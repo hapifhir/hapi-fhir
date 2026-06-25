@@ -3,7 +3,7 @@
 ${import}
 #end
 
-export interface ${tsInterface.InterfaceName} {
+export interface ${tsInterface.InterfaceName}${tsInterface.ExtendsClause} {
 #foreach ( $property in $tsInterface.Properties )
 	${property.Declaration};
 #end

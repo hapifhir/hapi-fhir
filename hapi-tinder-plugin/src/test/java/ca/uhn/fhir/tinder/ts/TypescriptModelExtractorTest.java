@@ -29,10 +29,26 @@ class TypescriptModelExtractorTest {
 		assertThat(patient).isNotNull();
 		assertThat(patient.getInterfaceName()).isEqualTo("IPatient");
 
-		// Every resource carries a resourceType discriminator
+		// Patient extends the FHIR base hierarchy rather than inlining inherited members
+		assertThat(patient.getExtendsName()).isEqualTo("DomainResource");
+		assertThat(patient.getProperties())
+				.extracting(TsProperty::getName)
+				.doesNotContain("id", "meta", "extension", "modifierExtension", "text", "contained");
+
+		// Each concrete resource carries a string-literal resourceType discriminator
 		TsProperty resourceType = property(patient, "resourceType");
-		assertThat(resourceType.getKind()).isEqualTo(TsTypeKind.PRIMITIVE);
-		assertThat(resourceType.getRenderedType()).isEqualTo("string");
+		assertThat(resourceType.isOptional()).isFalse();
+		assertThat(resourceType.getRenderedType()).isEqualTo("'Patient'");
+
+		// The base hierarchy itself is emitted and correctly chained
+		assertThat(model.getInterface("Element")).isNotNull();
+		assertThat(model.getInterface("BackboneElement").getExtendsName()).isEqualTo("Element");
+		assertThat(model.getInterface("Resource")).isNotNull();
+		assertThat(model.getInterface("DomainResource").getExtendsName()).isEqualTo("Resource");
+		// Resource has no resourceType field (mirrors the Java model)
+		assertThat(model.getInterface("Resource").getProperties())
+				.extracting(TsProperty::getName)
+				.doesNotContain("resourceType");
 
 		// Bound code -> enum union
 		TsProperty gender = property(patient, "gender");
@@ -59,9 +75,10 @@ class TypescriptModelExtractorTest {
 		assertThat(managingOrganization.getKind()).isEqualTo(TsTypeKind.INTERFACE);
 		assertThat(managingOrganization.getTypeName()).isEqualTo("Reference");
 
-		// Backbone element emitted as its own interface
+		// Backbone element emitted as its own interface, extending IBackboneElement
 		TsInterface contact = model.getInterface("PatientContact");
 		assertThat(contact).isNotNull();
+		assertThat(contact.getExtendsName()).isEqualTo("BackboneElement");
 		TsProperty contactProp = property(patient, "contact");
 		assertThat(contactProp.getKind()).isEqualTo(TsTypeKind.INTERFACE);
 		assertThat(contactProp.getTypeName()).isEqualTo("PatientContact");
@@ -87,12 +104,15 @@ class TypescriptModelExtractorTest {
 		File patientFile = new File(theDir, "IPatient.ts");
 		assertThat(patientFile).exists();
 		String patient = Files.readString(patientFile.toPath(), StandardCharsets.UTF_8);
-		assertThat(patient).contains("export interface IPatient {");
-		assertThat(patient).contains("resourceType: string;");
+		assertThat(patient).contains("export interface IPatient extends IDomainResource {");
+		assertThat(patient).contains("resourceType: 'Patient';");
 		assertThat(patient).contains("name?: Array<IHumanName>;");
 		assertThat(patient).contains("import { IHumanName } from './IHumanName';");
+		assertThat(patient).contains("import { IDomainResource } from './IDomainResource';");
 
 		assertThat(new File(theDir, "IHumanName.ts")).exists();
+		assertThat(new File(theDir, "IDomainResource.ts")).exists();
+		assertThat(new File(theDir, "IElement.ts")).exists();
 		assertThat(new File(theDir, "index.ts")).exists();
 		String index = Files.readString(new File(theDir, "index.ts").toPath(), StandardCharsets.UTF_8);
 		assertThat(index).contains("export * from './IPatient';");
@@ -105,7 +125,9 @@ class TypescriptModelExtractorTest {
 		TsInterface patient = model.getInterface("Patient");
 		assertThat(patient).isNotNull();
 		assertThat(patient.getProperties()).isNotEmpty();
-		assertThat(property(patient, "resourceType").getRenderedType()).isEqualTo("string");
+		assertThat(property(patient, "resourceType").getRenderedType()).isEqualTo("'Patient'");
+		assertThat(patient.getExtendsName()).isNotNull();
+		assertThat(model.getInterface("Element")).isNotNull();
 
 		// DSTU2 binds codes via a different runtime class; confirm bound codes still produce enum unions.
 		assertThat(property(patient, "gender").getKind()).isEqualTo(TsTypeKind.ENUM);

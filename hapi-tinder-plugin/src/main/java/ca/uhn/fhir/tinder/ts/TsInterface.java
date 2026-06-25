@@ -15,6 +15,7 @@ public class TsInterface {
 
 	private final String myName;
 	private final List<TsProperty> myProperties = new ArrayList<>();
+	private String myExtendsName;
 
 	public TsInterface(String theName) {
 		myName = theName;
@@ -29,6 +30,29 @@ public class TsInterface {
 	 */
 	public String getInterfaceName() {
 		return "I" + myName;
+	}
+
+	/**
+	 * Sets the bare name of the base interface this one extends (e.g. {@code "DomainResource"}); the
+	 * rendered clause and import use the "I"-prefixed form.
+	 */
+	public void setExtendsName(String theExtendsName) {
+		myExtendsName = theExtendsName;
+	}
+
+	public String getExtendsName() {
+		return myExtendsName;
+	}
+
+	/**
+	 * The {@code extends} clause to splice into the interface declaration: either an empty string or
+	 * {@code " extends IFoo"}.
+	 */
+	public String getExtendsClause() {
+		if (myExtendsName == null) {
+			return "";
+		}
+		return " extends I" + myExtendsName;
 	}
 
 	public List<TsProperty> getProperties() {
@@ -47,6 +71,9 @@ public class TsInterface {
 	 */
 	public List<String> getImports() {
 		Set<String> lines = new TreeSet<>();
+		if (myExtendsName != null) {
+			lines.add("import { I" + myExtendsName + " } from './I" + myExtendsName + "';");
+		}
 		for (TsProperty next : myProperties) {
 			switch (next.getKind()) {
 				case INTERFACE:

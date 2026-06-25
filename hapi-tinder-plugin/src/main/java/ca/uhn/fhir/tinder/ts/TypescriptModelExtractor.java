@@ -42,6 +42,32 @@ public class TypescriptModelExtractor {
 	private static final Set<String> NUMERIC_PRIMITIVES =
 			Set.of("integer", "decimal", "unsignedint", "positiveint", "integer64");
 
+	/**
+	 * Element names that are supplied by the base interfaces ({@code IElement}, {@code IBackboneElement},
+	 * {@code IResource}, {@code IDomainResource}) and therefore must not be re-declared on concrete
+	 * resources, datatypes or backbone elements.
+	 */
+	private static final Set<String> BASE_FIELD_NAMES =
+			Set.of("id", "extension", "modifierExtension", "meta", "implicitRules", "language", "text", "contained");
+
+	private static final String BASE_ELEMENT = "Element";
+	private static final String BASE_BACKBONE_ELEMENT = "BackboneElement";
+	private static final String BASE_RESOURCE = "Resource";
+	private static final String BASE_DOMAIN_RESOURCE = "DomainResource";
+
+	private static final Set<String> RESERVED_BASE_NAMES =
+			Set.of(BASE_ELEMENT, BASE_BACKBONE_ELEMENT, BASE_RESOURCE, BASE_DOMAIN_RESOURCE);
+
+	/**
+	 * The category of composite being generated, which determines its base interface and which members
+	 * it declares directly.
+	 */
+	private enum Kind {
+		RESOURCE,
+		DATATYPE,
+		BACKBONE
+	}
+
 	private final FhirContext myContext;
 
 	/**
@@ -61,11 +87,13 @@ public class TypescriptModelExtractor {
 	public TsModel extract() {
 		TsModel model = new TsModel(myContext.getVersion().getVersion().name());
 
+		addBaseInterfaces(model);
+
 		List<String> resourceNames = new ArrayList<>(myContext.getResourceTypes());
 		resourceNames.sort(String.CASE_INSENSITIVE_ORDER);
 		for (String nextResourceName : resourceNames) {
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(nextResourceName);
-			processComposite(def, def.getName(), true, model);
+			processComposite(def, def.getName(), Kind.RESOURCE, model);
 		}
 
 		// Complex datatypes are largely reached transitively, but enumerate them explicitly so that
@@ -73,11 +101,47 @@ public class TypescriptModelExtractor {
 		for (BaseRuntimeElementDefinition<?> nextDef : myContext.getElementDefinitions()) {
 			if (nextDef.getChildType() == ChildTypeEnum.COMPOSITE_DATATYPE
 					&& nextDef instanceof BaseRuntimeElementCompositeDefinition) {
-				processComposite((BaseRuntimeElementCompositeDefinition<?>) nextDef, nextDef.getName(), false, model);
+				processComposite(
+						(BaseRuntimeElementCompositeDefinition<?>) nextDef, nextDef.getName(), Kind.DATATYPE, model);
 			}
 		}
 
 		return model;
+	}
+
+	/**
+	 * Emits the four canonical FHIR base interfaces that every generated type extends. These mirror the
+	 * HAPI/FHIR base hierarchy: {@code Element} ← {@code BackboneElement}, and {@code Resource} ←
+	 * {@code DomainResource}. They are synthesized rather than introspected because HAPI does not expose
+	 * runtime definitions for abstract base classes. Note that {@code Resource} deliberately has no
+	 * {@code resourceType} member — like the Java model, the discriminator lives on each concrete
+	 * resource.
+	 */
+	private void addBaseInterfaces(TsModel theModel) {
+		TsInterface element = new TsInterface(BASE_ELEMENT);
+		element.addProperty(new TsProperty("id", "string", TsTypeKind.PRIMITIVE, false, true));
+		element.addProperty(new TsProperty("extension", "Extension", TsTypeKind.INTERFACE, true, true));
+		theModel.addInterface(element);
+
+		TsInterface backbone = new TsInterface(BASE_BACKBONE_ELEMENT);
+		backbone.setExtendsName(BASE_ELEMENT);
+		backbone.addProperty(new TsProperty("modifierExtension", "Extension", TsTypeKind.INTERFACE, true, true));
+		theModel.addInterface(backbone);
+
+		TsInterface resource = new TsInterface(BASE_RESOURCE);
+		resource.addProperty(new TsProperty("id", "string", TsTypeKind.PRIMITIVE, false, true));
+		resource.addProperty(new TsProperty("meta", "Meta", TsTypeKind.INTERFACE, false, true));
+		resource.addProperty(new TsProperty("implicitRules", "string", TsTypeKind.PRIMITIVE, false, true));
+		resource.addProperty(new TsProperty("language", "string", TsTypeKind.PRIMITIVE, false, true));
+		theModel.addInterface(resource);
+
+		TsInterface domainResource = new TsInterface(BASE_DOMAIN_RESOURCE);
+		domainResource.setExtendsName(BASE_RESOURCE);
+		domainResource.addProperty(new TsProperty("text", "Narrative", TsTypeKind.INTERFACE, false, true));
+		domainResource.addProperty(new TsProperty("contained", "Resource", TsTypeKind.INTERFACE, true, true));
+		domainResource.addProperty(new TsProperty("extension", "Extension", TsTypeKind.INTERFACE, true, true));
+		domainResource.addProperty(new TsProperty("modifierExtension", "Extension", TsTypeKind.INTERFACE, true, true));
+		theModel.addInterface(domainResource);
 	}
 
 	/**
@@ -90,8 +154,13 @@ public class TypescriptModelExtractor {
 	private String processComposite(
 			BaseRuntimeElementCompositeDefinition<?> theDefinition,
 			String theProposedName,
-			boolean theIsResource,
+			Kind theKind,
 			TsModel theModel) {
+		// Never overwrite a synthesized base interface (defensive: no concrete type uses these names).
+		if (RESERVED_BASE_NAMES.contains(theProposedName) && theModel.hasInterface(theProposedName)) {
+			return theProposedName;
+		}
+
 		Class<?> implClass = theDefinition.getImplementingClass();
 		String existing = myInterfaceNamesByClass.get(implClass);
 		if (existing != null) {
@@ -102,17 +171,45 @@ public class TypescriptModelExtractor {
 		myInterfaceNamesByClass.put(implClass, theProposedName);
 
 		TsInterface iface = new TsInterface(theProposedName);
+		iface.setExtendsName(baseInterfaceFor(theDefinition, theKind));
 		theModel.addInterface(iface);
 
-		if (theIsResource) {
-			iface.addProperty(new TsProperty("resourceType", "string", TsTypeKind.PRIMITIVE, false, false));
+		// Each concrete resource carries a string-literal discriminator, mirroring how the Java model
+		// derives the resource type from the class rather than a field on the Resource base.
+		if (theKind == Kind.RESOURCE) {
+			iface.addProperty(new TsProperty(
+					"resourceType", "'" + theDefinition.getName() + "'", TsTypeKind.PRIMITIVE, false, false));
 		}
 
 		for (BaseRuntimeChildDefinition nextChild : theDefinition.getChildren()) {
+			// Members supplied by the base interfaces are inherited, not re-declared.
+			if (BASE_FIELD_NAMES.contains(nextChild.getElementName())) {
+				continue;
+			}
 			handleChild(nextChild, theProposedName, iface, theModel);
 		}
 
 		return theProposedName;
+	}
+
+	/**
+	 * Determines which base interface a composite extends. Datatypes extend {@code Element}, backbone
+	 * elements extend {@code BackboneElement}, and resources extend {@code DomainResource} when they
+	 * carry the domain members ({@code text}/{@code contained}) or {@code Resource} otherwise (covering
+	 * Bundle/Parameters/Binary, and DSTU2 which has no separate DomainResource class).
+	 */
+	private static String baseInterfaceFor(BaseRuntimeElementCompositeDefinition<?> theDefinition, Kind theKind) {
+		switch (theKind) {
+			case DATATYPE:
+				return BASE_ELEMENT;
+			case BACKBONE:
+				return BASE_BACKBONE_ELEMENT;
+			case RESOURCE:
+			default:
+				boolean domain = theDefinition.getChildren().stream()
+						.anyMatch(t -> "text".equals(t.getElementName()) || "contained".equals(t.getElementName()));
+				return domain ? BASE_DOMAIN_RESOURCE : BASE_RESOURCE;
+		}
 	}
 
 	private void handleChild(
@@ -137,7 +234,7 @@ public class TypescriptModelExtractor {
 			BaseRuntimeElementDefinition<?> blockDef = theChild.getChildByName(elementName);
 			if (blockDef instanceof BaseRuntimeElementCompositeDefinition) {
 				String resolvedName = processComposite(
-						(BaseRuntimeElementCompositeDefinition<?>) blockDef, blockName, false, theModel);
+						(BaseRuntimeElementCompositeDefinition<?>) blockDef, blockName, Kind.BACKBONE, theModel);
 				theInterface.addProperty(
 						new TsProperty(elementName, resolvedName, TsTypeKind.INTERFACE, array, optional));
 			}
@@ -189,7 +286,7 @@ public class TypescriptModelExtractor {
 					String resolvedName = processComposite(
 							(BaseRuntimeElementCompositeDefinition<?>) theDefinition,
 							theDefinition.getName(),
-							false,
+							Kind.DATATYPE,
 							theModel);
 					return new ResolvedType(resolvedName, TsTypeKind.INTERFACE);
 				}
