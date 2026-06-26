@@ -85,4 +85,6 @@ public class TerminologyConstants {
 	 * job
 	 */
 	public static final String CUSTOM_PROPERTIES_FILE = "properties.csv";
+
+	public static final String EXTENSION_SOURCE_CONCEPT_DIRECT_PARENT_PIDS = "http://hapifhir.io/fhir/StructureDefinition/valueset-concept-direct-parent-pids";
 }

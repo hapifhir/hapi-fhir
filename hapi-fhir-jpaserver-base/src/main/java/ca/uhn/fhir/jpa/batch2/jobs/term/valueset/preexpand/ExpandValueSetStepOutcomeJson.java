@@ -1,0 +1,65 @@
+package ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
+import ca.uhn.fhir.model.api.IModelJson;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.hl7.fhir.r4.model.ValueSet;
+
+public class ExpandValueSetStepOutcomeJson implements IModelJson {
+	private final FhirContext myCanonicalFhirContext = FhirContext.forR4Cached();
+
+	@JsonProperty("sourceCompose")
+	private String mySourceCompose;
+
+	@JsonProperty("recordsAddedCounter")
+	private TerminologyFileSetJson.RecordsAddedCounter myRecordsAddedCounter;
+
+	@JsonProperty("startingOrder")
+	private int myStartingOrder;
+
+	@JsonProperty("stagingVersion")
+	private String myStagingVersion;
+
+
+	public void setRecordsAddedCounter(TerminologyFileSetJson.RecordsAddedCounter theRecordsAddedCounter) {
+		myRecordsAddedCounter = theRecordsAddedCounter;
+	}
+
+	public TerminologyFileSetJson.RecordsAddedCounter getRecordsAddedCounter() {
+		return myRecordsAddedCounter;
+	}
+
+	public void setSourceCompose(ValueSet.ValueSetComposeComponent theSourceCompose) {
+		String compose = null;
+		if (theSourceCompose != null) {
+			compose = myCanonicalFhirContext.newJsonParser().setPrettyPrint(false).encodeToString(theSourceCompose);
+		}
+		mySourceCompose = compose;
+	}
+
+	public ValueSet.ValueSetComposeComponent getSourceCompose() {
+		ValueSet.ValueSetComposeComponent retVal = null;
+		if (mySourceCompose != null) {
+			retVal = new ValueSet.ValueSetComposeComponent();
+			myCanonicalFhirContext.newJsonParser().parseInto(mySourceCompose, retVal);
+		}
+		return retVal;
+	}
+
+	public void setStartingOrder(int theStartingOrder) {
+		myStartingOrder = theStartingOrder;
+	}
+
+	public int getStartingOrder() {
+		return myStartingOrder;
+	}
+
+	public void setStagingVersion(String theStagingVersion) {
+		myStagingVersion = theStagingVersion;
+	}
+
+	public String getStagingVersion() {
+		return myStagingVersion;
+	}
+}

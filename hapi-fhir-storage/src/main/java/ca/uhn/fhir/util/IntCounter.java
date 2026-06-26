@@ -54,4 +54,8 @@ public class IntCounter {
 	public void increment() {
 		myCount++;
 	}
+
+	public void increment(int theDelta) {
+		myCount += theDelta;
+	}
 }

@@ -1,19 +1,31 @@
-package ca.uhn.fhir.jpa.batch2.jobs.term.valueset;
+package ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hl7.fhir.r4.model.ValueSet;
 
-public class ExpansionWorkChunkJson implements IModelJson {
+public class ExpandConceptsWorkChunkJson implements IModelJson {
 	private final FhirContext myCanonicalFhirContext = FhirContext.forR4Cached();
 
 	@JsonProperty("stagingUrl")
 	private String myStagingUrl;
+	@JsonProperty("stagingVersion")
+	private String myStagingVersion;
 	@JsonProperty("include")
 	private boolean myInclude;
 	@JsonProperty("compose")
 	private String myCompose;
+	@JsonProperty("startingOrder")
+	private int myStartingOrder;
+
+	public int getStartingOrder() {
+		return myStartingOrder;
+	}
+
+	public void setStartingOrder(int theStartingOrder) {
+		myStartingOrder = theStartingOrder;
+	}
 
 	public String getStagingUrl() {
 		return myStagingUrl;
@@ -48,4 +60,15 @@ public class ExpansionWorkChunkJson implements IModelJson {
 		myCompose = serialized;
 	}
 
+	public String getStagingVersion() {
+		return myStagingVersion;
+	}
+
+	public void setStagingVersion(String theStagingVersion) {
+		myStagingVersion = theStagingVersion;
+	}
+
+	public String getComposeAsJson() {
+		return myCompose;
+	}
 }

@@ -44,8 +44,6 @@ import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
-import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDesignationDao;
-import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptParentChildLinkDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptViewDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptViewOracleDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
@@ -69,6 +67,7 @@ import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
@@ -78,11 +77,9 @@ import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -127,7 +124,6 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -194,7 +190,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.lowerCase;
 import static org.apache.commons.lang3.StringUtils.startsWithIgnoreCase;
 
-public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
+public class TermReadSvcImpl implements ITermReadSvc {
 	public static final int DEFAULT_FETCH_SIZE = 250;
 	public static final int DEFAULT_MASS_INDEXER_OBJECT_LOADING_THREADS = 2;
 	// doesn't seem to be much gain by using more threads than this value
@@ -222,12 +218,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 	@Autowired
 	protected ITermValueSetConceptDao myValueSetConceptDao;
-
-	@Autowired
-	protected ITermValueSetConceptDesignationDao myValueSetConceptDesignationDao;
-
-	@Autowired
-	protected ITermValueSetConceptParentChildLinkDao myValueSetConceptParentChildLinkDao;
 
 	@Autowired
 	protected FhirContext myContext;
@@ -310,10 +300,9 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		return fetchValueSet(theValueSetUrl) != null;
 	}
 
-	private boolean addCodeIfNotAlreadyAdded(
+	private void addCodeIfNotAlreadyAdded(
 			@Nullable ValueSetExpansionOptions theExpansionOptions,
 			IValueSetConceptAccumulator theValueSetCodeAccumulator,
-			Set<String> theAddedCodes,
 			TermConcept theConcept,
 			String theConceptDisplayValue,
 			boolean theAdd,
@@ -332,13 +321,13 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 		Collection<TermConceptDesignation> designations = theConcept.getDesignations();
 
-		if (StringUtils.isNotEmpty(theValueSetIncludeVersion)) {
-			codeSystem = codeSystem + OUR_PIPE_CHARACTER + theValueSetIncludeVersion;
-		}
+		// FIXME: remove?
+//		if (StringUtils.isNotEmpty(theValueSetIncludeVersion)) {
+//			codeSystem = codeSystem + OUR_PIPE_CHARACTER + theValueSetIncludeVersion;
+//		}
 
-		return addCodeIfNotAlreadyAdded(
+		addCodeIfNotAlreadyAdded(
 				theValueSetCodeAccumulator,
-				theAddedCodes,
 				designations,
 				theAdd,
 				codeSystem,
@@ -349,9 +338,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				codeSystemVersion);
 	}
 
-	private boolean addCodeIfNotAlreadyAdded(
+	private void addCodeIfNotAlreadyAdded(
 			IValueSetConceptAccumulator theValueSetCodeAccumulator,
-			Set<String> theAddedCodes,
 			boolean theAdd,
 			String theCodeSystem,
 			String theCodeSystemVersion,
@@ -362,7 +350,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			Collection<TermConceptDesignation> theDesignations) {
 		if (StringUtils.isNotEmpty(theCodeSystemVersion)) {
 			if (isNoneBlank(theCodeSystem, theCode)) {
-				if (theAdd && theAddedCodes.add(theCodeSystem + OUR_PIPE_CHARACTER + theCode)) {
+				if (theAdd) {
 					theValueSetCodeAccumulator.includeConceptWithDesignations(
 							theCodeSystem + OUR_PIPE_CHARACTER + theCodeSystemVersion,
 							theCode,
@@ -371,17 +359,13 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 							theSourceConceptPid,
 							theSourceConceptDirectParentPids,
 							theCodeSystemVersion);
-					return true;
-				}
-
-				if (!theAdd && theAddedCodes.remove(theCodeSystem + OUR_PIPE_CHARACTER + theCode)) {
+				} else {
 					theValueSetCodeAccumulator.excludeConcept(
 							theCodeSystem + OUR_PIPE_CHARACTER + theCodeSystemVersion, theCode);
-					return true;
 				}
 			}
 		} else {
-			if (theAdd && theAddedCodes.add(theCodeSystem + OUR_PIPE_CHARACTER + theCode)) {
+			if (theAdd) {
 				theValueSetCodeAccumulator.includeConceptWithDesignations(
 						theCodeSystem,
 						theCode,
@@ -390,21 +374,14 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 						theSourceConceptPid,
 						theSourceConceptDirectParentPids,
 						theCodeSystemVersion);
-				return true;
-			}
-
-			if (!theAdd && theAddedCodes.remove(theCodeSystem + OUR_PIPE_CHARACTER + theCode)) {
+			} else {
 				theValueSetCodeAccumulator.excludeConcept(theCodeSystem, theCode);
-				return true;
 			}
 		}
-
-		return false;
 	}
 
-	private boolean addCodeIfNotAlreadyAdded(
+	private void addCodeIfNotAlreadyAdded(
 			IValueSetConceptAccumulator theValueSetCodeAccumulator,
-			Set<String> theAddedCodes,
 			Collection<TermConceptDesignation> theDesignations,
 			boolean theAdd,
 			String theCodeSystem,
@@ -414,25 +391,19 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			String theSourceConceptDirectParentPids,
 			String theSystemVersion) {
 		if (isNoneBlank(theCodeSystem, theCode)) {
-			if (theAdd && theAddedCodes.add(theCodeSystem + OUR_PIPE_CHARACTER + theCode)) {
+			if (theAdd) {
 				theValueSetCodeAccumulator.includeConceptWithDesignations(
-						theCodeSystem,
-						theCode,
-						theDisplay,
-						theDesignations,
-						theSourceConceptPid,
-						theSourceConceptDirectParentPids,
-						theSystemVersion);
-				return true;
-			}
-
-			if (!theAdd && theAddedCodes.remove(theCodeSystem + OUR_PIPE_CHARACTER + theCode)) {
+					theCodeSystem,
+					theCode,
+					theDisplay,
+					theDesignations,
+					theSourceConceptPid,
+					theSourceConceptDirectParentPids,
+					theSystemVersion);
+			} else {
 				theValueSetCodeAccumulator.excludeConcept(theCodeSystem, theCode);
-				return true;
 			}
 		}
-
-		return false;
 	}
 
 	private boolean addToSet(Set<TermConcept> theSetToPopulate, TermConcept theConcept) {
@@ -500,7 +471,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			@Nullable ValueSetExpansionOptions theExpansionOptions,
 			ValueSet theValueSetToExpand,
 			ExpansionFilter theFilter) {
-		Set<String> addedCodes = new HashSet<>();
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSetToExpand, "ValueSet to expand can not be null");
 
 		ValueSetExpansionOptions expansionOptions = provideExpansionOptions(theExpansionOptions);
@@ -522,7 +492,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		}
 
 		myTxTemplate.executeWithoutResult(tx -> expandValueSetIntoAccumulator(
-				theValueSetToExpand, theExpansionOptions, accumulator, theFilter, true, addedCodes));
+				theValueSetToExpand, theExpansionOptions, accumulator, theFilter, true));
 
 		if (accumulator.getTotalConcepts() != null) {
 			accumulator.setTotal(accumulator.getTotalConcepts());
@@ -554,8 +524,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			ValueSetExpansionOptions theExpansionOptions,
 			IValueSetConceptAccumulator theAccumulator,
 			ExpansionFilter theFilter,
-			boolean theAdd,
-			Set<String> theAddedCodes) {
+			boolean theAdd) {
 		Optional<TermValueSet> optionalTermValueSet;
 		if (theValueSetToExpand.hasUrl()) {
 			if (theValueSetToExpand.hasVersion()) {
@@ -582,7 +551,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 							"valueSetExpandedUsingInMemoryExpansion",
 							getValueSetInfo(theValueSetToExpand));
 			theAccumulator.addMessage(msg);
-			doExpandValueSet(theExpansionOptions, theValueSetToExpand, theAccumulator, theFilter, theAddedCodes);
+			doExpandValueSet(theExpansionOptions, theValueSetToExpand, theAccumulator, theFilter);
 			return;
 		}
 
@@ -600,7 +569,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 							termValueSet.getExpansionStatus().name(),
 							termValueSet.getExpansionStatus().getDescription());
 			theAccumulator.addMessage(msg);
-			doExpandValueSet(theExpansionOptions, theValueSetToExpand, theAccumulator, theFilter, theAddedCodes);
+			doExpandValueSet(theExpansionOptions, theValueSetToExpand, theAccumulator, theFilter);
 			return;
 		}
 
@@ -618,7 +587,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				termValueSet,
 				theFilter,
 				theAdd,
-				theAddedCodes,
 				myHibernatePropertiesProvider.isOracleDialect());
 	}
 
@@ -640,7 +608,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			TermValueSet theTermValueSet,
 			ExpansionFilter theFilter,
 			boolean theAdd,
-			Set<String> theAddedCodes,
 			boolean theOracle) {
 		// NOTE: if you modifiy the logic here, look to `expandConceptsOracle` and see if your new code applies to its
 		// copy pasted sibling
@@ -763,24 +730,21 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 				Long sourceConceptPid = pidToSourcePid.get(nextPid);
 				String sourceConceptDirectParentPids = pidToSourceDirectParentPids.get(nextPid);
-				if (theAddedCodes.add(system + OUR_PIPE_CHARACTER + code)) {
-					theAccumulator.includeConceptWithDesignations(
-							system,
-							code,
-							display,
-							designations,
-							sourceConceptPid,
-							sourceConceptDirectParentPids,
-							systemVersion);
-					if (wasFilteredResult) {
-						theAccumulator.incrementOrDecrementTotalConcepts(true, 1);
-					}
+				theAccumulator.includeConceptWithDesignations(
+						system,
+						code,
+						display,
+						designations,
+						sourceConceptPid,
+						sourceConceptDirectParentPids,
+						systemVersion);
+				if (wasFilteredResult) {
+					// FIXME: is this the best way to track the count?
+					theAccumulator.incrementOrDecrementTotalConcepts(true, 1);
 				}
 			} else {
-				if (theAddedCodes.remove(system + OUR_PIPE_CHARACTER + code)) {
 					theAccumulator.excludeConcept(system, code);
 					theAccumulator.incrementOrDecrementTotalConcepts(false, 1);
-				}
 			}
 		}
 
@@ -848,13 +812,11 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			ValueSetExpansionOptions theExpansionOptions,
 			ValueSet theValueSetToExpand,
 			IValueSetConceptAccumulator theValueSetCodeAccumulator) {
-		Set<String> addedCodes = new HashSet<>();
 		doExpandValueSet(
 				theExpansionOptions,
 				theValueSetToExpand,
 				theValueSetCodeAccumulator,
-				ExpansionFilter.NO_FILTER,
-				addedCodes);
+				ExpansionFilter.NO_FILTER);
 	}
 
 	/**
@@ -865,8 +827,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			ValueSetExpansionOptions theExpansionOptions,
 			ValueSet theValueSetToExpand,
 			IValueSetConceptAccumulator theValueSetCodeAccumulator,
-			@Nonnull ExpansionFilter theExpansionFilter,
-			Set<String> theAddedCodes) {
+			@Nonnull ExpansionFilter theExpansionFilter) {
 
 		StopWatch sw = new StopWatch();
 		String valueSetInfo = getValueSetInfo(theValueSetToExpand);
@@ -888,7 +849,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		for (ValueSet.ConceptSetComponent include :
 				theValueSetToExpand.getCompose().getInclude()) {
 			myTxTemplate.executeWithoutResult(tx -> expandValueSetHandleIncludeOrExclude(
-					theExpansionOptions, theValueSetCodeAccumulator, theAddedCodes, include, true, theExpansionFilter));
+					theExpansionOptions, theValueSetCodeAccumulator, include, true, theExpansionFilter));
 		}
 
 		// Handle excludes
@@ -898,7 +859,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			myTxTemplate.executeWithoutResult(tx -> expandValueSetHandleIncludeOrExclude(
 					theExpansionOptions,
 					theValueSetCodeAccumulator,
-					theAddedCodes,
 					exclude,
 					false,
 					ExpansionFilter.NO_FILTER));
@@ -933,13 +893,13 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	/**
 	 * Returns true if there are potentially more results to process.
 	 */
-	private void expandValueSetHandleIncludeOrExclude(
-			@Nullable ValueSetExpansionOptions theExpansionOptions,
-			IValueSetConceptAccumulator theValueSetCodeAccumulator,
-			Set<String> theAddedCodes,
-			ValueSet.ConceptSetComponent theIncludeOrExclude,
-			boolean theAdd,
-			@Nonnull ExpansionFilter theExpansionFilter) {
+	@Override
+	public void expandValueSetHandleIncludeOrExclude(
+		@Nullable ValueSetExpansionOptions theExpansionOptions,
+		IValueSetConceptAccumulator theValueSetCodeAccumulator,
+		ValueSet.ConceptSetComponent theIncludeOrExclude,
+		boolean theAdd,
+		@Nonnull ExpansionFilter theExpansionFilter) {
 
 		String system = theIncludeOrExclude.getSystem();
 		boolean hasSystem = isNotBlank(system);
@@ -962,7 +922,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				expandValueSetHandleIncludeOrExcludeUsingDatabase(
 						theExpansionOptions,
 						theValueSetCodeAccumulator,
-						theAddedCodes,
 						theIncludeOrExclude,
 						theAdd,
 						theExpansionFilter,
@@ -982,7 +941,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 				Consumer<FhirVersionIndependentConcept> consumer = c -> addOrRemoveCode(
 						theValueSetCodeAccumulator,
-						theAddedCodes,
 						theAdd,
 						system,
 						c.getCode(),
@@ -1037,8 +995,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 						theExpansionOptions,
 						theValueSetCodeAccumulator,
 						subExpansionFilter,
-						theAdd,
-						theAddedCodes);
+						theAdd);
 			}
 
 		} else {
@@ -1065,7 +1022,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	private void expandValueSetHandleIncludeOrExcludeUsingDatabase(
 			ValueSetExpansionOptions theExpansionOptions,
 			IValueSetConceptAccumulator theValueSetCodeAccumulator,
-			Set<String> theAddedCodes,
 			ValueSet.ConceptSetComponent theIncludeOrExclude,
 			boolean theAdd,
 			@Nonnull ExpansionFilter theExpansionFilter,
@@ -1083,7 +1039,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			expandWithoutHibernateSearch(
 					theValueSetCodeAccumulator,
 					theTermCodeSystemVersion,
-					theAddedCodes,
 					theIncludeOrExclude,
 					theSystem,
 					theAdd);
@@ -1167,17 +1122,14 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 								conceptDisplayValue = theIncludeConcept.getDisplay();
 							}
 						}
-						boolean added = addCodeIfNotAlreadyAdded(
+						addCodeIfNotAlreadyAdded(
 								theExpansionOptions,
 								theValueSetCodeAccumulator,
-								theAddedCodes,
 								concept,
 								conceptDisplayValue,
 								theAdd,
 								includeOrExcludeVersion);
-						if (added) {
-							delta++;
-						}
+						delta++;
 					}
 
 					ourLog.debug(
@@ -1348,16 +1300,14 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 	private void addOrRemoveCode(
 			IValueSetConceptAccumulator theValueSetCodeAccumulator,
-			Set<String> theAddedCodes,
 			boolean theAdd,
 			String theSystem,
 			String theCode,
 			String theDisplay,
 			String theSystemVersion) {
-		if (theAdd && theAddedCodes.add(theSystem + OUR_PIPE_CHARACTER + theCode)) {
-			theValueSetCodeAccumulator.includeConcept(theSystem, theCode, theDisplay, null, null, theSystemVersion);
-		}
-		if (!theAdd && theAddedCodes.remove(theSystem + OUR_PIPE_CHARACTER + theCode)) {
+		if (theAdd) {
+			theValueSetCodeAccumulator.includeConceptWithDesignations(theSystem, theCode, theDisplay, List.of(), null, null, theSystemVersion);
+		} else {
 			theValueSetCodeAccumulator.excludeConcept(theSystem, theCode);
 		}
 	}
@@ -1882,7 +1832,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	private void expandWithoutHibernateSearch(
 			IValueSetConceptAccumulator theValueSetCodeAccumulator,
 			TermCodeSystemVersion theVersion,
-			Set<String> theAddedCodes,
 			ValueSet.ConceptSetComponent theInclude,
 			String theSystem,
 			boolean theAdd) {
@@ -1903,7 +1852,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 								"Processing IS-A filter in database - Note that Hibernate Search is not enabled on this server, so this operation can be inefficient.");
 						TermConcept code = findCodeForFilterCriteriaCodeOrConcept(theSystem, nextFilter);
 						addConceptAndChildren(
-								theValueSetCodeAccumulator, theAddedCodes, theInclude, theSystem, theAdd, code);
+								theValueSetCodeAccumulator, theInclude, theSystem, theAdd, code);
 						handled = true;
 					}
 					break;
@@ -1930,7 +1879,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				if (conceptMatchesAllPropertyFilters(next, equalPropertyFilters)) {
 					addCodeIfNotAlreadyAdded(
 							theValueSetCodeAccumulator,
-							theAddedCodes,
 							theAdd,
 							theSystem,
 							theInclude.getVersion(),
@@ -1949,7 +1897,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			for (TermConcept next : concepts) {
 				addCodeIfNotAlreadyAdded(
 						theValueSetCodeAccumulator,
-						theAddedCodes,
 						theAdd,
 						theSystem,
 						theInclude.getVersion(),
@@ -1975,7 +1922,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 					.collect(Collectors.toList());
 			addCodeIfNotAlreadyAdded(
 					theValueSetCodeAccumulator,
-					theAddedCodes,
 					theAdd,
 					theSystem,
 					theInclude.getVersion(),
@@ -2002,15 +1948,13 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 	private void addConceptAndChildren(
 			IValueSetConceptAccumulator theValueSetCodeAccumulator,
-			Set<String> theAddedCodes,
 			ValueSet.ConceptSetComponent theInclude,
 			String theSystem,
 			boolean theAdd,
 			TermConcept theConcept) {
 		for (TermConcept nextChild : theConcept.getChildCodes()) {
-			boolean added = addCodeIfNotAlreadyAdded(
+			addCodeIfNotAlreadyAdded(
 					theValueSetCodeAccumulator,
-					theAddedCodes,
 					theAdd,
 					theSystem,
 					theInclude.getVersion(),
@@ -2019,10 +1963,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 					nextChild.getId(),
 					nextChild.getParentPidsAsString(),
 					nextChild.getDesignations());
-			if (added) {
-				addConceptAndChildren(
-						theValueSetCodeAccumulator, theAddedCodes, theInclude, theSystem, theAdd, nextChild);
-			}
+			addConceptAndChildren(
+						theValueSetCodeAccumulator, theInclude, theSystem, theAdd, nextChild);
 		}
 	}
 
@@ -2401,16 +2343,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		RuleBasedTransactionAttribute rules = new RuleBasedTransactionAttribute();
 		rules.getRollbackRules().add(new NoRollbackRuleAttribute(ExpansionTooCostlyException.class));
 		myTxTemplate = new TransactionTemplate(myTransactionManager, rules);
-	}
-
-	@Override
-	public void scheduleJobs(ISchedulerService theSchedulerService) {
-		// Register scheduled job to pre-expand ValueSets
-		// In the future it would be great to make this a cluster-aware task somehow
-		ScheduledJobDefinition vsJobDefinition = new ScheduledJobDefinition();
-		vsJobDefinition.setId(getClass().getName());
-		vsJobDefinition.setJobClass(Job.class);
-		theSchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_MINUTE, vsJobDefinition);
 	}
 
 	// FIXME: remove
@@ -3299,16 +3231,6 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSet, "ValueSet must not be null");
 		org.hl7.fhir.r4.model.ValueSet valueSetR4 = myVersionCanonicalizer.valueSetToCanonical(theValueSet);
 		return isValueSetPreExpandedForCodeValidation(valueSetR4);
-	}
-
-	public static class Job implements HapiJob {
-		@Autowired
-		private ITermReadSvc myTerminologySvc;
-
-		@Override
-		public void execute(JobExecutionContext theContext) {
-			myTerminologySvc.preExpandDeferredValueSetsToTerminologyTables();
-		}
 	}
 
 	/**

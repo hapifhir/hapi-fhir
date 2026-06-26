@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -13,6 +14,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetResultJson;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -76,6 +78,7 @@ import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
 import static ca.uhn.fhir.jpa.term.TerminologySvcDeltaR4Test.newDeltaCodeSystem;
 import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -515,7 +518,8 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		vs.setUrl("http://foo/vs");
 		vs.getCompose().addInclude().setSystem("http://foo/cs");
 		IIdType vsId = myValueSetDao.create(vs, newSrd()).getId().toUnqualifiedVersionless();
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		myTerminologyTestHelper.startValueSetExpansionJobAndWaitForCompletion("http://foo/vs", null);
 
 		// Confirm we pre-expanded successfully
 		runInTransaction(() -> {
@@ -988,14 +992,15 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 		updateValueSetActiveStatus(theValueSetActive, valueSet);
 
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
+
 		ValueSetExpansionOptions options = new ValueSetExpansionOptions()
 			.setOffset(1)
 			.setCount(1000);
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(options, valueSet);
-		ourLog.debug("Expanded ValueSet:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+		ourLog.info("Expanded ValueSet:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
-		assertExpansionTotalIsAppropriate(theValueSetActive, theForceDisableHibernateSearch, expandedValueSet);
+		assertEquals(myCodesInExtensionValueSet.size(), expandedValueSet.getExpansion().getTotal());
 
 		assertEquals(1, expandedValueSet.getExpansion().getOffset());
 		assertThat(expandedValueSet.getExpansion().getParameter()).hasSize(2);
@@ -1275,7 +1280,8 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		assertEquals("ValueSet \"ValueSet.url[http://vs]\" has not yet been pre-expanded. Performing in-memory expansion without parameters. Current status: NOT_EXPANDED | The ValueSet is waiting to be picked up and pre-expanded by a scheduled task.", outcome.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE));
 		assertThat(myValueSetTestUtil.toCodes(outcome)).as(myValueSetTestUtil.toCodes(outcome).toString()).containsExactly("code5", "code4", "code3", "code2", "code1");
 
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		// Perform pre-expansion
+		myTerminologyTestHelper.startValueSetExpansionJobAndWaitForCompletion("http://vs", null);
 
 		// Pre-Expanded
 		myCaptureQueriesListener.clear();
@@ -1848,8 +1854,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		assertNull(outcome.getCodeSystemVersion());
 
 		// Calculate pre-expansions
-		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myTerminologyTestHelper.startValueSetExpansionJobAndWaitForCompletion("http://ehealthontario.ca/fhir/ValueSet/vaccinecode", "0.1.17");
 
 		// Validate code - good
 		codeSystemUrl = "http://snomed.info/sct";
@@ -1982,8 +1987,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		assertEquals("error", outcome.getSeverityCode());
 
 		// Perform Pre-Expansion
-		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		// Make sure it's done
 		runInTransaction(() -> assertNull(myTermCodeSystemDao.findByCodeSystemUri("http://snomed.info/sct")));
@@ -2264,7 +2268,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 			return myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true);
 		});
 
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myTerminologyTestHelper.startValueSetExpansionJobAndWaitForCompletion("http://vs", null);
 
 		runInTransaction(() -> {
 			List<TermValueSetPreExpansionStatusEnum> statuses = myTermValueSetDao
@@ -2507,9 +2511,37 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		}
 	}
 
+	@Test
+	void testPreExpand_UnknownValueSet() {
+		assertThatThrownBy(()->myTerminologyTestHelper.startValueSetExpansionJobAndWaitForFailure("http://foo", "123"))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("ValueSet not found: http://foo|123");
+	}
+
+	@Test
+	void testPreExpand_Report() throws IOException {
+		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
+
+		String instanceId = myTerminologyTestHelper.startValueSetExpansionJobAndWaitForCompletion("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", null);
+		JobInstance instance = myJobCoordinator.getInstance(instanceId);
+		String report = instance.getReport(PreExpandValueSetResultJson.class).getReport();
+
+		assertThat(report).containsSubsequence("ValueSet Expansion Report",
+			"URL: http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2",
+			"Version: (none)",
+			"Concepts Added               : 24",
+			"Concept Designations Added   : 3",
+			"Compose: {\"include\":[{\"system\":\"http://acme.org\"}]}",
+			"   Concepts Added               : 24",
+			"   Concept Designations Added   : 3"
+		);
+	}
+
+
+
 	private void assertExpansionTotalIsAppropriate(boolean theValueSetActive, boolean theForceDisableHibernateSearch, ValueSet expandedValueSet) {
 		if (!theValueSetActive && theForceDisableHibernateSearch) {
-			assertTrue(expandedValueSet.getExpansion().getTotalElement().isEmpty());
+			assertTrue(expandedValueSet.getExpansion().getTotalElement().isEmpty(), ()->expandedValueSet.getExpansion().getTotalElement().getValueAsString());
 		} else {
 			assertEquals(myCodesInExtensionValueSet.size(), expandedValueSet.getExpansion().getTotal());
 		}

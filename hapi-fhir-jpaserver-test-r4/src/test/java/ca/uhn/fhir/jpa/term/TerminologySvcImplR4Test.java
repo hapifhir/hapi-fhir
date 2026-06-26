@@ -158,9 +158,9 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		TermValueSet termValueSet = runInTransaction(()-> {
 			TermValueSet vs = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get();
 			Long termValueSetId = vs.getId();
-			assertEquals(3, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
+			assertEquals(3, myTermValueSetConceptDesignationDao.countByTermValueSet(vs).intValue());
 			assertEquals(3, vs.getTotalConceptDesignations().intValue());
-			assertEquals(24, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
+			assertEquals(24, myTermValueSetConceptDao.countByTermValueSet(vs).intValue());
 			assertEquals(24, vs.getTotalConcepts().intValue());
 			return vs;
 		});
@@ -169,10 +169,10 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				myTermValueSetConceptDesignationDao.deleteByTermValueSetId(termValueSetId);
-				assertEquals(0, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
-				myTermValueSetConceptDao.deleteByTermValueSetId(termValueSetId);
-				assertEquals(0, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
+				myTermValueSetConceptDesignationDao.deleteByTermValueSetId(termValueSet);
+				assertEquals(0, myTermValueSetConceptDesignationDao.countByTermValueSet(termValueSet).intValue());
+				myTermValueSetConceptDao.deleteByTermValueSetId(termValueSet);
+				assertEquals(0, myTermValueSetConceptDao.countByTermValueSet(termValueSet).intValue());
 				myTermValueSetDao.deleteById(new IdAndPartitionId(termValueSetId));
 				assertFalse(myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).isPresent());
 			}
@@ -196,24 +196,24 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
 		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
-		Long termValueSetId = runInTransaction(()-> {
+		TermValueSet termValueSetId = runInTransaction(()-> {
 			TermValueSet termValueSet = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get();
 			Long id = termValueSet.getId();
-			assertEquals(3, myTermValueSetConceptDesignationDao.countByTermValueSetId(id).intValue());
+			assertEquals(3, myTermValueSetConceptDesignationDao.countByTermValueSet(termValueSet).intValue());
 			assertEquals(3, termValueSet.getTotalConceptDesignations().intValue());
-			assertEquals(24, myTermValueSetConceptDao.countByTermValueSetId(id).intValue());
+			assertEquals(24, myTermValueSetConceptDao.countByTermValueSet(termValueSet).intValue());
 			assertEquals(24, termValueSet.getTotalConcepts().intValue());
-			return id;
+			return termValueSet;
 		});
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				myTermValueSetConceptDesignationDao.deleteByTermValueSetId(termValueSetId);
-				assertEquals(0, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
+				assertEquals(0, myTermValueSetConceptDesignationDao.countByTermValueSet(termValueSetId).intValue());
 				myTermValueSetConceptDao.deleteByTermValueSetId(termValueSetId);
-				assertEquals(0, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
-				myTermValueSetDao.deleteById(new IdAndPartitionId(termValueSetId));
+				assertEquals(0, myTermValueSetConceptDao.countByTermValueSet(termValueSetId).intValue());
+				myTermValueSetDao.delete(termValueSetId);
 				assertFalse(myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).isPresent());
 			}
 		});

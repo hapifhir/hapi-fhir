@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.term.ExpansionFilter;
 import ca.uhn.fhir.jpa.term.IValueSetConceptAccumulator;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
@@ -115,6 +116,7 @@ public interface ITermReadSvc extends IValidationSupport {
 			IBaseCoding theCodingA,
 			IBaseCoding theCodingB);
 
+	// FIXME: remove
 	void preExpandDeferredValueSetsToTerminologyTables();
 
 	/**
@@ -130,6 +132,17 @@ public interface ITermReadSvc extends IValidationSupport {
 			String theDisplay,
 			IBaseDatatype theCoding,
 			IBaseDatatype theCodeableConcept);
+
+	/**
+	 * @param theIncludeOrExclude The <code>ValueSet.compose.include</code> or <code>ValueSet.compose.exclude</code> value to expand
+	 * @param theInclude <code>true</code>=include, <code>false</code>=exclude
+	 */
+	void expandValueSetHandleIncludeOrExclude(
+		@Nullable ValueSetExpansionOptions theExpansionOptions,
+		IValueSetConceptAccumulator theValueSetCodeAccumulator,
+		ValueSet.ConceptSetComponent theIncludeOrExclude,
+		boolean theInclude,
+		@Nonnull ExpansionFilter theExpansionFilter);
 
 	boolean isValueSetPreExpandedForCodeValidation(ValueSet theValueSet);
 

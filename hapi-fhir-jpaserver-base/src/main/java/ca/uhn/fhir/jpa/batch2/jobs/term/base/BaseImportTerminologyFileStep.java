@@ -420,14 +420,7 @@ public abstract class BaseImportTerminologyFileStep<
 
 		TerminologyFileSetJson.RecordsAddedCounter recordsAddedCounter =
 				getRecordsAddedCounter(theStepExecutionDetails);
-		recordsAddedCounter.incrementConceptsAdded(uploadStatistics.getAddedConceptCount());
-		recordsAddedCounter.incrementConceptLinksAdded(uploadStatistics.getAddedConceptLinkCount());
-		recordsAddedCounter.incrementPropertiesAdded(uploadStatistics.getAddedPropertyCount());
-		recordsAddedCounter.incrementDesignationsAdded(uploadStatistics.getAddedDesignationCount());
-		recordsAddedCounter.incrementConceptsRemoved(uploadStatistics.getRemovedConceptCount());
-		recordsAddedCounter.incrementConceptLinksRemoved(uploadStatistics.getRemovedConceptLinkCount());
-		recordsAddedCounter.incrementPropertiesRemoved(uploadStatistics.getRemovedPropertyCount());
-		recordsAddedCounter.incrementDesignationsRemoved(uploadStatistics.getRemovedDesignationCount());
+		recordsAddedCounter.increment(uploadStatistics);
 
 		retVal += uploadStatistics.getAddedConceptCount();
 		retVal += uploadStatistics.getAddedConceptLinkCount();

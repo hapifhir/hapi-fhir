@@ -95,15 +95,9 @@ public class ValueSetExpansionHSearchElasticIT extends ValueSetExpansionHSearchT
 
 		ValueSet valueSet = getValueSetWithAllCodeSystemConcepts(codeSystemVersion.getCodeSystemVersionId());
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(codeSystem, codeSystemVersion,
-			new SystemRequestDetails(), Collections.singletonList(valueSet), Collections.emptyList());
+		myValueSetDao.update(valueSet, newSrd());
 
-		await().atMost(20, SECONDS).until(() -> {
-			myTerminologyDeferredStorageSvc.saveDeferred();
-			return myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true);
-		});
-
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		Slice<TermValueSet> page = runInTransaction(() ->
 			myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 1), TermValueSetPreExpansionStatusEnum.EXPANDED));

@@ -50,9 +50,13 @@ public abstract class BaseImportTerminologyStep {
 		myJobPersistence = theJobPersistence;
 	}
 
-	protected ImportTerminologyMetadataAttachmentJson getJobMetadata(String jobInstanceId) {
-		AttachmentDetails jobMetadataAttachment = myJobPersistence.fetchAttachmentByFilename(
-				jobInstanceId, ImportTerminologyMetadataAttachmentJson.ATTACHMENT_FILENAME);
+	protected ImportTerminologyMetadataAttachmentJson getJobMetadata(String theJobInstanceId) {
+		return getJobMetadata(theJobInstanceId, myJobPersistence);
+	}
+
+	protected static ImportTerminologyMetadataAttachmentJson getJobMetadata(String theJobInstanceId, IJobPersistence theJobPersistence) {
+		AttachmentDetails jobMetadataAttachment = theJobPersistence.fetchAttachmentByFilename(
+			theJobInstanceId, ImportTerminologyMetadataAttachmentJson.ATTACHMENT_FILENAME);
 		ImportTerminologyMetadataAttachmentJson jobMetadata;
 		try {
 			jobMetadata = JsonUtil.deserialize(

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.batch2.jobs.term.valueset;
+package ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.UrlUtil;

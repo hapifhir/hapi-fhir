@@ -742,7 +742,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		CodeSystem delta2 = newDeltaCodeSystem();
 		delta2.addConcept().setCode("codeB").setDisplay("displayB");
 		myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), delta2);
-		myTermSvc.invalidatePreCalculatedExpansionOfValueSetsContainingCodeSystem("http://foo/cs");
+		myTermValueSetStorageSvc.invalidatePreCalculatedExpansionOfValueSetsContainingCodeSystem("http://foo/cs");
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 

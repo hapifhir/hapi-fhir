@@ -16,6 +16,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -47,7 +48,7 @@ public class ValueSetConceptAccumulatorTest {
 	@Test
 	public void testIncludeConcept() {
 		for (int i = 0; i < 1000; i++) {
-			myAccumulator.includeConcept("sys", "code", "display", null, null, null);
+			myAccumulator.includeConceptWithDesignations("sys", "code", "display", List.of(), null, null, null);
 		}
 		verify(myEntityManager, times(1000)).persist(any(TermValueSetConcept.class));
 	}
@@ -86,7 +87,7 @@ public class ValueSetConceptAccumulatorTest {
 		ArgumentCaptor<TermValueSetConcept> captor = ArgumentCaptor.forClass(TermValueSetConcept.class);
 
 		myAccumulator.setSupportLegacyLob(theSupportLegacyLob);
-		myAccumulator.includeConcept("sys", "code", "display", null, sourceConceptDirectParentPids, null);
+		myAccumulator.includeConceptWithDesignations("sys", "code", "display", List.of(), null, sourceConceptDirectParentPids, null);
 
 		verify(myEntityManager, times(1)).persist(captor.capture());
 

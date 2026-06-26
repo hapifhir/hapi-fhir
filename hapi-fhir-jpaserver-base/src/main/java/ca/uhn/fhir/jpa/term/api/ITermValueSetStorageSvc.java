@@ -8,7 +8,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r5.model.ValueSet;
+import org.hl7.fhir.r4.model.ValueSet;
 
 public interface ITermValueSetStorageSvc {
 
@@ -72,7 +72,7 @@ public interface ITermValueSetStorageSvc {
 	/**
 	 * Creates a new ValueSet entity linked to a ValueSet resource
 	 */
-	void storeTermValueSet(ResourceTable theResourceTable, org.hl7.fhir.r4.model.ValueSet theValueSet);
+	void storeTermValueSet(RequestDetails theRequestDetails, ResourceTable theResourceTable, org.hl7.fhir.r4.model.ValueSet theValueSet);
 
 	/**
 	 */

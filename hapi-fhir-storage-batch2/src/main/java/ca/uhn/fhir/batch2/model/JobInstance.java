@@ -387,6 +387,10 @@ public class JobInstance implements IModelJson, IJobInstance {
 		return myReport;
 	}
 
+	public <T extends IModelJson> T getReport(Class<T> theType) {
+		return JsonUtil.deserialize(getReport(), theType);
+	}
+
 	public JobInstance setReport(String theReport) {
 		myReport = theReport;
 		return this;

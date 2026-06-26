@@ -141,7 +141,7 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 	private void removeValueSetPreExpansions() {
 		List<TermValueSet> termValueSets = myTermValueSetDao.findAll();
 		for (TermValueSet termValueSet : termValueSets) {
-			myTermReadSvc.invalidatePreCalculatedExpansion(termValueSet.getResource().getIdDt(), new SystemRequestDetails());
+			myTermValueSetStorageSvc.invalidatePreCalculatedExpansion(termValueSet.getResource().getIdDt(), new SystemRequestDetails());
 		}
 	}
 

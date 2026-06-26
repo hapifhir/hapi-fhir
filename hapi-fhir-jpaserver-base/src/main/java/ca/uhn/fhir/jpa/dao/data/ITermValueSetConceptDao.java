@@ -31,10 +31,18 @@ import org.springframework.data.repository.query.Param;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public interface ITermValueSetConceptDao
 		extends JpaRepository<TermValueSetConcept, IdAndPartitionId>, IHapiFhirJpaRepository {
 
+	@Query("SELECT COUNT(*) FROM TermValueSetConcept vsc WHERE vsc.myValueSet = :vs")
+	Integer countByTermValueSet(@Param("vs") TermValueSet theValueSet);
+
+	/**
+	 * @deprecated Use {@link #countByTermValueSet(TermValueSet)}
+	 */
+	@Deprecated
 	@Query("SELECT COUNT(*) FROM TermValueSetConcept vsc WHERE vsc.myValueSetPid = :pid")
 	Integer countByTermValueSetId(@Param("pid") Long theValueSetId);
 
@@ -45,6 +53,9 @@ public interface ITermValueSetConceptDao
 	@Query("SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSetPid = :pid AND vsc.mySystem = :system_url")
 	List<TermValueSetConcept> findByTermValueSetIdSystemOnly(
 			Pageable thePage, @Param("pid") Long theValueSetId, @Param("system_url") String theSystem);
+
+	@Query("SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSet = :vs ORDER BY vsc.myOrder")
+	Stream<TermValueSetConcept> streamAllByTermValueSetOrdered(@Param("vs") TermValueSet theValueSet);
 
 	@Query("SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSet = :vs AND vsc.mySystem = :system_url AND vsc.myCode IN (:codes)")
 	List<TermValueSetConcept> findByCodesForTermValueSet(

@@ -1,9 +1,13 @@
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx;
+import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetParameters;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptParentChildLinkDao;
@@ -30,7 +34,6 @@ import ca.uhn.fhir.util.ValidateUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.SetMultimap;
-import jakarta.activation.DataHandler;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
@@ -39,12 +42,13 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r5.model.ValueSet;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -89,6 +93,8 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 	private VersionCanonicalizer myVersionCanonicalizer;
 	@Autowired
 	private ApplicationContext myApplicationContext;
+	@Autowired
+	private IJobCoordinator myJobCoordinator;
 
 	private IValidationSupport myValidationSupport;
 
@@ -167,7 +173,20 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 						storageConcept.setOrder(order.getAndIncrement());
 
 						statistics.incrementConceptsAddedCount();
+
+						ourLog.atInfo() // FIXME: make debug
+								.setMessage("Added Concept[{}] to ValueSet[{}] with order: {}")
+							.addArgument(storageConcept.getCode())
+							.addArgument(termValueSet.getUrl())
+							.addArgument(storageConcept.getOrder())
+							.log();
+
 						myTermValueSetConceptDao.save(storageConcept);
+					} else {
+						if (isNotBlank(conceptToAdd.getDisplay()) && !conceptToAdd.getDisplay().equals(storageConcept.getDisplay())) {
+							storageConcept.setDisplay(conceptToAdd.getDisplay());
+							myTermValueSetConceptDao.save(storageConcept);
+						}
 					}
 
 					SystemAndCode systemAndCode = new SystemAndCode(conceptToAdd.getSystem(), conceptToAdd.getVersion(), conceptToAdd.getCode());
@@ -295,7 +314,7 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 	public void activateStagingCodeSystemVersion(String theValueSetUrl, String theStagingVersionId) {
 		StopWatch sw = new StopWatch();
 
-		myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
+		String versionToDelete = myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
 			TermValueSet stagingValueSet = fetchTermValueSet(theValueSetUrl, theStagingVersionId);
 			if (stagingValueSet.getIntendedVersionId() == null) {
 				// FIXME: add code
@@ -308,12 +327,30 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 			}
 
 			TermValueSet currentValueSet = fetchTermValueSet(theValueSetUrl, intendedVersion);
-			currentValueSet.setVersion(currentValueSet.getVersion() + "_" + UUID.randomUUID());
+			String temporaryVersion = currentValueSet.getVersion() + "_" + UUID.randomUUID();
+			currentValueSet.setVersion(temporaryVersion);
 			myTermValueSetDao.saveAndFlush(currentValueSet);
 
+			stagingValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.EXPANDED);
 			stagingValueSet.setVersion(intendedVersion);
 			myTermValueSetDao.saveAndFlush(stagingValueSet);
+
+			return temporaryVersion;
 		});
+
+		myTxService
+			.withSystemRequestOnDefaultPartition()
+			.execute(() -> {
+				ourLog
+					.atInfo()
+					.setMessage("Deleting former version of ValueSet[url={}, version={}]")
+					.addArgument(theValueSetUrl)
+					.addArgument(versionToDelete)
+					.log();
+
+				TermValueSet valueSet = fetchTermValueSet(theValueSetUrl, versionToDelete);
+				deleteTermValueSet(valueSet);
+			});
 	}
 
 	@Nonnull
@@ -434,7 +471,7 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 	}
 
 	@Override
-	public void storeTermValueSet(ResourceTable theResourceTable, org.hl7.fhir.r4.model.ValueSet theValueSet) {
+	public void storeTermValueSet(RequestDetails theRequestDetails, ResourceTable theResourceTable, org.hl7.fhir.r4.model.ValueSet theValueSet) {
 		HapiTransactionService.requireTransaction();
 
 		// If we're in a transaction, we need to flush now so that we can correctly detect
@@ -470,6 +507,22 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 
 		if (theValueSet.getStatus() != null && theValueSet.getStatus() != Enumerations.PublicationStatus.ACTIVE) {
 			termValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.NOT_ACTIVE);
+		} else {
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+				@Override
+				public void afterCommit() {
+					JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+					startRequest.setJobDefinitionId(PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET);
+
+					PreExpandValueSetParameters parameters = new PreExpandValueSetParameters();
+					parameters.setUrl(theValueSet.getUrl());
+					parameters.setVersion(theValueSet.getVersion());
+					startRequest.setParameters(parameters);
+
+					ourLog.info("Submitting pre-expansion job for ValueSet[url={}, version={}]", parameters.getUrl(), parameters.getVersion());
+					myJobCoordinator.startInstance(theRequestDetails, startRequest);
+				}
+			});
 		}
 
 		// Delete version being replaced
@@ -540,22 +593,28 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 		if (optionalExistingTermValueSetById.isPresent()) {
 			TermValueSet existingTermValueSet = optionalExistingTermValueSetById.get();
 
-			ourLog.info("Deleting existing TermValueSet[{}] and its children...", existingTermValueSet.getId());
-			deletePreCalculatedValueSetContents(existingTermValueSet);
-			myTermValueSetDao.deleteById(existingTermValueSet.getPartitionedId());
-
-			/*
-			 * If we're updating an existing ValueSet within a transaction, we need to make
-			 * sure to manually flush now since otherwise we'll try to create a new
-			 * TermValueSet entity and fail with a constraint error on the URL, since
-			 * this one won't be deleted yet
-			 */
-			myTermValueSetDao.flush();
-
-			ourLog.info("Done deleting existing TermValueSet[{}] and its children.", existingTermValueSet.getId());
+			deleteTermValueSet(existingTermValueSet);
 		}
 
 		return optionalExistingTermValueSetById;
+	}
+
+	private void deleteTermValueSet(TermValueSet theTermValueSet) {
+		HapiTransactionService.requireTransaction();
+
+		ourLog.info("Deleting existing TermValueSet[{}] and its children...", theTermValueSet.getId());
+		deletePreCalculatedValueSetContents(theTermValueSet);
+		myTermValueSetDao.deleteById(theTermValueSet.getPartitionedId());
+
+		/*
+		 * If we're updating an existing ValueSet within a transaction, we need to make
+		 * sure to manually flush now since otherwise we'll try to create a new
+		 * TermValueSet entity and fail with a constraint error on the URL, since
+		 * this one won't be deleted yet
+		 */
+		myTermValueSetDao.flush();
+
+		ourLog.info("Done deleting existing TermValueSet[{}] and its children.", theTermValueSet.getId());
 	}
 
 	@Override
@@ -657,12 +716,6 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 			myValidationSupport = validationSupport;
 		}
 		return validationSupport;
-	}
-
-	private record SystemAndCode(UrlUtil.CanonicalUrlParts system, String code) {
-		public SystemAndCode(String theSystem, String theVersion, String theCode) {
-			this(UrlUtil.parseCanonicalUrl(theSystem, theVersion), theCode);
-		}
 	}
 
 	private record LanguageAndDesignation(String language, String designation, String useSystem, String useCode) {

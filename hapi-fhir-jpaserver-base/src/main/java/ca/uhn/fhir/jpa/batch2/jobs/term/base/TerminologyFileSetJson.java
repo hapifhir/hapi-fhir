@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.batch2.jobs.term.base;
 
+import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.HapiToStringBuilder;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -358,6 +359,17 @@ public class TerminologyFileSetJson implements IModelJson {
 			b.appendIfNonZero("conceptPropertiesRemoved", myPropertiesRemoved);
 			b.appendIfNonZero("designationsRemoved", myDesignationsRemoved);
 			return b.toString();
+		}
+
+		public void increment(UploadStatistics theUploadStatistics) {
+			incrementConceptsAdded(theUploadStatistics.getAddedConceptCount());
+			incrementConceptLinksAdded(theUploadStatistics.getAddedConceptLinkCount());
+			incrementPropertiesAdded(theUploadStatistics.getAddedPropertyCount());
+			incrementDesignationsAdded(theUploadStatistics.getAddedDesignationCount());
+			incrementConceptsRemoved(theUploadStatistics.getRemovedConceptCount());
+			incrementConceptLinksRemoved(theUploadStatistics.getRemovedConceptLinkCount());
+			incrementPropertiesRemoved(theUploadStatistics.getRemovedPropertyCount());
+			incrementDesignationsRemoved(theUploadStatistics.getRemovedDesignationCount());
 		}
 	}
 }

@@ -37,6 +37,7 @@ import static org.apache.commons.lang3.StringUtils.isAnyBlank;
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+// FIXME: still needed?
 public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValueSetConceptAccumulator.class);
 
@@ -71,23 +72,6 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 	}
 
 	@Override
-	public void includeConcept(
-			String theSystem,
-			String theCode,
-			String theDisplay,
-			Long theSourceConceptPid,
-			String theSourceConceptDirectParentPids,
-			String theSystemVersion) {
-		saveConcept(
-				theSystem,
-				theCode,
-				theDisplay,
-				theSourceConceptPid,
-				theSourceConceptDirectParentPids,
-				theSystemVersion);
-	}
-
-	@Override
 	public void includeConceptWithDesignations(
 			String theSystem,
 			String theCode,
@@ -111,9 +95,9 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 	}
 
 	@Override
-	public boolean excludeConcept(String theSystem, String theCode) {
+	public void excludeConcept(String theSystem, String theCode) {
 		if (isAnyBlank(theSystem, theCode)) {
-			return false;
+			return;
 		}
 
 		// Get existing entity so it can be deleted.
@@ -154,7 +138,6 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 				ourLog.info("Have excluded {} concepts from ValueSet[{}]", myConceptsExcluded, myTermValueSet.getUrl());
 			}
 		}
-		return false;
 	}
 
 	private TermValueSetConcept saveConcept(
