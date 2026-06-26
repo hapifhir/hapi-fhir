@@ -42,8 +42,6 @@ import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
-import static ca.uhn.fhir.batch2.jobs.export.BulkExportJobServiceUtil.JOB_INSTANCE_ID;
-
 /**
  * This class is responsible for initiating a bulk export job
  * with appropriate _type parameter and partitionId as well as
@@ -89,7 +87,6 @@ public class BulkExportJobService {
 		startRequest.setUseCache(useCache);
 		startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(theRequestDetails, startRequest);
-		theRequestDetails.getUserData().put(JOB_INSTANCE_ID, response.getInstanceId());
 
 		BulkExportJobServiceUtil.writePollingLocationsToResponseHeaders(theRequestDetails, response.getInstanceId());
 	}
