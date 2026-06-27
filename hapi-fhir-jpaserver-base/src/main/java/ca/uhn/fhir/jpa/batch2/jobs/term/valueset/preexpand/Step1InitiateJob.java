@@ -21,8 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-public class CreateExpansionWorkChunksStep implements IJobStepWorker<PreExpandValueSetParameters, VoidModel, ExpandConceptsWorkChunkJson> {
-	private static final Logger ourLog = LoggerFactory.getLogger(CreateExpansionWorkChunksStep.class);
+public class Step1InitiateJob implements IJobStepWorker<PreExpandValueSetParameters, VoidModel, ExpandConceptsWorkChunkJson> {
+	private static final Logger ourLog = LoggerFactory.getLogger(Step1InitiateJob.class);
 
 	/**
 	 * Because we're handling each ValueSet.compose section individually, we need to
@@ -64,10 +64,16 @@ public class CreateExpansionWorkChunksStep implements IJobStepWorker<PreExpandVa
 			.addArgument(canonicalUrl.versionId())
 			.log();
 
-		// The load IDs step just needs to fire once
+		// The load IDs step just needs to fire once, so we send a single notification
 		LoadAllConceptIdsWorkChunkJson loadConceptIdsWorkChunk = new LoadAllConceptIdsWorkChunkJson();
 		loadConceptIdsWorkChunk.setStagingVersionId(stagingVersion);
 		theDataSink.acceptForFutureStep(PreExpandValueSetJobAppCtx.STEP_ID_LOAD_ALL_CONCEPT_IDS, loadConceptIdsWorkChunk);
+
+		// Just in case no concepts match at all, we want to still send at least one chunk to the
+		// report generation reducer step so that it knows the staging version
+		ExpandValueSetStepOutcomeJson expandValueSetStepOutcomeJson = new ExpandValueSetStepOutcomeJson();
+		expandValueSetStepOutcomeJson.setStagingVersion(stagingVersion);
+		theDataSink.acceptForFutureStep(PreExpandValueSetJobAppCtx.STEP_ID_GENERATE_REPORT, expandValueSetStepOutcomeJson);
 
 		return RunOutcome.SUCCESS;
 	}

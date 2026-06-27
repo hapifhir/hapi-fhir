@@ -5,14 +5,12 @@ import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
-import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
 import org.apache.commons.io.StreamIterator;
@@ -20,7 +18,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.stream.Stream;
 
-public class LoadAllConceptIdsStep implements IJobStepWorker<PreExpandValueSetParameters, LoadAllConceptIdsWorkChunkJson, CompactConceptsWorkChunkJson> {
+/**
+ * After all of the inclusions and exclusions have been processed, this step fetches
+ * the final list of concepts. We do this for two reasons:
+ * <ul>
+ * <li>
+ *     So that we can apply an accurate total concept count to {@link TermValueSet#setTotalConcepts(Long)}.
+ * </li>
+ * <li>
+ *     We feed the list of concepts to {@link Step7CompactConceptsStep} which then
+ *     renumbers the concept {@link TermValueSetConcept#setOrder(int) orders} to
+ *     get rid of any gaps.
+ * </li>
+ * </ul>
+ */
+public class Step6LoadAllConceptIdsStep implements IJobStepWorker<PreExpandValueSetParameters, LoadAllConceptIdsWorkChunkJson, CompactConceptsWorkChunkJson> {
 
 	@Autowired
 	private ITermValueSetDao myTermValueSetDao;
@@ -49,16 +61,12 @@ public class LoadAllConceptIdsStep implements IJobStepWorker<PreExpandValueSetPa
 
 			CompactConceptsWorkChunkJson chunk = new CompactConceptsWorkChunkJson();
 
-			int order = -1;
+			int order = 0;
 			int conceptCount = 0;
 			while (conceptIterator.hasNext()) {
 				TermValueSetConcept concept = conceptIterator.next();
 				myEntityManager.detach(concept);
 				conceptCount++;
-
-				if (order == -1) {
-					order = concept.getOrder();
-				}
 
 				chunk.addConcept(concept.getPartitionId().getPartitionId(), concept.getId(), order++);
 

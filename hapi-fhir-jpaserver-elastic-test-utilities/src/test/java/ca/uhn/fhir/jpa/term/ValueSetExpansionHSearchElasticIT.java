@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.test.ValueSetExpansionHSearchTestCases;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
@@ -73,6 +74,11 @@ public class ValueSetExpansionHSearchElasticIT extends ValueSetExpansionHSearchT
 	@Override
 	public JpaStorageSettings getJpaStorageSettings() {
 		return myStorageSettings;
+	}
+
+	@Override
+	public Batch2JobHelper getBatch2JobHelper() {
+		return myBatch2JobHelper;
 	}
 
 	/**

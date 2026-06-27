@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetParameters;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
@@ -41,7 +42,9 @@ import jakarta.persistence.LockModeType;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +54,7 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -158,6 +162,7 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 				Set<ValueSet.ValueSetExpansionContainsComponent> conceptsToAdd = flattenedValueSet.systemToConcepts().get(system);
 				for (ValueSet.ValueSetExpansionContainsComponent conceptToAdd : conceptsToAdd) {
 
+					boolean shouldSave = false;
 					TermValueSetConcept storageConcept = codeToExistingConcept.get(conceptToAdd.getCode());
 					if (storageConcept == null) {
 						storageConcept = new TermValueSetConcept();
@@ -180,13 +185,32 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 							.addArgument(termValueSet.getUrl())
 							.addArgument(storageConcept.getOrder())
 							.log();
+						shouldSave = true;
 
-						myTermValueSetConceptDao.save(storageConcept);
-					} else {
-						if (isNotBlank(conceptToAdd.getDisplay()) && !conceptToAdd.getDisplay().equals(storageConcept.getDisplay())) {
-							storageConcept.setDisplay(conceptToAdd.getDisplay());
-							myTermValueSetConceptDao.save(storageConcept);
+					}
+
+					if (isNotBlank(conceptToAdd.getDisplay()) && !conceptToAdd.getDisplay().equals(storageConcept.getDisplay())) {
+						storageConcept.setDisplay(conceptToAdd.getDisplay());
+						shouldSave = true;
+					}
+
+					Extension sourceConceptPidExtension = conceptToAdd.getExtensionByUrl(TerminologyConstants.EXTENSION_SOURCE_CONCEPT_PID);
+					if (sourceConceptPidExtension != null) {
+						Long sourceConceptPid = ((DecimalType)sourceConceptPidExtension.getValue()).getValue().longValue();
+						if (!sourceConceptPid.equals(storageConcept.getSourceConceptPid())) {
+							storageConcept.setSourceConceptPid(sourceConceptPid);
+							shouldSave = true;
 						}
+					}
+
+					String directParentPids = conceptToAdd.getExtensionString(TerminologyConstants.EXTENSION_SOURCE_CONCEPT_DIRECT_PARENT_PIDS);
+					if (isNotBlank(directParentPids) && !directParentPids.equals(storageConcept.getSourceConceptDirectParentPids())) {
+						storageConcept.setSourceConceptDirectParentPids(directParentPids);
+						shouldSave = true;
+					}
+
+					if (shouldSave) {
+						myTermValueSetConceptDao.save(storageConcept);
 					}
 
 					SystemAndCode systemAndCode = new SystemAndCode(conceptToAdd.getSystem(), conceptToAdd.getVersion(), conceptToAdd.getCode());
@@ -311,7 +335,7 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 	}
 
 	@Override
-	public void activateStagingCodeSystemVersion(String theValueSetUrl, String theStagingVersionId) {
+	public void activateStagingVersion(String theValueSetUrl, String theStagingVersionId) {
 		StopWatch sw = new StopWatch();
 
 		String versionToDelete = myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
@@ -331,6 +355,7 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 			currentValueSet.setVersion(temporaryVersion);
 			myTermValueSetDao.saveAndFlush(currentValueSet);
 
+			stagingValueSet.setExpansionTimestamp(new Date());
 			stagingValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.EXPANDED);
 			stagingValueSet.setVersion(intendedVersion);
 			myTermValueSetDao.saveAndFlush(stagingValueSet);
@@ -352,6 +377,20 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 				deleteTermValueSet(valueSet);
 			});
 	}
+
+	@Override
+	public void dropStagingVersion(String theUrl, String theVersion) {
+		myTxService.withSystemRequestOnDefaultPartition().execute(()->{
+			TermValueSet valueSet = fetchTermValueSet(theUrl, theVersion);
+			if (valueSet.getIntendedVersionId() == null) {
+				// FIXME: add test and code
+				throw new InvalidRequestException(Msg.code(1) + "Cannot drop staging version of ValueSet[url=" + theUrl + ", version=" + theVersion + "] because it is not a staging version");
+			}
+
+			deleteTermValueSet(valueSet);
+		});
+	}
+
 
 	@Nonnull
 	private Map<String, TermValueSetConcept> fetchExistingConcepts(UrlUtil.CanonicalUrlParts system, FlattenedValueSet flattenedValueSet, TermValueSet termValueSet) {
@@ -691,6 +730,14 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 
 		return affectedValueSets.size();
 		});
+	}
+
+	@Override
+	public void markValueSetAsFailedToExpand(String theUrl, String theVersion) {
+		myTxService.withSystemRequestOnDefaultPartition().execute(()-> fetchTermValueSetOpt(theUrl, theVersion).ifPresent(theValueSet -> {
+			theValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND);
+			myEntityManager.merge(theValueSet);
+		}));
 	}
 
 	/*

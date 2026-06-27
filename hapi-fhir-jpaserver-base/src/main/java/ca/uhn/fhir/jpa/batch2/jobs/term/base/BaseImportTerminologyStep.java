@@ -22,18 +22,32 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.base;
 import ca.uhn.fhir.batch2.api.AttachmentDetails;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.JsonUtil;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.time.DateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.util.concurrent.Callable;
+
+import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 
 public abstract class BaseImportTerminologyStep {
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseImportTerminologyStep.class);
 
 	@Autowired
 	protected IJobPersistence myJobPersistence;
+
+	@Autowired
+	protected IHapiTransactionService myTransactionService;
 
 	/**
 	 * Constructor
@@ -66,4 +80,42 @@ public abstract class BaseImportTerminologyStep {
 		}
 		return jobMetadata;
 	}
+
+	protected <T> T executeInNewTransactionWithRetry(
+		Callable<T> theFunction, StepExecutionDetails<?, ?> theStepExecutionDetails) {
+		int retryCount = 0;
+		while (true) {
+			try {
+				return myTransactionService
+					.withSystemRequestOnDefaultPartition()
+					.execute(theFunction);
+			} catch (ResourceVersionConflictException e) {
+				retryCount++;
+				int maxRetries = 10;
+				if (retryCount > maxRetries) {
+					ourLog.atError()
+						.setMessage("Failed to saver terminology due to version conflict after {} retries: {}")
+						.addArgument(retryCount)
+						.addArgument(e.getMessage())
+						.log();
+					throw e;
+				}
+				ourLog.atWarn()
+					.setMessage("Failed to save terminology for step {}, retry {}/{} in 5 seconds: {}")
+					.addArgument(theStepExecutionDetails.getCurrentStepId())
+					.addArgument(retryCount)
+					.addArgument(maxRetries)
+					.addArgument(e.getMessage())
+					.log();
+
+				long sleepTime = 5 * DateUtils.MILLIS_PER_SECOND;
+				if (HapiSystemProperties.isUnitTestModeEnabled()) {
+					sleepTime = 10;
+				}
+
+				sleepAtLeast(sleepTime);
+			}
+		}
+	}
+
 }

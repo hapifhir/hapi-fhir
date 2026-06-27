@@ -109,14 +109,13 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion("2.68", fileDescriptors, false, properties);
 
 		// save all deferred concepts, properties, links, etc
-		myTerminologyDeferredStorageSvc.saveAllDeferred();
 		validateSavedConceptsCount();
 
 		// check the number of freetext-indexed TermConcepts
 		validateFreetextCounts();
 
 		// pre-expand  ValueSets
-		myTermReadSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		// pre-expansion uses freetext so check is to make sure all valuesets have the right number of concepts
 		validateValueSetPreexpansion();
@@ -131,7 +130,7 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 		removeValueSetPreExpansions();
 
 		// pre-expand  ValueSets again, after freetext reindexing
-		myTermReadSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		// pre-expansion uses freetext so check is to make sure all valuesets have the right number of concepts
 		validateValueSetPreexpansion();

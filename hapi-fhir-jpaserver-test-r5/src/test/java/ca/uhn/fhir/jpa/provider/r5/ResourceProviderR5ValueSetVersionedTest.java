@@ -298,8 +298,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet();
-		await().until(() -> clearDeferredStorageQueue());
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		Slice<TermValueSet> page = runInTransaction(()->myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED));
 		assertThat(page.getContent()).hasSize(2);
 
@@ -394,8 +393,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet();
-		await().until(() -> clearDeferredStorageQueue());
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		Slice<TermValueSet> page = runInTransaction(()->myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED));
 		assertThat(page.getContent()).hasSize(2);
@@ -562,8 +560,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet();
-		await().until(() -> clearDeferredStorageQueue());
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		Slice<TermValueSet> page = runInTransaction(()->myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED));
 		assertThat(page.getContent()).hasSize(2);
@@ -623,7 +620,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet();
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		try {
 			myClient
@@ -710,7 +707,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystem();
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		// Test with no version specified
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
@@ -955,8 +952,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 		validateTermValueSetNotExpanded(initialValueSetName_v1, "1", myExtensionalVsIdOnResourceTable_v1);
 		String initialValueSetName_v2 = valueSet_v2.getName();
 		validateTermValueSetNotExpanded(initialValueSetName_v2, "2", myExtensionalVsIdOnResourceTable_v2);
-		await().until(() -> clearDeferredStorageQueue());
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		validateTermValueSetExpandedAndChildrenV1(initialValueSetName_v1, codeSystem_v1);
 		validateTermValueSetExpandedAndChildrenV2(initialValueSetName_v2, codeSystem_v2);
 
@@ -978,7 +974,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 		String updatedValueSetName_v2 = valueSet_v2.getName();
 		validateTermValueSetNotExpanded(updatedValueSetName_v2,"2", myExtensionalVsIdOnResourceTable_v2);
 
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		validateTermValueSetExpandedAndChildrenV1(updatedValueSetName_v1, codeSystem_v1);
 		validateTermValueSetExpandedAndChildrenV2(updatedValueSetName_v2, codeSystem_v2);
 	}
@@ -1004,8 +1000,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 		validateTermValueSetNotExpanded(initialValueSetName_v1, "1", myExtensionalVsIdOnResourceTable_v1);
 		String initialValueSetName_v2 = valueSet_v2.getName();
 		validateTermValueSetNotExpanded(initialValueSetName_v2, "2", myExtensionalVsIdOnResourceTable_v2);
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
-		await().until(() -> clearDeferredStorageQueue());
+		myBatch2JobHelper.awaitNoJobsRunning();
 		validateTermValueSetExpandedAndChildrenV1(initialValueSetName_v1, codeSystem_v1);
 		validateTermValueSetExpandedAndChildrenV2(initialValueSetName_v2, codeSystem_v2);
 
@@ -1053,7 +1048,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 		String updatedValueSetName_v2 = valueSet_v2.getName();
 		validateTermValueSetNotExpanded(updatedValueSetName_v2, "2", myExtensionalVsIdOnResourceTable_v2);
 
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		validateTermValueSetExpandedAndChildrenV1(updatedValueSetName_v1, codeSystem_v1);
 		validateTermValueSetExpandedAndChildrenV2(updatedValueSetName_v2, codeSystem_v2);
 
@@ -1414,17 +1409,6 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 		ourLog.info(resp);
 
 		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
-
-	}
-
-	private boolean clearDeferredStorageQueue() {
-
-		if(!myTermDeferredStorageSvc.isStorageQueueEmpty(true)) {
-			myTermDeferredStorageSvc.saveAllDeferred();
-			return false;
-		} else {
-			return true;
-		}
 
 	}
 

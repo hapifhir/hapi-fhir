@@ -62,12 +62,7 @@ import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.sched.HapiJob;
-import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
-import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
-import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
@@ -101,7 +96,6 @@ import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.time.DateUtils;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
 import org.hibernate.CacheMode;
@@ -138,12 +132,9 @@ import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
-import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Propagation;
@@ -225,8 +216,6 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
 
-	private boolean myPreExpandingValueSets = false;
-
 	@Autowired
 	private ITermCodeSystemVersionDao myCodeSystemVersionDao;
 
@@ -276,9 +265,6 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 	@Autowired
 	private InMemoryTerminologyServerValidationSupport myInMemoryTerminologyServerValidationSupport;
-
-	@Autowired
-	private ValueSetConceptAccumulatorFactory myValueSetConceptAccumulatorFactory;
 
 	@Autowired
 	private PartitionSettings myPartitionSettings;
@@ -2345,86 +2331,6 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		myTxTemplate = new TransactionTemplate(myTransactionManager, rules);
 	}
 
-	// FIXME: remove
-	@Override
-	public synchronized void preExpandDeferredValueSetsToTerminologyTables() {
-		if (!myStorageSettings.isEnableTaskPreExpandValueSets()) {
-			return;
-		}
-		if (isNotSafeToPreExpandValueSets()) {
-			ourLog.info("Skipping scheduled pre-expansion of ValueSets while deferred entities are being loaded.");
-			return;
-		}
-		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
-
-		while (true) {
-			StopWatch sw = new StopWatch();
-			TermValueSet valueSetToExpand = txTemplate.execute(t -> {
-				Optional<TermValueSet> optionalTermValueSet = getNextTermValueSetNotExpanded();
-				if (optionalTermValueSet.isEmpty()) {
-					return null;
-				}
-
-				TermValueSet termValueSet = optionalTermValueSet.get();
-				termValueSet.setTotalConcepts(0L);
-				termValueSet.setTotalConceptDesignations(0L);
-				termValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS);
-				TermValueSet retVal = myEntityManager.merge(termValueSet);
-				myEntityManager.flush();
-				return retVal;
-			});
-			if (valueSetToExpand == null) {
-				return;
-			}
-
-			// We have a ValueSet to pre-expand.
-			setPreExpandingValueSets(true);
-			try {
-				ValueSet valueSet = txTemplate.execute(t -> {
-					TermValueSet refreshedValueSetToExpand = myTermValueSetDao
-							.findById(valueSetToExpand.getPartitionedId())
-							.orElseThrow(() -> new IllegalStateException("Unknown VS ID: " + valueSetToExpand.getId()));
-					return getValueSetFromResourceTable(refreshedValueSetToExpand.getResource());
-				});
-				assert valueSet != null;
-
-				ValueSetConceptAccumulator valueSetConceptAccumulator =
-						myValueSetConceptAccumulatorFactory.create(valueSetToExpand);
-				ValueSetExpansionOptions options = new ValueSetExpansionOptions();
-				options.setIncludeHierarchy(true);
-				expandValueSet(options, valueSet, valueSetConceptAccumulator);
-
-				// We are done with this ValueSet.
-				txTemplate.executeWithoutResult(t -> {
-					valueSetToExpand.setExpansionStatus(TermValueSetPreExpansionStatusEnum.EXPANDED);
-					valueSetToExpand.setExpansionTimestamp(new Date());
-					myEntityManager.merge(valueSetToExpand);
-				});
-
-				// FIXME: restore if needed
-//				afterValueSetExpansionStatusChange();
-
-				ourLog.info(
-						"Pre-expanded ValueSet[{}] with URL[{}] - Saved {} concepts in {}",
-						valueSet.getId(),
-						valueSet.getUrl(),
-						valueSetConceptAccumulator.getConceptsSaved(),
-						sw);
-
-			} catch (Exception e) {
-				ourLog.error(
-						"Failed to pre-expand ValueSet with URL[{}]: {}", valueSetToExpand.getUrl(), e.getMessage(), e);
-				txTemplate.executeWithoutResult(t -> {
-					valueSetToExpand.setExpansionStatus(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND);
-					myEntityManager.merge(valueSetToExpand);
-				});
-
-			} finally {
-				setPreExpandingValueSets(false);
-			}
-		}
-	}
-
 	@Override
 	public void invalidateCaches() {
 		invalidateCodeSystemCaches();
@@ -2450,39 +2356,8 @@ public class TermReadSvcImpl implements ITermReadSvc {
 						new TermCodeSystemVersionDetails(theVersion.getPid(), theVersion.getCodeSystemVersionId())));
 	}
 
-	private synchronized boolean isPreExpandingValueSets() {
-		return myPreExpandingValueSets;
-	}
-
-	private synchronized void setPreExpandingValueSets(boolean thePreExpandingValueSets) {
-		myPreExpandingValueSets = thePreExpandingValueSets;
-	}
-
 	private boolean isNotSafeToPreExpandValueSets() {
 		return myDeferredStorageSvc != null && !myDeferredStorageSvc.isStorageQueueEmpty(false);
-	}
-
-	private Optional<TermValueSet> getNextTermValueSetNotExpanded() {
-		Optional<TermValueSet> retVal = Optional.empty();
-		Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(
-				PageRequest.of(0, 1), TermValueSetPreExpansionStatusEnum.NOT_EXPANDED);
-
-		if (!page.getContent().isEmpty()) {
-			retVal = Optional.of(page.getContent().get(0));
-		}
-
-		return retVal;
-	}
-
-
-	private Optional<TermValueSet> getTermValueSet(String version, String url) {
-		Optional<TermValueSet> optionalExistingTermValueSetByUrl;
-		if (version != null) {
-			optionalExistingTermValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndVersion(url, version);
-		} else {
-			optionalExistingTermValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndNullVersion(url);
-		}
-		return optionalExistingTermValueSetByUrl;
 	}
 
 	@Override
@@ -3137,7 +3012,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 	@VisibleForTesting
 	boolean isBatchTerminologyTasksRunning() {
-		return isNotSafeToPreExpandValueSets() || isPreExpandingValueSets();
+		return isNotSafeToPreExpandValueSets();
 	}
 
 	@VisibleForTesting
@@ -3190,13 +3065,6 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		org.hl7.fhir.r4.model.ValueSet valueSetToExpand =
 				myVersionCanonicalizer.valueSetToCanonical(theValueSetToExpand);
 		expandValueSet(theExpansionOptions, valueSetToExpand, theValueSetCodeAccumulator);
-	}
-
-	private org.hl7.fhir.r4.model.ValueSet getValueSetFromResourceTable(ResourceTable theResourceTable) {
-		Class<? extends IBaseResource> type =
-				getFhirContext().getResourceDefinition("ValueSet").getImplementingClass();
-		IBaseResource valueSet = myJpaStorageResourceParser.toResource(null, type, theResourceTable, null, false);
-		return myVersionCanonicalizer.valueSetToCanonical(valueSet);
 	}
 
 	@Override

@@ -259,7 +259,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		Parameters respParam = myClient
 			.operation()
@@ -292,7 +292,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		List<String> expandedConceptsByValueSetUrl = getExpandedConceptsByValueSetUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 		Parameters respParam = myClient
@@ -329,7 +329,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		List<String> expandedConcepts = getExpandedConceptsByValueSetUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 		Parameters respParam = myClient
 			.operation()
@@ -358,7 +358,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		List<String> expandedConcepts = getExpandedConceptsByValueSetUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 
@@ -409,7 +409,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		Parameters respParam = myClient
 			.operation()
@@ -489,7 +489,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		Parameters respParam = myClient
 			.operation()
@@ -512,7 +512,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		List<String> expandedConcepts = getExpandedConceptsByValueSetUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 
@@ -543,7 +543,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		List<String> expandedConcepts = getExpandedConceptsByValueSetUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 
 		Parameters respParam = myClient
@@ -573,7 +573,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		List<String> expandedConcepts = getExpandedConceptsByValueSetUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 
@@ -606,7 +606,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		try {
 			Parameters respParam = myClient
@@ -648,7 +648,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 
@@ -673,7 +673,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 
@@ -706,7 +706,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 
@@ -739,7 +739,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 
@@ -1029,7 +1029,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 		String initialValueSetName = valueSet.getName();
 		validateTermValueSetNotExpanded(initialValueSetName);
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		validateTermValueSetExpandedAndChildren(initialValueSetName, codeSystem);
 
 		ValueSet updatedValueSet = valueSet;
@@ -1040,7 +1040,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 		String updatedValueSetName = valueSet.getName();
 		validateTermValueSetNotExpanded(updatedValueSetName);
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		validateTermValueSetExpandedAndChildren(updatedValueSetName, codeSystem);
 	}
 
@@ -1058,7 +1058,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 		String initialValueSetName = valueSet.getName();
 		validateTermValueSetNotExpanded(initialValueSetName);
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		validateTermValueSetExpandedAndChildren(initialValueSetName, codeSystem);
 
 		ValueSet updatedValueSet = valueSet;
@@ -1082,7 +1082,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 		String updatedValueSetName = valueSet.getName();
 		validateTermValueSetNotExpanded(updatedValueSetName);
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		validateTermValueSetExpandedAndChildren(updatedValueSetName, codeSystem);
 	}
 
@@ -1304,7 +1304,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		}
 
 		// Now do a pre-expansion
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		expandGet = new HttpGet(myServerBase + "/ValueSet/" + vsId.getIdPart() + "/$expand?_pretty=true");
 		try (CloseableHttpResponse status = ourHttpClient.execute(expandGet)) {

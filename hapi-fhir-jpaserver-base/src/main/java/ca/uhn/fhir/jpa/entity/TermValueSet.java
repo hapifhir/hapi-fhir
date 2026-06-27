@@ -101,7 +101,6 @@ public class TermValueSet extends BasePartitionable implements Serializable {
 	 * another version when the staging is complete, this element will hold the
 	 * version ID which this entity will take when the staging is complete.
 	 */
-	// FIXME: add migration
 	@Column(name = "VS_INTENDED_VERSION_ID", nullable = true, length = MAX_VER_LENGTH)
 	private String myIntendedVersionId;
 

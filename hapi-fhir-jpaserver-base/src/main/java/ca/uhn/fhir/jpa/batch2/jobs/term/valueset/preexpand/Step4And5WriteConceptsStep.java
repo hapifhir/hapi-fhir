@@ -5,6 +5,7 @@ import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyStep;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
@@ -15,17 +16,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.concurrent.Callable;
+
 import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx.STEP_ID_GENERATE_REPORT;
 
-public class WriteConceptsStep<OT extends IModelJson> implements IJobStepWorker<PreExpandValueSetParameters, WriteConceptsWorkChunkJson, OT> {
-	private static final Logger ourLog = LoggerFactory.getLogger(WriteConceptsStep.class);
+public class Step4And5WriteConceptsStep<OT extends IModelJson> extends BaseImportTerminologyStep implements IJobStepWorker<PreExpandValueSetParameters, WriteConceptsWorkChunkJson, OT> {
+	private static final Logger ourLog = LoggerFactory.getLogger(Step4And5WriteConceptsStep.class);
 
 	private final boolean myInclude;
 
 	@Autowired
 	private ITermValueSetStorageSvc myTermValueSetStorageSvc;
 
-	public WriteConceptsStep(boolean theInclude) {
+	public Step4And5WriteConceptsStep(boolean theInclude) {
 		myInclude = theInclude;
 	}
 
@@ -47,12 +50,14 @@ public class WriteConceptsStep<OT extends IModelJson> implements IJobStepWorker<
 			.addArgument(startingOrderOffset)
 			.log();
 
-		UploadStatistics statistics;
-		if (myInclude) {
-			statistics = myTermValueSetStorageSvc.addConceptsToExpansion(delta, startingOrder + startingOrderOffset);
-		} else {
-			statistics = myTermValueSetStorageSvc.removeConceptsFromExpansion(delta);
-		}
+		Callable<UploadStatistics> uploadFunction = ()->{
+			if (myInclude) {
+				return myTermValueSetStorageSvc.addConceptsToExpansion(delta, startingOrder + startingOrderOffset);
+			} else {
+				return myTermValueSetStorageSvc.removeConceptsFromExpansion(delta);
+			}
+		};
+		UploadStatistics statistics = super.executeInNewTransactionWithRetry(uploadFunction, theStepExecutionDetails);
 
 		TerminologyFileSetJson.RecordsAddedCounter recordsAddedCounter = new TerminologyFileSetJson.RecordsAddedCounter();
 		recordsAddedCounter.increment(statistics);

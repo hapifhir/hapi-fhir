@@ -21,6 +21,9 @@ public class ExpandValueSetStepOutcomeJson implements IModelJson {
 	@JsonProperty("stagingVersion")
 	private String myStagingVersion;
 
+	@JsonProperty("failureMessage")
+	private String myFailureMessage;
+
 
 	public void setRecordsAddedCounter(TerminologyFileSetJson.RecordsAddedCounter theRecordsAddedCounter) {
 		myRecordsAddedCounter = theRecordsAddedCounter;
@@ -61,5 +64,13 @@ public class ExpandValueSetStepOutcomeJson implements IModelJson {
 
 	public String getStagingVersion() {
 		return myStagingVersion;
+	}
+
+	public void setFailureMessage(String theFailureMessage) {
+		myFailureMessage = theFailureMessage;
+	}
+
+	public String getFailureMessage() {
+		return myFailureMessage;
 	}
 }

@@ -13,7 +13,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Multimaps;
-import org.hl7.fhir.r5.model.ValueSet;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -555,7 +555,7 @@ public class TermValueSetStorageSvcImplTest extends BaseJpaR5Test {
 
 		// Test
 
-		mySvc.activateStagingCodeSystemVersion(VS_URI, stagingVersion);
+		mySvc.activateStagingVersion(VS_URI, stagingVersion);
 
 		// Verify
 
@@ -588,7 +588,7 @@ public class TermValueSetStorageSvcImplTest extends BaseJpaR5Test {
 
 		// Test
 
-		assertThatThrownBy(()->mySvc.activateStagingCodeSystemVersion(VS_URI, "1.0"))
+		assertThatThrownBy(()->mySvc.activateStagingVersion(VS_URI, "1.0"))
 			.isInstanceOf(InvalidRequestException.class)
 			.hasMessageContaining("ValueSet URL[http://vs] Version[1.0] is not a staging version");
 
@@ -598,7 +598,7 @@ public class TermValueSetStorageSvcImplTest extends BaseJpaR5Test {
 	void testActivateStagingVersion_UnknownVersionPassed() {
 		// Test
 
-		assertThatThrownBy(()->mySvc.activateStagingCodeSystemVersion(VS_URI, "1.0"))
+		assertThatThrownBy(()->mySvc.activateStagingVersion(VS_URI, "1.0"))
 			.isInstanceOf(ResourceNotFoundException.class)
 			.hasMessageContaining("No ValueSet found with URL[http://vs] and Version[1.0]");
 

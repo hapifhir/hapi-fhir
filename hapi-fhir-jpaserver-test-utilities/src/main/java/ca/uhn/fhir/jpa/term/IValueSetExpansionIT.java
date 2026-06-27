@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ch.qos.logback.classic.Level;
@@ -144,6 +145,8 @@ public interface IValueSetExpansionIT {
 	IFhirResourceDaoValueSet<ValueSet> getValueSetDao();
 
 	JpaStorageSettings getJpaStorageSettings();
+
+	Batch2JobHelper getBatch2JobHelper();
 
 	@ParameterizedTest
 	@EnumSource(
@@ -678,7 +681,7 @@ public interface IValueSetExpansionIT {
 			IFhirResourceDao<ValueSet> valueSetDao = getDaoRegistry().getResourceDao("ValueSet");
 			DaoMethodOutcome outcome = valueSetDao.create(theValueSet, requestDetails);
 			theValueSet.setId(outcome.getId());
-			getTerminologyReadSvc().preExpandDeferredValueSetsToTerminologyTables();
+			getBatch2JobHelper().awaitNoJobsRunning();
 		}
 
 		// test

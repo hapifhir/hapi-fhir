@@ -186,6 +186,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.addIndex("20260610.10", "IDX_BT2JI_STAT_CT_ID")
 				.unique(false)
 				.withColumns("STAT", "CREATE_TIME", "ID");
+
+		version.onTable("TRM_VALUESET")
+				.addColumn("20260627.10", "VS_INTENDED_VERSION_ID")
+				.nullable()
+			.type(ColumnTypeEnum.STRING, 200);
 	}
 
 	protected void init8_10_0() {

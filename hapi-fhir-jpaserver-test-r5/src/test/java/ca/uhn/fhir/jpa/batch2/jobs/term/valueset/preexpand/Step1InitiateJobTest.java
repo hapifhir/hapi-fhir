@@ -24,11 +24,10 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx.STEP_ID_CREATE_EXPANSION_WORK_CHUNKS;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx.STEP_ID_EXPAND_CONCEPTS_EXCLUDE;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx.STEP_ID_EXPAND_CONCEPTS_INCLUDE;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx.STEP_ID_INITIATE_JOB;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -36,11 +35,11 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class CreateExpansionWorkChunksStepTest {
+class Step1InitiateJobTest {
 
 	private static final String THE_STAGING_VERSION = "the-staging-version";
-	private static final String THE_VS_URL = "http://foo";
-	private static final String THE_VS_VERSION = "1.0";
+	static final String THE_VS_URL = "http://foo";
+	static final String THE_VS_VERSION = "1.0";
 
 	@Spy
 	IHapiTransactionService myTransactionService = new MockHapiTransactionService();
@@ -59,7 +58,7 @@ class CreateExpansionWorkChunksStepTest {
 	@Mock
 	private IJobDataSink<ExpandConceptsWorkChunkJson> myDataSink;
 	@InjectMocks
-	private CreateExpansionWorkChunksStep mySvc;
+	private Step1InitiateJob mySvc;
 	@Captor
 	private ArgumentCaptor<IModelJson> myWorkChunkCaptor;
 
@@ -84,7 +83,7 @@ class CreateExpansionWorkChunksStepTest {
 		PreExpandValueSetParameters params = new PreExpandValueSetParameters();
 		params.setUrl(THE_VS_URL);
 		params.setVersion(THE_VS_VERSION);
-		mySvc.run(new StepExecutionDetails<>(params, new VoidModel(), new JobInstance(), new WorkChunk(), myJobStepExecutionServices, myJobDefinition, STEP_ID_CREATE_EXPANSION_WORK_CHUNKS, STEP_ID_EXPAND_CONCEPTS_INCLUDE), myDataSink);
+		mySvc.run(new StepExecutionDetails<>(params, new VoidModel(), new JobInstance(), new WorkChunk(), myJobStepExecutionServices, myJobDefinition, STEP_ID_INITIATE_JOB, STEP_ID_EXPAND_CONCEPTS_INCLUDE), myDataSink);
 
 		// Verify
 

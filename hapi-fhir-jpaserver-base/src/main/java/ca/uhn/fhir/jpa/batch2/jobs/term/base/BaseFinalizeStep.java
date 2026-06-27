@@ -158,8 +158,12 @@ public abstract class BaseFinalizeStep<PT extends IModelJson, IT extends IModelJ
 		}
 		if (!hasAny) {
 			indent(theReportBuilder, theIndent);
-			theReportBuilder.append("Nothing changed\n");
+			appendNoChangesMessage(theReportBuilder);
 		}
+	}
+
+	protected void appendNoChangesMessage(StringBuilder theReportBuilder) {
+		theReportBuilder.append("Nothing changed\n");
 	}
 
 	/**

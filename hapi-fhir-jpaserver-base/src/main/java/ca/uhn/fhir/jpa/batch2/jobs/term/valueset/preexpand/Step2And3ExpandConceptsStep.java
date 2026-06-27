@@ -14,9 +14,13 @@ import ca.uhn.fhir.jpa.term.IValueSetConceptAccumulator;
 import ca.uhn.fhir.jpa.term.SystemAndCode;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,8 +34,8 @@ import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValue
 import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx.STEP_ID_WRITE_CONCEPTS_INCLUDE;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class ExpandConceptsStep<OT extends IModelJson> implements IJobStepWorker<PreExpandValueSetParameters, ExpandConceptsWorkChunkJson, OT> {
-	private static final Logger ourLog = LoggerFactory.getLogger(ExpandConceptsStep.class);
+public class Step2And3ExpandConceptsStep<OT extends IModelJson> implements IJobStepWorker<PreExpandValueSetParameters, ExpandConceptsWorkChunkJson, OT> {
+	private static final Logger ourLog = LoggerFactory.getLogger(Step2And3ExpandConceptsStep.class);
 
 	private static final int CHUNK_SIZE = 100;
 	private final boolean myInclude;
@@ -40,7 +44,7 @@ public class ExpandConceptsStep<OT extends IModelJson> implements IJobStepWorker
 	@Autowired
 	private ITermReadSvc myTermReadSvc;
 
-	public ExpandConceptsStep(boolean theInclude) {
+	public Step2And3ExpandConceptsStep(boolean theInclude) {
 		myInclude = theInclude;
 	}
 
@@ -71,8 +75,24 @@ public class ExpandConceptsStep<OT extends IModelJson> implements IJobStepWorker
 		myTxService
 			.withSystemRequestOnDefaultPartition()
 			.execute(() -> {
-				myTermReadSvc.expandValueSetHandleIncludeOrExclude(expansionOptions, accumulator, data.getCompose(), myInclude, expansionFilter);
-				accumulator.close();
+
+				try {
+					myTermReadSvc.expandValueSetHandleIncludeOrExclude(expansionOptions, accumulator, data.getCompose(), myInclude, expansionFilter);
+					accumulator.close();
+				} catch (BaseServerResponseException e) {
+					ourLog.warn("Failed to handle ValueSet expansion compose: {}", e.toString());
+
+					// If any of our compose sections can't be expanded, we'll send a notification to
+					// the final step so that we can report the failure and clean up properly. This
+					// shouldn't happen, but it's probably not a HAPI bug - It can happen if the
+					// ValueSet includes unknown code systems, invalid filters, etc.
+					String rootMessage = ExceptionUtils.getRootCauseMessage(e);
+					ExpandValueSetStepOutcomeJson expandValueSetStepOutcomeJson = new ExpandValueSetStepOutcomeJson();
+					expandValueSetStepOutcomeJson.setStagingVersion(stagingVersion);
+					expandValueSetStepOutcomeJson.setFailureMessage(rootMessage);
+					theDataSink.acceptForFutureStep(PreExpandValueSetJobAppCtx.STEP_ID_GENERATE_REPORT, expandValueSetStepOutcomeJson);
+				}
+
 			});
 
 		ourLog.atInfo()
@@ -114,18 +134,18 @@ public class ExpandConceptsStep<OT extends IModelJson> implements IJobStepWorker
 		@Override
 		public void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, @Nullable Collection<TermConceptDesignation> theDesignations, Long theSourceConceptPid, String theSourceConceptDirectParentPids, @Nullable String theSystemVersion) {
 			if (myInclude) {
-				addConcept(theSystem, theCode, theDisplay, theDesignations, theSystemVersion, theSourceConceptDirectParentPids);
+				addConcept(theSystem, theCode, theDisplay, theDesignations, theSystemVersion, theSourceConceptPid, theSourceConceptDirectParentPids);
 			}
 		}
 
 		@Override
 		public void excludeConcept(String theSystem, String theCode) {
 			if (!myInclude) {
-				addConcept(theSystem, theCode, null, null, null, null);
+				addConcept(theSystem, theCode, null, null, null, null, null);
 			}
 		}
 
-		private void addConcept(String theSystem, String theCode, String theDisplay, @Nullable Collection<TermConceptDesignation> theDesignations, @Nullable String theSystemVersion, String theSourceConceptDirectParentPids) {
+		private void addConcept(String theSystem, String theCode, String theDisplay, @Nullable Collection<TermConceptDesignation> theDesignations, @Nullable String theSystemVersion, Long theSourceConceptPid, String theSourceConceptDirectParentPids) {
 			if (myConcepts.add(new SystemAndCode(theSystem, theCode))) {
 				ValueSet.ValueSetExpansionContainsComponent targetConcept = myBuffer.getExpansion().addContains();
 				targetConcept.setSystem(theSystem);
@@ -134,7 +154,10 @@ public class ExpandConceptsStep<OT extends IModelJson> implements IJobStepWorker
 				targetConcept.setVersion(theSystemVersion);
 
 				if (isNotBlank(theSourceConceptDirectParentPids)) {
-					targetConcept.addExtension(TerminologyConstants.EXTENSION_SOURCE_CONCEPT_DIRECT_PARENT_PIDS, theSourceConceptDirectParentPids);
+					targetConcept.addExtension(TerminologyConstants.EXTENSION_SOURCE_CONCEPT_DIRECT_PARENT_PIDS, new StringType(theSourceConceptDirectParentPids));
+				}
+				if (theSourceConceptPid != null) {
+					targetConcept.addExtension(TerminologyConstants.EXTENSION_SOURCE_CONCEPT_PID, new DecimalType(theSourceConceptPid));
 				}
 
 				if (theDesignations != null) {

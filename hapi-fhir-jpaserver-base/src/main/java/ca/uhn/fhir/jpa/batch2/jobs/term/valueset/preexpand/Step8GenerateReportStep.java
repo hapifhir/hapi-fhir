@@ -10,6 +10,7 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseFinalizeStep;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
@@ -20,7 +21,7 @@ import org.hl7.fhir.r4.model.ValueSet;
 import java.util.List;
 import java.util.TreeMap;
 
-public class GenerateReportStep extends BaseFinalizeStep<PreExpandValueSetParameters, ExpandValueSetStepOutcomeJson, PreExpandValueSetResultJson> implements IReductionStepWorker<PreExpandValueSetParameters, ExpandValueSetStepOutcomeJson, PreExpandValueSetResultJson> {
+public class Step8GenerateReportStep extends BaseFinalizeStep<PreExpandValueSetParameters, ExpandValueSetStepOutcomeJson, PreExpandValueSetResultJson> implements IReductionStepWorker<PreExpandValueSetParameters, ExpandValueSetStepOutcomeJson, PreExpandValueSetResultJson> {
 
 	private final ITermValueSetStorageSvc myTermValueSetStorageSvc;
 	private final ITermReadSvc myTermReadSvc;
@@ -30,8 +31,9 @@ public class GenerateReportStep extends BaseFinalizeStep<PreExpandValueSetParame
 	private final TreeMap<Integer, ValueSet.ValueSetComposeComponent> myComposeOrderToCompose = new TreeMap<>();
 
 	private String myStagingVersion;
+	private String myFailureMessage;
 
-	public GenerateReportStep(IValidationSupport theValidationSupport, ITermReadSvc theTermReadSvc, ITermValueSetStorageSvc theTermValueSetStorageSvc) {
+	public Step8GenerateReportStep(IValidationSupport theValidationSupport, ITermReadSvc theTermReadSvc, ITermValueSetStorageSvc theTermValueSetStorageSvc) {
 		myValidationSupport = theValidationSupport;
 		myTermReadSvc = theTermReadSvc;
 		myTermValueSetStorageSvc = theTermValueSetStorageSvc;
@@ -41,16 +43,22 @@ public class GenerateReportStep extends BaseFinalizeStep<PreExpandValueSetParame
 	@Override
 	public ChunkOutcome consume(ChunkExecutionDetails<PreExpandValueSetParameters, ExpandValueSetStepOutcomeJson> theChunkDetails) {
 		ExpandValueSetStepOutcomeJson data = theChunkDetails.getData();
-		int startingOrder = data.getStartingOrder();
 
-		myComposeOrderToCompose.computeIfAbsent(startingOrder, t -> data.getSourceCompose());
+		if (data.getSourceCompose() != null) {
+			int startingOrder = data.getStartingOrder();
+			myComposeOrderToCompose.computeIfAbsent(startingOrder, t -> data.getSourceCompose());
 
-		TerminologyFileSetJson.RecordsAddedCounter existingCounter = myComposeOrderToCounter.computeIfAbsent(startingOrder, t -> new TerminologyFileSetJson.RecordsAddedCounter());
-		existingCounter.copyFrom(data.getRecordsAddedCounter());
+			TerminologyFileSetJson.RecordsAddedCounter existingCounter = myComposeOrderToCounter.computeIfAbsent(startingOrder, t -> new TerminologyFileSetJson.RecordsAddedCounter());
+			existingCounter.copyFrom(data.getRecordsAddedCounter());
 
-		super.accumulateStatistics(data.getRecordsAddedCounter());
+			super.accumulateStatistics(data.getRecordsAddedCounter());
+		}
 
 		myStagingVersion = data.getStagingVersion();
+
+		if (data.getFailureMessage() != null) {
+			myFailureMessage = data.getFailureMessage();
+		}
 
 		return ChunkOutcome.SUCCESS();
 	}
@@ -59,7 +67,17 @@ public class GenerateReportStep extends BaseFinalizeStep<PreExpandValueSetParame
 	@Override
 	public RunOutcome run(@Nonnull StepExecutionDetails<PreExpandValueSetParameters, ExpandValueSetStepOutcomeJson> theStepExecutionDetails, @Nonnull IJobDataSink<PreExpandValueSetResultJson> theDataSink) throws JobExecutionFailedException, ReductionStepFailureException {
 		String url = theStepExecutionDetails.getParameters().getCanonicalUrl().url();
-		myTermValueSetStorageSvc.activateStagingCodeSystemVersion(url, myStagingVersion);
+		String version = theStepExecutionDetails.getParameters().getCanonicalUrl().versionId().orElse(null);
+
+		if (myFailureMessage != null) {
+			myTermValueSetStorageSvc.dropStagingVersion(url, myStagingVersion);
+			myTermValueSetStorageSvc.markValueSetAsFailedToExpand(url, version);
+
+			// FIXME: add code
+			throw new JobExecutionFailedException(Msg.code(1) + myFailureMessage);
+		}
+
+		myTermValueSetStorageSvc.activateStagingVersion(url, myStagingVersion);
 
 		String report = createReport(theStepExecutionDetails);
 
@@ -81,7 +99,7 @@ public class GenerateReportStep extends BaseFinalizeStep<PreExpandValueSetParame
 
 	@Override
 	public IReductionStepWorker<PreExpandValueSetParameters, ExpandValueSetStepOutcomeJson, PreExpandValueSetResultJson> newInstance() {
-		return new GenerateReportStep(myValidationSupport, myTermReadSvc, myTermValueSetStorageSvc);
+		return new Step8GenerateReportStep(myValidationSupport, myTermReadSvc, myTermValueSetStorageSvc);
 	}
 
 
@@ -109,4 +127,9 @@ public class GenerateReportStep extends BaseFinalizeStep<PreExpandValueSetParame
 			appendCounts(counter, theReportBuilder, 1);
 		}
 	}
+
+	protected void appendNoChangesMessage(StringBuilder theReportBuilder) {
+		theReportBuilder.append("No concepts matched\n");
+	}
+
 }

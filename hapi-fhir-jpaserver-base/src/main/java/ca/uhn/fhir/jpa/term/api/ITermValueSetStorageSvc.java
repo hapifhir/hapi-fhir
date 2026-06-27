@@ -62,7 +62,17 @@ public interface ITermValueSetStorageSvc {
 	 * @param theStagingVersionId The staging version ID
 	 * @since 8.12.0
 	 */
-	void activateStagingCodeSystemVersion(String theValueSetUrl, String theStagingVersionId);
+	void activateStagingVersion(String theValueSetUrl, String theStagingVersionId);
+
+	/**
+	 * Drops a ValueSet that is being staged (see {@link #startStagingVersion(String, String)}),
+	 * deleting all files associated with it.
+	 *
+	 * @param theValueSetUrl The ValueSet URL
+	 * @param theStagingVersionId The staging version ID
+	 * @since 8.12.0
+	 */
+	void dropStagingVersion(String theValueSetUrl, String theStagingVersionId);
 
 	/**
 	 * Deletes any stored ValueSet pre-expansion content related to the given ValueSet resource
@@ -91,4 +101,12 @@ public interface ITermValueSetStorageSvc {
 	 */
 	int invalidatePreCalculatedExpansionOfValueSetsContainingCodeSystem(String theCodeSystemUrl);
 
+	/**
+	 * Set the expansion status of the given ValueSet to {@link TermValueSetPreExpansionStatusEnum#FAILED_TO_EXPAND}
+	 *
+	 * @param theUrl The ValueSet URL
+	 * @param theVersion The ValueSet version
+	 * @since 8.12.0
+	 */
+	void markValueSetAsFailedToExpand(String theUrl, String theVersion);
 }

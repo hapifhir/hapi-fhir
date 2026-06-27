@@ -150,7 +150,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
 		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
 		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
@@ -191,7 +191,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
 		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
 		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
@@ -276,7 +276,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
 		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		ValidationSupportContext valCtx = new ValidationSupportContext(myValidationSupport);
 
 		IValidationSupport.CodeValidationResult result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, null, null, null, null);
@@ -325,7 +325,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
 		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		ValidationSupportContext valCtx = new ValidationSupportContext(myValidationSupport);
 
 		IValidationSupport.CodeValidationResult result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, null, null, null, null);
@@ -658,7 +658,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 		// Setup: code system + ValueSet, then pre-expand so the TermValueSet has EXPANDED status
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		// Prime: read and verify pre-expanded, which populates myValueSetCache with EXPANDED status
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId, mySrd);
@@ -681,7 +681,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 		// Setup: code system + ValueSet, then pre-expand so the TermValueSet has EXPANDED status
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		// Prime: read and verify pre-expanded, which populates myValueSetCache with EXPANDED status
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId, mySrd);
@@ -705,7 +705,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 		// Setup: pre-expanded ValueSet used by getValueSetEntity
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		ValidationSupportContext valCtx = new ValidationSupportContext(myValidationSupport);
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId, mySrd);
@@ -802,7 +802,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		IIdType vsV2Id = myValueSetDao.create(vsV2, mySrd).getId().toUnqualifiedVersionless();
 
 		// Pre-expand both TermValueSet entities
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		// Read back so url and version fields are populated from stored resources
 		ValueSet vsV1Read = myValueSetDao.read(vsV1Id, mySrd);

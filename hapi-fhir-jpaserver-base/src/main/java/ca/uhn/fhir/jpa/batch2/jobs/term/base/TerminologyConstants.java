@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.batch2.jobs.term.base;
 
+import org.hl7.fhir.r4.model.ValueSet;
+
 public class TerminologyConstants {
 
 	/** Non-instantiable */
@@ -86,5 +88,16 @@ public class TerminologyConstants {
 	 */
 	public static final String CUSTOM_PROPERTIES_FILE = "properties.csv";
 
+	/**
+	 * Extension that can be added to a concept passed to {@link ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc#addConceptsToExpansion(ValueSet, int)}
+	 * to indicate the source concept's PID.
+	 * TODO: This can be removed when we migrate to storing a proper closure table
+	 */
+	public static final String EXTENSION_SOURCE_CONCEPT_PID = "http://hapifhir.io/fhir/StructureDefinition/valueset-concept-pid";
+	/**
+	 * Extension that can be added to a concept passed to {@link ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc#addConceptsToExpansion(ValueSet, int)}
+	 * to indicate the source concept's parent's PIDs.
+	 * TODO: This can be removed when we migrate to storing a proper closure table
+	 */
 	public static final String EXTENSION_SOURCE_CONCEPT_DIRECT_PARENT_PIDS = "http://hapifhir.io/fhir/StructureDefinition/valueset-concept-direct-parent-pids";
 }

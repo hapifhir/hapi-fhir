@@ -329,6 +329,10 @@ public class TermValueSetConcept extends BasePartitionable implements Serializab
 		mySourceConceptPid = theSourceConceptPid;
 	}
 
+	public Long getSourceConceptPid() {
+		return mySourceConceptPid;
+	}
+
 	public void setSourceConceptDirectParentPids(String theSourceConceptDirectParentPids) {
 		mySourceConceptDirectParentPids = theSourceConceptDirectParentPids;
 		mySourceConceptDirectParentPidsVc = theSourceConceptDirectParentPids;
@@ -376,4 +380,5 @@ public class TermValueSetConcept extends BasePartitionable implements Serializab
 			.map(TermValueSetConceptParentChildLink::getChild)
 			.toList();
 	}
+
 }

@@ -6,7 +6,6 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
-import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
@@ -15,7 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
 
-public class CompactConceptsStep implements IJobStepWorker<PreExpandValueSetParameters, CompactConceptsWorkChunkJson, ExpandValueSetStepOutcomeJson> {
+/**
+ * This step updates the {@link TermValueSetConcept#setOrder(int) concept orders} to
+ * get rid of any gaps. This is necessary because when we search the concepts we use
+ * the order indexes for specifying paging, e.g. in
+ * {@link ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptViewDao#findByTermValueSetId(int, int, Long)}.
+ */
+public class Step7CompactConceptsStep implements IJobStepWorker<PreExpandValueSetParameters, CompactConceptsWorkChunkJson, ExpandValueSetStepOutcomeJson> {
 
 	@Autowired
 	private ITermValueSetConceptDao myValueSetConceptDao;

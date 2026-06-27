@@ -83,9 +83,6 @@ public abstract class BaseImportTerminologyFileStep<
 	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 
 	@Autowired
-	private IHapiTransactionService myTransactionService;
-
-	@Autowired
 	private IValidationSupport myValidationSupport;
 
 	@Autowired
@@ -166,43 +163,6 @@ public abstract class BaseImportTerminologyFileStep<
 			CodeSystem codeSystemToPopulate,
 			TerminologyFileSetJson theData,
 			String sourceFilename);
-
-	protected <T> T executeInNewTransactionWithRetry(
-			Callable<T> theFunction, StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails) {
-		int retryCount = 0;
-		while (true) {
-			try {
-				return myTransactionService
-						.withSystemRequestOnDefaultPartition()
-						.execute(theFunction);
-			} catch (ResourceVersionConflictException e) {
-				retryCount++;
-				int maxRetries = 10;
-				if (retryCount > maxRetries) {
-					ourLog.atError()
-							.setMessage("Failed to saver terminology due to version conflict after {} retries: {}")
-							.addArgument(retryCount)
-							.addArgument(e.getMessage())
-							.log();
-					throw e;
-				}
-				ourLog.atWarn()
-						.setMessage("Failed to save terminology for step {}, retry {}/{} in 5 seconds: {}")
-						.addArgument(theStepExecutionDetails.getCurrentStepId())
-						.addArgument(retryCount)
-						.addArgument(maxRetries)
-						.addArgument(e.getMessage())
-						.log();
-
-				long sleepTime = 5 * DateUtils.MILLIS_PER_SECOND;
-				if (HapiSystemProperties.isUnitTestModeEnabled()) {
-					sleepTime = 10;
-				}
-
-				sleepAtLeast(sleepTime);
-			}
-		}
-	}
 
 	protected abstract CT newContextObject(StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails);
 
