@@ -212,7 +212,9 @@ public class TermValueSetConceptParentChildLink implements Serializable {
 			if (!(theO instanceof TermValueSetConceptParentChildLinkPk that)) {
 				return false;
 			}
-			return Objects.equals(myChildPid, that.myChildPid) && Objects.equals(myParentPid, that.myParentPid) && Objects.equals(myPartitionIdValue, that.myPartitionIdValue);
+			return Objects.equals(myChildPid, that.myChildPid)
+					&& Objects.equals(myParentPid, that.myParentPid)
+					&& Objects.equals(myPartitionIdValue, that.myPartitionIdValue);
 		}
 
 		@Override

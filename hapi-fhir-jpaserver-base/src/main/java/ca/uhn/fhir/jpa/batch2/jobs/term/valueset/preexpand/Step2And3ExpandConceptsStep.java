@@ -34,13 +34,16 @@ import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValue
 import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx.STEP_ID_WRITE_CONCEPTS_INCLUDE;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class Step2And3ExpandConceptsStep<OT extends IModelJson> implements IJobStepWorker<PreExpandValueSetParameters, ExpandConceptsWorkChunkJson, OT> {
+public class Step2And3ExpandConceptsStep<OT extends IModelJson>
+		implements IJobStepWorker<PreExpandValueSetParameters, ExpandConceptsWorkChunkJson, OT> {
 	private static final Logger ourLog = LoggerFactory.getLogger(Step2And3ExpandConceptsStep.class);
 
 	private static final int CHUNK_SIZE = 100;
 	private final boolean myInclude;
+
 	@Autowired
 	private IHapiTransactionService myTxService;
+
 	@Autowired
 	private ITermReadSvc myTermReadSvc;
 
@@ -50,7 +53,12 @@ public class Step2And3ExpandConceptsStep<OT extends IModelJson> implements IJobS
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<PreExpandValueSetParameters, ExpandConceptsWorkChunkJson> theStepExecutionDetails, @Nonnull IJobDataSink<OT> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(
+			@Nonnull
+					StepExecutionDetails<PreExpandValueSetParameters, ExpandConceptsWorkChunkJson>
+							theStepExecutionDetails,
+			@Nonnull IJobDataSink<OT> theDataSink)
+			throws JobExecutionFailedException {
 
 		PreExpandValueSetParameters parameters = theStepExecutionDetails.getParameters();
 		UrlUtil.CanonicalUrlParts canonicalUrl = parameters.getCanonicalUrl();
@@ -63,46 +71,55 @@ public class Step2And3ExpandConceptsStep<OT extends IModelJson> implements IJobS
 		expansionOptions.setIncludeHierarchy(true);
 
 		ourLog.atInfo()
-			.setMessage("Expanding concepts for ValueSet[url={}, version={}].compose: {}")
-			.addArgument(canonicalUrl.url())
-			.addArgument(canonicalUrl.versionId())
-			.addArgument(data.getComposeAsJson())
-			.log();
+				.setMessage("Expanding concepts for ValueSet[url={}, version={}].compose: {}")
+				.addArgument(canonicalUrl.url())
+				.addArgument(canonicalUrl.versionId())
+				.addArgument(data.getComposeAsJson())
+				.log();
 
 		ExpansionFilter expansionFilter = ExpansionFilter.NO_FILTER;
-		ChunkingAccumulator accumulator = new ChunkingAccumulator(theDataSink, stagingUrl, stagingVersion, data.getCompose(), data.getStartingOrder());
+		ChunkingAccumulator accumulator = new ChunkingAccumulator(
+				theDataSink, stagingUrl, stagingVersion, data.getCompose(), data.getStartingOrder());
 
-		myTxService
-			.withSystemRequestOnDefaultPartition()
-			.execute(() -> {
+		myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
+			try {
+				myTermReadSvc.expandValueSetHandleIncludeOrExclude(
+						expansionOptions, accumulator, data.getCompose(), myInclude, expansionFilter);
+				accumulator.close();
+			} catch (BaseServerResponseException e) {
+				ourLog.warn("Failed to handle ValueSet expansion compose: {}", e.toString());
 
-				try {
-					myTermReadSvc.expandValueSetHandleIncludeOrExclude(expansionOptions, accumulator, data.getCompose(), myInclude, expansionFilter);
-					accumulator.close();
-				} catch (BaseServerResponseException e) {
-					ourLog.warn("Failed to handle ValueSet expansion compose: {}", e.toString());
-
-					// If any of our compose sections can't be expanded, we'll send a notification to
-					// the final step so that we can report the failure and clean up properly. This
-					// shouldn't happen, but it's probably not a HAPI bug - It can happen if the
-					// ValueSet includes unknown code systems, invalid filters, etc.
-					String rootMessage = ExceptionUtils.getRootCauseMessage(e);
-					ExpandValueSetStepOutcomeJson expandValueSetStepOutcomeJson = new ExpandValueSetStepOutcomeJson();
-					expandValueSetStepOutcomeJson.setStagingVersion(stagingVersion);
-					expandValueSetStepOutcomeJson.setFailureMessage(rootMessage);
-					theDataSink.acceptForFutureStep(PreExpandValueSetJobAppCtx.STEP_ID_GENERATE_REPORT, expandValueSetStepOutcomeJson);
-				}
-
-			});
+				/*
+				 * If any of our ValueSet.compose sections can't be expanded, we'll send a
+				 * notification to the final step so that we can report the failure and
+				 * clean up properly. This shouldn't ever happen as long as the ValueSet
+				 * is valid, but it can happen and is probably not a HAPI bug - It can
+				 * happen if the ValueSet includes unknown code systems, invalid
+				 * filters, etc.
+				 */
+				String rootMessage = ExceptionUtils.getRootCauseMessage(e);
+				ExpandValueSetStepOutcomeJson expandValueSetStepOutcomeJson = new ExpandValueSetStepOutcomeJson();
+				expandValueSetStepOutcomeJson.setStagingVersion(stagingVersion);
+				expandValueSetStepOutcomeJson.setFailureMessage(rootMessage);
+				theDataSink.acceptForFutureStep(
+						PreExpandValueSetJobAppCtx.STEP_ID_GENERATE_REPORT, expandValueSetStepOutcomeJson);
+			}
+		});
 
 		ourLog.atInfo()
-			.setMessage("Expanded {} concepts")
-			.addArgument(accumulator.getConceptCount())
-			.log();
+				.setMessage("Expanded {} concepts")
+				.addArgument(accumulator.getConceptCount())
+				.log();
 
 		return RunOutcome.SUCCESS;
 	}
 
+	/**
+	 * Accepts concepts from a ValueSet expansion and accumulates them into chunks that
+	 * are forwarded on as work chunks to
+	 * {@link Step4And5WriteConceptsStep}
+	 * for include/exclude from the ValueSet staging version.
+	 */
 	private class ChunkingAccumulator implements IValueSetConceptAccumulator {
 		private final IJobDataSink<OT> myDataSink;
 		private final ValueSet myBuffer = new ValueSet();
@@ -111,7 +128,12 @@ public class Step2And3ExpandConceptsStep<OT extends IModelJson> implements IJobS
 		private final String myStagingVersion;
 		private int myConceptCount = 0;
 
-		public ChunkingAccumulator(IJobDataSink<OT> theDataSink, String theStagingUrl, String theStagingVersion, ValueSet.ConceptSetComponent theCompose, Integer theStartingOrder) {
+		public ChunkingAccumulator(
+				IJobDataSink<OT> theDataSink,
+				String theStagingUrl,
+				String theStagingVersion,
+				ValueSet.ConceptSetComponent theCompose,
+				Integer theStartingOrder) {
 			myDataSink = theDataSink;
 			myStartingOrder = theStartingOrder;
 			myStagingVersion = theStagingVersion;
@@ -132,9 +154,23 @@ public class Step2And3ExpandConceptsStep<OT extends IModelJson> implements IJobS
 		}
 
 		@Override
-		public void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, @Nullable Collection<TermConceptDesignation> theDesignations, Long theSourceConceptPid, String theSourceConceptDirectParentPids, @Nullable String theSystemVersion) {
+		public void includeConceptWithDesignations(
+				String theSystem,
+				String theCode,
+				String theDisplay,
+				@Nullable Collection<TermConceptDesignation> theDesignations,
+				Long theSourceConceptPid,
+				String theSourceConceptDirectParentPids,
+				@Nullable String theSystemVersion) {
 			if (myInclude) {
-				addConcept(theSystem, theCode, theDisplay, theDesignations, theSystemVersion, theSourceConceptPid, theSourceConceptDirectParentPids);
+				addConcept(
+						theSystem,
+						theCode,
+						theDisplay,
+						theDesignations,
+						theSystemVersion,
+						theSourceConceptPid,
+						theSourceConceptDirectParentPids);
 			}
 		}
 
@@ -145,24 +181,36 @@ public class Step2And3ExpandConceptsStep<OT extends IModelJson> implements IJobS
 			}
 		}
 
-		private void addConcept(String theSystem, String theCode, String theDisplay, @Nullable Collection<TermConceptDesignation> theDesignations, @Nullable String theSystemVersion, Long theSourceConceptPid, String theSourceConceptDirectParentPids) {
+		private void addConcept(
+				String theSystem,
+				String theCode,
+				String theDisplay,
+				@Nullable Collection<TermConceptDesignation> theDesignations,
+				@Nullable String theSystemVersion,
+				Long theSourceConceptPid,
+				String theSourceConceptDirectParentPids) {
 			if (myConcepts.add(new SystemAndCode(theSystem, theCode))) {
-				ValueSet.ValueSetExpansionContainsComponent targetConcept = myBuffer.getExpansion().addContains();
+				ValueSet.ValueSetExpansionContainsComponent targetConcept =
+						myBuffer.getExpansion().addContains();
 				targetConcept.setSystem(theSystem);
 				targetConcept.setCode(theCode);
 				targetConcept.setDisplay(theDisplay);
 				targetConcept.setVersion(theSystemVersion);
 
 				if (isNotBlank(theSourceConceptDirectParentPids)) {
-					targetConcept.addExtension(TerminologyConstants.EXTENSION_SOURCE_CONCEPT_DIRECT_PARENT_PIDS, new StringType(theSourceConceptDirectParentPids));
+					targetConcept.addExtension(
+							TerminologyConstants.EXTENSION_SOURCE_CONCEPT_DIRECT_PARENT_PIDS,
+							new StringType(theSourceConceptDirectParentPids));
 				}
 				if (theSourceConceptPid != null) {
-					targetConcept.addExtension(TerminologyConstants.EXTENSION_SOURCE_CONCEPT_PID, new DecimalType(theSourceConceptPid));
+					targetConcept.addExtension(
+							TerminologyConstants.EXTENSION_SOURCE_CONCEPT_PID, new DecimalType(theSourceConceptPid));
 				}
 
 				if (theDesignations != null) {
 					for (TermConceptDesignation sourceDesignation : theDesignations) {
-						ValueSet.ConceptReferenceDesignationComponent targetDesignation = targetConcept.addDesignation();
+						ValueSet.ConceptReferenceDesignationComponent targetDesignation =
+								targetConcept.addDesignation();
 						targetDesignation.setLanguage(sourceDesignation.getLanguage());
 						targetDesignation.setValue(sourceDesignation.getValue());
 						targetDesignation.getUse().setSystem(sourceDesignation.getUseSystem());

@@ -34,7 +34,6 @@ public class PreExpandValueSetParameters implements IModelJson {
 		myUrl = theUrl;
 	}
 
-
 	public UrlUtil.CanonicalUrlParts getCanonicalUrl() {
 		return new UrlUtil.CanonicalUrlParts(myUrl, myVersion);
 	}

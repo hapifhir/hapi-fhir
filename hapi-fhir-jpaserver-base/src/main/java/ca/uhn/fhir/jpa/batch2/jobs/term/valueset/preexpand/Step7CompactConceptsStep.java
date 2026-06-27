@@ -20,28 +20,36 @@ import java.util.Optional;
  * the order indexes for specifying paging, e.g. in
  * {@link ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptViewDao#findByTermValueSetId(int, int, Long)}.
  */
-public class Step7CompactConceptsStep implements IJobStepWorker<PreExpandValueSetParameters, CompactConceptsWorkChunkJson, ExpandValueSetStepOutcomeJson> {
+public class Step7CompactConceptsStep
+		implements IJobStepWorker<
+				PreExpandValueSetParameters, CompactConceptsWorkChunkJson, ExpandValueSetStepOutcomeJson> {
 
 	@Autowired
 	private ITermValueSetConceptDao myValueSetConceptDao;
+
 	@Autowired
 	private IHapiTransactionService myTxService;
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<PreExpandValueSetParameters, CompactConceptsWorkChunkJson> theStepExecutionDetails, @Nonnull IJobDataSink<ExpandValueSetStepOutcomeJson> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(
+			@Nonnull
+					StepExecutionDetails<PreExpandValueSetParameters, CompactConceptsWorkChunkJson>
+							theStepExecutionDetails,
+			@Nonnull IJobDataSink<ExpandValueSetStepOutcomeJson> theDataSink)
+			throws JobExecutionFailedException {
 		CompactConceptsWorkChunkJson data = theStepExecutionDetails.getData();
 
-		myTxService.withSystemRequestOnDefaultPartition().execute(()->{
+		myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
 			for (CompactConceptsWorkChunkJson.Concept conceptDetails : data.getConcepts()) {
 
-				Optional<TermValueSetConcept> conceptOpt = myValueSetConceptDao.findById(new IdAndPartitionId(conceptDetails.getId(), conceptDetails.getPartitionId()));
+				Optional<TermValueSetConcept> conceptOpt = myValueSetConceptDao.findById(
+						new IdAndPartitionId(conceptDetails.getId(), conceptDetails.getPartitionId()));
 				if (conceptOpt.isPresent()) {
 					TermValueSetConcept concept = conceptOpt.get();
 					concept.setOrder(conceptDetails.getOrder());
 					myValueSetConceptDao.save(concept);
 				}
-
 			}
 		});
 

@@ -40,7 +40,6 @@ public interface ITermValueSetStorageSvc {
 	@Nonnull
 	UploadStatistics addConceptsToExpansion(@Nonnull ValueSet theDelta, int theStartingOrder);
 
-
 	/**
 	 * Adds concepts to the precalculated expansion of the given ValueSet, using
 	 * the <code>ValueSet.url</code> and <code>ValueSet.version</code> to identify
@@ -82,7 +81,10 @@ public interface ITermValueSetStorageSvc {
 	/**
 	 * Creates a new ValueSet entity linked to a ValueSet resource
 	 */
-	void storeTermValueSet(RequestDetails theRequestDetails, ResourceTable theResourceTable, org.hl7.fhir.r4.model.ValueSet theValueSet);
+	void storeTermValueSet(
+			RequestDetails theRequestDetails,
+			ResourceTable theResourceTable,
+			org.hl7.fhir.r4.model.ValueSet theValueSet);
 
 	/**
 	 */

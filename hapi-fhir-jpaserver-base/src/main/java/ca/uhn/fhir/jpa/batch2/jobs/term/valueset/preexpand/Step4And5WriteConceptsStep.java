@@ -20,7 +20,8 @@ import java.util.concurrent.Callable;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx.STEP_ID_GENERATE_REPORT;
 
-public class Step4And5WriteConceptsStep<OT extends IModelJson> extends BaseImportTerminologyStep implements IJobStepWorker<PreExpandValueSetParameters, WriteConceptsWorkChunkJson, OT> {
+public class Step4And5WriteConceptsStep<OT extends IModelJson> extends BaseImportTerminologyStep
+		implements IJobStepWorker<PreExpandValueSetParameters, WriteConceptsWorkChunkJson, OT> {
 	private static final Logger ourLog = LoggerFactory.getLogger(Step4And5WriteConceptsStep.class);
 
 	private final boolean myInclude;
@@ -34,7 +35,12 @@ public class Step4And5WriteConceptsStep<OT extends IModelJson> extends BaseImpor
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<PreExpandValueSetParameters, WriteConceptsWorkChunkJson> theStepExecutionDetails, @Nonnull IJobDataSink<OT> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(
+			@Nonnull
+					StepExecutionDetails<PreExpandValueSetParameters, WriteConceptsWorkChunkJson>
+							theStepExecutionDetails,
+			@Nonnull IJobDataSink<OT> theDataSink)
+			throws JobExecutionFailedException {
 
 		WriteConceptsWorkChunkJson data = theStepExecutionDetails.getData();
 
@@ -43,14 +49,14 @@ public class Step4And5WriteConceptsStep<OT extends IModelJson> extends BaseImpor
 		ValueSet delta = data.getValueSet();
 
 		ourLog.atInfo()
-			.setMessage("Writing {} concepts as {} with starting order {} and offset {}")
-			.addArgument(delta.getExpansion().getContains().size())
-			.addArgument(myInclude ? "INCLUDE" : "EXCLUDE")
-			.addArgument(startingOrder)
-			.addArgument(startingOrderOffset)
-			.log();
+				.setMessage("Writing {} concepts as {} with starting order {} and offset {}")
+				.addArgument(delta.getExpansion().getContains().size())
+				.addArgument(myInclude ? "INCLUDE" : "EXCLUDE")
+				.addArgument(startingOrder)
+				.addArgument(startingOrderOffset)
+				.log();
 
-		Callable<UploadStatistics> uploadFunction = ()->{
+		Callable<UploadStatistics> uploadFunction = () -> {
 			if (myInclude) {
 				return myTermValueSetStorageSvc.addConceptsToExpansion(delta, startingOrder + startingOrderOffset);
 			} else {
@@ -59,7 +65,8 @@ public class Step4And5WriteConceptsStep<OT extends IModelJson> extends BaseImpor
 		};
 		UploadStatistics statistics = super.executeInNewTransactionWithRetry(uploadFunction, theStepExecutionDetails);
 
-		TerminologyFileSetJson.RecordsAddedCounter recordsAddedCounter = new TerminologyFileSetJson.RecordsAddedCounter();
+		TerminologyFileSetJson.RecordsAddedCounter recordsAddedCounter =
+				new TerminologyFileSetJson.RecordsAddedCounter();
 		recordsAddedCounter.increment(statistics);
 
 		ExpandValueSetStepOutcomeJson outcome = new ExpandValueSetStepOutcomeJson();
@@ -71,5 +78,4 @@ public class Step4And5WriteConceptsStep<OT extends IModelJson> extends BaseImpor
 
 		return RunOutcome.SUCCESS;
 	}
-
 }

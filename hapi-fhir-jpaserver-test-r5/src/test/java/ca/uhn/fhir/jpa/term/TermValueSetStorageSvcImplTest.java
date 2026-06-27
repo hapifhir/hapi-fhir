@@ -604,6 +604,53 @@ public class TermValueSetStorageSvcImplTest extends BaseJpaR5Test {
 
 	}
 
+	@Test
+	void testDropStagingVersion() {
+		// Setup
+		createValueSetResource("1.0");
+		String stagingVersion = mySvc.startStagingVersion(VS_URI, "1.0");
+
+		ValueSet toAdd = new ValueSet();
+		toAdd.setUrl(VS_URI);
+		toAdd.setVersion(stagingVersion);
+		toAdd.getExpansion()
+			.addContains()
+			.setSystem(CS_URL)
+			.setCode("CODE0")
+			.setDisplay("Code 0")
+			.addDesignation(new ValueSet.ConceptReferenceDesignationComponent().setLanguage("en").setValue("Code 0 en"));
+		toAdd.getExpansion()
+			.addContains()
+			.setSystem(CS_URL)
+			.setCode("CODE1")
+			.setDisplay("Code 1");
+		mySvc.addConceptsToExpansion(toAdd, 1000);
+
+		// Test
+
+		mySvc.dropStagingVersion(VS_URI, stagingVersion);
+
+		// Verify
+
+		runInTransaction(()->{
+			assertEquals(1, myTermValueSetDao.count());
+			assertEquals(0, myTermValueSetConceptDao.count());
+		});
+	}
+
+	@Test
+	void testDropStagingVersion_NonStagingVersionSpecified() {
+		// Setup
+		createValueSetResource("1.0");
+
+		// Test
+
+		assertThatThrownBy(()->mySvc.dropStagingVersion(VS_URI, "1.0"))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("Cannot drop staging version of ValueSet[url=http://vs, version=1.0] because it is not a staging version");
+
+	}
+
 	private void assertPartitionSet() {
 		runInTransaction(() -> {
 			for (TermValueSet valueSet : myTermValueSetDao.findAll()) {

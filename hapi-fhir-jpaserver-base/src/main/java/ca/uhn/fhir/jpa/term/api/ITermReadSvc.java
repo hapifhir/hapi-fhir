@@ -132,11 +132,11 @@ public interface ITermReadSvc extends IValidationSupport {
 	 * @param theInclude <code>true</code>=include, <code>false</code>=exclude
 	 */
 	void expandValueSetHandleIncludeOrExclude(
-		@Nullable ValueSetExpansionOptions theExpansionOptions,
-		IValueSetConceptAccumulator theValueSetCodeAccumulator,
-		ValueSet.ConceptSetComponent theIncludeOrExclude,
-		boolean theInclude,
-		@Nonnull ExpansionFilter theExpansionFilter);
+			@Nullable ValueSetExpansionOptions theExpansionOptions,
+			IValueSetConceptAccumulator theValueSetCodeAccumulator,
+			ValueSet.ConceptSetComponent theIncludeOrExclude,
+			boolean theInclude,
+			@Nonnull ExpansionFilter theExpansionFilter);
 
 	boolean isValueSetPreExpandedForCodeValidation(ValueSet theValueSet);
 

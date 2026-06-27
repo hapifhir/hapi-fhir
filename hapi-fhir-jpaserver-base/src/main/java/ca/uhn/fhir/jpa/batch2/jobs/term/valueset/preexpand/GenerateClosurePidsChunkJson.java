@@ -21,9 +21,8 @@ public class GenerateClosurePidsChunkJson implements IModelJson {
 
 		@JsonProperty("part")
 		private Integer myPartitionId;
+
 		@JsonProperty("id")
 		private Long myId;
-
 	}
-
 }

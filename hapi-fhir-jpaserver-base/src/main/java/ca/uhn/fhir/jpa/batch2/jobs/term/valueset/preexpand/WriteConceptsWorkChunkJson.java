@@ -40,7 +40,8 @@ public class WriteConceptsWorkChunkJson implements IModelJson {
 	public void setValueSet(ValueSet theValueSet) {
 		String serialized = null;
 		if (theValueSet != null) {
-			serialized = myCanonicalFhirContext.newJsonParser().setPrettyPrint(false).encodeToString(theValueSet);
+			serialized =
+					myCanonicalFhirContext.newJsonParser().setPrettyPrint(false).encodeToString(theValueSet);
 		}
 		myValueSet = serialized;
 	}

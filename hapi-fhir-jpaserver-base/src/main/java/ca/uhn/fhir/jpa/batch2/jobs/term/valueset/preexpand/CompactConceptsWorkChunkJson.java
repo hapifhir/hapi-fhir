@@ -33,7 +33,6 @@ public class CompactConceptsWorkChunkJson implements IModelJson {
 		@JsonProperty("ord")
 		private int myOrder;
 
-
 		/**
 		 * Constructor
 		 */
@@ -62,6 +61,4 @@ public class CompactConceptsWorkChunkJson implements IModelJson {
 			return myOrder;
 		}
 	}
-
-
 }

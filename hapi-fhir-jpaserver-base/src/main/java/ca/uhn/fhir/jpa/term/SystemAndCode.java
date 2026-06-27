@@ -11,5 +11,4 @@ public record SystemAndCode(UrlUtil.CanonicalUrlParts system, String code) {
 	public SystemAndCode(String theSystem, String theCode) {
 		this(UrlUtil.parseCanonicalUrl(theSystem), theCode);
 	}
-
 }

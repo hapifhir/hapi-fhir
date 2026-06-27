@@ -26,7 +26,10 @@ public class PreExpandValueSetJobAppCtx {
 	private final ITermReadSvc myTermReadSvc;
 	private final IValidationSupport myValidationSupport;
 
-	public PreExpandValueSetJobAppCtx(IValidationSupport theValidationSupport, ITermReadSvc theTermReadSvc, ITermValueSetStorageSvc theTermValueSetStorageSvc) {
+	public PreExpandValueSetJobAppCtx(
+			IValidationSupport theValidationSupport,
+			ITermReadSvc theTermReadSvc,
+			ITermValueSetStorageSvc theTermValueSetStorageSvc) {
 		Validate.notNull(theTermReadSvc, "theTermReadSvc must not be null");
 		Validate.notNull(theTermValueSetStorageSvc, "theTermValueSetStorageSvc must not be null");
 		Validate.notNull(theValidationSupport, "theValidationSupport must not be null");
@@ -38,22 +41,54 @@ public class PreExpandValueSetJobAppCtx {
 	@Bean
 	public JobDefinition<PreExpandValueSetParameters> preExpandValueSetJobDefinition() {
 		return JobDefinition.newBuilder()
-			.setJobDefinitionId(JOB_ID_PRE_EXPAND_VALUESET)
-			.setJobDefinitionVersion(1)
-			.setJobDescription("Pre-calculates ValueSet expansion and stores the results in the database")
-			.setParametersType(PreExpandValueSetParameters.class)
-			.setParametersValidator(preExpandValueSetJobParametersValidator())
-			.gatedExecution()
-			.addFirstStep(STEP_ID_INITIATE_JOB, "Create work packages for ValueSet expansion", ExpandConceptsWorkChunkJson.class, expandValueSetStep1InitiateJobStep())
-			.addIntermediateStep(STEP_ID_EXPAND_CONCEPTS_INCLUDE, "Expand ValueSet.compose.include section into concept lists", ExpandConceptsWorkChunkJson.class, expandValueSetStep2ExpandConceptsIncludeStep())
-			.addIntermediateStep(STEP_ID_EXPAND_CONCEPTS_EXCLUDE, "Expand ValueSet.compose.exclude section into concept lists", WriteConceptsWorkChunkJson.class, expandValueSetStep3ExpandConceptsExcludeStep())
-			.addIntermediateStep(STEP_ID_WRITE_CONCEPTS_INCLUDE, "Write concepts for ValueSet.compose.include section", WriteConceptsWorkChunkJson.class, expandValueSetStep4WriteConceptsIncludeStep())
-			.addIntermediateStep(STEP_ID_WRITE_CONCEPTS_EXCLUDE, "Write concepts ValueSet.compose.exclude section", LoadAllConceptIdsWorkChunkJson.class, expandValueSetStep5WriteConceptsExcludeStep())
-			.addIntermediateStep(STEP_ID_LOAD_ALL_CONCEPT_IDS, "Fetch all concept IDs in the ValueSet", CompactConceptsWorkChunkJson.class, preExpandValueSetStep6LoadAllConceptIdsStep())
-			.addIntermediateStep(STEP_ID_COMPACT_CONCEPTS, "Count and compact concept orders", ExpandValueSetStepOutcomeJson.class, preExpandValueSetStep7CompactConceptsStep())
-			.addFinalReducerStep(STEP_ID_GENERATE_REPORT, "Generate Report", PreExpandValueSetResultJson.class, expandValueSetStep8GenerateReportStep())
-			.setStepWeightForProgressCalculator(STEP_ID_GENERATE_REPORT, 0.01)
-			.build();
+				.setJobDefinitionId(JOB_ID_PRE_EXPAND_VALUESET)
+				.setJobDefinitionVersion(1)
+				.setJobDescription("Pre-calculates ValueSet expansion and stores the results in the database")
+				.setParametersType(PreExpandValueSetParameters.class)
+				.setParametersValidator(preExpandValueSetJobParametersValidator())
+				.gatedExecution()
+				.addFirstStep(
+						STEP_ID_INITIATE_JOB,
+						"Create work packages for ValueSet expansion",
+						ExpandConceptsWorkChunkJson.class,
+						expandValueSetStep1InitiateJobStep())
+				.addIntermediateStep(
+						STEP_ID_EXPAND_CONCEPTS_INCLUDE,
+						"Expand ValueSet.compose.include section into concept lists",
+						ExpandConceptsWorkChunkJson.class,
+						expandValueSetStep2ExpandConceptsIncludeStep())
+				.addIntermediateStep(
+						STEP_ID_EXPAND_CONCEPTS_EXCLUDE,
+						"Expand ValueSet.compose.exclude section into concept lists",
+						WriteConceptsWorkChunkJson.class,
+						expandValueSetStep3ExpandConceptsExcludeStep())
+				.addIntermediateStep(
+						STEP_ID_WRITE_CONCEPTS_INCLUDE,
+						"Write concepts for ValueSet.compose.include section",
+						WriteConceptsWorkChunkJson.class,
+						expandValueSetStep4WriteConceptsIncludeStep())
+				.addIntermediateStep(
+						STEP_ID_WRITE_CONCEPTS_EXCLUDE,
+						"Write concepts ValueSet.compose.exclude section",
+						LoadAllConceptIdsWorkChunkJson.class,
+						expandValueSetStep5WriteConceptsExcludeStep())
+				.addIntermediateStep(
+						STEP_ID_LOAD_ALL_CONCEPT_IDS,
+						"Fetch all concept IDs in the ValueSet",
+						CompactConceptsWorkChunkJson.class,
+						preExpandValueSetStep6LoadAllConceptIdsStep())
+				.addIntermediateStep(
+						STEP_ID_COMPACT_CONCEPTS,
+						"Count and compact concept orders",
+						ExpandValueSetStepOutcomeJson.class,
+						preExpandValueSetStep7CompactConceptsStep())
+				.addFinalReducerStep(
+						STEP_ID_GENERATE_REPORT,
+						"Generate Report",
+						PreExpandValueSetResultJson.class,
+						expandValueSetStep8GenerateReportStep())
+				.setStepWeightForProgressCalculator(STEP_ID_GENERATE_REPORT, 0.01)
+				.build();
 	}
 
 	@Bean
@@ -100,6 +135,4 @@ public class PreExpandValueSetJobAppCtx {
 	public Step8GenerateReportStep expandValueSetStep8GenerateReportStep() {
 		return new Step8GenerateReportStep(myValidationSupport, myTermReadSvc, myTermValueSetStorageSvc);
 	}
-
-
 }

@@ -32,31 +32,43 @@ import java.util.stream.Stream;
  * </li>
  * </ul>
  */
-public class Step6LoadAllConceptIdsStep implements IJobStepWorker<PreExpandValueSetParameters, LoadAllConceptIdsWorkChunkJson, CompactConceptsWorkChunkJson> {
+public class Step6LoadAllConceptIdsStep
+		implements IJobStepWorker<
+				PreExpandValueSetParameters, LoadAllConceptIdsWorkChunkJson, CompactConceptsWorkChunkJson> {
 
 	@Autowired
 	private ITermValueSetDao myTermValueSetDao;
+
 	@Autowired
 	private ITermValueSetConceptDao myTermValueSetConceptDao;
+
 	@Autowired
 	private IHapiTransactionService myTxService;
+
 	@Autowired
 	private EntityManager myEntityManager;
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<PreExpandValueSetParameters, LoadAllConceptIdsWorkChunkJson> theStepExecutionDetails, @Nonnull IJobDataSink<CompactConceptsWorkChunkJson> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(
+			@Nonnull
+					StepExecutionDetails<PreExpandValueSetParameters, LoadAllConceptIdsWorkChunkJson>
+							theStepExecutionDetails,
+			@Nonnull IJobDataSink<CompactConceptsWorkChunkJson> theDataSink)
+			throws JobExecutionFailedException {
 		String url = theStepExecutionDetails.getParameters().getCanonicalUrl().url();
 		String version = theStepExecutionDetails.getData().getStagingVersionId();
 
 		myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
+			TermValueSet termValueSet = myTermValueSetDao
+					.findTermValueSetByUrlAndVersion(url, version)
+					.orElseThrow(
+							// FIXME: add code
+							() -> new JobExecutionFailedException(
+									Msg.code(0) + "Missing ValueSet[url=" + url + ", version=" + version + "]"));
 
-			TermValueSet termValueSet = myTermValueSetDao.findTermValueSetByUrlAndVersion(url, version).orElseThrow(
-				// FIXME: add code
-				() -> new JobExecutionFailedException(Msg.code(0) + "Missing ValueSet[url=" + url + ", version=" + version + "]")
-			);
-
-			Stream<TermValueSetConcept> allConcepts = myTermValueSetConceptDao.streamAllByTermValueSetOrdered(termValueSet);
+			Stream<TermValueSetConcept> allConcepts =
+					myTermValueSetConceptDao.streamAllByTermValueSetOrdered(termValueSet);
 			StreamIterator<TermValueSetConcept> conceptIterator = StreamIterator.iterator(allConcepts);
 
 			CompactConceptsWorkChunkJson chunk = new CompactConceptsWorkChunkJson();
@@ -76,7 +88,7 @@ public class Step6LoadAllConceptIdsStep implements IJobStepWorker<PreExpandValue
 				}
 			}
 
-			termValueSet.setTotalConcepts((long)conceptCount);
+			termValueSet.setTotalConcepts((long) conceptCount);
 			myTermValueSetDao.save(termValueSet);
 		});
 

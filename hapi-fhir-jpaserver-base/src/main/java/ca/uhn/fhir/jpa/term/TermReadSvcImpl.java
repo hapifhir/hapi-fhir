@@ -308,9 +308,9 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		Collection<TermConceptDesignation> designations = theConcept.getDesignations();
 
 		// FIXME: remove?
-//		if (StringUtils.isNotEmpty(theValueSetIncludeVersion)) {
-//			codeSystem = codeSystem + OUR_PIPE_CHARACTER + theValueSetIncludeVersion;
-//		}
+		//		if (StringUtils.isNotEmpty(theValueSetIncludeVersion)) {
+		//			codeSystem = codeSystem + OUR_PIPE_CHARACTER + theValueSetIncludeVersion;
+		//		}
 
 		addCodeIfNotAlreadyAdded(
 				theValueSetCodeAccumulator,
@@ -379,13 +379,13 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		if (isNoneBlank(theCodeSystem, theCode)) {
 			if (theAdd) {
 				theValueSetCodeAccumulator.includeConceptWithDesignations(
-					theCodeSystem,
-					theCode,
-					theDisplay,
-					theDesignations,
-					theSourceConceptPid,
-					theSourceConceptDirectParentPids,
-					theSystemVersion);
+						theCodeSystem,
+						theCode,
+						theDisplay,
+						theDesignations,
+						theSourceConceptPid,
+						theSourceConceptDirectParentPids,
+						theSystemVersion);
 			} else {
 				theValueSetCodeAccumulator.excludeConcept(theCodeSystem, theCode);
 			}
@@ -407,7 +407,6 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		}
 		return retVal;
 	}
-
 
 	@Override
 	@Transactional
@@ -477,8 +476,8 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			accumulator.addParameter().setName("count").setValue(new IntegerType(count));
 		}
 
-		myTxTemplate.executeWithoutResult(tx -> expandValueSetIntoAccumulator(
-				theValueSetToExpand, theExpansionOptions, accumulator, theFilter, true));
+		myTxTemplate.executeWithoutResult(tx ->
+				expandValueSetIntoAccumulator(theValueSetToExpand, theExpansionOptions, accumulator, theFilter, true));
 
 		if (accumulator.getTotalConcepts() != null) {
 			accumulator.setTotal(accumulator.getTotalConcepts());
@@ -729,8 +728,8 @@ public class TermReadSvcImpl implements ITermReadSvc {
 					theAccumulator.incrementOrDecrementTotalConcepts(true, 1);
 				}
 			} else {
-					theAccumulator.excludeConcept(system, code);
-					theAccumulator.incrementOrDecrementTotalConcepts(false, 1);
+				theAccumulator.excludeConcept(system, code);
+				theAccumulator.incrementOrDecrementTotalConcepts(false, 1);
 			}
 		}
 
@@ -799,10 +798,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			ValueSet theValueSetToExpand,
 			IValueSetConceptAccumulator theValueSetCodeAccumulator) {
 		doExpandValueSet(
-				theExpansionOptions,
-				theValueSetToExpand,
-				theValueSetCodeAccumulator,
-				ExpansionFilter.NO_FILTER);
+				theExpansionOptions, theValueSetToExpand, theValueSetCodeAccumulator, ExpansionFilter.NO_FILTER);
 	}
 
 	/**
@@ -843,16 +839,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		for (ValueSet.ConceptSetComponent exclude :
 				theValueSetToExpand.getCompose().getExclude()) {
 			myTxTemplate.executeWithoutResult(tx -> expandValueSetHandleIncludeOrExclude(
-					theExpansionOptions,
-					theValueSetCodeAccumulator,
-					exclude,
-					false,
-					ExpansionFilter.NO_FILTER));
-		}
-
-		if (theValueSetCodeAccumulator instanceof ValueSetConceptAccumulator) {
-			myTxTemplate.execute(
-					t -> ((ValueSetConceptAccumulator) theValueSetCodeAccumulator).removeGapsFromConceptOrder());
+					theExpansionOptions, theValueSetCodeAccumulator, exclude, false, ExpansionFilter.NO_FILTER));
 		}
 
 		ourLog.debug("Done working with {} in {}ms", valueSetInfo, sw.getMillis());
@@ -881,11 +868,11 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	 */
 	@Override
 	public void expandValueSetHandleIncludeOrExclude(
-		@Nullable ValueSetExpansionOptions theExpansionOptions,
-		IValueSetConceptAccumulator theValueSetCodeAccumulator,
-		ValueSet.ConceptSetComponent theIncludeOrExclude,
-		boolean theAdd,
-		@Nonnull ExpansionFilter theExpansionFilter) {
+			@Nullable ValueSetExpansionOptions theExpansionOptions,
+			IValueSetConceptAccumulator theValueSetCodeAccumulator,
+			ValueSet.ConceptSetComponent theIncludeOrExclude,
+			boolean theAdd,
+			@Nonnull ExpansionFilter theExpansionFilter) {
 
 		String system = theIncludeOrExclude.getSystem();
 		boolean hasSystem = isNotBlank(system);
@@ -926,12 +913,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 				}
 
 				Consumer<FhirVersionIndependentConcept> consumer = c -> addOrRemoveCode(
-						theValueSetCodeAccumulator,
-						theAdd,
-						system,
-						c.getCode(),
-						c.getDisplay(),
-						c.getSystemVersion());
+						theValueSetCodeAccumulator, theAdd, system, c.getCode(), c.getDisplay(), c.getSystemVersion());
 
 				try {
 					ConversionContext40_50.INSTANCE.init(
@@ -977,11 +959,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 				}
 
 				expandValueSetIntoAccumulator(
-						valueSet,
-						theExpansionOptions,
-						theValueSetCodeAccumulator,
-						subExpansionFilter,
-						theAdd);
+						valueSet, theExpansionOptions, theValueSetCodeAccumulator, subExpansionFilter, theAdd);
 			}
 
 		} else {
@@ -1023,11 +1001,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		 */
 		if (!isHibernateSearchEnabled()) {
 			expandWithoutHibernateSearch(
-					theValueSetCodeAccumulator,
-					theTermCodeSystemVersion,
-					theIncludeOrExclude,
-					theSystem,
-					theAdd);
+					theValueSetCodeAccumulator, theTermCodeSystemVersion, theIncludeOrExclude, theSystem, theAdd);
 			return;
 		}
 
@@ -1292,7 +1266,8 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			String theDisplay,
 			String theSystemVersion) {
 		if (theAdd) {
-			theValueSetCodeAccumulator.includeConceptWithDesignations(theSystem, theCode, theDisplay, List.of(), null, null, theSystemVersion);
+			theValueSetCodeAccumulator.includeConceptWithDesignations(
+					theSystem, theCode, theDisplay, List.of(), null, null, theSystemVersion);
 		} else {
 			theValueSetCodeAccumulator.excludeConcept(theSystem, theCode);
 		}
@@ -1837,8 +1812,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 						theValueSetCodeAccumulator.addMessage(
 								"Processing IS-A filter in database - Note that Hibernate Search is not enabled on this server, so this operation can be inefficient.");
 						TermConcept code = findCodeForFilterCriteriaCodeOrConcept(theSystem, nextFilter);
-						addConceptAndChildren(
-								theValueSetCodeAccumulator, theInclude, theSystem, theAdd, code);
+						addConceptAndChildren(theValueSetCodeAccumulator, theInclude, theSystem, theAdd, code);
 						handled = true;
 					}
 					break;
@@ -1949,11 +1923,9 @@ public class TermReadSvcImpl implements ITermReadSvc {
 					nextChild.getId(),
 					nextChild.getParentPidsAsString(),
 					nextChild.getDesignations());
-			addConceptAndChildren(
-						theValueSetCodeAccumulator, theInclude, theSystem, theAdd, nextChild);
+			addConceptAndChildren(theValueSetCodeAccumulator, theInclude, theSystem, theAdd, nextChild);
 		}
 	}
-
 
 	@Override
 	@Transactional(readOnly = true)

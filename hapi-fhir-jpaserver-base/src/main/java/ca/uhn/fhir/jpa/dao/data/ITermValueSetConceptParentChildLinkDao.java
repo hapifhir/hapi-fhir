@@ -20,18 +20,19 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.entity.TermValueSet;
-import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptParentChildLink;
-import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface ITermValueSetConceptParentChildLinkDao
-		extends JpaRepository<TermValueSetConceptParentChildLink, TermValueSetConceptParentChildLink.TermValueSetConceptParentChildLinkPk>, IHapiFhirJpaRepository {
+		extends JpaRepository<
+						TermValueSetConceptParentChildLink,
+						TermValueSetConceptParentChildLink.TermValueSetConceptParentChildLinkPk>,
+				IHapiFhirJpaRepository {
 
-	@Query("DELETE FROM TermValueSetConceptDesignation vscd WHERE vscd.myValueSet = :vs")
+	@Query("DELETE FROM TermValueSetConceptParentChildLink vscd WHERE vscd.myValueSet = :vs")
 	@Modifying
 	void deleteByTermValueSetId(@Param("vs") TermValueSet theValueSet);
 }

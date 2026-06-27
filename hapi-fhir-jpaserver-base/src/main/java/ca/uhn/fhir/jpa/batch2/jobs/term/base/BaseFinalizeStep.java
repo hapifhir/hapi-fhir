@@ -7,10 +7,11 @@ import jakarta.annotation.Nonnull;
 
 import java.util.List;
 
-public abstract class BaseFinalizeStep<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> implements IReductionStepWorker<PT, IT, OT> {
+public abstract class BaseFinalizeStep<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
+		implements IReductionStepWorker<PT, IT, OT> {
 
 	private final TerminologyFileSetJson.RecordsAddedCounter myTotalRecordsAddedCounter =
-		new TerminologyFileSetJson.RecordsAddedCounter();
+			new TerminologyFileSetJson.RecordsAddedCounter();
 
 	protected void accumulateStatistics(TerminologyFileSetJson.RecordsAddedCounter theRecordsAddedCounter) {
 		myTotalRecordsAddedCounter.copyFrom(theRecordsAddedCounter);
@@ -35,125 +36,126 @@ public abstract class BaseFinalizeStep<PT extends IModelJson, IT extends IModelJ
 	@Nonnull
 	protected abstract List<String> getReportTitleLines(StepExecutionDetails<PT, IT> theStepExecutionDetails);
 
-	protected abstract void appendAdditionalInfo(StepExecutionDetails<PT, IT> theStepExecutionDetails, StringBuilder theReportBuilder);
+	protected abstract void appendAdditionalInfo(
+			StepExecutionDetails<PT, IT> theStepExecutionDetails, StringBuilder theReportBuilder);
 
 	protected void addDivider(StringBuilder theReportBuilder) {
 		theReportBuilder.append("---------------------------------------------------\n");
 	}
 
 	protected void appendCounts(
-		TerminologyFileSetJson.RecordsAddedCounter theCounter, StringBuilder theReportBuilder, int theIndent) {
+			TerminologyFileSetJson.RecordsAddedCounter theCounter, StringBuilder theReportBuilder, int theIndent) {
 		boolean hasAny = false;
 		if (theCounter.getConceptsAdded() > 0) {
 			indent(theReportBuilder, theIndent);
 			theReportBuilder
-				.append("Concepts Added               : ")
-				.append(theCounter.getConceptsAdded())
-				.append("\n");
+					.append("Concepts Added               : ")
+					.append(theCounter.getConceptsAdded())
+					.append("\n");
 			hasAny = true;
 		}
 		if (theCounter.getConceptLinksAdded() > 0) {
 			indent(theReportBuilder, theIndent);
 			theReportBuilder
-				.append("Concepts Links Added         : ")
-				.append(theCounter.getConceptLinksAdded())
-				.append("\n");
+					.append("Concepts Links Added         : ")
+					.append(theCounter.getConceptLinksAdded())
+					.append("\n");
 			hasAny = true;
 		}
 		if (theCounter.getDesignationsAdded() > 0) {
 			indent(theReportBuilder, theIndent);
 			theReportBuilder
-				.append("Concept Designations Added   : ")
-				.append(theCounter.getDesignationsAdded())
-				.append("\n");
+					.append("Concept Designations Added   : ")
+					.append(theCounter.getDesignationsAdded())
+					.append("\n");
 			hasAny = true;
 		}
 		if (theCounter.getPropertiesAdded() > 0) {
 			indent(theReportBuilder, theIndent);
 			theReportBuilder
-				.append("Concept Properties Added     : ")
-				.append(theCounter.getPropertiesAdded())
-				.append("\n");
+					.append("Concept Properties Added     : ")
+					.append(theCounter.getPropertiesAdded())
+					.append("\n");
 			hasAny = true;
 		}
 		if (theCounter.getConceptsRemoved() > 0) {
 			indent(theReportBuilder, theIndent);
 			theReportBuilder
-				.append("Concepts Removed             : ")
-				.append(theCounter.getConceptsRemoved())
-				.append("\n");
+					.append("Concepts Removed             : ")
+					.append(theCounter.getConceptsRemoved())
+					.append("\n");
 			hasAny = true;
 		}
 		if (theCounter.getConceptLinksRemoved() > 0) {
 			indent(theReportBuilder, theIndent);
 			theReportBuilder
-				.append("Concepts Links Removed       : ")
-				.append(theCounter.getConceptLinksRemoved())
-				.append("\n");
+					.append("Concepts Links Removed       : ")
+					.append(theCounter.getConceptLinksRemoved())
+					.append("\n");
 			hasAny = true;
 		}
 		if (theCounter.getDesignationsRemoved() > 0) {
 			indent(theReportBuilder, theIndent);
 			theReportBuilder
-				.append("Concept Designations Removed : ")
-				.append(theCounter.getDesignationsRemoved())
-				.append("\n");
+					.append("Concept Designations Removed : ")
+					.append(theCounter.getDesignationsRemoved())
+					.append("\n");
 			hasAny = true;
 		}
 		if (theCounter.getPropertiesRemoved() > 0) {
 			indent(theReportBuilder, theIndent);
 			theReportBuilder
-				.append("Concept Properties Removed   : ")
-				.append(theCounter.getPropertiesRemoved())
-				.append("\n");
+					.append("Concept Properties Removed   : ")
+					.append(theCounter.getPropertiesRemoved())
+					.append("\n");
 			hasAny = true;
 		}
 		if (theCounter.getConceptMapsAdded() > 0) {
 			indent(theReportBuilder, theIndent);
 			theReportBuilder
-				.append("ConceptMaps Added            : ")
-				.append(theCounter.getConceptMapsAdded())
-				.append("\n");
+					.append("ConceptMaps Added            : ")
+					.append(theCounter.getConceptMapsAdded())
+					.append("\n");
 			hasAny = true;
 		}
 		if (theCounter.getConceptMapMappingsAdded() > 0) {
 			indent(theReportBuilder, theIndent);
 			theReportBuilder
-				.append("ConceptMap Mappings Added    : ")
-				.append(theCounter.getConceptMapMappingsAdded())
-				.append("\n");
+					.append("ConceptMap Mappings Added    : ")
+					.append(theCounter.getConceptMapMappingsAdded())
+					.append("\n");
 			hasAny = true;
 		}
 		if (theCounter.getValueSetsAdded() > 0) {
 			indent(theReportBuilder, theIndent);
 			theReportBuilder
-				.append("ValueSets Added              : ")
-				.append(theCounter.getValueSetsAdded())
-				.append("\n");
+					.append("ValueSets Added              : ")
+					.append(theCounter.getValueSetsAdded())
+					.append("\n");
 			hasAny = true;
 		}
 		if (theCounter.getValueSetInclusionsAdded() > 0) {
 			indent(theReportBuilder, theIndent);
 			theReportBuilder
-				.append("ValueSets Inclusions Added   : ")
-				.append(theCounter.getValueSetInclusionsAdded())
-				.append("\n");
+					.append("ValueSets Inclusions Added   : ")
+					.append(theCounter.getValueSetInclusionsAdded())
+					.append("\n");
 			hasAny = true;
 		}
 		if (theCounter.getValueSetCodesAdded() > 0) {
 			indent(theReportBuilder, theIndent);
 			theReportBuilder
-				.append("ValueSets Codes Added        : ")
-				.append(theCounter.getValueSetCodesAdded())
-				.append("\n");
+					.append("ValueSets Codes Added        : ")
+					.append(theCounter.getValueSetCodesAdded())
+					.append("\n");
 			hasAny = true;
 		}
 		if (theCounter.getOtherChanges() > 0) {
 			indent(theReportBuilder, theIndent);
 			theReportBuilder
-				.append("Other Changes Count          : ")
-				.append(theCounter.getOtherChanges())
-				.append("\n");
+					.append("Other Changes Count          : ")
+					.append(theCounter.getOtherChanges())
+					.append("\n");
 			hasAny = true;
 		}
 		if (!hasAny) {
@@ -172,5 +174,4 @@ public abstract class BaseFinalizeStep<PT extends IModelJson, IT extends IModelJ
 	protected void indent(StringBuilder theReportBuilder, int theIndent) {
 		theReportBuilder.append(" ".repeat(Math.max(0, theIndent * 3)));
 	}
-
 }

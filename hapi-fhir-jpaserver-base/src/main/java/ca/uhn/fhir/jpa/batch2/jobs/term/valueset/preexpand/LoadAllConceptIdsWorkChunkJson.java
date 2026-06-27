@@ -15,5 +15,4 @@ public class LoadAllConceptIdsWorkChunkJson implements IModelJson {
 	public void setStagingVersionId(String theStagingVersionId) {
 		myStagingVersionId = theStagingVersionId;
 	}
-
 }

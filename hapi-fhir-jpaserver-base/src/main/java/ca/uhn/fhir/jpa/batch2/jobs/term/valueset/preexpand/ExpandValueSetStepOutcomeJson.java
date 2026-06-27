@@ -24,7 +24,6 @@ public class ExpandValueSetStepOutcomeJson implements IModelJson {
 	@JsonProperty("failureMessage")
 	private String myFailureMessage;
 
-
 	public void setRecordsAddedCounter(TerminologyFileSetJson.RecordsAddedCounter theRecordsAddedCounter) {
 		myRecordsAddedCounter = theRecordsAddedCounter;
 	}
@@ -36,7 +35,8 @@ public class ExpandValueSetStepOutcomeJson implements IModelJson {
 	public void setSourceCompose(ValueSet.ValueSetComposeComponent theSourceCompose) {
 		String compose = null;
 		if (theSourceCompose != null) {
-			compose = myCanonicalFhirContext.newJsonParser().setPrettyPrint(false).encodeToString(theSourceCompose);
+			compose =
+					myCanonicalFhirContext.newJsonParser().setPrettyPrint(false).encodeToString(theSourceCompose);
 		}
 		mySourceCompose = compose;
 	}

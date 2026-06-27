@@ -30,5 +30,4 @@ public class PreExpandValueSetParametersValidator implements IJobParametersValid
 
 		return retVal;
 	}
-
 }

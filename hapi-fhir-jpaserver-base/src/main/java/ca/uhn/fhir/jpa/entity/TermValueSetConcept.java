@@ -148,15 +148,15 @@ public class TermValueSetConcept extends BasePartitionable implements Serializab
 	private transient Integer myHashCode;
 
 	@OneToMany(
-		fetch = FetchType.LAZY,
-		mappedBy = "myParent",
-		cascade = {})
+			fetch = FetchType.LAZY,
+			mappedBy = "myParent",
+			cascade = {})
 	private List<TermValueSetConceptParentChildLink> myChildren;
 
 	@OneToMany(
-		cascade = {},
-		fetch = FetchType.LAZY,
-		mappedBy = "myChild")
+			cascade = {},
+			fetch = FetchType.LAZY,
+			mappedBy = "myChild")
 	private List<TermValueSetConceptParentChildLink> myParents;
 
 	/**
@@ -277,9 +277,13 @@ public class TermValueSetConcept extends BasePartitionable implements Serializab
 
 	@Override
 	public boolean equals(Object theO) {
-		if (this == theO) {return true;}
+		if (this == theO) {
+			return true;
+		}
 
-		if (!(theO instanceof TermValueSetConcept that)){ return false;}
+		if (!(theO instanceof TermValueSetConcept that)) {
+			return false;
+		}
 
 		return new EqualsBuilder()
 				.append(myValueSetPid, that.myValueSetPid)
@@ -368,17 +372,14 @@ public class TermValueSetConcept extends BasePartitionable implements Serializab
 	}
 
 	public List<TermValueSetConcept> getParentConcepts() {
-		return getParents()
-			.stream()
-			.map(TermValueSetConceptParentChildLink::getParent)
-			.toList();
+		return getParents().stream()
+				.map(TermValueSetConceptParentChildLink::getParent)
+				.toList();
 	}
 
 	public List<TermValueSetConcept> getChildConcepts() {
-		return getChildren()
-			.stream()
-			.map(TermValueSetConceptParentChildLink::getChild)
-			.toList();
+		return getChildren().stream()
+				.map(TermValueSetConceptParentChildLink::getChild)
+				.toList();
 	}
-
 }

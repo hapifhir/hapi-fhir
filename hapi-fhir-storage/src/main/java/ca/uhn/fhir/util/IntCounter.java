@@ -43,11 +43,11 @@ public class IntCounter {
 		myCount = theStartingCount;
 	}
 
-    public int get() {
+	public int get() {
 		return myCount;
 	}
 
-    public int getAndIncrement() {
+	public int getAndIncrement() {
 		return myCount++;
 	}
 

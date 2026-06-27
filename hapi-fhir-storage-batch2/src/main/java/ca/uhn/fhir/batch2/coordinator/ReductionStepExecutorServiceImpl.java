@@ -205,7 +205,8 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 
 		// wipmb For 6.8 - this runs four tx. That's at least 2 too many
 		// combine the fetch and the case statement.  Use optional for the boolean.
-		Optional<JobInstance> instanceOpt = executeInTransactionWithSynchronization(() -> myJobPersistence.fetchInstance(theInstanceId));
+		Optional<JobInstance> instanceOpt =
+				executeInTransactionWithSynchronization(() -> myJobPersistence.fetchInstance(theInstanceId));
 
 		if (instanceOpt.isEmpty()) {
 			ourLog.warn("Unable to execute reduction step for instance {} - Instance not found", theInstanceId);

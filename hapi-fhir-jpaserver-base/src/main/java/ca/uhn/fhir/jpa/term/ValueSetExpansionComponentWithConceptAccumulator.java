@@ -269,5 +269,4 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 			}
 		}
 	}
-
 }

@@ -75,7 +75,6 @@ public interface ITermDeferredStorageSvc {
 	/**
 	 * This is mostly here for unit tests - Saves any and all deferred concepts and links
 	 */
-	// FIXME: remove
 	void saveAllDeferred();
 
 	void logQueueForUnitTest();

@@ -21,7 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-public class Step1InitiateJob implements IJobStepWorker<PreExpandValueSetParameters, VoidModel, ExpandConceptsWorkChunkJson> {
+public class Step1InitiateJob
+		implements IJobStepWorker<PreExpandValueSetParameters, VoidModel, ExpandConceptsWorkChunkJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(Step1InitiateJob.class);
 
 	/**
@@ -34,14 +35,19 @@ public class Step1InitiateJob implements IJobStepWorker<PreExpandValueSetParamet
 
 	@Autowired
 	private ITermValueSetStorageSvc myTermValueSetStorageSvc;
+
 	@Autowired
 	private VersionCanonicalizer myVersionCanonicalizer;
+
 	@Autowired
 	private IValidationSupport myValidationSupport;
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<PreExpandValueSetParameters, VoidModel> theStepExecutionDetails, @Nonnull IJobDataSink<ExpandConceptsWorkChunkJson> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(
+			@Nonnull StepExecutionDetails<PreExpandValueSetParameters, VoidModel> theStepExecutionDetails,
+			@Nonnull IJobDataSink<ExpandConceptsWorkChunkJson> theDataSink)
+			throws JobExecutionFailedException {
 
 		PreExpandValueSetParameters parameters = theStepExecutionDetails.getParameters();
 		String url = parameters.getUrl();
@@ -54,31 +60,42 @@ public class Step1InitiateJob implements IJobStepWorker<PreExpandValueSetParamet
 
 		ValueSet.ValueSetComposeComponent compose = valueSetCanonical.getCompose();
 		IntCounter orderOffset = new IntCounter(0);
-		int count = handleIncludeOrExclude(parameters, theDataSink, url, stagingVersion, compose.getInclude(), true, orderOffset);
-		count += handleIncludeOrExclude(parameters, theDataSink, url, stagingVersion, compose.getExclude(), false, orderOffset);
+		int count = handleIncludeOrExclude(
+				parameters, theDataSink, url, stagingVersion, compose.getInclude(), true, orderOffset);
+		count += handleIncludeOrExclude(
+				parameters, theDataSink, url, stagingVersion, compose.getExclude(), false, orderOffset);
 
 		ourLog.atInfo()
-			.setMessage("Generated {} expansion work chunks for ValueSet[url={}, version={}]")
-			.addArgument(count)
-			.addArgument(canonicalUrl.url())
-			.addArgument(canonicalUrl.versionId())
-			.log();
+				.setMessage("Generated {} expansion work chunks for ValueSet[url={}, version={}]")
+				.addArgument(count)
+				.addArgument(canonicalUrl.url())
+				.addArgument(canonicalUrl.versionId())
+				.log();
 
 		// The load IDs step just needs to fire once, so we send a single notification
 		LoadAllConceptIdsWorkChunkJson loadConceptIdsWorkChunk = new LoadAllConceptIdsWorkChunkJson();
 		loadConceptIdsWorkChunk.setStagingVersionId(stagingVersion);
-		theDataSink.acceptForFutureStep(PreExpandValueSetJobAppCtx.STEP_ID_LOAD_ALL_CONCEPT_IDS, loadConceptIdsWorkChunk);
+		theDataSink.acceptForFutureStep(
+				PreExpandValueSetJobAppCtx.STEP_ID_LOAD_ALL_CONCEPT_IDS, loadConceptIdsWorkChunk);
 
 		// Just in case no concepts match at all, we want to still send at least one chunk to the
 		// report generation reducer step so that it knows the staging version
 		ExpandValueSetStepOutcomeJson expandValueSetStepOutcomeJson = new ExpandValueSetStepOutcomeJson();
 		expandValueSetStepOutcomeJson.setStagingVersion(stagingVersion);
-		theDataSink.acceptForFutureStep(PreExpandValueSetJobAppCtx.STEP_ID_GENERATE_REPORT, expandValueSetStepOutcomeJson);
+		theDataSink.acceptForFutureStep(
+				PreExpandValueSetJobAppCtx.STEP_ID_GENERATE_REPORT, expandValueSetStepOutcomeJson);
 
 		return RunOutcome.SUCCESS;
 	}
 
-	private static int handleIncludeOrExclude(PreExpandValueSetParameters theParameters, @Nonnull IJobDataSink<ExpandConceptsWorkChunkJson> theDataSink, String theStagingUrl, String theStagingVersion, List<ValueSet.ConceptSetComponent> theSourceIncludesOrExcludes, boolean theInclude, IntCounter theOrderOffset) {
+	private static int handleIncludeOrExclude(
+			PreExpandValueSetParameters theParameters,
+			@Nonnull IJobDataSink<ExpandConceptsWorkChunkJson> theDataSink,
+			String theStagingUrl,
+			String theStagingVersion,
+			List<ValueSet.ConceptSetComponent> theSourceIncludesOrExcludes,
+			boolean theInclude,
+			IntCounter theOrderOffset) {
 		int retVal = 0;
 		for (ValueSet.ConceptSetComponent include : theSourceIncludesOrExcludes) {
 			ExpandConceptsWorkChunkJson workChunk = new ExpandConceptsWorkChunkJson();
@@ -90,19 +107,20 @@ public class Step1InitiateJob implements IJobStepWorker<PreExpandValueSetParamet
 			theOrderOffset.increment(MAX_CONCEPTS_PER_COMPOSE);
 
 			ourLog.atInfo()
-				.setMessage("Generating {} work chunk for System[{}] in ValueSet[url={}, version={}]")
-				.addArgument(theInclude ? "INCLUDE" : "EXCLUDE")
-				.addArgument(include.getSystem())
-				.addArgument(theParameters.getCanonicalUrl().url())
-				.addArgument(theParameters.getCanonicalUrl().versionId())
-				.log();
+					.setMessage("Generating {} work chunk for System[{}] in ValueSet[url={}, version={}]")
+					.addArgument(theInclude ? "INCLUDE" : "EXCLUDE")
+					.addArgument(include.getSystem())
+					.addArgument(theParameters.getCanonicalUrl().url())
+					.addArgument(theParameters.getCanonicalUrl().versionId())
+					.log();
 
-			String stepId = theInclude ? PreExpandValueSetJobAppCtx.STEP_ID_EXPAND_CONCEPTS_INCLUDE : PreExpandValueSetJobAppCtx.STEP_ID_EXPAND_CONCEPTS_EXCLUDE;
+			String stepId = theInclude
+					? PreExpandValueSetJobAppCtx.STEP_ID_EXPAND_CONCEPTS_INCLUDE
+					: PreExpandValueSetJobAppCtx.STEP_ID_EXPAND_CONCEPTS_EXCLUDE;
 			theDataSink.acceptForFutureStep(stepId, workChunk);
 			retVal++;
 		}
 
 		return retVal;
 	}
-
 }

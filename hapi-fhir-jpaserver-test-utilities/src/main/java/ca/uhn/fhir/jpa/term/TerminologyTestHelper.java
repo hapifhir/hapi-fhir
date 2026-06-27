@@ -434,11 +434,11 @@ public class TerminologyTestHelper {
 				.getReport();
 	}
 
-    public String startValueSetExpansionJobAndWaitForCompletion(String theUrl, String theVersion) {
+	public String startValueSetExpansionJobAndWaitForCompletion(String theUrl, String theVersion) {
 		return startValueSetExpansionJob(theUrl, theVersion, true);
 	}
 
-    public String startValueSetExpansionJobAndWaitForFailure(String theUrl, String theVersion) {
+	public String startValueSetExpansionJobAndWaitForFailure(String theUrl, String theVersion) {
 		return startValueSetExpansionJob(theUrl, theVersion, false);
 	}
 
@@ -451,7 +451,8 @@ public class TerminologyTestHelper {
 		startRequest.setJobDefinitionId(PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET);
 		startRequest.setParameters(parameters);
 
-		String instanceId = myJobCoordinator.startInstance(newSrd(), startRequest).getInstanceId();
+		String instanceId =
+				myJobCoordinator.startInstance(newSrd(), startRequest).getInstanceId();
 		if (expectSuccess) {
 			myBatch2JobHelper.awaitJobCompletion(instanceId);
 		} else {

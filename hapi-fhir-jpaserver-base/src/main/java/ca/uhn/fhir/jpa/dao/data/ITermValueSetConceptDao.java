@@ -57,9 +57,12 @@ public interface ITermValueSetConceptDao
 	@Query("SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSet = :vs ORDER BY vsc.myOrder")
 	Stream<TermValueSetConcept> streamAllByTermValueSetOrdered(@Param("vs") TermValueSet theValueSet);
 
-	@Query("SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSet = :vs AND vsc.mySystem = :system_url AND vsc.myCode IN (:codes)")
+	@Query(
+			"SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSet = :vs AND vsc.mySystem = :system_url AND vsc.myCode IN (:codes)")
 	List<TermValueSetConcept> findByCodesForTermValueSet(
-		@Param("vs") TermValueSet theValueSet, @Param("system_url") String theSystem, @Param("codes") Collection<String> theCodes);
+			@Param("vs") TermValueSet theValueSet,
+			@Param("system_url") String theSystem,
+			@Param("codes") Collection<String> theCodes);
 
 	@Query(
 			"SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSetPid = :pid AND vsc.mySystem = :system_url AND vsc.myCode = :codeval")

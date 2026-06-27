@@ -93,11 +93,13 @@ public class TerminologyConstants {
 	 * to indicate the source concept's PID.
 	 * TODO: This can be removed when we migrate to storing a proper closure table
 	 */
-	public static final String EXTENSION_SOURCE_CONCEPT_PID = "http://hapifhir.io/fhir/StructureDefinition/valueset-concept-pid";
+	public static final String EXTENSION_SOURCE_CONCEPT_PID =
+			"http://hapifhir.io/fhir/StructureDefinition/valueset-concept-pid";
 	/**
 	 * Extension that can be added to a concept passed to {@link ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc#addConceptsToExpansion(ValueSet, int)}
 	 * to indicate the source concept's parent's PIDs.
 	 * TODO: This can be removed when we migrate to storing a proper closure table
 	 */
-	public static final String EXTENSION_SOURCE_CONCEPT_DIRECT_PARENT_PIDS = "http://hapifhir.io/fhir/StructureDefinition/valueset-concept-direct-parent-pids";
+	public static final String EXTENSION_SOURCE_CONCEPT_DIRECT_PARENT_PIDS =
+			"http://hapifhir.io/fhir/StructureDefinition/valueset-concept-direct-parent-pids";
 }

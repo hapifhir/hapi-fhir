@@ -10,12 +10,16 @@ public class ExpandConceptsWorkChunkJson implements IModelJson {
 
 	@JsonProperty("stagingUrl")
 	private String myStagingUrl;
+
 	@JsonProperty("stagingVersion")
 	private String myStagingVersion;
+
 	@JsonProperty("include")
 	private boolean myInclude;
+
 	@JsonProperty("compose")
 	private String myCompose;
+
 	@JsonProperty("startingOrder")
 	private int myStartingOrder;
 
@@ -55,7 +59,8 @@ public class ExpandConceptsWorkChunkJson implements IModelJson {
 	public void setCompose(ValueSet.ConceptSetComponent theValueSetCompose) {
 		String serialized = null;
 		if (theValueSetCompose != null) {
-			serialized = myCanonicalFhirContext.newJsonParser().setPrettyPrint(false).encodeToString(theValueSetCompose);
+			serialized =
+					myCanonicalFhirContext.newJsonParser().setPrettyPrint(false).encodeToString(theValueSetCompose);
 		}
 		myCompose = serialized;
 	}

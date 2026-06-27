@@ -68,9 +68,10 @@ public abstract class BaseImportTerminologyStep {
 		return getJobMetadata(theJobInstanceId, myJobPersistence);
 	}
 
-	protected static ImportTerminologyMetadataAttachmentJson getJobMetadata(String theJobInstanceId, IJobPersistence theJobPersistence) {
+	protected static ImportTerminologyMetadataAttachmentJson getJobMetadata(
+			String theJobInstanceId, IJobPersistence theJobPersistence) {
 		AttachmentDetails jobMetadataAttachment = theJobPersistence.fetchAttachmentByFilename(
-			theJobInstanceId, ImportTerminologyMetadataAttachmentJson.ATTACHMENT_FILENAME);
+				theJobInstanceId, ImportTerminologyMetadataAttachmentJson.ATTACHMENT_FILENAME);
 		ImportTerminologyMetadataAttachmentJson jobMetadata;
 		try {
 			jobMetadata = JsonUtil.deserialize(
@@ -82,31 +83,31 @@ public abstract class BaseImportTerminologyStep {
 	}
 
 	protected <T> T executeInNewTransactionWithRetry(
-		Callable<T> theFunction, StepExecutionDetails<?, ?> theStepExecutionDetails) {
+			Callable<T> theFunction, StepExecutionDetails<?, ?> theStepExecutionDetails) {
 		int retryCount = 0;
 		while (true) {
 			try {
 				return myTransactionService
-					.withSystemRequestOnDefaultPartition()
-					.execute(theFunction);
+						.withSystemRequestOnDefaultPartition()
+						.execute(theFunction);
 			} catch (ResourceVersionConflictException e) {
 				retryCount++;
 				int maxRetries = 10;
 				if (retryCount > maxRetries) {
 					ourLog.atError()
-						.setMessage("Failed to saver terminology due to version conflict after {} retries: {}")
-						.addArgument(retryCount)
-						.addArgument(e.getMessage())
-						.log();
+							.setMessage("Failed to saver terminology due to version conflict after {} retries: {}")
+							.addArgument(retryCount)
+							.addArgument(e.getMessage())
+							.log();
 					throw e;
 				}
 				ourLog.atWarn()
-					.setMessage("Failed to save terminology for step {}, retry {}/{} in 5 seconds: {}")
-					.addArgument(theStepExecutionDetails.getCurrentStepId())
-					.addArgument(retryCount)
-					.addArgument(maxRetries)
-					.addArgument(e.getMessage())
-					.log();
+						.setMessage("Failed to save terminology for step {}, retry {}/{} in 5 seconds: {}")
+						.addArgument(theStepExecutionDetails.getCurrentStepId())
+						.addArgument(retryCount)
+						.addArgument(maxRetries)
+						.addArgument(e.getMessage())
+						.log();
 
 				long sleepTime = 5 * DateUtils.MILLIS_PER_SECOND;
 				if (HapiSystemProperties.isUnitTestModeEnabled()) {
@@ -117,5 +118,4 @@ public abstract class BaseImportTerminologyStep {
 			}
 		}
 	}
-
 }

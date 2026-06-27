@@ -56,7 +56,8 @@ import java.util.Set;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyStep.getJobMetadata;
 import static java.util.Objects.requireNonNull;
 
-public class ImportTerminologyStepFinalize<PT extends ImportTerminologyJobParameters> extends BaseFinalizeStep<PT, TerminologyFileSetJson, ImportTerminologyResultJson>
+public class ImportTerminologyStepFinalize<PT extends ImportTerminologyJobParameters>
+		extends BaseFinalizeStep<PT, TerminologyFileSetJson, ImportTerminologyResultJson>
 		implements IReductionStepWorker<PT, TerminologyFileSetJson, ImportTerminologyResultJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportTerminologyStepFinalize.class);
 
@@ -178,19 +179,21 @@ public class ImportTerminologyStepFinalize<PT extends ImportTerminologyJobParame
 
 	@Nonnull
 	@Override
-	protected List<String> getReportTitleLines(StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails) {
+	protected List<String> getReportTitleLines(
+			StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails) {
 		return List.of("Terminology Import Report");
 	}
 
 	@Override
-	protected void appendAdditionalInfo(StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails, StringBuilder theReportBuilder) {
+	protected void appendAdditionalInfo(
+			StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails, StringBuilder theReportBuilder) {
 		JobDefinition<PT> jobDefinition = theStepExecutionDetails.getJobDefinition();
 		BatchInstanceStepStatisticsDTO allStepStatistics = calculateStepStatistics(theStepExecutionDetails);
 
 		for (JobDefinitionStep<PT, ?, ?> step : jobDefinition.getSteps()) {
 			if (step.getJobStepWorker() instanceof ITerminologyImportFileHandlerStep) {
 				TerminologyFileSetJson.RecordsAddedCounter counter = myStepIdToRecordsAddedCounter.computeIfAbsent(
-					step.getStepId(), k -> new TerminologyFileSetJson.RecordsAddedCounter());
+						step.getStepId(), k -> new TerminologyFileSetJson.RecordsAddedCounter());
 
 				addDivider(theReportBuilder);
 				theReportBuilder.append("Step: ").append(step.getStepId());
@@ -200,14 +203,14 @@ public class ImportTerminologyStepFinalize<PT extends ImportTerminologyJobParame
 				if (stepStatistics != null) {
 					indent(theReportBuilder, 1);
 					theReportBuilder
-						.append("Total Work Chunks            : ")
-						.append(stepStatistics.chunkCount())
-						.append("\n");
+							.append("Total Work Chunks            : ")
+							.append(stepStatistics.chunkCount())
+							.append("\n");
 					indent(theReportBuilder, 1);
 					theReportBuilder
-						.append("Total Processing Time        : ")
-						.append(StopWatch.formatMillis(stepStatistics.millisElapsed()))
-						.append("\n");
+							.append("Total Processing Time        : ")
+							.append(StopWatch.formatMillis(stepStatistics.millisElapsed()))
+							.append("\n");
 				}
 
 				appendCounts(counter, theReportBuilder, 1);

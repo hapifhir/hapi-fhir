@@ -190,7 +190,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("TRM_VALUESET")
 				.addColumn("20260627.10", "VS_INTENDED_VERSION_ID")
 				.nullable()
-			.type(ColumnTypeEnum.STRING, 200);
+				.type(ColumnTypeEnum.STRING, 200);
 	}
 
 	protected void init8_10_0() {
