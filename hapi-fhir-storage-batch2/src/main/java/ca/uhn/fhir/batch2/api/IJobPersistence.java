@@ -212,6 +212,10 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 *     typically use the attachment ID as an element in the work chunk JSON passed between steps.
 	 * </li>
 	 * </ul>
+	 * Job attachments use a streaming API for both reading and writing in order to avoid loading
+	 * too much data into memory at any given time. When working with attachments, you should always
+	 * use InputStream/OutputStream/Reader/Writer/etc to work with the contents if possible in order
+	 * to minimize memory use.
 	 *
 	 * @param theInstanceId   The job instance ID
 	 * @param theRequest The request containing the attachment data
@@ -220,26 +224,40 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	String storeNewAttachment(String theInstanceId, AttachmentDetails theRequest);
 
 	/**
+	 * Appends additional bytes to a previously stored attachment. Any bytes that are appended using
+	 * this method are added to the end of the previously stored bytes, exactly as if the bytes had been
+	 * included in the original call to {@link #storeNewAttachment(String, AttachmentDetails)}.
+	 *
+	 * @param theInstanceId The job instance ID
+	 * @param theAttachmentId The attachment ID, as returned by {@link #storeNewAttachment(String, AttachmentDetails)}
+	 * @param theRequest The request containing the attachment data
+	 * @see #storeNewAttachment(String, AttachmentDetails) for a description of what attachments are used for and how they work.
+	 */
+	void appendToAttachment(String theInstanceId, String theAttachmentId, AttachmentDetails theRequest);
+
+	/**
 	 * Fetches the attachment data for a specific attachment ID.
 	 *
-	 * @see #storeNewAttachment(String, AttachmentDetails) for a description of what attachments are used for.
+	 * @see #storeNewAttachment(String, AttachmentDetails) for a description of what attachments are used for and how they work.
 	 * @param theInstanceId   The job instance ID
 	 * @param theAttachmentId The attachment ID
 	 * @return The bytes of the attachment data
 	 * @throws ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException If the attachment ID cannot be found
 	 */
+	@Nonnull
 	AttachmentDetails fetchAttachmentById(String theInstanceId, String theAttachmentId)
 			throws ResourceNotFoundException;
 
 	/**
 	 * Fetches the attachment data for a specific attachment filename
 	 *
-	 * @see #storeNewAttachment(String, AttachmentDetails) for a description of what attachments are used for.
+	 * @see #storeNewAttachment(String, AttachmentDetails) for a description of what attachments are used for and how they work.
 	 * @param theInstanceId   The job instance ID
 	 * @param theFilename The attachment filename
 	 * @return The bytes of the attachment data
 	 * @throws ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException If the attachment filename cannot be found
 	 */
+	@Nonnull
 	AttachmentDetails fetchAttachmentByFilename(String theInstanceId, String theFilename)
 			throws ResourceNotFoundException;
 
@@ -247,6 +265,8 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 * Fetches the metadata (attachment ID, attachment filename if any) for attachments stored
 	 * for a specific job instance. The attachments are returned in a stable order across pages,
 	 * but the specific order is up to the implementation.
+	 *
+	 * @see #storeNewAttachment(String, AttachmentDetails) for a description of what attachments are used for and how they work.
 	 */
 	List<AttachmentMetadata> listAttachmentsForJobInstance(Pageable thePage, String theInstanceId);
 

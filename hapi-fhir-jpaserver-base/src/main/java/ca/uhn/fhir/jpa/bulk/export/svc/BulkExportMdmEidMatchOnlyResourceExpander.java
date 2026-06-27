@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.svc.IBulkExportMdmEidMatchOnlyResourceExpander;
 import ca.uhn.fhir.mdm.svc.IBulkExportMdmResourceExpander;
 import ca.uhn.fhir.mdm.svc.MdmEidMatchOnlyExpandSvc;
@@ -57,6 +58,12 @@ public class BulkExportMdmEidMatchOnlyResourceExpander implements IBulkExportMdm
 	private final IIdHelperService<JpaPid> myIdHelperService;
 
 	/**
+	 * MDM settings. Mutable because settings are not available at construction time and are pushed in
+	 * later via {@link #setMdmSettings(IMdmSettings)} by {@code MdmExpandersHolder}.
+	 */
+	private IMdmSettings myMdmSettings;
+
+	/**
 	 * Constructor
 	 */
 	public BulkExportMdmEidMatchOnlyResourceExpander(
@@ -68,6 +75,27 @@ public class BulkExportMdmEidMatchOnlyResourceExpander implements IBulkExportMdm
 		myMdmEidMatchOnlyLinkExpandSvc = theMdmEidMatchOnlyLinkExpandSvc;
 		myFhirContext = theFhirContext;
 		myIdHelperService = theIdHelperService;
+	}
+
+	@Override
+	public void setMdmSettings(IMdmSettings theMdmSettings) {
+		myMdmSettings = theMdmSettings;
+	}
+
+	/**
+	 * Determines the partition to use when expanding group/patient members. When MDM is configured to
+	 * search all partitions for matching, members may live on partitions other than the request partition
+	 * (e.g. the Group's default partition), so expansion must widen to {@link RequestPartitionId#allPartitions()}.
+	 * Otherwise the original request partition is used.
+	 * <p>
+	 * In practice {@code myMdmSettings} is always set before this expander is used (the holder only hands
+	 * out this expander once MDM settings have been applied), so the null check is a defensive fallback:
+	 * if settings are somehow unset, we degrade to the request partition rather than throwing an NPE.
+	 */
+	private RequestPartitionId determineExpansionPartition(RequestPartitionId theRequestPartitionId) {
+		return (myMdmSettings != null && myMdmSettings.getSearchAllPartitionForMatch())
+				? RequestPartitionId.allPartitions()
+				: theRequestPartitionId;
 	}
 
 	/**
@@ -96,6 +124,8 @@ public class BulkExportMdmEidMatchOnlyResourceExpander implements IBulkExportMdm
 		IFhirResourceDao<?> groupDao = myDaoRegistry.getResourceDao("Group");
 		IBaseResource groupResource = groupDao.read(groupId, srd);
 
+		RequestPartitionId expansionPartition = determineExpansionPartition(requestPartitionId);
+
 		Set<String> allResourceIds = new HashSet<>();
 		FhirTerser terser = myFhirContext.newTerser();
 		// Extract all member.entity references from the Group resource
@@ -106,7 +136,7 @@ public class BulkExportMdmEidMatchOnlyResourceExpander implements IBulkExportMdm
 			if (!entityRef.getReferenceElement().isEmpty()) {
 				IIdType memberId = entityRef.getReferenceElement();
 				Set<String> expanded =
-						myMdmEidMatchOnlyLinkExpandSvc.expandMdmBySourceResourceId(requestPartitionId, memberId);
+						myMdmEidMatchOnlyLinkExpandSvc.expandMdmBySourceResourceId(expansionPartition, memberId);
 				allResourceIds.addAll(expanded);
 			}
 		}
@@ -115,7 +145,7 @@ public class BulkExportMdmEidMatchOnlyResourceExpander implements IBulkExportMdm
 				.map(id -> myFhirContext.getVersion().newIdType(id))
 				.collect(Collectors.toList());
 		List<JpaPid> pidList = myIdHelperService.resolveResourcePids(
-				requestPartitionId,
+				expansionPartition,
 				idTypes,
 				ResolveIdentityMode.excludeDeleted().cacheOk());
 		return new HashSet<>(pidList);
@@ -132,7 +162,8 @@ public class BulkExportMdmEidMatchOnlyResourceExpander implements IBulkExportMdm
 	public Set<String> expandPatient(String thePatientId, RequestPartitionId theRequestPartitionId) {
 		IIdType patientIdType =
 				myFhirContext.getVersion().newIdType(thePatientId).withResourceType("Patient");
-		return myMdmEidMatchOnlyLinkExpandSvc.expandMdmBySourceResourceId(theRequestPartitionId, patientIdType);
+		RequestPartitionId expansionPartition = determineExpansionPartition(theRequestPartitionId);
+		return myMdmEidMatchOnlyLinkExpandSvc.expandMdmBySourceResourceId(expansionPartition, patientIdType);
 	}
 
 	@Override
