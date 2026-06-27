@@ -30,11 +30,14 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.term.TermValueSetExpansionSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import ca.uhn.fhir.jpa.term.api.ITermValueSetExpansionSvc;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.ParametersUtil;
@@ -52,6 +55,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -69,6 +73,9 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 
 	@Autowired
 	private ITermReadSvc myTermReadSvc;
+
+	@Autowired
+	private ITermValueSetExpansionSvc myTermValueSetExpansionSvc;
 
 	@Autowired
 	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)
@@ -246,6 +253,22 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		return () -> new CodeValidationResult()
 				.setMessage("Validator is unable to provide validation for " + theCode + "#" + theSystem
 						+ " - Unknown or unusable ValueSet[" + theValueSetUrl + "]");
+	}
+
+	@Operation(name = ProviderConstants.OPERATION_EXPANSION_STATUS, idempotent = true, typeName = "ValueSet")
+	public IBaseParameters getExpansionStatus(
+			@OperationParam(name = "expansionStatus", max = OperationParam.MAX_UNLIMITED, typeName = "code")
+					List<IPrimitiveType<String>> theExpansionStatuses,
+			@OperationParam(name = "url", max = 1) StringParam theUrl,
+			@OperationParam(name = "name", max = 1) StringParam theName,
+			@OperationParam(name = "_count", max = 1, typeName = "integer") IPrimitiveType<Integer> theCount,
+			@OperationParam(name = "_offset", max = 1, typeName = "integer") IPrimitiveType<Integer> theOffset) {
+		List<String> statuses = theExpansionStatuses != null
+				? theExpansionStatuses.stream().map(IPrimitiveType::getValue).toList()
+				: null;
+		int count = theCount != null && theCount.hasValue() ? theCount.getValue() : 100;
+		int offset = theOffset != null && theOffset.hasValue() ? theOffset.getValue() : 0;
+		return myTermValueSetExpansionSvc.getExpansionStatus(theUrl, theName, statuses, count, offset);
 	}
 
 	@Operation(

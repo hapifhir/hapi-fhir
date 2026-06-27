@@ -57,6 +57,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -2579,6 +2580,205 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 			myStorageSettings.setDeferIndexingForCodesystemsOfSize(deferredIndexingDefault);
 			ReindexUtils.setRetryDelay(null);
 		}
+	}
+
+	@Test
+	void countByExpansionStatus_withMixedStatuses_returnsCountPerStatus() {
+		// Given three ValueSets with distinct expansion statuses
+		myStorageSettings.setPreExpandValueSets(true);
+		persistTermValueSet("http://vs-count-not-expanded", "Not Expanded VS");
+		persistTermValueSet("http://vs-count-failed", "Failed VS");
+		persistTermValueSet("http://vs-count-expanded", "Expanded VS");
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		setTermValueSetStatus("http://vs-count-failed", TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND);
+		setTermValueSetStatus("http://vs-count-expanded", TermValueSetPreExpansionStatusEnum.EXPANDED);
+
+		// When
+		List<Object[]> counts = runInTransaction(() -> myTermValueSetDao.countByExpansionStatus());
+
+		// Then each status bucket has the correct count
+		Map<TermValueSetPreExpansionStatusEnum, Long> countMap = counts.stream()
+			.collect(Collectors.toMap(
+				row -> (TermValueSetPreExpansionStatusEnum) row[0],
+				row -> (Long) row[1]));
+		assertThat(countMap).containsEntry(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, 1L);
+		assertThat(countMap).containsEntry(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND, 1L);
+		assertThat(countMap).containsEntry(TermValueSetPreExpansionStatusEnum.EXPANDED, 1L);
+	}
+
+	@Test
+	void findByExpansionStatusIn_withStatusFilter_returnsOnlyMatchingStatuses() {
+		// Given two NOT_EXPANDED and one FAILED_TO_EXPAND ValueSet
+		myStorageSettings.setPreExpandValueSets(true);
+		persistTermValueSet("http://vs-status-a", "VS A");
+		persistTermValueSet("http://vs-status-b", "VS B");
+		persistTermValueSet("http://vs-status-c", "VS C");
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		setTermValueSetStatus("http://vs-status-c", TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND);
+
+		PageRequest page = PageRequest.of(0, 10);
+
+		// FAILED_TO_EXPAND only returns one result
+		List<TermValueSet> failed = runInTransaction(() ->
+			myTermValueSetDao.findByExpansionStatusIn(page, List.of(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND)).getContent());
+		assertThat(failed).hasSize(1);
+		assertThat(failed.get(0).getUrl()).isEqualTo("http://vs-status-c");
+
+		// OR logic returns all three
+		List<TermValueSet> both = runInTransaction(() ->
+			myTermValueSetDao.findByExpansionStatusIn(page, List.of(
+				TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND)).getContent());
+		assertThat(both).hasSize(3);
+
+		// EXPANDED returns nothing
+		List<TermValueSet> expanded = runInTransaction(() ->
+			myTermValueSetDao.findByExpansionStatusIn(page, List.of(TermValueSetPreExpansionStatusEnum.EXPANDED)).getContent());
+		assertThat(expanded).isEmpty();
+	}
+
+	@Test
+	void findByExpansionStatusIn_withPageSize_respectsPagination() {
+		// Given three ValueSets all NOT_EXPANDED
+		myStorageSettings.setPreExpandValueSets(true);
+		persistTermValueSet("http://vs-page-1", "VS Page 1");
+		persistTermValueSet("http://vs-page-2", "VS Page 2");
+		persistTermValueSet("http://vs-page-3", "VS Page 3");
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+
+		List<TermValueSetPreExpansionStatusEnum> allStatuses = List.of(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED);
+
+		// Page size 2 returns only 2
+		List<TermValueSet> page1 = runInTransaction(() ->
+			myTermValueSetDao.findByExpansionStatusIn(PageRequest.of(0, 2), allStatuses).getContent());
+		assertThat(page1).hasSize(2);
+
+		// Page size 10 returns all 3
+		List<TermValueSet> all = runInTransaction(() ->
+			myTermValueSetDao.findByExpansionStatusIn(PageRequest.of(0, 10), allStatuses).getContent());
+		assertThat(all).hasSize(3);
+	}
+
+	@Test
+	void findByExpansionStatusInAndUrlLike_withUrlPattern_returnsUrlMatches() {
+		// Given two ValueSets with distinct URLs
+		myStorageSettings.setPreExpandValueSets(true);
+		persistTermValueSet("http://loinc.org/vs/LL1000-0", "LOINC VS");
+		persistTermValueSet("http://example.org/vs/my-codes", "Example VS");
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+
+		PageRequest page = PageRequest.of(0, 10);
+		List<TermValueSetPreExpansionStatusEnum> allStatuses = List.of(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED);
+
+		// Starts-with match
+		List<TermValueSet> startsWith = runInTransaction(() ->
+			myTermValueSetDao.findByExpansionStatusInAndUrlLike(page, allStatuses, "http://loinc.org%").getContent());
+		assertThat(startsWith).hasSize(1);
+		assertThat(startsWith.get(0).getUrl()).isEqualTo("http://loinc.org/vs/LL1000-0");
+
+		// Contains match — case-insensitive via LOWER()
+		List<TermValueSet> contains = runInTransaction(() ->
+			myTermValueSetDao.findByExpansionStatusInAndUrlLike(page, allStatuses, "%LOINC%").getContent());
+		assertThat(contains).hasSize(1);
+		assertThat(contains.get(0).getUrl()).isEqualTo("http://loinc.org/vs/LL1000-0");
+
+		// Wildcard matches both
+		List<TermValueSet> allUrls = runInTransaction(() ->
+			myTermValueSetDao.findByExpansionStatusInAndUrlLike(page, allStatuses, "%").getContent());
+		assertThat(allUrls).hasSize(2);
+	}
+
+	@Test
+	void findByExpansionStatusInAndNameLike_withNamePattern_returnsNameMatches() {
+		// Given two ValueSets with distinct names
+		myStorageSettings.setPreExpandValueSets(true);
+		persistTermValueSet("http://vs-name-1", "Cholesterol Panel");
+		persistTermValueSet("http://vs-name-2", "Blood Pressure");
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+
+		PageRequest page = PageRequest.of(0, 10);
+		List<TermValueSetPreExpansionStatusEnum> allStatuses = List.of(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED);
+
+		// Starts-with match
+		List<TermValueSet> startsWith = runInTransaction(() ->
+			myTermValueSetDao.findByExpansionStatusInAndNameLike(page, allStatuses, "Cholesterol%").getContent());
+		assertThat(startsWith).hasSize(1);
+		assertThat(startsWith.get(0).getName()).isEqualTo("Cholesterol Panel");
+
+		// Contains match — case-insensitive via LOWER()
+		List<TermValueSet> contains = runInTransaction(() ->
+			myTermValueSetDao.findByExpansionStatusInAndNameLike(page, allStatuses, "%PANEL%").getContent());
+		assertThat(contains).hasSize(1);
+		assertThat(contains.get(0).getName()).isEqualTo("Cholesterol Panel");
+
+		// Wildcard matches both
+		List<TermValueSet> allNames = runInTransaction(() ->
+			myTermValueSetDao.findByExpansionStatusInAndNameLike(page, allStatuses, "%").getContent());
+		assertThat(allNames).hasSize(2);
+	}
+
+	@Test
+	void findByExpansionStatusInAndUrlEquals_withExactUrl_returnsExactMatchOnly() {
+		// Given two ValueSets with similar URLs
+		myStorageSettings.setPreExpandValueSets(true);
+		persistTermValueSet("http://loinc.org/vs/LL1000-0", "LOINC VS Exact");
+		persistTermValueSet("http://loinc.org/vs/LL1000-0-extra", "LOINC VS Extra");
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+
+		PageRequest page = PageRequest.of(0, 10);
+		List<TermValueSetPreExpansionStatusEnum> allStatuses = List.of(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED);
+
+		// Exact match returns only the one with an identical URL
+		List<TermValueSet> exact = runInTransaction(() ->
+			myTermValueSetDao.findByExpansionStatusInAndUrlEquals(page, allStatuses, "http://loinc.org/vs/LL1000-0").getContent());
+		assertThat(exact).hasSize(1);
+		assertThat(exact.get(0).getUrl()).isEqualTo("http://loinc.org/vs/LL1000-0");
+
+		// No match returns empty
+		List<TermValueSet> noMatch = runInTransaction(() ->
+			myTermValueSetDao.findByExpansionStatusInAndUrlEquals(page, allStatuses, "http://loinc.org/vs/nonexistent").getContent());
+		assertThat(noMatch).isEmpty();
+	}
+
+	@Test
+	void findByExpansionStatusInAndNameEquals_withExactName_returnsExactMatchOnly() {
+		// Given two ValueSets with similar names
+		myStorageSettings.setPreExpandValueSets(true);
+		persistTermValueSet("http://vs-exact-name-1", "Cholesterol Panel");
+		persistTermValueSet("http://vs-exact-name-2", "Cholesterol Panel Extended");
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+
+		PageRequest page = PageRequest.of(0, 10);
+		List<TermValueSetPreExpansionStatusEnum> allStatuses = List.of(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED);
+
+		// Exact match returns only the one with an identical name
+		List<TermValueSet> exact = runInTransaction(() ->
+			myTermValueSetDao.findByExpansionStatusInAndNameEquals(page, allStatuses, "Cholesterol Panel").getContent());
+		assertThat(exact).hasSize(1);
+		assertThat(exact.get(0).getName()).isEqualTo("Cholesterol Panel");
+
+		// No match returns empty
+		List<TermValueSet> noMatch = runInTransaction(() ->
+			myTermValueSetDao.findByExpansionStatusInAndNameEquals(page, allStatuses, "Nonexistent Panel").getContent());
+		assertThat(noMatch).isEmpty();
+	}
+
+	private void persistTermValueSet(String theUrl, String theName) {
+		ValueSet vs = new ValueSet();
+		vs.setUrl(theUrl);
+		vs.setName(theName);
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose().addInclude().setSystem("http://example.org/cs");
+		myValueSetDao.create(vs, newSrd());
+	}
+
+	private void setTermValueSetStatus(String theUrl, TermValueSetPreExpansionStatusEnum theStatus) {
+		runInTransaction(() -> {
+			TermValueSet tvs = myTermValueSetDao
+				.findTermValueSetByUrlAndNullVersion(theUrl)
+				.orElseThrow(IllegalStateException::new);
+			tvs.setExpansionStatus(theStatus);
+			myTermValueSetDao.save(tvs);
+		});
 	}
 
 	private void assertExpansionTotalIsAppropriate(boolean theValueSetActive, boolean theForceDisableHibernateSearch, ValueSet expandedValueSet) {

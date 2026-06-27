@@ -156,8 +156,9 @@ public class TermValueSet extends BasePartitionable implements Serializable {
 		return myExpansionTimestamp;
 	}
 
-	public void setExpansionTimestamp(Date theExpansionTimestamp) {
+	public TermValueSet setExpansionTimestamp(Date theExpansionTimestamp) {
 		myExpansionTimestamp = theExpansionTimestamp;
+		return this;
 	}
 
 	public Long getId() {
@@ -254,8 +255,9 @@ public class TermValueSet extends BasePartitionable implements Serializable {
 		return myExpansionStatus;
 	}
 
-	public void setExpansionStatus(TermValueSetPreExpansionStatusEnum theExpansionStatus) {
+	public TermValueSet setExpansionStatus(TermValueSetPreExpansionStatusEnum theExpansionStatus) {
 		myExpansionStatus = theExpansionStatus;
+		return this;
 	}
 
 	public String getExpansionError() {
