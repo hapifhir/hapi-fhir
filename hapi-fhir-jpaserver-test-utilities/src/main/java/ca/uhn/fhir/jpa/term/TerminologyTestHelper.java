@@ -263,18 +263,20 @@ public class TerminologyTestHelper {
 		Batch2JobStartResponse instanceId = myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest);
 
 		if (theFiles.isSingleZip()) {
-			AttachmentDetails attachmentDetails = AttachmentDetails.build()
+			AttachmentDetails attachmentDetails = AttachmentDetails.newBuilder()
 					.withInputStream(new ByteArrayInputStream(theFiles.getZipBytes()))
 					.withContentType(AttachmentContentTypeEnum.ZIP)
 					.withFilename(distributionFilename)
+					.withNoMaximumSize()
 					.build();
 			myJobPersistence.storeNewAttachment(instanceId.getInstanceId(), attachmentDetails);
 		} else {
 			for (ZipCollectionBuilder.FileDescriptor descriptor : theFiles.getFiles()) {
-				AttachmentDetails attachmentDetails = AttachmentDetails.build()
+				AttachmentDetails attachmentDetails = AttachmentDetails.newBuilder()
 						.withInputStream(descriptor.inputStream())
 						.withContentType(AttachmentContentTypeEnum.PLAIN_TEXT)
 						.withFilename(descriptor.filename())
+						.withNoMaximumSize()
 						.build();
 				myJobPersistence.storeNewAttachment(instanceId.getInstanceId(), attachmentDetails);
 			}
@@ -287,8 +289,12 @@ public class TerminologyTestHelper {
 			} catch (IOException e) {
 				fail("Failed to store properties", e);
 			}
-			AttachmentDetails attachmentDetails =
-					new AttachmentDetails(out.toByteArray(), AttachmentContentTypeEnum.PROPERTIES, propertiesFilename);
+			AttachmentDetails attachmentDetails = AttachmentDetails.newBuilder()
+					.withBytes(out.toByteArray())
+					.withContentType(AttachmentContentTypeEnum.PROPERTIES)
+					.withFilename(propertiesFilename)
+					.withNoMaximumSize()
+					.build();
 			myJobPersistence.storeNewAttachment(instanceId.getInstanceId(), attachmentDetails);
 		}
 

@@ -49,8 +49,10 @@ import ca.uhn.fhir.util.DatatypeUtil;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.fhir.util.ValidateUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -99,19 +101,58 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	public static final String PARAM_MAKE_CURRENT = "makeCurrent";
 	public static final String PARAM_MODE = "mode";
 	public static final String PARAM_JOB_ATTACHMENT_ID = "jobAttachmentId";
+	public static final String PARAM_APPEND_TO_JOB_ATTACHMENT_ID = "appendToJobAttachmentId";
 	public static final String RESP_PARAM_OUTCOME = "outcome";
-	public static final Pattern LOINC_XML_FILENAME_PATTERN =
+	private static final Pattern LOINC_XML_FILENAME_PATTERN =
 			Pattern.compile("loinc[0-9._-]*\\.zip", Pattern.CASE_INSENSITIVE);
-	public static final Pattern SNOMED_CT_XML_FILENAME_PATTERN =
+	private static final Pattern SNOMED_CT_XML_FILENAME_PATTERN =
 			Pattern.compile("snomed[a-zA-Z0-9._-]*\\.zip", Pattern.CASE_INSENSITIVE);
-	public static final Pattern ICD10_FILENAME_PATTERN = Pattern.compile("icd10.*\\.zip", Pattern.CASE_INSENSITIVE);
+	private static final Pattern ICD10_FILENAME_PATTERN = Pattern.compile("icd10.*\\.zip", Pattern.CASE_INSENSITIVE);
 
-	public static final Pattern ICD10CM_FILENAME_PATTERN = Pattern.compile("icd10cm.*\\.zip", Pattern.CASE_INSENSITIVE);
-	public static final Pattern CUSTOM_TERMINOLOGY_PATTERN = Pattern.compile(".*\\.zip", Pattern.CASE_INSENSITIVE);
+	private static final Pattern ICD10CM_FILENAME_PATTERN =
+			Pattern.compile("icd10cm.*\\.zip", Pattern.CASE_INSENSITIVE);
+	private static final Pattern CUSTOM_TERMINOLOGY_PATTERN = Pattern.compile(".*\\.zip", Pattern.CASE_INSENSITIVE);
 	private static final Logger ourLog = LoggerFactory.getLogger(TerminologyUploaderProvider.class);
 	private static final String RESP_PARAM_CONCEPT_COUNT = "conceptCount";
 	private static final String RESP_PARAM_TARGET = "target";
 	private static final String RESP_PARAM_SUCCESS = "success";
+
+	/**
+	 * The maximum size for a LOINC distribution file. This is just the current size of the file
+	 * with some growth room in case future releases are larger.
+	 * Loinc_2.82.zip = 85 MB
+	 */
+	static final int LOINC_MAX_SIZE = Math.toIntExact(200 * FileUtils.ONE_MB);
+	/**
+	 * The maximum size for a loinc properties file. This is just the current size of the file
+	 * with some growth room in case future releases are larger.
+	 */
+	static final int LOINC_PROPERTIES_MAX_SIZE = Math.toIntExact(FileUtils.ONE_MB);
+	/**
+	 * The maximum size for a Snomed CT distribution file. This is just the current size of the file
+	 * with some growth room in case future releases are larger.
+	 * SnomedCT_InternationalRF2_PRODUCTION_20260501T120000Z.zip = 580 MB
+	 */
+	private static final int SNOMED_CT_MAX_SIZE = Math.toIntExact(800 * FileUtils.ONE_MB);
+	/**
+	 * The maximum size for an ICD-10 distribution file. This is just the current size of the file
+	 * with some growth room in case future releases are larger.
+	 * icd102019en.xml.zip = 672k
+	 * icd102019en.xml = 9.5 MB
+	 */
+	private static final int ICD_10_MAX_SIZE = Math.toIntExact(20 * FileUtils.ONE_MB);
+	/**
+	 * The maximum size for an ICD-10-CM distribution file. This is just the current size of the file
+	 * with some growth room in case future releases are larger.
+	 * icd10cm-April-1-2026-XML.zip = 2.1M
+	 * icd10c-tabular-April-1-2026.xml = 9 MB
+	 */
+	private static final int ICD_10_CM_MAX_SIZE = Math.toIntExact(20 * FileUtils.ONE_MB);
+	/**
+	 * This is arbitrary but feels like a sensible and safe default
+	 */
+	private static final int CUSTOM_MAX_SIZE = Math.toIntExact(50 * FileUtils.ONE_MB);
+
 	private final Map<String, JobType> myCanonicalUrlToJobType = new HashMap<>();
 	private final Map<String, JobType> myJobDefinitionIdToJobType = new HashMap<>();
 	private final JobType myCustomJobType;
@@ -141,12 +182,17 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		// LOINC
 		List<DistributionFilenamePattern> loincDistributionFiles = List.of(
 				new DistributionFilenamePattern(
-						LOINC_XML_FILENAME_PATTERN, FILENAME_LOINC_DISTRIBUTION_FILE, AttachmentContentTypeEnum.ZIP),
+						LOINC_XML_FILENAME_PATTERN,
+						FILENAME_LOINC_DISTRIBUTION_FILE,
+						AttachmentContentTypeEnum.ZIP,
+						LOINC_MAX_SIZE),
 				new DistributionFilenamePattern(
 						filenameToPattern(FILENAME_LOINC_UPLOAD_PROPERTIES_FILE),
 						FILENAME_LOINC_UPLOAD_PROPERTIES_FILE,
-						AttachmentContentTypeEnum.PROPERTIES));
+						AttachmentContentTypeEnum.PROPERTIES,
+						LOINC_PROPERTIES_MAX_SIZE));
 		JobType loincJobType = new JobType(
+				false,
 				ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC,
 				"LOINC",
 				FILENAME_LOINC_UPLOAD_PROPERTIES_FILE,
@@ -156,32 +202,41 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 		// SNOMED CT
 		JobType sctJobType = new JobType(
+				false,
 				ImportSnomedCtJobAppCtx.JOB_ID_IMPORT_TERM_SNOMED_CT,
 				"SNOMED CT",
 				null,
 				SNOMED_CT_XML_FILENAME_PATTERN,
-				FILENAME_SNOMED_CT_DISTRIBUTION_FILE);
+				FILENAME_SNOMED_CT_DISTRIBUTION_FILE,
+				SNOMED_CT_MAX_SIZE);
 		myCanonicalUrlToJobType.put(TerminologyConstants.SCT_URI, sctJobType);
 		myJobDefinitionIdToJobType.put(sctJobType.jobDefinitionId(), sctJobType);
 
 		// ICD-10
 		List<DistributionFilenamePattern> icd10DistributionFiles = List.of(
 				new DistributionFilenamePattern(
-						ICD10_FILENAME_PATTERN, FILENAME_ICD10_DISTRIBUTION_FILE, AttachmentContentTypeEnum.ZIP),
+						ICD10_FILENAME_PATTERN,
+						FILENAME_ICD10_DISTRIBUTION_FILE,
+						AttachmentContentTypeEnum.ZIP,
+						ICD_10_MAX_SIZE),
 				new DistributionFilenamePattern(
-						ICD10_XML_FILE_PATTERN, ICD10_XML_FILENAME, AttachmentContentTypeEnum.XML));
+						ICD10_XML_FILE_PATTERN, ICD10_XML_FILENAME, AttachmentContentTypeEnum.XML, ICD_10_MAX_SIZE));
 		JobType icd10JobType =
-				new JobType(ImportIcdJobAppCtx.JOB_ID_IMPORT_ICD_10, "ICD-10", null, icd10DistributionFiles);
+				new JobType(false, ImportIcdJobAppCtx.JOB_ID_IMPORT_ICD_10, "ICD-10", null, icd10DistributionFiles);
 		myCanonicalUrlToJobType.put(TerminologyConstants.ICD10_URI, icd10JobType);
 		myJobDefinitionIdToJobType.put(icd10JobType.jobDefinitionId(), icd10JobType);
 
 		// ICD-10-CM
 		List<DistributionFilenamePattern> icd10CpDistributionFiles = List.of(
 				new DistributionFilenamePattern(
-						ICD10CM_FILENAME_PATTERN, FILENAME_ICD10CM_DISTRIBUTION_FILE, AttachmentContentTypeEnum.ZIP),
-				new DistributionFilenamePattern(ICD10CM_FILE_PATTERN, ICD10CM_FILENAME, AttachmentContentTypeEnum.XML));
-		JobType icd10cmJobType =
-				new JobType(ImportIcdJobAppCtx.JOB_ID_IMPORT_ICD_10_CM, "ICD-10-CM", null, icd10CpDistributionFiles);
+						ICD10CM_FILENAME_PATTERN,
+						FILENAME_ICD10CM_DISTRIBUTION_FILE,
+						AttachmentContentTypeEnum.ZIP,
+						ICD_10_CM_MAX_SIZE),
+				new DistributionFilenamePattern(
+						ICD10CM_FILE_PATTERN, ICD10CM_FILENAME, AttachmentContentTypeEnum.XML, ICD_10_CM_MAX_SIZE));
+		JobType icd10cmJobType = new JobType(
+				false, ImportIcdJobAppCtx.JOB_ID_IMPORT_ICD_10_CM, "ICD-10-CM", null, icd10CpDistributionFiles);
 		myCanonicalUrlToJobType.put(TerminologyConstants.ICD10CM_URI, icd10cmJobType);
 		myJobDefinitionIdToJobType.put(icd10cmJobType.jobDefinitionId(), icd10cmJobType);
 
@@ -190,28 +245,35 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 				new DistributionFilenamePattern(
 						CUSTOM_TERMINOLOGY_PATTERN,
 						TerminologyConstants.FILENAME_CUSTOM_DISTRIBUTION_FILE,
-						AttachmentContentTypeEnum.ZIP),
+						AttachmentContentTypeEnum.ZIP,
+						CUSTOM_MAX_SIZE),
 				new DistributionFilenamePattern(
 						filenameToPattern(TerminologyConstants.CUSTOM_CODESYSTEM_JSON),
 						TerminologyConstants.CUSTOM_CODESYSTEM_JSON,
-						AttachmentContentTypeEnum.JSON),
+						AttachmentContentTypeEnum.JSON,
+						CUSTOM_MAX_SIZE),
 				new DistributionFilenamePattern(
 						filenameToPattern(TerminologyConstants.CUSTOM_CODESYSTEM_XML),
 						TerminologyConstants.CUSTOM_CODESYSTEM_XML,
-						AttachmentContentTypeEnum.XML),
+						AttachmentContentTypeEnum.XML,
+						CUSTOM_MAX_SIZE),
 				new DistributionFilenamePattern(
 						Pattern.compile("concepts.*\\.csv", Pattern.CASE_INSENSITIVE),
 						CUSTOM_CONCEPTS_FILE,
-						AttachmentContentTypeEnum.CSV),
+						AttachmentContentTypeEnum.CSV,
+						CUSTOM_MAX_SIZE),
 				new DistributionFilenamePattern(
 						Pattern.compile("properties.*\\.csv", Pattern.CASE_INSENSITIVE),
 						CUSTOM_PROPERTIES_FILE,
-						AttachmentContentTypeEnum.CSV),
+						AttachmentContentTypeEnum.CSV,
+						CUSTOM_MAX_SIZE),
 				new DistributionFilenamePattern(
 						Pattern.compile("hierarchy.*\\.csv", Pattern.CASE_INSENSITIVE),
 						CUSTOM_HIERARCHY_FILE,
-						AttachmentContentTypeEnum.CSV));
+						AttachmentContentTypeEnum.CSV,
+						CUSTOM_MAX_SIZE));
 		myCustomJobType = new JobType(
+				true,
 				ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY,
 				"Custom Terminology",
 				null,
@@ -262,6 +324,13 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		JobType jobType = myCanonicalUrlToJobType.get(canonicalUrl.url());
 		if (jobType == null) {
 			jobType = myCustomJobType;
+		}
+
+		if (mode == ImportTerminologyModeEnum.ADD || mode == ImportTerminologyModeEnum.REMOVE) {
+			if (!jobType.supportsDeltaOperations()) {
+				throw new InvalidRequestException(Msg.code(2980)
+						+ "Delta operations are not supported for terminology: " + jobType.terminologyName());
+			}
 		}
 
 		return startImportTerminologyJob(theMakeCurrent, theRequestDetails, canonicalUrl, jobType, mode);
@@ -343,58 +412,86 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			@OperationParam(name = PARAM_JOB_INSTANCE_ID, min = 1, typeName = "code")
 					IPrimitiveType<String> theJobInstanceId,
 			@OperationParam(name = PARAM_FILENAME, min = 0, typeName = "code") IPrimitiveType<String> theFilename,
+			@OperationParam(name = PARAM_APPEND_TO_JOB_ATTACHMENT_ID, min = 0, typeName = "code")
+					IPrimitiveType<String> theAppendToAttachmentId,
 			HttpServletRequest theServletRequest,
 			ServletRequestDetails theRequestDetails) {
 
+		String instanceId = toStringValue(theJobInstanceId);
 		JobInstance jobInstance = getJobInstance(theJobInstanceId);
 		validateJobIsInBuildingStatus(jobInstance);
 
+		String filename = toStringValue(theFilename);
+
 		try (InputStream inputStream = theServletRequest.getInputStream()) {
 
-			JobType jobType = myJobDefinitionIdToJobType.get(jobInstance.getJobDefinitionId());
-			if (jobType != null) {
-				AttachmentDetails attachmentDetails = null;
-				String filename = toStringValueOrEmpty(theFilename);
+			String appendToAttachmentId = toStringValueOrEmpty(theAppendToAttachmentId);
+			if (isNotBlank(appendToAttachmentId)) {
+				ValidateUtil.isTrueOrThrowInvalidRequest(
+						isBlank(filename),
+						"Parameter %s can not be combined with %s",
+						PARAM_FILENAME,
+						PARAM_APPEND_TO_JOB_ATTACHMENT_ID);
 
-				for (DistributionFilenamePattern pattern : jobType.distributionFilenamePatterns()) {
-					if (pattern.pattern().matcher(filename).find()) {
-						attachmentDetails =
-								new AttachmentDetails(inputStream, pattern.contentType(), pattern.jobFilename());
-						break;
-					}
-				}
+				AttachmentDetails attachment = myJobPersistence.fetchAttachmentById(instanceId, appendToAttachmentId);
+				assert attachment != null; // Method won't return null outside unit tests
 
-				if (attachmentDetails == null) {
-					throw new InvalidRequestException(Msg.code(2953) + "File named \"" + toStringValue(theFilename)
-							+ "\" is not valid for import " + jobType.terminologyName() + " job");
-				}
-
-				String instanceId = jobInstance.getInstanceId();
-
-				String attachmentId = myJobPersistence.storeNewAttachment(instanceId, attachmentDetails);
-
-				StringBuilder description = new StringBuilder();
-				description.append("Attachment with ID[");
-				description.append(attachmentId);
-				description.append("] has been stored for job with ID[");
-				description.append(instanceId);
-				description.append("].");
+				AttachmentDetails attachmentDetails =
+						createJobAttachmentDetails(attachment.getFilename(), jobInstance, inputStream);
+				myJobPersistence.appendToAttachment(instanceId, appendToAttachmentId, attachmentDetails);
 
 				IBaseParameters response = ParametersUtil.newInstance(getContext());
 				ParametersUtil.addParameterToParametersString(
-						getContext(), response, RESP_PARAM_OUTCOME, description.toString());
-				ParametersUtil.addParameterToParametersCode(
-						getContext(), response, PARAM_JOB_ATTACHMENT_ID, attachmentId);
+						getContext(), response, RESP_PARAM_OUTCOME, "Successfully appended to attachment");
 				return response;
 			}
+
+			AttachmentDetails attachmentDetails = createJobAttachmentDetails(filename, jobInstance, inputStream);
+			String attachmentId = myJobPersistence.storeNewAttachment(instanceId, attachmentDetails);
+
+			String description =
+					"Attachment with ID[" + attachmentId + "] has been stored for job with ID[" + instanceId + "].";
+
+			IBaseParameters response = ParametersUtil.newInstance(getContext());
+			ParametersUtil.addParameterToParametersString(getContext(), response, RESP_PARAM_OUTCOME, description);
+			ParametersUtil.addParameterToParametersCode(getContext(), response, PARAM_JOB_ATTACHMENT_ID, attachmentId);
+			return response;
+
 		} catch (IOException e) {
 			ourLog.warn(
 					"Failed to stream job attachment for job instance[{}]: {}", theJobInstanceId, e.getMessage(), e);
 			throw new InvalidRequestException(
 					Msg.code(2945) + "IO failure while streaming job attachment: " + e.getMessage(), e);
 		}
+	}
 
-		throw new InvalidRequestException(Msg.code(2946) + "Can't attach files to this job");
+	@Nonnull
+	private AttachmentDetails createJobAttachmentDetails(
+			String theFilename, JobInstance jobInstance, InputStream inputStream) {
+		JobType jobType = myJobDefinitionIdToJobType.get(jobInstance.getJobDefinitionId());
+		AttachmentDetails attachmentDetails = null;
+		if (jobType == null) {
+			throw new InvalidRequestException(Msg.code(2946) + "Can't attach files to this job");
+		}
+
+		for (DistributionFilenamePattern pattern : jobType.distributionFilenamePatterns()) {
+			if (pattern.pattern().matcher(theFilename).find()) {
+				attachmentDetails = AttachmentDetails.newBuilder()
+						.withInputStream(inputStream)
+						.withContentType(pattern.contentType())
+						.withFilename(pattern.jobFilename())
+						.withMaximumSize(pattern.maximumSizeInBytes())
+						.build();
+				break;
+			}
+		}
+
+		if (attachmentDetails == null) {
+			throw new InvalidRequestException(Msg.code(2953) + "File named \"" + theFilename
+					+ "\" is not valid for import " + jobType.terminologyName() + " job");
+		}
+
+		return attachmentDetails;
 	}
 
 	/**
@@ -585,6 +682,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	}
 
 	private record JobType(
+			boolean supportsDeltaOperations,
 			String jobDefinitionId,
 			String terminologyName,
 			String propertyFileName,
@@ -594,20 +692,26 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		 * Distribution which accepts a single ZIP file
 		 */
 		JobType(
+				boolean supportsDeltaOperations,
 				String jobDefinitionId,
 				String terminologyName,
 				String propertyFileName,
 				Pattern distributionFilenamePattern,
-				String distributionFileName) {
+				String distributionFileName,
+				Integer maximumSizeInBytes) {
 			this(
+					supportsDeltaOperations,
 					jobDefinitionId,
 					terminologyName,
 					propertyFileName,
 					List.of(new DistributionFilenamePattern(
-							distributionFilenamePattern, distributionFileName, AttachmentContentTypeEnum.ZIP)));
+							distributionFilenamePattern,
+							distributionFileName,
+							AttachmentContentTypeEnum.ZIP,
+							maximumSizeInBytes)));
 		}
 	}
 
 	private record DistributionFilenamePattern(
-			Pattern pattern, String jobFilename, AttachmentContentTypeEnum contentType) {}
+			Pattern pattern, String jobFilename, AttachmentContentTypeEnum contentType, Integer maximumSizeInBytes) {}
 }
