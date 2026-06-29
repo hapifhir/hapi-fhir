@@ -7,13 +7,12 @@ package ca.uhn.fhir.tinder.ts;
  */
 public enum TsTypeKind {
 	/**
-	 * A native TypeScript type (string, number, boolean, any). Rendered verbatim, never imported and
-	 * never prefixed with "I".
+	 * A native TypeScript type (string, number, boolean, any). Rendered verbatim and never imported.
 	 */
 	PRIMITIVE,
 	/**
-	 * A reference to a generated FHIR interface (resource, datatype or backbone element). Rendered with
-	 * an "I" prefix (e.g. {@code IHumanName}) and imported from a sibling {@code I*.ts} file.
+	 * A reference to a generated FHIR interface (resource, datatype or backbone element). Rendered
+	 * verbatim (e.g. {@code HumanName}) and imported from a sibling {@code <name>.ts} file.
 	 */
 	INTERFACE,
 	/**

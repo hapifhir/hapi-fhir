@@ -68,7 +68,7 @@ public class TinderTypescriptMojo extends AbstractMojo {
 			case "r5":
 				return FhirContext.forR5();
 			default:
-				throw new MojoFailureException(Msg.code(2985) + "Unknown FHIR version configured: " + theVersion);
+				throw new MojoFailureException(Msg.code(2986) + "Unknown FHIR version configured: " + theVersion);
 		}
 	}
 }

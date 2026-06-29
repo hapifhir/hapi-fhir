@@ -19,7 +19,9 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,12 +41,14 @@ public class TypescriptModelExtractor {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(TypescriptModelExtractor.class);
 
-	private static final Set<String> NUMERIC_PRIMITIVES =
-			Set.of("integer", "decimal", "unsignedint", "positiveint", "integer64");
+	// integer64 is deliberately excluded: its 64-bit range exceeds TypeScript's max safe integer (2^53),
+	// so — like the FHIR spec, which serializes it as a JSON string — it is mapped to string, not number.
+	// See https://hl7.org/fhir/R5/datatypes.html#integer64
+	private static final Set<String> NUMERIC_PRIMITIVES = Set.of("integer", "decimal", "unsignedint", "positiveint");
 
 	/**
-	 * Element names that are supplied by the base interfaces ({@code IElement}, {@code IBackboneElement},
-	 * {@code IResource}, {@code IDomainResource}) and therefore must not be re-declared on concrete
+	 * Element names that are supplied by the base interfaces ({@code Element}, {@code BackboneElement},
+	 * {@code Resource}, {@code DomainResource}) and therefore must not be re-declared on concrete
 	 * resources, datatypes or backbone elements.
 	 */
 	private static final Set<String> BASE_FIELD_NAMES =
@@ -341,7 +345,7 @@ public class TypescriptModelExtractor {
 			return enumName;
 		}
 
-		List<String> codes = extractCodes(enumType);
+		Collection<String> codes = extractCodes(enumType);
 		if (codes.isEmpty()) {
 			return null;
 		}
@@ -350,8 +354,9 @@ public class TypescriptModelExtractor {
 		return enumName;
 	}
 
-	private static List<String> extractCodes(Class<? extends Enum<?>> theEnumType) {
-		List<String> codes = new ArrayList<>();
+	private static Collection<String> extractCodes(Class<? extends Enum<?>> theEnumType) {
+		// LinkedHashSet so duplicate codes are dropped while generation order stays deterministic.
+		Set<String> codes = new LinkedHashSet<>();
 		Method codeMethod = findCodeMethod(theEnumType);
 		if (codeMethod == null) {
 			return codes;
@@ -361,7 +366,7 @@ public class TypescriptModelExtractor {
 				Object value = codeMethod.invoke(constant);
 				if (value instanceof String) {
 					String code = (String) value;
-					if (StringUtils.isNotBlank(code) && !code.equals("?") && !codes.contains(code)) {
+					if (StringUtils.isNotBlank(code) && !code.equals("?")) {
 						codes.add(code);
 					}
 				}

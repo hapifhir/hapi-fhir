@@ -2,6 +2,7 @@ package ca.uhn.fhir.tinder.ts;
 
 // Created by Claude Opus 4.8
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.tinder.VelocityHelper;
 import org.apache.commons.io.FileUtils;
 import org.apache.velocity.VelocityContext;
@@ -18,7 +19,7 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Renders a {@link TsModel} to a directory of TypeScript source files: one {@code I<name>.ts} per
+ * Renders a {@link TsModel} to a directory of TypeScript source files: one {@code <name>.ts} per
  * interface, one {@code <name>.ts} per enumeration, and a barrel {@code index.ts} re-exporting them all.
  */
 public class TypescriptWriter {
@@ -65,7 +66,7 @@ public class TypescriptWriter {
 			throws IOException {
 		try (InputStream templateStream = getClass().getResourceAsStream(theTemplate)) {
 			if (templateStream == null) {
-				throw new IOException("Unable to locate template on classpath: " + theTemplate);
+				throw new IOException(Msg.code(2987) + "Unable to locate template on classpath: " + theTemplate);
 			}
 			try (InputStreamReader templateReader = new InputStreamReader(templateStream, StandardCharsets.UTF_8);
 					OutputStreamWriter writer = new OutputStreamWriter(

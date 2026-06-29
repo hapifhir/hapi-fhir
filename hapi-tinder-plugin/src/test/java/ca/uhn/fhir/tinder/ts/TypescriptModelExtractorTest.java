@@ -75,7 +75,7 @@ class TypescriptModelExtractorTest {
 		assertThat(managingOrganization.getKind()).isEqualTo(TsTypeKind.INTERFACE);
 		assertThat(managingOrganization.getTypeName()).isEqualTo("Reference");
 
-		// Backbone element emitted as its own interface, extending IBackboneElement
+		// Backbone element emitted as its own interface, extending BackboneElement
 		TsInterface contact = model.getInterface("PatientContact");
 		assertThat(contact).isNotNull();
 		assertThat(contact.getExtendsName()).isEqualTo("BackboneElement");

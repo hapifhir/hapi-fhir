@@ -3,6 +3,7 @@ package ca.uhn.fhir.tinder.ts;
 // Created by Claude Opus 4.8
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -14,7 +15,7 @@ public class TsEnum {
 	private final String myName;
 	private final List<String> myCodes = new ArrayList<>();
 
-	public TsEnum(String theName, List<String> theCodes) {
+	public TsEnum(String theName, Collection<String> theCodes) {
 		myName = theName;
 		myCodes.addAll(theCodes);
 	}
