@@ -92,8 +92,7 @@ public class Step8GenerateReportStep
 			myTermValueSetStorageSvc.dropStagingVersion(url, myStagingVersion);
 			myTermValueSetStorageSvc.markValueSetAsFailedToExpand(url, version);
 
-			// FIXME: add code
-			throw new JobExecutionFailedException(Msg.code(1) + myFailureMessage);
+			throw new JobExecutionFailedException(Msg.code(2987) + myFailureMessage);
 		}
 
 		myTermValueSetStorageSvc.activateStagingVersion(url, myStagingVersion);

@@ -87,12 +87,6 @@ public interface ITermValueSetStorageSvc {
 			org.hl7.fhir.r4.model.ValueSet theValueSet);
 
 	/**
-	 */
-	// FIXME: should we just call the new batch job?
-	// FIXME: document if not
-	String invalidatePreCalculatedExpansion(IIdType theValueSetId, RequestDetails theRequestDetails);
-
-	/**
 	 * Invalidates pre-calculated expansions for all ValueSets whose expansions contain
 	 * concepts from the given CodeSystem URL. Should be called whenever a CodeSystem is
 	 * created or updated so that stale expansions are not used for code validation.

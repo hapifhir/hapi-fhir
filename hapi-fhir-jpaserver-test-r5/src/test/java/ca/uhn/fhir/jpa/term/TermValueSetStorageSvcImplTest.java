@@ -87,6 +87,24 @@ public class TermValueSetStorageSvcImplTest extends BaseJpaR5Test {
 	}
 
 	@Test
+	void testStartStagingVersion_UnknownValueSet() {
+		assertThatThrownBy(()->mySvc.startStagingVersion("http://foo", "1.0"))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("AAA");
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"2.0", ""})
+	void testStartStagingVersion_UnknownVersion(String theVersion) {
+		createValueSetResource("1.0");
+
+		assertThatThrownBy(()->mySvc.startStagingVersion(VS_URI, defaultIfBlank(theVersion, null)))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("AAA");
+	}
+
+
+	@Test
 	void testAddConceptsToExpansion_Flat() {
 		// Setup
 		createValueSetResource("1.0");

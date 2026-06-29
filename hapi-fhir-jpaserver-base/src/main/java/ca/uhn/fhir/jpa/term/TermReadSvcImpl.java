@@ -724,7 +724,6 @@ public class TermReadSvcImpl implements ITermReadSvc {
 						sourceConceptDirectParentPids,
 						systemVersion);
 				if (wasFilteredResult) {
-					// FIXME: is this the best way to track the count?
 					theAccumulator.incrementOrDecrementTotalConcepts(true, 1);
 				}
 			} else {

@@ -5,7 +5,6 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetParameters;
@@ -32,7 +31,6 @@ import ca.uhn.fhir.util.IntCounter;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
-import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.SetMultimap;
 import jakarta.annotation.Nonnull;
@@ -40,8 +38,6 @@ import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
@@ -99,12 +95,6 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 	private IHapiTransactionService myTxService;
 
 	@Autowired
-	private DaoRegistry myDaoRegistry;
-
-	@Autowired
-	private VersionCanonicalizer myVersionCanonicalizer;
-
-	@Autowired
 	private ApplicationContext myApplicationContext;
 
 	@Autowired
@@ -143,6 +133,7 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 		});
 	}
 
+	@Nonnull
 	@Override
 	public UploadStatistics addConceptsToExpansion(@Nonnull ValueSet theDelta, int theStartingOrder) {
 		StopWatch sw = new StopWatch();
@@ -151,7 +142,6 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 		String version = theDelta.getVersion();
 
 		myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
-			// FIXME: split the stuff below into methods
 			FlattenedValueSet flattenedValueSet = flattenValueSet(theDelta);
 			IntCounter order = new IntCounter(theStartingOrder);
 			Map<SystemAndCode, TermValueSetConcept> codeToStorageConcept = new HashMap<>();
@@ -160,6 +150,9 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 
 			statistics.setTarget(termValueSet.getResource().getIdDt());
 
+			/*
+			 * Concepts
+			 */
 			for (UrlUtil.CanonicalUrlParts system :
 					flattenedValueSet.systemToCodes().keySet()) {
 
@@ -172,100 +165,13 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 				Set<ValueSet.ValueSetExpansionContainsComponent> conceptsToAdd =
 						flattenedValueSet.systemToConcepts().get(system);
 				for (ValueSet.ValueSetExpansionContainsComponent conceptToAdd : conceptsToAdd) {
-
-					boolean shouldSave = false;
-					TermValueSetConcept storageConcept = codeToExistingConcept.get(conceptToAdd.getCode());
-					if (storageConcept == null) {
-						storageConcept = new TermValueSetConcept();
-						storageConcept.setCode(conceptToAdd.getCode());
-						storageConcept.setDisplay(conceptToAdd.getDisplay());
-						storageConcept.setSystem(conceptToAdd.getSystem());
-						storageConcept.setSystemVersion(conceptToAdd.getVersion());
-						storageConcept.setValueSet(termValueSet);
-
-						while (existingOrders.contains(order.get())) {
-							order.increment();
-						}
-						storageConcept.setOrder(order.getAndIncrement());
-
-						statistics.incrementConceptsAddedCount();
-
-						ourLog.atInfo() // FIXME: make debug
-								.setMessage("Added Concept[{}] to ValueSet[{}] with order: {}")
-								.addArgument(storageConcept.getCode())
-								.addArgument(termValueSet.getUrl())
-								.addArgument(storageConcept.getOrder())
-								.log();
-						shouldSave = true;
-					}
-
-					if (isNotBlank(conceptToAdd.getDisplay())
-							&& !conceptToAdd.getDisplay().equals(storageConcept.getDisplay())) {
-						storageConcept.setDisplay(conceptToAdd.getDisplay());
-						shouldSave = true;
-					}
-
-					Extension sourceConceptPidExtension =
-							conceptToAdd.getExtensionByUrl(TerminologyConstants.EXTENSION_SOURCE_CONCEPT_PID);
-					if (sourceConceptPidExtension != null) {
-						Long sourceConceptPid = ((DecimalType) sourceConceptPidExtension.getValue())
-								.getValue()
-								.longValue();
-						if (!sourceConceptPid.equals(storageConcept.getSourceConceptPid())) {
-							storageConcept.setSourceConceptPid(sourceConceptPid);
-							shouldSave = true;
-						}
-					}
-
-					String directParentPids = conceptToAdd.getExtensionString(
-							TerminologyConstants.EXTENSION_SOURCE_CONCEPT_DIRECT_PARENT_PIDS);
-					if (isNotBlank(directParentPids)
-							&& !directParentPids.equals(storageConcept.getSourceConceptDirectParentPids())) {
-						storageConcept.setSourceConceptDirectParentPids(directParentPids);
-						shouldSave = true;
-					}
-
-					if (shouldSave) {
-						myTermValueSetConceptDao.save(storageConcept);
-					}
-
-					SystemAndCode systemAndCode = new SystemAndCode(
-							conceptToAdd.getSystem(), conceptToAdd.getVersion(), conceptToAdd.getCode());
-					codeToStorageConcept.put(systemAndCode, storageConcept);
-
-					if (!conceptToAdd.getDesignation().isEmpty()) {
-						Set<LanguageAndDesignation> existingDesignations = storageConcept.getDesignations().stream()
-								.map(t -> new LanguageAndDesignation(
-										t.getLanguage(), t.getValue(), t.getUseSystem(), t.getUseCode()))
-								.collect(Collectors.toSet());
-						for (ValueSet.ConceptReferenceDesignationComponent designationToAdd :
-								conceptToAdd.getDesignation()) {
-							if (!existingDesignations.contains(new LanguageAndDesignation(
-									designationToAdd.getLanguage(),
-									designationToAdd.getValue(),
-									designationToAdd.getUse().getSystem(),
-									designationToAdd.getUse().getCode()))) {
-
-								TermValueSetConceptDesignation designation = new TermValueSetConceptDesignation();
-								designation.setPartitionId(storageConcept.getPartitionId());
-								designation.setConcept(storageConcept);
-								designation.setValueSet(termValueSet);
-								designation.setLanguage(designationToAdd.getLanguage());
-								designation.setValue(designationToAdd.getValue());
-								designation.setUseSystem(
-										designationToAdd.getUse().getSystem());
-								designation.setUseCode(designationToAdd.getUse().getCode());
-								designation.setUseDisplay(
-										designationToAdd.getUse().getDisplay());
-
-								statistics.incrementDesignationsAddedCount();
-								myTermValueSetConceptDesignationDao.save(designation);
-							}
-						}
-					}
+					storeConcept(conceptToAdd, termValueSet, order, existingOrders, statistics, codeToExistingConcept, codeToStorageConcept);
 				}
 			}
 
+			/*
+			 * Parent / Child links
+			 */
 			for (Map.Entry<SystemAndCode, SystemAndCode> entry :
 					flattenedValueSet.childCodeToParentCodes().entries()) {
 				SystemAndCode childSystemAndCode = entry.getKey();
@@ -279,27 +185,7 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 				Validate.notNull(childConcept, "Failed to find concept: %s", childSystemAndCode);
 				Validate.notNull(parentConcept, "Failed to find concept: %s", parentSystemAndCode);
 
-				boolean shouldAdd = childConcept.getParentConcepts().stream()
-						.map(c -> new SystemAndCode(c.getSystem(), c.getSystemVersion(), c.getCode()))
-						.noneMatch(t -> t.equals(parentSystemAndCode));
-				if (shouldAdd) {
-
-					TermValueSetConceptParentChildLink.TermValueSetConceptParentChildLinkPk pk =
-							new TermValueSetConceptParentChildLink.TermValueSetConceptParentChildLinkPk();
-					pk.setPartitionId(termValueSet.getPartitionedId().getPartitionIdValue());
-					pk.setParentPid(parentConcept.getId());
-					pk.setChildPid(childConcept.getId());
-
-					TermValueSetConceptParentChildLink linkToAdd = new TermValueSetConceptParentChildLink();
-					linkToAdd.setId(pk);
-					linkToAdd.setValueSet(termValueSet);
-					myTermValueSetConceptParentChildLinkDao.save(linkToAdd);
-
-					parentConcept.getChildren().add(linkToAdd);
-					childConcept.getParents().add(linkToAdd);
-
-					statistics.incrementConceptLinksAddedCount();
-				}
+				storeParentChildLink(childConcept, parentSystemAndCode, termValueSet, parentConcept, statistics);
 			}
 		});
 
@@ -314,6 +200,123 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 				.log();
 
 		return statistics;
+	}
+
+	private void storeConcept(ValueSet.ValueSetExpansionContainsComponent theConceptToAdd, TermValueSet theTargetTermValueSet, IntCounter theOrderCounter, Set<Integer> theExistingOrderMap, UploadStatistics theStatisticsToPopulate, Map<String, TermValueSetConcept> theCodeToExistingConceptMap, Map<SystemAndCode, TermValueSetConcept> theCodeToStorageConceptMap) {
+		boolean shouldSave = false;
+		TermValueSetConcept storageConcept = theCodeToExistingConceptMap.get(theConceptToAdd.getCode());
+		if (storageConcept == null) {
+			storageConcept = new TermValueSetConcept();
+			storageConcept.setCode(theConceptToAdd.getCode());
+			storageConcept.setDisplay(theConceptToAdd.getDisplay());
+			storageConcept.setSystem(theConceptToAdd.getSystem());
+			storageConcept.setSystemVersion(theConceptToAdd.getVersion());
+			storageConcept.setValueSet(theTargetTermValueSet);
+
+			while (theExistingOrderMap.contains(theOrderCounter.get())) {
+				theOrderCounter.increment();
+			}
+			storageConcept.setOrder(theOrderCounter.getAndIncrement());
+
+			theStatisticsToPopulate.incrementConceptsAddedCount();
+
+			ourLog.atTrace()
+					.setMessage("Added Concept[{}] to ValueSet[{}] with order: {}")
+					.addArgument(storageConcept.getCode())
+					.addArgument(theTargetTermValueSet.getUrl())
+					.addArgument(storageConcept.getOrder())
+					.log();
+			shouldSave = true;
+		}
+
+		if (isNotBlank(theConceptToAdd.getDisplay())
+				&& !theConceptToAdd.getDisplay().equals(storageConcept.getDisplay())) {
+			storageConcept.setDisplay(theConceptToAdd.getDisplay());
+			shouldSave = true;
+		}
+
+		Extension sourceConceptPidExtension =
+				theConceptToAdd.getExtensionByUrl(TerminologyConstants.EXTENSION_SOURCE_CONCEPT_PID);
+		if (sourceConceptPidExtension != null) {
+			Long sourceConceptPid = ((DecimalType) sourceConceptPidExtension.getValue())
+					.getValue()
+					.longValue();
+			if (!sourceConceptPid.equals(storageConcept.getSourceConceptPid())) {
+				storageConcept.setSourceConceptPid(sourceConceptPid);
+				shouldSave = true;
+			}
+		}
+
+		String directParentPids = theConceptToAdd.getExtensionString(
+				TerminologyConstants.EXTENSION_SOURCE_CONCEPT_DIRECT_PARENT_PIDS);
+		if (isNotBlank(directParentPids)
+				&& !directParentPids.equals(storageConcept.getSourceConceptDirectParentPids())) {
+			storageConcept.setSourceConceptDirectParentPids(directParentPids);
+			shouldSave = true;
+		}
+
+		if (shouldSave) {
+			myTermValueSetConceptDao.save(storageConcept);
+		}
+
+		SystemAndCode systemAndCode = new SystemAndCode(
+				theConceptToAdd.getSystem(), theConceptToAdd.getVersion(), theConceptToAdd.getCode());
+		theCodeToStorageConceptMap.put(systemAndCode, storageConcept);
+
+		if (!theConceptToAdd.getDesignation().isEmpty()) {
+			Set<LanguageAndDesignation> existingDesignations = storageConcept.getDesignations().stream()
+					.map(t -> new LanguageAndDesignation(
+							t.getLanguage(), t.getValue(), t.getUseSystem(), t.getUseCode()))
+					.collect(Collectors.toSet());
+			for (ValueSet.ConceptReferenceDesignationComponent designationToAdd :
+					theConceptToAdd.getDesignation()) {
+				if (!existingDesignations.contains(new LanguageAndDesignation(
+						designationToAdd.getLanguage(),
+						designationToAdd.getValue(),
+						designationToAdd.getUse().getSystem(),
+						designationToAdd.getUse().getCode()))) {
+
+					TermValueSetConceptDesignation designation = new TermValueSetConceptDesignation();
+					designation.setPartitionId(storageConcept.getPartitionId());
+					designation.setConcept(storageConcept);
+					designation.setValueSet(theTargetTermValueSet);
+					designation.setLanguage(designationToAdd.getLanguage());
+					designation.setValue(designationToAdd.getValue());
+					designation.setUseSystem(
+							designationToAdd.getUse().getSystem());
+					designation.setUseCode(designationToAdd.getUse().getCode());
+					designation.setUseDisplay(
+							designationToAdd.getUse().getDisplay());
+
+					theStatisticsToPopulate.incrementDesignationsAddedCount();
+					myTermValueSetConceptDesignationDao.save(designation);
+				}
+			}
+		}
+	}
+
+	private void storeParentChildLink(TermValueSetConcept childConcept, SystemAndCode parentSystemAndCode, TermValueSet termValueSet, TermValueSetConcept parentConcept, UploadStatistics statistics) {
+		boolean shouldAdd = childConcept.getParentConcepts().stream()
+			.map(c -> new SystemAndCode(c.getSystem(), c.getSystemVersion(), c.getCode()))
+			.noneMatch(t -> t.equals(parentSystemAndCode));
+		if (shouldAdd) {
+
+			TermValueSetConceptParentChildLink.TermValueSetConceptParentChildLinkPk pk =
+				new TermValueSetConceptParentChildLink.TermValueSetConceptParentChildLinkPk();
+			pk.setPartitionId(termValueSet.getPartitionedId().getPartitionIdValue());
+			pk.setParentPid(parentConcept.getId());
+			pk.setChildPid(childConcept.getId());
+
+			TermValueSetConceptParentChildLink linkToAdd = new TermValueSetConceptParentChildLink();
+			linkToAdd.setId(pk);
+			linkToAdd.setValueSet(termValueSet);
+			myTermValueSetConceptParentChildLinkDao.save(linkToAdd);
+
+			parentConcept.getChildren().add(linkToAdd);
+			childConcept.getParents().add(linkToAdd);
+
+			statistics.incrementConceptLinksAddedCount();
+		}
 	}
 
 	@Nonnull
@@ -356,15 +359,12 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 
 	@Override
 	public void activateStagingVersion(String theValueSetUrl, String theStagingVersionId) {
-		StopWatch sw = new StopWatch();
-
 		String versionToDelete = myTxService
 				.withSystemRequestOnDefaultPartition()
 				.execute(() -> {
 					TermValueSet stagingValueSet = fetchTermValueSet(theValueSetUrl, theStagingVersionId);
 					if (stagingValueSet.getIntendedVersionId() == null) {
-						// FIXME: add code
-						throw new InvalidRequestException(Msg.code(1) + "ValueSet URL[" + theValueSetUrl + "] Version["
+						throw new InvalidRequestException(Msg.code(2988) + "ValueSet URL[" + theValueSetUrl + "] Version["
 								+ theStagingVersionId + "] is not a staging version");
 					}
 
@@ -403,8 +403,7 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 		myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
 			TermValueSet valueSet = fetchTermValueSet(theUrl, theVersion);
 			if (valueSet.getIntendedVersionId() == null) {
-				// FIXME: add test and code
-				throw new InvalidRequestException(Msg.code(1) + "Cannot drop staging version of ValueSet[url=" + theUrl
+				throw new InvalidRequestException(Msg.code(2989) + "Cannot drop staging version of ValueSet[url=" + theUrl
 						+ ", version=" + theVersion + "] because it is not a staging version");
 			}
 
@@ -417,11 +416,10 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 			UrlUtil.CanonicalUrlParts system, FlattenedValueSet flattenedValueSet, TermValueSet termValueSet) {
 		Collection<String> codes = flattenedValueSet.systemToCodes().get(system);
 
-		Map<String, TermValueSetConcept> codeToExistingConcept = QueryChunker.chunk(codes.stream())
+		return QueryChunker.chunk(codes.stream())
 				.flatMap(t ->
 						myTermValueSetConceptDao.findByCodesForTermValueSet(termValueSet, system.url(), t).stream())
 				.collect(Collectors.toMap(TermValueSetConcept::getCode, Function.identity()));
-		return codeToExistingConcept;
 	}
 
 	private void updateValueSetStatisticsWithPessimisticLock(String url, String version, UploadStatistics statistics) {
@@ -482,8 +480,7 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 		Optional<TermValueSet> valueSetOpt = fetchTermValueSetOpt(theUrl, theVersion);
 
 		if (valueSetOpt.isEmpty()) {
-			// FIXME: add code and test
-			throw new ResourceNotFoundException(Msg.code(1) + "No ValueSet found with URL[" + theUrl + "] and Version["
+			throw new ResourceNotFoundException(Msg.code(2990) + "No ValueSet found with URL[" + theUrl + "] and Version["
 					+ getIfNull(theVersion, "(none)") + "]");
 		}
 
@@ -514,9 +511,8 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 			if (isNotBlank(code)) {
 				String systemUrl = contains.getSystem();
 				if (isBlank(systemUrl)) {
-					// FIXME: add code
 					throw new InvalidRequestException(
-							Msg.code(1) + "ValueSet contains a code with no system: " + UrlUtil.sanitizeUrlPart(code));
+							Msg.code(2991) + "ValueSet contains a code with no system: " + UrlUtil.sanitizeUrlPart(code));
 				}
 
 				String systemVersion = contains.getVersion();
@@ -674,11 +670,7 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 		Optional<TermValueSet> optionalExistingTermValueSetById =
 				myTermValueSetDao.findByResourcePid(theResourceTable.getId());
 
-		if (optionalExistingTermValueSetById.isPresent()) {
-			TermValueSet existingTermValueSet = optionalExistingTermValueSetById.get();
-
-			deleteTermValueSet(existingTermValueSet);
-		}
+		optionalExistingTermValueSetById.ifPresent(this::deleteTermValueSet);
 
 		return optionalExistingTermValueSetById;
 	}
@@ -699,57 +691,6 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 		myTermValueSetDao.flush();
 
 		ourLog.info("Done deleting existing TermValueSet[{}] and its children.", theTermValueSet.getId());
-	}
-
-	@Override
-	public String invalidatePreCalculatedExpansion(IIdType theValueSetId, RequestDetails theRequestDetails) {
-		return myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
-			IBaseResource valueSet = myDaoRegistry.getResourceDao("ValueSet").read(theValueSetId, theRequestDetails);
-			org.hl7.fhir.r4.model.ValueSet canonicalValueSet = myVersionCanonicalizer.valueSetToCanonical(valueSet);
-			Optional<TermValueSet> optionalTermValueSet =
-					fetchTermValueSetOpt(canonicalValueSet.getUrl(), canonicalValueSet.getVersion());
-			if (optionalTermValueSet.isEmpty()) {
-				return myContext
-						.getLocalizer()
-						.getMessage(TermReadSvcImpl.class, "valueSetNotFoundInTerminologyDatabase", theValueSetId);
-			}
-
-			ourLog.info(
-					"Invalidating pre-calculated expansion on ValueSet {} / {}",
-					theValueSetId,
-					canonicalValueSet.getUrl());
-
-			TermValueSet termValueSet = optionalTermValueSet.get();
-			if (termValueSet.getExpansionStatus() == TermValueSetPreExpansionStatusEnum.NOT_EXPANDED) {
-				return myContext
-						.getLocalizer()
-						.getMessage(
-								TermReadSvcImpl.class,
-								"valueSetCantInvalidateNotYetPrecalculated",
-								termValueSet.getUrl(),
-								termValueSet.getExpansionStatus());
-			}
-
-			Long totalConcepts = termValueSet.getTotalConcepts();
-
-			deletePreCalculatedValueSetContents(termValueSet);
-
-			termValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED);
-			termValueSet.setExpansionTimestamp(null);
-
-			assert termValueSet.getId() != null;
-			myEntityManager.merge(termValueSet);
-
-			afterValueSetExpansionStatusChange();
-
-			return myContext
-					.getLocalizer()
-					.getMessage(
-							TermReadSvcImpl.class,
-							"valueSetPreExpansionInvalidated",
-							termValueSet.getUrl(),
-							totalConcepts);
-		});
 	}
 
 	// Generated by claude-sonnet-4-6

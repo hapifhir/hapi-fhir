@@ -298,7 +298,7 @@ public class TerminologyTestHelper {
 		myJobCoordinator.enqueueBuildingJobForExecution(instanceId.getInstanceId());
 
 		if (expectSuccess) {
-			myBatch2JobHelper.awaitJobCompletion(instanceId.getInstanceId(), 99999999); // FIXME: restore
+			myBatch2JobHelper.awaitJobCompletion(instanceId);
 		} else {
 			myBatch2JobHelper.awaitJobFailure(instanceId);
 		}

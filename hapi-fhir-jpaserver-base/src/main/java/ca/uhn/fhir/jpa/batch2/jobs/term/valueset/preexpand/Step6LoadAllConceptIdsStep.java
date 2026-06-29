@@ -63,9 +63,8 @@ public class Step6LoadAllConceptIdsStep
 			TermValueSet termValueSet = myTermValueSetDao
 					.findTermValueSetByUrlAndVersion(url, version)
 					.orElseThrow(
-							// FIXME: add code
 							() -> new JobExecutionFailedException(
-									Msg.code(0) + "Missing ValueSet[url=" + url + ", version=" + version + "]"));
+									Msg.code(2986) + "Missing ValueSet[url=" + url + ", version=" + version + "]"));
 
 			Stream<TermValueSetConcept> allConcepts =
 					myTermValueSetConceptDao.streamAllByTermValueSetOrdered(termValueSet);
