@@ -24,6 +24,16 @@ import static ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum.EXPANSIO
 import static ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND;
 import static ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum.NOT_ACTIVE;
 import static ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum.NOT_EXPANDED;
+import static ca.uhn.fhir.jpa.term.api.ITermValueSetExpansionSvc.ERROR_MESSAGE;
+import static ca.uhn.fhir.jpa.term.api.ITermValueSetExpansionSvc.EXPANSION_STATUS;
+import static ca.uhn.fhir.jpa.term.api.ITermValueSetExpansionSvc.EXPANSION_TIMESTAMP;
+import static ca.uhn.fhir.jpa.term.api.ITermValueSetExpansionSvc.HAS_MORE;
+import static ca.uhn.fhir.jpa.term.api.ITermValueSetExpansionSvc.NAME;
+import static ca.uhn.fhir.jpa.term.api.ITermValueSetExpansionSvc.RESOURCE_ID;
+import static ca.uhn.fhir.jpa.term.api.ITermValueSetExpansionSvc.SUMMARY;
+import static ca.uhn.fhir.jpa.term.api.ITermValueSetExpansionSvc.URL;
+import static ca.uhn.fhir.jpa.term.api.ITermValueSetExpansionSvc.VALUESET;
+import static ca.uhn.fhir.jpa.term.api.ITermValueSetExpansionSvc.VERSION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -45,7 +55,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class TermValueSetExpansionSvcTest {
 
-	private static final Date EXPANSION_TIMESTAMP = new Date(1_700_000_000_000L);
+	private static final Date EXPANSION_TIMESTAMP_VALUE = new Date(1_700_000_000_000L);
 
 	private final ITermValueSetDao myTermValueSetDao = mock(ITermValueSetDao.class);
 	private final ITermValueSetExpansionSvc mySvc = new TermValueSetExpansionSvc(myTermValueSetDao, FhirContext.forR4Cached());
@@ -54,7 +64,7 @@ class TermValueSetExpansionSvcTest {
 	void getExpansionStatus_withBothUrlAndName_throwsInvalidRequestException() {
 		StringParam url = new StringParam("http://loinc.org");
 		StringParam name = new StringParam("Panel");
-		assertThatThrownBy(() -> call(url, name, null, 100, 0))
+		assertThatThrownBy(() -> call(url, name, null, 100))
 			.isInstanceOf(InvalidRequestException.class)
 			.hasMessageContaining("HAPI-2985: Only one of 'url' or 'name'");
 	}
@@ -63,7 +73,7 @@ class TermValueSetExpansionSvcTest {
 	void getExpansionStatus_withInvalidStatus_throwsInvalidRequestException() {
 		String invalidStatus = "NOT_A_VALID_STATUS";
 		List<String> statuses = List.of(invalidStatus);
-		assertThatThrownBy(() -> call(null, null, statuses, 100, 0))
+		assertThatThrownBy(() -> call(null, null, statuses, 100))
 			.isInstanceOf(InvalidRequestException.class)
 			.hasMessageContaining("HAPI-2986: Invalid expansionStatus value: `" + invalidStatus + "`");
 	}
@@ -74,7 +84,7 @@ class TermValueSetExpansionSvcTest {
 		when(myTermValueSetDao.findByExpansionStatusIn(any(), any()))
 				.thenReturn(new SliceImpl<>(List.of(marker("marker:statusIn"))));
 
-		Parameters response = call(null, null, null, 100, 0);
+		Parameters response = call(null, null, null, 100);
 
 		assertThat(extractValueSetUrls(response)).containsExactly("marker:statusIn");
 	}
@@ -85,7 +95,7 @@ class TermValueSetExpansionSvcTest {
 		when(myTermValueSetDao.findByExpansionStatusIn(any(), any()))
 				.thenReturn(new SliceImpl<>(List.of(marker("marker:statusIn"))));
 
-		Parameters response = call(null, null, List.of(), 100, 0);
+		Parameters response = call(null, null, List.of(), 100);
 
 		assertThat(extractValueSetUrls(response)).containsExactly("marker:statusIn");
 	}
@@ -96,7 +106,7 @@ class TermValueSetExpansionSvcTest {
 		when(myTermValueSetDao.findByExpansionStatusInAndUrlEquals(any(), any(), any()))
 				.thenReturn(new SliceImpl<>(List.of(marker("marker:urlEquals"))));
 
-		Parameters response = call(new StringParam("http://loinc.org").setExact(true), null, null, 100, 0);
+		Parameters response = call(new StringParam("http://loinc.org").setExact(true), null, null, 100);
 
 		assertThat(extractValueSetUrls(response)).containsExactly("marker:urlEquals");
 	}
@@ -107,7 +117,7 @@ class TermValueSetExpansionSvcTest {
 		when(myTermValueSetDao.findByExpansionStatusInAndUrlLike(any(), any(), any()))
 				.thenReturn(new SliceImpl<>(List.of(marker("marker:urlLike"))));
 
-		Parameters response = call(new StringParam("loinc"), null, null, 100, 0);
+		Parameters response = call(new StringParam("loinc"), null, null, 100);
 
 		assertThat(extractValueSetUrls(response)).containsExactly("marker:urlLike");
 	}
@@ -118,7 +128,7 @@ class TermValueSetExpansionSvcTest {
 		when(myTermValueSetDao.findByExpansionStatusInAndNameEquals(any(), any(), any()))
 				.thenReturn(new SliceImpl<>(List.of(marker("marker:nameEquals"))));
 
-		Parameters response = call(null, new StringParam("My ValueSet").setExact(true), null, 100, 0);
+		Parameters response = call(null, new StringParam("My ValueSet").setExact(true), null, 100);
 
 		assertThat(extractValueSetUrls(response)).containsExactly("marker:nameEquals");
 	}
@@ -129,7 +139,7 @@ class TermValueSetExpansionSvcTest {
 		when(myTermValueSetDao.findByExpansionStatusInAndNameLike(any(), any(), any()))
 				.thenReturn(new SliceImpl<>(List.of(marker("marker:nameLike"))));
 
-		Parameters response = call(null, new StringParam("Panel"), null, 100, 0);
+		Parameters response = call(null, new StringParam("Panel"), null, 100);
 
 		assertThat(extractValueSetUrls(response)).containsExactly("marker:nameLike");
 	}
@@ -139,7 +149,7 @@ class TermValueSetExpansionSvcTest {
 		givenCounts(new Object[] {EXPANDED, 5L}, new Object[] {FAILED_TO_EXPAND, 3L});
 		when(myTermValueSetDao.findByExpansionStatusIn(any(), any())).thenReturn(new SliceImpl<>(List.of()));
 
-		Parameters response = call(null, null, null, 100, 0);
+		Parameters response = call(null, null, null, 100);
 
 		ParametersParameterComponent summary = response.getParameter("summary");
 		assertThat(summary).isNotNull();
@@ -156,7 +166,7 @@ class TermValueSetExpansionSvcTest {
 		givenCounts();
 		when(myTermValueSetDao.findByExpansionStatusIn(any(), any())).thenReturn(new SliceImpl<>(List.of()));
 
-		Parameters response = call(null, null, null, 100, 0);
+		Parameters response = call(null, null, null, 100);
 
 		ParametersParameterComponent summary = response.getParameter("summary");
 		assertThat(extractParamInt(summary, "total")).isZero();
@@ -171,7 +181,7 @@ class TermValueSetExpansionSvcTest {
 		when(myTermValueSetDao.findByExpansionStatusIn(any(), any()))
 				.thenReturn(new SliceImpl<>(List.of(), PageRequest.of(0, 10), true));
 
-		Parameters response = call(null, null, null, 10, 0);
+		Parameters response = call(null, null, null, 10);
 
 		assertThat(extractParamString(response.getParameter("summary"), "hasMore")).isEqualTo("true");
 	}
@@ -182,26 +192,26 @@ class TermValueSetExpansionSvcTest {
 		when(myTermValueSetDao.findByExpansionStatusIn(any(), any()))
 				.thenReturn(new SliceImpl<>(List.of(), PageRequest.of(0, 10), false));
 
-		Parameters response = call(null, null, null, 10, 0);
+		Parameters response = call(null, null, null, 10);
 
-		assertThat(extractParamString(response.getParameter("summary"), "hasMore")).isEqualTo("false");
+		assertThat(extractParamString(response.getParameter(SUMMARY), HAS_MORE)).isEqualTo("false");
 	}
 
 	@Test
 	void getExpansionStatus_withFullyPopulatedValueSet_emitsAllParts() {
 		givenCounts();
-		TermValueSet vs = createTermValueSet("123", "http://vs/full", "Full VS", "1.0", EXPANDED, EXPANSION_TIMESTAMP, "boom");
+		TermValueSet vs = createTermValueSet("123", "http://vs/full", "Full VS", "1.0", EXPANDED, EXPANSION_TIMESTAMP_VALUE, "boom");
 		when(myTermValueSetDao.findByExpansionStatusIn(any(), any())).thenReturn(new SliceImpl<>(List.of(vs)));
 
-		Parameters response = call(null, null, null, 100, 0);
+		Parameters response = call(null, null, null, 100);
 
 		ParametersParameterComponent entry = extractValueSetParamByUrl(response, "http://vs/full");
-		assertThat(extractParamString(entry, "name")).isEqualTo("Full VS");
-		assertThat(extractParamString(entry, "version")).isEqualTo("1.0");
-		assertThat(extractParamString(entry, "resourceId")).isEqualTo("ValueSet/123");
-		assertThat(extractParamString(entry, "expansionStatus")).isEqualTo("EXPANDED");
-		assertThat(extractParamString(entry, "errorMessage")).isEqualTo("boom");
-		assertThat(extractAllParamNames(entry)).contains("expansionTimestamp");
+		assertThat(extractParamString(entry, NAME)).isEqualTo("Full VS");
+		assertThat(extractParamString(entry, VERSION)).isEqualTo("1.0");
+		assertThat(extractParamString(entry, RESOURCE_ID)).isEqualTo("ValueSet/123");
+		assertThat(extractParamString(entry, EXPANSION_STATUS)).isEqualTo("EXPANDED");
+		assertThat(extractParamString(entry, ERROR_MESSAGE)).isEqualTo("boom");
+		assertThat(extractAllParamNames(entry)).contains(EXPANSION_TIMESTAMP);
 	}
 
 	@Test
@@ -210,11 +220,11 @@ class TermValueSetExpansionSvcTest {
 		TermValueSet vs = createTermValueSet("456", "http://vs/min", null, null, NOT_EXPANDED, null, null);
 		when(myTermValueSetDao.findByExpansionStatusIn(any(), any())).thenReturn(new SliceImpl<>(List.of(vs)));
 
-		Parameters response = call(null, null, null, 100, 0);
+		Parameters response = call(null, null, null, 100);
 
 		ParametersParameterComponent entry = extractValueSetParamByUrl(response, "http://vs/min");
-		assertThat(extractParamString(entry, "expansionStatus")).isEqualTo("NOT_EXPANDED");
-		assertThat(extractAllParamNames(entry)).containsExactlyInAnyOrder("url", "resourceId", "expansionStatus");
+		assertThat(extractParamString(entry, EXPANSION_STATUS)).isEqualTo("NOT_EXPANDED");
+		assertThat(extractAllParamNames(entry)).containsExactlyInAnyOrder(URL, RESOURCE_ID, EXPANSION_STATUS);
 	}
 
 	/** Stubs the aggregate status-count query with the given {@code [status, count]} rows. */
@@ -223,8 +233,8 @@ class TermValueSetExpansionSvcTest {
 	}
 
 	private Parameters call(
-			StringParam theUrl, StringParam theName, List<String> theStatuses, int theCount, int theOffset) {
-		return (Parameters) mySvc.getExpansionStatus(theUrl, theName, theStatuses, theCount, theOffset);
+			StringParam theUrl, StringParam theName, List<String> theStatuses, int theCount) {
+		return (Parameters) mySvc.getExpansionStatus(theUrl, theName, theStatuses, theCount, 0);
 	}
 
 	private static TermValueSet marker(String theUrl) {
@@ -249,15 +259,15 @@ class TermValueSetExpansionSvcTest {
 
 	private static List<String> extractValueSetUrls(Parameters theResponse) {
 		return theResponse.getParameter().stream()
-				.filter(p -> "valueSet".equals(p.getName()))
+				.filter(p -> VALUESET.equals(p.getName()))
 				.map(p -> extractParamString(p, "url"))
 				.toList();
 	}
 
 	private static ParametersParameterComponent extractValueSetParamByUrl(Parameters theResponse, String theUrl) {
 		return theResponse.getParameter().stream()
-				.filter(p -> "valueSet".equals(p.getName()))
-				.filter(p -> theUrl.equals(extractParamString(p, "url")))
+				.filter(p -> VALUESET.equals(p.getName()))
+				.filter(p -> theUrl.equals(extractParamString(p, URL)))
 				.findFirst()
 				.orElseThrow();
 	}

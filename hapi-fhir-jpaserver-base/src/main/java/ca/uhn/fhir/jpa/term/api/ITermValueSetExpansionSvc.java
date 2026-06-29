@@ -47,9 +47,9 @@ public interface ITermValueSetExpansionSvc {
 	 *     or a status value is not a {@link TermValueSetPreExpansionStatusEnum} name
 	 */
 	IBaseParameters getExpansionStatus(
-		@Nullable StringParam theUrlParam,
-		@Nullable StringParam theNameParam,
-		@Nullable List<String> theExpansionStatuses,
-		int theCount,
-		int theOffset);
+			@Nullable StringParam theUrlParam,
+			@Nullable StringParam theNameParam,
+			@Nullable List<String> theExpansionStatuses,
+			int theCount,
+			int theOffset);
 }
