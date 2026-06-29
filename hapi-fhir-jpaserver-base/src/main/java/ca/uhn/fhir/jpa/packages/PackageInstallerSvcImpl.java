@@ -61,6 +61,7 @@ import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
+import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.TerserUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
@@ -72,7 +73,6 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.utilities.npm.IPackageCacheManager;
@@ -977,7 +977,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					(theResource instanceof MetadataResource) ? ((MetadataResource) theResource).getUrl() : null;
 
 			ourLog.error(
-					"Version conflict error: This is possibly due to a collision between ValueSets from different IGs that are coincidentally using the same resource ID: [{}] and new resource URL: [{}], with the existing resource having URL: [{}]. Ignoring this update and continuing: The first IG wins. Cause: {}",
+					"Concurrent install conflict on resource [{}]: update skipped (incoming: [{}], existing: [{}]). Cause: {}",
 					id.getIdPart(),
 					newResourceUrlOrNull,
 					existingResourceUrlOrNull,
@@ -1108,9 +1108,10 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		if (!("StructureDefinition".equals(r.fhirType()))) {
 			return false;
 		}
-		String kind = extractStringValueOrEmpty(r, "kind");
+		FhirTerser terser = myFhirContext.newTerser();
+		String kind = terser.getSinglePrimitiveValue(r, "kind").orElse("");
 		if (!kind.isEmpty() && !(kind.equals("logical"))) {
-			return extractValue(r, "snapshot") == null;
+			return terser.getSingleValueOrNull(r, "snapshot") == null;
 		}
 		return false;
 	}
@@ -1128,7 +1129,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 	}
 
-	private SearchParameterMap createSearchParameterMapFor(IBaseResource theResource, PackageInstallationSpec theSpec) {
+	protected SearchParameterMap createSearchParameterMapFor(
+			IBaseResource theResource, PackageInstallationSpec theSpec) {
 		String resourceType = theResource.fhirType();
 		if ("NamingSystem".equals(resourceType)) {
 			String uniqueId = extractUniqueIdFromNamingSystem(theResource);
@@ -1161,8 +1163,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			retVal.setSort(sort);
 			return retVal;
 		} else {
-			TokenParam identifierToken = extractIdentifier(theResource);
-			return SearchParameterMap.newSynchronous().add("identifier", identifierToken);
+			return buildIdentifierSearchParameterMap(theResource);
 		}
 	}
 
@@ -1184,9 +1185,12 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			String url = extractStringValueOrEmpty(theResource, "url");
 			return SearchParameterMap.newSynchronous().add("url", new UriParam(url));
 		} else {
-			TokenParam identifierToken = extractIdentifier(theResource);
-			return SearchParameterMap.newSynchronous().add("identifier", identifierToken);
+			return buildIdentifierSearchParameterMap(theResource);
 		}
+	}
+
+	private SearchParameterMap buildIdentifierSearchParameterMap(IBaseResource theResource) {
+		return SearchParameterMap.newSynchronous().add("identifier", extractIdentifier(theResource));
 	}
 
 	private String extractId(IBaseResource theResource) {
@@ -1198,27 +1202,28 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	}
 
 	private String extractUniqueIdFromNamingSystem(IBaseResource theResource) {
-		IBase uniqueIdComponent = (IBase) extractValue(theResource, "uniqueId");
+		FhirTerser terser = myFhirContext.newTerser();
+		IBase uniqueIdComponent = (IBase) terser.getSingleValueOrNull(theResource, "uniqueId");
 		if (uniqueIdComponent == null) {
 			throw new ImplementationGuideInstallationException(
 					Msg.code(1291) + "NamingSystem does not have uniqueId component.");
 		}
-		return extractStringValueOrEmpty(uniqueIdComponent, "value");
+		return terser.getSinglePrimitiveValue(uniqueIdComponent, "value").orElse("");
 	}
 
 	private TokenParam extractIdentifier(IBaseResource theResource) {
-		Identifier identifier = myFhirContext
-				.newTerser()
-				.getSingleValue(theResource, "identifier", Identifier.class)
-				.orElseThrow(
-						() -> new ImplementationGuideInstallationException(
-								Msg.code(1292)
-										+ "Resources in a package must have a url or identifier to be loaded by the package installer."));
-		return new TokenParam(identifier.getSystem(), identifier.getValue());
-	}
-
-	private Object extractValue(IBase theResource, String thePath) {
-		return myFhirContext.newTerser().getSingleValueOrNull(theResource, thePath);
+		final String missingUrlOrIdentifierError =
+				"Resources in a package must have a url or identifier to be loaded by the package installer.";
+		FhirTerser terser = myFhirContext.newTerser();
+		IBase identifier = (IBase) terser.getSingleValueOrNull(theResource, "identifier");
+		if (identifier == null) {
+			throw new ImplementationGuideInstallationException(Msg.code(1292) + missingUrlOrIdentifierError);
+		}
+		String identifierValue = terser.getSinglePrimitiveValue(identifier, "value")
+				.orElseThrow(() ->
+						new ImplementationGuideInstallationException(Msg.code(1292) + missingUrlOrIdentifierError));
+		String identifierSystem = terser.getSinglePrimitiveValueOrNull(identifier, "system");
+		return new TokenParam(identifierSystem, identifierValue);
 	}
 
 	private String extractStringValueOrEmpty(IBase theResource, String theElementName) {

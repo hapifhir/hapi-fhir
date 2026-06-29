@@ -228,8 +228,12 @@ public class ImportCustomTerminologyStep1ExpandDistributionIntoFilesStep
 						.newJsonParser()
 						.encodeResourceToString(codeSystem)
 						.getBytes(StandardCharsets.UTF_8);
-				AttachmentDetails attachmentRequest = new AttachmentDetails(
-						bytes, AttachmentContentTypeEnum.JSON, FILENAME_COMPLETE_CONCEPTS_JSON_FILENAME);
+				AttachmentDetails attachmentRequest = AttachmentDetails.newBuilder()
+						.withBytes(bytes)
+						.withContentType(AttachmentContentTypeEnum.JSON)
+						.withFilename(FILENAME_COMPLETE_CONCEPTS_JSON_FILENAME)
+						.withNoMaximumSize()
+						.build();
 				String attachmentId = myJobPersistence.storeNewAttachment(
 						theStepExecutionDetails.getInstance().getInstanceId(), attachmentRequest);
 				data.setAttachmentId(attachmentId);

@@ -1,7 +1,9 @@
 package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
+import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
@@ -35,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -43,8 +46,17 @@ import static org.mockito.Mockito.when;
 public class ReductionStepDataSinkTest {
 
 	private static final String INSTANCE_ID = "instanceId";
-	@Mock
+	private static final String JOB_DEFINITION_ID = "jobDefinitionId";
+
+	@Mock(strictness = Mock.Strictness.STRICT_STUBS)
 	private JobDefinitionRegistry myJobDefinitionRegistry;
+
+	private JobDefinition<MyModel> jobDefinition;
+	@Mock
+	private IJobStepWorker<MyModel, VoidModel, MyModel> myStep1;
+	@Mock
+	private IJobStepWorker<MyModel, MyModel, VoidModel> myStep2;
+
 
 	private static class TestJobParameters implements IModelJson { }
 
@@ -80,6 +92,16 @@ public class ReductionStepDataSinkTest {
 
 	@BeforeEach
 	public void init() {
+		jobDefinition = JobDefinition
+			.newBuilder()
+			.setJobDefinitionId(JOB_DEFINITION_ID)
+			.setJobDefinitionVersion(1)
+			.setJobDescription("A job")
+			.setParametersType(MyModel.class)
+			.addFirstStep("first-step", "Step", MyModel.class, myStep1)
+			.addLastStep("last-step", "Step", myStep2)
+				.build();
+
 		when(myJobDefinition.getJobDefinitionId())
 			.thenReturn("jobDefinition");
 		when(myWorkCursor.getJobDefinition())
@@ -105,8 +127,6 @@ public class ReductionStepDataSinkTest {
 		String data = "data";
 		StepOutputData stepData = new StepOutputData(data);
 		WorkChunkData<StepOutputData> chunkData = new WorkChunkData<>(stepData);
-		@SuppressWarnings("unchecked")
-		JobDefinition<IModelJson> jobDefinition = mock(JobDefinition.class);
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_POSTCOMPLETE_BATCH_JOB, jobCompletionInterceptor);
 
 		// when
@@ -115,7 +135,10 @@ public class ReductionStepDataSinkTest {
 		stubUpdateInstanceCallback(instance);
 		when(myJobPersistence.fetchAllWorkChunksIterator(any(), anyBoolean())).thenReturn(Collections.emptyIterator());
 		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(instance));
-		when(myJobDefinitionRegistry.getJobDefinitionOrThrowException(instance)).thenReturn(jobDefinition);
+		@SuppressWarnings("rawtypes")
+		JobDefinition jobDefinitionUncast = jobDefinition;
+		when(myJobDefinitionRegistry.getJobDefinitionOrThrowException(instance)).thenReturn(jobDefinitionUncast);
+		when(myJobDefinitionRegistry.getJobDefinitionOrThrowException(any(), anyInt())).thenReturn(jobDefinitionUncast);
 
 		// test
 		myDataSink.accept(chunkData);
@@ -131,8 +154,6 @@ public class ReductionStepDataSinkTest {
 		String data2 = "data2";
 		WorkChunkData<StepOutputData> firstData = new WorkChunkData<>(new StepOutputData(data));
 		WorkChunkData<StepOutputData> secondData = new WorkChunkData<>(new StepOutputData(data2));
-		@SuppressWarnings("unchecked")
-		JobDefinition<IModelJson> jobDefinition = mock(JobDefinition.class);
 
 		ourLogger.setLevel(Level.ERROR);
 
@@ -141,7 +162,10 @@ public class ReductionStepDataSinkTest {
 		when(myJobPersistence.fetchAllWorkChunksIterator(any(), anyBoolean())).thenReturn(Collections.emptyIterator());
 		stubUpdateInstanceCallback(instance);
 		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(instance));
-		when(myJobDefinitionRegistry.getJobDefinitionOrThrowException(instance)).thenReturn(jobDefinition);
+		@SuppressWarnings("rawtypes")
+		JobDefinition jobDefinitionUncast = jobDefinition;
+		when(myJobDefinitionRegistry.getJobDefinitionOrThrowException(instance)).thenReturn(jobDefinitionUncast);
+		when(myJobDefinitionRegistry.getJobDefinitionOrThrowException(any(), anyInt())).thenReturn(jobDefinitionUncast);
 
 		// test
 		myDataSink.accept(firstData);
@@ -180,4 +204,9 @@ public class ReductionStepDataSinkTest {
 			fail("Unexpected exception", anyOtherEx);
 		}
 	}
+
+	public static class MyModel implements IModelJson {
+
+	}
+
 }
