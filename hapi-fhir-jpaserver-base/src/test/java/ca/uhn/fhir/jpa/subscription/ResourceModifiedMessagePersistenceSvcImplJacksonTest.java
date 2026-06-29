@@ -250,7 +250,9 @@ class ResourceModifiedMessagePersistenceSvcImplJacksonTest {
 			ResourceModifiedMessage result =
 				mySvc.createResourceModifiedMessageFromEntityWithoutInflation(entity);
 
-			assertThat(result.getPayloadId()).isEqualTo("pt-id-rt");
+			// getPayloadId() returns the full relative reference e.g. "Patient/pt-id-rt"
+			// use getPayloadId(fhirContext).getIdPart() for just the id segment
+			assertThat(result.getPayloadId(FHIR_CONTEXT).getIdPart()).isEqualTo("pt-id-rt");
 		}
 	}
 }
