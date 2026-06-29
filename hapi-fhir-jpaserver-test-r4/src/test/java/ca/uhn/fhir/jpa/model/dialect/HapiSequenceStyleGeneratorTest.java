@@ -33,7 +33,7 @@ class HapiSequenceStyleGeneratorTest {
 	}
 
 	@Test
-	void generateNonReservedValue_returnsValue_whenNotReserved() {
+	void generateNonReservedValue_whenNotReserved_returnsValue() {
 		Deque<Long> values = new ArrayDeque<>(List.of(123L));
 		assertThat(HapiSequenceStyleGenerator.generateNonReservedValue(values::poll)).isEqualTo(123L);
 	}
