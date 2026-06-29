@@ -36,8 +36,7 @@ improves write throughput under high write concurrency.
 This behavior is **disabled by default**, so existing deployments are unaffected on upgrade. It can be enabled with
 `JpaStorageSettings#setPerThreadIdSequencePoolingEnabled(true)`.
 
-When per-thread pooling is enabled, ids are no longer handed out in strict creation order across threads (an id assigned
-later on one thread may be lower than one assigned earlier on another thread), so code must not treat the numeric
+Note that between different servers, ids have never  been allocated in strict creation order. So code must not treat the numeric
 internal id as a creation-order signal; use the last-updated time instead.
 
 ### Critical: do not run the shared-pool and per-thread behaviors against the same database at the same time
