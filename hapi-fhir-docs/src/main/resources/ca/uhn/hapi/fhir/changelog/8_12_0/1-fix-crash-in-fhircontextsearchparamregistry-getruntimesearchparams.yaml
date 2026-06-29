@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 1
+title: "// FIXME number this A bug in `FhirContextSearchParamRegistry` was fixed which caused a crash when calling
+   `getRuntimeSearchParams(..)`."
