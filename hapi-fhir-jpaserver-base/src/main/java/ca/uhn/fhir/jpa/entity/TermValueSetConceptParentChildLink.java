@@ -44,9 +44,9 @@ import java.util.Objects;
 @Table(
 		name = "TRM_VALUESET_CONCEPT_PC_LINK",
 		indexes = {
-			@Index(name = "FK_VS_CONCEPTPC_CHILD", columnList = "CHILD_PID", unique = false),
-			@Index(name = "FK_VS_CONCEPTPC_PARENT", columnList = "PARENT_PID", unique = false),
-			@Index(name = "FK_VS_CONCEPTPC_VS", columnList = "VALUESET_PID")
+			@Index(name = "FK_VS_CONCEPTPC_CHILD", columnList = "CHILD_PID,PARTITION_ID"),
+			@Index(name = "FK_VS_CONCEPTPC_PARENT", columnList = "PARENT_PID,PARTITION_ID"),
+			@Index(name = "FK_VS_CONCEPTPC_VS", columnList = "VALUESET_PID,PARTITION_ID")
 		})
 public class TermValueSetConceptParentChildLink implements Serializable {
 	@Serial
