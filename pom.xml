@@ -1090,7 +1090,12 @@
 		<httpcore_version>4.4.16</httpcore_version>
 		<httpclient_version>4.5.14</httpclient_version>
 
-      <!-- see : https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.22#annotations  -->
+
+		<jackson_legacy_core_version>2.18.2</jackson_legacy_core_version>
+		<jackson_legacy_databind_version>2.18.2</jackson_legacy_databind_version>
+
+
+		<!-- see : https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.22#annotations  -->
 		<jackson_annotations_version>2.22</jackson_annotations_version>
 		<jackson_datatype_version>2.22.0</jackson_datatype_version>
 
@@ -1221,6 +1226,21 @@
 				<artifactId>commonmark</artifactId>
 				<version>0.9.0</version>
 			</dependency>
+
+			<!-- start jackson 2.x legacy version consistency -->
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-core</artifactId>
+				<version>${jackson_legacy_core_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>${jackson_legacy_databind_version}</version>
+			</dependency>
+
+			<!-- end jackson 2.x legacy version consistency -->
+
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-annotations</artifactId>
