@@ -1,5 +1,6 @@
 package ca.uhn.fhir.cli;
 
+import ca.uhn.fhir.batch2.api.AttachmentContentTypeEnum;
 import ca.uhn.fhir.batch2.api.AttachmentDetails;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
@@ -8,16 +9,15 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyModeEnum;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.custom.ImportCustomTerminologyJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.icd.ImportIcdJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
-import ca.uhn.fhir.jpa.term.UploadStatistics;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.jpa.util.RandomTextUtils;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.test.utilities.BaseRestServerHelper;
@@ -29,16 +29,13 @@ import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.validation.FhirValidator;
 import com.google.common.base.Charsets;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.r4.model.Attachment;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Type;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,6 +46,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -64,7 +62,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -75,17 +72,17 @@ import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.ICD10CM
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.LOINC_URI;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -94,6 +91,8 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 
 	private static final String FHIR_VERSION_DSTU3 = "DSTU3";
 	private static final String FHIR_VERSION_R4 = "R4";
+	private static final String MY_INSTANCE_ID = "my-instance-id";
+	private static final String MY_ATTACHMENT_ID = "my-attachment-id";
 	private FhirContext myCtx;
 	private final String myConceptsFileName = "target/concepts.csv";
 	private final File myConceptsFile = new File(myConceptsFileName);
@@ -109,14 +108,9 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 	private final String myICD10FileName = new File("src/test/resources").getAbsolutePath() + "/icd10cm_tabular_2021.xml";
 
 	@Mock
-	protected ITermLoaderSvc myTermLoaderSvc;
-	@Mock
 	private IJobCoordinator myJobCoordinator;
 	@Mock
 	private IJobPersistence myJobPersistence;
-
-	@Captor
-	protected ArgumentCaptor<List<ITermLoaderSvc.FileDescriptor>> myDescriptorListCaptor;
 
 	static {
 		HapiSystemProperties.enableTestMode();
@@ -152,14 +146,12 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 		writeConceptAndHierarchyFiles();
 		if (testInfo.getDisplayName().contains(FHIR_VERSION_DSTU3)) {
 			myCtx = FhirContext.forDstu3();
-			myRestServerDstu3Helper.registerProvider(new TerminologyUploaderProvider(myCtx, myTermLoaderSvc, myJobCoordinator, myJobPersistence));
+			myRestServerDstu3Helper.registerProvider(new TerminologyUploaderProvider(myCtx, myJobCoordinator, myJobPersistence));
 			myBaseRestServerHelper = myRestServerDstu3Helper;
 		} else if (testInfo.getDisplayName().contains(FHIR_VERSION_R4) || testInfo.getDisplayName().endsWith("()") || testInfo.getDisplayName().endsWith("(File)")) {
 			myCtx = FhirContext.forR4();
-			myRestServerR4Helper.registerProvider(new TerminologyUploaderProvider(myCtx, myTermLoaderSvc, myJobCoordinator, myJobPersistence));
+			myRestServerR4Helper.registerProvider(new TerminologyUploaderProvider(myCtx, myJobCoordinator, myJobPersistence));
 			myBaseRestServerHelper = myRestServerR4Helper;
-		} else {
-			fail("Unknown FHIR Version param provided: " + testInfo.getDisplayName());
 		}
 	}
 
@@ -175,14 +167,8 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
-	public void testDeltaAdd(String theFhirVersion, boolean theIncludeTls) throws IOException {
-		if (FHIR_VERSION_DSTU3.equals(theFhirVersion)) {
-			when(myTermLoaderSvc.loadDeltaAdd(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.dstu3.model.IdType("CodeSystem/101")));
-		} else if (FHIR_VERSION_R4.equals(theFhirVersion)) {
-			when(myTermLoaderSvc.loadDeltaAdd(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.r4.model.IdType("CodeSystem/101")));
-		} else {
-			fail("Unknown FHIR Version param provided: " + theFhirVersion);
-		}
+	public void testDeltaAdd(String theFhirVersion, boolean theIncludeTls) {
+		mockJobCoordinatorForStartingJob(ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY);
 
 		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{
@@ -196,12 +182,13 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 			"-t", theIncludeTls, myBaseRestServerHelper
 		));
 
-		verify(myTermLoaderSvc, times(1)).loadDeltaAdd(eq("http://foo"), myDescriptorListCaptor.capture(), any());
+		verify(myJobCoordinator, times(1)).startInstance(any(), myStartRequestDetails.capture());
+		JobInstanceStartRequest startRequest = myStartRequestDetails.getValue();
+		ImportTerminologyJobParameters jobParameters = startRequest.getParameters(ImportTerminologyJobParameters.class);
+		assertEquals(ImportTerminologyModeEnum.ADD, jobParameters.getMode());
 
-		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
-		assertThat(listOfDescriptors).hasSize(1);
-		assertEquals("file:/files.zip", listOfDescriptors.get(0).getFilename());
-		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
+		verify(myJobPersistence, times(2)).storeNewAttachment(any(), any());
+		verify(myJobCoordinator, times(1)).enqueueBuildingJobForExecution(any());
 	}
 
 	@ParameterizedTest
@@ -223,7 +210,7 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 			fail("Unknown FHIR Version param provided: " + theFhirVersion);
 		}
 
-		when(myTermLoaderSvc.loadDeltaAdd(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.r4.model.IdType("CodeSystem/101")));
+		mockJobCoordinatorForStartingJob(ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY);
 
 		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{
@@ -236,89 +223,31 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 			"-t", theIncludeTls, myBaseRestServerHelper
 		));
 
-		verify(myTermLoaderSvc, times(1)).loadDeltaAdd(eq("http://foo"), myDescriptorListCaptor.capture(), any());
-
-		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
-		assertThat(listOfDescriptors).hasSize(2);
-		assertEquals("concepts.csv", listOfDescriptors.get(0).getFilename());
-		String uploadFile = IOUtils.toString(listOfDescriptors.get(0).getInputStream(), Charsets.UTF_8);
-		assertThat(uploadFile).as(uploadFile).contains("CODE,Display");
+		verify(myJobPersistence, times(1)).storeNewAttachment(any(), any());
+		verify(myJobCoordinator, times(1)).enqueueBuildingJobForExecution(any());
 	}
 
 	@ParameterizedTest
-	@MethodSource("paramsProvider")
-	public void testDeltaAddInvalidResource(String theFhirVersion, boolean theIncludeTls) throws IOException {
-		if (FHIR_VERSION_DSTU3.equals(theFhirVersion)) {
-			try (FileWriter w = new FileWriter(myCodeSystemFile, false)) {
-				org.hl7.fhir.dstu3.model.Patient patient = new org.hl7.fhir.dstu3.model.Patient();
-				patient.setActive(true);
-				myCtx.newJsonParser().encodeResourceToWriter(patient, w);
-			}
-		} else if (FHIR_VERSION_R4.equals(theFhirVersion)) {
-			try (FileWriter w = new FileWriter(myCodeSystemFile, false)) {
-				org.hl7.fhir.r4.model.Patient patient = new org.hl7.fhir.r4.model.Patient();
-				patient.setActive(true);
-				myCtx.newJsonParser().encodeResourceToWriter(patient, w);
-			}
-		} else {
-			fail("Unknown FHIR Version param provided: " + theFhirVersion);
-		}
-
-		try {
-			App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
-				new String[]{
-					UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
-					"-v", theFhirVersion,
-					"-m", "ADD",
-					"-u", "http://foo",
-					"-d", myCodeSystemFileName
-				},
-				"-t", theIncludeTls, myBaseRestServerHelper
-			));
-			fail();		} catch (Error e) {
-			assertThat(e.toString()).contains("HTTP 400 Bad Request: " + Msg.code(362) + "Request has parameter codeSystem of type Patient but method expects type CodeSystem");
-		}
-	}
-
-	@ParameterizedTest
-	@MethodSource("paramsProvider")
-	public void testDeltaAddInvalidFileType(String theFhirVersion, boolean theIncludeTls) throws IOException {
-		try (FileWriter w = new FileWriter(myTextFileName, false)) {
-			w.append("Help I'm a Bug");
-		}
-
-		try {
-			App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
-				new String[]{
-					UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
-					"-v", theFhirVersion,
-					"-m", "ADD",
-					"-u", "http://foo",
-					"-d", myTextFileName
-				},
-				"-t", theIncludeTls, myBaseRestServerHelper
-			));
-
-			fail();		} catch (Error e) {
-			assertThat(e.toString()).contains("Don't know how to handle file:");
-		}
-	}
-
-	@Test
-	public void testModifyingSizeLimitConvertsCorrectlyR4() {
+	@MethodSource("testModifyingSizeLimitConvertsCorrectlyR4Params")
+	public void testModifyingSizeLimitConvertsCorrectlyR4(String theInput, long theExpectedBytes) {
 
 		UploadTerminologyCommand uploadTerminologyCommand = new UploadTerminologyCommand();
-		uploadTerminologyCommand.setTransferSizeLimitHuman("1GB");
+		uploadTerminologyCommand.setTransferSizeLimitHuman(theInput);
 		long bytes = uploadTerminologyCommand.getTransferSizeLimit();
-		assertEquals(1024L * 1024L * 1024L, bytes);
+		assertEquals(theExpectedBytes, bytes);
 
-		uploadTerminologyCommand.setTransferSizeLimitHuman("500KB");
-		bytes = uploadTerminologyCommand.getTransferSizeLimit();
-		assertEquals(1024L * 500L, bytes);
+	}
 
-		uploadTerminologyCommand.setTransferSizeLimitHuman("10MB");
-		bytes = uploadTerminologyCommand.getTransferSizeLimit();
-		assertEquals(1024L * 1024L * 10L, bytes);
+	static Object[] testModifyingSizeLimitConvertsCorrectlyR4Params() {
+		return new Object[] {
+			new Object[] { "1GB", 1024L * 1024L * 1024L },
+			new Object[] { "1 GB", 1024L * 1024L * 1024L },
+			new Object[] { "1 gb", 1024L * 1024L * 1024L },
+			new Object[] { "500KB", 1024L * 500L },
+			new Object[] { "500kB", 1024L * 500L },
+			new Object[] { "500 kB", 1024L * 500L },
+			new Object[] { "10MB", 1024L * 1024L * 10L }
+		};
 	}
 
 	@ParameterizedTest
@@ -326,7 +255,7 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 	public void testDeltaAddUsingCompressedFile(String theFhirVersion, boolean theIncludeTls) throws IOException {
 		writeArchiveFile(myConceptsFile, myHierarchyFile);
 
-		when(myTermLoaderSvc.loadDeltaAdd(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.r4.model.IdType("CodeSystem/101")));
+		mockJobCoordinatorForStartingJob(ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY);
 
 		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{
@@ -339,17 +268,17 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 			"-t", theIncludeTls, myBaseRestServerHelper
 		));
 
-		verify(myTermLoaderSvc, times(1)).loadDeltaAdd(eq("http://foo"), myDescriptorListCaptor.capture(), any());
-
-		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
-		assertThat(listOfDescriptors).hasSize(1);
-		assertThat(listOfDescriptors.get(0).getFilename()).matches("^file:.*temp.*\\.zip$");
-		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
+		verify(myJobPersistence, times(1)).storeNewAttachment(any(), any());
+		verify(myJobCoordinator, times(1)).enqueueBuildingJobForExecution(any());
 	}
 
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
 	public void testDeltaAddInvalidFileName(String theFhirVersion, boolean theIncludeTls) {
+		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
+		startResponse.setInstanceId(MY_INSTANCE_ID);
+		when(myJobCoordinator.startInstance(any(), any())).thenReturn(startResponse);
+
 		try {
 			App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 				new String[]{
@@ -362,21 +291,16 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 				},
 				"-t", theIncludeTls, myBaseRestServerHelper
 			));
-			fail();		} catch (Error e) {
-			assertThat(e.toString().replace('\\', '/')).contains("FileNotFoundException: target/concepts.csv/foo.csv");
+			fail();
+		} catch (Error e) {
+			assertThat(e.toString().replace('\\', '/')).contains("File does not exist or can't be read: target/concepts.csv/foo.csv");
 		}
 	}
 
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
-	public void testDeltaRemove(String theFhirVersion, boolean theIncludeTls) throws IOException {
-		if (FHIR_VERSION_DSTU3.equals(theFhirVersion)) {
-			when(myTermLoaderSvc.loadDeltaRemove(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.dstu3.model.IdType("CodeSystem/101")));
-		} else if (FHIR_VERSION_R4.equals(theFhirVersion)) {
-			when(myTermLoaderSvc.loadDeltaRemove(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.r4.model.IdType("CodeSystem/101")));
-		} else {
-			fail("Unknown FHIR Version param provided: " + theFhirVersion);
-		}
+	public void testDeltaRemove(String theFhirVersion, boolean theIncludeTls) {
+		mockJobCoordinatorForStartingJob(ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY);
 
 		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{
@@ -390,12 +314,13 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 			"-t", theIncludeTls, myBaseRestServerHelper
 		));
 
-		verify(myTermLoaderSvc, times(1)).loadDeltaRemove(eq("http://foo"), myDescriptorListCaptor.capture(), any());
+		verify(myJobCoordinator, times(1)).startInstance(any(), myStartRequestDetails.capture());
+		JobInstanceStartRequest startRequest = myStartRequestDetails.getValue();
+		ImportTerminologyJobParameters jobParameters = startRequest.getParameters(ImportTerminologyJobParameters.class);
+		assertEquals(ImportTerminologyModeEnum.REMOVE, jobParameters.getMode());
 
-		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
-		assertThat(listOfDescriptors).hasSize(1);
-		assertEquals("file:/files.zip", listOfDescriptors.get(0).getFilename());
-		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
+		verify(myJobPersistence, times(2)).storeNewAttachment(any(), any());
+		verify(myJobCoordinator, times(1)).enqueueBuildingJobForExecution(any());
 	}
 
 	@ParameterizedTest
@@ -427,7 +352,6 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
 	public void testSnapshotLargeFile(String theFhirVersion, boolean theIncludeTls) {
-
 		mockJobCoordinatorForStartingJob(ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY);
 
 		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
@@ -444,8 +368,66 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 		));
 
 		// Verify
+		verify(myJobPersistence, times(2)).storeNewAttachment(eq(MY_INSTANCE_ID), any());
+		verifyNoMoreInteractions(myJobPersistence);
+
 		verify(myJobCoordinator, times(1)).startInstance(any(), myStartRequestDetails.capture());
 		assertEquals(ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY, myStartRequestDetails.getValue().getJobDefinitionId());
+	}
+
+	@ParameterizedTest
+	@MethodSource("paramsProvider")
+	public void testSnapshotLargeFile_SplitIntoChunks(String theFhirVersion, boolean theIncludeTls) throws IOException {
+		// Setup
+		ByteArrayOutputStream receivedDataBuffer = new ByteArrayOutputStream();
+		mockJobCoordinatorForStartingJob(ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY, receivedDataBuffer);
+
+		when(myJobPersistence.fetchAttachmentById(eq(MY_INSTANCE_ID), eq(MY_ATTACHMENT_ID))).thenReturn(AttachmentDetails
+			.newBuilder()
+				.withFilename(myConceptsFileName)
+				.withContentType(AttachmentContentTypeEnum.CSV)
+				.withNoMaximumSize()
+				.withBytes(new byte[0])
+				.build());
+
+		doAnswer(t->{
+			AttachmentDetails details = t.getArgument(2, AttachmentDetails.class);
+			byte[] bytes = IOUtils.toByteArray(details.getInputStream());
+			ourLog.info("Appending attachment request received {} bytes", bytes.length);
+			receivedDataBuffer.write(bytes);
+			return MY_ATTACHMENT_ID;
+		}).when(myJobPersistence).appendToAttachment(any(), any(), any());
+
+		// Rewrite the concepts file as exactly 1 MB
+		byte[] expectedBytes = RandomTextUtils.newSecureRandomAlphaNumericString((int) FileUtils.ONE_MB).getBytes(StandardCharsets.UTF_8);
+		FileUtils.deleteQuietly(myConceptsFile);
+		try (FileOutputStream fileOutputStream = new FileOutputStream(myConceptsFile)) {
+			fileOutputStream.write(expectedBytes);
+		}
+
+		// Test
+		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
+			new String[]{
+				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
+				"-v", theFhirVersion,
+				"-m", "SNAPSHOT",
+				"-u", "http://foo",
+				"-d", myConceptsFileName,
+				"-s", "400KB"
+			},
+			"-t", theIncludeTls, myBaseRestServerHelper
+		));
+
+		// Verify
+		verify(myJobPersistence, times(1)).storeNewAttachment(eq(MY_INSTANCE_ID), any());
+		verify(myJobPersistence, times(2)).appendToAttachment(eq(MY_INSTANCE_ID), eq(MY_ATTACHMENT_ID), any());
+		verifyNoMoreInteractions(myJobPersistence);
+
+		verify(myJobCoordinator, times(1)).startInstance(any(), myStartRequestDetails.capture());
+		assertEquals(ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY, myStartRequestDetails.getValue().getJobDefinitionId());
+
+		byte[] actualBytes = receivedDataBuffer.toByteArray();
+		assertArrayEquals(expectedBytes, actualBytes);
 	}
 
 	@ParameterizedTest
@@ -481,12 +463,17 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 
 	@Nonnull
 	private JobInstance mockJobCoordinatorForStartingJob(String theJobDefinition) {
+		return mockJobCoordinatorForStartingJob(theJobDefinition, null);
+	}
+
+	@Nonnull
+	private JobInstance mockJobCoordinatorForStartingJob(String theJobDefinition, @Nullable ByteArrayOutputStream theReceivedDataBuffer) {
 		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
-		startResponse.setInstanceId("my-instance-id");
+		startResponse.setInstanceId(MY_INSTANCE_ID);
 		when(myJobCoordinator.startInstance(any(), any())).thenReturn(startResponse);
 
 		JobInstance jobInstance = new JobInstance();
-		jobInstance.setInstanceId("my-instance-id");
+		jobInstance.setInstanceId(MY_INSTANCE_ID);
 		jobInstance.setStatus(StatusEnum.BUILDING);
 		jobInstance.setJobDefinitionId(theJobDefinition);
 
@@ -502,7 +489,7 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 				}
 			}
 			return jobInstance;
-		}).when(myJobCoordinator).getInstance(eq("my-instance-id"));
+		}).when(myJobCoordinator).getInstance(eq(MY_INSTANCE_ID));
 
 		doAnswer(t->{
 			jobInstance.setStatus(StatusEnum.IN_PROGRESS);
@@ -514,7 +501,10 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 			AttachmentDetails details = t.getArgument(1, AttachmentDetails.class);
 			byte[] bytes = IOUtils.toByteArray(details.getInputStream());
 			ourLog.info("Store aggachment request received {} bytes", bytes.length);
-			return "my-attachment-id";
+			if (theReceivedDataBuffer != null) {
+				theReceivedDataBuffer.write(bytes);
+			}
+			return MY_ATTACHMENT_ID;
 		});
 
 		return jobInstance;
@@ -561,11 +551,11 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 		}
 
 		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
-		startResponse.setInstanceId("my-instance-id");
+		startResponse.setInstanceId(MY_INSTANCE_ID);
 		when(myJobCoordinator.startInstance(any(), any())).thenReturn(startResponse);
 
 		JobInstance jobInstance = new JobInstance();
-		jobInstance.setInstanceId("my-instance-id");
+		jobInstance.setInstanceId(MY_INSTANCE_ID);
 		jobInstance.setStatus(StatusEnum.BUILDING);
 		jobInstance.setJobDefinitionId(ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC);
 
@@ -581,7 +571,7 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 				}
 			}
 			return jobInstance;
-		}).when(myJobCoordinator).getInstance(eq("my-instance-id"));
+		}).when(myJobCoordinator).getInstance(eq(MY_INSTANCE_ID));
 
 		assertThatThrownBy(()->App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{
@@ -614,85 +604,6 @@ public class UploadTerminologyCommandTest extends ConsoleOutputCapturingBaseTest
 		uploadICD10UsingCompressedFile(theFhirVersion, theIncludeTls);
 	}
 
-	@ParameterizedTest
-	@MethodSource("paramsProvider")
-	@SuppressWarnings("unused") // Both params for @BeforeEach
-	void testZipFileInParameters(String theFhirVersion, boolean theIncludeTls) {
-		final IBaseParameters inputParameters = switch (myCtx.getVersion().getVersion()) {
-			case DSTU2, DSTU2_HL7ORG, DSTU2_1 -> new org.hl7.fhir.dstu2.model.Parameters();
-			case DSTU3 -> new org.hl7.fhir.dstu3.model.Parameters();
-			case R4 -> new Parameters();
-			case R4B -> new org.hl7.fhir.r4b.model.Parameters();
-			case R5 -> new org.hl7.fhir.r5.model.Parameters();
-		};
-
-		final UploadTerminologyCommand uploadTerminologyCommand = new UploadTerminologyCommand();
-		uploadTerminologyCommand.setFhirContext(myCtx);
-		uploadTerminologyCommand.setTransferSizeBytes(1);
-
-		uploadTerminologyCommand.addFileToRequestBundle(inputParameters, "something.zip", new byte[] {1,2});
-
-		final String actualAttachmentUrl = getAttachmentUrl(inputParameters, myCtx);
-		assertTrue(actualAttachmentUrl.endsWith(".zip"));
-	}
-
-	private static String getAttachmentUrl(IBaseParameters theInputParameters, FhirContext theCtx) {
-		switch (theCtx.getVersion().getVersion()) {
-			case DSTU2:
-			case DSTU2_HL7ORG:
-			case DSTU2_1: {
-				assertInstanceOf(org.hl7.fhir.dstu2.model.Parameters.class, theInputParameters);
-				final org.hl7.fhir.dstu2.model.Parameters dstu2Parameters = (org.hl7.fhir.dstu2.model.Parameters) theInputParameters;
-				final List<org.hl7.fhir.dstu2.model.Parameters.ParametersParameterComponent> dstu2ParametersList = dstu2Parameters.getParameter();
-				final Optional<org.hl7.fhir.dstu2.model.Parameters.ParametersParameterComponent> optDstu2FileParam = dstu2ParametersList.stream().filter(param -> TerminologyUploaderProvider.PARAM_FILE.equals(param.getName())).findFirst();
-				assertTrue(optDstu2FileParam.isPresent());
-				final org.hl7.fhir.dstu2.model.Type dstu2Value = optDstu2FileParam.get().getValue();
-				assertInstanceOf(org.hl7.fhir.dstu2.model.Attachment.class, dstu2Value);
-				final org.hl7.fhir.dstu2.model.Attachment dstu2Attachment = (org.hl7.fhir.dstu2.model.Attachment) dstu2Value;
-				return dstu2Attachment.getUrl();
-			}
-			case DSTU3: {
-				assertInstanceOf(org.hl7.fhir.dstu3.model.Parameters.class, theInputParameters);
-				final org.hl7.fhir.dstu3.model.Parameters dstu3Parameters = (org.hl7.fhir.dstu3.model.Parameters) theInputParameters;
-				final List<org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent> dstu3ParametersList = dstu3Parameters.getParameter();
-				final Optional<org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent> optDstu3FileParam = dstu3ParametersList.stream().filter(param -> TerminologyUploaderProvider.PARAM_FILE.equals(param.getName())).findFirst();
-				assertTrue(optDstu3FileParam.isPresent());
-				final org.hl7.fhir.dstu3.model.Type dstu3Value = optDstu3FileParam.get().getValue();
-				assertInstanceOf(org.hl7.fhir.dstu3.model.Attachment.class, dstu3Value);
-				final org.hl7.fhir.dstu3.model.Attachment dstu3Attachment = (org.hl7.fhir.dstu3.model.Attachment) dstu3Value;
-				return dstu3Attachment.getUrl();
-			}
-			case R4: {
-				assertInstanceOf(Parameters.class, theInputParameters);
-				final Parameters r4Parameters = (Parameters) theInputParameters;
-				final Parameters.ParametersParameterComponent r4Parameter = r4Parameters.getParameter(TerminologyUploaderProvider.PARAM_FILE);
-				final Type r4Value = r4Parameter.getValue();
-				assertInstanceOf(Attachment.class, r4Value);
-				final Attachment r4Attachment = (Attachment) r4Value;
-				return r4Attachment.getUrl();
-			}
-			case R4B: {
-				assertInstanceOf(org.hl7.fhir.r4b.model.Parameters.class, theInputParameters);
-				final org.hl7.fhir.r4b.model.Parameters r4bParameters = (org.hl7.fhir.r4b.model.Parameters) theInputParameters;
-				final org.hl7.fhir.r4b.model.Parameters.ParametersParameterComponent r4bParameter = r4bParameters.getParameter(TerminologyUploaderProvider.PARAM_FILE);
-				final org.hl7.fhir.r4b.model.DataType value = r4bParameter.getValue();
-				assertInstanceOf(org.hl7.fhir.r4b.model.Attachment.class, value);
-				final org.hl7.fhir.r4b.model.Attachment r4bAttachment = (org.hl7.fhir.r4b.model.Attachment) value;
-				return r4bAttachment.getUrl();
-			}
-			case R5: {
-				assertInstanceOf(org.hl7.fhir.r5.model.Parameters.class, theInputParameters);
-				final org.hl7.fhir.r5.model.Parameters r4Parameters = (org.hl7.fhir.r5.model.Parameters) theInputParameters;
-				final org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent parameter = r4Parameters.getParameter(TerminologyUploaderProvider.PARAM_FILE);
-				final org.hl7.fhir.r5.model.DataType value = parameter.getValue();
-				assertInstanceOf(org.hl7.fhir.r5.model.Attachment.class, value);
-				final org.hl7.fhir.r5.model.Attachment attachment = (org.hl7.fhir.r5.model.Attachment) value;
-				return attachment.getUrl();
-			}
-			default:
-				throw new IllegalStateException("Unknown FHIR version: " + theCtx.getVersion().getVersion());
-		}
-	}
 
 	private void uploadICD10UsingCompressedFile(String theFhirVersion, boolean theIncludeTls) {
 		mockJobCoordinatorForStartingJob(ImportIcdJobAppCtx.JOB_ID_IMPORT_ICD_10);

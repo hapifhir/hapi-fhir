@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.batch2.jobs.term.custom;
 
+import ca.uhn.fhir.batch2.api.AttachmentContentTypeEnum;
+import ca.uhn.fhir.batch2.api.AttachmentDetails;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
@@ -38,6 +40,7 @@ import ca.uhn.fhir.rest.param.UriParam;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +50,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Supplier;
+
+import static ca.uhn.fhir.jpa.batch2.jobs.term.custom.ImportCustomTerminologyStep2HandleConcepts.FILENAME_COMPLETE_CONCEPTS_JSON_FILENAME;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ImportCustomTerminologyStep1ExpandDistributionIntoFilesStep
 		extends BaseExpandDistributionIntoFilesStep<
@@ -86,45 +93,50 @@ public class ImportCustomTerminologyStep1ExpandDistributionIntoFilesStep
 			StepExecutionDetails<ImportTerminologyJobParameters, VoidModel> theStepExecutionDetails) {
 		super.massageCodeSystem(theCodeSystem, theContext, theStepExecutionDetails);
 
+		// These should never happen since we validate
+		ImportTerminologyJobParameters jobParameters = theStepExecutionDetails.getParameters();
+		Validate.notBlank(jobParameters.getUrl(), "No URL specified in job parameters");
+		Validate.notBlank(jobParameters.getVersionId(), "No version specified in job parameters");
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous().setLoadSynchronousUpTo(2);
+		map.add(CodeSystem.SP_URL, new UriParam(jobParameters.getUrl()));
+		map.add(CodeSystem.SP_VERSION, new TokenParam(jobParameters.getVersionId()));
+
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao("CodeSystem");
+		IBundleProvider results = dao.search(map, theStepExecutionDetails.newSystemRequestDetails());
+
+		// There can't be more than one CodeSystem with the same URL and version
+		// because the DAO enforces it
+		Validate.isTrue(
+				results.size() <= 1,
+				"Expected exactly one CodeSystem resource with URL[%s] and version[%s]",
+				jobParameters.getUrl(),
+				jobParameters.getVersionId());
+
 		CodeSystem codeSystem = theContext.getCodeSystem();
 		if (codeSystem == null) {
 
-			// These should never happen since we validate
-			ImportTerminologyJobParameters jobParameters = theStepExecutionDetails.getParameters();
-			Validate.notBlank(jobParameters.getUrl(), "No URL specified in job parameters");
-			Validate.notBlank(jobParameters.getVersionId(), "No version specified in job parameters");
-
-			SearchParameterMap map = SearchParameterMap.newSynchronous().setLoadSynchronousUpTo(2);
-			map.add(CodeSystem.SP_URL, new UriParam(jobParameters.getUrl()));
-			map.add(CodeSystem.SP_VERSION, new TokenParam(jobParameters.getVersionId()));
-
-			IFhirResourceDao dao = myDaoRegistry.getResourceDao("CodeSystem");
-			IBundleProvider results = dao.search(map, theStepExecutionDetails.newSystemRequestDetails());
 			if (results.isEmpty()) {
-				throw new JobExecutionFailedException(Msg.code(2964)
-						+ "No CodeSystem resource was supplied in the custom terminology distribution file, and no CodeSystem resource was found in the database with URL["
-						+ jobParameters.getUrl() + "] and version[" + jobParameters.getVersionId() + "]");
+				codeSystem = new CodeSystem();
+				codeSystem.setId(UUID.randomUUID().toString());
+			} else {
+				codeSystem = myVersionCanonicalizer.codeSystemToCanonical(
+						results.getResources(0, 1).get(0));
+				ourLog.info(
+						"Found existing CodeSystem resource with URL[{}] and version[{}]: {}",
+						jobParameters.getUrl(),
+						jobParameters.getVersionId(),
+						codeSystem.getId());
 			}
-
-			// There can't be more than one CodeSystem with the same URL and version
-			// because the DAO enforces it
-			Validate.isTrue(
-					results.size() == 1,
-					"Expected exactly one CodeSystem resource with URL[%s] and version[%s]",
-					jobParameters.getUrl(),
-					jobParameters.getVersionId());
-
-			codeSystem = (CodeSystem) results.getResources(0, 1).get(0);
-			ourLog.info(
-					"Found existing CodeSystem resource with URL[{}] and version[{}]: {}",
-					jobParameters.getUrl(),
-					jobParameters.getVersionId(),
-					codeSystem.getId());
-		}
-
-		if (!codeSystem.getIdElement().hasIdPart()) {
-			throw new JobExecutionFailedException(
-					Msg.code(2963) + "CodeSystem resource supplied with the job must have an ID");
+		} else {
+			if (results.isEmpty()) {
+				if (!codeSystem.getIdElement().hasIdPart()) {
+					codeSystem.setId(UUID.randomUUID().toString());
+				}
+			} else {
+				IBaseResource foundCodeSystem = results.getResources(0, 1).get(0);
+				codeSystem.setId(foundCodeSystem.getIdElement().getIdPart());
+			}
 		}
 
 		ourLog.info(
@@ -154,7 +166,7 @@ public class ImportCustomTerminologyStep1ExpandDistributionIntoFilesStep
 			StepExecutionDetails<ImportTerminologyJobParameters, VoidModel> theStepExecutionDetails,
 			IJobDataSink<TerminologyFileSetJson> theDataSink,
 			MyContext theContext,
-			String theFileName,
+			String theSingleFileName,
 			Supplier<InputStream> theInputStreamSupplier,
 			ImportTerminologyJobParameters theJobParameters,
 			ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment)
@@ -163,32 +175,39 @@ public class ImportCustomTerminologyStep1ExpandDistributionIntoFilesStep
 				theStepExecutionDetails,
 				theDataSink,
 				theContext,
-				theFileName,
+				theSingleFileName,
 				theInputStreamSupplier,
 				theJobParameters,
 				theJobMetadataAttachment);
 
 		CodeSystem codeSystem = null;
-		if (theFileName.endsWith(TerminologyConstants.CUSTOM_CODESYSTEM_JSON)) {
-			codeSystem = myCanonicalFhirContext
-					.newJsonParser()
-					.parseResource(
-							CodeSystem.class,
-							new InputStreamReader(theInputStreamSupplier.get(), StandardCharsets.UTF_8));
-		} else if (theFileName.endsWith(TerminologyConstants.CUSTOM_CODESYSTEM_XML)) {
-			codeSystem = myCanonicalFhirContext
-					.newXmlParser()
-					.parseResource(
-							CodeSystem.class,
-							new InputStreamReader(theInputStreamSupplier.get(), StandardCharsets.UTF_8));
+		if (theSingleFileName.endsWith(TerminologyConstants.CUSTOM_CODESYSTEM_JSON)) {
+			try (InputStream inputStream = theInputStreamSupplier.get()) {
+				codeSystem = myCanonicalFhirContext
+						.newJsonParser()
+						.parseResource(CodeSystem.class, new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+			}
+		} else if (theSingleFileName.endsWith(TerminologyConstants.CUSTOM_CODESYSTEM_XML)) {
+			try (InputStream inputStream = theInputStreamSupplier.get()) {
+				codeSystem = myCanonicalFhirContext
+						.newXmlParser()
+						.parseResource(CodeSystem.class, new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+			}
 		}
 
 		if (codeSystem != null) {
 
 			String expectedUrl = theJobParameters.getUrl();
+			if (isBlank(codeSystem.getUrl())) {
+				codeSystem.setUrl(expectedUrl);
+			}
 			if (!Objects.equals(codeSystem.getUrl(), expectedUrl)) {
 				throw new JobExecutionFailedException(Msg.code(2965) + "CodeSystem resources has unexpected URL: "
 						+ codeSystem.getUrl() + ". Expected: " + expectedUrl);
+			}
+
+			if (isBlank(codeSystem.getVersion())) {
+				codeSystem.setVersion(theJobParameters.getVersionId());
 			}
 
 			if (theContext.getCodeSystem() != null) {
@@ -196,6 +215,31 @@ public class ImportCustomTerminologyStep1ExpandDistributionIntoFilesStep
 						+ "Multiple CodeSystem resources were supplied in the custom terminology distribution file.");
 			}
 			theContext.setCodeSystem(codeSystem);
+
+			/*
+			 * If there are concepts directly in the CodeSystem resource, send them to step 2, which
+			 * will handle them.
+			 */
+			if (!codeSystem.getConcept().isEmpty()) {
+				ourLog.info("CodeSystem file {} has inline concepts, processing them directly", theSingleFileName);
+
+				TerminologyFileSetJson data = new TerminologyFileSetJson();
+				byte[] bytes = myCanonicalFhirContext
+						.newJsonParser()
+						.encodeResourceToString(codeSystem)
+						.getBytes(StandardCharsets.UTF_8);
+				AttachmentDetails attachmentRequest = AttachmentDetails.newBuilder()
+						.withBytes(bytes)
+						.withContentType(AttachmentContentTypeEnum.JSON)
+						.withFilename(FILENAME_COMPLETE_CONCEPTS_JSON_FILENAME)
+						.withNoMaximumSize()
+						.build();
+				String attachmentId = myJobPersistence.storeNewAttachment(
+						theStepExecutionDetails.getInstance().getInstanceId(), attachmentRequest);
+				data.setAttachmentId(attachmentId);
+				data.setSourceFilename(FILENAME_COMPLETE_CONCEPTS_JSON_FILENAME);
+				theDataSink.accept(data);
+			}
 		}
 	}
 

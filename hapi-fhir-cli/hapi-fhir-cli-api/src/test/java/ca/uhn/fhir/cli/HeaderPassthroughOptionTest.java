@@ -8,15 +8,12 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.batch2.jobs.term.custom.ImportCustomTerminologyJobAppCtx;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
-import ca.uhn.fhir.jpa.term.UploadStatistics;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.ParseException;
-import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,14 +32,10 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.Assertions.in;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
@@ -70,8 +63,6 @@ public class HeaderPassthroughOptionTest {
 	@InjectMocks
 	private TerminologyUploaderProvider myProvider;
 
-	@Mock
-	protected ITermLoaderSvc myTermLoaderSvc;
 
 	@RegisterExtension
 	public RestfulServerExtension myServer = new RestfulServerExtension(myCtx)
@@ -80,7 +71,6 @@ public class HeaderPassthroughOptionTest {
 	@BeforeEach
 	public void beforeEach() {
 		myProvider.setContext(myCtx);
-		myProvider.setTerminologyLoaderSvc(myTermLoaderSvc);
 
 		when(myJobCoordinator.startInstance(any(), any())).thenReturn(new Batch2JobStartResponse().setInstanceId("A"));
 		JobInstance instance = new JobInstance();

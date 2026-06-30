@@ -28,13 +28,13 @@ class ImportLoincStep18ConsumerNameTest extends BaseImportLoincStepTest {
 		String classpath = "loinc-ver/v269/AccessoryFiles/ConsumerName/ConsumerName.csv";
 		mockFetchAttachment(classpath);
 		mockFetchJobMetadataAttachment();
-		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()).incrementDesignationsAddedCount(3));
+		when(myTermCodeSystemStorageSvc.addCodeSystemConcepts(any(), any())).thenReturn(new UploadStatistics(new IdType()).incrementDesignationsAddedCount(3));
 
 		// Test
 		mySvc.run(newStepExecutionDetails(classpath), myDataSink);
 
 		// Verify
-		verify(myTermCodeSystemStorageSvc, times(1)).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());
+		verify(myTermCodeSystemStorageSvc, times(1)).addCodeSystemConcepts(any(), myCodeSystemCaptor.capture());
 		CodeSystem cs = (CodeSystem) myCodeSystemCaptor.getValue();
 		String hierarchy = renderHierarchy(cs, true);
 		String expected = """

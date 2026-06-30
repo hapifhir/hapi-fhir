@@ -34,7 +34,7 @@ import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.term.LoadedFileDescriptors;
+import ca.uhn.fhir.jpa.term.NonClosableBOMInputStream;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.util.CsvUtil;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -62,7 +62,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -79,7 +78,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyUtil.getJobProperties;
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION;
 import static ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc.MAKE_LOADING_VERSION_CURRENT;
 import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -195,11 +194,12 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 
 		startStaging(theStepExecutionDetails, theDataSink, jobParameters, jobMetadataAttachment, context);
 
-		AttachmentDetails attachmentRequest = new AttachmentDetails(
-				new ByteArrayInputStream(
-						JsonUtil.serialize(jobMetadataAttachment).getBytes(StandardCharsets.UTF_8)),
-				AttachmentContentTypeEnum.JSON,
-				ImportTerminologyMetadataAttachmentJson.ATTACHMENT_FILENAME);
+		AttachmentDetails attachmentRequest = AttachmentDetails.newBuilder()
+				.withNoMaximumSize()
+				.withBytes(JsonUtil.serialize(jobMetadataAttachment).getBytes(StandardCharsets.UTF_8))
+				.withContentType(AttachmentContentTypeEnum.JSON)
+				.withFilename(ImportTerminologyMetadataAttachmentJson.ATTACHMENT_FILENAME)
+				.build();
 		myJobPersistence.storeNewAttachment(instanceId, attachmentRequest);
 
 		return RunOutcome.SUCCESS;
@@ -222,7 +222,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 				ZipArchiveInputStream zipInputStream = new ZipArchiveInputStream(bufferedInputStream);
 				ZipArchiveEntry entry;
 				while ((entry = zipInputStream.getNextEntry()) != null) {
-					try (InputStream fis = new LoadedFileDescriptors.NonClosableBOMInputStream(zipInputStream)) {
+					try (InputStream fis = new NonClosableBOMInputStream(zipInputStream)) {
 						String nextFileName = entry.getName();
 
 						ourLog.info(
@@ -367,10 +367,12 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 							if (theSingleFileAttachmentIdOrNull != null) {
 								attachmentId = theSingleFileAttachmentIdOrNull;
 							} else {
-								AttachmentDetails attachmentRequest = new AttachmentDetails(
-										theSingleFileInputStreamSupplier.get(),
-										AttachmentContentTypeEnum.ZIP,
-										theSingleFileName);
+								AttachmentDetails attachmentRequest = AttachmentDetails.newBuilder()
+										.withInputStream(theSingleFileInputStreamSupplier.get())
+										.withContentType(AttachmentContentTypeEnum.ZIP)
+										.withFilename(theSingleFileName)
+										.withNoMaximumSize()
+										.build();
 								attachmentId = myJobPersistence.storeNewAttachment(theJobInstanceId, attachmentRequest);
 							}
 							TerminologyFileSetJson data = newTerminologyFileSetJson();
@@ -452,9 +454,20 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 		IFhirResourceDao codeSystemDao = myDaoRegistry.getResourceDao("CodeSystem");
 		codeSystemDao.update(myVersionCanonicalizer.codeSystemFromCanonical(cs), srd);
 
-		ITermCodeSystemStorageSvc.StartStagingCodeSystemVersionResponse response =
-				myTermCodeSystemStorageSvc.startStagingCodeSystemVersion(cs.getUrl(), cs.getVersion());
-		jobMetadataAttachment.setCodeSystemStagingVersionId(response.stagingVersionId());
+		switch (theJobParameters.getMode()) {
+			case ADD, REMOVE -> jobMetadataAttachment.setCodeSystemStagingVersionId(codeSystemVersionId);
+			case SNAPSHOT -> {
+				ITermCodeSystemStorageSvc.StartStagingCodeSystemVersionResponse response =
+						myTermCodeSystemStorageSvc.startStagingCodeSystemVersion(cs.getUrl(), cs.getVersion());
+				jobMetadataAttachment.setCodeSystemStagingVersionId(response.stagingVersionId());
+				ourLog.atInfo()
+						.setMessage("Staging of CodeSystem[url={}, version={}] into staging version: {}")
+						.addArgument(cs.getUrl())
+						.addArgument(cs.getVersion())
+						.addArgument(response.stagingVersionId())
+						.log();
+			}
+		}
 
 		// Send a single chunk to trigger the first closure generation step
 		TerminologyFileSetJson fileSet = new TerminologyFileSetJson();
@@ -484,7 +497,7 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 			StepExecutionDetails<PT, VoidModel> theStepExecutionDetails,
 			IJobDataSink<TerminologyFileSetJson> theDataSink,
 			CT theContext,
-			String theFileName,
+			String theSingleFileName,
 			Supplier<InputStream> theInputStreamSupplier,
 			PT theJobParameters,
 			ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment)
@@ -587,10 +600,11 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 			}
 		};
 		byte[] bytes = CsvUtil.writeCsvToByteArray(theHeaders.toArray(new String[0]), producer);
-		AttachmentDetails attachmentDetails = AttachmentDetails.build()
+		AttachmentDetails attachmentDetails = AttachmentDetails.newBuilder()
 				.withContentType(AttachmentContentTypeEnum.CSV)
 				.withBytes(bytes)
 				.withFilename(theFilename + "_" + theStartRow + "-" + theEndRow)
+				.withNoMaximumSize()
 				.build();
 		return myJobPersistence.storeNewAttachment(theJobInstanceId, attachmentDetails);
 	}
@@ -642,21 +656,26 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 			quoteCharacter = null;
 		}
 
-		return new CSVParser(
-				theReader,
-				CSVFormat.DEFAULT
-						.builder()
-						.setDelimiter(theDelimiter)
-						.setEscape(null)
-						.setIgnoreEmptyLines(true)
-						.setQuote(quoteCharacter)
-						.setRecordSeparator('\n')
-						.setNullString("")
-						.setQuoteMode(QuoteMode.NON_NUMERIC)
-						.setHeader()
-						.setSkipHeaderRecord(true)
-						.setTrim(true)
-						.get());
+		return CSVParser.builder()
+				.setFormat(newCsvFormat(theDelimiter, quoteCharacter))
+				.setReader(theReader)
+				.get();
+	}
+
+	public static CSVFormat newCsvFormat(char theDelimiter, Character quoteCharacter) {
+		return CSVFormat.DEFAULT
+				.builder()
+				.setDelimiter(theDelimiter)
+				.setEscape(null)
+				.setIgnoreEmptyLines(true)
+				.setQuote(quoteCharacter)
+				.setRecordSeparator('\n')
+				.setNullString("")
+				.setQuoteMode(QuoteMode.MINIMAL)
+				.setHeader()
+				.setSkipHeaderRecord(true)
+				.setTrim(true)
+				.get();
 	}
 
 	private record StepIdAndFileHandlingInstructions(

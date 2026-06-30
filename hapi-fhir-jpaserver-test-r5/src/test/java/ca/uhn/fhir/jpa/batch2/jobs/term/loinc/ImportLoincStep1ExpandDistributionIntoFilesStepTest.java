@@ -35,7 +35,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -197,7 +196,12 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 		when(myDaoRegistry.getResourceDao(eq("CodeSystem"))).thenReturn(myCodeSystemDao);
 		when(myDaoRegistry.getResourceDao(eq("ValueSet"))).thenReturn(myValueSetDao);
 		when(myJobPersistence.fetchAttachmentByFilename(eq("my-instance-id"), eq(FILENAME_LOINC_DISTRIBUTION_FILE))).thenReturn(
-			new AttachmentDetails(zipCollectionBuilder.getZipBytes(), AttachmentContentTypeEnum.ZIP, FILENAME_LOINC_DISTRIBUTION_FILE)
+			AttachmentDetails.newBuilder()
+				.withBytes(zipCollectionBuilder.getZipBytes())
+				.withNoMaximumSize()
+				.withContentType(AttachmentContentTypeEnum.ZIP)
+				.withFilename(FILENAME_LOINC_DISTRIBUTION_FILE)
+				.build()
 		);
 
 		// Test
@@ -284,7 +288,12 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 		// Setup
 		when(myJobPersistence.fetchAttachmentByFilename(eq(MY_INSTANCE_ID), eq(FILENAME_LOINC_DISTRIBUTION_FILE))).thenAnswer(t -> {
 			byte[] bytes = RandomUtils.secure().randomBytes(1000);
-			return new AttachmentDetails(new ByteArrayInputStream(bytes), AttachmentContentTypeEnum.ZIP, FILENAME_LOINC_DISTRIBUTION_FILE);
+			return AttachmentDetails.newBuilder()
+				.withBytes(bytes)
+				.withNoMaximumSize()
+				.withContentType(AttachmentContentTypeEnum.ZIP)
+				.withFilename(FILENAME_LOINC_DISTRIBUTION_FILE)
+				.build();
 		});
 
 		// Test
@@ -359,7 +368,13 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 			String fileName = t.getArgument(1, String.class);
 			assertEquals(FILENAME_LOINC_DISTRIBUTION_FILE, fileName);
 			byte[] bytes = files.getZipBytes();
-			return new AttachmentDetails(new ByteArrayInputStream(bytes), AttachmentContentTypeEnum.ZIP, FILENAME_LOINC_DISTRIBUTION_FILE);
+			return AttachmentDetails
+				.newBuilder()
+				.withBytes(bytes)
+				.withNoMaximumSize()
+				.withContentType(AttachmentContentTypeEnum.ZIP)
+				.withFilename(FILENAME_LOINC_DISTRIBUTION_FILE)
+				.build();
 		});
 	}
 

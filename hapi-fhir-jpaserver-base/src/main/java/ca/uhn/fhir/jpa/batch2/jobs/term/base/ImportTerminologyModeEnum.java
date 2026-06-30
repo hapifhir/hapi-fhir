@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
@@ -17,13 +17,21 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.util;
+package ca.uhn.fhir.jpa.batch2.jobs.term.base;
 
-public class Counter {
+public enum ImportTerminologyModeEnum {
 
-	private long myCount;
-
-	public long getThenAdd() {
-		return myCount++;
-	}
+	/**
+	 * Specified codes are added to the existing codes.
+	 */
+	ADD,
+	/**
+	 * Specified codes are removed from the existing codes.
+	 */
+	REMOVE,
+	/**
+	 * Existing codes are removed and replaced with the new codes.
+	 * This is the default mode.
+	 */
+	SNAPSHOT
 }

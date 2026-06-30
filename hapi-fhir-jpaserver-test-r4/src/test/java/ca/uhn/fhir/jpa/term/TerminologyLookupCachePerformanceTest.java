@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
-import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.util.StopWatch;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -17,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static ca.uhn.fhir.jpa.term.TerminologySvcDeltaR4Test.newDeltaCodeSystem;
 import static org.assertj.core.api.Assertions.assertThat;
 
 // Created by claude-opus-4-6
@@ -91,9 +91,11 @@ class TerminologyLookupCachePerformanceTest extends BaseJpaR4Test {
 	void validateCode_warmCache_throughput() {
 		String url = CS_URL_PREFIX + "validate";
 		createNotPresentCodeSystem(url);
-		CustomTerminologySet delta = new CustomTerminologySet();
-		delta.addRootConcept("codeA", "Display A");
-		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd(url, delta);
+
+		CodeSystem additions = newDeltaCodeSystem();
+		additions.setUrl(url);
+		additions.addConcept().setCode("codeA").setDisplay("Display A");
+		myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), additions);
 
 		ValidationSupportContext valCtx = new ValidationSupportContext(myValidationSupport);
 		ConceptValidationOptions opts = new ConceptValidationOptions();
@@ -143,9 +145,11 @@ class TerminologyLookupCachePerformanceTest extends BaseJpaR4Test {
 	void deltaAdd_invalidateAndLookup_throughput() {
 		// Setup: code system with initial concept
 		createNotPresentCodeSystem(CS_URL_PREFIX + "delta");
-		CustomTerminologySet delta = new CustomTerminologySet();
-		delta.addRootConcept("initial", "Initial");
-		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd(CS_URL_PREFIX + "delta", delta);
+
+		CodeSystem delta = newDeltaCodeSystem();
+		delta.setUrl(CS_URL_PREFIX + "delta");
+		delta.addConcept().setCode("initial").setDisplay("Initial");
+		myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), delta);
 
 		// Warm
 		myTermSvc.lookupCode(
@@ -156,9 +160,10 @@ class TerminologyLookupCachePerformanceTest extends BaseJpaR4Test {
 		int cycles = 50;
 		StopWatch sw = new StopWatch();
 		for (int i = 0; i < cycles; i++) {
-			CustomTerminologySet addDelta = new CustomTerminologySet();
-			addDelta.addRootConcept("code-" + i, "Display " + i);
-			myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd(CS_URL_PREFIX + "delta", addDelta);
+			CodeSystem addDelta = newDeltaCodeSystem();
+			addDelta.setUrl(CS_URL_PREFIX + "delta");
+			addDelta.addConcept().setCode("code-" + i).setDisplay("Display " + i);
+			myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), addDelta);
 
 			IValidationSupport.LookupCodeResult result = myTermSvc.lookupCode(
 				new ValidationSupportContext(myValidationSupport),
@@ -181,11 +186,12 @@ class TerminologyLookupCachePerformanceTest extends BaseJpaR4Test {
 			cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
 			myCodeSystemDao.create(cs, mySrd);
 
-			CustomTerminologySet delta = new CustomTerminologySet();
+			CodeSystem delta = newDeltaCodeSystem();
+			delta.setUrl(url);
 			for (int j = 0; j < NUM_CONCEPTS_PER_CS; j++) {
-				delta.addRootConcept("concept-" + j, "Display " + j);
+				delta.addConcept().setCode("concept-" + j).setDisplay("Display " + j);
 			}
-			myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd(url, delta);
+			myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), delta);
 			urls.add(url);
 		}
 		return urls;

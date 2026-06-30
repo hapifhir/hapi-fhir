@@ -23,22 +23,25 @@ import ca.uhn.fhir.batch2.api.AttachmentContentTypeEnum;
 import ca.uhn.fhir.batch2.api.AttachmentDetails;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyModeEnum;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.custom.ImportCustomTerminologyJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.icd.ImportIcdJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.jpa.batch2.jobs.term.snomedct.ImportSnomedCtJobAppCtx;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.util.JsonUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.ByteArrayInputStream;
@@ -94,6 +97,14 @@ public class TerminologyTestHelper {
 		myBatch2JobHelper = theBatch2JobHelper;
 		myMemoryCacheService = theMemoryCacheService;
 		myValidationSupport = theValidationSupport;
+	}
+
+	public String startImportCustomJobAndWaitForCompletion(
+			String theUrl, String theVersion, ZipCollectionBuilder theFiles, ImportTerminologyModeEnum theMode) {
+		String jobDefinitionId = ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY;
+		String distributionFilename = TerminologyConstants.FILENAME_CUSTOM_DISTRIBUTION_FILE;
+		return startImportTerminologyJob(
+				theUrl, theVersion, theFiles, false, null, jobDefinitionId, distributionFilename, null, true, theMode);
 	}
 
 	public String startImportCustomJobAndWaitForCompletion(
@@ -200,7 +211,8 @@ public class TerminologyTestHelper {
 				jobDefinitionId,
 				distributionFilename,
 				propertiesFilename,
-				true);
+				true,
+				ImportTerminologyModeEnum.SNAPSHOT);
 	}
 
 	private String startImportTerminologyJobAndWaitForFailure(
@@ -221,7 +233,8 @@ public class TerminologyTestHelper {
 				jobDefinitionId,
 				distributionFilename,
 				propertiesFilename,
-				false);
+				false,
+				ImportTerminologyModeEnum.SNAPSHOT);
 	}
 
 	private String startImportTerminologyJob(
@@ -233,32 +246,37 @@ public class TerminologyTestHelper {
 			String jobDefinitionId,
 			String distributionFilename,
 			String propertiesFilename,
-			boolean expectSuccess) {
+			boolean expectSuccess,
+			ImportTerminologyModeEnum theMode) {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(jobDefinitionId);
+
 		ImportTerminologyJobParameters parameters = new ImportTerminologyJobParameters();
 		parameters.setUrl(theUrl);
 		parameters.setVersionId(versionId);
 		if (theDontMakeCurrent) {
 			parameters.setDontMakeCurrent(true);
 		}
+		parameters.setMode(theMode);
 		startRequest.setParameters(parameters);
 
 		Batch2JobStartResponse instanceId = myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest);
 
 		if (theFiles.isSingleZip()) {
-			AttachmentDetails attachmentDetails = AttachmentDetails.build()
+			AttachmentDetails attachmentDetails = AttachmentDetails.newBuilder()
 					.withInputStream(new ByteArrayInputStream(theFiles.getZipBytes()))
 					.withContentType(AttachmentContentTypeEnum.ZIP)
 					.withFilename(distributionFilename)
+					.withNoMaximumSize()
 					.build();
 			myJobPersistence.storeNewAttachment(instanceId.getInstanceId(), attachmentDetails);
 		} else {
-			for (ITermLoaderSvc.FileDescriptor descriptor : theFiles.getFiles()) {
-				AttachmentDetails attachmentDetails = AttachmentDetails.build()
-						.withInputStream(descriptor.getInputStream())
+			for (ZipCollectionBuilder.FileDescriptor descriptor : theFiles.getFiles()) {
+				AttachmentDetails attachmentDetails = AttachmentDetails.newBuilder()
+						.withInputStream(descriptor.inputStream())
 						.withContentType(AttachmentContentTypeEnum.PLAIN_TEXT)
-						.withFilename(descriptor.getFilename())
+						.withFilename(descriptor.filename())
+						.withNoMaximumSize()
 						.build();
 				myJobPersistence.storeNewAttachment(instanceId.getInstanceId(), attachmentDetails);
 			}
@@ -271,8 +289,12 @@ public class TerminologyTestHelper {
 			} catch (IOException e) {
 				fail("Failed to store properties", e);
 			}
-			AttachmentDetails attachmentDetails =
-					new AttachmentDetails(out.toByteArray(), AttachmentContentTypeEnum.PROPERTIES, propertiesFilename);
+			AttachmentDetails attachmentDetails = AttachmentDetails.newBuilder()
+					.withBytes(out.toByteArray())
+					.withContentType(AttachmentContentTypeEnum.PROPERTIES)
+					.withFilename(propertiesFilename)
+					.withNoMaximumSize()
+					.build();
 			myJobPersistence.storeNewAttachment(instanceId.getInstanceId(), attachmentDetails);
 		}
 
@@ -290,6 +312,11 @@ public class TerminologyTestHelper {
 	public String startImportSnomedCtJobAndWaitForCompletion(
 			String versionId, ZipCollectionBuilder theFiles, boolean theDontMakeCurrent) {
 		return startImportSnomedCtJobAndWaitForCompletion(versionId, theFiles, theDontMakeCurrent, false);
+	}
+
+	public String startImportSnomedCtJobAndWaitForFailure(
+			String versionId, ZipCollectionBuilder theFiles, boolean theDontMakeCurrent) {
+		return startImportSnomedCtJobAndWaitForCompletion(versionId, theFiles, theDontMakeCurrent, true);
 	}
 
 	public String startImportSnomedCtJobAndWaitForCompletion(
@@ -402,6 +429,12 @@ public class TerminologyTestHelper {
 				jobDefinitionId,
 				distributionFilename,
 				propertiesFilename);
+	}
+
+	public String getReport(String theJobInstanceId) {
+		JobInstance instance = myJobCoordinator.getInstance(theJobInstanceId);
+		return JsonUtil.deserialize(instance.getReport(), ImportTerminologyResultJson.class)
+				.getReport();
 	}
 
 	private static void addBaseLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles, String theClassPathPrefix)

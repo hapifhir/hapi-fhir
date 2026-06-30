@@ -15,7 +15,6 @@ import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
-import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
@@ -107,6 +106,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static ca.uhn.fhir.jpa.term.TerminologySvcDeltaR4Test.newDeltaCodeSystem;
 import static ca.uhn.fhir.rest.api.Constants.JAVA_VALIDATOR_DETAILS_SYSTEM;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -527,11 +527,12 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		myStructureDefinitionDao.create(profile, mySrd);
 
 		// Add a bunch of codes
-		CustomTerminologySet codesToAdd = new CustomTerminologySet();
+		CodeSystem additions = newDeltaCodeSystem();
+		additions.setUrl("http://loinc.org");
 		for (int i = 0; i < 100; i++) {
-			codesToAdd.addRootConcept("CODE" + i, "Display " + i);
+			additions.addConcept().setCode("CODE" + i).setDisplay("Display " + i);
 		}
-		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://loinc.org", codesToAdd);
+		myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), additions);
 
 		myStorageSettings.setMaximumExpansionSize(50);
 
@@ -1120,11 +1121,12 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		myStorageSettings.setPreExpandValueSets(true);
 
 		// Add a bunch of codes
-		CustomTerminologySet codesToAdd = new CustomTerminologySet();
+		CodeSystem additions = newDeltaCodeSystem();
+		additions.setUrl("http://loinc.org");
 		for (int i = 0; i < 100; i++) {
-			codesToAdd.addRootConcept("CODE" + i, "Display " + i);
+			additions.addConcept().setCode("CODE" + i).setDisplay("Display " + i);
 		}
-		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://loinc.org", codesToAdd);
+		myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), additions);
 
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 
