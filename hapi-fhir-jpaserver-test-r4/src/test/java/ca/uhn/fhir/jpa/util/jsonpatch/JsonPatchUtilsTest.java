@@ -28,7 +28,7 @@ public class JsonPatchUtilsTest extends BaseJpaR4Test {
 			"        \"patch\": [ {\n" +
 			"            \"op\": \"add\",\n" +
 			"            \"path\": \"/derivedFrom/-\",\n" +
-			"            \"value\": [{'reference': '/Media/465eb73a-bce3-423a-b86e-5d0d267638f4'}]\n" +
+			"            \"value\": [{\"reference\": \"/Media/465eb73a-bce3-423a-b86e-5d0d267638f4\"}]\n" +
 			"        } ]\n" +
 			"    } ]";
 
@@ -37,7 +37,7 @@ public class JsonPatchUtilsTest extends BaseJpaR4Test {
 			fail();
 		} catch (InvalidRequestException e) {
 			ourLog.info(e.toString());
-			assertThat(e.toString()).contains("was expecting double-quote to start field name");
+			assertThat(e.toString()).contains("missing type id property 'op'");
 			// The error message should not contain the patch body
 			assertThat(e.toString()).doesNotContain("add image to examination");
 		}

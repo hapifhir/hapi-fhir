@@ -57,8 +57,8 @@ public class JsonPatchUtils {
 		// Jackson 3: ObjectMapper is immutable — build via JsonMapper.builder().
 		// JsonParser.Feature.INCLUDE_SOURCE_IN_LOCATION → StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION
 		ObjectMapper mapper = JsonMapper.builder()
-			.disable(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION)
-			.build();
+				.disable(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION)
+				.build();
 
 		final JsonNode after;
 		try {
@@ -66,7 +66,7 @@ public class JsonPatchUtils {
 			JsonNode jsonPatchNode = mapper.readTree(parser);
 
 			JsonNode originalJsonDocument =
-				mapper.readTree(theCtx.newJsonParser().encodeResourceToString(theResourceToUpdate));
+					mapper.readTree(theCtx.newJsonParser().encodeResourceToString(theResourceToUpdate));
 
 			// Pre-populate missing parent arrays for "add" operations targeting array elements.
 			// When a FHIR resource has an empty repeating field (e.g., Group with no members),
@@ -91,14 +91,14 @@ public class JsonPatchUtils {
 				retVal = fhirJsonParser.parseResource(clazz, postPatchedContent);
 			} catch (DataFormatException e) {
 				String resourceId = theResourceToUpdate
-					.getIdElement()
-					.toUnqualifiedVersionless()
-					.getValue();
+						.getIdElement()
+						.toUnqualifiedVersionless()
+						.getValue();
 				String resourceType =
-					theCtx.getResourceDefinition(theResourceToUpdate).getName();
+						theCtx.getResourceDefinition(theResourceToUpdate).getName();
 				resourceId = defaultString(resourceId, resourceType);
 				String msg = theCtx.getLocalizer()
-					.getMessage(JsonPatchUtils.class, "failedToApplyPatch", resourceId, e.getMessage());
+						.getMessage(JsonPatchUtils.class, "failedToApplyPatch", resourceId, e.getMessage());
 				throw new InvalidRequestException(Msg.code(1271) + msg);
 			}
 
