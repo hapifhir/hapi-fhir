@@ -37,6 +37,7 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.ParametersUtil;
@@ -79,6 +80,9 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 	@Autowired
 	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)
 	private ValidationSupportChain myValidationSupportChain;
+
+	@Autowired
+	private IPagingProvider myPagingProvider;
 
 	@VisibleForTesting
 	public void setDaoRegistryForUnitTest(DaoRegistry theDaoRegistry) {
@@ -265,7 +269,9 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		List<String> statuses = theExpansionStatuses != null
 				? theExpansionStatuses.stream().map(IPrimitiveType::getValue).toList()
 				: null;
-		int count = theCount != null && theCount.hasValue() ? theCount.getValue() : 100;
+		int count =
+				theCount != null && theCount.hasValue() ? theCount.getValue() : myPagingProvider.getDefaultPageSize();
+		count = Math.min(myPagingProvider.getMaximumPageSize(), count);
 		int offset = theOffset != null && theOffset.hasValue() ? theOffset.getValue() : 0;
 		return myTermValueSetExpansionSvc.getExpansionStatus(theUrl, theName, statuses, count, offset);
 	}

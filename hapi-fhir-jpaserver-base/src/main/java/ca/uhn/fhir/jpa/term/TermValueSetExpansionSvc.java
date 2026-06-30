@@ -49,6 +49,9 @@ import static ca.uhn.fhir.util.ParametersUtil.addPartCode;
 import static ca.uhn.fhir.util.ParametersUtil.addPartString;
 import static ca.uhn.fhir.util.ParametersUtil.addPartUrl;
 
+/**
+ * Default implementation for {@link ITermValueSetExpansionSvc}.
+ */
 // Created by claude-opus-4-8
 public class TermValueSetExpansionSvc implements ITermValueSetExpansionSvc {
 	private static final String LIKE_WILDCARD = "%";
@@ -61,22 +64,6 @@ public class TermValueSetExpansionSvc implements ITermValueSetExpansionSvc {
 		myContext = theContext;
 	}
 
-	/**
-	 * Returns a {@code Parameters} resource with a {@code summary} part (repository-wide status counts)
-	 * followed by one {@code valueSet} part per matching ValueSet for the requested page.
-	 *
-	 * <p>{@code url} and {@code name} are mutually exclusive; both default to a starts-with match and
-	 * accept {@code :contains} and {@code :exact} qualifiers. Omitting all filters returns the first
-	 * page across every ValueSet.
-	 *
-	 * @param theUrlParam URL filter, or {@code null} for none
-	 * @param theNameParam name filter, or {@code null} for none
-	 * @param theExpansionStatuses status filter; {@code null} or empty returns all statuses
-	 * @param theCount page size
-	 * @param theOffset zero-based row offset
-	 * @throws InvalidRequestException if both {@code theUrlParam} and {@code theNameParam} are given,
-	 *     or a status value is not a {@link TermValueSetPreExpansionStatusEnum} name
-	 */
 	@Transactional(readOnly = true)
 	public IBaseParameters getExpansionStatus(
 			@Nullable StringParam theUrlParam,

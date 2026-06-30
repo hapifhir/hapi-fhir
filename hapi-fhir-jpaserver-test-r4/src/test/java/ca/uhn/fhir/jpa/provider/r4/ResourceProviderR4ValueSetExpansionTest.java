@@ -8,7 +8,7 @@ import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
-import ca.uhn.fhir.jpa.test.BaseJpaTest;
+import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -55,7 +55,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 // Created by claude-opus-4-8
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.NoFT.class})
-public class ResourceProviderR4ValueSetExpansionTest extends BaseJpaTest {
+public class ResourceProviderR4ValueSetExpansionTest extends BaseJpaR4Test {
 
 	@Autowired
 	private FhirContext myFhirCtx;
@@ -89,7 +89,7 @@ public class ResourceProviderR4ValueSetExpansionTest extends BaseJpaTest {
 			.withServer(t -> t.setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class)));
 
 	@Override
-	protected FhirContext getFhirContext() {
+	public FhirContext getFhirContext() {
 		return myFhirCtx;
 	}
 
@@ -378,6 +378,41 @@ public class ResourceProviderR4ValueSetExpansionTest extends BaseJpaTest {
 			.map(p -> p.getValue().primitiveValue())
 			.findFirst();
 		assertThat(errorMessage).contains("CodeSystem not found: http://example.org/cs");
+	}
+
+	@Test
+	void expansionStatus_withNoPaging_usesDefaultPageSize() {
+		for (int i = 0; i < 100; i++) {
+			createAndStoreTermValueSet("http://example.org/vs/es-" + i, "Example VS");
+		}
+
+		Parameters response = myServer.getFhirClient()
+			.operation()
+			.onType(ValueSet.class)
+			.named(OPERATION_EXPANSION_STATUS)
+			.withNoParameters(Parameters.class)
+			.execute();
+
+		assertThat(response.getParameter().stream().filter(p -> VALUESET.equals(p.getName()))).hasSize(10);
+	}
+
+	@Test
+	void expansionStatus_withLargeMaxPageSize_usesDefaultMaxPageSize() {
+		for (int i = 0; i < 100; i++) {
+			createAndStoreTermValueSet("http://example.org/vs/es-" + i, "Example VS");
+		}
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter("_count", new IntegerType(1000));
+
+		Parameters response = myServer.getFhirClient()
+			.operation()
+			.onType(ValueSet.class)
+			.named(OPERATION_EXPANSION_STATUS)
+			.withParameters(inParams)
+			.execute();
+
+		assertThat(response.getParameter().stream().filter(p -> VALUESET.equals(p.getName()))).hasSize(50);
 	}
 
 	private Parameters fetchExpansionStatus(String theQuery) {

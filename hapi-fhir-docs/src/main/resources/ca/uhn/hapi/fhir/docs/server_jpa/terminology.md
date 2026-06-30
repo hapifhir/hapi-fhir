@@ -2,7 +2,7 @@
 
 HAPI FHIR JPA Server includes an `IValidationSupport` class, `JpaPersistedResourceValidationSupport`, which can be used to validate terminology using CodeSystem, ValueSet and ConceptMap resources provided by the JPA Server. Terminology can be loaded into the JPA Server using standard FHIR REST APIs (PUT and POST) as well as using the hapi-fhir-cli [upload-terminology](/hapi-fhir/docs/tools/hapi_fhir_cli.html#upload-terminology) command.
 
-For large ValueSets, the JPA Server can pre-expand and persist the expanded concept list so that `$expand`, validation, and lookup calls do not need to resolve the ValueSet's compose rules on every request. See [ValueSet Pre-Expansion](/hapi-fhir/docs/server_jpa/valueset_expansion.html) for details on how this works and how to inspect expansion status.
+For large ValueSets, the JPA Server can pre-expand and persist the expanded concept list so that `$expand`, `$validate`, and `$lookup` calls do not need to resolve the `ValueSet.compose` rules on every request. See [ValueSet Pre-Expansion](/hapi-fhir/docs/server_jpa/valueset_expansion.html) for details on how this works and how to inspect expansion status.
 
 # Versioning of Terminology
 
