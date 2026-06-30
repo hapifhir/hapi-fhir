@@ -239,10 +239,17 @@
 
 
 		<!-- Patch Dependencies -->
+		<!-- dogote is now abandoned. Jan 2017 -->
+<!--		<dependency>-->
+<!--			<groupId>io.dogote</groupId>-->
+<!--			<artifactId>json-patch</artifactId>-->
+<!--		</dependency>-->
+
 		<dependency>
-			<groupId>io.dogote</groupId>
-			<artifactId>json-patch</artifactId>
+			<groupId>io.github.vishwakarma</groupId>
+			<artifactId>zjsonpatch</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>com.github.dnault</groupId>
 			<artifactId>xml-patch</artifactId>
