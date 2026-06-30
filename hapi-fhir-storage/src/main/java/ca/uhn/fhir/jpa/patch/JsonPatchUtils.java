@@ -25,13 +25,9 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-
-// ── Jackson 3 (tools.jackson) ────────────────────────────────────────────────
-// Package rename from com.fasterxml.jackson.* → tools.jackson.*
-// ObjectMapper construction moves to the format-specific JsonMapper builder.
-// JsonParser.Feature.INCLUDE_SOURCE_IN_LOCATION → StreamReadFeature (JSON-agnostic
-// stream feature; this particular feature lives on StreamReadFeature, not
-// JsonReadFeature, since it controls parser location reporting, not JSON syntax).
+import com.flipkart.zjsonpatch.Jackson3JsonPatch;
+import com.flipkart.zjsonpatch.JsonPatchApplicationException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import tools.jackson.core.JsonParser;
 import tools.jackson.core.StreamReadFeature;
 import tools.jackson.databind.JsonNode;
@@ -39,17 +35,19 @@ import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.ObjectNode;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
+// ── Jackson 3 (tools.jackson) ────────────────────────────────────────────────
+// Package rename from com.fasterxml.jackson.* → tools.jackson.*
+// ObjectMapper construction moves to the format-specific JsonMapper builder.
+// JsonParser.Feature.INCLUDE_SOURCE_IN_LOCATION → StreamReadFeature (JSON-agnostic
+// stream feature; this particular feature lives on StreamReadFeature, not
+// JsonReadFeature, since it controls parser location reporting, not JSON syntax).
 // ── zjsonpatch (io.github.vishwakarma) — Jackson 3 native API ───────────────
 // Maven groupId is io.github.vishwakarma, but the Java package remains
 // com.flipkart.zjsonpatch. For Jackson 3 trees, use the Jackson3JsonPatch
 // class (NOT JsonPatch, which is the Jackson 2.x API and will not accept
 // tools.jackson.databind.JsonNode instances).
-import com.flipkart.zjsonpatch.Jackson3JsonPatch;
-import com.flipkart.zjsonpatch.JsonPatchApplicationException;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public class JsonPatchUtils {
 
