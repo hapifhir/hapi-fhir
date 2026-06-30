@@ -36,9 +36,10 @@ improves write throughput under high write concurrency.
 The single shared pool remains the default, so existing deployments are unaffected on upgrade. Per-thread pooling can
 be enabled with `JpaStorageSettings#setIdSequencePoolingStrategy(IdSequencePoolingStrategy.PER_THREAD_POOL)`.
 
-When per-thread pooling is enabled, ids are no longer handed out in strict creation order across threads (an id assigned
-later on one thread may be lower than one assigned earlier on another thread), so code must not treat the numeric
-internal id as a creation-order signal; use the last-updated time instead.
+Internal ids have never reflected creation order across servers in a cluster, since each server allocates ids from its
+own block. With per-thread pooling this is also true between threads on a single server: an id assigned later on one
+thread may be lower than one assigned earlier on another. Code must not treat the numeric internal id as a
+creation-order signal; use the last-updated time instead.
 
 ### Critical: do not run the shared-pool and per-thread behaviors against the same database at the same time
 
