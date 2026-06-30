@@ -46,7 +46,7 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 	public void before() throws Exception {
 		super.before();
 		ForceOffsetSearchModeInterceptor forceOffsetSearchModeInterceptor = new ForceOffsetSearchModeInterceptor();
-		myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
+		myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry, myMatchResourceUrlService, myIdHelperService, myTransactionService);
 
 		registerInterceptor(myPatientIdPartitionInterceptor);
 		registerInterceptor(forceOffsetSearchModeInterceptor);

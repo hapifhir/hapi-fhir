@@ -6,6 +6,10 @@ import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -679,7 +683,7 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 			myPartitionSettings.setDefaultPartitionId(-1);
 			// PATIENT_ID mode: partition derived from patient ID via default algorithm
 			myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(
-					getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
+					getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry, myMatchResourceUrlService, myIdHelperService, myTransactionService);
 			myInterceptorRegistry.registerInterceptor(myPatientIdPartitionInterceptor);
 		}
 
@@ -757,7 +761,7 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 			myPartitionSettings.setDefaultPartitionId(-1);
 			// BUCKETED_PATIENT_ID mode: patients hashed into a small number of buckets
 			myPatientIdPartitionInterceptor = new SmallBucketPatientIdPartitionInterceptor(
-					getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
+					getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry, myMatchResourceUrlService, myIdHelperService, myTransactionService);
 			myInterceptorRegistry.registerInterceptor(myPatientIdPartitionInterceptor);
 		}
 
@@ -834,8 +838,18 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 				FhirContext theFhirContext,
 				ISearchParamExtractor theSearchParamExtractor,
 				PartitionSettings thePartitionSettings,
-				DaoRegistry theDaoRegistry) {
-			super(theFhirContext, theSearchParamExtractor, thePartitionSettings, theDaoRegistry);
+				DaoRegistry theDaoRegistry,
+				MatchResourceUrlService<JpaPid> theMatchResourceUrlService,
+				IIdHelperService<JpaPid> theIdHelperService,
+				IHapiTransactionService theTransactionService) {
+			super(
+					theFhirContext,
+					theSearchParamExtractor,
+					thePartitionSettings,
+					theDaoRegistry,
+					theMatchResourceUrlService,
+					theIdHelperService,
+					theTransactionService);
 		}
 
 		@Override

@@ -34,7 +34,11 @@ import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.partition.BaseRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
@@ -44,9 +48,12 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorOrders;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.storage.PreviousVersionReader;
@@ -127,7 +134,15 @@ public class PatientIdPartitionInterceptor {
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
+	private final MatchResourceUrlService<JpaPid> myMatchResourceUrlService;
+
+	private final IIdHelperService<JpaPid> myIdHelperService;
+
+	private final IHapiTransactionService myTransactionService;
+
 	private Map<String, ResourceCompartmentStoragePolicy> myResourceTypeToCompartmentPolicy = Map.of();
+
+	private boolean myAllPartitionSearchSupported = true;
 
 	/**
 	 * Constructor
@@ -136,11 +151,48 @@ public class PatientIdPartitionInterceptor {
 			FhirContext theFhirContext,
 			ISearchParamExtractor theSearchParamExtractor,
 			PartitionSettings thePartitionSettings,
-			DaoRegistry theDaoRegistry) {
+			DaoRegistry theDaoRegistry,
+			MatchResourceUrlService<JpaPid> theMatchResourceUrlService,
+			IIdHelperService<JpaPid> theIdHelperService,
+			IHapiTransactionService theTransactionService) {
 		myFhirContext = theFhirContext;
 		mySearchParamExtractor = theSearchParamExtractor;
 		myPartitionSettings = thePartitionSettings;
 		myDaoRegistry = theDaoRegistry;
+		myMatchResourceUrlService = theMatchResourceUrlService;
+		myIdHelperService = theIdHelperService;
+		myTransactionService = theTransactionService;
+	}
+
+	/**
+	 * Whether the underlying storage infrastructure supports all-partition (all-shard) searches.
+	 * When {@code true}, the interceptor:
+	 * <ul>
+	 *   <li>resolves conditional Patient references in a FHIR transaction bundle entry body (e.g.
+	 *       {@code subject.reference = "Patient?identifier=..."}) to a literal {@code Patient/<id>} via a
+	 *       live all-partition search before partition determination runs; and</li>
+	 *   <li>allows an unresolved chained subject/patient search param to fan out across all partitions
+	 *       instead of failing.</li>
+	 * </ul>
+	 * When {@code false} both behaviors are disabled and an error is thrown for unresolved chained params,
+	 * preserving the single-partition guarantee.
+	 * <p>
+	 * Defaults to {@code true}; configure via {@link #setAllPartitionSearchSupported(boolean)}.
+	 *
+	 * @since 8.12.0
+	 */
+	protected boolean isAllPartitionSearchSupported() {
+		return myAllPartitionSearchSupported;
+	}
+
+	/**
+	 * Sets whether the underlying storage infrastructure supports all-partition (all-shard)
+	 * searches. See {@link #isAllPartitionSearchSupported()} for the behaviors this controls.
+	 *
+	 * @since 8.12.0
+	 */
+	public void setAllPartitionSearchSupported(boolean theAllPartitionSearchSupported) {
+		myAllPartitionSearchSupported = theAllPartitionSearchSupported;
 	}
 
 	/**
@@ -778,7 +830,8 @@ public class PatientIdPartitionInterceptor {
 	 * compartment that Encounter actually belongs to.
 	 */
 	@Hook(Pointcut.STORAGE_TRANSACTION_PROCESSING)
-	public void transaction(RequestDetails theRequestDetails, IBaseBundle theBundle) {
+	public void transaction(
+			RequestDetails theRequestDetails, IBaseBundle theBundle, TransactionDetails theTransactionDetails) {
 		FhirTerser terser = myFhirContext.newTerser();
 
 		/*
@@ -852,6 +905,107 @@ public class PatientIdPartitionInterceptor {
 		if (theRequestDetails != null) {
 			theRequestDetails.getUserData().put(PLACEHOLDER_TO_REFERENCE_KEY, placeholderToResource);
 		}
+
+		// When all-partition search is supported, rewrite conditional Patient references to literal
+		// Patient/<id> before partition determination runs.
+		resolveAndReplaceConditionalPatientReferencesInTransactionBundle(
+				theRequestDetails, theBundle, theTransactionDetails);
+	}
+
+	/**
+	 * Walks the Patient-compartment references in each entry's resource body (e.g. {@code Observation.subject})
+	 * within the transaction bundle, and for each one expressed as a conditional reference
+	 * to a Patient (e.g. {@code "Patient?identifier=http://acme.org/mrn|PT00062"}),
+	 * resolves it to a literal {@code Patient/<id>} via a live all-partition search and rewrites the
+	 * reference in place on the resource body. This runs before partition determination
+	 * ({@link #identifyForCreate}).
+	 * <p>
+	 * Only the compartment-defining references are resolved here, since those are the ones partition
+	 * determination relies on. Any other conditional reference is left untouched and is resolved later by
+	 * the core transaction processor at save time.
+	 * <p>
+	 * The step is a no-op unless {@link #isAllPartitionSearchSupported()} is {@code true}. The conditional
+	 * reference must match exactly one Patient: if it matches none it is rejected with HAPI-2992, and if it
+	 * matches more than one it is rejected with HAPI-2985 (in either case the partition cannot be determined).
+	 */
+	private void resolveAndReplaceConditionalPatientReferencesInTransactionBundle(
+			RequestDetails theRequestDetails, IBaseBundle theBundle, TransactionDetails theTransactionDetails) {
+		if (!isAllPartitionSearchSupported()) {
+			return;
+		}
+
+		List<BundleEntryParts> entries = BundleUtil.toListOfEntries(myFhirContext, theBundle);
+		for (BundleEntryParts entry : entries) {
+			IBaseResource resource = entry.getResource();
+			if (resource == null) {
+				continue;
+			}
+			RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(resource);
+			List<RuntimeSearchParam> compartmentSps =
+					ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
+			if (compartmentSps.isEmpty()) {
+				continue;
+			}
+			ResourceCompartmentUtil.getResourceCompartmentReferences(resource, compartmentSps, mySearchParamExtractor)
+					.forEach(reference -> {
+						String referenceValue = reference.getReferenceElement().getValue();
+						if (isConditionalPatientReference(referenceValue)) {
+							resolveAndReplaceConditionalPatientReference(
+									reference, referenceValue, theRequestDetails, theTransactionDetails);
+						}
+					});
+		}
+	}
+
+	/**
+	 * A conditional Patient reference is one whose value targets the Patient resource type with a search
+	 * query, i.e. starts with {@code "Patient?"} or {@code "/Patient?"}.
+	 */
+	private static boolean isConditionalPatientReference(@Nullable String theReferenceValue) {
+		return theReferenceValue != null
+				&& (theReferenceValue.startsWith(PATIENT_STR + "?")
+						|| theReferenceValue.startsWith("/" + PATIENT_STR + "?"));
+	}
+
+	/**
+	 * Resolves a single conditional Patient reference against a live all-partition search and rewrites it
+	 * to {@code Patient/<id>} when exactly one match is found.
+	 *
+	 * @throws ResourceNotFoundException   if the conditional reference matches no Patient
+	 * @throws PreconditionFailedException if the conditional reference matches more than one Patient
+	 */
+	private void resolveAndReplaceConditionalPatientReference(
+			IBaseReference theReference,
+			String theReferenceValue,
+			RequestDetails theRequestDetails,
+			TransactionDetails theTransactionDetails) {
+		Class<? extends IBaseResource> patientClass =
+				myFhirContext.getResourceDefinition(PATIENT_STR).getImplementingClass();
+
+		// Run the resolution search across all partitions.
+		Set<JpaPid> matches = myTransactionService
+				.withRequest(theRequestDetails)
+				.withRequestPartitionId(RequestPartitionId.allPartitions())
+				.readOnly()
+				.execute(() -> myMatchResourceUrlService.processMatchUrl(
+						theReferenceValue,
+						patientClass,
+						theTransactionDetails,
+						theRequestDetails,
+						RequestPartitionId.allPartitions()));
+
+		if (matches.isEmpty()) {
+			throw new ResourceNotFoundException(Msg.code(2992) + "Conditional reference \"" + theReferenceValue
+					+ "\" matched no Patient resources; unable to determine partition");
+		}
+		if (matches.size() > 1) {
+			throw new PreconditionFailedException(Msg.code(2985) + "Conditional reference \"" + theReferenceValue
+					+ "\" matched multiple Patient resources; unable to determine partition");
+		}
+
+		JpaPid pid = matches.iterator().next();
+		IIdType resolvedId = myIdHelperService.translatePidIdToForcedId(myFhirContext, PATIENT_STR, pid);
+		theReference.setReference(resolvedId.toUnqualifiedVersionless().getValue());
 	}
 
 	@SuppressWarnings("SameParameterValue")
@@ -904,6 +1058,26 @@ public class PatientIdPartitionInterceptor {
 			}
 		});
 
+		// Every value for this parameter has now been scanned. What we do with the result depends on
+		// whether the infrastructure can fan a search out across all partitions.
+		if (isAllPartitionSearchSupported()) {
+			// We can always fan out, so we never need to reject the search here. Return whatever we
+			// resolved -- an empty list is fine: it means either this parameter expressed no patient
+			// scoping, or its only patient anchor was a chained subject/patient param we could not
+			// resolve to a concrete id (e.g. subject.identifier=...). Either way the caller widens to a
+			// non-patient-specific (all-partition) search.
+			return idParts;
+		}
+
+		// The infrastructure cannot fan out, so a search must resolve to a known partition. Three cases:
+		//   1. idParts is non-empty: we pinned the partition(s) directly from a concrete Patient id.
+		//      Return the ids.
+		//   2. idParts is empty and no chained subject/patient param was seen: this parameter expressed no
+		//      patient scoping, so there is nothing to resolve. Return the empty list.
+		//   3. idParts is empty but a chained subject/patient param was seen (e.g. subject.identifier=...):
+		//      the only patient anchor is one we could not resolve to a concrete id, so we cannot honor
+		//      the single-partition guarantee. Reject the search with HAPI-2928.
+		// Only case 3 errors; cases 1 and 2 fall through and return normally.
 		if (idParts.isEmpty() && !needingAtLeastOneChainedSpToResolveSet.isEmpty()) {
 			throw new MethodNotAllowedException(Msg.code(2928)
 					+ buildErrorMsgForChainedParameters(theParamName, needingAtLeastOneChainedSpToResolveSet));

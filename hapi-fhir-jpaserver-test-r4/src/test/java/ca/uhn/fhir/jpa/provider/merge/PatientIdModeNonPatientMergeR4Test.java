@@ -56,7 +56,7 @@ class PatientIdModeNonPatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		// Registered here, unregistered automatically by BaseJpaTest.@AfterEach
 		PatientIdPartitionInterceptor partitionInterceptor = new PatientIdPartitionInterceptor(
-			getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
+			getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry, myMatchResourceUrlService, myIdHelperService, myTransactionService);
 		registerInterceptor(partitionInterceptor);
 
 		myPartitionSettings.setPartitioningEnabled(true);

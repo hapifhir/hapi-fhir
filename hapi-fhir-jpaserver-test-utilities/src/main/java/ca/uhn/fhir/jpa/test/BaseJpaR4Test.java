@@ -42,6 +42,8 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
@@ -549,6 +551,10 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected DaoRegistry myDaoRegistry;
 	@Autowired
 	protected IIdHelperService<JpaPid> myIdHelperService;
+	@Autowired
+	protected MatchResourceUrlService<JpaPid> myMatchResourceUrlService;
+	@Autowired
+	protected IHapiTransactionService myTransactionService;
 	@Autowired
 	protected ValidationSettings myValidationSettings;
 	@Autowired
