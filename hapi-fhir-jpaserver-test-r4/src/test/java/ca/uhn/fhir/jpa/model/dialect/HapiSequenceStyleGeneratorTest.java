@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.model.dialect;
 
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.IdSequencePoolingStrategy;
 import org.hibernate.id.enhanced.StandardOptimizerDescriptor;
 import org.junit.jupiter.api.Test;
 
@@ -21,14 +22,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class HapiSequenceStyleGeneratorTest {
 
 	@Test
-	void perThreadPoolingEnabled_selectsThreadLocalPooledOptimizer() {
-		assertThat(HapiSequenceStyleGenerator.determineOptimizerExternalName(true))
+	void perThreadPool_selectsThreadLocalPooledOptimizer() {
+		assertThat(HapiSequenceStyleGenerator.determineOptimizerExternalName(IdSequencePoolingStrategy.PER_THREAD_POOL))
 				.isEqualTo(StandardOptimizerDescriptor.POOLED_LOTL.getExternalName());
 	}
 
 	@Test
-	void perThreadPoolingDisabled_selectsLegacyPooledOptimizer() {
-		assertThat(HapiSequenceStyleGenerator.determineOptimizerExternalName(false))
+	void sharedPool_selectsLegacyPooledOptimizer() {
+		assertThat(HapiSequenceStyleGenerator.determineOptimizerExternalName(IdSequencePoolingStrategy.SHARED_POOL))
 				.isEqualTo(StandardOptimizerDescriptor.POOLED.getExternalName());
 	}
 

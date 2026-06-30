@@ -32,7 +32,7 @@ import org.hibernate.service.Service;
 public class HapiHibernateDialectSettingsService implements Service {
 
 	private boolean myDatabasePartitionMode;
-	private boolean myPerThreadIdSequencePoolingEnabled = false;
+	private IdSequencePoolingStrategy myIdSequencePoolingStrategy = IdSequencePoolingStrategy.SHARED_POOL;
 
 	/**
 	 * Constructor
@@ -56,20 +56,18 @@ public class HapiHibernateDialectSettingsService implements Service {
 	}
 
 	/**
-	 * Should the id sequence generator allocate ids from a per-thread pool rather than a single shared
-	 * pool? Per-thread pools avoid serializing concurrent writers on a shared lock during pool refills.
-	 * Defaults to <code>false</code> (the legacy single shared pool).
+	 * The strategy the id sequence generator uses to allocate new resource ids. Defaults to
+	 * {@link IdSequencePoolingStrategy#SHARED_POOL} (the legacy single shared pool).
 	 */
-	public boolean isPerThreadIdSequencePoolingEnabled() {
-		return myPerThreadIdSequencePoolingEnabled;
+	public IdSequencePoolingStrategy getIdSequencePoolingStrategy() {
+		return myIdSequencePoolingStrategy;
 	}
 
 	/**
-	 * Should the id sequence generator allocate ids from a per-thread pool rather than a single shared
-	 * pool? Per-thread pools avoid serializing concurrent writers on a shared lock during pool refills.
-	 * Defaults to <code>false</code> (the legacy single shared pool).
+	 * The strategy the id sequence generator uses to allocate new resource ids. Defaults to
+	 * {@link IdSequencePoolingStrategy#SHARED_POOL} (the legacy single shared pool).
 	 */
-	public void setPerThreadIdSequencePoolingEnabled(boolean thePerThreadIdSequencePoolingEnabled) {
-		myPerThreadIdSequencePoolingEnabled = thePerThreadIdSequencePoolingEnabled;
+	public void setIdSequencePoolingStrategy(IdSequencePoolingStrategy theIdSequencePoolingStrategy) {
+		myIdSequencePoolingStrategy = theIdSequencePoolingStrategy;
 	}
 }

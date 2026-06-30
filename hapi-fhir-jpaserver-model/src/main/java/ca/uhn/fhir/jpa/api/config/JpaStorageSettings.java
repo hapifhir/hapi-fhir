@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.IdSequencePoolingStrategy;
 import com.google.common.annotations.Beta;
 import com.google.common.collect.Sets;
 import jakarta.annotation.Nonnull;
@@ -185,7 +186,7 @@ public class JpaStorageSettings extends StorageSettings {
 	private Set<String> myEnforceReferentialIntegrityOnDeleteDisableForPaths = Collections.emptySet();
 	private boolean myUniqueIndexesEnabled = true;
 	private boolean myEnforceReferentialIntegrityOnWrite = true;
-	private boolean myPerThreadIdSequencePoolingEnabled = false;
+	private IdSequencePoolingStrategy myIdSequencePoolingStrategy = IdSequencePoolingStrategy.SHARED_POOL;
 	private SearchTotalModeEnum myDefaultTotalMode = null;
 	private int myEverythingIncludesFetchPageSize = 50;
 	/**
@@ -1744,31 +1745,32 @@ public class JpaStorageSettings extends StorageSettings {
 	}
 
 	/**
-	 * If set to <code>true</code> (default is <code>false</code>), the database sequence id generator
-	 * allocates ids from a pool kept per thread, so that concurrent writers do not serialize on a
-	 * single shared pool lock while the pool is refilled from the database. The default is
-	 * <code>false</code> (the legacy single shared pool) so that existing deployments are unaffected on
-	 * upgrade; enabling it should be done across an entire cluster at once (see the upgrade notes), never
-	 * node by node, because the two behaviors interpret the same database sequence differently.
+	 * The strategy the database sequence id generator uses to allocate new resource ids. The default is
+	 * {@link IdSequencePoolingStrategy#SHARED_POOL}. {@link IdSequencePoolingStrategy#PER_THREAD_POOL} lets concurrent
+	 * writers each allocate from their own pool so they do not serialize on a single shared pool lock while the
+	 * pool is refilled from the database; switching to it should be done across an entire cluster at once (see
+	 * the upgrade notes), never node by node, because the two strategies interpret the same database sequence
+	 * differently.
 	 *
 	 * @since 8.12.0
 	 */
-	public boolean isPerThreadIdSequencePoolingEnabled() {
-		return myPerThreadIdSequencePoolingEnabled;
+	public IdSequencePoolingStrategy getIdSequencePoolingStrategy() {
+		return myIdSequencePoolingStrategy;
 	}
 
 	/**
-	 * If set to <code>true</code> (default is <code>false</code>), the database sequence id generator
-	 * allocates ids from a pool kept per thread, so that concurrent writers do not serialize on a
-	 * single shared pool lock while the pool is refilled from the database. The default is
-	 * <code>false</code> (the legacy single shared pool) so that existing deployments are unaffected on
-	 * upgrade; enabling it should be done across an entire cluster at once (see the upgrade notes), never
-	 * node by node, because the two behaviors interpret the same database sequence differently.
+	 * The strategy the database sequence id generator uses to allocate new resource ids. The default is
+	 * {@link IdSequencePoolingStrategy#SHARED_POOL}. {@link IdSequencePoolingStrategy#PER_THREAD_POOL} lets concurrent
+	 * writers each allocate from their own pool so they do not serialize on a single shared pool lock while the
+	 * pool is refilled from the database; switching to it should be done across an entire cluster at once (see
+	 * the upgrade notes), never node by node, because the two strategies interpret the same database sequence
+	 * differently.
 	 *
 	 * @since 8.12.0
 	 */
-	public void setPerThreadIdSequencePoolingEnabled(boolean thePerThreadIdSequencePoolingEnabled) {
-		myPerThreadIdSequencePoolingEnabled = thePerThreadIdSequencePoolingEnabled;
+	public void setIdSequencePoolingStrategy(IdSequencePoolingStrategy theIdSequencePoolingStrategy) {
+		Validate.notNull(theIdSequencePoolingStrategy, "theIdSequencePoolingStrategy must not be null");
+		myIdSequencePoolingStrategy = theIdSequencePoolingStrategy;
 	}
 
 	/**
