@@ -62,9 +62,8 @@ public class Step6LoadAllConceptIdsStep
 		myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
 			TermValueSet termValueSet = myTermValueSetDao
 					.findTermValueSetByUrlAndVersion(url, version)
-					.orElseThrow(
-							() -> new JobExecutionFailedException(
-									Msg.code(2986) + "Missing ValueSet[url=" + url + ", version=" + version + "]"));
+					.orElseThrow(() -> new JobExecutionFailedException(
+							Msg.code(2986) + "Missing ValueSet[url=" + url + ", version=" + version + "]"));
 
 			Stream<TermValueSetConcept> allConcepts =
 					myTermValueSetConceptDao.streamAllByTermValueSetOrdered(termValueSet);

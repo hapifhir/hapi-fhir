@@ -306,7 +306,8 @@ public class AsyncRequestUtil {
 	 *
 	 * @since 8.12.0
 	 */
-    public static void addWarningToOperationOutcomeIfNoPreferRespondAsync(FhirContext theContext, IBaseOperationOutcome theOo, ServletRequestDetails theRequestDetails) {
+	public static void addWarningToOperationOutcomeIfNoPreferRespondAsync(
+			FhirContext theContext, IBaseOperationOutcome theOo, ServletRequestDetails theRequestDetails) {
 		String preferHeader = theRequestDetails.getHeader(Constants.HEADER_PREFER);
 		PreferHeader prefer = RestfulServerUtils.parsePreferHeader(null, preferHeader);
 		if (!prefer.getRespondAsync()) {
@@ -317,7 +318,7 @@ public class AsyncRequestUtil {
 		}
 	}
 
-    /**
+	/**
 	 * This object is created and returned by a lambda passed to {@link #handleAsyncJobPollForStatusResponse}
 	 * @param rawBody
 	 * @param messages

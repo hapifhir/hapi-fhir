@@ -33,7 +33,6 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
-import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetResultJson;
@@ -43,13 +42,11 @@ import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.DatatypeUtil;
 import ca.uhn.fhir.util.JsonUtil;
-import ca.uhn.fhir.util.OperationOutcomeUtil;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
@@ -283,10 +280,11 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 			})
 	public void invalidateValueSetExpansion(
 			@IdParam(optional = true) IIdType theValueSetId,
-			@OperationParam(name= PARAM_URL, min = 0, typeName = "uri") IPrimitiveType<String> theUrl,
-			@OperationParam(name= PARAM_VERSION, min = 0, typeName = "code") IPrimitiveType<String> theVersion,
+			@OperationParam(name = PARAM_URL, min = 0, typeName = "uri") IPrimitiveType<String> theUrl,
+			@OperationParam(name = PARAM_VERSION, min = 0, typeName = "code") IPrimitiveType<String> theVersion,
 			ServletRequestDetails theRequestDetails,
-			HttpServletRequest theServletRequest) throws IOException {
+			HttpServletRequest theServletRequest)
+			throws IOException {
 		startRequest(theServletRequest);
 		try {
 
@@ -302,12 +300,14 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 			Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(theRequestDetails, startRequest);
 			String instanceId = startResponse.getInstanceId();
 
-			String pollUrl = "ValueSet/" + OPERATION_INVALIDATE_EXPANSION_POLL_FOR_STATUS + "?" + PARAM_JOB_INSTANCE_ID + "=" + instanceId;
+			String pollUrl = "ValueSet/" + OPERATION_INVALIDATE_EXPANSION_POLL_FOR_STATUS + "?" + PARAM_JOB_INSTANCE_ID
+					+ "=" + instanceId;
 
 			Consumer<IBaseOperationOutcome> operationOutcomePostProcessor =
-				oo -> AsyncRequestUtil.addWarningToOperationOutcomeIfNoPreferRespondAsync(getContext(), oo, theRequestDetails);
+					oo -> AsyncRequestUtil.addWarningToOperationOutcomeIfNoPreferRespondAsync(
+							getContext(), oo, theRequestDetails);
 			AsyncRequestUtil.handleAsynchronousOperationStartRequest(
-				theRequestDetails, pollUrl, OPERATION_INVALIDATE_EXPANSION, operationOutcomePostProcessor);
+					theRequestDetails, pollUrl, OPERATION_INVALIDATE_EXPANSION, operationOutcomePostProcessor);
 
 		} finally {
 			endRequest(theServletRequest);
@@ -318,24 +318,25 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 	 * <code>$hapi.fhir.invalidate-expansion.poll-for-status</code>
 	 */
 	@Operation(
-		typeName = "ValueSet",
-		name = OPERATION_INVALIDATE_EXPANSION_POLL_FOR_STATUS,
-		manualResponse = true,
-		idempotent = true)
+			typeName = "ValueSet",
+			name = OPERATION_INVALIDATE_EXPANSION_POLL_FOR_STATUS,
+			manualResponse = true,
+			idempotent = true)
 	public void uploadTerminologyPollForStatus(
-		@OperationParam(name = PARAM_JOB_INSTANCE_ID, min = 1, typeName = "code")
-		IPrimitiveType<String> theJobInstanceId,
-		ServletRequestDetails theRequestDetails)
-		throws IOException {
+			@OperationParam(name = PARAM_JOB_INSTANCE_ID, min = 1, typeName = "code")
+					IPrimitiveType<String> theJobInstanceId,
+			ServletRequestDetails theRequestDetails)
+			throws IOException {
 
 		JobInstance jobInstance = myJobCoordinator.getInstance(DatatypeUtil.toStringValue(theJobInstanceId));
 		Function<JobInstance, AsyncRequestUtil.CompletedJobPollResponse> completedJobResponseProvider = instance -> {
 			PreExpandValueSetResultJson resultJson =
-				JsonUtil.deserialize(jobInstance.getReport(), PreExpandValueSetResultJson.class);
+					JsonUtil.deserialize(jobInstance.getReport(), PreExpandValueSetResultJson.class);
 			String report = resultJson.getReport();
 			return new AsyncRequestUtil.CompletedJobPollResponse(null, List.of(report));
 		};
-		AsyncRequestUtil.handleAsyncJobPollForStatusResponse(theRequestDetails, jobInstance, OPERATION_INVALIDATE_EXPANSION, completedJobResponseProvider);
+		AsyncRequestUtil.handleAsyncJobPollForStatusResponse(
+				theRequestDetails, jobInstance, OPERATION_INVALIDATE_EXPANSION, completedJobResponseProvider);
 	}
 
 	public static ValueSetExpansionOptions createValueSetExpansionOptions(
