@@ -9,9 +9,10 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetResultJson;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.JsonUtil;
 import org.hl7.fhir.r5.model.Bundle;
@@ -30,13 +31,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_INVALIDATE_EXPANSION;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_INVALIDATE_EXPANSION_POLL_FOR_STATUS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -75,8 +76,7 @@ class ValueSetOperationProviderTest {
 
 		// Execute
 
-		MethodOutcome outcome = myServer
-			.getFhirClient()
+		MethodOutcome outcome = getFhirClient()
 			.operation()
 			.onType(ValueSet.class)
 			.named(OPERATION_INVALIDATE_EXPANSION)
@@ -101,6 +101,12 @@ class ValueSetOperationProviderTest {
 		assertNull(myStartRequestCaptor.getValue().getParameters(PreExpandValueSetParameters.class).getId());
 	}
 
+	private IGenericClient getFhirClient() {
+		IGenericClient retVal = myServer.getFhirClient();
+		retVal.registerInterceptor(new LoggingInterceptor(true));
+		return retVal;
+	}
+
 	@Test
 	void testInvalidateExpansion_NoPreferHeader() {
 
@@ -110,8 +116,7 @@ class ValueSetOperationProviderTest {
 
 		// Execute
 
-		MethodOutcome outcome = myServer
-			.getFhirClient()
+		MethodOutcome outcome = getFhirClient()
 			.operation()
 			.onType(ValueSet.class)
 			.named(OPERATION_INVALIDATE_EXPANSION)
@@ -144,8 +149,7 @@ class ValueSetOperationProviderTest {
 
 		// Execute
 
-		MethodOutcome outcome = myServer
-			.getFhirClient()
+		MethodOutcome outcome = getFhirClient()
 			.operation()
 			.onInstance("ValueSet/123")
 			.named(OPERATION_INVALIDATE_EXPANSION)
@@ -181,8 +185,7 @@ class ValueSetOperationProviderTest {
 
 		// Test
 
-		MethodOutcome outcome = myServer
-			.getFhirClient()
+		MethodOutcome outcome = getFhirClient()
 			.operation()
 			.onType("ValueSet")
 			.named(OPERATION_INVALIDATE_EXPANSION_POLL_FOR_STATUS)
@@ -212,8 +215,7 @@ class ValueSetOperationProviderTest {
 
 		// Test
 
-		MethodOutcome outcome = myServer
-			.getFhirClient()
+		MethodOutcome outcome = getFhirClient()
 			.operation()
 			.onType("ValueSet")
 			.named(OPERATION_INVALIDATE_EXPANSION_POLL_FOR_STATUS)

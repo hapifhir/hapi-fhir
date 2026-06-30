@@ -202,11 +202,16 @@ public class ProviderConstants {
 
 	/**
 	 * Operation name for the $invalidate-expansion operation
+	 * Note that this operation does not have the <code>$hapi.fhir</code>
+	 * prefix because it predates this convention. The companion
+	 * {@link #OPERATION_INVALIDATE_EXPANSION_POLL_FOR_STATUS} operation
+	 * does use the prefix.
 	 */
 	public static final String OPERATION_INVALIDATE_EXPANSION = "$invalidate-expansion";
 
 	/**
-	 * Operation name for the $invalidate-expansion operation
+	 * Operation name for the $hapi.fhir.invalidate-expansion.poll-for-status
+	 * @see #OPERATION_INVALIDATE_EXPANSION
 	 */
 	public static final String OPERATION_INVALIDATE_EXPANSION_POLL_FOR_STATUS =
 			"$hapi.fhir.invalidate-expansion.poll-for-status";
