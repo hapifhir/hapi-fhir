@@ -17,9 +17,14 @@ npm install @smile-cdr/fhirts
 Each FHIR version is exposed as a namespace to avoid collisions between identically named resources:
 
 ```typescript
-import { R4, R5 } from '@smile-cdr/fhirts';
+import { R4, R4B, R5 } from '@smile-cdr/fhirts';
 
 const patient: R4.Patient = {
+  resourceType: 'Patient',
+  gender: 'female',
+};
+
+const r4bPatient: R4B.Patient = {
   resourceType: 'Patient',
   gender: 'female',
 };

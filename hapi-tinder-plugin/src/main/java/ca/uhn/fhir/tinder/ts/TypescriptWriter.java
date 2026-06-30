@@ -66,7 +66,7 @@ public class TypescriptWriter {
 			throws IOException {
 		try (InputStream templateStream = getClass().getResourceAsStream(theTemplate)) {
 			if (templateStream == null) {
-				throw new IOException(Msg.code(2987) + "Unable to locate template on classpath: " + theTemplate);
+				throw new IOException("Unable to locate template on classpath: " + theTemplate);
 			}
 			try (InputStreamReader templateReader = new InputStreamReader(templateStream, StandardCharsets.UTF_8);
 					OutputStreamWriter writer = new OutputStreamWriter(
