@@ -147,18 +147,6 @@ public class TermValueSetConcept extends BasePartitionable implements Serializab
 	@Transient
 	private transient Integer myHashCode;
 
-	@OneToMany(
-			fetch = FetchType.LAZY,
-			mappedBy = "myParent",
-			cascade = {})
-	private List<TermValueSetConceptParentChildLink> myChildren;
-
-	@OneToMany(
-			cascade = {},
-			fetch = FetchType.LAZY,
-			mappedBy = "myChild")
-	private List<TermValueSetConceptParentChildLink> myParents;
-
 	/**
 	 * Constructor
 	 */
@@ -355,31 +343,5 @@ public class TermValueSetConcept extends BasePartitionable implements Serializab
 	@VisibleForTesting
 	public boolean hasSourceConceptDirectParentPidsLob() {
 		return nonNull(mySourceConceptDirectParentPids);
-	}
-
-	public List<TermValueSetConceptParentChildLink> getChildren() {
-		if (myChildren == null) {
-			myChildren = new ArrayList<>();
-		}
-		return myChildren;
-	}
-
-	public List<TermValueSetConceptParentChildLink> getParents() {
-		if (myParents == null) {
-			myParents = new ArrayList<>();
-		}
-		return myParents;
-	}
-
-	public List<TermValueSetConcept> getParentConcepts() {
-		return getParents().stream()
-				.map(TermValueSetConceptParentChildLink::getParent)
-				.toList();
-	}
-
-	public List<TermValueSetConcept> getChildConcepts() {
-		return getChildren().stream()
-				.map(TermValueSetConceptParentChildLink::getChild)
-				.toList();
 	}
 }

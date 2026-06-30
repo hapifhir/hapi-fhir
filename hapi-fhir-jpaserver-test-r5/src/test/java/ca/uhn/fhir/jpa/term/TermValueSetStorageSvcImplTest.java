@@ -5,7 +5,6 @@ import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
-import ca.uhn.fhir.jpa.entity.TermValueSetConceptParentChildLink;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -89,8 +88,8 @@ public class TermValueSetStorageSvcImplTest extends BaseJpaR5Test {
 	@Test
 	void testStartStagingVersion_UnknownValueSet() {
 		assertThatThrownBy(()->mySvc.startStagingVersion("http://foo", "1.0"))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessageContaining("AAA");
+			.isInstanceOf(ResourceNotFoundException.class)
+			.hasMessageContaining("No ValueSet found with URL[http://foo] and Version[1.0]");
 	}
 
 	@ParameterizedTest
@@ -98,9 +97,10 @@ public class TermValueSetStorageSvcImplTest extends BaseJpaR5Test {
 	void testStartStagingVersion_UnknownVersion(String theVersion) {
 		createValueSetResource("1.0");
 
+		String messageVersion = isNotBlank(theVersion) ? theVersion : "(none)";
 		assertThatThrownBy(()->mySvc.startStagingVersion(VS_URI, defaultIfBlank(theVersion, null)))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessageContaining("AAA");
+			.isInstanceOf(ResourceNotFoundException.class)
+			.hasMessageContaining("No ValueSet found with URL[http://vs] and Version[" + messageVersion + "]");
 	}
 
 
@@ -148,104 +148,6 @@ public class TermValueSetStorageSvcImplTest extends BaseJpaR5Test {
 		assertPartitionSet();
 	}
 
-	@Test
-	void testAddConceptsToExpansion_Hierarchy() {
-		// Setup
-		createValueSetResource("1.0");
-		String stagingVersion = mySvc.startStagingVersion(VS_URI, "1.0");
-
-		// Test
-		ValueSet toAdd = new ValueSet();
-		toAdd.setUrl(VS_URI);
-		toAdd.setVersion(stagingVersion);
-		ValueSet.ValueSetExpansionContainsComponent code0 = toAdd.getExpansion()
-			.addContains()
-			.setSystem(CS_URL)
-			.setCode("CODE0")
-			.setDisplay("Code 0");
-		code0.addContains()
-			.setSystem(CS_URL)
-			.setCode("CODE0-0")
-			.setDisplay("Code 0 Child 0");
-		code0.addContains()
-			.setSystem(CS_URL)
-			.setCode("CODE0-1")
-			.setDisplay("Code 0 Child 1");
-		myCaptureQueriesListener.clear();
-		UploadStatistics outcome = mySvc.addConceptsToExpansion(toAdd, 1000);
-		myCaptureQueriesListener.logInsertQueries();
-
-		// Verify
-		assertEquals(VS_ID_TYPED_AND_VERSION_1, outcome.getTarget().getValue());
-		assertEquals(3, outcome.getAddedConceptCount());
-		assertEquals(2, outcome.getAddedConceptLinkCount());
-		runInTransaction(() -> {
-			TermValueSet valueSet = myTermValueSetDao.findTermValueSetByUrlAndVersion(VS_URI, stagingVersion).orElseThrow();
-			String actual = renderExpansionHierarchy(valueSet);
-			String expected = """
-				-System[http://system-0]
-				 -CODE0 (Code 0) Order[1000]
-				   -CODE0-0 (Code 0 Child 0) Order[1001]
-				   -CODE0-1 (Code 0 Child 1) Order[1002]
-				""";
-			assertEquals(expected, actual);
-
-			assertEquals(3, valueSet.getTotalConcepts());
-			assertEquals(0, valueSet.getTotalConceptDesignations());
-		});
-		assertPartitionSet();
-	}
-
-	@Test
-	void testAddConceptsToExpansion_AddHierarchyToExistingConcepts() {
-		// Setup
-		createValueSetResource("1.0");
-		String stagingVersion = mySvc.startStagingVersion(VS_URI, "1.0");
-
-		// Create codes but not relationships between them
-		createTermValueSetConcept(stagingVersion, "CODE0", "Code 0");
-		createTermValueSetConcept(stagingVersion, "CODE0-0", "Code 0 Child 0");
-		createTermValueSetConcept(stagingVersion, "CODE0-1", "Code 0 Child 1");
-
-		// Test - Create the same codes but with parent/child relationships
-		ValueSet toAdd = new ValueSet();
-		toAdd.setUrl(VS_URI);
-		toAdd.setVersion(stagingVersion);
-		ValueSet.ValueSetExpansionContainsComponent code0 = toAdd.getExpansion()
-			.addContains()
-			.setSystem(CS_URL)
-			.setCode("CODE0")
-			.setDisplay("Code 0");
-		code0.addContains()
-			.setSystem(CS_URL)
-			.setCode("CODE0-0")
-			.setDisplay("Code 0 Child 0");
-		code0.addContains()
-			.setSystem(CS_URL)
-			.setCode("CODE0-1")
-			.setDisplay("Code 0 Child 1");
-		UploadStatistics outcome = mySvc.addConceptsToExpansion(toAdd, 1000);
-
-		// Verify
-		assertEquals(VS_ID_TYPED_AND_VERSION_1, outcome.getTarget().getValue());
-		assertEquals(0, outcome.getAddedConceptCount());
-		assertEquals(2, outcome.getAddedConceptLinkCount());
-		runInTransaction(() -> {
-			TermValueSet valueSet = myTermValueSetDao.findTermValueSetByUrlAndVersion(VS_URI, stagingVersion).orElseThrow();
-			String actual = renderExpansionHierarchy(valueSet);
-			String expected = """
-				-System[http://system-0]
-				 -CODE0 (Code 0) Order[0]
-				   -CODE0-0 (Code 0 Child 0) Order[1]
-				   -CODE0-1 (Code 0 Child 1) Order[2]
-				""";
-			assertEquals(expected, actual);
-
-			assertEquals(3, valueSet.getTotalConcepts());
-			assertEquals(0, valueSet.getTotalConceptDesignations());
-		});
-		assertPartitionSet();
-	}
 
 	@Test
 	void testAddConceptsToExpansion_SomeCodesAlreadyExist() {
@@ -446,8 +348,8 @@ public class TermValueSetStorageSvcImplTest extends BaseJpaR5Test {
 		String stagingVersion = mySvc.startStagingVersion(VS_URI, "1.0");
 
 		for (int i = 0; i < 5; i++) {
-			TermValueSetConcept parent = createTermValueSetConceptAndDesignation(stagingVersion, "CODE" + i, "Code " + i, null, "en", "Code " + i + " en", null);
-			createTermValueSetConceptAndDesignation(stagingVersion, "CODE" + i + "-0", "Code " + i + " Child 0", null, null, null, parent);
+			createTermValueSetConceptAndDesignation(stagingVersion, "CODE" + i, "Code " + i, null, "en", "Code " + i + " en", null);
+			createTermValueSetConceptAndDesignation(stagingVersion, "CODE" + i + "-0", "Code " + i + " Child 0", null, null, null, null);
 		}
 
 		// Test
@@ -457,11 +359,11 @@ public class TermValueSetStorageSvcImplTest extends BaseJpaR5Test {
 		toDelete.getExpansion()
 			.addContains()
 			.setSystem(CS_URL)
-			.setCode("CODE0"); // Will be deleted, plus its child
+			.setCode("CODE0");
 		toDelete.getExpansion()
 			.addContains()
 			.setSystem(CS_URL)
-			.setCode("CODE1-0"); // This is a child, parent will be left alone
+			.setCode("CODE1-0");
 		toDelete.getExpansion()
 			.addContains()
 			.setSystem(CS_URL)
@@ -474,30 +376,28 @@ public class TermValueSetStorageSvcImplTest extends BaseJpaR5Test {
 
 		// Verify
 		assertEquals(VS_ID_TYPED_AND_VERSION_1, outcome.getTarget().getValue());
-		// Code0 (1 + 1 for its child), Code1 (1) = 3
-		assertEquals(3, outcome.getRemovedConceptCount());
-		// Code0->Code0-1 Code1->Code1-0
-		assertEquals(2, outcome.getRemovedConceptLinkCount());
+		assertEquals(2, outcome.getRemovedConceptCount());
 		runInTransaction(() -> {
 			TermValueSet valueSet = myTermValueSetDao.findTermValueSetByUrlAndVersion(VS_URI, stagingVersion).orElseThrow();
 			String actual = renderExpansionHierarchy(valueSet);
 			String expected = """
 				-System[http://system-0]
+				 -CODE0-0 (Code 0 Child 0) Order[1]
 				 -CODE1 (Code 1) Order[2]
 				  -Designation[lang=en, value=Code 1 en]
 				 -CODE2 (Code 2) Order[4]
 				  -Designation[lang=en, value=Code 2 en]
-				   -CODE2-0 (Code 2 Child 0) Order[5]
+				 -CODE2-0 (Code 2 Child 0) Order[5]
 				 -CODE3 (Code 3) Order[6]
 				  -Designation[lang=en, value=Code 3 en]
-				   -CODE3-0 (Code 3 Child 0) Order[7]
+				 -CODE3-0 (Code 3 Child 0) Order[7]
 				 -CODE4 (Code 4) Order[8]
 				  -Designation[lang=en, value=Code 4 en]
-				   -CODE4-0 (Code 4 Child 0) Order[9]
+				 -CODE4-0 (Code 4 Child 0) Order[9]
 				""";
 			assertEquals(expected, actual);
 
-			assertEquals(7, valueSet.getTotalConcepts());
+			assertEquals(8, valueSet.getTotalConcepts());
 			assertEquals(4, valueSet.getTotalConceptDesignations());
 		});
 		assertPartitionSet();
@@ -544,14 +444,6 @@ public class TermValueSetStorageSvcImplTest extends BaseJpaR5Test {
 			code0child0.setValueSet(termValueSet);
 			code0child0.setOrder(1);
 			myTermValueSetConceptDao.save(code0child0);
-
-			TermValueSetConceptParentChildLink childLink = new TermValueSetConceptParentChildLink();
-			childLink.setValueSet(termValueSet);
-			TermValueSetConceptParentChildLink.TermValueSetConceptParentChildLinkPk pk = new TermValueSetConceptParentChildLink.TermValueSetConceptParentChildLinkPk();
-			pk.setParentPid(code0.getId());
-			pk.setChildPid(code0child0.getId());
-			childLink.setId(pk);
-			myITermValueSetConceptParentChildLinkDao.save(childLink);
 
 			termValueSet.setTotalConcepts(2L);
 			termValueSet.setTotalConceptDesignations(1L);
@@ -680,9 +572,6 @@ public class TermValueSetStorageSvcImplTest extends BaseJpaR5Test {
 			for (TermValueSetConceptDesignation valueSet : myTermValueSetConceptDesignationDao.findAll()) {
 				assertEquals(-1, valueSet.getPartitionId().getPartitionId());
 			}
-			for (TermValueSetConceptParentChildLink valueSet : myITermValueSetConceptParentChildLinkDao.findAll()) {
-				assertEquals(-1, valueSet.getPartitionId().getPartitionId());
-			}
 		});
 	}
 
@@ -723,16 +612,6 @@ public class TermValueSetStorageSvcImplTest extends BaseJpaR5Test {
 			termValueSet.setTotalConcepts(getIfNull(termValueSet.getTotalConcepts(), 0L) + 1);
 			myTermValueSetDao.save(termValueSet);
 
-			if (theParent != null) {
-				TermValueSetConceptParentChildLink childLink = new TermValueSetConceptParentChildLink();
-				childLink.setValueSet(termValueSet);
-				TermValueSetConceptParentChildLink.TermValueSetConceptParentChildLinkPk pk = new TermValueSetConceptParentChildLink.TermValueSetConceptParentChildLinkPk();
-				pk.setParentPid(theParent.getId());
-				pk.setChildPid(concept.getId());
-				childLink.setId(pk);
-				myITermValueSetConceptParentChildLinkDao.save(childLink);
-			}
-
 			return concept;
 		});
 	}
@@ -754,7 +633,6 @@ public class TermValueSetStorageSvcImplTest extends BaseJpaR5Test {
 		List<TermValueSetConcept> rootConcepts = theValueSet
 			.getConcepts()
 			.stream()
-			.filter(t -> t.getParents().isEmpty())
 			.toList();
 
 		appendToHierarchy(rootConcepts, target);
@@ -793,8 +671,6 @@ public class TermValueSetStorageSvcImplTest extends BaseJpaR5Test {
 				theTarget.append("]\n");
 			}
 
-			List<TermValueSetConcept> childConcepts = concept.getChildConcepts();
-			appendConceptsToHierarchy(theDepth + 1, theTarget, childConcepts);
 		}
 	}
 

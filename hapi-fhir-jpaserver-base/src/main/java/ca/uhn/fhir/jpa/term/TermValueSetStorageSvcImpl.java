@@ -10,14 +10,12 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobA
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetParameters;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDesignationDao;
-import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptParentChildLinkDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
-import ca.uhn.fhir.jpa.entity.TermValueSetConceptParentChildLink;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
@@ -37,7 +35,6 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
-import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
@@ -87,9 +84,6 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 
 	@Autowired
 	private ITermValueSetConceptDesignationDao myTermValueSetConceptDesignationDao;
-
-	@Autowired
-	private ITermValueSetConceptParentChildLinkDao myTermValueSetConceptParentChildLinkDao;
 
 	@Autowired
 	private IHapiTransactionService myTxService;
@@ -174,25 +168,6 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 							codeToExistingConcept,
 							codeToStorageConcept);
 				}
-			}
-
-			/*
-			 * Parent / Child links
-			 */
-			for (Map.Entry<SystemAndCode, SystemAndCode> entry :
-					flattenedValueSet.childCodeToParentCodes().entries()) {
-				SystemAndCode childSystemAndCode = entry.getKey();
-				SystemAndCode parentSystemAndCode = entry.getValue();
-				TermValueSetConcept childConcept = codeToStorageConcept.get(childSystemAndCode);
-				TermValueSetConcept parentConcept = codeToStorageConcept.get(parentSystemAndCode);
-
-				// Sanity check - These should never fail since we always create the parents
-				// in the block above, and you can't pass a child into this method without
-				// also passing in its parent
-				Validate.notNull(childConcept, "Failed to find concept: %s", childSystemAndCode);
-				Validate.notNull(parentConcept, "Failed to find concept: %s", parentSystemAndCode);
-
-				storeParentChildLink(childConcept, parentSystemAndCode, termValueSet, parentConcept, statistics);
 			}
 		});
 
@@ -303,35 +278,6 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 					myTermValueSetConceptDesignationDao.save(designation);
 				}
 			}
-		}
-	}
-
-	private void storeParentChildLink(
-			TermValueSetConcept childConcept,
-			SystemAndCode parentSystemAndCode,
-			TermValueSet termValueSet,
-			TermValueSetConcept parentConcept,
-			UploadStatistics statistics) {
-		boolean shouldAdd = childConcept.getParentConcepts().stream()
-				.map(c -> new SystemAndCode(c.getSystem(), c.getSystemVersion(), c.getCode()))
-				.noneMatch(t -> t.equals(parentSystemAndCode));
-		if (shouldAdd) {
-
-			TermValueSetConceptParentChildLink.TermValueSetConceptParentChildLinkPk pk =
-					new TermValueSetConceptParentChildLink.TermValueSetConceptParentChildLinkPk();
-			pk.setPartitionId(termValueSet.getPartitionedId().getPartitionIdValue());
-			pk.setParentPid(parentConcept.getId());
-			pk.setChildPid(childConcept.getId());
-
-			TermValueSetConceptParentChildLink linkToAdd = new TermValueSetConceptParentChildLink();
-			linkToAdd.setId(pk);
-			linkToAdd.setValueSet(termValueSet);
-			myTermValueSetConceptParentChildLinkDao.save(linkToAdd);
-
-			parentConcept.getChildren().add(linkToAdd);
-			childConcept.getParents().add(linkToAdd);
-
-			statistics.incrementConceptLinksAddedCount();
 		}
 	}
 
@@ -457,19 +403,6 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 		for (TermValueSetConceptDesignation designation : theConceptToDelete.getDesignations()) {
 			theStatistics.incrementDesignationsRemovedCount();
 			myTermValueSetConceptDesignationDao.delete(designation);
-		}
-		for (TermValueSetConceptParentChildLink parent : theConceptToDelete.getParents()) {
-			theStatistics.incrementConceptLinksRemovedCount();
-			myTermValueSetConceptParentChildLinkDao.delete(parent);
-			parent.getParent().getChildren().remove(parent);
-		}
-		for (TermValueSetConceptParentChildLink child : theConceptToDelete.getChildren()) {
-			theStatistics.incrementConceptLinksRemovedCount();
-			myTermValueSetConceptParentChildLinkDao.delete(child);
-			child.getChild().getParents().remove(child);
-
-			// Recurse
-			deleteConceptAndChildren(child.getChild(), theStatistics);
 		}
 
 		myTermValueSetConceptDao.delete(theConceptToDelete);
@@ -759,7 +692,6 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 	}
 
 	private void deletePreCalculatedValueSetContents(TermValueSet theValueSet) {
-		myTermValueSetConceptParentChildLinkDao.deleteByTermValueSetId(theValueSet);
 		myTermValueSetConceptDesignationDao.deleteByTermValueSetId(theValueSet);
 		myTermValueSetConceptDao.deleteByTermValueSetId(theValueSet);
 	}
