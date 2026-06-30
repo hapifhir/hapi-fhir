@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.flipkart.zjsonpatch.Jackson3JsonPatch;
 import com.flipkart.zjsonpatch.JsonPatchApplicationException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonParser;
 import tools.jackson.core.StreamReadFeature;
 import tools.jackson.databind.JsonNode;
@@ -109,16 +110,10 @@ public class JsonPatchUtils {
 			// the zjsonpatch version you pin in the pom, as it may differ slightly from
 			// the Jackson 2.x JsonPatchApplicationException class of the same name.
 			throw new InvalidRequestException(Msg.code(1272) + theE.getMessage());
+		} catch (JacksonException theE) {
+			// Jackson 3 parsing/serialization errors (unchecked)
+			throw new InvalidRequestException(Msg.code(9971) + theE.getMessage());
 		}
-		// NOTE: Jackson 3's JacksonException (the unchecked replacement for the old
-		// checked IOException/JsonProcessingException) no longer needs to be declared
-		// or caught explicitly here — mapper.readTree()/createParser()/writeValueAsString()
-		// will throw it unchecked if parsing/writing fails. If you want the same
-		// InvalidRequestException wrapping behavior the original IOException catch
-		// provided, add:
-		//   catch (JacksonException theE) {
-		//       throw new InvalidRequestException(Msg.code(1272) + theE.getMessage());
-		//   }
 	}
 
 	/**
