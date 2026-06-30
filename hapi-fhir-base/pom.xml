@@ -30,8 +30,6 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>
-			<!-- temp version declaration inclusion : see https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.22#annotations -->
-			<version>2.22</version>
 		</dependency>
 		<dependency>
 			<groupId>tools.jackson.core</groupId>
