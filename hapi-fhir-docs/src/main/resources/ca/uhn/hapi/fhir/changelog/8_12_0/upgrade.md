@@ -33,7 +33,7 @@ Database id generation can now be configured to allocate ids from a per-thread p
 all writer threads on a server. This removes lock contention between concurrent writers when the pool is refilled, and
 improves write throughput under high write concurrency.
 
-The single shared pool remains the default, so existing deployments are unaffected on upgrade. Per-thread pooling can
+This behavior is **disabled by default**, so existing deployments are unaffected on upgrade. Per-thread pooling can
 be enabled with `JpaStorageSettings#setIdSequencePoolingStrategy(IdSequencePoolingStrategy.PER_THREAD_POOL)`.
 
 Internal ids have never reflected creation order across servers in a cluster, since each server allocates ids from its
