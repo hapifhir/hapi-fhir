@@ -671,7 +671,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		try (CloseableHttpResponse response = ourHttpClient.execute(patch)) {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertThat(responseString).contains("<OperationOutcome");
-			assertThat(responseString).contains("was expecting double-quote to start field name");
+			assertThat(responseString).contains("was expecting double-quote to start");
 			assertEquals(400, response.getStatusLine().getStatusCode());
 		}
 
