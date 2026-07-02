@@ -140,7 +140,7 @@ public class SearchParameterUtil {
 		 * requests.
 		 * See https://github.com/hapifhir/hapi-fhir/issues/6536 for more information.
 		 */
-		if (theSearchParamDefinition.name().equals("patient")
+		if (theSearchParamDefinition.name().equalsIgnoreCase("patient")
 				&& theSearchParamDefinition.path().equals("Device.patient")) {
 			validCompartments.add("Patient");
 		}
@@ -158,7 +158,7 @@ public class SearchParameterUtil {
 			Set<String> omittedSps = RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.getOrDefault(
 					fhirResourceType, Collections.emptySet());
 
-			if (!omittedSps.contains(theSearchParamDefinition.name())
+			if (!omittedSps.contains(theSearchParamDefinition.name().toLowerCase())
 					&& isCoveredByPatientCompartmentBaseSp(
 							theResourceClazz, fhirResourceType, theSearchParamDefinition)) {
 				validCompartments.add("Patient");
