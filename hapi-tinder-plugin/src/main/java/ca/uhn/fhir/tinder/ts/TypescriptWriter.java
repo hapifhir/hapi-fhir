@@ -2,7 +2,6 @@ package ca.uhn.fhir.tinder.ts;
 
 // Created by Claude Opus 4.8
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.tinder.VelocityHelper;
 import org.apache.commons.io.FileUtils;
 import org.apache.velocity.VelocityContext;
