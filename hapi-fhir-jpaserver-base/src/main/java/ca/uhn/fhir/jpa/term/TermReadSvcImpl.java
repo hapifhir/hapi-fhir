@@ -177,9 +177,9 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.LOINC_URI;
 import static ca.uhn.fhir.jpa.entity.TermConceptPropertyBinder.CONCEPT_PROPERTY_PREFIX_NAME;
 import static ca.uhn.fhir.jpa.term.TermReadSvcUtil.isLoincUnversionedValueSet;
-import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
 import static java.lang.String.join;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -1661,6 +1661,16 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 					code.getDisplay());
 
 			b.must(f.bool()
+					.should(f.match().field("myParentPids").matching("" + code.getId()))
+					.should(f.match().field("myId").matching(code.getPid())));
+		} else if (theFilter.getOp() == ValueSet.FilterOperator.ISNOTA) {
+			ourLog.debug(
+					" * Filtering on codes that are not {}/{}/{} or its descendants",
+					code.getId(),
+					code.getCode(),
+					code.getDisplay());
+
+			b.mustNot(f.bool()
 					.should(f.match().field("myParentPids").matching("" + code.getId()))
 					.should(f.match().field("myId").matching(code.getPid())));
 		} else if (theFilter.getOp() == ValueSet.FilterOperator.DESCENDENTOF) {

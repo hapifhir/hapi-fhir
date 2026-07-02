@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -56,7 +57,8 @@ import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import java.util.*;
 
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_FINALIZE_IMPORT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.STEP_ID_FINALIZE_IMPORT;
+import static ca.uhn.fhir.jpa.term.TermCodeSystemStorageSvcImpl.DONT_POPULATE_PARENT_PIDS_CS_USERDATA_KEY;
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.*;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_GENERIC_CODE_SYSTEM_URL;
@@ -78,7 +80,7 @@ public abstract class BaseImportTerminologyFileStep<
 	protected IJobPersistence myJobPersistence;
 
 	@Autowired
-	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
+	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 
 	@Autowired
 	private IHapiTransactionService myTransactionService;
@@ -126,6 +128,8 @@ public abstract class BaseImportTerminologyFileStep<
 
 		String attachmentId = theData.getAttachmentId();
 		String sourceFilename = theData.getSourceFilename();
+
+		int recordsProcessed = 0;
 		if (isNotBlank(attachmentId)) {
 
 			AttachmentDetails attachment = myJobPersistence.fetchAttachmentById(jobInstanceId, attachmentId);
@@ -139,7 +143,7 @@ public abstract class BaseImportTerminologyFileStep<
 					theData,
 					sourceFilename);
 
-			syncToDb(theJobMetadata, theContext, codeSystemToPopulate, theStepExecutionDetails);
+			recordsProcessed = syncToDb(theJobMetadata, theContext, codeSystemToPopulate, theStepExecutionDetails);
 		}
 
 		if (!theData.getStepIdToRecordsAdded().isEmpty()
@@ -150,7 +154,7 @@ public abstract class BaseImportTerminologyFileStep<
 			theDataSink.acceptForFutureStep(STEP_ID_FINALIZE_IMPORT, counterWorkChunk);
 		}
 
-		return RunOutcome.SUCCESS;
+		return new RunOutcome(recordsProcessed);
 	}
 
 	protected abstract void processAttachment(
@@ -347,48 +351,93 @@ public abstract class BaseImportTerminologyFileStep<
 	 * Invoked after all CSV rows have been processed but before the CodeSystem is submitted for storage.
 	 * Subclasses may override, but they should call this super-method too.
 	 */
-	protected void syncToDb(
+	protected int syncToDb(
 			ImportTerminologyMetadataAttachmentJson theJobMetadata,
 			CT theCodeExtractionContext,
 			CodeSystem theCodeSystemToPopulate,
 			StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails) {
 
-		syncConceptsToDb(theStepExecutionDetails, theCodeExtractionContext, theCodeSystemToPopulate);
+		int recordsProcessed =
+				syncConceptsToDb(theStepExecutionDetails, theCodeExtractionContext, theCodeSystemToPopulate);
 		syncValueSetsToDb(theCodeExtractionContext, theStepExecutionDetails);
 		syncConceptMapsToDb(theJobMetadata, theCodeExtractionContext, theStepExecutionDetails);
+		return recordsProcessed;
 	}
 
-	private void syncConceptsToDb(
+	private int syncConceptsToDb(
 			@Nonnull StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails,
 			CT theCodeExtractionContext,
 			CodeSystem codeSystemToPopulate) {
+		int retVal = 0;
+		ImportTerminologyModeEnum mode = theStepExecutionDetails.getParameters().getMode();
+
 		if (!theCodeExtractionContext.getCodeToConcept().isEmpty()) {
 
 			populateConceptsIntoCodeSystem(theCodeExtractionContext.getCodeToConcept(), codeSystemToPopulate);
 
-			StopWatch sw = new StopWatch();
-
-			Callable<UploadStatistics> uploader = () -> {
-				IBaseResource codeSystemToPopulateNonCanonical =
-						myVersionCanonicalizer.codeSystemFromCanonical(codeSystemToPopulate);
-				return myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(codeSystemToPopulateNonCanonical);
-			};
-			UploadStatistics uploadStatistics = executeInNewTransactionWithRetry(uploader, theStepExecutionDetails);
-
-			ourLog.info(
-					"Imported {} concept entries including {} root concept entries for storage in {}. Outcome: {}",
-					theCodeExtractionContext.getCodeToConcept().size(),
-					codeSystemToPopulate.getConcept().size(),
-					sw,
-					uploadStatistics);
-
-			TerminologyFileSetJson.RecordsAddedCounter recordsAddedCounter =
-					getRecordsAddedCounter(theStepExecutionDetails);
-			recordsAddedCounter.incrementConceptsAdded(uploadStatistics.getAddedConceptCount());
-			recordsAddedCounter.incrementConceptLinksAdded(uploadStatistics.getAddedConceptLinkCount());
-			recordsAddedCounter.incrementPropertiesAdded(uploadStatistics.getAddedPropertyCount());
-			recordsAddedCounter.incrementDesignationsAdded(uploadStatistics.getAddedDesignationCount());
+			retVal = storeConceptsToDb(theStepExecutionDetails, theCodeExtractionContext, codeSystemToPopulate);
 		}
+
+		return retVal;
+	}
+
+	protected int storeConceptsToDb(
+			@Nonnull StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails,
+			CT theCodeExtractionContext,
+			CodeSystem theCanonicalCodeSystem) {
+		ImportTerminologyModeEnum mode = theStepExecutionDetails.getParameters().getMode();
+		int retVal = 0;
+
+		StopWatch sw = new StopWatch();
+
+		Callable<UploadStatistics> uploader = () -> {
+			IBaseResource codeSystemToPopulateNonCanonical =
+					myVersionCanonicalizer.codeSystemFromCanonical(theCanonicalCodeSystem);
+
+			/// We don't want to populate the parent PIDs closure when we save concepts
+			/// now, because we're still adding concepts in multiple chunks. We populate
+			/// the parent PIDs closure after all concepts and hierarchy entries have
+			/// been loaded, in {@link ImportTerminologyStepGenerateConceptClosures}
+			codeSystemToPopulateNonCanonical.setUserData(DONT_POPULATE_PARENT_PIDS_CS_USERDATA_KEY, Boolean.TRUE);
+
+			RequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
+			return switch (mode) {
+				case REMOVE -> myTermCodeSystemStorageSvc.removeCodeSystemConcepts(
+						requestDetails, codeSystemToPopulateNonCanonical);
+				case ADD, SNAPSHOT -> myTermCodeSystemStorageSvc.addCodeSystemConcepts(
+						requestDetails, codeSystemToPopulateNonCanonical);
+			};
+		};
+		UploadStatistics uploadStatistics = executeInNewTransactionWithRetry(uploader, theStepExecutionDetails);
+
+		ourLog.info(
+				"Processed {} {} concept entries including {} root concept entries for storage in {}. Outcome: {}",
+				theCodeExtractionContext.getCodeToConcept().size(),
+				mode,
+				theCanonicalCodeSystem.getConcept().size(),
+				sw,
+				uploadStatistics);
+
+		TerminologyFileSetJson.RecordsAddedCounter recordsAddedCounter =
+				getRecordsAddedCounter(theStepExecutionDetails);
+		recordsAddedCounter.incrementConceptsAdded(uploadStatistics.getAddedConceptCount());
+		recordsAddedCounter.incrementConceptLinksAdded(uploadStatistics.getAddedConceptLinkCount());
+		recordsAddedCounter.incrementPropertiesAdded(uploadStatistics.getAddedPropertyCount());
+		recordsAddedCounter.incrementDesignationsAdded(uploadStatistics.getAddedDesignationCount());
+		recordsAddedCounter.incrementConceptsRemoved(uploadStatistics.getRemovedConceptCount());
+		recordsAddedCounter.incrementConceptLinksRemoved(uploadStatistics.getRemovedConceptLinkCount());
+		recordsAddedCounter.incrementPropertiesRemoved(uploadStatistics.getRemovedPropertyCount());
+		recordsAddedCounter.incrementDesignationsRemoved(uploadStatistics.getRemovedDesignationCount());
+
+		retVal += uploadStatistics.getAddedConceptCount();
+		retVal += uploadStatistics.getAddedConceptLinkCount();
+		retVal += uploadStatistics.getAddedPropertyCount();
+		retVal += uploadStatistics.getAddedDesignationCount();
+		retVal += uploadStatistics.getRemovedConceptCount();
+		retVal += uploadStatistics.getRemovedConceptLinkCount();
+		retVal += uploadStatistics.getRemovedPropertyCount();
+		retVal += uploadStatistics.getRemovedDesignationCount();
+		return retVal;
 	}
 
 	private static void populateConceptsIntoCodeSystem(
@@ -404,9 +453,36 @@ public abstract class BaseImportTerminologyFileStep<
 			}
 		}
 
+		/// If there is a circular hierarchy chain, we want to still add the concepts. It isn't valid
+		/// for a CodeSystem to define a circular hierarchy (where a concept is a child of itself either
+		/// directly or indirectly) but it can happen if there is weird data in the source files.
+		/// The {@link ITermCodeSystemStorageSvc} handles this gracefully by automatically breaking
+		/// any circular loops it discovers and issuing a warning.
+
+		IdentityHashMap<CodeSystem.ConceptDefinitionComponent, CodeSystem.ConceptDefinitionComponent> added =
+				new IdentityHashMap<>();
+
 		for (CodeSystem.ConceptDefinitionComponent concept : codeToConcept.values()) {
 			if (!childCodes.contains(concept.getCode())) {
 				codeSystemToPopulate.addConcept(concept);
+				added.put(concept, concept);
+				addChildrenToIdentityMap(added, concept);
+			}
+		}
+
+		for (CodeSystem.ConceptDefinitionComponent concept : codeToConcept.values()) {
+			if (!added.containsKey(concept)) {
+				codeSystemToPopulate.addConcept(concept);
+			}
+		}
+	}
+
+	private static void addChildrenToIdentityMap(
+			IdentityHashMap<CodeSystem.ConceptDefinitionComponent, CodeSystem.ConceptDefinitionComponent> theAdded,
+			CodeSystem.ConceptDefinitionComponent theConcept) {
+		for (CodeSystem.ConceptDefinitionComponent childConcept : theConcept.getConcept()) {
+			if (theAdded.put(childConcept, childConcept) == null) {
+				addChildrenToIdentityMap(theAdded, childConcept);
 			}
 		}
 	}

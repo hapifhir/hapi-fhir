@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyStepChunkConceptsForGeneratingClosure;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyStepFinalize;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyStepGenerateConceptClosures;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -36,17 +37,19 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.STEP_WEIGHT_FINALIZE;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.STEP_WEIGHT_GENERATE_CONCEPT_CLOSURES;
+
 /**
  * This file is the Batch2 Job Definition for the LOINC Import job.
- * See the intividual step bean definitions, starting with {@link #importLoincStep1ExpandDistributionIntoFiles()}
+ * See the individual step bean definitions, starting with {@link #importLoincStep1ExpandDistributionIntoFiles()}
  * to see descriptions of how this job works.
  */
 @Configuration
 public class ImportLoincJobAppCtx {
 
 	public static final String JOB_ID_IMPORT_TERM_LOINC = "IMPORT_TERM_LOINC";
-	public static final String STEP_ID_FINALIZE_IMPORT = "finalize-import";
-	public static final String STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION = "chunk-concepts-for-closure-generation";
+	public static final String STEP_ID_IMPORT_PART_LINK_FILE = "import-part-link-file";
 
 	private final DaoRegistry myDaoRegistry;
 	private final ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
@@ -65,7 +68,7 @@ public class ImportLoincJobAppCtx {
 	}
 
 	/**
-	 * See the intividual step bean definitions, starting with {@link #importLoincStep1ExpandDistributionIntoFiles()}
+	 * See the individual step bean definitions, starting with {@link #importLoincStep1ExpandDistributionIntoFiles()}
 	 * to see descriptions of how this job works.
 	 */
 	@Bean
@@ -159,10 +162,12 @@ public class ImportLoincJobAppCtx {
 						TerminologyFileSetJson.class,
 						importLoincStep16PartFile())
 				.addIntermediateStep(
-						"import-part-link-file",
+						STEP_ID_IMPORT_PART_LINK_FILE,
 						"Import LOINC Part Link File",
 						TerminologyFileSetJson.class,
 						importLoincStep17PartLink())
+				// Part link file uses a large number of smaller files, so limit its weight
+				.setStepWeightForProgressCalculator(STEP_ID_IMPORT_PART_LINK_FILE, 0.1)
 				.addIntermediateStep(
 						"import-consumer-name",
 						"Import LOINC Consumer Names",
@@ -179,20 +184,26 @@ public class ImportLoincJobAppCtx {
 						TerminologyFileSetJson.class,
 						importLoincStep20LinguisticVariant())
 				.addIntermediateStep(
-						STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION,
+						TerminologyConstants.STEP_ID_CHUNK_CONCEPTS_FOR_CLOSURE_GENERATION,
 						"Create work chunks for calculating concept closures",
 						TerminologyFileSetJson.class,
 						importLoincStep21ChunkConceptsForClosureGeneration())
 				.addIntermediateStep(
-						"generate-concept-closures",
+						TerminologyConstants.STEP_ID_GENERATE_CONCEPT_CLOSURES,
 						"Generate concept closures",
 						TerminologyFileSetJson.class,
 						importLoincStep22GenerateConceptClosures())
+				// This step doesn't gain any work chunks until the previous step, we want to give it
+				// a fixed portion of the overall progress
+				.setStepWeightForProgressCalculator(
+						TerminologyConstants.STEP_ID_GENERATE_CONCEPT_CLOSURES, STEP_WEIGHT_GENERATE_CONCEPT_CLOSURES)
 				.addFinalReducerStep(
-						STEP_ID_FINALIZE_IMPORT,
+						TerminologyConstants.STEP_ID_FINALIZE_IMPORT,
 						"Finalize LOINC Import",
 						ImportTerminologyResultJson.class,
 						importLoincStep23Finalize())
+				// This step takes very little time and shouldn't factor significantly into the progress
+				.setStepWeightForProgressCalculator(TerminologyConstants.STEP_ID_FINALIZE_IMPORT, STEP_WEIGHT_FINALIZE)
 				.build();
 	}
 

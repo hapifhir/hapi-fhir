@@ -22,8 +22,8 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -84,8 +84,8 @@ public class ImportLoincStep11HandleIeeeMedicalDeviceCode
 		String ieeeDisplayName = trim(theRecord.get("IEEE_REFID"));
 
 		// LOINC Part -> IEEE 11073:10101 Mappings
-		String sourceCodeSystemUri = ITermLoaderSvc.LOINC_URI;
-		String targetCodeSystemUri = ITermLoaderSvc.IEEE_11073_10101_URI;
+		String sourceCodeSystemUri = TerminologyConstants.LOINC_URI;
+		String targetCodeSystemUri = TerminologyConstants.IEEE_11073_10101_URI;
 		String loincCopyrightStatement = theJobMetadata.getCodeSystem().getCopyright();
 		String conceptMapId = LOINC_IEEE_CM_ID + "-" + codeSystemVersionId;
 

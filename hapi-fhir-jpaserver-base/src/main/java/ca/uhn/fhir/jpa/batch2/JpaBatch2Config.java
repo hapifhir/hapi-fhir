@@ -22,8 +22,12 @@ package ca.uhn.fhir.jpa.batch2;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.config.BaseBatch2Config;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.batch2.jobs.term.custom.ImportCustomTerminologyJobAppCtx;
+import ca.uhn.fhir.jpa.batch2.jobs.term.icd.ImportIcdJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
+import ca.uhn.fhir.jpa.batch2.jobs.term.snomedct.ImportSnomedCtJobAppCtx;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
+import ca.uhn.fhir.jpa.dao.data.IBatch2AttachmentChunkRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2AttachmentRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkMetadataViewRepository;
@@ -35,7 +39,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({BulkExportJobConfig.class, ImportLoincJobAppCtx.class})
+@Import({
+	BulkExportJobConfig.class,
+	ImportLoincJobAppCtx.class,
+	ImportSnomedCtJobAppCtx.class,
+	ImportIcdJobAppCtx.class,
+	ImportCustomTerminologyJobAppCtx.class
+})
 public class JpaBatch2Config extends BaseBatch2Config {
 
 	@Bean
@@ -46,7 +56,8 @@ public class JpaBatch2Config extends BaseBatch2Config {
 			IBatch2WorkChunkMetadataViewRepository theWorkChunkMetadataViewRepo,
 			IHapiTransactionService theTransactionService,
 			EntityManager theEntityManager,
-			IInterceptorBroadcaster theInterceptorBroadcaster) {
+			IInterceptorBroadcaster theInterceptorBroadcaster,
+			IBatch2AttachmentChunkRepository theAttachmentChunkRepository) {
 		return new JpaJobPersistenceImpl(
 				theAttachmentRepository,
 				theJobInstanceRepository,
@@ -54,6 +65,7 @@ public class JpaBatch2Config extends BaseBatch2Config {
 				theWorkChunkMetadataViewRepo,
 				theTransactionService,
 				theEntityManager,
-				theInterceptorBroadcaster);
+				theInterceptorBroadcaster,
+				theAttachmentChunkRepository);
 	}
 }

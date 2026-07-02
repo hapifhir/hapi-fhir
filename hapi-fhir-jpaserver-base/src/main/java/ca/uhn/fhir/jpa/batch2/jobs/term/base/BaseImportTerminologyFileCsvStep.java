@@ -40,6 +40,7 @@ public abstract class BaseImportTerminologyFileCsvStep<
 				PT extends ImportTerminologyJobParameters, CT extends BaseImportTerminologyFileCsvStep.MyBaseContext>
 		extends BaseImportTerminologyFileStep<PT, CT> {
 
+	@Override
 	protected void processAttachment(
 			@Nonnull StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails,
 			ImportTerminologyMetadataAttachmentJson theJobMetadata,
@@ -48,7 +49,7 @@ public abstract class BaseImportTerminologyFileCsvStep<
 			PT jobParameters,
 			CodeSystem codeSystemToPopulate,
 			TerminologyFileSetJson theData,
-			String sourceFilename) {
+			String theSourceFilename) {
 		try (InputStream inputStream = attachment.getInputStream()) {
 			InputStreamReader reader = new InputStreamReader(
 					BOMInputStream.builder().setInputStream(inputStream).get(), StandardCharsets.UTF_8);
@@ -67,7 +68,7 @@ public abstract class BaseImportTerminologyFileCsvStep<
 						record,
 						codeSystemToPopulate,
 						theData,
-						sourceFilename);
+						theSourceFilename);
 			}
 
 		} catch (IOException e) {

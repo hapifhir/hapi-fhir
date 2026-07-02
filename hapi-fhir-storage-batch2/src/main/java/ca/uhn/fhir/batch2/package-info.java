@@ -40,8 +40,8 @@
  *
  * </p><p>
  *
- * Once a minute, Quartz runs the  {@link ca.uhn.fhir.batch2.api.IJobMaintenanceService#runMaintenancePass() maintenance pass}.
- * This loop inspects every job, and dispatches to {@link ca.uhn.fhir.batch2.maintenance.JobInstanceProcessor#process() the JobInstanceProcessor}.
+ * Once a minute, Quartz runs the  {@link ca.uhn.fhir.batch2.api.IJobMaintenanceService#runActiveJobMaintenancePass() maintenance pass}.
+ * This loop inspects every job, and dispatches to {@link ca.uhn.fhir.batch2.maintenance.ActiveJobInstanceProcessor#process() the JobInstanceProcessor}.
  * The JobInstanceProcessor counts the outstanding chunks for a job, and uses these statistics to fire the working state transitions (below).
  *
  * </p><p>
@@ -131,7 +131,7 @@
  *        </li>
  *    <li> Gated jobs that have a reducer step will transtion (IN_PROGRESS or ERRORED) -> FINALIZE when
  *         starting the reduction step
- *         {@link ca.uhn.fhir.batch2.maintenance.JobInstanceProcessor#triggerGatedExecutions}
+ *         {@link ca.uhn.fhir.batch2.maintenance.ActiveJobInstanceProcessor#triggerGatedExecutions}
  *         </li>
  * </ul>
  *

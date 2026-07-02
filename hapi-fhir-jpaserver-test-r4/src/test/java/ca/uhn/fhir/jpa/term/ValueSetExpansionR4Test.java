@@ -27,7 +27,6 @@ import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
-import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.jpa.util.ValueSetTestUtil;
 import ca.uhn.fhir.parser.IParser;
@@ -74,6 +73,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
+import static ca.uhn.fhir.jpa.term.TerminologySvcDeltaR4Test.newDeltaCodeSystem;
 import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -505,12 +505,11 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
 		myCodeSystemDao.create(cs, newSrd());
 
-		CustomTerminologySet additions = new CustomTerminologySet();
+		CodeSystem additions = newDeltaCodeSystem();
 		for (int i = 0; i < theCount; i++) {
-			additions.addRootConcept("code" + i, "display value " + i);
+			additions.addConcept().setCode("code" + i).setDisplay("display value " + i);
 		}
-		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", additions);
-		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), additions);
 
 		ValueSet vs = new ValueSet();
 		vs.setUrl("http://foo/vs");
@@ -2260,7 +2259,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 		// Perform pre-expansion
 		await().until(() -> {
-			myBatch2JobHelper.runMaintenancePass();
+			myBatch2JobHelper.runActiveJobMaintenancePass();
 			myTerminologyDeferredStorageSvc.saveAllDeferred();
 			return myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true);
 		});

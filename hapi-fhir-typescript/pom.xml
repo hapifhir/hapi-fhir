@@ -1,0 +1,218 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>ca.uhn.hapi.fhir</groupId>
+		<artifactId>hapi-fhir</artifactId>
+		<version>8.11.15-SNAPSHOT</version>
+
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
+	<artifactId>hapi-fhir-typescript</artifactId>
+	<packaging>pom</packaging>
+
+	<name>HAPI FHIR - TypeScript Models</name>
+	<description>
+		Generates and packages the @smile-cdr/fhirts npm package: TypeScript model definitions for
+		DSTU2, DSTU3, R4, R4B and R5, generated from the HAPI FHIR runtime model by hapi-fhir-tinder.
+	</description>
+
+	<properties>
+		<!-- This module produces an npm package, not a Maven artifact. -->
+		<maven.deploy.skip>true</maven.deploy.skip>
+		<maven.install.skip>true</maven.install.skip>
+
+		<ts.npm.package.name>@smile-cdr/fhirts</ts.npm.package.name>
+		<ts.typescript.version>^5.4.0</ts.typescript.version>
+		<ts.node.version>v24.18.0</ts.node.version>
+		<ts.npm.install.args>install --no-audit --no-fund</ts.npm.install.args>
+		<ts.npm.publish.args>publish --access public</ts.npm.publish.args>
+		<ts.npm.workdir>${project.build.directory}/npm</ts.npm.workdir>
+	</properties>
+
+	<build>
+		<plugins>
+			<!-- 1. Assemble the static npm scaffolding (package.json, tsconfig, .npmrc, top-level index). -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-npm-scaffolding</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${ts.npm.workdir}</outputDirectory>
+							<resources>
+								<!-- package.json is filtered so the name/version/typescript version can be injected. -->
+								<resource>
+									<directory>src/main/npm</directory>
+									<filtering>true</filtering>
+									<includes>
+										<include>package.json</include>
+									</includes>
+								</resource>
+								<!-- Everything else is copied verbatim (notably .npmrc, which contains ${NPM_TOKEN}). -->
+								<resource>
+									<directory>src/main/npm</directory>
+									<filtering>false</filtering>
+									<excludes>
+										<exclude>package.json</exclude>
+									</excludes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- 2. Generate the per-version TypeScript models from the HAPI runtime model. -->
+			<plugin>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>hapi-tinder-plugin</artifactId>
+				<version>${project.version}</version>
+				<executions>
+					<execution>
+						<id>generate-ts-dstu2</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate-typescript</goal>
+						</goals>
+						<configuration>
+							<version>dstu2</version>
+							<targetDirectory>${ts.npm.workdir}/src/FHIR-DSTU2</targetDirectory>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generate-ts-dstu3</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate-typescript</goal>
+						</goals>
+						<configuration>
+							<version>dstu3</version>
+							<targetDirectory>${ts.npm.workdir}/src/FHIR-DSTU3</targetDirectory>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generate-ts-r4</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate-typescript</goal>
+						</goals>
+						<configuration>
+							<version>r4</version>
+							<targetDirectory>${ts.npm.workdir}/src/FHIR-R4</targetDirectory>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generate-ts-r4b</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate-typescript</goal>
+						</goals>
+						<configuration>
+							<version>r4b</version>
+							<targetDirectory>${ts.npm.workdir}/src/FHIR-R4B</targetDirectory>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generate-ts-r5</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate-typescript</goal>
+						</goals>
+						<configuration>
+							<version>r5</version>
+							<targetDirectory>${ts.npm.workdir}/src/FHIR-R5</targetDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- 3. Install a local Node/npm and type-check the generated TypeScript. -->
+			<plugin>
+				<groupId>com.github.eirslett</groupId>
+				<artifactId>frontend-maven-plugin</artifactId>
+				<version>1.15.1</version>
+				<configuration>
+					<workingDirectory>${ts.npm.workdir}</workingDirectory>
+					<installDirectory>${project.build.directory}</installDirectory>
+				</configuration>
+				<executions>
+					<execution>
+						<id>install-node-and-npm</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>install-node-and-npm</goal>
+						</goals>
+						<configuration>
+							<nodeVersion>${ts.node.version}</nodeVersion>
+							<npmVersion>provided</npmVersion>
+						</configuration>
+					</execution>
+					<execution>
+						<id>npm-install</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<configuration>
+							<arguments>${ts.npm.install.args}</arguments>
+						</configuration>
+					</execution>
+					<execution>
+						<id>npm-build</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<configuration>
+							<arguments>run build</arguments>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<profiles>
+		<!--
+		When active, publishes the assembled package to npm. Authentication is via the NPM_TOKEN
+		environment variable, consumed by the generated .npmrc. The package name can be overridden with
+		-Dts.npm.package.name=...
+		-->
+		<profile>
+			<id>DEPLOY_TYPESCRIPT_HINTS</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.github.eirslett</groupId>
+						<artifactId>frontend-maven-plugin</artifactId>
+						<configuration>
+							<workingDirectory>${ts.npm.workdir}</workingDirectory>
+							<installDirectory>${project.build.directory}</installDirectory>
+						</configuration>
+						<executions>
+							<execution>
+								<id>npm-publish</id>
+								<phase>deploy</phase>
+								<goals>
+									<goal>npm</goal>
+								</goals>
+								<configuration>
+									<arguments>${ts.npm.publish.args}</arguments>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+</project>

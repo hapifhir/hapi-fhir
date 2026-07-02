@@ -30,19 +30,22 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.function.Supplier;
 
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx.STEP_ID_FINALIZE_IMPORT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.STEP_ID_FINALIZE_IMPORT;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_ALL_VALUESET_ID;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_GENERIC_VALUESET_URL;
 
@@ -70,31 +73,32 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 			StepExecutionDetails<ImportTerminologyJobParameters, VoidModel> theStepExecutionDetails,
 			IJobDataSink<TerminologyFileSetJson> theDataSink,
 			MyContext theContext,
-			String theFileName,
-			byte[] theBytes,
+			String theSingleFileName,
+			Supplier<InputStream> theInputStreamSupplier,
 			ImportTerminologyJobParameters theJobParameters,
-			TerminologyFileSetJson theFileSet,
-			ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment) {
+			ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment)
+			throws IOException {
 		super.handleSynchronous(
 				theStepExecutionDetails,
 				theDataSink,
 				theContext,
-				theFileName,
-				theBytes,
+				theSingleFileName,
+				theInputStreamSupplier,
 				theJobParameters,
-				theFileSet,
 				theJobMetadataAttachment);
 
-		if (theFileName.endsWith("loinc.xml")) {
+		if (theSingleFileName.endsWith("loinc.xml")) {
 			theContext.incrementLoincXmlCount();
-			handleLoincXml(theBytes, theJobMetadataAttachment);
+			handleLoincXml(theInputStreamSupplier, theJobMetadataAttachment);
 		}
 	}
 
-	private void handleLoincXml(byte[] theBytes, ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment) {
+	private void handleLoincXml(
+			Supplier<InputStream> theInputStream, ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment)
+			throws IOException {
 		ourLog.info("Processing 'loinc.xml' file");
 
-		String loincCodeSystemXml = new String(theBytes, StandardCharsets.UTF_8);
+		String loincCodeSystemXml = IOUtils.toString(theInputStream.get(), StandardCharsets.UTF_8);
 		theJobMetadataAttachment.setCodeSystemXml(loincCodeSystemXml);
 
 		CodeSystem codeSystem = theJobMetadataAttachment.getCodeSystem();
@@ -118,8 +122,11 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 	}
 
 	@Override
-	protected void massageCodeSystem(CodeSystem theCodeSystem) {
-		super.massageCodeSystem(theCodeSystem);
+	protected void massageCodeSystem(
+			CodeSystem theCodeSystem,
+			MyContext theContext,
+			StepExecutionDetails<ImportTerminologyJobParameters, VoidModel> theStepExecutionDetails) {
+		super.massageCodeSystem(theCodeSystem, theContext, theStepExecutionDetails);
 
 		// TODO: DM 2019-09-13 - Manually add EXTERNAL_COPYRIGHT_NOTICE property until Regenstrief adds this to
 		// loinc.xml
@@ -139,8 +146,10 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 			StepExecutionDetails<ImportTerminologyJobParameters, VoidModel> theStepExecutionDetails,
 			IJobDataSink<TerminologyFileSetJson> theDataSink,
 			ImportTerminologyJobParameters theJobParameters,
-			ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment) {
-		super.startStaging(theStepExecutionDetails, theDataSink, theJobParameters, theJobMetadataAttachment);
+			ImportTerminologyMetadataAttachmentJson theJobMetadataAttachment,
+			MyContext theContext) {
+		super.startStaging(
+				theStepExecutionDetails, theDataSink, theJobParameters, theJobMetadataAttachment, theContext);
 
 		CodeSystem cs = theJobMetadataAttachment.getCodeSystem();
 
@@ -167,7 +176,10 @@ public class ImportLoincStep1ExpandDistributionIntoFilesStep
 		retVal.setPublisher("Regenstrief Institute, Inc.");
 		retVal.setDescription("A value set that includes all LOINC codes");
 		retVal.setCopyright(theCopyrightStatement);
-		retVal.getCompose().addInclude().setSystem(ITermLoaderSvc.LOINC_URI).setVersion(theLoincVersion);
+		retVal.getCompose()
+				.addInclude()
+				.setSystem(TerminologyConstants.LOINC_URI)
+				.setVersion(theLoincVersion);
 
 		return retVal;
 	}

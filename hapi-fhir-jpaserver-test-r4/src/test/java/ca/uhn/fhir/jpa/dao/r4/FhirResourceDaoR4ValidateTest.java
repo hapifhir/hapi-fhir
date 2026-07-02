@@ -8,14 +8,13 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
-import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
@@ -107,6 +106,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static ca.uhn.fhir.jpa.term.TerminologySvcDeltaR4Test.newDeltaCodeSystem;
 import static ca.uhn.fhir.rest.api.Constants.JAVA_VALIDATOR_DETAILS_SYSTEM;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -527,11 +527,12 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		myStructureDefinitionDao.create(profile, mySrd);
 
 		// Add a bunch of codes
-		CustomTerminologySet codesToAdd = new CustomTerminologySet();
+		CodeSystem additions = newDeltaCodeSystem();
+		additions.setUrl("http://loinc.org");
 		for (int i = 0; i < 100; i++) {
-			codesToAdd.addRootConcept("CODE" + i, "Display " + i);
+			additions.addConcept().setCode("CODE" + i).setDisplay("Display " + i);
 		}
-		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://loinc.org", codesToAdd);
+		myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), additions);
 
 		myStorageSettings.setMaximumExpansionSize(50);
 
@@ -660,8 +661,9 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		String codingIsNotInValueSetMessageWithBindingSpecificReason ="None of the codings provided are in the value set 'ValueSet[http://mytest/ValueSet/OrgContactSampleVS]' (http://mytest/ValueSet/OrgContactSampleVS), and";
 		String unknownCodeSystemMessage = "CodeSystem is unknown and can't be validated: http://mylocalcodesystem for 'http://mylocalcodesystem#mylocalcode'";
 		String unableToValidateCodeMessage = "Unable to validate code http://mylocalcodesystem#mylocalcode - No codes in ValueSet belong to CodeSystem with URL http://mylocalcodesystem";
+		String noneOfTheCodingsMessage = "None of the codings provided are in the value set 'ValueSet[http://mytest/ValueSet/OrgContactSampleVS]' (http://mytest/ValueSet/OrgContactSampleVS), and a coding is recommended to come from this value set (codes = http://mylocalcodesystem#mylocalcode)";
 		// We control the severity of the unknownCodeSystemMessage through the ValidationMessageUnknownCodeSystemPostProcessingInterceptor
-		// but the severity of the other two messages is determined by the core validator based on binding strength currently.
+		// but the severity of the other messages is determined by the core validator, which is currently based on binding strength.
 		return Stream.of(
 			Arguments.of(Enumerations.BindingStrength.REQUIRED, "Error",
 				List.of(unableToValidateCodeMessage, unknownCodeSystemMessage, codingIsNotInValueSetMessageWithBindingSpecificReason),
@@ -676,11 +678,11 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 				List.of(unableToValidateCodeMessage, unknownCodeSystemMessage, codingIsNotInValueSetMessageWithBindingSpecificReason),
 				List.of("Warning", "Warning", "Warning")),
 			Arguments.of(Enumerations.BindingStrength.PREFERRED, "Error",
-				List.of(unableToValidateCodeMessage, unknownCodeSystemMessage),
-				List.of("Warning", "Error")),
+				List.of(unableToValidateCodeMessage, unknownCodeSystemMessage, noneOfTheCodingsMessage),
+				List.of("Warning", "Error", "Information")),
 			Arguments.of(Enumerations.BindingStrength.PREFERRED, "Warning",
-				List.of(unableToValidateCodeMessage, unknownCodeSystemMessage),
-				List.of("Warning", "Warning")),
+				List.of(unableToValidateCodeMessage, unknownCodeSystemMessage, noneOfTheCodingsMessage),
+				List.of("Warning", "Warning", "Information")),
 			Arguments.of(Enumerations.BindingStrength.EXAMPLE, "Error",
 				List.of(unknownCodeSystemMessage),
 				List.of("Error")),
@@ -1119,11 +1121,12 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		myStorageSettings.setPreExpandValueSets(true);
 
 		// Add a bunch of codes
-		CustomTerminologySet codesToAdd = new CustomTerminologySet();
+		CodeSystem additions = newDeltaCodeSystem();
+		additions.setUrl("http://loinc.org");
 		for (int i = 0; i < 100; i++) {
-			codesToAdd.addRootConcept("CODE" + i, "Display " + i);
+			additions.addConcept().setCode("CODE" + i).setDisplay("Display " + i);
 		}
-		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://loinc.org", codesToAdd);
+		myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), additions);
 
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 
@@ -2524,7 +2527,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		addLoincCodeToCodeSystemDao(loincCode);
 
-		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://fooVs"), null, new StringType(loincCode), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
+		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://fooVs"), null, new StringType(loincCode), new StringType(TerminologyConstants.LOINC_URI), null, null, null, mySrd);
 
 		assertFalse(result.isOk());
 		assertEquals("Validator is unable to provide validation for 10013-1#http://loinc.org - Unknown or unusable ValueSet[http://fooVs]", result.getMessage());
@@ -2532,7 +2535,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 	private void addLoincCodeToCodeSystemDao(String loincCode) {
 		CodeSystem cs = new CodeSystem();
-		cs.setUrl(ITermLoaderSvc.LOINC_URI);
+		cs.setUrl(TerminologyConstants.LOINC_URI);
 		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
 		cs.addConcept().setCode(loincCode);
 		cs.setId(LOINC_LOW);

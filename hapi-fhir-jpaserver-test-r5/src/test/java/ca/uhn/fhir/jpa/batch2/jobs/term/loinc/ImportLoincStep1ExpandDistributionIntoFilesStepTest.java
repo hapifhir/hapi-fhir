@@ -17,6 +17,7 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyFileCsvStep;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ITerminologyImportFileHandlerStep;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.TermTestUtil;
 import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
@@ -34,7 +35,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -120,14 +120,14 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 		assertEquals(9, attachmentCounter.get());
 
 		verify(myJobPersistence, times(9)).storeNewAttachment(any(), myAttachmentDetailsCaptor.capture());
-		assertEquals("Loinc.csv_0-4", myAttachmentDetailsCaptor.getAllValues().get(0).getFilename());
-		assertEquals("Loinc.csv_5-9", myAttachmentDetailsCaptor.getAllValues().get(1).getFilename());
-		assertEquals("Loinc.csv_10-14", myAttachmentDetailsCaptor.getAllValues().get(2).getFilename());
-		assertEquals("MultiAxialHierarchy.csv_0-4", myAttachmentDetailsCaptor.getAllValues().get(3).getFilename());
-		assertEquals("MultiAxialHierarchy.csv_5-8", myAttachmentDetailsCaptor.getAllValues().get(4).getFilename());
-		assertEquals("AnswerList.csv_0-4", myAttachmentDetailsCaptor.getAllValues().get(5).getFilename());
-		assertEquals("AnswerList.csv_5-9", myAttachmentDetailsCaptor.getAllValues().get(6).getFilename());
-		assertEquals("AnswerList.csv_10-10", myAttachmentDetailsCaptor.getAllValues().get(7).getFilename());
+		assertEquals("Loinc.csv_0_0-4", myAttachmentDetailsCaptor.getAllValues().get(0).getFilename());
+		assertEquals("Loinc.csv_0_5-9", myAttachmentDetailsCaptor.getAllValues().get(1).getFilename());
+		assertEquals("Loinc.csv_0_10-14", myAttachmentDetailsCaptor.getAllValues().get(2).getFilename());
+		assertEquals("MultiAxialHierarchy.csv_0_0-4", myAttachmentDetailsCaptor.getAllValues().get(3).getFilename());
+		assertEquals("MultiAxialHierarchy.csv_0_5-8", myAttachmentDetailsCaptor.getAllValues().get(4).getFilename());
+		assertEquals("AnswerList.csv_0_0-4", myAttachmentDetailsCaptor.getAllValues().get(5).getFilename());
+		assertEquals("AnswerList.csv_0_5-9", myAttachmentDetailsCaptor.getAllValues().get(6).getFilename());
+		assertEquals("AnswerList.csv_0_10-10", myAttachmentDetailsCaptor.getAllValues().get(7).getFilename());
 		assertEquals("metadata.json", myAttachmentDetailsCaptor.getAllValues().get(8).getFilename());
 	}
 
@@ -196,7 +196,12 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 		when(myDaoRegistry.getResourceDao(eq("CodeSystem"))).thenReturn(myCodeSystemDao);
 		when(myDaoRegistry.getResourceDao(eq("ValueSet"))).thenReturn(myValueSetDao);
 		when(myJobPersistence.fetchAttachmentByFilename(eq("my-instance-id"), eq(FILENAME_LOINC_DISTRIBUTION_FILE))).thenReturn(
-			new AttachmentDetails(zipCollectionBuilder.getZipBytes(), AttachmentContentTypeEnum.ZIP, FILENAME_LOINC_DISTRIBUTION_FILE)
+			AttachmentDetails.newBuilder()
+				.withBytes(zipCollectionBuilder.getZipBytes())
+				.withNoMaximumSize()
+				.withContentType(AttachmentContentTypeEnum.ZIP)
+				.withFilename(FILENAME_LOINC_DISTRIBUTION_FILE)
+				.build()
 		);
 
 		// Test
@@ -283,7 +288,12 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 		// Setup
 		when(myJobPersistence.fetchAttachmentByFilename(eq(MY_INSTANCE_ID), eq(FILENAME_LOINC_DISTRIBUTION_FILE))).thenAnswer(t -> {
 			byte[] bytes = RandomUtils.secure().randomBytes(1000);
-			return new AttachmentDetails(new ByteArrayInputStream(bytes), AttachmentContentTypeEnum.ZIP, FILENAME_LOINC_DISTRIBUTION_FILE);
+			return AttachmentDetails.newBuilder()
+				.withBytes(bytes)
+				.withNoMaximumSize()
+				.withContentType(AttachmentContentTypeEnum.ZIP)
+				.withFilename(FILENAME_LOINC_DISTRIBUTION_FILE)
+				.build();
 		});
 
 		// Test
@@ -358,7 +368,13 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 			String fileName = t.getArgument(1, String.class);
 			assertEquals(FILENAME_LOINC_DISTRIBUTION_FILE, fileName);
 			byte[] bytes = files.getZipBytes();
-			return new AttachmentDetails(new ByteArrayInputStream(bytes), AttachmentContentTypeEnum.ZIP, FILENAME_LOINC_DISTRIBUTION_FILE);
+			return AttachmentDetails
+				.newBuilder()
+				.withBytes(bytes)
+				.withNoMaximumSize()
+				.withContentType(AttachmentContentTypeEnum.ZIP)
+				.withFilename(FILENAME_LOINC_DISTRIBUTION_FILE)
+				.build();
 		});
 	}
 
@@ -384,7 +400,9 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 
 		ImportTerminologyJobParameters jobParameters = new ImportTerminologyJobParameters();
 		jobParameters.setJobProperties(new Properties());
+		jobParameters.setUrl(TerminologyConstants.LOINC_URI);
 		jobParameters.setVersionId("1.23");
+		jobParameters.setJobProperties(new Properties());
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId(MY_INSTANCE_ID);
 		return new StepExecutionDetails<>(jobParameters, null, instance, new WorkChunk(), myJobStepExecutionServices, jobDefinition, "step-0", "step-1");
