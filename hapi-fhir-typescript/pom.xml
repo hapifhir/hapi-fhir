@@ -26,7 +26,11 @@
 
 		<ts.npm.package.name>@smile-cdr/fhirts</ts.npm.package.name>
 		<ts.typescript.version>^5.4.0</ts.typescript.version>
-		<ts.node.version>v24.18.0</ts.node.version>
+		<!-- Pinned to the last Node 16 LTS release as a stopgap: the CDR CI compile-check runner
+		     (hdp-ci-maven, Amazon Linux 2, glibc 2.26) can't execute Node 18+ prebuilt binaries,
+		     which require glibc >= 2.28. Bump this once that runner's base image is upgraded. -->
+		<!-- TODO JM-GGG Temp fix until runner's base image is upgraded -->
+		<ts.node.version>v16.20.2</ts.node.version>
 		<ts.npm.install.args>install --no-audit --no-fund</ts.npm.install.args>
 		<ts.npm.publish.args>publish --access public</ts.npm.publish.args>
 		<ts.npm.workdir>${project.build.directory}/npm</ts.npm.workdir>
