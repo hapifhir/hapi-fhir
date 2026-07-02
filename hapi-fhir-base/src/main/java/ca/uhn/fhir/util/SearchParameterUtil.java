@@ -140,7 +140,7 @@ public class SearchParameterUtil {
 		 * requests.
 		 * See https://github.com/hapifhir/hapi-fhir/issues/6536 for more information.
 		 */
-		if (theSearchParamDefinition.name().equalsIgnoreCase("patient")
+		if (theSearchParamDefinition.name().equals("patient")
 				&& theSearchParamDefinition.path().equals("Device.patient")) {
 			validCompartments.add("Patient");
 		}
