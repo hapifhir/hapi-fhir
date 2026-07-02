@@ -59,6 +59,7 @@ import static ca.uhn.fhir.jpa.term.TermTestUtil.URL_MY_CODE_SYSTEM;
 import static ca.uhn.fhir.jpa.term.TermTestUtil.URL_MY_VALUE_SET;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -1088,15 +1089,16 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	private void validateTermValueSetNotExpanded(String theValueSetName) {
 		runInTransaction(() -> {
-			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
-			assertTrue(optionalValueSetByResourcePid.isPresent());
+			List<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
+			assertFalse(optionalValueSetByResourcePid.isEmpty());
 
 			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findByUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 			assertTrue(optionalValueSetByUrl.isPresent());
 
 			TermValueSet termValueSet = optionalValueSetByUrl.get();
-			assertSame(optionalValueSetByResourcePid.get(), termValueSet);
-			ourLog.info("ValueSet:\n" + termValueSet.toString());
+			assertSame(optionalValueSetByResourcePid.get(0), termValueSet);
+			assertThat(optionalValueSetByResourcePid).hasSize(1);
+			ourLog.info("ValueSet:\n{}", termValueSet);
 			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
 			assertEquals(theValueSetName, termValueSet.getName());
 			assertEquals(0, termValueSet.getConcepts().size());
@@ -1106,8 +1108,8 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	private void validateTermValueSetExpandedAndChildren(String theValueSetName, CodeSystem theCodeSystem) {
 		runInTransaction(() -> {
-			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
-			assertTrue(optionalValueSetByResourcePid.isPresent());
+			List<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
+			assertFalse(optionalValueSetByResourcePid.isEmpty());
 
 			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findByUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 			assertTrue(optionalValueSetByUrl.isPresent());
