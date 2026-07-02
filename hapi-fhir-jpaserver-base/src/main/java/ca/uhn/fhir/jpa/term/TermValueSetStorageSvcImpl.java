@@ -1,3 +1,22 @@
+/*-
+ * #%L
+ * HAPI FHIR JPA Server
+ * %%
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
@@ -534,6 +553,11 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 		if (theValueSet.getStatus() != null && theValueSet.getStatus() != Enumerations.PublicationStatus.ACTIVE) {
 			termValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.NOT_ACTIVE);
 		} else {
+			/*
+			 * If we're saving an active ValueSet, automatically start a batch job
+			 * to precalculate the expansion. We register this after the transaction
+			 * commits so that we don't create a job for a failed ValueSet.
+			 */
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 				@Override
 				public void afterCommit() {
@@ -555,7 +579,7 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 		}
 
 		// Delete version being replaced
-		Optional<TermValueSet> deletedTrmValueSet = deleteValueSetForResource(theResourceTable);
+		List<TermValueSet> deletedTrmValueSets = deleteValueSetForResource(theResourceTable);
 
 		/*
 		 * Do the upload.
@@ -564,9 +588,8 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 		String version = termValueSet.getVersion();
 		Optional<TermValueSet> optionalExistingTermValueSetByUrl;
 
-		if (deletedTrmValueSet.isPresent()
-				&& Objects.equals(deletedTrmValueSet.get().getUrl(), url)
-				&& Objects.equals(deletedTrmValueSet.get().getVersion(), version)) {
+		if (deletedTrmValueSets.stream()
+				.anyMatch(t -> Objects.equals(t.getUrl(), url) && Objects.equals(t.getVersion(), version))) {
 			// If we just deleted the valueset marker, we don't need to check if it exists
 			// in the database
 			optionalExistingTermValueSetByUrl = Optional.empty();
@@ -612,16 +635,15 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 		myTermReadSvc.invalidateValueSetCaches();
 	}
 
-	private Optional<TermValueSet> deleteValueSetForResource(ResourceTable theResourceTable) {
+	private List<TermValueSet> deleteValueSetForResource(ResourceTable theResourceTable) {
 		HapiTransactionService.requireTransaction();
 
 		// Get existing entity so it can be deleted.
-		Optional<TermValueSet> optionalExistingTermValueSetById =
-				myTermValueSetDao.findByResourcePid(theResourceTable.getId());
+		List<TermValueSet> termValueSets = myTermValueSetDao.findByResourcePid(theResourceTable.getId());
 
-		optionalExistingTermValueSetById.ifPresent(this::deleteTermValueSet);
+		termValueSets.forEach(this::deleteTermValueSet);
 
-		return optionalExistingTermValueSetById;
+		return termValueSets;
 	}
 
 	private void deleteTermValueSet(TermValueSet theTermValueSet) {

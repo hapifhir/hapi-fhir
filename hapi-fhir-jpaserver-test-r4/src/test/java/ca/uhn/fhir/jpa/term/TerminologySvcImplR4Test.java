@@ -156,7 +156,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		TermValueSet termValueSet = runInTransaction(()-> {
-			TermValueSet vs = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get();
+			TermValueSet vs = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).iterator().next();
 			Long termValueSetId = vs.getId();
 			assertEquals(3, myTermValueSetConceptDesignationDao.countByTermValueSet(vs).intValue());
 			assertEquals(3, vs.getTotalConceptDesignations().intValue());
@@ -174,7 +174,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 				myTermValueSetConceptDao.deleteByTermValueSetId(termValueSet);
 				assertEquals(0, myTermValueSetConceptDao.countByTermValueSet(termValueSet).intValue());
 				myTermValueSetDao.deleteById(new IdAndPartitionId(termValueSetId));
-				assertFalse(myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).isPresent());
+				assertTrue(myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).isEmpty());
 			}
 		});
 	}
@@ -197,7 +197,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		TermValueSet termValueSetId = runInTransaction(()-> {
-			TermValueSet termValueSet = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get();
+			TermValueSet termValueSet = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get(0);
 			Long id = termValueSet.getId();
 			assertEquals(3, myTermValueSetConceptDesignationDao.countByTermValueSet(termValueSet).intValue());
 			assertEquals(3, termValueSet.getTotalConceptDesignations().intValue());
@@ -214,7 +214,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 				myTermValueSetConceptDao.deleteByTermValueSetId(termValueSetId);
 				assertEquals(0, myTermValueSetConceptDao.countByTermValueSet(termValueSetId).intValue());
 				myTermValueSetDao.delete(termValueSetId);
-				assertFalse(myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).isPresent());
+				assertTrue(myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).isEmpty());
 			}
 		});
 	}
