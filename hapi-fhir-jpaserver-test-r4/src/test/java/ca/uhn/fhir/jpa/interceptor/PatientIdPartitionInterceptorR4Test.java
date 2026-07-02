@@ -128,7 +128,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	public void before() throws Exception {
 		super.before();
 		myForceOffsetSearchModeInterceptor = new ForceOffsetSearchModeInterceptor();
-		mySvc = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry, myMatchResourceUrlService, myIdHelperService, myTransactionService);
+		mySvc = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
 
 		myInterceptorRegistry.registerInterceptor(mySvc);
 		myInterceptorRegistry.registerInterceptor(myForceOffsetSearchModeInterceptor);
@@ -1067,13 +1067,18 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		bb.addTransactionCreateEntry(obs);
 
 		if (theSupportsAllPartitionSearch) {
+			// The pre-fetch resolves the inline conditional reference across partitions and rejects the ambiguous
+			// match with HAPI-2207 before any entry is written.
 			PreconditionFailedException e = assertThrows(
 					PreconditionFailedException.class, () -> mySystemDao.transaction(mySrd, bb.getBundleTyped()));
 			assertEquals(
-					Msg.code(2985)
-							+ "Conditional reference \"Patient?identifier=http://acme.org/mrn|PT00062\" matched multiple Patient resources; unable to determine partition",
+					Msg.code(2207)
+							+ "Invalid match URL \"Patient?identifier=http://acme.org/mrn|PT00062\" - Multiple resources match this search",
 					e.getMessage());
 		} else {
+			// When all-partition search is not supported (MegaScale), a transaction may not span partitions, so the
+			// deferring catch is disabled and the unroutable resource is rejected up-front with HAPI-1326.
+			myTransactionService.setTransactionPropagationWhenChangingPartitions(Propagation.REQUIRES_NEW);
 			MethodNotAllowedException e = assertThrows(
 					MethodNotAllowedException.class, () -> mySystemDao.transaction(mySrd, bb.getBundleTyped()));
 			assertEquals(

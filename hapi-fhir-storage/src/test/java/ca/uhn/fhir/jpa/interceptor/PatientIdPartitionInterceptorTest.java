@@ -6,9 +6,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
-import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
+import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -20,13 +18,13 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.test.junit.StringToIntegerListArgumentConverter;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
@@ -42,13 +40,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.converter.ConvertWith;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,10 +54,8 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -78,18 +73,12 @@ class PatientIdPartitionInterceptorTest {
 	@Mock
 	private DaoRegistry myDaoRegistry;
 
-	@Mock
-	private MatchResourceUrlService<JpaPid> myMatchResourceUrlService;
-
-	@Mock
-	private IIdHelperService<JpaPid> myIdHelperService;
-
 	@BeforeEach
 	void beforeEach() {
 		ISearchParamRegistry searchParamRegistry = new FhirContextSearchParamRegistry(myFhirContext);
 		StorageSettings storageSettings = new StorageSettings();
 		myRealSearchParamExtractor = new SearchParamExtractorR4(storageSettings, myPartitionSettings, myFhirContext, searchParamRegistry);
-		mySvc = new PatientIdPartitionInterceptor(myFhirContext, myRealSearchParamExtractor, myPartitionSettings, myDaoRegistry, myMatchResourceUrlService, myIdHelperService, new NonTransactionalHapiTransactionService());
+		mySvc = new PatientIdPartitionInterceptor(myFhirContext, myRealSearchParamExtractor, myPartitionSettings, myDaoRegistry);
 
 		myMatchUrlSvc = new MatchUrlService(myFhirContext, new FhirContextSearchParamRegistry(myFhirContext));
 	}
@@ -238,7 +227,7 @@ class PatientIdPartitionInterceptorTest {
 	void testPolicyVerification(String theResourceType, String thePolicy, String theExpectedFailureIfAny) {
 		Map<String, ResourceCompartmentStoragePolicy> policies = Map.of(theResourceType, ResourceCompartmentStoragePolicy.parse(thePolicy));
 
-		PatientIdPartitionInterceptor interceptor = new PatientIdPartitionInterceptor(myFhirContext, mySearchParamExtractor, myPartitionSettings, myDaoRegistry, myMatchResourceUrlService, myIdHelperService, new NonTransactionalHapiTransactionService());
+		PatientIdPartitionInterceptor interceptor = new PatientIdPartitionInterceptor(myFhirContext, mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
 		if (isNotBlank(theExpectedFailureIfAny)) {
 			assertThatThrownBy(() -> interceptor.setResourceTypePolicies(policies))
 				.isInstanceOf(ConfigurationException.class)
@@ -475,10 +464,11 @@ class PatientIdPartitionInterceptorTest {
 	}
 
 	/**
-	 * Resolution of conditional Patient references in a transaction body: with the resolution
-	 * collaborators supplied and all-partition search supported, {@code transaction()} rewrites a
-	 * {@code "Patient?identifier=..."} body reference to a literal {@code Patient/<id>} before partition
-	 * determination runs.
+	 * Resolution of conditional Patient references in a transaction body: after the pre-fetch has run, the
+	 * {@code STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH} hook rewrites a {@code "Patient?identifier=..."} body
+	 * reference to a literal {@code Patient/<id>} by reusing what the pre-fetch resolved into
+	 * {@link TransactionDetails#getResolvedMatchUrls()} (falling back to the match-URL cache), so that per-entry
+	 * partition determination can route the resource. No live search is performed here.
 	 */
 	@Nested
 	class ConditionalPatientReferenceResolutionInTransactionBundle {
@@ -493,100 +483,103 @@ class PatientIdPartitionInterceptorTest {
 			return bb.getBundleTyped();
 		}
 
+		/** The raw bundle entries, as the transaction processor passes them to the hook. */
+		@SuppressWarnings("unchecked")
+		private List<IBase> entriesOf(Bundle theBundle) {
+			return new ArrayList<>(theBundle.getEntry());
+		}
+
+		/** A version adapter mock whose {@code getResource(entry)} returns the entry's resource. */
+		@SuppressWarnings({"rawtypes", "unchecked"})
+		private ITransactionProcessorVersionAdapter versionAdapter() {
+			ITransactionProcessorVersionAdapter adapter = mock();
+			lenient()
+					.when(adapter.getResource(any()))
+					.thenAnswer(inv -> ((Bundle.BundleEntryComponent) inv.getArgument(0)).getResource());
+			return adapter;
+		}
+
+		private void fireHook(Bundle theBundle, TransactionDetails theTransactionDetails) {
+			mySvc.resolveConditionalPatientReferencesAfterPrefetch(
+					entriesOf(theBundle), versionAdapter(), theTransactionDetails);
+		}
+
 		@Test
-		void testTransaction_WhenAllPartitionSearchUnsupported_ResolutionSkipped() {
-			// When isAllPartitionSearchSupported() is false the resolution step returns early.
+		void testAfterPrefetch_WhenAllPartitionSearchUnsupported_ResolutionSkipped() {
+			// When isAllPartitionSearchSupported() is false the hook returns early (MegaScale: the pre-fetch
+			// does not resolve across partitions, so there is nothing to reuse).
 			mySvc.setAllPartitionSearchSupported(false);
 			Bundle bundle = bundleWithObservationSubjectReference(PATIENT_IDENTIFIER_MATCH_URL);
 			Observation obs = (Observation) bundle.getEntry().get(0).getResource();
 
-			mySvc.transaction(new SystemRequestDetails(), bundle, new TransactionDetails());
+			fireHook(bundle, new TransactionDetails());
 
-			// The conditional reference is left untouched and no match query is run.
+			// The conditional reference is left untouched and no resolution is attempted.
 			assertThat(obs.getSubject().getReference()).isEqualTo(PATIENT_IDENTIFIER_MATCH_URL);
-			verifyNoInteractions(myMatchResourceUrlService);
 		}
 
 		@Test
-		void testTransaction_singleMatch_rewritesReferenceToLiteralPatientId() {
+		void testAfterPrefetch_resolvedInForwardMap_rewritesReferenceToLiteralPatientId() {
 			JpaPid pid = mock();
-			when(myMatchResourceUrlService.processMatchUrl(eq(PATIENT_IDENTIFIER_MATCH_URL), any(), any(), any(), any()))
-					.thenReturn(Set.of(pid));
-			when(myIdHelperService.translatePidIdToForcedId(eq(myFhirContext), eq("Patient"), eq(pid)))
-					.thenReturn(new IdType("Patient/A"));
 
 			Bundle bundle = bundleWithObservationSubjectReference(PATIENT_IDENTIFIER_MATCH_URL);
 			Observation obs = (Observation) bundle.getEntry().get(0).getResource();
 
-			mySvc.transaction(new SystemRequestDetails(), bundle, new TransactionDetails());
+			// The pre-fetch resolved the match URL: it populates both the match-URL map and the resolved-id
+			// (reverse) map, which is what the hook reads to rewrite the reference.
+			TransactionDetails transactionDetails = new TransactionDetails();
+			transactionDetails.addResolvedMatchUrl(myFhirContext, PATIENT_IDENTIFIER_MATCH_URL, pid);
+			transactionDetails.addResolvedResourceId(new IdType("Patient/A"), pid);
+
+			fireHook(bundle, transactionDetails);
 
 			assertThat(obs.getSubject().getReference()).isEqualTo("Patient/A");
-
-			// The resolution search must fan out across every partition.
-			ArgumentCaptor<RequestPartitionId> partitionCaptor = ArgumentCaptor.forClass(RequestPartitionId.class);
-			verify(myMatchResourceUrlService)
-					.processMatchUrl(eq(PATIENT_IDENTIFIER_MATCH_URL), any(), any(), any(), partitionCaptor.capture());
-			assertThat(partitionCaptor.getValue().isAllPartitions()).isTrue();
 		}
 
 		@Test
-		void testTransaction_noMatch_throwsResourceNotFound() {
-			when(myMatchResourceUrlService.processMatchUrl(eq(PATIENT_IDENTIFIER_MATCH_URL), any(), any(), any(), any()))
-					.thenReturn(Set.of());
-
+		void testAfterPrefetch_absentFromTransactionMap_leftUntouched_andCacheNotConsulted() {
+			// A match URL that the pre-fetch did not resolve into getResolvedMatchUrls() (e.g. it was served from the
+			// cross-transaction match-URL cache, which populates the id map instead) is left untouched. The hook does
+			// NOT consult the match-URL cache. Per-entry partition determination then rejects the unroutable resource
+			// with HAPI-1326 downstream, so the transaction fails cleanly rather than committing mis-routed data.
 			Bundle bundle = bundleWithObservationSubjectReference(PATIENT_IDENTIFIER_MATCH_URL);
-			SystemRequestDetails requestDetails = new SystemRequestDetails();
-			TransactionDetails transactionDetails = new TransactionDetails();
+			Observation obs = (Observation) bundle.getEntry().get(0).getResource();
 
-			assertThatThrownBy(() -> mySvc.transaction(requestDetails, bundle, transactionDetails))
+			fireHook(bundle, new TransactionDetails());
+
+			assertThat(obs.getSubject().getReference()).isEqualTo(PATIENT_IDENTIFIER_MATCH_URL);
+		}
+
+		@Test
+		void testAfterPrefetch_noMatch_throwsResourceNotFound() {
+			// The pre-fetch marked the match URL as NOT_FOUND.
+			Bundle bundle = bundleWithObservationSubjectReference(PATIENT_IDENTIFIER_MATCH_URL);
+			TransactionDetails transactionDetails = new TransactionDetails();
+			transactionDetails.addResolvedMatchUrl(myFhirContext, PATIENT_IDENTIFIER_MATCH_URL, TransactionDetails.NOT_FOUND);
+
+			assertThatThrownBy(() -> fireHook(bundle, transactionDetails))
 					.isInstanceOf(ResourceNotFoundException.class)
 					.hasMessage(Msg.code(2992) + "Conditional reference \"" + PATIENT_IDENTIFIER_MATCH_URL
 							+ "\" matched no Patient resources; unable to determine partition");
 		}
 
 		@Test
-		void testTransaction_multipleMatches_throwsPreconditionFailed() {
-			JpaPid pid1 = mock();
-			JpaPid pid2 = mock();
-			when(myMatchResourceUrlService.processMatchUrl(eq(PATIENT_IDENTIFIER_MATCH_URL), any(), any(), any(), any()))
-					.thenReturn(Set.of(pid1, pid2));
-
-			Bundle bundle = bundleWithObservationSubjectReference(PATIENT_IDENTIFIER_MATCH_URL);
-			SystemRequestDetails requestDetails = new SystemRequestDetails();
-			TransactionDetails transactionDetails = new TransactionDetails();
-
-			assertThatThrownBy(() -> mySvc.transaction(requestDetails, bundle, transactionDetails))
-					.isInstanceOf(PreconditionFailedException.class)
-					.hasMessage(Msg.code(2985) + "Conditional reference \"" + PATIENT_IDENTIFIER_MATCH_URL
-							+ "\" matched multiple Patient resources; unable to determine partition");
-		}
-
-		@Test
-		void testTransaction_literalReference_isLeftUntouchedAndNotResolved() {
+		void testAfterPrefetch_literalReference_isLeftUntouchedAndNotResolved() {
 			Bundle bundle = bundleWithObservationSubjectReference("Patient/A");
 			Observation obs = (Observation) bundle.getEntry().get(0).getResource();
 
-			mySvc.transaction(new SystemRequestDetails(), bundle, new TransactionDetails());
+			fireHook(bundle, new TransactionDetails());
 
-			// A literal reference is left untouched and must not trigger a match query.
+			// A literal reference is not conditional, so it is left untouched and triggers no lookup.
 			assertThat(obs.getSubject().getReference()).isEqualTo("Patient/A");
-			verifyNoInteractions(myMatchResourceUrlService);
 		}
 
 		@Test
-		void testTransaction_multipleEntries_resolvesEachConditionalReference() {
+		void testAfterPrefetch_multipleEntries_resolvesEachConditionalReference() {
 			String matchUrlA = "Patient?identifier=http://acme.org/mrn|A";
 			String matchUrlB = "Patient?identifier=http://acme.org/mrn|B";
 			JpaPid pidA = mock();
 			JpaPid pidB = mock();
-			when(myMatchResourceUrlService.processMatchUrl(eq(matchUrlA), any(), any(), any(), any()))
-					.thenReturn(Set.of(pidA));
-			when(myMatchResourceUrlService.processMatchUrl(eq(matchUrlB), any(), any(), any(), any()))
-					.thenReturn(Set.of(pidB));
-			when(myIdHelperService.translatePidIdToForcedId(eq(myFhirContext), eq("Patient"), eq(pidA)))
-					.thenReturn(new IdType("Patient/A"));
-			when(myIdHelperService.translatePidIdToForcedId(eq(myFhirContext), eq("Patient"), eq(pidB)))
-					.thenReturn(new IdType("Patient/B"));
 
 			Observation obsA = new Observation();
 			obsA.getSubject().setReference(matchUrlA);
@@ -595,59 +588,64 @@ class PatientIdPartitionInterceptorTest {
 			BundleBuilder bb = new BundleBuilder(myFhirContext);
 			bb.addTransactionCreateEntry(obsA);
 			bb.addTransactionCreateEntry(obsB);
+			Bundle bundle = bb.getBundleTyped();
 
-			mySvc.transaction(new SystemRequestDetails(), bb.getBundleTyped(), new TransactionDetails());
+			TransactionDetails transactionDetails = new TransactionDetails();
+			transactionDetails.addResolvedMatchUrl(myFhirContext, matchUrlA, pidA);
+			transactionDetails.addResolvedMatchUrl(myFhirContext, matchUrlB, pidB);
+			transactionDetails.addResolvedResourceId(new IdType("Patient/A"), pidA);
+			transactionDetails.addResolvedResourceId(new IdType("Patient/B"), pidB);
+
+			fireHook(bundle, transactionDetails);
 
 			assertThat(obsA.getSubject().getReference()).isEqualTo("Patient/A");
 			assertThat(obsB.getSubject().getReference()).isEqualTo("Patient/B");
 		}
 
 		@Test
-		void testTransaction_multipleCompartmentReferencesInOneResource_eachResolvedToItsPatient() {
+		void testAfterPrefetch_multipleCompartmentReferencesInOneResource_eachResolvedToItsPatient() {
 			// subject and performer are both Patient-compartment search params for Observation, so a
 			// conditional reference on each is resolved independently to its own Patient.
 			String subjectMatchUrl = "Patient?identifier=http://acme.org/mrn|A";
 			String performerMatchUrl = "Patient?identifier=http://acme.org/mrn|B";
 			JpaPid pidA = mock();
 			JpaPid pidB = mock();
-			when(myMatchResourceUrlService.processMatchUrl(eq(subjectMatchUrl), any(), any(), any(), any()))
-					.thenReturn(Set.of(pidA));
-			when(myMatchResourceUrlService.processMatchUrl(eq(performerMatchUrl), any(), any(), any(), any()))
-					.thenReturn(Set.of(pidB));
-			when(myIdHelperService.translatePidIdToForcedId(eq(myFhirContext), eq("Patient"), eq(pidA)))
-					.thenReturn(new IdType("Patient/A"));
-			when(myIdHelperService.translatePidIdToForcedId(eq(myFhirContext), eq("Patient"), eq(pidB)))
-					.thenReturn(new IdType("Patient/B"));
 
 			Observation obs = new Observation();
 			obs.getSubject().setReference(subjectMatchUrl);
 			obs.addPerformer().setReference(performerMatchUrl);
 			BundleBuilder bb = new BundleBuilder(myFhirContext);
 			bb.addTransactionCreateEntry(obs);
+			Bundle bundle = bb.getBundleTyped();
 
-			mySvc.transaction(new SystemRequestDetails(), bb.getBundleTyped(), new TransactionDetails());
+			TransactionDetails transactionDetails = new TransactionDetails();
+			transactionDetails.addResolvedMatchUrl(myFhirContext, subjectMatchUrl, pidA);
+			transactionDetails.addResolvedMatchUrl(myFhirContext, performerMatchUrl, pidB);
+			transactionDetails.addResolvedResourceId(new IdType("Patient/A"), pidA);
+			transactionDetails.addResolvedResourceId(new IdType("Patient/B"), pidB);
+
+			fireHook(bundle, transactionDetails);
 
 			assertThat(obs.getSubject().getReference()).isEqualTo("Patient/A");
 			assertThat(obs.getPerformerFirstRep().getReference()).isEqualTo("Patient/B");
 		}
 
 		@Test
-		void testTransaction_nonPatientConditionalReference_isLeftUntouchedAndNotResolved() {
+		void testAfterPrefetch_nonPatientConditionalReference_isLeftUntouchedAndNotResolved() {
 			String groupConditionalReference = "Group?identifier=http://acme.org/grp|G1";
 			Observation obs = new Observation();
 			obs.getSubject().setReference(groupConditionalReference);
 			BundleBuilder bb = new BundleBuilder(myFhirContext);
 			bb.addTransactionCreateEntry(obs);
 
-			// Only Patient conditional references are resolved; a non-Patient one triggers no match query.
-			mySvc.transaction(new SystemRequestDetails(), bb.getBundleTyped(), new TransactionDetails());
+			// Only Patient conditional references are resolved; a non-Patient one triggers no lookup.
+			fireHook(bb.getBundleTyped(), new TransactionDetails());
 
 			assertThat(obs.getSubject().getReference()).isEqualTo(groupConditionalReference);
-			verifyNoInteractions(myMatchResourceUrlService);
 		}
 
 		@Test
-		void testTransaction_nonCompartmentPatientConditionalReference_isLeftUntouchedAndNotResolved() {
+		void testAfterPrefetch_nonCompartmentPatientConditionalReference_isLeftUntouchedAndNotResolved() {
 			// 'focus' is not a Patient-compartment search param for Observation, so a conditional Patient
 			// reference there does not drive partition selection. The interceptor leaves it untouched; the
 			// core transaction processor resolves it later at save time.
@@ -656,10 +654,9 @@ class PatientIdPartitionInterceptorTest {
 			BundleBuilder bb = new BundleBuilder(myFhirContext);
 			bb.addTransactionCreateEntry(obs);
 
-			mySvc.transaction(new SystemRequestDetails(), bb.getBundleTyped(), new TransactionDetails());
+			fireHook(bb.getBundleTyped(), new TransactionDetails());
 
 			assertThat(obs.getFocusFirstRep().getReference()).isEqualTo(PATIENT_IDENTIFIER_MATCH_URL);
-			verifyNoInteractions(myMatchResourceUrlService);
 		}
 	}
 

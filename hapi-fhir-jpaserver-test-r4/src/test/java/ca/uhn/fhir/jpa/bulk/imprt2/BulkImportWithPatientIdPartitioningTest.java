@@ -52,7 +52,7 @@ public class BulkImportWithPatientIdPartitioningTest extends BaseJpaR4Test {
 	@BeforeEach
 	@Override
 	public void before() {
-		myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry, myMatchResourceUrlService, myIdHelperService, myTransactionService);
+		myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
 		myInterceptorRegistry.registerInterceptor(myPatientIdPartitionInterceptor);
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setUnnamedPartitionMode(true);

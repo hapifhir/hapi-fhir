@@ -2062,6 +2062,41 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
+	 * Invoked during FHIR transaction processing, after all conditional URLs and reference targets have been
+	 * pre-fetched, but before any entry in the bundle has been written. Hooks may mutate the entries (for example
+	 * to resolve references to concrete IDs) using the data resolved during the pre-fetch, which is available on the
+	 * supplied {@link ca.uhn.fhir.rest.api.server.storage.TransactionDetails}.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>java.util.List - The list of bundle entries being processed, in processing order</li>
+	 * <li>ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter - The version adapter for reading and mutating the
+	 * bundle's entries in a FHIR-version-agnostic way.</li>
+	 * <li>ca.uhn.fhir.jpa.api.config.JpaStorageSettings - The active storage settings, so hooks can honor configuration
+	 * such as the server resource ID strategy when assigning IDs.</li>
+	 * <li>ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is being
+	 * processed.</li>
+	 * <li>ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - The same details as the RequestDetails parameter, but
+	 * only populated when operating in a RestfulServer. Provided as a convenience.</li>
+	 * <li>ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object.</li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 *
+	 * @since 8.11.15
+	 */
+	STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH(
+			void.class,
+			"java.util.List",
+			"ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter",
+			"ca.uhn.fhir.jpa.api.config.JpaStorageSettings",
+			"ca.uhn.fhir.rest.api.server.RequestDetails",
+			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+			"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"),
+
+	/**
+	 * <b>Storage Hook:</b>
 	 * Invoked after all entries in a transaction bundle have been executed
 	 * <p>
 	 * Hooks will have access to the original bundle, as well as all the deferred interceptor broadcasts related to the

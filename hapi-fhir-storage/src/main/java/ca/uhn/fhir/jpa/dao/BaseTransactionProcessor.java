@@ -1043,8 +1043,7 @@ public abstract class BaseTransactionProcessor {
 					IBaseResource resource = myVersionAdapter.getResource(theEntry);
 					String resourceType = myContext.getResourceType(resource);
 					nextWriteEntryRequestPartitionId =
-							myRequestPartitionHelperService.determineCreatePartitionForRequest(
-									requestDetailsForEntry, resource, resourceType);
+							determineCreatePartitionOrAllPartitions(requestDetailsForEntry, resource, resourceType);
 					break;
 				}
 				case PUT: {
@@ -1060,9 +1059,8 @@ public abstract class BaseTransactionProcessor {
 							nextWriteEntryRequestPartitionId = theTransactionDetails.getResolvedPartition(resourceId);
 						}
 						if (nextWriteEntryRequestPartitionId == null) {
-							nextWriteEntryRequestPartitionId =
-									myRequestPartitionHelperService.determineCreatePartitionForRequest(
-											requestDetailsForEntry, resource, resourceType);
+							nextWriteEntryRequestPartitionId = determineCreatePartitionOrAllPartitions(
+									requestDetailsForEntry, resource, resourceType);
 							if (resourceId != null) {
 								theTransactionDetails.addResolvedPartition(
 										resourceId, nextWriteEntryRequestPartitionId);
@@ -1074,6 +1072,51 @@ public abstract class BaseTransactionProcessor {
 			}
 		}
 		return nextWriteEntryRequestPartitionId;
+	}
+
+	/**
+	 * Determine the create partition for a transaction write entry, falling back to
+	 * {@link RequestPartitionId#allPartitions()} when the patient compartment can't be resolved yet because the
+	 * entry carries an unresolved conditional Patient reference (Msg 1326). Such an entry is re-resolved at create
+	 * time (inside the transaction, per-entry) once its inline reference has been rewritten to a concrete
+	 * {@code Patient/<id>}, so deferring here does not mask a genuinely unroutable resource — that still throws
+	 * Msg 1326 at the per-entry write.
+	 * <p>
+	 * The fallback only applies when a single transaction may span partitions
+	 * ({@code !isRequiresNewTransactionWhenChangingPartitions()}). On sharded (MegaScale) storage a transaction is
+	 * pinned to one partition, the after-prefetch resolver is a no-op, and the clean Msg 1326 rejection must be
+	 * preserved — so there we do not defer.
+	 * <p>
+	 * Msg 1321 (id-less Patient) and Msg 1324 (multiple distinct compartments) are not deferred.
+	 */
+	private RequestPartitionId determineCreatePartitionOrAllPartitions(
+			RequestDetails theRequestDetails, IBaseResource theResource, String theResourceType) {
+		if (myHapiTransactionService.isRequiresNewTransactionWhenChangingPartitions()) {
+			return myRequestPartitionHelperService.determineCreatePartitionForRequest(
+					theRequestDetails, theResource, theResourceType);
+		}
+		try {
+			return myRequestPartitionHelperService.determineCreatePartitionForRequest(
+					theRequestDetails, theResource, theResourceType);
+		} catch (MethodNotAllowedException e) {
+			if (messageContainsAnyCode(e, 1326)) {
+				return RequestPartitionId.allPartitions();
+			}
+			throw e;
+		}
+	}
+
+	private static boolean messageContainsAnyCode(Throwable theException, int... theCodes) {
+		String message = theException.getMessage();
+		if (message == null) {
+			return false;
+		}
+		for (int code : theCodes) {
+			if (message.contains(Msg.code(code))) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private boolean haveWriteOperationsHooks(RequestDetails theRequestDetails) {

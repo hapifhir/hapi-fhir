@@ -683,7 +683,7 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 			myPartitionSettings.setDefaultPartitionId(-1);
 			// PATIENT_ID mode: partition derived from patient ID via default algorithm
 			myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(
-					getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry, myMatchResourceUrlService, myIdHelperService, myTransactionService);
+					getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
 			myInterceptorRegistry.registerInterceptor(myPatientIdPartitionInterceptor);
 		}
 
@@ -761,7 +761,7 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 			myPartitionSettings.setDefaultPartitionId(-1);
 			// BUCKETED_PATIENT_ID mode: patients hashed into a small number of buckets
 			myPatientIdPartitionInterceptor = new SmallBucketPatientIdPartitionInterceptor(
-					getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry, myMatchResourceUrlService, myIdHelperService, myTransactionService);
+					getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
 			myInterceptorRegistry.registerInterceptor(myPatientIdPartitionInterceptor);
 		}
 
@@ -838,18 +838,12 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 				FhirContext theFhirContext,
 				ISearchParamExtractor theSearchParamExtractor,
 				PartitionSettings thePartitionSettings,
-				DaoRegistry theDaoRegistry,
-				MatchResourceUrlService<JpaPid> theMatchResourceUrlService,
-				IIdHelperService<JpaPid> theIdHelperService,
-				IHapiTransactionService theTransactionService) {
+				DaoRegistry theDaoRegistry) {
 			super(
 					theFhirContext,
 					theSearchParamExtractor,
 					thePartitionSettings,
-					theDaoRegistry,
-					theMatchResourceUrlService,
-					theIdHelperService,
-					theTransactionService);
+					theDaoRegistry);
 		}
 
 		@Override
