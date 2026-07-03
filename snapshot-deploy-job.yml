@@ -3,6 +3,7 @@
 
 jobs:
   - job: DeploySnapshot
+    timeoutInMinutes: 90
 
     # We'll run the process on the latest version of ubuntu because they tend to be the fastest
     pool:
