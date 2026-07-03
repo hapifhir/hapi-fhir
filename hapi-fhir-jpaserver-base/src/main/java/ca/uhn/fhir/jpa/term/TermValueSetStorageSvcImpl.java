@@ -24,6 +24,7 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetParameters;
@@ -85,6 +86,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 	public static final String INTENDED_VERSION_ID_NULL = "(null)";
 	private static final Logger ourLog = LoggerFactory.getLogger(TermValueSetStorageSvcImpl.class);
+
+	@Autowired
+	private JpaStorageSettings myStorageSettings;
 
 	@Autowired
 	private FhirContext myContext;
@@ -552,7 +556,7 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 
 		if (theValueSet.getStatus() != null && theValueSet.getStatus() != Enumerations.PublicationStatus.ACTIVE) {
 			termValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.NOT_ACTIVE);
-		} else {
+		} else if (myStorageSettings.isPreExpandValueSets() && myStorageSettings.isEnableTaskPreExpandValueSets()) {
 			/*
 			 * If we're saving an active ValueSet, automatically start a batch job
 			 * to precalculate the expansion. We register this after the transaction
