@@ -23,7 +23,7 @@ public class IntCounter {
 
 	private int myCount;
 
-	public int get() {
+	public long get() {
 		return myCount;
 	}
 

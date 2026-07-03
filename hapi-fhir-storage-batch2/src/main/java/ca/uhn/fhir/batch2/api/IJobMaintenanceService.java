@@ -66,8 +66,10 @@ public interface IJobMaintenanceService {
 
 	/**
 	 * Runs a maintenance pass for active jobs (jobs in statuses QUEUED, BUILDING, IN_PROGRESS, etc.)
+	 *
+	 * @return
 	 */
-	void runActiveJobMaintenancePass();
+	boolean runActiveJobMaintenancePass();
 
 	/**
 	 * Runs a maintenance pass for ended jobs (jobs in statuses FAILED, COMPLETED, etc.)

@@ -9,8 +9,10 @@ import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.BaseBatch2Test;
 import ca.uhn.fhir.batch2.coordinator.JobCoordinatorImplTest;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
+import ca.uhn.fhir.batch2.coordinator.ReductionStepChunkProcessingResponse;
 import ca.uhn.fhir.batch2.coordinator.TestJobParameters;
 import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
+import ca.uhn.fhir.batch2.model.BatchInstanceStatusDTO;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
@@ -67,6 +69,7 @@ import static ca.uhn.fhir.batch2.coordinator.JobCoordinatorImplTest.createWorkCh
 import static ca.uhn.fhir.batch2.coordinator.JobCoordinatorImplTest.createWorkChunkStep2;
 import static ca.uhn.fhir.batch2.coordinator.JobCoordinatorImplTest.createWorkChunkStep3;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.in;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -304,6 +307,87 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	}
 
 	@Test
+	void testInProgress_GatedExecutionWithReducer_ExecutesReducer() {
+		// Setup
+		List<WorkChunk> completedChunks = List.of(createWorkChunkStep1().setStatus(WorkChunkStatusEnum.COMPLETED).setId(CHUNK_ID));
+
+		List<WorkChunk> chunks = Arrays.asList(
+			JobCoordinatorImplTest.createWorkChunkStep3().setStatus(WorkChunkStatusEnum.QUEUED).setId(CHUNK_ID),
+			JobCoordinatorImplTest.createWorkChunkStep3().setStatus(WorkChunkStatusEnum.QUEUED).setId(CHUNK_ID_2)
+		);
+		myJobDefinitionRegistry.addJobDefinition(createJobDefinitionWithReduction(JobDefinition.Builder::gatedExecution));
+
+		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(false)))
+			.thenReturn(chunks.iterator());
+		when(myJobPersistence.getDistinctWorkChunkStatesForJobAndStep(anyString(), anyString()))
+			.thenReturn(completedChunks.stream().map(WorkChunk::getStatus).collect(Collectors.toSet()));
+
+		JobInstance instance1 = createInstance();
+		instance1.setJobDefinitionId(REDUCTION_JOB_ID);
+		instance1.setCurrentGatedStepId(STEP_3);
+		when(myJobPersistence.fetchInstances(anyInt(), eq(0), eq(StatusEnum.getNotEndedStatuses()))).thenReturn(Lists.newArrayList(instance1));
+		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(instance1));
+		stubUpdateInstanceCallback(instance1);
+
+		when(myReductionStepExecutorService.triggerReductionStep(any(), any())).thenReturn(new ReductionStepChunkProcessingResponse(true));
+		when(myJobPersistence.fetchBatchInstanceStatus(eq(INSTANCE_ID))).thenReturn(new BatchInstanceStatusDTO(INSTANCE_ID, StatusEnum.COMPLETED, new Date(), new Date()));
+
+		// Execute
+		boolean outcome = mySvc.runActiveJobMaintenancePass();
+
+		// Verify
+		assertTrue(outcome);
+		verify(myReductionStepExecutorService, times(1)).triggerReductionStep(eq(instance1), any());
+	}
+
+	/**
+	 * This is just a test for a misbehaving reduction step - The reduction
+	 * step should always leave the job either COMPLETED or FAILED because
+	 * it's the last step.
+	 */
+	@Test
+	void testInProgress_GatedExecutionWithReducer_ReductionStepDoesNotMarkJobAsComplete() {
+		// Setup
+		List<WorkChunk> completedChunks = List.of(createWorkChunkStep1().setStatus(WorkChunkStatusEnum.COMPLETED).setId(CHUNK_ID));
+
+		List<WorkChunk> chunks = Arrays.asList(
+			JobCoordinatorImplTest.createWorkChunkStep3().setStatus(WorkChunkStatusEnum.QUEUED).setId(CHUNK_ID),
+			JobCoordinatorImplTest.createWorkChunkStep3().setStatus(WorkChunkStatusEnum.QUEUED).setId(CHUNK_ID_2)
+		);
+		myJobDefinitionRegistry.addJobDefinition(createJobDefinitionWithReduction(JobDefinition.Builder::gatedExecution));
+
+		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(false)))
+			.thenReturn(chunks.iterator());
+		when(myJobPersistence.getDistinctWorkChunkStatesForJobAndStep(anyString(), anyString()))
+			.thenReturn(completedChunks.stream().map(WorkChunk::getStatus).collect(Collectors.toSet()));
+
+		JobInstance instance1 = createInstance();
+		instance1.setJobDefinitionId(REDUCTION_JOB_ID);
+		instance1.setCurrentGatedStepId(STEP_3);
+		when(myJobPersistence.fetchInstances(anyInt(), eq(0), eq(StatusEnum.getNotEndedStatuses()))).thenReturn(Lists.newArrayList(instance1));
+		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(instance1));
+
+		when(myReductionStepExecutorService.triggerReductionStep(any(), any())).thenAnswer(t ->{
+			instance1.setStatus(StatusEnum.IN_PROGRESS);
+			return new ReductionStepChunkProcessingResponse(true);
+		});
+		when(myJobPersistence.fetchBatchInstanceStatus(eq(INSTANCE_ID))).thenAnswer(t->new BatchInstanceStatusDTO(INSTANCE_ID, instance1.getStatus(), new Date(), new Date()));
+		when(myJobPersistence.updateInstance(eq(INSTANCE_ID), any())).thenAnswer(t -> {
+			IJobPersistence.JobInstanceUpdateCallback callback = t.getArgument(1, IJobPersistence.JobInstanceUpdateCallback.class);
+			callback.doUpdate(instance1);
+			return null;
+		});
+
+		// Execute
+		boolean outcome = mySvc.runActiveJobMaintenancePass();
+
+		// Verify
+		assertFalse(outcome);
+		assertEquals(StatusEnum.FAILED, instance1.getStatus());
+		assertEquals("Reduction step for job instance[INSTANCE-ID] existed with job in unexpected status: IN_PROGRESS", instance1.getErrorMessage());
+	}
+
+	@Test
 	public void testFailed_PurgeOldInstance() {
 		myJobDefinitionRegistry.addJobDefinition(createJobDefinition());
 		JobInstance instance = createInstance();
@@ -450,8 +534,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		verify(myJobPersistence, never()).fetchAllWorkChunkMetadataForJobInStates(any(), anyString(), any());
 		verify(myJobPersistence, never()).enqueueWorkChunkForProcessing(anyString(), any());
 		verify(myWorkChannelProducer, never()).send(any(JobWorkNotificationJsonMessage.class));
-		verify(myReductionStepExecutorService)
-			.triggerReductionStep(anyString(), any());
+		verify(myReductionStepExecutorService).triggerReductionStep(any(), any());
 	}
 
 	@Test

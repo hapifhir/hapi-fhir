@@ -1,0 +1,8 @@
+---
+type: add
+issue: 8093
+title: "Two aspects of Batch2 job maintenance have been cleaned up:
+
+* The job reduction step (which handles the final job step on job with a Reducer step) has been moved from having its own scheduler, to executing as a part of the maintenance job loop. This reduces the chances of conflicts where multiple threads try to concurrently update the same job.
+* Jobs can now declare \"progress weights\" to individual steps, which improves the accuracy of calculated job progress in cases where some steps execute faster than others.
+* The Batch2 job persistence service has been converted from using Spring @Transaction to using the HAPI transaction manager, for clearer stack traces and easier troubleshooting."

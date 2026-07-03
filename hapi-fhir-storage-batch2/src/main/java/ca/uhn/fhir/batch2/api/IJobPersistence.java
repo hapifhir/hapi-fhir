@@ -42,8 +42,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.Date;
@@ -72,7 +70,6 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 *
 	 * @param theInstance The details
 	 */
-	@Transactional(propagation = Propagation.REQUIRED)
 	String storeNewInstance(RequestDetails theRequestDetails, JobInstance theInstance);
 
 	/**
@@ -111,7 +108,6 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	List<JobInstance> fetchInstances(int thePageSize, int thePageIndex, Set<StatusEnum> theStatuses);
 
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	void enqueueWorkChunkForProcessing(String theChunkId, Consumer<Integer> theCallback);
 
 	/**
@@ -120,7 +116,6 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 * @param theInstanceId the instance id
 	 * @return the number of updated chunks
 	 */
-	@Transactional
 	int updatePollWaitingChunksForJobIfReady(String theInstanceId);
 
 	/**
@@ -152,7 +147,6 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 * Returns set of all distinct states for the specified job instance id
 	 * and step id.
 	 */
-	@Transactional
 	Set<WorkChunkStatusEnum> getDistinctWorkChunkStatesForJobAndStep(String theInstanceId, String theCurrentStepId);
 
 	/**
@@ -177,7 +171,6 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 * @param theStates states of interset
 	 * @return an iterator for the workchunks
 	 */
-	@Transactional(propagation = Propagation.SUPPORTS)
 	Page<WorkChunkMetadata> fetchAllWorkChunkMetadataForJobInStates(
 			Pageable thePageable, String theInstanceId, Set<WorkChunkStatusEnum> theStates);
 
@@ -282,7 +275,6 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 * @return true if the instance was modified
 	 */
 	// wipmb For 6.8 - consider changing callers to actual objects we can unit test
-	@Transactional
 	boolean updateInstance(String theInstanceId, JobInstanceUpdateCallback theModifier);
 
 	/**
@@ -301,7 +293,9 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	void deleteChunksAndMarkInstanceAsChunksPurged(String theInstanceId);
 
-	@Transactional(propagation = Propagation.MANDATORY)
+	/**
+	 * Must be called from within a DB transaction
+	 */
 	boolean markInstanceAsStatusWhenStatusIn(
 			String theInstance, StatusEnum theStatusEnum, Set<StatusEnum> thePriorStates);
 
@@ -313,7 +307,9 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	JobOperationResultJson cancelInstance(String theInstanceId);
 
-	@Transactional(propagation = Propagation.MANDATORY)
+	/**
+	 * Must be called from within a database transaction
+	 */
 	void updateInstanceUpdateTime(String theInstanceId);
 
 	/*
@@ -348,7 +344,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 * zero unfinished chunks left until the job is complete.  Makes the maintenance run simpler.
 	 *
 	 * @param theJobDefinition what kind of job
-	 * @param theParameters params for the job
+	 * @param theParameters params for the jobx
 	 * @return the ids of the instance and first chunk
 	 */
 	@Nonnull
@@ -375,10 +371,11 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	/**
 	 * Move from QUEUED->IN_PROGRESS when a work chunk arrives.
 	 * Ignore other prior states.
+	 * Must be called from within a database transaction.
 	 * @return did the transition happen
 	 */
-	@Transactional(propagation = Propagation.MANDATORY)
 	default boolean onChunkDequeued(String theJobInstanceId) {
+		HapiTransactionService.requireTransaction();
 		return markInstanceAsStatusWhenStatusIn(
 				theJobInstanceId, StatusEnum.IN_PROGRESS, Collections.singleton(StatusEnum.QUEUED));
 	}
@@ -393,7 +390,6 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 * @param theNextStepId the id of the next job step
 	 * @return whether any changes were made
 	 */
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	boolean advanceJobStepAndUpdateChunkStatus(
 			String theJobInstanceId, String theNextStepId, boolean theIsReductionStepBoolean);
 

@@ -72,7 +72,6 @@ public interface IWorkChunkPersistence {
 	 * @param theChunkId The ID from {@link #onWorkChunkCreate}
 	 * @return The WorkChunk or empty if no chunk exists, or not in a runnable state (QUEUED or ERRORRED)
 	 */
-	@Transactional(propagation = Propagation.MANDATORY)
 	Optional<WorkChunk> onWorkChunkDequeue(String theChunkId);
 
 	/**
