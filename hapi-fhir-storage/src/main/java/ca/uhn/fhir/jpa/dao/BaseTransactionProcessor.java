@@ -1075,48 +1075,33 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-	 * Determine the create partition for a transaction write entry, falling back to
-	 * {@link RequestPartitionId#allPartitions()} when the patient compartment can't be resolved yet because the
-	 * entry carries an unresolved conditional Patient reference (Msg 1326). Such an entry is re-resolved at create
-	 * time (inside the transaction, per-entry) once its inline reference has been rewritten to a concrete
-	 * {@code Patient/<id>}, so deferring here does not mask a genuinely unroutable resource — that still throws
-	 * Msg 1326 at the per-entry write.
+	 * Determine the create partition for a transaction write entry, if possible. It may not be possible in
+	 * patient-ID partition mode: an entry whose Patient reference is an inline match URL (e.g.
+	 * {@code subject = "Patient?identifier=..."}) that pre-fetch hasn't resolved yet cannot be routed to a Patient
+	 * compartment. In that case, when all-partition search is supported
+	 * ({@link PartitionSettings#isAllPartitionSearchSupported()}) we return
+	 * {@link RequestPartitionId#allPartitions()} for now; the actual routing is determined later, per-entry at
+	 * write time, once pre-fetch has resolved the inline match URL. On infrastructure that cannot search across all
+	 * partitions, the partition must be determined before the transaction opens, so it cannot be deferred and the
+	 * rejection bubbles up.
 	 * <p>
-	 * The fallback only applies when the storage supports all-partition search
-	 * ({@link PartitionSettings#isAllPartitionSearchSupported()}). On sharded storage a transaction is
-	 * pinned to one partition, the after-prefetch resolver is a no-op, and the clean Msg 1326 rejection must be
-	 * preserved — so there we do not defer.
-	 * <p>
-	 * Msg 1321 (id-less Patient) and Msg 1324 (multiple distinct compartments) are not deferred.
+	 * <b>Not a clean solution:</b> deferral is keyed off Msg 1326, an error code raised specifically by
+	 * {@code PatientIdPartitionInterceptor}, so the core transaction processor is coupled to an interceptor-specific
+	 * code. Done under delivery time pressure; this should be revisited for a cleaner separation when there is time
+	 * to design one.
 	 */
 	private RequestPartitionId tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
 			RequestDetails theRequestDetails, IBaseResource theResource, String theResourceType) {
-		if (!myPartitionSettings.isAllPartitionSearchSupported()) {
-			return myRequestPartitionHelperService.determineCreatePartitionForRequest(
-					theRequestDetails, theResource, theResourceType);
-		}
 		try {
 			return myRequestPartitionHelperService.determineCreatePartitionForRequest(
 					theRequestDetails, theResource, theResourceType);
 		} catch (MethodNotAllowedException e) {
-			if (messageContainsAnyCode(e, 1326)) {
+			// Msg 1326 is the patient-ID interceptor's "can't route to a compartment" signal (see javadoc).
+			if (myPartitionSettings.isAllPartitionSearchSupported() && messageStartsWith(e, Msg.code(1326))) {
 				return RequestPartitionId.allPartitions();
 			}
 			throw e;
 		}
-	}
-
-	private static boolean messageContainsAnyCode(Throwable theException, int... theCodes) {
-		String message = theException.getMessage();
-		if (message == null) {
-			return false;
-		}
-		for (int code : theCodes) {
-			if (message.contains(Msg.code(code))) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	private boolean haveWriteOperationsHooks(RequestDetails theRequestDetails) {
@@ -2994,5 +2979,10 @@ public abstract class BaseTransactionProcessor {
 
 	private static boolean isUrnEscaped(@Nonnull String theId) {
 		return theId.startsWith(URN_PREFIX_ESCAPED);
+	}
+
+	private static boolean messageStartsWith(Throwable theException, String thePrefix) {
+		String message = theException.getMessage();
+		return message != null && message.startsWith(thePrefix);
 	}
 }
