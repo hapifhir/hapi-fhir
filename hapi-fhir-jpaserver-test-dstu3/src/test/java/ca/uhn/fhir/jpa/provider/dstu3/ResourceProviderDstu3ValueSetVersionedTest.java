@@ -48,6 +48,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import jakarta.annotation.Nonnull;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3TerminologyTest.URL_MY_CODE_SYSTEM;
@@ -1019,14 +1020,15 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 
 	private void validateTermValueSetNotExpanded(String theValueSetName, String theVersion, JpaPid theId) {
 		runInTransaction(() -> {
-			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(theId);
-			assertTrue(optionalValueSetByResourcePid.isPresent());
+			List<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(theId);
+			assertFalse(optionalValueSetByResourcePid.isEmpty());
 
 			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndVersion("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", theVersion);
 			assertTrue(optionalValueSetByUrl.isPresent());
 
 			TermValueSet termValueSet = optionalValueSetByUrl.get();
-			assertThat(termValueSet).isSameAs(optionalValueSetByResourcePid.get());
+			assertThat(termValueSet).isSameAs(optionalValueSetByResourcePid.get(0));
+			assertThat(optionalValueSetByResourcePid).hasSize(1);
 			ourLog.info("ValueSet:\n" + termValueSet.toString());
 			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
 			assertEquals(theValueSetName, termValueSet.getName());
@@ -1037,14 +1039,15 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 
 	private void validateTermValueSetExpandedAndChildrenV1(String theValueSetName, CodeSystem theCodeSystem) {
 		runInTransaction(() -> {
-			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable_v1);
-			assertTrue(optionalValueSetByResourcePid.isPresent());
+			List<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable_v1);
+			assertFalse(optionalValueSetByResourcePid.isEmpty());
 
 			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndVersion("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", "1");
 			assertTrue(optionalValueSetByUrl.isPresent());
 
 			TermValueSet termValueSet = optionalValueSetByUrl.get();
-			assertThat(termValueSet).isSameAs(optionalValueSetByResourcePid.get());
+			assertThat(termValueSet).isSameAs(optionalValueSetByResourcePid.get(0));
+			assertThat(optionalValueSetByResourcePid).hasSize(1);
 			ourLog.info("ValueSet:\n" + termValueSet.toString());
 			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
 			assertEquals(theValueSetName, termValueSet.getName());
@@ -1070,14 +1073,15 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 	private void validateTermValueSetExpandedAndChildrenV2(String theValueSetName, CodeSystem theCodeSystem) {
 
 		runInTransaction(() -> {
-			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable_v2);
-			assertTrue(optionalValueSetByResourcePid.isPresent());
+			List<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable_v2);
+			assertFalse(optionalValueSetByResourcePid.isEmpty());
 
 			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndVersion("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", "2");
 			assertTrue(optionalValueSetByUrl.isPresent());
 
 			TermValueSet termValueSet = optionalValueSetByUrl.get();
-			assertThat(termValueSet).isSameAs(optionalValueSetByResourcePid.get());
+			assertThat(termValueSet).isSameAs(optionalValueSetByResourcePid.get(0));
+			assertThat(optionalValueSetByResourcePid).hasSize(1);
 			ourLog.info("ValueSet:\n" + termValueSet.toString());
 			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
 			assertEquals(theValueSetName, termValueSet.getName());
@@ -1398,39 +1402,6 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 		myStorageSettings.setPreExpandValueSets(new JpaStorageSettings().isPreExpandValueSets());
 	}
 
-	public CodeSystem createExternalCs(IFhirResourceDao<CodeSystem> theCodeSystemDao, IResourceTableDao theResourceTableDao, ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc, ServletRequestDetails theRequestDetails) {
-		CodeSystem codeSystem = new CodeSystem();
-		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
-		codeSystem.setVersion("SYSTEM VERSION");
-		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
-		IIdType id = theCodeSystemDao.create(codeSystem, theRequestDetails).getId().toUnqualified();
-
-		ResourceTable table = theResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-
-		TermCodeSystemVersion cs = new TermCodeSystemVersion();
-		cs.setResource(table);
-
-		TermConcept parentA = new TermConcept(cs, "ParentA").setDisplay("Parent A");
-		cs.getConcepts().add(parentA);
-
-		TermConcept childAA = new TermConcept(cs, "childAA").setDisplay("Child AA");
-		parentA.addChild(childAA, RelationshipTypeEnum.ISA);
-
-		TermConcept childAAA = new TermConcept(cs, "childAAA").setDisplay("Child AAA");
-		childAA.addChild(childAAA, RelationshipTypeEnum.ISA);
-
-		TermConcept childAAB = new TermConcept(cs, "childAAB").setDisplay("Child AAB");
-		childAA.addChild(childAAB, RelationshipTypeEnum.ISA);
-
-		TermConcept childAB = new TermConcept(cs, "childAB").setDisplay("Child AB");
-		parentA.addChild(childAB, RelationshipTypeEnum.ISA);
-
-		TermConcept parentB = new TermConcept(cs, "ParentB").setDisplay("Parent B");
-		cs.getConcepts().add(parentB);
-
-		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
-		return codeSystem;
-	}
 
 	public static CodeSystem createExternalCs(BaseJpaTest theTest, IFhirResourceDao<CodeSystem> theCodeSystemDao, IResourceTableDao theResourceTableDao, ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc, ServletRequestDetails theRequestDetails, String theCodeSystemVersion) {
 		CodeSystem codeSystem = new CodeSystem();
