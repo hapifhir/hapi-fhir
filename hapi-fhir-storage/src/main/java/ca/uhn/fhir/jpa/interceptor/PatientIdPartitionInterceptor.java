@@ -49,7 +49,6 @@ import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorOrders;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.storage.PreviousVersionReader;
@@ -877,39 +876,31 @@ public class PatientIdPartitionInterceptor {
 	}
 
 	/**
-	 * After the transaction pre-fetch has run (inside the transaction, before any entry is written), rewrite each
-	 * conditional Patient-compartment reference in an entry's resource body (e.g.
-	 * {@code Observation.subject = "Patient?identifier=http://acme.org/mrn|PT00062"}) to a literal
-	 * {@code Patient/<id>}, so that the per-entry partition determination ({@link #identifyForCreate}) can route the
-	 * resource to the correct Patient compartment.
-	 * <p>
-	 * The resolution reuses what the pre-fetch already resolved into
-	 * {@link TransactionDetails#getResolvedMatchUrls()} (keyed by the reference string) rather than issuing a
-	 * search. It relies on the pre-fetch's database-search path, which populates that map.
-	 * <p>
-	 * Only the compartment-defining references are resolved here, since those are the ones partition determination
-	 * relies on. Any other conditional reference is left untouched and is resolved later by the core transaction
-	 * processor at save time.
-	 * <p>
-	 * The step is a no-op unless {@link #isAllPartitionSearchSupported()} is {@code true} (on sharded
-	 * storage the pre-fetch does not resolve across partitions, so there is nothing to reuse). A conditional
-	 * reference that matches no Patient is rejected with HAPI-2992; a reference matching more than one Patient is
-	 * rejected by the pre-fetch itself with HAPI-2207 before this hook runs (in either case the partition cannot be
-	 * determined).
-	 * <p>
-	 * <b>Known limitation:</b> when the match-URL cache ({@code isMatchUrlCacheEnabled()}) is enabled, a reference
-	 * whose target was resolved and committed by an earlier transaction is served from that cache during pre-fetch,
-	 * which populates the id map rather than {@link TransactionDetails#getResolvedMatchUrls()}. Such a reference is
-	 * left unresolved here and the transaction is rejected up-front with HAPI-1326 (a clean failure — it never
-	 * commits a mis-routed resource). Resolving that case is deferred to a separate change.
+	 * Handles {@link Pointcut#STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH}, fired after the transaction pre-fetch has run
+	 * (inside the transaction, before any entry is written).
 	 */
 	@Hook(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH)
-	public void resolveConditionalPatientReferencesAfterPrefetch(
-			List<IBase> theEntries, TransactionDetails theTransactionDetails) {
-		if (!isAllPartitionSearchSupported()) {
-			return;
-		}
+	public void onTransactionWriteAfterPrefetch(List<IBase> theEntries, TransactionDetails theTransactionDetails) {
+		rewriteInlinePatientMatchUrlReferences(theEntries, theTransactionDetails);
+	}
 
+	/**
+	 * Rewrites each Patient-compartment reference given as an inline match URL (e.g.
+	 * {@code Observation.subject = "Patient?identifier=http://acme.org/mrn|PT00062"}) to a literal
+	 * {@code Patient/<id>}, so per-entry partition determination ({@link #identifyForCreate}) can route the resource to
+	 * the correct Patient compartment.
+	 * <p>
+	 * The rewrite reuses what the pre-fetch already resolved into
+	 * {@link TransactionDetails#getResolvedMatchUrls()} rather than issuing its own search, and touches only the
+	 * compartment-defining references. Anything the pre-fetch did not resolve is left untouched; if a partition still
+	 * cannot be determined for an entry, per-entry determination rejects the transaction.
+	 * <p>
+	 * This only ever has work to do when all-partition search is supported: on infrastructure that cannot search
+	 * across all partitions, an entry whose inline match URL the pre-fetch has not resolved is rejected before
+	 * pre-fetch runs (by per-transaction partition determination), so it never reaches this rewrite.
+	 */
+	private void rewriteInlinePatientMatchUrlReferences(
+			List<IBase> theEntries, TransactionDetails theTransactionDetails) {
 		FhirTerser terser = myFhirContext.newTerser();
 		for (IBase entry : theEntries) {
 			IBaseResource resource = terser.getSingleValueOrNull(entry, "resource", IBaseResource.class);
@@ -925,63 +916,42 @@ public class PatientIdPartitionInterceptor {
 			ResourceCompartmentUtil.getResourceCompartmentReferences(resource, compartmentSps, mySearchParamExtractor)
 					.forEach(reference -> {
 						String referenceValue = reference.getReferenceElement().getValue();
-						if (isConditionalPatientReference(referenceValue)) {
-							resolveConditionalPatientReferenceFromPrefetch(
-									reference, referenceValue, theTransactionDetails);
+						if (isPatientInlineMatchUrl(referenceValue)) {
+							rewriteInlineMatchUrlReference(reference, referenceValue, theTransactionDetails);
 						}
 					});
 		}
 	}
 
 	/**
-	 * A conditional Patient reference is one whose value targets the Patient resource type with a search
+	 * A Patient inline match URL is a reference whose value targets the Patient resource type with a search
 	 * query, i.e. starts with {@code "Patient?"} or {@code "/Patient?"}.
 	 */
-	private static boolean isConditionalPatientReference(@Nullable String theReferenceValue) {
+	private static boolean isPatientInlineMatchUrl(@Nullable String theReferenceValue) {
 		return theReferenceValue != null
 				&& (theReferenceValue.startsWith(PATIENT_STR + "?")
 						|| theReferenceValue.startsWith("/" + PATIENT_STR + "?"));
 	}
 
 	/**
-	 * Rewrites a single conditional Patient reference to {@code Patient/<id>} using the resource ID the pre-fetch
-	 * resolved for it into {@link TransactionDetails#getResolvedMatchUrls()} (its database-search path). No search is
-	 * performed here.
-	 * <ul>
-	 *   <li>resolved to a Patient → rewrite the reference in place;</li>
-	 *   <li>{@link TransactionDetails#NOT_FOUND} (matched no Patient) → reject with HAPI-2992;</li>
-	 *   <li>absent (not resolved by the pre-fetch's database search — including the match-URL cache-hit case, which
-	 *       does not populate this map) → left untouched, so per-entry partition determination rejects it with
-	 *       HAPI-1326 and the transaction fails cleanly. See the hook javadoc's "Known limitation".</li>
-	 * </ul>
-	 *
-	 * @throws ResourceNotFoundException if the conditional reference resolved to no Patient (pre-fetch stored
-	 *                                   {@link TransactionDetails#NOT_FOUND})
+	 * Rewrites a single Patient inline match URL reference to {@code Patient/<id>} using the resource ID the
+	 * pre-fetch already resolved for it into {@link TransactionDetails#getResolvedMatchUrls()}. No search is
+	 * performed here — we act only on what the pre-fetch put in the transaction details. If the match URL was not
+	 * resolved to a concrete Patient there, the reference is left untouched and per-entry partition determination
+	 * handles it.
 	 */
-	private void resolveConditionalPatientReferenceFromPrefetch(
+	private void rewriteInlineMatchUrlReference(
 			IBaseReference theReference, String theReferenceValue, TransactionDetails theTransactionDetails) {
 		IResourcePersistentId<?> resolved =
 				theTransactionDetails.getResolvedMatchUrls().get(theReferenceValue);
 
-		if (resolved == TransactionDetails.NOT_FOUND) {
-			throw new ResourceNotFoundException(Msg.code(2992) + "Conditional reference \"" + theReferenceValue
-					+ "\" matched no Patient resources; unable to determine partition");
-		}
-
-		if (resolved == null) {
-			// Not resolved into getResolvedMatchUrls() by the pre-fetch's database search. This also covers the
-			// match-URL cache-hit case (the cache populates the id map, not this map); we deliberately do NOT consult
-			// that cache here. Leaving the reference unresolved means per-entry partition determination rejects it
-			// with HAPI-1326 and the whole (atomic) transaction fails cleanly — it never commits a mis-routed
-			// resource. Resolving the cache-enabled case is out of scope and tracked separately.
+		// Act only on a match URL the pre-fetch resolved to a concrete Patient; otherwise leave the reference as is.
+		if (resolved == null || resolved == TransactionDetails.NOT_FOUND) {
 			return;
 		}
 
-		// Reuse the FHIR id the pre-fetch already resolved for this PID (TransactionDetails' reverse map), rather than
-		// re-translating via IIdHelperService. This keeps the interceptor free of storage-specific (JPA/Mongo)
-		// collaborators. The reverse map is populated by the single-token pre-fetch path; if it is absent (e.g. a
-		// multi-parameter conditional URL, whose pre-fetch path does not populate it), leave the reference unresolved
-		// so per-entry partition determination fails cleanly with HAPI-1326 rather than committing mis-routed data.
+		// Reuse the FHIR id the pre-fetch already resolved for this PID (TransactionDetails' reverse map)
+		// If the reverse map has no entry, leave the reference untouched.
 		IIdType resolvedId = theTransactionDetails.getReverseResolvedId(resolved);
 		if (resolvedId != null) {
 			theReference.setReference(resolvedId.toUnqualifiedVersionless().getValue());

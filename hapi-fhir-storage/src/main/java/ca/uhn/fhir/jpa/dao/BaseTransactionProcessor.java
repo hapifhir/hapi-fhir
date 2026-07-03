@@ -1087,8 +1087,7 @@ public abstract class BaseTransactionProcessor {
 	 * <p>
 	 * <b>Not a clean solution:</b> deferral is keyed off Msg 1326, an error code raised specifically by
 	 * {@code PatientIdPartitionInterceptor}, so the core transaction processor is coupled to an interceptor-specific
-	 * code. Done under delivery time pressure; this should be revisited for a cleaner separation when there is time
-	 * to design one.
+	 * code. This is a pragmatic interim approach; a cleaner separation should be designed when time allows.
 	 */
 	private RequestPartitionId tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
 			RequestDetails theRequestDetails, IBaseResource theResource, String theResourceType) {

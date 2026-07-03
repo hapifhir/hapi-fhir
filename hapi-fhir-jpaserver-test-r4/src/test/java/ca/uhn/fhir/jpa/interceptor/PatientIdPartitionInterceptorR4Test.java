@@ -34,7 +34,6 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceEnabledByTypeInterceptor;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -1037,20 +1036,13 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
 		bb.addTransactionCreateEntry(obs);
 
-		if (theSupportsAllPartitionSearch) {
-			ResourceNotFoundException e = assertThrows(
-					ResourceNotFoundException.class, () -> mySystemDao.transaction(mySrd, bb.getBundleTyped()));
-			assertEquals(
-					Msg.code(2992)
-							+ "Conditional reference \"Patient?identifier=http://acme.org/mrn|NO_SUCH_PATIENT\" matched no Patient resources; unable to determine partition",
-					e.getMessage());
-		} else {
-			MethodNotAllowedException e = assertThrows(
-					MethodNotAllowedException.class, () -> mySystemDao.transaction(mySrd, bb.getBundleTyped()));
-			assertEquals(
-					"HAPI-1326: Resource of type Observation has no values placing it in the Patient compartment",
-					e.getMessage());
-		}
+		// With no matching Patient the inline match URL cannot be resolved, so the hook leaves the reference
+		// untouched and per-entry partition determination rejects the resource with HAPI-1326 — under both configs.
+		MethodNotAllowedException e = assertThrows(
+				MethodNotAllowedException.class, () -> mySystemDao.transaction(mySrd, bb.getBundleTyped()));
+		assertEquals(
+				"HAPI-1326: Resource of type Observation has no values placing it in the Patient compartment",
+				e.getMessage());
 	}
 
 	@ParameterizedTest

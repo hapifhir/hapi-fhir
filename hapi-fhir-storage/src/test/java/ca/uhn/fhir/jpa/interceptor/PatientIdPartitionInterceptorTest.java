@@ -17,7 +17,6 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -485,21 +484,7 @@ class PatientIdPartitionInterceptorTest {
 		}
 
 		private void fireHook(Bundle theBundle, TransactionDetails theTransactionDetails) {
-			mySvc.resolveConditionalPatientReferencesAfterPrefetch(entriesOf(theBundle), theTransactionDetails);
-		}
-
-		@Test
-		void testAfterPrefetch_WhenAllPartitionSearchUnsupported_ResolutionSkipped() {
-			// When isAllPartitionSearchSupported() is false the hook returns early (on sharded storage the
-			// pre-fetch does not resolve across partitions, so there is nothing to reuse).
-			myPartitionSettings.setAllPartitionSearchSupported(false);
-			Bundle bundle = bundleWithObservationSubjectReference(PATIENT_IDENTIFIER_MATCH_URL);
-			Observation obs = (Observation) bundle.getEntry().get(0).getResource();
-
-			fireHook(bundle, new TransactionDetails());
-
-			// The conditional reference is left untouched and no resolution is attempted.
-			assertThat(obs.getSubject().getReference()).isEqualTo(PATIENT_IDENTIFIER_MATCH_URL);
+			mySvc.onTransactionWriteAfterPrefetch(entriesOf(theBundle), theTransactionDetails);
 		}
 
 		@Test
@@ -535,16 +520,17 @@ class PatientIdPartitionInterceptorTest {
 		}
 
 		@Test
-		void testAfterPrefetch_noMatch_throwsResourceNotFound() {
-			// The pre-fetch marked the match URL as NOT_FOUND.
+		void testAfterPrefetch_noMatch_leftUntouched() {
+			// The pre-fetch marked the match URL as NOT_FOUND; the hook leaves the reference untouched and lets
+			// per-entry partition determination handle it.
 			Bundle bundle = bundleWithObservationSubjectReference(PATIENT_IDENTIFIER_MATCH_URL);
+			Observation obs = (Observation) bundle.getEntry().get(0).getResource();
 			TransactionDetails transactionDetails = new TransactionDetails();
 			transactionDetails.addResolvedMatchUrl(myFhirContext, PATIENT_IDENTIFIER_MATCH_URL, TransactionDetails.NOT_FOUND);
 
-			assertThatThrownBy(() -> fireHook(bundle, transactionDetails))
-					.isInstanceOf(ResourceNotFoundException.class)
-					.hasMessage(Msg.code(2992) + "Conditional reference \"" + PATIENT_IDENTIFIER_MATCH_URL
-							+ "\" matched no Patient resources; unable to determine partition");
+			fireHook(bundle, transactionDetails);
+
+			assertThat(obs.getSubject().getReference()).isEqualTo(PATIENT_IDENTIFIER_MATCH_URL);
 		}
 
 		@Test
