@@ -34,7 +34,6 @@ import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.BaseRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -919,17 +918,15 @@ public class PatientIdPartitionInterceptor {
 	 * commits a mis-routed resource). Resolving that case is deferred to a separate change.
 	 */
 	@Hook(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH)
-	@SuppressWarnings({"rawtypes", "unchecked"})
 	public void resolveConditionalPatientReferencesAfterPrefetch(
-			List<IBase> theEntries,
-			ITransactionProcessorVersionAdapter theVersionAdapter,
-			TransactionDetails theTransactionDetails) {
+			List<IBase> theEntries, TransactionDetails theTransactionDetails) {
 		if (!isAllPartitionSearchSupported()) {
 			return;
 		}
 
+		FhirTerser terser = myFhirContext.newTerser();
 		for (IBase entry : theEntries) {
-			IBaseResource resource = theVersionAdapter.getResource(entry);
+			IBaseResource resource = terser.getSingleValueOrNull(entry, "resource", IBaseResource.class);
 			if (resource == null) {
 				continue;
 			}

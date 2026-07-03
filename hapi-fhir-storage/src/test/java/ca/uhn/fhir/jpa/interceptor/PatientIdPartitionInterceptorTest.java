@@ -6,7 +6,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -53,10 +52,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class PatientIdPartitionInterceptorTest {
@@ -489,19 +485,8 @@ class PatientIdPartitionInterceptorTest {
 			return new ArrayList<>(theBundle.getEntry());
 		}
 
-		/** A version adapter mock whose {@code getResource(entry)} returns the entry's resource. */
-		@SuppressWarnings({"rawtypes", "unchecked"})
-		private ITransactionProcessorVersionAdapter versionAdapter() {
-			ITransactionProcessorVersionAdapter adapter = mock();
-			lenient()
-					.when(adapter.getResource(any()))
-					.thenAnswer(inv -> ((Bundle.BundleEntryComponent) inv.getArgument(0)).getResource());
-			return adapter;
-		}
-
 		private void fireHook(Bundle theBundle, TransactionDetails theTransactionDetails) {
-			mySvc.resolveConditionalPatientReferencesAfterPrefetch(
-					entriesOf(theBundle), versionAdapter(), theTransactionDetails);
+			mySvc.resolveConditionalPatientReferencesAfterPrefetch(entriesOf(theBundle), theTransactionDetails);
 		}
 
 		@Test
