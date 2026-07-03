@@ -28,6 +28,7 @@ import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValue
 import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx.STEP_ID_EXPAND_CONCEPTS_INCLUDE;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx.STEP_ID_INITIATE_JOB;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -104,6 +105,12 @@ class Step1InitiateJobTest {
 		assertEquals(THE_STAGING_VERSION, ((ExpandConceptsWorkChunkJson)myWorkChunkCaptor.getAllValues().get(2)).getStagingVersion());
 		assertEquals("{\"system\":\"http://system-2\"}", ((ExpandConceptsWorkChunkJson)myWorkChunkCaptor.getAllValues().get(2)).getComposeAsJson());
 		assertEquals(2_000_000, ((ExpandConceptsWorkChunkJson)myWorkChunkCaptor.getAllValues().get(2)).getStartingOrder());
+
+		verify(myDataSink, times(1)).acceptForFutureStep(
+			eq(PreExpandValueSetJobAppCtx.STEP_ID_LOAD_ALL_CONCEPT_IDS), any(LoadAllConceptIdsWorkChunkJson.class));
+
+		verify(myDataSink, times(1)).acceptForFutureStep(
+			eq(PreExpandValueSetJobAppCtx.STEP_ID_GENERATE_REPORT), any(ExpandValueSetStepOutcomeJson.class));
 
 		verifyNoMoreInteractions(myDataSink);
 	}
