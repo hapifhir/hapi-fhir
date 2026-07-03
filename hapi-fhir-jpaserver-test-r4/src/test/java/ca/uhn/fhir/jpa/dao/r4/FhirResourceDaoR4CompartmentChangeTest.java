@@ -6,10 +6,6 @@ import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -839,11 +835,7 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 				ISearchParamExtractor theSearchParamExtractor,
 				PartitionSettings thePartitionSettings,
 				DaoRegistry theDaoRegistry) {
-			super(
-					theFhirContext,
-					theSearchParamExtractor,
-					thePartitionSettings,
-					theDaoRegistry);
+			super(theFhirContext, theSearchParamExtractor, thePartitionSettings, theDaoRegistry);
 		}
 
 		@Override
