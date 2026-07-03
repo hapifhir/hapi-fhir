@@ -3339,6 +3339,8 @@
 							<publishingServerId>central</publishingServerId>
 							<autoPublish>true</autoPublish>
 							<waitUntil>uploaded</waitUntil>
+							<waitMaxTime>1800</waitMaxTime>
+							<waitPollingInterval>10</waitPollingInterval>
 							<excludeArtifacts>
 								<excludeArtifact>hapi-fhir-base-test-jaxrsserver-kotlin</excludeArtifact>
 								<excludeArtifact>hapi-fhir-jpaserver-uhnfhirtest</excludeArtifact>
