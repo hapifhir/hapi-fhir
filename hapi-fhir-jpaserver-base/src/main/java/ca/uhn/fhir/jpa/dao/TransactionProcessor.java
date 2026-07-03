@@ -215,21 +215,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 			if (theRequestPartitionId != null) {
 				preFetch(theRequest, theTransactionDetails, theEntries, versionAdapter, theRequestPartitionId);
-
-				// Interceptor call: STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH
-				// Hooks may resolve references in the entry bodies to concrete IDs using the data resolved
-				// during the pre-fetch (available on theTransactionDetails). We do not re-sort the entries
-				// afterwards, since hooks here only rewrite reference strings and do not change processing order.
-				IInterceptorBroadcaster compositeBroadcaster =
-						CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
-				if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH)) {
-					HookParams params = new HookParams()
-							.add(List.class, theEntries)
-							.add(RequestDetails.class, theRequest)
-							.addIfMatchesType(ServletRequestDetails.class, theRequest)
-							.add(TransactionDetails.class, theTransactionDetails);
-					compositeBroadcaster.callHooks(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH, params);
-				}
+				callTransactionWriteAfterPrefetchHooks(theRequest, theEntries, theTransactionDetails);
 			}
 
 			return super.doTransactionWriteOperations(
@@ -246,6 +232,24 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					theTransactionStopWatch);
 		} finally {
 			myEntityManager.setFlushMode(initialFlushMode);
+		}
+	}
+
+	/**
+	 * Fires {@link Pointcut#STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH}. Hooks may resolve references in the entry
+	 * bodies to concrete IDs using the data resolved during the pre-fetch (available on {@code theTransactionDetails}).
+	 */
+	private void callTransactionWriteAfterPrefetchHooks(
+			RequestDetails theRequest, List<IBase> theEntries, TransactionDetails theTransactionDetails) {
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH)) {
+			HookParams params = new HookParams()
+					.add(List.class, theEntries)
+					.add(RequestDetails.class, theRequest)
+					.addIfMatchesType(ServletRequestDetails.class, theRequest)
+					.add(TransactionDetails.class, theTransactionDetails);
+			compositeBroadcaster.callHooks(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH, params);
 		}
 	}
 
