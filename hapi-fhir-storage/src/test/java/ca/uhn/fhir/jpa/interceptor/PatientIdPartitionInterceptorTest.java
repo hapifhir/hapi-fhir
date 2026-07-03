@@ -459,14 +459,14 @@ class PatientIdPartitionInterceptorTest {
 	}
 
 	/**
-	 * Resolution of conditional Patient references in a transaction body: after the pre-fetch has run, the
+	 * Rewriting of Patient inline match URLs in a transaction body: after the pre-fetch has run, the
 	 * {@code STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH} hook rewrites a {@code "Patient?identifier=..."} body
 	 * reference to a literal {@code Patient/<id>} by reusing what the pre-fetch resolved into
-	 * {@link TransactionDetails#getResolvedMatchUrls()} (falling back to the match-URL cache), so that per-entry
-	 * partition determination can route the resource. No live search is performed here.
+	 * {@link TransactionDetails#getResolvedMatchUrls()}, so that per-entry partition determination can route the
+	 * resource. No live search is performed here.
 	 */
 	@Nested
-	class ConditionalPatientReferenceResolutionInTransactionBundle {
+	class PatientInlineMatchUrlRewriteInTransactionBundle {
 
 		private static final String PATIENT_IDENTIFIER_MATCH_URL = "Patient?identifier=http://acme.org/mrn|PT00062";
 
@@ -540,12 +540,12 @@ class PatientIdPartitionInterceptorTest {
 
 			fireHook(bundle, new TransactionDetails());
 
-			// A literal reference is not conditional, so it is left untouched and triggers no lookup.
+			// A literal reference is not a match URL, so it is left untouched and triggers no lookup.
 			assertThat(obs.getSubject().getReference()).isEqualTo("Patient/A");
 		}
 
 		@Test
-		void testAfterPrefetch_multipleEntries_resolvesEachConditionalReference() {
+		void testAfterPrefetch_multipleEntries_rewritesEachInlineMatchUrl() {
 			String matchUrlA = "Patient?identifier=http://acme.org/mrn|A";
 			String matchUrlB = "Patient?identifier=http://acme.org/mrn|B";
 			JpaPid pidA = mock();
@@ -575,7 +575,7 @@ class PatientIdPartitionInterceptorTest {
 		@Test
 		void testAfterPrefetch_multipleCompartmentReferencesInOneResource_eachResolvedToItsPatient() {
 			// subject and performer are both Patient-compartment search params for Observation, so a
-			// conditional reference on each is resolved independently to its own Patient.
+			// inline match URL on each is rewritten independently to its own Patient.
 			String subjectMatchUrl = "Patient?identifier=http://acme.org/mrn|A";
 			String performerMatchUrl = "Patient?identifier=http://acme.org/mrn|B";
 			JpaPid pidA = mock();
@@ -601,23 +601,23 @@ class PatientIdPartitionInterceptorTest {
 		}
 
 		@Test
-		void testAfterPrefetch_nonPatientConditionalReference_isLeftUntouchedAndNotResolved() {
-			String groupConditionalReference = "Group?identifier=http://acme.org/grp|G1";
+		void testAfterPrefetch_nonPatientInlineMatchUrl_isLeftUntouchedAndNotResolved() {
+			String groupInlineMatchUrl = "Group?identifier=http://acme.org/grp|G1";
 			Observation obs = new Observation();
-			obs.getSubject().setReference(groupConditionalReference);
+			obs.getSubject().setReference(groupInlineMatchUrl);
 			BundleBuilder bb = new BundleBuilder(myFhirContext);
 			bb.addTransactionCreateEntry(obs);
 
-			// Only Patient conditional references are resolved; a non-Patient one triggers no lookup.
+			// Only Patient inline match URLs are rewritten; a non-Patient one triggers no lookup.
 			fireHook(bb.getBundleTyped(), new TransactionDetails());
 
-			assertThat(obs.getSubject().getReference()).isEqualTo(groupConditionalReference);
+			assertThat(obs.getSubject().getReference()).isEqualTo(groupInlineMatchUrl);
 		}
 
 		@Test
-		void testAfterPrefetch_nonCompartmentPatientConditionalReference_isLeftUntouchedAndNotResolved() {
-			// 'focus' is not a Patient-compartment search param for Observation, so a conditional Patient
-			// reference there does not drive partition selection. The interceptor leaves it untouched; the
+		void testAfterPrefetch_nonCompartmentPatientInlineMatchUrl_isLeftUntouchedAndNotResolved() {
+			// 'focus' is not a Patient-compartment search param for Observation, so a Patient inline match URL
+			// there does not drive partition selection. The interceptor leaves it untouched; the
 			// core transaction processor resolves it later at save time.
 			Observation obs = new Observation();
 			obs.addFocus().setReference(PATIENT_IDENTIFIER_MATCH_URL);
