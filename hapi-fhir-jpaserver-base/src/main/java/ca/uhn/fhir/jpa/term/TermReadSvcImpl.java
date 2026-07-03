@@ -307,11 +307,6 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 		Collection<TermConceptDesignation> designations = theConcept.getDesignations();
 
-		// FIXME: remove?
-		//		if (StringUtils.isNotEmpty(theValueSetIncludeVersion)) {
-		//			codeSystem = codeSystem + OUR_PIPE_CHARACTER + theValueSetIncludeVersion;
-		//		}
-
 		addCodeIfNotAlreadyAdded(
 				theValueSetCodeAccumulator,
 				designations,

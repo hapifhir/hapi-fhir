@@ -323,7 +323,6 @@ public class TermValueSetStorageSvcImplTest extends BaseJpaR5Test {
 		assertEquals(2, outcome.getAddedDesignationCount());
 		runInTransaction(() -> {
 			TermValueSet valueSet = myTermValueSetDao.findTermValueSetByUrlAndVersion(VS_URI, stagingVersion).orElseThrow();
-			// FIXME: ensure we include versions
 			String actual = renderExpansionHierarchy(valueSet);
 			String expected = """
 				-System[http://system-0|1.0]
