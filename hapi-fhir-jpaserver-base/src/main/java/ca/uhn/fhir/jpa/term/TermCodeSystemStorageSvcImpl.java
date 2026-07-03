@@ -434,7 +434,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			}
 
 			TermCodeSystem codeSystem = codeSystemVersion.getCodeSystem();
-			codeSystem.setCurrentVersion(codeSystemVersion);
+			codeSystem.setCurrentVersionPid(codeSystemVersion);
 		});
 	}
 
@@ -511,7 +511,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		// Populate the new version as the current version if no other version
 		// is already marked as current.
 		if (codeSystem.getCurrentVersion() == null) {
-			codeSystem.setCurrentVersion(codeSystemToStore);
+			codeSystem.setCurrentVersionPid(codeSystemToStore);
 		}
 
 		ourLog.debug("Validating all codes in CodeSystem for storage (this can take some time for large sets)");
