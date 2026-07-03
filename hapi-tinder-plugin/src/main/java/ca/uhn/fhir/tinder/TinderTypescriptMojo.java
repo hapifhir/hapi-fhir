@@ -3,7 +3,6 @@ package ca.uhn.fhir.tinder;
 // Created by Claude Opus 4.8
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.tinder.ts.TsModel;
 import ca.uhn.fhir.tinder.ts.TypescriptModelExtractor;
 import ca.uhn.fhir.tinder.ts.TypescriptWriter;
