@@ -1042,8 +1042,8 @@ public abstract class BaseTransactionProcessor {
 				case POST: {
 					IBaseResource resource = myVersionAdapter.getResource(theEntry);
 					String resourceType = myContext.getResourceType(resource);
-					nextWriteEntryRequestPartitionId =
-							determineCreatePartitionOrAllPartitions(requestDetailsForEntry, resource, resourceType);
+					nextWriteEntryRequestPartitionId = tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
+							requestDetailsForEntry, resource, resourceType);
 					break;
 				}
 				case PUT: {
@@ -1059,7 +1059,7 @@ public abstract class BaseTransactionProcessor {
 							nextWriteEntryRequestPartitionId = theTransactionDetails.getResolvedPartition(resourceId);
 						}
 						if (nextWriteEntryRequestPartitionId == null) {
-							nextWriteEntryRequestPartitionId = determineCreatePartitionOrAllPartitions(
+							nextWriteEntryRequestPartitionId = tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
 									requestDetailsForEntry, resource, resourceType);
 							if (resourceId != null) {
 								theTransactionDetails.addResolvedPartition(
@@ -1089,7 +1089,7 @@ public abstract class BaseTransactionProcessor {
 	 * <p>
 	 * Msg 1321 (id-less Patient) and Msg 1324 (multiple distinct compartments) are not deferred.
 	 */
-	private RequestPartitionId determineCreatePartitionOrAllPartitions(
+	private RequestPartitionId tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
 			RequestDetails theRequestDetails, IBaseResource theResource, String theResourceType) {
 		if (!myPartitionSettings.isAllPartitionSearchSupported()) {
 			return myRequestPartitionHelperService.determineCreatePartitionForRequest(
