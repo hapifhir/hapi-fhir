@@ -101,10 +101,28 @@ public class TerminologyTestHelper {
 
 	public String startImportCustomJobAndWaitForCompletion(
 			String theUrl, String theVersion, ZipCollectionBuilder theFiles, ImportTerminologyModeEnum theMode) {
+		return startImportCustomJobAndWaitForCompletion(theUrl, theVersion, theFiles, theMode, false);
+	}
+
+	public String startImportCustomJobAndWaitForCompletion(
+			String theUrl,
+			String theVersion,
+			ZipCollectionBuilder theFiles,
+			ImportTerminologyModeEnum theMode,
+			boolean theDontMakeCurrent) {
 		String jobDefinitionId = ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY;
 		String distributionFilename = TerminologyConstants.FILENAME_CUSTOM_DISTRIBUTION_FILE;
 		return startImportTerminologyJob(
-				theUrl, theVersion, theFiles, false, null, jobDefinitionId, distributionFilename, null, true, theMode);
+				theUrl,
+				theVersion,
+				theFiles,
+				theDontMakeCurrent,
+				null,
+				jobDefinitionId,
+				distributionFilename,
+				null,
+				true,
+				theMode);
 	}
 
 	public String startImportCustomJobAndWaitForCompletion(
