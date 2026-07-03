@@ -1083,7 +1083,7 @@ public abstract class BaseTransactionProcessor {
 	 * Msg 1326 at the per-entry write.
 	 * <p>
 	 * The fallback only applies when a single transaction may span partitions
-	 * ({@code !isRequiresNewTransactionWhenChangingPartitions()}). On sharded (MegaScale) storage a transaction is
+	 * ({@code !isRequiresNewTransactionWhenChangingPartitions()}). On sharded storage a transaction is
 	 * pinned to one partition, the after-prefetch resolver is a no-op, and the clean Msg 1326 rejection must be
 	 * preserved — so there we do not defer.
 	 * <p>

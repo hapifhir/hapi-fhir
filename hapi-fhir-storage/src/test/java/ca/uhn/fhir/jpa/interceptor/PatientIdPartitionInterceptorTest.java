@@ -490,8 +490,8 @@ class PatientIdPartitionInterceptorTest {
 
 		@Test
 		void testAfterPrefetch_WhenAllPartitionSearchUnsupported_ResolutionSkipped() {
-			// When isAllPartitionSearchSupported() is false the hook returns early (MegaScale: the pre-fetch
-			// does not resolve across partitions, so there is nothing to reuse).
+			// When isAllPartitionSearchSupported() is false the hook returns early (on sharded storage the
+			// pre-fetch does not resolve across partitions, so there is nothing to reuse).
 			mySvc.setAllPartitionSearchSupported(false);
 			Bundle bundle = bundleWithObservationSubjectReference(PATIENT_IDENTIFIER_MATCH_URL);
 			Observation obs = (Observation) bundle.getEntry().get(0).getResource();

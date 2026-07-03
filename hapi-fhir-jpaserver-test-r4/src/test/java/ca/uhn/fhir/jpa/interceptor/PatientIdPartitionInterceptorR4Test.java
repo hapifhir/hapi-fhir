@@ -1076,7 +1076,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 							+ "Invalid match URL \"Patient?identifier=http://acme.org/mrn|PT00062\" - Multiple resources match this search",
 					e.getMessage());
 		} else {
-			// When all-partition search is not supported (MegaScale), a transaction may not span partitions, so the
+			// When all-partition search is not supported (sharded storage), a transaction may not span partitions, so the
 			// deferring catch is disabled and the unroutable resource is rejected up-front with HAPI-1326.
 			myTransactionService.setTransactionPropagationWhenChangingPartitions(Propagation.REQUIRES_NEW);
 			MethodNotAllowedException e = assertThrows(

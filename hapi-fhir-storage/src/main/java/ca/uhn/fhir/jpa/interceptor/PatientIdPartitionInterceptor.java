@@ -905,7 +905,7 @@ public class PatientIdPartitionInterceptor {
 	 * relies on. Any other conditional reference is left untouched and is resolved later by the core transaction
 	 * processor at save time.
 	 * <p>
-	 * The step is a no-op unless {@link #isAllPartitionSearchSupported()} is {@code true} (on sharded/MegaScale
+	 * The step is a no-op unless {@link #isAllPartitionSearchSupported()} is {@code true} (on sharded
 	 * storage the pre-fetch does not resolve across partitions, so there is nothing to reuse). A conditional
 	 * reference that matches no Patient is rejected with HAPI-2992; a reference matching more than one Patient is
 	 * rejected by the pre-fetch itself with HAPI-2207 before this hook runs (in either case the partition cannot be
