@@ -61,7 +61,6 @@ class PatientIdPartitionInterceptorTest {
 	private final PartitionSettings myPartitionSettings = new PartitionSettings();
 	private PatientIdPartitionInterceptor mySvc;
 	private MatchUrlService myMatchUrlSvc;
-	private ISearchParamExtractor myRealSearchParamExtractor;
 
 	@Mock
 	private ISearchParamExtractor mySearchParamExtractor;
@@ -73,7 +72,8 @@ class PatientIdPartitionInterceptorTest {
 	void beforeEach() {
 		ISearchParamRegistry searchParamRegistry = new FhirContextSearchParamRegistry(myFhirContext);
 		StorageSettings storageSettings = new StorageSettings();
-		myRealSearchParamExtractor = new SearchParamExtractorR4(storageSettings, myPartitionSettings, myFhirContext, searchParamRegistry);
+		ISearchParamExtractor myRealSearchParamExtractor =
+				new SearchParamExtractorR4(storageSettings, myPartitionSettings, myFhirContext, searchParamRegistry);
 		mySvc = new PatientIdPartitionInterceptor(myFhirContext, myRealSearchParamExtractor, myPartitionSettings, myDaoRegistry);
 
 		myMatchUrlSvc = new MatchUrlService(myFhirContext, new FhirContextSearchParamRegistry(myFhirContext));
@@ -480,7 +480,6 @@ class PatientIdPartitionInterceptorTest {
 		}
 
 		/** The raw bundle entries, as the transaction processor passes them to the hook. */
-		@SuppressWarnings("unchecked")
 		private List<IBase> entriesOf(Bundle theBundle) {
 			return new ArrayList<>(theBundle.getEntry());
 		}
