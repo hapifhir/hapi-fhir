@@ -132,8 +132,6 @@ public class PatientIdPartitionInterceptor {
 
 	private Map<String, ResourceCompartmentStoragePolicy> myResourceTypeToCompartmentPolicy = Map.of();
 
-	private boolean myAllPartitionSearchSupported = true;
-
 	/**
 	 * Constructor
 	 */
@@ -149,8 +147,8 @@ public class PatientIdPartitionInterceptor {
 	}
 
 	/**
-	 * Whether the underlying storage infrastructure supports all-partition (all-shard) searches.
-	 * When {@code true}, the interceptor:
+	 * Whether the underlying storage infrastructure supports all-partition (all-shard) searches, read from
+	 * {@link PartitionSettings#isAllPartitionSearchSupported()}. When {@code true}, the interceptor:
 	 * <ul>
 	 *   <li>resolves conditional Patient references in a FHIR transaction bundle entry body (e.g.
 	 *       {@code subject.reference = "Patient?identifier=..."}) to a literal {@code Patient/<id>} via a
@@ -160,23 +158,11 @@ public class PatientIdPartitionInterceptor {
 	 * </ul>
 	 * When {@code false} both behaviors are disabled and an error is thrown for unresolved chained params,
 	 * preserving the single-partition guarantee.
-	 * <p>
-	 * Defaults to {@code true}; configure via {@link #setAllPartitionSearchSupported(boolean)}.
 	 *
-	 * @since 8.12.0
+	 * @since 8.11.15
 	 */
 	protected boolean isAllPartitionSearchSupported() {
-		return myAllPartitionSearchSupported;
-	}
-
-	/**
-	 * Sets whether the underlying storage infrastructure supports all-partition (all-shard)
-	 * searches. See {@link #isAllPartitionSearchSupported()} for the behaviors this controls.
-	 *
-	 * @since 8.12.0
-	 */
-	public void setAllPartitionSearchSupported(boolean theAllPartitionSearchSupported) {
-		myAllPartitionSearchSupported = theAllPartitionSearchSupported;
+		return myPartitionSettings.isAllPartitionSearchSupported();
 	}
 
 	/**

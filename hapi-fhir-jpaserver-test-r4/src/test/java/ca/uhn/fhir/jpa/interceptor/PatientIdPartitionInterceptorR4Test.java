@@ -152,6 +152,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		myPartitionSettings.setUnnamedPartitionMode(defaultSettings.isUnnamedPartitionMode());
 		myPartitionSettings.setDefaultPartitionId(defaultSettings.getDefaultPartitionId());
 		myPartitionSettings.setAllowReferencesAcrossPartitions(defaultSettings.getAllowReferencesAcrossPartitions());
+		myPartitionSettings.setAllPartitionSearchSupported(defaultSettings.isAllPartitionSearchSupported());
 
 		myTransactionService.setTransactionPropagationWhenChangingPartitions(HapiTransactionService.DEFAULT_TRANSACTION_PROPAGATION_WHEN_CHANGING_PARTITIONS);
 	}
@@ -683,7 +684,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 
 	@Test
 	public void testSearchChainedValue_noResolvedReference_whenAllPartitionSearchNotSupported_fails() {
-		mySvc.setAllPartitionSearchSupported(false);
+		myPartitionSettings.setAllPartitionSearchSupported(false);
 
 		createPatientA();
 		createObservationB();
@@ -702,7 +703,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		// Default all-partition search (isAllPartitionSearchSupported() == true): a chained
 		// subject.identifier with no direct reference searches all partitions and resolves to the
 		// matching Patient's Observation.
-		mySvc.setAllPartitionSearchSupported(true);
+		myPartitionSettings.setAllPartitionSearchSupported(true);
 
 		createPatient(withId("A"), withIdentifier("http://acme.org/mrn", "PT00062"), withActiveTrue());
 		IIdType obsId = createObservation(withSubject("Patient/A"), withStatus("final"));
@@ -966,7 +967,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	void testTransaction_CreateObservationWithInlineConditionalPatientReference(boolean theSupportsAllPartitionSearch) {
-		mySvc.setAllPartitionSearchSupported(theSupportsAllPartitionSearch);
+		myPartitionSettings.setAllPartitionSearchSupported(theSupportsAllPartitionSearch);
 
 		// Patient already exists, identified by a business (MRN) identifier
 		createPatient(withId("A"), withIdentifier("http://acme.org/mrn", "PT00062"), withActiveTrue());
@@ -995,7 +996,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	public void testTransaction_UpdateObservationWithInlineConditionalPatientReference(boolean theSupportsAllPartitionSearch) {
-		mySvc.setAllPartitionSearchSupported(theSupportsAllPartitionSearch);
+		myPartitionSettings.setAllPartitionSearchSupported(theSupportsAllPartitionSearch);
 
 		// Patient and Observation already exist, linked by a literal Patient/A reference
 		createPatient(withId("A"), withIdentifier("http://acme.org/mrn", "PT00062"), withActiveTrue());
@@ -1028,7 +1029,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	void testTransaction_CreateObservationWithInlineConditionalPatientReference_noMatch_fails(boolean theSupportsAllPartitionSearch) {
-		mySvc.setAllPartitionSearchSupported(theSupportsAllPartitionSearch);
+		myPartitionSettings.setAllPartitionSearchSupported(theSupportsAllPartitionSearch);
 
 		// No Patient carries this identifier
 		Observation obs = new Observation();
@@ -1055,7 +1056,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	void testTransaction_CreateObservationWithInlineConditionalPatientReference_multipleMatches_fails(boolean theSupportsAllPartitionSearch) {
-		mySvc.setAllPartitionSearchSupported(theSupportsAllPartitionSearch);
+		myPartitionSettings.setAllPartitionSearchSupported(theSupportsAllPartitionSearch);
 
 		// Two Patients carry the same identifier
 		createPatient(withId("A"), withIdentifier("http://acme.org/mrn", "PT00062"), withActiveTrue());
@@ -1076,9 +1077,8 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 							+ "Invalid match URL \"Patient?identifier=http://acme.org/mrn|PT00062\" - Multiple resources match this search",
 					e.getMessage());
 		} else {
-			// When all-partition search is not supported (sharded storage), a transaction may not span partitions, so the
-			// deferring catch is disabled and the unroutable resource is rejected up-front with HAPI-1326.
-			myTransactionService.setTransactionPropagationWhenChangingPartitions(Propagation.REQUIRES_NEW);
+			// When all-partition search is not supported (sharded storage), the after-prefetch resolver is a no-op
+			// and the deferring catch is disabled, so the unroutable resource is rejected up-front with HAPI-1326.
 			MethodNotAllowedException e = assertThrows(
 					MethodNotAllowedException.class, () -> mySystemDao.transaction(mySrd, bb.getBundleTyped()));
 			assertEquals(

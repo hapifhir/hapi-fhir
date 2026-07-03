@@ -35,6 +35,7 @@ public class PartitionSettings implements IDefaultPartitionSettings {
 	private boolean myAlwaysOpenNewTransactionForDifferentPartition;
 	private boolean myConditionalCreateDuplicateIdentifiersEnabled = false;
 	private boolean myDatabasePartitionMode = false;
+	private boolean myAllPartitionSearchSupported = true;
 
 	public PartitionSettings() {
 		super();
@@ -62,6 +63,28 @@ public class PartitionSettings implements IDefaultPartitionSettings {
 	 */
 	public PartitionSettings setDatabasePartitionMode(boolean theDatabasePartitionMode) {
 		myDatabasePartitionMode = theDatabasePartitionMode;
+		return this;
+	}
+
+	/**
+	 * Whether the underlying storage infrastructure supports all-partition (all-shard) searches. When
+	 * {@code true} (the default) a search may fan out across every partition; when {@code false} (e.g. sharded
+	 * storage that cannot search across all shards) operations are kept pinned to a single partition. This drives
+	 * inline conditional Patient-reference resolution and chained-parameter search fan-out in patient-id
+	 * partition mode, and the unpinned-transaction deferral in the core transaction processor.
+	 *
+	 * @since 8.11.15
+	 */
+	public boolean isAllPartitionSearchSupported() {
+		return myAllPartitionSearchSupported;
+	}
+
+	/**
+	 * @see #isAllPartitionSearchSupported()
+	 * @since 8.11.15
+	 */
+	public PartitionSettings setAllPartitionSearchSupported(boolean theAllPartitionSearchSupported) {
+		myAllPartitionSearchSupported = theAllPartitionSearchSupported;
 		return this;
 	}
 

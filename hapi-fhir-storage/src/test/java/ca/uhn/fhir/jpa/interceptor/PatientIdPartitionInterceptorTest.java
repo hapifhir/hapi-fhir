@@ -278,7 +278,7 @@ class PatientIdPartitionInterceptorTest {
 		Encounter?subject.gender=male&subject.identifier=http://patient|1
 		""")
 	void testSearch_ChainedParamWithNonResolvedParameter_allPartitionsSearchNotSupported_throwsException(String theValue) {
-		mySvc.setAllPartitionSearchSupported(false);
+		myPartitionSettings.setAllPartitionSearchSupported(false);
 
 		MatchUrlService.ResourceTypeAndSearchParameterMap parsedMatchUrl = myMatchUrlSvc.parseAndTranslateMatchUrl(theValue);
 		SearchParameterMap params = parsedMatchUrl.searchParameterMap();
@@ -302,7 +302,7 @@ class PatientIdPartitionInterceptorTest {
 		String resourceType = parsedMatchUrl.resourceType();
 		ReadPartitionIdRequestDetails readDetails = ReadPartitionIdRequestDetails.forSearchType(resourceType, params, null);
 
-		// mySvc has isAllPartitionSearchSupported() == true (the base default)
+		// myPartitionSettings.isAllPartitionSearchSupported() defaults to true
 		RequestPartitionId actual = mySvc.identifyForRead(readDetails, new ServletRequestDetails());
 
 		assertTrue(actual.isAllPartitions());
@@ -492,7 +492,7 @@ class PatientIdPartitionInterceptorTest {
 		void testAfterPrefetch_WhenAllPartitionSearchUnsupported_ResolutionSkipped() {
 			// When isAllPartitionSearchSupported() is false the hook returns early (on sharded storage the
 			// pre-fetch does not resolve across partitions, so there is nothing to reuse).
-			mySvc.setAllPartitionSearchSupported(false);
+			myPartitionSettings.setAllPartitionSearchSupported(false);
 			Bundle bundle = bundleWithObservationSubjectReference(PATIENT_IDENTIFIER_MATCH_URL);
 			Observation obs = (Observation) bundle.getEntry().get(0).getResource();
 

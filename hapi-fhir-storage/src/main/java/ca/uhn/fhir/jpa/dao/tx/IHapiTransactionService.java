@@ -122,21 +122,6 @@ public interface IHapiTransactionService {
 		return false;
 	}
 
-	/**
-	 * Returns {@code true} if a single transaction may not span multiple partitions, i.e. changing partitions
-	 * requires opening a new transaction ({@link Propagation#REQUIRES_NEW}). This is typically the case for
-	 * sharded storage. When {@code false}, a transaction may be opened unpinned (across all partitions).
-	 * <p>
-	 * This is an experimental API, subject to change in a future release.
-	 * </p>
-	 *
-	 * @since 8.11.15
-	 */
-	@Beta
-	default boolean isRequiresNewTransactionWhenChangingPartitions() {
-		return false;
-	}
-
 	interface IExecutionBuilder extends TransactionOperations {
 
 		IExecutionBuilder withIsolation(Isolation theIsolation);

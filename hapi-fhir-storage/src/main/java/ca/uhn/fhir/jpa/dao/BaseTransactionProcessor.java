@@ -1082,8 +1082,8 @@ public abstract class BaseTransactionProcessor {
 	 * {@code Patient/<id>}, so deferring here does not mask a genuinely unroutable resource — that still throws
 	 * Msg 1326 at the per-entry write.
 	 * <p>
-	 * The fallback only applies when a single transaction may span partitions
-	 * ({@code !isRequiresNewTransactionWhenChangingPartitions()}). On sharded storage a transaction is
+	 * The fallback only applies when the storage supports all-partition search
+	 * ({@link PartitionSettings#isAllPartitionSearchSupported()}). On sharded storage a transaction is
 	 * pinned to one partition, the after-prefetch resolver is a no-op, and the clean Msg 1326 rejection must be
 	 * preserved — so there we do not defer.
 	 * <p>
@@ -1091,7 +1091,7 @@ public abstract class BaseTransactionProcessor {
 	 */
 	private RequestPartitionId determineCreatePartitionOrAllPartitions(
 			RequestDetails theRequestDetails, IBaseResource theResource, String theResourceType) {
-		if (myHapiTransactionService.isRequiresNewTransactionWhenChangingPartitions()) {
+		if (!myPartitionSettings.isAllPartitionSearchSupported()) {
 			return myRequestPartitionHelperService.determineCreatePartitionForRequest(
 					theRequestDetails, theResource, theResourceType);
 		}
