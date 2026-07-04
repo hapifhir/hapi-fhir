@@ -146,25 +146,6 @@ public class PatientIdPartitionInterceptor {
 	}
 
 	/**
-	 * Whether the underlying storage infrastructure supports all-partition (all-shard) searches, read from
-	 * {@link PartitionSettings#isAllPartitionSearchSupported()}. When {@code true}, the interceptor:
-	 * <ul>
-	 *   <li>resolves conditional Patient references in a FHIR transaction bundle entry body (e.g.
-	 *       {@code subject.reference = "Patient?identifier=..."}) to a literal {@code Patient/<id>} via a
-	 *       live all-partition search before partition determination runs; and</li>
-	 *   <li>allows an unresolved chained subject/patient search param to fan out across all partitions
-	 *       instead of failing.</li>
-	 * </ul>
-	 * When {@code false} both behaviors are disabled and an error is thrown for unresolved chained params,
-	 * preserving the single-partition guarantee.
-	 *
-	 * @since 8.11.15
-	 */
-	protected boolean isAllPartitionSearchSupported() {
-		return myPartitionSettings.isAllPartitionSearchSupported();
-	}
-
-	/**
 	 * Supplies a map of resource types to policies specifying how the interceptor will
 	 * handle that resource type. Any resource types that are not found in the map will be
 	 * assumed to have the following default behaviour:
@@ -1010,7 +991,7 @@ public class PatientIdPartitionInterceptor {
 
 		// Every value for this parameter has now been scanned. What we do with the result depends on
 		// whether the infrastructure can fan a search out across all partitions.
-		if (isAllPartitionSearchSupported()) {
+		if (myPartitionSettings.isAllPartitionSearchSupported()) {
 			// We can always fan out, so we never need to reject the search here. Return whatever we
 			// resolved -- an empty list is fine: it means either this parameter expressed no patient
 			// scoping, or its only patient anchor was a chained subject/patient param we could not

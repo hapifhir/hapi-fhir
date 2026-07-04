@@ -506,11 +506,9 @@ class PatientIdPartitionInterceptorTest {
 		}
 
 		@Test
-		void testAfterPrefetch_absentFromTransactionMap_leftUntouched_andCacheNotConsulted() {
-			// A match URL that the pre-fetch did not resolve into getResolvedMatchUrls() (e.g. it was served from the
-			// cross-transaction match-URL cache, which populates the id map instead) is left untouched. The hook does
-			// NOT consult the match-URL cache. Per-entry partition determination then rejects the unroutable resource
-			// with HAPI-1326 downstream, so the transaction fails cleanly rather than committing mis-routed data.
+		void testAfterPrefetch_absentFromTransactionMap_leftUntouched() {
+			// A match URL the pre-fetch did not resolve is left untouched; per-entry partition determination
+			// then rejects the unroutable resource downstream.
 			Bundle bundle = bundleWithObservationSubjectReference(PATIENT_IDENTIFIER_MATCH_URL);
 			Observation obs = (Observation) bundle.getEntry().get(0).getResource();
 
