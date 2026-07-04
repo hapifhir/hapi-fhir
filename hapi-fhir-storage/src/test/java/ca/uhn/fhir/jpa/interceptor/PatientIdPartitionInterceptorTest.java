@@ -516,7 +516,7 @@ class PatientIdPartitionInterceptorTest {
 		}
 
 		@Test
-		void testAfterPrefetch_noMatch_leftUntouched() {
+		void testAfterPrefetch_resolvedToNotFound_leftUntouched() {
 			// The pre-fetch marked the match URL as NOT_FOUND.
 			Bundle bundle = bundleWithObservationSubjectReference(PATIENT_IDENTIFIER_MATCH_URL);
 			Observation obs = (Observation) bundle.getEntry().get(0).getResource();
