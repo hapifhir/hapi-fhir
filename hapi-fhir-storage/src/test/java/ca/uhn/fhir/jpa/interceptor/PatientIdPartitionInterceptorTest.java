@@ -494,8 +494,7 @@ class PatientIdPartitionInterceptorTest {
 			Bundle bundle = bundleWithObservationSubjectReference(PATIENT_IDENTIFIER_MATCH_URL);
 			Observation obs = (Observation) bundle.getEntry().get(0).getResource();
 
-			// The pre-fetch resolved the match URL: it populates both the match-URL map and the resolved-id
-			// (reverse) map, which is what the hook reads to rewrite the reference.
+			// The pre-fetch populates both the match-URL map and the resolved-id (reverse) map; the hook reads both.
 			TransactionDetails transactionDetails = new TransactionDetails();
 			transactionDetails.addResolvedMatchUrl(myFhirContext, PATIENT_IDENTIFIER_MATCH_URL, pid);
 			transactionDetails.addResolvedResourceId(new IdType("Patient/A"), pid);
@@ -507,8 +506,7 @@ class PatientIdPartitionInterceptorTest {
 
 		@Test
 		void testAfterPrefetch_absentFromTransactionMap_leftUntouched() {
-			// A match URL the pre-fetch did not resolve is left untouched; per-entry partition determination
-			// then rejects the unroutable resource downstream.
+			// Not in the pre-fetch's resolved map, so left untouched.
 			Bundle bundle = bundleWithObservationSubjectReference(PATIENT_IDENTIFIER_MATCH_URL);
 			Observation obs = (Observation) bundle.getEntry().get(0).getResource();
 
@@ -519,8 +517,7 @@ class PatientIdPartitionInterceptorTest {
 
 		@Test
 		void testAfterPrefetch_noMatch_leftUntouched() {
-			// The pre-fetch marked the match URL as NOT_FOUND; the hook leaves the reference untouched and lets
-			// per-entry partition determination handle it.
+			// The pre-fetch marked the match URL as NOT_FOUND.
 			Bundle bundle = bundleWithObservationSubjectReference(PATIENT_IDENTIFIER_MATCH_URL);
 			Observation obs = (Observation) bundle.getEntry().get(0).getResource();
 			TransactionDetails transactionDetails = new TransactionDetails();
@@ -538,7 +535,7 @@ class PatientIdPartitionInterceptorTest {
 
 			fireHook(bundle, new TransactionDetails());
 
-			// A literal reference is not a match URL, so it is left untouched and triggers no lookup.
+			// A literal reference is not a match URL.
 			assertThat(obs.getSubject().getReference()).isEqualTo("Patient/A");
 		}
 
@@ -572,8 +569,7 @@ class PatientIdPartitionInterceptorTest {
 
 		@Test
 		void testAfterPrefetch_multipleCompartmentReferencesInOneResource_eachResolvedToItsPatient() {
-			// subject and performer are both Patient-compartment search params for Observation, so a
-			// inline match URL on each is rewritten independently to its own Patient.
+			// subject and performer are both Patient-compartment params, so each is rewritten independently.
 			String subjectMatchUrl = "Patient?identifier=http://acme.org/mrn|A";
 			String performerMatchUrl = "Patient?identifier=http://acme.org/mrn|B";
 			JpaPid pidA = mock();
@@ -606,7 +602,7 @@ class PatientIdPartitionInterceptorTest {
 			BundleBuilder bb = new BundleBuilder(myFhirContext);
 			bb.addTransactionCreateEntry(obs);
 
-			// Only Patient inline match URLs are rewritten; a non-Patient one triggers no lookup.
+			// Only Patient inline match URLs are rewritten.
 			fireHook(bb.getBundleTyped(), new TransactionDetails());
 
 			assertThat(obs.getSubject().getReference()).isEqualTo(groupInlineMatchUrl);
@@ -614,9 +610,7 @@ class PatientIdPartitionInterceptorTest {
 
 		@Test
 		void testAfterPrefetch_nonCompartmentPatientInlineMatchUrl_isLeftUntouchedAndNotResolved() {
-			// 'focus' is not a Patient-compartment search param for Observation, so a Patient inline match URL
-			// there does not drive partition selection. The interceptor leaves it untouched; the
-			// core transaction processor resolves it later at save time.
+			// 'focus' is not a Patient-compartment search param for Observation, so it is not rewritten.
 			Observation obs = new Observation();
 			obs.addFocus().setReference(PATIENT_IDENTIFIER_MATCH_URL);
 			BundleBuilder bb = new BundleBuilder(myFhirContext);
