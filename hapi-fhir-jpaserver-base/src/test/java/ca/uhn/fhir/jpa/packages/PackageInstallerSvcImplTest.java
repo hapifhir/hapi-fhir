@@ -733,6 +733,7 @@ public class PackageInstallerSvcImplTest {
 		}
 	}
 
+<<<<<<< Updated upstream
 	private static SearchParameter createSearchParameter(String theId, Collection<String> theBase) {
 		SearchParameter searchParameter = new SearchParameter();
 		if (theId != null) {
@@ -1387,4 +1388,55 @@ public class PackageInstallerSvcImplTest {
 				.hasErrorMessage("ig-b/ValueSet/shared-id")
 				.hasErrorMessage("ig-a/ValueSet/shared-id");
 	}
+=======
+	@Nested
+	class CollectResourcesTest {
+
+		// Created by claude-sonnet-4-6
+		@Test
+		void collectResources_withDefaultInstallTypes_excludesNonConformanceResourcesFromAdditionalFolder() {
+			Patient patient = new Patient();
+			patient.setId("patient-1");
+
+			NpmPackage pkg = new NpmPackageFactory(myCtx)
+					.name("test.pkg").version("1.0.0")
+					.addResourceToFolder("example", "Patient-patient-1", patient)
+					.createPackage();
+
+			PackageInstallationSpec spec = new PackageInstallationSpec()
+					.setName("test.pkg").setVersion("1.0.0")
+					.setAdditionalResourceFolders(java.util.Set.of("example"));
+
+			List<IBaseResource> resources = mySvc.collectResources(pkg, spec);
+
+			assertThat(resources).noneMatch(r -> myCtx.getResourceType(r).equals("Patient"));
+		}
+
+		// Created by claude-sonnet-4-6
+		@Test
+		void collectResources_withExplicitInstallTypes_filtersToSpecifiedTypes() {
+			Patient patient = new Patient();
+			patient.setId("patient-1");
+
+			org.hl7.fhir.r4.model.Organization org = new org.hl7.fhir.r4.model.Organization();
+			org.setId("org-1");
+
+			NpmPackage pkg = new NpmPackageFactory(myCtx)
+					.name("test.pkg").version("1.0.0")
+					.addResourceToFolder("example", "Patient-patient-1", patient)
+					.addResourceToFolder("example", "Organization-org-1", org)
+					.createPackage();
+
+			PackageInstallationSpec spec = new PackageInstallationSpec()
+					.setName("test.pkg").setVersion("1.0.0")
+					.setInstallResourceTypes(List.of("Patient"))
+					.setAdditionalResourceFolders(java.util.Set.of("example"));
+
+			List<IBaseResource> resources = mySvc.collectResources(pkg, spec);
+
+			assertThat(resources).anyMatch(r -> myCtx.getResourceType(r).equals("Patient"));
+			assertThat(resources).noneMatch(r -> myCtx.getResourceType(r).equals("Organization"));
+		}
+	}
+>>>>>>> Stashed changes
 }
