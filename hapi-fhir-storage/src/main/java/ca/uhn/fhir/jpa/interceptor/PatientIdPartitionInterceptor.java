@@ -992,11 +992,8 @@ public class PatientIdPartitionInterceptor {
 		// Every value for this parameter has now been scanned. What we do with the result depends on
 		// whether the infrastructure can fan a search out across all partitions.
 		if (myPartitionSettings.isAllPartitionSearchSupported()) {
-			// We can always fan out, so we never need to reject the search here. Return whatever we
-			// resolved -- an empty list is fine: it means either this parameter expressed no patient
-			// scoping, or its only patient anchor was a chained subject/patient param we could not
-			// resolve to a concrete id (e.g. subject.identifier=...). Either way the caller widens to a
-			// non-patient-specific (all-partition) search.
+			// We can fan out across all partitions, so never reject here: return whatever we resolved
+			// (an empty list just widens to an all-partition search).
 			return idParts;
 		}
 
