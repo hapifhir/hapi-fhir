@@ -77,6 +77,7 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
 import static ca.uhn.fhir.jpa.term.TerminologySvcDeltaR4Test.newDeltaCodeSystem;
 import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
+import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -2500,7 +2501,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 		String instanceId = myTerminologyTestHelper.startValueSetExpansionJobAndWaitForCompletion("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", null);
 		JobInstance instance = myJobCoordinator.getInstance(instanceId);
-		String report = instance.getReport(PreExpandValueSetResultJson.class).getReport();
+		String report = requireNonNull(instance.getReport(PreExpandValueSetResultJson.class)).getReport();
 
 		assertThat(report).containsSubsequence("ValueSet Expansion Report",
 			"URL: http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2",
@@ -2532,7 +2533,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 		String instanceId = myTerminologyTestHelper.startValueSetExpansionJobAndWaitForCompletion(VS_URL, null);
 		JobInstance instance = myJobCoordinator.getInstance(instanceId);
-		String report = instance.getReport(PreExpandValueSetResultJson.class).getReport();
+		String report = requireNonNull(instance.getReport(PreExpandValueSetResultJson.class)).getReport();
 
 		assertThat(report).contains("No concepts matched");
 	}

@@ -89,7 +89,7 @@ public class PreExpandValueSetParametersValidator implements IJobParametersValid
 
 		IBaseResource valueSet = myValidationSupport.fetchValueSet(canonicalUrl.toString());
 		if (valueSet == null) {
-			retVal.add("ValueSet not found: " + UrlUtil.sanitizeUrlPart(canonicalUrl.url()));
+			retVal.add("ValueSet not found: " + UrlUtil.sanitizeUrlPart(canonicalUrl.toString()));
 		}
 
 		return retVal;
