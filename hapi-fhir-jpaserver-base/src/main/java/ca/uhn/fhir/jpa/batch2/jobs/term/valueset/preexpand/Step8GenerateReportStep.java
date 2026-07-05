@@ -42,14 +42,12 @@ import java.util.TreeMap;
 
 public class Step8GenerateReportStep
 		extends BaseFinalizeStep<
-				PreExpandValueSetParameters, ExpandValueSetStepOutcomeJson, PreExpandValueSetResultJson> {
+				PreExpandValueSetParameters, ExpandValueSetStepOutcomeJson, PreExpandValueSetResultJson, Integer> {
 
 	private final ITermValueSetStorageSvc myTermValueSetStorageSvc;
 	private final ITermReadSvc myTermReadSvc;
 	private final IValidationSupport myValidationSupport;
 	private final FhirContext myCanonicalFhirContext = FhirContext.forR4Cached();
-	private final TreeMap<Integer, TerminologyFileSetJson.RecordsAddedCounter> myComposeOrderToCounter =
-			new TreeMap<>();
 	private final TreeMap<Integer, ValueSet.ValueSetComposeComponent> myComposeOrderToCompose = new TreeMap<>();
 
 	private String myStagingVersion;
@@ -73,12 +71,7 @@ public class Step8GenerateReportStep
 		if (data.getSourceCompose() != null) {
 			int startingOrder = data.getStartingOrder();
 			myComposeOrderToCompose.computeIfAbsent(startingOrder, t -> data.getSourceCompose());
-
-			TerminologyFileSetJson.RecordsAddedCounter existingCounter = myComposeOrderToCounter.computeIfAbsent(
-					startingOrder, t -> new TerminologyFileSetJson.RecordsAddedCounter());
-			existingCounter.addFrom(data.getRecordsAddedCounter());
-
-			super.accumulateStatistics(data.getRecordsAddedCounter());
+			super.accumulateStatistics(startingOrder, data.getRecordsAddedCounter());
 		}
 
 		myStagingVersion = data.getStagingVersion();
@@ -155,7 +148,8 @@ public class Step8GenerateReportStep
 			StringBuilder theReportBuilder) {
 		for (Integer order : myComposeOrderToCompose.keySet()) {
 			ValueSet.ValueSetComposeComponent compose = myComposeOrderToCompose.get(order);
-			TerminologyFileSetJson.RecordsAddedCounter counter = myComposeOrderToCounter.get(order);
+			TerminologyFileSetJson.RecordsAddedCounter counter =
+					getStepToAccumulator().get(order);
 
 			addDivider(theReportBuilder);
 			theReportBuilder.append("Compose: ");

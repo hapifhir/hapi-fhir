@@ -57,7 +57,7 @@ public class Step2And3ExpandConceptsStep<OT extends IModelJson>
 		implements IJobStepWorker<PreExpandValueSetParameters, ExpandConceptsWorkChunkJson, OT> {
 	private static final Logger ourLog = LoggerFactory.getLogger(Step2And3ExpandConceptsStep.class);
 
-	private static final int CHUNK_SIZE = 100;
+	static final int CHUNK_SIZE = 100;
 	private final boolean myInclude;
 
 	@Autowired

@@ -628,9 +628,11 @@ public class UrlUtil {
 	 * Parses a versioned or unversioned canonical URL (e.g. <code>http://foo</code> or <code>http://foo|123</code>)
 	 * into its constituent parts.
 	 *
+	 * @param theUrl The URL to parse (may be null, in which case an empty {@link CanonicalUrlParts} is returned)
 	 * @since 8.12.0
 	 */
-	public static CanonicalUrlParts parseCanonicalUrl(String theUrl) {
+	@Nonnull
+	public static CanonicalUrlParts parseCanonicalUrl(@Nullable String theUrl) {
 		return parseCanonicalUrl(theUrl, null);
 	}
 
@@ -640,16 +642,23 @@ public class UrlUtil {
 	 * provided either in the URL or in a separate parameter. If both are provided, the version from the parameter
 	 * takes precedence.
 	 *
+	 * @param theUrl The URL to parse (may be null, in which case an empty {@link CanonicalUrlParts} is returned and any value in {@literal theVersion} is ignored)
+	 *
 	 * @since 8.12.0
 	 */
 	@Nonnull
-	public static CanonicalUrlParts parseCanonicalUrl(@Nonnull String theUrl, @Nullable String theVersion) {
-		int separatorStart = theUrl.indexOf('|');
+	public static CanonicalUrlParts parseCanonicalUrl(@Nullable String theUrl, @Nullable String theVersion) {
+		String inputUrl = defaultIfBlank(theUrl, null);
+		if (inputUrl == null) {
+			return new CanonicalUrlParts(null, Optional.empty());
+		}
+
+		int separatorStart = inputUrl.indexOf('|');
 		int separatorEnd;
 		if (separatorStart != -1) {
 			separatorEnd = separatorStart;
 		} else {
-			separatorStart = theUrl.indexOf("%7C");
+			separatorStart = inputUrl.indexOf("%7C");
 			if (separatorStart != -1) {
 				separatorEnd = separatorStart + 2;
 			} else {
@@ -658,14 +667,14 @@ public class UrlUtil {
 		}
 
 		if (separatorStart == -1) {
-			return new CanonicalUrlParts(theUrl, Optional.ofNullable(theVersion));
+			return new CanonicalUrlParts(inputUrl, Optional.ofNullable(theVersion));
 		} else {
-			String url = theUrl.substring(0, separatorStart);
-			String versionId = theUrl.substring(separatorEnd + 1);
+			String url = inputUrl.substring(0, separatorStart);
+			String versionId = inputUrl.substring(separatorEnd + 1);
 			if (isBlank(versionId)) {
 				return new CanonicalUrlParts(url, Optional.ofNullable(theVersion));
 			} else if (isNotBlank(theVersion) && !versionId.equals(theVersion)) {
-				throw new InvalidRequestException(Msg.code(2952) + "Version in URL[" + sanitizeUrlPart(theUrl)
+				throw new InvalidRequestException(Msg.code(2952) + "Version in URL[" + sanitizeUrlPart(inputUrl)
 						+ " does not match expected version: " + theVersion);
 			}
 

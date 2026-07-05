@@ -35,5 +35,5 @@ public interface ITermValueSetConceptDesignationDao
 
 	@Query("DELETE FROM TermValueSetConceptDesignation vscd WHERE vscd.myValueSet = :vs")
 	@Modifying
-	void deleteByTermValueSetId(@Param("vs") TermValueSet theValueSet);
+	void deleteByTermValueSet(@Param("vs") TermValueSet theValueSet);
 }

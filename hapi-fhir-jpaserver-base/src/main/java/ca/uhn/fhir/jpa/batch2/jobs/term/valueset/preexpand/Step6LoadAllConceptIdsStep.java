@@ -84,29 +84,31 @@ public class Step6LoadAllConceptIdsStep
 					.orElseThrow(() -> new JobExecutionFailedException(
 							Msg.code(2986) + "Missing ValueSet[url=" + url + ", version=" + version + "]"));
 
-			Stream<TermValueSetConcept> allConcepts =
-					myTermValueSetConceptDao.streamAllByTermValueSetOrdered(termValueSet);
-			StreamIterator<TermValueSetConcept> conceptIterator = StreamIterator.iterator(allConcepts);
+			try (Stream<TermValueSetConcept> allConcepts =
+					myTermValueSetConceptDao.streamAllByTermValueSetOrdered(termValueSet)) {
+				StreamIterator<TermValueSetConcept> conceptIterator = StreamIterator.iterator(allConcepts);
 
-			CompactConceptsWorkChunkJson chunk = new CompactConceptsWorkChunkJson();
+				CompactConceptsWorkChunkJson chunk = new CompactConceptsWorkChunkJson();
 
-			int order = 0;
-			int conceptCount = 0;
-			while (conceptIterator.hasNext()) {
-				TermValueSetConcept concept = conceptIterator.next();
-				myEntityManager.detach(concept);
-				conceptCount++;
+				int order = 0;
+				int conceptCount = 0;
+				while (conceptIterator.hasNext()) {
+					TermValueSetConcept concept = conceptIterator.next();
+					myEntityManager.detach(concept);
+					conceptCount++;
 
-				chunk.addConcept(concept.getPartitionId().getPartitionId(), concept.getId(), order++);
+					chunk.addConcept(concept.getPartitionId().getPartitionId(), concept.getId(), order++);
 
-				if (chunk.getConcepts().size() >= 100 || !conceptIterator.hasNext()) {
-					theDataSink.accept(chunk);
-					chunk.getConcepts().clear();
+					if (chunk.getConcepts().size() >= Step2And3ExpandConceptsStep.CHUNK_SIZE
+							|| !conceptIterator.hasNext()) {
+						theDataSink.accept(chunk);
+						chunk.getConcepts().clear();
+					}
 				}
-			}
 
-			termValueSet.setTotalConcepts((long) conceptCount);
-			myTermValueSetDao.save(termValueSet);
+				termValueSet.setTotalConcepts((long) conceptCount);
+				myTermValueSetDao.save(termValueSet);
+			}
 		});
 
 		return RunOutcome.SUCCESS;

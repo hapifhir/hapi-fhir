@@ -8,18 +8,16 @@ import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.ValueSetTestUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.CodeableConcept;
-import org.hl7.fhir.r5.model.Coding;
-import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.UriType;
 import org.hl7.fhir.r5.model.ValueSet;
@@ -67,15 +65,10 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 
 	@Test
 	public void testValidateCodeOperationNoValueSet() {
-		UriType valueSetIdentifier = null;
-		IdType id = null;
 		CodeType code = new CodeType("8450-9-XXX");
 		UriType system = new UriType("http://acme.org");
-		StringType display = null;
-		Coding coding = null;
-		CodeableConcept codeableConcept = null;
 		try {
-			myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+			myValueSetDao.validateCode(null, null, code, system, null, null, null, mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(901) + "Either ValueSet ID or ValueSet identifier or system and code must be provided. Unable to validate.", e.getMessage());
@@ -85,13 +78,9 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 	@Test
 	public void testValidateCodeOperationByIdentifierAndCodeAndSystem() {
 		UriType valueSetIdentifier = new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
-		IdType id = null;
 		CodeType code = new CodeType("11378-7");
 		UriType system = new UriType("http://acme.org");
-		StringType display = null;
-		Coding coding = null;
-		CodeableConcept codeableConcept = null;
-		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, null, code, system, null, null, null, mySrd);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
@@ -99,13 +88,10 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 	@Test
 	public void testValidateCodeOperationByIdentifierAndCodeAndSystemAndBadDisplay() {
 		UriType valueSetIdentifier = new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
-		IdType id = null;
 		CodeType code = new CodeType("11378-7");
 		UriType system = new UriType("http://acme.org");
 		StringType display = new StringType("Systolic blood pressure at First encounterXXXX");
-		Coding coding = null;
-		CodeableConcept codeableConcept = null;
-		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, null, code, system, display, null, null, mySrd);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 		assertThat(result.getMessage()).contains("Concept Display \"Systolic blood pressure at First encounterXXXX\" does not match expected \"Systolic blood pressure at First encounter\" for 'http://acme.org#11378-7' for in-memory expansion of ValueSet 'http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2'");
@@ -114,28 +100,20 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 	@Test
 	public void testValidateCodeOperationByIdentifierAndCodeAndSystemAndGoodDisplay() {
 		UriType valueSetIdentifier = new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
-		IdType id = null;
 		CodeType code = new CodeType("11378-7");
 		UriType system = new UriType("http://acme.org");
 		StringType display = new StringType("Systolic blood pressure at First encounter");
-		Coding coding = null;
-		CodeableConcept codeableConcept = null;
-		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, null, code, system, display, null, null, mySrd);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
 
 	@Test
 	public void testValidateCodeOperationByResourceIdAndCodeableConcept() {
-		UriType valueSetIdentifier = null;
 		IIdType id = myExtensionalVsId;
-		CodeType code = null;
-		UriType system = null;
-		StringType display = null;
-		Coding coding = null;
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.addCoding().setSystem("http://acme.org").setCode("11378-7");
-		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(null, id, null, null, null, null, codeableConcept, mySrd);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
@@ -144,38 +122,29 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 	public void testValidateCodeOperationByResourceIdAndCodeableConceptWithExistingValueSetAndPreExpansionEnabled() {
 		myStorageSettings.setPreExpandValueSets(true);
 
-		UriType valueSetIdentifier = null;
 		IIdType id = myExtensionalVsId;
-		CodeType code = null;
-		UriType system = null;
-		StringType display = null;
-		Coding coding = null;
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.addCoding().setSystem("http://acme.org").setCode("11378-7");
-		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(null, id, null, null, null, null, codeableConcept, mySrd);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
-		result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		result = myValueSetDao.validateCode(null, id, null, null, null, null, codeableConcept, mySrd);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
 		myBatch2JobHelper.awaitNoJobsRunning();
-		result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		result = myValueSetDao.validateCode(null, id, null, null, null, null, codeableConcept, mySrd);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
 
 	@Test
 	public void testValidateCodeOperationByResourceIdAndCodeAndSystem() {
-		UriType valueSetIdentifier = null;
 		IIdType id = myExtensionalVsId;
 		CodeType code = new CodeType("11378-7");
 		UriType system = new UriType("http://acme.org");
-		StringType display = null;
-		Coding coding = null;
-		CodeableConcept codeableConcept = null;
-		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(null, id, code, system, null, null, null, mySrd);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
@@ -184,23 +153,19 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 	public void testValidateCodeOperationByResourceIdAndCodeAndSystemWithExistingValueSetAndPreExpansionEnabled() {
 		myStorageSettings.setPreExpandValueSets(true);
 
-		UriType valueSetIdentifier = null;
 		IIdType id = myExtensionalVsId;
 		CodeType code = new CodeType("11378-7");
 		UriType system = new UriType("http://acme.org");
-		StringType display = null;
-		Coding coding = null;
-		CodeableConcept codeableConcept = null;
-		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(null, id, code, system, null, null, null, mySrd);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
-		result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		result = myValueSetDao.validateCode(null, id, code, system, null, null, null, mySrd);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
 		myBatch2JobHelper.awaitNoJobsRunning();
-		result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		result = myValueSetDao.validateCode(null, id, code, system, null, null, null, mySrd);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
@@ -248,16 +213,16 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 	public void testDeleteExpungePreExpandedValueSet() {
 		myStorageSettings.setExpungeEnabled(true);
 
-		// Create valueset
+		// Create ValueSet
 		ValueSet vs = myValidationSupport.fetchResource(ValueSet.class, "http://hl7.org/fhir/ValueSet/address-use");
 		assertNotNull(vs);
-		IIdType id = myValueSetDao.create(vs).getId().toUnqualifiedVersionless();
+		IIdType id = myValueSetDao.create(vs, newSrd()).getId().toUnqualifiedVersionless();
 
-		// Update valueset
+		// Update ValueSet
 		vs.setName("Hello");
 		assertEquals("2", myValueSetDao.update(vs, mySrd).getId().getVersionIdPart());
 		runInTransaction(() -> {
-			Optional<ResourceTable> resource = myResourceTableDao.findById(id.getIdPartAsLong());
+			Optional<ResourceTable> resource = myResourceTableDao.findById(JpaPid.fromId(id.getIdPartAsLong()));
 			assertTrue(resource.isPresent());
 		});
 
@@ -276,7 +241,7 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 
 		// Verify expunged
 		runInTransaction(() -> {
-			Optional<ResourceTable> resource = myResourceTableDao.findById(id.getIdPartAsLong());
+			Optional<ResourceTable> resource = myResourceTableDao.findById(JpaPid.fromId(id.getIdPartAsLong()));
 			assertFalse(resource.isPresent());
 		});
 	}
@@ -296,7 +261,7 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		ValueSet vs = new ValueSet();
 		vs.setUrl("http://example.com/fhir/ValueSet/observation-vitalsignresult");
 		vs.getCompose().addInclude().setSystem("http://loinc.org");
-		myValueSetDao.create(vs);
+		myValueSetDao.create(vs, newSrd());
 
 		try {
 			myValueSetDao.expand(vs, null);
@@ -320,7 +285,7 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		ValueSet vs = new ValueSet();
 		vs.setUrl("http://vs");
 		vs.getCompose().addInclude().setSystem("http://cs");
-		myValueSetDao.create(vs);
+		myValueSetDao.create(vs, newSrd());
 
 		// Precalculate
 
@@ -336,7 +301,7 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		assertTrue(outcome.isOk());
 		assertThat(outcome.getMessage()).startsWith("Code validation occurred using a ValueSet expansion that was pre-calculated at ");
 
-		// Expand valueset
+		// Expand ValueSet
 
 		ValueSet outcomeVs = myValueSetDao.expand(vs, null);
 		String expansionMessage = myValueSetTestUtil.extractExpansionMessage(outcomeVs);
@@ -345,13 +310,10 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 
 	@Test
 	public void testValidateCodeAgainstBuiltInValueSetAndCodeSystemWithValidCode() {
-		IPrimitiveType<String> display = null;
-		Coding coding = null;
-		CodeableConcept codeableConcept = null;
 		StringType vsIdentifier = new StringType("http://hl7.org/fhir/ValueSet/administrative-gender");
 		StringType code = new StringType("male");
 		StringType system = new StringType("http://hl7.org/fhir/administrative-gender");
-		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(vsIdentifier, null, code, system, display, coding, codeableConcept, mySrd);
+		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(vsIdentifier, null, code, system, null, null, null, mySrd);
 
 		ourLog.info(result.getMessage());
 		assertThat(result.isOk()).as(result.getMessage()).isTrue();

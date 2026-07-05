@@ -29,6 +29,7 @@ import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PreferHeader;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -43,6 +44,7 @@ import com.google.common.collect.Multimap;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.Strings;
 import org.apache.http.HttpStatus;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -166,8 +168,15 @@ public class AsyncRequestUtil {
 			ServletRequestDetails theRequestDetails,
 			JobInstance theJobInstance,
 			String theOperationName,
+			String theJobDefinitionId,
 			Function<JobInstance, CompletedJobPollResponse> theCompletedJobResponseProvider)
 			throws IOException {
+
+		if (!Strings.CS.equals(theJobInstance.getJobDefinitionId(), theJobDefinitionId)) {
+			throw new InvalidRequestException("Job instance[" + theJobInstance.getInstanceId()
+					+ "] is not of expected type: " + theJobDefinitionId);
+		}
+
 		int status = HttpStatus.SC_INTERNAL_SERVER_ERROR;
 		List<String> messages = new ArrayList<>();
 		String severity = "";

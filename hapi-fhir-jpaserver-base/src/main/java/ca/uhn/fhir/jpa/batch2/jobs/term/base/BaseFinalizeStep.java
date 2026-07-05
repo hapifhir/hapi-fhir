@@ -24,16 +24,29 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.model.api.IModelJson;
 import jakarta.annotation.Nonnull;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public abstract class BaseFinalizeStep<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
+/**
+ * @param <ST> The type for the keys on the keyed statistic accumulator. Different job types will use different types of keys for this.
+ */
+public abstract class BaseFinalizeStep<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson, ST>
 		implements IReductionStepWorker<PT, IT, OT> {
 
 	private final TerminologyFileSetJson.RecordsAddedCounter myTotalRecordsAddedCounter =
 			new TerminologyFileSetJson.RecordsAddedCounter();
+	private final Map<ST, TerminologyFileSetJson.RecordsAddedCounter> myStepToAccumulator = new HashMap<>();
 
-	protected void accumulateStatistics(TerminologyFileSetJson.RecordsAddedCounter theRecordsAddedCounter) {
+	protected void accumulateStatistics(ST theStep, TerminologyFileSetJson.RecordsAddedCounter theRecordsAddedCounter) {
 		myTotalRecordsAddedCounter.addFrom(theRecordsAddedCounter);
+		myStepToAccumulator
+				.computeIfAbsent(theStep, s -> new TerminologyFileSetJson.RecordsAddedCounter())
+				.addFrom(theRecordsAddedCounter);
+	}
+
+	protected Map<ST, TerminologyFileSetJson.RecordsAddedCounter> getStepToAccumulator() {
+		return myStepToAccumulator;
 	}
 
 	protected String createReport(StepExecutionDetails<PT, IT> theStepExecutionDetails) {
@@ -70,6 +83,14 @@ public abstract class BaseFinalizeStep<PT extends IModelJson, IT extends IModelJ
 			theReportBuilder
 					.append("Concepts Added               : ")
 					.append(theCounter.getConceptsAdded())
+					.append("\n");
+			hasAny = true;
+		}
+		if (theCounter.getConceptsUpdated() > 0) {
+			indent(theReportBuilder, theIndent);
+			theReportBuilder
+					.append("Concepts Updated             : ")
+					.append(theCounter.getConceptsUpdated())
 					.append("\n");
 			hasAny = true;
 		}

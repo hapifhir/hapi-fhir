@@ -13,6 +13,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.JsonUtil;
 import org.hl7.fhir.r5.model.Bundle;
@@ -36,6 +37,7 @@ import static ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider.PARAM_JOB_INS
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_INVALIDATE_EXPANSION;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_INVALIDATE_EXPANSION_POLL_FOR_STATUS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -96,9 +98,11 @@ class ValueSetOperationProviderTest {
 
 		verify(myJobCoordinator, times(1)).startInstance(any(), myStartRequestCaptor.capture());
 		assertEquals(PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET, myStartRequestCaptor.getValue().getJobDefinitionId());
-		assertEquals(VS_URL, myStartRequestCaptor.getValue().getParameters(PreExpandValueSetParameters.class).getUrl());
-		assertEquals(VS_VERSION, myStartRequestCaptor.getValue().getParameters(PreExpandValueSetParameters.class).getVersion());
-		assertNull(myStartRequestCaptor.getValue().getParameters(PreExpandValueSetParameters.class).getId());
+
+		assertThat(myStartRequestCaptor.getValue().getParameters(PreExpandValueSetParameters.class))                                                             .returns(VS_URL, PreExpandValueSetParameters::getUrl)
+			.returns(VS_URL, PreExpandValueSetParameters::getUrl)
+			.returns(VS_VERSION, PreExpandValueSetParameters::getVersion)
+			.returns(null, PreExpandValueSetParameters::getId);
 	}
 
 	private IGenericClient getFhirClient() {
@@ -134,10 +138,12 @@ class ValueSetOperationProviderTest {
 		assertEquals("http://localhost:" + myServer.getPort() + "/ValueSet/$hapi.fhir.invalidate-expansion.poll-for-status?jobInstanceId=123", outcome.getFirstResponseHeader(Constants.HEADER_CONTENT_LOCATION).orElseThrow());
 
 		verify(myJobCoordinator, times(1)).startInstance(any(), myStartRequestCaptor.capture());
+
 		assertEquals(PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET, myStartRequestCaptor.getValue().getJobDefinitionId());
-		assertEquals(VS_URL, myStartRequestCaptor.getValue().getParameters(PreExpandValueSetParameters.class).getUrl());
-		assertEquals(VS_VERSION, myStartRequestCaptor.getValue().getParameters(PreExpandValueSetParameters.class).getVersion());
-		assertNull(myStartRequestCaptor.getValue().getParameters(PreExpandValueSetParameters.class).getId());
+		assertThat(myStartRequestCaptor.getValue().getParameters(PreExpandValueSetParameters.class))                                                             .returns(VS_URL, PreExpandValueSetParameters::getUrl)
+			.returns(VS_URL, PreExpandValueSetParameters::getUrl)
+			.returns(VS_VERSION, PreExpandValueSetParameters::getVersion)
+			.returns(null, PreExpandValueSetParameters::getId);
 	}
 
 	@Test
@@ -179,6 +185,7 @@ class ValueSetOperationProviderTest {
 		// Setup
 
 		JobInstance jobInstance = new JobInstance();
+		jobInstance.setJobDefinitionId(PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET);
 		jobInstance.setStatus(StatusEnum.IN_PROGRESS);
 		jobInstance.setProgress(0.1);
 		when(myJobCoordinator.getInstance(eq("123"))).thenReturn(jobInstance);
@@ -209,6 +216,7 @@ class ValueSetOperationProviderTest {
 		result.setReport("This is the report text");
 
 		JobInstance jobInstance = new JobInstance();
+		jobInstance.setJobDefinitionId(PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET);
 		jobInstance.setStatus(StatusEnum.COMPLETED);
 		jobInstance.setReport(JsonUtil.serialize(result));
 		when(myJobCoordinator.getInstance(eq("123"))).thenReturn(jobInstance);
@@ -230,6 +238,33 @@ class ValueSetOperationProviderTest {
 		Bundle resultBundle = (Bundle) outcome.getResource();
 		String resultBundleString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resultBundle);
 		assertThat(resultBundleString).contains("This is the report text");
+	}
+
+	@Test
+	void testPollForStatus_WrongJobType() {
+
+		// Setup
+
+		JobInstance jobInstance = new JobInstance();
+		jobInstance.setInstanceId("123");
+		jobInstance.setJobDefinitionId("A");
+		jobInstance.setStatus(StatusEnum.COMPLETED);
+		when(myJobCoordinator.getInstance(eq("123"))).thenReturn(jobInstance);
+
+		// Test
+
+		assertThatThrownBy(()->getFhirClient()
+			.operation()
+			.onType("ValueSet")
+			.named(OPERATION_INVALIDATE_EXPANSION_POLL_FOR_STATUS)
+			.withParameter(Parameters.class, PARAM_JOB_INSTANCE_ID, new CodeType("123"))
+			.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.returnMethodOutcome()
+			.execute())
+			// Verify
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("Job instance[123] is not of expected type: PRE_EXPAND_VALUESET");
+
 	}
 
 }

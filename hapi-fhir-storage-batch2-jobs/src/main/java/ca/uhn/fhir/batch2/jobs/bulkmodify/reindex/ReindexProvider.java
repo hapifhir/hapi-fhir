@@ -204,7 +204,7 @@ public class ReindexProvider extends BaseBulkModifyOrRewriteProvider {
 
 	@Nonnull
 	@Override
-	protected String getJobId() {
+	protected String getJobDefinitionId() {
 		return ReindexUtils.JOB_REINDEX;
 	}
 

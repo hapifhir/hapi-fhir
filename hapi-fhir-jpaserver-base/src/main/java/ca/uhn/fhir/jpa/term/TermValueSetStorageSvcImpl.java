@@ -396,6 +396,11 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 		});
 	}
 
+	/**
+	 * Fetches existing concepts mapped by system URL. This method does not
+	 * consider the system version, since we don't currently allow duplicate codes for
+	 * different versions of the same system.
+	 */
 	@Nonnull
 	private Map<String, TermValueSetConcept> fetchExistingConcepts(
 			UrlUtil.CanonicalUrlParts system, FlattenedValueSet flattenedValueSet, TermValueSet termValueSet) {
@@ -718,8 +723,8 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 	}
 
 	private void deletePreCalculatedValueSetContents(TermValueSet theValueSet) {
-		myTermValueSetConceptDesignationDao.deleteByTermValueSetId(theValueSet);
-		myTermValueSetConceptDao.deleteByTermValueSetId(theValueSet);
+		myTermValueSetConceptDesignationDao.deleteByTermValueSet(theValueSet);
+		myTermValueSetConceptDao.deleteByTermValueSet(theValueSet);
 	}
 
 	@Nonnull

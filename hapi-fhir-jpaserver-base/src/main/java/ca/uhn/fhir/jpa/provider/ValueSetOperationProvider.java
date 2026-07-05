@@ -38,7 +38,6 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetPara
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetResultJson;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -47,7 +46,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.DatatypeUtil;
 import ca.uhn.fhir.util.JsonUtil;
-import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -90,16 +89,8 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 	private IJobCoordinator myJobCoordinator;
 
 	@Autowired
-	private ITermValueSetStorageSvc myValueSetStorageSvc;
-
-	@Autowired
 	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)
 	private ValidationSupportChain myValidationSupportChain;
-
-	@VisibleForTesting
-	public void setDaoRegistryForUnitTest(DaoRegistry theDaoRegistry) {
-		myDaoRegistry = theDaoRegistry;
-	}
 
 	public void setValidationSupport(IValidationSupport theValidationSupport) {
 		myValidationSupport = theValidationSupport;
@@ -160,7 +151,6 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		return (IFhirResourceDaoValueSet<IBaseResource>) myDaoRegistry.getResourceDao("ValueSet");
 	}
 
-	@SuppressWarnings("unchecked")
 	@Operation(
 			name = JpaConstants.OPERATION_VALIDATE_CODE,
 			idempotent = true,
@@ -220,22 +210,10 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 			} else {
 				// Otherwise, use the local DAO layer to validate the code
 				IFhirResourceDaoValueSet<IBaseResource> dao = getDao();
-				IPrimitiveType<String> valueSetIdentifier;
-				if (theValueSetUrl != null && theValueSetVersion != null) {
-					valueSetIdentifier = (IPrimitiveType<String>)
-							getContext().getElementDefinition("uri").newInstance();
-					valueSetIdentifier.setValue(theValueSetUrl.getValue() + "|" + theValueSetVersion);
-				} else {
-					valueSetIdentifier = theValueSetUrl;
-				}
-				IPrimitiveType<String> codeSystemIdentifier;
-				if (theSystem != null && theSystemVersion != null) {
-					codeSystemIdentifier = (IPrimitiveType<String>)
-							getContext().getElementDefinition("uri").newInstance();
-					codeSystemIdentifier.setValue(theSystem.getValue() + "|" + theSystemVersion);
-				} else {
-					codeSystemIdentifier = theSystem;
-				}
+
+				IPrimitiveType<String> valueSetIdentifier = parametersToIdentifier(theValueSetUrl, theValueSetVersion);
+				IPrimitiveType<String> codeSystemIdentifier = parametersToIdentifier(theSystem, theSystemVersion);
+
 				result = dao.validateCode(
 						valueSetIdentifier,
 						theId,
@@ -250,6 +228,20 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		} finally {
 			endRequest(theServletRequest);
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@Nullable
+	private IPrimitiveType<String> parametersToIdentifier(IPrimitiveType<String> url, IPrimitiveType<String> version) {
+		IPrimitiveType<String> valueSetIdentifier;
+		if (url != null && version != null) {
+			valueSetIdentifier = (IPrimitiveType<String>)
+					getContext().getElementDefinitionNotNull("uri").newInstance();
+			valueSetIdentifier.setValue(url.getValue() + "|" + version);
+		} else {
+			valueSetIdentifier = url;
+		}
+		return valueSetIdentifier;
 	}
 
 	private Optional<CodeValidationResult> validateCodeWithTerminologyService(
@@ -270,14 +262,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 						+ " - Unknown or unusable ValueSet[" + theValueSetUrl + "]");
 	}
 
-	@Operation(
-			name = OPERATION_INVALIDATE_EXPANSION,
-			idempotent = false,
-			manualResponse = true,
-			typeName = "ValueSet",
-			returnParameters = {
-				@OperationParam(name = CodeValidationResult.MESSAGE, typeName = "string", min = 1, max = 1)
-			})
+	@Operation(name = OPERATION_INVALIDATE_EXPANSION, idempotent = false, manualResponse = true, typeName = "ValueSet")
 	public void invalidateValueSetExpansion(
 			@IdParam(optional = true) IIdType theValueSetId,
 			@OperationParam(name = PARAM_URL, min = 0, typeName = "uri") IPrimitiveType<String> theUrl,
@@ -322,7 +307,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 			name = OPERATION_INVALIDATE_EXPANSION_POLL_FOR_STATUS,
 			manualResponse = true,
 			idempotent = true)
-	public void uploadTerminologyPollForStatus(
+	public void invalidateExpansionPollForStatus(
 			@OperationParam(name = PARAM_JOB_INSTANCE_ID, min = 1, typeName = "code")
 					IPrimitiveType<String> theJobInstanceId,
 			ServletRequestDetails theRequestDetails)
@@ -336,7 +321,11 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 			return new AsyncRequestUtil.CompletedJobPollResponse(null, List.of(report));
 		};
 		AsyncRequestUtil.handleAsyncJobPollForStatusResponse(
-				theRequestDetails, jobInstance, OPERATION_INVALIDATE_EXPANSION, completedJobResponseProvider);
+				theRequestDetails,
+				jobInstance,
+				OPERATION_INVALIDATE_EXPANSION,
+				PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET,
+				completedJobResponseProvider);
 	}
 
 	public static ValueSetExpansionOptions createValueSetExpansionOptions(

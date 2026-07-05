@@ -28,7 +28,6 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.jpa.util.ValueSetTestUtil;
@@ -131,11 +130,6 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 	@Override
 	public ITermDeferredStorageSvc getTerminologyDefferedStorageService() {
 		return myTerminologyDeferredStorageSvc;
-	}
-
-	@Override
-	public ITermReadSvc getTerminologyReadSvc() {
-		return myTermSvc;
 	}
 
 	@Override

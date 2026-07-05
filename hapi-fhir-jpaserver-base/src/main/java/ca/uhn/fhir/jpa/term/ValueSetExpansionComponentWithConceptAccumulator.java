@@ -166,6 +166,8 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 
 	@Override
 	public void excludeConcept(String theSystem, String theCode) {
+		myAddedCodes.remove(new SystemAndCode(theSystem, theCode));
+
 		String excludeSystem;
 		String excludeSystemVersion;
 		int versionSeparator = theSystem.indexOf("|");

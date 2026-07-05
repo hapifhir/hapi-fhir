@@ -46,7 +46,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -56,11 +55,9 @@ import static ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyStep.ge
 import static java.util.Objects.requireNonNull;
 
 public class ImportTerminologyStepFinalize<PT extends ImportTerminologyJobParameters>
-		extends BaseFinalizeStep<PT, TerminologyFileSetJson, ImportTerminologyResultJson> {
+		extends BaseFinalizeStep<PT, TerminologyFileSetJson, ImportTerminologyResultJson, String> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportTerminologyStepFinalize.class);
 
-	private final Map<String, TerminologyFileSetJson.RecordsAddedCounter> myStepIdToRecordsAddedCounter =
-			new HashMap<>();
 	private final Set<String> myResourcesToActivate = new HashSet<>();
 	private final DaoRegistry myDaoRegistry;
 	private final ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
@@ -93,11 +90,7 @@ public class ImportTerminologyStepFinalize<PT extends ImportTerminologyJobParame
 		for (Map.Entry<String, TerminologyFileSetJson.RecordsAddedCounter> entry :
 				data.getStepIdToRecordsAdded().entrySet()) {
 			TerminologyFileSetJson.RecordsAddedCounter recordsAddedCounter = entry.getValue();
-			super.accumulateStatistics(recordsAddedCounter);
-
-			myStepIdToRecordsAddedCounter
-					.computeIfAbsent(entry.getKey(), k -> new TerminologyFileSetJson.RecordsAddedCounter())
-					.addFrom(recordsAddedCounter);
+			super.accumulateStatistics(entry.getKey(), recordsAddedCounter);
 		}
 
 		myResourcesToActivate.addAll(data.getResourcesToActivate());
@@ -190,8 +183,8 @@ public class ImportTerminologyStepFinalize<PT extends ImportTerminologyJobParame
 
 		for (JobDefinitionStep<PT, ?, ?> step : jobDefinition.getSteps()) {
 			if (step.getJobStepWorker() instanceof ITerminologyImportFileHandlerStep) {
-				TerminologyFileSetJson.RecordsAddedCounter counter = myStepIdToRecordsAddedCounter.computeIfAbsent(
-						step.getStepId(), k -> new TerminologyFileSetJson.RecordsAddedCounter());
+				TerminologyFileSetJson.RecordsAddedCounter counter = getStepToAccumulator()
+						.computeIfAbsent(step.getStepId(), k -> new TerminologyFileSetJson.RecordsAddedCounter());
 
 				addDivider(theReportBuilder);
 				theReportBuilder.append("Step: ").append(step.getStepId());

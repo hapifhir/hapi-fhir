@@ -12,7 +12,6 @@ import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.test.ValueSetExpansionHSearchTestCases;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -31,9 +30,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.Collections;
 import java.util.Date;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_ALL_VALUESET_ID;
 
 /**
@@ -54,11 +51,6 @@ public class ValueSetExpansionHSearchElasticIT extends ValueSetExpansionHSearchT
 	@Override
 	public ITermDeferredStorageSvc getTerminologyDefferedStorageService() {
 		return myTerminologyDeferredStorageSvc;
-	}
-
-	@Override
-	public ITermReadSvc getTerminologyReadSvc() {
-		return myTermSvc;
 	}
 
 	@Override

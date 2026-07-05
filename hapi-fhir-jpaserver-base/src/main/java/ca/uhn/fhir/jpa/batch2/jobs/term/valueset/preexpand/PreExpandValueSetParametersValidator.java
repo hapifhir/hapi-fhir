@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -35,6 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class PreExpandValueSetParametersValidator implements IJobParametersValidator<PreExpandValueSetParameters> {
@@ -60,10 +62,17 @@ public class PreExpandValueSetParametersValidator implements IJobParametersValid
 			}
 
 			IIdType id = myFhirContext.getVersion().newIdType(theParameters.getId());
-			IBaseResource valueSet = myDaoRegistry.getResourceDao("ValueSet").read(id, theRequestDetails);
+			IBaseResource valueSet;
+			try {
+				valueSet = myDaoRegistry.getResourceDao("ValueSet").read(id, theRequestDetails);
+			} catch (ResourceNotFoundException e) {
+				retVal.add("ValueSet does not exist: " + UrlUtil.sanitizeUrlPart(theParameters.getId()));
+				return retVal;
+			}
 			Optional<String> urlValueOpt = myFhirContext.newTerser().getSinglePrimitiveValue(valueSet, "url");
 			if (urlValueOpt.isEmpty()) {
-				retVal.add("ValueSet does not have a URL and can not be pre-expanded: " + theParameters.getId());
+				retVal.add("ValueSet does not have a URL and can not be pre-expanded: "
+						+ UrlUtil.sanitizeUrlPart(theParameters.getId()));
 				return retVal;
 			}
 			urlValueOpt.ifPresent(theParameters::setUrl);
@@ -72,9 +81,15 @@ public class PreExpandValueSetParametersValidator implements IJobParametersValid
 		}
 
 		UrlUtil.CanonicalUrlParts canonicalUrl = theParameters.getCanonicalUrl();
+
+		if (isBlank(canonicalUrl.url())) {
+			retVal.add("Either a ValueSet URL or a ValueSet ID must be provided");
+			return retVal;
+		}
+
 		IBaseResource valueSet = myValidationSupport.fetchValueSet(canonicalUrl.toString());
 		if (valueSet == null) {
-			retVal.add("ValueSet not found: " + canonicalUrl);
+			retVal.add("ValueSet not found: " + UrlUtil.sanitizeUrlPart(canonicalUrl.url()));
 		}
 
 		return retVal;

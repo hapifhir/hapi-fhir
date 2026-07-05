@@ -99,10 +99,7 @@ public interface ITermValueSetStorageSvc {
 	/**
 	 * Creates a new ValueSet entity linked to a ValueSet resource
 	 */
-	void storeTermValueSet(
-			RequestDetails theRequestDetails,
-			ResourceTable theResourceTable,
-			org.hl7.fhir.r4.model.ValueSet theValueSet);
+	void storeTermValueSet(RequestDetails theRequestDetails, ResourceTable theResourceTable, ValueSet theValueSet);
 
 	/**
 	 * Invalidates pre-calculated expansions for all ValueSets whose expansions contain

@@ -13,7 +13,6 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -169,9 +168,9 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				myTermValueSetConceptDesignationDao.deleteByTermValueSetId(termValueSet);
+				myTermValueSetConceptDesignationDao.deleteByTermValueSet(termValueSet);
 				assertEquals(0, myTermValueSetConceptDesignationDao.countByTermValueSet(termValueSet).intValue());
-				myTermValueSetConceptDao.deleteByTermValueSetId(termValueSet);
+				myTermValueSetConceptDao.deleteByTermValueSet(termValueSet);
 				assertEquals(0, myTermValueSetConceptDao.countByTermValueSet(termValueSet).intValue());
 				myTermValueSetDao.deleteById(new IdAndPartitionId(termValueSetId));
 				assertTrue(myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).isEmpty());
@@ -209,9 +208,9 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				myTermValueSetConceptDesignationDao.deleteByTermValueSetId(termValueSetId);
+				myTermValueSetConceptDesignationDao.deleteByTermValueSet(termValueSetId);
 				assertEquals(0, myTermValueSetConceptDesignationDao.countByTermValueSet(termValueSetId).intValue());
-				myTermValueSetConceptDao.deleteByTermValueSetId(termValueSetId);
+				myTermValueSetConceptDao.deleteByTermValueSet(termValueSetId);
 				assertEquals(0, myTermValueSetConceptDao.countByTermValueSet(termValueSetId).intValue());
 				myTermValueSetDao.delete(termValueSetId);
 				assertTrue(myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).isEmpty());

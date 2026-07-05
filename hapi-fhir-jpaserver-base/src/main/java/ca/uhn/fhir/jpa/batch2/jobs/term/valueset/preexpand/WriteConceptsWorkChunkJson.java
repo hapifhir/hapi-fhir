@@ -65,7 +65,7 @@ public class WriteConceptsWorkChunkJson implements IModelJson {
 		myValueSet = serialized;
 	}
 
-	public Integer getStartingOrder() {
+	public int getStartingOrder() {
 		return myStartingOrder;
 	}
 
