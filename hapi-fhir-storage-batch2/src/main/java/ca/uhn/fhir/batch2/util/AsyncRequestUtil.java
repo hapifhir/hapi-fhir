@@ -173,7 +173,7 @@ public class AsyncRequestUtil {
 			throws IOException {
 
 		if (!Strings.CS.equals(theJobInstance.getJobDefinitionId(), theJobDefinitionId)) {
-			throw new InvalidRequestException("Job instance[" + theJobInstance.getInstanceId()
+			throw new InvalidRequestException(Msg.code(2993) + "Job instance[" + theJobInstance.getInstanceId()
 					+ "] is not of expected type: " + theJobDefinitionId);
 		}
 
