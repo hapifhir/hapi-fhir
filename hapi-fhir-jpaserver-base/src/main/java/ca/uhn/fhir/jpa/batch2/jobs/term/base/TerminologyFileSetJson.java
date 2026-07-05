@@ -323,7 +323,7 @@ public class TerminologyFileSetJson implements IModelJson {
 			return myValueSetInclusionsAdded;
 		}
 
-		public void copyFrom(RecordsAddedCounter theRecordsAddedCounter) {
+		public void addFrom(RecordsAddedCounter theRecordsAddedCounter) {
 			myConceptsAdded += theRecordsAddedCounter.myConceptsAdded;
 			myConceptLinksAdded += theRecordsAddedCounter.myConceptLinksAdded;
 			myPropertiesAdded += theRecordsAddedCounter.myPropertiesAdded;

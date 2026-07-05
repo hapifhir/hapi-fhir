@@ -33,7 +33,7 @@ public abstract class BaseFinalizeStep<PT extends IModelJson, IT extends IModelJ
 			new TerminologyFileSetJson.RecordsAddedCounter();
 
 	protected void accumulateStatistics(TerminologyFileSetJson.RecordsAddedCounter theRecordsAddedCounter) {
-		myTotalRecordsAddedCounter.copyFrom(theRecordsAddedCounter);
+		myTotalRecordsAddedCounter.addFrom(theRecordsAddedCounter);
 	}
 
 	protected String createReport(StepExecutionDetails<PT, IT> theStepExecutionDetails) {

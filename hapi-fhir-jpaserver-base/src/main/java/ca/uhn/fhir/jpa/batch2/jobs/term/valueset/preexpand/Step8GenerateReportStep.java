@@ -42,8 +42,6 @@ import java.util.TreeMap;
 
 public class Step8GenerateReportStep
 		extends BaseFinalizeStep<
-				PreExpandValueSetParameters, ExpandValueSetStepOutcomeJson, PreExpandValueSetResultJson>
-		implements IReductionStepWorker<
 				PreExpandValueSetParameters, ExpandValueSetStepOutcomeJson, PreExpandValueSetResultJson> {
 
 	private final ITermValueSetStorageSvc myTermValueSetStorageSvc;
@@ -78,7 +76,7 @@ public class Step8GenerateReportStep
 
 			TerminologyFileSetJson.RecordsAddedCounter existingCounter = myComposeOrderToCounter.computeIfAbsent(
 					startingOrder, t -> new TerminologyFileSetJson.RecordsAddedCounter());
-			existingCounter.copyFrom(data.getRecordsAddedCounter());
+			existingCounter.addFrom(data.getRecordsAddedCounter());
 
 			super.accumulateStatistics(data.getRecordsAddedCounter());
 		}

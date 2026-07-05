@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.base;
 import ca.uhn.fhir.batch2.api.ChunkExecutionDetails;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
-import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.ReductionStepFailureException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
@@ -57,8 +56,7 @@ import static ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseImportTerminologyStep.ge
 import static java.util.Objects.requireNonNull;
 
 public class ImportTerminologyStepFinalize<PT extends ImportTerminologyJobParameters>
-		extends BaseFinalizeStep<PT, TerminologyFileSetJson, ImportTerminologyResultJson>
-		implements IReductionStepWorker<PT, TerminologyFileSetJson, ImportTerminologyResultJson> {
+		extends BaseFinalizeStep<PT, TerminologyFileSetJson, ImportTerminologyResultJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportTerminologyStepFinalize.class);
 
 	private final Map<String, TerminologyFileSetJson.RecordsAddedCounter> myStepIdToRecordsAddedCounter =
@@ -99,7 +97,7 @@ public class ImportTerminologyStepFinalize<PT extends ImportTerminologyJobParame
 
 			myStepIdToRecordsAddedCounter
 					.computeIfAbsent(entry.getKey(), k -> new TerminologyFileSetJson.RecordsAddedCounter())
-					.copyFrom(recordsAddedCounter);
+					.addFrom(recordsAddedCounter);
 		}
 
 		myResourcesToActivate.addAll(data.getResourcesToActivate());
