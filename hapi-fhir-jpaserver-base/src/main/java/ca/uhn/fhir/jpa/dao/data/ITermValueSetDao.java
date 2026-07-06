@@ -35,8 +35,16 @@ import java.util.Optional;
 
 public interface ITermValueSetDao extends JpaRepository<TermValueSet, IdAndPartitionId>, IHapiFhirJpaRepository {
 
+	/**
+	 * There should generally be only one TermValueSet per resource under normal operation, but
+	 * more than one is possible given that there is no unique constraint on {@link TermValueSet#getResource()}.
+	 * The typical case for multiple TermValueSets for the same resource is when the resource
+	 * is being pre-expanded but a previous pre-expansion already exists. In this case, a new
+	 * staging version is created with a temporary version identifier and eventually it replaces
+	 * the previous version.
+	 */
 	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myResource.myPid = :resource_pid")
-	Optional<TermValueSet> findByResourcePid(@Param("resource_pid") JpaPid theResourcePid);
+	List<TermValueSet> findByResourcePid(@Param("resource_pid") JpaPid theResourcePid);
 
 	// Keeping for backwards compatibility but recommend using findTermValueSetByUrlAndNullVersion instead.
 	@Deprecated

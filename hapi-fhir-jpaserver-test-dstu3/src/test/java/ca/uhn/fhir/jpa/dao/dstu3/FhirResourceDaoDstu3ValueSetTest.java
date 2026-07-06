@@ -76,8 +76,8 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 		validationOutcome = myValueSetDao.validateCode(vsIdentifier, null, code, system, null, null, null, mySrd);
 		assertEquals(false, validationOutcome.isOk());
 
-		await().until(() -> clearDeferredStorageQueue());
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myTerminologyTestHelper.startValueSetExpansionJobAndWaitForCompletion("http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.20.5.2--20171231000000", "2017-12-31T00:00:00");
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		runInTransaction(() -> {
 			TermValueSet vsEntity = myTermValueSetDao.findByUrl("http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.20.5.2--20171231000000").orElseThrow(() -> new IllegalStateException());

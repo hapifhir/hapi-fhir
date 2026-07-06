@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.batch2.jobs.term.base;
 
+import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.HapiToStringBuilder;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -196,6 +197,10 @@ public class TerminologyFileSetJson implements IModelJson {
 		@JsonProperty("designationsRemoved")
 		private int myDesignationsRemoved;
 
+		@JsonInclude(JsonInclude.Include.NON_EMPTY)
+		@JsonProperty("conceptsUpdated")
+		private int myConceptsUpdated;
+
 		public void incrementConceptsAdded(int theAddedConceptCount) {
 			Validate.isTrue(theAddedConceptCount >= 0, "theAddedConceptCount must be >= 0");
 			myConceptsAdded += theAddedConceptCount;
@@ -290,6 +295,10 @@ public class TerminologyFileSetJson implements IModelJson {
 			return myConceptsAdded;
 		}
 
+		public int getConceptsUpdated() {
+			return myConceptsUpdated;
+		}
+
 		public int getConceptLinksAdded() {
 			return myConceptLinksAdded;
 		}
@@ -322,7 +331,7 @@ public class TerminologyFileSetJson implements IModelJson {
 			return myValueSetInclusionsAdded;
 		}
 
-		public void copyFrom(RecordsAddedCounter theRecordsAddedCounter) {
+		public void addFrom(RecordsAddedCounter theRecordsAddedCounter) {
 			myConceptsAdded += theRecordsAddedCounter.myConceptsAdded;
 			myConceptLinksAdded += theRecordsAddedCounter.myConceptLinksAdded;
 			myPropertiesAdded += theRecordsAddedCounter.myPropertiesAdded;
@@ -344,6 +353,7 @@ public class TerminologyFileSetJson implements IModelJson {
 			HapiToStringBuilder b =
 					new HapiToStringBuilder(RecordsAddedCounter.this, ToStringStyle.NO_CLASS_NAME_STYLE);
 			b.appendIfNonZero("conceptsAdded", myConceptsAdded);
+			b.appendIfNonZero("conceptsUpdated", myConceptsUpdated);
 			b.appendIfNonZero("conceptLinksAdded", myConceptLinksAdded);
 			b.appendIfNonZero("conceptPropertiesAdded", myPropertiesAdded);
 			b.appendIfNonZero("designationsAdded", myDesignationsAdded);
@@ -358,6 +368,22 @@ public class TerminologyFileSetJson implements IModelJson {
 			b.appendIfNonZero("conceptPropertiesRemoved", myPropertiesRemoved);
 			b.appendIfNonZero("designationsRemoved", myDesignationsRemoved);
 			return b.toString();
+		}
+
+		public void increment(UploadStatistics theUploadStatistics) {
+			incrementConceptsAdded(theUploadStatistics.getAddedConceptCount());
+			incrementConceptsUpdated(theUploadStatistics.getUpdatedConceptCount());
+			incrementConceptLinksAdded(theUploadStatistics.getAddedConceptLinkCount());
+			incrementPropertiesAdded(theUploadStatistics.getAddedPropertyCount());
+			incrementDesignationsAdded(theUploadStatistics.getAddedDesignationCount());
+			incrementConceptsRemoved(theUploadStatistics.getRemovedConceptCount());
+			incrementConceptLinksRemoved(theUploadStatistics.getRemovedConceptLinkCount());
+			incrementPropertiesRemoved(theUploadStatistics.getRemovedPropertyCount());
+			incrementDesignationsRemoved(theUploadStatistics.getRemovedDesignationCount());
+		}
+
+		private void incrementConceptsUpdated(int theUpdatedConceptCount) {
+			myConceptsUpdated += theUpdatedConceptCount;
 		}
 	}
 }

@@ -3954,7 +3954,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		ValueSet valueSetUnder1000 = loadResourceFromClasspath(ValueSet.class, "/largecodesystem/ValueSetV1.json");
 		myClient.update().resource(valueSetOver1000).execute();
 		myClient.update().resource(valueSetUnder1000).execute();
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		//When: We create matching and non-matching observations for the valuesets
 		Observation matchingObs = loadResourceFromClasspath(Observation.class, "/largecodesystem/observation-matching.json");
@@ -3973,10 +3973,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	private void assertOneResult(Bundle theResponse) {
 		assertThat(theResponse.getEntry()).hasSize(1);
-	}
-
-	private void printResourceToConsole(IBaseResource theResource) {
-		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theResource));
 	}
 
 	@Test

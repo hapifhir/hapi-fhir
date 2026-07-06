@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
-import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
@@ -13,10 +12,8 @@ import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IntegerType;
@@ -323,61 +320,6 @@ public class ResourceProviderR4ValueSetExpansionTest extends BaseJpaR4Test {
 			.map(p -> p.getValue().primitiveValue())
 			.findFirst();
 		assertThat(hasMore).contains("true");
-	}
-
-	@Test
-	void invalidateExpansion_onFailedToExpandValueSet_preservesErrorMessageOnNotExpandedEntry() {
-		// Given a FAILED_TO_EXPAND ValueSet with a known error message
-		ValueSet vs = new ValueSet();
-		vs.setUrl("http://example.org/vs/es-invalidate-preserves-error");
-		vs.setName("Invalidate Preserves Error VS");
-		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		vs.getCompose().addInclude().setSystem("http://example.org/cs");
-		IIdType vsId = myValueSetDao.create(vs, mySrd).getId().toUnqualifiedVersionless();
-		myTerminologyDeferredStorageSvc.saveAllDeferred();
-
-		updateTermValueSetStatusFailedWithError(
-			"http://example.org/vs/es-invalidate-preserves-error",
-			"CodeSystem not found: http://example.org/cs");
-
-		// When $invalidate-expansion is called on the instance
-		myServer.getFhirClient()
-			.operation()
-			.onInstance(vsId)
-			.named(ProviderConstants.OPERATION_INVALIDATE_EXPANSION)
-			.withNoParameters(Parameters.class)
-			.execute();
-
-		// Then $hapi.fhir.expansion-status shows the entry as NOT_EXPANDED with the error still present
-		Parameters inParams = new Parameters();
-		inParams.addParameter(EXPANSION_STATUS, new CodeType(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED.name()));
-
-		Parameters response = myServer.getFhirClient()
-			.operation()
-			.onType(ValueSet.class)
-			.named(OPERATION_EXPANSION_STATUS)
-			.withParameters(inParams)
-			.execute();
-
-		Optional<Parameters.ParametersParameterComponent> targetEntry = response.getParameter().stream()
-			.filter(p -> VALUESET.equals(p.getName()))
-			.filter(vsParam -> vsParam.getPart().stream()
-				.anyMatch(p -> URL.equals(p.getName())
-					&& "http://example.org/vs/es-invalidate-preserves-error".equals(p.getValue().primitiveValue())))
-			.findFirst();
-		assertThat(targetEntry).isPresent();
-
-		Optional<String> status = targetEntry.get().getPart().stream()
-			.filter(p -> EXPANSION_STATUS.equals(p.getName()))
-			.map(p -> p.getValue().primitiveValue())
-			.findFirst();
-		assertThat(status).contains(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED.name());
-
-		Optional<String> errorMessage = targetEntry.get().getPart().stream()
-			.filter(p -> ERROR_MESSAGE.equals(p.getName()))
-			.map(p -> p.getValue().primitiveValue())
-			.findFirst();
-		assertThat(errorMessage).contains("CodeSystem not found: http://example.org/cs");
 	}
 
 	@Test
