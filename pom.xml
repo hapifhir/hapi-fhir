@@ -1016,6 +1016,10 @@
 			<name>Tanmay Darmorha</name>
 			<organization>Optum</organization>
 		</developer>
+		<developer>
+			<id>bobvanderlinden</id>
+			<name>Bob van der Linden</name>
+		</developer>
 	</developers>
 
 	<licenses>
