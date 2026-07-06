@@ -27,7 +27,9 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.BaseTransactionProcessor;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.PreferHeader;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -42,6 +44,7 @@ import com.google.common.collect.Multimap;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.Strings;
 import org.apache.http.HttpStatus;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -165,8 +168,15 @@ public class AsyncRequestUtil {
 			ServletRequestDetails theRequestDetails,
 			JobInstance theJobInstance,
 			String theOperationName,
+			String theJobDefinitionId,
 			Function<JobInstance, CompletedJobPollResponse> theCompletedJobResponseProvider)
 			throws IOException {
+
+		if (!Strings.CS.equals(theJobInstance.getJobDefinitionId(), theJobDefinitionId)) {
+			throw new InvalidRequestException(Msg.code(2993) + "Job instance[" + theJobInstance.getInstanceId()
+					+ "] is not of expected type: " + theJobDefinitionId);
+		}
+
 		int status = HttpStatus.SC_INTERNAL_SERVER_ERROR;
 		List<String> messages = new ArrayList<>();
 		String severity = "";
@@ -295,6 +305,26 @@ public class AsyncRequestUtil {
 				theRequestDetails,
 				null,
 				null);
+	}
+
+	/**
+	 * Given a REST request and an OperationOutcome that is intended to be returned to the client, this method will add
+	 * a warning to the OperationOutcome if the <code>Prefer: respond-async</code> header is not present. This is intended
+	 * for asynchronous operations that have existed since before HAPI FHIR started using the asynchronous request
+	 *  pattern so that we don't break existing client calls.
+	 *
+	 * @since 8.12.0
+	 */
+	public static void addWarningToOperationOutcomeIfNoPreferRespondAsync(
+			FhirContext theContext, IBaseOperationOutcome theOo, ServletRequestDetails theRequestDetails) {
+		String preferHeader = theRequestDetails.getHeader(Constants.HEADER_PREFER);
+		PreferHeader prefer = RestfulServerUtils.parsePreferHeader(null, preferHeader);
+		if (!prefer.getRespondAsync()) {
+			String message = "This method should be invoked with the Prefer: respond-async header. Proceeding anyway.";
+			String severity = OperationOutcomeUtil.OO_SEVERITY_WARN;
+			String code = OperationOutcomeUtil.OO_ISSUE_CODE_REQUIRED;
+			OperationOutcomeUtil.addIssue(theContext, theOo, severity, message, null, code);
+		}
 	}
 
 	/**

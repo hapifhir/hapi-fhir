@@ -304,7 +304,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet();
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		Parameters respParam = myClient
 			.operation()
@@ -442,7 +442,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet();
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		Parameters respParam = myClient
 			.operation()
@@ -465,7 +465,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet();
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		try {
 			myClient

@@ -101,7 +101,8 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 					Msg.code(2932) + "Step " + theTargetStepId + " is not after step " + currentStepId);
 		}
 
-		Class<OT> expectedType = myTargetStep.getInputType();
+		Class<?> expectedType = myJobDefinition.getStepById(theTargetStepId).getInputType();
+
 		if (!expectedType.isAssignableFrom(dataValue.getClass())) {
 			throw new JobExecutionFailedException(Msg.code(2933) + "Data type "
 					+ dataValue.getClass().getSimpleName() + " for step " + theTargetStepId
