@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.interceptor.model.TransactionWriteAfterPrefetchDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
@@ -484,7 +485,8 @@ class PatientIdPartitionInterceptorTest {
 		}
 
 		private void fireHook(Bundle theBundle, TransactionDetails theTransactionDetails) {
-			mySvc.onTransactionWriteAfterPrefetch(entriesOf(theBundle), theTransactionDetails);
+			mySvc.onTransactionWriteAfterPrefetch(
+					new TransactionWriteAfterPrefetchDetails(entriesOf(theBundle)), theTransactionDetails);
 		}
 
 		@Test

@@ -32,6 +32,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.auth.CompartmentSearchParameterModifications;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.interceptor.model.TransactionWriteAfterPrefetchDetails;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -861,8 +862,9 @@ public class PatientIdPartitionInterceptor {
 	 * (inside the transaction, before any entry is written).
 	 */
 	@Hook(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH)
-	public void onTransactionWriteAfterPrefetch(List<IBase> theEntries, TransactionDetails theTransactionDetails) {
-		rewriteInlinePatientMatchUrlReferences(theEntries, theTransactionDetails);
+	public void onTransactionWriteAfterPrefetch(
+			TransactionWriteAfterPrefetchDetails theDetails, TransactionDetails theTransactionDetails) {
+		rewriteInlinePatientMatchUrlReferences(theDetails.getEntries(), theTransactionDetails);
 	}
 
 	/**

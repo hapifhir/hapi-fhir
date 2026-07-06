@@ -2069,7 +2069,8 @@ public enum Pointcut implements IPointcut {
 	 * <p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
-	 * <li>java.util.List - The list of bundle entries being processed, in processing order</li>
+	 * <li>ca.uhn.fhir.interceptor.model.TransactionWriteAfterPrefetchDetails - A context object wrapping the list of
+	 * bundle entries being processed, in processing order</li>
 	 * <li>ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is being
 	 * processed.</li>
 	 * <li>ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - The same details as the RequestDetails parameter, but
@@ -2084,7 +2085,7 @@ public enum Pointcut implements IPointcut {
 	 */
 	STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH(
 			void.class,
-			"java.util.List",
+			"ca.uhn.fhir.interceptor.model.TransactionWriteAfterPrefetchDetails",
 			"ca.uhn.fhir.rest.api.server.RequestDetails",
 			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 			"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"),

@@ -26,6 +26,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.interceptor.model.TransactionWriteAfterPrefetchDetails;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -245,7 +246,9 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
 		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH)) {
 			HookParams params = new HookParams()
-					.add(List.class, theEntries)
+					.add(
+							TransactionWriteAfterPrefetchDetails.class,
+							new TransactionWriteAfterPrefetchDetails(theEntries))
 					.add(RequestDetails.class, theRequest)
 					.addIfMatchesType(ServletRequestDetails.class, theRequest)
 					.add(TransactionDetails.class, theTransactionDetails);
