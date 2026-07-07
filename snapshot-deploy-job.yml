@@ -92,7 +92,9 @@ jobs:
         inputs:
           mavenPomFile: '$(System.DefaultWorkingDirectory)/pom.xml'
           goals: deploy
-          options: '--settings $(System.DefaultWorkingDirectory)/settings.xml -P DIST -DskipTests -DdeployToCentral --batch-mode --no-transfer-progress --threads 1C --fail-at-end -Dstyle.color=never '
+          # hapi-fhir-typescript is excluded from the reactor (-pl '!...') because it consumes too much
+          # disk space on the build agent, and it deploys nothing anyhow (maven.deploy.skip=true in its pom).
+          options: '--settings $(System.DefaultWorkingDirectory)/settings.xml -P DIST -DskipTests -DdeployToCentral --batch-mode --no-transfer-progress --threads 1C --fail-at-end -Dstyle.color=never -pl ''!hapi-fhir-typescript'''
           mavenOptions: '-Xmx2048m -XX:+UseG1GC $(MAVEN_OPTS)'
           publishJUnitResults: false
 
