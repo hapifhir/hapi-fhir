@@ -100,7 +100,7 @@ public class Step8GenerateReportStep
 
 		if (myFailureMessage != null) {
 			myTermValueSetStorageSvc.dropStagingVersion(url, myStagingVersion);
-			myTermValueSetStorageSvc.markValueSetAsFailedToExpand(url, version);
+			myTermValueSetStorageSvc.markValueSetAsFailedToExpand(url, version, myFailureMessage);
 
 			throw new JobExecutionFailedException(Msg.code(2987) + myFailureMessage);
 		}

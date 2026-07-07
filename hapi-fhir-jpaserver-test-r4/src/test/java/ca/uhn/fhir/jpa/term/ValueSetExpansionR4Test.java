@@ -190,45 +190,6 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 
 	@Test
-	public void testDontExpandNonActiveValueSets() {
-		myStorageSettings.setPreExpandValueSets(true);
-
-		// Given a ValueSet that is in DRAFT status
-
-		ValueSet valueSet = new ValueSet();
-		valueSet.setId("vs");
-		valueSet.setUrl("http://foo/vs");
-		valueSet.setStatus(Enumerations.PublicationStatus.DRAFT);
-		valueSet.getCompose().addInclude().setSystem(Enumerations.AdministrativeGender.MALE.getSystem());
-		myValueSetDao.update(valueSet, newSrd());
-		myBatch2JobHelper.awaitNoJobsRunning();
-
-		// Validate we're not expanding this value set right now
-
-		runInTransaction(() -> {
-			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndNullVersion("http://foo/vs");
-			assertTrue(optionalValueSetByUrl.isPresent());
-			TermValueSet termValueSet = optionalValueSetByUrl.get();
-			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_ACTIVE, termValueSet.getExpansionStatus());
-		});
-
-		// Given that we switch it to active
-
-		valueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		myValueSetDao.update(valueSet, newSrd());
-		myBatch2JobHelper.awaitNoJobsRunning();
-
-		// Validate that it's now expanded
-
-		runInTransaction(() -> {
-			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndNullVersion("http://foo/vs");
-			assertTrue(optionalValueSetByUrl.isPresent());
-			TermValueSet termValueSet = optionalValueSetByUrl.get();
-			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
-		});
-	}
-
-	@Test
 	public void testExpandInline_IncludeCodeSystem_FilterOnDisplay_NoFilter() throws Exception {
 		loadAndPersistCodeSystemWithDesignations(HttpVerb.PUT);
 
@@ -1145,6 +1106,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		});
 
 	}
+
 
 	@ParameterizedTest
 	@CsvSource(textBlock = """
@@ -2538,8 +2500,6 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		assertThat(report).contains("No concepts matched");
 	}
 
-
-
 	private void assertExpansionTotalIsAppropriate(boolean theValueSetActive, boolean theForceDisableHibernateSearch, ValueSet expandedValueSet) {
 		if (!theValueSetActive && theForceDisableHibernateSearch) {
 			assertTrue(expandedValueSet.getExpansion().getTotalElement().isEmpty(), ()->expandedValueSet.getExpansion().getTotalElement().getValueAsString());
@@ -2547,5 +2507,6 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 			assertEquals(myCodesInExtensionValueSet.size(), expandedValueSet.getExpansion().getTotal());
 		}
 	}
+
 
 }

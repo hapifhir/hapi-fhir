@@ -217,6 +217,10 @@ public class ProviderConstants {
 			"$hapi.fhir.invalidate-expansion.poll-for-status";
 
 	/**
+	 * Operation name for the $hapi.fhir.expansion-status operation
+	 */
+	public static final String OPERATION_EXPANSION_STATUS = "$hapi.fhir.expansion-status";
+	/**
 	 * url of resources to delete for the $delete-expunge operation
 	 */
 	public static final String OPERATION_REINDEX_PARAM_URL = "url";

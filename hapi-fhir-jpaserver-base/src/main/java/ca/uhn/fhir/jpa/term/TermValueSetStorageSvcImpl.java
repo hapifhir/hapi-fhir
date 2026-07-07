@@ -125,6 +125,8 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 		return myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
 			TermValueSet valueSet = fetchTermValueSet(theUrl, theVersion);
 			valueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS);
+			valueSet.setExpansionError(null);
+			valueSet.setExpansionTimestamp(null);
 			myTermValueSetDao.save(valueSet);
 
 			String stagingVersionId = UUID.randomUUID().toString();
@@ -561,6 +563,8 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 
 		if (theValueSet.getStatus() != null && theValueSet.getStatus() != Enumerations.PublicationStatus.ACTIVE) {
 			termValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.NOT_ACTIVE);
+			termValueSet.setExpansionTimestamp(null);
+			termValueSet.setExpansionError(null);
 		} else if (myStorageSettings.isPreExpandValueSets() && myStorageSettings.isEnableTaskPreExpandValueSets()) {
 			/*
 			 * If we're saving an active ValueSet, automatically start a batch job
@@ -704,11 +708,11 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 		});
 	}
 
-	@Override
-	public void markValueSetAsFailedToExpand(String theUrl, String theVersion) {
+	public void markValueSetAsFailedToExpand(String theUrl, String theVersion, String theFailureMessage) {
 		myTxService.withSystemRequestOnDefaultPartition().execute(() -> fetchTermValueSetOpt(theUrl, theVersion)
 				.ifPresent(theValueSet -> {
 					theValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND);
+					theValueSet.setExpansionError(theFailureMessage);
 					myEntityManager.merge(theValueSet);
 				}));
 	}

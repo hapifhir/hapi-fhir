@@ -48,6 +48,7 @@ import jakarta.persistence.UniqueConstraint;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.Length;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -149,6 +150,9 @@ public class TermValueSet extends BasePartitionable implements Serializable {
 	@Column(name = "EXPANDED_AT", nullable = true)
 	private Date myExpansionTimestamp;
 
+	@Column(name = "EXPANSION_ERROR", length = Length.LONG32, nullable = true)
+	private String myExpansionError;
+
 	@Transient
 	private transient Integer myHashCode;
 
@@ -163,8 +167,9 @@ public class TermValueSet extends BasePartitionable implements Serializable {
 		return myExpansionTimestamp;
 	}
 
-	public void setExpansionTimestamp(Date theExpansionTimestamp) {
+	public TermValueSet setExpansionTimestamp(Date theExpansionTimestamp) {
 		myExpansionTimestamp = theExpansionTimestamp;
+		return this;
 	}
 
 	public Long getId() {
@@ -283,8 +288,18 @@ public class TermValueSet extends BasePartitionable implements Serializable {
 		return myExpansionStatus;
 	}
 
-	public void setExpansionStatus(TermValueSetPreExpansionStatusEnum theExpansionStatus) {
+	public TermValueSet setExpansionStatus(TermValueSetPreExpansionStatusEnum theExpansionStatus) {
 		myExpansionStatus = theExpansionStatus;
+		return this;
+	}
+
+	public String getExpansionError() {
+		return myExpansionError;
+	}
+
+	public TermValueSet setExpansionError(String theExpansionError) {
+		myExpansionError = theExpansionError;
+		return this;
 	}
 
 	public String getVersion() {
