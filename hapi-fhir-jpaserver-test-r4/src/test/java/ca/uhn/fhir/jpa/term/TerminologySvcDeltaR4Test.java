@@ -721,8 +721,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		CodeSystem delta = newDeltaCodeSystem();
 		delta.addConcept().setCode("codeA").setDisplay("displayA");
 		myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), delta);
-		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		// Validate via the pre-expanded path — populates myValueSetCache
 		ValidationSupportContext ctx = new ValidationSupportContext(myValidationSupport);
@@ -742,9 +741,8 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		CodeSystem delta2 = newDeltaCodeSystem();
 		delta2.addConcept().setCode("codeB").setDisplay("displayB");
 		myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), delta2);
-		myTermSvc.invalidatePreCalculatedExpansionOfValueSetsContainingCodeSystem("http://foo/cs");
-		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myTermValueSetStorageSvc.invalidatePreCalculatedExpansionOfValueSetsContainingCodeSystem("http://foo/cs");
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		// codeB must now validate successfully against the updated pre-expanded ValueSet
 		IValidationSupport.CodeValidationResult resultBAfter = myValidationSupport.validateCode(ctx, options, "http://foo/cs", "codeB", null, "http://foo/vs");
