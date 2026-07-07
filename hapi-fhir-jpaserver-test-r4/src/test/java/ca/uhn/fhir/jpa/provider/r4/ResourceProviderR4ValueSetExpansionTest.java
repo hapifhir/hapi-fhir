@@ -34,6 +34,11 @@ import java.util.List;
 import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND;
+import static ca.uhn.fhir.jpa.provider.ValueSetOperationProvider.PARAM_COUNT;
+import static ca.uhn.fhir.jpa.provider.ValueSetOperationProvider.PARAM_EXPANSION_STATUS;
+import static ca.uhn.fhir.jpa.provider.ValueSetOperationProvider.PARAM_NAME;
+import static ca.uhn.fhir.jpa.provider.ValueSetOperationProvider.PARAM_OFFSET;
+import static ca.uhn.fhir.jpa.provider.ValueSetOperationProvider.PARAM_URL;
 import static ca.uhn.fhir.jpa.term.api.ITermValueSetExpansionSvc.ERROR_MESSAGE;
 import static ca.uhn.fhir.jpa.term.api.ITermValueSetExpansionSvc.EXPANSION_STATUS;
 import static ca.uhn.fhir.jpa.term.api.ITermValueSetExpansionSvc.HAS_MORE;
@@ -204,7 +209,7 @@ public class ResourceProviderR4ValueSetExpansionTest extends BaseJpaR4Test {
 	@Test
 	void expansionStatus_withInvalidStatus_returns400() {
 		Parameters inParams = new Parameters();
-		inParams.addParameter("expansionStatus", new CodeType("NOT_A_REAL_STATUS"));
+		inParams.addParameter(PARAM_EXPANSION_STATUS, new CodeType("NOT_A_REAL_STATUS"));
 
 		var operation = myServer.getFhirClient()
 			.operation()
@@ -280,8 +285,8 @@ public class ResourceProviderR4ValueSetExpansionTest extends BaseJpaR4Test {
 	@Test
 	void expansionStatus_withBothUrlAndName_returns400() {
 		Parameters inParams = new Parameters();
-		inParams.addParameter("url", new StringType("http://example.org/vs/es-both"));
-		inParams.addParameter("name", new StringType("Whatever"));
+		inParams.addParameter(PARAM_URL, new StringType("http://example.org/vs/es-both"));
+		inParams.addParameter(PARAM_NAME, new StringType("Whatever"));
 
 		var operation = myServer.getFhirClient()
 			.operation()
@@ -300,8 +305,8 @@ public class ResourceProviderR4ValueSetExpansionTest extends BaseJpaR4Test {
 		createAndStoreTermValueSet("http://example.org/vs/es-page-3", "Page VS 3");
 
 		Parameters inParams = new Parameters();
-		inParams.addParameter("_count", new IntegerType(1));
-		inParams.addParameter("_offset", new IntegerType(0));
+		inParams.addParameter(PARAM_COUNT, new IntegerType(1));
+		inParams.addParameter(PARAM_OFFSET, new IntegerType(0));
 
 		Parameters response = myServer.getFhirClient()
 			.operation()
@@ -345,7 +350,7 @@ public class ResourceProviderR4ValueSetExpansionTest extends BaseJpaR4Test {
 		}
 
 		Parameters inParams = new Parameters();
-		inParams.addParameter("_count", new IntegerType(1000));
+		inParams.addParameter(PARAM_COUNT, new IntegerType(1000));
 
 		Parameters response = myServer.getFhirClient()
 			.operation()

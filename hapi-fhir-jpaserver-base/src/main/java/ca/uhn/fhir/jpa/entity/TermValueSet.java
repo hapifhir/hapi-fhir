@@ -48,6 +48,7 @@ import jakarta.persistence.UniqueConstraint;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.Length;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -77,7 +78,6 @@ import static org.apache.commons.lang3.StringUtils.length;
 @IdClass(IdAndPartitionId.class)
 public class TermValueSet extends BasePartitionable implements Serializable {
 	public static final int MAX_EXPANSION_STATUS_LENGTH = 50;
-	public static final int MAX_EXPANSION_ERROR_LENGTH = 500;
 	public static final int MAX_NAME_LENGTH = 200;
 	public static final int MAX_URL_LENGTH = 200;
 	public static final int MAX_VER_LENGTH = 200;
@@ -150,7 +150,7 @@ public class TermValueSet extends BasePartitionable implements Serializable {
 	@Column(name = "EXPANDED_AT", nullable = true)
 	private Date myExpansionTimestamp;
 
-	@Column(name = "EXPANSION_ERROR", nullable = true, length = MAX_EXPANSION_ERROR_LENGTH)
+	@Column(name = "EXPANSION_ERROR", length = Length.LONG32, nullable = true)
 	private String myExpansionError;
 
 	@Transient
@@ -298,7 +298,7 @@ public class TermValueSet extends BasePartitionable implements Serializable {
 	}
 
 	public TermValueSet setExpansionError(String theExpansionError) {
-		myExpansionError = left(theExpansionError, MAX_EXPANSION_ERROR_LENGTH);
+		myExpansionError = theExpansionError;
 		return this;
 	}
 

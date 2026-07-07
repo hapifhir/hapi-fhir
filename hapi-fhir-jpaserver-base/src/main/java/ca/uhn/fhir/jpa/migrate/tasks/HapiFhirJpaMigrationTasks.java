@@ -195,7 +195,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("TRM_VALUESET")
 				.addColumn("20260706.10", "EXPANSION_ERROR")
 				.nullable()
-				.type(ColumnTypeEnum.STRING, 500);
+				.type(ColumnTypeEnum.TEXT);
 	}
 
 	protected void init8_10_0() {

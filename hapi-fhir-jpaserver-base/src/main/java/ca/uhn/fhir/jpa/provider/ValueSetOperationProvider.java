@@ -82,6 +82,10 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(ValueSetOperationProvider.class);
 	public static final String PARAM_URL = "url";
 	public static final String PARAM_VERSION = "version";
+	public static final String PARAM_EXPANSION_STATUS = "expansionStatus";
+	public static final String PARAM_NAME = "name";
+	public static final String PARAM_COUNT = "count";
+	public static final String PARAM_OFFSET = "offset";
 
 	@Autowired
 	protected IValidationSupport myValidationSupport;
@@ -118,8 +122,10 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 			@OperationParam(name = "context", min = 0, max = 1, typeName = "string") IPrimitiveType<String> theContext,
 			@OperationParam(name = "contextDirection", min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theContextDirection,
-			@OperationParam(name = "offset", min = 0, max = 1, typeName = "integer") IPrimitiveType<Integer> theOffset,
-			@OperationParam(name = "count", min = 0, max = 1, typeName = "integer") IPrimitiveType<Integer> theCount,
+			@OperationParam(name = PARAM_OFFSET, min = 0, max = 1, typeName = "integer")
+					IPrimitiveType<Integer> theOffset,
+			@OperationParam(name = PARAM_COUNT, min = 0, max = 1, typeName = "integer")
+					IPrimitiveType<Integer> theCount,
 			@OperationParam(
 							name = JpaConstants.OPERATION_EXPAND_PARAM_DISPLAY_LANGUAGE,
 							min = 0,
@@ -340,12 +346,12 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 
 	@Operation(name = ProviderConstants.OPERATION_EXPANSION_STATUS, idempotent = true, typeName = "ValueSet")
 	public IBaseParameters getExpansionStatus(
-			@OperationParam(name = "expansionStatus", max = OperationParam.MAX_UNLIMITED, typeName = "code")
+			@OperationParam(name = PARAM_EXPANSION_STATUS, max = OperationParam.MAX_UNLIMITED, typeName = "code")
 					List<IPrimitiveType<String>> theExpansionStatuses,
-			@OperationParam(name = "url", max = 1) StringParam theUrl,
-			@OperationParam(name = "name", max = 1) StringParam theName,
-			@OperationParam(name = "_count", max = 1, typeName = "integer") IPrimitiveType<Integer> theCount,
-			@OperationParam(name = "_offset", max = 1, typeName = "integer") IPrimitiveType<Integer> theOffset) {
+			@OperationParam(name = PARAM_URL, max = 1) StringParam theUrl,
+			@OperationParam(name = PARAM_NAME, max = 1) StringParam theName,
+			@OperationParam(name = PARAM_COUNT, max = 1, typeName = "integer") IPrimitiveType<Integer> theCount,
+			@OperationParam(name = PARAM_OFFSET, max = 1, typeName = "integer") IPrimitiveType<Integer> theOffset) {
 		List<String> statuses = theExpansionStatuses != null
 				? theExpansionStatuses.stream().map(IPrimitiveType::getValue).toList()
 				: null;

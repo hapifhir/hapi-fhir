@@ -36,32 +36,26 @@ ValueSets and validates codes entirely in memory. Because it does not touch the 
 it works the same whether or not pre-expansion is enabled — it is simply slower for large ValueSets,
 which is the problem pre-expansion exists to solve.
 
-<a id="enabling-pre-expansion"></a>
-
-## Enabling Pre-Expansion
-
-Two settings on `JpaStorageSettings` govern pre-expansion. **Both default to `true`**:
-
-| Setting | Default | Effect |
-|---|---|---|
-| `setPreExpandValueSets(boolean)` | `true` | Whether ValueSets and their expansions are stored in the terminology tables at all, so that `$expand` on large ValueSets can be optimized. |
-| `setEnableTaskPreExpandValueSets(boolean)` | `true` | Whether *this server instance* runs the background job that pre-expands uploaded ValueSets that are not yet expanded. |
-
-```java
-storageSettings.setPreExpandValueSets(true);
-storageSettings.setEnableTaskPreExpandValueSets(true);
-```
-
-The page size of each stored expansion is bounded by `setPreExpandValueSetsDefaultCount(int)` and
-`setPreExpandValueSetsMaxCount(int)` (both default `1000`).
 
 <a id="background-pre-expansion-job"></a>
 
 ## The Background Pre-Expansion Job
 
-When `EnableTaskPreExpandValueSets` is on, the server registers a clustered scheduled job that runs
-roughly **every 10 minutes**. On each run it looks for ValueSets that still need expansion and, for
-each one:
+Pre-expansion runs as an asynchronous job rather than something requested directly. What queues that
+job depends on which resource changed:
+
+- **Creating or updating a `ValueSet`** queues a pre-expansion job for that `ValueSet` immediately
+  after the transaction commits.
+- **Creating or updating a `CodeSystem`** invalidates the pre-calculated expansion of any
+  already-`EXPANDED` (or in-progress) `ValueSet` that references it, resetting its status to
+  `NOT_EXPANDED`. This does **not** by itself queue a new job — the `ValueSet` stays `NOT_EXPANDED`
+  until something else triggers expansion, such as a subsequent `ValueSet` update, an `$expand`
+  request (which falls back to in-memory expansion but does not queue pre-expansion), or an explicit
+  [`$invalidate-expansion`](#invalidate-expansion) call.
+- **Calling [`$invalidate-expansion`](#invalidate-expansion)** on a `ValueSet` explicitly queues a
+  pre-expansion job for it, regardless of its current status.
+
+Whichever way it is queued, the job performs the same steps:
 
 1. Sets the ValueSet's status to `EXPANSION_IN_PROGRESS`.
 2. Resolves the `compose` rules and writes the resulting concepts to `TRM_VALUESET_CONCEPT` (with
@@ -73,8 +67,7 @@ each one:
 The job is skipped while deferred terminology entities (e.g. a large CodeSystem still being loaded)
 are being processed, so that ValueSets are not expanded against incomplete CodeSystems.
 
-Expansion is normally queued automatically whenever a `ValueSet` resource is created or updated. The
-expanded data lives in the database and is reused across server restarts.
+The expanded data lives in the database and is reused across server restarts.
 
 <a id="expansion-statuses"></a>
 
@@ -191,11 +184,11 @@ invalidated).
 ### Invalidating Expansion: `$invalidate-expansion`
 
 `$invalidate-expansion` is a HAPI-specific operation (it is not part of the FHIR standard). It
-resets a ValueSet's status to `NOT_EXPANDED` and queues it for re-expansion by the background job.
+resets a ValueSet's status to `NOT_EXPANDED` and immediately queues a new pre-expansion job for it.
 The `EXPANSION_ERROR` from the previous failure is preserved on the `NOT_EXPANDED` entry so the
 failure reason remains visible while re-expansion is pending.
 
-```
+```http request
 POST [base]/ValueSet/[id]/$invalidate-expansion
 ```
 
@@ -207,7 +200,7 @@ POST [base]/ValueSet/[id]/$invalidate-expansion
 
 ### Finding failed ValueSets
 
-```
+```http request
 GET [base]/ValueSet/$hapi.fhir.expansion-status?expansionStatus=FAILED_TO_EXPAND
 ```
 
@@ -229,5 +222,5 @@ example: `Unable to expand ValueSet because CodeSystem could not be found: http:
 ### Triggering re-expansion
 
 After resolving the root cause, use [`$invalidate-expansion`](#invalidate-expansion)
-on each affected `ValueSet` to reset its status to `NOT_EXPANDED` and queue it for re-expansion. The
-background job will pick it up on its next run.
+on each affected `ValueSet` to reset its status to `NOT_EXPANDED` and immediately queue a new
+pre-expansion job.
