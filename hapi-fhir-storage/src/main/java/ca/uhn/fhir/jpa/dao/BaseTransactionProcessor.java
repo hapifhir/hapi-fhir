@@ -1042,8 +1042,9 @@ public abstract class BaseTransactionProcessor {
 				case POST: {
 					IBaseResource resource = myVersionAdapter.getResource(theEntry);
 					String resourceType = myContext.getResourceType(resource);
-					nextWriteEntryRequestPartitionId = tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
-							requestDetailsForEntry, resource, resourceType);
+					nextWriteEntryRequestPartitionId =
+							myRequestPartitionHelperService.determineCreatePartitionForRequest(
+									requestDetailsForEntry, resource, resourceType);
 					break;
 				}
 				case PUT: {
@@ -1059,8 +1060,9 @@ public abstract class BaseTransactionProcessor {
 							nextWriteEntryRequestPartitionId = theTransactionDetails.getResolvedPartition(resourceId);
 						}
 						if (nextWriteEntryRequestPartitionId == null) {
-							nextWriteEntryRequestPartitionId = tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
-									requestDetailsForEntry, resource, resourceType);
+							nextWriteEntryRequestPartitionId =
+									myRequestPartitionHelperService.determineCreatePartitionForRequest(
+											requestDetailsForEntry, resource, resourceType);
 							if (resourceId != null) {
 								theTransactionDetails.addResolvedPartition(
 										resourceId, nextWriteEntryRequestPartitionId);
@@ -1072,35 +1074,6 @@ public abstract class BaseTransactionProcessor {
 			}
 		}
 		return nextWriteEntryRequestPartitionId;
-	}
-
-	/**
-	 * Determine the create partition for a transaction write entry, if possible. It may not be possible in
-	 * patient-ID partition mode: an entry whose Patient reference is an inline match URL (e.g.
-	 * {@code subject = "Patient?identifier=..."}) that pre-fetch hasn't resolved yet cannot be routed to a Patient
-	 * compartment. In that case, when all-partition search is supported
-	 * ({@link PartitionSettings#isAllPartitionSearchSupported()}) we return
-	 * {@link RequestPartitionId#allPartitions()} for now; the actual routing is determined later, per-entry at
-	 * write time, once pre-fetch has resolved the inline match URL. On infrastructure that cannot search across all
-	 * partitions, the partition must be determined before the transaction opens, so it cannot be deferred and the
-	 * rejection bubbles up.
-	 * <p>
-	 * <b>Not a clean solution:</b> deferral is keyed off Msg 1326, an error code raised specifically by
-	 * {@code PatientIdPartitionInterceptor}, so the core transaction processor is coupled to an interceptor-specific
-	 * code. This is a pragmatic interim approach; a cleaner separation should be designed when time allows.
-	 */
-	private RequestPartitionId tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
-			RequestDetails theRequestDetails, IBaseResource theResource, String theResourceType) {
-		try {
-			return myRequestPartitionHelperService.determineCreatePartitionForRequest(
-					theRequestDetails, theResource, theResourceType);
-		} catch (MethodNotAllowedException e) {
-			// Msg 1326 is the patient-ID interceptor's "can't route to a compartment" signal (see javadoc).
-			if (myPartitionSettings.isAllPartitionSearchSupported() && messageStartsWith(e, Msg.code(1326))) {
-				return RequestPartitionId.allPartitions();
-			}
-			throw e;
-		}
 	}
 
 	private boolean haveWriteOperationsHooks(RequestDetails theRequestDetails) {
@@ -2978,10 +2951,5 @@ public abstract class BaseTransactionProcessor {
 
 	private static boolean isUrnEscaped(@Nonnull String theId) {
 		return theId.startsWith(URN_PREFIX_ESCAPED);
-	}
-
-	private static boolean messageStartsWith(Throwable theException, String thePrefix) {
-		String message = theException.getMessage();
-		return message != null && message.startsWith(thePrefix);
 	}
 }

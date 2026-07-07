@@ -1,7 +1,0 @@
----
-type: add
-issue: 8129
-title: "In Patient ID partition mode, when the underlying storage supports an all-partition search, a conditional
-  Patient reference in a transaction bundle body (e.g. `subject.reference = \"Patient?identifier=sys|val\"`) is now
-  resolved to the matching Patient before partition determination, so the referencing resource is placed in the
-  correct partition instead of being rejected with HAPI-1326."
