@@ -1,0 +1,8 @@
+---
+type: perf
+issue: 8090
+title: "Added an option to allow database id generation to allocate from a per-thread
+ pool, removing a global contention source. The option is disabled by default so that existing deployments are
+ unaffected on upgrade. Because internal ids may not increase with creation order when per-thread pooling is
+ enabled, the package installer now selects the most recently updated resource by last-updated time (rather
+ than by internal id) when deciding which existing resource to update."
