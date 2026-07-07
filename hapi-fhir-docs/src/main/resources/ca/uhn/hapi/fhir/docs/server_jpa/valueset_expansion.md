@@ -134,7 +134,7 @@ GET [base]/ValueSet/$hapi.fhir.expansion-status
 
 | Parameter | Type | Description |
 |---|---|---|
-| `expansionStatus` | code (repeatable) | Filter by status. Multiple values use OR logic. If omitted, all statuses are returned. |
+| `expansionStatus` | code (repeatable) | Filter by [status](#expansion-statuses). Multiple values use OR logic. If omitted, all statuses are returned. |
 | `url` | uri | Filter by `ValueSet` URL. Default: starts-with match (case-insensitive). Supports `:contains` and `:exact` modifiers. |
 | `name` | string | Filter by `ValueSet` name. Same modifier support as `url`. |
 | `_count` | integer | Page size (default 10, min 1, max 50). See `DatabaseBackedPagingProvider` in [Paging](/docs/server_plain/paging.html).|
