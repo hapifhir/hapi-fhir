@@ -95,7 +95,6 @@ import ca.uhn.fhir.jpa.delete.DeleteConflictFinderService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceServiceRegistry;
 import ca.uhn.fhir.jpa.graphql.DaoRegistryGraphQLStorageServices;
 import ca.uhn.fhir.jpa.interceptor.AuthResourceResolver;
@@ -187,12 +186,12 @@ import ca.uhn.fhir.jpa.term.TermCodeSystemStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
-import ca.uhn.fhir.jpa.term.ValueSetConceptAccumulator;
-import ca.uhn.fhir.jpa.term.ValueSetConceptAccumulatorFactory;
+import ca.uhn.fhir.jpa.term.TermValueSetStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReindexingSvc;
+import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
 import ca.uhn.fhir.jpa.term.config.TermCodeSystemConfig;
 import ca.uhn.fhir.jpa.util.DialectSvc;
 import ca.uhn.fhir.jpa.util.JpaHapiTransactionService;
@@ -1016,19 +1015,13 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public ValueSetConceptAccumulatorFactory valueSetConceptAccumulatorFactory() {
-		return new ValueSetConceptAccumulatorFactory();
-	}
-
-	@Bean
-	@Scope("prototype")
-	public ValueSetConceptAccumulator valueSetConceptAccumulator(TermValueSet theTermValueSet) {
-		return valueSetConceptAccumulatorFactory().create(theTermValueSet);
-	}
-
-	@Bean
 	public ITermCodeSystemStorageSvc termCodeSystemStorageSvc() {
 		return new TermCodeSystemStorageSvcImpl();
+	}
+
+	@Bean
+	public ITermValueSetStorageSvc termValueSetStorageSvc() {
+		return new TermValueSetStorageSvcImpl();
 	}
 
 	@Bean

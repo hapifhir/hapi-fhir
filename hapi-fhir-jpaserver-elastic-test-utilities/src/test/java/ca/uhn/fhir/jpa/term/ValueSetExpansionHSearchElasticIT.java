@@ -12,7 +12,7 @@ import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.test.ValueSetExpansionHSearchTestCases;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
@@ -30,9 +30,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.Collections;
 import java.util.Date;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_ALL_VALUESET_ID;
 
 /**
@@ -56,11 +54,6 @@ public class ValueSetExpansionHSearchElasticIT extends ValueSetExpansionHSearchT
 	}
 
 	@Override
-	public ITermReadSvc getTerminologyReadSvc() {
-		return myTermSvc;
-	}
-
-	@Override
 	public DaoRegistry getDaoRegistry() {
 		return myDaoRegistry;
 	}
@@ -73,6 +66,11 @@ public class ValueSetExpansionHSearchElasticIT extends ValueSetExpansionHSearchT
 	@Override
 	public JpaStorageSettings getJpaStorageSettings() {
 		return myStorageSettings;
+	}
+
+	@Override
+	public Batch2JobHelper getBatch2JobHelper() {
+		return myBatch2JobHelper;
 	}
 
 	/**
@@ -95,15 +93,9 @@ public class ValueSetExpansionHSearchElasticIT extends ValueSetExpansionHSearchT
 
 		ValueSet valueSet = getValueSetWithAllCodeSystemConcepts(codeSystemVersion.getCodeSystemVersionId());
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(codeSystem, codeSystemVersion,
-			new SystemRequestDetails(), Collections.singletonList(valueSet), Collections.emptyList());
+		myValueSetDao.update(valueSet, newSrd());
 
-		await().atMost(20, SECONDS).until(() -> {
-			myTerminologyDeferredStorageSvc.saveDeferred();
-			return myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true);
-		});
-
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		Slice<TermValueSet> page = runInTransaction(() ->
 			myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 1), TermValueSetPreExpansionStatusEnum.EXPANDED));

@@ -26,10 +26,14 @@ import ca.uhn.fhir.rest.server.util.JsonDateSerializer;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.Logs;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import tools.jackson.databind.annotation.JsonDeserialize;
 import tools.jackson.databind.annotation.JsonSerialize;
+
 
 import java.util.Collections;
 import java.util.Date;
@@ -385,6 +389,16 @@ public class JobInstance implements IModelJson, IJobInstance {
 	@Override
 	public String getReport() {
 		return myReport;
+	}
+
+	@Nullable
+	public <T extends IModelJson> T getReport(Class<T> theType) {
+		String report = getReport();
+		if (isBlank(report)) {
+			return null;
+		}
+
+		return JsonUtil.deserialize(report, theType);
 	}
 
 	public JobInstance setReport(String theReport) {
