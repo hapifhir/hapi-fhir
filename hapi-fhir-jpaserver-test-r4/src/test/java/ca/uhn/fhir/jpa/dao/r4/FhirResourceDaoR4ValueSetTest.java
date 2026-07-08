@@ -70,7 +70,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		myCodeSystemDao.update(loadResourceFromClasspath(CodeSystem.class, "r4/adi-cs.json"));
 		myValueSetDao.update(loadResourceFromClasspath(ValueSet.class, "r4/adi-vs.json"));
 
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		ValidationSupportContext context = new ValidationSupportContext(myValidationSupport);
 		ConceptValidationOptions options = new ConceptValidationOptions();
@@ -85,7 +85,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		myCodeSystemDao.update(loadResourceFromClasspath(CodeSystem.class, "r4/adi-cs.json"));
 		myValueSetDao.update(loadResourceFromClasspath(ValueSet.class, "r4/adi-vs.json"));
 
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		logAllValueSetConcepts();
 
@@ -162,7 +162,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		// Precalculated
 
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		logAllValueSets();
 		logAllValueSetConcepts();
 		myValidationSupport.invalidateCaches();
@@ -266,7 +266,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		// Precalculated
 
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		logAllValueSets();
 		myValidationSupport.invalidateCaches();
 
@@ -392,7 +392,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
@@ -432,7 +432,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
@@ -550,7 +550,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(true);
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		myCaptureQueriesListener.clear();;
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(null, new IdType("ValueSet/vaccinecode"), new CodeType("28571000087109"), new CodeType("http://snomed.info/sct"), null, null, null, mySrd);
@@ -601,8 +601,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		myValueSetDao.update(vs, mySrd);
 
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(true);
-		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		ValueSetExpansionOptions options = new ValueSetExpansionOptions();
 		options.setIncludeHierarchy(true);

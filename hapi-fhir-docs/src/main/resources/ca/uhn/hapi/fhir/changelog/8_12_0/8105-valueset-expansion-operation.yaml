@@ -1,0 +1,6 @@
+---
+type: add
+issue: 8105
+title: "A new type-level operation `ValueSet/$hapi.fhir.expansion-status` has been added that reports the expansion 
+status of all ValueSets and surfaces failure reasons without requiring a log search or a manual database query. 
+See [ValueSet Pre-Expansion](/hapi-fhir/docs/server_jpa/valueset_expansion.html#expansion-status) for details."

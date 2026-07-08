@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 8127
+title: "A bug in `FhirContextSearchParamRegistry` was fixed which caused a crash when calling
+   `getRuntimeSearchParams(String, Set)`."

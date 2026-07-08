@@ -52,6 +52,7 @@ import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
+import ca.uhn.fhir.jpa.term.TerminologyTestHelper;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
@@ -136,6 +137,8 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 
 	@Autowired
 	protected ITermDeferredStorageSvc myTerminologyDeferredStorageSvc;
+	@Autowired
+	protected TerminologyTestHelper myTerminologyTestHelper;
 	@Autowired
 	@Qualifier("myResourceCountsCache")
 	protected ResourceCountCache myResourceCountsCache;
