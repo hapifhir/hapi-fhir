@@ -41,6 +41,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.test.util.ComboSearchParameterTestHelper;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
@@ -207,6 +208,8 @@ abstract class TestDefinitions implements ITestDataBuilder {
 	private IJobStepExecutionServices myJobStepExecutionServices;
 	@Autowired
 	private ISearchParamRegistry mySearchParameterRegistry;
+	@Autowired
+	private Batch2JobHelper myBatch2JobHelper;
 
 	@Mock
 	JobDefinition<DeleteExpungeJobParameters> myDeleteExpungeJobDefinition;
@@ -2097,7 +2100,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		myCodeSystemDao.create(codeSystem, new SystemRequestDetails());
 
 		//Then: that this does not throw any exceptions
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 
 	}
@@ -2125,7 +2128,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		myValueSetDao.create(valueSet, newRequest());
 
 		myCaptureQueriesListener.clear();
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		myParentTest.logAllCodeSystemsAndVersionsCodeSystemsAndVersions();
 		myParentTest.logAllConcepts();

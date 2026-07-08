@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.coordinator;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
@@ -502,6 +503,56 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		verifyNoMoreInteractions(myStep1Worker);
 		verifyNoMoreInteractions(myStep2Worker);
 		verifyNoMoreInteractions(myStep3Worker);
+	}
+
+	@Test
+	void startInstance_storesJobInstanceIdInUserData() {
+		// Setup
+		JobDefinition<TestJobParameters> jobDefinition = createJobDefinition();
+		when(myJobDefinitionRegistry.getLatestJobDefinition(eq(JOB_DEFINITION_ID)))
+			.thenReturn(Optional.of(jobDefinition));
+		when(myJobInstancePersister.onCreateWithFirstChunk(any(), any(), any()))
+			.thenReturn(new IJobPersistence.CreateResult(INSTANCE_ID, CHUNK_ID));
+
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(JOB_DEFINITION_ID);
+		startRequest.setParameters(new TestJobParameters()
+			.setParam1(PARAM_1_VALUE)
+			.setParam2(PARAM_2_VALUE)
+			.setPassword(PASSWORD_VALUE));
+
+		// Execute
+		mySvc.startInstance(requestDetails, startRequest);
+
+		// Verify
+		assertThat(requestDetails.getUserData())
+			.containsEntry(IJobCoordinator.USER_DATA_KEY_JOB_INSTANCE_ID, INSTANCE_ID);
+	}
+
+	@Test
+	void startInstance_usingCache_storesJobInstanceIdInUserData() {
+		// Setup
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(JOB_DEFINITION_ID);
+		startRequest.setUseCache(true);
+		startRequest.setParameters("parameters");
+
+		JobInstance existingInstance = createInstance();
+		existingInstance.setInstanceId(INSTANCE_ID);
+		existingInstance.setStatus(StatusEnum.IN_PROGRESS);
+
+		when(myJobInstancePersister.fetchInstances(any(FetchJobInstancesRequest.class), anyInt(), anyInt()))
+			.thenReturn(Arrays.asList(existingInstance));
+
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+
+		// Execute
+		mySvc.startInstance(requestDetails, startRequest);
+
+		// Verify
+		assertThat(requestDetails.getUserData())
+			.containsEntry(IJobCoordinator.USER_DATA_KEY_JOB_INSTANCE_ID, INSTANCE_ID);
 	}
 
 	@Test

@@ -448,7 +448,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, vs.getExpansionStatus());
 		});
 
-		myTermReadSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		runInTransaction(() -> {
 			TermValueSet vs = myTermValueSetDao.findByUrl("https://bb/ValueSet/BBDemographicAgeUnit").orElseThrow(() -> new IllegalArgumentException());
@@ -630,7 +630,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		myValueSetDao.update(vs, mySrd);
 
-		myTermReadSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		await().until(() -> myTermReadSvc.isValueSetPreExpandedForCodeValidation(vs));
 
 		StructureDefinition profile = loadResourceFromClasspath(StructureDefinition.class, "/r4/test-validation-unknown-codesystem-structure-def.json");
@@ -1135,7 +1135,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		vs.setUrl("http://example.com/fhir/ValueSet/observation-vitalsignresult");
 		vs.getCompose().addInclude().setSystem("http://loinc.org");
 		myValueSetDao.create(vs);
-		myTermReadSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		await().until(() -> myTermReadSvc.isValueSetPreExpandedForCodeValidation(vs));
 
@@ -2445,7 +2445,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		myValueSetDao.create(vs, new SystemRequestDetails());
 
 		if (thePreCalculateExpansion) {
-			myTermReadSvc.preExpandDeferredValueSetsToTerminologyTables();
+			myBatch2JobHelper.awaitNoJobsRunning();
 		}
 
 		Observation obs = new Observation();
@@ -2511,7 +2511,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			.addInclude().setSystem("http://hl7.org/fhir/action-cardinality-behavior");
 		IIdType id = myValueSetDao.create(vs).getId().toUnqualifiedVersionless();
 
-		myTermReadSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		ValueSetExpansionOptions options = ValueSetExpansionOptions.forOffsetAndCount(0, 10000);
 		ValueSet expansion = myValueSetDao.expand(id, options, mySrd);

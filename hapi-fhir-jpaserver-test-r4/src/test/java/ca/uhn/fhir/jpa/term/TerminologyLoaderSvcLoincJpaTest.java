@@ -57,6 +57,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		files = new ZipCollectionBuilder(true);
 		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(files, "v267_loincupload.properties");
 		String instanceId = myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion("2.66", files);
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		logAllValueSets();
 
@@ -99,8 +100,10 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		files = new ZipCollectionBuilder(true);
 		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(files, "v267_loincupload.properties");
 		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion("2.67", files);
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		logAllCodeSystemsAndVersionsCodeSystemsAndVersions();
+
 
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
@@ -126,6 +129,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		files = new ZipCollectionBuilder(true);
 		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(files, "v268_loincupload.properties");
 		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion("2.68", files);
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
@@ -225,8 +229,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		// Now run the pre-expansion
 
 		logAllValueSets();
-		myTermDeferredStorageSvc.saveDeferred();
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		outcome = myValueSetDao.expand(new IdType("ValueSet/LL1001-8-2.67"), options, newSrd());
 		expansionMessage = outcome.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE);

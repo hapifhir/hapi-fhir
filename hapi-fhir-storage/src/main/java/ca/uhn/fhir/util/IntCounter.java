@@ -19,15 +19,43 @@
  */
 package ca.uhn.fhir.util;
 
+/**
+ * Simple integer counter.
+ * <b>NOT THREAD SAFE</b>
+ *
+ * @since 8.12.0
+ */
 public class IntCounter {
 
 	private int myCount;
+
+	/**
+	 * Constructor
+	 */
+	public IntCounter() {
+		myCount = 0;
+	}
+
+	/**
+	 * Constructor
+	 */
+	public IntCounter(int theStartingCount) {
+		myCount = theStartingCount;
+	}
 
 	public int get() {
 		return myCount;
 	}
 
+	public int getAndIncrement() {
+		return myCount++;
+	}
+
 	public void increment() {
 		myCount++;
+	}
+
+	public void increment(int theDelta) {
+		myCount += theDelta;
 	}
 }
