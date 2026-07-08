@@ -201,6 +201,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.when;
 
 @TestPropertySource(properties = {
@@ -1020,32 +1021,31 @@ public abstract class BaseJpaTest extends BaseTest {
 	}
 
 	protected TermValueSetConcept assertTermValueSetContainsConceptAndIsInDeclaredOrder(TermValueSet theValueSet, String theSystem, String theCode, String theDisplay, Integer theDesignationCount) {
-		List<TermValueSetConcept> contains = theValueSet.getConcepts();
+		List<TermValueSetConcept> contains = new ArrayList<>(theValueSet.getConcepts());
 
-		Stream<TermValueSetConcept> stream = contains.stream();
-		if (theSystem != null) {
-			stream = stream.filter(concept -> theSystem.equalsIgnoreCase(concept.getSystem()));
-		}
-		if (theCode != null) {
-			stream = stream.filter(concept -> theCode.equalsIgnoreCase(concept.getCode()));
-		}
-		if (theDisplay != null) {
-			stream = stream.filter(concept -> theDisplay.equalsIgnoreCase(concept.getDisplay()));
-		}
-		if (theDesignationCount != null) {
-			stream = stream.filter(concept -> concept.getDesignations().size() == theDesignationCount);
+		contains.removeIf(concept -> !theSystem.equalsIgnoreCase(concept.getSystem()));
+		if (contains.isEmpty()) {
+			fail("No concepts with system: " + theSystem);
 		}
 
-		Optional<TermValueSetConcept> first = stream.findFirst();
-		if (!first.isPresent()) {
-			String failureMessage = String.format("Expanded ValueSet %s did not contain concept [%s|%s|%s] with [%d] designations", theValueSet.getId(), theSystem, theCode, theDisplay, theDesignationCount);
-			fail(failureMessage);
-			return null;
-		} else {
-			TermValueSetConcept termValueSetConcept = first.get();
-			assertEquals(termValueSetConcept.getOrder(), theValueSet.getConcepts().indexOf(termValueSetConcept));
-			return termValueSetConcept;
+		contains.removeIf(concept -> !theCode.equalsIgnoreCase(concept.getCode()));
+		if (contains.isEmpty()) {
+			fail("No concepts with code: " + theCode);
 		}
+
+		contains.removeIf(concept -> !theDisplay.equalsIgnoreCase(concept.getDisplay()));
+		if (contains.isEmpty()) {
+			fail("No concepts with display: " + theDisplay);
+		}
+
+		contains.removeIf(concept -> concept.getDesignations().size() != theDesignationCount);
+		if (contains.isEmpty()) {
+			fail("No concepts with designation count: " + theDesignationCount);
+		}
+
+		TermValueSetConcept termValueSetConcept = contains.iterator().next();
+		assertEquals(termValueSetConcept.getOrder(), theValueSet.getConcepts().indexOf(termValueSetConcept));
+		return termValueSetConcept;
 	}
 
 	protected TermValueSetConceptDesignation assertTermConceptContainsDesignation(TermValueSetConcept theConcept, String theLanguage, String theUseSystem, String theUseCode, String theUseDisplay, String theDesignationValue) {
