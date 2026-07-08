@@ -1116,14 +1116,16 @@ public class PackageInstallerSvcImplTest {
 			// Verify
 			verify(myCodeSystemDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
 			SearchParameterMap map = mySearchParameterMapCaptor.getValue();
-			assertThat(map.toNormalizedQueryString()).startsWith("?url=http%3A//my-code-system");
+			assertThat(map.toNormalizedQueryString())
+				.startsWith("?url=http%3A//my-code-system")
+				.contains("_sort=-_lastUpdated,-_pid");
 
 			verify(myCodeSystemDao, times(1)).update(myCodeSystemCaptor.capture(), any(RequestDetails.class));
 			CodeSystem codeSystem = myCodeSystemCaptor.getValue();
 			assertEquals("existingcs", codeSystem.getIdPart());
 
 			LogbackTestExtensionAssert.assertThat(myLogCapture).hasInfoMessage(
-				"Updating existing resource matching ?url=http%3A//my-code-system&_sort=-_pid");
+				"Updating existing resource matching ?url=http%3A//my-code-system&_sort=-_lastUpdated,-_pid");
 		}
 
 		@Test
@@ -1152,7 +1154,7 @@ public class PackageInstallerSvcImplTest {
 
 			assertThat(outcome.getResourcesInstalled()).isEmpty();
 			LogbackTestExtensionAssert.assertThat(myLogCapture).hasInfoMessage(
-					"Skipping update of CodeSystem with content=not-present matching ?url=http%3A//my-code-system&_sort=-_pid since `PackageInstallationSpec.overwriteContentNotPresentCodeSystems=false")
+					"Skipping update of CodeSystem with content=not-present matching ?url=http%3A//my-code-system&_sort=-_lastUpdated,-_pid since `PackageInstallationSpec.overwriteContentNotPresentCodeSystems=false")
 				.hasInfoMessage("-- Skipped 1 resources of type CodeSystem");
 		}
 
@@ -1183,7 +1185,7 @@ public class PackageInstallerSvcImplTest {
 			assertEquals("existingcs", codeSystem.getIdPart());
 
 			LogbackTestExtensionAssert.assertThat(myLogCapture).hasInfoMessage(
-				"Updating existing resource matching ?url=http%3A//my-code-system&_sort=-_pid");
+				"Updating existing resource matching ?url=http%3A//my-code-system&_sort=-_lastUpdated,-_pid");
 		}
 
 
