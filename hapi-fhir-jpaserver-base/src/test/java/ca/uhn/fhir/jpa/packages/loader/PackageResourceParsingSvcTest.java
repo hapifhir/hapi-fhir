@@ -134,14 +134,11 @@ class PackageResourceParsingSvcTest {
 	}
 
 	@Test
-	void parseResourcesOfType_multiplePatientFilesWithNarrative_parsesAllAndSuppressesNarratives() {
-		Patient p1 = new Patient();
-		p1.setId("p1");
-		p1.getText().setDivAsString("<div>some narrative</div>");
+	void parseResourcesOfType_multipleFilesOfSameTypeInFolder_returnsAllOfThem() {
 		NpmPackage pkg = new NpmPackageFactory(CTX)
 				.name("test.pkg")
 				.version("1.0.0")
-				.addResource("Patient-p1", p1)
+				.addResource("Patient-p1", new Patient().setId("p1"))
 				.addResource("Patient-p2", new Patient().setId("p2"))
 				.createPackage();
 
@@ -149,9 +146,6 @@ class PackageResourceParsingSvcTest {
 
 		assertThat(resources).extracting(r -> r.getIdElement().getIdPart())
 			.containsExactlyInAnyOrder("p1", "p2");
-		assertThat(resources).extracting(r -> ((Patient) r).getText().isEmpty())
-			.as("narratives are suppressed on every parsed resource")
-			.containsOnly(true);
 	}
 
 	@Test

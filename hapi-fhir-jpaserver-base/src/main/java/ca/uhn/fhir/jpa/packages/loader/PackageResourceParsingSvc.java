@@ -38,8 +38,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Parses FHIR resources from NPM packages during IG installation. Resources are read as
- * UTF-8 JSON; narratives are suppressed since they are not needed during installation.
+ * Parses FHIR resources from NPM packages during IG installation. Resources are read as UTF-8 JSON.
  */
 public class PackageResourceParsingSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(PackageResourceParsingSvc.class);
