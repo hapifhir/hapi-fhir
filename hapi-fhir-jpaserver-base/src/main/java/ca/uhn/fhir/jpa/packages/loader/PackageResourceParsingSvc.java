@@ -70,7 +70,7 @@ public class PackageResourceParsingSvc {
 			return parseResourcesOfTypesFromFolder(typesInFolder, theFolderName, thePkg);
 		} catch (IOException e) {
 			throw new InternalErrorException(
-					Msg.code(2766) + "Cannot read type index for folder '" + theFolderName + "'", e);
+					Msg.code(2994) + "Cannot read type index for folder '" + theFolderName + "'", e);
 		}
 	}
 

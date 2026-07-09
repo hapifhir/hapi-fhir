@@ -117,8 +117,8 @@ class PackageResourceParsingSvcTest {
 		assertThat(packageResources.get(0).getIdElement().getIdPart()).isEqualTo("p1");
 		assertThat(exampleResources).hasSize(1);
 		assertThat(exampleResources.get(0).getIdElement().getIdPart()).isEqualTo("ep1");
-		assertThat(defaultFolderResources).as("2-arg overload defaults to the 'package' folder")
-			.isEqualTo(packageResources);
+		assertThat(defaultFolderResources).as("2-arg overload defaults to the 'package' folder").hasSize(1);
+		assertThat(defaultFolderResources.get(0).getIdElement().getIdPart()).isEqualTo("p1");
 	}
 
 	@Test
