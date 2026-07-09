@@ -733,7 +733,6 @@ public class PackageInstallerSvcImplTest {
 		}
 	}
 
-<<<<<<< Updated upstream
 	private static SearchParameter createSearchParameter(String theId, Collection<String> theBase) {
 		SearchParameter searchParameter = new SearchParameter();
 		if (theId != null) {
@@ -1388,7 +1387,7 @@ public class PackageInstallerSvcImplTest {
 				.hasErrorMessage("ig-b/ValueSet/shared-id")
 				.hasErrorMessage("ig-a/ValueSet/shared-id");
 	}
-=======
+
 	@Nested
 	class CollectResourcesTest {
 
@@ -1434,9 +1433,8 @@ public class PackageInstallerSvcImplTest {
 
 			List<IBaseResource> resources = mySvc.collectResources(pkg, spec);
 
-			assertThat(resources).anyMatch(r -> myCtx.getResourceType(r).equals("Patient"));
-			assertThat(resources).noneMatch(r -> myCtx.getResourceType(r).equals("Organization"));
+			assertThat(resources).anyMatch(r -> myCtx.getResourceType(r).equals("Patient"))
+				.noneMatch(r -> myCtx.getResourceType(r).equals("Organization"));
 		}
 	}
->>>>>>> Stashed changes
 }

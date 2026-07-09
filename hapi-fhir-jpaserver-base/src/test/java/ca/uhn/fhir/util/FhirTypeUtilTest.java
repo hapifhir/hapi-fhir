@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-// Created by claude-sonnet-4-6[1m]
+// Created by claude-sonnet-4-6
 class FhirTypeUtilTest {
 
 	static Stream<IBaseResource> canonicalResources() {
