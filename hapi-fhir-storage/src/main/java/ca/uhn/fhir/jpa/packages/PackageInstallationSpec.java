@@ -29,6 +29,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -107,7 +108,7 @@ public class PackageInstallationSpec {
 
 	@Schema(
 			description =
-					"Controls whether multiple versions of installed resources can coexist in the repository during STORE_AND_INSTALL installation")
+					"Controls whether multiple versions of canonical resources (e.g. StructureDefinition, ValueSet, CodeSystem) can coexist in the repository during STORE_AND_INSTALL installation. Applies only to canonical resources; non-canonical instance resources are always installed using their original IDs regardless of this setting.")
 	@JsonProperty("versionPolicy")
 	private VersionPolicyEnum myVersionPolicy = VersionPolicyEnum.MULTI_VERSION;
 
@@ -179,8 +180,9 @@ public class PackageInstallationSpec {
 		return myInstallResourceTypes;
 	}
 
-	public void setInstallResourceTypes(List<String> theInstallResourceTypes) {
+	public PackageInstallationSpec setInstallResourceTypes(List<String> theInstallResourceTypes) {
 		myInstallResourceTypes = theInstallResourceTypes;
+		return this;
 	}
 
 	public String getName() {
@@ -219,6 +221,9 @@ public class PackageInstallationSpec {
 	}
 
 	public Set<String> getAdditionalResourceFolders() {
+		if (myAdditionalResourceFolders == null) {
+			myAdditionalResourceFolders = new HashSet<>();
+		}
 		return myAdditionalResourceFolders;
 	}
 
@@ -289,15 +294,15 @@ public class PackageInstallationSpec {
 
 	public enum VersionPolicyEnum {
 		/**
-		 * Default. Uses server-assigned IDs for new resources. Existing resources matched
-		 * by canonical URL + version. Supports multiple versions of installed resources.
+		 * Default. Uses server-assigned IDs for new canonical resources. Existing resources are matched
+		 * by canonical URL + version. Supports multiple versions of installed canonical resources.
 		 */
 		MULTI_VERSION,
 
 		/**
-		 * Uses client-assigned IDs from package. Existing resources
+		 * Uses client-assigned IDs from package for canonical resources. Existing canonical resources
 		 * matched by canonical URL only (ignoring version), so installing a new version
-		 * of the same resource will overwrite the existing one.
+		 * of the same canonical resource will overwrite the existing one.
 		 */
 		SINGLE_VERSION
 	}
