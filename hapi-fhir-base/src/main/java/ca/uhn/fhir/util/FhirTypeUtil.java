@@ -19,12 +19,8 @@
  */
 package ca.uhn.fhir.util;
 
-import org.apache.commons.lang3.ClassUtils;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 /**
- * Utility methods for classifying FHIR types and resources. Covers cases such primitive type detection and
- * version-agnostic canonical resource detection across DSTU3, R4, R4B, and R5.
+ * Utility methods for classifying FHIR types by name.
  */
 public final class FhirTypeUtil {
 
@@ -60,19 +56,5 @@ public final class FhirTypeUtil {
 			// non-primitive type (or unknown type)
 			false;
 		};
-	}
-
-	/**
-	 * Returns true if the resource is a canonical/conformance resource, i.e. extends
-	 * {@code MetadataResource} (DSTU3/R4/R4B) or {@code CanonicalResource} (R5).
-	 */
-	public static boolean isCanonicalResource(IBaseResource theResource) {
-		return isCanonicalResourceClass(theResource.getClass());
-	}
-
-	static boolean isCanonicalResourceClass(Class<?> theClass) {
-		return ClassUtils.getAllSuperclasses(theClass).stream()
-				.map(Class::getSimpleName)
-				.anyMatch(name -> "MetadataResource".equals(name) || "CanonicalResource".equals(name));
 	}
 }

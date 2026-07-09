@@ -62,7 +62,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.util.FhirTypeUtil;
+import ca.uhn.fhir.util.ResourceCanonicalUtil;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.TerserUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
@@ -879,7 +879,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	private boolean allowMultipleVersionsForResource(
 			IBaseResource theResource, PackageInstallationSpec thePackageInstallationSpec) {
-		if (!FhirTypeUtil.isCanonicalResource(theResource)) {
+		if (!ResourceCanonicalUtil.isCanonicalResource(theResource)) {
 			return false;
 		}
 		if (isSearchParameter(theResource)) {
