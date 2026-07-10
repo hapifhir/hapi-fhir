@@ -5,7 +5,6 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
-import ca.uhn.fhir.packages.NpmPackageFactory;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -21,6 +20,7 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.packages.NpmPackageFactory;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -67,6 +67,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,6 +90,7 @@ import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.term.TerminologySvcDeltaR4Test.newDeltaCodeSystem;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport.GENERATING_SNAPSHOT_LOG_MSG;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -1310,6 +1312,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			.setVersion(packageVersion)
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
 			.setPackageContents(stream.toByteArray())
+			.setInstallResourceTypes(List.of("StructureDefinition", "Patient", "Organization"))
 			.setAdditionalResourceFolders(java.util.Set.of("examples"));
 
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
@@ -2217,6 +2220,109 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		// Without deferral this would be 3 (one rebuild per persisted SP).
 		verify(mySearchParamProvider, times(1)).search(any());
+	}
+
+	private static final String TEST_NONCANONICAL_PKG = "test.nonconformance.references";
+	private static final String TEST_NONCANONICAL_PKG_VERSION = "1.0.0";
+
+	// Created by claude-sonnet-4-6
+	@Test
+	void installPackage_nonConformanceResourceWithUnresolvableReference_withoutPlaceholders_fails() throws IOException {
+		Patient patient = new Patient();
+		patient.setId("patient-1");
+		patient.addIdentifier().setSystem("http://example.org/patients").setValue("patient-1");
+		patient.setManagingOrganization(new Reference("Organization/org-1"));
+
+		var factory = new NpmPackageFactory(myFhirContext).name(TEST_NONCANONICAL_PKG).version(TEST_NONCANONICAL_PKG_VERSION);
+		factory.addResourceToFolder("example", "Patient-patient-1", patient);
+
+		var spec = new PackageInstallationSpec()
+				.setName(TEST_NONCANONICAL_PKG).setVersion(TEST_NONCANONICAL_PKG_VERSION)
+				.setInstallMode(PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY)
+				.setPackageContents(factory.createPackageBytes())
+				.setInstallResourceTypes(List.of("Patient"))
+				.setAdditionalResourceFolders(java.util.Set.of("example"));
+
+		assertThatThrownBy(() -> myPackageInstallerSvc.install(spec))
+				.isInstanceOf(ImplementationGuideInstallationException.class);
+	}
+
+	// Created by claude-sonnet-4-6
+	@ParameterizedTest
+	@ValueSource(strings = {"package", "example"})
+	void installPackage_nonCanonicalResourcesWithDirectReference_installsSuccessfully(String theFolder)
+			throws IOException {
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		Patient patient = new Patient();
+		patient.setId("patient-1");
+		patient.addIdentifier().setSystem("http://example.org/patients").setValue("patient-1");
+		patient.setManagingOrganization(new Reference("Organization/org-1"));
+
+		Organization org = new Organization();
+		org.setId("org-1");
+		org.addIdentifier().setSystem("http://example.org/orgs").setValue("org-1");
+		org.setName("Test Org");
+
+		var factory = new NpmPackageFactory(myFhirContext).name(TEST_NONCANONICAL_PKG).version(TEST_NONCANONICAL_PKG_VERSION);
+		factory.addResourceToFolder(theFolder, "Patient-patient-1", patient);
+		factory.addResourceToFolder(theFolder, "Organization-org-1", org);
+
+		var spec = new PackageInstallationSpec()
+				.setName(TEST_NONCANONICAL_PKG).setVersion(TEST_NONCANONICAL_PKG_VERSION)
+				.setInstallMode(PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY)
+				.setPackageContents(factory.createPackageBytes())
+				.setInstallResourceTypes(List.of("Patient", "Organization"))
+				.setAdditionalResourceFolders(java.util.Set.of(theFolder));
+
+		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
+
+		assertThat(outcome.getResourcesInstalled()).containsKey("Organization");
+		assertThat(outcome.getResourcesInstalled()).containsKey("Patient");
+		runInTransaction(() -> {
+			Patient storedPatient = myPatientDao.read(new IdType("Patient/patient-1"), mySrd);
+			assertThat(storedPatient.getManagingOrganization().getReference()).isEqualTo("Organization/org-1");
+			assertThat(myOrganizationDao.read(new IdType("Organization/org-1"), mySrd)).isNotNull();
+		});
+	}
+
+	// Created by claude-sonnet-4-6
+	@ParameterizedTest
+	@ValueSource(strings = {"package", "example"})
+	void installPackage_nonCanonicalResourcesWithCyclicReference_installsSuccessfully(String theFolder)
+			throws IOException {
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		Organization orgA = new Organization();
+		orgA.setId("org-a");
+		orgA.addIdentifier().setSystem("http://example.org/orgs").setValue("org-a");
+		orgA.setPartOf(new Reference("Organization/org-b"));
+
+		Organization orgB = new Organization();
+		orgB.setId("org-b");
+		orgB.addIdentifier().setSystem("http://example.org/orgs").setValue("org-b");
+		orgB.setPartOf(new Reference("Organization/org-a"));
+
+		var factory = new NpmPackageFactory(myFhirContext).name(TEST_NONCANONICAL_PKG).version(TEST_NONCANONICAL_PKG_VERSION);
+		factory.addResourceToFolder(theFolder, "Organization-org-a", orgA);
+		factory.addResourceToFolder(theFolder, "Organization-org-b", orgB);
+
+		var spec = new PackageInstallationSpec()
+				.setName(TEST_NONCANONICAL_PKG).setVersion(TEST_NONCANONICAL_PKG_VERSION)
+				.setInstallMode(PackageInstallationSpec.InstallModeEnum.INSTALL_ONLY)
+				.setPackageContents(factory.createPackageBytes())
+				.setInstallResourceTypes(List.of("Organization"))
+				.setAdditionalResourceFolders(java.util.Set.of(theFolder));
+
+		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
+
+		assertThat(outcome.getResourcesInstalled()).containsKey("Organization");
+		runInTransaction(() -> {
+			Organization storedOrgA = myOrganizationDao.read(new IdType("Organization/org-a"), mySrd);
+			assertThat(storedOrgA.getPartOf().getReference()).isEqualTo("Organization/org-b");
+			Organization storedOrgB = myOrganizationDao.read(new IdType("Organization/org-b"), mySrd);
+			assertThat(storedOrgB.getPartOf().getReference()).isEqualTo("Organization/org-a");
+		});
 	}
 
 }

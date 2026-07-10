@@ -38,6 +38,8 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.icd.ImportIcdJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.jpa.batch2.jobs.term.snomedct.ImportSnomedCtJobAppCtx;
+import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx;
+import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetParameters;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -72,6 +74,7 @@ import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.L
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_RSNA_PLAYBOOK_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_XML_FILE;
+import static ca.uhn.fhir.jpa.test.BaseJpaTest.newSrd;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -435,6 +438,34 @@ public class TerminologyTestHelper {
 		JobInstance instance = myJobCoordinator.getInstance(theJobInstanceId);
 		return JsonUtil.deserialize(instance.getReport(), ImportTerminologyResultJson.class)
 				.getReport();
+	}
+
+	public String startValueSetExpansionJobAndWaitForCompletion(String theUrl, String theVersion) {
+		return startValueSetExpansionJob(theUrl, theVersion, true);
+	}
+
+	public String startValueSetExpansionJobAndWaitForFailure(String theUrl, String theVersion) {
+		return startValueSetExpansionJob(theUrl, theVersion, false);
+	}
+
+	private String startValueSetExpansionJob(String theUrl, String theVersion, boolean expectSuccess) {
+		PreExpandValueSetParameters parameters = new PreExpandValueSetParameters();
+		parameters.setUrl(theUrl);
+		parameters.setVersion(theVersion);
+
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET);
+		startRequest.setParameters(parameters);
+
+		String instanceId =
+				myJobCoordinator.startInstance(newSrd(), startRequest).getInstanceId();
+		if (expectSuccess) {
+			myBatch2JobHelper.awaitJobCompletion(instanceId);
+		} else {
+			myBatch2JobHelper.awaitJobFailure(instanceId);
+		}
+
+		return instanceId;
 	}
 
 	private static void addBaseLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles, String theClassPathPrefix)
