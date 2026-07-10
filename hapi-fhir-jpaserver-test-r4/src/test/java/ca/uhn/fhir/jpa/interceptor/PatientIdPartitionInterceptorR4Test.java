@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
@@ -1086,6 +1087,52 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 					"HAPI-1326: Resource of type Observation has no values placing it in the Patient compartment",
 					e.getMessage());
 		}
+	}
+
+	@Test
+	void testTransaction_ConditionalUpdatePatientByIdentifier_differentBodyId_rejectedWith2279_noDuplicate() {
+		myPartitionSettings.setAllPartitionSearchSupported(true);
+
+		createPatient(withId("A"), withIdentifier("http://acme.org/mrn", "PT00062"), withActiveTrue());
+
+		Patient update = new Patient();
+		update.setId("B");
+		update.addIdentifier().setSystem("http://acme.org/mrn").setValue("PT00062");
+		update.setActive(false);
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionUpdateEntry(update).conditional("Patient?identifier=http://acme.org/mrn|PT00062");
+
+		assertThatThrownBy(() -> mySystemDao.transaction(mySrd, bb.getBundleTyped()))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessage(
+				"HAPI-2279: Failed to UPDATE resource with match URL \"Patient?identifier=http://acme.org/mrn|PT00062\" because the matching resource does not match the provided ID");
+
+		// Only the original Patient A carries the MRN — no duplicate was created.
+		assertThat(myTestDaoSearch.searchForIds("Patient?identifier=http://acme.org/mrn|PT00062"))
+			.containsExactly("A");
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void testTransaction_ConditionalUpdatePatientByIdentifier_updatesInPlace(boolean theBodyCarriesMatchingId) {
+		myPartitionSettings.setAllPartitionSearchSupported(true);
+
+		createPatient(withId("A"), withIdentifier("http://acme.org/mrn", "PT00062"), withActiveTrue());
+
+		Patient update = new Patient();
+		if (theBodyCarriesMatchingId) {
+			update.setId("A");
+		}
+		update.addIdentifier().setSystem("http://acme.org/mrn").setValue("PT00062");
+		update.setActive(false);
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionUpdateEntry(update).conditional("Patient?identifier=http://acme.org/mrn|PT00062");
+
+		mySystemDao.transaction(mySrd, bb.getBundleTyped());
+
+		assertThat(myTestDaoSearch.searchForIds("Patient?identifier=http://acme.org/mrn|PT00062"))
+			.containsExactly("A");
+		assertThat(myPatientDao.read(new IdType("Patient/A"), mySrd).getActive()).isFalse();
 	}
 
 	@Test
