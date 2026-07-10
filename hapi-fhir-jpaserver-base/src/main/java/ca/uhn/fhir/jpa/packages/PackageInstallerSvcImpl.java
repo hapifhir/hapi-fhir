@@ -62,6 +62,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.ResourceCanonicalUtil;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.TerserUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
@@ -82,7 +83,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -316,17 +316,10 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		String currentFhirVersion = myFhirContext.getVersion().getVersion().getFhirVersionString();
 		assertFhirVersionsAreCompatible(fhirVersion, currentFhirVersion);
 
-		List<String> installTypes;
-		if (!theInstallationSpec.getInstallResourceTypes().isEmpty()) {
-			installTypes = theInstallationSpec.getInstallResourceTypes();
-		} else {
-			installTypes = DEFAULT_INSTALL_TYPES;
-		}
-
 		ourLog.info("Installing package: {}#{}", name, version);
 		Map<String, EnumMap<InstallResultEnum, Integer>> installCounts = new HashMap<>();
 
-		List<IBaseResource> resources = collectResources(npmPackage, theInstallationSpec, installTypes);
+		List<IBaseResource> resources = collectResources(npmPackage, theInstallationSpec);
 		for (IBaseResource next : resources) {
 			installResourceFromPackage(next, theInstallationSpec, theOutcome, installCounts, name, version);
 		}
@@ -363,21 +356,19 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		});
 	}
 
-	// Created by Claude Opus 4.6
-	private List<IBaseResource> collectResources(
-			NpmPackage theNpmPackage, PackageInstallationSpec theInstallationSpec, List<String> theInstallTypes) {
-		List<IBaseResource> allResources = new ArrayList<>();
-		for (String type : theInstallTypes) {
-			allResources.addAll(myPackageResourceParsingSvc.parseResourcesOfType(type, theNpmPackage));
-		}
+	List<IBaseResource> collectResources(NpmPackage theNpmPackage, PackageInstallationSpec theInstallationSpec) {
+		List<String> installTypes =
+				theInstallationSpec.getInstallResourceTypes().isEmpty()
+						? DEFAULT_INSTALL_TYPES
+						: theInstallationSpec.getInstallResourceTypes();
 
-		Set<String> additionalFolders = theInstallationSpec.getAdditionalResourceFolders();
-		if (additionalFolders != null && !additionalFolders.isEmpty()) {
-			ourLog.info("Installing resources from additional folders: {}", additionalFolders);
-			allResources.addAll(
-					AdditionalResourcesParser.getAdditionalResources(additionalFolders, theNpmPackage, myFhirContext));
-		}
-		return allResources;
+		Set<String> allFolders = new HashSet<>(theInstallationSpec.getAdditionalResourceFolders());
+		allFolders.add(PackageResourceParsingSvc.DEFAULT_PACKAGE_FOLDER);
+		return allFolders.stream()
+				.map(folder -> myPackageResourceParsingSvc.parseResourcesOfTypesFromFolder(
+						installTypes, folder, theNpmPackage))
+				.flatMap(Collection::stream)
+				.toList();
 	}
 
 	// Created by Claude Opus 4.6
@@ -888,6 +879,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	private boolean allowMultipleVersionsForResource(
 			IBaseResource theResource, PackageInstallationSpec thePackageInstallationSpec) {
+		if (!ResourceCanonicalUtil.isCanonicalResource(theResource)) {
+			return false;
+		}
 		if (isSearchParameter(theResource)) {
 			return false;
 		}

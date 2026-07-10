@@ -59,6 +59,12 @@ public class AdditionalResourcesParser {
 		return bundleBuilder.getBundle();
 	}
 
+	/**
+	 * @deprecated Use {@link ca.uhn.fhir.jpa.packages.loader.PackageResourceParsingSvc#parseResourcesFromFolder}
+	 * for a single folder, or {@link ca.uhn.fhir.jpa.packages.loader.PackageResourceParsingSvc#parseResourcesFromFolders}
+	 * for multiple folders.
+	 */
+	@Deprecated(since = "8.2.0", forRemoval = true)
 	@Nonnull
 	public static List<IBaseResource> getAdditionalResources(
 			Set<String> folderNames, NpmPackage npmPackage, FhirContext fhirContext) {
