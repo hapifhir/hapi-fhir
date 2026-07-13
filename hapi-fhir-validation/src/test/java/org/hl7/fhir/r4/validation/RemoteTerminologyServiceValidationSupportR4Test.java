@@ -352,7 +352,7 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 	@Test
 	void validateCodeInValueSet_stubValueSet_noSystemR4_doesNotSendInferSystem() {
 		ValueSet stubValueSet = new ValueSet();
-		stubValueSet.setUrl("http://example.org/valueset/test-vs");
+		stubValueSet.setUrl(VALUE_SET_URL);
 
 		myValueSetProvider.myValidateCodeResult = new Parameters().addParameter("result", true);
 
@@ -368,14 +368,14 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 	@Test
 	void validateCodeInValueSet_stubValueSet_withSystem_doesNotSendInferSystem() {
 		ValueSet stubValueSet = new ValueSet();
-		stubValueSet.setUrl("http://example.org/valueset/test-vs");
+		stubValueSet.setUrl(VALUE_SET_URL);
 
 		myValueSetProvider.myValidateCodeResult = new Parameters().addParameter("result", true);
 
 		mySvc.validateCodeInValueSet(
 			null,
 			new ConceptValidationOptions(),
-			"http://example.org/codesystem/test-cs",
+			VALUE_SET_URL,
 			"test-code",
 			null,
 			stubValueSet);
@@ -386,7 +386,7 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 	@Test
 	void validateCodeInValueSet_stubValueSet_inferSystemForced_sendsInferSystem() {
 		ValueSet stubValueSet = new ValueSet();
-		stubValueSet.setUrl("http://example.org/valueset/test-vs");
+		stubValueSet.setUrl(VALUE_SET_URL);
 
 		myValueSetProvider.myValidateCodeResult = new Parameters().addParameter("result", true);
 

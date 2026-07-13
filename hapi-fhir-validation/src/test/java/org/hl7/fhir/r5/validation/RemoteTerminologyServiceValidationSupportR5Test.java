@@ -25,8 +25,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
 public class RemoteTerminologyServiceValidationSupportR5Test extends BaseValidationTestWithInlineMocks {
+	private static final String VALUE_SET_URL = "http://example.org/valueset/test-vs";
 	private static final String ANY_NONBLANK_VALUE = "anything";
 	private static final FhirContext ourCtx = FhirContext.forR5Cached();
+
 	@RegisterExtension
 	public static RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(ourCtx);
 
@@ -55,7 +57,7 @@ public class RemoteTerminologyServiceValidationSupportR5Test extends BaseValidat
 	@Test
 	void validateCodeInValueSet_stubValueSet_noSystemR5_sendsInferSystem() {
 		ValueSet stubValueSet = new ValueSet();
-		stubValueSet.setUrl("http://example.org/valueset/test-vs");
+		stubValueSet.setUrl(VALUE_SET_URL);
 
 		myValueSetProvider.myValidateCodeResult = new Parameters().addParameter("result", true);
 
