@@ -768,7 +768,12 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 						next.myResourceDefinition.getName(),
 						next.myMatchUrlSearchMap,
 						next.getAssociatedResource());
-				if (partition.isAllPartitions()) {
+				if (partition.isAllPartitions() && !myPartitionSettings.isAllPartitionSearchSupported()) {
+					// I couldn't determine from the history why allPartitions
+					// was originally defaulted to the outer/transaction partition; it may have been because
+					// all-partition search was not supported. Now that isAllPartitionSearchSupported() makes that
+					// explicit, we only apply this fallback when all-partition search is unsupported. Otherwise, we
+					// keep allPartitions so the pre-fetch can search across all partitions.
 					partition = theOuterRequestPartitionId;
 				}
 			}
