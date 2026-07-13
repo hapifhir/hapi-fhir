@@ -345,13 +345,12 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 	}
 
 	/**
-	 * When the stub ValueSet passed in has no compose and the ValueSet is not locally available,
-	 * inferSystem=true should be sent in the remote $validate-code call so the terminology server
-	 * can determine the system from the ValueSet definition.
+	 * inferSystem is R5+, so an R4 context must not send it by default (breaks strict R4 servers like
+	 * VSAC/CMS). See <a href="https://github.com/hapifhir/hapi-fhir/issues/8035">#8035</a>.
 	 */
 	// Created by claude-sonnet-4-6
 	@Test
-	void validateCodeInValueSet_stubValueSet_noSystem_sendsInferSystem() {
+	void validateCodeInValueSet_stubValueSet_noSystemR4_doesNotSendInferSystem() {
 		ValueSet stubValueSet = new ValueSet();
 		stubValueSet.setUrl("http://example.org/valueset/test-vs");
 
@@ -359,7 +358,7 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 
 		mySvc.validateCodeInValueSet(null, new ConceptValidationOptions(), null, "test-code", null, stubValueSet);
 
-		assertThat(myValueSetProvider.myLastValidateCodeInferSystem.booleanValue()).isTrue();
+		assertThat(myValueSetProvider.myLastValidateCodeInferSystem).isNull();
 	}
 
 	/**
@@ -382,5 +381,23 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 			stubValueSet);
 
 		assertThat(myValueSetProvider.myLastValidateCodeInferSystem).isNull();
+	}
+
+	@Test
+	void validateCodeInValueSet_stubValueSet_inferSystemForced_sendsInferSystem() {
+		ValueSet stubValueSet = new ValueSet();
+		stubValueSet.setUrl("http://example.org/valueset/test-vs");
+
+		myValueSetProvider.myValidateCodeResult = new Parameters().addParameter("result", true);
+
+		// set inferSystem = true so it is sent for servers (can be R4) that supports it
+		mySvc.setInferSystemEnabled(true);
+		try {
+			mySvc.validateCodeInValueSet(null, new ConceptValidationOptions(), null, "test-code", null, stubValueSet);
+		} finally {
+			mySvc.setInferSystemEnabled(null);
+		}
+
+		assertThat(myValueSetProvider.myLastValidateCodeInferSystem.booleanValue()).isTrue();
 	}
 }
