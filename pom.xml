@@ -1100,7 +1100,7 @@
 		<jackson_annotations_version>2.22</jackson_annotations_version>
 		<jackson_datatype_version>2.22.0</jackson_datatype_version>
 
-		<!-- pay attentions to LTS versions going foward : https://github.com/FasterXML/jackson/wiki/Jackson-Releases#open-branches -->
+		<!-- pay attention to LTS versions going foward : https://github.com/FasterXML/jackson/wiki/Jackson-Releases#open-branches -->
 		<jackson_tools_version>3.1.5</jackson_tools_version>
 		<jackson_tools_databind_version>3.1.5</jackson_tools_databind_version>
 
