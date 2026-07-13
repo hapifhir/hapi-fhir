@@ -1100,8 +1100,8 @@
 		<jackson_annotations_version>2.22</jackson_annotations_version>
 		<jackson_datatype_version>2.22.0</jackson_datatype_version>
 
-		<jackson_tools_version>3.2.0</jackson_tools_version>
-		<jackson_tools_databind_version>3.2.0</jackson_tools_databind_version>
+		<jackson_tools_version>3.2.1</jackson_tools_version>
+		<jackson_tools_databind_version>3.2.1</jackson_tools_databind_version>
 
 		<httpclient5_version>5.4.3</httpclient5_version>
 		<httpcore5_version>5.3.1</httpcore5_version>
