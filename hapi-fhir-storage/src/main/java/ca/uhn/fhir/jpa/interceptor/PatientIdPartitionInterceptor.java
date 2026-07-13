@@ -865,6 +865,7 @@ public class PatientIdPartitionInterceptor {
 	public void onTransactionWriteAfterPrefetch(
 			TransactionWriteAfterPrefetchDetails theDetails, TransactionDetails theTransactionDetails) {
 		rewriteInlinePatientMatchUrlReferences(theDetails.getEntries(), theTransactionDetails);
+		rewriteIdlessConditionalPatientUpdatesToDirect(theDetails.getEntries(), theTransactionDetails);
 	}
 
 	/**
@@ -925,19 +926,71 @@ public class PatientIdPartitionInterceptor {
 	 */
 	private void rewriteInlineMatchUrlReference(
 			IBaseReference theReference, String theReferenceValue, TransactionDetails theTransactionDetails) {
-		IResourcePersistentId<?> resolved =
-				theTransactionDetails.getResolvedMatchUrls().get(theReferenceValue);
-
 		// Act only on a match URL the pre-fetch resolved to a concrete Patient; otherwise leave the reference as is.
-		if (resolved == null || resolved == TransactionDetails.NOT_FOUND) {
-			return;
-		}
+		getPreFetchResolvedId(theReferenceValue, theTransactionDetails)
+				.ifPresent(resolvedId -> theReference.setReference(
+						resolvedId.toUnqualifiedVersionless().getValue()));
+	}
 
-		// Reuse the FHIR id the pre-fetch already resolved for this PID (TransactionDetails' reverse map)
-		// If the reverse map has no entry, leave the reference untouched.
-		IIdType resolvedId = theTransactionDetails.getReverseResolvedId(resolved);
-		if (resolvedId != null) {
-			theReference.setReference(resolvedId.toUnqualifiedVersionless().getValue());
+	/**
+	 * Returns the concrete FHIR id the pre-fetch resolved for the given match URL (via
+	 * {@link TransactionDetails#getResolvedMatchUrls()} and the reverse-id map), or empty if the URL was not
+	 * resolved to a single existing resource ({@link TransactionDetails#NOT_FOUND}, absent, or no reverse-mapped id).
+	 * No search is performed — we act only on what the pre-fetch put in the transaction details.
+	 */
+	private Optional<IIdType> getPreFetchResolvedId(String theMatchUrl, TransactionDetails theTransactionDetails) {
+		IResourcePersistentId<?> resolved =
+				theTransactionDetails.getResolvedMatchUrls().get(theMatchUrl);
+		if (resolved == null || resolved == TransactionDetails.NOT_FOUND) {
+			return Optional.empty();
+		}
+		return Optional.ofNullable(theTransactionDetails.getReverseResolvedId(resolved));
+	}
+
+	/**
+	 * Rewrites an id-less conditional-update Patient (e.g. {@code PUT Patient?identifier=http://acme.org/mrn|PT00062}
+	 * with no body id) into a direct {@code PUT Patient/<id>}, using the id the pre-fetch already resolved for the
+	 * conditional URL ({@link TransactionDetails#getResolvedMatchUrls()}). Without a body id the entry can't be routed
+	 * (a Patient's partition is {@code hash(<id>)}) and would fail with HAPI-1321; the direct URL lets the write route to
+	 * the existing Patient and update it in place instead of creating a duplicate.
+	 * <p>
+	 * Only a truly id-less body is rewritten. A body that already carries a client-assigned id is already routable and
+	 * handled by the normal conditional-update path.
+	 * <p>
+	 * An unmatched id-less conditional PUT ({@link TransactionDetails#NOT_FOUND} or absent) is left untouched and still
+	 * fails with HAPI-1321.
+	 */
+	private void rewriteIdlessConditionalPatientUpdatesToDirect(
+			List<IBase> theEntries, TransactionDetails theTransactionDetails) {
+		FhirTerser terser = myFhirContext.newTerser();
+		for (IBase entry : theEntries) {
+			String verb = terser.getSinglePrimitiveValueOrNull(entry, "request.method");
+			if (!"PUT".equals(verb)) {
+				continue;
+			}
+			String url = terser.getSinglePrimitiveValueOrNull(entry, "request.url");
+			if (!isPatientInlineMatchUrl(url)) {
+				continue;
+			}
+			IBaseResource resource = terser.getSingleValueOrNull(entry, "resource", IBaseResource.class);
+			if (resource == null || !PATIENT_STR.equals(myFhirContext.getResourceType(resource))) {
+				continue;
+			}
+			// Skip a body that already has an id — only a truly id-less body needs the rewrite (see method Javadoc).
+			if (resource.getIdElement().getIdPart() != null) {
+				continue;
+			}
+
+			Optional<IIdType> matchedId = getPreFetchResolvedId(url, theTransactionDetails);
+			if (matchedId.isEmpty()) {
+				continue;
+			}
+
+			// Convert the conditional PUT into a direct update by rewriting the request URL to the matched Patient id
+			// (verb stays PUT). We only rewrite the URL. The transaction processor's direct-update path then stamps
+			// the body id from that URL before the write, so the resource routes to the matched Patient.
+			String reference = matchedId.get().toUnqualifiedVersionless().getValue();
+			terser.setElement(entry, "request.url", reference);
 		}
 	}
 
