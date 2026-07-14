@@ -34,7 +34,6 @@ import java.util.jar.JarOutputStream;
 import static ca.uhn.fhir.jpa.logging.SqlLoggerFilteringUtil.FILTER_FILE_PATH;
 import static ca.uhn.fhir.jpa.logging.SqlLoggerFilteringUtil.FILTER_UPDATE_INTERVAL_SECS;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
