@@ -66,6 +66,7 @@ stateDiagram-v2
    QUEUED          --> READY            : on gate release - gated (for compatibility with legacy QUEUED state up to Hapi-fhir version 7.1)
    READY           --> QUEUED           : placed on kafka (maint.)
    POLL_WAITING    --> READY            : after a poll delay on a POLL_WAITING work chunk has elapsed
+   REDUCTION_READY --> COMPLETED / FAILED : the input chunks are finalized by the reducer
   
   %% worker processing states
   QUEUED     --> on_receive : on deque by worker

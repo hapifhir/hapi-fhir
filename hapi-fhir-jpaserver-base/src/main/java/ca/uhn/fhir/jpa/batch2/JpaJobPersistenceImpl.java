@@ -115,8 +115,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class JpaJobPersistenceImpl implements IJobPersistence {
 	public static final String CREATE_TIME = "myCreateTime";
-	// Special step id for reduction steps
-	public static final String REDUCTION_STEP_ID = "reduction-step";
 
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	public static final int DEFAULT_ATTACHMENT_CHUNK_SIZE = toIntExact(FileUtils.ONE_MB);
@@ -588,41 +586,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 				.fetchChunksForStep(theInstanceId, theStepId)
 				.map(this::toChunk);
 	}
-
-	//	@Override
-	//	public WorkChunk fetchWorkChunkById(String theWorkChunkId) {
-	//		return myWorkChunkRepository.findById(theWorkChunkId)
-	//			.map(this::toChunk)
-	//			.orElse(null);
-	//	}
-
-	//	@Override
-	//	public void createReductionStepChunk(JobInstance theInstance, Consumer<Integer> theCallback) {
-	////		myWorkChunkRepository.fetchChunksForStep(theInstance.getInstanceId(), REDUCTION_STEP_ID);
-	//
-	//
-	////		myWorkChunkRepository.getDistinctStatusesForStep(
-	////			theInstance.getInstanceId(),
-	////			REDUCTION_STEP_ID
-	////		);
-	//
-	//		Batch2WorkChunkEntity entity = new Batch2WorkChunkEntity();
-	//		entity.setId(UUID.randomUUID().toString());
-	//		entity.setSequence(0);
-	//		entity.setJobDefinitionId(theInstance.getJobDefinitionId());
-	//		entity.setJobDefinitionVersion(theInstance.getJobDefinitionVersion());
-	//		entity.setTargetStepId(REDUCTION_STEP_ID);
-	//		entity.setInstanceId(theBatchWorkChunk.instanceId);
-	//		entity.setSerializedData(theBatchWorkChunk.serializedData);
-	//		entity.setCreateTime(new Date());
-	//		entity.setStartTime(new Date());
-	//		entity.setStatus(WorkChunkStatusEnum.READY);
-	//
-	//		Batch2WorkChunkEntity chunk = myTransactionService.withSystemRequestOnDefaultPartition().execute(() ->
-	// myWorkChunkRepository.save(entity));
-	//
-	//
-	//	}
 
 	@Override
 	public Page<WorkChunkMetadata> fetchAllWorkChunkMetadataForJobInStates(

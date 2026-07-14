@@ -451,7 +451,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		verify(myJobPersistence, never()).enqueueWorkChunkForProcessing(anyString(), any());
 		verify(myWorkChannelProducer, never()).send(any(JobWorkNotificationJsonMessage.class));
 		verify(myReductionStepExecutorService)
-			.triggerReductionStep(anyString(), any());
+			.triggerReductionStep(anyString(), any(), any());
 	}
 
 	@Test

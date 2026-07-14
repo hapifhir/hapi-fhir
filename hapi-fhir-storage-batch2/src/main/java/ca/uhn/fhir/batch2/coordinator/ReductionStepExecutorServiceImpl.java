@@ -40,15 +40,23 @@ import ca.uhn.fhir.batch2.util.BatchJobOpenTelemetryUtils;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.model.sched.HapiJob;
+import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
+import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
+import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.annotations.VisibleForTesting;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.time.DateUtils;
+import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
@@ -78,9 +86,10 @@ import static ca.uhn.fhir.batch2.model.StatusEnum.FINALIZE;
 import static ca.uhn.fhir.batch2.model.StatusEnum.IN_PROGRESS;
 import static ca.uhn.fhir.batch2.util.BatchJobOpenTelemetryUtils.JOB_STEP_EXECUTION_SPAN_NAME;
 
-public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorService {
+public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorService, IHasScheduledJobs {
+	public static final String SCHEDULED_JOB_ID = ReductionStepExecutorScheduledJob.class.getName();
 	private static final Logger ourLog = LoggerFactory.getLogger(ReductionStepExecutorServiceImpl.class);
-	private final Map<String, JobWorkCursor<?, ?, ?>> myInstanceIdToJobWorkCursor =
+	private final Map<String, ReductionStepWork> myInstanceIdToReductionWork =
 			Collections.synchronizedMap(new LinkedHashMap<>());
 	private final ExecutorService myReducerExecutor;
 	private final ExecutorService myReducerChunkExecutor;
@@ -88,6 +97,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 	private final IHapiTransactionService myTransactionService;
 	private final Semaphore myCurrentlyExecuting = new Semaphore(1);
 	private final AtomicReference<String> myCurrentlyFinalizingInstanceId = new AtomicReference<>();
+	private final AtomicReference<String> myCurrentlyFinalizingDriverChunkId = new AtomicReference<>();
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final JobInstanceStatusUpdater myJobInstanceStatusUpdater;
 	private final IJobStepExecutionServices myJobStepExecutionServices;
@@ -133,9 +143,15 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 	private void runHeartbeat() {
 		String currentlyFinalizingInstanceId = myCurrentlyFinalizingInstanceId.get();
 		if (currentlyFinalizingInstanceId != null) {
+			String driverChunkId = myCurrentlyFinalizingDriverChunkId.get();
 			ourLog.info("Running heartbeat for instance: {}", currentlyFinalizingInstanceId);
 			executeInTransactionWithSynchronization(() -> {
 				myJobPersistence.updateInstanceUpdateTime(currentlyFinalizingInstanceId);
+				// Keep the 'driver' work chunk's heartbeat fresh too, so that a long-running reduction
+				// is not mistaken for a dead worker and needlessly reprocessed when the message is redelivered.
+				if (driverChunkId != null) {
+					myJobPersistence.onWorkChunkHeartbeat(driverChunkId);
+				}
 				return null;
 			});
 		}
@@ -150,31 +166,35 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 	}
 
 	@Override
-	public void triggerReductionStep(String theInstanceId, JobWorkCursor<?, ?, ?> theJobWorkCursor) {
-		myInstanceIdToJobWorkCursor.putIfAbsent(theInstanceId, theJobWorkCursor);
+	public void triggerReductionStep(
+			String theInstanceId, JobWorkCursor<?, ?, ?> theJobWorkCursor, @Nullable String theDriverChunkId) {
+		myInstanceIdToReductionWork.putIfAbsent(
+				theInstanceId, new ReductionStepWork(theJobWorkCursor, theDriverChunkId));
 		if (myCurrentlyExecuting.availablePermits() > 0) {
 			myReducerExecutor.submit(this::reducerPass);
 		}
 	}
 
-	private void reducerPass() {
+	@Override
+	public void reducerPass() {
 		if (myCurrentlyExecuting.tryAcquire()) {
 			try {
-				String[] instanceIds = myInstanceIdToJobWorkCursor.keySet().toArray(new String[0]);
+				String[] instanceIds = myInstanceIdToReductionWork.keySet().toArray(new String[0]);
 				if (instanceIds.length > 0) {
 					String instanceId = instanceIds[0];
+					ReductionStepWork reductionWork = myInstanceIdToReductionWork.get(instanceId);
 					myCurrentlyFinalizingInstanceId.set(instanceId);
-					JobWorkCursor<?, ?, ?> jobWorkCursor = myInstanceIdToJobWorkCursor.get(instanceId);
-					ReductionStepChunkProcessingResponse stepOutcome = executeReductionStep(instanceId, jobWorkCursor);
+					myCurrentlyFinalizingDriverChunkId.set(reductionWork.driverChunkId());
+					executeReductionStep(instanceId, reductionWork.jobWorkCursor());
 
 					// If we get here, this succeeded. Purge the instance from the work queue
-					myInstanceIdToJobWorkCursor.remove(instanceId);
+					myInstanceIdToReductionWork.remove(instanceId);
 				}
-
 			} catch (Exception e) {
 				ourLog.error("Failed to execute reducer pass", e);
 			} finally {
 				myCurrentlyFinalizingInstanceId.set(null);
+				myCurrentlyFinalizingDriverChunkId.set(null);
 				myCurrentlyExecuting.release();
 			}
 		}
@@ -481,10 +501,47 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		}
 	}
 
+	@Override
+	public void scheduleJobs(ISchedulerService theSchedulerService) {
+		theSchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_SECOND, buildJobDefinition());
+	}
+
+	@Nonnull
+	private ScheduledJobDefinition buildJobDefinition() {
+		ScheduledJobDefinition jobDefinition = new ScheduledJobDefinition();
+		jobDefinition.setId(SCHEDULED_JOB_ID);
+		jobDefinition.setJobClass(ReductionStepExecutorScheduledJob.class);
+		return jobDefinition;
+	}
+
+	/**
+	 * Tracks the work required to run the reduction step for a single job instance.
+	 *
+	 * @param jobWorkCursor the cursor pointing at the reduction step
+	 * @param driverChunkId the id of the 'driver' work chunk that triggered this reduction (whose heartbeat
+	 *                      must be kept alive while the reduction runs), or {@code null} when the reduction
+	 *                      is run inline without a driver chunk.
+	 */
+	private record ReductionStepWork(JobWorkCursor<?, ?, ?> jobWorkCursor, @Nullable String driverChunkId) {}
+
 	private class HeartbeatTimerTask extends TimerTask {
 		@Override
 		public void run() {
 			runHeartbeat();
+		}
+	}
+
+	/**
+	 * Scheduled job for draining the map (in case of concurrent executions)
+	 * as well as handling failed reduction runs / retries.
+	 */
+	public static class ReductionStepExecutorScheduledJob implements HapiJob {
+		@Autowired
+		private IReductionStepExecutorService myTarget;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myTarget.reducerPass();
 		}
 	}
 }

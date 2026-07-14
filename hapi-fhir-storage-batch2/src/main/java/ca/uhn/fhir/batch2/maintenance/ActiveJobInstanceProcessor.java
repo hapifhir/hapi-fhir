@@ -294,7 +294,8 @@ public class ActiveJobInstanceProcessor {
 	private void triggerReductionStep(JobInstance theInstance, JobWorkCursor<?, ?, ?> jobWorkCursor) {
 		String instanceId = theInstance.getInstanceId();
 		ourLog.debug("Triggering Reduction step {} of instance {}.", jobWorkCursor.getCurrentStepId(), instanceId);
-		myReductionStepExecutorService.triggerReductionStep(instanceId, jobWorkCursor);
+		// inline reduction: there is no 'driver' work chunk on the queue for this path
+		myReductionStepExecutorService.triggerReductionStep(instanceId, jobWorkCursor, null);
 	}
 
 	/**

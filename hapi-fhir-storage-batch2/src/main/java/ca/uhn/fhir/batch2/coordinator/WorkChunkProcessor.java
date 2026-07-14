@@ -98,7 +98,7 @@ public class WorkChunkProcessor {
 
 		if (step.isReductionStep()) {
 			// reduction step is a long running async process
-			processReductionStep(theInstance, theCursor);
+			processReductionStep(theInstance, theCursor, theWorkChunk);
 			return null;
 		}
 
@@ -193,9 +193,11 @@ public class WorkChunkProcessor {
 				theNextStepId));
 	}
 
-	private void processReductionStep(JobInstance theInstance, JobWorkCursor<?, ?, ?> theCursor) {
-		myReductionStepExecutorService.triggerReductionStep(theInstance.getInstanceId(), theCursor);
-
-		// TODO - complete the job
+	private void processReductionStep(
+			JobInstance theInstance, JobWorkCursor<?, ?, ?> theCursor, @Nullable WorkChunk theWorkChunk) {
+		// theWorkChunk is the 'driver' chunk that was placed on the queue to trigger this reduction; keeping
+		// its heartbeat alive during the reduction prevents the broker from redelivering it as a dead worker.
+		String driverChunkId = theWorkChunk != null ? theWorkChunk.getId() : null;
+		myReductionStepExecutorService.triggerReductionStep(theInstance.getInstanceId(), theCursor, driverChunkId);
 	}
 }
