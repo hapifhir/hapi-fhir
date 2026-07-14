@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -17,15 +18,24 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarOutputStream;
 
 import static ca.uhn.fhir.jpa.logging.SqlLoggerFilteringUtil.FILTER_FILE_PATH;
 import static ca.uhn.fhir.jpa.logging.SqlLoggerFilteringUtil.FILTER_UPDATE_INTERVAL_SECS;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -193,6 +203,9 @@ public class SqlLoggerFilteringAndUtilTest {
 
 		private ch.qos.logback.classic.Logger myHibernateLogger;
 
+		@TempDir
+		File myTempDir;
+
 		@BeforeEach
 		void setUp() {
 			mySpiedUtil = spy(myTestedUtil);
@@ -318,6 +331,31 @@ public class SqlLoggerFilteringAndUtilTest {
 			}
 		}
 
+		/**
+		 * Regression test for the filter file being packaged inside a JAR (see GitLab #8908).
+		 */
+		@Test
+		void readsFilterDefinitionLines_whenResourcePackagedInJar_success() throws Exception {
+			// Package the filter file inside a JAR so it is only reachable through a jar: URL (no filesystem File)
+			File jarFile = new File(myTempDir, "sql-log-filters.jar");
+			try (JarOutputStream jarOut = new JarOutputStream(new FileOutputStream(jarFile))) {
+				jarOut.putNextEntry(new JarEntry(FILTER_FILE_PATH));
+				jarOut.write("test: select\n# a comment line\n".getBytes(StandardCharsets.UTF_8));
+				jarOut.closeEntry();
+			}
+
+			try (URLClassLoader jarClassLoader = new URLClassLoader(new URL[] {jarFile.toURI().toURL()}, null)) {
+				ClassPathResource resource = new ClassPathResource(FILTER_FILE_PATH, jarClassLoader);
+
+				// The previous implementation used getFile(), which throws for a JAR-packaged resource
+				assertThatThrownBy(resource::getFile).isInstanceOf(FileNotFoundException.class);
+
+				// The stream-based read must succeed for a JAR-packaged resource
+				List<String> lines = SqlLoggerFilteringUtil.getInstance().readFilterDefinitionLines(resource);
+
+				assertThat(lines).containsExactly("test: select", "# a comment line");
+			}
+		}
 	}
 
 
