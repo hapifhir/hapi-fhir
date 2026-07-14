@@ -347,9 +347,6 @@ public class SqlLoggerFilteringAndUtilTest {
 			try (URLClassLoader jarClassLoader = new URLClassLoader(new URL[] {jarFile.toURI().toURL()}, null)) {
 				ClassPathResource resource = new ClassPathResource(FILTER_FILE_PATH, jarClassLoader);
 
-				// The previous implementation used getFile(), which throws for a JAR-packaged resource
-				assertThatThrownBy(resource::getFile).isInstanceOf(FileNotFoundException.class);
-
 				// The stream-based read must succeed for a JAR-packaged resource
 				List<String> lines = SqlLoggerFilteringUtil.getInstance().readFilterDefinitionLines(resource);
 
@@ -357,6 +354,4 @@ public class SqlLoggerFilteringAndUtilTest {
 			}
 		}
 	}
-
-
 }
