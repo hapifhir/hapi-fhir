@@ -330,7 +330,7 @@ public class SqlLoggerFilteringAndUtilTest {
 		}
 
 		/**
-		 * Regression test for the filter file being packaged inside a JAR (see GitLab #8908).
+		 * Regression test for the filter file being packaged inside a JAR (see GitHub #8159).
 		 */
 		@Test
 		void readsFilterDefinitionLines_whenResourcePackagedInJar_success() throws Exception {
