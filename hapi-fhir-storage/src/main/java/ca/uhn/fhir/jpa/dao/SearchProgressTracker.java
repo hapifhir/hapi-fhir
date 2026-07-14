@@ -26,6 +26,7 @@ public final class SearchProgressTracker {
 	private final boolean haveMoreResults;
 	private final int skippedCount;
 	private final int nonSkippedCount;
+	// FIXME: remove these if not used
 	private final String myPreviousPageId;
 	private final String myNextPageId;
 	private final String myCurrentPageId;
@@ -71,6 +72,10 @@ public final class SearchProgressTracker {
 
 	public int nonSkippedCount() {
 		return nonSkippedCount;
+	}
+
+	public int totalCount() {
+		return skippedCount + nonSkippedCount;
 	}
 
 	@Override
