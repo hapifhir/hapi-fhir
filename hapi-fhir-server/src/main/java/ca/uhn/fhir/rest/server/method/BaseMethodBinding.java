@@ -414,7 +414,7 @@ public abstract class BaseMethodBinding {
 		Class<?> returnTypeFromMethod = theMethod.getReturnType();
 		if (MethodOutcome.class.isAssignableFrom(returnTypeFromMethod)) {
 			// returns a method outcome
-		} else if (IBundleProvider.class.equals(returnTypeFromMethod)) {
+		} else if (IBundleProvider.class.isAssignableFrom(returnTypeFromMethod)) {
 			// returns a bundle provider
 		} else if (void.class.equals(returnTypeFromMethod)) {
 			// returns a bundle

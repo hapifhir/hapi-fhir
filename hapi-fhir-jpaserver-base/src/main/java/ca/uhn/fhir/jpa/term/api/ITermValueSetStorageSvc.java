@@ -117,7 +117,8 @@ public interface ITermValueSetStorageSvc {
 	 *
 	 * @param theUrl The ValueSet URL
 	 * @param theVersion The ValueSet version
+	 * @param theFailureMessage the failure message
 	 * @since 8.12.0
 	 */
-	void markValueSetAsFailedToExpand(String theUrl, String theVersion);
+	void markValueSetAsFailedToExpand(String theUrl, String theVersion, String theFailureMessage);
 }

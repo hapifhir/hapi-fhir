@@ -38,11 +38,15 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetPara
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetResultJson;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.term.api.ITermValueSetExpansionSvc;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.DatatypeUtil;
 import ca.uhn.fhir.util.JsonUtil;
@@ -78,6 +82,10 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(ValueSetOperationProvider.class);
 	public static final String PARAM_URL = "url";
 	public static final String PARAM_VERSION = "version";
+	public static final String PARAM_EXPANSION_STATUS = "expansionStatus";
+	public static final String PARAM_NAME = "name";
+	public static final String PARAM_COUNT = "count";
+	public static final String PARAM_OFFSET = "offset";
 
 	@Autowired
 	protected IValidationSupport myValidationSupport;
@@ -87,6 +95,12 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
+
+	@Autowired
+	private IPagingProvider myPagingProvider;
+
+	@Autowired
+	private ITermValueSetExpansionSvc myTermValueSetExpansionSvc;
 
 	@Autowired
 	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)
@@ -108,8 +122,10 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 			@OperationParam(name = "context", min = 0, max = 1, typeName = "string") IPrimitiveType<String> theContext,
 			@OperationParam(name = "contextDirection", min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theContextDirection,
-			@OperationParam(name = "offset", min = 0, max = 1, typeName = "integer") IPrimitiveType<Integer> theOffset,
-			@OperationParam(name = "count", min = 0, max = 1, typeName = "integer") IPrimitiveType<Integer> theCount,
+			@OperationParam(name = PARAM_OFFSET, min = 0, max = 1, typeName = "integer")
+					IPrimitiveType<Integer> theOffset,
+			@OperationParam(name = PARAM_COUNT, min = 0, max = 1, typeName = "integer")
+					IPrimitiveType<Integer> theCount,
 			@OperationParam(
 							name = JpaConstants.OPERATION_EXPAND_PARAM_DISPLAY_LANGUAGE,
 							min = 0,
@@ -326,6 +342,24 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 				OPERATION_INVALIDATE_EXPANSION,
 				PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET,
 				completedJobResponseProvider);
+	}
+
+	@Operation(name = ProviderConstants.OPERATION_EXPANSION_STATUS, idempotent = true, typeName = "ValueSet")
+	public IBaseParameters getExpansionStatus(
+			@OperationParam(name = PARAM_EXPANSION_STATUS, max = OperationParam.MAX_UNLIMITED, typeName = "code")
+					List<IPrimitiveType<String>> theExpansionStatuses,
+			@OperationParam(name = PARAM_URL, max = 1) StringParam theUrl,
+			@OperationParam(name = PARAM_NAME, max = 1) StringParam theName,
+			@OperationParam(name = PARAM_COUNT, max = 1, typeName = "integer") IPrimitiveType<Integer> theCount,
+			@OperationParam(name = PARAM_OFFSET, max = 1, typeName = "integer") IPrimitiveType<Integer> theOffset) {
+		List<String> statuses = theExpansionStatuses != null
+				? theExpansionStatuses.stream().map(IPrimitiveType::getValue).toList()
+				: null;
+		int count =
+				theCount != null && theCount.hasValue() ? theCount.getValue() : myPagingProvider.getDefaultPageSize();
+		count = Math.min(myPagingProvider.getMaximumPageSize(), count);
+		int offset = theOffset != null && theOffset.hasValue() ? theOffset.getValue() : 0;
+		return myTermValueSetExpansionSvc.getExpansionStatus(theUrl, theName, statuses, count, offset);
 	}
 
 	public static ValueSetExpansionOptions createValueSetExpansionOptions(

@@ -1,0 +1,7 @@
+---
+type: add
+issue: 8911
+title: "When a batch2 job is started via IJobCoordinator.startInstance(), the job instance ID is now
+  stored in RequestDetails user data under the key IJobCoordinator.USER_DATA_KEY_JOB_INSTANCE_ID.
+  This allows interceptors and downstream consumers to associate the originating FHIR request with
+  its corresponding batch job."
