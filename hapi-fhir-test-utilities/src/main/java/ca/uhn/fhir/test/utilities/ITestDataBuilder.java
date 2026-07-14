@@ -486,8 +486,14 @@ public interface ITestDataBuilder {
 
 	default <E extends IBase> void applyElementModifiers(E element, Consumer<E>[] theModifiers) {
 		for (Consumer<E> nextModifier : theModifiers) {
-			nextModifier.accept(element);
+			if (nextModifier != null) {
+				nextModifier.accept(element);
+			}
 		}
+	}
+
+	default ICreationArgument ifTrue(boolean theApply, ICreationArgument theArgument) {
+		return theApply ? theArgument : null;
 	}
 
 	default ICreationArgument withObservationCode(@Nullable String theSystem, @Nullable String theCode) {

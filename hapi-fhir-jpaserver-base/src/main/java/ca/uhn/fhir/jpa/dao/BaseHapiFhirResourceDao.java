@@ -1731,6 +1731,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		myStorageInterceptorHooks = new StorageInterceptorHooksFacade(myInterceptorBroadcaster);
 
+		myDaoRegistry.register(this);
+
 		super.start();
 	}
 

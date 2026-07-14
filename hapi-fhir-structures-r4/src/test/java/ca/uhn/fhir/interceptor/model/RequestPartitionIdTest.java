@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.collections4.ListUtils;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,12 +14,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.shaded.org.bouncycastle.cert.ocsp.Req;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.interceptor.model.RequestPartitionId.allPartitions;
 import static ca.uhn.fhir.interceptor.model.RequestPartitionId.defaultPartition;
+import static ca.uhn.fhir.interceptor.model.RequestPartitionId.fromPartitionId;
 import static ca.uhn.fhir.interceptor.model.RequestPartitionId.fromPartitionIds;
 import static ca.uhn.fhir.interceptor.model.RequestPartitionId.fromPartitionNames;
 import static ca.uhn.fhir.interceptor.model.RequestPartitionIdTest.ContainsTestCase.Comparison.EQUAL;
@@ -29,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -50,11 +56,11 @@ public class RequestPartitionIdTest {
 	@SuppressWarnings("AssertBetweenInconvertibleTypes")
 	@Test
 	public void testEquals() {
-		assertEquals(RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1)), RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1)));
-		assertNotNull(RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1)));
+		assertEquals(fromPartitionId(123, LocalDate.of(2020, 1, 1)), fromPartitionId(123, LocalDate.of(2020, 1, 1)));
+		assertNotNull(fromPartitionId(123, LocalDate.of(2020, 1, 1)));
 
-		assertNotEquals(RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1)), "123");
-		assertNotEquals(RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1)), null);
+		assertNotEquals(fromPartitionId(123, LocalDate.of(2020, 1, 1)), "123");
+		assertNotEquals(fromPartitionId(123, LocalDate.of(2020, 1, 1)), null);
 	}
 
 	@Test
@@ -63,9 +69,9 @@ public class RequestPartitionIdTest {
 
 		assertFalse(allPartitions().isDefaultPartition());
 		assertFalse(allPartitions().isPartition(null));
-		assertFalse(RequestPartitionId.fromPartitionId(null).isAllPartitions());
-		assertTrue(RequestPartitionId.fromPartitionId(null).isDefaultPartition());
-		assertTrue(RequestPartitionId.fromPartitionId(null).isPartition(myPartitionSettings.getDefaultPartitionId()));
+		assertFalse(fromPartitionId(null).isAllPartitions());
+		assertTrue(fromPartitionId(null).isDefaultPartition());
+		assertTrue(fromPartitionId(null).isPartition(myPartitionSettings.getDefaultPartitionId()));
 		assertFalse(defaultPartition(myPartitionSettings).isAllPartitions());
 		assertTrue(defaultPartition(myPartitionSettings).isDefaultPartition());
 		assertTrue(defaultPartition(myPartitionSettings).isPartition(myPartitionSettings.getDefaultPartitionId()));
@@ -78,10 +84,10 @@ public class RequestPartitionIdTest {
 
 	@Test
 	public void testIsDefaultPartition_withPartitionAsParameter() {
-		assertThat(RequestPartitionId.fromPartitionId(null).isPartition(null)).isTrue();
+		assertThat(fromPartitionId(null).isPartition(null)).isTrue();
 		assertThat(fromPartitionIds(ourDefaultPartitionId).isPartition(ourDefaultPartitionId)).isTrue();
 
-		assertThat(RequestPartitionId.fromPartitionId(null).isPartition(ourDefaultPartitionId)).isFalse();
+		assertThat(fromPartitionId(null).isPartition(ourDefaultPartitionId)).isFalse();
 		assertThat(allPartitions().isPartition(ourDefaultPartitionId)).isFalse();
 		assertThat(fromPartitionIds(ourDefaultPartitionId, 2).isPartition(ourDefaultPartitionId)).isFalse();
 	}
@@ -89,13 +95,13 @@ public class RequestPartitionIdTest {
 	@Test
 	public void testHasDefaultPartition_withDefaultPartitionAsParameter() {
 
-		assertThat(RequestPartitionId.fromPartitionId(null).hasDefaultPartitionId(null)).isTrue();
+		assertThat(fromPartitionId(null).hasDefaultPartitionId(null)).isTrue();
 		assertThat(fromPartitionIds(ourDefaultPartitionId).hasDefaultPartitionId(ourDefaultPartitionId)).isTrue();
 		assertThat(fromPartitionIds(ourDefaultPartitionId, null).hasDefaultPartitionId(null)).isTrue();
 		assertThat(fromPartitionIds(ourDefaultPartitionId, null).hasDefaultPartitionId(ourDefaultPartitionId)).isTrue();
 
 		assertThat(fromPartitionIds(ourDefaultPartitionId).hasDefaultPartitionId(null)).isFalse();
-		assertThat(RequestPartitionId.fromPartitionId(null).hasDefaultPartitionId(ourDefaultPartitionId)).isFalse();
+		assertThat(fromPartitionId(null).hasDefaultPartitionId(ourDefaultPartitionId)).isFalse();
 	}
 
 	@Test
@@ -153,12 +159,63 @@ public class RequestPartitionIdTest {
 	@Test
 	public void testMergeIds_IncludesDefault() {
 		RequestPartitionId input0 = fromPartitionIds(1, 2, 3);
-		RequestPartitionId input1 = RequestPartitionId.fromPartitionId(null);
+		RequestPartitionId input1 = fromPartitionId(null);
 
 		RequestPartitionId actual = input0.mergeIds(input1);
 		RequestPartitionId expected = fromPartitionIds(1, 2, 3, null);
 		assertEquals(expected, actual);
 
+	}
+
+	@ParameterizedTest
+	@MethodSource("testCompareToTestCases")
+	void testCompareTo(RequestPartitionId thePartitionId0, RequestPartitionId thePartitionId1, ExpectedOrderEnum theExpectedOrder) {
+		List<RequestPartitionId> inputLR = new ArrayList<>();
+		inputLR.add(thePartitionId0);
+		inputLR.add(thePartitionId1);
+		inputLR.sort(RequestPartitionId::compareTo);
+		switch (theExpectedOrder) {
+			case LEFT_FIRST, EQUAL -> {
+				assertSame(thePartitionId0, inputLR.get(0));
+				assertSame(thePartitionId1, inputLR.get(1));
+			}
+			case RIGHT_FIRST -> {
+				assertSame(thePartitionId0, inputLR.get(1));
+				assertSame(thePartitionId1, inputLR.get(0));
+			}
+		}
+
+		// Now start with the opposite order
+		List<RequestPartitionId> inputRL = new ArrayList<>();
+		inputRL.add(thePartitionId1);
+		inputRL.add(thePartitionId0);
+		inputRL.sort(RequestPartitionId::compareTo);
+		switch (theExpectedOrder) {
+			case LEFT_FIRST -> {
+				assertSame(thePartitionId0, inputRL.get(0));
+				assertSame(thePartitionId1, inputRL.get(1));
+			}
+			case RIGHT_FIRST, EQUAL -> {
+				assertSame(thePartitionId0, inputRL.get(1));
+				assertSame(thePartitionId1, inputRL.get(0));
+			}
+		}
+	}
+
+	static Stream<Object[]> testCompareToTestCases() {
+		return Stream.of(
+			new Object[] { fromPartitionIds(1, 3, 5), fromPartitionIds(2, 4, 6), ExpectedOrderEnum.LEFT_FIRST },
+			new Object[] { fromPartitionIds(1), fromPartitionIds(2, 4, 6), ExpectedOrderEnum.LEFT_FIRST },
+			new Object[] { fromPartitionIds(1), fromPartitionId(null), ExpectedOrderEnum.LEFT_FIRST },
+			new Object[] { fromPartitionId(null), fromPartitionId(null), ExpectedOrderEnum.EQUAL },
+			new Object[] { fromPartitionIds(1,2,3), fromPartitionIds(1,3,5), ExpectedOrderEnum.EQUAL }
+		);
+	}
+
+	private enum ExpectedOrderEnum {
+		LEFT_FIRST,
+		RIGHT_FIRST,
+		EQUAL
 	}
 
 	@ParameterizedTest
@@ -168,14 +225,25 @@ public class RequestPartitionIdTest {
 		assertEquals(theExpectedString, actual);
 	}
 
+	@ParameterizedTest
+	@MethodSource("testStringifyForKeyTestCases")
+	public void testFromStringifedKey(RequestPartitionId theExpected, String theStringifiedKey) {
+		RequestPartitionId actual = RequestPartitionId.fromStringifiedKey(theStringifiedKey);
+		assertEquals(theExpected, actual);
+	}
+
 
 	static Stream<Object[]> testStringifyForKeyTestCases() {
 		return Stream.of(
 			new Object[]{RequestPartitionId.allPartitions(), "(all)"},
-			new Object[]{RequestPartitionId.fromPartitionId(null), "null"},
-			new Object[]{RequestPartitionId.fromPartitionIds(1, 2, 3), "1 2 3"},
-			new Object[]{RequestPartitionId.fromPartitionIds(null, 2, 3), "null 2 3"},
-			new Object[]{RequestPartitionId.allPartitionsWithPartitionIds(1, 2, 3), "(all) 1 2 3"}
+			new Object[]{fromPartitionId(null), "null"},
+			new Object[]{RequestPartitionId.fromPartitionIds(), ""},
+			new Object[]{RequestPartitionId.fromPartitionIds(1), "1"},
+			new Object[]{RequestPartitionId.fromPartitionIds(1, 2, 3), "1_2_3"},
+			new Object[]{RequestPartitionId.fromPartitionIds(null, 2, 3), "null_2_3"},
+			new Object[]{RequestPartitionId.fromPartitionIds(1, null, 3), "1_null_3"},
+			new Object[]{RequestPartitionId.allPartitionsWithPartitionIds(1, 2, 3), "(all)_1_2_3"},
+			new Object[]{RequestPartitionId.allPartitionsWithPartitionIds(1, null, 3), "(all)_1_null_3"}
 		);
 	}
 
@@ -238,7 +306,7 @@ public class RequestPartitionIdTest {
 	@Test
 	public void testSerDeserSer() throws JsonProcessingException {
 		{
-			RequestPartitionId start = RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1));
+			RequestPartitionId start = fromPartitionId(123, LocalDate.of(2020, 1, 1));
 			String json = assertSerDeserSer(start);
 			assertThat(json).contains("\"partitionDate\":[2020,1,1]");
 			assertThat(json).contains("\"partitionIds\":[123]");
@@ -249,7 +317,7 @@ public class RequestPartitionIdTest {
 			assertThat(json).contains("partitionNames\":[\"Name1\",\"Name2\"]");
 		}
 		assertSerDeserSer(allPartitions());
-		assertSerDeserSer(RequestPartitionId.fromPartitionId(null));
+		assertSerDeserSer(fromPartitionId(null));
 	}
 
 	private String assertSerDeserSer(RequestPartitionId start) throws JsonProcessingException {

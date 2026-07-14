@@ -67,6 +67,7 @@ import ca.uhn.fhir.jpa.dao.ResourceMetadataExtractorSvcImpl;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTagDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIdentifierPatientUniqueEntityDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIdentifierSystemEntityDao;
@@ -258,7 +259,6 @@ import java.util.List;
 	ValidationSupportConfig.class,
 	Batch2SupportConfig.class,
 	JpaBulkExportConfig.class,
-	SearchConfig.class,
 	PackageLoaderConfig.class,
 	EnversAuditConfig.class,
 	MdmJpaConfig.class
@@ -279,13 +279,31 @@ public class JpaConfig {
 	private static final String HAPI_DEFAULT_SCHEDULER_GROUP = "HAPI";
 
 	@Autowired
-	public JpaStorageSettings myStorageSettings;
+	protected JpaStorageSettings myStorageSettings;
 
 	@Autowired
-	private PartitionSettings myPartitionSettings;
+	protected PartitionSettings myPartitionSettings;
 
 	@Autowired
-	private FhirContext myFhirContext;
+	protected FhirContext myFhirContext;
+
+	@Autowired
+	protected IIdHelperService myIdHelperService;
+
+	@Autowired
+	protected IResourceHistoryTableDao myResourceHistoryTableDao;
+
+	@Autowired
+	protected ISearchParamRegistry mySearchParamRegistry;
+
+	@Autowired
+	protected IInterceptorBroadcaster myInterceptorBroadcaster;
+
+	@Autowired
+	protected IResourceTagDao myResourceTagDao;
+
+	@Autowired
+	protected FhirContext myContext;
 
 	@Bean
 	public ValidationSupportChain.CacheConfiguration validationSupportChainCacheConfiguration() {
@@ -320,11 +338,6 @@ public class JpaConfig {
 	public IValidationSupport jpaValidationSupportChain() {
 		return new JpaValidationSupportChain(
 				myFhirContext, validationSupportChainCacheConfiguration(), workerContextValidationSupportAdapter());
-	}
-
-	@Bean("myDaoRegistry")
-	public DaoRegistry daoRegistry() {
-		return new DaoRegistry();
 	}
 
 	@Lazy
@@ -896,8 +909,8 @@ public class JpaConfig {
 
 	@Bean
 	@Primary
-	public ISearchParamProvider searchParamProvider() {
-		return new DaoSearchParamProvider();
+	public ISearchParamProvider searchParamProvider(DaoRegistry theDaoRegistry) {
+		return new DaoSearchParamProvider(theDaoRegistry);
 	}
 
 	@Bean

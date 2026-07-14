@@ -299,7 +299,7 @@ public class GiantTransactionPerfTest {
 		myEobDao.setMemoryCacheService(myMemoryCacheService);
 		myEobDao.start();
 
-		myDaoRegistry.setResourceDaos(Lists.newArrayList(myEobDao));
+		myDaoRegistry.register(myEobDao);
 
 		when(myResourceTypeCacheSvc.getResourceTypeId(anyString())).thenReturn((short)100);
 

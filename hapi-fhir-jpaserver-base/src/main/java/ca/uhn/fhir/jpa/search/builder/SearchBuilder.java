@@ -39,6 +39,8 @@ import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.dao.ISearchResultConsumer;
+import ca.uhn.fhir.jpa.dao.SearchProgressTracker;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.search.ResourceNotFoundInIndexException;
@@ -100,6 +102,7 @@ import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -151,6 +154,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -228,7 +232,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private final FhirContext myContext;
 	private final IIdHelperService<JpaPid> myIdHelperService;
 	private final JpaStorageSettings myStorageSettings;
-	private final SearchQueryProperties mySearchProperties;
+	protected final SearchQueryProperties mySearchProperties;
 	private final IResourceHistoryTableDao myResourceHistoryTableDao;
 	private final BatchResourceLoader myBatchResourceLoader;
 
@@ -464,6 +468,38 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	@Override
 	public void setPreviouslyAddedResourcePids(@Nonnull List<JpaPid> thePidSet) {
 		myPidSet = new HashSet<>(thePidSet);
+	}
+
+	@Override
+	public SearchProgressTracker performSearchForPids(
+			ISearchResultConsumer<JpaPid> theConsumer,
+			SearchParameterMap theParams,
+			SearchRuntimeDetails theSearchRuntime,
+			RequestDetails theRequest,
+			@Nonnull RequestPartitionId theRequestPartitionId) {
+		try (IResultIterator<JpaPid> query =
+				createQuery(theParams, theSearchRuntime, theRequest, theRequestPartitionId)) {
+			while (query.hasNext()) {
+				JpaPid nextPid = query.next();
+				SearchProgressTracker progress = newSearchProgressTracker(query);
+				ISearchResultConsumer.Outcome outcome = theConsumer.consume(progress, nextPid);
+				if (!outcome.isContinue()) {
+					break;
+				}
+			}
+			return newSearchProgressTracker(query);
+		} catch (IOException e) {
+			ourLog.error("IO failure during database access", e);
+			throw new InternalErrorException(Msg.code(1164) + e);
+		}
+	}
+
+	@Nonnull
+	private static SearchProgressTracker newSearchProgressTracker(IResultIterator<JpaPid> theResultIterator) {
+		return new SearchProgressTracker(
+				theResultIterator.hasNext(),
+				theResultIterator.getSkippedCount(),
+				theResultIterator.getNonSkippedCount());
 	}
 
 	@SuppressWarnings("ConstantConditions")
@@ -3378,15 +3414,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		@Override
 		public int getNonSkippedCount() {
 			return myNonSkipCount;
-		}
-
-		@Override
-		public Collection<JpaPid> getNextResultBatch(long theBatchSize) {
-			Collection<JpaPid> batch = new ArrayList<>();
-			while (this.hasNext() && batch.size() < theBatchSize) {
-				batch.add(this.next());
-			}
-			return batch;
 		}
 
 		@Override

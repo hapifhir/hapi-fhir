@@ -43,9 +43,16 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 public interface ISearchBuilder<T extends IResourcePersistentId<?>> {
-	static final Logger ourLog = LoggerFactory.getLogger(ISearchBuilder.class);
+	Logger ourLog = LoggerFactory.getLogger(ISearchBuilder.class);
 
 	String SEARCH_BUILDER_BEAN_NAME = "SearchBuilder";
+
+	SearchProgressTracker performSearchForPids(
+			ISearchResultConsumer<T> theConsumer,
+			SearchParameterMap theParams,
+			SearchRuntimeDetails theSearchRuntimeDetails,
+			RequestDetails theRequest,
+			@Nonnull RequestPartitionId theRequestPartitionId);
 
 	IResultIterator<T> createQuery(
 			SearchParameterMap theParams,

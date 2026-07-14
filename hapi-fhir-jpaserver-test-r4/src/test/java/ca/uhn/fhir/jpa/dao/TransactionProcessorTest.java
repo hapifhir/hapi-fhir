@@ -543,9 +543,7 @@ public class TransactionProcessorTest {
 
 		@Bean
 		public DaoRegistry daoRegistry() {
-			DaoRegistry retVal = new DaoRegistry(fhirContext());
-			retVal.setResourceDaos(List.of());
-			return retVal;
+			return new DaoRegistry(fhirContext());
 		}
 
 		@Bean

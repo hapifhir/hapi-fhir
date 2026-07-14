@@ -2792,7 +2792,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			// Store a HealthcareService without name so the reference can be resolved
 			HealthcareService svc = createHealthcareServiceWithoutName();
 			IFhirResourceDao<HealthcareService> healthcareServiceDao =
-				(IFhirResourceDao<HealthcareService>) myDaoRegistry.getResourceDao("HealthcareService");
+				myDaoRegistry.getResourceDao("HealthcareService");
 			healthcareServiceDao.update(svc, mySrd);
 
 			// Create an OrganizationAffiliation referencing the stored HealthcareService (external reference)

@@ -36,6 +36,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
@@ -134,8 +135,9 @@ public class ResourceMergeServiceTest {
 	@Mock
 	PartitionSettings myPartitionSettingsMock;
 
+	@SuppressWarnings("rawtypes")
 	@Mock
-	IFhirSystemDao<Bundle, ?> mySystemDaoMock;
+	IFhirSystemDao mySystemDaoMock;
 
 	@Mock
 	CrossPartitionReplaceReferencesSvc myCrossPartitionReplaceReferencesSvcMock;

@@ -19,24 +19,30 @@
  */
 package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import jakarta.annotation.Nonnull;
 
-import java.io.Closeable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
+@FunctionalInterface
+public interface ISearchResultConsumer<T> {
 
-public interface IResultIterator<T extends IResourcePersistentId<?>> extends Iterator<T>, Closeable {
+	Outcome CONTINUE = new Outcome(true);
+	Outcome STOP = new Outcome(false);
 
-	int getSkippedCount();
+	/**
+	 * Consume a single search result from the search coordinator
+	 */
+	@Nonnull
+	Outcome consume(SearchProgressTracker theProgressTracker, T theResult);
 
-	int getNonSkippedCount();
+	class Outcome {
 
-	default Collection<T> getNextResultBatch(long theBatchSize) {
-		Collection<T> batch = new ArrayList<>();
-		while (this.hasNext() && batch.size() < theBatchSize) {
-			batch.add(next());
+		public boolean isContinue() {
+			return myContinue;
 		}
-		return batch;
+
+		private boolean myContinue;
+
+		private Outcome(boolean theContinue) {
+			myContinue = theContinue;
+		}
 	}
 }

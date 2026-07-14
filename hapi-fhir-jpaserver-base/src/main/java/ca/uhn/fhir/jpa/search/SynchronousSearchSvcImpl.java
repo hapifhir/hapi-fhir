@@ -20,16 +20,16 @@
 package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.dao.ISearchResultConsumer;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
+import ca.uhn.fhir.jpa.dao.SearchProgressTracker;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -42,8 +42,8 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.BundleProviderWithNamedPages;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.ServerInterceptorUtil;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
@@ -51,7 +51,6 @@ import jakarta.persistence.EntityManager;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -116,9 +115,6 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 				.withRequestPartitionId(theRequestPartitionId)
 				.readOnly()
 				.execute(() -> {
-					// Load the results synchronously
-					List<JpaPid> pids = new ArrayList<>();
-
 					Long count = 0L;
 					if (wantCount) {
 
@@ -156,22 +152,27 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 						clonedParams.setCount(requestedCount.intValue() + 1);
 					}
 
-					try (IResultIterator<JpaPid> resultIter = theSb.createQuery(
-							clonedParams, searchRuntimeDetails, theRequestDetails, theRequestPartitionId)) {
-						while (resultIter.hasNext()) {
-							pids.add(resultIter.next());
-							if (theLoadSynchronousUpTo != null && pids.size() >= theLoadSynchronousUpTo) {
-								break;
-							}
-							if (theParams.getLoadSynchronousUpTo() != null
-									&& pids.size() >= theParams.getLoadSynchronousUpTo()) {
-								break;
-							}
+					// Perform the actual search
+					// Load the results synchronously
+					final List<JpaPid> consumedPids = new ArrayList<>();
+					ISearchResultConsumer<JpaPid> searchResultConsumer = (progress, pid) -> {
+						consumedPids.add(pid);
+						if (theLoadSynchronousUpTo != null && consumedPids.size() >= theLoadSynchronousUpTo) {
+							return ISearchResultConsumer.STOP;
 						}
-					} catch (IOException e) {
-						ourLog.error("IO failure during database access", e);
-						throw new InternalErrorException(Msg.code(1164) + e);
-					}
+						if (theParams.getLoadSynchronousUpTo() != null
+								&& consumedPids.size() >= theParams.getLoadSynchronousUpTo()) {
+							return ISearchResultConsumer.STOP;
+						}
+						return ISearchResultConsumer.CONTINUE;
+					};
+					SearchProgressTracker progressTracker = theSb.performSearchForPids(
+							searchResultConsumer,
+							clonedParams,
+							searchRuntimeDetails,
+							theRequestDetails,
+							theRequestPartitionId);
+					List<JpaPid> pids = consumedPids;
 
 					// truncate the list we retrieved - if needed
 					int receivedResourceCount = -1;
@@ -315,7 +316,17 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 					resources = ServerInterceptorUtil.fireStoragePreshowResource(
 							resources, theRequestDetails, myInterceptorBroadcaster);
 
-					SimpleBundleProvider bundleProvider = new SimpleBundleProvider(resources);
+					SimpleBundleProvider bundleProvider;
+					if (progressTracker.getCurrentPageId() != null) {
+						BundleProviderWithNamedPages bundleProviderWithNamedPages = new BundleProviderWithNamedPages(
+								resources, null, progressTracker.getCurrentPageId(), null);
+						bundleProviderWithNamedPages.setPreviousPageId(progressTracker.getPreviousPageId());
+						bundleProviderWithNamedPages.setNextPageId(progressTracker.getNextPageId());
+						bundleProvider = bundleProviderWithNamedPages;
+					} else {
+						bundleProvider = new SimpleBundleProvider(resources);
+					}
+
 					if (hasACount && theSb.requiresTotal()) {
 						bundleProvider.setTotalResourcesRequestedReturned(receivedResourceCount);
 					}

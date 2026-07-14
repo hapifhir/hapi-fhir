@@ -33,6 +33,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.commons.text.StringTokenizer;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.time.LocalDate;
@@ -51,10 +52,14 @@ import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 /**
  * @since 5.0.0
  */
-public class RequestPartitionId implements IModelJson {
+public class RequestPartitionId implements Comparable<RequestPartitionId>, IModelJson {
 	private static final RequestPartitionId ALL_PARTITIONS = new RequestPartitionId();
 	private static final ObjectMapper ourObjectMapper =
 			new ObjectMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+	public static final String STRINGIFIER_ALL = "(all)";
+	public static final char STRINGIFIER_DELIM = '_';
+	public static final String STRINGIFIER_DELIM_STRING = Character.toString(STRINGIFIER_DELIM);
+	public static final String STRINGIFIER_NULL = "null";
 
 	@JsonProperty("partitionDate")
 	private final LocalDate myPartitionDate;
@@ -109,6 +114,34 @@ public class RequestPartitionId implements IModelJson {
 		myPartitionNames = null;
 		myPartitionIds = null;
 		myAllPartitions = true;
+	}
+
+	@Override
+	public int compareTo(RequestPartitionId theOther) {
+		if (!hasPartitionIds() && !theOther.hasPartitionIds()) {
+			return 0;
+		}
+		if (!hasPartitionIds()) {
+			return 1;
+		}
+		if (!theOther.hasPartitionIds()) {
+			return -1;
+		}
+
+		int thisLowest = getLowestPartitionId();
+		int otherLowest = theOther.getLowestPartitionId();
+
+		return thisLowest - otherLowest;
+	}
+
+	private int getLowestPartitionId() {
+		int lowest = Integer.MAX_VALUE;
+		for (Integer id : getPartitionIds()) {
+			if (id != null) {
+				lowest = Math.min(lowest, id);
+			}
+		}
+		return lowest;
 	}
 
 	/**
@@ -403,8 +436,9 @@ public class RequestPartitionId implements IModelJson {
 	 * @since 8.8.0
 	 */
 	@Nonnull
-	public static RequestPartitionId allPartitionsWithPartitionIds(List<Integer> thePartitionIds) {
-		return new RequestPartitionId(null, thePartitionIds, null, true);
+	public static RequestPartitionId allPartitionsWithPartitionIds(@Nonnull List<Integer> thePartitionIds) {
+		List<Integer> partitionIds = !thePartitionIds.isEmpty() ? thePartitionIds : null;
+		return new RequestPartitionId(null, partitionIds, null, true);
 	}
 
 	/**
@@ -504,15 +538,38 @@ public class RequestPartitionId implements IModelJson {
 		if (theRequestPartitionId.hasPartitionIds()) {
 			assert theRequestPartitionId.hasPartitionIds();
 			retVal = theRequestPartitionId.getPartitionIds().stream()
-					.map(t -> getIfNull(t, "null").toString())
-					.collect(Collectors.joining(" "));
+					.map(t -> getIfNull(t, STRINGIFIER_NULL).toString())
+					.collect(Collectors.joining(STRINGIFIER_DELIM_STRING));
 			if (theRequestPartitionId.isAllPartitions()) {
-				retVal = "(all) " + retVal;
+				retVal = STRINGIFIER_ALL + STRINGIFIER_DELIM + retVal;
 			}
 		} else {
-			retVal = "(all)";
+			retVal = STRINGIFIER_ALL;
 		}
 		return retVal;
+	}
+
+	public static RequestPartitionId fromStringifiedKey(String theInput) {
+		StringTokenizer tok = new StringTokenizer(theInput, STRINGIFIER_DELIM);
+		boolean all = false;
+		List<Integer> partitionIds = new ArrayList<>();
+
+		while (tok.hasNext()) {
+			String next = tok.nextToken();
+			if (STRINGIFIER_ALL.equals(next)) {
+				all = true;
+			} else if (STRINGIFIER_NULL.equals(next)) {
+				partitionIds.add(null);
+			} else {
+				partitionIds.add(Integer.parseInt(next));
+			}
+		}
+
+		if (all) {
+			return RequestPartitionId.allPartitionsWithPartitionIds(partitionIds);
+		} else {
+			return RequestPartitionId.fromPartitionIds(partitionIds);
+		}
 	}
 
 	public String asJson() throws JsonProcessingException {
