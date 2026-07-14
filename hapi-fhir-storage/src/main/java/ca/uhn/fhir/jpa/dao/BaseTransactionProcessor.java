@@ -1043,7 +1043,7 @@ public abstract class BaseTransactionProcessor {
 					IBaseResource resource = myVersionAdapter.getResource(theEntry);
 					String resourceType = myContext.getResourceType(resource);
 					nextWriteEntryRequestPartitionId = tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
-							requestDetailsForEntry, resource, resourceType);
+							requestDetailsForEntry, resource, resourceType, url);
 					break;
 				}
 				case PUT: {
@@ -1060,7 +1060,7 @@ public abstract class BaseTransactionProcessor {
 						}
 						if (nextWriteEntryRequestPartitionId == null) {
 							nextWriteEntryRequestPartitionId = tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
-									requestDetailsForEntry, resource, resourceType);
+									requestDetailsForEntry, resource, resourceType, url);
 							if (resourceId != null) {
 								theTransactionDetails.addResolvedPartition(
 										resourceId, nextWriteEntryRequestPartitionId);
@@ -1075,28 +1075,45 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-	 * Determine the create partition for a transaction write entry, if possible. It may not be possible in
-	 * patient-ID partition mode: an entry whose Patient reference is an inline match URL (e.g.
-	 * {@code subject = "Patient?identifier=..."}) that pre-fetch hasn't resolved yet cannot be routed to a Patient
-	 * compartment. In that case, when all-partition search is supported
-	 * ({@link PartitionSettings#isAllPartitionSearchSupported()}) we return
-	 * {@link RequestPartitionId#allPartitions()} for now; the actual routing is determined later, per-entry at
-	 * write time, once pre-fetch has resolved the inline match URL. On infrastructure that cannot search across all
-	 * partitions, the partition must be determined before the transaction opens, so it cannot be deferred and the
-	 * rejection bubbles up.
+	 * Determine the create partition for a transaction write entry before pre-fetch, if possible. In patient-ID
+	 * partition mode the Patient compartment sometimes can't be resolved this early — an inline Patient match URL that
+	 * pre-fetch hasn't resolved yet (Msg 1326), or an id-less conditional-update Patient body (Msg 1321). When
+	 * all-partition search is supported ({@link PartitionSettings#isAllPartitionSearchSupported()}) we defer these to
+	 * {@link RequestPartitionId#allPartitions()} and let routing be settled per-entry at write time, once pre-fetch and
+	 * {@code PatientIdPartitionInterceptor}'s after-prefetch rewrite have resolved the match URL to a concrete Patient.
+	 * Where all-partition search is unsupported the partition must be fixed up front, so the rejection bubbles up
+	 * instead. The body comments spell out which codes and body shapes are deferred.
 	 * <p>
-	 * <b>Not a clean solution:</b> deferral is keyed off Msg 1326, an error code raised specifically by
-	 * {@code PatientIdPartitionInterceptor}, so the core transaction processor is coupled to an interceptor-specific
-	 * code. This is a pragmatic interim approach; a cleaner separation should be designed when time allows.
+	 * <b>Not a clean solution:</b> deferral is keyed off Msg 1321/1326, error codes raised specifically by
+	 * {@code PatientIdPartitionInterceptor}, so the core transaction processor is coupled to interceptor-specific
+	 * codes. This is a pragmatic interim approach; a cleaner separation should be designed when time allows.
+	 *
+	 * @param theEntryRequestUrl the entry's request URL; a conditional update is written via a match URL (contains
+	 *     {@code '?'})
 	 */
 	private RequestPartitionId tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
-			RequestDetails theRequestDetails, IBaseResource theResource, String theResourceType) {
+			RequestDetails theRequestDetails,
+			IBaseResource theResource,
+			String theResourceType,
+			String theEntryRequestUrl) {
 		try {
 			return myRequestPartitionHelperService.determineCreatePartitionForRequest(
 					theRequestDetails, theResource, theResourceType);
 		} catch (MethodNotAllowedException e) {
-			// Msg 1326 is the patient-ID interceptor's "can't route to a compartment" signal (see javadoc).
-			if (myPartitionSettings.isAllPartitionSearchSupported() && messageStartsWith(e, Msg.code(1326))) {
+			if (!myPartitionSettings.isAllPartitionSearchSupported()) {
+				throw e;
+			}
+			// 1326: the entry's Patient compartment reference is not resolved before pre-fetch. Always deferrable.
+			if (messageStartsWith(e, Msg.code(1326))) {
+				return RequestPartitionId.allPartitions();
+			}
+			// 1321: a truly id-less Patient in a conditional update, whose identifier the after-prefetch rewrite might
+			// map to the existing Patient. Intentionally narrow, matching only an id-less body,
+			// and a more general fix is deferred to Tyner's broader fixes on patient id mode.
+			boolean conditionalUpdateOfIdlessPatient = isNotBlank(theEntryRequestUrl)
+					&& theEntryRequestUrl.indexOf('?') != -1
+					&& theResource.getIdElement().getIdPart() == null;
+			if (conditionalUpdateOfIdlessPatient && messageStartsWith(e, Msg.code(1321))) {
 				return RequestPartitionId.allPartitions();
 			}
 			throw e;
@@ -1562,7 +1579,7 @@ public abstract class BaseTransactionProcessor {
 							outcome = resourceDao.update(
 									res, null, false, false, requestDetailsForEntry, theTransactionDetails);
 						} else {
-							if (!shouldConditionalUpdateMatchId(theTransactionDetails, res.getIdElement())) {
+							if (!shouldConditionalUpdateMatchId(res.getIdElement())) {
 								res.setId((String) null);
 							}
 							String matchUrl;
@@ -1885,15 +1902,10 @@ public abstract class BaseTransactionProcessor {
 	/**
 	 * Check for if a resource id should be matched in a conditional update
 	 * If the FHIR version is older than R4, it follows the old specifications and does not match
-	 * If the resource id has been resolved, then it is an existing resource and does not need to be matched
 	 * If the resource id is local or a placeholder, the id is temporary and should not be matched
 	 */
-	private boolean shouldConditionalUpdateMatchId(TransactionDetails theTransactionDetails, IIdType theId) {
+	private boolean shouldConditionalUpdateMatchId(IIdType theId) {
 		if (myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.R4)) {
-			return false;
-		}
-		if (theTransactionDetails.hasResolvedResourceId(theId)
-				&& !theTransactionDetails.isResolvedResourceIdEmpty(theId)) {
 			return false;
 		}
 		if (theId != null && theId.getValue() != null) {
