@@ -673,12 +673,9 @@ public class FhirInstanceValidatorR5Test extends BaseTest {
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(rp));
 
 
-		assertEquals(2, outcome.size());
+		assertEquals(1, outcome.size());
 		assertThat(outcome.get(0).getMessage()).contains("Unknown code 'http://terminology.hl7.org/CodeSystem/v2-0131#GAGAGAGA'");
 		assertEquals(ResultSeverityEnum.ERROR, outcome.get(0).getSeverity());
-		assertThat(outcome.get(1).getMessage()).contains("None of the codings provided are in the value set 'Patient Relationship Type'");
-		assertEquals(ResultSeverityEnum.INFORMATION, outcome.get(1).getSeverity());
-
 	}
 
 	// TODO: uncomment value false when https://github.com/hapifhir/org.hl7.fhir.core/issues/1766 is fixed

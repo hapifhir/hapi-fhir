@@ -1014,7 +1014,7 @@
 	</licenses>
 
 	<properties>
-		<fhir_core_version>6.9.4.1</fhir_core_version>
+		<fhir_core_version>6.9.12-SNAPSHOT</fhir_core_version>
 		<spotless_version>2.41.1</spotless_version>
 		<spotless.exclude.pattern>**/test/**/*.java</spotless.exclude.pattern>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
@@ -1084,7 +1084,7 @@
 		<httpcore5_version>5.3.1</httpcore5_version>
 		<maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
-		<okhttp_version>4.12.0</okhttp_version>
+		<okhttp_version>5.3.2</okhttp_version>
 		<!--
 		Note: As of 2024-11, the opentelemetry-agent-for-testing dependency published to Maven
 		uses a version which lines up with the OTEL instrumentation version, but with "-alpha"
@@ -1368,11 +1368,13 @@
 				<artifactId>okhttp</artifactId>
 				<version>${okhttp_version}</version>
 			</dependency>
-			<!-- Pinned here for CVE: CVE-2022-24329 -->
+			<!-- OkHttp 5.x publishes as Kotlin Multiplatform; the plain "okhttp" artifact
+			     above is a metadata-only shell for Maven consumers. Actual compile-time
+			     usage must depend on this JVM variant instead. -->
 			<dependency>
-				<groupId>com.squareup.okio</groupId>
-				<artifactId>okio-jvm</artifactId>
-				<version>3.9.1</version>
+				<groupId>com.squareup.okhttp3</groupId>
+				<artifactId>okhttp-jvm</artifactId>
+				<version>${okhttp_version}</version>
 			</dependency>
 
 			<!-- Pinned here for CVE: CVE-2025-7962 This is used transitively in simplejavamail which has no fix yet -->
