@@ -40,22 +40,15 @@ import ca.uhn.fhir.batch2.util.BatchJobOpenTelemetryUtils;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
-import ca.uhn.fhir.jpa.model.sched.HapiJob;
-import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
-import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
-import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.annotations.VisibleForTesting;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
-import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.time.DateUtils;
-import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
@@ -66,6 +59,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Timer;
@@ -84,10 +78,9 @@ import static ca.uhn.fhir.batch2.model.StatusEnum.FINALIZE;
 import static ca.uhn.fhir.batch2.model.StatusEnum.IN_PROGRESS;
 import static ca.uhn.fhir.batch2.util.BatchJobOpenTelemetryUtils.JOB_STEP_EXECUTION_SPAN_NAME;
 
-public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorService, IHasScheduledJobs {
-	public static final String SCHEDULED_JOB_ID = ReductionStepExecutorScheduledJob.class.getName();
+public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorService {
 	private static final Logger ourLog = LoggerFactory.getLogger(ReductionStepExecutorServiceImpl.class);
-	private final Map<String, JobWorkCursor> myInstanceIdToJobWorkCursor =
+	private final Map<String, JobWorkCursor<?, ?, ?>> myInstanceIdToJobWorkCursor =
 			Collections.synchronizedMap(new LinkedHashMap<>());
 	private final ExecutorService myReducerExecutor;
 	private final ExecutorService myReducerChunkExecutor;
@@ -164,8 +157,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		}
 	}
 
-	@Override
-	public void reducerPass() {
+	private void reducerPass() {
 		if (myCurrentlyExecuting.tryAcquire()) {
 			try {
 				String[] instanceIds = myInstanceIdToJobWorkCursor.keySet().toArray(new String[0]);
@@ -173,7 +165,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 					String instanceId = instanceIds[0];
 					myCurrentlyFinalizingInstanceId.set(instanceId);
 					JobWorkCursor<?, ?, ?> jobWorkCursor = myInstanceIdToJobWorkCursor.get(instanceId);
-					executeReductionStep(instanceId, jobWorkCursor);
+					ReductionStepChunkProcessingResponse stepOutcome = executeReductionStep(instanceId, jobWorkCursor);
 
 					// If we get here, this succeeded. Purge the instance from the work queue
 					myInstanceIdToJobWorkCursor.remove(instanceId);
@@ -293,12 +285,22 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 			PT parameters,
 			IReductionStepWorker<PT, IT, OT> reductionStepWorker,
 			ReductionStepChunkProcessingResponse response) {
+		AtomicReference<String> driverWorkChunkId = new AtomicReference<>();
 		try {
 			executeInTransactionWithSynchronization(() -> {
 				try (Stream<WorkChunk> chunkIterator =
 						myJobPersistence.fetchAllWorkChunksForStepStream(instance.getInstanceId(), step.getStepId())) {
-					chunkIterator.forEach(chunk -> executeInNoTransaction(() -> processChunk(
-							chunk, instance, parameters, reductionStepWorker, response, theJobWorkCursor)));
+
+					chunkIterator.forEach(chunk -> {
+						if (chunk.getStatus() == WorkChunkStatusEnum.REDUCTION_READY) {
+							// these are our reduction steps
+							executeInNoTransaction(() -> processChunk(
+									chunk, instance, parameters, reductionStepWorker, response, theJobWorkCursor));
+						} else {
+							// this is the 'drive chunk' that we put on the queue
+							driverWorkChunkId.set(chunk.getId());
+						}
+					});
 				}
 				return null;
 			});
@@ -331,7 +333,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 						// we should update instance here to keep it consistent with the newest version in persistence
 						instance.setStatus(COMPLETED);
 					} catch (ReductionStepFailureException e) {
-
+						response.setSuccessful(false);
 						myJobPersistence.updateInstance(instance.getInstanceId(), i -> {
 							i.setErrorMessage(e.getMessage());
 							i.setEndTime(new Date());
@@ -377,6 +379,16 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 					}
 				}
 
+				// update our driver chunk
+				if (driverWorkChunkId.get() != null) {
+					boolean succeeded = response.isSuccessful();
+					myJobPersistence.markWorkChunksWithStatusAndWipeData(
+							instance.getInstanceId(),
+							List.of(driverWorkChunkId.get()),
+							succeeded ? WorkChunkStatusEnum.COMPLETED : WorkChunkStatusEnum.FAILED,
+							succeeded ? null : "reduction failed");
+				} // else - jobs that do not have the 'driver' chunk (pre-existing ones maybe)
+
 				return null;
 			});
 		}
@@ -405,19 +417,6 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 				.withRequest(null)
 				.withPropagation(Propagation.REQUIRES_NEW)
 				.execute(runnable);
-	}
-
-	@Override
-	public void scheduleJobs(ISchedulerService theSchedulerService) {
-		theSchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_SECOND, buildJobDefinition());
-	}
-
-	@Nonnull
-	private ScheduledJobDefinition buildJobDefinition() {
-		ScheduledJobDefinition jobDefinition = new ScheduledJobDefinition();
-		jobDefinition.setId(SCHEDULED_JOB_ID);
-		jobDefinition.setJobClass(ReductionStepExecutorScheduledJob.class);
-		return jobDefinition;
 	}
 
 	private <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> void processChunk(
@@ -486,16 +485,6 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		@Override
 		public void run() {
 			runHeartbeat();
-		}
-	}
-
-	public static class ReductionStepExecutorScheduledJob implements HapiJob {
-		@Autowired
-		private IReductionStepExecutorService myTarget;
-
-		@Override
-		public void execute(JobExecutionContext theContext) {
-			myTarget.reducerPass();
 		}
 	}
 }

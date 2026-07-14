@@ -98,6 +98,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -114,6 +115,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class JpaJobPersistenceImpl implements IJobPersistence {
 	public static final String CREATE_TIME = "myCreateTime";
+	// Special step id for reduction steps
+	public static final String REDUCTION_STEP_ID = "reduction-step";
+
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	public static final int DEFAULT_ATTACHMENT_CHUNK_SIZE = toIntExact(FileUtils.ONE_MB);
 	private final IBatch2AttachmentRepository myAttachmentRepository;
@@ -164,6 +168,17 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
 	public String onWorkChunkCreate(WorkChunkCreateEvent theBatchWorkChunk) {
+		Batch2WorkChunkEntity entity = createEntityFromCreateEvent(theBatchWorkChunk);
+
+		ourLog.debug("Create work chunk {}/{}/{}", entity.getInstanceId(), entity.getId(), entity.getTargetStepId());
+		ourLog.trace(
+				"Create work chunk data {}/{}: {}", entity.getInstanceId(), entity.getId(), entity.getSerializedData());
+		myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> myWorkChunkRepository.save(entity));
+
+		return entity.getId();
+	}
+
+	private Batch2WorkChunkEntity createEntityFromCreateEvent(WorkChunkCreateEvent theBatchWorkChunk) {
 		Batch2WorkChunkEntity entity = new Batch2WorkChunkEntity();
 		entity.setId(UUID.randomUUID().toString());
 		entity.setSequence(theBatchWorkChunk.sequence);
@@ -175,13 +190,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		entity.setCreateTime(new Date());
 		entity.setStartTime(new Date());
 		entity.setStatus(getOnCreateStatus(theBatchWorkChunk));
-
-		ourLog.debug("Create work chunk {}/{}/{}", entity.getInstanceId(), entity.getId(), entity.getTargetStepId());
-		ourLog.trace(
-				"Create work chunk data {}/{}: {}", entity.getInstanceId(), entity.getId(), entity.getSerializedData());
-		myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> myWorkChunkRepository.save(entity));
-
-		return entity.getId();
+		return entity;
 	}
 
 	@Override
@@ -580,6 +589,41 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 				.map(this::toChunk);
 	}
 
+	//	@Override
+	//	public WorkChunk fetchWorkChunkById(String theWorkChunkId) {
+	//		return myWorkChunkRepository.findById(theWorkChunkId)
+	//			.map(this::toChunk)
+	//			.orElse(null);
+	//	}
+
+	//	@Override
+	//	public void createReductionStepChunk(JobInstance theInstance, Consumer<Integer> theCallback) {
+	////		myWorkChunkRepository.fetchChunksForStep(theInstance.getInstanceId(), REDUCTION_STEP_ID);
+	//
+	//
+	////		myWorkChunkRepository.getDistinctStatusesForStep(
+	////			theInstance.getInstanceId(),
+	////			REDUCTION_STEP_ID
+	////		);
+	//
+	//		Batch2WorkChunkEntity entity = new Batch2WorkChunkEntity();
+	//		entity.setId(UUID.randomUUID().toString());
+	//		entity.setSequence(0);
+	//		entity.setJobDefinitionId(theInstance.getJobDefinitionId());
+	//		entity.setJobDefinitionVersion(theInstance.getJobDefinitionVersion());
+	//		entity.setTargetStepId(REDUCTION_STEP_ID);
+	//		entity.setInstanceId(theBatchWorkChunk.instanceId);
+	//		entity.setSerializedData(theBatchWorkChunk.serializedData);
+	//		entity.setCreateTime(new Date());
+	//		entity.setStartTime(new Date());
+	//		entity.setStatus(WorkChunkStatusEnum.READY);
+	//
+	//		Batch2WorkChunkEntity chunk = myTransactionService.withSystemRequestOnDefaultPartition().execute(() ->
+	// myWorkChunkRepository.save(entity));
+	//
+	//
+	//	}
+
 	@Override
 	public Page<WorkChunkMetadata> fetchAllWorkChunkMetadataForJobInStates(
 			Pageable thePageable, String theInstanceId, Set<WorkChunkStatusEnum> theStates) {
@@ -857,11 +901,16 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public boolean advanceJobStepAndUpdateChunkStatus(
 			String theJobInstanceId, String theNextStepId, boolean theIsReductionStep) {
+		AtomicReference<JobInstance> instanceRep = new AtomicReference<>();
 		boolean changed = updateInstance(theJobInstanceId, instance -> {
 			if (instance.getCurrentGatedStepId().equals(theNextStepId)) {
 				// someone else beat us here.  No changes
 				return false;
 			}
+			// we only need this if we're creating a reduction 'driver' chunk.
+			// and we only do that if we (this instance) is the one who will be transitioning
+			// the chunks to READY/REDUCTION_READY
+			instanceRep.set(instance);
 			ourLog.debug("Moving gated instance {} to the next step {}.", theJobInstanceId, theNextStepId);
 			instance.setCurrentGatedStepId(theNextStepId);
 			return true;
@@ -884,6 +933,34 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 					theNextStepId,
 					List.of(WorkChunkStatusEnum.GATE_WAITING, WorkChunkStatusEnum.QUEUED),
 					nextStep);
+
+			/*
+			 * we add a data-free READY chunk that will be enqueued by the system
+			 */
+			JobInstance instance = instanceRep.get();
+			if (instance == null) {
+				ourLog.warn("Instance was not set for reduction step; falling back to inline processing");
+				return changed;
+			}
+
+			if (theIsReductionStep) {
+				/**
+				 * We're creating a "driver" chunk with state READY
+				 */
+				WorkChunkCreateEvent reductionReadyChunk = new WorkChunkCreateEvent(
+						instance.getJobDefinitionId(),
+						instance.getJobDefinitionVersion(),
+						theNextStepId,
+						theJobInstanceId,
+						0,
+						null,
+						true);
+				Batch2WorkChunkEntity entity = createEntityFromCreateEvent(reductionReadyChunk);
+				entity.setStatus(WorkChunkStatusEnum.READY);
+
+				myWorkChunkRepository.save(entity);
+			}
+
 			ourLog.debug(
 					"Updated {} chunks of gated instance {} for step {} from fake QUEUED to READY.",
 					numChanged,

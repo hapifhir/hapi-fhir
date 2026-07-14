@@ -146,9 +146,17 @@ public class ActiveJobInstanceProcessor {
 			JobWorkCursor<?, ?, ?> jobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(
 					jobDefinition, updatedInstance.get().getCurrentGatedStepId());
 			if (jobWorkCursor.isReductionStep()) {
-				// Reduction step work chunks should never be sent to the queue but to its specific service instead.
-				triggerReductionStep(theInstance, jobWorkCursor);
-				return;
+				Set<WorkChunkStatusEnum> workChunkStatuses = myJobPersistence.getDistinctWorkChunkStatesForJobAndStep(
+						theInstance.getInstanceId(), jobWorkCursor.getCurrentStepId());
+				if (workChunkStatuses.size() == 1 && workChunkStatuses.contains(WorkChunkStatusEnum.REDUCTION_READY)) {
+					// we are not using a workchunk on the queue - run inline
+					triggerReductionStep(theInstance, jobWorkCursor);
+					return;
+				}
+				// workchunkstatuses contains more than REDUCTION_READY.
+				// this is expected if we're processing using a workchunk (in ready state)
+				// on the queue. we'll let it process normally
+				// Ie, let it get flipped to QUEUED, etc
 			}
 		}
 

@@ -79,9 +79,15 @@ public abstract class BaseBatch2Config {
 
 	@Bean
 	public WorkChunkProcessor jobStepExecutorService(
-			BatchJobSender theBatchJobSender, IJobStepExecutionServices theJobStepExecutionServices) {
+			BatchJobSender theBatchJobSender,
+			IJobStepExecutionServices theJobStepExecutionServices,
+			IReductionStepExecutorService theReductionStepExecutorService) {
 		return new WorkChunkProcessor(
-				myPersistence, theBatchJobSender, myHapiTransactionService, theJobStepExecutionServices);
+				myPersistence,
+				theBatchJobSender,
+				myHapiTransactionService,
+				theJobStepExecutionServices,
+				theReductionStepExecutorService);
 	}
 
 	@Bean

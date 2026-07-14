@@ -112,6 +112,15 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 			throw new RuntimeException(Msg.code(2914) + " " + msg, ex);
 		}
 
+		/*
+		 * Reduction steps do not produce a proper JobStepExecutorOutput.
+		 * They return "null" and run the job asynchronously
+		 * (so we cannot see, here, if they are successful or not)
+		 */
+		if (myDefinition.isLastStepReduction()) {
+			return;
+		}
+
 		if (!stepExecutorOutput.isSuccessful()) {
 			return;
 		}
@@ -122,7 +131,8 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 		 * So if there are no COMPLETED work chunks (ie, first step produces no work chunks)
 		 * we must complete it here.
 		 */
-		if (stepExecutorOutput.getDataSink().firstStepProducedNothing() && !myDefinition.isLastStepReduction()) {
+		if (!myDefinition.isLastStepReduction()
+				&& stepExecutorOutput.getDataSink().firstStepProducedNothing()) {
 			ourLog.info(
 					"First step of job myInstance {} produced no work chunks and last step is not a reduction, "
 							+ "marking as completed and setting end date",

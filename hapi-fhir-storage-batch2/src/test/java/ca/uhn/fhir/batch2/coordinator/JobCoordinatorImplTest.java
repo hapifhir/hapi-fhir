@@ -6,6 +6,7 @@ import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
+import ca.uhn.fhir.batch2.api.IReductionStepExecutorService;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
@@ -98,6 +99,8 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	private IInterceptorService myInterceptorService;
 	@Mock
 	private ISchedulerService myIHapiScheduler;
+	@Mock
+	private IReductionStepExecutorService myReductionStepExecutorService;
 	private final IHapiTransactionService myTransactionService = new NonTransactionalHapiTransactionService();
 	@Captor
 	private ArgumentCaptor<StepExecutionDetails<TestJobParameters, VoidModel>> myStep1ExecutionDetailsCaptor;
@@ -116,7 +119,6 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	private IChannelProducer<JobWorkNotification> myJobProducer;
 	private IChannelConsumer<JobWorkNotification> myJobConsumer;
 
-
 	@BeforeEach
 	public void beforeEach() {
 		IChannelNamer channelNamer = (name, settings) -> name;
@@ -128,7 +130,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		// The code refactored to keep the same functionality,
 		// but in this service (so it's a real service here!)
-		WorkChunkProcessor jobStepExecutorSvc = new WorkChunkProcessor(myJobInstancePersister, myBatchJobSender, new NonTransactionalHapiTransactionService(), myJobStepExecutionServices);
+		WorkChunkProcessor jobStepExecutorSvc = new WorkChunkProcessor(myJobInstancePersister, myBatchJobSender, new NonTransactionalHapiTransactionService(), myJobStepExecutionServices, myReductionStepExecutorService);
 		WorkChannelMessageListener workChannelMessageListener = new WorkChannelMessageListener(myJobInstancePersister,
 			myJobDefinitionRegistry, myBatchJobSender, jobStepExecutorSvc, myJobMaintenanceService, myTransactionService,myInterceptorBroadcaster, myInterceptorService, myIHapiScheduler);
 
