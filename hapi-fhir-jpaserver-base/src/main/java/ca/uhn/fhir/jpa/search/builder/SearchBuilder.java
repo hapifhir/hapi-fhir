@@ -470,6 +470,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		myPidSet = new HashSet<>(thePidSet);
 	}
 
+	protected Set<JpaPid> getPreviouslyAddedPids() {
+		return myPidSet;
+	}
+
 	@Override
 	public SearchProgressTracker performSearchForPids(
 			ISearchResultConsumer<JpaPid> theConsumer,
@@ -3267,7 +3271,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					// if we got here, it means the current JpaPid has already been processed,
 					// and we will decide (here) if we need to fetch related resources recursively
 					if (myFetchIncludesForEverythingOperation) {
-						myIncludesIterator = new IncludesIterator(myPidSet, myRequest);
+						myIncludesIterator = new IncludesIterator(getPreviouslyAddedPids(), myRequest);
 						myFetchIncludesForEverythingOperation = false;
 					}
 					if (myIncludesIterator != null) {

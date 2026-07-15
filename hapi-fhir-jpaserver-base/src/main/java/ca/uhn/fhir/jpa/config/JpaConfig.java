@@ -67,7 +67,6 @@ import ca.uhn.fhir.jpa.dao.ResourceMetadataExtractorSvcImpl;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTagDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIdentifierPatientUniqueEntityDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIdentifierSystemEntityDao;
@@ -282,28 +281,7 @@ public class JpaConfig {
 	protected JpaStorageSettings myStorageSettings;
 
 	@Autowired
-	protected PartitionSettings myPartitionSettings;
-
-	@Autowired
 	protected FhirContext myFhirContext;
-
-	@Autowired
-	protected IIdHelperService myIdHelperService;
-
-	@Autowired
-	protected IResourceHistoryTableDao myResourceHistoryTableDao;
-
-	@Autowired
-	protected ISearchParamRegistry mySearchParamRegistry;
-
-	@Autowired
-	protected IInterceptorBroadcaster myInterceptorBroadcaster;
-
-	@Autowired
-	protected IResourceTagDao myResourceTagDao;
-
-	@Autowired
-	protected FhirContext myContext;
 
 	@Bean
 	public ValidationSupportChain.CacheConfiguration validationSupportChainCacheConfiguration() {
