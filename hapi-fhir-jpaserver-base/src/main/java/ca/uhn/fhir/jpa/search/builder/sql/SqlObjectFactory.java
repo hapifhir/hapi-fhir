@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.search.builder.sql;
 
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
-import ca.uhn.fhir.jpa.search.builder.models.TokenIndexMode;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CompressedTokenPredicateBuilder;
@@ -120,9 +119,11 @@ public class SqlObjectFactory {
 	}
 
 	public CompressedTokenPredicateBuilder compressedTokenIndexTable(
-			SearchQueryBuilder theSearchSqlBuilder, TokenIndexMode theTokenIndexMode) {
+			SearchQueryBuilder theSearchSqlBuilder // , TokenIndexMode theTokenIndexMode
+			) {
 		return myApplicationContext.getBean(
-				CompressedTokenPredicateBuilder.class, theSearchSqlBuilder, theTokenIndexMode);
+				CompressedTokenPredicateBuilder.class, theSearchSqlBuilder // , theTokenIndexMode
+				);
 	}
 
 	public UriPredicateBuilder uriIndexTable(SearchQueryBuilder theSearchSqlBuilder) {

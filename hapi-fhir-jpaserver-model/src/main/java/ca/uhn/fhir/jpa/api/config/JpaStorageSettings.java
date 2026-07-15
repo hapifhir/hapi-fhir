@@ -24,8 +24,6 @@ import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy;
-import ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy.TokenIndex;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -45,7 +43,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -235,8 +232,9 @@ public class JpaStorageSettings extends StorageSettings {
 	private boolean myFilterParameterEnabled = false;
 	private StoreMetaSourceInformationEnum myStoreMetaSourceInformation =
 			StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID;
-	private TokenIndexStrategy myTokenIndexStrategy =
-			TokenIndexStrategy.of(EnumSet.of(TokenIndex.LEGACY), TokenIndex.LEGACY);
+	// Moved to CDR (ca.cdr.pers.settings.TokenIndexStrategy); token index strategy is provided via a CDR API.
+	//	private TokenIndexStrategy myTokenIndexStrategy =
+	//			TokenIndexStrategy.of(EnumSet.of(TokenIndex.LEGACY), TokenIndex.LEGACY);
 	private Set<String> myIdentifierTokenSearchParams = new HashSet<>(Set.of("identifier"));
 	private HistoryCountModeEnum myHistoryCountMode = DEFAULT_HISTORY_COUNT_MODE;
 	private int myInternalSynchronousSearchSize = DEFAULT_INTERNAL_SYNCHRONOUS_SEARCH_SIZE;
@@ -1875,32 +1873,23 @@ public class JpaStorageSettings extends StorageSettings {
 		myStoreMetaSourceInformation = theStoreMetaSourceInformation;
 	}
 
-	/**
-	 * Controls how token-index reads and writes are routed between the legacy
-	 * {@code HFJ_SPIDX_TOKEN} table and the compressed token index tables.
-	 *
-	 * @see TokenIndexStrategy
-	 */
-	public TokenIndexStrategy getTokenIndexStrategy() {
-		return myTokenIndexStrategy;
-	}
-
-	/**
-	 * Controls how token-index reads and writes are routed between the legacy
-	 * {@code HFJ_SPIDX_TOKEN} table and the compressed token index tables.
-	 *
-	 * <p>This setting supports a zero-downtime migration by configuring which tables
-	 * to write to (one or both) and which table to read from. The read target must
-	 * always be included in the write targets.
-	 *
-	 * <p>Default writes to and reads from {@link TokenIndexStrategy.TokenIndex#LEGACY}.
-	 *
-	 * @see TokenIndexStrategy
-	 */
-	public void setTokenIndexStrategy(TokenIndexStrategy theTokenIndexStrategy) {
-		Validate.notNull(theTokenIndexStrategy, "theTokenIndexStrategy must not be null");
-		myTokenIndexStrategy = theTokenIndexStrategy;
-	}
+	// TODO: remove
+	//	/**
+	//	 * Controls how token-index reads and writes are routed between the legacy
+	//	 * {@code HFJ_SPIDX_TOKEN} table and the compressed token index tables.
+	//	 */
+	//	public TokenIndexStrategy getTokenIndexStrategy() {
+	//		return myTokenIndexStrategy;
+	//	}
+	//
+	//	/**
+	//	 * Controls how token-index reads and writes are routed between the legacy
+	//	 * {@code HFJ_SPIDX_TOKEN} table and the compressed token index tables.
+	//	 */
+	//	public void setTokenIndexStrategy(TokenIndexStrategy theTokenIndexStrategy) {
+	//		Validate.notNull(theTokenIndexStrategy, "theTokenIndexStrategy must not be null");
+	//		myTokenIndexStrategy = theTokenIndexStrategy;
+	//	}
 
 	/**
 	 * Returns the set of token search parameter names that should be routed to the
@@ -1910,7 +1899,6 @@ public class JpaStorageSettings extends StorageSettings {
 	 * <p>Default: {@code {"identifier"}}.
 	 *
 	 * @see #setIdentifierTokenSearchParams(Set)
-	 * @see TokenIndexStrategy
 	 */
 	public Set<String> getIdentifierTokenSearchParams() {
 		return myIdentifierTokenSearchParams;

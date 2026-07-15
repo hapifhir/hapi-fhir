@@ -28,7 +28,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy;
+//import ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -141,7 +141,7 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		JpaStorageSettings defaults = new JpaStorageSettings();
 		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(defaults.isMarkResourcesForReindexingUponSearchParameterChange());
 		myStorageSettings.setMatchUrlCacheEnabled(defaults.isMatchUrlCacheEnabled());
-		myStorageSettings.setTokenIndexStrategy(defaults.getTokenIndexStrategy());
+		//myStorageSettings.setTokenIndexStrategy(defaults.getTokenIndexStrategy());
 	}
 
 	@Test
@@ -2807,7 +2807,8 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	void testSearch_CompressedToken_SearchOnePartition_IncludePartitionInHashes() {
-		myStorageSettings.setTokenIndexStrategy(TokenIndexStrategy.of(EnumSet.of(TokenIndexStrategy.TokenIndex.COMPRESSED), TokenIndexStrategy.TokenIndex.COMPRESSED));
+		// TODO: can this be moved?
+		//myStorageSettings.setTokenIndexStrategy(TokenIndexStrategy.of(EnumSet.of(TokenIndexStrategy.TokenIndex.COMPRESSED), TokenIndexStrategy.TokenIndex.COMPRESSED));
 		myPartitionSettings.setIncludePartitionInSearchHashes(true);
 
 		IIdType id = createPatient(withCreatePartition(1), withIdentifier("http://example.com", "ID-1"), withGender("male"));

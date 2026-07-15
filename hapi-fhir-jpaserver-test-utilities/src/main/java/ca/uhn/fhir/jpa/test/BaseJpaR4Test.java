@@ -62,8 +62,6 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamDateDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamQuantityDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamQuantityNormalizedDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenCommonResDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenIdentifierDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceReindexJobDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
@@ -290,10 +288,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected IResourceIndexedSearchParamDateDao myResourceIndexedSearchParamDateDao;
 	@Autowired
 	protected IResourceIndexedComboTokensNonUniqueDao myResourceIndexedComboTokensNonUniqueDao;
-	@Autowired
-	protected IResourceIndexedSearchParamTokenCommonResDao myTokenCommonResDao;
-	@Autowired
-	protected IResourceIndexedSearchParamTokenIdentifierDao myTokenIdentifierDao;
 	@Autowired
 	@Qualifier("myAllergyIntoleranceDaoR4")
 	protected IFhirResourceDao<AllergyIntolerance> myAllergyIntoleranceDao;

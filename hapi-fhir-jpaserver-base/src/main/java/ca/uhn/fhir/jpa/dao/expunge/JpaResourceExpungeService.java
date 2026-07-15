@@ -36,9 +36,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamNumberDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamQuantityDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamQuantityNormalizedDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenCommonResDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenIdentifierDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
@@ -101,12 +99,6 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 
 	@Autowired
 	private IResourceIndexedSearchParamTokenDao myResourceIndexedSearchParamTokenDao;
-
-	@Autowired
-	private IResourceIndexedSearchParamTokenIdentifierDao myResourceIndexedSearchParamTokenIdentifierDao;
-
-	@Autowired
-	private IResourceIndexedSearchParamTokenCommonResDao myResourceIndexedSearchParamTokenCommonResDao;
 
 	@Autowired
 	private IResourceIndexedSearchParamDateDao myResourceIndexedSearchParamDateDao;
@@ -383,8 +375,6 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 		}
 		if (resource == null || resource.isParamsTokenPopulated()) {
 			myResourceIndexedSearchParamTokenDao.deleteByResourceId(theResourceId);
-			myResourceIndexedSearchParamTokenIdentifierDao.deleteByResourceId(theResourceId);
-			myResourceIndexedSearchParamTokenCommonResDao.deleteByResourceId(theResourceId);
 		}
 		if (resource == null || resource.isParamsComboStringUniquePresent()) {
 			myResourceIndexedCompositeStringUniqueDao.deleteByResourceId(theResourceId);

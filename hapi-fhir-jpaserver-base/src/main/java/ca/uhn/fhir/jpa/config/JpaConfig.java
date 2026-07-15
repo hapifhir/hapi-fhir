@@ -140,7 +140,6 @@ import ca.uhn.fhir.jpa.search.SearchStrategyFactory;
 import ca.uhn.fhir.jpa.search.SearchUrlJobMaintenanceSvcImpl;
 import ca.uhn.fhir.jpa.search.SynchronousSearchSvcImpl;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
-import ca.uhn.fhir.jpa.search.builder.models.TokenIndexMode;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CompressedTokenPredicateBuilder;
@@ -855,8 +854,11 @@ public class JpaConfig {
 	@Bean
 	@Scope("prototype")
 	public CompressedTokenPredicateBuilder newTokenCompressedPredicateBuilder(
-			SearchQueryBuilder theSearchBuilder, TokenIndexMode theTokenIndexMode) {
-		return new CompressedTokenPredicateBuilder(theSearchBuilder, theTokenIndexMode);
+			SearchQueryBuilder theSearchBuilder // , TokenIndexMode theTokenIndexMode
+			) {
+		return new CompressedTokenPredicateBuilder(
+				theSearchBuilder // , theTokenIndexMode
+				);
 	}
 
 	@Bean

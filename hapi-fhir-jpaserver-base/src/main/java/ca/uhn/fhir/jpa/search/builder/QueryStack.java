@@ -37,7 +37,6 @@ import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParam
 import ca.uhn.fhir.jpa.search.builder.models.PredicateBuilderCacheKey;
 import ca.uhn.fhir.jpa.search.builder.models.PredicateBuilderCacheLookupResult;
 import ca.uhn.fhir.jpa.search.builder.models.PredicateBuilderTypeEnum;
-import ca.uhn.fhir.jpa.search.builder.models.TokenIndexMode;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseQuantityPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseSearchParamPredicateBuilder;
@@ -730,11 +729,12 @@ public class QueryStack {
 		 */
 		SearchQueryBuilder sqlBuilder = theParams.getSqlBuilder();
 
-		// Compressed token tables have no SP_MISSING column, so :missing is handled in a separate branch
-		if (theParams.getParamType() == RestSearchParameterTypeEnum.TOKEN
-				&& myStorageSettings.getTokenIndexStrategy().readFromCompressedTokenTables()) {
-			return createMissingPredicateForCompressedToken(theParams, sqlBuilder);
-		}
+		// Compressed token tables have no SP_MISSING column, so :missing is handled in a separate branch.
+		// Compressed token read routing is provided via a CDR API.
+		//		if (theParams.getParamType() == RestSearchParameterTypeEnum.TOKEN
+		//				&& myStorageSettings.getTokenIndexStrategy().readFromCompressedTokenTables()) {
+		//			return createMissingPredicateForCompressedToken(theParams, sqlBuilder);
+		//		}
 
 		if (myStorageSettings.getIndexMissingFields() == JpaStorageSettings.IndexEnabledEnum.DISABLED) {
 			// new search
@@ -844,10 +844,13 @@ public class QueryStack {
 			MissingParameterQueryParams theParams, SearchQueryBuilder sqlBuilder) {
 		ResourceTablePredicateBuilder table = sqlBuilder.getOrCreateResourceTablePredicateBuilder();
 
-		TokenIndexMode tokenIndexMode = TokenIndexMode.resolve(theParams.getParamName(), myStorageSettings);
+		// TokenIndexMode tokenIndexMode = TokenIndexMode.resolve(theParams.getParamName(), myStorageSettings);
 
-		CompressedTokenPredicateBuilder tokenBuilder =
-				sqlBuilder.getSqlBuilderFactory().compressedTokenIndexTable(sqlBuilder, tokenIndexMode);
+		CompressedTokenPredicateBuilder tokenBuilder = sqlBuilder
+				.getSqlBuilderFactory()
+				.compressedTokenIndexTable(
+						sqlBuilder // , tokenIndexMode
+						);
 
 		return tokenBuilder.createPredicateParamMissingValue(new MissingQueryParameterPredicateParams(
 				table, theParams.isMissing(), theParams.getParamName(), theParams.getRequestPartitionId()));

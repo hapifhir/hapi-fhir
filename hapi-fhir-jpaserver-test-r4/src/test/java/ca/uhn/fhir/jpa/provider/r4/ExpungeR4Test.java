@@ -16,9 +16,6 @@ import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
-import ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -61,7 +58,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,13 +66,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
-import static ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy.TokenIndex.COMPRESSED;
-import static ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy.TokenIndex.LEGACY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
@@ -113,7 +105,6 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
 		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
-		myStorageSettings.setTokenIndexStrategy(TokenIndexStrategy.of(EnumSet.of(LEGACY), LEGACY));
 
 		myServer.getRestfulServer().getInterceptorService().unregisterInterceptorsIf(t -> t instanceof CascadingDeleteInterceptor);
 	}
@@ -428,61 +419,6 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		runInTransaction(() -> assertThat(myResourceTableDao.findAll()).isEmpty());
 		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll()).isEmpty());
 
-	}
-
-	private static Stream<TokenIndexStrategy> tokenIndexStrategies() {
-		return Stream.of(
-				TokenIndexStrategy.of(EnumSet.of(LEGACY), LEGACY),
-				TokenIndexStrategy.of(EnumSet.of(LEGACY, COMPRESSED), LEGACY),
-				TokenIndexStrategy.of(EnumSet.of(LEGACY, COMPRESSED), COMPRESSED),
-				TokenIndexStrategy.of(EnumSet.of(COMPRESSED), COMPRESSED));
-	}
-
-	@ParameterizedTest
-	@MethodSource("tokenIndexStrategies")
-	void testDeleteExpungeResource_removesCompressedTokenIndexesKeepsCommonTokenTable(TokenIndexStrategy theStrategy) {
-		// setup
-		myStorageSettings.setTokenIndexStrategy(theStrategy);
-
-		Patient p = new Patient();
-		p.addIdentifier().setSystem("http://sys").setValue("A");
-		p.setGender(Enumerations.AdministrativeGender.MALE);
-		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
-		JpaPid pid = JpaPid.fromId(id.getIdPartAsLong());
-
-		if (theStrategy.writeToCompressedTokenTables()) {
-			runInTransaction(() -> {
-				assertThat(myTokenCommonResDao.findByResourceId(pid)).isNotEmpty();
-				assertThat(myTokenIdentifierDao.findByResourceId(pid)).isNotEmpty();
-			});
-		} else {
-			runInTransaction(() -> {
-				assertThat(myTokenCommonResDao.findByResourceId(pid)).isEmpty();
-				assertThat(myTokenIdentifierDao.findByResourceId(pid)).isEmpty();
-			});
-		}
-
-		// execute
-		myPatientDao.delete(id, mySrd);
-		myPatientDao.expunge(new ExpungeOptions().setExpungeDeletedResources(true), mySrd);
-
-		// validate
-		runInTransaction(() -> {
-			assertThat(myTokenCommonResDao.findByResourceId(pid))
-					.as("CommonRes link rows removed").isEmpty();
-			assertThat(myTokenIdentifierDao.findByResourceId(pid))
-					.as("Identifier rows removed").isEmpty();
-			if (theStrategy.writeToCompressedTokenTables()) {
-				long genderHash = ResourceIndexedSearchParamToken.calculateHashSystemAndValue(
-						myPartitionSettings, (RequestPartitionId) null, "Patient", Patient.SP_GENDER,
-						"http://hl7.org/fhir/administrative-gender", "male");
-				long count = myEntityManager
-						.createQuery("SELECT COUNT(t) FROM ResourceIndexedSearchParamTokenCommon t WHERE t.myHashSystemAndValue = :h", Long.class)
-						.setParameter("h", genderHash)
-						.getSingleResult();
-				assertThat(count).as("Common dictionary row retained (insert-only)").isEqualTo(1);
-			}
-		});
 	}
 
 	@Test

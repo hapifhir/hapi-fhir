@@ -31,16 +31,9 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.IndexedSearchParamIdentity;
-import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamTokenCommon;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamTokenCommonRes;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamTokenIdentifier;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
-import ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy;
-import ca.uhn.fhir.jpa.search.builder.models.TokenIndexMode;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.sp.SearchParamIdentityCacheSvcImpl;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
@@ -116,19 +109,18 @@ public class DaoSearchParamSynchronizer {
 				theParams.myStringParams,
 				existingParams.myStringParams,
 				null);
-		if (myStorageSettings.getTokenIndexStrategy().writeToLegacyTokenTable()) {
-			synchronize(
-					theRequestDetails,
-					theTransactionDetails,
-					theEntity,
-					retVal,
-					theParams.myTokenParams,
-					existingParams.myTokenParams,
-					null);
-		}
-		if (myStorageSettings.getTokenIndexStrategy().writeToCompressedTokenTables()) {
-			synchronizeTokenParamsToNewTables(theRequestDetails, theEntity, theParams, existingParams, retVal);
-		}
+		// Legacy token table only; compressed token write routing is provided via a CDR API.
+		synchronize(
+				theRequestDetails,
+				theTransactionDetails,
+				theEntity,
+				retVal,
+				theParams.myTokenParams,
+				existingParams.myTokenParams,
+				null);
+		//		if (compressedTokenTablesEnabled) {
+		//			synchronizeTokenParamsToNewTables(theRequestDetails, theEntity, theParams, existingParams, retVal);
+		//		}
 		synchronize(
 				theRequestDetails,
 				theTransactionDetails,
@@ -223,72 +215,41 @@ public class DaoSearchParamSynchronizer {
 		myStorageSettings = theStorageSettings;
 	}
 
-	/**
-	 * Synchronizes the extracted token params into the compressed token tables.
-	 */
-	private void synchronizeTokenParamsToNewTables(
-			RequestDetails theRequestDetails,
-			ResourceTable theEntity,
-			ResourceIndexedSearchParams theParams,
-			ResourceIndexedSearchParams theExistingParams,
-			AddRemoveCount theAddRemoveCount) {
-		TokenIndexStrategy tokenStrategy = myStorageSettings.getTokenIndexStrategy();
-
-		PartitionablePartitionId partitionId = theEntity.getPartitionId();
-		RequestPartitionId requestPartitionId =
-				PartitionablePartitionId.toRequestPartitionId(partitionId, myPartitionSettings);
-
-		List<ResourceIndexedSearchParamTokenCommonRes> newCommonResEntities = new ArrayList<>();
-		List<ResourceIndexedSearchParamTokenIdentifier> newIdentifierEntities = new ArrayList<>();
-
-		for (ResourceIndexedSearchParamToken token : theParams.myTokenParams) {
-			// Compressed tables have no SP_MISSING column, so skip tokens that represent missing values
-			if (token.isMissing()) {
-				continue;
-			}
-
-			// Initialize tokens only once, if synchronize() didn't initialize them already.
-			// synchronize() runs (and initializes) only when the legacy token table is written.
-			if (!tokenStrategy.writeToLegacyTokenTable()) {
-				Long resourceId = theEntity.getId().getId();
-				token.setResourceId(resourceId);
-				token.setPartitionId(partitionId);
-				token.setResource(theEntity);
-				token.calculateHashes();
-			}
-
-			findOrCreateSearchParamIdentity(token);
-
-			Long systemId = resolveTokenSystemId(theRequestDetails, requestPartitionId, token.getSystem());
-
-			if (TokenIndexMode.resolve(token.getParamName(), myStorageSettings) == TokenIndexMode.IDENTIFIER) {
-				newIdentifierEntities.add(TokenIndexEntityConverter.toIdentifier(token, theEntity, systemId));
-			} else {
-				ResourceIndexedSearchParamTokenCommon commonRow = TokenIndexEntityConverter.toCommon(token, systemId);
-				if (myEntityManager.find(ResourceIndexedSearchParamTokenCommon.class, commonRow.getHashSystemAndValue())
-						== null) {
-					myEntityManager.persist(commonRow);
-				}
-				newCommonResEntities.add(TokenIndexEntityConverter.toCommonRes(token, theEntity));
-			}
-		}
-
-		AddRemoveCount commonResDelta =
-				diffAndApply(new ArrayList<>(theExistingParams.myTokenCommonResEntities), newCommonResEntities);
-		AddRemoveCount identifierDelta =
-				diffAndApply(new ArrayList<>(theExistingParams.myTokenIdentifierEntities), newIdentifierEntities);
-
-		if (!tokenStrategy.writeToLegacyTokenTable()) {
-			// Only count when legacy didn't run; otherwise the legacy path already populated retVal.
-			theAddRemoveCount.addToAddCount(commonResDelta.getAddCount() + identifierDelta.getAddCount());
-			theAddRemoveCount.addToRemoveCount(commonResDelta.getRemoveCount() + identifierDelta.getRemoveCount());
-		}
-
-		theParams.myTokenCommonResEntities.clear();
-		theParams.myTokenCommonResEntities.addAll(newCommonResEntities);
-		theParams.myTokenIdentifierEntities.clear();
-		theParams.myTokenIdentifierEntities.addAll(newIdentifierEntities);
-	}
+	// Synchronizes the extracted token params into the compressed token tables.
+	// Moved to CDR: compressed token write routing is provided via a CDR API.
+	//	private void synchronizeTokenParamsToNewTables(
+	//			RequestDetails theRequestDetails,
+	//			ResourceTable theEntity,
+	//			ResourceIndexedSearchParams theParams,
+	//			ResourceIndexedSearchParams theExistingParams,
+	//			AddRemoveCount theAddRemoveCount) {
+	//		TokenIndexStrategy tokenStrategy = myStorageSettings.getTokenIndexStrategy();
+	//
+	//		PartitionablePartitionId partitionId = theEntity.getPartitionId();
+	//		RequestPartitionId requestPartitionId =
+	//				PartitionablePartitionId.toRequestPartitionId(partitionId, myPartitionSettings);
+	//
+	//		for (ResourceIndexedSearchParamToken token : theParams.myTokenParams) {
+	//			// Compressed tables have no SP_MISSING column, so skip tokens that represent missing values
+	//			if (token.isMissing()) {
+	//				continue;
+	//			}
+	//
+	//			if (!tokenStrategy.writeToLegacyTokenTable()) {
+	//				Long resourceId = theEntity.getId().getId();
+	//				token.setResourceId(resourceId);
+	//				token.setPartitionId(partitionId);
+	//				token.setResource(theEntity);
+	//				token.calculateHashes();
+	//			}
+	//
+	//			findOrCreateSearchParamIdentity(token);
+	//
+	//			Long systemId = resolveTokenSystemId(theRequestDetails, requestPartitionId, token.getSystem());
+	//
+	//			// TokenIndexMode.resolve(...) / TokenIndexEntityConverter routing lives in CDR now.
+	//		}
+	//	}
 
 	/**
 	 * Set-subtract diff against {@code existing}: persist rows in {@code desired} that aren't

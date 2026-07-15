@@ -26,7 +26,6 @@ import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceSystemEntity;
 import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParams;
-import ca.uhn.fhir.jpa.search.builder.models.TokenIndexMode;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.rest.api.Constants;
@@ -54,11 +53,11 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  *   <li>{@code HFJ_SPIDX2_TOKEN_IDENTIFIER} (Mode.IDENTIFIER)</li>
  * </ul>
  *
- * @see ca.uhn.fhir.jpa.model.entity.TokenIndexStrategy
+ * <p>Token index strategy is provided via a CDR API (see ca.cdr.pers.settings.TokenIndexStrategy).
  */
 public class CompressedTokenPredicateBuilder extends BaseTokenPredicateBuilder {
 
-	private final TokenIndexMode myIndexMode;
+	// private final TokenIndexMode myIndexMode;
 	private final DbColumn myColumnResId;
 
 	// COMMON mode: primary table is HFJ_SPIDX2_TOKEN_COMMON_RES
@@ -70,19 +69,21 @@ public class CompressedTokenPredicateBuilder extends BaseTokenPredicateBuilder {
 	private DbColumn myColumnIdentifierTypeHashSysAndValue;
 	private DbColumn myColumnIdentifierSystemUrlId;
 
-	public CompressedTokenPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, TokenIndexMode theMode) {
-		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable(theMode.getTableName()));
-		myIndexMode = theMode;
+	public CompressedTokenPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder // , TokenIndexMode theMode
+			) {
+		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("PLACEHOLDER_TABLE"));
+		// theMode.getTableName()));
+		// myIndexMode = theMode;
 		myColumnResId = getTable().addColumn("RES_ID");
 
-		if (myIndexMode == TokenIndexMode.COMMON) {
-			myColumnCommonHashSysAndValue = getTable().addColumn("HASH_SYS_AND_VALUE");
-		} else {
-			myColumnIdentifierHashIdentity = getTable().addColumn("HASH_IDENTITY");
-			myColumnIdentifierHashValue = getTable().addColumn("HASH_VALUE");
-			myColumnIdentifierTypeHashSysAndValue = getTable().addColumn("TYPE_HASH_SYS_AND_VALUE");
-			myColumnIdentifierSystemUrlId = getTable().addColumn("SP_SYSTEM_URL_ID");
-		}
+		//	if (myIndexMode == TokenIndexMode.COMMON) {
+		myColumnCommonHashSysAndValue = getTable().addColumn("HASH_SYS_AND_VALUE");
+		// } else {
+		myColumnIdentifierHashIdentity = getTable().addColumn("HASH_IDENTITY");
+		myColumnIdentifierHashValue = getTable().addColumn("HASH_VALUE");
+		myColumnIdentifierTypeHashSysAndValue = getTable().addColumn("TYPE_HASH_SYS_AND_VALUE");
+		myColumnIdentifierSystemUrlId = getTable().addColumn("SP_SYSTEM_URL_ID");
+		// }
 	}
 
 	@Override
@@ -102,9 +103,9 @@ public class CompressedTokenPredicateBuilder extends BaseTokenPredicateBuilder {
 				getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName);
 		mySearchParamIdentityCacheSvc.findOrCreateSearchParamIdentity(hashIdentity, theResourceName, theParamName);
 
-		if (myIndexMode == TokenIndexMode.IDENTIFIER) {
-			return BinaryCondition.equalTo(myColumnIdentifierHashIdentity, generatePlaceholder(hashIdentity));
-		}
+		// if (myIndexMode == TokenIndexMode.IDENTIFIER) {
+		// return BinaryCondition.equalTo(myColumnIdentifierHashIdentity, generatePlaceholder(hashIdentity));
+		// }
 		// COMMON mode: HASH_IDENTITY is in HFJ_SPIDX2_TOKEN_COMMON, requires subquery from HFJ_SPIDX2_TOKEN_COMMON_RES
 		return buildCommonSubquery("HASH_IDENTITY", hashIdentity);
 	}
@@ -130,21 +131,21 @@ public class CompressedTokenPredicateBuilder extends BaseTokenPredicateBuilder {
 				myColumnResId, theParams.getResourceTablePredicateBuilder().getResourceIdColumn());
 
 		Condition hashIdentityCondition;
-		if (myIndexMode == TokenIndexMode.IDENTIFIER) {
-			hashIdentityCondition =
-					BinaryCondition.equalTo(myColumnIdentifierHashIdentity, generatePlaceholder(hashIdentity));
-			subquery.addCondition(ComboCondition.and(resIdCondition, hashIdentityCondition));
-		} else {
-			// COMMON mode: join TOKEN_COMMON_RES with TOKEN_COMMON via HASH_SYS_AND_VALUE
-			DbTable commonTable = getSearchQueryBuilder().addTable("HFJ_SPIDX2_TOKEN_COMMON");
-			DbColumn commonHashSysAndValue = commonTable.addColumn("HASH_SYS_AND_VALUE");
-			DbColumn commonHashIdentity = commonTable.addColumn("HASH_IDENTITY");
-			subquery.addFromTable(commonTable);
+		// if (myIndexMode == TokenIndexMode.IDENTIFIER) {
+		//			hashIdentityCondition =
+		//					BinaryCondition.equalTo(myColumnIdentifierHashIdentity, generatePlaceholder(hashIdentity));
+		//			subquery.addCondition(ComboCondition.and(resIdCondition, hashIdentityCondition));
+		// } else {
+		// COMMON mode: join TOKEN_COMMON_RES with TOKEN_COMMON via HASH_SYS_AND_VALUE
+		DbTable commonTable = getSearchQueryBuilder().addTable("HFJ_SPIDX2_TOKEN_COMMON");
+		DbColumn commonHashSysAndValue = commonTable.addColumn("HASH_SYS_AND_VALUE");
+		DbColumn commonHashIdentity = commonTable.addColumn("HASH_IDENTITY");
+		subquery.addFromTable(commonTable);
 
-			Condition joinCondition = BinaryCondition.equalTo(myColumnCommonHashSysAndValue, commonHashSysAndValue);
-			hashIdentityCondition = BinaryCondition.equalTo(commonHashIdentity, generatePlaceholder(hashIdentity));
-			subquery.addCondition(ComboCondition.and(resIdCondition, joinCondition, hashIdentityCondition));
-		}
+		Condition joinCondition = BinaryCondition.equalTo(myColumnCommonHashSysAndValue, commonHashSysAndValue);
+		hashIdentityCondition = BinaryCondition.equalTo(commonHashIdentity, generatePlaceholder(hashIdentity));
+		subquery.addCondition(ComboCondition.and(resIdCondition, joinCondition, hashIdentityCondition));
+		// }
 
 		Condition exists = UnaryCondition.exists(subquery);
 		if (theParams.isMissing()) {
@@ -174,11 +175,11 @@ public class CompressedTokenPredicateBuilder extends BaseTokenPredicateBuilder {
 		Condition[] conditions = new Condition[theCodes.size()];
 		for (int i = 0; i < theCodes.size(); i++) {
 			FhirVersionIndependentConcept token = theCodes.get(i);
-			if (myIndexMode == TokenIndexMode.COMMON) {
-				conditions[i] = buildCommonCondition(theResourceType, theSearchParamName, token, theWantEquals);
-			} else {
-				conditions[i] = buildIdentifierCondition(theResourceType, theSearchParamName, token, theWantEquals);
-			}
+			//			if (myIndexMode == TokenIndexMode.COMMON) {
+			//				conditions[i] = buildCommonCondition(theResourceType, theSearchParamName, token, theWantEquals);
+			//			} else {
+			conditions[i] = buildIdentifierCondition(theResourceType, theSearchParamName, token, theWantEquals);
+			//	}
 		}
 
 		if (conditions.length == 1) {

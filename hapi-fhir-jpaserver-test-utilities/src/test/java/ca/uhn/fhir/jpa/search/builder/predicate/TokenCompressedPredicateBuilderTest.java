@@ -6,7 +6,6 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParams;
-import ca.uhn.fhir.jpa.search.builder.models.TokenIndexMode;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -91,7 +90,8 @@ class TokenCompressedPredicateBuilderTest {
 	void commonMode_producesCorrectQuery(String theSystem, String theValue, String theExpectedSql) {
 		// setup
 		CompressedTokenPredicateBuilder builder =
-			new CompressedTokenPredicateBuilder(mySearchQueryBuilder, TokenIndexMode.COMMON);
+			new CompressedTokenPredicateBuilder(mySearchQueryBuilder//, TokenIndexMode.COMMON
+			);
 
 		// execute
 		Condition predicate = buildTokenPredicate(builder, List.of(new TokenParam(theSystem, theValue)));
@@ -113,7 +113,8 @@ class TokenCompressedPredicateBuilderTest {
 	void identifierMode_producesCorrectQuery(String theSystem, String theValue, String theExpectedSql) {
 		// setup
 		CompressedTokenPredicateBuilder builder =
-			new CompressedTokenPredicateBuilder(mySearchQueryBuilder, TokenIndexMode.IDENTIFIER);
+			new CompressedTokenPredicateBuilder(mySearchQueryBuilder//, TokenIndexMode.IDENTIFIER
+			);
 
 		// execute
 		Condition predicate = buildTokenPredicate(builder, List.of(new TokenParam(theSystem, theValue)));
@@ -127,7 +128,8 @@ class TokenCompressedPredicateBuilderTest {
 	void identifierMode_missingParam_producesNotExistsSubquery() {
 		// setup
 		CompressedTokenPredicateBuilder builder =
-			new CompressedTokenPredicateBuilder(mySearchQueryBuilder, TokenIndexMode.IDENTIFIER);
+			new CompressedTokenPredicateBuilder(mySearchQueryBuilder//, TokenIndexMode.IDENTIFIER
+			);
 		builder.setSearchParamIdentityCacheSvcForUnitTest(mySearchParamIdentityCacheSvc);
 		stubResourceTablePredicateBuilder();
 
@@ -147,7 +149,8 @@ class TokenCompressedPredicateBuilderTest {
 	void commonMode_missingParam_producesNotExistsWithJoinToCommonTable() {
 		// setup
 		CompressedTokenPredicateBuilder builder =
-			new CompressedTokenPredicateBuilder(mySearchQueryBuilder, TokenIndexMode.COMMON);
+			new CompressedTokenPredicateBuilder(mySearchQueryBuilder//, TokenIndexMode.COMMON
+			);
 		builder.setSearchParamIdentityCacheSvcForUnitTest(mySearchParamIdentityCacheSvc);
 		stubResourceTablePredicateBuilder();
 
@@ -168,7 +171,8 @@ class TokenCompressedPredicateBuilderTest {
 	void identifierMode_ofType_producesTypeHashSysAndValuePredicate() {
 		// setup
 		CompressedTokenPredicateBuilder builder =
-			new CompressedTokenPredicateBuilder(mySearchQueryBuilder, TokenIndexMode.IDENTIFIER);
+			new CompressedTokenPredicateBuilder(mySearchQueryBuilder//, TokenIndexMode.IDENTIFIER
+			);
 		JpaStorageSettings storageSettings = new JpaStorageSettings();
 		storageSettings.setIndexIdentifierOfType(true);
 		builder.setStorageSettingsForUnitTest(storageSettings);
@@ -188,7 +192,8 @@ class TokenCompressedPredicateBuilderTest {
 	void identifierMode_notModifier_producesNotEqualsScopedByHashIdentity() {
 		// setup
 		CompressedTokenPredicateBuilder builder =
-			new CompressedTokenPredicateBuilder(mySearchQueryBuilder, TokenIndexMode.IDENTIFIER);
+			new CompressedTokenPredicateBuilder(mySearchQueryBuilder//, TokenIndexMode.IDENTIFIER
+			);
 		builder.setSearchParamIdentityCacheSvcForUnitTest(mySearchParamIdentityCacheSvc);
 
 		TokenParam param = new TokenParam("http://example.com", "abc").setModifier(TokenParamModifier.NOT);

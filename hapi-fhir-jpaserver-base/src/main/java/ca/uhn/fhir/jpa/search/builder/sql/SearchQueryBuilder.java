@@ -29,12 +29,10 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
-import ca.uhn.fhir.jpa.search.builder.models.TokenIndexMode;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseTokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.predicate.CompressedTokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
@@ -393,12 +391,15 @@ public class SearchQueryBuilder {
 	 */
 	public BaseTokenPredicateBuilder addTokenPredicateBuilder(
 			@Nullable DbColumn[] theSourceJoinColumn, RuntimeSearchParam theSearchParam) {
-		if (myStorageSettings.getTokenIndexStrategy().readFromCompressedTokenTables()) {
-			TokenIndexMode indexMode = TokenIndexMode.resolve(theSearchParam.getName(), myStorageSettings);
-			CompressedTokenPredicateBuilder retVal = mySqlBuilderFactory.compressedTokenIndexTable(this, indexMode);
-			addTable(retVal, theSourceJoinColumn);
-			return retVal;
-		}
+		// Compressed token read routing is provided via a CDR API.
+		//		if (myStorageSettings.getTokenIndexStrategy().readFromCompressedTokenTables()) {
+		//			// TokenIndexMode indexMode = TokenIndexMode.resolve(theSearchParam.getName(), myStorageSettings);
+		//			CompressedTokenPredicateBuilder retVal = mySqlBuilderFactory.compressedTokenIndexTable(
+		//					this // , indexMode
+		//					);
+		//			addTable(retVal, theSourceJoinColumn);
+		//			return retVal;
+		//		}
 		// default read from Legacy token table
 		return addTokenPredicateBuilder(theSourceJoinColumn);
 	}

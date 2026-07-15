@@ -291,21 +291,21 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 	@OptimisticLock(excluded = true)
 	private boolean myParamsTokenPopulated;
 
-	@OneToMany(
-			mappedBy = "myResource",
-			cascade = {},
-			fetch = FetchType.LAZY,
-			orphanRemoval = false)
-	@OptimisticLock(excluded = true)
-	private Collection<ResourceIndexedSearchParamTokenCommonRes> myParamsTokenCommonRes;
-
-	@OneToMany(
-			mappedBy = "myResource",
-			cascade = {},
-			fetch = FetchType.LAZY,
-			orphanRemoval = false)
-	@OptimisticLock(excluded = true)
-	private Collection<ResourceIndexedSearchParamTokenIdentifier> myParamsTokenIdentifier;
+	//	@OneToMany(
+	//			mappedBy = "myResource",
+	//			cascade = {},
+	//			fetch = FetchType.LAZY,
+	//			orphanRemoval = false)
+	//	@OptimisticLock(excluded = true)
+	//	private Collection<ResourceIndexedSearchParamTokenCommonRes> myParamsTokenCommonRes;
+	//
+	//	@OneToMany(
+	//			mappedBy = "myResource",
+	//			cascade = {},
+	//			fetch = FetchType.LAZY,
+	//			orphanRemoval = false)
+	//	@OptimisticLock(excluded = true)
+	//	private Collection<ResourceIndexedSearchParamTokenIdentifier> myParamsTokenIdentifier;
 
 	@OneToMany(
 			mappedBy = "myResource",
@@ -664,36 +664,37 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 		getParamsToken().addAll(theParamsToken);
 	}
 
-	public Collection<ResourceIndexedSearchParamTokenCommonRes> getParamsTokenCommonRes() {
-		if (myParamsTokenCommonRes == null) {
-			myParamsTokenCommonRes = new ArrayList<>();
-		}
-		return myParamsTokenCommonRes;
-	}
-
-	public void setParamsTokenCommonRes(Collection<ResourceIndexedSearchParamTokenCommonRes> theParamsTokenCommonRes) {
-		if (!isParamsTokenPopulated() && theParamsTokenCommonRes.isEmpty()) {
-			return;
-		}
-		getParamsTokenCommonRes().clear();
-		getParamsTokenCommonRes().addAll(theParamsTokenCommonRes);
-	}
-
-	public Collection<ResourceIndexedSearchParamTokenIdentifier> getParamsTokenIdentifier() {
-		if (myParamsTokenIdentifier == null) {
-			myParamsTokenIdentifier = new ArrayList<>();
-		}
-		return myParamsTokenIdentifier;
-	}
-
-	public void setParamsTokenIdentifier(
-			Collection<ResourceIndexedSearchParamTokenIdentifier> theParamsTokenIdentifier) {
-		if (!isParamsTokenPopulated() && theParamsTokenIdentifier.isEmpty()) {
-			return;
-		}
-		getParamsTokenIdentifier().clear();
-		getParamsTokenIdentifier().addAll(theParamsTokenIdentifier);
-	}
+	//	public Collection<ResourceIndexedSearchParamTokenCommonRes> getParamsTokenCommonRes() {
+	//		if (myParamsTokenCommonRes == null) {
+	//			myParamsTokenCommonRes = new ArrayList<>();
+	//		}
+	//		return myParamsTokenCommonRes;
+	//	}
+	//
+	//	public void setParamsTokenCommonRes(Collection<ResourceIndexedSearchParamTokenCommonRes> theParamsTokenCommonRes)
+	// {
+	//		if (!isParamsTokenPopulated() && theParamsTokenCommonRes.isEmpty()) {
+	//			return;
+	//		}
+	//		getParamsTokenCommonRes().clear();
+	//		getParamsTokenCommonRes().addAll(theParamsTokenCommonRes);
+	//	}
+	//
+	//	public Collection<ResourceIndexedSearchParamTokenIdentifier> getParamsTokenIdentifier() {
+	//		if (myParamsTokenIdentifier == null) {
+	//			myParamsTokenIdentifier = new ArrayList<>();
+	//		}
+	//		return myParamsTokenIdentifier;
+	//	}
+	//
+	//	public void setParamsTokenIdentifier(
+	//			Collection<ResourceIndexedSearchParamTokenIdentifier> theParamsTokenIdentifier) {
+	//		if (!isParamsTokenPopulated() && theParamsTokenIdentifier.isEmpty()) {
+	//			return;
+	//		}
+	//		getParamsTokenIdentifier().clear();
+	//		getParamsTokenIdentifier().addAll(theParamsTokenIdentifier);
+	//	}
 
 	public Collection<ResourceIndexedSearchParamUri> getParamsUri() {
 		if (myParamsUri == null) {
