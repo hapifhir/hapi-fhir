@@ -4,7 +4,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
-import org.apache.commons.collections4.ListUtils;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,9 +11,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testcontainers.shaded.org.bouncycastle.cert.ocsp.Req;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -41,9 +37,14 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("deprecation")
 public class RequestPartitionIdTest {
-	private static final Logger ourLog = LoggerFactory.getLogger(RequestPartitionIdTest.class);
 
 	private static final Integer ourDefaultPartitionId = 0;
+	private static final LocalDate PARTITION_DATE = LocalDate.of(2020, 1, 1);
+	private static final String PARTITION_NAME_1 = "Name1";
+	private static final String PARTITION_NAME_2 = "Name2";
+	private static final Integer PARTITION_ID_1 = 1;
+	private static final Integer PARTITION_ID_2 = 2;
+	private static final Integer PARTITION_ID_123 = 123;
 
 	@Mock
 	private IDefaultPartitionSettings myPartitionSettings;
@@ -113,6 +114,10 @@ public class RequestPartitionIdTest {
 		RequestPartitionId expected = fromPartitionIds(1, 2, 3, 4);
 		assertEquals(expected, actual);
 
+		assertEquals(fromPartitionIds(1, 2, 3, 4), fromPartitionIds(1, 2, 3).mergeIds(fromPartitionIds(1, 2, 4)));
+		assertEquals(allPartitions(), allPartitions().mergeIds(fromPartitionIds(1, 2, 4)));
+		assertEquals(allPartitions(), fromPartitionIds(1, 2, 3).mergeIds(allPartitions()));
+		assertEquals(fromPartitionIds(1, 2, 3, null), fromPartitionIds(1, 2, 3).mergeIds(fromPartitionId(null)));
 	}
 
 	@Test
@@ -307,26 +312,82 @@ public class RequestPartitionIdTest {
 	public void testSerDeserSer() throws JsonProcessingException {
 		{
 			RequestPartitionId start = fromPartitionId(123, LocalDate.of(2020, 1, 1));
-			String json = assertSerDeserSer(start);
+			String json = assertSerDeserSer(start).asJson();
 			assertThat(json).contains("\"partitionDate\":[2020,1,1]");
 			assertThat(json).contains("\"partitionIds\":[123]");
 		}
 		{
 			RequestPartitionId start = RequestPartitionId.forPartitionIdsAndNames(Lists.newArrayList("Name1", "Name2"), null, null);
-			String json = assertSerDeserSer(start);
+			String json = assertSerDeserSer(start).asJson();
 			assertThat(json).contains("partitionNames\":[\"Name1\",\"Name2\"]");
 		}
 		assertSerDeserSer(allPartitions());
 		assertSerDeserSer(fromPartitionId(null));
 	}
 
-	private String assertSerDeserSer(RequestPartitionId start) throws JsonProcessingException {
+
+	@Test
+	void testEqualsAndHashCode() {
+		RequestPartitionId expected = fromPartitionId(PARTITION_ID_123, PARTITION_DATE);
+		RequestPartitionId actual = fromPartitionId(PARTITION_ID_123, PARTITION_DATE);
+
+		assertEquals(expected, actual);
+		assertEquals(expected.hashCode(), actual.hashCode());
+		assertNotEquals(expected, "123");
+		assertNotEquals(expected, null);
+	}
+
+	@Test
+	void testPartitionHelpers() {
+		IDefaultPartitionSettings settings = new IDefaultPartitionSettings() {
+			@Override
+			public Integer getDefaultPartitionId() {
+				return 0;
+			}
+		};
+
+		assertTrue(fromPartitionId(null).isPartition(null));
+		assertTrue(fromPartitionId(null).isDefaultPartition());
+		assertThat(fromPartitionId(null).hasDefaultPartitionId(null)).isTrue();
+		assertThat(defaultPartition(settings).isPartition(0)).isTrue();
+		assertThat(defaultPartition(settings).isDefaultPartition()).isFalse();
+		assertThat(allPartitions().isAllPartitions()).isTrue();
+		assertThat(allPartitions().isPartition(0)).isFalse();
+		assertThat(fromPartitionIds(0, 2).isPartition(0)).isFalse();
+	}
+
+
+	@Test
+	void testJsonRoundTripPreservesSemanticFields() throws Exception {
+		RequestPartitionId start = RequestPartitionId.forPartitionIdsAndNames(Lists.newArrayList(PARTITION_NAME_1, PARTITION_NAME_2), Lists.newArrayList(PARTITION_ID_1, PARTITION_ID_2), PARTITION_DATE);
+
+		RequestPartitionId end = assertSerDeserSer(start);
+
+		assertThat(end.getPartitionDate()).isEqualTo(PARTITION_DATE);
+		assertThat(end.getPartitionNames()).containsExactly(PARTITION_NAME_1, PARTITION_NAME_2);
+		assertThat(end.getPartitionIds()).containsExactly(PARTITION_ID_1, PARTITION_ID_2);
+		assertThat(end.getPartitionIdsWithoutDefault()).containsExactly(PARTITION_ID_1, PARTITION_ID_2);
+		assertThat(end.getFirstPartitionIdOrNull()).isEqualTo(PARTITION_ID_1);
+		assertThat(end.getFirstPartitionNameOrNull()).isEqualTo(PARTITION_NAME_1);
+	}
+
+	@Test
+	void testJsonRoundTripPreservesAllAndDefaultPartitions() throws Exception {
+		RequestPartitionId all = assertSerDeserSer(allPartitions());
+		assertThat(all.isAllPartitions()).isTrue();
+		assertThat(all.hasPartitionIds()).isFalse();
+
+		RequestPartitionId defaultPartition = assertSerDeserSer(fromPartitionId(null));
+		assertThat(defaultPartition.getPartitionIds()).containsExactly((Integer) null);
+		assertThat(defaultPartition.isDefaultPartition()).isTrue();
+	}
+
+	private RequestPartitionId assertSerDeserSer(RequestPartitionId start) throws JsonProcessingException {
 		String json = start.asJson();
-		ourLog.info(json);
 		RequestPartitionId end = RequestPartitionId.fromJson(json);
 		assertEquals(start, end);
-		String json2 = end.asJson();
-		assertEquals(json, json2);
-		return json;
+		assertEquals(start.asJson(), end.asJson());
+		return end;
 	}
+
 }
