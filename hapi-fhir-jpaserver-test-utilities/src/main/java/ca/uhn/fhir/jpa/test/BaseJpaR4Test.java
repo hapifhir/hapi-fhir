@@ -1084,6 +1084,11 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		}
 
 		@Override
+        public String relativeDatePlaceHolder() {
+			return null;
+		}
+
+		@Override
 		public ContainedReferenceValidationPolicy policyForContained(IResourceValidator validator,
 																	 Object appContext,
 																	 org.hl7.fhir.r5.model.StructureDefinition structure,
