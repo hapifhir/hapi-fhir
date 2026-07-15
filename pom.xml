@@ -1122,6 +1122,8 @@
 		<elastic_apm_version>1.52.0</elastic_apm_version>
 		<elasticsearch_version>8.19.9</elasticsearch_version>
 		<ucum_version>1.0.9</ucum_version>
+		<!-- only required for third party libraries when generating JavaDoc. Not to be used internally. -->
+		<spotbugs_annotations_version>4.9.8</spotbugs_annotations_version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
@@ -1143,6 +1145,7 @@
 		<maven-license-plugin-version>2.5.0</maven-license-plugin-version>
 		<maven-enforcer-plugin-version>3.5.0</maven-enforcer-plugin-version>
 		<maven-checkstyle-version>3.6.0</maven-checkstyle-version>
+
 	</properties>
 
 	<dependencyManagement>
