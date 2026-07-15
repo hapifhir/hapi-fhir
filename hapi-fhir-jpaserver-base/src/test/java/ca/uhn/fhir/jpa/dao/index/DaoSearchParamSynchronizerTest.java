@@ -17,6 +17,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,6 +31,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -84,10 +86,83 @@ public class DaoSearchParamSynchronizerTest {
 		subject.setSearchParamIdentityCacheSvc(searchParamIdentityCacheSvc);
 	}
 
+	/**
+	 * A registered {@link ICustomIndexSynchronizer} is invoked once per resource sync with the
+	 * extracted params, the entity, and the existing params, so an extension (e.g. Smile CDR
+	 * compressed token indexing) can reconcile its own secondary index.
+	 *
+	 * <p>Created by claude-opus-4-8.</p>
+	 */
+	@Test
+	void synchronize_invokesRegisteredCustomIndexSynchronizer() {
+		ICustomIndexSynchronizer customSynchronizer = mock(ICustomIndexSynchronizer.class);
+		subject.setCustomIndexSynchronizers(List.of(customSynchronizer));
+		ResourceIndexedSearchParams newParams = ResourceIndexedSearchParams.withSets();
+		newParams.myTokenParams.add(new ResourceIndexedSearchParamToken(
+			new PartitionSettings(), "Patient", "status", "http://hl7.org/fhir/patient-status", "active"));
+		ResourceIndexedSearchParams existing = ResourceIndexedSearchParams.empty();
+
+		AddRemoveCount retVal =
+			subject.synchronizeSearchParamsToDatabase(null, null, newParams, theEntity, existing, false);
+
+		verify(customSynchronizer, times(1)).synchronize(null, null, newParams, theEntity, existing, false, retVal);
+	}
+
+	/**
+	 * With no registered synchronizer (vanilla HAPI), no custom index synchronization happens — the
+	 * default behavior is unchanged.
+	 *
+	 * <p>Created by claude-opus-4-8.</p>
+	 */
+	@Test
+	void synchronize_withNoCustomSynchronizer_writesBuiltInTokenIndex() {
+		when(theEntity.getResourceType()).thenReturn("Patient");
+		ResourceIndexedSearchParamToken tokenParam = new ResourceIndexedSearchParamToken(
+			new PartitionSettings(), "Patient", "status", "http://hl7.org/fhir/patient-status", "active");
+		ResourceIndexedSearchParams newParams = ResourceIndexedSearchParams.withSets();
+		newParams.myTokenParams.add(tokenParam);
+
+		subject.synchronizeSearchParamsToDatabase(
+			null, null, newParams, theEntity, ResourceIndexedSearchParams.empty(), false);
+
+		// Built-in token index written by default → the new token row is persisted.
+		verify(entityManager, times(1)).persist(tokenParam);
+	}
+
+	/**
+	 * When an {@link IBuiltInIndexWritePolicy} vetoes the built-in TOKEN index, the legacy token row
+	 * is NOT written, while other param types (e.g. string) are still written — proving suppression
+	 * is scoped to the vetoed param type only.
+	 *
+	 * <p>Created by claude-opus-4-8.</p>
+	 */
+	@Test
+	void synchronize_whenPolicySuppressesTokenIndex_skipsTokenButWritesOtherTypes() {
+		when(theEntity.getResourceType()).thenReturn("Patient");
+		IBuiltInIndexWritePolicy suppressTokens =
+			(resourceType, paramType) -> paramType != RestSearchParameterTypeEnum.TOKEN;
+		subject.setBuiltInIndexWritePolicies(List.of(suppressTokens));
+
+		ResourceIndexedSearchParamToken tokenParam = new ResourceIndexedSearchParamToken(
+			new PartitionSettings(), "Patient", "status", "http://hl7.org/fhir/patient-status", "active");
+		ResourceIndexedSearchParamString stringParam = new ResourceIndexedSearchParamString(
+			new PartitionSettings(), new StorageSettings(), "Patient", "name", "smith", "SMITH");
+		ResourceIndexedSearchParams newParams = ResourceIndexedSearchParams.withSets();
+		newParams.myTokenParams.add(tokenParam);
+		newParams.myStringParams.add(stringParam);
+
+		subject.synchronizeSearchParamsToDatabase(
+			null, null, newParams, theEntity, ResourceIndexedSearchParams.empty(), false);
+
+		verify(entityManager, never()).persist(tokenParam);
+		verify(entityManager, times(1)).persist(stringParam);
+	}
+
 	@Test
 	void synchronizeSearchParamsNumberOnlyValuesDifferent() {
 		when(theEntity.getResourceType()).thenReturn("Patient");
-		final AddRemoveCount addRemoveCount = subject.synchronizeSearchParamsToDatabase(null, null, theParams, theEntity, existingParams);
+		final AddRemoveCount addRemoveCount =
+			subject.synchronizeSearchParamsToDatabase(null, null, theParams, theEntity, existingParams, false);
 
 		assertEquals(0, addRemoveCount.getRemoveCount());
 		assertEquals(1, addRemoveCount.getAddCount());
@@ -115,7 +190,8 @@ public class DaoSearchParamSynchronizerTest {
 		ResourceIndexedSearchParams newParams = ResourceIndexedSearchParams.withSets();
 		newParams.myTokenParams.add(tokenParam);
 
-		subject.synchronizeSearchParamsToDatabase(null, null, newParams, theEntity, ResourceIndexedSearchParams.empty());
+		subject.synchronizeSearchParamsToDatabase(
+			null, null, newParams, theEntity, ResourceIndexedSearchParams.empty(), false);
 
 		assertThat(tokenParam.getResource()).isSameAs(theEntity);
 	}
@@ -135,7 +211,8 @@ public class DaoSearchParamSynchronizerTest {
 		ResourceIndexedSearchParams newParams = ResourceIndexedSearchParams.withSets();
 		newParams.myStringParams.add(stringParam);
 
-		subject.synchronizeSearchParamsToDatabase(null, null, newParams, theEntity, ResourceIndexedSearchParams.empty());
+		subject.synchronizeSearchParamsToDatabase(
+			null, null, newParams, theEntity, ResourceIndexedSearchParams.empty(), false);
 
 		assertThat(stringParam.getResource()).isSameAs(theEntity);
 	}
@@ -155,7 +232,8 @@ public class DaoSearchParamSynchronizerTest {
 		ResourceIndexedSearchParams newParams = ResourceIndexedSearchParams.withSets();
 		newParams.myUriParams.add(uriParam);
 
-		subject.synchronizeSearchParamsToDatabase(null, null, newParams, theEntity, ResourceIndexedSearchParams.empty());
+		subject.synchronizeSearchParamsToDatabase(
+			null, null, newParams, theEntity, ResourceIndexedSearchParams.empty(), false);
 
 		assertThat(uriParam.getResource()).isSameAs(theEntity);
 	}
@@ -174,7 +252,8 @@ public class DaoSearchParamSynchronizerTest {
 		ResourceIndexedSearchParams newParams = ResourceIndexedSearchParams.withSets();
 		newParams.myLinks.add(link);
 
-		subject.synchronizeSearchParamsToDatabase(null, null, newParams, theEntity, ResourceIndexedSearchParams.empty());
+		subject.synchronizeSearchParamsToDatabase(
+			null, null, newParams, theEntity, ResourceIndexedSearchParams.empty(), false);
 
 		// Verify getReference() was called with the correct target PID — this is how we confirm
 		// that setTargetResourceTable() was invoked, since myTargetResource has no public getter

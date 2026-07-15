@@ -20,13 +20,10 @@
 package ca.uhn.fhir.jpa.dao.index;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.cache.IResourceIdentifierCacheSvc;
 import ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
@@ -37,6 +34,7 @@ import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.sp.SearchParamIdentityCacheSvcImpl;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import com.google.common.annotations.VisibleForTesting;
@@ -45,18 +43,17 @@ import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class DaoSearchParamSynchronizer {
@@ -79,11 +76,17 @@ public class DaoSearchParamSynchronizer {
 	@Autowired
 	private IHapiTransactionService myTransactionService;
 
-	@Autowired
-	private IResourceIdentifierCacheSvc myResourceIdentifierCacheSvc;
+	/**
+	 * Custom secondary-index writers contributed by extensions (e.g. Smile CDR compressed token
+	 * indexing). Empty in vanilla HAPI. Injected via setter so it defaults to empty when no beans exist.
+	 */
+	private List<ICustomIndexSynchronizer> myCustomIndexSynchronizers = Collections.emptyList();
 
-	@Autowired
-	private PartitionSettings myPartitionSettings;
+	/**
+	 * Policies that may suppress writing a built-in index. Empty in vanilla HAPI (so all built-in
+	 * indexes are always written). A built-in index is written only if every policy allows it.
+	 */
+	private List<IBuiltInIndexWritePolicy> myBuiltInIndexWritePolicies = Collections.emptyList();
 
 	private UniqueIndexPreExistenceChecker myUniqueIndexPreExistenceChecker;
 
@@ -98,7 +101,8 @@ public class DaoSearchParamSynchronizer {
 			TransactionDetails theTransactionDetails,
 			ResourceIndexedSearchParams theParams,
 			ResourceTable theEntity,
-			ResourceIndexedSearchParams existingParams) {
+			ResourceIndexedSearchParams existingParams,
+			boolean theResourceIsBeingCreated) {
 		AddRemoveCount retVal = new AddRemoveCount();
 
 		synchronize(
@@ -109,18 +113,18 @@ public class DaoSearchParamSynchronizer {
 				theParams.myStringParams,
 				existingParams.myStringParams,
 				null);
-		// Legacy token table only; compressed token write routing is provided via a CDR API.
-		synchronize(
-				theRequestDetails,
-				theTransactionDetails,
-				theEntity,
-				retVal,
-				theParams.myTokenParams,
-				existingParams.myTokenParams,
-				null);
-		//		if (compressedTokenTablesEnabled) {
-		//			synchronizeTokenParamsToNewTables(theRequestDetails, theEntity, theParams, existingParams, retVal);
-		//		}
+		// The built-in (legacy) token index may be suppressed by a write policy — e.g. Smile CDR's
+		// compressed-only phase, where a custom synchronizer has taken over token indexing entirely.
+		if (shouldWriteBuiltInIndex(theEntity, RestSearchParameterTypeEnum.TOKEN)) {
+			synchronize(
+					theRequestDetails,
+					theTransactionDetails,
+					theEntity,
+					retVal,
+					theParams.myTokenParams,
+					existingParams.myTokenParams,
+					null);
+		}
 		synchronize(
 				theRequestDetails,
 				theTransactionDetails,
@@ -197,6 +201,19 @@ public class DaoSearchParamSynchronizer {
 		// make sure links are indexed
 		theEntity.setResourceLinks(theParams.myLinks);
 
+		// Let any registered custom secondary-index writers reconcile their own tables for this
+		// resource. No-op in vanilla HAPI (no synchronizers registered).
+		for (ICustomIndexSynchronizer synchronizer : myCustomIndexSynchronizers) {
+			synchronizer.synchronize(
+					theRequestDetails,
+					theTransactionDetails,
+					theParams,
+					theEntity,
+					existingParams,
+					theResourceIsBeingCreated,
+					retVal);
+		}
+
 		return retVal;
 	}
 
@@ -215,81 +232,31 @@ public class DaoSearchParamSynchronizer {
 		myStorageSettings = theStorageSettings;
 	}
 
-	// Synchronizes the extracted token params into the compressed token tables.
-	// Moved to CDR: compressed token write routing is provided via a CDR API.
-	//	private void synchronizeTokenParamsToNewTables(
-	//			RequestDetails theRequestDetails,
-	//			ResourceTable theEntity,
-	//			ResourceIndexedSearchParams theParams,
-	//			ResourceIndexedSearchParams theExistingParams,
-	//			AddRemoveCount theAddRemoveCount) {
-	//		TokenIndexStrategy tokenStrategy = myStorageSettings.getTokenIndexStrategy();
-	//
-	//		PartitionablePartitionId partitionId = theEntity.getPartitionId();
-	//		RequestPartitionId requestPartitionId =
-	//				PartitionablePartitionId.toRequestPartitionId(partitionId, myPartitionSettings);
-	//
-	//		for (ResourceIndexedSearchParamToken token : theParams.myTokenParams) {
-	//			// Compressed tables have no SP_MISSING column, so skip tokens that represent missing values
-	//			if (token.isMissing()) {
-	//				continue;
-	//			}
-	//
-	//			if (!tokenStrategy.writeToLegacyTokenTable()) {
-	//				Long resourceId = theEntity.getId().getId();
-	//				token.setResourceId(resourceId);
-	//				token.setPartitionId(partitionId);
-	//				token.setResource(theEntity);
-	//				token.calculateHashes();
-	//			}
-	//
-	//			findOrCreateSearchParamIdentity(token);
-	//
-	//			Long systemId = resolveTokenSystemId(theRequestDetails, requestPartitionId, token.getSystem());
-	//
-	//			// TokenIndexMode.resolve(...) / TokenIndexEntityConverter routing lives in CDR now.
-	//		}
-	//	}
-
-	/**
-	 * Set-subtract diff against {@code existing}: persist rows in {@code desired} that aren't
-	 * already present, remove rows in {@code existing} that aren't in {@code desired}. Relies on
-	 * content-based {@code equals}/{@code hashCode} on the entity.
-	 */
-	private <T> AddRemoveCount diffAndApply(List<T> theExisting, List<T> theDesired) {
-		Set<T> existingSet = new HashSet<>(theExisting);
-		Set<T> desiredSet = new HashSet<>(theDesired);
-
-		List<T> toRemove =
-				theExisting.stream().filter(row -> !desiredSet.contains(row)).collect(Collectors.toList());
-		List<T> toAdd =
-				theDesired.stream().filter(row -> !existingSet.contains(row)).collect(Collectors.toList());
-
-		for (T row : toRemove) {
-			if (!myEntityManager.contains(row)) {
-				continue;
-			}
-			myEntityManager.remove(row);
-		}
-		for (T row : toAdd) {
-			myEntityManager.persist(row);
-		}
-
-		AddRemoveCount delta = new AddRemoveCount();
-		delta.addToAddCount(toAdd.size());
-		delta.addToRemoveCount(toRemove.size());
-		return delta;
+	@Autowired(required = false)
+	public void setCustomIndexSynchronizers(List<ICustomIndexSynchronizer> theCustomIndexSynchronizers) {
+		myCustomIndexSynchronizers = theCustomIndexSynchronizers;
 	}
 
-	private Long resolveTokenSystemId(
-			@Nullable RequestDetails theRequestDetails,
-			RequestPartitionId theRequestPartitionId,
-			@Nullable String theSystem) {
-		if (StringUtils.isBlank(theSystem)) {
-			return null;
+	@Autowired(required = false)
+	public void setBuiltInIndexWritePolicies(List<IBuiltInIndexWritePolicy> theBuiltInIndexWritePolicies) {
+		myBuiltInIndexWritePolicies = theBuiltInIndexWritePolicies;
+	}
+
+	/**
+	 * Returns {@code true} unless a registered {@link IBuiltInIndexWritePolicy} vetoes writing the
+	 * built-in index of the given type for this resource. Any policy may veto; all must allow.
+	 */
+	private boolean shouldWriteBuiltInIndex(ResourceTable theEntity, RestSearchParameterTypeEnum theParamType) {
+		if (myBuiltInIndexWritePolicies.isEmpty()) {
+			return true;
 		}
-		return myResourceIdentifierCacheSvc.getOrCreateResourceIdentifierSystem(
-				theRequestDetails, theRequestPartitionId, theSystem);
+		String resourceType = theEntity.getResourceType();
+		for (IBuiltInIndexWritePolicy policy : myBuiltInIndexWritePolicies) {
+			if (!policy.shouldWriteBuiltInIndex(resourceType, theParamType)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private <T extends BaseResourceIndex> void synchronize(
