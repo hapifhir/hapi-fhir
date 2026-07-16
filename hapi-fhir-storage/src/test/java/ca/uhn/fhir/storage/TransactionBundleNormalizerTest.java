@@ -150,6 +150,25 @@ class TransactionBundleNormalizerTest {
 	}
 
 	@Test
+	void testTransform_usesResourceIdAsFullUrlForClientAssignedIds() {
+		Patient patient = new Patient();
+		patient.setId("Patient/237643");
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.TRANSACTION);
+		bundle.addEntry()
+				.setResource(patient)
+				.getRequest()
+				.setMethod(Bundle.HTTPVerb.PUT)
+				.setUrl("Patient/237643");
+
+		mySvc.normalize(bundle);
+
+		// A urn fullUrl here would displace the concrete id as the entry's identity in the
+		// transaction processor (reference substitution keys, duplicate-id detection)
+		assertThat(bundle.getEntryFirstRep().getFullUrl()).isEqualTo("Patient/237643");
+	}
+
+	@Test
 	void testTransform_doesNotOverwriteExistingFullUrl() {
 		String existing = "urn:uuid:22222222-2222-2222-2222-222222222222";
 		Bundle bundle = new Bundle();

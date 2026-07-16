@@ -109,13 +109,21 @@ public class TransactionBundleNormalizer {
 				continue;
 			}
 			if (isBlank(myVersionAdapter.getFullUrl(entry))) {
-				// Reuse an existing urn: resource.id (HAPI's placeholder id) rather than override it; else generate.
+				// Reuse an existing urn: resource.id (HAPI's placeholder id) rather than override it. A concrete
+				// client-assigned id becomes a type/id fullUrl: a urn here would displace the id as the entry's
+				// identity in the transaction processor (reference substitution keys, duplicate-id detection,
+				// auto-versioned references). Only id-less entries get a generated urn.
 				String resourceId = resource.getIdElement().getValue();
-				myVersionAdapter.setFullUrl(
-						entry,
-						resourceId != null && resourceId.startsWith("urn:")
-								? resourceId
-								: "urn:uuid:" + UUID.randomUUID());
+				String fullUrl;
+				if (resourceId != null && resourceId.startsWith("urn:")) {
+					fullUrl = resourceId;
+				} else if (resource.getIdElement().hasIdPart()) {
+					fullUrl = myFhirContext.getResourceType(resource) + "/"
+							+ resource.getIdElement().getIdPart();
+				} else {
+					fullUrl = "urn:uuid:" + UUID.randomUUID();
+				}
+				myVersionAdapter.setFullUrl(entry, fullUrl);
 			}
 
 			String fullUrl = myVersionAdapter.getFullUrl(entry);
