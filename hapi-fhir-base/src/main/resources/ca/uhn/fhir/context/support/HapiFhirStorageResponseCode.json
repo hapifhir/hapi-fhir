@@ -60,6 +60,18 @@
     "code": "AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE",
     "display": "Automatically created placeholder resource."
   }, {
+    "code": "SUCCESSFUL_META_ADD",
+    "display": "Meta add succeeded."
+  }, {
+    "code": "SUCCESSFUL_META_ADD_NO_CHANGE",
+    "display": "Meta add succeeded: No changes were detected so no action was taken."
+  }, {
+    "code": "SUCCESSFUL_META_DELETE",
+    "display": "Meta delete succeeded."
+  }, {
+    "code": "SUCCESSFUL_META_DELETE_NO_CHANGE",
+    "display": "Meta delete succeeded: No changes were detected so no action was taken."
+  }, {
     "code": "FAILURE",
     "display": "Failed to process resource."
   } ]
