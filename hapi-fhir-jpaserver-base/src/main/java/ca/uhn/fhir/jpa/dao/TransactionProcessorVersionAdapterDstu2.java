@@ -168,6 +168,13 @@ public class TransactionProcessorVersionAdapterDstu2
 	}
 
 	@Override
+	public IBaseOperationOutcome getResponseOutcome(Bundle.Entry theEntry) {
+		return theEntry.getResource() instanceof IBaseOperationOutcome
+				? (IBaseOperationOutcome) theEntry.getResource()
+				: null;
+	}
+
+	@Override
 	public void setRequestVerb(Bundle.Entry theEntry, String theVerb) {
 		theEntry.getRequest().setMethod(HTTPVerbEnum.forCode(theVerb));
 	}

@@ -164,6 +164,12 @@ public class TransactionProcessorVersionAdapterR4B
 	}
 
 	@Override
+	public IBaseOperationOutcome getResponseOutcome(Bundle.BundleEntryComponent theEntry) {
+		Resource outcome = theEntry.getResponse().getOutcome();
+		return outcome instanceof IBaseOperationOutcome ? (IBaseOperationOutcome) outcome : null;
+	}
+
+	@Override
 	public void setRequestVerb(Bundle.BundleEntryComponent theEntry, String theVerb) {
 		theEntry.getRequest().setMethod(Bundle.HTTPVerb.fromCode(theVerb));
 	}

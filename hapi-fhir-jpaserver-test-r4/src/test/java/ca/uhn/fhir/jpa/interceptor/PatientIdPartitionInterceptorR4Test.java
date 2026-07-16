@@ -44,6 +44,7 @@ import ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceEnabledByTy
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.FhirPatchBuilder;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.MultimapCollector;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ListMultimap;
@@ -67,6 +68,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Provenance;
@@ -1399,14 +1401,34 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 					.as("entry[%d] HTTP status for %s/%s", i, expected.resourceType(), expected.outcome())
 					.startsWith(expectedStatusPrefix);
 
-			// OperationOutcome code
+			// OperationOutcome: the primary issue must be indistinguishable from a natively produced one
 			OperationOutcome oo = (OperationOutcome) response.getOutcome();
 			assertThat(oo).as("entry[%d] must have an OperationOutcome", i).isNotNull();
 			assertThat(oo.getIssue()).as("entry[%d] OO must have at least one issue", i).isNotEmpty();
-			String actualCode = oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode();
-			assertThat(actualCode)
+			OperationOutcome.OperationOutcomeIssueComponent issue = oo.getIssueFirstRep();
+			assertThat(issue.getSeverity())
+					.as("entry[%d] issue severity", i)
+					.isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
+			assertThat(issue.getCode())
+					.as("entry[%d] issue code", i)
+					.isEqualTo(OperationOutcome.IssueType.INFORMATIONAL);
+			Coding coding = issue.getDetails().getCodingFirstRep();
+			assertThat(coding.getSystem())
+					.as("entry[%d] StorageResponseCode system", i)
+					.isEqualTo(expected.outcome().getSystem());
+			assertThat(coding.getCode())
 					.as("entry[%d] OperationOutcome StorageResponseCode for %s", i, expected.resourceType())
 					.isEqualTo(expected.outcome().name());
+			assertThat(coding.getDisplay())
+					.as("entry[%d] StorageResponseCode display", i)
+					.isEqualTo(expected.outcome().getDisplay());
+			assertThat(issue.getDiagnostics())
+					.as("entry[%d] diagnostics must name the versioned id, like a native outcome", i)
+					.contains(new IdType(location).toUnqualified().getValue());
+			assertThat(issue.getDiagnostics())
+					.as("entry[%d] diagnostics must not leak unformatted message arguments", i)
+					.doesNotContain("{0}")
+					.doesNotContain("{1}");
 
 			// Partition
 			if (expected.expectedPartition() != null) {
@@ -1542,6 +1564,13 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 				resultBundle,
 				List.of(inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH)));
 		assertPatientCountInDatabase(1);
+
+		// The restored message fills the match-URL slot the native message leaves as a literal "{1}"
+		OperationOutcome oo =
+				(OperationOutcome) resultBundle.getEntry().get(0).getResponse().getOutcome();
+		assertThat(oo.getIssueFirstRep().getDiagnostics())
+				.contains("Patient?identifier=old-sys|dup-put")
+				.doesNotContain("{1}");
 	}
 
 	/**
@@ -1619,6 +1648,47 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 				.as("conditional-create concurrency guard row")
 				.hasSize(1)
 				.allSatisfy(url -> assertThat(url).startsWith("Patient?identifier="));
+	}
+
+	@Test
+	void testTransaction_rewrittenPatientOutcomeKeepsAutoCreatedPlaceholderIssue() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		String bundle =
+				"""
+				{ "resourceType" : "Bundle", "type" : "transaction",
+					"entry" : [
+						{
+							"resource" : {
+								"resourceType" : "Patient",
+								"identifier" : [ { "system" : "old-sys", "value" : "placeholder-keeper"} ],
+								"managingOrganization" : { "reference" : "Organization/auto-created-org" }
+							},
+							"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|placeholder-keeper"}
+						}
+					]
+				}
+				""";
+
+		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, bundle);
+		Bundle output = mySystemDao.transaction(mySrd, requestBundle);
+
+		OperationOutcome oo =
+				(OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
+		assertThat(oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode())
+				.isEqualTo(StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH.name());
+
+		// The native issue reporting the auto-created placeholder Organization must survive the restore
+		assertThat(oo.getIssue()).as("restored outcome must keep the placeholder issue").hasSize(2);
+		OperationOutcome.OperationOutcomeIssueComponent placeholderIssue =
+				oo.getIssue().get(1);
+		assertThat(placeholderIssue.getDetails().getCodingFirstRep().getCode())
+				.isEqualTo(StorageResponseCodeEnum.AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE.name());
+		IdType placeholderId = (IdType) placeholderIssue
+				.getExtensionByUrl(HapiExtensions.EXTENSION_PLACEHOLDER_ID)
+				.getValue();
+		assertThat(placeholderId.getValue()).contains("Organization/auto-created-org");
 	}
 
 	private void assertPatientCountInDatabase(int theExpectedCount) {

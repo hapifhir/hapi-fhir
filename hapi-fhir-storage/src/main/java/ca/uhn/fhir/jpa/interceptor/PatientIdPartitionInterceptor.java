@@ -881,14 +881,48 @@ public class PatientIdPartitionInterceptor {
 			}
 
 			StorageResponseCodeEnum code = restoredOutcomeCode(rewrite);
-			IBaseOperationOutcome outcome = OperationOutcomeUtil.createOperationOutcome(
-					OperationOutcomeUtil.OO_SEVERITY_INFO,
-					restoredOutcomeMessage(code, reference, rewrite.conditionalUrl()),
-					OperationOutcomeUtil.OO_ISSUE_CODE_INFORMATIONAL,
-					myFhirContext,
-					code);
-			theVersionAdapter.setResponseOutcome(entry, outcome);
+			// The message names the versioned id, as native outcomes do
+			String versionedId = new IdDt(location).toUnqualified().getValue();
+			String message = restoredOutcomeMessage(code, versionedId, rewrite.conditionalUrl());
+
+			IBaseOperationOutcome liveOutcome = theVersionAdapter.getResponseOutcome(entry);
+			if (liveOutcome != null) {
+				restorePrimaryIssue(liveOutcome, code, message);
+			} else {
+				theVersionAdapter.setResponseOutcome(
+						entry,
+						OperationOutcomeUtil.createOperationOutcome(
+								OperationOutcomeUtil.OO_SEVERITY_INFO,
+								message,
+								OperationOutcomeUtil.OO_ISSUE_CODE_INFORMATIONAL,
+								myFhirContext,
+								code));
+			}
 		}
+	}
+
+	/**
+	 * Rewrites the live outcome's primary issue in place — diagnostics and StorageResponseCode coding — keeping
+	 * everything else the DAO attached, such as auto-created-placeholder issues.
+	 */
+	private void restorePrimaryIssue(
+			IBaseOperationOutcome theOutcome, StorageResponseCodeEnum theCode, String theMessage) {
+		FhirTerser terser = myFhirContext.newTerser();
+		List<IBase> issues = terser.getValues(theOutcome, "issue");
+		if (issues.isEmpty()) {
+			return;
+		}
+		IBase issue = issues.get(0);
+		setPrimitive(terser, issue, "diagnostics", theMessage);
+		List<IBase> codings = terser.getValues(issue, "details.coding");
+		if (!codings.isEmpty()) {
+			setPrimitive(terser, codings.get(0), "code", theCode.getCode());
+			setPrimitive(terser, codings.get(0), "display", theCode.getDisplay());
+		}
+	}
+
+	private static void setPrimitive(FhirTerser theTerser, IBase theTarget, String thePath, String theValue) {
+		((IPrimitiveType<?>) theTerser.getValues(theTarget, thePath, true).get(0)).setValueAsString(theValue);
 	}
 
 	private StorageResponseCodeEnum restoredOutcomeCode(RewrittenOutcome theRewrite) {
@@ -908,12 +942,12 @@ public class PatientIdPartitionInterceptor {
 					"successfulCreateConditionalNoMatch",
 					theId,
 					UrlUtil.sanitizeUrlPart(theConditionalUrl));
+				// Unlike the native message, fill the {1} match-URL slot the DAO leaves unformatted
 			case SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH -> localizer.getMessageSanitized(
-					BaseStorageDao.class, "successfulUpdateConditionalNoMatch", theId);
-			case SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH -> localizer.getMessageSanitized(
-					BaseStorageDao.class, "successfulUpdateConditionalWithMatch", theId, theConditionalUrl);
-			case SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH_NO_CHANGE -> localizer.getMessageSanitized(
-					BaseStorageDao.class, "successfulUpdateConditionalNoChangeWithMatch", theId, theConditionalUrl);
+					BaseStorageDao.class,
+					"successfulUpdateConditionalNoMatch",
+					theId,
+					UrlUtil.sanitizeUrlPart(theConditionalUrl));
 			default -> theCode.getDisplay();
 		};
 	}

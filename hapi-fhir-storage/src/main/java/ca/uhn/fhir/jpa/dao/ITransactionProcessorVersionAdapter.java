@@ -77,6 +77,11 @@ public interface ITransactionProcessorVersionAdapter<BUNDLE extends IBaseBundle,
 
 	void setResponseOutcome(BUNDLEENTRY theEntry, IBaseOperationOutcome theOperationOutcome);
 
+	/**
+	 * Returns the response operation outcome of the given entry, or {@code null} if none is set.
+	 */
+	IBaseOperationOutcome getResponseOutcome(BUNDLEENTRY theEntry);
+
 	void setRequestVerb(BUNDLEENTRY theEntry, String theVerb);
 
 	void setRequestUrl(BUNDLEENTRY theEntry, String theUrl);
