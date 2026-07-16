@@ -26,9 +26,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 
-import java.io.File;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -147,8 +148,7 @@ public class SqlLoggerFilteringUtil {
 		}
 
 		ourLog.debug("Starting filters refresh");
-		File resource = new ClassPathResource(theFilterFilePath).getFile();
-		List<String> filterDefinitionLines = Files.readAllLines(resource.toPath());
+		List<String> filterDefinitionLines = readFilterDefinitionLines(new ClassPathResource(theFilterFilePath));
 
 		for (ISqlLoggerFilter filter : mySqlLoggerFilters) {
 			synchronized (filter.getLockingObject()) {
@@ -160,6 +160,18 @@ public class SqlLoggerFilteringUtil {
 			}
 		}
 		ourLog.debug("Ended filter refresh");
+	}
+
+	/**
+	 * Reads the filter definition lines from a classpath resource. Uses a stream rather than
+	 * {@link ClassPathResource#getFile()} so the resource can be read when it is packaged inside a JAR.
+	 */
+	@VisibleForTesting
+	List<String> readFilterDefinitionLines(ClassPathResource theResource) throws IOException {
+		try (BufferedReader reader =
+				new BufferedReader(new InputStreamReader(theResource.getInputStream(), StandardCharsets.UTF_8))) {
+			return reader.lines().collect(Collectors.toList());
+		}
 	}
 
 	private void presentFilterDefinitionLineToFilters(String theFilterLine, List<ISqlLoggerFilter> theFilterList) {
