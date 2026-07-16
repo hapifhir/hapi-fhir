@@ -132,8 +132,7 @@ public class PatientIdPartitionInterceptor {
 	private enum RewriteIntent {
 		UNCONDITIONAL_CREATE,
 		CONDITIONAL_CREATE_NO_MATCH,
-		CONDITIONAL_UPDATE_NO_MATCH,
-		CONDITIONAL_UPDATE_MATCHED
+		CONDITIONAL_UPDATE_NO_MATCH
 	}
 
 	/**
@@ -807,14 +806,12 @@ public class PatientIdPartitionInterceptor {
 						String matchedReference =
 								matchedId.toUnqualifiedVersionless().getValue();
 						idSubstitutions.put(fullUrl, matchedReference);
-						// A conditional PUT can't carry the matched id through the conditional path (the framework
-						// clears resolved ids), so rewrite it as a direct update. A conditional POST already NOPs
-						// to the match correctly, so it is left alone.
+						// Stamp the matched id on the body so identifyForCreate can route the entry. The entry stays
+						// conditional: the framework validates the body id against the match and reports the
+						// conditional-match outcome natively. A conditional POST already NOPs to the match correctly,
+						// so it is left alone.
 						if ("PUT".equals(method)) {
-							rewriteAsDirectPut(theVersionAdapter, entry, resource, matchedReference);
-							rewrittenOutcomes.put(
-									matchedReference,
-									new RewrittenOutcome(RewriteIntent.CONDITIONAL_UPDATE_MATCHED, matchUrl));
+							resource.setId(matchedReference);
 						}
 					}
 				} else if (serverAssignsUuids) {
@@ -859,8 +856,7 @@ public class PatientIdPartitionInterceptor {
 	/**
 	 * Once the transaction has been processed, restore the operation outcome each rewritten Patient entry would have
 	 * had if {@link #resolvePatientReferencesAfterPreFetch} hadn't rewritten its verb to make compartment placement
-	 * order-independent. For a matched conditional update the live no-change flag is preserved, since that is the only
-	 * rewrite that can legitimately come back unchanged.
+	 * order-independent.
 	 */
 	@Hook(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_RESPONSE)
 	public void restoreRewrittenPatientOutcomes(
@@ -872,7 +868,6 @@ public class PatientIdPartitionInterceptor {
 			return;
 		}
 
-		FhirTerser terser = myFhirContext.newTerser();
 		List<IBase> entries = theVersionAdapter.getEntries(theResponse);
 		for (IBase entry : entries) {
 			String location = theVersionAdapter.getResponseLocation(entry);
@@ -885,7 +880,7 @@ public class PatientIdPartitionInterceptor {
 				continue;
 			}
 
-			StorageResponseCodeEnum code = restoredOutcomeCode(rewrite, entry, terser);
+			StorageResponseCodeEnum code = restoredOutcomeCode(rewrite);
 			IBaseOperationOutcome outcome = OperationOutcomeUtil.createOperationOutcome(
 					OperationOutcomeUtil.OO_SEVERITY_INFO,
 					restoredOutcomeMessage(code, reference, rewrite.conditionalUrl()),
@@ -896,29 +891,12 @@ public class PatientIdPartitionInterceptor {
 		}
 	}
 
-	private StorageResponseCodeEnum restoredOutcomeCode(
-			RewrittenOutcome theRewrite, IBase theEntry, FhirTerser theTerser) {
+	private StorageResponseCodeEnum restoredOutcomeCode(RewrittenOutcome theRewrite) {
 		return switch (theRewrite.intent()) {
 			case UNCONDITIONAL_CREATE -> StorageResponseCodeEnum.SUCCESSFUL_CREATE;
 			case CONDITIONAL_CREATE_NO_MATCH -> StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH;
 			case CONDITIONAL_UPDATE_NO_MATCH -> StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH;
-			case CONDITIONAL_UPDATE_MATCHED -> isLiveOutcomeNoChange(theEntry, theTerser)
-					? StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH_NO_CHANGE
-					: StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH;
 		};
-	}
-
-	private boolean isLiveOutcomeNoChange(IBase theEntry, FhirTerser theTerser) {
-		for (IBase issue : theTerser.getValues(theEntry, "response.outcome.issue")) {
-			String system = theTerser.getSinglePrimitiveValueOrNull(issue, "details.coding.system");
-			if (StorageResponseCodeEnum.SYSTEM.equals(system)) {
-				String code = theTerser.getSinglePrimitiveValueOrNull(issue, "details.coding.code");
-				if (isNotBlank(code)) {
-					return StorageResponseCodeEnum.valueOf(code).isNoChange();
-				}
-			}
-		}
-		return false;
 	}
 
 	private String restoredOutcomeMessage(StorageResponseCodeEnum theCode, String theId, String theConditionalUrl) {

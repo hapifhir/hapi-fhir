@@ -1619,7 +1619,7 @@ public abstract class BaseTransactionProcessor {
 							outcome = resourceDao.update(
 									res, null, false, false, requestDetailsForEntry, theTransactionDetails);
 						} else {
-							if (!shouldConditionalUpdateMatchId(theTransactionDetails, res.getIdElement())) {
+							if (!shouldConditionalUpdateMatchId(res.getIdElement())) {
 								res.setId((String) null);
 							}
 							String matchUrl;
@@ -1942,15 +1942,10 @@ public abstract class BaseTransactionProcessor {
 	/**
 	 * Check for if a resource id should be matched in a conditional update
 	 * If the FHIR version is older than R4, it follows the old specifications and does not match
-	 * If the resource id has been resolved, then it is an existing resource and does not need to be matched
 	 * If the resource id is local or a placeholder, the id is temporary and should not be matched
 	 */
-	private boolean shouldConditionalUpdateMatchId(TransactionDetails theTransactionDetails, IIdType theId) {
+	private boolean shouldConditionalUpdateMatchId(IIdType theId) {
 		if (myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.R4)) {
-			return false;
-		}
-		if (theTransactionDetails.hasResolvedResourceId(theId)
-				&& !theTransactionDetails.isResolvedResourceIdEmpty(theId)) {
 			return false;
 		}
 		if (theId != null && theId.getValue() != null) {

@@ -126,6 +126,7 @@ import java.util.stream.IntStream;
 
 import static ca.uhn.fhir.test.utilities.UuidUtils.HASH_UUID_PATTERN;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -3701,6 +3702,41 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			assertThat(e.getMessage()).contains("2279");
 		}
 
+	}
+
+	/**
+	 * The mismatched body id points at a resource that the transaction has already resolved (it is the match target
+	 * of another entry). Per the R4 spec the id mismatch must still be rejected — a resolved id gets no leniency.
+	 */
+	@Test
+	public void testTransactionUpdateMatchUrlWithOneMatchWithResolvedIdNoMatch() {
+		String methodName = "testTransactionUpdateMatchUrlWithOneMatchWithResolvedIdNoMatch";
+		Bundle request = new Bundle();
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		IIdType id = myPatientDao.create(p, mySrd).getId();
+		ourLog.info("Created patient, got it: {}", id);
+
+		Patient other = new Patient();
+		other.addIdentifier().setSystem("urn:system").setValue(methodName + "-other");
+		IIdType otherId = myPatientDao.create(other, mySrd).getId();
+		ourLog.info("Created other patient, got it: {}", otherId);
+
+		other = new Patient();
+		other.addIdentifier().setSystem("urn:system").setValue(methodName + "-other");
+		other.addName().setFamily("Updated");
+		request.addEntry().setResource(other).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient?identifier=urn%3Asystem%7C" + methodName + "-other");
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().setFamily("Hello");
+		p.setId(otherId.toUnqualifiedVersionless());
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient?identifier=urn%3Asystem%7C" + methodName);
+
+		assertThatThrownBy(() -> mySystemDao.transaction(mySrd, request))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining("2279");
 	}
 
 	@Test
