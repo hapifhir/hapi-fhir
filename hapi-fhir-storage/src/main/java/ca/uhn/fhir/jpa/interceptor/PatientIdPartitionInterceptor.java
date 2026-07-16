@@ -790,7 +790,7 @@ public class PatientIdPartitionInterceptor {
 				if ("POST".equals(method)) {
 					if (serverAssignsUuids) {
 						String newReference = assignNewIdAndRewriteToPut(
-								theVersionAdapter, entry, resource, fullUrl, idSubstitutions);
+								theVersionAdapter, theTransactionDetails, entry, resource, fullUrl, idSubstitutions);
 						rewrittenOutcomes.put(
 								newReference, new RewrittenOutcome(RewriteIntent.UNCONDITIONAL_CREATE, null));
 					}
@@ -920,11 +920,15 @@ public class PatientIdPartitionInterceptor {
 
 	private String assignNewIdAndRewriteToPut(
 			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
+			TransactionDetails theTransactionDetails,
 			IBase entry,
 			IBaseResource resource,
 			String fullUrl,
 			Map<String, String> idSubstitutions) {
 		String newReference = "Patient/" + UUID.randomUUID();
+		// A freshly minted id cannot exist yet. Record that the same way preFetch records unresolvable
+		// ids, so the update path skips its existence lookup.
+		theTransactionDetails.addResolvedResourceId(new IdDt(newReference), null);
 		idSubstitutions.put(fullUrl, newReference);
 		rewriteAsDirectPut(theVersionAdapter, entry, resource, newReference);
 		return newReference;

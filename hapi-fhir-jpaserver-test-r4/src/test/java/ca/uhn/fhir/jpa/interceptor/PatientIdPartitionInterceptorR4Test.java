@@ -977,6 +977,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 
 	@Test
 	public void testTransaction_SplitAncillaryAndPatient_NewTransactionPerPartition() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
 		registerInterceptor(new MyTransactionSplitInterceptor());
 		myTransactionService.setTransactionPropagationWhenChangingPartitions(Propagation.REQUIRES_NEW);
 
@@ -1015,8 +1016,10 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 
 		// Verify
 		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
-
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+		// One commit per sub-bundle: the compartment writes join their sub-bundle's all-partitions
+		// transaction rather than each committing a REQUIRES_NEW transaction of its own.
+		assertEquals(2, myCaptureQueriesListener.countCommits());
 	}
 
 	@Test
@@ -1195,8 +1198,9 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		TransactionUtil.TransactionResponse mainParsedResponse = performTransactionAndParseResponse(loadResourceFromClasspath(Bundle.class, "transaction-bundles/synthea/Sherise735_Zofia65_Swaniawski813_e0f7758e-a749-4357-858c-53e1db808e37.json"));
 
 		// verify
-		// This bundle contains 517 resources.
-		assertEquals(27, myCaptureQueriesListener.countSelectQueries());
+		// This bundle contains 517 resources. The split path pays one extra select: references to
+		// resources committed by an earlier sub-bundle must be identity-checked in the database.
+		assertEquals(theSplitTransaction ? 27 : 26, myCaptureQueriesListener.countSelectQueries());
 		// this is so high because we limit Hibernate to batches of 30 rows.
 		if (theSplitTransaction) {
 			assertEquals(328, myCaptureQueriesListener.getInsertQueries().size());
