@@ -62,6 +62,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * This ensures that reference resolution happens before the resource is finalized and before partition selection in
  * Patient ID Partition mode.
  */
+// Created by Claude Opus 4.7
 public class TransactionBundleNormalizer {
 
 	private final FhirContext myFhirContext;
@@ -210,6 +211,7 @@ public class TransactionBundleNormalizer {
 	 * @param theResponse the transaction response bundle
 	 * @param theSyntheticEntryCount the count returned by {@link #normalize(IBaseBundle)} for the request
 	 */
+	// Created by Claude Fable 5
 	@SuppressWarnings("unchecked")
 	public void stripSyntheticResponseEntries(IBaseBundle theResponse, int theSyntheticEntryCount) {
 		if (theSyntheticEntryCount > 0) {

@@ -130,6 +130,7 @@ public class PatientIdPartitionInterceptor {
 	 * How a Patient entry's verb was rewritten, so the original outcome code can be restored once the rewritten verb
 	 * has been processed.
 	 */
+	// Created by Claude Opus 4.7
 	private enum RewriteIntent {
 		UNCONDITIONAL_CREATE,
 		CONDITIONAL_CREATE_NO_MATCH,
@@ -140,6 +141,7 @@ public class PatientIdPartitionInterceptor {
 	 * @param conditionalUrl the original conditional match URL, needed to render the outcome message; null for
 	 *                       {@link RewriteIntent#UNCONDITIONAL_CREATE}.
 	 */
+	// Created by Claude Opus 4.7
 	private record RewrittenOutcome(RewriteIntent intent, String conditionalUrl) {}
 
 	@Autowired
@@ -749,6 +751,7 @@ public class PatientIdPartitionInterceptor {
 	 * unmatched conditional Patient is assigned a UUID on the body but stays a conditional update, so in-bundle
 	 * duplicates of the same match URL consolidate and the conditional-create concurrency guard still applies.
 	 */
+	// Created by Claude Opus 4.7
 	@Hook(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH)
 	public void resolvePatientReferencesAfterPreFetch(
 			TransactionWriteAfterPrefetchDetails thePrefetchDetails,
@@ -865,6 +868,7 @@ public class PatientIdPartitionInterceptor {
 	 * had if {@link #resolvePatientReferencesAfterPreFetch} hadn't rewritten its verb to make compartment placement
 	 * order-independent.
 	 */
+	// Created by Claude Opus 4.7
 	@Hook(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_RESPONSE)
 	public void restoreRewrittenPatientOutcomes(
 			IBaseBundle theResponse,
@@ -912,6 +916,7 @@ public class PatientIdPartitionInterceptor {
 	 * Rewrites the live outcome's primary issue in place — diagnostics and StorageResponseCode coding — keeping
 	 * everything else the DAO attached, such as auto-created-placeholder issues.
 	 */
+	// Created by Claude Fable 5
 	private void restorePrimaryIssue(
 			IBaseOperationOutcome theOutcome, StorageResponseCodeEnum theCode, String theMessage) {
 		FhirTerser terser = myFhirContext.newTerser();
@@ -928,10 +933,12 @@ public class PatientIdPartitionInterceptor {
 		}
 	}
 
+	// Created by Claude Fable 5
 	private static void setPrimitive(FhirTerser theTerser, IBase theTarget, String thePath, String theValue) {
 		((IPrimitiveType<?>) theTerser.getValues(theTarget, thePath, true).get(0)).setValueAsString(theValue);
 	}
 
+	// Created by Claude Opus 4.7
 	private StorageResponseCodeEnum restoredOutcomeCode(RewrittenOutcome theRewrite) {
 		return switch (theRewrite.intent()) {
 			case UNCONDITIONAL_CREATE -> StorageResponseCodeEnum.SUCCESSFUL_CREATE;
@@ -940,6 +947,7 @@ public class PatientIdPartitionInterceptor {
 		};
 	}
 
+	// Created by Claude Opus 4.7
 	private String restoredOutcomeMessage(StorageResponseCodeEnum theCode, String theId, String theConditionalUrl) {
 		HapiLocalizer localizer = myFhirContext.getLocalizer();
 		return switch (theCode) {
@@ -959,6 +967,7 @@ public class PatientIdPartitionInterceptor {
 		};
 	}
 
+	// Created by Claude Opus 4.7
 	private String assignNewIdAndRewriteToPut(
 			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
 			TransactionDetails theTransactionDetails,
@@ -975,6 +984,7 @@ public class PatientIdPartitionInterceptor {
 		return newReference;
 	}
 
+	// Created by Claude Opus 4.7
 	private void rewriteAsDirectPut(
 			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
 			IBase entry,
@@ -986,6 +996,7 @@ public class PatientIdPartitionInterceptor {
 		theVersionAdapter.setRequestIfNoneExist(entry, null);
 	}
 
+	// Created by Claude Fable 5
 	private void rewriteAsConditionalPut(
 			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
 			IBase entry,
@@ -1005,6 +1016,7 @@ public class PatientIdPartitionInterceptor {
 	 * (Msg 1321). The entry stays conditional, so the DAO reports the conditional-match outcome natively. An
 	 * unmatched id-less conditional update is left untouched and still fails with Msg 1321.
 	 */
+	// Created by Claude Fable 5
 	private void stampIdlessMatchedConditionalUpdate(
 			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
 			TransactionDetails theTransactionDetails,
@@ -1040,6 +1052,7 @@ public class PatientIdPartitionInterceptor {
 	 * across all partitions, an entry whose inline match URL the pre-fetch has not resolved is rejected before
 	 * pre-fetch runs (by per-transaction partition determination), so it never reaches this rewrite.
 	 */
+	// Created by Claude Opus 4.8
 	private void rewriteInlinePatientMatchUrlReferences(
 			List<IBase> theEntries, TransactionDetails theTransactionDetails) {
 		FhirTerser terser = myFhirContext.newTerser();
@@ -1068,6 +1081,7 @@ public class PatientIdPartitionInterceptor {
 	 * A Patient inline match URL is a reference whose value targets the Patient resource type with a search
 	 * query, i.e. starts with {@code "Patient?"} or {@code "/Patient?"}.
 	 */
+	// Created by Claude Opus 4.8
 	private static boolean isPatientInlineMatchUrl(@Nullable String theReferenceValue) {
 		return theReferenceValue != null
 				&& (theReferenceValue.startsWith(PATIENT_STR + "?")
@@ -1081,6 +1095,7 @@ public class PatientIdPartitionInterceptor {
 	 * resolved to a concrete Patient there, the reference is left untouched and per-entry partition determination
 	 * handles it.
 	 */
+	// Created by Claude Opus 4.8
 	private void rewriteInlineMatchUrlReference(
 			IBaseReference theReference, String theReferenceValue, TransactionDetails theTransactionDetails) {
 		// Act only on a match URL the pre-fetch resolved to a concrete Patient; otherwise leave the reference as is.
@@ -1095,6 +1110,7 @@ public class PatientIdPartitionInterceptor {
 	 * resolved to a single existing resource ({@link TransactionDetails#NOT_FOUND}, absent, or no reverse-mapped id).
 	 * No search is performed — we act only on what the pre-fetch put in the transaction details.
 	 */
+	// Created by Claude Opus 4.8
 	private Optional<IIdType> getPreFetchResolvedId(String theMatchUrl, TransactionDetails theTransactionDetails) {
 		IResourcePersistentId<?> resolved =
 				theTransactionDetails.getResolvedMatchUrls().get(theMatchUrl);

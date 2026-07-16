@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-// Created by claude-opus-4-7
+// Created by Claude Opus 4.7
 class TransactionBundleNormalizerTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TransactionBundleNormalizerTest.class);

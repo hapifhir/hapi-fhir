@@ -1445,6 +1445,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	 * be 4 entries, positionally aligned with the original request (A/B/C/D), and each Observation's
 	 * subject must resolve to the right Patient on read-back.
 	 */
+	// Created by Claude Opus 4.7
 	@Test
 	public void testTransactionInlineMatchUrl_multipleEntries_responseAlignsOneToOneWithOriginalRequest() {
 		// setup
@@ -1513,6 +1514,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals(newValue2, autoCreated2.getIdentifierFirstRep().getValue());
 	}
 
+	// Created by Claude Opus 4.7
 	private static void addObservation(Bundle theBundle, String theCodeText, String theSubjectInlineMatchUrl) {
 		Observation o = new Observation();
 		o.getCode().setText(theCodeText);
@@ -1520,10 +1522,12 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		theBundle.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST).setUrl("Observation");
 	}
 
+	// Created by Claude Opus 4.7
 	private Observation readObservation(BundleEntryComponent theResponseEntry) {
 		return myObservationDao.read(new IdType(theResponseEntry.getResponse().getLocationElement()), mySrd);
 	}
 
+	// Created by Claude Fable 5
 	@Test
 	public void testTransactionInlineMatchUrl_processingHooksSeeOriginalBundle() {
 		// The bundle normalizer runs after STORAGE_TRANSACTION_PROCESSING: hooks registered there
@@ -1561,6 +1565,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		}
 	}
 
+	// Created by Claude Fable 5
 	@Test
 	public void testTransactionConditionalWriteOutcomeDiagnostics_nameIdAndMatchUrl() {
 		Patient existing = new Patient();
@@ -3832,6 +3837,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	 * The mismatched body id points at a resource that the transaction has already resolved (it is the match target
 	 * of another entry). Per the R4 spec the id mismatch must still be rejected — a resolved id gets no leniency.
 	 */
+	// Created by Claude Fable 5
 	@Test
 	public void testTransactionUpdateMatchUrlWithOneMatchWithResolvedIdNoMatch() {
 		String methodName = "testTransactionUpdateMatchUrlWithOneMatchWithResolvedIdNoMatch";
