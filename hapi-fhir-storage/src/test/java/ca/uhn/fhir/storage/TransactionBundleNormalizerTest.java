@@ -114,7 +114,7 @@ class TransactionBundleNormalizerTest {
 	}
 
 	@Test
-	void testTransform_assignsUrnUuidFullUrlToEntriesLackingOne() {
+	void testNormalize_assignsUrnUuidFullUrlToEntriesLackingOne() {
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.TRANSACTION);
 		bundle.addEntry()
@@ -136,7 +136,7 @@ class TransactionBundleNormalizerTest {
 	}
 
 	@Test
-	void testTransform_reusesUrnResourceIdAsFullUrl() {
+	void testNormalize_reusesUrnResourceIdAsFullUrl() {
 		String urnId = "urn:uuid:11111111-1111-1111-1111-111111111111";
 		Patient patient = new Patient();
 		patient.setId(urnId);
@@ -150,7 +150,7 @@ class TransactionBundleNormalizerTest {
 	}
 
 	@Test
-	void testTransform_usesResourceIdAsFullUrlForClientAssignedIds() {
+	void testNormalize_usesResourceIdAsFullUrlForClientAssignedIds() {
 		Patient patient = new Patient();
 		patient.setId("Patient/237643");
 		Bundle bundle = new Bundle();
@@ -169,7 +169,7 @@ class TransactionBundleNormalizerTest {
 	}
 
 	@Test
-	void testTransform_doesNotOverwriteExistingFullUrl() {
+	void testNormalize_doesNotOverwriteExistingFullUrl() {
 		String existing = "urn:uuid:22222222-2222-2222-2222-222222222222";
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.TRANSACTION);
@@ -186,7 +186,7 @@ class TransactionBundleNormalizerTest {
 	}
 
 	@Test
-	void testTransform_inlineRefResolvesToExplicitInBundlePatient_noSynthetic() {
+	void testNormalize_inlineRefResolvesToExplicitInBundlePatient_noSynthetic() {
 		// An explicit (unconditional) in-bundle Patient + an Observation whose inline match URL targets that
 		// Patient's identifier should resolve to the Patient's fullUrl WITHOUT minting a synthetic conditional-create.
 		String patientFullUrl = "urn:uuid:33333333-3333-3333-3333-333333333333";

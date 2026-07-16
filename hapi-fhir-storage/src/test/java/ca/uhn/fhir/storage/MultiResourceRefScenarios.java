@@ -444,7 +444,7 @@ class MultiResourceRefScenarios implements ArgumentsProvider {
 				bundleAssert(4, theBundle -> {
 					List<Bundle.BundleEntryComponent> entries = theBundle.getEntry();
 
-					// Entry 0: synthetic Encounter placeholder (added by transformer)
+					// Entry 0: synthetic Encounter placeholder (added by the normalizer)
 					String encounterUrn = assertSyntheticEntryAt(theBundle, 0, ResourceType.Encounter,
 							"Encounter?identifier=sys|enc-1", "sys", "enc-1");
 
