@@ -5,7 +5,6 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.config.SearchConfig;
-import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.ISearchResultConsumer;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
@@ -37,6 +36,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -60,6 +60,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -103,6 +104,8 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 	private ExceptionService myExceptionSvc = new ExceptionService(myContext);
 
 	private SearchCoordinatorSvcImpl mySvc;
+	@Captor
+	private ArgumentCaptor<Search> mySearchCaptor;
 
 	@Override
 	@AfterEach
@@ -171,13 +174,13 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		initSearches();
 		initAsyncSearches();
 
-		List<JpaPid> allResults = new ArrayList<>();
+		List<JpaPid> allSavedSearchCacheResults = new ArrayList<>();
 		doAnswer(t -> {
 			List<JpaPid> oldResults = t.getArgument(1, List.class);
 			List<JpaPid> newResults = t.getArgument(2, List.class);
 			ourLog.info("Saving {} new results - have {} old results", newResults.size(), oldResults.size());
-			assertEquals(allResults.size(), oldResults.size());
-			allResults.addAll(newResults);
+			assertEquals(allSavedSearchCacheResults.size(), oldResults.size());
+			allSavedSearchCacheResults.addAll(newResults);
 			return null;
 		}).when(mySearchResultCacheSvc).storeResults(any(), anyList(), anyList(), any(), any());
 
@@ -199,21 +202,26 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		// Do all the stubbing before starting any work, since we want to avoid threading issues
 
+		// Test
+
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
-		assertEquals(790, result.size());
+		assertNull(result.size());
 
-		List<IBaseResource> resources = result.getResources(0, 100000);
+		// Verify that we get the right results back
+		List<IBaseResource> resources = result.getResources(0, 790);
 		assertThat(resources).hasSize(790);
 		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("799", resources.get(789).getIdElement().getValueAsString());
 
-		ArgumentCaptor<Search> searchCaptor = ArgumentCaptor.forClass(Search.class);
-		verify(mySearchCacheSvc, atLeastOnce()).save(searchCaptor.capture(), any());
+		// Verify that we saved all of the results in the search cache
+		assertThat(allSavedSearchCacheResults).hasSize(790);
+		assertEquals(10, allSavedSearchCacheResults.get(0).getId());
+		assertEquals(799, allSavedSearchCacheResults.get(789).getId());
 
-		assertThat(allResults).hasSize(790);
-		assertEquals(10, allResults.get(0).getId());
-		assertEquals(799, allResults.get(789).getId());
+		// Verify that the num found was updated correctly
+		verify(mySearchCacheSvc, atLeastOnce()).save(mySearchCaptor.capture(), any());
+		assertEquals(790, mySearchCaptor.getValue().getNumFound());
 
 		myExpectedNumberOfSearchBuildersCreated = 4;
 	}
@@ -270,7 +278,6 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		initSearches();
 		initAsyncSearches();
 
-
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
 
@@ -283,7 +290,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
-		assertEquals(790, result.size());
+		assertNull(result.size());
 
 		List<IBaseResource> resources;
 
@@ -292,6 +299,8 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("39", resources.get(29).getIdElement().getValueAsString());
 
+		verify(mySearchCacheSvc, atLeastOnce()).save(mySearchCaptor.capture(), any());
+		assertEquals(790, mySearchCaptor.getValue().getNumFound());
 	}
 
 	private void mockPerformSearchForPids(Iterator<JpaPid> tnePidIterator) {
@@ -332,6 +341,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 			retVal.setRequestPartitionHelperSvcForUnitTest(myPartitionHelperSvc);
 			retVal.setContext(myContext);
 			retVal.setInterceptorBroadcaster(myInterceptorBroadcaster);
+			retVal.setSearchBuilderFactoryForUnitTest(mySearchBuilderFactory);
 			return retVal;
 		});
 	}
@@ -413,17 +423,16 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
-		assertEquals(790, result.size());
+		assertNull(result.size());
 
-		ArgumentCaptor<Search> searchCaptor = ArgumentCaptor.forClass(Search.class);
-		verify(mySearchCacheSvc, atLeast(1)).save(searchCaptor.capture(), any());
-		Search search = searchCaptor.getValue();
+		verify(mySearchCacheSvc, atLeastOnce()).save(mySearchCaptor.capture(), any());
+		Search search = mySearchCaptor.getValue();
 		assertEquals(SearchTypeEnum.SEARCH, search.getSearchType());
 
 		List<IBaseResource> resources;
 
 		resources = result.getResources(0, 10);
-		assertEquals(790, result.size());
+		assertNull(result.size());
 		assertThat(resources).hasSize(10);
 		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("19", resources.get(9).getIdElement().getValueAsString());
@@ -451,13 +460,15 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
-		assertEquals(90, Objects.requireNonNull(result.size()).intValue());
+		assertNull(result.size());
 
 		List<IBaseResource> resources = result.getResources(0, 30);
 		assertThat(resources).hasSize(30);
 		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("39", resources.get(29).getIdElement().getValueAsString());
 
+		verify(mySearchCacheSvc, atLeastOnce()).save(mySearchCaptor.capture(), any());
+		assertEquals(90, mySearchCaptor.getValue().getNumFound());
 	}
 
 	@Test
