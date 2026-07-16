@@ -744,8 +744,10 @@ public class PatientIdPartitionInterceptor {
 	/**
 	 * Once {@code preFetch} has resolved every conditional URL and reference target, resolve each Patient entry to a
 	 * concrete ID and substitute all in-bundle references to it. This makes compartment placement independent of the
-	 * order entries are processed in: a matched conditional Patient reuses the existing resource's ID, while an
-	 * unconditional or unmatched Patient is assigned a UUID and its create is rewritten as an update so the ID sticks.
+	 * order entries are processed in: a matched conditional Patient reuses the existing resource's ID; an
+	 * unconditional Patient is assigned a UUID and its create is rewritten as a direct update so the ID sticks; an
+	 * unmatched conditional Patient is assigned a UUID on the body but stays a conditional update, so in-bundle
+	 * duplicates of the same match URL consolidate and the conditional-create concurrency guard still applies.
 	 */
 	@Hook(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH)
 	public void resolvePatientReferencesAfterPreFetch(
@@ -762,6 +764,7 @@ public class PatientIdPartitionInterceptor {
 				theStorageSettings.getResourceServerIdStrategy() == JpaStorageSettings.IdStrategyEnum.UUID;
 
 		Map<String, String> idSubstitutions = new HashMap<>();
+		Map<String, String> matchUrlToMintedReference = new HashMap<>();
 		Map<String, RewrittenOutcome> rewrittenOutcomes =
 				theTransactionDetails.getOrCreateUserData(REWRITTEN_OUTCOMES_KEY, HashMap::new);
 
@@ -815,12 +818,20 @@ public class PatientIdPartitionInterceptor {
 						}
 					}
 				} else if (serverAssignsUuids) {
-					String newReference =
-							assignNewIdAndRewriteToPut(theVersionAdapter, entry, resource, fullUrl, idSubstitutions);
+					// Keep the entry conditional (PUT Patient?<matchUrl>) rather than rewriting it to a direct
+					// update: the framework then consolidates in-bundle duplicates of the same match URL, and the
+					// create path writes the HFJ_RES_SEARCH_URL row that makes a concurrent transaction creating
+					// the same conditional URL collide instead of duplicating the patient. Duplicates share one
+					// minted id so references to any of them resolve to the single created patient.
+					String conditionalUrl = matchUrl.contains("?") ? matchUrl : PATIENT_STR + "?" + matchUrl;
+					String newReference = matchUrlToMintedReference.computeIfAbsent(
+							conditionalUrl, k -> PATIENT_STR + "/" + UUID.randomUUID());
+					idSubstitutions.put(fullUrl, newReference);
+					rewriteAsConditionalPut(theVersionAdapter, entry, resource, newReference, conditionalUrl);
 					RewriteIntent intent = "POST".equals(method)
 							? RewriteIntent.CONDITIONAL_CREATE_NO_MATCH
 							: RewriteIntent.CONDITIONAL_UPDATE_NO_MATCH;
-					rewrittenOutcomes.put(newReference, new RewrittenOutcome(intent, matchUrl));
+					rewrittenOutcomes.putIfAbsent(newReference, new RewrittenOutcome(intent, matchUrl));
 				}
 			}
 		}
@@ -949,6 +960,18 @@ public class PatientIdPartitionInterceptor {
 		resource.setId(theReference);
 		theVersionAdapter.setRequestVerb(entry, "PUT");
 		theVersionAdapter.setRequestUrl(entry, theReference);
+		theVersionAdapter.setRequestIfNoneExist(entry, null);
+	}
+
+	private void rewriteAsConditionalPut(
+			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
+			IBase entry,
+			IBaseResource resource,
+			String theReference,
+			String theConditionalUrl) {
+		resource.setId(theReference);
+		theVersionAdapter.setRequestVerb(entry, "PUT");
+		theVersionAdapter.setRequestUrl(entry, theConditionalUrl);
 		theVersionAdapter.setRequestIfNoneExist(entry, null);
 	}
 

@@ -15,6 +15,7 @@ import ca.uhn.fhir.jpa.dao.TransactionPrePartitionResponse;
 import ca.uhn.fhir.jpa.dao.TransactionUtil;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
@@ -73,7 +74,6 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -2086,8 +2086,8 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 1)
 				)
 			),
-			// "two conditional-create Patients with the same identifier" is covered by the @Disabled
-			// testTransaction_duplicateConditionalCreateInBundle_dedup, deferred to SMILE-11705 Task 5.
+			// "two conditional-create Patients with the same identifier" is covered by the
+			// testTransaction_*InBundle_dedup tests below.
 			Arguments.of(
 				"[cell 7] create Observation | inline match URL ref to an explicit unconditional new patient | contrived",
 				"""
@@ -2280,13 +2280,12 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	}
 
 	/**
-	 * Two conditional creates with the same identifier in one bundle: the second should NOP onto the first. The
-	 * post-preFetch hook instead sees both as NOT_FOUND (neither exists in the DB yet) and assigns each a distinct
-	 * UUID, so a duplicate patient is created. This is the single-bundle form of the concurrent-duplicate problem
-	 * deferred to SMILE-11705 Task 5; re-enable once in-bundle/concurrent conditional-create dedup is in place.
+	 * Two conditional creates with the same match URL in one bundle: the duplicate is consolidated onto the first
+	 * entry and silently dropped from the response — the canonical semantics of
+	 * {@code BaseTransactionProcessor#consolidateDuplicateConditionals} (cf.
+	 * {@code FhirSystemDaoR4Test#testTransactionWithDuplicateConditionalCreates}). Exactly one patient is created.
 	 */
 	@Test
-	@Disabled("SMILE-11705 Task 5: in-bundle duplicate conditional-create dedup not yet implemented")
 	void testTransaction_duplicateConditionalCreateInBundle_dedup() {
 		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
@@ -2315,13 +2314,134 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, bundle);
 		Bundle resultBundle = mySystemDao.transaction(mySrd, requestBundle);
 
-		// First entry creates the patient; the second matches it (NOP, 200). Both response entries point to it.
 		assertReferenceScenario(
 				resultBundle,
-				List.of(
-						inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
-						inSamePartitionAsEntry(
-								"Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH, 0)));
+				List.of(inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH)));
+		assertPatientCountInDatabase(1);
+	}
+
+	/**
+	 * Same as {@link #testTransaction_duplicateConditionalCreateInBundle_dedup} but with conditional PUTs: the
+	 * duplicate consolidates onto the first entry, which creates the patient (update-no-conditional-match).
+	 */
+	@Test
+	void testTransaction_duplicateConditionalUpdateInBundle_dedup() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		String bundle =
+				"""
+				{ "resourceType" : "Bundle", "type" : "transaction",
+					"entry" : [
+						{
+							"resource" : {
+								"resourceType" : "Patient",
+								"identifier" : [ { "system" : "old-sys", "value" : "dup-put"} ]
+							},
+							"request" : { "method" : "PUT", "url" : "Patient?identifier=old-sys|dup-put"}
+						}, {
+							"resource" : {
+								"resourceType" : "Patient",
+								"identifier" : [ { "system" : "old-sys", "value" : "dup-put"} ]
+							},
+							"request" : { "method" : "PUT", "url" : "Patient?identifier=old-sys|dup-put"}
+						}
+					]
+				}
+				""";
+
+		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, bundle);
+		Bundle resultBundle = mySystemDao.transaction(mySrd, requestBundle);
+
+		assertReferenceScenario(
+				resultBundle,
+				List.of(inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH)));
+		assertPatientCountInDatabase(1);
+	}
+
+	/**
+	 * A conditional create and a conditional update sharing one match URL consolidate too (both are rewritten to
+	 * the same conditional PUT), keeping the first entry's outcome. Stock HAPI would not consolidate across verbs;
+	 * in patient-id partition mode both target the same logical patient, so one create is the correct result.
+	 */
+	@Test
+	void testTransaction_mixedDuplicateConditionalWritesInBundle_dedup() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		String bundle =
+				"""
+				{ "resourceType" : "Bundle", "type" : "transaction",
+					"entry" : [
+						{
+							"resource" : {
+								"resourceType" : "Patient",
+								"identifier" : [ { "system" : "old-sys", "value" : "dup-mixed"} ]
+							},
+							"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|dup-mixed"}
+						}, {
+							"resource" : {
+								"resourceType" : "Patient",
+								"identifier" : [ { "system" : "old-sys", "value" : "dup-mixed"} ]
+							},
+							"request" : { "method" : "PUT", "url" : "Patient?identifier=old-sys|dup-mixed"}
+						}
+					]
+				}
+				""";
+
+		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, bundle);
+		Bundle resultBundle = mySystemDao.transaction(mySrd, requestBundle);
+
+		assertReferenceScenario(
+				resultBundle,
+				List.of(inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH)));
+		assertPatientCountInDatabase(1);
+	}
+
+	/**
+	 * A NOT_FOUND-conditional patient create must leave an HFJ_RES_SEARCH_URL row for its match URL — the unique
+	 * constraint on that row is what makes a concurrent transaction creating the same conditional URL collide
+	 * instead of creating a duplicate patient (see {@code ResourceSearchUrlSvc#enforceMatchUrlResourceUniqueness}).
+	 */
+	@Test
+	void testTransaction_conditionalCreatePatient_leavesSearchUrlRowForConcurrencyGuard() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		String bundle =
+				"""
+				{ "resourceType" : "Bundle", "type" : "transaction",
+					"entry" : [
+						{
+							"resource" : {
+								"resourceType" : "Patient",
+								"identifier" : [ { "system" : "old-sys", "value" : "race-guard"} ]
+							},
+							"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|race-guard"}
+						}
+					]
+				}
+				""";
+
+		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, bundle);
+		mySystemDao.transaction(mySrd, requestBundle);
+
+		List<String> searchUrls = runInTransaction(() -> myResourceSearchUrlDao.findAll().stream()
+				.map(ResourceSearchUrlEntity::getSearchUrl)
+				.toList());
+		assertThat(searchUrls)
+				.as("conditional-create concurrency guard row")
+				.hasSize(1)
+				.allSatisfy(url -> assertThat(url).startsWith("Patient?identifier="));
+	}
+
+	private void assertPatientCountInDatabase(int theExpectedCount) {
+		List<String> patientIds = runInTransaction(() -> myResourceTableDao.findAll().stream()
+				.filter(t -> "Patient".equals(t.getResourceType()))
+				.map(t -> t.getIdDt().toUnqualifiedVersionless().getValue())
+				.toList());
+		assertThat(patientIds).as("patients in database").hasSize(theExpectedCount);
 	}
 
 	@Interceptor
