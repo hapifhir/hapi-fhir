@@ -1525,6 +1525,54 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
+	public void testTransactionConditionalWriteOutcomeDiagnostics_nameIdAndMatchUrl() {
+		Patient existing = new Patient();
+		existing.addIdentifier().setSystem("urn:system").setValue("diag-match");
+		IIdType existingId =
+				myPatientDao.create(existing, mySrd).getId().toUnqualified();
+
+		Bundle request = new Bundle();
+		request.setType(BundleType.TRANSACTION);
+		Patient matchCreate = new Patient();
+		matchCreate.addIdentifier().setSystem("urn:system").setValue("diag-match");
+		request.addEntry()
+				.setFullUrl(IdType.newRandomUuid().getValue())
+				.setResource(matchCreate)
+				.getRequest()
+				.setMethod(HTTPVerb.POST)
+				.setUrl("Patient")
+				.setIfNoneExist("Patient?identifier=urn:system|diag-match");
+		Patient noMatchUpdate = new Patient();
+		noMatchUpdate.addIdentifier().setSystem("urn:system").setValue("diag-nomatch");
+		request.addEntry()
+				.setFullUrl(IdType.newRandomUuid().getValue())
+				.setResource(noMatchUpdate)
+				.getRequest()
+				.setMethod(HTTPVerb.PUT)
+				.setUrl("Patient?identifier=urn:system|diag-nomatch");
+
+		Bundle resp = mySystemDao.transaction(mySrd, request);
+
+		// Matched conditional create: diagnostics must name the matched (versioned) id, not the elapsed millis
+		String matchedDiagnostics = ((OperationOutcome)
+						resp.getEntry().get(0).getResponse().getOutcome())
+				.getIssueFirstRep()
+				.getDiagnostics();
+		assertThat(matchedDiagnostics)
+				.contains(existingId.getValue())
+				.contains("Patient?identifier=urn:system|diag-match");
+
+		// Conditional update without match: diagnostics must fill the match-URL slot
+		String noMatchDiagnostics = ((OperationOutcome)
+						resp.getEntry().get(1).getResponse().getOutcome())
+				.getIssueFirstRep()
+				.getDiagnostics();
+		assertThat(noMatchDiagnostics)
+				.contains("Patient?identifier=urn:system|diag-nomatch")
+				.doesNotContain("{1}");
+	}
+
+	@Test
 	public void testTransactionUpdateTwoResourcesWithSameId() {
 		Bundle request = new Bundle();
 

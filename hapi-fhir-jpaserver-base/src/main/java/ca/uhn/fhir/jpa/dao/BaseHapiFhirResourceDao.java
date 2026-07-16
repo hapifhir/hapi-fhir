@@ -608,7 +608,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 							.getMessageSanitized(
 									BaseStorageDao.class,
 									"successfulCreateConditionalWithMatch",
-									w.getMillisAndRestart(),
+									outcome.getId(),
 									UrlUtil.sanitizeUrlPart(theMatchUrl));
 					outcome.setOperationOutcome(createInfoOperationOutcome(msg, responseCode));
 					return outcome;
