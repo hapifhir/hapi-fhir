@@ -389,14 +389,13 @@ public class SearchTask implements Callable<Void> {
 
 	private boolean isFinished(final SearchProgressTracker theSearchProgressTracker) {
 		int skippedCount = theSearchProgressTracker.getSkippedCount();
-		int nonSkippedCount = theSearchProgressTracker.getNonSkippedCount();
 		int totalFetched = skippedCount + myCountSavedThisPass + myCountBlockedThisPass;
 
 		if (myMaxResultsToFetch != null && totalFetched < myMaxResultsToFetch) {
 			// total fetched < max results to fetch -> we've exhausted the search
 			return true;
 		} else {
-			if (nonSkippedCount == 0) {
+			if (skippedCount == 0) {
 				// no skipped resources in this query
 				if (myParams.getCount() != null) {
 					// count supplied

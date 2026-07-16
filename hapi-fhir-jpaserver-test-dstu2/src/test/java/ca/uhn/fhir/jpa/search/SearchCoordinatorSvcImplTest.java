@@ -12,7 +12,6 @@ import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.SearchProgressTracker;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
-import ca.uhn.fhir.jpa.interceptor.ForceOffsetSearchModeInterceptor;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
@@ -32,7 +31,6 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import jakarta.annotation.Nonnull;
-import net.sourceforge.plantuml.klimt.creole.Sea;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -70,7 +68,6 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
@@ -154,8 +151,8 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		params.add("name", new StringParam("ANAME"));
 
 		List<JpaPid> pids = createPidSequence(800);
-		IResultIterator<JpaPid> iter = new FailAfterNIterator(new SlowIterator(pids.iterator(), 2), 300);
-		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
+		Iterator<JpaPid> iter = new FailAfterNIterator(new SlowIterator(pids.iterator(), 2), 300);
+		mockPerformSearchForPids(iter);
 		mockSearchTask();
 
 		try {
@@ -189,7 +186,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		List<JpaPid> pids = createPidSequence(800);
 		SlowIterator iter = new SlowIterator(pids.iterator(), 1);
-		when(mySearchBuilder.createQuery(any(), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
+		mockPerformSearchForPids(iter);
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
 		when(mySearchCacheSvc.save(any(), any())).thenAnswer(t -> {
@@ -279,18 +276,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		List<JpaPid> pids = createPidSequence(800);
 		SlowIterator iter = new SlowIterator(pids.iterator(), 2);
-		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
-		when(mySearchBuilder.performSearchForPids(any(), any(), any(), any(), any())).thenAnswer(t->{
-			ISearchResultConsumer consumer = t.getArgument(0, ISearchResultConsumer.class);
-			int count = 0;
-			while (iter.hasNext()) {
-				ISearchResultConsumer.Outcome outcome = consumer.consume(new SearchProgressTracker(0, count++), iter.next());
-				if (!outcome.isContinue()) {
-					break;
-				}
-			}
-			return new SearchProgressTracker(0, count);
-		});
+		mockPerformSearchForPids(iter);
 		mockSearchTask();
 
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
@@ -306,6 +292,20 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("39", resources.get(29).getIdElement().getValueAsString());
 
+	}
+
+	private void mockPerformSearchForPids(Iterator<JpaPid> tnePidIterator) {
+		when(mySearchBuilder.performSearchForPids(any(), any(), any(), any(), any())).thenAnswer(t->{
+			ISearchResultConsumer<JpaPid> consumer = t.getArgument(0, ISearchResultConsumer.class);
+			int count = 0;
+			while (tnePidIterator.hasNext()) {
+				ISearchResultConsumer.Outcome outcome = consumer.consume(new SearchProgressTracker(0, count++), tnePidIterator.next());
+				if (!outcome.isContinue()) {
+					break;
+				}
+			}
+			return new SearchProgressTracker(0, count);
+		});
 	}
 
 	private void initPartitionHelperSearchType() {
@@ -346,14 +346,14 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		List<JpaPid> pids = createPidSequence(800);
 		SlowIterator iter = new SlowIterator(pids.iterator(), 500);
-		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
+		mockPerformSearchForPids(iter);
 		mockSearchTask();
 		when(myInterceptorBroadcaster.hasHooks(any())).thenReturn(true);
 		when(myInterceptorBroadcaster.getInvokersForPointcut(any())).thenReturn(List.of());
 
 		ourLog.info("Registering the first search");
 		new Thread(() -> mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null)).start();
-		await().untilAsserted(() -> assertThat(iter.getCountReturned()).isGreaterThan(0));
+		await().untilAsserted(() -> assertThat(iter.getNonSkippedCount()).isGreaterThan(0));
 
 		String searchId = mySvc.getActiveSearchIds().iterator().next();
 		CountDownLatch completionLatch = new CountDownLatch(1);
@@ -370,7 +370,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		};
 		new Thread(taskStarter).start();
 
-		await().until(() -> iter.getCountReturned() >= 3);
+		await().until(() -> iter.getNonSkippedCount() >= 3);
 
 		ourLog.info("About to cancel all searches");
 		mySvc.cancelAllActiveSearches();
@@ -401,8 +401,8 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		params.add("name", new StringParam("ANAME"));
 
 		List<JpaPid> pids = createPidSequence(800);
-		IResultIterator<JpaPid> iter = new SlowIterator(pids.iterator(), 2);
-		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
+		Iterator<JpaPid> iter = new SlowIterator(pids.iterator(), 2);
+		mockPerformSearchForPids(iter);
 		when(mySearchCacheSvc.save(any(), any())).thenAnswer(t -> {
 			ourLog.info("Saving search");
 			return t.getArgument(0, Search.class);
@@ -444,7 +444,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		List<JpaPid> pids = createPidSequence(100);
 		SlowIterator iter = new SlowIterator(pids.iterator(), 2);
-		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
+		mockPerformSearchForPids(iter);
 		mockSearchTask();
 
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
@@ -691,12 +691,12 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 			});
 	}
 
-	public static class FailAfterNIterator extends BaseIterator<JpaPid> implements IResultIterator<JpaPid> {
+	public static class FailAfterNIterator extends BaseIterator<JpaPid> {
 
-		private final IResultIterator<JpaPid> myWrap;
+		private final Iterator<JpaPid> myWrap;
 		private int myCount;
 
-		FailAfterNIterator(IResultIterator<JpaPid> theWrap, int theCount) {
+		FailAfterNIterator(Iterator<JpaPid> theWrap, int theCount) {
 			myWrap = theWrap;
 			myCount = theCount;
 		}
@@ -715,29 +715,6 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 			return myWrap.next();
 		}
 
-		@Override
-		public int getSkippedCount() {
-			return myWrap.getSkippedCount();
-		}
-
-		@Override
-		public int getNonSkippedCount() {
-			return myCount;
-		}
-
-		@Override
-		public Collection<JpaPid> getNextResultBatch(long theBatchSize) {
-			Collection<JpaPid> batch = new ArrayList<>();
-			while (this.hasNext() && batch.size() < theBatchSize) {
-				batch.add(this.next());
-			}
-			return batch;
-		}
-
-		@Override
-		public void close() {
-			// nothing
-		}
 	}
 
 	/**
@@ -746,10 +723,9 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 	 * <p>
 	 * Don't use it in real code!
 	 */
-	public static class SlowIterator extends BaseIterator<JpaPid> implements IResultIterator<JpaPid> {
+	public static class SlowIterator extends BaseIterator<JpaPid> {
 
 		private static final Logger ourLog = LoggerFactory.getLogger(SlowIterator.class);
-		private final IResultIterator<JpaPid> myResultIteratorWrap;
 		private final int myDelay;
 		private final Iterator<JpaPid> myWrap;
 		private final AtomicInteger myCountReturned = new AtomicInteger(0);
@@ -757,7 +733,6 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		SlowIterator(Iterator<JpaPid> theWrap, int theDelay) {
 			myWrap = theWrap;
 			myDelay = theDelay;
-			myResultIteratorWrap = null;
 		}
 
 		@Override
@@ -767,10 +742,6 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 				ourLog.info("No more results remaining");
 			}
 			return retVal;
-		}
-
-		public int getCountReturned() {
-			return myCountReturned.get();
 		}
 
 		@Override
@@ -785,32 +756,9 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 			return retVal;
 		}
 
-		@Override
-		public int getSkippedCount() {
-			if (myResultIteratorWrap == null) {
-				return 0;
-			} else {
-				return myResultIteratorWrap.getSkippedCount();
-			}
-		}
-
-		@Override
 		public int getNonSkippedCount() {
-			return 0;
+			return myCountReturned.get();
 		}
 
-		@Override
-		public Collection<JpaPid> getNextResultBatch(long theBatchSize) {
-			Collection<JpaPid> batch = new ArrayList<>();
-			while (this.hasNext() && batch.size() < theBatchSize) {
-				batch.add(this.next());
-			}
-			return batch;
-		}
-
-		@Override
-		public void close() {
-			// nothing
-		}
 	}
 }
