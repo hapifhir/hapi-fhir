@@ -500,10 +500,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	@Nonnull
 	private static SearchProgressTracker newSearchProgressTracker(IResultIterator<JpaPid> theResultIterator) {
-		return new SearchProgressTracker(
-				theResultIterator.hasNext(),
-				theResultIterator.getSkippedCount(),
-				theResultIterator.getNonSkippedCount());
+		return new SearchProgressTracker(theResultIterator.getSkippedCount(), theResultIterator.getNonSkippedCount());
 	}
 
 	@SuppressWarnings("ConstantConditions")

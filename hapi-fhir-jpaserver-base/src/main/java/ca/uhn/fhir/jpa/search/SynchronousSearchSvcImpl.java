@@ -42,7 +42,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.BundleProviderWithNamedPages;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.interceptor.ServerInterceptorUtil;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -316,16 +315,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 					resources = ServerInterceptorUtil.fireStoragePreshowResource(
 							resources, theRequestDetails, myInterceptorBroadcaster);
 
-					SimpleBundleProvider bundleProvider;
-					if (progressTracker.getCurrentPageId() != null) {
-						BundleProviderWithNamedPages bundleProviderWithNamedPages = new BundleProviderWithNamedPages(
-								resources, null, progressTracker.getCurrentPageId(), null);
-						bundleProviderWithNamedPages.setPreviousPageId(progressTracker.getPreviousPageId());
-						bundleProviderWithNamedPages.setNextPageId(progressTracker.getNextPageId());
-						bundleProvider = bundleProviderWithNamedPages;
-					} else {
-						bundleProvider = new SimpleBundleProvider(resources);
-					}
+					SimpleBundleProvider bundleProvider = new SimpleBundleProvider(resources);
 
 					if (hasACount && theSb.requiresTotal()) {
 						bundleProvider.setTotalResourcesRequestedReturned(receivedResourceCount);
