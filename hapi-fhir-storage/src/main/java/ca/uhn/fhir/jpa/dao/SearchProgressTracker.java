@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.dao;
 
-// FIXME: clean up class names, tostring, etc
 public final class SearchProgressTracker {
 	private final int mySkippedCount;
 	private final int myNonSkippedCount;
@@ -29,11 +28,18 @@ public final class SearchProgressTracker {
 		myNonSkippedCount = theNonSkippedCount;
 	}
 
-	public int skippedCount() {
+	/**
+	 * @return Returns the number of resources that were skipped during the search because they were duplicates
+	 * 	PIDs that had already been seen. This is an indication of an inefficient query.
+	 */
+	public int getSkippedCount() {
 		return mySkippedCount;
 	}
 
-	public int nonSkippedCount() {
+	/**
+	 * @return Returns the number of newly-seen and distinct PIDs returned by the search.
+	 */
+	public int getNonSkippedCount() {
 		return myNonSkippedCount;
 	}
 }

@@ -338,7 +338,7 @@ public class SearchTask implements Callable<Void> {
 						unsyncedPids.clear();
 
 						if (!theStillInProgress) {
-							int skippedCount = theSearchProgressTracker.skippedCount();
+							int skippedCount = theSearchProgressTracker.getSkippedCount();
 							ourLog.trace(
 									"MaxToFetch[{}] SkippedCount[{}] CountSavedThisPass[{}] CountSavedThisTotal[{}] AdditionalPrefetchRemaining[{}]",
 									myMaxResultsToFetch,
@@ -388,8 +388,8 @@ public class SearchTask implements Callable<Void> {
 	}
 
 	private boolean isFinished(final SearchProgressTracker theSearchProgressTracker) {
-		int skippedCount = theSearchProgressTracker.skippedCount();
-		int nonSkippedCount = theSearchProgressTracker.nonSkippedCount();
+		int skippedCount = theSearchProgressTracker.getSkippedCount();
+		int nonSkippedCount = theSearchProgressTracker.getNonSkippedCount();
 		int totalFetched = skippedCount + myCountSavedThisPass + myCountBlockedThisPass;
 
 		if (myMaxResultsToFetch != null && totalFetched < myMaxResultsToFetch) {
