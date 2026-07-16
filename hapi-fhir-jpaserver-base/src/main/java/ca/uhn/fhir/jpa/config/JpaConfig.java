@@ -61,7 +61,6 @@ import ca.uhn.fhir.jpa.dao.IResourceMetadataExtractorSvc;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.jpa.dao.JpaBulkDataExportHistoryHelper;
-import ca.uhn.fhir.jpa.dao.JpaDaoResourceLinkResolver;
 import ca.uhn.fhir.jpa.dao.JpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.ResourceHistoryCalculator;
@@ -86,6 +85,7 @@ import ca.uhn.fhir.jpa.dao.expunge.IExpungeEverythingService;
 import ca.uhn.fhir.jpa.dao.expunge.IResourceExpungeService;
 import ca.uhn.fhir.jpa.dao.expunge.JpaResourceExpungeService;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
+import ca.uhn.fhir.jpa.dao.index.DaoResourceLinkResolver;
 import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
@@ -96,7 +96,6 @@ import ca.uhn.fhir.jpa.delete.DeleteConflictFinderService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceServiceRegistry;
 import ca.uhn.fhir.jpa.graphql.DaoRegistryGraphQLStorageServices;
 import ca.uhn.fhir.jpa.interceptor.AuthResourceResolver;
@@ -188,12 +187,12 @@ import ca.uhn.fhir.jpa.term.TermCodeSystemStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
-import ca.uhn.fhir.jpa.term.ValueSetConceptAccumulator;
-import ca.uhn.fhir.jpa.term.ValueSetConceptAccumulatorFactory;
+import ca.uhn.fhir.jpa.term.TermValueSetStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReindexingSvc;
+import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
 import ca.uhn.fhir.jpa.term.config.TermCodeSystemConfig;
 import ca.uhn.fhir.jpa.util.DialectSvc;
 import ca.uhn.fhir.jpa.util.JpaHapiTransactionService;
@@ -459,7 +458,7 @@ public class JpaConfig {
 	@Bean
 	@Primary
 	public IResourceLinkResolver daoResourceLinkResolver() {
-		return new JpaDaoResourceLinkResolver();
+		return new DaoResourceLinkResolver<JpaPid>();
 	}
 
 	@Bean(name = PackageUtils.LOADER_WITH_CACHE)
@@ -1026,19 +1025,13 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public ValueSetConceptAccumulatorFactory valueSetConceptAccumulatorFactory() {
-		return new ValueSetConceptAccumulatorFactory();
-	}
-
-	@Bean
-	@Scope("prototype")
-	public ValueSetConceptAccumulator valueSetConceptAccumulator(TermValueSet theTermValueSet) {
-		return valueSetConceptAccumulatorFactory().create(theTermValueSet);
-	}
-
-	@Bean
 	public ITermCodeSystemStorageSvc termCodeSystemStorageSvc() {
 		return new TermCodeSystemStorageSvcImpl();
+	}
+
+	@Bean
+	public ITermValueSetStorageSvc termValueSetStorageSvc() {
+		return new TermValueSetStorageSvcImpl();
 	}
 
 	@Bean
@@ -1058,13 +1051,15 @@ public class JpaConfig {
 			IResourceSearchUrlDao theResourceSearchUrlDao,
 			MatchUrlService theMatchUrlService,
 			FhirContext theFhirContext,
-			PartitionSettings thePartitionSettings) {
+			PartitionSettings thePartitionSettings,
+			PlatformTransactionManager theTxManager) {
 		return new ResourceSearchUrlSvc(
 				thePersistenceContextProvider.getEntityManager(),
 				theResourceSearchUrlDao,
 				theMatchUrlService,
 				theFhirContext,
-				thePartitionSettings);
+				thePartitionSettings,
+				theTxManager);
 	}
 
 	@Bean

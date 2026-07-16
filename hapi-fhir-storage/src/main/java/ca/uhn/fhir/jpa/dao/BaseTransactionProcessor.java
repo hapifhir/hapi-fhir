@@ -3029,4 +3029,9 @@ public abstract class BaseTransactionProcessor {
 	private static boolean isUrnEscaped(@Nonnull String theId) {
 		return theId.startsWith(URN_PREFIX_ESCAPED);
 	}
+
+	private static boolean messageStartsWith(Throwable theException, String thePrefix) {
+		String message = theException.getMessage();
+		return message != null && message.startsWith(thePrefix);
+	}
 }

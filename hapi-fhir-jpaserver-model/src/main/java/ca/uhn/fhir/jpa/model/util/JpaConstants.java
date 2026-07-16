@@ -57,6 +57,19 @@ public class JpaConstants {
 			JpaConstants.class.getName() + "_RESOURCE_ID_SERVER_ASSIGNED_VALUE";
 
 	/**
+	 * Userdata key carrying the identifier-based match URL of an auto-created placeholder
+	 * reference target which was created to satisfy a conditional reference. When present
+	 * on a resource being created, the storage layer registers a search URL entry for the
+	 * resource (used to prevent concurrent duplicate conditional creates) and marks the
+	 * created entity so the entry is cleaned up at the resource's first update, mirroring
+	 * the lifecycle of entries created by ordinary conditional creates.
+	 *
+	 * @since 8.12.0
+	 */
+	public static final String PLACEHOLDER_RESOURCE_SEARCH_URL =
+			JpaConstants.class.getName() + "_PLACEHOLDER_RESOURCE_SEARCH_URL";
+
+	/**
 	 * Operation name for the $apply-codesystem-delta-add operation
 	 */
 	public static final String OPERATION_APPLY_CODESYSTEM_DELTA_ADD = "$apply-codesystem-delta-add";
@@ -182,6 +195,23 @@ public class JpaConstants {
 	 * Operation name for the "$upload-external-code-system" operation
 	 */
 	public static final String OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM = "$upload-external-code-system";
+	/**
+	 * Operation name for the "$hapi.fhir.upload-terminology.create-job" operation
+	 */
+	public static final String OPERATION_UPLOAD_TERMINOLOGY_CREATE_JOB = "$hapi.fhir.upload-terminology.create-job";
+	/**
+	 * Operation name for the "$hapi.fhir.upload-terminology.upload-file" operation
+	 */
+	public static final String OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE = "$hapi.fhir.upload-terminology.attach-file";
+	/**
+	 * Operation name for the "$hapi.fhir.upload-terminology.start-job" operation
+	 */
+	public static final String OPERATION_UPLOAD_TERMINOLOGY_START_JOB = "$hapi.fhir.upload-terminology.start-job";
+	/**
+	 * Operation name for the "$hapi.fhir.upload-terminology.poll-for-status" operation
+	 */
+	public static final String OPERATION_UPLOAD_TERMINOLOGY_POLL_FOR_STATUS =
+			"$hapi.fhir.upload-terminology.poll-for-status";
 	/**
 	 * Operation name for the "$import" operation
 	 */

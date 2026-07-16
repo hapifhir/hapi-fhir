@@ -98,7 +98,7 @@ public class ReplaceReferencesBatchTest extends BaseJpaR4Test {
 		myBatch2JobHelper.awaitJobFailure(jobStartResponse);
 
 		await().until(() -> {
-			myBatch2JobHelper.runMaintenancePass();
+			myBatch2JobHelper.runActiveJobMaintenancePass();
 			return myTaskDao.read(taskId, mySrd).getStatus().equals(Task.TaskStatus.FAILED);
 		});
 	}

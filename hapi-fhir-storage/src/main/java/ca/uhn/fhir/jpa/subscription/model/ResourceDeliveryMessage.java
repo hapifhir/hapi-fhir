@@ -59,7 +59,9 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 	 */
 	public ResourceDeliveryMessage() {
 		super();
-		myPartitionId = RequestPartitionId.defaultPartition();
+		// myPartitionId is intentionally left null until the producer or deserializer populates it. Pre-populating it
+		// with a hard-coded null-partition sentinel (the deprecated RequestPartitionId.defaultPartition()) masked the
+		// absence of a partition and ignored any configured default partition (GL-8692).
 	}
 
 	public IBaseResource getPayload(FhirContext theCtx) {
@@ -125,7 +127,13 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 		}
 	}
 
+	/**
+	 * @return the partition this message targets, or {@code null} if the producer/deserializer has not populated it.
+	 * A {@code null} value is resolved to the configured default partition downstream (e.g. when set on a
+	 * {@link ca.uhn.fhir.rest.api.server.SystemRequestDetails}).
+	 */
 	@Override
+	@Nullable
 	public RequestPartitionId getPartitionId() {
 		return myPartitionId;
 	}

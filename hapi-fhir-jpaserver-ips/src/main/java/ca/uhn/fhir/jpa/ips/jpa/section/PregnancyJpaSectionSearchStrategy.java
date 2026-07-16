@@ -27,7 +27,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Observation;
 
-import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.LOINC_URI;
 
 public class PregnancyJpaSectionSearchStrategy extends JpaSectionSearchStrategy<Observation> {
 

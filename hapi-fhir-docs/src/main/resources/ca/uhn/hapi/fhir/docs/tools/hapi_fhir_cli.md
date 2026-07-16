@@ -74,25 +74,27 @@ Note that the path and exact filename of the terminology files will likely need 
 ###	SNOMED CT
 
 ```
-./hapi-fhir-cli upload-terminology -d Downloads/SnomedCT_InternationalRF2_PRODUCTION_20220131T120000Z.zip -v r4 -t http://localhost:8080/fhir -u http://snomed.info/sct
+./hapi-fhir-cli upload-terminology -d Downloads/SnomedCT_InternationalRF2_PRODUCTION_20220131T120000Z.zip -v r4 -t http://localhost:8080/fhir -u http://snomed.info/sct|20220131
 ```
 
 ### LOINC
 
+LOINC can be downloaded from the [LOINC website](http://loinc.org/downloads). Note that the URL must be a versioned canonical URL containing the version of LOINC found in the distribution ZIP file as shown below, e.g. `http://loinc.org|2.82`.
+
 ```
-./hapi-fhir-cli upload-terminology -d Downloads/LOINC_2.54_MULTI-AXIAL_HIERARCHY.zip -d Downloads/LOINC_2.54_Text.zip -v r4 -t http://localhost:8080/fhir -u http://loinc.org
+./hapi-fhir-cli upload-terminology -d Downloads/Loinc_2.82.zip -v r4 -t http://localhost:8080/fhir -u http://loinc.org|2.82
 ```
 
 ### ICD-10 (International Version)
 
 ```
-./hapi-fhir-cli upload-terminology -d Downloads/icdClaML2019ens.zip -v r4 -t http://localhost:8080/fhir -u http://hl7.org/fhir/sid/icd-10
+./hapi-fhir-cli upload-terminology -d Downloads/icdClaML2019ens.zip -v r4 -t http://localhost:8080/fhir -u http://hl7.org/fhir/sid/icd-10|2019
 ```
 
 ### ICD-10-CM
 
 ```
-./hapi-fhir-cli upload-terminology -d Downloads/icd10cm_tabular_2021.xml -v r4 -t http://localhost:8080/fhir -u http://hl7.org/fhir/sid/icd-10-cm
+./hapi-fhir-cli upload-terminology -d Downloads/icd10cm_tabular_2021.xml -v r4 -t http://localhost:8080/fhir -u http://hl7.org/fhir/sid/icd-10-cm|2021
 ```
 
 # Migrate Database

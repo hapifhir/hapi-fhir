@@ -33,6 +33,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.interceptor.model.TransactionWriteAfterPrefetchDetails;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
@@ -991,6 +992,143 @@ public class PatientIdPartitionInterceptor {
 		theVersionAdapter.setRequestIfNoneExist(entry, null);
 	}
 
+	/**
+	 * Handles {@link Pointcut#STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH}, fired after the transaction pre-fetch has run
+	 * (inside the transaction, before any entry is written).
+	 */
+	@Hook(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH)
+	public void onTransactionWriteAfterPrefetch(
+			TransactionWriteAfterPrefetchDetails theDetails, TransactionDetails theTransactionDetails) {
+		rewriteInlinePatientMatchUrlReferences(theDetails.getEntries(), theTransactionDetails);
+		rewriteIdlessConditionalPatientUpdatesToDirect(theDetails.getEntries(), theTransactionDetails);
+	}
+
+	/**
+	 * Rewrites each Patient-compartment reference given as an inline match URL (e.g.
+	 * {@code Observation.subject = "Patient?identifier=http://acme.org/mrn|PT00062"}) to a literal
+	 * {@code Patient/<id>}, so per-entry partition determination ({@link #identifyForCreate}) can route the resource to
+	 * the correct Patient compartment.
+	 * <p>
+	 * The rewrite reuses what the pre-fetch already resolved into
+	 * {@link TransactionDetails#getResolvedMatchUrls()} rather than issuing its own search, and touches only the
+	 * compartment-defining references. Anything the pre-fetch did not resolve is left untouched; if a partition still
+	 * cannot be determined for an entry, per-entry determination rejects the transaction.
+	 * <p>
+	 * This only ever has work to do when all-partition search is supported: on infrastructure that cannot search
+	 * across all partitions, an entry whose inline match URL the pre-fetch has not resolved is rejected before
+	 * pre-fetch runs (by per-transaction partition determination), so it never reaches this rewrite.
+	 */
+	private void rewriteInlinePatientMatchUrlReferences(
+			List<IBase> theEntries, TransactionDetails theTransactionDetails) {
+		FhirTerser terser = myFhirContext.newTerser();
+		for (IBase entry : theEntries) {
+			IBaseResource resource = terser.getSingleValueOrNull(entry, "resource", IBaseResource.class);
+			if (resource == null) {
+				continue;
+			}
+			RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(resource);
+			List<RuntimeSearchParam> compartmentSps =
+					ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
+			if (compartmentSps.isEmpty()) {
+				continue;
+			}
+			ResourceCompartmentUtil.getResourceCompartmentReferences(resource, compartmentSps, mySearchParamExtractor)
+					.forEach(reference -> {
+						String referenceValue = reference.getReferenceElement().getValue();
+						if (isPatientInlineMatchUrl(referenceValue)) {
+							rewriteInlineMatchUrlReference(reference, referenceValue, theTransactionDetails);
+						}
+					});
+		}
+	}
+
+	/**
+	 * A Patient inline match URL is a reference whose value targets the Patient resource type with a search
+	 * query, i.e. starts with {@code "Patient?"} or {@code "/Patient?"}.
+	 */
+	private static boolean isPatientInlineMatchUrl(@Nullable String theReferenceValue) {
+		return theReferenceValue != null
+				&& (theReferenceValue.startsWith(PATIENT_STR + "?")
+						|| theReferenceValue.startsWith("/" + PATIENT_STR + "?"));
+	}
+
+	/**
+	 * Rewrites a single Patient inline match URL reference to {@code Patient/<id>} using the resource ID the
+	 * pre-fetch already resolved for it into {@link TransactionDetails#getResolvedMatchUrls()}. No search is
+	 * performed here — we act only on what the pre-fetch put in the transaction details. If the match URL was not
+	 * resolved to a concrete Patient there, the reference is left untouched and per-entry partition determination
+	 * handles it.
+	 */
+	private void rewriteInlineMatchUrlReference(
+			IBaseReference theReference, String theReferenceValue, TransactionDetails theTransactionDetails) {
+		// Act only on a match URL the pre-fetch resolved to a concrete Patient; otherwise leave the reference as is.
+		getPreFetchResolvedId(theReferenceValue, theTransactionDetails)
+				.ifPresent(resolvedId -> theReference.setReference(
+						resolvedId.toUnqualifiedVersionless().getValue()));
+	}
+
+	/**
+	 * Returns the concrete FHIR id the pre-fetch resolved for the given match URL (via
+	 * {@link TransactionDetails#getResolvedMatchUrls()} and the reverse-id map), or empty if the URL was not
+	 * resolved to a single existing resource ({@link TransactionDetails#NOT_FOUND}, absent, or no reverse-mapped id).
+	 * No search is performed — we act only on what the pre-fetch put in the transaction details.
+	 */
+	private Optional<IIdType> getPreFetchResolvedId(String theMatchUrl, TransactionDetails theTransactionDetails) {
+		IResourcePersistentId<?> resolved =
+				theTransactionDetails.getResolvedMatchUrls().get(theMatchUrl);
+		if (resolved == null || resolved == TransactionDetails.NOT_FOUND) {
+			return Optional.empty();
+		}
+		return Optional.ofNullable(theTransactionDetails.getReverseResolvedId(resolved));
+	}
+
+	/**
+	 * Rewrites an id-less conditional-update Patient (e.g. {@code PUT Patient?identifier=http://acme.org/mrn|PT00062}
+	 * with no body id) into a direct {@code PUT Patient/<id>}, using the id the pre-fetch already resolved for the
+	 * conditional URL ({@link TransactionDetails#getResolvedMatchUrls()}). Without a body id the entry can't be routed
+	 * (a Patient's partition is {@code hash(<id>)}) and would fail with HAPI-1321; the direct URL lets the write route to
+	 * the existing Patient and update it in place instead of creating a duplicate.
+	 * <p>
+	 * Only a truly id-less body is rewritten. A body that already carries a client-assigned id is already routable and
+	 * handled by the normal conditional-update path.
+	 * <p>
+	 * An unmatched id-less conditional PUT ({@link TransactionDetails#NOT_FOUND} or absent) is left untouched and still
+	 * fails with HAPI-1321.
+	 */
+	private void rewriteIdlessConditionalPatientUpdatesToDirect(
+			List<IBase> theEntries, TransactionDetails theTransactionDetails) {
+		FhirTerser terser = myFhirContext.newTerser();
+		for (IBase entry : theEntries) {
+			String verb = terser.getSinglePrimitiveValueOrNull(entry, "request.method");
+			if (!"PUT".equals(verb)) {
+				continue;
+			}
+			String url = terser.getSinglePrimitiveValueOrNull(entry, "request.url");
+			if (!isPatientInlineMatchUrl(url)) {
+				continue;
+			}
+			IBaseResource resource = terser.getSingleValueOrNull(entry, "resource", IBaseResource.class);
+			if (resource == null || !PATIENT_STR.equals(myFhirContext.getResourceType(resource))) {
+				continue;
+			}
+			// Skip a body that already has an id — only a truly id-less body needs the rewrite (see method Javadoc).
+			if (resource.getIdElement().getIdPart() != null) {
+				continue;
+			}
+
+			Optional<IIdType> matchedId = getPreFetchResolvedId(url, theTransactionDetails);
+			if (matchedId.isEmpty()) {
+				continue;
+			}
+
+			// Convert the conditional PUT into a direct update by rewriting the request URL to the matched Patient id
+			// (verb stays PUT). We only rewrite the URL. The transaction processor's direct-update path then stamps
+			// the body id from that URL before the write, so the resource routes to the matched Patient.
+			String reference = matchedId.get().toUnqualifiedVersionless().getValue();
+			terser.setElement(entry, "request.url", reference);
+		}
+	}
+
 	@SuppressWarnings("SameParameterValue")
 	private List<String> getResourceIdsForSearchParam(SearchParameterMap theParams, String theParamName) {
 		List<List<IQueryParameterType>> paramAndListForParamName = theParams.get(theParamName);
@@ -1041,6 +1179,23 @@ public class PatientIdPartitionInterceptor {
 			}
 		});
 
+		// Every value for this parameter has now been scanned. What we do with the result depends on
+		// whether the infrastructure can fan a search out across all partitions.
+		if (myPartitionSettings.isAllPartitionSearchSupported()) {
+			// We can fan out across all partitions, so never reject here: return whatever we resolved
+			// (an empty list just widens to an all-partition search).
+			return idParts;
+		}
+
+		// The infrastructure cannot fan out, so a search must resolve to a known partition. Three cases:
+		//   1. idParts is non-empty: we pinned the partition(s) directly from a concrete Patient id.
+		//      Return the ids.
+		//   2. idParts is empty and no chained subject/patient param was seen: this parameter expressed no
+		//      patient scoping, so there is nothing to resolve. Return the empty list.
+		//   3. idParts is empty but a chained subject/patient param was seen (e.g. subject.identifier=...):
+		//      the only patient anchor is one we could not resolve to a concrete id, so we cannot honor
+		//      the single-partition guarantee. Reject the search with HAPI-2928.
+		// Only case 3 errors; cases 1 and 2 fall through and return normally.
 		if (idParts.isEmpty() && !needingAtLeastOneChainedSpToResolveSet.isEmpty()) {
 			throw new MethodNotAllowedException(Msg.code(2928)
 					+ buildErrorMsgForChainedParameters(theParamName, needingAtLeastOneChainedSpToResolveSet));

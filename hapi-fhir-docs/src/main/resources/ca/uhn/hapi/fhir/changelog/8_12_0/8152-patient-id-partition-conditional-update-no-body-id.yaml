@@ -1,0 +1,5 @@
+---
+type: add
+issue: 8152
+title: "In Patient ID partition mode, transaction conditional updates for existing Patients are now supported when the
+  underlying storage supports an all-partition search."

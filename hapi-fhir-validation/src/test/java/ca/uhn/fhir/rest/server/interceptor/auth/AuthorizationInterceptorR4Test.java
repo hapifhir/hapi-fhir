@@ -4595,7 +4595,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 				params.add(RequestDetails.class, theRequestDetails);
 				params.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
 				params.add(TransactionDetails.class, new TransactionDetails());
-				params.add(RequestPartitionId.class, RequestPartitionId.defaultPartition());
+				params.add(RequestPartitionId.class, RequestPartitionId.fromPartitionId(null));
 				ourServer.getInterceptorService().callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, params);
 			}
 
@@ -4775,7 +4775,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 				params.add(RequestDetails.class, theRequestDetails);
 				params.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
 				params.add(TransactionDetails.class, new TransactionDetails());
-				params.add(RequestPartitionId.class, RequestPartitionId.defaultPartition());
+				params.add(RequestPartitionId.class, RequestPartitionId.fromPartitionId(null));
 				ourServer.getInterceptorService().callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, params);
 			}
 			{

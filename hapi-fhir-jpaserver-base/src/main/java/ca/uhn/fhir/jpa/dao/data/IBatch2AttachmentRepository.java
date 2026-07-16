@@ -19,21 +19,23 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.batch2.api.AttachmentMetadata;
 import ca.uhn.fhir.jpa.entity.Batch2JobAttachmentEntity;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface IBatch2AttachmentRepository
-		extends JpaRepository<Batch2JobAttachmentEntity, Batch2JobAttachmentEntity.Batch2WorkChunkAttachmentEntityPk>,
+		extends JpaRepository<Batch2JobAttachmentEntity, Batch2JobAttachmentEntity.AttachmentPk>,
 				IHapiFhirJpaRepository {
 
 	default Optional<Batch2JobAttachmentEntity> findById(String theInstanceId, String theAttachmentId) {
-		return findById(
-				new Batch2JobAttachmentEntity.Batch2WorkChunkAttachmentEntityPk(theInstanceId, theAttachmentId));
+		return findById(new Batch2JobAttachmentEntity.AttachmentPk(theInstanceId, theAttachmentId));
 	}
 
 	@Modifying
@@ -44,4 +46,8 @@ public interface IBatch2AttachmentRepository
 			"SELECT e FROM Batch2JobAttachmentEntity e WHERE e.myId.myJobInstanceId = :instanceId AND e.myFilename = :filename")
 	Optional<Batch2JobAttachmentEntity> findByIdAndFilename(
 			@Param("instanceId") String theInstanceId, @Param("filename") String theFilename);
+
+	@Query(
+			"SELECT new ca.uhn.fhir.batch2.api.AttachmentMetadata(e.myId.myAttachmentId, e.myFilename) FROM Batch2JobAttachmentEntity e WHERE e.myId.myJobInstanceId = :instanceId ORDER BY e.myId.myAttachmentId")
+	List<AttachmentMetadata> listAttachmentsForJobInstance(Pageable thePage, @Param("instanceId") String theInstanceId);
 }

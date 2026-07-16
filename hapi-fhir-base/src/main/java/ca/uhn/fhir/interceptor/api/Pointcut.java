@@ -2084,7 +2084,7 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 *
-	 * @since 8.11.5
+	 * @since 8.11.15
 	 */
 	STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH(
 			void.class,

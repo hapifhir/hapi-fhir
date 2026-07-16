@@ -7,7 +7,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>8.11.5-SNAPSHOT</version>
+	<version>8.11.16-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -73,6 +73,7 @@
 		<module>hapi-fhir-validation-resources-r4b</module>
 		<module>hapi-fhir-structures-r5</module>
 		<module>hapi-fhir-validation-resources-r5</module>
+		<module>hapi-fhir-typescript</module>
 		<module>hapi-fhir-jpa</module>
 		<module>hapi-fhir-serviceloaders</module>
 		<module>hapi-fhir-storage</module>
@@ -1011,6 +1012,15 @@
 		<developer>
 			<id>RohithVangalla1</id>
 		</developer>
+		<developer>
+			<id>tanmaydarmorha</id>
+			<name>Tanmay Darmorha</name>
+			<organization>Optum</organization>
+		</developer>
+		<developer>
+			<id>bobvanderlinden</id>
+			<name>Bob van der Linden</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -1021,7 +1031,7 @@
 	</licenses>
 
 	<properties>
-		<fhir_core_version>6.9.4.1</fhir_core_version>
+		<fhir_core_version>6.9.11</fhir_core_version>
 		<spotless_version>2.41.1</spotless_version>
 		<spotless.exclude.pattern>**/test/**/*.java</spotless.exclude.pattern>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
@@ -2793,9 +2803,9 @@
 									<version>[3.9.0,)</version>
 								</requireMavenVersion>
 								<requireJavaVersion>
-									<version>17</version>
+									<version>[17,)</version>
 									<message>
-										HAPI FHIR is targeting JDK 17 for published binaries
+										HAPI FHIR targets JDK 17 for published binaries (enforced via maven.compiler.release=17, which rejects post-17 APIs); builds run on JDK 17 or newer (CI uses JDK 21).
 									</message>
 								</requireJavaVersion>
 							</rules>
@@ -3333,6 +3343,8 @@
 							<publishingServerId>central</publishingServerId>
 							<autoPublish>true</autoPublish>
 							<waitUntil>uploaded</waitUntil>
+							<waitMaxTime>1800</waitMaxTime>
+							<waitPollingInterval>10</waitPollingInterval>
 							<excludeArtifacts>
 								<excludeArtifact>hapi-fhir-base-test-jaxrsserver-kotlin</excludeArtifact>
 								<excludeArtifact>hapi-fhir-jpaserver-uhnfhirtest</excludeArtifact>

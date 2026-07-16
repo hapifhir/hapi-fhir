@@ -28,6 +28,7 @@ HAPI FHIR contains couple of implementations for `IPagingProvider`.
 
 ### DatabaseBackedPagingProvider
 
+This is the the default paging provider used for FHIR search with `defaultPageSize = 10` and `maxPageSize = 50`.
 When using `DatabaseBackedPagingProvider` HAPI FHIR searches may be done asynchronously. This means that
 the result is also cached to the database and the client may base the cached search result set.
 

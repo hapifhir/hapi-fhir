@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.IdSequencePoolingStrategy;
 import com.google.common.annotations.Beta;
 import com.google.common.collect.Sets;
 import jakarta.annotation.Nonnull;
@@ -181,6 +182,7 @@ public class JpaStorageSettings extends StorageSettings {
 	private Set<String> myEnforceReferentialIntegrityOnDeleteDisableForPaths = Collections.emptySet();
 	private boolean myUniqueIndexesEnabled = true;
 	private boolean myEnforceReferentialIntegrityOnWrite = true;
+	private IdSequencePoolingStrategy myIdSequencePoolingStrategy = IdSequencePoolingStrategy.SHARED_POOL;
 	private SearchTotalModeEnum myDefaultTotalMode = null;
 	private int myEverythingIncludesFetchPageSize = 50;
 	/**
@@ -1712,6 +1714,35 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	public void setUniqueIndexesEnabled(boolean theUniqueIndexesEnabled) {
 		myUniqueIndexesEnabled = theUniqueIndexesEnabled;
+	}
+
+	/**
+	 * The strategy the database sequence id generator uses to allocate new resource ids. The default is
+	 * {@link IdSequencePoolingStrategy#SHARED_POOL}. {@link IdSequencePoolingStrategy#PER_THREAD_POOL} lets concurrent
+	 * writers each allocate from their own pool so they do not serialize on a single shared pool lock while the
+	 * pool is refilled from the database; switching to it should be done across an entire cluster at once (see
+	 * the upgrade notes), never node by node, because the two strategies interpret the same database sequence
+	 * differently.
+	 *
+	 * @since 8.12.0
+	 */
+	public IdSequencePoolingStrategy getIdSequencePoolingStrategy() {
+		return myIdSequencePoolingStrategy;
+	}
+
+	/**
+	 * The strategy the database sequence id generator uses to allocate new resource ids. The default is
+	 * {@link IdSequencePoolingStrategy#SHARED_POOL}. {@link IdSequencePoolingStrategy#PER_THREAD_POOL} lets concurrent
+	 * writers each allocate from their own pool so they do not serialize on a single shared pool lock while the
+	 * pool is refilled from the database; switching to it should be done across an entire cluster at once (see
+	 * the upgrade notes), never node by node, because the two strategies interpret the same database sequence
+	 * differently.
+	 *
+	 * @since 8.12.0
+	 */
+	public void setIdSequencePoolingStrategy(IdSequencePoolingStrategy theIdSequencePoolingStrategy) {
+		Validate.notNull(theIdSequencePoolingStrategy, "theIdSequencePoolingStrategy must not be null");
+		myIdSequencePoolingStrategy = theIdSequencePoolingStrategy;
 	}
 
 	/**

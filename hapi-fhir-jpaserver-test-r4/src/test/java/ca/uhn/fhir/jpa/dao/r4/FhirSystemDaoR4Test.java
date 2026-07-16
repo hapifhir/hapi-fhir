@@ -44,6 +44,7 @@ import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ClasspathUtil;
+import ca.uhn.fhir.util.ThreadPoolUtil;
 import ca.uhn.fhir.util.HapiExtensions;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -104,6 +105,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -114,12 +116,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
@@ -303,6 +307,39 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals("Patient/PT0/_history/1", actualPatient.getId());
 	}
 
+
+
+	@Test
+	public void testCreateWithIdSuppliedInMetadata_Concurrently() {
+		ThreadPoolTaskExecutor threadPool = ThreadPoolUtil.newThreadPool(10, "test");
+
+		// Test
+		List<Future<?>> futures = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			Future<?> future = threadPool.submit(this::testCreateWithIdSuppliedInMetadata);
+			futures.add(future);
+		}
+
+		int success = 0;
+		int fail = 0;
+		for (var future : futures) {
+			try {
+				future.get();
+				success++;
+			} catch (Exception e) {
+				ourLog.warn("Failed: {}", e.toString());
+				fail++;
+			}
+		}
+
+		// Verify
+		Patient actualPatient = myPatientDao.read(new IdType("Patient/PT0"), newSrd());
+		assertTrue(actualPatient.getActive());
+		assertEquals(1, success);
+		assertEquals(9, fail);
+
+		runInTransaction(()-> assertEquals(1, myResourceTableDao.count()));
+	}
 
 
 	@Test
@@ -544,8 +581,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	/**
-	 * See #410
-	 */
+     * See #410
+     */
 	@Test
 	public void testContainedArePreservedForBug410() throws IOException {
 		String input = ClasspathUtil.loadResource("/r4/bug-410-bundle.xml");

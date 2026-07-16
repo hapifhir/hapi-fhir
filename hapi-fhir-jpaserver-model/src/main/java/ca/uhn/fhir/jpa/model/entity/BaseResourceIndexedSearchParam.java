@@ -215,7 +215,8 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 			PartitionablePartitionId theRequestPartitionId,
 			String theResourceType,
 			String theParamName) {
-		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
+		RequestPartitionId requestPartitionId =
+				PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId, thePartitionSettings);
 		return calculateHashIdentity(thePartitionSettings, requestPartitionId, theResourceType, theParamName);
 	}
 

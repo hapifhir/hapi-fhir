@@ -1305,6 +1305,288 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 	}
 
 	@Test
+	public void testRevIncludes_NotSpecifiedReturnsEmptyList() throws Exception {
+
+		class PatientResourceProvider implements IResourceProvider {
+
+			@Override
+			public Class<Patient> getResourceType() {
+				return Patient.class;
+			}
+
+			@Search
+			public List<Patient> search(@OptionalParam(name = "name") StringParam theName) {
+				return Collections.emptyList();
+			}
+
+		}
+
+		class ObservationResourceProvider implements IResourceProvider {
+
+			@Override
+			public Class<Observation> getResourceType() {
+				return Observation.class;
+			}
+
+			@Search
+			public List<Observation> search(@OptionalParam(name = "subject") ReferenceParam theSubject) {
+				return Collections.emptyList();
+			}
+
+		}
+
+		RestfulServer rs = new RestfulServer(myCtx);
+		rs.setResourceProviders(new PatientResourceProvider(), new ObservationResourceProvider());
+
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		sc.setRestResourceRevIncludesEnabled(true);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+
+		List<CapabilityStatementRestResourceComponent> resources = conformance.getRestFirstRep().getResource();
+		CapabilityStatementRestResourceComponent patientResource = resources.stream()
+			.filter(resource -> "Patient".equals(resource.getType()))
+			.findFirst().get();
+		assertThat(patientResource.getSearchRevInclude()).isEmpty();
+	}
+
+	@Test
+	public void testIncludes_NotSpecifiedReturnsEmptyList() throws Exception {
+
+		class PatientResourceProvider implements IResourceProvider {
+
+			@Override
+			public Class<Patient> getResourceType() {
+				return Patient.class;
+			}
+
+			@Search
+			public List<Patient> search(@OptionalParam(name = "name") StringParam theName) {
+				return Collections.emptyList();
+			}
+
+		}
+
+		class ObservationResourceProvider implements IResourceProvider {
+
+			@Override
+			public Class<Observation> getResourceType() {
+				return Observation.class;
+			}
+
+			@Search
+			public List<Observation> search(@OptionalParam(name = "subject") ReferenceParam theSubject) {
+				return Collections.emptyList();
+			}
+
+		}
+
+		RestfulServer rs = new RestfulServer(myCtx);
+		rs.setResourceProviders(new PatientResourceProvider(), new ObservationResourceProvider());
+
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+
+		List<CapabilityStatementRestResourceComponent> resources = conformance.getRestFirstRep().getResource();
+		CapabilityStatementRestResourceComponent patientResource = resources.stream()
+			.filter(resource -> "Patient".equals(resource.getType()))
+			.findFirst().get();
+		assertThat(patientResource.getSearchInclude()).isEmpty();
+	}
+
+	@Test
+	public void testIncludes_Inferred() throws Exception {
+
+		class PatientResourceProvider implements IResourceProvider {
+
+			@Override
+			public Class<Patient> getResourceType() {
+				return Patient.class;
+			}
+
+			@Search
+			public List<Patient> search(
+				@IncludeParam Set<Include> theIncludes,
+				@OptionalParam(name = "general-practitioner") ReferenceParam theGp,
+				@OptionalParam(name = "organization") ReferenceParam theOrg,
+				@OptionalParam(name = "name") StringParam theName) {
+				return Collections.emptyList();
+			}
+
+		}
+
+		RestfulServer rs = new RestfulServer(myCtx);
+		rs.setResourceProviders(new PatientResourceProvider());
+
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+
+		List<CapabilityStatementRestResourceComponent> resources = conformance.getRestFirstRep().getResource();
+		CapabilityStatementRestResourceComponent patientResource = resources.stream()
+			.filter(resource -> "Patient".equals(resource.getType()))
+			.findFirst().get();
+		Set<String> searchIncludes = toStrings(patientResource.getSearchInclude());
+		assertThat(searchIncludes).containsExactlyInAnyOrder("*", "Patient:general-practitioner", "Patient:organization");
+	}
+
+	@Test
+	public void testIncludes_PresentDoesNotEmitRevIncludes() throws Exception {
+
+		class PatientResourceProvider implements IResourceProvider {
+
+			@Override
+			public Class<Patient> getResourceType() {
+				return Patient.class;
+			}
+
+			@Search
+			public List<Patient> search(@IncludeParam(allow = {"Patient:organization"}) Set<Include> theIncludes) {
+				return Collections.emptyList();
+			}
+
+		}
+
+		RestfulServer rs = new RestfulServer(myCtx);
+		rs.setResourceProviders(new PatientResourceProvider());
+
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		sc.setRestResourceRevIncludesEnabled(true);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+
+		List<CapabilityStatementRestResourceComponent> resources = conformance.getRestFirstRep().getResource();
+		CapabilityStatementRestResourceComponent patientResource = resources.stream()
+			.filter(resource -> "Patient".equals(resource.getType()))
+			.findFirst().get();
+		assertThat(toStrings(patientResource.getSearchInclude())).containsExactlyInAnyOrder("Patient:organization");
+		assertThat(patientResource.getSearchRevInclude()).isEmpty();
+	}
+
+	@Test
+	public void testRevIncludes_PresentDoesNotEmitIncludes() throws Exception {
+
+		class PatientResourceProvider implements IResourceProvider {
+
+			@Override
+			public Class<Patient> getResourceType() {
+				return Patient.class;
+			}
+
+			@Search
+			public List<Patient> search(@IncludeParam(reverse = true, allow = {"Observation:subject"}) Set<Include> theRevIncludes) {
+				return Collections.emptyList();
+			}
+
+		}
+
+		RestfulServer rs = new RestfulServer(myCtx);
+		rs.setResourceProviders(new PatientResourceProvider());
+
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		sc.setRestResourceRevIncludesEnabled(true);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+
+		List<CapabilityStatementRestResourceComponent> resources = conformance.getRestFirstRep().getResource();
+		CapabilityStatementRestResourceComponent patientResource = resources.stream()
+			.filter(resource -> "Patient".equals(resource.getType()))
+			.findFirst().get();
+		assertThat(patientResource.getSearchInclude()).isEmpty();
+		assertThat(toStrings(patientResource.getSearchRevInclude())).containsExactlyInAnyOrder("Observation:subject");
+	}
+
+	@Test
+	public void testIncludes_Explicit() throws Exception {
+
+		class PatientResourceProvider implements IResourceProvider {
+
+			@Override
+			public Class<Patient> getResourceType() {
+				return Patient.class;
+			}
+
+			@Search
+			public List<Patient> search(@IncludeParam(allow = {"Patient:general-practitioner", "Patient:organization"}) Set<Include> theIncludes) {
+				return Collections.emptyList();
+			}
+
+		}
+
+		RestfulServer rs = new RestfulServer(myCtx);
+		rs.setResourceProviders(new PatientResourceProvider());
+
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+
+		List<CapabilityStatementRestResourceComponent> resources = conformance.getRestFirstRep().getResource();
+		CapabilityStatementRestResourceComponent patientResource = resources.stream()
+			.filter(resource -> "Patient".equals(resource.getType()))
+			.findFirst().get();
+		assertThat(toStrings(patientResource.getSearchInclude())).containsExactlyInAnyOrder("Patient:general-practitioner", "Patient:organization");
+	}
+
+	@Test
+	public void testRevIncludes_DisabledReturnsEmpty() throws Exception {
+
+		class PatientResourceProvider implements IResourceProvider {
+
+			@Override
+			public Class<Patient> getResourceType() {
+				return Patient.class;
+			}
+
+			@Search
+			public List<Patient> search(@IncludeParam(reverse = true, allow = {"Observation:subject"}) Set<Include> theRevIncludes) {
+				return Collections.emptyList();
+			}
+
+		}
+
+		RestfulServer rs = new RestfulServer(myCtx);
+		rs.setResourceProviders(new PatientResourceProvider());
+
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		sc.setRestResourceRevIncludesEnabled(false);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+
+		List<CapabilityStatementRestResourceComponent> resources = conformance.getRestFirstRep().getResource();
+		CapabilityStatementRestResourceComponent patientResource = resources.stream()
+			.filter(resource -> "Patient".equals(resource.getType()))
+			.findFirst().get();
+		assertThat(patientResource.getSearchRevInclude()).isEmpty();
+	}
+
+	@Test
 	public void testBulkDataExport() throws ServletException {
 		RestfulServer rs = new RestfulServer(myCtx);
 		rs.setProviders(new BulkDataExportProvider());

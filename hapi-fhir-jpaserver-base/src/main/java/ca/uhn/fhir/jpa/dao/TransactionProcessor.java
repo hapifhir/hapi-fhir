@@ -26,6 +26,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.interceptor.model.TransactionWriteAfterPrefetchDetails;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -726,11 +727,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 						});
 					});
 		}
-
-		// FIXME:
-		// create placeholder resource here
-		// preFetchSearchParameterMaps will add MatchUrlToResolve.myRequestUrl as NOT_FOUND in the transactionDetails),
-		//
 	}
 
 	/**

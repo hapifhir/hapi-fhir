@@ -2,6 +2,8 @@
 
 HAPI FHIR JPA Server includes an `IValidationSupport` class, `JpaPersistedResourceValidationSupport`, which can be used to validate terminology using CodeSystem, ValueSet and ConceptMap resources provided by the JPA Server. Terminology can be loaded into the JPA Server using standard FHIR REST APIs (PUT and POST) as well as using the hapi-fhir-cli [upload-terminology](/hapi-fhir/docs/tools/hapi_fhir_cli.html#upload-terminology) command.
 
+For large ValueSets, the JPA Server can pre-expand and persist the expanded concept list so that `$expand`, `$validate`, and `$lookup` calls do not need to resolve the `ValueSet.compose` rules on every request. See [ValueSet Pre-Expansion](/hapi-fhir/docs/server_jpa/valueset_expansion.html) for details on how this works and how to inspect expansion status.
+
 # Versioning of Terminology
 
 Code systems can be versioned as described in the FHIR specification [here](http://hl7.org/fhir/codesystem.html#versioning). Similarly, value sets and concept maps that are defined with a versioned code system can also be versioned.
@@ -147,7 +149,7 @@ The TRM_CODESYSTEM table will have exactly one row for each unique CODE_SYSTEM_U
 
 <img src="/hapi-fhir/docs/images/termvalueset_schema.svg" alt="Resources" style="width: 100%; max-width: 600px;"/>
 
-The TRM_VALUESET table represents a single ValueSet resource with a specific URL and version. It can be used to map terminology concepts represented by the TRM_VALUESET_CONCEPT and TRM_VALUESET_C_DESIGNATION tables to a single ValueSet resource.
+The TRM_VALUESET table represents a single ValueSet resource with a specific URL and version. It can be used to map terminology concepts represented by the TRM_VALUESET_CONCEPT and TRM_VALUESET_C_DESIGNATION tables to a single ValueSet resource. The pre-expansion status and any failure reason for each ValueSet are also stored on this table; see [ValueSet Pre-Expansion](/hapi-fhir/docs/server_jpa/valueset_expansion.html).
 
 ### Columns
 
