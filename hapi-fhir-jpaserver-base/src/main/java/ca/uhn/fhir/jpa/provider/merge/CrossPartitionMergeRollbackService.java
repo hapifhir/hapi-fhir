@@ -20,15 +20,23 @@
 package ca.uhn.fhir.jpa.provider.merge;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.dao.PartitionedTransactionPartialFailureException;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
 import ca.uhn.fhir.replacereferences.PreviousResourceVersionRestorer;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Reference;
@@ -37,7 +45,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static ca.uhn.fhir.merge.MergeResourceHelper.addErrorToOperationOutcome;
@@ -69,12 +79,16 @@ public class CrossPartitionMergeRollbackService {
 	private final PreviousResourceVersionRestorer myResourceVersionRestorer;
 	private final DaoRegistry myDaoRegistry;
 	private final FhirContext myFhirContext;
+	private final IHapiTransactionService myHapiTransactionService;
 
 	public CrossPartitionMergeRollbackService(
-			DaoRegistry theDaoRegistry, PreviousResourceVersionRestorer theResourceVersionRestorer) {
+			DaoRegistry theDaoRegistry,
+			PreviousResourceVersionRestorer theResourceVersionRestorer,
+			IHapiTransactionService theHapiTransactionService) {
 		myDaoRegistry = theDaoRegistry;
 		myResourceVersionRestorer = theResourceVersionRestorer;
 		myFhirContext = theDaoRegistry.getFhirContext();
+		myHapiTransactionService = theHapiTransactionService;
 	}
 
 	/**
@@ -83,12 +97,14 @@ public class CrossPartitionMergeRollbackService {
 	 * steps are durable because partition changes commit in their own transactions; otherwise the outer transaction
 	 * has already rolled everything back and the caller reports that directly without invoking this service.
 	 *
-	 * <p>The work runs in referential-integrity order: first the undeletes (tombstoned originals, and the source
-	 * when it was deleted), then the reverts (committed copies, referrer updates, target, and the source when it was
-	 * kept), then the Provenance is deleted. The caller has already classified each
-	 * resource into the right bucket; this service just executes them. Undeletes and reverts are best-effort —
-	 * anything that cannot be reverted is reported so it can be reverted manually; an un-deletable Provenance is
-	 * left orphaned but not reported (no resource is in a merged state).
+	 * <p>The work runs partition-pinned and in referential-integrity order: first the undeletes (tombstoned
+	 * originals, and the source when it was deleted) so the resources the reverts repoint referrers at exist; then
+	 * the reverts partition by partition, with partitions holding merge-created copies (v1 resources, reverted by
+	 * deleting them) restored last so every referrer elsewhere is repointed away from a copy before it is deleted;
+	 * then any committed resources whose partition is unknown via the partition-unpinned fallback; and finally the
+	 * Provenances created by this attempt are deleted. Undeletes and reverts are best-effort — anything that cannot
+	 * be reverted is reported so it can be reverted manually; an un-deletable Provenance is left orphaned but not
+	 * reported (no resource is in a merged state).
 	 *
 	 * @param theContext what the forward steps recorded as committed
 	 * @param theRequestDetails the request details
@@ -106,13 +122,24 @@ public class CrossPartitionMergeRollbackService {
 
 		// Undeletes first (tombstoned originals, and the source when it was deleted) so that the resources they
 		// reference exist before the reverts below repoint referrers at them.
-		restoreResources(theContext.getResourcesToUndelete(), theRequestDetails, notReverted);
+		theContext
+				.getResourcesToUndeleteByPartition()
+				.forEach((partition, ids) -> restoreResourcesPinned(partition, ids, theRequestDetails, notReverted));
 
-		// Then revert the committed copies, referrer updates, target, and the kept source.
-		restoreResources(theContext.getResourcesToRevert(), theRequestDetails, notReverted);
+		// Then revert the committed copies, referrer updates, target, and the kept source, partition by partition.
+		// Partitions holding merge-created copies (v1 ids, reverted by deleting them) go last, so referrers in other
+		// partitions are repointed away from the copies before the copies are deleted.
+		orderPartitionsWithCopiesLast(theContext.getResourcesToRevertByPartition())
+				.forEach((partition, ids) -> restoreResourcesPinned(partition, ids, theRequestDetails, notReverted));
 
-		// Delete the Provenance created by this attempt (the "merge succeeded" signal).
-		deleteProvenance(theContext.getProvenanceId(), theRequestDetails);
+		// Committed resources whose partition could not be attributed: fall back to the partition-unpinned restore.
+		restoreResourcesUnpinned(theContext.getResourcesToRevertWithUnknownPartition(), theRequestDetails, notReverted);
+
+		// Delete the Provenances created by this attempt (per-partition subs and the main "merge succeeded" signal).
+		theContext
+				.getProvenanceIds()
+				.forEach(provenanceId ->
+						deleteProvenance(provenanceId, theContext.getProvenancePartition(), theRequestDetails));
 
 		String msg;
 		int statusCode;
@@ -140,6 +167,31 @@ public class CrossPartitionMergeRollbackService {
 	}
 
 	/**
+	 * Returns the given per-partition ids reordered so that partitions containing any version-1 id come last.
+	 * A v1 id is a resource the merge created (a copy), which the restorer reverts by deleting it — that delete
+	 * must not run until the reverts of every other partition have repointed referrers away from it.
+	 */
+	private static Map<RequestPartitionId, List<IIdType>> orderPartitionsWithCopiesLast(
+			Map<RequestPartitionId, List<IIdType>> theIdsByPartition) {
+		Map<RequestPartitionId, List<IIdType>> result = new LinkedHashMap<>();
+		theIdsByPartition.forEach((partition, ids) -> {
+			if (!containsVersionOneId(ids)) {
+				result.put(partition, ids);
+			}
+		});
+		theIdsByPartition.forEach((partition, ids) -> {
+			if (containsVersionOneId(ids)) {
+				result.put(partition, ids);
+			}
+		});
+		return result;
+	}
+
+	private static boolean containsVersionOneId(List<IIdType> theIds) {
+		return theIds.stream().anyMatch(id -> id.hasVersionIdPart() && id.getVersionIdPartAsLong() == 1L);
+	}
+
+	/**
 	 * Renders the failure that triggered the rollback for the outcome, as {@code <exception type>: <message>} (or just
 	 * the type when the exception carried no message), so the reported cause names both what failed and why.
 	 */
@@ -164,31 +216,55 @@ public class CrossPartitionMergeRollbackService {
 	}
 
 	/**
-	 * Restores the given recorded ids as a single cross-partition FHIR transaction. When a transaction-partitioning
-	 * interceptor is present the transaction is split per partition and dependency-ordered (referenced partitions
-	 * commit before referrers); within a partition the two-pass id resolution means references among the listed
-	 * resources resolve regardless of order. The restorer reverts an update, deletes a created resource, or
-	 * undeletes a tombstone as appropriate; the ids are already at the version to restore from. If the restore
-	 * fails — including a partial cross-partition failure where some partitions committed before a later one failed
-	 * — each id whose resource was not actually reverted is recorded for the manual-reconciliation report.
+	 * Restores the given recorded ids in one transaction pinned to the partition they were committed on — including
+	 * the pre-reads, which must not fan out across shards (a fanned-out read can resolve through a MegaScale ESR
+	 * surrogate row and fail, e.g. with Gone for a tombstoned original). The restorer reverts an update, deletes a
+	 * created resource, or undeletes a tombstone as appropriate; the ids are already at the version to restore
+	 * from. A single-partition restore is atomic, so on failure every id in the list is recorded for the
+	 * manual-reconciliation report and the rollback moves on to the next partition.
 	 */
-	private void restoreResources(
+	private void restoreResourcesPinned(
+			RequestPartitionId thePartition,
+			List<IIdType> theIds,
+			RequestDetails theRequestDetails,
+			List<IIdType> theNotReverted) {
+		if (theIds.isEmpty()) {
+			return;
+		}
+		List<Reference> refs = theIds.stream().map(Reference::new).toList();
+		try {
+			myResourceVersionRestorer.restoreToPreviousVersionsInTrx(refs, thePartition, theRequestDetails);
+		} catch (Exception e) {
+			ourLog.error(
+					"Merge rollback restore failed for partition {}; its {} resource(s) were not reverted",
+					thePartition,
+					theIds.size(),
+					e);
+			theNotReverted.addAll(theIds);
+		}
+	}
+
+	/**
+	 * Restores recorded ids whose partition is unknown, as a single partition-unpinned (allPartitions) transaction.
+	 * This is the fallback for the rare partial data-bundle failure whose committed ids could not be attributed to
+	 * a partition; unlike the pinned path its pre-reads fan out across shards and can hit ESR surrogate rows, so it
+	 * is best-effort. On failure every id is recorded for the manual-reconciliation report.
+	 */
+	private void restoreResourcesUnpinned(
 			List<IIdType> theIds, RequestDetails theRequestDetails, List<IIdType> theNotReverted) {
 		if (theIds.isEmpty()) {
 			return;
 		}
-		// The version restorer takes References, so wrap each id.
 		List<Reference> refs = theIds.stream().map(Reference::new).toList();
 		try {
 			myResourceVersionRestorer.restoreToPreviousVersionsInTrx(refs, theRequestDetails);
 		} catch (PartitionedTransactionPartialFailureException thePartialFailure) {
-			// When the restore is split per partition and the sub-bundles commit independently, this exception
-			// means some committed before a later one failed and stopped the rest. The committed sub-bundles name
-			// exactly the resources that were reverted — everything else recorded here remains in its merged state
-			// and is reported for manual reconciliation.
+			// The unpinned restore is split per partition and the sub-bundles commit independently — some committed
+			// before a later one failed. The committed sub-bundles name exactly the resources that were reverted;
+			// everything else remains in its merged state and is reported for manual reconciliation.
 			Set<String> revertedVersionlessIds = extractCommittedVersionlessIds(thePartialFailure);
 			ourLog.error(
-					"Merge rollback partially failed; {} of {} resource(s) were reverted before a later failure",
+					"Merge rollback fallback restore partially failed; {} of {} resource(s) were reverted before a later failure",
 					revertedVersionlessIds.size(),
 					theIds.size(),
 					thePartialFailure);
@@ -199,9 +275,8 @@ public class CrossPartitionMergeRollbackService {
 				}
 			}
 		} catch (Exception e) {
-			// No partial-commit information, so nothing is known to have been reverted: the restore rolled back
-			// atomically (single database), or failed before any partition committed. Report every recorded id.
-			ourLog.error("Merge rollback restore failed; no resources were reverted", e);
+			ourLog.error(
+					"Merge rollback fallback restore failed; its {} resource(s) were not reverted", theIds.size(), e);
 			theNotReverted.addAll(theIds);
 		}
 	}
@@ -224,17 +299,41 @@ public class CrossPartitionMergeRollbackService {
 	}
 
 	/**
-	 * Deletes a Provenance created by the merge attempt. A failure is swallowed and logged — an orphaned Provenance
-	 * is left behind but no resource remains in a merged state, so it is not reported as needing a manual revert.
+	 * Deletes a Provenance created by the merge attempt, pinned to the partition the merge recorded the
+	 * Provenances as stored on — their ids may not be partition-decodable (client-assigned ids; all ids under
+	 * MegaScale UUID server-id mode), so id-based partition resolution cannot be relied on. A failure is swallowed
+	 * and logged — an orphaned Provenance is left behind but no resource remains in a merged state, so it is not
+	 * reported as needing a manual revert.
 	 */
-	private void deleteProvenance(@Nullable IIdType theProvenanceId, RequestDetails theRequestDetails) {
+	private void deleteProvenance(
+			@Nullable IIdType theProvenanceId,
+			@Nullable RequestPartitionId thePartition,
+			RequestDetails theRequestDetails) {
 		if (theProvenanceId == null) {
 			return;
 		}
+		IIdType versionlessId = theProvenanceId.toUnqualifiedVersionless();
 		try {
-			myDaoRegistry
-					.getResourceDao("Provenance")
-					.delete(theProvenanceId.toUnqualifiedVersionless(), theRequestDetails);
+			IFhirResourceDao<IBaseResource> provenanceDao = myDaoRegistry.getResourceDao("Provenance");
+			if (thePartition == null) {
+				provenanceDao.delete(versionlessId, theRequestDetails);
+				return;
+			}
+			myHapiTransactionService
+					.withRequest(theRequestDetails)
+					.withRequestPartitionId(thePartition)
+					.execute(() -> {
+						// Seed the resolved-partition cache (keyed by "Type/id") so the 4-arg delete uses the
+						// pinned partition instead of re-resolving a non-decodable id.
+						TransactionDetails transactionDetails = new TransactionDetails();
+						transactionDetails.addResolvedPartition(
+								versionlessId.getResourceType() + "/" + versionlessId.getIdPart(), thePartition);
+						DeleteConflictList deleteConflicts = new DeleteConflictList();
+						DaoMethodOutcome outcome = provenanceDao.delete(
+								versionlessId, deleteConflicts, theRequestDetails, transactionDetails);
+						DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(myFhirContext, deleteConflicts);
+						return outcome;
+					});
 		} catch (Exception e) {
 			ourLog.error("Merge rollback could not delete Provenance {}", theProvenanceId.getValue(), e);
 		}

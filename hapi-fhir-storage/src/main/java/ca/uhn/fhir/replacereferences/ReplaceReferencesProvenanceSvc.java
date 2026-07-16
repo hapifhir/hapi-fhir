@@ -171,7 +171,7 @@ public class ReplaceReferencesProvenanceSvc {
 	 * @param theTargetId           the versioned id of the target resource of the operation.
 	 * @param theSourceId           the versioned id of the source resource of the operation.
 	 * @param theChangedResourceIds  the list of IDs of resources that were changed by the operation.
-	 * @param theProvenanceCorrelationId optional correlation id added as an extension to correlate multiple
+	 * @param theProvenanceGroupId  optional group id added as an extension to group multiple
 	 *                               Provenance resources created within a single operation execution
 	 * @param theStartTime          the start time of the operation.
 	 * @param theRequestDetails     the request details
@@ -181,7 +181,7 @@ public class ReplaceReferencesProvenanceSvc {
 			IIdType theTargetId,
 			IIdType theSourceId,
 			List<IIdType> theChangedResourceIds,
-			@Nullable String theProvenanceCorrelationId,
+			@Nullable String theProvenanceGroupId,
 			Date theStartTime,
 			RequestDetails theRequestDetails,
 			List<IProvenanceAgent> theProvenanceAgents,
@@ -190,7 +190,7 @@ public class ReplaceReferencesProvenanceSvc {
 				theTargetId,
 				theSourceId,
 				theChangedResourceIds,
-				theProvenanceCorrelationId,
+				theProvenanceGroupId,
 				theStartTime,
 				theRequestDetails,
 				theProvenanceAgents,
@@ -209,7 +209,7 @@ public class ReplaceReferencesProvenanceSvc {
 			IIdType theTargetId,
 			IIdType theSourceId,
 			List<IIdType> theChangedResourceIds,
-			@Nullable String theProvenanceCorrelationId,
+			@Nullable String theProvenanceGroupId,
 			Date theStartTime,
 			RequestDetails theRequestDetails,
 			List<IProvenanceAgent> theProvenanceAgents,
@@ -219,7 +219,7 @@ public class ReplaceReferencesProvenanceSvc {
 				theTargetId,
 				theSourceId,
 				theChangedResourceIds,
-				theProvenanceCorrelationId,
+				theProvenanceGroupId,
 				theStartTime,
 				theProvenanceAgents,
 				theContainedResources,
@@ -243,7 +243,7 @@ public class ReplaceReferencesProvenanceSvc {
 			IIdType theTargetId,
 			IIdType theSourceId,
 			List<IIdType> theChangedResourceIds,
-			@Nullable String theProvenanceCorrelationId,
+			@Nullable String theProvenanceGroupId,
 			Date theStartTime,
 			List<IProvenanceAgent> theProvenanceAgents,
 			List<IBaseResource> theContainedResources,
@@ -260,12 +260,9 @@ public class ReplaceReferencesProvenanceSvc {
 				theProvenanceAgents,
 				theContainedResources,
 				resourceType);
-		if (theProvenanceCorrelationId != null) {
+		if (theProvenanceGroupId != null) {
 			ExtensionUtil.setExtensionAsString(
-					myFhirContext,
-					provenance,
-					HapiExtensions.EXT_PROVENANCE_CORRELATION_ID,
-					theProvenanceCorrelationId);
+					myFhirContext, provenance, HapiExtensions.EXT_PROVENANCE_GROUP, theProvenanceGroupId);
 		}
 		return provenance;
 	}

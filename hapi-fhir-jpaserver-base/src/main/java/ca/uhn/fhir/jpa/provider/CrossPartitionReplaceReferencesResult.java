@@ -19,24 +19,35 @@
  */
 package ca.uhn.fhir.jpa.provider;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Result of copying compartment resources across partitions during a cross-partition merge.
  * Contains IDs extracted from the combined CREATE+UPDATE response bundle, plus
- * versioned IDs of the original source copies (for deferred deletion).
+ * versioned IDs of the original source copies (for deferred deletion). Both are also available
+ * grouped by the partition each resource lives on, for building the per-partition merge Provenances
+ * and the per-partition rollback bookkeeping.
  */
 // Created by claude-opus-4-6
 public class CrossPartitionReplaceReferencesResult {
 	private final List<IIdType> myChangedResourceIds;
 	private final List<IIdType> myCopiedResourceOriginalIds;
+	private final Map<RequestPartitionId, List<IIdType>> myChangedResourceIdsByPartition;
+	private final Map<RequestPartitionId, List<IIdType>> myCopiedResourceOriginalIdsByPartition;
 
 	public CrossPartitionReplaceReferencesResult(
-			List<IIdType> theChangedResourceIds, List<IIdType> theCopiedResourceOriginalIds) {
+			List<IIdType> theChangedResourceIds,
+			List<IIdType> theCopiedResourceOriginalIds,
+			Map<RequestPartitionId, List<IIdType>> theChangedResourceIdsByPartition,
+			Map<RequestPartitionId, List<IIdType>> theCopiedResourceOriginalIdsByPartition) {
 		myChangedResourceIds = theChangedResourceIds;
 		myCopiedResourceOriginalIds = theCopiedResourceOriginalIds;
+		myChangedResourceIdsByPartition = theChangedResourceIdsByPartition;
+		myCopiedResourceOriginalIdsByPartition = theCopiedResourceOriginalIdsByPartition;
 	}
 
 	public List<IIdType> getChangedResourceIds() {
@@ -45,5 +56,21 @@ public class CrossPartitionReplaceReferencesResult {
 
 	public List<IIdType> getCopiedResourceOriginalIds() {
 		return myCopiedResourceOriginalIds;
+	}
+
+	/**
+	 * Resources written by the data bundle, grouped by the partition they were committed on.
+	 * Copies (CREATEs) are grouped under their destination partition; updates (PUTs) under each
+	 * resource's current partition.
+	 */
+	public Map<RequestPartitionId, List<IIdType>> getChangedResourceIdsByPartition() {
+		return myChangedResourceIdsByPartition;
+	}
+
+	/**
+	 * Source-side compartment originals scheduled for deletion, grouped by the partition they live on.
+	 */
+	public Map<RequestPartitionId, List<IIdType>> getCopiedResourceOriginalIdsByPartition() {
+		return myCopiedResourceOriginalIdsByPartition;
 	}
 }

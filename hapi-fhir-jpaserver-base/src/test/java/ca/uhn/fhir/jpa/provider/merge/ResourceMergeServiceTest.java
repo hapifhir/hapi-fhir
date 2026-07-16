@@ -16,6 +16,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
@@ -27,15 +28,18 @@ import ca.uhn.fhir.merge.MergeProvenanceSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.CanonicalIdentifier;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
@@ -60,6 +64,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -67,6 +72,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -721,7 +727,7 @@ public class ResourceMergeServiceTest {
 			when(myResourceLinkDaoMock.countResourcesTargetingFhirTypeAndFhirId(any(), any())).thenReturn(0);
 			when(myCrossPartitionReplaceReferencesSvcMock
 				.copyCompartmentResourcesAndReplaceReferences(mySourcePatient, myTargetPatient, myRequestDetailsMock))
-				.thenReturn(new CrossPartitionReplaceReferencesResult(List.of(), List.of()));
+				.thenReturn(new CrossPartitionReplaceReferencesResult(List.of(), List.of(), Map.of(), Map.of()));
 
 			// When
 			MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
@@ -730,7 +736,7 @@ public class ResourceMergeServiceTest {
 			verifySuccessfulOutcomeForSync(mergeOutcome, patientToBeReturnedFromDaoAfterTargetUpdate);
 			verify(myCrossPartitionReplaceReferencesSvcMock).copyCompartmentResourcesAndReplaceReferences(mySourcePatient, myTargetPatient, myRequestDetailsMock);
 			verifyNoMoreInteractions(myReplaceReferencesPatchBundleSvcMock);
-			verifySourcePatientDeleted();
+			verifySourcePatientDeletedOneByOne();
 		}
 
 		@Test
@@ -750,7 +756,7 @@ public class ResourceMergeServiceTest {
 			when(myResourceLinkDaoMock.countResourcesTargetingFhirTypeAndFhirId(any(), any())).thenReturn(0);
 			when(myCrossPartitionReplaceReferencesSvcMock
 				.copyCompartmentResourcesAndReplaceReferences(mySourcePatient, myTargetPatient, myRequestDetailsMock))
-				.thenReturn(new CrossPartitionReplaceReferencesResult(List.of(), List.of()));
+				.thenReturn(new CrossPartitionReplaceReferencesResult(List.of(), List.of(), Map.of(), Map.of()));
 
 			// When
 			MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
@@ -806,20 +812,25 @@ public class ResourceMergeServiceTest {
 			IdDt copiedOriginalId = new IdDt("Observation", "obs1", "1");
 			when(myCrossPartitionReplaceReferencesSvcMock
 				.copyCompartmentResourcesAndReplaceReferences(mySourcePatient, myTargetPatient, myRequestDetailsMock))
-				.thenReturn(new CrossPartitionReplaceReferencesResult(List.of(changedObservationId, changedListId), List.of(copiedOriginalId)));
+				.thenReturn(new CrossPartitionReplaceReferencesResult(
+					List.of(changedObservationId, changedListId),
+					List.of(copiedOriginalId),
+					Map.of(RequestPartitionId.fromPartitionId(2), List.of(changedObservationId, changedListId)),
+					Map.of(RequestPartitionId.fromPartitionId(1), List.of(copiedOriginalId))));
+
+			IFhirResourceDao<Observation> observationDaoMock = mock(IFhirResourceDao.class);
+			doReturn(observationDaoMock).when(myDaoRegistryMock).getResourceDao("Observation");
 
 			// When
 			myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
-			// Then
-			ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
-			verify(mySystemDaoMock).transactionNested(any(), bundleCaptor.capture());
-			Bundle deleteBundle = bundleCaptor.getValue();
-			assertThat(deleteBundle.getEntry()).hasSize(2);
-			assertThat(deleteBundle.getEntry().get(0).getRequest().getMethod()).isEqualTo(Bundle.HTTPVerb.DELETE);
-			assertThat(deleteBundle.getEntry().get(0).getRequest().getUrl()).isEqualTo("Observation/obs1");
-			assertThat(deleteBundle.getEntry().get(1).getRequest().getMethod()).isEqualTo(Bundle.HTTPVerb.DELETE);
-			assertThat(deleteBundle.getEntry().get(1).getRequest().getUrl()).isEqualTo(SOURCE_PATIENT_TEST_ID);
+			// Then: the copied original and the source are deleted one-by-one via the resource DAOs (pinned to the
+			// source partition), not via a DELETE transaction bundle.
+			ArgumentCaptor<IIdType> observationIdCaptor = ArgumentCaptor.forClass(IIdType.class);
+			verify(observationDaoMock)
+				.delete(observationIdCaptor.capture(), any(DeleteConflictList.class), eq(myRequestDetailsMock), any(TransactionDetails.class));
+			assertThat(observationIdCaptor.getValue().toUnqualifiedVersionless().getValue()).isEqualTo("Observation/obs1");
+			verifySourcePatientDeletedOneByOne();
 		}
 	}
 
@@ -1003,6 +1014,17 @@ public class ResourceMergeServiceTest {
 		assertThat(deleteBundle.getEntry()).hasSize(1);
 		assertThat(deleteBundle.getEntry().get(0).getRequest().getMethod()).isEqualTo(Bundle.HTTPVerb.DELETE);
 		assertThat(deleteBundle.getEntry().get(0).getRequest().getUrl()).isEqualTo(SOURCE_PATIENT_TEST_ID);
+	}
+
+	/**
+	 * The cross-partition merge deletes one-by-one via the resource DAO (pinned to the source partition), not via a
+	 * DELETE transaction bundle — see {@code ResourceMergeService.deleteResourcesOneByOne}.
+	 */
+	private void verifySourcePatientDeletedOneByOne() {
+		ArgumentCaptor<IIdType> idCaptor = ArgumentCaptor.forClass(IIdType.class);
+		verify(myPatientDaoMock)
+			.delete(idCaptor.capture(), any(DeleteConflictList.class), eq(myRequestDetailsMock), any(TransactionDetails.class));
+		assertThat(idCaptor.getValue().toUnqualifiedVersionless().getValue()).isEqualTo(SOURCE_PATIENT_TEST_ID);
 	}
 
 	private void setupReplaceReferencesForSuccessForSync() {

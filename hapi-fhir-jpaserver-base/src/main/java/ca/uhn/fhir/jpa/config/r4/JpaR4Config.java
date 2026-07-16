@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.graphql.GraphQLProviderWithIntrospection;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -195,8 +196,11 @@ public class JpaR4Config {
 
 	@Bean
 	public CrossPartitionMergeRollbackService crossPartitionMergeRollbackService(
-			DaoRegistry theDaoRegistry, PreviousResourceVersionRestorer theResourceVersionRestorer) {
-		return new CrossPartitionMergeRollbackService(theDaoRegistry, theResourceVersionRestorer);
+			DaoRegistry theDaoRegistry,
+			PreviousResourceVersionRestorer theResourceVersionRestorer,
+			IHapiTransactionService theHapiTransactionService) {
+		return new CrossPartitionMergeRollbackService(
+				theDaoRegistry, theResourceVersionRestorer, theHapiTransactionService);
 	}
 
 	@Bean
@@ -204,9 +208,14 @@ public class JpaR4Config {
 			DaoRegistry theDaoRegistry,
 			MergeProvenanceSvc theMergeProvenanceSvc,
 			PreviousResourceVersionRestorer theResourceVersionRestorer,
-			MergeValidationService theMergeValidationService) {
+			MergeValidationService theMergeValidationService,
+			IHapiTransactionService theHapiTransactionService) {
 		return new ResourceUndoMergeService(
-				theDaoRegistry, theMergeProvenanceSvc, theResourceVersionRestorer, theMergeValidationService);
+				theDaoRegistry,
+				theMergeProvenanceSvc,
+				theResourceVersionRestorer,
+				theMergeValidationService,
+				theHapiTransactionService);
 	}
 
 	@Bean

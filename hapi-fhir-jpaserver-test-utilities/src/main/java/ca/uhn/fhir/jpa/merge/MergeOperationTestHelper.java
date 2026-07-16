@@ -28,13 +28,16 @@ import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.merge.AbstractMergeOperationInputParameterNames;
 import ca.uhn.fhir.merge.GenericMergeOperationInputParameterNames;
 import ca.uhn.fhir.merge.IResourceLinkService;
+import ca.uhn.fhir.merge.MergeProvenanceGroupIdUtil;
 import ca.uhn.fhir.merge.ResourceLinkServiceFactory;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.MetaUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -57,6 +60,7 @@ import org.slf4j.LoggerFactory;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -533,17 +537,71 @@ public class MergeOperationTestHelper {
 			@Nonnull Set<String> theExpectedProvenanceTargets,
 			@Nullable List<IProvenanceAgent> theExpectedProvenanceAgents) {
 
-		// A cross-partition merge now records a single Provenance listing every changed resource across all
-		// partitions — the same shape as a same-partition merge, so the validation is identical.
-		assertThat(theProvenances).as("Expected exactly one merge Provenance").hasSize(1);
-		assertSingleMergeProvenance(
-				theFhirContext,
-				theProvenances.get(0),
-				theInputParameters,
-				theSourceIdWithExpectedVersion,
-				theTargetIdWithExpectedVersion,
-				theExpectedProvenanceTargets,
-				theExpectedProvenanceAgents);
+		// A cross-partition merge records one sub-Provenance per involved partition (each listing that
+		// partition's changed resources after the post-merge target and source) plus a main Provenance
+		// (target and source only, with the merge input Parameters and target-update OperationOutcome
+		// contained), all sharing the same provenance group id prefix.
+		Provenance mainProvenance = null;
+		List<Provenance> subProvenances = new ArrayList<>();
+
+		for (Provenance provenance : theProvenances) {
+			if (provenance.hasContained()) {
+				assertThat(mainProvenance)
+						.as("Expected exactly one main Provenance with contained resources")
+						.isNull();
+				mainProvenance = provenance;
+			} else {
+				subProvenances.add(provenance);
+			}
+		}
+		assertThat(mainProvenance)
+				.as("Expected a main Provenance with contained resources")
+				.isNotNull();
+
+		// Validate main Provenance: [target, source] only, bare group id prefix, contained resources.
+		assertFirstTwoTargetsAreTargetAndSource(
+				mainProvenance, theTargetIdWithExpectedVersion, theSourceIdWithExpectedVersion);
+		assertThat(mainProvenance.getTarget()).hasSize(2);
+		assertCommonMergeProvenanceFields(
+				theFhirContext, mainProvenance, theTargetIdWithExpectedVersion, theExpectedProvenanceAgents);
+		assertMainMergeProvenanceContainedResources(mainProvenance, theInputParameters, theTargetIdWithExpectedVersion);
+
+		String mainGroupId = mainProvenance
+				.getExtensionByUrl(HapiExtensions.EXT_PROVENANCE_GROUP)
+				.getValueAsPrimitive()
+				.getValueAsString();
+		assertThat(mainGroupId).isNotBlank();
+
+		// Validate the sub-Provenances: every one references the post-merge target and source as its first two
+		// targets, carries the main group id prefix plus a ;partition= suffix, and lists its partition's
+		// changed resources from index 2 on. Collect those to compare against the expected set.
+		Set<String> allTargetsAcrossProvenances = new HashSet<>();
+		allTargetsAcrossProvenances.add(theTargetIdWithExpectedVersion.toString());
+		allTargetsAcrossProvenances.add(theSourceIdWithExpectedVersion.toString());
+
+		for (Provenance sub : subProvenances) {
+			assertThat(sub.getTarget().size()).isGreaterThan(2);
+			assertFirstTwoTargetsAreTargetAndSource(
+					sub, theTargetIdWithExpectedVersion, theSourceIdWithExpectedVersion);
+			assertThat(sub.hasContained()).isFalse();
+			assertCommonMergeProvenanceFields(
+					theFhirContext, sub, theTargetIdWithExpectedVersion, theExpectedProvenanceAgents);
+
+			String subGroupId = sub.getExtensionByUrl(HapiExtensions.EXT_PROVENANCE_GROUP)
+					.getValueAsPrimitive()
+					.getValueAsString();
+			assertThat(MergeProvenanceGroupIdUtil.extractGroupIdPrefix(subGroupId))
+					.isEqualTo(mainGroupId);
+			assertThat(MergeProvenanceGroupIdUtil.extractPartition(subGroupId))
+					.as("Sub-Provenance group id must name the partition it records changes for")
+					.isNotNull();
+
+			for (int i = 2; i < sub.getTarget().size(); i++) {
+				allTargetsAcrossProvenances.add(new IdDt(sub.getTarget().get(i).getReference()).toString());
+			}
+		}
+
+		assertThat(allTargetsAcrossProvenances).containsExactlyInAnyOrderElementsOf(theExpectedProvenanceTargets);
 	}
 
 	private static void assertFirstTwoTargetsAreTargetAndSource(

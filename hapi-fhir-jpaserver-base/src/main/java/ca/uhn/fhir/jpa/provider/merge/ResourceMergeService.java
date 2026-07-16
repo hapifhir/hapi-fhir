@@ -37,8 +37,10 @@ import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.provider.CrossPartitionReplaceReferencesPartialCommitException;
 import ca.uhn.fhir.jpa.provider.CrossPartitionReplaceReferencesResult;
 import ca.uhn.fhir.jpa.provider.CrossPartitionReplaceReferencesSvc;
+import ca.uhn.fhir.merge.MergeProvenanceGroupIdUtil;
 import ca.uhn.fhir.merge.MergeResourceHelper;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
@@ -62,8 +64,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.batch2.jobs.merge.MergeAppCtx.JOB_MERGE;
@@ -382,14 +387,23 @@ public class ResourceMergeService {
 			}
 			ourLog.error("Cross-partition merge failed; attempting rollback", theException);
 			Throwable failureCause = theException;
-			if (theException instanceof PartitionedTransactionPartialFailureException partialFailure) {
-				// A PartitionedTransactionPartialFailureException means a cross-partition transaction (the copy/
-				// replace-references step, or the delete step) committed some per-shard sub-bundles before a later one
+			if (theException instanceof CrossPartitionReplaceReferencesPartialCommitException partialCommit) {
+				// The copy/replace-references data bundle committed some per-shard sub-bundles before a later one
 				// failed. Those committed entries are carried on the exception rather than recorded in the rollback
-				// context (the step records into the context only after it returns), so harvest them here.
-				rollbackContext.addResourcesToRevert(extractCommittedResourceIds(partialFailure));
+				// context (the step records into the context only after it returns), so harvest them here — already
+				// attributed to the partition each was written on, so the rollback can restore them partition-pinned.
+				partialCommit.getCommittedIdsByPartition().forEach(rollbackContext::addResourcesToRevert);
+				rollbackContext.addResourcesToRevertWithUnknownPartition(
+						partialCommit.getCommittedIdsWithUnknownPartition());
 				// Report the underlying cause (e.g. the failing write's exception), not the partial-failure wrapper,
 				// so the merge outcome reflects the real error and its HTTP status.
+				if (partialCommit.getCause() != null) {
+					failureCause = partialCommit.getCause();
+				}
+			} else if (theException instanceof PartitionedTransactionPartialFailureException partialFailure) {
+				// A partial failure from some other cross-partition transaction in the forward steps — no partition
+				// attribution available, so the committed ids are restored with the unpinned fallback.
+				rollbackContext.addResourcesToRevertWithUnknownPartition(extractCommittedResourceIds(partialFailure));
 				if (partialFailure.getCause() != null) {
 					failureCause = partialFailure.getCause();
 				}
@@ -406,13 +420,21 @@ public class ResourceMergeService {
 	/**
 	 * Runs the cross-partition merge as a sequence of separate steps (NOT one atomic transaction, since per-partition
 	 * writes commit independently on MegaScale): copy the source compartment to the target partition and replace
-	 * references (its own cross-partition transaction), update source/target, create the single merge Provenance, and
-	 * delete the originals (+ source when deleteSource). The Provenance is created before the delete so it can
-	 * reference the to-be-deleted originals at their anticipated tombstone version (current + 1); the cross-shard
-	 * targets it references are still live at that point and resolve via the shard fan-out.
+	 * references (its own cross-partition transaction), update source/target, create the merge Provenances, and
+	 * delete the originals (+ source when deleteSource). The Provenances are created before the delete so they can
+	 * reference the to-be-deleted originals at their anticipated tombstone version (current + 1).
 	 * <p>
-	 * Each committed step is recorded in {@code theRollbackContext} so that a failure in a later step can revert the
-	 * earlier ones (the outer transaction cannot, because the partition changes committed in their own transactions).
+	 * One Provenance is created per involved partition, each listing only that partition's changed resources
+	 * (plus the post-merge target and source as its first two targets), and carrying the shared group id extension
+	 * with a {@code ;partition=} suffix naming its partition. A main Provenance (bare group id, the merge input
+	 * {@link org.hl7.fhir.r4.model.Parameters} and target-update OperationOutcome contained) is created last as the
+	 * "merge succeeded" signal. The undo operation restores the merge provenance-by-provenance, pinned to the
+	 * partition each Provenance's extension names — so it never needs cross-shard fan-out reads, which would
+	 * resolve through MegaScale ESR surrogate rows and fail on tombstoned originals.
+	 * <p>
+	 * Each committed step is recorded in {@code theRollbackContext} (grouped by partition) so that a failure in a
+	 * later step can revert the earlier ones (the outer transaction cannot, because the partition changes committed
+	 * in their own transactions).
 	 */
 	private void doCrossPartitionForwardSteps(
 			MergeOperationInputParameters theMergeOperationParameters,
@@ -424,18 +446,20 @@ public class ResourceMergeService {
 			MergeRollbackContext theRollbackContext) {
 
 		boolean deleteSource = theMergeOperationParameters.getDeleteSource();
+		RequestPartitionId sourcePartition = getRequiredPartition(theSourceResource);
+		RequestPartitionId targetPartition = getRequiredPartition(theTargetResource);
 
 		// 1) Copy the source compartment resources to the target partition and replace references, as its own
 		// cross-partition transaction. The originals are NOT deleted here — they are deleted in step 4, after the
-		// Provenance is created, so the Provenance can reference them.
+		// Provenances are created, so the Provenances can reference them.
 		CrossPartitionReplaceReferencesResult copyResult =
 				myCrossPartitionReplaceReferencesSvc.copyCompartmentResourcesAndReplaceReferences(
 						theSourceResource, theTargetResource, theRequestDetails);
-		List<IIdType> changedResourceIds = new ArrayList<>(copyResult.getChangedResourceIds());
 		List<IIdType> copiedResourceOriginalIds = copyResult.getCopiedResourceOriginalIds();
 
-		// Record the just-committed copies and referrer updates as resources to revert on rollback.
-		theRollbackContext.addResourcesToRevert(changedResourceIds);
+		// Record the just-committed copies and referrer updates as resources to revert on rollback, keeping the
+		// partition each group was written to.
+		copyResult.getChangedResourceIdsByPartition().forEach(theRollbackContext::addResourcesToRevert);
 
 		// 2) Update source/target. The target is always updated; the source is updated when kept, or deleted below.
 		DaoMethodOutcome outcome = myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
@@ -455,59 +479,134 @@ public class ResourceMergeService {
 		IIdType targetPostMergeId = outcome.getResource().getIdElement();
 
 		// Record the post-merge target (always updated), and the post-merge source when it is kept, as resources to
-		// revert. When the source is deleted it is recorded as an undelete instead (below, after the delete commits).
-		theRollbackContext.addResourceToRevert(targetPostMergeId);
+		// revert. When the source is deleted it is recorded as an undelete instead (below, as each delete commits).
+		theRollbackContext.addResourceToRevert(targetPartition, targetPostMergeId);
 		if (!deleteSource) {
-			theRollbackContext.addResourceToRevert(sourcePostMergeId);
+			theRollbackContext.addResourceToRevert(sourcePartition, sourcePostMergeId);
 		}
 
-		// 3) Create the single merge Provenance (the "merge succeeded" signal), referencing the post-merge source and
-		// target. Its changed-resource references are the copies and referrer updates, plus the to-be-deleted
-		// originals at their tombstone version (current + 1, since the delete below bumps each by one).
+		// 3) Create the merge Provenances: one per involved partition plus the main one.
 		if (theMergeOperationParameters.getCreateProvenance()) {
-			for (IIdType id : copiedResourceOriginalIds) {
-				changedResourceIds.add(withVersionIncremented(id));
-			}
-			List<IBaseResource> containedResources =
-					List.of(theMergeOperationParameters.getOriginalInputParameters(), outcome.getOperationOutcome());
-			IIdType provenanceId = myMergeResourceHelper.createProvenance(
+			createCrossPartitionProvenances(
+					theMergeOperationParameters,
+					copyResult,
 					sourcePostMergeId,
+					sourcePartition,
 					targetPostMergeId,
-					changedResourceIds,
-					// no correlation id: a merge records a single Provenance, nothing to correlate
-					null,
-					theRequestDetails,
+					targetPartition,
+					outcome,
 					theStartTime,
-					theMergeOperationParameters.getProvenanceAgents(),
-					containedResources);
-			theRollbackContext.setProvenanceId(provenanceId);
+					theRequestDetails,
+					theRollbackContext);
 		}
 
 		// 4) Delete the source-side compartment originals copied across partitions, plus the source itself when
 		// deleteSource. They all live in the source partition, so the delete is pinned to it — this lets MegaScale
 		// route the delete to the correct shard even when the ids are not partition-decodable (client-assigned / UUID
-		// ids). This happens after the Provenance is created so the Provenance can reference the originals.
+		// ids). This happens after the Provenances are created so they can reference the originals. Each resource is
+		// recorded as an undelete for rollback (at its tombstone version) as its delete commits, so a failure partway
+		// through the deletes still knows exactly which tombstones to undelete.
 		List<IIdType> resourceIdsToDelete = new ArrayList<>(copiedResourceOriginalIds);
 		if (deleteSource) {
 			resourceIdsToDelete.add(theSourceResource.getIdElement());
 		}
 		if (!resourceIdsToDelete.isEmpty()) {
-			// SHORTCUT (debugging): delete the originals one-by-one with the partition hardcoded to the source
-			// resource's partition, instead of a DELETE transaction bundle. This bypasses the MegaScale
-			// transaction splitter, which cannot determine a partition for a DELETE entry whose id is
-			// client-assigned (non-partition-decodable). Safe here because every id being deleted lives in the
-			// source resource's partition.
-			RequestPartitionId sourcePartition = getRequiredPartition(theSourceResource);
-			deleteResourcesOneByOne(resourceIdsToDelete, sourcePartition, theRequestDetails);
+			// The deletes run one-by-one with the partition pinned to the source resource's partition, instead of as
+			// a DELETE transaction bundle: the MegaScale transaction splitter cannot determine a partition for a
+			// DELETE entry whose id is client-assigned (non-partition-decodable). Safe here because every id being
+			// deleted lives in the source resource's partition.
+			deleteResourcesOneByOne(
+					resourceIdsToDelete,
+					sourcePartition,
+					theRequestDetails,
+					tombstoneId -> theRollbackContext.addResourceToUndelete(sourcePartition, tombstoneId));
+		}
+	}
+
+	/**
+	 * Creates the Provenances recording a cross-partition merge: one sub-Provenance per partition that has changed
+	 * resources, plus the main Provenance. Every Provenance's first two targets are the post-merge target and
+	 * source; a sub-Provenance's remaining targets are the resources changed in its partition — the copies and
+	 * referrer updates committed there, the originals at their anticipated tombstone version (current + 1, bumped
+	 * by the deletes that follow), the post-merge source in the source partition's sub, and the post-merge target
+	 * in the target partition's sub (unless its update was a no-op). The main Provenance lists no changed
+	 * resources; it carries the merge input Parameters and the target-update OperationOutcome as contained
+	 * resources, and is created last as the "merge succeeded" signal.
+	 */
+	private void createCrossPartitionProvenances(
+			MergeOperationInputParameters theMergeOperationParameters,
+			CrossPartitionReplaceReferencesResult theCopyResult,
+			IIdType theSourcePostMergeId,
+			RequestPartitionId theSourcePartition,
+			IIdType theTargetPostMergeId,
+			RequestPartitionId theTargetPartition,
+			DaoMethodOutcome theTargetUpdateOutcome,
+			Date theStartTime,
+			RequestDetails theRequestDetails,
+			MergeRollbackContext theRollbackContext) {
+
+		String groupIdPrefix =
+				MergeProvenanceGroupIdUtil.generateGroupIdPrefix(theSourcePostMergeId, theTargetPostMergeId);
+
+		// Collect each partition's changed resources: the committed copies and referrer updates, the originals at
+		// their anticipated tombstone version, and the post-merge source/target in their own partitions.
+		Map<RequestPartitionId, List<IIdType>> changedResourcesByPartition = new LinkedHashMap<>();
+		theCopyResult.getChangedResourceIdsByPartition().forEach((partition, ids) -> changedResourcesByPartition
+				.computeIfAbsent(partition, k -> new ArrayList<>())
+				.addAll(ids));
+		theCopyResult
+				.getCopiedResourceOriginalIdsByPartition()
+				.forEach((partition, ids) -> ids.forEach(id -> changedResourcesByPartition
+						.computeIfAbsent(partition, k -> new ArrayList<>())
+						.add(withVersionIncremented(id))));
+		changedResourcesByPartition
+				.computeIfAbsent(theSourcePartition, k -> new ArrayList<>())
+				.add(theSourcePostMergeId);
+		if (!theTargetUpdateOutcome.isNop()) {
+			changedResourcesByPartition
+					.computeIfAbsent(theTargetPartition, k -> new ArrayList<>())
+					.add(theTargetPostMergeId);
 		}
 
-		// The delete committed, so record the now-tombstoned resources (at their tombstone version, original + 1) as
-		// undeletes for rollback. The source's tombstone version is sourcePostMergeId (original + 1).
-		for (IIdType id : copiedResourceOriginalIds) {
-			theRollbackContext.addResourceToUndelete(withVersionIncremented(id));
+		// Record the partition the Provenances are stored on, so the rollback can delete them partition-pinned
+		// (their ids may not be partition-decodable). This mirrors the compartment-extension routing in
+		// ReplaceReferencesProvenanceSvc.addPatientCompartmentExtension: a Patient merge's Provenances go to the
+		// target Patient's partition; any other target type's go to the default partition.
+		RequestPartitionId provenancePartition = "Patient".equals(theTargetPostMergeId.getResourceType())
+				? theTargetPartition
+				: myPartitionSettings.getDefaultRequestPartitionId();
+		theRollbackContext.setProvenancePartition(provenancePartition);
+
+		for (Map.Entry<RequestPartitionId, List<IIdType>> entry : changedResourcesByPartition.entrySet()) {
+			IIdType subProvenanceId = myMergeResourceHelper.createProvenance(
+					theSourcePostMergeId,
+					theTargetPostMergeId,
+					entry.getValue(),
+					MergeProvenanceGroupIdUtil.buildGroupId(groupIdPrefix, entry.getKey()),
+					theRequestDetails,
+					theStartTime,
+					theMergeOperationParameters.getProvenanceAgents(),
+					List.of());
+			if (subProvenanceId != null) {
+				theRollbackContext.addProvenanceId(subProvenanceId);
+			}
 		}
-		if (deleteSource) {
-			theRollbackContext.addResourceToUndelete(sourcePostMergeId);
+
+		// The main Provenance carries the bare group id prefix (no partition suffix) — it records no
+		// partition-specific changes itself.
+		List<IBaseResource> containedResources = List.of(
+				theMergeOperationParameters.getOriginalInputParameters(), theTargetUpdateOutcome.getOperationOutcome());
+		IIdType mainProvenanceId = myMergeResourceHelper.createProvenance(
+				theSourcePostMergeId,
+				theTargetPostMergeId,
+				List.of(),
+				groupIdPrefix,
+				theRequestDetails,
+				theStartTime,
+				theMergeOperationParameters.getProvenanceAgents(),
+				containedResources);
+		if (mainProvenanceId != null) {
+			theRollbackContext.addProvenanceId(mainProvenanceId);
 		}
 	}
 
@@ -609,26 +708,37 @@ public class ResourceMergeService {
 	 * cross-partition merge every resource being deleted (the copied compartment originals, plus the source
 	 * resource when {@code deleteSource}) lives in the source resource's partition, so pinning them all to that
 	 * single partition is safe.
+	 *
+	 * <p>Each delete commits in its own transaction, so {@code theOnDeleted} is invoked with the tombstone's
+	 * versioned id right after each commit — a failure partway through the list must not lose track of the
+	 * deletes that already committed.
+	 *
+	 * <p>The resources being deleted can reference each other (e.g. a compartment Observation referencing a
+	 * compartment Encounter), so delete conflicts are collected across the whole list — with every id pre-marked
+	 * for deletion so conflicts among the co-deleted resources are skipped, mirroring how a DELETE transaction
+	 * bundle validates — and validated once at the end. A genuine conflict (an outside referrer) then throws after
+	 * some deletes have committed; those are already recorded via {@code theOnDeleted}, so the rollback undeletes
+	 * them.
 	 */
 	private void deleteResourcesOneByOne(
-			List<IIdType> theResourcesToDelete, RequestPartitionId thePartition, RequestDetails theRequestDetails) {
+			List<IIdType> theResourcesToDelete,
+			RequestPartitionId thePartition,
+			RequestDetails theRequestDetails,
+			Consumer<IIdType> theOnDeleted) {
+		DeleteConflictList deleteConflicts = new DeleteConflictList();
+		theResourcesToDelete.forEach(deleteConflicts::setResourceIdMarkedForDeletion);
 		for (IIdType id : theResourcesToDelete) {
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(id.getResourceType());
 			DaoMethodOutcome outcome = myHapiTransactionService
 					.withRequest(theRequestDetails)
 					.withRequestPartitionId(thePartition)
 					.execute(() -> {
-						// EXPERIMENT: seed the resolved-partition cache with the source partition (keyed by
-						// "Type/id") so the 4-arg delete uses it instead of re-resolving a non-decodable id to
-						// allPartitions. Hardcoded to the source partition for now.
+						// Seed the resolved-partition cache (keyed by "Type/id") so the 4-arg delete uses the
+						// pinned partition instead of re-resolving a non-decodable id to allPartitions.
 						TransactionDetails transactionDetails = new TransactionDetails();
 						transactionDetails.addResolvedPartition(
 								id.getResourceType() + "/" + id.getIdPart(), thePartition);
-						DeleteConflictList deleteConflicts = new DeleteConflictList();
-						DaoMethodOutcome result =
-								dao.delete(id, deleteConflicts, theRequestDetails, transactionDetails);
-						DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(myFhirContext, deleteConflicts);
-						return result;
+						return dao.delete(id, deleteConflicts, theRequestDetails, transactionDetails);
 					});
 			ourLog.warn(
 					"TRACE-INVESTIGATION: one-by-one delete id={} seededPartition={} -> nop(no-op)={} outcomeId={}",
@@ -638,7 +748,11 @@ public class ResourceMergeService {
 					(outcome != null && outcome.getId() != null)
 							? outcome.getId().getValue()
 							: null);
+			if (outcome != null && !outcome.isNop() && outcome.getId() != null) {
+				theOnDeleted.accept(outcome.getId());
+			}
 		}
+		DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(myFhirContext, deleteConflicts);
 	}
 
 	private void validateCrossPartitionAsyncNotSupported(

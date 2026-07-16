@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.provider.merge;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.TransactionPrePartitionResponse;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
@@ -1297,17 +1298,15 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 			assertFullyRevertedToPreMerge();
 		}
 
-		// Partial rollback. The rollback reverts the recorded resources as one cross-partition transaction that
-		// the partition splitter runs as independent per-partition sub-bundles (source, then target, then
-		// default), stopping at the first that fails. We fail the Provenance creation to trigger the rollback,
-		// then make the rollback itself fail on the Group:
-		//   - the source partition (the source Patient when it was kept) and the target partition (the target
-		//     Patient) restores commit
-		//   - the default partition's Group restore then fails and aborts the revert transaction
-		// The Observation copy is a v1 copy whose delete is a SEPARATE bundle that the restorer runs only AFTER
-		// the update bundle; since the update bundle threw on the Group, the copy delete never runs. So both the
-		// Group (its restore failed) and the Observation copy (its delete never ran) remain merged and are the
-		// resources reported for manual revert (notReverted = what we tried to revert − what committed).
+		// Partial rollback. The rollback reverts the recorded resources partition by partition, each partition
+		// as its own pinned transaction, continuing past a failed partition (partitions holding merge-created
+		// copies are reverted last so referrers elsewhere are repointed away from the copies first). We fail the
+		// Provenance creation to trigger the rollback, then make the rollback itself fail on the Group:
+		//   - the source partition's revert (the source Patient when it was kept) commits
+		//   - the default partition's Group restore fails; the rollback reports it and moves on
+		//   - the target partition's revert (the target Patient, and the Observation copy deleted as a v1 copy)
+		//     still commits
+		// So only the Group remains merged and is reported for manual revert.
 		@ParameterizedTest
 		@ValueSource(booleans = {false, true})
 		void testMerge_revertFailsMidSequence_reportsFailedAndSubsequentResources(boolean theDeleteSource) {
@@ -1322,16 +1321,10 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 				myInterceptorRegistry.unregisterInterceptor(failer);
 			}
 
-			// The Observation copy lives in the target compartment; its server-assigned id is only known now.
-			IIdType obsCopyId = searchBySubject(Observation.class, myPatientIdTgt.getValue())
-					.get(0)
-					.getIdElement();
-
-			// Both the Group (v2, restore failed) and the Observation copy (v1, delete never ran) are reported.
+			// Only the Group (v2, restore failed) is reported; every other partition's revert committed.
 			assertThat(diagnosticMessage)
 				.contains("could not be reverted and remain in their merged state, and must be reverted manually:")
 				.contains(myGroupId.withVersion("2").getValue())
-				.contains(obsCopyId.toUnqualifiedVersionless().getValue() + "/_history/1")
 				.contains(
 					"Merge failure cause: InternalErrorException: Simulated failure during Provenance creation");
 
@@ -1340,17 +1333,16 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 			assertThat(groupAfter.getMemberFirstRep().getEntity().getReference())
 				.isEqualTo(myPatientIdTgt.getValue());
 
-			// The source and target partitions' reverts committed before the failure: both Patients match their
-			// pre-merge state, and the source-compartment original Observation is untouched (the delete step,
-			// which runs after Provenance creation, never ran).
+			// The other partitions' reverts committed despite the Group failure: both Patients match their
+			// pre-merge state, the source-compartment original Observation is untouched (the delete step, which
+			// runs after Provenance creation, never ran), and the target-side Observation copy was deleted.
 			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
 				mySourceBefore, readResource(Patient.class, myPatientIdSrc));
 			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
 				myTargetBefore, readResource(Patient.class, myPatientIdTgt));
 			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
 				myObsBefore, readResource(Observation.class, myObsId));
-			// The Observation copy's delete never ran, so the copy remains in the target compartment.
-			assertThat(searchBySubject(Observation.class, myPatientIdTgt.getValue())).hasSize(1);
+			assertThat(searchBySubject(Observation.class, myPatientIdTgt.getValue())).isEmpty();
 			assertThat(searchBySubject(Observation.class, myPatientIdSrc.getValue())).hasSize(1);
 		}
 
@@ -1410,10 +1402,11 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 			assertResourceDeleted(obsId);
 
 			// Build the context exactly as the forward steps would after a committed delete: the original recorded
-			// as a resource to undelete at its tombstone version (original + 1), and the failure cause that
-			// triggered the rollback.
+			// as a resource to undelete at its tombstone version (original + 1) on the source partition, and the
+			// failure cause that triggered the rollback.
 			MergeRollbackContext rollbackContext = new MergeRollbackContext();
-			rollbackContext.addResourcesToUndelete(List.of(obsId.withVersion("2")));
+			rollbackContext.addResourceToUndelete(
+				RequestPartitionId.fromPartitionId(getPartitionId(obsId)), obsId.withVersion("2"));
 			rollbackContext.setFailureCause(new InternalErrorException("Simulated forward failure"));
 
 			OperationOutcomeWithStatusCode outcome = new OperationOutcomeWithStatusCode();

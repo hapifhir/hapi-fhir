@@ -24,15 +24,18 @@ import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.CanonicalIdentifier;
+import ca.uhn.fhir.util.HapiExtensions;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Type;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -59,7 +62,7 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 			IIdType theTargetId,
 			IIdType theSourceId,
 			List<IIdType> theChangedResourceIds,
-			@Nullable String theProvenanceCorrelationId,
+			@Nullable String theProvenanceGroupId,
 			Date theStartTime,
 			RequestDetails theRequestDetails,
 			List<IProvenanceAgent> theProvenanceAgents,
@@ -69,7 +72,7 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 				theTargetId,
 				theSourceId,
 				theChangedResourceIds,
-				theProvenanceCorrelationId,
+				theProvenanceGroupId,
 				theStartTime,
 				theRequestDetails,
 				theProvenanceAgents,
@@ -80,13 +83,16 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 	}
 
 	/**
-	 * Finds the merge Provenance for the given target and source resource IDs: the one with target+source in the
-	 * correct order whose first contained resource is the merge input {@link Parameters}.
+	 * Finds the merge Provenances for the given target and source resource IDs. The main Provenance is the one
+	 * with target+source in the correct order whose first contained resource is the merge input {@link Parameters};
+	 * when it belongs to a provenance group (a cross-partition merge records one sub-Provenance per involved
+	 * partition), every Provenance sharing its group id prefix is returned with it.
 	 *
 	 * @param theTargetId the target resource id
 	 * @param theSourceId the source resource id
 	 * @param theRequestDetails the request details
-	 * @return a singleton list with the merge Provenance, or empty if none was found.
+	 * @return a list whose first element is the main Provenance followed by its sub-Provenances,
+	 *         or empty if none was found.
 	 */
 	public List<Provenance> findMergeProvenances(
 			IIdType theTargetId, IIdType theSourceId, RequestDetails theRequestDetails) {
@@ -99,18 +105,21 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 						&& p.hasContained()
 						&& p.getContained().get(0) instanceof Parameters)
 				.findFirst()
-				.map(List::of)
+				.map(main -> collectGroupedProvenances(main, provenances))
 				.orElseGet(List::of);
 	}
 
 	/**
-	 * Finds the merge Provenance for the given target id and source identifiers. For Patient resources, tries both
-	 * patient-specific and generic parameter names for backward compatibility.
+	 * Finds the merge Provenances for the given target id and source identifiers. For Patient resources, tries both
+	 * patient-specific and generic parameter names for backward compatibility. As with
+	 * {@link #findMergeProvenances(IIdType, IIdType, RequestDetails)}, the main Provenance comes first, followed by
+	 * the sub-Provenances sharing its group id prefix (if any).
 	 *
 	 * @param theTargetId the target resource id
 	 * @param theSourceIdentifiers the source identifiers to match
 	 * @param theRequestDetails the request details
-	 * @return a singleton list with the merge Provenance, or empty if none was found.
+	 * @return a list whose first element is the main Provenance followed by its sub-Provenances,
+	 *         or empty if none was found.
 	 */
 	public List<Provenance> findMergeProvenancesBySourceIdentifiers(
 			IIdType theTargetId, List<CanonicalIdentifier> theSourceIdentifiers, RequestDetails theRequestDetails) {
@@ -127,8 +136,54 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 		return provenances.stream()
 				.filter(p -> containsSourceIdentifiersInInputParameters(p, parameterNamesList, theSourceIdentifiers))
 				.findFirst()
-				.map(List::of)
+				.map(main -> collectGroupedProvenances(main, provenances))
 				.orElseGet(List::of);
+	}
+
+	/**
+	 * Given the main Provenance, collects all Provenances from {@code theAllProvenances} that belong to the same
+	 * provenance group — i.e. whose {@link HapiExtensions#EXT_PROVENANCE_GROUP} value shares the main Provenance's
+	 * group id prefix. If the main Provenance has no group id (a same-partition merge records a single Provenance),
+	 * returns a singleton list containing only the main Provenance.
+	 *
+	 * @return a list whose first element is always the main Provenance, followed by its sub-Provenances.
+	 */
+	private List<Provenance> collectGroupedProvenances(
+			Provenance theMainProvenance, List<Provenance> theAllProvenances) {
+		String mainGroupId = getProvenanceGroupId(theMainProvenance);
+		if (mainGroupId == null) {
+			return List.of(theMainProvenance);
+		}
+		String groupIdPrefix = MergeProvenanceGroupIdUtil.extractGroupIdPrefix(mainGroupId);
+
+		List<Provenance> result = new ArrayList<>();
+		result.add(theMainProvenance);
+		String mainId =
+				theMainProvenance.getIdElement().toUnqualifiedVersionless().getValue();
+
+		for (Provenance provenance : theAllProvenances) {
+			if (mainId.equals(
+					provenance.getIdElement().toUnqualifiedVersionless().getValue())) {
+				continue;
+			}
+			if (MergeProvenanceGroupIdUtil.isInGroup(getProvenanceGroupId(provenance), groupIdPrefix)) {
+				result.add(provenance);
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * @return the value of the Provenance's {@link HapiExtensions#EXT_PROVENANCE_GROUP} extension, or {@code null}
+	 * when absent.
+	 */
+	@Nullable
+	public static String getProvenanceGroupId(Provenance theProvenance) {
+		Extension ext = theProvenance.getExtensionByUrl(HapiExtensions.EXT_PROVENANCE_GROUP);
+		if (ext != null && ext.hasValue()) {
+			return ext.getValueAsPrimitive().getValueAsString();
+		}
+		return null;
 	}
 
 	private boolean containsSourceIdentifiersInInputParameters(

@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.util.ResourceCompartmentUtil;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -99,7 +100,21 @@ public class PatientCompartmentEnforcingInterceptor {
 		String patientCompartmentCurrent;
 		if (myRequestPartitionHelperSvc != null) {
 			String resourceType = myFhirContext.getResourceType(theOldResource);
-			patientCompartmentOld = determinePartition(theRequestDetails, theOldResource, resourceType);
+			try {
+				patientCompartmentOld = determinePartition(theRequestDetails, theOldResource, resourceType);
+			} catch (MethodNotAllowedException e) {
+				// The old version's compartment cannot be determined because it carries no compartment values.
+				// This happens when the old version is a delete tombstone whose content could not be
+				// force-populated from the last non-deleted version (e.g. under MegaScale, where the lookup can
+				// resolve through a cross-partition surrogate row with no body). With no old compartment to
+				// compare against, no compartment change can be detected — treat like a create, which is not
+				// compartment-change-checked.
+				ourLog.debug(
+						"Could not determine the old version's compartment for {}; skipping compartment-change check",
+						theOldResource.getIdElement().toUnqualifiedVersionless().getValue(),
+						e);
+				return;
+			}
 			patientCompartmentCurrent = determinePartition(theRequestDetails, theResource, resourceType);
 		} else {
 			patientCompartmentOld = ResourceCompartmentUtil.getPatientCompartmentIdentity(
