@@ -2069,7 +2069,8 @@ public enum Pointcut implements IPointcut {
 	 * <p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
-	 * <li>java.util.List - The list of bundle entries being processed, in processing order</li>
+	 * <li>ca.uhn.fhir.interceptor.model.TransactionWriteAfterPrefetchDetails - Carries the list of bundle entries
+	 * being processed, in processing order.</li>
 	 * <li>ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter - The version adapter for reading and mutating the
 	 * bundle's entries in a FHIR-version-agnostic way.</li>
 	 * <li>ca.uhn.fhir.jpa.api.config.JpaStorageSettings - The active storage settings, so hooks can honor configuration
@@ -2088,7 +2089,7 @@ public enum Pointcut implements IPointcut {
 	 */
 	STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH(
 			void.class,
-			"java.util.List",
+			"ca.uhn.fhir.interceptor.model.TransactionWriteAfterPrefetchDetails",
 			"ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter",
 			"ca.uhn.fhir.jpa.api.config.JpaStorageSettings",
 			"ca.uhn.fhir.rest.api.server.RequestDetails",

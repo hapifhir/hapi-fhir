@@ -1077,8 +1077,8 @@ public abstract class BaseTransactionProcessor {
 				case POST: {
 					IBaseResource resource = myVersionAdapter.getResource(theEntry);
 					String resourceType = myContext.getResourceType(resource);
-					nextWriteEntryRequestPartitionId =
-							determineCreatePartitionOrAllPartitions(requestDetailsForEntry, resource, resourceType);
+					nextWriteEntryRequestPartitionId = tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
+							requestDetailsForEntry, resource, resourceType);
 					break;
 				}
 				case PUT: {
@@ -1094,7 +1094,7 @@ public abstract class BaseTransactionProcessor {
 							nextWriteEntryRequestPartitionId = theTransactionDetails.getResolvedPartition(resourceId);
 						}
 						if (nextWriteEntryRequestPartitionId == null) {
-							nextWriteEntryRequestPartitionId = determineCreatePartitionOrAllPartitions(
+							nextWriteEntryRequestPartitionId = tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
 									requestDetailsForEntry, resource, resourceType);
 							if (resourceId != null) {
 								theTransactionDetails.addResolvedPartition(
@@ -1132,26 +1132,39 @@ public abstract class BaseTransactionProcessor {
 	 * client-assigned id (Msg 1321) or an unresolved patient reference (Msg 1326). These entries are re-resolved at
 	 * create time once references are concrete. Msg 1324 (multiple distinct compartments) is not deferred.
 	 */
-	private RequestPartitionId determineCreatePartitionOrAllPartitions(
+	/**
+	 * Determine the create partition for a transaction write entry before pre-fetch, if possible. In patient-ID
+	 * partition mode the Patient compartment sometimes can't be resolved this early — an unresolved Patient
+	 * reference (Msg 1326) or an id-less Patient body (Msg 1321). When all-partition search is supported
+	 * ({@link PartitionSettings#isAllPartitionSearchSupported()}) these are deferred to
+	 * {@link RequestPartitionId#allPartitions()} and settled per entry at write time, once pre-fetch and the
+	 * after-prefetch hooks have resolved the entries; create-time partition validation remains the authoritative
+	 * gate. Where all-partition search is unsupported the partition must be fixed up front, so the rejection
+	 * bubbles up instead.
+	 * <p>
+	 * Deferral is keyed off Msg 1321/1326, codes raised by {@code PatientIdPartitionInterceptor}, which couples this
+	 * method to interceptor-specific codes. Pragmatic interim approach; a cleaner contract can follow.
+	 */
+	private RequestPartitionId tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
 			RequestDetails theRequestDetails, IBaseResource theResource, String theResourceType) {
 		try {
 			return myRequestPartitionHelperService.determineCreatePartitionForRequest(
 					theRequestDetails, theResource, theResourceType);
 		} catch (MethodNotAllowedException e) {
-			if (messageContainsAnyCode(e, 1321, 1326)) {
+			if (myPartitionSettings.isAllPartitionSearchSupported() && messageStartsWithAnyCode(e, 1321, 1326)) {
 				return RequestPartitionId.allPartitions();
 			}
 			throw e;
 		}
 	}
 
-	protected static boolean messageContainsAnyCode(Throwable theException, int... theCodes) {
+	protected static boolean messageStartsWithAnyCode(Throwable theException, int... theCodes) {
 		String message = theException.getMessage();
 		if (message == null) {
 			return false;
 		}
 		for (int code : theCodes) {
-			if (message.contains(Msg.code(code))) {
+			if (message.startsWith(Msg.code(code))) {
 				return true;
 			}
 		}
@@ -3028,10 +3041,5 @@ public abstract class BaseTransactionProcessor {
 
 	private static boolean isUrnEscaped(@Nonnull String theId) {
 		return theId.startsWith(URN_PREFIX_ESCAPED);
-	}
-
-	private static boolean messageStartsWith(Throwable theException, String thePrefix) {
-		String message = theException.getMessage();
-		return message != null && message.startsWith(thePrefix);
 	}
 }

@@ -217,23 +217,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 			if (theRequestPartitionId != null) {
 				preFetch(theRequest, theTransactionDetails, theEntries, versionAdapter, theRequestPartitionId);
-
-				// Interceptor call: STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH
-				IInterceptorBroadcaster compositeBroadcaster =
-						CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
-				if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH)) {
-					HookParams params = new HookParams()
-							.add(List.class, theEntries)
-							.add(ITransactionProcessorVersionAdapter.class, versionAdapter)
-							.add(JpaStorageSettings.class, myStorageSettings)
-							.add(RequestDetails.class, theRequest)
-							.addIfMatchesType(ServletRequestDetails.class, theRequest)
-							.add(TransactionDetails.class, theTransactionDetails);
-					compositeBroadcaster.callHooks(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH, params);
-
-					// The hook may have flipped some creates to updates; re-group by verb for the write loop.
-					sortEntriesIntoProcessingOrder(theEntries);
-				}
+				callTransactionWriteAfterPrefetchHooks(theRequest, theTransactionDetails, theEntries, versionAdapter);
 			}
 
 			return super.doTransactionWriteOperations(
@@ -304,6 +288,31 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		preFetchResourceVersions(idsToPreFetchVersionsFor);
 
 		preFetchFhirIds(idsToPreFetchFhirIdsFor, theTransactionDetails);
+	}
+
+	private void callTransactionWriteAfterPrefetchHooks(
+			RequestDetails theRequest,
+			TransactionDetails theTransactionDetails,
+			List<IBase> theEntries,
+			ITransactionProcessorVersionAdapter<?, ?> versionAdapter) {
+		// Interceptor call: STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH)) {
+			HookParams params = new HookParams()
+					.add(
+							TransactionWriteAfterPrefetchDetails.class,
+							new TransactionWriteAfterPrefetchDetails(theEntries))
+					.add(ITransactionProcessorVersionAdapter.class, versionAdapter)
+					.add(JpaStorageSettings.class, myStorageSettings)
+					.add(RequestDetails.class, theRequest)
+					.addIfMatchesType(ServletRequestDetails.class, theRequest)
+					.add(TransactionDetails.class, theTransactionDetails);
+			compositeBroadcaster.callHooks(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH, params);
+
+			// The hook may have flipped some creates to updates; re-group by verb for the write loop.
+			sortEntriesIntoProcessingOrder(theEntries);
+		}
 	}
 
 	private void preFetchFhirIds(Set<JpaPid> theIdsToPreFetchFhirIdsFor, TransactionDetails theTransactionDetails) {
@@ -763,13 +772,16 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 							next.getAssociatedResource());
 				} catch (MethodNotAllowedException e) {
 					// Msg 1321/1326 means the patient reference isn't resolvable yet; leave the partition as
-					// allPartitions so it falls back to the transaction partition below and the real compartment
-					// is enforced at create time.
-					if (!messageContainsAnyCode(e, 1321, 1326)) {
+					// allPartitions and let the block below settle it. The real compartment is enforced at
+					// create time.
+					if (!messageStartsWithAnyCode(e, 1321, 1326)) {
 						throw e;
 					}
 				}
-				if (partition.isAllPartitions()) {
+				if (partition.isAllPartitions() && !myPartitionSettings.isAllPartitionSearchSupported()) {
+					// Keep allPartitions when the infrastructure can fan a search out across all partitions, so
+					// the pre-fetch can find the match wherever it lives; otherwise pin to the transaction
+					// partition to preserve the single-partition guarantee.
 					partition = theOuterRequestPartitionId;
 				}
 			}

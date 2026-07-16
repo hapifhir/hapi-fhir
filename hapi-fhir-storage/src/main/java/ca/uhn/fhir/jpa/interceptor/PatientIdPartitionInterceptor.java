@@ -32,8 +32,8 @@ import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.interceptor.model.TransactionWriteAfterPrefetchDetails;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
@@ -751,11 +751,16 @@ public class PatientIdPartitionInterceptor {
 	 */
 	@Hook(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH)
 	public void resolvePatientReferencesAfterPreFetch(
-			List<IBase> theEntries,
+			TransactionWriteAfterPrefetchDetails thePrefetchDetails,
 			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
 			JpaStorageSettings theStorageSettings,
 			TransactionDetails theTransactionDetails) {
+		List<IBase> entries = thePrefetchDetails.getEntries();
 		FhirTerser terser = myFhirContext.newTerser();
+
+		// References given as inline Patient match URLs (present when the transformer is not active) resolve here
+		// from what pre-fetch already found, so per-entry routing can place each resource in its compartment.
+		rewriteInlinePatientMatchUrlReferences(entries, theTransactionDetails);
 
 		// A placeholder Patient (urn:uuid id, no client id) can only be assigned a server id up front when the server
 		// assigns UUIDs; otherwise its id isn't known until insert, too late for compartment routing. In that case we
@@ -768,9 +773,10 @@ public class PatientIdPartitionInterceptor {
 		Map<String, RewrittenOutcome> rewrittenOutcomes =
 				theTransactionDetails.getOrCreateUserData(REWRITTEN_OUTCOMES_KEY, HashMap::new);
 
-		for (IBase entry : theEntries) {
+		for (IBase entry : entries) {
 			String fullUrl = theVersionAdapter.getFullUrl(entry);
 			if (fullUrl == null || !fullUrl.startsWith("urn:uuid:")) {
+				stampIdlessMatchedConditionalUpdate(theVersionAdapter, theTransactionDetails, entry);
 				continue;
 			}
 			IBaseResource resource = theVersionAdapter.getResource(entry);
@@ -835,7 +841,7 @@ public class PatientIdPartitionInterceptor {
 		}
 
 		if (!idSubstitutions.isEmpty()) {
-			for (IBase entry : theEntries) {
+			for (IBase entry : entries) {
 				IBaseResource resource = theVersionAdapter.getResource(entry);
 				if (resource == null) {
 					continue;
@@ -993,14 +999,30 @@ public class PatientIdPartitionInterceptor {
 	}
 
 	/**
-	 * Handles {@link Pointcut#STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH}, fired after the transaction pre-fetch has run
-	 * (inside the transaction, before any entry is written).
+	 * Without a transformer-assigned placeholder fullUrl (present when inline match URL support is not active), an
+	 * id-less conditional Patient update that pre-fetch matched to an existing Patient still needs the matched id
+	 * stamped on the body: a Patient's write partition derives from its id, so an id-less body cannot be routed
+	 * (Msg 1321). The entry stays conditional, so the DAO reports the conditional-match outcome natively. An
+	 * unmatched id-less conditional update is left untouched and still fails with Msg 1321.
 	 */
-	@Hook(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH)
-	public void onTransactionWriteAfterPrefetch(
-			TransactionWriteAfterPrefetchDetails theDetails, TransactionDetails theTransactionDetails) {
-		rewriteInlinePatientMatchUrlReferences(theDetails.getEntries(), theTransactionDetails);
-		rewriteIdlessConditionalPatientUpdatesToDirect(theDetails.getEntries(), theTransactionDetails);
+	private void stampIdlessMatchedConditionalUpdate(
+			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
+			TransactionDetails theTransactionDetails,
+			IBase theEntry) {
+		String method = theVersionAdapter.getEntryRequestVerb(myFhirContext, theEntry);
+		String url = theVersionAdapter.getEntryRequestUrl(theEntry);
+		if (!"PUT".equals(method) || url == null || !url.contains("?")) {
+			return;
+		}
+		IBaseResource resource = theVersionAdapter.getResource(theEntry);
+		if (resource == null
+				|| !PATIENT_STR.equals(myFhirContext.getResourceType(resource))
+				|| resource.getIdElement().getIdPart() != null) {
+			return;
+		}
+		getPreFetchResolvedId(url, theTransactionDetails)
+				.ifPresent(matchedId ->
+						resource.setId(matchedId.toUnqualifiedVersionless().getValue()));
 	}
 
 	/**
@@ -1080,53 +1102,6 @@ public class PatientIdPartitionInterceptor {
 			return Optional.empty();
 		}
 		return Optional.ofNullable(theTransactionDetails.getReverseResolvedId(resolved));
-	}
-
-	/**
-	 * Rewrites an id-less conditional-update Patient (e.g. {@code PUT Patient?identifier=http://acme.org/mrn|PT00062}
-	 * with no body id) into a direct {@code PUT Patient/<id>}, using the id the pre-fetch already resolved for the
-	 * conditional URL ({@link TransactionDetails#getResolvedMatchUrls()}). Without a body id the entry can't be routed
-	 * (a Patient's partition is {@code hash(<id>)}) and would fail with HAPI-1321; the direct URL lets the write route to
-	 * the existing Patient and update it in place instead of creating a duplicate.
-	 * <p>
-	 * Only a truly id-less body is rewritten. A body that already carries a client-assigned id is already routable and
-	 * handled by the normal conditional-update path.
-	 * <p>
-	 * An unmatched id-less conditional PUT ({@link TransactionDetails#NOT_FOUND} or absent) is left untouched and still
-	 * fails with HAPI-1321.
-	 */
-	private void rewriteIdlessConditionalPatientUpdatesToDirect(
-			List<IBase> theEntries, TransactionDetails theTransactionDetails) {
-		FhirTerser terser = myFhirContext.newTerser();
-		for (IBase entry : theEntries) {
-			String verb = terser.getSinglePrimitiveValueOrNull(entry, "request.method");
-			if (!"PUT".equals(verb)) {
-				continue;
-			}
-			String url = terser.getSinglePrimitiveValueOrNull(entry, "request.url");
-			if (!isPatientInlineMatchUrl(url)) {
-				continue;
-			}
-			IBaseResource resource = terser.getSingleValueOrNull(entry, "resource", IBaseResource.class);
-			if (resource == null || !PATIENT_STR.equals(myFhirContext.getResourceType(resource))) {
-				continue;
-			}
-			// Skip a body that already has an id — only a truly id-less body needs the rewrite (see method Javadoc).
-			if (resource.getIdElement().getIdPart() != null) {
-				continue;
-			}
-
-			Optional<IIdType> matchedId = getPreFetchResolvedId(url, theTransactionDetails);
-			if (matchedId.isEmpty()) {
-				continue;
-			}
-
-			// Convert the conditional PUT into a direct update by rewriting the request URL to the matched Patient id
-			// (verb stays PUT). We only rewrite the URL. The transaction processor's direct-update path then stamps
-			// the body id from that URL before the write, so the resource routes to the matched Patient.
-			String reference = matchedId.get().toUnqualifiedVersionless().getValue();
-			terser.setElement(entry, "request.url", reference);
-		}
 	}
 
 	@SuppressWarnings("SameParameterValue")

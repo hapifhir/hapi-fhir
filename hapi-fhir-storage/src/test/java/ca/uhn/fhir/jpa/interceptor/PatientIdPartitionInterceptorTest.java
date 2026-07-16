@@ -13,6 +13,9 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
+import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.interceptor.model.TransactionWriteAfterPrefetchDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -24,6 +27,7 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.test.junit.StringToIntegerListArgumentConverter;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
@@ -485,8 +489,14 @@ class PatientIdPartitionInterceptorTest {
 		}
 
 		private void fireHook(Bundle theBundle, TransactionDetails theTransactionDetails) {
-			mySvc.onTransactionWriteAfterPrefetch(
-					new TransactionWriteAfterPrefetchDetails(entriesOf(theBundle)), theTransactionDetails);
+			@SuppressWarnings({"unchecked", "rawtypes"})
+			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> adapter =
+					(ITransactionProcessorVersionAdapter) new TransactionProcessorVersionAdapterR4();
+			mySvc.resolvePatientReferencesAfterPreFetch(
+					new TransactionWriteAfterPrefetchDetails(entriesOf(theBundle)),
+					adapter,
+					new JpaStorageSettings(),
+					theTransactionDetails);
 		}
 
 		@Test
