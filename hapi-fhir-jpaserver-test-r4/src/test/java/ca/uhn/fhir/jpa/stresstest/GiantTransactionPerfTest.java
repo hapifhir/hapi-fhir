@@ -297,9 +297,8 @@ public class GiantTransactionPerfTest {
 		myEobDao.setResourceTypeCacheSvc(myResourceTypeCacheSvc);
 		myEobDao.setInterceptorBroadcasterForUnitTest(myInterceptorSvc);
 		myEobDao.setMemoryCacheService(myMemoryCacheService);
+		myEobDao.setDaoRegistryForUnitTest(myDaoRegistry);
 		myEobDao.start();
-
-		myDaoRegistry.register(myEobDao);
 
 		when(myResourceTypeCacheSvc.getResourceTypeId(anyString())).thenReturn((short)100);
 

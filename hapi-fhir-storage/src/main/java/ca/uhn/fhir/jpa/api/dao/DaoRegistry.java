@@ -44,7 +44,7 @@ public class DaoRegistry implements IDaoRegistry {
 	@Autowired
 	private FhirContext myFhirContext;
 
-	private volatile Map<String, IFhirResourceDao<?>> myResourceNameToResourceDao = new HashMap<>();
+	private final Map<String, IFhirResourceDao<?>> myResourceNameToResourceDao = new HashMap<>();
 	private volatile IFhirSystemDao<?, ?> mySystemDao;
 	private Set<String> mySupportedResourceTypes;
 
@@ -69,7 +69,6 @@ public class DaoRegistry implements IDaoRegistry {
 			supportedResourceTypes.addAll(theSupportedResourceTypes);
 		}
 		mySupportedResourceTypes = supportedResourceTypes;
-		myResourceNameToResourceDao = null;
 	}
 
 	@SuppressWarnings("unchecked")
