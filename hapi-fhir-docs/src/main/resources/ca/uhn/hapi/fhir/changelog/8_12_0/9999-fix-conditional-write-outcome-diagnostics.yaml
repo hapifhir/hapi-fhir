@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 9999
+jira: SMILE-11705
+title: "Fixed the OperationOutcome diagnostics of conditional writes in a transaction: a conditional create that
+  matched an existing resource reported the elapsed processing time in place of the matched resource id, and a
+  conditional update that created a new resource left the match URL placeholder in its message unfilled."
