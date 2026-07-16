@@ -257,6 +257,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	private StorageInterceptorHooksFacade myStorageInterceptorHooks;
 
+	@VisibleForTesting
+	public void setDaoRegistryForUnitTest(DaoRegistry theDaoRegistry) {
+		myDaoRegistry = theDaoRegistry;
+	}
+
 	@Nullable
 	public static <T extends IBaseResource> T invokeStoragePreShowResources(
 			IInterceptorBroadcaster theInterceptorBroadcaster, RequestDetails theRequest, T retVal) {

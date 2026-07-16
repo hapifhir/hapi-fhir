@@ -175,6 +175,8 @@ public class TransactionProcessorTest {
 
 	@BeforeEach
 	void before() {
+		myDaoRegistry.unregisterAll();
+
 		myTransactionProcessor.setEntityManagerForUnitTest(myEntityManager);
 		when(myEntityManager.unwrap(eq(Session.class))).thenReturn(mySession);
 

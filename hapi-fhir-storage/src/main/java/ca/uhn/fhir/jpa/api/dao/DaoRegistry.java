@@ -221,4 +221,15 @@ public class DaoRegistry implements IDaoRegistry {
 	public FhirContext getFhirContext() {
 		return myFhirContext;
 	}
+
+	/**
+	 * This method is primarily intended for unit tests. It clears all previously
+	 * registered resource providers and any registered system provider.
+	 *
+	 * @since 8.12.0
+	 */
+	public void unregisterAll() {
+		myResourceNameToResourceDao.clear();
+		mySystemDao = null;
+	}
 }
