@@ -75,8 +75,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 						]
 					}
 					""",
-				// Patient has no fullUrl → Task 2 assigns one → Synthea hack fires → creates with UUID id.
-				// Task 4 corrects OO from SUCCESSFUL_UPDATE_AS_CREATE back to SUCCESSFUL_CREATE.
+				// The hook rewrites the POST to a direct PUT with a minted UUID id; the restored outcome is a plain create.
 				List.of(
 					inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
 				)
@@ -96,8 +95,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 						]
 					}
 					""",
-				// Conditional create (ifNoneExist) with no existing match: a create whose outcome reports that no
-				// conditional match was found. Task 4 restores that code from the rewritten verb's outcome.
+				// Rewritten to a conditional PUT with a minted body id; the restored outcome is the POST-origin code.
 				List.of(
 					inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH)
 				)
@@ -117,8 +115,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 						]
 					}
 					""",
-				// Patient has no fullUrl → Task 2 assigns one → Synthea hack fires → creates with UUID id.
-				// Task 4 corrects OO from SUCCESSFUL_UPDATE_AS_CREATE back to SUCCESSFUL_CREATE.
+				// Matched conditional POSTs are left untouched → native no-op create outcome.
 				List.of(
 					inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH)
 				)
@@ -138,8 +135,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 						]
 					}
 					""",
-				// PUT matches pat1 and the body equals the stored resource → no-change update (200). Task 4 must keep the
-				// no-change flag while restoring the conditional-match code.
+				// Matched conditional PUT stays conditional (matched id stamped on the body) → native no-change outcome.
 				List.of(
 					inCompartmentOf(
 						"Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH_NO_CHANGE, "pat1")
@@ -162,7 +158,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 						]
 					}
 					""",
-				// Non-rewritten direct PUT-by-id: the OO reconciliation must leave it a plain update, not a create.
+				// Non-rewritten direct PUT-by-id: the restore hook must leave it a plain update, not a create.
 				List.of(
 					inCompartmentOf("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE, "pat1")
 				)
@@ -183,7 +179,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 						]
 					}
 					""",
-				// Identical to the stored pat2: a no-change update; the reconciliation must preserve the no-change code.
+				// Identical to the stored pat2: a no-change update; the restore hook must preserve the no-change code.
 				List.of(
 					inCompartmentOf("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CHANGE, "pat2")
 				)
@@ -418,7 +414,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 						]
 					}
 					""",
-				// Patient has fullUrl → Synthea hack fires → UUID id assigned → Patient & Observation in same compartment.
+				// The hook assigns the patient a minted UUID id and substitutes the urn subject → same compartment.
 				List.of(
 					inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0)
@@ -477,7 +473,6 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 					}
 					""",
 				// Patient conditional create: identNew doesn't exist → creates with server-assigned UUID.
-				// Task 3 allPartitions fallback enables routing; actual create succeeds (UUID assigned before identifyForCreate).
 				List.of(
 					inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0)
@@ -567,7 +562,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 						]
 					}
 					""",
-				// Unconditional Patient → hack assigns an id and substitutes the urn ref → Observation routes to its compartment.
+				// The hook assigns the unconditional patient an id and substitutes the urn ref → Observation routes to its compartment.
 				List.of(
 					inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH, 0)
@@ -596,7 +591,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 						]
 					}
 					""",
-				// Conditional Patient gets no id at routing → Observation's urn ref can't resolve → 1326 (needs Task 3).
+				// The conditional patient has no id at routing time (allPartitions fallback); the hook resolves the urn ref after preFetch.
 				List.of(
 					inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH, 0)
@@ -772,7 +767,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 						]
 					}
 					""",
-				// Transformer rewrites Obs subject using Patient conditional-update entry's fullUrl (Option A).
+				// Transformer rewrites Obs subject using Patient conditional-update entry's fullUrl.
 				// Patient PUT matches pat1 → update (200). Obs in pat1's compartment.
 				List.of(
 					inCompartmentOf("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH, "pat1"),
@@ -808,7 +803,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				)
 			),
 			Arguments.of(
-				"Create Patient + Observation | inline match URL does NOT bind to the unconditional in-bundle patient, contrived",
+				"Create Patient + Observation | inline match URL binds to the unconditional in-bundle patient",
 				"""
 					{ "resourceType" : "Bundle", "type" : "transaction",
 						"entry" : [
@@ -829,16 +824,15 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 						]
 					}
 					""",
-				// CONTRIVED: the transformer only indexes conditional-write entries, so the unconditional Patient is
-				// NOT matched by the inline URL — a separate synthetic conditional-create for old-sys|c7 is prepended.
-				// Intended: Observation co-locates with the (single) Patient. Observe whether a duplicate patient appears.
+				// The identifier index includes unconditional entries: the ref binds to the in-bundle Patient,
+				// no synthetic is minted, and the Observation co-locates with it.
 				List.of(
 					inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0)
 				)
 			),
 			Arguments.of(
-				"Create Patient + Conditionally Update Observation | inline match URL does NOT bind to the unconditional in-bundle patient, contrived",
+				"Create Patient + Conditionally Update Observation | inline match URL binds to the unconditional in-bundle patient",
 				"""
 					{ "resourceType" : "Bundle", "type" : "transaction",
 						"entry" : [
@@ -859,7 +853,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 						]
 					}
 					""",
-				// CONTRIVED: same shape as cell 7 but the Observation is a conditional PUT. Observe.
+				// Same unconditional-entry binding, with a conditional-PUT Observation.
 				List.of(
 					inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH, 0)
