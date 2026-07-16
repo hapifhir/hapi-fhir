@@ -115,7 +115,7 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 
 
 	private void mockSearch(List<JpaPid> pids) {
-		SearchProgressTracker tracker = new SearchProgressTracker(false, 0, 0);
+		SearchProgressTracker tracker = new SearchProgressTracker(0, 0);
 		mockSearch(pids, tracker);
 	}
 

@@ -287,7 +287,7 @@ public class SearchTask implements Callable<Void> {
 				.execute(this::doSaveSearch);
 	}
 
-	private void saveUnsynced(final SearchProgressTracker theSearchProgressTracker) {
+	private void saveUnsynced(final SearchProgressTracker theSearchProgressTracker, boolean theStillInProgress) {
 		myTxService
 				.withRequest(myRequest)
 				.withRequestPartitionId(myRequestPartitionId)
@@ -331,13 +331,13 @@ public class SearchTask implements Callable<Void> {
 					synchronized (mySyncedPids) {
 						int numSyncedThisPass = unsyncedPids.size();
 						ourLog.trace(
-								"Syncing {} search results - Have more: {}",
+								"Syncing {} search results - In progress: {}",
 								numSyncedThisPass,
-								theSearchProgressTracker.haveMoreResults());
+								theSearchProgressTracker);
 						mySyncedPids.addAll(unsyncedPids);
 						unsyncedPids.clear();
 
-						if (!theSearchProgressTracker.haveMoreResults()) {
+						if (!theStillInProgress) {
 							int skippedCount = theSearchProgressTracker.skippedCount();
 							ourLog.trace(
 									"MaxToFetch[{}] SkippedCount[{}] CountSavedThisPass[{}] CountSavedThisTotal[{}] AdditionalPrefetchRemaining[{}]",
@@ -680,7 +680,7 @@ public class SearchTask implements Callable<Void> {
 			Validate.isTrue(isNotAborted(), "Abort has been requested");
 
 			if (shouldSync) {
-				saveUnsynced(progress);
+				saveUnsynced(progress, true);
 			}
 
 			if (myLoadingThrottleForUnitTests != null) {
@@ -710,7 +710,7 @@ public class SearchTask implements Callable<Void> {
 		// If no abort was requested, bail out
 		Validate.isTrue(isNotAborted(), "Abort has been requested");
 
-		saveUnsynced(progressTracker);
+		saveUnsynced(progressTracker, false);
 	}
 
 	/**

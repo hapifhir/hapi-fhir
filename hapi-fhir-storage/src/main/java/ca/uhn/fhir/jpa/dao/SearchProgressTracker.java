@@ -21,18 +21,12 @@ package ca.uhn.fhir.jpa.dao;
 
 // FIXME: clean up class names, tostring, etc
 public final class SearchProgressTracker {
-	private final boolean myHaveMoreResults;
 	private final int mySkippedCount;
 	private final int myNonSkippedCount;
 
-	public SearchProgressTracker(boolean theHaveMoreResults, int theSkippedCount, int theNonSkippedCount) {
-		myHaveMoreResults = theHaveMoreResults;
+	public SearchProgressTracker(int theSkippedCount, int theNonSkippedCount) {
 		mySkippedCount = theSkippedCount;
 		myNonSkippedCount = theNonSkippedCount;
-	}
-
-	public boolean haveMoreResults() {
-		return myHaveMoreResults;
 	}
 
 	public int skippedCount() {
