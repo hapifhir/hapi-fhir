@@ -28,20 +28,43 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 // Created by claude-opus-4-7
-class InlineMatchUrlBundleSyntaxTransformerServiceTest {
+class TransactionBundleNormalizerTest {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(InlineMatchUrlBundleSyntaxTransformerServiceTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TransactionBundleNormalizerTest.class);
 
 	private static final FhirContext ourFhirContext = FhirContext.forR4Cached();
 
-	private InlineMatchUrlBundleSyntaxTransformerService mySvc;
+	private TransactionBundleNormalizer mySvc;
 
 	@BeforeEach
 	void setUp() {
 		FhirContextSearchParamRegistry searchParamRegistry = new FhirContextSearchParamRegistry(ourFhirContext);
 		MatchUrlService matchUrlService = new MatchUrlService(ourFhirContext, searchParamRegistry);
-		mySvc = new InlineMatchUrlBundleSyntaxTransformerService(
+		mySvc = new TransactionBundleNormalizer(
 				ourFhirContext, matchUrlService, new TransactionProcessorVersionAdapterR4());
+	}
+
+	@Test
+	void testStripSyntheticResponseEntries_removesLeadingSyntheticEntries() {
+		Bundle response = new Bundle();
+		response.addEntry().setFullUrl("urn:uuid:synthetic-1");
+		response.addEntry().setFullUrl("urn:uuid:synthetic-2");
+		response.addEntry().setFullUrl("urn:uuid:original");
+
+		mySvc.stripSyntheticResponseEntries(response, 2);
+
+		assertThat(response.getEntry()).hasSize(1);
+		assertEquals("urn:uuid:original", response.getEntry().get(0).getFullUrl());
+	}
+
+	@Test
+	void testStripSyntheticResponseEntries_zeroCountLeavesResponseUntouched() {
+		Bundle response = new Bundle();
+		response.addEntry().setFullUrl("urn:uuid:original");
+
+		mySvc.stripSyntheticResponseEntries(response, 0);
+
+		assertThat(response.getEntry()).hasSize(1);
 	}
 
 	@ParameterizedTest
@@ -52,7 +75,7 @@ class InlineMatchUrlBundleSyntaxTransformerServiceTest {
 		Bundle requestBundle = ourFhirContext.newJsonParser().parseResource(Bundle.class, theBundle);
 
 		// then
-		int actualSyntheticCount = mySvc.transform(requestBundle);
+		int actualSyntheticCount = mySvc.normalize(requestBundle);
 		ourLog.info(ourFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(requestBundle));
 
 		// expectations
@@ -71,7 +94,7 @@ class InlineMatchUrlBundleSyntaxTransformerServiceTest {
 			String theExpectedMessage) {
 		Bundle requestBundle = ourFhirContext.newJsonParser().parseResource(Bundle.class, theBundle);
 
-		assertThatThrownBy(() -> mySvc.transform(requestBundle))
+		assertThatThrownBy(() -> mySvc.normalize(requestBundle))
 				.isInstanceOf(theExpectedException)
 				.hasMessage(theExpectedMessage);
 	}
@@ -82,7 +105,7 @@ class InlineMatchUrlBundleSyntaxTransformerServiceTest {
 			String theComment, String theBundle, int theExpectedSyntheticCount, Consumer<Bundle> theAssertions) {
 		Bundle requestBundle = ourFhirContext.newJsonParser().parseResource(Bundle.class, theBundle);
 
-		int actualSyntheticCount = mySvc.transform(requestBundle);
+		int actualSyntheticCount = mySvc.normalize(requestBundle);
 
 		assertThat(actualSyntheticCount).isEqualTo(theExpectedSyntheticCount);
 		assertNotNull(requestBundle);
@@ -105,7 +128,7 @@ class InlineMatchUrlBundleSyntaxTransformerServiceTest {
 				.setMethod(Bundle.HTTPVerb.POST)
 				.setUrl("Observation");
 
-		int syntheticCount = mySvc.transform(bundle);
+		int syntheticCount = mySvc.normalize(bundle);
 
 		assertThat(syntheticCount).isZero();
 		assertThat(bundle.getEntry())
@@ -121,7 +144,7 @@ class InlineMatchUrlBundleSyntaxTransformerServiceTest {
 		bundle.setType(Bundle.BundleType.TRANSACTION);
 		bundle.addEntry().setResource(patient).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Patient");
 
-		mySvc.transform(bundle);
+		mySvc.normalize(bundle);
 
 		assertThat(bundle.getEntryFirstRep().getFullUrl()).isEqualTo(urnId);
 	}
@@ -138,7 +161,7 @@ class InlineMatchUrlBundleSyntaxTransformerServiceTest {
 				.setMethod(Bundle.HTTPVerb.POST)
 				.setUrl("Patient");
 
-		mySvc.transform(bundle);
+		mySvc.normalize(bundle);
 
 		assertThat(bundle.getEntryFirstRep().getFullUrl()).isEqualTo(existing);
 	}
@@ -162,7 +185,7 @@ class InlineMatchUrlBundleSyntaxTransformerServiceTest {
 				.setMethod(Bundle.HTTPVerb.POST)
 				.setUrl("Observation");
 
-		int syntheticCount = mySvc.transform(bundle);
+		int syntheticCount = mySvc.normalize(bundle);
 
 		assertThat(syntheticCount).isZero();
 		assertThat(bundle.getEntry()).hasSize(2);

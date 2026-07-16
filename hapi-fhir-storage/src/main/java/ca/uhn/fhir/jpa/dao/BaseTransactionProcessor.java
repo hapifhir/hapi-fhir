@@ -85,7 +85,7 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletSubRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ServletRequestUtil;
-import ca.uhn.fhir.storage.InlineMatchUrlBundleSyntaxTransformerService;
+import ca.uhn.fhir.storage.TransactionBundleNormalizer;
 import ca.uhn.fhir.util.AsyncUtil;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ElementUtil;
@@ -216,6 +216,10 @@ public abstract class BaseTransactionProcessor {
 	@Autowired
 	private IResourceVersionSvc myResourceVersionSvc;
 
+	// Optional so that contexts wiring this class without JpaConfig keep working; see the lazy getter.
+	@Autowired(required = false)
+	private TransactionBundleNormalizer myTransactionBundleNormalizer;
+
 	@VisibleForTesting
 	public void setStorageSettings(StorageSettings theStorageSettings) {
 		myStorageSettings = theStorageSettings;
@@ -228,6 +232,14 @@ public abstract class BaseTransactionProcessor {
 	@VisibleForTesting
 	public void setVersionAdapter(ITransactionProcessorVersionAdapter theVersionAdapter) {
 		myVersionAdapter = theVersionAdapter;
+	}
+
+	private TransactionBundleNormalizer getTransactionBundleNormalizer() {
+		if (myTransactionBundleNormalizer == null) {
+			myTransactionBundleNormalizer =
+					new TransactionBundleNormalizer(myContext, myMatchUrlService, myVersionAdapter);
+		}
+		return myTransactionBundleNormalizer;
 	}
 
 	private TaskExecutor getTaskExecutor() {
@@ -249,17 +261,6 @@ public abstract class BaseTransactionProcessor {
 		IInterceptorBroadcaster compositeBroadcaster =
 				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
 
-		// Gate the inline-match-URL transformer behind both flags. Both express explicit opt-in to the
-		// transformer's effects: allow inline match URLs in references (syntax) AND auto-create placeholder
-		// targets when no match is found (the transformer's on-miss behavior is exactly auto-create).
-		int syntheticEntryCount = 0;
-		if (myStorageSettings.isAllowInlineMatchUrlReferences()
-				&& myStorageSettings.isAutoCreatePlaceholderReferenceTargets()) {
-			InlineMatchUrlBundleSyntaxTransformerService inlineMatchUrlBundleSyntaxTransformerService =
-					new InlineMatchUrlBundleSyntaxTransformerService(myContext, myMatchUrlService, myVersionAdapter);
-			syntheticEntryCount = inlineMatchUrlBundleSyntaxTransformerService.transform(theRequest);
-		}
-
 		// Interceptor call: STORAGE_TRANSACTION_PROCESSING
 		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_PROCESSING)) {
 			HookParams params = new HookParams()
@@ -268,6 +269,16 @@ public abstract class BaseTransactionProcessor {
 					.add(IBaseBundle.class, theRequest)
 					.add(TransactionDetails.class, transactionDetails);
 			compositeBroadcaster.callHooks(Pointcut.STORAGE_TRANSACTION_PROCESSING, params);
+		}
+
+		// Normalize AFTER the pointcut so hooks see the client's original bundle (and entries they
+		// add are normalized too). Gate behind both flags: allow inline match URLs in references
+		// (syntax) AND auto-create placeholder targets when no match is found (the normalizer's
+		// on-miss behavior is exactly auto-create).
+		int syntheticEntryCount = 0;
+		if (myStorageSettings.isAllowInlineMatchUrlReferences()
+				&& myStorageSettings.isAutoCreatePlaceholderReferenceTargets()) {
+			syntheticEntryCount = getTransactionBundleNormalizer().normalize(theRequest);
 		}
 
 		IBaseBundle response;
@@ -287,14 +298,11 @@ public abstract class BaseTransactionProcessor {
 					theRequestDetails, transactionDetails, theRequest, actionName, theNestedMode);
 		}
 
-		List<IBase> entries = myVersionAdapter.getEntries(response);
-
-		// Synthetic conditional-create entries that the transformer prepended to the request now have
-		// corresponding response entries at the head of the response bundle. Drop them so the response
-		// aligns 1:1 with the caller's original (pre-transform) request.
 		if (syntheticEntryCount > 0) {
-			entries.subList(0, syntheticEntryCount).clear();
+			getTransactionBundleNormalizer().stripSyntheticResponseEntries(response, syntheticEntryCount);
 		}
+
+		List<IBase> entries = myVersionAdapter.getEntries(response);
 
 		for (int i = 0; i < entries.size(); i++) {
 			if (ElementUtil.isEmpty(entries.get(i))) {
@@ -673,16 +681,6 @@ public abstract class BaseTransactionProcessor {
 				myVersionAdapter.createBundle(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTIONRESPONSE.toCode());
 		List<IBase> getEntries = new ArrayList<>();
 
-		// FIXME-TG:
-		// pay very close attention to how and were 'originalRequestOrder' is used.  each entry in the bundle will be
-		// processed
-		// and produce an outcome.  many clients will checks the outcome of a resource processing through direct access
-		// (outcome[x])
-		// as opposed of in a loop.  if we add conditional creates as placeholders for inlineMatchUrls (see
-		// patientInlineMatchUrlPreCreationService.addConditionalCreateEntriesForInlineMatchUrls),
-		// the original order will be skewed.  we have to find a way to track/detect added conditional creates and
-		// remove them when we're done
-		// processing the bundle
 		final IdentityHashMap<IBase, Integer> originalRequestOrder = new IdentityHashMap<>();
 		for (int i = 0; i < requestEntries.size(); i++) {
 			IBase requestEntry = requestEntries.get(i);

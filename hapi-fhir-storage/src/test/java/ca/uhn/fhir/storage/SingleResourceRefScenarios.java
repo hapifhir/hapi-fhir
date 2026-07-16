@@ -1,6 +1,6 @@
 package ca.uhn.fhir.storage;
 
-import ca.uhn.fhir.storage.InlineMatchUrlBundleSyntaxTransformerServiceTest.SysVal;
+import ca.uhn.fhir.storage.TransactionBundleNormalizerTest.SysVal;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
@@ -12,10 +12,10 @@ import org.junit.jupiter.params.provider.ArgumentsProvider;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static ca.uhn.fhir.storage.InlineMatchUrlBundleSyntaxTransformerServiceTest.assertSourceEntryAt;
-import static ca.uhn.fhir.storage.InlineMatchUrlBundleSyntaxTransformerServiceTest.assertSyntheticEntryAt;
-import static ca.uhn.fhir.storage.InlineMatchUrlBundleSyntaxTransformerServiceTest.bundleAssert;
-import static ca.uhn.fhir.storage.InlineMatchUrlBundleSyntaxTransformerServiceTest.findSyntheticEntryIndex;
+import static ca.uhn.fhir.storage.TransactionBundleNormalizerTest.assertSourceEntryAt;
+import static ca.uhn.fhir.storage.TransactionBundleNormalizerTest.assertSyntheticEntryAt;
+import static ca.uhn.fhir.storage.TransactionBundleNormalizerTest.bundleAssert;
+import static ca.uhn.fhir.storage.TransactionBundleNormalizerTest.findSyntheticEntryIndex;
 import static org.assertj.core.api.Assertions.assertThat;
 
 // Created by claude-opus-4-7

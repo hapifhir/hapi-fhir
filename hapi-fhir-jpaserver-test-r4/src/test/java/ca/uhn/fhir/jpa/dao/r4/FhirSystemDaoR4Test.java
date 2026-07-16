@@ -52,6 +52,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.persistence.Id;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.persister.entity.AbstractEntityPersister;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
@@ -120,6 +121,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -1483,6 +1485,43 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	private Observation readObservation(BundleEntryComponent theResponseEntry) {
 		return myObservationDao.read(new IdType(theResponseEntry.getResponse().getLocationElement()), mySrd);
+	}
+
+	@Test
+	public void testTransactionInlineMatchUrl_processingHooksSeeOriginalBundle() {
+		// The bundle normalizer runs after STORAGE_TRANSACTION_PROCESSING: hooks registered there
+		// act on the client's original bundle, not the normalized one (synthetics, rewritten refs).
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		Bundle request = new Bundle();
+		request.setType(BundleType.TRANSACTION);
+		addObservation(request, "obs-hook", "Patient?identifier=urn:system|hook-sees-original");
+
+		AtomicInteger entryCountAtHook = new AtomicInteger();
+		AtomicReference<String> subjectRefAtHook = new AtomicReference<>();
+		IAnonymousInterceptor interceptor = (thePointcut, theArgs) -> {
+			Bundle bundleAtHook = (Bundle) theArgs.get(IBaseBundle.class);
+			List<BundleEntryComponent> entriesAtHook = bundleAtHook.getEntry();
+			entryCountAtHook.set(entriesAtHook.size());
+			Observation obsAtHook = (Observation)
+					entriesAtHook.get(entriesAtHook.size() - 1).getResource();
+			subjectRefAtHook.set(obsAtHook.getSubject().getReference());
+		};
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_TRANSACTION_PROCESSING, interceptor);
+		try {
+			Bundle resp = mySystemDao.transaction(mySrd, request);
+
+			assertEquals(1, entryCountAtHook.get());
+			assertEquals("Patient?identifier=urn:system|hook-sees-original", subjectRefAtHook.get());
+
+			// end state unchanged: response aligns 1:1 with the request, placeholder patient created
+			assertThat(resp.getEntry()).hasSize(1);
+			Observation respObs = readObservation(resp.getEntry().get(0));
+			assertThat(respObs.getSubject().getReference()).startsWith("Patient/");
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+		}
 	}
 
 	@Test

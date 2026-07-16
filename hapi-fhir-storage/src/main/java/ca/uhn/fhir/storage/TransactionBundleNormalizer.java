@@ -62,7 +62,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * This ensures that reference resolution happens before the resource is finalized and before partition selection in
  * Patient ID Partition mode.
  */
-public class InlineMatchUrlBundleSyntaxTransformerService {
+public class TransactionBundleNormalizer {
 
 	private final FhirContext myFhirContext;
 	private final MatchUrlService myMatchUrlService;
@@ -70,7 +70,7 @@ public class InlineMatchUrlBundleSyntaxTransformerService {
 	@SuppressWarnings("rawtypes")
 	private final ITransactionProcessorVersionAdapter myVersionAdapter;
 
-	public InlineMatchUrlBundleSyntaxTransformerService(
+	public TransactionBundleNormalizer(
 			FhirContext theFhirContext,
 			MatchUrlService theMatchUrlService,
 			@SuppressWarnings("rawtypes") ITransactionProcessorVersionAdapter theVersionAdapter) {
@@ -88,7 +88,7 @@ public class InlineMatchUrlBundleSyntaxTransformerService {
 	 * @return the number of synthetic placeholder entries prepended to the bundle (0 if no inline match URLs found)
 	 */
 	@SuppressWarnings("unchecked")
-	public int transform(IBaseBundle theBundle) {
+	public int normalize(IBaseBundle theBundle) {
 		List<IBase> bundleEntries = myVersionAdapter.getEntries(theBundle);
 
 		if (bundleEntries.isEmpty()) {
@@ -201,6 +201,21 @@ public class InlineMatchUrlBundleSyntaxTransformerService {
 		Collections.rotate(bundleEntries, n);
 
 		return n;
+	}
+
+	/**
+	 * Removes the response entries corresponding to the synthetic entries that {@link #normalize(IBaseBundle)}
+	 * prepended to the request bundle, so the response aligns 1:1 with the caller's original bundle.
+	 *
+	 * @param theResponse the transaction response bundle
+	 * @param theSyntheticEntryCount the count returned by {@link #normalize(IBaseBundle)} for the request
+	 */
+	@SuppressWarnings("unchecked")
+	public void stripSyntheticResponseEntries(IBaseBundle theResponse, int theSyntheticEntryCount) {
+		if (theSyntheticEntryCount > 0) {
+			List<IBase> entries = myVersionAdapter.getEntries(theResponse);
+			entries.subList(0, theSyntheticEntryCount).clear();
+		}
 	}
 
 	/**
