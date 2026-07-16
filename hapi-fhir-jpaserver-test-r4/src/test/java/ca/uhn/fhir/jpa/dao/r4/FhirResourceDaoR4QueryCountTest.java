@@ -2472,10 +2472,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, createTransactionWithCreatesAndOneMatchUrl());
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		// 1 lookup for the match URL
-		// FIXME-TG: the transformer adds a SELECT on the "conditional create finds existing match" path, where it
-		//  now has to fetch the existing resource's version to build a response Location header that Phase C will
-		//  strip anyway. Might be worth fixing later.
+		// 1 lookup for the match URL, plus 1 for the matched resource's version: the normalizer's synthetic
+		// conditional create fetches it to populate a response location that the response cleanup then strips
 		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(16, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(2, myCaptureQueriesListener.countUpdateQueries());
@@ -4117,7 +4115,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		Bundle input = loadResource(myFhirContext, Bundle.class, "/r4/test-patient-bundle.json");
 
-		// Capture the original entry count before submitting — the InlineMatchUrlBundleSyntaxTransformer
+		// Capture the original entry count before submitting — the TransactionBundleNormalizer
 		// may prepend synthetic conditional-create entries to the request bundle in-place.
 		int inputEntryCount = input.getEntry().size();
 

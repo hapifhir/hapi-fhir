@@ -921,7 +921,6 @@ public abstract class BaseTransactionProcessor {
 					writeOperationsDetails);
 		}
 
-		// FIXME-TG: just a bookmark, nothing to fix
 		RequestPartitionId requestPartitionId =
 				determineRequestPartitionIdForWriteEntries(theRequestDetails, theTransactionDetails, theEntries);
 
@@ -1022,7 +1021,6 @@ public abstract class BaseTransactionProcessor {
 					nextWriteEntryRequestPartitionId = null;
 					break;
 				case DELETE: {
-					// if were doing a patch delete put but id then read and create
 					String requestUrl = myVersionAdapter.getEntryRequestUrl(theEntry);
 					if (isNotBlank(requestUrl)) {
 						if (requestUrl.indexOf('?') != -1) {
@@ -1126,12 +1124,6 @@ public abstract class BaseTransactionProcessor {
 		theEntries.sort(new TransactionSorter(placeholderIds));
 	}
 
-	/**
-	 * Determine the create partition for a transaction write entry, falling back to
-	 * {@link RequestPartitionId#allPartitions()} when the patient compartment can't be resolved yet — a Patient with no
-	 * client-assigned id (Msg 1321) or an unresolved patient reference (Msg 1326). These entries are re-resolved at
-	 * create time once references are concrete. Msg 1324 (multiple distinct compartments) is not deferred.
-	 */
 	/**
 	 * Determine the create partition for a transaction write entry before pre-fetch, if possible. In patient-ID
 	 * partition mode the Patient compartment sometimes can't be resolved this early — an unresolved Patient

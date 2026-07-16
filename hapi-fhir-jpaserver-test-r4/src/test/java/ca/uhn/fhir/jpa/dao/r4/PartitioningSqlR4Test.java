@@ -3196,7 +3196,7 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		Bundle input = loadResource(myFhirContext, Bundle.class, "/r4/test-patient-bundle.json");
 
-		// Capture the original entry count before submitting — the InlineMatchUrlBundleSyntaxTransformer
+		// Capture the original entry count before submitting — the TransactionBundleNormalizer
 		// may prepend synthetic conditional-create entries to the request bundle in-place.
 		int inputEntryCount = input.getEntry().size();
 

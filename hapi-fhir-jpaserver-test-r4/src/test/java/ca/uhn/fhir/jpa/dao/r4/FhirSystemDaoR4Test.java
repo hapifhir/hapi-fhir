@@ -1435,13 +1435,13 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	/**
-	 * End-to-end coverage for the inline-match-URL bundle-syntax transformer pre-pass and response cleanup.
+	 * End-to-end coverage for the {@code TransactionBundleNormalizer} pre-pass and response cleanup.
 	 * Submits a 4-entry transaction bundle whose Observations reference Patients via inline match URLs:
 	 *   A → pre-existing Patient (out-of-bundle resolution)
 	 *   B → new Patient X (triggers a synthetic conditional create)
 	 *   C → new Patient X (same as B; dedup — must hit the same synthetic)
 	 *   D → new Patient Y (different from X; second synthetic)
-	 * The transformer prepends 2 synthetic Patient entries to the request. After cleanup the response must
+	 * The normalizer prepends 2 synthetic Patient entries to the request. After cleanup the response must
 	 * be 4 entries, positionally aligned with the original request (A/B/C/D), and each Observation's
 	 * subject must resolve to the right Patient on read-back.
 	 */

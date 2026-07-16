@@ -880,7 +880,6 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 
 	@Test
 	public void testTransactionWithPlaceholderReferencesToNormallyUpdatedResource() {
-		// pepe
 		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
 
 		String patientFullUrl = "urn:uuid:123-456-789";

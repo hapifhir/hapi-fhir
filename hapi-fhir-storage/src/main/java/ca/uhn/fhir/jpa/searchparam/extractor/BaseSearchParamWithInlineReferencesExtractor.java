@@ -73,8 +73,6 @@ public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IRe
 	private IRequestPartitionHelperSvc myPartitionHelperSvc;
 
 	@Override
-	// FIXME-EHP:
-	//
 	public void extractInlineReferences(
 			RequestDetails theRequestDetails, IBaseResource theResource, TransactionDetails theTransactionDetails) {
 		FhirTerser terser = myFhirContext.newTerser();
@@ -113,7 +111,6 @@ public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IRe
 				}
 				Class<? extends IBaseResource> matchResourceType = matchResourceDef.getImplementingClass();
 
-				// T is a IResourcePersistedId
 				T resolvedMatch = null;
 				if (theTransactionDetails != null) {
 					resolvedMatch =
@@ -138,11 +135,7 @@ public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IRe
 				T match;
 				IIdType newId = null;
 				if (matches.isEmpty()) {
-					// FIXME-EHP:
-					// extract to new service CreatePlaceholderService and remove -->>
 					Optional<IBasePersistedResource> placeholderOpt =
-							// FIXME-EHP:
-							//  extract from DaoResourceLinkResolver
 							myDaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo(
 									theResource,
 									matchResourceType,
@@ -163,9 +156,6 @@ public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IRe
 								.getMessage(BaseStorageDao.class, "invalidMatchUrlNoMatches", nextId.getValue());
 						throw new ResourceNotFoundException(Msg.code(1091) + msg);
 					}
-					// <--
-					// and move the service invocation to transactionProcessing.preFetchConditionalUrls
-					// we may also want to keep the invocation here as well maybe?  just in case?
 				} else if (matches.size() > 1) {
 					String msg = myFhirContext
 							.getLocalizer()

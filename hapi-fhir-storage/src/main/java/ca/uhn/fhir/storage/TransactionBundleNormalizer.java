@@ -295,7 +295,6 @@ public class TransactionBundleNormalizer {
 			}
 		}
 
-		// Mark as placeholder
 		if (placeholder instanceof IBaseHasExtensions) {
 			IBaseExtension<?, ?> extension = ((IBaseHasExtensions) placeholder).addExtension();
 			extension.setUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER);
