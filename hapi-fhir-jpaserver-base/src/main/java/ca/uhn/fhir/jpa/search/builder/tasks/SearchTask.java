@@ -706,6 +706,7 @@ public class SearchTask implements Callable<Void> {
 		 */
 		SearchProgressTracker progressTracker = sb.performSearchForPids(
 				resultConsumer, myParams, mySearchRuntimeDetails, myRequest, myRequestPartitionId);
+		assert progressTracker != null;
 
 		// If no abort was requested, bail out
 		Validate.isTrue(isNotAborted(), "Abort has been requested");
