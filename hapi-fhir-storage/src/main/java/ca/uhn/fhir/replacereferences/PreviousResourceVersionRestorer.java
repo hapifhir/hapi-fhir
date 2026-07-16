@@ -24,9 +24,13 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -38,9 +42,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Propagation;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * This is a class to restore resources to their previous versions based on the provided versioned resource references.
@@ -116,10 +118,10 @@ public class PreviousResourceVersionRestorer {
 		// independent of entry order — see the comment on the transactionNested call below.
 		BundleBuilder updateBundleBuilder = new BundleBuilder(myFhirContext);
 
-		// The v1 "copies" are deleted in a SEPARATE bundle, pinned to the partition they actually live in
-		// (the target partition by construction). They cannot share the cross-partition update bundle because
-		// their ids may be non-partition-decodable; and they must be deleted AFTER the update bundle so that,
-		// by the time the deletes run, the update bundle has already repointed every referrer away from them
+		// The v1 "copies" are deleted separately, one at a time, after the update bundle — they cannot share the
+		// cross-partition update bundle because their ids may be non-partition-decodable (see deleteCopies).
+		// The ordering matters: each one-by-one delete validates its own delete conflicts immediately, so the
+		// update bundle must have already repointed every referrer away from the copies by the time they run
 		// (satisfying referential-integrity-on-delete).
 		List<CopyToDelete> copiesToDelete = new ArrayList<>();
 
@@ -227,34 +229,33 @@ public class PreviousResourceVersionRestorer {
 	}
 
 	/**
-	 * Deletes the v1 copies, each in a bundle pinned to the partition the copy actually lives in (captured from
-	 * the pre-read). Copies that resolved to the same partition are grouped into one bundle. Pinning the bundle
-	 * to a concrete partition lets MegaScale route the delete to the correct shard even when the copy's id is
-	 * not partition-decodable.
+	 * Deletes the v1 copies one at a time, each in its own transaction pinned to the partition the copy actually
+	 * lives in (captured from the pre-read).
+	 *
+	 * The deletes deliberately do NOT go through a transaction bundle: a transaction is repartitioned per entry by
+	 * the transaction-partitioning interceptor, which re-resolves each entry's partition from its id and fails for
+	 * ids that are not partition-decodable (client-assigned ids; all ids under MegaScale UUID server-id mode) —
+	 * pinning the bundle to a concrete partition does not prevent that re-resolution. Calling the DAO directly
+	 * bypasses the interceptor, and seeding the resolved-partition cache on the {@link TransactionDetails} makes the
+	 * DAO use the captured partition instead of re-resolving the id. Mirrors the forward merge's one-by-one delete.
 	 */
 	private void deleteCopies(List<CopyToDelete> theCopiesToDelete, RequestDetails theRequestDetails) {
-		if (theCopiesToDelete.isEmpty()) {
-			return;
-		}
-
-		Map<RequestPartitionId, List<IIdType>> idsByPartition = new LinkedHashMap<>();
 		for (CopyToDelete copy : theCopiesToDelete) {
-			idsByPartition
-					.computeIfAbsent(copy.partitionId(), k -> new ArrayList<>())
-					.add(copy.id());
-		}
-
-		idsByPartition.forEach((partitionId, ids) -> {
-			BundleBuilder deleteBundleBuilder = new BundleBuilder(myFhirContext);
-			for (IIdType id : ids) {
-				deleteBundleBuilder.addTransactionDeleteEntry(id);
-			}
+			IIdType id = copy.id();
+			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(id.getResourceType());
 			myHapiTransactionService
 					.withRequest(theRequestDetails)
-					.withRequestPartitionId(partitionId)
-					.execute(() -> myDaoRegistry
-							.getSystemDao()
-							.transactionNested(theRequestDetails, deleteBundleBuilder.getBundle()));
-		});
+					.withRequestPartitionId(copy.partitionId())
+					.execute(() -> {
+						TransactionDetails transactionDetails = new TransactionDetails();
+						transactionDetails.addResolvedPartition(
+								id.getResourceType() + "/" + id.getIdPart(), copy.partitionId());
+						DeleteConflictList deleteConflicts = new DeleteConflictList();
+						DaoMethodOutcome outcome =
+								dao.delete(id, deleteConflicts, theRequestDetails, transactionDetails);
+						DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(myFhirContext, deleteConflicts);
+						return outcome;
+					});
+		}
 	}
 }

@@ -1519,6 +1519,15 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		// Populate the PID in the resource so it is available to hooks
 		addPidToResource(savedEntity, theResource);
 
+		ourLog.warn(
+				"TRACE-INVESTIGATION: updateInternal id=[{}] entityPid(partition/pid)={}/{} version={} unchanged={} wasDeleted={}",
+				theResource.getIdElement().getValue(),
+				savedEntity.getPersistentId().getPartitionId(),
+				savedEntity.getPersistentId().getId(),
+				savedEntity.getVersion(),
+				savedEntity.isUnchangedInCurrentOperation(),
+				theOldResource != null && theOldResource.isDeleted());
+
 		// Notify interceptors
 		if (!savedEntity.isUnchangedInCurrentOperation()) {
 			notifyInterceptors(theRequestDetails, theResource, theOldResource, theTransactionDetails, false);

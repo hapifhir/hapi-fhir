@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.JpaResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
+import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
@@ -66,6 +67,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.ArrayList;
@@ -276,13 +278,32 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 					int previousPartition =
 							previousPid.getPartitionId() != null ? previousPid.getPartitionId() : Integer.MIN_VALUE;
 					int nextPartition = nextPid.getPartitionId() != null ? nextPid.getPartitionId() : Integer.MIN_VALUE;
-					IResourceLookup<JpaPid> preferred = previousPartition >= nextPartition ? previousValue : nextLookup;
+
+					// TEMP unblock: the colliding rows are the same resource (real row + cross-partition ESR
+					// "surrogate" stand-ins). Prefer the REAL (non-ESR) row over a surrogate. We can only safely
+					// avoid a row we can positively confirm is an ESR via the current connection, so: if exactly one
+					// side is a confirmed ESR surrogate, keep the other; otherwise fall back to keeping the higher
+					// (non-default, real-shard) partition.
+					boolean previousIsEsr = isEsrSurrogate(previousPid);
+					boolean nextIsEsr = isEsrSurrogate(nextPid);
+
+					IResourceLookup<JpaPid> preferred;
+					if (previousIsEsr != nextIsEsr) {
+						preferred = previousIsEsr ? nextLookup : previousValue;
+					} else {
+						preferred = previousPartition >= nextPartition ? previousValue : nextLookup;
+					}
 					retVal.put(resourceId, preferred);
 					ourLog.warn(
-							"TEMP: keeping same-PID lookup for Resource ID[{}] on partition {}, ignoring duplicate surrogate on partition {}",
+							"TEMP: keeping same-PID lookup for Resource ID[{}] on partition {}, ignoring duplicate surrogate on partition {} (esrAware={}, previousPartition={} previousIsEsr={}, nextPartition={} nextIsEsr={})",
 							resourceId,
-							Math.max(previousPartition, nextPartition),
-							Math.min(previousPartition, nextPartition));
+							preferred.getPersistentId().getPartitionId(),
+							(preferred == previousValue ? nextPartition : previousPartition),
+							previousIsEsr != nextIsEsr,
+							previousPartition,
+							previousIsEsr,
+							nextPartition,
+							nextIsEsr);
 				} else {
 					/*
 					 *  This means that either:
@@ -301,6 +322,40 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		}
 
 		return retVal;
+	}
+
+	/**
+	 * TEMP unblock helper: returns {@code true} if the current version of the resource identified by the given
+	 * PID (RES_ID + partition) is stored as an {@link ResourceEncodingEnum#ESR} (a MegaScale cross-partition
+	 * surrogate stand-in). Used to prefer the real (non-ESR) row when an all-partitions resolution finds the same
+	 * resource PID on multiple partitions. Because each MegaScale partition lives in its own physical shard
+	 * database, the encoding query is pinned to the candidate's own partition so it routes to the shard where
+	 * that row physically lives (a query on the current connection cannot see rows on other shards).
+	 */
+	private boolean isEsrSurrogate(JpaPid theCandidate) {
+		Integer partitionId = theCandidate.getPartitionId();
+		Long resId = theCandidate.getId();
+		if (partitionId == null || resId == null) {
+			return false;
+		}
+		Boolean result = myTransactionService
+				.withSystemRequestOnPartition(RequestPartitionId.fromPartitionId(partitionId))
+				.readOnly()
+				.execute((TransactionCallback<Boolean>) status -> {
+					List<ResourceEncodingEnum> encodings = myEntityManager
+							.createQuery(
+									"SELECT v.myEncoding FROM ResourceHistoryTable v "
+											+ "JOIN v.myResourceTable t "
+											+ "WHERE t.myPid.myId = :resId "
+											+ "AND v.myPartitionIdValue = :partitionId "
+											+ "AND t.myVersion = v.myResourceVersion",
+									ResourceEncodingEnum.class)
+							.setParameter("resId", resId)
+							.setParameter("partitionId", partitionId)
+							.getResultList();
+					return encodings.stream().anyMatch(e -> e == ResourceEncodingEnum.ESR);
+				});
+		return Boolean.TRUE.equals(result);
 	}
 
 	/**

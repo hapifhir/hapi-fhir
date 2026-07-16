@@ -981,8 +981,12 @@ public abstract class BaseTransactionProcessor {
 		// A caller (e.g. the cross-partition $merge flow) may stamp the partition directly on the
 		// Bundle.entry so that id-only writes whose partition cannot be derived from the body/url
 		// (notably DELETE of a non-decodable id) are routed to the correct partition.
-		RequestPartitionId nextWriteEntryRequestPartitionId =
-				(RequestPartitionId) theEntry.getUserData(Constants.RESOURCE_PARTITION_ID);
+		// EXPERIMENT (temporarily disabled): verifying that reading the partition from the Bundle.entry userData is
+		// ineffectual for the current merge flow — nothing stamps entries since the producer was parked, so this
+		// read should always be null. Original line:
+		//		RequestPartitionId nextWriteEntryRequestPartitionId =
+		//				(RequestPartitionId) theEntry.getUserData(Constants.RESOURCE_PARTITION_ID);
+		RequestPartitionId nextWriteEntryRequestPartitionId = null;
 		String verb = myVersionAdapter.getEntryRequestVerb(myContext, theEntry);
 		String url = extractTransactionUrlOrThrowException(theEntry, verb);
 		RequestDetails requestDetailsForEntry =

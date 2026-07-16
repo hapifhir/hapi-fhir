@@ -716,6 +716,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		// Notify JPA interceptors
 		if (!updatedEntity.isUnchangedInCurrentOperation()) {
+			ourLog.warn(
+					"TRACE-INVESTIGATION: DAO capturing PRECOMMIT_RESOURCE_CREATED hook: resType={} theResourceId=[{}] theResourceIdentity={} entityId=[{}] entityPid={}",
+					getResourceName(),
+					theResource.getIdElement().getValue(),
+					System.identityHashCode(theResource),
+					entity.getIdDt() != null ? entity.getIdDt().getValue() : null,
+					entity.getId());
 			hookParams = new HookParams()
 					.add(IBaseResource.class, theResource)
 					.add(RequestDetails.class, theRequest)
@@ -851,13 +858,33 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		validateIdPresentForDelete(theId);
 		validateDeleteEnabled();
 
-		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(
-				theRequestDetails, getResourceName(), theId);
+		// EXPERIMENT (not the full James port): consult the TransactionDetails resolved-partition cache first. The
+		// cross-partition merge one-by-one delete seeds it with the source partition keyed by "Type/id", so a
+		// non-decodable id resolves to the correct shard instead of re-resolving to allPartitions (phantom delete).
+		RequestPartitionId requestPartitionId = null;
+		if (theId.hasResourceType() && theId.hasIdPart()) {
+			requestPartitionId =
+					theTransactionDetails.getResolvedPartition(theId.getResourceType() + "/" + theId.getIdPart());
+		}
+		boolean fromCache = requestPartitionId != null;
+		if (requestPartitionId == null) {
+			requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(
+					theRequestDetails, getResourceName(), theId);
+		}
+		ourLog.warn(
+				"TRACE-INVESTIGATION: delete(4-arg) id=[{}] requestPartitionId={} fromCache={}",
+				theId.getValue(),
+				requestPartitionId,
+				fromCache);
 
 		final ResourceTable entity;
 		try {
 			entity = readEntityLatestVersion(theRequestDetails, theId, requestPartitionId, theTransactionDetails);
 		} catch (ResourceNotFoundException ex) {
+			ourLog.warn(
+					"TRACE-INVESTIGATION: delete(4-arg) NOT_FOUND -> phantom SUCCESSFUL_DELETE_NOT_FOUND (nothing deleted) id=[{}] resolvedPartition={}",
+					theId.getValue(),
+					requestPartitionId);
 			// we don't want to throw 404s.
 			// if not found, return an outcome anyway.
 			// Because no object actually existed, we'll
@@ -867,6 +894,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					MESSAGE_KEY_DELETE_RESOURCE_NOT_EXISTING,
 					StorageResponseCodeEnum.SUCCESSFUL_DELETE_NOT_FOUND);
 		}
+		ourLog.warn(
+				"TRACE-INVESTIGATION: delete(4-arg) FOUND entity id=[{}] entityPid(partition/pid)={} isDeleted={}",
+				theId.getValue(),
+				entity.getId(),
+				isDeleted(entity));
 
 		if (theId.hasVersionIdPart()) {
 			boolean versionMatches =
@@ -930,6 +962,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 						InterceptorInvocationTimingEnum.class,
 						theTransactionDetails.getInvocationTiming(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED));
 
+		ourLog.warn(
+				"TRACE-INVESTIGATION: DELETE hook: resType={} idBeforeDelete=[{}] deletedEntityPid(partition/pid)={} tombstoneVersion={}",
+				getResourceName(),
+				idBeforeDelete.getValue(),
+				entity.getId(),
+				savedEntity.getIdDt().getVersionIdPart());
 		doCallHooks(theTransactionDetails, theRequestDetails, Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, hookParams);
 
 		DaoMethodOutcome outcome = toMethodOutcome(

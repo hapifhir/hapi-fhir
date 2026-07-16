@@ -169,6 +169,13 @@ public class CrossPartitionReplaceReferencesSvc {
 	 */
 	private List<IBaseResource> discoverReferencingResources(IIdType theSourceId, RequestDetails theRequestDetails) {
 		List<ReferencingResourceId> ids = findReferencingResourceIds(theSourceId, theRequestDetails);
+		ourLog.warn(
+				"TRACE-INVESTIGATION: discovered {} referencing resource-ids for {}: {}",
+				ids.size(),
+				theSourceId.getValue(),
+				ids.stream()
+						.map(r -> r.id().getValue() + "@partition=" + r.partitionId())
+						.toList());
 		return loadResources(ids, theRequestDetails);
 	}
 
@@ -369,11 +376,19 @@ public class CrossPartitionReplaceReferencesSvc {
 			String placeholder = theOldIdToPlaceholder.get(oldId);
 			resource.setUserData(Constants.RESOURCE_PARTITION_ID, null);
 			resource.setId((IIdType) null);
+			ourLog.warn(
+					"TRACE-INVESTIGATION: COPY(POST) entry oldId={} placeholder={} idNowEmpty={}",
+					oldId,
+					placeholder,
+					resource.getIdElement().isEmpty());
 			theBundleBuilder.addTransactionCreateEntry(resource, placeholder);
 		}
 
 		// PUT entries: update list resources keep their partition ID intact
 		for (IBaseResource resource : theUpdateList) {
+			ourLog.warn(
+					"TRACE-INVESTIGATION: UPDATE(PUT) entry id={}",
+					resource.getIdElement().getValue());
 			theBundleBuilder.addTransactionUpdateEntry(resource);
 		}
 	}
