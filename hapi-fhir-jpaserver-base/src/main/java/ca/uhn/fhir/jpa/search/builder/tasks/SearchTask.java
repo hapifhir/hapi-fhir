@@ -387,7 +387,6 @@ public class SearchTask implements Callable<Void> {
 		ourLog.trace("saveUnsynced() - post-commit");
 	}
 
-	@SuppressWarnings("rawtypes")
 	private boolean isFinished(final SearchProgressTracker theSearchProgressTracker) {
 		int skippedCount = theSearchProgressTracker.skippedCount();
 		int nonSkippedCount = theSearchProgressTracker.nonSkippedCount();

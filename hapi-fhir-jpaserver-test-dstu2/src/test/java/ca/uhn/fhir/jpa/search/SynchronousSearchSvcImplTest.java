@@ -1,9 +1,5 @@
 package ca.uhn.fhir.jpa.search;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.ISearchResultConsumer;
@@ -25,6 +21,9 @@ import java.util.Collection;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -65,30 +64,6 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 		IBundleProvider result = mySynchronousSearchSvc.executeQuery( "Patient", params, RequestPartitionId.allPartitions());
 		assertNull(result.getUuid());
 		assertFalse(result.isEmpty());
-
-		List<IBaseResource> resources = result.getResources(0, 1000);
-		assertThat(resources).hasSize(790);
-		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
-		assertEquals("799", resources.get(789).getIdElement().getValueAsString());
-	}
-
-	@Test
-	public void testSynchronousSearch_ReturnsPageIds() {
-		SearchParameterMap params = new SearchParameterMap();
-
-		SearchProgressTracker tracker = new SearchProgressTracker(false, 0, 0, "current-page-id", "prev-page-id", "next-page-id");
-		List<JpaPid> pids = createPidSequence(800);
-		mockSearch(pids, tracker);
-
-		doAnswer(loadPids()).when(mySearchBuilder)
-			.loadResourcesByPid(any(), any(), any(), anyBoolean(), any());
-
-		IBundleProvider result = mySynchronousSearchSvc.executeQuery( "Patient", params, RequestPartitionId.allPartitions());
-		assertNull(result.getUuid());
-		assertFalse(result.isEmpty());
-		assertEquals("current-page-id", result.getCurrentPageId());
-		assertEquals("prev-page-id", result.getPreviousPageId());
-		assertEquals("next-page-id", result.getNextPageId());
 
 		List<IBaseResource> resources = result.getResources(0, 1000);
 		assertThat(resources).hasSize(790);

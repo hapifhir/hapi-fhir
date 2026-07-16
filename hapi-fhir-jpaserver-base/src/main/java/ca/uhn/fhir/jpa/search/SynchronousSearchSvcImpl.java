@@ -316,16 +316,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 					resources = ServerInterceptorUtil.fireStoragePreshowResource(
 							resources, theRequestDetails, myInterceptorBroadcaster);
 
-					SimpleBundleProvider bundleProvider;
-					if (progressTracker.getCurrentPageId() != null) {
-						BundleProviderWithNamedPages bundleProviderWithNamedPages = new BundleProviderWithNamedPages(
-								resources, null, progressTracker.getCurrentPageId(), null);
-						bundleProviderWithNamedPages.setPreviousPageId(progressTracker.getPreviousPageId());
-						bundleProviderWithNamedPages.setNextPageId(progressTracker.getNextPageId());
-						bundleProvider = bundleProviderWithNamedPages;
-					} else {
-						bundleProvider = new SimpleBundleProvider(resources);
-					}
+					SimpleBundleProvider bundleProvider = new SimpleBundleProvider(resources);
 
 					if (hasACount && theSb.requiresTotal()) {
 						bundleProvider.setTotalResourcesRequestedReturned(receivedResourceCount);
