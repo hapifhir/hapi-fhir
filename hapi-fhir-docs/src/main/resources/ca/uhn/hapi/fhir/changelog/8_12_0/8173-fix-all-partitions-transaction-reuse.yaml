@@ -1,6 +1,6 @@
 ---
 type: fix
-issue: 9999
+issue: 8173
 jira: SMILE-11705
 title: "When transaction propagation on partition change is set to REQUIRES_NEW, resource writes belonging to a
   transaction that was opened for all partitions now join that transaction instead of each committing in a new

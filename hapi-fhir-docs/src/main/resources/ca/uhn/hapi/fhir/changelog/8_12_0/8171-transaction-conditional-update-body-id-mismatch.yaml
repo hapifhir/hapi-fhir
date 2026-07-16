@@ -1,6 +1,6 @@
 ---
 type: change
-issue: 9999
+issue: 8171
 jira: SMILE-11705
 title: "In a FHIR transaction, a conditional update whose resource body carries an id different from the resource
   matched by its conditional URL is now always rejected with error HAPI-2279. Previously the mismatched body id

@@ -1,6 +1,6 @@
 ---
 type: fix
-issue: 9999
+issue: 8172
 jira: SMILE-11705
 title: "Fixed the OperationOutcome diagnostics of conditional writes in a transaction: a conditional create that
   matched an existing resource reported the elapsed processing time in place of the matched resource id, and a

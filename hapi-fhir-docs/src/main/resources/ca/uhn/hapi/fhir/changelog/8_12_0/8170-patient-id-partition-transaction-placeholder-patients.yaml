@@ -1,6 +1,6 @@
 ---
 type: add
-issue: 9999
+issue: 8170
 jira: SMILE-11705
 title: "In Patient ID partition mode, when the underlying storage supports an all-partition search, transaction
   bundles containing placeholder or conditional Patients are now fully supported. Patient entries referenced by
