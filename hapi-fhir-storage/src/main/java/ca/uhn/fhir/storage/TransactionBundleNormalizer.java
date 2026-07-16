@@ -253,7 +253,7 @@ public class TransactionBundleNormalizer {
 			for (IQueryParameterType paramType : andGroup) {
 				if (paramType instanceof TokenParam tokenParam) {
 					if (isBlank(tokenParam.getSystem()) || isBlank(tokenParam.getValue())) {
-						throw new PreconditionFailedException(Msg.code(2702)
+						throw new PreconditionFailedException(Msg.code(2995)
 								+ "Inline match URL identifier must have both a system and a value: " + theMatchUrl);
 					}
 				}

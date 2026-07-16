@@ -29,7 +29,7 @@ class SingleResourceRefThrowScenarios implements ArgumentsProvider {
 					}
 					""",
 				PreconditionFailedException.class,
-				"HAPI-2702: Inline match URL identifier must have both a system and a value: Patient?identifier=value1"
+				"HAPI-2995: Inline match URL identifier must have both a system and a value: Patient?identifier=value1"
 			),
 			Arguments.of(
 				"identifier with blank value | throws PreconditionFailed",
@@ -47,7 +47,7 @@ class SingleResourceRefThrowScenarios implements ArgumentsProvider {
 					}
 					""",
 				PreconditionFailedException.class,
-				"HAPI-2702: Inline match URL identifier must have both a system and a value: Patient?identifier=http://system|"
+				"HAPI-2995: Inline match URL identifier must have both a system and a value: Patient?identifier=http://system|"
 			),
 			Arguments.of(
 				"multiple search parameters | throws PreconditionFailed",
