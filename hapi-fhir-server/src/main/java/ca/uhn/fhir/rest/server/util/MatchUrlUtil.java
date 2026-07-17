@@ -41,17 +41,20 @@ public class MatchUrlUtil {
 	/**
 	 * Returns {@code true} if the given reference value looks like an inline match URL
 	 * (e.g. {@code Patient?identifier=http://sys|val}) — i.e. a relative reference with a
-	 * query string. Absolute URLs ({@code http://}, {@code https://}) and existing
-	 * placeholders ({@code urn:}) are excluded.
+	 * query string. Scheme'd values ({@code http://}, {@code urn:}, {@code mailto:}, ...) are
+	 * absolute references, not inline match URLs.
 	 */
 	public static boolean isInlineMatchUrl(String theValue) {
 		if (StringUtils.isBlank(theValue)) {
 			return false;
 		}
-		if (theValue.startsWith("http://") || theValue.startsWith("https://") || theValue.startsWith("urn:")) {
+		int queryIndex = theValue.indexOf('?');
+		if (queryIndex == -1) {
 			return false;
 		}
-		return theValue.contains("?");
+		// Only inspect the part before the query string for a scheme separator: token values inside
+		// the query legitimately contain URLs (e.g. Patient?identifier=http://sys|val)
+		return theValue.lastIndexOf(':', queryIndex) == -1;
 	}
 
 	/**
