@@ -1750,14 +1750,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	@Transactional
 	public T readByPid(IResourcePersistentId thePid) {
 		return readByPid(thePid, false);
 	}
 
 	@Override
-	@Transactional
 	public T readByPid(IResourcePersistentId thePid, boolean theDeletedOk) {
+		return myTxTemplate.execute(tx -> {
 		StopWatch w = new StopWatch();
 		JpaPid jpaPid = (JpaPid) thePid;
 
@@ -1773,6 +1772,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		ourLog.debug("Processed read by PID on {} in {}ms", jpaPid, w.getMillis());
 		return retVal;
+		});
 	}
 
 	/**
