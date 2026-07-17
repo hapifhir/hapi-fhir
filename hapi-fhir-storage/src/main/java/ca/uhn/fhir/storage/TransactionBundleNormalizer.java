@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.util.MatchUrlUtil;
@@ -47,7 +48,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -135,7 +135,7 @@ public class TransactionBundleNormalizer {
 					fullUrl = myFhirContext.getResourceType(resource) + "/"
 							+ resource.getIdElement().getIdPart();
 				} else {
-					fullUrl = "urn:uuid:" + UUID.randomUUID();
+					fullUrl = IdDt.newRandomUuid().getValue();
 				}
 				myVersionAdapter.setFullUrl(entry, fullUrl);
 			}
@@ -198,7 +198,7 @@ public class TransactionBundleNormalizer {
 				// Otherwise, generate a synthetic conditional-create on first encounter; reuse for duplicates.
 				MatchUrlInfo info = matchUrlToInfo.computeIfAbsent(refValue, url -> {
 					validateParsedMatchUrl(url, parsed);
-					return new MatchUrlInfo("urn:uuid:" + UUID.randomUUID(), parsed);
+					return new MatchUrlInfo(IdDt.newRandomUuid().getValue(), parsed);
 				});
 				ref.setReference(info.urnUuid());
 			}
