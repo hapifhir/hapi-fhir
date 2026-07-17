@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.CodeSystemIdentifierResolver;
 import ca.uhn.fhir.util.ILockable;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -309,6 +310,21 @@ public class PrePopulatedValidationSupport extends BaseValidationSupport impleme
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
 		return myUrlToCodeSystems.get(theSystem);
+	}
+
+	@Override
+	@Nullable
+	public IBaseResource fetchCodeSystemByIdentifier(
+			@Nonnull String theIdentifierSystem,
+			@Nonnull String theIdentifierValue,
+			@Nullable String theVersion) {
+
+		return CodeSystemIdentifierResolver.findCodeSystem(
+				getFhirContext(),
+				myUrlToCodeSystems.values(),
+				theIdentifierSystem,
+				theIdentifierValue,
+				theVersion);
 	}
 
 	@Override

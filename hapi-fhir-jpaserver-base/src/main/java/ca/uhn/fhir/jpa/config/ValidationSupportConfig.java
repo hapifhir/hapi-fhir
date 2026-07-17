@@ -29,13 +29,11 @@ import ca.uhn.fhir.jpa.validation.FhirContextValidationSupportSvc;
 import ca.uhn.fhir.jpa.validation.ValidatorPolicyAdvisor;
 import ca.uhn.fhir.jpa.validation.ValidatorResourceFetcher;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
-import org.hl7.fhir.common.hapi.validation.support.CodeSystemIdentifierAliasValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.common.hapi.validation.validator.WorkerContextValidationSupportAdapter;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -54,17 +52,6 @@ public class ValidationSupportConfig {
 	@Bean(name = JpaConfig.DEFAULT_PROFILE_VALIDATION_SUPPORT)
 	public DefaultProfileValidationSupport defaultProfileValidationSupport() {
 		return new DefaultProfileValidationSupport(myFhirContext);
-	}
-
-	@Bean
-	public CodeSystemIdentifierAliasValidationSupport codeSystemIdentifierAliasValidationSupport(
-			FhirContext theFhirContext,
-			@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT)
-			IValidationSupport theJpaValidationSupport) {
-
-		return new CodeSystemIdentifierAliasValidationSupport(
-				theFhirContext,
-				theJpaValidationSupport);
 	}
 
 	@Bean

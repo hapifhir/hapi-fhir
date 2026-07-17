@@ -22,6 +22,8 @@ package ca.uhn.fhir.jpa.packages;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.CodeSystemIdentifierResolver;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +51,24 @@ public class NpmJpaValidationSupport implements IValidationSupport {
 	@Override
 	public IBaseResource fetchCodeSystem(String theUri) {
 		return fetchResource("CodeSystem", theUri);
+	}
+
+	@Override
+	@Nullable
+	public IBaseResource fetchCodeSystemByIdentifier(
+		@Nonnull String theIdentifierSystem,
+		@Nonnull String theIdentifierValue,
+		@Nullable String theVersion) {
+
+	    FhirVersionEnum fhirVersion = myFhirContext.getVersion().getVersion();
+	    List<IBaseResource> codeSystems = myHapiPackageCacheManager.loadPackageAssetsByType(fhirVersion, "CodeSystem");
+
+	    return CodeSystemIdentifierResolver.findCodeSystem(
+		myFhirContext,
+		codeSystems,
+		theIdentifierSystem,
+		theIdentifierValue,
+		theVersion);
 	}
 
 	@Override

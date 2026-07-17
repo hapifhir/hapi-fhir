@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.CodeSystemIdentifierResolver;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -53,6 +54,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 import static org.hl7.fhir.instance.model.api.IAnyResource.SP_RES_LAST_UPDATED;
 
@@ -71,10 +73,6 @@ import static org.hl7.fhir.instance.model.api.IAnyResource.SP_RES_LAST_UPDATED;
 public class JpaPersistedResourceValidationSupport implements IValidationSupport {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaPersistedResourceValidationSupport.class);
-
-	private static final String OID_URN_PREFIX = "urn:oid:";
-	private static final String RFC_3986_IDENTIFIER_SYSTEM = "urn:ietf:rfc:3986";
-	private static final char CANONICAL_VERSION_SEPARATOR = '|';
 
 	private final FhirContext myFhirContext;
 	private final DaoRegistry myDaoRegistry;
@@ -101,139 +99,70 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
-		if (isBlank(theSystem)) {
-			return null;
-		}
-
 		if (TermReadSvcUtil.isLoincUnversionedCodeSystem(theSystem)) {
-			IIdType id = myFhirContext.getVersion().newIdType("CodeSystem", LOINC_LOW);
-			return findResourceByIdWithNoException(id, myCodeSystemType);
+			IIdType id = myFhirContext
+				.getVersion()
+				.newIdType(
+					"CodeSystem",
+					LOINC_LOW);
+
+			return findResourceByIdWithNoException(
+					id,
+					myCodeSystemType);
 		}
 
-		/*
-		 * First perform normal canonical resolution using CodeSystem.url and,
-		 * if supplied, CodeSystem.version.
-		 */
-		IBaseResource directResult = fetchResource(myCodeSystemType, theSystem);
-		if (directResult != null) {
-			return directResult;
-		}
-
-		/*
-		 * Compatibility fallback:
-		 *
-		 * A ValueSet.compose.include.system can contain an OID URN while the
-		 * installed CodeSystem uses an HTTP canonical URL and carries the OID
-		 * only as CodeSystem.identifier.
-		 */
-		int versionSeparator = theSystem.lastIndexOf(CANONICAL_VERSION_SEPARATOR);
-
-		String requestedSystem;
-		String requestedVersion;
-
-		if (versionSeparator >= 0) {
-			requestedSystem = theSystem.substring(0, versionSeparator);
-			requestedVersion = theSystem.substring(versionSeparator + 1);
-		} else {
-			requestedSystem = theSystem;
-			requestedVersion = null;
-		}
-
-		if (!requestedSystem.startsWith(OID_URN_PREFIX)) {
-			return null;
-		}
-
-		return fetchCodeSystemByIdentifier(
-				RFC_3986_IDENTIFIER_SYSTEM,
-				requestedSystem,
-				requestedVersion);
+		return fetchResource(
+				myCodeSystemType,
+				theSystem);
 	}
 
 	/**
 	 * Resolves a CodeSystem using CodeSystem.identifier.
 	 *
-	 * <p>This method is intentionally restricted to internal validation-support
-	 * resolution. It does not alter the normal REST search semantics for the
-	 * CodeSystem url search parameter.</p>
 	 */
+	@Override
 	@Nullable
-	private IBaseResource fetchCodeSystemByIdentifier(
-			String theIdentifierSystem,
-			String theIdentifierValue,
-			@Nullable String theVersion) {
+	public IBaseResource fetchCodeSystemByIdentifier(
+		@Nonnull String theIdentifierSystem,
+		@Nonnull String theIdentifierValue,
+		@Nullable String theVersion) {
 
-		if (myCodeSystemType == null
-			|| !myDaoRegistry.isResourceTypeSupported("CodeSystem")) {
+		if (myCodeSystemType == null || !myDaoRegistry.isResourceTypeSupported("CodeSystem")) {
 			return null;
 		}
 
 		SearchParameterMap params = SearchParameterMap.newSynchronous()
-			.setLoadSynchronousUpTo(1)
 			.add(
 				CodeSystem.SP_IDENTIFIER,
 				new TokenParam(
-						theIdentifierSystem,
-						theIdentifierValue));
+					theIdentifierSystem,
+					theIdentifierValue));
 
-		if (!isBlank(theVersion)) {
+		if (isNotBlank(theVersion)) {
 			params.add(
 				CodeSystem.SP_VERSION,
 				new TokenParam(theVersion));
 		}
 
-		/*
-		 * This matches the existing unversioned canonical-resolution behaviour:
-		 * where several resources match, use the most recently updated one.
-		 */
-		params.setSort(
-				new SortSpec(SP_RES_LAST_UPDATED)
-						.setOrder(SortOrderEnum.DESC));
-
 		IBundleProvider search = myDaoRegistry
-				.getResourceDao("CodeSystem")
-				.search(
-						params,
-						new SystemRequestDetails());
+			.getResourceDao("CodeSystem")
+			.search(
+					params,
+					new SystemRequestDetails());
 
 		Integer size = search.size();
 		if (size == null || size == 0) {
-			ourLog.debug(
-					"No CodeSystem found for identifier {}|{}{}",
-					theIdentifierSystem,
-					theIdentifierValue,
-					isBlank(theVersion)
-							? ""
-							: " and version " + theVersion);
 			return null;
 		}
 
-		if (size > 1) {
-			ourLog.warn(
-					"Found multiple CodeSystem instances for identifier {}|{}{}; "
-							+ "using the most recently updated resource",
-					theIdentifierSystem,
-					theIdentifierValue,
-					isBlank(theVersion)
-							? ""
-							: " and version " + theVersion);
-		}
+		List<IBaseResource> resources = search.getResources(0, size);
 
-		List<IBaseResource> resources = search.getResources(0, 1);
-		if (resources.isEmpty()) {
-			return null;
-		}
-
-		IBaseResource result = resources.get(0);
-
-		ourLog.info(
-				"Resolved CodeSystem identifier alias {}{} using persisted JPA resource {}",
-				theIdentifierValue,
-				isBlank(theVersion)
-						? ""
-						: "|" + theVersion,
-				result.getIdElement().toUnqualifiedVersionless().getValue());
-
-		return result;
+		return CodeSystemIdentifierResolver.findCodeSystem(
+			myFhirContext,
+			resources,
+			theIdentifierSystem,
+			theIdentifierValue,
+			theVersion);
 	}
 
 	@Override
