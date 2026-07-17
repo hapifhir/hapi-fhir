@@ -122,13 +122,13 @@ public class TransactionBundleNormalizer {
 			if (resource == null) {
 				continue;
 			}
-			if (isBlank(myVersionAdapter.getFullUrl(entry))) {
+			String fullUrl = myVersionAdapter.getFullUrl(entry);
+			if (isBlank(fullUrl)) {
 				// Reuse an existing urn: resource.id (HAPI's placeholder id) rather than override it. A concrete
 				// client-assigned id becomes a type/id fullUrl: a urn here would displace the id as the entry's
 				// identity in the transaction processor (reference substitution keys, duplicate-id detection,
 				// auto-versioned references). Only id-less entries get a generated urn.
 				String resourceId = resource.getIdElement().getValue();
-				String fullUrl;
 				if (resourceId != null && resourceId.startsWith("urn:")) {
 					fullUrl = resourceId;
 				} else if (resource.getIdElement().hasIdPart()) {
@@ -140,10 +140,6 @@ public class TransactionBundleNormalizer {
 				myVersionAdapter.setFullUrl(entry, fullUrl);
 			}
 
-			String fullUrl = myVersionAdapter.getFullUrl(entry);
-			if (isBlank(fullUrl)) {
-				continue;
-			}
 			// Key on (resourceType, system|value), first-wins. Type-aware so e.g. Patient?identifier=sys|x
 			// can't resolve to a non-Patient entry that happens to carry sys|x.
 			String resourceType = myFhirContext.getResourceType(resource);
