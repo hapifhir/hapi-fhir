@@ -56,6 +56,7 @@ import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorOrders;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.storage.PreviousVersionReader;
+import ca.uhn.fhir.storage.TransactionBundleNormalizer;
 import ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceTargetRequest;
 import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
@@ -741,6 +742,19 @@ public class PatientIdPartitionInterceptor {
 		}
 
 		return provideNonPatientSpecificCompartment();
+	}
+
+	/**
+	 * Requests transaction bundle normalization for the current transaction: the normalizer pre-shapes the bundle
+	 * (placeholder fullUrls, identifier-bound in-bundle references, synthetic conditional creates for inline match
+	 * URL references) so {@link #resolvePatientReferencesAfterPreFetch} can resolve every Patient entry to a
+	 * concrete id for compartment routing. Normalization only runs for transactions where a registered interceptor
+	 * requests it this way.
+	 */
+	// Created by Claude Fable 5
+	@Hook(Pointcut.STORAGE_TRANSACTION_PROCESSING)
+	public void requestTransactionBundleNormalization(@Nonnull TransactionDetails theTransactionDetails) {
+		theTransactionDetails.putUserData(TransactionBundleNormalizer.NORMALIZATION_REQUESTED_KEY, Boolean.TRUE);
 	}
 
 	/**

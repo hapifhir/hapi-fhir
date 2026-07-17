@@ -340,9 +340,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
 		// Verify
 		myCaptureQueriesListener.logSelectQueries();
-		// When the match URL resolves to an existing patient, the conditional create representing the
-		// auto-created placeholder also prefetches the matched resource's current version (+1 select)
-		assertEquals(theTargetAlreadyExists ? 2 : 1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(theTargetAlreadyExists ? 20 : 25, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(4, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
@@ -379,12 +377,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
 		// Verify
 		myCaptureQueriesListener.logSelectQueries();
-		// Without the match URL cache the patient is matched again (1 select); its version is also
-		// prefetched (1 select) unless a previous matched pass already put it in the process-wide
-		// conditional-create version cache (only the first pass of the pre-existing variants did)
-		assertEquals(
-				theMatchUrlCacheEnabled ? 0 : (theTargetAlreadyExists ? 1 : 2),
-				myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(theMatchUrlCacheEnabled ? 0 : 1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(20, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(4, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());

@@ -3,6 +3,8 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.storage.TransactionBundleNormalizer;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
@@ -472,7 +474,14 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		addObservation(request, "obs-batch-1", matchUrl);
 		addObservation(request, "obs-batch-2", matchUrl);
 
-		Bundle response = mySystemDao.transaction(mySrd, request);
+		// Normalization is requested, but the bundle is a batch: the transaction-only gate keeps it inert
+		IAnonymousInterceptor normalizationRequest = registerNormalizationRequestInterceptor();
+		Bundle response;
+		try {
+			response = mySystemDao.transaction(mySrd, request);
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(normalizationRequest);
+		}
 
 		// No synthetic entries or placeholder rewrites in the caller's batch bundle (the stock
 		// per-entry resolution substitutes the concrete Patient id in place)
@@ -1517,7 +1526,13 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		addObservation(request, "obs-D", "Patient?identifier=" + system + "|" + newValue2);
 
 		// execute
-		Bundle resp = mySystemDao.transaction(mySrd, request);
+		IAnonymousInterceptor normalizationRequest = registerNormalizationRequestInterceptor();
+		Bundle resp;
+		try {
+			resp = mySystemDao.transaction(mySrd, request);
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(normalizationRequest);
+		}
 
 		// response 1:1 with original request
 		assertThat(resp.getEntry()).hasSize(4);
@@ -1558,6 +1573,41 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals(newValue2, autoCreated2.getIdentifierFirstRep().getValue());
 	}
 
+	// Created by Claude Fable 5
+	@Test
+	public void testTransactionInlineMatchUrl_notNormalizedWithoutRequestMarker() {
+		// Without a registered interceptor requesting bundle normalization, the normalizer stays
+		// inert regardless of the storage settings: inline match URL references resolve at write
+		// time (extractor auto-creates a placeholder) exactly as before the normalizer existed.
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+
+		Bundle request = new Bundle();
+		request.setType(BundleType.TRANSACTION);
+		addObservation(request, "obs-no-marker", "Patient?identifier=urn:system|no-marker");
+
+		Bundle resp = mySystemDao.transaction(mySrd, request);
+
+		assertThat(resp.getEntry()).hasSize(1);
+		assertThat(request.getEntry()).hasSize(1);
+		assertNull(request.getEntry().get(0).getFullUrl());
+		Observation obs = (Observation) request.getEntry().get(0).getResource();
+		assertThat(obs.getSubject().getReference()).startsWith("Patient/");
+
+		Patient placeholder = myPatientDao.read(new IdType(obs.getSubject().getReference()), mySrd);
+		assertThat(placeholder.getExtensionByUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER)).isNotNull();
+		assertEquals("no-marker", placeholder.getIdentifierFirstRep().getValue());
+	}
+
+	// Created by Claude Fable 5
+	private IAnonymousInterceptor registerNormalizationRequestInterceptor() {
+		IAnonymousInterceptor interceptor = (thePointcut, theArgs) -> theArgs.get(TransactionDetails.class)
+				.putUserData(TransactionBundleNormalizer.NORMALIZATION_REQUESTED_KEY, Boolean.TRUE);
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_TRANSACTION_PROCESSING, interceptor);
+		return interceptor;
+	}
+
 	// Created by Claude Opus 4.7
 	private static void addObservation(Bundle theBundle, String theCodeText, String theSubjectInlineMatchUrl) {
 		Observation o = new Observation();
@@ -1594,6 +1644,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			subjectRefAtHook.set(obsAtHook.getSubject().getReference());
 		};
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_TRANSACTION_PROCESSING, interceptor);
+		IAnonymousInterceptor normalizationRequest = registerNormalizationRequestInterceptor();
 		try {
 			Bundle resp = mySystemDao.transaction(mySrd, request);
 
@@ -1606,6 +1657,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			assertThat(respObs.getSubject().getReference()).startsWith("Patient/");
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
+			myInterceptorRegistry.unregisterInterceptor(normalizationRequest);
 		}
 	}
 

@@ -66,6 +66,19 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 // Created by Claude Opus 4.7
 public class TransactionBundleNormalizer {
 
+	/**
+	 * {@link ca.uhn.fhir.rest.api.server.storage.TransactionDetails} user-data key through which an
+	 * interceptor requests bundle normalization for the current transaction, by setting it to
+	 * {@link Boolean#TRUE} from a
+	 * {@link ca.uhn.fhir.interceptor.api.Pointcut#STORAGE_TRANSACTION_PROCESSING} hook. Without a
+	 * requester the normalizer is never invoked: normalization exists to pre-shape bundles for
+	 * components that resolve the placeholders it introduces (e.g.
+	 * {@code PatientIdPartitionInterceptor}), and would otherwise alter transaction processing for
+	 * deployments that gain nothing from it.
+	 */
+	public static final String NORMALIZATION_REQUESTED_KEY =
+			TransactionBundleNormalizer.class.getName() + "_normalizationRequested";
+
 	private final FhirContext myFhirContext;
 	private final MatchUrlService myMatchUrlService;
 

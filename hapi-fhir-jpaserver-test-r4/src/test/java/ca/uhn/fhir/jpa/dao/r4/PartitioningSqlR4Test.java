@@ -3196,9 +3196,6 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		Bundle input = loadResource(myFhirContext, Bundle.class, "/r4/test-patient-bundle.json");
 
-		// Capture the original entry count before submitting — the TransactionBundleNormalizer
-		// may prepend synthetic conditional-create entries to the request bundle in-place.
-		int inputEntryCount = input.getEntry().size();
 
 		myCaptureQueriesListener.clear();
 		Bundle output = mySystemDao.transaction(requestDetails, input);
@@ -3211,7 +3208,7 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
-		assertThat(output.getEntry()).hasSize(inputEntryCount);
+		assertThat(output.getEntry()).hasSize(input.getEntry().size());
 
 		runInTransaction(()->{
 			assertEquals(437, myResourceTableDao.count());
@@ -3226,7 +3223,6 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		requestDetails.setRequestPartitionId(fromPartitionId(myPartitionId));
 
 		input = loadResource(myFhirContext, Bundle.class, "/r4/test-patient-bundle.json");
-		inputEntryCount = input.getEntry().size();
 
 		myCaptureQueriesListener.clear();
 		output = mySystemDao.transaction(requestDetails, input);
@@ -3239,7 +3235,7 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
-		assertThat(output.getEntry()).hasSize(inputEntryCount);
+		assertThat(output.getEntry()).hasSize(input.getEntry().size());
 
 		runInTransaction(()->{
 			assertEquals(437, myResourceTableDao.count());

@@ -2472,9 +2472,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, createTransactionWithCreatesAndOneMatchUrl());
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		// 1 lookup for the match URL, plus 1 for the matched resource's version: the normalizer's synthetic
-		// conditional create fetches it to populate a response location that the response cleanup then strips
-		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		// 1 lookup for the match URL only
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(16, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(2, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -4115,10 +4114,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		Bundle input = loadResource(myFhirContext, Bundle.class, "/r4/test-patient-bundle.json");
 
-		// Capture the original entry count before submitting — the TransactionBundleNormalizer
-		// may prepend synthetic conditional-create entries to the request bundle in-place.
-		int inputEntryCount = input.getEntry().size();
-
 		myCaptureQueriesListener.clear();
 		Bundle output;
 		try {
@@ -4135,7 +4130,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
-		assertThat(output.getEntry()).hasSize(inputEntryCount);
+		assertThat(output.getEntry()).hasSize(input.getEntry().size());
 
 		runInTransaction(() -> {
 			assertEquals(437, myResourceTableDao.count());
