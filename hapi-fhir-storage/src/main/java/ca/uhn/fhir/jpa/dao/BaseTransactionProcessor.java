@@ -217,8 +217,7 @@ public abstract class BaseTransactionProcessor {
 	@Autowired
 	private IResourceVersionSvc myResourceVersionSvc;
 
-	// Optional so that contexts wiring this class without JpaConfig keep working; see the lazy getter.
-	@Autowired(required = false)
+	@Autowired
 	private TransactionBundleNormalizer myTransactionBundleNormalizer;
 
 	@VisibleForTesting
@@ -233,15 +232,6 @@ public abstract class BaseTransactionProcessor {
 	@VisibleForTesting
 	public void setVersionAdapter(ITransactionProcessorVersionAdapter theVersionAdapter) {
 		myVersionAdapter = theVersionAdapter;
-	}
-
-	private TransactionBundleNormalizer getTransactionBundleNormalizer() {
-		// Benign race: concurrent first calls may construct twice; the object is stateless.
-		if (myTransactionBundleNormalizer == null) {
-			myTransactionBundleNormalizer =
-					new TransactionBundleNormalizer(myContext, myMatchUrlService, myVersionAdapter);
-		}
-		return myTransactionBundleNormalizer;
 	}
 
 	private TaskExecutor getTaskExecutor() {
@@ -284,7 +274,7 @@ public abstract class BaseTransactionProcessor {
 				&& isTransactionBundle
 				&& myStorageSettings.isAllowInlineMatchUrlReferences()
 				&& myStorageSettings.isAutoCreatePlaceholderReferenceTargets()) {
-			syntheticEntryCount = getTransactionBundleNormalizer().normalize(theRequest);
+			syntheticEntryCount = myTransactionBundleNormalizer.normalize(theRequest);
 		}
 
 		IBaseBundle response;
@@ -305,7 +295,7 @@ public abstract class BaseTransactionProcessor {
 		}
 
 		if (syntheticEntryCount > 0) {
-			getTransactionBundleNormalizer().stripSyntheticResponseEntries(response, syntheticEntryCount);
+			myTransactionBundleNormalizer.stripSyntheticResponseEntries(response, syntheticEntryCount);
 		}
 
 		List<IBase> entries = myVersionAdapter.getEntries(response);

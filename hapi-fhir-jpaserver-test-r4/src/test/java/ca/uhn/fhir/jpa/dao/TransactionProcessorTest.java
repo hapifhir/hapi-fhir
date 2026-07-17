@@ -35,6 +35,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
+import ca.uhn.fhir.storage.TransactionBundleNormalizer;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.test.util.LogbackTestExtension;
@@ -581,6 +582,14 @@ public class TransactionProcessorTest {
 		@Bean
 		public ITransactionProcessorVersionAdapter<Bundle, Bundle.BundleEntryComponent> versionAdapter() {
 			return new TransactionProcessorVersionAdapterR4();
+		}
+
+		@Bean
+		public TransactionBundleNormalizer transactionBundleNormalizer(
+				FhirContext theFhirContext,
+				MatchUrlService theMatchUrlService,
+				ITransactionProcessorVersionAdapter<Bundle, Bundle.BundleEntryComponent> theVersionAdapter) {
+			return new TransactionBundleNormalizer(theFhirContext, theMatchUrlService, theVersionAdapter);
 		}
 
 		@Bean
