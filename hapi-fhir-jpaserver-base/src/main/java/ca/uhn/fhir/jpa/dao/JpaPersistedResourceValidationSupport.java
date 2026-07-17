@@ -40,6 +40,7 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -71,6 +72,10 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaPersistedResourceValidationSupport.class);
 
+	private static final String OID_URN_PREFIX = "urn:oid:";
+	private static final String RFC_3986_IDENTIFIER_SYSTEM = "urn:ietf:rfc:3986";
+	private static final char CANONICAL_VERSION_SEPARATOR = '|';
+
 	private final FhirContext myFhirContext;
 	private final DaoRegistry myDaoRegistry;
 
@@ -96,12 +101,139 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
+		if (isBlank(theSystem)) {
+			return null;
+		}
+
 		if (TermReadSvcUtil.isLoincUnversionedCodeSystem(theSystem)) {
 			IIdType id = myFhirContext.getVersion().newIdType("CodeSystem", LOINC_LOW);
 			return findResourceByIdWithNoException(id, myCodeSystemType);
 		}
 
-		return fetchResource(myCodeSystemType, theSystem);
+		/*
+		 * First perform normal canonical resolution using CodeSystem.url and,
+		 * if supplied, CodeSystem.version.
+		 */
+		IBaseResource directResult = fetchResource(myCodeSystemType, theSystem);
+		if (directResult != null) {
+			return directResult;
+		}
+
+		/*
+		 * Compatibility fallback:
+		 *
+		 * A ValueSet.compose.include.system can contain an OID URN while the
+		 * installed CodeSystem uses an HTTP canonical URL and carries the OID
+		 * only as CodeSystem.identifier.
+		 */
+		int versionSeparator = theSystem.lastIndexOf(CANONICAL_VERSION_SEPARATOR);
+
+		String requestedSystem;
+		String requestedVersion;
+
+		if (versionSeparator >= 0) {
+			requestedSystem = theSystem.substring(0, versionSeparator);
+			requestedVersion = theSystem.substring(versionSeparator + 1);
+		} else {
+			requestedSystem = theSystem;
+			requestedVersion = null;
+		}
+
+		if (!requestedSystem.startsWith(OID_URN_PREFIX)) {
+			return null;
+		}
+
+		return fetchCodeSystemByIdentifier(
+				RFC_3986_IDENTIFIER_SYSTEM,
+				requestedSystem,
+				requestedVersion);
+	}
+
+	/**
+	 * Resolves a CodeSystem using CodeSystem.identifier.
+	 *
+	 * <p>This method is intentionally restricted to internal validation-support
+	 * resolution. It does not alter the normal REST search semantics for the
+	 * CodeSystem url search parameter.</p>
+	 */
+	@Nullable
+	private IBaseResource fetchCodeSystemByIdentifier(
+			String theIdentifierSystem,
+			String theIdentifierValue,
+			@Nullable String theVersion) {
+
+		if (myCodeSystemType == null
+			|| !myDaoRegistry.isResourceTypeSupported("CodeSystem")) {
+			return null;
+		}
+
+		SearchParameterMap params = SearchParameterMap.newSynchronous()
+			.setLoadSynchronousUpTo(1)
+			.add(
+				CodeSystem.SP_IDENTIFIER,
+				new TokenParam(
+						theIdentifierSystem,
+						theIdentifierValue));
+
+		if (!isBlank(theVersion)) {
+			params.add(
+				CodeSystem.SP_VERSION,
+				new TokenParam(theVersion));
+		}
+
+		/*
+		 * This matches the existing unversioned canonical-resolution behaviour:
+		 * where several resources match, use the most recently updated one.
+		 */
+		params.setSort(
+				new SortSpec(SP_RES_LAST_UPDATED)
+						.setOrder(SortOrderEnum.DESC));
+
+		IBundleProvider search = myDaoRegistry
+				.getResourceDao("CodeSystem")
+				.search(
+						params,
+						new SystemRequestDetails());
+
+		Integer size = search.size();
+		if (size == null || size == 0) {
+			ourLog.debug(
+					"No CodeSystem found for identifier {}|{}{}",
+					theIdentifierSystem,
+					theIdentifierValue,
+					isBlank(theVersion)
+							? ""
+							: " and version " + theVersion);
+			return null;
+		}
+
+		if (size > 1) {
+			ourLog.warn(
+					"Found multiple CodeSystem instances for identifier {}|{}{}; "
+							+ "using the most recently updated resource",
+					theIdentifierSystem,
+					theIdentifierValue,
+					isBlank(theVersion)
+							? ""
+							: " and version " + theVersion);
+		}
+
+		List<IBaseResource> resources = search.getResources(0, 1);
+		if (resources.isEmpty()) {
+			return null;
+		}
+
+		IBaseResource result = resources.get(0);
+
+		ourLog.info(
+				"Resolved CodeSystem identifier alias {}{} using persisted JPA resource {}",
+				theIdentifierValue,
+				isBlank(theVersion)
+						? ""
+						: "|" + theVersion,
+				result.getIdElement().toUnqualifiedVersionless().getValue());
+
+		return result;
 	}
 
 	@Override

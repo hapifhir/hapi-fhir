@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import org.hl7.fhir.common.hapi.validation.support.CodeSystemIdentifierAliasValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
@@ -58,6 +59,9 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 
 	@Autowired
 	private ITermConceptMappingSvc myConceptMappingSvc;
+
+	@Autowired
+	private CodeSystemIdentifierAliasValidationSupport myCodeSystemIdentifierAliasValidationSupport;
 
 	@Autowired
 	private InMemoryTerminologyServerValidationSupport myInMemoryTerminologyServerValidationSupport;
@@ -112,6 +116,7 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 		addValidationSupport(myTerminologyService);
 		addValidationSupport(
 				new SnapshotGeneratingValidationSupport(myFhirContext, myWorkerContextValidationSupportAdapter));
+		addValidationSupport(myCodeSystemIdentifierAliasValidationSupport);
 		addValidationSupport(myInMemoryTerminologyServerValidationSupport);
 		addValidationSupport(myNpmJpaValidationSupport);
 		addValidationSupport(new CommonCodeSystemsTerminologyService(myFhirContext));

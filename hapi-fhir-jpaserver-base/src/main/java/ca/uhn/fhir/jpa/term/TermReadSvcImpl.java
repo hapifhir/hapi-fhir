@@ -979,6 +979,143 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		return sb.toString();
 	}
 
+	private boolean shouldUseTemporaryParentChildExistsFallback(
+			String theSystem,
+			ValueSet.ConceptSetComponent theIncludeOrExclude,
+			@Nonnull ExpansionFilter theExpansionFilter) {
+	
+		/*
+		 * LOINC must always continue through the existing database/Lucene
+		 * implementation because parent/child have additional LOINC semantics there.
+		 */
+		if (isCodeSystemLoinc(theSystem)) {
+			return false;
+		}
+	
+		boolean foundParentChildExists = false;
+	
+		for (ValueSet.ConceptSetFilterComponent filter :
+				theIncludeOrExclude.getFilter()) {
+	
+			if (!isParentChildExistsFilter(filter)) {
+				return false;
+			}
+	
+			foundParentChildExists = true;
+		}
+	
+		for (ValueSet.ConceptSetFilterComponent filter :
+				theExpansionFilter.getFilters()) {
+	
+			if (!isParentChildExistsFilter(filter)) {
+				return false;
+			}
+	
+			foundParentChildExists = true;
+		}
+	
+		return foundParentChildExists;
+	}
+	
+	private boolean isParentChildExistsFilter(
+			ValueSet.ConceptSetFilterComponent theFilter) {
+	
+		if (theFilter.getOp() != ValueSet.FilterOperator.EXISTS) {
+			return false;
+		}
+	
+		return "parent".equals(theFilter.getProperty())
+				|| "child".equals(theFilter.getProperty());
+	}
+
+	private void expandValueSetHandleIncludeOrExcludeUsingInMemory(
+			@Nullable ValueSetExpansionOptions theExpansionOptions,
+			IValueSetConceptAccumulator theValueSetCodeAccumulator,
+			Set<String> theAddedCodes,
+			ValueSet.ConceptSetComponent theIncludeOrExclude,
+			boolean theAdd,
+			@Nonnull ExpansionFilter theExpansionFilter,
+			String theSystem) {
+	
+		ValueSet.ConceptSetComponent effectiveIncludeOrExclude =
+				theIncludeOrExclude.copy();
+	
+		/*
+		 * Nested ValueSet expansion can contribute additional filters.
+		 * Add those filters to the component passed to the in-memory expander.
+		 */
+		for (ValueSet.ConceptSetFilterComponent filter :
+				theExpansionFilter.getFilters()) {
+	
+			effectiveIncludeOrExclude.addFilter(filter.copy());
+		}
+	
+		/*
+		 * The database path applies ExpansionFilter.code as a Hibernate Search
+		 * predicate. Represent the same condition as a normal code filter for
+		 * the in-memory implementation.
+		 */
+		if (theExpansionFilter.hasCode()) {
+	
+			if (theExpansionFilter.getSystem() != null
+					&& !theSystem.equals(theExpansionFilter.getSystem())) {
+				return;
+			}
+	
+			effectiveIncludeOrExclude
+					.addFilter()
+					.setProperty("code")
+					.setOp(ValueSet.FilterOperator.EQUAL)
+					.setValue(theExpansionFilter.getCode());
+		}
+	
+		Consumer<FhirVersionIndependentConcept> consumer =
+				concept -> addOrRemoveCode(
+						theValueSetCodeAccumulator,
+						theAddedCodes,
+						theAdd,
+						theSystem,
+						concept.getCode(),
+						concept.getDisplay(),
+						concept.getSystemVersion());
+	
+		try {
+			ConversionContext40_50.INSTANCE.init(
+					new VersionConvertor_40_50(new BaseAdvisor_40_50()),
+					"ValueSet");
+	
+			org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent
+					canonicalIncludeOrExclude =
+					ValueSet40_50.convertConceptSetComponent(
+							effectiveIncludeOrExclude);
+	
+			myInMemoryTerminologyServerValidationSupport
+					.expandValueSetIncludeOrExclude(
+							new ValidationSupportContext(
+									provideValidationSupport()),
+							consumer,
+							canonicalIncludeOrExclude);
+	
+		} catch (
+				InMemoryTerminologyServerValidationSupport
+						.ExpansionCouldNotBeCompletedInternallyException e) {
+	
+			if (theExpansionOptions != null
+					&& !theExpansionOptions.isFailOnMissingCodeSystem()
+					&& e.getCodeValidationIssue()
+							.hasIssueDetailCode(
+									CodeValidationIssueCoding.NOT_FOUND
+											.getCode())) {
+				return;
+			}
+	
+			throw new InternalErrorException(Msg.code(888) + e);
+	
+		} finally {
+			ConversionContext40_50.INSTANCE.close("ValueSet");
+		}
+	}
+	
 	/**
 	 * Returns true if there are potentially more results to process.
 	 */
@@ -1006,18 +1143,43 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 			Optional<TermCodeSystemVersion> termCodeSystemVersion =
 					optionalFindTermCodeSystemVersion(theIncludeOrExclude);
+			
 			if (termCodeSystemVersion.isPresent()) {
-
-				expandValueSetHandleIncludeOrExcludeUsingDatabase(
-						theExpansionOptions,
-						theValueSetCodeAccumulator,
-						theAddedCodes,
-						theIncludeOrExclude,
-						theAdd,
-						theExpansionFilter,
-						system,
-						termCodeSystemVersion.get());
-
+				
+				boolean useTemporaryParentChildExistsFallback =
+						shouldUseTemporaryParentChildExistsFallback(
+								system,
+								theIncludeOrExclude,
+								theExpansionFilter);
+			
+				if (useTemporaryParentChildExistsFallback) {
+					ourLog.warn(
+							"Temporarily using in-memory ValueSet expansion for non-LOINC "
+									+ "CodeSystem {} because the ValueSet contains a "
+									+ "parent/child EXISTS filter",
+							system);
+			
+					expandValueSetHandleIncludeOrExcludeUsingInMemory(
+							theExpansionOptions,
+							theValueSetCodeAccumulator,
+							theAddedCodes,
+							theIncludeOrExclude,
+							theAdd,
+							theExpansionFilter,
+							system);
+			
+				} else {
+					expandValueSetHandleIncludeOrExcludeUsingDatabase(
+							theExpansionOptions,
+							theValueSetCodeAccumulator,
+							theAddedCodes,
+							theIncludeOrExclude,
+							theAdd,
+							theExpansionFilter,
+							system,
+							termCodeSystemVersion.get());
+				}
+				
 			} else {
 
 				if (!theIncludeOrExclude.getConcept().isEmpty() && theExpansionFilter.hasCode()) {
