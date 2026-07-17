@@ -180,12 +180,15 @@ public class ReadPartitionIdRequestDetails extends PartitionIdRequestDetails {
 				theResourceType, op, theId.withResourceType(theResourceType), null, null, null, null);
 	}
 
-	public static ReadPartitionIdRequestDetails forSearchType(String theResourceType, SearchParameterMap theParams) {
+	public static ReadPartitionIdRequestDetails forSearchType(
+			@Nonnull String theResourceType, @Nullable SearchParameterMap theParams) {
 		return forSearchType(theResourceType, theParams, null);
 	}
 
 	public static ReadPartitionIdRequestDetails forSearchType(
-			String theResourceType, SearchParameterMap theParams, IBaseResource theConditionalOperationTargetOrNull) {
+			@Nonnull String theResourceType,
+			@Nullable SearchParameterMap theParams,
+			@Nullable IBaseResource theConditionalOperationTargetOrNull) {
 		return new ReadPartitionIdRequestDetails(
 				theResourceType,
 				RestOperationTypeEnum.SEARCH_TYPE,

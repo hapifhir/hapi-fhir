@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.server.util;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -44,7 +45,7 @@ public class MatchUrlUtil {
 	 * query string. Scheme'd values ({@code http://}, {@code urn:}, {@code mailto:}, ...) are
 	 * absolute references, not inline match URLs.
 	 */
-	public static boolean isInlineMatchUrl(String theValue) {
+	public static boolean isInlineMatchUrl(@Nullable String theValue) {
 		if (StringUtils.isBlank(theValue)) {
 			return false;
 		}

@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -65,6 +66,10 @@ public interface ITransactionProcessorVersionAdapter<BUNDLE extends IBaseBundle,
 
 	void setResponseLocation(BUNDLEENTRY theEntry, String theResponseLocation);
 
+	/**
+	 * Returns the response location of the given entry, or {@code null} if none is set.
+	 */
+	@Nullable
 	String getResponseLocation(BUNDLEENTRY theEntry);
 
 	void setResponseETag(BUNDLEENTRY theEntry, String theEtag);
@@ -80,13 +85,18 @@ public interface ITransactionProcessorVersionAdapter<BUNDLE extends IBaseBundle,
 	/**
 	 * Returns the response operation outcome of the given entry, or {@code null} if none is set.
 	 */
+	@Nullable
 	IBaseOperationOutcome getResponseOutcome(BUNDLEENTRY theEntry);
 
 	void setRequestVerb(BUNDLEENTRY theEntry, String theVerb);
 
 	void setRequestUrl(BUNDLEENTRY theEntry, String theUrl);
 
-	void setRequestIfNoneExist(BUNDLEENTRY theEntry, String theIfNoneExist);
+	/**
+	 * Sets the given entry's {@code request.ifNoneExist} conditional-create URL, or clears it when
+	 * {@code theIfNoneExist} is {@code null}.
+	 */
+	void setRequestIfNoneExist(BUNDLEENTRY theEntry, @Nullable String theIfNoneExist);
 
 	Optional<IBaseExtension<?, ?>> getEntryRequestExtensionByUrl(BUNDLEENTRY theEntry, String theUrl);
 }

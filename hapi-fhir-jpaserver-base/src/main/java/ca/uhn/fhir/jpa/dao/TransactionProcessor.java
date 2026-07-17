@@ -294,7 +294,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			RequestDetails theRequest,
 			TransactionDetails theTransactionDetails,
 			List<IBase> theEntries,
-			ITransactionProcessorVersionAdapter<?, ?> versionAdapter) {
+			ITransactionProcessorVersionAdapter<?, ?> theVersionAdapter) {
 		// Interceptor call: STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH
 		IInterceptorBroadcaster compositeBroadcaster =
 				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
@@ -303,7 +303,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					.add(
 							TransactionWriteAfterPrefetchDetails.class,
 							new TransactionWriteAfterPrefetchDetails(theEntries))
-					.add(ITransactionProcessorVersionAdapter.class, versionAdapter)
+					.add(ITransactionProcessorVersionAdapter.class, theVersionAdapter)
 					.add(JpaStorageSettings.class, myStorageSettings)
 					.add(RequestDetails.class, theRequest)
 					.addIfMatchesType(ServletRequestDetails.class, theRequest)

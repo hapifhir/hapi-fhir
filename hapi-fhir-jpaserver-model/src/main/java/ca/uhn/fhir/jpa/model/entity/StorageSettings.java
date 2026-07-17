@@ -248,7 +248,7 @@ public class StorageSettings {
 	/**
 	 * Should references containing match URLs be resolved and replaced in create and update operations. For
 	 * example, if this property is set to true and a resource is created containing a reference
-	 * to "Patient?identifier=12345", this is reference match URL will be resolved and replaced according
+	 * to "Patient?identifier=12345", this reference match URL will be resolved and replaced according
 	 * to the usual match URL rules.
 	 * <p>
 	 * Default is {@literal true} beginning in HAPI FHIR 2.4, since this

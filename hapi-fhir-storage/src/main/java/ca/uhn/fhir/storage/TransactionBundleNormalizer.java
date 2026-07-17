@@ -34,6 +34,7 @@ import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.TerserUtil;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -74,9 +75,9 @@ public class TransactionBundleNormalizer {
 	private final ITransactionProcessorVersionAdapter myVersionAdapter;
 
 	public TransactionBundleNormalizer(
-			FhirContext theFhirContext,
-			MatchUrlService theMatchUrlService,
-			@SuppressWarnings("rawtypes") ITransactionProcessorVersionAdapter theVersionAdapter) {
+			@Nonnull FhirContext theFhirContext,
+			@Nonnull MatchUrlService theMatchUrlService,
+			@Nonnull @SuppressWarnings("rawtypes") ITransactionProcessorVersionAdapter theVersionAdapter) {
 		myFhirContext = theFhirContext;
 		myMatchUrlService = theMatchUrlService;
 		myVersionAdapter = theVersionAdapter;
@@ -91,8 +92,9 @@ public class TransactionBundleNormalizer {
 	 * @return the changes made to the bundle, to be undone via
 	 *         {@link #undoRequestBundleChanges(IBaseBundle, NormalizationState, boolean)} after processing
 	 */
+	@Nonnull
 	@SuppressWarnings("unchecked")
-	public NormalizationState normalize(IBaseBundle theBundle) {
+	public NormalizationState normalize(@Nonnull IBaseBundle theBundle) {
 		NormalizationState state = new NormalizationState();
 		List<IBase> bundleEntries = myVersionAdapter.getEntries(theBundle);
 
@@ -157,7 +159,7 @@ public class TransactionBundleNormalizer {
 		// matters for response cleanup.
 		Map<String, MatchUrlInfo> matchUrlToInfo = new HashMap<>();
 		for (IBase entry : bundleEntries) {
-			// Only process write entries (POST/PUT/PATCH); read entries (GET/DELETE) have no resource body to walk.
+			// Only process write entries (POST/PUT/PATCH); GET and DELETE entries carry no resource body to walk.
 			String verb = myVersionAdapter.getEntryRequestVerb(myFhirContext, entry);
 			if (!"POST".equals(verb) && !"PUT".equals(verb) && !"PATCH".equals(verb)) {
 				continue;
@@ -289,7 +291,7 @@ public class TransactionBundleNormalizer {
 	 */
 	// Created by Claude Fable 5
 	@SuppressWarnings("unchecked")
-	public void stripSyntheticResponseEntries(IBaseBundle theResponse, int theSyntheticEntryCount) {
+	public void stripSyntheticResponseEntries(@Nonnull IBaseBundle theResponse, int theSyntheticEntryCount) {
 		if (theSyntheticEntryCount > 0) {
 			List<IBase> entries = myVersionAdapter.getEntries(theResponse);
 			entries.subList(0, theSyntheticEntryCount).clear();

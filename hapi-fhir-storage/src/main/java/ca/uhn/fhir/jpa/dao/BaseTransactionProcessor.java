@@ -235,6 +235,7 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	private TransactionBundleNormalizer getTransactionBundleNormalizer() {
+		// Benign race: concurrent first calls may construct twice; the object is stateless.
 		if (myTransactionBundleNormalizer == null) {
 			myTransactionBundleNormalizer =
 					new TransactionBundleNormalizer(myContext, myMatchUrlService, myVersionAdapter);

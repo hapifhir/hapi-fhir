@@ -754,10 +754,10 @@ public class PatientIdPartitionInterceptor {
 	// Created by Claude Opus 4.7
 	@Hook(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH)
 	public void resolvePatientReferencesAfterPreFetch(
-			TransactionWriteAfterPrefetchDetails thePrefetchDetails,
-			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
-			JpaStorageSettings theStorageSettings,
-			TransactionDetails theTransactionDetails) {
+			@Nonnull TransactionWriteAfterPrefetchDetails thePrefetchDetails,
+			@Nonnull ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
+			@Nonnull JpaStorageSettings theStorageSettings,
+			@Nonnull TransactionDetails theTransactionDetails) {
 		List<IBase> entries = thePrefetchDetails.getEntries();
 		FhirTerser terser = myFhirContext.newTerser();
 
@@ -871,9 +871,9 @@ public class PatientIdPartitionInterceptor {
 	// Created by Claude Opus 4.7
 	@Hook(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_RESPONSE)
 	public void restoreRewrittenPatientOutcomes(
-			IBaseBundle theResponse,
-			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
-			TransactionDetails theTransactionDetails) {
+			@Nonnull IBaseBundle theResponse,
+			@Nonnull ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
+			@Nonnull TransactionDetails theTransactionDetails) {
 		Map<String, RewrittenOutcome> rewrittenOutcomes = theTransactionDetails.getUserData(REWRITTEN_OUTCOMES_KEY);
 		if (rewrittenOutcomes == null || rewrittenOutcomes.isEmpty()) {
 			return;
@@ -971,42 +971,42 @@ public class PatientIdPartitionInterceptor {
 	private String assignNewIdAndRewriteToPut(
 			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
 			TransactionDetails theTransactionDetails,
-			IBase entry,
-			IBaseResource resource,
-			String fullUrl,
-			Map<String, String> idSubstitutions) {
+			IBase theEntry,
+			IBaseResource theResource,
+			String theFullUrl,
+			Map<String, String> theIdSubstitutions) {
 		String newReference = "Patient/" + UUID.randomUUID();
 		// A freshly minted id cannot exist yet. Record that the same way preFetch records unresolvable
 		// ids, so the update path skips its existence lookup.
 		theTransactionDetails.addResolvedResourceId(new IdDt(newReference), null);
-		idSubstitutions.put(fullUrl, newReference);
-		rewriteAsDirectPut(theVersionAdapter, entry, resource, newReference);
+		theIdSubstitutions.put(theFullUrl, newReference);
+		rewriteAsDirectPut(theVersionAdapter, theEntry, theResource, newReference);
 		return newReference;
 	}
 
 	// Created by Claude Opus 4.7
 	private void rewriteAsDirectPut(
 			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
-			IBase entry,
-			IBaseResource resource,
+			IBase theEntry,
+			IBaseResource theResource,
 			String theReference) {
-		resource.setId(theReference);
-		theVersionAdapter.setRequestVerb(entry, "PUT");
-		theVersionAdapter.setRequestUrl(entry, theReference);
-		theVersionAdapter.setRequestIfNoneExist(entry, null);
+		theResource.setId(theReference);
+		theVersionAdapter.setRequestVerb(theEntry, "PUT");
+		theVersionAdapter.setRequestUrl(theEntry, theReference);
+		theVersionAdapter.setRequestIfNoneExist(theEntry, null);
 	}
 
 	// Created by Claude Fable 5
 	private void rewriteAsConditionalPut(
 			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
-			IBase entry,
-			IBaseResource resource,
+			IBase theEntry,
+			IBaseResource theResource,
 			String theReference,
 			String theConditionalUrl) {
-		resource.setId(theReference);
-		theVersionAdapter.setRequestVerb(entry, "PUT");
-		theVersionAdapter.setRequestUrl(entry, theConditionalUrl);
-		theVersionAdapter.setRequestIfNoneExist(entry, null);
+		theResource.setId(theReference);
+		theVersionAdapter.setRequestVerb(theEntry, "PUT");
+		theVersionAdapter.setRequestUrl(theEntry, theConditionalUrl);
+		theVersionAdapter.setRequestIfNoneExist(theEntry, null);
 	}
 
 	/**
