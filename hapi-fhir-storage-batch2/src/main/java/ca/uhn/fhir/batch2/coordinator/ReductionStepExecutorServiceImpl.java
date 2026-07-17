@@ -175,13 +175,16 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		}
 	}
 
+	private String firstKey(Map<String, ?> theMap) {
+		return theMap.keySet().stream().findFirst().orElse(null);
+	}
+
 	@Override
 	public void reducerPass() {
 		if (myCurrentlyExecuting.tryAcquire()) {
 			try {
-				String[] instanceIds = myInstanceIdToReductionWork.keySet().toArray(new String[0]);
-				if (instanceIds.length > 0) {
-					String instanceId = instanceIds[0];
+				String instanceId;
+				while ((instanceId = firstKey(myInstanceIdToReductionWork)) != null) {
 					ReductionStepWork reductionWork = myInstanceIdToReductionWork.get(instanceId);
 					myCurrentlyFinalizingInstanceId.set(instanceId);
 
@@ -193,6 +196,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 
 					// If we get here, this succeeded. Purge the instance from the work queue
 					myInstanceIdToReductionWork.remove(instanceId);
+					myCurrentlyFinalizingInstanceId.set(null);
 				}
 			} catch (Exception e) {
 				ourLog.error("Failed to execute reducer pass", e);
