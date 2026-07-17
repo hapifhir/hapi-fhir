@@ -2070,11 +2070,8 @@ public enum Pointcut implements IPointcut {
 	 * Hooks may accept the following parameters:
 	 * <ul>
 	 * <li>ca.uhn.fhir.interceptor.model.TransactionWriteAfterPrefetchDetails - Carries the list of bundle entries
-	 * being processed, in processing order.</li>
-	 * <li>ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter - The version adapter for reading and mutating the
-	 * bundle's entries in a FHIR-version-agnostic way.</li>
-	 * <li>ca.uhn.fhir.jpa.api.config.JpaStorageSettings - The active storage settings, so hooks can honor configuration
-	 * such as the server resource ID strategy when assigning IDs.</li>
+	 * being processed, in processing order, along with the version adapter and storage settings for working with
+	 * them in a FHIR-version-agnostic way.</li>
 	 * <li>ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is being
 	 * processed.</li>
 	 * <li>ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - The same details as the RequestDetails parameter, but
@@ -2090,8 +2087,6 @@ public enum Pointcut implements IPointcut {
 	STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH(
 			void.class,
 			"ca.uhn.fhir.interceptor.model.TransactionWriteAfterPrefetchDetails",
-			"ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter",
-			"ca.uhn.fhir.jpa.api.config.JpaStorageSettings",
 			"ca.uhn.fhir.rest.api.server.RequestDetails",
 			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 			"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"),
@@ -2108,9 +2103,8 @@ public enum Pointcut implements IPointcut {
 	 * <p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
-	 * <li>org.hl7.fhir.instance.model.api.IBaseBundle - The response bundle being assembled.</li>
-	 * <li>ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter - The version adapter for reading and mutating the
-	 * response bundle's entries in a FHIR-version-agnostic way.</li>
+	 * <li>ca.uhn.fhir.interceptor.model.TransactionResponseAssembledDetails - Carries the assembled response bundle,
+	 * along with the version adapter for reading and mutating its entries in a FHIR-version-agnostic way.</li>
 	 * <li>ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is being
 	 * processed.</li>
 	 * <li>ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - The same details as the RequestDetails parameter, but
@@ -2125,8 +2119,7 @@ public enum Pointcut implements IPointcut {
 	 */
 	STORAGE_TRANSACTION_RESPONSE_ASSEMBLED(
 			void.class,
-			"org.hl7.fhir.instance.model.api.IBaseBundle",
-			"ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter",
+			"ca.uhn.fhir.interceptor.model.TransactionResponseAssembledDetails",
 			"ca.uhn.fhir.rest.api.server.RequestDetails",
 			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 			"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"),

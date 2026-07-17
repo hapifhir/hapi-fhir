@@ -493,9 +493,7 @@ class PatientIdPartitionInterceptorTest {
 			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> adapter =
 					(ITransactionProcessorVersionAdapter) new TransactionProcessorVersionAdapterR4();
 			mySvc.resolvePatientReferencesAfterPreFetch(
-					new TransactionWriteAfterPrefetchDetails(entriesOf(theBundle)),
-					adapter,
-					new JpaStorageSettings(),
+					new TransactionWriteAfterPrefetchDetails(entriesOf(theBundle), adapter, new JpaStorageSettings()),
 					theTransactionDetails);
 		}
 

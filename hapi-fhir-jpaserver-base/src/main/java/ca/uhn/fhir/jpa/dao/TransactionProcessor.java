@@ -299,12 +299,13 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		IInterceptorBroadcaster compositeBroadcaster =
 				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
 		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH)) {
+			@SuppressWarnings("unchecked")
+			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> versionAdapter =
+					(ITransactionProcessorVersionAdapter<IBaseBundle, IBase>) theVersionAdapter;
 			HookParams params = new HookParams()
 					.add(
 							TransactionWriteAfterPrefetchDetails.class,
-							new TransactionWriteAfterPrefetchDetails(theEntries))
-					.add(ITransactionProcessorVersionAdapter.class, theVersionAdapter)
-					.add(JpaStorageSettings.class, myStorageSettings)
+							new TransactionWriteAfterPrefetchDetails(theEntries, versionAdapter, myStorageSettings))
 					.add(RequestDetails.class, theRequest)
 					.addIfMatchesType(ServletRequestDetails.class, theRequest)
 					.add(TransactionDetails.class, theTransactionDetails);

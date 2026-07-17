@@ -32,6 +32,7 @@ import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.interceptor.model.TransactionResponseAssembledDetails;
 import ca.uhn.fhir.interceptor.model.TransactionWriteAfterPrefetchDetails;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -769,10 +770,9 @@ public class PatientIdPartitionInterceptor {
 	@Hook(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH)
 	public void resolvePatientReferencesAfterPreFetch(
 			@Nonnull TransactionWriteAfterPrefetchDetails thePrefetchDetails,
-			@Nonnull ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
-			@Nonnull JpaStorageSettings theStorageSettings,
 			@Nonnull TransactionDetails theTransactionDetails) {
 		List<IBase> entries = thePrefetchDetails.getEntries();
+		ITransactionProcessorVersionAdapter<IBaseBundle, IBase> versionAdapter = thePrefetchDetails.getVersionAdapter();
 		FhirTerser terser = myFhirContext.newTerser();
 
 		// References given as inline Patient match URLs (present when the transformer is not active) resolve here
@@ -781,8 +781,8 @@ public class PatientIdPartitionInterceptor {
 		// A placeholder Patient (urn:uuid id, no client id) can only be assigned a server id up front when the server
 		// assigns UUIDs; otherwise its id isn't known until insert, too late for compartment routing. In that case we
 		// leave the entry untouched.
-		boolean serverAssignsUuids =
-				theStorageSettings.getResourceServerIdStrategy() == JpaStorageSettings.IdStrategyEnum.UUID;
+		boolean serverAssignsUuids = thePrefetchDetails.getStorageSettings().getResourceServerIdStrategy()
+				== JpaStorageSettings.IdStrategyEnum.UUID;
 
 		Map<String, String> idSubstitutions = new HashMap<>();
 		Map<String, String> matchUrlToMintedReference = new HashMap<>();
@@ -790,21 +790,21 @@ public class PatientIdPartitionInterceptor {
 				theTransactionDetails.getOrCreateUserData(REWRITTEN_OUTCOMES_KEY, HashMap::new);
 
 		for (IBase entry : entries) {
-			String fullUrl = theVersionAdapter.getFullUrl(entry);
+			String fullUrl = versionAdapter.getFullUrl(entry);
 			if (fullUrl == null || !fullUrl.startsWith("urn:uuid:")) {
-				stampIdlessMatchedConditionalUpdate(theVersionAdapter, theTransactionDetails, entry);
+				stampIdlessMatchedConditionalUpdate(versionAdapter, theTransactionDetails, entry);
 				continue;
 			}
-			IBaseResource resource = theVersionAdapter.getResource(entry);
+			IBaseResource resource = versionAdapter.getResource(entry);
 			if (resource == null || !PATIENT_STR.equals(myFhirContext.getResourceType(resource))) {
 				continue;
 			}
 
-			String method = theVersionAdapter.getEntryRequestVerb(myFhirContext, entry);
-			String url = theVersionAdapter.getEntryRequestUrl(entry);
+			String method = versionAdapter.getEntryRequestVerb(myFhirContext, entry);
+			String url = versionAdapter.getEntryRequestUrl(entry);
 			String matchUrl = null;
 			if ("POST".equals(method)) {
-				matchUrl = theVersionAdapter.getEntryRequestIfNoneExist(entry);
+				matchUrl = versionAdapter.getEntryRequestIfNoneExist(entry);
 			} else if ("PUT".equals(method) && url != null && url.contains("?")) {
 				matchUrl = url;
 			}
@@ -813,7 +813,7 @@ public class PatientIdPartitionInterceptor {
 				if ("POST".equals(method)) {
 					if (serverAssignsUuids) {
 						String newReference = assignNewIdAndRewriteToPut(
-								theVersionAdapter, theTransactionDetails, entry, resource, fullUrl, idSubstitutions);
+								versionAdapter, theTransactionDetails, entry, resource, fullUrl, idSubstitutions);
 						rewrittenOutcomes.put(
 								newReference, new RewrittenOutcome(RewriteIntent.UNCONDITIONAL_CREATE, null));
 					}
@@ -847,7 +847,7 @@ public class PatientIdPartitionInterceptor {
 					String newReference = matchUrlToMintedReference.computeIfAbsent(
 							conditionalUrl, k -> PATIENT_STR + "/" + UUID.randomUUID());
 					idSubstitutions.put(fullUrl, newReference);
-					rewriteAsConditionalPut(theVersionAdapter, entry, resource, newReference, conditionalUrl);
+					rewriteAsConditionalPut(versionAdapter, entry, resource, newReference, conditionalUrl);
 					RewriteIntent intent = "POST".equals(method)
 							? RewriteIntent.CONDITIONAL_CREATE_NO_MATCH
 							: RewriteIntent.CONDITIONAL_UPDATE_NO_MATCH;
@@ -858,7 +858,7 @@ public class PatientIdPartitionInterceptor {
 
 		if (!idSubstitutions.isEmpty()) {
 			for (IBase entry : entries) {
-				IBaseResource resource = theVersionAdapter.getResource(entry);
+				IBaseResource resource = versionAdapter.getResource(entry);
 				if (resource == null) {
 					continue;
 				}
@@ -884,17 +884,17 @@ public class PatientIdPartitionInterceptor {
 	// Created by Claude Opus 4.7
 	@Hook(Pointcut.STORAGE_TRANSACTION_RESPONSE_ASSEMBLED)
 	public void restoreRewrittenPatientOutcomes(
-			@Nonnull IBaseBundle theResponse,
-			@Nonnull ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
+			@Nonnull TransactionResponseAssembledDetails theResponseDetails,
 			@Nonnull TransactionDetails theTransactionDetails) {
+		ITransactionProcessorVersionAdapter<IBaseBundle, IBase> versionAdapter = theResponseDetails.getVersionAdapter();
 		Map<String, RewrittenOutcome> rewrittenOutcomes = theTransactionDetails.getUserData(REWRITTEN_OUTCOMES_KEY);
 		if (rewrittenOutcomes == null || rewrittenOutcomes.isEmpty()) {
 			return;
 		}
 
-		List<IBase> entries = theVersionAdapter.getEntries(theResponse);
+		List<IBase> entries = versionAdapter.getEntries(theResponseDetails.getResponseBundle());
 		for (IBase entry : entries) {
-			String location = theVersionAdapter.getResponseLocation(entry);
+			String location = versionAdapter.getResponseLocation(entry);
 			if (isBlank(location)) {
 				continue;
 			}
@@ -909,11 +909,11 @@ public class PatientIdPartitionInterceptor {
 			String versionedId = new IdDt(location).toUnqualified().getValue();
 			String message = restoredOutcomeMessage(code, versionedId, rewrite.conditionalUrl());
 
-			IBaseOperationOutcome liveOutcome = theVersionAdapter.getResponseOutcome(entry);
+			IBaseOperationOutcome liveOutcome = versionAdapter.getResponseOutcome(entry);
 			if (liveOutcome != null) {
 				restorePrimaryIssue(liveOutcome, code, message);
 			} else {
-				theVersionAdapter.setResponseOutcome(
+				versionAdapter.setResponseOutcome(
 						entry,
 						OperationOutcomeUtil.createOperationOutcome(
 								OperationOutcomeUtil.OO_SEVERITY_INFO,
