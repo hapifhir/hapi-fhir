@@ -109,35 +109,28 @@ public class TransactionBundleNormalizer {
 			return 0;
 		}
 
-		FhirTerser terser = myFhirContext.newTerser();
+		Map<IdentifierKey, String> inBundleFullUrlByIdentifier = assignFullUrlsAndIndexIdentifiers(bundleEntries);
+		Map<String, MatchUrlInfo> matchUrlToInfo =
+				rewriteInlineMatchUrlReferences(bundleEntries, inBundleFullUrlByIdentifier);
+		return prependSyntheticEntries(theBundle, bundleEntries, matchUrlToInfo);
+	}
 
-		// First pass: ensure every resource-bearing entry has a placeholder fullUrl (Patient ID Partition
-		// mode keys on it to pre-assign Patient POST-creates an id), and index in-bundle write entries by
-		// their resource identifier -> fullUrl. An inline match URL ref below resolves against this index, so
-		// it reuses an in-bundle entry (conditional OR unconditional) instead of minting a duplicate synthetic.
+	/**
+	 * First pass: ensures every resource-bearing entry has a fullUrl (Patient ID Partition mode keys on it to
+	 * pre-assign Patient POST-creates an id), and indexes in-bundle entries by resource identifier -> fullUrl.
+	 * An inline match URL ref resolves against this index, so it reuses an in-bundle entry (conditional OR
+	 * unconditional) instead of minting a duplicate synthetic.
+	 */
+	@SuppressWarnings("unchecked")
+	private Map<IdentifierKey, String> assignFullUrlsAndIndexIdentifiers(List<IBase> theBundleEntries) {
+		FhirTerser terser = myFhirContext.newTerser();
 		Map<IdentifierKey, String> inBundleFullUrlByIdentifier = new HashMap<>();
-		for (IBase entry : bundleEntries) {
+		for (IBase entry : theBundleEntries) {
 			IBaseResource resource = myVersionAdapter.getResource(entry);
 			if (resource == null) {
 				continue;
 			}
-			String fullUrl = myVersionAdapter.getFullUrl(entry);
-			if (isBlank(fullUrl)) {
-				// Reuse an existing urn: resource.id (HAPI's placeholder id) rather than override it. A concrete
-				// client-assigned id becomes a type/id fullUrl: a urn here would displace the id as the entry's
-				// identity in the transaction processor (reference substitution keys, duplicate-id detection,
-				// auto-versioned references). Only id-less entries get a generated urn.
-				String resourceId = resource.getIdElement().getValue();
-				if (resourceId != null && resourceId.startsWith("urn:")) {
-					fullUrl = resourceId;
-				} else if (resource.getIdElement().hasIdPart()) {
-					fullUrl = myFhirContext.getResourceType(resource) + "/"
-							+ resource.getIdElement().getIdPart();
-				} else {
-					fullUrl = IdDt.newRandomUuid().getValue();
-				}
-				myVersionAdapter.setFullUrl(entry, fullUrl);
-			}
+			String fullUrl = ensureEntryFullUrl(entry, resource);
 
 			// Key on (resourceType, system|value), first-wins. Type-aware so e.g. Patient?identifier=sys|x
 			// can't resolve to a non-Patient entry that happens to carry sys|x.
@@ -155,12 +148,45 @@ public class TransactionBundleNormalizer {
 				inBundleFullUrlByIdentifier.putIfAbsent(new IdentifierKey(resourceType, system, value), fullUrl);
 			}
 		}
+		return inBundleFullUrlByIdentifier;
+	}
 
-		// Second pass: rewrite each inline match URL reference. The matchUrlToInfo map (synthetic placeholders)
-		// is keyed on the raw URL string; order among synthetic entries doesn't matter — the count is what
-		// matters for response cleanup.
+	/**
+	 * Returns the entry's fullUrl, assigning one first if it is blank. An existing urn: resource.id (HAPI's
+	 * placeholder id) is reused rather than overridden; a concrete client-assigned id becomes a type/id fullUrl,
+	 * since a urn here would displace the id as the entry's identity in the transaction processor (reference
+	 * substitution keys, duplicate-id detection, auto-versioned references). Only id-less entries get a
+	 * generated urn.
+	 */
+	@SuppressWarnings("unchecked")
+	private String ensureEntryFullUrl(IBase theEntry, IBaseResource theResource) {
+		String fullUrl = myVersionAdapter.getFullUrl(theEntry);
+		if (isBlank(fullUrl)) {
+			String resourceId = theResource.getIdElement().getValue();
+			if (resourceId != null && resourceId.startsWith("urn:")) {
+				fullUrl = resourceId;
+			} else if (theResource.getIdElement().hasIdPart()) {
+				fullUrl = myFhirContext.getResourceType(theResource) + "/"
+						+ theResource.getIdElement().getIdPart();
+			} else {
+				fullUrl = IdDt.newRandomUuid().getValue();
+			}
+			myVersionAdapter.setFullUrl(theEntry, fullUrl);
+		}
+		return fullUrl;
+	}
+
+	/**
+	 * Second pass: rewrites each inline match URL reference in a write entry, either to the fullUrl of an
+	 * in-bundle entry carrying the same (type, identifier), or to a synthetic placeholder minted on first
+	 * encounter and reused for duplicates. Returns the minted placeholders, keyed on the raw URL string.
+	 */
+	@SuppressWarnings("unchecked")
+	private Map<String, MatchUrlInfo> rewriteInlineMatchUrlReferences(
+			List<IBase> theBundleEntries, Map<IdentifierKey, String> theInBundleFullUrlByIdentifier) {
+		FhirTerser terser = myFhirContext.newTerser();
 		Map<String, MatchUrlInfo> matchUrlToInfo = new HashMap<>();
-		for (IBase entry : bundleEntries) {
+		for (IBase entry : theBundleEntries) {
 			// Only process write entries (POST/PUT/PATCH); GET and DELETE entries carry no resource body to walk.
 			String verb = myVersionAdapter.getEntryRequestVerb(myFhirContext, entry);
 			if (!"POST".equals(verb) && !"PUT".equals(verb) && !"PATCH".equals(verb)) {
@@ -186,7 +212,7 @@ public class TransactionBundleNormalizer {
 				// fullUrl (assigned in the first pass) instead of minting a duplicate synthetic placeholder.
 				IdentifierKey refKey = identifierKey(parsed.resourceDefinition().getName(), identifiers);
 				if (refKey != null) {
-					String existingFullUrl = inBundleFullUrlByIdentifier.get(refKey);
+					String existingFullUrl = theInBundleFullUrlByIdentifier.get(refKey);
 					if (existingFullUrl != null) {
 						ref.setReference(existingFullUrl);
 						continue;
@@ -201,26 +227,31 @@ public class TransactionBundleNormalizer {
 				ref.setReference(info.urnUuid());
 			}
 		}
+		return matchUrlToInfo;
+	}
 
-		if (matchUrlToInfo.isEmpty()) {
+	/**
+	 * Appends a synthetic conditional-create entry for each minted placeholder, then rotates them to the front
+	 * so they are processed before the entries referencing them, and so response cleanup can strip a fixed
+	 * [0, N) range. Returns the number of entries prepended.
+	 */
+	private int prependSyntheticEntries(
+			IBaseBundle theBundle, List<IBase> theBundleEntries, Map<String, MatchUrlInfo> theMatchUrlToInfo) {
+		if (theMatchUrlToInfo.isEmpty()) {
 			return 0;
 		}
 
-		// Append synthetic conditional-create entries directly to theBundle. BundleBuilder preserves
-		// existing entries (since 8.6.0) so this just adds at the end.
+		// BundleBuilder preserves existing entries (since 8.6.0) so this just adds at the end.
 		BundleBuilder builder = new BundleBuilder(myFhirContext, theBundle);
-		for (Map.Entry<String, MatchUrlInfo> e : matchUrlToInfo.entrySet()) {
+		for (Map.Entry<String, MatchUrlInfo> e : theMatchUrlToInfo.entrySet()) {
 			String matchUrl = e.getKey();
 			MatchUrlInfo info = e.getValue();
 			IBaseResource placeholder = buildPlaceholder(info);
 			builder.addTransactionCreateEntry(placeholder, info.urnUuid()).conditional(matchUrl);
 		}
 
-		// Rotate the just-appended entries to the front so they're processed before the entries
-		// referencing them, and so response cleanup can strip a fixed [0, N) range.
-		int n = matchUrlToInfo.size();
-		Collections.rotate(bundleEntries, n);
-
+		int n = theMatchUrlToInfo.size();
+		Collections.rotate(theBundleEntries, n);
 		return n;
 	}
 
