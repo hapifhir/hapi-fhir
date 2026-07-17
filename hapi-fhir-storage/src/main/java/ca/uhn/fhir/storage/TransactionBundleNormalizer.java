@@ -19,8 +19,6 @@
  */
 package ca.uhn.fhir.storage;
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
@@ -33,17 +31,18 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.util.MatchUrlUtil;
 import ca.uhn.fhir.util.BundleBuilder;
+import ca.uhn.fhir.util.CanonicalIdentifier;
+import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.TerserUtil;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -181,11 +180,11 @@ public class TransactionBundleNormalizer {
 						myMatchUrlService.parseAndTranslateMatchUrl(refValue);
 				// Validate before any resolution so a URL's acceptance never depends on what else the
 				// bundle happens to contain (an invalid URL must not slip through by binding in-bundle).
-				validateParsedMatchUrl(refValue, parsed);
+				List<CanonicalIdentifier> identifiers = extractAndValidateIdentifiers(refValue, parsed);
 
 				// If an in-bundle entry already carries this (type, identifier), point the inline ref at its
 				// fullUrl (assigned in the first pass) instead of minting a duplicate synthetic placeholder.
-				IdentifierKey refKey = identifierKey(parsed);
+				IdentifierKey refKey = identifierKey(parsed.resourceDefinition().getName(), identifiers);
 				if (refKey != null) {
 					String existingFullUrl = inBundleFullUrlByIdentifier.get(refKey);
 					if (existingFullUrl != null) {
@@ -196,7 +195,9 @@ public class TransactionBundleNormalizer {
 
 				// Otherwise, generate a synthetic conditional-create on first encounter; reuse for duplicates.
 				MatchUrlInfo info = matchUrlToInfo.computeIfAbsent(
-						refValue, url -> new MatchUrlInfo(IdDt.newRandomUuid().getValue(), parsed));
+						refValue,
+						url -> new MatchUrlInfo(
+								IdDt.newRandomUuid().getValue(), parsed.resourceDefinition(), identifiers));
 				ref.setReference(info.urnUuid());
 			}
 		}
@@ -211,7 +212,7 @@ public class TransactionBundleNormalizer {
 		for (Map.Entry<String, MatchUrlInfo> e : matchUrlToInfo.entrySet()) {
 			String matchUrl = e.getKey();
 			MatchUrlInfo info = e.getValue();
-			IBaseResource placeholder = buildPlaceholder(info.parsed());
+			IBaseResource placeholder = buildPlaceholder(info);
 			builder.addTransactionCreateEntry(placeholder, info.urnUuid()).conditional(matchUrl);
 		}
 
@@ -241,25 +242,24 @@ public class TransactionBundleNormalizer {
 
 	/**
 	 * Build the {@link IdentifierKey} for an inline match URL of the form {@code Type?identifier=system|value},
-	 * or {@code null} if it isn't a single-token identifier match URL (those fall through to synthetic creation).
+	 * or {@code null} if the URL has more than one identifier token (those fall through to synthetic creation).
 	 */
-	private IdentifierKey identifierKey(MatchUrlService.ResourceTypeAndSearchParameterMap theParsed) {
-		SearchParameterMap params = theParsed.searchParameterMap();
-		if (params.keySet().size() != 1 || !params.containsKey("identifier")) {
+	private static IdentifierKey identifierKey(String theResourceType, List<CanonicalIdentifier> theIdentifiers) {
+		if (theIdentifiers.size() != 1) {
 			return null;
 		}
-		List<List<IQueryParameterType>> identifierValues = params.get("identifier");
-		if (identifierValues.size() != 1 || identifierValues.get(0).size() != 1) {
-			return null;
-		}
-		if (!(identifierValues.get(0).get(0) instanceof TokenParam tokenParam) || isBlank(tokenParam.getValue())) {
-			return null;
-		}
+		CanonicalIdentifier identifier = theIdentifiers.get(0);
 		return new IdentifierKey(
-				theParsed.resourceDefinition().getName(), tokenParam.getSystem(), tokenParam.getValue());
+				theResourceType,
+				identifier.getSystemElement().getValueAsString(),
+				identifier.getValueElement().getValueAsString());
 	}
 
-	private void validateParsedMatchUrl(
+	/**
+	 * Walks the parsed match URL once: enforces the identifier-equality-only contract and returns the
+	 * identifier tokens the URL consists of.
+	 */
+	private List<CanonicalIdentifier> extractAndValidateIdentifiers(
 			String theMatchUrl, MatchUrlService.ResourceTypeAndSearchParameterMap theParsed) {
 		SearchParameterMap params = theParsed.searchParameterMap();
 
@@ -268,9 +268,8 @@ public class TransactionBundleNormalizer {
 					+ "Inline match URL matching only supports identifier search parameters: " + theMatchUrl);
 		}
 
-		List<List<IQueryParameterType>> identifierValues = params.get("identifier");
-
-		for (List<IQueryParameterType> andGroup : identifierValues) {
+		List<CanonicalIdentifier> identifiers = new ArrayList<>();
+		for (List<IQueryParameterType> andGroup : params.get("identifier")) {
 			for (IQueryParameterType paramType : andGroup) {
 				if (paramType instanceof TokenParam tokenParam) {
 					if (tokenParam.getModifier() != null) {
@@ -281,55 +280,32 @@ public class TransactionBundleNormalizer {
 						throw new PreconditionFailedException(Msg.code(2995)
 								+ "Inline match URL identifier must have both a system and a value: " + theMatchUrl);
 					}
+					CanonicalIdentifier identifier = new CanonicalIdentifier();
+					identifier.setSystem(tokenParam.getSystem());
+					identifier.setValue(tokenParam.getValue());
+					identifiers.add(identifier);
 				}
 			}
 		}
+		return identifiers;
 	}
 
-	private IBaseResource buildPlaceholder(MatchUrlService.ResourceTypeAndSearchParameterMap theParsed) {
-		RuntimeResourceDefinition resourceDef = theParsed.resourceDefinition();
-		IBaseResource placeholder = resourceDef.newInstance();
-
-		BaseRuntimeChildDefinition identifierChildDef = resourceDef.getChildByName("identifier");
-		if (identifierChildDef != null) {
-			List<List<IQueryParameterType>> identifierValues =
-					theParsed.searchParameterMap().get("identifier");
-			if (identifierValues != null) {
-				for (List<IQueryParameterType> andGroup : identifierValues) {
-					for (IQueryParameterType paramType : andGroup) {
-						if (!(paramType instanceof TokenParam tokenParam)) {
-							continue;
-						}
-
-						BaseRuntimeElementDefinition<?> identifierElementDef =
-								identifierChildDef.getChildByName("identifier");
-						IBase identifierIBase =
-								identifierElementDef.newInstance(identifierChildDef.getInstanceConstructorArguments());
-
-						IBase systemIBase = TerserUtil.newElement(myFhirContext, "uri", tokenParam.getSystem());
-						IBase valueIBase = TerserUtil.newElement(myFhirContext, "string", tokenParam.getValue());
-
-						BaseRuntimeElementDefinition<?> identifierTypeDef =
-								myFhirContext.getElementDefinition(identifierIBase.getClass());
-						identifierTypeDef.getChildByName("system").getMutator().setValue(identifierIBase, systemIBase);
-						identifierTypeDef.getChildByName("value").getMutator().setValue(identifierIBase, valueIBase);
-
-						identifierChildDef.getMutator().addValue(placeholder, identifierIBase);
-					}
-				}
-			}
+	private IBaseResource buildPlaceholder(MatchUrlInfo theInfo) {
+		IBaseResource placeholder = theInfo.resourceDef().newInstance();
+		for (CanonicalIdentifier identifier : theInfo.identifiers()) {
+			TerserUtil.addIdentifierToResource(
+					myFhirContext,
+					placeholder,
+					identifier.getSystemElement().getValueAsString(),
+					identifier.getValueElement().getValueAsString());
 		}
-
-		if (placeholder instanceof IBaseHasExtensions) {
-			IBaseExtension<?, ?> extension = ((IBaseHasExtensions) placeholder).addExtension();
-			extension.setUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER);
-			extension.setValue(myFhirContext.newPrimitiveBoolean(true));
-		}
-
+		ExtensionUtil.addExtensionIfSupported(
+				myFhirContext, placeholder, HapiExtensions.EXT_RESOURCE_PLACEHOLDER, "boolean", Boolean.TRUE);
 		return placeholder;
 	}
 
-	private record MatchUrlInfo(String urnUuid, MatchUrlService.ResourceTypeAndSearchParameterMap parsed) {}
+	private record MatchUrlInfo(
+			String urnUuid, RuntimeResourceDefinition resourceDef, List<CanonicalIdentifier> identifiers) {}
 
 	/** Key matching an inline match URL reference to an in-bundle entry by resource type + identifier token. */
 	private record IdentifierKey(String resourceType, String system, String value) {
