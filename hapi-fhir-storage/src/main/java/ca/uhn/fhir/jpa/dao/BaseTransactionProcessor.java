@@ -282,41 +282,32 @@ public abstract class BaseTransactionProcessor {
 		String bundleTypeCode = myVersionAdapter.getBundleType(theRequest);
 		boolean isTransactionBundle = bundleTypeCode == null
 				|| org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION.toCode().equals(bundleTypeCode);
-		TransactionBundleNormalizer.NormalizationState normalizationState = null;
+		int syntheticEntryCount = 0;
 		if (isTransactionBundle
 				&& myStorageSettings.isAllowInlineMatchUrlReferences()
 				&& myStorageSettings.isAutoCreatePlaceholderReferenceTargets()) {
-			normalizationState = getTransactionBundleNormalizer().normalize(theRequest);
+			syntheticEntryCount = getTransactionBundleNormalizer().normalize(theRequest);
 		}
 
 		IBaseBundle response;
-		boolean succeeded = false;
-		try {
-			// Interceptor call: STORAGE_TRANSACTION_PRE_PARTITION
-			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_PRE_PARTITION)) {
-				response = new TransactionPartitionProcessor<BUNDLE>(
-								this,
-								myContext,
-								theRequestDetails,
-								theNestedMode,
-								compositeBroadcaster,
-								actionName,
-								transactionDetails)
-						.execute(theRequest);
-			} else {
-				response = processTransactionAsSubRequest(
-						theRequestDetails, transactionDetails, theRequest, actionName, theNestedMode);
-			}
-			succeeded = true;
-		} finally {
-			if (normalizationState != null) {
-				getTransactionBundleNormalizer().undoRequestBundleChanges(theRequest, normalizationState, succeeded);
-			}
+		// Interceptor call: STORAGE_TRANSACTION_PRE_PARTITION
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_PRE_PARTITION)) {
+			response = new TransactionPartitionProcessor<BUNDLE>(
+							this,
+							myContext,
+							theRequestDetails,
+							theNestedMode,
+							compositeBroadcaster,
+							actionName,
+							transactionDetails)
+					.execute(theRequest);
+		} else {
+			response = processTransactionAsSubRequest(
+					theRequestDetails, transactionDetails, theRequest, actionName, theNestedMode);
 		}
 
-		if (normalizationState != null && normalizationState.getSyntheticEntryCount() > 0) {
-			getTransactionBundleNormalizer()
-					.stripSyntheticResponseEntries(response, normalizationState.getSyntheticEntryCount());
+		if (syntheticEntryCount > 0) {
+			getTransactionBundleNormalizer().stripSyntheticResponseEntries(response, syntheticEntryCount);
 		}
 
 		List<IBase> entries = myVersionAdapter.getEntries(response);

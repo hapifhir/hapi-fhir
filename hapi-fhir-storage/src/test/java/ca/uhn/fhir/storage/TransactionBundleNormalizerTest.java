@@ -74,7 +74,7 @@ class TransactionBundleNormalizerTest {
 		Bundle requestBundle = ourFhirContext.newJsonParser().parseResource(Bundle.class, theBundle);
 
 		// then
-		int actualSyntheticCount = mySvc.normalize(requestBundle).getSyntheticEntryCount();
+		int actualSyntheticCount = mySvc.normalize(requestBundle);
 		ourLog.info(ourFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(requestBundle));
 
 		// expectations
@@ -90,7 +90,7 @@ class TransactionBundleNormalizerTest {
 			String theComment, String theBundle, int theExpectedSyntheticCount, Consumer<Bundle> theAssertions) {
 		Bundle requestBundle = ourFhirContext.newJsonParser().parseResource(Bundle.class, theBundle);
 
-		int actualSyntheticCount = mySvc.normalize(requestBundle).getSyntheticEntryCount();
+		int actualSyntheticCount = mySvc.normalize(requestBundle);
 
 		assertThat(actualSyntheticCount).isEqualTo(theExpectedSyntheticCount);
 		assertNotNull(requestBundle);
@@ -113,7 +113,7 @@ class TransactionBundleNormalizerTest {
 				.setMethod(Bundle.HTTPVerb.POST)
 				.setUrl("Observation");
 
-		int syntheticCount = mySvc.normalize(bundle).getSyntheticEntryCount();
+		int syntheticCount = mySvc.normalize(bundle);
 
 		assertThat(syntheticCount).isZero();
 		assertThat(bundle.getEntry())
@@ -170,86 +170,6 @@ class TransactionBundleNormalizerTest {
 		assertThat(bundle.getEntryFirstRep().getFullUrl()).isEqualTo(existing);
 	}
 
-	// Created by Claude Fable 5
-	@Test
-	void testUndoRequestBundleChanges_success_removesSyntheticsAndFullUrls_keepsRefs() {
-		Bundle bundle = bundleWithObservationReferencing("Patient?identifier=sys|undo1");
-		TransactionBundleNormalizer.NormalizationState state = mySvc.normalize(bundle);
-		assertThat(state.getSyntheticEntryCount()).isEqualTo(1);
-		Observation obs = (Observation) bundle.getEntry().get(1).getResource();
-		// Simulate the substitution processing performs on success
-		obs.getSubject().setReference("Patient/123");
-
-		mySvc.undoRequestBundleChanges(bundle, state, true);
-
-		assertThat(bundle.getEntry()).hasSize(1);
-		assertThat(bundle.getEntryFirstRep().getFullUrl()).isNull();
-		assertThat(obs.getSubject().getReference()).isEqualTo("Patient/123");
-	}
-
-	// Created by Claude Fable 5
-	@Test
-	void testUndoRequestBundleChanges_failure_restoresRewrittenRefs() {
-		Bundle bundle = bundleWithObservationReferencing("Patient?identifier=sys|undo2");
-		TransactionBundleNormalizer.NormalizationState state = mySvc.normalize(bundle);
-		Observation obs = (Observation) bundle.getEntry().get(1).getResource();
-		assertThat(obs.getSubject().getReference()).startsWith("urn:uuid:");
-
-		mySvc.undoRequestBundleChanges(bundle, state, false);
-
-		assertThat(bundle.getEntry()).hasSize(1);
-		assertThat(bundle.getEntryFirstRep().getFullUrl()).isNull();
-		assertThat(obs.getSubject().getReference()).isEqualTo("Patient?identifier=sys|undo2");
-	}
-
-	// Created by Claude Fable 5
-	@Test
-	void testUndoRequestBundleChanges_failure_skipsRefsAlreadySubstitutedToConcreteIds() {
-		// A committed partition slice substitutes refs to concrete ids before a later slice fails;
-		// those keep their concrete ids, exactly as they would without normalization.
-		Bundle bundle = bundleWithObservationReferencing("Patient?identifier=sys|undo3");
-		TransactionBundleNormalizer.NormalizationState state = mySvc.normalize(bundle);
-		Observation obs = (Observation) bundle.getEntry().get(1).getResource();
-		obs.getSubject().setReference("Patient/123");
-
-		mySvc.undoRequestBundleChanges(bundle, state, false);
-
-		assertThat(bundle.getEntry()).hasSize(1);
-		assertThat(obs.getSubject().getReference()).isEqualTo("Patient/123");
-	}
-
-	// Created by Claude Fable 5
-	@Test
-	void testUndoRequestBundleChanges_noSynthetics_stillClearsInjectedFullUrls() {
-		Bundle bundle = new Bundle();
-		bundle.setType(Bundle.BundleType.TRANSACTION);
-		bundle.addEntry()
-				.setResource(new Patient().addIdentifier(new Identifier().setSystem("sys").setValue("p1")))
-				.getRequest()
-				.setMethod(Bundle.HTTPVerb.POST)
-				.setUrl("Patient");
-		TransactionBundleNormalizer.NormalizationState state = mySvc.normalize(bundle);
-		assertThat(state.getSyntheticEntryCount()).isZero();
-		assertThat(bundle.getEntryFirstRep().getFullUrl()).startsWith("urn:uuid:");
-
-		mySvc.undoRequestBundleChanges(bundle, state, true);
-
-		assertThat(bundle.getEntry()).hasSize(1);
-		assertThat(bundle.getEntryFirstRep().getFullUrl()).isNull();
-	}
-
-	// Created by Claude Fable 5
-	private static Bundle bundleWithObservationReferencing(String theSubjectReference) {
-		Bundle bundle = new Bundle();
-		bundle.setType(Bundle.BundleType.TRANSACTION);
-		bundle.addEntry()
-				.setResource(new Observation().setSubject(new Reference(theSubjectReference)))
-				.getRequest()
-				.setMethod(Bundle.HTTPVerb.POST)
-				.setUrl("Observation");
-		return bundle;
-	}
-
 	@Test
 	void testNormalize_inlineRefResolvesToExplicitInBundlePatient_noSynthetic() {
 		// An explicit (unconditional) in-bundle Patient + an Observation whose inline match URL targets that
@@ -269,7 +189,7 @@ class TransactionBundleNormalizerTest {
 				.setMethod(Bundle.HTTPVerb.POST)
 				.setUrl("Observation");
 
-		int syntheticCount = mySvc.normalize(bundle).getSyntheticEntryCount();
+		int syntheticCount = mySvc.normalize(bundle);
 
 		assertThat(syntheticCount).isZero();
 		assertThat(bundle.getEntry()).hasSize(2);
