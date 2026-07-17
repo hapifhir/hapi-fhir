@@ -272,11 +272,7 @@ public abstract class BaseTransactionProcessor {
 			compositeBroadcaster.callHooks(Pointcut.STORAGE_TRANSACTION_PROCESSING, params);
 		}
 
-		// Normalize AFTER the pointcut so hooks see the client's original bundle.
-		// Three gates: a registered interceptor must have requested normalization (see
-		// TransactionBundleNormalizer#NORMALIZATION_REQUESTED_KEY); both storage flags; and the bundle must be a
-		// transaction: batch entries execute as isolated single-entry transactions where a cross-entry urn reference
-		// cannot resolve — their inline match URLs resolve per-entry at write time instead.
+		// Normalize the transaction bundle if requested & required settings are true.
 		String bundleTypeCode = myVersionAdapter.getBundleType(theRequest);
 		boolean isTransactionBundle = bundleTypeCode == null
 				|| org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION.toCode().equals(bundleTypeCode);
@@ -1135,7 +1131,7 @@ public abstract class BaseTransactionProcessor {
 
 	/**
 	 * Determine the create partition for a transaction write entry before pre-fetch, if possible. In patient-ID
-	 * partition mode the Patient compartment sometimes can't be resolved this early — an unresolved Patient
+	 * partition mode, the Patient compartment sometimes can't be resolved this early — an unresolved Patient
 	 * reference (Msg 1326) or an id-less Patient body (Msg 1321). When all-partition search is supported
 	 * ({@link PartitionSettings#isAllPartitionSearchSupported()}) these are deferred to
 	 * {@link RequestPartitionId#allPartitions()} and settled per entry at write time, once pre-fetch and the

@@ -763,7 +763,7 @@ public class PatientIdPartitionInterceptor {
 	 * order entries are processed in: a matched conditional Patient reuses the existing resource's ID; an
 	 * unconditional Patient is assigned a UUID and its create is rewritten as a direct update so the ID sticks; an
 	 * unmatched conditional Patient is assigned a UUID on the body but stays a conditional update, so in-bundle
-	 * duplicates of the same match URL consolidate and the conditional-create concurrency guard still applies.
+	 * duplicates of the same match URL consolidate.
 	 */
 	// Created by Claude Opus 4.7
 	@Hook(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH)
@@ -776,12 +776,11 @@ public class PatientIdPartitionInterceptor {
 		FhirTerser terser = myFhirContext.newTerser();
 
 		// References given as inline Patient match URLs (present when the transformer is not active) resolve here
-		// from what pre-fetch already found, so per-entry routing can place each resource in its compartment.
 		rewriteInlinePatientMatchUrlReferences(entries, theTransactionDetails);
 
 		// A placeholder Patient (urn:uuid id, no client id) can only be assigned a server id up front when the server
 		// assigns UUIDs; otherwise its id isn't known until insert, too late for compartment routing. In that case we
-		// leave the entry untouched so identifyForCreate throws the documented Msg 1321 (unsupported configuration).
+		// leave the entry untouched.
 		boolean serverAssignsUuids =
 				theStorageSettings.getResourceServerIdStrategy() == JpaStorageSettings.IdStrategyEnum.UUID;
 
@@ -1024,11 +1023,9 @@ public class PatientIdPartitionInterceptor {
 	}
 
 	/**
-	 * Without a transformer-assigned placeholder fullUrl (present when inline match URL support is not active), an
-	 * id-less conditional Patient update that pre-fetch matched to an existing Patient still needs the matched id
-	 * stamped on the body: a Patient's write partition derives from its id, so an id-less body cannot be routed
-	 * (Msg 1321). The entry stays conditional, so the DAO reports the conditional-match outcome natively. An
-	 * unmatched id-less conditional update is left untouched and still fails with Msg 1321.
+	 * Without a transformer-assigned placeholder fullUrl, an id-less conditional Patient update that pre-fetch matched
+	 * to an existing Patient still needs the matched id stamped on the body. The entry stays conditional, so the DAO
+	 * reports the conditional-match outcome natively. An unmatched id-less conditional update is left untouched.
 	 */
 	// Created by Claude Fable 5
 	private void stampIdlessMatchedConditionalUpdate(
@@ -1066,7 +1063,6 @@ public class PatientIdPartitionInterceptor {
 	 * across all partitions, an entry whose inline match URL the pre-fetch has not resolved is rejected before
 	 * pre-fetch runs (by per-transaction partition determination), so it never reaches this rewrite.
 	 */
-	// Created by Claude Opus 4.8
 	private void rewriteInlinePatientMatchUrlReferences(
 			List<IBase> theEntries, TransactionDetails theTransactionDetails) {
 		FhirTerser terser = myFhirContext.newTerser();
@@ -1095,7 +1091,6 @@ public class PatientIdPartitionInterceptor {
 	 * A Patient inline match URL is a reference whose value targets the Patient resource type with a search
 	 * query, i.e. starts with {@code "Patient?"} or {@code "/Patient?"}.
 	 */
-	// Created by Claude Opus 4.8
 	private static boolean isPatientInlineMatchUrl(@Nullable String theReferenceValue) {
 		return theReferenceValue != null
 				&& (theReferenceValue.startsWith(PATIENT_STR + "?")
@@ -1109,7 +1104,6 @@ public class PatientIdPartitionInterceptor {
 	 * resolved to a concrete Patient there, the reference is left untouched and per-entry partition determination
 	 * handles it.
 	 */
-	// Created by Claude Opus 4.8
 	private void rewriteInlineMatchUrlReference(
 			IBaseReference theReference, String theReferenceValue, TransactionDetails theTransactionDetails) {
 		// Act only on a match URL the pre-fetch resolved to a concrete Patient; otherwise leave the reference as is.
@@ -1124,7 +1118,6 @@ public class PatientIdPartitionInterceptor {
 	 * resolved to a single existing resource ({@link TransactionDetails#NOT_FOUND}, absent, or no reverse-mapped id).
 	 * No search is performed — we act only on what the pre-fetch put in the transaction details.
 	 */
-	// Created by Claude Opus 4.8
 	private Optional<IIdType> getPreFetchResolvedId(String theMatchUrl, TransactionDetails theTransactionDetails) {
 		IResourcePersistentId<?> resolved =
 				theTransactionDetails.getResolvedMatchUrls().get(theMatchUrl);
