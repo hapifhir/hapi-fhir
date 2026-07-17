@@ -449,7 +449,7 @@ class MultiResourceRefScenarios implements ArgumentsProvider {
 					String encounterUrn = assertSyntheticEntryAt(theBundle, 0, ResourceType.Encounter,
 							"Encounter?identifier=sys|enc-1", "sys", "enc-1");
 
-					// Entry 1: user's Patient preserved (Option A); fullUrl auto-assigned since none provided
+					// Entry 1: user's Patient preserved; fullUrl auto-assigned since none provided
 					Bundle.BundleEntryComponent patientEntry = entries.get(1);
 					assertThat(patientEntry.getResource().getResourceType()).isEqualTo(ResourceType.Patient);
 					assertThat(patientEntry.getFullUrl()).startsWith("urn:uuid:");

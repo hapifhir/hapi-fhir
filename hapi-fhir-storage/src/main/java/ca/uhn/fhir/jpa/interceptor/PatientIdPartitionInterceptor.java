@@ -773,7 +773,7 @@ public class PatientIdPartitionInterceptor {
 			@Nonnull TransactionDetails theTransactionDetails) {
 		List<IBase> entries = thePrefetchDetails.getEntries();
 
-		// References given as inline Patient match URLs (present when the transformer is not active) resolve here
+		// References given as inline Patient match URLs (present when the normalizer is not active) resolve here
 		rewriteInlinePatientMatchUrlReferences(entries, theTransactionDetails);
 
 		Map<String, String> idSubstitutions = resolvePatientEntryIds(thePrefetchDetails, theTransactionDetails);
@@ -1042,7 +1042,7 @@ public class PatientIdPartitionInterceptor {
 	}
 
 	/**
-	 * Without a transformer-assigned placeholder fullUrl, an id-less conditional Patient update that pre-fetch matched
+	 * Without a normalizer-assigned placeholder fullUrl, an id-less conditional Patient update that pre-fetch matched
 	 * to an existing Patient still needs the matched id stamped on the body. The entry stays conditional, so the DAO
 	 * reports the conditional-match outcome natively. An unmatched id-less conditional update is left untouched.
 	 */

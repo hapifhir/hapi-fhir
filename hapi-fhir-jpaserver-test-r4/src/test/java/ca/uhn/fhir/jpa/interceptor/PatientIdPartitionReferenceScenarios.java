@@ -202,7 +202,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 						]
 					}
 					""",
-				// Direct Patient/pat1 reference → Observation in pat1's compartment. No transformer involved.
+				// Direct Patient/pat1 reference → Observation in pat1's compartment. No normalizer involved.
 				List.of(
 					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat1")
 				)
@@ -223,7 +223,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 						]
 					}
 					""",
-				// Inline match URL → transformer prepends synthetic conditional-create (pat1 exists → NOP).
+				// Inline match URL → normalizer prepends synthetic conditional-create (pat1 exists → NOP).
 				// 1 synthetic stripped; response has 1 entry. Observation in pat1's compartment.
 				List.of(
 					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat1")
@@ -382,7 +382,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 						]
 					}
 					""",
-				// Both inline match URLs → one shared synthetic (de-duplicated by transformer). identChain doesn't exist → creates with UUID.
+				// Both inline match URLs → one shared synthetic (de-duplicated by normalizer). identChain doesn't exist → creates with UUID.
 				// 1 synthetic stripped; response has 2 entries. Both in the new patient's compartment.
 				List.of(
 					inAnyCompartment("Encounter", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
@@ -680,7 +680,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 						]
 					}
 					""",
-				// Transformer rewrites Obs subject (inline match URL) using Patient conditional-create entry's fullUrl.
+				// Normalizer rewrites Obs subject (inline match URL) using Patient conditional-create entry's fullUrl.
 				// Patient: NOP (ident1=pat1 exists). Obs: PUT no match → creates new.
 				List.of(
 					inCompartmentOf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH, "pat1"),
@@ -709,7 +709,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 						]
 					}
 					""",
-				// Transformer rewrites Obs subject using Patient conditional-create entry's fullUrl.
+				// Normalizer rewrites Obs subject using Patient conditional-create entry's fullUrl.
 				// Patient creates new (newCreate doesn't exist). Obs conditional PUT: obsCC doesn't exist → creates.
 				List.of(
 					inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
@@ -767,7 +767,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 						]
 					}
 					""",
-				// Transformer rewrites Obs subject using Patient conditional-update entry's fullUrl.
+				// Normalizer rewrites Obs subject using Patient conditional-update entry's fullUrl.
 				// Patient PUT matches pat1 → update (200). Obs in pat1's compartment.
 				List.of(
 					inCompartmentOf("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH, "pat1"),
@@ -894,7 +894,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 						]
 					}
 					""",
-				// Transformer rewrites ObsA/ObsB subjects using PatA/PatB fullUrls. Both patients created new.
+				// Normalizer rewrites ObsA/ObsB subjects using PatA/PatB fullUrls. Both patients created new.
 				// All 4 entries remain in response. Cross-partition writes land in each patient's own compartment.
 				List.of(
 					inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),

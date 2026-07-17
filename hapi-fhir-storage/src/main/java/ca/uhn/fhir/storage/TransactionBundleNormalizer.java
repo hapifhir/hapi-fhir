@@ -241,7 +241,7 @@ public class TransactionBundleNormalizer {
 			return 0;
 		}
 
-		// BundleBuilder preserves existing entries (since 8.6.0) so this just adds at the end.
+		// BundleBuilder preserves existing entries, so this just adds at the end.
 		BundleBuilder builder = new BundleBuilder(myFhirContext, theBundle);
 		for (Map.Entry<String, MatchUrlInfo> e : theMatchUrlToInfo.entrySet()) {
 			String matchUrl = e.getKey();
