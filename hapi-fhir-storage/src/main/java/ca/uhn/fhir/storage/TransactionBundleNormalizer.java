@@ -41,10 +41,13 @@ import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -85,14 +88,16 @@ public class TransactionBundleNormalizer {
 	 * the URLs with placeholder ids.
 	 *
 	 * @param theBundle the transaction bundle to process
-	 * @return the number of synthetic placeholder entries prepended to the bundle (0 if no inline match URLs found)
+	 * @return the changes made to the bundle, to be undone via
+	 *         {@link #undoRequestBundleChanges(IBaseBundle, NormalizationState, boolean)} after processing
 	 */
 	@SuppressWarnings("unchecked")
-	public int normalize(IBaseBundle theBundle) {
+	public NormalizationState normalize(IBaseBundle theBundle) {
+		NormalizationState state = new NormalizationState();
 		List<IBase> bundleEntries = myVersionAdapter.getEntries(theBundle);
 
 		if (bundleEntries.isEmpty()) {
-			return 0;
+			return state;
 		}
 
 		FhirTerser terser = myFhirContext.newTerser();
@@ -123,6 +128,7 @@ public class TransactionBundleNormalizer {
 					fullUrl = "urn:uuid:" + UUID.randomUUID();
 				}
 				myVersionAdapter.setFullUrl(entry, fullUrl);
+				state.myEntriesWithInjectedFullUrl.add(entry);
 			}
 
 			String fullUrl = myVersionAdapter.getFullUrl(entry);
@@ -181,6 +187,7 @@ public class TransactionBundleNormalizer {
 					String existingFullUrl = inBundleFullUrlByIdentifier.get(refKey);
 					if (existingFullUrl != null) {
 						ref.setReference(existingFullUrl);
+						state.myRewrittenReferences.add(new RewrittenReference(ref, refValue, existingFullUrl));
 						continue;
 					}
 				}
@@ -196,11 +203,12 @@ public class TransactionBundleNormalizer {
 				MatchUrlInfo info = matchUrlToInfo.computeIfAbsent(
 						refValue, url -> new MatchUrlInfo("urn:uuid:" + UUID.randomUUID(), parsed));
 				ref.setReference(info.urnUuid());
+				state.myRewrittenReferences.add(new RewrittenReference(ref, refValue, info.urnUuid()));
 			}
 		}
 
 		if (matchUrlToInfo.isEmpty()) {
-			return 0;
+			return state;
 		}
 
 		// Append synthetic conditional-create entries directly to theBundle. BundleBuilder preserves
@@ -216,10 +224,61 @@ public class TransactionBundleNormalizer {
 		// Rotate the just-appended entries to the front so they're processed before the entries
 		// referencing them, and so response cleanup can strip a fixed [0, N) range.
 		int n = matchUrlToInfo.size();
+		state.mySyntheticEntries.addAll(bundleEntries.subList(bundleEntries.size() - n, bundleEntries.size()));
 		Collections.rotate(bundleEntries, n);
 
-		return n;
+		return state;
 	}
+
+	/**
+	 * Undoes {@link #normalize(IBaseBundle)}'s changes to the caller's request bundle after processing:
+	 * removes the synthetic entries and the injected fullUrls in every case, and on failure additionally
+	 * restores the rewritten references to their original inline match URLs — mirroring how transaction
+	 * rollback restores the substitutions processing itself made. On success the references are left as
+	 * processing substituted them (concrete created ids), matching a transaction without normalization.
+	 * <p>
+	 * A reference is only restored while it still holds the value the normalizer set: on a partially
+	 * committed multi-partition transaction, references already substituted to concrete ids by a committed
+	 * slice keep them, exactly as they would without normalization.
+	 */
+	// Created by Claude Fable 5
+	@SuppressWarnings("unchecked")
+	public void undoRequestBundleChanges(IBaseBundle theRequest, NormalizationState theState, boolean theSucceeded) {
+		if (!theState.mySyntheticEntries.isEmpty()) {
+			Set<IBase> syntheticEntries = Collections.newSetFromMap(new IdentityHashMap<>());
+			syntheticEntries.addAll(theState.mySyntheticEntries);
+			myVersionAdapter.getEntries(theRequest).removeIf(syntheticEntries::contains);
+		}
+		for (IBase entry : theState.myEntriesWithInjectedFullUrl) {
+			myVersionAdapter.setFullUrl(entry, null);
+		}
+		if (!theSucceeded) {
+			for (RewrittenReference rewritten : theState.myRewrittenReferences) {
+				IBaseReference ref = rewritten.reference();
+				if (rewritten.rewrittenValue().equals(ref.getReferenceElement().getValue())) {
+					ref.setReference(rewritten.originalValue());
+				}
+			}
+		}
+	}
+
+	/**
+	 * The changes {@link #normalize(IBaseBundle)} made to a request bundle. Opaque except for the
+	 * synthetic entry count, which callers need to strip the corresponding response entries.
+	 */
+	// Created by Claude Fable 5
+	public static final class NormalizationState {
+		private final List<IBase> mySyntheticEntries = new ArrayList<>();
+		private final List<IBase> myEntriesWithInjectedFullUrl = new ArrayList<>();
+		private final List<RewrittenReference> myRewrittenReferences = new ArrayList<>();
+
+		public int getSyntheticEntryCount() {
+			return mySyntheticEntries.size();
+		}
+	}
+
+	// Created by Claude Fable 5
+	private record RewrittenReference(IBaseReference reference, String originalValue, String rewrittenValue) {}
 
 	/**
 	 * Removes the response entries corresponding to the synthetic entries that {@link #normalize(IBaseBundle)}

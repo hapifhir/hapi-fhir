@@ -281,32 +281,41 @@ public abstract class BaseTransactionProcessor {
 		String bundleTypeCode = myVersionAdapter.getBundleType(theRequest);
 		boolean isTransactionBundle = bundleTypeCode == null
 				|| org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION.toCode().equals(bundleTypeCode);
-		int syntheticEntryCount = 0;
+		TransactionBundleNormalizer.NormalizationState normalizationState = null;
 		if (isTransactionBundle
 				&& myStorageSettings.isAllowInlineMatchUrlReferences()
 				&& myStorageSettings.isAutoCreatePlaceholderReferenceTargets()) {
-			syntheticEntryCount = getTransactionBundleNormalizer().normalize(theRequest);
+			normalizationState = getTransactionBundleNormalizer().normalize(theRequest);
 		}
 
 		IBaseBundle response;
-		// Interceptor call: STORAGE_TRANSACTION_PRE_PARTITION
-		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_PRE_PARTITION)) {
-			response = new TransactionPartitionProcessor<BUNDLE>(
-							this,
-							myContext,
-							theRequestDetails,
-							theNestedMode,
-							compositeBroadcaster,
-							actionName,
-							transactionDetails)
-					.execute(theRequest);
-		} else {
-			response = processTransactionAsSubRequest(
-					theRequestDetails, transactionDetails, theRequest, actionName, theNestedMode);
+		boolean succeeded = false;
+		try {
+			// Interceptor call: STORAGE_TRANSACTION_PRE_PARTITION
+			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_PRE_PARTITION)) {
+				response = new TransactionPartitionProcessor<BUNDLE>(
+								this,
+								myContext,
+								theRequestDetails,
+								theNestedMode,
+								compositeBroadcaster,
+								actionName,
+								transactionDetails)
+						.execute(theRequest);
+			} else {
+				response = processTransactionAsSubRequest(
+						theRequestDetails, transactionDetails, theRequest, actionName, theNestedMode);
+			}
+			succeeded = true;
+		} finally {
+			if (normalizationState != null) {
+				getTransactionBundleNormalizer().undoRequestBundleChanges(theRequest, normalizationState, succeeded);
+			}
 		}
 
-		if (syntheticEntryCount > 0) {
-			getTransactionBundleNormalizer().stripSyntheticResponseEntries(response, syntheticEntryCount);
+		if (normalizationState != null && normalizationState.getSyntheticEntryCount() > 0) {
+			getTransactionBundleNormalizer()
+					.stripSyntheticResponseEntries(response, normalizationState.getSyntheticEntryCount());
 		}
 
 		List<IBase> entries = myVersionAdapter.getEntries(response);
