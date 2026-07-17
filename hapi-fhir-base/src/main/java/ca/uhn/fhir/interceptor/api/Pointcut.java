@@ -2085,7 +2085,7 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 *
-	 * @since 8.12.0
+	 * @since 8.11.15
 	 */
 	STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH(
 			void.class,
@@ -2098,10 +2098,13 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
-	 * Invoked during FHIR transaction processing, after all write operations have been performed and the response
-	 * bundle has been assembled — including each response entry's final location. Hooks may inspect or adjust the
-	 * response entries (for example to correct an operation outcome) using the data resolved during processing, which
-	 * is available on the supplied {@link ca.uhn.fhir.rest.api.server.storage.TransactionDetails}.
+	 * Invoked during FHIR transaction processing, once every entry has been processed and the response bundle has been
+	 * fully assembled, including each response entry's final location. Hooks may adjust the response entries
+	 * (for example to correct an operation outcome) before the response is returned to the caller, using the data
+	 * resolved during processing, which is available on the supplied
+	 * {@link ca.uhn.fhir.rest.api.server.storage.TransactionDetails}. When transaction processing is split into
+	 * multiple sub-transactions (e.g. by partition), this pointcut is invoked once per sub-transaction, with that
+	 * sub-transaction's response bundle.
 	 * <p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
@@ -2118,9 +2121,9 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 *
-	 * @since 8.12.0
+	 * @since FIXME-TG update after version bump
 	 */
-	STORAGE_TRANSACTION_WRITE_AFTER_RESPONSE(
+	STORAGE_TRANSACTION_RESPONSE_ASSEMBLED(
 			void.class,
 			"org.hl7.fhir.instance.model.api.IBaseBundle",
 			"ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter",

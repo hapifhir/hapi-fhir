@@ -883,7 +883,7 @@ public class PatientIdPartitionInterceptor {
 	 * order-independent.
 	 */
 	// Created by Claude Opus 4.7
-	@Hook(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_RESPONSE)
+	@Hook(Pointcut.STORAGE_TRANSACTION_RESPONSE_ASSEMBLED)
 	public void restoreRewrittenPatientOutcomes(
 			@Nonnull IBaseBundle theResponse,
 			@Nonnull ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
