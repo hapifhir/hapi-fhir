@@ -456,6 +456,50 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals(Msg.code(2001) + "Resource Patient/BABABABA is not known", oo.getIssue().get(0).getDiagnostics());
 	}
 
+	// Created by Claude Fable 5
+	@Test
+	public void testBatchWithInlineMatchUrlReference_resolvedPerEntry() {
+		// Batch entries execute as isolated single-entry transactions, so the transaction bundle
+		// normalizer must not touch batch bundles: a cross-entry urn reference cannot resolve there.
+		// Inline match URLs in batch entries resolve per-entry at write time instead.
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+
+		String matchUrl = "Patient?identifier=urn:system|batch-inline-match";
+		Bundle request = new Bundle();
+		request.setType(BundleType.BATCH);
+		addObservation(request, "obs-batch-1", matchUrl);
+		addObservation(request, "obs-batch-2", matchUrl);
+
+		Bundle response = mySystemDao.transaction(mySrd, request);
+
+		// No synthetic entries or placeholder rewrites in the caller's batch bundle (the stock
+		// per-entry resolution substitutes the concrete Patient id in place)
+		assertThat(request.getEntry()).hasSize(2);
+		for (BundleEntryComponent entry : request.getEntry()) {
+			assertNull(entry.getFullUrl());
+			Observation obs = (Observation) entry.getResource();
+			assertThat(obs.getSubject().getReference()).startsWith("Patient/");
+		}
+
+		assertThat(response.getEntry()).hasSize(2);
+		for (BundleEntryComponent entry : response.getEntry()) {
+			assertEquals("201 Created", entry.getResponse().getStatus());
+			assertThat(entry.getResponse().getLocation()).contains("Observation/");
+		}
+
+		// Both entries resolved to the same auto-created placeholder Patient
+		Observation obs1 = readObservation(response.getEntry().get(0));
+		Observation obs2 = readObservation(response.getEntry().get(1));
+		assertThat(obs1.getSubject().getReference()).startsWith("Patient/");
+		assertEquals(obs1.getSubject().getReference(), obs2.getSubject().getReference());
+
+		Patient placeholder = myPatientDao.read(new IdType(obs1.getSubject().getReference()), mySrd);
+		assertThat(placeholder.getExtensionByUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER)).isNotNull();
+		assertEquals("batch-inline-match", placeholder.getIdentifierFirstRep().getValue());
+	}
+
 	@Test
 	public void testBatchCreateWithBadSearch() {
 		Bundle request = new Bundle();

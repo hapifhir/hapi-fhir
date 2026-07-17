@@ -274,9 +274,16 @@ public abstract class BaseTransactionProcessor {
 		// Normalize AFTER the pointcut so hooks see the client's original bundle (and entries they
 		// add are normalized too). Gate behind both flags: allow inline match URLs in references
 		// (syntax) AND auto-create placeholder targets when no match is found (the normalizer's
-		// on-miss behavior is exactly auto-create).
+		// on-miss behavior is exactly auto-create). Transaction bundles only (a null type is
+		// processed as a transaction, so it normalizes too): batch entries execute as isolated
+		// single-entry transactions where a cross-entry urn reference cannot resolve — their inline
+		// match URLs resolve per-entry at write time instead.
+		String bundleTypeCode = myVersionAdapter.getBundleType(theRequest);
+		boolean isTransactionBundle = bundleTypeCode == null
+				|| org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION.toCode().equals(bundleTypeCode);
 		int syntheticEntryCount = 0;
-		if (myStorageSettings.isAllowInlineMatchUrlReferences()
+		if (isTransactionBundle
+				&& myStorageSettings.isAllowInlineMatchUrlReferences()
 				&& myStorageSettings.isAutoCreatePlaceholderReferenceTargets()) {
 			syntheticEntryCount = getTransactionBundleNormalizer().normalize(theRequest);
 		}
