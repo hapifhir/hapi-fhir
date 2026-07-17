@@ -28,6 +28,7 @@ import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.batch2.api.JobCompletionDetails;
 import ca.uhn.fhir.batch2.api.ReductionStepFailureException;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.maintenance.WorkChunkHeartbeatService;
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -97,12 +98,12 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 	private final IHapiTransactionService myTransactionService;
 	private final Semaphore myCurrentlyExecuting = new Semaphore(1);
 	private final AtomicReference<String> myCurrentlyFinalizingInstanceId = new AtomicReference<>();
-	private final AtomicReference<String> myCurrentlyFinalizingDriverChunkId = new AtomicReference<>();
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final JobInstanceStatusUpdater myJobInstanceStatusUpdater;
 	private final IJobStepExecutionServices myJobStepExecutionServices;
 	private final IInterceptorService myInterceptorService;
 	private Timer myHeartbeatTimer;
+	private final WorkChunkHeartbeatService myWorkChunkHeartbeatService;
 
 	/**
 	 * Constructor
@@ -112,7 +113,8 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 			IHapiTransactionService theTransactionService,
 			JobDefinitionRegistry theJobDefinitionRegistry,
 			IJobStepExecutionServices theJobStepExecutionServices,
-			IInterceptorService theInterceptorService) {
+			IInterceptorService theInterceptorService,
+			WorkChunkHeartbeatService theWorkChunkHeartbeatService) {
 		myJobPersistence = theJobPersistence;
 		myTransactionService = theTransactionService;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
@@ -120,6 +122,8 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry, theInterceptorService);
 		myInterceptorService = theInterceptorService;
 		myReducerExecutor = Executors.newSingleThreadExecutor(new CustomizableThreadFactory("batch2-reducer"));
+
+		myWorkChunkHeartbeatService = theWorkChunkHeartbeatService;
 
 		// This is a single thread executor because there are no guarantees that the chunk
 		// processing is actually thread safe. Be careful if you think you want to add more
@@ -143,15 +147,11 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 	private void runHeartbeat() {
 		String currentlyFinalizingInstanceId = myCurrentlyFinalizingInstanceId.get();
 		if (currentlyFinalizingInstanceId != null) {
-			String driverChunkId = myCurrentlyFinalizingDriverChunkId.get();
+			// this 'heartbeat' is only for the jobinstance
+			// it sets the jobinstance updated time
 			ourLog.info("Running heartbeat for instance: {}", currentlyFinalizingInstanceId);
 			executeInTransactionWithSynchronization(() -> {
 				myJobPersistence.updateInstanceUpdateTime(currentlyFinalizingInstanceId);
-				// Keep the 'driver' work chunk's heartbeat fresh too, so that a long-running reduction
-				// is not mistaken for a dead worker and needlessly reprocessed when the message is redelivered.
-				if (driverChunkId != null) {
-					myJobPersistence.onWorkChunkHeartbeat(driverChunkId);
-				}
 				return null;
 			});
 		}
@@ -184,8 +184,12 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 					String instanceId = instanceIds[0];
 					ReductionStepWork reductionWork = myInstanceIdToReductionWork.get(instanceId);
 					myCurrentlyFinalizingInstanceId.set(instanceId);
-					myCurrentlyFinalizingDriverChunkId.set(reductionWork.driverChunkId());
-					executeReductionStep(instanceId, reductionWork.jobWorkCursor());
+
+					try (WorkChunkHeartbeatService.HeartbeatHandle handle =
+							myWorkChunkHeartbeatService.scheduleHeartbeatJob(
+									instanceId, reductionWork.driverChunkId())) {
+						executeReductionStep(instanceId, reductionWork.jobWorkCursor());
+					}
 
 					// If we get here, this succeeded. Purge the instance from the work queue
 					myInstanceIdToReductionWork.remove(instanceId);
@@ -194,7 +198,6 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 				ourLog.error("Failed to execute reducer pass", e);
 			} finally {
 				myCurrentlyFinalizingInstanceId.set(null);
-				myCurrentlyFinalizingDriverChunkId.set(null);
 				myCurrentlyExecuting.release();
 			}
 		}
