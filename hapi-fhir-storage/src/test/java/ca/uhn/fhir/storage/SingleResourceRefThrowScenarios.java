@@ -65,7 +65,32 @@ class SingleResourceRefThrowScenarios implements ArgumentsProvider {
 					}
 					""",
 				PreconditionFailedException.class,
-				"HAPI-2700: Inline match URL matching only supports identifier search parameters: Patient?identifier=http://system|value1&active=true"
+				"HAPI-2996: Inline match URL matching only supports identifier search parameters: Patient?identifier=http://system|value1&active=true"
+			),
+			Arguments.of(
+				"identifier without system, matching no-system identifier in bundle | still throws PreconditionFailed",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [{ "value" : "value1" }]
+								},
+								"request" : { "method" : "POST", "url" : "Patient" }
+							},
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"subject" : { "reference": "Patient?identifier=value1" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation" }
+							}
+						]
+					}
+					""",
+				PreconditionFailedException.class,
+				"HAPI-2995: Inline match URL identifier must have both a system and a value: Patient?identifier=value1"
 			)
 		);
 	}

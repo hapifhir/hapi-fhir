@@ -179,6 +179,9 @@ public class TransactionBundleNormalizer {
 				}
 				MatchUrlService.ResourceTypeAndSearchParameterMap parsed =
 						myMatchUrlService.parseAndTranslateMatchUrl(refValue);
+				// Validate before any resolution so a URL's acceptance never depends on what else the
+				// bundle happens to contain (an invalid URL must not slip through by binding in-bundle).
+				validateParsedMatchUrl(refValue, parsed);
 
 				// If an in-bundle entry already carries this (type, identifier), point the inline ref at its
 				// fullUrl (assigned in the first pass) instead of minting a duplicate synthetic placeholder.
@@ -192,10 +195,8 @@ public class TransactionBundleNormalizer {
 				}
 
 				// Otherwise, generate a synthetic conditional-create on first encounter; reuse for duplicates.
-				MatchUrlInfo info = matchUrlToInfo.computeIfAbsent(refValue, url -> {
-					validateParsedMatchUrl(url, parsed);
-					return new MatchUrlInfo(IdDt.newRandomUuid().getValue(), parsed);
-				});
+				MatchUrlInfo info = matchUrlToInfo.computeIfAbsent(
+						refValue, url -> new MatchUrlInfo(IdDt.newRandomUuid().getValue(), parsed));
 				ref.setReference(info.urnUuid());
 			}
 		}
@@ -263,7 +264,7 @@ public class TransactionBundleNormalizer {
 		SearchParameterMap params = theParsed.searchParameterMap();
 
 		if (params.keySet().size() != 1 || !params.containsKey("identifier")) {
-			throw new PreconditionFailedException(Msg.code(2700)
+			throw new PreconditionFailedException(Msg.code(2996)
 					+ "Inline match URL matching only supports identifier search parameters: " + theMatchUrl);
 		}
 
