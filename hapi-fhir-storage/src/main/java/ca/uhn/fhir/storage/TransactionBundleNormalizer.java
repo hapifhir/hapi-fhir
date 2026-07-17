@@ -273,6 +273,10 @@ public class TransactionBundleNormalizer {
 		for (List<IQueryParameterType> andGroup : identifierValues) {
 			for (IQueryParameterType paramType : andGroup) {
 				if (paramType instanceof TokenParam tokenParam) {
+					if (tokenParam.getModifier() != null) {
+						throw new PreconditionFailedException(Msg.code(2997)
+								+ "Inline match URL identifier must not use a search modifier: " + theMatchUrl);
+					}
 					if (isBlank(tokenParam.getSystem()) || isBlank(tokenParam.getValue())) {
 						throw new PreconditionFailedException(Msg.code(2995)
 								+ "Inline match URL identifier must have both a system and a value: " + theMatchUrl);

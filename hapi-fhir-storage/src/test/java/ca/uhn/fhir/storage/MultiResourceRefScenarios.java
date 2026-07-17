@@ -1,5 +1,6 @@
 package ca.uhn.fhir.storage;
 
+import ca.uhn.fhir.storage.TransactionBundleNormalizerTest.SysVal;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Observation;
@@ -473,6 +474,111 @@ class MultiResourceRefScenarios implements ArgumentsProvider {
 							obs -> obs.getSubject().getReference());
 					assertSourceEntryAt(theBundle, 3, Observation.class, encounterUrn,
 							obs -> obs.getEncounter().getReference());
+				})
+			),
+			Arguments.of(
+				"Practitioner carrying the identifier a Patient match URL asks for | type mismatch, no bind, synthetic added",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Practitioner",
+									"identifier" : [{ "system" : "sys", "value" : "val" }]
+								},
+								"request" : { "method" : "POST", "url" : "Practitioner" }
+							},
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"subject" : { "reference": "Patient?identifier=sys|val" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation" }
+							}
+						]
+					}
+					""",
+				1,
+				bundleAssert(3, theBundle -> {
+					String urn = assertSyntheticEntryAt(theBundle, 0, ResourceType.Patient,
+							"Patient?identifier=sys|val", "sys", "val");
+
+					// The Practitioner's identifier must not satisfy a Patient match URL
+					Bundle.BundleEntryComponent practitionerEntry = theBundle.getEntry().get(1);
+					assertThat(practitionerEntry.getResource().getResourceType()).isEqualTo(ResourceType.Practitioner);
+					assertThat(urn).isNotEqualTo(practitionerEntry.getFullUrl());
+
+					assertSourceEntryAt(theBundle, 2, Observation.class, urn, obs -> obs.getSubject().getReference());
+				})
+			),
+			Arguments.of(
+				"two in-bundle Patients carrying the same identifier | ref binds the first, no synthetic",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"fullUrl" : "urn:uuid:patient-a",
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [{ "system" : "sys", "value" : "val" }]
+								},
+								"request" : { "method" : "POST", "url" : "Patient" }
+							},
+							{
+								"fullUrl" : "urn:uuid:patient-b",
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [{ "system" : "sys", "value" : "val" }]
+								},
+								"request" : { "method" : "POST", "url" : "Patient" }
+							},
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"subject" : { "reference": "Patient?identifier=sys|val" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation" }
+							}
+						]
+					}
+					""",
+				0,
+				bundleAssert(3, theBundle -> assertSourceEntryAt(theBundle, 2, Observation.class, "urn:uuid:patient-a",
+						obs -> obs.getSubject().getReference()))
+			),
+			Arguments.of(
+				"multi-and-group match URL, in-bundle Patient carries both identifiers | never binds, synthetic added",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"fullUrl" : "urn:uuid:patient-1",
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [
+										{ "system" : "sys", "value" : "val1" },
+										{ "system" : "sys", "value" : "val2" }
+									]
+								},
+								"request" : { "method" : "POST", "url" : "Patient" }
+							},
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"subject" : { "reference": "Patient?identifier=sys|val1&identifier=sys|val2" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation" }
+							}
+						]
+					}
+					""",
+				1,
+				bundleAssert(3, theBundle -> {
+					String urn = assertSyntheticEntryAt(theBundle, 0, ResourceType.Patient,
+							"Patient?identifier=sys|val1&identifier=sys|val2",
+							List.of(new SysVal("sys", "val1"), new SysVal("sys", "val2")));
+					assertThat(urn).isNotEqualTo("urn:uuid:patient-1");
+					assertSourceEntryAt(theBundle, 2, Observation.class, urn, obs -> obs.getSubject().getReference());
 				})
 			)
 		);
