@@ -1,0 +1,7 @@
+---
+type: add
+issue: 8128
+backport: 8.10.1
+title: "In Patient ID partition mode, when the underlying storage supports an all-partition search, a search that
+  scopes to a Patient only through a chained `subject`/`patient` parameter (e.g. `Observation?subject.identifier=sys|val`)
+  is now allowed and searches across all partitions, rather than being rejected with HAPI-2928."
