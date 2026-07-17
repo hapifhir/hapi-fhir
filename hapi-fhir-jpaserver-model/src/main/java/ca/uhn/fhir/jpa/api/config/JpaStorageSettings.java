@@ -43,7 +43,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -232,10 +231,6 @@ public class JpaStorageSettings extends StorageSettings {
 	private boolean myFilterParameterEnabled = false;
 	private StoreMetaSourceInformationEnum myStoreMetaSourceInformation =
 			StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID;
-	// Moved to CDR (ca.cdr.pers.settings.TokenIndexStrategy); token index strategy is provided via a CDR API.
-	//	private TokenIndexStrategy myTokenIndexStrategy =
-	//			TokenIndexStrategy.of(EnumSet.of(TokenIndex.LEGACY), TokenIndex.LEGACY);
-	private Set<String> myIdentifierTokenSearchParams = new HashSet<>(Set.of("identifier"));
 	private HistoryCountModeEnum myHistoryCountMode = DEFAULT_HISTORY_COUNT_MODE;
 	private int myInternalSynchronousSearchSize = DEFAULT_INTERNAL_SYNCHRONOUS_SEARCH_SIZE;
 	/**
@@ -1871,48 +1866,6 @@ public class JpaStorageSettings extends StorageSettings {
 	public void setStoreMetaSourceInformation(StoreMetaSourceInformationEnum theStoreMetaSourceInformation) {
 		Validate.notNull(theStoreMetaSourceInformation, "theStoreMetaSourceInformation must not be null");
 		myStoreMetaSourceInformation = theStoreMetaSourceInformation;
-	}
-
-	// TODO: remove
-	//	/**
-	//	 * Controls how token-index reads and writes are routed between the legacy
-	//	 * {@code HFJ_SPIDX_TOKEN} table and the compressed token index tables.
-	//	 */
-	//	public TokenIndexStrategy getTokenIndexStrategy() {
-	//		return myTokenIndexStrategy;
-	//	}
-	//
-	//	/**
-	//	 * Controls how token-index reads and writes are routed between the legacy
-	//	 * {@code HFJ_SPIDX_TOKEN} table and the compressed token index tables.
-	//	 */
-	//	public void setTokenIndexStrategy(TokenIndexStrategy theTokenIndexStrategy) {
-	//		Validate.notNull(theTokenIndexStrategy, "theTokenIndexStrategy must not be null");
-	//		myTokenIndexStrategy = theTokenIndexStrategy;
-	//	}
-
-	/**
-	 * Returns the set of token search parameter names that should be routed to the
-	 * {@code HFJ_SPIDX2_TOKEN_IDENTIFIER} table when compressed token indexing is active.
-	 * All other token search parameters use {@code HFJ_SPIDX2_TOKEN_COMMON_RES}.
-	 *
-	 * <p>Default: {@code {"identifier"}}.
-	 *
-	 * @see #setIdentifierTokenSearchParams(Set)
-	 */
-	public Set<String> getIdentifierTokenSearchParams() {
-		return myIdentifierTokenSearchParams;
-	}
-
-	/**
-	 * Sets the token search parameter names that should be routed to the
-	 * {@code HFJ_SPIDX2_TOKEN_IDENTIFIER} table when compressed token indexing is active.
-	 *
-	 * @see #getIdentifierTokenSearchParams()
-	 */
-	public void setIdentifierTokenSearchParams(Set<String> theIdentifierTokenSearchParams) {
-		Validate.notNull(theIdentifierTokenSearchParams, "theIdentifierTokenSearchParams must not be null");
-		myIdentifierTokenSearchParams = theIdentifierTokenSearchParams;
 	}
 
 	/**

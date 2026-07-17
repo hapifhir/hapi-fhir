@@ -105,74 +105,72 @@ public class DaoSearchParamSynchronizer {
 			boolean theResourceIsBeingCreated) {
 		AddRemoveCount retVal = new AddRemoveCount();
 
-		synchronize(
-				theRequestDetails,
-				theTransactionDetails,
-				theEntity,
-				retVal,
-				theParams.myStringParams,
-				existingParams.myStringParams,
-				null);
-		// The built-in (legacy) token index may be suppressed by a write policy — e.g. Smile CDR's
+		// Each scalar built-in index may be suppressed by a write policy — e.g. Smile CDR's
 		// compressed-only phase, where a custom synchronizer has taken over token indexing entirely.
-		if (shouldWriteBuiltInIndex(theEntity, RestSearchParameterTypeEnum.TOKEN)) {
-			synchronize(
-					theRequestDetails,
-					theTransactionDetails,
-					theEntity,
-					retVal,
-					theParams.myTokenParams,
-					existingParams.myTokenParams,
-					null);
-		}
-		synchronize(
+		synchronizeIfAllowed(
 				theRequestDetails,
 				theTransactionDetails,
 				theEntity,
 				retVal,
+				RestSearchParameterTypeEnum.STRING,
+				theParams.myStringParams,
+				existingParams.myStringParams);
+		synchronizeIfAllowed(
+				theRequestDetails,
+				theTransactionDetails,
+				theEntity,
+				retVal,
+				RestSearchParameterTypeEnum.TOKEN,
+				theParams.myTokenParams,
+				existingParams.myTokenParams);
+		synchronizeIfAllowed(
+				theRequestDetails,
+				theTransactionDetails,
+				theEntity,
+				retVal,
+				RestSearchParameterTypeEnum.NUMBER,
 				theParams.myNumberParams,
-				existingParams.myNumberParams,
-				null);
-		synchronize(
+				existingParams.myNumberParams);
+		synchronizeIfAllowed(
 				theRequestDetails,
 				theTransactionDetails,
 				theEntity,
 				retVal,
+				RestSearchParameterTypeEnum.QUANTITY,
 				theParams.myQuantityParams,
-				existingParams.myQuantityParams,
-				null);
-		synchronize(
+				existingParams.myQuantityParams);
+		synchronizeIfAllowed(
 				theRequestDetails,
 				theTransactionDetails,
 				theEntity,
 				retVal,
+				RestSearchParameterTypeEnum.QUANTITY,
 				theParams.myQuantityNormalizedParams,
-				existingParams.myQuantityNormalizedParams,
-				null);
-		synchronize(
+				existingParams.myQuantityNormalizedParams);
+		synchronizeIfAllowed(
 				theRequestDetails,
 				theTransactionDetails,
 				theEntity,
 				retVal,
+				RestSearchParameterTypeEnum.DATE,
 				theParams.myDateParams,
-				existingParams.myDateParams,
-				null);
-		synchronize(
+				existingParams.myDateParams);
+		synchronizeIfAllowed(
 				theRequestDetails,
 				theTransactionDetails,
 				theEntity,
 				retVal,
+				RestSearchParameterTypeEnum.URI,
 				theParams.myUriParams,
-				existingParams.myUriParams,
-				null);
-		synchronize(
+				existingParams.myUriParams);
+		synchronizeIfAllowed(
 				theRequestDetails,
 				theTransactionDetails,
 				theEntity,
 				retVal,
+				RestSearchParameterTypeEnum.SPECIAL,
 				theParams.myCoordsParams,
-				existingParams.myCoordsParams,
-				null);
+				existingParams.myCoordsParams);
 		synchronize(
 				theRequestDetails,
 				theTransactionDetails,
@@ -204,14 +202,10 @@ public class DaoSearchParamSynchronizer {
 		// Let any registered custom secondary-index writers reconcile their own tables for this
 		// resource. No-op in vanilla HAPI (no synchronizers registered).
 		for (ICustomIndexSynchronizer synchronizer : myCustomIndexSynchronizers) {
-			synchronizer.synchronize(
-					theRequestDetails,
-					theTransactionDetails,
-					theParams,
-					theEntity,
-					existingParams,
-					theResourceIsBeingCreated,
-					retVal);
+			AddRemoveCount customDelta = synchronizer.synchronize(
+					theRequestDetails, theTransactionDetails, theParams, theEntity, theResourceIsBeingCreated);
+			retVal.addToAddCount(customDelta.getAddCount());
+			retVal.addToRemoveCount(customDelta.getRemoveCount());
 		}
 
 		return retVal;
@@ -240,6 +234,31 @@ public class DaoSearchParamSynchronizer {
 	@Autowired(required = false)
 	public void setBuiltInIndexWritePolicies(List<IBuiltInIndexWritePolicy> theBuiltInIndexWritePolicies) {
 		myBuiltInIndexWritePolicies = theBuiltInIndexWritePolicies;
+	}
+
+	/**
+	 * Synchronizes one scalar built-in index collection, unless a registered
+	 * {@link IBuiltInIndexWritePolicy} vetoes that index type for this resource. When vetoed, the
+	 * collection is skipped entirely: no new rows are written and pre-existing rows are left untouched.
+	 */
+	private <T extends BaseResourceIndex> void synchronizeIfAllowed(
+			RequestDetails theRequestDetails,
+			TransactionDetails theTransactionDetails,
+			ResourceTable theEntity,
+			AddRemoveCount theAddRemoveCount,
+			RestSearchParameterTypeEnum theParamType,
+			Collection<T> theNewParams,
+			Collection<T> theExistingParams) {
+		if (shouldWriteBuiltInIndex(theEntity, theParamType)) {
+			synchronize(
+					theRequestDetails,
+					theTransactionDetails,
+					theEntity,
+					theAddRemoveCount,
+					theNewParams,
+					theExistingParams,
+					null);
+		}
 	}
 
 	/**

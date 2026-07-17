@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.dao.index;
 
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
@@ -38,8 +39,10 @@ import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
  * <p>Vanilla HAPI registers no implementations, so this is a no-op unless an extension (e.g. Smile CDR
  * compressed token indexing) provides a bean.
  *
- * <p>This is a write/update-diff seam only. Full-resource deletion is handled separately through
- * {@code IResourceExpungeService#deleteAllSearchParams}.
+ * <p>Implementations own the full lifecycle of their rows: {@link #synchronize} covers create and
+ * update (a FHIR delete is an update with empty extracted params, so it flows through the same
+ * diff), and {@link #deleteByResourceId} covers physical row deletion during {@code $expunge},
+ * invoked from {@code IResourceExpungeService#deleteAllSearchParams}.
  */
 public interface ICustomIndexSynchronizer {
 
@@ -50,17 +53,24 @@ public interface ICustomIndexSynchronizer {
 	 * @param theTransactionDetails the active transaction context
 	 * @param theParams           the freshly extracted (desired) search parameters
 	 * @param theEntity           the resource entity being indexed
-	 * @param theExistingParams   the search parameters currently persisted for the resource
 	 * @param theResourceIsBeingCreated {@code true} if this is the first-ever persist of the resource,
 	 *     so no rows can pre-exist; implementations may skip loading current rows to reconcile against
-	 * @param theAddRemoveCount   accumulator the implementation should update with the rows it added/removed
+	 * @return the number of rows this implementation added and removed, never {@code null}; the caller
+	 *     adds it to the overall synchronization total
 	 */
-	void synchronize(
+	AddRemoveCount synchronize(
 			RequestDetails theRequestDetails,
 			TransactionDetails theTransactionDetails,
 			ResourceIndexedSearchParams theParams,
 			ResourceTable theEntity,
-			ResourceIndexedSearchParams theExistingParams,
-			boolean theResourceIsBeingCreated,
-			AddRemoveCount theAddRemoveCount);
+			boolean theResourceIsBeingCreated);
+
+	/**
+	 * Physically delete every row the custom index holds for the given resource. Invoked during
+	 * {@code $expunge}, alongside the built-in index deletions. Unlike the built-in indexes there is
+	 * no populated-flag guard, so implementations must tolerate being called when no rows exist.
+	 *
+	 * @param theResourceId the id of the resource being expunged
+	 */
+	void deleteByResourceId(JpaPid theResourceId);
 }

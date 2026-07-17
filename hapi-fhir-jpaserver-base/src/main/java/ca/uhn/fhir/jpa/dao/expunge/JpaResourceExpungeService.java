@@ -42,6 +42,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
+import ca.uhn.fhir.jpa.dao.index.ICustomIndexSynchronizer;
 import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceServiceRegistry;
 import ca.uhn.fhir.jpa.esr.IExternallyStoredResourceService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -150,6 +151,18 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 
 	@Autowired
 	private ExternallyStoredResourceServiceRegistry myExternallyStoredResourceServiceRegistry;
+
+	/**
+	 * Custom secondary indexes contributed by extensions (e.g. Smile CDR compressed token indexing),
+	 * asked to delete their rows when a resource's search params are expunged. Empty in vanilla HAPI.
+	 * Injected via setter so it defaults to empty when no beans exist.
+	 */
+	private List<ICustomIndexSynchronizer> myCustomIndexSynchronizers = Collections.emptyList();
+
+	@Autowired(required = false)
+	public void setCustomIndexSynchronizers(List<ICustomIndexSynchronizer> theCustomIndexSynchronizers) {
+		myCustomIndexSynchronizers = theCustomIndexSynchronizers;
+	}
 
 	@Override
 	@Transactional
@@ -387,6 +400,12 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 		}
 		if (resource == null || resource.isHasLinks()) {
 			myResourceLinkDao.deleteByResourceId(theResourceId);
+		}
+
+		// Custom secondary indexes own their rows and have no populated-flag, so they are always
+		// asked to delete. No-op in vanilla HAPI (no synchronizers registered).
+		for (ICustomIndexSynchronizer customIndexSynchronizer : myCustomIndexSynchronizers) {
+			customIndexSynchronizer.deleteByResourceId(theResourceId);
 		}
 	}
 

@@ -68,8 +68,6 @@ public class ResourceTableFKProvider {
 		retval.add(new ResourceForeignKey("HFJ_SPIDX_QUANTITY_NRML", PARTITION_ID, "RES_ID"));
 		retval.add(new ResourceForeignKey("HFJ_SPIDX_STRING", PARTITION_ID, "RES_ID"));
 		retval.add(new ResourceForeignKey("HFJ_SPIDX_TOKEN", PARTITION_ID, "RES_ID"));
-		retval.add(new ResourceForeignKey("HFJ_SPIDX2_TOKEN_IDENTIFIER", PARTITION_ID, "RES_ID"));
-		retval.add(new ResourceForeignKey("HFJ_SPIDX2_TOKEN_COMMON_RES", PARTITION_ID, "RES_ID"));
 		retval.add(new ResourceForeignKey("HFJ_SPIDX_URI", PARTITION_ID, "RES_ID"));
 		retval.add(new ResourceForeignKey("MPI_LINK", GOLDEN_RESOURCE_PARTITION_ID, GOLDEN_RESOURCE_PID));
 		retval.add(new ResourceForeignKey("MPI_LINK", TARGET_PARTITION_ID, TARGET_PID));

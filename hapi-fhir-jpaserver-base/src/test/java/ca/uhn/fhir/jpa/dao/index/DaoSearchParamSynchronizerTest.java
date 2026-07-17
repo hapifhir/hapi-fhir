@@ -26,11 +26,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -88,24 +90,51 @@ public class DaoSearchParamSynchronizerTest {
 
 	/**
 	 * A registered {@link ICustomIndexSynchronizer} is invoked once per resource sync with the
-	 * extracted params, the entity, and the existing params, so an extension (e.g. Smile CDR
-	 * compressed token indexing) can reconcile its own secondary index.
+	 * extracted params and the entity, so an extension (e.g. Smile CDR compressed token indexing)
+	 * can reconcile its own secondary index.
 	 *
 	 * <p>Created by claude-opus-4-8.</p>
 	 */
 	@Test
 	void synchronize_invokesRegisteredCustomIndexSynchronizer() {
 		ICustomIndexSynchronizer customSynchronizer = mock(ICustomIndexSynchronizer.class);
+		when(customSynchronizer.synchronize(any(), any(), any(), any(), anyBoolean()))
+			.thenReturn(new AddRemoveCount());
 		subject.setCustomIndexSynchronizers(List.of(customSynchronizer));
 		ResourceIndexedSearchParams newParams = ResourceIndexedSearchParams.withSets();
 		newParams.myTokenParams.add(new ResourceIndexedSearchParamToken(
 			new PartitionSettings(), "Patient", "status", "http://hl7.org/fhir/patient-status", "active"));
 		ResourceIndexedSearchParams existing = ResourceIndexedSearchParams.empty();
 
-		AddRemoveCount retVal =
-			subject.synchronizeSearchParamsToDatabase(null, null, newParams, theEntity, existing, false);
+		subject.synchronizeSearchParamsToDatabase(null, null, newParams, theEntity, existing, false);
 
-		verify(customSynchronizer, times(1)).synchronize(null, null, newParams, theEntity, existing, false, retVal);
+		verify(customSynchronizer, times(1)).synchronize(null, null, newParams, theEntity, false);
+	}
+
+	/**
+	 * The {@link AddRemoveCount} returned by a custom synchronizer is added to the overall
+	 * synchronization total — the extension reports what it wrote and the aggregation policy stays
+	 * with the caller: 1 built-in token row + 3 custom adds, 0 built-in removes + 2 custom removes.
+	 *
+	 * <p>Created by claude-fable-5.</p>
+	 */
+	@Test
+	void synchronize_addsCustomSynchronizerCountsToTotal() {
+		ICustomIndexSynchronizer customSynchronizer = mock(ICustomIndexSynchronizer.class);
+		AddRemoveCount customDelta = new AddRemoveCount();
+		customDelta.addToAddCount(3);
+		customDelta.addToRemoveCount(2);
+		when(customSynchronizer.synchronize(any(), any(), any(), any(), anyBoolean())).thenReturn(customDelta);
+		subject.setCustomIndexSynchronizers(List.of(customSynchronizer));
+		ResourceIndexedSearchParams newParams = ResourceIndexedSearchParams.withSets();
+		newParams.myTokenParams.add(new ResourceIndexedSearchParamToken(
+			new PartitionSettings(), "Patient", "status", "http://hl7.org/fhir/patient-status", "active"));
+
+		AddRemoveCount retVal = subject.synchronizeSearchParamsToDatabase(
+			null, null, newParams, theEntity, ResourceIndexedSearchParams.empty(), false);
+
+		assertThat(retVal.getAddCount()).isEqualTo(4);
+		assertThat(retVal.getRemoveCount()).isEqualTo(2);
 	}
 
 	/**
@@ -156,6 +185,69 @@ public class DaoSearchParamSynchronizerTest {
 
 		verify(entityManager, never()).persist(tokenParam);
 		verify(entityManager, times(1)).persist(stringParam);
+	}
+
+	/**
+	 * The write policy is consulted uniformly for every scalar built-in index type, not just TOKEN:
+	 * a policy vetoing STRING suppresses the string row while the token row is still written.
+	 *
+	 * <p>Created by claude-fable-5.</p>
+	 */
+	@Test
+	void synchronize_whenPolicySuppressesStringType_skipsStringButWritesToken() {
+		when(theEntity.getResourceType()).thenReturn("Patient");
+		IBuiltInIndexWritePolicy suppressStrings =
+			(resourceType, paramType) -> paramType != RestSearchParameterTypeEnum.STRING;
+		subject.setBuiltInIndexWritePolicies(List.of(suppressStrings));
+
+		ResourceIndexedSearchParamToken tokenParam = new ResourceIndexedSearchParamToken(
+			new PartitionSettings(), "Patient", "status", "http://hl7.org/fhir/patient-status", "active");
+		ResourceIndexedSearchParamString stringParam = new ResourceIndexedSearchParamString(
+			new PartitionSettings(), new StorageSettings(), "Patient", "name", "smith", "SMITH");
+		ResourceIndexedSearchParams newParams = ResourceIndexedSearchParams.withSets();
+		newParams.myTokenParams.add(tokenParam);
+		newParams.myStringParams.add(stringParam);
+
+		subject.synchronizeSearchParamsToDatabase(
+			null, null, newParams, theEntity, ResourceIndexedSearchParams.empty(), false);
+
+		verify(entityManager, never()).persist(stringParam);
+		verify(entityManager, times(1)).persist(tokenParam);
+	}
+
+	/**
+	 * The write policy is consulted once per scalar index collection — STRING, TOKEN, NUMBER,
+	 * QUANTITY (regular and normalized), DATE, URI and SPECIAL (coords) — and never for resource
+	 * links or combo indexes, which carry no search-parameter semantics.
+	 *
+	 * <p>Created by claude-fable-5.</p>
+	 */
+	@Test
+	void synchronize_policyConsultedForAllScalarIndexTypes() {
+		when(theEntity.getResourceType()).thenReturn("Patient");
+		List<RestSearchParameterTypeEnum> consulted = new ArrayList<>();
+		IBuiltInIndexWritePolicy recordingPolicy = (resourceType, paramType) -> {
+			consulted.add(paramType);
+			return true;
+		};
+		subject.setBuiltInIndexWritePolicies(List.of(recordingPolicy));
+
+		ResourceIndexedSearchParams newParams = ResourceIndexedSearchParams.withSets();
+		newParams.myTokenParams.add(new ResourceIndexedSearchParamToken(
+			new PartitionSettings(), "Patient", "status", "http://hl7.org/fhir/patient-status", "active"));
+
+		subject.synchronizeSearchParamsToDatabase(
+			null, null, newParams, theEntity, ResourceIndexedSearchParams.empty(), false);
+
+		assertThat(consulted).containsExactlyInAnyOrder(
+			RestSearchParameterTypeEnum.STRING,
+			RestSearchParameterTypeEnum.TOKEN,
+			RestSearchParameterTypeEnum.NUMBER,
+			RestSearchParameterTypeEnum.QUANTITY,
+			RestSearchParameterTypeEnum.QUANTITY,
+			RestSearchParameterTypeEnum.DATE,
+			RestSearchParameterTypeEnum.URI,
+			RestSearchParameterTypeEnum.SPECIAL);
 	}
 
 	@Test
