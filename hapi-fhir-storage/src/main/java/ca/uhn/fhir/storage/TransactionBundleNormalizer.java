@@ -23,13 +23,12 @@ import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.util.MatchUrlUtil;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.FhirTerser;
@@ -167,8 +166,13 @@ public class TransactionBundleNormalizer {
 				if (!MatchUrlUtil.isInlineMatchUrl(refValue)) {
 					continue;
 				}
-				MatchUrlService.ResourceTypeAndSearchParameterMap parsed =
-						myMatchUrlService.parseAndTranslateMatchUrl(refValue);
+				MatchUrlService.ResourceTypeAndSearchParameterMap parsed;
+				try {
+					parsed = myMatchUrlService.parseAndTranslateMatchUrl(refValue);
+				} catch (InvalidRequestException e) {
+					// Unparseable match URL: pass through; write-time resolution reports the parse error.
+					continue;
+				}
 
 				// If an in-bundle entry already carries this (type, identifier), point the inline ref at its
 				// fullUrl (assigned in the first pass) instead of minting a duplicate synthetic placeholder.
@@ -181,11 +185,16 @@ public class TransactionBundleNormalizer {
 					}
 				}
 
+				// Match URLs the normalizer can't claim (non-identifier or system-less/value-less tokens)
+				// pass through untouched: write-time inline reference resolution handles them exactly as it
+				// would outside a transaction (search, auto-create where possible, or an honest error).
+				if (!isEligibleForSyntheticCreate(parsed)) {
+					continue;
+				}
+
 				// Otherwise, generate a synthetic conditional-create on first encounter; reuse for duplicates.
-				MatchUrlInfo info = matchUrlToInfo.computeIfAbsent(refValue, url -> {
-					validateParsedMatchUrl(url, parsed);
-					return new MatchUrlInfo("urn:uuid:" + UUID.randomUUID(), parsed);
-				});
+				MatchUrlInfo info = matchUrlToInfo.computeIfAbsent(
+						refValue, url -> new MatchUrlInfo("urn:uuid:" + UUID.randomUUID(), parsed));
 				ref.setReference(info.urnUuid());
 			}
 		}
@@ -241,34 +250,36 @@ public class TransactionBundleNormalizer {
 		if (identifierValues.size() != 1 || identifierValues.get(0).size() != 1) {
 			return null;
 		}
-		if (!(identifierValues.get(0).get(0) instanceof TokenParam tokenParam) || isBlank(tokenParam.getValue())) {
+		if (!(identifierValues.get(0).get(0) instanceof TokenParam tokenParam)
+				|| isBlank(tokenParam.getSystem())
+				|| isBlank(tokenParam.getValue())) {
 			return null;
 		}
 		return new IdentifierKey(
 				theParsed.resourceDefinition().getName(), tokenParam.getSystem(), tokenParam.getValue());
 	}
 
-	private void validateParsedMatchUrl(
-			String theMatchUrl, MatchUrlService.ResourceTypeAndSearchParameterMap theParsed) {
+	/**
+	 * A synthetic conditional create is only minted for match URLs consisting solely of {@code identifier}
+	 * tokens that each carry a system and a value — the shapes a placeholder resource can faithfully
+	 * represent and later be matched by.
+	 */
+	// Created by Claude Fable 5
+	private boolean isEligibleForSyntheticCreate(MatchUrlService.ResourceTypeAndSearchParameterMap theParsed) {
 		SearchParameterMap params = theParsed.searchParameterMap();
-
 		if (params.keySet().size() != 1 || !params.containsKey("identifier")) {
-			throw new PreconditionFailedException(Msg.code(2700)
-					+ "Inline match URL matching only supports identifier search parameters: " + theMatchUrl);
+			return false;
 		}
-
-		List<List<IQueryParameterType>> identifierValues = params.get("identifier");
-
-		for (List<IQueryParameterType> andGroup : identifierValues) {
+		for (List<IQueryParameterType> andGroup : params.get("identifier")) {
 			for (IQueryParameterType paramType : andGroup) {
-				if (paramType instanceof TokenParam tokenParam) {
-					if (isBlank(tokenParam.getSystem()) || isBlank(tokenParam.getValue())) {
-						throw new PreconditionFailedException(Msg.code(2995)
-								+ "Inline match URL identifier must have both a system and a value: " + theMatchUrl);
-					}
+				if (!(paramType instanceof TokenParam tokenParam)
+						|| isBlank(tokenParam.getSystem())
+						|| isBlank(tokenParam.getValue())) {
+					return false;
 				}
 			}
 		}
+		return true;
 	}
 
 	private IBaseResource buildPlaceholder(MatchUrlService.ResourceTypeAndSearchParameterMap theParsed) {

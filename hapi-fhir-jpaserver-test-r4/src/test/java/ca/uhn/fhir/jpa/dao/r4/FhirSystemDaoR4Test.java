@@ -1558,6 +1558,82 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals(newValue2, autoCreated2.getIdentifierFirstRep().getValue());
 	}
 
+	// Created by Claude Fable 5
+	@Test
+	public void testTransactionInlineMatchUrl_valueOnlyIdentifier_resolvesExisting() {
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		Patient existing = new Patient();
+		existing.addIdentifier().setSystem("urn:system").setValue("vo-match");
+		IIdType existingId = myPatientDao.create(existing, mySrd).getId().toUnqualifiedVersionless();
+
+		Bundle request = new Bundle();
+		request.setType(BundleType.TRANSACTION);
+		addObservation(request, "obs-vo", "Patient?identifier=vo-match");
+
+		Bundle resp = mySystemDao.transaction(mySrd, request);
+
+		assertThat(resp.getEntry()).hasSize(1);
+		Observation obs = readObservation(resp.getEntry().get(0));
+		assertEquals(existingId.getValue(), obs.getSubject().getReference());
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	public void testTransactionInlineMatchUrl_valueOnlyIdentifier_noMatchAutoCreatesPlaceholder() {
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+
+		Bundle request = new Bundle();
+		request.setType(BundleType.TRANSACTION);
+		addObservation(request, "obs-vo-new", "Patient?identifier=vo-new");
+
+		Bundle resp = mySystemDao.transaction(mySrd, request);
+
+		assertThat(resp.getEntry()).hasSize(1);
+		Observation obs = readObservation(resp.getEntry().get(0));
+		Patient placeholder = myPatientDao.read(new IdType(obs.getSubject().getReference()), mySrd);
+		assertThat(placeholder.getExtensionByUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER)).isNotNull();
+		assertEquals("vo-new", placeholder.getIdentifierFirstRep().getValue());
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	public void testTransactionInlineMatchUrl_nonIdentifierParam_resolvesExisting() {
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		Patient existing = new Patient();
+		existing.addName().setFamily("PassthroughSmith");
+		IIdType existingId = myPatientDao.create(existing, mySrd).getId().toUnqualifiedVersionless();
+
+		Bundle request = new Bundle();
+		request.setType(BundleType.TRANSACTION);
+		addObservation(request, "obs-name", "Patient?family=PassthroughSmith");
+
+		Bundle resp = mySystemDao.transaction(mySrd, request);
+
+		assertThat(resp.getEntry()).hasSize(1);
+		Observation obs = readObservation(resp.getEntry().get(0));
+		assertEquals(existingId.getValue(), obs.getSubject().getReference());
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	public void testTransactionInlineMatchUrl_nonIdentifierParam_noMatchCannotAutoCreate() {
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		Bundle request = new Bundle();
+		request.setType(BundleType.TRANSACTION);
+		addObservation(request, "obs-name-nomatch", "Patient?family=NoSuchFamilyName");
+
+		assertThatThrownBy(() -> mySystemDao.transaction(mySrd, request))
+			.hasMessageContaining("HAPI-2746");
+	}
+
 	// Created by Claude Opus 4.7
 	private static void addObservation(Bundle theBundle, String theCodeText, String theSubjectInlineMatchUrl) {
 		Observation o = new Observation();

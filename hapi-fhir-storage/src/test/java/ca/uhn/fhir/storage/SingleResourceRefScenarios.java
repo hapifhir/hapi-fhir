@@ -331,6 +331,134 @@ class SingleResourceRefScenarios implements ArgumentsProvider {
 						theBundle, 0, Observation.class,
 						"urn:uuid:already-a-placeholder",
 						obs -> obs.getSubject().getReference()))
+			),
+			// Match URLs the normalizer can't claim pass through untouched: the write-time inline
+			// reference resolution handles them (search, auto-create where possible, or an honest error).
+			Arguments.of(
+				"identifier without system | passes through unchanged",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"subject" : { "reference": "Patient?identifier=value1" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation" }
+							}
+						]
+					}
+					""",
+				0,
+				bundleAssert(1, theBundle -> assertSourceEntryAt(
+						theBundle, 0, Observation.class,
+						"Patient?identifier=value1",
+						obs -> obs.getSubject().getReference()))
+			),
+			Arguments.of(
+				"identifier with blank value | passes through unchanged",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"subject" : { "reference": "Patient?identifier=http://system|" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation" }
+							}
+						]
+					}
+					""",
+				0,
+				bundleAssert(1, theBundle -> assertSourceEntryAt(
+						theBundle, 0, Observation.class,
+						"Patient?identifier=http://system|",
+						obs -> obs.getSubject().getReference()))
+			),
+			Arguments.of(
+				"identifier plus another search parameter | passes through unchanged",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"subject" : { "reference": "Patient?identifier=http://system|value1&active=true" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation" }
+							}
+						]
+					}
+					""",
+				0,
+				bundleAssert(1, theBundle -> assertSourceEntryAt(
+						theBundle, 0, Observation.class,
+						"Patient?identifier=http://system|value1&active=true",
+						obs -> obs.getSubject().getReference()))
+			),
+			Arguments.of(
+				"non-identifier search parameter | passes through unchanged",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"subject" : { "reference": "Patient?name=Smith" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation" }
+							}
+						]
+					}
+					""",
+				0,
+				bundleAssert(1, theBundle -> assertSourceEntryAt(
+						theBundle, 0, Observation.class,
+						"Patient?name=Smith",
+						obs -> obs.getSubject().getReference()))
+			),
+			Arguments.of(
+				"unparseable search parameter | passes through unchanged",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"subject" : { "reference": "Patient?foo=bar" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation" }
+							}
+						]
+					}
+					""",
+				0,
+				bundleAssert(1, theBundle -> assertSourceEntryAt(
+						theBundle, 0, Observation.class,
+						"Patient?foo=bar",
+						obs -> obs.getSubject().getReference()))
+			),
+			Arguments.of(
+				"multiple identifiers where one lacks a system | passes through unchanged",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"subject" : { "reference": "Patient?identifier=system|val1&identifier=val2" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation" }
+							}
+						]
+					}
+					""",
+				0,
+				bundleAssert(1, theBundle -> assertSourceEntryAt(
+						theBundle, 0, Observation.class,
+						"Patient?identifier=system|val1&identifier=val2",
+						obs -> obs.getSubject().getReference()))
 			)
 		);
 	}

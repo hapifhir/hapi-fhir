@@ -23,7 +23,6 @@ import java.util.function.Function;
 
 import static ca.uhn.fhir.util.HapiExtensions.EXT_RESOURCE_PLACEHOLDER;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -83,20 +82,6 @@ class TransactionBundleNormalizerTest {
 		assertNotNull(requestBundle);
 		assertNotNull(theAssertions);
 		theAssertions.accept(requestBundle);
-	}
-
-	@ParameterizedTest
-	@ArgumentsSource(SingleResourceRefThrowScenarios.class)
-	void testTransaction_singleResourceRefThrowScenarios(
-			String theComment,
-			String theBundle,
-			Class<? extends Throwable> theExpectedException,
-			String theExpectedMessage) {
-		Bundle requestBundle = ourFhirContext.newJsonParser().parseResource(Bundle.class, theBundle);
-
-		assertThatThrownBy(() -> mySvc.normalize(requestBundle))
-				.isInstanceOf(theExpectedException)
-				.hasMessage(theExpectedMessage);
 	}
 
 	@ParameterizedTest
