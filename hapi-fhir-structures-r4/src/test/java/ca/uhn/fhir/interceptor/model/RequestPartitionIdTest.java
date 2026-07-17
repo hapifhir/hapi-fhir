@@ -209,7 +209,11 @@ public class RequestPartitionIdTest {
 
 	static Stream<Object[]> testCompareToTestCases() {
 		return Stream.of(
+			new Object[] { allPartitions(), fromPartitionIds(1, 2, 3), ExpectedOrderEnum.RIGHT_FIRST },
+			new Object[] { allPartitions(), fromPartitionId(null), ExpectedOrderEnum.RIGHT_FIRST },
+			new Object[] { allPartitions(), allPartitions(), ExpectedOrderEnum.EQUAL },
 			new Object[] { fromPartitionIds(1, 3, 5), fromPartitionIds(2, 4, 6), ExpectedOrderEnum.LEFT_FIRST },
+			new Object[] { fromPartitionIds(null, 3, 5), fromPartitionIds(2, 4, 6), ExpectedOrderEnum.RIGHT_FIRST },
 			new Object[] { fromPartitionIds(1), fromPartitionIds(2, 4, 6), ExpectedOrderEnum.LEFT_FIRST },
 			new Object[] { fromPartitionIds(1), fromPartitionId(null), ExpectedOrderEnum.LEFT_FIRST },
 			new Object[] { fromPartitionId(null), fromPartitionId(null), ExpectedOrderEnum.EQUAL },

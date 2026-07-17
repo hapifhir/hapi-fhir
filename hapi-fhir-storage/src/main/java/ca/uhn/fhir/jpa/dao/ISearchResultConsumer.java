@@ -21,10 +21,23 @@ package ca.uhn.fhir.jpa.dao;
 
 import jakarta.annotation.Nonnull;
 
+/**
+ * This interface should be implemented by search result consumers. I.e. classes that are
+ * responsible for processing search results as they are returned from the {@link ISearchBuilder}.
+ */
 @FunctionalInterface
 public interface ISearchResultConsumer<T> {
 
+	/**
+	 * Return value for {@link #consume(SearchProgressTracker, Object)} indicating that the
+	 * caller should continue to supply results.
+	 */
 	Outcome CONTINUE = new Outcome(true);
+
+	/**
+	 * Return value for {@link #consume(SearchProgressTracker, Object)} indicating that no
+	 * forther results are wanted.
+	 */
 	Outcome STOP = new Outcome(false);
 
 	/**
@@ -33,13 +46,16 @@ public interface ISearchResultConsumer<T> {
 	@Nonnull
 	Outcome consume(SearchProgressTracker theProgressTracker, T theResult);
 
+	/**
+	 * Response type for {@link #consume(SearchProgressTracker, Object)}
+	 */
 	class Outcome {
 
 		public boolean isContinue() {
 			return myContinue;
 		}
 
-		private boolean myContinue;
+		private final boolean myContinue;
 
 		private Outcome(boolean theContinue) {
 			myContinue = theContinue;

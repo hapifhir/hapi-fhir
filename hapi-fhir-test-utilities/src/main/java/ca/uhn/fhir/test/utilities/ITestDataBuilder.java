@@ -492,6 +492,10 @@ public interface ITestDataBuilder {
 		}
 	}
 
+	/**
+	 * This method can be used to conditionally apply a value to a resource being created only
+	 * if {@literal theApply} is true.
+	 */
 	default ICreationArgument ifTrue(boolean theApply, ICreationArgument theArgument) {
 		return theApply ? theArgument : null;
 	}

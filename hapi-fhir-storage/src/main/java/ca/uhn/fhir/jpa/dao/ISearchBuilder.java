@@ -47,6 +47,14 @@ public interface ISearchBuilder<T extends IResourcePersistentId<?>> {
 
 	String SEARCH_BUILDER_BEAN_NAME = "SearchBuilder";
 
+	/**
+	 * Perform a FHIR search for the given parameters, returning the PIDs of the matching resources.
+	 *
+	 * @param theConsumer              The consumer to receive search results.
+	 * @param theParams                A map containing the requested search parameters.
+	 * @return                         Returns a class containing statistics about the performed search.
+	 * @since 8.12.0
+	 */
 	SearchProgressTracker performSearchForPids(
 			ISearchResultConsumer<T> theConsumer,
 			SearchParameterMap theParams,
