@@ -24,7 +24,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.PartitionedTransactionPartialFailureException;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
@@ -38,7 +37,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -53,7 +51,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -173,17 +170,8 @@ public class CrossPartitionReplaceReferencesSvc {
 		copiesByDestPartition.forEach((partition, resources) -> resources.forEach(r -> entryPartitions.add(partition)));
 		entryPartitions.addAll(updatePartitions);
 
-		Bundle combinedResponse;
-		try {
-			combinedResponse = (Bundle)
-					myDaoRegistry.getSystemDao().transactionNested(theRequestDetails, bundleBuilder.getBundle());
-		} catch (PartitionedTransactionPartialFailureException thePartialFailure) {
-			// Some per-partition sub-bundles committed before a later one failed. Attribute the committed ids to
-			// their partitions (the generic exception cannot know them) so the merge rollback can restore them
-			// partition-pinned.
-			throw attributeCommittedIdsToPartitions(
-					thePartialFailure, updateList, updatePartitions, copiesByDestPartition.keySet());
-		}
+		Bundle combinedResponse =
+				(Bundle) myDaoRegistry.getSystemDao().transactionNested(theRequestDetails, bundleBuilder.getBundle());
 
 		// Attribute each changed resource to its partition positionally (1:1 with request entries). Must use the
 		// raw response entries — extractChangedResourceIds below filters out no-op updates, which would break the
@@ -206,60 +194,6 @@ public class CrossPartitionReplaceReferencesSvc {
 				copiedResourceOriginalIds,
 				changedResourceIdsByPartition,
 				copiedResourceOriginalIdsByPartition);
-	}
-
-	/**
-	 * Wraps a partial data-bundle failure with the partition of each committed resource, attributed per id: PUT
-	 * entries keep their ids, so they are matched against the (positionally partition-mapped) update list;
-	 * anything unmatched is a POST-created copy (its response id is new), attributed to the single copy
-	 * destination partition when unambiguous. NOTE: a committed sub-bundle cannot be used to attribute its
-	 * unmatched entries — under MegaScale the split is per shard, and one shard can colocate several logical
-	 * partitions, so a sub-bundle can mix entries from different partitions.
-	 */
-	private CrossPartitionReplaceReferencesPartialCommitException attributeCommittedIdsToPartitions(
-			PartitionedTransactionPartialFailureException theFailure,
-			List<IBaseResource> theUpdateList,
-			List<RequestPartitionId> theUpdatePartitions,
-			Set<RequestPartitionId> theCopyDestPartitions) {
-
-		Map<String, RequestPartitionId> updateIdToPartition = new HashMap<>();
-		for (int i = 0; i < theUpdateList.size(); i++) {
-			String versionlessId = theUpdateList
-					.get(i)
-					.getIdElement()
-					.toUnqualifiedVersionless()
-					.getValue();
-			updateIdToPartition.put(versionlessId, theUpdatePartitions.get(i));
-		}
-		RequestPartitionId unambiguousCopyPartition = theCopyDestPartitions.size() == 1
-				? theCopyDestPartitions.iterator().next()
-				: null;
-
-		Map<RequestPartitionId, List<IIdType>> committedByPartition = new LinkedHashMap<>();
-		List<IIdType> unknownPartition = new ArrayList<>();
-		for (List<IBase> subBundleEntries : theFailure.getCommittedResponseEntriesPerSubBundle()) {
-			for (IBase entry : subBundleEntries) {
-				Optional<IIdType> committedId =
-						ReplaceReferencesProvenanceSvc.extractChangedResourceId((Bundle.BundleEntryComponent) entry);
-				if (committedId.isEmpty()) {
-					continue;
-				}
-				RequestPartitionId partition = updateIdToPartition.get(
-						committedId.get().toUnqualifiedVersionless().getValue());
-				if (partition == null) {
-					partition = unambiguousCopyPartition;
-				}
-				if (partition != null) {
-					committedByPartition
-							.computeIfAbsent(partition, k -> new ArrayList<>())
-							.add(committedId.get());
-				} else {
-					unknownPartition.add(committedId.get());
-				}
-			}
-		}
-		return new CrossPartitionReplaceReferencesPartialCommitException(
-				theFailure, committedByPartition, unknownPartition);
 	}
 
 	/**

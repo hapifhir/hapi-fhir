@@ -146,9 +146,6 @@ public class ResourceMergeServiceTest {
 	@Mock
 	CrossPartitionReplaceReferencesSvc myCrossPartitionReplaceReferencesSvcMock;
 
-	@Mock
-	CrossPartitionMergeRollbackService myCrossPartitionMergeRollbackServiceMock;
-
 	private ResourceMergeService myResourceMergeService;
 
 	private final FhirContext myFhirContext = FhirContext.forR4Cached();
@@ -190,8 +187,7 @@ public class ResourceMergeServiceTest {
 			myMergeValidationServiceMock,
 			myMergeResourceHelper,
 			myCrossPartitionReplaceReferencesSvcMock,
-			myPartitionSettingsMock,
-			myCrossPartitionMergeRollbackServiceMock);
+			myPartitionSettingsMock);
 	}
 
 	@Nested

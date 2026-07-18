@@ -35,6 +35,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.interceptor.model.TransactionWriteAfterPrefetchDetails;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.BaseRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -566,7 +567,21 @@ public class PatientIdPartitionInterceptor {
 		IFhirResourceDao<IBaseResource> resourceDao = myDaoRegistry.getResourceDao(theResource);
 		PreviousVersionReader<IBaseResource> reader = new PreviousVersionReader<>(resourceDao);
 
-		Optional<IBaseResource> oPreviousVersion = reader.readPreviousVersion(theResource);
+		// A deleted resource has an empty body, so its partition can only come from its id; but a client-assigned
+		// id does not encode a partition, and an unpinned read then resolves to allPartitions, which on a
+		// physically-partitioned server (MegaScale) routes to the default database and never finds a resource that
+		// lives on another shard. The previous version lives in the same partition as the resource being written,
+		// so pin the read to the partition carried on the current thread's transaction.
+		//
+		// Only pin to a concrete partition. If the thread has no partition (null) or is on allPartitions, fall back
+		// to the default id-based resolution: passing an explicit allPartitions would short-circuit partition
+		// resolution and suppress id decoding for an id that would otherwise resolve on its own.
+		RequestPartitionId threadPartition = HapiTransactionService.getRequestPartitionAssociatedWithThread();
+		RequestPartitionId pinnedPartition =
+				threadPartition != null && !threadPartition.isAllPartitions() && threadPartition.hasPartitionIds()
+						? threadPartition
+						: null;
+		Optional<IBaseResource> oPreviousVersion = reader.readPreviousVersion(theResource, false, pinnedPartition);
 
 		return oPreviousVersion.orElse(theResource);
 	}

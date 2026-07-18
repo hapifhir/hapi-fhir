@@ -37,7 +37,6 @@ import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
-import ca.uhn.fhir.jpa.provider.CrossPartitionReplaceReferencesPartialCommitException;
 import ca.uhn.fhir.jpa.provider.CrossPartitionReplaceReferencesResult;
 import ca.uhn.fhir.jpa.provider.CrossPartitionReplaceReferencesSvc;
 import ca.uhn.fhir.merge.MergeProvenanceGroupIdUtil;
@@ -53,6 +52,7 @@ import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -72,16 +72,21 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.batch2.jobs.merge.MergeAppCtx.JOB_MERGE;
+import static ca.uhn.fhir.merge.MergeResourceHelper.addErrorToOperationOutcome;
 import static ca.uhn.fhir.merge.MergeResourceHelper.addInfoToOperationOutcome;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_200_OK;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_202_ACCEPTED;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_500_INTERNAL_ERROR;
+import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
 
 /**
  * Service for the FHIR Patient/$merge and [ResourceType]/$hapi.fhir.merge (generic merge) operations.
  */
 public class ResourceMergeService {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceMergeService.class);
+
+	private static final String ISSUE_TYPE_EXCEPTION = "exception";
 
 	private final FhirContext myFhirContext;
 	private final JpaStorageSettings myStorageSettings;
@@ -97,7 +102,6 @@ public class ResourceMergeService {
 	private final MergeValidationService myMergeValidationService;
 	private final CrossPartitionReplaceReferencesSvc myCrossPartitionReplaceReferencesSvc;
 	private final PartitionSettings myPartitionSettings;
-	private final CrossPartitionMergeRollbackService myCrossPartitionMergeRollbackService;
 
 	public ResourceMergeService(
 			JpaStorageSettings theStorageSettings,
@@ -111,8 +115,7 @@ public class ResourceMergeService {
 			MergeValidationService theMergeValidationService,
 			MergeResourceHelper theMergeResourceHelper,
 			CrossPartitionReplaceReferencesSvc theCrossPartitionReplaceReferencesSvc,
-			PartitionSettings thePartitionSettings,
-			CrossPartitionMergeRollbackService theCrossPartitionMergeRollbackService) {
+			PartitionSettings thePartitionSettings) {
 		myStorageSettings = theStorageSettings;
 		myDaoRegistry = theDaoRegistry;
 
@@ -128,7 +131,6 @@ public class ResourceMergeService {
 		myMergeValidationService = theMergeValidationService;
 		myCrossPartitionReplaceReferencesSvc = theCrossPartitionReplaceReferencesSvc;
 		myPartitionSettings = thePartitionSettings;
-		myCrossPartitionMergeRollbackService = theCrossPartitionMergeRollbackService;
 	}
 
 	/**
@@ -269,8 +271,8 @@ public class ResourceMergeService {
 		if (crossPartition) {
 			// Cross-partition writes can commit independently per partition (changing partitions opens its own
 			// transaction under REQUIRES_NEW), so the outer transaction cannot guarantee
-			// atomicity. doMergeSyncCrossPartition owns the transaction boundary and the rollback,
-			// and populates the outcome itself.
+			// atomicity. doMergeSyncCrossPartition owns the transaction boundary and populates the outcome itself,
+			// reporting anything a partial failure left committed.
 			doMergeSyncCrossPartition(
 					theMergeOperationParameters,
 					theSourceResource,
@@ -365,7 +367,10 @@ public class ResourceMergeService {
 			MergeOperationOutcome theMergeOutcome,
 			Date theStartTime) {
 
-		MergeRollbackContext rollbackContext = new MergeRollbackContext();
+		// Everything the forward steps commit, recorded as it commits, at its committed version. A cross-partition
+		// merge cannot be made atomic, and this path does not attempt to revert what committed — so this list is
+		// purely what the failure report hands the operator to revert manually.
+		List<IIdType> committedResourceIds = new ArrayList<>();
 
 		try {
 			myHapiTransactionService
@@ -377,40 +382,28 @@ public class ResourceMergeService {
 							theRequestDetails,
 							theMergeOutcome,
 							theStartTime,
-							rollbackContext));
+							committedResourceIds));
 		} catch (Exception theException) {
 			if (!myHapiTransactionService.isRequiresNewTransactionWhenChangingPartitions()) {
 				// Partition changes joined the outer transaction, which has already rolled the whole merge back, so
-				// there is nothing committed to revert. This is a clean failure — propagate it like a same-partition
-				// merge failure and let merge() turn it into the outcome.
+				// nothing is committed. This is a clean failure — propagate it like a same-partition merge failure
+				// and let merge() turn it into the outcome.
 				throw theException;
 			}
-			ourLog.error("Cross-partition merge failed; attempting rollback", theException);
+			ourLog.error("Cross-partition merge failed", theException);
 			Throwable failureCause = theException;
-			if (theException instanceof CrossPartitionReplaceReferencesPartialCommitException partialCommit) {
-				// The copy/replace-references data bundle committed some per-shard sub-bundles before a later one
-				// failed. Those committed entries are carried on the exception rather than recorded in the rollback
-				// context (the step records into the context only after it returns), so harvest them here — already
-				// attributed to the partition each was written on, so the rollback can restore them partition-pinned.
-				partialCommit.getCommittedIdsByPartition().forEach(rollbackContext::addResourcesToRevert);
-				rollbackContext.addResourcesToRevertWithUnknownPartition(
-						partialCommit.getCommittedIdsWithUnknownPartition());
+			if (theException instanceof PartitionedTransactionPartialFailureException partialFailure) {
+				// A cross-partition transaction in the forward steps committed some sub-bundles before a later one
+				// failed. Those committed entries are carried on the exception rather than recorded above (the step
+				// records what it committed only after it returns), so harvest them here.
+				committedResourceIds.addAll(extractCommittedResourceIds(partialFailure));
 				// Report the underlying cause (e.g. the failing write's exception), not the partial-failure wrapper,
 				// so the merge outcome reflects the real error and its HTTP status.
-				if (partialCommit.getCause() != null) {
-					failureCause = partialCommit.getCause();
-				}
-			} else if (theException instanceof PartitionedTransactionPartialFailureException partialFailure) {
-				// A partial failure from some other cross-partition transaction in the forward steps — no partition
-				// attribution available, so the committed ids are restored with the unpinned fallback.
-				rollbackContext.addResourcesToRevertWithUnknownPartition(extractCommittedResourceIds(partialFailure));
 				if (partialFailure.getCause() != null) {
 					failureCause = partialFailure.getCause();
 				}
 			}
-			rollbackContext.setFailureCause(failureCause);
-			myCrossPartitionMergeRollbackService.rollbackPartialCrossPartitionMerge(
-					rollbackContext, theRequestDetails, theMergeOutcome);
+			reportFailedCrossPartitionMerge(committedResourceIds, failureCause, theMergeOutcome);
 			return;
 		}
 
@@ -432,9 +425,10 @@ public class ResourceMergeService {
 	 * partition each Provenance's extension names — so it never needs cross-shard fan-out reads, which would
 	 * resolve through MegaScale ESR surrogate rows and fail on tombstoned originals.
 	 * <p>
-	 * Each committed step is recorded in {@code theRollbackContext} (grouped by partition) so that a failure in a
-	 * later step can revert the earlier ones (the outer transaction cannot, because the partition changes committed
-	 * in their own transactions).
+	 * Each committed step appends what it committed to {@code theCommittedResourceIds}. None of it is reverted if a
+	 * later step fails — the outer transaction cannot roll it back (the partition changes committed in their own
+	 * transactions) and this path does not compensate — so the list exists solely to report what a failed merge left
+	 * behind for manual reverting.
 	 */
 	private void doCrossPartitionForwardSteps(
 			MergeOperationInputParameters theMergeOperationParameters,
@@ -443,7 +437,7 @@ public class ResourceMergeService {
 			RequestDetails theRequestDetails,
 			MergeOperationOutcome theMergeOutcome,
 			Date theStartTime,
-			MergeRollbackContext theRollbackContext) {
+			List<IIdType> theCommittedResourceIds) {
 
 		boolean deleteSource = theMergeOperationParameters.getDeleteSource();
 		RequestPartitionId sourcePartition = getRequiredPartition(theSourceResource);
@@ -457,9 +451,8 @@ public class ResourceMergeService {
 						theSourceResource, theTargetResource, theRequestDetails);
 		List<IIdType> copiedResourceOriginalIds = copyResult.getCopiedResourceOriginalIds();
 
-		// Record the just-committed copies and referrer updates as resources to revert on rollback, keeping the
-		// partition each group was written to.
-		copyResult.getChangedResourceIdsByPartition().forEach(theRollbackContext::addResourcesToRevert);
+		// Record the just-committed copies and referrer updates.
+		theCommittedResourceIds.addAll(copyResult.getChangedResourceIds());
 
 		// 2) Update source/target. The target is always updated; the source is updated when kept, or deleted below.
 		DaoMethodOutcome outcome = myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
@@ -478,11 +471,11 @@ public class ResourceMergeService {
 		}
 		IIdType targetPostMergeId = outcome.getResource().getIdElement();
 
-		// Record the post-merge target (always updated), and the post-merge source when it is kept, as resources to
-		// revert. When the source is deleted it is recorded as an undelete instead (below, as each delete commits).
-		theRollbackContext.addResourceToRevert(targetPartition, targetPostMergeId);
+		// Record the post-merge target (always updated), and the post-merge source when it is kept. When the source
+		// is deleted, its tombstone is recorded below instead, as its delete commits.
+		theCommittedResourceIds.add(targetPostMergeId);
 		if (!deleteSource) {
-			theRollbackContext.addResourceToRevert(sourcePartition, sourcePostMergeId);
+			theCommittedResourceIds.add(sourcePostMergeId);
 		}
 
 		// 3) Create the merge Provenances: one per involved partition plus the main one.
@@ -497,15 +490,15 @@ public class ResourceMergeService {
 					outcome,
 					theStartTime,
 					theRequestDetails,
-					theRollbackContext);
+					theCommittedResourceIds);
 		}
 
 		// 4) Delete the source-side compartment originals copied across partitions, plus the source itself when
 		// deleteSource. They all live in the source partition, so the delete is pinned to it — this lets MegaScale
 		// route the delete to the correct shard even when the ids are not partition-decodable (client-assigned / UUID
-		// ids). This happens after the Provenances are created so they can reference the originals. Each resource is
-		// recorded as an undelete for rollback (at its tombstone version) as its delete commits, so a failure partway
-		// through the deletes still knows exactly which tombstones to undelete.
+		// ids). This happens after the Provenances are created so they can reference the originals. Each tombstone is
+		// recorded as its delete commits, so a failure partway through the deletes still reports the deletes that
+		// already took effect.
 		List<IIdType> resourceIdsToDelete = new ArrayList<>(copiedResourceOriginalIds);
 		if (deleteSource) {
 			resourceIdsToDelete.add(theSourceResource.getIdElement());
@@ -516,10 +509,7 @@ public class ResourceMergeService {
 			// DELETE entry whose id is client-assigned (non-partition-decodable). Safe here because every id being
 			// deleted lives in the source resource's partition.
 			deleteResourcesOneByOne(
-					resourceIdsToDelete,
-					sourcePartition,
-					theRequestDetails,
-					tombstoneId -> theRollbackContext.addResourceToUndelete(sourcePartition, tombstoneId));
+					resourceIdsToDelete, sourcePartition, theRequestDetails, theCommittedResourceIds::add);
 		}
 	}
 
@@ -543,7 +533,7 @@ public class ResourceMergeService {
 			DaoMethodOutcome theTargetUpdateOutcome,
 			Date theStartTime,
 			RequestDetails theRequestDetails,
-			MergeRollbackContext theRollbackContext) {
+			List<IIdType> theCommittedResourceIds) {
 
 		String groupIdPrefix =
 				MergeProvenanceGroupIdUtil.generateGroupIdPrefix(theSourcePostMergeId, theTargetPostMergeId);
@@ -568,15 +558,6 @@ public class ResourceMergeService {
 					.add(theTargetPostMergeId);
 		}
 
-		// Record the partition the Provenances are stored on, so the rollback can delete them partition-pinned
-		// (their ids may not be partition-decodable). This mirrors the compartment-extension routing in
-		// ReplaceReferencesProvenanceSvc.addPatientCompartmentExtension: a Patient merge's Provenances go to the
-		// target Patient's partition; any other target type's go to the default partition.
-		RequestPartitionId provenancePartition = "Patient".equals(theTargetPostMergeId.getResourceType())
-				? theTargetPartition
-				: myPartitionSettings.getDefaultRequestPartitionId();
-		theRollbackContext.setProvenancePartition(provenancePartition);
-
 		for (Map.Entry<RequestPartitionId, List<IIdType>> entry : changedResourcesByPartition.entrySet()) {
 			IIdType subProvenanceId = myMergeResourceHelper.createProvenance(
 					theSourcePostMergeId,
@@ -588,7 +569,7 @@ public class ResourceMergeService {
 					theMergeOperationParameters.getProvenanceAgents(),
 					List.of());
 			if (subProvenanceId != null) {
-				theRollbackContext.addProvenanceId(subProvenanceId);
+				theCommittedResourceIds.add(subProvenanceId);
 			}
 		}
 
@@ -606,8 +587,70 @@ public class ResourceMergeService {
 				theMergeOperationParameters.getProvenanceAgents(),
 				containedResources);
 		if (mainProvenanceId != null) {
-			theRollbackContext.addProvenanceId(mainProvenanceId);
+			theCommittedResourceIds.add(mainProvenanceId);
 		}
+	}
+
+	/**
+	 * Populates the outcome for a cross-partition merge that failed after one or more of its steps had already
+	 * committed. A cross-partition merge is not atomic — partition changes commit in their own transactions — and
+	 * nothing here is reverted, so whatever committed is left in place and reported for manual reverting.
+	 *
+	 * <p>Note that the merge Provenances are reported alongside the data when they had already been created: a
+	 * failure after step 3 leaves the whole Provenance group behind, including the main "merge succeeded" Provenance,
+	 * so until an operator removes them the failed merge is indistinguishable from a completed one and
+	 * {@code $hapi.fhir.undo-merge} will act on it. This is a deliberate limitation of not rolling back.
+	 *
+	 * @param theCommittedResourceIds everything the forward steps committed, at its committed version
+	 * @param theFailureCause the exception that ended the merge
+	 * @param theOutcome the outcome to populate
+	 */
+	private void reportFailedCrossPartitionMerge(
+			List<IIdType> theCommittedResourceIds,
+			@Nullable Throwable theFailureCause,
+			OperationOutcomeWithStatusCode theOutcome) {
+
+		String msg;
+		int statusCode;
+		if (theCommittedResourceIds.isEmpty()) {
+			// Nothing committed, so the merge failed cleanly and no resource is in a merged state. Report the
+			// triggering exception's own status, just as the outer-transaction (nothing-committed) path does.
+			statusCode = resolveHttpStatusCode(theFailureCause);
+			msg = format(
+					"Cross-partition merge failed; no resources were committed. Merge failure cause: %s",
+					describeFailureCause(theFailureCause));
+		} else {
+			// Resources are left in their merged state — a server-side inconsistency regardless of what triggered
+			// the merge failure, hence always 500. Each is reported by its versioned id: this is the post-merge
+			// version the resource is left at, which points an operator straight at the state to revert.
+			statusCode = STATUS_HTTP_500_INTERNAL_ERROR;
+			String committedIds = theCommittedResourceIds.stream()
+					.map(id -> id.toUnqualified().getValue())
+					.collect(joining(", "));
+			msg = format(
+					"Cross-partition merge failed partway through and was not rolled back. The following resources "
+							+ "were committed and remain in their merged state, and must be reverted manually: %s. "
+							+ "Merge failure cause: %s",
+					committedIds, describeFailureCause(theFailureCause));
+		}
+		theOutcome.setHttpStatusCode(statusCode);
+		addErrorToOperationOutcome(myFhirContext, theOutcome.getOperationOutcome(), msg, ISSUE_TYPE_EXCEPTION);
+	}
+
+	private static int resolveHttpStatusCode(@Nullable Throwable theFailureCause) {
+		if (theFailureCause instanceof BaseServerResponseException serverException) {
+			return serverException.getStatusCode();
+		}
+		return STATUS_HTTP_500_INTERNAL_ERROR;
+	}
+
+	private static String describeFailureCause(@Nullable Throwable theFailureCause) {
+		if (theFailureCause == null) {
+			return "unknown";
+		}
+		String type = theFailureCause.getClass().getSimpleName();
+		String message = theFailureCause.getMessage();
+		return message != null ? type + ": " + message : type;
 	}
 
 	private static IIdType withVersionIncremented(IIdType theId) {
@@ -717,8 +760,8 @@ public class ResourceMergeService {
 	 * compartment Encounter), so delete conflicts are collected across the whole list — with every id pre-marked
 	 * for deletion so conflicts among the co-deleted resources are skipped, mirroring how a DELETE transaction
 	 * bundle validates — and validated once at the end. A genuine conflict (an outside referrer) then throws after
-	 * some deletes have committed; those are already recorded via {@code theOnDeleted}, so the rollback undeletes
-	 * them.
+	 * some deletes have committed; those are already recorded via {@code theOnDeleted}, so they are reported for
+	 * manual reverting.
 	 */
 	private void deleteResourcesOneByOne(
 			List<IIdType> theResourcesToDelete,
