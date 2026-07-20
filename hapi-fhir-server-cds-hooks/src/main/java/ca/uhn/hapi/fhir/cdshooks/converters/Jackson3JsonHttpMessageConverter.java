@@ -80,7 +80,7 @@ public class Jackson3JsonHttpMessageConverter extends AbstractHttpMessageConvert
 			return myMapper.readValue(theInputMessage.getBody(), theClazz);
 		} catch (JacksonException e) {
 			throw new HttpMessageNotReadableException(
-					Msg.code(9901) + "Could not read JSON: " + e.getMessage(), e, theInputMessage);
+					Msg.code(3001) + "Could not read JSON: " + e.getMessage(), e, theInputMessage);
 		}
 	}
 
@@ -90,7 +90,7 @@ public class Jackson3JsonHttpMessageConverter extends AbstractHttpMessageConvert
 		try {
 			myMapper.writeValue(theOutputMessage.getBody(), theObject);
 		} catch (JacksonException e) {
-			throw new HttpMessageNotWritableException(Msg.code(9902) + "Could not write JSON: " + e.getMessage(), e);
+			throw new HttpMessageNotWritableException(Msg.code(3002) + "Could not write JSON: " + e.getMessage(), e);
 		}
 	}
 
