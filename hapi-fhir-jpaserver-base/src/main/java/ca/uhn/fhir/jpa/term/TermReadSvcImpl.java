@@ -43,6 +43,7 @@ import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
+import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptViewDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptViewOracleDao;
@@ -235,6 +236,9 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 	@Autowired
 	private ITermConceptDao myTermConceptDao;
+
+	@Autowired
+	private ITermConceptParentChildLinkDao myConceptParentChildLinkDao;
 
 	@Autowired
 	private ITermValueSetConceptViewDao myTermValueSetConceptViewDao;
@@ -1295,8 +1299,14 @@ public class TermReadSvcImpl implements ITermReadSvc {
 				break;
 			case "parent":
 			case "child":
-				isCodeSystemLoincOrThrowInvalidRequestException(theCodeSystemIdentifier, theFilter.getProperty());
-				handleFilterLoincParentChild(theF, theB, theFilter);
+				if (theFilter.getOp() == ValueSet.FilterOperator.EXISTS) {
+					// The 'exists' operator on the hierarchical parent/child properties is generic (not
+					// LOINC-specific): it selects concepts that do (or don't) have parents/children.
+					handleFilterHierarchyExists(theCodeSystemIdentifier, theF, theB, theFilter);
+				} else {
+					isCodeSystemLoincOrThrowInvalidRequestException(theCodeSystemIdentifier, theFilter.getProperty());
+					handleFilterLoincParentChild(theF, theB, theFilter);
+				}
 				break;
 			case "ancestor":
 				isCodeSystemLoincOrThrowInvalidRequestException(theCodeSystemIdentifier, theFilter.getProperty());
@@ -1481,6 +1491,59 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		}
 		b.must(f.bool(innerB -> terms.forEach(
 				term -> innerB.should(f.match().field(term.field()).matching(term.text())))));
+	}
+
+	/**
+	 * Handles {@code property=child|parent} with {@code op=exists}. These hierarchical membership filters
+	 * are not code-system specific: {@code child exists=false} selects the leaf concepts (no children),
+	 * {@code parent exists=false} selects the roots (no parents), and the {@code true} variants select the
+	 * complement. Concepts that have children/parents are resolved from the stored parent/child links.
+	 */
+	private void handleFilterHierarchyExists(
+			String theCodeSystemIdentifier,
+			SearchPredicateFactory theF,
+			BooleanPredicateClausesStep<?> theB,
+			ValueSet.ConceptSetFilterComponent theFilter) {
+
+		// theFilter.getValue() is "true" or "false": do we want the concepts that HAVE the relation?
+		boolean wantConceptsWithRelation = Boolean.parseBoolean(theFilter.getValue());
+		boolean filterOnChildren = "child".equals(theFilter.getProperty());
+
+		Collection<String> codesHavingRelation =
+				findCodesHavingHierarchyRelation(theCodeSystemIdentifier, filterOnChildren);
+
+		if (codesHavingRelation.isEmpty()) {
+			// No concept has the relation. exists=true matches nothing; exists=false matches everything
+			// (so no additional predicate is needed).
+			if (wantConceptsWithRelation) {
+				theB.must(theF.matchNone());
+			}
+			return;
+		}
+
+		PredicateFinalStep matchesAnyOfThoseCodes =
+				theF.simpleQueryString().field("myCode").matching(String.join(" | ", codesHavingRelation));
+		if (wantConceptsWithRelation) {
+			theB.must(matchesAnyOfThoseCodes); // keep concepts that have the relation
+		} else {
+			theB.mustNot(matchesAnyOfThoseCodes); // keep the complement (leaves / roots)
+		}
+	}
+
+	/**
+	 * Returns the codes that actually have the requested hierarchy relation within the CodeSystem version.
+	 * Note the parent/child inversion: a concept "has children" iff it appears as a PARENT in a link, and
+	 * "has parents" iff it appears as a CHILD.
+	 */
+	private Collection<String> findCodesHavingHierarchyRelation(
+			String theCodeSystemIdentifier, boolean theFilterOnChildren) {
+		TermCodeSystemVersionDetails codeSystemVersion = getCurrentCodeSystemVersion(theCodeSystemIdentifier);
+		if (codeSystemVersion == null) {
+			return Collections.emptyList();
+		}
+		return theFilterOnChildren
+				? myConceptParentChildLinkDao.findDistinctParentCodesByCodeSystemVersion(codeSystemVersion.pid())
+				: myConceptParentChildLinkDao.findDistinctChildCodesByCodeSystemVersion(codeSystemVersion.pid());
 	}
 
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")

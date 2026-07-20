@@ -346,6 +346,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				myEntityManager.persist(persCs);
 
 				persCs.getConcepts().addAll(TermReadSvcImpl.toPersistedConcepts(codeSystem.getConcept(), persCs));
+				linkFlatHierarchyFromConceptProperties(codeSystem, persCs);
 				ourLog.debug("Code system has {} concepts", persCs.getConcepts().size());
 				storeNewCodeSystemVersion(
 						codeSystemUrl,
@@ -1214,6 +1215,87 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				codeSystem.setCurrentVersionPid(stagingCodeSystemVersionEntity);
 			}
 		});
+	}
+
+	static final String CONCEPT_PROPERTY_PARENT_URI = "http://hl7.org/fhir/concept-properties#parent";
+	static final String CONCEPT_PROPERTY_CHILD_URI = "http://hl7.org/fhir/concept-properties#child";
+
+	/**
+	 * Builds parent/child links for CodeSystems that express their hierarchy FLAT — i.e. concepts sit in a
+	 * flat list and each carries a {@code parent} (or {@code child}) concept-property, rather than being
+	 * nested via {@code CodeSystem.concept}. Only property definitions declaring the canonical
+	 * concept-properties URI ({@value #CONCEPT_PROPERTY_PARENT_URI} / {@value #CONCEPT_PROPERTY_CHILD_URI})
+	 * are honored. This runs in addition to the nested-concept handling, so a mixed representation is
+	 * supported and existing links are never duplicated.
+	 */
+	static void linkFlatHierarchyFromConceptProperties(CodeSystem theCodeSystem, TermCodeSystemVersion thePersCs) {
+		Set<String> parentPropertyCodes = resolveHierarchyPropertyCodes(theCodeSystem, CONCEPT_PROPERTY_PARENT_URI);
+		Set<String> childPropertyCodes = resolveHierarchyPropertyCodes(theCodeSystem, CONCEPT_PROPERTY_CHILD_URI);
+		if (parentPropertyCodes.isEmpty() && childPropertyCodes.isEmpty()) {
+			return;
+		}
+
+		Map<String, TermConcept> conceptsByCode = new HashMap<>();
+		for (TermConcept concept : thePersCs.getConcepts()) {
+			indexConceptsByCode(concept, conceptsByCode);
+		}
+
+		linkFlatHierarchy(theCodeSystem.getConcept(), conceptsByCode, parentPropertyCodes, childPropertyCodes);
+	}
+
+	private static Set<String> resolveHierarchyPropertyCodes(CodeSystem theCodeSystem, String theCanonicalUri) {
+		Set<String> codes = new HashSet<>();
+		for (CodeSystem.PropertyComponent property : theCodeSystem.getProperty()) {
+			if (theCanonicalUri.equals(property.getUri()) && property.hasCode()) {
+				codes.add(property.getCode());
+			}
+		}
+		return codes;
+	}
+
+	private static void indexConceptsByCode(TermConcept theConcept, Map<String, TermConcept> theConceptsByCode) {
+		theConceptsByCode.putIfAbsent(theConcept.getCode(), theConcept);
+		for (TermConceptParentChildLink childLink : theConcept.getChildren()) {
+			indexConceptsByCode(childLink.getChild(), theConceptsByCode);
+		}
+	}
+
+	private static void linkFlatHierarchy(
+			List<CodeSystem.ConceptDefinitionComponent> theSourceConcepts,
+			Map<String, TermConcept> theConceptsByCode,
+			Set<String> theParentPropertyCodes,
+			Set<String> theChildPropertyCodes) {
+		for (CodeSystem.ConceptDefinitionComponent sourceConcept : theSourceConcepts) {
+			TermConcept concept = theConceptsByCode.get(sourceConcept.getCode());
+			if (concept != null) {
+				for (CodeSystem.ConceptPropertyComponent property : sourceConcept.getProperty()) {
+					if (!property.hasValue() || !property.getValue().isPrimitive()) {
+						continue;
+					}
+					String relatedCode = property.getValue().primitiveValue();
+					if (isBlank(relatedCode)) {
+						continue;
+					}
+					if (theParentPropertyCodes.contains(property.getCode())) {
+						addChildLinkIfAbsent(theConceptsByCode.get(relatedCode), concept);
+					} else if (theChildPropertyCodes.contains(property.getCode())) {
+						addChildLinkIfAbsent(concept, theConceptsByCode.get(relatedCode));
+					}
+				}
+			}
+			linkFlatHierarchy(
+					sourceConcept.getConcept(), theConceptsByCode, theParentPropertyCodes, theChildPropertyCodes);
+		}
+	}
+
+	private static void addChildLinkIfAbsent(TermConcept theParent, TermConcept theChild) {
+		if (theParent == null || theChild == null || theParent == theChild) {
+			return;
+		}
+		boolean alreadyLinked = theChild.getParents().stream().anyMatch(link -> theParent.equals(link.getParent()));
+		if (!alreadyLinked) {
+			theParent.addChild(theChild, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
+		}
 	}
 
 	private TermConcept convertResourceConceptAndChildrenToStorageConcepts(

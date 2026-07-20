@@ -2,6 +2,7 @@ package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import org.hl7.fhir.r5.model.CodeSystem;
+import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.Enumerations.FilterOperator;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.junit.jupiter.api.Test;
@@ -37,6 +38,44 @@ class ValueSetExpansionFilterContextTest {
 		var p = cs.addConcept().setCode("P");
 		p.addConcept().setCode("C1").addConcept().setCode("C2");
 		p.addConcept().setCode("C3");
+		return cs;
+	}
+
+	public static final String CONCEPT_PROPERTIES_PARENT =
+		"http://hl7.org/fhir/concept-properties#parent";
+	public static final String CONCEPT_PROPERTIES_CHILD =
+		"http://hl7.org/fhir/concept-properties#child";
+
+	/**
+	 * Helper: build the same P → C1 → C2, P → C3 hierarchy as {@link #hierarchicalCS(boolean)}, but
+	 * expressed FLAT (all concepts at top level) with the hierarchy encoded via a {@code parent}
+	 * concept-property whose definition uses the canonical concept-properties URI.
+	 */
+	private static CodeSystem flatCSWithParentProperty(boolean caseSensitive) {
+		CodeSystem cs = new CodeSystem()
+			.setUrl("http://example.org/flatparent")
+			.setCaseSensitive(caseSensitive);
+		cs.addProperty().setCode("parent").setUri(CONCEPT_PROPERTIES_PARENT).setType(CodeSystem.PropertyType.CODE);
+		cs.addConcept().setCode("P");
+		cs.addConcept().setCode("C1").addProperty().setCode("parent").setValue(new CodeType("P"));
+		cs.addConcept().setCode("C2").addProperty().setCode("parent").setValue(new CodeType("C1"));
+		cs.addConcept().setCode("C3").addProperty().setCode("parent").setValue(new CodeType("P"));
+		return cs;
+	}
+
+	/**
+	 * Like {@link #flatCSWithParentProperty(boolean)} but the {@code parent} property definition uses a
+	 * NON-canonical URI, so the hierarchy must be ignored (every concept is treated as a root/leaf).
+	 */
+	private static CodeSystem flatCSWithNonCanonicalParentProperty(boolean caseSensitive) {
+		CodeSystem cs = new CodeSystem()
+			.setUrl("http://example.org/flatparent-noncanonical")
+			.setCaseSensitive(caseSensitive);
+		cs.addProperty().setCode("parent").setUri("http://example.org/custom#parent").setType(CodeSystem.PropertyType.CODE);
+		cs.addConcept().setCode("P");
+		cs.addConcept().setCode("C1").addProperty().setCode("parent").setValue(new CodeType("P"));
+		cs.addConcept().setCode("C2").addProperty().setCode("parent").setValue(new CodeType("C1"));
+		cs.addConcept().setCode("C3").addProperty().setCode("parent").setValue(new CodeType("P"));
 		return cs;
 	}
 
@@ -605,6 +644,129 @@ class ValueSetExpansionFilterContextTest {
 		assertThat(actual)
 			.as("EXISTS[%s=%s] on code '%s' (caseSensitive=%b)",
 				property, wantExists, testCode, caseSensitive)
+			.isEqualTo(expectedIsFiltered);
+	}
+
+	private static CodeSystem hierarchyCS(String kind, boolean caseSensitive) {
+		return "flat".equals(kind) ? flatCSWithParentProperty(caseSensitive) : hierarchicalCS(caseSensitive);
+	}
+
+	@ParameterizedTest(name = "[child-exists] kind={0}, want={1}, code={2} ⇒ filtered={3}")
+	@CsvSource(
+		delimiter = '|',
+		value = {
+			// hierarchy shape: P -> C1 -> C2, P -> C3. Leaves: C2, C3.
+			// kind   | wantExists | code | expectedIsFiltered
+			// exists=false keeps leaves (KDL case)
+			"nested   | false      | P    | true",
+			"nested   | false      | C1   | true",
+			"nested   | false      | C2   | false",
+			"nested   | false      | C3   | false",
+			"flat     | false      | P    | true",
+			"flat     | false      | C1   | true",
+			"flat     | false      | C2   | false",
+			"flat     | false      | C3   | false",
+			// exists=true keeps concepts that have children
+			"nested   | true       | P    | false",
+			"nested   | true       | C1   | false",
+			"nested   | true       | C2   | true",
+			"nested   | true       | C3   | true",
+			"flat     | true       | P    | false",
+			"flat     | true       | C1   | false",
+			"flat     | true       | C2   | true",
+			"flat     | true       | C3   | true"
+		})
+	void testChildExistsFilterBehavior(String kind, boolean wantExists, String testCode, boolean expectedIsFiltered) {
+		CodeSystem cs = hierarchyCS(kind, true);
+		boolean actual = isFilteredWithProperty(
+			cs,
+			"child",
+			FilterOperator.EXISTS,
+			Boolean.toString(wantExists),
+			new FhirVersionIndependentConcept(cs.getUrl(), testCode));
+
+		assertThat(actual)
+			.as("child EXISTS=%s on code '%s' (kind=%s)", wantExists, testCode, kind)
+			.isEqualTo(expectedIsFiltered);
+	}
+
+	@ParameterizedTest(name = "[parent-exists] kind={0}, want={1}, code={2} ⇒ filtered={3}")
+	@CsvSource(
+		delimiter = '|',
+		value = {
+			// Root: P. Non-roots: C1, C2, C3.
+			// kind   | wantExists | code | expectedIsFiltered
+			// exists=false keeps the root
+			"nested   | false      | P    | false",
+			"nested   | false      | C1   | true",
+			"nested   | false      | C2   | true",
+			"nested   | false      | C3   | true",
+			"flat     | false      | P    | false",
+			"flat     | false      | C1   | true",
+			"flat     | false      | C2   | true",
+			"flat     | false      | C3   | true",
+			// exists=true keeps concepts that have a parent
+			"nested   | true       | P    | true",
+			"nested   | true       | C1   | false",
+			"nested   | true       | C2   | false",
+			"nested   | true       | C3   | false",
+			"flat     | true       | P    | true",
+			"flat     | true       | C1   | false",
+			"flat     | true       | C2   | false",
+			"flat     | true       | C3   | false"
+		})
+	void testParentExistsFilterBehavior(String kind, boolean wantExists, String testCode, boolean expectedIsFiltered) {
+		CodeSystem cs = hierarchyCS(kind, true);
+		boolean actual = isFilteredWithProperty(
+			cs,
+			"parent",
+			FilterOperator.EXISTS,
+			Boolean.toString(wantExists),
+			new FhirVersionIndependentConcept(cs.getUrl(), testCode));
+
+		assertThat(actual)
+			.as("parent EXISTS=%s on code '%s' (kind=%s)", wantExists, testCode, kind)
+			.isEqualTo(expectedIsFiltered);
+	}
+
+	@Test
+	void childExistsIgnoresNonCanonicalParentProperty() {
+		// The parent property definition does NOT use the canonical concept-properties URI, so no
+		// hierarchy is built: every concept is a leaf → child exists=false keeps all of them.
+		CodeSystem cs = flatCSWithNonCanonicalParentProperty(true);
+		for (String code : List.of("P", "C1", "C2", "C3")) {
+			boolean filtered = isFilteredWithProperty(
+				cs,
+				"child",
+				FilterOperator.EXISTS,
+				"false",
+				new FhirVersionIndependentConcept(cs.getUrl(), code));
+			assertThat(filtered)
+				.as("child EXISTS=false on '%s' with non-canonical parent property", code)
+				.isFalse();
+		}
+	}
+
+	@ParameterizedTest(name = "[descendent-of-flat] filter={0}, code={1} ⇒ filtered={2}")
+	@CsvSource({
+		// Structural ops must also work when hierarchy comes from a flat parent concept-property.
+		"P, P,  true",
+		"P, C1, false",
+		"P, C2, false",
+		"P, C3, false",
+		"C1, C2, false",
+		"C1, C3, true"
+	})
+	void descendentOfWorksOnFlatParentProperty(String filterValue, String testCode, boolean expectedIsFiltered) {
+		CodeSystem cs = flatCSWithParentProperty(true);
+		boolean actual = isFiltered(
+			cs,
+			FilterOperator.DESCENDENTOF,
+			filterValue,
+			new FhirVersionIndependentConcept(cs.getUrl(), testCode));
+
+		assertThat(actual)
+			.as("DESCENDENTOF[%s] on '%s' (flat parent property)", filterValue, testCode)
 			.isEqualTo(expectedIsFiltered);
 	}
 }

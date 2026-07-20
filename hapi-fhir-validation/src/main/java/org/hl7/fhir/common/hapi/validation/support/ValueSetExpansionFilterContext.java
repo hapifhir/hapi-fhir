@@ -2,6 +2,7 @@ package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import org.hl7.fhir.r5.model.CodeSystem;
+import org.hl7.fhir.r5.model.Enumerations.FilterOperator;
 import org.hl7.fhir.r5.model.ValueSet;
 
 import java.util.ArrayDeque;
@@ -19,20 +20,34 @@ import java.util.regex.PatternSyntaxException;
 
 /**
  * Class to apply ValueSet filters during in-memory expansion.
- * Will only work on 'code', 'concept' and 'display' property types.
+ * Works on 'code', 'concept' and 'display' property types, plus the hierarchical 'child' and 'parent'
+ * properties (with the {@code exists} operator).
+ *
+ * <p>The concept hierarchy used by the structural operators is built both from nested
+ * {@code CodeSystem.concept} arrays and from a FLAT representation where each concept carries a
+ * {@code parent} (or {@code child}) concept-property whose {@code CodeSystem.property} definition uses
+ * the canonical concept-properties URI ({@value #CONCEPT_PROPERTY_PARENT_URI} /
+ * {@value #CONCEPT_PROPERTY_CHILD_URI}).
  *
  * Supports: equal | is-a | descendent-of | is-not-a | regex | in | not-in | generalizes | child-of | descendent-leaf | exists
  */
 public class ValueSetExpansionFilterContext {
+	public static final String CONCEPT_PROPERTY_PARENT_URI = "http://hl7.org/fhir/concept-properties#parent";
+	public static final String CONCEPT_PROPERTY_CHILD_URI = "http://hl7.org/fhir/concept-properties#child";
+
 	private final Map<String, Map<String, String>> propertyIndex = new HashMap<>();
 
 	private final Map<String, Set<String>> conceptCodeTree = new HashMap<>();
 	private final Set<String> allCodes = new HashSet<>();
 	private final Set<String> allCodesLower = new HashSet<>();
+	private final Set<String> allChildCodes = new HashSet<>();
+	private final Set<String> allChildCodesLower = new HashSet<>();
 	private final Map<String, Set<String>> inSetsMap = new HashMap<>();
 	private final Map<String, Pattern> regexCache = new HashMap<>();
 	private final CodeSystem codeSystem;
 	private final List<ValueSet.ConceptSetFilterComponent> filters;
+	private Set<String> parentPropertyCodes = Collections.emptySet();
+	private Set<String> childPropertyCodes = Collections.emptySet();
 	private boolean hasIndexRun = false;
 
 	public ValueSetExpansionFilterContext(CodeSystem codeSystem, List<ValueSet.ConceptSetFilterComponent> filters) {
@@ -66,6 +81,24 @@ public class ValueSetExpansionFilterContext {
 					filter.hasProperty() ? filter.getProperty().toLowerCase(Locale.ROOT) : "concept";
 			boolean onCode = theFilterProperty.equals("concept") || theFilterProperty.equals("code");
 			boolean onDisplay = theFilterProperty.equals("display");
+			boolean onChild = theFilterProperty.equals("child");
+			boolean onParent = theFilterProperty.equals("parent");
+
+			/*
+			 * Hierarchical membership filters. Per the FHIR spec the 'child' and 'parent' properties are
+			 * used with the 'exists' operator to select concepts that do (or don't) have children/parents
+			 * — e.g. property=child op=exists value=false selects the leaf concepts.
+			 */
+			if (onChild || onParent) {
+				if (filter.getOp() == FilterOperator.EXISTS) {
+					boolean wantExists = Boolean.parseBoolean(filter.getValue());
+					boolean hasRelation = onChild ? hasChildren(concept.getCode()) : hasParent(concept.getCode());
+					return wantExists == hasRelation;
+				}
+
+				// Any other operator on child/parent is unsupported in the in-memory support → exclude.
+				return false;
+			}
 
 			/**
 			 * Only code/display supported in the in-memory validation support, so reject any custom concept properties,
@@ -273,6 +306,17 @@ public class ValueSetExpansionFilterContext {
 		return values.stream().anyMatch(part -> isEqualsWithOptionalCaseSensitive(part, theCandidatePropertyValue));
 	}
 
+	private boolean hasChildren(String theCode) {
+		return !conceptCodeTree.getOrDefault(theCode, Collections.emptySet()).isEmpty();
+	}
+
+	private boolean hasParent(String theCode) {
+		if (codeSystem.getCaseSensitive()) {
+			return allChildCodes.contains(theCode);
+		}
+		return allChildCodesLower.contains(theCode.toLowerCase());
+	}
+
 	private boolean isFilterPropertyValueNotInCodeSystem(String theFilterPropertyValue) {
 		// Fast O(1) existence check, respecting case sensitivity
 		if (codeSystem.getCaseSensitive()) {
@@ -299,9 +343,26 @@ public class ValueSetExpansionFilterContext {
 
 	private void buildIndexes() {
 		if (!hasIndexRun) {
+			parentPropertyCodes = resolveHierarchyPropertyCodes(CONCEPT_PROPERTY_PARENT_URI);
+			childPropertyCodes = resolveHierarchyPropertyCodes(CONCEPT_PROPERTY_CHILD_URI);
 			buildIndexes(codeSystem.getConcept());
 			hasIndexRun = true;
 		}
+	}
+
+	/**
+	 * Resolve the concept-property code(s) that carry hierarchy for the given canonical concept-properties
+	 * URI. Only property definitions declaring exactly that URI are honored, so a custom property that
+	 * happens to be named "parent"/"child" is ignored.
+	 */
+	private Set<String> resolveHierarchyPropertyCodes(String theCanonicalUri) {
+		Set<String> codes = new HashSet<>();
+		for (CodeSystem.PropertyComponent property : codeSystem.getProperty()) {
+			if (theCanonicalUri.equals(property.getUri()) && property.hasCode()) {
+				codes.add(property.getCode());
+			}
+		}
+		return codes;
 	}
 
 	private void buildIndexes(List<CodeSystem.ConceptDefinitionComponent> defs) {
@@ -313,9 +374,27 @@ public class ValueSetExpansionFilterContext {
 			allCodes.add(code);
 			allCodesLower.add(code.toLowerCase());
 
-			// 2) Index immediate children
+			// 2) Index immediate children (nested representation)
 			for (var child : def.getConcept()) {
-				conceptCodeTree.computeIfAbsent(code, k -> new HashSet<>()).add(child.getCode());
+				addParentChildEdge(code, child.getCode());
+			}
+
+			// 2b) Index hierarchy expressed via flat parent/child concept-properties
+			for (var property : def.getProperty()) {
+				if (!property.hasValue() || !property.getValue().isPrimitive()) {
+					continue;
+				}
+				String relatedCode = property.getValue().primitiveValue();
+				if (isBlank(relatedCode)) {
+					continue;
+				}
+				if (parentPropertyCodes.contains(property.getCode())) {
+					// 'code' declares 'relatedCode' as its parent → relatedCode -> code
+					addParentChildEdge(relatedCode, code);
+				} else if (childPropertyCodes.contains(property.getCode())) {
+					// 'code' declares 'relatedCode' as its child → code -> relatedCode
+					addParentChildEdge(code, relatedCode);
+				}
 			}
 
 			// 3) Index the "code" property
@@ -327,5 +406,15 @@ public class ValueSetExpansionFilterContext {
 			// 5) Recurse
 			buildIndexes(def.getConcept());
 		}
+	}
+
+	private void addParentChildEdge(String theParentCode, String theChildCode) {
+		conceptCodeTree.computeIfAbsent(theParentCode, k -> new HashSet<>()).add(theChildCode);
+		allChildCodes.add(theChildCode);
+		allChildCodesLower.add(theChildCode.toLowerCase());
+	}
+
+	private static boolean isBlank(String theValue) {
+		return theValue == null || theValue.isEmpty();
 	}
 }
