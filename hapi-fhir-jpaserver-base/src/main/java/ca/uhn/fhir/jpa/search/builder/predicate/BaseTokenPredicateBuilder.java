@@ -69,10 +69,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
- * Abstract base for token search predicate builders. Contains the shared
- * parameter-parsing and code-resolution logic used by both
- * {@link TokenPredicateBuilder} (legacy {@code HFJ_SPIDX_TOKEN}) and
- * {@link CompressedTokenPredicateBuilder} (compressed token index tables).
+ * Base class for predicate builders that handle token search parameters.
  */
 public abstract class BaseTokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 

@@ -43,7 +43,6 @@ import ca.uhn.fhir.jpa.search.builder.predicate.BaseSearchParamPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseTokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.predicate.CompressedTokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ICanMakeMissingParamPredicate;
@@ -729,12 +728,12 @@ public class QueryStack {
 		 */
 		SearchQueryBuilder sqlBuilder = theParams.getSqlBuilder();
 
-		// Compressed token tables have no SP_MISSING column, so :missing is handled in a separate branch.
-		// Compressed token read routing is provided via a CDR API.
-		//		if (theParams.getParamType() == RestSearchParameterTypeEnum.TOKEN
-		//				&& myStorageSettings.getTokenIndexStrategy().readFromCompressedTokenTables()) {
-		//			return createMissingPredicateForCompressedToken(theParams, sqlBuilder);
-		//		}
+		// allow custom index providers to build their own :missing predicate
+		Optional<BaseSearchParamPredicateBuilder> custom =
+				sqlBuilder.getCustomPredicateBuilder(theParams.getParamType(), theParams.getParamName());
+		if (custom.isPresent()) {
+			return createMissingPredicateForCustomIndexProvider(theParams, sqlBuilder, custom.get());
+		}
 
 		if (myStorageSettings.getIndexMissingFields() == JpaStorageSettings.IndexEnabledEnum.DISABLED) {
 			// new search
@@ -743,6 +742,19 @@ public class QueryStack {
 			// old search
 			return createMissingPredicateForIndexedMissingFields(theParams, sqlBuilder);
 		}
+	}
+
+	/**
+	 * Builds the {@code :missing} predicate using the custom index builder
+	 */
+	private Condition createMissingPredicateForCustomIndexProvider(
+			MissingParameterQueryParams theParams,
+			SearchQueryBuilder theSqlBuilder,
+			BaseSearchParamPredicateBuilder theCustomPredicateBuilder) {
+		ResourceTablePredicateBuilder table = theSqlBuilder.getOrCreateResourceTablePredicateBuilder();
+		MissingQueryParameterPredicateParams missingQueryParameterPredicate = new MissingQueryParameterPredicateParams(
+				table, theParams.isMissing(), theParams.getParamName(), theParams.getRequestPartitionId());
+		return theCustomPredicateBuilder.createPredicateParamMissingValue(missingQueryParameterPredicate);
 	}
 
 	/**
@@ -834,25 +846,6 @@ public class QueryStack {
 		ICanMakeMissingParamPredicate innerQuery = PredicateBuilderFactory.createPredicateBuilderForParamType(
 				theParams.getParamType(), theParams.getSqlBuilder(), this);
 		return innerQuery.createPredicateParamMissingValue(new MissingQueryParameterPredicateParams(
-				table, theParams.isMissing(), theParams.getParamName(), theParams.getRequestPartitionId()));
-	}
-
-	/**
-	 * Creates :missing predicate for compressed token tables.
-	 */
-	private Condition createMissingPredicateForCompressedToken(
-			MissingParameterQueryParams theParams, SearchQueryBuilder sqlBuilder) {
-		ResourceTablePredicateBuilder table = sqlBuilder.getOrCreateResourceTablePredicateBuilder();
-
-		// TokenIndexMode tokenIndexMode = TokenIndexMode.resolve(theParams.getParamName(), myStorageSettings);
-
-		CompressedTokenPredicateBuilder tokenBuilder = sqlBuilder
-				.getSqlBuilderFactory()
-				.compressedTokenIndexTable(
-						sqlBuilder // , tokenIndexMode
-						);
-
-		return tokenBuilder.createPredicateParamMissingValue(new MissingQueryParameterPredicateParams(
 				table, theParams.isMissing(), theParams.getParamName(), theParams.getRequestPartitionId()));
 	}
 

@@ -19,10 +19,11 @@
  */
 package ca.uhn.fhir.jpa.search.builder.sql;
 
+import ca.uhn.fhir.jpa.dao.index.ICustomIndexPredicateProvider;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
+import ca.uhn.fhir.jpa.search.builder.predicate.BaseSearchParamPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.predicate.CompressedTokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
@@ -39,16 +40,42 @@ import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class SqlObjectFactory {
 
 	@Autowired
 	private ApplicationContext myApplicationContext;
+
+	private List<ICustomIndexPredicateProvider> myCustomIndexPredicateProviders = Collections.emptyList();
+
+	@Autowired(required = false)
+	public void setCustomIndexPredicateProviders(List<ICustomIndexPredicateProvider> theCustomIndexPredicateProviders) {
+		myCustomIndexPredicateProviders = theCustomIndexPredicateProviders;
+	}
+
+	/**
+	 * Lets an alternative index serve reads for the given search parameter, falling back to the built-in index if none handles it.
+	 */
+	public Optional<BaseSearchParamPredicateBuilder> provideCustomPredicateBuilder(
+			SearchQueryBuilder theSearchSqlBuilder, RestSearchParameterTypeEnum theParamType, String theParamName) {
+		for (ICustomIndexPredicateProvider provider : myCustomIndexPredicateProviders) {
+			Optional<BaseSearchParamPredicateBuilder> builder =
+					provider.provideCustomPredicateBuilder(theSearchSqlBuilder, theParamType, theParamName);
+			if (builder.isPresent()) {
+				return builder;
+			}
+		}
+		return Optional.empty();
+	}
 
 	public ComboUniqueSearchParameterPredicateBuilder newComboUniqueSearchParameterPredicateBuilder(
 			SearchQueryBuilder theSearchSqlBuilder) {
@@ -116,14 +143,6 @@ public class SqlObjectFactory {
 
 	public TokenPredicateBuilder tokenIndexTable(SearchQueryBuilder theSearchSqlBuilder) {
 		return myApplicationContext.getBean(TokenPredicateBuilder.class, theSearchSqlBuilder);
-	}
-
-	public CompressedTokenPredicateBuilder compressedTokenIndexTable(
-			SearchQueryBuilder theSearchSqlBuilder // , TokenIndexMode theTokenIndexMode
-			) {
-		return myApplicationContext.getBean(
-				CompressedTokenPredicateBuilder.class, theSearchSqlBuilder // , theTokenIndexMode
-				);
 	}
 
 	public UriPredicateBuilder uriIndexTable(SearchQueryBuilder theSearchSqlBuilder) {

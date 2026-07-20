@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.BaseSearchParamPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseTokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
@@ -49,6 +50,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -82,10 +84,12 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.TOKEN;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN;
@@ -388,20 +392,25 @@ public class SearchQueryBuilder {
 
 	/**
 	 * Adds a predicate builder for a TOKEN search parameter.
+	 * If a custom-index provider is configured, it builds the predicate; otherwise it falls back to the built-in token table.
 	 */
 	public BaseTokenPredicateBuilder addTokenPredicateBuilder(
 			@Nullable DbColumn[] theSourceJoinColumn, RuntimeSearchParam theSearchParam) {
-		// Compressed token read routing is provided via a CDR API.
-		//		if (myStorageSettings.getTokenIndexStrategy().readFromCompressedTokenTables()) {
-		//			// TokenIndexMode indexMode = TokenIndexMode.resolve(theSearchParam.getName(), myStorageSettings);
-		//			CompressedTokenPredicateBuilder retVal = mySqlBuilderFactory.compressedTokenIndexTable(
-		//					this // , indexMode
-		//					);
-		//			addTable(retVal, theSourceJoinColumn);
-		//			return retVal;
-		//		}
-		// default read from Legacy token table
+		Optional<BaseSearchParamPredicateBuilder> custom = getCustomPredicateBuilder(TOKEN, theSearchParam.getName());
+		if (custom.isPresent()) {
+			BaseTokenPredicateBuilder retVal = (BaseTokenPredicateBuilder) custom.get();
+			addTable(retVal, theSourceJoinColumn);
+			return retVal;
+		}
 		return addTokenPredicateBuilder(theSourceJoinColumn);
+	}
+
+	/**
+	 * Returns a custom-index predicate builder for the given search parameter, or empty if none handles it.
+	 */
+	public Optional<BaseSearchParamPredicateBuilder> getCustomPredicateBuilder(
+			RestSearchParameterTypeEnum theParamType, String theParamName) {
+		return mySqlBuilderFactory.provideCustomPredicateBuilder(this, theParamType, theParamName);
 	}
 
 	/**
