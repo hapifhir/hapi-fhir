@@ -780,92 +780,115 @@ public class PatientIdPartitionInterceptor {
 	}
 
 	/**
-	 * Resolves each urn-fullUrl Patient entry to a concrete ID (reusing a matched conditional's existing ID, or
-	 * minting one when the server assigns UUIDs) and returns the fullUrl/URL -> concrete-reference substitutions
-	 * to apply to the rest of the bundle.
+	 * Resolves each Patient entry carrying a placeholder (urn:uuid) fullUrl to a concrete ID and returns the
+	 * fullUrl/URL -> concrete-reference substitutions to apply to the rest of the bundle. For entries without a
+	 * placeholder fullUrl, the only possible work is stamping a matched ID on an id-less conditional Patient
+	 * update.
 	 */
 	// Created by Claude Fable 5
 	private Map<String, String> resolvePatientEntryIds(
 			TransactionWriteAfterPrefetchDetails thePrefetchDetails, TransactionDetails theTransactionDetails) {
 		ITransactionProcessorVersionAdapter<IBaseBundle, IBase> versionAdapter = thePrefetchDetails.getVersionAdapter();
+		Map<String, String> idSubstitutions = new HashMap<>();
+		Map<String, String> matchUrlToMintedReference = new HashMap<>();
+
+		for (IBase entry : thePrefetchDetails.getEntries()) {
+			String fullUrl = versionAdapter.getFullUrl(entry);
+			if (fullUrl == null || !fullUrl.startsWith("urn:uuid:")) {
+				setIdOnIdlessMatchedConditionalPatientUpdate(versionAdapter, theTransactionDetails, entry);
+			} else {
+				resolvePlaceholderPatientEntry(
+						thePrefetchDetails,
+						theTransactionDetails,
+						entry,
+						fullUrl,
+						idSubstitutions,
+						matchUrlToMintedReference);
+			}
+		}
+		return idSubstitutions;
+	}
+
+	/**
+	 * Resolves one Patient entry carrying a placeholder (urn:uuid) fullUrl: a matched conditional reuses the
+	 * existing resource's ID; when the server assigns UUIDs, an unconditional create is assigned a minted ID and
+	 * rewritten as a direct update, and an unmatched conditional is assigned a minted ID but stays conditional.
+	 * Substitutions and minted references accumulate in the supplied maps.
+	 */
+	// Created by Claude Fable 5
+	private void resolvePlaceholderPatientEntry(
+			TransactionWriteAfterPrefetchDetails thePrefetchDetails,
+			TransactionDetails theTransactionDetails,
+			IBase theEntry,
+			String theFullUrl,
+			Map<String, String> theIdSubstitutions,
+			Map<String, String> theMatchUrlToMintedReference) {
+		ITransactionProcessorVersionAdapter<IBaseBundle, IBase> versionAdapter = thePrefetchDetails.getVersionAdapter();
+		IBaseResource resource = versionAdapter.getResource(theEntry);
+		if (resource == null || !PATIENT_STR.equals(myFhirContext.getResourceType(resource))) {
+			return;
+		}
 
 		// A placeholder Patient (urn:uuid id, no client id) can only be assigned a server id up front when the server
 		// assigns UUIDs; otherwise its id isn't known until insert, too late for compartment routing. In that case we
 		// leave the entry untouched.
 		boolean serverAssignsUuids = thePrefetchDetails.getStorageSettings().getResourceServerIdStrategy()
 				== JpaStorageSettings.IdStrategyEnum.UUID;
-
-		Map<String, String> idSubstitutions = new HashMap<>();
-		Map<String, String> matchUrlToMintedReference = new HashMap<>();
 		Map<String, RewrittenOutcome> rewrittenOutcomes =
 				theTransactionDetails.getOrCreateUserData(REWRITTEN_OUTCOMES_KEY, HashMap::new);
 
-		for (IBase entry : thePrefetchDetails.getEntries()) {
-			String fullUrl = versionAdapter.getFullUrl(entry);
-			if (fullUrl == null || !fullUrl.startsWith("urn:uuid:")) {
-				setIdOnIdlessMatchedConditionalPatientUpdate(versionAdapter, theTransactionDetails, entry);
-				continue;
-			}
-			IBaseResource resource = versionAdapter.getResource(entry);
-			if (resource == null || !PATIENT_STR.equals(myFhirContext.getResourceType(resource))) {
-				continue;
-			}
+		String method = versionAdapter.getEntryRequestVerb(myFhirContext, theEntry);
+		String url = versionAdapter.getEntryRequestUrl(theEntry);
+		String matchUrl = null;
+		if ("POST".equals(method)) {
+			matchUrl = versionAdapter.getEntryRequestIfNoneExist(theEntry);
+		} else if ("PUT".equals(method) && url != null && url.contains("?")) {
+			matchUrl = url;
+		}
 
-			String method = versionAdapter.getEntryRequestVerb(myFhirContext, entry);
-			String url = versionAdapter.getEntryRequestUrl(entry);
-			String matchUrl = null;
+		if (isBlank(matchUrl)) {
 			if ("POST".equals(method)) {
-				matchUrl = versionAdapter.getEntryRequestIfNoneExist(entry);
-			} else if ("PUT".equals(method) && url != null && url.contains("?")) {
-				matchUrl = url;
+				if (serverAssignsUuids) {
+					String newReference = assignNewIdAndRewriteToPut(
+							versionAdapter, theTransactionDetails, theEntry, resource, theFullUrl, theIdSubstitutions);
+					rewrittenOutcomes.put(newReference, new RewrittenOutcome(RewriteIntent.UNCONDITIONAL_CREATE, null));
+				}
+			} else if ("PUT".equals(method) && isNotBlank(url) && !Strings.CS.equals(theFullUrl, url)) {
+				theIdSubstitutions.put(theFullUrl, url);
 			}
-
-			if (isBlank(matchUrl)) {
-				if ("POST".equals(method)) {
-					if (serverAssignsUuids) {
-						String newReference = assignNewIdAndRewriteToPut(
-								versionAdapter, theTransactionDetails, entry, resource, fullUrl, idSubstitutions);
-						rewrittenOutcomes.put(
-								newReference, new RewrittenOutcome(RewriteIntent.UNCONDITIONAL_CREATE, null));
-					}
-				} else if ("PUT".equals(method) && isNotBlank(url) && !Strings.CS.equals(fullUrl, url)) {
-					idSubstitutions.put(fullUrl, url);
+		} else {
+			PreFetchResolution resolution = getPreFetchResolution(matchUrl, theTransactionDetails);
+			if (resolution.matched() && resolution.matchedId() == null) {
+				// Matched, but without a reverse-mapped id (non-token match URL): the id is unknowable this
+				// early, and minting a new id for a matched URL would be wrong — leave the entry untouched.
+			} else if (resolution.matched()) {
+				String matchedReference =
+						resolution.matchedId().toUnqualifiedVersionless().getValue();
+				theIdSubstitutions.put(theFullUrl, matchedReference);
+				// Stamp the matched id on the body so identifyForCreate can route the entry. The entry stays
+				// conditional: the framework validates the body id against the match and reports the
+				// conditional-match outcome natively. A conditional POST already NOPs to the match correctly,
+				// so it is left alone.
+				if ("PUT".equals(method)) {
+					resource.setId(matchedReference);
 				}
-			} else {
-				PreFetchResolution resolution = getPreFetchResolution(matchUrl, theTransactionDetails);
-				if (resolution.matched() && resolution.matchedId() == null) {
-					// Matched, but without a reverse-mapped id (non-token match URL): the id is unknowable this
-					// early, and minting a new id for a matched URL would be wrong — leave the entry untouched.
-				} else if (resolution.matched()) {
-					String matchedReference =
-							resolution.matchedId().toUnqualifiedVersionless().getValue();
-					idSubstitutions.put(fullUrl, matchedReference);
-					// Stamp the matched id on the body so identifyForCreate can route the entry. The entry stays
-					// conditional: the framework validates the body id against the match and reports the
-					// conditional-match outcome natively. A conditional POST already NOPs to the match correctly,
-					// so it is left alone.
-					if ("PUT".equals(method)) {
-						resource.setId(matchedReference);
-					}
-				} else if (serverAssignsUuids) {
-					// Keep the entry conditional (PUT Patient?<matchUrl>) rather than rewriting it to a direct
-					// update: the framework then consolidates in-bundle duplicates of the same match URL, and the
-					// create path writes the HFJ_RES_SEARCH_URL row that makes a concurrent transaction creating
-					// the same conditional URL collide instead of duplicating the patient. Duplicates share one
-					// minted id so references to any of them resolve to the single created patient.
-					String conditionalUrl = matchUrl.contains("?") ? matchUrl : PATIENT_STR + "?" + matchUrl;
-					String newReference =
-							matchUrlToMintedReference.computeIfAbsent(conditionalUrl, k -> mintPatientReference());
-					idSubstitutions.put(fullUrl, newReference);
-					rewriteAsPut(versionAdapter, entry, resource, newReference, conditionalUrl);
-					RewriteIntent intent = "POST".equals(method)
-							? RewriteIntent.CONDITIONAL_CREATE_NO_MATCH
-							: RewriteIntent.CONDITIONAL_UPDATE_NO_MATCH;
-					rewrittenOutcomes.putIfAbsent(newReference, new RewrittenOutcome(intent, matchUrl));
-				}
+			} else if (serverAssignsUuids) {
+				// Keep the entry conditional (PUT Patient?<matchUrl>) rather than rewriting it to a direct
+				// update: the framework then consolidates in-bundle duplicates of the same match URL, and the
+				// create path writes the HFJ_RES_SEARCH_URL row that makes a concurrent transaction creating
+				// the same conditional URL collide instead of duplicating the patient. Duplicates share one
+				// minted id so references to any of them resolve to the single created patient.
+				String conditionalUrl = matchUrl.contains("?") ? matchUrl : PATIENT_STR + "?" + matchUrl;
+				String newReference =
+						theMatchUrlToMintedReference.computeIfAbsent(conditionalUrl, k -> mintPatientReference());
+				theIdSubstitutions.put(theFullUrl, newReference);
+				rewriteAsPut(versionAdapter, theEntry, resource, newReference, conditionalUrl);
+				RewriteIntent intent = "POST".equals(method)
+						? RewriteIntent.CONDITIONAL_CREATE_NO_MATCH
+						: RewriteIntent.CONDITIONAL_UPDATE_NO_MATCH;
+				rewrittenOutcomes.putIfAbsent(newReference, new RewrittenOutcome(intent, matchUrl));
 			}
 		}
-		return idSubstitutions;
 	}
 
 	/** Replaces every in-bundle reference that matches a substitution key with its concrete reference. */
