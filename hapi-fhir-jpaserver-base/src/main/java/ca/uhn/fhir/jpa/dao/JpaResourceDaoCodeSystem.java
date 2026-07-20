@@ -246,11 +246,25 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 		if (thePerformIndexing) {
 			if (!retVal.isUnchangedInCurrentOperation()) {
 
-				org.hl7.fhir.r4.model.CodeSystem cs = myVersionCanonicalizer.codeSystemToCanonical(theResource);
-				addPidToResource(theEntity, cs);
+				addPidToResource(theEntity, theResource);
 
 				myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(
-						cs, (ResourceTable) theEntity, theRequest);
+						theResource, (ResourceTable) theEntity, theRequest);
+
+				String codeSystemUrl = theResource != null
+						? myFhirContext.newTerser().getSinglePrimitiveValueOrNull(theResource, "url")
+						: null;
+				if (isNotBlank(codeSystemUrl)) {
+					int invalidated =
+							myTermValueSetStorageSvc.invalidatePreCalculatedExpansionOfValueSetsContainingCodeSystem(
+									codeSystemUrl);
+					if (invalidated > 0) {
+						ourLog.info(
+								"Invalidated {} pre-calculated ValueSet expansion(s) due to update of CodeSystem: {}",
+								invalidated,
+								codeSystemUrl);
+					}
+				}
 			}
 
 			/*
@@ -408,7 +422,7 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 			displayLanguage = theDisplayLanguage.getValue();
 		}
 
-		ourLog.info("Looking up {} / {}", system, code);
+		ourLog.debug("Looking up {} / {}", system, code);
 
 		Collection<String> propertyNames = CollectionUtils.emptyIfNull(thePropertyNames).stream()
 				.map(IPrimitiveType::getValueAsString)
@@ -416,7 +430,7 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 
 		if (theValidationSupport.isCodeSystemSupported(new ValidationSupportContext(theValidationSupport), system)) {
 
-			ourLog.info("Code system {} is supported", system);
+			ourLog.debug("Code system {} is supported", system);
 			IValidationSupport.LookupCodeResult retVal = theValidationSupport.lookupCode(
 					new ValidationSupportContext(theValidationSupport),
 					new LookupCodeRequest(system, code, displayLanguage, propertyNames));

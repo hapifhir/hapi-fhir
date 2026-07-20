@@ -26,15 +26,14 @@ import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
-import ca.uhn.fhir.jpa.search.builder.sql.ColumnTupleObject;
-import ca.uhn.fhir.jpa.search.builder.sql.JpaPidValueTuples;
+import ca.uhn.fhir.jpa.search.builder.sql.PartitionableJoinColumns;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
-import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import com.healthmarketscience.sqlbuilder.Condition;
+import com.healthmarketscience.sqlbuilder.CustomCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -123,9 +122,14 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 		}
 
 		if (allOrPids != null && allOrPids.isEmpty()) {
-
+			// During unqualified chain resolution, e.g. ?based-on._idx=x, do not drop out early and instead evaluate
+			// all target types
+			if (theSourceJoinColumn != null) {
+				SearchFilterParser.CompareOperation operation = defaultIfNull(theOperation, defaultOperation);
+				return new CustomCondition(
+						operation == SearchFilterParser.CompareOperation.ne ? "(NULL IS NULL)" : "(NULL IS NOT NULL)");
+			}
 			setMatchNothing();
-
 		} else if (allOrPids != null) {
 
 			SearchFilterParser.CompareOperation operation = defaultIfNull(theOperation, defaultOperation);
@@ -149,19 +153,12 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 				predicate = queryRootTable.combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
 				return predicate;
 			} else {
-				if (getSearchQueryBuilder().isIncludePartitionIdInJoins()) {
-					ColumnTupleObject left = new ColumnTupleObject(theSourceJoinColumn);
-					JpaPidValueTuples right = JpaPidValueTuples.from(getSearchQueryBuilder(), allOrPids);
-					return QueryParameterUtils.toInPredicate(
-							left, right, operation == SearchFilterParser.CompareOperation.ne);
-				} else {
-					DbColumn resIdColumn = getResourceIdColumn(theSourceJoinColumn);
-					List<Long> resourceIds = JpaPid.toLongList(allOrPids);
-					return QueryParameterUtils.toEqualToOrInPredicate(
-							resIdColumn,
-							generatePlaceholders(resourceIds),
-							operation == SearchFilterParser.CompareOperation.ne);
-				}
+				return getSearchQueryBuilder()
+						.getTuplePredicateBuilder()
+						.toInPredicate(
+								PartitionableJoinColumns.from(theSourceJoinColumn),
+								allOrPids,
+								operation == SearchFilterParser.CompareOperation.ne);
 			}
 		}
 

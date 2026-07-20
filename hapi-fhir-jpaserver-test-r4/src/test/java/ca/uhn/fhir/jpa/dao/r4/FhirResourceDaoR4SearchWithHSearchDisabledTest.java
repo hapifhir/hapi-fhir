@@ -143,7 +143,7 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 
 		Organization org = new Organization();
 		org.setName(methodName);
-		IIdType orgId = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
+		myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(ca.uhn.fhir.rest.api.Constants.PARAM_TEXT, new StringParam(methodName));
@@ -177,8 +177,8 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 		assertEquals("CODEA", outcome.getExpansion().getContains().get(0).getCode());
 
 		// Deferred expand
-		IIdType id = myValueSetDao.create(vs).getId().toUnqualifiedVersionless();
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		IIdType id = myValueSetDao.create(vs, newSrd()).getId().toUnqualifiedVersionless();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		outcome = myValueSetDao.expand(id, null, mySrd);
 		ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals("CODEA", outcome.getExpansion().getContains().get(0).getCode());

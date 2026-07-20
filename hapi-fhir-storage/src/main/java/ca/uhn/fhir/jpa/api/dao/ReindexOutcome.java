@@ -19,13 +19,14 @@
  */
 package ca.uhn.fhir.jpa.api.dao;
 
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static java.util.Collections.unmodifiableList;
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 
 public class ReindexOutcome {
 
@@ -37,8 +38,9 @@ public class ReindexOutcome {
 	 */
 	private boolean myHasPendingWork;
 
+	@Nonnull
 	public List<String> getWarnings() {
-		return defaultIfNull(myWarnings, Collections.emptyList());
+		return unmodifiableList(getIfNull(myWarnings, List.of()));
 	}
 
 	public void addWarning(String theWarning) {

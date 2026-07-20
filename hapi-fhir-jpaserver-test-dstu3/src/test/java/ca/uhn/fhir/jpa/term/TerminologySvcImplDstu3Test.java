@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.LOINC_URI;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
@@ -1861,7 +1861,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				ResourceTable resourceTable = (ResourceTable) myCodeSystemDao.readEntity(codeSystemResource.getIdElement(), null);
+				ResourceTable resourceTable = (ResourceTable) myCodeSystemDao.readEntity(codeSystemResource.getIdElement().toVersionless(), null);
 				JpaPid codeSystemResourcePid = resourceTable.getId();
 				TermCodeSystem codeSystem = myTermCodeSystemDao.findByResourcePid(codeSystemResourcePid);
 				assertEquals(CS_URL, codeSystem.getCodeSystemUri());

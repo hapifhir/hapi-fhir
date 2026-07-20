@@ -48,10 +48,12 @@ import jakarta.persistence.UniqueConstraint;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.Length;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -79,9 +81,11 @@ public class TermValueSet extends BasePartitionable implements Serializable {
 	public static final int MAX_NAME_LENGTH = 200;
 	public static final int MAX_URL_LENGTH = 200;
 	public static final int MAX_VER_LENGTH = 200;
+
+	@Serial
 	private static final long serialVersionUID = 1L;
 
-	@Id()
+	@Id
 	@SequenceGenerator(name = "SEQ_VALUESET_PID", sequenceName = "SEQ_VALUESET_PID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_VALUESET_PID")
 	@Column(name = "PID")
@@ -92,6 +96,14 @@ public class TermValueSet extends BasePartitionable implements Serializable {
 
 	@Column(name = "VER", nullable = true, length = MAX_VER_LENGTH)
 	private String myVersion;
+
+	/**
+	 * If this version is a temporary staging version which is intended to replace
+	 * another version when the staging is complete, this element will hold the
+	 * version ID which this entity will take when the staging is complete.
+	 */
+	@Column(name = "VS_INTENDED_VERSION_ID", nullable = true, length = MAX_VER_LENGTH)
+	private String myIntendedVersionId;
 
 	@ManyToOne()
 	@JoinColumns(
@@ -138,6 +150,9 @@ public class TermValueSet extends BasePartitionable implements Serializable {
 	@Column(name = "EXPANDED_AT", nullable = true)
 	private Date myExpansionTimestamp;
 
+	@Column(name = "EXPANSION_ERROR", length = Length.LONG32, nullable = true)
+	private String myExpansionError;
+
 	@Transient
 	private transient Integer myHashCode;
 
@@ -152,8 +167,9 @@ public class TermValueSet extends BasePartitionable implements Serializable {
 		return myExpansionTimestamp;
 	}
 
-	public void setExpansionTimestamp(Date theExpansionTimestamp) {
+	public TermValueSet setExpansionTimestamp(Date theExpansionTimestamp) {
 		myExpansionTimestamp = theExpansionTimestamp;
+		return this;
 	}
 
 	public Long getId() {
@@ -162,6 +178,28 @@ public class TermValueSet extends BasePartitionable implements Serializable {
 
 	public IdAndPartitionId getPartitionedId() {
 		return IdAndPartitionId.forId(myId, this);
+	}
+
+	/**
+	 * If this version is a temporary staging version which is intended to replace
+	 * another version when the staging is complete, this element will hold the
+	 * version ID which this entity will take when the staging is complete.
+	 *
+	 * @since 8.12.0
+	 */
+	public String getIntendedVersionId() {
+		return myIntendedVersionId;
+	}
+
+	/**
+	 * If this version is a temporary staging version which is intended to replace
+	 * another version when the staging is complete, this element will hold the
+	 * version ID which this entity will take when the staging is complete.
+	 *
+	 * @since 8.12.0
+	 */
+	public void setIntendedVersionId(String theIntendedVersionId) {
+		myIntendedVersionId = theIntendedVersionId;
 	}
 
 	public String getUrl() {
@@ -250,8 +288,18 @@ public class TermValueSet extends BasePartitionable implements Serializable {
 		return myExpansionStatus;
 	}
 
-	public void setExpansionStatus(TermValueSetPreExpansionStatusEnum theExpansionStatus) {
+	public TermValueSet setExpansionStatus(TermValueSetPreExpansionStatusEnum theExpansionStatus) {
 		myExpansionStatus = theExpansionStatus;
+		return this;
+	}
+
+	public String getExpansionError() {
+		return myExpansionError;
+	}
+
+	public TermValueSet setExpansionError(String theExpansionError) {
+		myExpansionError = theExpansionError;
+		return this;
 	}
 
 	public String getVersion() {

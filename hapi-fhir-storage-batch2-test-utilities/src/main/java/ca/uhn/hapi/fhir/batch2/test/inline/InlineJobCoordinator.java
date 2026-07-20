@@ -19,6 +19,7 @@
  */
 package ca.uhn.hapi.fhir.batch2.test.inline;
 
+import ca.uhn.fhir.batch2.api.AttachmentDetails;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
@@ -37,7 +38,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.collect.ListMultimap;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -92,7 +93,6 @@ public class InlineJobCoordinator<T extends IModelJson> implements IJobCoordinat
 
 		final JobInstance jobInstance = JobInstance.fromJobDefinition(myJobDefinition);
 		jobInstance.setParameters(jobParameters);
-		jobInstance.setStatus(StatusEnum.QUEUED);
 		// Allow the test code to pass its own job instance ID so that it may use it to retrieve the job execution results
 		jobInstance.setInstanceId(requestDetails.getHeader(JOB_INSTANCE_ID_FOR_TESTING));
 
@@ -150,9 +150,9 @@ public class InlineJobCoordinator<T extends IModelJson> implements IJobCoordinat
 
 		List<JobInstance> list = myJobInstanceMap.values()
 			.stream()
-			.filter(job -> StringUtils.equals(theRequest.getJobStatus(), job.getStatus().name()))
-			.filter(job -> StringUtils.equals(theRequest.getJobDefinitionId(), job.getJobDefinitionId()))
-			.filter(job -> StringUtils.equals(theRequest.getJobId(), job.getInstanceId()))
+			.filter(job -> Strings.CS.equals(theRequest.getJobStatus(), job.getStatus().name()))
+			.filter(job -> Strings.CS.equals(theRequest.getJobDefinitionId(), job.getJobDefinitionId()))
+			.filter(job -> Strings.CS.equals(theRequest.getJobId(), job.getInstanceId()))
 			.filter(job -> theRequest.getJobCreateTimeFrom() != null && theRequest.getJobCreateTimeFrom().before(job.getCreateTime()))
 			.filter(job -> theRequest.getJobCreateTimeTo() != null && theRequest.getJobCreateTimeTo().after(job.getCreateTime()))
 			.toList();
@@ -186,6 +186,19 @@ public class InlineJobCoordinator<T extends IModelJson> implements IJobCoordinat
     public BatchInstanceStatusDTO getBatchInstanceStatus(String theJobInstanceId) {
         return null;
     }
+
+	@Override
+	public void enqueueBuildingJobForExecution(String theInstanceId) {
+		JobInstance instance = getInstance(theInstanceId);
+		assert instance != null;
+		assert instance.getStatus() == StatusEnum.BUILDING;
+		instance.setStatus(StatusEnum.QUEUED);
+	}
+
+	@Override
+	public void addAttachmentToBuildingJob(String theInstanceId, AttachmentDetails theAttachmentDetails) {
+		// nothing
+	}
 
 	@SuppressWarnings("unchecked")
 	private static <T> T unsafeCast(Object theObject) {

@@ -1,0 +1,3391 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ClaML SYSTEM "ClaML.dtd">
+<ClaML version="2.0.0">
+	<Meta name="TopLevelSort" value="I II III IV V VI VII VIII IX X XI XII XIII XIV XV XVI XVII XVIII XIX XX XXI XXII"/>
+	<Meta name="lang" value="en"/>
+	<Identifier authority="WHO" uid="icd10_20210322"/>
+	<Title date="2020-03-22" name="ICD-10-EN" version="2019-covid-expanded">International Statistical Classification of Diseases and Related Health Problems 10th Revision</Title>
+	<ClassKinds>
+		<ClassKind name="category"/>
+		<ClassKind name="block"/>
+		<ClassKind name="chapter"/>
+	</ClassKinds>
+	<UsageKinds>
+		<UsageKind mark="*" name="aster"/>
+		<UsageKind mark="+" name="dagger"/>
+	</UsageKinds>
+	<RubricKinds>
+		<RubricKind inherited="false" name="footnote"/>
+		<RubricKind inherited="false" name="text"/>
+		<RubricKind inherited="false" name="coding-hint"/>
+		<RubricKind inherited="false" name="definition"/>
+		<RubricKind inherited="false" name="introduction"/>
+		<RubricKind inherited="false" name="modifierlink"/>
+		<RubricKind inherited="false" name="note"/>
+		<RubricKind inherited="false" name="exclusion"/>
+		<RubricKind inherited="false" name="inclusion"/>
+		<RubricKind inherited="false" name="preferredLong"/>
+		<RubricKind inherited="false" name="preferred"/>
+	</RubricKinds>
+	<Modifier code="S01B18_5">
+		<SubClass code="0"/>
+		<SubClass code="9"/>
+		<Rubric id="id-icd10_20190322-1587556953279-0" kind="text">
+			<Label xml:lang="en" xml:space="default">The following fifth-character subdivisions are for use with categories B18.0-B18.1 and provided for optional use in a supplementary character position.</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="J96_5">
+		<SubClass code="0"/>
+		<SubClass code="1"/>
+		<SubClass code="9"/>
+		<Rubric id="id-icd10_20190322-1587556953279-1" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following supplementary subclassification is provided for optional use with subcategories in J96.- :</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="I70M10_4">
+		<SubClass code="0"/>
+		<SubClass code="1"/>
+		<Rubric id="id-icd10_20190322-1587556953279-2" kind="text">
+			<Label xml:lang="en" xml:space="default">The following supplementary classification to indicate the presence or absence of gangrene is provided for optional use with appropriate subcategories in I70.</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S04E10_4">
+		<SubClass code=".0"/>
+		<SubClass code=".1"/>
+		<SubClass code=".2"/>
+		<SubClass code=".3"/>
+		<SubClass code=".4"/>
+		<SubClass code=".5"/>
+		<SubClass code=".6"/>
+		<SubClass code=".7"/>
+		<SubClass code=".8"/>
+		<SubClass code=".9"/>
+		<Rubric id="id-icd10_20190322-1587556953279-3" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following fourth-character subdivisions are for use with categories E10-E14:</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S05F10_4">
+		<SubClass code=".0"/>
+		<SubClass code=".1"/>
+		<SubClass code=".2"/>
+		<SubClass code=".3"/>
+		<SubClass code=".4"/>
+		<SubClass code=".5"/>
+		<SubClass code=".6"/>
+		<SubClass code=".7"/>
+		<SubClass code=".8"/>
+		<SubClass code=".9"/>
+		<Rubric id="id-icd10_20190322-1587556953279-4" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following fourth-character subdivisions are for use with categories F10-F19:</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S05F70_4">
+		<SubClass code=".0"/>
+		<SubClass code=".1"/>
+		<SubClass code=".8"/>
+		<SubClass code=".9"/>
+		<Rubric id="id-icd10_20190322-1587556953279-5" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following fourth-character subdivisions are for use with categories F70-F79 to identify the extent of impairment of behaviour:</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S11K25_4">
+		<SubClass code=".0"/>
+		<SubClass code=".1"/>
+		<SubClass code=".2"/>
+		<SubClass code=".3"/>
+		<SubClass code=".4"/>
+		<SubClass code=".5"/>
+		<SubClass code=".6"/>
+		<SubClass code=".7"/>
+		<SubClass code=".9"/>
+		<Rubric id="id-icd10_20190322-1587556953279-6" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following fourth-character subdivisions are for use with categories K25-K28:</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S13M00_5">
+		<SubClass code="0"/>
+		<SubClass code="1"/>
+		<SubClass code="2"/>
+		<SubClass code="3"/>
+		<SubClass code="4"/>
+		<SubClass code="5"/>
+		<SubClass code="6"/>
+		<SubClass code="7"/>
+		<SubClass code="8"/>
+		<SubClass code="9"/>
+		<Rubric id="id-icd10_20190322-1587556953279-7" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>Site of musculoskeletal involvement</Para>
+				<Para>The following subclassification to indicate the site of involvement is provided for optional use with appropriate categories in Chapter XIII. As local extensions or specialty adaptations may vary in the number of characters used, it is suggested that the supplementary site subclassification be placed in an identifiably separate position (e.g. in an additional box). Different sub-classifications for use with derangement of knee, dorsopathies, and biomechanical lesions not elsewhere classified are given at M23, before M40 and at M99 respectively.</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S13M23_5">
+		<SubClass code="0"/>
+		<SubClass code="1"/>
+		<SubClass code="2"/>
+		<SubClass code="3"/>
+		<SubClass code="4"/>
+		<SubClass code="5"/>
+		<SubClass code="6"/>
+		<SubClass code="7"/>
+		<SubClass code="9"/>
+		<Rubric id="id-icd10_20190322-1587556953279-8" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following supplementary subclassification to indicate the site of involvement is provided for optional use with appropriate subcategories in M23.-; see also note at the beginning of this chapter.</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S13M40_5">
+		<SubClass code="0"/>
+		<SubClass code="1"/>
+		<SubClass code="2"/>
+		<SubClass code="3"/>
+		<SubClass code="4"/>
+		<SubClass code="5"/>
+		<SubClass code="6"/>
+		<SubClass code="7"/>
+		<SubClass code="8"/>
+		<SubClass code="9"/>
+		<Rubric id="id-icd10_20190322-1587556953279-9" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following supplementary subclassification to indicate the site of involvement is provided for optional use with appropriate categories in the block on dorsopathies, except categories M50 and M51; see also note at the beginning of this chapter.</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S13M99_5">
+		<SubClass code="0"/>
+		<SubClass code="1"/>
+		<SubClass code="2"/>
+		<SubClass code="3"/>
+		<SubClass code="4"/>
+		<SubClass code="5"/>
+		<SubClass code="6"/>
+		<SubClass code="7"/>
+		<SubClass code="8"/>
+		<SubClass code="9"/>
+		<Rubric id="id-icd10_20190322-1587556953279-10" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following supplementary subclassification to indicate the site of lesions is provided for optional use with appropriate subcategories in M99.-; see also note at the beginning of this chapter.</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S14N00_4">
+		<SubClass code=".0"/>
+		<SubClass code=".1"/>
+		<SubClass code=".2"/>
+		<SubClass code=".3"/>
+		<SubClass code=".4"/>
+		<SubClass code=".5"/>
+		<SubClass code=".6"/>
+		<SubClass code=".7"/>
+		<SubClass code=".8"/>
+		<SubClass code=".9"/>
+		<Rubric id="id-icd10_20190322-1587556953279-11" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following fourth-character subdivisions classify morphological changes and are for use with categories N00-N07. Subdivisions .0-.8 should not normally be used unless these have been specifically identified (e.g. by renal biopsy or autopsy). The three-character categories relate to clinical syndromes.</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S15O03_4">
+		<SubClass code=".0"/>
+		<SubClass code=".1"/>
+		<SubClass code=".2"/>
+		<SubClass code=".3"/>
+		<SubClass code=".4"/>
+		<SubClass code=".5"/>
+		<SubClass code=".6"/>
+		<SubClass code=".7"/>
+		<SubClass code=".8"/>
+		<SubClass code=".9"/>
+		<Rubric id="id-icd10_20190322-1587556953279-12" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following fourth-character subdivisions are for use with categories O03-O06:</Para>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-13" kind="note">
+			<Label xml:lang="en" xml:space="default">
+				<Para>Incomplete abortion includes retained products of conception following abortion.</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S18R83_4">
+		<SubClass code=".0"/>
+		<SubClass code=".1"/>
+		<SubClass code=".2"/>
+		<SubClass code=".3"/>
+		<SubClass code=".4"/>
+		<SubClass code=".5"/>
+		<SubClass code=".6"/>
+		<SubClass code=".7"/>
+		<SubClass code=".8"/>
+		<SubClass code=".9"/>
+		<Rubric id="id-icd10_20190322-1587556953279-14" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following fourth-character subdivisions are for use with categories R83-R89:</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S19S02_5">
+		<SubClass code="0"/>
+		<SubClass code="1"/>
+		<Rubric id="id-icd10_20190322-1587556953279-15" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following subdivisions are provided for optional use in a supplementary character position where it is not possible or not desired to use multiple coding to identify fracture and open wound; a fracture not indicated as closed or open should be classified as closed.</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S19S06_5">
+		<SubClass code="0"/>
+		<SubClass code="1"/>
+		<Rubric id="id-icd10_20190322-1587556953279-16" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following subdivisions are provided for optional use in a supplementary character position where it is not possible or not desired to use multiple coding to identify intracranial injury and open wound:</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S19S12_5">
+		<SubClass code="0"/>
+		<SubClass code="1"/>
+		<Rubric id="id-icd10_20190322-1587556953279-17" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following subdivisions are provided for optional use in a supplementary character position where it is not possible or not desired to use multiple coding to identify fracture and open wound; a fracture not indicated as closed or open should be classified as closed.</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S19S22_5">
+		<SubClass code="0"/>
+		<SubClass code="1"/>
+		<Rubric id="id-icd10_20190322-1587556953279-18" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following subdivisions are provided for optional use in a supplementary character position where it is not possible or not desired to use multiple coding to identify fracture and open wound; a fracture not indicated as closed or open should be classified as closed.</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S19S26_5">
+		<SubClass code="0"/>
+		<SubClass code="1"/>
+		<Rubric id="id-icd10_20190322-1587556953279-19" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following subdivisions are provided for optional use in a supplementary character position where it is not possible or not desired to use multiple coding:</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S19S27_5">
+		<SubClass code="0"/>
+		<SubClass code="1"/>
+		<Rubric id="id-icd10_20190322-1587556953279-20" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following subdivisions are provided for optional use in a supplementary character position where it is not possible or not desired to use multiple coding:</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S19S32_5">
+		<SubClass code="0"/>
+		<SubClass code="1"/>
+		<Rubric id="id-icd10_20190322-1587556953279-21" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following subdivisions are provided for optional use in a supplementary character position where it is not possible or not desired to use multiple coding to identify fracture and open wound; a fracture not indicated as closed or open should be classified as closed.</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S19S36_5">
+		<SubClass code="0"/>
+		<SubClass code="1"/>
+		<Rubric id="id-icd10_20190322-1587556953279-22" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following subdivisions are provided for optional use in a supplementary character position where it is not possible or not desired to use multiple coding:</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S19S37_5">
+		<SubClass code="0"/>
+		<SubClass code="1"/>
+		<Rubric id="id-icd10_20190322-1587556953279-23" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following subdivisions are provided for optional use in a supplementary character position where it is not possible or not desired to use multiple coding:</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S19S42_5">
+		<SubClass code="0"/>
+		<SubClass code="1"/>
+		<Rubric id="id-icd10_20190322-1587556953279-24" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following subdivisions are provided for optional use in a supplementary character position where it is not possible or not desired to use multiple coding to identify fracture and open wound; a fracture not indicated as closed or open should be classified as closed.</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S19S52_5">
+		<SubClass code="0"/>
+		<SubClass code="1"/>
+		<Rubric id="id-icd10_20190322-1587556953279-25" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following subdivisions are provided for optional use in a supplementary character position where it is not possible or not desired to use multiple coding to identify fracture and open wound; a fracture not indicated as closed or open should be classified as closed.</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S19S62_5">
+		<SubClass code="0"/>
+		<SubClass code="1"/>
+		<Rubric id="id-icd10_20190322-1587556953279-26" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following subdivisions are provided for optional use in a supplementary character position where it is not possible or not desired to use multiple coding to identify fracture and open wound; a fracture not indicated as closed or open should be classified as closed.</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S19S72_5">
+		<SubClass code="0"/>
+		<SubClass code="1"/>
+		<Rubric id="id-icd10_20190322-1587556953279-27" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following subdivisions are provided for optional use in a supplementary character position where it is not possible or not desired to use multiple coding to identify fracture and open wound; a fracture not indicated as closed or open should be classified as closed.</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S19S82_5">
+		<SubClass code="0"/>
+		<SubClass code="1"/>
+		<Rubric id="id-icd10_20190322-1587556953279-28" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following subdivisions are provided for optional use in a supplementary character position where it is not possible or not desired to use multiple coding to identify fracture and open wound; a fracture not indicated as closed or open should be classified as closed.</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S19S92_5">
+		<SubClass code="0"/>
+		<SubClass code="1"/>
+		<Rubric id="id-icd10_20190322-1587556953279-29" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The followig subdivisions are provided for optional use in a supplementary character position where it is not possible or not desired to use multiple coding to identify fracture and open wound; a fracture not indicated as closed or open should be classified as closed.</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S19T02_5">
+		<SubClass code="0"/>
+		<SubClass code="1"/>
+		<Rubric id="id-icd10_20190322-1587556953279-30" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following subdivisions are provided for optional use in a supplementary character position where it is not possible or not desired to use multiple coding to identify fracture and open wound; a fracture not indicated as closed or open should be classified as closed.</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S19T08_5">
+		<SubClass code="0"/>
+		<SubClass code="1"/>
+		<Rubric id="id-icd10_20190322-1587556953279-31" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following subdivisions are provided for optional use in a supplementary character position where it is not possible or not desired to use multiple coding to identify fracture and open wound; a fracture not indicated as closed or open should be classified as closed.</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S19T10_5">
+		<SubClass code="0"/>
+		<SubClass code="1"/>
+		<Rubric id="id-icd10_20190322-1587556953279-32" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following subdivisions are provided for optional use in a supplementary character position where it is not possible or not desired to use multiple coding to identify fracture and open wound; a fracture not indicated as closed or open should be classified as closed.</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S19T12_5">
+		<SubClass code="0"/>
+		<SubClass code="1"/>
+		<Rubric id="id-icd10_20190322-1587556953279-33" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following subdivisions are provided for optional use in a supplementary character position where it is not possible or not desired to use multiple coding to identify fracture and open wound; a fracture not indicated as closed or open should be classified as closed.</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S19T142_5">
+		<SubClass code="0"/>
+		<SubClass code="1"/>
+		<Rubric id="id-icd10_20190322-1587556953279-34" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following subdivisions are provided for optional use in a supplementary character position where it is not possible or not desired to use multiple coding to identify fracture and open wound; a fracture not indicated as closed or open should be classified as closed.</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S20W00_4">
+		<SubClass code="0"/>
+		<SubClass code="1"/>
+		<SubClass code="2"/>
+		<SubClass code="3"/>
+		<SubClass code="4"/>
+		<SubClass code="5"/>
+		<SubClass code="6"/>
+		<SubClass code="7"/>
+		<SubClass code="8"/>
+		<SubClass code="9"/>
+		<Rubric id="id-icd10_20190322-1587556953279-35" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para class="headingIntro">Place of occurrence code</Para>
+				<Para>The following categories are provided to to be used as separate variables in addition to ICD categories W00-Y34 to identify the place of occurrence of the external cause where relevant:</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S20V01T_5">
+		<SubClass code="0"/>
+		<SubClass code="1"/>
+		<SubClass code="2"/>
+		<SubClass code="3"/>
+		<SubClass code="4"/>
+		<SubClass code="8"/>
+		<SubClass code="9"/>
+		<Rubric id="id-icd10_20190322-1587556953279-36" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para class="headingIntro">Activity code</Para>
+				<Para>The following categories are provided to be used as separate variables in addition to categories V01-Y34 to indicate the activity of the injured person at the time the event occurred.  This supplementary classification should not be confused with, or be used instead of,  the recommended categories provided to indicate the place of occurrence of events classifiable to W00-Y34.</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S20V01_4">
+		<SubClass code=".0"/>
+		<SubClass code=".1"/>
+		<SubClass code=".9"/>
+		<Rubric id="id-icd10_20190322-1587556953279-37" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following fourth-character subdivisions are for use with categories V01-V06:</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S20V10_4">
+		<SubClass code=".0"/>
+		<SubClass code=".1"/>
+		<SubClass code=".2"/>
+		<SubClass code=".3"/>
+		<SubClass code=".4"/>
+		<SubClass code=".5"/>
+		<SubClass code=".9"/>
+		<Rubric id="id-icd10_20190322-1587556953279-38" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following fourth-character subdivisions are for use with categories V10-V18:</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S20V20_4">
+		<SubClass code=".0"/>
+		<SubClass code=".1"/>
+		<SubClass code=".2"/>
+		<SubClass code=".3"/>
+		<SubClass code=".4"/>
+		<SubClass code=".5"/>
+		<SubClass code=".9"/>
+		<Rubric id="id-icd10_20190322-1587556953279-39" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following fourth-character subdivisions are for use with categories V20-V28:</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S20V30_4">
+		<SubClass code=".0"/>
+		<SubClass code=".1"/>
+		<SubClass code=".2"/>
+		<SubClass code=".3"/>
+		<SubClass code=".4"/>
+		<SubClass code=".5"/>
+		<SubClass code=".6"/>
+		<SubClass code=".7"/>
+		<SubClass code=".9"/>
+		<Rubric id="id-icd10_20190322-1587556953279-40" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following fourth-character subdivisions are for use with categories V30-V38:</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S20V40_4">
+		<SubClass code=".0"/>
+		<SubClass code=".1"/>
+		<SubClass code=".2"/>
+		<SubClass code=".3"/>
+		<SubClass code=".4"/>
+		<SubClass code=".5"/>
+		<SubClass code=".6"/>
+		<SubClass code=".7"/>
+		<SubClass code=".9"/>
+		<Rubric id="id-icd10_20190322-1587556953279-41" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following fourth-character subdivisions are for use with categories V40-V48</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S20V50_4">
+		<SubClass code=".0"/>
+		<SubClass code=".1"/>
+		<SubClass code=".2"/>
+		<SubClass code=".3"/>
+		<SubClass code=".4"/>
+		<SubClass code=".5"/>
+		<SubClass code=".6"/>
+		<SubClass code=".7"/>
+		<SubClass code=".9"/>
+		<Rubric id="id-icd10_20190322-1587556953279-42" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following fourth-character subdivisions are for use with categories V50-V58:</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S20V60_4">
+		<SubClass code=".0"/>
+		<SubClass code=".1"/>
+		<SubClass code=".2"/>
+		<SubClass code=".3"/>
+		<SubClass code=".4"/>
+		<SubClass code=".5"/>
+		<SubClass code=".6"/>
+		<SubClass code=".7"/>
+		<SubClass code=".9"/>
+		<Rubric id="id-icd10_20190322-1587556953279-43" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following fourth-character subdivisions are for use with categories V60-V68:</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S20V70_4">
+		<SubClass code=".0"/>
+		<SubClass code=".1"/>
+		<SubClass code=".2"/>
+		<SubClass code=".3"/>
+		<SubClass code=".4"/>
+		<SubClass code=".5"/>
+		<SubClass code=".6"/>
+		<SubClass code=".7"/>
+		<SubClass code=".9"/>
+		<Rubric id="id-icd10_20190322-1587556953279-44" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following fourth-character subdivisions are for use with categories V70-V78:</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S20V90_4">
+		<SubClass code=".0"/>
+		<SubClass code=".1"/>
+		<SubClass code=".2"/>
+		<SubClass code=".3"/>
+		<SubClass code=".4"/>
+		<SubClass code=".5"/>
+		<SubClass code=".6"/>
+		<SubClass code=".7"/>
+		<SubClass code=".8"/>
+		<SubClass code=".9"/>
+		<Rubric id="id-icd10_20190322-1587556953279-45" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following fourth-character subdivisions are for use with categories V90-V94:</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<Modifier code="S20Y70_4">
+		<SubClass code=".0"/>
+		<SubClass code=".1"/>
+		<SubClass code=".2"/>
+		<SubClass code=".3"/>
+		<SubClass code=".8"/>
+		<Rubric id="id-icd10_20190322-1587556953279-46" kind="text">
+			<Label xml:lang="en" xml:space="default">
+				<Para>The following fourth-character subdivisions are for use with categories Y70-Y82:</Para>
+			</Label>
+		</Rubric>
+	</Modifier>
+	<ModifierClass code="0" modifier="S01B18_5">
+		<SuperClass code="S01B18_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-47" kind="preferred">
+			<Label xml:lang="en">immune-tolerant phase</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="9" modifier="S01B18_5">
+		<SuperClass code="S01B18_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-48" kind="preferred">
+			<Label xml:lang="en">other and unspecified phase</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="0" modifier="J96_5">
+		<SuperClass code="J96_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-49" kind="preferred">
+			<Label xml:lang="en">Type I [hypoxic]</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="1" modifier="J96_5">
+		<SuperClass code="J96_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-50" kind="preferred">
+			<Label xml:lang="en">Type II [hypercapnic]</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="9" modifier="J96_5">
+		<SuperClass code="J96_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-51" kind="preferred">
+			<Label xml:lang="en">Type unspecified</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="0" modifier="I70M10_4">
+		<SuperClass code="I70M10_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-52" kind="preferred">
+			<Label xml:lang="en">without gangrene</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="1" modifier="I70M10_4">
+		<SuperClass code="I70M10_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-53" kind="preferred">
+			<Label xml:lang="en">with gangrene</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".0" modifier="S04E10_4">
+		<SuperClass code="S04E10_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-54" kind="preferred">
+			<Label xml:lang="en" xml:space="default">With coma</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-55" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Diabetic:</Fragment>
+				<Fragment type="list">coma with or without ketoacidosis</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-56" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Diabetic:</Fragment>
+				<Fragment type="list">hyperosmolar coma</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-57" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Diabetic:</Fragment>
+				<Fragment type="list">hypoglycaemic coma</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-58" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Hyperglycaemic coma NOS</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".1" modifier="S04E10_4">
+		<SuperClass code="S04E10_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-59" kind="preferred">
+			<Label xml:lang="en" xml:space="default">With ketoacidosis</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-60" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Diabetic:</Fragment>
+				<Fragment type="list">acidosis</Fragment>
+				<Fragment type="item">without mention of coma</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-61" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Diabetic:</Fragment>
+				<Fragment type="list">ketoacidosis</Fragment>
+				<Fragment type="item">without mention of coma</Fragment>
+			</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".2" modifier="S04E10_4" usage="dagger">
+		<SuperClass code="S04E10_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-62" kind="preferred">
+			<Label xml:lang="en" xml:space="default">With renal complications</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-63" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Diabetic nephropathy<Reference class="in brackets" usage="aster">N08.3</Reference></Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-64" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Intracapillary glomerulonephrosis<Reference class="in brackets" usage="aster">N08.3</Reference></Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-65" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Kimmelstiel-Wilson syndrome<Reference class="in brackets" usage="aster">N08.3</Reference></Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".3" modifier="S04E10_4" usage="dagger">
+		<SuperClass code="S04E10_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-66" kind="preferred">
+			<Label xml:lang="en" xml:space="default">With ophthalmic complications</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-67" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Diabetic:</Fragment>
+				<Fragment type="list">cataract<Reference class="in brackets" usage="aster">H28.0</Reference></Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-68" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Diabetic:</Fragment>
+				<Fragment type="list">retinopathy<Reference class="in brackets" usage="aster">H36.0</Reference></Fragment>
+			</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".4" modifier="S04E10_4" usage="dagger">
+		<SuperClass code="S04E10_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-69" kind="preferred">
+			<Label xml:lang="en" xml:space="default">With neurological complications</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-70" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Diabetic:</Fragment>
+				<Fragment type="list">amyotrophy<Reference class="in brackets" usage="aster">G73.0</Reference></Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-71" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Diabetic:</Fragment>
+				<Fragment type="list">autonomic neuropathy<Reference class="in brackets" usage="aster">G99.0</Reference></Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-72" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Diabetic:</Fragment>
+				<Fragment type="list">mononeuropathy<Reference class="in brackets" usage="aster">G59.0</Reference></Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-73" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Diabetic:</Fragment>
+				<Fragment type="list">polyneuropathy<Reference class="in brackets" usage="aster">G63.2</Reference></Fragment>
+				<Fragment type="list">autonomic<Reference class="in brackets" usage="aster">G99.0</Reference></Fragment>
+			</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".5" modifier="S04E10_4">
+		<SuperClass code="S04E10_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-74" kind="preferred">
+			<Label xml:lang="en" xml:space="default">With peripheral circulatory complications</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-75" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Diabetic:</Fragment>
+				<Fragment type="list">gangrene</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-76" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Diabetic:</Fragment>
+				<Fragment type="list" usage="dagger">peripheral angiopathy<Reference class="in brackets" usage="aster">I79.2</Reference></Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-77" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Diabetic:</Fragment>
+				<Fragment type="list">ulcer</Fragment>
+			</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".6" modifier="S04E10_4">
+		<SuperClass code="S04E10_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-78" kind="preferred">
+			<Label xml:lang="en" xml:space="default">With other specified complications</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-79" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="item" usage="dagger">Diabetic arthropathy<Reference class="in brackets" usage="aster">M14.2</Reference></Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-80" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="item" usage="dagger">Neuropathic diabetic arthropathy<Reference class="in brackets" usage="aster">M14.6</Reference></Fragment>
+			</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".7" modifier="S04E10_4">
+		<SuperClass code="S04E10_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-81" kind="preferred">
+			<Label xml:lang="en" xml:space="default">With multiple complications</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".8" modifier="S04E10_4">
+		<SuperClass code="S04E10_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-82" kind="preferred">
+			<Label xml:lang="en" xml:space="default">With unspecified complications</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".9" modifier="S04E10_4">
+		<SuperClass code="S04E10_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-83" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Without complications</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".0" modifier="S05F10_4">
+		<SuperClass code="S05F10_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-84" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Acute intoxication</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-85" kind="definition">
+			<Label xml:lang="en" xml:space="default">
+				<Para>A condition that follows the administration of a psychoactive substance resulting in disturbances in level of consciousness, cognition, perception, affect or behaviour, or other psycho-physiological functions and responses. The disturbances are directly related to the acute pharmacological effects of the substance and resolve with time, with complete recovery, except where tissue damage or other complications have arisen. Complications may include trauma, inhalation of vomitus, delirium, coma, convulsions, and other medical complications. The nature of these complications depends on the pharmacological class of substance and mode of administration.</Para>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-86" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Acute drunkenness (in alcoholism)</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-87" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">"Bad trips" (drugs)</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-88" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Drunkenness NOS</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-89" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Pathological intoxication</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-90" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Trance and possession disorders in psychoactive substance intoxication</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-91" kind="exclusion">
+			<Label xml:lang="en" xml:space="default">intoxication meaning poisoning<Reference class="in brackets" code="T36">T36-T50</Reference></Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".1" modifier="S05F10_4">
+		<SuperClass code="S05F10_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-92" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Harmful use</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-93" kind="definition">
+			<Label xml:lang="en" xml:space="default">
+				<Para>A pattern of psychoactive substance use that is causing damage to health. The damage may be physical (as in cases of hepatitis from the self-administration of injected psychoactive substances) or mental (e.g. episodes of depressive disorder secondary to heavy consumption of alcohol).</Para>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-94" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Psychoactive substance abuse</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".2" modifier="S05F10_4">
+		<SuperClass code="S05F10_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-95" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Dependence syndrome</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-96" kind="definition">
+			<Label xml:lang="en" xml:space="default">
+				<Para>A cluster of behavioural, cognitive, and physiological phenomena that develop after repeated substance use and that typically include a strong desire to take the drug, difficulties in controlling its use, persisting in its use despite harmful consequences, a higher priority given to drug use than to other activities and obligations, increased tolerance, and sometimes a physical withdrawal state.</Para>
+				<Para>The dependence syndrome may be present for a specific psychoactive substance (e.g. tobacco, alcohol, or diazepam), for a class of substances (e.g. opioid drugs), or for a wider range of pharmacologically different psychoactive substances.</Para>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-97" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Chronic alcoholism</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-98" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Dipsomania</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-99" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Drug addiction</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".3" modifier="S05F10_4">
+		<SuperClass code="S05F10_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-100" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Withdrawal state</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-101" kind="definition">
+			<Label xml:lang="en" xml:space="default">
+				<Para>A group of symptoms of variable clustering and severity occurring on absolute or relative withdrawal of a psychoactive substance after persistent use of that substance. The onset and course of the withdrawal state are time-limited and are related to the type of psychoactive substance and dose being used immediately before cessation or reduction of use. The withdrawal state may be complicated by convulsions.</Para>
+			</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".4" modifier="S05F10_4">
+		<SuperClass code="S05F10_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-102" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Withdrawal state with delirium</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-103" kind="definition">
+			<Label xml:lang="en" xml:space="default">
+				<Para>A condition where the withdrawal state as defined in the common fourth character .3 is complicated by delirium as defined in F05.-. Convulsions may also occur. When organic factors are also considered to play a role in the etiology, the condition should be classified to F05.8.</Para>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-104" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Delirium tremens (alcohol-induced)</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".5" modifier="S05F10_4">
+		<SuperClass code="S05F10_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-105" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Psychotic disorder</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-106" kind="definition">
+			<Label xml:lang="en" xml:space="default">
+				<Para>A cluster of psychotic phenomena that occur during or following psychoactive substance use but that are not explained on the basis of acute intoxication alone and do not form part of a withdrawal state. The disorder is characterized by hallucinations (typically auditory, but often in more than one sensory modality), perceptual distortions, delusions (often of a paranoid or persecutory nature), psychomotor disturbances (excitement or stupor), and an abnormal affect, which may range from intense fear to ecstasy. The sensorium is usually clear but some degree of clouding of consciousness, though not severe confusion, may be present.</Para>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-107" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Alcoholic:</Fragment>
+				<Fragment type="list">hallucinosis</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-108" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Alcoholic:</Fragment>
+				<Fragment type="list">jealousy</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-109" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Alcoholic:</Fragment>
+				<Fragment type="list">paranoia</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-110" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Alcoholic:</Fragment>
+				<Fragment type="list">psychosis NOS</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-111" kind="exclusion">
+			<Label xml:lang="en" xml:space="default">alcohol- or other psychoactive substance-induced residual and late-onset psychotic disorder<Reference class="in brackets" code="F10">F10-F19 with common fourth character .7</Reference></Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".6" modifier="S05F10_4">
+		<SuperClass code="S05F10_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-112" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Amnesic syndrome</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-113" kind="definition">
+			<Label xml:lang="en" xml:space="default">
+				<Para>A syndrome associated with chronic prominent impairment of recent and remote memory. Immediate recall is usually preserved and recent memory is characteristically more disturbed than remote memory. Disturbances of time sense and ordering of events are usually evident, as are difficulties in learning new material. Confabulation may be marked but is not invariably present. Other cognitive functions are usually relatively well preserved and amnesic defects are out of proportion to other disturbances.</Para>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-114" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Amnestic disorder, alcohol- or drug-induced</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-115" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Korsakov psychosis or syndrome, alcohol- or other psychoactive substance-induced or unspecified</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-116" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Use additional code, <Reference class="in brackets" usage="dagger">E51.2</Reference><Reference class="in brackets" usage="aster">G32.8</Reference>, if desired, when associated with Wernicke’s disease or syndrome.</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-117" kind="exclusion">
+			<Label xml:lang="en" xml:space="default">nonalcoholic Korsakov psychosis or syndrome<Reference class="in brackets">F04</Reference></Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".7" modifier="S05F10_4">
+		<SuperClass code="S05F10_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-118" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Residual and late-onset psychotic disorder</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-119" kind="definition">
+			<Label xml:lang="en" xml:space="default">
+				<Para>A disorder in which alcohol- or psychoactive substance-induced changes of cognition, affect, personality, or behaviour persist beyond the period during which a direct psychoactive substance-related effect might reasonably be assumed to be operating. Onset of the disorder should be directly related to the use of the psychoactive substance. Cases in which initial onset of the state occurs later than episode(s) of such substance use should be coded here only where clear and strong evidence is available to attribute the state to the residual effect of the psychoactive substance. Flashbacks may be distinguished from psychotic state partly by their episodic nature, frequently of very short duration, and by their duplication of previous alcohol- or other psychoactive substance-related experiences.</Para>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-120" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Alcoholic dementia NOS</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-121" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Chronic alcoholic brain syndrome</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-122" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Dementia and other milder forms of persisting impairment of cognitive functions</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-123" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Flashbacks</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-124" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Late-onset psychoactive substance-induced psychotic disorder</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-125" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Posthallucinogen perception disorder</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-126" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Residual:</Fragment>
+				<Fragment type="list">affective disorder</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-127" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Residual:</Fragment>
+				<Fragment type="list">disorder of personality and behaviour</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-128" kind="exclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">alcohol- or psychoactive substance-induced:</Fragment>
+				<Fragment type="list">Korsakov syndrome<Reference class="in brackets" code="F10">F10-F19 with common fourth character .6</Reference></Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-129" kind="exclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">alcohol- or psychoactive substance-induced:</Fragment>
+				<Fragment type="list">psychotic state<Reference class="in brackets" code="F10">F10-F19 with common fourth character .5</Reference></Fragment>
+			</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".8" modifier="S05F10_4">
+		<SuperClass code="S05F10_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-130" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Other mental and behavioural disorders</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".9" modifier="S05F10_4">
+		<SuperClass code="S05F10_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-131" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Unspecified mental and behavioural disorder</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".0" modifier="S05F70_4">
+		<SuperClass code="S05F70_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-132" kind="preferred">
+			<Label xml:lang="en" xml:space="default">With the statement of no, or minimal, impairment of behaviour</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".1" modifier="S05F70_4">
+		<SuperClass code="S05F70_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-133" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Significant impairment of behaviour requiring attention or treatment</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".8" modifier="S05F70_4">
+		<SuperClass code="S05F70_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-134" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Other impairments of behaviour</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".9" modifier="S05F70_4">
+		<SuperClass code="S05F70_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-135" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Without mention of impairment of behaviour</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".0" modifier="S11K25_4">
+		<SuperClass code="S11K25_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-136" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Acute with haemorrhage</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".1" modifier="S11K25_4">
+		<SuperClass code="S11K25_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-137" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Acute with perforation</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".2" modifier="S11K25_4">
+		<SuperClass code="S11K25_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-138" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Acute with both haemorrhage and perforation</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".3" modifier="S11K25_4">
+		<SuperClass code="S11K25_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-139" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Acute without haemorrhage or perforation</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".4" modifier="S11K25_4">
+		<SuperClass code="S11K25_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-140" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Chronic or unspecified with haemorrhage</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".5" modifier="S11K25_4">
+		<SuperClass code="S11K25_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-141" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Chronic or unspecified with perforation</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".6" modifier="S11K25_4">
+		<SuperClass code="S11K25_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-142" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Chronic or unspecified with both haemorrhage and perforation</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".7" modifier="S11K25_4">
+		<SuperClass code="S11K25_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-143" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Chronic without haemorrhage or perforation</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".9" modifier="S11K25_4">
+		<SuperClass code="S11K25_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-144" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Unspecified as acute or chronic, without haemorrhage or perforation</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="0" modifier="S13M00_5">
+		<SuperClass code="S13M00_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-145" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Multiple sites</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="1" modifier="S13M00_5">
+		<SuperClass code="S13M00_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-146" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Shoulder region</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-147" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">clavicle</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-148" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">scapula</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-149" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="item">acromioclavicular</Fragment>
+				<Fragment type="item">joints</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-150" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="item">glenohumeral</Fragment>
+				<Fragment type="item">joints</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-151" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="item">sternoclavicular</Fragment>
+				<Fragment type="item">joints</Fragment>
+			</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="2" modifier="S13M00_5">
+		<SuperClass code="S13M00_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-152" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Upper arm</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-153" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">humerus</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-154" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">elbow joint</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="3" modifier="S13M00_5">
+		<SuperClass code="S13M00_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-155" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Forearm</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-156" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">radius</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-157" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">ulna</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-158" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">wrist joint</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="4" modifier="S13M00_5">
+		<SuperClass code="S13M00_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-159" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Hand</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-160" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">carpus</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-161" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">fingers</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-162" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">metacarpus</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-163" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">joints between these bones</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="5" modifier="S13M00_5">
+		<SuperClass code="S13M00_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-164" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Pelvic region and thigh</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-165" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">buttock</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-166" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">femur</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-167" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">pelvis</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-168" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">hip (joint)</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-169" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">sacroiliac joint</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="6" modifier="S13M00_5">
+		<SuperClass code="S13M00_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-170" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Lower leg</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-171" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">fibula</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-172" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">knee joint</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-173" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">tibia</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="7" modifier="S13M00_5">
+		<SuperClass code="S13M00_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-174" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Ankle and foot</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-175" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">metatarsus</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-176" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">tarsus</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-177" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">toes</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-178" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">ankle joint</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-179" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">other joints in foot</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="8" modifier="S13M00_5">
+		<SuperClass code="S13M00_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-180" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Other</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-181" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">head</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-182" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">neck</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-183" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">ribs</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-184" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">skull</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-185" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">trunk</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-186" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">vertebral column</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="9" modifier="S13M00_5">
+		<SuperClass code="S13M00_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-187" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Site unspecified</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="0" modifier="S13M23_5">
+		<SuperClass code="S13M23_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-188" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Multiple sites</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="1" modifier="S13M23_5">
+		<SuperClass code="S13M23_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-189" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Anterior cruciate ligament or Anterior horn of medial meniscus</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="2" modifier="S13M23_5">
+		<SuperClass code="S13M23_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-190" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Posterior cruciate ligament or Posterior horn of medial meniscus</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="3" modifier="S13M23_5">
+		<SuperClass code="S13M23_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-191" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Medial collateral ligament or Other and unspecified medial meniscus</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="4" modifier="S13M23_5">
+		<SuperClass code="S13M23_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-192" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Lateral collateral ligament or Anterior horn of lateral meniscus</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="5" modifier="S13M23_5">
+		<SuperClass code="S13M23_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-193" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Posterior horn of lateral meniscus</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="6" modifier="S13M23_5">
+		<SuperClass code="S13M23_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-194" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Other and unspecified lateral meniscus</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="7" modifier="S13M23_5">
+		<SuperClass code="S13M23_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-195" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Capsular ligament</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="9" modifier="S13M23_5">
+		<SuperClass code="S13M23_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-196" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Unspecified ligament or Unspecified meniscus</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="0" modifier="S13M40_5">
+		<SuperClass code="S13M40_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-197" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Multiple sites in spine</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="1" modifier="S13M40_5">
+		<SuperClass code="S13M40_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-198" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Occipito-atlanto-axial region</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="2" modifier="S13M40_5">
+		<SuperClass code="S13M40_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-199" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Cervical region</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="3" modifier="S13M40_5">
+		<SuperClass code="S13M40_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-200" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Cervicothoracic region</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="4" modifier="S13M40_5">
+		<SuperClass code="S13M40_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-201" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Thoracic region</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="5" modifier="S13M40_5">
+		<SuperClass code="S13M40_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-202" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Thoracolumbar region</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="6" modifier="S13M40_5">
+		<SuperClass code="S13M40_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-203" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Lumbar region</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="7" modifier="S13M40_5">
+		<SuperClass code="S13M40_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-204" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Lumbosacral region</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="8" modifier="S13M40_5">
+		<SuperClass code="S13M40_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-205" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Sacral and sacrococcygeal region</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="9" modifier="S13M40_5">
+		<SuperClass code="S13M40_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-206" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Site unspecified</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="0" modifier="S13M99_5">
+		<SuperClass code="S13M99_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-207" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Head region</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-208" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">occipitocervical</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="1" modifier="S13M99_5">
+		<SuperClass code="S13M99_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-209" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Cervical region</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-210" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">cervicothoracic</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="2" modifier="S13M99_5">
+		<SuperClass code="S13M99_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-211" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Thoracic region</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-212" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">thoracolumbar</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="3" modifier="S13M99_5">
+		<SuperClass code="S13M99_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-213" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Lumbar region</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-214" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">lumbosacral</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="4" modifier="S13M99_5">
+		<SuperClass code="S13M99_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-215" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Sacral region</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-216" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">sacrococcygeal</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-217" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">sacroiliac</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="5" modifier="S13M99_5">
+		<SuperClass code="S13M99_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-218" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Pelvic region</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-219" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">hip</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-220" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">pubic</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="6" modifier="S13M99_5">
+		<SuperClass code="S13M99_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-221" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Lower extremity</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="7" modifier="S13M99_5">
+		<SuperClass code="S13M99_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-222" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Upper extremity</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-223" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">acromioclavicular</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-224" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">sternoclavicular</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="8" modifier="S13M99_5">
+		<SuperClass code="S13M99_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-225" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Rib cage</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-226" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">costochondral</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-227" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">costovertebral</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-228" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">sternochondral</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="9" modifier="S13M99_5">
+		<SuperClass code="S13M99_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-229" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Abdomen and other</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".0" modifier="S14N00_4">
+		<SuperClass code="S14N00_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-230" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Minor glomerular abnormality</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-231" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Minimal change lesion</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".1" modifier="S14N00_4">
+		<SuperClass code="S14N00_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-232" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Focal and segmental glomerular lesions</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-233" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Focal and segmental:</Fragment>
+				<Fragment type="list">hyalinosis</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-234" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Focal and segmental:</Fragment>
+				<Fragment type="list">sclerosis</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-235" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Focal glomerulonephritis</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".2" modifier="S14N00_4">
+		<SuperClass code="S14N00_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-236" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Diffuse membranous glomerulonephritis</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".3" modifier="S14N00_4">
+		<SuperClass code="S14N00_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-237" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Diffuse mesangial proliferative glomerulonephritis</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".4" modifier="S14N00_4">
+		<SuperClass code="S14N00_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-238" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Diffuse endocapillary proliferative glomerulonephritis</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".5" modifier="S14N00_4">
+		<SuperClass code="S14N00_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-239" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Diffuse mesangiocapillary glomerulonephritis</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-240" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Membranoproliferative glomerulonephritis, types 1 and 3, or NOS</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".6" modifier="S14N00_4">
+		<SuperClass code="S14N00_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-241" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Dense deposit disease</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-242" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Membranoproliferative glomerulonephritis, type 2</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".7" modifier="S14N00_4">
+		<SuperClass code="S14N00_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-243" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Diffuse crescentic glomerulonephritis</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-244" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Extracapillary glomerulonephritis</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".8" modifier="S14N00_4">
+		<SuperClass code="S14N00_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-245" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Other</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-246" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Proliferative glomerulonephritis NOS</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".9" modifier="S14N00_4">
+		<SuperClass code="S14N00_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-247" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Unspecified</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".0" modifier="S15O03_4">
+		<SuperClass code="S15O03_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-248" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Incomplete, complicated by genital tract and pelvic infection</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-249" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">With conditions in O08.0</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".1" modifier="S15O03_4">
+		<SuperClass code="S15O03_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-250" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Incomplete, complicated by delayed or excessive haemorrhage</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-251" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">With conditions in O08.1</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".2" modifier="S15O03_4">
+		<SuperClass code="S15O03_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-252" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Incomplete, complicated by embolism</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-253" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">With conditions in O08.2</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".3" modifier="S15O03_4">
+		<SuperClass code="S15O03_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-254" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Incomplete, with other and unspecified complications</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-255" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">With conditions in O08.3-O08.9</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".4" modifier="S15O03_4">
+		<SuperClass code="S15O03_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-256" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Incomplete, without complication</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".5" modifier="S15O03_4">
+		<SuperClass code="S15O03_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-257" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Complete or unspecified, complicated by genital tract and pelvic infection</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-258" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">With conditions in O08.0</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".6" modifier="S15O03_4">
+		<SuperClass code="S15O03_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-259" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Complete or unspecified, complicated by delayed or excessive haemorrhage</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-260" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">With conditions in O08.1</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".7" modifier="S15O03_4">
+		<SuperClass code="S15O03_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-261" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Complete or unspecified, complicated by embolism</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-262" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">With conditions in O08.2</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".8" modifier="S15O03_4">
+		<SuperClass code="S15O03_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-263" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Complete or unspecified, with other and unspecified complications</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-264" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">With conditions in O08.3-O08.9</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".9" modifier="S15O03_4">
+		<SuperClass code="S15O03_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-265" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Complete or unspecified, without complication</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".0" modifier="S18R83_4">
+		<SuperClass code="S18R83_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-266" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Abnormal level of enzymes</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".1" modifier="S18R83_4">
+		<SuperClass code="S18R83_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-267" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Abnormal level of hormones</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".2" modifier="S18R83_4">
+		<SuperClass code="S18R83_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-268" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Abnormal level of other drugs, medicaments and biological substances</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".3" modifier="S18R83_4">
+		<SuperClass code="S18R83_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-269" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Abnormal level of substances chiefly nonmedicinal as to source</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".4" modifier="S18R83_4">
+		<SuperClass code="S18R83_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-270" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Abnormal immunological findings</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".5" modifier="S18R83_4">
+		<SuperClass code="S18R83_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-271" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Abnormal microbiological findings</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-272" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Positive culture findings</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".6" modifier="S18R83_4">
+		<SuperClass code="S18R83_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-273" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Abnormal cytological findings</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-274" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Abnormal Papanicolaou smear</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".7" modifier="S18R83_4">
+		<SuperClass code="S18R83_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-275" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Abnormal histological findings</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".8" modifier="S18R83_4">
+		<SuperClass code="S18R83_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-276" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Other abnormal findings</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-277" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Abnormal chromosomal findings</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".9" modifier="S18R83_4">
+		<SuperClass code="S18R83_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-278" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Unspecified abnormal finding</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="0" modifier="S19S02_5">
+		<SuperClass code="S19S02_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-279" kind="preferred">
+			<Label xml:lang="en" xml:space="default">closed</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="1" modifier="S19S02_5">
+		<SuperClass code="S19S02_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-280" kind="preferred">
+			<Label xml:lang="en" xml:space="default">open</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="0" modifier="S19S06_5">
+		<SuperClass code="S19S06_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-281" kind="preferred">
+			<Label xml:lang="en" xml:space="default">without open intracranial wound</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="1" modifier="S19S06_5">
+		<SuperClass code="S19S06_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-282" kind="preferred">
+			<Label xml:lang="en" xml:space="default">with open intracranial wound</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="0" modifier="S19S12_5">
+		<SuperClass code="S19S12_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-283" kind="preferred">
+			<Label xml:lang="en" xml:space="default">closed</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="1" modifier="S19S12_5">
+		<SuperClass code="S19S12_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-284" kind="preferred">
+			<Label xml:lang="en" xml:space="default">open</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="0" modifier="S19S22_5">
+		<SuperClass code="S19S22_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-285" kind="preferred">
+			<Label xml:lang="en" xml:space="default">closed</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="1" modifier="S19S22_5">
+		<SuperClass code="S19S22_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-286" kind="preferred">
+			<Label xml:lang="en" xml:space="default">open</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="0" modifier="S19S26_5">
+		<SuperClass code="S19S26_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-287" kind="preferred">
+			<Label xml:lang="en" xml:space="default">without open wound into thoracic cavity</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="1" modifier="S19S26_5">
+		<SuperClass code="S19S26_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-288" kind="preferred">
+			<Label xml:lang="en" xml:space="default">with open wound into thoracic cavity</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="0" modifier="S19S27_5">
+		<SuperClass code="S19S27_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-289" kind="preferred">
+			<Label xml:lang="en" xml:space="default">without open wound into thoracic cavity</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="1" modifier="S19S27_5">
+		<SuperClass code="S19S27_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-290" kind="preferred">
+			<Label xml:lang="en" xml:space="default">with open wound into thoracic cavity</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="0" modifier="S19S32_5">
+		<SuperClass code="S19S32_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-291" kind="preferred">
+			<Label xml:lang="en" xml:space="default">closed</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="1" modifier="S19S32_5">
+		<SuperClass code="S19S32_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-292" kind="preferred">
+			<Label xml:lang="en" xml:space="default">open</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="0" modifier="S19S36_5">
+		<SuperClass code="S19S36_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-293" kind="preferred">
+			<Label xml:lang="en" xml:space="default">without open wound into cavity</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="1" modifier="S19S36_5">
+		<SuperClass code="S19S36_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-294" kind="preferred">
+			<Label xml:lang="en" xml:space="default">with open wound into cavity</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="0" modifier="S19S37_5">
+		<SuperClass code="S19S37_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-295" kind="preferred">
+			<Label xml:lang="en" xml:space="default">without open wound into cavity</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="1" modifier="S19S37_5">
+		<SuperClass code="S19S37_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-296" kind="preferred">
+			<Label xml:lang="en" xml:space="default">with open wound into cavity</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="0" modifier="S19S42_5">
+		<SuperClass code="S19S42_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-297" kind="preferred">
+			<Label xml:lang="en" xml:space="default">closed</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="1" modifier="S19S42_5">
+		<SuperClass code="S19S42_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-298" kind="preferred">
+			<Label xml:lang="en" xml:space="default">open</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="0" modifier="S19S52_5">
+		<SuperClass code="S19S52_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-299" kind="preferred">
+			<Label xml:lang="en" xml:space="default">closed</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="1" modifier="S19S52_5">
+		<SuperClass code="S19S52_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-300" kind="preferred">
+			<Label xml:lang="en" xml:space="default">open</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="0" modifier="S19S62_5">
+		<SuperClass code="S19S62_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-301" kind="preferred">
+			<Label xml:lang="en" xml:space="default">closed</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="1" modifier="S19S62_5">
+		<SuperClass code="S19S62_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-302" kind="preferred">
+			<Label xml:lang="en" xml:space="default">open</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="0" modifier="S19S72_5">
+		<SuperClass code="S19S72_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-303" kind="preferred">
+			<Label xml:lang="en" xml:space="default">closed</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="1" modifier="S19S72_5">
+		<SuperClass code="S19S72_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-304" kind="preferred">
+			<Label xml:lang="en" xml:space="default">open</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="0" modifier="S19S82_5">
+		<SuperClass code="S19S82_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-305" kind="preferred">
+			<Label xml:lang="en" xml:space="default">closed</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="1" modifier="S19S82_5">
+		<SuperClass code="S19S82_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-306" kind="preferred">
+			<Label xml:lang="en" xml:space="default">open</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="0" modifier="S19S92_5">
+		<SuperClass code="S19S92_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-307" kind="preferred">
+			<Label xml:lang="en" xml:space="default">closed</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="1" modifier="S19S92_5">
+		<SuperClass code="S19S92_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-308" kind="preferred">
+			<Label xml:lang="en" xml:space="default">open</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="0" modifier="S19T02_5">
+		<SuperClass code="S19T02_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-309" kind="preferred">
+			<Label xml:lang="en" xml:space="default">closed</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="1" modifier="S19T02_5">
+		<SuperClass code="S19T02_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-310" kind="preferred">
+			<Label xml:lang="en" xml:space="default">open</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="0" modifier="S19T08_5">
+		<SuperClass code="S19T08_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-311" kind="preferred">
+			<Label xml:lang="en" xml:space="default">closed</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="1" modifier="S19T08_5">
+		<SuperClass code="S19T08_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-312" kind="preferred">
+			<Label xml:lang="en" xml:space="default">open</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="0" modifier="S19T10_5">
+		<SuperClass code="S19T10_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-313" kind="preferred">
+			<Label xml:lang="en" xml:space="default">closed</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="1" modifier="S19T10_5">
+		<SuperClass code="S19T10_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-314" kind="preferred">
+			<Label xml:lang="en" xml:space="default">open</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="0" modifier="S19T12_5">
+		<SuperClass code="S19T12_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-315" kind="preferred">
+			<Label xml:lang="en" xml:space="default">closed</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="1" modifier="S19T12_5">
+		<SuperClass code="S19T12_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-316" kind="preferred">
+			<Label xml:lang="en" xml:space="default">open</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="0" modifier="S19T142_5">
+		<SuperClass code="S19T142_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-317" kind="preferred">
+			<Label xml:lang="en" xml:space="default">closed</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="1" modifier="S19T142_5">
+		<SuperClass code="S19T142_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-318" kind="preferred">
+			<Label xml:lang="en" xml:space="default">open</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="0" modifier="S20W00_4">
+		<SuperClass code="S20W00_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-319" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Home</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-320" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Apartment</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-321" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Boarding-house</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-322" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Caravan [trailer] park, residential</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-323" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Farmhouse</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-324" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Home premises</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-325" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">House (residential)</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-326" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Noninstitutional place of residence</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-327" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Private:</Fragment>
+				<Fragment type="list">driveway to home</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-328" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Private:</Fragment>
+				<Fragment type="list">garage</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-329" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Private:</Fragment>
+				<Fragment type="list">garden to home</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-330" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Private:</Fragment>
+				<Fragment type="list">yard to home</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-331" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Swimming-pool in private house or garden</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-332" kind="exclusion">
+			<Label xml:lang="en" xml:space="default">abandoned or derelict house8</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-333" kind="exclusion">
+			<Label xml:lang="en" xml:space="default">home under construction but not yet occupied6</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-334" kind="exclusion">
+			<Label xml:lang="en" xml:space="default">institutional place of residence1</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="1" modifier="S20W00_4">
+		<SuperClass code="S20W00_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-335" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Residential institution</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-336" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Children's home</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-337" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Dormitory</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-338" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Home for the sick</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-339" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Hospice</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-340" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Military camp</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-341" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Nursing home</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-342" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Old people's home</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-343" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Orphanage</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-344" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Pensioner's home</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-345" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Prison</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-346" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Reform school</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="2" modifier="S20W00_4">
+		<SuperClass code="S20W00_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-347" kind="preferred">
+			<Label xml:lang="en" xml:space="default">School, other institution and public administrative area</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-348" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Building (including adjacent grounds) used by the general public or by a particular group of the public such as:</Fragment>
+				<Fragment type="list">assembly hall</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-349" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Building (including adjacent grounds) used by the general public or by a particular group of the public such as:</Fragment>
+				<Fragment type="list">campus</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-350" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Building (including adjacent grounds) used by the general public or by a particular group of the public such as:</Fragment>
+				<Fragment type="list">church</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-351" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Building (including adjacent grounds) used by the general public or by a particular group of the public such as:</Fragment>
+				<Fragment type="list">cinema</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-352" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Building (including adjacent grounds) used by the general public or by a particular group of the public such as:</Fragment>
+				<Fragment type="list">clubhouse</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-353" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Building (including adjacent grounds) used by the general public or by a particular group of the public such as:</Fragment>
+				<Fragment type="list">college</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-354" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Building (including adjacent grounds) used by the general public or by a particular group of the public such as:</Fragment>
+				<Fragment type="list">court-house</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-355" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Building (including adjacent grounds) used by the general public or by a particular group of the public such as:</Fragment>
+				<Fragment type="list">dancehall</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-356" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Building (including adjacent grounds) used by the general public or by a particular group of the public such as:</Fragment>
+				<Fragment type="list">day nursery</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-357" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Building (including adjacent grounds) used by the general public or by a particular group of the public such as:</Fragment>
+				<Fragment type="list">gallery</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-358" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Building (including adjacent grounds) used by the general public or by a particular group of the public such as:</Fragment>
+				<Fragment type="list">hospital</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-359" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Building (including adjacent grounds) used by the general public or by a particular group of the public such as:</Fragment>
+				<Fragment type="list">institute for higher education</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-360" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Building (including adjacent grounds) used by the general public or by a particular group of the public such as:</Fragment>
+				<Fragment type="list">kindergarten</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-361" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Building (including adjacent grounds) used by the general public or by a particular group of the public such as:</Fragment>
+				<Fragment type="list">library</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-362" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Building (including adjacent grounds) used by the general public or by a particular group of the public such as:</Fragment>
+				<Fragment type="list">movie-house</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-363" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Building (including adjacent grounds) used by the general public or by a particular group of the public such as:</Fragment>
+				<Fragment type="list">museum</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-364" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Building (including adjacent grounds) used by the general public or by a particular group of the public such as:</Fragment>
+				<Fragment type="list">music-hall</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-365" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Building (including adjacent grounds) used by the general public or by a particular group of the public such as:</Fragment>
+				<Fragment type="list">opera-house</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-366" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Building (including adjacent grounds) used by the general public or by a particular group of the public such as:</Fragment>
+				<Fragment type="list">post office</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-367" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Building (including adjacent grounds) used by the general public or by a particular group of the public such as:</Fragment>
+				<Fragment type="list">public hall</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-368" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Building (including adjacent grounds) used by the general public or by a particular group of the public such as:</Fragment>
+				<Fragment type="list">school (private)(public)(state)</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-369" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Building (including adjacent grounds) used by the general public or by a particular group of the public such as:</Fragment>
+				<Fragment type="list">theatre</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-370" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Building (including adjacent grounds) used by the general public or by a particular group of the public such as:</Fragment>
+				<Fragment type="list">university</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-371" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Building (including adjacent grounds) used by the general public or by a particular group of the public such as:</Fragment>
+				<Fragment type="list">youth centre</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-372" kind="exclusion">
+			<Label xml:lang="en" xml:space="default">building under construction  6</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-373" kind="exclusion">
+			<Label xml:lang="en" xml:space="default">residential institution  1</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-374" kind="exclusion">
+			<Label xml:lang="en" xml:space="default">sports and athletics area  3</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="3" modifier="S20W00_4">
+		<SuperClass code="S20W00_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-375" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Sports and athletics area</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-376" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Baseball field</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-377" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Basketball-court</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-378" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Cricket ground</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-379" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Football field</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-380" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Golf-course</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-381" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Gymnasium</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-382" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Hockey field</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-383" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Riding-school</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-384" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Skating-rink</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-385" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Squash-court</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-386" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Stadium</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-387" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Swimming-pool, public</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-388" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Tennis-court</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-389" kind="exclusion">
+			<Label xml:lang="en" xml:space="default">swimming-pool or tennis-court in private home or garden0</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="4" modifier="S20W00_4">
+		<SuperClass code="S20W00_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-390" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Street and highway</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-391" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Freeway</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-392" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Motorway</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-393" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Pavement</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-394" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Road</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-395" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Sidewalk</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="5" modifier="S20W00_4">
+		<SuperClass code="S20W00_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-396" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Trade and service area</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-397" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Airport</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-398" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Bank</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-399" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Café</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-400" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Casino</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-401" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Garage (commercial)</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-402" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Gas station</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-403" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Hotel</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-404" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Market</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-405" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Office building</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-406" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Petrol station</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-407" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Radio or television station</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-408" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Restaurant</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-409" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Service station</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-410" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Shop (commercial)</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-411" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Shopping mall</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-412" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Station (bus)(railway)</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-413" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Store</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-414" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Supermarket</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-415" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Warehouse</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-416" kind="exclusion">
+			<Label xml:lang="en" xml:space="default">garage in private home0</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="6" modifier="S20W00_4">
+		<SuperClass code="S20W00_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-417" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Industrial and construction area</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-418" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Building [any] under construction</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-419" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Dockyard</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-420" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Dry dock</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-421" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Factory:</Fragment>
+				<Fragment type="list">building</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-422" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Factory:</Fragment>
+				<Fragment type="list">premises</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-423" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Gasworks</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-424" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Industrial yard</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-425" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Mine</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-426" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Oil rig and other offshore installations</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-427" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Pit (coal)(gravel)(sand)</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-428" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Power-station (coal)(nuclear)(oil)</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-429" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Shipyard</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-430" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Tunnel under construction</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-431" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Workshop</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="7" modifier="S20W00_4">
+		<SuperClass code="S20W00_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-432" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Farm</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-433" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Farm:</Fragment>
+				<Fragment type="list">buildings</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-434" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Farm:</Fragment>
+				<Fragment type="list">land under cultivation</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-435" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Ranch</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-436" kind="exclusion">
+			<Label xml:lang="en" xml:space="default">farmhouse and home premises of farm0</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="8" modifier="S20W00_4">
+		<SuperClass code="S20W00_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-437" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Other specified places</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-438" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Beach</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-439" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Campsite</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-440" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Canal</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-441" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Caravan site NOS</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-442" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Derelict house</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-443" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Desert</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-444" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Dock NOS</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-445" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Forest</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-446" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Harbour</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-447" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Hill</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-448" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Lake</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-449" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Marsh</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-450" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Military training ground</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-451" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Mountain</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-452" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Park (amusement) (public)</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-453" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Parking-lot and parking-place</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-454" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Pond or pool</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-455" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Prairie</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-456" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Public place NOS</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-457" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Railway line</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-458" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">River</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-459" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Sea</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-460" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Seashore</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-461" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Stream</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-462" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Swamp</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-463" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Water reservoir</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-464" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Zoo</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="9" modifier="S20W00_4">
+		<SuperClass code="S20W00_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-465" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Unspecified place</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="0" modifier="S20V01T_5">
+		<SuperClass code="S20V01T_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-466" kind="preferred">
+			<Label xml:lang="en" xml:space="default">While engaged in sports activity</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-467" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Physical exercise with a described functional element such as:</Fragment>
+				<Fragment type="list">golf</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-468" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Physical exercise with a described functional element such as:</Fragment>
+				<Fragment type="list">jogging</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-469" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Physical exercise with a described functional element such as:</Fragment>
+				<Fragment type="list">riding</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-470" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Physical exercise with a described functional element such as:</Fragment>
+				<Fragment type="list">school athletics</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-471" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Physical exercise with a described functional element such as:</Fragment>
+				<Fragment type="list">skiing</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-472" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Physical exercise with a described functional element such as:</Fragment>
+				<Fragment type="list">swimming</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-473" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Physical exercise with a described functional element such as:</Fragment>
+				<Fragment type="list">trekking</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-474" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Physical exercise with a described functional element such as:</Fragment>
+				<Fragment type="list">water-skiing</Fragment>
+			</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="1" modifier="S20V01T_5">
+		<SuperClass code="S20V01T_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-475" kind="preferred">
+			<Label xml:lang="en" xml:space="default">While engaged in leisure activity</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-476" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Hobby activities</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-477" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Leisure-time activities with an entertainment element such as going to the cinema, to a dance or to a party</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-478" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Participation in sessions and activities of voluntary organizations</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-479" kind="exclusion">
+			<Label xml:lang="en" xml:space="default">sports activities0</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="2" modifier="S20V01T_5">
+		<SuperClass code="S20V01T_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-480" kind="preferred">
+			<Label xml:lang="en" xml:space="default">While working for income</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-481" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Paid work (manual)(professional)</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-482" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Transportation (time) to and from such activities</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-483" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Work for salary, bonus and other types of income</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="3" modifier="S20V01T_5">
+		<SuperClass code="S20V01T_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-484" kind="preferred">
+			<Label xml:lang="en" xml:space="default">While engaged in other types of work</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-485" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Domestic duties such as:</Fragment>
+				<Fragment type="list">caring for children and relatives</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-486" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Domestic duties such as:</Fragment>
+				<Fragment type="list">cleaning</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-487" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Domestic duties such as:</Fragment>
+				<Fragment type="list">cooking</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-488" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Domestic duties such as:</Fragment>
+				<Fragment type="list">gardening</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-489" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">
+				<Fragment type="list">Domestic duties such as:</Fragment>
+				<Fragment type="list">household maintenance</Fragment>
+			</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-490" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Duties for which one would not normally gain an income</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-491" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Learning activities, e.g. attending school session or lesson</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-492" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Undergoing education</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="4" modifier="S20V01T_5">
+		<SuperClass code="S20V01T_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-493" kind="preferred">
+			<Label xml:lang="en" xml:space="default">While resting, sleeping, eating or engaging in other vital activities</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-494" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Personal hygiene</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="8" modifier="S20V01T_5">
+		<SuperClass code="S20V01T_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-495" kind="preferred">
+			<Label xml:lang="en" xml:space="default">While engaged in other specified activities</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code="9" modifier="S20V01T_5">
+		<SuperClass code="S20V01T_5"/>
+		<Rubric id="id-icd10_20190322-1587556953279-496" kind="preferred">
+			<Label xml:lang="en" xml:space="default">During unspecified activity</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".0" modifier="S20V01_4">
+		<SuperClass code="S20V01_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-497" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Nontraffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".1" modifier="S20V01_4">
+		<SuperClass code="S20V01_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-498" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Traffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".9" modifier="S20V01_4">
+		<SuperClass code="S20V01_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-499" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Unspecified whether traffic or nontraffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".0" modifier="S20V10_4">
+		<SuperClass code="S20V10_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-500" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Driver injured in nontraffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".1" modifier="S20V10_4">
+		<SuperClass code="S20V10_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-501" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Passenger injured in nontraffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".2" modifier="S20V10_4">
+		<SuperClass code="S20V10_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-502" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Unspecified pedal cyclist injured in nontraffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".3" modifier="S20V10_4">
+		<SuperClass code="S20V10_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-503" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Person injured while boarding or alighting</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".4" modifier="S20V10_4">
+		<SuperClass code="S20V10_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-504" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Driver injured in traffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".5" modifier="S20V10_4">
+		<SuperClass code="S20V10_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-505" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Passenger injured in traffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".9" modifier="S20V10_4">
+		<SuperClass code="S20V10_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-506" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Unspecified pedal cyclist injured in traffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".0" modifier="S20V20_4">
+		<SuperClass code="S20V20_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-507" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Driver injured in nontraffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".1" modifier="S20V20_4">
+		<SuperClass code="S20V20_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-508" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Passenger injured in nontraffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".2" modifier="S20V20_4">
+		<SuperClass code="S20V20_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-509" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Unspecified motorcycle rider injured in nontraffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".3" modifier="S20V20_4">
+		<SuperClass code="S20V20_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-510" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Person injured while boarding or alighting</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".4" modifier="S20V20_4">
+		<SuperClass code="S20V20_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-511" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Driver injured in traffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".5" modifier="S20V20_4">
+		<SuperClass code="S20V20_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-512" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Passenger injured in traffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".9" modifier="S20V20_4">
+		<SuperClass code="S20V20_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-513" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Unspecified motorcycle rider injured in traffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".0" modifier="S20V30_4">
+		<SuperClass code="S20V30_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-514" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Driver injured in nontraffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".1" modifier="S20V30_4">
+		<SuperClass code="S20V30_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-515" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Passenger injured in nontraffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".2" modifier="S20V30_4">
+		<SuperClass code="S20V30_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-516" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Person on outside of vehicle injured in nontraffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".3" modifier="S20V30_4">
+		<SuperClass code="S20V30_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-517" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Unspecified occupant of three-wheeled motor vehicle injured in nontraffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".4" modifier="S20V30_4">
+		<SuperClass code="S20V30_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-518" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Person injured while boarding or alighting</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".5" modifier="S20V30_4">
+		<SuperClass code="S20V30_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-519" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Driver injured in traffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".6" modifier="S20V30_4">
+		<SuperClass code="S20V30_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-520" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Passenger injured in traffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".7" modifier="S20V30_4">
+		<SuperClass code="S20V30_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-521" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Person on outside of vehicle injured in traffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".9" modifier="S20V30_4">
+		<SuperClass code="S20V30_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-522" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Unspecified occupant of three-wheeled motor vehicle injured in traffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".0" modifier="S20V40_4">
+		<SuperClass code="S20V40_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-523" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Driver injured in nontraffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".1" modifier="S20V40_4">
+		<SuperClass code="S20V40_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-524" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Passenger injured in nontraffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".2" modifier="S20V40_4">
+		<SuperClass code="S20V40_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-525" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Person on outside of vehicle injured in nontraffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".3" modifier="S20V40_4">
+		<SuperClass code="S20V40_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-526" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Unspecified car occupant injured in nontraffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".4" modifier="S20V40_4">
+		<SuperClass code="S20V40_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-527" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Person injured while boarding or alighting</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".5" modifier="S20V40_4">
+		<SuperClass code="S20V40_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-528" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Driver injured in traffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".6" modifier="S20V40_4">
+		<SuperClass code="S20V40_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-529" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Passenger injured in traffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".7" modifier="S20V40_4">
+		<SuperClass code="S20V40_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-530" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Person on outside of vehicle injured in traffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".9" modifier="S20V40_4">
+		<SuperClass code="S20V40_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-531" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Unspecified car occupant injured in traffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".0" modifier="S20V50_4">
+		<SuperClass code="S20V50_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-532" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Driver injured in nontraffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".1" modifier="S20V50_4">
+		<SuperClass code="S20V50_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-533" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Passenger injured in nontraffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".2" modifier="S20V50_4">
+		<SuperClass code="S20V50_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-534" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Person on outside of vehicle injured in nontraffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".3" modifier="S20V50_4">
+		<SuperClass code="S20V50_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-535" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Unspecified occupant of pick-up truck or van injured in nontraffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".4" modifier="S20V50_4">
+		<SuperClass code="S20V50_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-536" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Person injured while boarding or alighting</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".5" modifier="S20V50_4">
+		<SuperClass code="S20V50_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-537" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Driver injured in traffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".6" modifier="S20V50_4">
+		<SuperClass code="S20V50_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-538" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Passenger injured in traffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".7" modifier="S20V50_4">
+		<SuperClass code="S20V50_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-539" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Person on outside of vehicle injured in traffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".9" modifier="S20V50_4">
+		<SuperClass code="S20V50_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-540" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Unspecified occupant of pick-up truck or van injured in traffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".0" modifier="S20V60_4">
+		<SuperClass code="S20V60_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-541" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Driver injured in nontraffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".1" modifier="S20V60_4">
+		<SuperClass code="S20V60_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-542" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Passenger injured in nontraffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".2" modifier="S20V60_4">
+		<SuperClass code="S20V60_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-543" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Person on outside of vehicle injured in nontraffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".3" modifier="S20V60_4">
+		<SuperClass code="S20V60_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-544" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Unspecified occupant of heavy transport vehicle injured in nontraffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".4" modifier="S20V60_4">
+		<SuperClass code="S20V60_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-545" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Person injured while boarding or alighting</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".5" modifier="S20V60_4">
+		<SuperClass code="S20V60_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-546" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Driver injured in traffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".6" modifier="S20V60_4">
+		<SuperClass code="S20V60_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-547" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Passenger injured in traffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".7" modifier="S20V60_4">
+		<SuperClass code="S20V60_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-548" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Person on outside of vehicle injured in traffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".9" modifier="S20V60_4">
+		<SuperClass code="S20V60_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-549" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Unspecified occupant of heavy transport vehicle injured in traffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".0" modifier="S20V70_4">
+		<SuperClass code="S20V70_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-550" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Driver injured in nontraffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".1" modifier="S20V70_4">
+		<SuperClass code="S20V70_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-551" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Passenger injured in nontraffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".2" modifier="S20V70_4">
+		<SuperClass code="S20V70_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-552" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Person on outside of vehicle injured in nontraffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".3" modifier="S20V70_4">
+		<SuperClass code="S20V70_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-553" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Unspecified bus occupant injured in nontraffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".4" modifier="S20V70_4">
+		<SuperClass code="S20V70_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-554" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Person injured while boarding or alighting</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".5" modifier="S20V70_4">
+		<SuperClass code="S20V70_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-555" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Driver injured in traffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".6" modifier="S20V70_4">
+		<SuperClass code="S20V70_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-556" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Passenger injured in traffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".7" modifier="S20V70_4">
+		<SuperClass code="S20V70_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-557" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Person on outside of vehicle injured in traffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".9" modifier="S20V70_4">
+		<SuperClass code="S20V70_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-558" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Unspecified bus occupant injured in traffic accident</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".0" modifier="S20V90_4">
+		<SuperClass code="S20V90_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-559" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Merchant ship</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".1" modifier="S20V90_4">
+		<SuperClass code="S20V90_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-560" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Passenger ship</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-561" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Ferry-boat</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-562" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Liner</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".2" modifier="S20V90_4">
+		<SuperClass code="S20V90_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-563" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Fishing boat</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".3" modifier="S20V90_4">
+		<SuperClass code="S20V90_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-564" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Other powered watercraft</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-565" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Hovercraft (on open water)</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-566" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Jet skis</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".4" modifier="S20V90_4">
+		<SuperClass code="S20V90_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-567" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Sailboat</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-568" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Yacht</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".5" modifier="S20V90_4">
+		<SuperClass code="S20V90_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-569" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Canoe or kayak</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".6" modifier="S20V90_4">
+		<SuperClass code="S20V90_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-570" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Inflatable craft (nonpowered)</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".7" modifier="S20V90_4">
+		<SuperClass code="S20V90_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-571" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Water-skis</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".8" modifier="S20V90_4">
+		<SuperClass code="S20V90_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-572" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Other unpowered watercraft</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-573" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Surf-board</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-574" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Windsurfer</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".9" modifier="S20V90_4">
+		<SuperClass code="S20V90_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-575" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Unspecified watercraft</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-576" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Boat NOS</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-577" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Ship NOS</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-578" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Watercraft NOS</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".0" modifier="S20Y70_4">
+		<SuperClass code="S20Y70_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-579" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Diagnostic and monitoring devices</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".1" modifier="S20Y70_4">
+		<SuperClass code="S20Y70_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-580" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Therapeutic (nonsurgical) and rehabilitative devices</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".2" modifier="S20Y70_4">
+		<SuperClass code="S20Y70_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-581" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Prosthetic and other implants, materials and accessory devices</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".3" modifier="S20Y70_4">
+		<SuperClass code="S20Y70_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-582" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Surgical instruments, materials and devices (including sutures)</Label>
+		</Rubric>
+	</ModifierClass>
+	<ModifierClass code=".8" modifier="S20Y70_4">
+		<SuperClass code="S20Y70_4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-583" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Miscellaneous devices, not elsewhere classified</Label>
+		</Rubric>
+	</ModifierClass>
+	<Class code="I" kind="chapter">
+		<SubClass code="A00-A09"/>
+		<SubClass code="A15-A19"/>
+		<SubClass code="A20-A28"/>
+		<SubClass code="A30-A49"/>
+		<SubClass code="A50-A64"/>
+		<SubClass code="A65-A69"/>
+		<SubClass code="A70-A74"/>
+		<SubClass code="A75-A79"/>
+		<SubClass code="A80-A89"/>
+		<SubClass code="A92-A99"/>
+		<SubClass code="B00-B09"/>
+		<SubClass code="B15-B19"/>
+		<SubClass code="B20-B24"/>
+		<SubClass code="B25-B34"/>
+		<SubClass code="B35-B49"/>
+		<SubClass code="B50-B64"/>
+		<SubClass code="B65-B83"/>
+		<SubClass code="B85-B89"/>
+		<SubClass code="B90-B94"/>
+		<SubClass code="B95-B98"/>
+		<SubClass code="B99-B99"/>
+		<Rubric id="id-icd10_20190322-1587556953279-584" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Certain infectious and parasitic diseases</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-585" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">diseases generally recognized as communicable or transmissible</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-586" kind="coding-hint">
+			<Label xml:lang="en" xml:space="default">Use additional code (U82-U84), if desired, to identify resistance to antimicrobial drugs</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-587" kind="exclusion">
+			<Label xml:lang="en" xml:space="default">carrier or suspected carrier of infectious disease <Reference class="in brackets" code="Z22">Z22.-</Reference></Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-588" kind="exclusion">
+			<Label xml:lang="en" xml:space="default">certain localized infections - see body system-related chapters</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-589" kind="exclusion">
+			<Label xml:lang="en" xml:space="default">infectious and parasitic diseases complicating pregnancy, childbirth and the puerperium [except obstetrical tetanus] <Reference class="in brackets" code="O98">O98.-</Reference></Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-590" kind="exclusion">
+			<Label xml:lang="en" xml:space="default">infectious and parasitic diseases specific to the perinatal period [except tetanus neonatorum, whooping cough, congenital syphilis, perinatal gonococcal infection and perinatal human immunodeficiency virus [HIV] disease] <Reference class="in brackets" code="P35">P35-P39</Reference></Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-591" kind="exclusion">
+			<Label xml:lang="en" xml:space="default">influenza and other acute respiratory infections <Reference class="in brackets" code="J00">J00-J22</Reference></Label>
+		</Rubric>
+	</Class>
+	<Class code="A00-A09" kind="block">
+		<SuperClass code="I"/>
+		<SubClass code="A00"/>
+		<SubClass code="A01"/>
+		<SubClass code="A02"/>
+		<SubClass code="A03"/>
+		<SubClass code="A04"/>
+		<SubClass code="A05"/>
+		<SubClass code="A06"/>
+		<SubClass code="A07"/>
+		<SubClass code="A08"/>
+		<SubClass code="A09"/>
+		<Rubric id="id-icd10_20190322-1587556953279-592" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Intestinal infectious diseases</Label>
+		</Rubric>
+	</Class>
+	<Class code="A00" kind="category">
+		<Meta name="MortBCode" value="001"/>
+		<Meta name="MortL4Code" value="4-002"/>
+		<Meta name="MortL3Code" value="3-003"/>
+		<Meta name="MortL2Code" value="2-001"/>
+		<Meta name="MortL1Code" value="1-002"/>
+		<SuperClass code="A00-A09"/>
+		<SubClass code="A00.0"/>
+		<SubClass code="A00.1"/>
+		<SubClass code="A00.9"/>
+		<Rubric id="id-icd10_20190322-1587556953279-593" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Cholera</Label>
+		</Rubric>
+	</Class>
+	<Class code="A00.0" kind="category">
+		<Meta name="MortBCode" value="001"/>
+		<Meta name="MortL4Code" value="4-002"/>
+		<Meta name="MortL3Code" value="3-003"/>
+		<Meta name="MortL2Code" value="2-001"/>
+		<Meta name="MortL1Code" value="1-002"/>
+		<SuperClass code="A00"/>
+		<Rubric id="id-icd10_20190322-1587556953279-594" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Cholera due to Vibrio cholerae 01, biovar cholerae</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-595" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Classical cholera</Label>
+		</Rubric>
+	</Class>
+	<Class code="A00.1" kind="category">
+		<Meta name="MortBCode" value="001"/>
+		<Meta name="MortL4Code" value="4-002"/>
+		<Meta name="MortL3Code" value="3-003"/>
+		<Meta name="MortL2Code" value="2-001"/>
+		<Meta name="MortL1Code" value="1-002"/>
+		<SuperClass code="A00"/>
+		<Rubric id="id-icd10_20190322-1587556953279-596" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Cholera due to Vibrio cholerae 01, biovar eltor</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-597" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Cholera eltor</Label>
+		</Rubric>
+	</Class>
+	<Class code="A00.9" kind="category">
+		<Meta name="MortBCode" value="001"/>
+		<Meta name="MortL4Code" value="4-002"/>
+		<Meta name="MortL3Code" value="3-003"/>
+		<Meta name="MortL2Code" value="2-001"/>
+		<Meta name="MortL1Code" value="1-002"/>
+		<SuperClass code="A00"/>
+		<Rubric id="id-icd10_20190322-1587556953279-598" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Cholera, unspecified</Label>
+		</Rubric>
+	</Class>
+	<Class code="A01" kind="category">
+		<Meta name="MortBCode" value="002"/>
+		<Meta name="MortL4Code" value="4-002"/>
+		<Meta name="MortL3Code" value="3-003"/>
+		<Meta name="MortL2Code" value="2-003"/>
+		<Meta name="MortL1Code" value="1-004"/>
+		<SuperClass code="A00-A09"/>
+		<SubClass code="A01.0"/>
+		<SubClass code="A01.1"/>
+		<SubClass code="A01.2"/>
+		<SubClass code="A01.3"/>
+		<SubClass code="A01.4"/>
+		<Rubric id="id-icd10_20190322-1587556953279-599" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Typhoid and paratyphoid fevers</Label>
+		</Rubric>
+	</Class>
+	<Class code="A01.0" kind="category">
+		<Meta name="MortBCode" value="002"/>
+		<Meta name="MortL4Code" value="4-002"/>
+		<Meta name="MortL3Code" value="3-003"/>
+		<Meta name="MortL2Code" value="2-003"/>
+		<Meta name="MortL1Code" value="1-004"/>
+		<SuperClass code="A01"/>
+		<Rubric id="id-icd10_20190322-1587556953279-600" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Typhoid fever</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-601" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Infection due to Salmonella typhi</Label>
+		</Rubric>
+	</Class>
+	<Class code="A01.1" kind="category">
+		<Meta name="MortBCode" value="002"/>
+		<Meta name="MortL4Code" value="4-002"/>
+		<Meta name="MortL3Code" value="3-003"/>
+		<Meta name="MortL2Code" value="2-003"/>
+		<Meta name="MortL1Code" value="1-004"/>
+		<SuperClass code="A01"/>
+		<Rubric id="id-icd10_20190322-1587556953279-602" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Paratyphoid fever A</Label>
+		</Rubric>
+	</Class>
+	<Class code="A01.2" kind="category">
+		<Meta name="MortBCode" value="002"/>
+		<Meta name="MortL4Code" value="4-002"/>
+		<Meta name="MortL3Code" value="3-003"/>
+		<Meta name="MortL2Code" value="2-003"/>
+		<Meta name="MortL1Code" value="1-004"/>
+		<SuperClass code="A01"/>
+		<Rubric id="id-icd10_20190322-1587556953279-603" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Paratyphoid fever B</Label>
+		</Rubric>
+	</Class>
+	<Class code="A01.3" kind="category">
+		<Meta name="MortBCode" value="002"/>
+		<Meta name="MortL4Code" value="4-002"/>
+		<Meta name="MortL3Code" value="3-003"/>
+		<Meta name="MortL2Code" value="2-003"/>
+		<Meta name="MortL1Code" value="1-004"/>
+		<SuperClass code="A01"/>
+		<Rubric id="id-icd10_20190322-1587556953279-604" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Paratyphoid fever C</Label>
+		</Rubric>
+	</Class>
+	<Class code="A01.4" kind="category">
+		<Meta name="MortBCode" value="002"/>
+		<Meta name="MortL4Code" value="4-002"/>
+		<Meta name="MortL3Code" value="3-003"/>
+		<Meta name="MortL2Code" value="2-003"/>
+		<Meta name="MortL1Code" value="1-004"/>
+		<SuperClass code="A01"/>
+		<Rubric id="id-icd10_20190322-1587556953279-605" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Paratyphoid fever, unspecified</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-606" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Infection due to Salmonella paratyphi NOS</Label>
+		</Rubric>
+	</Class>
+	<Class code="A02" kind="category">
+		<Meta name="MortBCode" value="006"/>
+		<Meta name="MortL4Code" value="4-002"/>
+		<Meta name="MortL3Code" value="3-003"/>
+		<Meta name="MortL2Code" value="2-003"/>
+		<Meta name="MortL1Code" value="1-004"/>
+		<SuperClass code="A00-A09"/>
+		<SubClass code="A02.0"/>
+		<SubClass code="A02.1"/>
+		<SubClass code="A02.2"/>
+		<SubClass code="A02.8"/>
+		<SubClass code="A02.9"/>
+		<Rubric id="id-icd10_20190322-1587556953279-607" kind="preferred">
+			<Label xml:lang="en" xml:space="default">Other salmonella infections</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-608" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">infection or foodborne intoxication due to any Salmonella species other than S. typhi and S. paratyphi</Label>
+		</Rubric>
+	</Class>
+</ClaML>

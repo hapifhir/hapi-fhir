@@ -71,6 +71,9 @@ public class TermCodeSystemDeleteJobSvc implements ITermCodeSystemDeleteJobSvc {
 	@Autowired
 	private ITermDeferredStorageSvc myDeferredStorageSvc;
 
+	@Autowired
+	private ITermReadSvc myTermReadSvc;
+
 	@Override
 	public Iterator<IdAndPartitionId> getAllCodeSystemVersionForCodeSystemPid(long thePid) {
 		// TODO - make this a pageable iterator
@@ -130,8 +133,9 @@ public class TermCodeSystemDeleteJobSvc implements ITermCodeSystemDeleteJobSvc {
 					"Removing code system version: {} as current version of code system: {}",
 					theVersionPid,
 					codeSystem.getPid());
-			codeSystem.setCurrentVersion(null);
-			myCodeSystemDao.save(codeSystem);
+			codeSystem.setCurrentVersionPid(null);
+			// Flush the FK null before deleting the referenced TermCodeSystemVersion row
+			myCodeSystemDao.saveAndFlush(codeSystem);
 		}
 
 		ourLog.info("Deleting code system version: {}", theVersionPid);
@@ -140,6 +144,8 @@ public class TermCodeSystemDeleteJobSvc implements ITermCodeSystemDeleteJobSvc {
 			myTermCodeSystemVersionDao.delete(theTermCodeSystemVersion);
 			ourLog.info("Code system version: {} deleted", theVersionPid);
 		});
+
+		myTermReadSvc.invalidateCodeSystemCaches();
 	}
 
 	@Override
@@ -156,6 +162,8 @@ public class TermCodeSystemDeleteJobSvc implements ITermCodeSystemDeleteJobSvc {
 
 			ourLog.info("Code system {} deleted", thePid);
 		}
+
+		myTermReadSvc.invalidateCodeSystemCaches();
 	}
 
 	@Override

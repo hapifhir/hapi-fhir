@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.packages;
 
+import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -39,7 +40,7 @@ import java.util.Map;
 		getterVisibility = JsonAutoDetect.Visibility.NONE,
 		isGetterVisibility = JsonAutoDetect.Visibility.NONE,
 		setterVisibility = JsonAutoDetect.Visibility.NONE)
-public class PackageInstallOutcomeJson {
+public class PackageInstallOutcomeJson implements IModelJson {
 
 	@JsonProperty("messages")
 	private List<String> myMessage;
@@ -100,12 +101,11 @@ public class PackageInstallOutcomeJson {
 	}
 
 	public void incrementResourcesInstalled(String theResourceType) {
-		Integer existing = getResourcesInstalled().get(theResourceType);
-		if (existing == null) {
-			getResourcesInstalled().put(theResourceType, 1);
-		} else {
-			getResourcesInstalled().put(theResourceType, existing + 1);
-		}
+		getResourcesInstalled().merge(theResourceType, 1, Integer::sum);
+	}
+
+	public void increaseResourcesInstalled(String theResourceType, int theCount) {
+		getResourcesInstalled().merge(theResourceType, theCount, Integer::sum);
 	}
 
 	@Override

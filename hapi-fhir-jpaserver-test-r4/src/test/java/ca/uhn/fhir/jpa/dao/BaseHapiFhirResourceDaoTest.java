@@ -20,10 +20,10 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
-import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
@@ -46,6 +46,8 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.collect.Lists;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.LockModeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
@@ -57,6 +59,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -99,6 +103,12 @@ import static org.mockito.Mockito.when;
 class BaseHapiFhirResourceDaoTest {
 	public static final String RESOURCE_TYPE = "Patient";
 	public static final String RESOURCE_ID = "123";
+
+	@Spy
+	private PartitionSettings myPartitionSettings;
+
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
+	private CriteriaBuilder myCriteriaBuilder;
 
 	@Mock
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -211,8 +221,8 @@ class BaseHapiFhirResourceDaoTest {
 		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(eq(requestDetails), eq("Patient"), eq(versionedId)))
 			.thenReturn(RequestPartitionId.allPartitions());
 
-		MockHapiTransactionService myTransactionService = new MockHapiTransactionService();
-		mySvc.setTransactionService(myTransactionService);
+		MockHapiTransactionService transactionService = new MockHapiTransactionService();
+		mySvc.setTransactionService(transactionService);
 		setup(Patient.class);
 
 		IResourceLookup<JpaPid> mockDeletedResourceLookup = mock(IResourceLookup.class);
@@ -220,8 +230,8 @@ class BaseHapiFhirResourceDaoTest {
 		when(myIdHelperService.resolveResourceIdentity(any(), eq("Patient"), eq("1"), argThat(ResolveIdentityMode::isIncludeDeleted)))
 			.thenReturn(mockDeletedResourceLookup);
 
-		when(myEntityManager.createQuery(any(), eq(ResourceHistoryTable.class))).thenReturn(mock());
-		when(myEntityManager.find(any(), any())).thenReturn(null); // Simulate that the entity is expunged and not found in the db
+		when(myEntityManager.getCriteriaBuilder()).thenReturn(myCriteriaBuilder);
+		when(myEntityManager.createQuery(any(CriteriaQuery.class))).thenReturn(mock());
 
 		// ACT && ASSERT
 		assertThrows(ResourceNotFoundException.class, () -> mySvc.readEntity(versionedId, requestDetails));
@@ -234,8 +244,8 @@ class BaseHapiFhirResourceDaoTest {
 		SearchParameterMap map = new SearchParameterMap();
 		RequestDetails requestDetails = new SystemRequestDetails();
 
-		MockHapiTransactionService myTransactionService = new MockHapiTransactionService();
-		mySvc.setTransactionService(myTransactionService);
+		MockHapiTransactionService transactionService = new MockHapiTransactionService();
+		mySvc.setTransactionService(transactionService);
 		setup(Patient.class);
 		List<Patient> resourceList = new ArrayList<>();
 		resourceList.add(null);
@@ -443,11 +453,12 @@ class BaseHapiFhirResourceDaoTest {
 		}
 	}
 
-	@Test
-	public void requestReindexForRelatedResources_withSpecialBaseResource_doesNotIncludeUrlsInJobParameters() {
+	@ParameterizedTest
+	@ValueSource(strings = {"Resource", "DomainResource", "CanonicalResource", "MetadataResource"})
+	void requestReindexForRelatedResources_withAbstractBaseResource_doesNotIncludeUrlsInJobParameters(String theBase) {
 		when(myStorageSettings.isMarkResourcesForReindexingUponSearchParameterChange()).thenReturn(true);
 
-		List<String> base = Lists.newArrayList("Resource");
+		List<String> base = Lists.newArrayList(theBase);
 
 		mySvc.requestReindexForRelatedResources(false, base, new ServletRequestDetails());
 
@@ -492,8 +503,8 @@ class BaseHapiFhirResourceDaoTest {
 	@MethodSource("searchParameterMapProvider")
 	public void testMethodSearchForIds_withNullSPMapLoadSynchronousUpTo_defaultsToInternalSynchronousSearchSize(SearchParameterMap theSearchParameterMap, int expectedSearchSize) {
 		// setup
-		MockHapiTransactionService myTransactionService = new MockHapiTransactionService();
-		mySvc.setTransactionService(myTransactionService);
+		MockHapiTransactionService transactionService = new MockHapiTransactionService();
+		mySvc.setTransactionService(transactionService);
 
 		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), any(), any(), any())).thenReturn(mock(RequestPartitionId.class));
 		when(mySearchBuilderFactory.newSearchBuilder(any(), any())).thenReturn(myISearchBuilder);

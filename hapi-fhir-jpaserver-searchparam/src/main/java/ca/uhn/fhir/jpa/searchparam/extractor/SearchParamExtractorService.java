@@ -61,6 +61,7 @@ import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -230,9 +231,9 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 			theNewParams.findMissingSearchParams(myPartitionSettings, myStorageSettings, theEntity, activeSearchParams);
 		}
 
-		extractSearchParamComboUnique(theEntity, theNewParams);
+		extractSearchParamComboUnique(theRequestDetails, theEntity, theNewParams);
 
-		extractSearchParamComboNonUnique(theEntity, theNewParams);
+		extractSearchParamComboNonUnique(theRequestDetails, theEntity, theNewParams);
 
 		theNewParams.setUpdatedTime(theTransactionDetails.getTransactionDate());
 	}
@@ -587,6 +588,7 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 						theRequestPartitionId,
 						theExistingParams,
 						theNewParams,
+						theResource,
 						theEntity,
 						theTransactionDetails,
 						sourceResourceName,
@@ -604,6 +606,7 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 			RequestPartitionId theRequestPartitionId,
 			ResourceIndexedSearchParams theExistingParams,
 			ResourceIndexedSearchParams theNewParams,
+			IBaseResource theResource,
 			ResourceTable theEntity,
 			TransactionDetails theTransactionDetails,
 			String theSourceResourceName,
@@ -775,6 +778,7 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 						theRequestPartitionId,
 						theSourceResourceName,
 						thePathAndRef,
+						theResource,
 						theEntity,
 						transactionDate,
 						nextId,
@@ -813,6 +817,7 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 		theNewParams.myLinks.add(resourceLink);
 	}
 
+	@SuppressWarnings("OptionalAssignedToNull")
 	private Optional<ResourceLink> findMatchingResourceLink(
 			PathAndRef thePathAndRef, Collection<ResourceLink> theResourceLinks) {
 		IIdType referenceElement = thePathAndRef.getRef().getReferenceElement();
@@ -843,10 +848,10 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 
 			// comparing the searchParam path ex: Group.member.entity
 			boolean hasMatchingSearchParamPath =
-					StringUtils.equals(resourceLink.getSourcePath(), thePathAndRef.getPath());
+					Strings.CS.equals(resourceLink.getSourcePath(), thePathAndRef.getPath());
 
 			boolean hasMatchingResourceType =
-					StringUtils.equals(resourceLink.getTargetResourceType(), referenceElement.getResourceType());
+					Strings.CS.equals(resourceLink.getTargetResourceType(), referenceElement.getResourceType());
 
 			boolean hasMatchingResourceId = false;
 			Optional<String> idPartOpt = targetResourceIdMap.get(resourceLink.getTargetResourcePk());
@@ -860,7 +865,7 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 			if (idPartOpt.isPresent()) {
 				String idPart = idPartOpt.get();
 				idPart = idPart.substring(idPart.indexOf('/'));
-				hasMatchingResourceId = StringUtils.equals(idPart, referenceElement.getIdPart());
+				hasMatchingResourceId = Strings.CS.equals(idPart, referenceElement.getIdPart());
 			}
 
 			boolean hasMatchingResourceVersion = myContext.getParserOptions().isStripVersionsFromReferences()
@@ -986,6 +991,7 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 			RequestPartitionId theRequestPartitionId,
 			String theSourceResourceName,
 			PathAndRef thePathAndRef,
+			IBaseResource theResource,
 			ResourceTable theEntity,
 			Date theUpdateTime,
 			IIdType theNextId,
@@ -1030,6 +1036,7 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 						CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
 				if (compositeBroadcaster.hasHooks(Pointcut.JPA_RESOLVE_CROSS_PARTITION_REFERENCE)) {
 					CrossPartitionReferenceDetails referenceDetails = new CrossPartitionReferenceDetails(
+							theResource,
 							theRequestPartitionId,
 							theSourceResourceName,
 							thePathAndRef,
@@ -1044,6 +1051,7 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 						requestPartitionId = RequestPartitionId.fromPartitionId(resolvedResourceId.getPartitionId());
 					}
 					targetResource = myResourceLinkResolver.findTargetResource(
+							theResource,
 							requestPartitionId,
 							theSourceResourceName,
 							thePathAndRef,
@@ -1053,11 +1061,21 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 
 			} else {
 				targetResource = myResourceLinkResolver.findTargetResource(
-						theRequestPartitionId, theSourceResourceName, thePathAndRef, theRequest, theTransactionDetails);
+						theResource,
+						theRequestPartitionId,
+						theSourceResourceName,
+						thePathAndRef,
+						theRequest,
+						theTransactionDetails);
 			}
 		} else {
 			targetResource = myResourceLinkResolver.findTargetResource(
-					theRequestPartitionId, theSourceResourceName, thePathAndRef, theRequest, theTransactionDetails);
+					theResource,
+					theRequestPartitionId,
+					theSourceResourceName,
+					thePathAndRef,
+					theRequest,
+					theTransactionDetails);
 		}
 
 		if (targetResource == null) {
@@ -1134,18 +1152,20 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 		return mySearchParamExtractor.extractParamValuesAsStrings(theActiveSearchParam, theResource);
 	}
 
-	public void extractSearchParamComboUnique(ResourceTable theEntity, ResourceIndexedSearchParams theParams) {
+	public void extractSearchParamComboUnique(
+			RequestDetails theRequestDetails, ResourceTable theEntity, ResourceIndexedSearchParams theParams) {
 		String resourceType = theEntity.getResourceType();
 		Set<ResourceIndexedComboStringUnique> comboUniques =
-				mySearchParamExtractor.extractSearchParamComboUnique(resourceType, theParams);
+				mySearchParamExtractor.extractSearchParamComboUnique(theRequestDetails, resourceType, theParams);
 		theParams.myComboStringUniques.addAll(comboUniques);
 		populateResourceTableForComboParams(theParams.myComboStringUniques, theEntity);
 	}
 
-	public void extractSearchParamComboNonUnique(ResourceTable theEntity, ResourceIndexedSearchParams theParams) {
+	public void extractSearchParamComboNonUnique(
+			RequestDetails theRequestDetails, ResourceTable theEntity, ResourceIndexedSearchParams theParams) {
 		String resourceType = theEntity.getResourceType();
 		Set<ResourceIndexedComboTokenNonUnique> comboNonUniques =
-				mySearchParamExtractor.extractSearchParamComboNonUnique(resourceType, theParams);
+				mySearchParamExtractor.extractSearchParamComboNonUnique(theRequestDetails, resourceType, theParams);
 		theParams.myComboTokenNonUnique.addAll(comboNonUniques);
 		populateResourceTableForComboParams(theParams.myComboTokenNonUnique, theEntity);
 	}

@@ -19,7 +19,10 @@
  */
 package ca.uhn.fhir.jpa.batch2;
 
+import ca.uhn.fhir.batch2.api.AttachmentDetails;
+import ca.uhn.fhir.batch2.api.AttachmentMetadata;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.model.BatchInstanceStatusDTO;
 import ca.uhn.fhir.batch2.model.BatchWorkChunkStatusDTO;
@@ -33,29 +36,42 @@ import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkMetadata;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.dao.data.IBatch2AttachmentChunkRepository;
+import ca.uhn.fhir.jpa.dao.data.IBatch2AttachmentRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkMetadataViewRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.entity.Batch2JobAttachmentChunkEntity;
+import ca.uhn.fhir.jpa.entity.Batch2JobAttachmentEntity;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkMetadataView;
 import ca.uhn.fhir.model.api.PagingIterator;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.Logs;
+import ca.uhn.fhir.util.ValidateUtil;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.input.BoundedInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -67,52 +83,82 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT;
 import static ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH;
+import static java.lang.Math.toIntExact;
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class JpaJobPersistenceImpl implements IJobPersistence {
-	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	public static final String CREATE_TIME = "myCreateTime";
-
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
+	public static final int DEFAULT_ATTACHMENT_CHUNK_SIZE = toIntExact(FileUtils.ONE_MB);
+	private final IBatch2AttachmentRepository myAttachmentRepository;
+	private final IBatch2AttachmentChunkRepository myAttachmentChunkRepository;
 	private final IBatch2JobInstanceRepository myJobInstanceRepository;
 	private final IBatch2WorkChunkRepository myWorkChunkRepository;
 	private final IBatch2WorkChunkMetadataViewRepository myWorkChunkMetadataViewRepo;
 	private final EntityManager myEntityManager;
 	private final IHapiTransactionService myTransactionService;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
+	private int myMaxBytesPerAttachmentChunk;
 
 	/**
 	 * Constructor
 	 */
 	public JpaJobPersistenceImpl(
+			IBatch2AttachmentRepository theAttachmentRepository,
 			IBatch2JobInstanceRepository theJobInstanceRepository,
 			IBatch2WorkChunkRepository theWorkChunkRepository,
 			IBatch2WorkChunkMetadataViewRepository theWorkChunkMetadataViewRepo,
 			IHapiTransactionService theTransactionService,
 			EntityManager theEntityManager,
-			IInterceptorBroadcaster theInterceptorBroadcaster) {
+			IInterceptorBroadcaster theInterceptorBroadcaster,
+			IBatch2AttachmentChunkRepository theAttachmentChunkRepository) {
+		Validate.notNull(theAttachmentRepository, "theAttachmentRepository");
+		Validate.notNull(theAttachmentChunkRepository, "theAttachmentChunkRepository");
 		Validate.notNull(theJobInstanceRepository, "theJobInstanceRepository");
 		Validate.notNull(theWorkChunkRepository, "theWorkChunkRepository");
+		myAttachmentRepository = theAttachmentRepository;
 		myJobInstanceRepository = theJobInstanceRepository;
 		myWorkChunkRepository = theWorkChunkRepository;
 		myWorkChunkMetadataViewRepo = theWorkChunkMetadataViewRepo;
 		myTransactionService = theTransactionService;
 		myEntityManager = theEntityManager;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
+		myAttachmentChunkRepository = theAttachmentChunkRepository;
+		setMaxBytesPerAttachmentChunk(null);
+	}
+
+	/**
+	 * Set to <code>null</code> for a default value
+	 */
+	@VisibleForTesting
+	public void setMaxBytesPerAttachmentChunk(Integer theMaxBytesPerAttachmentChunk) {
+		myMaxBytesPerAttachmentChunk = getIfNull(theMaxBytesPerAttachmentChunk, DEFAULT_ATTACHMENT_CHUNK_SIZE);
 	}
 
 	@Override
@@ -136,20 +182,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> myWorkChunkRepository.save(entity));
 
 		return entity.getId();
-	}
-
-	/**
-	 * Gets the initial onCreate state for the given workchunk.
-	 * Gated job chunks start in GATE_WAITING; they will be transitioned to READY during maintenance pass when all
-	 * chunks in the previous step are COMPLETED.
-	 * Non gated job chunks start in READY
-	 */
-	private static WorkChunkStatusEnum getOnCreateStatus(WorkChunkCreateEvent theBatchWorkChunk) {
-		if (theBatchWorkChunk.isGatedExecution) {
-			return WorkChunkStatusEnum.GATE_WAITING;
-		} else {
-			return WorkChunkStatusEnum.READY;
-		}
 	}
 
 	@Override
@@ -179,7 +211,11 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			return Optional.empty();
 		} else {
 			Optional<Batch2WorkChunkEntity> chunk = myWorkChunkRepository.findById(theChunkId);
-			return chunk.map(this::toChunk);
+			return chunk.map(c -> {
+				WorkChunk ret = toChunk(c);
+				ret.setPreviousStatus(chunkLock.getStatus());
+				return ret;
+			});
 		}
 	}
 
@@ -323,8 +359,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			JsonNode rootNode = mapper.readTree(theParams);
 			String originalUrl = "originalRequestUrl";
 
-			if (rootNode instanceof ObjectNode) {
-				ObjectNode objectNode = (ObjectNode) rootNode;
+			if (rootNode instanceof ObjectNode objectNode) {
 
 				if (objectNode.has(originalUrl)) {
 					String url = objectNode.get(originalUrl).asText();
@@ -341,13 +376,25 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public List<JobInstance> fetchInstances(int thePageSize, int thePageIndex) {
 		// default sort is myCreateTime Asc
 		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.ASC, CREATE_TIME);
 		return myTransactionService
 				.withSystemRequestOnDefaultPartition()
+				.withPropagation(Propagation.REQUIRES_NEW)
 				.execute(() -> myJobInstanceRepository.findAll(pageRequest).stream()
+						.map(this::toInstance)
+						.collect(Collectors.toList()));
+	}
+
+	@Override
+	public List<JobInstance> fetchInstances(int thePageSize, int thePageIndex, Set<StatusEnum> theStatuses) {
+		// The repository query returns a stable sort
+		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize);
+		return myTransactionService
+				.withSystemRequestOnDefaultPartition()
+				.withPropagation(Propagation.REQUIRES_NEW)
+				.execute(() -> myJobInstanceRepository.findAllWithStatuses(pageRequest, theStatuses).stream()
 						.map(this::toInstance)
 						.collect(Collectors.toList()));
 	}
@@ -419,6 +466,11 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
+	public void onWorkChunkHeartbeat(String theChunkId) {
+		myWorkChunkRepository.updateWorkChunkHeartbeat(theChunkId, new Date());
+	}
+
+	@Override
 	public void onWorkChunkFailed(String theChunkId, String theErrorMessage) {
 		ourLog.info("Marking chunk {} as failed with message: {}", theChunkId, theErrorMessage);
 		String errorMessage = truncateErrorMessage(theErrorMessage);
@@ -439,18 +491,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 						theEvent.getRecoveredErrorCount(),
 						WorkChunkStatusEnum.COMPLETED,
 						theEvent.getRecoveredWarningMessage()));
-	}
-
-	@Nullable
-	private static String truncateErrorMessage(String theErrorMessage) {
-		String errorMessage;
-		if (theErrorMessage != null && theErrorMessage.length() > ERROR_MSG_MAX_LENGTH) {
-			ourLog.warn("Truncating error message that is too long to store in database: {}", theErrorMessage);
-			errorMessage = theErrorMessage.substring(0, ERROR_MSG_MAX_LENGTH);
-		} else {
-			errorMessage = theErrorMessage;
-		}
-		return errorMessage;
 	}
 
 	@Override
@@ -550,6 +590,168 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
+	public String storeNewAttachment(String theInstanceId, AttachmentDetails theRequest) {
+		ValidateUtil.isNotBlankOrThrowInvalidRequest(theInstanceId, "No instance ID provided");
+		ValidateUtil.isTrueOrThrowInvalidRequest(theRequest.getContentType() != null, "No content type provided");
+		ValidateUtil.isTrueOrThrowInvalidRequest(theRequest.getInputStream() != null, "No input stream provided");
+
+		return myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
+			validateInstanceForAttachmentWriting(theInstanceId);
+
+			Batch2JobAttachmentEntity attachment;
+			if (isNotBlank(theRequest.getFilename())) {
+				Optional<Batch2JobAttachmentEntity> existingOpt =
+						myAttachmentRepository.findByIdAndFilename(theInstanceId, theRequest.getFilename());
+				if (existingOpt.isPresent()) {
+					throw new JobExecutionFailedException(Msg.code(2960) + "Attachment with filename["
+							+ theRequest.getFilename() + "] already exists for instance[" + theInstanceId + "]");
+				} else {
+					ourLog.info(
+							"Storing new attachment with filename[{}] for instance[{}]",
+							theRequest.getFilename(),
+							theInstanceId);
+					attachment = new Batch2JobAttachmentEntity(theInstanceId);
+					attachment.setFilename(theRequest.getFilename());
+				}
+			} else {
+				ourLog.info("Storing new attachment with no filename for instance[{}]", theInstanceId);
+				attachment = new Batch2JobAttachmentEntity(theInstanceId);
+				attachment.setFilename(attachment.getId().getAttachmentId());
+			}
+			attachment.setContentType(theRequest.getContentType());
+			attachment.setCompressedStatus(
+					theRequest.getContentType().isSupportsCompression()
+							? Batch2JobAttachmentEntity.CompressionEnum.GZIP
+							: Batch2JobAttachmentEntity.CompressionEnum.NONE);
+
+			writeToAttachment(theRequest, attachment);
+
+			return attachment.getId().getAttachmentId();
+		});
+	}
+
+	@Override
+	public void appendToAttachment(String theInstanceId, String theAttachmentId, AttachmentDetails theRequest) {
+		myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
+			validateInstanceForAttachmentWriting(theInstanceId);
+
+			Optional<Batch2JobAttachmentEntity> attachmentOpt =
+					myAttachmentRepository.findById(theInstanceId, theAttachmentId);
+			if (attachmentOpt.isEmpty()) {
+				throw new InvalidRequestException(Msg.code(2984) + "Unknown attachment ID[" + theAttachmentId
+						+ "] for job instance[" + theInstanceId + "]");
+			}
+
+			ourLog.info("Appending to attachment[{}] for job instance[{}]", theAttachmentId, theInstanceId);
+
+			Batch2JobAttachmentEntity attachment = attachmentOpt.get();
+			writeToAttachment(theRequest, attachment);
+		});
+	}
+
+	/**
+	 * Ensures that the job instance ID exists, and corresponds to a job that is not ended.
+	 * Otherwise, throws an exception.
+	 */
+	private void validateInstanceForAttachmentWriting(String theInstanceId) {
+		JobInstance instance = fetchInstance(theInstanceId)
+				.orElseThrow(
+						() -> new InvalidRequestException(Msg.code(2902) + "Unknown instance ID: " + theInstanceId));
+
+		if (instance.getStatus().isEnded()) {
+			throw new InvalidRequestException(Msg.code(2903) + "Can't add attachment to instance[" + theInstanceId
+					+ "] in status: " + instance.getStatus());
+		}
+	}
+
+	private void writeToAttachment(AttachmentDetails theRequest, Batch2JobAttachmentEntity theAttachment) {
+		try {
+			int maximumAllowableBytes = theRequest.getMaximumSize().orElse(Integer.MAX_VALUE);
+
+			// We'll bound the input stream to one byte larger than the maximum allowable size
+			// so that if we hit that size, we know we've exceeded the max.
+			BoundedInputStream countingInputStream = BoundedInputStream.builder()
+					.setInputStream(theRequest.getInputStream())
+					.setCount(theAttachment.getAttachmentLengthUncompressed())
+					.setMaxCount((long) maximumAllowableBytes + 1L)
+					.get();
+			OutputStream storageOutputStream = new AttachmentWritingOutputStream(theAttachment, countingInputStream);
+			OutputStream outputStream;
+			if (theRequest.getContentType().isSupportsCompression()) {
+				outputStream = new GZIPOutputStream(storageOutputStream);
+			} else {
+				outputStream = storageOutputStream;
+			}
+
+			countingInputStream.transferTo(outputStream);
+			outputStream.flush();
+			outputStream.close();
+
+			long actualCount = countingInputStream.getCount();
+			if (actualCount > maximumAllowableBytes) {
+				throw new PayloadTooLargeException(Msg.code(2983) + "Maximum allowable size exceeded");
+			}
+
+		} catch (IOException e) {
+			throw new InternalErrorException(Msg.code(2904) + e.getMessage(), e);
+		}
+	}
+
+	@Nonnull
+	@Override
+	public AttachmentDetails fetchAttachmentById(String theInstanceId, String theAttachmentId) {
+		Supplier<Optional<Batch2JobAttachmentEntity>> supplier =
+				() -> myAttachmentRepository.findById(theInstanceId, theAttachmentId);
+		return fetchAttachment(supplier, "ID", theAttachmentId);
+	}
+
+	@Nonnull
+	@Override
+	public AttachmentDetails fetchAttachmentByFilename(String theInstanceId, String theFilename) {
+		Supplier<Optional<Batch2JobAttachmentEntity>> supplier =
+				() -> myAttachmentRepository.findByIdAndFilename(theInstanceId, theFilename);
+		return fetchAttachment(supplier, "Filename", theFilename);
+	}
+
+	private AttachmentDetails fetchAttachment(
+			Supplier<Optional<Batch2JobAttachmentEntity>> supplier, String theLookupType, String theLookupValue) {
+		return myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
+			Batch2JobAttachmentEntity attachment = supplier.get()
+					.orElseThrow(() -> new ResourceNotFoundException(Msg.code(2905) + "Attachment with " + theLookupType
+							+ " [" + theLookupValue + "] not found"));
+
+			InputStream readerStream = new AttachmentReadingInputStream(attachment);
+
+			if (attachment.getCompressedStatus() == Batch2JobAttachmentEntity.CompressionEnum.GZIP) {
+				try {
+					readerStream = new GZIPInputStream(readerStream);
+				} catch (IOException e) {
+					throw new InternalErrorException(Msg.code(2906) + e.getMessage(), e);
+				}
+			}
+
+			String filename = attachment.getFilename();
+			if (filename.equals(attachment.getId().getAttachmentId())) {
+				filename = null;
+			}
+
+			return AttachmentDetails.newBuilder()
+					.withContentType(attachment.getContentType())
+					.withFilename(filename)
+					.withInputStream(readerStream)
+					.withNoMaximumSize()
+					.build();
+		});
+	}
+
+	@Override
+	public List<AttachmentMetadata> listAttachmentsForJobInstance(Pageable thePage, String theInstanceId) {
+		return myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
+			return myAttachmentRepository.listAttachmentsForJobInstance(thePage, theInstanceId);
+		});
+	}
+
+	@Override
 	public boolean updateInstance(String theInstanceId, JobInstanceUpdateCallback theModifier) {
 		/*
 		 * We may already have a copy of the entity in the L1 cache, and it may be
@@ -582,6 +784,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void deleteInstanceAndChunks(String theInstanceId) {
 		ourLog.info("Deleting instance and chunks: {}", theInstanceId);
+		myAttachmentChunkRepository.deleteAllForInstance(theInstanceId);
+		myAttachmentRepository.deleteAllForInstance(theInstanceId);
 		myWorkChunkRepository.deleteAllForInstance(theInstanceId);
 		myJobInstanceRepository.deleteById(theInstanceId);
 	}
@@ -688,5 +892,167 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		}
 
 		return changed;
+	}
+
+	/**
+	 * Gets the initial onCreate state for the given workchunk.
+	 * Gated job chunks start in GATE_WAITING; they will be transitioned to READY during maintenance pass when all
+	 * chunks in the previous step are COMPLETED.
+	 * Non gated job chunks start in READY
+	 */
+	private static WorkChunkStatusEnum getOnCreateStatus(WorkChunkCreateEvent theBatchWorkChunk) {
+		if (theBatchWorkChunk.isGatedExecution) {
+			return WorkChunkStatusEnum.GATE_WAITING;
+		} else {
+			return WorkChunkStatusEnum.READY;
+		}
+	}
+
+	@Nullable
+	private static String truncateErrorMessage(String theErrorMessage) {
+		String errorMessage;
+		if (theErrorMessage != null && theErrorMessage.length() > ERROR_MSG_MAX_LENGTH) {
+			ourLog.warn("Truncating error message that is too long to store in database: {}", theErrorMessage);
+			errorMessage = theErrorMessage.substring(0, ERROR_MSG_MAX_LENGTH);
+		} else {
+			errorMessage = theErrorMessage;
+		}
+		return errorMessage;
+	}
+
+	/**
+	 * This class is responsible for writing the stream of bytes received from a client request
+	 * to store a job attachment using {@link #storeNewAttachment(String, AttachmentDetails)}.
+	 * It avoids ever holding too much data in RAM by flushing chunks of data first to the
+	 * initial attachment entity {@link Batch2JobAttachmentEntity} and then automatically writing
+	 * additional chunks to {@link Batch2JobAttachmentChunkEntity} instances.
+	 * This means that the contents of an attachment file will potentially be split over multiple
+	 * rows across these 2 entities. When fetching the attachment back, {@link AttachmentReadingInputStream}
+	 * is used to automatically combine them.
+	 */
+	private class AttachmentWritingOutputStream extends OutputStream {
+		private Batch2JobAttachmentEntity myAttachment;
+		private final BoundedInputStream myCountingInputStream;
+		private ByteArrayOutputStream myTargetBuffer = new ByteArrayOutputStream(myMaxBytesPerAttachmentChunk);
+		private boolean myClosing;
+
+		private AttachmentWritingOutputStream(
+				Batch2JobAttachmentEntity theAttachment, BoundedInputStream theCountingInputStream) {
+			myAttachment = theAttachment;
+			myCountingInputStream = theCountingInputStream;
+		}
+
+		@Override
+		public void write(int b) {
+			myTargetBuffer.write(b);
+			flushIfNecessary();
+		}
+
+		private void flushIfNecessary() {
+			if (myTargetBuffer != null) {
+				if (myTargetBuffer.size() >= myMaxBytesPerAttachmentChunk || myClosing) {
+					byte[] bytesToWrite = myTargetBuffer.toByteArray();
+					if (myAttachment.getData() == null) {
+						/*
+						 * We're writing the first chunk to the DB, so put the bytes directly into
+						 * the attachment entity.
+						 */
+						ourLog.info(
+								"Writing initial chunk of attachment with ID {} to database",
+								myAttachment.getId().getAttachmentId());
+						myAttachment.setData(bytesToWrite);
+						myAttachment.setAttachmentLengthCompressed(bytesToWrite.length);
+						myAttachment.setAttachmentLengthUncompressed(myCountingInputStream.getCount());
+						myAttachmentRepository.save(myAttachment);
+					} else {
+						/*
+						 * We're writing additional chunks to the DB, so put the bytes into a new
+						 * attachment chunk entity and update the attachment entity with the chunk index.
+						 */
+						Batch2JobAttachmentChunkEntity nextChunk = myAttachment.newChunkEntity(bytesToWrite);
+
+						ourLog.info(
+								"Writing additional chunk {} for attachment with ID {} to database",
+								nextChunk.getId().getChunkIndex(),
+								myAttachment.getId().getAttachmentId());
+						myAttachmentChunkRepository.save(nextChunk);
+
+						myAttachment.incrementAttachmentLengthCompressed(bytesToWrite.length);
+						myAttachment.setAttachmentLengthUncompressed(Math.toIntExact(myCountingInputStream.getCount()));
+						myAttachment = myEntityManager.merge(myAttachment);
+					}
+					myTargetBuffer.reset();
+				}
+			}
+		}
+
+		@Override
+		public void close() throws IOException {
+			super.close();
+
+			myClosing = true;
+			flushIfNecessary();
+			myTargetBuffer = null;
+		}
+	}
+
+	/**
+	 * This class is responsible for fetching a job attachment from the database. Because
+	 * attachment bytes can be split across both {@link Batch2JobAttachmentEntity} and
+	 * {@link Batch2JobAttachmentChunkEntity} entities, this class is responsible for
+	 * combining the chunks into a single stream.
+	 */
+	private class AttachmentReadingInputStream extends InputStream {
+
+		private final Integer myMaximumExtraChunkIndex;
+		private final Batch2JobAttachmentEntity myAttachment;
+		private ByteArrayInputStream myWrappedStream;
+		private Integer myCurrentExtraChunkIndex;
+
+		public AttachmentReadingInputStream(Batch2JobAttachmentEntity theAttachment) {
+			myAttachment = theAttachment;
+			myWrappedStream = new ByteArrayInputStream(theAttachment.getData());
+			myCurrentExtraChunkIndex = null;
+			myMaximumExtraChunkIndex = theAttachment.getExtraChunkMaximumIndex();
+		}
+
+		@Override
+		public int read() {
+			int nextByte = myWrappedStream.read();
+			while (nextByte == -1) {
+				if (Objects.equals(myCurrentExtraChunkIndex, myMaximumExtraChunkIndex)) {
+					// Ok, we're done for real
+					return -1;
+				}
+
+				// We still have additional chunks to read back, so fetch the next one
+				int nextExtraChunkIndex = 0;
+				if (myCurrentExtraChunkIndex != null) {
+					nextExtraChunkIndex = myCurrentExtraChunkIndex + 1;
+				}
+				if (nextExtraChunkIndex > myMaximumExtraChunkIndex) {
+					return -1;
+				}
+				myCurrentExtraChunkIndex = nextExtraChunkIndex;
+
+				ourLog.atInfo()
+						.setMessage("Fetching JobInstance[{}] Attachment[{}] chunk with index: {}")
+						.addArgument(myAttachment.getId().getJobInstanceId())
+						.addArgument(myAttachment.getId().getAttachmentId())
+						.addArgument(nextExtraChunkIndex)
+						.log();
+
+				Batch2JobAttachmentChunkEntity.ChunkPk nextId =
+						new Batch2JobAttachmentChunkEntity.ChunkPk(myAttachment.getId(), nextExtraChunkIndex);
+				myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
+					Batch2JobAttachmentChunkEntity nextAttachment =
+							myAttachmentChunkRepository.getReferenceById(nextId);
+					myWrappedStream = new ByteArrayInputStream(nextAttachment.getData());
+				});
+
+				nextByte = myWrappedStream.read();
+			}
+			return nextByte;
+		}
 	}
 }

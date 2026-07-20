@@ -27,6 +27,7 @@ import ca.uhn.fhir.util.ValidateUtil;
 import ca.uhn.hapi.fhir.sql.hibernatesvc.PartitionedIdProperty;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EmbeddedId;
@@ -57,6 +58,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.Length;
+import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.search.engine.backend.types.Projectable;
 import org.hibernate.search.engine.backend.types.Searchable;
@@ -75,8 +77,10 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericFie
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyBinding;
 import org.hibernate.type.SqlTypes;
+import org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum;
 import org.hl7.fhir.r4.model.Coding;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -110,6 +114,8 @@ public class TermConcept implements Serializable {
 	public static final int MAX_DESC_LENGTH = 400;
 	public static final int MAX_DISP_LENGTH = 500;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TermConcept.class);
+
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@OneToMany(
@@ -207,9 +213,15 @@ public class TermConcept implements Serializable {
 	@JdbcTypeCode(SqlTypes.TINYINT)
 	private EntityIndexStatusEnum myIndexStatus;
 
+	/**
+	 * A custom @ColumnTransformer was added to this column in 8.12.0 so that as of this
+	 * release, we'll never try to read it back. It should be safe to remove
+	 * after 2 more releases.
+	 */
 	@Deprecated(since = "7.2.0")
 	@Lob
-	@Column(name = "PARENT_PIDS", nullable = true)
+	@Column(name = "PARENT_PIDS", nullable = true, insertable = false, updatable = false)
+	@ColumnTransformer(read = "NULL", write = "?")
 	private String myParentPids;
 
 	@FullTextField(
@@ -232,6 +244,9 @@ public class TermConcept implements Serializable {
 	@Transient
 	private boolean mySupportLegacyLob = false;
 
+	@Transient
+	private boolean myDontPopulateParentPids;
+
 	public TermConcept() {
 		super();
 	}
@@ -251,6 +266,9 @@ public class TermConcept implements Serializable {
 	public TermConceptParentChildLink addChild(TermConcept theChild, RelationshipTypeEnum theRelationshipType) {
 		Validate.notNull(theRelationshipType, "theRelationshipType must not be null");
 		TermConceptParentChildLink link = new TermConceptParentChildLink();
+		if (myCodeSystem != null) {
+			link.setCodeSystem(myCodeSystem);
+		}
 		link.setParent(this);
 		link.setChild(theChild);
 		link.setRelationshipType(theRelationshipType);
@@ -374,6 +392,10 @@ public class TermConcept implements Serializable {
 		return retVal;
 	}
 
+	public boolean hasDesignations() {
+		return myDesignations != null && !myDesignations.isEmpty();
+	}
+
 	public Collection<TermConceptDesignation> getDesignations() {
 		if (myDesignations == null) {
 			myDesignations = new ArrayList<>();
@@ -426,6 +448,10 @@ public class TermConcept implements Serializable {
 		return myParents;
 	}
 
+	public boolean hasProperties() {
+		return myProperties != null && !myProperties.isEmpty();
+	}
+
 	public Collection<TermConceptProperty> getProperties() {
 		if (myProperties == null) {
 			myProperties = new ArrayList<>();
@@ -442,6 +468,15 @@ public class TermConcept implements Serializable {
 		return this;
 	}
 
+	@Nullable
+	public TermConceptPropertyTypeEnum getPropertyType(String thePropertyName) {
+		return myProperties.stream()
+				.filter(t -> t.getKey().equals(thePropertyName))
+				.findFirst()
+				.map(TermConceptProperty::getType)
+				.orElse(null);
+	}
+
 	public List<String> getStringProperties(String thePropertyName) {
 		List<String> retVal = new ArrayList<>();
 		for (TermConceptProperty next : getProperties()) {
@@ -452,6 +487,18 @@ public class TermConcept implements Serializable {
 			}
 		}
 		return retVal;
+	}
+
+	/**
+	 * Returns the value of the first property having a given property name. The property
+	 * must be a primitive property (e.g. a string, integer, etc.)
+	 */
+	public String getPrimitiveProperty(String thePropertyName) {
+		return myProperties.stream()
+				.filter(t -> t.getKey().equals(thePropertyName))
+				.findFirst()
+				.map(TermConceptProperty::getValue)
+				.orElse(null);
 	}
 
 	public String getStringProperty(String thePropertyName) {
@@ -484,7 +531,7 @@ public class TermConcept implements Serializable {
 			TermConcept parent = nextParentLink.getParent();
 			if (parent != null) {
 				Long parentConceptId = parent.getId();
-				Validate.notNull(parentConceptId);
+				Validate.notNull(parentConceptId, "Parent concept ID cannot be null");
 				if (theParentPids.add(parentConceptId)) {
 					parentPids(parent, theParentPids);
 				}
@@ -496,30 +543,33 @@ public class TermConcept implements Serializable {
 	@PreUpdate
 	@PrePersist
 	public void prePersist() {
-		if (isNull(myParentPids) && isNull(myParentPidsVc)) {
-			Set<Long> parentPids = new HashSet<>();
-			TermConcept entity = this;
-			parentPids(entity, parentPids);
-			entity.setParentPids(parentPids);
+		if (!myDontPopulateParentPids) {
+			if (isNull(myParentPids) && isNull(myParentPidsVc)) {
+				Set<Long> parentPids = new HashSet<>();
+				TermConcept entity = this;
+				parentPids(entity, parentPids);
+				entity.setParentPids(parentPids);
 
-			ourLog.trace("Code {}/{} has parents {}", entity.getId(), entity.getCode(), entity.getParentPidsAsString());
-		}
+				ourLog.trace(
+						"Code {}/{} has parents {}", entity.getId(), entity.getCode(), entity.getParentPidsAsString());
+			}
 
-		if (!mySupportLegacyLob) {
-			clearParentPidsLob();
+			if (!mySupportLegacyLob) {
+				clearParentPidsLob();
+			}
 		}
 	}
 
 	private void setParentPids(Set<Long> theParentPids) {
 		StringBuilder b = new StringBuilder();
 		for (Long next : theParentPids) {
-			if (b.length() > 0) {
+			if (!b.isEmpty()) {
 				b.append(' ');
 			}
 			b.append(next);
 		}
 
-		if (b.length() == 0) {
+		if (b.isEmpty()) {
 			b.append("NONE");
 		}
 
@@ -567,6 +617,14 @@ public class TermConcept implements Serializable {
 
 	public PartitionablePartitionId getPartitionId() {
 		return PartitionablePartitionId.with(myPartitionIdValue, null);
+	}
+
+	public void setDontPopulateParentPids(boolean theDontPopulateParentPids) {
+		myDontPopulateParentPids = theDontPopulateParentPids;
+	}
+
+	public boolean isDontPopulateParentPids() {
+		return myDontPopulateParentPids;
 	}
 
 	public static class TermConceptPkValueBridge implements ValueBridge<TermConceptPk, Long> {
@@ -632,10 +690,9 @@ public class TermConcept implements Serializable {
 			if (this == theO) {
 				return true;
 			}
-			if (!(theO instanceof TermConceptPk)) {
+			if (!(theO instanceof TermConceptPk that)) {
 				return false;
 			}
-			TermConceptPk that = (TermConceptPk) theO;
 			return Objects.equals(myId, that.myId) && Objects.equals(myPartitionIdValue, that.myPartitionIdValue);
 		}
 

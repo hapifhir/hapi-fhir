@@ -59,6 +59,8 @@ import ca.uhn.fhir.jpa.search.BatchResourceLoader.ResourceLoadResult;
 import ca.uhn.fhir.jpa.search.SearchConstants;
 import ca.uhn.fhir.jpa.search.builder.models.ResolvedSearchQueryExecutor;
 import ca.uhn.fhir.jpa.search.builder.models.SearchQueryProperties;
+import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.sql.GeneratedSql;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryExecutor;
@@ -68,9 +70,11 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.Dstu3DistanceHelper;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
+import ca.uhn.fhir.jpa.searchparam.util.PerformanceTracingLogger;
 import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.jpa.util.CartesianProductUtil;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
+import ca.uhn.fhir.jpa.util.DialectSvc;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.jpa.util.SqlQueryList;
@@ -80,8 +84,10 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
+import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
@@ -107,8 +113,13 @@ import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
+import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
+import com.healthmarketscience.sqlbuilder.SelectQuery;
+import com.healthmarketscience.sqlbuilder.UnaryCondition;
+import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
@@ -119,6 +130,8 @@ import jakarta.persistence.Tuple;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Selection;
@@ -154,17 +167,23 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.dao.index.IdHelperService.EMPTY_PREDICATE_ARRAY;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.NO_MORE;
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.NO_MORE_PARTITION_ID;
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.NO_MORE_PID;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.UNDESIRED_RESOURCE_LINKAGES_FOR_EVERYTHING_ON_PATIENT_INSTANCE;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.LOCATION_POSITION;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
 import static ca.uhn.fhir.jpa.util.InClauseNormalizer.normalizeIdListForInClause;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.EQUAL;
+import static ca.uhn.fhir.rest.param.ParameterUtil.coerceToDateParam;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.stripStart;
+import static org.apache.commons.lang3.StringUtils.substring;
 
 /**
  * The SearchBuilder is responsible for actually forming the SQL query that handles
@@ -196,6 +215,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	public static Integer myMaxPageSizeForTests = null;
 	protected final IInterceptorBroadcaster myInterceptorBroadcaster;
 	protected final IResourceTagDao myResourceTagDao;
+	private final PerformanceTracingLogger myPerformanceTracingLogger;
+	private final DialectSvc myDialectSvc;
 	private String myResourceName;
 	private final Class<? extends IBaseResource> myResourceType;
 	private final HapiFhirLocalContainerEntityManagerFactoryBean myEntityManagerFactory;
@@ -261,7 +282,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			IIdHelperService theIdHelperService,
 			IResourceHistoryTableDao theResourceHistoryTagDao,
 			BatchResourceLoader theBatchResourceLoader,
-			Class<? extends IBaseResource> theResourceType) {
+			Class<? extends IBaseResource> theResourceType,
+			DialectSvc theDialectSvc) {
 		myResourceName = theResourceName;
 		myResourceType = theResourceType;
 		myStorageSettings = theStorageSettings;
@@ -278,8 +300,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		myIdHelperService = theIdHelperService;
 		myResourceHistoryTableDao = theResourceHistoryTagDao;
 		myBatchResourceLoader = theBatchResourceLoader;
+		myDialectSvc = theDialectSvc;
 
 		mySearchProperties = new SearchQueryProperties();
+		myPerformanceTracingLogger = new PerformanceTracingLogger(theInterceptorBroadcaster);
 	}
 
 	@VisibleForTesting
@@ -317,6 +341,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		// Remove any empty parameters
 		theParams.clean();
+
+		// Extract _compartmentLastUpdated from the regular param map if present (it arrives as a raw parameter)
+		normalizeCompartmentLastUpdated(theParams);
 
 		// For DSTU3, pull out near-distance first so when it comes time to evaluate near, we already know the distance
 		if (myContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
@@ -357,6 +384,31 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			if (predicate != null) {
 				theSearchSqlBuilder.addPredicate(predicate);
 			}
+		}
+	}
+
+	private void normalizeCompartmentLastUpdated(@Nonnull SearchParameterMap theParams) {
+		if (theParams.containsKey(Constants.PARAM_COMPARTMENT_LAST_UPDATED)) {
+			List<List<IQueryParameterType>> compartmentLastUpdatedValues =
+					theParams.remove(Constants.PARAM_COMPARTMENT_LAST_UPDATED);
+			if (theParams.getCompartmentLastUpdated() == null && compartmentLastUpdatedValues != null) {
+				List<QualifiedParamList> qualifiedParams = new ArrayList<>();
+				for (List<IQueryParameterType> nextAnd : compartmentLastUpdatedValues) {
+					for (IQueryParameterType nextOr : nextAnd) {
+						QualifiedParamList qpl = new QualifiedParamList();
+						qpl.add(nextOr.getValueAsQueryToken());
+						qualifiedParams.add(qpl);
+					}
+				}
+				DateRangeParam dateRange = new DateRangeParam();
+				dateRange.setValuesAsQueryTokens(myContext, Constants.PARAM_COMPARTMENT_LAST_UPDATED, qualifiedParams);
+				theParams.setCompartmentLastUpdated(dateRange);
+			}
+		}
+
+		if (theParams.getCompartmentLastUpdated() != null && !"Patient".equals(myResourceName)) {
+			throw new InvalidRequestException(Msg.code(2876) + Constants.PARAM_COMPARTMENT_LAST_UPDATED
+					+ " is only supported for Patient searches");
 		}
 	}
 
@@ -517,6 +569,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 									&&
 									// todo MB don't we support _lastUpdated and _offset now?
 									theParams.getLastUpdated() == null
+									&& theParams.getCompartmentLastUpdated() == null
 									&& theParams.getEverythingMode() == null
 									&& theParams.getOffset() == null);
 
@@ -789,6 +842,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// Last updated
 		addLastUpdatePredicate(sqlBuilder);
 
+		addCompartmentLastUpdatedPredicate(sqlBuilder);
+
 		/*
 		 * Exclude the pids already in the previous iterator. This is an optimization, as opposed
 		 * to something needed to guarantee correct results.
@@ -882,6 +937,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		JdbcTemplate jdbcTemplate = initializeJdbcTemplate(theSearchQueryProperties.getMaxResultsRequested());
 
+		// Per the $everything spec, _type filters "return resources" with no special exemption for the anchor.
+		// We intentionally exclude the anchor when its type is not listed in _type
+		boolean typeFilterExcludesAnchor = myParams.get(Constants.PARAM_TYPE) != null
+				&& !extractTypeSourceResourcesFromParams().contains(myResourceName);
+
 		Set<JpaPid> targetPids = new HashSet<>();
 		if (myParams.get(IAnyResource.SP_RES_ID) != null) {
 
@@ -894,9 +954,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						Msg.code(2841) + "Resource " + myParams.get(IAnyResource.SP_RES_ID) + " is not known.");
 			}
 
-			// add the target pids to our executors as the first
-			// results iterator to go through
-			theSearchQueryExecutors.add(new ResolvedSearchQueryExecutor(new ArrayList<>(targetPids)));
+			if (!typeFilterExcludesAnchor) {
+				theSearchQueryExecutors.add(new ResolvedSearchQueryExecutor(new ArrayList<>(targetPids)));
+			}
 		} else {
 			// For Everything queries, we make the query root by the ResourceLink table, since this query
 			// is basically a reverse-include search. For type/Everything (as opposed to instance/Everything)
@@ -921,7 +981,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					jdbcTemplate.query(sql, new JpaPidRowMapper(myPartitionSettings.isPartitioningEnabled()), args);
 
 			// we add a search executor to fetch unlinked patients first
-			theSearchQueryExecutors.add(new ResolvedSearchQueryExecutor(output));
+			if (!typeFilterExcludesAnchor) {
+				theSearchQueryExecutors.add(new ResolvedSearchQueryExecutor(output));
+			}
 		}
 
 		List<String> typeSourceResources = new ArrayList<>();
@@ -976,6 +1038,57 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			Condition lastUpdatedPredicates = theSqlBuilder.addPredicateLastUpdated(lu);
 			theSqlBuilder.addPredicate(lastUpdatedPredicates);
 		}
+	}
+
+	private void addCompartmentLastUpdatedPredicate(SearchQueryBuilder theSqlBuilder) {
+		DateRangeParam compartmentLastUpdated = myParams.getCompartmentLastUpdated();
+		if (compartmentLastUpdated == null || compartmentLastUpdated.isEmpty()) {
+			return;
+		}
+
+		ResourceTablePredicateBuilder resourceTableRoot =
+				theSqlBuilder.getOrCreateResourceTablePredicateBuilder(true, null);
+
+		// Condition 1: Patient directly updated within the date range
+		Condition patientDirectlyUpdated =
+				theSqlBuilder.addPredicateLastUpdated(compartmentLastUpdated, resourceTableRoot);
+
+		// Condition 2: EXISTS subquery — compartment resources updated within the date range
+		ResourceTablePredicateBuilder srcResourceTable =
+				new ResourceTablePredicateBuilder(theSqlBuilder, SearchIncludeDeletedEnum.NEVER);
+
+		ResourceLinkPredicateBuilder resLink = new ResourceLinkPredicateBuilder(null, theSqlBuilder);
+		SelectQuery subquery = new SelectQuery();
+		subquery.addCustomColumns(1);
+		subquery.addFromTable(resLink.getTable());
+
+		// Join HFJ_RES_LINK to HFJ_RESOURCE (source resource)
+		DbColumn[] srcResColumns = theSqlBuilder.toJoinColumns(
+				srcResourceTable.getPartitionIdColumn(), srcResourceTable.getResourceIdColumn());
+		Condition resLinkJoinCondition =
+				SearchQueryBuilder.toJoinCondition(resLink.getJoinColumnsForSource(), srcResColumns);
+		subquery.addJoin(
+				SelectQuery.JoinType.INNER, resLink.getTable(), srcResourceTable.getTable(), resLinkJoinCondition);
+
+		// Correlate the subquery to the outer query's Patient resource
+		DbColumn[] outerColumns = theSqlBuilder.toJoinColumns(
+				resourceTableRoot.getPartitionIdColumn(), resourceTableRoot.getResourceIdColumn());
+		subquery.addCondition(SearchQueryBuilder.toJoinCondition(resLink.getJoinColumnsForTarget(), outerColumns));
+
+		// Restrict subquery to requested partition(s)
+		Condition srcPartitionPredicate = srcResourceTable.createPartitionIdPredicate(myRequestPartitionId);
+		if (srcPartitionPredicate != null) {
+			subquery.addCondition(srcPartitionPredicate);
+		}
+
+		// Date conditions on the source resource's RES_UPDATED
+		ComboCondition dateCondition = theSqlBuilder.addPredicateLastUpdated(compartmentLastUpdated, srcResourceTable);
+		subquery.addCondition(dateCondition);
+
+		Condition existsSubquery = UnaryCondition.exists(subquery);
+
+		Condition combinedCondition = ComboCondition.or(patientDirectlyUpdated, existsSubquery);
+		theSqlBuilder.addPredicate(combinedCondition);
 	}
 
 	private JdbcTemplate initializeJdbcTemplate(Integer theMaximumResults) {
@@ -1263,19 +1376,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		List<JpaPid> versionlessPids = new ArrayList<>(thePids);
 		int expectedCount = versionlessPids.size();
-		if (versionlessPids.size() < getMaximumPageSize()) {
-			/*
-			 * This method adds a bunch of extra params to the end of the parameter list
-			 * which are for a resource PID that will never exist (-1 / NO_MORE). We do this
-			 * so that the database can rely on a cached execution plan since we're not
-			 * generating a new SQL query for every possible number of resources.
-			 */
-			versionlessPids = normalizeIdListForInClause(versionlessPids);
-		}
+		versionlessPids = normalizeIdListForInClause(versionlessPids);
 
 		// Load the resource bodies
-		List<ResourceHistoryTable> resourceSearchViewList =
-				myResourceHistoryTableDao.findCurrentVersionsByResourcePidsAndFetchResourceTable(versionlessPids);
+		List<ResourceHistoryTable> resourceSearchViewList = loadCurrentResourceVersions(versionlessPids);
 
 		/*
 		 * If we have specific versions to load, replace the history entries with the
@@ -1354,6 +1458,81 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			}
 			theResourceListToPopulate.set(index, next.resource());
 		}
+	}
+
+	private List<ResourceHistoryTable> loadCurrentResourceVersions(List<JpaPid> theResourcePids) {
+		List<ResourceHistoryTable> resourceSearchViewList;
+
+		if (myPartitionSettings.isDatabasePartitionMode() && myDialectSvc.isMssql()) {
+			resourceSearchViewList = loadCurrentResourceVersionsForMsSqlDbpm(theResourcePids);
+		} else {
+			resourceSearchViewList =
+					myResourceHistoryTableDao.findCurrentVersionsByResourcePidsAndFetchResourceTable(theResourcePids);
+		}
+		return resourceSearchViewList;
+	}
+
+	/**
+	 * In Database Partition Mode, when loading resource bodies for most databases we issue
+	 * SQL like <code>WHERE (PARITION_ID,RES_ID) IN (1,2), (1,3)</code> but this syntax is
+	 * not supported by MSSQL / SQL Server. So for that specific platform, we rework the
+	 * call to issue SQL like <code>WHERE PARTITION = 1 AND RES_ID IN (2, 3)</code>.
+	 * We do this because the Hibernate MSSQL dialect turns the tuple-based IN clause into a
+	 * series of <code>(partition_id = ? and res_id = ?) OR (partition_id = ? and res_id = ?) OR ...</code>
+	 * and MSSQL seems to have a horribe time picking a good query plan for that style of query.
+	 */
+	@VisibleForTesting
+	public List<ResourceHistoryTable> loadCurrentResourceVersionsForMsSqlDbpm(List<JpaPid> theResourcePids) {
+		Validate.isTrue(myPartitionSettings.isDatabasePartitionMode(), "This method should only be called in DBPM");
+
+		Multimap<Integer, Long> partitionIdToPid = splitPidListByPartitionId(theResourcePids);
+
+		CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<ResourceHistoryTable> cq = cb.createQuery(ResourceHistoryTable.class);
+		Root<ResourceHistoryTable> from = cq.from(ResourceHistoryTable.class);
+
+		Join<?, ?> resourceTable = (Join<?, ?>) from.fetch("myResourceTable", JoinType.INNER);
+		List<Predicate> partitionAndPidPredicates =
+				new ArrayList<>(partitionIdToPid.keySet().size());
+		for (Map.Entry<Integer, Collection<Long>> entry :
+				partitionIdToPid.asMap().entrySet()) {
+			Integer partitionId = entry.getKey();
+			Collection<Long> pids = entry.getValue();
+
+			Predicate partitionIdPredicate = cb.equal(resourceTable.get("myPartitionIdValue"), partitionId);
+			Predicate pidPredicate = resourceTable.get("myResourceId").in(pids);
+			partitionAndPidPredicates.add(cb.and(partitionIdPredicate, pidPredicate));
+		}
+
+		Predicate currentVersionPredicate = cb.equal(resourceTable.get("myVersion"), from.get("myResourceVersion"));
+
+		cq.where(currentVersionPredicate, cb.or(partitionAndPidPredicates.toArray(EMPTY_PREDICATE_ARRAY)));
+
+		TypedQuery<ResourceHistoryTable> query = myEntityManager.createQuery(cq);
+		return query.getResultList();
+	}
+
+	@Nonnull
+	public static Multimap<Integer, Long> splitPidListByPartitionId(List<JpaPid> theResourcePids) {
+		// Split the resource PIDs into partitions for efficient querying. We use a tree
+		// for the partition IDs to make the SQL consistent for tests.
+		Multimap<Integer, Long> partitionIdToPid =
+				MultimapBuilder.treeKeys().arrayListValues().build();
+		Integer partitionInUse = null;
+		for (JpaPid pid : theResourcePids) {
+			// The SearchBuilder pads the list with entries that will never match
+			// a real resource in order to create predictable numbers of parameters,
+			// so we'll put appropriate values here for that too
+			if (JpaConstants.NO_MORE.equals(pid)) {
+				partitionIdToPid.put(getIfNull(partitionInUse, NO_MORE_PARTITION_ID), NO_MORE_PID);
+			} else {
+				partitionIdToPid.put(pid.getPartitionId(), pid.getId());
+				if (partitionInUse == null) {
+					partitionInUse = pid.getPartitionId();
+				}
+			}
+		}
+		return partitionIdToPid;
 	}
 
 	@SuppressWarnings("OptionalIsPresent")
@@ -2011,7 +2190,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		String message =
 				"Search with _include=* can be inefficient when references using canonical URLs are detected. Use more specific _include values instead.";
-		firePerformanceWarning(theRequestDetails, message);
+		myPerformanceTracingLogger.firePerformanceWarning(theRequestDetails, message);
 
 		List<List<String>> canonicalUrlPartitions = ListUtils.partition(
 				List.copyOf(theCanonicalUrls), getMaximumPageSize() - canonicalUrlTargets.hashIdentityValues.size());
@@ -2241,7 +2420,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				readPartition =
 						myPartitionHelperSvc.determineReadPartitionForRequestForSearchType(theRequestDetails, type);
 			} else {
-				readPartition = RequestPartitionId.defaultPartition();
+				readPartition = myPartitionSettings.getDefaultRequestPartitionId();
 			}
 			if (readPartition.hasPartitionIds()) {
 				partitionIds.addAll(readPartition.getPartitionIds());
@@ -2394,109 +2573,67 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			RuntimeSearchParam theComboParam,
 			List<JpaParamUtil.ComponentAndCorrespondingParam> theComboParamComponents) {
 
-		List<List<IQueryParameterType>> inputs = new ArrayList<>(theComboParamComponents.size());
-		List<Runnable> searchParameterConsumerTasks = new ArrayList<>(theComboParamComponents.size());
-		for (JpaParamUtil.ComponentAndCorrespondingParam nextComponent : theComboParamComponents) {
-			boolean foundMatch = false;
-
-			/*
-			 * The following List<List<IQueryParameterType>> is a list of query parameters where the
-			 * outer list contains AND combinations, and the inner lists contain OR combinations.
-			 * For each component in the Combo SearchParameter, we need to find a list of OR parameters
-			 * (i.e. the inner List) which is appropriate for the given component.
-			 *
-			 * We can only use a combo param when the query parameter is fairly basic
-			 * (no modifiers such as :missing or :below, references are qualified with
-			 * a resource type, etc.) Once we've confirmed that we have a parameter for
-			 * each component, we remove the components from the source SearchParameterMap
-			 * since we're going to consume them and add a predicate to the SQL builder.
-			 */
-			List<List<IQueryParameterType>> sameNameParametersAndList = theParams.get(nextComponent.getParamName());
-			if (sameNameParametersAndList != null) {
-				boolean parameterIsChained = false;
-				for (int andIndex = 0; andIndex < sameNameParametersAndList.size(); andIndex++) {
-					List<IQueryParameterType> sameNameParametersOrList = sameNameParametersAndList.get(andIndex);
-					IQueryParameterType firstValue = sameNameParametersOrList.get(0);
-
-					if (firstValue instanceof ReferenceParam refParam) {
-						if (!Objects.equals(nextComponent.getChain(), refParam.getChain())) {
-							continue;
-						}
-					}
-
-					if (!validateParamValuesAreValidForComboParam(
-							theRequest, theParams, theComboParam, nextComponent, sameNameParametersOrList)) {
-						continue;
-					}
-
-					inputs.add(sameNameParametersOrList);
-					searchParameterConsumerTasks.add(() -> sameNameParametersAndList.remove(sameNameParametersOrList));
-					foundMatch = true;
-					break;
-				}
-			} else if (!nextComponent.getParamName().equals(nextComponent.getCombinedParamName())) {
-
-				/*
-				 * If we didn't find any parameters for the parameter name (e.g. "patient") and
-				 * we're looking for a chained parameter (e.g. "patient.identifier"), check if
-				 * there are any matches for the full combined parameter name
-				 * (e.g. "patient.identifier").
-				 */
-				List<List<IQueryParameterType>> combinedNameParametersAndList =
-						theParams.get(nextComponent.getCombinedParamName());
-				if (combinedNameParametersAndList != null) {
-					for (int andIndex = 0; andIndex < combinedNameParametersAndList.size(); andIndex++) {
-						List<IQueryParameterType> combinedNameParametersOrList =
-								combinedNameParametersAndList.get(andIndex);
-						if (!combinedNameParametersOrList.isEmpty()) {
-
-							if (!validateParamValuesAreValidForComboParam(
-									theRequest,
-									theParams,
-									theComboParam,
-									nextComponent,
-									combinedNameParametersOrList)) {
-								continue;
-							}
-
-							inputs.add(combinedNameParametersOrList);
-							searchParameterConsumerTasks.add(
-									() -> combinedNameParametersAndList.remove(combinedNameParametersOrList));
-							foundMatch = true;
-							break;
-						}
-					}
-				}
-			}
-
-			if (!foundMatch) {
-				return false;
-			}
-		}
-
-		if (CartesianProductUtil.calculateCartesianProductSize(inputs) > 500) {
-			ourLog.debug(
-					"Search is not a candidate for unique combo searching - Too many OR values would result in too many permutations");
+		// Find any combinations of parameters in the search parameter map which
+		// can be applied to the given combo param, and extract/remove them from the
+		// search parameter map
+		ComboQueryParameters result = getComboQueryParameters(theRequest, theParams, theComboParamComponents);
+		if (result == null) {
 			return false;
 		}
 
-		searchParameterConsumerTasks.forEach(Runnable::run);
+		// Convert these parameter combinations into index strings as would be stored in
+		// the combo index table
+		List<String> indexStrings = buildComboIndexStrings(theRequest, theComboParam, theComboParamComponents, result);
 
-		List<List<IQueryParameterType>> inputPermutations = Lists.cartesianProduct(inputs);
-		List<String> indexStrings = new ArrayList<>(CartesianProductUtil.calculateCartesianProductSize(inputs));
+		// Create a predicate which searches for the index strings on the appropriate
+		// combo index table
+		switch (requireNonNull(theComboParam.getComboSearchParamType())) {
+			case UNIQUE:
+				theQueryStack.addPredicateCompositeUnique(indexStrings, myRequestPartitionId);
+				break;
+			case NON_UNIQUE:
+				theQueryStack.addPredicateCompositeNonUnique(indexStrings, result.dateParams(), myRequestPartitionId);
+				break;
+		}
+
+		// Remove any empty parameters remaining after this
+		theParams.clean();
+
+		return true;
+	}
+
+	@Nonnull
+	private List<String> buildComboIndexStrings(
+			RequestDetails theRequest,
+			RuntimeSearchParam theComboParam,
+			List<JpaParamUtil.ComponentAndCorrespondingParam> theComboParamComponents,
+			ComboQueryParameters result) {
+		List<List<IQueryParameterType>> inputPermutations = Lists.cartesianProduct(result.standardParams());
+		List<String> indexStrings = new ArrayList<>(inputPermutations.size());
 		for (List<IQueryParameterType> nextPermutation : inputPermutations) {
 
 			List<String> parameters = new ArrayList<>();
-			for (int paramIndex = 0; paramIndex < theComboParamComponents.size(); paramIndex++) {
+			for (int paramIndex = 0; paramIndex < nextPermutation.size(); paramIndex++) {
 
 				JpaParamUtil.ComponentAndCorrespondingParam componentAndCorrespondingParam =
 						theComboParamComponents.get(paramIndex);
 				String nextParamName = componentAndCorrespondingParam.getCombinedParamName();
 				IQueryParameterType nextOr = nextPermutation.get(paramIndex);
 
-				// The only prefix accepted when combo searching is 'eq' (see validateParamValuesAreValidForComboParam).
-				// As a result, we strip the prefix if present.
-				String nextOrValue = stripStart(nextOr.getValueAsQueryToken(), EQUAL.getValue());
+				String nextOrValue = nextOr.getValueAsQueryToken();
+				switch (componentAndCorrespondingParam.getComponentParameter().getParamType()) {
+					case NUMBER, QUANTITY ->
+					// Discard "eq" prefix since it is the same as not having a prefix
+					// on a number or quantity
+					nextOrValue = stripStart(nextOr.getValueAsQueryToken(), EQUAL.getValue());
+					case DATE -> {
+						// Discard "eq" prefix since it is the same as not having a prefix on a date
+						nextOrValue = stripStart(nextOr.getValueAsQueryToken(), EQUAL.getValue());
+						// Precision greater than DAY is handled by additionally joining on the
+						// date index table
+						nextOrValue = substring(nextOrValue, 0, 10);
+					}
+				}
 
 				RestSearchParameterTypeEnum paramType = JpaParamUtil.getParameterTypeForComposite(
 						mySearchParamRegistry, componentAndCorrespondingParam);
@@ -2554,33 +2691,194 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		indexStrings.sort(Comparator.naturalOrder());
 
 		// Interceptor broadcast: JPA_PERFTRACE_INFO
-		IInterceptorBroadcaster compositeBroadcaster =
-				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
-		if (compositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO)) {
-			String indexStringForLog = indexStrings.size() > 1 ? indexStrings.toString() : indexStrings.get(0);
-			StorageProcessingMessage msg = new StorageProcessingMessage()
-					.setMessage("Using " + theComboParam.getComboSearchParamType() + " index(es) for query for search: "
-							+ indexStringForLog);
-			HookParams params = new HookParams()
-					.add(RequestDetails.class, theRequest)
-					.addIfMatchesType(ServletRequestDetails.class, theRequest)
-					.add(StorageProcessingMessage.class, msg);
-			compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_INFO, params);
+		String indexStringForLog = indexStrings.size() > 1 ? indexStrings.toString() : indexStrings.get(0);
+		String perfMessage = "Using " + theComboParam.getComboSearchParamType() + " index(es) for query for search: "
+				+ indexStringForLog;
+		myPerformanceTracingLogger.firePerformanceInfo(theRequest, perfMessage);
+		return indexStrings;
+	}
+
+	/**
+	 * Returns null if no parameter combinations are found that can be applied to the given
+	 * combo param.
+	 */
+	@Nullable
+	private ComboQueryParameters getComboQueryParameters(
+			RequestDetails theRequest,
+			@Nonnull SearchParameterMap theParams,
+			List<JpaParamUtil.ComponentAndCorrespondingParam> theComboParamComponents) {
+		List<List<IQueryParameterType>> standardParams = new ArrayList<>(theComboParamComponents.size());
+		List<List<DateParam>> rangedDateParams = new ArrayList<>(2);
+		List<Runnable> searchParameterConsumerTasks = new ArrayList<>(theComboParamComponents.size());
+
+		for (JpaParamUtil.ComponentAndCorrespondingParam nextComponent : theComboParamComponents) {
+			boolean foundMatch = false;
+			List<List<IQueryParameterType>> sameNameParametersAndList = theParams.get(nextComponent.getParamName());
+
+			/*
+			 * The following List<List<IQueryParameterType>> is a list of query parameters where the
+			 * outer list contains AND combinations, and the inner lists contain OR combinations.
+			 * For each component in the Combo SearchParameter, we need to find a list of OR parameters
+			 * (i.e. the inner List) which is appropriate for the given component.
+			 *
+			 * We can only use a combo param when the query parameter is fairly basic
+			 * (no modifiers such as :missing or :below, references are qualified with
+			 * a resource type, etc.) Once we've confirmed that we have a parameter for
+			 * each component, we remove the components from the source SearchParameterMap
+			 * since we're going to consume them and add a predicate to the SQL builder.
+			 */
+			if (sameNameParametersAndList != null) {
+
+				for (int andIndex = 0; andIndex < sameNameParametersAndList.size(); andIndex++) {
+					List<IQueryParameterType> sameNameParametersOrList = sameNameParametersAndList.get(andIndex);
+					IQueryParameterType firstValue = sameNameParametersOrList.get(0);
+
+					if (firstValue instanceof ReferenceParam refParam) {
+						if (!Objects.equals(nextComponent.getChain(), refParam.getChain())) {
+							continue;
+						}
+					}
+
+					if (nextComponent.isComboRangedDate()) {
+						if (firstValue.getMissing() != null) {
+							return null;
+						}
+
+						List<DateParam> dateParamOrList = new ArrayList<>(sameNameParametersOrList.size());
+						for (IQueryParameterType dateParamUntyped : sameNameParametersOrList) {
+							DateParam dateParam = coerceToDateParam(dateParamUntyped);
+							switch (getIfNull(dateParam.getPrefix(), EQUAL)) {
+								case APPROXIMATE, ENDS_BEFORE, STARTS_AFTER -> {
+									myPerformanceTracingLogger.firePerformanceInfo(
+											theRequest,
+											"Can not use combo param to search for parameter "
+													+ nextComponent.getParamName() + " because the modifier "
+													+ dateParam.getPrefix().getValue() + " prevents it");
+									return null;
+								}
+								case EQUAL,
+										GREATERTHAN,
+										GREATERTHAN_OR_EQUALS,
+										LESSTHAN,
+										LESSTHAN_OR_EQUALS,
+										NOT_EQUAL -> dateParamOrList.add(dateParam);
+							}
+						}
+						rangedDateParams.add(dateParamOrList);
+
+						/*
+						 * If the precision is YEAR or MONTH or DAY, we can rely purely on the combo index's ordinal
+						 * column. If the precision is more than that, we will use the combo index's ordinal, but we
+						 * will also need to apply the
+						 */
+						if (dateParamOrList.stream()
+								.allMatch(t -> t.getPrecision().ordinal() <= TemporalPrecisionEnum.DAY.ordinal()
+										|| ParameterUtil.isTimeAllZeros(t))) {
+							searchParameterConsumerTasks.add(
+									() -> sameNameParametersAndList.remove(sameNameParametersOrList));
+						}
+						foundMatch = true;
+
+						/*
+						 * Note: No "break;" here even though the other paths have one. For most
+						 * parameters if we have multiple ANDs we want separate JOINs against
+						 * the uniqueness table so we will handle them the next time we enter
+						 * this method. But for dates we want to use the same join because
+						 * multiple joins means a date range.
+						 */
+
+					} else {
+
+						if (!validateParamValuesAreValidForComboParam(
+								theRequest, theParams, nextComponent, sameNameParametersOrList)) {
+							continue;
+						}
+
+						standardParams.add(sameNameParametersOrList);
+
+						boolean shouldRemoveParamFromQuery = true;
+						for (IQueryParameterType next : sameNameParametersOrList) {
+							if (next instanceof DateParam dateParam) {
+								/*
+								 * We only index the date portion of DateTime values in the non-unique
+								 * index table, so if the search includes more precision, we need to
+								 * keep the param name and value in the map so that we'll also join
+								 * on the standard date index table for the time component.
+								 */
+								if (dateParam.getPrecision().ordinal() > TemporalPrecisionEnum.DAY.ordinal()) {
+									shouldRemoveParamFromQuery = false;
+									myPerformanceTracingLogger.firePerformanceInfo(
+											theRequest,
+											"Search is indexed with a combo search param. It may perform better if a date without a time is supplied for the "
+													+ nextComponent.getParamName() + " parameter");
+									break;
+								}
+							}
+						}
+						if (shouldRemoveParamFromQuery) {
+							searchParameterConsumerTasks.add(
+									() -> sameNameParametersAndList.remove(sameNameParametersOrList));
+						}
+
+						foundMatch = true;
+						break;
+					}
+				}
+			} else if (!nextComponent.getParamName().equals(nextComponent.getCombinedParamName())) {
+
+				/*
+				 * If we didn't find any parameters for the parameter name (e.g. "patient") and
+				 * we're looking for a chained parameter (e.g. "patient.identifier"), check if
+				 * there are any matches for the full combined parameter name
+				 * (e.g. "patient.identifier").
+				 */
+				List<List<IQueryParameterType>> combinedNameParametersAndList =
+						theParams.get(nextComponent.getCombinedParamName());
+				if (combinedNameParametersAndList != null) {
+					for (int andIndex = 0; andIndex < combinedNameParametersAndList.size(); andIndex++) {
+						List<IQueryParameterType> combinedNameParametersOrList =
+								combinedNameParametersAndList.get(andIndex);
+						if (!combinedNameParametersOrList.isEmpty()) {
+
+							if (!validateParamValuesAreValidForComboParam(
+									theRequest, theParams, nextComponent, combinedNameParametersOrList)) {
+								continue;
+							}
+
+							standardParams.add(combinedNameParametersOrList);
+							searchParameterConsumerTasks.add(
+									() -> combinedNameParametersAndList.remove(combinedNameParametersOrList));
+							foundMatch = true;
+							break;
+						}
+					}
+				}
+			}
+
+			if (!foundMatch) {
+				return null;
+			}
 		}
 
-		switch (requireNonNull(theComboParam.getComboSearchParamType())) {
-			case UNIQUE:
-				theQueryStack.addPredicateCompositeUnique(indexStrings, myRequestPartitionId);
-				break;
-			case NON_UNIQUE:
-				theQueryStack.addPredicateCompositeNonUnique(indexStrings, myRequestPartitionId);
-				break;
+		// Make sure we don't have so many permutations of the parameter options that
+		// it would be wildly inefficient to iterate them all
+		int searchParamCombinations = CartesianProductUtil.calculateCartesianProductSize(standardParams);
+		if (searchParamCombinations > 500) {
+			// Interceptor broadcast: JPA_PERFTRACE_INFO
+			String message =
+					"Search is not a candidate for unique combo searching - Too many OR values would result in too many permutations";
+			myPerformanceTracingLogger.firePerformanceInfo(theRequest, message);
+			return null;
 		}
 
-		// Remove any empty parameters remaining after this
-		theParams.clean();
+		// Assuming we get here, we're going to proceed with using the combo index, so we run
+		// any of the "consumer tasks". These tasks clear the parameters from the parameter
+		// map so that we don't also create a normal index join for them (i.e. if we're using
+		// a combo parameter with "family=SMITH" in it, we don't also need to join on the
+		// string index table to find that parameter).
+		searchParameterConsumerTasks.forEach(Runnable::run);
 
-		return true;
+		return new ComboQueryParameters(standardParams, rangedDateParams);
 	}
 
 	/**
@@ -2592,17 +2890,17 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private boolean validateParamValuesAreValidForComboParam(
 			RequestDetails theRequest,
 			@Nonnull SearchParameterMap theParams,
-			RuntimeSearchParam theComboParam,
 			JpaParamUtil.ComponentAndCorrespondingParam theComboComponent,
 			List<IQueryParameterType> theValues) {
 
 		for (IQueryParameterType nextOrValue : theValues) {
-			if (nextOrValue instanceof DateParam dateParam) {
-				if (dateParam.getPrecision() != TemporalPrecisionEnum.DAY) {
+			if (theComboComponent.getComponentParameter().getParamType() == RestSearchParameterTypeEnum.DATE) {
+				DateParam dateParam = coerceToDateParam(nextOrValue);
+				if (dateParam.getPrecision().ordinal() < TemporalPrecisionEnum.DAY.ordinal()) {
 					String message = "Search with params " + describeParams(theParams)
-							+ " is not a candidate for combo searching - Date search with non-DAY precision for parameter '"
+							+ " is not a candidate for combo searching - Date search with less than DAY precision for parameter '"
 							+ theComboComponent.getCombinedParamName() + "'";
-					firePerformanceInfo(theRequest, message);
+					myPerformanceTracingLogger.firePerformanceInfo(theRequest, message);
 					return false;
 				}
 			}
@@ -2617,7 +2915,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							+ theComboComponent.getCombinedParamName()
 							+ "' has prefix: '"
 							+ paramWithPrefix.getPrefix().getValue() + "'";
-					firePerformanceInfo(theRequest, message);
+					myPerformanceTracingLogger.firePerformanceInfo(theRequest, message);
 					return false;
 				}
 			}
@@ -2631,7 +2929,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					String message =
 							"Search is not a candidate for unique combo searching - Reference with no type specified for parameter '"
 									+ theComboComponent.getCombinedParamName() + "'";
-					firePerformanceInfo(theRequest, message);
+					myPerformanceTracingLogger.firePerformanceInfo(theRequest, message);
 					return false;
 				}
 			}
@@ -2642,21 +2940,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						+ " is not a candidate for combo searching - Parameter '"
 						+ theComboComponent.getCombinedParamName()
 						+ "' has modifier: '" + nextOrValue.getQueryParameterQualifier() + "'";
-				firePerformanceInfo(theRequest, message);
+				myPerformanceTracingLogger.firePerformanceInfo(theRequest, message);
 				return false;
-			}
-
-			// Date params are not eligible for using composite unique index
-			// as index could contain date with different precision (e.g. DAY, SECOND)
-			if (theComboParam.getComboSearchParamType() == ComboSearchParamType.UNIQUE) {
-				if (nextOrValue instanceof DateParam) {
-					ourLog.debug(
-							"Search with params {} is not a candidate for combo searching - "
-									+ "Unique combo search parameter '{}' has DATE type",
-							describeParams(theParams),
-							theComboComponent);
-					return false;
-				}
 			}
 		}
 
@@ -2722,6 +3007,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 				if (myCurrentIterator == null) {
 					Set<Include> includes = new HashSet<>();
+					List<String> typeNames = new ArrayList<>();
 					if (myParams.containsKey(Constants.PARAM_TYPE)) {
 						for (List<IQueryParameterType> typeList : myParams.get(Constants.PARAM_TYPE)) {
 							for (IQueryParameterType type : typeList) {
@@ -2730,6 +3016,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 									String rt = resourceType.trim();
 									if (isNotBlank(rt)) {
 										includes.add(new Include(rt + ":*", true));
+										typeNames.add(rt);
 									}
 								}
 							}
@@ -2738,16 +3025,21 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					if (includes.isEmpty()) {
 						includes.add(new Include("*", true));
 					}
-					Set<JpaPid> newPids = loadIncludes(
-							myContext,
-							myEntityManager,
-							myCurrentPids,
-							includes,
-							false,
-							getParams().getLastUpdated(),
-							mySearchUuid,
-							myRequest,
-							null);
+					SearchBuilderLoadIncludesParameters<JpaPid> loadParams =
+							new SearchBuilderLoadIncludesParameters<>();
+					loadParams.setFhirContext(myContext);
+					loadParams.setEntityManager(myEntityManager);
+					loadParams.setMatches(myCurrentPids);
+					loadParams.setIncludeFilters(includes);
+					loadParams.setReverseMode(false);
+					loadParams.setLastUpdated(getParams().getLastUpdated());
+					loadParams.setSearchIdOrDescription(mySearchUuid);
+					loadParams.setRequestDetails(myRequest);
+					loadParams.setMaxCount(null);
+					if (!typeNames.isEmpty()) {
+						loadParams.setDesiredResourceTypes(typeNames);
+					}
+					Set<JpaPid> newPids = loadIncludes(loadParams);
 					myCurrentIterator = newPids.iterator();
 				}
 
@@ -3018,7 +3310,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					+ myPidSet.size() + "-" + mySkipCount
 					+ ". This indicates an inefficient query! Retrying with new max count of "
 					+ mySearchProperties.getMaxResultsRequested();
-			firePerformanceWarning(myRequest, msg);
+			myPerformanceTracingLogger.firePerformanceWarning(myRequest, msg);
 		}
 
 		private void initializeIteratorQuery(Integer theOffset, Integer theMaxResultsToFetch) {
@@ -3106,33 +3398,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 	}
 
-	private void firePerformanceInfo(RequestDetails theRequest, String theMessage) {
-		// Only log at debug level since these messages aren't considered important enough
-		// that we should be cluttering the system log, but they are important to the
-		// specific query being executed to we'll INFO level them there
-		ourLog.debug(theMessage);
-		firePerformanceMessage(theRequest, theMessage, Pointcut.JPA_PERFTRACE_INFO);
-	}
-
-	private void firePerformanceWarning(RequestDetails theRequest, String theMessage) {
-		ourLog.warn(theMessage);
-		firePerformanceMessage(theRequest, theMessage, Pointcut.JPA_PERFTRACE_WARNING);
-	}
-
-	private void firePerformanceMessage(RequestDetails theRequest, String theMessage, Pointcut thePointcut) {
-		IInterceptorBroadcaster compositeBroadcaster =
-				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
-		if (compositeBroadcaster.hasHooks(thePointcut)) {
-			StorageProcessingMessage message = new StorageProcessingMessage();
-			message.setMessage(theMessage);
-			HookParams params = new HookParams()
-					.add(RequestDetails.class, theRequest)
-					.addIfMatchesType(ServletRequestDetails.class, theRequest)
-					.add(StorageProcessingMessage.class, message);
-			compositeBroadcaster.callHooks(thePointcut, params);
-		}
-	}
-
 	public static int getMaximumPageSize() {
 		if (myMaxPageSizeForTests != null) {
 			return myMaxPageSizeForTests;
@@ -3148,4 +3413,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		org.hibernate.query.Query<?> hibernateQuery = (org.hibernate.query.Query<?>) theQuery;
 		return hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
 	}
+
+	private record ComboQueryParameters(
+			List<List<IQueryParameterType>> standardParams, List<List<DateParam>> dateParams) {}
 }

@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import ca.uhn.fhir.interceptor.model.IDefaultPartitionSettings;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import jakarta.annotation.Nonnull;
@@ -115,12 +116,23 @@ public class PartitionablePartitionId implements Cloneable {
 				+ myPartitionDate + '}';
 	}
 
+	/**
+	 * Resolves a {@link PartitionablePartitionId} to a {@link RequestPartitionId}. When the input is {@code null}, the
+	 * configured default partition supplied by <code>theDefaultPartitionSettings</code> is used (rather than a
+	 * hard-coded {@code null} partition), so that a non-null configured default partition ID is honored.
+	 *
+	 * @param theRequestPartitionId the partition to resolve, may be {@code null}
+	 * @param theDefaultPartitionSettings supplies the default partition ID used when the input is {@code null}
+	 * @return a non-null {@link RequestPartitionId}
+	 */
 	@Nonnull
-	public static RequestPartitionId toRequestPartitionId(@Nullable PartitionablePartitionId theRequestPartitionId) {
+	public static RequestPartitionId toRequestPartitionId(
+			@Nullable PartitionablePartitionId theRequestPartitionId,
+			@Nonnull IDefaultPartitionSettings theDefaultPartitionSettings) {
 		if (theRequestPartitionId != null) {
 			return theRequestPartitionId.toPartitionId();
 		} else {
-			return RequestPartitionId.defaultPartition();
+			return theDefaultPartitionSettings.getDefaultRequestPartitionId();
 		}
 	}
 

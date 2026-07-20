@@ -25,16 +25,19 @@ import ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencesJobParameters;
 import ca.uhn.fhir.batch2.util.Batch2TaskHelper;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.StopLimitAccumulator;
 import jakarta.annotation.Nonnull;
@@ -50,6 +53,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.batch2.jobs.replacereferences.ReplaceReferencesAppCtx.JOB_REPLACE_REFERENCES;
@@ -67,6 +71,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	private final Batch2TaskHelper myBatch2TaskHelper;
 	private final JpaStorageSettings myStorageSettings;
 	private final ReplaceReferencesProvenanceSvc myReplaceReferencesProvenanceSvc;
+	private final PartitionSettings myPartitionSettings;
 	private final FhirContext myFhirContext;
 
 	public ReplaceReferencesSvcImpl(
@@ -77,6 +82,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 			ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundleSvc,
 			Batch2TaskHelper theBatch2TaskHelper,
 			JpaStorageSettings theStorageSettings,
+			PartitionSettings thePartitionSettings,
 			ReplaceReferencesProvenanceSvc theReplaceReferencesProvenanceSvc) {
 		myDaoRegistry = theDaoRegistry;
 		myHapiTransactionService = theHapiTransactionService;
@@ -86,6 +92,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 		myBatch2TaskHelper = theBatch2TaskHelper;
 		myStorageSettings = theStorageSettings;
 		myReplaceReferencesProvenanceSvc = theReplaceReferencesProvenanceSvc;
+		myPartitionSettings = thePartitionSettings;
 		myFhirContext = theDaoRegistry.getFhirContext();
 	}
 
@@ -99,6 +106,8 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 		// 2. To find out the current versions of the resources, which is needed for creating the Provenance resource
 		IBaseResource sourceResource = readResource(theReplaceReferencesRequest.sourceId, theRequestDetails);
 		IBaseResource targetResource = readResource(theReplaceReferencesRequest.targetId, theRequestDetails);
+
+		throwIfCrossPartition(sourceResource, targetResource);
 
 		if (theRequestDetails.isPreferAsync()) {
 			return replaceReferencesPreferAsync(
@@ -169,18 +178,20 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 					+ theReplaceReferencesRequest.sourceId
 					+ " exceeds the resource-limit "
 					+ theReplaceReferencesRequest.resourceLimit
-					+ ". Submit the request asynchronsly by adding the HTTP Header 'Prefer: respond-async'.");
+					+ ". Submit the request asynchronously by adding the HTTP Header 'Prefer: respond-async'.");
 		}
 
 		Bundle result = myReplaceReferencesPatchBundleSvc.patchReferencingResources(
 				theReplaceReferencesRequest, accumulator.getItemList(), theRequestDetails);
 
 		if (theReplaceReferencesRequest.createProvenance) {
+			List<IIdType> changedResourceIds =
+					ReplaceReferencesProvenanceSvc.extractChangedResourceIds(List.of(result));
 			myReplaceReferencesProvenanceSvc.createProvenance(
 					// we need to use versioned ids for the Provenance resource
 					theTargetResource.getIdElement().toUnqualified(),
 					theSourceResource.getIdElement().toUnqualified(),
-					List.of(result),
+					changedResourceIds,
 					startTime,
 					theRequestDetails,
 					theReplaceReferencesRequest.provenanceAgents,
@@ -209,5 +220,26 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 		String resourceType = theId.getResourceType();
 		IFhirResourceDao<IBaseResource> resourceDao = myDaoRegistry.getResourceDao(resourceType);
 		return resourceDao.read(theId, theRequestDetails);
+	}
+
+	/**
+	 * Cross-partition replace references is not yet supported because the expected behavior
+	 * is not well defined for all cross-partition request modes. For patient-id partition mode,
+	 * this can be implemented using {@link CrossPartitionReplaceReferencesSvc}.
+	 */
+	private void throwIfCrossPartition(IBaseResource theSourceResource, IBaseResource theTargetResource) {
+		if (isCrossPartition(theSourceResource, theTargetResource)) {
+			throw new NotImplementedOperationException(
+					Msg.code(2882) + "Cross-partition replace references is not supported.");
+		}
+	}
+
+	private boolean isCrossPartition(IBaseResource theSourceResource, IBaseResource theTargetResource) {
+		if (!myPartitionSettings.isPartitioningEnabled()) {
+			return false;
+		}
+		Optional<RequestPartitionId> srcPart = RequestPartitionId.getPartitionFromUserDataIfPresent(theSourceResource);
+		Optional<RequestPartitionId> tgtPart = RequestPartitionId.getPartitionFromUserDataIfPresent(theTargetResource);
+		return srcPart.isPresent() && tgtPart.isPresent() && !srcPart.get().equals(tgtPart.get());
 	}
 }

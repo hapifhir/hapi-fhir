@@ -7,8 +7,10 @@ import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
 import org.junit.jupiter.api.AfterEach;
@@ -98,12 +100,17 @@ public abstract class BaseTermR4Test extends BaseJpaR4Test {
 
 	void loadAndPersistCodeSystemAndValueSet() throws IOException {
 		loadAndPersistCodeSystem();
-		loadAndPersistValueSet(HttpVerb.POST);
+		loadAndPersistValueSet(HttpVerb.POST, Enumerations.PublicationStatus.ACTIVE);
 	}
 
 	void loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb theVerb) throws IOException {
 		loadAndPersistCodeSystemWithDesignations(theVerb);
-		loadAndPersistValueSet(theVerb);
+		loadAndPersistValueSet(theVerb, Enumerations.PublicationStatus.ACTIVE);
+	}
+
+	void loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb theVerb, boolean theValueSetActive) throws IOException {
+		loadAndPersistCodeSystemWithDesignations(theVerb);
+		loadAndPersistValueSet(theVerb, theValueSetActive ? Enumerations.PublicationStatus.ACTIVE : Enumerations.PublicationStatus.DRAFT);
 	}
 
 	void loadAndPersistCodeSystemAndValueSetWithDesignationsAndExclude(HttpVerb theVerb) throws IOException {
@@ -149,8 +156,13 @@ public abstract class BaseTermR4Test extends BaseJpaR4Test {
 	}
 
 	void loadAndPersistValueSet(HttpVerb theVerb) throws IOException {
+		loadAndPersistValueSet(theVerb, Enumerations.PublicationStatus.ACTIVE);
+	}
+
+	void loadAndPersistValueSet(HttpVerb theVerb, @Nonnull Enumerations.PublicationStatus theStatus) throws IOException {
 		ValueSet valueSet = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 		valueSet.setId("ValueSet/vs");
+		valueSet.setStatus(theStatus);
 		persistValueSet(valueSet, theVerb);
 	}
 

@@ -179,7 +179,7 @@ class SubscriptionCanonicalizerTest {
 	}
 
 	private static Stream<RequestPartitionId> crossPartitionParams() {
-		return Stream.of(null, RequestPartitionId.fromPartitionId(1), RequestPartitionId.defaultPartition()) ;
+		return Stream.of(null, RequestPartitionId.fromPartitionId(1), RequestPartitionId.fromPartitionId(null)) ;
 	}
 
 	private class FakeNonNullDefaultPartitionIDHelper implements IRequestPartitionHelperSvc {

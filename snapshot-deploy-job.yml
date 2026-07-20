@@ -3,6 +3,7 @@
 
 jobs:
   - job: DeploySnapshot
+    timeoutInMinutes: 90
 
     # We'll run the process on the latest version of ubuntu because they tend to be the fastest
     pool:
@@ -16,11 +17,27 @@ jobs:
       - group: GPG_VARIABLE_GROUP
       - group: CENTRAL_VARIABLE_GROUP
       - group: SLACK_VARIABLE_GROUP
+      - name: MAVEN_OPTS
+        value: ''
 
     container:
       image: smilecdr/hapi-build:latest
 
     steps:
+
+      # Microsoft-hosted images ship with a bunch of preinstalled SDKs we don't use (.NET, Android, Haskell)
+      # that eat into the free disk space on the VM. The WAR assembly step for hapi-fhir-jpaserver-uhnfhirtest
+      # has failed with "No space left on device" on this job before, so we clear that space up front.
+      # This runs with `target: host` because the rest of the job's steps execute inside the container
+      # defined above, but these preinstalled SDKs live on the host VM.
+      - bash: |
+          echo "Disk space before cleanup:"
+          df -h /
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup || true
+          echo "Disk space after cleanup:"
+          df -h /
+        displayName: 'Free up host disk space before build'
+        target: host
 
       # We need a valid signing key to sign our builds for deployment to sonatype. We have uploaded
       # both our private and public keys to Azure as 'secure files' that we load into individual pipelines.
@@ -86,23 +103,22 @@ jobs:
       # 5. Deploy SNAPSHOT build to sonatype
       - task: Maven@4
         displayName: 'Deploy to Maven Central staging'
-        env:
-          MAVEN_OPTS: "-Xmx2048m -XX:+UseG1GC"
         inputs:
           mavenPomFile: '$(System.DefaultWorkingDirectory)/pom.xml'
           goals: deploy
           options: '--settings $(System.DefaultWorkingDirectory)/settings.xml -P DIST -DskipTests -DdeployToCentral --batch-mode --no-transfer-progress --threads 1C --fail-at-end -Dstyle.color=never '
+          mavenOptions: '-Xmx2048m -XX:+UseG1GC $(MAVEN_OPTS)'
           publishJUnitResults: false
 
       # 6. Notify Slack if the deploy failed
       - bash: |
           PIPELINE_URL="$(System.TeamFoundationCollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)"
-          curl -s -X POST 'https://slack-bots.azure.smilecdr.com/robogary/slack/slack-message' \
+          curl -s -X POST "${SLACK_PROXY_HOOK_URL}" \
             -H 'Content-Type: application/json' \
             -H "X-Slack-Sender-Token: ${SLACK_SENDER_TOKEN}" \
             --data "{
-              \"channel\": \"cdr-build-status\",
-              \"author\": \"robogary\",
+              \"channel\": \"${SLACK_CHANNEL}\",
+              \"author\": \"${SLACK_AUTHOR}\",
               \"text\": \"HAPI FHIR Nightly SNAPSHOT Deploy Failed\",
               \"blocks\": [
                 {
@@ -134,7 +150,10 @@ jobs:
         displayName: 'Notify Slack on failure'
         condition: failed()
         env:
+          SLACK_PROXY_HOOK_URL: $(SLACK_PROXY_HOOK_URL)
           SLACK_SENDER_TOKEN: $(SLACK_SENDER_TOKEN)
+          SLACK_CHANNEL: $(SLACK_CHANNEL)
+          SLACK_AUTHOR: $(SLACK_AUTHOR)
           PIPELINE_NAME: $(Build.DefinitionName)
           BRANCH_NAME: $(Build.SourceBranchName)
           BUILD_NUMBER: $(Build.BuildNumber)

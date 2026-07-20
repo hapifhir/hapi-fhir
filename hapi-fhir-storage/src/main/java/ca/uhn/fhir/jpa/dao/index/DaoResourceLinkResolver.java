@@ -40,6 +40,7 @@ import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
 import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
 import ca.uhn.fhir.rest.api.Constants;
@@ -76,6 +77,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -103,6 +105,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 
 	@Override
 	public IResourceLookup findTargetResource(
+			IBaseResource theSourceResource,
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			String theSourceResourceName,
 			PathAndRef thePathAndRef,
@@ -158,7 +161,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 		} catch (ResourceNotFoundException e) {
 
 			Optional<IBasePersistedResource> createdTableOpt = createPlaceholderTargetIfConfiguredToDoSo(
-					type, targetReference, idPart, theRequest, theTransactionDetails);
+					theSourceResource, type, targetReference, idPart, theRequest, theTransactionDetails);
 			if (!createdTableOpt.isPresent()) {
 
 				if (!myStorageSettings.isEnforceReferentialIntegrityOnWrite()) {
@@ -279,6 +282,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 	 * @param theIdToAssignToPlaceholder If specified, the placeholder resource created will be given a specific ID
 	 */
 	public <T extends IBaseResource> Optional<IBasePersistedResource> createPlaceholderTargetIfConfiguredToDoSo(
+			IBaseResource theSource,
 			Class<T> theType,
 			IBaseReference theReference,
 			@Nullable String theIdToAssignToPlaceholder,
@@ -329,7 +333,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 					CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
 			if (interceptorBroadcaster.hasHooks(Pointcut.STORAGE_PRE_AUTO_CREATE_PLACEHOLDER_REFERENCE)) {
 				AutoCreatePlaceholderReferenceTargetRequest request =
-						new AutoCreatePlaceholderReferenceTargetRequest(newResource);
+						new AutoCreatePlaceholderReferenceTargetRequest(theSource, newResource);
 				HookParams params = new HookParams()
 						.add(AutoCreatePlaceholderReferenceTargetRequest.class, request)
 						.add(RequestDetails.class, theRequest)
@@ -361,11 +365,25 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 						.update(newResource, null, true, false, theRequest, theTransactionDetails)
 						.getEntity();
 			} else {
+				/*
+				 * If we're creating a placeholder resource to satisfy a conditional URL
+				 * with identifiers, pass the identifier-based match URL along so that the
+				 * storage layer can register a duplicate-create guard record for the
+				 * placeholder, as it does for ordinary conditional creates.
+				 */
+				String reference = theReference.getReferenceElement().getValue();
+				if (reference.contains("?")) {
+					String matchUrl = extractIdentifierFromUrl(reference).stream()
+							.map(DaoResourceLinkResolver::toUrlParam)
+							.collect(Collectors.joining("&"));
+					if (isNotBlank(matchUrl)) {
+						newResource.setUserData(JpaConstants.PLACEHOLDER_RESOURCE_SEARCH_URL, matchUrl);
+					}
+				}
+
 				placeholderEntity =
 						placeholderResourceDao.create(newResource, theRequest).getEntity();
 			}
-
-			verifyPlaceholderCanBeCreated(theType, theIdToAssignToPlaceholder, theReference, placeholderEntity);
 
 			IResourcePersistentId persistentId = placeholderEntity.getPersistentId();
 			persistentId = myIdHelperService.newPid(persistentId.getId());
@@ -377,14 +395,13 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 		return Optional.ofNullable(placeholderEntity);
 	}
 
-	/**
-	 * Subclasses may override
-	 */
-	protected void verifyPlaceholderCanBeCreated(
-			Class<? extends IBaseResource> theType,
-			String theIdToAssignToPlaceholder,
-			IBaseReference theReference,
-			IBasePersistedResource theStoredEntity) {}
+	@Nonnull
+	private static String toUrlParam(CanonicalIdentifier theIdentifier) {
+		return "identifier="
+				+ UrlUtil.escapeUrlParam(theIdentifier.getSystemElement().getValue())
+				+ "|"
+				+ UrlUtil.escapeUrlParam(theIdentifier.getValueElement().getValue());
+	}
 
 	private <T extends IBaseResource> void tryToAddPlaceholderExtensionToResource(T newResource) {
 		if (newResource instanceof IBaseHasExtensions) {

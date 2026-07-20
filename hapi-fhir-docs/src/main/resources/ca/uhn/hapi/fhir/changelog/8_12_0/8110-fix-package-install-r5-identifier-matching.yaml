@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 8110
+title: "Previously, `PackageInstallerSvcImpl` threw an error when installing packages
+  containing resources matched by identifier (e.g. Organization) in an R5 FhirContext.
+  This has been fixed."

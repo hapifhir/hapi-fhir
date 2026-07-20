@@ -95,7 +95,7 @@ public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkT
 		String jobInstanceId = getTestManager().createAndStoreJobInstance(jobDef);
 		String myChunkId = getTestManager().createChunk(jobInstanceId, false);
 
-		getTestManager().runMaintenancePass();
+		getTestManager().runActiveJobMaintenancePass();
 		// the worker has received the chunk, and marks it started.
 		WorkChunk chunk = getTestManager().getSvc().onWorkChunkDequeue(myChunkId).orElseThrow(IllegalArgumentException::new);
 

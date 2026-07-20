@@ -8,14 +8,13 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
-import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
@@ -107,6 +106,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static ca.uhn.fhir.jpa.term.TerminologySvcDeltaR4Test.newDeltaCodeSystem;
 import static ca.uhn.fhir.rest.api.Constants.JAVA_VALIDATOR_DETAILS_SYSTEM;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -448,7 +448,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, vs.getExpansionStatus());
 		});
 
-		myTermReadSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		runInTransaction(() -> {
 			TermValueSet vs = myTermValueSetDao.findByUrl("https://bb/ValueSet/BBDemographicAgeUnit").orElseThrow(() -> new IllegalArgumentException());
@@ -527,11 +527,12 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		myStructureDefinitionDao.create(profile, mySrd);
 
 		// Add a bunch of codes
-		CustomTerminologySet codesToAdd = new CustomTerminologySet();
+		CodeSystem additions = newDeltaCodeSystem();
+		additions.setUrl("http://loinc.org");
 		for (int i = 0; i < 100; i++) {
-			codesToAdd.addRootConcept("CODE" + i, "Display " + i);
+			additions.addConcept().setCode("CODE" + i).setDisplay("Display " + i);
 		}
-		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://loinc.org", codesToAdd);
+		myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), additions);
 
 		myStorageSettings.setMaximumExpansionSize(50);
 
@@ -629,7 +630,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		myValueSetDao.update(vs, mySrd);
 
-		myTermReadSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		await().until(() -> myTermReadSvc.isValueSetPreExpandedForCodeValidation(vs));
 
 		StructureDefinition profile = loadResourceFromClasspath(StructureDefinition.class, "/r4/test-validation-unknown-codesystem-structure-def.json");
@@ -660,8 +661,9 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		String codingIsNotInValueSetMessageWithBindingSpecificReason ="None of the codings provided are in the value set 'ValueSet[http://mytest/ValueSet/OrgContactSampleVS]' (http://mytest/ValueSet/OrgContactSampleVS), and";
 		String unknownCodeSystemMessage = "CodeSystem is unknown and can't be validated: http://mylocalcodesystem for 'http://mylocalcodesystem#mylocalcode'";
 		String unableToValidateCodeMessage = "Unable to validate code http://mylocalcodesystem#mylocalcode - No codes in ValueSet belong to CodeSystem with URL http://mylocalcodesystem";
+		String noneOfTheCodingsMessage = "None of the codings provided are in the value set 'ValueSet[http://mytest/ValueSet/OrgContactSampleVS]' (http://mytest/ValueSet/OrgContactSampleVS), and a coding is recommended to come from this value set (codes = http://mylocalcodesystem#mylocalcode)";
 		// We control the severity of the unknownCodeSystemMessage through the ValidationMessageUnknownCodeSystemPostProcessingInterceptor
-		// but the severity of the other two messages is determined by the core validator based on binding strength currently.
+		// but the severity of the other messages is determined by the core validator, which is currently based on binding strength.
 		return Stream.of(
 			Arguments.of(Enumerations.BindingStrength.REQUIRED, "Error",
 				List.of(unableToValidateCodeMessage, unknownCodeSystemMessage, codingIsNotInValueSetMessageWithBindingSpecificReason),
@@ -676,11 +678,11 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 				List.of(unableToValidateCodeMessage, unknownCodeSystemMessage, codingIsNotInValueSetMessageWithBindingSpecificReason),
 				List.of("Warning", "Warning", "Warning")),
 			Arguments.of(Enumerations.BindingStrength.PREFERRED, "Error",
-				List.of(unableToValidateCodeMessage, unknownCodeSystemMessage),
-				List.of("Warning", "Error")),
+				List.of(unableToValidateCodeMessage, unknownCodeSystemMessage, noneOfTheCodingsMessage),
+				List.of("Warning", "Error", "Information")),
 			Arguments.of(Enumerations.BindingStrength.PREFERRED, "Warning",
-				List.of(unableToValidateCodeMessage, unknownCodeSystemMessage),
-				List.of("Warning", "Warning")),
+				List.of(unableToValidateCodeMessage, unknownCodeSystemMessage, noneOfTheCodingsMessage),
+				List.of("Warning", "Warning", "Information")),
 			Arguments.of(Enumerations.BindingStrength.EXAMPLE, "Error",
 				List.of(unknownCodeSystemMessage),
 				List.of("Error")),
@@ -1119,11 +1121,12 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		myStorageSettings.setPreExpandValueSets(true);
 
 		// Add a bunch of codes
-		CustomTerminologySet codesToAdd = new CustomTerminologySet();
+		CodeSystem additions = newDeltaCodeSystem();
+		additions.setUrl("http://loinc.org");
 		for (int i = 0; i < 100; i++) {
-			codesToAdd.addRootConcept("CODE" + i, "Display " + i);
+			additions.addConcept().setCode("CODE" + i).setDisplay("Display " + i);
 		}
-		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://loinc.org", codesToAdd);
+		myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), additions);
 
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 
@@ -1132,7 +1135,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		vs.setUrl("http://example.com/fhir/ValueSet/observation-vitalsignresult");
 		vs.getCompose().addInclude().setSystem("http://loinc.org");
 		myValueSetDao.create(vs);
-		myTermReadSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		await().until(() -> myTermReadSvc.isValueSetPreExpandedForCodeValidation(vs));
 
@@ -2243,6 +2246,35 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 
+	// Created by Claude Sonnet 4.6
+	@Test
+	void testValidateQuestionnaireResponseWithVersionedCanonicalReference() {
+		Questionnaire q = new Questionnaire();
+		q.setId("q-versioned");
+		q.setUrl("http://foo/q");
+		q.setVersion("1.0");
+		q.addItem().setLinkId("link0").setRequired(true).setType(Questionnaire.QuestionnaireItemType.STRING);
+		q.addItem().setLinkId("link1").setRequired(true).setType(Questionnaire.QuestionnaireItemType.STRING);
+		myQuestionnaireDao.update(q, mySrd);
+
+		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>aaa</div>");
+		qa.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
+		qa.getQuestionnaireElement().setValue("http://foo/q|1.0");
+		qa.addItem().setLinkId("link1").addAnswer().setValue(new StringType("FOO"));
+
+		MethodOutcome validationOutcome = myQuestionnaireResponseDao.validate(qa, null, null, null, null, null, null);
+		OperationOutcome oo = (OperationOutcome) validationOutcome.getOperationOutcome();
+		String encoded = encode(oo);
+		ourLog.info(encoded);
+
+		// Validator will have resolved the questionnaire and validated against it. I will, however
+		// report a structural error (missing required 'link0'), but NOT a "could not be resolved" warning.
+		assertHasErrors(oo);
+		assertThat(encoded).doesNotContain("could not be resolved");
+		assertEquals("No response answer found for required item 'link0'", oo.getIssueFirstRep().getDiagnostics());
+	}
+
 	@Test
 	void testValidateCodeInUnknownCodeSystemWithRequiredBinding() throws IOException {
 		Condition condition = loadResourceFromClasspath(Condition.class, "/r4/code-in-unknown-system-with-required-binding.xml");
@@ -2413,7 +2445,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		myValueSetDao.create(vs, new SystemRequestDetails());
 
 		if (thePreCalculateExpansion) {
-			myTermReadSvc.preExpandDeferredValueSetsToTerminologyTables();
+			myBatch2JobHelper.awaitNoJobsRunning();
 		}
 
 		Observation obs = new Observation();
@@ -2479,7 +2511,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			.addInclude().setSystem("http://hl7.org/fhir/action-cardinality-behavior");
 		IIdType id = myValueSetDao.create(vs).getId().toUnqualifiedVersionless();
 
-		myTermReadSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		ValueSetExpansionOptions options = ValueSetExpansionOptions.forOffsetAndCount(0, 10000);
 		ValueSet expansion = myValueSetDao.expand(id, options, mySrd);
@@ -2495,7 +2527,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		addLoincCodeToCodeSystemDao(loincCode);
 
-		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://fooVs"), null, new StringType(loincCode), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
+		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://fooVs"), null, new StringType(loincCode), new StringType(TerminologyConstants.LOINC_URI), null, null, null, mySrd);
 
 		assertFalse(result.isOk());
 		assertEquals("Validator is unable to provide validation for 10013-1#http://loinc.org - Unknown or unusable ValueSet[http://fooVs]", result.getMessage());
@@ -2503,7 +2535,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 	private void addLoincCodeToCodeSystemDao(String loincCode) {
 		CodeSystem cs = new CodeSystem();
-		cs.setUrl(ITermLoaderSvc.LOINC_URI);
+		cs.setUrl(TerminologyConstants.LOINC_URI);
 		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
 		cs.addConcept().setCode(loincCode);
 		cs.setId(LOINC_LOW);

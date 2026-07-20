@@ -2,9 +2,6 @@ name: Pull Request Pipeline
 
 on:
   pull_request:
-    branches:
-      - master
-      - rel_*
 
 jobs:
   load-config-and-run:
@@ -36,3 +33,66 @@ jobs:
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Fail the PR if a changelog entry newly added in this PR is in the wrong version directory for the
+  # target branch (GL-8831). Only files ADDED in this PR are enforced — pre-existing entries are never
+  # re-validated, and edits to existing entries (e.g. a typo fix in an older release dir) are allowed.
+  changelog-location:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate changelog location
+        run: |
+          set -euo pipefail
+          changelog_root="hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/changelog"
+
+          git fetch --quiet origin "$GITHUB_BASE_REF"
+
+          # Changelog entries newly ADDED in this PR: number-prefixed .yml/.yaml under the changelog tree.
+          # Edits to existing entries (diff-filter M) are intentionally excluded so typo fixes in older
+          # release dirs do not fail.
+          mapfile -t entries < <(git diff --name-only --diff-filter=A "origin/$GITHUB_BASE_REF...HEAD" \
+            | grep -E "^${changelog_root}/(.*/)?[0-9][^/]*\.ya?ml$" || true)
+
+          if [ "${#entries[@]}" -eq 0 ]; then
+            echo "No changelog entries added/changed in this PR — nothing to check."
+            exit 0
+          fi
+
+          # Project version from the root pom (the project <version> is the first one in the file).
+          pom_version=$(sed -n 's:.*<version>\(.*\)</version>.*:\1:p' pom.xml | head -1)
+          echo "pom version: $pom_version"
+
+          # Only enforce for -SNAPSHOT versions.
+          if [[ "$pom_version" != *-SNAPSHOT ]]; then
+            echo "pom version is not -SNAPSHOT — skipping changelog location check."
+            exit 0
+          fi
+
+          base_ver="${pom_version%-SNAPSHOT}"
+          major="${base_ver%%.*}"
+          rest="${base_ver#*.}"
+          minor="${rest%%.*}"
+
+          if [[ "$GITHUB_BASE_REF" == "master" ]]; then
+            expected="${changelog_root}/${major}_$((minor + 1))_0"
+          elif [[ "$GITHUB_BASE_REF" =~ ^rel_[0-9]+_[0-9]+$ ]]; then
+            expected="${changelog_root}/${major}_${minor}_0"
+          else
+            echo "Target branch '$GITHUB_BASE_REF' is not master or rel_X_Y — skipping changelog location check."
+            exit 0
+          fi
+          echo "Expected changelog directory: $expected"
+
+          status=0
+          for f in "${entries[@]}"; do
+            if [[ "$(dirname "$f")" != "$expected" ]]; then
+              echo "::error file=$f::Changelog '$f' is in the wrong directory for target branch '$GITHUB_BASE_REF'. Expected it in '$expected/' (pom version '$pom_version')."
+              status=1
+            fi
+          done
+          exit $status

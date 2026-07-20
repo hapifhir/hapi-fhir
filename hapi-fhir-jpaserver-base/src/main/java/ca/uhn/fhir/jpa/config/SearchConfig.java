@@ -51,6 +51,7 @@ import ca.uhn.fhir.jpa.search.builder.tasks.SearchTask;
 import ca.uhn.fhir.jpa.search.builder.tasks.SearchTaskParameters;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
+import ca.uhn.fhir.jpa.util.DialectSvc;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.IMetaTagSorter;
@@ -67,6 +68,9 @@ import org.springframework.transaction.PlatformTransactionManager;
 public class SearchConfig {
 	public static final String SEARCH_TASK = "searchTask";
 	public static final String CONTINUE_TASK = "continueTask";
+
+	@Autowired
+	private DialectSvc myDialectSvc;
 
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
@@ -200,7 +204,8 @@ public class SearchConfig {
 				myIdHelperService,
 				myResourceHistoryTableDao,
 				myBatchResourceLoader,
-				theResourceType);
+				theResourceType,
+				myDialectSvc);
 	}
 
 	@Bean(name = SEARCH_TASK)

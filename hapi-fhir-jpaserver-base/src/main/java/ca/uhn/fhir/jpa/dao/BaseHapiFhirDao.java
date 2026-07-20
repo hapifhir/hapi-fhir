@@ -77,7 +77,9 @@ import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
+import ca.uhn.fhir.jpa.util.DialectSvc;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
@@ -189,6 +191,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	protected ITermReadSvc myTerminologySvc;
 
 	@Autowired
+	protected ITermValueSetStorageSvc myTermValueSetStorageSvc;
+
+	@Autowired
 	protected IResourceHistoryTableDao myResourceHistoryTableDao;
 
 	@Autowired
@@ -211,6 +216,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	@Autowired
 	protected PartitionSettings myPartitionSettings;
+
+	@Autowired
+	protected DialectSvc myDialectSvc;
 
 	@Autowired
 	ExpungeService myExpungeService;
@@ -1039,6 +1047,15 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					entity.getIdDt().toUnqualified().getValue());
 			if (theResource != null) {
 				myJpaStorageResourceParser.updateResourceMetadata(entity, theResource);
+
+				ResourceHistoryTable entityCurrentVersion = entity.getCurrentVersionEntity();
+				if (entityCurrentVersion != null) {
+					MetaUtil.populateResourceSource(
+							myFhirContext,
+							entityCurrentVersion.getSourceUri(),
+							entityCurrentVersion.getRequestId(),
+							theResource);
+				}
 			}
 			entity.setUnchangedInCurrentOperation(true);
 			return entity;
@@ -1122,7 +1139,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				// Synchronize search param indexes
 				AddRemoveCount searchParamAddRemoveCount =
 						myDaoSearchParamSynchronizer.synchronizeSearchParamsToDatabase(
-								newParams, entity, existingParams);
+								theRequest, theTransactionDetails, newParams, entity, existingParams);
 
 				newParams.populateResourceTableParamCollections(entity);
 
@@ -1276,7 +1293,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			// constraint failure, ie updating the same resource at the same time
 			encodedResource = populateResourceIntoEntity(theTransactionDetails, theRequest, theResource, entity, true);
 			// For some reason the current version entity is not attached until after using updateEntity
-			historyEntity = ((ResourceTable) readEntity(theResourceId, theRequest)).getCurrentVersionEntity();
+			historyEntity =
+					((ResourceTable) readEntity(theResourceId.toVersionless(), theRequest)).getCurrentVersionEntity();
+			historyEntity.setUpdated(theTransactionDetails.getTransactionDate());
 
 			// Update version/lastUpdated so that interceptors see the correct version
 			myJpaStorageResourceParser.updateResourceMetadata(savedEntity, theResource);

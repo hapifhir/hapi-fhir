@@ -309,7 +309,8 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 			String theResourceType,
 			String theParamName,
 			String theValueExact) {
-		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
+		RequestPartitionId requestPartitionId =
+				PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId, thePartitionSettings);
 		return calculateHashExact(
 				thePartitionSettings, requestPartitionId, theResourceType, theParamName, theValueExact);
 	}
@@ -331,7 +332,8 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 			String theResourceType,
 			String theParamName,
 			String theValueNormalized) {
-		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
+		RequestPartitionId requestPartitionId =
+				PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId, thePartitionSettings);
 		return calculateHashNormalized(
 				thePartitionSettings,
 				requestPartitionId,
@@ -370,6 +372,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 
 	@Override
 	public BaseResourceIndexedSearchParam setResource(ResourceTable theResource) {
+		myResource = theResource;
 		setResourceType(theResource.getResourceType());
 		return this;
 	}

@@ -26,6 +26,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
+
 public class DatatypeUtil {
 	private DatatypeUtil() {
 		// non-instantiable
@@ -69,6 +71,14 @@ public class DatatypeUtil {
 	 */
 	public static String toStringValue(IPrimitiveType<?> thePrimitiveType) {
 		return thePrimitiveType != null ? thePrimitiveType.getValueAsString() : null;
+	}
+
+	/**
+	 * Returns {@link IPrimitiveType#getValueAsString()} if <code>thePrimitiveType</code> is
+	 * not null, else returns "".
+	 */
+	public static String toStringValueOrEmpty(IPrimitiveType<?> thePrimitiveType) {
+		return getIfNull(toStringValue(thePrimitiveType), "");
 	}
 
 	/**

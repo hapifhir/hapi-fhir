@@ -24,18 +24,17 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.term.ExpansionFilter;
 import ca.uhn.fhir.jpa.term.IValueSetConceptAccumulator;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -107,18 +106,12 @@ public interface ITermReadSvc extends IValidationSupport {
 
 	CodeSystem fetchCanonicalCodeSystemFromCompleteContext(String theSystem);
 
-	void deleteValueSetAndChildren(ResourceTable theResourceTable);
-
-	void storeTermValueSet(ResourceTable theResourceTable, ValueSet theValueSet);
-
 	IFhirResourceDaoCodeSystem.SubsumesResult subsumes(
 			IPrimitiveType<String> theCodeA,
 			IPrimitiveType<String> theCodeB,
 			IPrimitiveType<String> theSystem,
 			IBaseCoding theCodingA,
 			IBaseCoding theCodingB);
-
-	void preExpandDeferredValueSetsToTerminologyTables();
 
 	/**
 	 * Version independent
@@ -134,6 +127,17 @@ public interface ITermReadSvc extends IValidationSupport {
 			IBaseDatatype theCoding,
 			IBaseDatatype theCodeableConcept);
 
+	/**
+	 * @param theIncludeOrExclude The <code>ValueSet.compose.include</code> or <code>ValueSet.compose.exclude</code> value to expand
+	 * @param theInclude <code>true</code>=include, <code>false</code>=exclude
+	 */
+	void expandValueSetHandleIncludeOrExclude(
+			@Nullable ValueSetExpansionOptions theExpansionOptions,
+			IValueSetConceptAccumulator theValueSetCodeAccumulator,
+			ValueSet.ConceptSetComponent theIncludeOrExclude,
+			boolean theInclude,
+			@Nonnull ExpansionFilter theExpansionFilter);
+
 	boolean isValueSetPreExpandedForCodeValidation(ValueSet theValueSet);
 
 	/**
@@ -141,7 +145,33 @@ public interface ITermReadSvc extends IValidationSupport {
 	 */
 	boolean isValueSetPreExpandedForCodeValidation(IBaseResource theValueSet);
 
-	String invalidatePreCalculatedExpansion(IIdType theValueSetId, RequestDetails theRequestDetails);
+	/**
+	 * Invalidates only the code system version cache. Use after operations that
+	 * change the code system version (e.g., CodeSystem create/update) but do not
+	 * affect ValueSet data.
+	 *
+	 * @since 8.10.0
+	 */
+	void invalidateCodeSystemCaches();
+
+	/**
+	 * Invalidates only the ValueSet entity cache. Use after operations that
+	 * change pre-expanded ValueSet data but do not affect code system versions.
+	 *
+	 * @since 8.10.0
+	 */
+	void invalidateValueSetCaches();
+
+	/**
+	 * Writes a code system version entry directly into the cache, avoiding
+	 * a subsequent cache-miss DB roundtrip. Call this after persisting a new
+	 * code system version in {@code storeNewCodeSystemVersion}.
+	 *
+	 * @param theCodeSystemUrl the canonical URL of the code system
+	 * @param theVersion the newly persisted {@code TermCodeSystemVersion}
+	 * @since 8.10.0
+	 */
+	void updateCodeSystemVersionCache(String theCodeSystemUrl, TermCodeSystemVersion theVersion);
 
 	/**
 	 * Version independent

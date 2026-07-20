@@ -32,12 +32,14 @@ import ca.uhn.fhir.jpa.api.svc.IMergeOperationProviderSvc;
 import ca.uhn.fhir.jpa.config.GeneratedDaoAndResourceProviderConfigR4;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
+import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.graphql.GraphQLProviderWithIntrospection;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
-import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
+import ca.uhn.fhir.jpa.provider.CrossPartitionReplaceReferencesSvc;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.jpa.provider.merge.MergeOperationProviderSvc;
 import ca.uhn.fhir.jpa.provider.merge.MergeValidationService;
@@ -45,11 +47,7 @@ import ca.uhn.fhir.jpa.provider.merge.PatientMergeProvider;
 import ca.uhn.fhir.jpa.provider.merge.ResourceMergeService;
 import ca.uhn.fhir.jpa.provider.merge.ResourceUndoMergeService;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
-import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.TermVersionAdapterSvcR4;
-import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
-import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.merge.ExtensionBasedLinkService;
 import ca.uhn.fhir.merge.MergeProvenanceSvc;
@@ -57,6 +55,7 @@ import ca.uhn.fhir.merge.MergeResourceHelper;
 import ca.uhn.fhir.merge.PatientNativeLinkService;
 import ca.uhn.fhir.merge.ResourceLinkServiceFactory;
 import ca.uhn.fhir.replacereferences.PreviousResourceVersionRestorer;
+import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Meta;
@@ -113,12 +112,6 @@ public class JpaR4Config {
 	}
 
 	@Bean
-	public ITermLoaderSvc termLoaderService(
-			ITermDeferredStorageSvc theDeferredStorageSvc, ITermCodeSystemStorageSvc theCodeSystemStorageSvc) {
-		return new TermLoaderSvcImpl(theDeferredStorageSvc, theCodeSystemStorageSvc);
-	}
-
-	@Bean
 	public MergeValidationService mergeValidationService(
 			FhirContext theFhirContext,
 			DaoRegistry theDaoRegistry,
@@ -158,27 +151,41 @@ public class JpaR4Config {
 	}
 
 	@Bean
+	public CrossPartitionReplaceReferencesSvc crossPartitionReplaceReferencesSvc(
+			DaoRegistry theDaoRegistry,
+			IResourceLinkDao theResourceLinkDao,
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+		return new CrossPartitionReplaceReferencesSvc(theDaoRegistry, theResourceLinkDao, theRequestPartitionHelperSvc);
+	}
+
+	@Bean
 	public ResourceMergeService resourceMergeService(
 			DaoRegistry theDaoRegistry,
-			IReplaceReferencesSvc theReplaceReferencesSvc,
+			ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundleSvc,
+			IResourceLinkDao theResourceLinkDao,
 			HapiTransactionService theHapiTransactionService,
 			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
 			IJobCoordinator theJobCoordinator,
 			Batch2TaskHelper theBatch2TaskHelper,
 			JpaStorageSettings theStorageSettings,
 			MergeValidationService theMergeValidationService,
-			MergeResourceHelper theMergeResourceHelper) {
+			MergeResourceHelper theMergeResourceHelper,
+			CrossPartitionReplaceReferencesSvc theCrossPartitionReplaceReferencesSvc,
+			PartitionSettings thePartitionSettings) {
 
 		return new ResourceMergeService(
 				theStorageSettings,
 				theDaoRegistry,
-				theReplaceReferencesSvc,
+				theReplaceReferencesPatchBundleSvc,
+				theResourceLinkDao,
 				theHapiTransactionService,
 				theRequestPartitionHelperSvc,
 				theJobCoordinator,
 				theBatch2TaskHelper,
 				theMergeValidationService,
-				theMergeResourceHelper);
+				theMergeResourceHelper,
+				theCrossPartitionReplaceReferencesSvc,
+				thePartitionSettings);
 	}
 
 	@Bean
@@ -186,14 +193,9 @@ public class JpaR4Config {
 			DaoRegistry theDaoRegistry,
 			MergeProvenanceSvc theMergeProvenanceSvc,
 			PreviousResourceVersionRestorer theResourceVersionRestorer,
-			MergeValidationService theMergeValidationService,
-			IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+			MergeValidationService theMergeValidationService) {
 		return new ResourceUndoMergeService(
-				theDaoRegistry,
-				theMergeProvenanceSvc,
-				theResourceVersionRestorer,
-				theMergeValidationService,
-				theRequestPartitionHelperSvc);
+				theDaoRegistry, theMergeProvenanceSvc, theResourceVersionRestorer, theMergeValidationService);
 	}
 
 	@Bean

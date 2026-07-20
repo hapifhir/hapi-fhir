@@ -57,7 +57,7 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 		getTestManager().createChunksInStates(result);
 
 		// test
-		getTestManager().runMaintenancePass();
+		getTestManager().runActiveJobMaintenancePass();
 
 		// verify
 		getTestManager().verifyWorkChunkMessageHandlerCalled(sendLatch, numToTransition);
@@ -139,7 +139,7 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 		getTestManager().createChunksInStates(state);
 
 		// test
-		getTestManager().runMaintenancePass();
+		getTestManager().runActiveJobMaintenancePass();
 
 		// verify
 		// nothing ever queued -> nothing ever sent to queue
@@ -194,7 +194,7 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 		getTestManager().createChunksInStates(state);
 
 		// test
-		getTestManager().runMaintenancePass();
+		getTestManager().runActiveJobMaintenancePass();
 
 		// verify
 		getTestManager().verifyWorkChunkMessageHandlerCalled(sendingLatch, 2);
@@ -224,7 +224,7 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 		// TEST run job maintenance - force transition
 		getTestManager().enableMaintenanceRunner(true);
 
-		getTestManager().runMaintenancePass();
+		getTestManager().runActiveJobMaintenancePass();
 
 		// verify
 		getTestManager().verifyWorkChunkMessageHandlerCalled(sendLatch, expectedTransitions);

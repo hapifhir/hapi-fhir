@@ -33,6 +33,7 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
@@ -96,26 +97,30 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
-		if (TermReadSvcUtil.isLoincUnversionedCodeSystem(theSystem)) {
+		IBaseResource retVal = fetchResource(myCodeSystemType, theSystem);
+
+		if (retVal == null && TermReadSvcUtil.isLoincUnversionedCodeSystem(theSystem)) {
 			IIdType id = myFhirContext.getVersion().newIdType("CodeSystem", LOINC_LOW);
-			return findResourceByIdWithNoException(id, myCodeSystemType);
+			retVal = findResourceByIdWithNoException(id, myCodeSystemType);
 		}
 
-		return fetchResource(myCodeSystemType, theSystem);
+		return retVal;
 	}
 
 	@Override
-	public IBaseResource fetchValueSet(String theSystem) {
-		if (TermReadSvcUtil.isLoincUnversionedValueSet(theSystem)) {
-			Optional<String> vsIdOpt = TermReadSvcUtil.getValueSetId(theSystem);
+	public IBaseResource fetchValueSet(String theValueSetUrl) {
+		IBaseResource retVal = fetchResource(myValueSetType, theValueSetUrl);
+
+		if (retVal == null && TermReadSvcUtil.isLoincUnversionedValueSet(theValueSetUrl)) {
+			Optional<String> vsIdOpt = TermReadSvcUtil.getValueSetId(theValueSetUrl);
 			if (vsIdOpt.isEmpty()) {
 				return null;
 			}
 			IIdType id = myFhirContext.getVersion().newIdType("ValueSet", vsIdOpt.get());
-			return findResourceByIdWithNoException(id, myValueSetType);
+			retVal = findResourceByIdWithNoException(id, myValueSetType);
 		}
 
-		return fetchResource(myValueSetType, theSystem);
+		return retVal;
 	}
 
 	/**
@@ -217,15 +222,15 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 							&& myFhirContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
 						params = new SearchParameterMap();
 						params.setLoadSynchronousUpTo(1);
-						int versionSeparator = theUri.lastIndexOf('|');
-						if (versionSeparator != -1) {
-							params.add(ValueSet.SP_VERSION, new TokenParam(theUri.substring(versionSeparator + 1)));
+
+						UrlUtil.CanonicalUrlParts canonicalUrl = UrlUtil.parseCanonicalUrl(theUri);
+						if (canonicalUrl.versionId().isPresent()) {
 							params.add(
-									ca.uhn.fhir.model.dstu2.resource.ValueSet.SP_SYSTEM,
-									new UriParam(theUri.substring(0, versionSeparator)));
-						} else {
-							params.add(ca.uhn.fhir.model.dstu2.resource.ValueSet.SP_SYSTEM, new UriParam(theUri));
+									ValueSet.SP_VERSION,
+									new TokenParam(canonicalUrl.versionId().get()));
 						}
+						params.add(
+								ca.uhn.fhir.model.dstu2.resource.ValueSet.SP_SYSTEM, new UriParam(canonicalUrl.url()));
 						params.setSort(new SortSpec(SP_RES_LAST_UPDATED).setOrder(SortOrderEnum.DESC));
 						search = myDaoRegistry.getResourceDao(resourceName).search(params, new SystemRequestDetails());
 					}
@@ -292,17 +297,21 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	/**
 	 * Creates a {@link SearchParameterMap} for a canonical URL, which can be either
 	 * unversioned (<code>http://foo</code>) or versioned (<code>http://foo|1.2.3</code>).
+	 * The version separator may appear as a literal <code>|</code> or percent-encoded as <code>%7C</code>.
 	 */
 	@Nonnull
 	private static SearchParameterMap createSearchParameterMapForCanonicalUrl(String theUri) {
+		UrlUtil.CanonicalUrlParts parsedCanonicalUrl = UrlUtil.parseCanonicalUrl(theUri);
+
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronousUpTo(1);
-		int versionSeparator = theUri.lastIndexOf('|');
-		if (versionSeparator != -1) {
-			params.add(StructureDefinition.SP_VERSION, new TokenParam(theUri.substring(versionSeparator + 1)));
-			params.add(StructureDefinition.SP_URL, new UriParam(theUri.substring(0, versionSeparator)));
+		if (parsedCanonicalUrl.versionId().isPresent()) {
+			params.add(
+					StructureDefinition.SP_VERSION,
+					new TokenParam(parsedCanonicalUrl.versionId().get()));
+			params.add(StructureDefinition.SP_URL, new UriParam(parsedCanonicalUrl.url()));
 		} else {
-			params.add(StructureDefinition.SP_URL, new UriParam(theUri));
+			params.add(StructureDefinition.SP_URL, new UriParam(parsedCanonicalUrl.url()));
 			// When no version is specified, we will take the most recently updated resource as the current
 			// version
 			params.setSort(new SortSpec(SP_RES_LAST_UPDATED).setOrder(SortOrderEnum.DESC));

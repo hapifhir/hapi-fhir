@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.test;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
+import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
 import ca.uhn.fhir.batch2.jobs.merge.MergeAppCtx;
@@ -99,11 +100,12 @@ import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.warm.ICacheWarmingSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
+import ca.uhn.fhir.jpa.term.TerminologyTestHelper;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
@@ -519,9 +521,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected ITermReadSvc myTermSvc;
 	@Autowired
-	protected ITermDeferredStorageSvc myTerminologyDeferredStorageSvc;
+	protected TerminologyTestHelper myTerminologyTestHelper;
 	@Autowired
-	protected ITermLoaderSvc myTerminologyLoaderSvc;
+	protected ITermDeferredStorageSvc myTerminologyDeferredStorageSvc;
 	@Autowired
 	protected PlatformTransactionManager myTransactionMgr;
 	@Autowired
@@ -535,6 +537,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected IFhirResourceDao<Library> myLibraryDao;
 	@Autowired
 	protected ITermValueSetDao myTermValueSetDao;
+	@Autowired
+	protected ITermValueSetStorageSvc myTermValueSetStorageSvc;
 	@Autowired
 	protected ITermValueSetConceptDao myTermValueSetConceptDao;
 	@Autowired
@@ -577,6 +581,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected IJobMaintenanceService myJobMaintenanceService;
 	@Autowired
 	protected IJobCoordinator myJobCoordinator;
+	@Autowired
+	protected IJobPersistence myJobPersistence;
 
 	private IValidationPolicyAdvisor policyAdvisor;
 	@RegisterExtension
@@ -1084,6 +1090,11 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		}
 
 		@Override
+        public String relativeDatePlaceHolder() {
+            return null;
+        }
+
+		@Override
 		public ContainedReferenceValidationPolicy policyForContained(IResourceValidator validator,
 																	 Object appContext,
 																	 org.hl7.fhir.r5.model.StructureDefinition structure,
@@ -1097,7 +1108,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		}
 
 		@Override
-		public boolean isSuppressMessageId(String path, String messageId) {
+		public boolean isSuppressMessageId(String path, String messageId, Object... theMessageArguments) {
 			return false;
 		}
 

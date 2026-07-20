@@ -8,8 +8,10 @@ import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -18,10 +20,10 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Device;
+import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.Meta;
@@ -43,7 +45,6 @@ import java.util.List;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -73,6 +74,199 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
+	}
+
+	@Test
+	// Created by claude-sonnet-4-6
+	void testMultipleChains_OnSingleValuedReference_ReuseSingleJoin() {
+		// Setup
+		createPatient(withId("P0"), withFamily("Smith"), withGiven("John"), withGender("male"));    // matches
+		createPatient(withId("P1"), withFamily("Jones"), withGiven("Jane"), withGender("female"));  // does not match
+		createPatient(withId("P2"), withFamily("Smith"), withGiven("Sarah"), withGender("female")); // partially matches
+		createCoverage(withId("C0"), withReference("beneficiary", "Patient/P0"));
+		createCoverage(withId("C1"), withReference("beneficiary", "Patient/P1"));
+		createCoverage(withId("C2"), withReference("beneficiary", "Patient/P2"));
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Coverage.SP_PATIENT, new ReferenceParam("family", "Smith"));
+		map.add(Coverage.SP_PATIENT, new ReferenceParam("given", "John"));
+		map.add(Coverage.SP_PATIENT, new ReferenceParam("gender", "male"));
+
+		// Test
+		myCaptureQueriesListener.clear();
+		IBundleProvider search = myCoverageDao.search(map, newSrd());
+
+		// Verify - only C0 returned
+		assertThat(toUnqualifiedVersionlessIdValues(search)).containsExactly("Coverage/C0");
+
+		// Verify - only 1 HFJ_RES_LINK join is used (not one per chained param)
+		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
+		String querySql = selectQueries.get(0).getSql(false, false);
+		ourLog.debug("\n querySql: {}", querySql);
+		assertThat(StringUtils.countMatches(querySql, "HFJ_RES_LINK")).isEqualTo(1);
+	}
+
+	@Test
+	// Created by claude-sonnet-4-6
+	void testMultipleQualifiedChains_OnMultiValuedReference_UseSeparateJoins() {
+		// Setup
+		createPractitioner(withId("Prac1"), withFamily("Smith"));
+		createOrganization(withId("Org1"), withName("Lab"));
+
+		// DR1 has both a Practitioner named Smith AND an Organization named Lab as performers
+		createResource("DiagnosticReport", withId("DR1"),
+			withReference("performer", "Practitioner/Prac1"),
+			withReference("performer", "Organization/Org1"));
+
+		// DR2 has only the Practitioner - no Organization performer -> should NOT match
+		createResource("DiagnosticReport", withId("DR2"),
+			withReference("performer", "Practitioner/Prac1"));
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(DiagnosticReport.SP_PERFORMER, new ReferenceParam("Practitioner", "name", "Smith"));
+		map.add(DiagnosticReport.SP_PERFORMER, new ReferenceParam("Organization", "name", "Lab"));
+
+		// Execute
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myDiagnosticReportDao.search(map, newSrd());
+
+		// Verify - Only DR1 is returned
+		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactlyInAnyOrder("DiagnosticReport/DR1");
+
+		// Verify - 2 HFJ_RES_LINK joins are used, one for each performer type (Practitioner vs Organization)
+		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
+		String querySql = selectQueries.get(0).getSql(false, false);
+		assertThat(StringUtils.countMatches(querySql, "HFJ_RES_LINK")).isEqualTo(2);
+	}
+
+	@Test
+	void testMultipleChainsWithSameResourceType_OnMultiValuedReference_UseSeparateJoins() {
+		createPractitioner(withId("Prac1"), withFamily("Smith"), withGender("male"));
+		createPractitioner(withId("Prac2"), withFamily("Jones"), withGender("female"));
+
+		createPatient(withId("PatA"),
+			withReference("generalPractitioner", "Practitioner/Prac1"),
+			withReference("generalPractitioner", "Practitioner/Prac2"));
+
+		createPatient(withId("PatB"),
+			withReference("generalPractitioner", "Practitioner/Prac1"));
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Patient.SP_GENERAL_PRACTITIONER, new ReferenceParam("family", "Smith"));
+		map.add(Patient.SP_GENERAL_PRACTITIONER, new ReferenceParam("gender", "female"));
+
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myPatientDao.search(map, newSrd());
+
+		// Only patA is returned — each filter satisfied independently by a different practitioner
+		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactlyInAnyOrder("Patient/PatA");
+
+		// 2 HFJ_RES_LINK joins required: multi-valued reference cannot collapse to a single join
+		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
+		String querySql = selectQueries.get(0).getSql(false, false);
+		assertThat(StringUtils.countMatches(querySql, "HFJ_RES_LINK")).isEqualTo(2);
+	}
+
+	@Test
+	void testMixedTypeOrGroupAndClause_OnMultiValuedReference_UseSeparateJoins() {
+		// Setup: DR1 has two Organization performers: Lab and Acme
+		createOrganization(withId("OrgLab"), withName("Lab"));
+		createOrganization(withId("OrgAcme"), withName("Acme"));
+		createPractitioner(withId("Prac1"), withFamily("Smith"));
+
+		// DR1 matches: performer includes both OrgLab (satisfies clause 1) and OrgAcme (satisfies clause 2)
+		createResource("DiagnosticReport", withId("DR1"),
+			withReference("performer", "Organization/OrgLab"),
+			withReference("performer", "Organization/OrgAcme"));
+
+		// DR2 has only OrgLab — satisfies clause 1's OR-group but NOT clause 2 (Acme)
+		createResource("DiagnosticReport", withId("DR2"),
+			withReference("performer", "Organization/OrgLab"));
+
+		// AND clause 1: mixed-type OR-group
+		ReferenceOrListParam clause1 = new ReferenceOrListParam()
+			.add(new ReferenceParam("Organization", "name", "Lab"))
+			.add(new ReferenceParam("Practitioner", "name", "Smith"));
+
+		// AND clause 2: single-type OR-group
+		ReferenceOrListParam clause2 = new ReferenceOrListParam()
+			.add(new ReferenceParam("Organization", "name", "Acme"));
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(DiagnosticReport.SP_PERFORMER, clause1);
+		map.add(DiagnosticReport.SP_PERFORMER, clause2);
+
+		// Execute
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myDiagnosticReportDao.search(map, newSrd());
+
+		// Verify - only DR1 is returned
+		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactlyInAnyOrder("DiagnosticReport/DR1");
+
+		// Verify - 2 HFJ_RES_LINK joins — each AND clause must bind independently
+		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
+		String querySql = selectQueries.get(0).getSql(false, false);
+		assertThat(StringUtils.countMatches(querySql, "HFJ_RES_LINK")).isEqualTo(2);
+	}
+
+	@Test
+	void testAndClauses_DirectReference_ReturnsResourcesMatchingAllTargets() {
+		// Setup
+		IIdType patientA = createPatient(withId("PA"));
+		IIdType patientB = createPatient(withId("PB"));
+
+		AuditEvent matching = new AuditEvent();
+		matching.setId("AE-MATCH");
+		matching.addEntity().setWhat(new Reference(patientA));
+		matching.addEntity().setWhat(new Reference(patientB));
+		myAuditEventDao.update(matching, mySrd);
+
+		AuditEvent partialA = new AuditEvent();
+		partialA.setId("AE-A-ONLY");
+		partialA.addEntity().setWhat(new Reference(patientA));
+		myAuditEventDao.update(partialA, mySrd);
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(AuditEvent.SP_ENTITY, new ReferenceParam("Patient/PA"));
+		map.add(AuditEvent.SP_ENTITY, new ReferenceParam("Patient/PB"));
+
+		// Execute
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myAuditEventDao.search(map, newSrd());
+
+		// Verify - only the AuditEvent that references both patients is returned
+		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactly("AuditEvent/AE-MATCH");
+
+		// Verify - 2 HFJ_RES_LINK joins — each AND clause must bind to its own link row
+		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
+		String querySql = selectQueries.get(0).getSql(false, false);
+		assertThat(StringUtils.countMatches(querySql, "HFJ_RES_LINK")).isEqualTo(2);
+	}
+
+	@Test
+	void testAndClauses_DirectReferenceWithoutResType_ReturnsResourcesMatchingAllTargets() {
+		// Setup
+		IIdType patientA = createPatient(withId("PA"));
+		IIdType patientB = createPatient(withId("PB"));
+
+		AuditEvent matching = new AuditEvent();
+		matching.setId("AE-MATCH");
+		matching.addEntity().setWhat(new Reference(patientA));
+		matching.addEntity().setWhat(new Reference(patientB));
+		myAuditEventDao.update(matching, mySrd);
+
+		AuditEvent partial = new AuditEvent();
+		partial.setId("AE-A");
+		partial.addEntity().setWhat(new Reference(patientA));
+		myAuditEventDao.update(partial, mySrd);
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(AuditEvent.SP_ENTITY, new ReferenceParam("PA"));
+		map.add(AuditEvent.SP_ENTITY, new ReferenceParam("PB"));
+
+		IBundleProvider results = myAuditEventDao.search(map, newSrd());
+
+		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactly("AuditEvent/AE-MATCH");
 	}
 
 	@Test
@@ -115,7 +309,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		msgHeader.setEvent(new Coding("http://foo", "bar", "blah"));
 		inputBundle.addEntry().setResource(msgHeader);
 
-		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("Bundle", "message", null);
+		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("Bundle", "message", ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 		assertEquals("Bundle.entry[0].resource", sp.getPath());
 		assertThat(sp.getBase()).containsExactly("Bundle");
 		assertEquals(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, sp.getStatus());
@@ -622,7 +816,9 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		String url = "/Observation?subject.organization=" + orgId.getValueAsString();
 
 		// execute
+		myCaptureQueriesListener.clear();
 		List<String> oids = myTestDaoSearch.searchForIds(url);
+		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
 		assertThat(oids).hasSize(1);
@@ -1766,6 +1962,84 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			.doesNotContain("HASH_NORM_PREFIX")
 			.doesNotContain("SP_VALUE_NORMALIZED")
 			.contains("HASH_EXACT");
+	}
+
+	@Test
+	// Created by claude-opus-4-7 for https://github.com/hapifhir/hapi-fhir/issues/8025
+	void test_unqualifiedChainedIdOnMultiTargetReference_returnsMatchingResource() {
+		// SearchParameter http://hl7.org/fhir/SearchParameter/DiagnosticReport-based-on declares
+		//   target = [ CarePlan, ImmunizationRecommendation, MedicationRequest, NutritionOrder, ServiceRequest ]
+		// The customer's DiagnosticReport references a ServiceRequest with FHIR id "sr-1".
+		createResource("ServiceRequest", withId("sr-1"));
+		createResource("DiagnosticReport", withId("dr-1"),
+			withReference("basedOn", "ServiceRequest/sr-1"));
+
+		// Sanity: the qualified form works. resourceTypes contains only ServiceRequest,
+		// so the iteration in ResourceLinkPredicateBuilder runs once, resolveResourceIdentities
+		// returns a non-empty PID set, and setMatchNothing() is never called.
+		SearchParameterMap qualified = SearchParameterMap.newSynchronous();
+		qualified.add(DiagnosticReport.SP_BASED_ON, new ReferenceParam("ServiceRequest", "_id", "sr-1"));
+		IBundleProvider qualifiedResult = myDiagnosticReportDao.search(qualified, newSrd());
+		assertThat(toUnqualifiedVersionlessIdValues(qualifiedResult))
+			.as("qualified chain (sanity)")
+			.containsExactly("DiagnosticReport/dr-1");
+
+		// The unqualified form must return the same resource. Today, it does not.
+		// resourceTypes contains all 5 SP targets. The first iteration (CarePlan) builds
+		// IIdHelperService.resolveResourceIdentities([CarePlan/sr-1]), which returns empty,
+		// triggers setMatchNothing() on the shared SearchQueryBuilder, and the entire query
+		// is short-circuited to "no rows" — even though the ServiceRequest iteration would
+		// have built a perfectly correct subquery on its turn.
+		SearchParameterMap unqualified = SearchParameterMap.newSynchronous();
+		unqualified.add(DiagnosticReport.SP_BASED_ON, new ReferenceParam(null, "_id", "sr-1"));
+		IBundleProvider unqualifiedResult = myDiagnosticReportDao.search(unqualified, newSrd());
+		assertThat(toUnqualifiedVersionlessIdValues(unqualifiedResult))
+			.as("unqualified chain — fails today, must return the same DR as the qualified form")
+			.containsExactly("DiagnosticReport/dr-1");
+	}
+
+	@Test
+	// Created by claude-opus-4-7 for https://github.com/hapifhir/hapi-fhir/issues/8025
+	void test_unqualifiedChainedIdOnMultiTargetReference_returnsAllWhenIdAmbiguousAcrossTypes() {
+		// FHIR ids are unique within a resource type but may collide ACROSS types.
+		// An unqualified chained _id search on a multi-target reference must therefore
+		// return matches from every target type whose resource has that id.
+		//
+		// Today this case is doubly broken: setMatchNothing() fires on the first iteration
+		// whose target type doesn't have the id, even though TWO of the iterations would
+		// have produced correct subqueries. After the fix, both DRs must come back.
+		createResource("ServiceRequest", withId("shared-id"));
+		createResource("CarePlan",       withId("shared-id"));
+
+		createResource("DiagnosticReport", withId("dr-sr"),
+			withReference("basedOn", "ServiceRequest/shared-id"));
+		createResource("DiagnosticReport", withId("dr-cp"),
+			withReference("basedOn", "CarePlan/shared-id"));
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(DiagnosticReport.SP_BASED_ON, new ReferenceParam(null, "_id", "shared-id"));
+		IBundleProvider result = myDiagnosticReportDao.search(map, newSrd());
+
+		assertThat(toUnqualifiedVersionlessIdValues(result))
+			.containsExactlyInAnyOrder("DiagnosticReport/dr-sr", "DiagnosticReport/dr-cp");
+	}
+
+	@Test
+	// Created by claude-opus-4-7 for https://github.com/hapifhir/hapi-fhir/issues/8025
+	void test_unqualifiedChainedIdOnMultiTargetReference_returnsEmptyWhenIdMatchesNoTargetType() {
+		// Regression guard. After fixing the OR-context handling in ResourceIdPredicateBuilder,
+		// we must still return an empty bundle when the id genuinely does not exist for any
+		// target type. The fix should change HOW we arrive at empty (per-iteration FALSE
+		// condition in the OR, rather than a global setMatchNothing), not WHETHER we do.
+		createResource("ServiceRequest", withId("sr-1"));
+		createResource("DiagnosticReport", withId("dr-1"),
+			withReference("basedOn", "ServiceRequest/sr-1"));
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(DiagnosticReport.SP_BASED_ON, new ReferenceParam(null, "_id", "does-not-exist"));
+		IBundleProvider result = myDiagnosticReportDao.search(map, newSrd());
+
+		assertThat(toUnqualifiedVersionlessIdValues(result)).isEmpty();
 	}
 
 	private void countUnionStatementsInGeneratedQuery(String theUrl, int theExpectedNumberOfUnions) {

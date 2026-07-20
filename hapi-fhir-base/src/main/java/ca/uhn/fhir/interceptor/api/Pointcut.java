@@ -1889,7 +1889,7 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
-	 * <li>org.hl7.fhir.instance.model.api.IBaseResource - The resource being deleted</li>
+	 * <li>org.hl7.fhir.instance.model.api.IBaseResource - The resource being deleted. Its idElement, meta.versionId, and meta.lastUpdated will reflect the version and time of deletion, but all other content reflects the state prior to deletion.</li>
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
 	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
@@ -2056,6 +2056,36 @@ public enum Pointcut implements IPointcut {
 	STORAGE_TRANSACTION_PROCESSING(
 			void.class,
 			"org.hl7.fhir.instance.model.api.IBaseBundle",
+			"ca.uhn.fhir.rest.api.server.RequestDetails",
+			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+			"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"),
+
+	/**
+	 * <b>Storage Hook:</b>
+	 * Invoked during FHIR transaction processing, after all conditional URLs and reference targets have been
+	 * pre-fetched, but before any entry in the bundle has been written. Hooks may mutate the entries (for example
+	 * to resolve references to concrete IDs) using the data resolved during the pre-fetch, which is available on the
+	 * supplied {@link ca.uhn.fhir.rest.api.server.storage.TransactionDetails}.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>ca.uhn.fhir.interceptor.model.TransactionWriteAfterPrefetchDetails - A context object wrapping the list of
+	 * bundle entries being processed, in processing order</li>
+	 * <li>ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is being
+	 * processed.</li>
+	 * <li>ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - The same details as the RequestDetails parameter, but
+	 * only populated when operating in a RestfulServer. Provided as a convenience.</li>
+	 * <li>ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object.</li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 *
+	 * @since 8.11.15
+	 */
+	STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH(
+			void.class,
+			"ca.uhn.fhir.interceptor.model.TransactionWriteAfterPrefetchDetails",
 			"ca.uhn.fhir.rest.api.server.RequestDetails",
 			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 			"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"),

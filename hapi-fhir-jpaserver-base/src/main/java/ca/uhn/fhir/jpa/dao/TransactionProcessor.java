@@ -26,6 +26,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.interceptor.model.TransactionWriteAfterPrefetchDetails;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -40,6 +41,7 @@ import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -214,6 +216,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 			if (theRequestPartitionId != null) {
 				preFetch(theRequest, theTransactionDetails, theEntries, versionAdapter, theRequestPartitionId);
+				callTransactionWriteAfterPrefetchHooks(theRequest, theEntries, theTransactionDetails);
 			}
 
 			return super.doTransactionWriteOperations(
@@ -230,6 +233,26 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					theTransactionStopWatch);
 		} finally {
 			myEntityManager.setFlushMode(initialFlushMode);
+		}
+	}
+
+	/**
+	 * Fires {@link Pointcut#STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH}. Hooks may resolve references in the entry
+	 * bodies to concrete IDs using the data resolved during the pre-fetch (available on {@code theTransactionDetails}).
+	 */
+	private void callTransactionWriteAfterPrefetchHooks(
+			RequestDetails theRequest, List<IBase> theEntries, TransactionDetails theTransactionDetails) {
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH)) {
+			HookParams params = new HookParams()
+					.add(
+							TransactionWriteAfterPrefetchDetails.class,
+							new TransactionWriteAfterPrefetchDetails(theEntries))
+					.add(RequestDetails.class, theRequest)
+					.addIfMatchesType(ServletRequestDetails.class, theRequest)
+					.add(TransactionDetails.class, theTransactionDetails);
+			compositeBroadcaster.callHooks(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH, params);
 		}
 	}
 
@@ -368,17 +391,30 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			if (resource != null) {
 				String verb = theVersionAdapter.getEntryRequestVerb(myFhirContext, nextEntry);
 
-				/*
-				 * Pre-fetch any resources that are being updated or patched within
-				 * the transaction
-				 */
 				if ("PUT".equals(verb) || "PATCH".equals(verb)) {
+					/*
+					 * Pre-fetch any resources that are being updated or patched within
+					 * the transaction
+					 */
 					String requestUrl = theVersionAdapter.getEntryRequestUrl(nextEntry);
 					if (countMatches(requestUrl, '?') == 0) {
 						IIdType id = myFhirContext.getVersion().newIdType();
 						id.setValue(requestUrl);
 						IIdType unqualifiedVersionless = id.toUnqualifiedVersionless();
 						idsToPreResolve.put(unqualifiedVersionless, PrefetchReasonEnum.DIRECT_TARGET);
+					}
+				} else if ("POST".equals(verb)) {
+					/*
+					 * Pre-fetch any resources that are having operations applied to them
+					 */
+					String requestUrl = theVersionAdapter.getEntryRequestUrl(nextEntry);
+					Optional<ParsedRequestOperation> operation = parseUrlForOperationInvocation(requestUrl);
+					if (operation.isPresent()) {
+						String operationName = operation.get().operationName();
+						if (JpaConstants.OPERATION_META_ADD.equals(operationName)
+								|| JpaConstants.OPERATION_META_DELETE.equals(operationName)) {
+							idsToPreResolve.put(operation.get().targetInstance(), PrefetchReasonEnum.DIRECT_TARGET);
+						}
 					}
 				}
 
@@ -727,7 +763,12 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 						next.myResourceDefinition.getName(),
 						next.myMatchUrlSearchMap,
 						next.getAssociatedResource());
-				if (partition.isAllPartitions()) {
+				if (partition.isAllPartitions() && !myPartitionSettings.isAllPartitionSearchSupported()) {
+					// I couldn't determine from the history why allPartitions
+					// was originally defaulted to the outer/transaction partition; it may have been because
+					// all-partition search was not supported. Now that isAllPartitionSearchSupported() makes that
+					// explicit, we only apply this fallback when all-partition search is unsupported. Otherwise, we
+					// keep allPartitions so the pre-fetch can search across all partitions.
 					partition = theOuterRequestPartitionId;
 				}
 			}
@@ -845,7 +886,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 			if (values.size() == 1) {
 				List<List<IQueryParameterType>> andList = values.iterator().next();
-				if (andList.size() == 1 || andList.get(0).size() == 1) {
+				if (andList.size() == 1 && andList.get(0).size() == 1) {
 					IQueryParameterType param = andList.get(0).get(0);
 
 					if (param instanceof TokenParam tokenParam) {
@@ -1131,7 +1172,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	}
 
 	@Override
-	protected void flushSession(Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome) {
+	protected void flushSession(
+			@Nonnull TransactionDetails theTransactionDetails, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome) {
 		try {
 			int insertionCount;
 			int updateCount;

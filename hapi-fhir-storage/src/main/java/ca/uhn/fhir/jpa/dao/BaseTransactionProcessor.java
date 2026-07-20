@@ -47,6 +47,7 @@ import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -88,6 +89,7 @@ import ca.uhn.fhir.util.AsyncUtil;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
@@ -106,6 +108,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -240,7 +243,7 @@ public abstract class BaseTransactionProcessor {
 			RequestDetails theRequestDetails, BUNDLE theRequest, boolean theNestedMode) {
 		String actionName = "Transaction";
 
-		TransactionDetails transactionDetails = new TransactionDetails();
+		TransactionDetails transactionDetails = new TransactionDetails(theRequest);
 
 		IInterceptorBroadcaster compositeBroadcaster =
 				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
@@ -335,7 +338,8 @@ public abstract class BaseTransactionProcessor {
 			IBase theNewEntry,
 			String theResourceType,
 			IBaseResource theRes,
-			RequestDetails theRequestDetails) {
+			RequestDetails theRequestDetails,
+			TransactionDetails theTransactionDetails) {
 		IIdType newId = theOutcome.getId().toUnqualified();
 		IIdType resourceId =
 				isPlaceholder(theNextResourceId) ? theNextResourceId : theNextResourceId.toUnqualifiedVersionless();
@@ -344,6 +348,8 @@ public abstract class BaseTransactionProcessor {
 				theIdSubstitutions.put(resourceId, newId);
 			}
 			if (isPlaceholder(resourceId)) {
+				theTransactionDetails.addResolvedResource(resourceId, theRes);
+
 				/*
 				 * The correct way for substitution IDs to be is to be with no resource type, but we'll accept the qualified kind too just to be lenient.
 				 */
@@ -455,7 +461,11 @@ public abstract class BaseTransactionProcessor {
 				if (i < totalAttempts && transactionSemantics.isTryBatchAsTransactionFirst()) {
 					BundleUtil.setBundleType(myContext, theRequest, "transaction");
 					response = processTransaction(
-							theRequestDetails, new TransactionDetails(), theRequest, "Transaction", theNestedMode);
+							theRequestDetails,
+							new TransactionDetails(theRequest),
+							theRequest,
+							"Transaction",
+							theNestedMode);
 				} else {
 					BundleUtil.setBundleType(myContext, theRequest, "batch");
 					response = processBatch(theRequestDetails, theRequest, theNestedMode);
@@ -551,8 +561,7 @@ public abstract class BaseTransactionProcessor {
 		for (int i = 0; i < requestEntriesSize; i++) {
 
 			nextResponseEntry = responseMap.get(i);
-			if (nextResponseEntry instanceof ServerResponseExceptionHolder) {
-				ServerResponseExceptionHolder caughtEx = (ServerResponseExceptionHolder) nextResponseEntry;
+			if (nextResponseEntry instanceof ServerResponseExceptionHolder caughtEx) {
 				if (caughtEx.getException() != null) {
 					IBase nextEntry = myVersionAdapter.addEntry(response);
 					populateEntryWithOperationOutcome(caughtEx.getException(), nextEntry);
@@ -721,12 +730,11 @@ public abstract class BaseTransactionProcessor {
 							Msg.code(530) + "Can not invoke read operation on nested transaction");
 				}
 
-				if (!(theRequestDetails instanceof ServletRequestDetails)) {
+				if (!(theRequestDetails instanceof ServletRequestDetails srd)) {
 					throw new MethodNotAllowedException(
 							Msg.code(531) + "Can not call transaction GET methods from this context");
 				}
 
-				ServletRequestDetails srd = (ServletRequestDetails) theRequestDetails;
 				Integer originalOrder = theOriginalRequestOrder.get(nextReqEntry);
 				IBase nextRespEntry =
 						(IBase) myVersionAdapter.getEntries(theResponse).get(originalOrder);
@@ -775,9 +783,7 @@ public abstract class BaseTransactionProcessor {
 		Optional<IBaseExtension<?, ?>> partitionIdsExtensionOptional =
 				myVersionAdapter.getEntryRequestExtensionByUrl(theReqEntry, EXTENSION_TRANSACTION_ENTRY_PARTITION_IDS);
 		if (partitionIdsExtensionOptional.isPresent()
-				&& partitionIdsExtensionOptional.get().getValue() instanceof IPrimitiveType<?>) {
-			IPrimitiveType<?> valueAsPrimitiveType =
-					(IPrimitiveType<?>) partitionIdsExtensionOptional.get().getValue();
+				&& partitionIdsExtensionOptional.get().getValue() instanceof IPrimitiveType<?> valueAsPrimitiveType) {
 			String value = valueAsPrimitiveType.getValueAsString();
 			theRequestDetails.setHeaders(Constants.HEADER_X_REQUEST_PARTITION_IDS, List.of(value));
 		}
@@ -1036,9 +1042,8 @@ public abstract class BaseTransactionProcessor {
 				case POST: {
 					IBaseResource resource = myVersionAdapter.getResource(theEntry);
 					String resourceType = myContext.getResourceType(resource);
-					nextWriteEntryRequestPartitionId =
-							myRequestPartitionHelperService.determineCreatePartitionForRequest(
-									requestDetailsForEntry, resource, resourceType);
+					nextWriteEntryRequestPartitionId = tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
+							requestDetailsForEntry, resource, resourceType, url);
 					break;
 				}
 				case PUT: {
@@ -1054,9 +1059,8 @@ public abstract class BaseTransactionProcessor {
 							nextWriteEntryRequestPartitionId = theTransactionDetails.getResolvedPartition(resourceId);
 						}
 						if (nextWriteEntryRequestPartitionId == null) {
-							nextWriteEntryRequestPartitionId =
-									myRequestPartitionHelperService.determineCreatePartitionForRequest(
-											requestDetailsForEntry, resource, resourceType);
+							nextWriteEntryRequestPartitionId = tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
+									requestDetailsForEntry, resource, resourceType, url);
 							if (resourceId != null) {
 								theTransactionDetails.addResolvedPartition(
 										resourceId, nextWriteEntryRequestPartitionId);
@@ -1068,6 +1072,52 @@ public abstract class BaseTransactionProcessor {
 			}
 		}
 		return nextWriteEntryRequestPartitionId;
+	}
+
+	/**
+	 * Determine the create partition for a transaction write entry before pre-fetch, if possible. In patient-ID
+	 * partition mode the Patient compartment sometimes can't be resolved this early — an inline Patient match URL that
+	 * pre-fetch hasn't resolved yet (Msg 1326), or an id-less conditional-update Patient body (Msg 1321). When
+	 * all-partition search is supported ({@link PartitionSettings#isAllPartitionSearchSupported()}) we defer these to
+	 * {@link RequestPartitionId#allPartitions()} and let routing be settled per-entry at write time, once pre-fetch and
+	 * {@code PatientIdPartitionInterceptor}'s after-prefetch rewrite have resolved the match URL to a concrete Patient.
+	 * Where all-partition search is unsupported the partition must be fixed up front, so the rejection bubbles up
+	 * instead. The body comments spell out which codes and body shapes are deferred.
+	 * <p>
+	 * <b>Not a clean solution:</b> deferral is keyed off Msg 1321/1326, error codes raised specifically by
+	 * {@code PatientIdPartitionInterceptor}, so the core transaction processor is coupled to interceptor-specific
+	 * codes. This is a pragmatic interim approach; a cleaner separation should be designed when time allows.
+	 *
+	 * @param theEntryRequestUrl the entry's request URL; a conditional update is written via a match URL (contains
+	 *     {@code '?'})
+	 */
+	private RequestPartitionId tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
+			RequestDetails theRequestDetails,
+			IBaseResource theResource,
+			String theResourceType,
+			String theEntryRequestUrl) {
+		try {
+			return myRequestPartitionHelperService.determineCreatePartitionForRequest(
+					theRequestDetails, theResource, theResourceType);
+		} catch (MethodNotAllowedException e) {
+			if (!myPartitionSettings.isAllPartitionSearchSupported()) {
+				throw e;
+			}
+			// 1326: the entry's Patient compartment reference is not resolved before pre-fetch. Always deferrable.
+			if (messageStartsWith(e, Msg.code(1326))) {
+				return RequestPartitionId.allPartitions();
+			}
+			// 1321: a truly id-less Patient in a conditional update, whose identifier the after-prefetch rewrite might
+			// map to the existing Patient. Intentionally narrow, matching only an id-less body,
+			// and a more general fix is deferred to Tyner's broader fixes on patient id mode.
+			boolean conditionalUpdateOfIdlessPatient = isNotBlank(theEntryRequestUrl)
+					&& theEntryRequestUrl.indexOf('?') != -1
+					&& theResource.getIdElement().getIdPart() == null;
+			if (conditionalUpdateOfIdlessPatient && messageStartsWith(e, Msg.code(1321))) {
+				return RequestPartitionId.allPartitions();
+			}
+			throw e;
+		}
 	}
 
 	private boolean haveWriteOperationsHooks(RequestDetails theRequestDetails) {
@@ -1425,16 +1475,27 @@ public abstract class BaseTransactionProcessor {
 
 				switch (verb) {
 					case "POST": {
-						// CREATE
+						// CREATE (or $operation)
 						validateResourcePresent(res, order, verb);
 
-						IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
+						// Generally POST means that we're doing a create or conditional create,
+						// but it can also be an operation invocation.
+						Optional<ParsedRequestOperation> parsedOperationOpt = parseUrlForOperationInvocation(url);
+						if (parsedOperationOpt.isPresent()) {
+							ParsedRequestOperation parsedOperation = parsedOperationOpt.get();
+							invokeOperationInTransaction(
+									parsedOperation, res, requestDetailsForEntry, nextRespEntry, theTransactionDetails);
+							break;
+						}
+
+						// Ok, it's a create / conditional create
 						res.setId((String) null);
 
 						DaoMethodOutcome outcome;
 						String matchUrl = myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry);
 						matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
 						// create individual resource
+						IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
 						outcome =
 								resourceDao.create(res, matchUrl, false, requestDetailsForEntry, theTransactionDetails);
 						setConditionalUrlToBeValidatedLater(conditionalUrlToIdMap, matchUrl, outcome.getId());
@@ -1449,7 +1510,8 @@ public abstract class BaseTransactionProcessor {
 									nextRespEntry,
 									resourceType,
 									res,
-									requestDetailsForEntry);
+									requestDetailsForEntry,
+									theTransactionDetails);
 						}
 						entriesToProcess.put(nextRespEntry, outcome.getId(), nextRespEntry);
 						theTransactionDetails.addResolvedResource(outcome.getId(), outcome::getResource);
@@ -1491,9 +1553,6 @@ public abstract class BaseTransactionProcessor {
 										.toUnqualifiedVersionless()
 										.getValueAsString());
 							}
-							if (allDeleted.isEmpty()) {
-								status = Constants.STATUS_HTTP_204_NO_CONTENT;
-							}
 
 							myVersionAdapter.setResponseOutcome(nextRespEntry, deleteOutcome.getOperationOutcome());
 						}
@@ -1520,7 +1579,7 @@ public abstract class BaseTransactionProcessor {
 							outcome = resourceDao.update(
 									res, null, false, false, requestDetailsForEntry, theTransactionDetails);
 						} else {
-							if (!shouldConditionalUpdateMatchId(theTransactionDetails, res.getIdElement())) {
+							if (!shouldConditionalUpdateMatchId(res.getIdElement())) {
 								res.setId((String) null);
 							}
 							String matchUrl;
@@ -1556,7 +1615,8 @@ public abstract class BaseTransactionProcessor {
 								nextRespEntry,
 								resourceType,
 								res,
-								requestDetailsForEntry);
+								requestDetailsForEntry,
+								theTransactionDetails);
 						entriesToProcess.put(nextRespEntry, outcome.getId(), nextRespEntry);
 						break;
 					}
@@ -1573,8 +1633,7 @@ public abstract class BaseTransactionProcessor {
 						IBaseParameters patchBodyParameters = null;
 						PatchTypeEnum patchType = null;
 
-						if (res instanceof IBaseBinary) {
-							IBaseBinary binary = (IBaseBinary) res;
+						if (res instanceof IBaseBinary binary) {
 							if (binary.getContent() != null && binary.getContent().length > 0) {
 								patchBody = toUtf8String(binary.getContent());
 							}
@@ -1642,7 +1701,8 @@ public abstract class BaseTransactionProcessor {
 									nextRespEntry,
 									resourceType,
 									res,
-									requestDetailsForEntry);
+									requestDetailsForEntry,
+									theTransactionDetails);
 						}
 						entriesToProcess.put(nextRespEntry, outcome.getId(), nextRespEntry);
 
@@ -1693,7 +1753,7 @@ public abstract class BaseTransactionProcessor {
 			theTransactionStopWatch.startTask("Flush writes to database");
 
 			// flush the changes
-			flushSession(theIdToPersistedOutcome);
+			flushSession(theTransactionDetails, theIdToPersistedOutcome);
 
 			theTransactionStopWatch.endCurrentTask();
 
@@ -1765,6 +1825,64 @@ public abstract class BaseTransactionProcessor {
 		}
 	}
 
+	private void invokeOperationInTransaction(
+			ParsedRequestOperation theParsedRequestOperation,
+			IBaseResource theResource,
+			RequestDetails theRequestDetailsForEntry,
+			IBase theResponseBundleEntry,
+			TransactionDetails theTransactionDetails) {
+		switch (theParsedRequestOperation.operation()) {
+			case META_ADD, META_DELETE -> {
+				IIdType instanceId = theParsedRequestOperation.targetInstance();
+				invokeOperationMetaAddOrDeleteInTransaction(
+						theParsedRequestOperation,
+						theResource,
+						theRequestDetailsForEntry,
+						theResponseBundleEntry,
+						theTransactionDetails,
+						instanceId);
+			}
+			case UNSUPPORTED -> throw new InvalidRequestException(
+					Msg.code(2899) + "Operation " + UrlUtil.sanitizeUrlPart(theParsedRequestOperation.operationName())
+							+ " is not supported in a FHIR transaction");
+		}
+	}
+
+	private void invokeOperationMetaAddOrDeleteInTransaction(
+			ParsedRequestOperation theParsedRequestOperation,
+			IBaseResource theResource,
+			RequestDetails theRequestDetailsForEntry,
+			IBase theResponseBundleEntry,
+			TransactionDetails theTransactionDetails,
+			IIdType instanceId) {
+		IBaseMetaType meta = null;
+		if (theResource instanceof IBaseParameters request) {
+			meta = (IBaseMetaType) ParametersUtil.getNamedParameterValue(myContext, request, "meta")
+					.filter(t -> t instanceof IBaseMetaType)
+					.orElse(null);
+		}
+
+		if (meta == null) {
+			throw new InvalidRequestException(Msg.code(2898) + theParsedRequestOperation.operationName()
+					+ " request must have a parameter named 'meta' of type 'Meta'");
+		}
+
+		IFhirResourceDao resourceDao = getDaoOrThrowException(
+				myContext.getResourceDefinition(instanceId.getResourceType()).getImplementingClass());
+		DaoMethodOutcome outcome =
+				switch (theParsedRequestOperation.operation()) {
+					case META_ADD -> resourceDao.metaAddOperation(
+							instanceId, meta, theRequestDetailsForEntry, theTransactionDetails);
+					case META_DELETE -> resourceDao.metaDeleteOperation(
+							instanceId, meta, theRequestDetailsForEntry, theTransactionDetails);
+					case UNSUPPORTED -> throw new IllegalStateException(
+							Msg.code(2900) + "Can't handle this operation here");
+				};
+
+		myVersionAdapter.setResponseOutcome(theResponseBundleEntry, outcome.getOperationOutcome());
+		myVersionAdapter.setResponseStatus(theResponseBundleEntry, toStatusString(Constants.STATUS_HTTP_200_OK));
+	}
+
 	/**
 	 * Subclasses may override this in order to invoke specific operations when
 	 * we're finished handling all the write entries in the transaction bundle
@@ -1784,15 +1902,10 @@ public abstract class BaseTransactionProcessor {
 	/**
 	 * Check for if a resource id should be matched in a conditional update
 	 * If the FHIR version is older than R4, it follows the old specifications and does not match
-	 * If the resource id has been resolved, then it is an existing resource and does not need to be matched
 	 * If the resource id is local or a placeholder, the id is temporary and should not be matched
 	 */
-	private boolean shouldConditionalUpdateMatchId(TransactionDetails theTransactionDetails, IIdType theId) {
+	private boolean shouldConditionalUpdateMatchId(IIdType theId) {
 		if (myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.R4)) {
-			return false;
-		}
-		if (theTransactionDetails.hasResolvedResourceId(theId)
-				&& !theTransactionDetails.isResolvedResourceIdEmpty(theId)) {
 			return false;
 		}
 		if (theId != null && theId.getValue() != null) {
@@ -1803,13 +1916,9 @@ public abstract class BaseTransactionProcessor {
 
 	private boolean shouldSwapBinaryToActualResource(
 			IBaseResource theResource, String theResourceType, IIdType theNextResourceId) {
-		if ("Binary".equalsIgnoreCase(theResourceType)
+		return "Binary".equalsIgnoreCase(theResourceType)
 				&& theNextResourceId.getResourceType() != null
-				&& !theNextResourceId.getResourceType().equalsIgnoreCase("Binary")) {
-			return true;
-		} else {
-			return false;
-		}
+				&& !theNextResourceId.getResourceType().equalsIgnoreCase("Binary");
 	}
 
 	private void setConditionalUrlToBeValidatedLater(
@@ -1984,10 +2093,7 @@ public abstract class BaseTransactionProcessor {
 		for (DaoMethodOutcome nextOutcome : theIdToPersistedOutcome.values()) {
 
 			if (i++ % 250 == 0) {
-				ourLog.debug(
-						"Have indexed {} entities out of {} in transaction",
-						i,
-						theIdToPersistedOutcome.values().size());
+				ourLog.debug("Have indexed {} entities out of {} in transaction", i, theIdToPersistedOutcome.size());
 			}
 
 			if (nextOutcome.isNop()) {
@@ -2111,14 +2217,32 @@ public abstract class BaseTransactionProcessor {
 								+ " found in element named '" + nextRef.getName() + "' within resource of type: "
 								+ theResource.getIdElement().getResourceType());
 			} else {
-				// get a map of
-				// existing ids -> PID (for resources that exist in the DB)
-				// should this be allPartitions?
+				// get a map of existing ids -> PID (for resources that exist in the DB)
 				ResourcePersistentIdMap resourceVersionMap = myResourceVersionSvc.getLatestVersionIdsForResourceIds(
 						RequestPartitionId.allPartitions(),
 						theReferencesToAutoVersion.stream()
 								.map(IBaseReference::getReferenceElement)
 								.collect(Collectors.toList()));
+
+				// When cross-partition references are not allowed, determine the write partition
+				// of the source resource so we can reject auto-versioned references that point to
+				// resources in a different partition.
+				RequestPartitionId writePartition = null;
+				if (myPartitionSettings.isPartitioningEnabled()
+						&& myPartitionSettings.getAllowReferencesAcrossPartitions()
+								== PartitionSettings.CrossPartitionReferenceMode.NOT_ALLOWED) {
+					String resourceType = myContext.getResourceType(theResource);
+					String resourceCacheKey = theResource.getIdElement().hasIdPart()
+							? resourceType + "/" + theResource.getIdElement().getIdPart()
+							: null;
+					writePartition = resourceCacheKey != null
+							? theTransactionDetails.getResolvedPartition(resourceCacheKey)
+							: null;
+					if (writePartition == null) {
+						writePartition = myRequestPartitionHelperService.determineCreatePartitionForRequest(
+								theRequest, theResource, resourceType);
+					}
+				}
 
 				for (IBaseReference baseRef : theReferencesToAutoVersion) {
 					IIdType id = baseRef.getReferenceElement();
@@ -2133,8 +2257,16 @@ public abstract class BaseTransactionProcessor {
 						// we will add the looked up info to the transaction
 						// for later
 						if (resourceVersionMap.containsKey(id)) {
-							theTransactionDetails.addResolvedResourceId(
-									id, resourceVersionMap.getResourcePersistentId(id));
+							IResourcePersistentId pid = resourceVersionMap.getResourcePersistentId(id);
+							if (writePartition != null && !writePartition.hasPartitionId(pid.getPartitionId())) {
+								// The referenced resource exists but in a different partition.
+								// Reject it: auto-versioning must not produce cross-partition links.
+								throw new InvalidRequestException(Msg.code(2918) + "Resource "
+										+ id.toUnqualifiedVersionless().getValue()
+										+ " is referenced by auto-version-references-at-path but exists in a"
+										+ " different partition. Cross-partition references are not allowed.");
+							}
+							theTransactionDetails.addResolvedResourceId(id, pid);
 						}
 					}
 				}
@@ -2355,7 +2487,8 @@ public abstract class BaseTransactionProcessor {
 		}
 	}
 
-	protected abstract void flushSession(Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome);
+	protected abstract void flushSession(
+			@Nonnull TransactionDetails theTransactionDetails, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome);
 
 	private void validateResourcePresent(IBaseResource theResource, Integer theOrder, String theVerb) {
 		if (theResource == null) {
@@ -2364,6 +2497,35 @@ public abstract class BaseTransactionProcessor {
 					.getMessage(BaseTransactionProcessor.class, "missingMandatoryResource", theVerb, theOrder);
 			throw new InvalidRequestException(Msg.code(543) + msg);
 		}
+	}
+
+	@Nonnull
+	public Optional<ParsedRequestOperation> parseUrlForOperationInvocation(String theUrl) {
+		if (isBlank(theUrl)) {
+			return Optional.empty();
+		}
+
+		int lastSlashIdx = theUrl.lastIndexOf('/');
+		if (lastSlashIdx == -1) {
+			return Optional.empty();
+		}
+
+		String operationName = theUrl.substring(lastSlashIdx + 1);
+		if (operationName.startsWith("$")) {
+			String prefix = theUrl.substring(0, lastSlashIdx);
+			IIdType id = myContext.getVersion().newIdType(prefix);
+			if (id.hasResourceType() && id.hasIdPart()) {
+				TransactionOperationEnum operation =
+						switch (operationName) {
+							case JpaConstants.OPERATION_META_ADD -> TransactionOperationEnum.META_ADD;
+							case JpaConstants.OPERATION_META_DELETE -> TransactionOperationEnum.META_DELETE;
+							default -> TransactionOperationEnum.UNSUPPORTED;
+						};
+				return Optional.of(new ParsedRequestOperation(operationName, operation, id));
+			}
+		}
+
+		return Optional.empty();
 	}
 
 	private IIdType newIdType(String theResourceType, String theResourceId, String theVersion) {
@@ -2525,6 +2687,19 @@ public abstract class BaseTransactionProcessor {
 		myPartitionSettings = thePartitionSettings;
 	}
 
+	public record ParsedRequestOperation(
+			@Nonnull String operationName,
+			@Nonnull TransactionOperationEnum operation,
+			@Nonnull IIdType targetInstance) {}
+
+	public enum TransactionOperationEnum {
+		META_ADD,
+
+		META_DELETE,
+
+		UNSUPPORTED;
+	}
+
 	/**
 	 * Transaction Order, per the spec:
 	 * <p>
@@ -2624,6 +2799,7 @@ public abstract class BaseTransactionProcessor {
 		private final Map<Integer, Object> myResponseMap;
 		private final int myResponseOrder;
 		private final boolean myNestedMode;
+
 		private BaseServerResponseException myLastSeenException;
 
 		protected RetriableBundleTask(
@@ -2650,7 +2826,7 @@ public abstract class BaseTransactionProcessor {
 			IInterceptorBroadcaster compositeBroadcaster =
 					CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, myRequestDetails);
 
-			TransactionDetails transactionDetails = new TransactionDetails();
+			TransactionDetails transactionDetails = new TransactionDetails(subRequestBundle);
 
 			// Interceptor call: STORAGE_TRANSACTION_PROCESSING
 			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_PROCESSING)) {
@@ -2721,6 +2897,7 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	private static class ServerResponseExceptionHolder {
+
 		private BaseServerResponseException myException;
 
 		public BaseServerResponseException getException() {
@@ -2813,5 +2990,10 @@ public abstract class BaseTransactionProcessor {
 
 	private static boolean isUrnEscaped(@Nonnull String theId) {
 		return theId.startsWith(URN_PREFIX_ESCAPED);
+	}
+
+	private static boolean messageStartsWith(Throwable theException, String thePrefix) {
+		String message = theException.getMessage();
+		return message != null && message.startsWith(thePrefix);
 	}
 }

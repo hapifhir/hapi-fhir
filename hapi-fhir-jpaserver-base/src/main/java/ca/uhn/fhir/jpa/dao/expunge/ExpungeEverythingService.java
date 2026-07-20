@@ -26,6 +26,8 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.entity.Batch2JobAttachmentChunkEntity;
+import ca.uhn.fhir.jpa.entity.Batch2JobAttachmentEntity;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.entity.BulkImportJobEntity;
@@ -244,9 +246,10 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 					for (TermCodeSystem next : myEntityManager
 							.createQuery("SELECT c FROM " + TermCodeSystem.class.getName() + " c", TermCodeSystem.class)
 							.getResultList()) {
-						next.setCurrentVersion(null);
-						myEntityManager.merge(next);
+						next.setCurrentVersionPid(null);
 					}
+					// Flush FK nulls before deleting TermCodeSystemVersion rows below
+					myEntityManager.flush();
 				});
 		counter.addAndGet(
 				expungeEverythingByTypeWithoutPurging(theRequest, ResourceSystemEntity.class, requestPartitionId));
@@ -417,7 +420,7 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 
 	/**
 	 * Deletes Batch2WorkChunkEntity and Batch2JobInstanceEntity while holding the maintenance
-	 * semaphore (via {@link IJobMaintenanceService#holdMaintenanceForExpunge()}) to prevent any
+	 * semaphore (via {@link IJobMaintenanceService#holdJobMaintenanceForExpunge()}) to prevent any
 	 * concurrent maintenance pass from inserting or updating batch2 entities during deletion.
 	 *
 	 * <p>The semaphore hold prevents maintenance on the local JVM. In clustered deployments,
@@ -435,7 +438,7 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 		// Hold the maintenance semaphore while deleting batch2 entities.
 		// This prevents the local maintenance job from inserting/updating work chunks and job
 		// instances while we are deleting them, eliminating FK violations and deadlocks.
-		try (Closeable ignored = myJobMaintenanceService.holdMaintenanceForExpunge()) {
+		try (Closeable ignored = myJobMaintenanceService.holdJobMaintenanceForExpunge()) {
 			int outcome = 0;
 			int consecutiveFailures = 0;
 			while (true) {
@@ -445,6 +448,10 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 					deleted = 0;
 					deleted += expungeEverythingByTypeWithoutPurging(
 							theRequest, Batch2WorkChunkEntity.class, theRequestPartitionId);
+					deleted += expungeEverythingByTypeWithoutPurging(
+							theRequest, Batch2JobAttachmentChunkEntity.class, theRequestPartitionId);
+					deleted += expungeEverythingByTypeWithoutPurging(
+							theRequest, Batch2JobAttachmentEntity.class, theRequestPartitionId);
 					deleted += expungeEverythingByTypeWithoutPurging(
 							theRequest, Batch2JobInstanceEntity.class, theRequestPartitionId);
 				} catch (ResourceVersionConflictException e) {

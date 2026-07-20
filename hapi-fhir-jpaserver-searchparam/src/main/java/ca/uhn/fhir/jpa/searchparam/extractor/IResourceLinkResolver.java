@@ -30,12 +30,28 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 public interface IResourceLinkResolver {
 
 	/**
+	 * @deprecated Use {@link #findTargetResource(IBaseResource, RequestPartitionId, String, PathAndRef, RequestDetails, TransactionDetails)} instead.
+	 */
+	@SuppressWarnings("DataFlowIssue")
+	@Deprecated(since = "8.10.0", forRemoval = true)
+	default IResourceLookup findTargetResource(
+			@Nonnull RequestPartitionId theRequestPartitionId,
+			String theSourceResourceName,
+			PathAndRef thePathAndRef,
+			RequestDetails theRequest,
+			TransactionDetails theTransactionDetails) {
+		return findTargetResource(
+				null, theRequestPartitionId, theSourceResourceName, thePathAndRef, theRequest, theTransactionDetails);
+	}
+
+	/**
 	 * This method resolves the target of a reference found within a resource that is being created/updated. We do this
 	 * so that we can create indexed links between resources, and so that we can validate that the target actually
 	 * exists in cases where we need to check that.
 	 * <p>
 	 * This method returns an {@link IResourceLookup} to avoid needing to resolve the entire resource.
 	 *
+	 * @param theSourceResource     The resource containing the reference
 	 * @param theRequestPartitionId The partition ID of the target resource
 	 * @param theSourceResourceName The resource type for the resource containing the reference
 	 * @param thePathAndRef         The path and reference
@@ -43,6 +59,7 @@ public interface IResourceLinkResolver {
 	 * @param theTransactionDetails The current TransactionDetails object
 	 */
 	IResourceLookup findTargetResource(
+			@Nonnull IBaseResource theSourceResource,
 			@Nonnull RequestPartitionId theRequestPartitionId,
 			String theSourceResourceName,
 			PathAndRef thePathAndRef,

@@ -30,7 +30,6 @@ import ca.uhn.fhir.util.MetaUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.NotImplementedException;
-import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -148,10 +147,29 @@ public interface ITestDataBuilder {
 	}
 
 	/**
+	 * Set Observation.effectiveInstant
+	 */
+	default ICreationArgument withEffectiveInstant(@Nullable String theInstant) {
+		return withInstantAt("effectiveInstant", theInstant);
+	}
+
+	/**
+	 * Set Observation.effectivePeriod
+	 */
+	default ICreationArgument withEffectivePeriod(@Nullable String theStart, @Nullable String theEnd) {
+		return withPeriodAt("effectivePeriod", theStart, theEnd);
+	}
+
+
+	/**
 	 * Set Observation.effectiveDate
 	 */
 	default ICreationArgument withDateTimeAt(String thePath, String theDate) {
 		return t -> __setPrimitiveChild(getFhirContext(), t, thePath, "dateTime", theDate);
+	}
+
+	default ICreationArgument withInstantAt(String thePath, String theDate) {
+		return t -> __setPrimitiveChild(getFhirContext(), t, thePath, "instant", theDate);
 	}
 
 	/**
@@ -279,12 +297,24 @@ public interface ITestDataBuilder {
 		return buildResource("Provenance", theModifiers);
 	}
 
+	default IIdType createDevice(ICreationArgument... theModifiers) {
+		return createResource("Device", theModifiers);
+	}
+
 	default IIdType createList(ICreationArgument... theModifiers) {
 		return createResource("List", theModifiers);
 	}
 
+	default IIdType createLocation(ICreationArgument... theModifiers) {
+		return createResource("Location", theModifiers);
+	}
+
 	default IIdType createPatient(ICreationArgument... theModifiers) {
 		return createResource("Patient", theModifiers);
+	}
+
+	default IIdType createCodeSystem(ICreationArgument... theModifiers) {
+		return createResource("CodeSystem", theModifiers);
 	}
 
 	default IIdType createCoverage(ICreationArgument... theModifiers) {
@@ -295,6 +325,10 @@ public interface ITestDataBuilder {
 		return createResource("Organization", theModifiers);
 	}
 
+	default IBaseResource buildOrganization(ICreationArgument... theModifiers) {
+		return buildResource("Organization", theModifiers);
+	}
+
 	default IIdType createPractitioner(ICreationArgument... theModifiers) {
 		return createResource("Practitioner", theModifiers);
 	}
@@ -303,7 +337,7 @@ public interface ITestDataBuilder {
 		return buildResource("Practitioner", theModifiers);
 	}
 
-	default void deleteResource(IIdType theIIdType){
+	default void deleteResource(IIdType theIIdType) {
 		doDeleteResource(theIIdType);
 	}
 
@@ -408,7 +442,9 @@ public interface ITestDataBuilder {
 	default Consumer<IBase> withPrimitiveAttribute(String thePath, Object theValue) {
 		return t -> {
 			FhirTerser terser = getFhirContext().newTerser();
-			terser.addElement(t, thePath, "" + theValue);
+			if (theValue != null) {
+				terser.addElement(t, thePath, "" + theValue);
+			}
 		};
 	}
 
@@ -486,6 +522,13 @@ public interface ITestDataBuilder {
 		);
 	}
 
+	default <T extends IBase> ICreationArgument withPeriodAt(String thePath, @Nullable String theStart, @Nullable String theEnd) {
+		return withElementAt(thePath,
+			withPrimitiveAttribute("start", theStart),
+			withPrimitiveAttribute("end", theEnd)
+		);
+	}
+
 	default ICreationArgument withObservationComponent(ICreationArgument... theModifiers) {
 		return withElementAt("component", theModifiers);
 	}
@@ -497,40 +540,76 @@ public interface ITestDataBuilder {
 	/**
 	 * Sets the <code>managingOrganization</code> element on a Patient
 	 */
-	default ICreationArgument withOrganization(@Nullable String theHasMember) {
-		IIdType id = theHasMember != null ? getFhirContext().getVersion().newIdType(theHasMember) : null;
+	default ICreationArgument withOrganization(@Nullable String theOrganizationId) {
+		IIdType id = theOrganizationId != null ? getFhirContext().getVersion().newIdType(theOrganizationId) : null;
 		return withReference("managingOrganization", id);
 	}
 
-	default ICreationArgument withOrganization(@Nullable IIdType theHasMember) {
-		return withReference("managingOrganization", theHasMember);
+	default ICreationArgument withOrganization(@Nullable IIdType theOrganizationId) {
+		return withReference("managingOrganization", theOrganizationId);
 	}
 
 	/**
-	 * Users of this API must implement this method
+	 * Set the "url" property on a canonical resource such as a CodeSystem
 	 */
-	IIdType doCreateResource(IBaseResource theResource);
+	default ICreationArgument withUrl(String theUrl) {
+		return t -> __setPrimitiveChild(getFhirContext(), t, "url", "uri", theUrl);
+	}
 
 	/**
-	 * Users of this API must implement this method
+	 * Set the "version" property on a canonical resource such as a CodeSystem
 	 */
-	IIdType doUpdateResource(IBaseResource theResource);
+	default ICreationArgument withVersion(String theVersion) {
+		return t -> __setPrimitiveChild(getFhirContext(), t, "version", "uri", theVersion);
+	}
 
-	default void doDeleteResource(IIdType theIIdType){
+	/**
+	 * CodeSystem.content
+	 */
+	default ICreationArgument withCodeSystemContent(String theContent) {
+		return t -> __setPrimitiveChild(getFhirContext(), t, "content", "code", theContent);
+	}
+
+	/**
+	 * Optional method for cases where this is purely used for building resources.
+	 * Implement this method if you want to call it to store the new resource
+	 * @param theResource the resource to be created
+	 */
+	default IIdType doCreateResource(IBaseResource theResource) {
 		throw new NotImplementedException("Not implemented");
 	}
 
 	/**
-	 * Users of this API must implement this method
+	 * Optional method for cases where this is purely used for building resources.
+	 * Implement this method if you want to call it to store the updated resource
+	 * @param theResource the resource to be updated
 	 */
-	FhirContext getFhirContext();
+	default IIdType doUpdateResource(IBaseResource theResource) {
+		throw new NotImplementedException("Not implemented");
+	}
+
+	/**
+	 * Optional method for cases where this is purely used for building resources.
+	 * Implement this method if you want to call it to delete a resource
+	 * @param theIIdType the id of the resource to be deleted
+	 */
+	default void doDeleteResource(IIdType theIIdType) {
+		throw new NotImplementedException("Not implemented");
+	}
+
+	/**
+	 * Optional method for cases where this is purely used for building resources.
+	 */
+	default FhirContext getFhirContext() {
+		throw new NotImplementedException("Not implemented");
+	}
 
 	default ICreationArgument[] asArray(ICreationArgument theIBaseResourceConsumer) {
 		return new ICreationArgument[]{theIBaseResourceConsumer};
 	}
 
 	interface Support {
-		void setRequestId(String theRequestId);
+		default void setRequestId(String theRequestId) {}
 
 		FhirContext getFhirContext();
 
@@ -585,14 +664,12 @@ public interface ITestDataBuilder {
 
 		@Override
 		public IIdType doCreateResource(IBaseResource theResource) {
-			Validate.isTrue(false, "Create not supported");
-			return null;
+			throw new UnsupportedOperationException("Create not supported");
 		}
 
 		@Override
 		public IIdType doUpdateResource(IBaseResource theResource) {
-			Validate.isTrue(false, "Update not supported");
-			return null;
+			throw new UnsupportedOperationException("Update not supported");
 		}
 	}
 

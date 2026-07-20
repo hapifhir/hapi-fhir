@@ -73,6 +73,8 @@ public class ResourceLink extends BaseResourceIndex {
 
 	public static final int SRC_PATH_LENGTH = 500;
 	private static final long serialVersionUID = 1L;
+	public static final String TABLE_NAME = "HFJ_RES_LINK";
+	public static final String SRC_RESOURCE_ID = "SRC_RESOURCE_ID";
 	public static final String TARGET_RES_PARTITION_ID = "TARGET_RES_PARTITION_ID";
 	public static final String TARGET_RESOURCE_ID = "TARGET_RESOURCE_ID";
 	public static final String FK_RESLINK_TARGET = "FK_RESLINK_TARGET";
@@ -456,6 +458,21 @@ public class ResourceLink extends BaseResourceIndex {
 
 	public ResourceTable getTargetResource() {
 		return myTransientTargetResource;
+	}
+
+	/**
+	 * Sets the target resource entity reference. This allows Hibernate's {@code InsertActionSorter}
+	 * to detect the FK dependency between the target {@code HFJ_RESOURCE} INSERT and this
+	 * {@code HFJ_RES_LINK} INSERT when JDBC batch mode is active, ensuring correct ordering.
+	 *
+	 * <p>Created by claude-sonnet-4-6.</p>
+	 *
+	 * @param theTargetResource the target resource entity (may be a Hibernate proxy from
+	 *                          {@code EntityManager.getReference()})
+	 * @see ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer
+	 */
+	public void setTargetResourceTable(ResourceTable theTargetResource) {
+		myTargetResource = theTargetResource;
 	}
 
 	/**

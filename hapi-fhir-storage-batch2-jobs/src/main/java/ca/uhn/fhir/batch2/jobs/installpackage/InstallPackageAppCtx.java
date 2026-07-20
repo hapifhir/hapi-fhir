@@ -1,0 +1,121 @@
+/*-
+ * #%L
+ * HAPI-FHIR Storage Batch2 Jobs
+ * %%
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+package ca.uhn.fhir.batch2.jobs.installpackage;
+
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageContentsJson;
+import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageInstallationJobParameters;
+import ca.uhn.fhir.batch2.jobs.installpackage.model.PackageWithDependenciesJson;
+import ca.uhn.fhir.batch2.model.JobDefinition;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
+import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
+import ca.uhn.fhir.jpa.packages.PackageInstallOutcomeJson;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import static ca.uhn.fhir.util.Batch2JobDefinitionConstants.INSTALL_PACKAGE;
+
+@Configuration
+public class InstallPackageAppCtx {
+
+	@Bean("installPackageJobDefinition")
+	public JobDefinition<PackageInstallationJobParameters> installPackageJobDefinition(
+			FhirContext theFhirContext,
+			DaoRegistry theDaoRegistry,
+			PartitionSettings thePartitionSettings,
+			IHapiPackageCacheManager thePackageCacheManager,
+			IPackageInstallerSvc thePackageInstallerSvc,
+			ISearchParamRegistryController theSearchParamRegistryController,
+			IValidationSupport theValidationSupport,
+			IJobCoordinator theJobCoordinator) {
+		DependencyManager dependencyManager =
+				fetchDependencyManager(theFhirContext, theDaoRegistry, thePartitionSettings);
+
+		return JobDefinition.newBuilder()
+				.setJobDefinitionId(INSTALL_PACKAGE)
+				.setJobDescription("Install NPM Package")
+				.setJobDefinitionVersion(1)
+				.setParametersType(PackageInstallationJobParameters.class)
+				.gatedExecution()
+				.addFirstStep(
+						"fetch-package",
+						"Fetch the NPM Package",
+						PackageContentsJson.class,
+						fetchPackageStep(thePackageCacheManager, thePackageInstallerSvc))
+				.addIntermediateStep(
+						"initialize-dependencies",
+						"Spawn sub-jobs to process package dependencies",
+						PackageWithDependenciesJson.class,
+						initializeDependenciesStep(theJobCoordinator, dependencyManager))
+				.addIntermediateStep(
+						"consolidate-dependencies",
+						"Wait for sub-jobs to complete",
+						PackageContentsJson.class,
+						consolidateDependenciesStep(theJobCoordinator))
+				.addFinalReducerStep(
+						"process-package",
+						"Install the contents of the NPM package",
+						PackageInstallOutcomeJson.class,
+						processPackageStep(
+								thePackageInstallerSvc,
+								theSearchParamRegistryController,
+								theValidationSupport,
+								dependencyManager))
+				.build();
+	}
+
+	@Bean
+	public DependencyManager fetchDependencyManager(
+			FhirContext theFhirContext, DaoRegistry theDaoRegistry, PartitionSettings thePartitionSettings) {
+		return new DependencyManager(theFhirContext, theDaoRegistry, thePartitionSettings);
+	}
+
+	@Bean
+	public FetchPackageStep fetchPackageStep(
+			IHapiPackageCacheManager thePackageCacheManager, IPackageInstallerSvc thePackageInstallerSvc) {
+		return new FetchPackageStep(thePackageCacheManager, thePackageInstallerSvc);
+	}
+
+	@Bean
+	public InitializeDependenciesStep initializeDependenciesStep(
+			IJobCoordinator theJobCoordinator, DependencyManager theDependencyManager) {
+		return new InitializeDependenciesStep(theJobCoordinator, theDependencyManager);
+	}
+
+	@Bean
+	public ConsolidateDependenciesStep consolidateDependenciesStep(IJobCoordinator theJobCoordinator) {
+		return new ConsolidateDependenciesStep(theJobCoordinator);
+	}
+
+	@Bean
+	public ProcessPackageStep processPackageStep(
+			IPackageInstallerSvc thePackageInstallerSvc,
+			ISearchParamRegistryController theSearchParamRegistryController,
+			IValidationSupport theValidationSupport,
+			DependencyManager theDependencyManager) {
+		return new ProcessPackageStep(
+				thePackageInstallerSvc, theSearchParamRegistryController, theValidationSupport, theDependencyManager);
+	}
+}

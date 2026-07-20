@@ -28,14 +28,12 @@ import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionJson;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils;
-import ca.uhn.fhir.batch2.jobs.reindex.ReindexWarningProcessor;
 import ca.uhn.fhir.batch2.jobs.reindex.svcs.ReindexJobService;
 import ca.uhn.fhir.batch2.jobs.reindex.v2.ReindexResults;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.ReindexOutcome;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -88,16 +86,10 @@ public class ReindexV3ModifyResourcesStep extends BaseBulkModifyResourcesStep<Re
 	@Override
 	protected void processPidsInTransaction(
 			StepExecutionDetails<ReindexJobParameters, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
-			ReindexJobParameters theJobParameters,
 			State theState,
 			List<TypedPidAndVersionJson> thePids,
 			TransactionDetails theTransactionDetails,
 			IJobDataSink<BulkModifyResourcesChunkOutcomeJson> theDataSink) {
-
-		// TODO: this whole construction with a "warning processor" getting attached to the sink
-		// is weirdly complex - all it does is massage specific warning messages. This logic
-		// should just be moved into this class
-		theDataSink.setWarningProcessor(new ReindexWarningProcessor());
 
 		// Convert JSON TypedPids into Persistent IDs
 		List<? extends IResourcePersistentId<?>> persistentIds = thePids.stream()
@@ -109,8 +101,9 @@ public class ReindexV3ModifyResourcesStep extends BaseBulkModifyResourcesStep<Re
 		ReindexResults reindexResults = new ReindexResults();
 
 		// Prefetch Resources from DB
+		ReindexJobParameters jobParameters = theStepExecutionDetails.getParameters();
 		boolean reindexSearchParameters =
-				theJobParameters.getReindexSearchParameters() != ReindexParameters.ReindexSearchParametersEnum.NONE;
+				jobParameters.getReindexSearchParameters() != ReindexParameters.ReindexSearchParametersEnum.NONE;
 		mySystemDao.preFetchResources(persistentIds, reindexSearchParameters);
 		ourLog.info(
 				"Prefetched {} resources in {} - Instance[{}] Chunk[{}]",
@@ -120,10 +113,10 @@ public class ReindexV3ModifyResourcesStep extends BaseBulkModifyResourcesStep<Re
 				theStepExecutionDetails.getChunkId());
 
 		ReindexParameters parameters = new ReindexParameters()
-				.setReindexSearchParameters(theJobParameters.getReindexSearchParameters())
-				.setOptimizeStorage(theJobParameters.getOptimizeStorage())
-				.setOptimisticLock(theJobParameters.getOptimisticLock())
-				.setCorrectCurrentVersion(theJobParameters.getCorrectCurrentVersion());
+				.setReindexSearchParameters(jobParameters.getReindexSearchParameters())
+				.setOptimizeStorage(jobParameters.getOptimizeStorage())
+				.setOptimisticLock(jobParameters.getOptimisticLock())
+				.setCorrectCurrentVersion(jobParameters.getCorrectCurrentVersion());
 
 		// Reindex
 
@@ -145,7 +138,7 @@ public class ReindexV3ModifyResourcesStep extends BaseBulkModifyResourcesStep<Re
 				outcome.getWarnings().forEach(theDataSink::recoveredError);
 				reindexResults.addResourceTypeToCompletionStatus(nextResourceType, outcome.isHasPendingWork());
 
-			} catch (BaseServerResponseException | DataFormatException e) {
+			} catch (BaseServerResponseException e) {
 				String resourceForcedId = myIdHelperService
 						.translatePidIdToForcedIdWithCache(resourcePersistentId)
 						.orElse(resourcePersistentId.toString());

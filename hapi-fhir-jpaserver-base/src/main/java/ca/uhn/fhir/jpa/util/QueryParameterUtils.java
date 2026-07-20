@@ -24,14 +24,9 @@ import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchInclude;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
-import ca.uhn.fhir.jpa.search.builder.sql.ColumnTupleObject;
-import ca.uhn.fhir.jpa.search.builder.sql.JpaPidValueTuples;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
@@ -41,28 +36,20 @@ import com.healthmarketscience.sqlbuilder.InCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.From;
 import jakarta.persistence.criteria.Predicate;
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.apache.commons.collections4.bidimap.UnmodifiableBidiMap;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 
 public class QueryParameterUtils {
-	private static final Logger ourLog = LoggerFactory.getLogger(QueryParameterUtils.class);
 	public static final int DEFAULT_SYNC_SIZE = 250;
 
 	private static final BidiMap<SearchFilterParser.CompareOperation, ParamPrefixEnum> ourCompareOperationToParamPrefix;
@@ -87,8 +74,8 @@ public class QueryParameterUtils {
 	@Nullable
 	public static Condition toAndPredicate(List<Condition> theAndPredicates) {
 		List<Condition> andPredicates =
-				theAndPredicates.stream().filter(Objects::nonNull).collect(Collectors.toList());
-		if (andPredicates.size() == 0) {
+				theAndPredicates.stream().filter(Objects::nonNull).toList();
+		if (andPredicates.isEmpty()) {
 			return null;
 		} else if (andPredicates.size() == 1) {
 			return andPredicates.get(0);
@@ -100,8 +87,8 @@ public class QueryParameterUtils {
 	@Nullable
 	public static Condition toOrPredicate(List<Condition> theOrPredicates) {
 		List<Condition> orPredicates =
-				theOrPredicates.stream().filter(t -> t != null).collect(Collectors.toList());
-		if (orPredicates.size() == 0) {
+				theOrPredicates.stream().filter(Objects::nonNull).toList();
+		if (orPredicates.isEmpty()) {
 			return null;
 		} else if (orPredicates.size() == 1) {
 			return orPredicates.get(0);
@@ -118,12 +105,6 @@ public class QueryParameterUtils {
 	@Nullable
 	public static Condition toAndPredicate(Condition... theAndPredicates) {
 		return toAndPredicate(Arrays.asList(theAndPredicates));
-	}
-
-	@Nonnull
-	public static Condition toInPredicate(
-			ColumnTupleObject theColumns, JpaPidValueTuples theValues, boolean theInverse) {
-		return new InCondition(theColumns, theValues).setNegate(theInverse);
 	}
 
 	@Nonnull
@@ -157,7 +138,7 @@ public class QueryParameterUtils {
 		if (thePrefix != null && ourCompareOperationToParamPrefix.containsValue(thePrefix)) {
 			retVal = ourCompareOperationToParamPrefix.getKey(thePrefix);
 		}
-		return ObjectUtils.defaultIfNull(retVal, SearchFilterParser.CompareOperation.eq);
+		return getIfNull(retVal, SearchFilterParser.CompareOperation.eq);
 	}
 
 	public static ParamPrefixEnum fromOperation(SearchFilterParser.CompareOperation thePrefix) {
@@ -165,47 +146,29 @@ public class QueryParameterUtils {
 		if (thePrefix != null && ourCompareOperationToParamPrefix.containsKey(thePrefix)) {
 			retVal = ourCompareOperationToParamPrefix.get(thePrefix);
 		}
-		return ObjectUtils.defaultIfNull(retVal, ParamPrefixEnum.EQUAL);
+		return getIfNull(retVal, ParamPrefixEnum.EQUAL);
 	}
 
 	public static String getChainedPart(String parameter) {
 		return parameter.substring(parameter.indexOf(".") + 1);
 	}
 
-	public static String getParamNameWithPrefix(String theSpnamePrefix, String theParamName) {
+	public static String getParamNameWithPrefix(String theSPNamePrefix, String theParamName) {
+		if (StringUtils.isBlank(theSPNamePrefix)) {
+			return theParamName;
+		}
 
-		if (StringUtils.isBlank(theSpnamePrefix)) return theParamName;
-
-		return theSpnamePrefix + "." + theParamName;
+		return theSPNamePrefix + "." + theParamName;
 	}
 
 	public static Predicate[] toPredicateArray(List<Predicate> thePredicates) {
 		return thePredicates.toArray(new Predicate[0]);
 	}
 
-	private static List<Predicate> createLastUpdatedPredicates(
-			final DateRangeParam theLastUpdated, CriteriaBuilder builder, From<?, ResourceTable> from) {
-		List<Predicate> lastUpdatedPredicates = new ArrayList<>();
-		if (theLastUpdated != null) {
-			if (theLastUpdated.getLowerBoundAsInstant() != null) {
-				ourLog.debug("LastUpdated lower bound: {}", new InstantDt(theLastUpdated.getLowerBoundAsInstant()));
-				Predicate predicateLower =
-						builder.greaterThanOrEqualTo(from.get("myUpdated"), theLastUpdated.getLowerBoundAsInstant());
-				lastUpdatedPredicates.add(predicateLower);
-			}
-			if (theLastUpdated.getUpperBoundAsInstant() != null) {
-				Predicate predicateUpper =
-						builder.lessThanOrEqualTo(from.get("myUpdated"), theLastUpdated.getUpperBoundAsInstant());
-				lastUpdatedPredicates.add(predicateUpper);
-			}
-		}
-		return lastUpdatedPredicates;
-	}
-
 	public static void verifySearchHasntFailedOrThrowInternalErrorException(Search theSearch) {
 		if (theSearch.getStatus() == SearchStatusEnum.FAILED) {
 			Integer status = theSearch.getFailureCode();
-			status = defaultIfNull(status, 500);
+			status = getIfNull(status, 500);
 
 			String message = theSearch.getFailureMessage();
 			throw BaseServerResponseException.newInstance(status, message);

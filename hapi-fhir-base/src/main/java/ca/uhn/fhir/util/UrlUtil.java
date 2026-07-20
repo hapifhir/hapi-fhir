@@ -47,6 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
@@ -623,6 +624,64 @@ public class UrlUtil {
 		return candidates;
 	}
 
+	/**
+	 * Parses a versioned or unversioned canonical URL (e.g. <code>http://foo</code> or <code>http://foo|123</code>)
+	 * into its constituent parts.
+	 *
+	 * @param theUrl The URL to parse (may be null, in which case an empty {@link CanonicalUrlParts} is returned)
+	 * @since 8.12.0
+	 */
+	@Nonnull
+	public static CanonicalUrlParts parseCanonicalUrl(@Nullable String theUrl) {
+		return parseCanonicalUrl(theUrl, null);
+	}
+
+	/**
+	 * Parses a versioned or unversioned canonical URL (e.g. <code>http://foo</code> or <code>http://foo|123</code>)
+	 * into its constituent parts. An optional version ID can also be provided, for scenarios where the version can be
+	 * provided either in the URL or in a separate parameter. If both are provided, the version from the parameter
+	 * takes precedence.
+	 *
+	 * @param theUrl The URL to parse (may be null, in which case an empty {@link CanonicalUrlParts} is returned and any value in {@literal theVersion} is ignored)
+	 *
+	 * @since 8.12.0
+	 */
+	@Nonnull
+	public static CanonicalUrlParts parseCanonicalUrl(@Nullable String theUrl, @Nullable String theVersion) {
+		String inputUrl = defaultIfBlank(theUrl, null);
+		if (inputUrl == null) {
+			return new CanonicalUrlParts(null, Optional.empty());
+		}
+
+		int separatorStart = inputUrl.indexOf('|');
+		int separatorEnd;
+		if (separatorStart != -1) {
+			separatorEnd = separatorStart;
+		} else {
+			separatorStart = inputUrl.indexOf("%7C");
+			if (separatorStart != -1) {
+				separatorEnd = separatorStart + 2;
+			} else {
+				separatorEnd = -1;
+			}
+		}
+
+		if (separatorStart == -1) {
+			return new CanonicalUrlParts(inputUrl, Optional.ofNullable(theVersion));
+		} else {
+			String url = inputUrl.substring(0, separatorStart);
+			String versionId = inputUrl.substring(separatorEnd + 1);
+			if (isBlank(versionId)) {
+				return new CanonicalUrlParts(url, Optional.ofNullable(theVersion));
+			} else if (isNotBlank(theVersion) && !versionId.equals(theVersion)) {
+				throw new InvalidRequestException(Msg.code(2952) + "Version in URL[" + sanitizeUrlPart(inputUrl)
+						+ " does not match expected version: " + theVersion);
+			}
+
+			return new CanonicalUrlParts(url, Optional.of(versionId));
+		}
+	}
+
 	private static void throwInvalidRequestExceptionForNotValidUri(String theUri, Exception theCause) {
 		throw new InvalidRequestException(
 				Msg.code(2419) + String.format("Provided URI is not valid: %s", theUri), theCause);
@@ -664,6 +723,40 @@ public class UrlUtil {
 
 		public void setVersionId(String theVersionId) {
 			myVersionId = theVersionId;
+		}
+	}
+
+	public record CanonicalUrlParts(String url, Optional<String> versionId) {
+
+		/**
+		 * Constructor
+		 */
+		public CanonicalUrlParts(@Nonnull String theUrl, @Nullable String theVersion) {
+			this(theUrl, Optional.ofNullable(defaultIfBlank(theVersion, null)));
+		}
+
+		/**
+		 * If a version is present, returns the complete versioned canonical URL (e.g.
+		 * <code>http://loinc.org|2.69</code>). Otherwise, returns {@link #url()} (e.g.
+		 * <code>http://loinc.org</code>).
+		 *
+		 * @since 8.12.0
+		 */
+		@Nonnull
+		@Override
+		public String toString() {
+			if (versionId().isPresent()) {
+				return url() + "|" + versionId().get();
+			}
+			return url();
+		}
+
+		/**
+		 * Does the URL have a version?
+		 * @since 8.12.0
+		 */
+		public boolean hasVersion() {
+			return versionId().isPresent();
 		}
 	}
 }

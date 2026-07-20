@@ -64,7 +64,6 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.PreventDanglingInterceptorsExtension;
@@ -154,6 +153,7 @@ import static org.mockito.Mockito.mock;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR5Config.class, TestDaoSearch.Config.class})
 public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuilder {
+
 	@Autowired
 	protected IJobStepExecutionServices myJobStepExecutionServices;
 	@Autowired
@@ -233,8 +233,6 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	protected ITermCodeSystemDao myTermCodeSystemDao;
 	@Autowired
 	protected ITermConceptParentChildLinkDao myTermConceptParentChildLinkDao;
-	@Autowired
-	protected ITermLoaderSvc myTermLoaderSvc;
 	@Autowired
 	protected ITermCodeSystemVersionDao myTermCodeSystemVersionDao;
 	@Autowired
@@ -358,8 +356,6 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	protected IFulltextSearchSvc mySearchDao;
 	@Autowired(required = false)
 	protected ISearchDao mySearchEntityDao;
-	@Autowired
-	protected IResourceReindexJobDao myResourceReindexJobDao;
 	@Autowired
 	@Qualifier("mySearchParameterDaoR5")
 	protected IFhirResourceDao<SearchParameter> mySearchParameterDao;

@@ -30,6 +30,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.TransactionUtil;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.util.TransactionSemanticsHeader;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
@@ -63,6 +64,9 @@ public class ConsumeFilesStepV2
 
 	@Autowired
 	private IFhirSystemDao mySystemDao;
+
+	@Autowired
+	private PartitionSettings myPartitionSettings;
 
 	@Nonnull
 	@Override
@@ -113,7 +117,7 @@ public class ConsumeFilesStepV2
 			List<IBaseResource> resources, RequestPartitionId thePartitionId) {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setRequestPartitionId(
-				requireNonNullElseGet(thePartitionId, RequestPartitionId::defaultPartition));
+				requireNonNullElseGet(thePartitionId, myPartitionSettings::getDefaultRequestPartitionId));
 
 		TransactionSemanticsHeader transactionSemantics = TransactionSemanticsHeader.newBuilder()
 				.withTryBatchAsTransactionFirst(true)

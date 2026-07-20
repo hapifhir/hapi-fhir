@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.model.sched;
 
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
+import org.quartz.TriggerKey;
 
 import java.util.Set;
 
@@ -49,6 +50,21 @@ public interface IHapiScheduler {
 	void unpause();
 
 	void scheduleJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition);
+
+	/**
+	 * Unschedules job(s) by their trigger keys (usually group + id, but this is provided
+	 * by ScheduledJobDefinition).
+	 * @param theTriggerKeys - keys of jobs to unschedule
+	 */
+	void unscheduleJobs(TriggerKey... theTriggerKeys);
+
+	/**
+	 * Schedules a job on this scheduler to run on a schedule defined by the Quartz
+	 * cron expression.
+	 * @param theCronExpression The Quartz cron expression
+	 * @param theJobDefinition the JobDefinition to run
+	 */
+	void scheduleCronJob(String theCronExpression, ScheduledJobDefinition theJobDefinition);
 
 	Set<JobKey> getJobKeysForUnitTest() throws SchedulerException;
 

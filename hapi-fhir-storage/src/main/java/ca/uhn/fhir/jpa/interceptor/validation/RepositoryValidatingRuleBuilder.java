@@ -146,6 +146,51 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 		}
 
 		/**
+		 * Apply validation against the specified profile when no profile is explicitly declared in the incoming resource.
+		 * This method should cause validation against the specific profile to be applied to the resource type,
+		 * when no profile is explicitly declared in the incoming resource.
+		 *
+		 * @param theProfile The profile canonical URL to validate against
+		 */
+		public FinalizedTypedRule impliedProfileIfNotExplicit(String theProfile) {
+			Validate.notNull(theProfile, "theProfile must not be null");
+			Validate.notEmpty(theProfile, "theProfile must not be null or empty");
+			myRules.add(new RequireValidationRule(
+					myFhirContext,
+					myType,
+					myValidationSupport,
+					myValidatorResourceFetcher,
+					myValidationPolicyAdvisor,
+					myInterceptorBroadcaster,
+					theProfile,
+					RequireValidationRule.ImpliedProfileMode.IF_NOT_EXPLICIT));
+			return new FinalizedTypedRule(myType);
+		}
+
+		/**
+		 * Apply validation against the specified profile to the resource type, regardless of the profile
+		 * declaration of the incoming resource, including if it declares that it adheres to a separate profile.
+		 * This method should cause validation against the specific profile to be applied to the resource type
+		 * in all cases.
+		 *
+		 * @param theProfile The profile canonical URL to validate against
+		 */
+		public FinalizedTypedRule impliedProfileAlways(String theProfile) {
+			Validate.notNull(theProfile, "theProfile must not be null");
+			Validate.notEmpty(theProfile, "theProfile must not be null or empty");
+			myRules.add(new RequireValidationRule(
+					myFhirContext,
+					myType,
+					myValidationSupport,
+					myValidatorResourceFetcher,
+					myValidationPolicyAdvisor,
+					myInterceptorBroadcaster,
+					theProfile,
+					RequireValidationRule.ImpliedProfileMode.ALWAYS));
+			return new FinalizedTypedRule(myType);
+		}
+
+		/**
 		 * Require any resource being persisted to declare conformance to at least one of the given profiles, meaning that the specified
 		 * profile URL must be found within the resource in <code>Resource.meta.profile</code>.
 		 * <p>

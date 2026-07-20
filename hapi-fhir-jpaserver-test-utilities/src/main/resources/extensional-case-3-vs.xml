@@ -12,7 +12,7 @@
 		</telecom>
 	</contact>
 	<description value="an enumeration of codes defined by LOINC" />
-	<status value="draft" />
+	<status value="active" />
 	<experimental value="true" />
 	<compose>
 		<include>

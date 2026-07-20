@@ -14,7 +14,7 @@ import ca.uhn.fhir.tinder.model.ValueSetTm;
 import ca.uhn.fhir.tinder.parser.TargetType;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.text.WordUtils;
+import org.apache.commons.text.WordUtils;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,11 +42,11 @@ public class ValueSetGenerator {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValueSetGenerator.class);
 	private int myConceptCount;
-	private Set<ValueSetTm> myMarkedValueSets = new HashSet<ValueSetTm>();
+	private final Set<ValueSetTm> myMarkedValueSets = new HashSet<>();
 	private List<ValueSetFileDefinition> myResourceValueSetFiles;
 	private int myValueSetCount;
-	private Map<String, ValueSetTm> myValueSets = new HashMap<String, ValueSetTm>();
-	private String myVersion;
+	private final Map<String, ValueSetTm> myValueSets = new HashMap<>();
+	private final String myVersion;
 	private String myFilenamePrefix = "";
 	private String myFilenameSuffix = "";
 	private String myTemplate = null;
@@ -81,7 +82,7 @@ public class ValueSetGenerator {
 		return myValueSets;
 	}
 
-	public void parse() throws FileNotFoundException, IOException {
+	public void parse() throws IOException {
 		FhirContext ctx = FhirContext.forDstu2();
 		IParser newXmlParser = ctx.newXmlParser();
 		newXmlParser.setParserErrorHandler(new LenientErrorHandler(false));
@@ -121,15 +122,14 @@ public class ValueSetGenerator {
 		if (myResourceValueSetFiles != null) {
 			for (ValueSetFileDefinition next : myResourceValueSetFiles) {
 				File file = new File(next.getValueSetFile());
-				ourLog.info("Parsing ValueSet file: {}" + file.getName());
+				ourLog.info("Parsing ValueSet file: {}", file.getName());
 				vs = IOUtils.toString(new FileReader(file));
 				ValueSetTm tm;
 				if ("dstu".equals(myVersion)) {
-					ValueSet nextVs = (ValueSet) newXmlParser.parseResource(ValueSet.class, vs);
+					ValueSet nextVs = newXmlParser.parseResource(ValueSet.class, vs);
 					tm = parseValueSet(nextVs);
 				} else {
-					ca.uhn.fhir.model.dstu2.resource.ValueSet nextVs = (ca.uhn.fhir.model.dstu2.resource.ValueSet)
-							newXmlParser.parseResource(ca.uhn.fhir.model.dstu2.resource.ValueSet.class, vs);
+					ca.uhn.fhir.model.dstu2.resource.ValueSet nextVs = newXmlParser.parseResource(ValueSet.class, vs);
 					tm = parseValueSet(nextVs);
 				}
 				if (tm != null) {
@@ -302,12 +302,12 @@ public class ValueSetGenerator {
 		}
 		String fileName = prefix + valueSetName + suffix;
 		File f = new File(theOutputDirectory, fileName);
-		OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(f, false), "UTF-8");
+		OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(f, false), StandardCharsets.UTF_8);
 
 		ourLog.debug("Writing file: {}", f.getAbsolutePath());
 
 		VelocityContext ctx = new VelocityContext();
-		InputStream templateIs = null;
+		InputStream templateIs;
 		ctx.put("valueSet", theValueSetTm);
 		ctx.put("packageBase", thePackageBase);
 		ctx.put("esc", new TinderResourceGeneratorMojo.EscapeTool());
@@ -323,7 +323,7 @@ public class ValueSetGenerator {
 			templateIs = this.getClass().getResourceAsStream(templateName);
 		}
 
-		InputStreamReader templateReader = new InputStreamReader(templateIs, "UTF-8");
+		InputStreamReader templateReader = new InputStreamReader(templateIs, StandardCharsets.UTF_8);
 		v.evaluate(ctx, w, "", templateReader);
 
 		w.close();
@@ -342,7 +342,7 @@ public class ValueSetGenerator {
 		}
 	}
 
-	public static void main(String[] args) throws FileNotFoundException, IOException {
+	public static void main(String[] args) throws IOException {
 
 		ValueSetGenerator p = new ValueSetGenerator("dstu1");
 		p.parse();

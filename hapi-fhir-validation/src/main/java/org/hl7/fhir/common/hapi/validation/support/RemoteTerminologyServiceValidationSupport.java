@@ -22,18 +22,25 @@ import ca.uhn.fhir.util.ParametersUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.dstu3.model.OperationOutcome.OperationOutcomeIssueComponent;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
@@ -60,7 +67,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * <a href="http://hl7.org/fhir/valueset-operation-validate-code.html">ValueSet/$validate-code</a>
  * operation in order to validate codes.
  */
-public class RemoteTerminologyServiceValidationSupport extends BaseValidationSupport implements IValidationSupport {
+public class RemoteTerminologyServiceValidationSupport extends BaseTerminologyServerValidationSupport {
 	private static final Logger ourLog = Logs.getTerminologyTroubleshootingLog();
 
 	public static final String ERROR_CODE_UNKNOWN_CODE_IN_CODE_SYSTEM = "unknownCodeInSystem";
@@ -68,6 +75,13 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 
 	private String myBaseUrl;
 	private final List<Object> myClientInterceptors = new ArrayList<>();
+
+	/**
+	 * Override for sending {@code inferSystem} on remote {@code $validate-code}:
+	 * {@code null} (default) sends it only for R5+, {@code TRUE} always sends it, {@code FALSE} never does.
+	 */
+	@Nullable
+	private Boolean myInferSystemEnabled = null;
 
 	@Nullable
 	private final IRestfulClientFactory myRestfulClientFactory;
@@ -478,6 +492,22 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 
 		String fhirType = theValue.fhirType();
 		switch (fhirType) {
+			case IValidationSupport.TYPE_CODE:
+				CodeType codeType = (CodeType) theValue;
+				conceptProperty = new CodeConceptProperty(theName, codeType.getValue());
+				break;
+			case IValidationSupport.TYPE_INTEGER:
+				IntegerType integerType = (IntegerType) theValue;
+				conceptProperty = new IntegerConceptProperty(theName, integerType.getValue());
+				break;
+			case IValidationSupport.TYPE_DECIMAL:
+				DecimalType decimalType = (DecimalType) theValue;
+				conceptProperty = new DecimalConceptProperty(theName, decimalType.getValue());
+				break;
+			case IValidationSupport.TYPE_DATETIME:
+				DateTimeType dateTimeType = (DateTimeType) theValue;
+				conceptProperty = new DateTimeConceptProperty(theName, dateTimeType.getValueAsString());
+				break;
 			case IValidationSupport.TYPE_STRING:
 				StringType stringType = (StringType) theValue;
 				conceptProperty = new StringConceptProperty(theName, stringType.getValue());
@@ -656,7 +686,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 					.named("validate-code")
 					.withParameters(input)
 					.execute();
-			return createCodeValidationResult(output, errorMessageBuilder, theCode);
+			return createCodeValidationResult(output, errorMessageBuilder, theCode, theDisplay);
 		} catch (ResourceNotFoundException | InvalidRequestException ex) {
 			ourLog.error(ex.getMessage(), ex);
 			String errorMessage = errorMessageBuilder.buildErrorMessage(ex.getMessage());
@@ -678,11 +708,14 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	}
 
 	private CodeValidationResult createCodeValidationResult(
-			IBaseParameters theOutput, ValidationErrorMessageBuilder theMessageBuilder, String theCode) {
+			IBaseParameters theOutput,
+			ValidationErrorMessageBuilder theMessageBuilder,
+			String theCode,
+			String theRequestedDisplay) {
 		final FhirContext fhirContext = getFhirContext();
 		Optional<String> resultValue = getNamedParameterValueAsString(fhirContext, theOutput, "result");
 
-		if (!resultValue.isPresent()) {
+		if (resultValue.isEmpty()) {
 			throw new IllegalArgumentException(
 					Msg.code(2560) + "Parameter `result` is missing from the $validate-code response.");
 		}
@@ -710,27 +743,74 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 			return result;
 		}
 
-		// for now assume severity ERROR, we may need to process the following for success cases as well
-		result.setSeverity(IssueSeverity.ERROR);
-
 		Optional<String> messageValue = getNamedParameterValueAsString(fhirContext, theOutput, "message");
 		messageValue.ifPresent(value -> result.setMessage(theMessageBuilder.buildErrorMessage(value)));
 
+		// Detect display mismatch: server returned result=false but echoed a canonical display that
+		// differs from the requested one. The code itself is known; only the requested display is wrong.
+		boolean isDisplayMismatch = isNotBlank(theRequestedDisplay)
+				&& displayValue.isPresent()
+				&& isNotBlank(displayValue.get())
+				&& !theRequestedDisplay.equals(displayValue.get());
+
+		IssueSeverity displaySeverity = getIssueSeverityForCodeDisplayMismatch();
+		List<CodeValidationIssue> issues = new ArrayList<>();
 		Optional<IBaseResource> issuesValue = getNamedParameterResource(fhirContext, theOutput, "issues");
 		if (issuesValue.isPresent()) {
 			// it seems to be safe to cast to IBaseOperationOutcome as any other type would not reach this point
 			createCodeValidationIssues(
 							(IBaseOperationOutcome) issuesValue.get(),
-							fhirContext.getVersion().getVersion())
-					.ifPresent(i -> i.forEach(result::addIssue));
+							fhirContext.getVersion().getVersion(),
+							isDisplayMismatch,
+							displaySeverity)
+					.ifPresent(issues::addAll);
 		} else {
-			// create a validation issue out of the message
-			// this is a workaround to overcome an issue in the FHIR Validator library
-			// where ValueSet bindings are only reading issues but not messages
+			// Synthesized-from-message workaround for FHIR Validator library limitation
 			// @see https://github.com/hapifhir/org.hl7.fhir.core/issues/1766
-			result.addIssue(createCodeValidationIssue(result.getMessage()));
+			// When the displays differ AND the message text mentions "display" (case-insensitive),
+			// the synthesized issue gets the configured display-mismatch severity. Otherwise ERROR.
+			boolean messageQualifies = isDisplayMismatch && containsDisplayWord(messageValue.orElse(null));
+			IssueSeverity synthesizedSeverity = messageQualifies ? displaySeverity : IssueSeverity.ERROR;
+			issues.add(createCodeValidationIssue(result.getMessage(), synthesizedSeverity));
 		}
+
+		issues.forEach(result::addIssue);
+		result.setSeverity(aggregateMaxSeverity(issues));
 		return result;
+	}
+
+	/**
+	 * Returns the highest-severity entry across the given issues using the precedence
+	 * {@code FATAL > ERROR > WARNING > INFORMATION}. Falls back to {@link IssueSeverity#ERROR} on
+	 * an empty list to preserve the previous default behaviour for {@code result=false} responses.
+	 */
+	private static IssueSeverity aggregateMaxSeverity(Collection<CodeValidationIssue> theIssues) {
+		IssueSeverity max = null;
+		for (CodeValidationIssue issue : theIssues) {
+			IssueSeverity severity = issue.getSeverity();
+			if (severity == null) {
+				continue;
+			}
+			if (max == null || severityRank(severity) > severityRank(max)) {
+				max = severity;
+			}
+		}
+		return max != null ? max : IssueSeverity.ERROR;
+	}
+
+	private static int severityRank(IssueSeverity theSeverity) {
+		switch (theSeverity) {
+			case FATAL:
+				return 4;
+			case ERROR:
+				return 3;
+			case WARNING:
+				return 2;
+			case INFORMATION:
+				return 1;
+			default:
+				return 0;
+		}
 	}
 
 	/**
@@ -747,57 +827,190 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	 */
 	public static Optional<Collection<CodeValidationIssue>> createCodeValidationIssues(
 			IBaseOperationOutcome theOperationOutcome, FhirVersionEnum theFhirVersion) {
+		// Backward-compat overload — delegates to the display-mismatch-aware method with no-op flags.
+		return createCodeValidationIssues(theOperationOutcome, theFhirVersion, false, IssueSeverity.ERROR);
+	}
+
+	private static Collection<CodeValidationIssue> createCodeValidationIssuesDstu3(
+			org.hl7.fhir.dstu3.model.OperationOutcome theOperationOutcome,
+			boolean theIsDisplayMismatch,
+			IssueSeverity theDisplaySeverity) {
+		List<IssueData> data = theOperationOutcome.getIssue().stream()
+				.map(RemoteTerminologyServiceValidationSupport::extractIssueDataDstu3)
+				.collect(Collectors.toList());
+		return buildCodeValidationIssues(data, theIsDisplayMismatch, theDisplaySeverity);
+	}
+
+	private static CodeValidationIssue createCodeValidationIssue(String theMessage, IssueSeverity theSeverity) {
+		return new CodeValidationIssue(
+				theMessage, theSeverity, CodeValidationIssueCode.INVALID, CodeValidationIssueCoding.INVALID_CODE);
+	}
+
+	/**
+	 * Display-mismatch-aware variant of {@link #createCodeValidationIssues(IBaseOperationOutcome, FhirVersionEnum)}.
+	 * When {@code theIsDisplayMismatch} is true (response-level gate fired), an issue qualifies for severity
+	 * override if the issue itself, or its {@code diagnostics} primitive element, carries an extension whose URL is
+	 * either
+	 * <ul>
+	 *   <li>exactly {@link #DISPLAY_MISMATCH_EXTENSION_URL}; or</li>
+	 *   <li>{@link #MESSAGE_ID_EXTENSION_URL} with a primitive value containing the substring "display"
+	 *       (case-insensitive).</li>
+	 * </ul>
+	 * Qualifying issues get their severity replaced with {@code theDisplaySeverity}. Issues without any
+	 * qualifying signal keep their server-reported severity. Supported for R4 and DSTU3.
+	 */
+	public static Optional<Collection<CodeValidationIssue>> createCodeValidationIssues(
+			IBaseOperationOutcome theOperationOutcome,
+			FhirVersionEnum theFhirVersion,
+			boolean theIsDisplayMismatch,
+			IssueSeverity theDisplaySeverity) {
 		if (theFhirVersion == FhirVersionEnum.R4) {
-			return Optional.of(createCodeValidationIssuesR4((OperationOutcome) theOperationOutcome));
+			return Optional.of(createCodeValidationIssuesR4(
+					(OperationOutcome) theOperationOutcome, theIsDisplayMismatch, theDisplaySeverity));
 		}
 		if (theFhirVersion == FhirVersionEnum.DSTU3) {
-			return Optional.of(
-					createCodeValidationIssuesDstu3((org.hl7.fhir.dstu3.model.OperationOutcome) theOperationOutcome));
+			return Optional.of(createCodeValidationIssuesDstu3(
+					(org.hl7.fhir.dstu3.model.OperationOutcome) theOperationOutcome,
+					theIsDisplayMismatch,
+					theDisplaySeverity));
 		}
 		return Optional.empty();
 	}
 
-	private static Collection<CodeValidationIssue> createCodeValidationIssuesR4(OperationOutcome theOperationOutcome) {
-		return theOperationOutcome.getIssue().stream()
-				.map(issueComponent -> {
-					String diagnostics = issueComponent.getDiagnostics();
-					IssueSeverity issueSeverity =
-							IssueSeverity.fromCode(issueComponent.getSeverity().toCode());
-					String issueTypeCode = issueComponent.getCode().toCode();
-					CodeableConcept details = issueComponent.getDetails();
-					CodeValidationIssue issue = new CodeValidationIssue(diagnostics, issueSeverity, issueTypeCode);
-					CodeValidationIssueDetails issueDetails = new CodeValidationIssueDetails(details.getText());
-					details.getCoding().forEach(coding -> issueDetails.addCoding(coding.getSystem(), coding.getCode()));
-					issue.setDetails(issueDetails);
-					return issue;
-				})
+	private static Collection<CodeValidationIssue> createCodeValidationIssuesR4(
+			OperationOutcome theOperationOutcome, boolean theIsDisplayMismatch, IssueSeverity theDisplaySeverity) {
+		List<IssueData> data = theOperationOutcome.getIssue().stream()
+				.map(RemoteTerminologyServiceValidationSupport::extractIssueDataR4)
 				.collect(Collectors.toList());
+		return buildCodeValidationIssues(data, theIsDisplayMismatch, theDisplaySeverity);
 	}
 
-	private static Collection<CodeValidationIssue> createCodeValidationIssuesDstu3(
-			org.hl7.fhir.dstu3.model.OperationOutcome theOperationOutcome) {
-		return theOperationOutcome.getIssue().stream()
-				.map(issueComponent -> {
-					String diagnostics = issueComponent.getDiagnostics();
-					IssueSeverity issueSeverity =
-							IssueSeverity.fromCode(issueComponent.getSeverity().toCode());
-					String issueTypeCode = issueComponent.getCode().toCode();
-					org.hl7.fhir.dstu3.model.CodeableConcept details = issueComponent.getDetails();
-					CodeValidationIssue issue = new CodeValidationIssue(diagnostics, issueSeverity, issueTypeCode);
-					CodeValidationIssueDetails issueDetails = new CodeValidationIssueDetails(details.getText());
-					details.getCoding().forEach(coding -> issueDetails.addCoding(coding.getSystem(), coding.getCode()));
-					issue.setDetails(issueDetails);
-					return issue;
-				})
+	private static IssueData extractIssueDataR4(OperationOutcome.OperationOutcomeIssueComponent theIssue) {
+		CodeableConcept details = theIssue.getDetails();
+		List<CodingPair> codings = details.getCoding().stream()
+				.map(c -> new CodingPair(c.getSystem(), c.getCode()))
 				.collect(Collectors.toList());
+		List<? extends IBaseExtension<?, ?>> diagnosticsExtensions = theIssue.hasDiagnosticsElement()
+				? theIssue.getDiagnosticsElement().getExtension()
+				: null;
+		// FHIR requires severity and code, but servers can misbehave
+		String severityCode =
+				theIssue.getSeverity() != null ? theIssue.getSeverity().toCode() : null;
+		IssueSeverity severity = severityCode != null ? IssueSeverity.fromCode(severityCode) : IssueSeverity.ERROR;
+		String issueTypeCode = theIssue.getCode() != null ? theIssue.getCode().toCode() : null;
+		return new IssueData(
+				theIssue.getDiagnostics(),
+				severity,
+				issueTypeCode,
+				details.getText(),
+				codings,
+				isDisplayMismatchIssue(theIssue.getExtension(), diagnosticsExtensions));
 	}
 
-	private static CodeValidationIssue createCodeValidationIssue(String theMessage) {
-		return new CodeValidationIssue(
-				theMessage,
-				IssueSeverity.ERROR,
-				CodeValidationIssueCode.INVALID,
-				CodeValidationIssueCoding.INVALID_CODE);
+	private static IssueData extractIssueDataDstu3(OperationOutcomeIssueComponent theIssue) {
+		var details = theIssue.getDetails();
+		List<CodingPair> codings = details.getCoding().stream()
+				.map(c -> new CodingPair(c.getSystem(), c.getCode()))
+				.collect(Collectors.toList());
+		List<? extends IBaseExtension<?, ?>> diagnosticsExtensions = theIssue.hasDiagnosticsElement()
+				? theIssue.getDiagnosticsElement().getExtension()
+				: null;
+		// FHIR requires severity and code, but servers can misbehave
+		String severityCode =
+				theIssue.getSeverity() != null ? theIssue.getSeverity().toCode() : null;
+		IssueSeverity severity = severityCode != null ? IssueSeverity.fromCode(severityCode) : IssueSeverity.ERROR;
+		String issueTypeCode = theIssue.getCode() != null ? theIssue.getCode().toCode() : null;
+		return new IssueData(
+				theIssue.getDiagnostics(),
+				severity,
+				issueTypeCode,
+				details.getText(),
+				codings,
+				isDisplayMismatchIssue(theIssue.getExtension(), diagnosticsExtensions));
+	}
+
+	private static Collection<CodeValidationIssue> buildCodeValidationIssues(
+			List<IssueData> theIssues, boolean theIsDisplayMismatch, IssueSeverity theDisplaySeverity) {
+		List<CodeValidationIssue> out = new ArrayList<>(theIssues.size());
+		for (IssueData data : theIssues) {
+			boolean isDisplayIssue = theIsDisplayMismatch && data.isDisplaySignal();
+			IssueSeverity severity = isDisplayIssue ? theDisplaySeverity : data.serverSeverity();
+			CodeValidationIssue issue = new CodeValidationIssue(data.diagnostics(), severity, data.issueTypeCode());
+			CodeValidationIssueDetails issueDetails = new CodeValidationIssueDetails(data.detailsText());
+			data.codings().forEach(c -> issueDetails.addCoding(c.system(), c.code()));
+			issue.setDetails(issueDetails);
+			out.add(issue);
+		}
+		return out;
+	}
+
+	private record IssueData(
+			String diagnostics,
+			IssueSeverity serverSeverity,
+			String issueTypeCode,
+			String detailsText,
+			List<CodingPair> codings,
+			boolean isDisplaySignal) {}
+
+	private record CodingPair(String system, String code) {}
+
+	/**
+	 * Extension URL that indicates an OperationOutcome issue represents a display mismatch.
+	 */
+	public static final String DISPLAY_MISMATCH_EXTENSION_URL =
+			"http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-displayMismatched";
+
+	/**
+	 * Standard FHIR extension URL that carries the i18n message identifier for an OperationOutcome
+	 * issue. When the message-id value contains the substring "display" (case-insensitive — e.g. an
+	 * i18n key like {@code Display_Name_for__should_be_one_of__instead_of}) it is treated as a
+	 * display-mismatch signal (provided the response-level gate has fired).
+	 */
+	public static final String MESSAGE_ID_EXTENSION_URL =
+			"http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id";
+
+	/**
+	 * Per-issue detector for display-mismatch signals. Returns true if either of the supplied
+	 * extension lists carries an extension whose URL is {@link #DISPLAY_MISMATCH_EXTENSION_URL},
+	 * or {@link #MESSAGE_ID_EXTENSION_URL} with a primitive value containing "display"
+	 * (case-insensitive).
+	 * <p>
+	 * Pass the issue's own extensions and the {@code diagnostics} primitive element's extensions —
+	 * both are valid carriers per the FHIR spec. Callers must additionally check the response-level
+	 * gate before treating a positive result as a display mismatch.
+	 */
+	private static boolean isDisplayMismatchIssue(
+			List<? extends IBaseExtension<?, ?>> theIssueExtensions,
+			List<? extends IBaseExtension<?, ?>> theDiagnosticsExtensions) {
+		return hasDisplayMismatchSignal(theIssueExtensions) || hasDisplayMismatchSignal(theDiagnosticsExtensions);
+	}
+
+	private static boolean containsDisplayWord(String theText) {
+		return theText != null && Strings.CI.contains(theText, "display");
+	}
+
+	/**
+	 * Returns true if any of the supplied extensions matches the per-issue display-mismatch contract:
+	 * URL equals {@link #DISPLAY_MISMATCH_EXTENSION_URL}, or URL equals {@link #MESSAGE_ID_EXTENSION_URL}
+	 * with a primitive value whose string form contains "display" (case-insensitive).
+	 */
+	private static boolean hasDisplayMismatchSignal(List<? extends IBaseExtension<?, ?>> theExtensions) {
+		if (theExtensions == null || theExtensions.isEmpty()) {
+			return false;
+		}
+		for (IBaseExtension<?, ?> ext : theExtensions) {
+			if (DISPLAY_MISMATCH_EXTENSION_URL.equals(ext.getUrl())) {
+				return true;
+			}
+			if (MESSAGE_ID_EXTENSION_URL.equals(ext.getUrl())) {
+				Object value = ext.getValue();
+				if (value instanceof IPrimitiveType
+						&& containsDisplayWord(((IPrimitiveType<?>) value).getValueAsString())) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	public interface ValidationErrorMessageBuilder {
@@ -824,7 +1037,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		ParametersUtil.addParameterToParametersString(fhirContext, params, "code", theCode);
 		if (isNotBlank(theCodeSystem)) {
 			ParametersUtil.addParameterToParametersUri(fhirContext, params, "system", theCodeSystem);
-		} else {
+		} else if (shouldInferSystem(fhirContext)) {
 			// system could not be determined locally — ask the remote server to infer it
 			ParametersUtil.addParameterToParametersBoolean(fhirContext, params, "inferSystem", true);
 		}
@@ -835,6 +1048,27 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 			ParametersUtil.addParameterToParameters(fhirContext, params, "valueSet", theValueSet);
 		}
 		return params;
+	}
+
+	/**
+	 * {@code inferSystem} is an R5+ {@code $validate-code} parameter that strict R4/DSTU3 servers
+	 * (e.g. VSAC, CMS) reject, so by default it is only sent for R5+; see {@link #setInferSystemEnabled(Boolean)}.
+	 */
+	private boolean shouldInferSystem(FhirContext theFhirContext) {
+		if (myInferSystemEnabled != null) {
+			return myInferSystemEnabled;
+		}
+		return theFhirContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.R4);
+	}
+
+	@Nullable
+	public Boolean getInferSystemEnabled() {
+		return myInferSystemEnabled;
+	}
+
+	public RemoteTerminologyServiceValidationSupport setInferSystemEnabled(@Nullable Boolean theInferSystemEnabled) {
+		myInferSystemEnabled = theInferSystemEnabled;
+		return this;
 	}
 
 	/**

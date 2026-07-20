@@ -35,6 +35,7 @@ import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Optional;
 
 public class JobInstanceProgressCalculator {
@@ -59,11 +60,10 @@ public class JobInstanceProgressCalculator {
 		StopWatch stopWatch = new StopWatch();
 		ourLog.trace("calculating progress: {}", theInstanceId);
 
-		// calculate progress based on number of work chunks in COMPLETE state
 		InstanceProgress instanceProgress = calculateInstanceProgress(theInstanceId);
 
 		myJobPersistence.updateInstance(theInstanceId, currentInstance -> {
-			instanceProgress.updateInstance(currentInstance);
+			instanceProgress.updateInstance(myJobDefinitionRegistry, currentInstance);
 
 			if (currentInstance.getCombinedRecordsProcessed() > 0) {
 				ourLog.info(
@@ -84,6 +84,9 @@ public class JobInstanceProgressCalculator {
 			}
 			ourLog.debug(instanceProgress.toString());
 
+			// Log per-step throughput for operational visibility
+			logStepProgress(currentInstance, instanceProgress);
+
 			if (instanceProgress.hasNewStatus()) {
 				myJobInstanceStatusUpdater.updateInstanceStatus(currentInstance, instanceProgress.getNewStatus());
 			}
@@ -93,8 +96,31 @@ public class JobInstanceProgressCalculator {
 		ourLog.trace("calculating progress: {} - complete in {}", theInstanceId, stopWatch);
 	}
 
+	private void logStepProgress(JobInstance theInstance, InstanceProgress theProgress) {
+		Map<String, StepProgressData> stepProgressMap = theProgress.getStepProgressMap();
+		if (stepProgressMap.isEmpty()) {
+			return;
+		}
+		for (Map.Entry<String, StepProgressData> entry : stepProgressMap.entrySet()) {
+			StepProgressData stepData = entry.getValue();
+			if (stepData.getRecordsProcessed() > 0) {
+				ourLog.debug(
+						"Job {} step [{}]: {}/{} chunks complete, {} records ({}/sec)",
+						theInstance.getInstanceId(),
+						entry.getKey(),
+						stepData.getCompleteChunkCount(),
+						stepData.getChunkCount(),
+						stepData.getRecordsProcessed(),
+						String.format("%.1f", stepData.getThroughputPerSecond()));
+			}
+		}
+	}
+
 	@Nonnull
 	public InstanceProgress calculateInstanceProgress(String instanceId) {
+		JobInstance jobInstance = getJobInstance(instanceId);
+		JobDefinition<IModelJson> jobDefinition = myJobDefinitionRegistry.getJobDefinitionOrThrowException(jobInstance);
+
 		InstanceProgress instanceProgress = new InstanceProgress();
 		Iterator<WorkChunk> workChunkIterator = myJobPersistence.fetchAllWorkChunksIterator(instanceId, false);
 
@@ -103,20 +129,14 @@ public class JobInstanceProgressCalculator {
 
 			// global stats
 			myProgressAccumulator.addChunk(next);
-			// instance stats
+			// instance stats (includes per-step tracking)
 			instanceProgress.addChunk(next);
 		}
 
 		// wipmb separate status update from stats collection in 6.8
-		instanceProgress.calculateNewStatus(lastStepIsReduction(instanceId));
+		instanceProgress.calculateNewStatus(jobDefinition.isLastStepReduction());
 
 		return instanceProgress;
-	}
-
-	private boolean lastStepIsReduction(String theInstanceId) {
-		JobInstance jobInstance = getJobInstance(theInstanceId);
-		JobDefinition<IModelJson> jobDefinition = myJobDefinitionRegistry.getJobDefinitionOrThrowException(jobInstance);
-		return jobDefinition.isLastStepReduction();
 	}
 
 	private JobInstance getJobInstance(String theInstanceId) {

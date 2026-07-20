@@ -7,10 +7,10 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.api.pid.StreamTemplate;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.JpaResourceDao;
 import ca.uhn.fhir.jpa.dao.r4.suites.IPatchTests;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -44,6 +44,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.HasParam;
@@ -61,14 +62,18 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ClasspathUtil;
+import ca.uhn.fhir.util.OperationOutcomeUtil;
+import ca.uhn.fhir.util.ParametersUtil;
 import com.google.common.collect.Lists;
-import org.apache.commons.io.IOUtils;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Age;
@@ -123,7 +128,6 @@ import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Timing;
 import org.hl7.fhir.r4.model.UriType;
 import org.intellij.lang.annotations.Language;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
@@ -137,7 +141,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -169,24 +172,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
-@SuppressWarnings({"unchecked", "deprecation", "Duplicates"})
+@SuppressWarnings({"unchecked", "deprecation", "Duplicates", "LoggingSimilarMessage"})
 public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4Test.class);
-
-	@AfterEach
-	public void after() {
-		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
-		myStorageSettings.setTreatReferencesAsLogical(new JpaStorageSettings().getTreatReferencesAsLogical());
-		myStorageSettings.setEnforceReferentialIntegrityOnDelete(new JpaStorageSettings().isEnforceReferentialIntegrityOnDelete());
-		myStorageSettings.setEnforceReferenceTargetTypes(new JpaStorageSettings().isEnforceReferenceTargetTypes());
-		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
-		myStorageSettings.setInternalSynchronousSearchSize(new JpaStorageSettings().getInternalSynchronousSearchSize());
-		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
-		myStorageSettings.setHistoryCountMode(JpaStorageSettings.DEFAULT_HISTORY_COUNT_MODE);
-		myStorageSettings.setMassIngestionMode(false);
-		myStorageSettings.setWriteToSearchParamIdentityTable(false);
-	}
 
 	@BeforeEach
 	public void beforeEach() {
@@ -226,41 +215,33 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 	private void sort(ArrayList<Coding> thePublished) {
 		ArrayList<Coding> tags = new ArrayList<>(thePublished);
-		Collections.sort(tags, new Comparator<Coding>() {
-			@Override
-			public int compare(Coding theO1, Coding theO2) {
-				int retVal = defaultString(theO1.getSystem()).compareTo(defaultString(theO2.getSystem()));
-				if (retVal == 0) {
-					retVal = defaultString(theO1.getCode()).compareTo(defaultString(theO2.getCode()));
-				}
-				return retVal;
-			}
-		});
+		tags.sort(Comparator.comparing((Coding o) -> defaultString(o.getSystem())).thenComparing(o -> defaultString(o.getCode())));
 		thePublished.clear();
-		for (Coding next : tags) {
-			thePublished.add(next);
-		}
+		thePublished.addAll(tags);
 	}
 
 	private void sortCodings(List<Coding> theSecLabels) {
-		Collections.sort(theSecLabels, new Comparator<Coding>() {
-			@Override
-			public int compare(Coding theO1, Coding theO2) {
-				return theO1.getSystemElement().getValue().compareTo(theO2.getSystemElement().getValue());
-			}
-		});
+		theSecLabels.sort(Comparator.comparing(o -> o.getSystemElement().getValue()));
 	}
 
 	private List<CanonicalType> sortIds(List<CanonicalType> theProfiles) {
 		ArrayList<CanonicalType> retVal = new ArrayList<>(theProfiles);
-		Collections.sort(retVal, new Comparator<UriType>() {
-			@Override
-			public int compare(UriType theO1, UriType theO2) {
-				return theO1.getValue().compareTo(theO2.getValue());
-			}
-		});
+		retVal.sort(Comparator.comparing((UriType o) -> o.getValue()));
 		return retVal;
 	}
+
+	@Test
+	public void testSearchForIds_NullFhirId() {
+		IIdType id = createPatient(withActiveTrue());
+
+		runInTransaction(() ->{
+			myEntityManager.createNativeQuery("UPDATE HFJ_RESOURCE SET FHIR_ID = null").executeUpdate();
+		});
+
+		List<IIdType> ids = myPatientDao.searchForResourceIds(new SearchParameterMap(), newSrd());
+		assertEquals(id.getIdPart(), ids.get(0).getIdPart());
+	}
+
 
 	@Test
 	public void testUpdateResourceTwiceInSameTransaction() {
@@ -285,7 +266,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 		runInTransaction(()->{
 			assertEquals(1, myResourceTableDao.count());
-			assertThat(myResourceHistoryTableDao.findAll().stream().map(t->t.getVersion()).sorted().toList())
+			assertThat(myResourceHistoryTableDao.findAll().stream().map(ResourceHistoryTable::getVersion).sorted().toList())
 				.asList()
 				.containsExactly(1L, 2L);
 			assertEquals(2L, myResourceTableDao.findAll().iterator().next().getVersion());
@@ -300,7 +281,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 		runInTransaction(()->{
 			assertEquals(1, myResourceTableDao.count());
-			assertThat(myResourceHistoryTableDao.findAll().stream().map(t->t.getVersion()).sorted().toList())
+			assertThat(myResourceHistoryTableDao.findAll().stream().map(ResourceHistoryTable::getVersion).sorted().toList())
 				.asList()
 				.containsExactly(1L, 2L, 3L, 4L);
 			assertEquals(4L, myResourceTableDao.findAll().iterator().next().getVersion());
@@ -341,7 +322,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 		pt1.getTelecomFirstRep().setValue(modifiedEmail);
 
-		IIdType id1 = myPatientDao.update(pt1).getId().toUnqualifiedVersionless();
+		myPatientDao.update(pt1).getId().toUnqualifiedVersionless();
 
 		// then
 		runInTransaction(() -> {
@@ -349,7 +330,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 				.findAll()
 				.stream()
 				.filter(t -> defaultString(t.getSystem()).equals("email"))
-				.map(t -> t.getValue())
+				.map(ResourceIndexedSearchParamToken::getValue)
 				.collect(Collectors.toList());
 
 			assertThat(paramValues).hasSize(2);
@@ -435,7 +416,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 	}
 
 	@Tag("intermittent")
-	//	@Test
+	@Test
 	public void testTermConceptReindexingDoesntDuplicateData() {
 		myStorageSettings.setSchedulingDisabled(true);
 
@@ -447,13 +428,13 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		cs.addConcept().setCode("zoop2").setDisplay("zoop_disp2").setDefinition("zoop_defi2");
 		cs.addConcept().setCode("zoop3").setDisplay("zoop_disp3").setDefinition("zoop_defi3");
 
-		IIdType id1 = myCodeSystemDao.create(cs).getId().toUnqualifiedVersionless();
+		myCodeSystemDao.create(cs).getId().toUnqualifiedVersionless();
 
 		runInTransaction(() -> {
 			assertEquals(3L, myTermConceptDao.count());
 
 			SearchSession session = Search.session(myEntityManager);
-			List<TermConcept> termConcepts = session.search(TermConcept.class).where(f -> f.matchAll()).fetchAllHits();
+			List<TermConcept> termConcepts = session.search(TermConcept.class).where(SearchPredicateFactory::matchAll).fetchAllHits();
 			assertEquals(3, termConcepts.size());
 		});
 
@@ -466,7 +447,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 			assertEquals(3L, myTermConceptDao.count());
 
 			SearchSession session = Search.session(myEntityManager);
-			List<TermConcept> termConcepts = session.search(TermConcept.class).where(f -> f.matchAll()).fetchAllHits();
+			List<TermConcept> termConcepts = session.search(TermConcept.class).where(SearchPredicateFactory::matchAll).fetchAllHits();
 			assertEquals(3, termConcepts.size());
 		});
 	}
@@ -521,7 +502,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		org.setLanguageElement(new CodeType("EN_ca"));
 		org.setName(methodName);
 
-		ArrayList<Coding> tl = new ArrayList<Coding>();
+		ArrayList<Coding> tl = new ArrayList<>();
 		tl.add(new Coding().setSystem(methodName).setCode(methodName));
 		org.getMeta().getTag().addAll(tl);
 
@@ -532,14 +513,14 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add("_tag", new TokenParam(methodName, methodName));
-		assertEquals(1, myOrganizationDao.search(map).size().intValue());
+		assertEquals(1, myOrganizationDao.search(map).sizeOrThrowNpe());
 
 		myOrganizationDao.delete(orgId, mySrd);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add("_tag", new TokenParam(methodName, methodName));
-		assertEquals(0, myOrganizationDao.search(map).size().intValue());
+		assertEquals(0, myOrganizationDao.search(map).sizeOrThrowNpe());
 	}
 
 	@Test
@@ -551,7 +532,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_CONCEPT, new TokenParam("testChoiceParam01CCS", "testChoiceParam01CCV")).setLoadSynchronous(true));
-			assertEquals(1, found.size().intValue());
+			assertEquals(1, found.sizeOrThrowNpe());
 			assertEquals(id1, found.getResources(0, 1).get(0).getIdElement());
 		}
 	}
@@ -565,7 +546,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_DATE, new DateParam("2001")).setLoadSynchronous(true));
-			assertEquals(1, found.size().intValue());
+			assertEquals(1, found.sizeOrThrowNpe());
 			assertEquals(id2, found.getResources(0, 1).get(0).getIdElement());
 		}
 	}
@@ -663,53 +644,53 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam(">100", "foo", "bar")).setLoadSynchronous(true));
-			assertEquals(1, found.size().intValue());
+			assertEquals(1, found.sizeOrThrowNpe());
 			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
 		}
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("gt100", "foo", "bar")).setLoadSynchronous(true));
-			assertEquals(1, found.size().intValue());
+			assertEquals(1, found.sizeOrThrowNpe());
 			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
 		}
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("<100", "foo", "bar")).setLoadSynchronous(true));
-			assertEquals(0, found.size().intValue());
+			assertEquals(0, found.sizeOrThrowNpe());
 		}
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("lt100", "foo", "bar")).setLoadSynchronous(true));
-			assertEquals(0, found.size().intValue());
+			assertEquals(0, found.sizeOrThrowNpe());
 		}
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.0001", "foo", "bar")).setLoadSynchronous(true));
-			assertEquals(0, found.size().intValue());
+			assertEquals(0, found.sizeOrThrowNpe());
 		}
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("~120", "foo", "bar")).setLoadSynchronous(true));
-			assertEquals(1, found.size().intValue());
+			assertEquals(1, found.sizeOrThrowNpe());
 			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
 		}
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("ap120", "foo", "bar")).setLoadSynchronous(true));
-			assertEquals(1, found.size().intValue());
+			assertEquals(1, found.sizeOrThrowNpe());
 			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
 		}
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("eq123", "foo", "bar")).setLoadSynchronous(true));
-			assertEquals(1, found.size().intValue());
+			assertEquals(1, found.sizeOrThrowNpe());
 			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
 		}
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("eq120", "foo", "bar")).setLoadSynchronous(true));
-			assertEquals(0, found.size().intValue());
+			assertEquals(0, found.sizeOrThrowNpe());
 		}
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("ne120", "foo", "bar")).setLoadSynchronous(true));
-			assertEquals(1, found.size().intValue());
+			assertEquals(1, found.sizeOrThrowNpe());
 			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
 		}
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("ne123", "foo", "bar")).setLoadSynchronous(true));
-			assertEquals(0, found.size().intValue());
+			assertEquals(0, found.sizeOrThrowNpe());
 		}
 	}
 
@@ -724,53 +705,53 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam(">100", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
-			assertEquals(1, found.size().intValue());
+			assertEquals(1, found.sizeOrThrowNpe());
 			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
 		}
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("gt100", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
-			assertEquals(1, found.size().intValue());
+			assertEquals(1, found.sizeOrThrowNpe());
 			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
 		}
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("<100", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
-			assertEquals(0, found.size().intValue());
+			assertEquals(0, found.sizeOrThrowNpe());
 		}
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("lt100", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
-			assertEquals(0, found.size().intValue());
+			assertEquals(0, found.sizeOrThrowNpe());
 		}
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.0001", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
-			assertEquals(0, found.size().intValue());
+			assertEquals(0, found.sizeOrThrowNpe());
 		}
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("~120", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
-			assertEquals(1, found.size().intValue());
+			assertEquals(1, found.sizeOrThrowNpe());
 			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
 		}
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("ap120", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
-			assertEquals(1, found.size().intValue());
+			assertEquals(1, found.sizeOrThrowNpe());
 			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
 		}
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("eq123", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
-			assertEquals(1, found.size().intValue());
+			assertEquals(1, found.sizeOrThrowNpe());
 			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
 		}
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("eq120", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
-			assertEquals(0, found.size().intValue());
+			assertEquals(0, found.sizeOrThrowNpe());
 		}
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("ne120", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
-			assertEquals(1, found.size().intValue());
+			assertEquals(1, found.sizeOrThrowNpe());
 			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
 		}
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("ne123", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
-			assertEquals(0, found.size().intValue());
+			assertEquals(0, found.sizeOrThrowNpe());
 		}
 
 	}
@@ -866,7 +847,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_STRING, new StringParam("testChoiceParam04Str")).setLoadSynchronous(true));
-			assertEquals(1, found.size().intValue());
+			assertEquals(1, found.sizeOrThrowNpe());
 			assertEquals(id4, found.getResources(0, 1).get(0).getIdElement());
 		}
 	}
@@ -932,10 +913,10 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 	@Test
 	@Disabled
-	public void testCreateBuiltInProfiles() throws Exception {
+	public void testCreateBuiltInProfiles() {
 		org.hl7.fhir.r4.model.Bundle bundle;
 		String name = "profiles-resources";
-		ourLog.info("Uploading " + name);
+		ourLog.info("Uploading {}", name);
 		String vsContents;
 		vsContents = ClasspathUtil.loadResource("/org/hl7/fhir/r4/model/profile/" + name + ".xml");
 
@@ -1016,8 +997,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		IIdType obsId = myObservationDao.update(obs, mySrd).getId();
 		assertEquals("Observation/" + idName, obsId.toUnqualifiedVersionless().getValue());
 
-		pat = myPatientDao.read(patId.toUnqualifiedVersionless(), mySrd);
-		obs = myObservationDao.read(obsId.toUnqualifiedVersionless(), mySrd);
+		myPatientDao.read(patId.toUnqualifiedVersionless(), mySrd);
+		myObservationDao.read(obsId.toUnqualifiedVersionless(), mySrd);
 	}
 
 	@Test
@@ -1037,7 +1018,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				assertThat(myResourceTagDao.findAll()).hasSize(1);
 				assertThat(myTagDefinitionDao.findAll()).hasSize(1);
 			}
@@ -1062,7 +1043,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				assertThat(myResourceTagDao.findAll()).isEmpty();
 				assertThat(myTagDefinitionDao.findAll()).isEmpty();
 			}
@@ -1072,23 +1053,24 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 	@Test
 	public void testCreateLongString() {
-		String input = "<NamingSystem>\n" +
-			"        <name value=\"NDF-RT (National Drug File – Reference Terminology)\"/>\n" +
-			"        <status value=\"draft\"/>\n" +
-			"        <kind value=\"codesystem\"/>\n" +
-			"        <publisher value=\"HL7, Inc\"/>\n" +
-			"        <date value=\"2015-08-21\"/>\n" +
-			"        <uniqueId>\n" +
-			"          <type value=\"uri\"/>\n" +
-			"          <value value=\"http://hl7.org/fhir/ndfrt\"/>\n" +
-			"          <preferred value=\"true\"/>\n" +
-			"        </uniqueId>\n" +
-			"        <uniqueId>\n" +
-			"          <type value=\"oid\"/>\n" +
-			"          <value value=\"2.16.840.1.113883.6.209\"/>\n" +
-			"          <preferred value=\"false\"/>\n" +
-			"        </uniqueId>\n" +
-			"      </NamingSystem>";
+		String input = """
+			<NamingSystem>
+			        <name value="NDF-RT (National Drug File – Reference Terminology)"/>
+			        <status value="draft"/>
+			        <kind value="codesystem"/>
+			        <publisher value="HL7, Inc"/>
+			        <date value="2015-08-21"/>
+			        <uniqueId>
+			          <type value="uri"/>
+			          <value value="http://hl7.org/fhir/ndfrt"/>
+			          <preferred value="true"/>
+			        </uniqueId>
+			        <uniqueId>
+			          <type value="oid"/>
+			          <value value="2.16.840.1.113883.6.209"/>
+			          <preferred value="false"/>
+			        </uniqueId>
+			      </NamingSystem>""";
 
 		NamingSystem res = myFhirContext.newXmlParser().parseResource(NamingSystem.class, input);
 		IIdType id = myNamingSystemDao.create(res, mySrd).getId().toUnqualifiedVersionless();
@@ -1118,20 +1100,20 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		 * If any of this ever fails, it means that one of the OperationOutcome issue severity codes has changed code value across versions. We store the string as a constant, so something will need to
 		 * be fixed.
 		 */
-		assertEquals(org.hl7.fhir.dstu2.model.OperationOutcome.IssueSeverity.ERROR.toCode(), BaseStorageDao.OO_SEVERITY_ERROR);
-		assertEquals(org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity.ERROR.toCode(), BaseStorageDao.OO_SEVERITY_ERROR);
-		assertEquals(org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity.ERROR.toCode(), BaseStorageDao.OO_SEVERITY_ERROR);
-		assertEquals(org.hl7.fhir.dstu2.model.OperationOutcome.IssueSeverity.INFORMATION.toCode(), BaseStorageDao.OO_SEVERITY_INFO);
-		assertEquals(org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity.INFORMATION.toCode(), BaseStorageDao.OO_SEVERITY_INFO);
-		assertEquals(org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity.INFORMATION.toCode(), BaseStorageDao.OO_SEVERITY_INFO);
-		assertEquals(org.hl7.fhir.dstu2.model.OperationOutcome.IssueSeverity.WARNING.toCode(), BaseStorageDao.OO_SEVERITY_WARN);
-		assertEquals(org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity.WARNING.toCode(), BaseStorageDao.OO_SEVERITY_WARN);
-		assertEquals(org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity.WARNING.toCode(), BaseStorageDao.OO_SEVERITY_WARN);
+		assertEquals(OperationOutcomeUtil.OO_SEVERITY_ERROR, org.hl7.fhir.dstu2.model.OperationOutcome.IssueSeverity.ERROR.toCode());
+		assertEquals(OperationOutcomeUtil.OO_SEVERITY_ERROR, IssueSeverity.ERROR.toCode());
+		assertEquals(OperationOutcomeUtil.OO_SEVERITY_ERROR, IssueSeverity.ERROR.toCode());
+		assertEquals(OperationOutcomeUtil.OO_SEVERITY_INFO, org.hl7.fhir.dstu2.model.OperationOutcome.IssueSeverity.INFORMATION.toCode());
+		assertEquals(OperationOutcomeUtil.OO_SEVERITY_INFO, IssueSeverity.INFORMATION.toCode());
+		assertEquals(OperationOutcomeUtil.OO_SEVERITY_INFO, IssueSeverity.INFORMATION.toCode());
+		assertEquals(OperationOutcomeUtil.OO_SEVERITY_WARN, org.hl7.fhir.dstu2.model.OperationOutcome.IssueSeverity.WARNING.toCode());
+		assertEquals(OperationOutcomeUtil.OO_SEVERITY_WARN, IssueSeverity.WARNING.toCode());
+		assertEquals(OperationOutcomeUtil.OO_SEVERITY_WARN, IssueSeverity.WARNING.toCode());
 	}
 
 	@Test
 	public void testCreateOperationOutcomeError() {
-		JpaResourceDao<Bundle> dao = new JpaResourceDao<Bundle>();
+		JpaResourceDao<Bundle> dao = new JpaResourceDao<>();
 		dao.setContext(myFhirContext);
 		OperationOutcome oo = (OperationOutcome) dao.createErrorOperationOutcome("my message", "incomplete");
 		assertEquals(IssueSeverity.ERROR.toCode(), oo.getIssue().get(0).getSeverity().toCode());
@@ -1141,7 +1123,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 	@Test
 	public void testCreateOperationOutcomeInfo() {
-		JpaResourceDao<Bundle> dao = new JpaResourceDao<Bundle>();
+		JpaResourceDao<Bundle> dao = new JpaResourceDao<>();
 		dao.setContext(myFhirContext);
 		OperationOutcome oo = (OperationOutcome) dao.createInfoOperationOutcome("my message");
 		assertEquals(IssueSeverity.INFORMATION.toCode(), oo.getIssue().get(0).getSeverity().toCode());
@@ -1253,7 +1235,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		p.addName().setFamily("Hello");
 		results = myPatientDao.create(p, mySrd);
 		assertThat(results.getId().getIdPart()).isNotEqualTo(id.getIdPart());
-		assertTrue(results.getCreated().booleanValue());
+		assertTrue(results.getCreated());
 
 		// Now try to create one with the original match URL and it should fail
 
@@ -1285,7 +1267,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		results = myPatientDao.create(p, "Patient?_id=" + id.toVersionless().getValue(), mySrd);
 		assertEquals(id.getIdPart(), results.getId().getIdPart());
 		assertEquals(id.getVersionIdPart(), results.getId().getVersionIdPart());
-		assertFalse(results.getCreated().booleanValue());
+		assertFalse(results.getCreated());
 
 	}
 
@@ -1323,7 +1305,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_CONCEPT, new TokenParam("testChoiceParam01CCS", "testChoiceParam01CCV")).setLoadSynchronous(true));
-			assertEquals(1, found.size().intValue());
+			assertEquals(1, found.sizeOrThrowNpe());
 			assertEquals(id1, found.getResources(0, 1).get(0).getIdElement());
 		}
 	}
@@ -1425,7 +1407,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 			fail();
 		} catch (ResourceVersionConflictException e) {
 			assertConflictException("Patient", e);
-			ourLog.info("Expected exception thrown: " + e.getMessage());
+			ourLog.info("Expected exception thrown: {}", e.getMessage());
 		}
 
 		myPatientDao.delete(patId, mySrd);
@@ -1450,7 +1432,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 	public void testDeleteResource() {
 		myStorageSettings.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
 
-		int initialHistory = myPatientDao.history(null, null, null, mySrd).size();
+		int initialHistory = myPatientDao.history(null, null, null, mySrd).sizeOrThrowNpe();
 
 		IIdType id1;
 		IIdType id2;
@@ -1494,7 +1476,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		}
 
 		IBundleProvider history = myPatientDao.history(null, null, null, mySrd);
-		assertEquals(4 + initialHistory, history.size().intValue());
+		assertEquals(4 + initialHistory, history.sizeOrThrowNpe());
 		List<IBaseResource> resources = history.getResources(0, 4);
 		assertTrue(resources.get(0).isDeleted());
 
@@ -1669,7 +1651,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		}
 
 		IBundleProvider history = myPatientDao.history(id, null, null, null, mySrd);
-		assertEquals(2, history.size().intValue());
+		assertEquals(2, history.sizeOrThrowNpe());
 
 		assertTrue(history.getResources(0, 1).get(0).isDeleted());
 		assertFalse(history.getResources(1, 2).get(0).isDeleted());
@@ -1922,7 +1904,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 	}
 
 	@Test
-	public void testHistoryOverMultiplePages() throws Exception {
+	public void testHistoryOverMultiplePages() {
 		myStorageSettings.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
 
 		String methodName = "testHistoryOverMultiplePages";
@@ -1952,7 +1934,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 		// By instance
 		IBundleProvider history = myPatientDao.history(id, null, null, null, mySrd);
-		assertEquals(fullSize + 1, history.size().intValue());
+		assertEquals(fullSize + 1, history.sizeOrThrowNpe());
 		for (int i = 0; i < fullSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
@@ -1960,18 +1942,18 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 			int finalI = i;
 			IBundleProvider finalHistory = history;
 			assertEquals(expected, actual, ()->{
-				String retVal = "i=" + finalI + ", fullSize=" + finalFullSize;
+				StringBuilder retVal = new StringBuilder("i=" + finalI + ", fullSize=" + finalFullSize);
 				List<IBaseResource> allResources = finalHistory.getResources(0, finalI + 1);
 				for (int idx = 0; idx < allResources.size(); idx++) {
-					retVal += "\n" + idx + " - " + allResources.get(idx).getIdElement().getValue();
+					retVal.append("\n").append(idx).append(" - ").append(allResources.get(idx).getIdElement().getValue());
 				}
-				return retVal;
+				return retVal.toString();
 			});
 		}
 
 		// By type
 		history = myPatientDao.history(null, null, null, mySrd);
-		assertEquals(fullSize + 1, history.size().intValue());
+		assertEquals(fullSize + 1, history.sizeOrThrowNpe());
 		for (int i = 0; i < fullSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
@@ -1980,7 +1962,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 		// By server
 		history = mySystemDao.history(null, null, null, mySrd);
-		assertEquals(fullSize + 1, history.size().intValue());
+		assertEquals(fullSize + 1, history.sizeOrThrowNpe());
 		for (int i = 0; i < fullSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
@@ -1993,7 +1975,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 		// By instance
 		history = myPatientDao.history(id, middleDate, null, null, mySrd);
-		assertEquals(halfSize, history.size().intValue());
+		assertEquals(halfSize, history.sizeOrThrowNpe());
 		for (int i = 0; i < halfSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
@@ -2002,7 +1984,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 		// By type
 		history = myPatientDao.history(middleDate, null, null, mySrd);
-		assertEquals(halfSize, history.size().intValue());
+		assertEquals(halfSize, history.sizeOrThrowNpe());
 		for (int i = 0; i < halfSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
@@ -2011,7 +1993,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 		// By server
 		history = mySystemDao.history(middleDate, null, null, mySrd);
-		assertEquals(halfSize, history.size().intValue());
+		assertEquals(halfSize, history.sizeOrThrowNpe());
 		for (int i = 0; i < halfSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
@@ -2029,7 +2011,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 		// By instance
 		history = myPatientDao.history(id, null, null, null, mySrd);
-		assertEquals(fullSize + 1, history.size().intValue());
+		assertEquals(fullSize + 1, history.sizeOrThrowNpe());
 		for (int i = 0; i < fullSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
@@ -2038,7 +2020,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 		// By type
 		history = myPatientDao.history(null, null, null, mySrd);
-		assertEquals(fullSize + 1, history.size().intValue());
+		assertEquals(fullSize + 1, history.sizeOrThrowNpe());
 		for (int i = 0; i < fullSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
@@ -2047,7 +2029,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 		// By server
 		history = mySystemDao.history(null, null, null, mySrd);
-		assertEquals(fullSize + 1, history.size().intValue());
+		assertEquals(fullSize + 1, history.sizeOrThrowNpe());
 		for (int i = 0; i < fullSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
@@ -2060,7 +2042,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 		// By instance
 		history = myPatientDao.history(id, middleDate, null, null, mySrd);
-		assertEquals(halfSize, history.size().intValue());
+		assertEquals(halfSize, history.sizeOrThrowNpe());
 		for (int i = 0; i < halfSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
@@ -2069,7 +2051,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 		// By type
 		history = myPatientDao.history(middleDate, null, null, mySrd);
-		assertEquals(halfSize, history.size().intValue());
+		assertEquals(halfSize, history.sizeOrThrowNpe());
 		for (int i = 0; i < halfSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
@@ -2078,7 +2060,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 		// By server
 		history = mySystemDao.history(middleDate, null, null, mySrd);
-		assertEquals(halfSize, history.size().intValue());
+		assertEquals(halfSize, history.sizeOrThrowNpe());
 		for (int i = 0; i < halfSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
@@ -2097,7 +2079,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		IIdType id = myPatientDao.create(inPatient, mySrd).getId().toUnqualifiedVersionless();
 
 		IBundleProvider history = myPatientDao.history(null, null, null, mySrd);
-		assertEquals(1, history.size().intValue());
+		assertEquals(1, history.sizeOrThrowNpe());
 		Patient outPatient = (Patient) history.getResources(0, 1).get(0);
 		assertEquals("version1", inPatient.getName().get(0).getFamily());
 		List<String> profiles = toStringList(outPatient.getMeta().getProfile());
@@ -2108,10 +2090,10 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		 */
 
 		inPatient.getMeta().addProfile("http://example.com/2");
-		myPatientDao.metaAddOperation(id, inPatient.getMeta(), mySrd);
+		myPatientDao.metaAddOperation(id, inPatient.getMeta(), mySrd, new TransactionDetails());
 
 		history = myPatientDao.history(null, null, null, mySrd);
-		assertEquals(1, history.size().intValue());
+		assertEquals(1, history.sizeOrThrowNpe());
 		outPatient = (Patient) history.getResources(0, 1).get(0);
 		assertEquals("version1", inPatient.getName().get(0).getFamily());
 		profiles = toStringList(outPatient.getMeta().getProfile());
@@ -2127,7 +2109,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		myPatientDao.update(inPatient, mySrd);
 
 		history = myPatientDao.history(null, null, null, mySrd);
-		assertEquals(2, history.size().intValue());
+		assertEquals(2, history.sizeOrThrowNpe());
 		outPatient = (Patient) history.getResources(0, 2).get(0);
 		assertEquals("version2", outPatient.getName().get(0).getFamily());
 		profiles = toStringList(outPatient.getMeta().getProfile());
@@ -2154,10 +2136,10 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 		IBundleProvider history = myPatientDao.history(id, null, null, null, mySrd);
 		List<IBaseResource> entries = history.getResources(0, 3);
-		ourLog.info(entries.get(0).getIdElement() + " - " + entries.get(0).getMeta().getLastUpdated());
-		ourLog.info(entries.get(1).getIdElement() + " - " + entries.get(1).getMeta().getLastUpdated());
-		ourLog.info(entries.get(2).getIdElement() + " - " + entries.get(2).getMeta().getLastUpdated());
-		assertEquals(3, history.size().intValue());
+		ourLog.info("{} - {}", entries.get(0).getIdElement(), entries.get(0).getMeta().getLastUpdated());
+		ourLog.info("{} - {}", entries.get(1).getIdElement(), entries.get(1).getMeta().getLastUpdated());
+		ourLog.info("{} - {}", entries.get(2).getIdElement(), entries.get(2).getMeta().getLastUpdated());
+		assertEquals(3, history.sizeOrThrowNpe());
 
 		assertEquals(id.withVersion("3"), entries.get(0).getIdElement());
 		assertEquals(id.withVersion("2"), entries.get(1).getIdElement());
@@ -2224,19 +2206,19 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		Thread.sleep(10);
 		Date after = new Date();
 
-		// No since
+		// No "since" param
 
 		IBundleProvider history = myPatientDao.history(null, null, null, mySrd);
-		assertEquals(1, history.size().intValue());
+		assertEquals(1, history.sizeOrThrowNpe());
 		Patient outPatient = (Patient) history.getResources(0, 1).get(0);
 		assertEquals("version1", inPatient.getName().get(0).getFamily());
 		List<String> profiles = toStringList(outPatient.getMeta().getProfile());
 		assertThat(profiles).containsExactly("http://example.com/1");
 
-		// Before since
+		// Before "since" param
 
 		history = myPatientDao.history(before, null, null, mySrd);
-		assertEquals(1, history.size().intValue());
+		assertEquals(1, history.sizeOrThrowNpe());
 		outPatient = (Patient) history.getResources(0, 1).get(0);
 		assertEquals("version1", inPatient.getName().get(0).getFamily());
 		profiles = toStringList(outPatient.getMeta().getProfile());
@@ -2245,7 +2227,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		// After since
 
 		history = myPatientDao.history(after, null, null, mySrd);
-		assertEquals(0, history.size().intValue());
+		assertEquals(0, history.sizeOrThrowNpe());
 
 	}
 
@@ -2391,7 +2373,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		meta.addTag().setSystem("tag_scheme1").setCode("tag_code1");
 		meta.addProfile("http://profile/1");
 		meta.addSecurity().setSystem("seclabel_sys1").setCode("seclabel_code1");
-		Meta newMeta = myPatientDao.metaDeleteOperation(id.withVersion("1"), meta, mySrd);
+		DaoMethodOutcome outcome = myPatientDao.metaDeleteOperation(id.withVersion("1"), meta, mySrd, new TransactionDetails());
+		Meta newMeta = (Meta) ParametersUtil.getNamedParameterValue(myFhirContext, (IBaseParameters) outcome.getResource(), "return").orElseThrow();
 		assertThat(newMeta.getProfile()).hasSize(1);
 		assertThat(newMeta.getSecurity()).hasSize(1);
 		assertThat(newMeta.getTag()).hasSize(1);
@@ -2436,7 +2419,24 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		meta.addTag().setSystem("tag_scheme1").setCode("tag_code1");
 		meta.addProfile("http://profile/1");
 		meta.addSecurity().setSystem("seclabel_sys1").setCode("seclabel_code1");
-		newMeta = myPatientDao.metaAddOperation(id.withVersion("1"), meta, mySrd);
+		outcome = myPatientDao.metaAddOperation(id.withVersion("1"), meta, mySrd, new TransactionDetails());
+		assertFalse(outcome.isNop());
+		newMeta = (Meta) ParametersUtil.getNamedParameterValue(myFhirContext, (IBaseParameters) outcome.getResource(), "return").orElseThrow();
+		assertThat(newMeta.getProfile()).hasSize(2);
+		assertThat(newMeta.getSecurity()).hasSize(2);
+		assertThat(newMeta.getTag()).hasSize(2);
+
+		/*
+		 * Meta-Add on previous version - Same call should have no effect
+		 */
+
+		meta = new Meta();
+		meta.addTag().setSystem("tag_scheme1").setCode("tag_code1");
+		meta.addProfile("http://profile/1");
+		meta.addSecurity().setSystem("seclabel_sys1").setCode("seclabel_code1");
+		outcome = myPatientDao.metaAddOperation(id.withVersion("1"), meta, mySrd, new TransactionDetails());
+		assertTrue(outcome.isNop());
+		newMeta = (Meta) ParametersUtil.getNamedParameterValue(myFhirContext, (IBaseParameters) outcome.getResource(), "return").orElseThrow();
 		assertThat(newMeta.getProfile()).hasSize(2);
 		assertThat(newMeta.getSecurity()).hasSize(2);
 		assertThat(newMeta.getTag()).hasSize(2);
@@ -2459,7 +2459,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		meta.addTag().setSystem("tag_scheme1").setCode("tag_code1");
 		meta.addProfile("http://profile/1");
 		meta.addSecurity().setSystem("seclabel_sys1").setCode("seclabel_code1");
-		newMeta = myPatientDao.metaDeleteOperation(id.toVersionless(), meta, mySrd);
+		outcome = myPatientDao.metaDeleteOperation(id.toVersionless(), meta, mySrd, new TransactionDetails());
+		newMeta = (Meta) ParametersUtil.getNamedParameterValue(myFhirContext, (IBaseParameters) outcome.getResource(), "return").orElseThrow();
 		assertThat(newMeta.getProfile()).hasSize(1);
 		assertThat(newMeta.getSecurity()).hasSize(1);
 		assertThat(newMeta.getTag()).hasSize(1);
@@ -2475,7 +2476,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		meta.addTag().setSystem("tag_scheme1").setCode("tag_code1");
 		meta.addProfile("http://profile/1");
 		meta.addSecurity().setSystem("seclabel_sys1").setCode("seclabel_code1");
-		newMeta = myPatientDao.metaAddOperation(id.toVersionless(), meta, mySrd);
+		outcome = myPatientDao.metaAddOperation(id.toVersionless(), meta, mySrd, new TransactionDetails());
+		newMeta = (Meta) ParametersUtil.getNamedParameterValue(myFhirContext, (IBaseParameters) outcome.getResource(), "return").orElseThrow();
 		assertThat(newMeta.getProfile()).hasSize(2);
 		assertThat(newMeta.getSecurity()).hasSize(2);
 		assertThat(newMeta.getTag()).hasSize(2);
@@ -2488,7 +2490,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
      */
 	@Test
 	public void testInvalidChainNames() {
-		ReferenceParam param = null;
+		ReferenceParam param;
 
 		// OK
 		param = new ReferenceParam("999999999999");
@@ -2554,30 +2556,32 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 		//@formatter:off
 		String inputStr =
-			"{" +
-				"  \"resourceType\":\"Organization\",\n" +
-				"  \"extension\":[\n" +
-				"     {\n" +
-				"       \"url\":\"http://fhir.connectinggta.ca/Profile/organization#providerIdPool\",\n" +
-				"       \"valueUri\":\"urn:oid:2.16.840.1.113883.3.239.23.21.1\"\n" +
-				"     }\n" +
-				"  ],\n" +
-				"  \"text\":{\n" +
-				"     \"status\":\"empty\",\n" +
-				"     \"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">No narrative template available for resource profile: http://fhir.connectinggta.ca/Profile/organization</div>\"\n" +
-				"  },\n" +
-				"  \"identifier\":[\n" +
-				"     {\n" +
-				"       \"use\":\"official\",\n" +
-				"       \"system\":\"urn:cgta:hsp_ids\",\n" +
-				"       \"value\":\"urn:oid:2.16.840.1.113883.3.239.23.21\"\n" +
-				"     }\n" +
-				"  ],\n" +
-				"  \"name\":\"Peterborough Regional Health Centre\"\n" +
-				"}\n";
+			"""
+{\
+  "resourceType":"Organization",
+  "extension":[
+     {
+       "url":"http://fhir.connectinggta.ca/Profile/organization#providerIdPool",
+       "valueUri":"urn:oid:2.16.840.1.113883.3.239.23.21.1"
+     }
+  ],
+  "text":{
+     "status":"empty",
+     "div":"<div xmlns=\\"http://www.w3.org/1999/xhtml\\">No narrative template available for resource profile: http://fhir.connectinggta.ca/Profile/organization</div>"
+  },
+  "identifier":[
+     {
+       "use":"official",
+       "system":"urn:cgta:hsp_ids",
+       "value":"urn:oid:2.16.840.1.113883.3.239.23.21"
+     }
+  ],
+  "name":"Peterborough Regional Health Centre"
+}
+""";
 		//@formatter:on
 
-		List<IResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
+		List<IResourcePersistentId<?>> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
 		int initial = val.size();
 
 		Organization org = myFhirContext.newJsonParser().parseResource(Organization.class, inputStr);
@@ -2692,12 +2696,12 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		found = toList(myPatientDao.search(new SearchParameterMap(Patient.SP_BIRTHDATE, new DateParam(ParamPrefixEnum.GREATERTHAN, "2002-01-01")).setLoadSynchronous(true)));
 		assertThat(found).hasSize(initialSize2002);
 
-		// If this throws an exception, that would be an acceptable outcome as well..
+		// If this throws an exception, that would be an acceptable outcome as well.
 		try {
 			found = toList(myPatientDao.search(new SearchParameterMap(Patient.SP_BIRTHDATE + "AAAA", new DateParam(ParamPrefixEnum.GREATERTHAN, "2000-01-01")).setLoadSynchronous(true)));
 			assertThat(found).isEmpty();
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1223) + "Unknown search parameter \"birthdateAAAA\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _lastUpdated, _profile, _security, _source, _tag, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
+			assertEquals(Msg.code(1223) + "Unknown search parameter \"birthdateAAAA\" for resource type \"Patient\". Valid search parameters for this search are: " + getValidPatientSearchParams(), e.getMessage());
 		}
 	}
 
@@ -2754,13 +2758,6 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		assertThat(found).hasSize(1);
 		assertEquals(id, found.get(0).getIdElement().getIdPartAsLong().longValue());
 
-		// found = ourPatientDao.search(Patient.SP_GENDER, new IdentifierDt(null, "M"));
-		// assertEquals(1, found.size());
-		// assertEquals(id, found.get(0).getId().asLong().longValue());
-		//
-		// found = ourPatientDao.search(Patient.SP_GENDER, new IdentifierDt(null, "F"));
-		// assertEquals(0, found.size());
-
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", "001testPersistSearchParams"));
 		map.add(Patient.SP_GENDER, new TokenParam("urn:some:wrong:system", AdministrativeGender.MALE.toCode()));
@@ -2816,7 +2813,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		/*
 		 * VREAD
 		 */
-		assertTrue(id1.hasVersionIdPart()); // just to make sure..
+		assertTrue(id1.hasVersionIdPart()); // just to make sure.
 		obs = myObservationDao.read(id1, mySrd);
 		assertEquals(o1.getCode().getCoding().get(0).getCode(), obs.getCode().getCoding().get(0).getCode());
 
@@ -3030,7 +3027,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		tx.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		tx.execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				ResourceHistoryTable table = myResourceHistoryTableDao.findForIdAndVersion(JpaPidFk.fromId(id.getIdPartAsLong(), null), 1L);
 				String newContent = myFhirContext.newJsonParser().encodeResourceToString(p);
 				newContent = newContent.replace("male", "foo");
@@ -3061,7 +3058,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 			metaAdd.addTag().setSystem(null).setCode("Dog").setDisplay("Puppies");
 			metaAdd.addSecurity().setSystem("seclabel:sys:1").setCode("seclabel:code:1").setDisplay("seclabel:dis:1");
 			metaAdd.addProfile("http://profile/1");
-			myPatientDao.metaAddOperation(id1, metaAdd, mySrd);
+			myPatientDao.metaAddOperation(id1, metaAdd, mySrd, new TransactionDetails());
 		}
 		{
 			Patient patient = new Patient();
@@ -3131,7 +3128,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 			metaDel.addTag().setSystem(null).setCode("Dog");
 			metaDel.addSecurity().setSystem("seclabel:sys:1").setCode("seclabel:code:1");
 			metaDel.addProfile("http://profile/1");
-			myPatientDao.metaDeleteOperation(id1, metaDel, mySrd);
+			myPatientDao.metaDeleteOperation(id1, metaDel, mySrd, new TransactionDetails());
 		}
 
 		meta = myPatientDao.metaGetOperation(Meta.class, mySrd);
@@ -3264,9 +3261,9 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		map.add(Organization.SP_NAME, new StringParam("X" + methodName + "X"));
 		map.setRevIncludes(Collections.singleton(Patient.INCLUDE_ORGANIZATION));
 		IBundleProvider resultsP = myOrganizationDao.search(map);
-		assertEquals(1, resultsP.size().intValue());
+		assertEquals(1, resultsP.sizeOrThrowNpe());
 
-		List<IBaseResource> results = resultsP.getResources(0, resultsP.size());
+		List<IBaseResource> results = resultsP.getResources(0, resultsP.sizeOrThrowNpe());
 		assertThat(results).hasSize(2);
 		assertEquals(Organization.class, results.get(0).getClass());
 		assertEquals(BundleEntrySearchModeEnum.MATCH, ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(results.get(0)));
@@ -3275,8 +3272,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 	}
 
 	@Test
-	public void testSaveAndReturnCollectionBundle() throws IOException {
-		String input = IOUtils.toString(FhirResourceDaoR4Test.class.getResourceAsStream("/r4/collection-bundle.json"));
+	public void testSaveAndReturnCollectionBundle() {
+		String input = ClasspathUtil.loadResource("/r4/collection-bundle.json");
 		Bundle inputBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, input);
 
 		myBundleDao.update(inputBundle);
@@ -3312,7 +3309,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -3324,7 +3321,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 			oid2 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -3336,7 +3333,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 			oid3 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -3348,7 +3345,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 			oid4 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 
@@ -4043,13 +4040,13 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 		assertThat(str.length()).isGreaterThan(ResourceIndexedSearchParamString.MAX_LENGTH);
 
-		List<IResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
+		List<IResourcePersistentId<?>> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
 		int initial = val.size();
 
 		myOrganizationDao.create(org, mySrd);
 
 		val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
-		assertThat(val).hasSize(initial + 0);
+		assertThat(val).hasSize(initial);
 
 		val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam(str.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH))), null);
 		assertThat(val).hasSize(initial + 1);
@@ -4144,8 +4141,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		assertEquals("http://profile/1", profiles.get(0).getValue());
 		assertEquals("http://profile/2", profiles.get(1).getValue());
 
-		myPatientDao.metaAddOperation(patientId, new Meta().addTag("http://foo", "Cat", "Kittens"), null);
-		myPatientDao.metaAddOperation(patientId, new Meta().addTag("http://foo", "Cow", "Calves"), null);
+		myPatientDao.metaAddOperation(patientId, new Meta().addTag("http://foo", "Cat", "Kittens"), null, new TransactionDetails());
+		myPatientDao.metaAddOperation(patientId, new Meta().addTag("http://foo", "Cow", "Calves"), null, new TransactionDetails());
 
 		retrieved = myPatientDao.read(patientId, mySrd);
 		published = (ArrayList<Coding>) retrieved.getMeta().getTag();
@@ -4286,7 +4283,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 			// Timing period with no start
 			Arguments.of(List.of(feb7, feb8, feb9, feb10), periodNoStart, List.of(feb7, feb8, feb9)),
 			// Timing period with no end
-			Arguments.of(List.of(feb8, feb9, feb10, feb11), periodNoEnd, List.of(feb8, feb9, feb10, feb11)),
+			Arguments.of(List.of(feb8, feb9, feb10, feb11), periodNoEnd, List.of()),
 			// Timing period with start and end, event falls within date range
 			Arguments.of(List.of(feb7, feb8, feb9, feb10), periodStartEnd, List.of(feb7, feb8, feb9, feb10)),
 			// Timing period with start and end, event falls before date range
@@ -4308,7 +4305,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 		String subStr1 = longStr1.substring(0, ResourceIndexedSearchParamToken.MAX_LENGTH);
 		String subStr2 = longStr2.substring(0, ResourceIndexedSearchParamToken.MAX_LENGTH);
-		List<IResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("type", new TokenParam(subStr1, subStr2)), null);
+		List<IResourcePersistentId<?>> val = myOrganizationDao.searchForIds(new SearchParameterMap("type", new TokenParam(subStr1, subStr2)), null);
 		int initial = val.size();
 
 		myOrganizationDao.create(org, mySrd);
@@ -4378,7 +4375,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 	public void testDontReuseErrorSearches() {
 		SearchParameterMap map = new SearchParameterMap();
 		map.add("subject", new ReferenceParam("Patient/123"));
-		String normalized = map.toNormalizedQueryString(myFhirContext);
+		String normalized = map.toNormalizedQueryString();
 		String uuid = UUID.randomUUID().toString();
 
 		runInTransaction(() -> {
@@ -4387,11 +4384,11 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 			search.setStatus(SearchStatusEnum.FAILED);
 			search.setFailureCode(500);
 			search.setFailureMessage("FOO");
-			mySearchCacheSvc.save(search, RequestPartitionId.defaultPartition());
+			mySearchCacheSvc.save(search, RequestPartitionId.fromPartitionId(null));
 		});
 
 		IBundleProvider results = myEncounterDao.search(map);
-		assertEquals(0, results.size().intValue());
+		assertEquals(0, results.sizeOrThrowNpe());
 		assertThat(results.getUuid()).isNotEqualTo(uuid);
 	}
 
@@ -4488,7 +4485,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 	void testSearchForStream_withIncludeDeletedResources_resultIncludesDeletedResources() {
 		// given
 		IIdType deletedObservationId = createObservation();
-		IIdType observationId = createObservation();
+		createObservation();
 
 		SystemRequestDetails request = new SystemRequestDetails();
 

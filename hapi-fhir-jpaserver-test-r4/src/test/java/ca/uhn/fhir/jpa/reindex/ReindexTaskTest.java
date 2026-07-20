@@ -36,9 +36,11 @@ import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.base.Charsets;
 import jakarta.annotation.PostConstruct;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -428,10 +430,10 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 			String obsResBody = myFhirContext.newJsonParser().encodeResourceToString(o);
 
 			o.setId(new IdType("obs-to-delete"));
-			DaoMethodOutcome toDeleteObs = myObservationDao.update(o);
+			DaoMethodOutcome toDeleteObs = myObservationDao.update(o, newSrd());
 
 			o.setId(new IdType("obs-to-keep"));
-			DaoMethodOutcome toKeepObs = myObservationDao.update(o);
+			DaoMethodOutcome toKeepObs = myObservationDao.update(o, newSrd());
 
 			DaoMethodOutcome deleteOutcome = myObservationDao.delete(toDeleteObs.getId(), mySrd);
 
@@ -466,20 +468,20 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 			String obsResBody = myFhirContext.newJsonParser().encodeResourceToString(o);
 
 			o.setId(new IdType("obs-to-delete"));
-			DaoMethodOutcome toDeleteObs = myObservationDao.update(o);
+			DaoMethodOutcome toDeleteObs = myObservationDao.update(o, newSrd());
 			DaoMethodOutcome obsToDeleteOutcome = myObservationDao.delete(toDeleteObs.getId(), mySrd);
 
 			o.setId(new IdType("obs-to-keep"));
-			DaoMethodOutcome toKeepObs = myObservationDao.update(o);
+			DaoMethodOutcome toKeepObs = myObservationDao.update(o, newSrd());
 
 			BaseDateTimeDt date = new DateTimeDt().setValue(new Date());
 			sleepAtLeast(1000);
 
 			o.setId(new IdType("obs-to-keep-2"));
-			DaoMethodOutcome toKeepObs2 = myObservationDao.update(o);
+			DaoMethodOutcome toKeepObs2 = myObservationDao.update(o, newSrd());
 
 			o.setId(new IdType("obs-to-delete-2"));
-			DaoMethodOutcome toDeleteObs2 = myObservationDao.update(o);
+			DaoMethodOutcome toDeleteObs2 = myObservationDao.update(o, newSrd());
 			DaoMethodOutcome obsToDeleteOutcome2 = myObservationDao.delete(toDeleteObs2.getId(), mySrd);
 
 			JpaPid obsDeletedJpaPid = (JpaPid) toDeleteObs.getPersistentId();
@@ -496,7 +498,7 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 			// When
 			String theLastUpdatedParam = "&" + Constants.PARAM_LASTUPDATED + "=le" + date.getValueAsString();
 			String theFullUrl = "?_includeDeleted=" + theIncludeDeleted.getCode() + theLastUpdatedParam;
-			ourLog.info("Reindexing with URL: " + theFullUrl);
+			ourLog.info("Reindexing with URL: {}", theFullUrl);
 
 			doOptimizeStorageReindexWithUrl(theFullUrl);
 
@@ -536,10 +538,10 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 			String obsResBody = myFhirContext.newJsonParser().encodeResourceToString(o);
 
 			o.setId(new IdType("obs-to-delete"));
-			DaoMethodOutcome toDeleteObs = myObservationDao.update(o);
+			DaoMethodOutcome toDeleteObs = myObservationDao.update(o, newSrd());
 
 			o.setId(new IdType("obs-to-keep"));
-			DaoMethodOutcome toKeepObs = myObservationDao.update(o);
+			DaoMethodOutcome toKeepObs = myObservationDao.update(o, newSrd());
 
 			DaoMethodOutcome afterDeleteObsVersion = myObservationDao.delete(toDeleteObs.getId(), mySrd);
 
@@ -574,11 +576,11 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 			String obsResBody = myFhirContext.newJsonParser().encodeResourceToString(o);
 
 			o.setId(new IdType("obs-to-delete"));
-			DaoMethodOutcome toDeleteObs = myObservationDao.update(o);
+			DaoMethodOutcome toDeleteObs = myObservationDao.update(o, newSrd());
 			DaoMethodOutcome deletedObsVersionBeforeDate = myObservationDao.delete(toDeleteObs.getId(), mySrd);
 
 			o.setId(new IdType("obs-to-keep"));
-			DaoMethodOutcome toKeepObs = myObservationDao.update(o);
+			DaoMethodOutcome toKeepObs = myObservationDao.update(o, newSrd());
 
 			Patient p = new Patient().setActive(true);
 			p.setId("p1");
@@ -589,10 +591,10 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 			sleepAtLeast(1000);
 
 			o.setId(new IdType("obs-to-keep-2"));
-			DaoMethodOutcome toKeepObs2 = myObservationDao.update(o);
+			DaoMethodOutcome toKeepObs2 = myObservationDao.update(o, newSrd());
 
 			o.setId(new IdType("obs-to-delete-2"));
-			DaoMethodOutcome toDeleteObs2 = myObservationDao.update(o);
+			DaoMethodOutcome toDeleteObs2 = myObservationDao.update(o, newSrd());
 			DaoMethodOutcome deletedObsVersionAfterDate = myObservationDao.delete(toDeleteObs2.getId(), mySrd);
 
 			JpaPid obsDeletedJpaPid = (JpaPid) toDeleteObs.getPersistentId();
@@ -609,7 +611,7 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 
 			// When
 			String theFullUrl = "Observation?_includeDeleted=" + theIncludeDeleted.getCode() + buildAdditionalSearchParams(theIncludeDeleted, theLastUpdatedParam, theIdParam, date);
-			ourLog.info("Reindexing with URL: " + theFullUrl);
+			ourLog.info("Reindexing with URL: {}", theFullUrl);
 			doOptimizeStorageReindexWithUrl(theFullUrl);
 
 			// Then
@@ -681,19 +683,19 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 			String obsResBody = myFhirContext.newJsonParser().encodeResourceToString(o);
 
 			o.setId(new IdType("obs1"));
-			DaoMethodOutcome obs1 = myObservationDao.update(o);
+			DaoMethodOutcome obs1 = myObservationDao.update(o, newSrd());
 			JpaPid obs1Pid = (JpaPid) obs1.getPersistentId();
 			DaoMethodOutcome obs1Deleted = myObservationDao.delete(obs1.getId(), mySrd);
 			JpaPid obs1DeletedPid = (JpaPid) obs1Deleted.getPersistentId();
 
 			o.setId(new IdType("obs2"));
-			DaoMethodOutcome obs2 = myObservationDao.update(o);
+			DaoMethodOutcome obs2 = myObservationDao.update(o, newSrd());
 			JpaPid obs2Pid = (JpaPid) obs2.getPersistentId();
 			DaoMethodOutcome obs2Deleted = myObservationDao.delete(obs2.getId(), mySrd);
 			JpaPid obs2DeletedPid = (JpaPid) obs2Deleted.getPersistentId();
 
 			o.setId(new IdType("obs3"));
-			DaoMethodOutcome obs3 = myObservationDao.update(o);
+			DaoMethodOutcome obs3 = myObservationDao.update(o, newSrd());
 			JpaPid obs3Pid = (JpaPid) obs3.getPersistentId();
 			DaoMethodOutcome obs3Deleted = myObservationDao.delete(obs3.getId(), mySrd);
 			JpaPid obs3DeletedPid = (JpaPid) obs3Deleted.getPersistentId();
@@ -842,7 +844,7 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 			assertEquals(1, entriesInSpIndexTokenTable);
 
 			// simulate resource deletion
-			ResourceTable resource = myResourceTableDao.findById(obsId.getIdPartAsLong()).orElseThrow();
+			ResourceTable resource = myResourceTableDao.findById(JpaPid.fromId(obsId.getIdPartAsLong())).orElseThrow();
 			Date currentDate = new Date();
 			resource.setDeleted(currentDate);
 			resource.setUpdated(currentDate);
@@ -869,7 +871,7 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testReindex_Everything() {
+	public void testReindex_noUrl_reindexesAll() {
 		// setup
 
 		for (int i = 0; i < 50; ++i) {
@@ -912,21 +914,86 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testReindex_DuplicateResourceBeforeEnforceUniqueShouldSaveWarning() {
-		myReindexTestHelper.createObservationWithStatusAndCode();
-		myReindexTestHelper.createObservationWithStatusAndCode();
+	void testReindex_domainResourceBasedSearchParameterChange_reindexesAllResourceTypes() {
+		// setup - create resources while auto-reindex is disabled so they won't be indexed with the new SPs
+		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);
 
-		DaoMethodOutcome searchParameter = myReindexTestHelper.createUniqueCodeSearchParameter();
+		for (int i = 0; i < 3; i++) {
+			myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.FINAL);
+		}
+		for (int i = 0; i < 3; i++) {
+			myReindexTestHelper.createEyeColourPatient(true);
+		}
+
+		myReindexTestHelper.createAlleleSearchParameter();
+		myReindexTestHelper.createEyeColourSearchParameter();
+		mySearchParamRegistry.forceRefresh();
+
+		// verify the new SPs are not yet reflected in index
+		assertThat(myReindexTestHelper.getAlleleObservationIds()).isEmpty();
+		assertThat(myReindexTestHelper.getEyeColourPatientIds()).isEmpty();
+
+		// execute - create a DomainResource-based SP with auto-reindex enabled, triggering a full reindex
+		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(true);
+
+		SearchParameter domainResourceSp = new SearchParameter();
+		domainResourceSp.setId("SearchParameter/domain-resource-sp");
+		domainResourceSp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		domainResourceSp.addBase("DomainResource");
+		domainResourceSp.setCode("domain-ext");
+		domainResourceSp.setType(Enumerations.SearchParamType.TOKEN);
+		domainResourceSp.setExpression("DomainResource.text");
+		mySearchParameterDao.update(domainResourceSp, mySrd);
+
+		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(JOB_REINDEX);
+
+		// validate - both Observations and Patients should now be indexed with the allele/eyecolour SPs
+		assertThat(myReindexTestHelper.getAlleleObservationIds()).hasSize(3);
+		assertThat(myReindexTestHelper.getEyeColourPatientIds()).hasSize(3);
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testReindex_DuplicateResourceBeforeEnforceUniqueShouldSaveWarning(boolean theIndividualBatches) {
+		// Setup
+		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);
+		myReindexTestHelper.createObservationWithStatusAndCode();
+		myReindexTestHelper.createObservationWithStatusAndCode();
+		myReindexTestHelper.createUniqueCodeSearchParameter();
+
+		ReindexJobParameters jobParameters = new ReindexJobParameters();
+
+		/*
+		 * Two paths here to verify reindex failure modes when a new unique index was added,
+		 * and multiple resources have the duplicate values meaning they violate the added
+		 * unique constraint:
+		 *
+		 * If we use a batch size of 1, one chunk should succeed but the other should fail.
+		 * If we use a large batch size, both resources will be in the same chunk and both
+		 * will fail.
+		 *
+		 * In both cases, the job should fail because at least one resource has failed to
+		 * reindex. We just want to make sure that both paths produce
+		 * the same result.
+		 */
+		if (theIndividualBatches) {
+			jobParameters.setBatchSize(1);
+		} else {
+			jobParameters.setBatchSize(100);
+		}
 
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(JOB_REINDEX);
-		startRequest.setParameters(new ReindexJobParameters());
-		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest);
-		JobInstance myJob = myBatch2JobHelper.awaitJobCompletion(startResponse);
+		startRequest.setParameters(jobParameters);
 
-		assertEquals(StatusEnum.COMPLETED, myJob.getStatus());
-		assertNotNull(myJob.getWarningMessages());
-		assertThat(myJob.getWarningMessages()).contains("Failed to reindex resource because unique search parameter " + searchParameter.getEntity().getIdDt().toVersionless().toString());
+		// Test
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest);
+		JobInstance myJob = myBatch2JobHelper.awaitJobFailure(startResponse);
+
+		// Verify
+		assertEquals(StatusEnum.FAILED, myJob.getStatus());
+		assertThat(myJob.getErrorMessage()).contains("See report for details");
+		assertThat(myJob.getReport()).contains("Observation as it would create a duplicate unique index matching query: Observation?code=http%3A%2F%2Floinc.org%7C29463-7");
 	}
 
 	@Test
@@ -1045,7 +1112,7 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 		// This observation will fail
 		String failingId = myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.FINAL).toUnqualifiedVersionless().getValue();
 		// This observation will succeed
-		String passingId = myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.FINAL).toUnqualifiedVersionless().getValue();
+		myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.FINAL).toUnqualifiedVersionless().getValue();
 		myReindexTestHelper.createAlleleSearchParameter();
 		mySearchParamRegistry.forceRefresh();
 

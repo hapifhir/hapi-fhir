@@ -111,8 +111,21 @@ public class RequestPartitionId implements IModelJson {
 		myAllPartitions = true;
 	}
 
-	@Nonnull
+	/**
+	 * @deprecated Use {@link #getPartitionFromUserDataIfPresent(IBaseResource)}
+	 */
+	@Deprecated(since = "8.10.0", forRemoval = true)
 	public static Optional<RequestPartitionId> getPartitionIfAssigned(IBaseResource theFromResource) {
+		return getPartitionFromUserDataIfPresent(theFromResource);
+	}
+
+	/**
+	 * Fetches the {@link RequestPartitionId} from the given resource's user data using the
+	 * {@link Constants#RESOURCE_PARTITION_ID} key. This key is set by the JPA layer when
+	 * fetching resources from the database.
+	 */
+	@Nonnull
+	public static Optional<RequestPartitionId> getPartitionFromUserDataIfPresent(IBaseResource theFromResource) {
 		return Optional.ofNullable((RequestPartitionId) theFromResource.getUserData(Constants.RESOURCE_PARTITION_ID));
 	}
 
@@ -123,14 +136,19 @@ public class RequestPartitionId implements IModelJson {
 	 * partition names and dates are ignored and not returned. This {@link RequestPartitionId}
 	 * and {@literal theOther} are not modified.
 	 *
+	 * @param theOther The {@link RequestPartitionId} to merge in. If {@literal null}, this method will simply return {@literal this}.
 	 * @since 7.4.0
 	 */
-	public RequestPartitionId mergeIds(RequestPartitionId theOther) {
+	public RequestPartitionId mergeIds(@Nullable RequestPartitionId theOther) {
+		if (theOther == null) {
+			return this;
+		}
+
 		if ((isAllPartitions() && !hasPartitionIds()) || (theOther.isAllPartitions() && !theOther.hasPartitionIds())) {
 			return RequestPartitionId.allPartitions();
 		}
 
-		// don't know why this is required - otherwise PartitionedStrictTransactionR4Test fails
+		// Short circuit if we're merging something identical in
 		if (this.equals(theOther)) {
 			return this;
 		}
@@ -390,16 +408,6 @@ public class RequestPartitionId implements IModelJson {
 	}
 
 	/**
-	 * @deprecated use {@link RequestPartitionId#defaultPartition(IDefaultPartitionSettings)} instead
-	 */
-	@Deprecated
-	@Nonnull
-	//	TODO GGG: This is a now-bad usage and we should remove it. we cannot assume null means default.
-	public static RequestPartitionId defaultPartition() {
-		return fromPartitionIds(Collections.singletonList(null));
-	}
-
-	/**
 	 * Creates a RequestPartitionId for the default partition using the provided partition settings.
 	 * This method uses the default partition ID from the given settings to create the RequestPartitionId.
 	 *
@@ -409,13 +417,6 @@ public class RequestPartitionId implements IModelJson {
 	@Nonnull
 	public static RequestPartitionId defaultPartition(IDefaultPartitionSettings theDefaultPartitionSettings) {
 		return fromPartitionId(theDefaultPartitionSettings.getDefaultPartitionId());
-	}
-
-	@Deprecated
-	@Nonnull
-	//	TODO GGG: This is a now-bad usage and we should remove it. we cannot assume null means default.
-	public static RequestPartitionId defaultPartition(@Nullable LocalDate thePartitionDate) {
-		return fromPartitionIds(Collections.singletonList(null), thePartitionDate);
 	}
 
 	@Nonnull

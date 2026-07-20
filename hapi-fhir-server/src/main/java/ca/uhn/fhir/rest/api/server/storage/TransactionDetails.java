@@ -31,6 +31,7 @@ import com.google.common.collect.ListMultimap;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -80,19 +81,35 @@ public class TransactionDetails {
 	private EnumSet<Pointcut> myDeferredInterceptorBroadcastPointcuts;
 	private boolean myFhirTransaction;
 	private List<IIdType> myAutoCreatedPlaceholderResources = Collections.emptyList();
+	private IBaseBundle myTransactionBundle;
 
 	/**
 	 * Constructor
 	 */
 	public TransactionDetails() {
-		this(new Date());
+		this(new Date(), null);
 	}
 
 	/**
 	 * Constructor
 	 */
 	public TransactionDetails(Date theTransactionDate) {
+		this(theTransactionDate, null);
+	}
+
+	/**
+	 * Constructor
+	 */
+	public TransactionDetails(IBaseBundle theTransactionBundle) {
+		this(new Date(), theTransactionBundle);
+	}
+
+	/**
+	 * Constructor
+	 */
+	public TransactionDetails(Date theTransactionDate, IBaseBundle theTransactionBundle) {
 		myTransactionDate = theTransactionDate;
+		myTransactionBundle = theTransactionBundle;
 	}
 
 	/**
@@ -101,14 +118,21 @@ public class TransactionDetails {
 	 * @since 5.5.0
 	 */
 	public List<Runnable> getRollbackUndoActions() {
+		if (myRollbackUndoActions.isEmpty()) {
+			// Empty collection is immutable already
+			return myRollbackUndoActions;
+		}
 		return Collections.unmodifiableList(myRollbackUndoActions);
 	}
 
 	/**
 	 * Add an action that should be executed if the transaction is rolled back. If a rollback is triggered, the
-	 * actions will be executed in reverse order in order to leave .
+	 * actions will be executed in reverse order in order to undo any state changes or perform other cleanup.
+	 *
+	 * @param theRunnable The action to execute (can optionally be an instance of {@link IExceptionAwareRollbackAction})
 	 *
 	 * @since 5.5.0
+	 * @see IExceptionAwareRollbackAction
 	 */
 	public void addRollbackUndoAction(@Nonnull Runnable theRunnable) {
 		assert theRunnable != null;
@@ -517,6 +541,10 @@ public class TransactionDetails {
 			myAutoCreatedPlaceholderResources = Collections.emptyList();
 		}
 		return retVal;
+	}
+
+	public IBaseBundle getTransactionBundle() {
+		return myTransactionBundle;
 	}
 
 	public <T extends IResourcePersistentId<?>> IIdType getReverseResolvedId(T thePid) {

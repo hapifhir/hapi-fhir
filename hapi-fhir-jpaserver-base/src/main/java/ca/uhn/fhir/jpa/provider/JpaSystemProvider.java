@@ -246,13 +246,10 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 			IdDt sourceId = new IdDt(theSourceId.getValue());
 			IdDt targetId = new IdDt(theTargetId.getValue());
 
-			RequestPartitionId partitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(
-					theRequestDetails, ReadPartitionIdRequestDetails.forRead(targetId));
-
 			int resourceLimit = myStorageSettings.getInternalSynchronousSearchSize();
 
 			UndoReplaceReferencesRequest undoReplaceReferencesRequest =
-					new UndoReplaceReferencesRequest(sourceId, targetId, partitionId, resourceLimit);
+					new UndoReplaceReferencesRequest(sourceId, targetId, resourceLimit);
 
 			return getUndoReplaceReferencesSvc().undoReplaceReferences(undoReplaceReferencesRequest, theRequestDetails);
 		} finally {

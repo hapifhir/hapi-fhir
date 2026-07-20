@@ -40,8 +40,8 @@
  *
  * </p><p>
  *
- * Once a minute, Quartz runs the  {@link ca.uhn.fhir.batch2.api.IJobMaintenanceService#runMaintenancePass() maintenance pass}.
- * This loop inspects every job, and dispatches to {@link ca.uhn.fhir.batch2.maintenance.JobInstanceProcessor#process() the JobInstanceProcessor}.
+ * Once a minute, Quartz runs the  {@link ca.uhn.fhir.batch2.api.IJobMaintenanceService#runActiveJobMaintenancePass() maintenance pass}.
+ * This loop inspects every job, and dispatches to {@link ca.uhn.fhir.batch2.maintenance.ActiveJobInstanceProcessor#process() the JobInstanceProcessor}.
  * The JobInstanceProcessor counts the outstanding chunks for a job, and uses these statistics to fire the working state transitions (below).
  *
  * </p><p>
@@ -113,6 +113,11 @@
  *    <li> As a special case, if the first chunk produces no children, the job advances IN_PROGRESS->COMPLETE
  *         {@link ca.uhn.fhir.batch2.coordinator.JobStepExecutor#executeStep()}
  *         </li>
+ *    <li> If the state change was from IN_PROGRESS->IN_PROGRESS, this signals a potentially slow (or dead) worker.
+ *         Said chunks may be delayed and put back onto the queue to give slow workers time to catch up (so as not to
+ *         duplicate work - which might compromise data in the case of certain non-idempotent options).
+ *         {@link ca.uhn.fhir.batch2.coordinator.WorkChannelMessageListener.MessageProcess#handlePotentiallySlowWorkChunk()}
+ *        </li>
  *    <li> Other transitions happen during maintenance runs. If a job is running, and the user has requested cancellation,
  *         the job transitions (IN_PROGRESS or ERRORED) -> CANCELLED.
  *         </li>
@@ -126,7 +131,7 @@
  *        </li>
  *    <li> Gated jobs that have a reducer step will transtion (IN_PROGRESS or ERRORED) -> FINALIZE when
  *         starting the reduction step
- *         {@link ca.uhn.fhir.batch2.maintenance.JobInstanceProcessor#triggerGatedExecutions}
+ *         {@link ca.uhn.fhir.batch2.maintenance.ActiveJobInstanceProcessor#triggerGatedExecutions}
  *         </li>
  * </ul>
  *

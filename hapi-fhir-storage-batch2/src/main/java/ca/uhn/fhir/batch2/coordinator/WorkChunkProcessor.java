@@ -93,14 +93,20 @@ public class WorkChunkProcessor {
 		PT parameters = theInstance.getParameters(jobDefinition.getParametersType());
 
 		IJobStepWorker<PT, IT, OT> worker = step.getJobStepWorker();
-		BaseDataSink<PT, IT, OT> dataSink = getDataSink(theCursor, jobDefinition, instanceId);
+		BaseDataSink<PT, IT, OT> dataSink = getDataSink(theCursor, theWorkChunk, jobDefinition, instanceId);
 
 		assert !step.isReductionStep();
 
 		// all other kinds of steps
 		Validate.notNull(theWorkChunk, "theWorkChunk must not be null");
-		Optional<StepExecutionDetails<PT, IT>> stepExecutionDetailsOpt =
-				getExecutionDetailsForNonReductionStep(theWorkChunk, theInstance, inputType, parameters);
+		Optional<StepExecutionDetails<PT, IT>> stepExecutionDetailsOpt = getExecutionDetailsForNonReductionStep(
+				theWorkChunk,
+				theInstance,
+				inputType,
+				parameters,
+				theCursor.getJobDefinition(),
+				theCursor.getCurrentStepId(),
+				theCursor.getNextStepId());
 		if (stepExecutionDetailsOpt.isEmpty()) {
 			return new JobStepExecutorOutput<>(false, dataSink);
 		}
@@ -119,13 +125,16 @@ public class WorkChunkProcessor {
 	 */
 	@SuppressWarnings("unchecked")
 	<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> BaseDataSink<PT, IT, OT> getDataSink(
-			JobWorkCursor<PT, IT, OT> theCursor, JobDefinition<PT> theJobDefinition, String theInstanceId) {
+			JobWorkCursor<PT, IT, OT> theCursor,
+			WorkChunk theWorkChunk,
+			JobDefinition<PT> theJobDefinition,
+			String theInstanceId) {
 		BaseDataSink<PT, IT, OT> dataSink;
 
 		assert !theCursor.isReductionStep();
 		if (theCursor.isFinalStep()) {
 			dataSink = (BaseDataSink<PT, IT, OT>) new FinalStepDataSink<>(
-					theJobDefinition.getJobDefinitionId(), theInstanceId, theCursor.asFinalCursor());
+					theJobDefinition.getJobDefinitionId(), theInstanceId, theWorkChunk, theCursor.asFinalCursor());
 		} else {
 			dataSink = new JobDataSink<>(
 					myBatchJobSender,
@@ -133,6 +142,7 @@ public class WorkChunkProcessor {
 					theJobDefinition,
 					theInstanceId,
 					theCursor,
+					theWorkChunk,
 					myHapiTransactionService);
 		}
 		return dataSink;
@@ -143,7 +153,13 @@ public class WorkChunkProcessor {
 	 */
 	private <PT extends IModelJson, IT extends IModelJson>
 			Optional<StepExecutionDetails<PT, IT>> getExecutionDetailsForNonReductionStep(
-					WorkChunk theWorkChunk, JobInstance theInstance, Class<IT> theInputType, PT theParameters) {
+					WorkChunk theWorkChunk,
+					JobInstance theInstance,
+					Class<IT> theInputType,
+					PT theParameters,
+					JobDefinition<PT> theJobDefinition,
+					String theCurrentStepId,
+					String theNextStepId) {
 		IT inputData = null;
 
 		if (!theInputType.equals(VoidModel.class)) {
@@ -159,6 +175,13 @@ public class WorkChunkProcessor {
 		}
 
 		return Optional.of(new StepExecutionDetails<>(
-				theParameters, inputData, theInstance, theWorkChunk, myJobStepExecutionServices));
+				theParameters,
+				inputData,
+				theInstance,
+				theWorkChunk,
+				myJobStepExecutionServices,
+				theJobDefinition,
+				theCurrentStepId,
+				theNextStepId));
 	}
 }

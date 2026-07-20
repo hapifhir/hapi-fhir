@@ -1,0 +1,166 @@
+/*-
+ * #%L
+ * HAPI FHIR JPA Server
+ * %%
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
+
+import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import jakarta.annotation.Nonnull;
+import org.apache.commons.csv.CSVRecord;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.StringType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.apache.commons.lang3.StringUtils.firstNonBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
+
+/**
+ * @see ImportLoincJobAppCtx#importLoincStep2Concepts()
+ */
+public class ImportLoincStep2HandleConcepts
+		extends BaseImportLoincStep<ImportLoincStep2HandleConcepts.CodeExtractionContext> {
+	private static final Logger ourLog = LoggerFactory.getLogger(ImportLoincStep2HandleConcepts.class);
+
+	@Nonnull
+	@Override
+	public List<LoincFileNameSpecification> getFilesToProcess(
+			StepExecutionDetails<ImportTerminologyJobParameters, ?> theStepExecutionDetails) {
+		return List.of(new LoincFileNameSpecification(
+				FileHandlingType.CSV_SPLIT_WITH_REPEAT_HEADER_1000_LINE_CHUNKS,
+				LoincUploadPropertiesEnum.LOINC_FILE,
+				LoincUploadPropertiesEnum.LOINC_FILE_DEFAULT));
+	}
+
+	@Override
+	protected CodeExtractionContext newContextObject(
+			StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
+		return new ImportLoincStep2HandleConcepts.CodeExtractionContext();
+	}
+
+	@Override
+	protected void handleRecord(
+			StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> theStepExecutionDetails,
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			ImportTerminologyJobParameters theJobParameters,
+			CodeExtractionContext theContext,
+			CSVRecord theRecord,
+			CodeSystem theCodeSystemToPopulate,
+			TerminologyFileSetJson theData,
+			String theSourceFilename) {
+
+		Map<String, CodeSystem.PropertyType> propertyNameToType = theContext.getPropertyNameToType(theJobMetadata);
+
+		String code = trim(theRecord.get("LOINC_NUM"));
+		if (isNotBlank(code)) {
+			String longCommonName = trim(theRecord.get("LONG_COMMON_NAME"));
+			String shortName = trim(theRecord.get("SHORTNAME"));
+			String consumerName = trim(theRecord.get("CONSUMER_NAME"));
+			String display = firstNonBlank(longCommonName, shortName, consumerName);
+
+			CodeSystem.ConceptDefinitionComponent concept = getOrAddConcept(theContext, code);
+			concept.setCode(code);
+			concept.setDisplay(display);
+
+			if (isNotBlank(shortName) && !display.equalsIgnoreCase(shortName)) {
+				CodeSystem.ConceptDefinitionDesignationComponent shortNameDesignation = concept.addDesignation();
+				shortNameDesignation.setUse(new Coding(null, null, "ShortName"));
+				shortNameDesignation.setValue(shortName);
+			}
+
+			for (String nextPropertyName : propertyNameToType.keySet()) {
+				if (!theRecord.toMap().containsKey(nextPropertyName)) {
+					continue;
+				}
+
+				CodeSystem.PropertyType nextPropertyType = propertyNameToType.get(nextPropertyName);
+
+				String nextPropertyValue = theRecord.get(nextPropertyName);
+				if (isNotBlank(nextPropertyValue)) {
+					nextPropertyValue = trim(nextPropertyValue);
+
+					switch (nextPropertyType) {
+						case STRING:
+							concept.addProperty().setCode(nextPropertyName).setValue(new StringType(nextPropertyValue));
+							ourLog.trace(
+									"Adding string property: {} to concept.code {}",
+									nextPropertyName,
+									concept.getCode());
+							break;
+
+						case CODING:
+							// "Coding" property types are handled by loincCodingProperties, partlink, hierarchy,
+							// RsnaPlaybook or DocumentOntology handlers
+							break;
+
+						case DECIMAL:
+						case CODE:
+						case INTEGER:
+						case BOOLEAN:
+						case DATETIME:
+						case NULL:
+							throw new InternalErrorException(Msg.code(915)
+									+ "Don't know how to handle LOINC property of type: " + nextPropertyType);
+					}
+				}
+			}
+
+			boolean existingValue = theContext.getSeenCodes().add(code);
+			if (!existingValue) {
+				throw new JobExecutionFailedException(
+						Msg.code(2942) + "The code " + code + " has appeared more than once");
+			}
+		}
+	}
+
+	@Override
+	protected int syncToDb(
+			ImportTerminologyMetadataAttachmentJson theJobMetadata,
+			CodeExtractionContext theCodeExtractionContext,
+			CodeSystem theCodeSystemToPopulate,
+			StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
+		int retVal = super.syncToDb(
+				theJobMetadata, theCodeExtractionContext, theCodeSystemToPopulate, theStepExecutionDetails);
+		ourLog.info(
+				"LOINC CodeSystem populated with {} concepts",
+				theCodeSystemToPopulate.getConcept().size());
+		return retVal;
+	}
+
+	protected static class CodeExtractionContext extends BaseImportLoincStep.MyBaseContext {
+
+		private final Set<String> mySeenCodes = new HashSet<>();
+
+		public Set<String> getSeenCodes() {
+			return mySeenCodes;
+		}
+	}
+}

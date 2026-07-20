@@ -273,7 +273,7 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 		List<? extends BaseResourceIndexedSearchParam> repositorySearchParams =
 			getAndValidateIndexedSearchParamsRepository(theIndexedSpRepository, theId, theSearchParam, theResourceType);
 
-		long hash = SearchParamHash.hashSearchParam(new PartitionSettings(), null, theResourceType, theSearchParam);
+		long hash = SearchParamHash.hashSearchParam(new PartitionSettings(), RequestPartitionId.fromPartitionId(null), theResourceType, theSearchParam);
 		if (myStorageSettings.isIndexStorageOptimized()) {
 			// validated sp_name, res_type, sp_updated columns are null in DB
 			runInTransaction(() -> {
@@ -300,7 +300,7 @@ public class FhirResourceDaoR4IndexStorageOptimizedTest extends BaseJpaR4Test {
 		JpaRepository<? extends BaseResourceIndexedSearchParam, Long> theIndexedSpRepository,
 		IIdType theId, String theSearchParam, String theResourceType) {
 		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(new PartitionSettings(),
-			RequestPartitionId.defaultPartition(), theResourceType, theSearchParam);
+			RequestPartitionId.fromPartitionId(null), theResourceType, theSearchParam);
 
 		await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
 			IndexedSearchParamIdentity spIdentity = runInTransaction(() ->

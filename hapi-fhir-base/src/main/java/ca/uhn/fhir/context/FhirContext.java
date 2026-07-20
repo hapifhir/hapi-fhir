@@ -51,6 +51,7 @@ import ca.uhn.fhir.util.VersionUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.jena.riot.Lang;
@@ -382,9 +383,27 @@ public class FhirContext {
 	 * </p>
 	 */
 	@Nullable
-	public BaseRuntimeElementDefinition<?> getElementDefinition(final String theElementName) {
+	public BaseRuntimeElementDefinition<?> getElementDefinition(@Nonnull final String theElementName) {
+		Validate.notBlank(theElementName, "theElementName must not be null or blank");
 		validateInitialized();
 		return myNameToElementDefinition.get(theElementName.toLowerCase());
+	}
+
+	/**
+	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
+	 * for extending the core library. Will not return null, and will throw an exception if the name is not known.
+	 * <p>
+	 * Note that this method is case insensitive!
+	 * </p>
+	 *
+	 * @since 8.12.0
+	 */
+	@Nonnull
+	public BaseRuntimeElementDefinition<?> getElementDefinitionNotNull(final String theElementName) {
+		validateInitialized();
+		BaseRuntimeElementDefinition<?> retVal = getElementDefinition(theElementName);
+		Validate.isTrue(retVal != null, "No element definition found for name: %s", theElementName);
+		return retVal;
 	}
 
 	/**
@@ -611,6 +630,27 @@ public class FhirContext {
 			}
 		}
 		return retVal;
+	}
+
+	/**
+	 * Returns whether the given resource name resolves to a known/valid FHIR resource type
+	 * in this context. Encapsulates the {@link DataFormatException} thrown by
+	 * {@link #getResourceDefinition(String)} for unknown names — returning {@code false}
+	 * instead. Also returns {@code false} when the input is blank or when the lookup
+	 * yields {@code null}.
+	 *
+	 * @param theResourceName The resource type name to check (case insensitive).
+	 * @return {@code true} if the name resolves to a known resource type, {@code false} otherwise.
+	 */
+	public boolean isKnownResourceType(String theResourceName) {
+		if (StringUtils.isBlank(theResourceName)) {
+			return false;
+		}
+		try {
+			return getResourceDefinition(theResourceName) != null;
+		} catch (DataFormatException e) {
+			return false;
+		}
 	}
 
 	/**
