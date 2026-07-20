@@ -26,15 +26,15 @@ The Batch Job Coordinator will then store two records in the database:
 
 A Scheduled Job runs periodically (once a minute).  For each Job Instance in the database, it:
 
-1. Calculates job progress (% of work chunks in `COMPLETE` status). If the job is finished, purges any left over work chunks still in the database.
+1. Calculates job progress (% of work chunks in `COMPLETED` status). If the job is finished, purges any left over work chunks still in the database.
 1. Moves all `POLL_WAITING` work chunks to `READY` if their `nextPollTime` has expired.
-1. Calculates job progress (% of work chunks in `COMPLETE` status). If the job is finished, purges any leftover work chunks still in the database.
+1. Calculates job progress (% of work chunks in `COMPLETED` status). If the job is finished, purges any leftover work chunks still in the database.
 1. Cleans up any complete, failed, or cancelled jobs that need to be removed.
 1. When the current step is complete, moves any gated jobs onto their next step and updates all chunks in `GATE_WAITING` to `READY`. If the job is being moved to its final reduction step, chunks are moved from `GATE_WAITING` to `REDUCTION_READY` and a 'driver' chunk is created in the `READY` state.
 1. Moves all `READY` work chunks into the `QUEUED` state and publishes a message to the Batch Notification Message Channel to inform worker threads that a work chunk is now ready for processing. \*
 1. If the final step of a gated job is a reduction step:
    - the driver chunk is consumed by a worker and a reduction execution is triggered (all `REDUCTION_READY` chunks are consumed).
-   - all `REDUCTION_READY` chunks, the driver chunk, and the job are all transitioned to `COMPLETE`
+   - all `REDUCTION_READY` chunks, the driver chunk, and the job are all transitioned to `COMPLETED`
 
 \* NB: `REDUCTION_READY` chunks are never sent to the queue, but are consumed directly.
 
