@@ -12,6 +12,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.dao.ReindexOutcome;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
@@ -19,10 +20,12 @@ import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
@@ -66,6 +69,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -93,6 +97,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -167,6 +172,9 @@ class BaseHapiFhirResourceDaoTest {
 
 	@Mock
 	private IFulltextSearchSvc myFulltextSearchDao;
+
+	@Mock
+	private IResourceTableDao myResourceTableDao;
 
 	@Captor
 	private ArgumentCaptor<SearchParameterMap> mySearchParameterMapCaptor;
@@ -497,6 +505,35 @@ class BaseHapiFhirResourceDaoTest {
 
 		// then
 		verify(myFulltextSearchDao).reindex(entity);
+	}
+
+	@Test
+	public void reindex_withFullTextReindexFailure_marksIndexingAsFailed() {
+		// given
+		JpaPid pid = JpaPid.fromId(123L);
+		ResourceTable entity = new ResourceTable();
+		entity.setIdForUnitTest(pid.getId());
+		entity.setResourceType("Patient");
+		entity.setFhirId("123");
+
+		when(myEntityManager.find(ResourceTable.class, pid, LockModeType.OPTIMISTIC)).thenReturn(entity);
+		when(myJpaStorageResourceParser.toResource(entity, false)).thenReturn(new Patient());
+		doReturn(entity)
+				.when(mySpiedSvc)
+				.updateEntity(any(), any(), any(), any(), anyBoolean(), anyBoolean(), any(), anyBoolean(), anyBoolean());
+		doThrow(new IllegalStateException("Full-text failure")).when(myFulltextSearchDao).reindex(entity);
+
+		ReindexParameters params =
+				new ReindexParameters().setReindexSearchParameters(ReindexParameters.ReindexSearchParametersEnum.ALL);
+
+		// when
+		ReindexOutcome outcome = mySpiedSvc.reindex(pid, params, new SystemRequestDetails(), new TransactionDetails());
+
+		// then
+		assertThat(outcome.getWarnings())
+				.containsExactly(
+						"Failed to reindex fulltext index for resource Patient/123/_history/0: java.lang.IllegalStateException: Full-text failure");
+		verify(myResourceTableDao).updateIndexStatus(pid, EntityIndexStatusEnum.INDEXING_FAILED);
 	}
 
 	@ParameterizedTest
