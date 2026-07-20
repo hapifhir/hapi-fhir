@@ -187,9 +187,10 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 			while (true) {
 				String instanceId;
 				synchronized (myInstanceIdToReductionWork) {
-					instanceId = myInstanceIdToReductionWork.keySet()
-						.stream().filter(k -> !failedThisPass.contains(k))
-						.findFirst().orElse(null);
+					instanceId = myInstanceIdToReductionWork.keySet().stream()
+							.filter(k -> !failedThisPass.contains(k))
+							.findFirst()
+							.orElse(null);
 				}
 				if (instanceId == null) {
 					break;
@@ -198,15 +199,13 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 				myCurrentlyFinalizingInstanceId.set(instanceId);
 
 				try (WorkChunkHeartbeatService.HeartbeatHandle handle =
-						 myWorkChunkHeartbeatService.scheduleHeartbeatJob(
-							 instanceId, reductionWork.driverChunkId())) {
+						myWorkChunkHeartbeatService.scheduleHeartbeatJob(instanceId, reductionWork.driverChunkId())) {
 					executeReductionStep(instanceId, reductionWork.jobWorkCursor());
 					myInstanceIdToReductionWork.remove(instanceId);
 				} catch (Exception e) {
 					failedThisPass.add(instanceId);
 					ourLog.error("Failed to execute reduction for instance {}", instanceId, e);
-				}
-				finally {
+				} finally {
 					myCurrentlyFinalizingInstanceId.set(null);
 				}
 			}
