@@ -23,7 +23,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -111,7 +110,7 @@ public class SearchQueryBuilder {
 	private final PartitionSettings myPartitionSettings;
 	private final RequestPartitionId myRequestPartitionId;
 	private final String myResourceType;
-	private final JpaStorageSettings myStorageSettings;
+	private final StorageSettings myStorageSettings;
 	private final FhirContext myFhirContext;
 	private final SqlObjectFactory mySqlBuilderFactory;
 	private final boolean myCountQuery;
@@ -135,7 +134,7 @@ public class SearchQueryBuilder {
 	 */
 	public SearchQueryBuilder(
 			FhirContext theFhirContext,
-			JpaStorageSettings theStorageSettings,
+			StorageSettings theStorageSettings,
 			PartitionSettings thePartitionSettings,
 			RequestPartitionId theRequestPartitionId,
 			String theResourceType,
@@ -164,7 +163,7 @@ public class SearchQueryBuilder {
 	 */
 	private SearchQueryBuilder(
 			FhirContext theFhirContext,
-			JpaStorageSettings theStorageSettings,
+			StorageSettings theStorageSettings,
 			PartitionSettings thePartitionSettings,
 			RequestPartitionId theRequestPartitionId,
 			String theResourceType,

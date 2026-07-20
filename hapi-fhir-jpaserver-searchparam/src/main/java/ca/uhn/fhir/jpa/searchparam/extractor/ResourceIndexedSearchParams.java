@@ -66,8 +66,6 @@ public final class ResourceIndexedSearchParams {
 	private static final Set<String> myIgnoredParams = Set.of(Constants.PARAM_TEXT, Constants.PARAM_CONTENT);
 	public final Collection<ResourceIndexedSearchParamString> myStringParams;
 	public final Collection<ResourceIndexedSearchParamToken> myTokenParams;
-	//	public final Collection<ResourceIndexedSearchParamTokenCommonRes> myTokenCommonResEntities;
-	//	public final Collection<ResourceIndexedSearchParamTokenIdentifier> myTokenIdentifierEntities;
 	public final Collection<ResourceIndexedSearchParamNumber> myNumberParams;
 	public final Collection<ResourceIndexedSearchParamQuantity> myQuantityParams;
 	public final Collection<ResourceIndexedSearchParamQuantityNormalized> myQuantityNormalizedParams;
@@ -94,8 +92,6 @@ public final class ResourceIndexedSearchParams {
 	private ResourceIndexedSearchParams(Mode theMode) {
 		myStringParams = theMode.newCollection();
 		myTokenParams = theMode.newCollection();
-		//		myTokenCommonResEntities = theMode.newCollection();
-		//		myTokenIdentifierEntities = theMode.newCollection();
 		myNumberParams = theMode.newCollection();
 		myQuantityParams = theMode.newCollection();
 		myQuantityNormalizedParams = theMode.newCollection();
@@ -115,12 +111,7 @@ public final class ResourceIndexedSearchParams {
 			myStringParams.addAll(theEntity.getParamsString());
 		}
 		if (theEntity.isParamsTokenPopulated()) {
-			// Legacy token table only; compressed token routing is provided via a CDR API.
 			myTokenParams.addAll(theEntity.getParamsToken());
-			//			if (theTokenIndexStrategy.writeToCompressedTokenTables()) {
-			//				myTokenCommonResEntities.addAll(theEntity.getParamsTokenCommonRes());
-			//				myTokenIdentifierEntities.addAll(theEntity.getParamsTokenIdentifier());
-			//			}
 		}
 		if (theEntity.isParamsNumberPopulated()) {
 			myNumberParams.addAll(theEntity.getParamsNumber());
@@ -173,8 +164,6 @@ public final class ResourceIndexedSearchParams {
 	public void populateResourceTableParamCollections(ResourceTable theEntity) {
 		theEntity.setParamsString(myStringParams);
 		theEntity.setParamsToken(myTokenParams);
-		//		theEntity.setParamsTokenCommonRes(myTokenCommonResEntities);
-		//		theEntity.setParamsTokenIdentifier(myTokenIdentifierEntities);
 		theEntity.setParamsNumber(myNumberParams);
 		theEntity.setParamsQuantity(myQuantityParams);
 		theEntity.setParamsQuantityNormalized(myQuantityNormalizedParams);
@@ -711,8 +700,8 @@ public final class ResourceIndexedSearchParams {
 	}
 
 	/**
-	 * Create a new instance holding all existing indexes in lists (duplicates preserved):
-	 * legacy token rows included, compressed token rows excluded (compressed routing is provided via a CDR API).
+	 * Create a new instance that holds all the existing indexes
+	 * in lists so that any duplicates are preserved.
 	 */
 	public static ResourceIndexedSearchParams withLists(ResourceTable theResourceTable) {
 		return new ResourceIndexedSearchParams(theResourceTable, Mode.LIST);

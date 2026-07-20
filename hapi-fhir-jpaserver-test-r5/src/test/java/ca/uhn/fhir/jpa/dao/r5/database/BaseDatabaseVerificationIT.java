@@ -157,6 +157,7 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 		assertThatExceptionOfType(ResourceGoneException.class).isThrownBy(() -> myPatientDao.read(id, new SystemRequestDetails()));
 	}
 
+
 	@Test
 	public void testEverything() {
         Set<String> expectedIds = new HashSet<>();

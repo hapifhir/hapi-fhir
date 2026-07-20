@@ -2,13 +2,13 @@ package ca.uhn.fhir.jpa.search.builder.sql;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirMariaDBDialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirOracleDialect;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
 import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import com.google.common.collect.Lists;
@@ -45,7 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class SearchQueryBuilderTest {
 
 	private FhirContext myFhirContext;
-	private JpaStorageSettings myStorageSettings;
+	private StorageSettings myStorageSettings;
 	private PartitionSettings myPartitionSettings;
 	private RequestPartitionId myRequestPartitionId;
 
@@ -55,7 +55,7 @@ public class SearchQueryBuilderTest {
 	@BeforeEach
 	public void before() {
 		myFhirContext = FhirContext.forR4Cached();
-		myStorageSettings = new JpaStorageSettings();
+		myStorageSettings = new StorageSettings();
 		myPartitionSettings = new PartitionSettings();
 		myRequestPartitionId = RequestPartitionId.allPartitions();
 	}
