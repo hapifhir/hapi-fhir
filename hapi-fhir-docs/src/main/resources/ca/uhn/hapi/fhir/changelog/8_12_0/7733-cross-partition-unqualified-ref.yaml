@@ -1,3 +1,4 @@
 ---
 type: fix
+issue: 7733
 title: "Previously, when searching using an unqualified reference parameter value (e.g. subject=123 instead of subject=Patient/123) in a cross-partition environment, the server would throw an error stating the parameter must be in the format [resourceType]/[id]. The server now correctly handles unqualified reference values by falling back to the search parameter's declared target types to determine the appropriate partition scope."
