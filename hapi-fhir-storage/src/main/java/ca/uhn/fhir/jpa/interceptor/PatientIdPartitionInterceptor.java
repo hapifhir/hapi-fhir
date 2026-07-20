@@ -804,7 +804,7 @@ public class PatientIdPartitionInterceptor {
 		for (IBase entry : thePrefetchDetails.getEntries()) {
 			String fullUrl = versionAdapter.getFullUrl(entry);
 			if (fullUrl == null || !fullUrl.startsWith("urn:uuid:")) {
-				stampIdlessMatchedConditionalUpdate(versionAdapter, theTransactionDetails, entry);
+				setIdOnIdlessMatchedConditionalPatientUpdate(versionAdapter, theTransactionDetails, entry);
 				continue;
 			}
 			IBaseResource resource = versionAdapter.getResource(entry);
@@ -1047,7 +1047,7 @@ public class PatientIdPartitionInterceptor {
 	 * reports the conditional-match outcome natively. An unmatched id-less conditional update is left untouched.
 	 */
 	// Created by Claude Fable 5
-	private void stampIdlessMatchedConditionalUpdate(
+	private void setIdOnIdlessMatchedConditionalPatientUpdate(
 			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
 			TransactionDetails theTransactionDetails,
 			IBase theEntry) {
