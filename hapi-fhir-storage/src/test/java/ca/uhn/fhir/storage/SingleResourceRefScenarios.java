@@ -25,7 +25,7 @@ class SingleResourceRefScenarios implements ArgumentsProvider {
 	public Stream<? extends Arguments> provideArguments(ExtensionContext theContext) {
 		return Stream.of(
 			Arguments.of(
-				"unconditional create Observation | subject referencing a patient",
+				"unconditional create Observation | subject referencing a patient via inline match URL",
 				"""
 					{ "resourceType" : "Bundle", "type" : "transaction",
 						"entry" : [
@@ -49,7 +49,7 @@ class SingleResourceRefScenarios implements ArgumentsProvider {
 				})
 			),
 			Arguments.of(
-				"conditional update (PUT) Observation | subject referencing a patient via inline match URL",
+				"unconditional update Observation | subject referencing a patient via inline match URL",
 				"""
 					{ "resourceType" : "Bundle", "type" : "transaction",
 						"entry" : [
@@ -126,7 +126,7 @@ class SingleResourceRefScenarios implements ArgumentsProvider {
 				})
 			),
 			Arguments.of(
-				"multiple identifier values in one match URL | placeholder has multiple identifiers",
+				"repeated identifier parameter in one match URL | placeholder has multiple identifiers",
 				"""
 					{ "resourceType" : "Bundle", "type" : "transaction",
 						"entry" : [
