@@ -29,21 +29,22 @@ public class WorkChunkHeartbeatService {
 	 * so it might not always be an acktimeout, but could be some other metric
 	 * for how long a message is expected to take to process.
 	 */
-	private Duration myAckTimeout = Duration.ofMillis(1001);
+	private Duration myHeartbeatInterval = Duration.ofMillis(1001);
 
 	public WorkChunkHeartbeatService(ISchedulerService theSchedulerService) {
 		myScheduleSvc = theSchedulerService;
 	}
 
 	/**
-	 * Set the timeout (done asynchronously because we do not have the
-	 * timeout value at initialization)
+	 * Set the timeout (setting comes from queuing service.
+	 * It will be set on startup after said service is online
+	 * so we don't have it until the service starts up)
 	 */
 	public void setAckTimeout(Duration theAckTimeout) {
 		if (theAckTimeout != null) {
-			// we don't want a time that's <100ms
+			// we don't want a time that's too small (eg <100ms)
 			long ackTimeout = Math.max(theAckTimeout.toMillis() / 3, 500);
-			myAckTimeout = Duration.ofMillis(ackTimeout);
+			myHeartbeatInterval = Duration.ofMillis(ackTimeout);
 		}
 	}
 
@@ -60,7 +61,7 @@ public class WorkChunkHeartbeatService {
 		definition.setId(jobId);
 		definition.addJobData(CHUNK_ID, theChunkId);
 		TriggerKey key = definition.toTriggerKey();
-		myScheduleSvc.scheduleLocalJob(myAckTimeout.toMillis(), definition);
+		myScheduleSvc.scheduleLocalJob(myHeartbeatInterval.toMillis(), definition);
 		return () -> myScheduleSvc.unscheduleLocalJobs(key);
 	}
 

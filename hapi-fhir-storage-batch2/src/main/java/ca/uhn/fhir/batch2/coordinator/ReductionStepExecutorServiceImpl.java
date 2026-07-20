@@ -67,10 +67,12 @@ import org.springframework.transaction.annotation.Propagation;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Callable;
@@ -175,35 +177,47 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		}
 	}
 
-	private String firstKey(Map<String, ?> theMap) {
-		return theMap.keySet().stream().findFirst().orElse(null);
-	}
-
 	@Override
 	public void reducerPass() {
-		if (myCurrentlyExecuting.tryAcquire()) {
-			try {
+		if (!myCurrentlyExecuting.tryAcquire()) {
+			return;
+		}
+		try {
+			Set<String> failedThisPass = new HashSet<>();
+			while (true) {
 				String instanceId;
-				while ((instanceId = firstKey(myInstanceIdToReductionWork)) != null) {
-					ReductionStepWork reductionWork = myInstanceIdToReductionWork.get(instanceId);
-					myCurrentlyFinalizingInstanceId.set(instanceId);
+				synchronized (myInstanceIdToReductionWork) {
+					instanceId = myInstanceIdToReductionWork.keySet()
+						.stream().filter(k -> !failedThisPass.contains(k))
+						.findFirst().orElse(null);
+				}
+				if (instanceId == null) {
+					break;
+				}
+				ReductionStepWork reductionWork = myInstanceIdToReductionWork.get(instanceId);
+				myCurrentlyFinalizingInstanceId.set(instanceId);
 
-					try (WorkChunkHeartbeatService.HeartbeatHandle handle =
-							myWorkChunkHeartbeatService.scheduleHeartbeatJob(
-									instanceId, reductionWork.driverChunkId())) {
-						executeReductionStep(instanceId, reductionWork.jobWorkCursor());
-					}
-
-					// If we get here, this succeeded. Purge the instance from the work queue
+				try (WorkChunkHeartbeatService.HeartbeatHandle handle =
+						 myWorkChunkHeartbeatService.scheduleHeartbeatJob(
+							 instanceId, reductionWork.driverChunkId())) {
+					executeReductionStep(instanceId, reductionWork.jobWorkCursor());
 					myInstanceIdToReductionWork.remove(instanceId);
+				} catch (Exception e) {
+					failedThisPass.add(instanceId);
+					ourLog.error("Failed to execute reduction for instance {}", instanceId, e);
+				}
+				finally {
 					myCurrentlyFinalizingInstanceId.set(null);
 				}
-			} catch (Exception e) {
-				ourLog.error("Failed to execute reducer pass", e);
-			} finally {
-				myCurrentlyFinalizingInstanceId.set(null);
-				myCurrentlyExecuting.release();
 			}
+		} catch (Exception e) {
+			ourLog.error("Failed to execute reducer pass", e);
+		} finally {
+			myCurrentlyFinalizingInstanceId.set(null);
+			myCurrentlyExecuting.release();
+		}
+		if (!myInstanceIdToReductionWork.isEmpty()) {
+			myReducerExecutor.submit(this::reducerPass);
 		}
 	}
 
