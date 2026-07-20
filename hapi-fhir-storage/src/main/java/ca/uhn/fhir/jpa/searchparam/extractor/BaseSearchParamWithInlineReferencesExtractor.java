@@ -171,7 +171,6 @@ public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IRe
 				if (newId == null) {
 					newId = myIdHelperService.translatePidIdToForcedId(myFhirContext, resourceTypeString, match);
 				}
-
 				ourLog.debug("Replacing inline match URL[{}] with ID[{}}", nextId.getValue(), newId);
 
 				if (theTransactionDetails != null) {
@@ -184,7 +183,6 @@ public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IRe
 					String previousReference = nextRef.getReferenceElement().getValue();
 					theTransactionDetails.addRollbackUndoAction(() -> nextRef.setReference(previousReference));
 				}
-
 				nextRef.setReference(newId.getValue());
 			}
 		}
