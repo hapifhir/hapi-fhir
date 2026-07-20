@@ -62,7 +62,6 @@ import ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceTargetReque
 import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
-import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.UrlUtil;
@@ -929,18 +928,11 @@ public class PatientIdPartitionInterceptor {
 			String versionedId = locationId.toUnqualified().getValue();
 			String message = restoredOutcomeMessage(code, versionedId, rewrite.conditionalUrl());
 
+			// An entry without a live outcome is left without one: this hook restores what the DAO would have
+			// reported for the original verb, and a DAO that reports nothing would have reported nothing.
 			IBaseOperationOutcome liveOutcome = versionAdapter.getResponseOutcome(entry);
 			if (liveOutcome != null) {
 				restorePrimaryIssue(liveOutcome, code, message);
-			} else {
-				versionAdapter.setResponseOutcome(
-						entry,
-						OperationOutcomeUtil.createOperationOutcome(
-								OperationOutcomeUtil.OO_SEVERITY_INFO,
-								message,
-								OperationOutcomeUtil.OO_ISSUE_CODE_INFORMATIONAL,
-								myFhirContext,
-								code));
 			}
 		}
 	}
