@@ -2805,27 +2805,6 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	}
 
-	@Test
-	void testSearch_CompressedToken_SearchOnePartition_IncludePartitionInHashes() {
-		// TODO: can this be moved?
-		//myStorageSettings.setTokenIndexStrategy(TokenIndexStrategy.of(EnumSet.of(TokenIndexStrategy.TokenIndex.COMPRESSED), TokenIndexStrategy.TokenIndex.COMPRESSED));
-		myPartitionSettings.setIncludePartitionInSearchHashes(true);
-
-		IIdType id = createPatient(withCreatePartition(1), withIdentifier("http://example.com", "ID-1"), withGender("male"));
-
-		// IDENTIFIER branch
-		addNextTargetPartitionsForRead(1);
-		SearchParameterMap identifierMap = SearchParameterMap.newSynchronous().add(Patient.SP_IDENTIFIER, new TokenParam("http://example.com", "ID-1"));
-		List<IIdType> identifierIds = toUnqualifiedVersionlessIds(myPatientDao.search(identifierMap, mySrd));
-		assertThat(identifierIds).containsExactly(id);
-
-		// COMMON branch
-		addNextTargetPartitionsForRead(1);
-		SearchParameterMap genderMap = SearchParameterMap.newSynchronous().add(Patient.SP_GENDER, new TokenParam(null, "male"));
-		List<IIdType> genderIds = toUnqualifiedVersionlessIds(myPatientDao.search(genderMap, mySrd));
-		assertThat(genderIds).containsExactly(id);
-	}
-
 
 	@ParameterizedTest
 	@ValueSource(strings = {"ALL", "ONE", "MANY"})

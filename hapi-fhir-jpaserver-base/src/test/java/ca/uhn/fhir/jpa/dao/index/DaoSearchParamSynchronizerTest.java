@@ -115,8 +115,6 @@ public class DaoSearchParamSynchronizerTest {
 	 * The {@link AddRemoveCount} returned by a custom synchronizer is added to the overall
 	 * synchronization total — the extension reports what it wrote and the aggregation policy stays
 	 * with the caller: 1 built-in token row + 3 custom adds, 0 built-in removes + 2 custom removes.
-	 *
-	 * <p>Created by claude-fable-5.</p>
 	 */
 	@Test
 	void synchronize_addsCustomSynchronizerCountsToTotal() {
@@ -190,8 +188,6 @@ public class DaoSearchParamSynchronizerTest {
 	/**
 	 * The write policy is consulted uniformly for every scalar built-in index type, not just TOKEN:
 	 * a policy vetoing STRING suppresses the string row while the token row is still written.
-	 *
-	 * <p>Created by claude-fable-5.</p>
 	 */
 	@Test
 	void synchronize_whenPolicySuppressesStringType_skipsStringButWritesToken() {
@@ -219,8 +215,6 @@ public class DaoSearchParamSynchronizerTest {
 	 * The write policy is consulted once per scalar index collection — STRING, TOKEN, NUMBER,
 	 * QUANTITY (regular and normalized), DATE, URI and SPECIAL (coords) — and never for resource
 	 * links or combo indexes, which carry no search-parameter semantics.
-	 *
-	 * <p>Created by claude-fable-5.</p>
 	 */
 	@Test
 	void synchronize_policyConsultedForAllScalarIndexTypes() {
