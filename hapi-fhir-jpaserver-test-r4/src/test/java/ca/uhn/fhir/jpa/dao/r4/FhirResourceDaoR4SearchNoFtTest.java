@@ -3625,10 +3625,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			.collect(Collectors.toList());
 		String resultingQueryNotFormatted = queries.get(0);
 
-
 		assertThat(countMatches(resultingQueryNotFormatted, "HASH_VALUE")).as(resultingQueryNotFormatted).isEqualTo(1);
 		assertThat(resultingQueryNotFormatted).contains("HASH_VALUE IN ('3140583648400062149','4929264259256651518')");
-
 
 		// Ensure that the search actually worked
 		assertEquals(2, search.size().intValue());

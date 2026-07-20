@@ -1159,7 +1159,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(12, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(10, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(10, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-		assertEquals(50, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(30, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		assertEquals(10, outcome.getDeletedEntities().size());
 	}
 
@@ -1191,7 +1191,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-		assertEquals(30, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(28, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		assertEquals(10, outcome.getRecordsProcessed());
 		runInTransaction(() -> assertEquals(0, myResourceTableDao.count()));
 	}
@@ -4730,7 +4730,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
-		assertEquals(5, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(3, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		runInTransaction(() -> {
 			ResourceTable version = myResourceTableDao.findById(JpaPid.fromId(patientId.getIdPartAsLong())).orElseThrow();
 			assertFalse(version.isParamsTokenPopulated());
@@ -4763,7 +4763,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myObservationDao.delete(idDt, mySrd);
 
 		// then
-		assertQueryCount(3, 1, 1, 4);
+		assertQueryCount(3, 1, 1, 2);
 		runInTransaction(() -> {
 			assertEquals(0, myResourceIndexedSearchParamTokenDao.count());
 			ResourceTable version = myResourceTableDao.findById(JpaPid.fromId(idDt.getIdPartAsLong())).orElseThrow();
