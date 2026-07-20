@@ -833,21 +833,20 @@ public class PatientIdPartitionInterceptor {
 					idSubstitutions.put(fullUrl, url);
 				}
 			} else {
-				IResourcePersistentId<?> resolved =
-						theTransactionDetails.getResolvedMatchUrls().get(matchUrl);
-				if (resolved != null && resolved != TransactionDetails.NOT_FOUND) {
-					IIdType matchedId = theTransactionDetails.getReverseResolvedId(resolved);
-					if (matchedId != null) {
-						String matchedReference =
-								matchedId.toUnqualifiedVersionless().getValue();
-						idSubstitutions.put(fullUrl, matchedReference);
-						// Stamp the matched id on the body so identifyForCreate can route the entry. The entry stays
-						// conditional: the framework validates the body id against the match and reports the
-						// conditional-match outcome natively. A conditional POST already NOPs to the match correctly,
-						// so it is left alone.
-						if ("PUT".equals(method)) {
-							resource.setId(matchedReference);
-						}
+				PreFetchResolution resolution = getPreFetchResolution(matchUrl, theTransactionDetails);
+				if (resolution.matched() && resolution.matchedId() == null) {
+					// Matched, but without a reverse-mapped id (non-token match URL): the id is unknowable this
+					// early, and minting a new id for a matched URL would be wrong — leave the entry untouched.
+				} else if (resolution.matched()) {
+					String matchedReference =
+							resolution.matchedId().toUnqualifiedVersionless().getValue();
+					idSubstitutions.put(fullUrl, matchedReference);
+					// Stamp the matched id on the body so identifyForCreate can route the entry. The entry stays
+					// conditional: the framework validates the body id against the match and reports the
+					// conditional-match outcome natively. A conditional POST already NOPs to the match correctly,
+					// so it is left alone.
+					if ("PUT".equals(method)) {
+						resource.setId(matchedReference);
 					}
 				} else if (serverAssignsUuids) {
 					// Keep the entry conditional (PUT Patient?<matchUrl>) rather than rewriting it to a direct
@@ -1062,9 +1061,10 @@ public class PatientIdPartitionInterceptor {
 				|| resource.getIdElement().getIdPart() != null) {
 			return;
 		}
-		getPreFetchResolvedId(url, theTransactionDetails)
-				.ifPresent(matchedId ->
-						resource.setId(matchedId.toUnqualifiedVersionless().getValue()));
+		IIdType matchedId = getPreFetchResolution(url, theTransactionDetails).matchedId();
+		if (matchedId != null) {
+			resource.setId(matchedId.toUnqualifiedVersionless().getValue());
+		}
 	}
 
 	/**
@@ -1126,24 +1126,35 @@ public class PatientIdPartitionInterceptor {
 	private void rewriteInlineMatchUrlReference(
 			IBaseReference theReference, String theReferenceValue, TransactionDetails theTransactionDetails) {
 		// Act only on a match URL the pre-fetch resolved to a concrete Patient; otherwise leave the reference as is.
-		getPreFetchResolvedId(theReferenceValue, theTransactionDetails)
-				.ifPresent(resolvedId -> theReference.setReference(
-						resolvedId.toUnqualifiedVersionless().getValue()));
+		IIdType resolvedId =
+				getPreFetchResolution(theReferenceValue, theTransactionDetails).matchedId();
+		if (resolvedId != null) {
+			theReference.setReference(resolvedId.toUnqualifiedVersionless().getValue());
+		}
 	}
 
 	/**
-	 * Returns the concrete FHIR id the pre-fetch resolved for the given match URL (via
-	 * {@link TransactionDetails#getResolvedMatchUrls()} and the reverse-id map), or empty if the URL was not
-	 * resolved to a single existing resource ({@link TransactionDetails#NOT_FOUND}, absent, or no reverse-mapped id).
-	 * No search is performed — we act only on what the pre-fetch put in the transaction details.
+	 * What the pre-fetch resolved for a match URL: {@code matched} is true when the pre-fetch found an existing
+	 * resource. {@code matchedId} carries its FHIR id, or null when the match has no reverse-mapped id (non-token
+	 * match URL) — such an entry is matched yet its id is unknowable this early, so callers that mint ids for
+	 * unmatched URLs must not treat it as unmatched.
 	 */
-	private Optional<IIdType> getPreFetchResolvedId(String theMatchUrl, TransactionDetails theTransactionDetails) {
+	// Created by Claude Fable 5
+	private record PreFetchResolution(boolean matched, @Nullable IIdType matchedId) {}
+
+	/**
+	 * Consults what the pre-fetch resolved for the given match URL, via
+	 * {@link TransactionDetails#getResolvedMatchUrls()} and the reverse-id map. No search is performed — we act
+	 * only on what the pre-fetch put in the transaction details.
+	 */
+	// Created by Claude Fable 5
+	private PreFetchResolution getPreFetchResolution(String theMatchUrl, TransactionDetails theTransactionDetails) {
 		IResourcePersistentId<?> resolved =
 				theTransactionDetails.getResolvedMatchUrls().get(theMatchUrl);
 		if (resolved == null || resolved == TransactionDetails.NOT_FOUND) {
-			return Optional.empty();
+			return new PreFetchResolution(false, null);
 		}
-		return Optional.ofNullable(theTransactionDetails.getReverseResolvedId(resolved));
+		return new PreFetchResolution(true, theTransactionDetails.getReverseResolvedId(resolved));
 	}
 
 	@SuppressWarnings("SameParameterValue")

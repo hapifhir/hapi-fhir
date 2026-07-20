@@ -489,11 +489,16 @@ class PatientIdPartitionInterceptorTest {
 		}
 
 		private void fireHook(Bundle theBundle, TransactionDetails theTransactionDetails) {
+			fireHook(theBundle, theTransactionDetails, new JpaStorageSettings());
+		}
+
+		private void fireHook(
+				Bundle theBundle, TransactionDetails theTransactionDetails, JpaStorageSettings theStorageSettings) {
 			@SuppressWarnings({"unchecked", "rawtypes"})
 			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> adapter =
 					(ITransactionProcessorVersionAdapter) new TransactionProcessorVersionAdapterR4();
 			mySvc.resolvePatientReferencesAfterPreFetch(
-					new TransactionWriteAfterPrefetchDetails(entriesOf(theBundle), adapter, new JpaStorageSettings()),
+					new TransactionWriteAfterPrefetchDetails(entriesOf(theBundle), adapter, theStorageSettings),
 					theTransactionDetails);
 		}
 
@@ -512,6 +517,76 @@ class PatientIdPartitionInterceptorTest {
 			fireHook(bundle, transactionDetails);
 
 			assertThat(obs.getSubject().getReference()).isEqualTo("Patient/A");
+		}
+
+		// Created by Claude Fable 5
+		@Test
+		void testAfterPrefetch_resolvedWithoutReverseId_leftUntouched() {
+			// The full-search fallback (non-token match URL) registers the forward mapping only; without a
+			// reverse-mapped id the reference cannot be rewritten.
+			JpaPid pid = mock();
+			Bundle bundle = bundleWithObservationSubjectReference(PATIENT_IDENTIFIER_MATCH_URL);
+			Observation obs = (Observation) bundle.getEntry().get(0).getResource();
+
+			TransactionDetails transactionDetails = new TransactionDetails();
+			transactionDetails.addResolvedMatchUrl(myFhirContext, PATIENT_IDENTIFIER_MATCH_URL, pid);
+
+			fireHook(bundle, transactionDetails);
+
+			assertThat(obs.getSubject().getReference()).isEqualTo(PATIENT_IDENTIFIER_MATCH_URL);
+		}
+
+		// Created by Claude Fable 5
+		@Test
+		void testAfterPrefetch_conditionalCreateResolvedWithoutReverseId_entryLeftUntouched() {
+			// A conditional entry whose match URL resolved in the forward map only is matched — even under the
+			// UUID strategy no id may be minted for it, and the entry keeps its POST + ifNoneExist shape.
+			JpaPid pid = mock();
+			String matchUrl = "Patient?name=Smith";
+			Patient patient = new Patient();
+			Bundle bundle = new Bundle();
+			bundle.setType(Bundle.BundleType.TRANSACTION);
+			bundle.addEntry()
+					.setFullUrl("urn:uuid:11111111-1111-1111-1111-111111111111")
+					.setResource(patient)
+					.getRequest()
+					.setMethod(Bundle.HTTPVerb.POST)
+					.setUrl("Patient")
+					.setIfNoneExist(matchUrl);
+
+			TransactionDetails transactionDetails = new TransactionDetails();
+			transactionDetails.addResolvedMatchUrl(myFhirContext, matchUrl, pid);
+
+			JpaStorageSettings uuidStrategySettings = new JpaStorageSettings();
+			uuidStrategySettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+			fireHook(bundle, transactionDetails, uuidStrategySettings);
+
+			Bundle.BundleEntryComponent entry = bundle.getEntryFirstRep();
+			assertThat(entry.getRequest().getMethod()).isEqualTo(Bundle.HTTPVerb.POST);
+			assertThat(entry.getRequest().getIfNoneExist()).isEqualTo(matchUrl);
+			assertThat(patient.getIdElement().getIdPart()).isNull();
+		}
+
+		// Created by Claude Fable 5
+		@Test
+		void testAfterPrefetch_idlessConditionalPutResolvedWithoutReverseId_bodyLeftIdless() {
+			// The stamp helper needs the matched id; matched-without-a-reverse-mapped-id must leave the
+			// body untouched, same as unmatched.
+			JpaPid pid = mock();
+			String matchUrl = "Patient?name=Smith";
+			Patient patient = new Patient();
+			Bundle bundle = new Bundle();
+			bundle.setType(Bundle.BundleType.TRANSACTION);
+			bundle.addEntry().setResource(patient).getRequest().setMethod(Bundle.HTTPVerb.PUT).setUrl(matchUrl);
+
+			TransactionDetails transactionDetails = new TransactionDetails();
+			transactionDetails.addResolvedMatchUrl(myFhirContext, matchUrl, pid);
+
+			fireHook(bundle, transactionDetails);
+
+			assertThat(patient.getIdElement().getIdPart()).isNull();
+			assertThat(bundle.getEntryFirstRep().getRequest().getUrl()).isEqualTo(matchUrl);
+			assertThat(bundle.getEntryFirstRep().getRequest().getMethod()).isEqualTo(Bundle.HTTPVerb.PUT);
 		}
 
 		@Test
