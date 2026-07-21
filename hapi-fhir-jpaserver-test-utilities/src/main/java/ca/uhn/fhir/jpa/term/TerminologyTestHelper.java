@@ -23,18 +23,27 @@ import ca.uhn.fhir.batch2.api.AttachmentContentTypeEnum;
 import ca.uhn.fhir.batch2.api.AttachmentDetails;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyModeEnum;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
+import ca.uhn.fhir.jpa.batch2.jobs.term.custom.ImportCustomTerminologyJobAppCtx;
+import ca.uhn.fhir.jpa.batch2.jobs.term.icd.ImportIcdJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.jpa.batch2.jobs.term.snomedct.ImportSnomedCtJobAppCtx;
+import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx;
+import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetParameters;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.util.JsonUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.ByteArrayInputStream;
@@ -65,6 +74,7 @@ import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.L
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_RSNA_PLAYBOOK_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_XML_FILE;
+import static ca.uhn.fhir.jpa.test.BaseJpaTest.newSrd;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -92,6 +102,75 @@ public class TerminologyTestHelper {
 		myValidationSupport = theValidationSupport;
 	}
 
+	public String startImportCustomJobAndWaitForCompletion(
+			String theUrl, String theVersion, ZipCollectionBuilder theFiles, ImportTerminologyModeEnum theMode) {
+		String jobDefinitionId = ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY;
+		String distributionFilename = TerminologyConstants.FILENAME_CUSTOM_DISTRIBUTION_FILE;
+		return startImportTerminologyJob(
+				theUrl, theVersion, theFiles, false, null, jobDefinitionId, distributionFilename, null, true, theMode);
+	}
+
+	public String startImportCustomJobAndWaitForCompletion(
+			String theUrl, String theVersion, ZipCollectionBuilder theFiles) {
+		String jobDefinitionId = ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY;
+		String distributionFilename = TerminologyConstants.FILENAME_CUSTOM_DISTRIBUTION_FILE;
+		return startImportTerminologyJobAndWaitForCompletion(
+				theUrl, theVersion, theFiles, false, null, jobDefinitionId, distributionFilename, null);
+	}
+
+	public String startImportCustomJobAndWaitForFailure(
+			String theUrl, String theVersion, ZipCollectionBuilder theFiles) {
+		String jobDefinitionId = ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY;
+		String distributionFilename = TerminologyConstants.FILENAME_CUSTOM_DISTRIBUTION_FILE;
+		return startImportTerminologyJobAndWaitForFailure(
+				theUrl, theVersion, theFiles, false, null, jobDefinitionId, distributionFilename, null);
+	}
+
+	public String startImportIcdJobAndWaitForCompletion(String theVersion, ZipCollectionBuilder theFiles) {
+		String jobDefinitionId = ImportIcdJobAppCtx.JOB_ID_IMPORT_ICD_10;
+		String distributionFilename = TerminologyConstants.FILENAME_ICD10_DISTRIBUTION_FILE;
+		String propertiesFilename = null;
+		return startImportTerminologyJobAndWaitForCompletion(
+				TerminologyConstants.ICD10_URI,
+				theVersion,
+				theFiles,
+				false,
+				null,
+				jobDefinitionId,
+				distributionFilename,
+				propertiesFilename);
+	}
+
+	public String startImportIcdJobAndWaitForFailure(String theVersion, ZipCollectionBuilder theFiles) {
+		String jobDefinitionId = ImportIcdJobAppCtx.JOB_ID_IMPORT_ICD_10;
+		String distributionFilename = TerminologyConstants.FILENAME_ICD10_DISTRIBUTION_FILE;
+		String propertiesFilename = null;
+		return startImportTerminologyJobAndWaitForFailure(
+				TerminologyConstants.ICD10_URI,
+				theVersion,
+				theFiles,
+				false,
+				null,
+				jobDefinitionId,
+				distributionFilename,
+				propertiesFilename);
+	}
+
+	public String startImportIcdCmJobAndWaitForCompletion(String theVersion, ZipCollectionBuilder theFiles) {
+		String jobDefinitionId = ImportIcdJobAppCtx.JOB_ID_IMPORT_ICD_10_CM;
+		String distributionFilename = TerminologyConstants.FILENAME_ICD10CM_DISTRIBUTION_FILE;
+		String propertiesFilename = null;
+		return startImportTerminologyJobAndWaitForCompletion(
+				TerminologyConstants.ICD10CM_URI,
+				theVersion,
+				theFiles,
+				false,
+				null,
+				jobDefinitionId,
+				distributionFilename,
+				propertiesFilename);
+	}
+
 	public String startImportLoincJobAndWaitForCompletion(String versionId, ZipCollectionBuilder theFiles) {
 		return startImportLoincJobAndWaitForCompletion(versionId, theFiles, false);
 	}
@@ -103,22 +182,108 @@ public class TerminologyTestHelper {
 
 	public String startImportLoincJobAndWaitForCompletion(
 			String versionId, ZipCollectionBuilder theFiles, boolean theDontMakeCurrent, Properties theJobProperties) {
+		String jobDefinitionId = ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC;
+		String distributionFilename = FILENAME_LOINC_DISTRIBUTION_FILE;
+		String propertiesFilename = LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode();
+		return startImportTerminologyJobAndWaitForCompletion(
+				TerminologyConstants.LOINC_URI,
+				versionId,
+				theFiles,
+				theDontMakeCurrent,
+				theJobProperties,
+				jobDefinitionId,
+				distributionFilename,
+				propertiesFilename);
+	}
+
+	private String startImportTerminologyJobAndWaitForCompletion(
+			String theUrl,
+			String versionId,
+			ZipCollectionBuilder theFiles,
+			boolean theDontMakeCurrent,
+			Properties theJobProperties,
+			String jobDefinitionId,
+			String distributionFilename,
+			String propertiesFilename) {
+		return startImportTerminologyJob(
+				theUrl,
+				versionId,
+				theFiles,
+				theDontMakeCurrent,
+				theJobProperties,
+				jobDefinitionId,
+				distributionFilename,
+				propertiesFilename,
+				true,
+				ImportTerminologyModeEnum.SNAPSHOT);
+	}
+
+	private String startImportTerminologyJobAndWaitForFailure(
+			String theUrl,
+			String versionId,
+			ZipCollectionBuilder theFiles,
+			boolean theDontMakeCurrent,
+			Properties theJobProperties,
+			String jobDefinitionId,
+			String distributionFilename,
+			String propertiesFilename) {
+		return startImportTerminologyJob(
+				theUrl,
+				versionId,
+				theFiles,
+				theDontMakeCurrent,
+				theJobProperties,
+				jobDefinitionId,
+				distributionFilename,
+				propertiesFilename,
+				false,
+				ImportTerminologyModeEnum.SNAPSHOT);
+	}
+
+	private String startImportTerminologyJob(
+			String theUrl,
+			String versionId,
+			ZipCollectionBuilder theFiles,
+			boolean theDontMakeCurrent,
+			Properties theJobProperties,
+			String jobDefinitionId,
+			String distributionFilename,
+			String propertiesFilename,
+			boolean expectSuccess,
+			ImportTerminologyModeEnum theMode) {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-		startRequest.setJobDefinitionId(ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC);
+		startRequest.setJobDefinitionId(jobDefinitionId);
+
 		ImportTerminologyJobParameters parameters = new ImportTerminologyJobParameters();
+		parameters.setUrl(theUrl);
 		parameters.setVersionId(versionId);
 		if (theDontMakeCurrent) {
 			parameters.setDontMakeCurrent(true);
 		}
+		parameters.setMode(theMode);
 		startRequest.setParameters(parameters);
 
 		Batch2JobStartResponse instanceId = myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest);
 
-		AttachmentDetails attachmentDetails = new AttachmentDetails(
-				new ByteArrayInputStream(theFiles.getZipBytes()),
-				AttachmentContentTypeEnum.ZIP,
-				FILENAME_LOINC_DISTRIBUTION_FILE);
-		myJobPersistence.storeNewAttachment(instanceId.getInstanceId(), attachmentDetails);
+		if (theFiles.isSingleZip()) {
+			AttachmentDetails attachmentDetails = AttachmentDetails.newBuilder()
+					.withInputStream(new ByteArrayInputStream(theFiles.getZipBytes()))
+					.withContentType(AttachmentContentTypeEnum.ZIP)
+					.withFilename(distributionFilename)
+					.withNoMaximumSize()
+					.build();
+			myJobPersistence.storeNewAttachment(instanceId.getInstanceId(), attachmentDetails);
+		} else {
+			for (ZipCollectionBuilder.FileDescriptor descriptor : theFiles.getFiles()) {
+				AttachmentDetails attachmentDetails = AttachmentDetails.newBuilder()
+						.withInputStream(descriptor.inputStream())
+						.withContentType(AttachmentContentTypeEnum.PLAIN_TEXT)
+						.withFilename(descriptor.filename())
+						.withNoMaximumSize()
+						.build();
+				myJobPersistence.storeNewAttachment(instanceId.getInstanceId(), attachmentDetails);
+			}
+		}
 
 		if (theJobProperties != null) {
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -127,16 +292,22 @@ public class TerminologyTestHelper {
 			} catch (IOException e) {
 				fail("Failed to store properties", e);
 			}
-			attachmentDetails = new AttachmentDetails(
-					out.toByteArray(),
-					AttachmentContentTypeEnum.PROPERTIES,
-					LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode());
+			AttachmentDetails attachmentDetails = AttachmentDetails.newBuilder()
+					.withBytes(out.toByteArray())
+					.withContentType(AttachmentContentTypeEnum.PROPERTIES)
+					.withFilename(propertiesFilename)
+					.withNoMaximumSize()
+					.build();
 			myJobPersistence.storeNewAttachment(instanceId.getInstanceId(), attachmentDetails);
 		}
 
 		myJobCoordinator.enqueueBuildingJobForExecution(instanceId.getInstanceId());
 
-		myBatch2JobHelper.awaitJobCompletion(instanceId);
+		if (expectSuccess) {
+			myBatch2JobHelper.awaitJobCompletion(instanceId);
+		} else {
+			myBatch2JobHelper.awaitJobFailure(instanceId);
+		}
 
 		return instanceId.getInstanceId();
 	}
@@ -146,34 +317,36 @@ public class TerminologyTestHelper {
 		return startImportSnomedCtJobAndWaitForCompletion(versionId, theFiles, theDontMakeCurrent, false);
 	}
 
+	public String startImportSnomedCtJobAndWaitForFailure(
+			String versionId, ZipCollectionBuilder theFiles, boolean theDontMakeCurrent) {
+		return startImportSnomedCtJobAndWaitForCompletion(versionId, theFiles, theDontMakeCurrent, true);
+	}
+
 	public String startImportSnomedCtJobAndWaitForCompletion(
 			String versionId, ZipCollectionBuilder theFiles, boolean theDontMakeCurrent, boolean theExpectFailure) {
-		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-		startRequest.setJobDefinitionId(ImportSnomedCtJobAppCtx.JOB_ID_IMPORT_TERM_SNOMED_CT);
-		ImportTerminologyJobParameters parameters = new ImportTerminologyJobParameters();
-		parameters.setVersionId(versionId);
-		if (theDontMakeCurrent) {
-			parameters.setDontMakeCurrent(true);
-		}
-		startRequest.setParameters(parameters);
 
-		Batch2JobStartResponse instanceId = myJobCoordinator.startInstance(new SystemRequestDetails(), startRequest);
-
-		AttachmentDetails attachmentDetails = new AttachmentDetails(
-				new ByteArrayInputStream(theFiles.getZipBytes()),
-				AttachmentContentTypeEnum.ZIP,
-				FILENAME_SNOMED_CT_DISTRIBUTION_FILE);
-		myJobPersistence.storeNewAttachment(instanceId.getInstanceId(), attachmentDetails);
-
-		myJobCoordinator.enqueueBuildingJobForExecution(instanceId.getInstanceId());
-
+		String distributionFilename = FILENAME_SNOMED_CT_DISTRIBUTION_FILE;
 		if (theExpectFailure) {
-			myBatch2JobHelper.awaitJobFailure(instanceId);
+			return startImportTerminologyJobAndWaitForFailure(
+					TerminologyConstants.SCT_URI,
+					versionId,
+					theFiles,
+					theDontMakeCurrent,
+					null,
+					ImportSnomedCtJobAppCtx.JOB_ID_IMPORT_TERM_SNOMED_CT,
+					distributionFilename,
+					null);
 		} else {
-			myBatch2JobHelper.awaitJobCompletion(instanceId);
+			return startImportTerminologyJobAndWaitForCompletion(
+					TerminologyConstants.SCT_URI,
+					versionId,
+					theFiles,
+					theDontMakeCurrent,
+					null,
+					ImportSnomedCtJobAppCtx.JOB_ID_IMPORT_TERM_SNOMED_CT,
+					distributionFilename,
+					null);
 		}
-
-		return instanceId.getInstanceId();
 	}
 
 	public void startImportLoincJobAndWaitForCompletion(String theVersion, boolean theMakeItCurrent) throws Exception {
@@ -244,6 +417,55 @@ public class TerminologyTestHelper {
 
 		fail("Setup failed. Unexpected version: " + theVersion);
 		return null;
+	}
+
+	public String startImportLoincJobAndWaitForFailure(String theVersion, ZipCollectionBuilder theFiles) {
+		String jobDefinitionId = ImportLoincJobAppCtx.JOB_ID_IMPORT_TERM_LOINC;
+		String distributionFilename = FILENAME_LOINC_DISTRIBUTION_FILE;
+		String propertiesFilename = LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE.getCode();
+		return startImportTerminologyJobAndWaitForFailure(
+				TerminologyConstants.LOINC_URI,
+				theVersion,
+				theFiles,
+				false,
+				null,
+				jobDefinitionId,
+				distributionFilename,
+				propertiesFilename);
+	}
+
+	public String getReport(String theJobInstanceId) {
+		JobInstance instance = myJobCoordinator.getInstance(theJobInstanceId);
+		return JsonUtil.deserialize(instance.getReport(), ImportTerminologyResultJson.class)
+				.getReport();
+	}
+
+	public String startValueSetExpansionJobAndWaitForCompletion(String theUrl, String theVersion) {
+		return startValueSetExpansionJob(theUrl, theVersion, true);
+	}
+
+	public String startValueSetExpansionJobAndWaitForFailure(String theUrl, String theVersion) {
+		return startValueSetExpansionJob(theUrl, theVersion, false);
+	}
+
+	private String startValueSetExpansionJob(String theUrl, String theVersion, boolean expectSuccess) {
+		PreExpandValueSetParameters parameters = new PreExpandValueSetParameters();
+		parameters.setUrl(theUrl);
+		parameters.setVersion(theVersion);
+
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET);
+		startRequest.setParameters(parameters);
+
+		String instanceId =
+				myJobCoordinator.startInstance(newSrd(), startRequest).getInstanceId();
+		if (expectSuccess) {
+			myBatch2JobHelper.awaitJobCompletion(instanceId);
+		} else {
+			myBatch2JobHelper.awaitJobFailure(instanceId);
+		}
+
+		return instanceId;
 	}
 
 	private static void addBaseLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles, String theClassPathPrefix)

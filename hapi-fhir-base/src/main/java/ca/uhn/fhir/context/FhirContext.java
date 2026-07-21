@@ -383,9 +383,27 @@ public class FhirContext {
 	 * </p>
 	 */
 	@Nullable
-	public BaseRuntimeElementDefinition<?> getElementDefinition(final String theElementName) {
+	public BaseRuntimeElementDefinition<?> getElementDefinition(@Nonnull final String theElementName) {
+		Validate.notBlank(theElementName, "theElementName must not be null or blank");
 		validateInitialized();
 		return myNameToElementDefinition.get(theElementName.toLowerCase());
+	}
+
+	/**
+	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
+	 * for extending the core library. Will not return null, and will throw an exception if the name is not known.
+	 * <p>
+	 * Note that this method is case insensitive!
+	 * </p>
+	 *
+	 * @since 8.12.0
+	 */
+	@Nonnull
+	public BaseRuntimeElementDefinition<?> getElementDefinitionNotNull(final String theElementName) {
+		validateInitialized();
+		BaseRuntimeElementDefinition<?> retVal = getElementDefinition(theElementName);
+		Validate.isTrue(retVal != null, "No element definition found for name: %s", theElementName);
+		return retVal;
 	}
 
 	/**

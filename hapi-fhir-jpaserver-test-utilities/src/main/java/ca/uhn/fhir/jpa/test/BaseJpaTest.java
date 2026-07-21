@@ -41,6 +41,7 @@ import ca.uhn.fhir.jpa.config.r4.FhirContextR4Config;
 import ca.uhn.fhir.jpa.config.util.ResourceTypeUtil;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTagDao;
@@ -66,6 +67,8 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
+import ca.uhn.fhir.jpa.dao.mdm.MdmLinkDaoJpaImpl;
+import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
@@ -198,6 +201,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.when;
 
 @TestPropertySource(properties = {
@@ -337,6 +341,8 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	@Autowired
 	protected ApplicationContext myApplicationContext;
+	@Autowired
+	protected IBatch2JobInstanceRepository myJobInstanceDao;
 
 	@TestConfiguration
 	public static class TestSearchParamConfig {
@@ -691,6 +697,12 @@ public abstract class BaseJpaTest extends BaseTest {
 		});
 	}
 
+	protected void logAllBatch2JobInstances() {
+		runInTransaction(() -> {
+			ourLog.info("Batch2 Job instances:\n * {}", myJobInstanceDao.findAll().stream().map(Batch2JobInstanceEntity::toString).collect(Collectors.joining("\n * ")));
+		});
+	}
+
 	protected void logAllNonUniqueIndexes() {
 		runInTransaction(() -> {
 			ourLog.info("Non unique indexes:\n * {}", myResourceIndexedComboTokensNonUniqueDao.findAll().stream().map(ResourceIndexedComboTokenNonUnique::toString).collect(Collectors.joining("\n * ")));
@@ -1009,32 +1021,31 @@ public abstract class BaseJpaTest extends BaseTest {
 	}
 
 	protected TermValueSetConcept assertTermValueSetContainsConceptAndIsInDeclaredOrder(TermValueSet theValueSet, String theSystem, String theCode, String theDisplay, Integer theDesignationCount) {
-		List<TermValueSetConcept> contains = theValueSet.getConcepts();
+		List<TermValueSetConcept> contains = new ArrayList<>(theValueSet.getConcepts());
 
-		Stream<TermValueSetConcept> stream = contains.stream();
-		if (theSystem != null) {
-			stream = stream.filter(concept -> theSystem.equalsIgnoreCase(concept.getSystem()));
-		}
-		if (theCode != null) {
-			stream = stream.filter(concept -> theCode.equalsIgnoreCase(concept.getCode()));
-		}
-		if (theDisplay != null) {
-			stream = stream.filter(concept -> theDisplay.equalsIgnoreCase(concept.getDisplay()));
-		}
-		if (theDesignationCount != null) {
-			stream = stream.filter(concept -> concept.getDesignations().size() == theDesignationCount);
+		contains.removeIf(concept -> !theSystem.equalsIgnoreCase(concept.getSystem()));
+		if (contains.isEmpty()) {
+			fail("No concepts with system: " + theSystem);
 		}
 
-		Optional<TermValueSetConcept> first = stream.findFirst();
-		if (!first.isPresent()) {
-			String failureMessage = String.format("Expanded ValueSet %s did not contain concept [%s|%s|%s] with [%d] designations", theValueSet.getId(), theSystem, theCode, theDisplay, theDesignationCount);
-			fail(failureMessage);
-			return null;
-		} else {
-			TermValueSetConcept termValueSetConcept = first.get();
-			assertEquals(termValueSetConcept.getOrder(), theValueSet.getConcepts().indexOf(termValueSetConcept));
-			return termValueSetConcept;
+		contains.removeIf(concept -> !theCode.equalsIgnoreCase(concept.getCode()));
+		if (contains.isEmpty()) {
+			fail("No concepts with code: " + theCode);
 		}
+
+		contains.removeIf(concept -> !theDisplay.equalsIgnoreCase(concept.getDisplay()));
+		if (contains.isEmpty()) {
+			fail("No concepts with display: " + theDisplay);
+		}
+
+		contains.removeIf(concept -> concept.getDesignations().size() != theDesignationCount);
+		if (contains.isEmpty()) {
+			fail("No concepts with designation count: " + theDesignationCount);
+		}
+
+		TermValueSetConcept termValueSetConcept = contains.iterator().next();
+		assertEquals(termValueSetConcept.getOrder(), theValueSet.getConcepts().indexOf(termValueSetConcept));
+		return termValueSetConcept;
 	}
 
 	protected TermValueSetConceptDesignation assertTermConceptContainsDesignation(TermValueSetConcept theConcept, String theLanguage, String theUseSystem, String theUseCode, String theUseDisplay, String theDesignationValue) {

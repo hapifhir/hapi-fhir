@@ -22,10 +22,16 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.base;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nonnull;
 
 import java.util.Properties;
 
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
+
 public class ImportTerminologyJobParameters implements IModelJson {
+
+	@JsonProperty("url")
+	private String myUrl;
 
 	@JsonProperty("versionId")
 	private String myVersionId;
@@ -33,8 +39,31 @@ public class ImportTerminologyJobParameters implements IModelJson {
 	@JsonProperty("dontMakeCurrent")
 	private Boolean myDontMakeCurrent;
 
+	@JsonProperty("mode")
+	private ImportTerminologyModeEnum myMode;
+
 	@JsonIgnore
 	private Properties myJobProperties;
+
+	/**
+	 * Returns {@link ImportTerminologyModeEnum#SNAPSHOT} if not set.
+	 */
+	@Nonnull
+	public ImportTerminologyModeEnum getMode() {
+		return getIfNull(myMode, ImportTerminologyModeEnum.SNAPSHOT);
+	}
+
+	public void setMode(ImportTerminologyModeEnum theMode) {
+		myMode = theMode;
+	}
+
+	public String getUrl() {
+		return myUrl;
+	}
+
+	public void setUrl(String theUrl) {
+		myUrl = theUrl;
+	}
 
 	public Properties getJobProperties() {
 		return myJobProperties;
@@ -42,13 +71,6 @@ public class ImportTerminologyJobParameters implements IModelJson {
 
 	public void setJobProperties(Properties theJobProperties) {
 		myJobProperties = theJobProperties;
-	}
-
-	/**
-	 * Subclasses may override this to specify a job property file name
-	 */
-	protected String getJobPropertyFileName() {
-		return null;
 	}
 
 	public String getVersionId() {

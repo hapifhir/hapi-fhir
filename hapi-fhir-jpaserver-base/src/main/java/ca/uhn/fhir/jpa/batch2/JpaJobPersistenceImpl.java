@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.batch2;
 
 import ca.uhn.fhir.batch2.api.AttachmentDetails;
+import ca.uhn.fhir.batch2.api.AttachmentMetadata;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
@@ -54,6 +55,7 @@ import ca.uhn.fhir.model.api.PagingIterator;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.Logs;
@@ -62,7 +64,6 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.dnault.xmlpatch.repackaged.org.apache.commons.io.input.CountingInputStream;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -70,6 +71,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.input.BoundedInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -106,13 +108,14 @@ import java.util.zip.GZIPOutputStream;
 import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT;
 import static ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH;
 import static java.lang.Math.toIntExact;
-import static java.util.Objects.requireNonNullElseGet;
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class JpaJobPersistenceImpl implements IJobPersistence {
 	public static final String CREATE_TIME = "myCreateTime";
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
+	public static final int DEFAULT_ATTACHMENT_CHUNK_SIZE = toIntExact(FileUtils.ONE_MB);
 	private final IBatch2AttachmentRepository myAttachmentRepository;
 	private final IBatch2AttachmentChunkRepository myAttachmentChunkRepository;
 	private final IBatch2JobInstanceRepository myJobInstanceRepository;
@@ -155,8 +158,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	 */
 	@VisibleForTesting
 	public void setMaxBytesPerAttachmentChunk(Integer theMaxBytesPerAttachmentChunk) {
-		myMaxBytesPerAttachmentChunk =
-				requireNonNullElseGet(theMaxBytesPerAttachmentChunk, () -> toIntExact(FileUtils.ONE_MB));
+		myMaxBytesPerAttachmentChunk = getIfNull(theMaxBytesPerAttachmentChunk, DEFAULT_ATTACHMENT_CHUNK_SIZE);
 	}
 
 	@Override
@@ -374,13 +376,25 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public List<JobInstance> fetchInstances(int thePageSize, int thePageIndex) {
 		// default sort is myCreateTime Asc
 		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.ASC, CREATE_TIME);
 		return myTransactionService
 				.withSystemRequestOnDefaultPartition()
+				.withPropagation(Propagation.REQUIRES_NEW)
 				.execute(() -> myJobInstanceRepository.findAll(pageRequest).stream()
+						.map(this::toInstance)
+						.collect(Collectors.toList()));
+	}
+
+	@Override
+	public List<JobInstance> fetchInstances(int thePageSize, int thePageIndex, Set<StatusEnum> theStatuses) {
+		// The repository query returns a stable sort
+		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize);
+		return myTransactionService
+				.withSystemRequestOnDefaultPartition()
+				.withPropagation(Propagation.REQUIRES_NEW)
+				.execute(() -> myJobInstanceRepository.findAllWithStatuses(pageRequest, theStatuses).stream()
 						.map(this::toInstance)
 						.collect(Collectors.toList()));
 	}
@@ -582,14 +596,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		ValidateUtil.isTrueOrThrowInvalidRequest(theRequest.getInputStream() != null, "No input stream provided");
 
 		return myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
-			JobInstance instance = fetchInstance(theInstanceId)
-					.orElseThrow(() ->
-							new InvalidRequestException(Msg.code(2902) + "Unknown instance ID: " + theInstanceId));
-
-			if (instance.getStatus().isEnded()) {
-				throw new InvalidRequestException(Msg.code(2903) + "Can't add attachment to instance[" + theInstanceId
-						+ "] in status: " + instance.getStatus());
-			}
+			validateInstanceForAttachmentWriting(theInstanceId);
 
 			Batch2JobAttachmentEntity attachment;
 			if (isNotBlank(theRequest.getFilename())) {
@@ -617,28 +624,80 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 							? Batch2JobAttachmentEntity.CompressionEnum.GZIP
 							: Batch2JobAttachmentEntity.CompressionEnum.NONE);
 
-			try {
-				CountingInputStream countingInputStream = new CountingInputStream(theRequest.getInputStream());
-				AttachmentWritingOutputStream storageOutputStream =
-						new AttachmentWritingOutputStream(attachment, countingInputStream);
-				OutputStream outputStream;
-				if (theRequest.getContentType().isSupportsCompression()) {
-					outputStream = new GZIPOutputStream(storageOutputStream);
-				} else {
-					outputStream = storageOutputStream;
-				}
-
-				countingInputStream.transferTo(outputStream);
-				outputStream.flush();
-				outputStream.close();
-			} catch (IOException e) {
-				throw new InternalErrorException(Msg.code(2904) + e.getMessage(), e);
-			}
+			writeToAttachment(theRequest, attachment);
 
 			return attachment.getId().getAttachmentId();
 		});
 	}
 
+	@Override
+	public void appendToAttachment(String theInstanceId, String theAttachmentId, AttachmentDetails theRequest) {
+		myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
+			validateInstanceForAttachmentWriting(theInstanceId);
+
+			Optional<Batch2JobAttachmentEntity> attachmentOpt =
+					myAttachmentRepository.findById(theInstanceId, theAttachmentId);
+			if (attachmentOpt.isEmpty()) {
+				throw new InvalidRequestException(Msg.code(2984) + "Unknown attachment ID[" + theAttachmentId
+						+ "] for job instance[" + theInstanceId + "]");
+			}
+
+			ourLog.info("Appending to attachment[{}] for job instance[{}]", theAttachmentId, theInstanceId);
+
+			Batch2JobAttachmentEntity attachment = attachmentOpt.get();
+			writeToAttachment(theRequest, attachment);
+		});
+	}
+
+	/**
+	 * Ensures that the job instance ID exists, and corresponds to a job that is not ended.
+	 * Otherwise, throws an exception.
+	 */
+	private void validateInstanceForAttachmentWriting(String theInstanceId) {
+		JobInstance instance = fetchInstance(theInstanceId)
+				.orElseThrow(
+						() -> new InvalidRequestException(Msg.code(2902) + "Unknown instance ID: " + theInstanceId));
+
+		if (instance.getStatus().isEnded()) {
+			throw new InvalidRequestException(Msg.code(2903) + "Can't add attachment to instance[" + theInstanceId
+					+ "] in status: " + instance.getStatus());
+		}
+	}
+
+	private void writeToAttachment(AttachmentDetails theRequest, Batch2JobAttachmentEntity theAttachment) {
+		try {
+			int maximumAllowableBytes = theRequest.getMaximumSize().orElse(Integer.MAX_VALUE);
+
+			// We'll bound the input stream to one byte larger than the maximum allowable size
+			// so that if we hit that size, we know we've exceeded the max.
+			BoundedInputStream countingInputStream = BoundedInputStream.builder()
+					.setInputStream(theRequest.getInputStream())
+					.setCount(theAttachment.getAttachmentLengthUncompressed())
+					.setMaxCount((long) maximumAllowableBytes + 1L)
+					.get();
+			OutputStream storageOutputStream = new AttachmentWritingOutputStream(theAttachment, countingInputStream);
+			OutputStream outputStream;
+			if (theRequest.getContentType().isSupportsCompression()) {
+				outputStream = new GZIPOutputStream(storageOutputStream);
+			} else {
+				outputStream = storageOutputStream;
+			}
+
+			countingInputStream.transferTo(outputStream);
+			outputStream.flush();
+			outputStream.close();
+
+			long actualCount = countingInputStream.getCount();
+			if (actualCount > maximumAllowableBytes) {
+				throw new PayloadTooLargeException(Msg.code(2983) + "Maximum allowable size exceeded");
+			}
+
+		} catch (IOException e) {
+			throw new InternalErrorException(Msg.code(2904) + e.getMessage(), e);
+		}
+	}
+
+	@Nonnull
 	@Override
 	public AttachmentDetails fetchAttachmentById(String theInstanceId, String theAttachmentId) {
 		Supplier<Optional<Batch2JobAttachmentEntity>> supplier =
@@ -646,6 +705,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		return fetchAttachment(supplier, "ID", theAttachmentId);
 	}
 
+	@Nonnull
 	@Override
 	public AttachmentDetails fetchAttachmentByFilename(String theInstanceId, String theFilename) {
 		Supplier<Optional<Batch2JobAttachmentEntity>> supplier =
@@ -675,11 +735,19 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 				filename = null;
 			}
 
-			return AttachmentDetails.build()
+			return AttachmentDetails.newBuilder()
 					.withContentType(attachment.getContentType())
 					.withFilename(filename)
 					.withInputStream(readerStream)
+					.withNoMaximumSize()
 					.build();
+		});
+	}
+
+	@Override
+	public List<AttachmentMetadata> listAttachmentsForJobInstance(Pageable thePage, String theInstanceId) {
+		return myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
+			return myAttachmentRepository.listAttachmentsForJobInstance(thePage, theInstanceId);
 		});
 	}
 
@@ -864,13 +932,12 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	 */
 	private class AttachmentWritingOutputStream extends OutputStream {
 		private Batch2JobAttachmentEntity myAttachment;
-		private final CountingInputStream myCountingInputStream;
+		private final BoundedInputStream myCountingInputStream;
 		private ByteArrayOutputStream myTargetBuffer = new ByteArrayOutputStream(myMaxBytesPerAttachmentChunk);
 		private boolean myClosing;
-		private int myNextAdditionalChunkIndex = 0;
 
 		private AttachmentWritingOutputStream(
-				Batch2JobAttachmentEntity theAttachment, CountingInputStream theCountingInputStream) {
+				Batch2JobAttachmentEntity theAttachment, BoundedInputStream theCountingInputStream) {
 			myAttachment = theAttachment;
 			myCountingInputStream = theCountingInputStream;
 		}
@@ -911,7 +978,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 						myAttachmentChunkRepository.save(nextChunk);
 
 						myAttachment.incrementAttachmentLengthCompressed(bytesToWrite.length);
-						myAttachment.incrementAttachmentLengthUncompressed(myCountingInputStream.getCount());
+						myAttachment.setAttachmentLengthUncompressed(Math.toIntExact(myCountingInputStream.getCount()));
 						myAttachment = myEntityManager.merge(myAttachment);
 					}
 					myTargetBuffer.reset();

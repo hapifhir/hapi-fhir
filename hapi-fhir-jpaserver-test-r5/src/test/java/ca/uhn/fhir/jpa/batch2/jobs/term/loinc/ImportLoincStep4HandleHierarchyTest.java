@@ -28,13 +28,13 @@ class ImportLoincStep4HandleHierarchyTest extends BaseImportLoincStepTest {
 		String classpath = "loinc-ver/v269/AccessoryFiles/MultiAxialHierarchy/MultiAxialHierarchy.csv";
 		mockFetchAttachment(classpath);
 		mockFetchJobMetadataAttachment();
-		when(myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(any())).thenReturn(new UploadStatistics(new IdType()).incrementConceptsAddedCount());
+		when(myTermCodeSystemStorageSvc.addCodeSystemConcepts(any(), any())).thenReturn(new UploadStatistics(new IdType()).incrementConceptsAddedCount());
 
 		// Test
 		mySvc.run(newStepExecutionDetails(classpath), myDataSink);
 
 		// Verify
-		verify(myTermCodeSystemStorageSvc, times(1)).uploadCodeSystemConcepts(myCodeSystemCaptor.capture());
+		verify(myTermCodeSystemStorageSvc, times(1)).addCodeSystemConcepts(any(), myCodeSystemCaptor.capture());
 		CodeSystem cs = (CodeSystem) myCodeSystemCaptor.getValue();
 		String hierarchy = renderHierarchy(cs);
 		String expected = """

@@ -19,13 +19,13 @@
  */
 package ca.uhn.fhir.jpa.batch2.jobs.term.snomedct;
 
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.BaseExpandDistributionIntoFilesStep;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.CodeSystem;
-
-import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.SCT_URI;
 
 /**
  * @see ImportSnomedCtJobAppCtx#importSnomedCtStep1ExpandDistributionIntoFiles()
@@ -51,10 +51,12 @@ public class ImportSnomedCtStep1ExpandDistributionIntoFilesStep
 	}
 
 	@Override
-	protected void massageCodeSystem(CodeSystem theCodeSystem) {
-		super.massageCodeSystem(theCodeSystem);
+	protected void massageCodeSystem(
+			CodeSystem theCodeSystem,
+			Void theContext,
+			StepExecutionDetails<ImportTerminologyJobParameters, VoidModel> theStepExecutionDetails) {
+		super.massageCodeSystem(theCodeSystem, theContext, theStepExecutionDetails);
 
-		theCodeSystem.setUrl(SCT_URI);
 		theCodeSystem.setName("SNOMED CT");
 	}
 }

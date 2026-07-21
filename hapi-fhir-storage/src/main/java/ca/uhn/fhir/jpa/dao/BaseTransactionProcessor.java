@@ -1042,9 +1042,8 @@ public abstract class BaseTransactionProcessor {
 				case POST: {
 					IBaseResource resource = myVersionAdapter.getResource(theEntry);
 					String resourceType = myContext.getResourceType(resource);
-					nextWriteEntryRequestPartitionId =
-							myRequestPartitionHelperService.determineCreatePartitionForRequest(
-									requestDetailsForEntry, resource, resourceType);
+					nextWriteEntryRequestPartitionId = tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
+							requestDetailsForEntry, resource, resourceType, url);
 					break;
 				}
 				case PUT: {
@@ -1060,9 +1059,8 @@ public abstract class BaseTransactionProcessor {
 							nextWriteEntryRequestPartitionId = theTransactionDetails.getResolvedPartition(resourceId);
 						}
 						if (nextWriteEntryRequestPartitionId == null) {
-							nextWriteEntryRequestPartitionId =
-									myRequestPartitionHelperService.determineCreatePartitionForRequest(
-											requestDetailsForEntry, resource, resourceType);
+							nextWriteEntryRequestPartitionId = tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
+									requestDetailsForEntry, resource, resourceType, url);
 							if (resourceId != null) {
 								theTransactionDetails.addResolvedPartition(
 										resourceId, nextWriteEntryRequestPartitionId);
@@ -1074,6 +1072,52 @@ public abstract class BaseTransactionProcessor {
 			}
 		}
 		return nextWriteEntryRequestPartitionId;
+	}
+
+	/**
+	 * Determine the create partition for a transaction write entry before pre-fetch, if possible. In patient-ID
+	 * partition mode the Patient compartment sometimes can't be resolved this early — an inline Patient match URL that
+	 * pre-fetch hasn't resolved yet (Msg 1326), or an id-less conditional-update Patient body (Msg 1321). When
+	 * all-partition search is supported ({@link PartitionSettings#isAllPartitionSearchSupported()}) we defer these to
+	 * {@link RequestPartitionId#allPartitions()} and let routing be settled per-entry at write time, once pre-fetch and
+	 * {@code PatientIdPartitionInterceptor}'s after-prefetch rewrite have resolved the match URL to a concrete Patient.
+	 * Where all-partition search is unsupported the partition must be fixed up front, so the rejection bubbles up
+	 * instead. The body comments spell out which codes and body shapes are deferred.
+	 * <p>
+	 * <b>Not a clean solution:</b> deferral is keyed off Msg 1321/1326, error codes raised specifically by
+	 * {@code PatientIdPartitionInterceptor}, so the core transaction processor is coupled to interceptor-specific
+	 * codes. This is a pragmatic interim approach; a cleaner separation should be designed when time allows.
+	 *
+	 * @param theEntryRequestUrl the entry's request URL; a conditional update is written via a match URL (contains
+	 *     {@code '?'})
+	 */
+	private RequestPartitionId tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
+			RequestDetails theRequestDetails,
+			IBaseResource theResource,
+			String theResourceType,
+			String theEntryRequestUrl) {
+		try {
+			return myRequestPartitionHelperService.determineCreatePartitionForRequest(
+					theRequestDetails, theResource, theResourceType);
+		} catch (MethodNotAllowedException e) {
+			if (!myPartitionSettings.isAllPartitionSearchSupported()) {
+				throw e;
+			}
+			// 1326: the entry's Patient compartment reference is not resolved before pre-fetch. Always deferrable.
+			if (messageStartsWith(e, Msg.code(1326))) {
+				return RequestPartitionId.allPartitions();
+			}
+			// 1321: a truly id-less Patient in a conditional update, whose identifier the after-prefetch rewrite might
+			// map to the existing Patient. Intentionally narrow, matching only an id-less body,
+			// and a more general fix is deferred to Tyner's broader fixes on patient id mode.
+			boolean conditionalUpdateOfIdlessPatient = isNotBlank(theEntryRequestUrl)
+					&& theEntryRequestUrl.indexOf('?') != -1
+					&& theResource.getIdElement().getIdPart() == null;
+			if (conditionalUpdateOfIdlessPatient && messageStartsWith(e, Msg.code(1321))) {
+				return RequestPartitionId.allPartitions();
+			}
+			throw e;
+		}
 	}
 
 	private boolean haveWriteOperationsHooks(RequestDetails theRequestDetails) {
@@ -1535,7 +1579,7 @@ public abstract class BaseTransactionProcessor {
 							outcome = resourceDao.update(
 									res, null, false, false, requestDetailsForEntry, theTransactionDetails);
 						} else {
-							if (!shouldConditionalUpdateMatchId(theTransactionDetails, res.getIdElement())) {
+							if (!shouldConditionalUpdateMatchId(res.getIdElement())) {
 								res.setId((String) null);
 							}
 							String matchUrl;
@@ -1858,15 +1902,10 @@ public abstract class BaseTransactionProcessor {
 	/**
 	 * Check for if a resource id should be matched in a conditional update
 	 * If the FHIR version is older than R4, it follows the old specifications and does not match
-	 * If the resource id has been resolved, then it is an existing resource and does not need to be matched
 	 * If the resource id is local or a placeholder, the id is temporary and should not be matched
 	 */
-	private boolean shouldConditionalUpdateMatchId(TransactionDetails theTransactionDetails, IIdType theId) {
+	private boolean shouldConditionalUpdateMatchId(IIdType theId) {
 		if (myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.R4)) {
-			return false;
-		}
-		if (theTransactionDetails.hasResolvedResourceId(theId)
-				&& !theTransactionDetails.isResolvedResourceIdEmpty(theId)) {
 			return false;
 		}
 		if (theId != null && theId.getValue() != null) {
@@ -2951,5 +2990,10 @@ public abstract class BaseTransactionProcessor {
 
 	private static boolean isUrnEscaped(@Nonnull String theId) {
 		return theId.startsWith(URN_PREFIX_ESCAPED);
+	}
+
+	private static boolean messageStartsWith(Throwable theException, String thePrefix) {
+		String message = theException.getMessage();
+		return message != null && message.startsWith(thePrefix);
 	}
 }

@@ -36,6 +36,7 @@ import ca.uhn.fhir.jpa.delete.batch2.DeleteExpungeSqlBuilder;
 import ca.uhn.fhir.jpa.delete.batch2.DeleteExpungeSvcImpl;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.util.DialectSvc;
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -77,8 +78,14 @@ public class Batch2SupportConfig {
 			JpaStorageSettings theStorageSettings,
 			IIdHelperService theIdHelper,
 			IResourceLinkDao theResourceLinkDao,
-			PartitionSettings thePartitionSettings) {
+			PartitionSettings thePartitionSettings,
+			DialectSvc theDialectSvc) {
 		return new DeleteExpungeSqlBuilder(
-				theResourceTableFKProvider, theStorageSettings, theIdHelper, theResourceLinkDao, thePartitionSettings);
+				theResourceTableFKProvider,
+				theStorageSettings,
+				theIdHelper,
+				theResourceLinkDao,
+				thePartitionSettings,
+				theDialectSvc);
 	}
 }

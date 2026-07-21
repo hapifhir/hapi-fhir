@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 8037
+title: "Fixed: Scheduled cleanup of HFJ_RES_SEARCH_URL no longer issues a single unbounded DELETE
+   that could exceed per-statement timeouts on large tables; cleanup now removes stale rows in paged batches."

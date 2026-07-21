@@ -25,7 +25,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
-import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVRecord;
@@ -40,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.apache.commons.lang3.StringUtils.firstNonBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
@@ -84,7 +84,7 @@ public class ImportLoincStep2HandleConcepts
 			String longCommonName = trim(theRecord.get("LONG_COMMON_NAME"));
 			String shortName = trim(theRecord.get("SHORTNAME"));
 			String consumerName = trim(theRecord.get("CONSUMER_NAME"));
-			String display = TermLoaderSvcImpl.firstNonBlank(longCommonName, shortName, consumerName);
+			String display = firstNonBlank(longCommonName, shortName, consumerName);
 
 			CodeSystem.ConceptDefinitionComponent concept = getOrAddConcept(theContext, code);
 			concept.setCode(code);
@@ -142,15 +142,17 @@ public class ImportLoincStep2HandleConcepts
 	}
 
 	@Override
-	protected void syncToDb(
+	protected int syncToDb(
 			ImportTerminologyMetadataAttachmentJson theJobMetadata,
 			CodeExtractionContext theCodeExtractionContext,
 			CodeSystem theCodeSystemToPopulate,
 			StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> theStepExecutionDetails) {
-		super.syncToDb(theJobMetadata, theCodeExtractionContext, theCodeSystemToPopulate, theStepExecutionDetails);
+		int retVal = super.syncToDb(
+				theJobMetadata, theCodeExtractionContext, theCodeSystemToPopulate, theStepExecutionDetails);
 		ourLog.info(
 				"LOINC CodeSystem populated with {} concepts",
 				theCodeSystemToPopulate.getConcept().size());
+		return retVal;
 	}
 
 	protected static class CodeExtractionContext extends BaseImportLoincStep.MyBaseContext {

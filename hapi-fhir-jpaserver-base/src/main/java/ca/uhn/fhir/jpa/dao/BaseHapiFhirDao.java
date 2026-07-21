@@ -77,6 +77,7 @@ import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
 import ca.uhn.fhir.jpa.util.DialectSvc;
 import ca.uhn.fhir.model.api.IResource;
@@ -188,6 +189,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	@Autowired
 	protected ITermReadSvc myTerminologySvc;
+
+	@Autowired
+	protected ITermValueSetStorageSvc myTermValueSetStorageSvc;
 
 	@Autowired
 	protected IResourceHistoryTableDao myResourceHistoryTableDao;

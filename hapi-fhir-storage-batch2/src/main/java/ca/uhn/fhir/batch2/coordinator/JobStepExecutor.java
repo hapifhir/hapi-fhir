@@ -149,7 +149,7 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 			// wipmb 6.8 either delete fast-tracking, or narrow this call to just this instance and step
 			// This runs full maintenance for EVERY job as each chunk completes in a fast tracked job.  That's a LOT of
 			// work.
-			boolean success = myJobMaintenanceService.triggerMaintenancePass();
+			boolean success = myJobMaintenanceService.triggerActiveJobMaintenancePass();
 			if (!success) {
 				myJobPersistence.updateInstance(myInstance.getInstanceId(), instance -> {
 					instance.setFastTracking(false);

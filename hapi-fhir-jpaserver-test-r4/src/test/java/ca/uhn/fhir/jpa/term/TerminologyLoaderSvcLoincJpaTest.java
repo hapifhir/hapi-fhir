@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
@@ -13,6 +12,7 @@ import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +20,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.util.List;
 
-import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.LOINC_URI;
 import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
@@ -56,6 +57,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		files = new ZipCollectionBuilder(true);
 		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(files, "v267_loincupload.properties");
 		String instanceId = myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion("2.66", files);
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		logAllValueSets();
 
@@ -84,7 +86,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		JobInstance jobInstance = myJobCoordinator.getInstance(instanceId);
 		String report = JsonUtil.deserialize(jobInstance.getReport(), ImportTerminologyResultJson.class).getReport();
 		ourLog.info("Report:\n{}", report);
-		assertThat(report).contains("Concepts Added             : 82");
+		assertThat(report).contains("Concepts Added               : 82");
 
 		logAllCodeSystemsAndVersionsCodeSystemsAndVersions();
 		logAllConcepts();
@@ -98,8 +100,10 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		files = new ZipCollectionBuilder(true);
 		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(files, "v267_loincupload.properties");
 		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion("2.67", files);
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		logAllCodeSystemsAndVersionsCodeSystemsAndVersions();
+
 
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
@@ -125,6 +129,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		files = new ZipCollectionBuilder(true);
 		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(files, "v268_loincupload.properties");
 		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion("2.68", files);
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
@@ -153,6 +158,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		myJpaValidationSupportChain.invalidateCaches();
 
 		CodeSystem cs = (CodeSystem) myValidationSupport.fetchCodeSystem("http://loinc.org");
+		assertNotNull(cs);
 		assertEquals("2.68", cs.getVersion());
 
 		runInTransaction(()->{
@@ -204,8 +210,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 	public void testValueSetExpansion() throws IOException {
 		// Load LOINC marked as version 2.66
 
-		ZipCollectionBuilder files;
-		files = new ZipCollectionBuilder(true);
+		ZipCollectionBuilder files = new ZipCollectionBuilder(true);
 		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(files, "v267_loincupload.properties");
 		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion("2.67", files);
 
@@ -224,8 +229,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		// Now run the pre-expansion
 
 		logAllValueSets();
-		myTermDeferredStorageSvc.saveDeferred();
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		outcome = myValueSetDao.expand(new IdType("ValueSet/LL1001-8-2.67"), options, newSrd());
 		expansionMessage = outcome.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE);
@@ -233,6 +237,15 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	void testLoadLoinc_NoDistributionAttached() {
+		// Test
+		ZipCollectionBuilder files = new ZipCollectionBuilder(false);
+		String instanceId = myTerminologyTestHelper.startImportLoincJobAndWaitForFailure("2.67", files);
 
+		// Verify
+		String errorMessage = myJobCoordinator.getInstance(instanceId).getErrorMessage();
+		assertThat(errorMessage).contains("No distribution file (loinc.zip) was attached for LOINC");
+	}
 
 }

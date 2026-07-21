@@ -22,8 +22,8 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyMetadataAttachmentJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import com.google.common.base.Splitter;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVRecord;
@@ -143,7 +143,7 @@ public class ImportLoincStep20LinguisticVariant extends BaseImportLoincStep<Base
 		if (!fullySpecifiedNameStr.equals(":::::")) {
 			concept.addDesignation()
 					.setLanguage(languageCode)
-					.setUse(new Coding(ITermLoaderSvc.LOINC_URI, "FullySpecifiedName", "FullySpecifiedName"))
+					.setUse(new Coding(TerminologyConstants.LOINC_URI, "FullySpecifiedName", "FullySpecifiedName"))
 					.setValue(fullySpecifiedNameStr);
 		}
 
@@ -166,7 +166,7 @@ public class ImportLoincStep20LinguisticVariant extends BaseImportLoincStep<Base
 		theConcept
 				.addDesignation()
 				.setLanguage(theLanguageCode)
-				.setUse(new Coding(ITermLoaderSvc.LOINC_URI, theFieldName, theFieldName))
+				.setUse(new Coding(TerminologyConstants.LOINC_URI, theFieldName, theFieldName))
 				.setValue(field);
 	}
 }

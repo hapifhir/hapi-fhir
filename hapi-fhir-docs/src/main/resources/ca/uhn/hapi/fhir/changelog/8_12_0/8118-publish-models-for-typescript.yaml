@@ -1,0 +1,4 @@
+---
+type: add
+issue: 8118
+title: "Typescript models for DSTU2/DSTU3/R4/R4B/R5 are now automatically published during official release. These can be found at the [npmjs.org registry](https://www.npmjs.com/package/@smile-cdr/fhirts)."

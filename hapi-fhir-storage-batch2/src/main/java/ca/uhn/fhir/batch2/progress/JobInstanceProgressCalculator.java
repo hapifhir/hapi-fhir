@@ -63,7 +63,7 @@ public class JobInstanceProgressCalculator {
 		InstanceProgress instanceProgress = calculateInstanceProgress(theInstanceId);
 
 		myJobPersistence.updateInstance(theInstanceId, currentInstance -> {
-			instanceProgress.updateInstance(currentInstance);
+			instanceProgress.updateInstance(myJobDefinitionRegistry, currentInstance);
 
 			if (currentInstance.getCombinedRecordsProcessed() > 0) {
 				ourLog.info(
@@ -118,6 +118,9 @@ public class JobInstanceProgressCalculator {
 
 	@Nonnull
 	public InstanceProgress calculateInstanceProgress(String instanceId) {
+		JobInstance jobInstance = getJobInstance(instanceId);
+		JobDefinition<IModelJson> jobDefinition = myJobDefinitionRegistry.getJobDefinitionOrThrowException(jobInstance);
+
 		InstanceProgress instanceProgress = new InstanceProgress();
 		Iterator<WorkChunk> workChunkIterator = myJobPersistence.fetchAllWorkChunksIterator(instanceId, false);
 
@@ -131,15 +134,9 @@ public class JobInstanceProgressCalculator {
 		}
 
 		// wipmb separate status update from stats collection in 6.8
-		instanceProgress.calculateNewStatus(lastStepIsReduction(instanceId));
+		instanceProgress.calculateNewStatus(jobDefinition.isLastStepReduction());
 
 		return instanceProgress;
-	}
-
-	private boolean lastStepIsReduction(String theInstanceId) {
-		JobInstance jobInstance = getJobInstance(theInstanceId);
-		JobDefinition<IModelJson> jobDefinition = myJobDefinitionRegistry.getJobDefinitionOrThrowException(jobInstance);
-		return jobDefinition.isLastStepReduction();
 	}
 
 	private JobInstance getJobInstance(String theInstanceId) {

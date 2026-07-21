@@ -116,6 +116,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 						first.getStatus(),
 						first.getInstanceId());
 
+				storeJobInstanceIdInRequestDetails(theRequestDetails, response);
 				return response;
 			}
 		}
@@ -137,7 +138,15 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 
 		Batch2JobStartResponse response = new Batch2JobStartResponse();
 		response.setInstanceId(instanceAndFirstChunk.jobInstanceId);
+		storeJobInstanceIdInRequestDetails(theRequestDetails, response);
 		return response;
+	}
+
+	private static void storeJobInstanceIdInRequestDetails(
+			RequestDetails theRequestDetails, Batch2JobStartResponse theResponse) {
+		if (theRequestDetails != null) {
+			theRequestDetails.getUserData().put(USER_DATA_KEY_JOB_INSTANCE_ID, theResponse.getInstanceId());
+		}
 	}
 
 	/**
