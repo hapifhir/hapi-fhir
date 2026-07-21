@@ -295,11 +295,33 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	/**
 	 * Constructor
 	 */
-	@SuppressWarnings({"rawtypes", "unchecked"})
 	public SearchBuilder(String theResourceName, Class<? extends IBaseResource> theResourceType) {
 		myResourceName = theResourceName;
 		myResourceType = theResourceType;
 		mySearchProperties = new SearchQueryProperties();
+	}
+
+	/**
+	 * Unit Test Constructor
+	 */
+	public SearchBuilder(
+			String theResourceName,
+			Class<? extends IBaseResource> theResourceType,
+			FhirContext theFhirContext,
+			PartitionSettings thePartitionSettings,
+			DaoRegistry theDaoRegistry,
+			ISearchParamRegistry theSearchParamRegistry,
+			JpaStorageSettings theStorageSettings,
+			IResourceHistoryTableDao theResourceHistoryTableDao,
+			BatchResourceLoader theBatchResourceLoader) {
+		this(theResourceName, theResourceType);
+		myContext = theFhirContext;
+		myPartitionSettings = thePartitionSettings;
+		myDaoRegistry = theDaoRegistry;
+		mySearchParamRegistry = theSearchParamRegistry;
+		myStorageSettings = theStorageSettings;
+		myResourceHistoryTableDao = theResourceHistoryTableDao;
+		myBatchResourceLoader = theBatchResourceLoader;
 	}
 
 	@PostConstruct

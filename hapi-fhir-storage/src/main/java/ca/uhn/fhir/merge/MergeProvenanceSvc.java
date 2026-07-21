@@ -44,7 +44,7 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 	private static final String ACTIVITY_CODE_MERGE = "merge";
 
 	public MergeProvenanceSvc(DaoRegistry theDaoRegistry) {
-		super(theDaoRegistry);
+		super(theDaoRegistry.getFhirContext(), theDaoRegistry);
 	}
 
 	@Override
