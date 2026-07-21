@@ -1229,9 +1229,9 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	 * supported and existing links are never duplicated.
 	 */
 	static void linkFlatHierarchyFromConceptProperties(CodeSystem theCodeSystem, TermCodeSystemVersion thePersCs) {
-		Set<String> parentPropertyCodes = resolveHierarchyPropertyCodes(theCodeSystem, CONCEPT_PROPERTY_PARENT_URI);
-		Set<String> childPropertyCodes = resolveHierarchyPropertyCodes(theCodeSystem, CONCEPT_PROPERTY_CHILD_URI);
-		if (parentPropertyCodes.isEmpty() && childPropertyCodes.isEmpty()) {
+		String parentPropertyCode = resolveHierarchyPropertyCode(theCodeSystem, CONCEPT_PROPERTY_PARENT_URI);
+		String childPropertyCode = resolveHierarchyPropertyCode(theCodeSystem, CONCEPT_PROPERTY_CHILD_URI);
+		if (parentPropertyCode == null && childPropertyCode == null) {
 			return;
 		}
 
@@ -1240,17 +1240,20 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			indexConceptsByCode(concept, conceptsByCode);
 		}
 
-		linkFlatHierarchy(theCodeSystem.getConcept(), conceptsByCode, parentPropertyCodes, childPropertyCodes);
+		linkFlatHierarchy(theCodeSystem.getConcept(), conceptsByCode, parentPropertyCode, childPropertyCode);
 	}
 
-	private static Set<String> resolveHierarchyPropertyCodes(CodeSystem theCodeSystem, String theCanonicalUri) {
-		Set<String> codes = new HashSet<>();
+	/**
+	 * Returns the concept-property code declaring the given canonical concept-properties URI, or
+	 * {@code null} if the CodeSystem does not define such a property.
+	 */
+	private static String resolveHierarchyPropertyCode(CodeSystem theCodeSystem, String theCanonicalUri) {
 		for (CodeSystem.PropertyComponent property : theCodeSystem.getProperty()) {
 			if (theCanonicalUri.equals(property.getUri()) && property.hasCode()) {
-				codes.add(property.getCode());
+				return property.getCode();
 			}
 		}
-		return codes;
+		return null;
 	}
 
 	private static void indexConceptsByCode(TermConcept theConcept, Map<String, TermConcept> theConceptsByCode) {
@@ -1263,8 +1266,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	private static void linkFlatHierarchy(
 			List<CodeSystem.ConceptDefinitionComponent> theSourceConcepts,
 			Map<String, TermConcept> theConceptsByCode,
-			Set<String> theParentPropertyCodes,
-			Set<String> theChildPropertyCodes) {
+			String theParentPropertyCode,
+			String theChildPropertyCode) {
 		for (CodeSystem.ConceptDefinitionComponent sourceConcept : theSourceConcepts) {
 			TermConcept concept = theConceptsByCode.get(sourceConcept.getCode());
 			if (concept != null) {
@@ -1276,15 +1279,15 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 					if (isBlank(relatedCode)) {
 						continue;
 					}
-					if (theParentPropertyCodes.contains(property.getCode())) {
+					if (theParentPropertyCode != null && theParentPropertyCode.equals(property.getCode())) {
 						addChildLinkIfAbsent(theConceptsByCode.get(relatedCode), concept);
-					} else if (theChildPropertyCodes.contains(property.getCode())) {
+					} else if (theChildPropertyCode != null && theChildPropertyCode.equals(property.getCode())) {
 						addChildLinkIfAbsent(concept, theConceptsByCode.get(relatedCode));
 					}
 				}
 			}
 			linkFlatHierarchy(
-					sourceConcept.getConcept(), theConceptsByCode, theParentPropertyCodes, theChildPropertyCodes);
+					sourceConcept.getConcept(), theConceptsByCode, theParentPropertyCode, theChildPropertyCode);
 		}
 	}
 

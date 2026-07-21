@@ -46,8 +46,8 @@ public class ValueSetExpansionFilterContext {
 	private final Map<String, Pattern> regexCache = new HashMap<>();
 	private final CodeSystem codeSystem;
 	private final List<ValueSet.ConceptSetFilterComponent> filters;
-	private Set<String> parentPropertyCodes = Collections.emptySet();
-	private Set<String> childPropertyCodes = Collections.emptySet();
+	private String parentPropertyCode;
+	private String childPropertyCode;
 	private boolean hasIndexRun = false;
 
 	public ValueSetExpansionFilterContext(CodeSystem codeSystem, List<ValueSet.ConceptSetFilterComponent> filters) {
@@ -349,26 +349,25 @@ public class ValueSetExpansionFilterContext {
 
 	private void buildIndexes() {
 		if (!hasIndexRun) {
-			parentPropertyCodes = resolveHierarchyPropertyCodes(CONCEPT_PROPERTY_PARENT_URI);
-			childPropertyCodes = resolveHierarchyPropertyCodes(CONCEPT_PROPERTY_CHILD_URI);
+			parentPropertyCode = resolveHierarchyPropertyCode(CONCEPT_PROPERTY_PARENT_URI);
+			childPropertyCode = resolveHierarchyPropertyCode(CONCEPT_PROPERTY_CHILD_URI);
 			buildIndexes(codeSystem.getConcept());
 			hasIndexRun = true;
 		}
 	}
 
 	/**
-	 * Resolve the concept-property code(s) that carry hierarchy for the given canonical concept-properties
-	 * URI. Only property definitions declaring exactly that URI are honored, so a custom property that
-	 * happens to be named "parent"/"child" is ignored.
+	 * Resolve the concept-property code that carries hierarchy for the given canonical concept-properties
+	 * URI, or {@code null} if none is defined. Only a property definition declaring exactly that URI is
+	 * honored, so a custom property that happens to be named "parent"/"child" is ignored.
 	 */
-	private Set<String> resolveHierarchyPropertyCodes(String theCanonicalUri) {
-		Set<String> codes = new HashSet<>();
+	private String resolveHierarchyPropertyCode(String theCanonicalUri) {
 		for (CodeSystem.PropertyComponent property : codeSystem.getProperty()) {
 			if (theCanonicalUri.equals(property.getUri()) && property.hasCode()) {
-				codes.add(property.getCode());
+				return property.getCode();
 			}
 		}
-		return codes;
+		return null;
 	}
 
 	private void buildIndexes(List<CodeSystem.ConceptDefinitionComponent> defs) {
@@ -394,10 +393,10 @@ public class ValueSetExpansionFilterContext {
 				if (isBlank(relatedCode)) {
 					continue;
 				}
-				if (parentPropertyCodes.contains(property.getCode())) {
+				if (parentPropertyCode != null && parentPropertyCode.equals(property.getCode())) {
 					// 'code' declares 'relatedCode' as its parent → relatedCode -> code
 					addParentChildEdge(relatedCode, code);
-				} else if (childPropertyCodes.contains(property.getCode())) {
+				} else if (childPropertyCode != null && childPropertyCode.equals(property.getCode())) {
 					// 'code' declares 'relatedCode' as its child → code -> relatedCode
 					addParentChildEdge(code, relatedCode);
 				}
