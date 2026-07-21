@@ -75,6 +75,13 @@ public class DaoSearchParamSynchronizer {
 	@Autowired
 	private IHapiTransactionService myTransactionService;
 
+	@Autowired(required = false)
+	public void setSearchParamIndexProviderRegistry(SearchParamIndexProviderRegistry theRegistry) {
+		if (theRegistry != null) {
+			myIndexProviderRegistry = theRegistry;
+		}
+	}
+
 	private SearchParamIndexProviderRegistry myIndexProviderRegistry = new SearchParamIndexProviderRegistry(List.of());
 
 	private UniqueIndexPreExistenceChecker myUniqueIndexPreExistenceChecker;
@@ -94,14 +101,6 @@ public class DaoSearchParamSynchronizer {
 			boolean isNewResource) {
 		AddRemoveCount retVal = new AddRemoveCount();
 
-		synchronizeToken(
-				theRequestDetails,
-				theTransactionDetails,
-				theEntity,
-				retVal,
-				theParams.myTokenParams,
-				existingParams.myTokenParams,
-				isNewResource);
 		synchronize(
 				theRequestDetails,
 				theTransactionDetails,
@@ -110,6 +109,14 @@ public class DaoSearchParamSynchronizer {
 				theParams.myStringParams,
 				existingParams.myStringParams,
 				null);
+		synchronizeToken(
+				theRequestDetails,
+				theTransactionDetails,
+				theEntity,
+				retVal,
+				theParams.myTokenParams,
+				existingParams.myTokenParams,
+				isNewResource);
 		synchronize(
 				theRequestDetails,
 				theTransactionDetails,
@@ -204,23 +211,9 @@ public class DaoSearchParamSynchronizer {
 		myStorageSettings = theStorageSettings;
 	}
 
-	@Autowired(required = false)
-	public void setSearchParamIndexProviderRegistry(SearchParamIndexProviderRegistry theRegistry) {
-		if (theRegistry != null) {
-			myIndexProviderRegistry = theRegistry;
-		}
-	}
-
 	/**
-	 * Synchronizes one scalar built-in index collection and lets a registered
-	 * {@link ISearchParamIndexProvider} maintain its custom replacement for the same type. The built-in
-	 * write is skipped when a provider {@link ISearchParamIndexProvider#suppressesBuiltInIndex suppresses}
-	 * it; the custom provider (if one {@link ISearchParamIndexProvider#supports supports} the type) then
-	 * reconciles its own rows from the freshly extracted params.
-	 *
-	 * <p>Currently only invoked for {@link RestSearchParameterTypeEnum#TOKEN} — the sole type whose reads
-	 * are wired to custom providers — so custom index providers are consulted for TOKEN alone. The method
-	 * stays type-parameterized as the seam for wiring further types when their read paths are added.
+	 * Synchronizes token index params for a resource, writing to the built-in {@code HFJ_SPIDX_TOKEN}
+	 * table (unless suppressed) and to any registered custom token index provider.
 	 */
 	private <T extends BaseResourceIndex> void synchronizeToken(
 			RequestDetails theRequestDetails,

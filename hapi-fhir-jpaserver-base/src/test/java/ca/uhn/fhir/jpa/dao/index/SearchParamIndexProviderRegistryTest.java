@@ -38,22 +38,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class SearchParamIndexProviderRegistryTest {
 
-	private static final SearchParamIndexRouting TOKEN =
-			SearchParamIndexRouting.forParamType(RestSearchParameterTypeEnum.TOKEN);
-	private static final SearchParamIndexRouting STRING =
-			SearchParamIndexRouting.forParamType(RestSearchParameterTypeEnum.STRING);
-	private static final SearchParamIndexRouting NUMBER =
-			SearchParamIndexRouting.forParamType(RestSearchParameterTypeEnum.NUMBER);
+	private static final SearchParamIndexRouting TOKEN = SearchParamIndexRouting.forParamType(RestSearchParameterTypeEnum.TOKEN);
+	private static final SearchParamIndexRouting STRING = SearchParamIndexRouting.forParamType(RestSearchParameterTypeEnum.STRING);
+	private static final SearchParamIndexRouting NUMBER = SearchParamIndexRouting.forParamType(RestSearchParameterTypeEnum.NUMBER);
 
 	@Test
-	void resolveProvider_noProviders_returnsEmpty() {
+	void resolveProvider_withNoProviders_returnsEmpty() {
 		SearchParamIndexProviderRegistry registry = new SearchParamIndexProviderRegistry(List.of());
 		assertThat(registry.resolveProvider(TOKEN)).isEmpty();
 		assertThat(registry.isBuiltInIndexWriteSuppressed(TOKEN)).isFalse();
 	}
 
 	@Test
-	void nullProviders_treatedAsEmpty() {
+	void resolveProvider_withNullProviders_returnsEmpty() {
 		SearchParamIndexProviderRegistry registry = new SearchParamIndexProviderRegistry(null);
 		assertThat(registry.getProviders()).isEmpty();
 		assertThat(registry.resolveProvider(TOKEN)).isEmpty();
@@ -72,11 +69,10 @@ class SearchParamIndexProviderRegistryTest {
 	}
 
 	@Test
-	void resolveProvider_skipsNonHandlingProvider_fallsThrough() {
+	void resolveProvider_skipsNonHandlingProvider() {
 		TestProvider tokenOnly = new TestProvider(10, RestSearchParameterTypeEnum.TOKEN, false);
 		TestProvider stringOnly = new TestProvider(20, RestSearchParameterTypeEnum.STRING, false);
-		SearchParamIndexProviderRegistry registry =
-				new SearchParamIndexProviderRegistry(List.of(tokenOnly, stringOnly));
+		SearchParamIndexProviderRegistry registry = new SearchParamIndexProviderRegistry(List.of(tokenOnly, stringOnly));
 
 		assertThat(registry.resolveProvider(STRING)).containsSame(stringOnly);
 		assertThat(registry.resolveProvider(NUMBER)).isEmpty();
@@ -87,10 +83,10 @@ class SearchParamIndexProviderRegistryTest {
 		TestProvider nonSuppressing = new TestProvider(10, RestSearchParameterTypeEnum.TOKEN, false);
 		TestProvider suppressing = new TestProvider(20, RestSearchParameterTypeEnum.TOKEN, true);
 
-		assertThat(new SearchParamIndexProviderRegistry(List.of(nonSuppressing)).isBuiltInIndexWriteSuppressed(TOKEN))
-				.isFalse();
-		assertThat(new SearchParamIndexProviderRegistry(List.of(nonSuppressing, suppressing)).isBuiltInIndexWriteSuppressed(TOKEN))
-				.isTrue();
+		SearchParamIndexProviderRegistry registry = new SearchParamIndexProviderRegistry(List.of(nonSuppressing));
+		assertThat(registry.isBuiltInIndexWriteSuppressed(TOKEN)).isFalse();
+		registry = new SearchParamIndexProviderRegistry(List.of(nonSuppressing, suppressing));
+		assertThat(registry.isBuiltInIndexWriteSuppressed(TOKEN)).isTrue();
 	}
 
 	private static class TestProvider implements ISearchParamIndexProvider, Ordered {
@@ -116,16 +112,16 @@ class SearchParamIndexProviderRegistryTest {
 
 		@Override
 		public Optional<BaseSearchParamPredicateBuilder> createPredicateBuilder(
-				SearchQueryBuilder theSqlBuilder, String theParamName) {
+			SearchQueryBuilder theSqlBuilder, String theParamName) {
 			return Optional.empty();
 		}
 
 		@Override
 		public AddRemoveCount synchronize(
-				RequestDetails theRequestDetails,
-				Collection<? extends BaseResourceIndex> theExtractedParams,
-				ResourceTable theEntity,
-				boolean theResourceIsBeingCreated) {
+			RequestDetails theRequestDetails,
+			Collection<? extends BaseResourceIndex> theExtractedParams,
+			ResourceTable theEntity,
+			boolean theResourceIsBeingCreated) {
 			return new AddRemoveCount();
 		}
 

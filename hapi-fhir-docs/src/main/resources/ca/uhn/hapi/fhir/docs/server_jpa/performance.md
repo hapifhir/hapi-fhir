@@ -83,4 +83,4 @@ Setting this property explicitly to true enables the feature: [Index Storage Opt
 
 * If this setting is enabled along with [Index Missing Fields](/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/entity/StorageSettings.html#getIndexMissingFields()) setting, the following index may need to be added into the `HFJ_SPIDX_xxx` tables to improve the search performance: `(HASH_IDENTITY, SP_MISSING, RES_ID, PARTITION_ID)`.
 
-* This setting should not be enabled in combination with [Include Partition in Search Hashes](/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/config/PartitionSettings.html#setIncludePartitionInSearchHashes(boolean)) flag, as in this case, Partition could not be included in Search Hashes.
+* This setting should not be enabled in combination with [Include Partition in Search Hashes](/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/config/PartitionSettings.html#setIncludePartitionInSearchHashes(boolean)) flag, as in this case, Partition could not be included in Search Hashes. 

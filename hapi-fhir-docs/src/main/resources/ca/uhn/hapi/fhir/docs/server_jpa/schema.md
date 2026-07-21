@@ -877,6 +877,7 @@ Note: This table has the columns listed below, but it also has all common column
     </tbody>
 </table>
 
+
 # HFJ_SPIDX_URI: URI Search Parameters
 
 FHIR Search Parameters of type [*uri*](https://www.hl7.org/fhir/search.html#uri) produce rows in the `HFJ_SPIDX_URI` table.
