@@ -21,6 +21,8 @@ package ca.uhn.fhir.broker.api;
 
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 
+import java.util.concurrent.CompletableFuture;
+
 /**
  * Sends messages to a Message Broker.
  *
@@ -40,4 +42,18 @@ public interface IChannelProducer<T> {
 	 * @return the result of the send operation
 	 */
 	ISendResult send(IMessage<T> theMessage);
+
+	/**
+	 * Send a message to the broker asynchronously.
+	 * <p>
+	 * The returned CompletableFuture completes when the broker acknowledges receipt.
+	 * Callers that don't need confirmation can ignore the future (fire-and-forget).
+	 * </p>
+	 *
+	 * @param theMessage the message to send
+	 * @return a CompletableFuture that completes with the send result
+	 */
+	default CompletableFuture<ISendResult> sendAsync(IMessage<T> theMessage) {
+		return CompletableFuture.supplyAsync(() -> send(theMessage));
+	}
 }
