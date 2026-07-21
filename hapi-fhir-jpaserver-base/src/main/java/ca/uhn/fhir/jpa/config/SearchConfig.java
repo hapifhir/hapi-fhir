@@ -80,7 +80,7 @@ public class SearchConfig {
 				theJpaStorageResourceParser,
 				theExternallyStoredResourceServiceRegistry,
 				theMetaTagSorter,
-			myPartitionSettings,
+				myPartitionSettings,
 				thePartitionLookupSvc);
 	}
 
