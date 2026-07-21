@@ -79,7 +79,9 @@ public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkT
 	})
 	default void chunkCreation_nonFirstChunk_isInExpectedStatus(boolean theGatedExecution, WorkChunkStatusEnum expectedStatus) {
 		String jobInstanceId = getTestManager().createAndStoreJobInstance(null);
-		String myChunkId = getTestManager().createChunk(jobInstanceId, theGatedExecution);
+		String myChunkId = getTestManager().runInTransaction(() -> {
+			return getTestManager().createChunk(jobInstanceId, theGatedExecution);
+		});
 
 		WorkChunk fetchedWorkChunk = getTestManager().freshFetchWorkChunk(myChunkId);
 		assertEquals(expectedStatus, fetchedWorkChunk.getStatus(), "New chunks are " + expectedStatus);
@@ -88,9 +90,13 @@ public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkT
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	default void chunkCreation_firstChunk_isInReady(boolean theGatedExecution) {
-		JobDefinition<TestJobParameters> jobDef = getTestManager().withJobDefinition(theGatedExecution);
+		JobDefinition<TestJobParameters> jobDef = getTestManager().runInTransaction(() -> {
+			return getTestManager().withJobDefinition(theGatedExecution);
+		});
 		String jobInstanceId = getTestManager().createAndStoreJobInstance(jobDef);
-		String myChunkId = getTestManager().createFirstChunk(jobDef, jobInstanceId);
+		String myChunkId = getTestManager().runInTransaction(() -> {
+			return getTestManager().createFirstChunk(jobDef, jobInstanceId);
+		});
 
 		WorkChunk fetchedWorkChunk = getTestManager().freshFetchWorkChunk(myChunkId);
 		// the first chunk of both gated and non-gated job should start in READY
@@ -104,7 +110,9 @@ public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkT
 
 		JobDefinition<TestJobParameters> jobDef = getTestManager().withJobDefinition(false);
 		String jobInstanceId = getTestManager().createAndStoreJobInstance(jobDef);
-		String myChunkId = getTestManager().createChunk(jobInstanceId, false);
+		String myChunkId = getTestManager().runInTransaction(() -> {
+			return getTestManager().createChunk(jobInstanceId, false);
+		});
 
 		getTestManager().runActiveJobMaintenancePass();
 		// the worker has received the chunk, and marks it started.

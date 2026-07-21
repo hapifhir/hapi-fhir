@@ -251,6 +251,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest
 		return retVal;
 	}
 
+	@Override
 	public void runInTransaction(Runnable theRunnable) {
 		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -260,6 +261,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest
 		});
 	}
 
+	@Override
 	public <T> T runInTransaction(Callable<T> theRunnable) {
 		return newTxTemplate().execute(t -> {
 			try {
@@ -285,7 +287,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest
 	}
 
 	public String createAndDequeueWorkChunk(String theJobInstanceId) {
-		String chunkId = createChunk(theJobInstanceId);
+		String chunkId = runInTransaction(() -> createChunk(theJobInstanceId));
 		mySvc.onWorkChunkDequeue(chunkId);
 		return chunkId;
 	}
