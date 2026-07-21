@@ -1,1 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=ca.uhn.fhir.spring.boot.autoconfigure.FhirAutoConfiguration
