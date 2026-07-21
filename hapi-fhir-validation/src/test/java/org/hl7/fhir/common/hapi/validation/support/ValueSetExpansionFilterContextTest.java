@@ -6,10 +6,12 @@ import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.Enumerations.FilterOperator;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -768,5 +770,27 @@ class ValueSetExpansionFilterContextTest {
 		assertThat(actual)
 			.as("DESCENDENTOF[%s] on '%s' (flat parent property)", filterValue, testCode)
 			.isEqualTo(expectedIsFiltered);
+	}
+
+	/**
+	 * A flat parent-property hierarchy can contain a cycle (A parent B, B parent A). A structural filter
+	 * such as descendent-of must terminate instead of looping forever.
+	 */
+	@Test
+	@Timeout(value = 10, unit = TimeUnit.SECONDS)
+	void descendentOfTerminatesOnCyclicHierarchy() {
+		CodeSystem cs = new CodeSystem().setUrl("http://example.org/cycle").setCaseSensitive(true);
+		cs.addProperty().setCode("parent").setUri(CONCEPT_PROPERTIES_PARENT).setType(CodeSystem.PropertyType.CODE);
+		cs.addConcept().setCode("A").addProperty().setCode("parent").setValue(new CodeType("B"));
+		cs.addConcept().setCode("B").addProperty().setCode("parent").setValue(new CodeType("A"));
+
+		// Candidate "ZZZ" is not part of the (cyclic) subtree, so without a visited-set this loops forever.
+		boolean actual = isFiltered(
+			cs,
+			FilterOperator.DESCENDENTOF,
+			"A",
+			new FhirVersionIndependentConcept(cs.getUrl(), "ZZZ"));
+
+		assertThat(actual).isTrue();
 	}
 }

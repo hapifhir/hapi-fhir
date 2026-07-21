@@ -108,6 +108,98 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testAddFlatParentPropertyHierarchyWithCycle() {
+		createNotPresentCodeSystem();
+
+		CodeSystem delta = newDeltaCodeSystem();
+		delta.addProperty()
+			.setCode("parent")
+			.setUri("http://hl7.org/fhir/concept-properties#parent")
+			.setType(CodeSystem.PropertyType.CODE);
+		// A parent=B, B parent=A → cycle expressed via flat parent properties
+		delta.addConcept().setCode("A").setDisplay("A").addProperty().setCode("parent").setValue(new CodeType("B"));
+		delta.addConcept().setCode("B").setDisplay("B").addProperty().setCode("parent").setValue(new CodeType("A"));
+
+		try {
+			myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), delta);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage()).startsWith(Msg.code(3003) + "Cycle detected around code ");
+		}
+	}
+
+	@Test
+	public void testAddFlatParentPropertyHierarchy_childExistsFilterSelectsLeaves() {
+		createNotPresentCodeSystem();
+
+		CodeSystem delta = newDeltaCodeSystem();
+		delta.addProperty()
+			.setCode("parent")
+			.setUri("http://hl7.org/fhir/concept-properties#parent")
+			.setType(CodeSystem.PropertyType.CODE);
+		// Flat hierarchy via parent property; note the forward reference (C1 declared before its parent P).
+		delta.addConcept().setCode("C1").setDisplay("Child 1").addProperty().setCode("parent").setValue(new CodeType("P"));
+		delta.addConcept().setCode("P").setDisplay("Parent");
+		delta.addConcept().setCode("C2").setDisplay("Child 2").addProperty().setCode("parent").setValue(new CodeType("C1"));
+		delta.addConcept().setCode("C3").setDisplay("Child 3").addProperty().setCode("parent").setValue(new CodeType("P"));
+		myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), delta);
+
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://foo/vs-leaves");
+		vs.getCompose()
+			.addInclude()
+			.setSystem("http://foo/cs")
+			.addFilter()
+			.setProperty("child")
+			.setOp(ValueSet.FilterOperator.EXISTS)
+			.setValue("false");
+		ValueSet expanded = myValueSetDao.expand(vs, null);
+
+		List<String> codes = expanded.getExpansion().getContains().stream()
+			.map(ValueSet.ValueSetExpansionContainsComponent::getCode)
+			.collect(Collectors.toList());
+		assertThat(codes).containsExactlyInAnyOrder("C2", "C3");
+	}
+
+	@Test
+	public void testAddFlatParentPropertyHierarchy_descendentOfFilter() {
+		createNotPresentCodeSystem();
+
+		CodeSystem delta = newDeltaCodeSystem();
+		delta.addProperty()
+			.setCode("parent")
+			.setUri("http://hl7.org/fhir/concept-properties#parent")
+			.setType(CodeSystem.PropertyType.CODE);
+		delta.addConcept().setCode("C1").setDisplay("Child 1").addProperty().setCode("parent").setValue(new CodeType("P"));
+		delta.addConcept().setCode("P").setDisplay("Parent");
+		delta.addConcept().setCode("C2").setDisplay("Child 2").addProperty().setCode("parent").setValue(new CodeType("C1"));
+		delta.addConcept().setCode("C3").setDisplay("Child 3").addProperty().setCode("parent").setValue(new CodeType("P"));
+		myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), delta);
+
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://foo/vs-descendants");
+		vs.getCompose()
+			.addInclude()
+			.setSystem("http://foo/cs")
+			.addFilter()
+			.setProperty("concept")
+			.setOp(ValueSet.FilterOperator.DESCENDENTOF)
+			.setValue("P");
+		ValueSet expanded = myValueSetDao.expand(vs, null);
+
+		List<String> codes = expanded.getExpansion().getContains().stream()
+			.map(ValueSet.ValueSetExpansionContainsComponent::getCode)
+			.collect(Collectors.toList());
+		assertThat(codes).containsExactlyInAnyOrder("C1", "C2", "C3");
+	}
+
+	@Test
 	public void testAddHierarchyConcepts() {
 		ourLog.info("Starting testAddHierarchyConcepts");
 

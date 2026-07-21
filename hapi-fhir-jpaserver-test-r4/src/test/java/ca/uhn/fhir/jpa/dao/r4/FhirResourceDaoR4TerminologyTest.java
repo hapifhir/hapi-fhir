@@ -422,6 +422,42 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	}
 
 	/**
+	 * Codes may contain query-syntax characters. The child/parent-exists filter must treat them as exact
+	 * terms, not parse them as a query string.
+	 */
+	@Test
+	public void testExpandWithChildExistsFilter_CodesWithSpecialCharacters() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(TermTestUtil.URL_MY_CODE_SYSTEM);
+		cs.setVersion("1");
+		cs.setContent(CodeSystemContentMode.COMPLETE);
+		ConceptDefinitionComponent parent = cs.addConcept().setCode("P|A").setDisplay("Parent with pipe");
+		parent.addConcept().setCode("C+1").setDisplay("Child with plus");
+		parent.addConcept().setCode("C-2:x").setDisplay("Child with dash and colon");
+		myCodeSystemDao.create(cs, mySrd);
+
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl(TermTestUtil.URL_MY_VALUE_SET);
+		valueSet.getCompose()
+			.addInclude()
+			.setSystem(TermTestUtil.URL_MY_CODE_SYSTEM)
+			.addFilter()
+			.setProperty("child")
+			.setOp(FilterOperator.EXISTS)
+			.setValue("false");
+		myValueSetDao.create(valueSet, mySrd);
+
+		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter(""));
+		logAndValidateValueSet(result);
+
+		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
+		assertThat(codes).containsExactlyInAnyOrder("C+1", "C-2:x");
+	}
+
+	/**
 	 * Same {@code child exists=false} leaf filter as the flat-hierarchy test below, but here the CodeSystem
 	 * resource expresses its hierarchy via NESTED {@code CodeSystem.concept} arrays (as in the nested KDL
 	 * representation), exercising the nested resource-loading path ({@code toPersistedConcepts}).
@@ -457,6 +493,48 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
 		assertThat(codes).containsExactlyInAnyOrder("C2", "C3");
+	}
+
+	/**
+	 * Structural filters such as {@code descendent-of} must also work when the hierarchy is expressed FLAT
+	 * via a {@code parent} concept-property, because the flat properties are turned into the same
+	 * parent/child links that back the transitive-closure index.
+	 */
+	@Test
+	public void testExpandWithDescendentOfFilter_FlatParentPropertyHierarchy() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(TermTestUtil.URL_MY_CODE_SYSTEM);
+		cs.setVersion("1");
+		cs.setContent(CodeSystemContentMode.COMPLETE);
+		cs.addProperty()
+			.setCode("parent")
+			.setUri("http://hl7.org/fhir/concept-properties#parent")
+			.setType(CodeSystem.PropertyType.CODE);
+		cs.addConcept().setCode("P").setDisplay("Parent");
+		cs.addConcept().setCode("C1").setDisplay("Child 1").addProperty().setCode("parent").setValue(new CodeType("P"));
+		cs.addConcept().setCode("C2").setDisplay("Child 2").addProperty().setCode("parent").setValue(new CodeType("C1"));
+		cs.addConcept().setCode("C3").setDisplay("Child 3").addProperty().setCode("parent").setValue(new CodeType("P"));
+		myCodeSystemDao.create(cs, mySrd);
+
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl(TermTestUtil.URL_MY_VALUE_SET);
+		valueSet.getCompose()
+			.addInclude()
+			.setSystem(TermTestUtil.URL_MY_CODE_SYSTEM)
+			.addFilter()
+			.setProperty("concept")
+			.setOp(FilterOperator.DESCENDENTOF)
+			.setValue("P");
+		myValueSetDao.create(valueSet, mySrd);
+
+		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter(""));
+		logAndValidateValueSet(result);
+
+		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
+		assertThat(codes).containsExactlyInAnyOrder("C1", "C2", "C3");
 	}
 
 	/**

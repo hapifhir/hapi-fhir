@@ -277,8 +277,14 @@ public class ValueSetExpansionFilterContext {
 
 	private boolean isDescendantOf(String theParentCode, String theCandidatePropertyValue) {
 		Deque<String> stack = new ArrayDeque<>(conceptCodeTree.getOrDefault(theParentCode, Set.of()));
+		// Guard against cycles (possible when the hierarchy is expressed via flat parent/child properties),
+		// otherwise a cycle would loop forever for a candidate that is not part of the subtree.
+		Set<String> visited = new HashSet<>();
 		while (!stack.isEmpty()) {
 			String theChildCode = stack.pop();
+			if (!visited.add(theChildCode)) {
+				continue;
+			}
 			if (isEqualsWithOptionalCaseSensitive(theChildCode, theCandidatePropertyValue)) {
 				return true;
 			}

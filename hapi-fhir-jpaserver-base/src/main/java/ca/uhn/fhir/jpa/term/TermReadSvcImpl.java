@@ -1521,8 +1521,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			return;
 		}
 
-		PredicateFinalStep matchesAnyOfThoseCodes =
-				theF.simpleQueryString().field("myCode").matching(String.join(" | ", codesHavingRelation));
+		PredicateFinalStep matchesAnyOfThoseCodes = theF.terms().field("myCode").matchingAny(codesHavingRelation);
 		if (wantConceptsWithRelation) {
 			theB.must(matchesAnyOfThoseCodes); // keep concepts that have the relation
 		} else {

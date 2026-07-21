@@ -172,7 +172,9 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	private UploadStatistics addConceptsToCodeSystemVersion(
 			TermCodeSystem theTermCodeSystem,
 			TermCodeSystemVersion theCodeSystemVersion,
-			List<TermConcept> theAdditions) {
+			List<TermConcept> theAdditions,
+			Set<String> theParentPropertyCodes,
+			Set<String> theChildPropertyCodes) {
 		HapiTransactionService.requireTransaction();
 
 		Validate.notNull(theTermCodeSystem, "No code system found for code system version: %s", theCodeSystemVersion);
@@ -225,8 +227,98 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			addConceptInHierarchy(theCodeSystemVersion, parentCodes, nextRootConcept, retVal, codeToConcept, 0);
 		}
 
+		// Wire up hierarchy expressed FLAT via parent/child concept-properties. This runs after all concepts
+		// have been added to codeToConcept, so forward references (parent declared after child) resolve.
+		addFlatHierarchyLinksForDelta(
+				theCodeSystemVersion,
+				theAdditions,
+				codeToConcept,
+				theParentPropertyCodes,
+				theChildPropertyCodes,
+				retVal);
+
 		myTerminologySvc.invalidateCodeSystemCaches();
 		return retVal;
+	}
+
+	/**
+	 * Delta-import counterpart to {@link #linkFlatHierarchyFromConceptProperties}: turns flat {@code parent}
+	 * / {@code child} concept-properties (canonical concept-properties URIs) into parent/child links. Parent
+	 * codes are resolved against the concepts being added as well as concepts already persisted in the
+	 * CodeSystem version.
+	 */
+	private void addFlatHierarchyLinksForDelta(
+			TermCodeSystemVersion theCsv,
+			List<TermConcept> theSourceConcepts,
+			Map<String, TermConcept> theCodeToConcept,
+			Set<String> theParentPropertyCodes,
+			Set<String> theChildPropertyCodes,
+			UploadStatistics theStatisticsTracker) {
+		if (theParentPropertyCodes.isEmpty() && theChildPropertyCodes.isEmpty()) {
+			return;
+		}
+		for (TermConcept sourceConcept : theSourceConcepts) {
+			TermConcept concept = theCodeToConcept.get(sourceConcept.getCode());
+			if (concept != null) {
+				for (TermConceptProperty property : sourceConcept.getProperties()) {
+					String relatedCode = property.getValue();
+					if (isBlank(relatedCode)) {
+						continue;
+					}
+					if (theParentPropertyCodes.contains(property.getKey())) {
+						TermConcept parent = resolveDeltaConcept(theCsv, relatedCode, theCodeToConcept);
+						addDeltaHierarchyLink(parent, concept, theStatisticsTracker);
+					} else if (theChildPropertyCodes.contains(property.getKey())) {
+						TermConcept child = resolveDeltaConcept(theCsv, relatedCode, theCodeToConcept);
+						addDeltaHierarchyLink(concept, child, theStatisticsTracker);
+					}
+				}
+			}
+			// Recurse into any nested source children (mixed representation)
+			List<TermConcept> nestedChildren = sourceConcept.getChildren().stream()
+					.map(TermConceptParentChildLink::getChild)
+					.toList();
+			addFlatHierarchyLinksForDelta(
+					theCsv,
+					nestedChildren,
+					theCodeToConcept,
+					theParentPropertyCodes,
+					theChildPropertyCodes,
+					theStatisticsTracker);
+		}
+	}
+
+	private TermConcept resolveDeltaConcept(
+			TermCodeSystemVersion theCsv, String theCode, Map<String, TermConcept> theCodeToConcept) {
+		TermConcept concept = theCodeToConcept.get(theCode);
+		if (concept == null) {
+			concept = myConceptDao
+					.findByCodeSystemAndCode(theCsv.getPid(), theCode)
+					.orElse(null);
+			if (concept != null) {
+				theCodeToConcept.put(theCode, concept);
+			}
+		}
+		return concept;
+	}
+
+	private void addDeltaHierarchyLink(
+			TermConcept theParent, TermConcept theChild, UploadStatistics theStatisticsTracker) {
+		if (theParent == null || theChild == null || theParent == theChild) {
+			return;
+		}
+		boolean alreadyLinked = theChild.getParents().stream()
+				.anyMatch(link -> theParent.getCode().equals(link.getParent().getCode()));
+		if (alreadyLinked) {
+			return;
+		}
+		theParent.addChild(theChild, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
+		// Null out the index status and parent PIDs so saveConcept() re-persists the concept, stores the new
+		// parent link, and forces the transitive parent PIDs to be recomputed on reindex.
+		theChild.setIndexStatus(null);
+		theChild.setParentPids(null);
+		saveConcept(theChild);
+		theStatisticsTracker.incrementConceptLinksAddedCount();
 	}
 
 	private void deleteEverythingRelatedToConcept(TermConcept theConcept, UploadStatistics theUploadStatistics) {
@@ -1019,6 +1111,10 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		delectHierarchyCycleAndThrowExceptionIfFound(codeSystem.getConcept(), new HashSet<>());
 
+		Set<String> parentPropertyCodes = resolveHierarchyPropertyCodes(codeSystem, CONCEPT_PROPERTY_PARENT_URI);
+		Set<String> childPropertyCodes = resolveHierarchyPropertyCodes(codeSystem, CONCEPT_PROPERTY_CHILD_URI);
+		detectFlatHierarchyCycleAndThrowExceptionIfFound(codeSystem, parentPropertyCodes, childPropertyCodes);
+
 		return myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
 			TermCodeSystemVersion codeSystemVersionEntity =
 					myCodeSystemVersionDao.findByCodeSystemUriAndVersion(systemUrl, systemVersionId);
@@ -1049,7 +1145,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 					codeSystemVersionEntity.getPartitionId().getPartitionId());
 			TermCodeSystem termCodeSystem =
 					myTermCodeSystemDao.findById(termCodeSystemPid).orElseThrow();
-			return addConceptsToCodeSystemVersion(termCodeSystem, codeSystemVersionEntity, additions);
+			return addConceptsToCodeSystemVersion(
+					termCodeSystem, codeSystemVersionEntity, additions, parentPropertyCodes, childPropertyCodes);
 		});
 	}
 
@@ -1064,6 +1161,79 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			delectHierarchyCycleAndThrowExceptionIfFound(concept.getConcept(), theCodesInHierarchy);
 			theCodesInHierarchy.remove(code);
 		}
+	}
+
+	/**
+	 * Cycle detection counterpart to {@link #delectHierarchyCycleAndThrowExceptionIfFound} for hierarchies
+	 * expressed FLAT via {@code parent}/{@code child} concept-properties (canonical concept-properties URIs).
+	 * Only cycles within the submitted concepts are detected, mirroring the nested check's scope.
+	 */
+	private void detectFlatHierarchyCycleAndThrowExceptionIfFound(
+			CodeSystem theCodeSystem, Set<String> theParentPropertyCodes, Set<String> theChildPropertyCodes) {
+		if (theParentPropertyCodes.isEmpty() && theChildPropertyCodes.isEmpty()) {
+			return;
+		}
+
+		// Build a directed child -> parent graph from the flat properties
+		Map<String, Set<String>> childToParents = new HashMap<>();
+		collectFlatHierarchyEdges(
+				theCodeSystem.getConcept(), theParentPropertyCodes, theChildPropertyCodes, childToParents);
+
+		Set<String> visited = new HashSet<>();
+		Set<String> codesInPath = new HashSet<>();
+		for (String code : childToParents.keySet()) {
+			detectFlatHierarchyCycleDepthFirst(code, childToParents, visited, codesInPath);
+		}
+	}
+
+	private void collectFlatHierarchyEdges(
+			List<CodeSystem.ConceptDefinitionComponent> theConcepts,
+			Set<String> theParentPropertyCodes,
+			Set<String> theChildPropertyCodes,
+			Map<String, Set<String>> theChildToParents) {
+		for (CodeSystem.ConceptDefinitionComponent concept : theConcepts) {
+			String code = concept.getCode();
+			for (CodeSystem.ConceptPropertyComponent property : concept.getProperty()) {
+				if (!property.hasValue() || !property.getValue().isPrimitive()) {
+					continue;
+				}
+				String relatedCode = property.getValue().primitiveValue();
+				if (isBlank(relatedCode)) {
+					continue;
+				}
+				if (theParentPropertyCodes.contains(property.getCode())) {
+					// code's parent is relatedCode
+					theChildToParents
+							.computeIfAbsent(code, k -> new HashSet<>())
+							.add(relatedCode);
+				} else if (theChildPropertyCodes.contains(property.getCode())) {
+					// code's child is relatedCode, so relatedCode's parent is code
+					theChildToParents
+							.computeIfAbsent(relatedCode, k -> new HashSet<>())
+							.add(code);
+				}
+			}
+			collectFlatHierarchyEdges(
+					concept.getConcept(), theParentPropertyCodes, theChildPropertyCodes, theChildToParents);
+		}
+	}
+
+	private void detectFlatHierarchyCycleDepthFirst(
+			String theCode,
+			Map<String, Set<String>> theChildToParents,
+			Set<String> theVisited,
+			Set<String> theCodesInPath) {
+		if (theVisited.contains(theCode)) {
+			return;
+		}
+		if (!theCodesInPath.add(theCode)) {
+			throw new InvalidRequestException(Msg.code(3003) + "Cycle detected around code " + theCode);
+		}
+		for (String parentCode : theChildToParents.getOrDefault(theCode, Collections.emptySet())) {
+			detectFlatHierarchyCycleDepthFirst(parentCode, theChildToParents, theVisited, theCodesInPath);
+		}
+		theCodesInPath.remove(theCode);
+		theVisited.add(theCode);
 	}
 
 	private IIdType validateOrCreateNotPresentCodeSystem(
