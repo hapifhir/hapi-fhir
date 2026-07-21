@@ -66,7 +66,7 @@ public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkT
 	 * (ie, no driver chunk)
 	 * or put a chunk on the queue
 	 */
-	default boolean doesReductionInline() {
+	default boolean isInlineReduction() {
 		// we return true here because some implementations already
 		// do these inline (mongo)
 		return true;
@@ -129,7 +129,7 @@ public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkT
 		// setup
 		getTestManager().disableWorkChunkMessageHandler();
 
-		String driverChunk = (theIsReductionStep && !doesReductionInline()) ? "+3|READY" : "";
+		String driverChunk = (theIsReductionStep && !isInlineReduction()) ? "+3|READY" : "";
 		WorkChunkStatusEnum nextState = theIsReductionStep ? WorkChunkStatusEnum.REDUCTION_READY : WorkChunkStatusEnum.READY;
 		String state = String.format("""
 						1|COMPLETED
@@ -203,7 +203,7 @@ public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkT
 		// setup
 		getTestManager().disableWorkChunkMessageHandler();
 		String state = theState;
-		if (doesReductionInline()) {
+		if (isInlineReduction()) {
 			state = theState.replace("+3|READY", "").trim();
 		}
 

@@ -1794,7 +1794,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	class Batch2SpecTest extends AbstractIJobPersistenceSpecificationTest {
 
 		@Override
-		public boolean inlineReduction() {
+		public boolean isInlineReduction() {
 			return false;
 		}
 

@@ -99,7 +99,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest
 		return mySvc;
 	}
 
-	public boolean inlineReduction() {
+	public boolean isInlineReduction() {
 		// Default to inline reduction (no 'driver' work chunk). This matches implementations
 		// that run reduction inline during the maintenance pass (e.g. the Mongo-backed CDR
 		// implementation) so they pass the shared spec without needing to override this.
@@ -184,8 +184,8 @@ public abstract class AbstractIJobPersistenceSpecificationTest
 		class StateTransitions implements IWorkChunkStateTransitions {
 
 			@Override
-			public boolean doesReductionInline() {
-				return inlineReduction();
+			public boolean isInlineReduction() {
+				return AbstractIJobPersistenceSpecificationTest.this.isInlineReduction();
 			}
 
 			@Override
