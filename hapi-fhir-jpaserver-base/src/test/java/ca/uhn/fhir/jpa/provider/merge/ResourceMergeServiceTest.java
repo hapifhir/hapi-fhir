@@ -56,6 +56,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -90,7 +91,7 @@ public class ResourceMergeServiceTest {
 	private static final String TARGET_PATIENT_TEST_ID_WITH_VERSION_2 = TARGET_PATIENT_TEST_ID + "/_history/2";
 	public static final String PRECONDITION_FAILED_MESSAGE = "bad wolf";
 
-	@Mock
+	@Mock(strictness = Mock.Strictness.LENIENT)
 	DaoRegistry myDaoRegistryMock;
 
 	@Mock
@@ -497,6 +498,7 @@ public class ResourceMergeServiceTest {
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
 		mergeOperationParameters.setDeleteSource(theWithDeleteSource);
+		mergeOperationParameters.setProvenanceAgents(new ArrayList<>());
 
 		Patient sourcePatient = createPatient(SOURCE_PATIENT_TEST_ID_WITH_VERSION_1);
 		when(myRequestDetailsMock.isPreferAsync()).thenReturn(true);
