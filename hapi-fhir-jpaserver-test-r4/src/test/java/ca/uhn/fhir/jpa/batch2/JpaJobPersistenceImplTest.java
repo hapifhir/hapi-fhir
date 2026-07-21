@@ -1794,6 +1794,11 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	class Batch2SpecTest extends AbstractIJobPersistenceSpecificationTest {
 
 		@Override
+		public boolean inlineReduction() {
+			return false;
+		}
+
+		@Override
 		public PlatformTransactionManager getTxManager() {
 			return JpaJobPersistenceImplTest.this.getTxManager();
 		}

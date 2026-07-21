@@ -61,6 +61,17 @@ public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkT
 		getTestManager().enableMaintenanceRunner(false);
 	}
 
+	/**
+	 * Whether the batch system will do the work inline
+	 * (ie, no driver chunk)
+	 * or put a chunk on the queue
+	 */
+	default boolean doesReductionInline() {
+		// we return true here because some implementations already
+		// do these inline (mongo)
+		return true;
+	}
+
 	@ParameterizedTest
 	@CsvSource({
 		"false, READY",
@@ -118,13 +129,15 @@ public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkT
 		// setup
 		getTestManager().disableWorkChunkMessageHandler();
 
+		String driverChunk = (theIsReductionStep && !doesReductionInline()) ? "+3|READY" : "";
 		WorkChunkStatusEnum nextState = theIsReductionStep ? WorkChunkStatusEnum.REDUCTION_READY : WorkChunkStatusEnum.READY;
 		String state = String.format("""
 						1|COMPLETED
 						2|COMPLETED
 						3|GATE_WAITING,3|%s
 						3|QUEUED,3|%s
-		""", nextState.name(), nextState.name());
+						%s
+		""", nextState.name(), nextState.name(), driverChunk).trim();
 
 		JobDefinition<TestJobParameters> jobDef = theIsReductionStep ? getTestManager().withJobDefinitionWithReductionStep() : getTestManager().withJobDefinition(true);
 		String jobInstanceId = getTestManager().createAndStoreJobInstance(jobDef);
@@ -147,46 +160,57 @@ public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkT
 			1|COMPLETED
 			2|COMPLETED
 			3|READY
+			+3|READY
 		""",
 		"""
 			1|COMPLETED
 			2|COMPLETED
 			3|REDUCTION_READY
+			+3|READY
 		""",
 		"""
 			1|COMPLETED
 			2|COMPLETED
 			3|IN_PROGRESS
+			+3|READY
 		""",
 		"""
 			1|COMPLETED
 			2|COMPLETED
 			3|POLL_WAITING
+			+3|READY
 		""",
 		"""
 			1|COMPLETED
 			2|COMPLETED
 			3|ERRORED
+			+3|READY
 		""",
 		"""
 			1|COMPLETED
 			2|COMPLETED
 			3|FAILED
+			+3|READY
 		""",
 		"""
 			1|COMPLETED
 			2|COMPLETED
 			3|COMPLETED
+			+3|READY
 		"""
 	})
 	default void advanceJobStepAndUpdateChunkStatus_reductionJobWithInvalidStates_doNotTransition(String theState) {
 		// setup
 		getTestManager().disableWorkChunkMessageHandler();
+		String state = theState;
+		if (doesReductionInline()) {
+			state = theState.replace("+3|READY", "").trim();
+		}
 
 		JobDefinition<TestJobParameters> jobDef = getTestManager().withJobDefinitionWithReductionStep();
 		String jobInstanceId = getTestManager().createAndStoreJobInstance(jobDef);
 
-		JobMaintenanceStateInformation info = new JobMaintenanceStateInformation(jobInstanceId, jobDef, theState);
+		JobMaintenanceStateInformation info = new JobMaintenanceStateInformation(jobInstanceId, jobDef, state);
 		getTestManager().createChunksInStates(info);
 		assertEquals(SECOND_STEP_ID, getTestManager().freshFetchJobInstance(jobInstanceId).getCurrentGatedStepId());
 

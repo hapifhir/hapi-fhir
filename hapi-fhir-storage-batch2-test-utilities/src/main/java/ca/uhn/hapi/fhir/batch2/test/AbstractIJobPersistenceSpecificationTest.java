@@ -99,6 +99,15 @@ public abstract class AbstractIJobPersistenceSpecificationTest
 		return mySvc;
 	}
 
+	public boolean inlineReduction() {
+		// Default to inline reduction (no 'driver' work chunk). This matches implementations
+		// that run reduction inline during the maintenance pass (e.g. the Mongo-backed CDR
+		// implementation) so they pass the shared spec without needing to override this.
+		// Implementations that create a data-free 'driver' work chunk (the JPA implementation)
+		// override this to return false.
+		return true;
+	}
+
 	@Nonnull
 	public JobDefinition<TestJobParameters> withJobDefinitionWithReductionStep() {
 		JobDefinition.Builder<TestJobParameters, ?> builder = JobDefinition.newBuilder()
@@ -173,6 +182,11 @@ public abstract class AbstractIJobPersistenceSpecificationTest
 
 		@Nested
 		class StateTransitions implements IWorkChunkStateTransitions {
+
+			@Override
+			public boolean doesReductionInline() {
+				return inlineReduction();
+			}
 
 			@Override
 			public ITestFixture getTestManager() {
