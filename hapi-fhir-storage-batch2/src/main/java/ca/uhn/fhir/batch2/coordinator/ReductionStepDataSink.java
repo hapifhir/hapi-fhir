@@ -98,8 +98,7 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 			 * reducer touches. If the two could never collide we wouldn't need this duplication
 			 * here. Until then though, this is safer.
 			 */
-
-			progress.updateInstanceForReductionStep(instance);
+			progress.updateInstanceForReductionStep(myJobDefinitionRegistry, instance);
 
 			instance.setReport(dataString);
 			instance.setStatus(StatusEnum.COMPLETED);

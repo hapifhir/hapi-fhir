@@ -286,13 +286,13 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@ParameterizedTest
 	@CsvSource(textBlock = """
-		# AlreadyExisting , ExpectSelectCount , ExpectInsertCount , ExpectUpdateCount
-		true              , 8                 , 0                 , 10
-		false             , 7                 , 25                , 0
+		# AlreadyExisting , ExpectSelectCount , ExpectInsertCount , ExpectUpdateCount , ExpectCommitCount
+		true              , 9                  , 0                , 10                , 1
+		false             , 8                  , 25               , 0                 , 1
 		""")
-	void testCodeSystem(boolean theAlreadyExisting, int theExpectSelectCount, int theExpectInsertCount, int theExpectUpdateCount) {
+	void testCodeSystem(boolean theAlreadyExisting, int theExpectSelectCount, int theExpectInsertCount, int theExpectUpdateCount, int theExpectCommitCount) {
 		// Setup
-		createCodeSystem(withUrl("http://foo"), withCodeSystemContent("not-present"));
+		createCodeSystem(withUrl("http://foo"), withVersion("123"), withCodeSystemContent("not-present"));
 
 		String stagingVersion = myTermCodeSystemStorageSvc.startStagingCodeSystemVersion("http://foo", "123").stagingVersionId();
 
@@ -320,12 +320,12 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		};
 
 		if (theAlreadyExisting) {
-			myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(inputSupplier.get());
+			myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), inputSupplier.get());
 		}
 
 		// Test
 		myCaptureQueriesListener.clear();
-		myTermCodeSystemStorageSvc.uploadCodeSystemConcepts(inputSupplier.get());
+		myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), inputSupplier.get());
 
 		// Verify
 		assertThat(myCaptureQueriesListener).has(
@@ -333,7 +333,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 				.selectCount(theExpectSelectCount)
 				.insertCount(theExpectInsertCount)
 				.updateCount(theExpectUpdateCount)
-				.commitCount(1)
+				.commitCount(theExpectCommitCount)
 				.noOtherCounts()
 		);
 	}
@@ -4465,7 +4465,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	public void testValueSetExpand_PreExpanded_UseHibernateSearch() {
 		createLocalCsAndVs();
 
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		runInTransaction(() -> {
 			Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
 			assertEquals(1, page.getContent().size());
@@ -4961,7 +4961,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
 
 		// Now pre-expand the VS and try again (should use disk because we're fetching from pre-expansion)
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		myCaptureQueriesListener.clear();
 		result = myValidationSupport.validateCode(ctx, options, csUrl, code, null, vsUrl);
 		assertNotNull(result);

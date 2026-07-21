@@ -38,7 +38,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
-import static ca.uhn.fhir.interceptor.model.RequestPartitionId.defaultPartition;
 import static ca.uhn.fhir.jpa.dao.r4.PartititonTestUtil.assertLocalDateFromDbMatches;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -108,7 +107,7 @@ public class PartitioningInterceptorR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testCreateNonPartionableResourceWithPartitionDate() {
-		addNextTargetPartitionForCreate(defaultPartition(LocalDate.of(2021, 2, 22)));
+		addNextTargetPartitionForCreate(RequestPartitionId.fromPartitionId(null, LocalDate.of(2021, 2, 22)));
 
 		StructureDefinition sd = new StructureDefinition();
 		sd.setUrl("http://foo");
@@ -125,7 +124,7 @@ public class PartitioningInterceptorR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testCreateNonPartionableResourceWithNullPartitionReturned() {
-		addNextTargetPartitionForCreate(RequestPartitionId.defaultPartition());
+		addNextTargetPartitionForCreate(RequestPartitionId.fromPartitionId(null));
 
 		StructureDefinition sd = new StructureDefinition();
 		sd.setUrl("http://foo");
@@ -238,7 +237,7 @@ public class PartitioningInterceptorR4Test extends BasePartitioningR4Test {
 	}
 
 	private void addCreateDefaultPartition() {
-		addNextInterceptorCreateResult(defaultPartition());
+		addNextInterceptorCreateResult(RequestPartitionId.fromPartitionId(null));
 	}
 
 	public void createRequestId() {
@@ -303,7 +302,7 @@ public class PartitioningInterceptorR4Test extends BasePartitioningR4Test {
 				myObjectConsumer.accept(theResource);
 			}
 			// doesn't matter; just not allPartitions
-			return defaultPartition(LocalDate.of(2021, 2, 22));
+			return RequestPartitionId.fromPartitionId(null, LocalDate.of(2021, 2, 22));
 		}
 	}
 }

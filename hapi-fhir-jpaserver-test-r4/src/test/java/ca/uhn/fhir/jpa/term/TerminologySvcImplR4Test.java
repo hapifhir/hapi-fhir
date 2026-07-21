@@ -13,7 +13,6 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -150,17 +149,17 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
 		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
 		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		TermValueSet termValueSet = runInTransaction(()-> {
-			TermValueSet vs = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get();
+			TermValueSet vs = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).iterator().next();
 			Long termValueSetId = vs.getId();
-			assertEquals(3, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
+			assertEquals(3, myTermValueSetConceptDesignationDao.countByTermValueSet(vs).intValue());
 			assertEquals(3, vs.getTotalConceptDesignations().intValue());
-			assertEquals(24, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
+			assertEquals(24, myTermValueSetConceptDao.countByTermValueSet(vs).intValue());
 			assertEquals(24, vs.getTotalConcepts().intValue());
 			return vs;
 		});
@@ -169,12 +168,12 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				myTermValueSetConceptDesignationDao.deleteByTermValueSetId(termValueSetId);
-				assertEquals(0, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
-				myTermValueSetConceptDao.deleteByTermValueSetId(termValueSetId);
-				assertEquals(0, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
+				myTermValueSetConceptDesignationDao.deleteByTermValueSet(termValueSet);
+				assertEquals(0, myTermValueSetConceptDesignationDao.countByTermValueSet(termValueSet).intValue());
+				myTermValueSetConceptDao.deleteByTermValueSet(termValueSet);
+				assertEquals(0, myTermValueSetConceptDao.countByTermValueSet(termValueSet).intValue());
 				myTermValueSetDao.deleteById(new IdAndPartitionId(termValueSetId));
-				assertFalse(myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).isPresent());
+				assertTrue(myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).isEmpty());
 			}
 		});
 	}
@@ -191,30 +190,30 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
 		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
 		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
-		Long termValueSetId = runInTransaction(()-> {
-			TermValueSet termValueSet = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get();
+		TermValueSet termValueSetId = runInTransaction(()-> {
+			TermValueSet termValueSet = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get(0);
 			Long id = termValueSet.getId();
-			assertEquals(3, myTermValueSetConceptDesignationDao.countByTermValueSetId(id).intValue());
+			assertEquals(3, myTermValueSetConceptDesignationDao.countByTermValueSet(termValueSet).intValue());
 			assertEquals(3, termValueSet.getTotalConceptDesignations().intValue());
-			assertEquals(24, myTermValueSetConceptDao.countByTermValueSetId(id).intValue());
+			assertEquals(24, myTermValueSetConceptDao.countByTermValueSet(termValueSet).intValue());
 			assertEquals(24, termValueSet.getTotalConcepts().intValue());
-			return id;
+			return termValueSet;
 		});
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				myTermValueSetConceptDesignationDao.deleteByTermValueSetId(termValueSetId);
-				assertEquals(0, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
-				myTermValueSetConceptDao.deleteByTermValueSetId(termValueSetId);
-				assertEquals(0, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
-				myTermValueSetDao.deleteById(new IdAndPartitionId(termValueSetId));
-				assertFalse(myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).isPresent());
+				myTermValueSetConceptDesignationDao.deleteByTermValueSet(termValueSetId);
+				assertEquals(0, myTermValueSetConceptDesignationDao.countByTermValueSet(termValueSetId).intValue());
+				myTermValueSetConceptDao.deleteByTermValueSet(termValueSetId);
+				assertEquals(0, myTermValueSetConceptDao.countByTermValueSet(termValueSetId).intValue());
+				myTermValueSetDao.delete(termValueSetId);
+				assertTrue(myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).isEmpty());
 			}
 		});
 	}
@@ -276,7 +275,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
 		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		ValidationSupportContext valCtx = new ValidationSupportContext(myValidationSupport);
 
 		IValidationSupport.CodeValidationResult result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, null, null, null, null);
@@ -325,7 +324,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
 		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		ValidationSupportContext valCtx = new ValidationSupportContext(myValidationSupport);
 
 		IValidationSupport.CodeValidationResult result = myTermSvc.validateCodeIsInPreExpandedValueSet(valCtx, optsNoGuess, valueSet, null, null, null, null, null);
@@ -488,7 +487,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		myCodeSystemDao.update(codeSystem, mySrd);
 
 		await().until(() -> {
-			myBatch2JobHelper.runMaintenancePass();
+			myBatch2JobHelper.runActiveJobMaintenancePass();
 			myTerminologyDeferredStorageSvc.saveAllDeferred();
 			myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 			return myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true);
@@ -658,7 +657,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 		// Setup: code system + ValueSet, then pre-expand so the TermValueSet has EXPANDED status
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		// Prime: read and verify pre-expanded, which populates myValueSetCache with EXPANDED status
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId, mySrd);
@@ -681,7 +680,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 		// Setup: code system + ValueSet, then pre-expand so the TermValueSet has EXPANDED status
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		// Prime: read and verify pre-expanded, which populates myValueSetCache with EXPANDED status
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId, mySrd);
@@ -705,7 +704,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 		// Setup: pre-expanded ValueSet used by getValueSetEntity
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		ValidationSupportContext valCtx = new ValidationSupportContext(myValidationSupport);
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId, mySrd);
@@ -802,7 +801,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		IIdType vsV2Id = myValueSetDao.create(vsV2, mySrd).getId().toUnqualifiedVersionless();
 
 		// Pre-expand both TermValueSet entities
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		// Read back so url and version fields are populated from stored resources
 		ValueSet vsV1Read = myValueSetDao.read(vsV1Id, mySrd);

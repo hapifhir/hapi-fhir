@@ -156,6 +156,29 @@ public abstract class BaseMethodBinding {
 		return doGetIncludesOrRevIncludes(true);
 	}
 
+	/**
+	 * Returns <code>true</code> if this method declares an <code>@IncludeParam</code>
+	 * parameter matching the requested direction. Unlike {@link #getIncludes()} and
+	 * {@link #getRevIncludes()}, which report only the <code>allow</code> values, this
+	 * method reports the <i>presence</i> of the annotation. A bare <code>@IncludeParam</code>
+	 * with no <code>allow</code> (i.e. "accept any include") returns <code>true</code>
+	 * even though {@link #getIncludes()} returns an empty set.
+	 *
+	 * @param theReverse <code>false</code> to check for <code>@IncludeParam</code>,
+	 *                   <code>true</code> to check for <code>@IncludeParam(reverse=true)</code>
+	 */
+	public boolean hasIncludeParameter(boolean theReverse) {
+		for (IParameter next : myParameters) {
+			if (next instanceof IncludeParameter) {
+				IncludeParameter includeParameter = (IncludeParameter) next;
+				if (includeParameter.isReverse() == theReverse) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	private Set<String> doGetIncludesOrRevIncludes(boolean reverse) {
 		Set<String> retVal = new TreeSet<>();
 		for (IParameter next : myParameters) {
@@ -391,7 +414,7 @@ public abstract class BaseMethodBinding {
 		Class<?> returnTypeFromMethod = theMethod.getReturnType();
 		if (MethodOutcome.class.isAssignableFrom(returnTypeFromMethod)) {
 			// returns a method outcome
-		} else if (IBundleProvider.class.equals(returnTypeFromMethod)) {
+		} else if (IBundleProvider.class.isAssignableFrom(returnTypeFromMethod)) {
 			// returns a bundle provider
 		} else if (void.class.equals(returnTypeFromMethod)) {
 			// returns a bundle

@@ -160,7 +160,7 @@ public class Batch2JobHelper {
 		if (hasStatus(theInstanceId, theExpectedStatuses)) {
 			return true;
 		}
-		myJobMaintenanceService.runMaintenancePass();
+		myJobMaintenanceService.runActiveJobMaintenancePass();
 		return hasStatus(theInstanceId, theExpectedStatuses);
 	}
 
@@ -190,7 +190,7 @@ public class Batch2JobHelper {
 				.atMost(waitDuration)
 				.until(() -> {
 					counter.getAndIncrement();
-					forceRunMaintenancePass();
+					forceRunActiveJobMaintenancePass();
 					return hasStatus(theInstanceId, theStatusEnums);
 				});
 		} catch (ConditionTimeoutException ex) {
@@ -328,22 +328,33 @@ public class Batch2JobHelper {
 		HashMap<String, String> map = new HashMap<>();
 		Awaitility.await().atMost(DEFAULT_WAIT_DURATION)
 			.until(() -> {
-				myJobMaintenanceService.runMaintenancePass();
+				myJobMaintenanceService.runActiveJobMaintenancePass();
 
-				List<JobInstance> jobs = myJobCoordinator.getInstances(1000, 1);
+				boolean foundAtLeastOneJob = false;
+				for (int pageIndex = 0; ; pageIndex++) {
+
+					List<JobInstance> jobs = myJobCoordinator.getInstances(1000, pageIndex);
+					for (JobInstance job : jobs) {
+						foundAtLeastOneJob = true;
+						if (!job.getStatus().isEnded()) {
+							map.put(job.getInstanceId(), job.getStatus().name());
+						} else {
+							map.remove(job.getInstanceId());
+						}
+					}
+
+					if (jobs.isEmpty()) {
+						break;
+					}
+
+				}
+
 				// "All Jobs" assumes at least one job exists
-				if (theExpectAtLeastOneJobToExist && jobs.isEmpty()) {
+				if (theExpectAtLeastOneJobToExist && !foundAtLeastOneJob) {
 					ourLog.warn("No jobs found yet...");
 					return false;
 				}
 
-				for (JobInstance job : jobs) {
-					if (!job.getStatus().isEnded()) {
-						map.put(job.getInstanceId(), job.getStatus().name());
-					} else {
-						map.remove(job.getInstanceId());
-					}
-				}
 				return map.isEmpty();
 			});
 
@@ -354,21 +365,33 @@ public class Batch2JobHelper {
 		}
 	}
 
+	/**
+	 * @deprecated Use {@link #runActiveJobMaintenancePass()} instead
+	 */
+	@Deprecated(since = "8.12.0", forRemoval = true)
 	public void runMaintenancePass() {
-		myJobMaintenanceService.runMaintenancePass();
+		myJobMaintenanceService.runActiveJobMaintenancePass();
+	}
+
+	public void runActiveJobMaintenancePass() {
+		myJobMaintenanceService.runActiveJobMaintenancePass();
+	}
+
+	public void runEndedJobMaintenancePass() {
+		myJobMaintenanceService.runEndedJobMaintenancePass();
 	}
 
 	@VisibleForTesting
 	public void enableMaintenanceRunner(boolean theEnabled) {
-		myJobMaintenanceService.enableMaintenancePass(theEnabled);
+		myJobMaintenanceService.enableMaintenance(theEnabled);
 	}
 
 	/**
 	 * Forces a run of the maintenance pass without waiting for
 	 * the semaphore to release
 	 */
-	public void forceRunMaintenancePass() {
-		myJobMaintenanceService.forceMaintenancePass();
+	public void forceRunActiveJobMaintenancePass() {
+		myJobMaintenanceService.forceActiveJobMaintenancePass();
 	}
 
 	public void cancelAllJobsAndAwaitCancellation() {

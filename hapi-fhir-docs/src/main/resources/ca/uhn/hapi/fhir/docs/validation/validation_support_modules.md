@@ -162,6 +162,12 @@ This module will invoke the following operations on the remote terminology serve
 * **POST [base]/CodeSystem/$validate-code** &ndash; Validate codes in fields where no specific ValueSet is bound 
 * **POST [base]/ValueSet/$validate-code** &ndash; Validate codes in fields where a specific ValueSet is bound 
 
+## Inferring the Code System
+
+When a code is validated but its system cannot be determined locally, this module can send the `inferSystem=true` parameter on `$validate-code` to ask the remote server to infer the system. Because `inferSystem` is an R5+ `$validate-code` parameter that strict R4/DSTU3 servers (e.g. VSAC, CMS) reject, it is only sent for R5 and newer FHIR contexts by default.
+
+Use `setInferSystemEnabled(Boolean)` to override this behavior: `null` (default) sends it only for R5+, `TRUE` always sends it (e.g. for an R4 server that does support it), and `FALSE` never sends it.
+
 # UnknownCodeSystemWarningValidationSupport
 
 [JavaDoc](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/support/UnknownCodeSystemWarningValidationSupport.html) / [Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-validation/src/main/java/org/hl7/fhir/common/hapi/validation/support/UnknownCodeSystemWarningValidationSupport.java)

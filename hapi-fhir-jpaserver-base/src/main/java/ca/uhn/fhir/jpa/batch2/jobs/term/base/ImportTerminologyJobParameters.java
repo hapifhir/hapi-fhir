@@ -1,0 +1,91 @@
+/*-
+ * #%L
+ * HAPI FHIR JPA Server
+ * %%
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+package ca.uhn.fhir.jpa.batch2.jobs.term.base;
+
+import ca.uhn.fhir.model.api.IModelJson;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nonnull;
+
+import java.util.Properties;
+
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
+
+public class ImportTerminologyJobParameters implements IModelJson {
+
+	@JsonProperty("url")
+	private String myUrl;
+
+	@JsonProperty("versionId")
+	private String myVersionId;
+
+	@JsonProperty("dontMakeCurrent")
+	private Boolean myDontMakeCurrent;
+
+	@JsonProperty("mode")
+	private ImportTerminologyModeEnum myMode;
+
+	@JsonIgnore
+	private Properties myJobProperties;
+
+	/**
+	 * Returns {@link ImportTerminologyModeEnum#SNAPSHOT} if not set.
+	 */
+	@Nonnull
+	public ImportTerminologyModeEnum getMode() {
+		return getIfNull(myMode, ImportTerminologyModeEnum.SNAPSHOT);
+	}
+
+	public void setMode(ImportTerminologyModeEnum theMode) {
+		myMode = theMode;
+	}
+
+	public String getUrl() {
+		return myUrl;
+	}
+
+	public void setUrl(String theUrl) {
+		myUrl = theUrl;
+	}
+
+	public Properties getJobProperties() {
+		return myJobProperties;
+	}
+
+	public void setJobProperties(Properties theJobProperties) {
+		myJobProperties = theJobProperties;
+	}
+
+	public String getVersionId() {
+		return myVersionId;
+	}
+
+	public void setVersionId(String theVersionId) {
+		myVersionId = theVersionId;
+	}
+
+	public Boolean getDontMakeCurrent() {
+		return myDontMakeCurrent;
+	}
+
+	public void setDontMakeCurrent(Boolean theDontMakeCurrent) {
+		myDontMakeCurrent = theDontMakeCurrent;
+	}
+}

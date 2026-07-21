@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static ca.uhn.fhir.jpa.term.TerminologySvcDeltaR4Test.newDeltaCodeSystem;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -13,7 +14,6 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
-import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -70,7 +70,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		myCodeSystemDao.update(loadResourceFromClasspath(CodeSystem.class, "r4/adi-cs.json"));
 		myValueSetDao.update(loadResourceFromClasspath(ValueSet.class, "r4/adi-vs.json"));
 
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		ValidationSupportContext context = new ValidationSupportContext(myValidationSupport);
 		ConceptValidationOptions options = new ConceptValidationOptions();
@@ -85,7 +85,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		myCodeSystemDao.update(loadResourceFromClasspath(CodeSystem.class, "r4/adi-cs.json"));
 		myValueSetDao.update(loadResourceFromClasspath(ValueSet.class, "r4/adi-vs.json"));
 
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		logAllValueSetConcepts();
 
@@ -104,20 +104,21 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		ourLog.info("Creating CodeSystem");
 		CodeSystem cs = new CodeSystem();
 		cs.setId("CodeSystem/cs");
-		cs.setUrl("http://cs");
+		cs.setUrl("http://foo/cs");
+		cs.setVersion("1.0");
 		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
 		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		myCodeSystemDao.update(cs);
 
 		ourLog.info("Adding codes to codesystem");
-		CustomTerminologySet delta = new CustomTerminologySet();
-		TermConcept parent = delta.addRootConcept("parent");
+		CodeSystem delta = newDeltaCodeSystem();
+		CodeSystem.ConceptDefinitionComponent parent = delta.addConcept().setCode("parent");
 		for (int j = 0; j < 1200; j++) {
 			parent
-				.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA)
+				.addConcept()
 				.setCode("child" + j);
 		}
-		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://cs", delta);
+		myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), delta);
 
 		ourLog.info("Creating ValueSet");
 		ValueSet vs = new ValueSet();
@@ -125,14 +126,14 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		vs.setUrl("http://vs");
 		vs.getCompose()
 			.addInclude()
-			.setSystem("http://cs")
+			.setSystem("http://foo/cs")
 			.addFilter()
 			.setProperty("concept")
 			.setOp(ValueSet.FilterOperator.ISA)
 			.setValue("parent");
 		vs.getCompose()
 			.addInclude()
-			.setSystem("http://cs-np")
+			.setSystem("http://foo/cs-np")
 			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code0")))
 			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code1")));
 		myValueSetDao.update(vs);
@@ -141,52 +142,53 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		ValidationSupportContext ctx = new ValidationSupportContext(myValidationSupport);
 		ConceptValidationOptions options = new ConceptValidationOptions();
 
-		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "childX", null, "http://vs");
+		outcome = myValidationSupport.validateCode(ctx, options, "http://foo/cs", "childX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
 		assertThat(outcome.getMessage()).contains("cannot apply filters");
 
 		// In memory - Enumerated in non-present CS
 
-		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "code1", null, "http://vs");
+		outcome = myValidationSupport.validateCode(ctx, options, "http://foo/cs-np", "code1", null, "http://vs");
 		assertNotNull(outcome);
 		assertTrue(outcome.isOk());
 		assertEquals("Code was validated against in-memory expansion of ValueSet: http://vs", outcome.getSourceDetails());
 
-		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "codeX", null, "http://vs");
+		outcome = myValidationSupport.validateCode(ctx, options, "http://foo/cs-np", "codeX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertThat(outcome.getMessage()).contains("Unknown code 'http://cs-np#codeX' for in-memory expansion of ValueSet 'http://vs'");
+		assertThat(outcome.getMessage()).contains("Unknown code 'http://foo/cs-np#codeX' for in-memory expansion of ValueSet 'http://vs'");
 
 		// Precalculated
 
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		logAllValueSets();
+		logAllValueSetConcepts();
 		myValidationSupport.invalidateCaches();
 
-		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "child10", null, "http://vs");
+		outcome = myValidationSupport.validateCode(ctx, options, "http://foo/cs", "child10", null, "http://vs");
 		assertNotNull(outcome);
 		assertTrue(outcome.isOk());
 		assertThat(outcome.getMessage()).startsWith("Code validation occurred using a ValueSet expansion that was pre-calculated at ");
 
-		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "childX", null, "http://vs");
+		outcome = myValidationSupport.validateCode(ctx, options, "http://foo/cs", "childX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertThat(outcome.getMessage()).contains("Unknown code \"http://cs#childX\"");
+		assertThat(outcome.getMessage()).contains("Unknown code \"http://foo/cs#childX\"");
 		assertThat(outcome.getMessage()).contains("Code validation occurred using a ValueSet expansion that was pre-calculated at ");
 
 		// Precalculated - Enumerated in non-present CS
 
-		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "code1", null, "http://vs");
+		outcome = myValidationSupport.validateCode(ctx, options, "http://foo/cs-np", "code1", null, "http://vs");
 		assertNotNull(outcome);
 		assertTrue(outcome.isOk());
 		assertThat(outcome.getMessage()).startsWith("Code validation occurred using a ValueSet expansion that was pre-calculated at ");
 
-		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "codeX", null, "http://vs");
+		outcome = myValidationSupport.validateCode(ctx, options, "http://foo/cs-np", "codeX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertThat(outcome.getMessage()).contains("Unknown code \"http://cs-np#codeX\"");
+		assertThat(outcome.getMessage()).contains("Unknown code \"http://foo/cs-np#codeX\"");
 		assertThat(outcome.getMessage()).contains("Code validation occurred using a ValueSet expansion that was pre-calculated at ");
 
 	}
@@ -200,20 +202,20 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		ourLog.info("Creating CodeSystem");
 		CodeSystem cs = new CodeSystem();
 		cs.setId("CodeSystem/cs");
-		cs.setUrl("http://cs");
+		cs.setUrl("http://foo/cs");
 		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
 		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		myCodeSystemDao.update(cs);
 
 		ourLog.info("Adding codes to codesystem");
-		CustomTerminologySet delta = new CustomTerminologySet();
-		TermConcept parent = delta.addRootConcept("parent");
+		CodeSystem delta = newDeltaCodeSystem();
+		CodeSystem.ConceptDefinitionComponent parent = delta.addConcept().setCode("parent");
 		for (int j = 0; j < 1200; j++) {
 			parent
-				.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA)
+				.addConcept()
 				.setCode("child" + j);
 		}
-		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://cs", delta);
+		myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), delta);
 
 		ourLog.info("Creating ValueSet");
 		ValueSet vs = new ValueSet();
@@ -221,14 +223,14 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		vs.setUrl("http://vs");
 		vs.getCompose()
 			.addInclude()
-			.setSystem("http://cs")
+			.setSystem("http://foo/cs")
 			.addFilter()
 			.setProperty("concept")
 			.setOp(ValueSet.FilterOperator.ISA)
 			.setValue("parent");
 		vs.getCompose()
 			.addInclude()
-			.setSystem("http://cs-np")
+			.setSystem("http://foo/cs-np")
 			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code0")))
 			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("code1")));
 		myValueSetDao.update(vs);
@@ -239,57 +241,57 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 
 		// In memory - Hierarchy in existing CS
 
-		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "child10", null, "http://vs");
+		outcome = myValidationSupport.validateCode(ctx, options, "http://foo/cs", "child10", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
 		assertThat(outcome.getMessage()).contains("cannot apply filters");
 
-		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "childX", null, "http://vs");
+		outcome = myValidationSupport.validateCode(ctx, options, "http://foo/cs", "childX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
 		assertThat(outcome.getMessage()).contains("cannot apply filters");
 
 		// In memory - Enumerated in non-present CS
 
-		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "code1", null, "http://vs");
+		outcome = myValidationSupport.validateCode(ctx, options, "http://foo/cs-np", "code1", null, "http://vs");
 		assertNotNull(outcome);
 		assertTrue(outcome.isOk());
 		assertEquals("Code was validated against in-memory expansion of ValueSet: http://vs", outcome.getSourceDetails());
 
-		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "codeX", null, "http://vs");
+		outcome = myValidationSupport.validateCode(ctx, options, "http://foo/cs-np", "codeX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertThat(outcome.getMessage()).contains("Unknown code 'http://cs-np#codeX' for in-memory expansion of ValueSet 'http://vs'");
+		assertThat(outcome.getMessage()).contains("Unknown code 'http://foo/cs-np#codeX' for in-memory expansion of ValueSet 'http://vs'");
 
 		// Precalculated
 
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		logAllValueSets();
 		myValidationSupport.invalidateCaches();
 
-		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "child10", null, "http://vs");
+		outcome = myValidationSupport.validateCode(ctx, options, "http://foo/cs", "child10", null, "http://vs");
 		assertNotNull(outcome);
 		assertTrue(outcome.isOk());
 		assertThat(outcome.getMessage()).startsWith("Code validation occurred using a ValueSet expansion that was pre-calculated at ");
 
-		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "childX", null, "http://vs");
+		outcome = myValidationSupport.validateCode(ctx, options, "http://foo/cs", "childX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertThat(outcome.getMessage()).contains("Unknown code \"http://cs#childX\"");
+		assertThat(outcome.getMessage()).contains("Unknown code \"http://foo/cs#childX\"");
 		assertThat(outcome.getMessage()).contains("Code validation occurred using a ValueSet expansion that was pre-calculated at ");
 
 		// Precalculated - Enumerated in non-present CS
 
-		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "code1", null, "http://vs");
+		outcome = myValidationSupport.validateCode(ctx, options, "http://foo/cs-np", "code1", null, "http://vs");
 		assertNotNull(outcome);
 		assertTrue(outcome.isOk());
 		assertThat(outcome.getMessage()).startsWith("Code validation occurred using a ValueSet expansion that was pre-calculated at ");
 
-		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "codeX", null, "http://vs");
+		outcome = myValidationSupport.validateCode(ctx, options, "http://foo/cs-np", "codeX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertThat(outcome.getMessage()).contains("Unknown code \"http://cs-np#codeX\"");
+		assertThat(outcome.getMessage()).contains("Unknown code \"http://foo/cs-np#codeX\"");
 		assertThat(outcome.getMessage()).contains("Code validation occurred using a ValueSet expansion that was pre-calculated at ");
 
 	}
@@ -390,7 +392,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
@@ -430,7 +432,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
@@ -486,11 +488,12 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 	@Test
 	public void testExpandByValueSet_ExceedsMaxSize() {
 		// Add a bunch of codes
-		CustomTerminologySet codesToAdd = new CustomTerminologySet();
+		CodeSystem codesToAdd = newDeltaCodeSystem();
+		codesToAdd.setUrl("http://loinc.org");
 		for (int i = 0; i < 100; i++) {
-			codesToAdd.addRootConcept("CODE" + i, "Display " + i);
+			codesToAdd.addConcept().setCode("CODE" + i).setDisplay("Display " + i);
 		}
-		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://loinc.org", codesToAdd);
+		myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), codesToAdd);
 		myStorageSettings.setMaximumExpansionSize(50);
 
 		ValueSet vs = new ValueSet();
@@ -547,7 +550,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(true);
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		myCaptureQueriesListener.clear();;
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(null, new IdType("ValueSet/vaccinecode"), new CodeType("28571000087109"), new CodeType("http://snomed.info/sct"), null, null, null, mySrd);
@@ -598,8 +601,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		myValueSetDao.update(vs, mySrd);
 
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(true);
-		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		ValueSetExpansionOptions options = new ValueSetExpansionOptions();
 		options.setIncludeHierarchy(true);

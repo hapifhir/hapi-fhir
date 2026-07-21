@@ -67,6 +67,7 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Callable;
@@ -204,9 +205,15 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 
 		// wipmb For 6.8 - this runs four tx. That's at least 2 too many
 		// combine the fetch and the case statement.  Use optional for the boolean.
-		JobInstance instance = executeInTransactionWithSynchronization(() -> myJobPersistence
-				.fetchInstance(theInstanceId)
-				.orElseThrow(() -> new InternalErrorException("Unknown instance: " + theInstanceId)));
+		Optional<JobInstance> instanceOpt =
+				executeInTransactionWithSynchronization(() -> myJobPersistence.fetchInstance(theInstanceId));
+
+		if (instanceOpt.isEmpty()) {
+			ourLog.warn("Unable to execute reduction step for instance {} - Instance not found", theInstanceId);
+			return new ReductionStepChunkProcessingResponse(false);
+		}
+
+		JobInstance instance = instanceOpt.get();
 
 		boolean shouldProceed = false;
 		switch (instance.getStatus()) {

@@ -639,7 +639,17 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			validateResourceIdCreation(theResource, theRequest);
 		}
 
-		if (theMatchUrl != null) {
+		String searchUrlToRegister = theMatchUrl;
+		if (searchUrlToRegister == null) {
+			// Auto-created placeholder reference targets which were created to satisfy
+			// a conditional reference pass their identifier-based match URL along via
+			// userdata so that they get a search URL entry just like conditional creates do
+			searchUrlToRegister = (String) theResource.getUserData(JpaConstants.PLACEHOLDER_RESOURCE_SEARCH_URL);
+			if (searchUrlToRegister != null) {
+				theResource.setUserData(JpaConstants.PLACEHOLDER_RESOURCE_SEARCH_URL, null);
+			}
+		}
+		if (searchUrlToRegister != null) {
 			// Note: We actually create the search URL below by calling enforceMatchUrlResourceUniqueness
 			// since we can't do that until we know the assigned PID, but we set this flag up here
 			// because we need to set it before we persist the ResourceTable entity in order to
@@ -675,10 +685,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		theTransactionDetails.addResolvedResourceId(jpaPid.getAssociatedResourceId(), jpaPid);
 		theTransactionDetails.addResolvedResource(jpaPid.getAssociatedResourceId(), theResource);
 
-		// Pre-cache the match URL, and create an entry in the HFJ_RES_SEARCH_URL table to
-		// protect against concurrent writes to the same conditional URL
+		// Create an entry in the HFJ_RES_SEARCH_URL table to protect against
+		// concurrent writes to the same conditional URL
+		if (searchUrlToRegister != null) {
+			myResourceSearchUrlSvc.enforceMatchUrlResourceUniqueness(
+					getResourceName(), searchUrlToRegister, updatedEntity);
+		}
+
+		// Pre-cache the match URL
 		if (theMatchUrl != null) {
-			myResourceSearchUrlSvc.enforceMatchUrlResourceUniqueness(getResourceName(), theMatchUrl, updatedEntity);
 			myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, getResourceName(), theMatchUrl, jpaPid);
 		}
 
@@ -1905,7 +1920,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		if (reindexSearchParameters) {
-			reindexSearchParameters(entity, retVal, theTransactionDetails);
+			boolean searchParameterReindexSucceeded = reindexSearchParameters(entity, retVal, theTransactionDetails);
+			if (searchParameterReindexSucceeded) {
+				reindexFullTextIndex(entity, retVal);
+			}
 		}
 
 		if (optimizeStorage) {
@@ -1969,15 +1987,32 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@SuppressWarnings("unchecked")
-	private void reindexSearchParameters(
+	private boolean reindexSearchParameters(
 			ResourceTable entity, ReindexOutcome theReindexOutcome, TransactionDetails theTransactionDetails) {
 		try {
 			T resource = (T) myJpaStorageResourceParser.toResource(entity, false);
 			reindexSearchParameters(resource, entity, theTransactionDetails);
+			return true;
 		} catch (Exception e) {
 			ourLog.warn("Failure during reindex: {}", e.toString());
 			theReindexOutcome.addWarning("Failed to reindex resource " + entity.getIdDt() + ": " + e.getMessage());
 			myResourceTableDao.updateIndexStatus(entity.getId(), EntityIndexStatusEnum.INDEXING_FAILED);
+			return false;
+		}
+	}
+
+	private void reindexFullTextIndex(ResourceTable theEntity, ReindexOutcome theReindexOutcome) {
+		if (mySearchDao == null) {
+			return;
+		}
+
+		try {
+			mySearchDao.reindex(theEntity);
+		} catch (Exception e) {
+			ourLog.warn("Failure during fulltext reindex: {}", e.toString());
+			theReindexOutcome.addWarning(
+					"Failed to reindex fulltext index for resource " + theEntity.getIdDt() + ": " + e);
+			myResourceTableDao.updateIndexStatus(theEntity.getId(), EntityIndexStatusEnum.INDEXING_FAILED);
 		}
 	}
 
@@ -2975,7 +3010,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			myIdHelperService.addResolvedPidToFhirIdAfterCommit(
 					entity.getPersistentId(),
 					entity.getPartitionId() == null
-							? RequestPartitionId.defaultPartition()
+							? myPartitionSettings.getDefaultRequestPartitionId()
 							: entity.getPartitionId().toPartitionId(),
 					entity.getResourceType(),
 					entity.getFhirId(),
