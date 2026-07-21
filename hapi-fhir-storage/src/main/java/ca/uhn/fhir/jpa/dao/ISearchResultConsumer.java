@@ -36,7 +36,7 @@ public interface ISearchResultConsumer<T> {
 
 	/**
 	 * Return value for {@link #consume(SearchProgressTracker, Object)} indicating that no
-	 * forther results are wanted.
+	 * further results are wanted.
 	 */
 	Outcome STOP = new Outcome(false);
 
