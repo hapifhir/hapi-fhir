@@ -1,0 +1,11 @@
+---
+type: add
+issue: 8180
+title: "ValueSet expansion now supports the hierarchical `child` and `parent` filter properties with the
+  `exists` operator (for example `child exists=false` to select the leaf concepts, or `parent exists=false`
+  to select the roots), for any terminology rather than only LOINC. In addition, the concept hierarchy is
+  now built from CodeSystems that express it FLAT via the canonical `parent`/`child` concept-properties
+  (`http://hl7.org/fhir/concept-properties#parent` / `#child`), not only from nested `CodeSystem.concept`
+  arrays. This also makes the existing structural filters such as `is-a` and `descendent-of` work for such
+  flat CodeSystems. Both the in-memory validation-support expansion and the JPA terminology service are
+  supported. Thanks to Patrick Werner for the contribution!"
