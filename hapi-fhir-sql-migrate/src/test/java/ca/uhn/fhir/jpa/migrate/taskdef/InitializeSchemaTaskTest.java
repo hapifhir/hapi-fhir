@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.tasks.api.ISchemaInitializationProvider;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class InitializeSchemaTaskTest extends BaseTest {
 
@@ -46,6 +48,38 @@ public class InitializeSchemaTaskTest extends BaseTest {
 		getMigrator().migrate();
 
 		assertThat(task.initializedSchema()).isFalse();
+	}
+
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testExistingSchemaWithoutHistory_dryRun_stillRequiresBaseline(
+		Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
+
+		InitializeSchemaTask task = new InitializeSchemaTask("1", "1", new TestProvider("SOMETABLE", true));
+		getMigrator().addTask(task);
+		getMigrator().setDryRun(true);
+
+		assertThatThrownBy(() -> getMigrator().migrate())
+			.isInstanceOf(HapiMigrationException.class)
+			.hasMessageContaining("--baseline-version");
+	}
+
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testExistingSchema_invalidBaselineVersion_isRejected(
+		Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
+
+		InitializeSchemaTask task = new InitializeSchemaTask("1", "1", new TestProvider("SOMETABLE", true));
+		getMigrator().addTask(task);
+		getMigrator().setBaselineVersion("not-a-version");
+
+		assertThatThrownBy(() -> getMigrator().migrate())
+			.isInstanceOf(HapiMigrationException.class)
+			.hasMessageContaining("Invalid --baseline-version");
 	}
 
 	private class TestProvider implements ISchemaInitializationProvider {

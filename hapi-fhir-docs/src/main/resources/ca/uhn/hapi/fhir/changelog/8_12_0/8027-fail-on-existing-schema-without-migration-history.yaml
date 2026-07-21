@@ -1,4 +1,4 @@
 ---
 type: fix
 issue: 8027
-title: "Fixed an issue where schema migrations on existing databases could incorrectly skip required tasks when migration history was unavailable or incomplete, potentially resulting in missing schema elements and runtime SQL errors."
+title: "Fixed an issue where schema migrations on existing databases could incorrectly skip required tasks when migration history was unavailable or incomplete, potentially resulting in missing schema elements and runtime SQL errors. The migrator now fails fast when an existing HAPI FHIR schema is detected but no migration history is present. A new `--baseline-version` option (e.g. `--baseline-version 8.4.0`) has been added to the `migrate-database` CLI command to record migrations up to a given version as already applied, allowing existing pre-migration-history schemas to be migrated forward. Thanks to Patrick Werner for the fix."
