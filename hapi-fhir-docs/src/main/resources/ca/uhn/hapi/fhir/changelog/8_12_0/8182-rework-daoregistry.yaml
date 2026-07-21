@@ -1,0 +1,6 @@
+---
+type: change
+issue: 8182
+title: "The JPA DaoRegistry class has been reworked so that it no longer pulls in resource DAOs by querying the
+   Spring ApplicationContext (a violation of the principle of Inversion of Control). It now uses an explicit registration
+   step by the providers."
