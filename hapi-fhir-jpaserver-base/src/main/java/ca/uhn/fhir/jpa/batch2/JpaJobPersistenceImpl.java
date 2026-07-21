@@ -45,6 +45,7 @@ import ca.uhn.fhir.jpa.dao.data.IBatch2AttachmentRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkMetadataViewRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Batch2JobAttachmentChunkEntity;
 import ca.uhn.fhir.jpa.entity.Batch2JobAttachmentEntity;
@@ -98,7 +99,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -164,14 +164,15 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRED)
 	public String onWorkChunkCreate(WorkChunkCreateEvent theBatchWorkChunk) {
+		HapiTransactionService.requireTransaction();
+
 		Batch2WorkChunkEntity entity = createEntityFromCreateEvent(theBatchWorkChunk);
 
 		ourLog.debug("Create work chunk {}/{}/{}", entity.getInstanceId(), entity.getId(), entity.getTargetStepId());
 		ourLog.trace(
 				"Create work chunk data {}/{}: {}", entity.getInstanceId(), entity.getId(), entity.getSerializedData());
-		myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> myWorkChunkRepository.save(entity));
+		myWorkChunkRepository.save(entity);
 
 		return entity.getId();
 	}
@@ -864,7 +865,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public boolean advanceJobStepAndUpdateChunkStatus(
 			String theJobInstanceId, String theNextStepId, boolean theIsReductionStep) {
-		AtomicReference<JobInstance> instanceRep = new AtomicReference<>();
 		boolean changed = updateInstance(theJobInstanceId, instance -> {
 			if (instance.getCurrentGatedStepId().equals(theNextStepId)) {
 				// someone else beat us here.  No changes
@@ -873,7 +873,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			// we only need this if we're creating a reduction 'driver' chunk.
 			// and we only do that if we (this instance) is the one who will be transitioning
 			// the chunks to READY/REDUCTION_READY
-			instanceRep.set(instance);
+
 			ourLog.debug("Moving gated instance {} to the next step {}.", theJobInstanceId, theNextStepId);
 			instance.setCurrentGatedStepId(theNextStepId);
 			return true;
@@ -900,11 +900,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			/*
 			 * we add a data-free READY chunk that will be enqueued by the system
 			 */
-			JobInstance instance = instanceRep.get();
-			if (instance == null) {
-				ourLog.warn("Instance was not set for reduction step; falling back to inline processing");
-				return changed;
-			}
+			JobInstance instance = fetchInstance(theJobInstanceId).orElse(null);
+			assert instance != null : "Instance was not set for reduction step; falling back to inline processing";
 
 			if (theIsReductionStep) {
 				/**
