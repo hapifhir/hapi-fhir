@@ -214,7 +214,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private static final String MY_TARGET_RESOURCE_VERSION = "myTargetResourceVersion";
 	public static final JpaPid[] EMPTY_JPA_PID_ARRAY = new JpaPid[0];
 	public static Integer myMaxPageSizeForTests = null;
-	private final String myResourceName;
+	private String myResourceName;
 	private final Class<? extends IBaseResource> myResourceType;
 	private final SearchQueryProperties mySearchProperties;
 	private PerformanceTracingLogger myPerformanceTracingLogger;
