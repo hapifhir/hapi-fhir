@@ -1750,29 +1750,29 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	@Transactional
 	public T readByPid(IResourcePersistentId thePid) {
 		return readByPid(thePid, false);
 	}
 
 	@Override
-	@Transactional
 	public T readByPid(IResourcePersistentId thePid, boolean theDeletedOk) {
-		StopWatch w = new StopWatch();
-		JpaPid jpaPid = (JpaPid) thePid;
+		return myTxTemplate.execute(tx -> {
+			StopWatch w = new StopWatch();
+			JpaPid jpaPid = (JpaPid) thePid;
 
-		Optional<ResourceTable> entity = myResourceTableDao.findById(jpaPid);
-		if (entity.isEmpty()) {
-			throw new ResourceNotFoundException(Msg.code(975) + "No resource found with PID " + jpaPid);
-		}
-		if (isDeleted(entity.get()) && !theDeletedOk) {
-			throw createResourceGoneException(entity.get());
-		}
+			Optional<ResourceTable> entity = myResourceTableDao.findById(jpaPid);
+			if (entity.isEmpty()) {
+				throw new ResourceNotFoundException(Msg.code(975) + "No resource found with PID " + jpaPid);
+			}
+			if (isDeleted(entity.get()) && !theDeletedOk) {
+				throw createResourceGoneException(entity.get());
+			}
 
-		T retVal = myJpaStorageResourceParser.toResource(null, myResourceType, entity.get(), null, false);
+			T retVal = myJpaStorageResourceParser.toResource(null, myResourceType, entity.get(), null, false);
 
-		ourLog.debug("Processed read by PID on {} in {}ms", jpaPid, w.getMillis());
-		return retVal;
+			ourLog.debug("Processed read by PID on {} in {}ms", jpaPid, w.getMillis());
+			return retVal;
+		});
 	}
 
 	/**
