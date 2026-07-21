@@ -162,7 +162,6 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -1703,15 +1702,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	@Transactional
 	public <MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, RequestDetails theRequestDetails) {
-		String sql =
-				"SELECT d FROM TagDefinition d WHERE d.myId IN (SELECT DISTINCT t.myTagId FROM ResourceTag t WHERE t.myResourceType = :res_type)";
-		TypedQuery<TagDefinition> q = myEntityManager.createQuery(sql, TagDefinition.class);
-		q.setParameter("res_type", myResourceName);
-		List<TagDefinition> tagDefinitions = q.getResultList();
+		return myTxTemplate.execute(tx -> {
+			String sql =
+					"SELECT d FROM TagDefinition d WHERE d.myId IN (SELECT DISTINCT t.myTagId FROM ResourceTag t WHERE t.myResourceType = :res_type)";
+			TypedQuery<TagDefinition> q = myEntityManager.createQuery(sql, TagDefinition.class);
+			q.setParameter("res_type", myResourceName);
+			List<TagDefinition> tagDefinitions = q.getResultList();
 
-		return toMetaDt(theType, tagDefinitions);
+			return toMetaDt(theType, tagDefinitions);
+		});
 	}
 
 	private boolean isDeleted(BaseHasResource entityToUpdate) {
