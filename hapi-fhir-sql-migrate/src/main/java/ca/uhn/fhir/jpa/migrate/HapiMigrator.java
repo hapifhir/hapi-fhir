@@ -33,13 +33,13 @@ import org.flywaydb.core.api.MigrationVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import javax.sql.DataSource;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -291,8 +291,8 @@ public class HapiMigrator {
 			baselineVersion += ".99999999.999999";
 		} else if (!baselineVersion.matches("\\d+\\.\\d+\\.\\d+(\\.\\d+)+")) {
 			throw new HapiMigrationException(
-				Msg.code(2962) + "Invalid --baseline-version '" + theBaselineVersion
-					+ "'. Expected a product version (e.g. 8.4.0) or a full migration version (e.g. 8.4.0.20250515.2).");
+					Msg.code(2962) + "Invalid --baseline-version '" + theBaselineVersion
+							+ "'. Expected a product version (e.g. 8.4.0) or a full migration version (e.g. 8.4.0.20250515.2).");
 		}
 		return MigrationVersion.fromVersion(baselineVersion);
 	}
