@@ -161,6 +161,48 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	private boolean myNeverUseLocalSearchForUnitTests;
 	private int mySyncSize = DEFAULT_SYNC_SIZE;
 
+	/**
+	 * Constructor
+	 */
+	public SearchCoordinatorSvcImpl() {
+		super();
+	}
+
+	/**
+	 * Unit test constructor
+	 */
+	public SearchCoordinatorSvcImpl(
+			FhirContext theContext,
+			JpaStorageSettings theStorageSettings,
+			IInterceptorBroadcaster theInterceptorBroadcaster,
+			HapiTransactionService theTransactionService,
+			ISearchCacheSvc theSearchCacheSvc,
+			ISearchResultCacheSvc theSearchResultCacheSvc,
+			DaoRegistry theDaoRegistry,
+			SearchBuilderFactory<JpaPid> theSearchBuilderFactory,
+			ISynchronousSearchSvc theSynchronousSearchSvc,
+			PersistedJpaBundleProviderFactory thePersistedJpaBundleProviderFactory,
+			SearchStrategyFactory theSearchStrategyFactory,
+			ExceptionService theExceptionSvc,
+			BeanFactory theBeanFactory,
+			IRequestPartitionHelperSvc thePartitionHelperSvc) {
+		myContext = theContext;
+		myStorageSettings = theStorageSettings;
+		myInterceptorBroadcaster = theInterceptorBroadcaster;
+		myTxService = theTransactionService;
+		mySearchCacheSvc = theSearchCacheSvc;
+		mySearchBuilderFactory = theSearchBuilderFactory;
+		mySynchronousSearchSvc = theSynchronousSearchSvc;
+		mySearchStrategyFactory = theSearchStrategyFactory;
+		myBeanFactory = theBeanFactory;
+		myRequestPartitionHelperSvc = thePartitionHelperSvc;
+		myExceptionSvc = theExceptionSvc;
+		myPersistedJpaBundleProviderFactory = thePersistedJpaBundleProviderFactory;
+		myDaoRegistry = theDaoRegistry;
+		mySearchResultCacheSvc = theSearchResultCacheSvc;
+		start();
+	}
+
 	@PostConstruct
 	public void start() {
 		myStorageInterceptorHooks = new StorageInterceptorHooksFacade(myInterceptorBroadcaster);

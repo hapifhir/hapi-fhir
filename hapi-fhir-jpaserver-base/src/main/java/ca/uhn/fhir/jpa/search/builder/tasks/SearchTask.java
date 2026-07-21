@@ -187,6 +187,7 @@ public class SearchTask implements Callable<Void> {
 		mySearchBuilderFactory = theSearchBuilderFactory;
 		myStorageSettings = theStorageSettings;
 		mySearchCacheSvc = theSearchCacheSvc;
+		start();
 	}
 
 	@PostConstruct
