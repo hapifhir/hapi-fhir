@@ -7,5 +7,8 @@ title: "ValueSet expansion now supports the hierarchical `child` and `parent` fi
   now built from CodeSystems that express it FLAT via the canonical `parent`/`child` concept-properties
   (`http://hl7.org/fhir/concept-properties#parent` / `#child`), not only from nested `CodeSystem.concept`
   arrays. This also makes the existing structural filters such as `is-a` and `descendent-of` work for such
-  flat CodeSystems. Both the in-memory validation-support expansion and the JPA terminology service are
-  supported. Thanks to Patrick Werner for the contribution!"
+  flat CodeSystems. The standard boolean concept-properties `inactive` and `notSelectable` are now also
+  supported with the `exists` operator (for example `inactive exists=true` to select the inactive concepts);
+  a concept is treated as flagged only when it carries the property with the boolean value `true`. Both the
+  in-memory validation-support expansion and the JPA terminology service are supported. Thanks to Patrick
+  Werner for the contribution!"
