@@ -422,6 +422,31 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	}
 
 	/**
+	 * For {@code property=child|parent} + {@code op=exists} the value is semantically required and must be a
+	 * real boolean literal. A blank or non-boolean value (e.g. "0", "no") must be rejected rather than being
+	 * silently coerced to {@code false} (which would flip the filter to select leaves/roots).
+	 */
+	@Test
+	public void testExpandWithChildExistsFilter_RejectsNonBooleanValue() {
+		createExternalCs();
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl(TermTestUtil.URL_MY_VALUE_SET);
+		valueSet.getCompose()
+			.addInclude()
+			.setSystem(TermTestUtil.URL_MY_CODE_SYSTEM)
+			.addFilter()
+			.setProperty("child")
+			.setOp(FilterOperator.EXISTS)
+			.setValue("no");
+		myValueSetDao.create(valueSet, mySrd);
+
+		assertThatThrownBy(() -> myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter("")))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("child");
+	}
+
+	/**
 	 * Codes may contain query-syntax characters. The child/parent-exists filter must treat them as exact
 	 * terms, not parse them as a query string.
 	 */

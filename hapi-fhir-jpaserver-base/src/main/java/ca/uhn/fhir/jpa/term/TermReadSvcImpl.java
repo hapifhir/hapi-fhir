@@ -1505,8 +1505,10 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			BooleanPredicateClausesStep<?> theB,
 			ValueSet.ConceptSetFilterComponent theFilter) {
 
-		// theFilter.getValue() is "true" or "false": do we want the concepts that HAVE the relation?
-		boolean wantConceptsWithRelation = Boolean.parseBoolean(theFilter.getValue());
+		// The value is semantically required here and must be a real boolean literal. The generic EXISTS
+		// validation allows a blank value, and Boolean.parseBoolean() would silently coerce a blank or
+		// non-"true" value (e.g. "0", "no") to false, flipping the filter to select leaves/roots.
+		boolean wantConceptsWithRelation = parseRequiredBoolean(theFilter);
 		boolean filterOnChildren = "child".equals(theFilter.getProperty());
 
 		Collection<String> codesHavingRelation =
@@ -1527,6 +1529,24 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		} else {
 			theB.mustNot(matchesAnyOfThoseCodes); // keep the complement (leaves / roots)
 		}
+	}
+
+	/**
+	 * Parse the filter value as a strict boolean literal ({@code true}/{@code false}, case-insensitive,
+	 * ignoring surrounding whitespace), throwing {@link InvalidRequestException} for a blank or otherwise
+	 * non-boolean value.
+	 */
+	private boolean parseRequiredBoolean(ValueSet.ConceptSetFilterComponent theFilter) {
+		String value = StringUtils.trimToNull(theFilter.getValue());
+		if ("true".equalsIgnoreCase(value)) {
+			return true;
+		}
+		if ("false".equalsIgnoreCase(value)) {
+			return false;
+		}
+		throw new InvalidRequestException(Msg.code(2995) + "Filter with property '" + theFilter.getProperty()
+				+ "' and op '" + theFilter.getOp().toCode() + "' requires a boolean value ('true' or 'false') but was '"
+				+ theFilter.getValue() + "'");
 	}
 
 	/**

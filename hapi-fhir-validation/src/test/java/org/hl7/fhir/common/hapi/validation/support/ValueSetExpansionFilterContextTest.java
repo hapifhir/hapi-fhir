@@ -793,4 +793,52 @@ class ValueSetExpansionFilterContextTest {
 
 		assertThat(actual).isTrue();
 	}
+
+	/**
+	 * In a cyclic hierarchy (A parent B, B parent A) a concept must not be reported as a descendant of
+	 * itself: descendent-of "A" applied to candidate "A" must NOT match (so the concept is filtered out).
+	 */
+	@Test
+	@Timeout(value = 10, unit = TimeUnit.SECONDS)
+	void descendentOfDoesNotMatchSelfOnCyclicHierarchy() {
+		CodeSystem cs = new CodeSystem().setUrl("http://example.org/cycle").setCaseSensitive(true);
+		cs.addProperty().setCode("parent").setUri(CONCEPT_PROPERTIES_PARENT).setType(CodeSystem.PropertyType.CODE);
+		cs.addConcept().setCode("A").addProperty().setCode("parent").setValue(new CodeType("B"));
+		cs.addConcept().setCode("B").addProperty().setCode("parent").setValue(new CodeType("A"));
+
+		boolean actual = isFiltered(
+			cs,
+			FilterOperator.DESCENDENTOF,
+			"A",
+			new FhirVersionIndependentConcept(cs.getUrl(), "A"));
+
+		// "A" is not a descendant of itself, so it does not pass the filter and IS filtered out.
+		assertThat(actual).isTrue();
+	}
+
+	/**
+	 * On a case-insensitive CodeSystem, a structural filter whose value differs only in case from the
+	 * stored code (e.g. "p" vs stored "P") must still resolve the subtree.
+	 */
+	@ParameterizedTest(name = "[descendent-of-flat-ci] filter={0}, code={1} ⇒ filtered={2}")
+	@CsvSource({
+		// filterValue differs in case from the stored parent code "P" / "C1".
+		"p, C1, false",
+		"p, C2, false",
+		"p, C3, false",
+		"c1, C2, false",
+		"c1, C3, true"
+	})
+	void descendentOfIsCaseInsensitiveOnFlatParentProperty(String filterValue, String testCode, boolean expectedIsFiltered) {
+		CodeSystem cs = flatCSWithParentProperty(false);
+		boolean actual = isFiltered(
+			cs,
+			FilterOperator.DESCENDENTOF,
+			filterValue,
+			new FhirVersionIndependentConcept(cs.getUrl(), testCode));
+
+		assertThat(actual)
+			.as("DESCENDENTOF[%s] on '%s' (case-insensitive flat parent property)", filterValue, testCode)
+			.isEqualTo(expectedIsFiltered);
+	}
 }

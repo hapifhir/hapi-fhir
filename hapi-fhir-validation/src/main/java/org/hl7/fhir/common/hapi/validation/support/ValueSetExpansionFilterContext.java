@@ -219,7 +219,7 @@ public class ValueSetExpansionFilterContext {
 					}
 
 					// 2) Look up the direct children of X
-					Set<String> directKids = conceptCodeTree.getOrDefault(theFilterValue, Collections.emptySet());
+					Set<String> directKids = getChildren(theFilterValue);
 
 					// 3) Accept only if our candidate code matches one of those children
 					return directKids.stream()
@@ -237,7 +237,7 @@ public class ValueSetExpansionFilterContext {
 					}
 
 					// 3) It must have no children of its own → is a leaf
-					Set<String> kids = conceptCodeTree.getOrDefault(theConceptCode, Collections.emptySet());
+					Set<String> kids = getChildren(theConceptCode);
 					return kids.isEmpty();
 				}
 				case EXISTS: {
@@ -276,22 +276,40 @@ public class ValueSetExpansionFilterContext {
 	}
 
 	private boolean isDescendantOf(String theParentCode, String theCandidatePropertyValue) {
-		Deque<String> stack = new ArrayDeque<>(conceptCodeTree.getOrDefault(theParentCode, Set.of()));
+		Deque<String> stack = new ArrayDeque<>(getChildren(theParentCode));
 		// Guard against cycles (possible when the hierarchy is expressed via flat parent/child properties),
 		// otherwise a cycle would loop forever for a candidate that is not part of the subtree.
+		// Seed the visited-set with the parent so that a cycle back to it (A→B→A) does not make the parent
+		// its own descendant.
 		Set<String> visited = new HashSet<>();
+		visited.add(normalizeCode(theParentCode));
 		while (!stack.isEmpty()) {
 			String theChildCode = stack.pop();
-			if (!visited.add(theChildCode)) {
+			if (!visited.add(normalizeCode(theChildCode))) {
 				continue;
 			}
 			if (isEqualsWithOptionalCaseSensitive(theChildCode, theCandidatePropertyValue)) {
 				return true;
 			}
-			stack.addAll(conceptCodeTree.getOrDefault(theChildCode, Set.of()));
+			stack.addAll(getChildren(theChildCode));
 		}
 
 		return false;
+	}
+
+	/**
+	 * Return the direct children of the given code, resolving the lookup case-insensitively when the
+	 * CodeSystem is not case-sensitive (so a filter value like "p" resolves the subtree stored under "P").
+	 */
+	private Set<String> getChildren(String theCode) {
+		return conceptCodeTree.getOrDefault(normalizeCode(theCode), Set.of());
+	}
+
+	/**
+	 * Normalize a code for use as a hierarchy map key / visited-set entry, honoring case sensitivity.
+	 */
+	private String normalizeCode(String theCode) {
+		return codeSystem.getCaseSensitive() ? theCode : theCode.toLowerCase(Locale.ROOT);
 	}
 
 	private boolean isEqualsWithOptionalCaseSensitive(String a, String b) {
@@ -313,7 +331,7 @@ public class ValueSetExpansionFilterContext {
 	}
 
 	private boolean hasChildren(String theCode) {
-		return !conceptCodeTree.getOrDefault(theCode, Collections.emptySet()).isEmpty();
+		return !getChildren(theCode).isEmpty();
 	}
 
 	private boolean hasParent(String theCode) {
@@ -414,7 +432,12 @@ public class ValueSetExpansionFilterContext {
 	}
 
 	private void addParentChildEdge(String theParentCode, String theChildCode) {
-		conceptCodeTree.computeIfAbsent(theParentCode, k -> new HashSet<>()).add(theChildCode);
+		// Key the tree by the normalized parent code so that case-insensitive systems resolve the subtree
+		// even when a filter value differs in case from the stored code. Child values keep their original
+		// casing because membership comparisons go through isEqualsWithOptionalCaseSensitive().
+		conceptCodeTree
+				.computeIfAbsent(normalizeCode(theParentCode), k -> new HashSet<>())
+				.add(theChildCode);
 		allChildCodes.add(theChildCode);
 		allChildCodesLower.add(theChildCode.toLowerCase());
 	}
