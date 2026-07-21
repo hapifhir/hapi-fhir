@@ -19,7 +19,9 @@
  */
 package ca.uhn.fhir.jpa.config;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.IDaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.config.util.ResourceCountCacheUtil;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
@@ -39,11 +41,16 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({JpaConfig.class})
+@Import({JpaConfig.class, SearchConfig.class})
 public class HapiJpaConfig {
 
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
+
+	@Bean
+	public DaoRegistry daoRegistry(FhirContext theFhirContext) {
+		return new DaoRegistry(theFhirContext);
+	}
 
 	@Bean
 	public IHSearchSortHelper extendedFulltextSortHelper() {

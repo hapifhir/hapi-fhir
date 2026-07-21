@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.dao;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.config.HapiFhirLocalContainerEntityManagerFactoryBean;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaMetricsRepository;
 import ca.uhn.fhir.jpa.dao.mdm.MdmMetricSvcJpaImpl;
 import ca.uhn.fhir.jpa.entity.MdmLink;
@@ -51,21 +50,15 @@ public class MdmMetricSvcJpaIT extends BaseMdmR4Test implements IMdmMetricSvcTes
 		private IMdmLinkJpaMetricsRepository myJpaRepository;
 
 		@Autowired
-		private DaoRegistry myDaoRegistry;
-
-		@Autowired
 		private EntityManagerFactory myEntityManagerFactory;
-
-		@Autowired
-		private HapiFhirLocalContainerEntityManagerFactoryBean myEntityFactory;
 
 		// this has to be provided via spring, or the
 		// @Transactional barrier is never invoked
 		@Bean
-		IMdmMetricSvc mdmMetricSvc() {
+		IMdmMetricSvc mdmMetricSvc(DaoRegistry theDaoRegistry) {
 			return new MdmMetricSvcJpaImpl(
 				myJpaRepository,
-				myDaoRegistry,
+				theDaoRegistry,
 				myEntityManagerFactory
 			);
 		}

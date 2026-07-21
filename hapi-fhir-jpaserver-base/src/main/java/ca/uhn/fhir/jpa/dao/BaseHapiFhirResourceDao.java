@@ -257,6 +257,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	private StorageInterceptorHooksFacade myStorageInterceptorHooks;
 
+	@VisibleForTesting
+	public void setDaoRegistryForUnitTest(DaoRegistry theDaoRegistry) {
+		myDaoRegistry = theDaoRegistry;
+	}
+
 	@Nullable
 	public static <T extends IBaseResource> T invokeStoragePreShowResources(
 			IInterceptorBroadcaster theInterceptorBroadcaster, RequestDetails theRequest, T retVal) {
@@ -1730,6 +1735,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		myTxTemplate = new TransactionTemplate(myPlatformTransactionManager);
 
 		myStorageInterceptorHooks = new StorageInterceptorHooksFacade(myInterceptorBroadcaster);
+
+		myDaoRegistry.register(this);
 
 		super.start();
 	}

@@ -62,7 +62,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
-import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public class SearchConfig {
@@ -70,25 +69,25 @@ public class SearchConfig {
 	public static final String CONTINUE_TASK = "continueTask";
 
 	@Autowired
-	private DialectSvc myDialectSvc;
+	protected DialectSvc myDialectSvc;
 
 	@Autowired
-	private JpaStorageSettings myStorageSettings;
+	protected JpaStorageSettings myStorageSettings;
 
 	@Autowired
-	private HapiFhirLocalContainerEntityManagerFactoryBean myEntityManagerFactory;
+	protected HapiFhirLocalContainerEntityManagerFactoryBean myEntityManagerFactory;
 
 	@Autowired
-	private SqlObjectFactory mySqlBuilderFactory;
+	protected SqlObjectFactory mySqlBuilderFactory;
 
 	@Autowired
-	private HibernatePropertiesProvider myDialectProvider;
+	protected HibernatePropertiesProvider myDialectProvider;
 
 	@Autowired
-	private ISearchParamRegistry mySearchParamRegistry;
+	protected ISearchParamRegistry mySearchParamRegistry;
 
 	@Autowired
-	private PartitionSettings myPartitionSettings;
+	protected PartitionSettings myPartitionSettings;
 
 	@Autowired
 	protected IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -97,52 +96,49 @@ public class SearchConfig {
 	protected IResourceTagDao myResourceTagDao;
 
 	@Autowired
-	private DaoRegistry myDaoRegistry;
+	protected DaoRegistry myDaoRegistry;
 
 	@Autowired
-	private FhirContext myContext;
+	protected FhirContext myContext;
 
 	@Autowired
-	private IIdHelperService myIdHelperService;
+	protected IIdHelperService myIdHelperService;
 
 	@Autowired
-	private PlatformTransactionManager myManagedTxManager;
+	protected SearchStrategyFactory mySearchStrategyFactory;
 
 	@Autowired
-	private SearchStrategyFactory mySearchStrategyFactory;
+	protected SearchBuilderFactory mySearchBuilderFactory;
 
 	@Autowired
-	private SearchBuilderFactory mySearchBuilderFactory;
+	protected ISearchResultCacheSvc mySearchResultCacheSvc;
 
 	@Autowired
-	private ISearchResultCacheSvc mySearchResultCacheSvc;
+	protected ISearchCacheSvc mySearchCacheSvc;
 
 	@Autowired
-	private ISearchCacheSvc mySearchCacheSvc;
+	protected IPagingProvider myPagingProvider;
 
 	@Autowired
-	private IPagingProvider myPagingProvider;
+	protected BeanFactory myBeanFactory;
 
 	@Autowired
-	private BeanFactory myBeanFactory;
+	protected ISynchronousSearchSvc mySynchronousSearchSvc;
 
 	@Autowired
-	private ISynchronousSearchSvc mySynchronousSearchSvc;
+	protected PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
 
 	@Autowired
-	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
+	protected IRequestPartitionHelperSvc myRequestPartitionHelperService;
 
 	@Autowired
-	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
+	protected HapiTransactionService myHapiTransactionService;
 
 	@Autowired
-	private HapiTransactionService myHapiTransactionService;
+	protected IResourceHistoryTableDao myResourceHistoryTableDao;
 
 	@Autowired
-	private IResourceHistoryTableDao myResourceHistoryTableDao;
-
-	@Autowired
-	private BatchResourceLoader myBatchResourceLoader;
+	protected BatchResourceLoader myBatchResourceLoader;
 
 	@Bean
 	public ISearchCoordinatorSvc searchCoordinatorSvc() {
