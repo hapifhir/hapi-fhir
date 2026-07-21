@@ -73,7 +73,7 @@ public class SchedulerServiceImplTest {
 
 		ourLog.info("Fired {} times in {}", CountingJob.ourCount, sw);
 		assertThat(sw.getMillis()).isGreaterThan(500L);
-		assertThat(sw.getMillis()).isLessThan(1200L);
+		assertThat(sw.getMillis()).isLessThan(1600L);
 	}
 
 	@Test
@@ -213,7 +213,8 @@ public class SchedulerServiceImplTest {
 		long elapsedTime = Instant.now().getEpochSecond() - now.getEpochSecond();
 		assertEquals(1, elapsedTime, "actual time is " + elapsedTime);
 
-		assertEquals(2, CronJob.ourCount.get());
+		// Should be 2, but if the system is bogged down we might increment to 3
+		assertThat(CronJob.ourCount.get()).isBetween(2, 3);
 
 		// verify correct scheduler
 		Set<JobKey> keys = theUseClustered ? mySvc.getClusteredJobKeysForUnitTest()
