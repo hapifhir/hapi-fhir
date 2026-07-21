@@ -948,11 +948,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		ResourceIndexedSearchParams newParams = null;
 
-		// Whether this is the first-ever persist of the resource. Captured before the resource is
-		// populated into the entity (which creates the current version), so custom index synchronizers
-		// can skip loading pre-existing rows on create. Mirrors the first-version check used elsewhere.
-		boolean resourceIsBeingCreated = false;
-
+		// Whether this is the first-ever persist of the resource
+		boolean isNewResource = false;
 		EncodedResource changed;
 		if (theDeletedTimestampOrNull != null) {
 			// DELETE
@@ -965,14 +962,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 			// CREATE or UPDATE
 
-			resourceIsBeingCreated = entity.getVersion() == 1L && entity.getCurrentVersionEntity() == null;
-
+			isNewResource = entity.getVersion() == 1L && entity.getCurrentVersionEntity() == null;
 			IdentityHashMap<ResourceTable, ResourceIndexedSearchParams> existingSearchParams =
 					getSearchParamsMapFromTransaction(theTransactionDetails);
 			existingParams = existingSearchParams.get(entity);
 			if (existingParams == null) {
-				//				existingParams =
-				//					ResourceIndexedSearchParams.withLists(entity, myStorageSettings.getTokenIndexStrategy());
 				existingParams = ResourceIndexedSearchParams.withLists(entity);
 				existingSearchParams.put(entity, existingParams);
 
@@ -1144,12 +1138,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				// Synchronize search param indexes
 				AddRemoveCount searchParamAddRemoveCount =
 						myDaoSearchParamSynchronizer.synchronizeSearchParamsToDatabase(
-								theRequest,
-								theTransactionDetails,
-								newParams,
-								entity,
-								existingParams,
-								resourceIsBeingCreated);
+								theRequest, theTransactionDetails, newParams, entity, existingParams, isNewResource);
 
 				newParams.populateResourceTableParamCollections(entity);
 

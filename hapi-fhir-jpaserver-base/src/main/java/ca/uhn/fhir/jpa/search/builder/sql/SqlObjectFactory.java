@@ -19,7 +19,8 @@
  */
 package ca.uhn.fhir.jpa.search.builder.sql;
 
-import ca.uhn.fhir.jpa.dao.index.ICustomIndexPredicateProvider;
+import ca.uhn.fhir.jpa.dao.index.SearchParamIndexProviderRegistry;
+import ca.uhn.fhir.jpa.dao.index.SearchParamIndexRouting;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseSearchParamPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPredicateBuilder;
@@ -45,7 +46,6 @@ import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -55,26 +55,24 @@ public class SqlObjectFactory {
 	@Autowired
 	private ApplicationContext myApplicationContext;
 
-	private List<ICustomIndexPredicateProvider> myCustomIndexPredicateProviders = Collections.emptyList();
+	private SearchParamIndexProviderRegistry myIndexProviderRegistry = new SearchParamIndexProviderRegistry(List.of());
 
 	@Autowired(required = false)
-	public void setCustomIndexPredicateProviders(List<ICustomIndexPredicateProvider> theCustomIndexPredicateProviders) {
-		myCustomIndexPredicateProviders = theCustomIndexPredicateProviders;
+	public void setSearchParamIndexProviderRegistry(SearchParamIndexProviderRegistry theRegistry) {
+		if (theRegistry != null) {
+			myIndexProviderRegistry = theRegistry;
+		}
 	}
 
 	/**
-	 * Lets an alternative index serve reads for the given search parameter, falling back to the built-in index if none handles it.
+	 * Lets a custom index serve reads for the given search parameter, falling back to the built-in index
+	 * if no provider handles it.
 	 */
 	public Optional<BaseSearchParamPredicateBuilder> provideCustomPredicateBuilder(
 			SearchQueryBuilder theSearchSqlBuilder, RestSearchParameterTypeEnum theParamType, String theParamName) {
-		for (ICustomIndexPredicateProvider provider : myCustomIndexPredicateProviders) {
-			Optional<BaseSearchParamPredicateBuilder> builder =
-					provider.provideCustomPredicateBuilder(theSearchSqlBuilder, theParamType, theParamName);
-			if (builder.isPresent()) {
-				return builder;
-			}
-		}
-		return Optional.empty();
+		return myIndexProviderRegistry
+				.resolveProvider(SearchParamIndexRouting.forParamType(theParamType))
+				.flatMap(provider -> provider.createPredicateBuilder(theSearchSqlBuilder, theParamName));
 	}
 
 	public ComboUniqueSearchParameterPredicateBuilder newComboUniqueSearchParameterPredicateBuilder(

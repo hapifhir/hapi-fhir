@@ -86,7 +86,9 @@ import ca.uhn.fhir.jpa.dao.expunge.IResourceExpungeService;
 import ca.uhn.fhir.jpa.dao.expunge.JpaResourceExpungeService;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
 import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
+import ca.uhn.fhir.jpa.dao.index.ISearchParamIndexProvider;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.index.SearchParamIndexProviderRegistry;
 import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
@@ -229,6 +231,7 @@ import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValid
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.WorkerContextValidationSupportAdapter;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -291,6 +294,12 @@ public class JpaConfig {
 	@Bean
 	public ValidationSupportChain.CacheConfiguration validationSupportChainCacheConfiguration() {
 		return ValidationSupportChain.CacheConfiguration.defaultValues();
+	}
+
+	@Bean
+	public SearchParamIndexProviderRegistry searchParamIndexProviderRegistry(
+			ObjectProvider<ISearchParamIndexProvider> theProviders) {
+		return new SearchParamIndexProviderRegistry(theProviders.stream().toList());
 	}
 
 	/**
