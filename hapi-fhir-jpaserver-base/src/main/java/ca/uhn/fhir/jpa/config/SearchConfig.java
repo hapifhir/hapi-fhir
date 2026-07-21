@@ -51,7 +51,6 @@ import ca.uhn.fhir.jpa.search.builder.tasks.SearchTask;
 import ca.uhn.fhir.jpa.search.builder.tasks.SearchTaskParameters;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
-import ca.uhn.fhir.jpa.util.DialectSvc;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.IMetaTagSorter;
@@ -69,100 +68,82 @@ public class SearchConfig {
 	public static final String CONTINUE_TASK = "continueTask";
 
 	@Autowired
-	protected DialectSvc myDialectSvc;
+	protected JpaStorageSettings theStorageSettings;
 
 	@Autowired
-	protected JpaStorageSettings myStorageSettings;
+	protected HapiFhirLocalContainerEntityManagerFactoryBean theEntityManagerFactory;
 
 	@Autowired
-	protected HapiFhirLocalContainerEntityManagerFactoryBean myEntityManagerFactory;
+	protected SqlObjectFactory theSqlBuilderFactory;
 
 	@Autowired
-	protected SqlObjectFactory mySqlBuilderFactory;
+	protected HibernatePropertiesProvider theDialectProvider;
 
 	@Autowired
-	protected HibernatePropertiesProvider myDialectProvider;
+	protected ISearchParamRegistry theSearchParamRegistry;
 
 	@Autowired
-	protected ISearchParamRegistry mySearchParamRegistry;
+	protected PartitionSettings thePartitionSettings;
 
 	@Autowired
-	protected PartitionSettings myPartitionSettings;
+	protected IInterceptorBroadcaster theInterceptorBroadcaster;
 
 	@Autowired
-	protected IInterceptorBroadcaster myInterceptorBroadcaster;
+	protected IResourceTagDao theResourceTagDao;
 
 	@Autowired
-	protected IResourceTagDao myResourceTagDao;
+	protected DaoRegistry theDaoRegistry;
 
 	@Autowired
-	protected DaoRegistry myDaoRegistry;
+	protected FhirContext theContext;
 
 	@Autowired
-	protected FhirContext myContext;
+	protected IIdHelperService theIdHelperService;
 
 	@Autowired
-	protected IIdHelperService myIdHelperService;
+	protected SearchStrategyFactory theSearchStrategyFactory;
 
 	@Autowired
-	protected SearchStrategyFactory mySearchStrategyFactory;
+	protected SearchBuilderFactory theSearchBuilderFactory;
 
 	@Autowired
-	protected SearchBuilderFactory mySearchBuilderFactory;
+	protected ISearchResultCacheSvc theSearchResultCacheSvc;
 
 	@Autowired
-	protected ISearchResultCacheSvc mySearchResultCacheSvc;
+	protected ISearchCacheSvc theSearchCacheSvc;
 
 	@Autowired
-	protected ISearchCacheSvc mySearchCacheSvc;
+	protected IPagingProvider thePagingProvider;
 
 	@Autowired
-	protected IPagingProvider myPagingProvider;
+	protected BeanFactory theBeanFactory;
 
 	@Autowired
-	protected BeanFactory myBeanFactory;
+	protected ISynchronousSearchSvc theSynchronousSearchSvc;
 
 	@Autowired
-	protected ISynchronousSearchSvc mySynchronousSearchSvc;
+	protected PersistedJpaBundleProviderFactory thePersistedJpaBundleProviderFactory;
 
 	@Autowired
-	protected PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
+	protected IRequestPartitionHelperSvc theRequestPartitionHelperService;
 
 	@Autowired
-	protected IRequestPartitionHelperSvc myRequestPartitionHelperService;
+	protected HapiTransactionService theHapiTransactionService;
 
 	@Autowired
-	protected HapiTransactionService myHapiTransactionService;
+	protected IResourceHistoryTableDao theResourceHistoryTableDao;
 
 	@Autowired
-	protected IResourceHistoryTableDao myResourceHistoryTableDao;
-
-	@Autowired
-	protected BatchResourceLoader myBatchResourceLoader;
+	protected BatchResourceLoader theBatchResourceLoader;
 
 	@Bean
 	public ISearchCoordinatorSvc searchCoordinatorSvc() {
-		return new SearchCoordinatorSvcImpl(
-				myContext,
-				myStorageSettings,
-				myInterceptorBroadcaster,
-				myHapiTransactionService,
-				mySearchCacheSvc,
-				mySearchResultCacheSvc,
-				myDaoRegistry,
-				mySearchBuilderFactory,
-				mySynchronousSearchSvc,
-				myPersistedJpaBundleProviderFactory,
-				mySearchParamRegistry,
-				mySearchStrategyFactory,
-				exceptionService(),
-				myBeanFactory,
-				myRequestPartitionHelperService);
+		return new SearchCoordinatorSvcImpl();
 	}
 
 	@Bean
 	public ExceptionService exceptionService() {
-		return new ExceptionService(myContext);
+		return new ExceptionService(theContext);
 	}
 
 	@Bean
@@ -173,74 +154,38 @@ public class SearchConfig {
 			IMetaTagSorter theMetaTagSorter,
 			IPartitionLookupSvc thePartitionLookupSvc) {
 		return new BatchResourceLoader(
-				myContext,
+				theContext,
 				theResourceMetadataExtractorSvc,
 				theJpaStorageResourceParser,
 				theExternallyStoredResourceServiceRegistry,
 				theMetaTagSorter,
-				myPartitionSettings,
+				thePartitionSettings,
 				thePartitionLookupSvc);
 	}
 
 	@Bean(name = ISearchBuilder.SEARCH_BUILDER_BEAN_NAME)
 	@Scope("prototype")
 	public ISearchBuilder newSearchBuilder(String theResourceName, Class<? extends IBaseResource> theResourceType) {
-		return new SearchBuilder(
-				theResourceName,
-				myStorageSettings,
-				myEntityManagerFactory,
-				mySqlBuilderFactory,
-				myDialectProvider,
-				mySearchParamRegistry,
-				myPartitionSettings,
-				myInterceptorBroadcaster,
-				myResourceTagDao,
-				myDaoRegistry,
-				myContext,
-				myIdHelperService,
-				myResourceHistoryTableDao,
-				myBatchResourceLoader,
-				theResourceType,
-				myDialectSvc);
+		return new SearchBuilder(theResourceName, theResourceType);
 	}
 
 	@Bean(name = SEARCH_TASK)
 	@Scope("prototype")
 	public SearchTask createSearchTask(SearchTaskParameters theParams) {
-		return new SearchTask(
-				theParams,
-				myHapiTransactionService,
-				myContext,
-				myInterceptorBroadcaster,
-				mySearchBuilderFactory,
-				mySearchResultCacheSvc,
-				myStorageSettings,
-				mySearchCacheSvc,
-				myPagingProvider);
+		return new SearchTask(theParams);
 	}
 
 	@Bean(name = CONTINUE_TASK)
 	@Scope("prototype")
 	public SearchContinuationTask createSearchContinuationTask(SearchTaskParameters theParams) {
-		return new SearchContinuationTask(
-				theParams,
-				myHapiTransactionService,
-				myContext,
-				myInterceptorBroadcaster,
-				mySearchBuilderFactory,
-				mySearchResultCacheSvc,
-				myStorageSettings,
-				mySearchCacheSvc,
-				myPagingProvider,
-				exceptionService() // singleton
-				);
+		return new SearchContinuationTask(theParams);
 	}
 
 	@PostConstruct
 	public void validateConfiguration() {
-		if (myStorageSettings.isIndexStorageOptimized()
-				&& myPartitionSettings.isPartitioningEnabled()
-				&& myPartitionSettings.isIncludePartitionInSearchHashes()) {
+		if (theStorageSettings.isIndexStorageOptimized()
+				&& thePartitionSettings.isPartitioningEnabled()
+				&& thePartitionSettings.isIncludePartitionInSearchHashes()) {
 			throw new ConfigurationException(Msg.code(2525) + "Incorrect configuration. "
 					+ "StorageSettings#isIndexStorageOptimized and PartitionSettings.isIncludePartitionInSearchHashes "
 					+ "cannot be enabled at the same time.");
