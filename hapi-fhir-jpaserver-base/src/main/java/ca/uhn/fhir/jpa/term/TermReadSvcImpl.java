@@ -1308,6 +1308,16 @@ public class TermReadSvcImpl implements ITermReadSvc {
 					handleFilterLoincParentChild(theF, theB, theFilter);
 				}
 				break;
+			case "inactive":
+			case "notSelectable":
+				if (theFilter.getOp() == ValueSet.FilterOperator.EXISTS) {
+					// Standard boolean concept-property: value-aware exists (a concept is flagged only when
+					// it carries the property with value true), rather than a plain property-presence check.
+					handleFilterBooleanPropertyExists(theF, theB, theFilter);
+				} else {
+					handleFilterPropertyDefault(theF, theB, theFilter);
+				}
+				break;
 			case "ancestor":
 				isCodeSystemLoincOrThrowInvalidRequestException(theCodeSystemIdentifier, theFilter.getProperty());
 				handleFilterLoincAncestor(theCodeSystemIdentifier, theF, theB, theFilter);
@@ -1528,6 +1538,26 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			theB.must(matchesAnyOfThoseCodes); // keep concepts that have the relation
 		} else {
 			theB.mustNot(matchesAnyOfThoseCodes); // keep the complement (leaves / roots)
+		}
+	}
+
+	/**
+	 * Handles the standard boolean concept-properties {@code inactive} / {@code notSelectable} with
+	 * {@code op=exists}. A concept is considered flagged only when it carries the property with the boolean
+	 * value {@code true}, so {@code exists=true} selects those concepts and {@code exists=false} selects the
+	 * complement (concepts where the property is absent or explicitly {@code false}).
+	 */
+	private void handleFilterBooleanPropertyExists(
+			SearchPredicateFactory theF,
+			BooleanPredicateClausesStep<?> theB,
+			ValueSet.ConceptSetFilterComponent theFilter) {
+		boolean wantFlagged = parseRequiredBoolean(theFilter);
+		Term term = new Term(CONCEPT_PROPERTY_PREFIX_NAME + theFilter.getProperty(), "true");
+		PredicateFinalStep flaggedTrue = theF.match().field(term.field()).matching(term.text());
+		if (wantFlagged) {
+			theB.must(flaggedTrue);
+		} else {
+			theB.mustNot(flaggedTrue);
 		}
 	}
 

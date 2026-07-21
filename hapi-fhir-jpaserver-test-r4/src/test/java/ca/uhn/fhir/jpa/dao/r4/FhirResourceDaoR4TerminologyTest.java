@@ -447,6 +447,75 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	}
 
 	/**
+	 * The standard boolean concept-property {@code inactive} with {@code op=exists} selects the concepts
+	 * that ARE inactive (property present with value true) for {@code value=true}, and their complement
+	 * for {@code value=false}. A concept that declares {@code inactive=false} must count as active.
+	 */
+	@Test
+	public void testExpandWithInactiveExistsFilter_SelectsInactiveConcepts() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(TermTestUtil.URL_MY_CODE_SYSTEM);
+		cs.setVersion("1");
+		cs.setContent(CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("ACTIVE").setDisplay("Active concept");
+		cs.addConcept().setCode("EXPLICIT_ACTIVE").setDisplay("Explicitly active")
+			.addProperty().setCode("inactive").setValue(new BooleanType(false));
+		cs.addConcept().setCode("RETIRED").setDisplay("Retired concept")
+			.addProperty().setCode("inactive").setValue(new BooleanType(true));
+		myCodeSystemDao.create(cs, mySrd);
+
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		assertThat(expandWithFilter("inactive", FilterOperator.EXISTS, "true"))
+			.containsExactlyInAnyOrder("RETIRED");
+		assertThat(expandWithFilter("inactive", FilterOperator.EXISTS, "false"))
+			.containsExactlyInAnyOrder("ACTIVE", "EXPLICIT_ACTIVE");
+	}
+
+	/**
+	 * The standard boolean concept-property {@code notSelectable} behaves like {@code inactive}: {@code
+	 * exists=true} selects the concepts flagged {@code notSelectable=true}.
+	 */
+	@Test
+	public void testExpandWithNotSelectableExistsFilter_SelectsNotSelectableConcepts() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(TermTestUtil.URL_MY_CODE_SYSTEM);
+		cs.setVersion("1");
+		cs.setContent(CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("LEAF").setDisplay("Selectable leaf");
+		cs.addConcept().setCode("GROUPING").setDisplay("Grouping concept")
+			.addProperty().setCode("notSelectable").setValue(new BooleanType(true));
+		myCodeSystemDao.create(cs, mySrd);
+
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		assertThat(expandWithFilter("notSelectable", FilterOperator.EXISTS, "true"))
+			.containsExactlyInAnyOrder("GROUPING");
+		assertThat(expandWithFilter("notSelectable", FilterOperator.EXISTS, "false"))
+			.containsExactlyInAnyOrder("LEAF");
+	}
+
+	/**
+	 * Expand a ValueSet composed of a single include on {@link TermTestUtil#URL_MY_CODE_SYSTEM} with the
+	 * given filter, returning the resulting codes.
+	 */
+	private ArrayList<String> expandWithFilter(String theProperty, FilterOperator theOp, String theValue) {
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl(TermTestUtil.URL_MY_VALUE_SET + "-" + theProperty + "-" + theValue);
+		valueSet.getCompose()
+			.addInclude()
+			.setSystem(TermTestUtil.URL_MY_CODE_SYSTEM)
+			.addFilter()
+			.setProperty(theProperty)
+			.setOp(theOp)
+			.setValue(theValue);
+		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter(""));
+		return toCodesContains(result.getExpansion().getContains());
+	}
+
+	/**
 	 * Codes may contain query-syntax characters. The child/parent-exists filter must treat them as exact
 	 * terms, not parse them as a query string.
 	 */

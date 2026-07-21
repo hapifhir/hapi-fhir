@@ -21,7 +21,8 @@ import java.util.regex.PatternSyntaxException;
 /**
  * Class to apply ValueSet filters during in-memory expansion.
  * Works on 'code', 'concept' and 'display' property types, plus the hierarchical 'child' and 'parent'
- * properties (with the {@code exists} operator).
+ * properties and the standard boolean 'inactive' and 'notSelectable' properties (each with the
+ * {@code exists} operator).
  *
  * <p>The concept hierarchy used by the structural operators is built both from nested
  * {@code CodeSystem.concept} arrays and from a FLAT representation where each concept carries a
@@ -38,6 +39,8 @@ public class ValueSetExpansionFilterContext {
 	private final Map<String, Map<String, String>> propertyIndex = new HashMap<>();
 
 	private final Map<String, Set<String>> conceptCodeTree = new HashMap<>();
+	private final Set<String> inactiveCodes = new HashSet<>();
+	private final Set<String> notSelectableCodes = new HashSet<>();
 	private final Set<String> allCodes = new HashSet<>();
 	private final Set<String> allCodesLower = new HashSet<>();
 	private final Set<String> allChildCodes = new HashSet<>();
@@ -83,6 +86,8 @@ public class ValueSetExpansionFilterContext {
 			boolean onDisplay = theFilterProperty.equals("display");
 			boolean onChild = theFilterProperty.equals("child");
 			boolean onParent = theFilterProperty.equals("parent");
+			boolean onInactive = theFilterProperty.equals("inactive");
+			boolean onNotSelectable = theFilterProperty.equals("notselectable");
 
 			/*
 			 * Hierarchical membership filters. Per the FHIR spec the 'child' and 'parent' properties are
@@ -97,6 +102,23 @@ public class ValueSetExpansionFilterContext {
 				}
 
 				// Any other operator on child/parent is unsupported in the in-memory support → exclude.
+				return false;
+			}
+
+			/*
+			 * Standard boolean concept-properties: 'inactive' and 'notSelectable'. Used with the 'exists'
+			 * operator to select the concepts that are (or are not) flagged — a concept is considered
+			 * flagged only when it carries the property with the boolean value 'true'.
+			 */
+			if (onInactive || onNotSelectable) {
+				if (filter.getOp() == FilterOperator.EXISTS) {
+					boolean wantExists = Boolean.parseBoolean(filter.getValue());
+					Set<String> flaggedCodes = onInactive ? inactiveCodes : notSelectableCodes;
+					boolean isFlagged = flaggedCodes.contains(normalizeCode(concept.getCode()));
+					return wantExists == isFlagged;
+				}
+
+				// Any other operator on these boolean properties is unsupported in the in-memory support.
 				return false;
 			}
 
@@ -417,6 +439,12 @@ public class ValueSetExpansionFilterContext {
 				} else if (childPropertyCode != null && childPropertyCode.equals(property.getCode())) {
 					// 'code' declares 'relatedCode' as its child → code -> relatedCode
 					addParentChildEdge(code, relatedCode);
+				} else if ("inactive".equals(property.getCode()) && "true".equalsIgnoreCase(relatedCode)) {
+					// Standard boolean concept-property: the concept is inactive.
+					inactiveCodes.add(normalizeCode(code));
+				} else if ("notSelectable".equals(property.getCode()) && "true".equalsIgnoreCase(relatedCode)) {
+					// Standard boolean concept-property: the concept is not selectable (abstract).
+					notSelectableCodes.add(normalizeCode(code));
 				}
 			}
 

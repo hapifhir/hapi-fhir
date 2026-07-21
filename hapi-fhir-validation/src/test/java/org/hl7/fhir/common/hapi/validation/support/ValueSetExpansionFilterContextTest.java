@@ -1,6 +1,7 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
+import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.Enumerations.FilterOperator;
@@ -814,6 +815,53 @@ class ValueSetExpansionFilterContextTest {
 
 		// "A" is not a descendant of itself, so it does not pass the filter and IS filtered out.
 		assertThat(actual).isTrue();
+	}
+
+	/**
+	 * Build a flat CodeSystem carrying the standard boolean concept-property {@code inactive} /
+	 * {@code notSelectable} (with value {@code true}) on the code named {@code flaggedCode}.
+	 */
+	private static CodeSystem flatCSWithBooleanProperty(String propertyCode, String flaggedCode) {
+		CodeSystem cs = new CodeSystem().setUrl("http://example.org/bool").setCaseSensitive(true);
+		cs.addConcept().setCode("PLAIN");
+		cs.addConcept().setCode(flaggedCode).addProperty().setCode(propertyCode).setValue(new BooleanType(true));
+		// A concept that declares the property explicitly as FALSE must NOT be treated as flagged.
+		cs.addConcept().setCode("EXPLICIT_FALSE").addProperty().setCode(propertyCode).setValue(new BooleanType(false));
+		return cs;
+	}
+
+	@Test
+	void inactiveExistsSelectsInactiveConcepts() {
+		CodeSystem cs = flatCSWithBooleanProperty("inactive", "GONE");
+
+		// exists=true keeps only the inactive concept
+		assertThat(isFilteredWithProperty(cs, "inactive", FilterOperator.EXISTS, "true",
+			new FhirVersionIndependentConcept(cs.getUrl(), "GONE"))).isFalse();
+		assertThat(isFilteredWithProperty(cs, "inactive", FilterOperator.EXISTS, "true",
+			new FhirVersionIndependentConcept(cs.getUrl(), "PLAIN"))).isTrue();
+		// A concept whose inactive property is explicitly false is NOT inactive
+		assertThat(isFilteredWithProperty(cs, "inactive", FilterOperator.EXISTS, "true",
+			new FhirVersionIndependentConcept(cs.getUrl(), "EXPLICIT_FALSE"))).isTrue();
+
+		// exists=false keeps the complement (the active concepts)
+		assertThat(isFilteredWithProperty(cs, "inactive", FilterOperator.EXISTS, "false",
+			new FhirVersionIndependentConcept(cs.getUrl(), "PLAIN"))).isFalse();
+		assertThat(isFilteredWithProperty(cs, "inactive", FilterOperator.EXISTS, "false",
+			new FhirVersionIndependentConcept(cs.getUrl(), "GONE"))).isTrue();
+	}
+
+	@Test
+	void notSelectableExistsSelectsNotSelectableConcepts() {
+		CodeSystem cs = flatCSWithBooleanProperty("notSelectable", "ABSTRACT");
+
+		assertThat(isFilteredWithProperty(cs, "notSelectable", FilterOperator.EXISTS, "true",
+			new FhirVersionIndependentConcept(cs.getUrl(), "ABSTRACT"))).isFalse();
+		assertThat(isFilteredWithProperty(cs, "notSelectable", FilterOperator.EXISTS, "true",
+			new FhirVersionIndependentConcept(cs.getUrl(), "PLAIN"))).isTrue();
+		assertThat(isFilteredWithProperty(cs, "notSelectable", FilterOperator.EXISTS, "false",
+			new FhirVersionIndependentConcept(cs.getUrl(), "PLAIN"))).isFalse();
+		assertThat(isFilteredWithProperty(cs, "notSelectable", FilterOperator.EXISTS, "false",
+			new FhirVersionIndependentConcept(cs.getUrl(), "ABSTRACT"))).isTrue();
 	}
 
 	/**
