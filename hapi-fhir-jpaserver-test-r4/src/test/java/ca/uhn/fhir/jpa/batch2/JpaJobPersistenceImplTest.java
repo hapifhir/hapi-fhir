@@ -221,14 +221,18 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	}
 
 	private String storeWorkChunk(String theJobDefinitionId, String theTargetStepId, String theInstanceId, int theSequence, String theSerializedData, boolean theGatedExecution) {
-		WorkChunkCreateEvent batchWorkChunk = new WorkChunkCreateEvent(theJobDefinitionId, TestJobDefinitionUtils.TEST_JOB_VERSION, theTargetStepId, theInstanceId, theSequence, theSerializedData, theGatedExecution);
-		return mySvc.onWorkChunkCreate(batchWorkChunk);
+		return runInTransaction(() -> {
+			WorkChunkCreateEvent batchWorkChunk = new WorkChunkCreateEvent(theJobDefinitionId, TestJobDefinitionUtils.TEST_JOB_VERSION, theTargetStepId, theInstanceId, theSequence, theSerializedData, theGatedExecution);
+			return mySvc.onWorkChunkCreate(batchWorkChunk);
+		});
 	}
 
 	@SuppressWarnings("SameParameterValue")
 	private String storeFirstWorkChunk(String theJobDefinitionId, String theTargetStepId, String theInstanceId, int theSequence, String theSerializedData) {
-		WorkChunkCreateEvent batchWorkChunk = new WorkChunkCreateEvent(theJobDefinitionId, TestJobDefinitionUtils.TEST_JOB_VERSION, theTargetStepId, theInstanceId, theSequence, theSerializedData, false);
-		return mySvc.onWorkChunkCreate(batchWorkChunk);
+		return runInTransaction(() -> {
+			WorkChunkCreateEvent batchWorkChunk = new WorkChunkCreateEvent(theJobDefinitionId, TestJobDefinitionUtils.TEST_JOB_VERSION, theTargetStepId, theInstanceId, theSequence, theSerializedData, false);
+			return mySvc.onWorkChunkCreate(batchWorkChunk);
+		});
 	}
 
 	@Test
@@ -347,7 +351,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		storeWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, instanceId, 0, CHUNK_DATA, false);
 		WorkChunkCreateEvent batchWorkChunk = new WorkChunkCreateEvent(JOB_DEFINITION_ID, JOB_DEF_VER, FIRST_STEP_ID, instanceId, 0, CHUNK_DATA, false);
-		String chunkId = mySvc.onWorkChunkCreate(batchWorkChunk);
+		String chunkId = runInTransaction(() -> mySvc.onWorkChunkCreate(batchWorkChunk));
 		Optional<Batch2WorkChunkEntity> byId = myWorkChunkRepository.findById(chunkId);
 		Batch2WorkChunkEntity entity = byId.orElseThrow();
 		entity.setStatus(theStatus);
@@ -1530,7 +1534,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 				"{}",
 				false
 			);
-			String id = mySvc.onWorkChunkCreate(chunk);
+			String id = runInTransaction(() -> mySvc.onWorkChunkCreate(chunk));
 			chunkIds.add(id);
 		}
 
