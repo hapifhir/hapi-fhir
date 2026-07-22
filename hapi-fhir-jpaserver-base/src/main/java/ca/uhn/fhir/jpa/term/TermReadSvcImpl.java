@@ -1318,6 +1318,17 @@ public class TermReadSvcImpl implements ITermReadSvc {
 					handleFilterPropertyDefault(theF, theB, theFilter);
 				}
 				break;
+			case "deprecated":
+			case "deprecationDate":
+			case "retirementDate":
+				if (theFilter.getOp() == ValueSet.FilterOperator.EXISTS) {
+					// Standard date-valued concept-property: 'exists' is a presence check (no date-value
+					// comparison), value-aware so that exists=false selects the complement.
+					handleFilterPresenceExists(theF, theB, theFilter);
+				} else {
+					handleFilterPropertyDefault(theF, theB, theFilter);
+				}
+				break;
 			case "ancestor":
 				isCodeSystemLoincOrThrowInvalidRequestException(theCodeSystemIdentifier, theFilter.getProperty());
 				handleFilterLoincAncestor(theCodeSystemIdentifier, theF, theB, theFilter);
@@ -1538,6 +1549,25 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			theB.must(matchesAnyOfThoseCodes); // keep concepts that have the relation
 		} else {
 			theB.mustNot(matchesAnyOfThoseCodes); // keep the complement (leaves / roots)
+		}
+	}
+
+	/**
+	 * Handles a standard concept-property with {@code op=exists} as a plain presence check on the stored
+	 * property: {@code exists=true} keeps the concepts that carry the property, {@code exists=false} keeps
+	 * the complement. Used for the date-valued {@code deprecated} / {@code deprecationDate} /
+	 * {@code retirementDate} properties (the date value itself is not interpreted).
+	 */
+	private void handleFilterPresenceExists(
+			SearchPredicateFactory theF,
+			BooleanPredicateClausesStep<?> theB,
+			ValueSet.ConceptSetFilterComponent theFilter) {
+		boolean wantExists = parseRequiredBoolean(theFilter);
+		PredicateFinalStep hasProperty = theF.exists().field(CONCEPT_PROPERTY_PREFIX_NAME + theFilter.getProperty());
+		if (wantExists) {
+			theB.must(hasProperty);
+		} else {
+			theB.mustNot(hasProperty);
 		}
 	}
 

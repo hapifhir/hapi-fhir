@@ -498,6 +498,31 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	}
 
 	/**
+	 * The standard date-valued concept-property {@code deprecated} with {@code op=exists} is a presence
+	 * check: {@code exists=true} selects the concepts that carry a deprecation date, {@code exists=false}
+	 * their complement. (No date-value comparison is performed.)
+	 */
+	@Test
+	public void testExpandWithDeprecatedExistsFilter_SelectsDeprecatedConcepts() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(TermTestUtil.URL_MY_CODE_SYSTEM);
+		cs.setVersion("1");
+		cs.setContent(CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("CURRENT").setDisplay("Current concept");
+		cs.addConcept().setCode("OLD").setDisplay("Deprecated concept")
+			.addProperty().setCode("deprecated").setValue(new DateTimeType("2020-01-01"));
+		myCodeSystemDao.create(cs, mySrd);
+
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		assertThat(expandWithFilter("deprecated", FilterOperator.EXISTS, "true"))
+			.containsExactlyInAnyOrder("OLD");
+		assertThat(expandWithFilter("deprecated", FilterOperator.EXISTS, "false"))
+			.containsExactlyInAnyOrder("CURRENT");
+	}
+
+	/**
 	 * Expand a ValueSet composed of a single include on {@link TermTestUtil#URL_MY_CODE_SYSTEM} with the
 	 * given filter, returning the resulting codes.
 	 */
