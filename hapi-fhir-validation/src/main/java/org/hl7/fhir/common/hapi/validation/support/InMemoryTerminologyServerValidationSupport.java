@@ -1023,7 +1023,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			// than silently returning an incomplete/empty expansion, so the caller can report an error or
 			// delegate to another terminology service in the chain. The message already carries the
 			// originating Msg.code from ValueSetExpansionFilterContext.
-			throw new ExpansionCouldNotBeCompletedInternallyException(
+			throw new ExpansionCouldNotBeCompletedInternallyException(Msg.code(3007) +
 					e.getMessage(),
 					new CodeValidationIssue(
 							e.getMessage(),
