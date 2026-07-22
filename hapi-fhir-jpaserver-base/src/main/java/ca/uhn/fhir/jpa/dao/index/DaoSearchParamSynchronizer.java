@@ -407,9 +407,16 @@ public class DaoSearchParamSynchronizer {
 			return new ArrayList<>();
 		}
 
+		// Wrap theToSubtract in a HashSet so contains() is O(1) instead of O(N).
+		// Without this, large code system re-PUTs (e.g. NDC, ~10^6 ResourceIndexedSearchParam* rows)
+		// spin for hours in O(N^2) ArrayList scans inside synchronize() because the second call
+		// (subtract(newParams, theExistingParams)) passes the original existing-params collection
+		// (typically an ArrayList) as theToSubtract.
+		Set<T> toSubtractSet = (theToSubtract instanceof Set) ? (Set<T>) theToSubtract : new HashSet<>(theToSubtract);
+
 		ArrayList<T> retVal = new ArrayList<>();
 		for (T next : theSubtractFrom) {
-			if (!theToSubtract.contains(next)) {
+			if (!toSubtractSet.contains(next)) {
 				retVal.add(next);
 			}
 		}
