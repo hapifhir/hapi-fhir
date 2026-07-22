@@ -32,7 +32,9 @@ public interface IInProgressActionsTests extends IWorkChunkCommon, WorkChunkTest
 	@Test
 	default void processingOk_inProgressToSuccess_clearsDataSavesRecordCount() {
 		String jobId = getTestManager().createAndStoreJobInstance(null);
-		String myChunkId = getTestManager().createAndDequeueWorkChunk(jobId);
+		String myChunkId = getTestManager().runInTransaction(() -> {
+			return getTestManager().createAndDequeueWorkChunk(jobId);
+		});
 		// execution ok
 		getTestManager().getSvc().onWorkChunkCompletion(new WorkChunkCompletionEvent(myChunkId, 3, 0));
 
@@ -62,7 +64,9 @@ public interface IInProgressActionsTests extends IWorkChunkCommon, WorkChunkTest
 	@Test
 	default void processingFailure_inProgressToFailed() {
 		String jobId = getTestManager().createAndStoreJobInstance(null);
-		String myChunkId = getTestManager().createAndDequeueWorkChunk(jobId);
+		String myChunkId = getTestManager().runInTransaction(() -> {
+			return getTestManager().createAndDequeueWorkChunk(jobId);
+		});
 		// execution had a failure
 		getTestManager().getSvc().onWorkChunkFailed(myChunkId, "some error");
 
