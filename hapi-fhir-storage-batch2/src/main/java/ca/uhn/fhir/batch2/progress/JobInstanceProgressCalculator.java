@@ -63,6 +63,13 @@ public class JobInstanceProgressCalculator {
 		InstanceProgress instanceProgress = calculateInstanceProgress(theInstanceId);
 
 		myJobPersistence.updateInstance(theInstanceId, currentInstance -> {
+			if (currentInstance.getStatus() != null
+					&& currentInstance.getStatus().isEnded()) {
+				// a terminal state (eg: reducer set COMPLETED) was reached
+				// after snapshotted progress; don't update the final progress
+				// with a stale value
+				return false;
+			}
 			instanceProgress.updateInstance(myJobDefinitionRegistry, currentInstance);
 
 			if (currentInstance.getCombinedRecordsProcessed() > 0) {
