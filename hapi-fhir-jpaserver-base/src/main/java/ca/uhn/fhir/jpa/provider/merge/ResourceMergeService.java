@@ -30,11 +30,9 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.dao.PartitionedTransactionPartialFailureException;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
-import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.CrossPartitionReplaceReferencesResult;
@@ -46,8 +44,6 @@ import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -504,7 +500,8 @@ public class ResourceMergeService {
 			resourceIdsToDelete.add(theSourceResource.getIdElement());
 		}
 		if (!resourceIdsToDelete.isEmpty()) {
-			theCommittedResourceIds.addAll(deleteResourcesOneByOne(resourceIdsToDelete, sourcePartition));
+			theCommittedResourceIds.addAll(MergeResourceHelper.deleteResourcesInPartitionTransaction(
+					resourceIdsToDelete, sourcePartition, myDaoRegistry, myHapiTransactionService));
 		}
 	}
 
@@ -737,51 +734,6 @@ public class ResourceMergeService {
 			deleteBuilder.addTransactionDeleteEntry(id);
 		}
 		myDaoRegistry.getSystemDao().transactionNested(theRequestDetails, deleteBuilder.getBundle());
-	}
-
-	/**
-	 * Deletes the given resources in a single transaction pinned to {@code thePartition}, as individual DAO
-	 * deletes instead of one DELETE transaction bundle: a bundle would pass through the MegaScale
-	 * transaction-splitting interceptor, which cannot determine a partition for a DELETE entry whose id is
-	 * client-assigned (non-partition-decodable). In the cross-partition merge every resource being deleted (the
-	 * copied compartment originals, plus the source resource when {@code deleteSource}) lives in the source
-	 * resource's partition, so pinning them all to that single partition is safe — and lets them share one
-	 * transaction: either every delete commits, or none do.
-	 *
-	 * <p>The resources being deleted can reference each other (e.g. a compartment Observation referencing a
-	 * compartment Encounter), so delete conflicts are collected across the whole list — with every id pre-marked
-	 * for deletion so conflicts among the co-deleted resources are skipped, mirroring how a DELETE transaction
-	 * bundle validates — and validated once before the transaction commits. A genuine conflict (an outside
-	 * referrer) rolls the whole transaction back, leaving no deletes behind.
-	 *
-	 * @return the deleted resources' tombstone versioned ids — the resources at the version their delete
-	 *         committed. No-op deletes (resources already deleted) are excluded, since they committed nothing.
-	 *         On any failure the transaction rolls back and this method throws instead of returning.
-	 */
-	private List<IIdType> deleteResourcesOneByOne(List<IIdType> theResourcesToDelete, RequestPartitionId thePartition) {
-		DeleteConflictList deleteConflicts = new DeleteConflictList();
-		theResourcesToDelete.forEach(deleteConflicts::setResourceIdMarkedForDeletion);
-		// The explicit partition on the SystemRequestDetails short-circuits the delete's partition resolution,
-		// so a non-decodable id is not re-resolved to allPartitions (which would make the delete a silent no-op).
-		SystemRequestDetails deleteRequestDetails = SystemRequestDetails.forRequestPartitionId(thePartition);
-		return myHapiTransactionService
-				.withRequest(deleteRequestDetails)
-				.withRequestPartitionId(thePartition)
-				.execute(() -> {
-					TransactionDetails transactionDetails = new TransactionDetails();
-					List<IIdType> tombstones = new ArrayList<>();
-					for (IIdType id : theResourcesToDelete) {
-						IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(id.getResourceType());
-						DaoMethodOutcome outcome =
-								dao.delete(id, deleteConflicts, deleteRequestDetails, transactionDetails);
-						if (outcome != null && !outcome.isNop() && outcome.getId() != null) {
-							tombstones.add(outcome.getId());
-						}
-					}
-					// Validated inside the transaction: an outside referrer rolls back every delete.
-					DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(myFhirContext, deleteConflicts);
-					return tombstones;
-				});
 	}
 
 	private void validateCrossPartitionAsyncNotSupported(

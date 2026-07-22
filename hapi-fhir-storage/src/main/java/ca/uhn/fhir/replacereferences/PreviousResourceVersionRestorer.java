@@ -27,10 +27,13 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.merge.MergeResourceHelper;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -56,12 +59,16 @@ public class PreviousResourceVersionRestorer {
 	private final HapiTransactionService myHapiTransactionService;
 	private final DaoRegistry myDaoRegistry;
 	private final FhirContext myFhirContext;
+	private final PartitionSettings myPartitionSettings;
 
 	public PreviousResourceVersionRestorer(
-			DaoRegistry theDaoRegistry, HapiTransactionService theHapiTransactionService) {
+			DaoRegistry theDaoRegistry,
+			HapiTransactionService theHapiTransactionService,
+			PartitionSettings thePartitionSettings) {
 		myDaoRegistry = theDaoRegistry;
 		myHapiTransactionService = theHapiTransactionService;
 		myFhirContext = theDaoRegistry.getFhirContext();
+		myPartitionSettings = thePartitionSettings;
 	}
 
 	/**
@@ -86,8 +93,21 @@ public class PreviousResourceVersionRestorer {
 	 *
 	 * @throws IllegalArgumentException if a given reference is versionless
 	 * @throws ResourceVersionConflictException if the current version of the resource does not match the version specified in the reference.
+	 * @throws InternalErrorException if no explicit partition is provided and all-partition search is not supported
+	 *     (e.g. MegaScale) — the caller must use the partition-pinned overload on such platforms, since the
+	 *     unpinned fan-out reads are unreliable there (they can resolve through ESR surrogate rows on other shards).
 	 */
 	public void restoreToPreviousVersionsInTrx(List<Reference> theReferences, RequestDetails theRequestDetails) {
+		// Without an explicit partition the pre-reads (and deletes) fan out across all shards. That is only legitimate
+		// on platforms that support all-partition search (single-database HAPI). On platforms that do not (MegaScale),
+		// the unpinned reads can resolve through another shard's ESR surrogate row and fail, so the scattered mode is
+		// refused outright — the caller must supply the partition via the partition-pinned overload.
+		if (!myPartitionSettings.isAllPartitionSearchSupported()) {
+			throw new InternalErrorException(Msg.code(2997)
+					+ "Cannot restore resources to their previous versions without an explicit partition because"
+					+ " all-partition search is not supported on this server; the partition the resources live on must"
+					+ " be supplied.");
+		}
 		// Run under an allPartitions context so the references (which may span partitions) are resolved against
 		// every partition, mirroring how the forward cross-partition merge submits its bundle. When a
 		// transaction-partitioning interceptor is present it then repartitions the bundle per resource; otherwise
@@ -118,16 +138,6 @@ public class PreviousResourceVersionRestorer {
 				.execute(() -> restoreToPreviousVersions(theReferences, theRequestDetails, thePartitionId));
 	}
 
-	/**
-	 * A v1 "copy" resource to delete during undo, paired with the partition it actually lives in
-	 * (captured from its {@code RESOURCE_PARTITION_ID} user data during the pre-read). The
-	 * copies were all written to the target partition by the forward merge, but their ids may be
-	 * non-partition-decodable (client-assigned ids; all ids under MegaScale UUID server-id mode), so
-	 * the captured partition pins the subsequent DELETE to the correct shard rather than relying on
-	 * id-based partition resolution.
-	 */
-	private record CopyToDelete(IIdType id, RequestPartitionId partitionId) {}
-
 	private void restoreToPreviousVersions(
 			List<Reference> theReferences,
 			RequestDetails theRequestDetails,
@@ -142,12 +152,12 @@ public class PreviousResourceVersionRestorer {
 		// independent of entry order — see the comment on the transactionNested call below.
 		BundleBuilder updateBundleBuilder = new BundleBuilder(myFhirContext);
 
-		// The v1 "copies" are deleted separately, one at a time, after the update bundle — they cannot share the
-		// cross-partition update bundle because their ids may be non-partition-decodable (see deleteCopies).
-		// The ordering matters: each one-by-one delete validates its own delete conflicts immediately, so the
-		// update bundle must have already repointed every referrer away from the copies by the time they run
-		// (satisfying referential-integrity-on-delete).
-		List<CopyToDelete> copiesToDelete = new ArrayList<>();
+		// The v1 resources created by the operation (e.g. the copies a cross-partition merge writes to the target
+		// partition) are deleted separately, after the update bundle — they cannot share the cross-partition
+		// update bundle because their ids may be non-partition-decodable (see deleteResources). The ordering
+		// matters: the deletes validate their delete conflicts, so the update bundle must have already repointed
+		// every referrer away from them by the time they run (satisfying referential-integrity-on-delete).
+		List<IIdType> resourcesToDelete = new ArrayList<>();
 
 		for (Reference reference : theReferences) {
 			String referenceStr = reference.getReference();
@@ -197,16 +207,10 @@ public class PreviousResourceVersionRestorer {
 				}
 
 				if (referenceVersion == 1) {
-					// Resource was created new by the operation (v1) — delete it to undo. The DELETE is pinned to
-					// the caller-supplied partition when present, otherwise to the partition captured from the
-					// pre-read's RESOURCE_PARTITION_ID user data. The caller-supplied partition is preferred
-					// because a fanned-out pre-read can resolve through an ESR surrogate row on another shard,
-					// which stamps the surrogate's partition rather than the copy's real one.
-					RequestPartitionId partitionId = thePinnedPartition != null
-							? thePinnedPartition
-							: RequestPartitionId.getPartitionFromUserDataIfPresent(currentResource)
-									.orElse(RequestPartitionId.allPartitions());
-					copiesToDelete.add(new CopyToDelete(referenceId.toUnqualifiedVersionless(), partitionId));
+					// Resource was created new by the operation (v1) — delete it to undo. The delete is pinned to
+					// the caller-supplied partition when present; otherwise it runs unpinned in the scattered
+					// transaction (see deleteResources).
+					resourcesToDelete.add(referenceId.toUnqualifiedVersionless());
 					continue;
 				}
 			}
@@ -235,10 +239,10 @@ public class PreviousResourceVersionRestorer {
 			myDaoRegistry.getSystemDao().transactionNested(theRequestDetails, updateBundleBuilder.getBundle());
 		}
 
-		// Now delete the v1 copies. By this point the update bundle above has reverted every referrer back to
-		// referencing the source originals (not the copies), so deleting the copies cannot violate
-		// referential-integrity-on-delete. Each delete is pinned to the copy's actual partition.
-		deleteCopies(copiesToDelete, theRequestDetails);
+		// Now delete the v1 resources created by the operation. By this point the update bundle above has reverted
+		// every referrer back to referencing the source originals (not the created resources), so deleting them
+		// cannot violate referential-integrity-on-delete.
+		deleteResources(resourcesToDelete, thePinnedPartition, theRequestDetails);
 	}
 
 	/**
@@ -286,33 +290,54 @@ public class PreviousResourceVersionRestorer {
 	}
 
 	/**
-	 * Deletes the v1 copies one at a time, each in its own transaction pinned to the partition the copy actually
-	 * lives in (captured from the pre-read).
+	 * Deletes the v1 resources created by the operation (e.g. the copies a cross-partition merge writes to the
+	 * target partition), after the update bundle. When the caller supplied the partition the resources live on,
+	 * the whole batch is deleted atomically in one transaction pinned to it — either every delete commits or none
+	 * do (see {@link MergeResourceHelper#deleteResourcesInPartitionTransaction}); otherwise the deletes
+	 * participate in the caller's already-open scattered (allPartitions) transaction (see
+	 * {@link #deleteAcrossPartitions}).
 	 *
-	 * The deletes deliberately do NOT go through a transaction bundle: a transaction is repartitioned per entry by
-	 * the transaction-partitioning interceptor, which re-resolves each entry's partition from its id and fails for
-	 * ids that are not partition-decodable (client-assigned ids; all ids under MegaScale UUID server-id mode) —
-	 * pinning the bundle to a concrete partition does not prevent that re-resolution. Calling the DAO directly
-	 * bypasses the interceptor, and seeding the resolved-partition cache on the {@link TransactionDetails} makes the
-	 * DAO use the captured partition instead of re-resolving the id. Mirrors the forward merge's one-by-one delete.
+	 * In both cases the deletes deliberately do NOT go through a transaction bundle: a transaction bundle is
+	 * repartitioned per entry by the transaction-partitioning interceptor, which re-resolves each entry's
+	 * partition from its id and fails for ids that are not partition-decodable (client-assigned ids; all ids under
+	 * MegaScale UUID server-id mode) — pinning the bundle to a concrete partition does not prevent that
+	 * re-resolution. Calling the DAO directly bypasses the interceptor.
 	 */
-	private void deleteCopies(List<CopyToDelete> theCopiesToDelete, RequestDetails theRequestDetails) {
-		// The copies can reference each other (e.g. a copied Observation referencing a copied Encounter), so
-		// delete conflicts are collected across the whole list — with every id pre-marked for deletion so
-		// conflicts among the co-deleted copies are skipped, mirroring how a DELETE transaction bundle
-		// validates — and validated once at the end.
+	private void deleteResources(
+			List<IIdType> theResourcesToDelete,
+			@Nullable RequestPartitionId thePinnedPartition,
+			RequestDetails theRequestDetails) {
+		if (theResourcesToDelete.isEmpty()) {
+			return;
+		}
+		if (thePinnedPartition != null) {
+			// Same-partition batch: delete the whole list atomically in one transaction pinned to the partition.
+			// The returned tombstone ids are not needed here (the undo does not record them).
+			MergeResourceHelper.deleteResourcesInPartitionTransaction(
+					theResourcesToDelete, thePinnedPartition, myDaoRegistry, myHapiTransactionService);
+		} else {
+			deleteAcrossPartitions(theResourcesToDelete, theRequestDetails);
+		}
+	}
+
+	/**
+	 * Deletes the given resources without pinning them to a partition; each delete resolves its partition normally
+	 * and participates in the scattered (allPartitions) transaction the caller opened. Reached only when
+	 * all-partition search is supported (single-database HAPI) — the scattered entry point refuses this mode
+	 * otherwise.
+	 *
+	 * <p>The resources can reference each other (e.g. a copied Observation referencing a copied Encounter), so
+	 * delete conflicts are collected across the whole list — with every id pre-marked for deletion so conflicts
+	 * among the co-deleted resources are skipped, mirroring how a DELETE transaction bundle validates — and
+	 * validated once at the end.
+	 */
+	private void deleteAcrossPartitions(List<IIdType> theResourcesToDelete, RequestDetails theRequestDetails) {
 		DeleteConflictList deleteConflicts = new DeleteConflictList();
-		theCopiesToDelete.forEach(copy -> deleteConflicts.setResourceIdMarkedForDeletion(copy.id()));
-		for (CopyToDelete copy : theCopiesToDelete) {
-			IIdType id = copy.id();
+		theResourcesToDelete.forEach(deleteConflicts::setResourceIdMarkedForDeletion);
+		TransactionDetails transactionDetails = new TransactionDetails();
+		for (IIdType id : theResourcesToDelete) {
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(id.getResourceType());
-			// The explicit partition on the SystemRequestDetails short-circuits the delete's partition resolution,
-			// so a non-decodable id is not re-resolved to allPartitions (which would make the delete a silent no-op).
-			SystemRequestDetails deleteRequestDetails = SystemRequestDetails.forRequestPartitionId(copy.partitionId());
-			myHapiTransactionService
-					.withRequest(deleteRequestDetails)
-					.withRequestPartitionId(copy.partitionId())
-					.execute(() -> dao.delete(id, deleteConflicts, deleteRequestDetails, new TransactionDetails()));
+			dao.delete(id, deleteConflicts, theRequestDetails, transactionDetails);
 		}
 		DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(myFhirContext, deleteConflicts);
 	}
