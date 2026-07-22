@@ -69,7 +69,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.batch2.jobs.merge.MergeAppCtx.JOB_MERGE;
@@ -505,7 +504,7 @@ public class ResourceMergeService {
 			resourceIdsToDelete.add(theSourceResource.getIdElement());
 		}
 		if (!resourceIdsToDelete.isEmpty()) {
-			deleteResourcesOneByOne(resourceIdsToDelete, sourcePartition, theCommittedResourceIds::add);
+			theCommittedResourceIds.addAll(deleteResourcesOneByOne(resourceIdsToDelete, sourcePartition));
 		}
 	}
 
@@ -755,17 +754,17 @@ public class ResourceMergeService {
 	 * bundle validates — and validated once before the transaction commits. A genuine conflict (an outside
 	 * referrer) rolls the whole transaction back, leaving no deletes behind.
 	 *
-	 * <p>{@code theOnDeleted} is invoked with each tombstone's versioned id after the transaction commits; on
-	 * any failure nothing was deleted and it is not invoked.
+	 * @return the deleted resources' tombstone versioned ids — the resources at the version their delete
+	 *         committed. No-op deletes (resources already deleted) are excluded, since they committed nothing.
+	 *         On any failure the transaction rolls back and this method throws instead of returning.
 	 */
-	private void deleteResourcesOneByOne(
-			List<IIdType> theResourcesToDelete, RequestPartitionId thePartition, Consumer<IIdType> theOnDeleted) {
+	private List<IIdType> deleteResourcesOneByOne(List<IIdType> theResourcesToDelete, RequestPartitionId thePartition) {
 		DeleteConflictList deleteConflicts = new DeleteConflictList();
 		theResourcesToDelete.forEach(deleteConflicts::setResourceIdMarkedForDeletion);
 		// The explicit partition on the SystemRequestDetails short-circuits the delete's partition resolution,
 		// so a non-decodable id is not re-resolved to allPartitions (which would make the delete a silent no-op).
 		SystemRequestDetails deleteRequestDetails = SystemRequestDetails.forRequestPartitionId(thePartition);
-		List<IIdType> deletedIds = myHapiTransactionService
+		return myHapiTransactionService
 				.withRequest(deleteRequestDetails)
 				.withRequestPartitionId(thePartition)
 				.execute(() -> {
@@ -783,7 +782,6 @@ public class ResourceMergeService {
 					DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(myFhirContext, deleteConflicts);
 					return tombstones;
 				});
-		deletedIds.forEach(theOnDeleted);
 	}
 
 	private void validateCrossPartitionAsyncNotSupported(
