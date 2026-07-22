@@ -127,7 +127,7 @@ public class ValueSetExpansionFilterContext {
 			if (standardProperty != null) {
 				String conflictingUri = conflictingPropertyUris.get(standardProperty);
 				if (conflictingUri != null) {
-					throw new UnsupportedFilterException(Msg.code(3006)
+					throw new UnsupportedFilterException(Msg.code(3005)
 							+ "In-memory ValueSet expansion cannot evaluate filter on property '"
 							+ filter.getProperty() + "': the CodeSystem declares it with URI '" + conflictingUri
 							+ "' rather than the standard '" + standardProperty.canonicalUri()
@@ -579,7 +579,7 @@ public class ValueSetExpansionFilterContext {
 	private static UnsupportedFilterException unsupportedFilter(ValueSet.ConceptSetFilterComponent theFilter) {
 		String op = theFilter.hasOp() ? theFilter.getOp().toCode() : "(none)";
 		String property = theFilter.hasProperty() ? theFilter.getProperty() : "(none)";
-		return new UnsupportedFilterException(Msg.code(3005)
+		return new UnsupportedFilterException(Msg.code(3004)
 				+ "In-memory ValueSet expansion does not support filter with property '" + property
 				+ "' and operator '" + op + "'");
 	}
