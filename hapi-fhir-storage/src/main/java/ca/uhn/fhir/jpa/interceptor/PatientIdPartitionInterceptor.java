@@ -775,7 +775,7 @@ public class PatientIdPartitionInterceptor {
 		// References given as inline Patient match URLs (present when the normalizer is not active) resolve here
 		rewriteInlinePatientMatchUrlReferences(entries, theTransactionDetails);
 
-		Map<String, String> idSubstitutions = resolvePatientEntryIds(thePrefetchDetails, theTransactionDetails);
+		Map<String, String> idSubstitutions = rewriteResolvedOrAssignPatientEntryIds(thePrefetchDetails, theTransactionDetails);
 		substituteReferences(thePrefetchDetails.getVersionAdapter(), entries, idSubstitutions);
 	}
 
@@ -786,7 +786,7 @@ public class PatientIdPartitionInterceptor {
 	 * update.
 	 */
 	// Created by Claude Fable 5
-	private Map<String, String> resolvePatientEntryIds(
+	private Map<String, String> rewriteResolvedOrAssignPatientEntryIds(
 			TransactionWriteAfterPrefetchDetails thePrefetchDetails, TransactionDetails theTransactionDetails) {
 		ITransactionProcessorVersionAdapter<IBaseBundle, IBase> versionAdapter = thePrefetchDetails.getVersionAdapter();
 		Map<String, String> idSubstitutions = new HashMap<>();
