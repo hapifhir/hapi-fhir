@@ -35,6 +35,7 @@ import tools.jackson.core.json.JsonFactory;
 import tools.jackson.core.json.JsonReadFeature;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.cfg.JsonNodeFeature;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.DecimalNode;
@@ -425,9 +426,10 @@ public class JacksonStructure implements JsonLikeStructure {
 				.build();
 
 		return JsonMapper.builder(jsonFactory)
-				// JACKSONTOOL3-TODO.  overload constructor : JsonNodeFactory(boolean bigDecimalExact) where did this
-				// go?
+				// Note : JsonNodeFactory(boolean bigDecimalExact) overloaded constructor replaced with STRIP_TRAILING_BIGDECIMAL_ZEROES
 				.nodeFactory(new JsonNodeFactory())
+				// see https://github.com/FasterXML/jackson-databind/blob/3.x/src/main/java/tools/jackson/databind/cfg/JsonNodeFeature.java#L49L58
+				.enable(JsonNodeFeature.STRIP_TRAILING_BIGDECIMAL_ZEROES)
 				.enable(JsonReadFeature.ALLOW_LEADING_PLUS_SIGN_FOR_NUMBERS)
 				.enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
 				.enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
