@@ -125,6 +125,18 @@ public class BulkExportJobParameters extends BaseBatchJobParameters {
 	@JsonProperty("includeHistory")
 	private boolean myIncludeHistory;
 
+	/**
+	 * If set, the export runs under this registered batch2 job definition instead of the
+	 * default <code>BULK_EXPORT</code> job. Intended to be set by server-side interceptor
+	 * code, typically hooked on <code>STORAGE_PRE_INITIATE_BULK_EXPORT</code> (though any
+	 * hook that receives these parameters before job start, such as
+	 * <code>STORAGE_INITIATE_BULK_EXPORT</code>, is honored equally); it is never populated
+	 * from the client request. The target job definition must accept
+	 * {@link BulkExportJobParameters} (or a subclass) as its parameters type.
+	 */
+	@JsonProperty("jobDefinitionIdOverride")
+	private String myJobDefinitionIdOverride;
+
 	public String getExportIdentifier() {
 		return myExportId;
 	}
@@ -317,6 +329,26 @@ public class BulkExportJobParameters extends BaseBatchJobParameters {
 	 */
 	public void setIncludeHistory(boolean theIncludeHistory) {
 		myIncludeHistory = theIncludeHistory;
+	}
+
+	/**
+	 * If set, the export runs under this registered batch2 job definition instead of the
+	 * default <code>BULK_EXPORT</code> job. Intended to be set by server-side interceptor
+	 * code, typically hooked on <code>STORAGE_PRE_INITIATE_BULK_EXPORT</code> (though any
+	 * hook that receives these parameters before job start, such as
+	 * <code>STORAGE_INITIATE_BULK_EXPORT</code>, is honored equally); it is never populated
+	 * from the client request. The target job definition must accept
+	 * {@link BulkExportJobParameters} (or a subclass) as its parameters type.
+	 */
+	public String getJobDefinitionIdOverride() {
+		return myJobDefinitionIdOverride;
+	}
+
+	/**
+	 * @see #getJobDefinitionIdOverride()
+	 */
+	public void setJobDefinitionIdOverride(String theJobDefinitionIdOverride) {
+		myJobDefinitionIdOverride = theJobDefinitionIdOverride;
 	}
 
 	public enum ExportStyle {

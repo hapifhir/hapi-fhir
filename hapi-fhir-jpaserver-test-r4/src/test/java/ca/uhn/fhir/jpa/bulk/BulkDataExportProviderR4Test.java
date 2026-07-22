@@ -31,6 +31,7 @@ import ca.uhn.fhir.rest.server.tenant.UrlBaseTenantIdentificationStrategy;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.MockInvoker;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.UrlUtil;
@@ -1259,6 +1260,99 @@ public class BulkDataExportProviderR4Test {
 		// verify
 		assertTrue(preInitiateCalled.get());
 		assertTrue(initiateCalled.get());
+	}
+
+	@Test
+	public void testInitiateBulkExport_hookSetsJobDefinitionIdOverride_jobStartsWithOverriddenId() throws IOException {
+		// setup
+		String overriddenJobId = "MY_CUSTOM_EXPORT_JOB";
+		when(myInterceptorBroadcaster.hasHooks(eq(Pointcut.STORAGE_PRE_INITIATE_BULK_EXPORT))).thenReturn(true);
+		when(myInterceptorBroadcaster.getInvokersForPointcut(eq(Pointcut.STORAGE_PRE_INITIATE_BULK_EXPORT))).thenReturn(MockInvoker.list(params -> {
+			params.get(BulkExportJobParameters.class).setJobDefinitionIdOverride(overriddenJobId);
+			return true;
+		}));
+		when(myJobCoordinator.startInstance(isNotNull(), any())).thenReturn(createJobStartResponse());
+
+		// test
+		HttpGet get = new HttpGet(String.format("http://localhost:%s/%s", myServer.getPort(), ProviderConstants.OPERATION_EXPORT));
+		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		try (CloseableHttpResponse response = myClient.execute(get)) {
+			assertEquals(202, response.getStatusLine().getStatusCode());
+		}
+
+		// verify
+		JobInstanceStartRequest startRequest = verifyJobStart();
+		assertEquals(overriddenJobId, startRequest.getJobDefinitionId());
+		assertEquals(overriddenJobId, startRequest.getParameters(BulkExportJobParameters.class).getJobDefinitionIdOverride());
+	}
+
+	@Test
+	public void testInitiateBulkExport_initiateHookSetsJobDefinitionIdOverride_jobStartsWithOverriddenId() throws IOException {
+		// setup - the override is honored from STORAGE_INITIATE_BULK_EXPORT too, since that
+		// hook receives the same mutable parameters before job start
+		String overriddenJobId = "MY_CUSTOM_EXPORT_JOB";
+		when(myInterceptorBroadcaster.hasHooks(eq(Pointcut.STORAGE_PRE_INITIATE_BULK_EXPORT))).thenReturn(false);
+		when(myInterceptorBroadcaster.hasHooks(eq(Pointcut.STORAGE_INITIATE_BULK_EXPORT))).thenReturn(true);
+		when(myInterceptorBroadcaster.getInvokersForPointcut(eq(Pointcut.STORAGE_INITIATE_BULK_EXPORT))).thenReturn(MockInvoker.list(params -> {
+			params.get(BulkExportJobParameters.class).setJobDefinitionIdOverride(overriddenJobId);
+			return true;
+		}));
+		when(myJobCoordinator.startInstance(isNotNull(), any())).thenReturn(createJobStartResponse());
+
+		// test
+		HttpGet get = new HttpGet(String.format("http://localhost:%s/%s", myServer.getPort(), ProviderConstants.OPERATION_EXPORT));
+		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		try (CloseableHttpResponse response = myClient.execute(get)) {
+			assertEquals(202, response.getStatusLine().getStatusCode());
+		}
+
+		// verify
+		JobInstanceStartRequest startRequest = verifyJobStart();
+		assertEquals(overriddenJobId, startRequest.getJobDefinitionId());
+	}
+
+	@Test
+	public void testInitiateBulkExport_noOverride_jobStartsWithDefaultBulkExportId() throws IOException {
+		// setup
+		when(myJobCoordinator.startInstance(isNotNull(), any())).thenReturn(createJobStartResponse());
+
+		// test
+		HttpGet get = new HttpGet(String.format("http://localhost:%s/%s", myServer.getPort(), ProviderConstants.OPERATION_EXPORT));
+		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		try (CloseableHttpResponse response = myClient.execute(get)) {
+			assertEquals(202, response.getStatusLine().getStatusCode());
+		}
+
+		// verify
+		JobInstanceStartRequest startRequest = verifyJobStart();
+		assertEquals(Batch2JobDefinitionConstants.BULK_EXPORT, startRequest.getJobDefinitionId());
+		assertNull(startRequest.getParameters(BulkExportJobParameters.class).getJobDefinitionIdOverride());
+	}
+
+	@Test
+	public void testInitiateBulkExport_jobDefinitionIdOverrideIsNotClientReachable() throws IOException {
+		// setup
+		when(myJobCoordinator.startInstance(isNotNull(), any())).thenReturn(createJobStartResponse());
+
+		// test - a client attempting to smuggle the override in as an operation parameter
+		// (body and query string) must have no effect on which job is started
+		Parameters input = new Parameters();
+		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(Constants.CT_FHIR_NDJSON));
+		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE, new StringType("Patient"));
+		input.addParameter("jobDefinitionIdOverride", new StringType("EVIL_JOB"));
+		input.addParameter("_jobDefinitionIdOverride", new StringType("EVIL_JOB"));
+
+		HttpPost post = new HttpPost(String.format("http://localhost:%s/%s?jobDefinitionIdOverride=EVIL_JOB", myServer.getPort(), ProviderConstants.OPERATION_EXPORT));
+		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.setEntity(new ResourceEntity(myCtx, input));
+		try (CloseableHttpResponse response = myClient.execute(post)) {
+			assertEquals(202, response.getStatusLine().getStatusCode());
+		}
+
+		// verify
+		JobInstanceStartRequest startRequest = verifyJobStart();
+		assertEquals(Batch2JobDefinitionConstants.BULK_EXPORT, startRequest.getJobDefinitionId());
+		assertNull(startRequest.getParameters(BulkExportJobParameters.class).getJobDefinitionIdOverride());
 	}
 
 	@Test
