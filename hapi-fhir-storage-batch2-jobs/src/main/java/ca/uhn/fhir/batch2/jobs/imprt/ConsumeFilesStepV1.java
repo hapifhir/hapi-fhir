@@ -30,7 +30,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
@@ -75,9 +74,6 @@ public class ConsumeFilesStepV1 implements ILastJobStepWorker<BulkImportJobParam
 
 	@Autowired
 	private IIdHelperService<?> myIdHelperService;
-
-	@Autowired
-	private IFhirSystemDao<?, ?> mySystemDao;
 
 	@Autowired
 	private PartitionSettings myPartitionSettings;
@@ -163,7 +159,7 @@ public class ConsumeFilesStepV1 implements ILastJobStepWorker<BulkImportJobParam
 			ids.remove(resId);
 		}
 
-		mySystemDao.preFetchResources(resolvedIds, true);
+		myDaoRegistry.getSystemDao().preFetchResources(resolvedIds, true);
 
 		for (IBaseResource next : theResources) {
 			updateResource(theRequestDetails, theTransactionDetails, next);

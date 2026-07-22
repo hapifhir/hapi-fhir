@@ -118,7 +118,7 @@ public abstract class BaseBulkModifyResourcesIndividuallyStep<PT extends BaseBul
 		List<? extends IResourcePersistentId<?>> typedPidsAsPersistentIds =
 				typedPids.stream().map(t -> t.toPersistentId(myIdHelperService)).toList();
 
-		mySystemDao.preFetchResources(typedPidsAsPersistentIds, true);
+		myDaoRegistry.getSystemDao().preFetchResources(typedPidsAsPersistentIds, true);
 
 		for (int i = 0; i < typedPids.size(); i++) {
 			TypedPidJson typedPid = typedPids.get(i);
