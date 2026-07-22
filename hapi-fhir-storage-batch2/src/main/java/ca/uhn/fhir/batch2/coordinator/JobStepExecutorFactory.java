@@ -22,11 +22,11 @@ package ca.uhn.fhir.batch2.coordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
+import ca.uhn.fhir.batch2.maintenance.WorkChunkHeartbeatService;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.model.api.IModelJson;
 import jakarta.annotation.Nonnull;
 
@@ -40,7 +40,7 @@ public class JobStepExecutorFactory {
 	private final IJobMaintenanceService myJobMaintenanceService;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final IInterceptorService myInterceptorService;
-	private final ISchedulerService myIHapiScheduler;
+	private final WorkChunkHeartbeatService myWorkChunkHeartbeatService;
 
 	private Duration myAckTimeout;
 
@@ -51,14 +51,14 @@ public class JobStepExecutorFactory {
 			@Nonnull IJobMaintenanceService theJobMaintenanceService,
 			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
 			@Nonnull IInterceptorService theInterceptorService,
-			ISchedulerService theScheduler) {
+			WorkChunkHeartbeatService theWorkChunkHeartbeatService) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
 		myJobStepExecutorSvc = theExecutorSvc;
 		myJobMaintenanceService = theJobMaintenanceService;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myInterceptorService = theInterceptorService;
-		myIHapiScheduler = theScheduler;
+		myWorkChunkHeartbeatService = theWorkChunkHeartbeatService;
 	}
 
 	public void setAckTimeout(Duration theAckTimeout) {
@@ -95,7 +95,6 @@ public class JobStepExecutorFactory {
 				myJobMaintenanceService,
 				myJobDefinitionRegistry,
 				myInterceptorService,
-				myIHapiScheduler,
-				getAckTimeout());
+				myWorkChunkHeartbeatService);
 	}
 }

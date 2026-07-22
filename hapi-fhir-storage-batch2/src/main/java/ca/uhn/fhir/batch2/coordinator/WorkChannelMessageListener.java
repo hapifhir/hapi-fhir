@@ -23,6 +23,7 @@ import ca.uhn.fhir.batch2.api.DelayChunkException;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
+import ca.uhn.fhir.batch2.maintenance.WorkChunkHeartbeatService;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
@@ -36,7 +37,6 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
-import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.util.Logs;
 import jakarta.annotation.Nonnull;
@@ -58,7 +58,6 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 	private final IHapiTransactionService myHapiTransactionService;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
 	private final JobStepExecutorFactory myJobStepExecutorFactory;
-	private final ISchedulerService myIHapiScheduler;
 
 	public WorkChannelMessageListener(
 			@Nonnull IJobPersistence theJobPersistence,
@@ -69,12 +68,11 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 			IHapiTransactionService theHapiTransactionService,
 			IInterceptorBroadcaster theInterceptorBroadcaster,
 			@Nonnull IInterceptorService theInterceptorService,
-			ISchedulerService theScheduler) {
+			WorkChunkHeartbeatService theWorkChunkHeartbeatService) {
 		myJobPersistence = theJobPersistence;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myHapiTransactionService = theHapiTransactionService;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
-		myIHapiScheduler = theScheduler;
 		myJobStepExecutorFactory = new JobStepExecutorFactory(
 				theJobPersistence,
 				theBatchJobSender,
@@ -82,7 +80,7 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 				theJobMaintenanceService,
 				theJobDefinitionRegistry,
 				theInterceptorService,
-				myIHapiScheduler);
+				theWorkChunkHeartbeatService);
 	}
 
 	public void setAckTimeout(Duration theTimeout) {

@@ -1,0 +1,12 @@
+---
+type: add
+issue: 8157
+title: "Previously, batch jobs with reduction steps would be run inline
+      once the previous step had completed, without sending anything to the queue.
+      This had a problem where if a server shut down mid-reduction, the job would
+      be stuck in 'IN_PROGRESS' forever.
+      This has been fixed; a new 'driver' chunk will be sent to the queue. Upon
+      consumption of which, a reduction job will be triggered.
+      Should the server shut down mid-processing, the delivery mechanism of the queue
+      will redeliver the 'driver' chunk and the reduction will start anew.
+"
