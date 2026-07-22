@@ -101,8 +101,8 @@ public class ValueSetExpansionFilterContext {
 					return wantExists == hasRelation;
 				}
 
-				// Any other operator on child/parent is unsupported in the in-memory support → exclude.
-				return false;
+				// The hierarchical child/parent properties only support the 'exists' operator in-memory.
+				throw unsupportedFilter(filter);
 			}
 
 			/*
@@ -118,13 +118,16 @@ public class ValueSetExpansionFilterContext {
 					return wantExists == isFlagged;
 				}
 
-				// Any other operator on these boolean properties is unsupported in the in-memory support.
-				return false;
+				// The boolean inactive/notSelectable properties only support the 'exists' operator in-memory.
+				throw unsupportedFilter(filter);
 			}
 
-			/**
-			 * Only code/display supported in the in-memory validation support, so reject any custom concept properties,
-			 * even though that should technically be supported by the FHIR spec.
+			/*
+			 * Only code/display (and the standard properties handled above) are supported by the in-memory
+			 * validation support. Custom concept properties are valid per the FHIR spec but cannot be
+			 * evaluated here, so signal that this filter is unsupported rather than silently producing an
+			 * (incorrect) empty expansion — the caller can then surface an error or delegate to another
+			 * terminology service in the chain.
 			 *
 			 * @see <a href="https://build.fhir.org/codesystem.html#properties">
 			 *      FHIR CodeSystem Concept Properties (4.8.11)</a>
@@ -132,7 +135,7 @@ public class ValueSetExpansionFilterContext {
 			 *      FHIR CodeSystem Defined Concept Properties (4.8.12)</a>
 			 */
 			if (!onCode && !onDisplay) {
-				return false;
+				throw unsupportedFilter(filter);
 			}
 
 			String theFilterValue = filter.getValue();
@@ -472,5 +475,25 @@ public class ValueSetExpansionFilterContext {
 
 	private static boolean isBlank(String theValue) {
 		return theValue == null || theValue.isEmpty();
+	}
+
+	private static UnsupportedFilterException unsupportedFilter(ValueSet.ConceptSetFilterComponent theFilter) {
+		String op = theFilter.hasOp() ? theFilter.getOp().toCode() : "(none)";
+		String property = theFilter.hasProperty() ? theFilter.getProperty() : "(none)";
+		return new UnsupportedFilterException("In-memory ValueSet expansion does not support filter with property '"
+				+ property + "' and operator '" + op + "'");
+	}
+
+	/**
+	 * Thrown when a ValueSet filter uses a property/operator combination that the in-memory expansion
+	 * cannot evaluate. Callers should surface this as an expansion error (or delegate to another
+	 * terminology service) rather than returning a silently incomplete/empty expansion.
+	 */
+	public static class UnsupportedFilterException extends RuntimeException {
+		private static final long serialVersionUID = 1L;
+
+		public UnsupportedFilterException(String theMessage) {
+			super(theMessage);
+		}
 	}
 }

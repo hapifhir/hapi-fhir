@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ValueSetExpansionFilterContextTest {
 
@@ -276,15 +277,42 @@ class ValueSetExpansionFilterContextTest {
 	}
 
 	@Test
-	void unsupportedPropertyYieldsEmpty() {
+	void unsupportedPropertyThrows() {
+		// An unknown property is not something this in-memory engine can evaluate. Rather than silently
+		// producing an (incorrect) empty expansion, it must signal that it cannot apply the filter.
 		CodeSystem cs = flatCodeSystem(false, "A", "B");
 		ValueSet.ConceptSetFilterComponent f = new ValueSet.ConceptSetFilterComponent()
-			.setProperty("severity")   // not code/display
+			.setProperty("severity")   // not code/display/any known standard property
 			.setOp(FilterOperator.EQUAL)
 			.setValue("A");
-		boolean filtered = new ValueSetExpansionFilterContext(cs, List.of(f))
-			.isFiltered(new FhirVersionIndependentConcept(cs.getUrl(), "A"));
-		assertThat(filtered).isTrue();  // always filtered out
+		ValueSetExpansionFilterContext ctx = new ValueSetExpansionFilterContext(cs, List.of(f));
+		FhirVersionIndependentConcept concept = new FhirVersionIndependentConcept(cs.getUrl(), "A");
+
+		assertThatThrownBy(() -> ctx.isFiltered(concept))
+			.isInstanceOf(ValueSetExpansionFilterContext.UnsupportedFilterException.class)
+			.hasMessageContaining("severity");
+	}
+
+	@ParameterizedTest(name = "[unsupported-op] property={0}, op={1}")
+	@CsvSource({
+		// The hierarchical / boolean properties only support the 'exists' operator in-memory.
+		"child, ISA",
+		"parent, DESCENDENTOF",
+		"inactive, EQUAL",
+		"notSelectable, IN",
+	})
+	void unsupportedOperatorOnStandardPropertyThrows(String property, FilterOperator op) {
+		CodeSystem cs = hierarchicalCS(true);
+		ValueSet.ConceptSetFilterComponent f = new ValueSet.ConceptSetFilterComponent()
+			.setProperty(property)
+			.setOp(op)
+			.setValue("P");
+		ValueSetExpansionFilterContext ctx = new ValueSetExpansionFilterContext(cs, List.of(f));
+		FhirVersionIndependentConcept concept = new FhirVersionIndependentConcept(cs.getUrl(), "P");
+
+		assertThatThrownBy(() -> ctx.isFiltered(concept))
+			.isInstanceOf(ValueSetExpansionFilterContext.UnsupportedFilterException.class)
+			.hasMessageContaining(property);
 	}
 
 

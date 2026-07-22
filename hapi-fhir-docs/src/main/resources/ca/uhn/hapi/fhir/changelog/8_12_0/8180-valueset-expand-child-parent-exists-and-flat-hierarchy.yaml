@@ -1,5 +1,5 @@
 ---
-type: add
+type: change
 issue: 8180
 title: "ValueSet expansion now supports the hierarchical `child` and `parent` filter properties with the
   `exists` operator (for example `child exists=false` to select the leaf concepts, or `parent exists=false`
@@ -10,5 +10,8 @@ title: "ValueSet expansion now supports the hierarchical `child` and `parent` fi
   flat CodeSystems. The standard boolean concept-properties `inactive` and `notSelectable` are now also
   supported with the `exists` operator (for example `inactive exists=true` to select the inactive concepts);
   a concept is treated as flagged only when it carries the property with the boolean value `true`. Both the
-  in-memory validation-support expansion and the JPA terminology service are supported. Thanks to Patrick
-  Werner for the contribution!"
+  in-memory validation-support expansion and the JPA terminology service are supported. Additionally, the
+  in-memory expansion now reports an error for a `compose.include.filter` it cannot evaluate (a custom
+  concept property, or a non-`exists` operator on `child`/`parent`/`inactive`/`notSelectable`), rather than
+  silently returning an empty expansion, so the failure can be surfaced or delegated to another terminology
+  service in the validation-support chain. Thanks to Patrick Werner for the contribution!"

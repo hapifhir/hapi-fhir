@@ -1574,7 +1574,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		if ("false".equalsIgnoreCase(value)) {
 			return false;
 		}
-		throw new InvalidRequestException(Msg.code(2995) + "Filter with property '" + theFilter.getProperty()
+		throw new InvalidRequestException(Msg.code(3003) + "Filter with property '" + theFilter.getProperty()
 				+ "' and op '" + theFilter.getOp().toCode() + "' requires a boolean value ('true' or 'false') but was '"
 				+ theFilter.getValue() + "'");
 	}
