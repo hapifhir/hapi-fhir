@@ -21,9 +21,7 @@ package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -47,7 +45,8 @@ import ca.uhn.fhir.jpa.search.builder.tasks.SearchTask;
 import ca.uhn.fhir.jpa.search.builder.tasks.SearchTaskParameters;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
-import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
+import ca.uhn.fhir.jpa.search.exec.ICacheAwareSearchSvc;
+import ca.uhn.fhir.jpa.search.exec.ISynchronousSearchSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -59,10 +58,9 @@ import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.AsyncUtil;
 import ca.uhn.fhir.util.StopWatch;
@@ -80,8 +78,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.io.Serial;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -113,6 +109,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	private final DaoRegistry myDaoRegistry;
 	private final SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
 	private final ISynchronousSearchSvc mySynchronousSearchSvc;
+	private final ICacheAwareSearchSvc myCacheAwareSearchSvc;
 	private final PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
 	private final ISearchParamRegistry mySearchParamRegistry;
 	private final SearchStrategyFactory mySearchStrategyFactory;
@@ -128,26 +125,28 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	private long myMaxMillisToWaitForRemoteResults = DateUtils.MILLIS_PER_MINUTE;
 	private boolean myNeverUseLocalSearchForUnitTests;
 	private int mySyncSize = DEFAULT_SYNC_SIZE;
+	private IPagingProvider myPagingProvider;
 
 	/**
 	 * Constructor
 	 */
 	public SearchCoordinatorSvcImpl(
-			FhirContext theContext,
-			JpaStorageSettings theStorageSettings,
-			IInterceptorBroadcaster theInterceptorBroadcaster,
-			HapiTransactionService theTxService,
-			ISearchCacheSvc theSearchCacheSvc,
-			ISearchResultCacheSvc theSearchResultCacheSvc,
-			DaoRegistry theDaoRegistry,
-			SearchBuilderFactory<JpaPid> theSearchBuilderFactory,
-			ISynchronousSearchSvc theSynchronousSearchSvc,
-			PersistedJpaBundleProviderFactory thePersistedJpaBundleProviderFactory,
-			ISearchParamRegistry theSearchParamRegistry,
-			SearchStrategyFactory theSearchStrategyFactory,
-			ExceptionService theExceptionSvc,
-			BeanFactory theBeanFactory,
-			IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+		FhirContext theContext,
+		JpaStorageSettings theStorageSettings,
+		IInterceptorBroadcaster theInterceptorBroadcaster,
+		HapiTransactionService theTxService,
+		ISearchCacheSvc theSearchCacheSvc,
+		ISearchResultCacheSvc theSearchResultCacheSvc,
+		DaoRegistry theDaoRegistry,
+		SearchBuilderFactory<JpaPid> theSearchBuilderFactory,
+		ISynchronousSearchSvc theSynchronousSearchSvc,
+		ICacheAwareSearchSvc theCacheAwareSearchSvc,
+		PersistedJpaBundleProviderFactory thePersistedJpaBundleProviderFactory,
+		ISearchParamRegistry theSearchParamRegistry,
+		SearchStrategyFactory theSearchStrategyFactory,
+		ExceptionService theExceptionSvc,
+		BeanFactory theBeanFactory,
+		IRequestPartitionHelperSvc theRequestPartitionHelperSvc, IPagingProvider thePagingProvider) {
 		super();
 		myContext = theContext;
 		myStorageSettings = theStorageSettings;
@@ -158,12 +157,14 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		myDaoRegistry = theDaoRegistry;
 		mySearchBuilderFactory = theSearchBuilderFactory;
 		mySynchronousSearchSvc = theSynchronousSearchSvc;
+		myCacheAwareSearchSvc = theCacheAwareSearchSvc;
 		myPersistedJpaBundleProviderFactory = thePersistedJpaBundleProviderFactory;
 		mySearchParamRegistry = theSearchParamRegistry;
 		mySearchStrategyFactory = theSearchStrategyFactory;
 		myExceptionSvc = theExceptionSvc;
 		myBeanFactory = theBeanFactory;
 		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
+		myPagingProvider = thePagingProvider;
 
 		myStorageInterceptorHooks = new StorageInterceptorHooksFacade(myInterceptorBroadcaster);
 	}
@@ -412,7 +413,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 
 		Search search = new Search();
 		QueryParameterUtils.populateSearchEntity(
-				theParams, theResourceType, searchUuid, queryString, search, requestPartitionId);
+				theParams, theResourceType, searchUuid, queryString, search, requestPartitionId, myPagingProvider);
 
 		// Invoke any STORAGE_PRESEARCH_REGISTERED interceptor hooks
 		myStorageInterceptorHooks.callStoragePresearchRegistered(
@@ -460,32 +461,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 					theParams, theRequestDetails, searchUuid, sb, loadSynchronousUpTo, requestPartitionId);
 		}
 
-		/*
-		 * See if there are any cached searches whose results we can return
-		 * instead
-		 */
-		SearchCacheStatusEnum cacheStatus = SearchCacheStatusEnum.MISS;
-		if (theCacheControlDirective != null && theCacheControlDirective.isNoCache()) {
-			cacheStatus = SearchCacheStatusEnum.NOT_TRIED;
-		}
-
-		if (cacheStatus != SearchCacheStatusEnum.NOT_TRIED) {
-			if (theParams.getEverythingMode() == null) {
-				if (myStorageSettings.getReuseCachedSearchResultsForMillis() != null) {
-					PersistedJpaBundleProvider foundSearchProvider = findCachedQuery(
-							theParams, theResourceType, theRequestDetails, queryString, requestPartitionId);
-					if (foundSearchProvider != null) {
-						foundSearchProvider.setCacheStatus(SearchCacheStatusEnum.HIT);
-						return foundSearchProvider;
-					}
-				}
-			}
-		}
-
-		PersistedJpaSearchFirstPageBundleProvider retVal = submitSearch(
-				theCallingDao, theParams, theResourceType, theRequestDetails, sb, requestPartitionId, search);
-		retVal.setCacheStatus(cacheStatus);
-		return retVal;
+		return myCacheAwareSearchSvc.executeQuery(theParams, theRequestDetails, theCacheControlDirective, search, sb, requestPartitionId);
 	}
 
 	/**
@@ -702,63 +678,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		return retVal;
 	}
 
-	@Nullable
-	private PersistedJpaBundleProvider findCachedQuery(
-			SearchParameterMap theParams,
-			String theResourceType,
-			RequestDetails theRequestDetails,
-			String theQueryString,
-			RequestPartitionId theRequestPartitionId) {
-		// May be null
-		return myTxService
-				.withRequest(theRequestDetails)
-				.withRequestPartitionId(theRequestPartitionId)
-				.execute(() -> {
-					IInterceptorBroadcaster compositeBroadcaster =
-							CompositeInterceptorBroadcaster.newCompositeBroadcaster(
-									myInterceptorBroadcaster, theRequestDetails);
-
-					// Interceptor call: STORAGE_PRECHECK_FOR_CACHED_SEARCH
-
-					HookParams params = new HookParams()
-							.add(SearchParameterMap.class, theParams)
-							.add(RequestDetails.class, theRequestDetails)
-							.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-					boolean canUseCache =
-							compositeBroadcaster.callHooks(Pointcut.STORAGE_PRECHECK_FOR_CACHED_SEARCH, params);
-					if (!canUseCache) {
-						return null;
-					}
-
-					// Check for a search matching the given hash
-					Search searchToUse = findSearchToUseOrNull(theQueryString, theResourceType, theRequestPartitionId);
-					if (searchToUse == null) {
-						return null;
-					}
-
-					ourLog.debug("Reusing search {} from cache", searchToUse.getUuid());
-					// Interceptor call: JPA_PERFTRACE_SEARCH_REUSING_CACHED
-					params = new HookParams()
-							.add(SearchParameterMap.class, theParams)
-							.add(RequestDetails.class, theRequestDetails)
-							.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-					compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_SEARCH_REUSING_CACHED, params);
-
-					return myPersistedJpaBundleProviderFactory.newInstance(theRequestDetails, searchToUse.getUuid());
-				});
-	}
-
-	@Nullable
-	private Search findSearchToUseOrNull(
-			String theQueryString, String theResourceType, RequestPartitionId theRequestPartitionId) {
-		// createdCutoff is in recent past
-		final Instant createdCutoff =
-				Instant.now().minus(myStorageSettings.getReuseCachedSearchResultsForMillis(), ChronoUnit.MILLIS);
-
-		Optional<Search> candidate = mySearchCacheSvc.findCandidatesForReuse(
-				theResourceType, theQueryString, createdCutoff, theRequestPartitionId);
-		return candidate.orElse(null);
-	}
 
 	@Nullable
 	private Integer getLoadSynchronousUpToOrNull(CacheControlDirective theCacheControlDirective) {

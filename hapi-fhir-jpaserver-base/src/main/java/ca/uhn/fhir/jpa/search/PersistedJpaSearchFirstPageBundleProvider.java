@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.search.builder.tasks.SearchTask;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.method.ResponsePage;
 import jakarta.annotation.Nonnull;
@@ -142,6 +143,11 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 		if (size != null) {
 			return size;
 		}
+
+		if (getSearchEntity().getSearchParameterMap().isEmpty() || getSearchEntity().getSearchParameterMap().get().getSearchTotalMode() != SearchTotalModeEnum.ACCURATE) {
+			return null;
+		}
+
 		return super.size();
 	}
 }

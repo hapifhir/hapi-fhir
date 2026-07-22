@@ -73,6 +73,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
+// FIXME: move to exec package
 public class PersistedJpaBundleProvider implements IBundleProvider {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(PersistedJpaBundleProvider.class);
@@ -414,7 +415,8 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		return myCacheStatus;
 	}
 
-	void setCacheStatus(SearchCacheStatusEnum theSearchCacheStatusEnum) {
+	// FIXME: make protected after we move this class
+	public void setCacheStatus(SearchCacheStatusEnum theSearchCacheStatusEnum) {
 		myCacheStatus = theSearchCacheStatusEnum;
 	}
 

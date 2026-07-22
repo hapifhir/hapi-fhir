@@ -18,6 +18,7 @@ import ca.uhn.fhir.jpa.search.builder.tasks.SearchTask;
 import ca.uhn.fhir.jpa.search.builder.tasks.SearchTaskParameters;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
+import ca.uhn.fhir.jpa.search.exec.ISynchronousSearchSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
@@ -130,13 +131,14 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 			myDaoRegistry,
 			mySearchBuilderFactory,
 			mySynchronousSearchSvc,
+			null,
 			myPersistedJpaBundleProviderFactory,
 			null, // search param registry
 			mySearchStrategyFactory,
 			myExceptionSvc,
 			myBeanFactory,
-			myPartitionHelperSvc
-		);
+			myPartitionHelperSvc,
+			myPagingProvider);
 
 	}
 

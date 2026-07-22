@@ -129,7 +129,9 @@ import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProviderDstu2;
 import ca.uhn.fhir.jpa.sched.AutowiringSpringBeanJobFactory;
 import ca.uhn.fhir.jpa.sched.HapiSchedulerServiceImpl;
-import ca.uhn.fhir.jpa.search.ISynchronousSearchSvc;
+import ca.uhn.fhir.jpa.search.exec.CacheAwareSearchSvcImpl;
+import ca.uhn.fhir.jpa.search.exec.ICacheAwareSearchSvc;
+import ca.uhn.fhir.jpa.search.exec.ISynchronousSearchSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
 import ca.uhn.fhir.jpa.search.PersistedJpaIdSearchBundleProvider;
@@ -137,7 +139,7 @@ import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
 import ca.uhn.fhir.jpa.search.SearchStrategyFactory;
 import ca.uhn.fhir.jpa.search.SearchUrlJobMaintenanceSvcImpl;
-import ca.uhn.fhir.jpa.search.SynchronousSearchSvcImpl;
+import ca.uhn.fhir.jpa.search.exec.SynchronousSearchSvcImpl;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
@@ -994,6 +996,11 @@ public class JpaConfig {
 	@Bean
 	public ISynchronousSearchSvc synchronousSearchSvc() {
 		return new SynchronousSearchSvcImpl();
+	}
+
+	@Bean
+	public ICacheAwareSearchSvc cacheAwareSearchSvc() {
+		return new CacheAwareSearchSvcImpl();
 	}
 
 	@Bean

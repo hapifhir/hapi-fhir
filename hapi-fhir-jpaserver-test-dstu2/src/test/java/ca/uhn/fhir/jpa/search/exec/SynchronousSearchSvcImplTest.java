@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.search;
+package ca.uhn.fhir.jpa.search.exec;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.search.BaseSearchSvc;
+import ca.uhn.fhir.jpa.search.exec.SynchronousSearchSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;

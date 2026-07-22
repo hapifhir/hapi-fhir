@@ -40,7 +40,8 @@ import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.BatchResourceLoader;
 import ca.uhn.fhir.jpa.search.ExceptionService;
-import ca.uhn.fhir.jpa.search.ISynchronousSearchSvc;
+import ca.uhn.fhir.jpa.search.exec.ICacheAwareSearchSvc;
+import ca.uhn.fhir.jpa.search.exec.ISynchronousSearchSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.search.SearchStrategyFactory;
@@ -130,6 +131,9 @@ public class SearchConfig {
 	private ISynchronousSearchSvc mySynchronousSearchSvc;
 
 	@Autowired
+	private ICacheAwareSearchSvc myCacheAwareSearchSvc;
+
+	@Autowired
 	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
 
 	@Autowired
@@ -156,12 +160,14 @@ public class SearchConfig {
 				myDaoRegistry,
 				mySearchBuilderFactory,
 				mySynchronousSearchSvc,
+			myCacheAwareSearchSvc,
 				myPersistedJpaBundleProviderFactory,
 				mySearchParamRegistry,
 				mySearchStrategyFactory,
 				exceptionService(),
 				myBeanFactory,
-				myRequestPartitionHelperService);
+				myRequestPartitionHelperService,
+			myPagingProvider);
 	}
 
 	@Bean

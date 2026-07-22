@@ -284,7 +284,6 @@ public class SearchTask implements Callable<Void> {
 		myTxService
 				.withRequest(myRequest)
 				.withRequestPartitionId(myRequestPartitionId)
-				.withPropagation(Propagation.REQUIRES_NEW)
 				.execute(this::doSaveSearch);
 	}
 

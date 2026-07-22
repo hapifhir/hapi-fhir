@@ -81,7 +81,7 @@ public class BaseSearchSvc {
 		private final Iterator<JpaPid> myWrap;
 		private int myCount;
 
-		ResultIterator(Iterator<JpaPid> theWrap) {
+		public ResultIterator(Iterator<JpaPid> theWrap) {
 			myWrap = theWrap;
 		}
 
