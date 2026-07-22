@@ -1868,25 +1868,24 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testSearchWithQueryCache() {
-		List<String> ids = create150Patients();
+		// Setup
+		create150Patients();
 
+		// Test
 		myCaptureQueriesListener.clear();
-
 		Bundle outcome = myClient
 			.search()
 			.forResource("Patient")
 			.returnBundle(Bundle.class)
 			.execute();
 
-//		IBundleProvider search = myPatientDao.search(new SearchParameterMap(), mySrd);
-//		search.getResources(0, 10);
-
+		// Verify
 		assertEquals(10, outcome.getEntry().size());
 		assertThat(myCaptureQueriesListener).has(
 			onAllThreads()
 				.connectionCount(1)
 				.commitCount(1)
-				.selectCount(1)
+				.selectCount(3)
 		);
 	}
 

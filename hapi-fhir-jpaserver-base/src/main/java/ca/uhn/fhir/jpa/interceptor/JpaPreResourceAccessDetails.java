@@ -41,11 +41,19 @@ public class JpaPreResourceAccessDetails implements IPreResourceAccessDetails {
 	private final ICallable<ISearchBuilder> mySearchBuilderSupplier;
 	private List<IBaseResource> myResources;
 
+	// FIXME: needed?
 	public JpaPreResourceAccessDetails(
 			List<JpaPid> theResourcePids, ICallable<ISearchBuilder> theSearchBuilderSupplier) {
 		myResourcePids = theResourcePids;
 		myBlocked = new boolean[myResourcePids.size()];
 		mySearchBuilderSupplier = theSearchBuilderSupplier;
+	}
+
+	public JpaPreResourceAccessDetails(List<JpaPid> theResourcePids, List<IBaseResource> theUnsyncedResources) {
+		myResourcePids = theResourcePids;
+		myBlocked = new boolean[theResourcePids.size()];
+		myResources = theUnsyncedResources;
+		mySearchBuilderSupplier = null;
 	}
 
 	@Override

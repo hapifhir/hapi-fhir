@@ -19,9 +19,7 @@
  */
 package ca.uhn.fhir.jpa.search;
 
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
-import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.search.exec.ICacheAwareSearchSvc;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.BasePagingProvider;
@@ -34,16 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class DatabaseBackedPagingProvider extends BasePagingProvider {
 
 	@Autowired
-	private DaoRegistry myDaoRegistry;
-
-	@Autowired
-	private SearchBuilderFactory mySearchBuilderFactory;
-
-	@Autowired
-	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
-
-	@Autowired
-	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+	private ICacheAwareSearchSvc myCacheAwareSearchSvc;
 
 	/**
 	 * Constructor
@@ -64,13 +53,13 @@ public class DatabaseBackedPagingProvider extends BasePagingProvider {
 
 	@Override
 	public synchronized IBundleProvider retrieveResultList(RequestDetails theRequestDetails, String theId) {
-		PersistedJpaBundleProvider provider = myPersistedJpaBundleProviderFactory.newInstance(theRequestDetails, theId);
-		return validateAndReturnBundleProvider(provider);
+		return myCacheAwareSearchSvc.continueQuery(theRequestDetails, theId);
 	}
 
 	/**
 	 * Subclasses may override in order to modify the bundle provider being returned
 	 */
+	// FIXME: megascale needs this
 	@Nullable
 	protected PersistedJpaBundleProvider validateAndReturnBundleProvider(PersistedJpaBundleProvider theBundleProvider) {
 		if (!theBundleProvider.ensureSearchEntityLoaded()) {
@@ -82,7 +71,6 @@ public class DatabaseBackedPagingProvider extends BasePagingProvider {
 
 	@Override
 	public synchronized String storeResultList(RequestDetails theRequestDetails, IBundleProvider theList) {
-		String uuid = theList.getUuid();
-		return uuid;
+		return theList.getUuid();
 	}
 }
