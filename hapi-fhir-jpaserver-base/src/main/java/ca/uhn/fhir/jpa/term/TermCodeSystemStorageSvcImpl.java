@@ -1260,6 +1260,12 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			if (theReservedCode.equals(property.getCode())
 					&& property.hasUri()
 					&& !theCanonicalUri.equals(property.getUri())) {
+				ourLog.info(
+						"CodeSystem {} declares property '{}' with URI '{}' rather than the standard '{}'; it is not treated as a hierarchy property and no parent/child links are built from it.",
+						theCodeSystem.getUrl(),
+						theReservedCode,
+						property.getUri(),
+						theCanonicalUri);
 				return null;
 			}
 		}
