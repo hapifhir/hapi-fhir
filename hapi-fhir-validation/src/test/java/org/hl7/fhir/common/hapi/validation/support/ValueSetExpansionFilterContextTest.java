@@ -4,6 +4,7 @@ import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.CodeType;
+import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.Enumerations.FilterOperator;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.junit.jupiter.api.Test;
@@ -876,6 +877,31 @@ class ValueSetExpansionFilterContextTest {
 			new FhirVersionIndependentConcept(cs.getUrl(), "PLAIN"))).isFalse();
 		assertThat(isFilteredWithProperty(cs, "inactive", FilterOperator.EXISTS, "false",
 			new FhirVersionIndependentConcept(cs.getUrl(), "GONE"))).isTrue();
+	}
+
+	@ParameterizedTest(name = "[date-exists] property={0}")
+	@CsvSource({
+		// Standard date-valued concept-properties: 'exists' is a presence check (no value=true semantics).
+		"deprecated",
+		"deprecationDate",
+		"retirementDate",
+	})
+	void dateStandardPropertyExistsSelectsFlaggedConcepts(String propertyCode) {
+		CodeSystem cs = new CodeSystem().setUrl("http://example.org/date").setCaseSensitive(true);
+		cs.addConcept().setCode("PLAIN");
+		cs.addConcept().setCode("FLAGGED").addProperty().setCode(propertyCode).setValue(new DateTimeType("2020-01-01"));
+
+		// exists=true keeps only the concept that carries the property
+		assertThat(isFilteredWithProperty(cs, propertyCode, FilterOperator.EXISTS, "true",
+			new FhirVersionIndependentConcept(cs.getUrl(), "FLAGGED"))).isFalse();
+		assertThat(isFilteredWithProperty(cs, propertyCode, FilterOperator.EXISTS, "true",
+			new FhirVersionIndependentConcept(cs.getUrl(), "PLAIN"))).isTrue();
+
+		// exists=false keeps the complement
+		assertThat(isFilteredWithProperty(cs, propertyCode, FilterOperator.EXISTS, "false",
+			new FhirVersionIndependentConcept(cs.getUrl(), "PLAIN"))).isFalse();
+		assertThat(isFilteredWithProperty(cs, propertyCode, FilterOperator.EXISTS, "false",
+			new FhirVersionIndependentConcept(cs.getUrl(), "FLAGGED"))).isTrue();
 	}
 
 	@Test

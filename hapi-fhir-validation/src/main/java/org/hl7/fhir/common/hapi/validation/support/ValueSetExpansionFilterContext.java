@@ -21,8 +21,8 @@ import java.util.regex.PatternSyntaxException;
 /**
  * Class to apply ValueSet filters during in-memory expansion.
  * Works on 'code', 'concept' and 'display' property types, plus the hierarchical 'child' and 'parent'
- * properties and the standard boolean 'inactive' and 'notSelectable' properties (each with the
- * {@code exists} operator).
+ * properties, the standard boolean 'inactive' and 'notSelectable' properties, and the standard date-valued
+ * 'deprecated', 'deprecationDate' and 'retirementDate' properties (each with the {@code exists} operator).
  *
  * <p>The concept hierarchy used by the structural operators is built both from nested
  * {@code CodeSystem.concept} arrays and from a FLAT representation where each concept carries a
@@ -41,6 +41,9 @@ public class ValueSetExpansionFilterContext {
 	private final Map<String, Set<String>> conceptCodeTree = new HashMap<>();
 	private final Set<String> inactiveCodes = new HashSet<>();
 	private final Set<String> notSelectableCodes = new HashSet<>();
+	private final Set<String> deprecatedCodes = new HashSet<>();
+	private final Set<String> deprecationDateCodes = new HashSet<>();
+	private final Set<String> retirementDateCodes = new HashSet<>();
 	private final Set<String> allCodes = new HashSet<>();
 	private final Set<String> allCodesLower = new HashSet<>();
 	private final Set<String> allChildCodes = new HashSet<>();
@@ -88,6 +91,9 @@ public class ValueSetExpansionFilterContext {
 			boolean onParent = theFilterProperty.equals("parent");
 			boolean onInactive = theFilterProperty.equals("inactive");
 			boolean onNotSelectable = theFilterProperty.equals("notselectable");
+			boolean onDeprecated = theFilterProperty.equals("deprecated");
+			boolean onDeprecationDate = theFilterProperty.equals("deprecationdate");
+			boolean onRetirementDate = theFilterProperty.equals("retirementdate");
 
 			/*
 			 * Hierarchical membership filters. Per the FHIR spec the 'child' and 'parent' properties are
@@ -119,6 +125,25 @@ public class ValueSetExpansionFilterContext {
 				}
 
 				// The boolean inactive/notSelectable properties only support the 'exists' operator in-memory.
+				throw unsupportedFilter(filter);
+			}
+
+			/*
+			 * Standard date-valued concept-properties: 'deprecated', 'deprecationDate' and 'retirementDate'.
+			 * Used with the 'exists' operator as a presence check (a concept is selected when it carries the
+			 * property with a value) — there is no boolean value=true semantics as for inactive/notSelectable.
+			 */
+			if (onDeprecated || onDeprecationDate || onRetirementDate) {
+				if (filter.getOp() == FilterOperator.EXISTS) {
+					boolean wantExists = Boolean.parseBoolean(filter.getValue());
+					Set<String> codesWithProperty = onDeprecated
+						? deprecatedCodes
+						: (onDeprecationDate ? deprecationDateCodes : retirementDateCodes);
+					boolean hasProperty = codesWithProperty.contains(normalizeCode(concept.getCode()));
+					return wantExists == hasProperty;
+				}
+
+				// These date-valued properties only support the 'exists' operator in-memory.
 				throw unsupportedFilter(filter);
 			}
 
@@ -448,6 +473,13 @@ public class ValueSetExpansionFilterContext {
 				} else if ("notSelectable".equals(property.getCode()) && "true".equalsIgnoreCase(relatedCode)) {
 					// Standard boolean concept-property: the concept is not selectable (abstract).
 					notSelectableCodes.add(normalizeCode(code));
+				} else if ("deprecated".equals(property.getCode())) {
+					// Standard date-valued concept-property (presence indicates the concept is deprecated).
+					deprecatedCodes.add(normalizeCode(code));
+				} else if ("deprecationDate".equals(property.getCode())) {
+					deprecationDateCodes.add(normalizeCode(code));
+				} else if ("retirementDate".equals(property.getCode())) {
+					retirementDateCodes.add(normalizeCode(code));
 				}
 			}
 
