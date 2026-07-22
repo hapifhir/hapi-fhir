@@ -149,11 +149,12 @@ public class ActiveJobInstanceProcessor {
 				Set<WorkChunkStatusEnum> workChunkStatuses = myJobPersistence.getDistinctWorkChunkStatesForJobAndStep(
 						theInstance.getInstanceId(), jobWorkCursor.getCurrentStepId());
 				if ((workChunkStatuses.size() == 1 && workChunkStatuses.contains(WorkChunkStatusEnum.REDUCTION_READY))
-					|| workChunkStatuses.isEmpty()) {
+						|| workChunkStatuses.isEmpty()) {
 					// we are not using a workchunk on the queue - run inline
 					// we get here in 2 ways:
 					// * previous step has generated a bunch of REDUCTION_READY chunks (the one unique status)
-					// * previous step has generated zero chunks (likely because there's no data to reduce; job is a no-op)
+					// * previous step has generated zero chunks (likely because there's no data to reduce; job is a
+					// no-op)
 					triggerReductionStep(theInstance, jobWorkCursor);
 					return;
 				} // else
