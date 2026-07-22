@@ -42,6 +42,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -61,6 +62,33 @@ import java.util.Map;
 public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 
 	public static final Object EMPTY_OBJECT = new Object();
+
+	/**
+	 * Result of executing a partitioned transaction, wrapping both the aggregated response bundle
+	 * and the per-sub-bundle response entries.
+	 * <p>
+	 * {@link #getResponseEntriesPerSubBundle()} returns one inner list per sub-bundle, as grouped by the
+	 * partitioning interceptor. The partition ID of an entry is not carried here but can be derived from its
+	 * {@code response.location} via {@code IRequestPartitionHelperSvc}.
+	 */
+	public static class PartitionedTransactionResult<B extends IBaseBundle> {
+		private final B myResponseBundle;
+		private final List<List<IBase>> myResponseEntriesPerSubBundle;
+
+		public PartitionedTransactionResult(B theResponseBundle, List<List<IBase>> theResponseEntriesPerSubBundle) {
+			myResponseBundle = theResponseBundle;
+			myResponseEntriesPerSubBundle = Collections.unmodifiableList(theResponseEntriesPerSubBundle);
+		}
+
+		public B getResponseBundle() {
+			return myResponseBundle;
+		}
+
+		public List<List<IBase>> getResponseEntriesPerSubBundle() {
+			return myResponseEntriesPerSubBundle;
+		}
+	}
+
 	private final RequestDetails myRequestDetails;
 	private final boolean myNestedMode;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -92,8 +120,13 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 	/**
 	 * Invoke the {@link Pointcut#STORAGE_TRANSACTION_PRE_PARTITION} hook to slice the transaction request
 	 * bundle into partitions, execute each slice, and aggregate the results.
+	 *
+	 * @return a result containing both the aggregated response bundle and the response entries
+	 * grouped by committed sub-bundle
+	 * @throws PartitionedTransactionPartialFailureException if some sub-bundles committed successfully
+	 * before a later sub-bundle failed
 	 */
-	public BUNDLE execute(BUNDLE theRequest) {
+	public PartitionedTransactionResult<BUNDLE> execute(BUNDLE theRequest) {
 
 		// Stash a copy of the entries in the bundle before we call the hook, so we
 		// can check later that the hook didn't make any illegal changes
@@ -146,7 +179,8 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 
 	@Nonnull
 	@SuppressWarnings("unchecked")
-	private BUNDLE processPartitionedBundles(BUNDLE theOriginalBundle, List<IBaseBundle> thePartitionedRequests) {
+	private PartitionedTransactionResult<BUNDLE> processPartitionedBundles(
+			BUNDLE theOriginalBundle, List<IBaseBundle> thePartitionedRequests) {
 
 		RuntimeResourceDefinition bundleDefinition = myFhirContext.getResourceDefinition("Bundle");
 		BaseRuntimeChildDefinition bundleEntryChild = bundleDefinition.getChildByName("entry");
@@ -178,6 +212,8 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 		}
 
 		Map<String, IIdType> idSubstitutions = new HashMap<>();
+		List<List<IBase>> responseEntriesPerSubBundle = new ArrayList<>();
+
 		for (IBaseBundle singlePartitionRequest : partitionedRequests) {
 
 			/*
@@ -204,8 +240,21 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 				}
 			}
 
-			IBaseBundle singlePartitionResponse = myTransactionProcessor.processTransactionAsSubRequest(
-					myRequestDetails, transactionDetails, singlePartitionRequest, myActionName, myNestedMode);
+			IBaseBundle singlePartitionResponse;
+			try {
+				singlePartitionResponse = myTransactionProcessor.processTransactionAsSubRequest(
+						myRequestDetails, transactionDetails, singlePartitionRequest, myActionName, myNestedMode);
+			} catch (Exception e) {
+				if (responseEntriesPerSubBundle.isEmpty()) {
+					throw e;
+				}
+				throw new PartitionedTransactionPartialFailureException(
+						Msg.code(2974)
+								+ "Partitioned transaction partially failed: one or more partitions committed before a later partition failed. Cause: "
+								+ e.getMessage(),
+						responseEntriesPerSubBundle,
+						e);
+			}
 
 			// Capture any placeholder ID substitutions from this partition
 			TransactionUtil.TransactionResponse singlePartitionResponseParsed =
@@ -224,14 +273,17 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 					partitionRequestEntries.size() == partitionResponseEntries.size(),
 					"Partitioned request and response bundles have different number of entries");
 
+			List<IBase> responseEntriesForSubBundle = new ArrayList<>();
 			for (int i = 0; i < partitionRequestEntries.size(); i++) {
 				IBase partitionRequestEntry = partitionRequestEntries.get(i);
 				IBase partitionResponseEntry = partitionResponseEntries.get(i);
 				Integer originalIndex = originalEntryToIndex.get(partitionRequestEntry);
 				if (originalIndex != null) {
 					responseEntries.set(originalIndex, partitionResponseEntry);
+					responseEntriesForSubBundle.add(partitionResponseEntry);
 				}
 			}
+			responseEntriesPerSubBundle.add(responseEntriesForSubBundle);
 		}
 
 		BUNDLE response = (BUNDLE) bundleDefinition.newInstance();
@@ -239,7 +291,7 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 		for (IBase responseEntry : responseEntries) {
 			bundleEntryChild.getMutator().addValue(response, responseEntry);
 		}
-		return response;
+		return new PartitionedTransactionResult<>(response, responseEntriesPerSubBundle);
 	}
 
 	@Nonnull

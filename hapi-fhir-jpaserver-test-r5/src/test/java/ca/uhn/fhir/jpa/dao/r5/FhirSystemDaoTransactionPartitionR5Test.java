@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r5;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.dao.PartitionedTransactionPartialFailureException;
 import ca.uhn.fhir.jpa.dao.TransactionPrePartitionResponse;
 import ca.uhn.fhir.jpa.dao.TransactionUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -86,7 +87,9 @@ public class FhirSystemDaoTransactionPartitionR5Test extends BaseJpaR5Test {
 
 		// Test
 		assertThatThrownBy(()->mySystemDao.transaction(newSrd(), request))
-			.isInstanceOf(InternalErrorException.class);
+			.isInstanceOf(PartitionedTransactionPartialFailureException.class)
+			.hasCauseInstanceOf(InternalErrorException.class)
+			.hasRootCauseMessage("Patient cannot be inactive");
 
 		// Verify
 
