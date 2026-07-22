@@ -31,7 +31,7 @@ public class DaoRegistrationService {
 		myDaoRegistry.register(theResourceDao);
 	}
 
-	public void registerResourceDao(IFhirSystemDao<?, ?> theSystemDao) {
+	public void registerSystemDao(IFhirSystemDao<?, ?> theSystemDao) {
 		myDaoRegistry.register(theSystemDao);
 	}
 }

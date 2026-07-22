@@ -218,9 +218,10 @@ public class GiantTransactionPerfTest {
 		mySystemDao.setTransactionProcessorForUnitTest(myTransactionProcessor);
 		mySystemDao.setStorageSettingsForUnitTest(myStorageSettings);
 		mySystemDao.setInterceptorBroadcasterForUnitTest(myInterceptorSvc);
+		myDaoRegistry.register(mySystemDao);
 
 		when(myAppCtx.getBean(eq(IInstanceValidatorModule.class))).thenReturn(myInstanceValidatorSvc);
-		when(myAppCtx.getBean(eq(IFhirSystemDao.class))).thenReturn(mySystemDao);
+		when(myAppCtx.getBean(eq(DaoRegistry.class))).thenReturn(myDaoRegistry);
 
 		myInMemoryResourceMatcher = new InMemoryResourceMatcher();
 
