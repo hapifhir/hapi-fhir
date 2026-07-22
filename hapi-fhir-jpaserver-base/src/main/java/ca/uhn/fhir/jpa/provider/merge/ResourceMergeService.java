@@ -495,22 +495,17 @@ public class ResourceMergeService {
 		}
 
 		// 4) Delete the source-side compartment originals copied across partitions, plus the source itself when
-		// deleteSource. They all live in the source partition, so the delete is pinned to it — this lets MegaScale
-		// route the delete to the correct shard even when the ids are not partition-decodable (client-assigned / UUID
-		// ids). This happens after the Provenances are created so they can reference the originals. Each tombstone is
-		// recorded as its delete commits, so a failure partway through the deletes still reports the deletes that
-		// already took effect.
+		// deleteSource. They all live in the source partition, so the deletes run in one transaction pinned to it —
+		// this lets MegaScale route them to the correct shard even when the ids are not partition-decodable
+		// (client-assigned / UUID ids), and makes this step atomic: a failure rolls back every delete, so either
+		// all tombstones are recorded or none are. This happens after the Provenances are created so they can
+		// reference the originals.
 		List<IIdType> resourceIdsToDelete = new ArrayList<>(copiedResourceOriginalIds);
 		if (deleteSource) {
 			resourceIdsToDelete.add(theSourceResource.getIdElement());
 		}
 		if (!resourceIdsToDelete.isEmpty()) {
-			// The deletes run one-by-one with the partition pinned to the source resource's partition, instead of as
-			// a DELETE transaction bundle: the MegaScale transaction splitter cannot determine a partition for a
-			// DELETE entry whose id is client-assigned (non-partition-decodable). Safe here because every id being
-			// deleted lives in the source resource's partition.
-			deleteResourcesOneByOne(
-					resourceIdsToDelete, sourcePartition, theRequestDetails, theCommittedResourceIds::add);
+			deleteResourcesOneByOne(resourceIdsToDelete, sourcePartition, theCommittedResourceIds::add);
 		}
 	}
 
@@ -746,46 +741,49 @@ public class ResourceMergeService {
 	}
 
 	/**
-	 * Deletes each resource individually (a single-resource DAO delete per id) with the partition pinned to
-	 * {@code thePartition}, instead of submitting one DELETE transaction bundle. Because these are not system
-	 * transactions, they do not pass through the MegaScale transaction-splitting interceptor, which cannot
-	 * determine a partition for a DELETE entry whose id is client-assigned (non-partition-decodable). In the
-	 * cross-partition merge every resource being deleted (the copied compartment originals, plus the source
-	 * resource when {@code deleteSource}) lives in the source resource's partition, so pinning them all to that
-	 * single partition is safe.
-	 *
-	 * <p>Each delete commits in its own transaction, so {@code theOnDeleted} is invoked with the tombstone's
-	 * versioned id right after each commit — a failure partway through the list must not lose track of the
-	 * deletes that already committed.
+	 * Deletes the given resources in a single transaction pinned to {@code thePartition}, as individual DAO
+	 * deletes instead of one DELETE transaction bundle: a bundle would pass through the MegaScale
+	 * transaction-splitting interceptor, which cannot determine a partition for a DELETE entry whose id is
+	 * client-assigned (non-partition-decodable). In the cross-partition merge every resource being deleted (the
+	 * copied compartment originals, plus the source resource when {@code deleteSource}) lives in the source
+	 * resource's partition, so pinning them all to that single partition is safe — and lets them share one
+	 * transaction: either every delete commits, or none do.
 	 *
 	 * <p>The resources being deleted can reference each other (e.g. a compartment Observation referencing a
 	 * compartment Encounter), so delete conflicts are collected across the whole list — with every id pre-marked
 	 * for deletion so conflicts among the co-deleted resources are skipped, mirroring how a DELETE transaction
-	 * bundle validates — and validated once at the end. A genuine conflict (an outside referrer) then throws after
-	 * some deletes have committed; those are already recorded via {@code theOnDeleted}, so they are reported for
-	 * manual reverting.
+	 * bundle validates — and validated once before the transaction commits. A genuine conflict (an outside
+	 * referrer) rolls the whole transaction back, leaving no deletes behind.
+	 *
+	 * <p>{@code theOnDeleted} is invoked with each tombstone's versioned id after the transaction commits; on
+	 * any failure nothing was deleted and it is not invoked.
 	 */
 	private void deleteResourcesOneByOne(
-			List<IIdType> theResourcesToDelete,
-			RequestPartitionId thePartition,
-			RequestDetails theRequestDetails,
-			Consumer<IIdType> theOnDeleted) {
+			List<IIdType> theResourcesToDelete, RequestPartitionId thePartition, Consumer<IIdType> theOnDeleted) {
 		DeleteConflictList deleteConflicts = new DeleteConflictList();
 		theResourcesToDelete.forEach(deleteConflicts::setResourceIdMarkedForDeletion);
 		// The explicit partition on the SystemRequestDetails short-circuits the delete's partition resolution,
 		// so a non-decodable id is not re-resolved to allPartitions (which would make the delete a silent no-op).
 		SystemRequestDetails deleteRequestDetails = SystemRequestDetails.forRequestPartitionId(thePartition);
-		for (IIdType id : theResourcesToDelete) {
-			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(id.getResourceType());
-			DaoMethodOutcome outcome = myHapiTransactionService
-					.withRequest(deleteRequestDetails)
-					.withRequestPartitionId(thePartition)
-					.execute(() -> dao.delete(id, deleteConflicts, deleteRequestDetails, new TransactionDetails()));
-			if (outcome != null && !outcome.isNop() && outcome.getId() != null) {
-				theOnDeleted.accept(outcome.getId());
-			}
-		}
-		DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(myFhirContext, deleteConflicts);
+		List<IIdType> deletedIds = myHapiTransactionService
+				.withRequest(deleteRequestDetails)
+				.withRequestPartitionId(thePartition)
+				.execute(() -> {
+					TransactionDetails transactionDetails = new TransactionDetails();
+					List<IIdType> tombstones = new ArrayList<>();
+					for (IIdType id : theResourcesToDelete) {
+						IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(id.getResourceType());
+						DaoMethodOutcome outcome =
+								dao.delete(id, deleteConflicts, deleteRequestDetails, transactionDetails);
+						if (outcome != null && !outcome.isNop() && outcome.getId() != null) {
+							tombstones.add(outcome.getId());
+						}
+					}
+					// Validated inside the transaction: an outside referrer rolls back every delete.
+					DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(myFhirContext, deleteConflicts);
+					return tombstones;
+				});
+		deletedIds.forEach(theOnDeleted);
 	}
 
 	private void validateCrossPartitionAsyncNotSupported(
