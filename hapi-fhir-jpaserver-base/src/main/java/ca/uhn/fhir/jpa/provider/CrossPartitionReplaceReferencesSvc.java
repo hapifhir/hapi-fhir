@@ -20,35 +20,38 @@
 package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Propagation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Stream;
 
 /**
  * Discovers resources referencing a source resource, copies them to the target resource's
@@ -63,30 +66,32 @@ public class CrossPartitionReplaceReferencesSvc {
 	private final DaoRegistry myDaoRegistry;
 	private final IResourceLinkDao myResourceLinkDao;
 	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+	private final IHapiTransactionService myHapiTransactionService;
 	private final FhirContext myFhirContext;
 
 	public CrossPartitionReplaceReferencesSvc(
 			DaoRegistry theDaoRegistry,
 			IResourceLinkDao theResourceLinkDao,
-			IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
+			IHapiTransactionService theHapiTransactionService) {
 		myDaoRegistry = theDaoRegistry;
 		myResourceLinkDao = theResourceLinkDao;
 		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
+		myHapiTransactionService = theHapiTransactionService;
 		myFhirContext = theDaoRegistry.getFhirContext();
 	}
 
 	/**
-	 * Copies referencing resources from the source resource's partition to the target resource's partition,
-	 * and updates references in resources that don't change partition. Assumes the caller provides the outer
-	 * transaction — all internal operations use {@code transactionNested()}.
+	 * Copies the resources referencing the source into the target's partition and rewrites references, executed as
+	 * its OWN single FHIR transaction (a combined CREATE + PUT bundle). The source copies are NOT deleted here — the
+	 * caller deletes them after creating the merge Provenance so the Provenance can still reference the originals (as
+	 * tombstones), using the returned {@link CrossPartitionReplaceReferencesResult#getCopiedResourceOriginalIds()}.
 	 * <p>
-	 * Does NOT delete the source copies — the caller is responsible for deleting them after
-	 * provenance creation using the returned {@link CrossPartitionReplaceReferencesResult#getCopiedResourceOriginalIds()}.
-	 * Deletion cannot happen here because provenance must reference the originals (as tombstones),
-	 * and deleting first would violate referential integrity checks.
+	 * Resources are discovered across every shard (the reference-link index is partitioned by source resource), so
+	 * this works in MegaScale where the referrers live on a different shard than the merge request's partition.
 	 *
-	 * @return a {@link CrossPartitionReplaceReferencesResult} containing references to created/updated resources
-	 *         and versioned references to the original source copies for deferred deletion.
+	 * @return the changed-resource ids from the transaction response, plus the versioned ids of the original copies
+	 *         for deferred deletion.
 	 */
 	public CrossPartitionReplaceReferencesResult copyCompartmentResourcesAndReplaceReferences(
 			IBaseResource theSourceResource, IBaseResource theTargetResource, RequestDetails theRequestDetails) {
@@ -94,10 +99,8 @@ public class CrossPartitionReplaceReferencesSvc {
 		IIdType sourceId = theSourceResource.getIdElement().toUnqualifiedVersionless();
 		IIdType targetId = theTargetResource.getIdElement().toUnqualifiedVersionless();
 
-		RequestPartitionId sourcePartitionId = RequestPartitionId.getPartitionFromUserDataIfPresent(theSourceResource)
-				.orElse(null);
-		RequestPartitionId targetPartitionId = RequestPartitionId.getPartitionFromUserDataIfPresent(theTargetResource)
-				.orElse(null);
+		RequestPartitionId sourcePartitionId = getRequiredPartition(theSourceResource);
+		RequestPartitionId targetPartitionId = getRequiredPartition(theTargetResource);
 
 		ourLog.info(
 				"Cross-partition merge: copying referencing resources from {} (partition {}) to {} (partition {})",
@@ -111,19 +114,23 @@ public class CrossPartitionReplaceReferencesSvc {
 
 		if (allReferencingResources.isEmpty()) {
 			ourLog.info("No referencing resources found for {}", sourceId.getValue());
-			return new CrossPartitionReplaceReferencesResult(List.of(), List.of());
+			return new CrossPartitionReplaceReferencesResult(List.of(), List.of(), Map.of(), Map.of());
 		}
 
-		// Step 2: Classify into COPY (partition changes after rewrite) vs UPDATE (same partition)
-		List<IBaseResource> copyList = new ArrayList<>();
+		// Step 2: Classify into COPY (partition changes after rewrite) vs UPDATE (same partition).
+		// copiesByDestPartition: keyed by destination partition, insertion-ordered for response correlation.
+		Map<RequestPartitionId, List<IBaseResource>> copiesByDestPartition = new LinkedHashMap<>();
 		List<IBaseResource> updateList = new ArrayList<>();
 		replaceSourceReferencesAndClassifyResources(
 				allReferencingResources,
 				sourceId.getValue(),
 				targetId.getValue(),
 				theRequestDetails,
-				copyList,
+				copiesByDestPartition,
 				updateList);
+
+		List<IBaseResource> copyList =
+				copiesByDestPartition.values().stream().flatMap(List::stream).toList();
 
 		ourLog.info(
 				"Classified {} resources: {} to copy, {} to update references",
@@ -132,31 +139,61 @@ public class CrossPartitionReplaceReferencesSvc {
 				updateList.size());
 
 		if (copyList.isEmpty() && updateList.isEmpty()) {
-			return new CrossPartitionReplaceReferencesResult(List.of(), List.of());
+			return new CrossPartitionReplaceReferencesResult(List.of(), List.of(), Map.of(), Map.of());
 		}
 
-		// Capture versioned IDs from copyList before buildCombinedBundle clears them
+		// Capture the versioned ids of the original source copies before buildCombinedBundle clears them
+		// (RESOURCE_PARTITION_ID and id are cleared by buildCombinedBundle for copies). The caller deletes these
+		// after the Provenances are created. Also capture their per-partition grouping while the partition
+		// user data is still present.
 		List<IIdType> copiedResourceOriginalIds =
 				copyList.stream().map(IBaseResource::getIdElement).toList();
+		Map<RequestPartitionId, List<IIdType>> copiedResourceOriginalIdsByPartition = groupIdsByPartition(copyList);
 
-		// Step 3: Discover additional resources to update BEFORE bundle execution.
+		// Step 3: Discover additional resources to update BEFORE bundle assembly.
 		discoverAndAddAdditionalResourcesToUpdate(copyList, updateList, theRequestDetails);
 
-		// Step 4: Build and execute a single combined transaction bundle.
+		// Capture each update resource's partition after discovery (updateList is now final).
+		List<RequestPartitionId> updatePartitions = updateList.stream()
+				.map(CrossPartitionReplaceReferencesSvc::getRequiredPartition)
+				.toList();
+
+		// Step 4: Build and execute a single combined transaction bundle (copies as CREATE, referrer updates as PUT).
 		Map<String, String> oldIdToPlaceholder = new HashMap<>();
-		IBaseBundle combinedBundle = buildCombinedBundle(copyList, updateList, oldIdToPlaceholder);
-		@SuppressWarnings("unchecked")
-		IBaseBundle combinedResponse =
-				(IBaseBundle) myDaoRegistry.getSystemDao().transactionNested(theRequestDetails, combinedBundle);
+		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
+		buildCombinedBundle(copyList, updateList, oldIdToPlaceholder, bundleBuilder);
+
+		// The partition of each request entry, positional: buildCombinedBundle adds copies (POST) first, then
+		// updates (PUT); copiesByDestPartition is insertion-ordered (LinkedHashMap), matching the copy entries'
+		// order in the bundle. Used to attribute each response entry to the partition it was written on.
+		List<RequestPartitionId> entryPartitions = new ArrayList<>();
+		copiesByDestPartition.forEach((partition, resources) -> resources.forEach(r -> entryPartitions.add(partition)));
+		entryPartitions.addAll(updatePartitions);
+
+		Bundle combinedResponse =
+				(Bundle) myDaoRegistry.getSystemDao().transactionNested(theRequestDetails, bundleBuilder.getBundle());
+
+		// Attribute each changed resource to its partition positionally (1:1 with request entries). Must use the
+		// raw response entries — extractChangedResourceIds below filters out no-op updates, which would break the
+		// positional correlation.
+		List<Bundle.BundleEntryComponent> responseEntries = combinedResponse.getEntry();
+		Map<RequestPartitionId, List<IIdType>> changedResourceIdsByPartition = new LinkedHashMap<>();
+		for (int i = 0; i < responseEntries.size(); i++) {
+			int entryIndex = i;
+			ReplaceReferencesProvenanceSvc.extractChangedResourceId(responseEntries.get(i))
+					.ifPresent(id -> changedResourceIdsByPartition
+							.computeIfAbsent(entryPartitions.get(entryIndex), k -> new ArrayList<>())
+							.add(id));
+		}
+
 		List<IIdType> changedResourceIds =
-				ReplaceReferencesProvenanceSvc.extractChangedResourceIds(List.of((Bundle) combinedResponse));
+				ReplaceReferencesProvenanceSvc.extractChangedResourceIds(List.of(combinedResponse));
 
-		ourLog.info(
-				"Cross-partition merge complete: copied {} resources, updated {} references",
-				copyList.size(),
-				updateList.size());
-
-		return new CrossPartitionReplaceReferencesResult(changedResourceIds, copiedResourceOriginalIds);
+		return new CrossPartitionReplaceReferencesResult(
+				changedResourceIds,
+				copiedResourceOriginalIds,
+				changedResourceIdsByPartition,
+				copiedResourceOriginalIdsByPartition);
 	}
 
 	/**
@@ -164,12 +201,38 @@ public class CrossPartitionReplaceReferencesSvc {
 	 * then loads and returns those resources.
 	 */
 	private List<IBaseResource> discoverReferencingResources(IIdType theSourceId, RequestDetails theRequestDetails) {
-		List<IdDt> ids;
-		try (Stream<IdDt> stream = myResourceLinkDao.streamSourceIdsForTargetFhirId(
-				theSourceId.getResourceType(), theSourceId.getIdPart())) {
-			ids = stream.toList(); // never null — returns empty list if no results
-		}
+		List<ReferencingResourceId> ids = findReferencingResourceIds(theSourceId, theRequestDetails);
 		return loadResources(ids, theRequestDetails);
+	}
+
+	/**
+	 * A referencing resource id discovered via the HFJ_RES_LINK index, paired with the partition the
+	 * source resource lives in. The partition pins the subsequent read to the correct shard rather
+	 * than relying on id-based partition resolution (which fails for client-assigned ids in MegaScale
+	 * Patient ID mode). A null partition id maps to the default partition.
+	 */
+	private record ReferencingResourceId(IdDt id, RequestPartitionId partitionId) {}
+
+	/**
+	 * Returns the IDs of all resources that have a reference link pointing to {@code theTargetId}.
+	 * <p>
+	 * Fans out to every shard — HFJ_RES_LINK rows are partitioned by source resource, so on
+	 * MegaScale a single-DB query only sees outgoing refs from that shard. REQUIRES_NEW is
+	 * mandatory: with the default REQUIRED propagation the per-shard thunks would join the
+	 * outer tx and skip the fan-out entirely. On non-MegaScale HAPI this is a single query.
+	 */
+	private List<ReferencingResourceId> findReferencingResourceIds(
+			IIdType theTargetId, RequestDetails theRequestDetails) {
+		return myHapiTransactionService
+				.withRequest(theRequestDetails)
+				.withRequestPartitionId(RequestPartitionId.allPartitions())
+				.withPropagation(Propagation.REQUIRES_NEW)
+				.searchList(partition -> myResourceLinkDao
+						.streamSourceIdsAndPartitionForTargetFhirId(
+								theTargetId.getResourceType(), theTargetId.getIdPart())
+						.map(view -> new ReferencingResourceId(
+								view.toIdDt(), RequestPartitionId.fromPartitionId(view.partitionId())))
+						.toList());
 	}
 
 	/**
@@ -194,16 +257,15 @@ public class CrossPartitionReplaceReferencesSvc {
 				.map(r -> r.getIdElement().toUnqualifiedVersionless().getValue())
 				.toList());
 
-		List<IdDt> additionalIds = new ArrayList<>();
+		List<ReferencingResourceId> additionalIds = new ArrayList<>();
 		for (IBaseResource resource : theCopyList) {
 			IIdType oldId = resource.getIdElement();
-			try (Stream<IdDt> stream =
-					myResourceLinkDao.streamSourceIdsForTargetFhirId(oldId.getResourceType(), oldId.getIdPart())) {
-				stream.forEach(id -> {
-					if (alreadyDiscoveredIds.add(id.toUnqualifiedVersionless().getValue())) {
-						additionalIds.add(id);
-					}
-				});
+			List<ReferencingResourceId> referrers = findReferencingResourceIds(oldId, theRequestDetails);
+			for (ReferencingResourceId referrer : referrers) {
+				if (alreadyDiscoveredIds.add(
+						referrer.id().toUnqualifiedVersionless().getValue())) {
+					additionalIds.add(referrer);
+				}
 			}
 		}
 
@@ -216,15 +278,46 @@ public class CrossPartitionReplaceReferencesSvc {
 		}
 	}
 
-	private List<IBaseResource> loadResources(List<IdDt> theIds, RequestDetails theRequestDetails) {
+	private static RequestPartitionId getRequiredPartition(IBaseResource theResource) {
+		return RequestPartitionId.getPartitionFromUserDataIfPresent(theResource)
+				.orElseThrow(() -> new IllegalStateException(
+						"Resource " + theResource.getIdElement().getValue() + " has no partition info"));
+	}
+
+	private static Map<RequestPartitionId, List<IIdType>> groupIdsByPartition(List<IBaseResource> theResources) {
+		Map<RequestPartitionId, List<IIdType>> result = new LinkedHashMap<>();
+		for (IBaseResource resource : theResources) {
+			RequestPartitionId partition = getRequiredPartition(resource);
+			result.computeIfAbsent(partition, k -> new ArrayList<>()).add(resource.getIdElement());
+		}
+		return result;
+	}
+
+	private List<IBaseResource> loadResources(List<ReferencingResourceId> theIds, RequestDetails theRequestDetails) {
 		List<IBaseResource> result = new ArrayList<>();
-		for (IdDt id : theIds) {
+		for (ReferencingResourceId referencingId : theIds) {
+			IdDt id = referencingId.id();
 			try {
 				@SuppressWarnings("unchecked")
 				IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(id.getResourceType());
-				result.add(dao.read(id.toVersionless(), theRequestDetails));
-			} catch (ResourceGoneException | ResourceNotFoundException e) {
-				ourLog.warn("Skipping deleted/not-found resource: {}", id.getValue());
+				// Pin the read to the source resource's partition (from the link index) instead of relying
+				// on id-based partition resolution, which fails for client-assigned (non-partition-decodable)
+				// ids in MegaScale Patient ID mode. A pinned partition is incompatible with the outer
+				// allPartitions tx, so in MegaScale REQUIRES_NEW-on-change escapes to the correct shard.
+				IBaseResource resource = myHapiTransactionService
+						.withRequest(theRequestDetails)
+						.withRequestPartitionId(referencingId.partitionId())
+						.execute(() -> dao.read(id.toVersionless(), theRequestDetails));
+				result.add(resource);
+			} catch (ResourceGoneException e) {
+				// Genuinely deleted between discovery and load — tolerated, the link is stale.
+				ourLog.warn("Skipping deleted resource: {}", id.getValue());
+			} catch (ResourceNotFoundException e) {
+				// The link index proves this resource existed; failing to read it now is contradictory
+				// (e.g. a partition-pinning miss). Fail the merge loudly rather than silently dropping it.
+				throw new InternalErrorException(
+						Msg.code(2975) + "Resource " + id.getValue()
+								+ " was found in the reference link index but could not be loaded; aborting cross-partition merge to avoid silently losing data.");
 			}
 		}
 		return result;
@@ -242,7 +335,7 @@ public class CrossPartitionReplaceReferencesSvc {
 			String theSourceRef,
 			String theTargetRef,
 			RequestDetails theRequestDetails,
-			List<IBaseResource> theCopyList,
+			Map<RequestPartitionId, List<IBaseResource>> theCopiesByDestPartition,
 			List<IBaseResource> theUpdateList) {
 
 		for (IBaseResource resource : theResources) {
@@ -254,12 +347,15 @@ public class CrossPartitionReplaceReferencesSvc {
 			// routes based on the post-merge state.
 			replaceVersionlessReferences(resource, Map.of(theSourceRef, theTargetRef));
 
-			Integer newPartitionId = determinePartition(resource, theRequestDetails);
+			RequestPartitionId newPartition = determinePartition(resource, theRequestDetails);
+			Integer newPartitionId = newPartition.getFirstPartitionIdOrNull();
 
 			if (Objects.equals(currentPartitionId, newPartitionId)) {
 				theUpdateList.add(resource);
 			} else {
-				theCopyList.add(resource);
+				theCopiesByDestPartition
+						.computeIfAbsent(newPartition, k -> new ArrayList<>())
+						.add(resource);
 			}
 		}
 	}
@@ -269,14 +365,13 @@ public class CrossPartitionReplaceReferencesSvc {
 	 * RESOURCE_PARTITION_ID and asking the partition helper to compute a fresh partition
 	 * based on the resource's current references. The original partition is restored afterward.
 	 */
-	private Integer determinePartition(IBaseResource theResource, RequestDetails theRequestDetails) {
+	private RequestPartitionId determinePartition(IBaseResource theResource, RequestDetails theRequestDetails) {
 		Object savedPartitionUserData = theResource.getUserData(Constants.RESOURCE_PARTITION_ID);
 		try {
 			theResource.setUserData(Constants.RESOURCE_PARTITION_ID, null);
 			String resourceType = myFhirContext.getResourceType(theResource);
-			RequestPartitionId targetPartition = myRequestPartitionHelperSvc.determineCreatePartitionForRequest(
+			return myRequestPartitionHelperSvc.determineCreatePartitionForRequest(
 					theRequestDetails, theResource, resourceType);
-			return targetPartition.getFirstPartitionIdOrNull();
 		} finally {
 			theResource.setUserData(Constants.RESOURCE_PARTITION_ID, savedPartitionUserData);
 		}
@@ -291,11 +386,13 @@ public class CrossPartitionReplaceReferencesSvc {
 	 * Source→target references are already rewritten by {@link #replaceSourceReferencesAndClassifyResources}.
 	 *
 	 * @param theOldIdToPlaceholder populated by this method with old ID → urn:uuid mappings
+	 * @param theBundleBuilder      the bundle being assembled; copy (POST) then update (PUT) entries are appended
 	 */
-	private IBaseBundle buildCombinedBundle(
+	private void buildCombinedBundle(
 			List<IBaseResource> theCopyList,
 			List<IBaseResource> theUpdateList,
-			Map<String, String> theOldIdToPlaceholder) {
+			Map<String, String> theOldIdToPlaceholder,
+			BundleBuilder theBundleBuilder) {
 
 		// Build old ID → urn:uuid placeholder map from the copy list
 		for (IBaseResource resource : theCopyList) {
@@ -308,23 +405,19 @@ public class CrossPartitionReplaceReferencesSvc {
 		replaceVersionlessReferences(theCopyList, theOldIdToPlaceholder);
 		replaceVersionlessReferences(theUpdateList, theOldIdToPlaceholder);
 
-		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
-
 		// POST entries: clear partition + ID on copied resources, add as CREATE with placeholder fullUrl
 		for (IBaseResource resource : theCopyList) {
 			String oldId = resource.getIdElement().toUnqualifiedVersionless().getValue();
 			String placeholder = theOldIdToPlaceholder.get(oldId);
 			resource.setUserData(Constants.RESOURCE_PARTITION_ID, null);
 			resource.setId((IIdType) null);
-			bundleBuilder.addTransactionCreateEntry(resource, placeholder);
+			theBundleBuilder.addTransactionCreateEntry(resource, placeholder);
 		}
 
 		// PUT entries: update list resources keep their partition ID intact
 		for (IBaseResource resource : theUpdateList) {
-			bundleBuilder.addTransactionUpdateEntry(resource);
+			theBundleBuilder.addTransactionUpdateEntry(resource);
 		}
-
-		return bundleBuilder.getBundle();
 	}
 
 	/**
@@ -349,6 +442,11 @@ public class CrossPartitionReplaceReferencesSvc {
 				continue;
 			}
 			String refValue = refElement.toUnqualifiedVersionless().getValue();
+			// Skip references with no literal reference value (e.g. identifier-only or display-only references).
+			// Such references have a null refValue, which would NPE on lookups against an immutable map.
+			if (refValue == null || refValue.isEmpty()) {
+				continue;
+			}
 			String replacement = theReferenceMap.get(refValue);
 			if (replacement != null) {
 				refInfo.getResourceReference().setReference(replacement);
