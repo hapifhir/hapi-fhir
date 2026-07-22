@@ -93,12 +93,4 @@ public class Jackson3JsonHttpMessageConverter extends AbstractHttpMessageConvert
 			throw new HttpMessageNotWritableException(Msg.code(3002) + "Could not write JSON: " + e.getMessage(), e);
 		}
 	}
-
-	/**
-	 * Optional: support typed reads (e.g. generic collections like List<Foo>).
-	 * Override canRead/read on GenericHttpMessageConverter if needed.
-	 */
-	public boolean canRead(Type theType, Class<?> theContextClass, MediaType theMediaType) {
-		return canRead(theMediaType);
-	}
 }
