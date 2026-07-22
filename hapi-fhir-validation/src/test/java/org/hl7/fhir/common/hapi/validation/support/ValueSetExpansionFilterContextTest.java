@@ -48,8 +48,6 @@ class ValueSetExpansionFilterContextTest {
 
 	public static final String CONCEPT_PROPERTIES_PARENT =
 		"http://hl7.org/fhir/concept-properties#parent";
-	public static final String CONCEPT_PROPERTIES_CHILD =
-		"http://hl7.org/fhir/concept-properties#child";
 
 	/**
 	 * Helper: build the same P → C1 → C2, P → C3 hierarchy as {@link #hierarchicalCS(boolean)}, but
@@ -988,6 +986,27 @@ class ValueSetExpansionFilterContextTest {
 			.isInstanceOf(ValueSetExpansionFilterContext.UnsupportedFilterException.class)
 			.hasMessageContaining("inactive")
 			.hasMessageContaining("http://example.org/custom#inactive");
+	}
+
+	@ParameterizedTest(name = "[strict-boolean] property={0}, value={1}")
+	@CsvSource({
+		"child, yes",
+		"parent, 0",
+		"inactive, ''",
+		"deprecated, maybe"
+	})
+	void standardPropertyExistsWithNonBooleanValueThrows(String property, String value) {
+		// The 'exists' value is semantically a boolean; a non-'true'/'false' value must be rejected rather
+		// than silently coerced to false (which would invert the filter, e.g. selecting the leaves/roots).
+		CodeSystem cs = hierarchicalCS(true);
+		ValueSet.ConceptSetFilterComponent f = new ValueSet.ConceptSetFilterComponent()
+			.setProperty(property).setOp(FilterOperator.EXISTS).setValue(value);
+		ValueSetExpansionFilterContext ctx = new ValueSetExpansionFilterContext(cs, List.of(f));
+		FhirVersionIndependentConcept concept = new FhirVersionIndependentConcept(cs.getUrl(), "C1");
+
+		assertThatThrownBy(() -> ctx.isFiltered(concept))
+			.isInstanceOf(ValueSetExpansionFilterContext.UnsupportedFilterException.class)
+			.hasMessageContaining(property);
 	}
 
 	/**

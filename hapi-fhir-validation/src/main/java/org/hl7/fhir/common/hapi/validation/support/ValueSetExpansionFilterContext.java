@@ -134,7 +134,7 @@ public class ValueSetExpansionFilterContext {
 							+ "', so its meaning is unknown");
 				}
 				if (filter.getOp() == FilterOperator.EXISTS) {
-					boolean wantExists = Boolean.parseBoolean(filter.getValue());
+					boolean wantExists = parseRequiredBoolean(filter);
 					return wantExists == conceptHasStandardProperty(standardProperty, concept.getCode());
 				}
 
@@ -401,7 +401,7 @@ public class ValueSetExpansionFilterContext {
 		if (codeSystem.getCaseSensitive()) {
 			return allChildCodes.contains(theCode);
 		}
-		return allChildCodesLower.contains(theCode.toLowerCase());
+		return allChildCodesLower.contains(theCode.toLowerCase(Locale.ROOT));
 	}
 
 	private boolean isFilterPropertyValueNotInCodeSystem(String theFilterPropertyValue) {
@@ -409,7 +409,7 @@ public class ValueSetExpansionFilterContext {
 		if (codeSystem.getCaseSensitive()) {
 			return !allCodes.contains(theFilterPropertyValue);
 		} else {
-			return !allCodesLower.contains(theFilterPropertyValue.toLowerCase());
+			return !allCodesLower.contains(theFilterPropertyValue.toLowerCase(Locale.ROOT));
 		}
 	}
 
@@ -484,7 +484,7 @@ public class ValueSetExpansionFilterContext {
 
 			// 1) Index existence
 			allCodes.add(code);
-			allCodesLower.add(code.toLowerCase());
+			allCodesLower.add(code.toLowerCase(Locale.ROOT));
 
 			// 2) Index immediate children (nested representation)
 			for (var child : def.getConcept()) {
@@ -523,7 +523,7 @@ public class ValueSetExpansionFilterContext {
 				.computeIfAbsent(normalizeCode(theParentCode), k -> new HashSet<>())
 				.add(theChildCode);
 		allChildCodes.add(theChildCode);
-		allChildCodesLower.add(theChildCode.toLowerCase());
+		allChildCodesLower.add(theChildCode.toLowerCase(Locale.ROOT));
 	}
 
 	/**
@@ -574,6 +574,28 @@ public class ValueSetExpansionFilterContext {
 
 	private static boolean isBlank(String theValue) {
 		return theValue == null || theValue.isEmpty();
+	}
+
+	/**
+	 * Parses the value of an {@code exists} filter as a strict boolean literal. The value is semantically
+	 * required and must be {@code true} or {@code false}; anything else (blank, "0", "no", …) is rejected
+	 * rather than silently coerced to {@code false}, which would invert the filter (for example selecting
+	 * the leaves/roots for a {@code child}/{@code parent} filter).
+	 *
+	 * @throws UnsupportedFilterException if the value is not a strict boolean literal
+	 */
+	private static boolean parseRequiredBoolean(ValueSet.ConceptSetFilterComponent theFilter) {
+		String value = theFilter.hasValue() ? theFilter.getValue().trim() : null;
+		if ("true".equalsIgnoreCase(value)) {
+			return true;
+		}
+		if ("false".equalsIgnoreCase(value)) {
+			return false;
+		}
+		throw new UnsupportedFilterException(Msg.code(3006)
+				+ "In-memory ValueSet expansion filter on property '" + theFilter.getProperty()
+				+ "' with operator 'exists' requires a boolean value ('true' or 'false') but was '"
+				+ theFilter.getValue() + "'");
 	}
 
 	private static UnsupportedFilterException unsupportedFilter(ValueSet.ConceptSetFilterComponent theFilter) {
