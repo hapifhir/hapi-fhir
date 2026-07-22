@@ -75,6 +75,13 @@ public class ValueSetExpansionFilterContext {
 		this.filters = filters;
 	}
 
+	/**
+	 * @return {@code true} if the concept is filtered OUT (fails at least one filter), {@code false} if it
+	 *     passes all filters.
+	 * @throws UnsupportedFilterException if a filter uses a property/operator combination the in-memory
+	 *     expansion cannot evaluate. Callers should surface this as an expansion error or delegate to another
+	 *     terminology service (this exception is unchecked to keep the public API backwards-compatible).
+	 */
 	public boolean isFiltered(FhirVersionIndependentConcept concept) {
 		if (filters == null || filters.isEmpty()) {
 			return false;
@@ -90,6 +97,11 @@ public class ValueSetExpansionFilterContext {
 		return false;
 	}
 
+	/**
+	 * @return {@code true} if the concept passes the given filter, {@code false} otherwise.
+	 * @throws UnsupportedFilterException if the filter uses a property/operator combination the in-memory
+	 *     expansion cannot evaluate (see {@link #isFiltered}).
+	 */
 	public boolean passesFilter(ValueSet.ConceptSetFilterComponent filter, FhirVersionIndependentConcept concept) {
 		if (filter.hasOp()) {
 			// Lazy load the index, if there are any filters to process.
