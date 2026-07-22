@@ -1530,25 +1530,57 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		// validation allows a blank value, and Boolean.parseBoolean() would silently coerce a blank or
 		// non-"true" value (e.g. "0", "no") to false, flipping the filter to select leaves/roots.
 		boolean wantConceptsWithRelation = parseRequiredBoolean(theFilter);
-		boolean filterOnChildren = "child".equals(theFilter.getProperty());
 
-		Collection<String> codesHavingRelation =
-				findCodesHavingHierarchyRelation(theCodeSystemIdentifier, filterOnChildren);
+		if ("parent".equals(theFilter.getProperty())) {
+			handleFilterHasParentExists(theF, theB, wantConceptsWithRelation);
+		} else {
+			handleFilterHasChildrenExists(theCodeSystemIdentifier, theF, theB, wantConceptsWithRelation);
+		}
+	}
 
-		if (codesHavingRelation.isEmpty()) {
-			// No concept has the relation. exists=true matches nothing; exists=false matches everything
+	/**
+	 * Resolves {@code parent exists} from the pre-indexed transitive-ancestor field {@code myParentPids},
+	 * which carries the sentinel token {@code "NONE"} for root concepts (see {@code TermConcept#setParentPids}).
+	 * A concept has a parent iff that field is not {@code "NONE"}. This is a single indexed term query, so it
+	 * avoids enumerating every non-root code — which for a large CodeSystem is almost the entire code system —
+	 * into a huge terms query.
+	 */
+	private void handleFilterHasParentExists(
+			SearchPredicateFactory theF, BooleanPredicateClausesStep<?> theB, boolean theWantConceptsWithParent) {
+		PredicateFinalStep isRoot = theF.match().field("myParentPids").matching("NONE");
+		if (theWantConceptsWithParent) {
+			theB.mustNot(isRoot); // keep the concepts that have a parent (non-roots)
+		} else {
+			theB.must(isRoot); // keep the roots
+		}
+	}
+
+	/**
+	 * Resolves {@code child exists} by enumerating the codes that appear as a parent in a stored link (the
+	 * inner nodes). Unlike the parent case there is no pre-indexed per-concept flag for "has children", but
+	 * this is typically the smaller side of the hierarchy since most concepts are leaves.
+	 */
+	private void handleFilterHasChildrenExists(
+			String theCodeSystemIdentifier,
+			SearchPredicateFactory theF,
+			BooleanPredicateClausesStep<?> theB,
+			boolean theWantConceptsWithChildren) {
+		Collection<String> codesHavingChildren = findCodesHavingChildren(theCodeSystemIdentifier);
+
+		if (codesHavingChildren.isEmpty()) {
+			// No concept has children. exists=true matches nothing; exists=false matches everything
 			// (so no additional predicate is needed).
-			if (wantConceptsWithRelation) {
+			if (theWantConceptsWithChildren) {
 				theB.must(theF.matchNone());
 			}
 			return;
 		}
 
-		PredicateFinalStep matchesAnyOfThoseCodes = theF.terms().field("myCode").matchingAny(codesHavingRelation);
-		if (wantConceptsWithRelation) {
-			theB.must(matchesAnyOfThoseCodes); // keep concepts that have the relation
+		PredicateFinalStep matchesAnyOfThoseCodes = theF.terms().field("myCode").matchingAny(codesHavingChildren);
+		if (theWantConceptsWithChildren) {
+			theB.must(matchesAnyOfThoseCodes); // keep concepts that have children
 		} else {
-			theB.mustNot(matchesAnyOfThoseCodes); // keep the complement (leaves / roots)
+			theB.mustNot(matchesAnyOfThoseCodes); // keep the complement (leaves)
 		}
 	}
 
@@ -1610,19 +1642,15 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	}
 
 	/**
-	 * Returns the codes that actually have the requested hierarchy relation within the CodeSystem version.
-	 * Note the parent/child inversion: a concept "has children" iff it appears as a PARENT in a link, and
-	 * "has parents" iff it appears as a CHILD.
+	 * Returns the codes of the concepts that have at least one child within the CodeSystem version (i.e. that
+	 * appear as a PARENT in a stored parent/child link).
 	 */
-	private Collection<String> findCodesHavingHierarchyRelation(
-			String theCodeSystemIdentifier, boolean theFilterOnChildren) {
+	private Collection<String> findCodesHavingChildren(String theCodeSystemIdentifier) {
 		TermCodeSystemVersionDetails codeSystemVersion = getCurrentCodeSystemVersion(theCodeSystemIdentifier);
 		if (codeSystemVersion == null) {
 			return Collections.emptyList();
 		}
-		return theFilterOnChildren
-				? myConceptParentChildLinkDao.findDistinctParentCodesByCodeSystemVersion(codeSystemVersion.pid())
-				: myConceptParentChildLinkDao.findDistinctChildCodesByCodeSystemVersion(codeSystemVersion.pid());
+		return myConceptParentChildLinkDao.findDistinctParentCodesByCodeSystemVersion(codeSystemVersion.pid());
 	}
 
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")

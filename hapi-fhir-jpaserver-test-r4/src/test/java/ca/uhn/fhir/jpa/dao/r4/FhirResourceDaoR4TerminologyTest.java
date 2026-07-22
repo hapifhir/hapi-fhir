@@ -422,6 +422,34 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	}
 
 	/**
+	 * The complement of {@code parent exists=false}: {@code parent exists=true} selects every concept that
+	 * HAS a parent (all non-root concepts), including concepts that sit several levels deep or under multiple
+	 * parents (e.g. childAAB is reachable from both childAA and childBA).
+	 */
+	@Test
+	public void testExpandWithParentExistsFilter_SelectsNonRootConcepts() {
+		createExternalCs();
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl(TermTestUtil.URL_MY_VALUE_SET);
+		valueSet.getCompose()
+			.addInclude()
+			.setSystem(TermTestUtil.URL_MY_CODE_SYSTEM)
+			.addFilter()
+			.setProperty("parent")
+			.setOp(FilterOperator.EXISTS)
+			.setValue("true");
+		myValueSetDao.create(valueSet, mySrd);
+
+		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter(""));
+		logAndValidateValueSet(result);
+
+		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
+		assertThat(codes).containsExactlyInAnyOrder(
+			"childAA", "childAAA", "childAAB", "childAB", "childBA", "childCA");
+	}
+
+	/**
 	 * For {@code property=child|parent} + {@code op=exists} the value is semantically required and must be a
 	 * real boolean literal. A blank or non-boolean value (e.g. "0", "no") must be rejected rather than being
 	 * silently coerced to {@code false} (which would flip the filter to select leaves/roots).
