@@ -121,7 +121,7 @@ public class Batch2JobFeaturesTest extends BaseJpaR5Test {
 
 
 	@ParameterizedTest(name = "Async={0}")
-	@ValueSource(booleans = {true, false})
+	@ValueSource(booleans = { true, false })
 	void testSendToFutureStep(boolean theAsync) {
 		MockSendToStepJobParameters parameters = new MockSendToStepJobParameters();
 		parameters.addSendMessage(STEP_0, STEP_1, "message-from-step-0-to-1");
