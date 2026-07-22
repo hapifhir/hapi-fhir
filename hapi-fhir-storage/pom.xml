@@ -127,12 +127,6 @@
 			<artifactId>jackson-annotations</artifactId>
 		</dependency>
 
-		<!-- dogote is now abandoned. Jan 2017 -->
-<!--		<dependency>-->
-<!--			<groupId>io.dogote</groupId>-->
-<!--			<artifactId>json-patch</artifactId>-->
-<!--		</dependency>-->
-
 		<dependency>
 			<groupId>io.github.vishwakarma</groupId>
 			<artifactId>zjsonpatch</artifactId>
