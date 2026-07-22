@@ -1215,6 +1215,101 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		assertEquals(2, myCaptureQueriesListener.countCommits());
 	}
 
+	/**
+	 * A patient-compartment entry may reference a default-partition entry in the same transaction bundle
+	 * even under the default {@code NOT_ALLOWED} cross-partition reference mode: in-bundle targets resolve
+	 * from {@code TransactionDetails} before any partition-scoped lookup.
+	 *
+	 * TODO-TG: Pining this behaviour for now. In future, may need to change this so that it is rejected in
+	 *  NOT_ALLOWED mode.
+	 */
+	// Created by Claude Fable 5
+	@Test
+	void testTransaction_CompartmentEntryReferencingInBundleDefaultPartitionEntry_worksUnderNotAllowed() {
+		assertThat(myPartitionSettings.getAllowReferencesAcrossPartitions())
+			.isEqualTo(PartitionSettings.CrossPartitionReferenceMode.NOT_ALLOWED);
+		createPatient(withId("A"), withActiveTrue());
+
+		String orgFullUrl = IdType.newRandomUuid().getValue();
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(buildOrganization(withName("Ancillary Org")), orgFullUrl);
+		bb.addTransactionCreateEntry(buildEncounter(withSubject("Patient/A"), withReference("serviceProvider", orgFullUrl)));
+
+		Bundle output = mySystemDao.transaction(newSrd(), bb.getBundleTyped());
+
+		IIdType orgId = new IdType(output.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless();
+		IIdType encounterId = new IdType(output.getEntry().get(1).getResponse().getLocation()).toUnqualifiedVersionless();
+		assertResourceIsInPartition(ALTERNATE_DEFAULT_ID, orgId);
+		assertResourceIsInPartition(PATIENT_A_COMPARTMENT_ID, encounterId);
+
+		Encounter encounter = myEncounterDao.read(encounterId, newSrd());
+		assertThat(encounter.getServiceProvider().getReference()).isEqualTo(orgId.getValue());
+	}
+
+	/**
+	 * A reference to a <i>pre-existing</i> default-partition resource also works in a transaction under
+	 * {@code NOT_ALLOWED}: transaction pre-fetch resolves every direct reference target on its own read
+	 * partition and records it in {@code TransactionDetails}, so the partition-scoped target lookup that
+	 * {@code NOT_ALLOWED} would otherwise force never runs.
+	 *
+	 * TODO-TG: Pining this behaviour for now. In future, may need to change this so that it is rejected in
+	 * 	NOT_ALLOWED mode.
+	 */
+	// Created by Claude Fable 5
+	@Test
+	void testTransaction_CompartmentEntryReferencingPreexistingDefaultPartitionResource_alsoWorksUnderNotAllowed() {
+		assertThat(myPartitionSettings.getAllowReferencesAcrossPartitions())
+			.isEqualTo(PartitionSettings.CrossPartitionReferenceMode.NOT_ALLOWED);
+		createPatient(withId("A"), withActiveTrue());
+		IIdType orgId = createOrganization(withId("ORG"), withName("Ancillary Org"));
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(buildEncounter(withSubject("Patient/A"), withReference("serviceProvider", orgId)));
+
+		Bundle output = mySystemDao.transaction(newSrd(), bb.getBundleTyped());
+
+		IIdType encounterId = new IdType(output.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless();
+		assertResourceIsInPartition(PATIENT_A_COMPARTMENT_ID, encounterId);
+		Encounter encounter = myEncounterDao.read(encounterId, newSrd());
+		assertThat(encounter.getServiceProvider().getReference()).isEqualTo(orgId.toUnqualifiedVersionless().getValue());
+	}
+
+	/**
+	 * Where {@code NOT_ALLOWED} does bite: a plain (non-transaction) create has no pre-resolved target in
+	 * {@code TransactionDetails}, so the target lookup is scoped to the source's compartment partition and
+	 * the default-partition Organization is not visible from it.
+	 */
+	// Created by Claude Fable 5
+	@Test
+	void testCreate_CompartmentResourceReferencingPreexistingDefaultPartitionResource_rejectedUnderNotAllowed() {
+		assertThat(myPartitionSettings.getAllowReferencesAcrossPartitions())
+			.isEqualTo(PartitionSettings.CrossPartitionReferenceMode.NOT_ALLOWED);
+		createPatient(withId("A"), withActiveTrue());
+		IIdType orgId = createOrganization(withId("ORG"), withName("Ancillary Org"));
+
+		assertThatThrownBy(() -> createEncounter(withSubject("Patient/A"), withReference("serviceProvider", orgId)))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("Organization/ORG");
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	void testTransaction_CompartmentEntryReferencingPreexistingDefaultPartitionResource_worksUnderAllowedUnqualified() {
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+		createPatient(withId("A"), withActiveTrue());
+		IIdType orgId = createOrganization(withId("ORG"), withName("Ancillary Org"));
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(buildEncounter(withSubject("Patient/A"), withReference("serviceProvider", orgId)));
+
+		Bundle output = mySystemDao.transaction(newSrd(), bb.getBundleTyped());
+
+		IIdType encounterId = new IdType(output.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless();
+		assertResourceIsInPartition(PATIENT_A_COMPARTMENT_ID, encounterId);
+		Encounter encounter = myEncounterDao.read(encounterId, newSrd());
+		assertThat(encounter.getServiceProvider().getReference()).isEqualTo(orgId.toUnqualifiedVersionless().getValue());
+	}
+
 	@Test
 	public void testSearch() throws IOException {
 		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
