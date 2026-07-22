@@ -126,11 +126,6 @@ public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
 		return List.of();
 	}
 
-	public String relativeDatePlaceHolder() {
-		// We don't require a placeholder value. null in this return ensures real values are returned.
-		return null;
-	}
-
 	@Override
 	public String relativeDatePlaceHolder() {
 		// We don't require a placeholder value. null in this return ensures real values are returned.
