@@ -978,14 +978,6 @@ public abstract class BaseTransactionProcessor {
 	private RequestPartitionId getEntryRequestPartitionId(
 			RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, IBase theEntry) {
 
-		// A caller (e.g. the cross-partition $merge flow) may stamp the partition directly on the
-		// Bundle.entry so that id-only writes whose partition cannot be derived from the body/url
-		// (notably DELETE of a non-decodable id) are routed to the correct partition.
-		// EXPERIMENT (temporarily disabled): verifying that reading the partition from the Bundle.entry userData is
-		// ineffectual for the current merge flow — nothing stamps entries since the producer was parked, so this
-		// read should always be null. Original line:
-		//		RequestPartitionId nextWriteEntryRequestPartitionId =
-		//				(RequestPartitionId) theEntry.getUserData(Constants.RESOURCE_PARTITION_ID);
 		RequestPartitionId nextWriteEntryRequestPartitionId = null;
 		String verb = myVersionAdapter.getEntryRequestVerb(myContext, theEntry);
 		String url = extractTransactionUrlOrThrowException(theEntry, verb);
@@ -999,7 +991,7 @@ public abstract class BaseTransactionProcessor {
 					break;
 				case DELETE: {
 					String requestUrl = myVersionAdapter.getEntryRequestUrl(theEntry);
-					if (nextWriteEntryRequestPartitionId == null && isNotBlank(requestUrl)) {
+					if (isNotBlank(requestUrl)) {
 						if (requestUrl.indexOf('?') != -1) {
 							MatchUrlService.ResourceTypeAndSearchParameterMap typeAndParams =
 									myMatchUrlService.parseAndTranslateMatchUrl(requestUrl);
@@ -1025,7 +1017,7 @@ public abstract class BaseTransactionProcessor {
 				}
 				case PATCH: {
 					String requestUrl = myVersionAdapter.getEntryRequestUrl(theEntry);
-					if (nextWriteEntryRequestPartitionId == null && isNotBlank(requestUrl)) {
+					if (isNotBlank(requestUrl)) {
 						if (requestUrl.indexOf('?') != -1) {
 							MatchUrlService.ResourceTypeAndSearchParameterMap typeAndParams =
 									myMatchUrlService.parseAndTranslateMatchUrl(requestUrl);
@@ -1052,13 +1044,8 @@ public abstract class BaseTransactionProcessor {
 				case POST: {
 					IBaseResource resource = myVersionAdapter.getResource(theEntry);
 					String resourceType = myContext.getResourceType(resource);
-					if (nextWriteEntryRequestPartitionId == null) {
-						nextWriteEntryRequestPartitionId = tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
-								requestDetailsForEntry, resource, resourceType, url);
-					}
-					if (resource != null) {
-						resource.setUserData(Constants.RESOURCE_PARTITION_ID, nextWriteEntryRequestPartitionId);
-					}
+					nextWriteEntryRequestPartitionId = tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
+							requestDetailsForEntry, resource, resourceType, url);
 					break;
 				}
 				case PUT: {
@@ -1070,21 +1057,17 @@ public abstract class BaseTransactionProcessor {
 							resourceId =
 									resourceType + "/" + resource.getIdElement().getIdPart();
 						}
-						if (nextWriteEntryRequestPartitionId == null) {
-							if (resourceId != null) {
-								nextWriteEntryRequestPartitionId =
-										theTransactionDetails.getResolvedPartition(resourceId);
-							}
-							if (nextWriteEntryRequestPartitionId == null) {
-								nextWriteEntryRequestPartitionId =
-										tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
-												requestDetailsForEntry, resource, resourceType, url);
-							}
-						}
 						if (resourceId != null) {
-							theTransactionDetails.addResolvedPartition(resourceId, nextWriteEntryRequestPartitionId);
+							nextWriteEntryRequestPartitionId = theTransactionDetails.getResolvedPartition(resourceId);
 						}
-						resource.setUserData(Constants.RESOURCE_PARTITION_ID, nextWriteEntryRequestPartitionId);
+						if (nextWriteEntryRequestPartitionId == null) {
+							nextWriteEntryRequestPartitionId = tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
+									requestDetailsForEntry, resource, resourceType, url);
+							if (resourceId != null) {
+								theTransactionDetails.addResolvedPartition(
+										resourceId, nextWriteEntryRequestPartitionId);
+							}
+						}
 					}
 					break;
 				}
