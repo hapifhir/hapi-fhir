@@ -1258,11 +1258,6 @@
 				<artifactId>jackson-databind</artifactId>
 				<version>${jackson_tools_databind_version}</version>
 			</dependency>
-<!--			<dependency>-->
-<!--				<groupId>com.fasterxml.jackson.datatype</groupId>-->
-<!--				<artifactId>jackson-datatype-jsr310</artifactId>-->
-<!--				<version>${jackson_datatype_version}</version>-->
-<!--			</dependency>-->
 			<dependency>
 				<groupId>tools.jackson.dataformat</groupId>
 				<artifactId>jackson-dataformat-yaml</artifactId>
