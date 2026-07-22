@@ -39,11 +39,8 @@ public class ValueSetExpansionFilterContext {
 	private final Map<String, Map<String, String>> propertyIndex = new HashMap<>();
 
 	private final Map<String, Set<String>> conceptCodeTree = new HashMap<>();
-	private final Set<String> inactiveCodes = new HashSet<>();
-	private final Set<String> notSelectableCodes = new HashSet<>();
-	private final Set<String> deprecatedCodes = new HashSet<>();
-	private final Set<String> deprecationDateCodes = new HashSet<>();
-	private final Set<String> retirementDateCodes = new HashSet<>();
+	// Codes carrying a standard concept-property usable with the 'exists' operator (see StandardExistsProperty).
+	private final Map<StandardExistsProperty, Set<String>> conceptsByStandardProperty = new HashMap<>();
 	private final Set<String> allCodes = new HashSet<>();
 	private final Set<String> allCodesLower = new HashSet<>();
 	private final Set<String> allChildCodes = new HashSet<>();
@@ -89,11 +86,6 @@ public class ValueSetExpansionFilterContext {
 			boolean onDisplay = theFilterProperty.equals("display");
 			boolean onChild = theFilterProperty.equals("child");
 			boolean onParent = theFilterProperty.equals("parent");
-			boolean onInactive = theFilterProperty.equals("inactive");
-			boolean onNotSelectable = theFilterProperty.equals("notselectable");
-			boolean onDeprecated = theFilterProperty.equals("deprecated");
-			boolean onDeprecationDate = theFilterProperty.equals("deprecationdate");
-			boolean onRetirementDate = theFilterProperty.equals("retirementdate");
 
 			/*
 			 * Hierarchical membership filters. Per the FHIR spec the 'child' and 'parent' properties are
@@ -112,38 +104,22 @@ public class ValueSetExpansionFilterContext {
 			}
 
 			/*
-			 * Standard boolean concept-properties: 'inactive' and 'notSelectable'. Used with the 'exists'
-			 * operator to select the concepts that are (or are not) flagged — a concept is considered
-			 * flagged only when it carries the property with the boolean value 'true'.
+			 * Standard concept-properties usable with the 'exists' operator: the boolean 'inactive' /
+			 * 'notSelectable' (a concept is flagged only when the value is 'true') and the date-valued
+			 * 'deprecated' / 'deprecationDate' / 'retirementDate' (flagged when the property is present).
+			 * That value distinction is applied at index time; here it is a uniform membership check.
 			 */
-			if (onInactive || onNotSelectable) {
+			StandardExistsProperty standardProperty = StandardExistsProperty.forFilterProperty(theFilterProperty);
+			if (standardProperty != null) {
 				if (filter.getOp() == FilterOperator.EXISTS) {
 					boolean wantExists = Boolean.parseBoolean(filter.getValue());
-					Set<String> flaggedCodes = onInactive ? inactiveCodes : notSelectableCodes;
-					boolean isFlagged = flaggedCodes.contains(normalizeCode(concept.getCode()));
+					boolean isFlagged = conceptsByStandardProperty
+							.getOrDefault(standardProperty, Set.of())
+							.contains(normalizeCode(concept.getCode()));
 					return wantExists == isFlagged;
 				}
 
-				// The boolean inactive/notSelectable properties only support the 'exists' operator in-memory.
-				throw unsupportedFilter(filter);
-			}
-
-			/*
-			 * Standard date-valued concept-properties: 'deprecated', 'deprecationDate' and 'retirementDate'.
-			 * Used with the 'exists' operator as a presence check (a concept is selected when it carries the
-			 * property with a value) — there is no boolean value=true semantics as for inactive/notSelectable.
-			 */
-			if (onDeprecated || onDeprecationDate || onRetirementDate) {
-				if (filter.getOp() == FilterOperator.EXISTS) {
-					boolean wantExists = Boolean.parseBoolean(filter.getValue());
-					Set<String> codesWithProperty = onDeprecated
-						? deprecatedCodes
-						: (onDeprecationDate ? deprecationDateCodes : retirementDateCodes);
-					boolean hasProperty = codesWithProperty.contains(normalizeCode(concept.getCode()));
-					return wantExists == hasProperty;
-				}
-
-				// These date-valued properties only support the 'exists' operator in-memory.
+				// These standard properties only support the 'exists' operator in-memory.
 				throw unsupportedFilter(filter);
 			}
 
@@ -467,19 +443,8 @@ public class ValueSetExpansionFilterContext {
 				} else if (childPropertyCode != null && childPropertyCode.equals(property.getCode())) {
 					// 'code' declares 'relatedCode' as its child → code -> relatedCode
 					addParentChildEdge(code, relatedCode);
-				} else if ("inactive".equals(property.getCode()) && "true".equalsIgnoreCase(relatedCode)) {
-					// Standard boolean concept-property: the concept is inactive.
-					inactiveCodes.add(normalizeCode(code));
-				} else if ("notSelectable".equals(property.getCode()) && "true".equalsIgnoreCase(relatedCode)) {
-					// Standard boolean concept-property: the concept is not selectable (abstract).
-					notSelectableCodes.add(normalizeCode(code));
-				} else if ("deprecated".equals(property.getCode())) {
-					// Standard date-valued concept-property (presence indicates the concept is deprecated).
-					deprecatedCodes.add(normalizeCode(code));
-				} else if ("deprecationDate".equals(property.getCode())) {
-					deprecationDateCodes.add(normalizeCode(code));
-				} else if ("retirementDate".equals(property.getCode())) {
-					retirementDateCodes.add(normalizeCode(code));
+				} else {
+					indexStandardExistsProperty(property.getCode(), code, relatedCode);
 				}
 			}
 
@@ -505,6 +470,24 @@ public class ValueSetExpansionFilterContext {
 		allChildCodesLower.add(theChildCode.toLowerCase());
 	}
 
+	/**
+	 * Record that {@code theConceptCode} carries the standard concept-property {@code thePropertyCode} (if it
+	 * is one we support with {@code exists}). Boolean properties (inactive/notSelectable) only count when the
+	 * value is {@code true}; date-valued properties count on presence.
+	 */
+	private void indexStandardExistsProperty(String thePropertyCode, String theConceptCode, String theValue) {
+		StandardExistsProperty standardProperty = StandardExistsProperty.forConceptPropertyCode(thePropertyCode);
+		if (standardProperty == null) {
+			return;
+		}
+		if (standardProperty.requiresBooleanTrue() && !"true".equalsIgnoreCase(theValue)) {
+			return;
+		}
+		conceptsByStandardProperty
+				.computeIfAbsent(standardProperty, k -> new HashSet<>())
+				.add(normalizeCode(theConceptCode));
+	}
+
 	private static boolean isBlank(String theValue) {
 		return theValue == null || theValue.isEmpty();
 	}
@@ -514,6 +497,60 @@ public class ValueSetExpansionFilterContext {
 		String property = theFilter.hasProperty() ? theFilter.getProperty() : "(none)";
 		return new UnsupportedFilterException("In-memory ValueSet expansion does not support filter with property '"
 				+ property + "' and operator '" + op + "'");
+	}
+
+	/**
+	 * The standard FHIR concept-properties that this in-memory support can evaluate with the {@code exists}
+	 * operator. Boolean properties ({@code inactive}, {@code notSelectable}) count only when their value is
+	 * {@code true}; the date-valued properties ({@code deprecated}, {@code deprecationDate},
+	 * {@code retirementDate}) count on presence.
+	 *
+	 * @see <a href="http://hl7.org/fhir/codesystem-concept-properties.html">FHIR standard concept properties</a>
+	 */
+	private enum StandardExistsProperty {
+		INACTIVE("inactive", true),
+		NOT_SELECTABLE("notSelectable", true),
+		DEPRECATED("deprecated", false),
+		DEPRECATION_DATE("deprecationDate", false),
+		RETIREMENT_DATE("retirementDate", false);
+
+		private final String code;
+		private final boolean requiresBooleanTrue;
+
+		StandardExistsProperty(String theCode, boolean theRequiresBooleanTrue) {
+			code = theCode;
+			requiresBooleanTrue = theRequiresBooleanTrue;
+		}
+
+		private boolean requiresBooleanTrue() {
+			return requiresBooleanTrue;
+		}
+
+		/**
+		 * Match a filter property name (already lower-cased during filtering) to a standard property, or
+		 * {@code null} if it is not one of them.
+		 */
+		private static StandardExistsProperty forFilterProperty(String theLowerCasedProperty) {
+			for (StandardExistsProperty next : values()) {
+				if (next.code.toLowerCase(Locale.ROOT).equals(theLowerCasedProperty)) {
+					return next;
+				}
+			}
+			return null;
+		}
+
+		/**
+		 * Match an exact CodeSystem concept-property code to a standard property, or {@code null} if it is
+		 * not one of them.
+		 */
+		private static StandardExistsProperty forConceptPropertyCode(String theCode) {
+			for (StandardExistsProperty next : values()) {
+				if (next.code.equals(theCode)) {
+					return next;
+				}
+			}
+			return null;
+		}
 	}
 
 	/**
