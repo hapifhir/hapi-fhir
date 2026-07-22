@@ -99,6 +99,15 @@ public abstract class AbstractIJobPersistenceSpecificationTest
 		return mySvc;
 	}
 
+	public boolean isInlineReduction() {
+		// Default to inline reduction (no 'driver' work chunk). This matches implementations
+		// that run reduction inline during the maintenance pass (e.g. the Mongo-backed CDR
+		// implementation) so they pass the shared spec without needing to override this.
+		// Implementations that create a data-free 'driver' work chunk (the JPA implementation)
+		// override this to return false.
+		return true;
+	}
+
 	@Nonnull
 	public JobDefinition<TestJobParameters> withJobDefinitionWithReductionStep() {
 		JobDefinition.Builder<TestJobParameters, ?> builder = JobDefinition.newBuilder()
@@ -175,6 +184,11 @@ public abstract class AbstractIJobPersistenceSpecificationTest
 		class StateTransitions implements IWorkChunkStateTransitions {
 
 			@Override
+			public boolean isInlineReduction() {
+				return AbstractIJobPersistenceSpecificationTest.this.isInlineReduction();
+			}
+
+			@Override
 			public ITestFixture getTestManager() {
 				return AbstractIJobPersistenceSpecificationTest.this;
 			}
@@ -237,6 +251,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest
 		return retVal;
 	}
 
+	@Override
 	public void runInTransaction(Runnable theRunnable) {
 		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -246,6 +261,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest
 		});
 	}
 
+	@Override
 	public <T> T runInTransaction(Callable<T> theRunnable) {
 		return newTxTemplate().execute(t -> {
 			try {
@@ -271,7 +287,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest
 	}
 
 	public String createAndDequeueWorkChunk(String theJobInstanceId) {
-		String chunkId = createChunk(theJobInstanceId);
+		String chunkId = runInTransaction(() -> createChunk(theJobInstanceId));
 		mySvc.onWorkChunkDequeue(chunkId);
 		return chunkId;
 	}
