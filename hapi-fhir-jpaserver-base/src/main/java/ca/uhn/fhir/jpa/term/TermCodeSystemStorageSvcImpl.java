@@ -1223,15 +1223,20 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	/**
 	 * Builds parent/child links for CodeSystems that express their hierarchy FLAT — i.e. concepts sit in a
 	 * flat list and each carries a {@code parent} (or {@code child}) concept-property, rather than being
-	 * nested via {@code CodeSystem.concept}. Only property definitions declaring the canonical
+	 * nested via {@code CodeSystem.concept}. The {@code parent}/{@code child} properties are identified by
+	 * their reserved code name; a property the CodeSystem declares with a URI other than the canonical
 	 * concept-properties URI ({@value #CONCEPT_PROPERTY_PARENT_URI} / {@value #CONCEPT_PROPERTY_CHILD_URI})
-	 * are honored. This runs in addition to the nested-concept handling, so a mixed representation is
-	 * supported and existing links are never duplicated.
+	 * has a different meaning and is skipped. This runs in addition to the nested-concept handling, so a
+	 * mixed representation is supported and existing links are never duplicated.
 	 */
 	static void linkFlatHierarchyFromConceptProperties(CodeSystem theCodeSystem, TermCodeSystemVersion thePersCs) {
-		String parentPropertyCode = resolveHierarchyPropertyCode(theCodeSystem, CONCEPT_PROPERTY_PARENT_URI);
-		String childPropertyCode = resolveHierarchyPropertyCode(theCodeSystem, CONCEPT_PROPERTY_CHILD_URI);
+		String parentPropertyCode = hierarchyPropertyCodeOrNull(theCodeSystem, "parent", CONCEPT_PROPERTY_PARENT_URI);
+		String childPropertyCode = hierarchyPropertyCodeOrNull(theCodeSystem, "child", CONCEPT_PROPERTY_CHILD_URI);
 		if (parentPropertyCode == null && childPropertyCode == null) {
+			return;
+		}
+		if (!hasAnyHierarchyProperty(theCodeSystem.getConcept(), parentPropertyCode, childPropertyCode)) {
+			// No concept actually carries a flat parent/child property → nothing to link (avoids indexing).
 			return;
 		}
 
@@ -1244,16 +1249,42 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	}
 
 	/**
-	 * Returns the concept-property code declaring the given canonical concept-properties URI, or
-	 * {@code null} if the CodeSystem does not define such a property.
+	 * Returns the reserved concept-property code ({@code parent}/{@code child}) so the flat hierarchy is
+	 * matched by name, unless the CodeSystem declares a property with that code but a URI other than the
+	 * canonical concept-properties URI — in which case its meaning is unknown and {@code null} is returned so
+	 * it is not treated as hierarchy.
 	 */
-	private static String resolveHierarchyPropertyCode(CodeSystem theCodeSystem, String theCanonicalUri) {
+	private static String hierarchyPropertyCodeOrNull(
+			CodeSystem theCodeSystem, String theReservedCode, String theCanonicalUri) {
 		for (CodeSystem.PropertyComponent property : theCodeSystem.getProperty()) {
-			if (theCanonicalUri.equals(property.getUri()) && property.hasCode()) {
-				return property.getCode();
+			if (theReservedCode.equals(property.getCode())
+					&& property.hasUri()
+					&& !theCanonicalUri.equals(property.getUri())) {
+				return null;
 			}
 		}
-		return null;
+		return theReservedCode;
+	}
+
+	/**
+	 * Cheap pre-check (no allocation) for whether any concept carries a flat {@code parent}/{@code child}
+	 * property, so CodeSystems without a flat hierarchy skip the concept indexing entirely.
+	 */
+	private static boolean hasAnyHierarchyProperty(
+			List<CodeSystem.ConceptDefinitionComponent> theConcepts, String theParentCode, String theChildCode) {
+		for (CodeSystem.ConceptDefinitionComponent concept : theConcepts) {
+			for (CodeSystem.ConceptPropertyComponent property : concept.getProperty()) {
+				String code = property.getCode();
+				if ((theParentCode != null && theParentCode.equals(code))
+						|| (theChildCode != null && theChildCode.equals(code))) {
+					return true;
+				}
+			}
+			if (hasAnyHierarchyProperty(concept.getConcept(), theParentCode, theChildCode)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private static void indexConceptsByCode(TermConcept theConcept, Map<String, TermConcept> theConceptsByCode) {

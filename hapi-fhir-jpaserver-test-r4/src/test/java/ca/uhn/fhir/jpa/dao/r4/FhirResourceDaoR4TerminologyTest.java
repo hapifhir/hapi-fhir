@@ -698,6 +698,79 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		assertThat(codes).containsExactlyInAnyOrder("C2", "C3");
 	}
 
+	/**
+	 * The flat {@code parent} hierarchy must also be recognised when the CodeSystem does NOT declare the
+	 * {@code parent} concept-property — it is matched by its reserved code name (as the German KDL
+	 * terminology uses the codes directly, without a property declaration).
+	 */
+	@Test
+	public void testExpandWithDescendentOfFilter_FlatParentPropertyUndeclared() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(TermTestUtil.URL_MY_CODE_SYSTEM);
+		cs.setVersion("1");
+		cs.setContent(CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("P").setDisplay("Parent");
+		cs.addConcept().setCode("C1").setDisplay("Child 1").addProperty().setCode("parent").setValue(new CodeType("P"));
+		cs.addConcept().setCode("C2").setDisplay("Child 2").addProperty().setCode("parent").setValue(new CodeType("C1"));
+		cs.addConcept().setCode("C3").setDisplay("Child 3").addProperty().setCode("parent").setValue(new CodeType("P"));
+		myCodeSystemDao.create(cs, mySrd);
+
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl(TermTestUtil.URL_MY_VALUE_SET);
+		valueSet.getCompose()
+			.addInclude()
+			.setSystem(TermTestUtil.URL_MY_CODE_SYSTEM)
+			.addFilter()
+			.setProperty("concept")
+			.setOp(FilterOperator.DESCENDENTOF)
+			.setValue("P");
+		myValueSetDao.create(valueSet, mySrd);
+
+		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter(""));
+		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
+		assertThat(codes).containsExactlyInAnyOrder("C1", "C2", "C3");
+	}
+
+	/**
+	 * A {@code parent} property declared with a NON-canonical URI has an unknown meaning, so it must NOT be
+	 * treated as hierarchy: no parent/child links are built from it.
+	 */
+	@Test
+	public void testExpandWithDescendentOfFilter_FlatParentPropertyNonCanonicalUriNotLinked() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(TermTestUtil.URL_MY_CODE_SYSTEM);
+		cs.setVersion("1");
+		cs.setContent(CodeSystemContentMode.COMPLETE);
+		cs.addProperty()
+			.setCode("parent")
+			.setUri("http://example.org/custom#parent")
+			.setType(CodeSystem.PropertyType.CODE);
+		cs.addConcept().setCode("P").setDisplay("Parent");
+		cs.addConcept().setCode("C1").setDisplay("Child 1").addProperty().setCode("parent").setValue(new CodeType("P"));
+		myCodeSystemDao.create(cs, mySrd);
+
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl(TermTestUtil.URL_MY_VALUE_SET);
+		valueSet.getCompose()
+			.addInclude()
+			.setSystem(TermTestUtil.URL_MY_CODE_SYSTEM)
+			.addFilter()
+			.setProperty("concept")
+			.setOp(FilterOperator.DESCENDENTOF)
+			.setValue("P");
+		myValueSetDao.create(valueSet, mySrd);
+
+		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter(""));
+		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
+		assertThat(codes).isEmpty();
+	}
+
 	@Test
 	public void testExpandWithCodesAndDisplayFilterPartialOnCodes() {
 		CodeSystem codeSystem = createExternalCsDogs();
