@@ -4,11 +4,15 @@ import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.Enumerations.FilterOperator;
 import org.hl7.fhir.r5.model.ValueSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -26,21 +30,36 @@ import java.util.regex.PatternSyntaxException;
  *
  * <p>The concept hierarchy used by the structural operators is built both from nested
  * {@code CodeSystem.concept} arrays and from a FLAT representation where each concept carries a
- * {@code parent} (or {@code child}) concept-property whose {@code CodeSystem.property} definition uses
- * the canonical concept-properties URI ({@value #CONCEPT_PROPERTY_PARENT_URI} /
- * {@value #CONCEPT_PROPERTY_CHILD_URI}).
+ * {@code parent} (or {@code child}) concept-property. These standard properties are matched by their
+ * reserved code name; a property the CodeSystem declares with a non-canonical URI is treated as having a
+ * different meaning and is not used.
  *
  * Supports: equal | is-a | descendent-of | is-not-a | regex | in | not-in | generalizes | child-of | descendent-leaf | exists
  */
 public class ValueSetExpansionFilterContext {
-	public static final String CONCEPT_PROPERTY_PARENT_URI = "http://hl7.org/fhir/concept-properties#parent";
-	public static final String CONCEPT_PROPERTY_CHILD_URI = "http://hl7.org/fhir/concept-properties#child";
+	/** Base of the canonical FHIR concept-properties system; the individual property URIs append the code. */
+	private static final String CONCEPT_PROPERTIES_SYSTEM = "http://hl7.org/fhir/concept-properties#";
+
+	private static final Logger ourLog = LoggerFactory.getLogger(ValueSetExpansionFilterContext.class);
 
 	private final Map<String, Map<String, String>> propertyIndex = new HashMap<>();
 
 	private final Map<String, Set<String>> conceptCodeTree = new HashMap<>();
-	// Codes carrying a standard concept-property usable with the 'exists' operator (see StandardExistsProperty).
-	private final Map<StandardExistsProperty, Set<String>> conceptsByStandardProperty = new HashMap<>();
+	// Concepts carrying a boolean/date standard property, for membership 'exists' checks (see kinds below).
+	private final Map<StandardConceptProperty, Set<String>> conceptsByStandardProperty =
+			new EnumMap<>(StandardConceptProperty.class);
+	// Standard properties the CodeSystem declares with the canonical concept-properties URI (honored as-is).
+	private final Set<StandardConceptProperty> canonicalUriDeclared = EnumSet.noneOf(StandardConceptProperty.class);
+	// A standard property is "conflicting" when the CodeSystem declares it (by its reserved code) but with a
+	// 'uri' that differs from the canonical concept-properties URI — it then means something non-standard, so
+	// we cannot evaluate it. Maps such a property to that declared URI. A missing declaration, or one without
+	// a uri, is NOT conflicting: the property is matched by its reserved code name instead.
+	private final Map<StandardConceptProperty, String> conflictingPropertyUris =
+			new EnumMap<>(StandardConceptProperty.class);
+	// Standard properties used by one of the filters (drives the "matched by code name" info log).
+	private final Set<StandardConceptProperty> propertiesUsedInFilters = EnumSet.noneOf(StandardConceptProperty.class);
+	// Standard properties for which the "matched by code name (not declared)" info log was already emitted.
+	private final Set<StandardConceptProperty> loggedNameMatch = EnumSet.noneOf(StandardConceptProperty.class);
 	private final Set<String> allCodes = new HashSet<>();
 	private final Set<String> allCodesLower = new HashSet<>();
 	private final Set<String> allChildCodes = new HashSet<>();
@@ -49,8 +68,6 @@ public class ValueSetExpansionFilterContext {
 	private final Map<String, Pattern> regexCache = new HashMap<>();
 	private final CodeSystem codeSystem;
 	private final List<ValueSet.ConceptSetFilterComponent> filters;
-	private String parentPropertyCode;
-	private String childPropertyCode;
 	private boolean hasIndexRun = false;
 
 	public ValueSetExpansionFilterContext(CodeSystem codeSystem, List<ValueSet.ConceptSetFilterComponent> filters) {
@@ -84,39 +101,27 @@ public class ValueSetExpansionFilterContext {
 					filter.hasProperty() ? filter.getProperty().toLowerCase(Locale.ROOT) : "concept";
 			boolean onCode = theFilterProperty.equals("concept") || theFilterProperty.equals("code");
 			boolean onDisplay = theFilterProperty.equals("display");
-			boolean onChild = theFilterProperty.equals("child");
-			boolean onParent = theFilterProperty.equals("parent");
 
 			/*
-			 * Hierarchical membership filters. Per the FHIR spec the 'child' and 'parent' properties are
-			 * used with the 'exists' operator to select concepts that do (or don't) have children/parents
-			 * — e.g. property=child op=exists value=false selects the leaf concepts.
+			 * Standard FHIR concept-properties, all evaluated with the 'exists' operator:
+			 *  - 'child' / 'parent' (hierarchical: does the concept have children / a parent),
+			 *  - the boolean 'inactive' / 'notSelectable' (flagged only when the value is 'true'),
+			 *  - the date-valued 'deprecated' / 'deprecationDate' / 'retirementDate' (flagged when present).
+			 * They are identified by their reserved code name; if the CodeSystem declares one with a
+			 * non-canonical URI its meaning is unknown and the filter fails.
 			 */
-			if (onChild || onParent) {
-				if (filter.getOp() == FilterOperator.EXISTS) {
-					boolean wantExists = Boolean.parseBoolean(filter.getValue());
-					boolean hasRelation = onChild ? hasChildren(concept.getCode()) : hasParent(concept.getCode());
-					return wantExists == hasRelation;
-				}
-
-				// The hierarchical child/parent properties only support the 'exists' operator in-memory.
-				throw unsupportedFilter(filter);
-			}
-
-			/*
-			 * Standard concept-properties usable with the 'exists' operator: the boolean 'inactive' /
-			 * 'notSelectable' (a concept is flagged only when the value is 'true') and the date-valued
-			 * 'deprecated' / 'deprecationDate' / 'retirementDate' (flagged when the property is present).
-			 * That value distinction is applied at index time; here it is a uniform membership check.
-			 */
-			StandardExistsProperty standardProperty = StandardExistsProperty.forFilterProperty(theFilterProperty);
+			StandardConceptProperty standardProperty = StandardConceptProperty.forFilterProperty(theFilterProperty);
 			if (standardProperty != null) {
+				String conflictingUri = conflictingPropertyUris.get(standardProperty);
+				if (conflictingUri != null) {
+					throw new UnsupportedFilterException("In-memory ValueSet expansion cannot evaluate filter on"
+							+ " property '" + filter.getProperty() + "': the CodeSystem declares it with URI '"
+							+ conflictingUri + "' rather than the standard '" + standardProperty.canonicalUri()
+							+ "', so its meaning is unknown");
+				}
 				if (filter.getOp() == FilterOperator.EXISTS) {
 					boolean wantExists = Boolean.parseBoolean(filter.getValue());
-					boolean isFlagged = conceptsByStandardProperty
-							.getOrDefault(standardProperty, Set.of())
-							.contains(normalizeCode(concept.getCode()));
-					return wantExists == isFlagged;
+					return wantExists == conceptHasStandardProperty(standardProperty, concept.getCode());
 				}
 
 				// These standard properties only support the 'exists' operator in-memory.
@@ -293,6 +298,24 @@ public class ValueSetExpansionFilterContext {
 	}
 
 	/**
+	 * Whether the given concept satisfies the {@code exists} check for a standard property: for the
+	 * hierarchical {@code child}/{@code parent} this means it has children / a parent; for the
+	 * boolean/date properties it means the concept was indexed as carrying that property.
+	 */
+	private boolean conceptHasStandardProperty(StandardConceptProperty theProperty, String theConceptCode) {
+		switch (theProperty.kind()) {
+			case PARENT:
+				return hasParent(theConceptCode);
+			case CHILD:
+				return hasChildren(theConceptCode);
+			default:
+				return conceptsByStandardProperty
+						.getOrDefault(theProperty, Set.of())
+						.contains(normalizeCode(theConceptCode));
+		}
+	}
+
+	/**
 	 * Return false if we should even _try_ a structural filter on this property + value:
 	 *   1) Must be on the code (not display)
 	 *   2) The filter value must actually exist in the CodeSystem
@@ -393,22 +416,48 @@ public class ValueSetExpansionFilterContext {
 
 	private void buildIndexes() {
 		if (!hasIndexRun) {
-			parentPropertyCode = resolveHierarchyPropertyCode(CONCEPT_PROPERTY_PARENT_URI);
-			childPropertyCode = resolveHierarchyPropertyCode(CONCEPT_PROPERTY_CHILD_URI);
+			classifyStandardProperties();
 			buildIndexes(codeSystem.getConcept());
 			hasIndexRun = true;
 		}
 	}
 
 	/**
-	 * Resolve the concept-property code that carries hierarchy for the given canonical concept-properties
-	 * URI, or {@code null} if none is defined. Only a property definition declaring exactly that URI is
-	 * honored, so a custom property that happens to be named "parent"/"child" is ignored.
+	 * Inspect how the CodeSystem declares the standard concept-properties, and which the filters use. A
+	 * property declared with its canonical URI is honored; one declared with a <em>different</em> URI has an
+	 * unknown meaning and is recorded as conflicting (a filter using it will fail rather than be
+	 * misinterpreted); an undeclared property is matched by its reserved code name (with an informational log
+	 * emitted when it is first matched, if a filter uses it).
 	 */
-	private String resolveHierarchyPropertyCode(String theCanonicalUri) {
+	private void classifyStandardProperties() {
+		if (filters != null) {
+			for (ValueSet.ConceptSetFilterComponent filter : filters) {
+				if (filter.hasProperty()) {
+					StandardConceptProperty property = StandardConceptProperty.forFilterProperty(
+							filter.getProperty().toLowerCase(Locale.ROOT));
+					if (property != null) {
+						propertiesUsedInFilters.add(property);
+					}
+				}
+			}
+		}
+		for (StandardConceptProperty property : StandardConceptProperty.values()) {
+			CodeSystem.PropertyComponent declaration = findPropertyDeclarationByCode(property.code());
+			if (declaration == null || !declaration.hasUri()) {
+				continue; // undeclared / no URI → matched by reserved code name (logged when first matched)
+			}
+			if (property.canonicalUri().equals(declaration.getUri())) {
+				canonicalUriDeclared.add(property);
+			} else {
+				conflictingPropertyUris.put(property, declaration.getUri());
+			}
+		}
+	}
+
+	private CodeSystem.PropertyComponent findPropertyDeclarationByCode(String theCode) {
 		for (CodeSystem.PropertyComponent property : codeSystem.getProperty()) {
-			if (theCanonicalUri.equals(property.getUri()) && property.hasCode()) {
-				return property.getCode();
+			if (theCode.equals(property.getCode())) {
+				return property;
 			}
 		}
 		return null;
@@ -428,24 +477,17 @@ public class ValueSetExpansionFilterContext {
 				addParentChildEdge(code, child.getCode());
 			}
 
-			// 2b) Index hierarchy expressed via flat parent/child concept-properties
+			// 2b) Index the standard concept-properties expressed on this concept (flat hierarchy via
+			// parent/child, plus the boolean/date exists-properties).
 			for (var property : def.getProperty()) {
 				if (!property.hasValue() || !property.getValue().isPrimitive()) {
 					continue;
 				}
-				String relatedCode = property.getValue().primitiveValue();
-				if (isBlank(relatedCode)) {
+				String value = property.getValue().primitiveValue();
+				if (isBlank(value)) {
 					continue;
 				}
-				if (parentPropertyCode != null && parentPropertyCode.equals(property.getCode())) {
-					// 'code' declares 'relatedCode' as its parent → relatedCode -> code
-					addParentChildEdge(relatedCode, code);
-				} else if (childPropertyCode != null && childPropertyCode.equals(property.getCode())) {
-					// 'code' declares 'relatedCode' as its child → code -> relatedCode
-					addParentChildEdge(code, relatedCode);
-				} else {
-					indexStandardExistsProperty(property.getCode(), code, relatedCode);
-				}
+				indexStandardProperty(property.getCode(), code, value);
 			}
 
 			// 3) Index the "code" property
@@ -471,20 +513,48 @@ public class ValueSetExpansionFilterContext {
 	}
 
 	/**
-	 * Record that {@code theConceptCode} carries the standard concept-property {@code thePropertyCode} (if it
-	 * is one we support with {@code exists}). Boolean properties (inactive/notSelectable) only count when the
-	 * value is {@code true}; date-valued properties count on presence.
+	 * Index the given concept property if it is one of the standard properties we support. The parent/child
+	 * properties add a hierarchy edge; the boolean {@code inactive}/{@code notSelectable} count the concept
+	 * only when the value is {@code true}; the date-valued properties count it on presence. A property the
+	 * CodeSystem declared with a non-canonical URI is skipped (its meaning is unknown).
 	 */
-	private void indexStandardExistsProperty(String thePropertyCode, String theConceptCode, String theValue) {
-		StandardExistsProperty standardProperty = StandardExistsProperty.forConceptPropertyCode(thePropertyCode);
-		if (standardProperty == null) {
+	private void indexStandardProperty(String thePropertyCode, String theConceptCode, String theValue) {
+		StandardConceptProperty property = StandardConceptProperty.forConceptPropertyCode(thePropertyCode);
+		if (property == null || conflictingPropertyUris.containsKey(property)) {
 			return;
 		}
-		if (standardProperty.requiresBooleanTrue() && !"true".equalsIgnoreCase(theValue)) {
-			return;
+		if (propertiesUsedInFilters.contains(property)
+				&& !canonicalUriDeclared.contains(property)
+				&& loggedNameMatch.add(property)) {
+			ourLog.info(
+					"Concept property '{}' in CodeSystem '{}' is not declared with its canonical URI '{}'; matching by property code name.",
+					property.code(),
+					codeSystem.getUrl(),
+					property.canonicalUri());
 		}
+		switch (property.kind()) {
+			case PARENT:
+				// 'theConceptCode' declares 'theValue' as its parent → theValue -> theConceptCode
+				addParentChildEdge(theValue, theConceptCode);
+				break;
+			case CHILD:
+				// 'theConceptCode' declares 'theValue' as its child → theConceptCode -> theValue
+				addParentChildEdge(theConceptCode, theValue);
+				break;
+			case BOOLEAN_TRUE:
+				if ("true".equalsIgnoreCase(theValue)) {
+					addStandardPropertyMembership(property, theConceptCode);
+				}
+				break;
+			case PRESENCE:
+				addStandardPropertyMembership(property, theConceptCode);
+				break;
+		}
+	}
+
+	private void addStandardPropertyMembership(StandardConceptProperty theProperty, String theConceptCode) {
 		conceptsByStandardProperty
-				.computeIfAbsent(standardProperty, k -> new HashSet<>())
+				.computeIfAbsent(theProperty, k -> new HashSet<>())
 				.add(normalizeCode(theConceptCode));
 	}
 
@@ -500,38 +570,61 @@ public class ValueSetExpansionFilterContext {
 	}
 
 	/**
-	 * The standard FHIR concept-properties that this in-memory support can evaluate with the {@code exists}
-	 * operator. Boolean properties ({@code inactive}, {@code notSelectable}) count only when their value is
-	 * {@code true}; the date-valued properties ({@code deprecated}, {@code deprecationDate},
-	 * {@code retirementDate}) count on presence.
+	 * The standard FHIR concept-properties this in-memory support can evaluate with the {@code exists}
+	 * operator, identified by their reserved code name. The {@link Kind} determines how a match is
+	 * interpreted: {@code parent}/{@code child} contribute a hierarchy edge; {@code inactive}/
+	 * {@code notSelectable} count a concept only when their value is {@code true}; the date-valued
+	 * {@code deprecated}/{@code deprecationDate}/{@code retirementDate} count a concept on presence.
 	 *
 	 * @see <a href="http://hl7.org/fhir/codesystem-concept-properties.html">FHIR standard concept properties</a>
 	 */
-	private enum StandardExistsProperty {
-		INACTIVE("inactive", true),
-		NOT_SELECTABLE("notSelectable", true),
-		DEPRECATED("deprecated", false),
-		DEPRECATION_DATE("deprecationDate", false),
-		RETIREMENT_DATE("retirementDate", false);
+	private enum StandardConceptProperty {
+		PARENT("parent", Kind.PARENT),
+		CHILD("child", Kind.CHILD),
+		INACTIVE("inactive", Kind.BOOLEAN_TRUE),
+		NOT_SELECTABLE("notSelectable", Kind.BOOLEAN_TRUE),
+		DEPRECATED("deprecated", Kind.PRESENCE),
+		DEPRECATION_DATE("deprecationDate", Kind.PRESENCE),
+		RETIREMENT_DATE("retirementDate", Kind.PRESENCE);
 
-		private final String code;
-		private final boolean requiresBooleanTrue;
-
-		StandardExistsProperty(String theCode, boolean theRequiresBooleanTrue) {
-			code = theCode;
-			requiresBooleanTrue = theRequiresBooleanTrue;
+		/** How a matched property is interpreted during indexing and {@code exists} evaluation. */
+		private enum Kind {
+			PARENT, // hierarchical: the property value is the concept's parent code
+			CHILD, // hierarchical: the property value is the concept's child code
+			BOOLEAN_TRUE, // boolean flag: the concept is flagged only when the value is 'true'
+			PRESENCE // date-valued: the concept is flagged when the property is present
 		}
 
-		private boolean requiresBooleanTrue() {
-			return requiresBooleanTrue;
+		private final String code;
+		private final Kind kind;
+
+		StandardConceptProperty(String theCode, Kind theKind) {
+			code = theCode;
+			kind = theKind;
+		}
+
+		private String code() {
+			return code;
+		}
+
+		private Kind kind() {
+			return kind;
+		}
+
+		/**
+		 * The canonical concept-properties URI that identifies this standard property (e.g.
+		 * {@code http://hl7.org/fhir/concept-properties#inactive}).
+		 */
+		private String canonicalUri() {
+			return CONCEPT_PROPERTIES_SYSTEM + code;
 		}
 
 		/**
 		 * Match a filter property name (already lower-cased during filtering) to a standard property, or
 		 * {@code null} if it is not one of them.
 		 */
-		private static StandardExistsProperty forFilterProperty(String theLowerCasedProperty) {
-			for (StandardExistsProperty next : values()) {
+		private static StandardConceptProperty forFilterProperty(String theLowerCasedProperty) {
+			for (StandardConceptProperty next : values()) {
 				if (next.code.toLowerCase(Locale.ROOT).equals(theLowerCasedProperty)) {
 					return next;
 				}
@@ -543,8 +636,8 @@ public class ValueSetExpansionFilterContext {
 		 * Match an exact CodeSystem concept-property code to a standard property, or {@code null} if it is
 		 * not one of them.
 		 */
-		private static StandardExistsProperty forConceptPropertyCode(String theCode) {
-			for (StandardExistsProperty next : values()) {
+		private static StandardConceptProperty forConceptPropertyCode(String theCode) {
+			for (StandardConceptProperty next : values()) {
 				if (next.code.equals(theCode)) {
 					return next;
 				}

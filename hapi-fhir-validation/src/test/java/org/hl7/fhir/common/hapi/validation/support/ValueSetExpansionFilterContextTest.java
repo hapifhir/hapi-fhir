@@ -779,6 +779,42 @@ class ValueSetExpansionFilterContextTest {
 		}
 	}
 
+	@Test
+	void parentExistsOnNonCanonicalParentPropertyThrows() {
+		// 'parent' is declared with a non-canonical URI → its meaning is unknown, so a parent-exists filter
+		// must fail rather than be silently misinterpreted.
+		CodeSystem cs = flatCSWithNonCanonicalParentProperty(true);
+		ValueSet.ConceptSetFilterComponent f = new ValueSet.ConceptSetFilterComponent()
+			.setProperty("parent").setOp(FilterOperator.EXISTS).setValue("true");
+		ValueSetExpansionFilterContext ctx = new ValueSetExpansionFilterContext(cs, List.of(f));
+
+		assertThatThrownBy(() -> ctx.isFiltered(new FhirVersionIndependentConcept(cs.getUrl(), "C1")))
+			.isInstanceOf(ValueSetExpansionFilterContext.UnsupportedFilterException.class)
+			.hasMessageContaining("parent")
+			.hasMessageContaining("http://example.org/custom#parent");
+	}
+
+	@Test
+	void flatParentPropertyWithoutDeclarationBuildsHierarchyByName() {
+		// No CodeSystem.property declaration for 'parent' at all → matched by its reserved code name, so the
+		// flat hierarchy is still built.
+		CodeSystem cs = new CodeSystem().setUrl("http://example.org/undeclared").setCaseSensitive(true);
+		cs.addConcept().setCode("P");
+		cs.addConcept().setCode("C1").addProperty().setCode("parent").setValue(new CodeType("P"));
+		cs.addConcept().setCode("C2").addProperty().setCode("parent").setValue(new CodeType("C1"));
+
+		// descendent-of P now finds C1 and C2 (hierarchy from the undeclared flat parent property)
+		assertThat(isFiltered(cs, FilterOperator.DESCENDENTOF, "P",
+			new FhirVersionIndependentConcept(cs.getUrl(), "C1"))).isFalse();
+		assertThat(isFiltered(cs, FilterOperator.DESCENDENTOF, "P",
+			new FhirVersionIndependentConcept(cs.getUrl(), "C2"))).isFalse();
+		// child exists=false selects only the leaf C2
+		assertThat(isFilteredWithProperty(cs, "child", FilterOperator.EXISTS, "false",
+			new FhirVersionIndependentConcept(cs.getUrl(), "C2"))).isFalse();
+		assertThat(isFilteredWithProperty(cs, "child", FilterOperator.EXISTS, "false",
+			new FhirVersionIndependentConcept(cs.getUrl(), "P"))).isTrue();
+	}
+
 	@ParameterizedTest(name = "[descendent-of-flat] filter={0}, code={1} ⇒ filtered={2}")
 	@CsvSource({
 		// Structural ops must also work when hierarchy comes from a flat parent concept-property.
@@ -916,6 +952,42 @@ class ValueSetExpansionFilterContextTest {
 			new FhirVersionIndependentConcept(cs.getUrl(), "PLAIN"))).isFalse();
 		assertThat(isFilteredWithProperty(cs, "notSelectable", FilterOperator.EXISTS, "false",
 			new FhirVersionIndependentConcept(cs.getUrl(), "ABSTRACT"))).isTrue();
+	}
+
+	@Test
+	void standardPropertyDeclaredWithCanonicalUriIsHonored() {
+		CodeSystem cs = new CodeSystem().setUrl("http://example.org/cs").setCaseSensitive(true);
+		cs.addProperty().setCode("inactive")
+			.setUri("http://hl7.org/fhir/concept-properties#inactive")
+			.setType(CodeSystem.PropertyType.BOOLEAN);
+		cs.addConcept().setCode("ACTIVE");
+		cs.addConcept().setCode("GONE").addProperty().setCode("inactive").setValue(new BooleanType(true));
+
+		assertThat(isFilteredWithProperty(cs, "inactive", FilterOperator.EXISTS, "true",
+			new FhirVersionIndependentConcept(cs.getUrl(), "GONE"))).isFalse();
+		assertThat(isFilteredWithProperty(cs, "inactive", FilterOperator.EXISTS, "true",
+			new FhirVersionIndependentConcept(cs.getUrl(), "ACTIVE"))).isTrue();
+	}
+
+	@Test
+	void standardPropertyDeclaredWithConflictingUriThrows() {
+		// The CodeSystem declares a property literally named 'inactive' but with a NON-canonical URI, so its
+		// meaning is unknown — a filter using it cannot be evaluated as the standard 'inactive' property.
+		CodeSystem cs = new CodeSystem().setUrl("http://example.org/cs").setCaseSensitive(true);
+		cs.addProperty().setCode("inactive")
+			.setUri("http://example.org/custom#inactive")
+			.setType(CodeSystem.PropertyType.BOOLEAN);
+		cs.addConcept().setCode("A").addProperty().setCode("inactive").setValue(new BooleanType(true));
+
+		ValueSet.ConceptSetFilterComponent f = new ValueSet.ConceptSetFilterComponent()
+			.setProperty("inactive").setOp(FilterOperator.EXISTS).setValue("true");
+		ValueSetExpansionFilterContext ctx = new ValueSetExpansionFilterContext(cs, List.of(f));
+		FhirVersionIndependentConcept concept = new FhirVersionIndependentConcept(cs.getUrl(), "A");
+
+		assertThatThrownBy(() -> ctx.isFiltered(concept))
+			.isInstanceOf(ValueSetExpansionFilterContext.UnsupportedFilterException.class)
+			.hasMessageContaining("inactive")
+			.hasMessageContaining("http://example.org/custom#inactive");
 	}
 
 	/**
