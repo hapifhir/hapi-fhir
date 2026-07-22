@@ -306,15 +306,13 @@ public class PreviousResourceVersionRestorer {
 		for (CopyToDelete copy : theCopiesToDelete) {
 			IIdType id = copy.id();
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(id.getResourceType());
+			// The explicit partition on the SystemRequestDetails short-circuits the delete's partition resolution,
+			// so a non-decodable id is not re-resolved to allPartitions (which would make the delete a silent no-op).
+			SystemRequestDetails deleteRequestDetails = SystemRequestDetails.forRequestPartitionId(copy.partitionId());
 			myHapiTransactionService
-					.withRequest(theRequestDetails)
+					.withRequest(deleteRequestDetails)
 					.withRequestPartitionId(copy.partitionId())
-					.execute(() -> {
-						TransactionDetails transactionDetails = new TransactionDetails();
-						transactionDetails.addResolvedPartition(
-								id.getResourceType() + "/" + id.getIdPart(), copy.partitionId());
-						return dao.delete(id, deleteConflicts, theRequestDetails, transactionDetails);
-					});
+					.execute(() -> dao.delete(id, deleteConflicts, deleteRequestDetails, new TransactionDetails()));
 		}
 		DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(myFhirContext, deleteConflicts);
 	}

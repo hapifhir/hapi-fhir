@@ -46,6 +46,7 @@ import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
@@ -771,19 +772,15 @@ public class ResourceMergeService {
 			Consumer<IIdType> theOnDeleted) {
 		DeleteConflictList deleteConflicts = new DeleteConflictList();
 		theResourcesToDelete.forEach(deleteConflicts::setResourceIdMarkedForDeletion);
+		// The explicit partition on the SystemRequestDetails short-circuits the delete's partition resolution,
+		// so a non-decodable id is not re-resolved to allPartitions (which would make the delete a silent no-op).
+		SystemRequestDetails deleteRequestDetails = SystemRequestDetails.forRequestPartitionId(thePartition);
 		for (IIdType id : theResourcesToDelete) {
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(id.getResourceType());
 			DaoMethodOutcome outcome = myHapiTransactionService
-					.withRequest(theRequestDetails)
+					.withRequest(deleteRequestDetails)
 					.withRequestPartitionId(thePartition)
-					.execute(() -> {
-						// Seed the resolved-partition cache (keyed by "Type/id") so the 4-arg delete uses the
-						// pinned partition instead of re-resolving a non-decodable id to allPartitions.
-						TransactionDetails transactionDetails = new TransactionDetails();
-						transactionDetails.addResolvedPartition(
-								id.getResourceType() + "/" + id.getIdPart(), thePartition);
-						return dao.delete(id, deleteConflicts, theRequestDetails, transactionDetails);
-					});
+					.execute(() -> dao.delete(id, deleteConflicts, deleteRequestDetails, new TransactionDetails()));
 			if (outcome != null && !outcome.isNop() && outcome.getId() != null) {
 				theOnDeleted.accept(outcome.getId());
 			}

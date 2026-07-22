@@ -851,18 +851,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		validateIdPresentForDelete(theId);
 		validateDeleteEnabled();
 
-		// Consult the TransactionDetails resolved-partition cache first. The cross-partition merge one-by-one
-		// delete seeds it with the source partition keyed by "Type/id", so a non-decodable id resolves to the
-		// correct shard instead of re-resolving to allPartitions (phantom delete).
-		RequestPartitionId requestPartitionId = null;
-		if (theId.hasResourceType() && theId.hasIdPart()) {
-			requestPartitionId =
-					theTransactionDetails.getResolvedPartition(theId.getResourceType() + "/" + theId.getIdPart());
-		}
-		if (requestPartitionId == null) {
-			requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(
-					theRequestDetails, getResourceName(), theId);
-		}
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(
+				theRequestDetails, getResourceName(), theId);
 
 		final ResourceTable entity;
 		try {
