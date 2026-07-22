@@ -1,5 +1,6 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.Enumerations.FilterOperator;
@@ -126,9 +127,10 @@ public class ValueSetExpansionFilterContext {
 			if (standardProperty != null) {
 				String conflictingUri = conflictingPropertyUris.get(standardProperty);
 				if (conflictingUri != null) {
-					throw new UnsupportedFilterException("In-memory ValueSet expansion cannot evaluate filter on"
-							+ " property '" + filter.getProperty() + "': the CodeSystem declares it with URI '"
-							+ conflictingUri + "' rather than the standard '" + standardProperty.canonicalUri()
+					throw new UnsupportedFilterException(Msg.code(3006)
+							+ "In-memory ValueSet expansion cannot evaluate filter on property '"
+							+ filter.getProperty() + "': the CodeSystem declares it with URI '" + conflictingUri
+							+ "' rather than the standard '" + standardProperty.canonicalUri()
 							+ "', so its meaning is unknown");
 				}
 				if (filter.getOp() == FilterOperator.EXISTS) {
@@ -577,8 +579,9 @@ public class ValueSetExpansionFilterContext {
 	private static UnsupportedFilterException unsupportedFilter(ValueSet.ConceptSetFilterComponent theFilter) {
 		String op = theFilter.hasOp() ? theFilter.getOp().toCode() : "(none)";
 		String property = theFilter.hasProperty() ? theFilter.getProperty() : "(none)";
-		return new UnsupportedFilterException("In-memory ValueSet expansion does not support filter with property '"
-				+ property + "' and operator '" + op + "'");
+		return new UnsupportedFilterException(Msg.code(3005)
+				+ "In-memory ValueSet expansion does not support filter with property '" + property
+				+ "' and operator '" + op + "'");
 	}
 
 	/**

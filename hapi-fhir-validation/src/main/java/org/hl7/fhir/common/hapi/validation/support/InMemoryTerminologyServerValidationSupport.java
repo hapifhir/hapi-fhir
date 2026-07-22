@@ -1021,9 +1021,10 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		} catch (ValueSetExpansionFilterContext.UnsupportedFilterException e) {
 			// The in-memory engine cannot evaluate this filter. Surface it as an expansion failure rather
 			// than silently returning an incomplete/empty expansion, so the caller can report an error or
-			// delegate to another terminology service in the chain.
+			// delegate to another terminology service in the chain. The message already carries the
+			// originating Msg.code from ValueSetExpansionFilterContext.
 			throw new ExpansionCouldNotBeCompletedInternallyException(
-					Msg.code(3004) + e.getMessage(),
+					e.getMessage(),
 					new CodeValidationIssue(
 							e.getMessage(),
 							IssueSeverity.ERROR,
