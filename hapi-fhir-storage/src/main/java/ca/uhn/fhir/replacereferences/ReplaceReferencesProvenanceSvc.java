@@ -165,6 +165,16 @@ public class ReplaceReferencesProvenanceSvc {
 		}
 	}
 
+	/**
+	 * Creates a Provenance resource for the $replace-references and $merge operations.
+	 *
+	 * @param theTargetId           the versioned id of the target resource of the operation.
+	 * @param theSourceId           the versioned id of the source resource of the operation.
+	 * @param theChangedResourceIds  the list of IDs of resources that were changed by the operation.
+	 * @param theStartTime          the start time of the operation.
+	 * @param theRequestDetails     the request details
+	 * @param theProvenanceAgents   the list of agents to be included in the Provenance resource.
+	 */
 	public IIdType createProvenance(
 			IIdType theTargetId,
 			IIdType theSourceId,

@@ -105,6 +105,7 @@ public class CrossPartitionReplaceReferencesSvc {
 			return new CrossPartitionReplaceReferencesResult(List.of(), List.of(), Map.of(), Map.of());
 		}
 
+		// Step 2: Classify into COPY (partition changes after rewrite) vs UPDATE (same partition)
 		Map<RequestPartitionId, List<IBaseResource>> copiesByDestPartition = new LinkedHashMap<>();
 		List<IBaseResource> updateList = new ArrayList<>();
 		replaceSourceReferencesAndClassifyResources(
@@ -128,16 +129,19 @@ public class CrossPartitionReplaceReferencesSvc {
 			return new CrossPartitionReplaceReferencesResult(List.of(), List.of(), Map.of(), Map.of());
 		}
 
+		// Capture versioned IDs from copyList before buildCombinedBundle clears them
 		List<IIdType> copiedResourceOriginalIds =
 				copyList.stream().map(IBaseResource::getIdElement).toList();
 		Map<RequestPartitionId, List<IIdType>> copiedResourceOriginalIdsByPartition = groupIdsByPartition(copyList);
 
+		// Step 3: Discover additional resources to update BEFORE bundle execution.
 		discoverAndAddAdditionalResourcesToUpdate(copyList, updateList, theRequestDetails);
 
 		List<RequestPartitionId> updatePartitions = updateList.stream()
 				.map(CrossPartitionReplaceReferencesSvc::getRequiredPartition)
 				.toList();
 
+		// Step 4: Build and execute a single combined transaction bundle.
 		Map<String, String> oldIdToPlaceholder = new HashMap<>();
 		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
 		buildCombinedBundle(copyList, updateList, oldIdToPlaceholder, bundleBuilder);
@@ -329,6 +333,16 @@ public class CrossPartitionReplaceReferencesSvc {
 		}
 	}
 
+	/**
+	 * Builds a single combined transaction bundle containing POST (CREATE) entries for copied
+	 * resources and PUT (UPDATE) entries for reference-only changes. References to copied resources
+	 * are replaced with {@code urn:uuid} placeholders in both lists — the transaction processor's
+	 * {@code IdSubstitutionMap} resolves these after the POST entries create the new resources.
+	 * <p>
+	 * Source→target references are already rewritten by {@link #replaceSourceReferencesAndClassifyResources}.
+	 *
+	 * @param theOldIdToPlaceholder populated by this method with old ID → urn:uuid mappings
+	 */
 	private void buildCombinedBundle(
 			List<IBaseResource> theCopyList,
 			List<IBaseResource> theUpdateList,

@@ -402,6 +402,7 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 			Parameters result = callMerge(mergeParams);
 			myMergeHelper.validateSyncMergeOutcome(result, mergeParams.asParametersResource(), myPatientIdTgt);
 
+			// rewritten to PatientTgt, but the performer reference to Organization is left unchanged.
 			Observation movedObs = assertSingleResourceMovedToTarget(
 				Observation.class, Map.of("obs-src", obsId), myPatientIdTgt, Observation::getIdentifier);
 			Reference movedPerformer = movedObs.getPerformerFirstRep();
@@ -578,7 +579,6 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 		}
 
 		// Obs(subject=PatientSrc, performer=Org). Merges PatientSrc→PatientTgt: Obs moves to PatientTgt's partition, subject is
-		// rewritten to PatientTgt, but the performer reference to Organization is left unchanged.
 		@Test
 		void testMerge_multipleReferences_onlySourcePatientRefReplaced() {
 			// Setup
@@ -726,7 +726,7 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 		@ParameterizedTest
 		@CsvSource({"false", "true"})
 		void testMerge_noReferencingResources_succeeds(boolean theDeleteSource) {
-			// Execute
+			// Execute & verify
 			MergeTestParameters mergeParams = new MergeTestParameters()
 				.sourceResource(new Reference(myPatientIdSrc))
 				.targetResource(new Reference(myPatientIdTgt))
@@ -761,7 +761,7 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 				createObservation(myPatientIdSrc, null, null, null);
 			}
 
-			// Execute & verify
+			// Execute with preview=true
 			MergeTestParameters params = new MergeTestParameters()
 				.sourceResource(new Reference(myPatientIdSrc))
 				.targetResource(new Reference(myPatientIdTgt))
@@ -802,7 +802,6 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 			IIdType obsId = createObservation(myPatientIdSrc, encId, null, "obs-src1");
 			Integer obsPartitionBefore = getPartitionId(obsId);
 
-			// Execute with preview=true
 			callMerge(new MergeTestParameters()
 				.sourceResource(new Reference(myPatientIdSrc))
 				.targetResource(new Reference(myPatientIdTgt))
@@ -922,7 +921,6 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 			IBaseResource encBefore = readResource(Encounter.class, encId);
 			IBaseResource obsBefore = readResource(Observation.class, obsId);
 
-			// Merge
 			callMerge(new MergeTestParameters()
 				.sourceResource(new Reference(myPatientIdSrc))
 				.targetResource(new Reference(myPatientIdTgt))
@@ -970,7 +968,6 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 			IBaseResource encBefore = readResource(Encounter.class, encId);
 			IBaseResource obsBefore = readResource(Observation.class, obsId);
 
-			// Merge
 			callMerge(new MergeTestParameters()
 				.sourceResource(new Reference(myPatientIdSrc))
 				.targetResource(new Reference(myPatientIdTgt))

@@ -791,9 +791,7 @@ public class MergeOperationTestHelper {
 		return expected;
 	}
 
-	// ================================================
 	// PRIVATE HELPERS
-	// ================================================
 
 	/**
 	 * If the resource has an 'active' field, asserts it has the expected value.

@@ -101,6 +101,7 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 			IIdType theTargetId, List<CanonicalIdentifier> theSourceIdentifiers, RequestDetails theRequestDetails) {
 
 		String resourceType = theTargetId.getResourceType();
+		// Returns a list because Patient resources can be merged via two endpoints (Patient/$merge or
 		List<AbstractMergeOperationInputParameterNames> parameterNamesList =
 				AbstractMergeOperationInputParameterNames.getParameterNamesForResourceType(resourceType);
 

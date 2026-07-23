@@ -71,6 +71,29 @@ public class PreviousResourceVersionRestorer {
 		myPartitionSettings = thePartitionSettings;
 	}
 
+	/**
+	 * Given a list of versioned resource references, this method restores each resource to its previous version
+	 * if the resource's current version matches the version in the reference
+	 * (i.e. the resource was not updated since the reference was created).
+	 *
+	 * Three cases are handled:
+	 * <ul>
+	 *   <li><b>Tombstoned resource</b> (ResourceGoneException): the exception carries the tombstone version.
+	 *       If it matches the reference version, the resource is undeleted by restoring to version - 1.</li>
+	 *   <li><b>Version-1 resource</b>: the resource was created new by the operation. It is deleted to undo.</li>
+	 *   <li><b>Existing resource at version N &gt; 1</b>: normal case — restore to version N - 1.</li>
+	 * </ul>
+	 *
+	 * This method is transactional and will attempt to restore all resources in a single transaction.
+	 *
+	 * Note that restoring updates a resource using its previous version's content,
+	 * so it will actually cause a new version to be created (i.e. it does not rewrite the history).
+	 * @param theReferences a list of versioned resource references to restore
+	 * @param theRequestDetails the request details for the operation
+	 *
+	 * @throws IllegalArgumentException if a given reference is versionless
+	 * @throws ResourceVersionConflictException if the current version of the resource does not match the version specified in the reference.
+	 */
 	public void restoreToPreviousVersionsInTrx(List<Reference> theReferences, RequestDetails theRequestDetails) {
 		if (!myPartitionSettings.isAllPartitionSearchSupported()) {
 			throw new InternalErrorException(Msg.code(2997)
@@ -150,6 +173,7 @@ public class PreviousResourceVersionRestorer {
 				}
 
 				if (referenceVersion == 1) {
+					// Resource was created new by the operation (v1) — collect for bundle delete
 					resourcesToDelete.add(referenceId.toUnqualifiedVersionless());
 					continue;
 				}
@@ -165,6 +189,7 @@ public class PreviousResourceVersionRestorer {
 			IIdType previousId = referenceId.withVersion(Long.toString(previousVersion));
 			IBaseResource previousResource = readResource(dao, previousId, theRequestDetails, thePinnedPartition);
 			previousResource.setId(previousResource.getIdElement().toUnqualifiedVersionless());
+			// Update the resource to the previous version's content
 			updateBundleBuilder.addTransactionUpdateEntry(previousResource);
 		}
 

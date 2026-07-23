@@ -25,6 +25,11 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Result of copying compartment resources across partitions during a cross-partition merge.
+ * Contains IDs extracted from the combined CREATE+UPDATE response bundle, plus
+ * versioned IDs of the original source copies (for deferred deletion).
+ */
 // Created by claude-opus-4-6
 public class CrossPartitionReplaceReferencesResult {
 	private final List<IIdType> myChangedResourceIds;

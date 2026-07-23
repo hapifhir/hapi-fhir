@@ -156,7 +156,6 @@ public class TransactionPartitionProcessorTest implements ITestDataBuilder {
 
 	@Test
 	void testPartialFailure_secondSubBundleFails_exceptionContainsSucceededPartitionEntries() {
-		// Setup
 		Bundle request = createRequest_Obs0_Patient0_Obs1_Patient1();
 
 		Bundle response0 = new Bundle();
@@ -169,7 +168,6 @@ public class TransactionPartitionProcessorTest implements ITestDataBuilder {
 
 		myInterceptor.setNextRanges(List.of(1, 3), List.of(0, 2));
 
-		// Test / Verify
 		assertThatThrownBy(() -> mySvc.execute(request))
 				.isInstanceOf(PartitionedTransactionPartialFailureException.class)
 				.satisfies(ex -> {
@@ -210,7 +208,6 @@ public class TransactionPartitionProcessorTest implements ITestDataBuilder {
 
 		myInterceptor.setNextRanges(List.of(1, 3), List.of(0, 2), List.of(4));
 
-		// Test / Verify
 		assertThatThrownBy(() -> mySvc.execute(request))
 				.isInstanceOf(PartitionedTransactionPartialFailureException.class)
 				.satisfies(ex -> {
@@ -228,7 +225,6 @@ public class TransactionPartitionProcessorTest implements ITestDataBuilder {
 
 	@Test
 	void testPartialFailure_firstSubBundleFails_originalExceptionPropagates() {
-		// Setup
 		Bundle request = createRequest_Obs0_Patient0_Obs1_Patient1();
 
 		when(myTransactionProcessor.processTransactionAsSubRequest(any(), any(), any(), any(), anyBoolean()))

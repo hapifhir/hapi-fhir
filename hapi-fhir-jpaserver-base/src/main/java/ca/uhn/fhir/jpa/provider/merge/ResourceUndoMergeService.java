@@ -63,6 +63,20 @@ import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_400_BAD_REQUEST;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_500_INTERNAL_ERROR;
 import static java.lang.String.format;
 
+/**
+ * This service implements the $hapi.fhir.undo-merge operation.
+ * It reverts the changes made by a previous merge (Patient/$merge or {resourceType}/$hapi.fhir.merge) operation based on the Provenance resource
+ * that was created as part of the merge operation.
+ *
+ * Supports both Patient-specific ($hapi.fhir.undo-merge on Patient) and generic
+ * ($hapi.fhir.undo-merge on any resource type with 'identifier' element) operations.
+ *
+ * Current limitations:
+ * - It fails if any resources to be restored have been subsequently changed since the merge operation was performed.
+ * - It can only run synchronously.
+ * - It fails if the number of resources to restore exceeds a specified resource limit
+ * (currently set to same size as getInternalSynchronousSearchSize in JPAStorageSettings by the operation provider).
+ */
 public class ResourceUndoMergeService {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceUndoMergeService.class);
