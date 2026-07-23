@@ -20,10 +20,15 @@
 package ca.uhn.fhir.jpa.model.dialect;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.HapiHibernateDialectSettingsService;
 import org.hibernate.boot.model.TypeContributions;
 import org.hibernate.dialect.OracleDialect;
 import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
+import org.hibernate.mapping.Table;
 import org.hibernate.service.ServiceRegistry;
+import org.hibernate.service.spi.ServiceBinding;
+import org.hibernate.service.spi.ServiceRegistryImplementor;
+import org.hibernate.tool.schema.spi.Exporter;
 import org.hibernate.type.SqlTypes;
 import org.hibernate.type.descriptor.jdbc.JdbcType;
 import org.hibernate.type.descriptor.jdbc.spi.JdbcTypeRegistry;
@@ -35,6 +40,8 @@ import java.sql.Types;
  * Minimum version: 12.2 (Oracle 12c R2)
  */
 public class HapiFhirOracleDialect extends OracleDialect implements IHapiFhirDialect {
+
+	private boolean myDatabasePartitionMode;
 
 	public HapiFhirOracleDialect() {
 		super();
@@ -66,8 +73,20 @@ public class HapiFhirOracleDialect extends OracleDialect implements IHapiFhirDia
 	}
 
 	@Override
+	public Exporter<Table> getTableExporter() {
+		return new HapiFhirOracleTableExporter(this, myDatabasePartitionMode);
+	}
+
+	@Override
 	public void contributeTypes(TypeContributions typeContributions, ServiceRegistry serviceRegistry) {
 		super.contributeTypes(typeContributions, serviceRegistry);
+
+		// We need to know if we are in database partition mode, as this affects the DDL we generate.
+		ServiceBinding<HapiHibernateDialectSettingsService> binding = ((ServiceRegistryImplementor) serviceRegistry)
+				.locateServiceBinding(HapiHibernateDialectSettingsService.class);
+		if (binding != null) {
+			myDatabasePartitionMode = binding.getService().isDatabasePartitionMode();
+		}
 
 		// What follows is necessary for Oracle 23+ which would otherwise try to use
 		// native BOOLEAN type that causes conversion issues with existing

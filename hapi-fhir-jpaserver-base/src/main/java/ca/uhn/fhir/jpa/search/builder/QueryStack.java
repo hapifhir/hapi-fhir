@@ -40,6 +40,7 @@ import ca.uhn.fhir.jpa.search.builder.models.PredicateBuilderTypeEnum;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseQuantityPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseSearchParamPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.BaseTokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
@@ -726,6 +727,14 @@ public class QueryStack {
 		 * that do not have a missing field (:missing=false) for much the same reason.
 		 */
 		SearchQueryBuilder sqlBuilder = theParams.getSqlBuilder();
+
+		// allow custom index providers to build their own :missing predicate
+		Optional<BaseSearchParamPredicateBuilder> custom =
+				sqlBuilder.getCustomPredicateBuilder(theParams.getParamType(), theParams.getParamName());
+		if (custom.isPresent()) {
+			return createMissingPredicateForCustomIndexProvider(theParams, sqlBuilder, custom.get());
+		}
+
 		if (myStorageSettings.getIndexMissingFields() == JpaStorageSettings.IndexEnabledEnum.DISABLED) {
 			// new search
 			return createMissingPredicateForUnindexedMissingFields(theParams, sqlBuilder);
@@ -733,6 +742,19 @@ public class QueryStack {
 			// old search
 			return createMissingPredicateForIndexedMissingFields(theParams, sqlBuilder);
 		}
+	}
+
+	/**
+	 * Builds the {@code :missing} predicate using the custom index builder
+	 */
+	private Condition createMissingPredicateForCustomIndexProvider(
+			MissingParameterQueryParams theParams,
+			SearchQueryBuilder theSqlBuilder,
+			BaseSearchParamPredicateBuilder theCustomPredicateBuilder) {
+		ResourceTablePredicateBuilder table = theSqlBuilder.getOrCreateResourceTablePredicateBuilder();
+		MissingQueryParameterPredicateParams missingQueryParameterPredicate = new MissingQueryParameterPredicateParams(
+				table, theParams.isMissing(), theParams.getParamName(), theParams.getRequestPartitionId());
+		return theCustomPredicateBuilder.createPredicateParamMissingValue(missingQueryParameterPredicate);
 	}
 
 	/**
@@ -2289,7 +2311,7 @@ public class QueryStack {
 		if (paramInverted) {
 			boolean selectPartitionId = myPartitionSettings.isDatabasePartitionMode();
 			SearchQueryBuilder sqlBuilder = theSqlBuilder.newChildSqlBuilder(selectPartitionId);
-			TokenPredicateBuilder tokenSelector = sqlBuilder.addTokenPredicateBuilder(null);
+			BaseTokenPredicateBuilder tokenSelector = sqlBuilder.addTokenPredicateBuilder(null, theSearchParam);
 			sqlBuilder.addPredicate(tokenSelector.createPredicateToken(
 					tokens, theResourceName, theSpnamePrefix, theSearchParam, theRequestPartitionId));
 
@@ -2312,11 +2334,11 @@ public class QueryStack {
 						theRequestPartitionId));
 			}
 
-			TokenPredicateBuilder tokenJoin = createOrReusePredicateBuilder(
+			BaseTokenPredicateBuilder tokenJoin = createOrReusePredicateBuilder(
 							PredicateBuilderTypeEnum.TOKEN,
 							theSourceJoinColumn,
 							paramName,
-							() -> theSqlBuilder.addTokenPredicateBuilder(theSourceJoinColumn))
+							() -> theSqlBuilder.addTokenPredicateBuilder(theSourceJoinColumn, theSearchParam))
 					.getResult();
 
 			predicate = tokenJoin.createPredicateToken(

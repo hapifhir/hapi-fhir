@@ -57,14 +57,24 @@ public class ResourceSystemEntity {
 		return myPid;
 	}
 
-	@SuppressWarnings("UnstableApiUsage")
 	public void setSystem(String theSystem) {
 		Validate.notBlank(theSystem, "System URL cannot be blank");
 		Validate.isTrue(theSystem.length() <= 500, "System URL cannot be longer than 500 characters: %s", theSystem);
 		mySystem = theSystem;
+		myPid = calculatePid(theSystem);
+	}
 
+	/**
+	 * Computes the {@code PID} for a system URL. This is a deterministic, partition-independent
+	 * murmur3-128 hash of the URL, so callers can calculate the id without a database lookup.
+	 *
+	 * @param theSystem The system URL (must not be {@literal null})
+	 * @return The PID associated with the given system URL
+	 */
+	@SuppressWarnings("UnstableApiUsage")
+	public static long calculatePid(String theSystem) {
 		Hasher hasher = Hashing.murmur3_128(0).newHasher();
 		hasher.putBytes(theSystem.getBytes(StandardCharsets.UTF_8));
-		myPid = hasher.hash().asLong();
+		return hasher.hash().asLong();
 	}
 }

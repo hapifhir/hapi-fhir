@@ -42,6 +42,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
+import ca.uhn.fhir.jpa.dao.index.SearchParamIndexProviderRegistry;
 import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceServiceRegistry;
 import ca.uhn.fhir.jpa.esr.IExternallyStoredResourceService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -150,6 +151,15 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 
 	@Autowired
 	private ExternallyStoredResourceServiceRegistry myExternallyStoredResourceServiceRegistry;
+
+	private SearchParamIndexProviderRegistry myIndexProviderRegistry = new SearchParamIndexProviderRegistry(List.of());
+
+	@Autowired(required = false)
+	public void setSearchParamIndexProviderRegistry(SearchParamIndexProviderRegistry theRegistry) {
+		if (theRegistry != null) {
+			myIndexProviderRegistry = theRegistry;
+		}
+	}
 
 	@Override
 	@Transactional
@@ -388,6 +398,8 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 		if (resource == null || resource.isHasLinks()) {
 			myResourceLinkDao.deleteByResourceId(theResourceId);
 		}
+
+		myIndexProviderRegistry.getProviders().forEach(provider -> provider.deleteByResourceId(theResourceId));
 	}
 
 	private void expungeHistoricalVersionsOfId(

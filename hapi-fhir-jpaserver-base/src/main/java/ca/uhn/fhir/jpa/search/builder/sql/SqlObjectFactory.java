@@ -19,7 +19,10 @@
  */
 package ca.uhn.fhir.jpa.search.builder.sql;
 
+import ca.uhn.fhir.jpa.dao.index.SearchParamIndexProviderRegistry;
+import ca.uhn.fhir.jpa.dao.index.SearchParamIndexRouting;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
+import ca.uhn.fhir.jpa.search.builder.predicate.BaseSearchParamPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
@@ -38,16 +41,39 @@ import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class SqlObjectFactory {
 
 	@Autowired
 	private ApplicationContext myApplicationContext;
+
+	private SearchParamIndexProviderRegistry myIndexProviderRegistry = new SearchParamIndexProviderRegistry(List.of());
+
+	@Autowired(required = false)
+	public void setSearchParamIndexProviderRegistry(SearchParamIndexProviderRegistry theRegistry) {
+		if (theRegistry != null) {
+			myIndexProviderRegistry = theRegistry;
+		}
+	}
+
+	/**
+	 * Lets a custom index serve reads for the given search parameter, falling back to the built-in index
+	 * if no provider handles it.
+	 */
+	public Optional<BaseSearchParamPredicateBuilder> provideCustomPredicateBuilder(
+			SearchQueryBuilder theSearchSqlBuilder, RestSearchParameterTypeEnum theParamType, String theParamName) {
+		return myIndexProviderRegistry
+				.resolveProvider(SearchParamIndexRouting.forParamType(theParamType))
+				.flatMap(provider -> provider.createPredicateBuilder(theSearchSqlBuilder, theParamName));
+	}
 
 	public ComboUniqueSearchParameterPredicateBuilder newComboUniqueSearchParameterPredicateBuilder(
 			SearchQueryBuilder theSearchSqlBuilder) {
