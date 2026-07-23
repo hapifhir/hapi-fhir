@@ -688,9 +688,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		 * In case there is no running search, if the total is listed as accurate we know one is coming
 		 * so let's wait a bit for it to show up
 		 */
-		Optional<Search> search = myTxService
-				.withRequest(theRequestDetails)
-				.execute(() -> mySearchCacheSvc.fetchByUuid(theUuid, theRequestPartitionId));
+		Optional<Search> search = mySearchCacheSvc.fetchByUuid(theUuid, theRequestPartitionId);
 		if (search.isPresent()) {
 			Optional<SearchParameterMap> searchParameterMap = search.get().getSearchParameterMap();
 			if (searchParameterMap.isPresent()

@@ -196,6 +196,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.addColumn("20260706.10", "EXPANSION_ERROR")
 				.nullable()
 				.type(ColumnTypeEnum.TEXT);
+
+		version.onTable(Search.HFJ_SEARCH)
+				.modifyColumn("20260716.10", Search.SEARCH_UUID)
+				.nonNullable()
+				.withType(ColumnTypeEnum.STRING, 136);
 	}
 
 	protected void init8_10_0() {
