@@ -1,0 +1,14 @@
+---
+type: add
+jira: PRAR-4911
+title: "A new jobDefinitionIdOverride property has been added to BulkExportJobParameters. When set
+by server-side interceptor code (typically on the STORAGE_PRE_INITIATE_BULK_EXPORT pointcut,
+though STORAGE_INITIATE_BULK_EXPORT works equally), the bulk export kickoff
+(including the $export and $davinci-data-export operations) starts the named registered batch2 job
+definition instead of the default BULK_EXPORT job, while parameter parsing, permission checks, and
+$export-poll-status remain unchanged. The property cannot be set from the client request. Note that
+in a mixed-version cluster, a job instance whose stored parameters contain this new property cannot
+be deserialized by older binaries, so the feature should only be used once all nodes are upgraded.
+Also note that exports run under an alternate job definition are not covered by the automatic
+bulk-export file purge, which only applies to BULK_EXPORT instances; retention of their output is
+the responsibility of the alternate job's operator."

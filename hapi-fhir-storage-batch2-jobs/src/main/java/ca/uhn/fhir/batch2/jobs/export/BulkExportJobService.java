@@ -42,6 +42,8 @@ import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /**
  * This class is responsible for initiating a bulk export job
  * with appropriate _type parameter and partitionId as well as
@@ -85,7 +87,10 @@ public class BulkExportJobService {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setParameters(theBulkExportJobParameters);
 		startRequest.setUseCache(useCache);
-		startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
+		String jobDefinitionId = isNotBlank(theBulkExportJobParameters.getJobDefinitionIdOverride())
+				? theBulkExportJobParameters.getJobDefinitionIdOverride()
+				: Batch2JobDefinitionConstants.BULK_EXPORT;
+		startRequest.setJobDefinitionId(jobDefinitionId);
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(theRequestDetails, startRequest);
 
 		BulkExportJobServiceUtil.writePollingLocationsToResponseHeaders(theRequestDetails, response.getInstanceId());

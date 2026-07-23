@@ -1167,13 +1167,15 @@ public enum Pointcut implements IPointcut {
 	 * Invoked when a Bulk Export job is being kicked off, but before any permission checks
 	 * have been done.
 	 * This hook can be used to modify or update parameters as need be before
-	 * authorization/permission checks are done.
+	 * authorization/permission checks are done. Among the parameters a hook may set is
+	 * <code>jobDefinitionIdOverride</code>, which routes the export to an alternate
+	 * registered batch2 job definition instead of the default <code>BULK_EXPORT</code> job.
 	 * <p>
 	 * Hooks may accept the following parameters:
 	 * </p>
 	 * <ul>
 	 * <li>
-	 * ca.uhn.fhir.jpa.bulk.export.api.BulkDataExportOptions - The details of the job being kicked off
+	 * ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters - The (mutable) parameters of the job being kicked off
 	 * </li>
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
@@ -1205,14 +1207,16 @@ public enum Pointcut implements IPointcut {
 	 * Invoked when a Bulk Export job is being kicked off. Hook methods may modify
 	 * the request, or raise an exception to prevent it from being initiated.
 	 * This hook is not guaranteed to be called before permission checks, and so
-	 * anu implementers should be cautious of changing the options in ways that would
-	 * affect permissions.
+	 * any implementers should be cautious of changing the options in ways that would
+	 * affect permissions. Like {@link #STORAGE_PRE_INITIATE_BULK_EXPORT}, this hook
+	 * receives the mutable job parameters, so anything settable there (including
+	 * <code>jobDefinitionIdOverride</code>) is also honored when set from this hook.
 	 * <p>
 	 * Hooks may accept the following parameters:
 	 * </p>
 	 * <ul>
 	 * <li>
-	 * ca.uhn.fhir.jpa.bulk.export.api.BulkDataExportOptions - The details of the job being kicked off
+	 * ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters - The (mutable) parameters of the job being kicked off
 	 * </li>
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
