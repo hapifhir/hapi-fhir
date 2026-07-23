@@ -205,12 +205,12 @@ public class PreviousResourceVersionRestorer {
 			RequestDetails theRequestDetails,
 			@Nullable RequestPartitionId thePartition) {
 		if (thePartition != null) {
-			return readPinnedToPartition(theDao, theId, thePartition);
+			return readInPartition(theDao, theId, thePartition);
 		}
 		return readAcrossPartitions(theDao, theId, theRequestDetails);
 	}
 
-	private IBaseResource readPinnedToPartition(
+	private IBaseResource readInPartition(
 			IFhirResourceDao<IBaseResource> theDao, IIdType theId, RequestPartitionId thePartition) {
 		SystemRequestDetails requestDetailsForPartition = SystemRequestDetails.forRequestPartitionId(thePartition);
 		return theDao.read(theId, requestDetailsForPartition);
