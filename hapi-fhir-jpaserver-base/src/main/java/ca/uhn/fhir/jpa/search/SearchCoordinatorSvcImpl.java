@@ -75,7 +75,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.io.Serial;
 import java.util.Date;
@@ -131,22 +130,23 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	 * Constructor
 	 */
 	public SearchCoordinatorSvcImpl(
-		FhirContext theContext,
-		JpaStorageSettings theStorageSettings,
-		IInterceptorBroadcaster theInterceptorBroadcaster,
-		HapiTransactionService theTxService,
-		ISearchCacheSvc theSearchCacheSvc,
-		ISearchResultCacheSvc theSearchResultCacheSvc,
-		DaoRegistry theDaoRegistry,
-		SearchBuilderFactory<JpaPid> theSearchBuilderFactory,
-		ISynchronousSearchSvc theSynchronousSearchSvc,
-		ICacheAwareSearchSvc theCacheAwareSearchSvc,
-		PersistedJpaBundleProviderFactory thePersistedJpaBundleProviderFactory,
-		ISearchParamRegistry theSearchParamRegistry,
-		SearchStrategyFactory theSearchStrategyFactory,
-		ExceptionService theExceptionSvc,
-		BeanFactory theBeanFactory,
-		IRequestPartitionHelperSvc theRequestPartitionHelperSvc, IPagingProvider thePagingProvider) {
+			FhirContext theContext,
+			JpaStorageSettings theStorageSettings,
+			IInterceptorBroadcaster theInterceptorBroadcaster,
+			HapiTransactionService theTxService,
+			ISearchCacheSvc theSearchCacheSvc,
+			ISearchResultCacheSvc theSearchResultCacheSvc,
+			DaoRegistry theDaoRegistry,
+			SearchBuilderFactory<JpaPid> theSearchBuilderFactory,
+			ISynchronousSearchSvc theSynchronousSearchSvc,
+			ICacheAwareSearchSvc theCacheAwareSearchSvc,
+			PersistedJpaBundleProviderFactory thePersistedJpaBundleProviderFactory,
+			ISearchParamRegistry theSearchParamRegistry,
+			SearchStrategyFactory theSearchStrategyFactory,
+			ExceptionService theExceptionSvc,
+			BeanFactory theBeanFactory,
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
+			IPagingProvider thePagingProvider) {
 		super();
 		myContext = theContext;
 		myStorageSettings = theStorageSettings;
@@ -231,7 +231,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 			int theTo,
 			@Nullable RequestDetails theRequestDetails,
 			RequestPartitionId theRequestPartitionId) {
-		assert !TransactionSynchronizationManager.isActualTransactionActive();
 
 		// If we're actively searching right now, don't try to do anything until at least one batch has been
 		// persisted in the DB
@@ -461,7 +460,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 					theParams, theRequestDetails, searchUuid, sb, loadSynchronousUpTo, requestPartitionId);
 		}
 
-		return myCacheAwareSearchSvc.executeQuery(theParams, theRequestDetails, theCacheControlDirective, search, sb, requestPartitionId);
+		return myCacheAwareSearchSvc.executeQuery(
+				theParams, theRequestDetails, theCacheControlDirective, search, sb, requestPartitionId);
 	}
 
 	/**
@@ -677,7 +677,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		ourLog.debug("Search initial phase completed in {}ms", w.getMillis());
 		return retVal;
 	}
-
 
 	@Nullable
 	private Integer getLoadSynchronousUpToOrNull(CacheControlDirective theCacheControlDirective) {

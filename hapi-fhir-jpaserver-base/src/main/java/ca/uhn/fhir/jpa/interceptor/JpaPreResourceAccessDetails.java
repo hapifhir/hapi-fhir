@@ -23,6 +23,7 @@ import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.util.ICallable;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.ArrayList;
@@ -50,6 +51,11 @@ public class JpaPreResourceAccessDetails implements IPreResourceAccessDetails {
 	}
 
 	public JpaPreResourceAccessDetails(List<JpaPid> theResourcePids, List<IBaseResource> theUnsyncedResources) {
+		Validate.isTrue(
+				theResourcePids.size() == theUnsyncedResources.size(),
+				"Size mismatch - theResourcePids.size() %d != theUnsyncedResources.size() %d",
+				theResourcePids.size(),
+				theUnsyncedResources.size());
 		myResourcePids = theResourcePids;
 		myBlocked = new boolean[theResourcePids.size()];
 		myResources = theUnsyncedResources;
@@ -64,6 +70,7 @@ public class JpaPreResourceAccessDetails implements IPreResourceAccessDetails {
 	@Override
 	public IBaseResource getResource(int theIndex) {
 		if (myResources == null) {
+			// FIXME: needed?
 			myResources = new ArrayList<>(myResourcePids.size());
 			mySearchBuilderSupplier
 					.call()

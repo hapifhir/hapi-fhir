@@ -59,7 +59,6 @@ import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.transaction.annotation.Propagation;
 
 import java.io.IOException;
 import java.util.ArrayList;

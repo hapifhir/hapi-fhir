@@ -12,8 +12,14 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 public interface ICacheAwareSearchSvc {
 
 	// FIXME: rename to executeNewQuery
-	IBundleProvider executeQuery(SearchParameterMap theParams, RequestDetails theRequestDetails, CacheControlDirective theCacheControlDirective, Search theSearchEntity, ISearchBuilder<JpaPid> theSearchBuilder, RequestPartitionId theRequestPartitionId);
+	IBundleProvider executeQuery(
+			SearchParameterMap theParams,
+			RequestDetails theRequestDetails,
+			CacheControlDirective theCacheControlDirective,
+			Search theSearchEntity,
+			ISearchBuilder<JpaPid> theSearchBuilder,
+			RequestPartitionId theRequestPartitionId);
 
 	// FIXME: rename to continueExistingQuery
-    IBundleProvider continueQuery(RequestDetails theRequestDetails, String theId);
+	IBundleProvider continueQuery(RequestDetails theRequestDetails, String theId);
 }

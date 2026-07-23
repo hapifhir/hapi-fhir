@@ -144,7 +144,9 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 			return size;
 		}
 
-		if (getSearchEntity().getSearchParameterMap().isEmpty() || getSearchEntity().getSearchParameterMap().get().getSearchTotalMode() != SearchTotalModeEnum.ACCURATE) {
+		if (getSearchEntity().getSearchParameterMap().isEmpty()
+				|| getSearchEntity().getSearchParameterMap().get().getSearchTotalMode()
+						!= SearchTotalModeEnum.ACCURATE) {
 			return null;
 		}
 

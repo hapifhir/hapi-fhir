@@ -178,13 +178,13 @@ public class QueryParameterUtils {
 	}
 
 	public static void populateSearchEntity(
-		SearchParameterMap theParams,
-		String theResourceType,
-		String theSearchUuid,
-		String theQueryString,
-		Search theSearch,
-		RequestPartitionId theRequestPartitionId,
-		@Nullable IPagingProvider thePagingProvider) {
+			SearchParameterMap theParams,
+			String theResourceType,
+			String theSearchUuid,
+			String theQueryString,
+			Search theSearch,
+			RequestPartitionId theRequestPartitionId,
+			@Nullable IPagingProvider thePagingProvider) {
 		theSearch.setDeleted(false);
 		theSearch.setUuid(theSearchUuid);
 		theSearch.setCreated(new Date());
@@ -193,12 +193,13 @@ public class QueryParameterUtils {
 
 		if (theParams.getCount() != null) {
 			theSearch.setPreferredPageSize(theParams.getCount());
-		} else if (thePagingProvider != null){
+		} else if (thePagingProvider != null) {
 			theSearch.setPreferredPageSize(thePagingProvider.getDefaultPageSize());
 		}
 		if (theSearch.getPreferredPageSize() == null) {
 			theSearch.setPreferredPageSize(DEFAULT_DEFAULT_PAGE_SIZE);
-		} else if (thePagingProvider != null && theSearch.getPreferredPageSize() > thePagingProvider.getMaximumPageSize()) {
+		} else if (thePagingProvider != null
+				&& theSearch.getPreferredPageSize() > thePagingProvider.getMaximumPageSize()) {
 			theSearch.setPreferredPageSize(thePagingProvider.getMaximumPageSize());
 		}
 
