@@ -60,8 +60,8 @@ import java.util.Set;
  * All operations are performed within a single DB transaction for atomicity.
  */
 // Created by claude-opus-4-6
-public class CrossPartitionReplaceReferencesSvc {
-	private static final Logger ourLog = LoggerFactory.getLogger(CrossPartitionReplaceReferencesSvc.class);
+public class PartitionAwareReplaceReferencesSvc {
+	private static final Logger ourLog = LoggerFactory.getLogger(PartitionAwareReplaceReferencesSvc.class);
 
 	private final DaoRegistry myDaoRegistry;
 	private final IResourceLinkDao myResourceLinkDao;
@@ -69,7 +69,7 @@ public class CrossPartitionReplaceReferencesSvc {
 	private final IHapiTransactionService myHapiTransactionService;
 	private final FhirContext myFhirContext;
 
-	public CrossPartitionReplaceReferencesSvc(
+	public PartitionAwareReplaceReferencesSvc(
 			DaoRegistry theDaoRegistry,
 			IResourceLinkDao theResourceLinkDao,
 			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
@@ -79,7 +79,6 @@ public class CrossPartitionReplaceReferencesSvc {
 		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 		myHapiTransactionService = theHapiTransactionService;
 		myFhirContext = theDaoRegistry.getFhirContext();
-		ids = stream.toList(); // never null — returns empty list if no results
 	}
 
 	/**
@@ -88,14 +87,14 @@ public class CrossPartitionReplaceReferencesSvc {
 	 * transaction — all internal operations use {@code transactionNested()}.
 	 * <p>
 	 * Does NOT delete the source copies — the caller is responsible for deleting them after
-	 * provenance creation using the returned {@link CrossPartitionReplaceReferencesResult#getCopiedResourceOriginalIds()}.
+	 * provenance creation using the returned {@link PartitionAwareReplaceReferencesResult#getCopiedResourceOriginalIds()}.
 	 * Deletion cannot happen here because provenance must reference the originals (as tombstones),
 	 * and deleting first would violate referential integrity checks.
 	 *
-	 * @return a {@link CrossPartitionReplaceReferencesResult} containing references to created/updated resources
+	 * @return a {@link PartitionAwareReplaceReferencesResult} containing references to created/updated resources
 	 *         and versioned references to the original source copies for deferred deletion.
 	 */
-	public CrossPartitionReplaceReferencesResult copyCompartmentResourcesAndReplaceReferences(
+	public PartitionAwareReplaceReferencesResult copyCompartmentResourcesAndReplaceReferences(
 			IBaseResource theSourceResource, IBaseResource theTargetResource, RequestDetails theRequestDetails) {
 
 		IIdType sourceId = theSourceResource.getIdElement().toUnqualifiedVersionless();
@@ -116,7 +115,7 @@ public class CrossPartitionReplaceReferencesSvc {
 
 		if (allReferencingResources.isEmpty()) {
 			ourLog.info("No referencing resources found for {}", sourceId.getValue());
-			return new CrossPartitionReplaceReferencesResult(List.of(), List.of(), Map.of(), Map.of());
+			return new PartitionAwareReplaceReferencesResult(List.of(), List.of(), Map.of(), Map.of());
 		}
 
 		// Step 2: Classify into COPY (partition changes after rewrite) vs UPDATE (same partition)
@@ -140,7 +139,7 @@ public class CrossPartitionReplaceReferencesSvc {
 				updateList.size());
 
 		if (copyList.isEmpty() && updateList.isEmpty()) {
-			return new CrossPartitionReplaceReferencesResult(List.of(), List.of(), Map.of(), Map.of());
+			return new PartitionAwareReplaceReferencesResult(List.of(), List.of(), Map.of(), Map.of());
 		}
 
 		// Capture versioned IDs from copyList before buildCombinedBundle clears them
@@ -152,7 +151,7 @@ public class CrossPartitionReplaceReferencesSvc {
 		discoverAndAddAdditionalResourcesToUpdate(copyList, updateList, theRequestDetails);
 
 		List<RequestPartitionId> updatePartitions = updateList.stream()
-				.map(CrossPartitionReplaceReferencesSvc::getRequiredPartition)
+				.map(PartitionAwareReplaceReferencesSvc::getRequiredPartition)
 				.toList();
 
 		// Step 4: Build and execute a single combined transaction bundle.
@@ -180,7 +179,7 @@ public class CrossPartitionReplaceReferencesSvc {
 		List<IIdType> changedResourceIds =
 				ReplaceReferencesProvenanceSvc.extractChangedResourceIds(List.of(combinedResponse));
 
-		return new CrossPartitionReplaceReferencesResult(
+		return new PartitionAwareReplaceReferencesResult(
 				changedResourceIds,
 				copiedResourceOriginalIds,
 				changedResourceIdsByPartition,

@@ -35,8 +35,8 @@ import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
-import ca.uhn.fhir.jpa.provider.CrossPartitionReplaceReferencesResult;
-import ca.uhn.fhir.jpa.provider.CrossPartitionReplaceReferencesSvc;
+import ca.uhn.fhir.jpa.provider.PartitionAwareReplaceReferencesResult;
+import ca.uhn.fhir.jpa.provider.PartitionAwareReplaceReferencesSvc;
 import ca.uhn.fhir.merge.MergeProvenanceGroupIdUtil;
 import ca.uhn.fhir.merge.MergeResourceHelper;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -96,7 +96,7 @@ public class ResourceMergeService {
 	private final MergeResourceHelper myMergeResourceHelper;
 	private final Batch2TaskHelper myBatch2TaskHelper;
 	private final MergeValidationService myMergeValidationService;
-	private final CrossPartitionReplaceReferencesSvc myCrossPartitionReplaceReferencesSvc;
+	private final PartitionAwareReplaceReferencesSvc myPartitionAwareReplaceReferencesSvc;
 	private final PartitionSettings myPartitionSettings;
 
 	public ResourceMergeService(
@@ -110,7 +110,7 @@ public class ResourceMergeService {
 			Batch2TaskHelper theBatch2TaskHelper,
 			MergeValidationService theMergeValidationService,
 			MergeResourceHelper theMergeResourceHelper,
-			CrossPartitionReplaceReferencesSvc theCrossPartitionReplaceReferencesSvc,
+			PartitionAwareReplaceReferencesSvc thePartitionAwareReplaceReferencesSvc,
 			PartitionSettings thePartitionSettings) {
 		myStorageSettings = theStorageSettings;
 		myDaoRegistry = theDaoRegistry;
@@ -125,7 +125,7 @@ public class ResourceMergeService {
 		myHapiTransactionService = theHapiTransactionService;
 		myMergeResourceHelper = theMergeResourceHelper;
 		myMergeValidationService = theMergeValidationService;
-		myCrossPartitionReplaceReferencesSvc = theCrossPartitionReplaceReferencesSvc;
+		myPartitionAwareReplaceReferencesSvc = thePartitionAwareReplaceReferencesSvc;
 		myPartitionSettings = thePartitionSettings;
 	}
 
@@ -264,7 +264,7 @@ public class ResourceMergeService {
 
 		validateResourceLimit(theMergeOperationParameters, theSourceResource, theRequestDetails, crossPartition);
 
-		if (crossPartition) {
+		if (requiresPartitionAwareMerge(theSourceResource, theTargetResource)) {
 			doMergeSyncCrossPartition(
 					theMergeOperationParameters,
 					theSourceResource,
@@ -406,8 +406,8 @@ public class ResourceMergeService {
 		RequestPartitionId sourcePartition = getRequiredPartition(theSourceResource);
 		RequestPartitionId targetPartition = getRequiredPartition(theTargetResource);
 
-		CrossPartitionReplaceReferencesResult copyResult =
-				myCrossPartitionReplaceReferencesSvc.copyCompartmentResourcesAndReplaceReferences(
+		PartitionAwareReplaceReferencesResult copyResult =
+				myPartitionAwareReplaceReferencesSvc.copyCompartmentResourcesAndReplaceReferences(
 						theSourceResource, theTargetResource, theRequestDetails);
 		List<IIdType> copiedResourceOriginalIds = copyResult.getCopiedResourceOriginalIds();
 
@@ -460,7 +460,7 @@ public class ResourceMergeService {
 
 	private void createCrossPartitionProvenances(
 			MergeOperationInputParameters theMergeOperationParameters,
-			CrossPartitionReplaceReferencesResult theCopyResult,
+			PartitionAwareReplaceReferencesResult theCopyResult,
 			IIdType theSourcePostMergeId,
 			RequestPartitionId theSourcePartition,
 			IIdType theTargetPostMergeId,
@@ -676,6 +676,11 @@ public class ResourceMergeService {
 			}
 			throw new PreconditionFailedException(Msg.code(2880) + message);
 		}
+	}
+
+	private boolean requiresPartitionAwareMerge(IBaseResource theSourceResource, IBaseResource theTargetResource) {
+		return isCrossPartitionMerge(theSourceResource, theTargetResource)
+				|| !myPartitionSettings.isAllPartitionSearchSupported();
 	}
 
 	private boolean isCrossPartitionMerge(IBaseResource theSourceResource, IBaseResource theTargetResource) {

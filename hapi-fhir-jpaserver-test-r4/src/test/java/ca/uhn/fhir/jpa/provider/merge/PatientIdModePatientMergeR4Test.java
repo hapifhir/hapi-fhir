@@ -70,7 +70,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 /**
  * Integration tests for cross-partition Patient $merge in PATIENT_ID unnamed partition mode.
  *
- * <p>Tests the behavior of {@code CrossPartitionReplaceReferencesSvc} when merging
+ * <p>Tests the behavior of {@code PartitionAwareReplaceReferencesSvc} when merging
  * patients that reside in different partitions (as determined by {@code PatientIdPartitionInterceptor}).
  */
 // Created by claude-opus-4-6

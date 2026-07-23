@@ -226,7 +226,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	/**
 	 * Cross-partition replace references is not yet supported because the expected behavior
 	 * is not well defined for all cross-partition request modes. For patient-id partition mode,
-	 * this can be implemented using {@link CrossPartitionReplaceReferencesSvc}.
+	 * this can be implemented using {@link PartitionAwareReplaceReferencesSvc}.
 	 */
 	private void throwIfCrossPartition(IBaseResource theSourceResource, IBaseResource theTargetResource) {
 		if (isCrossPartition(theSourceResource, theTargetResource)) {

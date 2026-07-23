@@ -40,8 +40,8 @@ import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.graphql.GraphQLProviderWithIntrospection;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
-import ca.uhn.fhir.jpa.provider.CrossPartitionReplaceReferencesSvc;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
+import ca.uhn.fhir.jpa.provider.PartitionAwareReplaceReferencesSvc;
 import ca.uhn.fhir.jpa.provider.merge.MergeOperationProviderSvc;
 import ca.uhn.fhir.jpa.provider.merge.MergeValidationService;
 import ca.uhn.fhir.jpa.provider.merge.PatientMergeProvider;
@@ -152,12 +152,12 @@ public class JpaR4Config {
 	}
 
 	@Bean
-	public CrossPartitionReplaceReferencesSvc crossPartitionReplaceReferencesSvc(
+	public PartitionAwareReplaceReferencesSvc partitionAwareReplaceReferencesSvc(
 			DaoRegistry theDaoRegistry,
 			IResourceLinkDao theResourceLinkDao,
 			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
 			HapiTransactionService theHapiTransactionService) {
-		return new CrossPartitionReplaceReferencesSvc(
+		return new PartitionAwareReplaceReferencesSvc(
 				theDaoRegistry, theResourceLinkDao, theRequestPartitionHelperSvc, theHapiTransactionService);
 	}
 
@@ -173,7 +173,7 @@ public class JpaR4Config {
 			JpaStorageSettings theStorageSettings,
 			MergeValidationService theMergeValidationService,
 			MergeResourceHelper theMergeResourceHelper,
-			CrossPartitionReplaceReferencesSvc theCrossPartitionReplaceReferencesSvc,
+			PartitionAwareReplaceReferencesSvc thePartitionAwareReplaceReferencesSvc,
 			PartitionSettings thePartitionSettings) {
 
 		return new ResourceMergeService(
@@ -187,7 +187,7 @@ public class JpaR4Config {
 				theBatch2TaskHelper,
 				theMergeValidationService,
 				theMergeResourceHelper,
-				theCrossPartitionReplaceReferencesSvc,
+				thePartitionAwareReplaceReferencesSvc,
 				thePartitionSettings);
 	}
 

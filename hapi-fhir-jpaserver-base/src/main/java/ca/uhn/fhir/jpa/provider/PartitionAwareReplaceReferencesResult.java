@@ -31,13 +31,13 @@ import java.util.Map;
  * versioned IDs of the original source copies (for deferred deletion).
  */
 // Created by claude-opus-4-6
-public class CrossPartitionReplaceReferencesResult {
+public class PartitionAwareReplaceReferencesResult {
 	private final List<IIdType> myChangedResourceIds;
 	private final List<IIdType> myCopiedResourceOriginalIds;
 	private final Map<RequestPartitionId, List<IIdType>> myChangedResourceIdsByPartition;
 	private final Map<RequestPartitionId, List<IIdType>> myCopiedResourceOriginalIdsByPartition;
 
-	public CrossPartitionReplaceReferencesResult(
+	public PartitionAwareReplaceReferencesResult(
 			List<IIdType> theChangedResourceIds,
 			List<IIdType> theCopiedResourceOriginalIds,
 			Map<RequestPartitionId, List<IIdType>> theChangedResourceIdsByPartition,
