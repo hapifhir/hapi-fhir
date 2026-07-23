@@ -85,7 +85,8 @@ public class ResetSequencesTestHelper implements AfterEachCallback {
 		List<Component.ValueGenerationPlan> generationPlans = getFieldValue(persister.getGenerator(), "generationPlans");
 		Component.ValueGenerationPlan plan = generationPlans.get(0);
 
-		HapiSequenceStyleGenerator subGenerator = getFieldValue(plan, "subgenerator");
+		// Hibernate 7 renamed Component.ValueGenerationPlan#subgenerator to #generator.
+		HapiSequenceStyleGenerator subGenerator = getFieldValue(plan, "generator");
 
 		Optimizer optimizer = subGenerator.getOptimizer();
 		if (optimizer instanceof PooledLoThreadLocalOptimizer) {
