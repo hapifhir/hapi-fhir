@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,8 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -224,5 +227,22 @@ public class AddIndexTaskTest extends BaseTest {
 				}
 			}
 		}
+	}
+
+	@Test
+	public void testWithColumnsListOverloadEmitsColumnsInDeclaredOrder() {
+		List<BaseTask> capturedTasks = new ArrayList<>();
+		new Builder("1.0.0", capturedTasks::add)
+			.onTable("SOMETABLE")
+			.addIndex("1", "IDX_ANINDEX")
+			.unique(false)
+			.withColumns(List.of("PID", "TEXTCOL"));
+
+		assertThat(capturedTasks).hasSize(1);
+		AddIndexTask task = (AddIndexTask) capturedTasks.get(0);
+		task.setOnline(false);
+		task.setDriverType(DriverTypeEnum.H2_EMBEDDED);
+
+		assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)", task.generateSql());
 	}
 }
