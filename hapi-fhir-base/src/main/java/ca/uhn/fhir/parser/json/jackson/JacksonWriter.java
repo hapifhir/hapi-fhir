@@ -317,6 +317,7 @@ public class JacksonWriter extends BaseJsonLikeWriter {
 			super(theDelegate);
 			myDelegate = theDelegate;
 		}
+
 		@Override
 		public void close() throws IOException {
 			myDelegate.flush();
