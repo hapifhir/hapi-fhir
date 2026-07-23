@@ -29,6 +29,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Compartment;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
@@ -144,15 +145,89 @@ public class SearchParameterUtil {
 			validCompartments.add("Patient");
 		}
 
+		/*
+		 * In many cases, the "patient" SP is a "convenience" SP that resolves to a path to
+		 * another SearchParameter that  declares patient compartment membership. In this case,
+		 *  we add the "patient" SP to the patient compartment as well.
+		 */
+		if ("patient".equalsIgnoreCase(theSearchParamDefinition.name())
+				&& paramType.equals(RestSearchParameterTypeEnum.REFERENCE)) {
+
+			String fhirResourceType = getResourceTypeName(theResourceClazz);
+			// Ignore deliberately omitted parameters
+			Set<String> omittedSps = RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT.getOrDefault(
+					fhirResourceType, Collections.emptySet());
+
+			if (!omittedSps.contains(theSearchParamDefinition.name().toLowerCase())
+					&& isCoveredByPatientCompartmentBaseSp(
+							theResourceClazz, fhirResourceType, theSearchParamDefinition)) {
+				validCompartments.add("Patient");
+			}
+		}
+
 		return validCompartments;
 	}
 
-	private static String getCleansedCompartmentName(String theCompartmentName) {
+	static String getCleansedCompartmentName(String theCompartmentName) {
 		// As of 2021-12-28 the R5 structures incorrectly have this prefix
 		if (theCompartmentName.startsWith("Base FHIR compartment definition for ")) {
 			return theCompartmentName.substring("Base FHIR compartment definition for ".length());
 		}
 		return theCompartmentName;
+	}
+
+	/**
+	 * Returns the FHIR resource type name for the given class. Uses the {@link ResourceDef}
+	 * annotation when present (since Java class names may differ from FHIR type names, e.g.
+	 * {@code ListResource.class} → {@code "List"}), falling back to the simple class name.
+	 */
+	private static String getResourceTypeName(Class<? extends IBase> theResourceClazz) {
+		ResourceDef resourceDef = theResourceClazz.getAnnotation(ResourceDef.class);
+		return (resourceDef != null && !resourceDef.name().isEmpty())
+				? resourceDef.name()
+				: theResourceClazz.getSimpleName();
+	}
+
+	/**
+	 * Returns true if {@code thePatientSp}'s path covers the same field as another {@code @SearchParamDefinition}
+	 * that declares Patient compartment membership on the same {@code theResourceClazz}.
+	 * A base SP segment matches when the patient SP has the same path (exact alias) or suffixed with
+	 * {@code .where(resolve() is Patient)} (narrowing).
+	 *
+	 * <p> Example: Observation.patient's path is Observation.subject.where(resolve() is Patient) --> returns true because
+	 * Observation.subject (the base SP) declares Patient compartment membership.
+	 * <p> Example: Coverage.patient's path is Coverage.beneficiary --> returns true because Coverage.beneficiary
+	 * declares Patient compartment membership.
+	 *
+	 * <p> Note that the {@code SearchParamDefinition} is scanned since RuntimeSearchParams have not finished being
+	 * constructed yet.
+	 */
+	private static boolean isCoveredByPatientCompartmentBaseSp(
+			Class<? extends IBase> theResourceClazz, String theResourceType, SearchParamDefinition thePatientSp) {
+		Set<String> patientPathSegments = ownPathSegments(theResourceType, thePatientSp.path());
+		return Arrays.stream(theResourceClazz.getFields())
+				.map(f -> f.getAnnotation(SearchParamDefinition.class))
+				// Any other SP that is not the "patient" SP
+				.filter(spd -> spd != null && !thePatientSp.name().equalsIgnoreCase(spd.name()))
+				// That declares Patient compartment membership
+				.filter(spd -> Arrays.stream(spd.providesMembershipIn())
+						.anyMatch(c -> "Patient".equals(getCleansedCompartmentName(c.name()))))
+				// Get the path for theResourceType
+				.flatMap(spd -> ownPathSegments(theResourceType, spd.path()).stream())
+				.anyMatch(baseSegment -> patientPathSegments.contains(baseSegment + ".where(resolve() is Patient)")
+						|| patientPathSegments.contains(baseSegment));
+	}
+
+	/**
+	 * Splits a (possibly pipe-delimited multi-resource) SP path into segments, keeping only the
+	 * segments that belong to the given resource type. This is necessary since in R4+, sp.path()
+	 * returns a list of paths delimited by '|' if the SP has multiple resource bases.
+	 */
+	private static Set<String> ownPathSegments(String theResourceType, String thePath) {
+		return Arrays.stream(thePath.split("\\|"))
+				.map(String::trim)
+				.filter(segment -> segment.startsWith(theResourceType + "."))
+				.collect(Collectors.toSet());
 	}
 
 	// Created by Claude Opus 4.7
