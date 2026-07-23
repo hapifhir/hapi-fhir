@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
@@ -17,19 +17,21 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.config.util;
+package ca.uhn.fhir.jpa.api.dao;
 
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.util.ResourceCountCache;
-import org.apache.commons.lang3.time.DateUtils;
+public class DaoRegistrationService {
 
-public final class ResourceCountCacheUtil {
-	private ResourceCountCacheUtil() {}
+	private final DaoRegistry myDaoRegistry;
 
-	public static ResourceCountCache newResourceCountCache(DaoRegistry theDaoRegistry) {
-		ResourceCountCache retVal =
-				new ResourceCountCache(() -> theDaoRegistry.getSystemDao().getResourceCounts());
-		retVal.setCacheMillis(4 * DateUtils.MILLIS_PER_HOUR);
-		return retVal;
+	public DaoRegistrationService(DaoRegistry theDaoRegistry) {
+		myDaoRegistry = theDaoRegistry;
+	}
+
+	public void registerResourceDao(IFhirResourceDao<?> theResourceDao) {
+		myDaoRegistry.register(theResourceDao);
+	}
+
+	public void registerSystemDao(IFhirSystemDao<?, ?> theSystemDao) {
+		myDaoRegistry.register(theSystemDao);
 	}
 }

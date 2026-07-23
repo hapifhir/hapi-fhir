@@ -31,7 +31,6 @@ import ca.uhn.fhir.batch2.jobs.step.GenerateRangeChunksStep;
 import ca.uhn.fhir.batch2.jobs.step.LoadIdsStep;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
@@ -52,9 +51,6 @@ public class ReindexV2Config {
 
 	@Autowired
 	private HapiTransactionService myHapiTransactionService;
-
-	@Autowired
-	private IFhirSystemDao<?, ?> mySystemDao;
 
 	@Autowired
 	private DaoRegistry myRegistry;
@@ -106,8 +102,7 @@ public class ReindexV2Config {
 
 	@Bean
 	public ReindexStepV2 reindexStepV2() {
-		return new ReindexStepV2(
-				myReindexJobService, myHapiTransactionService, mySystemDao, myRegistry, myIdHelperService);
+		return new ReindexStepV2(myReindexJobService, myHapiTransactionService, myRegistry, myIdHelperService);
 	}
 
 	@Bean("reindexGenerateRangeChunkStepV2")

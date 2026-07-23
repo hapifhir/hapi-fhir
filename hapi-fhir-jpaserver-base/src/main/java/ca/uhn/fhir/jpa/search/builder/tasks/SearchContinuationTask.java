@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.IPagingProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
@@ -38,9 +39,20 @@ public class SearchContinuationTask extends SearchTask {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchContinuationTask.class);
 
-	private final ExceptionService myExceptionSvc;
+	@Autowired
+	private ExceptionService myExceptionSvc;
+
 	private final RequestDetails myRequestDetails;
 
+	public SearchContinuationTask(SearchTaskParameters theCreationParams) {
+		super(theCreationParams);
+
+		myRequestDetails = theCreationParams.Request;
+	}
+
+	/**
+	 * Unit test constructor
+	 */
 	public SearchContinuationTask(
 			SearchTaskParameters theCreationParams,
 			HapiTransactionService theTxService,
