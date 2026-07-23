@@ -62,17 +62,6 @@ public interface IResourceLinkDao extends JpaRepository<ResourceLink, Long>, IHa
 			@Param("resourceType") String theTargetResourceType,
 			@Param("resourceFhirId") String theTargetResourceFhirId);
 
-	/**
-	 * Stream Resource Ids (with their source partition id) of all resources that have a reference to
-	 * the provided resource id. The partition id is projected so callers can pin reads to the correct
-	 * shard rather than relying on id-based partition resolution, which fails for client-assigned
-	 * (non-partition-decodable) ids in MegaScale Patient ID mode. The projected partition id may be
-	 * {@code null} for default-partition rows.
-	 *
-	 * @param theTargetResourceType the resource type part of the id
-	 * @param theTargetResourceFhirId the value part of the id
-	 * @return
-	 */
 	@Query(
 			"SELECT DISTINCT new ca.uhn.fhir.jpa.dao.data.SourceIdAndPartitionView(t.myPartitionIdValue, t.mySourceResourceType, t.mySourceResource.myFhirId) FROM ResourceLink t WHERE t.myTargetResourceType = :resourceType AND t.myTargetResource.myFhirId = :resourceFhirId")
 	Stream<SourceIdAndPartitionView> streamSourceIdsAndPartitionForTargetFhirId(

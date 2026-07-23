@@ -159,8 +159,6 @@ public class ResourceMergeServiceTest {
 		lenient().when(myDaoRegistryMock.getResourceDao("Patient")).thenReturn(myPatientDaoMock);
 		when(myDaoRegistryMock.getResourceDao(Task.class)).thenReturn(myTaskDaoMock);
 		when(myDaoRegistryMock.getResourceDao("Provenance")).thenReturn(myProvenanceDaoMock);
-		// createProvenance now returns the created Provenance's id (create(...).getId()), so the create mock must
-		// return a non-null outcome.
 		lenient()
 				.when(myProvenanceDaoMock.create(any(), any(RequestDetails.class)))
 				.thenReturn(new DaoMethodOutcome());
@@ -820,8 +818,6 @@ public class ResourceMergeServiceTest {
 			// When
 			myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
-			// Then: the copied original and the source are deleted one-by-one via the resource DAOs (pinned to the
-			// source partition), not via a DELETE transaction bundle.
 			ArgumentCaptor<IIdType> observationIdCaptor = ArgumentCaptor.forClass(IIdType.class);
 			verify(observationDaoMock)
 				.delete(observationIdCaptor.capture(), any(DeleteConflictList.class), eq(myRequestDetailsMock), any(TransactionDetails.class));
@@ -1012,10 +1008,6 @@ public class ResourceMergeServiceTest {
 		assertThat(deleteBundle.getEntry().get(0).getRequest().getUrl()).isEqualTo(SOURCE_PATIENT_TEST_ID);
 	}
 
-	/**
-	 * The cross-partition merge deletes one-by-one via the resource DAO (pinned to the source partition), not via a
-	 * DELETE transaction bundle — see {@code ResourceMergeService.deleteResourcesOneByOne}.
-	 */
 	private void verifySourcePatientDeletedOneByOne() {
 		ArgumentCaptor<IIdType> idCaptor = ArgumentCaptor.forClass(IIdType.class);
 		verify(myPatientDaoMock)

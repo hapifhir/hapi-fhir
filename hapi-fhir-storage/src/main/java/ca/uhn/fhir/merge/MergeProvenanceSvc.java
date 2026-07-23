@@ -82,18 +82,6 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 				true);
 	}
 
-	/**
-	 * Finds the merge Provenances for the given target and source resource IDs. The main Provenance is the one
-	 * with target+source in the correct order whose first contained resource is the merge input {@link Parameters};
-	 * when it belongs to a provenance group (a cross-partition merge records one sub-Provenance per involved
-	 * partition), every Provenance sharing its group id prefix is returned with it.
-	 *
-	 * @param theTargetId the target resource id
-	 * @param theSourceId the source resource id
-	 * @param theRequestDetails the request details
-	 * @return a list whose first element is the main Provenance followed by its sub-Provenances,
-	 *         or empty if none was found.
-	 */
 	public List<Provenance> findMergeProvenances(
 			IIdType theTargetId, IIdType theSourceId, RequestDetails theRequestDetails) {
 
@@ -109,24 +97,10 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 				.orElseGet(List::of);
 	}
 
-	/**
-	 * Finds the merge Provenances for the given target id and source identifiers. For Patient resources, tries both
-	 * patient-specific and generic parameter names for backward compatibility. As with
-	 * {@link #findMergeProvenances(IIdType, IIdType, RequestDetails)}, the main Provenance comes first, followed by
-	 * the sub-Provenances sharing its group id prefix (if any).
-	 *
-	 * @param theTargetId the target resource id
-	 * @param theSourceIdentifiers the source identifiers to match
-	 * @param theRequestDetails the request details
-	 * @return a list whose first element is the main Provenance followed by its sub-Provenances,
-	 *         or empty if none was found.
-	 */
 	public List<Provenance> findMergeProvenancesBySourceIdentifiers(
 			IIdType theTargetId, List<CanonicalIdentifier> theSourceIdentifiers, RequestDetails theRequestDetails) {
 
 		String resourceType = theTargetId.getResourceType();
-		// Patient resources can be merged via two endpoints (Patient/$merge or Patient/$hapi.fhir.merge), each
-		// storing different parameter names in the Provenance; all other resource types use only the generic ones.
 		List<AbstractMergeOperationInputParameterNames> parameterNamesList =
 				AbstractMergeOperationInputParameterNames.getParameterNamesForResourceType(resourceType);
 
@@ -140,14 +114,6 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 				.orElseGet(List::of);
 	}
 
-	/**
-	 * Given the main Provenance, collects all Provenances from {@code theAllProvenances} that belong to the same
-	 * provenance group — i.e. whose {@link HapiExtensions#EXT_PROVENANCE_GROUP} value shares the main Provenance's
-	 * group id prefix. If the main Provenance has no group id (a same-partition merge records a single Provenance),
-	 * returns a singleton list containing only the main Provenance.
-	 *
-	 * @return a list whose first element is always the main Provenance, followed by its sub-Provenances.
-	 */
 	private List<Provenance> collectGroupedProvenances(
 			Provenance theMainProvenance, List<Provenance> theAllProvenances) {
 		String mainGroupId = getProvenanceGroupId(theMainProvenance);
@@ -173,10 +139,6 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 		return result;
 	}
 
-	/**
-	 * @return the value of the Provenance's {@link HapiExtensions#EXT_PROVENANCE_GROUP} extension, or {@code null}
-	 * when absent.
-	 */
 	@Nullable
 	public static String getProvenanceGroupId(Provenance theProvenance) {
 		Extension ext = theProvenance.getExtensionByUrl(HapiExtensions.EXT_PROVENANCE_GROUP);

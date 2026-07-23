@@ -265,10 +265,6 @@ public class ResourceMergeService {
 		validateResourceLimit(theMergeOperationParameters, theSourceResource, theRequestDetails, crossPartition);
 
 		if (crossPartition) {
-			// Cross-partition writes can commit independently per partition (changing partitions opens its own
-			// transaction under REQUIRES_NEW), so the outer transaction cannot guarantee
-			// atomicity. doMergeSyncCrossPartition owns the transaction boundary and populates the outcome itself,
-			// reporting anything a partial failure left committed.
 			doMergeSyncCrossPartition(
 					theMergeOperationParameters,
 					theSourceResource,
@@ -277,8 +273,6 @@ public class ResourceMergeService {
 					theMergeOutcome,
 					startTime);
 		} else {
-			// Same partition: the whole merge runs in one transaction, so a failure rolls everything back
-			// automatically and no rollback is needed.
 			doMergeSyncSamePartition(
 					theMergeOperationParameters,
 					theSourceResource,
@@ -299,8 +293,6 @@ public class ResourceMergeService {
 			MergeOperationOutcome theMergeOutcome,
 			Date theStartTime) {
 
-		// The outer tx is intentionally not pinned to a partition: per-operation partition resolution
-		// handles writes (per-bundle-entry resolution in transactionNested).
 		myHapiTransactionService.withRequest(theRequestDetails).execute(() -> {
 			List<Bundle> responseBundles = replaceReferencesInNestedTransaction(
 					theSourceResource,
@@ -311,8 +303,6 @@ public class ResourceMergeService {
 			List<IIdType> changedResourceIds =
 					ReplaceReferencesProvenanceSvc.extractChangedResourceIds(responseBundles);
 
-			// Finalize the merge: update source/target, create the Provenance, delete the source when
-			// requested. The whole merge runs in this one transaction, so there is no rollback bookkeeping here.
 			DaoMethodOutcome outcome = myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
 					theSourceResource,
 					theTargetResource,
@@ -322,8 +312,6 @@ public class ResourceMergeService {
 			theMergeOutcome.setUpdatedTargetResource(outcome.getResource());
 
 			if (theMergeOperationParameters.getCreateProvenance()) {
-				// The source is referenced at its post-merge version: its post-update version when kept, or its
-				// post-delete version (bumped by one) when deleteSource, since the delete happens below.
 				IIdType sourcePostMergeId = theSourceResource.getIdElement();
 				if (theMergeOperationParameters.getDeleteSource()) {
 					sourcePostMergeId = sourcePostMergeId.withVersion(
@@ -363,9 +351,6 @@ public class ResourceMergeService {
 			MergeOperationOutcome theMergeOutcome,
 			Date theStartTime) {
 
-		// Everything the forward steps commit, recorded as it commits, at its committed version. A cross-partition
-		// merge cannot be made atomic, and this path does not attempt to revert what committed — so this list is
-		// purely what the failure report hands the operator to revert manually.
 		List<IIdType> committedResourceIds = new ArrayList<>();
 
 		try {
@@ -381,20 +366,12 @@ public class ResourceMergeService {
 							committedResourceIds));
 		} catch (Exception theException) {
 			if (!myHapiTransactionService.isRequiresNewTransactionWhenChangingPartitions()) {
-				// Partition changes joined the outer transaction, which has already rolled the whole merge back, so
-				// nothing is committed. This is a clean failure — propagate it like a same-partition merge failure
-				// and let merge() turn it into the outcome.
 				throw theException;
 			}
 			ourLog.error("Cross-partition merge failed", theException);
 			Throwable failureCause = theException;
 			if (theException instanceof PartitionedTransactionPartialFailureException partialFailure) {
-				// A cross-partition transaction in the forward steps committed some sub-bundles before a later one
-				// failed. Those committed entries are carried on the exception rather than recorded above (the step
-				// records what it committed only after it returns), so harvest them here.
 				committedResourceIds.addAll(extractCommittedResourceIds(partialFailure));
-				// Report the underlying cause (e.g. the failing write's exception), not the partial-failure wrapper,
-				// so the merge outcome reflects the real error and its HTTP status.
 				if (partialFailure.getCause() != null) {
 					failureCause = partialFailure.getCause();
 				}
@@ -406,26 +383,6 @@ public class ResourceMergeService {
 		addMergeCompletedSuccessfully(theMergeOutcome);
 	}
 
-	/**
-	 * Runs the cross-partition merge as a sequence of separate steps (NOT one atomic transaction, since per-partition
-	 * writes commit independently on MegaScale): copy the source compartment to the target partition and replace
-	 * references (its own cross-partition transaction), update source/target, create the merge Provenances, and
-	 * delete the originals (+ source when deleteSource). The Provenances are created before the delete so they can
-	 * reference the to-be-deleted originals at their anticipated tombstone version (current + 1).
-	 * <p>
-	 * One Provenance is created per involved partition, each listing only that partition's changed resources
-	 * (plus the post-merge target and source as its first two targets), and carrying the shared group id extension
-	 * with a {@code ;partition=} suffix naming its partition. A main Provenance (bare group id, the merge input
-	 * {@link org.hl7.fhir.r4.model.Parameters} and target-update OperationOutcome contained) is created last as the
-	 * "merge succeeded" signal. The undo operation restores the merge provenance-by-provenance, pinned to the
-	 * partition each Provenance's extension names — so it never needs cross-shard fan-out reads, which would
-	 * resolve through MegaScale ESR surrogate rows and fail on tombstoned originals.
-	 * <p>
-	 * Each committed step appends what it committed to {@code theCommittedResourceIds}. None of it is reverted if a
-	 * later step fails — the outer transaction cannot roll it back (the partition changes committed in their own
-	 * transactions) and this path does not compensate — so the list exists solely to report what a failed merge left
-	 * behind for manual reverting.
-	 */
 	private void doCrossPartitionForwardSteps(
 			MergeOperationInputParameters theMergeOperationParameters,
 			IBaseResource theSourceResource,
@@ -439,18 +396,13 @@ public class ResourceMergeService {
 		RequestPartitionId sourcePartition = getRequiredPartition(theSourceResource);
 		RequestPartitionId targetPartition = getRequiredPartition(theTargetResource);
 
-		// 1) Copy the source compartment resources to the target partition and replace references, as its own
-		// cross-partition transaction. The originals are NOT deleted here — they are deleted in step 4, after the
-		// Provenances are created, so the Provenances can reference them.
 		CrossPartitionReplaceReferencesResult copyResult =
 				myCrossPartitionReplaceReferencesSvc.copyCompartmentResourcesAndReplaceReferences(
 						theSourceResource, theTargetResource, theRequestDetails);
 		List<IIdType> copiedResourceOriginalIds = copyResult.getCopiedResourceOriginalIds();
 
-		// Record the just-committed copies and referrer updates.
 		theCommittedResourceIds.addAll(copyResult.getChangedResourceIds());
 
-		// 2) Update source/target. The target is always updated; the source is updated when kept, or deleted below.
 		DaoMethodOutcome outcome = myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
 				theSourceResource,
 				theTargetResource,
@@ -459,22 +411,17 @@ public class ResourceMergeService {
 				theRequestDetails);
 		theMergeOutcome.setUpdatedTargetResource(outcome.getResource());
 
-		// The source's post-merge versioned ref: its post-update version when kept, or its post-delete version
-		// (bumped by one) when deleteSource, since the delete happens below.
 		IIdType sourcePostMergeId = theSourceResource.getIdElement();
 		if (deleteSource) {
 			sourcePostMergeId = withVersionIncremented(sourcePostMergeId);
 		}
 		IIdType targetPostMergeId = outcome.getResource().getIdElement();
 
-		// Record the post-merge target (always updated), and the post-merge source when it is kept. When the source
-		// is deleted, its tombstone is recorded below instead, as its delete commits.
 		theCommittedResourceIds.add(targetPostMergeId);
 		if (!deleteSource) {
 			theCommittedResourceIds.add(sourcePostMergeId);
 		}
 
-		// 3) Create the merge Provenances: one per involved partition plus the main one.
 		if (theMergeOperationParameters.getCreateProvenance()) {
 			createCrossPartitionProvenances(
 					theMergeOperationParameters,
@@ -489,12 +436,6 @@ public class ResourceMergeService {
 					theCommittedResourceIds);
 		}
 
-		// 4) Delete the source-side compartment originals copied across partitions, plus the source itself when
-		// deleteSource. They all live in the source partition, so the deletes run in one transaction pinned to it —
-		// this lets MegaScale route them to the correct shard even when the ids are not partition-decodable
-		// (client-assigned / UUID ids), and makes this step atomic: a failure rolls back every delete, so either
-		// all tombstones are recorded or none are. This happens after the Provenances are created so they can
-		// reference the originals.
 		List<IIdType> resourceIdsToDelete = new ArrayList<>(copiedResourceOriginalIds);
 		if (deleteSource) {
 			resourceIdsToDelete.add(theSourceResource.getIdElement());
@@ -505,16 +446,6 @@ public class ResourceMergeService {
 		}
 	}
 
-	/**
-	 * Creates the Provenances recording a cross-partition merge: one sub-Provenance per partition that has changed
-	 * resources, plus the main Provenance. Every Provenance's first two targets are the post-merge target and
-	 * source; a sub-Provenance's remaining targets are the resources changed in its partition — the copies and
-	 * referrer updates committed there, the originals at their anticipated tombstone version (current + 1, bumped
-	 * by the deletes that follow), the post-merge source in the source partition's sub, and the post-merge target
-	 * in the target partition's sub (unless its update was a no-op). The main Provenance lists no changed
-	 * resources; it carries the merge input Parameters and the target-update OperationOutcome as contained
-	 * resources, and is created last as the "merge succeeded" signal.
-	 */
 	private void createCrossPartitionProvenances(
 			MergeOperationInputParameters theMergeOperationParameters,
 			CrossPartitionReplaceReferencesResult theCopyResult,
@@ -530,8 +461,6 @@ public class ResourceMergeService {
 		String groupIdPrefix =
 				MergeProvenanceGroupIdUtil.generateGroupIdPrefix(theSourcePostMergeId, theTargetPostMergeId);
 
-		// Collect each partition's changed resources: the committed copies and referrer updates, the originals at
-		// their anticipated tombstone version, and the post-merge source/target in their own partitions.
 		Map<RequestPartitionId, List<IIdType>> changedResourcesByPartition = new LinkedHashMap<>();
 		theCopyResult.getChangedResourceIdsByPartition().forEach((partition, ids) -> changedResourcesByPartition
 				.computeIfAbsent(partition, k -> new ArrayList<>())
@@ -566,8 +495,6 @@ public class ResourceMergeService {
 			}
 		}
 
-		// The main Provenance carries the bare group id prefix (no partition suffix) — it records no
-		// partition-specific changes itself.
 		List<IBaseResource> containedResources = List.of(
 				theMergeOperationParameters.getOriginalInputParameters(), theTargetUpdateOutcome.getOperationOutcome());
 		IIdType mainProvenanceId = myMergeResourceHelper.createProvenance(
@@ -584,20 +511,6 @@ public class ResourceMergeService {
 		}
 	}
 
-	/**
-	 * Populates the outcome for a cross-partition merge that failed after one or more of its steps had already
-	 * committed. A cross-partition merge is not atomic — partition changes commit in their own transactions — and
-	 * nothing here is reverted, so whatever committed is left in place and reported for manual reverting.
-	 *
-	 * <p>Note that the merge Provenances are reported alongside the data when they had already been created: a
-	 * failure after step 3 leaves the whole Provenance group behind, including the main "merge succeeded" Provenance,
-	 * so until an operator removes them the failed merge is indistinguishable from a completed one and
-	 * {@code $hapi.fhir.undo-merge} will act on it. This is a deliberate limitation of not rolling back.
-	 *
-	 * @param theCommittedResourceIds everything the forward steps committed, at its committed version
-	 * @param theFailureCause the exception that ended the merge
-	 * @param theOutcome the outcome to populate
-	 */
 	private void reportFailedCrossPartitionMerge(
 			List<IIdType> theCommittedResourceIds,
 			@Nullable Throwable theFailureCause,
@@ -606,16 +519,11 @@ public class ResourceMergeService {
 		String msg;
 		int statusCode;
 		if (theCommittedResourceIds.isEmpty()) {
-			// Nothing committed, so the merge failed cleanly and no resource is in a merged state. Report the
-			// triggering exception's own status, just as the outer-transaction (nothing-committed) path does.
 			statusCode = resolveHttpStatusCode(theFailureCause);
 			msg = format(
 					"Cross-partition merge failed; no resources were committed. Merge failure cause: %s",
 					describeFailureCause(theFailureCause));
 		} else {
-			// Resources are left in their merged state — a server-side inconsistency regardless of what triggered
-			// the merge failure, hence always 500. Each is reported by its versioned id: this is the post-merge
-			// version the resource is left at, which points an operator straight at the state to revert.
 			statusCode = STATUS_HTTP_500_INTERNAL_ERROR;
 			String committedIds = theCommittedResourceIds.stream()
 					.map(id -> id.toUnqualified().getValue())
@@ -656,12 +564,6 @@ public class ResourceMergeService {
 						"Resource " + theResource.getIdElement().getValue() + " has no partition info"));
 	}
 
-	/**
-	 * Recovers the versioned ids of the resources that committed before a partitioned transaction failed partway, from
-	 * the {@link PartitionedTransactionPartialFailureException} that carries the committed response entries. The
-	 * exception carries the committed entries grouped per committed sub-bundle; no-op responses (no change) are skipped
-	 * — nothing committed for those.
-	 */
 	private List<IIdType> extractCommittedResourceIds(PartitionedTransactionPartialFailureException theFailure) {
 		List<IIdType> committed = new ArrayList<>();
 		for (List<IBase> subBundleEntries : theFailure.getCommittedResponseEntriesPerSubBundle()) {

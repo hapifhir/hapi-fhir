@@ -83,7 +83,6 @@ public class TransactionPartitionProcessorTest implements ITestDataBuilder {
 		assertThat(parsedResponse.getStorageOutcomes().get(2).getTargetId().getValue()).isEqualTo("Observation/OBS-1");
 		assertThat(parsedResponse.getStorageOutcomes().get(3).getTargetId().getValue()).isEqualTo("Patient/PAT-1");
 
-		// Verify response entries are grouped by partition
 		List<List<IBase>> entriesPerSubBundle = result.getResponseEntriesPerSubBundle();
 		assertThat(entriesPerSubBundle).hasSize(2);
 		assertResponseLocations(entriesPerSubBundle.get(0), "Patient/PAT-0", "Patient/PAT-1");
@@ -164,7 +163,6 @@ public class TransactionPartitionProcessorTest implements ITestDataBuilder {
 		response0.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
 		addResponseEntry(response0, "201 Created", "Patient/PAT-0", StorageResponseCodeEnum.SUCCESSFUL_CREATE);
 		addResponseEntry(response0, "201 Created", "Patient/PAT-1", StorageResponseCodeEnum.SUCCESSFUL_CREATE);
-		// 1st sub-bundle succeeds, 2nd throws
 		when(myTransactionProcessor.processTransactionAsSubRequest(any(), any(), any(), any(), anyBoolean()))
 				.thenReturn(response0)
 				.thenThrow(new InternalErrorException("Simulated failure on second partition"));
@@ -188,7 +186,6 @@ public class TransactionPartitionProcessorTest implements ITestDataBuilder {
 
 	@Test
 	void testPartialFailure_thirdSubBundleFails_exceptionContainsFirstTwoPartitionEntries() {
-		// Setup — 3 partitions: [PAT-0, PAT-1], [OBS-0, OBS-1], [Encounter/ENC-0]
 		BundleBuilder requestBuilder = new BundleBuilder(myFhirContext);
 		requestBuilder.addTransactionUpdateEntry(buildObservation(withId("OBS-0"), withSubject("Patient/PAT-0"), withStatus("final")));
 		requestBuilder.addTransactionUpdateEntry(buildPatient(withId("PAT-0")));
@@ -207,7 +204,6 @@ public class TransactionPartitionProcessorTest implements ITestDataBuilder {
 		addResponseEntry(response1, "201 Created", "Observation/OBS-0", StorageResponseCodeEnum.SUCCESSFUL_CREATE);
 		addResponseEntry(response1, "201 Created", "Observation/OBS-1", StorageResponseCodeEnum.SUCCESSFUL_CREATE);
 
-		// 1st and 2nd sub-bundles succeed, 3rd throws
 		when(myTransactionProcessor.processTransactionAsSubRequest(any(), any(), any(), any(), anyBoolean()))
 				.thenReturn(response0, response1)
 				.thenThrow(new InternalErrorException("Simulated failure on third partition"));
@@ -240,7 +236,6 @@ public class TransactionPartitionProcessorTest implements ITestDataBuilder {
 
 		myInterceptor.setNextRanges(List.of(1, 3), List.of(0, 2));
 
-		// Test / Verify — nothing committed yet, so original exception propagates unwrapped
 		assertThatThrownBy(() -> mySvc.execute(request))
 				.isInstanceOf(InternalErrorException.class)
 				.isNotInstanceOf(PartitionedTransactionPartialFailureException.class)

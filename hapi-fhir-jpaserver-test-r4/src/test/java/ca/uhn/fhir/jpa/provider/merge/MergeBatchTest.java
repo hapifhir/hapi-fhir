@@ -113,9 +113,6 @@ public class MergeBatchTest extends BaseJpaR4Test {
 		assertMergeProvenance(inputParams.asParametersResource(paramNames));
 	}
 
-	/**
-	 * Reads the merge Provenance (DAO-based) and validates it with the shared static verifier.
-	 */
 	private void assertMergeProvenance(Parameters theInputParameters) {
 		IIdType versionedSourceId = myTestData.getSourcePatientId().withVersion("2");
 		IIdType versionedTargetId = myTestData.getTargetPatientId().withVersion("2");

@@ -25,13 +25,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Result of copying compartment resources across partitions during a cross-partition merge.
- * Contains IDs extracted from the combined CREATE+UPDATE response bundle, plus
- * versioned IDs of the original source copies (for deferred deletion). Both are also available
- * grouped by the partition each resource lives on, for building the per-partition merge Provenances
- * and the per-partition rollback bookkeeping.
- */
 // Created by claude-opus-4-6
 public class CrossPartitionReplaceReferencesResult {
 	private final List<IIdType> myChangedResourceIds;
@@ -58,18 +51,10 @@ public class CrossPartitionReplaceReferencesResult {
 		return myCopiedResourceOriginalIds;
 	}
 
-	/**
-	 * Resources written by the data bundle, grouped by the partition they were committed on.
-	 * Copies (CREATEs) are grouped under their destination partition; updates (PUTs) under each
-	 * resource's current partition.
-	 */
 	public Map<RequestPartitionId, List<IIdType>> getChangedResourceIdsByPartition() {
 		return myChangedResourceIdsByPartition;
 	}
 
-	/**
-	 * Source-side compartment originals scheduled for deletion, grouped by the partition they live on.
-	 */
 	public Map<RequestPartitionId, List<IIdType>> getCopiedResourceOriginalIdsByPartition() {
 		return myCopiedResourceOriginalIdsByPartition;
 	}

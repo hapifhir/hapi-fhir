@@ -63,14 +63,6 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 
 	public static final Object EMPTY_OBJECT = new Object();
 
-	/**
-	 * Result of executing a partitioned transaction, wrapping both the aggregated response bundle
-	 * and the per-sub-bundle response entries.
-	 * <p>
-	 * {@link #getResponseEntriesPerSubBundle()} returns one inner list per sub-bundle, as grouped by the
-	 * partitioning interceptor. The partition ID of an entry is not carried here but can be derived from its
-	 * {@code response.location} via {@code IRequestPartitionHelperSvc}.
-	 */
 	public static class PartitionedTransactionResult<B extends IBaseBundle> {
 		private final B myResponseBundle;
 		private final List<List<IBase>> myResponseEntriesPerSubBundle;
@@ -117,15 +109,6 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 		myTransactionDetails = theTransactionDetails;
 	}
 
-	/**
-	 * Invoke the {@link Pointcut#STORAGE_TRANSACTION_PRE_PARTITION} hook to slice the transaction request
-	 * bundle into partitions, execute each slice, and aggregate the results.
-	 *
-	 * @return a result containing both the aggregated response bundle and the response entries
-	 * grouped by committed sub-bundle
-	 * @throws PartitionedTransactionPartialFailureException if some sub-bundles committed successfully
-	 * before a later sub-bundle failed
-	 */
 	public PartitionedTransactionResult<BUNDLE> execute(BUNDLE theRequest) {
 
 		// Stash a copy of the entries in the bundle before we call the hook, so we

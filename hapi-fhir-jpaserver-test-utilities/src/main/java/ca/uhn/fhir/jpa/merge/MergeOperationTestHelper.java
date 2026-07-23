@@ -439,9 +439,6 @@ public class MergeOperationTestHelper {
 		}
 	}
 
-	/**
-	 * Searches (via the client) for all Provenance resources targeting the given resource.
-	 */
 	public List<Provenance> searchProvenancesByTarget(@Nonnull IIdType theTargetId) {
 		Bundle bundle = myClient.search()
 				.forResource(Provenance.class)
@@ -456,9 +453,6 @@ public class MergeOperationTestHelper {
 				.toList();
 	}
 
-	/**
-	 * Validates the single merge Provenance record, reading it via the client.
-	 */
 	public void assertMergeProvenance(
 			@Nonnull Parameters theInputParams,
 			@Nonnull IIdType theExpectedSourceId,
@@ -478,9 +472,6 @@ public class MergeOperationTestHelper {
 				theExpectedAgents);
 	}
 
-	/**
-	 * Validates the set of cross-partition merge Provenance records, reading them via the client.
-	 */
 	public void assertCrossPartitionMergeProvenance(
 			@Nonnull Parameters theInputParams,
 			@Nonnull IIdType theExpectedSourceId,
@@ -501,9 +492,6 @@ public class MergeOperationTestHelper {
 	}
 
 	// ================================================
-	// STATIC MERGE PROVENANCE VERIFIERS
-	// (operate on already-read Provenance resources, so they are reusable by both client-based and
-	//  DAO-based callers
 	// ================================================
 
 	public static void assertSingleMergeProvenance(
@@ -537,10 +525,6 @@ public class MergeOperationTestHelper {
 			@Nonnull Set<String> theExpectedProvenanceTargets,
 			@Nullable List<IProvenanceAgent> theExpectedProvenanceAgents) {
 
-		// A cross-partition merge records one sub-Provenance per involved partition (each listing that
-		// partition's changed resources after the post-merge target and source) plus a main Provenance
-		// (target and source only, with the merge input Parameters and target-update OperationOutcome
-		// contained), all sharing the same provenance group id prefix.
 		Provenance mainProvenance = null;
 		List<Provenance> subProvenances = new ArrayList<>();
 
@@ -558,7 +542,6 @@ public class MergeOperationTestHelper {
 				.as("Expected a main Provenance with contained resources")
 				.isNotNull();
 
-		// Validate main Provenance: [target, source] only, bare group id prefix, contained resources.
 		assertFirstTwoTargetsAreTargetAndSource(
 				mainProvenance, theTargetIdWithExpectedVersion, theSourceIdWithExpectedVersion);
 		assertThat(mainProvenance.getTarget()).hasSize(2);
@@ -572,9 +555,6 @@ public class MergeOperationTestHelper {
 				.getValueAsString();
 		assertThat(mainGroupId).isNotBlank();
 
-		// Validate the sub-Provenances: every one references the post-merge target and source as its first two
-		// targets, carries the main group id prefix plus a ;partition= suffix, and lists its partition's
-		// changed resources from index 2 on. Collect those to compare against the expected set.
 		Set<String> allTargetsAcrossProvenances = new HashSet<>();
 		allTargetsAcrossProvenances.add(theTargetIdWithExpectedVersion.toString());
 		allTargetsAcrossProvenances.add(theSourceIdWithExpectedVersion.toString());
@@ -667,10 +647,6 @@ public class MergeOperationTestHelper {
 		assertResourcesAreEqualIgnoringVersionAndLastUpdated(myFhirContext, theBefore, theAfter);
 	}
 
-	/**
-	 * Static variant for callers that do not have a configured {@link MergeOperationTestHelper}
-	 * instance available (e.g. App-IT tests that only have an HTTP client).
-	 */
 	public static void assertResourcesAreEqualIgnoringVersionAndLastUpdated(
 			@Nonnull FhirContext theFhirContext, @Nonnull IBaseResource theBefore, @Nonnull IBaseResource theAfter) {
 

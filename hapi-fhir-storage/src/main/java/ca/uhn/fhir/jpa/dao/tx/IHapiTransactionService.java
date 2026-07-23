@@ -122,15 +122,6 @@ public interface IHapiTransactionService {
 		return false;
 	}
 
-	/**
-	 * Returns <code>true</code> if changing partitions within a transaction starts a new (independent)
-	 * transaction (i.e. <code>REQUIRES_NEW</code> propagation) rather than joining the existing one. When
-	 * <code>true</code>, a write committed for one partition is durable even if a later partition's write
-	 * fails, so callers spanning partitions cannot rely on the outer transaction for atomicity.
-	 * <p>
-	 * This is an experimental API, subject to change in a future release.
-	 * </p>
-	 */
 	@Beta
 	default boolean isRequiresNewTransactionWhenChangingPartitions() {
 		return false;

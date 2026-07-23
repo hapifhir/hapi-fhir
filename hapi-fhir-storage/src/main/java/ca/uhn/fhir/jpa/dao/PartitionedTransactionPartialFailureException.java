@@ -25,13 +25,6 @@ import org.hl7.fhir.instance.model.api.IBase;
 import java.util.List;
 
 // Created by Claude Opus 4.6 (1M context)
-/**
- * Thrown when a partitioned transaction commits some sub-bundles successfully before a later
- * sub-bundle fails. Carries the response entries for the sub-bundles that did commit (one inner
- * list per committed sub-bundle), so callers (e.g., the merge service) can drive rollback of the
- * committed work. How entries are distributed across sub-bundles is decided by the
- * {@code STORAGE_TRANSACTION_PRE_PARTITION} interceptor, not by this class.
- */
 public class PartitionedTransactionPartialFailureException extends BaseServerResponseException {
 
 	private final List<List<IBase>> myResponseEntriesPerSubBundle;
@@ -49,10 +42,6 @@ public class PartitionedTransactionPartialFailureException extends BaseServerRes
 		return 500;
 	}
 
-	/**
-	 * Returns the response entries from sub-bundles that committed successfully before the failure.
-	 * Each inner list contains the Bundle entry components for one committed sub-bundle, in execution order.
-	 */
 	public List<List<IBase>> getCommittedResponseEntriesPerSubBundle() {
 		return myResponseEntriesPerSubBundle;
 	}

@@ -81,18 +81,6 @@ public class CrossPartitionReplaceReferencesSvc {
 		myFhirContext = theDaoRegistry.getFhirContext();
 	}
 
-	/**
-	 * Copies the resources referencing the source into the target's partition and rewrites references, executed as
-	 * its OWN single FHIR transaction (a combined CREATE + PUT bundle). The source copies are NOT deleted here — the
-	 * caller deletes them after creating the merge Provenance so the Provenance can still reference the originals (as
-	 * tombstones), using the returned {@link CrossPartitionReplaceReferencesResult#getCopiedResourceOriginalIds()}.
-	 * <p>
-	 * Resources are discovered across every shard (the reference-link index is partitioned by source resource), so
-	 * this works in MegaScale where the referrers live on a different shard than the merge request's partition.
-	 *
-	 * @return the changed-resource ids from the transaction response, plus the versioned ids of the original copies
-	 *         for deferred deletion.
-	 */
 	public CrossPartitionReplaceReferencesResult copyCompartmentResourcesAndReplaceReferences(
 			IBaseResource theSourceResource, IBaseResource theTargetResource, RequestDetails theRequestDetails) {
 
@@ -117,8 +105,6 @@ public class CrossPartitionReplaceReferencesSvc {
 			return new CrossPartitionReplaceReferencesResult(List.of(), List.of(), Map.of(), Map.of());
 		}
 
-		// Step 2: Classify into COPY (partition changes after rewrite) vs UPDATE (same partition).
-		// copiesByDestPartition: keyed by destination partition, insertion-ordered for response correlation.
 		Map<RequestPartitionId, List<IBaseResource>> copiesByDestPartition = new LinkedHashMap<>();
 		List<IBaseResource> updateList = new ArrayList<>();
 		replaceSourceReferencesAndClassifyResources(
@@ -142,30 +128,20 @@ public class CrossPartitionReplaceReferencesSvc {
 			return new CrossPartitionReplaceReferencesResult(List.of(), List.of(), Map.of(), Map.of());
 		}
 
-		// Capture the versioned ids of the original source copies before buildCombinedBundle clears them
-		// (RESOURCE_PARTITION_ID and id are cleared by buildCombinedBundle for copies). The caller deletes these
-		// after the Provenances are created. Also capture their per-partition grouping while the partition
-		// user data is still present.
 		List<IIdType> copiedResourceOriginalIds =
 				copyList.stream().map(IBaseResource::getIdElement).toList();
 		Map<RequestPartitionId, List<IIdType>> copiedResourceOriginalIdsByPartition = groupIdsByPartition(copyList);
 
-		// Step 3: Discover additional resources to update BEFORE bundle assembly.
 		discoverAndAddAdditionalResourcesToUpdate(copyList, updateList, theRequestDetails);
 
-		// Capture each update resource's partition after discovery (updateList is now final).
 		List<RequestPartitionId> updatePartitions = updateList.stream()
 				.map(CrossPartitionReplaceReferencesSvc::getRequiredPartition)
 				.toList();
 
-		// Step 4: Build and execute a single combined transaction bundle (copies as CREATE, referrer updates as PUT).
 		Map<String, String> oldIdToPlaceholder = new HashMap<>();
 		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
 		buildCombinedBundle(copyList, updateList, oldIdToPlaceholder, bundleBuilder);
 
-		// The partition of each request entry, positional: buildCombinedBundle adds copies (POST) first, then
-		// updates (PUT); copiesByDestPartition is insertion-ordered (LinkedHashMap), matching the copy entries'
-		// order in the bundle. Used to attribute each response entry to the partition it was written on.
 		List<RequestPartitionId> entryPartitions = new ArrayList<>();
 		copiesByDestPartition.forEach((partition, resources) -> resources.forEach(r -> entryPartitions.add(partition)));
 		entryPartitions.addAll(updatePartitions);
@@ -173,9 +149,6 @@ public class CrossPartitionReplaceReferencesSvc {
 		Bundle combinedResponse =
 				(Bundle) myDaoRegistry.getSystemDao().transactionNested(theRequestDetails, bundleBuilder.getBundle());
 
-		// Attribute each changed resource to its partition positionally (1:1 with request entries). Must use the
-		// raw response entries — extractChangedResourceIds below filters out no-op updates, which would break the
-		// positional correlation.
 		List<Bundle.BundleEntryComponent> responseEntries = combinedResponse.getEntry();
 		Map<RequestPartitionId, List<IIdType>> changedResourceIdsByPartition = new LinkedHashMap<>();
 		for (int i = 0; i < responseEntries.size(); i++) {
@@ -205,22 +178,8 @@ public class CrossPartitionReplaceReferencesSvc {
 		return loadResources(ids, theRequestDetails);
 	}
 
-	/**
-	 * A referencing resource id discovered via the HFJ_RES_LINK index, paired with the partition the
-	 * source resource lives in. The partition pins the subsequent read to the correct shard rather
-	 * than relying on id-based partition resolution (which fails for client-assigned ids in MegaScale
-	 * Patient ID mode). A null partition id maps to the default partition.
-	 */
 	private record ReferencingResourceId(IdDt id, RequestPartitionId partitionId) {}
 
-	/**
-	 * Returns the IDs of all resources that have a reference link pointing to {@code theTargetId}.
-	 * <p>
-	 * Fans out to every shard — HFJ_RES_LINK rows are partitioned by source resource, so on
-	 * MegaScale a single-DB query only sees outgoing refs from that shard. REQUIRES_NEW is
-	 * mandatory: with the default REQUIRED propagation the per-shard thunks would join the
-	 * outer tx and skip the fan-out entirely. On non-MegaScale HAPI this is a single query.
-	 */
 	private List<ReferencingResourceId> findReferencingResourceIds(
 			IIdType theTargetId, RequestDetails theRequestDetails) {
 		return myHapiTransactionService
@@ -300,21 +259,14 @@ public class CrossPartitionReplaceReferencesSvc {
 			try {
 				@SuppressWarnings("unchecked")
 				IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(id.getResourceType());
-				// Pin the read to the source resource's partition (from the link index) instead of relying
-				// on id-based partition resolution, which fails for client-assigned (non-partition-decodable)
-				// ids in MegaScale Patient ID mode. A pinned partition is incompatible with the outer
-				// allPartitions tx, so in MegaScale REQUIRES_NEW-on-change escapes to the correct shard.
 				IBaseResource resource = myHapiTransactionService
 						.withRequest(theRequestDetails)
 						.withRequestPartitionId(referencingId.partitionId())
 						.execute(() -> dao.read(id.toVersionless(), theRequestDetails));
 				result.add(resource);
 			} catch (ResourceGoneException e) {
-				// Genuinely deleted between discovery and load — tolerated, the link is stale.
 				ourLog.warn("Skipping deleted resource: {}", id.getValue());
 			} catch (ResourceNotFoundException e) {
-				// The link index proves this resource existed; failing to read it now is contradictory
-				// (e.g. a partition-pinning miss). Fail the merge loudly rather than silently dropping it.
 				throw new InternalErrorException(
 						Msg.code(2975) + "Resource " + id.getValue()
 								+ " was found in the reference link index but could not be loaded; aborting cross-partition merge to avoid silently losing data.");
@@ -377,17 +329,6 @@ public class CrossPartitionReplaceReferencesSvc {
 		}
 	}
 
-	/**
-	 * Builds a single combined transaction bundle containing POST (CREATE) entries for copied
-	 * resources and PUT (UPDATE) entries for reference-only changes. References to copied resources
-	 * are replaced with {@code urn:uuid} placeholders in both lists — the transaction processor's
-	 * {@code IdSubstitutionMap} resolves these after the POST entries create the new resources.
-	 * <p>
-	 * Source→target references are already rewritten by {@link #replaceSourceReferencesAndClassifyResources}.
-	 *
-	 * @param theOldIdToPlaceholder populated by this method with old ID → urn:uuid mappings
-	 * @param theBundleBuilder      the bundle being assembled; copy (POST) then update (PUT) entries are appended
-	 */
 	private void buildCombinedBundle(
 			List<IBaseResource> theCopyList,
 			List<IBaseResource> theUpdateList,
@@ -442,8 +383,6 @@ public class CrossPartitionReplaceReferencesSvc {
 				continue;
 			}
 			String refValue = refElement.toUnqualifiedVersionless().getValue();
-			// Skip references with no literal reference value (e.g. identifier-only or display-only references).
-			// Such references have a null refValue, which would NPE on lookups against an immutable map.
 			if (refValue == null || refValue.isEmpty()) {
 				continue;
 			}

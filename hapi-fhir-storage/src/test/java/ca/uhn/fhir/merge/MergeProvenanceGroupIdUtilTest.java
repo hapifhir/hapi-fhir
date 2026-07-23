@@ -51,7 +51,6 @@ class MergeProvenanceGroupIdUtilTest {
 
 		assertThat(MergeProvenanceGroupIdUtil.isInGroup(groupIdPartition1, prefix)).isTrue();
 		assertThat(MergeProvenanceGroupIdUtil.isInGroup(groupIdPartition2, prefix)).isTrue();
-		// a bare prefix with no partition suffix still belongs to its own group
 		assertThat(MergeProvenanceGroupIdUtil.isInGroup(prefix, prefix)).isTrue();
 	}
 
@@ -63,14 +62,11 @@ class MergeProvenanceGroupIdUtilTest {
 
 		assertThat(MergeProvenanceGroupIdUtil.isInGroup(otherGroupId, prefix)).isFalse();
 		assertThat(MergeProvenanceGroupIdUtil.isInGroup(null, prefix)).isFalse();
-		// a group id must not match a longer prefix that merely starts with it
 		assertThat(MergeProvenanceGroupIdUtil.isInGroup(prefix, prefix + "-longer")).isFalse();
 	}
 
 	@Test
 	void isInGroup_prefixOfAnotherPrefixDoesNotMatch() {
-		// two merges whose prefixes share a leading substring must not be confused: matching requires the
-		// full prefix up to the ;partition= delimiter, not an arbitrary startsWith
 		String prefix = "merge-Patient-a-b-uuid";
 		String lookalike = "merge-Patient-a-b-uuid2;partition=1";
 

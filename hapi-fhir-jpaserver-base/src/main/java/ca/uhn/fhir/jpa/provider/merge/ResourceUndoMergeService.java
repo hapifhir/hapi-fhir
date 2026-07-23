@@ -63,25 +63,6 @@ import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_400_BAD_REQUEST;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_500_INTERNAL_ERROR;
 import static java.lang.String.format;
 
-/**
- * This service implements the $hapi.fhir.undo-merge operation.
- * It reverts the changes made by a previous merge (Patient/$merge or {resourceType}/$hapi.fhir.merge) operation based on the Provenance resources
- * that were created as part of the merge operation.
- *
- * Supports both Patient-specific ($hapi.fhir.undo-merge on Patient) and generic
- * ($hapi.fhir.undo-merge on any resource type with 'identifier' element) operations.
- *
- * A same-partition merge records a single Provenance listing every changed resource; a cross-partition merge
- * records one sub-Provenance per involved partition (grouped with the main Provenance via the provenance-group
- * extension), and the undo restores it provenance-by-provenance, pinned to the partition each sub-Provenance's
- * extension names.
- *
- * Current limitations:
- * - It fails if any resources to be restored have been subsequently changed since the merge operation was performed.
- * - It can only run synchronously.
- * - It fails if the number of resources to restore exceeds a specified resource limit
- * (currently set to same size as getInternalSynchronousSearchSize in JPAStorageSettings by the operation provider).
- */
 public class ResourceUndoMergeService {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceUndoMergeService.class);
@@ -149,8 +130,6 @@ public class ResourceUndoMergeService {
 				inputParameters, theRequestDetails, opOutcome, theInputParamNames);
 		IIdType targetId = targetResource.getIdElement();
 
-		// The first element is always the main Provenance; the rest (if any) are the per-partition sub-Provenances
-		// of a cross-partition merge.
 		List<Provenance> provenances = findMergeProvenances(inputParameters, targetId, theRequestDetails);
 		Provenance mainProvenance = provenances.get(0);
 
@@ -189,10 +168,6 @@ public class ResourceUndoMergeService {
 		return provenances;
 	}
 
-	/**
-	 * Undoes a same-partition merge from its single Provenance, which lists every changed resource. The restore
-	 * is submitted as one cross-partition FHIR transaction (see the comment inside).
-	 */
 	private void undoSingleProvenance(
 			Provenance theProvenance,
 			UndoMergeOperationInputParameters inputParameters,
@@ -203,11 +178,6 @@ public class ResourceUndoMergeService {
 				"Undoing merge from a single Provenance: {}",
 				theProvenance.getIdElement().toUnqualifiedVersionless().getValue());
 
-		// target.get(0) is the target, target.get(1) is the source, and everything from index 2 on is the changed
-		// data. The restore submits them as a single FHIR transaction; when a transaction-partitioning interceptor
-		// is present it splits and dependency-orders the writes per partition — so the resources a referrer points
-		// at are committed before the referrer is restored, with no manual source-first/target-last ordering needed
-		// here. When the target update was a no-op there is nothing to revert for it, so it is sliced off.
 		List<Reference> references = theProvenance.getTarget();
 		validateResourceLimit(references.size(), inputParameters.getResourceLimit());
 
@@ -220,11 +190,6 @@ public class ResourceUndoMergeService {
 			myResourceVersionRestorer.restoreToPreviousVersionsInTrx(referencesToRestore, theRequestDetails);
 			populateSuccessOutcome(referencesToRestore.size(), theProvenance, theUndoMergeOutcome);
 		} catch (PartitionedTransactionPartialFailureException thePartialFailure) {
-			// Under MegaScale the restore is split per partition and partitions commit independently, so some
-			// may have committed before a later one failed. Those committed restores cannot be rolled back
-			// automatically; report them for manual reconciliation. Any other failure — a version conflict, a
-			// deleted resource, or a single-database atomic rollback where nothing committed — propagates to
-			// undoMerge's handler, which surfaces its real status (e.g. 409/410) and leaves the merge intact.
 			ourLog.error(
 					"Undo-merge partially failed; some partitions committed before a later one failed",
 					thePartialFailure);
@@ -233,29 +198,9 @@ public class ResourceUndoMergeService {
 		}
 	}
 
-	/**
-	 * The restore work of one sub-Provenance: the partition its group extension names, and its data references
-	 * (targets from index 2 on — index 0 and 1 are the merge target and source, present in every Provenance of the
-	 * group for discovery).
-	 */
 	private record SubProvenanceRestore(
 			Provenance provenance, RequestPartitionId partition, List<Reference> dataRefs) {}
 
-	/**
-	 * Undoes a cross-partition merge from its per-partition sub-Provenances, restoring provenance-by-provenance,
-	 * each pinned to the partition its group extension names — no cross-shard fan-out reads (which would resolve
-	 * through MegaScale ESR surrogate rows and fail on tombstoned originals).
-	 *
-	 * <p>Ordering: the source partition's sub-Provenance is restored first — it undeletes the tombstoned originals
-	 * (and the source itself) that the other partitions' restored referrers point at. The target partition's
-	 * sub-Provenance is restored last — it deletes the merge-created copies, which must wait until every referrer
-	 * elsewhere has been repointed away from them. The source/target subs are recognized by containing the merge
-	 * source/target (the main Provenance's first two targets) among their data references.
-	 *
-	 * <p>The restores run inside one outer transaction: on a single database that makes the whole undo atomic; when
-	 * partition changes commit independently (MegaScale), each per-partition restore commits on its own, the undo
-	 * stops at the first failure, and the outcome reports which partitions had already been restored.
-	 */
 	private void undoGroupedMerge(
 			Provenance theMainProvenance,
 			List<Provenance> theSubProvenances,
@@ -300,11 +245,6 @@ public class ResourceUndoMergeService {
 		}
 	}
 
-	/**
-	 * Builds the per-sub-Provenance restore work and orders it: the sub containing the merge source among its data
-	 * references first, the sub containing the merge target last, the rest in between (see
-	 * {@link #undoGroupedMerge}).
-	 */
 	private List<SubProvenanceRestore> orderSubProvenanceRestores(
 			Provenance theMainProvenance, List<Provenance> theSubProvenances) {
 
@@ -338,11 +278,6 @@ public class ResourceUndoMergeService {
 		return ordered;
 	}
 
-	/**
-	 * Extracts the partition a sub-Provenance records changes for, from its group extension's
-	 * {@code ;partition=} suffix. Every sub-Provenance is written with one; its absence means the Provenance
-	 * group is malformed and the undo cannot restore partition-pinned, so it fails rather than guessing.
-	 */
 	private RequestPartitionId extractRequiredPartition(Provenance theSubProvenance) {
 		String groupId = MergeProvenanceSvc.getProvenanceGroupId(theSubProvenance);
 		RequestPartitionId partition = groupId != null ? MergeProvenanceGroupIdUtil.extractPartition(groupId) : null;
@@ -363,10 +298,6 @@ public class ResourceUndoMergeService {
 		return theReferences.stream().anyMatch(ref -> versionlessRefValue(ref).equals(theVersionlessId));
 	}
 
-	/**
-	 * Populates the {@link OperationOutcomeWithStatusCode} for a successful undo-merge with an informational
-	 * message and a 200 status code.
-	 */
 	private void populateSuccessOutcome(
 			int theRestoredCount, Provenance theMainProvenance, OperationOutcomeWithStatusCode theUndoMergeOutcome) {
 		String msg = format(
@@ -376,14 +307,6 @@ public class ResourceUndoMergeService {
 		theUndoMergeOutcome.setHttpStatusCode(STATUS_HTTP_200_OK);
 	}
 
-	/**
-	 * Builds the {@link OperationOutcomeWithStatusCode} for a partially-failed undo-merge (only reached for a
-	 * {@link PartitionedTransactionPartialFailureException}, i.e. when some partitions committed before a later
-	 * one failed). We determine which resources actually persisted by probing each reference's current version
-	 * (see {@link #wasReferenceRestored(Reference, RequestPartitionId, RequestDetails)}): a committed restore
-	 * advances the version, while a rolled-back one does not. The committed restores cannot be rolled back
-	 * automatically, so the outcome reports both sets at 500 for manual reconciliation.
-	 */
 	private void buildPartialUndoFailureOutcome(
 			List<Reference> theRestoredReferences,
 			Exception theFailure,
@@ -412,16 +335,6 @@ public class ResourceUndoMergeService {
 		addErrorToOperationOutcome(myFhirContext, opOutcome, msg, ISSUE_TYPE_EXCEPTION);
 	}
 
-	/**
-	 * Builds the {@link OperationOutcomeWithStatusCode} for a failed grouped undo-merge.
-	 *
-	 * <p>Per-partition restores commit independently when partitions span separate databases, so a failure partway
-	 * through can leave some partitions reverted to their pre-merge state while others remain merged. We determine
-	 * which actually persisted by probing the current version of one data reference per sub-Provenance, pinned to
-	 * its partition (each per-partition restore is atomic, so one reference tells the whole sub-Provenance's fate).
-	 * When everything lives in a single database the failed outer transaction rolls all of it back, so nothing
-	 * probes as persisted and the merge is reported as fully intact.
-	 */
 	private void buildGroupedUndoFailureOutcome(
 			List<SubProvenanceRestore> theRestores, Exception theFailure, OperationOutcomeWithStatusCode theOutcome) {
 
@@ -446,8 +359,6 @@ public class ResourceUndoMergeService {
 		}
 
 		if (revertedProvenances.isEmpty()) {
-			// Single-database (atomic) case, or the failure happened before anything was restored: the
-			// outer transaction rolled everything back, so the merge is fully intact.
 			String msg = format(
 					"Undo-merge failed. No resources could be restored; the merge remains fully in effect. Cause: %s",
 					theFailure.getMessage());
@@ -455,8 +366,6 @@ public class ResourceUndoMergeService {
 			return;
 		}
 
-		// Some restores committed independently before the failure and cannot be automatically rolled back.
-		// Report at Provenance granularity (each per-partition restore is all-or-nothing).
 		String msg = format(
 				"Undo-merge partially failed; changes that were already committed cannot be automatically "
 						+ "rolled back and require manual reconciliation. Restored provenances: %s. Not restored "
@@ -465,15 +374,6 @@ public class ResourceUndoMergeService {
 		addErrorToOperationOutcome(myFhirContext, opOutcome, msg, ISSUE_TYPE_EXCEPTION);
 	}
 
-	/**
-	 * Returns {@code true} if the resource referenced by the given versioned Provenance reference now has a
-	 * current version greater than the version recorded in the reference — i.e. a restore actually committed
-	 * for it. A resource that was created by the merge and restored by deleting it is detected via its
-	 * tombstone version. When {@code thePartition} is supplied the probe read is pinned to it (a fanned-out
-	 * read could resolve through an ESR surrogate row and misreport); otherwise it reads with the caller's
-	 * request details. Probe failures are treated as "not restored" so the resource is reported as needing
-	 * manual cleanup rather than being silently assumed reverted.
-	 */
 	private boolean wasReferenceRestored(
 			Reference theProvenanceRef,
 			@Nullable RequestPartitionId thePartition,
@@ -490,7 +390,6 @@ public class ResourceUndoMergeService {
 			IBaseResource current = dao.read(versionedId.toUnqualifiedVersionless(), probeRequestDetails);
 			return current.getIdElement().getVersionIdPartAsLong() > provenanceVersion;
 		} catch (ResourceGoneException e) {
-			// Resource was created by the merge and restored by deleting it; the tombstone is a new version.
 			IIdType goneId = e.getResourceId();
 			return goneId != null && goneId.hasVersionIdPart() && goneId.getVersionIdPartAsLong() > provenanceVersion;
 		} catch (Exception e) {
@@ -502,11 +401,6 @@ public class ResourceUndoMergeService {
 		}
 	}
 
-	/**
-	 * Validates the resource limit against the number of distinct resources referenced across all
-	 * Provenances. Source and target appear in every Provenance, so collecting into a set dedups
-	 * them automatically — no special handling needed.
-	 */
 	private void validateGroupedMergeResourceLimit(
 			Provenance theMainProvenance,
 			List<Provenance> theSubProvenances,

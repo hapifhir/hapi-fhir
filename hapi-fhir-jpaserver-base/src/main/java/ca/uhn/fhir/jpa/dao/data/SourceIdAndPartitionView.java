@@ -22,14 +22,6 @@ package ca.uhn.fhir.jpa.dao.data;
 import ca.uhn.fhir.model.primitive.IdDt;
 import jakarta.annotation.Nullable;
 
-/**
- * Projection of a referencing (source) resource discovered via the HFJ_RES_LINK index: its
- * type + FHIR id, plus the partition id of the source resource. The partition id lets callers
- * pin reads to the correct shard rather than relying on id-based partition resolution, which
- * fails for client-assigned (non-partition-decodable) ids in MegaScale Patient ID mode.
- * <p>
- * {@code partitionId} may be {@code null} for default-partition rows.
- */
 // Created by claude-opus
 public record SourceIdAndPartitionView(@Nullable Integer partitionId, String resourceType, String fhirId) {
 	public IdDt toIdDt() {

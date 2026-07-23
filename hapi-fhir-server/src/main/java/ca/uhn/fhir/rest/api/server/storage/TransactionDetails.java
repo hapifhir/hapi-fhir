@@ -234,22 +234,10 @@ public class TransactionDetails {
 		return myResolvedPartitions.get(theId);
 	}
 
-	/**
-	 * Returns an unmodifiable view of all id-to-partition resolutions cached in this transaction. Used to carry
-	 * resolved partitions across the sub-transactions of a partitioned (split) transaction bundle.
-	 */
 	public Map<String, RequestPartitionId> getResolvedPartitions() {
 		return Collections.unmodifiableMap(myResolvedPartitions);
 	}
 
-	/**
-	 * Copies the resolved resource-id-to-PID mappings from another {@link TransactionDetails} into this one. Used to
-	 * carry resolutions across the sub-transactions of a partitioned (split) transaction bundle, so that a reference
-	 * in a later sub-bundle to a resource created/resolved in an earlier sub-bundle resolves directly to its PID
-	 * (see {@code DaoResourceLinkResolver}) instead of falling back to an all-partitions lookup. Negative (not-found)
-	 * cached resolutions are NOT copied — a resource absent from one partition's sub-bundle may be present in
-	 * another's — which is why we iterate the reverse (PID-keyed) map, whose keys are always real PIDs.
-	 */
 	public void copyResolvedResourceIdsFrom(TransactionDetails theOther) {
 		theOther.myResolvedResourceIds.forEach((idValue, pid) -> {
 			if (pid != null) {

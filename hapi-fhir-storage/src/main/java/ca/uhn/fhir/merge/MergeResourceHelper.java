@@ -99,26 +99,6 @@ public class MergeResourceHelper {
 		OperationOutcomeUtil.addIssue(theFhirContex, theOutcome, "error", theDiagnosticMsg, null, theCode);
 	}
 
-	/**
-	 * Deletes the given resources in a single transaction pinned to {@code thePartition}, as individual DAO
-	 * deletes instead of one DELETE transaction bundle: a bundle would pass through the MegaScale
-	 * transaction-splitting interceptor, which cannot determine a partition for a DELETE entry whose id is
-	 * client-assigned (non-partition-decodable). Every resource in the list is expected to live in
-	 * {@code thePartition} (the cross-partition merge deletes the copied compartment originals plus the source
-	 * resource when {@code deleteSource}; the merge undo deletes the v1 resources the forward merge
-	 * created — both same-partition sets), so pinning them all to that single partition is safe — and lets them
-	 * share one transaction: either every delete commits, or none do.
-	 *
-	 * <p>The resources being deleted can reference each other (e.g. a compartment Observation referencing a
-	 * compartment Encounter), so delete conflicts are collected across the whole list — with every id pre-marked
-	 * for deletion so conflicts among the co-deleted resources are skipped, mirroring how a DELETE transaction
-	 * bundle validates — and validated once before the transaction commits. A genuine conflict (an outside
-	 * referrer) rolls the whole transaction back, leaving no deletes behind.
-	 *
-	 * @return the deleted resources' tombstone versioned ids — the resources at the version their delete
-	 *         committed. No-op deletes (resources already deleted) are excluded, since they committed nothing.
-	 *         On any failure the transaction rolls back and this method throws instead of returning.
-	 */
 	public static List<IIdType> deleteResourcesInPartitionTransaction(
 			List<IIdType> theResourceIds,
 			RequestPartitionId thePartition,
@@ -126,8 +106,6 @@ public class MergeResourceHelper {
 			IHapiTransactionService theTransactionService) {
 		DeleteConflictList deleteConflicts = new DeleteConflictList();
 		theResourceIds.forEach(deleteConflicts::setResourceIdMarkedForDeletion);
-		// The explicit partition on the SystemRequestDetails short-circuits the delete's partition resolution,
-		// so a non-decodable id is not re-resolved to allPartitions (which would make the delete a silent no-op).
 		SystemRequestDetails deleteRequestDetails = SystemRequestDetails.forRequestPartitionId(thePartition);
 		return theTransactionService
 				.withRequest(deleteRequestDetails)
@@ -143,7 +121,6 @@ public class MergeResourceHelper {
 							tombstones.add(outcome.getId());
 						}
 					}
-					// Validated inside the transaction: an outside referrer rolls back every delete.
 					DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(
 							theDaoRegistry.getFhirContext(), deleteConflicts);
 					return tombstones;
