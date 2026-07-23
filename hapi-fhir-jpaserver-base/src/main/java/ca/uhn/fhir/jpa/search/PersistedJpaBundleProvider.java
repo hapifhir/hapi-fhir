@@ -499,50 +499,59 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 			// Load non-iterate `_include` (use originalPids so `_include` only applies to the
 			// initial search results, not to revincluded resources — per FHIR spec, without `:iterate`)
-			Set<JpaPid> nonIterateIncludedPids = theSearchBuilder.loadIncludes(
-					myContext,
-					myEntityManager,
-					originalPids,
-					mySearchEntity.toIncludesList(false),
-					false,
-					mySearchEntity.getLastUpdated(),
-					myUuid,
-					myRequest,
-					maxIncludes);
-			if (maxIncludes != null) {
-				maxIncludes -= nonIterateIncludedPids.size();
+			Set<JpaPid> nonIterateIncludedPids = new HashSet<>();
+			if (maxIncludes == null || maxIncludes > 0) {
+				nonIterateIncludedPids = theSearchBuilder.loadIncludes(
+						myContext,
+						myEntityManager,
+						originalPids,
+						mySearchEntity.toIncludesList(false),
+						false,
+						mySearchEntity.getLastUpdated(),
+						myUuid,
+						myRequest,
+						maxIncludes);
+				if (maxIncludes != null) {
+					maxIncludes -= nonIterateIncludedPids.size();
+				}
 			}
 			thePids.addAll(nonIterateIncludedPids);
 			includedPidList.addAll(nonIterateIncludedPids);
 
 			// Load `_revinclude:iterate`
-			Set<JpaPid> iterateRevIncludedPids = theSearchBuilder.loadIncludes(
-					myContext,
-					myEntityManager,
-					thePids,
-					mySearchEntity.toRevIncludesList(true),
-					true,
-					mySearchEntity.getLastUpdated(),
-					myUuid,
-					myRequest,
-					maxIncludes);
-			if (maxIncludes != null) {
-				maxIncludes -= iterateRevIncludedPids.size();
+			Set<JpaPid> iterateRevIncludedPids = new HashSet<>();
+			if (maxIncludes == null || maxIncludes > 0) {
+				iterateRevIncludedPids = theSearchBuilder.loadIncludes(
+						myContext,
+						myEntityManager,
+						thePids,
+						mySearchEntity.toRevIncludesList(true),
+						true,
+						mySearchEntity.getLastUpdated(),
+						myUuid,
+						myRequest,
+						maxIncludes);
+				if (maxIncludes != null) {
+					maxIncludes -= iterateRevIncludedPids.size();
+				}
 			}
 			thePids.addAll(iterateRevIncludedPids);
 			includedPidList.addAll(iterateRevIncludedPids);
 
 			// Load `_include:iterate`
-			Set<JpaPid> iterateIncludedPids = theSearchBuilder.loadIncludes(
-					myContext,
-					myEntityManager,
-					thePids,
-					mySearchEntity.toIncludesList(true),
-					false,
-					mySearchEntity.getLastUpdated(),
-					myUuid,
-					myRequest,
-					maxIncludes);
+			Set<JpaPid> iterateIncludedPids = new HashSet<>();
+			if (maxIncludes == null || maxIncludes > 0) {
+				iterateIncludedPids = theSearchBuilder.loadIncludes(
+						myContext,
+						myEntityManager,
+						thePids,
+						mySearchEntity.toIncludesList(true),
+						false,
+						mySearchEntity.getLastUpdated(),
+						myUuid,
+						myRequest,
+						maxIncludes);
+			}
 			thePids.addAll(iterateIncludedPids);
 			includedPidList.addAll(iterateIncludedPids);
 		}
