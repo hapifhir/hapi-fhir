@@ -1034,7 +1034,7 @@
 		<fhir_core_version>6.9.12</fhir_core_version>
 		<spotless_version>2.41.1</spotless_version>
 		<spotless.exclude.pattern>**/test/**/*.java</spotless.exclude.pattern>
-		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
+		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m -Dspring.test.extension.context.scope=test_class</surefire_jvm_args>
 		<surefire_version>3.5.6</surefire_version>
 
 
@@ -3245,7 +3245,7 @@
 		<profile>
 			<id>CI</id>
 			<properties>
-				<surefire_jvm_args>-Dspring.test.context.cache.maxSize=2 -Dfile.encoding=UTF-8 -Xmx2648m
+				<surefire_jvm_args>-Dspring.test.context.cache.maxSize=2 -Dspring.test.extension.context.scope=test_class -Dfile.encoding=UTF-8 -Xmx2648m
 					-XX:-TieredCompilation -Dfile.encoding=UTF-8 -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=2048M
 					-XX:ReservedCodeCacheSize=220M
 				</surefire_jvm_args>

@@ -53,6 +53,14 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 public class SqlLoggerFilteringAndUtilTest {
 
+	@AfterEach
+	void shutdownLeakedRefreshExecutors() {
+		// Some tests run against a fresh (spied) util instance whose spied refresh task can keep a scheduled
+		// executor alive against a stubbed refreshFilters, leaking it into later tests and inflating the shared
+		// refresh counter. Shut every refresh executor down after each test so the counter stays meaningful.
+		SqlLoggerFilteringUtil.shutdownRefreshExecutorsForTests();
+	}
+
 	@Nested
 	public class SqlStatementFilteringLoggerTests {
 		@Spy
