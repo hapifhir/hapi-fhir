@@ -367,6 +367,10 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 				org.hl7.fhir.dstu3.model.StringType stringType = (org.hl7.fhir.dstu3.model.StringType) theValue;
 				conceptProperty = new StringConceptProperty(theName, stringType.getValue());
 				break;
+			case IValidationSupport.TYPE_BOOLEAN:
+				org.hl7.fhir.dstu3.model.BooleanType booleanType = (org.hl7.fhir.dstu3.model.BooleanType) theValue;
+				conceptProperty = new BooleanConceptProperty(theName, booleanType.getValue());
+				break;
 			case IValidationSupport.TYPE_CODING:
 				org.hl7.fhir.dstu3.model.Coding coding = (org.hl7.fhir.dstu3.model.Coding) theValue;
 				conceptProperty =
