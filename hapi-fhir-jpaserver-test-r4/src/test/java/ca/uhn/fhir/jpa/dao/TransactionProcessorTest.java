@@ -67,6 +67,7 @@ import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -175,6 +176,10 @@ public class TransactionProcessorTest {
 
 	@BeforeEach
 	void before() {
+		// Spring Boot 4 removed the MockitoTestExecutionListener that used to initialize plain @Mock/@Captor
+		// fields, so we initialize them explicitly here.
+		MockitoAnnotations.openMocks(this);
+
 		myDaoRegistry.unregisterAll();
 
 		myTransactionProcessor.setEntityManagerForUnitTest(myEntityManager);
