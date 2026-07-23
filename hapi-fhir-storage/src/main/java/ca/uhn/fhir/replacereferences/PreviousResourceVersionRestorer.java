@@ -138,6 +138,7 @@ public class PreviousResourceVersionRestorer {
 			}
 			long referenceVersion = referenceId.getVersionIdPartAsLong();
 
+			// Read the current resource
 			IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(referenceId.getResourceType());
 
 			IBaseResource currentResource = null;

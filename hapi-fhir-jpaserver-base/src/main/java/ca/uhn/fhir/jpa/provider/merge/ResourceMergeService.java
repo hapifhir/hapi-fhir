@@ -294,6 +294,7 @@ public class ResourceMergeService {
 			Date theStartTime) {
 
 		myHapiTransactionService.withRequest(theRequestDetails).execute(() -> {
+			// 1. Replace references (nested transactions inside)
 			List<Bundle> responseBundles = replaceReferencesInNestedTransaction(
 					theSourceResource,
 					theTargetResource,
@@ -303,6 +304,7 @@ public class ResourceMergeService {
 			List<IIdType> changedResourceIds =
 					ReplaceReferencesProvenanceSvc.extractChangedResourceIds(responseBundles);
 
+			// 2. Update source/target
 			DaoMethodOutcome outcome = myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
 					theSourceResource,
 					theTargetResource,
@@ -311,12 +313,20 @@ public class ResourceMergeService {
 					theRequestDetails);
 			theMergeOutcome.setUpdatedTargetResource(outcome.getResource());
 
+			// 4. Create provenance (if requested)
 			if (theMergeOperationParameters.getCreateProvenance()) {
 				IIdType sourcePostMergeId = theSourceResource.getIdElement();
+				// If the source resource is to be deleted, increment the version id of the source resource to be put in
+				// the
+				// provenance. Since the resource will be deleted after the provenance is created, its version will be
+				// incremented by
+				// the delete operation.
 				if (theMergeOperationParameters.getDeleteSource()) {
 					sourcePostMergeId = sourcePostMergeId.withVersion(
 							Long.toString(sourcePostMergeId.getVersionIdPartAsLong() + 1));
 				}
+				// we store the original input parameters and the operation outcome of updating target as
+				// contained resources in the provenance. undo-merge service uses these to contained resources.
 				List<IBaseResource> containedResources = List.of(
 						theMergeOperationParameters.getOriginalInputParameters(), outcome.getOperationOutcome());
 				myMergeResourceHelper.createProvenance(
@@ -436,13 +446,15 @@ public class ResourceMergeService {
 					theCommittedResourceIds);
 		}
 
-		List<IIdType> resourceIdsToDelete = new ArrayList<>(copiedResourceOriginalIds);
+		List<IIdType> resourcesToDeleteIds = new ArrayList<>(copiedResourceOriginalIds);
+		// 3. Add source patient to resourcesToDeleteIds (unified for both paths)
 		if (deleteSource) {
-			resourceIdsToDelete.add(theSourceResource.getIdElement());
+			resourcesToDeleteIds.add(theSourceResource.getIdElement());
 		}
-		if (!resourceIdsToDelete.isEmpty()) {
+		// 5. Unified delete (AFTER provenance)
+		if (!resourcesToDeleteIds.isEmpty()) {
 			theCommittedResourceIds.addAll(MergeResourceHelper.deleteResourcesInPartitionTransaction(
-					resourceIdsToDelete, sourcePartition, myDaoRegistry, myHapiTransactionService));
+					resourcesToDeleteIds, sourcePartition, myDaoRegistry, myHapiTransactionService));
 		}
 	}
 
@@ -465,6 +477,7 @@ public class ResourceMergeService {
 		theCopyResult.getChangedResourceIdsByPartition().forEach((partition, ids) -> changedResourcesByPartition
 				.computeIfAbsent(partition, k -> new ArrayList<>())
 				.addAll(ids));
+		// Add tombstone IDs for copied resource originals (version+1).
 		theCopyResult
 				.getCopiedResourceOriginalIdsByPartition()
 				.forEach((partition, ids) -> ids.forEach(id -> changedResourcesByPartition

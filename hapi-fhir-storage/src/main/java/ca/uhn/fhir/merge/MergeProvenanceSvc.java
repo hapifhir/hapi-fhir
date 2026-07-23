@@ -102,6 +102,8 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 
 		String resourceType = theTargetId.getResourceType();
 		// Returns a list because Patient resources can be merged via two endpoints (Patient/$merge or
+		// Patient/$hapi.fhir.merge), each storing different parameter names in the Provenance.
+		// All other resource types only use the generic endpoint and parameter names.
 		List<AbstractMergeOperationInputParameterNames> parameterNamesList =
 				AbstractMergeOperationInputParameterNames.getParameterNamesForResourceType(resourceType);
 
@@ -140,6 +142,15 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 		return result;
 	}
 
+	/**
+	 * Finds a Provenance with the activity code "merge" that has the given target id and source identifiers.
+	 * For Patient resources, tries both patient-specific and generic parameter names for backward compatibility.
+	 *
+	 * @param theTargetId the target resource id
+	 * @param theSourceIdentifiers the source identifiers to match
+	 * @param theRequestDetails the request details
+	 * @return the Provenance resource if matching one is found, or null if not found.
+	 */
 	@Nullable
 	public static String getProvenanceGroupId(Provenance theProvenance) {
 		Extension ext = theProvenance.getExtensionByUrl(HapiExtensions.EXT_PROVENANCE_GROUP);

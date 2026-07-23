@@ -79,8 +79,22 @@ public class CrossPartitionReplaceReferencesSvc {
 		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 		myHapiTransactionService = theHapiTransactionService;
 		myFhirContext = theDaoRegistry.getFhirContext();
+		ids = stream.toList(); // never null — returns empty list if no results
 	}
 
+	/**
+	 * Copies referencing resources from the source resource's partition to the target resource's partition,
+	 * and updates references in resources that don't change partition. Assumes the caller provides the outer
+	 * transaction — all internal operations use {@code transactionNested()}.
+	 * <p>
+	 * Does NOT delete the source copies — the caller is responsible for deleting them after
+	 * provenance creation using the returned {@link CrossPartitionReplaceReferencesResult#getCopiedResourceOriginalIds()}.
+	 * Deletion cannot happen here because provenance must reference the originals (as tombstones),
+	 * and deleting first would violate referential integrity checks.
+	 *
+	 * @return a {@link CrossPartitionReplaceReferencesResult} containing references to created/updated resources
+	 *         and versioned references to the original source copies for deferred deletion.
+	 */
 	public CrossPartitionReplaceReferencesResult copyCompartmentResourcesAndReplaceReferences(
 			IBaseResource theSourceResource, IBaseResource theTargetResource, RequestDetails theRequestDetails) {
 

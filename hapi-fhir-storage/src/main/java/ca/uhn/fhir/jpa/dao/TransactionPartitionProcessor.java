@@ -109,6 +109,10 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 		myTransactionDetails = theTransactionDetails;
 	}
 
+	/**
+	 * Invoke the {@link Pointcut#STORAGE_TRANSACTION_PRE_PARTITION} hook to slice the transaction request
+	 * bundle into partitions, execute each slice, and aggregate the results.
+	 */
 	public PartitionedTransactionResult<BUNDLE> execute(BUNDLE theRequest) {
 
 		// Stash a copy of the entries in the bundle before we call the hook, so we

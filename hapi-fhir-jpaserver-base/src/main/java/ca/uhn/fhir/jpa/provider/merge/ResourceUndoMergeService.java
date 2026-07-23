@@ -166,9 +166,11 @@ public class ResourceUndoMergeService {
 
 		List<Provenance> provenances;
 		if (inputParameters.getSourceResource() != null) {
+			// the client provided a source id, use it to find the provenance together with the target id
 			IIdType sourceId = inputParameters.getSourceResource().getReferenceElement();
 			provenances = myMergeProvenanceSvc.findMergeProvenances(targetId, sourceId, theRequestDetails);
 		} else {
+			// the client provided source identifiers, find a provenance using those identifiers and the target id
 			provenances = myMergeProvenanceSvc.findMergeProvenancesBySourceIdentifiers(
 					targetId, inputParameters.getSourceIdentifiers(), theRequestDetails);
 		}
@@ -197,6 +199,11 @@ public class ResourceUndoMergeService {
 
 		List<Reference> referencesToRestore = references;
 		if (wasTargetUpdateANoop(theProvenance)) {
+			// skip restoring the target resource if it was not updated by the merge operation.
+			// This happens when the merge operation deletes the source resource (so the target doesn't have the
+			// replaces link added) and either the source resource didn't have any identifiers that were copied over to
+			// the target resource,
+			// or a resultPatient that didn't change anything in the target was provided.
 			referencesToRestore = references.subList(1, references.size());
 		}
 

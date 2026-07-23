@@ -453,6 +453,10 @@ public class MergeOperationTestHelper {
 				.toList();
 	}
 
+	/**
+	 * Validates merge provenance record.
+	 * Delegates to {@link ReplaceReferencesTestHelper#assertMergeProvenance}.
+	 */
 	public void assertMergeProvenance(
 			@Nonnull Parameters theInputParams,
 			@Nonnull IIdType theExpectedSourceId,
@@ -629,9 +633,12 @@ public class MergeOperationTestHelper {
 		assertThat(theProvenance.getContained()).hasSize(2);
 		Parameters containedParameters =
 				(Parameters) theProvenance.getContained().get(0);
+		// there would be an id added to the in the contained input parameters,
+		// other than that it should be equal to the input parameters that was used for the operation
 		containedParameters.setId((String) null);
 		assertThat(containedParameters.equalsDeep(theInputParameters)).isTrue();
 
+		// the second contained resource is the OperationOutcome of updating the target resource
 		OperationOutcome outcome =
 				(OperationOutcome) theProvenance.getContained().get(1);
 		assertThat(outcome.getIssue()).hasSize(1);
