@@ -22,6 +22,19 @@
 
 	<dependencyManagement>
 		<dependencies>
+			<!--
+			Import the Jackson 2 BOM *before* spring-boot-dependencies. Spring Boot 4 defaults to Jackson 3
+			(tools.jackson), but HAPI FHIR (and org.hl7.fhir.core) still use Jackson 2. The first-declared
+			import wins, so this keeps com.fasterxml.jackson.* pinned to our Jackson 2 version rather than
+			letting the Boot BOM pull in Jackson 3.
+			-->
+			<dependency>
+				<groupId>com.fasterxml.jackson</groupId>
+				<artifactId>jackson-bom</artifactId>
+				<version>${jackson_version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-dependencies</artifactId>
