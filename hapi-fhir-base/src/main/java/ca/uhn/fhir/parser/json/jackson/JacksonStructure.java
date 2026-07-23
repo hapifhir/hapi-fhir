@@ -429,7 +429,8 @@ public class JacksonStructure implements JsonLikeStructure {
 				// Note : JsonNodeFactory(boolean bigDecimalExact) overloaded constructor replaced with
 				// STRIP_TRAILING_BIGDECIMAL_ZEROES
 				.nodeFactory(new JsonNodeFactory())
-				// see : https://github.com/FasterXML/jackson-databind/blob/3.x/src/main/java/tools/jackson/databind/cfg/JsonNodeFeature.java#L49L58
+				// see :
+				// https://github.com/FasterXML/jackson-databind/blob/3.x/src/main/java/tools/jackson/databind/cfg/JsonNodeFeature.java#L49L58
 				.disable(JsonNodeFeature.STRIP_TRAILING_BIGDECIMAL_ZEROES)
 				.enable(JsonReadFeature.ALLOW_LEADING_PLUS_SIGN_FOR_NUMBERS)
 				.enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
