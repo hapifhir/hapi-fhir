@@ -36,6 +36,7 @@ import tools.jackson.core.util.DefaultIndenter;
 import tools.jackson.core.util.DefaultPrettyPrinter;
 import tools.jackson.core.util.Separators;
 
+import java.io.FilterWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.math.BigDecimal;
@@ -308,24 +309,14 @@ public class JacksonWriter extends BaseJsonLikeWriter {
 		return this;
 	}
 
-	private static class NonClosingWriter extends Writer {
+	private static class NonClosingWriter extends FilterWriter {
 
 		private final Writer myDelegate;
 
 		private NonClosingWriter(Writer theDelegate) {
+			super(theDelegate);
 			myDelegate = theDelegate;
 		}
-
-		@Override
-		public void write(char[] theChars, int theOffset, int theLength) throws IOException {
-			myDelegate.write(theChars, theOffset, theLength);
-		}
-
-		@Override
-		public void flush() throws IOException {
-			myDelegate.flush();
-		}
-
 		@Override
 		public void close() throws IOException {
 			myDelegate.flush();
