@@ -187,6 +187,7 @@ public class TransactionProcessorTest {
 		when(myPatientDao.getResourceType()).thenReturn(Patient.class);
 		when(myPatientDao.getContext()).thenReturn(myFhirContext);
 		myDaoRegistry.register(myPatientDao);
+		myDaoRegistry.register(mySystemDao);
 	}
 
 	@AfterEach

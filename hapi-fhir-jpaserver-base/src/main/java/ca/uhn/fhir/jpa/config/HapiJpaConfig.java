@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.IDaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistrationService;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.config.util.ResourceCountCacheUtil;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
@@ -53,6 +53,11 @@ public class HapiJpaConfig {
 	}
 
 	@Bean
+	public DaoRegistrationService daoRegistrationService(DaoRegistry theDaoRegistry) {
+		return new DaoRegistrationService(theDaoRegistry);
+	}
+
+	@Bean
 	public IHSearchSortHelper extendedFulltextSortHelper() {
 		return new HSearchSortHelperImpl(mySearchParamRegistry);
 	}
@@ -78,7 +83,7 @@ public class HapiJpaConfig {
 	}
 
 	@Bean(name = "myResourceCountsCache")
-	public ResourceCountCache resourceCountsCache(IFhirSystemDao<?, ?> theSystemDao) {
-		return ResourceCountCacheUtil.newResourceCountCache(theSystemDao);
+	public ResourceCountCache resourceCountsCache(DaoRegistry theDaoRegistry) {
+		return ResourceCountCacheUtil.newResourceCountCache(theDaoRegistry);
 	}
 }

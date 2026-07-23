@@ -31,7 +31,6 @@ import ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils;
 import ca.uhn.fhir.batch2.jobs.reindex.svcs.ReindexJobService;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -50,22 +49,16 @@ public class ReindexStepV2
 
 	private final ReindexJobService myReindexJobService;
 	private final HapiTransactionService myHapiTransactionService;
-
-	private final IFhirSystemDao<?, ?> mySystemDao;
-
 	private final DaoRegistry myDaoRegistry;
-
 	private final IIdHelperService<IResourcePersistentId<?>> myIdHelperService;
 
 	public ReindexStepV2(
 			ReindexJobService theJobService,
 			HapiTransactionService theHapiTransactionService,
-			IFhirSystemDao<?, ?> theSystemDao,
 			DaoRegistry theRegistry,
 			IIdHelperService<IResourcePersistentId<?>> theIdHelperService) {
 		myDaoRegistry = theRegistry;
 		myHapiTransactionService = theHapiTransactionService;
-		mySystemDao = theSystemDao;
 		myIdHelperService = theIdHelperService;
 		myReindexJobService = theJobService;
 	}
@@ -125,7 +118,7 @@ public class ReindexStepV2
 				.setChunkId(theChunkId)
 				.setJobParameters(theJobParameters);
 
-		ReindexTaskV2 reindexJob = new ReindexTaskV2(jp, myDaoRegistry, mySystemDao, myIdHelperService);
+		ReindexTaskV2 reindexJob = new ReindexTaskV2(jp, myDaoRegistry, myIdHelperService);
 
 		return myHapiTransactionService
 				.withRequest(requestDetails)

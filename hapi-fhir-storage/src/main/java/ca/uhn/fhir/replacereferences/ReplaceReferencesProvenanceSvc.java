@@ -67,12 +67,12 @@ public class ReplaceReferencesProvenanceSvc {
 	private static final String ACT_REASON_RECORDS_MANAGEMENT_CODE = "RECORDMGT";
 	protected static final String ACTIVITY_CODE_SYSTEM = "http://terminology.hl7.org/CodeSystem/iso-21089-lifecycle";
 	private static final String ACTIVITY_CODE_LINK = "link";
-	private final IFhirResourceDao<IBaseResource> myProvenanceDao;
 	private final FhirContext myFhirContext;
+	private final DaoRegistry myDaoRegistry;
 
-	public ReplaceReferencesProvenanceSvc(DaoRegistry theDaoRegistry) {
-		myProvenanceDao = theDaoRegistry.getResourceDao("Provenance");
-		myFhirContext = theDaoRegistry.getFhirContext();
+	public ReplaceReferencesProvenanceSvc(FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
+		myDaoRegistry = theDaoRegistry;
+		myFhirContext = theFhirContext;
 	}
 
 	protected CodeableConcept getActivityCodeableConcept() {
@@ -214,8 +214,13 @@ public class ReplaceReferencesProvenanceSvc {
 					theProvenanceAgents,
 					theContainedResources,
 					resourceType);
-			myProvenanceDao.create(provenance, theRequestDetails);
+
+			provideProvenanceDao().create(provenance, theRequestDetails);
 		}
+	}
+
+	private IFhirResourceDao<Provenance> provideProvenanceDao() {
+		return myDaoRegistry.getResourceDao("Provenance");
 	}
 
 	/**
@@ -268,7 +273,7 @@ public class ReplaceReferencesProvenanceSvc {
 		// we want the most recent one.
 		map.setSort(new SortSpec("recorded", SortOrderEnum.DESC));
 
-		IBundleProvider searchBundle = myProvenanceDao.search(map, theRequestDetails);
+		IBundleProvider searchBundle = provideProvenanceDao().search(map, theRequestDetails);
 		// 'activity' is not available as a search parameter in r4, was added in r5,
 		// so we need to filter the results manually.
 		return filterByActivity(searchBundle.getAllResources());
@@ -336,19 +341,17 @@ public class ReplaceReferencesProvenanceSvc {
 
 	public static List<IIdType> extractChangedResourceIds(List<Bundle> theResponseBundles) {
 		List<IIdType> changedResourceIds = new ArrayList<>();
-		theResponseBundles.forEach(outputBundle -> {
-			outputBundle.getEntry().forEach(entry -> {
-				if (entry.getResponse() != null && entry.getResponse().hasLocation()) {
-					if (isNoChangeResponse(entry.getResponse())) {
-						ourLog.warn(
-								"Skipping reference {} because the operation resulted in no change",
-								entry.getResponse().getLocation());
-						return;
-					}
-					changedResourceIds.add(new IdDt(entry.getResponse().getLocation()));
+		theResponseBundles.forEach(outputBundle -> outputBundle.getEntry().forEach(entry -> {
+			if (entry.getResponse() != null && entry.getResponse().hasLocation()) {
+				if (isNoChangeResponse(entry.getResponse())) {
+					ourLog.warn(
+							"Skipping reference {} because the operation resulted in no change",
+							entry.getResponse().getLocation());
+					return;
 				}
-			});
-		});
+				changedResourceIds.add(new IdDt(entry.getResponse().getLocation()));
+			}
+		}));
 		return changedResourceIds;
 	}
 
