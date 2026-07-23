@@ -1001,21 +1001,35 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		ValueSetExpansionFilterContext valueSetExpansionFilterContext =
 				new ValueSetExpansionFilterContext(includeOrExcludeSystemResource, theInclude.getFilter());
 
-		for (FhirVersionIndependentConcept next : nextCodeList) {
-			if (includeOrExcludeSystemResource != null && theWantCode != null) {
-				boolean matches = includeOrExcludeSystemResource.getCaseSensitive()
-						? theWantCode.equals(next.getCode())
-						: theWantCode.equalsIgnoreCase(next.getCode());
+		try {
+			for (FhirVersionIndependentConcept next : nextCodeList) {
+				if (includeOrExcludeSystemResource != null && theWantCode != null) {
+					boolean matches = includeOrExcludeSystemResource.getCaseSensitive()
+							? theWantCode.equals(next.getCode())
+							: theWantCode.equalsIgnoreCase(next.getCode());
 
-				if (!matches) {
-					continue;
+					if (!matches) {
+						continue;
+					}
+				}
+
+				if (!valueSetExpansionFilterContext.isFiltered(next)) {
+					theConsumer.accept(next);
+					retVal = true;
 				}
 			}
-
-			if (!valueSetExpansionFilterContext.isFiltered(next)) {
-				theConsumer.accept(next);
-				retVal = true;
-			}
+		} catch (ValueSetExpansionFilterContext.UnsupportedFilterException e) {
+			// The in-memory engine cannot evaluate this filter. Surface it as an expansion failure rather
+			// than silently returning an incomplete/empty expansion, so the caller can report an error or
+			// delegate to another terminology service in the chain. The message already carries the
+			// originating Msg.code from ValueSetExpansionFilterContext.
+			throw new ExpansionCouldNotBeCompletedInternallyException(
+					Msg.code(3007) + e.getMessage(),
+					new CodeValidationIssue(
+							e.getMessage(),
+							IssueSeverity.ERROR,
+							CodeValidationIssueCode.INVALID,
+							CodeValidationIssueCoding.VS_INVALID));
 		}
 
 		return retVal;

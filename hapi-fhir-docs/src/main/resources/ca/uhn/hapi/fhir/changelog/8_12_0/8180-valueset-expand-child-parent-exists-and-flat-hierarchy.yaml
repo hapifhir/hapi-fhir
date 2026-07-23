@@ -1,0 +1,24 @@
+---
+type: change
+issue: 8180
+title: "ValueSet expansion now supports the hierarchical `child` and `parent` filter properties with the
+  `exists` operator (for example `child exists=false` to select the leaf concepts, or `parent exists=false`
+  to select the roots), for any terminology rather than only LOINC. In addition, the concept hierarchy is
+  now built from CodeSystems that express it FLAT via `parent`/`child` concept-properties, not only from
+  nested `CodeSystem.concept` arrays. This also makes the existing structural filters such as `is-a` and
+  `descendent-of` work for such flat CodeSystems. The standard boolean concept-properties `inactive` and `notSelectable` are now also
+  supported with the `exists` operator (for example `inactive exists=true` to select the inactive concepts);
+  a concept is treated as flagged only when it carries the property with the boolean value `true`. The
+  standard date-valued concept-properties `deprecated`, `deprecationDate` and `retirementDate` are likewise
+  supported with the `exists` operator as a presence check (for example `deprecated exists=true` to select
+  the deprecated concepts). Both the in-memory validation-support expansion and the JPA terminology service
+  are supported. These standard properties are matched by their reserved code name, so a flat hierarchy is
+  recognised even when the CodeSystem does not declare the `parent`/`child` property with the canonical URI.
+  A property the CodeSystem declares with a non-canonical URI (a different meaning) is not treated as the
+  standard property — the in-memory expansion reports an error for a filter using it, and the JPA persist
+  path does not build hierarchy links from it. Additionally, the in-memory expansion now reports an error for
+  a `compose.include.filter` it cannot evaluate (a custom concept property, or a non-`exists` operator on the
+  standard properties above), rather than silently returning an empty expansion, so the failure can be
+  surfaced or delegated to another terminology service in the validation-support chain. (Existing stored
+  CodeSystems must be re-persisted/reindexed to pick up links from previously-undeclared flat properties.)
+  Thanks to Patrick Werner for the contribution!"

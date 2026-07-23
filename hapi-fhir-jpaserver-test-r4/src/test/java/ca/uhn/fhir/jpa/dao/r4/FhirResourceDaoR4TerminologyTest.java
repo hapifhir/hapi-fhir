@@ -34,6 +34,7 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -374,6 +375,428 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
 		assertThat(codes).containsExactlyInAnyOrder("hello", "goodbye", "labrador", "beagle");
 
+	}
+
+	@Test
+	public void testExpandWithChildExistsFilter_SelectsLeafConcepts() {
+		createExternalCs();
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl(TermTestUtil.URL_MY_VALUE_SET);
+		valueSet.getCompose()
+			.addInclude()
+			.setSystem(TermTestUtil.URL_MY_CODE_SYSTEM)
+			.addFilter()
+			.setProperty("child")
+			.setOp(FilterOperator.EXISTS)
+			.setValue("false");
+		myValueSetDao.create(valueSet, mySrd);
+
+		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter(""));
+		logAndValidateValueSet(result);
+
+		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
+		assertThat(codes).containsExactlyInAnyOrder("childAAA", "childAAB", "childAB", "childCA");
+	}
+
+	@Test
+	public void testExpandWithParentExistsFilter_SelectsRootConcepts() {
+		createExternalCs();
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl(TermTestUtil.URL_MY_VALUE_SET);
+		valueSet.getCompose()
+			.addInclude()
+			.setSystem(TermTestUtil.URL_MY_CODE_SYSTEM)
+			.addFilter()
+			.setProperty("parent")
+			.setOp(FilterOperator.EXISTS)
+			.setValue("false");
+		myValueSetDao.create(valueSet, mySrd);
+
+		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter(""));
+		logAndValidateValueSet(result);
+
+		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
+		assertThat(codes).containsExactlyInAnyOrder("ParentA", "ParentB", "ParentC");
+	}
+
+	/**
+	 * The complement of {@code parent exists=false}: {@code parent exists=true} selects every concept that
+	 * HAS a parent (all non-root concepts), including concepts that sit several levels deep or under multiple
+	 * parents (e.g. childAAB is reachable from both childAA and childBA).
+	 */
+	@Test
+	public void testExpandWithParentExistsFilter_SelectsNonRootConcepts() {
+		createExternalCs();
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl(TermTestUtil.URL_MY_VALUE_SET);
+		valueSet.getCompose()
+			.addInclude()
+			.setSystem(TermTestUtil.URL_MY_CODE_SYSTEM)
+			.addFilter()
+			.setProperty("parent")
+			.setOp(FilterOperator.EXISTS)
+			.setValue("true");
+		myValueSetDao.create(valueSet, mySrd);
+
+		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter(""));
+		logAndValidateValueSet(result);
+
+		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
+		assertThat(codes).containsExactlyInAnyOrder(
+			"childAA", "childAAA", "childAAB", "childAB", "childBA", "childCA");
+	}
+
+	/**
+	 * For {@code property=child|parent} + {@code op=exists} the value is semantically required and must be a
+	 * real boolean literal. A blank or non-boolean value (e.g. "0", "no") must be rejected rather than being
+	 * silently coerced to {@code false} (which would flip the filter to select leaves/roots).
+	 */
+	@Test
+	public void testExpandWithChildExistsFilter_RejectsNonBooleanValue() {
+		createExternalCs();
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl(TermTestUtil.URL_MY_VALUE_SET);
+		valueSet.getCompose()
+			.addInclude()
+			.setSystem(TermTestUtil.URL_MY_CODE_SYSTEM)
+			.addFilter()
+			.setProperty("child")
+			.setOp(FilterOperator.EXISTS)
+			.setValue("no");
+		myValueSetDao.create(valueSet, mySrd);
+
+		assertThatThrownBy(() -> myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter("")))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("child");
+	}
+
+	/**
+	 * The standard boolean concept-property {@code inactive} with {@code op=exists} selects the concepts
+	 * that ARE inactive (property present with value true) for {@code value=true}, and their complement
+	 * for {@code value=false}. A concept that declares {@code inactive=false} must count as active.
+	 */
+	@Test
+	public void testExpandWithInactiveExistsFilter_SelectsInactiveConcepts() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(TermTestUtil.URL_MY_CODE_SYSTEM);
+		cs.setVersion("1");
+		cs.setContent(CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("ACTIVE").setDisplay("Active concept");
+		cs.addConcept().setCode("EXPLICIT_ACTIVE").setDisplay("Explicitly active")
+			.addProperty().setCode("inactive").setValue(new BooleanType(false));
+		cs.addConcept().setCode("RETIRED").setDisplay("Retired concept")
+			.addProperty().setCode("inactive").setValue(new BooleanType(true));
+		myCodeSystemDao.create(cs, mySrd);
+
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		assertThat(expandWithFilter("inactive", FilterOperator.EXISTS, "true"))
+			.containsExactlyInAnyOrder("RETIRED");
+		assertThat(expandWithFilter("inactive", FilterOperator.EXISTS, "false"))
+			.containsExactlyInAnyOrder("ACTIVE", "EXPLICIT_ACTIVE");
+	}
+
+	/**
+	 * The standard boolean concept-property {@code notSelectable} behaves like {@code inactive}: {@code
+	 * exists=true} selects the concepts flagged {@code notSelectable=true}.
+	 */
+	@Test
+	public void testExpandWithNotSelectableExistsFilter_SelectsNotSelectableConcepts() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(TermTestUtil.URL_MY_CODE_SYSTEM);
+		cs.setVersion("1");
+		cs.setContent(CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("LEAF").setDisplay("Selectable leaf");
+		cs.addConcept().setCode("GROUPING").setDisplay("Grouping concept")
+			.addProperty().setCode("notSelectable").setValue(new BooleanType(true));
+		myCodeSystemDao.create(cs, mySrd);
+
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		assertThat(expandWithFilter("notSelectable", FilterOperator.EXISTS, "true"))
+			.containsExactlyInAnyOrder("GROUPING");
+		assertThat(expandWithFilter("notSelectable", FilterOperator.EXISTS, "false"))
+			.containsExactlyInAnyOrder("LEAF");
+	}
+
+	/**
+	 * The standard date-valued concept-property {@code deprecated} with {@code op=exists} is a presence
+	 * check: {@code exists=true} selects the concepts that carry a deprecation date, {@code exists=false}
+	 * their complement. (No date-value comparison is performed.)
+	 */
+	@Test
+	public void testExpandWithDeprecatedExistsFilter_SelectsDeprecatedConcepts() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(TermTestUtil.URL_MY_CODE_SYSTEM);
+		cs.setVersion("1");
+		cs.setContent(CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("CURRENT").setDisplay("Current concept");
+		cs.addConcept().setCode("OLD").setDisplay("Deprecated concept")
+			.addProperty().setCode("deprecated").setValue(new DateTimeType("2020-01-01"));
+		myCodeSystemDao.create(cs, mySrd);
+
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		assertThat(expandWithFilter("deprecated", FilterOperator.EXISTS, "true"))
+			.containsExactlyInAnyOrder("OLD");
+		assertThat(expandWithFilter("deprecated", FilterOperator.EXISTS, "false"))
+			.containsExactlyInAnyOrder("CURRENT");
+	}
+
+	/**
+	 * Expand a ValueSet composed of a single include on {@link TermTestUtil#URL_MY_CODE_SYSTEM} with the
+	 * given filter, returning the resulting codes.
+	 */
+	private ArrayList<String> expandWithFilter(String theProperty, FilterOperator theOp, String theValue) {
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl(TermTestUtil.URL_MY_VALUE_SET + "-" + theProperty + "-" + theValue);
+		valueSet.getCompose()
+			.addInclude()
+			.setSystem(TermTestUtil.URL_MY_CODE_SYSTEM)
+			.addFilter()
+			.setProperty(theProperty)
+			.setOp(theOp)
+			.setValue(theValue);
+		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter(""));
+		return toCodesContains(result.getExpansion().getContains());
+	}
+
+	/**
+	 * Codes may contain query-syntax characters. The child/parent-exists filter must treat them as exact
+	 * terms, not parse them as a query string.
+	 */
+	@Test
+	public void testExpandWithChildExistsFilter_CodesWithSpecialCharacters() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(TermTestUtil.URL_MY_CODE_SYSTEM);
+		cs.setVersion("1");
+		cs.setContent(CodeSystemContentMode.COMPLETE);
+		ConceptDefinitionComponent parent = cs.addConcept().setCode("P|A").setDisplay("Parent with pipe");
+		parent.addConcept().setCode("C+1").setDisplay("Child with plus");
+		parent.addConcept().setCode("C-2:x").setDisplay("Child with dash and colon");
+		myCodeSystemDao.create(cs, mySrd);
+
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl(TermTestUtil.URL_MY_VALUE_SET);
+		valueSet.getCompose()
+			.addInclude()
+			.setSystem(TermTestUtil.URL_MY_CODE_SYSTEM)
+			.addFilter()
+			.setProperty("child")
+			.setOp(FilterOperator.EXISTS)
+			.setValue("false");
+		myValueSetDao.create(valueSet, mySrd);
+
+		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter(""));
+		logAndValidateValueSet(result);
+
+		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
+		assertThat(codes).containsExactlyInAnyOrder("C+1", "C-2:x");
+	}
+
+	/**
+	 * Same {@code child exists=false} leaf filter as the flat-hierarchy test below, but here the CodeSystem
+	 * resource expresses its hierarchy via NESTED {@code CodeSystem.concept} arrays (as in the nested KDL
+	 * representation), exercising the nested resource-loading path ({@code toPersistedConcepts}).
+	 */
+	@Test
+	public void testExpandWithChildExistsFilter_NestedConceptHierarchy() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(TermTestUtil.URL_MY_CODE_SYSTEM);
+		cs.setVersion("1");
+		cs.setContent(CodeSystemContentMode.COMPLETE);
+		ConceptDefinitionComponent p = cs.addConcept().setCode("P").setDisplay("Parent");
+		ConceptDefinitionComponent c1 = p.addConcept().setCode("C1").setDisplay("Child 1");
+		c1.addConcept().setCode("C2").setDisplay("Child 2");
+		p.addConcept().setCode("C3").setDisplay("Child 3");
+		myCodeSystemDao.create(cs, mySrd);
+
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl(TermTestUtil.URL_MY_VALUE_SET);
+		valueSet.getCompose()
+			.addInclude()
+			.setSystem(TermTestUtil.URL_MY_CODE_SYSTEM)
+			.addFilter()
+			.setProperty("child")
+			.setOp(FilterOperator.EXISTS)
+			.setValue("false");
+		myValueSetDao.create(valueSet, mySrd);
+
+		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter(""));
+		logAndValidateValueSet(result);
+
+		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
+		assertThat(codes).containsExactlyInAnyOrder("C2", "C3");
+	}
+
+	/**
+	 * Structural filters such as {@code descendent-of} must also work when the hierarchy is expressed FLAT
+	 * via a {@code parent} concept-property, because the flat properties are turned into the same
+	 * parent/child links that back the transitive-closure index.
+	 */
+	@Test
+	public void testExpandWithDescendentOfFilter_FlatParentPropertyHierarchy() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(TermTestUtil.URL_MY_CODE_SYSTEM);
+		cs.setVersion("1");
+		cs.setContent(CodeSystemContentMode.COMPLETE);
+		cs.addProperty()
+			.setCode("parent")
+			.setUri("http://hl7.org/fhir/concept-properties#parent")
+			.setType(CodeSystem.PropertyType.CODE);
+		cs.addConcept().setCode("P").setDisplay("Parent");
+		cs.addConcept().setCode("C1").setDisplay("Child 1").addProperty().setCode("parent").setValue(new CodeType("P"));
+		cs.addConcept().setCode("C2").setDisplay("Child 2").addProperty().setCode("parent").setValue(new CodeType("C1"));
+		cs.addConcept().setCode("C3").setDisplay("Child 3").addProperty().setCode("parent").setValue(new CodeType("P"));
+		myCodeSystemDao.create(cs, mySrd);
+
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl(TermTestUtil.URL_MY_VALUE_SET);
+		valueSet.getCompose()
+			.addInclude()
+			.setSystem(TermTestUtil.URL_MY_CODE_SYSTEM)
+			.addFilter()
+			.setProperty("concept")
+			.setOp(FilterOperator.DESCENDENTOF)
+			.setValue("P");
+		myValueSetDao.create(valueSet, mySrd);
+
+		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter(""));
+		logAndValidateValueSet(result);
+
+		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
+		assertThat(codes).containsExactlyInAnyOrder("C1", "C2", "C3");
+	}
+
+	/**
+	 * A CodeSystem whose hierarchy is expressed FLAT via a {@code parent} concept-property (canonical
+	 * concept-properties URI) rather than nested {@code CodeSystem.concept} arrays must still support the
+	 * {@code child exists=false} leaf filter (as used by the German KDL terminology).
+	 */
+	@Test
+	public void testExpandWithChildExistsFilter_FlatParentPropertyHierarchy() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(TermTestUtil.URL_MY_CODE_SYSTEM);
+		cs.setVersion("1");
+		cs.setContent(CodeSystemContentMode.COMPLETE);
+		cs.addProperty()
+			.setCode("parent")
+			.setUri("http://hl7.org/fhir/concept-properties#parent")
+			.setType(CodeSystem.PropertyType.CODE);
+		cs.addConcept().setCode("P").setDisplay("Parent");
+		cs.addConcept().setCode("C1").setDisplay("Child 1").addProperty().setCode("parent").setValue(new CodeType("P"));
+		cs.addConcept().setCode("C2").setDisplay("Child 2").addProperty().setCode("parent").setValue(new CodeType("C1"));
+		cs.addConcept().setCode("C3").setDisplay("Child 3").addProperty().setCode("parent").setValue(new CodeType("P"));
+		myCodeSystemDao.create(cs, mySrd);
+
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl(TermTestUtil.URL_MY_VALUE_SET);
+		valueSet.getCompose()
+			.addInclude()
+			.setSystem(TermTestUtil.URL_MY_CODE_SYSTEM)
+			.addFilter()
+			.setProperty("child")
+			.setOp(FilterOperator.EXISTS)
+			.setValue("false");
+		myValueSetDao.create(valueSet, mySrd);
+
+		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter(""));
+		logAndValidateValueSet(result);
+
+		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
+		assertThat(codes).containsExactlyInAnyOrder("C2", "C3");
+	}
+
+	/**
+	 * The flat {@code parent} hierarchy must also be recognised when the CodeSystem does NOT declare the
+	 * {@code parent} concept-property — it is matched by its reserved code name (as the German KDL
+	 * terminology uses the codes directly, without a property declaration).
+	 */
+	@Test
+	public void testExpandWithDescendentOfFilter_FlatParentPropertyUndeclared() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(TermTestUtil.URL_MY_CODE_SYSTEM);
+		cs.setVersion("1");
+		cs.setContent(CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("P").setDisplay("Parent");
+		cs.addConcept().setCode("C1").setDisplay("Child 1").addProperty().setCode("parent").setValue(new CodeType("P"));
+		cs.addConcept().setCode("C2").setDisplay("Child 2").addProperty().setCode("parent").setValue(new CodeType("C1"));
+		cs.addConcept().setCode("C3").setDisplay("Child 3").addProperty().setCode("parent").setValue(new CodeType("P"));
+		myCodeSystemDao.create(cs, mySrd);
+
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl(TermTestUtil.URL_MY_VALUE_SET);
+		valueSet.getCompose()
+			.addInclude()
+			.setSystem(TermTestUtil.URL_MY_CODE_SYSTEM)
+			.addFilter()
+			.setProperty("concept")
+			.setOp(FilterOperator.DESCENDENTOF)
+			.setValue("P");
+		myValueSetDao.create(valueSet, mySrd);
+
+		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter(""));
+		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
+		assertThat(codes).containsExactlyInAnyOrder("C1", "C2", "C3");
+	}
+
+	/**
+	 * A {@code parent} property declared with a NON-canonical URI has an unknown meaning, so it must NOT be
+	 * treated as hierarchy: no parent/child links are built from it.
+	 */
+	@Test
+	public void testExpandWithDescendentOfFilter_FlatParentPropertyNonCanonicalUriNotLinked() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(TermTestUtil.URL_MY_CODE_SYSTEM);
+		cs.setVersion("1");
+		cs.setContent(CodeSystemContentMode.COMPLETE);
+		cs.addProperty()
+			.setCode("parent")
+			.setUri("http://example.org/custom#parent")
+			.setType(CodeSystem.PropertyType.CODE);
+		cs.addConcept().setCode("P").setDisplay("Parent");
+		cs.addConcept().setCode("C1").setDisplay("Child 1").addProperty().setCode("parent").setValue(new CodeType("P"));
+		myCodeSystemDao.create(cs, mySrd);
+
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl(TermTestUtil.URL_MY_VALUE_SET);
+		valueSet.getCompose()
+			.addInclude()
+			.setSystem(TermTestUtil.URL_MY_CODE_SYSTEM)
+			.addFilter()
+			.setProperty("concept")
+			.setOp(FilterOperator.DESCENDENTOF)
+			.setValue("P");
+		myValueSetDao.create(valueSet, mySrd);
+
+		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter(""));
+		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
+		assertThat(codes).isEmpty();
 	}
 
 	@Test

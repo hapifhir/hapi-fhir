@@ -34,6 +34,14 @@ public interface ITermConceptParentChildLinkDao
 	@Query("SELECT t.myParentPid FROM TermConceptParentChildLink t WHERE t.myChildPid = :child_pid")
 	Collection<Long> findAllWithChild(@Param("child_pid") Long theConceptPid);
 
+	/**
+	 * Returns the distinct codes of all concepts that have at least one child (i.e. that appear as a
+	 * parent in a parent/child link) within the given CodeSystem version.
+	 */
+	@Query(
+			"SELECT DISTINCT t.myParent.myCode FROM TermConceptParentChildLink t WHERE t.myCodeSystemVersionPid = :csv_pid")
+	Collection<String> findDistinctParentCodesByCodeSystemVersion(@Param("csv_pid") Long theCodeSystemVersionPid);
+
 	@Modifying
 	@Query("DELETE FROM TermConceptParentChildLink WHERE myCodeSystemVersionPid = :cs_pid")
 	int deleteByCodeSystemVersion(@Param("cs_pid") Long thePid);
