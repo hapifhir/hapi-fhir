@@ -104,7 +104,7 @@ import java.util.regex.Pattern;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.interceptor.PatientIdPartitionReferenceScenarios.inAnyCompartment;
+import static ca.uhn.fhir.jpa.interceptor.PatientIdPartitionReferenceScenarios.inAnyPartitionExceptDefault;
 import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onAllThreads;
 import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onCurrentThread;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -1310,6 +1310,36 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		assertThat(encounter.getServiceProvider().getReference()).isEqualTo(orgId.toUnqualifiedVersionless().getValue());
 	}
 
+	/**
+	 * An inline match URL reference to an ancillary type with no match anywhere: the normalizer mints a
+	 * synthetic Organization conditional-create, which routes to the default partition while the referencing
+	 * Observation lands in the patient's compartment — the synthetic and its referencing entry end up in
+	 * different partitions.
+	 */
+	// Created by Claude Fable 5
+	@Test
+	void testTransaction_InlineMatchUrlAncillaryReference_syntheticCreatedInDefaultPartition() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		createPatient(withId("A"), withActiveTrue());
+
+		Observation obs = new Observation();
+		obs.setSubject(new Reference("Patient/A"));
+		obs.addPerformer(new Reference("Organization?identifier=org-sys|org-new"));
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(obs);
+
+		Bundle output = mySystemDao.transaction(newSrd(), bb.getBundleTyped());
+
+		IIdType obsId = new IdType(output.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless();
+		assertResourceIsInPartition(PATIENT_A_COMPARTMENT_ID, obsId);
+
+		Observation actualObs = myObservationDao.read(obsId, newSrd());
+		IIdType orgId = new IdType(actualObs.getPerformerFirstRep().getReference()).toUnqualifiedVersionless();
+		assertThat(orgId.getResourceType()).isEqualTo("Organization");
+		assertResourceIsInPartition(ALTERNATE_DEFAULT_ID, orgId);
+	}
+
 	@Test
 	public void testSearch() throws IOException {
 		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
@@ -1745,6 +1775,18 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	@ParameterizedTest
 	@ArgumentsSource(PatientIdPartitionReferenceScenarios.class)
 	void testTransaction_allReferenceScenarios(String theComment, String theBundle, List<ExpectedEntry> theExpectedEntries) {
+		runReferenceScenario(theComment, theBundle, theExpectedEntries);
+	}
+
+	@ParameterizedTest
+	@ArgumentsSource(PatientIdPartitionCrossPartitionScenarios.class)
+	void testTransaction_crossPartitionReferenceScenarios(PartitionSettings.CrossPartitionReferenceMode theMode, String theComment, String theBundle, List<ExpectedEntry> theExpectedEntries) {
+		myPartitionSettings.setAllowReferencesAcrossPartitions(theMode);
+		runReferenceScenario(theComment, theBundle, theExpectedEntries);
+	}
+
+	// Created by Claude Fable 5
+	private void runReferenceScenario(String theComment, String theBundle, List<ExpectedEntry> theExpectedEntries) {
 		// fixed setup
 		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
@@ -1808,7 +1850,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 
 		assertReferenceScenario(
 				resultBundle,
-				List.of(inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH)));
+				List.of(inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH)));
 		assertPatientCountInDatabase(1);
 	}
 
@@ -1847,7 +1889,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 
 		assertReferenceScenario(
 				resultBundle,
-				List.of(inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH)));
+				List.of(inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH)));
 		assertPatientCountInDatabase(1);
 
 		// The restored message fills the match-URL slot the native message leaves as a literal "{1}"
@@ -1894,7 +1936,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 
 		assertReferenceScenario(
 				resultBundle,
-				List.of(inAnyCompartment("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH)));
+				List.of(inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH)));
 		assertPatientCountInDatabase(1);
 	}
 
