@@ -25,25 +25,29 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.interceptor.auth.CompartmentSearchParameterModifications;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.interceptor.model.TransactionResponseAssembledDetails;
 import ca.uhn.fhir.interceptor.model.TransactionWriteAfterPrefetchDetails;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.BaseStorageDao;
+import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.BaseRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.util.ResourceCompartmentUtil;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -53,14 +57,14 @@ import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorOrders;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.storage.PreviousVersionReader;
+import ca.uhn.fhir.storage.TransactionBundleNormalizer;
 import ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceTargetRequest;
-import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.SearchParameterUtil;
-import ca.uhn.fhir.util.bundle.BundleEntryParts;
+import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -69,6 +73,7 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -86,13 +91,11 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.interceptor.model.RequestPartitionId.getPartitionFromUserDataIfPresent;
 import static ca.uhn.fhir.jpa.interceptor.ResourceCompartmentStoragePolicy.alwaysUseDefaultPartition;
 import static ca.uhn.fhir.jpa.interceptor.ResourceCompartmentStoragePolicy.mandatorySingleCompartment;
 import static ca.uhn.fhir.jpa.interceptor.ResourceCompartmentStoragePolicy.nonUniqueCompartmentInDefault;
@@ -113,10 +116,34 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Interceptor
 public class PatientIdPartitionInterceptor {
 	public static final String PATIENT_COMPARTMENT_NONE = "NONE";
-	public static final String PLACEHOLDER_TO_REFERENCE_KEY =
-			PatientIdPartitionInterceptor.class.getName() + "_placeholderToResource";
 	private static final Logger ourLog = LoggerFactory.getLogger(PatientIdPartitionInterceptor.class);
 	private static final String PATIENT_STR = "Patient";
+
+	/**
+	 * {@link TransactionDetails} user-data key under which {@link #resolvePatientReferencesAfterPreFetch} records the
+	 * {@link RewrittenOutcome}s it applied (keyed by the resulting {@code Patient/id}), so
+	 * {@link #restoreRewrittenPatientOutcomes} can restore the outcome the caller's original request implied.
+	 */
+	private static final String REWRITTEN_OUTCOMES_KEY =
+			PatientIdPartitionInterceptor.class.getName() + "_rewrittenOutcomes";
+
+	/**
+	 * How a Patient entry's verb was rewritten, so the original outcome code can be restored once the rewritten verb
+	 * has been processed.
+	 */
+	// Created by Claude Opus 4.7
+	private enum RewriteIntent {
+		UNCONDITIONAL_CREATE,
+		CONDITIONAL_CREATE_NO_MATCH,
+		CONDITIONAL_UPDATE_NO_MATCH
+	}
+
+	/**
+	 * @param conditionalUrl the original conditional match URL, needed to render the outcome message; null for
+	 *                       {@link RewriteIntent#UNCONDITIONAL_CREATE}.
+	 */
+	// Created by Claude Opus 4.7
+	private record RewrittenOutcome(RewriteIntent intent, String conditionalUrl) {}
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -300,21 +327,9 @@ public class PatientIdPartitionInterceptor {
 					+ oCompartmentIdentity.stream().map(t -> "Patient/" + t).collect(Collectors.joining(", ")));
 
 		} else {
-			Set<RequestPartitionId> compartments =
-					getPartitionViaPartiallyProcessedReference(theRequestDetails, policy, resource);
-			if (compartments.size() == 1) {
-				return compartments.iterator().next();
-			} else if (compartments.isEmpty()) {
-				Optional<RequestPartitionId> partitionId = policy.getPartitionIdForNoCompartment(myPartitionSettings);
-				if (partitionId.isPresent()) {
-					return partitionId.get();
-				}
-			} else {
-				Optional<RequestPartitionId> partitionId =
-						policy.getPartitionIdForNonUniqueCompartment(myPartitionSettings);
-				if (partitionId.isPresent()) {
-					return partitionId.get();
-				}
+			Optional<RequestPartitionId> partitionId = policy.getPartitionIdForNoCompartment(myPartitionSettings);
+			if (partitionId.isPresent()) {
+				return partitionId.get();
 			}
 
 			return throwNonCompartmentMemberInstanceFailureResponse(resource);
@@ -622,50 +637,6 @@ public class PatientIdPartitionInterceptor {
 		};
 	}
 
-	/**
-	 * HACK: enable synthea bundles to sneak through with a server-assigned UUID.
-	 * If we don't have a simple id for a compartment owner, maybe we're in a bundle during processing
-	 * and a reference points to the Patient which has already been processed and assigned a partition.
-	 */
-	@SuppressWarnings("unchecked")
-	@Nonnull
-	private Set<RequestPartitionId> getPartitionViaPartiallyProcessedReference(
-			RequestDetails theRequestDetails, ResourceCompartmentStoragePolicy thePolicy, IBaseResource theResource) {
-		Map<String, IBaseResource> placeholderToReference = null;
-		if (theRequestDetails != null) {
-			placeholderToReference =
-					(Map<String, IBaseResource>) theRequestDetails.getUserData().get(PLACEHOLDER_TO_REFERENCE_KEY);
-		}
-		if (placeholderToReference == null) {
-			placeholderToReference = Map.of();
-		}
-
-		List<IBaseReference> references = myFhirContext
-				.newTerser()
-				.getCompartmentReferencesForResource(
-						PATIENT_STR, theResource, new CompartmentSearchParameterModifications())
-				.toList();
-
-		Set<RequestPartitionId> retVal = new HashSet<>();
-		for (IBaseReference reference : references) {
-			String referenceString = reference.getReferenceElement().getValue();
-			IBaseResource target = placeholderToReference.get(referenceString);
-			if (target != null && Objects.equals(myFhirContext.getResourceType(target), PATIENT_STR)) {
-				Optional<RequestPartitionId> partition = getPartitionFromUserDataIfPresent(target);
-				if (partition.isPresent()) {
-					retVal.add(partition.get());
-				} else if (PATIENT_STR.equals(target.getIdElement().getResourceType())) {
-					if (!target.getIdElement().isUuid() && target.getIdElement().hasIdPart()) {
-						retVal.add(provideSingleCompartmentPartition(
-								theRequestDetails, target.getIdElement().getIdPart()));
-					}
-				}
-			}
-		}
-
-		return retVal;
-	}
-
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
 	public RequestPartitionId identifyForRead(
 			@Nonnull ReadPartitionIdRequestDetails theReadDetails, RequestDetails theRequestDetails) {
@@ -774,98 +745,342 @@ public class PatientIdPartitionInterceptor {
 	}
 
 	/**
-	 * If we're about to process a FHIR transaction, we want to note the mappings between placeholder IDs
-	 * and their resources and stuff them into a userdata map where we can access them later. We do this
-	 * so that when we see a resource in the patient compartment (e.g. an Encounter) and it has a subject
-	 * reference that's just a placeholder ID, we can look up the target of that and figure out which
-	 * compartment that Encounter actually belongs to.
+	 * Requests transaction bundle normalization for the current transaction: the normalizer pre-shapes the bundle
+	 * (placeholder fullUrls, identifier-bound in-bundle references, synthetic conditional creates for inline match
+	 * URL references) so {@link #resolvePatientReferencesAfterPreFetch} can resolve every Patient entry to a
+	 * concrete id for compartment routing. Normalization only runs for transactions where a registered interceptor
+	 * requests it this way.
 	 */
+	// Created by Claude Fable 5
 	@Hook(Pointcut.STORAGE_TRANSACTION_PROCESSING)
-	public void transaction(RequestDetails theRequestDetails, IBaseBundle theBundle) {
-		FhirTerser terser = myFhirContext.newTerser();
+	public void requestTransactionBundleNormalization(@Nonnull TransactionDetails theTransactionDetails) {
+		theTransactionDetails.putUserData(TransactionBundleNormalizer.NORMALIZATION_REQUESTED_KEY, Boolean.TRUE);
+	}
 
-		/*
-		 * If we have a Patient in the transaction bundle which is being POST-ed as a normal
-		 * resource "create" (i.e., it will get a server-assigned ID), we'll proactively assign it an ID here.
-		 *
-		 * This is mostly a hack to get Synthea data working, but real clients could also be
-		 * following the same pattern.
-		 */
-		List<IBase> rawEntries = new ArrayList<>(terser.getValues(theBundle, "entry", IBase.class));
-		List<BundleEntryParts> parsedEntries = BundleUtil.toListOfEntries(myFhirContext, theBundle);
-		Validate.isTrue(rawEntries.size() == parsedEntries.size(), "Parsed and raw entries don't match");
+	/**
+	 * Once {@code preFetch} has resolved every conditional URL and reference target, resolve each Patient entry to a
+	 * concrete ID and substitute all in-bundle references to it. This makes compartment placement independent of the
+	 * order entries are processed in: a matched conditional Patient reuses the existing resource's ID; an
+	 * unconditional Patient is assigned a UUID and its create is rewritten as a direct update so the ID sticks; an
+	 * unmatched conditional Patient is assigned a UUID on the body but stays a conditional update, so in-bundle
+	 * duplicates of the same match URL consolidate.
+	 */
+	// Created by Claude Opus 4.7
+	@Hook(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH)
+	public void resolvePatientReferencesAfterPreFetch(
+			@Nonnull TransactionWriteAfterPrefetchDetails thePrefetchDetails,
+			@Nonnull TransactionDetails theTransactionDetails) {
+		List<IBase> entries = thePrefetchDetails.getEntries();
 
+		// References given as inline Patient match URLs (present when the normalizer is not active) resolve here
+		rewriteInlinePatientMatchUrlReferences(entries, theTransactionDetails);
+
+		Map<String, String> idSubstitutions =
+				rewriteResolvedOrAssignPatientEntryIds(thePrefetchDetails, theTransactionDetails);
+		substituteReferences(thePrefetchDetails.getVersionAdapter(), entries, idSubstitutions);
+	}
+
+	/**
+	 * Resolves each Patient entry carrying a placeholder (urn:uuid) fullUrl to a concrete ID and returns the
+	 * fullUrl/URL -> concrete-reference substitutions to apply to the rest of the bundle. For entries without a
+	 * placeholder fullUrl, the only possible work is stamping a matched ID on an id-less conditional Patient
+	 * update.
+	 */
+	// Created by Claude Fable 5
+	private Map<String, String> rewriteResolvedOrAssignPatientEntryIds(
+			TransactionWriteAfterPrefetchDetails thePrefetchDetails, TransactionDetails theTransactionDetails) {
+		ITransactionProcessorVersionAdapter<IBaseBundle, IBase> versionAdapter = thePrefetchDetails.getVersionAdapter();
 		Map<String, String> idSubstitutions = new HashMap<>();
-		for (int i = 0; i < rawEntries.size(); i++) {
-			BundleEntryParts nextEntry = parsedEntries.get(i);
-			if (nextEntry.getResource() != null
-					&& myFhirContext.getResourceType(nextEntry.getResource()).equals(PATIENT_STR)) {
-				if (nextEntry.getMethod() == RequestTypeEnum.POST && isBlank(nextEntry.getConditionalUrl())) {
-					if (nextEntry.getFullUrl() != null && nextEntry.getFullUrl().startsWith("urn:uuid:")) {
-						String newId = UUID.randomUUID().toString();
-						nextEntry.getResource().setId(newId);
-						idSubstitutions.put(nextEntry.getFullUrl(), "Patient/" + newId);
+		Map<String, String> matchUrlToMintedReference = new HashMap<>();
 
-						IBase entry = rawEntries.get(i);
-						IBase request = terser.getValues(entry, "request").get(0);
-						terser.setElement(request, "ifNoneExist", null);
-						terser.setElement(request, "method", "PUT");
-						terser.setElement(request, "url", "Patient/" + newId);
-					}
-				} else if (nextEntry.getMethod() == RequestTypeEnum.PUT
-						&& isNotBlank(nextEntry.getFullUrl())
-						&& isNotBlank(nextEntry.getUrl())
-						&& isBlank(nextEntry.getConditionalUrl())
-						&& !Strings.CS.equals(nextEntry.getFullUrl(), nextEntry.getUrl())) {
-					idSubstitutions.put(nextEntry.getFullUrl(), nextEntry.getUrl());
-				}
+		for (IBase entry : thePrefetchDetails.getEntries()) {
+			String fullUrl = versionAdapter.getFullUrl(entry);
+			if (fullUrl == null || !fullUrl.startsWith("urn:uuid:")) {
+				setIdOnIdlessMatchedConditionalPatientUpdate(versionAdapter, theTransactionDetails, entry);
+			} else {
+				resolvePlaceholderPatientEntry(
+						thePrefetchDetails,
+						theTransactionDetails,
+						entry,
+						fullUrl,
+						idSubstitutions,
+						matchUrlToMintedReference);
 			}
 		}
+		return idSubstitutions;
+	}
 
-		if (!idSubstitutions.isEmpty()) {
-			for (BundleEntryParts entry : parsedEntries) {
-				IBaseResource resource = entry.getResource();
-				if (resource != null) {
-					List<ResourceReferenceInfo> references = terser.getAllResourceReferences(resource);
-					for (ResourceReferenceInfo reference : references) {
-						String referenceString = reference
-								.getResourceReference()
-								.getReferenceElement()
-								.getValue();
-						String substitution = idSubstitutions.get(referenceString);
-						if (substitution != null) {
-							reference.getResourceReference().setReference(substitution);
-						}
-					}
-				}
-			}
+	/**
+	 * Resolves one Patient entry carrying a placeholder (urn:uuid) fullUrl: a matched conditional reuses the
+	 * existing resource's ID; when the server assigns UUIDs, an unconditional create is assigned a minted ID and
+	 * rewritten as a direct update, and an unmatched conditional is assigned a minted ID but stays conditional.
+	 * Substitutions and minted references accumulate in the supplied maps.
+	 */
+	// Created by Claude Fable 5
+	private void resolvePlaceholderPatientEntry(
+			TransactionWriteAfterPrefetchDetails thePrefetchDetails,
+			TransactionDetails theTransactionDetails,
+			IBase theEntry,
+			String theFullUrl,
+			Map<String, String> theIdSubstitutions,
+			Map<String, String> theMatchUrlToMintedReference) {
+		ITransactionProcessorVersionAdapter<IBaseBundle, IBase> versionAdapter = thePrefetchDetails.getVersionAdapter();
+		IBaseResource resource = versionAdapter.getResource(theEntry);
+		if (resource == null || !PATIENT_STR.equals(myFhirContext.getResourceType(resource))) {
+			return;
 		}
 
-		List<BundleEntryParts> entries = BundleUtil.toListOfEntries(myFhirContext, theBundle);
-		Map<String, IBaseResource> placeholderToResource = new HashMap<>();
-		for (BundleEntryParts nextEntry : entries) {
-			String fullUrl = nextEntry.getFullUrl();
-			if (fullUrl != null && fullUrl.startsWith("urn:uuid:")) {
-				if (nextEntry.getResource() != null) {
-					placeholderToResource.put(fullUrl, nextEntry.getResource());
-				}
-			}
+		// A placeholder Patient (urn:uuid id, no client id) can only be assigned a server id up front when the server
+		// assigns UUIDs; otherwise its id isn't known until insert, too late for compartment routing. In that case we
+		// leave the entry untouched.
+		boolean serverAssignsUuids = thePrefetchDetails.getStorageSettings().getResourceServerIdStrategy()
+				== JpaStorageSettings.IdStrategyEnum.UUID;
+		Map<String, RewrittenOutcome> rewrittenOutcomes =
+				theTransactionDetails.getOrCreateUserData(REWRITTEN_OUTCOMES_KEY, HashMap::new);
+
+		String method = versionAdapter.getEntryRequestVerb(myFhirContext, theEntry);
+		String url = versionAdapter.getEntryRequestUrl(theEntry);
+		String matchUrl = null;
+		if ("POST".equals(method)) {
+			matchUrl = versionAdapter.getEntryRequestIfNoneExist(theEntry);
+		} else if ("PUT".equals(method) && url != null && url.contains("?")) {
+			matchUrl = url;
 		}
 
-		if (theRequestDetails != null) {
-			theRequestDetails.getUserData().put(PLACEHOLDER_TO_REFERENCE_KEY, placeholderToResource);
+		if (isBlank(matchUrl)) {
+			if ("POST".equals(method)) {
+				if (serverAssignsUuids) {
+					String newReference = assignNewIdAndRewriteToPut(
+							versionAdapter, theTransactionDetails, theEntry, resource, theFullUrl, theIdSubstitutions);
+					rewrittenOutcomes.put(newReference, new RewrittenOutcome(RewriteIntent.UNCONDITIONAL_CREATE, null));
+				}
+			} else if ("PUT".equals(method) && isNotBlank(url) && !Strings.CS.equals(theFullUrl, url)) {
+				theIdSubstitutions.put(theFullUrl, url);
+			}
+		} else {
+			PreFetchResolution resolution = getPreFetchResolution(matchUrl, theTransactionDetails);
+			if (resolution.matched() && resolution.matchedId() == null) {
+				// Matched, but without a reverse-mapped id (non-token match URL): the id is unknowable this
+				// early, and minting a new id for a matched URL would be wrong — leave the entry untouched.
+			} else if (resolution.matched()) {
+				String matchedReference =
+						resolution.matchedId().toUnqualifiedVersionless().getValue();
+				theIdSubstitutions.put(theFullUrl, matchedReference);
+				// Stamp the matched id on the body so identifyForCreate can route the entry. The entry stays
+				// conditional: the framework validates the body id against the match and reports the
+				// conditional-match outcome natively. A conditional POST already NOPs to the match correctly,
+				// so it is left alone.
+				if ("PUT".equals(method)) {
+					resource.setId(matchedReference);
+				}
+			} else if (serverAssignsUuids) {
+				// Keep the entry conditional (PUT Patient?<matchUrl>) rather than rewriting it to a direct
+				// update: the framework then consolidates in-bundle duplicates of the same match URL, and the
+				// create path writes the HFJ_RES_SEARCH_URL row that makes a concurrent transaction creating
+				// the same conditional URL collide instead of duplicating the patient. Duplicates share one
+				// minted id so references to any of them resolve to the single created patient.
+				String conditionalUrl = matchUrl.contains("?") ? matchUrl : PATIENT_STR + "?" + matchUrl;
+				String newReference =
+						theMatchUrlToMintedReference.computeIfAbsent(conditionalUrl, k -> mintPatientReference());
+				theIdSubstitutions.put(theFullUrl, newReference);
+				rewriteAsPut(versionAdapter, theEntry, resource, newReference, conditionalUrl);
+				RewriteIntent intent = "POST".equals(method)
+						? RewriteIntent.CONDITIONAL_CREATE_NO_MATCH
+						: RewriteIntent.CONDITIONAL_UPDATE_NO_MATCH;
+				rewrittenOutcomes.putIfAbsent(newReference, new RewrittenOutcome(intent, matchUrl));
+			}
+		}
+	}
+
+	/** Replaces every in-bundle reference that matches a substitution key with its concrete reference. */
+	// Created by Claude Fable 5
+	private void substituteReferences(
+			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
+			List<IBase> theEntries,
+			Map<String, String> theIdSubstitutions) {
+		if (theIdSubstitutions.isEmpty()) {
+			return;
+		}
+		FhirTerser terser = myFhirContext.newTerser();
+		for (IBase entry : theEntries) {
+			IBaseResource resource = theVersionAdapter.getResource(entry);
+			if (resource == null) {
+				continue;
+			}
+			for (ResourceReferenceInfo reference : terser.getAllResourceReferences(resource)) {
+				String referenceString =
+						reference.getResourceReference().getReferenceElement().getValue();
+				String substitution = theIdSubstitutions.get(referenceString);
+				if (substitution != null) {
+					reference.getResourceReference().setReference(substitution);
+				}
+			}
 		}
 	}
 
 	/**
-	 * Handles {@link Pointcut#STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH}, fired after the transaction pre-fetch has run
-	 * (inside the transaction, before any entry is written).
+	 * Once the transaction has been processed, restore the operation outcome each rewritten Patient entry would have
+	 * had if {@link #resolvePatientReferencesAfterPreFetch} hadn't rewritten its verb to make compartment placement
+	 * order-independent.
 	 */
-	@Hook(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH)
-	public void onTransactionWriteAfterPrefetch(
-			TransactionWriteAfterPrefetchDetails theDetails, TransactionDetails theTransactionDetails) {
-		rewriteInlinePatientMatchUrlReferences(theDetails.getEntries(), theTransactionDetails);
-		rewriteIdlessConditionalPatientUpdatesToDirect(theDetails.getEntries(), theTransactionDetails);
+	// Created by Claude Opus 4.7
+	@Hook(Pointcut.STORAGE_TRANSACTION_RESPONSE_ASSEMBLED)
+	public void restoreRewrittenPatientOutcomes(
+			@Nonnull TransactionResponseAssembledDetails theResponseDetails,
+			@Nonnull TransactionDetails theTransactionDetails) {
+		ITransactionProcessorVersionAdapter<IBaseBundle, IBase> versionAdapter = theResponseDetails.getVersionAdapter();
+		Map<String, RewrittenOutcome> rewrittenOutcomes = theTransactionDetails.getUserData(REWRITTEN_OUTCOMES_KEY);
+		if (rewrittenOutcomes == null || rewrittenOutcomes.isEmpty()) {
+			return;
+		}
+
+		List<IBase> entries = versionAdapter.getEntries(theResponseDetails.getResponseBundle());
+		for (IBase entry : entries) {
+			String location = versionAdapter.getResponseLocation(entry);
+			if (isBlank(location)) {
+				continue;
+			}
+			IdDt locationId = new IdDt(location);
+			String reference = locationId.toUnqualifiedVersionless().getValue();
+			RewrittenOutcome rewrite = rewrittenOutcomes.get(reference);
+			if (rewrite == null) {
+				continue;
+			}
+
+			StorageResponseCodeEnum code = restoredOutcomeCode(rewrite);
+			// The message names the versioned id, as native outcomes do
+			String versionedId = locationId.toUnqualified().getValue();
+			String message = restoredOutcomeMessage(code, versionedId, rewrite.conditionalUrl());
+
+			// An entry without a live outcome is left without one: this hook restores what the DAO would have
+			// reported for the original verb, and a DAO that reports nothing would have reported nothing.
+			IBaseOperationOutcome liveOutcome = versionAdapter.getResponseOutcome(entry);
+			if (liveOutcome != null) {
+				restorePrimaryIssue(liveOutcome, code, message);
+			}
+		}
+	}
+
+	/**
+	 * Rewrites the live outcome's primary issue in place — diagnostics and StorageResponseCode coding — keeping
+	 * everything else the DAO attached, such as auto-created-placeholder issues.
+	 */
+	// Created by Claude Fable 5
+	private void restorePrimaryIssue(
+			IBaseOperationOutcome theOutcome, StorageResponseCodeEnum theCode, String theMessage) {
+		FhirTerser terser = myFhirContext.newTerser();
+		List<IBase> issues = terser.getValues(theOutcome, "issue");
+		if (issues.isEmpty()) {
+			return;
+		}
+		IBase issue = issues.get(0);
+		setPrimitive(terser, issue, "diagnostics", theMessage);
+		List<IBase> codings = terser.getValues(issue, "details.coding");
+		if (!codings.isEmpty()) {
+			setPrimitive(terser, codings.get(0), "code", theCode.getCode());
+			setPrimitive(terser, codings.get(0), "display", theCode.getDisplay());
+		}
+	}
+
+	// Created by Claude Fable 5
+	private static void setPrimitive(FhirTerser theTerser, IBase theTarget, String thePath, String theValue) {
+		((IPrimitiveType<?>) theTerser.getValues(theTarget, thePath, true).get(0)).setValueAsString(theValue);
+	}
+
+	// Created by Claude Opus 4.7
+	private StorageResponseCodeEnum restoredOutcomeCode(RewrittenOutcome theRewrite) {
+		return switch (theRewrite.intent()) {
+			case UNCONDITIONAL_CREATE -> StorageResponseCodeEnum.SUCCESSFUL_CREATE;
+			case CONDITIONAL_CREATE_NO_MATCH -> StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH;
+			case CONDITIONAL_UPDATE_NO_MATCH -> StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH;
+		};
+	}
+
+	// Created by Claude Opus 4.7
+	private String restoredOutcomeMessage(StorageResponseCodeEnum theCode, String theId, String theConditionalUrl) {
+		HapiLocalizer localizer = myFhirContext.getLocalizer();
+		return switch (theCode) {
+			case SUCCESSFUL_CREATE -> localizer.getMessageSanitized(BaseStorageDao.class, "successfulCreate", theId);
+			case SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH -> localizer.getMessageSanitized(
+					BaseStorageDao.class,
+					"successfulCreateConditionalNoMatch",
+					theId,
+					UrlUtil.sanitizeUrlPart(theConditionalUrl));
+				// Unlike the native message, fill the {1} match-URL slot the DAO leaves unformatted
+			case SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH -> localizer.getMessageSanitized(
+					BaseStorageDao.class,
+					"successfulUpdateConditionalNoMatch",
+					theId,
+					UrlUtil.sanitizeUrlPart(theConditionalUrl));
+			default -> theCode.getDisplay();
+		};
+	}
+
+	// Created by Claude Opus 4.7
+	private String assignNewIdAndRewriteToPut(
+			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
+			TransactionDetails theTransactionDetails,
+			IBase theEntry,
+			IBaseResource theResource,
+			String theFullUrl,
+			Map<String, String> theIdSubstitutions) {
+		String newReference = mintPatientReference();
+		// A freshly minted id cannot exist yet. Record that the same way preFetch records unresolvable
+		// ids, so the update path skips its existence lookup.
+		theTransactionDetails.addResolvedResourceId(new IdDt(newReference), null);
+		theIdSubstitutions.put(theFullUrl, newReference);
+		rewriteAsPut(theVersionAdapter, theEntry, theResource, newReference, newReference);
+		return newReference;
+	}
+
+	/**
+	 * Rewrites the entry as a PUT of the given id: a direct update when the request URL is the id itself, or a
+	 * conditional update when it is a match URL.
+	 */
+	// Created by Claude Opus 4.7
+	private void rewriteAsPut(
+			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
+			IBase theEntry,
+			IBaseResource theResource,
+			String theReference,
+			String theRequestUrl) {
+		theResource.setId(theReference);
+		theVersionAdapter.setRequestVerb(theEntry, "PUT");
+		theVersionAdapter.setRequestUrl(theEntry, theRequestUrl);
+		theVersionAdapter.setRequestIfNoneExist(theEntry, null);
+	}
+
+	/** Mints a concrete reference for a Patient the server will create under the UUID id strategy. */
+	// Created by Claude Fable 5
+	private static String mintPatientReference() {
+		return PATIENT_STR + "/" + UUID.randomUUID();
+	}
+
+	/**
+	 * Without a normalizer-assigned placeholder fullUrl, an id-less conditional Patient update that pre-fetch matched
+	 * to an existing Patient still needs the matched id stamped on the body. The entry stays conditional, so the DAO
+	 * reports the conditional-match outcome natively. An unmatched id-less conditional update is left untouched.
+	 */
+	// Created by Claude Fable 5
+	private void setIdOnIdlessMatchedConditionalPatientUpdate(
+			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
+			TransactionDetails theTransactionDetails,
+			IBase theEntry) {
+		String method = theVersionAdapter.getEntryRequestVerb(myFhirContext, theEntry);
+		String url = theVersionAdapter.getEntryRequestUrl(theEntry);
+		if (!"PUT".equals(method) || url == null || !url.contains("?")) {
+			return;
+		}
+		IBaseResource resource = theVersionAdapter.getResource(theEntry);
+		if (resource == null
+				|| !PATIENT_STR.equals(myFhirContext.getResourceType(resource))
+				|| resource.getIdElement().getIdPart() != null) {
+			return;
+		}
+		IIdType matchedId = getPreFetchResolution(url, theTransactionDetails).matchedId();
+		if (matchedId != null) {
+			resource.setId(matchedId.toUnqualifiedVersionless().getValue());
+		}
 	}
 
 	/**
@@ -927,71 +1142,35 @@ public class PatientIdPartitionInterceptor {
 	private void rewriteInlineMatchUrlReference(
 			IBaseReference theReference, String theReferenceValue, TransactionDetails theTransactionDetails) {
 		// Act only on a match URL the pre-fetch resolved to a concrete Patient; otherwise leave the reference as is.
-		getPreFetchResolvedId(theReferenceValue, theTransactionDetails)
-				.ifPresent(resolvedId -> theReference.setReference(
-						resolvedId.toUnqualifiedVersionless().getValue()));
+		IIdType resolvedId =
+				getPreFetchResolution(theReferenceValue, theTransactionDetails).matchedId();
+		if (resolvedId != null) {
+			theReference.setReference(resolvedId.toUnqualifiedVersionless().getValue());
+		}
 	}
 
 	/**
-	 * Returns the concrete FHIR id the pre-fetch resolved for the given match URL (via
-	 * {@link TransactionDetails#getResolvedMatchUrls()} and the reverse-id map), or empty if the URL was not
-	 * resolved to a single existing resource ({@link TransactionDetails#NOT_FOUND}, absent, or no reverse-mapped id).
-	 * No search is performed — we act only on what the pre-fetch put in the transaction details.
+	 * What the pre-fetch resolved for a match URL: {@code matched} is true when the pre-fetch found an existing
+	 * resource. {@code matchedId} carries its FHIR id, or null when the match has no reverse-mapped id (non-token
+	 * match URL) — such an entry is matched yet its id is unknowable this early, so callers that mint ids for
+	 * unmatched URLs must not treat it as unmatched.
 	 */
-	private Optional<IIdType> getPreFetchResolvedId(String theMatchUrl, TransactionDetails theTransactionDetails) {
+	// Created by Claude Fable 5
+	private record PreFetchResolution(boolean matched, @Nullable IIdType matchedId) {}
+
+	/**
+	 * Consults what the pre-fetch resolved for the given match URL, via
+	 * {@link TransactionDetails#getResolvedMatchUrls()} and the reverse-id map. No search is performed — we act
+	 * only on what the pre-fetch put in the transaction details.
+	 */
+	// Created by Claude Fable 5
+	private PreFetchResolution getPreFetchResolution(String theMatchUrl, TransactionDetails theTransactionDetails) {
 		IResourcePersistentId<?> resolved =
 				theTransactionDetails.getResolvedMatchUrls().get(theMatchUrl);
 		if (resolved == null || resolved == TransactionDetails.NOT_FOUND) {
-			return Optional.empty();
+			return new PreFetchResolution(false, null);
 		}
-		return Optional.ofNullable(theTransactionDetails.getReverseResolvedId(resolved));
-	}
-
-	/**
-	 * Rewrites an id-less conditional-update Patient (e.g. {@code PUT Patient?identifier=http://acme.org/mrn|PT00062}
-	 * with no body id) into a direct {@code PUT Patient/<id>}, using the id the pre-fetch already resolved for the
-	 * conditional URL ({@link TransactionDetails#getResolvedMatchUrls()}). Without a body id the entry can't be routed
-	 * (a Patient's partition is {@code hash(<id>)}) and would fail with HAPI-1321; the direct URL lets the write route to
-	 * the existing Patient and update it in place instead of creating a duplicate.
-	 * <p>
-	 * Only a truly id-less body is rewritten. A body that already carries a client-assigned id is already routable and
-	 * handled by the normal conditional-update path.
-	 * <p>
-	 * An unmatched id-less conditional PUT ({@link TransactionDetails#NOT_FOUND} or absent) is left untouched and still
-	 * fails with HAPI-1321.
-	 */
-	private void rewriteIdlessConditionalPatientUpdatesToDirect(
-			List<IBase> theEntries, TransactionDetails theTransactionDetails) {
-		FhirTerser terser = myFhirContext.newTerser();
-		for (IBase entry : theEntries) {
-			String verb = terser.getSinglePrimitiveValueOrNull(entry, "request.method");
-			if (!"PUT".equals(verb)) {
-				continue;
-			}
-			String url = terser.getSinglePrimitiveValueOrNull(entry, "request.url");
-			if (!isPatientInlineMatchUrl(url)) {
-				continue;
-			}
-			IBaseResource resource = terser.getSingleValueOrNull(entry, "resource", IBaseResource.class);
-			if (resource == null || !PATIENT_STR.equals(myFhirContext.getResourceType(resource))) {
-				continue;
-			}
-			// Skip a body that already has an id — only a truly id-less body needs the rewrite (see method Javadoc).
-			if (resource.getIdElement().getIdPart() != null) {
-				continue;
-			}
-
-			Optional<IIdType> matchedId = getPreFetchResolvedId(url, theTransactionDetails);
-			if (matchedId.isEmpty()) {
-				continue;
-			}
-
-			// Convert the conditional PUT into a direct update by rewriting the request URL to the matched Patient id
-			// (verb stays PUT). We only rewrite the URL. The transaction processor's direct-update path then stamps
-			// the body id from that URL before the write, so the resource routes to the matched Patient.
-			String reference = matchedId.get().toUnqualifiedVersionless().getValue();
-			terser.setElement(entry, "request.url", reference);
-		}
+		return new PreFetchResolution(true, theTransactionDetails.getReverseResolvedId(resolved));
 	}
 
 	@SuppressWarnings("SameParameterValue")

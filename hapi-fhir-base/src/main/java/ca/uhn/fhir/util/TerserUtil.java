@@ -131,6 +131,33 @@ public final class TerserUtil {
 		theIdentifierDefinition.getMutator().addValue(theResourceToCloneInto, newIdentifierBase);
 	}
 
+	// Created by Claude Fable 5
+	/**
+	 * Adds an identifier with the given system and value to the resource's {@code identifier} field, building the
+	 * version-appropriate {@code Identifier} element from the resource's own definition. Version-independent.
+	 * Does nothing if the resource type has no {@code identifier} field.
+	 */
+	public static void addIdentifierToResource(
+			FhirContext theFhirContext, IBaseResource theResource, String theSystem, String theValue) {
+		RuntimeResourceDefinition resourceDefinition = theFhirContext.getResourceDefinition(theResource);
+		BaseRuntimeChildDefinition identifierDefinition = resourceDefinition.getChildByName(FIELD_NAME_IDENTIFIER);
+		if (identifierDefinition == null) {
+			return;
+		}
+		IBase identifier = identifierDefinition
+				.getChildByName(FIELD_NAME_IDENTIFIER)
+				.newInstance(identifierDefinition.getInstanceConstructorArguments());
+		IBase system = newElement(theFhirContext, "uri", theSystem);
+		IBase value = newElement(theFhirContext, "string", theValue);
+
+		BaseRuntimeElementDefinition<?> identifierTypeDefinition =
+				theFhirContext.getElementDefinition(identifier.getClass());
+		identifierTypeDefinition.getChildByName("system").getMutator().setValue(identifier, system);
+		identifierTypeDefinition.getChildByName("value").getMutator().setValue(identifier, value);
+
+		identifierDefinition.getMutator().addValue(theResource, identifier);
+	}
+
 	/**
 	 * Checks if the specified fields has any values
 	 *

@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.server.util;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -36,6 +37,25 @@ public class MatchUrlUtil {
 	 */
 	private MatchUrlUtil() {
 		// nothing
+	}
+
+	/**
+	 * Returns {@code true} if the given reference value looks like an inline match URL
+	 * (e.g. {@code Patient?identifier=http://sys|val}) — i.e. a relative reference with a
+	 * query string. Scheme'd values ({@code http://}, {@code urn:}, {@code mailto:}, ...) are
+	 * absolute references, not inline match URLs.
+	 */
+	public static boolean isInlineMatchUrl(@Nullable String theValue) {
+		if (StringUtils.isBlank(theValue)) {
+			return false;
+		}
+		int queryIndex = theValue.indexOf('?');
+		if (queryIndex == -1) {
+			return false;
+		}
+		// Only inspect the part before the query string for a scheme separator: token values inside
+		// the query legitimately contain URLs (e.g. Patient?identifier=http://sys|val)
+		return theValue.lastIndexOf(':', queryIndex) == -1;
 	}
 
 	/**

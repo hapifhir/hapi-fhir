@@ -164,6 +164,12 @@ public class TransactionProcessorVersionAdapterR5
 	}
 
 	@Override
+	public IBaseOperationOutcome getResponseOutcome(Bundle.BundleEntryComponent theEntry) {
+		Resource outcome = theEntry.getResponse().getOutcome();
+		return outcome instanceof IBaseOperationOutcome ? (IBaseOperationOutcome) outcome : null;
+	}
+
+	@Override
 	public void setRequestVerb(Bundle.BundleEntryComponent theEntry, String theVerb) {
 		theEntry.getRequest().setMethod(Bundle.HTTPVerb.fromCode(theVerb));
 	}
@@ -171,6 +177,16 @@ public class TransactionProcessorVersionAdapterR5
 	@Override
 	public void setRequestUrl(Bundle.BundleEntryComponent theEntry, String theUrl) {
 		theEntry.getRequest().setUrl(theUrl);
+	}
+
+	@Override
+	public void setRequestIfNoneExist(Bundle.BundleEntryComponent theEntry, String theIfNoneExist) {
+		theEntry.getRequest().setIfNoneExist(theIfNoneExist);
+	}
+
+	@Override
+	public String getResponseLocation(Bundle.BundleEntryComponent theEntry) {
+		return theEntry.getResponse().getLocation();
 	}
 
 	@Override

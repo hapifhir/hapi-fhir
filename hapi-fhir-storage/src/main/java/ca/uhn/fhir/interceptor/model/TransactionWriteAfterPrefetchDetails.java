@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR - Core Library
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
@@ -19,7 +19,11 @@
  */
 package ca.uhn.fhir.interceptor.model;
 
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 
 import java.util.List;
 
@@ -35,12 +39,19 @@ import java.util.List;
 public class TransactionWriteAfterPrefetchDetails {
 
 	private final List<IBase> myEntries;
+	private final ITransactionProcessorVersionAdapter<IBaseBundle, IBase> myVersionAdapter;
+	private final JpaStorageSettings myStorageSettings;
 
 	/**
 	 * Constructor
 	 */
-	public TransactionWriteAfterPrefetchDetails(List<IBase> theEntries) {
+	public TransactionWriteAfterPrefetchDetails(
+			@Nonnull List<IBase> theEntries,
+			@Nonnull ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
+			@Nonnull JpaStorageSettings theStorageSettings) {
 		myEntries = theEntries;
+		myVersionAdapter = theVersionAdapter;
+		myStorageSettings = theStorageSettings;
 	}
 
 	/**
@@ -49,5 +60,20 @@ public class TransactionWriteAfterPrefetchDetails {
 	 */
 	public List<IBase> getEntries() {
 		return myEntries;
+	}
+
+	/**
+	 * Provides the version adapter for reading and mutating the bundle's entries in a FHIR-version-agnostic way.
+	 */
+	public ITransactionProcessorVersionAdapter<IBaseBundle, IBase> getVersionAdapter() {
+		return myVersionAdapter;
+	}
+
+	/**
+	 * Provides the active storage settings, so hooks can honor configuration such as the server resource ID strategy
+	 * when assigning IDs.
+	 */
+	public JpaStorageSettings getStorageSettings() {
+		return myStorageSettings;
 	}
 }

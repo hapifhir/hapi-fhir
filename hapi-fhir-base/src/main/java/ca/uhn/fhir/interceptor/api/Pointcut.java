@@ -2069,8 +2069,9 @@ public enum Pointcut implements IPointcut {
 	 * <p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
-	 * <li>ca.uhn.fhir.interceptor.model.TransactionWriteAfterPrefetchDetails - A context object wrapping the list of
-	 * bundle entries being processed, in processing order</li>
+	 * <li>ca.uhn.fhir.interceptor.model.TransactionWriteAfterPrefetchDetails - Carries the list of bundle entries
+	 * being processed, in processing order, along with the version adapter and storage settings for working with
+	 * them in a FHIR-version-agnostic way.</li>
 	 * <li>ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is being
 	 * processed.</li>
 	 * <li>ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - The same details as the RequestDetails parameter, but
@@ -2086,6 +2087,39 @@ public enum Pointcut implements IPointcut {
 	STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH(
 			void.class,
 			"ca.uhn.fhir.interceptor.model.TransactionWriteAfterPrefetchDetails",
+			"ca.uhn.fhir.rest.api.server.RequestDetails",
+			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+			"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"),
+
+	/**
+	 * <b>Storage Hook:</b>
+	 * Invoked during FHIR transaction processing, once every entry has been processed and the response bundle has been
+	 * fully assembled, including each response entry's final location. Hooks may adjust the response entries
+	 * (for example to correct an operation outcome) before the response is returned to the caller, using the data
+	 * resolved during processing, which is available on the supplied
+	 * {@link ca.uhn.fhir.rest.api.server.storage.TransactionDetails}. When transaction processing is split into
+	 * multiple sub-transactions (e.g. by partition), this pointcut is invoked once per sub-transaction, with that
+	 * sub-transaction's response bundle.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>ca.uhn.fhir.interceptor.model.TransactionResponseAssembledDetails - Carries the assembled response bundle,
+	 * along with the version adapter for reading and mutating its entries in a FHIR-version-agnostic way.</li>
+	 * <li>ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is being
+	 * processed.</li>
+	 * <li>ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - The same details as the RequestDetails parameter, but
+	 * only populated when operating in a RestfulServer. Provided as a convenience.</li>
+	 * <li>ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object.</li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 *
+	 * @since FIXME-TG update after version bump
+	 */
+	STORAGE_TRANSACTION_RESPONSE_ASSEMBLED(
+			void.class,
+			"ca.uhn.fhir.interceptor.model.TransactionResponseAssembledDetails",
 			"ca.uhn.fhir.rest.api.server.RequestDetails",
 			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 			"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"),
