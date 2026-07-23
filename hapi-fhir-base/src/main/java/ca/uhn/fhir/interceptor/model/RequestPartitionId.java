@@ -569,9 +569,7 @@ public class RequestPartitionId implements Comparable<RequestPartitionId>, IMode
 	 */
 	@Nonnull
 	public static RequestPartitionId fromStringifiedKey(@Nonnull String theInput) {
-		Validate.notBlank(theInput, "theInput must not be blank");
-
-		StringTokenizer tok = new StringTokenizer(theInput, STRINGIFIER_DELIM);
+		StringTokenizer tok = new StringTokenizer(getIfNull(theInput, ""), STRINGIFIER_DELIM);
 		boolean all = false;
 		List<Integer> partitionIds = new ArrayList<>();
 
