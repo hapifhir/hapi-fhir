@@ -3196,7 +3196,6 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		Bundle input = loadResource(myFhirContext, Bundle.class, "/r4/test-patient-bundle.json");
 
-
 		myCaptureQueriesListener.clear();
 		Bundle output = mySystemDao.transaction(requestDetails, input);
 		myCaptureQueriesListener.logSelectQueries();
