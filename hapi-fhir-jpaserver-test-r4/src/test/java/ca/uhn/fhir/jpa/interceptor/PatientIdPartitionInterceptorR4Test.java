@@ -1966,15 +1966,19 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 				""";
 
 		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, bundle);
-		mySystemDao.transaction(mySrd, requestBundle);
+		Bundle resultBundle = mySystemDao.transaction(mySrd, requestBundle);
+
+		assertReferenceScenario(
+				resultBundle,
+				List.of(inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH)));
+		assertPatientCountInDatabase(1);
 
 		List<String> searchUrls = runInTransaction(() -> myResourceSearchUrlDao.findAll().stream()
 				.map(ResourceSearchUrlEntity::getSearchUrl)
 				.toList());
 		assertThat(searchUrls)
 				.as("conditional-create concurrency guard row")
-				.hasSize(1)
-				.allSatisfy(url -> assertThat(url).startsWith("Patient?identifier="));
+				.containsExactly("Patient?identifier=old-sys%7Crace-guard");
 	}
 
 	@Test
