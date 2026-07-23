@@ -37,6 +37,7 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -1783,6 +1784,58 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	void testTransaction_crossPartitionReferenceScenarios(PartitionSettings.CrossPartitionReferenceMode theMode, String theComment, String theBundle, List<ExpectedEntry> theExpectedEntries) {
 		myPartitionSettings.setAllowReferencesAcrossPartitions(theMode);
 		runReferenceScenario(theComment, theBundle, theExpectedEntries);
+	}
+
+	@ParameterizedTest
+	@ArgumentsSource(PatientIdPartitionNormalizerOffScenarios.Accepted.class)
+	void testTransaction_normalizerOffScenarios(String theComment, String theBundle, List<ExpectedEntry> theExpectedEntries) {
+		setupNormalizerOffFixture();
+
+		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, theBundle);
+		ourLog.info("Test case: {}", theComment);
+
+		Bundle resultBundle = mySystemDao.transaction(mySrd, requestBundle);
+		ourLog.info("Response bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resultBundle));
+
+		assertNotNull(resultBundle);
+		assertReferenceScenario(resultBundle, theExpectedEntries);
+	}
+
+	@ParameterizedTest
+	@ArgumentsSource(PatientIdPartitionNormalizerOffScenarios.Rejected.class)
+	void testTransaction_normalizerOffScenarios_rejected(String theComment, String theBundle, String theExpectedError) {
+		setupNormalizerOffFixture();
+
+		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, theBundle);
+		ourLog.info("Test case: {}", theComment);
+
+		assertThatThrownBy(() -> mySystemDao.transaction(mySrd, requestBundle))
+			.isInstanceOf(BaseServerResponseException.class)
+			.hasMessage(theExpectedError);
+		// Nothing from the failed bundle persisted — only the fixture's two patients exist.
+		assertPatientCountInDatabase(2);
+	}
+
+	/**
+	 * Same fixture as {@link #runReferenceScenario} except {@code autoCreatePlaceholderReferenceTargets} stays
+	 * {@code false}, which keeps the {@code TransactionBundleNormalizer} disabled. All-partition search is
+	 * enabled because without the normalizer, inline match URLs resolve only through the pre-fetch search.
+	 */
+	// Created by Claude Fable 5
+	private void setupNormalizerOffFixture() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(false);
+		myPartitionSettings.setAllPartitionSearchSupported(true);
+
+		createPatient(
+			withId("pat1"),
+			withIdentifier("old-sys", "ident1"),
+			withIdentifier("new-sys", "newId1")
+		);
+		createPatient(
+			withId("pat2"),
+			withIdentifier("old-sys", "ident2")
+		);
 	}
 
 	// Created by Claude Fable 5
