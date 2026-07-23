@@ -26,9 +26,10 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -61,12 +62,12 @@ public class GraphQLQueryBodyParameter implements IParameter {
 
 		if (CT_JSON.equals(ctValue)) {
 			try {
-				ObjectMapper mapper = new ObjectMapper();
+				JsonMapper mapper = new JsonMapper();
 				JsonNode jsonNode = mapper.readTree(requestReader);
 				if (jsonNode != null && jsonNode.get("query") != null) {
 					return jsonNode.get("query").asText();
 				}
-			} catch (IOException e) {
+			} catch (JacksonException e) {
 				throw new InternalErrorException(Msg.code(356) + e);
 			}
 		}

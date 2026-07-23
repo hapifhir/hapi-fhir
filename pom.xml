@@ -1094,9 +1094,20 @@
 		<hibernate_validator_version>8.0.0.Final</hibernate_validator_version>
 		<httpcore_version>4.4.16</httpcore_version>
 		<httpclient_version>4.5.14</httpclient_version>
-		<jackson_version>2.21.1</jackson_version>
-		<jackson_databind_version>2.21.1</jackson_databind_version>
+
+
+		<jackson_legacy_core_version>2.18.2</jackson_legacy_core_version>
+		<jackson_legacy_databind_version>2.18.2</jackson_legacy_databind_version>
+
+
+		<!-- see : https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.22#annotations  -->
 		<jackson_annotations_version>2.21</jackson_annotations_version>
+		<jackson_datatype_version>2.21.5</jackson_datatype_version>
+
+		<!-- pay attention to LTS versions going foward : https://github.com/FasterXML/jackson/wiki/Jackson-Releases#open-branches -->
+		<jackson_tools_version>3.1.5</jackson_tools_version>
+		<jackson_tools_databind_version>3.1.5</jackson_tools_databind_version>
+
 		<httpclient5_version>5.4.3</httpclient5_version>
 		<httpcore5_version>5.3.1</httpcore5_version>
 		<maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
@@ -1223,35 +1234,45 @@
 				<artifactId>commonmark</artifactId>
 				<version>0.9.0</version>
 			</dependency>
+
+			<!-- start jackson 2.x legacy version consistency -->
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-core</artifactId>
+				<version>${jackson_legacy_core_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>${jackson_legacy_databind_version}</version>
+			</dependency>
+
+			<!-- end jackson 2.x legacy version consistency -->
+
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-annotations</artifactId>
 				<version>${jackson_annotations_version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
+				<groupId>tools.jackson.core</groupId>
 				<artifactId>jackson-core</artifactId>
-				<version>${jackson_version}</version>
+				<version>${jackson_tools_version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
+				<groupId>tools.jackson.core</groupId>
 				<artifactId>jackson-databind</artifactId>
-				<version>${jackson_databind_version}</version>
+				<version>${jackson_tools_databind_version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.fasterxml.jackson.datatype</groupId>
-				<artifactId>jackson-datatype-jsr310</artifactId>
-				<version>${jackson_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.fasterxml.jackson.dataformat</groupId>
+				<groupId>tools.jackson.dataformat</groupId>
 				<artifactId>jackson-dataformat-yaml</artifactId>
-				<version>${jackson_version}</version>
+				<version>${jackson_tools_version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.fasterxml.jackson.module</groupId>
+				<groupId>tools.jackson.module</groupId>
 				<artifactId>jackson-module-jakarta-xmlbind-annotations</artifactId>
-				<version>${jackson_version}</version>
+				<version>${jackson_tools_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.jayway.jsonpath</groupId>
@@ -1332,11 +1353,13 @@
 				<artifactId>xml-patch</artifactId>
 				<version>0.3.1</version>
 			</dependency>
+
 			<dependency>
-				<groupId>io.dogote</groupId>
-				<artifactId>json-patch</artifactId>
-				<version>1.15</version>
+				<groupId>io.github.vishwakarma</groupId>
+				<artifactId>zjsonpatch</artifactId>
+				<version>0.6.2</version>
 			</dependency>
+
 			<dependency>
 				<groupId>com.google.errorprone</groupId>
 				<artifactId>error_prone_core</artifactId>
@@ -1989,7 +2012,7 @@
 			<dependency>
 				<groupId>org.glassfish</groupId>
 				<artifactId>javax.json</artifactId>
-				<version>1.0.4</version>
+				<version>1.1.4</version>
 			</dependency>
 			<dependency>
 				<groupId>org.glassfish.jaxb</groupId>

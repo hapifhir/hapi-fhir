@@ -98,7 +98,7 @@ public class HfqlRestProviderTest {
 			String outcome = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			String expected = """
 				1,HAPI FHIR THE-VERSION
-				my-search-id,999,"{""select"":[{""clause"":""name[0].family"",""alias"":""name[0].family"",""operator"":""SELECT"",""dataType"":""STRING""},{""clause"":""name[0].given[0]"",""alias"":""name[0].given[0]"",""operator"":""SELECT"",""dataType"":""STRING""}],""fromResourceName"":""Patient""}"
+				my-search-id,999,"{""fromResourceName"":""Patient"",""select"":[{""alias"":""name[0].family"",""clause"":""name[0].family"",""dataType"":""STRING"",""operator"":""SELECT""},{""alias"":""name[0].given[0]"",""clause"":""name[0].given[0]"",""dataType"":""STRING"",""operator"":""SELECT""}]}"
 				0,Simpson,Homer
 				3,Simpson,Marge
 				""".replace("THE-VERSION", VersionUtil.getVersion());
@@ -184,7 +184,7 @@ public class HfqlRestProviderTest {
 			String outcome = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			String expected = """
 				1,HAPI FHIR THE-VERSION
-				,-1,"{""select"":[{""clause"":""TABLE_NAME"",""alias"":""TABLE_NAME"",""operator"":""SELECT"",""dataType"":""STRING""}]}"
+				,-1,"{""select"":[{""alias"":""TABLE_NAME"",""clause"":""TABLE_NAME"",""dataType"":""STRING"",""operator"":""SELECT""}]}"
 				0,Account
 				6,Patient
 				""".replace("THE-VERSION", VersionUtil.getVersion());
@@ -225,7 +225,7 @@ public class HfqlRestProviderTest {
 			String outcome = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			String expected = """
 				1,HAPI FHIR THE-VERSION
-				,-1,"{""select"":[{""clause"":""COLUMN_NAME"",""alias"":""COLUMN_NAME"",""operator"":""SELECT"",""dataType"":""STRING""}]}"
+				,-1,"{""select"":[{""alias"":""COLUMN_NAME"",""clause"":""COLUMN_NAME"",""dataType"":""STRING"",""operator"":""SELECT""}]}"
 				0,FOO
 				6,BAR
 				""".replace("THE-VERSION", VersionUtil.getVersion());

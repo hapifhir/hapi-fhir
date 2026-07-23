@@ -26,19 +26,21 @@ import ca.uhn.fhir.parser.json.BaseJsonLikeObject;
 import ca.uhn.fhir.parser.json.BaseJsonLikeValue;
 import ca.uhn.fhir.parser.json.BaseJsonLikeWriter;
 import ca.uhn.fhir.parser.json.JsonLikeStructure;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.StreamReadConstraints;
-import com.fasterxml.jackson.core.json.JsonReadFeature;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.DecimalNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.StreamReadConstraints;
+import tools.jackson.core.StreamReadFeature;
+import tools.jackson.core.StreamWriteFeature;
+import tools.jackson.core.TokenStreamLocation;
+import tools.jackson.core.json.JsonFactory;
+import tools.jackson.core.json.JsonReadFeature;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.cfg.JsonNodeFeature;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.DecimalNode;
+import tools.jackson.databind.node.JsonNodeFactory;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
 import java.io.PushbackReader;
@@ -53,7 +55,7 @@ import java.util.Map;
 
 public class JacksonStructure implements JsonLikeStructure {
 
-	private static final ObjectMapper OBJECT_MAPPER = createObjectMapper();
+	private static final JsonMapper OBJECT_MAPPER = createJsonMapper();
 	private JacksonWriter jacksonWriter;
 	private ROOT_TYPE rootType = null;
 	private JsonNode nativeRoot = null;
@@ -117,7 +119,7 @@ public class JacksonStructure implements JsonLikeStructure {
 			}
 		} catch (Exception e) {
 			String message;
-			if (e instanceof JsonProcessingException) {
+			if (e instanceof JacksonException) {
 				/*
 				 * Currently there is no way of preventing Jackson from adding this
 				 * annoying REDACTED message from certain messages we get back from
@@ -125,15 +127,25 @@ public class JacksonStructure implements JsonLikeStructure {
 				 * will accept this request at some point:
 				 * https://github.com/FasterXML/jackson-core/issues/1158
 				 */
-				JsonProcessingException jpe = (JsonProcessingException) e;
+				JacksonException jpe = (JacksonException) e;
 				StringBuilder messageBuilder = new StringBuilder();
 				String originalMessage = jpe.getOriginalMessage();
 				originalMessage = originalMessage.replace(
 						"Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); ", "");
+				originalMessage = originalMessage.replace("property name and value", "field name and value");
 				messageBuilder.append(originalMessage);
-				if (jpe.getLocation() != null) {
+				TokenStreamLocation location = jpe.getLocation();
+				if (location != null) {
 					messageBuilder.append("\n at [");
-					jpe.getLocation().appendOffsetDescription(messageBuilder);
+					if (location.getLineNr() > 0 && location.getColumnNr() > 0) {
+						messageBuilder
+								.append("line: ")
+								.append(location.getLineNr())
+								.append(", column: ")
+								.append(location.getColumnNr());
+					} else {
+						location.appendOffsetDescription(messageBuilder);
+					}
 					messageBuilder.append("]");
 				}
 				message = messageBuilder.toString();
@@ -154,7 +166,9 @@ public class JacksonStructure implements JsonLikeStructure {
 	@Override
 	public BaseJsonLikeWriter getJsonLikeWriter(Writer writer) throws IOException {
 		if (null == jacksonWriter) {
-			jacksonWriter = new JacksonWriter(OBJECT_MAPPER.getFactory(), writer);
+			jacksonWriter = new JacksonWriter(OBJECT_MAPPER.tokenStreamFactory(), writer);
+		} else {
+			jacksonWriter.setWriter(writer);
 		}
 
 		return jacksonWriter;
@@ -200,7 +214,7 @@ public class JacksonStructure implements JsonLikeStructure {
 
 		@Override
 		public Iterator<String> keyIterator() {
-			return nativeObject.fieldNames();
+			return nativeObject.propertyNames().iterator();
 		}
 
 		@Override
@@ -406,21 +420,26 @@ public class JacksonStructure implements JsonLikeStructure {
 		}
 	}
 
-	private static ObjectMapper createObjectMapper() {
-		ObjectMapper retVal = JsonMapper.builder()
-				.enable(JsonReadFeature.ALLOW_LEADING_PLUS_SIGN_FOR_NUMBERS)
+	private static JsonMapper createJsonMapper() {
+		JsonFactory jsonFactory = JsonFactory.builder()
+				.streamReadConstraints(createStreamReadConstraints())
 				.build();
-		retVal = retVal.setNodeFactory(new JsonNodeFactory(true));
-		retVal = retVal.enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
-		retVal = retVal.enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
-		retVal = retVal.disable(JsonParser.Feature.INCLUDE_SOURCE_IN_LOCATION);
-		retVal = retVal.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
-		retVal = retVal.disable(JsonParser.Feature.AUTO_CLOSE_SOURCE);
-		retVal = retVal.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
 
-		retVal.getFactory().setStreamReadConstraints(createStreamReadConstraints());
-
-		return retVal;
+		return JsonMapper.builder(jsonFactory)
+				// Note : JsonNodeFactory(boolean bigDecimalExact) overloaded constructor replaced with
+				// STRIP_TRAILING_BIGDECIMAL_ZEROES
+				.nodeFactory(new JsonNodeFactory())
+				// see :
+				// https://github.com/FasterXML/jackson-databind/blob/3.x/src/main/java/tools/jackson/databind/cfg/JsonNodeFeature.java#L49L58
+				.disable(JsonNodeFeature.STRIP_TRAILING_BIGDECIMAL_ZEROES)
+				.enable(JsonReadFeature.ALLOW_LEADING_PLUS_SIGN_FOR_NUMBERS)
+				.enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
+				.enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
+				.disable(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION)
+				.disable(StreamWriteFeature.AUTO_CLOSE_TARGET)
+				.disable(StreamReadFeature.AUTO_CLOSE_SOURCE)
+				.configure(JsonReadFeature.ALLOW_SINGLE_QUOTES, true)
+				.build();
 	}
 
 	private static StreamReadConstraints createStreamReadConstraints() {

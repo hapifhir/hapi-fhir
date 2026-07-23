@@ -24,19 +24,17 @@ import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.model.api.annotation.SensitiveNoDisplay;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.FilterProvider;
-import com.fasterxml.jackson.databind.ser.PropertyWriter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.annotation.Nonnull;
 import org.thymeleaf.util.Validate;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.ser.FilterProvider;
+import tools.jackson.databind.ser.PropertyWriter;
+import tools.jackson.databind.ser.std.SimpleBeanPropertyFilter;
+import tools.jackson.databind.ser.std.SimpleFilterProvider;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,9 +44,9 @@ import java.util.List;
 
 public class JsonUtil {
 
-	private static final ObjectMapper ourMapperPrettyPrint;
-	private static final ObjectMapper ourMapperNonPrettyPrint;
-	private static final ObjectMapper ourMapperIncludeSensitive;
+	private static final JsonMapper ourMapperPrettyPrint;
+	private static final JsonMapper ourMapperNonPrettyPrint;
+	private static final JsonMapper ourMapperIncludeSensitive;
 
 	public static final SimpleBeanPropertyFilter SIMPLE_BEAN_PROPERTY_FILTER = new SensitiveDataFilter();
 
@@ -58,26 +56,35 @@ public class JsonUtil {
 			.addFilter(IModelJson.SENSITIVE_DATA_FILTER_NAME, SimpleBeanPropertyFilter.serializeAll());
 
 	static {
-		ourMapperPrettyPrint = new ObjectMapper();
-		ourMapperPrettyPrint.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-		ourMapperPrettyPrint.setFilterProvider(SENSITIVE_DATA_FILTER_PROVIDER);
-		ourMapperPrettyPrint.enable(SerializationFeature.INDENT_OUTPUT);
-		// Needed to handle ZonedDateTime
-		ourMapperPrettyPrint.registerModule(new JavaTimeModule());
+		ourMapperPrettyPrint = JsonMapper.builder()
+				.changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL)
+						.withContentInclusion(JsonInclude.Include.NON_NULL))
+				.changeDefaultVisibility(vc -> vc.withFieldVisibility(JsonAutoDetect.Visibility.PUBLIC_ONLY))
+				.filterProvider(SENSITIVE_DATA_FILTER_PROVIDER)
+				.enable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+				.enable(SerializationFeature.APPLY_JSON_INCLUDE_FOR_CONTAINERS)
+				.enable(SerializationFeature.INDENT_OUTPUT)
+				.build();
 
-		ourMapperNonPrettyPrint = new ObjectMapper();
-		ourMapperNonPrettyPrint.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-		ourMapperNonPrettyPrint.setFilterProvider(SENSITIVE_DATA_FILTER_PROVIDER);
-		ourMapperNonPrettyPrint.disable(SerializationFeature.INDENT_OUTPUT);
-		// Needed to handle ZonedDateTime
-		ourMapperNonPrettyPrint.registerModule(new JavaTimeModule());
+		ourMapperNonPrettyPrint = JsonMapper.builder()
+				.changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL)
+						.withContentInclusion(JsonInclude.Include.NON_NULL))
+				.changeDefaultVisibility(vc -> vc.withFieldVisibility(JsonAutoDetect.Visibility.PUBLIC_ONLY))
+				.filterProvider(SENSITIVE_DATA_FILTER_PROVIDER)
+				.enable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+				.enable(SerializationFeature.APPLY_JSON_INCLUDE_FOR_CONTAINERS)
+				.disable(SerializationFeature.INDENT_OUTPUT)
+				.build();
 
-		ourMapperIncludeSensitive = new ObjectMapper();
-		ourMapperIncludeSensitive.setFilterProvider(SHOW_ALL_DATA_FILTER_PROVIDER);
-		ourMapperIncludeSensitive.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-		ourMapperIncludeSensitive.disable(SerializationFeature.INDENT_OUTPUT);
-		// Needed to handle ZonedDateTime
-		ourMapperIncludeSensitive.registerModule(new JavaTimeModule());
+		ourMapperIncludeSensitive = JsonMapper.builder()
+				.filterProvider(SHOW_ALL_DATA_FILTER_PROVIDER)
+				.changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL)
+						.withContentInclusion(JsonInclude.Include.NON_NULL))
+				.changeDefaultVisibility(vc -> vc.withFieldVisibility(JsonAutoDetect.Visibility.PUBLIC_ONLY))
+				.enable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+				.enable(SerializationFeature.APPLY_JSON_INCLUDE_FOR_CONTAINERS)
+				.disable(SerializationFeature.INDENT_OUTPUT)
+				.build();
 	}
 
 	/**
@@ -87,7 +94,7 @@ public class JsonUtil {
 		Validate.notEmpty(theInput, "theInput must not be blank or null");
 		try {
 			return ourMapperPrettyPrint.readerFor(theType).readValue(theInput);
-		} catch (IOException e) {
+		} catch (JacksonException e) {
 			// Should not happen
 			throw new InternalErrorException(Msg.code(2060) + e);
 		}
@@ -96,13 +103,15 @@ public class JsonUtil {
 	/**
 	 * Parse JSON
 	 */
-	public static <T> List<T> deserializeList(@Nonnull String theInput, @Nonnull Class<T> theType) throws IOException {
+	public static <T> List<T> deserializeList(@Nonnull String theInput, @Nonnull Class<T> theType)
+			throws JacksonException {
 		return ourMapperPrettyPrint.readerForListOf(theType).readValue(theInput);
 	}
+
 	/**
 	 * Parse JSON
 	 */
-	public static <T> T deserialize(@Nonnull InputStream theInput, @Nonnull Class<T> theType) throws IOException {
+	public static <T> T deserialize(@Nonnull InputStream theInput, @Nonnull Class<T> theType) throws JacksonException {
 		return ourMapperPrettyPrint.readerFor(theType).readValue(theInput);
 	}
 
@@ -113,7 +122,7 @@ public class JsonUtil {
 	public static String serializeWithSensitiveData(@Nonnull IModelJson theInput) {
 		try {
 			return ourMapperIncludeSensitive.writeValueAsString(theInput);
-		} catch (JsonProcessingException e) {
+		} catch (JacksonException e) {
 			throw new InvalidRequestException(Msg.code(2487) + "Failed to encode " + theInput.getClass(), e);
 		}
 	}
@@ -137,7 +146,7 @@ public class JsonUtil {
 				ourMapperNonPrettyPrint.writeValue(sw, theInput);
 			}
 			return sw.toString();
-		} catch (IOException e) {
+		} catch (JacksonException e) {
 			// Should not happen
 			throw new InternalErrorException(Msg.code(2061) + e);
 		}
@@ -161,7 +170,7 @@ public class JsonUtil {
 	public static String serializeOrInvalidRequest(IModelJson theJson) {
 		try {
 			return ourMapperNonPrettyPrint.writeValueAsString(theJson);
-		} catch (JsonProcessingException e) {
+		} catch (JacksonException e) {
 			throw newInvalidRequestException(theJson, e);
 		}
 	}
@@ -187,21 +196,11 @@ public class JsonUtil {
 
 		@Override
 		protected boolean include(PropertyWriter writer) {
-			return true; // Default include all except explicitly checked and excluded
-		}
-
-		@Override
-		public void serializeAsField(Object pojo, JsonGenerator gen, SerializerProvider provider, PropertyWriter writer)
-				throws Exception {
-			if (include(writer)) {
-				if (!isFieldSensitive(writer)) {
-					super.serializeAsField(pojo, gen, provider, writer);
-				}
-			}
+			return !isFieldSensitive(writer);
 		}
 
 		private boolean isFieldSensitive(PropertyWriter writer) {
-			return writer.getAnnotation(SensitiveNoDisplay.class) != null;
+			return writer.findAnnotation(SensitiveNoDisplay.class) != null;
 		}
 	}
 }

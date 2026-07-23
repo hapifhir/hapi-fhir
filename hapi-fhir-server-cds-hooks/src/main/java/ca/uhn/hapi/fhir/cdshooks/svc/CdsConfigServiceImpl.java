@@ -23,23 +23,23 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsConfigService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import tools.jackson.databind.json.JsonMapper;
 
 public class CdsConfigServiceImpl implements ICdsConfigService {
 	private final FhirContext myFhirContext;
-	private final ObjectMapper myObjectMapper;
+	private final JsonMapper myJsonMapper;
 	private final DaoRegistry myDaoRegistry;
 	private final RestfulServer myRestfulServer;
 
 	public CdsConfigServiceImpl(
 			@Nonnull FhirContext theFhirContext,
-			@Nonnull ObjectMapper theObjectMapper,
+			@Nonnull JsonMapper theJsonMapper,
 			@Nullable DaoRegistry theDaoRegistry,
 			@Nullable RestfulServer theRestfulServer) {
 		myFhirContext = theFhirContext;
-		myObjectMapper = theObjectMapper;
+		myJsonMapper = theJsonMapper;
 		myDaoRegistry = theDaoRegistry;
 		myRestfulServer = theRestfulServer;
 	}
@@ -52,8 +52,8 @@ public class CdsConfigServiceImpl implements ICdsConfigService {
 
 	@Nonnull
 	@Override
-	public ObjectMapper getObjectMapper() {
-		return myObjectMapper;
+	public JsonMapper getJsonMapper() {
+		return myJsonMapper;
 	}
 
 	@Nullable

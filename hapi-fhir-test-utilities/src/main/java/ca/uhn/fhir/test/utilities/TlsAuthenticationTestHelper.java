@@ -23,8 +23,8 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.tls.KeyStoreInfo;
 import ca.uhn.fhir.tls.TlsAuthentication;
 import ca.uhn.fhir.tls.TrustStoreInfo;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -101,7 +101,7 @@ public class TlsAuthenticationTestHelper implements AfterEachCallback {
 
 	public File createTlsAuthenticationFile() {
 		try {
-			ObjectMapper mapper = new ObjectMapper();
+			JsonMapper mapper = new JsonMapper();
 
 			ObjectNode keyStore = mapper.createObjectNode();
 			keyStore.put("filePath", KEYSTORE_RESOURCE_PATH);
