@@ -79,7 +79,7 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 	private static final Logger ourLog = LoggerFactory.getLogger(PatientIdModePatientMergeR4Test.class);
 
 	private static final String NOT_ROLLED_BACK_MESSAGE_FRAGMENT =
-		"were committed and remain in their merged state, and must be reverted manually:";
+		"may have been committed and left in their merged state; they should be checked and, if necessary, reverted manually:";
 
 	private static final String NOTHING_COMMITTED_MESSAGE_PREFIX =
 		"Cross-partition merge failed; no resources were committed. Merge failure cause: ";

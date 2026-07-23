@@ -32,28 +32,14 @@ import java.util.Map;
  */
 // Created by claude-opus-4-6
 public class PartitionAwareReplaceReferencesResult {
-	private final List<IIdType> myChangedResourceIds;
-	private final List<IIdType> myCopiedResourceOriginalIds;
 	private final Map<RequestPartitionId, List<IIdType>> myChangedResourceIdsByPartition;
 	private final Map<RequestPartitionId, List<IIdType>> myCopiedResourceOriginalIdsByPartition;
 
 	public PartitionAwareReplaceReferencesResult(
-			List<IIdType> theChangedResourceIds,
-			List<IIdType> theCopiedResourceOriginalIds,
 			Map<RequestPartitionId, List<IIdType>> theChangedResourceIdsByPartition,
 			Map<RequestPartitionId, List<IIdType>> theCopiedResourceOriginalIdsByPartition) {
-		myChangedResourceIds = theChangedResourceIds;
-		myCopiedResourceOriginalIds = theCopiedResourceOriginalIds;
 		myChangedResourceIdsByPartition = theChangedResourceIdsByPartition;
 		myCopiedResourceOriginalIdsByPartition = theCopiedResourceOriginalIdsByPartition;
-	}
-
-	public List<IIdType> getChangedResourceIds() {
-		return myChangedResourceIds;
-	}
-
-	public List<IIdType> getCopiedResourceOriginalIds() {
-		return myCopiedResourceOriginalIds;
 	}
 
 	public Map<RequestPartitionId, List<IIdType>> getChangedResourceIdsByPartition() {

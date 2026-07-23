@@ -362,7 +362,7 @@ public class ResourceMergeService {
 			MergeOperationOutcome theMergeOutcome,
 			Date theStartTime) {
 
-		List<IIdType> committedResourceIds = new ArrayList<>();
+		List<IIdType> possiblyCommittedResourceIds = new ArrayList<>();
 
 		try {
 			myHapiTransactionService
@@ -374,7 +374,7 @@ public class ResourceMergeService {
 							theRequestDetails,
 							theMergeOutcome,
 							theStartTime,
-							committedResourceIds));
+							possiblyCommittedResourceIds));
 		} catch (Exception theException) {
 			if (!myHapiTransactionService.isRequiresNewTransactionWhenChangingPartitions()) {
 				throw theException;
@@ -382,12 +382,12 @@ public class ResourceMergeService {
 			ourLog.error("Cross-partition merge failed", theException);
 			Throwable failureCause = theException;
 			if (theException instanceof PartitionedTransactionPartialFailureException partialFailure) {
-				committedResourceIds.addAll(extractCommittedResourceIds(partialFailure));
+				possiblyCommittedResourceIds.addAll(extractCommittedResourceIds(partialFailure));
 				if (partialFailure.getCause() != null) {
 					failureCause = partialFailure.getCause();
 				}
 			}
-			reportFailedCrossPartitionMerge(committedResourceIds, failureCause, theMergeOutcome);
+			reportFailedCrossPartitionMerge(possiblyCommittedResourceIds, failureCause, theMergeOutcome);
 			return;
 		}
 
@@ -401,7 +401,7 @@ public class ResourceMergeService {
 			RequestDetails theRequestDetails,
 			MergeOperationOutcome theMergeOutcome,
 			Date theStartTime,
-			List<IIdType> theCommittedResourceIds) {
+			List<IIdType> thePossiblyCommittedResourceIds) {
 
 		boolean deleteSource = theMergeOperationParameters.getDeleteSource();
 		RequestPartitionId sourcePartition = getRequiredPartition(theSourceResource);
@@ -410,9 +410,11 @@ public class ResourceMergeService {
 		PartitionAwareReplaceReferencesResult copyResult =
 				myPartitionAwareReplaceReferencesSvc.copyCompartmentResourcesAndReplaceReferences(
 						theSourceResource, theTargetResource, theRequestDetails);
-		List<IIdType> copiedResourceOriginalIds = copyResult.getCopiedResourceOriginalIds();
+		List<IIdType> copiedResourceOriginalIds = copyResult.getCopiedResourceOriginalIdsByPartition().values().stream()
+				.flatMap(List::stream)
+				.toList();
 
-		theCommittedResourceIds.addAll(copyResult.getChangedResourceIds());
+		copyResult.getChangedResourceIdsByPartition().values().forEach(thePossiblyCommittedResourceIds::addAll);
 
 		DaoMethodOutcome outcome = myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
 				theSourceResource,
@@ -428,9 +430,9 @@ public class ResourceMergeService {
 		}
 		IIdType targetPostMergeId = outcome.getResource().getIdElement();
 
-		theCommittedResourceIds.add(targetPostMergeId);
+		thePossiblyCommittedResourceIds.add(targetPostMergeId);
 		if (!deleteSource) {
-			theCommittedResourceIds.add(sourcePostMergeId);
+			thePossiblyCommittedResourceIds.add(sourcePostMergeId);
 		}
 
 		if (theMergeOperationParameters.getCreateProvenance()) {
@@ -444,7 +446,7 @@ public class ResourceMergeService {
 					outcome,
 					theStartTime,
 					theRequestDetails,
-					theCommittedResourceIds);
+					thePossiblyCommittedResourceIds);
 		}
 
 		List<IIdType> resourcesToDeleteIds = new ArrayList<>(copiedResourceOriginalIds);
@@ -454,7 +456,7 @@ public class ResourceMergeService {
 		}
 		// 5. Unified delete (AFTER provenance)
 		if (!resourcesToDeleteIds.isEmpty()) {
-			theCommittedResourceIds.addAll(MergeResourceHelper.deleteResourcesInPartitionTransaction(
+			thePossiblyCommittedResourceIds.addAll(MergeResourceHelper.deleteResourcesInPartitionTransaction(
 					resourcesToDeleteIds, sourcePartition, myDaoRegistry, myHapiTransactionService));
 		}
 	}
@@ -469,7 +471,7 @@ public class ResourceMergeService {
 			DaoMethodOutcome theTargetUpdateOutcome,
 			Date theStartTime,
 			RequestDetails theRequestDetails,
-			List<IIdType> theCommittedResourceIds) {
+			List<IIdType> thePossiblyCommittedResourceIds) {
 
 		String groupIdPrefix =
 				MergeProvenanceGroupIdUtil.generateGroupIdPrefix(theSourcePostMergeId, theTargetPostMergeId);
@@ -505,7 +507,7 @@ public class ResourceMergeService {
 					theMergeOperationParameters.getProvenanceAgents(),
 					List.of());
 			if (subProvenanceId != null) {
-				theCommittedResourceIds.add(subProvenanceId);
+				thePossiblyCommittedResourceIds.add(subProvenanceId);
 			}
 		}
 
@@ -521,33 +523,34 @@ public class ResourceMergeService {
 				theMergeOperationParameters.getProvenanceAgents(),
 				containedResources);
 		if (mainProvenanceId != null) {
-			theCommittedResourceIds.add(mainProvenanceId);
+			thePossiblyCommittedResourceIds.add(mainProvenanceId);
 		}
 	}
 
 	private void reportFailedCrossPartitionMerge(
-			List<IIdType> theCommittedResourceIds,
+			List<IIdType> thePossiblyCommittedResourceIds,
 			@Nullable Throwable theFailureCause,
 			OperationOutcomeWithStatusCode theOutcome) {
 
 		String msg;
 		int statusCode;
-		if (theCommittedResourceIds.isEmpty()) {
+		if (thePossiblyCommittedResourceIds.isEmpty()) {
 			statusCode = resolveHttpStatusCode(theFailureCause);
 			msg = format(
 					"Cross-partition merge failed; no resources were committed. Merge failure cause: %s",
 					describeFailureCause(theFailureCause));
 		} else {
 			statusCode = STATUS_HTTP_500_INTERNAL_ERROR;
-			String committedIds = theCommittedResourceIds.stream()
+			String possiblyCommittedIds = thePossiblyCommittedResourceIds.stream()
 					.map(id -> id.toUnqualified().getValue())
 					.collect(joining(", "));
 			msg = format(
-					"Cross-partition merge failed partway through and was not rolled back. The following resources "
-							+ "were committed and remain in their merged state, and must be reverted manually: %s. "
-							+ "Merge failure cause: %s",
-					committedIds, describeFailureCause(theFailureCause));
+					"Cross-partition merge failed partway through and could not be rolled back automatically. The "
+							+ "following resources may have been committed and left in their merged state; they should be "
+							+ "checked and, if necessary, reverted manually: %s. Merge failure cause: %s",
+					possiblyCommittedIds, describeFailureCause(theFailureCause));
 		}
+		ourLog.error("Reporting cross-partition merge failure to caller: {}", msg);
 		theOutcome.setHttpStatusCode(statusCode);
 		addErrorToOperationOutcome(myFhirContext, theOutcome.getOperationOutcome(), msg, ISSUE_TYPE_EXCEPTION);
 	}

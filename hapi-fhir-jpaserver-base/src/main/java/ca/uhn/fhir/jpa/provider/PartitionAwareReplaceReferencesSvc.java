@@ -88,7 +88,7 @@ public class PartitionAwareReplaceReferencesSvc {
 	 * transaction — all internal operations use {@code transactionNested()}.
 	 * <p>
 	 * Does NOT delete the source copies — the caller is responsible for deleting them after
-	 * provenance creation using the returned {@link PartitionAwareReplaceReferencesResult#getCopiedResourceOriginalIds()}.
+	 * provenance creation using the returned {@link PartitionAwareReplaceReferencesResult#getCopiedResourceOriginalIdsByPartition()}.
 	 * Deletion cannot happen here because provenance must reference the originals (as tombstones),
 	 * and deleting first would violate referential integrity checks.
 	 *
@@ -116,7 +116,7 @@ public class PartitionAwareReplaceReferencesSvc {
 
 		if (allReferencingResources.isEmpty()) {
 			ourLog.info("No referencing resources found for {}", sourceId.getValue());
-			return new PartitionAwareReplaceReferencesResult(List.of(), List.of(), Map.of(), Map.of());
+			return new PartitionAwareReplaceReferencesResult(Map.of(), Map.of());
 		}
 
 		// Step 2: Classify into COPY (partition changes after rewrite) vs UPDATE (same partition)
@@ -140,12 +140,10 @@ public class PartitionAwareReplaceReferencesSvc {
 				updateList.size());
 
 		if (copyList.isEmpty() && updateList.isEmpty()) {
-			return new PartitionAwareReplaceReferencesResult(List.of(), List.of(), Map.of(), Map.of());
+			return new PartitionAwareReplaceReferencesResult(Map.of(), Map.of());
 		}
 
 		// Capture versioned IDs from copyList before buildCombinedBundle clears them
-		List<IIdType> copiedResourceOriginalIds =
-				copyList.stream().map(IBaseResource::getIdElement).toList();
 		Map<RequestPartitionId, List<IIdType>> copiedResourceOriginalIdsByPartition = groupIdsByPartition(copyList);
 
 		// Step 3: Discover additional resources to update BEFORE bundle execution.
@@ -177,14 +175,8 @@ public class PartitionAwareReplaceReferencesSvc {
 							.add(id));
 		}
 
-		List<IIdType> changedResourceIds =
-				ReplaceReferencesProvenanceSvc.extractChangedResourceIds(List.of(combinedResponse));
-
 		return new PartitionAwareReplaceReferencesResult(
-				changedResourceIds,
-				copiedResourceOriginalIds,
-				changedResourceIdsByPartition,
-				copiedResourceOriginalIdsByPartition);
+				changedResourceIdsByPartition, copiedResourceOriginalIdsByPartition);
 	}
 
 	/**

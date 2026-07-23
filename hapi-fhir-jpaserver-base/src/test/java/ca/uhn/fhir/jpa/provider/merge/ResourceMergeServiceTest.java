@@ -28,6 +28,7 @@ import ca.uhn.fhir.merge.MergeProvenanceSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesRequest;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
@@ -722,7 +723,7 @@ public class ResourceMergeServiceTest {
 			when(myResourceLinkDaoMock.countResourcesTargetingFhirTypeAndFhirId(any(), any())).thenReturn(0);
 			when(myPartitionAwareReplaceReferencesSvcMock
 				.copyCompartmentResourcesAndReplaceReferences(mySourcePatient, myTargetPatient, myRequestDetailsMock))
-				.thenReturn(new PartitionAwareReplaceReferencesResult(List.of(), List.of(), Map.of(), Map.of()));
+				.thenReturn(new PartitionAwareReplaceReferencesResult(Map.of(), Map.of()));
 
 			// When
 			MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
@@ -751,7 +752,7 @@ public class ResourceMergeServiceTest {
 			when(myResourceLinkDaoMock.countResourcesTargetingFhirTypeAndFhirId(any(), any())).thenReturn(0);
 			when(myPartitionAwareReplaceReferencesSvcMock
 				.copyCompartmentResourcesAndReplaceReferences(mySourcePatient, myTargetPatient, myRequestDetailsMock))
-				.thenReturn(new PartitionAwareReplaceReferencesResult(List.of(), List.of(), Map.of(), Map.of()));
+				.thenReturn(new PartitionAwareReplaceReferencesResult(Map.of(), Map.of()));
 
 			// When
 			MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
@@ -808,8 +809,6 @@ public class ResourceMergeServiceTest {
 			when(myPartitionAwareReplaceReferencesSvcMock
 				.copyCompartmentResourcesAndReplaceReferences(mySourcePatient, myTargetPatient, myRequestDetailsMock))
 				.thenReturn(new PartitionAwareReplaceReferencesResult(
-					List.of(changedObservationId, changedListId),
-					List.of(copiedOriginalId),
 					Map.of(RequestPartitionId.fromPartitionId(2), List.of(changedObservationId, changedListId)),
 					Map.of(RequestPartitionId.fromPartitionId(1), List.of(copiedOriginalId))));
 
@@ -820,9 +819,11 @@ public class ResourceMergeServiceTest {
 			myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
 
 			ArgumentCaptor<IIdType> observationIdCaptor = ArgumentCaptor.forClass(IIdType.class);
+			ArgumentCaptor<RequestDetails> observationDeleteRequestCaptor = ArgumentCaptor.forClass(RequestDetails.class);
 			verify(observationDaoMock)
-				.delete(observationIdCaptor.capture(), any(DeleteConflictList.class), eq(myRequestDetailsMock), any(TransactionDetails.class));
+				.delete(observationIdCaptor.capture(), any(DeleteConflictList.class), observationDeleteRequestCaptor.capture(), any(TransactionDetails.class));
 			assertThat(observationIdCaptor.getValue().toUnqualifiedVersionless().getValue()).isEqualTo("Observation/obs1");
+			verifyDeleteRanInSourcePartition(observationDeleteRequestCaptor.getValue());
 			verifySourcePatientDeletedOneByOne();
 		}
 	}
@@ -885,7 +886,7 @@ public class ResourceMergeServiceTest {
 		lenient().when(myRequestPartitionHelperSvcMock.determineReadPartitionForRequest(eq(myRequestDetailsMock), any())).thenReturn(myRequestPartitionIdMock);
 		IHapiTransactionService.IExecutionBuilder executionBuilderMock =
 			mock(IHapiTransactionService.IExecutionBuilder.class);
-		when(myTransactionServiceMock.withRequest(myRequestDetailsMock)).thenReturn(executionBuilderMock);
+		when(myTransactionServiceMock.withRequest(any(RequestDetails.class))).thenReturn(executionBuilderMock);
 		lenient()
 				.when(executionBuilderMock.withRequestPartitionId(any(RequestPartitionId.class)))
 				.thenReturn(executionBuilderMock);
@@ -1011,9 +1012,17 @@ public class ResourceMergeServiceTest {
 
 	private void verifySourcePatientDeletedOneByOne() {
 		ArgumentCaptor<IIdType> idCaptor = ArgumentCaptor.forClass(IIdType.class);
+		ArgumentCaptor<RequestDetails> requestDetailsCaptor = ArgumentCaptor.forClass(RequestDetails.class);
 		verify(myPatientDaoMock)
-			.delete(idCaptor.capture(), any(DeleteConflictList.class), eq(myRequestDetailsMock), any(TransactionDetails.class));
+			.delete(idCaptor.capture(), any(DeleteConflictList.class), requestDetailsCaptor.capture(), any(TransactionDetails.class));
 		assertThat(idCaptor.getValue().toUnqualifiedVersionless().getValue()).isEqualTo(SOURCE_PATIENT_TEST_ID);
+		verifyDeleteRanInSourcePartition(requestDetailsCaptor.getValue());
+	}
+
+	private void verifyDeleteRanInSourcePartition(RequestDetails theCapturedRequestDetails) {
+		assertThat(theCapturedRequestDetails).isInstanceOf(SystemRequestDetails.class);
+		assertThat(((SystemRequestDetails) theCapturedRequestDetails).getRequestPartitionId())
+			.isEqualTo(RequestPartitionId.fromPartitionId(1));
 	}
 
 	private void setupReplaceReferencesForSuccessForSync() {
