@@ -42,8 +42,8 @@ import org.mockito.Mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -71,20 +71,20 @@ public class SubscriptionValidatingInterceptorTest {
 
 	@Autowired
 	private SubscriptionValidatingInterceptor mySubscriptionValidatingInterceptor;
-	@MockBean
+	@MockitoBean
 	private DaoRegistry myDaoRegistry;
-	@MockBean
+	@MockitoBean
 	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
-	@MockBean
+	@MockitoBean
 	private SubscriptionSettings mySubscriptionSettings;
-	@MockBean
+	@MockitoBean
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@Mock
 	private IFhirResourceDao<SubscriptionTopic> mySubscriptionTopicDao;
 	private FhirContext myFhirContext;
 
 	private PartitionSettings myPartitionSettings = new PartitionSettings();
-	@SpyBean
+	@MockitoSpyBean
 	private SubscriptionChannelTypeValidatorFactory mySubscriptionChannelTypeValidatorFactory;
 
 	@BeforeEach

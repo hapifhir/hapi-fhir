@@ -36,7 +36,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -57,7 +57,7 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 	@RegisterExtension
 	public LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension(AsyncResourceModifiedSubmitterSvc.class.getName(), Level.DEBUG);
 
-	@SpyBean
+	@MockitoSpyBean
 	IResourceModifiedConsumer myResourceModifiedConsumer;
 
 	@Autowired

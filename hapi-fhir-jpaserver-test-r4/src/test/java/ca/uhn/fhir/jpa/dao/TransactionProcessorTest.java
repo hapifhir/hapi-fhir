@@ -70,7 +70,7 @@ import org.mockito.Mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -128,9 +128,9 @@ public class TransactionProcessorTest {
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private NonTransactionalHapiTransactionService myHapiTransactionService;
-	@MockBean
+	@MockitoBean
 	private EntityManagerFactory myEntityManagerFactory;
-	@MockBean(answer = Answers.RETURNS_DEEP_STUBS)
+	@MockitoBean(answers = Answers.RETURNS_DEEP_STUBS)
 	private EntityManager myEntityManager;
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private CriteriaBuilder myCriteriaBuilder;
@@ -140,29 +140,29 @@ public class TransactionProcessorTest {
 	private CriteriaQuery<Tuple> myCriteriaQuery;
 	@Mock
 	private Path myHashSystemAndValuePath;
-	@MockBean
+	@MockitoBean
 	private PlatformTransactionManager myPlatformTransactionManager;
-	@MockBean
+	@MockitoBean
 	private MatchResourceUrlService<JpaPid> myMatchResourceUrlService;
-	@MockBean
+	@MockitoBean
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
-	@MockBean
+	@MockitoBean
 	private IIdHelperService<JpaPid> myIdHelperService;
-	@MockBean
+	@MockitoBean
 	private PartitionSettings myPartitionSettings;
-	@MockBean
+	@MockitoBean
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
-	@MockBean
+	@MockitoBean
 	private IResourceVersionSvc myResourceVersionSvc;
-	@MockBean
+	@MockitoBean
 	private SearchParamMatcher mySearchParamMatcher;
-	@MockBean(answer = Answers.RETURNS_DEEP_STUBS)
+	@MockitoBean(answers = Answers.RETURNS_DEEP_STUBS)
 	private SessionImpl mySession;
-	@MockBean
+	@MockitoBean
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
-	@MockBean
+	@MockitoBean
 	private ResourceSearchUrlSvc myResourceSearchUrlSvc;
-	@MockBean
+	@MockitoBean
 	private MemoryCacheService myMemoryCacheService;
 	@Captor
 	private ArgumentCaptor<Long> myLongCaptor;
