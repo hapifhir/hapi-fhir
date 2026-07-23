@@ -220,7 +220,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	public static Integer myMaxPageSizeForTests = null;
 	private String myResourceName;
 	private final Class<? extends IBaseResource> myResourceType;
-	private final SearchQueryProperties mySearchProperties;
+	protected final SearchQueryProperties mySearchProperties;
 	private PerformanceTracingLogger myPerformanceTracingLogger;
 
 	@Autowired
