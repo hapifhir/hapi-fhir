@@ -31,7 +31,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
@@ -77,9 +76,6 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
-
-	@Autowired
-	protected IFhirSystemDao<?, ?> mySystemDao;
 
 	@Autowired
 	protected IIdHelperService<IResourcePersistentId<?>> myIdHelperService;
@@ -287,12 +283,6 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 	public void setDaoRegistryForUnitTest(DaoRegistry theDaoRegistry) {
 		assert theDaoRegistry != null;
 		myDaoRegistry = theDaoRegistry;
-	}
-
-	@VisibleForTesting
-	public void setSystemDaoForUnitTest(IFhirSystemDao<?, ?> theSystemDao) {
-		assert theSystemDao != null;
-		mySystemDao = theSystemDao;
 	}
 
 	@VisibleForTesting

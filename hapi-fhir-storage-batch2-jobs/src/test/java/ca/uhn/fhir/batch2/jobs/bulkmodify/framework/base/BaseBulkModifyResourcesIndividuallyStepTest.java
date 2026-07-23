@@ -21,7 +21,10 @@ import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -58,7 +61,7 @@ class BaseBulkModifyResourcesIndividuallyStepTest {
 	@Mock
 	private DaoRegistry myDaoRegistry;
 	@Mock
-	private IFhirSystemDao<?,?> mySystemDao;
+	private IFhirSystemDao<Bundle, Meta> mySystemDao;
 	@Mock
 	private IIdHelperService<IResourcePersistentId<?>> myIdHelperService;
 	@Mock
@@ -73,6 +76,11 @@ class BaseBulkModifyResourcesIndividuallyStepTest {
 	private IFhirResourceDaoPatient<Patient> myResourceDao;
 	@Captor
 	private ArgumentCaptor<BulkModifyResourcesChunkOutcomeJson> myDataCaptor;
+
+	@BeforeEach
+	void before() {
+		when(myDaoRegistry.<Bundle, Meta>getSystemDao()).thenReturn(mySystemDao);
+	}
 
 	@ParameterizedTest
 	@CsvSource(delimiter = '|', textBlock = """

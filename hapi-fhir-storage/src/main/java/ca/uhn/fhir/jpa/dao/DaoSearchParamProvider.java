@@ -28,12 +28,14 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class DaoSearchParamProvider implements ISearchParamProvider {
 
-	@Autowired
-	private DaoRegistry myDaoRegistry;
+	private final DaoRegistry myDaoRegistry;
+
+	public DaoSearchParamProvider(DaoRegistry theDaoRegistry) {
+		myDaoRegistry = theDaoRegistry;
+	}
 
 	@Override
 	public IBundleProvider search(SearchParameterMap theParams) {

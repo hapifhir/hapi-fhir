@@ -28,6 +28,7 @@ import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.interceptor.model.TransactionWriteAfterPrefetchDetails;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
@@ -296,7 +297,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		 * Pre-Fetch Resource Bodies (this will happen for any resources we are potentially
 		 * going to update)
 		 */
-		IFhirSystemDao<?, ?> systemDao = myApplicationContext.getBean(IFhirSystemDao.class);
+		IFhirSystemDao<?, ?> systemDao =
+				myApplicationContext.getBean(DaoRegistry.class).getSystemDao();
 		systemDao.preFetchResources(List.copyOf(idsToPreFetchBodiesFor), true);
 
 		/*

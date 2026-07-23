@@ -70,9 +70,11 @@ import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -104,26 +106,56 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchCoordinatorSvcImpl.class);
 	public static final int SEARCH_EXPIRY_OFFSET_MINUTES = 10;
 
-	private final FhirContext myContext;
-	private final JpaStorageSettings myStorageSettings;
-	private final IInterceptorBroadcaster myInterceptorBroadcaster;
-	private final HapiTransactionService myTxService;
-	private final ISearchCacheSvc mySearchCacheSvc;
-	private final ISearchResultCacheSvc mySearchResultCacheSvc;
-	private final DaoRegistry myDaoRegistry;
-	private final SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
-	private final ISynchronousSearchSvc mySynchronousSearchSvc;
-	private final PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
-	private final ISearchParamRegistry mySearchParamRegistry;
-	private final SearchStrategyFactory mySearchStrategyFactory;
-	private final ExceptionService myExceptionSvc;
-	private final BeanFactory myBeanFactory;
-	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+	@Autowired
+	private FhirContext myContext;
+
+	@Autowired
+	private JpaStorageSettings myStorageSettings;
+
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
+
+	@Autowired
+	private HapiTransactionService myTxService;
+
+	@Autowired
+	private ISearchCacheSvc mySearchCacheSvc;
+
+	@Autowired
+	private ISearchResultCacheSvc mySearchResultCacheSvc;
+
+	@Autowired
+	private DaoRegistry myDaoRegistry;
+
+	@Autowired
+	private SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
+
+	@Autowired
+	private ISynchronousSearchSvc mySynchronousSearchSvc;
+
+	@Autowired
+	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
+
+	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
+
+	@Autowired
+	private SearchStrategyFactory mySearchStrategyFactory;
+
+	@Autowired
+	private ExceptionService myExceptionSvc;
+
+	@Autowired
+	private BeanFactory myBeanFactory;
+
+	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+
 	private ConcurrentHashMap<String, SearchTask> myIdToSearchTask = new ConcurrentHashMap<>();
 
 	private final Consumer<String> myOnRemoveSearchTask = myIdToSearchTask::remove;
 
-	private final StorageInterceptorHooksFacade myStorageInterceptorHooks;
+	private StorageInterceptorHooksFacade myStorageInterceptorHooks;
 	private Integer myLoadingThrottleForUnitTests = null;
 	private long myMaxMillisToWaitForRemoteResults = DateUtils.MILLIS_PER_MINUTE;
 	private boolean myNeverUseLocalSearchForUnitTests;
@@ -132,39 +164,47 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	/**
 	 * Constructor
 	 */
+	public SearchCoordinatorSvcImpl() {
+		super();
+	}
+
+	/**
+	 * Unit test constructor
+	 */
 	public SearchCoordinatorSvcImpl(
 			FhirContext theContext,
 			JpaStorageSettings theStorageSettings,
 			IInterceptorBroadcaster theInterceptorBroadcaster,
-			HapiTransactionService theTxService,
+			HapiTransactionService theTransactionService,
 			ISearchCacheSvc theSearchCacheSvc,
 			ISearchResultCacheSvc theSearchResultCacheSvc,
 			DaoRegistry theDaoRegistry,
 			SearchBuilderFactory<JpaPid> theSearchBuilderFactory,
 			ISynchronousSearchSvc theSynchronousSearchSvc,
 			PersistedJpaBundleProviderFactory thePersistedJpaBundleProviderFactory,
-			ISearchParamRegistry theSearchParamRegistry,
 			SearchStrategyFactory theSearchStrategyFactory,
 			ExceptionService theExceptionSvc,
 			BeanFactory theBeanFactory,
-			IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
-		super();
+			IRequestPartitionHelperSvc thePartitionHelperSvc) {
 		myContext = theContext;
 		myStorageSettings = theStorageSettings;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
-		myTxService = theTxService;
+		myTxService = theTransactionService;
 		mySearchCacheSvc = theSearchCacheSvc;
-		mySearchResultCacheSvc = theSearchResultCacheSvc;
-		myDaoRegistry = theDaoRegistry;
 		mySearchBuilderFactory = theSearchBuilderFactory;
 		mySynchronousSearchSvc = theSynchronousSearchSvc;
-		myPersistedJpaBundleProviderFactory = thePersistedJpaBundleProviderFactory;
-		mySearchParamRegistry = theSearchParamRegistry;
 		mySearchStrategyFactory = theSearchStrategyFactory;
-		myExceptionSvc = theExceptionSvc;
 		myBeanFactory = theBeanFactory;
-		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
+		myRequestPartitionHelperSvc = thePartitionHelperSvc;
+		myExceptionSvc = theExceptionSvc;
+		myPersistedJpaBundleProviderFactory = thePersistedJpaBundleProviderFactory;
+		myDaoRegistry = theDaoRegistry;
+		mySearchResultCacheSvc = theSearchResultCacheSvc;
+		start();
+	}
 
+	@PostConstruct
+	public void start() {
 		myStorageInterceptorHooks = new StorageInterceptorHooksFacade(myInterceptorBroadcaster);
 	}
 

@@ -25,13 +25,11 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -41,15 +39,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
-	private ApplicationContext myAppCtx;
-
+public class DaoRegistry implements IDaoRegistry {
 	@Autowired
 	private FhirContext myFhirContext;
 
-	private volatile Map<String, IFhirResourceDao<?>> myResourceNameToResourceDao;
+	private final Map<String, IFhirResourceDao<?>> myResourceNameToResourceDao = new HashMap<>();
 	private volatile IFhirSystemDao<?, ?> mySystemDao;
 	private Set<String> mySupportedResourceTypes;
 
@@ -74,63 +69,55 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 			supportedResourceTypes.addAll(theSupportedResourceTypes);
 		}
 		mySupportedResourceTypes = supportedResourceTypes;
-		myResourceNameToResourceDao = null;
 	}
 
-	@Override
-	public void setApplicationContext(ApplicationContext theApplicationContext) throws BeansException {
-		myAppCtx = theApplicationContext;
-	}
-
-	public IFhirSystemDao getSystemDao() {
-		IFhirSystemDao retVal = mySystemDao;
-		if (retVal == null) {
-			retVal = myAppCtx.getBean(IFhirSystemDao.class);
-			mySystemDao = retVal;
-		}
-		return retVal;
+	@SuppressWarnings("unchecked")
+	public <T, MT> IFhirSystemDao<T, MT> getSystemDao() {
+		return (IFhirSystemDao<T, MT>) mySystemDao;
 	}
 
 	/**
 	 * @throws InvalidRequestException If the given resource type is not supported
 	 */
-	public IFhirResourceDao getResourceDao(String theResourceName) {
+	@SuppressWarnings("unchecked")
+	public <R extends IBaseResource, D extends IFhirResourceDao<R>> D getResourceDao(String theResourceName) {
 		IFhirResourceDao<IBaseResource> retVal = getResourceDaoOrNull(theResourceName);
 		if (retVal == null) {
 			List<String> supportedResourceTypes =
-					myResourceNameToResourceDao.keySet().stream().sorted().collect(Collectors.toList());
+					myResourceNameToResourceDao.keySet().stream().sorted().toList();
 			throw new InvalidRequestException(Msg.code(572)
 					+ "Unable to process request, this server does not know how to handle resources of type "
 					+ theResourceName + " - Can handle: " + supportedResourceTypes);
 		}
-		return retVal;
+		return (D) retVal;
 	}
 
 	@SuppressWarnings("unchecked")
-	public <R extends IBaseResource> IFhirResourceDao<R> getResourceDao(R theResource) {
-		return (IFhirResourceDao<R>) getResourceDao(theResource.getClass());
+	public <R extends IBaseResource, D extends IFhirResourceDao<R>> D getResourceDao(R theResource) {
+		return (D) getResourceDao(theResource.getClass());
 	}
 
-	public <R extends IBaseResource> IFhirResourceDao<R> getResourceDao(Class<R> theResourceType) {
+	@SuppressWarnings("unchecked")
+	public <R extends IBaseResource, D extends IFhirResourceDao<R>> D getResourceDao(Class<R> theResourceType) {
 		IFhirResourceDao<R> retVal = getResourceDaoIfExists(theResourceType);
 		Validate.notNull(
 				retVal, "No DAO exists for resource type %s - Have: %s", theResourceType, myResourceNameToResourceDao);
-		return retVal;
+		return (D) retVal;
 	}
 
 	/**
 	 * Use getResourceDaoOrNull
 	 */
 	@Deprecated
-	public <T extends IBaseResource> IFhirResourceDao<T> getResourceDaoIfExists(Class<T> theResourceType) {
+	public <R extends IBaseResource, D extends IFhirResourceDao<R>> D getResourceDaoIfExists(Class<R> theResourceType) {
 		return getResourceDaoOrNull(theResourceType);
 	}
 
 	@Nullable
-	public <T extends IBaseResource> IFhirResourceDao<T> getResourceDaoOrNull(Class<T> theResourceType) {
+	public <R extends IBaseResource, D extends IFhirResourceDao<R>> D getResourceDaoOrNull(Class<R> theResourceType) {
 		String resourceName = myFhirContext.getResourceType(theResourceType);
 		try {
-			return (IFhirResourceDao<T>) getResourceDao(resourceName);
+			return getResourceDao(resourceName);
 		} catch (InvalidRequestException e) {
 			return null;
 		}
@@ -140,14 +127,14 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 	 * Use getResourceDaoOrNull
 	 */
 	@Deprecated
-	public <T extends IBaseResource> IFhirResourceDao<T> getResourceDaoIfExists(String theResourceType) {
+	public <R extends IBaseResource, D extends IFhirResourceDao<R>> D getResourceDaoIfExists(String theResourceType) {
 		return getResourceDaoOrNull(theResourceType);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Nullable
-	public <T extends IBaseResource> IFhirResourceDao<T> getResourceDaoOrNull(String theResourceName) {
-		init();
-		return (IFhirResourceDao<T>) myResourceNameToResourceDao.get(theResourceName);
+	public <R extends IBaseResource, D extends IFhirResourceDao<R>> D getResourceDaoOrNull(String theResourceName) {
+		return (D) myResourceNameToResourceDao.get(theResourceName);
 	}
 
 	@Override
@@ -158,46 +145,43 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 		return mySupportedResourceTypes.contains(theResourceType);
 	}
 
-	private void init() {
-		if (myResourceNameToResourceDao != null && !myResourceNameToResourceDao.isEmpty()) {
-			return;
-		}
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	public void register(@Nonnull IFhirResourceDao theResourceDao) {
+		Validate.notNull(theResourceDao, "theResourceDao must not be null");
+		Validate.notNull(theResourceDao.getResourceType(), "theResourceDao.getResourceType() must not be null");
 
-		Map<String, IFhirResourceDao> resourceDaos = myAppCtx.getBeansOfType(IFhirResourceDao.class);
-
-		initializeMaps(resourceDaos.values());
-	}
-
-	private void initializeMaps(Collection<IFhirResourceDao> theResourceDaos) {
-
-		myResourceNameToResourceDao = new HashMap<>();
-
-		for (IFhirResourceDao nextResourceDao : theResourceDaos) {
-			Class resourceType = nextResourceDao.getResourceType();
-			assert resourceType != null;
-			RuntimeResourceDefinition nextResourceDef = myFhirContext.getResourceDefinition(resourceType);
-			if (mySupportedResourceTypes == null || mySupportedResourceTypes.contains(nextResourceDef.getName())) {
-				myResourceNameToResourceDao.put(nextResourceDef.getName(), nextResourceDao);
-			}
-		}
-	}
-
-	public void register(IFhirResourceDao theResourceDao) {
-		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theResourceDao.getResourceType());
+		RuntimeResourceDefinition resourceDef =
+				myFhirContext.getResourceDefinition((Class<? extends IBaseResource>) theResourceDao.getResourceType());
 		String resourceName = resourceDef.getName();
+
+		Validate.isTrue(
+				myResourceNameToResourceDao.get(resourceName) == null,
+				"Resource type %s is already registered",
+				resourceName);
 		myResourceNameToResourceDao.put(resourceName, theResourceDao);
+	}
+
+	/**
+	 * Adds a system DAO to the registry. This method may only be called once.
+	 * @param theSystemDao The system DAO (must not be null)
+	 */
+	public void register(@Nonnull IFhirSystemDao<?, ?> theSystemDao) {
+		Validate.notNull(theSystemDao, "theSystemDao must not be null");
+		Validate.isTrue(mySystemDao == null, "A system DAO has already been registered");
+		mySystemDao = theSystemDao;
 	}
 
 	/**
 	 * @deprecated use getDaoOrThrow
 	 */
+	@SuppressWarnings("rawtypes")
 	@Deprecated
 	public IFhirResourceDao getDaoOrThrowException(Class<? extends IBaseResource> theClass) {
 		return getDaoOrThrow(theClass);
 	}
 
-	public <T extends IBaseResource> IFhirResourceDao<T> getDaoOrThrow(Class<T> theClass) {
-		IFhirResourceDao<T> retVal = getResourceDao(theClass);
+	public <R extends IBaseResource, D extends IFhirResourceDao<R>> D getDaoOrThrow(Class<R> theClass) {
+		D retVal = getResourceDao(theClass);
 		if (retVal == null) {
 			List<String> supportedResourceNames = myResourceNameToResourceDao.keySet().stream()
 					.map(t -> myFhirContext.getResourceType(t))
@@ -210,10 +194,7 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 		return retVal;
 	}
 
-	public void setResourceDaos(Collection<IFhirResourceDao> theResourceDaos) {
-		initializeMaps(theResourceDaos);
-	}
-
+	@SuppressWarnings("rawtypes")
 	public IFhirResourceDao getSubscriptionDao() {
 		return getResourceDao(ResourceTypeEnum.SUBSCRIPTION.getCode());
 	}
@@ -238,5 +219,16 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 	// remove the FhirContext parameter and pull it from the DaoRegistry parameter
 	public FhirContext getFhirContext() {
 		return myFhirContext;
+	}
+
+	/**
+	 * This method is primarily intended for unit tests. It clears all previously
+	 * registered resource providers and any registered system provider.
+	 *
+	 * @since 8.12.0
+	 */
+	public void unregisterAll() {
+		myResourceNameToResourceDao.clear();
+		mySystemDao = null;
 	}
 }
