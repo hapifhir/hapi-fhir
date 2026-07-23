@@ -35,6 +35,7 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
+import org.springframework.orm.jpa.hibernate.HibernateExceptionTranslator;
 import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -45,6 +46,8 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiFhirHibernateJpaDialect.class);
 	static final String RESOURCE_VERSION_CONSTRAINT_FAILURE = "resourceVersionConstraintFailure";
 	private final HapiLocalizer myLocalizer;
+
+	private static final DefaultExceptionTranslator ourDefaultExceptionTranslator = new DefaultExceptionTranslator();
 
 	/**
 	 * Constructor
@@ -65,8 +68,24 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 		return theException;
 	}
 
+	/**
+	 * Spring 7 moved the Hibernate exception conversion out of {@link HibernateJpaDialect} and into
+	 * {@link HibernateExceptionTranslator}, and {@link HibernateJpaDialect#translateExceptionIfPossible} now
+	 * delegates to a translator it holds internally. We therefore hook in here instead of overriding the
+	 * conversion method, which would no longer be called.
+	 */
 	@Override
-	protected DataAccessException convertHibernateAccessException(@Nonnull HibernateException theException) {
+	public DataAccessException translateExceptionIfPossible(@Nonnull RuntimeException theException) {
+		if (theException instanceof HibernateException hibernateException) {
+			return convertHibernateAccessException(hibernateException, null);
+		}
+		return super.translateExceptionIfPossible(theException);
+	}
+
+	/**
+	 * Applies HAPI FHIR's translation of Hibernate exceptions, falling back to Spring's standard conversion.
+	 */
+	DataAccessException convertHibernateAccessException(@Nonnull HibernateException theException) {
 		return convertHibernateAccessException(theException, null);
 	}
 
@@ -108,7 +127,7 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 							theException);
 				}
 				if (constraintName.contains(ResourceSearchUrlEntity.RES_SEARCH_URL_COLUMN_NAME)) {
-					throw super.convertHibernateAccessException(theException);
+					throw ourDefaultExceptionTranslator.convert(theException);
 				}
 			}
 
@@ -145,12 +164,22 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 			}
 		}
 
-		DataAccessException retVal = super.convertHibernateAccessException(theException);
+		DataAccessException retVal = ourDefaultExceptionTranslator.convert(theException);
 		return retVal;
 	}
 
 	@Nonnull
 	private String makeErrorMessage(String thePrefix, String theMessageKey) {
 		return thePrefix + myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, theMessageKey);
+	}
+
+	/**
+	 * Exposes Spring's protected Hibernate exception conversion, which is the behaviour
+	 * {@literal super.convertHibernateAccessException()} provided before Spring 7.
+	 */
+	private static class DefaultExceptionTranslator extends HibernateExceptionTranslator {
+		DataAccessException convert(HibernateException theException) {
+			return convertHibernateAccessException(theException);
+		}
 	}
 }

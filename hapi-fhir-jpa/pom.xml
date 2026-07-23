@@ -70,6 +70,11 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<!-- Provides the Derby dialect, which Hibernate 7 moved out of hibernate-core -->
+		<dependency>
+			<groupId>org.hibernate.orm</groupId>
+			<artifactId>hibernate-community-dialects</artifactId>
+		</dependency>
 		<!-- Spring -->
 		<dependency>
 			<groupId>org.springframework</groupId>
