@@ -126,7 +126,7 @@ public class PreviousResourceVersionRestorer {
 
 		BundleBuilder updateBundleBuilder = new BundleBuilder(myFhirContext);
 
-		List<IIdType> resourcesToDelete = new ArrayList<>();
+		List<IIdType> idsToDelete = new ArrayList<>();
 
 		for (Reference reference : theReferences) {
 			String referenceStr = reference.getReference();
@@ -175,7 +175,7 @@ public class PreviousResourceVersionRestorer {
 
 				if (referenceVersion == 1) {
 					// Resource was created new by the operation (v1) — collect for bundle delete
-					resourcesToDelete.add(referenceId.toUnqualifiedVersionless());
+					idsToDelete.add(referenceId.toUnqualifiedVersionless());
 					continue;
 				}
 			}
@@ -198,7 +198,7 @@ public class PreviousResourceVersionRestorer {
 			myDaoRegistry.getSystemDao().transactionNested(theRequestDetails, updateBundleBuilder.getBundle());
 		}
 
-		deleteResources(resourcesToDelete, thePinnedPartition, theRequestDetails);
+		deleteResources(idsToDelete, thePinnedPartition, theRequestDetails);
 	}
 
 	private IBaseResource readResource(
@@ -228,25 +228,25 @@ public class PreviousResourceVersionRestorer {
 	}
 
 	private void deleteResources(
-			List<IIdType> theResourcesToDelete,
+			List<IIdType> theIdsToDelete,
 			@Nullable RequestPartitionId thePinnedPartition,
 			RequestDetails theRequestDetails) {
-		if (theResourcesToDelete.isEmpty()) {
+		if (theIdsToDelete.isEmpty()) {
 			return;
 		}
 		if (thePinnedPartition != null) {
 			MergeResourceHelper.deleteResourcesInPartitionTransaction(
-					theResourcesToDelete, thePinnedPartition, myDaoRegistry, myHapiTransactionService);
+					theIdsToDelete, thePinnedPartition, myDaoRegistry, myHapiTransactionService);
 		} else {
-			deleteAcrossPartitions(theResourcesToDelete, theRequestDetails);
+			deleteAcrossPartitions(theIdsToDelete, theRequestDetails);
 		}
 	}
 
-	private void deleteAcrossPartitions(List<IIdType> theResourcesToDelete, RequestDetails theRequestDetails) {
+	private void deleteAcrossPartitions(List<IIdType> theIdsToDelete, RequestDetails theRequestDetails) {
 		DeleteConflictList deleteConflicts = new DeleteConflictList();
-		theResourcesToDelete.forEach(deleteConflicts::setResourceIdMarkedForDeletion);
+		theIdsToDelete.forEach(deleteConflicts::setResourceIdMarkedForDeletion);
 		TransactionDetails transactionDetails = new TransactionDetails();
-		for (IIdType id : theResourcesToDelete) {
+		for (IIdType id : theIdsToDelete) {
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(id.getResourceType());
 			dao.delete(id, deleteConflicts, theRequestDetails, transactionDetails);
 		}
