@@ -67,6 +67,7 @@ import ca.uhn.fhir.jpa.util.FhirPathUtils;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
@@ -91,6 +92,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -588,6 +590,20 @@ public class QueryStack {
 					JpaParamUtil.resolveCompositeComponents(mySearchParamRegistry, theParamDef);
 			RuntimeSearchParam left = componentParams.get(0).getComponentParameter();
 			IQueryParameterType leftValue = cp.getLeftValue();
+			RuntimeSearchParam right = componentParams.get(1).getComponentParameter();
+			IQueryParameterType rightValue = cp.getRightValue();
+
+			Condition tokenDatePredicate = createPredicateTokenDateComposite(
+					theResourceName, left, leftValue, right, rightValue, theRequestPartitionId, theSqlBuilder);
+			if (tokenDatePredicate != null) {
+				if (orCondidtion == null) {
+					orCondidtion = toOrPredicate(tokenDatePredicate);
+				} else {
+					orCondidtion = toOrPredicate(orCondidtion, tokenDatePredicate);
+				}
+				continue;
+			}
+
 			Condition leftPredicate = createPredicateCompositePart(
 					theSourceJoinColumn,
 					theResourceName,
@@ -597,8 +613,6 @@ public class QueryStack {
 					theRequestPartitionId,
 					theSqlBuilder);
 
-			RuntimeSearchParam right = componentParams.get(1).getComponentParameter();
-			IQueryParameterType rightValue = cp.getRightValue();
 			Condition rightPredicate = createPredicateCompositePart(
 					theSourceJoinColumn,
 					theResourceName,
@@ -618,6 +632,56 @@ public class QueryStack {
 		}
 
 		return orCondidtion;
+	}
+
+	private Condition createPredicateTokenDateComposite(
+			String theResourceName,
+			RuntimeSearchParam theLeftParam,
+			IQueryParameterType theLeftValue,
+			RuntimeSearchParam theRightParam,
+			IQueryParameterType theRightValue,
+			RequestPartitionId theRequestPartitionId,
+			SearchQueryBuilder theSqlBuilder) {
+		if (theLeftParam.getParamType() == RestSearchParameterTypeEnum.TOKEN
+				&& theRightParam.getParamType() == RestSearchParameterTypeEnum.DATE
+				&& theRightValue instanceof DateParam rightDate) {
+			return createPredicateTokenDateComposite(
+					theResourceName, theLeftParam, theLeftValue, rightDate, theRequestPartitionId, theSqlBuilder);
+		}
+		if (theLeftParam.getParamType() == RestSearchParameterTypeEnum.DATE
+				&& theRightParam.getParamType() == RestSearchParameterTypeEnum.TOKEN
+				&& theLeftValue instanceof DateParam leftDate) {
+			return createPredicateTokenDateComposite(
+					theResourceName, theRightParam, theRightValue, leftDate, theRequestPartitionId, theSqlBuilder);
+		}
+		return null;
+	}
+
+	private Condition createPredicateTokenDateComposite(
+			String theResourceName,
+			RuntimeSearchParam theTokenParam,
+			IQueryParameterType theTokenValue,
+			DateParam theDateValue,
+			RequestPartitionId theRequestPartitionId,
+			SearchQueryBuilder theSqlBuilder) {
+		String tokenValue = theTokenValue.getValueAsQueryToken();
+		if (isBlank(tokenValue)
+				|| !tokenValue.contains("|")
+				|| tokenValue.startsWith("|")
+				|| tokenValue.endsWith("|")
+				|| theDateValue.getPrecision().ordinal() > TemporalPrecisionEnum.DAY.ordinal()) {
+			return null;
+		}
+
+		String indexString = theResourceName + "?" + UrlUtil.escapeUrlParam(theTokenParam.getName()) + "="
+				+ UrlUtil.escapeUrlParam(tokenValue);
+		ComboNonUniqueSearchParameterPredicateBuilder predicateBuilder =
+				theSqlBuilder.addComboNonUniquePredicateBuilder();
+		Condition hashPredicate = predicateBuilder.createPredicateHashComplete(
+				theRequestPartitionId, Collections.singletonList(indexString));
+		Condition datePredicate = predicateBuilder.createPredicateDateParams(
+				Collections.singletonList(Collections.singletonList(theDateValue)));
+		return toAndPredicate(hashPredicate, datePredicate);
 	}
 
 	private Condition createPredicateCompositePart(
