@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
+import ca.uhn.fhir.jpa.dao.data.ReferencingResourceId;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -209,9 +210,11 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	private @Nonnull StopLimitAccumulator<IdDt> getAllPidsWithLimit(
 			ReplaceReferencesRequest theReplaceReferencesRequest) {
 
-		Stream<IdDt> idStream = myResourceLinkDao.streamSourceIdsForTargetFhirId(
-				theReplaceReferencesRequest.sourceId.getResourceType(),
-				theReplaceReferencesRequest.sourceId.getIdPart());
+		Stream<IdDt> idStream = myResourceLinkDao
+				.streamSourceIdsForTargetFhirId(
+						theReplaceReferencesRequest.sourceId.getResourceType(),
+						theReplaceReferencesRequest.sourceId.getIdPart())
+				.map(ReferencingResourceId::toIdDt);
 		StopLimitAccumulator<IdDt> accumulator =
 				StopLimitAccumulator.fromStreamAndLimit(idStream, theReplaceReferencesRequest.resourceLimit);
 		return accumulator;

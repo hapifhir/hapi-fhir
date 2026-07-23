@@ -25,6 +25,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
+import ca.uhn.fhir.jpa.dao.data.ReferencingResourceId;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -195,8 +196,6 @@ public class PartitionAwareReplaceReferencesSvc {
 		return loadResources(ids, theRequestDetails);
 	}
 
-	private record ReferencingResourceId(IdDt id, RequestPartitionId partitionId) {}
-
 	private List<ReferencingResourceId> findReferencingResourceIds(
 			IIdType theTargetId, RequestDetails theRequestDetails) {
 		return myHapiTransactionService
@@ -204,10 +203,7 @@ public class PartitionAwareReplaceReferencesSvc {
 				.withRequestPartitionId(RequestPartitionId.allPartitions())
 				.withPropagation(Propagation.REQUIRES_NEW)
 				.searchList(partition -> myResourceLinkDao
-						.streamSourceIdsAndPartitionForTargetFhirId(
-								theTargetId.getResourceType(), theTargetId.getIdPart())
-						.map(view -> new ReferencingResourceId(
-								view.toIdDt(), RequestPartitionId.fromPartitionId(view.partitionId())))
+						.streamSourceIdsForTargetFhirId(theTargetId.getResourceType(), theTargetId.getIdPart())
 						.toList());
 	}
 
@@ -239,7 +235,7 @@ public class PartitionAwareReplaceReferencesSvc {
 			List<ReferencingResourceId> referrers = findReferencingResourceIds(oldId, theRequestDetails);
 			for (ReferencingResourceId referrer : referrers) {
 				if (alreadyDiscoveredIds.add(
-						referrer.id().toUnqualifiedVersionless().getValue())) {
+						referrer.toIdDt().toUnqualifiedVersionless().getValue())) {
 					additionalIds.add(referrer);
 				}
 			}
@@ -272,13 +268,13 @@ public class PartitionAwareReplaceReferencesSvc {
 	private List<IBaseResource> loadResources(List<ReferencingResourceId> theIds, RequestDetails theRequestDetails) {
 		List<IBaseResource> result = new ArrayList<>();
 		for (ReferencingResourceId referencingId : theIds) {
-			IdDt id = referencingId.id();
+			IdDt id = referencingId.toIdDt();
 			try {
 				@SuppressWarnings("unchecked")
 				IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(id.getResourceType());
 				IBaseResource resource = myHapiTransactionService
 						.withRequest(theRequestDetails)
-						.withRequestPartitionId(referencingId.partitionId())
+						.withRequestPartitionId(referencingId.toRequestPartitionId())
 						.execute(() -> dao.read(id.toVersionless(), theRequestDetails));
 				result.add(resource);
 			} catch (ResourceGoneException e) {

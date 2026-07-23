@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
-import ca.uhn.fhir.model.primitive.IdDt;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -57,14 +56,8 @@ public interface IResourceLinkDao extends JpaRepository<ResourceLink, Long>, IHa
 	 * @return
 	 */
 	@Query(
-			"SELECT DISTINCT new ca.uhn.fhir.model.primitive.IdDt(t.mySourceResourceType, t.mySourceResource.myFhirId) FROM ResourceLink t WHERE t.myTargetResourceType = :resourceType AND t.myTargetResource.myFhirId = :resourceFhirId")
-	Stream<IdDt> streamSourceIdsForTargetFhirId(
-			@Param("resourceType") String theTargetResourceType,
-			@Param("resourceFhirId") String theTargetResourceFhirId);
-
-	@Query(
-			"SELECT DISTINCT new ca.uhn.fhir.jpa.dao.data.SourceIdAndPartitionView(t.myPartitionIdValue, t.mySourceResourceType, t.mySourceResource.myFhirId) FROM ResourceLink t WHERE t.myTargetResourceType = :resourceType AND t.myTargetResource.myFhirId = :resourceFhirId")
-	Stream<SourceIdAndPartitionView> streamSourceIdsAndPartitionForTargetFhirId(
+			"SELECT DISTINCT new ca.uhn.fhir.jpa.dao.data.ReferencingResourceId(t.myPartitionIdValue, t.mySourceResourceType, t.mySourceResource.myFhirId) FROM ResourceLink t WHERE t.myTargetResourceType = :resourceType AND t.myTargetResource.myFhirId = :resourceFhirId")
+	Stream<ReferencingResourceId> streamSourceIdsForTargetFhirId(
 			@Param("resourceType") String theTargetResourceType,
 			@Param("resourceFhirId") String theTargetResourceFhirId);
 

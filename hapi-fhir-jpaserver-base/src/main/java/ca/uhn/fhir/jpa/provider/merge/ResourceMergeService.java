@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.PartitionedTransactionPartialFailureException;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
+import ca.uhn.fhir.jpa.dao.data.ReferencingResourceId;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
@@ -634,9 +635,9 @@ public class ResourceMergeService {
 				false,
 				null);
 		List<IdDt> resourceIds;
-		try (Stream<IdDt> stream = myResourceLinkDao.streamSourceIdsForTargetFhirId(
+		try (Stream<ReferencingResourceId> stream = myResourceLinkDao.streamSourceIdsForTargetFhirId(
 				replaceReferencesRequest.sourceId.getResourceType(), replaceReferencesRequest.sourceId.getIdPart())) {
-			resourceIds = stream.toList();
+			resourceIds = stream.map(ReferencingResourceId::toIdDt).toList();
 		}
 		Bundle result = myReplaceReferencesPatchBundleSvc.patchReferencingResourcesInNestedTransaction(
 				replaceReferencesRequest, resourceIds, theRequestDetails);

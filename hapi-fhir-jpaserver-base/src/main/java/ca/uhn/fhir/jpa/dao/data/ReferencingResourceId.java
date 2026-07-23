@@ -19,12 +19,17 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.primitive.IdDt;
 import jakarta.annotation.Nullable;
 
 // Created by claude-opus
-public record SourceIdAndPartitionView(@Nullable Integer partitionId, String resourceType, String fhirId) {
+public record ReferencingResourceId(@Nullable Integer partitionId, String resourceType, String fhirId) {
 	public IdDt toIdDt() {
 		return new IdDt(resourceType, fhirId);
+	}
+
+	public RequestPartitionId toRequestPartitionId() {
+		return RequestPartitionId.fromPartitionId(partitionId);
 	}
 }
