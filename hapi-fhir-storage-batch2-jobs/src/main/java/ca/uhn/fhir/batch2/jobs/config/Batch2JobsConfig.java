@@ -32,7 +32,6 @@ import org.springframework.context.annotation.Import;
 // When you define a new batch job, add it here.
 @Configuration
 @Import({
-	BatchCommonCtx.class,
 	BulkImportAppCtx.class,
 	ReindexAppCtx.class,
 	DeleteExpungeAppCtx.class,
