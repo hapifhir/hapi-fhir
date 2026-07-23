@@ -62,6 +62,12 @@ public interface IResourceLinkDao extends JpaRepository<ResourceLink, Long>, IHa
 			@Param("resourceType") String theTargetResourceType,
 			@Param("resourceFhirId") String theTargetResourceFhirId);
 
+	@Query(
+			"SELECT DISTINCT new ca.uhn.fhir.jpa.dao.data.SourceIdAndPartitionView(t.myPartitionIdValue, t.mySourceResourceType, t.mySourceResource.myFhirId) FROM ResourceLink t WHERE t.myTargetResourceType = :resourceType AND t.myTargetResource.myFhirId = :resourceFhirId")
+	Stream<SourceIdAndPartitionView> streamSourceIdsAndPartitionForTargetFhirId(
+			@Param("resourceType") String theTargetResourceType,
+			@Param("resourceFhirId") String theTargetResourceFhirId);
+
 	/**
 	 * Count the number of resources that have a reference to the provided resource id
 	 *

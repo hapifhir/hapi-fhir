@@ -19,9 +19,11 @@
  */
 package ca.uhn.fhir.jpa.provider;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Result of copying compartment resources across partitions during a cross-partition merge.
@@ -32,11 +34,18 @@ import java.util.List;
 public class CrossPartitionReplaceReferencesResult {
 	private final List<IIdType> myChangedResourceIds;
 	private final List<IIdType> myCopiedResourceOriginalIds;
+	private final Map<RequestPartitionId, List<IIdType>> myChangedResourceIdsByPartition;
+	private final Map<RequestPartitionId, List<IIdType>> myCopiedResourceOriginalIdsByPartition;
 
 	public CrossPartitionReplaceReferencesResult(
-			List<IIdType> theChangedResourceIds, List<IIdType> theCopiedResourceOriginalIds) {
+			List<IIdType> theChangedResourceIds,
+			List<IIdType> theCopiedResourceOriginalIds,
+			Map<RequestPartitionId, List<IIdType>> theChangedResourceIdsByPartition,
+			Map<RequestPartitionId, List<IIdType>> theCopiedResourceOriginalIdsByPartition) {
 		myChangedResourceIds = theChangedResourceIds;
 		myCopiedResourceOriginalIds = theCopiedResourceOriginalIds;
+		myChangedResourceIdsByPartition = theChangedResourceIdsByPartition;
+		myCopiedResourceOriginalIdsByPartition = theCopiedResourceOriginalIdsByPartition;
 	}
 
 	public List<IIdType> getChangedResourceIds() {
@@ -45,5 +54,13 @@ public class CrossPartitionReplaceReferencesResult {
 
 	public List<IIdType> getCopiedResourceOriginalIds() {
 		return myCopiedResourceOriginalIds;
+	}
+
+	public Map<RequestPartitionId, List<IIdType>> getChangedResourceIdsByPartition() {
+		return myChangedResourceIdsByPartition;
+	}
+
+	public Map<RequestPartitionId, List<IIdType>> getCopiedResourceOriginalIdsByPartition() {
+		return myCopiedResourceOriginalIdsByPartition;
 	}
 }

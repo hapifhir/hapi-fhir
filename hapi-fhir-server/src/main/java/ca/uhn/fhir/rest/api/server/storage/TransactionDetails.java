@@ -234,6 +234,23 @@ public class TransactionDetails {
 		return myResolvedPartitions.get(theId);
 	}
 
+	public Map<String, RequestPartitionId> getResolvedPartitions() {
+		return Collections.unmodifiableMap(myResolvedPartitions);
+	}
+
+	public void copyResolvedResourceIdsFrom(TransactionDetails theOther) {
+		theOther.myResolvedResourceIds.forEach((idValue, pid) -> {
+			if (pid != null) {
+				if (myResolvedResourceIds.isEmpty()) {
+					myResolvedResourceIds = new HashMap<>();
+					myReverseResolvedResourceIds = new HashMap<>();
+				}
+				myResolvedResourceIds.put(idValue, pid);
+				myReverseResolvedResourceIds.put(pid, theOther.myReverseResolvedResourceIds.get(pid));
+			}
+		});
+	}
+
 	/**
 	 * A <b>Resolved Resource ID</b> is a mapping between a resource ID (e.g. "<code>Patient/ABC</code>" or
 	 * "<code>Observation/123</code>") and a storage ID for that resource. Resources should only be placed within

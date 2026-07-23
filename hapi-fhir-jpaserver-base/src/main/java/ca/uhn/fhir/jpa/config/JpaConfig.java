@@ -1125,8 +1125,10 @@ public class JpaConfig {
 
 	@Bean
 	public PreviousResourceVersionRestorer resourceVersionRestorer(
-			DaoRegistry theDaoRegistry, HapiTransactionService theHapiTransactionService) {
-		return new PreviousResourceVersionRestorer(theDaoRegistry, theHapiTransactionService);
+			DaoRegistry theDaoRegistry,
+			HapiTransactionService theHapiTransactionService,
+			PartitionSettings thePartitionSettings) {
+		return new PreviousResourceVersionRestorer(theDaoRegistry, theHapiTransactionService, thePartitionSettings);
 	}
 
 	@Bean

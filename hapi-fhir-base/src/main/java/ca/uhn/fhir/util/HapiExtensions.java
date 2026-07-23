@@ -259,6 +259,8 @@ public class HapiExtensions {
 	public static final String EXT_PATIENT_COMPARTMENT =
 			"http://hapifhir.io/fhir/StructureDefinition/patient-compartment";
 
+	public static final String EXT_PROVENANCE_GROUP = "http://hapifhir.io/fhir/StructureDefinition/provenance-group";
+
 	/**
 	 * Non instantiable
 	 */

@@ -20,12 +20,18 @@
 package ca.uhn.fhir.merge;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
@@ -38,6 +44,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Reference;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -92,6 +99,34 @@ public class MergeResourceHelper {
 		OperationOutcomeUtil.addIssue(theFhirContex, theOutcome, "error", theDiagnosticMsg, null, theCode);
 	}
 
+	public static List<IIdType> deleteResourcesInPartitionTransaction(
+			List<IIdType> theResourceIds,
+			RequestPartitionId thePartition,
+			DaoRegistry theDaoRegistry,
+			IHapiTransactionService theTransactionService) {
+		DeleteConflictList deleteConflicts = new DeleteConflictList();
+		theResourceIds.forEach(deleteConflicts::setResourceIdMarkedForDeletion);
+		SystemRequestDetails deleteRequestDetails = SystemRequestDetails.forRequestPartitionId(thePartition);
+		return theTransactionService
+				.withRequest(deleteRequestDetails)
+				.withRequestPartitionId(thePartition)
+				.execute(() -> {
+					TransactionDetails transactionDetails = new TransactionDetails();
+					List<IIdType> tombstones = new ArrayList<>();
+					for (IIdType id : theResourceIds) {
+						IFhirResourceDao<?> dao = theDaoRegistry.getResourceDao(id.getResourceType());
+						DaoMethodOutcome outcome =
+								dao.delete(id, deleteConflicts, deleteRequestDetails, transactionDetails);
+						if (outcome != null && !outcome.isNop() && outcome.getId() != null) {
+							tombstones.add(outcome.getId());
+						}
+					}
+					DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(
+							theDaoRegistry.getFhirContext(), deleteConflicts);
+					return tombstones;
+				});
+	}
+
 	public DaoMethodOutcome updateMergedResourcesAfterReferencesReplaced(
 			IBaseResource theSourceResource,
 			IBaseResource theTargetResource,
@@ -112,30 +147,21 @@ public class MergeResourceHelper {
 		return targetOutcome;
 	}
 
-	public void createProvenance(
-			IBaseResource theSourceResource,
-			IBaseResource theTargetResource,
+	public IIdType createProvenance(
+			IIdType theSourceVersionedId,
+			IIdType theTargetVersionedId,
 			List<IIdType> theChangedResourceIds,
-			boolean theIsDeleteSource,
+			@Nullable String theProvenanceGroupId,
 			RequestDetails theRequestDetails,
 			Date theStartTime,
 			List<IProvenanceAgent> theProvenanceAgents,
 			List<IBaseResource> theContainedResources) {
 
-		IIdType sourceIdForProvenance = theSourceResource.getIdElement();
-		if (theIsDeleteSource) {
-			// If the source resource is to be deleted, increment the version id of the source resource to be put in the
-			// provenance. Since the resource will be deleted after the provenance is created, its version will be
-			// incremented by
-			// the delete operation.
-			sourceIdForProvenance = theSourceResource
-					.getIdElement()
-					.withVersion(Long.toString(sourceIdForProvenance.getVersionIdPartAsLong() + 1));
-		}
-		myProvenanceSvc.createProvenance(
-				theTargetResource.getIdElement(),
-				sourceIdForProvenance,
+		return myProvenanceSvc.createProvenance(
+				theTargetVersionedId,
+				theSourceVersionedId,
 				theChangedResourceIds,
+				theProvenanceGroupId,
 				theStartTime,
 				theRequestDetails,
 				theProvenanceAgents,

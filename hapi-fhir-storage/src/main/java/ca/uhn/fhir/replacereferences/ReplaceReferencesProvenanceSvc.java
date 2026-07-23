@@ -53,6 +53,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * This service is used to create a Provenance resource for the $replace-references operation
@@ -174,18 +175,20 @@ public class ReplaceReferencesProvenanceSvc {
 	 * @param theRequestDetails     the request details
 	 * @param theProvenanceAgents   the list of agents to be included in the Provenance resource.
 	 */
-	public void createProvenance(
+	public IIdType createProvenance(
 			IIdType theTargetId,
 			IIdType theSourceId,
 			List<IIdType> theChangedResourceIds,
+			@Nullable String theProvenanceGroupId,
 			Date theStartTime,
 			RequestDetails theRequestDetails,
 			List<IProvenanceAgent> theProvenanceAgents,
 			List<IBaseResource> theContainedResources) {
-		createProvenance(
+		return createProvenance(
 				theTargetId,
 				theSourceId,
 				theChangedResourceIds,
+				theProvenanceGroupId,
 				theStartTime,
 				theRequestDetails,
 				theProvenanceAgents,
@@ -195,27 +198,59 @@ public class ReplaceReferencesProvenanceSvc {
 				false);
 	}
 
-	protected void createProvenance(
+	@Nullable
+	protected IIdType createProvenance(
 			IIdType theTargetId,
 			IIdType theSourceId,
 			List<IIdType> theChangedResourceIds,
+			@Nullable String theProvenanceGroupId,
 			Date theStartTime,
 			RequestDetails theRequestDetails,
 			List<IProvenanceAgent> theProvenanceAgents,
 			List<IBaseResource> theContainedResources,
 			boolean theCreateEvenWhenNoReferencesWereUpdated) {
-		String resourceType = theTargetId.getResourceType();
-		if (!theChangedResourceIds.isEmpty() || theCreateEvenWhenNoReferencesWereUpdated) {
-			Provenance provenance = createProvenanceObject(
-					theTargetId,
-					theSourceId,
-					theChangedResourceIds,
-					theStartTime,
-					theProvenanceAgents,
-					theContainedResources,
-					resourceType);
-			myProvenanceDao.create(provenance, theRequestDetails);
+		Provenance provenance = buildProvenance(
+				theTargetId,
+				theSourceId,
+				theChangedResourceIds,
+				theProvenanceGroupId,
+				theStartTime,
+				theProvenanceAgents,
+				theContainedResources,
+				theCreateEvenWhenNoReferencesWereUpdated);
+		if (provenance == null) {
+			return null;
 		}
+		return myProvenanceDao.create(provenance, theRequestDetails).getId();
+	}
+
+	@Nullable
+	public Provenance buildProvenance(
+			IIdType theTargetId,
+			IIdType theSourceId,
+			List<IIdType> theChangedResourceIds,
+			@Nullable String theProvenanceGroupId,
+			Date theStartTime,
+			List<IProvenanceAgent> theProvenanceAgents,
+			List<IBaseResource> theContainedResources,
+			boolean theCreateEvenWhenNoReferencesWereUpdated) {
+		String resourceType = theTargetId.getResourceType();
+		if (theChangedResourceIds.isEmpty() && !theCreateEvenWhenNoReferencesWereUpdated) {
+			return null;
+		}
+		Provenance provenance = createProvenanceObject(
+				theTargetId,
+				theSourceId,
+				theChangedResourceIds,
+				theStartTime,
+				theProvenanceAgents,
+				theContainedResources,
+				resourceType);
+		if (theProvenanceGroupId != null) {
+			ExtensionUtil.setExtensionAsString(
+					myFhirContext, provenance, HapiExtensions.EXT_PROVENANCE_GROUP, theProvenanceGroupId);
+		}
+		return provenance;
 	}
 
 	/**
@@ -336,23 +371,26 @@ public class ReplaceReferencesProvenanceSvc {
 
 	public static List<IIdType> extractChangedResourceIds(List<Bundle> theResponseBundles) {
 		List<IIdType> changedResourceIds = new ArrayList<>();
-		theResponseBundles.forEach(outputBundle -> {
-			outputBundle.getEntry().forEach(entry -> {
-				if (entry.getResponse() != null && entry.getResponse().hasLocation()) {
-					if (isNoChangeResponse(entry.getResponse())) {
-						ourLog.warn(
-								"Skipping reference {} because the operation resulted in no change",
-								entry.getResponse().getLocation());
-						return;
-					}
-					changedResourceIds.add(new IdDt(entry.getResponse().getLocation()));
-				}
-			});
-		});
+		theResponseBundles.forEach(
+				outputBundle -> outputBundle.getEntry().forEach(entry -> extractChangedResourceId(entry)
+						.ifPresent(changedResourceIds::add)));
 		return changedResourceIds;
 	}
 
-	private static boolean isNoChangeResponse(Bundle.BundleEntryResponseComponent theResponse) {
+	public static Optional<IIdType> extractChangedResourceId(Bundle.BundleEntryComponent theEntry) {
+		if (theEntry.getResponse() == null || !theEntry.getResponse().hasLocation()) {
+			return Optional.empty();
+		}
+		if (isNoChangeResponse(theEntry.getResponse())) {
+			ourLog.warn(
+					"Skipping reference {} because the operation resulted in no change",
+					theEntry.getResponse().getLocation());
+			return Optional.empty();
+		}
+		return Optional.of(new IdDt(theEntry.getResponse().getLocation()));
+	}
+
+	public static boolean isNoChangeResponse(Bundle.BundleEntryResponseComponent theResponse) {
 		if (!theResponse.hasOutcome()) {
 			return false;
 		}
