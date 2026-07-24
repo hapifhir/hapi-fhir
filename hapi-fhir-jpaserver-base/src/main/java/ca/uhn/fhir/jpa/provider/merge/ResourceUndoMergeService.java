@@ -142,6 +142,7 @@ public class ResourceUndoMergeService {
 		IBaseResource targetResource = myMergeValidationService.resolveTargetResource(
 				inputParameters, theRequestDetails, opOutcome, theInputParamNames);
 		if (targetResource == null) {
+			// resolveTargetResource already added the error issue to opOutcome
 			undoMergeOutcome.setHttpStatusCode(STATUS_HTTP_422_UNPROCESSABLE_ENTITY);
 			return undoMergeOutcome;
 		}
@@ -156,9 +157,9 @@ public class ResourceUndoMergeService {
 				mainProvenance.getIdElement().asStringValue());
 
 		if (provenanceGroup.memberProvenances().isEmpty()) {
-			undoSingleProvenance(mainProvenance, inputParameters, theRequestDetails, undoMergeOutcome);
+			undoUngroupedProvenance(mainProvenance, inputParameters, theRequestDetails, undoMergeOutcome);
 		} else {
-			undoGroupedMerge(
+			undoGroupedProvenances(
 					mainProvenance,
 					provenanceGroup.memberProvenances(),
 					inputParameters,
@@ -191,7 +192,7 @@ public class ResourceUndoMergeService {
 		});
 	}
 
-	private void undoSingleProvenance(
+	private void undoUngroupedProvenance(
 			Provenance theProvenance,
 			UndoMergeOperationInputParameters inputParameters,
 			RequestDetails theRequestDetails,
@@ -224,7 +225,7 @@ public class ResourceUndoMergeService {
 			MergeChangeType changeType,
 			List<Reference> dataRefs) {}
 
-	private void undoGroupedMerge(
+	private void undoGroupedProvenances(
 			Provenance theMainProvenance,
 			List<Provenance> theChangeProvenances,
 			UndoMergeOperationInputParameters inputParameters,
