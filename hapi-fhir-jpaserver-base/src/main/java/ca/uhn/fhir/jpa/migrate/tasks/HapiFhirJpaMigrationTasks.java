@@ -199,7 +199,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// addressing potential missing column PARTITION_ID from index IDX_RES_TYPE_FHIR_ID for MSSQL_2012
 		{
-
 			if (getFlags().contains(FlagEnum.DB_PARTITION_MODE)) {
 
 				final Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
