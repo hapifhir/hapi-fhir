@@ -204,7 +204,7 @@ public class SearchParameterUtil {
 	 */
 	private static boolean isCoveredByPatientCompartmentBaseSp(
 			Class<? extends IBase> theResourceClazz, String theResourceType, SearchParamDefinition thePatientSp) {
-		Set<String> patientPathSegments = ownPathSegments(theResourceType, thePatientSp.path());
+		Set<String> patientPathSegments = ownPathSegmentsNoWhitespace(theResourceType, thePatientSp.path());
 		return Arrays.stream(theResourceClazz.getFields())
 				.map(f -> f.getAnnotation(SearchParamDefinition.class))
 				// Any other SP that is not the "patient" SP
@@ -213,8 +213,10 @@ public class SearchParameterUtil {
 				.filter(spd -> Arrays.stream(spd.providesMembershipIn())
 						.anyMatch(c -> "Patient".equals(getCleansedCompartmentName(c.name()))))
 				// Get the path for theResourceType
-				.flatMap(spd -> ownPathSegments(theResourceType, spd.path()).stream())
-				.anyMatch(baseSegment -> patientPathSegments.contains(baseSegment + ".where(resolve() is Patient)")
+				.flatMap(spd -> ownPathSegmentsNoWhitespace(theResourceType, spd.path()).stream())
+				// "where(resolve()isPatient)" has no space before "is" on purpose — ownPathSegmentsNoWhitespace
+				// strips all whitespace so the narrowing suffix must be spaceless too.
+				.anyMatch(baseSegment -> patientPathSegments.contains(baseSegment + ".where(resolve()isPatient)")
 						|| patientPathSegments.contains(baseSegment));
 	}
 
@@ -222,10 +224,14 @@ public class SearchParameterUtil {
 	 * Splits a (possibly pipe-delimited multi-resource) SP path into segments, keeping only the
 	 * segments that belong to the given resource type. This is necessary since in R4+, sp.path()
 	 * returns a list of paths delimited by '|' if the SP has multiple resource bases.
+	 *
+	 * <p>ALL whitespace is stripped, since FHIRPath permits arbitrary whitespace (eg.
+	 * Observation.subject == Observation . subject).
+	 * The returned segments are therefore comparison keys since it may not be valid FHIRPath.
 	 */
-	private static Set<String> ownPathSegments(String theResourceType, String thePath) {
+	private static Set<String> ownPathSegmentsNoWhitespace(String theResourceType, String thePath) {
 		return Arrays.stream(thePath.split("\\|"))
-				.map(String::trim)
+				.map(StringUtils::deleteWhitespace)
 				.filter(segment -> segment.startsWith(theResourceType + "."))
 				.collect(Collectors.toSet());
 	}
