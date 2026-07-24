@@ -44,4 +44,9 @@ public enum MigrationTaskExecutionResultEnum {
 	 * The migration was applied
 	 */
 	APPLIED,
+
+	/**
+	 * The migration was recorded as already applied by an explicit baseline operation.
+	 */
+	BASELINED,
 }

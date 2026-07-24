@@ -63,6 +63,7 @@ public class HapiMigrationDao {
 		List<HapiMigrationEntity> allEntries = findAll();
 		return allEntries.stream()
 				.filter(HapiMigrationEntity::getSuccess)
+				.filter(t -> t.getVersion() != null)
 				.map(HapiMigrationEntity::getVersion)
 				.map(MigrationVersion::fromVersion)
 				.collect(Collectors.toSet());
