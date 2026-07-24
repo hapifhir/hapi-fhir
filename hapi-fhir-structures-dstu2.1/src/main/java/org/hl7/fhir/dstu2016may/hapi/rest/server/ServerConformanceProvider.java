@@ -113,18 +113,18 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 		}
 	}
 
-	private Map<String, List<BaseMethodBinding>> collectMethodBindings(RequestDetails theRequestDetails) {
-		Map<String, List<BaseMethodBinding>> resourceToMethods = new TreeMap<>();
+	private Map<String, List<IMethodBinding>> collectMethodBindings(RequestDetails theRequestDetails) {
+		Map<String, List<IMethodBinding>> resourceToMethods = new TreeMap<>();
 		for (ResourceBinding next : getServerConfiguration(theRequestDetails).getResourceBindings()) {
 			String resourceName = next.getResourceName();
-			for (BaseMethodBinding nextMethodBinding : next.getMethodBindings()) {
+			for (IMethodBinding nextMethodBinding : next.getMethodBindings()) {
 				if (resourceToMethods.containsKey(resourceName) == false) {
 					resourceToMethods.put(resourceName, new ArrayList<>());
 				}
 				resourceToMethods.get(resourceName).add(nextMethodBinding);
 			}
 		}
-		for (BaseMethodBinding nextMethodBinding :
+		for (IMethodBinding nextMethodBinding :
 				getServerConfiguration(theRequestDetails).getServerBindings()) {
 			String resourceName = "";
 			if (resourceToMethods.containsKey(resourceName) == false) {
@@ -214,8 +214,8 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 		Set<SystemRestfulInteraction> systemOps = new HashSet<>();
 		Set<String> operationNames = new HashSet<>();
 
-		Map<String, List<BaseMethodBinding>> resourceToMethods = collectMethodBindings(theRequestDetails);
-		for (Entry<String, List<BaseMethodBinding>> nextEntry : resourceToMethods.entrySet()) {
+		Map<String, List<IMethodBinding>> resourceToMethods = collectMethodBindings(theRequestDetails);
+		for (Entry<String, List<IMethodBinding>> nextEntry : resourceToMethods.entrySet()) {
 
 			if (nextEntry.getKey().isEmpty() == false) {
 				Set<TypeRestfulInteraction> resourceOps = new HashSet<>();

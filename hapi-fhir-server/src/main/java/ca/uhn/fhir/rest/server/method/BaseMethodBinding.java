@@ -68,7 +68,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public abstract class BaseMethodBinding {
+public abstract class BaseMethodBinding implements IMethodBinding {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseMethodBinding.class);
 	private final List<BaseQueryParameter> myQueryParameters;
@@ -266,9 +266,6 @@ public abstract class BaseMethodBinding {
 	}
 
 	public abstract MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest);
-
-	public abstract Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest)
-			throws BaseServerResponseException, IOException;
 
 	protected final Object invokeServerMethod(RequestDetails theRequest, Object[] theMethodParams) {
 		// Handle server action interceptors

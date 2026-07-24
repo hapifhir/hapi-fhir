@@ -37,6 +37,7 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerConfiguration;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.server.method.IMethodBinding;
 import ca.uhn.fhir.rest.server.method.IParameter;
 import ca.uhn.fhir.rest.server.method.OperationMethodBinding;
 import ca.uhn.fhir.rest.server.method.OperationMethodBinding.ReturnType;
@@ -150,18 +151,18 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
 		}
 	}
 
-	private Map<String, List<BaseMethodBinding>> collectMethodBindings(RequestDetails theRequestDetails) {
-		Map<String, List<BaseMethodBinding>> resourceToMethods = new TreeMap<>();
+	private Map<String, List<IMethodBinding>> collectMethodBindings(RequestDetails theRequestDetails) {
+		Map<String, List<IMethodBinding>> resourceToMethods = new TreeMap<>();
 		for (ResourceBinding next : getServerConfiguration(theRequestDetails).getResourceBindings()) {
 			String resourceName = next.getResourceName();
-			for (BaseMethodBinding nextMethodBinding : next.getMethodBindings()) {
+			for (IMethodBinding nextMethodBinding : next.getMethodBindings()) {
 				if (resourceToMethods.containsKey(resourceName) == false) {
 					resourceToMethods.put(resourceName, new ArrayList<>());
 				}
 				resourceToMethods.get(resourceName).add(nextMethodBinding);
 			}
 		}
-		for (BaseMethodBinding nextMethodBinding :
+		for (IMethodBinding nextMethodBinding :
 				getServerConfiguration(theRequestDetails).getServerBindings()) {
 			String resourceName = "";
 			if (resourceToMethods.containsKey(resourceName) == false) {
@@ -272,10 +273,10 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
 		Set<SystemRestfulInteraction> systemOps = new HashSet<>();
 		Set<String> operationNames = new HashSet<>();
 
-		Map<String, List<BaseMethodBinding>> resourceToMethods = collectMethodBindings(theRequestDetails);
+		Map<String, List<IMethodBinding>> resourceToMethods = collectMethodBindings(theRequestDetails);
 		Map<String, Class<? extends IBaseResource>> resourceNameToSharedSupertype =
 				serverConfiguration.getNameToSharedSupertype();
-		for (Entry<String, List<BaseMethodBinding>> nextEntry : resourceToMethods.entrySet()) {
+		for (Entry<String, List<IMethodBinding>> nextEntry : resourceToMethods.entrySet()) {
 
 			if (nextEntry.getKey().isEmpty() == false) {
 				Set<TypeRestfulInteraction> resourceOps = new HashSet<>();
@@ -718,7 +719,7 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
 	}
 
 	private void maybeAddBulkDataDeclarationToConformingToIg(
-			CapabilityStatement theCapabilityStatement, List<BaseMethodBinding> theServerBindings) {
+			CapabilityStatement theCapabilityStatement, List<IMethodBinding> theServerBindings) {
 		boolean bulkExportEnabled = theServerBindings.stream()
 				.filter(OperationMethodBinding.class::isInstance)
 				.map(OperationMethodBinding.class::cast)

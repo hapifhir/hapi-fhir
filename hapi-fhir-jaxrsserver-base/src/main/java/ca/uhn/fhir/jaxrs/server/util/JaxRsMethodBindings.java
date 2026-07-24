@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.server.method.IMethodBinding;
 import ca.uhn.fhir.rest.server.method.OperationMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.util.ReflectionUtil;
@@ -47,8 +48,8 @@ public class JaxRsMethodBindings {
 	private static final ConcurrentHashMap<Class<?>, JaxRsMethodBindings> classBindings =
 			new ConcurrentHashMap<Class<?>, JaxRsMethodBindings>();
 	/** Static collection of operationBindings mapped to a class */
-	private ConcurrentHashMap<RestOperationTypeEnum, ConcurrentHashMap<String, BaseMethodBinding>> operationBindings =
-			new ConcurrentHashMap<RestOperationTypeEnum, ConcurrentHashMap<String, BaseMethodBinding>>();
+	private ConcurrentHashMap<RestOperationTypeEnum, ConcurrentHashMap<String, IMethodBinding>> operationBindings =
+			new ConcurrentHashMap<RestOperationTypeEnum, ConcurrentHashMap<String, IMethodBinding>>();
 
 	/**
 	 * The constructor
@@ -92,7 +93,7 @@ public class JaxRsMethodBindings {
 	}
 
 	private void addMethodBinding(String key, BaseMethodBinding binding) {
-		ConcurrentHashMap<String, BaseMethodBinding> mapByOperation =
+		ConcurrentHashMap<String, IMethodBinding> mapByOperation =
 				getMapForOperation(binding.getRestOperationType());
 		if (mapByOperation.containsKey(key)) {
 			throw new IllegalArgumentException(Msg.code(597) + "Multiple Search Method Bindings Found : "
@@ -108,8 +109,8 @@ public class JaxRsMethodBindings {
 	 * @param operationType the operation type.
 	 * @return the map defined in the operation bindings
 	 */
-	private ConcurrentHashMap<String, BaseMethodBinding> getMapForOperation(RestOperationTypeEnum operationType) {
-		ConcurrentHashMap<String, BaseMethodBinding> result = operationBindings.get(operationType);
+	private ConcurrentHashMap<String, IMethodBinding> getMapForOperation(RestOperationTypeEnum operationType) {
+		ConcurrentHashMap<String, IMethodBinding> result = operationBindings.get(operationType);
 		if (result == null) {
 			operationBindings.putIfAbsent(operationType, new ConcurrentHashMap<String, BaseMethodBinding>());
 			return getMapForOperation(operationType);
@@ -128,7 +129,7 @@ public class JaxRsMethodBindings {
 	 */
 	public BaseMethodBinding getBinding(RestOperationTypeEnum operationType, String theBindingKey) {
 		String bindingKey = StringUtils.defaultIfBlank(theBindingKey, DEFAULT_METHOD_KEY);
-		ConcurrentHashMap<String, BaseMethodBinding> map = getMapForOperation(operationType);
+		ConcurrentHashMap<String, IMethodBinding> map = getMapForOperation(operationType);
 		if (map == null || !map.containsKey(bindingKey)) {
 			throw new NotImplementedOperationException(Msg.code(598) + "Operation not implemented");
 		} else {

@@ -25,6 +25,7 @@ import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.server.method.IMethodBinding;
 import ca.uhn.fhir.rest.server.method.OperationMethodBinding;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
@@ -109,7 +110,7 @@ public class InteractionBlockingInterceptor {
 	}
 
 	@Hook(Pointcut.SERVER_PROVIDER_METHOD_BOUND)
-	public BaseMethodBinding bindMethod(BaseMethodBinding theMethodBinding) {
+	public IMethodBinding bindMethod(BaseMethodBinding theMethodBinding) {
 
 		boolean allowed = true;
 		String resourceName = theMethodBinding.getResourceName();

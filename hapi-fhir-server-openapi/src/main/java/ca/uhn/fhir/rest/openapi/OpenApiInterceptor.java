@@ -33,6 +33,7 @@ import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.server.method.IMethodBinding;
 import ca.uhn.fhir.rest.server.method.ReadMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ClasspathUtil;
@@ -486,7 +487,7 @@ public class OpenApiInterceptor {
 			capabilitiesProvider = (IServerConformanceProvider<?>) restfulServer.getServerConformanceProvider();
 		}
 
-		final MultiKeyMap<String, BaseMethodBinding> operationLookup = buildOperationLookup(restfulServer);
+		final MultiKeyMap<String, IMethodBinding> operationLookup = buildOperationLookup(restfulServer);
 
 		OpenAPI openApi = new OpenAPI();
 
@@ -720,9 +721,9 @@ public class OpenApiInterceptor {
 	 * Iterate through the resource bindings on the server to build a lookup of resource + operation name
 	 * to the method binding that will process that operation.
 	 */
-	private MultiKeyMap<String, BaseMethodBinding> buildOperationLookup(RestfulServer restfulServer) {
+	private MultiKeyMap<String, IMethodBinding> buildOperationLookup(RestfulServer restfulServer) {
 
-		final MultiKeyMap<String, BaseMethodBinding> map = new MultiKeyMap<>();
+		final MultiKeyMap<String, IMethodBinding> map = new MultiKeyMap<>();
 		final Collection<ResourceBinding> resourceBindings = restfulServer.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			final String resourceName = resourceBinding.getResourceName();
