@@ -117,6 +117,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	private ISearchCacheSvc mySearchCacheSvc;
 
 	@Autowired
+	private ICacheAwareSearchSvc myCacheAwareSearchSvc;
+
+	@Autowired
 	private ISearchResultCacheSvc mySearchResultCacheSvc;
 
 	@Autowired
@@ -192,12 +195,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		mySearchCacheSvc = theSearchCacheSvc;
 		mySearchBuilderFactory = theSearchBuilderFactory;
 		mySynchronousSearchSvc = theSynchronousSearchSvc;
-		myCacheAwareSearchSvc = theCacheAwareSearchSvc;
 		myPersistedJpaBundleProviderFactory = thePersistedJpaBundleProviderFactory;
-		mySearchParamRegistry = theSearchParamRegistry;
 		mySearchStrategyFactory = theSearchStrategyFactory;
 		myBeanFactory = theBeanFactory;
-		myRequestPartitionHelperSvc = thePartitionHelperSvc;
 		myExceptionSvc = theExceptionSvc;
 		myPersistedJpaBundleProviderFactory = thePersistedJpaBundleProviderFactory;
 		myDaoRegistry = theDaoRegistry;
