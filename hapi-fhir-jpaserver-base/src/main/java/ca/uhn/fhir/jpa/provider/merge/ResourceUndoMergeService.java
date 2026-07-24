@@ -156,7 +156,8 @@ public class ResourceUndoMergeService {
 				"Found Provenance resource with id: {} to be used for $undo-merge operation",
 				mainProvenance.getIdElement().asStringValue());
 
-		if (provenanceGroup.memberProvenances().isEmpty()) {
+		if (MergeProvenanceGroupValue.fromProvenance(mainProvenance).isEmpty()) {
+			// this Provenance carries no group value, so undo it as an ungrouped Provenance
 			undoUngroupedProvenance(mainProvenance, inputParameters, theRequestDetails, undoMergeOutcome);
 		} else {
 			undoGroupedProvenances(
@@ -219,7 +220,7 @@ public class ResourceUndoMergeService {
 		populateSuccessOutcome(referencesToRestore.size(), theProvenance, theUndoMergeOutcome);
 	}
 
-	private record PartitionRestore(
+	private record ProvenanceRestoreInfo(
 			Provenance provenance,
 			RequestPartitionId partition,
 			MergeChangeType changeType,
@@ -227,27 +228,27 @@ public class ResourceUndoMergeService {
 
 	private void undoGroupedProvenances(
 			Provenance theMainProvenance,
-			List<Provenance> theChangeProvenances,
+			List<Provenance> theMemberProvenances,
 			UndoMergeOperationInputParameters inputParameters,
 			RequestDetails theRequestDetails,
 			OperationOutcomeWithStatusCode theUndoMergeOutcome) {
 
-		validateGroupedMergeResourceLimit(theMainProvenance, theChangeProvenances, inputParameters);
+		validateGroupedMergeResourceLimit(theMainProvenance, theMemberProvenances, inputParameters);
 
 		ourLog.info(
 				"Undoing grouped merge from main Provenance: {} with {} member Provenance(s)",
 				theMainProvenance.getIdElement().toUnqualifiedVersionless().getValue(),
-				theChangeProvenances.size());
+				theMemberProvenances.size());
 
-		List<PartitionRestore> orderedRestores = orderPartitionRestores(theMainProvenance, theChangeProvenances);
-		List<PartitionRestore> completedRestores = new ArrayList<>();
+		List<ProvenanceRestoreInfo> orderedRestores = orderRestores(theMainProvenance, theMemberProvenances);
+		List<ProvenanceRestoreInfo> completedRestores = new ArrayList<>();
 
 		try {
 			int restoredCount = myHapiTransactionService
 					.withRequest(theRequestDetails)
 					.execute(() -> {
 						int totalRestored = 0;
-						for (PartitionRestore restore : orderedRestores) {
+						for (ProvenanceRestoreInfo restore : orderedRestores) {
 							ourLog.info(
 									"Restoring {} resource(s) the merge did {} to, from member Provenance {} for partition {}",
 									restore.dataRefs().size(),
@@ -266,6 +267,8 @@ public class ResourceUndoMergeService {
 					});
 			populateSuccessOutcome(restoredCount, theMainProvenance, theUndoMergeOutcome);
 		} catch (Exception theException) {
+			// when changing partitions doesn't require a new transaction, the whole undo ran in one transaction
+			// that rolls back atomically on failure, so nothing was restored and we just rethrow
 			if (!myHapiTransactionService.isRequiresNewTransactionWhenChangingPartitions()) {
 				throw theException;
 			}
@@ -278,16 +281,16 @@ public class ResourceUndoMergeService {
 	 * the referrers restored afterwards point at live resources; resources the merge created are deleted last, once
 	 * every referrer has been repointed away from them.
 	 */
-	private List<PartitionRestore> orderPartitionRestores(
-			Provenance theMainProvenance, List<Provenance> theChangeProvenances) {
+	private List<ProvenanceRestoreInfo> orderRestores(
+			Provenance theMainProvenance, List<Provenance> theMemberProvenances) {
 
 		String versionlessTargetId =
 				versionlessRefValue(theMainProvenance.getTarget().get(0));
 		String versionlessSourceId =
 				versionlessRefValue(theMainProvenance.getTarget().get(1));
 
-		List<PartitionRestore> restores = new ArrayList<>();
-		for (Provenance memberProvenance : theChangeProvenances) {
+		List<ProvenanceRestoreInfo> restores = new ArrayList<>();
+		for (Provenance memberProvenance : theMemberProvenances) {
 			// first two targets are the merge target and source, used to locate this Provenance
 			// the rest are the refs to restore
 			validateFirstTwoTargetsAreTargetAndSource(memberProvenance, versionlessTargetId, versionlessSourceId);
@@ -295,7 +298,7 @@ public class ResourceUndoMergeService {
 					.getTarget()
 					.subList(2, memberProvenance.getTarget().size());
 
-			restores.add(new PartitionRestore(
+			restores.add(new ProvenanceRestoreInfo(
 					memberProvenance,
 					extractRequiredPartition(memberProvenance),
 					extractRequiredChangeType(memberProvenance),
@@ -327,7 +330,7 @@ public class ResourceUndoMergeService {
 				.flatMap(MergeProvenanceGroupValue::getPartition)
 				.orElseThrow(() -> new InternalErrorException(Msg.code(2996)
 						+ String.format(
-								"The member Provenance '%s' does not name the partition it records changes for in its group extension.",
+								"The member Provenance '%s' does not have the partition it records changes for in its group extension.",
 								theChangeProvenance.getIdElement().asStringValue())));
 	}
 
@@ -336,7 +339,7 @@ public class ResourceUndoMergeService {
 				.flatMap(MergeProvenanceGroupValue::getChangeType)
 				.orElseThrow(() -> new InternalErrorException(Msg.code(3000)
 						+ String.format(
-								"The member Provenance '%s' does not name the change type it records changes for in its group extension.",
+								"The member Provenance '%s' does not have the change type it records changes for in its group extension.",
 								theChangeProvenance.getIdElement().asStringValue())));
 	}
 
@@ -354,8 +357,8 @@ public class ResourceUndoMergeService {
 	}
 
 	private void buildNonAtomicUndoFailureOutcome(
-			List<PartitionRestore> theOrderedRestores,
-			List<PartitionRestore> theCompletedRestores,
+			List<ProvenanceRestoreInfo> theOrderedRestores,
+			List<ProvenanceRestoreInfo> theCompletedRestores,
 			Exception theFailure,
 			OperationOutcomeWithStatusCode theOutcome) {
 
@@ -371,7 +374,7 @@ public class ResourceUndoMergeService {
 			return;
 		}
 
-		List<PartitionRestore> remainingRestores = new ArrayList<>(theOrderedRestores);
+		List<ProvenanceRestoreInfo> remainingRestores = new ArrayList<>(theOrderedRestores);
 		remainingRestores.removeAll(theCompletedRestores);
 
 		String msg = format(
@@ -387,7 +390,7 @@ public class ResourceUndoMergeService {
 		addErrorToOperationOutcome(myFhirContext, opOutcome, msg, ISSUE_TYPE_EXCEPTION);
 	}
 
-	private static String describeProvenances(List<PartitionRestore> theRestores) {
+	private static String describeProvenances(List<ProvenanceRestoreInfo> theRestores) {
 		return theRestores.stream()
 				.map(restore -> restore.provenance()
 						.getIdElement()
@@ -398,13 +401,13 @@ public class ResourceUndoMergeService {
 
 	private void validateGroupedMergeResourceLimit(
 			Provenance theMainProvenance,
-			List<Provenance> theChangeProvenances,
+			List<Provenance> theMemberProvenances,
 			UndoMergeOperationInputParameters inputParameters) {
 		Set<String> referencedResources = new HashSet<>();
 		for (Reference ref : theMainProvenance.getTarget()) {
 			referencedResources.add(versionlessRefValue(ref));
 		}
-		for (Provenance memberProvenance : theChangeProvenances) {
+		for (Provenance memberProvenance : theMemberProvenances) {
 			for (Reference ref : memberProvenance.getTarget()) {
 				referencedResources.add(versionlessRefValue(ref));
 			}
