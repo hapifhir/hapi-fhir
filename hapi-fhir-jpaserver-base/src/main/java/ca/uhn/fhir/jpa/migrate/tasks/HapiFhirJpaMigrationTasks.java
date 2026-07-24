@@ -53,7 +53,6 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.VersionEnum;
 import org.intellij.lang.annotations.Language;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -198,71 +197,56 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.nullable()
 				.type(ColumnTypeEnum.TEXT);
 
-		// Addressing collation issue for MSSQL
+		// addressing potential missing column PARTITION_ID from index IDX_RES_TYPE_FHIR_ID for MSSQL_2012
 		{
-			final Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
-
-			List<String> idxResTypeFhirIdColumnList = new ArrayList<>();
 
 			if (getFlags().contains(FlagEnum.DB_PARTITION_MODE)) {
-				idxResTypeFhirIdColumnList.add("PARTITION_ID");
+
+				final Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
+
+				// Precondition for the rebuild: returns 1 (run) when IDX_RES_TYPE_FHIR_ID does NOT have
+				// PARTITION_ID as a key column, and 0 (skip) when it does. This limits the rebuild to databases
+				// whose index is still missing PARTITION_ID, so already-correct databases are left untouched.
+				@Language(("SQL"))
+				final String onlyIfSql =
+						"""
+				SELECT CASE WHEN EXISTS (
+					SELECT 1
+					FROM sys.indexes i
+					JOIN sys.index_columns ic ON ic.object_id = i.object_id AND ic.index_id = i.index_id
+					JOIN sys.columns      c  ON c.object_id  = ic.object_id AND c.column_id = ic.column_id
+					WHERE i.object_id = OBJECT_ID('HFJ_RESOURCE')
+						AND i.name = 'IDX_RES_TYPE_FHIR_ID'
+						AND ic.is_included_column = 0          -- key columns only, not INCLUDE
+						AND c.name = 'PARTITION_ID'
+				) THEN 0 ELSE 1 END
+				"""
+								.stripLeading();
+
+				final String onlyfIReason =
+						"Skipping IDX_RES_TYPE_FHIR_ID rebuild, column PARTITION_ID already part of the index";
+
+				hfjResource
+						.dropIndex("20260724.10", "IDX_RES_TYPE_FHIR_ID")
+						.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012)
+						.runEvenDuringSchemaInitialization()
+						.onlyIf(onlyIfSql, onlyfIReason);
+
+				// No onlyIf guard needed on the recreate: AddIndexTask is a no-op if the index already exists, so
+				// this creates the index only when the guarded drop above actually removed it. If the drop was
+				// skipped (PARTITION_ID already a key column), the index is still present and this does nothing.
+				hfjResource
+						.addIndex("20260724.20", "IDX_RES_TYPE_FHIR_ID")
+						.unique(true)
+						.online(true)
+						// include res_id and our deleted_at flag so we can satisfy Observation?_sort=_id from the
+						// index on
+						// platforms that support it.
+						.includeColumns("RES_ID, RES_DELETED_AT")
+						.withColumns("PARTITION_ID", "RES_TYPE", "FHIR_ID")
+						.runEvenDuringSchemaInitialization()
+						.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012);
 			}
-
-			idxResTypeFhirIdColumnList.addAll(List.of("RES_TYPE", "FHIR_ID"));
-
-			// Changes 20260723.10-50 repeat migration 20251208.10-50 but rebuilds index IDX_RES_TYPE_FHIR_ID
-			// accounting for whether database partitioning is enabled.  The tasks are set to run even during
-			// schema based initialization to cover new installations.
-			//
-			// This query checks if the FHIR_ID column has a case-sensitive collation.
-			@Language(("SQL"))
-			final String onlyIfSql = "SELECT CASE CHARINDEX('_CI_', COLLATION_NAME) WHEN 0 THEN 0 ELSE 1 END "
-					+ "FROM INFORMATION_SCHEMA.COLUMNS "
-					+ "WHERE TABLE_SCHEMA = SCHEMA_NAME() "
-					+ "AND TABLE_NAME = 'HFJ_RESOURCE' "
-					+ "AND COLUMN_NAME = 'FHIR_ID' ";
-			final String onlyfIReason =
-					"Skipping change to HFJ_RESOURCE.FHIR_ID collation to SQL_Latin1_General_CP1_CS_AS because it is already using it";
-
-			hfjResource
-					.dropIndex("20260723.10", "IDX_RES_FHIR_ID")
-					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012)
-					.runEvenDuringSchemaInitialization()
-					.onlyIf(onlyIfSql, onlyfIReason);
-
-			hfjResource
-					.dropIndex("20260723.20", "IDX_RES_TYPE_FHIR_ID")
-					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012)
-					.runEvenDuringSchemaInitialization()
-					.onlyIf(onlyIfSql, onlyfIReason);
-
-			version.executeRawSql(
-					"20260723.30",
-					"ALTER TABLE HFJ_RESOURCE ALTER COLUMN FHIR_ID varchar(64) COLLATE SQL_Latin1_General_CP1_CS_AS")
-				.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012)
-				.runEvenDuringSchemaInitialization()
-				.onlyIf(onlyIfSql, onlyfIReason);
-
-			hfjResource
-				.addIndex("20260723.40", "IDX_RES_FHIR_ID")
-				.unique(false)
-				.online(true)
-				.withColumns("FHIR_ID")
-				.runEvenDuringSchemaInitialization()
-				// note that we do not apply the onlyIf() here since we have now fixed the column.
-				.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012);
-
-			hfjResource
-					.addIndex("20260723.50", "IDX_RES_TYPE_FHIR_ID")
-					.unique(true)
-					.online(true)
-					// include res_id and our deleted flag so we can satisfy Observation?_sort=_id from the index on
-					// platforms that support it.
-					.includeColumns("RES_ID, RES_DELETED_AT")
-					.withColumns(idxResTypeFhirIdColumnList.toArray(new String[0]))
-					.runEvenDuringSchemaInitialization()
-					// note that we do not apply the onlyIf() here since we have now fixed the column.
-					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012);
 		}
 	}
 
@@ -315,23 +299,20 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.dropIndex("20251208.10", "IDX_RES_FHIR_ID")
 					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012)
 					.runEvenDuringSchemaInitialization()
-					.onlyIf(onlyIfSql, onlyfIReason)
-					.doNothing();
+					.onlyIf(onlyIfSql, onlyfIReason);
 
 			hfjResource
 					.dropIndex("20251208.20", "IDX_RES_TYPE_FHIR_ID")
 					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012)
 					.runEvenDuringSchemaInitialization()
-					.onlyIf(onlyIfSql, onlyfIReason)
-					.doNothing();
+					.onlyIf(onlyIfSql, onlyfIReason);
 
 			version.executeRawSql(
 							"20251208.30",
 							"ALTER TABLE HFJ_RESOURCE ALTER COLUMN FHIR_ID varchar(64) COLLATE SQL_Latin1_General_CP1_CS_AS")
 					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012)
 					.runEvenDuringSchemaInitialization()
-					.onlyIf(onlyIfSql, onlyfIReason)
-					.doNothing();
+					.onlyIf(onlyIfSql, onlyfIReason);
 
 			hfjResource
 					.addIndex("20251208.40", "IDX_RES_FHIR_ID")
@@ -340,8 +321,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.withColumns("FHIR_ID")
 					.runEvenDuringSchemaInitialization()
 					// note that we do not apply the onlyIf() here since we have now fixed the column.
-					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012)
-					.doNothing();
+					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012);
 
 			hfjResource
 					.addIndex("20251208.50", "IDX_RES_TYPE_FHIR_ID")
@@ -353,8 +333,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.withColumns("RES_TYPE", "FHIR_ID")
 					.runEvenDuringSchemaInitialization()
 					// note that we do not apply the onlyIf() here since we have now fixed the column.
-					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012)
-					.doNothing();
+					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012);
 		}
 
 		// slow running batch jobs

@@ -208,6 +208,12 @@ public class HapiSchemaMigrationTest {
 		verifyHfjResourceFhirIdCollation(myCurrentDatabase);
 	}
 
+	/**
+	 * SCENARIO 1 - FRESH INSTALL: a brand-new database runs all migrations from scratch
+	 * (including the 8.8.0 collation fix and the V8_12_0 corrective rebuild). The unique index
+	 * {@code IDX_RES_TYPE_FHIR_ID} must end up {@code (PARTITION_ID, RES_TYPE, FHIR_ID)} in database
+	 * partition mode, and {@code (RES_TYPE, FHIR_ID)} when partitioning is disabled.
+	 */
 	@ParameterizedTest(name = "flags={0}")
 	@MethodSource("mssqlCollationFixIndexColumnParams")
 	public void testMssqlCollationFix_fhirIdUniqueIndexColumnsMatchPartitionMode(
@@ -231,6 +237,41 @@ public class HapiSchemaMigrationTest {
 						Set.of(DB_PARTITION_MODE.getCommandLineValue()),
 						List.of(COLUMN_PARTITION_ID, COLUMN_RES_TYPE, COLUMN_FHIR_ID)),
 				Arguments.of(Collections.emptySet(), List.of(COLUMN_RES_TYPE, COLUMN_FHIR_ID)));  // non partitioned mode
+	}
+
+	/**
+	 * SCENARIO 2 - UPGRADE OF AN EXISTING (8.8.0+) DATABASE: the 8.8.0 collation fix already
+	 * ran, leaving a case-SENSITIVE FHIR_ID collation and the 2-column {@code IDX_RES_TYPE_FHIR_ID}.
+	 * The V8_12_0 corrective migration must still rebuild that index as
+	 * {@code (PARTITION_ID, RES_TYPE, FHIR_ID)} in database partition mode - i.e. the index rebuild
+	 * must not be gated behind the case-insensitive collation check, otherwise the databases that
+	 * were actually broken (already case-sensitive) are never repaired.
+	 */
+	@Test
+	public void testMssqlCollationFix_upgradeFromAlreadyFixedCollation_rebuildsPartitionScopedIndex() {
+		HapiSystemProperties.disableUnitTestMode();
+		myCurrentDatabase = myEmbeddedServersExtension.mssql2012Database;
+
+		HapiFhirJpaMigrationTasks tasks =
+				new HapiFhirJpaMigrationTasks(Set.of(DB_PARTITION_MODE.getCommandLineValue()));
+
+		// given: migrate everything before the V8_12_0 corrective release to build the schema
+		List<VersionEnum> versionsBeforeFix =
+				getAllVersionsMatching(theVersion -> !theVersion.isEqualOrNewerThan(VersionEnum.V8_12_0));
+		migrate(myCurrentDatabase, tasks.getAllTasks(versionsBeforeFix.toArray(new VersionEnum[0])));
+
+		// and: the 8.8.0 collation fix (20251208) has left the index in its 2-column form, missing
+		//   PARTITION_ID - the "already broken" state the corrective migration must repair.
+		assertThat(getIndexColumnsInKeyOrder(myCurrentDatabase, TABLE_HFJ_RESOURCE, INDEX_RES_TYPE_FHIR_ID))
+				.containsExactly(COLUMN_RES_TYPE, COLUMN_FHIR_ID);
+
+		// when: the V8_12_0 corrective migration runs
+		migrate(myCurrentDatabase, tasks.getAllTasks(VersionEnum.V8_12_0));
+
+		// then: the unique index must be rebuilt to include PARTITION_ID
+		List<String> indexColumns =
+				getIndexColumnsInKeyOrder(myCurrentDatabase, TABLE_HFJ_RESOURCE, INDEX_RES_TYPE_FHIR_ID);
+		assertThat(indexColumns).containsExactly(COLUMN_PARTITION_ID, COLUMN_RES_TYPE, COLUMN_FHIR_ID);
 	}
 
 	/**
