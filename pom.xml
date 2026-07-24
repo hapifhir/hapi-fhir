@@ -2665,6 +2665,12 @@
 						<perCoreThreadCount>true</perCoreThreadCount>
 						<runOrder>alphabetical</runOrder>
 						<useModulePath>false</useModulePath>
+						<!--
+						Pass the same JVM args as surefire so integration tests get the shared settings, notably
+						spring.test.extension.context.scope=test_class which @Nested test mixins rely on under
+						Spring Framework 7.
+						-->
+						<argLine>@{argLine} ${surefire_jvm_args}</argLine>
 						<includes>
 							<include>**/*IT.java</include>
 						</includes>
