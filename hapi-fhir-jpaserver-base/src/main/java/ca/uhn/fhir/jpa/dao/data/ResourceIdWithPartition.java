@@ -23,8 +23,12 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.primitive.IdDt;
 import jakarta.annotation.Nullable;
 
+/**
+ * A resource identifier (type and FHIR id) together with the partition it lives in. Currently produced by
+ * querying the resource-link table for the sources referencing a given target.
+ */
 // Created by claude-opus
-public record ReferencingResourceId(@Nullable Integer partitionId, String resourceType, String fhirId) {
+public record ResourceIdWithPartition(@Nullable Integer partitionId, String resourceType, String fhirId) {
 	public IdDt toIdDt() {
 		return new IdDt(resourceType, fhirId);
 	}

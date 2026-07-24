@@ -56,8 +56,8 @@ public interface IResourceLinkDao extends JpaRepository<ResourceLink, Long>, IHa
 	 * @return
 	 */
 	@Query(
-			"SELECT DISTINCT new ca.uhn.fhir.jpa.dao.data.ReferencingResourceId(t.myPartitionIdValue, t.mySourceResourceType, t.mySourceResource.myFhirId) FROM ResourceLink t WHERE t.myTargetResourceType = :resourceType AND t.myTargetResource.myFhirId = :resourceFhirId")
-	Stream<ReferencingResourceId> streamSourceIdsForTargetFhirId(
+			"SELECT DISTINCT new ca.uhn.fhir.jpa.dao.data.ResourceIdWithPartition(t.myPartitionIdValue, t.mySourceResourceType, t.mySourceResource.myFhirId) FROM ResourceLink t WHERE t.myTargetResourceType = :resourceType AND t.myTargetResource.myFhirId = :resourceFhirId")
+	Stream<ResourceIdWithPartition> streamSourceIdsForTargetFhirId(
 			@Param("resourceType") String theTargetResourceType,
 			@Param("resourceFhirId") String theTargetResourceFhirId);
 

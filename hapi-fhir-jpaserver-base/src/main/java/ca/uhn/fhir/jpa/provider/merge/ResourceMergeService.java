@@ -32,7 +32,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.PartitionedTransactionPartialFailureException;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
-import ca.uhn.fhir.jpa.dao.data.ReferencingResourceId;
+import ca.uhn.fhir.jpa.dao.data.ResourceIdWithPartition;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
@@ -231,26 +231,27 @@ public class ResourceMergeService {
 			RequestDetails theRequestDetails,
 			MergeOperationOutcome theMergeOutcome) {
 
-		RequestPartitionId partitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(
-				theRequestDetails, ReadPartitionIdRequestDetails.forRead(theTargetResource.getIdElement()));
-
 		if (theRequestDetails.isPreferAsync()) {
 			doMergeAsync(
 					theMergeOperationParameters,
 					theSourceResource,
 					theTargetResource,
 					theRequestDetails,
-					theMergeOutcome,
-					partitionId);
+					theMergeOutcome);
 		} else {
 			doMergeSync(
 					theMergeOperationParameters,
 					theSourceResource,
 					theTargetResource,
 					theRequestDetails,
-					theMergeOutcome,
-					partitionId);
+					theMergeOutcome);
 		}
+	}
+
+	private RequestPartitionId determineTargetReadPartition(
+			IBaseResource theTargetResource, RequestDetails theRequestDetails) {
+		return myRequestPartitionHelperSvc.determineReadPartitionForRequest(
+				theRequestDetails, ReadPartitionIdRequestDetails.forRead(theTargetResource.getIdElement()));
 	}
 
 	private void doMergeSync(
@@ -258,8 +259,7 @@ public class ResourceMergeService {
 			IBaseResource theSourceResource,
 			IBaseResource theTargetResource,
 			RequestDetails theRequestDetails,
-			MergeOperationOutcome theMergeOutcome,
-			RequestPartitionId partitionId) {
+			MergeOperationOutcome theMergeOutcome) {
 
 		Date startTime = new Date();
 
@@ -280,7 +280,6 @@ public class ResourceMergeService {
 					theMergeOperationParameters,
 					theSourceResource,
 					theTargetResource,
-					partitionId,
 					theRequestDetails,
 					theMergeOutcome,
 					startTime);
@@ -291,10 +290,11 @@ public class ResourceMergeService {
 			MergeOperationInputParameters theMergeOperationParameters,
 			IBaseResource theSourceResource,
 			IBaseResource theTargetResource,
-			RequestPartitionId thePartitionId,
 			RequestDetails theRequestDetails,
 			MergeOperationOutcome theMergeOutcome,
 			Date theStartTime) {
+
+		RequestPartitionId partitionId = determineTargetReadPartition(theTargetResource, theRequestDetails);
 
 		myHapiTransactionService.withRequest(theRequestDetails).execute(() -> {
 			// 1. Replace references (nested transactions inside)
@@ -302,7 +302,7 @@ public class ResourceMergeService {
 					theSourceResource,
 					theTargetResource,
 					theMergeOperationParameters.getResourceLimit(),
-					thePartitionId,
+					partitionId,
 					theRequestDetails);
 			List<IIdType> changedResourceIds =
 					ReplaceReferencesProvenanceSvc.extractChangedResourceIds(responseBundles);
@@ -632,12 +632,12 @@ public class ResourceMergeService {
 			IBaseResource theSourceResource,
 			IBaseResource theTargetResource,
 			RequestDetails theRequestDetails,
-			MergeOperationOutcome theMergeOutcome,
-			RequestPartitionId thePartitionId) {
+			MergeOperationOutcome theMergeOutcome) {
 
+		RequestPartitionId partitionId = determineTargetReadPartition(theTargetResource, theRequestDetails);
 		String operationName = theRequestDetails.getOperation();
 		MergeJobParameters mergeJobParameters = theMergeOperationParameters.asMergeJobParameters(
-				myFhirContext, myStorageSettings, theSourceResource, theTargetResource, thePartitionId, operationName);
+				myFhirContext, myStorageSettings, theSourceResource, theTargetResource, partitionId, operationName);
 
 		Task task = myBatch2TaskHelper.startJobAndCreateAssociatedTask(
 				myTaskDao, theRequestDetails, myJobCoordinator, JOB_MERGE, mergeJobParameters);
@@ -673,9 +673,9 @@ public class ResourceMergeService {
 				false,
 				null);
 		List<IdDt> resourceIds;
-		try (Stream<ReferencingResourceId> stream = myResourceLinkDao.streamSourceIdsForTargetFhirId(
+		try (Stream<ResourceIdWithPartition> stream = myResourceLinkDao.streamSourceIdsForTargetFhirId(
 				replaceReferencesRequest.sourceId.getResourceType(), replaceReferencesRequest.sourceId.getIdPart())) {
-			resourceIds = stream.map(ReferencingResourceId::toIdDt).toList();
+			resourceIds = stream.map(ResourceIdWithPartition::toIdDt).toList();
 		}
 		Bundle result = myReplaceReferencesPatchBundleSvc.patchReferencingResourcesInNestedTransaction(
 				replaceReferencesRequest, resourceIds, theRequestDetails);

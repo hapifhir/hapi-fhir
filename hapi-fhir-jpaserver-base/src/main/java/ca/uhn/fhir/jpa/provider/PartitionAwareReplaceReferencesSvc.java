@@ -25,7 +25,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
-import ca.uhn.fhir.jpa.dao.data.ReferencingResourceId;
+import ca.uhn.fhir.jpa.dao.data.ResourceIdWithPartition;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -188,11 +188,11 @@ public class PartitionAwareReplaceReferencesSvc {
 	 * then loads and returns those resources.
 	 */
 	private List<IBaseResource> discoverReferencingResources(IIdType theSourceId, RequestDetails theRequestDetails) {
-		List<ReferencingResourceId> ids = findReferencingResourceIds(theSourceId, theRequestDetails);
+		List<ResourceIdWithPartition> ids = findReferencingResourceIds(theSourceId, theRequestDetails);
 		return loadResources(ids, theRequestDetails);
 	}
 
-	private List<ReferencingResourceId> findReferencingResourceIds(
+	private List<ResourceIdWithPartition> findReferencingResourceIds(
 			IIdType theTargetId, RequestDetails theRequestDetails) {
 		return myHapiTransactionService
 				.withRequest(theRequestDetails)
@@ -225,11 +225,11 @@ public class PartitionAwareReplaceReferencesSvc {
 				.map(r -> r.getIdElement().toUnqualifiedVersionless().getValue())
 				.toList());
 
-		List<ReferencingResourceId> additionalIds = new ArrayList<>();
+		List<ResourceIdWithPartition> additionalIds = new ArrayList<>();
 		for (IBaseResource resource : theCopyList) {
 			IIdType oldId = resource.getIdElement();
-			List<ReferencingResourceId> referrers = findReferencingResourceIds(oldId, theRequestDetails);
-			for (ReferencingResourceId referrer : referrers) {
+			List<ResourceIdWithPartition> referrers = findReferencingResourceIds(oldId, theRequestDetails);
+			for (ResourceIdWithPartition referrer : referrers) {
 				if (alreadyDiscoveredIds.add(
 						referrer.toIdDt().toUnqualifiedVersionless().getValue())) {
 					additionalIds.add(referrer);
@@ -261,9 +261,9 @@ public class PartitionAwareReplaceReferencesSvc {
 		return result;
 	}
 
-	private List<IBaseResource> loadResources(List<ReferencingResourceId> theIds, RequestDetails theRequestDetails) {
+	private List<IBaseResource> loadResources(List<ResourceIdWithPartition> theIds, RequestDetails theRequestDetails) {
 		List<IBaseResource> result = new ArrayList<>();
-		for (ReferencingResourceId referencingId : theIds) {
+		for (ResourceIdWithPartition referencingId : theIds) {
 			IdDt id = referencingId.toIdDt();
 			try {
 				@SuppressWarnings("unchecked")
