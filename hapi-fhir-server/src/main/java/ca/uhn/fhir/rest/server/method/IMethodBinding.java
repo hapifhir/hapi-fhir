@@ -10,7 +10,6 @@ import java.io.IOException;
 public interface IMethodBinding {
 	MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest);
 
-
 	/**
 	 *  Which FHIR operation does this binding support?
 	 *  Takes the requestDetails so the same binding inspect the caller and support multiple actions.
@@ -28,7 +27,6 @@ public interface IMethodBinding {
 	 * @return the operation of this handler
 	 */
 	RestOperationTypeEnum getRestOperationType();
-
 
 	Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest)
 			throws BaseServerResponseException, IOException;
@@ -53,8 +51,6 @@ public interface IMethodBinding {
 	 */
 	String getResourceName();
 
-
-
 	// fixme move this stuff to a conformance-builder sibling
 
 	boolean isSupportsConditional();
@@ -68,5 +64,4 @@ public interface IMethodBinding {
 	default void close() {
 		// default empty close()
 	}
-
 }
