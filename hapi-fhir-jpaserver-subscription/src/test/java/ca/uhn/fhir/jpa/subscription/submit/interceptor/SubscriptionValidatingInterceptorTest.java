@@ -32,6 +32,7 @@ import org.hl7.fhir.r4b.model.CanonicalType;
 import org.hl7.fhir.r4b.model.Enumerations;
 import org.hl7.fhir.r4b.model.Subscription;
 import org.hl7.fhir.r4b.model.SubscriptionTopic;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,6 +40,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,10 +89,20 @@ public class SubscriptionValidatingInterceptorTest {
 	@MockitoSpyBean
 	private SubscriptionChannelTypeValidatorFactory mySubscriptionChannelTypeValidatorFactory;
 
+	private AutoCloseable myMocks;
+
 	@BeforeEach
 	public void before() {
+		// Spring Boot 4 removed the MockitoTestExecutionListener that used to initialize plain @Mock fields,
+		// so we initialize them explicitly here and release them in tearDown.
+		myMocks = MockitoAnnotations.openMocks(this);
 		setFhirContext(FhirVersionEnum.R4B);
 		when(myDaoRegistry.isResourceTypeSupported(any())).thenReturn(true);
+	}
+
+	@AfterEach
+	public void after() throws Exception {
+		myMocks.close();
 	}
 
 	@ParameterizedTest
