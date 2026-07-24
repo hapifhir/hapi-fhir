@@ -32,12 +32,15 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.ValidateUtil;
 import jakarta.annotation.Nonnull;
@@ -92,6 +95,16 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 			throw new InvalidRequestException(Msg.code(2065) + "No parameters supplied");
 		}
 		Validate.notBlank(theStartRequest.getJobDefinitionId(), "No job definition ID supplied in start request");
+
+		// Interceptor call: STORAGE_PRECREATE_BATCH_JOB_INSTANCE
+		String existingJobDefinition = theStartRequest.getJobDefinitionId();
+		CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorService, theRequestDetails)
+			.ifHasCallHooks(Pointcut.STORAGE_PRECREATE_BATCH_JOB_INSTANCE, ()->new HookParams()
+				.add(RequestDetails.class, theRequestDetails)
+				.add(JobInstanceStartRequest.class, theStartRequest));
+		if (!existingJobDefinition.equals(theStartRequest.getJobDefinitionId())) {
+			ourLog.info("Requested Batch2 Job Definition ID has been overridden from {} to {}", existingJobDefinition, theStartRequest.getJobDefinitionId());
+		}
 
 		// if cache - use that first
 		if (theStartRequest.isUseCache()) {
