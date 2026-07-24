@@ -28,7 +28,7 @@ import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.merge.AbstractMergeOperationInputParameterNames;
 import ca.uhn.fhir.merge.GenericMergeOperationInputParameterNames;
 import ca.uhn.fhir.merge.IResourceLinkService;
-import ca.uhn.fhir.merge.MergeProvenanceGroupUtil;
+import ca.uhn.fhir.merge.MergeProvenanceGroupValue;
 import ca.uhn.fhir.merge.ResourceLinkServiceFactory;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -552,8 +552,9 @@ public class MergeOperationTestHelper {
 				theFhirContext, mainProvenance, theTargetIdWithExpectedVersion, theExpectedProvenanceAgents);
 		assertMainMergeProvenanceContainedResources(mainProvenance, theInputParameters, theTargetIdWithExpectedVersion);
 
-		String mainGroupId =
-				MergeProvenanceGroupUtil.getProvenanceGroupValue(mainProvenance).orElse(null);
+		String mainGroupId = MergeProvenanceGroupValue.fromProvenance(mainProvenance)
+				.map(MergeProvenanceGroupValue::getGroupId)
+				.orElse(null);
 		assertThat(mainGroupId).isNotBlank();
 
 		Set<String> allTargetsAcrossProvenances = new HashSet<>();
@@ -568,15 +569,14 @@ public class MergeOperationTestHelper {
 			assertCommonMergeProvenanceFields(
 					theFhirContext, memberProvenance, theTargetIdWithExpectedVersion, theExpectedProvenanceAgents);
 
-			String memberProvenanceGroupValue = MergeProvenanceGroupUtil.getProvenanceGroupValue(memberProvenance)
-					.orElseThrow();
-			assertThat(MergeProvenanceGroupUtil.extractGroupId(memberProvenanceGroupValue))
-					.isEqualTo(mainGroupId);
-			assertThat(MergeProvenanceGroupUtil.extractPartition(memberProvenanceGroupValue))
-					.as("Partition-specific Provenance group id must name the partition it records changes for")
+			MergeProvenanceGroupValue memberGroupValue =
+					MergeProvenanceGroupValue.fromProvenance(memberProvenance).orElseThrow();
+			assertThat(memberGroupValue.getGroupId()).isEqualTo(mainGroupId);
+			assertThat(memberGroupValue.getPartition())
+					.as("member Provenance group value must name the partition it records changes for")
 					.isPresent();
-			assertThat(MergeProvenanceGroupUtil.extractOperation(memberProvenanceGroupValue))
-					.as("Partition-specific Provenance group id must name the operation it records changes for")
+			assertThat(memberGroupValue.getChangeType())
+					.as("member Provenance group value must name the change type it records changes for")
 					.isPresent();
 
 			for (int i = 2; i < memberProvenance.getTarget().size(); i++) {

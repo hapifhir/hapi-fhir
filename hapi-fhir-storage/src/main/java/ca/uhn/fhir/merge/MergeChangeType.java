@@ -19,10 +19,14 @@
  */
 package ca.uhn.fhir.merge;
 
-import java.util.Optional;
+import ca.uhn.fhir.i18n.Msg;
 
+/**
+ * The type of change a merge made to a set of resources, recorded on each member merge Provenance and used to
+ * order undo restores (undeletes, then updates, then deletes).
+ */
 // Created by Claude Opus 4.8
-public enum MergeProvenanceOperation {
+public enum MergeChangeType {
 	CREATE("create", 3),
 	UPDATE("update", 2),
 	DELETE("delete", 1);
@@ -30,7 +34,7 @@ public enum MergeProvenanceOperation {
 	private final String myCode;
 	private final int myUndoOrder;
 
-	MergeProvenanceOperation(String theCode, int theUndoOrder) {
+	MergeChangeType(String theCode, int theUndoOrder) {
 		myCode = theCode;
 		myUndoOrder = theUndoOrder;
 	}
@@ -43,12 +47,12 @@ public enum MergeProvenanceOperation {
 		return myUndoOrder;
 	}
 
-	public static Optional<MergeProvenanceOperation> fromCode(String theCode) {
-		for (MergeProvenanceOperation operation : values()) {
-			if (operation.myCode.equals(theCode)) {
-				return Optional.of(operation);
+	public static MergeChangeType fromCode(String theCode) {
+		for (MergeChangeType changeType : values()) {
+			if (changeType.myCode.equals(theCode)) {
+				return changeType;
 			}
 		}
-		return Optional.empty();
+		throw new IllegalArgumentException(Msg.code(2999) + "Invalid change type code '" + theCode + "'");
 	}
 }

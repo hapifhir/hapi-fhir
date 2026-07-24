@@ -60,7 +60,7 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 			IIdType theTargetId,
 			IIdType theSourceId,
 			List<IIdType> theChangedResourceIds,
-			@Nullable String theProvenanceGroupId,
+			@Nullable String theProvenanceGroupExtensionValue,
 			Date theStartTime,
 			RequestDetails theRequestDetails,
 			List<IProvenanceAgent> theProvenanceAgents,
@@ -70,7 +70,7 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 				theTargetId,
 				theSourceId,
 				theChangedResourceIds,
-				theProvenanceGroupId,
+				theProvenanceGroupExtensionValue,
 				theStartTime,
 				theRequestDetails,
 				theProvenanceAgents,
@@ -112,7 +112,8 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 	private Optional<Provenance> findMainProvenance(
 			List<Provenance> theProvenances, IIdType theTargetId, IIdType theSourceId) {
 		return theProvenances.stream()
-				.filter(p -> isMainProvenance(p) && isTargetAndSourceInCorrectOrder(p, theTargetId, theSourceId))
+				.filter(p -> MergeProvenanceGroupValue.isMainProvenance(p)
+						&& isTargetAndSourceInCorrectOrder(p, theTargetId, theSourceId))
 				.findFirst();
 	}
 
@@ -127,30 +128,29 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 				AbstractMergeOperationInputParameterNames.getParameterNamesForResourceType(resourceType);
 
 		return theProvenances.stream()
-				.filter(p -> isMainProvenance(p)
+				.filter(p -> MergeProvenanceGroupValue.isMainProvenance(p)
 						&& !p.getTarget().isEmpty()
 						&& isEqualVersionlessId(theTargetId, p.getTarget().get(0))
 						&& containsSourceIdentifiersInInputParameters(p, parameterNamesList, theSourceIdentifiers))
 				.findFirst();
 	}
 
-	private static boolean isMainProvenance(Provenance theProvenance) {
-		return MergeProvenanceGroupUtil.getProvenanceGroupValue(theProvenance)
-				.flatMap(MergeProvenanceGroupUtil::extractPartition)
-				.isEmpty();
-	}
-
+	/**
+	 * From the given list, finds the member Provenances that belong to the same merge operation as the main
+	 * Provenance (those sharing its group id) and bundles them with it into the returned {@link MergeProvenanceGroup},
+	 * or an empty member list if the main Provenance carries no group id.
+	 */
 	private MergeProvenanceGroup collectGroupedProvenances(
 			Provenance theMainProvenance, List<Provenance> theAllProvenances) {
-		Optional<String> groupId = MergeProvenanceGroupUtil.getProvenanceGroupValue(theMainProvenance)
-				.map(MergeProvenanceGroupUtil::extractGroupId);
-		if (groupId.isEmpty()) {
+		Optional<MergeProvenanceGroupValue> mainGroupValue =
+				MergeProvenanceGroupValue.fromProvenance(theMainProvenance);
+		if (mainGroupValue.isEmpty()) {
 			return new MergeProvenanceGroup(theMainProvenance, List.of());
 		}
 
 		List<Provenance> memberProvenances = theAllProvenances.stream()
 				.filter(p -> p != theMainProvenance)
-				.filter(p -> MergeProvenanceGroupUtil.isInGroup(p, groupId.get()))
+				.filter(mainGroupValue.get()::isInSameGroup)
 				.toList();
 		return new MergeProvenanceGroup(theMainProvenance, memberProvenances);
 	}

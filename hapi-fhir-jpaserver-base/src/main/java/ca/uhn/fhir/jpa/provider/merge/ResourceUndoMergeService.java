@@ -25,9 +25,9 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.merge.AbstractMergeOperationInputParameterNames;
+import ca.uhn.fhir.merge.MergeChangeType;
 import ca.uhn.fhir.merge.MergeProvenanceGroup;
-import ca.uhn.fhir.merge.MergeProvenanceGroupUtil;
-import ca.uhn.fhir.merge.MergeProvenanceOperation;
+import ca.uhn.fhir.merge.MergeProvenanceGroupValue;
 import ca.uhn.fhir.merge.MergeProvenanceSvc;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.replacereferences.PreviousResourceVersionRestorer;
@@ -221,7 +221,7 @@ public class ResourceUndoMergeService {
 	private record PartitionRestore(
 			Provenance provenance,
 			RequestPartitionId partition,
-			MergeProvenanceOperation operation,
+			MergeChangeType changeType,
 			List<Reference> dataRefs) {}
 
 	private void undoGroupedMerge(
@@ -250,7 +250,7 @@ public class ResourceUndoMergeService {
 							ourLog.info(
 									"Restoring {} resource(s) the merge did {} to, from member Provenance {} for partition {}",
 									restore.dataRefs().size(),
-									restore.operation().getCode(),
+									restore.changeType().getCode(),
 									restore.provenance()
 											.getIdElement()
 											.toUnqualifiedVersionless()
@@ -297,11 +297,11 @@ public class ResourceUndoMergeService {
 			restores.add(new PartitionRestore(
 					memberProvenance,
 					extractRequiredPartition(memberProvenance),
-					extractRequiredOperation(memberProvenance),
+					extractRequiredChangeType(memberProvenance),
 					dataRefs));
 		}
 
-		restores.sort(Comparator.comparingInt(restore -> restore.operation().getUndoOrder()));
+		restores.sort(Comparator.comparingInt(restore -> restore.changeType().getUndoOrder()));
 		return restores;
 	}
 
@@ -322,20 +322,20 @@ public class ResourceUndoMergeService {
 	}
 
 	private RequestPartitionId extractRequiredPartition(Provenance theChangeProvenance) {
-		return MergeProvenanceGroupUtil.getProvenanceGroupValue(theChangeProvenance)
-				.flatMap(MergeProvenanceGroupUtil::extractPartition)
+		return MergeProvenanceGroupValue.fromProvenance(theChangeProvenance)
+				.flatMap(MergeProvenanceGroupValue::getPartition)
 				.orElseThrow(() -> new InternalErrorException(Msg.code(2996)
 						+ String.format(
 								"The member Provenance '%s' does not name the partition it records changes for in its group extension.",
 								theChangeProvenance.getIdElement().asStringValue())));
 	}
 
-	private MergeProvenanceOperation extractRequiredOperation(Provenance theChangeProvenance) {
-		return MergeProvenanceGroupUtil.getProvenanceGroupValue(theChangeProvenance)
-				.flatMap(MergeProvenanceGroupUtil::extractOperation)
+	private MergeChangeType extractRequiredChangeType(Provenance theChangeProvenance) {
+		return MergeProvenanceGroupValue.fromProvenance(theChangeProvenance)
+				.flatMap(MergeProvenanceGroupValue::getChangeType)
 				.orElseThrow(() -> new InternalErrorException(Msg.code(3000)
 						+ String.format(
-								"The member Provenance '%s' does not name the operation it records changes for in its group extension.",
+								"The member Provenance '%s' does not name the change type it records changes for in its group extension.",
 								theChangeProvenance.getIdElement().asStringValue())));
 	}
 

@@ -179,7 +179,7 @@ public class ReplaceReferencesProvenanceSvc {
 			IIdType theTargetId,
 			IIdType theSourceId,
 			List<IIdType> theChangedResourceIds,
-			@Nullable String theProvenanceGroupId,
+			@Nullable String theProvenanceGroupExtensionValue,
 			Date theStartTime,
 			RequestDetails theRequestDetails,
 			List<IProvenanceAgent> theProvenanceAgents,
@@ -188,7 +188,7 @@ public class ReplaceReferencesProvenanceSvc {
 				theTargetId,
 				theSourceId,
 				theChangedResourceIds,
-				theProvenanceGroupId,
+				theProvenanceGroupExtensionValue,
 				theStartTime,
 				theRequestDetails,
 				theProvenanceAgents,
@@ -203,7 +203,7 @@ public class ReplaceReferencesProvenanceSvc {
 			IIdType theTargetId,
 			IIdType theSourceId,
 			List<IIdType> theChangedResourceIds,
-			@Nullable String theProvenanceGroupId,
+			@Nullable String theProvenanceGroupExtensionValue,
 			Date theStartTime,
 			RequestDetails theRequestDetails,
 			List<IProvenanceAgent> theProvenanceAgents,
@@ -213,7 +213,7 @@ public class ReplaceReferencesProvenanceSvc {
 				theTargetId,
 				theSourceId,
 				theChangedResourceIds,
-				theProvenanceGroupId,
+				theProvenanceGroupExtensionValue,
 				theStartTime,
 				theProvenanceAgents,
 				theContainedResources,
@@ -229,7 +229,7 @@ public class ReplaceReferencesProvenanceSvc {
 			IIdType theTargetId,
 			IIdType theSourceId,
 			List<IIdType> theChangedResourceIds,
-			@Nullable String theProvenanceGroupId,
+			@Nullable String theProvenanceGroupExtensionValue,
 			Date theStartTime,
 			List<IProvenanceAgent> theProvenanceAgents,
 			List<IBaseResource> theContainedResources,
@@ -246,9 +246,9 @@ public class ReplaceReferencesProvenanceSvc {
 				theProvenanceAgents,
 				theContainedResources,
 				resourceType);
-		if (theProvenanceGroupId != null) {
+		if (theProvenanceGroupExtensionValue != null) {
 			ExtensionUtil.setExtensionAsString(
-					myFhirContext, provenance, HapiExtensions.EXT_PROVENANCE_GROUP, theProvenanceGroupId);
+					myFhirContext, provenance, HapiExtensions.EXT_PROVENANCE_GROUP, theProvenanceGroupExtensionValue);
 		}
 		return provenance;
 	}
