@@ -28,7 +28,7 @@ import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.merge.AbstractMergeOperationInputParameterNames;
 import ca.uhn.fhir.merge.GenericMergeOperationInputParameterNames;
 import ca.uhn.fhir.merge.IResourceLinkService;
-import ca.uhn.fhir.merge.MergeProvenanceGroupIdUtil;
+import ca.uhn.fhir.merge.MergeProvenanceGroupUtil;
 import ca.uhn.fhir.merge.ResourceLinkServiceFactory;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -37,7 +37,6 @@ import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.MetaUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -530,7 +529,7 @@ public class MergeOperationTestHelper {
 			@Nullable List<IProvenanceAgent> theExpectedProvenanceAgents) {
 
 		Provenance mainProvenance = null;
-		List<Provenance> subProvenances = new ArrayList<>();
+		List<Provenance> perPartitionProvenances = new ArrayList<>();
 
 		for (Provenance provenance : theProvenances) {
 			if (provenance.hasContained()) {
@@ -539,7 +538,7 @@ public class MergeOperationTestHelper {
 						.isNull();
 				mainProvenance = provenance;
 			} else {
-				subProvenances.add(provenance);
+				perPartitionProvenances.add(provenance);
 			}
 		}
 		assertThat(mainProvenance)
@@ -553,35 +552,36 @@ public class MergeOperationTestHelper {
 				theFhirContext, mainProvenance, theTargetIdWithExpectedVersion, theExpectedProvenanceAgents);
 		assertMainMergeProvenanceContainedResources(mainProvenance, theInputParameters, theTargetIdWithExpectedVersion);
 
-		String mainGroupId = mainProvenance
-				.getExtensionByUrl(HapiExtensions.EXT_PROVENANCE_GROUP)
-				.getValueAsPrimitive()
-				.getValueAsString();
+		String mainGroupId =
+				MergeProvenanceGroupUtil.getProvenanceGroupId(mainProvenance).orElse(null);
 		assertThat(mainGroupId).isNotBlank();
 
 		Set<String> allTargetsAcrossProvenances = new HashSet<>();
 		allTargetsAcrossProvenances.add(theTargetIdWithExpectedVersion.toString());
 		allTargetsAcrossProvenances.add(theSourceIdWithExpectedVersion.toString());
 
-		for (Provenance sub : subProvenances) {
-			assertThat(sub.getTarget().size()).isGreaterThan(2);
+		for (Provenance perPartitionProvenance : perPartitionProvenances) {
+			assertThat(perPartitionProvenance.getTarget().size()).isGreaterThan(2);
 			assertFirstTwoTargetsAreTargetAndSource(
-					sub, theTargetIdWithExpectedVersion, theSourceIdWithExpectedVersion);
-			assertThat(sub.hasContained()).isFalse();
+					perPartitionProvenance, theTargetIdWithExpectedVersion, theSourceIdWithExpectedVersion);
+			assertThat(perPartitionProvenance.hasContained()).isFalse();
 			assertCommonMergeProvenanceFields(
-					theFhirContext, sub, theTargetIdWithExpectedVersion, theExpectedProvenanceAgents);
+					theFhirContext,
+					perPartitionProvenance,
+					theTargetIdWithExpectedVersion,
+					theExpectedProvenanceAgents);
 
-			String subGroupId = sub.getExtensionByUrl(HapiExtensions.EXT_PROVENANCE_GROUP)
-					.getValueAsPrimitive()
-					.getValueAsString();
-			assertThat(MergeProvenanceGroupIdUtil.extractGroupIdPrefix(subGroupId))
+			String perPartitionGroupId = MergeProvenanceGroupUtil.getProvenanceGroupId(perPartitionProvenance)
+					.orElseThrow();
+			assertThat(MergeProvenanceGroupUtil.extractGroupIdPrefix(perPartitionGroupId))
 					.isEqualTo(mainGroupId);
-			assertThat(MergeProvenanceGroupIdUtil.extractPartition(subGroupId))
-					.as("Sub-Provenance group id must name the partition it records changes for")
-					.isNotNull();
+			assertThat(MergeProvenanceGroupUtil.extractPartition(perPartitionGroupId))
+					.as("Partition-specific Provenance group id must name the partition it records changes for")
+					.isPresent();
 
-			for (int i = 2; i < sub.getTarget().size(); i++) {
-				allTargetsAcrossProvenances.add(new IdDt(sub.getTarget().get(i).getReference()).toString());
+			for (int i = 2; i < perPartitionProvenance.getTarget().size(); i++) {
+				allTargetsAcrossProvenances.add(
+						new IdDt(perPartitionProvenance.getTarget().get(i).getReference()).toString());
 			}
 		}
 

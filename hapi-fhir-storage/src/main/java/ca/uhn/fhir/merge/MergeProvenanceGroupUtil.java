@@ -21,19 +21,30 @@ package ca.uhn.fhir.merge;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import jakarta.annotation.Nullable;
+import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Provenance;
 
+import java.util.Optional;
 import java.util.UUID;
 
 // Created by Claude Fable 5
-public final class MergeProvenanceGroupIdUtil {
+public final class MergeProvenanceGroupUtil {
 
 	private static final String GROUP_ID_PREFIX_START = "merge-";
 	private static final String PARTITION_DELIMITER = ";partition=";
 	private static final String DEFAULT_PARTITION_VALUE = "default";
 
-	private MergeProvenanceGroupIdUtil() {}
+	private MergeProvenanceGroupUtil() {}
+
+	public static Optional<String> getProvenanceGroupId(Provenance theProvenance) {
+		Extension ext = theProvenance.getExtensionByUrl(HapiExtensions.EXT_PROVENANCE_GROUP);
+		if (ext != null && ext.hasValue()) {
+			return Optional.ofNullable(ext.getValueAsPrimitive().getValueAsString());
+		}
+		return Optional.empty();
+	}
 
 	public static String generateGroupIdPrefix(IIdType theSourceId, IIdType theTargetId) {
 		return GROUP_ID_PREFIX_START
@@ -49,11 +60,14 @@ public final class MergeProvenanceGroupIdUtil {
 		return theGroupIdPrefix + PARTITION_DELIMITER + partitionValue;
 	}
 
-	public static boolean isInGroup(@Nullable String theGroupId, String theGroupIdPrefix) {
-		if (theGroupId == null) {
-			return false;
-		}
+	public static boolean isInGroup(String theGroupId, String theGroupIdPrefix) {
 		return theGroupId.equals(theGroupIdPrefix) || theGroupId.startsWith(theGroupIdPrefix + PARTITION_DELIMITER);
+	}
+
+	public static boolean isInGroup(Provenance theProvenance, String theGroupIdPrefix) {
+		return getProvenanceGroupId(theProvenance)
+				.filter(groupId -> isInGroup(groupId, theGroupIdPrefix))
+				.isPresent();
 	}
 
 	public static String extractGroupIdPrefix(String theGroupId) {
@@ -61,18 +75,17 @@ public final class MergeProvenanceGroupIdUtil {
 		return delimiterIndex >= 0 ? theGroupId.substring(0, delimiterIndex) : theGroupId;
 	}
 
-	@Nullable
-	public static RequestPartitionId extractPartition(String theGroupId) {
+	public static Optional<RequestPartitionId> extractPartition(String theGroupId) {
 		int delimiterIndex = theGroupId.indexOf(PARTITION_DELIMITER);
 		if (delimiterIndex < 0) {
-			return null;
+			return Optional.empty();
 		}
 		String partitionValue = theGroupId.substring(delimiterIndex + PARTITION_DELIMITER.length());
 		if (DEFAULT_PARTITION_VALUE.equals(partitionValue)) {
-			return RequestPartitionId.fromPartitionId((Integer) null);
+			return Optional.of(RequestPartitionId.fromPartitionId((Integer) null));
 		}
 		try {
-			return RequestPartitionId.fromPartitionId(Integer.parseInt(partitionValue));
+			return Optional.of(RequestPartitionId.fromPartitionId(Integer.parseInt(partitionValue)));
 		} catch (NumberFormatException e) {
 			throw new IllegalArgumentException(
 					Msg.code(2995) + "Invalid partition id '" + partitionValue + "' in provenance group id: "

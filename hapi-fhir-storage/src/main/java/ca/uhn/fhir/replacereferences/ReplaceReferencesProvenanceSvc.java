@@ -358,7 +358,7 @@ public class ReplaceReferencesProvenanceSvc {
 		return result;
 	}
 
-	private boolean isEqualVersionlessId(IIdType theId, Reference theReference) {
+	protected boolean isEqualVersionlessId(IIdType theId, Reference theReference) {
 		if (!theReference.hasReference()) {
 			return false;
 		}

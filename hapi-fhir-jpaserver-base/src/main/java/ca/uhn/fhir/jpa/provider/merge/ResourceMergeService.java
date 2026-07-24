@@ -38,7 +38,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.PartitionAwareReplaceReferencesResult;
 import ca.uhn.fhir.jpa.provider.PartitionAwareReplaceReferencesSvc;
-import ca.uhn.fhir.merge.MergeProvenanceGroupIdUtil;
+import ca.uhn.fhir.merge.MergeProvenanceGroupUtil;
 import ca.uhn.fhir.merge.MergeResourceHelper;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
@@ -436,7 +436,7 @@ public class ResourceMergeService {
 		}
 
 		if (theMergeOperationParameters.getCreateProvenance()) {
-			createCrossPartitionProvenances(
+			createPerPartitionProvenances(
 					theMergeOperationParameters,
 					copyResult,
 					sourcePostMergeId,
@@ -461,7 +461,7 @@ public class ResourceMergeService {
 		}
 	}
 
-	private void createCrossPartitionProvenances(
+	private void createPerPartitionProvenances(
 			MergeOperationInputParameters theMergeOperationParameters,
 			PartitionAwareReplaceReferencesResult theCopyResult,
 			IIdType theSourcePostMergeId,
@@ -474,7 +474,7 @@ public class ResourceMergeService {
 			List<IIdType> thePossiblyCommittedResourceIds) {
 
 		String groupIdPrefix =
-				MergeProvenanceGroupIdUtil.generateGroupIdPrefix(theSourcePostMergeId, theTargetPostMergeId);
+				MergeProvenanceGroupUtil.generateGroupIdPrefix(theSourcePostMergeId, theTargetPostMergeId);
 
 		Map<RequestPartitionId, List<IIdType>> changedResourcesByPartition = new LinkedHashMap<>();
 		theCopyResult.getChangedResourceIdsByPartition().forEach((partition, ids) -> changedResourcesByPartition
@@ -496,7 +496,7 @@ public class ResourceMergeService {
 		}
 
 		for (Map.Entry<RequestPartitionId, List<IIdType>> entry : changedResourcesByPartition.entrySet()) {
-			String groupId = MergeProvenanceGroupIdUtil.buildGroupId(groupIdPrefix, entry.getKey());
+			String groupId = MergeProvenanceGroupUtil.buildGroupId(groupIdPrefix, entry.getKey());
 			IIdType subProvenanceId = myMergeResourceHelper.createProvenance(
 					theSourcePostMergeId,
 					theTargetPostMergeId,

@@ -27,7 +27,8 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.PartitionedTransactionPartialFailureException;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.merge.AbstractMergeOperationInputParameterNames;
-import ca.uhn.fhir.merge.MergeProvenanceGroupIdUtil;
+import ca.uhn.fhir.merge.MergeProvenanceGroup;
+import ca.uhn.fhir.merge.MergeProvenanceGroupUtil;
 import ca.uhn.fhir.merge.MergeProvenanceSvc;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.replacereferences.PreviousResourceVersionRestorer;
@@ -53,6 +54,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static ca.uhn.fhir.merge.MergeResourceHelper.addErrorToOperationOutcome;
@@ -144,44 +146,48 @@ public class ResourceUndoMergeService {
 				inputParameters, theRequestDetails, opOutcome, theInputParamNames);
 		IIdType targetId = targetResource.getIdElement();
 
-		List<Provenance> provenances = findMergeProvenances(inputParameters, targetId, theRequestDetails);
-		Provenance mainProvenance = provenances.get(0);
+		MergeProvenanceGroup provenanceGroup =
+				findMergeProvenancesOrThrow(inputParameters, targetId, theRequestDetails);
+		Provenance mainProvenance = provenanceGroup.mainProvenance();
 
 		ourLog.info(
 				"Found Provenance resource with id: {} to be used for $undo-merge operation",
 				mainProvenance.getIdElement().asStringValue());
 
-		if (provenances.size() == 1) {
+		if (provenanceGroup.perPartitionProvenances().isEmpty()) {
 			undoSingleProvenance(mainProvenance, inputParameters, theRequestDetails, undoMergeOutcome);
 		} else {
-			List<Provenance> subProvenances = provenances.subList(1, provenances.size());
-			undoGroupedMerge(mainProvenance, subProvenances, inputParameters, theRequestDetails, undoMergeOutcome);
+			undoGroupedMerge(
+					mainProvenance,
+					provenanceGroup.perPartitionProvenances(),
+					inputParameters,
+					theRequestDetails,
+					undoMergeOutcome);
 		}
 
 		return undoMergeOutcome;
 	}
 
-	private List<Provenance> findMergeProvenances(
+	private MergeProvenanceGroup findMergeProvenancesOrThrow(
 			UndoMergeOperationInputParameters inputParameters, IIdType targetId, RequestDetails theRequestDetails) {
 
-		List<Provenance> provenances;
+		Optional<MergeProvenanceGroup> provenanceGroup;
 		if (inputParameters.getSourceResource() != null) {
 			// the client provided a source id, use it to find the provenance together with the target id
 			IIdType sourceId = inputParameters.getSourceResource().getReferenceElement();
-			provenances = myMergeProvenanceSvc.findMergeProvenances(targetId, sourceId, theRequestDetails);
+			provenanceGroup = myMergeProvenanceSvc.findMergeProvenances(targetId, sourceId, theRequestDetails);
 		} else {
 			// the client provided source identifiers, find a provenance using those identifiers and the target id
-			provenances = myMergeProvenanceSvc.findMergeProvenancesBySourceIdentifiers(
+			provenanceGroup = myMergeProvenanceSvc.findMergeProvenancesBySourceIdentifiers(
 					targetId, inputParameters.getSourceIdentifiers(), theRequestDetails);
 		}
 
-		if (provenances.isEmpty()) {
+		return provenanceGroup.orElseThrow(() -> {
 			String msg =
 					"Unable to find a Provenance created by a $merge operation for the provided source and target resources."
 							+ " Ensure that the provided resource references or identifiers were previously used as parameters in a successful $merge operation";
-			throw new ResourceNotFoundException(Msg.code(2747) + msg);
-		}
-		return provenances;
+			return new ResourceNotFoundException(Msg.code(2747) + msg);
+		});
 	}
 
 	private void undoSingleProvenance(
@@ -219,33 +225,32 @@ public class ResourceUndoMergeService {
 		}
 	}
 
-	private record SubProvenanceRestore(
-			Provenance provenance, RequestPartitionId partition, List<Reference> dataRefs) {}
+	private record PartitionRestore(Provenance provenance, RequestPartitionId partition, List<Reference> dataRefs) {}
 
 	private void undoGroupedMerge(
 			Provenance theMainProvenance,
-			List<Provenance> theSubProvenances,
+			List<Provenance> thePerPartitionProvenances,
 			UndoMergeOperationInputParameters inputParameters,
 			RequestDetails theRequestDetails,
 			OperationOutcomeWithStatusCode theUndoMergeOutcome) {
 
-		validateGroupedMergeResourceLimit(theMainProvenance, theSubProvenances, inputParameters);
+		validateGroupedMergeResourceLimit(theMainProvenance, thePerPartitionProvenances, inputParameters);
 
 		ourLog.info(
-				"Undoing grouped merge from main Provenance: {} with {} sub-Provenance(s)",
+				"Undoing grouped merge from main Provenance: {} with {} partition-specific Provenance(s)",
 				theMainProvenance.getIdElement().toUnqualifiedVersionless().getValue(),
-				theSubProvenances.size());
+				thePerPartitionProvenances.size());
 
-		List<SubProvenanceRestore> orderedRestores = orderSubProvenanceRestores(theMainProvenance, theSubProvenances);
+		List<PartitionRestore> orderedRestores = orderPartitionRestores(theMainProvenance, thePerPartitionProvenances);
 
 		try {
 			int restoredCount = myHapiTransactionService
 					.withRequest(theRequestDetails)
 					.execute(() -> {
 						int totalRestored = 0;
-						for (SubProvenanceRestore restore : orderedRestores) {
+						for (PartitionRestore restore : orderedRestores) {
 							ourLog.info(
-									"Restoring {} resource(s) from sub-Provenance {} pinned to partition {}",
+									"Restoring {} resource(s) from partition-specific Provenance {} pinned to partition {}",
 									restore.dataRefs().size(),
 									restore.provenance()
 											.getIdElement()
@@ -266,49 +271,75 @@ public class ResourceUndoMergeService {
 		}
 	}
 
-	private List<SubProvenanceRestore> orderSubProvenanceRestores(
-			Provenance theMainProvenance, List<Provenance> theSubProvenances) {
+	/**
+	 * Orders the restores to preserve referential integrity: the source partition first, since it undeletes the
+	 * deleted originals that referrers elsewhere will be restored to point at; the target partition last, since it
+	 * deletes the merge-created copies those referrers must first be repointed away from.
+	 */
+	private List<PartitionRestore> orderPartitionRestores(
+			Provenance theMainProvenance, List<Provenance> thePerPartitionProvenances) {
 
-		String targetId = versionlessRefValue(theMainProvenance.getTarget().get(0));
-		String sourceId = versionlessRefValue(theMainProvenance.getTarget().get(1));
+		String versionlessTargetId =
+				versionlessRefValue(theMainProvenance.getTarget().get(0));
+		String versionlessSourceId =
+				versionlessRefValue(theMainProvenance.getTarget().get(1));
 
-		SubProvenanceRestore sourceSub = null;
-		SubProvenanceRestore targetSub = null;
-		List<SubProvenanceRestore> middleSubs = new ArrayList<>();
-		for (Provenance sub : theSubProvenances) {
-			List<Reference> dataRefs =
-					sub.getTarget().subList(2, sub.getTarget().size());
-			SubProvenanceRestore restore = new SubProvenanceRestore(sub, extractRequiredPartition(sub), dataRefs);
-			if (containsVersionlessRef(dataRefs, sourceId)) {
-				sourceSub = restore;
-			} else if (containsVersionlessRef(dataRefs, targetId)) {
-				targetSub = restore;
+		PartitionRestore sourceRestore = null;
+		PartitionRestore targetRestore = null;
+		List<PartitionRestore> middleRestores = new ArrayList<>();
+		for (Provenance perPartitionProvenance : thePerPartitionProvenances) {
+			// first two targets are the merge target and source, used to locate this Provenance
+			// the rest are the refs to restore; target/source repeat there, identifying their partitions below
+			validateFirstTwoTargetsAreTargetAndSource(perPartitionProvenance, versionlessTargetId, versionlessSourceId);
+			List<Reference> dataRefs = perPartitionProvenance
+					.getTarget()
+					.subList(2, perPartitionProvenance.getTarget().size());
+
+			PartitionRestore restore = new PartitionRestore(
+					perPartitionProvenance, extractRequiredPartition(perPartitionProvenance), dataRefs);
+			if (containsVersionlessRef(dataRefs, versionlessSourceId)) {
+				sourceRestore = restore;
+			} else if (containsVersionlessRef(dataRefs, versionlessTargetId)) {
+				targetRestore = restore;
 			} else {
-				middleSubs.add(restore);
+				middleRestores.add(restore);
 			}
 		}
 
-		List<SubProvenanceRestore> ordered = new ArrayList<>();
-		if (sourceSub != null) {
-			ordered.add(sourceSub);
+		List<PartitionRestore> ordered = new ArrayList<>();
+		if (sourceRestore != null) {
+			ordered.add(sourceRestore);
 		}
-		ordered.addAll(middleSubs);
-		if (targetSub != null) {
-			ordered.add(targetSub);
+		ordered.addAll(middleRestores);
+		if (targetRestore != null) {
+			ordered.add(targetRestore);
 		}
 		return ordered;
 	}
 
-	private RequestPartitionId extractRequiredPartition(Provenance theSubProvenance) {
-		String groupId = MergeProvenanceSvc.getProvenanceGroupId(theSubProvenance);
-		RequestPartitionId partition = groupId != null ? MergeProvenanceGroupIdUtil.extractPartition(groupId) : null;
-		if (partition == null) {
-			throw new InternalErrorException(Msg.code(2996)
+	private void validateFirstTwoTargetsAreTargetAndSource(
+			Provenance thePerPartitionProvenance, String theVersionlessTargetId, String theVersionlessSourceId) {
+
+		List<Reference> targets = thePerPartitionProvenance.getTarget();
+		if (targets.size() < 2
+				|| !versionlessRefValue(targets.get(0)).equals(theVersionlessTargetId)
+				|| !versionlessRefValue(targets.get(1)).equals(theVersionlessSourceId)) {
+			throw new InternalErrorException(Msg.code(2998)
 					+ String.format(
-							"The sub-Provenance '%s' does not name the partition it records changes for in its group extension.",
-							theSubProvenance.getIdElement().asStringValue()));
+							"The partition-specific Provenance '%s' does not start with the merge target '%s' and source '%s' references.",
+							thePerPartitionProvenance.getIdElement().asStringValue(),
+							theVersionlessTargetId,
+							theVersionlessSourceId));
 		}
-		return partition;
+	}
+
+	private RequestPartitionId extractRequiredPartition(Provenance thePerPartitionProvenance) {
+		return MergeProvenanceGroupUtil.getProvenanceGroupId(thePerPartitionProvenance)
+				.flatMap(MergeProvenanceGroupUtil::extractPartition)
+				.orElseThrow(() -> new InternalErrorException(Msg.code(2996)
+						+ String.format(
+								"The partition-specific Provenance '%s' does not name the partition it records changes for in its group extension.",
+								thePerPartitionProvenance.getIdElement().asStringValue())));
 	}
 
 	private static String versionlessRefValue(Reference theReference) {
@@ -357,14 +388,14 @@ public class ResourceUndoMergeService {
 	}
 
 	private void buildGroupedUndoFailureOutcome(
-			List<SubProvenanceRestore> theRestores, Exception theFailure, OperationOutcomeWithStatusCode theOutcome) {
+			List<PartitionRestore> theRestores, Exception theFailure, OperationOutcomeWithStatusCode theOutcome) {
 
 		IBaseOperationOutcome opOutcome = theOutcome.getOperationOutcome();
 		theOutcome.setHttpStatusCode(STATUS_HTTP_500_INTERNAL_ERROR);
 
 		List<String> revertedProvenances = new ArrayList<>();
 		List<String> notRevertedProvenances = new ArrayList<>();
-		for (SubProvenanceRestore restore : theRestores) {
+		for (PartitionRestore restore : theRestores) {
 			if (restore.dataRefs().isEmpty()) {
 				continue;
 			}
@@ -424,14 +455,14 @@ public class ResourceUndoMergeService {
 
 	private void validateGroupedMergeResourceLimit(
 			Provenance theMainProvenance,
-			List<Provenance> theSubProvenances,
+			List<Provenance> thePerPartitionProvenances,
 			UndoMergeOperationInputParameters inputParameters) {
 		Set<String> referencedResources = new HashSet<>();
 		for (Reference ref : theMainProvenance.getTarget()) {
 			referencedResources.add(versionlessRefValue(ref));
 		}
-		for (Provenance sub : theSubProvenances) {
-			for (Reference ref : sub.getTarget()) {
+		for (Provenance perPartitionProvenance : thePerPartitionProvenances) {
+			for (Reference ref : perPartitionProvenance.getTarget()) {
 				referencedResources.add(versionlessRefValue(ref));
 			}
 		}
