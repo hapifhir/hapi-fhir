@@ -416,10 +416,6 @@ public class Builder {
 				}
 
 				public BuilderCompleteTask withColumns(String... theColumnNames) {
-					return withColumns(Arrays.asList(theColumnNames));
-				}
-
-				public BuilderCompleteTask withColumns(List<String> theColumnNames) {
 					AddIndexTask task = new AddIndexTask(myRelease, myVersion);
 					task.setTableName(myTableName);
 					task.setIndexName(myIndexName);
