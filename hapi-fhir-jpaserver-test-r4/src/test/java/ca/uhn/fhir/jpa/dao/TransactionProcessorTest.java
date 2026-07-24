@@ -178,7 +178,11 @@ public class TransactionProcessorTest {
 	void before() {
 		// Spring Boot 4 removed the MockitoTestExecutionListener that used to initialize plain @Mock/@Captor
 		// fields, so we initialize them explicitly here.
-		MockitoAnnotations.openMocks(this);
+		try (AutoCloseable ignored = MockitoAnnotations.openMocks(this)) {
+			// no-op: openMocks initializes @Mock/@Captor fields
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 
 		myDaoRegistry.unregisterAll();
 
