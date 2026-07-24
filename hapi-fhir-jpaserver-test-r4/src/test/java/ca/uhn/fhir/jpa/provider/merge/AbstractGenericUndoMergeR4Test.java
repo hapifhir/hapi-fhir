@@ -16,6 +16,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
@@ -436,6 +437,19 @@ public abstract class AbstractGenericUndoMergeR4Test<T extends IBaseResource> ex
 	}
 
 
+
+	@Test
+	void testUndoMerge_TargetResourceNotFound_422UnprocessableEntity() {
+		Parameters params = new Parameters();
+		params.addParameter().setName("source-resource").setValue(new Reference(getResourceTypeName() + "/123"));
+		params.addParameter().setName("target-resource").setValue(new Reference(getResourceTypeName() + "/no-such-target"));
+
+		callUndoWithParamsAndAssertException(params,
+			UnprocessableEntityException.class,
+			422,
+			"Resource not found for the reference specified in 'target-resource' parameter"
+		);
+	}
 
 	@Test
 	void testUndoMerge_BothSrcParametersProvided_400BadRequest() {

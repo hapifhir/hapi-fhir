@@ -723,7 +723,7 @@ public class ResourceMergeServiceTest {
 			when(myResourceLinkDaoMock.countResourcesTargetingFhirTypeAndFhirId(any(), any())).thenReturn(0);
 			when(myPartitionAwareReplaceReferencesSvcMock
 				.copyCompartmentResourcesAndReplaceReferences(mySourcePatient, myTargetPatient, myRequestDetailsMock))
-				.thenReturn(new PartitionAwareReplaceReferencesResult(Map.of(), Map.of()));
+				.thenReturn(new PartitionAwareReplaceReferencesResult(Map.of(), Map.of(), Map.of()));
 
 			// When
 			MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
@@ -752,7 +752,7 @@ public class ResourceMergeServiceTest {
 			when(myResourceLinkDaoMock.countResourcesTargetingFhirTypeAndFhirId(any(), any())).thenReturn(0);
 			when(myPartitionAwareReplaceReferencesSvcMock
 				.copyCompartmentResourcesAndReplaceReferences(mySourcePatient, myTargetPatient, myRequestDetailsMock))
-				.thenReturn(new PartitionAwareReplaceReferencesResult(Map.of(), Map.of()));
+				.thenReturn(new PartitionAwareReplaceReferencesResult(Map.of(), Map.of(), Map.of()));
 
 			// When
 			MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
@@ -810,6 +810,7 @@ public class ResourceMergeServiceTest {
 				.copyCompartmentResourcesAndReplaceReferences(mySourcePatient, myTargetPatient, myRequestDetailsMock))
 				.thenReturn(new PartitionAwareReplaceReferencesResult(
 					Map.of(RequestPartitionId.fromPartitionId(2), List.of(changedObservationId, changedListId)),
+					Map.of(),
 					Map.of(RequestPartitionId.fromPartitionId(1), List.of(copiedOriginalId))));
 
 			IFhirResourceDao<Observation> observationDaoMock = mock(IFhirResourceDao.class);

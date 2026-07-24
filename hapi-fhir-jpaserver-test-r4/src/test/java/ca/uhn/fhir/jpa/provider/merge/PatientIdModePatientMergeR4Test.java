@@ -20,11 +20,11 @@ import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -906,6 +906,42 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 			assertThat(searchBySubject(Encounter.class, myPatientIdTgt.getValue())).isEmpty();
 		}
 
+		@Test
+		void testUndoMerge_targetNotUpdatedByMerge_leavesTargetUntouched() {
+			createPatient("Patient/src", List.of());
+
+			IIdType obsId = createObservation(myPatientIdSrc, null, null, "obs-src");
+
+			IBaseResource patientTgtBefore = readResource(Patient.class, myPatientIdTgt);
+			String tgtVersionBeforeMerge = patientTgtBefore.getIdElement().getVersionIdPart();
+
+			callMerge(new MergeTestParameters()
+				.sourceResource(new Reference(myPatientIdSrc))
+				.targetResource(new Reference(myPatientIdTgt))
+				.deleteSource(true));
+
+			assertThat(readResource(Patient.class, myPatientIdTgt).getIdElement().getVersionIdPart())
+				.as("merge must not update the target when the source has no identifiers to copy to it")
+				.isEqualTo(tgtVersionBeforeMerge);
+
+			Parameters undoParams = new Parameters();
+			undoParams.addParameter().setName("source-resource").setValue(new Reference(myPatientIdSrc));
+			undoParams.addParameter().setName("target-resource").setValue(new Reference(myPatientIdTgt));
+			myMergeHelper.callUndoMergeOperation("Patient", undoParams);
+
+			assertThat(readResource(Patient.class, myPatientIdTgt).getIdElement().getVersionIdPart())
+				.as("undo must not restore the target when the merge never updated it")
+				.isEqualTo(tgtVersionBeforeMerge);
+			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
+				patientTgtBefore, readResource(Patient.class, myPatientIdTgt));
+
+			List<Observation> restoredObs = searchBySubject(Observation.class, myPatientIdSrc.getValue());
+			assertThat(restoredObs)
+				.as("the cross-partition undo must still have run and moved the Observation back")
+				.hasSize(1);
+			assertThat(restoredObs.get(0).getIdElement().toUnqualifiedVersionless()).isEqualTo(obsId);
+		}
+
 		@ParameterizedTest
 		@CsvSource({"false", "true"})
 		void testUndoMerge_referrerHasLowerPidThanTarget_restored(boolean theDeleteSource) {
@@ -1031,7 +1067,9 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 			undoParams.addParameter().setName("source-resource").setValue(new Reference(myPatientIdSrc));
 			undoParams.addParameter().setName("target-resource").setValue(new Reference(myPatientIdTgt));
 			assertThatThrownBy(() -> myMergeHelper.callUndoMergeOperation("Patient", undoParams))
-				.isInstanceOf(BaseServerResponseException.class);
+				.as("the whole undo rolls back in a single database, so the underlying conflict must surface "
+					+ "rather than a partial-failure report")
+				.isInstanceOf(ResourceVersionConflictException.class);
 
 			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
 				sourceBeforeUndo, readResource(Patient.class, myPatientIdSrc));

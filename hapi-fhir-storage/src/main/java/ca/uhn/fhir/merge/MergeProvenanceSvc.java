@@ -135,23 +135,24 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 	}
 
 	private static boolean isMainProvenance(Provenance theProvenance) {
-		return MergeProvenanceGroupUtil.getProvenanceGroupId(theProvenance)
+		return MergeProvenanceGroupUtil.getProvenanceGroupValue(theProvenance)
 				.flatMap(MergeProvenanceGroupUtil::extractPartition)
 				.isEmpty();
 	}
 
 	private MergeProvenanceGroup collectGroupedProvenances(
 			Provenance theMainProvenance, List<Provenance> theAllProvenances) {
-		Optional<String> groupId = MergeProvenanceGroupUtil.getProvenanceGroupId(theMainProvenance);
+		Optional<String> groupId = MergeProvenanceGroupUtil.getProvenanceGroupValue(theMainProvenance)
+				.map(MergeProvenanceGroupUtil::extractGroupId);
 		if (groupId.isEmpty()) {
 			return new MergeProvenanceGroup(theMainProvenance, List.of());
 		}
 
-		List<Provenance> perPartitionProvenances = theAllProvenances.stream()
+		List<Provenance> memberProvenances = theAllProvenances.stream()
 				.filter(p -> p != theMainProvenance)
 				.filter(p -> MergeProvenanceGroupUtil.isInGroup(p, groupId.get()))
 				.toList();
-		return new MergeProvenanceGroup(theMainProvenance, perPartitionProvenances);
+		return new MergeProvenanceGroup(theMainProvenance, memberProvenances);
 	}
 
 	private boolean containsSourceIdentifiersInInputParameters(

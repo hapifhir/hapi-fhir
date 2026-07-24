@@ -39,6 +39,7 @@ import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.PartitionAwareReplaceReferencesResult;
 import ca.uhn.fhir.jpa.provider.PartitionAwareReplaceReferencesSvc;
 import ca.uhn.fhir.merge.MergeProvenanceGroupUtil;
+import ca.uhn.fhir.merge.MergeProvenanceOperation;
 import ca.uhn.fhir.merge.MergeResourceHelper;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
@@ -62,6 +63,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -414,7 +416,8 @@ public class ResourceMergeService {
 				.flatMap(List::stream)
 				.toList();
 
-		copyResult.getChangedResourceIdsByPartition().values().forEach(thePossiblyCommittedResourceIds::addAll);
+		copyResult.getCreatedResourceIdsByPartition().values().forEach(thePossiblyCommittedResourceIds::addAll);
+		copyResult.getUpdatedResourceIdsByPartition().values().forEach(thePossiblyCommittedResourceIds::addAll);
 
 		DaoMethodOutcome outcome = myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
 				theSourceResource,
@@ -436,7 +439,7 @@ public class ResourceMergeService {
 		}
 
 		if (theMergeOperationParameters.getCreateProvenance()) {
-			createPerPartitionProvenances(
+			createProvenanceGroup(
 					theMergeOperationParameters,
 					copyResult,
 					sourcePostMergeId,
@@ -461,7 +464,7 @@ public class ResourceMergeService {
 		}
 	}
 
-	private void createPerPartitionProvenances(
+	private void createProvenanceGroup(
 			MergeOperationInputParameters theMergeOperationParameters,
 			PartitionAwareReplaceReferencesResult theCopyResult,
 			IIdType theSourcePostMergeId,
@@ -473,43 +476,64 @@ public class ResourceMergeService {
 			RequestDetails theRequestDetails,
 			List<IIdType> thePossiblyCommittedResourceIds) {
 
-		String groupIdPrefix =
-				MergeProvenanceGroupUtil.generateGroupIdPrefix(theSourcePostMergeId, theTargetPostMergeId);
+		String groupId = MergeProvenanceGroupUtil.generateGroupId(theSourcePostMergeId, theTargetPostMergeId);
 
-		Map<RequestPartitionId, List<IIdType>> changedResourcesByPartition = new LinkedHashMap<>();
-		theCopyResult.getChangedResourceIdsByPartition().forEach((partition, ids) -> changedResourcesByPartition
-				.computeIfAbsent(partition, k -> new ArrayList<>())
-				.addAll(ids));
+		Map<MergeProvenanceOperation, Map<RequestPartitionId, List<IIdType>>> changedResourcesByOperationAndPartition =
+				new EnumMap<>(MergeProvenanceOperation.class);
+
+		theCopyResult
+				.getCreatedResourceIdsByPartition()
+				.forEach((partition, ids) -> addChangedResourceIds(
+						changedResourcesByOperationAndPartition, MergeProvenanceOperation.CREATE, partition, ids));
+		theCopyResult
+				.getUpdatedResourceIdsByPartition()
+				.forEach((partition, ids) -> addChangedResourceIds(
+						changedResourcesByOperationAndPartition, MergeProvenanceOperation.UPDATE, partition, ids));
 		// Add tombstone IDs for copied resource originals (version+1).
 		theCopyResult
 				.getCopiedResourceOriginalIdsByPartition()
-				.forEach((partition, ids) -> ids.forEach(id -> changedResourcesByPartition
-						.computeIfAbsent(partition, k -> new ArrayList<>())
-						.add(withVersionIncremented(id))));
-		changedResourcesByPartition
-				.computeIfAbsent(theSourcePartition, k -> new ArrayList<>())
-				.add(theSourcePostMergeId);
+				.forEach((partition, ids) -> addChangedResourceIds(
+						changedResourcesByOperationAndPartition,
+						MergeProvenanceOperation.DELETE,
+						partition,
+						ids.stream()
+								.map(ResourceMergeService::withVersionIncremented)
+								.toList()));
+
+		MergeProvenanceOperation sourceOperation = theMergeOperationParameters.getDeleteSource()
+				? MergeProvenanceOperation.DELETE
+				: MergeProvenanceOperation.UPDATE;
+		addChangedResourceIds(
+				changedResourcesByOperationAndPartition,
+				sourceOperation,
+				theSourcePartition,
+				List.of(theSourcePostMergeId));
+
 		if (!theTargetUpdateOutcome.isNop()) {
-			changedResourcesByPartition
-					.computeIfAbsent(theTargetPartition, k -> new ArrayList<>())
-					.add(theTargetPostMergeId);
+			addChangedResourceIds(
+					changedResourcesByOperationAndPartition,
+					MergeProvenanceOperation.UPDATE,
+					theTargetPartition,
+					List.of(theTargetPostMergeId));
 		}
 
-		for (Map.Entry<RequestPartitionId, List<IIdType>> entry : changedResourcesByPartition.entrySet()) {
-			String groupId = MergeProvenanceGroupUtil.buildGroupId(groupIdPrefix, entry.getKey());
-			IIdType subProvenanceId = myMergeResourceHelper.createProvenance(
-					theSourcePostMergeId,
-					theTargetPostMergeId,
-					entry.getValue(),
-					groupId,
-					theRequestDetails,
-					theStartTime,
-					theMergeOperationParameters.getProvenanceAgents(),
-					List.of());
-			if (subProvenanceId != null) {
-				thePossiblyCommittedResourceIds.add(subProvenanceId);
-			}
-		}
+		changedResourcesByOperationAndPartition.forEach(
+				(operation, idsByPartition) -> idsByPartition.forEach((partition, changedIds) -> {
+					String memberGroupValue =
+							MergeProvenanceGroupUtil.buildMemberProvenanceGroupValue(groupId, partition, operation);
+					IIdType memberProvenanceId = myMergeResourceHelper.createProvenance(
+							theSourcePostMergeId,
+							theTargetPostMergeId,
+							changedIds,
+							memberGroupValue,
+							theRequestDetails,
+							theStartTime,
+							theMergeOperationParameters.getProvenanceAgents(),
+							List.of());
+					if (memberProvenanceId != null) {
+						thePossiblyCommittedResourceIds.add(memberProvenanceId);
+					}
+				}));
 
 		List<IBaseResource> containedResources = List.of(
 				theMergeOperationParameters.getOriginalInputParameters(), theTargetUpdateOutcome.getOperationOutcome());
@@ -517,7 +541,7 @@ public class ResourceMergeService {
 				theSourcePostMergeId,
 				theTargetPostMergeId,
 				List.of(),
-				groupIdPrefix,
+				groupId,
 				theRequestDetails,
 				theStartTime,
 				theMergeOperationParameters.getProvenanceAgents(),
@@ -525,6 +549,19 @@ public class ResourceMergeService {
 		if (mainProvenanceId != null) {
 			thePossiblyCommittedResourceIds.add(mainProvenanceId);
 		}
+	}
+
+	private static void addChangedResourceIds(
+			Map<MergeProvenanceOperation, Map<RequestPartitionId, List<IIdType>>> theChangedResources,
+			MergeProvenanceOperation theOperation,
+			RequestPartitionId thePartition,
+			List<IIdType> theChangedIds) {
+
+		RequestPartitionId partitionKey = RequestPartitionId.fromPartitionId(thePartition.getFirstPartitionIdOrNull());
+		theChangedResources
+				.computeIfAbsent(theOperation, k -> new LinkedHashMap<>())
+				.computeIfAbsent(partitionKey, k -> new ArrayList<>())
+				.addAll(theChangedIds);
 	}
 
 	private void reportFailedCrossPartitionMerge(
@@ -683,6 +720,9 @@ public class ResourceMergeService {
 	}
 
 	private boolean requiresPartitionAwareMerge(IBaseResource theSourceResource, IBaseResource theTargetResource) {
+		// The regular replace-references path only discovers referrers within a single partition. When
+		// all-partition search is not supported, referrers can live on shards it never queries, so for now we
+		// route even same-partition merges through the partition-aware path.
 		return isCrossPartitionMerge(theSourceResource, theTargetResource)
 				|| !myPartitionSettings.isAllPartitionSearchSupported();
 	}

@@ -32,13 +32,15 @@ import java.util.UUID;
 // Created by Claude Fable 5
 public final class MergeProvenanceGroupUtil {
 
-	private static final String GROUP_ID_PREFIX_START = "merge-";
+	private static final String GROUP_ID_PREFIX = "merge-";
+	private static final char COMPONENT_SEPARATOR = ';';
 	private static final String PARTITION_DELIMITER = ";partition=";
+	private static final String OPERATION_DELIMITER = ";operation=";
 	private static final String DEFAULT_PARTITION_VALUE = "default";
 
 	private MergeProvenanceGroupUtil() {}
 
-	public static Optional<String> getProvenanceGroupId(Provenance theProvenance) {
+	public static Optional<String> getProvenanceGroupValue(Provenance theProvenance) {
 		Extension ext = theProvenance.getExtensionByUrl(HapiExtensions.EXT_PROVENANCE_GROUP);
 		if (ext != null && ext.hasValue()) {
 			return Optional.ofNullable(ext.getValueAsPrimitive().getValueAsString());
@@ -46,51 +48,67 @@ public final class MergeProvenanceGroupUtil {
 		return Optional.empty();
 	}
 
-	public static String generateGroupIdPrefix(IIdType theSourceId, IIdType theTargetId) {
-		return GROUP_ID_PREFIX_START
+	public static String generateGroupId(IIdType theSourceId, IIdType theTargetId) {
+		return GROUP_ID_PREFIX
 				+ theSourceId.getResourceType()
 				+ "-" + theSourceId.getIdPart()
 				+ "-" + theTargetId.getIdPart()
 				+ "-" + UUID.randomUUID();
 	}
 
-	public static String buildGroupId(String theGroupIdPrefix, RequestPartitionId thePartition) {
+	public static String buildMemberProvenanceGroupValue(
+			String theGroupId, RequestPartitionId thePartition, MergeProvenanceOperation theOperation) {
 		Integer partitionId = thePartition.getFirstPartitionIdOrNull();
 		String partitionValue = partitionId != null ? partitionId.toString() : DEFAULT_PARTITION_VALUE;
-		return theGroupIdPrefix + PARTITION_DELIMITER + partitionValue;
+		return theGroupId + PARTITION_DELIMITER + partitionValue + OPERATION_DELIMITER + theOperation.getCode();
 	}
 
-	public static boolean isInGroup(String theGroupId, String theGroupIdPrefix) {
-		return theGroupId.equals(theGroupIdPrefix) || theGroupId.startsWith(theGroupIdPrefix + PARTITION_DELIMITER);
+	public static boolean isInGroup(String theGroupValue, String theGroupId) {
+		return theGroupValue.equals(theGroupId) || theGroupValue.startsWith(theGroupId + PARTITION_DELIMITER);
 	}
 
-	public static boolean isInGroup(Provenance theProvenance, String theGroupIdPrefix) {
-		return getProvenanceGroupId(theProvenance)
-				.filter(groupId -> isInGroup(groupId, theGroupIdPrefix))
+	public static boolean isInGroup(Provenance theProvenance, String theGroupId) {
+		return getProvenanceGroupValue(theProvenance)
+				.filter(groupValue -> isInGroup(groupValue, theGroupId))
 				.isPresent();
 	}
 
-	public static String extractGroupIdPrefix(String theGroupId) {
-		int delimiterIndex = theGroupId.indexOf(PARTITION_DELIMITER);
-		return delimiterIndex >= 0 ? theGroupId.substring(0, delimiterIndex) : theGroupId;
+	public static String extractGroupId(String theGroupValue) {
+		int separatorIndex = theGroupValue.indexOf(COMPONENT_SEPARATOR);
+		return separatorIndex >= 0 ? theGroupValue.substring(0, separatorIndex) : theGroupValue;
 	}
 
-	public static Optional<RequestPartitionId> extractPartition(String theGroupId) {
-		int delimiterIndex = theGroupId.indexOf(PARTITION_DELIMITER);
+	public static Optional<RequestPartitionId> extractPartition(String theGroupValue) {
+		return extractComponent(theGroupValue, PARTITION_DELIMITER).map(partitionValue -> {
+			if (DEFAULT_PARTITION_VALUE.equals(partitionValue)) {
+				return RequestPartitionId.fromPartitionId((Integer) null);
+			}
+			try {
+				return RequestPartitionId.fromPartitionId(Integer.parseInt(partitionValue));
+			} catch (NumberFormatException e) {
+				throw new IllegalArgumentException(
+						Msg.code(2995) + "Invalid partition id '" + partitionValue + "' in provenance group value: "
+								+ theGroupValue,
+						e);
+			}
+		});
+	}
+
+	public static Optional<MergeProvenanceOperation> extractOperation(String theGroupValue) {
+		return extractComponent(theGroupValue, OPERATION_DELIMITER)
+				.map(operationValue -> MergeProvenanceOperation.fromCode(operationValue)
+						.orElseThrow(() -> new IllegalArgumentException(Msg.code(2999) + "Invalid operation '"
+								+ operationValue + "' in provenance group value: " + theGroupValue)));
+	}
+
+	private static Optional<String> extractComponent(String theGroupValue, String theDelimiter) {
+		int delimiterIndex = theGroupValue.indexOf(theDelimiter);
 		if (delimiterIndex < 0) {
 			return Optional.empty();
 		}
-		String partitionValue = theGroupId.substring(delimiterIndex + PARTITION_DELIMITER.length());
-		if (DEFAULT_PARTITION_VALUE.equals(partitionValue)) {
-			return Optional.of(RequestPartitionId.fromPartitionId((Integer) null));
-		}
-		try {
-			return Optional.of(RequestPartitionId.fromPartitionId(Integer.parseInt(partitionValue)));
-		} catch (NumberFormatException e) {
-			throw new IllegalArgumentException(
-					Msg.code(2995) + "Invalid partition id '" + partitionValue + "' in provenance group id: "
-							+ theGroupId,
-					e);
-		}
+		int valueStart = delimiterIndex + theDelimiter.length();
+		int valueEnd = theGroupValue.indexOf(COMPONENT_SEPARATOR, valueStart);
+		return Optional.of(
+				valueEnd < 0 ? theGroupValue.substring(valueStart) : theGroupValue.substring(valueStart, valueEnd));
 	}
 }

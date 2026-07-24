@@ -116,7 +116,7 @@ public class PartitionAwareReplaceReferencesSvc {
 
 		if (allReferencingResources.isEmpty()) {
 			ourLog.info("No referencing resources found for {}", sourceId.getValue());
-			return new PartitionAwareReplaceReferencesResult(Map.of(), Map.of());
+			return new PartitionAwareReplaceReferencesResult(Map.of(), Map.of(), Map.of());
 		}
 
 		// Step 2: Classify into COPY (partition changes after rewrite) vs UPDATE (same partition)
@@ -140,7 +140,7 @@ public class PartitionAwareReplaceReferencesSvc {
 				updateList.size());
 
 		if (copyList.isEmpty() && updateList.isEmpty()) {
-			return new PartitionAwareReplaceReferencesResult(Map.of(), Map.of());
+			return new PartitionAwareReplaceReferencesResult(Map.of(), Map.of(), Map.of());
 		}
 
 		// Capture versioned IDs from copyList before buildCombinedBundle clears them
@@ -166,17 +166,21 @@ public class PartitionAwareReplaceReferencesSvc {
 				(Bundle) myDaoRegistry.getSystemDao().transactionNested(theRequestDetails, bundleBuilder.getBundle());
 
 		List<Bundle.BundleEntryComponent> responseEntries = combinedResponse.getEntry();
-		Map<RequestPartitionId, List<IIdType>> changedResourceIdsByPartition = new LinkedHashMap<>();
+		Map<RequestPartitionId, List<IIdType>> createdResourceIdsByPartition = new LinkedHashMap<>();
+		Map<RequestPartitionId, List<IIdType>> updatedResourceIdsByPartition = new LinkedHashMap<>();
+		int createdEntryCount = copyList.size();
 		for (int i = 0; i < responseEntries.size(); i++) {
 			int entryIndex = i;
+			Map<RequestPartitionId, List<IIdType>> idsByPartition =
+					entryIndex < createdEntryCount ? createdResourceIdsByPartition : updatedResourceIdsByPartition;
 			ReplaceReferencesProvenanceSvc.extractChangedResourceId(responseEntries.get(i))
-					.ifPresent(id -> changedResourceIdsByPartition
+					.ifPresent(id -> idsByPartition
 							.computeIfAbsent(entryPartitions.get(entryIndex), k -> new ArrayList<>())
 							.add(id));
 		}
 
 		return new PartitionAwareReplaceReferencesResult(
-				changedResourceIdsByPartition, copiedResourceOriginalIdsByPartition);
+				createdResourceIdsByPartition, updatedResourceIdsByPartition, copiedResourceOriginalIdsByPartition);
 	}
 
 	/**

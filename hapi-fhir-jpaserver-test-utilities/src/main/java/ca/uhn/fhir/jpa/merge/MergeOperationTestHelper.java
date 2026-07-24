@@ -529,7 +529,7 @@ public class MergeOperationTestHelper {
 			@Nullable List<IProvenanceAgent> theExpectedProvenanceAgents) {
 
 		Provenance mainProvenance = null;
-		List<Provenance> perPartitionProvenances = new ArrayList<>();
+		List<Provenance> memberProvenances = new ArrayList<>();
 
 		for (Provenance provenance : theProvenances) {
 			if (provenance.hasContained()) {
@@ -538,7 +538,7 @@ public class MergeOperationTestHelper {
 						.isNull();
 				mainProvenance = provenance;
 			} else {
-				perPartitionProvenances.add(provenance);
+				memberProvenances.add(provenance);
 			}
 		}
 		assertThat(mainProvenance)
@@ -553,35 +553,35 @@ public class MergeOperationTestHelper {
 		assertMainMergeProvenanceContainedResources(mainProvenance, theInputParameters, theTargetIdWithExpectedVersion);
 
 		String mainGroupId =
-				MergeProvenanceGroupUtil.getProvenanceGroupId(mainProvenance).orElse(null);
+				MergeProvenanceGroupUtil.getProvenanceGroupValue(mainProvenance).orElse(null);
 		assertThat(mainGroupId).isNotBlank();
 
 		Set<String> allTargetsAcrossProvenances = new HashSet<>();
 		allTargetsAcrossProvenances.add(theTargetIdWithExpectedVersion.toString());
 		allTargetsAcrossProvenances.add(theSourceIdWithExpectedVersion.toString());
 
-		for (Provenance perPartitionProvenance : perPartitionProvenances) {
-			assertThat(perPartitionProvenance.getTarget().size()).isGreaterThan(2);
+		for (Provenance memberProvenance : memberProvenances) {
+			assertThat(memberProvenance.getTarget().size()).isGreaterThan(2);
 			assertFirstTwoTargetsAreTargetAndSource(
-					perPartitionProvenance, theTargetIdWithExpectedVersion, theSourceIdWithExpectedVersion);
-			assertThat(perPartitionProvenance.hasContained()).isFalse();
+					memberProvenance, theTargetIdWithExpectedVersion, theSourceIdWithExpectedVersion);
+			assertThat(memberProvenance.hasContained()).isFalse();
 			assertCommonMergeProvenanceFields(
-					theFhirContext,
-					perPartitionProvenance,
-					theTargetIdWithExpectedVersion,
-					theExpectedProvenanceAgents);
+					theFhirContext, memberProvenance, theTargetIdWithExpectedVersion, theExpectedProvenanceAgents);
 
-			String perPartitionGroupId = MergeProvenanceGroupUtil.getProvenanceGroupId(perPartitionProvenance)
+			String memberProvenanceGroupValue = MergeProvenanceGroupUtil.getProvenanceGroupValue(memberProvenance)
 					.orElseThrow();
-			assertThat(MergeProvenanceGroupUtil.extractGroupIdPrefix(perPartitionGroupId))
+			assertThat(MergeProvenanceGroupUtil.extractGroupId(memberProvenanceGroupValue))
 					.isEqualTo(mainGroupId);
-			assertThat(MergeProvenanceGroupUtil.extractPartition(perPartitionGroupId))
+			assertThat(MergeProvenanceGroupUtil.extractPartition(memberProvenanceGroupValue))
 					.as("Partition-specific Provenance group id must name the partition it records changes for")
 					.isPresent();
+			assertThat(MergeProvenanceGroupUtil.extractOperation(memberProvenanceGroupValue))
+					.as("Partition-specific Provenance group id must name the operation it records changes for")
+					.isPresent();
 
-			for (int i = 2; i < perPartitionProvenance.getTarget().size(); i++) {
+			for (int i = 2; i < memberProvenance.getTarget().size(); i++) {
 				allTargetsAcrossProvenances.add(
-						new IdDt(perPartitionProvenance.getTarget().get(i).getReference()).toString());
+						new IdDt(memberProvenance.getTarget().get(i).getReference()).toString());
 			}
 		}
 

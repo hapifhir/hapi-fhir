@@ -14,62 +14,94 @@ class MergeProvenanceGroupUtilTest {
 	private static final IdDt TARGET_ID = new IdDt("Patient/tgt-id-with-dashes");
 
 	@Test
-	void generateGroupIdPrefix_containsTypeAndIdParts_andIsUniquePerInvocation() {
-		String prefix1 = MergeProvenanceGroupUtil.generateGroupIdPrefix(SOURCE_ID, TARGET_ID);
-		String prefix2 = MergeProvenanceGroupUtil.generateGroupIdPrefix(SOURCE_ID, TARGET_ID);
+	void generateGroupId_containsTypeAndIdParts_andIsUniquePerInvocation() {
+		String groupId1 = MergeProvenanceGroupUtil.generateGroupId(SOURCE_ID, TARGET_ID);
+		String groupId2 = MergeProvenanceGroupUtil.generateGroupId(SOURCE_ID, TARGET_ID);
 
-		assertThat(prefix1).startsWith("merge-Patient-src-id-with-dashes-tgt-id-with-dashes-");
-		assertThat(prefix1).isNotEqualTo(prefix2);
+		assertThat(groupId1).startsWith("merge-Patient-src-id-with-dashes-tgt-id-with-dashes-");
+		assertThat(groupId1).isNotEqualTo(groupId2);
 	}
 
 	@Test
-	void buildGroupId_numericPartition_roundTrips() {
-		String prefix = MergeProvenanceGroupUtil.generateGroupIdPrefix(SOURCE_ID, TARGET_ID);
-		String groupId = MergeProvenanceGroupUtil.buildGroupId(prefix, RequestPartitionId.fromPartitionId(42));
+	void buildMemberProvenanceGroupValue_numericPartition_roundTrips() {
+		String groupId = MergeProvenanceGroupUtil.generateGroupId(SOURCE_ID, TARGET_ID);
+		String groupValue = MergeProvenanceGroupUtil.buildMemberProvenanceGroupValue(
+				groupId, RequestPartitionId.fromPartitionId(42), MergeProvenanceOperation.UPDATE);
 
-		assertThat(groupId).isEqualTo(prefix + ";partition=42");
-		assertThat(MergeProvenanceGroupUtil.extractGroupIdPrefix(groupId)).isEqualTo(prefix);
-		assertThat(MergeProvenanceGroupUtil.extractPartition(groupId))
+		assertThat(groupValue).isEqualTo(groupId + ";partition=42;operation=update");
+		assertThat(MergeProvenanceGroupUtil.extractGroupId(groupValue)).isEqualTo(groupId);
+		assertThat(MergeProvenanceGroupUtil.extractPartition(groupValue))
 				.contains(RequestPartitionId.fromPartitionId(42));
+		assertThat(MergeProvenanceGroupUtil.extractOperation(groupValue)).contains(MergeProvenanceOperation.UPDATE);
 	}
 
 	@Test
-	void buildGroupId_defaultPartition_roundTrips() {
-		String prefix = MergeProvenanceGroupUtil.generateGroupIdPrefix(SOURCE_ID, TARGET_ID);
-		RequestPartitionId defaultPartition = RequestPartitionId.fromPartitionId((Integer) null);
-		String groupId = MergeProvenanceGroupUtil.buildGroupId(prefix, defaultPartition);
+	void buildMemberProvenanceGroupValue_nullIdDefaultPartition_roundTrips() {
+		String groupId = MergeProvenanceGroupUtil.generateGroupId(SOURCE_ID, TARGET_ID);
+		RequestPartitionId nullIdDefaultPartition = RequestPartitionId.fromPartitionId((Integer) null);
+		String groupValue = MergeProvenanceGroupUtil.buildMemberProvenanceGroupValue(
+				groupId, nullIdDefaultPartition, MergeProvenanceOperation.DELETE);
 
-		assertThat(groupId).isEqualTo(prefix + ";partition=default");
-		assertThat(MergeProvenanceGroupUtil.extractPartition(groupId)).contains(defaultPartition);
+		assertThat(groupValue).isEqualTo(groupId + ";partition=default;operation=delete");
+		assertThat(MergeProvenanceGroupUtil.extractPartition(groupValue)).contains(nullIdDefaultPartition);
+		assertThat(MergeProvenanceGroupUtil.extractOperation(groupValue)).contains(MergeProvenanceOperation.DELETE);
 	}
 
 	@Test
-	void isInGroup_matchesSamePrefixAcrossPartitions() {
-		String prefix = MergeProvenanceGroupUtil.generateGroupIdPrefix(SOURCE_ID, TARGET_ID);
-		String groupIdPartition1 = MergeProvenanceGroupUtil.buildGroupId(prefix, RequestPartitionId.fromPartitionId(1));
-		String groupIdPartition2 = MergeProvenanceGroupUtil.buildGroupId(prefix, RequestPartitionId.fromPartitionId(2));
+	void buildMemberProvenanceGroupValue_samePartitionDifferentOperations_producesDistinctValuesWithSameGroupId() {
+		String groupId = MergeProvenanceGroupUtil.generateGroupId(SOURCE_ID, TARGET_ID);
+		RequestPartitionId partition = RequestPartitionId.fromPartitionId(1);
 
-		assertThat(MergeProvenanceGroupUtil.isInGroup(groupIdPartition1, prefix)).isTrue();
-		assertThat(MergeProvenanceGroupUtil.isInGroup(groupIdPartition2, prefix)).isTrue();
-		assertThat(MergeProvenanceGroupUtil.isInGroup(prefix, prefix)).isTrue();
+		String createGroupValue = MergeProvenanceGroupUtil.buildMemberProvenanceGroupValue(
+				groupId, partition, MergeProvenanceOperation.CREATE);
+		String deleteGroupValue = MergeProvenanceGroupUtil.buildMemberProvenanceGroupValue(
+				groupId, partition, MergeProvenanceOperation.DELETE);
+
+		assertThat(createGroupValue).isNotEqualTo(deleteGroupValue);
+		assertThat(MergeProvenanceGroupUtil.extractGroupId(createGroupValue)).isEqualTo(groupId);
+		assertThat(MergeProvenanceGroupUtil.extractGroupId(deleteGroupValue)).isEqualTo(groupId);
+		assertThat(MergeProvenanceGroupUtil.isInGroup(createGroupValue, groupId)).isTrue();
+		assertThat(MergeProvenanceGroupUtil.isInGroup(deleteGroupValue, groupId)).isTrue();
+	}
+
+	@Test
+	void undoOrder_undeletesBeforeUpdatesBeforeDeletes() {
+		assertThat(MergeProvenanceOperation.DELETE.getUndoOrder())
+				.isLessThan(MergeProvenanceOperation.UPDATE.getUndoOrder());
+		assertThat(MergeProvenanceOperation.UPDATE.getUndoOrder())
+				.isLessThan(MergeProvenanceOperation.CREATE.getUndoOrder());
+	}
+
+	@Test
+	void isInGroup_matchesSameGroupIdAcrossPartitions() {
+		String groupId = MergeProvenanceGroupUtil.generateGroupId(SOURCE_ID, TARGET_ID);
+		String groupValuePartition1 = MergeProvenanceGroupUtil.buildMemberProvenanceGroupValue(
+				groupId, RequestPartitionId.fromPartitionId(1), MergeProvenanceOperation.UPDATE);
+		String groupValuePartition2 = MergeProvenanceGroupUtil.buildMemberProvenanceGroupValue(
+				groupId, RequestPartitionId.fromPartitionId(2), MergeProvenanceOperation.UPDATE);
+
+		assertThat(MergeProvenanceGroupUtil.isInGroup(groupValuePartition1, groupId)).isTrue();
+		assertThat(MergeProvenanceGroupUtil.isInGroup(groupValuePartition2, groupId)).isTrue();
+		assertThat(MergeProvenanceGroupUtil.isInGroup(groupId, groupId)).isTrue();
 	}
 
 	@Test
 	void isInGroup_rejectsOtherGroups() {
-		String prefix = MergeProvenanceGroupUtil.generateGroupIdPrefix(SOURCE_ID, TARGET_ID);
-		String otherPrefix = MergeProvenanceGroupUtil.generateGroupIdPrefix(SOURCE_ID, TARGET_ID);
-		String otherGroupId = MergeProvenanceGroupUtil.buildGroupId(otherPrefix, RequestPartitionId.fromPartitionId(1));
+		String groupId = MergeProvenanceGroupUtil.generateGroupId(SOURCE_ID, TARGET_ID);
+		String otherGroupId = MergeProvenanceGroupUtil.generateGroupId(SOURCE_ID, TARGET_ID);
+		String otherGroupValue = MergeProvenanceGroupUtil.buildMemberProvenanceGroupValue(
+				otherGroupId, RequestPartitionId.fromPartitionId(1), MergeProvenanceOperation.UPDATE);
 
-		assertThat(MergeProvenanceGroupUtil.isInGroup(otherGroupId, prefix)).isFalse();
-		assertThat(MergeProvenanceGroupUtil.isInGroup(prefix, prefix + "-longer")).isFalse();
+		assertThat(MergeProvenanceGroupUtil.isInGroup(otherGroupValue, groupId)).isFalse();
+		assertThat(MergeProvenanceGroupUtil.isInGroup(groupId, groupId + "-longer")).isFalse();
 	}
 
 	@Test
-	void isInGroup_prefixOfAnotherPrefixDoesNotMatch() {
-		String prefix = "merge-Patient-a-b-uuid";
+	void isInGroup_groupIdThatIsPrefixOfAnotherDoesNotMatch() {
+		String groupId = "merge-Patient-a-b-uuid";
 		String lookalike = "merge-Patient-a-b-uuid2;partition=1";
 
-		assertThat(MergeProvenanceGroupUtil.isInGroup(lookalike, prefix)).isFalse();
+		assertThat(MergeProvenanceGroupUtil.isInGroup(lookalike, groupId)).isFalse();
 	}
 
 	@Test
@@ -82,5 +114,25 @@ class MergeProvenanceGroupUtilTest {
 		assertThatThrownBy(() -> MergeProvenanceGroupUtil.extractPartition("merge-Patient-a-b-uuid;partition=abc"))
 				.isInstanceOf(IllegalArgumentException.class)
 				.hasMessageContaining("Invalid partition id");
+	}
+
+	@Test
+	void extractPartition_stopsAtOperationDelimiter() {
+		assertThat(MergeProvenanceGroupUtil.extractPartition("merge-Patient-a-b-uuid;partition=7;operation=create"))
+				.contains(RequestPartitionId.fromPartitionId(7));
+	}
+
+	@Test
+	void extractOperation_noSuffix_returnsEmpty() {
+		assertThat(MergeProvenanceGroupUtil.extractOperation("merge-Patient-a-b-uuid;partition=1"))
+				.isEmpty();
+	}
+
+	@Test
+	void extractOperation_invalidSuffix_throws() {
+		assertThatThrownBy(() ->
+						MergeProvenanceGroupUtil.extractOperation("merge-Patient-a-b-uuid;partition=1;operation=bogus"))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessageContaining("Invalid operation");
 	}
 }

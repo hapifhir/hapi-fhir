@@ -32,18 +32,25 @@ import java.util.Map;
  */
 // Created by claude-opus-4-6
 public class PartitionAwareReplaceReferencesResult {
-	private final Map<RequestPartitionId, List<IIdType>> myChangedResourceIdsByPartition;
+	private final Map<RequestPartitionId, List<IIdType>> myCreatedResourceIdsByPartition;
+	private final Map<RequestPartitionId, List<IIdType>> myUpdatedResourceIdsByPartition;
 	private final Map<RequestPartitionId, List<IIdType>> myCopiedResourceOriginalIdsByPartition;
 
 	public PartitionAwareReplaceReferencesResult(
-			Map<RequestPartitionId, List<IIdType>> theChangedResourceIdsByPartition,
+			Map<RequestPartitionId, List<IIdType>> theCreatedResourceIdsByPartition,
+			Map<RequestPartitionId, List<IIdType>> theUpdatedResourceIdsByPartition,
 			Map<RequestPartitionId, List<IIdType>> theCopiedResourceOriginalIdsByPartition) {
-		myChangedResourceIdsByPartition = theChangedResourceIdsByPartition;
+		myCreatedResourceIdsByPartition = theCreatedResourceIdsByPartition;
+		myUpdatedResourceIdsByPartition = theUpdatedResourceIdsByPartition;
 		myCopiedResourceOriginalIdsByPartition = theCopiedResourceOriginalIdsByPartition;
 	}
 
-	public Map<RequestPartitionId, List<IIdType>> getChangedResourceIdsByPartition() {
-		return myChangedResourceIdsByPartition;
+	public Map<RequestPartitionId, List<IIdType>> getCreatedResourceIdsByPartition() {
+		return myCreatedResourceIdsByPartition;
+	}
+
+	public Map<RequestPartitionId, List<IIdType>> getUpdatedResourceIdsByPartition() {
+		return myUpdatedResourceIdsByPartition;
 	}
 
 	public Map<RequestPartitionId, List<IIdType>> getCopiedResourceOriginalIdsByPartition() {
