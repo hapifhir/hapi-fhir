@@ -99,11 +99,14 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		// Interceptor call: STORAGE_PRECREATE_BATCH_JOB_INSTANCE
 		String existingJobDefinition = theStartRequest.getJobDefinitionId();
 		CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorService, theRequestDetails)
-			.ifHasCallHooks(Pointcut.STORAGE_PRECREATE_BATCH_JOB_INSTANCE, ()->new HookParams()
-				.add(RequestDetails.class, theRequestDetails)
-				.add(JobInstanceStartRequest.class, theStartRequest));
+				.ifHasCallHooks(Pointcut.STORAGE_PRECREATE_BATCH_JOB_INSTANCE, () -> new HookParams()
+						.add(RequestDetails.class, theRequestDetails)
+						.add(JobInstanceStartRequest.class, theStartRequest));
 		if (!existingJobDefinition.equals(theStartRequest.getJobDefinitionId())) {
-			ourLog.info("Requested Batch2 Job Definition ID has been overridden from {} to {}", existingJobDefinition, theStartRequest.getJobDefinitionId());
+			ourLog.info(
+					"Requested Batch2 Job Definition ID has been overridden from {} to {}",
+					existingJobDefinition,
+					theStartRequest.getJobDefinitionId());
 		}
 
 		// if cache - use that first
