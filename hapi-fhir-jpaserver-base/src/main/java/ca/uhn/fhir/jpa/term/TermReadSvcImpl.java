@@ -1523,7 +1523,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	private void handleFilterHierarchyExists(
 			String theCodeSystemIdentifier,
 			SearchPredicateFactory theF,
-			BooleanPredicateClausesStep<?> theB,
+			BooleanPredicateClausesStep<?, ?> theB,
 			ValueSet.ConceptSetFilterComponent theFilter) {
 
 		// The value is semantically required here and must be a real boolean literal. The generic EXISTS
@@ -1546,7 +1546,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	 * into a huge terms query.
 	 */
 	private void handleFilterHasParentExists(
-			SearchPredicateFactory theF, BooleanPredicateClausesStep<?> theB, boolean theWantConceptsWithParent) {
+			SearchPredicateFactory theF, BooleanPredicateClausesStep<?, ?> theB, boolean theWantConceptsWithParent) {
 		PredicateFinalStep isRoot = theF.match().field("myParentPids").matching("NONE");
 		if (theWantConceptsWithParent) {
 			theB.mustNot(isRoot); // keep the concepts that have a parent (non-roots)
@@ -1563,7 +1563,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	private void handleFilterHasChildrenExists(
 			String theCodeSystemIdentifier,
 			SearchPredicateFactory theF,
-			BooleanPredicateClausesStep<?> theB,
+			BooleanPredicateClausesStep<?, ?> theB,
 			boolean theWantConceptsWithChildren) {
 		Collection<String> codesHavingChildren = findCodesHavingChildren(theCodeSystemIdentifier);
 
@@ -1592,7 +1592,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	 */
 	private void handleFilterPresenceExists(
 			SearchPredicateFactory theF,
-			BooleanPredicateClausesStep<?> theB,
+			BooleanPredicateClausesStep<?, ?> theB,
 			ValueSet.ConceptSetFilterComponent theFilter) {
 		boolean wantExists = parseRequiredBoolean(theFilter);
 		PredicateFinalStep hasProperty = theF.exists().field(CONCEPT_PROPERTY_PREFIX_NAME + theFilter.getProperty());
@@ -1611,7 +1611,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	 */
 	private void handleFilterBooleanPropertyExists(
 			SearchPredicateFactory theF,
-			BooleanPredicateClausesStep<?> theB,
+			BooleanPredicateClausesStep<?, ?> theB,
 			ValueSet.ConceptSetFilterComponent theFilter) {
 		boolean wantFlagged = parseRequiredBoolean(theFilter);
 		Term term = new Term(CONCEPT_PROPERTY_PREFIX_NAME + theFilter.getProperty(), "true");
