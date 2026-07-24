@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.support.CodeSystemIdentifierResolver;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
@@ -118,6 +119,9 @@ public class ValidationSupportChain implements IValidationSupport {
 	public static final ValueSetExpansionOptions EMPTY_EXPANSION_OPTIONS = new ValueSetExpansionOptions();
 	static Logger ourLog = Logs.getTerminologyTroubleshootingLog();
 	private final List<IValidationSupport> myChain = new CopyOnWriteArrayList<>();
+
+	private static final String OID_URN_PREFIX = "urn:oid:";
+	private static final String RFC_3986_IDENTIFIER_SYSTEM = "urn:ietf:rfc:3986";
 
 	@Nullable
 	private final Cache<BaseKey<?>, Object> myExpiringCache;
@@ -690,11 +694,100 @@ public class ValidationSupportChain implements IValidationSupport {
 		return retVal;
 	}
 
+	private record CanonicalReference(String url, @Nullable String version) {
+
+		private static CanonicalReference parse(String theValue) {
+			int separator = theValue.lastIndexOf('|');
+
+			if (separator < 0) {
+				return new CanonicalReference(theValue, null);
+			}
+
+			return new CanonicalReference(theValue.substring(0, separator), theValue.substring(separator + 1));
+		}
+
+		private String asString() {
+			return isNotBlank(version) ? url + "|" + version : url;
+		}
+	}
+
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
-		Function<IValidationSupport, IBaseResource> invoker = v -> v.fetchCodeSystem(theSystem);
+		if (isBlank(theSystem)) {
+			return null;
+		}
+
 		ResourceByUrlKey<IBaseResource> key = new ResourceByUrlKey<>(ResourceByUrlKey.TypeEnum.CODESYSTEM, theSystem);
-		return fetchValue(key, invoker, theSystem);
+
+		CacheValue<IBaseResource> retVal = getFromCache(key);
+
+		if (retVal != null) {
+			return retVal.getValue();
+		}
+
+		retVal = CacheValue.empty();
+
+		IBaseResource canonicalResult = fetchCodeSystemByCanonicalUrl(theSystem);
+
+		if (canonicalResult != null) {
+			retVal = new CacheValue<>(canonicalResult);
+		}
+
+		if (retVal.getValue() == null) {
+			CanonicalReference requested = CanonicalReference.parse(theSystem);
+
+			if (requested.url().startsWith(OID_URN_PREFIX)) {
+				IBaseResource aliasResult =
+						fetchCodeSystemByIdentifier(RFC_3986_IDENTIFIER_SYSTEM, requested.url(), requested.version());
+
+				if (aliasResult != null) {
+					ourLog.info("Resolved CodeSystem identifier alias {}", requested.asString());
+
+					retVal = new CacheValue<>(aliasResult);
+				}
+			}
+		}
+
+		putInCache(key, retVal);
+		return retVal.getValue();
+	}
+
+	@Nullable
+	private IBaseResource fetchCodeSystemByCanonicalUrl(String theSystem) {
+		for (IValidationSupport next : myChain) {
+			IBaseResource outcome;
+			if (next instanceof ValidationSupportChain nestedChain) {
+				outcome = nestedChain.fetchCodeSystemByCanonicalUrl(theSystem);
+			} else {
+				outcome = next.fetchCodeSystem(theSystem);
+			}
+			if (outcome != null) {
+				ourLog.debug("CodeSystem {} fetched by canonical URL from {}", theSystem, next.getName());
+
+				return outcome;
+			}
+		}
+		return null;
+	}
+
+	@Override
+	@Nullable
+	public IBaseResource fetchCodeSystemByIdentifier(
+			@Nonnull String theIdentifierSystem, @Nonnull String theIdentifierValue, @Nullable String theVersion) {
+
+		List<IBaseResource> candidates = new ArrayList<>();
+
+		for (IValidationSupport next : myChain) {
+			IBaseResource outcome =
+					next.fetchCodeSystemByIdentifier(theIdentifierSystem, theIdentifierValue, theVersion);
+
+			if (outcome != null) {
+				candidates.add(outcome);
+			}
+		}
+
+		return CodeSystemIdentifierResolver.findCodeSystem(
+				getFhirContext(), candidates, theIdentifierSystem, theIdentifierValue, theVersion);
 	}
 
 	private <T> T fetchValue(ResourceByUrlKey<T> theKey, Function<IValidationSupport, T> theInvoker, String theUrl) {

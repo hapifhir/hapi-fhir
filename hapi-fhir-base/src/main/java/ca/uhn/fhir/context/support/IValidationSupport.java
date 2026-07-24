@@ -194,6 +194,34 @@ public interface IValidationSupport {
 	}
 
 	/**
+	 * Fetch a CodeSystem by one of its identifiers.
+	 *
+	 * <p>This method is intended for validation-support implementations which
+	 * can resolve a CodeSystem using {@code CodeSystem.identifier} instead of
+	 * its canonical {@code CodeSystem.url}.</p>
+	 *
+	 * <p>Implementations should apply an exact match to both
+	 * {@code identifier.system} and {@code identifier.value}. If
+	 * {@code theVersion} is supplied, {@code CodeSystem.version} must also
+	 * match exactly.</p>
+	 *
+	 * @param theIdentifierSystem
+	 * 		the CodeSystem.identifier.system value
+	 * @param theIdentifierValue
+	 * 		the CodeSystem.identifier.value value
+	 * @param theVersion
+	 * 		optional CodeSystem.version
+	 * @return the matching CodeSystem, or {@code null} if none is available
+	 */
+	@Nullable
+	default IBaseResource fetchCodeSystemByIdentifier(
+			@Nonnull String theIdentifierSystem, @Nonnull String theIdentifierValue, @Nullable String theVersion) {
+
+		return CodeSystemIdentifierResolver.findCodeSystem(
+				getFhirContext(), fetchAllConformanceResources(), theIdentifierSystem, theIdentifierValue, theVersion);
+	}
+
+	/**
 	 * Loads a resource needed by the validation (a StructureDefinition, or a
 	 * ValueSet)
 	 *

@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.support.CodeSystemIdentifierResolver;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -41,6 +42,7 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -53,6 +55,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 import static org.hl7.fhir.instance.model.api.IAnyResource.SP_RES_LAST_UPDATED;
 
@@ -105,6 +108,38 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 		}
 
 		return retVal;
+	}
+
+	/**
+	 * Resolves a CodeSystem using CodeSystem.identifier.
+	 */
+	@Override
+	@Nullable
+	public IBaseResource fetchCodeSystemByIdentifier(
+			@Nonnull String theIdentifierSystem, @Nonnull String theIdentifierValue, @Nullable String theVersion) {
+
+		if (myCodeSystemType == null || !myDaoRegistry.isResourceTypeSupported("CodeSystem")) {
+			return null;
+		}
+
+		SearchParameterMap params = SearchParameterMap.newSynchronous()
+				.add(CodeSystem.SP_IDENTIFIER, new TokenParam(theIdentifierSystem, theIdentifierValue));
+
+		if (isNotBlank(theVersion)) {
+			params.add(CodeSystem.SP_VERSION, new TokenParam(theVersion));
+		}
+
+		IBundleProvider search = myDaoRegistry.getResourceDao("CodeSystem").search(params, new SystemRequestDetails());
+
+		Integer size = search.size();
+		if (size == null || size == 0) {
+			return null;
+		}
+
+		List<IBaseResource> resources = search.getResources(0, size);
+
+		return CodeSystemIdentifierResolver.findCodeSystem(
+				myFhirContext, resources, theIdentifierSystem, theIdentifierValue, theVersion);
 	}
 
 	@Override
