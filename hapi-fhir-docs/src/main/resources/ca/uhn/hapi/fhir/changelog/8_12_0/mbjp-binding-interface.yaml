@@ -1,0 +1,4 @@
+---
+type: change
+issue: fixme
+title: "Introduce interface for RestfulServer bindings to allow custome binding handlers."
