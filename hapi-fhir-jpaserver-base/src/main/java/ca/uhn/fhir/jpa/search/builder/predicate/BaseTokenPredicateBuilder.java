@@ -125,21 +125,17 @@ public abstract class BaseTokenPredicateBuilder extends BaseSearchParamPredicate
 		for (IQueryParameterType nextParameter : theParameters) {
 			String code;
 			String system;
-			if (nextParameter instanceof TokenParam) {
-				TokenParam id = (TokenParam) nextParameter;
-				system = id.getSystem();
-				code = id.getValue();
-				modifier = id.getModifier();
-			} else if (nextParameter instanceof BaseIdentifierDt) {
-				BaseIdentifierDt id = (BaseIdentifierDt) nextParameter;
-				system = id.getSystemElement().getValueAsString();
-				code = id.getValueElement().getValue();
-			} else if (nextParameter instanceof BaseCodingDt) {
-				BaseCodingDt id = (BaseCodingDt) nextParameter;
-				system = id.getSystemElement().getValueAsString();
-				code = id.getCodeElement().getValue();
-			} else if (nextParameter instanceof NumberParam) {
-				NumberParam number = (NumberParam) nextParameter;
+			if (nextParameter instanceof TokenParam idParam) {
+				system = idParam.getSystem();
+				code = idParam.getValue();
+				modifier = idParam.getModifier();
+			} else if (nextParameter instanceof BaseIdentifierDt idParam) {
+				system = idParam.getSystemElement().getValueAsString();
+				code = idParam.getValueElement().getValue();
+			} else if (nextParameter instanceof BaseCodingDt idParam) {
+				system = idParam.getSystemElement().getValueAsString();
+				code = idParam.getCodeElement().getValue();
+			} else if (nextParameter instanceof NumberParam number) {
 				system = null;
 				code = number.getValueAsQueryToken(getFhirContext());
 			} else {
@@ -318,10 +314,10 @@ public abstract class BaseTokenPredicateBuilder extends BaseSearchParamPredicate
 		if (retVal == null) {
 			if (theSearchParam != null) {
 				Set<String> valueSetUris = Sets.newHashSet();
+				Class<? extends IBaseResource> type = getFhirContext()
+						.getResourceDefinition(getResourceType())
+						.getImplementingClass();
 				for (String nextPath : theSearchParam.getPathsSplitForResourceType(getResourceType())) {
-					Class<? extends IBaseResource> type = getFhirContext()
-							.getResourceDefinition(getResourceType())
-							.getImplementingClass();
 					BaseRuntimeChildDefinition def =
 							getFhirContext().newTerser().getDefinition(type, nextPath);
 					if (def instanceof BaseRuntimeDeclaredChildDefinition) {
@@ -331,6 +327,12 @@ public abstract class BaseTokenPredicateBuilder extends BaseSearchParamPredicate
 						}
 					}
 				}
+				/*
+				 * We can only safely infer the system when the search parameter's paths bind to exactly one ValueSet:
+				 *   - zero bindings: there's nothing to expand;
+				 *   - more than one binding: it's ambiguous which ValueSet the code belongs to, and guessing could assign the wrong system.
+				 * In both cases we leave the system unresolved.
+				 */
 				if (valueSetUris.size() == 1) {
 					String valueSet = valueSetUris.iterator().next();
 					ValueSetExpansionOptions options = new ValueSetExpansionOptions().setFailOnMissingCodeSystem(false);
