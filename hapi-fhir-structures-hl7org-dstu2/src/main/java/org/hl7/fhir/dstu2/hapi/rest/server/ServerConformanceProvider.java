@@ -35,7 +35,6 @@ import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerConfiguration;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.IMethodBinding;
 import ca.uhn.fhir.rest.server.method.IParameter;
 import ca.uhn.fhir.rest.server.method.OperationMethodBinding;
@@ -130,9 +129,7 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 	}
 
 	private void checkBindingForSystemOps(
-			ConformanceRestComponent rest,
-			Set<SystemRestfulInteraction> systemOps,
-			IMethodBinding nextMethodBinding) {
+			ConformanceRestComponent rest, Set<SystemRestfulInteraction> systemOps, IMethodBinding nextMethodBinding) {
 		if (nextMethodBinding.getRestOperationType() != null) {
 			String sysOpCode = nextMethodBinding.getRestOperationType().getCode();
 			if (sysOpCode != null) {
@@ -157,19 +154,15 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 		Map<String, List<IMethodBinding>> resourceToMethods = new TreeMap<String, List<IMethodBinding>>();
 		for (ResourceBinding next : getServerConfiguration(theRequestDetails).getResourceBindings()) {
 			String resourceName = next.getResourceName();
-      // fixme can we share this with other versions.
+			// fixme can we share this with other versions.
 			for (IMethodBinding nextMethodBinding : next.getMethodBindings()) {
-        resourceToMethods
-            .getOrDefault(resourceName, new ArrayList<>())
-            .add(nextMethodBinding);
+				resourceToMethods.getOrDefault(resourceName, new ArrayList<>()).add(nextMethodBinding);
 			}
 		}
 		for (IMethodBinding nextMethodBinding :
 				getServerConfiguration(theRequestDetails).getServerBindings()) {
 			String resourceName = "";
-      resourceToMethods
-          .getOrDefault(resourceName, new ArrayList<>())
-          .add(nextMethodBinding);
+			resourceToMethods.getOrDefault(resourceName, new ArrayList<>()).add(nextMethodBinding);
 		}
 		return resourceToMethods;
 	}
@@ -326,7 +319,7 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 			} else {
 				for (IMethodBinding nextMethodBinding : nextEntry.getValue()) {
 					checkBindingForSystemOps(rest, systemOps, nextMethodBinding);
-          // fixme this should be shared, and abstract
+					// fixme this should be shared, and abstract
 					if (nextMethodBinding instanceof OperationMethodBinding) {
 						OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
 						String opName = bindings.getOperationBindingToId().get(methodBinding);

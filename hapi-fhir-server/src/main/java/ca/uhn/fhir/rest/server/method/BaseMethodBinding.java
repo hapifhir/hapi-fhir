@@ -43,7 +43,6 @@ import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.BundleProviders;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -55,7 +54,6 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -194,6 +192,14 @@ public abstract class BaseMethodBinding implements IMethodBinding {
 
 	public Method getMethod() {
 		return myMethod;
+	}
+
+	/**
+	 * Use the Method toString() as our identity and description.
+	 */
+	@Override
+	public String getBindingKey() {
+		return getMethod().toString();
 	}
 
 	public List<IParameter> getParameters() {

@@ -49,7 +49,7 @@ public class JaxRsMethodBindingsDstu3Test {
 			}
 		}
 		new TestFindPatientProvider();
-		assertEquals(TestFindPatientProvider.class, new TestFindPatientProvider().getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getDeclaringClass());
+		assertEquals(TestFindPatientProvider.class, new TestFindPatientProvider().getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getProvider().getClass());
 	}
 
 	@Test
@@ -66,8 +66,8 @@ public class JaxRsMethodBindingsDstu3Test {
 				return null;
 			}
 		}
-		assertEquals(TestFindPatientProvider.class, new TestFindPatientProvider().getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getDeclaringClass());
-		assertEquals(TestUpdatePatientProvider.class, new TestUpdatePatientProvider().getBindings().getBinding(RestOperationTypeEnum.UPDATE, "").getMethod().getDeclaringClass());
+		assertEquals(TestFindPatientProvider.class, new TestFindPatientProvider().getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getProvider().getClass());
+		assertEquals(TestUpdatePatientProvider.class, new TestUpdatePatientProvider().getBindings().getBinding(RestOperationTypeEnum.UPDATE, "").getProvider().getClass());
 	}
 
 	@Test
@@ -116,10 +116,10 @@ public class JaxRsMethodBindingsDstu3Test {
 			}
 		}
 		JaxRsMethodBindings bindings = new TestFindPatientProvider().getBindings();
-		assertEquals("search", bindings.getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getName());
-		assertEquals("update", bindings.getBinding(RestOperationTypeEnum.UPDATE, "").getMethod().getName());
-		assertEquals("firstMethod", bindings.getBinding(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, "$firstMethod").getMethod().getName());
-		assertEquals("secondMethod", bindings.getBinding(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, "$secondMethod").getMethod().getName());
+		assertEquals("search", bindings.getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getBindingKey());
+		assertEquals("update", bindings.getBinding(RestOperationTypeEnum.UPDATE, "").getBindingKey());
+		assertEquals("firstMethod", bindings.getBinding(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, "$firstMethod").getBindingKey());
+		assertEquals("secondMethod", bindings.getBinding(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, "$secondMethod").getBindingKey());
 		try {
 			bindings.getBinding(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, "$thirdMethod");
 			fail();

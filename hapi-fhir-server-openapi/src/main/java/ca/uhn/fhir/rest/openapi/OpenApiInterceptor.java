@@ -32,7 +32,6 @@ import ca.uhn.fhir.rest.server.IServerConformanceProvider;
 import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
-import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.IMethodBinding;
 import ca.uhn.fhir.rest.server.method.ReadMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -459,7 +458,7 @@ public class OpenApiInterceptor {
 	 * @param operation - The Operation that is in the process of being generated.
 	 * @param baseMethodBinding - Object containing metadata about the method that processes this operation.
 	 */
-	protected void customizeOperation(OpenAPI openApi, Operation operation, BaseMethodBinding baseMethodBinding) {
+	protected void customizeOperation(OpenAPI openApi, Operation operation, IMethodBinding baseMethodBinding) {
 		// Here just to be overridden by extending classes.
 	}
 
@@ -685,7 +684,7 @@ public class OpenApiInterceptor {
 			// Search
 			if (typeRestfulInteractions.contains(CapabilityStatement.TypeRestfulInteraction.SEARCHTYPE)) {
 
-				final BaseMethodBinding baseMethodBinding =
+				final IMethodBinding baseMethodBinding =
 						operationLookup.get(resourceType, RestOperationTypeEnum.SEARCH_TYPE.name());
 
 				addSearchOperation(
@@ -728,7 +727,7 @@ public class OpenApiInterceptor {
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			final String resourceName = resourceBinding.getResourceName();
 
-			for (BaseMethodBinding methodBinding : resourceBinding.getMethodBindings()) {
+			for (IMethodBinding methodBinding : resourceBinding.getMethodBindings()) {
 				final RestOperationTypeEnum restOperationType = methodBinding.getRestOperationType();
 				final MultiKey<String> key = new MultiKey<>(resourceName, restOperationType.name());
 
@@ -781,7 +780,7 @@ public class OpenApiInterceptor {
 			final FhirContext ctx,
 			final String resourceType,
 			final CapabilityStatement.CapabilityStatementRestResourceComponent nextResource,
-			final BaseMethodBinding baseMethodBinding) {
+			final IMethodBinding baseMethodBinding) {
 		operation.addTagsItem(resourceType);
 		operation.setDescription("This is a search type");
 		operation.setSummary("search-type: Search for " + resourceType + " instances");

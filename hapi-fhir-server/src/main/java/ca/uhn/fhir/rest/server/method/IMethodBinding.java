@@ -4,15 +4,12 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
-import java.io.Closeable;
 import java.io.IOException;
 
 public interface IMethodBinding {
 	Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest)
-		throws BaseServerResponseException, IOException;
-
+			throws BaseServerResponseException, IOException;
 
 	/**
 	 * The "target" of this binding.
@@ -27,7 +24,6 @@ public interface IMethodBinding {
 	 * @return the target resource name or null for server methods.
 	 */
 	String getResourceName();
-
 
 	/**
 	 *  Which FHIR operation does this binding support?
@@ -48,7 +44,7 @@ public interface IMethodBinding {
 	RestOperationTypeEnum getRestOperationType();
 
 	boolean isSupportsConditional();
-	// fixme move this stuff to a conformance-builder sibling \
+	// fixme move this stuff to a conformance-builder sibling
 	/** for conformance */
 	boolean isSupportsConditionalMultiple();
 
@@ -60,4 +56,9 @@ public interface IMethodBinding {
 
 	void close();
 
+	/**
+	 * Get to describe and identify this binding.
+	 * Used to detect and warn of duplicate bindings.
+	 */
+	String getBindingKey();
 }

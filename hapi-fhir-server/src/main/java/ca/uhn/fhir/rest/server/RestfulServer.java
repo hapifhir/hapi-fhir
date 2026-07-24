@@ -1847,8 +1847,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			}
 
 			for (Iterator<IMethodBinding> it =
-			     resourceBinding.getMethodBindings().iterator();
-			     it.hasNext(); ) {
+							resourceBinding.getMethodBindings().iterator();
+					it.hasNext(); ) {
 				IMethodBinding binding = it.next();
 				if (theProvider.equals(binding.getProvider())) {
 					it.remove();

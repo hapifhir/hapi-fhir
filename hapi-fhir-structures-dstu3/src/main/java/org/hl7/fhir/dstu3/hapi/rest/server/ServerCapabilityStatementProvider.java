@@ -36,7 +36,6 @@ import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerConfiguration;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.IMethodBinding;
 import ca.uhn.fhir.rest.server.method.IParameter;
 import ca.uhn.fhir.rest.server.method.OperationMethodBinding;
@@ -130,7 +129,7 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
 	private void checkBindingForSystemOps(
 			CapabilityStatementRestComponent rest,
 			Set<SystemRestfulInteraction> systemOps,
-			BaseMethodBinding nextMethodBinding) {
+			IMethodBinding nextMethodBinding) {
 		if (nextMethodBinding.getRestOperationType() != null) {
 			String sysOpCode = nextMethodBinding.getRestOperationType().getCode();
 			if (sysOpCode != null) {
@@ -297,7 +296,7 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
 
 				// Map<String, CapabilityStatement.RestResourceSearchParam> nameToSearchParam = new HashMap<String,
 				// CapabilityStatement.RestResourceSearchParam>();
-				for (BaseMethodBinding nextMethodBinding : nextEntry.getValue()) {
+				for (IMethodBinding nextMethodBinding : nextEntry.getValue()) {
 					if (nextMethodBinding.getRestOperationType() != null) {
 						String resOpCode =
 								nextMethodBinding.getRestOperationType().getCode();
@@ -401,7 +400,7 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
 					resource.addSearchInclude(nextInclude);
 				}
 			} else {
-				for (BaseMethodBinding nextMethodBinding : nextEntry.getValue()) {
+				for (IMethodBinding nextMethodBinding : nextEntry.getValue()) {
 					checkBindingForSystemOps(rest, systemOps, nextMethodBinding);
 					if (nextMethodBinding instanceof OperationMethodBinding) {
 						OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;

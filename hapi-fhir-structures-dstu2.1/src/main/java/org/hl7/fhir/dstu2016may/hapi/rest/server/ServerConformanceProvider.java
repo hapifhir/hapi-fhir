@@ -90,9 +90,7 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 	}
 
 	private void checkBindingForSystemOps(
-			ConformanceRestComponent rest,
-			Set<SystemRestfulInteraction> systemOps,
-			BaseMethodBinding nextMethodBinding) {
+			ConformanceRestComponent rest, Set<SystemRestfulInteraction> systemOps, IMethodBinding nextMethodBinding) {
 		if (nextMethodBinding.getRestOperationType() != null) {
 			String sysOpCode = nextMethodBinding.getRestOperationType().getCode();
 			if (sysOpCode != null) {
@@ -230,7 +228,7 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 
 				// Map<String, Conformance.RestResourceSearchParam> nameToSearchParam = new HashMap<String,
 				// Conformance.RestResourceSearchParam>();
-				for (BaseMethodBinding nextMethodBinding : nextEntry.getValue()) {
+				for (IMethodBinding nextMethodBinding : nextEntry.getValue()) {
 					if (nextMethodBinding.getRestOperationType() != null) {
 						String resOpCode =
 								nextMethodBinding.getRestOperationType().getCode();
@@ -323,7 +321,7 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 					resource.addSearchInclude(nextInclude);
 				}
 			} else {
-				for (BaseMethodBinding nextMethodBinding : nextEntry.getValue()) {
+				for (IMethodBinding nextMethodBinding : nextEntry.getValue()) {
 					checkBindingForSystemOps(rest, systemOps, nextMethodBinding);
 					if (nextMethodBinding instanceof OperationMethodBinding) {
 						OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;

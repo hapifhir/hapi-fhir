@@ -93,8 +93,7 @@ public class JaxRsMethodBindings {
 	}
 
 	private void addMethodBinding(String key, BaseMethodBinding binding) {
-		ConcurrentHashMap<String, IMethodBinding> mapByOperation =
-				getMapForOperation(binding.getRestOperationType());
+		ConcurrentHashMap<String, IMethodBinding> mapByOperation = getMapForOperation(binding.getRestOperationType());
 		if (mapByOperation.containsKey(key)) {
 			throw new IllegalArgumentException(Msg.code(597) + "Multiple Search Method Bindings Found : "
 					+ mapByOperation.get(key) + " -- " + binding.getMethod());
@@ -112,7 +111,7 @@ public class JaxRsMethodBindings {
 	private ConcurrentHashMap<String, IMethodBinding> getMapForOperation(RestOperationTypeEnum operationType) {
 		ConcurrentHashMap<String, IMethodBinding> result = operationBindings.get(operationType);
 		if (result == null) {
-			operationBindings.putIfAbsent(operationType, new ConcurrentHashMap<String, BaseMethodBinding>());
+			operationBindings.putIfAbsent(operationType, new ConcurrentHashMap<String, IMethodBinding>());
 			return getMapForOperation(operationType);
 		} else {
 			return result;
@@ -127,7 +126,7 @@ public class JaxRsMethodBindings {
 	 * @return the binding defined
 	 * @throws NotImplementedOperationException cannot be found
 	 */
-	public BaseMethodBinding getBinding(RestOperationTypeEnum operationType, String theBindingKey) {
+	public IMethodBinding getBinding(RestOperationTypeEnum operationType, String theBindingKey) {
 		String bindingKey = StringUtils.defaultIfBlank(theBindingKey, DEFAULT_METHOD_KEY);
 		ConcurrentHashMap<String, IMethodBinding> map = getMapForOperation(operationType);
 		if (map == null || !map.containsKey(bindingKey)) {

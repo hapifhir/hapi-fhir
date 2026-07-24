@@ -37,10 +37,8 @@ public interface IRestfulServerUtil {
 			RequestDetails theRequest, ParamStyle myParamStyle, Class<? extends IBaseResource> myResourceBundleType);
 
 	<T extends IBaseResource> T loadResourceFromRequest(
-            RequestDetails theRequest, IMethodBinding theMethodBinding, Class<T> theResourceType);
+			RequestDetails theRequest, IMethodBinding theMethodBinding, Class<T> theResourceType);
 
 	IBaseResource parseResourceFromRequest(
-			RequestDetails theRequest,
-			IMethodBinding theMethodBinding,
-			Class<? extends IBaseResource> theResourceType);
+			RequestDetails theRequest, IMethodBinding theMethodBinding, Class<? extends IBaseResource> theResourceType);
 }

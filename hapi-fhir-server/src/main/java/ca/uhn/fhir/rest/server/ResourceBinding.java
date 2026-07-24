@@ -20,7 +20,6 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.IMethodBinding;
 import ca.uhn.fhir.rest.server.method.MethodMatchEnum;
 
@@ -87,13 +86,11 @@ public class ResourceBinding {
 		return myMethodBindings;
 	}
 
-	public void addMethod(BaseMethodBinding method) {
-		if (myMethodBindings.stream()
-				.anyMatch(
-						t -> t.getMethod().toString().equals(method.getMethod().toString()))) {
+	public void addMethod(IMethodBinding method) {
+		if (myMethodBindings.stream().anyMatch(t -> t.getBindingKey().equals(method.getBindingKey()))) {
 			ourLog.warn(
 					"The following method has been registered twice against this RestfulServer: {}",
-					method.getMethod());
+					method.getBindingKey());
 		}
 		this.myMethodBindings.push(method);
 	}

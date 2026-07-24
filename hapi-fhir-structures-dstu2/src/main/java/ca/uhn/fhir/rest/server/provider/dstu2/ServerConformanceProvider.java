@@ -55,7 +55,6 @@ import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerConfiguration;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.IMethodBinding;
 import ca.uhn.fhir.rest.server.method.IParameter;
 import ca.uhn.fhir.rest.server.method.OperationMethodBinding;
@@ -140,17 +139,13 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 		for (ResourceBinding next : getServerConfiguration(theRequestDetails).getResourceBindings()) {
 			String resourceName = next.getResourceName();
 			for (IMethodBinding nextMethodBinding : next.getMethodBindings()) {
-				resourceToMethods
-					.getOrDefault(resourceName, new ArrayList<>())
-					.add(nextMethodBinding);
+				resourceToMethods.getOrDefault(resourceName, new ArrayList<>()).add(nextMethodBinding);
 			}
 		}
 		for (IMethodBinding nextMethodBinding :
 				getServerConfiguration(theRequestDetails).getServerBindings()) {
 			String resourceName = "";
-			resourceToMethods
-				.getOrDefault(resourceName, new ArrayList<>())
-				.add(nextMethodBinding);
+			resourceToMethods.getOrDefault(resourceName, new ArrayList<>()).add(nextMethodBinding);
 		}
 		return resourceToMethods;
 	}
