@@ -464,7 +464,7 @@ public class ResourceMergeService {
 		// partition's entries in its own partition rather than flattening, which reads more clearly.
 		Map<RequestPartitionId, List<IIdType>> resourcesToDeleteByPartition = new LinkedHashMap<>();
 		copyResult
-				.getCopiedResourceOriginalIdsByPartition()
+				.getCopiedResourceOriginalIdsByOriginalPartition()
 				.forEach((partition, originalIds) -> resourcesToDeleteByPartition
 						.computeIfAbsent(partition, k -> new ArrayList<>())
 						.addAll(originalIds));
@@ -515,7 +515,7 @@ public class ResourceMergeService {
 						changedResourcesByChangeTypeAndPartition, MergeChangeType.UPDATE, partition, ids));
 		// The copied resources' originals will be deleted, so record them as DELETE at their tombstone version (+1).
 		theCopyResult
-				.getCopiedResourceOriginalIdsByPartition()
+				.getCopiedResourceOriginalIdsByOriginalPartition()
 				.forEach((partition, ids) -> addChangedResourceIds(
 						changedResourcesByChangeTypeAndPartition,
 						MergeChangeType.DELETE,

@@ -34,15 +34,15 @@ import java.util.Map;
 public class PartitionAwareReplaceReferencesResult {
 	private final Map<RequestPartitionId, List<IIdType>> myCreatedResourceIdsByPartition;
 	private final Map<RequestPartitionId, List<IIdType>> myUpdatedResourceIdsByPartition;
-	private final Map<RequestPartitionId, List<IIdType>> myCopiedResourceOriginalIdsByPartition;
+	private final Map<RequestPartitionId, List<IIdType>> myCopiedResourceOriginalIdsByOriginalPartition;
 
 	public PartitionAwareReplaceReferencesResult(
 			Map<RequestPartitionId, List<IIdType>> theCreatedResourceIdsByPartition,
 			Map<RequestPartitionId, List<IIdType>> theUpdatedResourceIdsByPartition,
-			Map<RequestPartitionId, List<IIdType>> theCopiedResourceOriginalIdsByPartition) {
+			Map<RequestPartitionId, List<IIdType>> theCopiedResourceOriginalIdsByOriginalPartition) {
 		myCreatedResourceIdsByPartition = theCreatedResourceIdsByPartition;
 		myUpdatedResourceIdsByPartition = theUpdatedResourceIdsByPartition;
-		myCopiedResourceOriginalIdsByPartition = theCopiedResourceOriginalIdsByPartition;
+		myCopiedResourceOriginalIdsByOriginalPartition = theCopiedResourceOriginalIdsByOriginalPartition;
 	}
 
 	public Map<RequestPartitionId, List<IIdType>> getCreatedResourceIdsByPartition() {
@@ -53,7 +53,7 @@ public class PartitionAwareReplaceReferencesResult {
 		return myUpdatedResourceIdsByPartition;
 	}
 
-	public Map<RequestPartitionId, List<IIdType>> getCopiedResourceOriginalIdsByPartition() {
-		return myCopiedResourceOriginalIdsByPartition;
+	public Map<RequestPartitionId, List<IIdType>> getCopiedResourceOriginalIdsByOriginalPartition() {
+		return myCopiedResourceOriginalIdsByOriginalPartition;
 	}
 }

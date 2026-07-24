@@ -89,7 +89,7 @@ public class PartitionAwareReplaceReferencesSvc {
 	 * transaction — all internal operations use {@code transactionNested()}.
 	 * <p>
 	 * Does NOT delete the source copies — the caller is responsible for deleting them after
-	 * provenance creation using the returned {@link PartitionAwareReplaceReferencesResult#getCopiedResourceOriginalIdsByPartition()}.
+	 * provenance creation using the returned {@link PartitionAwareReplaceReferencesResult#getCopiedResourceOriginalIdsByOriginalPartition()}.
 	 * Deletion cannot happen here because provenance must reference the originals (as tombstones),
 	 * and deleting first would violate referential integrity checks.
 	 *
@@ -120,10 +120,10 @@ public class PartitionAwareReplaceReferencesSvc {
 			return new PartitionAwareReplaceReferencesResult(Map.of(), Map.of(), Map.of());
 		}
 
-		// Step 2: Classify each referencing resource as COPY or UPDATE. A COPY moves to a new partition once its
-		// references are rewritten, so we group copies by that destination partition to write each into the right
-		// place. An UPDATE stays in its own partition, so it needs no grouping - its partition is read back from
-		// the resource itself when needed (see updatePartitions below).
+		// Step 2: Classify each referencing resource as COPY (moves partition once its references are rewritten)
+		// or UPDATE (stays put, not grouped). Copies are grouped by destination partition only to key the returned
+		// per-partition result (which the provenance and undo are built from); the write itself is routed by the
+		// transaction re-deriving each copy's partition from its rewritten references, not by this map.
 		Map<RequestPartitionId, List<IBaseResource>> copiesByDestPartition = new LinkedHashMap<>();
 		List<IBaseResource> updateList = new ArrayList<>();
 		replaceSourceReferencesAndClassifyResources(
@@ -148,14 +148,15 @@ public class PartitionAwareReplaceReferencesSvc {
 		}
 
 		// Capture versioned IDs from copyList before buildCombinedBundle clears them
-		Map<RequestPartitionId, List<IIdType>> copiedResourceOriginalIdsByPartition = groupIdsByPartition(copyList);
+		Map<RequestPartitionId, List<IIdType>> copiedResourceOriginalIdsByOriginalPartition =
+				groupIdsByPartition(copyList);
 
 		// Step 3: Discover additional resources to update BEFORE building the plan.
 		discoverAndAddAdditionalResourcesToUpdate(copyList, updateList, theRequestDetails);
 
-		// Step 4: Build one ordered plan of bundle entries. Each entry carries its destination partition and whether
-		// it is a create (a copy) or an update, so the transaction response can be interpreted without any parallel
-		// bookkeeping. Copies come first so their POSTed placeholders resolve before the PUT updates that use them.
+		// Step 4: Build one ordered plan of bundle entries, each carrying its partition and whether it's a create
+		// (copy) or update, so the response can be interpreted without parallel bookkeeping. Copies come first so
+		// their POSTed placeholders resolve before the PUT updates that reference them.
 		List<PlannedEntry> plan = new ArrayList<>();
 		copiesByDestPartition.forEach((partition, resources) ->
 				resources.forEach(resource -> plan.add(new PlannedEntry(resource, partition, ChangeType.CREATE))));
@@ -165,8 +166,7 @@ public class PartitionAwareReplaceReferencesSvc {
 		Bundle combinedResponse =
 				(Bundle) myDaoRegistry.getSystemDao().transactionNested(theRequestDetails, buildCombinedBundle(plan));
 
-		// Step 5: Map each response entry back to its partition and change type via the plan (response entry i ↔ plan
-		// i).
+		// Step 5: Map each response entry to its partition and change type via the plan (entry i ↔ plan i).
 		List<Bundle.BundleEntryComponent> responseEntries = combinedResponse.getEntry();
 		Map<RequestPartitionId, List<IIdType>> createdResourceIdsByPartition = new LinkedHashMap<>();
 		Map<RequestPartitionId, List<IIdType>> updatedResourceIdsByPartition = new LinkedHashMap<>();
@@ -182,7 +182,9 @@ public class PartitionAwareReplaceReferencesSvc {
 		}
 
 		return new PartitionAwareReplaceReferencesResult(
-				createdResourceIdsByPartition, updatedResourceIdsByPartition, copiedResourceOriginalIdsByPartition);
+				createdResourceIdsByPartition,
+				updatedResourceIdsByPartition,
+				copiedResourceOriginalIdsByOriginalPartition);
 	}
 
 	/**
@@ -199,6 +201,9 @@ public class PartitionAwareReplaceReferencesSvc {
 		return myHapiTransactionService
 				.withRequest(theRequestDetails)
 				.withRequestPartitionId(RequestPartitionId.allPartitions())
+				// REQUIRES_NEW is required: the referencing resources may live in any partition, and the
+				// all-partitions scope only takes effect in a fresh transaction. Reusing the caller's transaction
+				// confines the search to its partition, so referrers on other shards are silently missed.
 				.withPropagation(Propagation.REQUIRES_NEW)
 				.searchList(partition -> myResourceLinkDao
 						.streamSourceIdsForTargetFhirId(theTargetId.getResourceType(), theTargetId.getIdPart())
@@ -359,7 +364,7 @@ public class PartitionAwareReplaceReferencesSvc {
 		Map<String, String> oldIdToPlaceholder = new HashMap<>();
 		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
 
-		// Build old ID → urn:uuid placeholder map from the resources being created (the copies)
+		// Assign a urn:uuid placeholder to each created (copied) resource's old ID
 		for (PlannedEntry entry : thePlan) {
 			if (entry.changeType() == ChangeType.CREATE) {
 				String oldId = entry.resource()
@@ -370,8 +375,8 @@ public class PartitionAwareReplaceReferencesSvc {
 			}
 		}
 
-		// Replace inter-resource references with urn:uuid placeholders in every entry.
-		// Source→target references were already rewritten by replaceSourceReferencesAndClassifyResources.
+		// Point every entry's inter-resource references at those placeholders (source→target refs were already
+		// rewritten during classification).
 		for (PlannedEntry entry : thePlan) {
 			replaceVersionlessReferences(entry.resource(), oldIdToPlaceholder);
 		}
@@ -379,14 +384,14 @@ public class PartitionAwareReplaceReferencesSvc {
 		for (PlannedEntry entry : thePlan) {
 			IBaseResource resource = entry.resource();
 			if (entry.changeType() == ChangeType.CREATE) {
-				// clear partition + ID on copied resources, add as CREATE with placeholder fullUrl
+				// CREATE: clear partition + ID, add with placeholder fullUrl
 				String placeholder = oldIdToPlaceholder.get(
 						resource.getIdElement().toUnqualifiedVersionless().getValue());
 				resource.setUserData(Constants.RESOURCE_PARTITION_ID, null);
 				resource.setId((IIdType) null);
 				bundleBuilder.addTransactionCreateEntry(resource, placeholder);
 			} else {
-				// update list resources keep their partition ID intact
+				// UPDATE: keep partition ID intact
 				bundleBuilder.addTransactionUpdateEntry(resource);
 			}
 		}
