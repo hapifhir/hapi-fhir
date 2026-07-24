@@ -147,7 +147,7 @@ public class SearchParameterUtil {
 
 		/*
 		 * In many cases, the "patient" SP is a "convenience" SP that resolves to a path to
-		 * another SearchParameter that  declares patient compartment membership. In this case,
+		 * another SearchParameter that declares patient compartment membership. In this case,
 		 *  we add the "patient" SP to the patient compartment as well.
 		 */
 		if ("patient".equalsIgnoreCase(theSearchParamDefinition.name())
