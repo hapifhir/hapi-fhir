@@ -258,7 +258,6 @@ import java.util.List;
 	ValidationSupportConfig.class,
 	Batch2SupportConfig.class,
 	JpaBulkExportConfig.class,
-	SearchConfig.class,
 	PackageLoaderConfig.class,
 	EnversAuditConfig.class,
 	MdmJpaConfig.class
@@ -279,13 +278,10 @@ public class JpaConfig {
 	private static final String HAPI_DEFAULT_SCHEDULER_GROUP = "HAPI";
 
 	@Autowired
-	public JpaStorageSettings myStorageSettings;
+	protected JpaStorageSettings myStorageSettings;
 
 	@Autowired
-	private PartitionSettings myPartitionSettings;
-
-	@Autowired
-	private FhirContext myFhirContext;
+	protected FhirContext myFhirContext;
 
 	@Bean
 	public ValidationSupportChain.CacheConfiguration validationSupportChainCacheConfiguration() {
@@ -320,11 +316,6 @@ public class JpaConfig {
 	public IValidationSupport jpaValidationSupportChain() {
 		return new JpaValidationSupportChain(
 				myFhirContext, validationSupportChainCacheConfiguration(), workerContextValidationSupportAdapter());
-	}
-
-	@Bean("myDaoRegistry")
-	public DaoRegistry daoRegistry() {
-		return new DaoRegistry();
 	}
 
 	@Lazy
@@ -896,8 +887,8 @@ public class JpaConfig {
 
 	@Bean
 	@Primary
-	public ISearchParamProvider searchParamProvider() {
-		return new DaoSearchParamProvider();
+	public ISearchParamProvider searchParamProvider(DaoRegistry theDaoRegistry) {
+		return new DaoSearchParamProvider(theDaoRegistry);
 	}
 
 	@Bean
@@ -1114,8 +1105,9 @@ public class JpaConfig {
 
 	@Primary
 	@Bean
-	public ReplaceReferencesProvenanceSvc replaceReferencesProvenanceSvc(DaoRegistry theDaoRegistry) {
-		return new ReplaceReferencesProvenanceSvc(theDaoRegistry);
+	public ReplaceReferencesProvenanceSvc replaceReferencesProvenanceSvc(
+			FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
+		return new ReplaceReferencesProvenanceSvc(theFhirContext, theDaoRegistry);
 	}
 
 	@Bean

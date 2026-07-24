@@ -58,7 +58,9 @@ public interface IWorkChunkStorageTests extends IWorkChunkCommon, WorkChunkTestC
 		JobInstance instance = createInstance();
 		String instanceId = getTestManager().getSvc().storeNewInstance(newSrd(), instance);
 
-		String id = getTestManager().storeWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, instanceId, 0, null, false);
+		String id = getTestManager().runInTransaction(() -> {
+			return getTestManager().storeWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, instanceId, 0, null, false);
+		});
 
 		getTestManager().runInTransaction(() -> {
 			WorkChunk chunk = getTestManager().freshFetchWorkChunk(id);
@@ -73,9 +75,13 @@ public interface IWorkChunkStorageTests extends IWorkChunkCommon, WorkChunkTestC
 	})
 	default void testWorkChunkCreate_inExpectedStatus(boolean theGatedExecution, WorkChunkStatusEnum expectedStatus) {
 		JobInstance instance = createInstance();
-		String instanceId = getTestManager().getSvc().storeNewInstance(newSrd(), instance);
+		String instanceId = getTestManager().runInTransaction(() -> {
+			return getTestManager().getSvc().storeNewInstance(newSrd(), instance);
+		});
 
-		String id = getTestManager().storeWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, instanceId, 0, CHUNK_DATA, theGatedExecution);
+		String id = getTestManager().runInTransaction(() -> {
+			return getTestManager().storeWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, instanceId, 0, CHUNK_DATA, theGatedExecution);
+		});
 		assertNotNull(id);
 
 		getTestManager().runInTransaction(() -> assertEquals(expectedStatus, getTestManager().freshFetchWorkChunk(id).getStatus()));

@@ -34,6 +34,7 @@ import ca.uhn.fhir.batch2.coordinator.ReductionStepExecutorServiceImpl;
 import ca.uhn.fhir.batch2.coordinator.WorkChannelMessageListener;
 import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
 import ca.uhn.fhir.batch2.maintenance.JobMaintenanceServiceImpl;
+import ca.uhn.fhir.batch2.maintenance.WorkChunkHeartbeatService;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
@@ -79,9 +80,15 @@ public abstract class BaseBatch2Config {
 
 	@Bean
 	public WorkChunkProcessor jobStepExecutorService(
-			BatchJobSender theBatchJobSender, IJobStepExecutionServices theJobStepExecutionServices) {
+			BatchJobSender theBatchJobSender,
+			IJobStepExecutionServices theJobStepExecutionServices,
+			IReductionStepExecutorService theReductionStepExecutorService) {
 		return new WorkChunkProcessor(
-				myPersistence, theBatchJobSender, myHapiTransactionService, theJobStepExecutionServices);
+				myPersistence,
+				theBatchJobSender,
+				myHapiTransactionService,
+				theJobStepExecutionServices,
+				theReductionStepExecutorService);
 	}
 
 	@Bean
@@ -101,13 +108,15 @@ public abstract class BaseBatch2Config {
 			IJobPersistence theJobPersistence,
 			IHapiTransactionService theTransactionService,
 			JobDefinitionRegistry theJobDefinitionRegistry,
-			IJobStepExecutionServices theJobStepExecutionServices) {
+			IJobStepExecutionServices theJobStepExecutionServices,
+			WorkChunkHeartbeatService theWorkChunkHeartbeatService) {
 		return new ReductionStepExecutorServiceImpl(
 				theJobPersistence,
 				theTransactionService,
 				theJobDefinitionRegistry,
 				theJobStepExecutionServices,
-				myInterceptorService);
+				myInterceptorService,
+				theWorkChunkHeartbeatService);
 	}
 
 	@Bean
@@ -144,7 +153,7 @@ public abstract class BaseBatch2Config {
 			@Nonnull IJobMaintenanceService theJobMaintenanceService,
 			IHapiTransactionService theHapiTransactionService,
 			IInterceptorBroadcaster theInterceptorBroadcaster,
-			ISchedulerService theSchedulerSvc) {
+			WorkChunkHeartbeatService theWorkChunkHeartbeatService) {
 		return new WorkChannelMessageListener(
 				theJobPersistence,
 				theJobDefinitionRegistry,
@@ -154,7 +163,12 @@ public abstract class BaseBatch2Config {
 				theHapiTransactionService,
 				theInterceptorBroadcaster,
 				myInterceptorService,
-				theSchedulerSvc);
+				theWorkChunkHeartbeatService);
+	}
+
+	@Bean
+	public WorkChunkHeartbeatService workchunkHeartbeatService(ISchedulerService theSchedulerSvc) {
+		return new WorkChunkHeartbeatService(theSchedulerSvc);
 	}
 
 	/**
@@ -170,8 +184,12 @@ public abstract class BaseBatch2Config {
 	@Bean
 	public SmartInitializingSingleton batch2AckTimeoutInitializer(
 			WorkChannelMessageListener theWorkChannelMessageListener,
-			IChannelConsumer<JobWorkNotification> theChannelConsumer) {
-		return () -> theWorkChannelMessageListener.setAckTimeout(theChannelConsumer.getAckTimeout());
+			IChannelConsumer<JobWorkNotification> theChannelConsumer,
+			WorkChunkHeartbeatService theWorkChunkHeartbeatService) {
+		return () -> {
+			theWorkChannelMessageListener.setAckTimeout(theChannelConsumer.getAckTimeout());
+			theWorkChunkHeartbeatService.setAckTimeout(theChannelConsumer.getAckTimeout());
+		};
 	}
 
 	@Bean
