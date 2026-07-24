@@ -117,6 +117,8 @@ public class TransactionProcessorTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(TransactionProcessorTest.class);
 
+	private AutoCloseable myMocks;
+
 	@Mock
 	private IFhirResourceDao<Practitioner> myPractitionerDao;
 	@Mock
@@ -177,12 +179,8 @@ public class TransactionProcessorTest {
 	@BeforeEach
 	void before() {
 		// Spring Boot 4 removed the MockitoTestExecutionListener that used to initialize plain @Mock/@Captor
-		// fields, so we initialize them explicitly here.
-		try (AutoCloseable ignored = MockitoAnnotations.openMocks(this)) {
-			// no-op: openMocks initializes @Mock/@Captor fields
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+		// fields, so we initialize them explicitly here and release them in tearDown.
+		myMocks = MockitoAnnotations.openMocks(this);
 
 		myDaoRegistry.unregisterAll();
 
@@ -200,8 +198,9 @@ public class TransactionProcessorTest {
 	}
 
 	@AfterEach
-	void after() {
+	void after() throws Exception {
 		myHapiTransactionService.clearNonCompatiblePartitions();
+		myMocks.close();
 	}
 
 
