@@ -80,7 +80,7 @@ public class IndexNamePrefixLayoutStrategy implements IndexLayoutStrategy {
 		if (!matcher.matches()) {
 			// Hibernate Search 8 no longer exposes this message through a public logger, so we raise the
 			// equivalent SearchException ourselves.
-			throw new SearchException(Msg.code(2996)
+			throw new SearchException(Msg.code(3008)
 					+ String.format(
 							"Invalid Elasticsearch index layout: primary (non-alias) name for existing Elasticsearch index '%1$s' does not match the expected pattern '%2$s'.",
 							elasticsearchIndexName, UNIQUE_KEY_EXTRACTION_PATTERN));
