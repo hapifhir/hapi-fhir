@@ -8,22 +8,8 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import java.io.IOException;
 
 public interface IMethodBinding {
-	Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest)
-			throws BaseServerResponseException, IOException;
+	MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest);
 
-	/**
-	 * The "target" of this binding.
-	 * If this binding extends BaseMethodBinding, then the provider will be the annotated provider object.
-	 * Other bindings should return the "target" of this binding, as applicable.
-	 * @return the object handling this binding.
-	 */
-	Object getProvider();
-
-	/**
-	 * The resource name for type and instance methods, or null for server methods.
-	 * @return the target resource name or null for server methods.
-	 */
-	String getResourceName();
 
 	/**
 	 *  Which FHIR operation does this binding support?
@@ -43,8 +29,35 @@ public interface IMethodBinding {
 	 */
 	RestOperationTypeEnum getRestOperationType();
 
-	boolean isSupportsConditional();
+
+	Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest)
+			throws BaseServerResponseException, IOException;
+
+	/**
+	 * Get to describe and identify this binding.
+	 * Used to detect and warn of duplicate bindings.
+	 */
+	String getBindingKey();
+
+	/**
+	 * The "target" of this binding.
+	 * If this binding extends BaseMethodBinding, then the provider will be the annotated provider object.
+	 * Other bindings should return the "target" of this binding, as applicable.
+	 * @return the object handling this binding.
+	 */
+	Object getProvider();
+
+	/**
+	 * The resource name for type and instance methods, or null for server methods.
+	 * @return the target resource name or null for server methods.
+	 */
+	String getResourceName();
+
+
+
 	// fixme move this stuff to a conformance-builder sibling
+
+	boolean isSupportsConditional();
 	/** for conformance */
 	boolean isSupportsConditionalMultiple();
 
@@ -52,13 +65,8 @@ public interface IMethodBinding {
 	 * Can this binding handle this request?
 	 * @return if this binding can handle this request.
 	 */
-	MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest);
+	default void close() {
+		// default empty close()
+	}
 
-	void close();
-
-	/**
-	 * Get to describe and identify this binding.
-	 * Used to detect and warn of duplicate bindings.
-	 */
-	String getBindingKey();
 }
