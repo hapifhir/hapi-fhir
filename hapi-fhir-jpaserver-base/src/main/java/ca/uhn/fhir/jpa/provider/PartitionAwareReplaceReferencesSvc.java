@@ -38,6 +38,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -119,7 +120,10 @@ public class PartitionAwareReplaceReferencesSvc {
 			return new PartitionAwareReplaceReferencesResult(Map.of(), Map.of(), Map.of());
 		}
 
-		// Step 2: Classify into COPY (partition changes after rewrite) vs UPDATE (same partition)
+		// Step 2: Classify each referencing resource as COPY or UPDATE. A COPY moves to a new partition once its
+		// references are rewritten, so we group copies by that destination partition to write each into the right
+		// place. An UPDATE stays in its own partition, so it needs no grouping - its partition is read back from
+		// the resource itself when needed (see updatePartitions below).
 		Map<RequestPartitionId, List<IBaseResource>> copiesByDestPartition = new LinkedHashMap<>();
 		List<IBaseResource> updateList = new ArrayList<>();
 		replaceSourceReferencesAndClassifyResources(
@@ -146,36 +150,34 @@ public class PartitionAwareReplaceReferencesSvc {
 		// Capture versioned IDs from copyList before buildCombinedBundle clears them
 		Map<RequestPartitionId, List<IIdType>> copiedResourceOriginalIdsByPartition = groupIdsByPartition(copyList);
 
-		// Step 3: Discover additional resources to update BEFORE bundle execution.
+		// Step 3: Discover additional resources to update BEFORE building the plan.
 		discoverAndAddAdditionalResourcesToUpdate(copyList, updateList, theRequestDetails);
 
-		List<RequestPartitionId> updatePartitions = updateList.stream()
-				.map(PartitionAwareReplaceReferencesSvc::getRequiredPartition)
-				.toList();
-
-		// Step 4: Build and execute a single combined transaction bundle.
-		Map<String, String> oldIdToPlaceholder = new HashMap<>();
-		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
-		buildCombinedBundle(copyList, updateList, oldIdToPlaceholder, bundleBuilder);
-
-		List<RequestPartitionId> entryPartitions = new ArrayList<>();
-		copiesByDestPartition.forEach((partition, resources) -> resources.forEach(r -> entryPartitions.add(partition)));
-		entryPartitions.addAll(updatePartitions);
+		// Step 4: Build one ordered plan of bundle entries. Each entry carries its destination partition and whether
+		// it is a create (a copy) or an update, so the transaction response can be interpreted without any parallel
+		// bookkeeping. Copies come first so their POSTed placeholders resolve before the PUT updates that use them.
+		List<PlannedEntry> plan = new ArrayList<>();
+		copiesByDestPartition.forEach((partition, resources) ->
+				resources.forEach(resource -> plan.add(new PlannedEntry(resource, partition, ChangeType.CREATE))));
+		updateList.forEach(
+				resource -> plan.add(new PlannedEntry(resource, getRequiredPartition(resource), ChangeType.UPDATE)));
 
 		Bundle combinedResponse =
-				(Bundle) myDaoRegistry.getSystemDao().transactionNested(theRequestDetails, bundleBuilder.getBundle());
+				(Bundle) myDaoRegistry.getSystemDao().transactionNested(theRequestDetails, buildCombinedBundle(plan));
 
+		// Step 5: Map each response entry back to its partition and change type via the plan (response entry i ↔ plan
+		// i).
 		List<Bundle.BundleEntryComponent> responseEntries = combinedResponse.getEntry();
 		Map<RequestPartitionId, List<IIdType>> createdResourceIdsByPartition = new LinkedHashMap<>();
 		Map<RequestPartitionId, List<IIdType>> updatedResourceIdsByPartition = new LinkedHashMap<>();
-		int createdEntryCount = copyList.size();
 		for (int i = 0; i < responseEntries.size(); i++) {
-			int entryIndex = i;
-			Map<RequestPartitionId, List<IIdType>> idsByPartition =
-					entryIndex < createdEntryCount ? createdResourceIdsByPartition : updatedResourceIdsByPartition;
+			PlannedEntry planned = plan.get(i);
+			Map<RequestPartitionId, List<IIdType>> idsByPartition = planned.changeType() == ChangeType.CREATE
+					? createdResourceIdsByPartition
+					: updatedResourceIdsByPartition;
 			ReplaceReferencesProvenanceSvc.extractChangedResourceId(responseEntries.get(i))
 					.ifPresent(id -> idsByPartition
-							.computeIfAbsent(entryPartitions.get(entryIndex), k -> new ArrayList<>())
+							.computeIfAbsent(planned.partition(), k -> new ArrayList<>())
 							.add(id));
 		}
 
@@ -338,56 +340,58 @@ public class PartitionAwareReplaceReferencesSvc {
 		}
 	}
 
+	private enum ChangeType {
+		CREATE,
+		UPDATE
+	}
+
+	private record PlannedEntry(IBaseResource resource, RequestPartitionId partition, ChangeType changeType) {}
+
 	/**
 	 * Builds a single combined transaction bundle containing POST (CREATE) entries for copied
 	 * resources and PUT (UPDATE) entries for reference-only changes. References to copied resources
-	 * are replaced with {@code urn:uuid} placeholders in both lists — the transaction processor's
+	 * are replaced with {@code urn:uuid} placeholders — the transaction processor's
 	 * {@code IdSubstitutionMap} resolves these after the POST entries create the new resources.
 	 * <p>
 	 * Source→target references are already rewritten by {@link #replaceSourceReferencesAndClassifyResources}.
-	 *
-	 * @param theOldIdToPlaceholder populated by this method with old ID → urn:uuid mappings
 	 */
-	private void buildCombinedBundle(
-			List<IBaseResource> theCopyList,
-			List<IBaseResource> theUpdateList,
-			Map<String, String> theOldIdToPlaceholder,
-			BundleBuilder theBundleBuilder) {
+	private IBaseBundle buildCombinedBundle(List<PlannedEntry> thePlan) {
+		Map<String, String> oldIdToPlaceholder = new HashMap<>();
+		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
 
-		// Build old ID → urn:uuid placeholder map from the copy list
-		for (IBaseResource resource : theCopyList) {
-			String oldId = resource.getIdElement().toUnqualifiedVersionless().getValue();
-			theOldIdToPlaceholder.put(oldId, IdDt.newRandomUuid().getValue());
+		// Build old ID → urn:uuid placeholder map from the resources being created (the copies)
+		for (PlannedEntry entry : thePlan) {
+			if (entry.changeType() == ChangeType.CREATE) {
+				String oldId = entry.resource()
+						.getIdElement()
+						.toUnqualifiedVersionless()
+						.getValue();
+				oldIdToPlaceholder.put(oldId, IdDt.newRandomUuid().getValue());
+			}
 		}
 
-		// Replace inter-resource references with urn:uuid placeholders in BOTH lists.
+		// Replace inter-resource references with urn:uuid placeholders in every entry.
 		// Source→target references were already rewritten by replaceSourceReferencesAndClassifyResources.
-		replaceVersionlessReferences(theCopyList, theOldIdToPlaceholder);
-		replaceVersionlessReferences(theUpdateList, theOldIdToPlaceholder);
-
-		// POST entries: clear partition + ID on copied resources, add as CREATE with placeholder fullUrl
-		for (IBaseResource resource : theCopyList) {
-			String oldId = resource.getIdElement().toUnqualifiedVersionless().getValue();
-			String placeholder = theOldIdToPlaceholder.get(oldId);
-			resource.setUserData(Constants.RESOURCE_PARTITION_ID, null);
-			resource.setId((IIdType) null);
-			theBundleBuilder.addTransactionCreateEntry(resource, placeholder);
+		for (PlannedEntry entry : thePlan) {
+			replaceVersionlessReferences(entry.resource(), oldIdToPlaceholder);
 		}
 
-		// PUT entries: update list resources keep their partition ID intact
-		for (IBaseResource resource : theUpdateList) {
-			theBundleBuilder.addTransactionUpdateEntry(resource);
+		for (PlannedEntry entry : thePlan) {
+			IBaseResource resource = entry.resource();
+			if (entry.changeType() == ChangeType.CREATE) {
+				// clear partition + ID on copied resources, add as CREATE with placeholder fullUrl
+				String placeholder = oldIdToPlaceholder.get(
+						resource.getIdElement().toUnqualifiedVersionless().getValue());
+				resource.setUserData(Constants.RESOURCE_PARTITION_ID, null);
+				resource.setId((IIdType) null);
+				bundleBuilder.addTransactionCreateEntry(resource, placeholder);
+			} else {
+				// update list resources keep their partition ID intact
+				bundleBuilder.addTransactionUpdateEntry(resource);
+			}
 		}
-	}
 
-	/**
-	 * Rewrites versionless references in all resources in the list using the given map.
-	 * Versioned references are left unchanged.
-	 */
-	private void replaceVersionlessReferences(List<IBaseResource> theResources, Map<String, String> theReferenceMap) {
-		for (IBaseResource resource : theResources) {
-			replaceVersionlessReferences(resource, theReferenceMap);
-		}
+		return bundleBuilder.getBundle();
 	}
 
 	/**
