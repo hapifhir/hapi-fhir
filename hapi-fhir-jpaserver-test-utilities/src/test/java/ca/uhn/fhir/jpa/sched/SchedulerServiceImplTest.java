@@ -31,15 +31,18 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.AopTestUtils;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.DURATION;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -201,19 +204,26 @@ public class SchedulerServiceImplTest {
 		// verify
 		/*
 		 * We're ignoring the first call because
-		 * we set it to fire "now", and that might be < 1 second
+		 * we set it to fire "now", and that might be < 1 second.
+		 *
+		 * We also have to be careful because scheduler will fire
+		 * once immediately upon scheduling, and then on the exact second (.000ms) afterwards.
+		 * This means that the first 'wait' is not enough.
+		 *
+		 * it also means that our gap should be tolerant of a little bit of time before or after.
+		 * So we'll verify to within 1s around the expected next second.
 		 */
+		ourLatch.awaitExpected();
+
+		ourLatch.setExpectAtLeast(1);
 		ourLatch.awaitExpected();
 
 		Instant now = Instant.now();
 
 		ourLatch.setExpectAtLeast(1);
-
 		ourLatch.awaitExpected();
-		long elapsedTime = Instant.now().getEpochSecond() - now.getEpochSecond();
-		assertEquals(1, elapsedTime, "actual time is " + elapsedTime);
-
-		assertEquals(2, CronJob.ourCount.get());
+		long elapsedTime = Duration.between(now, Instant.now()).toMillis();
+		assertThat(elapsedTime).isBetween(500L, 1500L);
 
 		// verify correct scheduler
 		Set<JobKey> keys = theUseClustered ? mySvc.getClusteredJobKeysForUnitTest()

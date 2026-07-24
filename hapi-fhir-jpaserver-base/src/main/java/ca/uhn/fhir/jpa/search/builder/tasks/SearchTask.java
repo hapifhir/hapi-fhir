@@ -56,9 +56,11 @@ import co.elastic.apm.api.ElasticApm;
 import co.elastic.apm.api.Span;
 import co.elastic.apm.api.Transaction;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 
 import java.io.IOException;
@@ -91,10 +93,31 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 public class SearchTask implements Callable<Void> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchTask.class);
-	// injected beans
-	protected final HapiTransactionService myTxService;
-	protected final FhirContext myContext;
-	protected final ISearchResultCacheSvc mySearchResultCacheSvc;
+
+	@Autowired
+	protected HapiTransactionService myTxService;
+
+	@Autowired
+	protected FhirContext myContext;
+
+	@Autowired
+	protected ISearchResultCacheSvc mySearchResultCacheSvc;
+
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
+
+	@Autowired
+	private SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
+
+	@Autowired
+	private JpaStorageSettings myStorageSettings;
+
+	@Autowired
+	private ISearchCacheSvc mySearchCacheSvc;
+
+	@Autowired
+	private IPagingProvider myPagingProvider;
+
 	private final SearchParameterMap myParams;
 	private final String myResourceType;
 	private final ArrayList<JpaPid> mySyncedPids = new ArrayList<>();
@@ -108,12 +131,7 @@ public class SearchTask implements Callable<Void> {
 	private final Consumer<String> myOnRemove;
 	private final int mySyncSize;
 	private final Integer myLoadingThrottleForUnitTests;
-	private final IInterceptorBroadcaster myInterceptorBroadcaster;
-	private final SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
-	private final JpaStorageSettings myStorageSettings;
-	private final ISearchCacheSvc mySearchCacheSvc;
-	private final IPagingProvider myPagingProvider;
-	private final IInterceptorBroadcaster myCompositeBroadcaster;
+	private IInterceptorBroadcaster myCompositeBroadcaster;
 	private Search mySearch;
 	private boolean myAbortRequested;
 	private int myCountSavedTotal = 0;
@@ -129,26 +147,7 @@ public class SearchTask implements Callable<Void> {
 	/**
 	 * Constructor
 	 */
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	public SearchTask(
-			SearchTaskParameters theCreationParams,
-			HapiTransactionService theManagedTxManager,
-			FhirContext theContext,
-			IInterceptorBroadcaster theInterceptorBroadcaster,
-			SearchBuilderFactory theSearchBuilderFactory,
-			ISearchResultCacheSvc theSearchResultCacheSvc,
-			JpaStorageSettings theStorageSettings,
-			ISearchCacheSvc theSearchCacheSvc,
-			IPagingProvider thePagingProvider) {
-		// beans
-		myTxService = theManagedTxManager;
-		myContext = theContext;
-		myInterceptorBroadcaster = theInterceptorBroadcaster;
-		mySearchBuilderFactory = theSearchBuilderFactory;
-		mySearchResultCacheSvc = theSearchResultCacheSvc;
-		myStorageSettings = theStorageSettings;
-		mySearchCacheSvc = theSearchCacheSvc;
-		myPagingProvider = thePagingProvider;
+	public SearchTask(SearchTaskParameters theCreationParams) {
 
 		// values
 		myOnRemove = theCreationParams.OnRemove;
@@ -161,9 +160,38 @@ public class SearchTask implements Callable<Void> {
 		myLoadingThrottleForUnitTests = theCreationParams.getLoadingThrottleForUnitTests();
 
 		mySearchRuntimeDetails = new SearchRuntimeDetails(myRequest, mySearch.getUuid());
-		mySearchRuntimeDetails.setQueryString(myParams.toNormalizedQueryString(myContext));
+		mySearchRuntimeDetails.setQueryString(myParams.toNormalizedQueryString());
 		myRequestPartitionId = theCreationParams.RequestPartitionId;
 		myParentTransaction = ElasticApm.currentTransaction();
+	}
+
+	/**
+	 * Unit test constructor
+	 */
+	public SearchTask(
+			SearchTaskParameters theCreationParams,
+			HapiTransactionService theTransactionService,
+			FhirContext theContext,
+			IInterceptorBroadcaster theInterceptorBroadcaster,
+			SearchBuilderFactory<JpaPid> theSearchBuilderFactory,
+			ISearchResultCacheSvc theSearchResultCacheSvc,
+			JpaStorageSettings theStorageSettings,
+			ISearchCacheSvc theSearchCacheSvc,
+			IPagingProvider thePagingProvider) {
+		this(theCreationParams);
+		myTxService = theTransactionService;
+		myContext = theContext;
+		myInterceptorBroadcaster = theInterceptorBroadcaster;
+		mySearchResultCacheSvc = theSearchResultCacheSvc;
+		myPagingProvider = thePagingProvider;
+		mySearchBuilderFactory = theSearchBuilderFactory;
+		myStorageSettings = theStorageSettings;
+		mySearchCacheSvc = theSearchCacheSvc;
+		start();
+	}
+
+	@PostConstruct
+	void start() {
 		myCompositeBroadcaster =
 				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, myRequest);
 	}
