@@ -78,11 +78,7 @@ public class DatabaseSearchResultCacheSvcImpl implements ISearchResultCacheSvc {
 		return myTransactionService
 				.withRequest(theRequestDetails)
 				.withRequestPartitionId(theRequestPartitionId)
-				.execute(() -> {
-					List<Object[]> retVal = mySearchResultDao.findWithSearchPidOrderIndependent(theSearch.getId());
-					ourLog.trace("fetchAllResultPids returned {} pids", retVal.size());
-					return ISearchResultDao.toJpaPidList(retVal);
-				});
+				.execute(() -> mySearchResultDao.findWithSearchPidOrdered(theSearch.getId()));
 	}
 
 	@Override

@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 import java.util.function.Consumer;
 
+// FIXME: still used?
 public class SearchTaskParameters {
 	// parameters
 	public ca.uhn.fhir.jpa.entity.Search Search;

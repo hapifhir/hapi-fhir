@@ -59,6 +59,8 @@ import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTypeDao;
+import ca.uhn.fhir.jpa.dao.data.ISearchDao;
+import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
@@ -331,6 +333,10 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected ITermDeferredStorageSvc myTermDeferredStorageSvc;
 	@Autowired
 	protected IResourceSearchUrlDao mySearchUrlDao;
+	@Autowired
+	protected ISearchDao mySearchDao;
+	@Autowired
+	protected ISearchResultDao mySearchResultDao;
 	private final List<Object> myRegisteredInterceptors = new ArrayList<>(1);
 	@Autowired
 	private IResourceHistoryTagDao myResourceHistoryTagDao;
@@ -715,12 +721,24 @@ public abstract class BaseJpaTest extends BaseTest {
 		});
 	}
 
+    protected void logAllSearches() {
+        runInTransaction(() -> {
+            ourLog.info("Searches:\n * {}", mySearchDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+        });
+    }
+
+    protected void logAllSearchResults() {
+        runInTransaction(() -> {
+            ourLog.info("Search Results:\n * {}", mySearchResultDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+        });
+    }
+
     protected void logAllSearchUrls() {
         runInTransaction(() -> {
             ourLog.info("Token indexes:\n * {}", mySearchUrlDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
         });
     }
-    
+
 	protected void logAllTokenIndexes(String... theParamNames) {
 		String messageSuffix = theParamNames.length > 0 ? " containing " + Arrays.asList(theParamNames) : "";
 		runInTransaction(() -> {

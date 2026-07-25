@@ -883,9 +883,23 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		 * parameters in one query. So we only do this optimization if there aren't too
 		 * many results.
 		 */
-		if (myHasNextIteratorQuery) {
-			if (myPidSet.size() + sqlBuilder.countBindVariables() < 900) {
-				sqlBuilder.excludeResourceIdsPredicate(myPidSet);
+		if (myPidSet != null && !myPidSet.isEmpty()) {
+			boolean excluded = false;
+			if (myHasNextIteratorQuery) {
+				if (myPidSet.size() + sqlBuilder.countBindVariables() < 900) {
+					sqlBuilder.excludeResourceIdsPredicate(myPidSet);
+					excluded = true;
+				}
+			}
+			/*
+			 * If we haven't explicitly added a "WHERE pid NOT IN (previous_pids)" to the
+			 * generated SQL, then we need to increase the maximum number of rows to fetch
+			 * since we'll presumably see the previous results again this time.
+			 */
+			if (!excluded) {
+				if (theSearchProperties.getMaxResultsRequested() != null) {
+					theSearchProperties.setMaxResultsRequested(theSearchProperties.getMaxResultsRequested() + myPidSet.size());
+				}
 			}
 		}
 
