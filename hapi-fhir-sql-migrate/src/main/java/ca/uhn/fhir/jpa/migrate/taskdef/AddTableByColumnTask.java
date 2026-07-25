@@ -21,11 +21,11 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import ca.uhn.fhir.util.Logs;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 
 public class AddTableByColumnTask extends BaseTableTask {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(AddTableByColumnTask.class);
+	private static final Logger ourLog = Logs.getDatabaseMigrationLog();
 
 	private final List<AddColumnTask> myAddColumnTasks = new ArrayList<>();
 	private List<String> myPkColumns;

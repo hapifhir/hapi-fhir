@@ -23,6 +23,7 @@ import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
 import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeToDriverTypeToSqlType;
+import ca.uhn.fhir.util.Logs;
 import com.healthmarketscience.sqlbuilder.AlterTableQuery;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.CreateIndexQuery;
@@ -36,12 +37,11 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSchema;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSpec;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.Types;
 
 public class MigrationQueryBuilder {
-	private static final Logger ourLog = LoggerFactory.getLogger(MigrationQueryBuilder.class);
+	private static final Logger ourLog = Logs.getDatabaseMigrationLog();
 
 	private final DbSpec mySpec;
 	private final DbSchema mySchema;

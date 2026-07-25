@@ -21,13 +21,13 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import ca.uhn.fhir.util.Logs;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapperResultSetExtractor;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
@@ -42,7 +42,7 @@ import javax.sql.DataSource;
 
 public class DropIndexTask extends BaseTableTask {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(DropIndexTask.class);
+	private static final Logger ourLog = Logs.getDatabaseMigrationLog();
 	private String myIndexName;
 	private boolean myOnline;
 
