@@ -51,6 +51,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
@@ -59,9 +60,11 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.IPagingProvider;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.AsyncUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
@@ -69,6 +72,7 @@ import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.BeanFactory;
@@ -92,6 +96,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.DEFAULT_SYNC_SIZE;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -202,6 +207,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		myPersistedJpaBundleProviderFactory = thePersistedJpaBundleProviderFactory;
 		myDaoRegistry = theDaoRegistry;
 		mySearchResultCacheSvc = theSearchResultCacheSvc;
+		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
+		myCacheAwareSearchSvc = theCacheAwareSearchSvc;
+		myPagingProvider = thePagingProvider;
 		start();
 	}
 
@@ -235,16 +243,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		mySyncSize = theSyncSize;
 	}
 
-	@Override
-	public void cancelAllActiveSearches() {
-		for (SearchTask next : myIdToSearchTask.values()) {
-			ourLog.info(
-					"Requesting immediate abort of search: {}", next.getSearch().getUuid());
-			next.requestImmediateAbort();
-			AsyncUtil.awaitLatchAndIgnoreInterrupt(next.getCompletionLatch(), 30, TimeUnit.SECONDS);
-		}
-	}
-
 	@SuppressWarnings("SameParameterValue")
 	@VisibleForTesting
 	public void setMaxMillisToWaitForRemoteResultsForUnitTest(long theMaxMillisToWaitForRemoteResults) {
@@ -272,6 +270,10 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 			int theTo,
 			@Nullable RequestDetails theRequestDetails,
 			RequestPartitionId theRequestPartitionId) {
+
+		if (true) {
+			throw new IllegalStateException("FIXME: this method should be removed");
+		}
 
 		// If we're actively searching right now, don't try to do anything until at least one batch has been
 		// persisted in the DB
@@ -687,6 +689,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		return Optional.empty();
 	}
 
+
 	@Nonnull
 	private PersistedJpaSearchFirstPageBundleProvider submitSearch(
 			IDao theCallingDao,
@@ -761,5 +764,42 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 				return theFromIndex;
 			}
 		};
+	}
+
+	/**
+	 * Updates the search entity with failure information based on the exception.
+	 * Determines the appropriate HTTP status code based on exception type:
+	 * - DataFormatException -> 400 Bad Request (client error)
+	 * - BaseServerResponseException -> Use exception's status code
+	 * - Other exceptions -> 500 Internal Server Error
+	 *
+	 * Optionally appends stack trace if unit test capture is enabled.
+	 *
+	 * @param theThrowable The exception that caused the search to fail
+	 */
+	public static void markSearchAsFailedWithExceptionDetails(Search theSearch, Throwable theThrowable) {
+		Throwable rootCause = ExceptionUtils.getRootCause(theThrowable);
+		rootCause = defaultIfNull(rootCause, theThrowable);
+
+		String failureMessage = rootCause.getMessage();
+
+		int failureCode;
+		if (rootCause instanceof DataFormatException || theThrowable instanceof DataFormatException) {
+			// DataFormatException indicates invalid client input
+			// and should return HTTP 400 Bad Request, not 500 Internal Server Error.
+			failureCode = InvalidRequestException.STATUS_CODE;
+		} else if (theThrowable instanceof BaseServerResponseException baseServerResponseException) {
+			failureCode = baseServerResponseException.getStatusCode();
+		} else {
+			failureCode = InternalErrorException.STATUS_CODE;
+		}
+
+		if (HapiSystemProperties.isUnitTestCaptureStackEnabled()) {
+			failureMessage += "\nStack\n" + ExceptionUtils.getStackTrace(rootCause);
+		}
+
+		theSearch.setFailureMessage(failureMessage);
+		theSearch.setFailureCode(failureCode);
+		theSearch.setStatus(SearchStatusEnum.FAILED);
 	}
 }

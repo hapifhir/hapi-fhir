@@ -21,6 +21,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
@@ -46,7 +47,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -88,6 +88,28 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+
+	/**
+	 * Constructor
+	 */
+	public CacheAwareSearchSvcImpl() {
+		super();
+	}
+
+	/**
+	 * Unit test constructor
+	 */
+	public CacheAwareSearchSvcImpl(FhirContext theFhirContext, IHapiTransactionService theTxService, JpaStorageSettings theStorageSettings, IInterceptorBroadcaster theInterceptorBroadcaster, ISearchCacheSvc theSearchCacheSvc, ISearchResultCacheSvc theSearchResultCacheSvc, EntityManager theEntityManager, SearchBuilderFactory<JpaPid> theSearchBuilderFactory, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+		myFhirContext = theFhirContext;
+		myTxService = theTxService;
+		myStorageSettings = theStorageSettings;
+		myInterceptorBroadcaster = theInterceptorBroadcaster;
+		mySearchCacheSvc = theSearchCacheSvc;
+		mySearchResultCacheSvc = theSearchResultCacheSvc;
+		myEntityManager = theEntityManager;
+		mySearchBuilderFactory = theSearchBuilderFactory;
+		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
+	}
 
 	@Override
 	public IBundleProvider executeQuery(
@@ -160,12 +182,11 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 
 	public class JpaBundleProvider implements IBundleProvider {
 		private final Map<JpaPid, IBaseResource> myFetchedResources = new HashMap<>();
-
 		private SearchParameterMap myParams;
-		private RequestDetails myRequestDetails;
+		private final RequestDetails myRequestDetails;
 		private RequestPartitionId myRequestPartitionId;
 		private CacheControlDirective myCacheControlDirective;
-		private IInterceptorBroadcaster myCompositeBroadcaster;
+		private final IInterceptorBroadcaster myCompositeBroadcaster;
 		private String mySearchUuid;
 		private Search mySearchEntity;
 		private List<JpaPid> myCachedPidsFromMatches;
@@ -410,6 +431,7 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 					myStorageSettings.getSearchPreFetchThresholds().get(0);
 				ensureSearchPerformed(0, firstPrefetchThreshold);
 			}
+			validateSearchEntityNotFailed();
 		}
 
 		private void ensureSearchPerformed(int theFromIndex, int theToIndex) {
@@ -448,7 +470,7 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 						.withRequest(myRequestDetails)
 						.withRequestPartitionId(myRequestPartitionId)
 						.execute(() -> ensureSearchPerformedInsideTransaction(theFromIndex, theToIndex));
-					return;
+					break;
 				} catch (Exception e) {
 					if (i == 5) {
 						throw e;
@@ -458,6 +480,8 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 					resetState();
 				}
 			}
+
+			validateSearchEntityNotFailed();
 		}
 
 		private void resetState() {
@@ -599,9 +623,11 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 					if (numToFetch != null && newPidsThisPass.size() == numToFetch) {
 						haveMoreResults = true;
 					}
-				} catch (IOException e) {
+				} catch (Exception e) {
 					// FIXME: add code
-					throw new InternalErrorException(Msg.code(1) + e, e);
+					SearchCoordinatorSvcImpl.markSearchAsFailedWithExceptionDetails(mySearchEntity, e);
+					mySearchCacheSvc.save(mySearchEntity, myRequestPartitionId);
+					return;
 				}
 
 				countFoundThisPass += newPidsThisPass.size();
@@ -695,10 +721,17 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 			fetchResourcesAndIncludes(searchBuilder, pidsToReturn, theFromIndex, theToIndex);
 		}
 
+		private void validateSearchEntityNotFailed() {
+			if (mySearchEntity != null && mySearchEntity.getStatus() == SearchStatusEnum.FAILED) {
+				// FIXME: new code
+				throw new InternalErrorException(Msg.code(1) + "Search failed: " + mySearchEntity.getFailureMessage());
+			}
+		}
+
 		@Nullable
 		private Integer calculateNextSearchThreshold(int numWanted, ISearchBuilder<JpaPid> searchBuilder) {
 			@Nullable Integer numToFetch = null;
-			
+
 			// For subsequent pages, we'll use the predetermined search thresholds
 			for (int nextThreshold : myStorageSettings.getSearchPreFetchThresholds()) {
 
@@ -729,8 +762,11 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 			return mySearchBuilderFactory.newSearchBuilder(mySearchEntity.getResourceType(), resourceType);
 		}
 
-		private static JpaPid extractFetchedResourcePid(IBaseResource next) {
-			return (JpaPid) next.getUserData(IDao.RESOURCE_PID_KEY);
+		private static JpaPid extractFetchedResourcePid(IBaseResource theResource) {
+			JpaPid retVal = (JpaPid) theResource.getUserData(IDao.RESOURCE_PID_KEY);
+			Validate.notNull(retVal, "Resource has not PID assigned by DAO layer: %s", theResource);
+			return retVal;
 		}
+
 	}
 }

@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.search.ExceptionService;
+import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -104,7 +105,7 @@ public class SearchContinuationTask extends SearchTask {
 		} catch (Throwable e) {
 			ourLog.error("Failure processing search", e);
 
-			markSearchAsFailedWithExceptionDetails(e);
+			SearchCoordinatorSvcImpl.markSearchAsFailedWithExceptionDetails(mySearch, e);
 
 			saveSearch();
 			return null;

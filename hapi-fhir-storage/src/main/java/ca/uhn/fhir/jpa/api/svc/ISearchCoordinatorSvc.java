@@ -33,8 +33,7 @@ import java.util.Optional;
 
 public interface ISearchCoordinatorSvc<T extends IResourcePersistentId> {
 
-	void cancelAllActiveSearches();
-
+	// FIXME: remove
 	List<T> getResources(
 			String theUuid,
 			int theFrom,
@@ -60,4 +59,5 @@ public interface ISearchCoordinatorSvc<T extends IResourcePersistentId> {
 	 */
 	Optional<Integer> getSearchTotal(
 			String theUuid, @Nullable RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId);
+
 }
