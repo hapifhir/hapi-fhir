@@ -149,6 +149,34 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 
 	@Test
+	public void testSearchAndBlockSome_HitAndCrossThresholdInSinglePass() {
+		myStorageSettings.setSearchPreFetchThresholds(Arrays.asList(5, 10, 100));
+
+		create50Observations();
+
+		AtomicInteger preAccessInterceptorCallCount = new AtomicInteger(0);
+		List<String> interceptedResourceIds = new ArrayList<>();
+		IAnonymousInterceptor interceptor = new PreAccessInterceptorCountingAndBlockOdd(preAccessInterceptorCallCount, interceptedResourceIds);
+		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
+
+		// Perform a search
+		SearchParameterMap map = new SearchParameterMap();
+		map.setSort(new SortSpec(Observation.SP_IDENTIFIER, SortOrderEnum.ASC));
+		map.setCount(4);
+		IBundleProvider outcome = myObservationDao.search(map, mySrd);
+		ourLog.info("Search UUID: {}", outcome.getUuid());
+
+		// Fetch the first 20 (should hit the first search boundary and need to cross it in the same pass)
+		List<IBaseResource> resources = outcome.getResources(0, 4);
+		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
+		assertEquals(myObservationIdsEvenOnly.subList(0, 4), returnedIdValues);
+		// It takes 2 passes because we should have searched for 4 resources in the first pass,
+		// but filtered half of them leaving only 2, so we needed another pass
+		assertEquals(2, preAccessInterceptorCallCount.get());
+		assertThat(interceptedResourceIds).as("Wrong response from " + outcome.getClass()).isEqualTo(myObservationIds.subList(0, 17));
+	}
+
+		@Test
 	public void testSearchAndBlockSome_LoadSynchronous() {
 		// setup
 		create50Observations();

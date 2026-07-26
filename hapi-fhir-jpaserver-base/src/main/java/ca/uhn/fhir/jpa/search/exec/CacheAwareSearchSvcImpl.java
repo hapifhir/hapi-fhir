@@ -448,8 +448,6 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 
 					int countFoundThisPass = 0;
 					int countBlockedThisPass = 0;
-					List<JpaPid> newUnsyncedPids = null;
-					List<IBaseResource> newUnsyncedResources = null;
 					List<JpaPid> previouslyFoundPids = List.of();
 					SearchRuntimeDetails searchDetails =
 						new SearchRuntimeDetails(myRequestDetails, mySearchEntity.getUuid());
@@ -468,40 +466,6 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 
 					int numWanted = theToIndex - mySearchEntity.getNumFound();
 
-					@Nullable
-					Integer numToFetch = null;
-
-					// FIXME: use thresholds?
-					if (false && mySearchEntity.getNumFound() == 0) {
-						// For the first page, just fetch the number requested plus one
-						// so that we can tell whether there will be more results to return
-						// on subsequent pages
-						numToFetch = numWanted + 1;
-					} else {
-
-						// For subsequent pages, we'll use the predetermined search thresholds
-						for (int nextThreshold : myStorageSettings.getSearchPreFetchThresholds()) {
-
-							/*
-							 * If we're past the last prefetch threshold then
-							 * we're potentially fetching unlimited amounts of data.
-							 * We'll move responsibility for deduplication to the database in this case
-							 * so that we don't run the risk of blowing out the memory
-							 * in the app server
-							 */
-							if (nextThreshold == -1) {
-								searchBuilder.setDeduplicateInDatabase(true);
-							} else {
-								if ((numWanted + mySearchEntity.getNumFound()) < nextThreshold) {
-									numToFetch = nextThreshold + 1;
-									break;
-								}
-							}
-
-						}
-					}
-					searchBuilder.setMaxResultsToFetch(numToFetch);
-
 					// FIXME: set these?
 								/*
 								searchBuilder.setFetchSize(0);
@@ -514,72 +478,85 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 					}
 
 					List<JpaPid> newPids = new ArrayList<>();
-					try (IResultIterator<JpaPid> query = searchBuilder.createQuery(
-						myParams, searchDetails, myRequestDetails, myRequestPartitionId)) {
+					while (true) {
 
-						int numToReturn = theToIndex - theFromIndex;
-						while (query.hasNext()) {
-							JpaPid next = query.next();
-							newPids.add(next);
+						Integer numToFetch = calculateNextSearchThreshold(numWanted, searchBuilder);
+						searchBuilder.setMaxResultsToFetch(numToFetch);
 
-							if (pidsToReturn.size() < numToReturn) {
+						List<JpaPid> newPidsThisPass = new ArrayList<>();
+						try (IResultIterator<JpaPid> query = searchBuilder.createQuery(
+							myParams, searchDetails, myRequestDetails, myRequestPartitionId)) {
+
+							while (query.hasNext()) {
+								JpaPid next = query.next();
+								newPidsThisPass.add(next);
+
 								if (numToSkip == 0) {
 									pidsToReturn.add(next);
 								} else {
 									numToSkip--;
 								}
+
+								if (numToFetch != null && newPidsThisPass.size() == numToFetch) {
+									break;
+								}
 							}
 
-							if (numToFetch != null && newPids.size() == numToFetch) {
-								break;
+							if (!newPidsThisPass.isEmpty()) {
+								addedResultsThisPass = true;
+							}
+							if (numToFetch != null && newPidsThisPass.size() == numToFetch) {
+								haveMoreResults = true;
 							}
 						}
 
-						if (!newPids.isEmpty()) {
-							addedResultsThisPass = true;
-						}
-						if (numToFetch != null && newPids.size() == numToFetch) {
-							haveMoreResults = true;
-						}
-					}
+						countFoundThisPass += newPidsThisPass.size();
 
-					List<IBaseResource> newResources =
-						searchBuilder.loadResourcesByPid(newPids, myRequestDetails);
-					countFoundThisPass += newPids.size();
+						// Interceptor call: STORAGE_PREACCESS_RESOURCES
+						// This can be used to remove results from the search result details before
+						// the user has a chance to know that they were in the results
+						boolean blockedResults = false;
+						if (myCompositeBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES) && !newPidsThisPass.isEmpty()) {
+							Set<JpaPid> blockedPids = new HashSet<>();
 
-					// Interceptor call: STORAGE_PREACCESS_RESOURCES
-					// This can be used to remove results from the search result details before
-					// the user has a chance to know that they were in the results
-					if (myRequestDetails != null && !newPids.isEmpty()) {
-						JpaPreResourceAccessDetails accessDetails =
-							new JpaPreResourceAccessDetails(newPids, newResources);
-						HookParams params = new HookParams()
-							.add(IPreResourceAccessDetails.class, accessDetails)
-							.add(RequestDetails.class, myRequestDetails)
-							.addIfMatchesType(ServletRequestDetails.class, myRequestDetails);
-						myCompositeBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+							List<IBaseResource> newResources =
+								searchBuilder.loadResourcesByPid(newPidsThisPass, myRequestDetails);
+							JpaPreResourceAccessDetails accessDetails =
+								new JpaPreResourceAccessDetails(newPidsThisPass, newResources);
+							HookParams params = new HookParams()
+								.add(IPreResourceAccessDetails.class, accessDetails)
+								.add(RequestDetails.class, myRequestDetails)
+								.addIfMatchesType(ServletRequestDetails.class, myRequestDetails);
+							myCompositeBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
 
-						for (int i = newPids.size() - 1; i >= 0; i--) {
-							if (accessDetails.isDontReturnResourceAtIndex(i)) {
-								newPids.remove(i);
-								newResources.remove(i);
-								countBlockedThisPass++;
+							for (int i = newPidsThisPass.size() - 1; i >= 0; i--) {
+								if (accessDetails.isDontReturnResourceAtIndex(i)) {
+									blockedResults = true;
+									JpaPid blockedPid = newPidsThisPass.remove(i);
+									newResources.remove(i);
+									blockedPids.add(blockedPid);
+									countFoundThisPass--;
+									countBlockedThisPass++;
+								}
+							}
+
+							if (!blockedPids.isEmpty()) {
+								pidsToReturn.removeIf(blockedPids::contains);
 							}
 						}
-					}
 
-					if (newUnsyncedPids == null) {
-						newUnsyncedPids = new ArrayList<>();
-					}
-					if (newUnsyncedResources == null) {
-						newUnsyncedResources = new ArrayList<>();
-					}
-					newUnsyncedPids.addAll(newPids);
-					newUnsyncedResources.addAll(newResources);
-
-					if (initialSearch || addedResultsThisPass) {
 						mySearchEntity.setNumFound(mySearchEntity.getNumFound() + countFoundThisPass);
 						mySearchEntity.setNumBlocked(mySearchEntity.getNumBlocked() + countBlockedThisPass);
+
+						newPids.addAll(newPidsThisPass);
+
+						if (!blockedResults || mySearchEntity.getNumFound() >= theToIndex) {
+							break;
+						}
+
+					}
+
+					if (initialSearch || addedResultsThisPass) {
 						if (haveMoreResults) {
 							mySearchEntity.setStatus(SearchStatusEnum.PASSCMPLET);
 							/*
@@ -601,25 +578,53 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 
 						mySearchCacheSvc.save(mySearchEntity, myRequestPartitionId);
 						mySearchResultCacheSvc.storeResults(
-							mySearchEntity, previouslyFoundPids, newUnsyncedPids, myRequestDetails, myRequestPartitionId);
+							mySearchEntity, previouslyFoundPids, newPids, myRequestDetails, myRequestPartitionId);
 					}
 
-					// Fetch actual wanted resources
-//							if (newUnsyncedPids != null) {
-//								if (theFromIndex == pidsToReturn.size()) {
-//									int toIndex = theToIndex - theFromIndex;
-//									toIndex = Math.min(toIndex, newUnsyncedResources.size());
-//									fetchedResources = new ArrayList<>(newUnsyncedResources.subList(0, toIndex));
-//								}
-//
-//								pidsToReturn.addAll(newUnsyncedPids);
-//							}
+					pidsToReturn = pidsToReturn.subList(0, Math.min(pidsToReturn.size(), theToIndex - theFromIndex));
 
 					mySearchPerformed = true;
 					return fetchResourcesAndIncludes(searchBuilder, pidsToReturn, fetchedResources, theResponsePageBuilder);
 
 
 				});
+		}
+
+		@Nullable
+		private Integer calculateNextSearchThreshold(int numWanted, ISearchBuilder<JpaPid> searchBuilder) {
+			@Nullable
+			Integer numToFetch = null;
+
+			// FIXME: use thresholds?
+			if (false && mySearchEntity.getNumFound() == 0) {
+				// For the first page, just fetch the number requested plus one
+				// so that we can tell whether there will be more results to return
+				// on subsequent pages
+				numToFetch = numWanted + 1;
+			} else {
+
+				// For subsequent pages, we'll use the predetermined search thresholds
+				for (int nextThreshold : myStorageSettings.getSearchPreFetchThresholds()) {
+
+					/*
+					 * If we're past the last prefetch threshold then
+					 * we're potentially fetching unlimited amounts of data.
+					 * We'll move responsibility for deduplication to the database in this case
+					 * so that we don't run the risk of blowing out the memory
+					 * in the app server
+					 */
+					if (nextThreshold == -1) {
+						searchBuilder.setDeduplicateInDatabase(true);
+					} else {
+						if ((numWanted + mySearchEntity.getNumFound()) < nextThreshold) {
+							numToFetch = nextThreshold + 1;
+							break;
+						}
+					}
+
+				}
+			}
+			return numToFetch;
 		}
 
 		private ISearchBuilder<JpaPid> newSearchBuilder() {
