@@ -1832,9 +1832,10 @@ public class JpaStorageSettings extends StorageSettings {
 	 * </p>
 	 */
 	public void setSearchPreFetchThresholds(List<Integer> thePreFetchThresholds) {
-		Validate.isTrue(thePreFetchThresholds.size() > 0, "thePreFetchThresholds must not be empty");
+		Validate.isTrue(!thePreFetchThresholds.isEmpty(), "thePreFetchThresholds must not be empty");
 		int last = 0;
 		for (Integer nextInt : thePreFetchThresholds) {
+			Validate.isTrue(nextInt != null, "null is not a valid prefetch threshold");
 			Validate.isTrue(nextInt > 0 || nextInt == -1, nextInt + " is not a valid prefetch threshold");
 			Validate.isTrue(nextInt != last, "Prefetch thresholds must be sequential");
 			Validate.isTrue(nextInt > last || nextInt == -1, "Prefetch thresholds must be sequential");

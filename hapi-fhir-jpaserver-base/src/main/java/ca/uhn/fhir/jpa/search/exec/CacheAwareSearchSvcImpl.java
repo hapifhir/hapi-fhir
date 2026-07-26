@@ -7,6 +7,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
@@ -47,9 +48,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -249,10 +253,10 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 			return resources;
 		}
 
-		protected List<IBaseResource> toResourceList(
+		protected List<IBaseResource> fetchResourcesAndIncludes(
 			ISearchBuilder theSearchBuilder,
 			List<JpaPid> thePids,
-			@Nullable List<IBaseResource> theResources,
+			@Nonnull Map<JpaPid, IBaseResource> theResources,
 			ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
 			List<JpaPid> includedPidList = new ArrayList<>();
 			if (mySearchEntity.getSearchType() == SearchTypeEnum.SEARCH) {
@@ -331,33 +335,42 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 
 			// Fetch the resource bodies
 
-			List<IBaseResource> resources;
-			if (theResources != null) {
-				// The match results were previously fetched so we only need to fetch the included resources
-				resources = theResources;
-				if (!includedPidList.isEmpty()) {
-					List<IBaseResource> includeResources = new ArrayList<>(includedPidList.size());
-					theSearchBuilder.loadResourcesByPid(
-						includedPidList, includedPidList, includeResources, false, myRequestDetails);
-					resources.addAll(includeResources);
-				}
+			Collection<JpaPid> pidsToFetch;
+			if (!theResources.isEmpty()) {
+				pidsToFetch = new HashSet<>(thePids);
+				pidsToFetch.removeAll(theResources.keySet());
 			} else {
-				// We need to fetch all rsources
-				resources = new ArrayList<>(thePids.size());
-				theSearchBuilder.loadResourcesByPid(thePids, includedPidList, resources, false, myRequestDetails);
+				pidsToFetch = thePids;
+			}
+
+			if (!pidsToFetch.isEmpty()) {
+				List<IBaseResource> includeResources = new ArrayList<>(pidsToFetch.size());
+				theSearchBuilder.loadResourcesByPid(pidsToFetch, includedPidList, includeResources, false, myRequestDetails);
+				for (IBaseResource next : includeResources) {
+					JpaPid pid = (JpaPid) next.getUserData(IDao.RESOURCE_PID_KEY);
+					theResources.put(pid, next);
+				}
+			}
+
+			List<IBaseResource> resourcesToReturn = new ArrayList<>(pidsToFetch.size());
+			for (JpaPid pid : thePids) {
+				IBaseResource resource = theResources.get(pid);
+				if (resource != null) {
+					resourcesToReturn.add(resource);
+				}
 			}
 
 			// we will send the resource list to our interceptors
 			// this can (potentially) change the results being returned.
-			int precount = resources.size();
-			resources = ServerInterceptorUtil.fireStoragePreshowResource(
-				resources, myRequestDetails, myInterceptorBroadcaster);
+			int precount = resourcesToReturn.size();
+			resourcesToReturn = ServerInterceptorUtil.fireStoragePreshowResource(
+				resourcesToReturn, myRequestDetails, myInterceptorBroadcaster);
 			// we only care about omitted results from this page
-			theResponsePageBuilder.setOmittedResourceCount(precount - resources.size());
-			theResponsePageBuilder.setResources(resources);
+			theResponsePageBuilder.setOmittedResourceCount(precount - resourcesToReturn.size());
+			theResponsePageBuilder.setResources(resourcesToReturn);
 			theResponsePageBuilder.setIncludedResourceCount(includedPidList.size());
 
-			return resources;
+			return resourcesToReturn;
 		}
 
 		private List<IBaseResource> ensureSearchPerformed(
@@ -427,12 +440,11 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 							mySearchEntity, theFromIndex, theToIndex, myRequestDetails, myRequestPartitionId);
 						mySearchPerformed = true;
 						ISearchBuilder<JpaPid> searchBuilder = newSearchBuilder();
-						return toResourceList(searchBuilder, existingSearchPids, null, theResponsePageBuilder);
+						return fetchResourcesAndIncludes(searchBuilder, existingSearchPids, Map.of(), theResponsePageBuilder);
 					}
 
 					ISearchBuilder<JpaPid> searchBuilder = newSearchBuilder();
-					List<IBaseResource> fetchedResources = null;
-					List<JpaPid> pidsToFetch;
+					Map<JpaPid, IBaseResource> fetchedResources = new HashMap<>();
 
 					int countFoundThisPass = 0;
 					int countBlockedThisPass = 0;
@@ -459,7 +471,8 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 					@Nullable
 					Integer numToFetch = null;
 
-					if (mySearchEntity.getNumFound() == 0) {
+					// FIXME: use thresholds?
+					if (false && mySearchEntity.getNumFound() == 0) {
 						// For the first page, just fetch the number requested plus one
 						// so that we can tell whether there will be more results to return
 						// on subsequent pages
@@ -479,8 +492,8 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 							if (nextThreshold == -1) {
 								searchBuilder.setDeduplicateInDatabase(true);
 							} else {
-								if (numWanted < nextThreshold) {
-									numToFetch = nextThreshold;
+								if ((numWanted + mySearchEntity.getNumFound()) < nextThreshold) {
+									numToFetch = nextThreshold + 1;
 									break;
 								}
 							}
@@ -603,7 +616,7 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 //							}
 
 					mySearchPerformed = true;
-					return toResourceList(searchBuilder, pidsToReturn, fetchedResources, theResponsePageBuilder);
+					return fetchResourcesAndIncludes(searchBuilder, pidsToReturn, fetchedResources, theResponsePageBuilder);
 
 
 				});
