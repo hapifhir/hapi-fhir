@@ -46,6 +46,7 @@ import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.test.util.ComboSearchParameterTestHelper;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.util.SqlQuery;
+import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -55,6 +56,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -66,6 +68,8 @@ import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.consent.ConsentOperationStatusEnum;
+import ca.uhn.fhir.rest.server.interceptor.consent.ConsentOutcome;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
@@ -76,6 +80,7 @@ import jakarta.annotation.Nonnull;
 import org.assertj.core.api.Condition;
 import org.assertj.core.data.Index;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -158,6 +163,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -208,6 +214,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	private AuthorizationInterceptor myAuthInterceptor;
 	private ConsentInterceptor myConsentInterceptor;
 	private ComboSearchParameterTestHelper myComboSearchParameterTestHelper;
+	@Mock
+	private IConsentService myConsentService;
 
 	@AfterEach
 	public void afterResetDao() {
@@ -1866,16 +1874,49 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 
-	@Test
-	public void testSearchWithQueryCache() {
+	@ParameterizedTest
+	@CsvSource(useHeadersInDisplayName = true, textBlock = """
+		UseQueryCache , UseConsentInterceptor, ExpectConnection, ExpectCommit, ExpectSelect, ExpectInsert, ExpectUpdate
+		HIT           , false                , 1               , 1           , 4           , 0           , 0
+		MISS          , false                , 1               , 1           , 3           , 15          , 0
+		SKIP          , false                , 1               , 1           , 2           , 0           , 0
+		HIT           , true                 , 1               , 1           , 3           , 15          , 0
+		MISS          , true                 , 1               , 1           , 3           , 15          , 0
+		SKIP          , true                 , 1               , 1           , 3           , 0           , 0
+		""")
+	void testSearch_FirstPage(QueryCacheMode theUseQueryCache, boolean theUseConsentInterceptor, int theExpectConnection, int theExpectCommit, int theExpectSelect, int theExpectInsert, int theExpectUpdate) {
 		// Setup
 		create150Patients();
 
+		if (theUseQueryCache == QueryCacheMode.HIT) {
+			// Perform the search once to warm the cache
+			Bundle outcome = myClient
+				.search()
+				.forResource("Patient")
+				.returnBundle(Bundle.class)
+				.execute();
+			assertEquals(10, outcome.getEntry().size());
+		}
+
+		if (theUseConsentInterceptor) {
+			when(myConsentService.shouldProcessCanSeeResource(any(), any())).thenReturn(true);
+			when(myConsentService.startOperation(any(), any())).thenReturn(new ConsentOutcome(ConsentOperationStatusEnum.PROCEED));
+			when(myConsentService.canSeeResource(any(), any(), any())).thenReturn(new ConsentOutcome(ConsentOperationStatusEnum.PROCEED));
+			when(myConsentService.willSeeResource(any(), any(), any())).thenReturn(new ConsentOutcome(ConsentOperationStatusEnum.PROCEED));
+			registerInterceptor(new ConsentInterceptor(myConsentService));
+		}
+
 		// Test
+		CacheControlDirective cacheControl = switch (theUseQueryCache) {
+			case HIT, MISS -> new CacheControlDirective();
+			case SKIP -> new CacheControlDirective().setNoCache(true).setNoStore(true).setMaxResults(10);
+		};
+
 		myCaptureQueriesListener.clear();
 		Bundle outcome = myClient
 			.search()
 			.forResource("Patient")
+			.cacheControl(cacheControl)
 			.returnBundle(Bundle.class)
 			.execute();
 
@@ -1883,9 +1924,79 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(10, outcome.getEntry().size());
 		assertThat(myCaptureQueriesListener).has(
 			onAllThreads()
-				.connectionCount(1)
-				.commitCount(1)
-				.selectCount(3)
+				.connectionCount(theExpectConnection)
+				.commitCount(theExpectCommit)
+				.selectCount(theExpectSelect)
+				.updateCount(theExpectUpdate)
+				.insertCount(theExpectInsert)
+		);
+	}
+
+	@ParameterizedTest
+	@CsvSource(useHeadersInDisplayName = true, textBlock = """
+		UseQueryCache , UseConsentInterceptor, ExpectConnection, ExpectCommit, ExpectSelect, ExpectInsert, ExpectUpdate
+		HIT           , false                , 1               , 1           , 3           , 0           , 0
+		MISS          , false                , 1               , 1           , 4           , 136         , 1
+		SKIP          , false                , 1               , 1           , 2           , 0           , 0
+		HIT           , true                 , 1               , 1           , 5           , 136         , 1
+		MISS          , true                 , 1               , 1           , 5           , 136         , 1
+		SKIP          , true                 , 1               , 1           , 3           , 0           , 0
+		""")
+	void testSearch_SecondPage(QueryCacheMode theUseQueryCache, boolean theUseConsentInterceptor, int theExpectConnection, int theExpectCommit, int theExpectSelect, int theExpectInsert, int theExpectUpdate) {
+		// Setup
+		create150Patients();
+
+		if (theUseQueryCache == QueryCacheMode.HIT) {
+			// Perform the search once to warm the cache
+			Bundle outcome = myClient
+				.search()
+				.forResource("Patient")
+				.returnBundle(Bundle.class)
+				.execute();
+			assertEquals(10, outcome.getEntry().size());
+
+			outcome = myClient
+				.loadPage()
+				.next(outcome)
+				.execute();
+			assertEquals(10, outcome.getEntry().size());
+		}
+
+		if (theUseConsentInterceptor) {
+			when(myConsentService.shouldProcessCanSeeResource(any(), any())).thenReturn(true);
+			when(myConsentService.startOperation(any(), any())).thenReturn(new ConsentOutcome(ConsentOperationStatusEnum.PROCEED));
+			when(myConsentService.canSeeResource(any(), any(), any())).thenReturn(new ConsentOutcome(ConsentOperationStatusEnum.PROCEED));
+			when(myConsentService.willSeeResource(any(), any(), any())).thenReturn(new ConsentOutcome(ConsentOperationStatusEnum.PROCEED));
+			registerInterceptor(new ConsentInterceptor(myConsentService));
+		}
+
+		// Test
+
+		IQuery<IBaseBundle> search = myClient
+			.search()
+			.forResource("Patient");
+		if (theUseQueryCache == QueryCacheMode.SKIP) {
+			search = search.offset(0).count(10);
+		}
+
+		Bundle outcome = search
+			.returnBundle(Bundle.class)
+			.execute();
+		myCaptureQueriesListener.clear();
+		outcome = myClient
+			.loadPage()
+			.next(outcome)
+			.execute();
+
+		// Verify
+		assertEquals(10, outcome.getEntry().size());
+		assertThat(myCaptureQueriesListener).has(
+			onAllThreads()
+				.connectionCount(theExpectConnection)
+				.commitCount(theExpectCommit)
+				.selectCount(theExpectSelect)
+				.updateCount(theExpectUpdate)
+				.insertCount(theExpectInsert)
 		);
 	}
 
@@ -5204,4 +5315,11 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myConsentInterceptor = new ConsentInterceptor(new IConsentService() {});
 		myInterceptorRegistry.registerInterceptor(myConsentInterceptor);
 	}
+
+	enum QueryCacheMode {
+		HIT,
+		MISS,
+		SKIP
+	}
+
 }

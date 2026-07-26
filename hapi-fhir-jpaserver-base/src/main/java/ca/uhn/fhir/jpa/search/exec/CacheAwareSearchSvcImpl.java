@@ -21,7 +21,6 @@ import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
-import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
@@ -68,9 +67,6 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
-
-	@Autowired
-	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
 
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -254,7 +250,7 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 		}
 
 		protected List<IBaseResource> fetchResourcesAndIncludes(
-			ISearchBuilder theSearchBuilder,
+			ISearchBuilder<JpaPid> theSearchBuilder,
 			List<JpaPid> thePids,
 			@Nonnull Map<JpaPid, IBaseResource> theResources,
 			ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
@@ -267,70 +263,78 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 				Set<JpaPid> originalPids = new HashSet<>(thePids);
 
 				// Load non-iterate `_revinclude`
-				Set<JpaPid> nonIterateRevIncludedPids = theSearchBuilder.loadIncludes(
-					myFhirContext,
-					myEntityManager,
-					thePids,
-					mySearchEntity.toRevIncludesList(false),
-					true,
-					mySearchEntity.getLastUpdated(),
-					mySearchEntity.getUuid(),
-					myRequestDetails,
-					maxIncludes);
-				if (maxIncludes != null) {
-					maxIncludes -= nonIterateRevIncludedPids.size();
+				{
+					Set<JpaPid> nonIterateRevIncludedPids = theSearchBuilder.loadIncludes(
+						myFhirContext,
+						myEntityManager,
+						thePids,
+						mySearchEntity.toRevIncludesList(false),
+						true,
+						mySearchEntity.getLastUpdated(),
+						mySearchEntity.getUuid(),
+						myRequestDetails,
+						maxIncludes);
+					if (maxIncludes != null) {
+						maxIncludes -= nonIterateRevIncludedPids.size();
+					}
+					thePids.addAll(nonIterateRevIncludedPids);
+					includedPidList.addAll(nonIterateRevIncludedPids);
 				}
-				thePids.addAll(nonIterateRevIncludedPids);
-				includedPidList.addAll(nonIterateRevIncludedPids);
 
 				// Load non-iterate `_include` (use originalPids so `_include` only applies to the
 				// initial search results, not to revincluded resources — per FHIR spec, without `:iterate`)
-				Set<JpaPid> nonIterateIncludedPids = theSearchBuilder.loadIncludes(
-					myFhirContext,
-					myEntityManager,
-					originalPids,
-					mySearchEntity.toIncludesList(false),
-					false,
-					mySearchEntity.getLastUpdated(),
-					mySearchEntity.getUuid(),
-					myRequestDetails,
-					maxIncludes);
-				if (maxIncludes != null) {
-					maxIncludes -= nonIterateIncludedPids.size();
+				{
+					Set<JpaPid> nonIterateIncludedPids = theSearchBuilder.loadIncludes(
+						myFhirContext,
+						myEntityManager,
+						originalPids,
+						mySearchEntity.toIncludesList(false),
+						false,
+						mySearchEntity.getLastUpdated(),
+						mySearchEntity.getUuid(),
+						myRequestDetails,
+						maxIncludes);
+					if (maxIncludes != null) {
+						maxIncludes -= nonIterateIncludedPids.size();
+					}
+					thePids.addAll(nonIterateIncludedPids);
+					includedPidList.addAll(nonIterateIncludedPids);
 				}
-				thePids.addAll(nonIterateIncludedPids);
-				includedPidList.addAll(nonIterateIncludedPids);
 
 				// Load `_revinclude:iterate`
-				Set<JpaPid> iterateRevIncludedPids = theSearchBuilder.loadIncludes(
-					myFhirContext,
-					myEntityManager,
-					thePids,
-					mySearchEntity.toRevIncludesList(true),
-					true,
-					mySearchEntity.getLastUpdated(),
-					mySearchEntity.getUuid(),
-					myRequestDetails,
-					maxIncludes);
-				if (maxIncludes != null) {
-					maxIncludes -= iterateRevIncludedPids.size();
+				{
+					Set<JpaPid> iterateRevIncludedPids = theSearchBuilder.loadIncludes(
+						myFhirContext,
+						myEntityManager,
+						thePids,
+						mySearchEntity.toRevIncludesList(true),
+						true,
+						mySearchEntity.getLastUpdated(),
+						mySearchEntity.getUuid(),
+						myRequestDetails,
+						maxIncludes);
+					if (maxIncludes != null) {
+						maxIncludes -= iterateRevIncludedPids.size();
+					}
+					thePids.addAll(iterateRevIncludedPids);
+					includedPidList.addAll(iterateRevIncludedPids);
 				}
-				thePids.addAll(iterateRevIncludedPids);
-				includedPidList.addAll(iterateRevIncludedPids);
 
 				// Load `_include:iterate`
-				Set<JpaPid> iterateIncludedPids = theSearchBuilder.loadIncludes(
-					myFhirContext,
-					myEntityManager,
-					thePids,
-					mySearchEntity.toIncludesList(true),
-					false,
-					mySearchEntity.getLastUpdated(),
-					mySearchEntity.getUuid(),
-					myRequestDetails,
-					maxIncludes);
-				thePids.addAll(iterateIncludedPids);
-				includedPidList.addAll(iterateIncludedPids);
+				{
+					Set<JpaPid> iterateIncludedPids = theSearchBuilder.loadIncludes(
+						myFhirContext,
+						myEntityManager,
+						thePids,
+						mySearchEntity.toIncludesList(true),
+						false,
+						mySearchEntity.getLastUpdated(),
+						mySearchEntity.getUuid(),
+						myRequestDetails,
+						maxIncludes);
+					thePids.addAll(iterateIncludedPids);
+					includedPidList.addAll(iterateIncludedPids);
+				}
 			}
 
 			// Fetch the resource bodies
@@ -440,7 +444,7 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 							mySearchEntity, theFromIndex, theToIndex, myRequestDetails, myRequestPartitionId);
 						mySearchPerformed = true;
 						ISearchBuilder<JpaPid> searchBuilder = newSearchBuilder();
-						return fetchResourcesAndIncludes(searchBuilder, existingSearchPids, Map.of(), theResponsePageBuilder);
+						return fetchResourcesAndIncludes(searchBuilder, existingSearchPids, new HashMap<>(), theResponsePageBuilder);
 					}
 
 					ISearchBuilder<JpaPid> searchBuilder = newSearchBuilder();
@@ -631,9 +635,7 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 			Class<? extends IBaseResource> resourceType = myFhirContext
 				.getResourceDefinition(mySearchEntity.getResourceType())
 				.getImplementingClass();
-			ISearchBuilder<JpaPid> searchBuilder =
-				mySearchBuilderFactory.newSearchBuilder(mySearchEntity.getResourceType(), resourceType);
-			return searchBuilder;
+			return mySearchBuilderFactory.newSearchBuilder(mySearchEntity.getResourceType(), resourceType);
 		}
 	}
 }

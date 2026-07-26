@@ -283,7 +283,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(sort(myPatientIdsEvenOnly, myObservationIdsEvenOnly), sort(returnedIdValues));
 
-		assertEquals(4, preAccessInterceptorCallCount.get());
+		assertEquals(2, preAccessInterceptorCallCount.get());
 	}
 
 	@Test
@@ -305,7 +305,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		List<IBaseResource> resources = outcome.getResources(0, 100);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(sort(myPatientIds, myObservationIds), sort(returnedIdValues));
-		assertEquals(4, hitCount.get());
+		assertEquals(2, hitCount.get());
 
 	}
 
