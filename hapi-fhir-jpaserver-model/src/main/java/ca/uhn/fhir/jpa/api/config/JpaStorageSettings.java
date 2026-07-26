@@ -1839,7 +1839,8 @@ public class JpaStorageSettings extends StorageSettings {
 			Validate.isTrue(nextInt > 0 || nextInt == -1, nextInt + " is not a valid prefetch threshold");
 			Validate.isTrue(nextInt != last, "Prefetch thresholds must be sequential");
 			Validate.isTrue(nextInt > last || nextInt == -1, "Prefetch thresholds must be sequential");
-			Validate.isTrue(last != -1, "Prefetch thresholds must be sequential, and -1 can only be used as the final entry");
+			Validate.isTrue(
+					last != -1, "Prefetch thresholds must be sequential, and -1 can only be used as the final entry");
 			last = nextInt;
 		}
 		mySearchPreFetchThresholds = thePreFetchThresholds;

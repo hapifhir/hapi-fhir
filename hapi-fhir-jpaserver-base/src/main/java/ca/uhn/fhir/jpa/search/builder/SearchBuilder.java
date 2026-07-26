@@ -898,7 +898,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			 */
 			if (!excluded) {
 				if (theSearchProperties.getMaxResultsRequested() != null) {
-					theSearchProperties.setMaxResultsRequested(theSearchProperties.getMaxResultsRequested() + myPidSet.size());
+					theSearchProperties.setMaxResultsRequested(
+							theSearchProperties.getMaxResultsRequested() + myPidSet.size());
 				}
 			}
 		}
@@ -3211,7 +3212,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 						if (nextPid != null) {
 							if (!myPidSet.contains(nextPid)) {
-								if (!mySearchProperties.isDeduplicateInDatabase()) {
+								if (!mySearchProperties.isDeduplicateInDatabase()
+										|| myFetchIncludesForEverythingOperation) {
 									/*
 									 * We only add to the map if we aren't fetching "everything";
 									 * otherwise, we let the de-duplication happen in the database
