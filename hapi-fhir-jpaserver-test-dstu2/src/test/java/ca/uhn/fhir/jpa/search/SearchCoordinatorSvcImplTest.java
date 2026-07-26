@@ -101,6 +101,8 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 	private ISynchronousSearchSvc mySynchronousSearchSvc;
 	@Spy
 	private ExceptionService myExceptionSvc = new ExceptionService(myContext);
+	@Mock
+	private IPagingProvider myPagingProvider;
 
 	private SearchCoordinatorSvcImpl mySvc;
 
