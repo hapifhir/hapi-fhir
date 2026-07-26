@@ -876,7 +876,7 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	@SuppressWarnings({"rawtypes"})
 	protected List toList(IBundleProvider theSearch) {
-		return theSearch.getResources(0, theSearch.sizeOrThrowNpe());
+		return theSearch.getAllResources();
 	}
 
 	protected List<String> toUnqualifiedIdValues(IBaseBundle theFound) {
@@ -893,9 +893,8 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	protected List<String> toUnqualifiedIdValues(IBundleProvider theFound) {
 		List<String> retVal = new ArrayList<>();
-		int size = theFound.sizeOrThrowNpe();
-		ourLog.info("Found {} results", size);
-		List<IBaseResource> resources = theFound.getResources(0, size);
+		List<IBaseResource> resources = theFound.getAllResources();
+		ourLog.info("Found {} results", resources.size());
 		for (IBaseResource next : resources) {
 			retVal.add(next.getIdElement().toUnqualified().getValue());
 		}
