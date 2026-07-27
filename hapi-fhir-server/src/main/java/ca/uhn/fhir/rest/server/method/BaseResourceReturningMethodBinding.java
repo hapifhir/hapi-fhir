@@ -58,6 +58,7 @@ import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
+import javax.annotation.Nullable;
 
 public abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 	protected final ResponseBundleBuilder myResponseBundleBuilder;
@@ -272,6 +273,19 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest)
 			throws BaseServerResponseException, IOException {
 		IBaseResource response = doInvokeServer(theServer, theRequest);
+		return callHooksAndWriteResponse(theServer, theRequest, response, isAddContentLocationHeader());
+	}
+
+	/**
+	 * Call the SERVER_OUTGOING_RESPONSE pointcut and write the response out.
+	 */
+	@Nullable
+	public static Object callHooksAndWriteResponse(
+			IRestfulServer<?> theServer,
+			RequestDetails theRequest,
+			IBaseResource response,
+			boolean theAddContentLocationHeader)
+			throws IOException {
 		/*
 		When we write directly to an HttpServletResponse, the invocation returns null. However, we still want to invoke
 		the SERVER_OUTGOING_RESPONSE pointcut.
@@ -303,7 +317,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 					responseDetails.getResponseResource(),
 					summaryMode,
 					responseDetails.getResponseCode(),
-					isAddContentLocationHeader(),
+					theAddContentLocationHeader,
 					theRequest.isRespondGzip(),
 					theRequest,
 					null,

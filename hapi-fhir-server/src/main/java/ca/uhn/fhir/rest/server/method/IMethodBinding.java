@@ -14,6 +14,8 @@ import java.io.IOException;
 public interface IMethodBinding {
 	/**
 	 * Can this binding handle this request?
+	 * Note: at this stage of processing, RequestDetails.getRestOperationType() is not available.
+	 *
 	 * @return if this binding can handle this request.
 	 */
 	MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest);
@@ -22,6 +24,7 @@ public interface IMethodBinding {
 	 *  Which FHIR operation does this binding support?
 	 *  Takes the requestDetails so the same binding inspect the caller and support multiple actions.
 	 *  E.g. read and vread.
+	 *  This is used by RestfulServer to populate RequestDetails.getRestOperationType().
 	 *
 	 * @return the operation of this binding for this request.
 	 */
@@ -36,6 +39,16 @@ public interface IMethodBinding {
 	 */
 	RestOperationTypeEnum getRestOperationType();
 
+	/**
+	 * Actually do the work.
+	 * Implementors are expected to write the results to the output if required.
+	 * See {@link BaseResourceReturningMethodBinding#callHooksAndWriteResponse}
+	 * @param theServer
+	 * @param theRequest
+	 * @return
+	 * @throws BaseServerResponseException
+	 * @throws IOException
+	 */
 	Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest)
 			throws BaseServerResponseException, IOException;
 
