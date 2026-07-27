@@ -59,5 +59,4 @@ public interface ISearchCoordinatorSvc<T extends IResourcePersistentId> {
 	 */
 	Optional<Integer> getSearchTotal(
 			String theUuid, @Nullable RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId);
-
 }

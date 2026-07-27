@@ -28,10 +28,12 @@ import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.interceptor.ServerInterceptorUtil;
 import ca.uhn.fhir.rest.server.method.ResponsePage;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -50,7 +52,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -99,7 +100,16 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 	/**
 	 * Unit test constructor
 	 */
-	public CacheAwareSearchSvcImpl(FhirContext theFhirContext, IHapiTransactionService theTxService, JpaStorageSettings theStorageSettings, IInterceptorBroadcaster theInterceptorBroadcaster, ISearchCacheSvc theSearchCacheSvc, ISearchResultCacheSvc theSearchResultCacheSvc, EntityManager theEntityManager, SearchBuilderFactory<JpaPid> theSearchBuilderFactory, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+	public CacheAwareSearchSvcImpl(
+			FhirContext theFhirContext,
+			IHapiTransactionService theTxService,
+			JpaStorageSettings theStorageSettings,
+			IInterceptorBroadcaster theInterceptorBroadcaster,
+			ISearchCacheSvc theSearchCacheSvc,
+			ISearchResultCacheSvc theSearchResultCacheSvc,
+			EntityManager theEntityManager,
+			SearchBuilderFactory<JpaPid> theSearchBuilderFactory,
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
 		myFhirContext = theFhirContext;
 		myTxService = theTxService;
 		myStorageSettings = theStorageSettings;
@@ -113,14 +123,14 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 
 	@Override
 	public IBundleProvider executeQuery(
-		SearchParameterMap theParams,
-		RequestDetails theRequestDetails,
-		CacheControlDirective theCacheControlDirective,
-		Search theSearchEntity,
-		ISearchBuilder<JpaPid> theSearchBuilder,
-		RequestPartitionId theRequestPartitionId) {
+			SearchParameterMap theParams,
+			RequestDetails theRequestDetails,
+			CacheControlDirective theCacheControlDirective,
+			Search theSearchEntity,
+			ISearchBuilder<JpaPid> theSearchBuilder,
+			RequestPartitionId theRequestPartitionId) {
 		return new JpaBundleProvider(
-			theParams, theRequestDetails, theCacheControlDirective, theRequestPartitionId, theSearchEntity);
+				theParams, theRequestDetails, theCacheControlDirective, theRequestPartitionId, theSearchEntity);
 	}
 
 	@Override
@@ -129,23 +139,23 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 	}
 
 	private Optional<Search> findCachedQuery(
-		SearchParameterMap theParams,
-		String theResourceType,
-		RequestDetails theRequestDetails,
-		String theQueryString,
-		RequestPartitionId theRequestPartitionId) {
+			SearchParameterMap theParams,
+			String theResourceType,
+			RequestDetails theRequestDetails,
+			String theQueryString,
+			RequestPartitionId theRequestPartitionId) {
 
 		HapiTransactionService.requireTransaction();
 
 		IInterceptorBroadcaster compositeBroadcaster =
-			CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
 
 		// Interceptor call: STORAGE_PRECHECK_FOR_CACHED_SEARCH
 
 		HookParams params = new HookParams()
-			.add(SearchParameterMap.class, theParams)
-			.add(RequestDetails.class, theRequestDetails)
-			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+				.add(SearchParameterMap.class, theParams)
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
 		boolean canUseCache = compositeBroadcaster.callHooks(Pointcut.STORAGE_PRECHECK_FOR_CACHED_SEARCH, params);
 		if (!canUseCache) {
 			return Optional.empty();
@@ -160,9 +170,9 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 		ourLog.debug("Reusing search {} from cache", searchToUse.getUuid());
 		// Interceptor call: JPA_PERFTRACE_SEARCH_REUSING_CACHED
 		params = new HookParams()
-			.add(SearchParameterMap.class, theParams)
-			.add(RequestDetails.class, theRequestDetails)
-			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+				.add(SearchParameterMap.class, theParams)
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
 		compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_SEARCH_REUSING_CACHED, params);
 
 		return Optional.of(searchToUse);
@@ -170,13 +180,13 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 
 	@Nullable
 	private Search findSearchToUseOrNull(
-		String theQueryString, String theResourceType, RequestPartitionId theRequestPartitionId) {
+			String theQueryString, String theResourceType, RequestPartitionId theRequestPartitionId) {
 		// createdCutoff is in recent past
 		final Instant createdCutoff =
-			Instant.now().minus(myStorageSettings.getReuseCachedSearchResultsForMillis(), ChronoUnit.MILLIS);
+				Instant.now().minus(myStorageSettings.getReuseCachedSearchResultsForMillis(), ChronoUnit.MILLIS);
 
 		Optional<Search> candidate = mySearchCacheSvc.findCandidatesForReuse(
-			theResourceType, theQueryString, createdCutoff, theRequestPartitionId);
+				theResourceType, theQueryString, createdCutoff, theRequestPartitionId);
 		return candidate.orElse(null);
 	}
 
@@ -197,11 +207,11 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 		private Integer myCachedPidsFromMatchesAndIncludesEndingIndex;
 
 		public JpaBundleProvider(
-			SearchParameterMap theParams,
-			RequestDetails theRequestDetails,
-			CacheControlDirective theCacheControlDirective,
-			RequestPartitionId theRequestPartitionId,
-			Search theSearchEntity) {
+				SearchParameterMap theParams,
+				RequestDetails theRequestDetails,
+				CacheControlDirective theCacheControlDirective,
+				RequestPartitionId theRequestPartitionId,
+				Search theSearchEntity) {
 			this(theRequestDetails, theSearchEntity.getUuid());
 			myParams = theParams;
 			myCacheControlDirective = theCacheControlDirective;
@@ -213,7 +223,7 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 			myRequestDetails = theRequestDetails;
 			mySearchUuid = theSearchUuid;
 			myCompositeBroadcaster =
-				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, myRequestDetails);
+					CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, myRequestDetails);
 		}
 
 		@SuppressWarnings("unchecked")
@@ -221,7 +231,7 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 		public IPrimitiveType<Date> getPublished() {
 			ensureSearchPerformed();
 			IPrimitiveType<Date> retVal = (IPrimitiveType<Date>)
-				myFhirContext.getElementDefinition("instant").newInstance();
+					myFhirContext.getElementDefinition("instant").newInstance();
 			retVal.setValue(mySearchEntity.getCreated());
 			return retVal;
 		}
@@ -244,8 +254,11 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 		@Nullable
 		@Override
 		public Integer size() {
-			if (myParams != null && myParams.getSearchTotalMode() == SearchTotalModeEnum.ACCURATE) {
-				ensureSearchPerformed();
+			if (myParams != null) {
+				if (myParams.getSearchTotalMode() == SearchTotalModeEnum.ACCURATE
+						|| myParams.getSummaryMode() == SummaryEnum.COUNT) {
+					ensureSearchPerformed();
+				}
 			}
 			if (mySearchEntity != null) {
 				return mySearchEntity.getTotalCount();
@@ -255,22 +268,22 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 
 		@Override
 		public List<IBaseResource> getResources(
-			int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
+				int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
 			ensureSearchPerformed(theFromIndex, theToIndex);
 
 			/// These should always be true unless we have a logic bug, since
 			/// {@link #ensureSearchPerformed(int, int, ResponsePage.ResponsePageBuilder)}
 			/// should reset them
 			Validate.isTrue(
-				theFromIndex == myCachedPidsFromMatchesAndIncludesStartingIndex,
-				"Expected %d but got %d",
-				myCachedPidsFromMatchesStartingIndex,
-				theFromIndex);
+					theFromIndex == myCachedPidsFromMatchesAndIncludesStartingIndex,
+					"Expected %d but got %d",
+					theFromIndex,
+					myCachedPidsFromMatchesAndIncludesStartingIndex);
 			Validate.isTrue(
-				theToIndex == myCachedPidsFromMatchesAndIncludesEndingIndex,
-				"Expected %d but got %d",
-				myCachedPidsFromMatchesEndingIndex,
-				theToIndex);
+					theToIndex == myCachedPidsFromMatchesAndIncludesEndingIndex,
+					"Expected %d but got %d",
+					theToIndex,
+					myCachedPidsFromMatchesAndIncludesEndingIndex);
 
 			List<IBaseResource> retVal = new ArrayList<>();
 			for (JpaPid nextPid : myCachedPidsFromMatchesAndIncludes) {
@@ -281,7 +294,7 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 			// this can (potentially) change the results being returned.
 			int precount = retVal.size();
 			retVal = ServerInterceptorUtil.fireStoragePreshowResource(
-				retVal, myRequestDetails, myInterceptorBroadcaster);
+					retVal, myRequestDetails, myInterceptorBroadcaster);
 
 			// we only care about omitted results from this page
 			// FIXME: what are these used for?
@@ -298,13 +311,13 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 		public List<IBaseResource> getAllResources() {
 			List<IBaseResource> resources = getResources(0, 10000);
 			Validate.isTrue(
-				resources.size() < 10000,
-				"Can not call getAllResources on a collection of more than 10000 resources");
+					resources.size() < 10000,
+					"Can not call getAllResources on a collection of more than 10000 resources");
 			return resources;
 		}
 
 		protected void fetchResourcesAndIncludes(
-			ISearchBuilder<JpaPid> theSearchBuilder, List<JpaPid> thePids, int theFromIndex, int theToIndex) {
+				ISearchBuilder<JpaPid> theSearchBuilder, List<JpaPid> thePids, int theFromIndex, int theToIndex) {
 
 			myCachedPidsFromMatches = List.copyOf(thePids);
 			myCachedPidsFromMatchesStartingIndex = theFromIndex;
@@ -321,15 +334,15 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 				// Load non-iterate `_revinclude`
 				{
 					Set<JpaPid> nonIterateRevIncludedPids = theSearchBuilder.loadIncludes(
-						myFhirContext,
-						myEntityManager,
-						thePids,
-						mySearchEntity.toRevIncludesList(false),
-						true,
-						mySearchEntity.getLastUpdated(),
-						mySearchEntity.getUuid(),
-						myRequestDetails,
-						maxIncludes);
+							myFhirContext,
+							myEntityManager,
+							thePids,
+							mySearchEntity.toRevIncludesList(false),
+							true,
+							mySearchEntity.getLastUpdated(),
+							mySearchEntity.getUuid(),
+							myRequestDetails,
+							maxIncludes);
 					if (maxIncludes != null) {
 						maxIncludes -= nonIterateRevIncludedPids.size();
 					}
@@ -341,15 +354,15 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 				// initial search results, not to revincluded resources — per FHIR spec, without `:iterate`)
 				{
 					Set<JpaPid> nonIterateIncludedPids = theSearchBuilder.loadIncludes(
-						myFhirContext,
-						myEntityManager,
-						originalPids,
-						mySearchEntity.toIncludesList(false),
-						false,
-						mySearchEntity.getLastUpdated(),
-						mySearchEntity.getUuid(),
-						myRequestDetails,
-						maxIncludes);
+							myFhirContext,
+							myEntityManager,
+							originalPids,
+							mySearchEntity.toIncludesList(false),
+							false,
+							mySearchEntity.getLastUpdated(),
+							mySearchEntity.getUuid(),
+							myRequestDetails,
+							maxIncludes);
 					if (maxIncludes != null) {
 						maxIncludes -= nonIterateIncludedPids.size();
 					}
@@ -360,15 +373,15 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 				// Load `_revinclude:iterate`
 				{
 					Set<JpaPid> iterateRevIncludedPids = theSearchBuilder.loadIncludes(
-						myFhirContext,
-						myEntityManager,
-						thePids,
-						mySearchEntity.toRevIncludesList(true),
-						true,
-						mySearchEntity.getLastUpdated(),
-						mySearchEntity.getUuid(),
-						myRequestDetails,
-						maxIncludes);
+							myFhirContext,
+							myEntityManager,
+							thePids,
+							mySearchEntity.toRevIncludesList(true),
+							true,
+							mySearchEntity.getLastUpdated(),
+							mySearchEntity.getUuid(),
+							myRequestDetails,
+							maxIncludes);
 					if (maxIncludes != null) {
 						maxIncludes -= iterateRevIncludedPids.size();
 					}
@@ -379,15 +392,15 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 				// Load `_include:iterate`
 				{
 					Set<JpaPid> iterateIncludedPids = theSearchBuilder.loadIncludes(
-						myFhirContext,
-						myEntityManager,
-						thePids,
-						mySearchEntity.toIncludesList(true),
-						false,
-						mySearchEntity.getLastUpdated(),
-						mySearchEntity.getUuid(),
-						myRequestDetails,
-						maxIncludes);
+							myFhirContext,
+							myEntityManager,
+							thePids,
+							mySearchEntity.toIncludesList(true),
+							false,
+							mySearchEntity.getLastUpdated(),
+							mySearchEntity.getUuid(),
+							myRequestDetails,
+							maxIncludes);
 					thePids.addAll(iterateIncludedPids);
 					includedPidList.addAll(iterateIncludedPids);
 				}
@@ -395,10 +408,11 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 
 			// Fetch the resource bodies
 
-			Collection<JpaPid> pidsToFetch;
+			List<JpaPid> pidsToFetch;
 			if (!myFetchedResources.isEmpty()) {
-				pidsToFetch = new HashSet<>(thePids);
-				pidsToFetch.removeAll(myFetchedResources.keySet());
+				pidsToFetch = thePids.stream()
+						.filter(p -> !myFetchedResources.containsKey(p))
+						.toList();
 			} else {
 				pidsToFetch = thePids;
 			}
@@ -406,10 +420,13 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 			if (!pidsToFetch.isEmpty()) {
 				List<IBaseResource> includeResources = new ArrayList<>(pidsToFetch.size());
 				theSearchBuilder.loadResourcesByPid(
-					pidsToFetch, includedPidList, includeResources, false, myRequestDetails);
-				for (IBaseResource next : includeResources) {
-					JpaPid pid = extractFetchedResourcePid(next);
-					myFetchedResources.put(pid, next);
+						pidsToFetch, includedPidList, includeResources, false, myRequestDetails);
+
+				int limit = Math.min(pidsToFetch.size(), includeResources.size());
+				for (int i = 0; i < limit; i++) {
+					JpaPid pid = pidsToFetch.get(i);
+					IBaseResource resource = includeResources.get(i);
+					myFetchedResources.put(pid, resource);
 				}
 			}
 
@@ -428,7 +445,7 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 		private void ensureSearchPerformed() {
 			if (myCachedPidsFromMatches == null) {
 				Integer firstPrefetchThreshold =
-					myStorageSettings.getSearchPreFetchThresholds().get(0);
+						myStorageSettings.getSearchPreFetchThresholds().get(0);
 				ensureSearchPerformed(0, firstPrefetchThreshold);
 			}
 			validateSearchEntityNotFailed();
@@ -451,9 +468,9 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 				 * exceeding the window we want, we can just return that window.
 				 */
 				if (myParams.getIncludes().isEmpty()
-					&& myParams.getRevIncludes().isEmpty()) {
+						&& myParams.getRevIncludes().isEmpty()) {
 					if (myCachedPidsFromMatchesStartingIndex <= theFromIndex
-						&& myCachedPidsFromMatchesEndingIndex >= theToIndex) {
+							&& myCachedPidsFromMatchesEndingIndex >= theToIndex) {
 						int rangeStart = theFromIndex - myCachedPidsFromMatchesStartingIndex;
 						int rangeEnd = (theToIndex - theFromIndex) + rangeStart;
 						myCachedPidsFromMatchesAndIncludes = myCachedPidsFromMatches.subList(rangeStart, rangeEnd);
@@ -464,18 +481,28 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 				}
 			}
 
+			if (myParams.getSummaryMode() == SummaryEnum.COUNT) {
+				if (mySearchEntity.getTotalCount() != null) {
+					myCachedPidsFromMatchesAndIncludes = List.of();
+					myCachedPidsFromMatchesAndIncludesStartingIndex = theFromIndex;
+					myCachedPidsFromMatchesAndIncludesEndingIndex = theToIndex;
+					return;
+				}
+			}
+
 			for (int i = 0; ; i++) {
 				try {
 					myTxService
-						.withRequest(myRequestDetails)
-						.withRequestPartitionId(myRequestPartitionId)
-						.execute(() -> ensureSearchPerformedInsideTransaction(theFromIndex, theToIndex));
+							.withRequest(myRequestDetails)
+							.withRequestPartitionId(myRequestPartitionId)
+							.execute(() -> ensureSearchPerformedInsideTransaction(theFromIndex, theToIndex));
 					break;
-				} catch (Exception e) {
+				} catch (ResourceVersionConflictException e) {
+					// FIXME: is this the right exception?
 					if (i == 5) {
 						throw e;
 					}
-					ourLog.warn("Constraint error while writing search results to query cache");
+					ourLog.warn("Constraint error while writing search results to query cache: {}", e.toString());
 					new SleepUtil().sleepAtLeast(500, false);
 					resetState();
 				}
@@ -507,13 +534,11 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 
 			if (mySearchEntity == null) {
 
-				ReadPartitionIdRequestDetails details =
-					ReadPartitionIdRequestDetails.forSearchUuid(mySearchUuid);
-				myRequestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(
-					myRequestDetails, details);
+				ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forSearchUuid(mySearchUuid);
+				myRequestPartitionId =
+						myRequestPartitionHelperSvc.determineReadPartitionForRequest(myRequestDetails, details);
 
-				Optional<Search> searchEntityOpt =
-					mySearchCacheSvc.fetchByUuid(mySearchUuid, myRequestPartitionId);
+				Optional<Search> searchEntityOpt = mySearchCacheSvc.fetchByUuid(mySearchUuid, myRequestPartitionId);
 				// FIXME: throw better exception
 				mySearchEntity = searchEntityOpt.orElseThrow();
 				myParams = mySearchEntity.getSearchParameterMap().orElseThrow();
@@ -530,11 +555,11 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 							if (myStorageSettings.getReuseCachedSearchResultsForMillis() != null) {
 								Optional<Search> cachedQueryOpt;
 								cachedQueryOpt = findCachedQuery(
-									myParams,
-									mySearchEntity.getResourceType(),
-									myRequestDetails,
-									mySearchEntity.getSearchQueryString(),
-									myRequestPartitionId);
+										myParams,
+										mySearchEntity.getResourceType(),
+										myRequestDetails,
+										mySearchEntity.getSearchQueryString(),
+										myRequestPartitionId);
 								if (cachedQueryOpt.isPresent()) {
 									// FIXME: where does this go?
 									cacheStatus = SearchCacheStatusEnum.HIT;
@@ -542,8 +567,8 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 									initialSearch = false;
 									// FIXME: add better exception
 									myParams = mySearchEntity
-										.getSearchParameterMap()
-										.orElseThrow();
+											.getSearchParameterMap()
+											.orElseThrow();
 								}
 							}
 						}
@@ -551,9 +576,26 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 				}
 			}
 
+			/// If we have a `_count=summary` query, just calculate the count and return
+			if (myParams.getSummaryMode() == SummaryEnum.COUNT) {
+				if (mySearchEntity.getTotalCount() == null) {
+					ISearchBuilder<JpaPid> searchBuilder = newSearchBuilder();
+
+					Long countQuery = searchBuilder.createCountQuery(
+							myParams, mySearchEntity.getUuid(), myRequestDetails, myRequestPartitionId);
+					mySearchEntity.setTotalCount(Math.toIntExact(countQuery));
+					mySearchEntity.setStatus(SearchStatusEnum.FINISHED);
+					mySearchCacheSvc.save(mySearchEntity, myRequestPartitionId);
+				}
+				myCachedPidsFromMatchesAndIncludes = List.of();
+				myCachedPidsFromMatchesAndIncludesStartingIndex = theFromIndex;
+				myCachedPidsFromMatchesAndIncludesEndingIndex = theToIndex;
+				return;
+			}
+
 			if (mySearchEntity.getNumFound() >= theToIndex) {
 				List<JpaPid> existingSearchPids = mySearchResultCacheSvc.fetchResultPids(
-					mySearchEntity, theFromIndex, theToIndex, myRequestDetails, myRequestPartitionId);
+						mySearchEntity, theFromIndex, theToIndex, myRequestDetails, myRequestPartitionId);
 				ISearchBuilder<JpaPid> searchBuilder = newSearchBuilder();
 				fetchResourcesAndIncludes(searchBuilder, existingSearchPids, theFromIndex, theToIndex);
 				return;
@@ -564,12 +606,11 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 			int countFoundThisPass = 0;
 			int countBlockedThisPass = 0;
 			List<JpaPid> previouslyFoundPids = List.of();
-			SearchRuntimeDetails searchDetails =
-				new SearchRuntimeDetails(myRequestDetails, mySearchEntity.getUuid());
+			SearchRuntimeDetails searchDetails = new SearchRuntimeDetails(myRequestDetails, mySearchEntity.getUuid());
 
 			if (mySearchEntity.getNumFound() > 0) {
 				previouslyFoundPids = mySearchResultCacheSvc.fetchAllResultPids(
-					mySearchEntity, myRequestDetails, myRequestPartitionId);
+						mySearchEntity, myRequestDetails, myRequestPartitionId);
 				Validate.notNull(previouslyFoundPids, "previouslyFoundPids should not be null");
 				searchBuilder.setPreviouslyAddedResourcePids(previouslyFoundPids);
 
@@ -582,10 +623,10 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 			int numWanted = theToIndex - mySearchEntity.getNumFound();
 
 			// FIXME: set these?
-						/*
-						searchBuilder.setFetchSize(0);
-						searchBuilder.setRequireTotal(true);
-						*/
+			/*
+			searchBuilder.setFetchSize(0);
+			searchBuilder.setRequireTotal(true);
+			*/
 
 			int numToSkip = 0;
 			if (theFromIndex > mySearchEntity.getNumFound()) {
@@ -599,8 +640,8 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 				searchBuilder.setMaxResultsToFetch(numToFetch);
 
 				List<JpaPid> newPidsThisPass = new ArrayList<>();
-				try (IResultIterator<JpaPid> query = searchBuilder.createQuery(
-					myParams, searchDetails, myRequestDetails, myRequestPartitionId)) {
+				try (IResultIterator<JpaPid> query =
+						searchBuilder.createQuery(myParams, searchDetails, myRequestDetails, myRequestPartitionId)) {
 
 					while (query.hasNext()) {
 						JpaPid next = query.next();
@@ -637,17 +678,17 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 				// the user has a chance to know that they were in the results
 				boolean blockedResults = false;
 				if (myCompositeBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES)
-					&& !newPidsThisPass.isEmpty()) {
+						&& !newPidsThisPass.isEmpty()) {
 					Set<JpaPid> blockedPids = new HashSet<>();
 
 					List<IBaseResource> newResources =
-						searchBuilder.loadResourcesByPid(newPidsThisPass, myRequestDetails);
+							searchBuilder.loadResourcesByPid(newPidsThisPass, myRequestDetails);
 					JpaPreResourceAccessDetails accessDetails =
-						new JpaPreResourceAccessDetails(newPidsThisPass, newResources);
+							new JpaPreResourceAccessDetails(newPidsThisPass, newResources);
 					HookParams params = new HookParams()
-						.add(IPreResourceAccessDetails.class, accessDetails)
-						.add(RequestDetails.class, myRequestDetails)
-						.addIfMatchesType(ServletRequestDetails.class, myRequestDetails);
+							.add(IPreResourceAccessDetails.class, accessDetails)
+							.add(RequestDetails.class, myRequestDetails)
+							.addIfMatchesType(ServletRequestDetails.class, myRequestDetails);
 					myCompositeBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
 
 					for (int i = newPidsThisPass.size() - 1; i >= 0; i--) {
@@ -664,9 +705,11 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 					if (!blockedPids.isEmpty()) {
 						pidsToReturn.removeIf(blockedPids::contains);
 					}
-					for (IBaseResource newResource : newResources) {
-						JpaPid pid = extractFetchedResourcePid(newResource);
-						myFetchedResources.put(pid, newResource);
+
+					for (int i = 0; i < newPidsThisPass.size(); i++) {
+						JpaPid pid = newPidsThisPass.get(i);
+						IBaseResource resource = newResources.get(i);
+						myFetchedResources.put(pid, resource);
 					}
 				}
 
@@ -689,13 +732,10 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 					 * perform an explicit count query.
 					 */
 					if (myParams.getSearchTotalMode() == SearchTotalModeEnum.ACCURATE
-						&& mySearchEntity.getTotalCount() == null) {
+							&& mySearchEntity.getTotalCount() == null) {
 						Long countQuery = newSearchBuilder()
-							.createCountQuery(
-								myParams,
-								mySearchEntity.getUuid(),
-								myRequestDetails,
-								myRequestPartitionId);
+								.createCountQuery(
+										myParams, mySearchEntity.getUuid(), myRequestDetails, myRequestPartitionId);
 						if (countQuery != null) {
 							mySearchEntity.setTotalCount(Math.toIntExact(countQuery));
 						}
@@ -708,15 +748,10 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 
 				mySearchCacheSvc.save(mySearchEntity, myRequestPartitionId);
 				mySearchResultCacheSvc.storeResults(
-					mySearchEntity,
-					previouslyFoundPids,
-					newPids,
-					myRequestDetails,
-					myRequestPartitionId);
+						mySearchEntity, previouslyFoundPids, newPids, myRequestDetails, myRequestPartitionId);
 			}
 
-			pidsToReturn =
-				pidsToReturn.subList(0, Math.min(pidsToReturn.size(), theToIndex - theFromIndex));
+			pidsToReturn = pidsToReturn.subList(0, Math.min(pidsToReturn.size(), theToIndex - theFromIndex));
 
 			fetchResourcesAndIncludes(searchBuilder, pidsToReturn, theFromIndex, theToIndex);
 		}
@@ -757,8 +792,8 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 
 		private ISearchBuilder<JpaPid> newSearchBuilder() {
 			Class<? extends IBaseResource> resourceType = myFhirContext
-				.getResourceDefinition(mySearchEntity.getResourceType())
-				.getImplementingClass();
+					.getResourceDefinition(mySearchEntity.getResourceType())
+					.getImplementingClass();
 			return mySearchBuilderFactory.newSearchBuilder(mySearchEntity.getResourceType(), resourceType);
 		}
 
@@ -767,6 +802,5 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 			Validate.notNull(retVal, "Resource has not PID assigned by DAO layer: %s", theResource);
 			return retVal;
 		}
-
 	}
 }
