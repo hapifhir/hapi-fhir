@@ -35,7 +35,6 @@ import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
-import ca.uhn.fhir.jpa.dao.data.ResourceIdWithPartition;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -125,7 +124,7 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 	public Stream<IdDt> streamSourceIdsThatReferenceTargetId(IIdType theTargetId) {
 		return myResourceLinkDao
 				.streamSourceIdsForTargetFhirId(theTargetId.getResourceType(), theTargetId.getIdPart())
-				.map(ResourceIdWithPartition::toIdDt);
+				.map(pid -> new IdDt(pid.getAssociatedResourceId()));
 	}
 
 	private Stream<TypedResourcePid> streamResourceIdsWithUrl(

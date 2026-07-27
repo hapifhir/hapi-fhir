@@ -25,8 +25,8 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
-import ca.uhn.fhir.jpa.dao.data.ResourceIdWithPartition;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
@@ -189,12 +189,11 @@ public class PartitionAwareReplaceReferencesSvc {
 	 * then loads and returns those resources.
 	 */
 	private List<IBaseResource> discoverReferencingResources(IIdType theSourceId, RequestDetails theRequestDetails) {
-		List<ResourceIdWithPartition> ids = findReferencingResourceIds(theSourceId, theRequestDetails);
+		List<JpaPid> ids = findReferencingResourceIds(theSourceId, theRequestDetails);
 		return loadResources(ids, theRequestDetails);
 	}
 
-	private List<ResourceIdWithPartition> findReferencingResourceIds(
-			IIdType theTargetId, RequestDetails theRequestDetails) {
+	private List<JpaPid> findReferencingResourceIds(IIdType theTargetId, RequestDetails theRequestDetails) {
 		return myHapiTransactionService
 				.withRequest(theRequestDetails)
 				.withRequestPartitionId(RequestPartitionId.allPartitions())
@@ -225,13 +224,14 @@ public class PartitionAwareReplaceReferencesSvc {
 				.map(r -> r.getIdElement().toUnqualifiedVersionless().getValue())
 				.toList());
 
-		List<ResourceIdWithPartition> additionalIds = new ArrayList<>();
+		List<JpaPid> additionalIds = new ArrayList<>();
 		for (IBaseResource resource : theCopyList) {
 			IIdType oldId = resource.getIdElement();
-			List<ResourceIdWithPartition> referrers = findReferencingResourceIds(oldId, theRequestDetails);
-			for (ResourceIdWithPartition referrer : referrers) {
-				if (alreadyDiscoveredIds.add(
-						referrer.toIdDt().toUnqualifiedVersionless().getValue())) {
+			List<JpaPid> referrers = findReferencingResourceIds(oldId, theRequestDetails);
+			for (JpaPid referrer : referrers) {
+				if (alreadyDiscoveredIds.add(referrer.getAssociatedResourceId()
+						.toUnqualifiedVersionless()
+						.getValue())) {
 					additionalIds.add(referrer);
 				}
 			}
@@ -261,10 +261,10 @@ public class PartitionAwareReplaceReferencesSvc {
 		return result;
 	}
 
-	private List<IBaseResource> loadResources(List<ResourceIdWithPartition> theIds, RequestDetails theRequestDetails) {
+	private List<IBaseResource> loadResources(List<JpaPid> theIds, RequestDetails theRequestDetails) {
 		List<IBaseResource> result = new ArrayList<>();
-		for (ResourceIdWithPartition referencingId : theIds) {
-			IdDt id = referencingId.toIdDt();
+		for (JpaPid referencingId : theIds) {
+			IIdType id = referencingId.getAssociatedResourceId();
 			try {
 				@SuppressWarnings("unchecked")
 				IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(id.getResourceType());
@@ -272,7 +272,7 @@ public class PartitionAwareReplaceReferencesSvc {
 				// rather than relying on the id to resolve the shard — the id may not identify the partition.
 				IBaseResource resource = myHapiTransactionService
 						.withRequest(theRequestDetails)
-						.withRequestPartitionId(referencingId.toRequestPartitionId())
+						.withRequestPartitionId(RequestPartitionId.fromPartitionId(referencingId.getPartitionId()))
 						.execute(() -> dao.read(id.toVersionless(), theRequestDetails));
 				result.add(resource);
 			} catch (ResourceGoneException e) {
