@@ -156,13 +156,13 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 			String resourceName = next.getResourceName();
 			// fixme can we share this with other versions.
 			for (IMethodBinding nextMethodBinding : next.getMethodBindings()) {
-				resourceToMethods.getOrDefault(resourceName, new ArrayList<>()).add(nextMethodBinding);
+				resourceToMethods.computeIfAbsent(resourceName, k->new ArrayList<>()).add(nextMethodBinding);
 			}
 		}
 		for (IMethodBinding nextMethodBinding :
 				getServerConfiguration(theRequestDetails).getServerBindings()) {
 			String resourceName = "";
-			resourceToMethods.getOrDefault(resourceName, new ArrayList<>()).add(nextMethodBinding);
+			resourceToMethods.computeIfAbsent(resourceName, k->new ArrayList<>()).add(nextMethodBinding);
 		}
 		return resourceToMethods;
 	}
