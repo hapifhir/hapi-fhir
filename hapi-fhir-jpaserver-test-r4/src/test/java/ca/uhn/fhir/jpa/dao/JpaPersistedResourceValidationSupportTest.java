@@ -30,6 +30,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -65,7 +66,7 @@ class JpaPersistedResourceValidationSupportTest {
 		@Captor
 		ArgumentCaptor<SearchParameterMap> searchParameterMapCaptor;
 		@Mock
-		IFhirResourceDao<?> mockDao;
+		IFhirResourceDao<Patient> mockDao;
 
 		@BeforeEach
 		public void beforeEach() {
@@ -159,7 +160,7 @@ class JpaPersistedResourceValidationSupportTest {
 	class FetchResourceTests {
 
 		@Mock
-		private IFhirResourceDao<?> myResourceDao;
+		private IFhirResourceDao<Patient> myResourceDao;
 
 		@ParameterizedTest
 		@EnumSource(value = FhirVersionEnum.class, mode = EnumSource.Mode.EXCLUDE, names = {"DSTU2_1"})

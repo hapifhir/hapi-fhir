@@ -32,9 +32,9 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistrationService;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.dao.ReindexOutcome;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -162,7 +162,6 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -220,6 +219,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private DaoRegistry myDaoRegistry;
 
 	@Autowired
+	private DaoRegistrationService myDaoRegistrationService;
+
+	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
 
 	@Autowired
@@ -252,10 +254,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Autowired
 	private ResourceSearchUrlSvc myResourceSearchUrlSvc;
 
-	@Autowired
-	private IFhirSystemDao<?, ?> mySystemDao;
-
 	private StorageInterceptorHooksFacade myStorageInterceptorHooks;
+
+	@VisibleForTesting
+	public void setDaoRegistryForUnitTest(DaoRegistry theDaoRegistry) {
+		myDaoRegistry = theDaoRegistry;
+		if (myDaoRegistrationService == null) {
+			myDaoRegistrationService = new DaoRegistrationService(theDaoRegistry);
+		}
+	}
 
 	@Nullable
 	public static <T extends IBaseResource> T invokeStoragePreShowResources(
@@ -1068,7 +1075,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		List<IResourcePersistentId<?>> resolvedIds =
 				theResourceIds.stream().map(t -> (IResourcePersistentId<?>) t).collect(Collectors.toList());
-		mySystemDao.preFetchResources(resolvedIds, false);
+		myDaoRegistry.getSystemDao().preFetchResources(resolvedIds, false);
 
 		for (P pid : theResourceIds) {
 			JpaPid jpaPid = (JpaPid) pid;
@@ -1698,15 +1705,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	@Transactional
 	public <MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, RequestDetails theRequestDetails) {
-		String sql =
-				"SELECT d FROM TagDefinition d WHERE d.myId IN (SELECT DISTINCT t.myTagId FROM ResourceTag t WHERE t.myResourceType = :res_type)";
-		TypedQuery<TagDefinition> q = myEntityManager.createQuery(sql, TagDefinition.class);
-		q.setParameter("res_type", myResourceName);
-		List<TagDefinition> tagDefinitions = q.getResultList();
+		return myTxTemplate.execute(tx -> {
+			String sql =
+					"SELECT d FROM TagDefinition d WHERE d.myId IN (SELECT DISTINCT t.myTagId FROM ResourceTag t WHERE t.myResourceType = :res_type)";
+			TypedQuery<TagDefinition> q = myEntityManager.createQuery(sql, TagDefinition.class);
+			q.setParameter("res_type", myResourceName);
+			List<TagDefinition> tagDefinitions = q.getResultList();
 
-		return toMetaDt(theType, tagDefinitions);
+			return toMetaDt(theType, tagDefinitions);
+		});
 	}
 
 	private boolean isDeleted(BaseHasResource entityToUpdate) {
@@ -1731,6 +1739,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		myStorageInterceptorHooks = new StorageInterceptorHooksFacade(myInterceptorBroadcaster);
 
+		myDaoRegistrationService.registerResourceDao(this);
+
 		super.start();
 	}
 
@@ -1743,29 +1753,29 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	@Transactional
 	public T readByPid(IResourcePersistentId thePid) {
 		return readByPid(thePid, false);
 	}
 
 	@Override
-	@Transactional
 	public T readByPid(IResourcePersistentId thePid, boolean theDeletedOk) {
-		StopWatch w = new StopWatch();
-		JpaPid jpaPid = (JpaPid) thePid;
+		return myTxTemplate.execute(tx -> {
+			StopWatch w = new StopWatch();
+			JpaPid jpaPid = (JpaPid) thePid;
 
-		Optional<ResourceTable> entity = myResourceTableDao.findById(jpaPid);
-		if (entity.isEmpty()) {
-			throw new ResourceNotFoundException(Msg.code(975) + "No resource found with PID " + jpaPid);
-		}
-		if (isDeleted(entity.get()) && !theDeletedOk) {
-			throw createResourceGoneException(entity.get());
-		}
+			Optional<ResourceTable> entity = myResourceTableDao.findById(jpaPid);
+			if (entity.isEmpty()) {
+				throw new ResourceNotFoundException(Msg.code(975) + "No resource found with PID " + jpaPid);
+			}
+			if (isDeleted(entity.get()) && !theDeletedOk) {
+				throw createResourceGoneException(entity.get());
+			}
 
-		T retVal = myJpaStorageResourceParser.toResource(null, myResourceType, entity.get(), null, false);
+			T retVal = myJpaStorageResourceParser.toResource(null, myResourceType, entity.get(), null, false);
 
-		ourLog.debug("Processed read by PID on {} in {}ms", jpaPid, w.getMillis());
-		return retVal;
+			ourLog.debug("Processed read by PID on {} in {}ms", jpaPid, w.getMillis());
+			return retVal;
+		});
 	}
 
 	/**

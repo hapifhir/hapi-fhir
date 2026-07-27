@@ -104,7 +104,7 @@ public class ReindexV3ModifyResourcesStep extends BaseBulkModifyResourcesStep<Re
 		ReindexJobParameters jobParameters = theStepExecutionDetails.getParameters();
 		boolean reindexSearchParameters =
 				jobParameters.getReindexSearchParameters() != ReindexParameters.ReindexSearchParametersEnum.NONE;
-		mySystemDao.preFetchResources(persistentIds, reindexSearchParameters);
+		myDaoRegistry.getSystemDao().preFetchResources(persistentIds, reindexSearchParameters);
 		ourLog.info(
 				"Prefetched {} resources in {} - Instance[{}] Chunk[{}]",
 				persistentIds.size(),

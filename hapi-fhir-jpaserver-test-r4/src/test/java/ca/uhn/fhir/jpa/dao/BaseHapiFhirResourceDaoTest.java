@@ -11,6 +11,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.dao.ReindexOutcome;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
@@ -197,6 +198,7 @@ class BaseHapiFhirResourceDaoTest {
 		mySvc.setResourceType(Patient.class);
 		mySvc.setContext(myFhirContext);
 		mySvc.setTransactionService(myTransactionService);
+		mySvc.setDaoRegistryForUnitTest(new DaoRegistry(myFhirContext));
 		mySvc.start();
 		mySpiedSvc = spy(mySvc);
 	}
@@ -231,7 +233,6 @@ class BaseHapiFhirResourceDaoTest {
 
 		MockHapiTransactionService transactionService = new MockHapiTransactionService();
 		mySvc.setTransactionService(transactionService);
-		setup(Patient.class);
 
 		IResourceLookup<JpaPid> mockDeletedResourceLookup = mock(IResourceLookup.class);
 		when(mockDeletedResourceLookup.getPersistentId()).thenReturn(JpaPid.fromIdAndVersion(1L, 1L)); // Simulate that the PID is not yet expired in the RESOURCE_LOOKUP_BY_FORCED_ID memory cache
@@ -254,7 +255,7 @@ class BaseHapiFhirResourceDaoTest {
 
 		MockHapiTransactionService transactionService = new MockHapiTransactionService();
 		mySvc.setTransactionService(transactionService);
-		setup(Patient.class);
+
 		List<Patient> resourceList = new ArrayList<>();
 		resourceList.add(null);
 		resourceList.add(new Patient());
@@ -376,9 +377,6 @@ class BaseHapiFhirResourceDaoTest {
 
 	@Test
 	public void delete_nonExistentEntity_doesNotThrow404() {
-		// initialize our class
-		setup(Patient.class);
-
 		// setup
 		when(myStorageSettings.isDeleteEnabled()).thenReturn(true);
 
