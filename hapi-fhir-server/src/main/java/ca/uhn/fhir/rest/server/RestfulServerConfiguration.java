@@ -356,18 +356,16 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 		for (ResourceBinding next : getResourceBindings()) {
 			String resourceName = next.getResourceName();
 			for (IMethodBinding nextMethodBinding : next.getMethodBindings()) {
-				if (resourceToMethods.containsKey(resourceName) == false) {
-					resourceToMethods.put(resourceName, new ArrayList<>());
-				}
-				resourceToMethods.get(resourceName).add(nextMethodBinding);
+				resourceToMethods
+						.computeIfAbsent(resourceName, k -> new ArrayList<>())
+						.add(nextMethodBinding);
 			}
 		}
 		for (IMethodBinding nextMethodBinding : getServerBindings()) {
 			String resourceName = "";
-			if (resourceToMethods.containsKey(resourceName) == false) {
-				resourceToMethods.put(resourceName, new ArrayList<>());
-			}
-			resourceToMethods.get(resourceName).add(nextMethodBinding);
+			resourceToMethods
+					.computeIfAbsent(resourceName, k -> new ArrayList<>())
+					.add(nextMethodBinding);
 		}
 		return resourceToMethods;
 	}

@@ -111,28 +111,6 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 		}
 	}
 
-	private Map<String, List<IMethodBinding>> collectMethodBindings(RequestDetails theRequestDetails) {
-		Map<String, List<IMethodBinding>> resourceToMethods = new TreeMap<>();
-		for (ResourceBinding next : getServerConfiguration(theRequestDetails).getResourceBindings()) {
-			String resourceName = next.getResourceName();
-			for (IMethodBinding nextMethodBinding : next.getMethodBindings()) {
-				if (resourceToMethods.containsKey(resourceName) == false) {
-					resourceToMethods.put(resourceName, new ArrayList<>());
-				}
-				resourceToMethods.get(resourceName).add(nextMethodBinding);
-			}
-		}
-		for (IMethodBinding nextMethodBinding :
-				getServerConfiguration(theRequestDetails).getServerBindings()) {
-			String resourceName = "";
-			if (resourceToMethods.containsKey(resourceName) == false) {
-				resourceToMethods.put(resourceName, new ArrayList<>());
-			}
-			resourceToMethods.get(resourceName).add(nextMethodBinding);
-		}
-		return resourceToMethods;
-	}
-
 	private DateTimeType conformanceDate(RequestDetails theRequestDetails) {
 		IPrimitiveType<Date> buildDate =
 				getServerConfiguration(theRequestDetails).getConformanceDate();

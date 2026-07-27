@@ -51,7 +51,6 @@ import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.Bindings;
 import ca.uhn.fhir.rest.server.IServerConformanceProvider;
-import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerConfiguration;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -78,7 +77,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -132,22 +130,6 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 				}
 			}
 		}
-	}
-
-	private Map<String, List<IMethodBinding>> collectMethodBindings(RequestDetails theRequestDetails) {
-		Map<String, List<IMethodBinding>> resourceToMethods = new TreeMap<String, List<IMethodBinding>>();
-		for (ResourceBinding next : getServerConfiguration(theRequestDetails).getResourceBindings()) {
-			String resourceName = next.getResourceName();
-			for (IMethodBinding nextMethodBinding : next.getMethodBindings()) {
-				resourceToMethods.computeIfAbsent(resourceName, l->new ArrayList<>()).add(nextMethodBinding);
-			}
-		}
-		for (IMethodBinding nextMethodBinding :
-				getServerConfiguration(theRequestDetails).getServerBindings()) {
-			String resourceName = "";
-			resourceToMethods.computeIfAbsent(resourceName, k->new ArrayList<>()).add(nextMethodBinding);
-		}
-		return resourceToMethods;
 	}
 
 	private DateTimeDt conformanceDate(RequestDetails theRequestDetails) {
