@@ -7,7 +7,15 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
 import java.io.IOException;
 
+/**
+ * Abstract interface for RestfulServer handlers.
+ *
+ */
 public interface IMethodBinding {
+	/**
+	 * Can this binding handle this request?
+	 * @return if this binding can handle this request.
+	 */
 	MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest);
 
 	/**
@@ -22,8 +30,8 @@ public interface IMethodBinding {
 	}
 
 	/**
-	 * A simpler version of the above for implementors that are not polymorphic, or for servers that are
-	 * not standard FHIR REST (e.g. JAXRs, or GraphQL).
+	 * A simpler version of the above for implementors that are not polymorphic, for servers that are
+	 * not standard FHIR REST (e.g. JAXRs, or GraphQL), and for building conformance documents.
 	 * @return the operation of this handler
 	 */
 	RestOperationTypeEnum getRestOperationType();
@@ -51,15 +59,20 @@ public interface IMethodBinding {
 	 */
 	String getResourceName();
 
-	// fixme move this stuff to a conformance-builder sibling
+	// TODO separate invocation from conformance by moving this stuff to a conformance-builder.  Maybe a visitor pattern.
 
+	/**
+	 * For conformance.
+	 */
 	boolean isSupportsConditional();
-	/** for conformance */
+
+	/**
+	 * For conformance.
+	 */
 	boolean isSupportsConditionalMultiple();
 
 	/**
-	 * Can this binding handle this request?
-	 * @return if this binding can handle this request.
+	 * Release any resources bound by this handler.
 	 */
 	default void close() {
 		// default empty close()
