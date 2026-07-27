@@ -122,6 +122,7 @@ import com.healthmarketscience.sqlbuilder.UnaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
@@ -213,24 +214,52 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private static final String MY_TARGET_RESOURCE_VERSION = "myTargetResourceVersion";
 	public static final JpaPid[] EMPTY_JPA_PID_ARRAY = new JpaPid[0];
 	public static Integer myMaxPageSizeForTests = null;
-	protected final IInterceptorBroadcaster myInterceptorBroadcaster;
-	protected final IResourceTagDao myResourceTagDao;
-	private final PerformanceTracingLogger myPerformanceTracingLogger;
-	private final DialectSvc myDialectSvc;
 	private String myResourceName;
 	private final Class<? extends IBaseResource> myResourceType;
-	private final HapiFhirLocalContainerEntityManagerFactoryBean myEntityManagerFactory;
-	private final SqlObjectFactory mySqlBuilderFactory;
-	private final HibernatePropertiesProvider myDialectProvider;
-	private final ISearchParamRegistry mySearchParamRegistry;
-	private final PartitionSettings myPartitionSettings;
-	private final DaoRegistry myDaoRegistry;
-	private final FhirContext myContext;
-	private final IIdHelperService<JpaPid> myIdHelperService;
-	private final JpaStorageSettings myStorageSettings;
 	private final SearchQueryProperties mySearchProperties;
-	private final IResourceHistoryTableDao myResourceHistoryTableDao;
-	private final BatchResourceLoader myBatchResourceLoader;
+	private PerformanceTracingLogger myPerformanceTracingLogger;
+
+	@Autowired
+	protected IInterceptorBroadcaster myInterceptorBroadcaster;
+
+	@Autowired
+	protected IResourceTagDao myResourceTagDao;
+
+	@Autowired
+	private DialectSvc myDialectSvc;
+
+	@Autowired
+	private HapiFhirLocalContainerEntityManagerFactoryBean myEntityManagerFactory;
+
+	@Autowired
+	private SqlObjectFactory mySqlBuilderFactory;
+
+	@Autowired
+	private HibernatePropertiesProvider myDialectProvider;
+
+	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
+
+	@Autowired
+	private PartitionSettings myPartitionSettings;
+
+	@Autowired
+	private DaoRegistry myDaoRegistry;
+
+	@Autowired
+	private FhirContext myContext;
+
+	@Autowired
+	private IIdHelperService<JpaPid> myIdHelperService;
+
+	@Autowired
+	private JpaStorageSettings myStorageSettings;
+
+	@Autowired
+	private IResourceHistoryTableDao myResourceHistoryTableDao;
+
+	@Autowired
+	private BatchResourceLoader myBatchResourceLoader;
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
@@ -266,44 +295,38 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	/**
 	 * Constructor
 	 */
-	@SuppressWarnings({"rawtypes", "unchecked"})
-	public SearchBuilder(
-			String theResourceName,
-			JpaStorageSettings theStorageSettings,
-			HapiFhirLocalContainerEntityManagerFactoryBean theEntityManagerFactory,
-			SqlObjectFactory theSqlBuilderFactory,
-			HibernatePropertiesProvider theDialectProvider,
-			ISearchParamRegistry theSearchParamRegistry,
-			PartitionSettings thePartitionSettings,
-			IInterceptorBroadcaster theInterceptorBroadcaster,
-			IResourceTagDao theResourceTagDao,
-			DaoRegistry theDaoRegistry,
-			FhirContext theContext,
-			IIdHelperService theIdHelperService,
-			IResourceHistoryTableDao theResourceHistoryTagDao,
-			BatchResourceLoader theBatchResourceLoader,
-			Class<? extends IBaseResource> theResourceType,
-			DialectSvc theDialectSvc) {
+	public SearchBuilder(String theResourceName, Class<? extends IBaseResource> theResourceType) {
 		myResourceName = theResourceName;
 		myResourceType = theResourceType;
-		myStorageSettings = theStorageSettings;
-
-		myEntityManagerFactory = theEntityManagerFactory;
-		mySqlBuilderFactory = theSqlBuilderFactory;
-		myDialectProvider = theDialectProvider;
-		mySearchParamRegistry = theSearchParamRegistry;
-		myPartitionSettings = thePartitionSettings;
-		myInterceptorBroadcaster = theInterceptorBroadcaster;
-		myResourceTagDao = theResourceTagDao;
-		myDaoRegistry = theDaoRegistry;
-		myContext = theContext;
-		myIdHelperService = theIdHelperService;
-		myResourceHistoryTableDao = theResourceHistoryTagDao;
-		myBatchResourceLoader = theBatchResourceLoader;
-		myDialectSvc = theDialectSvc;
-
 		mySearchProperties = new SearchQueryProperties();
-		myPerformanceTracingLogger = new PerformanceTracingLogger(theInterceptorBroadcaster);
+	}
+
+	/**
+	 * Unit Test Constructor
+	 */
+	public SearchBuilder(
+			String theResourceName,
+			Class<? extends IBaseResource> theResourceType,
+			FhirContext theFhirContext,
+			PartitionSettings thePartitionSettings,
+			DaoRegistry theDaoRegistry,
+			ISearchParamRegistry theSearchParamRegistry,
+			JpaStorageSettings theStorageSettings,
+			IResourceHistoryTableDao theResourceHistoryTableDao,
+			BatchResourceLoader theBatchResourceLoader) {
+		this(theResourceName, theResourceType);
+		myContext = theFhirContext;
+		myPartitionSettings = thePartitionSettings;
+		myDaoRegistry = theDaoRegistry;
+		mySearchParamRegistry = theSearchParamRegistry;
+		myStorageSettings = theStorageSettings;
+		myResourceHistoryTableDao = theResourceHistoryTableDao;
+		myBatchResourceLoader = theBatchResourceLoader;
+	}
+
+	@PostConstruct
+	void start() {
+		myPerformanceTracingLogger = new PerformanceTracingLogger(myInterceptorBroadcaster);
 	}
 
 	@VisibleForTesting

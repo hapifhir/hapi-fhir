@@ -218,9 +218,10 @@ public class GiantTransactionPerfTest {
 		mySystemDao.setTransactionProcessorForUnitTest(myTransactionProcessor);
 		mySystemDao.setStorageSettingsForUnitTest(myStorageSettings);
 		mySystemDao.setInterceptorBroadcasterForUnitTest(myInterceptorSvc);
+		myDaoRegistry.register(mySystemDao);
 
 		when(myAppCtx.getBean(eq(IInstanceValidatorModule.class))).thenReturn(myInstanceValidatorSvc);
-		when(myAppCtx.getBean(eq(IFhirSystemDao.class))).thenReturn(mySystemDao);
+		when(myAppCtx.getBean(eq(DaoRegistry.class))).thenReturn(myDaoRegistry);
 
 		myInMemoryResourceMatcher = new InMemoryResourceMatcher();
 
@@ -297,9 +298,8 @@ public class GiantTransactionPerfTest {
 		myEobDao.setResourceTypeCacheSvc(myResourceTypeCacheSvc);
 		myEobDao.setInterceptorBroadcasterForUnitTest(myInterceptorSvc);
 		myEobDao.setMemoryCacheService(myMemoryCacheService);
+		myEobDao.setDaoRegistryForUnitTest(myDaoRegistry);
 		myEobDao.start();
-
-		myDaoRegistry.setResourceDaos(Lists.newArrayList(myEobDao));
 
 		when(myResourceTypeCacheSvc.getResourceTypeId(anyString())).thenReturn((short)100);
 

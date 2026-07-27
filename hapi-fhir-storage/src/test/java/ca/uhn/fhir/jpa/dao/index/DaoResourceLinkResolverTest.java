@@ -116,7 +116,7 @@ class DaoResourceLinkResolverTest {
 	private void registerPatientDao() {
 		when(myPatientDao.getResourceType()).thenReturn(Patient.class);
 		when(myIdHelperService.newPid(any())).thenReturn(JpaPid.fromId(123L));
-		myDaoRegistry.setResourceDaos(List.of((IFhirResourceDao) myPatientDao));
+		myDaoRegistry.register(myPatientDao);
 	}
 
 	private DaoMethodOutcome outcomeWithCreatedEntity() {

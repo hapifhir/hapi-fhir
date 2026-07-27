@@ -43,6 +43,7 @@ import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
+import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptViewDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptViewOracleDao;
@@ -235,6 +236,9 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 	@Autowired
 	private ITermConceptDao myTermConceptDao;
+
+	@Autowired
+	private ITermConceptParentChildLinkDao myConceptParentChildLinkDao;
 
 	@Autowired
 	private ITermValueSetConceptViewDao myTermValueSetConceptViewDao;
@@ -1295,8 +1299,35 @@ public class TermReadSvcImpl implements ITermReadSvc {
 				break;
 			case "parent":
 			case "child":
-				isCodeSystemLoincOrThrowInvalidRequestException(theCodeSystemIdentifier, theFilter.getProperty());
-				handleFilterLoincParentChild(theF, theB, theFilter);
+				if (theFilter.getOp() == ValueSet.FilterOperator.EXISTS) {
+					// The 'exists' operator on the hierarchical parent/child properties is generic (not
+					// LOINC-specific): it selects concepts that do (or don't) have parents/children.
+					handleFilterHierarchyExists(theCodeSystemIdentifier, theF, theB, theFilter);
+				} else {
+					isCodeSystemLoincOrThrowInvalidRequestException(theCodeSystemIdentifier, theFilter.getProperty());
+					handleFilterLoincParentChild(theF, theB, theFilter);
+				}
+				break;
+			case "inactive":
+			case "notSelectable":
+				if (theFilter.getOp() == ValueSet.FilterOperator.EXISTS) {
+					// Standard boolean concept-property: value-aware exists (a concept is flagged only when
+					// it carries the property with value true), rather than a plain property-presence check.
+					handleFilterBooleanPropertyExists(theF, theB, theFilter);
+				} else {
+					handleFilterPropertyDefault(theF, theB, theFilter);
+				}
+				break;
+			case "deprecated":
+			case "deprecationDate":
+			case "retirementDate":
+				if (theFilter.getOp() == ValueSet.FilterOperator.EXISTS) {
+					// Standard date-valued concept-property: 'exists' is a presence check (no date-value
+					// comparison), value-aware so that exists=false selects the complement.
+					handleFilterPresenceExists(theF, theB, theFilter);
+				} else {
+					handleFilterPropertyDefault(theF, theB, theFilter);
+				}
 				break;
 			case "ancestor":
 				isCodeSystemLoincOrThrowInvalidRequestException(theCodeSystemIdentifier, theFilter.getProperty());
@@ -1481,6 +1512,145 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		}
 		b.must(f.bool(innerB -> terms.forEach(
 				term -> innerB.should(f.match().field(term.field()).matching(term.text())))));
+	}
+
+	/**
+	 * Handles {@code property=child|parent} with {@code op=exists}. These hierarchical membership filters
+	 * are not code-system specific: {@code child exists=false} selects the leaf concepts (no children),
+	 * {@code parent exists=false} selects the roots (no parents), and the {@code true} variants select the
+	 * complement. Concepts that have children/parents are resolved from the stored parent/child links.
+	 */
+	private void handleFilterHierarchyExists(
+			String theCodeSystemIdentifier,
+			SearchPredicateFactory theF,
+			BooleanPredicateClausesStep<?> theB,
+			ValueSet.ConceptSetFilterComponent theFilter) {
+
+		// The value is semantically required here and must be a real boolean literal. The generic EXISTS
+		// validation allows a blank value, and Boolean.parseBoolean() would silently coerce a blank or
+		// non-"true" value (e.g. "0", "no") to false, flipping the filter to select leaves/roots.
+		boolean wantConceptsWithRelation = parseRequiredBoolean(theFilter);
+
+		if ("parent".equals(theFilter.getProperty())) {
+			handleFilterHasParentExists(theF, theB, wantConceptsWithRelation);
+		} else {
+			handleFilterHasChildrenExists(theCodeSystemIdentifier, theF, theB, wantConceptsWithRelation);
+		}
+	}
+
+	/**
+	 * Resolves {@code parent exists} from the pre-indexed transitive-ancestor field {@code myParentPids},
+	 * which carries the sentinel token {@code "NONE"} for root concepts (see {@code TermConcept#setParentPids}).
+	 * A concept has a parent iff that field is not {@code "NONE"}. This is a single indexed term query, so it
+	 * avoids enumerating every non-root code — which for a large CodeSystem is almost the entire code system —
+	 * into a huge terms query.
+	 */
+	private void handleFilterHasParentExists(
+			SearchPredicateFactory theF, BooleanPredicateClausesStep<?> theB, boolean theWantConceptsWithParent) {
+		PredicateFinalStep isRoot = theF.match().field("myParentPids").matching("NONE");
+		if (theWantConceptsWithParent) {
+			theB.mustNot(isRoot); // keep the concepts that have a parent (non-roots)
+		} else {
+			theB.must(isRoot); // keep the roots
+		}
+	}
+
+	/**
+	 * Resolves {@code child exists} by enumerating the codes that appear as a parent in a stored link (the
+	 * inner nodes). Unlike the parent case there is no pre-indexed per-concept flag for "has children", but
+	 * this is typically the smaller side of the hierarchy since most concepts are leaves.
+	 */
+	private void handleFilterHasChildrenExists(
+			String theCodeSystemIdentifier,
+			SearchPredicateFactory theF,
+			BooleanPredicateClausesStep<?> theB,
+			boolean theWantConceptsWithChildren) {
+		Collection<String> codesHavingChildren = findCodesHavingChildren(theCodeSystemIdentifier);
+
+		if (codesHavingChildren.isEmpty()) {
+			// No concept has children. exists=true matches nothing; exists=false matches everything
+			// (so no additional predicate is needed).
+			if (theWantConceptsWithChildren) {
+				theB.must(theF.matchNone());
+			}
+			return;
+		}
+
+		PredicateFinalStep matchesAnyOfThoseCodes = theF.terms().field("myCode").matchingAny(codesHavingChildren);
+		if (theWantConceptsWithChildren) {
+			theB.must(matchesAnyOfThoseCodes); // keep concepts that have children
+		} else {
+			theB.mustNot(matchesAnyOfThoseCodes); // keep the complement (leaves)
+		}
+	}
+
+	/**
+	 * Handles a standard concept-property with {@code op=exists} as a plain presence check on the stored
+	 * property: {@code exists=true} keeps the concepts that carry the property, {@code exists=false} keeps
+	 * the complement. Used for the date-valued {@code deprecated} / {@code deprecationDate} /
+	 * {@code retirementDate} properties (the date value itself is not interpreted).
+	 */
+	private void handleFilterPresenceExists(
+			SearchPredicateFactory theF,
+			BooleanPredicateClausesStep<?> theB,
+			ValueSet.ConceptSetFilterComponent theFilter) {
+		boolean wantExists = parseRequiredBoolean(theFilter);
+		PredicateFinalStep hasProperty = theF.exists().field(CONCEPT_PROPERTY_PREFIX_NAME + theFilter.getProperty());
+		if (wantExists) {
+			theB.must(hasProperty);
+		} else {
+			theB.mustNot(hasProperty);
+		}
+	}
+
+	/**
+	 * Handles the standard boolean concept-properties {@code inactive} / {@code notSelectable} with
+	 * {@code op=exists}. A concept is considered flagged only when it carries the property with the boolean
+	 * value {@code true}, so {@code exists=true} selects those concepts and {@code exists=false} selects the
+	 * complement (concepts where the property is absent or explicitly {@code false}).
+	 */
+	private void handleFilterBooleanPropertyExists(
+			SearchPredicateFactory theF,
+			BooleanPredicateClausesStep<?> theB,
+			ValueSet.ConceptSetFilterComponent theFilter) {
+		boolean wantFlagged = parseRequiredBoolean(theFilter);
+		Term term = new Term(CONCEPT_PROPERTY_PREFIX_NAME + theFilter.getProperty(), "true");
+		PredicateFinalStep flaggedTrue = theF.match().field(term.field()).matching(term.text());
+		if (wantFlagged) {
+			theB.must(flaggedTrue);
+		} else {
+			theB.mustNot(flaggedTrue);
+		}
+	}
+
+	/**
+	 * Parse the filter value as a strict boolean literal ({@code true}/{@code false}, case-insensitive,
+	 * ignoring surrounding whitespace), throwing {@link InvalidRequestException} for a blank or otherwise
+	 * non-boolean value.
+	 */
+	private boolean parseRequiredBoolean(ValueSet.ConceptSetFilterComponent theFilter) {
+		String value = StringUtils.trimToNull(theFilter.getValue());
+		if ("true".equalsIgnoreCase(value)) {
+			return true;
+		}
+		if ("false".equalsIgnoreCase(value)) {
+			return false;
+		}
+		throw new InvalidRequestException(Msg.code(3003) + "Filter with property '" + theFilter.getProperty()
+				+ "' and op '" + theFilter.getOp().toCode() + "' requires a boolean value ('true' or 'false') but was '"
+				+ theFilter.getValue() + "'");
+	}
+
+	/**
+	 * Returns the codes of the concepts that have at least one child within the CodeSystem version (i.e. that
+	 * appear as a PARENT in a stored parent/child link).
+	 */
+	private Collection<String> findCodesHavingChildren(String theCodeSystemIdentifier) {
+		TermCodeSystemVersionDetails codeSystemVersion = getCurrentCodeSystemVersion(theCodeSystemIdentifier);
+		if (codeSystemVersion == null) {
+			return Collections.emptyList();
+		}
+		return myConceptParentChildLinkDao.findDistinctParentCodesByCodeSystemVersion(codeSystemVersion.pid());
 	}
 
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
