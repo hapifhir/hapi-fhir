@@ -38,9 +38,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
@@ -50,7 +52,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * and a state string.
  *
  * State strings are defined as follows:
- * "step-name-or-step-index,INITIAL_STATE|step-name-or-step-index,FINAL_STATE"
+ * "step-name-or-step-index|INITIAL_STATE,step-name-or-step-index|FINAL_STATE"
+ * eg: "1|COMPLETED,2|READY" -> starts in step 1 as COMPLETED, ends in step 2 as READY
+ *
+ * If a chunk is added (but has no initial chunk it is created from), use the "+" to indicate this
+ * eg: "+3|READY" -> indicates a new chunk is created in step 3 with state READY. No previous initial state
+ * exists though (it is an expected new state). Eg: reduction steps.
  *
  * where "step-name-or-step-index" is the name or index of a step in the provided
  * JobDefinition; the step that the work chunk should start in.
@@ -68,12 +75,16 @@ public class JobMaintenanceStateInformation {
 	private static final Logger ourLog = LoggerFactory.getLogger(JobMaintenanceStateInformation.class);
 
 	private static final String COMMENT_PATTERN = "(#.*)$";
+	public static final String ADD_SIGIL = "+";
 
 	private final List<String> myLineComments = new ArrayList<>();
 
 	private final List<WorkChunk> myInitialWorkChunks = new ArrayList<>();
 
 	private final List<WorkChunk> myFinalWorkChunk = new ArrayList<>();
+
+	// chunks created, but have no initial chunk
+	private final List<WorkChunk> myCreatedFinalChunks = new ArrayList<>();
 
 	private final JobDefinition<?> myJobDefinition;
 
@@ -120,35 +131,64 @@ public class JobMaintenanceStateInformation {
 	}
 
 	public void verifyFinalStates(IJobPersistence theJobPersistence, Consumer<WorkChunk> theChunkConsumer) {
-		assertEquals(getInitialWorkChunks().size(), getFinalWorkChunk().size());
-
-		HashMap<String, WorkChunk> workchunkMap = new HashMap<>();
+		// set workchunks (from initial state)
+		HashMap<String, WorkChunk> expectedWorkChunkMap = new HashMap<>();
 		for (WorkChunk fs : getFinalWorkChunk()) {
-			workchunkMap.put(fs.getId(), fs);
+			expectedWorkChunkMap.put(fs.getId(), fs);
 		}
 
-		// fetch all workchunks
+		// fetch all workchunks (from db)
 		Iterator<WorkChunk> workChunkIterator = theJobPersistence.fetchAllWorkChunksIterator(getInstanceId(), true);
-		List<WorkChunk> workchunks = new ArrayList<>();
-		workChunkIterator.forEachRemaining(workchunks::add);
+		List<WorkChunk> actualWorkchunks = new ArrayList<>();
+		workChunkIterator.forEachRemaining(actualWorkchunks::add);
 
-		assertEquals(workchunks.size(), workchunkMap.size());
-		workchunks.forEach(c -> ourLog.info("Returned " + c.toString()));
+		actualWorkchunks.forEach(c -> ourLog.info("Returned " + c.toString()));
 
-		for (WorkChunk wc : workchunks) {
-			WorkChunk expected = workchunkMap.get(wc.getId());
-			assertNotNull(expected);
+		assertEquals(expectedWorkChunkMap.size() + myCreatedFinalChunks.size(), actualWorkchunks.size());
 
-			// verify status and step id
-			assertEquals(expected.getTargetStepId(), wc.getTargetStepId());
-			assertEquals(expected.getStatus(), wc.getStatus());
-			theChunkConsumer.accept(wc);
+		for (WorkChunk wc : actualWorkchunks) {
+			WorkChunk expected = expectedWorkChunkMap.get(wc.getId());
+
+			if (expected == null) {
+				// if the id doesn't match, it could be a newly created chunk
+				// check if final created chunks has been initialized
+				assertFalse(myCreatedFinalChunks.isEmpty(), "Found newly created chunk; but no final created chunks were expected");
+
+				// find by state and step
+				Set<WorkChunk> found = myCreatedFinalChunks.stream()
+					.filter(chunk -> {
+						if (chunk.getStatus() != wc.getStatus()) {
+							return false;
+						}
+						if (!chunk.getTargetStepId().equals(wc.getTargetStepId())) {
+							return false;
+						}
+						return true;
+					})
+					.collect(Collectors.toSet());
+				/*
+				 * this is a weird standard, but we currently
+				 * only expect adding a single new chunk with a single
+				 * expected status. so we're verifying to that.
+				 *
+				 * If this logic should change, we'll need a better way to
+				 * match than on STATUS and target step id
+				 */
+				assertEquals(1, found.size(), "Expected 1 created new chunk in state "
+					+ wc.getStatus().name() + " for state " + wc.getTargetStepId() + " but found " + found.size());
+			} else {
+				assertNotNull(expected);
+
+				// verify status and step id
+				assertEquals(expected.getTargetStepId(), wc.getTargetStepId());
+				assertEquals(expected.getStatus(), wc.getStatus());
+				theChunkConsumer.accept(wc);
+			}
 		}
 	}
 
 	public void initialize(IJobPersistence theJobPersistence) {
-		// should have as many input workchunks as output workchunks
-		// unless we have newly created ones somewhere
+		// same initial as final chunks
 		assertEquals(getInitialWorkChunks().size(), getFinalWorkChunk().size());
 
 		Set<String> stepIds = new HashSet<>();
@@ -226,6 +266,18 @@ public class JobMaintenanceStateInformation {
 			});
 			addWorkChunkBasedOnState(states[1], chunk -> {
 				myFinalWorkChunk.add(chunk);
+			});
+		} else if (theLine.startsWith(ADD_SIGIL)) {
+			// added final state; no initial state
+			String state = theLine.substring(1); // chop off the sigil
+
+			if (state.contains(",")) {
+				throw new RuntimeException("Invalid format. State transition found, but not expected");
+			}
+			// add only the last chunk
+			addWorkChunkBasedOnState(state, chunk -> {
+//				myFinalWorkChunk.add(chunk);
+				myCreatedFinalChunks.add(chunk);
 			});
 		} else {
 			// does not have final state; no change

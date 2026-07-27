@@ -16,13 +16,13 @@ import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -72,16 +72,11 @@ class SearchBuilderTest {
 	@Mock(strictness = Mock.Strictness.LENIENT)
 	private DaoRegistry myDaoRegistry;
 
-	/**
-	 * NB: only the fields that are injected in the constructor will be injected by
-	 * mockito
-	 */
-	@InjectMocks
 	private SearchBuilder mySearchBuilder;
 
 	@BeforeEach
 	public void beforeEach() {
-		mySearchBuilder.setResourceName("QuestionnaireResponse");
+		mySearchBuilder = new SearchBuilder("QuestionnaireResponse", QuestionnaireResponse.class, myFhirContext, myPartitionSettings, myDaoRegistry, mySearchParamRegistry, myStorageSettings, myResourceHistoryTableDao, myBatchResourceLoader);
 		when(myDaoRegistry.getRegisteredDaoTypes()).thenReturn(ourCtx.getResourceTypes());
 	}
 

@@ -45,6 +45,7 @@ import ca.uhn.fhir.jpa.dao.data.IBatch2AttachmentRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkMetadataViewRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Batch2JobAttachmentChunkEntity;
 import ca.uhn.fhir.jpa.entity.Batch2JobAttachmentEntity;
@@ -114,6 +115,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class JpaJobPersistenceImpl implements IJobPersistence {
 	public static final String CREATE_TIME = "myCreateTime";
+
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	public static final int DEFAULT_ATTACHMENT_CHUNK_SIZE = toIntExact(FileUtils.ONE_MB);
 	private final IBatch2AttachmentRepository myAttachmentRepository;
@@ -162,8 +164,20 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRED)
 	public String onWorkChunkCreate(WorkChunkCreateEvent theBatchWorkChunk) {
+		HapiTransactionService.requireTransaction();
+
+		Batch2WorkChunkEntity entity = createEntityFromCreateEvent(theBatchWorkChunk);
+
+		ourLog.debug("Create work chunk {}/{}/{}", entity.getInstanceId(), entity.getId(), entity.getTargetStepId());
+		ourLog.trace(
+				"Create work chunk data {}/{}: {}", entity.getInstanceId(), entity.getId(), entity.getSerializedData());
+		myWorkChunkRepository.save(entity);
+
+		return entity.getId();
+	}
+
+	private Batch2WorkChunkEntity createEntityFromCreateEvent(WorkChunkCreateEvent theBatchWorkChunk) {
 		Batch2WorkChunkEntity entity = new Batch2WorkChunkEntity();
 		entity.setId(UUID.randomUUID().toString());
 		entity.setSequence(theBatchWorkChunk.sequence);
@@ -175,13 +189,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		entity.setCreateTime(new Date());
 		entity.setStartTime(new Date());
 		entity.setStatus(getOnCreateStatus(theBatchWorkChunk));
-
-		ourLog.debug("Create work chunk {}/{}/{}", entity.getInstanceId(), entity.getId(), entity.getTargetStepId());
-		ourLog.trace(
-				"Create work chunk data {}/{}: {}", entity.getInstanceId(), entity.getId(), entity.getSerializedData());
-		myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> myWorkChunkRepository.save(entity));
-
-		return entity.getId();
+		return entity;
 	}
 
 	@Override
@@ -862,6 +870,10 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 				// someone else beat us here.  No changes
 				return false;
 			}
+			// we only need this if we're creating a reduction 'driver' chunk.
+			// and we only do that if we (this instance) is the one who will be transitioning
+			// the chunks to READY/REDUCTION_READY
+
 			ourLog.debug("Moving gated instance {} to the next step {}.", theJobInstanceId, theNextStepId);
 			instance.setCurrentGatedStepId(theNextStepId);
 			return true;
@@ -884,6 +896,31 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 					theNextStepId,
 					List.of(WorkChunkStatusEnum.GATE_WAITING, WorkChunkStatusEnum.QUEUED),
 					nextStep);
+
+			/*
+			 * we add a data-free READY chunk that will be enqueued by the system
+			 */
+			JobInstance instance = fetchInstance(theJobInstanceId).orElse(null);
+			assert instance != null : "Instance was not set for reduction step; falling back to inline processing";
+
+			if (theIsReductionStep) {
+				/**
+				 * We're creating a "driver" chunk with state READY
+				 */
+				WorkChunkCreateEvent reductionReadyChunk = new WorkChunkCreateEvent(
+						instance.getJobDefinitionId(),
+						instance.getJobDefinitionVersion(),
+						theNextStepId,
+						theJobInstanceId,
+						0,
+						null,
+						true);
+				Batch2WorkChunkEntity entity = createEntityFromCreateEvent(reductionReadyChunk);
+				entity.setStatus(WorkChunkStatusEnum.READY);
+
+				myWorkChunkRepository.save(entity);
+			}
+
 			ourLog.debug(
 					"Updated {} chunks of gated instance {} for step {} from fake QUEUED to READY.",
 					numChanged,

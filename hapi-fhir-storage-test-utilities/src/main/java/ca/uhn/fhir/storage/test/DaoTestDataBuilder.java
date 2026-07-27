@@ -150,12 +150,11 @@ public class DaoTestDataBuilder implements ITestDataBuilder.WithSupport, ITestDa
 
 	@Configuration
 	public static class Config {
-		@Autowired FhirContext myFhirContext;
-		@Autowired DaoRegistry myDaoRegistry;
 
 		@Bean
-		DaoTestDataBuilder testDataBuilder() {
+		DaoTestDataBuilder testDataBuilder(@Autowired FhirContext myFhirContext, @Autowired DaoRegistry myDaoRegistry) {
 			return new DaoTestDataBuilder(myFhirContext, myDaoRegistry, new SystemRequestDetails());
 		}
+
 	}
 }
