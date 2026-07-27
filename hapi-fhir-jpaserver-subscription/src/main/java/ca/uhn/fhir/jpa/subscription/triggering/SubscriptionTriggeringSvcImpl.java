@@ -309,7 +309,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 				theJobDetails.setCurrentSearchUrl(nextSearchUrl);
 				theJobDetails.setCurrentOffset(params.getOffset());
 			} else {
-				// populate properties for asynchronous path
+				// This is the asynchronous path
 				theJobDetails.setCurrentSearchUuid(search.getUuid());
 			}
 

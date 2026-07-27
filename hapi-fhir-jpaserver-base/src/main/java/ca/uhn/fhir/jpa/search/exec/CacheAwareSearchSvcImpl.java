@@ -20,6 +20,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.search.ExceptionService;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
@@ -33,6 +34,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.IPagingProvider;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.interceptor.ServerInterceptorUtil;
 import ca.uhn.fhir.rest.server.method.ResponsePage;
@@ -63,6 +65,9 @@ import java.util.Set;
 
 public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(CacheAwareSearchSvcImpl.class);
+
+	@Autowired
+	private ExceptionService myExceptionSvc;
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -483,6 +488,7 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 							&& myCachedPidsFromMatchesEndingIndex >= theToIndex) {
 						int rangeStart = theFromIndex - myCachedPidsFromMatchesStartingIndex;
 						int rangeEnd = (theToIndex - theFromIndex) + rangeStart;
+						rangeEnd = Math.min(rangeEnd, myCachedPidsFromMatches.size());
 						myCachedPidsFromMatchesAndIncludes = myCachedPidsFromMatches.subList(rangeStart, rangeEnd);
 						myCachedPidsFromMatchesAndIncludesStartingIndex = theFromIndex;
 						myCachedPidsFromMatchesAndIncludesEndingIndex = theToIndex;
@@ -503,10 +509,12 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 			for (int i = 0; ; i++) {
 				try {
 					myTxService
-							.withRequest(myRequestDetails)
-							.withRequestPartitionId(myRequestPartitionId)
-							.execute(() -> ensureSearchPerformedInsideTransaction(theFromIndex, theToIndex));
+						.withRequest(myRequestDetails)
+						.withRequestPartitionId(myRequestPartitionId)
+						.execute(() -> ensureSearchPerformedInsideTransaction(theFromIndex, theToIndex));
 					break;
+				} catch (ResourceGoneException e) {
+					throw e;
 				} catch (UnexpectedRollbackException e) {
 					validateSearchEntityNotFailed();
 					throw e;
@@ -551,9 +559,12 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 				myRequestPartitionId =
 						myRequestPartitionHelperSvc.determineReadPartitionForRequest(myRequestDetails, details);
 
+				// FIXME: make debug
+				ourLog.info("Fetching cached search with UUID: {}", mySearchUuid);
+
 				Optional<Search> searchEntityOpt = mySearchCacheSvc.fetchByUuid(mySearchUuid, myRequestPartitionId);
+				mySearchEntity = searchEntityOpt.orElseThrow(()->myExceptionSvc.newUnknownSearchException(mySearchUuid));
 				// FIXME: throw better exception
-				mySearchEntity = searchEntityOpt.orElseThrow();
 				myParams = mySearchEntity.getSearchParameterMap().orElseThrow();
 
 			} else {
@@ -577,6 +588,11 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 									// FIXME: where does this go?
 									cacheStatus = SearchCacheStatusEnum.HIT;
 									mySearchEntity = cachedQueryOpt.get();
+
+									// FIXME: make debug
+									ourLog.info("Query cache HIT - Replacing search {} with search {}", mySearchUuid, mySearchEntity.getUuid());
+
+									mySearchUuid = mySearchEntity.getUuid();
 									initialSearch = false;
 									// FIXME: add better exception
 									myParams = mySearchEntity
