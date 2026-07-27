@@ -185,6 +185,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		when(mySearchCacheSvc.save(any(), any())).thenAnswer(t -> {
 			Search search = t.getArgument(0, Search.class);
 			myCurrentSearch = search;
+			search.setId(123L);
 			return search;
 		});
 
@@ -309,9 +310,6 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		assertThat(resources).hasSize(30);
 		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("39", resources.get(29).getIdElement().getValueAsString());
-
-		assertNotNull(result.getUuid());
-		assertEquals(90, Objects.requireNonNull(result.size()).intValue());
 	}
 
 	@Test

@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.HistorySearchStyleEnum;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import ca.uhn.fhir.system.HapiSystemProperties;
+import graphql.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.Basic;
@@ -286,6 +287,11 @@ public class Search implements ICachedSearchDetails, Serializable {
 		if (HapiSystemProperties.isUnitTestCaptureStackEnabled()) {
 			myFailureMessage = theFailureMessage;
 		}
+	}
+
+	@VisibleForTesting
+	public void setId(Long theId) {
+		myId = theId;
 	}
 
 	public Long getId() {
