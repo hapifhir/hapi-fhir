@@ -41,7 +41,6 @@ import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
-import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
@@ -411,8 +410,8 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		return myUuid;
 	}
 
-	public SearchCacheStatusEnum getCacheStatus() {
-		return myCacheStatus;
+	public SearchCacheStatus getCacheStatus() {
+		return null;
 	}
 
 	// FIXME: make protected after we move this class

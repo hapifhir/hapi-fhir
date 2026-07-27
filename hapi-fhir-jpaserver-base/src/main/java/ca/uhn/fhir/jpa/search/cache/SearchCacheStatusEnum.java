@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.search.cache;
 
+// FIXME: remove
 public enum SearchCacheStatusEnum {
 	NOT_TRIED,
 	MISS,

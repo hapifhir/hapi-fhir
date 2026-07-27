@@ -159,7 +159,7 @@ public interface IBundleProvider {
 	 * @return A list of resources. The size of this list must be at least <code>theToIndex - theFromIndex</code>.
 	 */
 	default List<IBaseResource> getResources(
-			int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
+		int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
 		return getResources(theFromIndex, theToIndex);
 	}
 
@@ -176,8 +176,8 @@ public interface IBundleProvider {
 		Integer sizeI = size();
 		if (sizeI == null) {
 			throw new ConfigurationException(
-					Msg.code(464)
-							+ "Attempt to request all resources from an asynchronous search result.  The SearchParameterMap for this search probably should have been synchronous.");
+				Msg.code(464)
+					+ "Attempt to request all resources from an asynchronous search result.  The SearchParameterMap for this search probably should have been synchronous.");
 		}
 		int size = containsAllResources() ? getResourceListComplete().size() : sizeI.intValue();
 		if (size > 0) {
@@ -191,6 +191,7 @@ public interface IBundleProvider {
 	 * This may return more than size() resources.
 	 * But if no implementation is provided, it will return what getAllResources() returns
 	 * (which is limited by size())
+	 *
 	 * @return
 	 */
 	default List<IBaseResource> getResourceListComplete() {
@@ -240,6 +241,7 @@ public interface IBundleProvider {
 	 * Whether or not this bundle provider contains all resources specified in the total.
 	 * This can be the case if a provider has all the resources and passes them back directly
 	 * (as is the case for some plain/hybrid providers that return lists of resources.
+	 *
 	 * @return
 	 */
 	default boolean containsAllResources() {
@@ -272,7 +274,56 @@ public interface IBundleProvider {
 	 */
 	default List<String> getAllResourceIds() {
 		return getAllResources().stream()
-				.map(resource -> resource.getIdElement().getIdPart())
-				.collect(Collectors.toList());
+			.map(resource -> resource.getIdElement().getIdPart())
+			.collect(Collectors.toList());
 	}
+
+	/**
+	 * Returns the cache status for the search, if known. This method may return null.
+	 *
+	 * @since 8.14.0
+	 */
+	@Nullable
+	default SearchCacheStatus getCacheStatus() {
+		return null;
+	}
+
+	enum SearchCacheStatusEnum {
+		/**
+		 * We did not attempt to check whether the search was a cache hit against a query cache
+		 */
+		NOT_TRIED,
+		/**
+		 * A search cache was checked, and no cache hit was found
+		 */
+		MISS,
+		/**
+		 * A search cache hit was detected
+		 */
+		HIT
+	}
+
+	class SearchCacheStatus {
+
+		private SearchCacheStatusEnum myStatus;
+		private Date myCacheEntryTimestamp;
+
+		public SearchCacheStatusEnum getStatus() {
+			return myStatus;
+		}
+
+		public void setStatus(SearchCacheStatusEnum theStatus) {
+			myStatus = theStatus;
+		}
+
+		public Date getCacheEntryTimestamp() {
+			return myCacheEntryTimestamp;
+		}
+
+		public void setCacheEntryTimestamp(Date theCacheEntryTimestamp) {
+			myCacheEntryTimestamp = theCacheEntryTimestamp;
+		}
+
+	}
+
 }

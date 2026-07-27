@@ -214,6 +214,7 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 		private Integer myCachedPidsFromMatchesEndingIndex;
 		private Integer myCachedPidsFromMatchesAndIncludesStartingIndex;
 		private Integer myCachedPidsFromMatchesAndIncludesEndingIndex;
+		private SearchCacheStatus myCacheStatus;
 
 		public JpaBundleProvider(
 				SearchParameterMap theParams,
@@ -540,6 +541,13 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 			}
 		}
 
+		@Nullable
+		@Override
+		public SearchCacheStatus getCacheStatus() {
+			ensureSearchPerformed();
+			return myCacheStatus;
+		}
+
 		private void ensureSearchPerformedInsideTransaction(int theFromIndex, int theToIndex) {
 			List<JpaPid> pidsToReturn = new ArrayList<>();
 			boolean haveMoreResults = false;
@@ -585,14 +593,15 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 										mySearchEntity.getSearchQueryString(),
 										myRequestPartitionId);
 								if (cachedQueryOpt.isPresent()) {
-									// FIXME: where does this go?
-									cacheStatus = SearchCacheStatusEnum.HIT;
 									mySearchEntity = cachedQueryOpt.get();
-
-									// FIXME: make debug
-									ourLog.info("Query cache HIT - Replacing search {} with search {}", mySearchUuid, mySearchEntity.getUuid());
-
 									mySearchUuid = mySearchEntity.getUuid();
+
+									myCacheStatus = new IBundleProvider.SearchCacheStatus();
+									myCacheStatus.setStatus(SearchCacheStatusEnum.HIT);
+									myCacheStatus.setCacheEntryTimestamp(mySearchEntity.getCreated());
+
+									ourLog.debug("Query cache HIT - Replacing search {} with search {}", mySearchUuid, mySearchEntity.getUuid());
+
 									initialSearch = false;
 									// FIXME: add better exception
 									myParams = mySearchEntity
@@ -758,6 +767,7 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 			if (initialSearch || addedResultsThisPass) {
 				if (haveMoreResults) {
 					mySearchEntity.setStatus(SearchStatusEnum.PASSCMPLET);
+					searchDetails.setSearchStatus(SearchStatusEnum.PASSCMPLET);
 					/*
 					 * If we finished the first page of results and we still don't know
 					 * the total count, but the client requested the total cound, we will
@@ -772,10 +782,25 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 							mySearchEntity.setTotalCount(Math.toIntExact(countQuery));
 						}
 					}
+
+					// Interceptor: JPA_PERFTRACE_SEARCH_PASS_COMPLETE
+					myCompositeBroadcaster.ifHasCallHooks(Pointcut.JPA_PERFTRACE_SEARCH_PASS_COMPLETE, ()->new HookParams()
+						.add(RequestDetails.class, myRequestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, myRequestDetails)
+						.add(SearchRuntimeDetails.class, searchDetails));
+
 				} else {
 					mySearchEntity.setStatus(SearchStatusEnum.FINISHED);
+					searchDetails.setSearchStatus(SearchStatusEnum.FINISHED);
 					mySearchEntity.setTotalCount(mySearchEntity.getNumFound());
+
+					// Interceptor: JPA_PERFTRACE_SEARCH_COMPLETE
+					myCompositeBroadcaster.ifHasCallHooks(Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE, ()->new HookParams()
+						.add(RequestDetails.class, myRequestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, myRequestDetails)
+						.add(SearchRuntimeDetails.class, searchDetails));
 				}
+
 				mySearchEntity.setSearchParameterMap(myParams);
 
 				mySearchCacheSvc.save(mySearchEntity, myRequestPartitionId);
