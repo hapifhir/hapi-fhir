@@ -121,7 +121,7 @@ public class JaxRsMethodBindingsDstu3Test {
 		assertThat(bindings.getBinding(RestOperationTypeEnum.UPDATE, "").getBindingKey()).contains(".update(");
 		assertThat(bindings.getBinding(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, "$firstMethod").getBindingKey()).contains(".firstMethod(");
 		assertThat(bindings.getBinding(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, "$secondMethod").getBindingKey()).contains(".secondMethod(");
-		assertThrows(NotImplementedOperationException.class, ()-> bindings.getBinding(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, "$thirdMethod"));
+		assertThrows(NotImplementedOperationException.class, () -> bindings.getBinding(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, "$thirdMethod"));
 	}
 
 }
