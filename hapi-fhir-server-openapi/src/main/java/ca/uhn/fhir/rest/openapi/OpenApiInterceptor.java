@@ -736,7 +736,8 @@ public class OpenApiInterceptor {
 				if (RestOperationTypeEnum.VREAD.equals(restOperationType)) {
 					map.put(resourceName, RestOperationTypeEnum.READ.name(), methodBinding);
 				} else if (RestOperationTypeEnum.READ.equals(restOperationType)
-						&& ((ReadMethodBinding) methodBinding).isVread()) {
+						&& methodBinding instanceof ReadMethodBinding theReadMethodBinding
+						&& theReadMethodBinding.isVread()) {
 					map.put(resourceName, RestOperationTypeEnum.VREAD.name(), methodBinding);
 				}
 			}
