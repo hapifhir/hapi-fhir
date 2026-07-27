@@ -16,6 +16,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
@@ -45,7 +46,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchException;
 
@@ -101,7 +101,7 @@ public abstract class AbstractGenericUndoMergeR4Test<T extends IBaseResource> ex
 		// verify that Provenance resources were saved with versioned target references
 		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths("Provenance.target");
 
-		myHelper = new MergeOperationTestHelper(myClient, myBatch2JobHelper, myFhirContext, myLinkServiceFactory, myDaoRegistry);
+		myHelper = new MergeOperationTestHelper(myClient, myBatch2JobHelper, myFhirContext, myLinkServiceFactory);
 	}
 
 
@@ -438,6 +438,19 @@ public abstract class AbstractGenericUndoMergeR4Test<T extends IBaseResource> ex
 
 
 	@Test
+	void testUndoMerge_TargetResourceNotFound_422UnprocessableEntity() {
+		Parameters params = new Parameters();
+		params.addParameter().setName("source-resource").setValue(new Reference(getResourceTypeName() + "/123"));
+		params.addParameter().setName("target-resource").setValue(new Reference(getResourceTypeName() + "/no-such-target"));
+
+		callUndoWithParamsAndAssertException(params,
+			UnprocessableEntityException.class,
+			422,
+			"Resource not found for the reference specified in 'target-resource' parameter"
+		);
+	}
+
+	@Test
 	void testUndoMerge_BothSrcParametersProvided_400BadRequest() {
 		// Build parameters with both source-resource AND source-resource-identifier (conflicting)
 		Parameters params = new Parameters();
@@ -531,16 +544,7 @@ public abstract class AbstractGenericUndoMergeR4Test<T extends IBaseResource> ex
 	}
 
 	protected void validateSuccessOutcome(Parameters theOutParams, int theExpectedResourceCount) {
-		// Assert outcome
-		OperationOutcome outcome = (OperationOutcome) theOutParams.getParameter("outcome").getResource();
-		assertThat(outcome.getIssue())
-			.hasSize(1)
-			.element(0)
-			.satisfies(issue -> {
-				assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
-				String detailsTxt = issue.getDetails().getText();
-				assertThat(detailsTxt).matches(format("Successfully restored %d resources to their previous versions based on the Provenance resource: Provenance/[0-9]+/_history/1", theExpectedResourceCount));
-			});
+		myHelper.validateUndoMergeSuccessOutcome(theOutParams, theExpectedResourceCount);
 	}
 
 }

@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
+import ca.uhn.fhir.jpa.dao.data.ResourceIdWithPartition;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -187,15 +188,18 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 		if (theReplaceReferencesRequest.createProvenance) {
 			List<IIdType> changedResourceIds =
 					ReplaceReferencesProvenanceSvc.extractChangedResourceIds(List.of(result));
-			myReplaceReferencesProvenanceSvc.createProvenance(
-					// we need to use versioned ids for the Provenance resource
-					theTargetResource.getIdElement().toUnqualified(),
-					theSourceResource.getIdElement().toUnqualified(),
-					changedResourceIds,
-					startTime,
-					theRequestDetails,
-					theReplaceReferencesRequest.provenanceAgents,
-					Collections.emptyList());
+			if (!changedResourceIds.isEmpty()) {
+				myReplaceReferencesProvenanceSvc.createProvenance(
+						// we need to use versioned ids for the Provenance resource
+						theTargetResource.getIdElement().toUnqualified(),
+						theSourceResource.getIdElement().toUnqualified(),
+						changedResourceIds,
+						null,
+						startTime,
+						theRequestDetails,
+						theReplaceReferencesRequest.provenanceAgents,
+						Collections.emptyList());
+			}
 		}
 
 		Parameters retval = new Parameters();
@@ -208,9 +212,11 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	private @Nonnull StopLimitAccumulator<IdDt> getAllPidsWithLimit(
 			ReplaceReferencesRequest theReplaceReferencesRequest) {
 
-		Stream<IdDt> idStream = myResourceLinkDao.streamSourceIdsForTargetFhirId(
-				theReplaceReferencesRequest.sourceId.getResourceType(),
-				theReplaceReferencesRequest.sourceId.getIdPart());
+		Stream<IdDt> idStream = myResourceLinkDao
+				.streamSourceIdsForTargetFhirId(
+						theReplaceReferencesRequest.sourceId.getResourceType(),
+						theReplaceReferencesRequest.sourceId.getIdPart())
+				.map(ResourceIdWithPartition::toIdDt);
 		StopLimitAccumulator<IdDt> accumulator =
 				StopLimitAccumulator.fromStreamAndLimit(idStream, theReplaceReferencesRequest.resourceLimit);
 		return accumulator;
@@ -225,7 +231,7 @@ public class ReplaceReferencesSvcImpl implements IReplaceReferencesSvc {
 	/**
 	 * Cross-partition replace references is not yet supported because the expected behavior
 	 * is not well defined for all cross-partition request modes. For patient-id partition mode,
-	 * this can be implemented using {@link CrossPartitionReplaceReferencesSvc}.
+	 * this can be implemented using {@link PartitionAwareReplaceReferencesSvc}.
 	 */
 	private void throwIfCrossPartition(IBaseResource theSourceResource, IBaseResource theTargetResource) {
 		if (isCrossPartition(theSourceResource, theTargetResource)) {
