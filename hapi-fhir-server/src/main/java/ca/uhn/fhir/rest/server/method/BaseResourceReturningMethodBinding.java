@@ -194,13 +194,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 					responseBundleProvider = (IBundleProvider) resultObj;
 
 					ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(
-							theServer,
-							theRequest,
-							params,
-							responseBundleProvider,
-							count,
-							responseBundleType,
-							linkSelf);
+							theServer, theRequest, params, responseBundleProvider, count, responseBundleType, linkSelf);
 					responseObject = myResponseBundleBuilder.buildResponseBundle(responseBundleRequest);
 				}
 				break;
@@ -230,7 +224,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 						HttpServletResponse response = srd.getServletResponse();
 						String value = "HIT from " + theRequest.getFhirServerBase();
 						if (cacheStatus.getCacheEntryTimestamp() != null) {
-							value += " - Cache entry dated " + new InstantDt(cacheStatus.getCacheEntryTimestamp()).getValueAsString();
+							value += " - Cache entry dated "
+									+ new InstantDt(cacheStatus.getCacheEntryTimestamp()).getValueAsString();
 						}
 						response.addHeader(Constants.HEADER_X_CACHE, value);
 					}

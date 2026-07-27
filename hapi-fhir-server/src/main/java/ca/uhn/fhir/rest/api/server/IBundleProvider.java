@@ -159,7 +159,7 @@ public interface IBundleProvider {
 	 * @return A list of resources. The size of this list must be at least <code>theToIndex - theFromIndex</code>.
 	 */
 	default List<IBaseResource> getResources(
-		int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
+			int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
 		return getResources(theFromIndex, theToIndex);
 	}
 
@@ -176,8 +176,8 @@ public interface IBundleProvider {
 		Integer sizeI = size();
 		if (sizeI == null) {
 			throw new ConfigurationException(
-				Msg.code(464)
-					+ "Attempt to request all resources from an asynchronous search result.  The SearchParameterMap for this search probably should have been synchronous.");
+					Msg.code(464)
+							+ "Attempt to request all resources from an asynchronous search result.  The SearchParameterMap for this search probably should have been synchronous.");
 		}
 		int size = containsAllResources() ? getResourceListComplete().size() : sizeI.intValue();
 		if (size > 0) {
@@ -274,8 +274,8 @@ public interface IBundleProvider {
 	 */
 	default List<String> getAllResourceIds() {
 		return getAllResources().stream()
-			.map(resource -> resource.getIdElement().getIdPart())
-			.collect(Collectors.toList());
+				.map(resource -> resource.getIdElement().getIdPart())
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -323,7 +323,5 @@ public interface IBundleProvider {
 		public void setCacheEntryTimestamp(Date theCacheEntryTimestamp) {
 			myCacheEntryTimestamp = theCacheEntryTimestamp;
 		}
-
 	}
-
 }

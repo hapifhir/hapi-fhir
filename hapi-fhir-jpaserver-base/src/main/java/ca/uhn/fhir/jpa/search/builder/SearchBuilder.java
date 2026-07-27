@@ -3147,6 +3147,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		 * The $everything operation also jams some extra results in.
 		 */
 		private List<ISearchQueryExecutor> myQueryList = new ArrayList<>();
+
 		private boolean myHaveFiredSelectComplete;
 
 		private QueryIterator(SearchRuntimeDetails theSearchRuntimeDetails, RequestDetails theRequest) {
@@ -3321,9 +3322,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			if (!myHaveFiredSelectComplete) {
 				myHaveFiredSelectComplete = true;
 				HookParams params = new HookParams()
-					.add(RequestDetails.class, myRequest)
-					.addIfMatchesType(ServletRequestDetails.class, myRequest)
-					.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
+						.add(RequestDetails.class, myRequest)
+						.addIfMatchesType(ServletRequestDetails.class, myRequest)
+						.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
 				myCompositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE, params);
 			}
 		}

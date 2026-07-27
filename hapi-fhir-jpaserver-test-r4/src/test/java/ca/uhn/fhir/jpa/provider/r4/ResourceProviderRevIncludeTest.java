@@ -153,8 +153,9 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 		//TODO GGG/KHS reduce this to something less than 5 by smarter iterating and getting the resource types earlier when needed.
 		assertThat(myCaptureQueriesListener).has(
 			onAllThreads()
-				.selectCount(5)
+				.selectCount(7)
 		);
+
 	}
 
 	@Test

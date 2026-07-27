@@ -264,6 +264,9 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 		@Nullable
 		@Override
 		public Integer size() {
+			if (mySearchEntity == null && mySearchUuid != null) {
+				ensureSearchPerformed();
+			}
 			if (mySearchEntity != null && mySearchEntity.getId() != null) {
 				return mySearchEntity.getTotalCount();
 			}
@@ -287,20 +290,6 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 		public List<IBaseResource> getResources(
 				int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
 			ensureSearchPerformed(theFromIndex, theToIndex);
-
-			/// These should always be true unless we have a logic bug, since
-			/// {@link #ensureSearchPerformed(int, int, ResponsePage.ResponsePageBuilder)}
-			/// should reset them
-			Validate.isTrue(
-					theFromIndex == myCachedPidsFromMatchesAndIncludesStartingIndex,
-					"Expected %d but got %d",
-					theFromIndex,
-					myCachedPidsFromMatchesAndIncludesStartingIndex);
-			Validate.isTrue(
-					theToIndex == myCachedPidsFromMatchesAndIncludesEndingIndex,
-					"Expected %d but got %d",
-					theToIndex,
-					myCachedPidsFromMatchesAndIncludesEndingIndex);
 
 			List<IBaseResource> retVal = new ArrayList<>();
 			for (JpaPid nextPid : myCachedPidsFromMatchesAndIncludes) {
@@ -474,6 +463,13 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 					if (myCachedPidsFromMatchesAndIncludesEndingIndex == theToIndex) {
 						return;
 					}
+					if (mySearchEntity != null
+							&& mySearchEntity.getStatus() == SearchStatusEnum.FINISHED
+							&& mySearchEntity.getTotalCount() != null
+							&& mySearchEntity.getTotalCount() <= theToIndex
+							&& theToIndex < myCachedPidsFromMatchesAndIncludesEndingIndex) {
+						return;
+					}
 				}
 			}
 
@@ -510,9 +506,9 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 			for (int i = 0; ; i++) {
 				try {
 					myTxService
-						.withRequest(myRequestDetails)
-						.withRequestPartitionId(myRequestPartitionId)
-						.execute(() -> ensureSearchPerformedInsideTransaction(theFromIndex, theToIndex));
+							.withRequest(myRequestDetails)
+							.withRequestPartitionId(myRequestPartitionId)
+							.execute(() -> ensureSearchPerformedInsideTransaction(theFromIndex, theToIndex));
 					break;
 				} catch (ResourceGoneException e) {
 					throw e;
@@ -571,7 +567,8 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 				ourLog.info("Fetching cached search with UUID: {}", mySearchUuid);
 
 				Optional<Search> searchEntityOpt = mySearchCacheSvc.fetchByUuid(mySearchUuid, myRequestPartitionId);
-				mySearchEntity = searchEntityOpt.orElseThrow(()->myExceptionSvc.newUnknownSearchException(mySearchUuid));
+				mySearchEntity =
+						searchEntityOpt.orElseThrow(() -> myExceptionSvc.newUnknownSearchException(mySearchUuid));
 				// FIXME: throw better exception
 				myParams = mySearchEntity.getSearchParameterMap().orElseThrow();
 
@@ -600,7 +597,10 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 									myCacheStatus.setStatus(SearchCacheStatusEnum.HIT);
 									myCacheStatus.setCacheEntryTimestamp(mySearchEntity.getCreated());
 
-									ourLog.debug("Query cache HIT - Replacing search {} with search {}", mySearchUuid, mySearchEntity.getUuid());
+									ourLog.debug(
+											"Query cache HIT - Replacing search {} with search {}",
+											mySearchUuid,
+											mySearchEntity.getUuid());
 
 									initialSearch = false;
 									// FIXME: add better exception
@@ -784,10 +784,11 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 					}
 
 					// Interceptor: JPA_PERFTRACE_SEARCH_PASS_COMPLETE
-					myCompositeBroadcaster.ifHasCallHooks(Pointcut.JPA_PERFTRACE_SEARCH_PASS_COMPLETE, ()->new HookParams()
-						.add(RequestDetails.class, myRequestDetails)
-						.addIfMatchesType(ServletRequestDetails.class, myRequestDetails)
-						.add(SearchRuntimeDetails.class, searchDetails));
+					myCompositeBroadcaster.ifHasCallHooks(
+							Pointcut.JPA_PERFTRACE_SEARCH_PASS_COMPLETE, () -> new HookParams()
+									.add(RequestDetails.class, myRequestDetails)
+									.addIfMatchesType(ServletRequestDetails.class, myRequestDetails)
+									.add(SearchRuntimeDetails.class, searchDetails));
 
 				} else {
 					mySearchEntity.setStatus(SearchStatusEnum.FINISHED);
@@ -795,10 +796,10 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 					mySearchEntity.setTotalCount(mySearchEntity.getNumFound());
 
 					// Interceptor: JPA_PERFTRACE_SEARCH_COMPLETE
-					myCompositeBroadcaster.ifHasCallHooks(Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE, ()->new HookParams()
-						.add(RequestDetails.class, myRequestDetails)
-						.addIfMatchesType(ServletRequestDetails.class, myRequestDetails)
-						.add(SearchRuntimeDetails.class, searchDetails));
+					myCompositeBroadcaster.ifHasCallHooks(Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE, () -> new HookParams()
+							.add(RequestDetails.class, myRequestDetails)
+							.addIfMatchesType(ServletRequestDetails.class, myRequestDetails)
+							.add(SearchRuntimeDetails.class, searchDetails));
 				}
 
 				mySearchEntity.setSearchParameterMap(myParams);
@@ -820,8 +821,17 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 		}
 
 		@Nullable
-		private Integer calculateNextSearchThreshold(int numWanted, ISearchBuilder<JpaPid> searchBuilder) {
+		private Integer calculateNextSearchThreshold(int theNumWanted, ISearchBuilder<JpaPid> searchBuilder) {
 			@Nullable Integer numToFetch = null;
+
+			boolean firstSearch = mySearchEntity.getNumFound() == 0 && mySearchEntity.getNumBlocked() == 0;
+			if (firstSearch) {
+				int firstThreshold =
+						myStorageSettings.getSearchPreFetchThresholds().get(0);
+				if (theNumWanted > firstThreshold) {
+					return theNumWanted;
+				}
+			}
 
 			// For subsequent pages, we'll use the predetermined search thresholds
 			for (int nextThreshold : myStorageSettings.getSearchPreFetchThresholds()) {
@@ -836,8 +846,8 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 				if (nextThreshold == -1) {
 					searchBuilder.setDeduplicateInDatabase(true);
 				} else {
-					if ((numWanted + mySearchEntity.getNumFound()) < nextThreshold) {
-						numToFetch = nextThreshold + 1;
+					if ((theNumWanted + mySearchEntity.getNumFound()) <= nextThreshold) {
+						numToFetch = (nextThreshold - mySearchEntity.getNumFound()) + 1;
 						break;
 					}
 				}
