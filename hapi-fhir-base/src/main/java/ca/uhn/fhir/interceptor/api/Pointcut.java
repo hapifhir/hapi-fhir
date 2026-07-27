@@ -378,10 +378,12 @@ public enum Pointcut implements IPointcut {
 	 * </ul>
 	 * <p>
 	 * Hook methods  may modify the method binding, replace it, or return <code>null</code> to cancel the binding.
+	 * Note that the parameter will be a BaseMethodBinding wrapping an annotated method discovered in a provider, but this hook can return
+	 * any implementation of IMethodBinding, not limited to annotation-style bindings.
 	 * </p>
 	 */
 	SERVER_PROVIDER_METHOD_BOUND(
-			"ca.uhn.fhir.rest.server.method.BaseMethodBinding", "ca.uhn.fhir.rest.server.method.BaseMethodBinding"),
+			"ca.uhn.fhir.rest.server.method.IMethodBinding", "ca.uhn.fhir.rest.server.method.BaseMethodBinding"),
 
 	/**
 	 * <b>Server Hook:</b>
