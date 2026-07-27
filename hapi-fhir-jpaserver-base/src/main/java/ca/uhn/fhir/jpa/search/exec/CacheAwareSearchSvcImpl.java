@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.search.exec;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -34,7 +33,6 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.IPagingProvider;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.interceptor.ServerInterceptorUtil;
 import ca.uhn.fhir.rest.server.method.ResponsePage;
@@ -212,11 +210,11 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 		private Integer myCachedPidsFromMatchesAndIncludesEndingIndex;
 
 		public JpaBundleProvider(
-			SearchParameterMap theParams,
-			RequestDetails theRequestDetails,
-			CacheControlDirective theCacheControlDirective,
-			RequestPartitionId theRequestPartitionId,
-			Search theSearchEntity) {
+				SearchParameterMap theParams,
+				RequestDetails theRequestDetails,
+				CacheControlDirective theCacheControlDirective,
+				RequestPartitionId theRequestPartitionId,
+				Search theSearchEntity) {
 			this(theRequestDetails, theSearchEntity.getUuid());
 			myParams = theParams;
 			myCacheControlDirective = theCacheControlDirective;
@@ -259,6 +257,9 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 		@Nullable
 		@Override
 		public Integer size() {
+			if (mySearchEntity != null && mySearchEntity.getId() != null) {
+				return mySearchEntity.getTotalCount();
+			}
 			if (myParams != null && myPagingProvider != null) {
 				int from = 0;
 				if (myParams.getOffset() != null) {
@@ -270,8 +271,6 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 					to = myParams.getCount();
 				}
 				ensureSearchPerformed(from, to);
-			}
-			if (mySearchEntity != null) {
 				return mySearchEntity.getTotalCount();
 			}
 			return null;
@@ -590,8 +589,9 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 			/// If we have a `_count=summary` query, just calculate the count and return
 			if (myParams.getSummaryMode() == SummaryEnum.COUNT) {
 				if (mySearchEntity.getTotalCount() == null) {
-					Long countQuery = newSearchBuilder().createCountQuery(
-							myParams, mySearchEntity.getUuid(), myRequestDetails, myRequestPartitionId);
+					Long countQuery = newSearchBuilder()
+							.createCountQuery(
+									myParams, mySearchEntity.getUuid(), myRequestDetails, myRequestPartitionId);
 					mySearchEntity.setTotalCount(Math.toIntExact(countQuery));
 					mySearchEntity.setStatus(SearchStatusEnum.FINISHED);
 					mySearchCacheSvc.save(mySearchEntity, myRequestPartitionId);

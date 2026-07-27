@@ -911,9 +911,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	}
 
 	protected List<String> toUnqualifiedVersionlessIdValues(IBundleProvider theFound) {
-		int fromIndex = 0;
-		Integer toIndex = theFound.containsAllResources() ? (Integer) theFound.getResourceListComplete().size() : theFound.size();
-		return toUnqualifiedVersionlessIdValues(theFound, fromIndex, toIndex, true);
+		return toUnqualifiedVersionlessIdValues(theFound, 0, null, true);
 	}
 
 	/**

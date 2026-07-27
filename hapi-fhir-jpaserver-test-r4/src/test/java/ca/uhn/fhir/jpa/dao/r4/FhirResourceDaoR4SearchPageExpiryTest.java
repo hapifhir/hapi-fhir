@@ -395,8 +395,6 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			}
 		});
 
-		mySearchCoordinatorSvc.cancelAllActiveSearches();
-
 		myStorageSettings.setExpireSearchResults(true);
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 

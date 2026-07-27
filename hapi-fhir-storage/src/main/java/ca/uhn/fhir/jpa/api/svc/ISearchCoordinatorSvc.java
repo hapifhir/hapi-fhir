@@ -63,10 +63,7 @@ public interface ISearchCoordinatorSvc<T extends IResourcePersistentId> {
 	 *                          {@link RequestPartitionId} you can use a {@link ca.uhn.fhir.rest.api.server.SystemRequestDetails}
 	 *                          and supply it there.
 	 */
-	IBundleProvider continueExistingSearch(
-			String theSearchUuid,
-			@Nullable RequestDetails theRequestDetails);
-
+	IBundleProvider continueExistingSearch(String theSearchUuid, @Nullable RequestDetails theRequestDetails);
 
 	/**
 	 * Fetch the total number of search results for the given currently executing search, if one is currently executing and
