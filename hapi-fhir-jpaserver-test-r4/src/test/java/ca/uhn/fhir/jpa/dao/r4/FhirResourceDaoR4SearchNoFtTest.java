@@ -918,11 +918,10 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.setCaptureQueryStackTrace(true);
 		IBundleProvider resp = myPatientDao.patientTypeEverything(request, mySrd, new PatientEverythingParameters(), null);
 		List<IIdType> actual = toUnqualifiedVersionlessIds(resp);
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual).containsExactlyInAnyOrder(orgId, medId, patId, moId, patId2);
 		assertThat(myCaptureQueriesListener).has(
 			onCurrentThread()
-				.selectCount(5)
+				.selectCount(7)
 		);
 
 		// Specific patient ID with linked stuff

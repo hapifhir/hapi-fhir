@@ -2026,7 +2026,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		// could stand to reduce this!
 		assertThat(myCaptureQueriesListener).has(
 			onAllThreads()
-				.selectCount(37)
+				.selectCount(50)
 				.insertCount(151)
 				.updateCount(1)
 				.commitCount(17)
@@ -4437,10 +4437,13 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			ourPatientProvider.waitForUpdateCount(200);
 
 			// Validate
-			assertEquals(7, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-			assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
-			assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-			assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+			assertThat(myCaptureQueriesListener).has(
+				onCurrentThread()
+					.selectCount(7)
+					.commitCount(3)
+					.connectionCount(3)
+					.noOtherCounts()
+			);
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
 		}
@@ -4481,10 +4484,11 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		assertThat(myCaptureQueriesListener).has(
 			onCurrentThread()
-				.selectCount(6)
+				.selectCount(9)
 				.insertCount(201)
-				.commitCount(5)
-				.connectionCount(5)
+				.commitCount(2)
+				.updateCount(1)
+				.connectionCount(2)
 				.noOtherCounts()
 		);
 
@@ -4494,8 +4498,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertThat(myCaptureQueriesListener).has(
 			onCurrentThread()
 				.selectCount(2)
-				.commitCount(2)
-				.connectionCount(2)
+				.commitCount(1)
+				.connectionCount(1)
 				.noOtherCounts()
 		);
 

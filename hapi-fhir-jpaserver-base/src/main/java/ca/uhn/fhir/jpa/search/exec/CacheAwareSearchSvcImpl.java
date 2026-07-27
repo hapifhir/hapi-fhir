@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.search.exec;
 
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -16,6 +17,7 @@ import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
@@ -25,6 +27,7 @@ import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
@@ -53,6 +56,7 @@ import org.springframework.transaction.UnexpectedRollbackException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -138,70 +142,57 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 			ISearchBuilder<JpaPid> theSearchBuilder,
 			RequestPartitionId theRequestPartitionId) {
 		return new JpaBundleProvider(
-				theParams, theRequestDetails, theCacheControlDirective, theRequestPartitionId, theSearchEntity);
+				myFhirContext,
+				theParams,
+				theRequestDetails,
+				theCacheControlDirective,
+				theRequestPartitionId,
+				theSearchEntity,
+				myInterceptorBroadcaster,
+				myPagingProvider,
+				myStorageSettings,
+				myEntityManager,
+				myTxService,
+				myRequestPartitionHelperSvc,
+				mySearchCacheSvc,
+				mySearchResultCacheSvc,
+				myExceptionSvc,
+				mySearchBuilderFactory);
 	}
 
 	@Override
 	public IBundleProvider continueExistingSearch(String theId, RequestDetails theRequestDetails) {
-		return new JpaBundleProvider(theRequestDetails, theId);
+		return new JpaBundleProvider(
+				myFhirContext,
+				theRequestDetails,
+				theId,
+				myInterceptorBroadcaster,
+				myPagingProvider,
+				myStorageSettings,
+				myEntityManager,
+				myTxService,
+				myRequestPartitionHelperSvc,
+				mySearchCacheSvc,
+				mySearchResultCacheSvc,
+				myExceptionSvc,
+				mySearchBuilderFactory);
 	}
 
-	private Optional<Search> findCachedQuery(
-			SearchParameterMap theParams,
-			String theResourceType,
-			RequestDetails theRequestDetails,
-			String theQueryString,
-			RequestPartitionId theRequestPartitionId) {
-
-		HapiTransactionService.requireTransaction();
-
-		IInterceptorBroadcaster compositeBroadcaster =
-				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
-
-		// Interceptor call: STORAGE_PRECHECK_FOR_CACHED_SEARCH
-
-		HookParams params = new HookParams()
-				.add(SearchParameterMap.class, theParams)
-				.add(RequestDetails.class, theRequestDetails)
-				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-		boolean canUseCache = compositeBroadcaster.callHooks(Pointcut.STORAGE_PRECHECK_FOR_CACHED_SEARCH, params);
-		if (!canUseCache) {
-			return Optional.empty();
-		}
-
-		// Check for a search matching the given hash
-		Search searchToUse = findSearchToUseOrNull(theQueryString, theResourceType, theRequestPartitionId);
-		if (searchToUse == null) {
-			return Optional.empty();
-		}
-
-		ourLog.debug("Reusing search {} from cache", searchToUse.getUuid());
-		// Interceptor call: JPA_PERFTRACE_SEARCH_REUSING_CACHED
-		params = new HookParams()
-				.add(SearchParameterMap.class, theParams)
-				.add(RequestDetails.class, theRequestDetails)
-				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-		compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_SEARCH_REUSING_CACHED, params);
-
-		return Optional.of(searchToUse);
-	}
-
-	@Nullable
-	private Search findSearchToUseOrNull(
-			String theQueryString, String theResourceType, RequestPartitionId theRequestPartitionId) {
-		// createdCutoff is in recent past
-		final Instant createdCutoff =
-				Instant.now().minus(myStorageSettings.getReuseCachedSearchResultsForMillis(), ChronoUnit.MILLIS);
-
-		Optional<Search> candidate = mySearchCacheSvc.findCandidatesForReuse(
-				theResourceType, theQueryString, createdCutoff, theRequestPartitionId);
-		return candidate.orElse(null);
-	}
-
-	public class JpaBundleProvider implements IBundleProvider {
+	public static class JpaBundleProvider implements IBundleProvider {
 		private final Map<JpaPid, IBaseResource> myFetchedResources = new HashMap<>();
 		private final RequestDetails myRequestDetails;
 		private final IInterceptorBroadcaster myCompositeBroadcaster;
+		private final FhirContext myFhirContext;
+		private final IPagingProvider myPagingProvider;
+		private final JpaStorageSettings myStorageSettings;
+		private final EntityManager myEntityManager;
+		private final IHapiTransactionService myTxService;
+		private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+		private final ISearchCacheSvc mySearchCacheSvc;
+		private final ISearchResultCacheSvc mySearchResultCacheSvc;
+		private final ExceptionService myExceptionService;
+		private final SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
+		private final BaseRuntimeElementDefinition<IPrimitiveType<Date>> myInstantDefinition;
 		private SearchParameterMap myParams;
 		private RequestPartitionId myRequestPartitionId;
 		private CacheControlDirective myCacheControlDirective;
@@ -215,32 +206,86 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 		private Integer myCachedPidsFromMatchesAndIncludesEndingIndex;
 		private SearchCacheStatus myCacheStatus;
 
+		/**
+		 * Constructor for a new (first page) search
+		 */
 		public JpaBundleProvider(
+				FhirContext theFhirContext,
 				SearchParameterMap theParams,
 				RequestDetails theRequestDetails,
 				CacheControlDirective theCacheControlDirective,
 				RequestPartitionId theRequestPartitionId,
-				Search theSearchEntity) {
-			this(theRequestDetails, theSearchEntity.getUuid());
+				Search theSearchEntity,
+				IInterceptorBroadcaster theInterceptorBroadcaster,
+				IPagingProvider thePagingProvider,
+				JpaStorageSettings theStorageSettings,
+				EntityManager theEntityManager,
+				IHapiTransactionService theTxService,
+				IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
+				ISearchCacheSvc theSearchCacheSvc,
+				ISearchResultCacheSvc theSearchResultCacheSvc,
+				ExceptionService theExceptionService,
+				SearchBuilderFactory<JpaPid> theSearchBuilderFactory) {
+			this(
+					theFhirContext,
+					theRequestDetails,
+					theSearchEntity.getUuid(),
+					theInterceptorBroadcaster,
+					thePagingProvider,
+					theStorageSettings,
+					theEntityManager,
+					theTxService,
+					theRequestPartitionHelperSvc,
+					theSearchCacheSvc,
+					theSearchResultCacheSvc,
+					theExceptionService,
+					theSearchBuilderFactory);
 			myParams = theParams;
 			myCacheControlDirective = theCacheControlDirective;
 			myRequestPartitionId = theRequestPartitionId;
 			mySearchEntity = theSearchEntity;
 		}
 
-		public JpaBundleProvider(RequestDetails theRequestDetails, String theSearchUuid) {
+		/**
+		 * Constructor for a pre-existing (i.e. subsequent page) search by UUID
+		 */
+		@SuppressWarnings("unchecked")
+		public JpaBundleProvider(
+				FhirContext theFhirContext,
+				RequestDetails theRequestDetails,
+				String theSearchUuid,
+				IInterceptorBroadcaster theInterceptorBroadcaster,
+				IPagingProvider thePagingProvider,
+				JpaStorageSettings theStorageSettings,
+				EntityManager theEntityManager,
+				IHapiTransactionService theTxService,
+				IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
+				ISearchCacheSvc theSearchCacheSvc,
+				ISearchResultCacheSvc theSearchResultCacheSvc,
+				ExceptionService theExceptionService,
+				SearchBuilderFactory<JpaPid> theSearchBuilderFactory) {
+			myPagingProvider = thePagingProvider;
+			myFhirContext = theFhirContext;
 			myRequestDetails = theRequestDetails;
 			mySearchUuid = theSearchUuid;
-			myCompositeBroadcaster =
-					CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, myRequestDetails);
+			myStorageSettings = theStorageSettings;
+			myEntityManager = theEntityManager;
+			myTxService = theTxService;
+			myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
+			mySearchCacheSvc = theSearchCacheSvc;
+			mySearchResultCacheSvc = theSearchResultCacheSvc;
+			myExceptionService = theExceptionService;
+			mySearchBuilderFactory = theSearchBuilderFactory;
+			myCompositeBroadcaster = CompositeInterceptorBroadcaster.newCompositeBroadcaster(
+					theInterceptorBroadcaster, myRequestDetails);
+			myInstantDefinition =
+					(BaseRuntimeElementDefinition<IPrimitiveType<Date>>) myFhirContext.getElementDefinition("instant");
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
 		public IPrimitiveType<Date> getPublished() {
 			ensureSearchPerformed();
-			IPrimitiveType<Date> retVal = (IPrimitiveType<Date>)
-					myFhirContext.getElementDefinition("instant").newInstance();
+			IPrimitiveType<Date> retVal = myInstantDefinition.newInstance();
 			retVal.setValue(mySearchEntity.getCreated());
 			return retVal;
 		}
@@ -249,7 +294,7 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 		@Override
 		public String getUuid() {
 			ensureSearchPerformed();
-			if (mySearchUuid == null) {
+			if (mySearchEntity == null) {
 				return mySearchUuid;
 			}
 			return mySearchEntity.getUuid();
@@ -263,9 +308,6 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 		@Nullable
 		@Override
 		public Integer size() {
-			if (mySearchEntity == null && mySearchUuid != null) {
-				ensureSearchPerformed();
-			}
 			if (mySearchEntity != null && mySearchEntity.getId() != null) {
 				return mySearchEntity.getTotalCount();
 			}
@@ -298,8 +340,8 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 			// we will send the resource list to our interceptors
 			// this can (potentially) change the results being returned.
 			int precount = retVal.size();
-			retVal = ServerInterceptorUtil.fireStoragePreshowResource(
-					retVal, myRequestDetails, myInterceptorBroadcaster);
+			retVal = ServerInterceptorUtil.fireStoragePreshowResourcesToCompositeBroadcaster(
+					retVal, myRequestDetails, myCompositeBroadcaster);
 
 			// we only care about omitted results from this page
 			theResponsePageBuilder.setOmittedResourceCount(precount - retVal.size());
@@ -329,7 +371,7 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 
 			List<JpaPid> includedPidList = new ArrayList<>();
 			if (mySearchEntity.getSearchType() == SearchTypeEnum.SEARCH) {
-				Integer maxIncludes = myStorageSettings.getMaximumIncludesToLoadPerPage();
+				Integer remainingIncludesUntilMax = myStorageSettings.getMaximumIncludesToLoadPerPage();
 
 				// Save original search result PIDs — non-iterate `_include` must apply only to initial results, not to
 				// `_revinclude` results
@@ -337,38 +379,20 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 
 				// Load non-iterate `_revinclude`
 				{
-					Set<JpaPid> nonIterateRevIncludedPids = theSearchBuilder.loadIncludes(
-							myFhirContext,
-							myEntityManager,
-							thePids,
-							mySearchEntity.toRevIncludesList(false),
-							true,
-							mySearchEntity.getLastUpdated(),
-							mySearchEntity.getUuid(),
-							myRequestDetails,
-							maxIncludes);
-					if (maxIncludes != null) {
-						maxIncludes -= nonIterateRevIncludedPids.size();
-					}
-					thePids.addAll(nonIterateRevIncludedPids);
-					includedPidList.addAll(nonIterateRevIncludedPids);
+					Collection<Include> includes = mySearchEntity.toRevIncludesList(false);
+					remainingIncludesUntilMax = fetchRevIncludes(
+							theSearchBuilder, thePids, includedPidList, remainingIncludesUntilMax, includes);
 				}
 
 				// Load non-iterate `_include` (use originalPids so `_include` only applies to the
 				// initial search results, not to revincluded resources — per FHIR spec, without `:iterate`)
 				{
-					Set<JpaPid> nonIterateIncludedPids = theSearchBuilder.loadIncludes(
-							myFhirContext,
-							myEntityManager,
-							originalPids,
-							mySearchEntity.toIncludesList(false),
-							false,
-							mySearchEntity.getLastUpdated(),
-							mySearchEntity.getUuid(),
-							myRequestDetails,
-							maxIncludes);
-					if (maxIncludes != null) {
-						maxIncludes -= nonIterateIncludedPids.size();
+					Collection<Include> includes = mySearchEntity.toIncludesList(false);
+					SearchBuilderLoadIncludesParameters<JpaPid> parameters =
+							createLoadIncludeParameters(originalPids, includes, false, remainingIncludesUntilMax);
+					Set<JpaPid> nonIterateIncludedPids = theSearchBuilder.loadIncludes(parameters);
+					if (remainingIncludesUntilMax != null) {
+						remainingIncludesUntilMax -= nonIterateIncludedPids.size();
 					}
 					thePids.addAll(nonIterateIncludedPids);
 					includedPidList.addAll(nonIterateIncludedPids);
@@ -376,35 +400,17 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 
 				// Load `_revinclude:iterate`
 				{
-					Set<JpaPid> iterateRevIncludedPids = theSearchBuilder.loadIncludes(
-							myFhirContext,
-							myEntityManager,
-							thePids,
-							mySearchEntity.toRevIncludesList(true),
-							true,
-							mySearchEntity.getLastUpdated(),
-							mySearchEntity.getUuid(),
-							myRequestDetails,
-							maxIncludes);
-					if (maxIncludes != null) {
-						maxIncludes -= iterateRevIncludedPids.size();
-					}
-					thePids.addAll(iterateRevIncludedPids);
-					includedPidList.addAll(iterateRevIncludedPids);
+					Collection<Include> includes = mySearchEntity.toRevIncludesList(true);
+					remainingIncludesUntilMax = fetchRevIncludes(
+							theSearchBuilder, thePids, includedPidList, remainingIncludesUntilMax, includes);
 				}
 
 				// Load `_include:iterate`
 				{
-					Set<JpaPid> iterateIncludedPids = theSearchBuilder.loadIncludes(
-							myFhirContext,
-							myEntityManager,
-							thePids,
-							mySearchEntity.toIncludesList(true),
-							false,
-							mySearchEntity.getLastUpdated(),
-							mySearchEntity.getUuid(),
-							myRequestDetails,
-							maxIncludes);
+					Collection<Include> includes = mySearchEntity.toIncludesList(true);
+					SearchBuilderLoadIncludesParameters<JpaPid> parameters =
+							createLoadIncludeParameters(thePids, includes, false, remainingIncludesUntilMax);
+					Set<JpaPid> iterateIncludedPids = theSearchBuilder.loadIncludes(parameters);
 					thePids.addAll(iterateIncludedPids);
 					includedPidList.addAll(iterateIncludedPids);
 				}
@@ -437,6 +443,42 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 			myCachedPidsFromMatchesAndIncludes = thePids;
 			myCachedPidsFromMatchesAndIncludesStartingIndex = theFromIndex;
 			myCachedPidsFromMatchesAndIncludesEndingIndex = theToIndex;
+		}
+
+		private Integer fetchRevIncludes(
+				ISearchBuilder<JpaPid> theSearchBuilder,
+				List<JpaPid> thePids,
+				List<JpaPid> theIncludedPidList,
+				Integer theMaxIncludes,
+				Collection<Include> theIncludes) {
+			SearchBuilderLoadIncludesParameters<JpaPid> parameters =
+					createLoadIncludeParameters(thePids, theIncludes, true, theMaxIncludes);
+			Set<JpaPid> nonIterateRevIncludedPids = theSearchBuilder.loadIncludes(parameters);
+			if (theMaxIncludes != null) {
+				theMaxIncludes -= nonIterateRevIncludedPids.size();
+			}
+			thePids.addAll(nonIterateRevIncludedPids);
+			theIncludedPidList.addAll(nonIterateRevIncludedPids);
+			return theMaxIncludes;
+		}
+
+		@Nonnull
+		private SearchBuilderLoadIncludesParameters<JpaPid> createLoadIncludeParameters(
+				Collection<JpaPid> thePids,
+				Collection<Include> theIncludesToLoad,
+				boolean theReverse,
+				Integer theMaxIncludes) {
+			SearchBuilderLoadIncludesParameters<JpaPid> parameters = new SearchBuilderLoadIncludesParameters<>();
+			parameters.setFhirContext(myFhirContext);
+			parameters.setEntityManager(myEntityManager);
+			parameters.setMatches(thePids);
+			parameters.setIncludeFilters(theIncludesToLoad);
+			parameters.setReverseMode(theReverse);
+			parameters.setLastUpdated(mySearchEntity.getLastUpdated());
+			parameters.setSearchIdOrDescription(mySearchEntity.getUuid());
+			parameters.setRequestDetails(myRequestDetails);
+			parameters.setMaxCount(theMaxIncludes);
+			return parameters;
 		}
 
 		/**
@@ -514,6 +556,7 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 							.execute(() -> ensureSearchPerformedInsideTransaction(theFromIndex, theToIndex));
 					break;
 				} catch (ResourceGoneException e) {
+					ourLog.info("Attempting to access search with unknown UUID: {}", mySearchUuid);
 					throw e;
 				} catch (UnexpectedRollbackException e) {
 					validateSearchEntityNotFailed();
@@ -571,7 +614,7 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 
 				Optional<Search> searchEntityOpt = mySearchCacheSvc.fetchByUuid(mySearchUuid, myRequestPartitionId);
 				mySearchEntity =
-						searchEntityOpt.orElseThrow(() -> myExceptionSvc.newUnknownSearchException(mySearchUuid));
+						searchEntityOpt.orElseThrow(() -> myExceptionService.newUnknownSearchException(mySearchUuid));
 				// FIXME: throw better exception
 				myParams = mySearchEntity.getSearchParameterMap().orElseThrow();
 
@@ -894,6 +937,60 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 					.getResourceDefinition(mySearchEntity.getResourceType())
 					.getImplementingClass();
 			return mySearchBuilderFactory.newSearchBuilder(mySearchEntity.getResourceType(), resourceType);
+		}
+
+		private Optional<Search> findCachedQuery(
+				SearchParameterMap theParams,
+				String theResourceType,
+				RequestDetails theRequestDetails,
+				String theQueryString,
+				RequestPartitionId theRequestPartitionId) {
+
+			HapiTransactionService.requireTransaction();
+
+			// Interceptor call: STORAGE_PRECHECK_FOR_CACHED_SEARCH
+			if (myCompositeBroadcaster.hasHooks(Pointcut.STORAGE_PRECHECK_FOR_CACHED_SEARCH)) {
+				HookParams params = new HookParams()
+						.add(SearchParameterMap.class, theParams)
+						.add(RequestDetails.class, theRequestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+				boolean canUseCache =
+						myCompositeBroadcaster.callHooks(Pointcut.STORAGE_PRECHECK_FOR_CACHED_SEARCH, params);
+				if (!canUseCache) {
+					return Optional.empty();
+				}
+			}
+
+			// Check for a search matching the given hash
+			Search searchToUse = findSearchToUseOrNull(theQueryString, theResourceType, theRequestPartitionId);
+			if (searchToUse == null) {
+				return Optional.empty();
+			}
+
+			ourLog.debug("Reusing search {} from cache", searchToUse.getUuid());
+
+			// Interceptor call: JPA_PERFTRACE_SEARCH_REUSING_CACHED
+			if (myCompositeBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_SEARCH_REUSING_CACHED)) {
+				HookParams params = new HookParams()
+						.add(SearchParameterMap.class, theParams)
+						.add(RequestDetails.class, theRequestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+				myCompositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_SEARCH_REUSING_CACHED, params);
+			}
+
+			return Optional.of(searchToUse);
+		}
+
+		@Nullable
+		private Search findSearchToUseOrNull(
+				String theQueryString, String theResourceType, RequestPartitionId theRequestPartitionId) {
+			// createdCutoff is in recent past
+			final Instant createdCutoff =
+					Instant.now().minus(myStorageSettings.getReuseCachedSearchResultsForMillis(), ChronoUnit.MILLIS);
+
+			Optional<Search> candidate = mySearchCacheSvc.findCandidatesForReuse(
+					theResourceType, theQueryString, createdCutoff, theRequestPartitionId);
+			return candidate.orElse(null);
 		}
 
 		private record SearchThreshold(@Nullable Integer threshold, boolean isLastThreshold) {}

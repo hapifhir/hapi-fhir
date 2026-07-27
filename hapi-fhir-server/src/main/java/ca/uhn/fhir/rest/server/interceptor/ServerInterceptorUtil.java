@@ -48,6 +48,22 @@ public class ServerInterceptorUtil {
 			List<IBaseResource> theResources,
 			RequestDetails theRequest,
 			IInterceptorBroadcaster theInterceptorBroadcaster) {
+
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(theInterceptorBroadcaster, theRequest);
+
+		return fireStoragePreshowResourcesToCompositeBroadcaster(theResources, theRequest, compositeBroadcaster);
+	}
+
+	/**
+	 * Fires {@link Pointcut#STORAGE_PRESHOW_RESOURCES} interceptor hook, and potentially remove resources
+	 * from the resource list
+	 */
+	@CheckReturnValue
+	public static List<IBaseResource> fireStoragePreshowResourcesToCompositeBroadcaster(
+			List<IBaseResource> theResources,
+			RequestDetails theRequest,
+			IInterceptorBroadcaster theCompositeBroadcaster) {
 		List<IBaseResource> retVal = theResources;
 		retVal.removeIf(Objects::isNull);
 
@@ -55,15 +71,13 @@ public class ServerInterceptorUtil {
 		// This can be used to remove results from the search result details before
 		// the user has a chance to know that they were in the results
 		if (!retVal.isEmpty()) {
-			IInterceptorBroadcaster compositeBroadcaster =
-					CompositeInterceptorBroadcaster.newCompositeBroadcaster(theInterceptorBroadcaster, theRequest);
-			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRESHOW_RESOURCES)) {
+			if (theCompositeBroadcaster.hasHooks(Pointcut.STORAGE_PRESHOW_RESOURCES)) {
 				SimplePreResourceShowDetails accessDetails = new SimplePreResourceShowDetails(retVal);
 				HookParams params = new HookParams()
 						.add(IPreResourceShowDetails.class, accessDetails)
 						.add(RequestDetails.class, theRequest)
 						.addIfMatchesType(ServletRequestDetails.class, theRequest);
-				compositeBroadcaster.callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+				theCompositeBroadcaster.callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, params);
 
 				retVal = accessDetails.getAllResources();
 			}
