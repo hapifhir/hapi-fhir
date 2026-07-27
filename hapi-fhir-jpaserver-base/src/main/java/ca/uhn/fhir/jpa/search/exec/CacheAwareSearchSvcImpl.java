@@ -7,7 +7,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
@@ -24,7 +23,6 @@ import ca.uhn.fhir.jpa.search.ExceptionService;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
-import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
@@ -58,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -201,11 +200,11 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 
 	public class JpaBundleProvider implements IBundleProvider {
 		private final Map<JpaPid, IBaseResource> myFetchedResources = new HashMap<>();
-		private SearchParameterMap myParams;
 		private final RequestDetails myRequestDetails;
+		private final IInterceptorBroadcaster myCompositeBroadcaster;
+		private SearchParameterMap myParams;
 		private RequestPartitionId myRequestPartitionId;
 		private CacheControlDirective myCacheControlDirective;
-		private final IInterceptorBroadcaster myCompositeBroadcaster;
 		private String mySearchUuid;
 		private Search mySearchEntity;
 		private List<JpaPid> myCachedPidsFromMatches;
@@ -449,9 +448,13 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 		 */
 		private void ensureSearchPerformed() {
 			if (myCachedPidsFromMatches == null) {
-				Integer firstPrefetchThreshold =
-						myStorageSettings.getSearchPreFetchThresholds().get(0);
-				ensureSearchPerformed(0, firstPrefetchThreshold);
+				int to;
+				if (myParams != null && myParams.getCount() != null) {
+					to = myParams.getCount();
+				} else {
+					to = myStorageSettings.getSearchPreFetchThresholds().get(0);
+				}
+				ensureSearchPerformed(0, to);
 			}
 			validateSearchEntityNotFailed();
 		}
@@ -611,6 +614,12 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 							}
 						}
 					}
+				} else {
+
+					// FIXME: better exception
+					mySearchEntity = mySearchCacheSvc
+							.fetchByUuid(mySearchEntity.getUuid(), myRequestPartitionId)
+							.orElseThrow();
 				}
 			}
 
@@ -620,6 +629,7 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 					Long countQuery = newSearchBuilder()
 							.createCountQuery(
 									myParams, mySearchEntity.getUuid(), myRequestDetails, myRequestPartitionId);
+					mySearchEntity.setSearchParameterMap(myParams);
 					mySearchEntity.setTotalCount(Math.toIntExact(countQuery));
 					mySearchEntity.setStatus(SearchStatusEnum.FINISHED);
 					mySearchCacheSvc.save(mySearchEntity, myRequestPartitionId);
@@ -677,8 +687,8 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 			List<JpaPid> newPids = new ArrayList<>();
 			while (true) {
 
-				Integer numToFetch = calculateNextSearchThreshold(numWanted, searchBuilder);
-				searchBuilder.setMaxResultsToFetch(numToFetch);
+				SearchThreshold searchThreshold = calculateNextSearchThreshold(numWanted, searchBuilder);
+				searchBuilder.setMaxResultsToFetch(searchThreshold.threshold());
 
 				List<JpaPid> newPidsThisPass = new ArrayList<>();
 				try (IResultIterator<JpaPid> query =
@@ -694,7 +704,8 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 							numToSkip--;
 						}
 
-						if (numToFetch != null && newPidsThisPass.size() == numToFetch) {
+						if (searchThreshold.threshold() != null
+								&& newPidsThisPass.size() == searchThreshold.threshold()) {
 							break;
 						}
 					}
@@ -702,11 +713,10 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 					if (!newPidsThisPass.isEmpty()) {
 						addedResultsThisPass = true;
 					}
-					if (numToFetch != null && newPidsThisPass.size() == numToFetch) {
+					if (searchThreshold.threshold() != null && newPidsThisPass.size() == searchThreshold.threshold()) {
 						haveMoreResults = true;
 					}
 				} catch (Exception e) {
-					// FIXME: add code
 					SearchCoordinatorSvcImpl.markSearchAsFailedWithExceptionDetails(mySearchEntity, e);
 					mySearchCacheSvc.save(mySearchEntity, myRequestPartitionId);
 					return;
@@ -758,6 +768,15 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 				mySearchEntity.setNumBlocked(mySearchEntity.getNumBlocked() + countBlockedThisPass);
 
 				newPids.addAll(newPidsThisPass);
+
+				// If our last prefetch threshold specifies a specific maximum count, force the search
+				// to be over when we hit that count.
+				if (searchThreshold.threshold() != null
+						&& searchThreshold.isLastThreshold()
+						&& mySearchEntity.getNumFound() >= searchThreshold.threshold()) {
+					haveMoreResults = false;
+					break;
+				}
 
 				if (!blockedResults || mySearchEntity.getNumFound() >= theToIndex) {
 					break;
@@ -820,21 +839,33 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 			}
 		}
 
-		@Nullable
-		private Integer calculateNextSearchThreshold(int theNumWanted, ISearchBuilder<JpaPid> searchBuilder) {
-			@Nullable Integer numToFetch = null;
+		@Nonnull
+		private SearchThreshold calculateNextSearchThreshold(int theNumWanted, ISearchBuilder<JpaPid> searchBuilder) {
+			List<Integer> thresholds = myStorageSettings.getSearchPreFetchThresholds();
+			int firstThreshold = thresholds.get(0);
+			int lastThreshold = thresholds.get(thresholds.size() - 1);
 
+			/*
+			 * If we're searching for the first page of results:
+			 *
+			 * - If the requested count is greater than the first threshold, just search
+			 *   for exactly the requested count instead of advancing to the next threshold.
+			 * - If the requested count is greater than the last threshold, just search
+			 *   for exactly the last threshold, and don't exceed it.
+			 */
 			boolean firstSearch = mySearchEntity.getNumFound() == 0 && mySearchEntity.getNumBlocked() == 0;
 			if (firstSearch) {
-				int firstThreshold =
-						myStorageSettings.getSearchPreFetchThresholds().get(0);
 				if (theNumWanted > firstThreshold) {
-					return theNumWanted;
+					if (lastThreshold > 0 && theNumWanted > lastThreshold) {
+						return new SearchThreshold(lastThreshold, true);
+					}
+					return new SearchThreshold(theNumWanted + 1, false);
 				}
 			}
 
 			// For subsequent pages, we'll use the predetermined search thresholds
-			for (int nextThreshold : myStorageSettings.getSearchPreFetchThresholds()) {
+			for (Iterator<Integer> iterator = thresholds.iterator(); iterator.hasNext(); ) {
+				int nextThreshold = iterator.next();
 
 				/*
 				 * If we're past the last prefetch threshold then
@@ -844,16 +875,18 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 				 * in the app server
 				 */
 				if (nextThreshold == -1) {
-					searchBuilder.setDeduplicateInDatabase(true);
+					break;
 				} else {
 					if ((theNumWanted + mySearchEntity.getNumFound()) <= nextThreshold) {
-						numToFetch = (nextThreshold - mySearchEntity.getNumFound()) + 1;
-						break;
+						int numToFetch = (nextThreshold - mySearchEntity.getNumFound()) + 1;
+						boolean isLastThreshold = !iterator.hasNext();
+						return new SearchThreshold(numToFetch, isLastThreshold);
 					}
 				}
 			}
 
-			return numToFetch;
+			searchBuilder.setDeduplicateInDatabase(true);
+			return new SearchThreshold(null, true);
 		}
 
 		private ISearchBuilder<JpaPid> newSearchBuilder() {
@@ -863,10 +896,6 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 			return mySearchBuilderFactory.newSearchBuilder(mySearchEntity.getResourceType(), resourceType);
 		}
 
-		private static JpaPid extractFetchedResourcePid(IBaseResource theResource) {
-			JpaPid retVal = (JpaPid) theResource.getUserData(IDao.RESOURCE_PID_KEY);
-			Validate.notNull(retVal, "Resource has not PID assigned by DAO layer: %s", theResource);
-			return retVal;
-		}
+		private record SearchThreshold(@Nullable Integer threshold, boolean isLastThreshold) {}
 	}
 }
