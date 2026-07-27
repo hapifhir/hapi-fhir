@@ -320,7 +320,7 @@ public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageService
 			CacheControlDirective cacheControlDirective = new CacheControlDirective();
 			cacheControlDirective.parse(requestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL));
 
-			response = mySearchCoordinatorSvc.registerSearch(
+			response = mySearchCoordinatorSvc.createNewSearch(
 					getDao(theType), params, theType, cacheControlDirective, requestDetails);
 
 			searchOffset = 0;

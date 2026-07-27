@@ -302,7 +302,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
 			systemRequestDetails.setRequestPartitionId(theJobDetails.getRequestPartitionId());
 
-			search = mySearchCoordinatorSvc.registerSearch(
+			search = mySearchCoordinatorSvc.createNewSearch(
 					callingDao, params, resourceType, new CacheControlDirective(), systemRequestDetails);
 
 			if (isNull(search.getUuid())) {

@@ -422,7 +422,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	}
 
 	@Override
-	public IBundleProvider registerSearch(
+	public IBundleProvider createNewSearch(
 			final IFhirResourceDao<?> theCallingDao,
 			final SearchParameterMap theParams,
 			String theResourceType,
@@ -498,12 +498,17 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 			sb.setMaxResultsToFetch(maxToLoad);
 
 			ourLog.debug("Search {} is loading in synchronous mode", searchUuid);
-			return mySynchronousSearchSvc.executeQuery(
+			return mySynchronousSearchSvc.createNewSearch(
 					theParams, theRequestDetails, searchUuid, sb, loadSynchronousUpTo, requestPartitionId);
 		}
 
-		return myCacheAwareSearchSvc.executeQuery(
+		return myCacheAwareSearchSvc.createNewSearch(
 				theParams, theRequestDetails, theCacheControlDirective, search, sb, requestPartitionId);
+	}
+
+	@Override
+	public IBundleProvider continueExistingSearch(String theSearchUuid, @Nullable RequestDetails theRequestDetails) {
+		return myCacheAwareSearchSvc.continueExistingSearch(theSearchUuid, theRequestDetails);
 	}
 
 	/**

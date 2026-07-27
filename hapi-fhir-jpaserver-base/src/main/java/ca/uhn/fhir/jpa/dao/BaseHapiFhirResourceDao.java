@@ -2398,7 +2398,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			cacheControlDirective.parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL));
 		}
 
-		IBundleProvider retVal = mySearchCoordinatorSvc.registerSearch(
+		IBundleProvider retVal = mySearchCoordinatorSvc.createNewSearch(
 				this, theParams, getResourceName(), cacheControlDirective, theRequest);
 
 		if (retVal instanceof PersistedJpaBundleProvider provider) {

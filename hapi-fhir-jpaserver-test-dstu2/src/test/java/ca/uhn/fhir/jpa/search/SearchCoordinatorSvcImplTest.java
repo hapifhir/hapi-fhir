@@ -151,7 +151,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		IResultIterator<JpaPid> iter = new FailAfterNIterator(new SlowIterator(pids.iterator(), 0), 300);
 		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 
-		IBundleProvider outcome = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), newSrd());
+		IBundleProvider outcome = mySvc.createNewSearch(myCallingDao, params, "Patient", new CacheControlDirective(), newSrd());
 		assertThatThrownBy(() -> outcome.getResources(0, 1000))
 			.isInstanceOf(InternalErrorException.class)
 			.hasMessageContaining("FAILED")
@@ -190,7 +190,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		// Do all the stubbing before starting any work, since we want to avoid threading issues
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
+		IBundleProvider result = mySvc.createNewSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 
 		List<IBaseResource> resources = result.getResources(0, 100000);
 		assertNotNull(result.getUuid());
@@ -224,7 +224,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
+		IBundleProvider result = mySvc.createNewSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 
 		List<IBaseResource> resources;
 
@@ -271,7 +271,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		});
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
+		IBundleProvider result = mySvc.createNewSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 
 		List<IBaseResource> resources;
 
@@ -303,7 +303,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
+		IBundleProvider result = mySvc.createNewSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 
 		List<IBaseResource> resources = result.getResources(0, 30);
 		assertThat(resources).hasSize(30);
@@ -346,9 +346,9 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
 
-		mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
+		mySvc.createNewSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 
-		verify(mySynchronousSearchSvc).executeQuery(any(), any(), any(), any(), any(), any());
+		verify(mySynchronousSearchSvc).createNewSearch(any(), any(), any(), any(), any(), any());
 
 	}
 
@@ -362,9 +362,9 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		params.setOffset(10);
 		params.setCount(10);
 
-		mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
+		mySvc.createNewSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 
-		verify(mySynchronousSearchSvc).executeQuery(any(), any(), any(), any(), any(), any());
+		verify(mySynchronousSearchSvc).createNewSearch(any(), any(), any(), any(), any(), any());
 	}
 
 	@Test
@@ -376,9 +376,9 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		SearchParameterMap params = new SearchParameterMap();
 		CacheControlDirective cacheControlDirective = new CacheControlDirective().setMaxResults(loadUpto).setNoStore(true);
 
-		mySvc.registerSearch(myCallingDao, params, "Patient", cacheControlDirective, null);
+		mySvc.createNewSearch(myCallingDao, params, "Patient", cacheControlDirective, null);
 
-		verify(mySynchronousSearchSvc).executeQuery(any(), any(), any(), any(), eq(30), any());
+		verify(mySynchronousSearchSvc).createNewSearch(any(), any(), any(), any(), eq(30), any());
 	}
 
 	public static class FailAfterNIterator extends BaseIterator<JpaPid> implements IResultIterator<JpaPid> {

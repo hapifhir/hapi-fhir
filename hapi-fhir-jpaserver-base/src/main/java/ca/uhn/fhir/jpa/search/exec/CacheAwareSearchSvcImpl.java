@@ -26,12 +26,14 @@ import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.interceptor.ServerInterceptorUtil;
@@ -90,6 +92,9 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
+	@Autowired
+	private IPagingProvider myPagingProvider;
+
 	/**
 	 * Constructor
 	 */
@@ -122,7 +127,7 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 	}
 
 	@Override
-	public IBundleProvider executeQuery(
+	public IBundleProvider createNewSearch(
 			SearchParameterMap theParams,
 			RequestDetails theRequestDetails,
 			CacheControlDirective theCacheControlDirective,
@@ -134,7 +139,7 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 	}
 
 	@Override
-	public IBundleProvider continueQuery(RequestDetails theRequestDetails, String theId) {
+	public IBundleProvider continueExistingSearch(String theId, RequestDetails theRequestDetails) {
 		return new JpaBundleProvider(theRequestDetails, theId);
 	}
 
@@ -207,11 +212,11 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 		private Integer myCachedPidsFromMatchesAndIncludesEndingIndex;
 
 		public JpaBundleProvider(
-				SearchParameterMap theParams,
-				RequestDetails theRequestDetails,
-				CacheControlDirective theCacheControlDirective,
-				RequestPartitionId theRequestPartitionId,
-				Search theSearchEntity) {
+			SearchParameterMap theParams,
+			RequestDetails theRequestDetails,
+			CacheControlDirective theCacheControlDirective,
+			RequestPartitionId theRequestPartitionId,
+			Search theSearchEntity) {
 			this(theRequestDetails, theSearchEntity.getUuid());
 			myParams = theParams;
 			myCacheControlDirective = theCacheControlDirective;
@@ -254,11 +259,17 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 		@Nullable
 		@Override
 		public Integer size() {
-			if (myParams != null) {
-				if (myParams.getSearchTotalMode() == SearchTotalModeEnum.ACCURATE
-						|| myParams.getSummaryMode() == SummaryEnum.COUNT) {
-					ensureSearchPerformed();
+			if (myParams != null && myPagingProvider != null) {
+				int from = 0;
+				if (myParams.getOffset() != null) {
+					from = myParams.getOffset();
 				}
+
+				int to = myPagingProvider.getDefaultPageSize();
+				if (myParams.getCount() != null) {
+					to = myParams.getCount();
+				}
+				ensureSearchPerformed(from, to);
 			}
 			if (mySearchEntity != null) {
 				return mySearchEntity.getTotalCount();
@@ -579,9 +590,7 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 			/// If we have a `_count=summary` query, just calculate the count and return
 			if (myParams.getSummaryMode() == SummaryEnum.COUNT) {
 				if (mySearchEntity.getTotalCount() == null) {
-					ISearchBuilder<JpaPid> searchBuilder = newSearchBuilder();
-
-					Long countQuery = searchBuilder.createCountQuery(
+					Long countQuery = newSearchBuilder().createCountQuery(
 							myParams, mySearchEntity.getUuid(), myRequestDetails, myRequestPartitionId);
 					mySearchEntity.setTotalCount(Math.toIntExact(countQuery));
 					mySearchEntity.setStatus(SearchStatusEnum.FINISHED);
@@ -757,9 +766,8 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 		}
 
 		private void validateSearchEntityNotFailed() {
-			if (mySearchEntity != null && mySearchEntity.getStatus() == SearchStatusEnum.FAILED) {
-				// FIXME: new code
-				throw new InternalErrorException(Msg.code(1) + "Search failed: " + mySearchEntity.getFailureMessage());
+			if (mySearchEntity != null) {
+				QueryParameterUtils.verifySearchHasntFailedOrThrowInternalErrorException(mySearchEntity);
 			}
 		}
 

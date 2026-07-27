@@ -19,10 +19,12 @@
  */
 package ca.uhn.fhir.jpa.search;
 
-import ca.uhn.fhir.jpa.search.exec.ICacheAwareSearchSvc;
+import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.BasePagingProvider;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -32,7 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class DatabaseBackedPagingProvider extends BasePagingProvider {
 
 	@Autowired
-	private ICacheAwareSearchSvc myCacheAwareSearchSvc;
+	private ISearchCoordinatorSvc<JpaPid> mySearchCoordinatorSvc;
 
 	/**
 	 * Constructor
@@ -52,8 +54,8 @@ public class DatabaseBackedPagingProvider extends BasePagingProvider {
 	}
 
 	@Override
-	public synchronized IBundleProvider retrieveResultList(RequestDetails theRequestDetails, String theId) {
-		return myCacheAwareSearchSvc.continueQuery(theRequestDetails, theId);
+	public IBundleProvider retrieveResultList(RequestDetails theRequestDetails, @Nonnull String theId) {
+		return mySearchCoordinatorSvc.continueExistingSearch(theId, theRequestDetails);
 	}
 
 	/**

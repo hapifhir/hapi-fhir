@@ -12,7 +12,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 public interface ICacheAwareSearchSvc {
 
 	// FIXME: rename to executeNewQuery
-	IBundleProvider executeQuery(
+	IBundleProvider createNewSearch(
 			SearchParameterMap theParams,
 			RequestDetails theRequestDetails,
 			CacheControlDirective theCacheControlDirective,
@@ -21,5 +21,5 @@ public interface ICacheAwareSearchSvc {
 			RequestPartitionId theRequestPartitionId);
 
 	// FIXME: rename to continueExistingQuery
-	IBundleProvider continueQuery(RequestDetails theRequestDetails, String theId);
+	IBundleProvider continueExistingSearch(String theId, RequestDetails theRequestDetails);
 }

@@ -90,7 +90,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 
 	@Override
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	public IBundleProvider executeQuery(
+	public IBundleProvider createNewSearch(
 			SearchParameterMap theParams,
 			RequestDetails theRequestDetails,
 			String theSearchUuid,
@@ -351,7 +351,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 				myContext.getResourceDefinition(theResourceType).getImplementingClass();
 		final ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(theResourceType, resourceTypeClass);
 		sb.setFetchSize(mySyncSize);
-		return executeQuery(
+		return createNewSearch(
 				theSearchParameterMap,
 				null,
 				searchUuid,

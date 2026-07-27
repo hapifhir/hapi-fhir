@@ -28,7 +28,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 public interface ISynchronousSearchSvc extends ISearchSvc {
 
-	IBundleProvider executeQuery(
+	IBundleProvider createNewSearch(
 			SearchParameterMap theParams,
 			RequestDetails theRequestDetails,
 			String theSearchUuid,
