@@ -48,6 +48,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.UnexpectedRollbackException;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -307,7 +308,6 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 					retVal, myRequestDetails, myInterceptorBroadcaster);
 
 			// we only care about omitted results from this page
-			// FIXME: what are these used for?
 			theResponsePageBuilder.setOmittedResourceCount(precount - retVal.size());
 			theResponsePageBuilder.setResources(retVal);
 			theResponsePageBuilder.setIncludedResourceCount(retVal.size());
@@ -507,6 +507,9 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 							.withRequestPartitionId(myRequestPartitionId)
 							.execute(() -> ensureSearchPerformedInsideTransaction(theFromIndex, theToIndex));
 					break;
+				} catch (UnexpectedRollbackException e) {
+					validateSearchEntityNotFailed();
+					throw e;
 				} catch (ResourceVersionConflictException e) {
 					// FIXME: is this the right exception?
 					if (i == 5) {
@@ -602,7 +605,11 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 				return;
 			}
 
-			if (mySearchEntity.getNumFound() >= theToIndex) {
+			/*
+			 * If the previously found search is either finished, or has already found enough results to
+			 * satisfy the currently wanted count, then we can just return previously fetched results.
+			 */
+			if (mySearchEntity.getStatus() == SearchStatusEnum.FINISHED || mySearchEntity.getNumFound() >= theToIndex) {
 				List<JpaPid> existingSearchPids = mySearchResultCacheSvc.fetchResultPids(
 						mySearchEntity, theFromIndex, theToIndex, myRequestDetails, myRequestPartitionId);
 				ISearchBuilder<JpaPid> searchBuilder = newSearchBuilder();
