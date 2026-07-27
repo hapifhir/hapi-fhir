@@ -55,7 +55,6 @@ import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.SearchParamPresentPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.sql.PartitionableJoinColumns;
 import ca.uhn.fhir.jpa.search.builder.sql.PredicateBuilderFactory;
@@ -383,14 +382,9 @@ public class QueryStack {
 				return;
 
 			case TOKEN:
-				TokenPredicateBuilder tokenPredicateBuilder = mySqlBuilder.createTokenPredicateBuilder();
-				addSortCustomJoin(
-						resourceLinkPredicateBuilder.getJoinColumnsForTarget(),
-						tokenPredicateBuilder,
-						tokenPredicateBuilder.createHashIdentityPredicate(targetType, theChain));
-
-				mySqlBuilder.addSortString(tokenPredicateBuilder.getColumnSystem(), theAscending, myUseAggregate);
-				mySqlBuilder.addSortString(tokenPredicateBuilder.getColumnValue(), theAscending, myUseAggregate);
+				DbColumn[] theSourceJoinColumns = resourceLinkPredicateBuilder.getJoinColumnsForTarget();
+				resolveTokenPredicateBuilder(theChain)
+						.addSort(theSourceJoinColumns, targetType, theChain, theAscending, myUseAggregate);
 				return;
 
 			case DATE:
@@ -464,14 +458,16 @@ public class QueryStack {
 	public void addSortOnToken(String theResourceName, String theParamName, boolean theAscending) {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 
-		TokenPredicateBuilder tokenPredicateBuilder = mySqlBuilder.createTokenPredicateBuilder();
-		Condition hashIdentityPredicate =
-				tokenPredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
+		DbColumn[] theSourceJoinColumns = firstPredicateBuilder.getJoinColumns();
+		resolveTokenPredicateBuilder(theParamName)
+				.addSort(theSourceJoinColumns, theResourceName, theParamName, theAscending, myUseAggregate);
+	}
 
-		addSortCustomJoin(firstPredicateBuilder, tokenPredicateBuilder, hashIdentityPredicate);
-
-		mySqlBuilder.addSortString(tokenPredicateBuilder.getColumnSystem(), theAscending, myUseAggregate);
-		mySqlBuilder.addSortString(tokenPredicateBuilder.getColumnValue(), theAscending, myUseAggregate);
+	private BaseTokenPredicateBuilder resolveTokenPredicateBuilder(String theParamName) {
+		return mySqlBuilder
+				.getCustomPredicateBuilder(RestSearchParameterTypeEnum.TOKEN, theParamName)
+				.map(BaseTokenPredicateBuilder.class::cast)
+				.orElseGet(mySqlBuilder::createTokenPredicateBuilder);
 	}
 
 	public void addSortOnUri(String theResourceName, String theParamName, boolean theAscending) {

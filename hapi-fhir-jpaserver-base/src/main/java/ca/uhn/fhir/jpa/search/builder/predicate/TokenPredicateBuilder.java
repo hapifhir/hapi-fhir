@@ -27,7 +27,9 @@ import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import com.google.common.annotations.VisibleForTesting;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
+import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
+import com.healthmarketscience.sqlbuilder.SelectQuery;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 
 import java.util.Arrays;
@@ -81,6 +83,24 @@ public class TokenPredicateBuilder extends BaseTokenPredicateBuilder {
 
 	public DbColumn getColumnValue() {
 		return myColumnValue;
+	}
+
+	@Override
+	public void addSort(
+			DbColumn[] theSourceJoinColumns,
+			String theResourceName,
+			String theParamName,
+			boolean theAscending,
+			boolean theUseAggregate) {
+		SearchQueryBuilder sqlBuilder = getSearchQueryBuilder();
+
+		ComboCondition onCondition = sqlBuilder.createOnCondition(theSourceJoinColumns, getJoinColumns());
+		onCondition.addCondition(createHashIdentityPredicate(theResourceName, theParamName));
+		sqlBuilder.addCustomJoin(
+				SelectQuery.JoinType.LEFT_OUTER, theSourceJoinColumns[0].getTable(), getTable(), onCondition);
+
+		sqlBuilder.addSortString(getColumnSystem(), theAscending, theUseAggregate);
+		sqlBuilder.addSortString(getColumnValue(), theAscending, theUseAggregate);
 	}
 
 	@Override

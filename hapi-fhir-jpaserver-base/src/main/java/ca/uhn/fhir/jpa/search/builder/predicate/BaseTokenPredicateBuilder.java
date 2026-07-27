@@ -49,6 +49,7 @@ import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import com.google.common.collect.Sets;
 import com.healthmarketscience.sqlbuilder.Condition;
+import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -261,6 +262,23 @@ public abstract class BaseTokenPredicateBuilder extends BaseSearchParamPredicate
 			String theSearchParamName,
 			List<FhirVersionIndependentConcept> theCodes,
 			boolean theWantEquals);
+
+	/**
+	 * Adds the join(s) and {@code ORDER BY} clause(s) needed to sort search results on this token
+	 * search parameter.
+	 *
+	 * @param theSourceJoinColumns the columns to join from
+	 * @param theResourceName      the resource type being searched
+	 * @param theParamName         the token search parameter name to sort on
+	 * @param theAscending         {@code true} for ascending order
+	 * @param theUseAggregate      {@code true} to wrap the sort columns in MIN/MAX aggregates
+	 */
+	public abstract void addSort(
+			DbColumn[] theSourceJoinColumns,
+			String theResourceName,
+			String theParamName,
+			boolean theAscending,
+			boolean theUseAggregate);
 
 	private List<FhirVersionIndependentConcept> extractValueSetCodes(IBaseResource theValueSet) {
 		List<FhirVersionIndependentConcept> retVal = new ArrayList<>();
