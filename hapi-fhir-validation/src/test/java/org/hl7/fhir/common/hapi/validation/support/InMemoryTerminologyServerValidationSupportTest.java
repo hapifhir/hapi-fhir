@@ -104,6 +104,32 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 	}
 
 	@Test
+	public void testExpandValueSet_unsupportedFilterProperty_returnsError() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://example.com/unsupported-cs");
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.addConcept().setCode("A").setDisplay("A");
+		cs.addConcept().setCode("B").setDisplay("B");
+		myPrePopulated.addCodeSystem(cs);
+
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://example.com/unsupported-vs");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose().addInclude().setSystem(cs.getUrl())
+			.addFilter().setProperty("severity").setOp(ValueSet.FilterOperator.EQUAL).setValue("A");
+		myPrePopulated.addValueSet(vs);
+
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+		IValidationSupport.ValueSetExpansionOutcome expansion =
+				mySvc.expandValueSet(valCtx, new ValueSetExpansionOptions(), vs);
+
+		// The unsupported filter must surface as an expansion error, not a silent (empty) success.
+		assertNotNull(expansion);
+		assertThat(expansion.getError()).contains("severity");
+	}
+
+	@Test
 	public void testValidateCode_mimetypeVSRandomCode_returnsOk() {
 		final String codeSystem = CommonCodeSystemsTerminologyService.MIMETYPES_CODESYSTEM_URL;
 		final String valueSetUrl = CommonCodeSystemsTerminologyService.MIMETYPES_VALUESET_URL;
