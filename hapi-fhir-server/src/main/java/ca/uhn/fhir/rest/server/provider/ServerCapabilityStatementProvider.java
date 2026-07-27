@@ -260,7 +260,6 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		for (Entry<String, List<IMethodBinding>> nextEntry : resourceToMethods.entrySet()) {
 			String resourceName = nextEntry.getKey();
 			for (IMethodBinding nextMethod : nextEntry.getValue()) {
-				// fixme leave some javadoc about this limitation
 				if (nextMethod instanceof SearchMethodBinding searchBinding) {
 					resourceNameToIncludes.putAll(resourceName, searchBinding.getIncludes());
 					resourceNameToRevIncludes.putAll(resourceName, searchBinding.getRevIncludes());
@@ -523,7 +522,6 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 			} else {
 				for (IMethodBinding nextMethodBinding : nextEntry.getValue()) {
 					checkBindingForSystemOps(terser, rest, systemOps, nextMethodBinding);
-					// fixme more conformance gloop
 					if (nextMethodBinding instanceof OperationMethodBinding) {
 						OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
 						if (!methodBinding.isGlobalMethod()) {

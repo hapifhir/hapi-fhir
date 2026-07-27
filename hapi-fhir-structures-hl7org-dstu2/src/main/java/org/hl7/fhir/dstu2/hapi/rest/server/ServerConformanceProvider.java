@@ -300,7 +300,6 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 			} else {
 				for (IMethodBinding nextMethodBinding : nextEntry.getValue()) {
 					checkBindingForSystemOps(rest, systemOps, nextMethodBinding);
-					// fixme this should be shared, and abstract
 					if (nextMethodBinding instanceof OperationMethodBinding) {
 						OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
 						String opName = bindings.getOperationBindingToId().get(methodBinding);

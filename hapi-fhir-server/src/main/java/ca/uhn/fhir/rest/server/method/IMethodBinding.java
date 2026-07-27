@@ -59,7 +59,9 @@ public interface IMethodBinding {
 	 */
 	String getResourceName();
 
-	// TODO separate invocation from conformance by moving this to a conformance-builder.  Maybe a visitor pattern.
+	// TODO post-release: separate invocation from conformance by moving this to a conformance-builder.  Maybe a visitor pattern.
+	// There are several places in the conformance builder that reference specific classes like
+	// OperationMethodBinding or SearchMethodBinding
 
 	/**
 	 * For conformance.
