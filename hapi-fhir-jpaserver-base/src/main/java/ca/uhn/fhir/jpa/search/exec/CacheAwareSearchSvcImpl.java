@@ -481,7 +481,7 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 				}
 			}
 
-			if (myParams.getSummaryMode() == SummaryEnum.COUNT) {
+			if (myParams != null && mySearchEntity != null && myParams.getSummaryMode() == SummaryEnum.COUNT) {
 				if (mySearchEntity.getTotalCount() != null) {
 					myCachedPidsFromMatchesAndIncludes = List.of();
 					myCachedPidsFromMatchesAndIncludesStartingIndex = theFromIndex;
