@@ -29,57 +29,54 @@ class MethodBindingTest {
 
 	@RegisterExtension
 	static RestfulServerExtension ourServer = new RestfulServerExtension(ourFhirContext).withServer(
-		server->{
-			server.getServerBindings().add(new IMethodBinding() {
-				@Override
-				public MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest) {
-					if (StringUtils.isEmpty(theRequest.getResourceName()) &&
-						StringUtils.isNotEmpty(theRequest.getOperation())) {
-						return MethodMatchEnum.APPROXIMATE;
-					} else {
-						return MethodMatchEnum.NONE;
-					}
+		server-> server.getServerBindings().add(new IMethodBinding() {
+			@Override
+			public MethodMatchEnum incomingServerRequestMatchesMethod(RequestDetails theRequest) {
+				if (StringUtils.isEmpty(theRequest.getResourceName()) &&
+					StringUtils.isNotEmpty(theRequest.getOperation())) {
+					return MethodMatchEnum.APPROXIMATE;
+				} else {
+					return MethodMatchEnum.NONE;
 				}
+			}
 
-				@Override
-				public RestOperationTypeEnum getRestOperationType() {
-					return RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
-				}
+			@Override
+			public RestOperationTypeEnum getRestOperationType() {
+				return RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
+			}
 
-				@Override
-				public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
-					Parameters parameters = new Parameters();
-					parameters.addParameter("value", "Hello! " + theRequest.getOperation());
-					return BaseResourceReturningMethodBinding.callHooksAndWriteResponse(theServer, theRequest, parameters, false);
-				}
+			@Override
+			public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
+				Parameters parameters = new Parameters();
+				parameters.addParameter("value", "Hello! " + theRequest.getOperation());
+				return BaseResourceReturningMethodBinding.callHooksAndWriteResponse(theServer, theRequest, parameters, false);
+			}
 
-				@Override
-				public String getBindingKey() {
-					return "global - any operation";
-				}
+			@Override
+			public String getBindingKey() {
+				return "global - any operation";
+			}
 
-				@Override
-				public Object getProvider() {
-					return this;
-				}
+			@Override
+			public Object getProvider() {
+				return this;
+			}
 
-				@Override
-				public String getResourceName() {
-					return "";
-				}
+			@Override
+			public String getResourceName() {
+				return "";
+			}
 
-				@Override
-				public boolean isSupportsConditional() {
-					return false;
-				}
+			@Override
+			public boolean isSupportsConditional() {
+				return false;
+			}
 
-				@Override
-				public boolean isSupportsConditionalMultiple() {
-					return false;
-				}
-			});
-
-		}
+			@Override
+			public boolean isSupportsConditionalMultiple() {
+				return false;
+			}
+		})
 	);
 
 	@Test
@@ -93,7 +90,7 @@ class MethodBindingTest {
 			.withNoParameters(Parameters.class)
 			.execute();
 
-		ourLog.info("$cql response:\n{}", ourFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.info("response:\n{}", ourFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 
 		String message = response.getParameter().stream()
 			.filter(p -> "value".equals(p.getName()))
