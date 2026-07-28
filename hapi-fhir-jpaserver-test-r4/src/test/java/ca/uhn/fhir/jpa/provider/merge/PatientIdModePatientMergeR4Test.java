@@ -5,6 +5,7 @@ import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.TransactionPrePartitionResponse;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.interceptor.PatientCompartmentEnforcingInterceptor;
 import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
 import ca.uhn.fhir.jpa.merge.MergeOperationTestHelper;
 import ca.uhn.fhir.jpa.merge.MergeTestParameters;
@@ -86,6 +87,8 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 	private ResourceLinkServiceFactory myResourceLinkServiceFactory;
 	@Autowired
 	private HapiTransactionService myHapiTransactionService;
+	@Autowired
+	private PatientCompartmentEnforcingInterceptor myPatientCompartmentEnforcingInterceptor;
 	private PatientIdPartitionInterceptor myPartitionInterceptor;
 	private MergeOperationTestHelper myMergeHelper;
 	private IIdType myPatientIdSrc;
@@ -615,6 +618,51 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 				expectedVersionedSourceId, expectedVersionedTargetId,
 				idsExpectedToReferenceTarget, expectedProvenanceTargets,
 				expectedTargetIdentifiers, null);
+		}
+	}
+
+	@Nested
+	class SamePartitionMergeWithCompartmentEnforcement {
+
+		// "src-4963" and "tgt-1" both hash to partition 14829 under
+		// PatientIdPartitionInterceptor.defaultPartitionAlgorithm
+		private static final String SAME_PARTITION_SOURCE_ID_PART = "src-4963";
+		private static final String SAME_PARTITION_TARGET_ID_PART = "tgt-1";
+
+		private IIdType mySamePartitionSrc;
+		private IIdType mySamePartitionTgt;
+
+		@BeforeEach
+		void beforeEach() {
+			registerInterceptor(myPatientCompartmentEnforcingInterceptor);
+
+			mySamePartitionSrc = createPatient("Patient/" + SAME_PARTITION_SOURCE_ID_PART,
+				List.of(createTestIdentifier("same-partition-src"))).getIdElement().toUnqualifiedVersionless();
+			mySamePartitionTgt = createPatient("Patient/" + SAME_PARTITION_TARGET_ID_PART,
+				List.of(createTestIdentifier("same-partition-tgt"))).getIdElement().toUnqualifiedVersionless();
+			assertInSamePartition(mySamePartitionSrc, mySamePartitionTgt);
+		}
+
+		// Observation(subject=PatientSrc) where PatientSrc and PatientTgt are in the SAME partition, with
+		// PatientCompartmentEnforcingInterceptor registered. The Observation does not change partition, so the
+		// merge must succeed and simply rewrite its subject to PatientTgt.
+		@Test
+		void testMerge_compartmentResourceReferencingSource_whenPatientsInSamePartition_succeeds() {
+			// Setup
+			IIdType obsId = createObservation(mySamePartitionSrc, null, null, "obs-same-partition");
+			Integer obsPartitionBefore = getPartitionId(obsId);
+
+			// Execute
+			MergeTestParameters mergeParams = new MergeTestParameters()
+				.sourceResource(new Reference(mySamePartitionSrc))
+				.targetResource(new Reference(mySamePartitionTgt));
+			Parameters result = callMerge(mergeParams);
+			myMergeHelper.validateSyncMergeOutcome(result, mergeParams.asParametersResource(), mySamePartitionTgt);
+
+			// Verify: Observation keeps its ID and partition, subject rewritten to the target patient
+			Observation updatedObs = readResource(Observation.class, obsId);
+			assertThat(updatedObs.getSubject().getReference()).isEqualTo(mySamePartitionTgt.getValue());
+			assertThat(getPartitionId(obsId)).isEqualTo(obsPartitionBefore);
 		}
 	}
 
