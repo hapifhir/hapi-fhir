@@ -1989,7 +1989,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			}
 
 			Map<String, Object> limitParams = new HashMap<>();
-			if (maxCount != null) {
+			if (maxCount != null && maxCount > 0) {
 				LinkedList<Object> bindVariables = new LinkedList<>();
 				sql = SearchQueryBuilder.applyLimitToSql(
 						myDialectProvider.getDialect(), null, maxCount, sql, null, bindVariables);
@@ -2153,7 +2153,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			if (wantResourceType != null) {
 				q.setParameter("want_resource_type", wantResourceType);
 			}
-			if (maxCount != null) {
+			if (maxCount != null && maxCount > 0) {
 				q.setMaxResults(maxCount);
 			}
 			if (hasDesiredResourceTypes) {
