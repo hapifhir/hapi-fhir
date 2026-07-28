@@ -135,8 +135,7 @@ public class RequestPartitionId implements Comparable<RequestPartitionId>, IMode
 
 		int thisLowest = getLowestPartitionId();
 		int otherLowest = theOther.getLowestPartitionId();
-
-		return thisLowest - otherLowest;
+		return Integer.compare(thisLowest, otherLowest);
 	}
 
 	private int getLowestPartitionId() {
@@ -441,8 +440,8 @@ public class RequestPartitionId implements Comparable<RequestPartitionId>, IMode
 	 * @since 8.8.0
 	 */
 	@Nonnull
-	public static RequestPartitionId allPartitionsWithPartitionIds(@Nonnull List<Integer> thePartitionIds) {
-		List<Integer> partitionIds = !thePartitionIds.isEmpty() ? thePartitionIds : null;
+	public static RequestPartitionId allPartitionsWithPartitionIds(@Nullable List<Integer> thePartitionIds) {
+		List<Integer> partitionIds = thePartitionIds != null && !thePartitionIds.isEmpty() ? thePartitionIds : null;
 		return new RequestPartitionId(null, partitionIds, null, true);
 	}
 
@@ -544,9 +543,18 @@ public class RequestPartitionId implements Comparable<RequestPartitionId>, IMode
 	 * The stringified value will not contain any spaces, and can be parsed back into a {@link RequestPartitionId}
 	 * using {@link #fromStringifiedKey(String)}.
 	 * </p>
+	 * <p>
+	 * This method cannot be used on a RequestPartitionId that has partition names present
+	 * but does not have equivalent partition IDs present. Attempting to do so will result in
+	 * an {@link IllegalArgumentException}.
+	 * </p>
 	 */
 	public static String stringifyForKey(@Nonnull RequestPartitionId theRequestPartitionId) {
 		Validate.notNull(theRequestPartitionId, "theRequestPartitionId must not be null");
+
+		Validate.isTrue(
+				theRequestPartitionId.hasPartitionIds() || !theRequestPartitionId.hasPartitionNames(),
+				"Can not stringify a RequestPartitionId that has names and not IDs present");
 
 		String retVal;
 		if (theRequestPartitionId.hasPartitionIds()) {

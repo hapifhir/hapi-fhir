@@ -26,6 +26,7 @@ import static ca.uhn.fhir.interceptor.model.RequestPartitionIdTest.ContainsTestC
 import static ca.uhn.fhir.interceptor.model.RequestPartitionIdTest.ContainsTestCase.Comparison.LEFT_CONTAINS_RIGHT;
 import static ca.uhn.fhir.interceptor.model.RequestPartitionIdTest.ContainsTestCase.Comparison.NEITHER;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -210,6 +211,9 @@ public class RequestPartitionIdTest {
 	static Stream<Object[]> testCompareToTestCases() {
 		return Stream.of(
 			new Object[] { allPartitions(), fromPartitionIds(1, 2, 3), ExpectedOrderEnum.RIGHT_FIRST },
+			new Object[] { fromPartitionIds(Integer.MAX_VALUE - 1), fromPartitionIds(Integer.MAX_VALUE ), ExpectedOrderEnum.LEFT_FIRST },
+			new Object[] { fromPartitionIds(Integer.MIN_VALUE), fromPartitionIds(Integer.MIN_VALUE + 1), ExpectedOrderEnum.LEFT_FIRST },
+			new Object[] { fromPartitionIds(Integer.MIN_VALUE), fromPartitionIds(Integer.MAX_VALUE), ExpectedOrderEnum.LEFT_FIRST },
 			new Object[] { allPartitions(), fromPartitionId(null), ExpectedOrderEnum.RIGHT_FIRST },
 			new Object[] { allPartitions(), allPartitions(), ExpectedOrderEnum.EQUAL },
 			new Object[] { fromPartitionIds(1, 3, 5), fromPartitionIds(2, 4, 6), ExpectedOrderEnum.LEFT_FIRST },
@@ -241,6 +245,14 @@ public class RequestPartitionIdTest {
 		assertEquals(theExpected, actual);
 	}
 
+	@Test
+	public void testStringifyForKey_OnlyNamesPresent() {
+		RequestPartitionId theRequestPartitionId = RequestPartitionId.fromPartitionNames("A", "B");
+		assertThatThrownBy(()->RequestPartitionId.stringifyForKey(theRequestPartitionId))
+			 .isInstanceOf(IllegalArgumentException.class)
+			 .hasMessageContaining("Can not stringify a RequestPartitionId that has names and not IDs present");
+	}
+
 
 	static Stream<Object[]> testStringifyForKeyTestCases() {
 		return Stream.of(
@@ -252,7 +264,9 @@ public class RequestPartitionIdTest {
 			new Object[]{RequestPartitionId.fromPartitionIds(null, 2, 3), "null_2_3"},
 			new Object[]{RequestPartitionId.fromPartitionIds(1, null, 3), "1_null_3"},
 			new Object[]{RequestPartitionId.allPartitionsWithPartitionIds(1, 2, 3), "(all)_1_2_3"},
-			new Object[]{RequestPartitionId.allPartitionsWithPartitionIds(1, null, 3), "(all)_1_null_3"}
+			new Object[]{RequestPartitionId.allPartitionsWithPartitionIds(1, null, 3), "(all)_1_null_3"},
+			new Object[]{RequestPartitionId.allPartitionsWithPartitionIds(), "(all)"},
+			new Object[]{RequestPartitionId.allPartitionsWithPartitionIds(((List<Integer>)null)), "(all)"}
 		);
 	}
 
