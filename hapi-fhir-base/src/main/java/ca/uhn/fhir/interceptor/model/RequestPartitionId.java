@@ -19,15 +19,18 @@
  */
 package ca.uhn.fhir.interceptor.model;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.JsonUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -577,7 +580,7 @@ public class RequestPartitionId implements Comparable<RequestPartitionId>, IMode
 	 */
 	@Nonnull
 	public static RequestPartitionId fromStringifiedKey(@Nonnull String theInput) {
-		StringTokenizer tok = new StringTokenizer(getIfNull(theInput, ""), STRINGIFIER_DELIM);
+		StringTokenizer tok = new StringTokenizer(StringUtils.trim(getIfNull(theInput, "")), STRINGIFIER_DELIM);
 		boolean all = false;
 		List<Integer> partitionIds = new ArrayList<>();
 
@@ -588,7 +591,13 @@ public class RequestPartitionId implements Comparable<RequestPartitionId>, IMode
 			} else if (STRINGIFIER_NULL.equals(next)) {
 				partitionIds.add(null);
 			} else {
-				partitionIds.add(Integer.parseInt(next));
+				try {
+					partitionIds.add(Integer.parseInt(next));
+				} catch (NumberFormatException e) {
+					throw new IllegalArgumentException(
+							Msg.code(3016) + "Failed to parse stringified request partition key part: "
+									+ UrlUtil.sanitizeUrlPart(next));
+				}
 			}
 		}
 

@@ -9,8 +9,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.thymeleaf.util.StringUtils;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -235,7 +237,9 @@ public class RequestPartitionIdTest {
 	@MethodSource("testStringifyForKeyTestCases")
 	public void testStringifyForKey(RequestPartitionId theRequestPartitionId, String theExpectedString) {
 		String actual = RequestPartitionId.stringifyForKey(theRequestPartitionId);
-		assertEquals(theExpectedString, actual);
+		String expected = StringUtils.trim(theExpectedString);
+		expected = expected.replaceAll("_+", "_");
+		assertEquals(expected, actual);
 	}
 
 	@ParameterizedTest
@@ -243,6 +247,14 @@ public class RequestPartitionIdTest {
 	public void testFromStringifedKey(RequestPartitionId theExpected, String theStringifiedKey) {
 		RequestPartitionId actual = RequestPartitionId.fromStringifiedKey(theStringifiedKey);
 		assertEquals(theExpected, actual);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"all", "1 2"})
+	public void testFromStringifedKey_Invalid(String theStringifiedKey) {
+		assertThatThrownBy(()->RequestPartitionId.fromStringifiedKey(theStringifiedKey))
+			 .isInstanceOf(IllegalArgumentException.class)
+			 .hasMessageContaining("Failed to parse stringified request partition key part");
 	}
 
 	@Test
@@ -259,8 +271,12 @@ public class RequestPartitionIdTest {
 			new Object[]{RequestPartitionId.allPartitions(), "(all)"},
 			new Object[]{fromPartitionId(null), "null"},
 			new Object[]{RequestPartitionId.fromPartitionIds(), ""},
+			new Object[]{RequestPartitionId.fromPartitionIds(), "   "},
 			new Object[]{RequestPartitionId.fromPartitionIds(1), "1"},
+			new Object[]{RequestPartitionId.fromPartitionIds(1), "    1  "},
 			new Object[]{RequestPartitionId.fromPartitionIds(1, 2, 3), "1_2_3"},
+			new Object[]{RequestPartitionId.fromPartitionIds(1, 2, 3), "   1_2_3   "},
+			new Object[]{RequestPartitionId.fromPartitionIds(1, 2, 3), "1___2__3"},
 			new Object[]{RequestPartitionId.fromPartitionIds(null, 2, 3), "null_2_3"},
 			new Object[]{RequestPartitionId.fromPartitionIds(1, null, 3), "1_null_3"},
 			new Object[]{RequestPartitionId.allPartitionsWithPartitionIds(1, 2, 3), "(all)_1_2_3"},
