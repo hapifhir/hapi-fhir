@@ -375,10 +375,7 @@ public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageService
 	private InvalidRequestException newInvalidCursorException(String searchId) {
 		String msg = myContext
 				.getLocalizer()
-				.getMessageSanitized(
-						DaoRegistryGraphQLStorageServices.class,
-						"invalidGraphqlCursorArgument",
-					searchId);
+				.getMessageSanitized(DaoRegistryGraphQLStorageServices.class, "invalidGraphqlCursorArgument", searchId);
 		InvalidRequestException invalidCursorException = new InvalidRequestException(Msg.code(2076) + msg);
 		return invalidCursorException;
 	}

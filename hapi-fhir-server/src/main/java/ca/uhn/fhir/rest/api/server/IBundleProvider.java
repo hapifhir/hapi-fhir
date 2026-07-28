@@ -159,7 +159,7 @@ public interface IBundleProvider {
 	 * @return A list of resources. The size of this list must be at least <code>theToIndex - theFromIndex</code>.
 	 */
 	default List<IBaseResource> getResources(
-		int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
+			int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
 		return getResources(theFromIndex, theToIndex);
 	}
 
@@ -176,8 +176,8 @@ public interface IBundleProvider {
 		Integer sizeI = size();
 		if (sizeI == null) {
 			throw new ConfigurationException(
-				Msg.code(464)
-					+ "Attempt to request all resources from an asynchronous search result.  The SearchParameterMap for this search probably should have been synchronous.");
+					Msg.code(464)
+							+ "Attempt to request all resources from an asynchronous search result.  The SearchParameterMap for this search probably should have been synchronous.");
 		}
 		int size = containsAllResources() ? getResourceListComplete().size() : sizeI.intValue();
 		if (size > 0) {
@@ -274,8 +274,8 @@ public interface IBundleProvider {
 	 */
 	default List<String> getAllResourceIds() {
 		return getAllResources().stream()
-			.map(resource -> resource.getIdElement().getIdPart())
-			.collect(Collectors.toList());
+				.map(resource -> resource.getIdElement().getIdPart())
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -286,6 +286,19 @@ public interface IBundleProvider {
 	@Nullable
 	default SearchCacheStatus getCacheStatus() {
 		return null;
+	}
+
+	/**
+	 * Subclasses may override this method to indicate that no actions should be
+	 * performed against this provider before fetching the resource list. This
+	 * is an optimization for cases where the invocation of {@link #getResources(int, int)}
+	 * or {@link #getResources(int, int, ResponsePage.ResponsePageBuilder)} will
+	 * trigger a database lookup.
+	 *
+	 * @since 8.14.0
+	 */
+	default boolean isShouldFetchResourcesBeforeOtherProperties() {
+		return false;
 	}
 
 	/**

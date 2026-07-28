@@ -179,11 +179,10 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 	}
 
 	public static class JpaBundleProvider implements IBundleProvider {
-		public static final SearchCacheStatus CACHE_STATUS_BYPASS = SearchCacheStatus
-			.builder()
-			.withCacheName("HapiQueryCache")
-			.setStatus(SearchCacheStatusEnum.FWD_BYPASS)
-			.build();
+		public static final SearchCacheStatus CACHE_STATUS_BYPASS = SearchCacheStatus.builder()
+				.withCacheName("HapiQueryCache")
+				.setStatus(SearchCacheStatusEnum.FWD_BYPASS)
+				.build();
 		private final Map<JpaPid, IBaseResource> myFetchedResources = new HashMap<>();
 		private final RequestDetails myRequestDetails;
 		private final IInterceptorBroadcaster myCompositeBroadcaster;
@@ -313,9 +312,17 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 			return null;
 		}
 
+		@Override
+		public boolean isShouldFetchResourcesBeforeOtherProperties() {
+			return true;
+		}
+
 		@Nullable
 		@Override
 		public Integer size() {
+			if (mySearchEntity == null && mySearchUuid != null) {
+				ensureSearchPerformed();
+			}
 			if (mySearchEntity != null && mySearchEntity.getId() != null) {
 				return mySearchEntity.getTotalCount();
 			}
@@ -644,12 +651,11 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 									mySearchEntity = cachedQueryOpt.get();
 									mySearchUuid = mySearchEntity.getUuid();
 
-									myCacheStatus = SearchCacheStatus
-										.builder()
-										.withCacheName("HapiQueryCache")
-										.setStatus(SearchCacheStatusEnum.HIT)
-										.setCacheEntryTimestamp(mySearchEntity.getCreated())
-										.build();
+									myCacheStatus = SearchCacheStatus.builder()
+											.withCacheName("HapiQueryCache")
+											.setStatus(SearchCacheStatusEnum.HIT)
+											.setCacheEntryTimestamp(mySearchEntity.getCreated())
+											.build();
 
 									ourLog.debug(
 											"Query cache HIT - Replacing search {} with search {}",
@@ -662,11 +668,10 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 											.getSearchParameterMap()
 											.orElseThrow();
 								} else {
-									myCacheStatus = SearchCacheStatus
-										.builder()
-										.withCacheName("HapiQueryCache")
-										.setStatus(SearchCacheStatusEnum.FWD_MISS)
-										.build();
+									myCacheStatus = SearchCacheStatus.builder()
+											.withCacheName("HapiQueryCache")
+											.setStatus(SearchCacheStatusEnum.FWD_MISS)
+											.build();
 								}
 							}
 						}
@@ -780,7 +785,6 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 					mySearchCacheSvc.save(mySearchEntity, myRequestPartitionId);
 					return;
 				}
-
 
 				countFoundThisPass += newPidsThisPass.size();
 
