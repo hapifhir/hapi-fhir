@@ -735,16 +735,18 @@ public abstract class BaseJpaTest extends BaseTest {
             ourLog.info("Token indexes:\n * {}", mySearchUrlDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
         });
     }
-
-	protected void logAllTokenIndexes(String... theParamNames) {
+    
+	protected String logAllTokenIndexes(String... theParamNames) {
 		String messageSuffix = theParamNames.length > 0 ? " containing " + Arrays.asList(theParamNames) : "";
-		runInTransaction(() -> {
-			String message = getAllTokenIndexes(theParamNames)
+		String message = runInTransaction(() -> {
+			String allIndexes = getAllTokenIndexes(theParamNames)
 				.stream()
 				.map(ResourceIndexedSearchParamToken::toString)
 				.collect(Collectors.joining("\n * "));
-			ourLog.info("Token indexes{}:\n * {}", messageSuffix, message);
+			return "Token indexes" + messageSuffix + ":\n * " + allIndexes;
 		});
+		ourLog.info(message);
+		return message;
 	}
 
 	@Nonnull
@@ -775,15 +777,17 @@ public abstract class BaseJpaTest extends BaseTest {
 		});
 	}
 
-	protected void logAllStringIndexes(String... theParamNames) {
+	protected String logAllStringIndexes(String... theParamNames) {
 		String messageSuffix = theParamNames.length > 0 ? " containing " + Arrays.asList(theParamNames) : "";
-		runInTransaction(() -> {
-			String message = getAllStringIndexes(theParamNames)
+		String message = runInTransaction(() -> {
+			String indexes = getAllStringIndexes(theParamNames)
 				.stream()
 				.map(ResourceIndexedSearchParamString::toString)
 				.collect(Collectors.joining("\n * "));
-			ourLog.info("String indexes{}:\n * {}", messageSuffix, message);
+			return "String indexes" + messageSuffix + ":\n * " + indexes;
 		});
+		ourLog.info(message);
+		return message;
 	}
 
 	@Nonnull
