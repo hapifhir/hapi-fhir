@@ -1,0 +1,4 @@
+---
+type: add
+issue: 8191
+title: "A new pointcut has been added that can be used to modify requested batch2 jobs, overriding the job definition and/or parameters."

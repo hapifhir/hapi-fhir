@@ -3437,6 +3437,34 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
+	 * This pointcut is invoked when a new Batch job instance is being requested. This happens before
+	 * any other processing happens, so it can be used to modify the job parameters or even replace the
+	 * job definition being requested.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.batch2.model.JobInstanceStartRequest - Contains the details of the job instance that is about
+	 * to be started. Hooks may change any aspect of this object, although care should be taken to not provide
+	 * confusing or unexpected behaviour to the client.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that lead to the creation
+	 * of the jobInstance.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	STORAGE_PRECREATE_BATCH_JOB_INSTANCE(
+			void.class,
+			"ca.uhn.fhir.batch2.model.JobInstanceStartRequest",
+			"ca.uhn.fhir.rest.api.server.RequestDetails"),
+
+	/**
+	 * <b>Storage Hook:</b>
 	 * Invoked before a batch job is persisted to the database.
 	 * <p>
 	 * Hooks will have access to the content of the job being created
