@@ -57,16 +57,16 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 	}
 
 	public static QueryCondition onCurrentThread() {
-		return new QueryCondition(false);
+		return new QueryCondition(true);
 	}
 
 	public static QueryCondition onAllThreads() {
-		return new QueryCondition(true);
+		return new QueryCondition(false);
 	}
 
 	public static class QueryCondition extends Condition<CircularQueueCaptureQueriesListener> {
 
-		private final boolean myAllThreads;
+		private final boolean myOnCurrentThread;
 		private final List<BaseTest> myTests = new ArrayList<>();
 		private CircularQueueCaptureQueriesListener myListener;
 		private boolean myHaveSelectCounts;
@@ -80,13 +80,13 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 		/**
 		 * Constructor
 		 */
-		public QueryCondition(boolean theAllThreads) {
-			myAllThreads = theAllThreads;
+		public QueryCondition(boolean theOnCurrentThread) {
+			myOnCurrentThread = theOnCurrentThread;
 		}
 
 		public QueryCondition selectCount(int theCount) {
 			myHaveSelectCounts = true;
-			myTests.add(new TestSelect(theCount, myAllThreads));
+			myTests.add(new TestSelect(theCount, myOnCurrentThread));
 			return this;
 		}
 
@@ -97,36 +97,36 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 
 		public QueryCondition updateCount(int theCount) {
 			myHaveUpdateCounts = true;
-			myTests.add(new TestUpdate(theCount, myAllThreads));
+			myTests.add(new TestUpdate(theCount, myOnCurrentThread));
 			return this;
 		}
 
 		public QueryCondition insertCount(int theCount) {
 			myHaveInsertCounts = true;
-			myTests.add(new TestInsert(theCount, myAllThreads));
+			myTests.add(new TestInsert(theCount, myOnCurrentThread));
 			return this;
 		}
 
 		public QueryCondition deleteCount(int theCount) {
 			myHaveDeleteCounts = true;
-			myTests.add(new TestDelete(theCount, myAllThreads));
+			myTests.add(new TestDelete(theCount, myOnCurrentThread));
 			return this;
 		}
 
 		public QueryCondition commitCount(int theCount) {
 			myHaveCommitCounts = true;
-			myTests.add(new TestCommit(theCount, myAllThreads));
+			myTests.add(new TestCommit(theCount, myOnCurrentThread));
 			return this;
 		}
 
 		public QueryCondition rollbackCount(int theCount) {
 			myHaveRollbackCounts = true;
-			myTests.add(new TestRollback(theCount, myAllThreads));
+			myTests.add(new TestRollback(theCount, myOnCurrentThread));
 			return this;
 		}
 
 		public QueryCondition connectionCount(int theConnectionCount) {
-			myTests.add(new TestConnections(theConnectionCount, myAllThreads));
+			myTests.add(new TestConnections(theConnectionCount, myOnCurrentThread));
 			return this;
 		}
 
@@ -202,22 +202,22 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 			}
 
 			public QueryCondition contains(String theExpectedSql) {
-				myTests.add(new TestSelect(myIndex, myAllThreads, myInlineParams, theExpectedSql, SqlMatchModeEnum.CONTAINS));
+				myTests.add(new TestSelect(myIndex, myOnCurrentThread, myInlineParams, theExpectedSql, SqlMatchModeEnum.CONTAINS));
 				return QueryCondition.this;
 			}
 
 			public QueryCondition doesNotContain(String theNotExpectedSql) {
-				myTests.add(new TestSelect(myIndex, myAllThreads, myInlineParams, theNotExpectedSql, SqlMatchModeEnum.DOES_NOT_CONTAIN));
+				myTests.add(new TestSelect(myIndex, myOnCurrentThread, myInlineParams, theNotExpectedSql, SqlMatchModeEnum.DOES_NOT_CONTAIN));
 				return QueryCondition.this;
 			}
 
 			public QueryCondition startsWith(String theExpectedSql) {
-				myTests.add(new TestSelect(myIndex, myAllThreads, myInlineParams, theExpectedSql, SqlMatchModeEnum.STARTS_WITH));
+				myTests.add(new TestSelect(myIndex, myOnCurrentThread, myInlineParams, theExpectedSql, SqlMatchModeEnum.STARTS_WITH));
 				return QueryCondition.this;
 			}
 
 			public QueryCondition endsWith(String theExpectedSql) {
-				myTests.add(new TestSelect(myIndex, myAllThreads, myInlineParams, theExpectedSql, SqlMatchModeEnum.ENDS_WITH));
+				myTests.add(new TestSelect(myIndex, myOnCurrentThread, myInlineParams, theExpectedSql, SqlMatchModeEnum.ENDS_WITH));
 				return QueryCondition.this;
 			}
 
@@ -233,12 +233,12 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 			}
 
 			public QueryCondition countInstances(int theExpectedCount, String theExpectedSql) {
-				myTests.add(new TestSelect(myIndex, myAllThreads, myInlineParams, theExpectedSql, SqlMatchModeEnum.COUNT_INSTANCES, theExpectedCount));
+				myTests.add(new TestSelect(myIndex, myOnCurrentThread, myInlineParams, theExpectedSql, SqlMatchModeEnum.COUNT_INSTANCES, theExpectedCount));
 				return QueryCondition.this;
 			}
 
 			public QueryCondition countInstancesIgnoreCase(int theExpectedCount, String theExpectedSql) {
-				myTests.add(new TestSelect(myIndex, myAllThreads, myInlineParams, theExpectedSql, SqlMatchModeEnum.COUNT_INSTANCES_IGNORE_CASE, theExpectedCount));
+				myTests.add(new TestSelect(myIndex, myOnCurrentThread, myInlineParams, theExpectedSql, SqlMatchModeEnum.COUNT_INSTANCES_IGNORE_CASE, theExpectedCount));
 				return QueryCondition.this;
 			}
 
@@ -246,7 +246,7 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 			 * Does the SQL match exactly?
 			 */
 			public QueryCondition matches(String theExpectedSql) {
-				myTests.add(new TestSelect(myIndex, myAllThreads, myInlineParams, theExpectedSql, SqlMatchModeEnum.MATCHES));
+				myTests.add(new TestSelect(myIndex, myOnCurrentThread, myInlineParams, theExpectedSql, SqlMatchModeEnum.MATCHES));
 				return QueryCondition.this;
 			}
 

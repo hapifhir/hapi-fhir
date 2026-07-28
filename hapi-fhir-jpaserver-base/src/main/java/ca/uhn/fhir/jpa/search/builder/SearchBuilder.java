@@ -39,6 +39,8 @@ import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.dao.ISearchResultConsumer;
+import ca.uhn.fhir.jpa.dao.SearchProgressTracker;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.search.ResourceNotFoundInIndexException;
@@ -100,6 +102,7 @@ import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -152,6 +155,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -216,7 +220,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	public static Integer myMaxPageSizeForTests = null;
 	private String myResourceName;
 	private final Class<? extends IBaseResource> myResourceType;
-	private final SearchQueryProperties mySearchProperties;
+	protected final SearchQueryProperties mySearchProperties;
 	private PerformanceTracingLogger myPerformanceTracingLogger;
 
 	@Autowired
@@ -487,6 +491,39 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	@Override
 	public void setPreviouslyAddedResourcePids(@Nonnull List<JpaPid> thePidSet) {
 		myPidSet = new HashSet<>(thePidSet);
+	}
+
+	protected Set<JpaPid> getPreviouslyAddedPids() {
+		return myPidSet;
+	}
+
+	@Override
+	public SearchProgressTracker performSearchForPids(
+			ISearchResultConsumer<JpaPid> theConsumer,
+			SearchParameterMap theParams,
+			SearchRuntimeDetails theSearchRuntime,
+			RequestDetails theRequest,
+			@Nonnull RequestPartitionId theRequestPartitionId) {
+		try (IResultIterator<JpaPid> query =
+				createQuery(theParams, theSearchRuntime, theRequest, theRequestPartitionId)) {
+			while (query.hasNext()) {
+				JpaPid nextPid = query.next();
+				SearchProgressTracker progress = newSearchProgressTracker(query);
+				ISearchResultConsumer.Outcome outcome = theConsumer.consume(progress, nextPid);
+				if (!outcome.isContinue()) {
+					break;
+				}
+			}
+			return newSearchProgressTracker(query);
+		} catch (IOException e) {
+			ourLog.error("IO failure during database access", e);
+			throw new InternalErrorException(Msg.code(1164) + e);
+		}
+	}
+
+	@Nonnull
+	private static SearchProgressTracker newSearchProgressTracker(IResultIterator<JpaPid> theResultIterator) {
+		return new SearchProgressTracker(theResultIterator.getSkippedCount(), theResultIterator.getNonSkippedCount());
 	}
 
 	@SuppressWarnings("ConstantConditions")
@@ -3254,7 +3291,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					// if we got here, it means the current JpaPid has already been processed,
 					// and we will decide (here) if we need to fetch related resources recursively
 					if (myFetchIncludesForEverythingOperation) {
-						myIncludesIterator = new IncludesIterator(myPidSet, myRequest);
+						myIncludesIterator = new IncludesIterator(getPreviouslyAddedPids(), myRequest);
 						myFetchIncludesForEverythingOperation = false;
 					}
 					if (myIncludesIterator != null) {
@@ -3401,15 +3438,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		@Override
 		public int getNonSkippedCount() {
 			return myNonSkipCount;
-		}
-
-		@Override
-		public Collection<JpaPid> getNextResultBatch(long theBatchSize) {
-			Collection<JpaPid> batch = new ArrayList<>();
-			while (this.hasNext() && batch.size() < theBatchSize) {
-				batch.add(this.next());
-			}
-			return batch;
 		}
 
 		@Override

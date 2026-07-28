@@ -85,6 +85,8 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 	private Class<? extends WebSocketConfigurer> myEnableSpringWebsocketSupport;
 	private String myEnableSpringWebsocketContextPath;
 	private long myIdleTimeoutMillis = 30000;
+	public int myMinThreads = 5;
+	public int myMaxThreads = 50;
 	private final List<Consumer<Server>> myBeforeStartServerConsumers = new ArrayList<>();
 
 	/**
@@ -123,6 +125,16 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 		return (T) this;
 	}
 
+	public T withMinThreads(int theMinThreads) {
+		myMinThreads = theMinThreads;
+		return (T) this;
+	}
+
+	public T withMaxThreads(int theMaxThreads) {
+		myMaxThreads = theMaxThreads;
+		return (T) this;
+	}
+	
 
 	/**
 	 * Returns the total number of connections that this server has received. This
@@ -171,8 +183,8 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 		 * dumps a nightmare to read. Use a smaller but growable pool.
 		 */
 		QueuedThreadPool threadPool = new QueuedThreadPool();
-		threadPool.setMinThreads(5);
-		threadPool.setMaxThreads(50);
+		threadPool.setMinThreads(myMinThreads);
+		threadPool.setMaxThreads(myMaxThreads);
 		threadPool.setIdleTimeout(1000);
 		threadPool.setName("HAPI-Jetty-Server");
 
