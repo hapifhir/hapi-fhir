@@ -58,7 +58,6 @@ import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
-import javax.annotation.Nullable;
 
 public abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 	protected final ResponseBundleBuilder myResponseBundleBuilder;
@@ -279,7 +278,6 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 	/**
 	 * Call the SERVER_OUTGOING_RESPONSE pointcut and write the response out.
 	 */
-	@Nullable
 	public static Object callHooksAndWriteResponse(
 			IRestfulServer<?> theServer,
 			RequestDetails theRequest,
