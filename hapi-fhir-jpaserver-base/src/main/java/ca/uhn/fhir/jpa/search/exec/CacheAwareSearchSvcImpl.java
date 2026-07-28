@@ -302,7 +302,10 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 
 		@Override
 		public Integer preferredPageSize() {
-			return mySearchEntity.getPreferredPageSize();
+			if (mySearchEntity != null) {
+				return mySearchEntity.getPreferredPageSize();
+			}
+			return null;
 		}
 
 		@Nullable
