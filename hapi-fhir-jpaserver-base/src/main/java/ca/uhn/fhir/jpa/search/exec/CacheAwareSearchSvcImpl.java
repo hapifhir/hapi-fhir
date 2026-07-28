@@ -756,7 +756,9 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 					if (!newPidsThisPass.isEmpty()) {
 						addedResultsThisPass = true;
 					}
-					if (searchThreshold.threshold() != null && newPidsThisPass.size() == searchThreshold.threshold()) {
+
+					int pidsCountThisPass = newPidsThisPass.size() + query.getSkippedCount();
+					if (searchThreshold.threshold() != null && pidsCountThisPass >= searchThreshold.threshold()) {
 						haveMoreResults = true;
 					}
 				} catch (Exception e) {
@@ -764,6 +766,7 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 					mySearchCacheSvc.save(mySearchEntity, myRequestPartitionId);
 					return;
 				}
+
 
 				countFoundThisPass += newPidsThisPass.size();
 
