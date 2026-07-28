@@ -9,7 +9,8 @@ import java.io.IOException;
 
 /**
  * Abstract interface for RestfulServer handlers.
- *
+ * This interface should not be considered stable.
+ * Implementors should expect changes until this interface is marked stable.
  */
 public interface IMethodBinding {
 	/**
