@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.util.HapiToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 public final class SearchProgressTracker {
