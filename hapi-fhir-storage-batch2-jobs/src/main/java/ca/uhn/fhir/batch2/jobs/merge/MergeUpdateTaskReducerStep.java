@@ -63,6 +63,20 @@ public class MergeUpdateTaskReducerStep extends ReplaceReferenceUpdateTaskReduce
 	}
 
 	@Override
+	protected void createProvenance(
+			StepExecutionDetails<MergeJobParameters, ReplaceReferencePatchOutcomeJson> theStepExecutionDetails,
+			RequestDetails theRequestDetails,
+			List<IBaseResource> theContainedResources) {
+
+		if (!theStepExecutionDetails.getParameters().getCreateProvenance()) {
+			return;
+		}
+
+		createProvenanceForChangedResources(
+				theStepExecutionDetails, theRequestDetails, theContainedResources, extractChangedResourceIds());
+	}
+
+	@Override
 	protected void performOperationSpecificActions(
 			StepExecutionDetails<MergeJobParameters, ReplaceReferencePatchOutcomeJson> theStepExecutionDetails,
 			RequestDetails theRequestDetails) {

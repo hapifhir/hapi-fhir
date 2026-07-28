@@ -922,6 +922,42 @@ Note: This table has the columns listed below, but it also has all common column
     </tbody>
 </table>
 
+<a id="HFJ_RES_SYSTEM"></a>
+
+# HFJ_RES_SYSTEM: System URLs
+
+The `HFJ_RES_SYSTEM` table stores system URLs (such as `http://loinc.org` or identifier systems). Each unique URL is stored once.
+
+## Columns
+
+<table class="table table-striped table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Relationships</th>
+            <th>Datatype</th>
+            <th>Nullable</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>PID</td>
+            <td>Primary Key</td>
+            <td>Long</td>
+            <td>Not nullable</td>
+            <td>Hash of the SYSTEM_URL value.</td>
+        </tr>
+        <tr>
+            <td>SYSTEM_URL</td>
+            <td></td>
+            <td>String (500)</td>
+            <td>Not nullable</td>
+            <td>The system URI. Has a unique constraint.</td>
+        </tr>
+    </tbody>
+</table>
+
 # HFJ_SPIDX_IDENTITY: Search Parameter Identities
 
 The `HFJ_SPIDX_IDENTITY` table stores hash identities representing unique combinations of search parameter name and resource type of
