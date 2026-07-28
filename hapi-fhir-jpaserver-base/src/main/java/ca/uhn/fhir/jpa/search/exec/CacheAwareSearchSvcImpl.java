@@ -368,6 +368,7 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 			theResponsePageBuilder.setResources(retVal);
 			theResponsePageBuilder.setIncludedResourceCount(retVal.size());
 			theResponsePageBuilder.setTotalRequestedResourcesFetched(mySearchEntity.getNumFound());
+			theResponsePageBuilder.setHasNextPage(theToIndex < mySearchEntity.getNumFound());
 
 			return retVal;
 		}
