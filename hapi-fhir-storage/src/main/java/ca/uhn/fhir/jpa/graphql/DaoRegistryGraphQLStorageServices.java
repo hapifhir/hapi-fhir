@@ -53,8 +53,10 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -297,15 +299,7 @@ public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageService
 			searchOffset = Integer.parseInt(searchOffsetArgument.get());
 
 			response = Optional.ofNullable(myPagingProvider.retrieveResultList(requestDetails, searchId))
-					.orElseThrow(() -> {
-						String msg = myContext
-								.getLocalizer()
-								.getMessageSanitized(
-										DaoRegistryGraphQLStorageServices.class,
-										"invalidGraphqlCursorArgument",
-										searchId);
-						return new InvalidRequestException(Msg.code(2076) + msg);
-					});
+					.orElseThrow(() -> newInvalidCursorException(searchId));
 
 			pageSize =
 					Optional.ofNullable(response.preferredPageSize()).orElseGet(myPagingProvider::getDefaultPageSize);
@@ -362,7 +356,12 @@ public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageService
 			links.setPrev(linkPrev);
 		}
 
-		List<IBaseResource> resourceList = response.getResources(searchOffset, numToReturn + searchOffset);
+		List<IBaseResource> resourceList;
+		try {
+			resourceList = response.getResources(searchOffset, numToReturn + searchOffset);
+		} catch (ResourceGoneException e) {
+			throw newInvalidCursorException(searchId);
+		}
 
 		IVersionSpecificBundleFactory bundleFactory = myContext.newBundleFactory();
 		bundleFactory.addRootPropertiesToBundle(response.getUuid(), links, response.size(), response.getPublished());
@@ -370,5 +369,17 @@ public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageService
 
 		IBaseResource result = bundleFactory.getResourceBundle();
 		return (IBaseBundle) result;
+	}
+
+	@Nonnull
+	private InvalidRequestException newInvalidCursorException(String searchId) {
+		String msg = myContext
+				.getLocalizer()
+				.getMessageSanitized(
+						DaoRegistryGraphQLStorageServices.class,
+						"invalidGraphqlCursorArgument",
+					searchId);
+		InvalidRequestException invalidCursorException = new InvalidRequestException(Msg.code(2076) + msg);
+		return invalidCursorException;
 	}
 }
