@@ -67,7 +67,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -703,6 +702,12 @@ public class ResourceMergeServiceTest {
 			myTargetPatient.setUserData(Constants.RESOURCE_PARTITION_ID, RequestPartitionId.fromPartitionId(TARGET_PARTITION_ID));
 			setupValidationMockForSuccess(mySourcePatient, myTargetPatient);
 			when(myPartitionSettingsMock.isPartitioningEnabled()).thenReturn(true);
+			when(myRequestPartitionHelperSvcMock.determineCreatePartitionForRequestIgnoringCachedPartition(
+							any(), eq(mySourcePatient), any()))
+					.thenReturn(RequestPartitionId.fromPartitionId(SOURCE_PARTITION_ID));
+			when(myRequestPartitionHelperSvcMock.determineCreatePartitionForRequestIgnoringCachedPartition(
+							any(), eq(myTargetPatient), any()))
+					.thenReturn(RequestPartitionId.fromPartitionId(TARGET_PARTITION_ID));
 		}
 
 		@ParameterizedTest
