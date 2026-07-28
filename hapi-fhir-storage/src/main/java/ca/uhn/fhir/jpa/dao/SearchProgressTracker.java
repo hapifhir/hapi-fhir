@@ -19,6 +19,10 @@
  */
 package ca.uhn.fhir.jpa.dao;
 
+import ca.uhn.fhir.util.HapiToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 public final class SearchProgressTracker {
 	private final int mySkippedCount;
 	private final int myNonSkippedCount;
@@ -41,5 +45,13 @@ public final class SearchProgressTracker {
 	 */
 	public int getNonSkippedCount() {
 		return myNonSkippedCount;
+	}
+
+	@Override
+	public String toString() {
+		HapiToStringBuilder builder = new HapiToStringBuilder(this, ToStringStyle.NO_CLASS_NAME_STYLE);
+		builder.appendIfNonZero("skipped", mySkippedCount);
+		builder.appendIfNonZero("nonSkipped", myNonSkippedCount);
+		return builder.toString();
 	}
 }
