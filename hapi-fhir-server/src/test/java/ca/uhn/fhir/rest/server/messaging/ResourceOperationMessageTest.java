@@ -2,8 +2,8 @@ package ca.uhn.fhir.rest.server.messaging;
 
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.messaging.json.ResourceOperationJsonMessage;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 import org.junit.jupiter.api.Test;
 
 import static ca.uhn.fhir.rest.server.messaging.json.HapiMessageHeaders.FIRST_FAILURE_KEY;
@@ -15,12 +15,12 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 class ResourceOperationMessageTest {
 
 	@Test
-	public void testSerializationAndDeserializationOfResourceModifiedMessage() throws JsonProcessingException {
+	public void testSerializationAndDeserializationOfResourceModifiedMessage() throws JacksonException {
 		ResourceOperationJsonMessage jsonMessage = new ResourceOperationJsonMessage();
 		ResourceOperationMessage payload = new ResourceOperationMessage();
 		payload.setMediaType(Constants.CT_FHIR_JSON_NEW);
 		jsonMessage.setPayload(payload);
-		ObjectMapper mapper = new ObjectMapper();
+		JsonMapper mapper = new JsonMapper();
 		String serialized = mapper.writeValueAsString(jsonMessage);
 		jsonMessage = mapper.readValue(serialized, ResourceOperationJsonMessage.class);
 

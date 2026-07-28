@@ -20,19 +20,18 @@
 package ca.uhn.fhir.rest.server.util;
 
 import ca.uhn.fhir.model.primitive.DateTimeDt;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
 
-import java.io.IOException;
 import java.util.Date;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class JsonDateDeserializer extends JsonDeserializer<Date> {
+public class JsonDateDeserializer extends ValueDeserializer<Date> {
 
 	@Override
-	public Date deserialize(JsonParser theParser, DeserializationContext theDeserializationContext) throws IOException {
+	public Date deserialize(JsonParser theParser, DeserializationContext theDeserializationContext) {
 		String string = theParser.getValueAsString();
 		if (isNotBlank(string)) {
 			return new DateTimeDt(string).getValue();

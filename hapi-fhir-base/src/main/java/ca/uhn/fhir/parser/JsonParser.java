@@ -231,9 +231,14 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 	protected void doEncodeToWriter(IBase theElement, Writer theWriter, EncodeContext theEncodeContext)
 			throws IOException, DataFormatException {
 		BaseJsonLikeWriter eventWriter = createJsonWriter(theWriter);
+		if (myPrettyPrint) {
+			eventWriter.setPrettyPrint(myPrettyPrint);
+		}
+		eventWriter.init();
 		eventWriter.beginObject();
 		encodeCompositeElementToStreamWriter(null, null, theElement, eventWriter, false, null, theEncodeContext);
 		eventWriter.endObject();
+		eventWriter.flush();
 		eventWriter.close();
 	}
 

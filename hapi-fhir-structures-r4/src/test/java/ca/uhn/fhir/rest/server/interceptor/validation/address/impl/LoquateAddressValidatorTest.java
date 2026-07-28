@@ -4,10 +4,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidationResult;
 import ca.uhn.fhir.rest.server.interceptor.validation.address.IAddressValidator;
 import ca.uhn.fhir.util.ExtensionUtil;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.r4.model.Address;
@@ -16,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.HashMap;
 import java.util.Properties;
 
 import static ca.uhn.fhir.rest.server.interceptor.validation.address.impl.LoquateAddressValidator.PROPERTY_GEOCODE;
@@ -123,10 +121,10 @@ class LoquateAddressValidatorTest {
 
 	@Test
 	public void testGetText() {
-		ObjectNode node = new ObjectNode(null, new HashMap<>());
-		node.set("text1", new TextNode("This,Is,Text"));
-		node.set("text2", new TextNode("This Is-Text,"));
-		node.set("text3", new TextNode("This Is-Text  with Invalid Formatting"));
+		ObjectNode node = new JsonMapper().createObjectNode();
+		node.put("text1", "This,Is,Text");
+		node.put("text2", "This Is-Text,");
+		node.put("text3", "This Is-Text  with Invalid Formatting");
 
 		assertEquals("This, Is, Text", myValidator.standardize(myValidator.getString(node, "text1")));
 		assertEquals("This Is-Text,", myValidator.standardize(myValidator.getString(node, "text2")));
@@ -157,7 +155,7 @@ class LoquateAddressValidatorTest {
 	public void testInvalidAddressValidationResponse() throws Exception {
 		try {
 			AddressValidationResult res = myValidator.getValidationResult(new AddressValidationResult(),
-				new ObjectMapper().readTree(RESPONSE_INVALID), ourCtx);
+				new JsonMapper().readTree(RESPONSE_INVALID), ourCtx);
 			fail();		} catch (Exception e) {
 		}
 	}
@@ -166,7 +164,7 @@ class LoquateAddressValidatorTest {
 	public void testRequestBody() {
 		try {
 			assertEquals(clear(REQUEST), clear(myValidator.getRequestBody(ourCtx, getAddress())));
-		} catch (JsonProcessingException e) {
+		} catch (JacksonException e) {
 			fail();		}
 	}
 
@@ -206,11 +204,11 @@ class LoquateAddressValidatorTest {
 	@Test
 	public void testSuccessfulResponses() throws Exception {
 		AddressValidationResult res = myValidator.getValidationResult(new AddressValidationResult(),
-			new ObjectMapper().readTree(RESPONSE_INVALID_ADDRESS), ourCtx);
+			new JsonMapper().readTree(RESPONSE_INVALID_ADDRESS), ourCtx);
 		assertFalse(res.isValid());
 
 		res = myValidator.getValidationResult(new AddressValidationResult(),
-			new ObjectMapper().readTree(RESPONSE_VALID_ADDRESS), ourCtx);
+			new JsonMapper().readTree(RESPONSE_VALID_ADDRESS), ourCtx);
 		assertTrue(res.isValid());
 		assertEquals("My Valid Address", res.getValidatedAddressString());
 	}
@@ -219,7 +217,7 @@ class LoquateAddressValidatorTest {
 	public void testSuccessfulResponsesWithGeocodeAndQuality() throws Exception {
 		myValidator.getProperties().setProperty(PROPERTY_GEOCODE, "true");
 		AddressValidationResult res = myValidator.getValidationResult(new AddressValidationResult(),
-			new ObjectMapper().readTree(RESPONSE_VALID_ADDRESS_W_GEO), ourCtx);
+			new JsonMapper().readTree(RESPONSE_VALID_ADDRESS_W_GEO), ourCtx);
 		assertTrue(res.isValid());
 
 		IBase address = res.getValidatedAddress();
@@ -246,7 +244,7 @@ class LoquateAddressValidatorTest {
 	public void testErrorResponses() throws Exception {
 		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
 			myValidator.getValidationResult(new AddressValidationResult(),
-				new ObjectMapper().readTree(RESPONSE_INVALID_KEY), ourCtx);
+				new JsonMapper().readTree(RESPONSE_INVALID_KEY), ourCtx);
 		});
 	}
 

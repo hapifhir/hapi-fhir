@@ -21,12 +21,10 @@ package ca.uhn.fhir.serializer;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import java.io.IOException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.deser.std.StdDeserializer;
 
 public class FhirResourceDeserializer extends StdDeserializer<IBaseResource> {
 	private final IParser myParser;
@@ -37,8 +35,8 @@ public class FhirResourceDeserializer extends StdDeserializer<IBaseResource> {
 	}
 
 	@Override
-	public IBaseResource deserialize(JsonParser theJsonParser, DeserializationContext theContext) throws IOException {
-		String json = theJsonParser.getCodec().readTree(theJsonParser).toString();
+	public IBaseResource deserialize(JsonParser theJsonParser, DeserializationContext theContext) {
+		String json = theContext.readTree(theJsonParser).toString();
 		return myParser.parseResource(json);
 	}
 }

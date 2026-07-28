@@ -1,8 +1,9 @@
 package ca.uhn.hapi.fhir.docs;
 
 import ca.uhn.fhir.context.ConfigurationException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.base.Charsets;
 import org.apache.commons.collections4.IteratorUtils;
@@ -10,6 +11,7 @@ import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -92,7 +94,7 @@ class ChangelogFilesTest {
 				fail("Invalid changelog filename: " + next);
 			}
 
-			ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+			ObjectMapper mapper = YAMLMapper.builder().build();
 			ObjectNode tree;
 			try (FileInputStream fis = new FileInputStream(next)) {
 				tree = (ObjectNode) mapper.readTree(new InputStreamReader(fis, Charsets.UTF_8));
@@ -100,7 +102,7 @@ class ChangelogFilesTest {
 				throw new ConfigurationException("Failed to read " + next, e);
 			}
 
-			List<String> fieldNames = IteratorUtils.toList(tree.fieldNames());
+			List<String> fieldNames = IteratorUtils.toList(tree.propertyNames().iterator());
 			boolean title = fieldNames.remove("title");
 			assertThat(title).as("No 'title' element in " + next).isTrue();
 

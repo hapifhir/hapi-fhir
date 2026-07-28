@@ -4,6 +4,7 @@ import ca.uhn.fhir.parser.json.jackson.JacksonStructure;
 import org.junit.jupiter.api.Test;
 
 import java.io.StringReader;
+import java.io.StringWriter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -139,6 +140,29 @@ public class JsonLikeStructureTest {
 		assertEquals(BaseJsonLikeValue.ValueType.SCALAR, value.getJsonType());
 		assertEquals(BaseJsonLikeValue.ScalarType.BOOLEAN, value.getDataType());
 		assertEquals(value.getAsString(), "true");
+	}
+
+	@Test
+	public void testGetJsonLikeWriterUsesCurrentWriter() throws Exception {
+		JacksonStructure structure = new JacksonStructure();
+
+		StringWriter firstWriter = new StringWriter();
+		BaseJsonLikeWriter jsonWriter = structure.getJsonLikeWriter(firstWriter);
+		jsonWriter.init();
+		jsonWriter.beginObject();
+		jsonWriter.write("first", "value");
+		jsonWriter.endObject();
+		jsonWriter.close();
+		assertEquals("{\"first\":\"value\"}", firstWriter.toString());
+
+		StringWriter secondWriter = new StringWriter();
+		jsonWriter = structure.getJsonLikeWriter(secondWriter);
+		jsonWriter.init();
+		jsonWriter.beginObject();
+		jsonWriter.write("second", "value");
+		jsonWriter.endObject();
+		jsonWriter.close();
+		assertEquals("{\"second\":\"value\"}", secondWriter.toString());
 	}
 
 }

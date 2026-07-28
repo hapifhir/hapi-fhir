@@ -21,12 +21,11 @@ package ca.uhn.fhir.serializer;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import java.io.IOException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ser.std.StdSerializer;
 
 public class FhirResourceSerializer extends StdSerializer<IBaseResource> {
 	private final IParser myParser;
@@ -37,8 +36,8 @@ public class FhirResourceSerializer extends StdSerializer<IBaseResource> {
 	}
 
 	@Override
-	public void serialize(IBaseResource theResource, JsonGenerator theJsonGenerator, SerializerProvider theProvider)
-			throws IOException {
+	public void serialize(IBaseResource theResource, JsonGenerator theJsonGenerator, SerializationContext theProvider)
+			throws JacksonException {
 		String resourceJson = myParser.encodeResourceToString(theResource);
 		theJsonGenerator.writeRawValue(resourceJson);
 	}
