@@ -22,6 +22,8 @@ package ca.uhn.fhir.util;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.util.Date;
+
 /**
  * Added functionality to {@link ToStringBuilder}
  *
@@ -33,12 +35,26 @@ public class HapiToStringBuilder extends ToStringBuilder {
 		super(theObject, theStyle);
 	}
 
+
+
+	/**
+	 * Appends a date with FHIR serialization
+	 */
+	public HapiToStringBuilder append(String theFieldName, Date theValue) {
+		if (theValue != null) {
+			append(theFieldName, DateUtils.convertDateToIso8601String(theValue));
+		}
+		super.append(theFieldName, theValue);
+		return this;
+	}
+
 	/**
 	 * Performs an {@link #append(String, int)} if {@literal theValue != 0}
 	 */
-	public void appendIfNonZero(String theFieldName, int theValue) {
+	public HapiToStringBuilder appendIfNonZero(String theFieldName, int theValue) {
 		if (theValue != 0) {
 			append(theFieldName, theValue);
 		}
+		return this;
 	}
 }

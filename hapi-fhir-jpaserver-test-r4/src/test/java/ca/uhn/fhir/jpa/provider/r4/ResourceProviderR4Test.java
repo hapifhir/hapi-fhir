@@ -794,7 +794,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.execute();
 
 		List<String> ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
-		ourLog.info("Loaded page 1 with ids: {}", ids);
+		ourLog.info("Loaded page 1 with requested count {} and got {} ids: {}", count, ids.size(), ids);
 		assertThat(output.getEntry()).hasSize(Math.min(count, totalNumberOfPatientsCreated));
 
 		// When: loading the next page

@@ -323,7 +323,12 @@ public class DaoRegistryGraphQLStorageServices implements IGraphQLStorageService
 
 		// response.size() may return {@literal null}, in that case use pageSize
 		String serverBase = requestDetails.getFhirServerBase();
-		Optional<Integer> numTotalResults = Optional.ofNullable(response.size());
+		Optional<Integer> numTotalResults;
+		try {
+			numTotalResults = Optional.ofNullable(response.size());
+		} catch (ResourceGoneException e) {
+			throw newInvalidCursorException(searchId);
+		}
 		int numToReturn = numTotalResults
 				.map(integer -> Math.min(pageSize, integer - searchOffset))
 				.orElse(pageSize);

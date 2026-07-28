@@ -632,8 +632,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		await().until(() -> runInTransaction(() -> mySearchEntityDao.count() == 0));
 		await().until(() -> runInTransaction(() -> mySearchResultDao.count() == 0));
 
-		PersistedJpaSearchFirstPageBundleProvider search = (PersistedJpaSearchFirstPageBundleProvider) myPatientDao.search(new SearchParameterMap());
-		assertEquals(PersistedJpaSearchFirstPageBundleProvider.class, search.getClass());
+		IBundleProvider search = myPatientDao.search(new SearchParameterMap());
 		assertEquals(2, search.size().intValue());
 		assertThat(search.getResources(0, 2)).hasSize(2);
 

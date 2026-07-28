@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
+import ca.uhn.fhir.jpa.util.SearchParameterMapCalculator;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
@@ -34,6 +35,7 @@ import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SearchCacheStatus;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
@@ -65,6 +67,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
+import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantCount;
+import static java.util.Objects.nonNull;
 
 public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(CacheAwareSearchSvcImpl.class);
@@ -181,7 +186,7 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 	public static class JpaBundleProvider implements IBundleProvider {
 		public static final SearchCacheStatus CACHE_STATUS_BYPASS = SearchCacheStatus.builder()
 				.withCacheName("HapiQueryCache")
-				.setStatus(SearchCacheStatusEnum.FWD_BYPASS)
+				.setStatus(SearchCacheStatus.SearchCacheStatusEnum.FWD_BYPASS)
 				.build();
 		private final Map<JpaPid, IBaseResource> myFetchedResources = new HashMap<>();
 		private final RequestDetails myRequestDetails;
@@ -645,7 +650,7 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 										myParams,
 										mySearchEntity.getResourceType(),
 										myRequestDetails,
-										mySearchEntity.getSearchQueryString(),
+										myParams.toNormalizedQueryString(),
 										myRequestPartitionId);
 								if (cachedQueryOpt.isPresent()) {
 									mySearchEntity = cachedQueryOpt.get();
@@ -653,7 +658,7 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 
 									myCacheStatus = SearchCacheStatus.builder()
 											.withCacheName("HapiQueryCache")
-											.setStatus(SearchCacheStatusEnum.HIT)
+											.setStatus(SearchCacheStatus.SearchCacheStatusEnum.HIT)
 											.setCacheEntryTimestamp(mySearchEntity.getCreated())
 											.build();
 
@@ -670,7 +675,7 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 								} else {
 									myCacheStatus = SearchCacheStatus.builder()
 											.withCacheName("HapiQueryCache")
-											.setStatus(SearchCacheStatusEnum.FWD_MISS)
+											.setStatus(SearchCacheStatus.SearchCacheStatusEnum.FWD_MISS)
 											.build();
 								}
 							}
@@ -686,7 +691,7 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 			}
 
 			/// If we have a `_count=summary` query, just calculate the count and return
-			if (myParams.getSummaryMode() == SummaryEnum.COUNT) {
+			if (SearchParameterMapCalculator.isWantOnlyCount(myParams)) {
 				if (mySearchEntity.getTotalCount() == null) {
 					Long countQuery = newSearchBuilder()
 							.createCountQuery(
@@ -851,18 +856,21 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 				if (haveMoreResults) {
 					mySearchEntity.setStatus(SearchStatusEnum.PASSCMPLET);
 					searchDetails.setSearchStatus(SearchStatusEnum.PASSCMPLET);
+
 					/*
-					 * If we finished the first page of results and we still don't know
-					 * the total count, but the client requested the total cound, we will
-					 * perform an explicit count query.
+					 * If we finished the first page of results, and we still don't know
+					 * the total count, but the client requested the total count (or the
+					 * server is configured to always return it), we will perform an
+					 * explicit count query.
 					 */
-					if (myParams.getSearchTotalMode() == SearchTotalModeEnum.ACCURATE
-							&& mySearchEntity.getTotalCount() == null) {
-						Long countQuery = newSearchBuilder()
+					if (mySearchEntity.getTotalCount() == null) {
+						if (SearchParameterMapCalculator.isWantCount(myParams, myStorageSettings)) {
+							Long countQuery = newSearchBuilder()
 								.createCountQuery(
-										myParams, mySearchEntity.getUuid(), myRequestDetails, myRequestPartitionId);
-						if (countQuery != null) {
-							mySearchEntity.setTotalCount(Math.toIntExact(countQuery));
+									myParams, mySearchEntity.getUuid(), myRequestDetails, myRequestPartitionId);
+							if (countQuery != null) {
+								mySearchEntity.setTotalCount(Math.toIntExact(countQuery));
+							}
 						}
 					}
 

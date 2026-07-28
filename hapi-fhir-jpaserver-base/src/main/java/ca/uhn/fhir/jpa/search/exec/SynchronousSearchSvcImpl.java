@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.util.SearchParameterMapCalculator;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.Constants;
@@ -58,9 +59,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantCount;
 import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantOnlyCount;
-import static java.util.Objects.nonNull;
 
 public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 
@@ -101,9 +100,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 		searchRuntimeDetails.setLoadSynchronous(true);
 
 		boolean theParamWantOnlyCount = isWantOnlyCount(theParams);
-		boolean theParamOrConfigWantCount = nonNull(theParams.getSearchTotalMode())
-				? isWantCount(theParams)
-				: isWantCount(myStorageSettings.getDefaultTotalMode());
+		boolean theParamOrConfigWantCount = SearchParameterMapCalculator.isWantCount(theParams, myStorageSettings);
 		boolean wantCount = theParamWantOnlyCount || theParamOrConfigWantCount;
 
 		// Execute the query and make sure we return distinct results

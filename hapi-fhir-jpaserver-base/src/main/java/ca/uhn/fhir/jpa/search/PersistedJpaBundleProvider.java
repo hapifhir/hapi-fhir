@@ -49,6 +49,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SearchCacheStatus;
 import ca.uhn.fhir.rest.api.server.SimplePreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.SimplePreResourceShowDetails;
 import ca.uhn.fhir.rest.server.interceptor.ServerInterceptorUtil;
@@ -126,7 +127,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	 */
 	private Search mySearchEntity;
 	private final String myUuid;
-	private SearchCacheStatusEnum myCacheStatus;
+	private SearchCacheStatus.SearchCacheStatusEnum myCacheStatus;
 	private RequestPartitionId myRequestPartitionId;
 
 	/**
@@ -415,7 +416,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	}
 
 	// FIXME: make protected after we move this class
-	public void setCacheStatus(SearchCacheStatusEnum theSearchCacheStatusEnum) {
+	public void setCacheStatus(SearchCacheStatus.SearchCacheStatusEnum theSearchCacheStatusEnum) {
 		myCacheStatus = theSearchCacheStatusEnum;
 	}
 

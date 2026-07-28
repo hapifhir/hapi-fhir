@@ -38,6 +38,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
+import ca.uhn.fhir.rest.api.server.SearchCacheStatus;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -218,9 +219,9 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 		if (responseBundleProvider != null) {
 			if (theRequest instanceof ServletRequestDetails srd) {
-				IBundleProvider.SearchCacheStatus cacheStatus = responseBundleProvider.getCacheStatus();
+				SearchCacheStatus cacheStatus = responseBundleProvider.getCacheStatus();
 				if (cacheStatus != null) {
-					if (cacheStatus.getStatus() == IBundleProvider.SearchCacheStatusEnum.HIT) {
+					if (cacheStatus.getStatus() == SearchCacheStatus.SearchCacheStatusEnum.HIT) {
 						HttpServletResponse response = srd.getServletResponse();
 						String value = "HIT from " + theRequest.getFhirServerBase();
 						if (cacheStatus.getCacheEntryTimestamp() != null) {
