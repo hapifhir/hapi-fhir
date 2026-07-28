@@ -19,19 +19,27 @@
  */
 package ca.uhn.fhir.replacereferences;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.merge.MergeResourceHelper;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.util.BundleBuilder;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,13 +50,21 @@ import java.util.List;
  */
 public class PreviousResourceVersionRestorer {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(PreviousResourceVersionRestorer.class);
+
 	private final HapiTransactionService myHapiTransactionService;
 	private final DaoRegistry myDaoRegistry;
+	private final FhirContext myFhirContext;
+	private final PartitionSettings myPartitionSettings;
 
 	public PreviousResourceVersionRestorer(
-			DaoRegistry theDaoRegistry, HapiTransactionService theHapiTransactionService) {
+			DaoRegistry theDaoRegistry,
+			HapiTransactionService theHapiTransactionService,
+			PartitionSettings thePartitionSettings) {
 		myDaoRegistry = theDaoRegistry;
 		myHapiTransactionService = theHapiTransactionService;
+		myFhirContext = theDaoRegistry.getFhirContext();
+		myPartitionSettings = thePartitionSettings;
 	}
 
 	/**
@@ -75,13 +91,39 @@ public class PreviousResourceVersionRestorer {
 	 * @throws ResourceVersionConflictException if the current version of the resource does not match the version specified in the reference.
 	 */
 	public void restoreToPreviousVersionsInTrx(List<Reference> theReferences, RequestDetails theRequestDetails) {
+		if (!myPartitionSettings.isAllPartitionSearchSupported()) {
+			throw new IllegalStateException(Msg.code(3010)
+					+ "Cannot restore resources to their previous versions without an explicit partition because"
+					+ " all-partition search is not supported on this server; the partition the resources live on must"
+					+ " be supplied.");
+		}
 		myHapiTransactionService
 				.withRequest(theRequestDetails)
-				.execute(() -> restoreToPreviousVersions(theReferences, theRequestDetails));
+				.withRequestPartitionId(RequestPartitionId.allPartitions())
+				.execute(() -> restoreToPreviousVersions(theReferences, theRequestDetails, null));
 	}
 
-	private void restoreToPreviousVersions(List<Reference> theReferences, RequestDetails theRequestDetails) {
+	public void restoreToPreviousVersionsInTrx(
+			List<Reference> theReferences, RequestPartitionId thePartitionId, RequestDetails theRequestDetails) {
+		myHapiTransactionService
+				.withRequest(theRequestDetails)
+				.withRequestPartitionId(thePartitionId)
+				.execute(() -> restoreToPreviousVersions(theReferences, theRequestDetails, thePartitionId));
+	}
+
+	private void restoreToPreviousVersions(
+			List<Reference> theReferences,
+			RequestDetails theRequestDetails,
+			@Nullable RequestPartitionId thePartition) {
+		if (theReferences.isEmpty()) {
+			ourLog.info("No resource references provided to restore; nothing to do.");
+			return;
+		}
+
+		BundleBuilder updateBundleBuilder = new BundleBuilder(myFhirContext);
+
 		List<IIdType> idsToDelete = new ArrayList<>();
+
 		for (Reference reference : theReferences) {
 			String referenceStr = reference.getReference();
 			IIdType referenceId = new IdDt(referenceStr);
@@ -94,9 +136,11 @@ public class PreviousResourceVersionRestorer {
 
 			// Read the current resource
 			IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(referenceId.getResourceType());
+
 			IBaseResource currentResource = null;
 			try {
-				currentResource = dao.read(referenceId.toUnqualifiedVersionless(), theRequestDetails);
+				currentResource =
+						readResource(dao, referenceId.toUnqualifiedVersionless(), theRequestDetails, thePartition);
 			} catch (ResourceGoneException e) {
 				IIdType deletedId = e.getResourceId();
 				if (deletedId == null || !deletedId.hasVersionIdPart()) {
@@ -127,7 +171,7 @@ public class PreviousResourceVersionRestorer {
 
 				if (referenceVersion == 1) {
 					// Resource was created new by the operation (v1) — collect for bundle delete
-					idsToDelete.add(referenceId);
+					idsToDelete.add(referenceId.toUnqualifiedVersionless());
 					continue;
 				}
 			}
@@ -140,14 +184,54 @@ public class PreviousResourceVersionRestorer {
 			}
 
 			IIdType previousId = referenceId.withVersion(Long.toString(previousVersion));
-			IBaseResource previousResource = dao.read(previousId, theRequestDetails);
+			IBaseResource previousResource = readResource(dao, previousId, theRequestDetails, thePartition);
 			previousResource.setId(previousResource.getIdElement().toUnqualifiedVersionless());
 			// Update the resource to the previous version's content
-			dao.update(previousResource, theRequestDetails);
+			updateBundleBuilder.addTransactionUpdateEntry(previousResource);
 		}
 
-		if (!idsToDelete.isEmpty()) {
-			deleteResourcesInNestedTransaction(idsToDelete, theRequestDetails);
+		if (!updateBundleBuilder.getBundle().isEmpty()) {
+			myDaoRegistry.getSystemDao().transactionNested(theRequestDetails, updateBundleBuilder.getBundle());
+		}
+
+		deleteResources(idsToDelete, thePartition, theRequestDetails);
+	}
+
+	private IBaseResource readResource(
+			IFhirResourceDao<IBaseResource> theDao,
+			IIdType theId,
+			RequestDetails theRequestDetails,
+			@Nullable RequestPartitionId thePartition) {
+		if (thePartition != null) {
+			return readInPartition(theDao, theId, thePartition);
+		}
+		return readAcrossPartitions(theDao, theId, theRequestDetails);
+	}
+
+	private IBaseResource readInPartition(
+			IFhirResourceDao<IBaseResource> theDao, IIdType theId, RequestPartitionId thePartition) {
+		SystemRequestDetails requestDetailsForPartition = SystemRequestDetails.forRequestPartitionId(thePartition);
+		return theDao.read(theId, requestDetailsForPartition);
+	}
+
+	private IBaseResource readAcrossPartitions(
+			IFhirResourceDao<IBaseResource> theDao, IIdType theId, RequestDetails theRequestDetails) {
+		return myHapiTransactionService
+				.withRequest(theRequestDetails)
+				.withRequestPartitionId(RequestPartitionId.allPartitions())
+				.read(partition -> theDao.read(theId, theRequestDetails));
+	}
+
+	private void deleteResources(
+			List<IIdType> theIdsToDelete, @Nullable RequestPartitionId thePartition, RequestDetails theRequestDetails) {
+		if (theIdsToDelete.isEmpty()) {
+			return;
+		}
+		if (thePartition != null) {
+			MergeResourceHelper.deleteResourcesInPartitionTransaction(
+					theIdsToDelete, thePartition, myDaoRegistry, myHapiTransactionService);
+		} else {
+			deleteResourcesInNestedTransaction(theIdsToDelete, theRequestDetails);
 		}
 	}
 

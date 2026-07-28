@@ -128,7 +128,7 @@ public abstract class AbstractGenericMergeR4Test<T extends IBaseResource> extend
 		// with versioned target references, and delete-source on merge works correctly.
 		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths("Provenance.target");
 
-		myHelper = new MergeOperationTestHelper(myClient, myBatch2JobHelper, myFhirContext, myLinkServiceFactory, myDaoRegistry,
+		myHelper = new MergeOperationTestHelper(myClient, myBatch2JobHelper, myFhirContext, myLinkServiceFactory,
 				getOperationName(), getParameterNames());
 		myReplaceReferencesTestHelper = new ReplaceReferencesTestHelper(myFhirContext, myDaoRegistry);
 	}
