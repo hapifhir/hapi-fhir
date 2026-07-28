@@ -26,7 +26,7 @@ public class PatientUndoMergeR4Test extends AbstractGenericUndoMergeR4Test<Patie
 	@BeforeEach
 	void beforePatientUndoMerge() {
 		myHelperUsingPatientMergeEndpoint = new MergeOperationTestHelper(
-				myClient, myBatch2JobHelper, myFhirContext, myLinkServiceFactory, myDaoRegistry,
+				myClient, myBatch2JobHelper, myFhirContext, myLinkServiceFactory,
 				"$merge", new PatientMergeOperationInputParameterNames());
 	}
 
