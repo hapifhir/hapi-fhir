@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.util.BundleBuilder;
 
 import org.hl7.fhir.r4.model.Bundle;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(PartitioningSearchCacheR4Test.class);
@@ -46,8 +48,9 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			myCaptureQueriesListener.clear();
 			addNextTargetPartitionsForRead(1);
 			addNextTargetPartitionsForRead(1);
-			PersistedJpaBundleProvider outcome = (PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
-			assertEquals(SearchCacheStatusEnum.MISS, outcome.getCacheStatus());
+			IBundleProvider outcome = myPatientDao.search(new SearchParameterMap(), mySrd);
+			assertNotNull(outcome.getCacheStatus());
+			assertEquals(IBundleProvider.SearchCacheStatusEnum.FWD_MISS, outcome.getCacheStatus().getStatus());
 			assertEquals(2, outcome.sizeOrThrowNpe(), ()-> "Resources:\n * " + runInTransaction(()->myResourceTableDao.findAll().stream().map(ResourceTable::toString).collect(Collectors.joining("\n * "))) +
 				"\n\nActual IDs: " + toUnqualifiedVersionlessIdValues(outcome) +
 				"\n\nSQL Queries: " + myCaptureQueriesListener.getSelectQueries().stream().map(t->t.getSql(true, false)).collect(Collectors.joining("\n * ")));
@@ -66,8 +69,8 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			myCaptureQueriesListener.clear();
 			addNextTargetPartitionsForRead(2);
 			addNextTargetPartitionsForRead(2);
-			PersistedJpaBundleProvider outcome = (PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
-			assertEquals(SearchCacheStatusEnum.MISS, outcome.getCacheStatus());
+			IBundleProvider outcome = myPatientDao.search(new SearchParameterMap(), mySrd);
+			assertEquals(IBundleProvider.SearchCacheStatusEnum.FWD_MISS, outcome.getCacheStatus().getStatus());
 			assertEquals(2, outcome.sizeOrThrowNpe());
 
 			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
@@ -84,8 +87,8 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			myCaptureQueriesListener.clear();
 			addNextTargetPartitionsForRead(2);
 			addNextTargetPartitionsForRead(2);
-			PersistedJpaBundleProvider outcome = (PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
-			assertEquals(SearchCacheStatusEnum.HIT, outcome.getCacheStatus());
+			IBundleProvider outcome = myPatientDao.search(new SearchParameterMap(), mySrd);
+			assertEquals(IBundleProvider.SearchCacheStatusEnum.HIT, outcome.getCacheStatus().getStatus());
 			assertEquals(2, outcome.sizeOrThrowNpe());
 
 			List<SqlQuery> selectQueries = myCaptureQueriesListener.logSelectQueries();

@@ -159,7 +159,7 @@ public interface IBundleProvider {
 	 * @return A list of resources. The size of this list must be at least <code>theToIndex - theFromIndex</code>.
 	 */
 	default List<IBaseResource> getResources(
-			int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
+		int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
 		return getResources(theFromIndex, theToIndex);
 	}
 
@@ -176,8 +176,8 @@ public interface IBundleProvider {
 		Integer sizeI = size();
 		if (sizeI == null) {
 			throw new ConfigurationException(
-					Msg.code(464)
-							+ "Attempt to request all resources from an asynchronous search result.  The SearchParameterMap for this search probably should have been synchronous.");
+				Msg.code(464)
+					+ "Attempt to request all resources from an asynchronous search result.  The SearchParameterMap for this search probably should have been synchronous.");
 		}
 		int size = containsAllResources() ? getResourceListComplete().size() : sizeI.intValue();
 		if (size > 0) {
@@ -274,8 +274,8 @@ public interface IBundleProvider {
 	 */
 	default List<String> getAllResourceIds() {
 		return getAllResources().stream()
-				.map(resource -> resource.getIdElement().getIdPart())
-				.collect(Collectors.toList());
+			.map(resource -> resource.getIdElement().getIdPart())
+			.collect(Collectors.toList());
 	}
 
 	/**
@@ -288,40 +288,79 @@ public interface IBundleProvider {
 		return null;
 	}
 
+	/**
+	 * Statuses as defined in <a href="RFC 9211">https://datatracker.ietf.org/doc/rfc9211/</a>
+	 */
 	enum SearchCacheStatusEnum {
 		/**
 		 * We did not attempt to check whether the search was a cache hit against a query cache
 		 */
-		NOT_TRIED,
+		FWD_BYPASS,
 		/**
 		 * A search cache was checked, and no cache hit was found
 		 */
-		MISS,
+		FWD_MISS,
 		/**
 		 * A search cache hit was detected
 		 */
 		HIT
 	}
 
+	/**
+	 * Cache response statuses as defined in <a href="RFC 9211">https://datatracker.ietf.org/doc/rfc9211/</a>
+	 */
 	class SearchCacheStatus {
 
-		private SearchCacheStatusEnum myStatus;
-		private Date myCacheEntryTimestamp;
+		private final String myCacheName;
+		private final SearchCacheStatusEnum myStatus;
+		private final Date myCacheEntryTimestamp;
+
+		private SearchCacheStatus(String theCacheName, SearchCacheStatusEnum theStatus, Date theCacheEntryTimestamp) {
+			myCacheName = theCacheName;
+			myStatus = theStatus;
+			myCacheEntryTimestamp = theCacheEntryTimestamp;
+		}
+
+		public String getCacheName() {
+			return myCacheName;
+		}
 
 		public SearchCacheStatusEnum getStatus() {
 			return myStatus;
-		}
-
-		public void setStatus(SearchCacheStatusEnum theStatus) {
-			myStatus = theStatus;
 		}
 
 		public Date getCacheEntryTimestamp() {
 			return myCacheEntryTimestamp;
 		}
 
-		public void setCacheEntryTimestamp(Date theCacheEntryTimestamp) {
-			myCacheEntryTimestamp = theCacheEntryTimestamp;
+		public static Builder builder() {
+			return new Builder();
+		}
+
+		public static class Builder {
+
+			private String myCacheName;
+			private SearchCacheStatusEnum myStatus;
+			private Date myCacheEntryTimestamp;
+
+			public Builder withCacheName(String theCacheName) {
+				myCacheName = theCacheName;
+				return this;
+			}
+
+			public Builder setStatus(SearchCacheStatusEnum theStatus) {
+				myStatus = theStatus;
+				return this;
+			}
+
+			public Builder setCacheEntryTimestamp(Date theCacheEntryTimestamp) {
+				myCacheEntryTimestamp = theCacheEntryTimestamp;
+				return this;
+			}
+
+			public SearchCacheStatus build() {
+				return new SearchCacheStatus(myCacheName, myStatus, myCacheEntryTimestamp);
+			}
 		}
 	}
 }

@@ -179,6 +179,11 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 	}
 
 	public static class JpaBundleProvider implements IBundleProvider {
+		public static final SearchCacheStatus CACHE_STATUS_BYPASS = SearchCacheStatus
+			.builder()
+			.withCacheName("HapiQueryCache")
+			.setStatus(SearchCacheStatusEnum.FWD_BYPASS)
+			.build();
 		private final Map<JpaPid, IBaseResource> myFetchedResources = new HashMap<>();
 		private final RequestDetails myRequestDetails;
 		private final IInterceptorBroadcaster myCompositeBroadcaster;
@@ -599,11 +604,8 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 			boolean addedResultsThisPass = false;
 			boolean initialSearch = false;
 
-			SearchCacheStatusEnum cacheStatus;
 			if (myCacheControlDirective != null && myCacheControlDirective.isNoCache()) {
-				cacheStatus = SearchCacheStatusEnum.NOT_TRIED;
-			} else {
-				cacheStatus = SearchCacheStatusEnum.MISS;
+				myCacheStatus = CACHE_STATUS_BYPASS;
 			}
 
 			if (mySearchEntity == null) {
@@ -628,7 +630,7 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 				// are any cached seaerches we can reuse instead
 				if (mySearchEntity.getId() == null) {
 					initialSearch = true;
-					if (cacheStatus != SearchCacheStatusEnum.NOT_TRIED) {
+					if (myCacheStatus == null) {
 						if (myParams.getEverythingMode() == null) {
 							if (myStorageSettings.getReuseCachedSearchResultsForMillis() != null) {
 								Optional<Search> cachedQueryOpt;
@@ -642,9 +644,12 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 									mySearchEntity = cachedQueryOpt.get();
 									mySearchUuid = mySearchEntity.getUuid();
 
-									myCacheStatus = new IBundleProvider.SearchCacheStatus();
-									myCacheStatus.setStatus(SearchCacheStatusEnum.HIT);
-									myCacheStatus.setCacheEntryTimestamp(mySearchEntity.getCreated());
+									myCacheStatus = SearchCacheStatus
+										.builder()
+										.withCacheName("HapiQueryCache")
+										.setStatus(SearchCacheStatusEnum.HIT)
+										.setCacheEntryTimestamp(mySearchEntity.getCreated())
+										.build();
 
 									ourLog.debug(
 											"Query cache HIT - Replacing search {} with search {}",
@@ -656,6 +661,12 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 									myParams = mySearchEntity
 											.getSearchParameterMap()
 											.orElseThrow();
+								} else {
+									myCacheStatus = SearchCacheStatus
+										.builder()
+										.withCacheName("HapiQueryCache")
+										.setStatus(SearchCacheStatusEnum.FWD_MISS)
+										.build();
 								}
 							}
 						}
