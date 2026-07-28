@@ -372,6 +372,7 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 			return retVal;
 		}
 
+		// FIXME: drop this
 		@Nonnull
 		@Override
 		public List<IBaseResource> getAllResources() {
