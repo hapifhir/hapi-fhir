@@ -35,8 +35,6 @@ public class HapiToStringBuilder extends ToStringBuilder {
 		super(theObject, theStyle);
 	}
 
-
-
 	/**
 	 * Appends a date with FHIR serialization
 	 */

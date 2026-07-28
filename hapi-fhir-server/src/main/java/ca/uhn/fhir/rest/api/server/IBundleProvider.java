@@ -300,5 +300,4 @@ public interface IBundleProvider {
 	default boolean isShouldFetchResourcesBeforeOtherProperties() {
 		return false;
 	}
-
 }

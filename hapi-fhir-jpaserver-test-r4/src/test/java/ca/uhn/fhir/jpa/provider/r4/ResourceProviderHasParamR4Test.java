@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
@@ -596,16 +597,27 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testMultipleHasParameter_NOT_IN() throws Exception {
 
+		List<String> expectedPatientIds = new ArrayList<>();
 		for (int i=0; i<10; i++) {
-			createPatientWithObs(10);
+			expectedPatientIds.add(createPatientWithObs(10).toUnqualifiedVersionless().getValue());
 		}
 
-		String uri = myServerBase + "/Patient?_has:Observation:subject:code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt180") + "&_has:Observation:subject:date=gt1950" + "&_has:Observation:subject:status=final&_count=4";
+		String uri = myServerBase +
+			"/Patient?_has:Observation:subject:code-value-quantity=http://" +
+			UrlUtil.escapeUrlParam("loinc.org|2345-7$gt180") +
+			"&_has:Observation:subject:date=gt1950" +
+			"&_has:Observation:subject:status=final" +
+			"&_count=4";
 
-		ourLog.info("uri = " + uri);
+		ourLog.info("uri = {}", uri);
+
+		myStorageSettings.setSearchPreFetchThresholds(List.of(4, 100, -1));
+
 		myCaptureQueriesListener.clear();
+		List<String> actualPatientIds = searchAndReturnUnqualifiedVersionlessIdValues(uri);
+		myCaptureQueriesListener.logSelectQueries();
 
-		searchAndReturnUnqualifiedVersionlessIdValues(uri);
+		assertEquals(4, actualPatientIds.size());
 
 		List<String> queries = myCaptureQueriesListener.getSelectQueries().stream().map(t -> t.getSql(true, false)).toList();
 
@@ -632,7 +644,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 		return ids;
 	}
 
-	private void createPatientWithObs(int obsNum) {
+	private IIdType createPatientWithObs(int obsNum) {
 		
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("001");
@@ -653,5 +665,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 		for (int i=0; i<obsNum; i++) {
 			myObservationDao.create(o1).getId().toUnqualifiedVersionless();
 		}
+
+		return pid;
 	}
 }

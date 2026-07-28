@@ -117,14 +117,15 @@ public class ResponsePage {
 	private PagingStyle myPagingStyle;
 
 	ResponsePage(
-		String theSearchId,
-		List<IBaseResource> theResourceList,
-		int thePageSize,
-		int theNumToReturn,
-		int theIncludedResourceCount,
-		int theOmittedResourceCount,
-		int theTotalRequestedResourcesFetched,
-		IBundleProvider theBundleProvider, @Nullable Boolean theHasNextPage) {
+			String theSearchId,
+			List<IBaseResource> theResourceList,
+			int thePageSize,
+			int theNumToReturn,
+			int theIncludedResourceCount,
+			int theOmittedResourceCount,
+			int theTotalRequestedResourcesFetched,
+			IBundleProvider theBundleProvider,
+			@Nullable Boolean theHasNextPage) {
 		mySearchId = theSearchId;
 		myResourceList = theResourceList;
 		myPageSize = thePageSize;
@@ -426,6 +427,7 @@ public class ResponsePage {
 		private int myOmittedResourceCount;
 		private IBundleProvider myBundleProvider;
 		private int myTotalRequestedResourcesFetched = -1;
+
 		@Nullable
 		private Boolean myHasNextPage;
 
@@ -474,7 +476,6 @@ public class ResponsePage {
 			return this;
 		}
 
-
 		/**
 		 * Combine this builder with a second buider.
 		 * Useful if a second page is requested, but you do not wish to
@@ -510,8 +511,7 @@ public class ResponsePage {
 					myOmittedResourceCount, // omitted resources
 					myTotalRequestedResourcesFetched, // total count of requested resources
 					myBundleProvider, // the bundle provider
-					myHasNextPage
-					);
+					myHasNextPage);
 		}
 	}
 

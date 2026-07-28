@@ -30,7 +30,6 @@ import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.jpa.util.SearchParameterMapCalculator;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
-import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
@@ -67,9 +66,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
-import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantCount;
-import static java.util.Objects.nonNull;
 
 public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(CacheAwareSearchSvcImpl.class);
@@ -723,6 +719,8 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 
 			ISearchBuilder<JpaPid> searchBuilder = newSearchBuilder();
 
+			int initialNumFound = mySearchEntity.getNumFound();
+			int initialNumBlocked = mySearchEntity.getNumBlocked();
 			int countFoundThisPass = 0;
 			int countBlockedThisPass = 0;
 			List<JpaPid> previouslyFoundPids = List.of();
@@ -795,10 +793,14 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 
 				countFoundThisPass += newPidsThisPass.size();
 
+				boolean blockedResults = false;
+				if (countFoundThisPass < numWanted && haveMoreResults) {
+					blockedResults = true;
+				}
+
 				// Interceptor call: STORAGE_PREACCESS_RESOURCES
 				// This can be used to remove results from the search result details before
 				// the user has a chance to know that they were in the results
-				boolean blockedResults = false;
 				if (myCompositeBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES)
 						&& !newPidsThisPass.isEmpty()) {
 					Set<JpaPid> blockedPids = new HashSet<>();
@@ -835,8 +837,8 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 					}
 				}
 
-				mySearchEntity.setNumFound(mySearchEntity.getNumFound() + countFoundThisPass);
-				mySearchEntity.setNumBlocked(mySearchEntity.getNumBlocked() + countBlockedThisPass);
+				mySearchEntity.setNumFound(initialNumFound + countFoundThisPass);
+				mySearchEntity.setNumBlocked(initialNumBlocked + countBlockedThisPass);
 
 				newPids.addAll(newPidsThisPass);
 
@@ -868,8 +870,8 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 					if (mySearchEntity.getTotalCount() == null) {
 						if (SearchParameterMapCalculator.isWantCount(myParams, myStorageSettings)) {
 							Long countQuery = newSearchBuilder()
-								.createCountQuery(
-									myParams, mySearchEntity.getUuid(), myRequestDetails, myRequestPartitionId);
+									.createCountQuery(
+											myParams, mySearchEntity.getUuid(), myRequestDetails, myRequestPartitionId);
 							if (countQuery != null) {
 								mySearchEntity.setTotalCount(Math.toIntExact(countQuery));
 							}

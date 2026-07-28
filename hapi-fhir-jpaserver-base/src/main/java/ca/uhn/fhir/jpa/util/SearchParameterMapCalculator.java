@@ -59,7 +59,7 @@ public class SearchParameterMapCalculator {
 	 */
 	public static boolean isWantCount(SearchParameterMap theParams, JpaStorageSettings theStorageSettings) {
 		return nonNull(theParams.getSearchTotalMode())
-			? isWantCount(theParams)
-			: isWantCount(theStorageSettings.getDefaultTotalMode());
+				? isWantCount(theParams)
+				: isWantCount(theStorageSettings.getDefaultTotalMode());
 	}
 }
