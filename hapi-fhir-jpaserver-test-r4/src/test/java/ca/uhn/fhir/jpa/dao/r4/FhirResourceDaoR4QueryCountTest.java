@@ -38,8 +38,7 @@ import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.reindex.ReindexTestHelper;
-import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
-import ca.uhn.fhir.jpa.search.exec.CacheAwareSearchSvcImpl;
+import ca.uhn.fhir.jpa.search.exec.JpaBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
@@ -2416,7 +2415,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		map.addInclude(Observation.INCLUDE_PATIENT);
 		map.addInclude(Observation.INCLUDE_SUBJECT);
 		IBundleProvider results = myObservationDao.search(map, mySrd);
-		assertEquals(CacheAwareSearchSvcImpl.JpaBundleProvider.class, results.getClass());
+		assertEquals(JpaBundleProvider.class, results.getClass());
 		ids = toUnqualifiedVersionlessIdValues(results);
 		assertThat(ids).containsExactlyInAnyOrder("Patient/A", "Encounter/E", "Observation/O");
 

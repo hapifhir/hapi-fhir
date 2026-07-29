@@ -4,8 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.config.SearchConfig;
-import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.ISearchResultConsumer;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.SearchProgressTracker;
@@ -46,7 +44,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static ca.uhn.fhir.jpa.test.BaseJpaTest.newSrd;
@@ -55,15 +52,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -153,9 +147,8 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		params.add("name", new StringParam("ANAME"));
 
 		List<JpaPid> pids = createPidSequence(800);
-		Iterator<JpaPid> iter = new FailAfterNIterator(new SlowIterator(pids.iterator(), 2), 300);
+		Iterator<JpaPid> iter = new FailAfterNIterator(new SlowIterator(pids.iterator(), 0), 300);
 		mockPerformSearchForPids(iter);
-		mockSearchTask();
 
 		IBundleProvider outcome = mySvc.createNewSearch(myCallingDao, params, "Patient", new CacheControlDirective(), newSrd());
 		assertThatThrownBy(() -> outcome.getResources(0, 1000))
@@ -184,7 +177,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		params.add("name", new StringParam("ANAME"));
 
 		List<JpaPid> pids = createPidSequence(800);
-		SlowIterator iter = new SlowIterator(pids.iterator(), 1);
+		SlowIterator iter = new SlowIterator(pids.iterator(), 0);
 		mockPerformSearchForPids(iter);
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
@@ -199,14 +192,13 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		// Test
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
-		assertNotNull(result.getUuid());
-		assertNull(result.size());
+		IBundleProvider result = mySvc.createNewSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 
 		// Verify that we get the right results back
 		List<IBaseResource> resources = result.getResources(0, 790);
 		assertThat(resources).hasSize(790);
 		assertEquals(790, result.size());
+		assertNotNull(result.getUuid());
 		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("799", resources.get(789).getIdElement().getValueAsString());
 
@@ -232,15 +224,12 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		params.add("name", new StringParam("ANAME"));
 
 		List<JpaPid> pids = createPidSequence(800);
-		SlowIterator iter = new SlowIterator(pids.iterator(), 2);
+		SlowIterator iter = new SlowIterator(pids.iterator(), 0);
 		mockPerformSearchForPids(iter);
-		mockSearchTask();
 
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
-		assertNotNull(result.getUuid());
-		assertNull(result.size());
+		IBundleProvider result = mySvc.createNewSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 
 		List<IBaseResource> resources;
 
@@ -249,8 +238,11 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("39", resources.get(29).getIdElement().getValueAsString());
 
+		assertNotNull(result.getUuid());
+		assertNull(result.size());
+
 		verify(mySearchCacheSvc, atLeastOnce()).save(mySearchCaptor.capture(), any());
-		assertEquals(790, mySearchCaptor.getValue().getNumFound());
+		assertEquals(31, mySearchCaptor.getValue().getNumFound());
 	}
 
 	private void mockPerformSearchForPids(Iterator<JpaPid> tnePidIterator) {
@@ -292,7 +284,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		params.add("name", new StringParam("ANAME"));
 
 		List<JpaPid> pids = createPidSequence(800);
-		Iterator<JpaPid> iter = new SlowIterator(pids.iterator(), 2);
+		Iterator<JpaPid> iter = new SlowIterator(pids.iterator(), 0);
 		mockPerformSearchForPids(iter);
 		when(mySearchCacheSvc.save(any(), any())).thenAnswer(t -> {
 			ourLog.info("Saving search");
@@ -300,9 +292,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		});
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
-		mockSearchTask();
-
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
+		IBundleProvider result = mySvc.createNewSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
 		assertNull(result.size());
 
@@ -331,23 +321,23 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		params.add("name", new StringParam("ANAME"));
 
 		List<JpaPid> pids = createPidSequence(100);
-		SlowIterator iter = new SlowIterator(pids.iterator(), 2);
+		SlowIterator iter = new SlowIterator(pids.iterator(), 0);
 		mockPerformSearchForPids(iter);
-		mockSearchTask();
 
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
-		assertNotNull(result.getUuid());
-		assertNull(result.size());
+		IBundleProvider result = mySvc.createNewSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 
 		List<IBaseResource> resources = result.getResources(0, 30);
 		assertThat(resources).hasSize(30);
 		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("39", resources.get(29).getIdElement().getValueAsString());
 
+		assertNotNull(result.getUuid());
+		assertNull(result.size());
+
 		verify(mySearchCacheSvc, atLeastOnce()).save(mySearchCaptor.capture(), any());
-		assertEquals(90, mySearchCaptor.getValue().getNumFound());
+		assertEquals(31, mySearchCaptor.getValue().getNumFound());
 	}
 
 	@Test
