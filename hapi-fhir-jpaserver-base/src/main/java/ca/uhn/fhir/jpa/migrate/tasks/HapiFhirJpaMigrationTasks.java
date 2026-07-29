@@ -197,6 +197,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.nullable()
 				.type(ColumnTypeEnum.TEXT);
 
+		version.onTable(Search.HFJ_SEARCH)
+				.modifyColumn("20260716.10", Search.SEARCH_UUID)
+				.nonNullable()
+				.withType(ColumnTypeEnum.STRING, 136);
+
 		// addressing potential missing column PARTITION_ID from index IDX_RES_TYPE_FHIR_ID for MSSQL_2012
 		{
 			if (getFlags().contains(FlagEnum.DB_PARTITION_MODE)) {

@@ -83,10 +83,10 @@ public class Search implements ICachedSearchDetails, Serializable {
 
 	/**
 	 * Long enough to accommodate a full UUID (36) with an additional prefix
-	 * used by megascale (12)
+	 * used by megascale (100)
 	 */
 	@SuppressWarnings("WeakerAccess")
-	public static final int SEARCH_UUID_COLUMN_LENGTH = 48;
+	public static final int SEARCH_UUID_COLUMN_LENGTH = 136;
 
 	public static final String HFJ_SEARCH = "HFJ_SEARCH";
 	public static final String SEARCH_UUID = "SEARCH_UUID";
