@@ -82,7 +82,8 @@ class HapiMigratorIT {
 	/** We test initialization in two cases: an empty database, and one that has been manually filled by running the schema sql. */
 			@ParameterizedTest
 		@ValueSource(booleans = {true, false})
-		public void testInitializeSchema(boolean thePreCreateSchema) {
+	public void testInitializeSchema_existingSchemaRequiresBaselineAndSkipsBaselinedMigrations(
+			boolean thePreCreateSchema) {
 		if (thePreCreateSchema) {
 			String sql = ClasspathUtil.loadResource("/hapi-migrator-it-init-schema/h2.sql");
 			List<String> statements = SqlUtil.splitSqlFileIntoStatements(sql);
@@ -129,6 +130,7 @@ class HapiMigratorIT {
 			migrator = buildMigrator(taskList.toTaskArray());
 			migrator.setBaselineVersion("5.5.0.20250101.1");
 			outcome = migrator.migrate();
+			// Migration 20250101.1 is included in the baseline, so only later migrations execute.
 			assertThat(toTaskVersionList(outcome))
 					.as(toTaskStatementDescriptions(outcome))
 					.containsExactly("20250101.2", "20250101.3");
