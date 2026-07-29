@@ -127,7 +127,7 @@ class HapiMigratorIT {
 					.isInstanceOf(HapiMigrationException.class)
 					.hasMessageContaining("--baseline-version");
 
-			migrator = buildMigrator(taskList.toTaskArray());
+			// The failure above happens before any task runs, so the same migrator can be reused
 			migrator.setBaselineVersion("5.5.0.20250101.1");
 			outcome = migrator.migrate();
 			// Migration 20250101.1 is included in the baseline, so only later migrations execute.
