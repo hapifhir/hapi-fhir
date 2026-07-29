@@ -632,11 +632,12 @@ public class JpaBundleProvider implements IBundleProvider {
 		List<JpaPid> newPids = new ArrayList<>();
 		boolean haveMoreResults;
 		boolean addedResultsThisPass;
+		int lastSkipCount = 0;
 		while (true) {
 			addedResultsThisPass = false;
 			haveMoreResults = false;
 
-			SearchThreshold searchThreshold = calculateNextSearchThreshold(numWanted, searchBuilder);
+			SearchThreshold searchThreshold = calculateNextSearchThreshold(numWanted + lastSkipCount, searchBuilder);
 			searchBuilder.setMaxResultsToFetch(searchThreshold.threshold());
 
 			List<JpaPid> newPidsThisPass = new ArrayList<>();
@@ -654,6 +655,7 @@ public class JpaBundleProvider implements IBundleProvider {
 				return;
 			}
 
+			lastSkipCount = outcome.getSkippedCount();
 			if (!newPidsThisPass.isEmpty()) {
 				addedResultsThisPass = true;
 			}
@@ -694,6 +696,7 @@ public class JpaBundleProvider implements IBundleProvider {
 
 				if (!blockedPids.isEmpty()) {
 					pidsToReturn.removeIf(blockedPids::contains);
+					lastSkipCount += blockedPids.size();
 				}
 
 				for (int i = 0; i < newPidsThisPass.size(); i++) {

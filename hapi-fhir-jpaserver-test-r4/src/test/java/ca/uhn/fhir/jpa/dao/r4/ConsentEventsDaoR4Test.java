@@ -127,7 +127,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		List<IBaseResource> resources = outcome.getResources(0, 10);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(myObservationIdsEvenOnly.subList(0, 10), returnedIdValues);
-		assertEquals(1, preAccessInterceptorCallCount.get());
+		assertEquals(2, preAccessInterceptorCallCount.get());
 		assertThat(interceptedResourceIds).as("Wrong response from " + outcome.getClass()).isEqualTo(myObservationIds.subList(0, 21));
 
 		// Fetch the next 30 (do cross a fetch boundary)
@@ -173,7 +173,14 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		// It takes 2 passes because we should have searched for 4 resources in the first pass,
 		// but filtered half of them leaving only 2, so we needed another pass
 		assertEquals(2, preAccessInterceptorCallCount.get());
-		assertThat(interceptedResourceIds).as("Wrong response from " + outcome.getClass()).isEqualTo(myObservationIds.subList(0, 17));
+
+		runInTransaction(() -> {
+			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(outcome.getUuid()).orElseThrow();
+			assertEquals(7, search.getNumFound());
+			assertEquals(7, search.getNumBlocked());
+		});
+
+		assertThat(interceptedResourceIds).as("Wrong response from " + outcome.getClass()).isEqualTo(myObservationIds.subList(0, 14));
 	}
 
 		@Test
@@ -230,7 +237,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		List<IBaseResource> resources = outcome.getResources(0, 100);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(sort(myPatientIdsEvenOnly, myObservationIdsEvenOnly), sort(returnedIdValues));
-		assertEquals(2, hitCount.get());
+		assertEquals(3, hitCount.get());
 
 	}
 
@@ -283,7 +290,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(sort(myPatientIdsEvenOnly, myObservationIdsEvenOnly), sort(returnedIdValues));
 
-		assertEquals(2, preAccessInterceptorCallCount.get());
+		assertEquals(4, preAccessInterceptorCallCount.get());
 	}
 
 	@Test
@@ -305,7 +312,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		List<IBaseResource> resources = outcome.getResources(0, 100);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(sort(myPatientIds, myObservationIds), sort(returnedIdValues));
-		assertEquals(2, hitCount.get());
+		assertEquals(4, hitCount.get());
 
 	}
 
