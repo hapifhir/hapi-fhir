@@ -101,12 +101,14 @@ class HapiMigratorIT {
 		MigrationTaskList taskList = new MigrationTaskList();
 		Builder version = HapiMigrationStorageSvcTest.forVersion(taskList);
 
-		version.initializeSchema("1", schemaInitProvider);
+		version.initializeSchema("20250101.1", schemaInitProvider);
 
-		Builder.BuilderAddTableByColumns nonSchemaInit = version.addTableByColumns("2", TABLE_NAME_NON_SCHEMA_INIT, "PID");
+		Builder.BuilderAddTableByColumns nonSchemaInit =
+				version.addTableByColumns("20250101.2", TABLE_NAME_NON_SCHEMA_INIT, "PID");
 		nonSchemaInit.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
 
-		Builder.BuilderAddTableByColumns schemaInit = version.addTableByColumns("3", TABLE_NAME_SCHEMA_INIT, "PID");
+		Builder.BuilderAddTableByColumns schemaInit =
+				version.addTableByColumns("20250101.3", TABLE_NAME_SCHEMA_INIT, "PID");
 		schemaInit.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
 		schemaInit.withFlags().runEvenDuringSchemaInitialization();
 
@@ -125,12 +127,16 @@ class HapiMigratorIT {
 					.hasMessageContaining("--baseline-version");
 
 			migrator = buildMigrator(taskList.toTaskArray());
-			migrator.setBaselineVersion("5.5.0.1");
+			migrator.setBaselineVersion("5.5.0.20250101.1");
 			outcome = migrator.migrate();
-			assertThat(toTaskVersionList(outcome)).as(toTaskStatementDescriptions(outcome)).containsExactly("2", "3");
+			assertThat(toTaskVersionList(outcome))
+					.as(toTaskStatementDescriptions(outcome))
+					.containsExactly("20250101.2", "20250101.3");
 		} else {
 			outcome = migrator.migrate();
-			assertThat(toTaskVersionList(outcome)).as(toTaskStatementDescriptions(outcome)).containsExactly("1", "3");
+			assertThat(toTaskVersionList(outcome))
+					.as(toTaskStatementDescriptions(outcome))
+					.containsExactly("20250101.1", "20250101.3");
 		}
 
 		/*
@@ -143,16 +149,20 @@ class HapiMigratorIT {
 		/*
 		 * Add another pair of tasks - Both should run
 		 */
-		Builder.BuilderAddTableByColumns nonSchemaInit2 = version.addTableByColumns("4", TABLE_NAME_NON_SCHEMA_INIT_2, "PID");
+		Builder.BuilderAddTableByColumns nonSchemaInit2 =
+				version.addTableByColumns("20250101.4", TABLE_NAME_NON_SCHEMA_INIT_2, "PID");
 		nonSchemaInit2.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
 
-		Builder.BuilderAddTableByColumns schemaInit2 = version.addTableByColumns("5", TABLE_NAME_SCHEMA_INIT_2, "PID");
+		Builder.BuilderAddTableByColumns schemaInit2 =
+				version.addTableByColumns("20250101.5", TABLE_NAME_SCHEMA_INIT_2, "PID");
 		schemaInit2.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
 		schemaInit2.withFlags().runEvenDuringSchemaInitialization();
 
 		migrator = buildMigrator(taskList.toTaskArray());
 		outcome = migrator.migrate();
-		assertThat(toTaskVersionList(outcome)).as(toTaskStatementDescriptions(outcome)).containsExactly("4", "5");
+		assertThat(toTaskVersionList(outcome))
+				.as(toTaskStatementDescriptions(outcome))
+				.containsExactly("20250101.4", "20250101.5");
 
 	}
 

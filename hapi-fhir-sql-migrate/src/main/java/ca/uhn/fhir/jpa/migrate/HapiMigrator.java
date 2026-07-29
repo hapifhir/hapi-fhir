@@ -46,6 +46,10 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class HapiMigrator {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigrator.class);
+	/** Maximum suffix for a product-version baseline, derived from {@link BaseTask#MIGRATION_VERSION_PATTERN}. */
+	private static final String PRODUCT_VERSION_BASELINE_SUFFIX =
+			"." + "9".repeat(BaseTask.MIGRATION_DATE_LENGTH) + "." + "9".repeat(BaseTask.MIGRATION_SEQUENCE_MAX_LENGTH);
+
 	private final MigrationTaskList myTaskList = new MigrationTaskList();
 	private boolean myDryRun;
 	private boolean myRunHeavyweightSkippableTasks;
@@ -288,8 +292,8 @@ public class HapiMigrator {
 		if (baselineVersion.matches("\\d+\\.\\d+\\.\\d+")) {
 			// A product version like 8.4.0 was supplied. Pad it so that every schema version belonging to that
 			// release is treated as part of the baseline.
-			baselineVersion += ".99999999.999999";
-		} else if (!baselineVersion.matches("\\d+\\.\\d+\\.\\d+(\\.\\d+)+")) {
+			baselineVersion += PRODUCT_VERSION_BASELINE_SUFFIX;
+		} else if (!baselineVersion.matches("\\d+\\.\\d+\\.\\d+\\." + BaseTask.MIGRATION_VERSION_PATTERN)) {
 			throw new HapiMigrationException(
 					Msg.code(2962) + "Invalid --baseline-version '" + theBaselineVersion
 							+ "'. Expected a product version (e.g. 8.4.0) or a full migration version (e.g. 8.4.0.20250515.2).");
