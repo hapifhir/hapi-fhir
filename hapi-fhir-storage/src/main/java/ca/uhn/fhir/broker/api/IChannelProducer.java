@@ -21,6 +21,9 @@ package ca.uhn.fhir.broker.api;
 
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Sends messages to a Message Broker.
  *
@@ -40,4 +43,24 @@ public interface IChannelProducer<T> {
 	 * @return the result of the send operation
 	 */
 	ISendResult send(IMessage<T> theMessage);
+
+	/**
+	 * Send a batch of messages to the broker.
+	 * <p>
+	 * The default implementation simply sends each message in turn, which preserves the semantics of
+	 * {@link #send(IMessage)} exactly. Implementations backed by a broker that can amortize the cost of
+	 * synchronizing a batch (for example a single transacted JMS session, or a single flush) are expected to
+	 * override this method.
+	 * </p>
+	 *
+	 * @param theMessages the messages to send, in the order in which they should be sent
+	 * @return the result of each send operation, in the same order as <code>theMessages</code>
+	 */
+	default List<ISendResult> sendAll(List<IMessage<T>> theMessages) {
+		List<ISendResult> retVal = new ArrayList<>(theMessages.size());
+		for (IMessage<T> nextMessage : theMessages) {
+			retVal.add(send(nextMessage));
+		}
+		return retVal;
+	}
 }
