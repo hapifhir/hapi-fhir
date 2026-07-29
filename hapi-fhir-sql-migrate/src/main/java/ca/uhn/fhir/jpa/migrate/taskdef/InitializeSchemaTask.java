@@ -67,9 +67,6 @@ public class InitializeSchemaTask extends BaseTask {
 					"The table {} already exists.  Skipping schema initialization for {}",
 					schemaExistsIndicatorTable,
 					driverType);
-			if (mySchemaInitializationProvider.canInitializeSchema()) {
-				myInitializedSchema = true;
-			}
 			return;
 		}
 

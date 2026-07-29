@@ -47,5 +47,19 @@ public class BaseTaskTest {
 		}
 	}
 
+	@Test
+	public void testValidateVersionMigrationSequenceTooLong() {
+		DropTableTask task = new DropTableTask("1", "12345678.1234567");
+		try {
+			task.validateVersion();
+			fail();
+		} catch (IllegalStateException e) {
+			assertEquals(
+					Msg.code(62) + "The version 12345678.1234567 does not match the expected pattern "
+							+ BaseTask.MIGRATION_VERSION_PATTERN,
+					e.getMessage());
+		}
+	}
+
 
 }
