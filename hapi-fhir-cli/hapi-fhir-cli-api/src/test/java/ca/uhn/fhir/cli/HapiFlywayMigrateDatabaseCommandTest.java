@@ -259,6 +259,35 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 			}
 
 	@Test
+	public void testMigrateFrom340_whenNoMigrationTableExists_withBaselineVersion_executesMigration()
+			throws IOException, SQLException {
+
+		File location = getLocation("migrator_h2_test_340_with_baseline");
+
+		String url = "jdbc:h2:" + location.getAbsolutePath();
+		DriverTypeEnum.ConnectionProperties connectionProperties =
+				DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "", "");
+
+		executeSqlStatements(connectionProperties, "/persistence_create_h2_340.sql");
+		seedDatabase340(connectionProperties);
+
+		String[] args = new String[]{
+			BaseFlywayMigrateDatabaseCommand.MIGRATE_DATABASE,
+			"-d", "H2_EMBEDDED",
+			"-u", url,
+			"-n", "",
+			"-p", "",
+			"--baseline-version", "3.4.0"
+		};
+
+		App.main(args);
+
+		assertThat(JdbcUtils.getTableNames(connectionProperties))
+				.contains("HFJ_RES_REINDEX_JOB")
+				.doesNotContain("FLY_HFJ_MIGRATION", "HFJ_SEARCH_PARM");
+	}
+
+	@Test
 	public void testMigrateFrom340_whenMigrationHistoryExists_rejectsBaselineVersion() throws IOException, SQLException {
 
 		File location = getLocation("migrator_h2_test_340_with_history_and_baseline");
