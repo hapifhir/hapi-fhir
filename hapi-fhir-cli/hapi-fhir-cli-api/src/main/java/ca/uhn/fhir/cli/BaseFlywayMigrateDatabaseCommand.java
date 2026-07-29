@@ -104,7 +104,7 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 				null,
 				BASELINE_VERSION,
 				"Version",
-				"Record all migrations up to this version as already applied before migrating. This is intended for existing HAPI FHIR schemas that do not have migration history. E.g. 8.4.0");
+				"The HAPI FHIR version to which this database has previously been migrated. Before running migrations, all migrations up to and including this version are recorded as already applied. This is intended for existing HAPI FHIR schemas without migration history. Example: 8.4.0.");
 		addOptionalOption(
 				retVal,
 				null,
