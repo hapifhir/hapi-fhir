@@ -34,6 +34,8 @@ import java.util.Set;
 
 public interface IJobCoordinator {
 
+	String USER_DATA_KEY_JOB_INSTANCE_ID = "jobInstanceId";
+
 	/**
 	 * Starts a new job instance
 	 *

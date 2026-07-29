@@ -67,7 +67,7 @@ public class ResourceCountCache implements IHasScheduledJobs {
 		try {
 			retVal = myFetcher.call();
 		} catch (Exception e) {
-			throw new InternalErrorException(Msg.code(799) + e);
+			throw new InternalErrorException(Msg.code(799) + e, e);
 		}
 
 		myCapabilityStatement.set(retVal);

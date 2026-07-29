@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5864
+title: "Previously, DAO/batch reindexing could update search parameter indexes without republishing resources
+  to the fulltext (Hibernate Search / Elasticsearch) index. Reindex now republishes fulltext documents
+  after successful search parameter reindexing. Thanks to Patrick Werner for the fix!"

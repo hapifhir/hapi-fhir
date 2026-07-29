@@ -160,8 +160,8 @@ public class ResourceCompartmentUtil {
 	 * @param theResourceDef      the RuntimeResourceDefinition providing the RuntimeSearchParam list
 	 * @param theIncludeSupersets If <code>false</code>, include only the parameters explicitly defined as being a part
 	 *                            of the Patient compartment. If <code>true</code>, include other parameters whose path
-	 *                            would include the same resources. For example, for the <code>Observation</code> resource
-	 *                            type, the superset would include both the <code>subject</code> and <code>patient</code>
+	 *                            would include the same resources. For example, for the <code>Encounter</code> resource
+	 *                            type, the superset would include both the <code>patient</code> and <code>subject</code>
 	 *                            parameters, where the non-superset would include only the <code>patient</code> parameter.
 	 * @return the RuntimeSearchParam filtered list
 	 * @since 8.6.0

@@ -563,7 +563,11 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 				return new AsyncRequestUtil.CompletedJobPollResponse(null, List.of(report));
 			};
 			AsyncRequestUtil.handleAsyncJobPollForStatusResponse(
-					theRequestDetails, jobInstance, OPERATION_UPLOAD_TERMINOLOGY_START_JOB, completedDetailsProvider);
+					theRequestDetails,
+					jobInstance,
+					OPERATION_UPLOAD_TERMINOLOGY_START_JOB,
+					jobType.jobDefinitionId(),
+					completedDetailsProvider);
 
 		} else {
 			throw new InvalidRequestException(Msg.code(2948) + "Can't use this operation to poll status of this job");

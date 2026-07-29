@@ -23,6 +23,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.MigrationTaskExecutionResultEnum;
 import org.flywaydb.core.api.MigrationVersion;
 
 import java.util.Optional;
@@ -57,8 +58,12 @@ public class HapiMigrationStorageSvc {
 	 *
 	 * @return a list of migration versions that have been successfully run against the database
 	 */
-	Set<MigrationVersion> fetchAppliedMigrationVersions() {
+	public Set<MigrationVersion> fetchAppliedMigrationVersions() {
 		return myHapiMigrationDao.fetchSuccessfulMigrationVersions();
+	}
+
+	public boolean hasSuccessfulMigrationVersions() {
+		return myHapiMigrationDao.findAll().stream().anyMatch(t -> t.getSuccess() && t.getVersion() != null);
 	}
 
 	/**
@@ -83,6 +88,14 @@ public class HapiMigrationStorageSvc {
 		if (theBaseTask.getExecutionResult() != null) {
 			entity.setResult(theBaseTask.getExecutionResult().name());
 		}
+		myHapiMigrationDao.save(entity);
+	}
+
+	public void saveTaskAsBaselined(BaseTask theBaseTask) {
+		HapiMigrationEntity entity = HapiMigrationEntity.fromBaseTask(theBaseTask);
+		entity.setExecutionTime(0);
+		entity.setSuccess(true);
+		entity.setResult(MigrationTaskExecutionResultEnum.BASELINED.name());
 		myHapiMigrationDao.save(entity);
 	}
 

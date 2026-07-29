@@ -67,10 +67,12 @@ public class FhirContextSearchParamRegistry implements ISearchParamRegistry {
 	public ResourceSearchParams getActiveSearchParams(
 			@Nonnull String theResourceName, @Nonnull SearchParamLookupContextEnum theContext) {
 		ResourceSearchParams retval = new ResourceSearchParams(theResourceName);
-		RuntimeResourceDefinition nextResDef = myCtx.getResourceDefinition(theResourceName);
-		for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
-			if (isAllowedForContext(nextSp, theContext)) {
-				retval.put(nextSp.getName(), nextSp);
+		if (!"Resource".equals(theResourceName)) {
+			RuntimeResourceDefinition nextResDef = myCtx.getResourceDefinition(theResourceName);
+			for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
+				if (isAllowedForContext(nextSp, theContext)) {
+					retval.put(nextSp.getName(), nextSp);
+				}
 			}
 		}
 

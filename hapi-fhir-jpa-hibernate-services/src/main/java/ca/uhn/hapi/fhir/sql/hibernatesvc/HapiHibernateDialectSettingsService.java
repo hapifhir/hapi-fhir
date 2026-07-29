@@ -32,6 +32,7 @@ import org.hibernate.service.Service;
 public class HapiHibernateDialectSettingsService implements Service {
 
 	private boolean myDatabasePartitionMode;
+	private IdSequencePoolingStrategy myIdSequencePoolingStrategy = IdSequencePoolingStrategy.SHARED_POOL;
 
 	/**
 	 * Constructor
@@ -52,5 +53,21 @@ public class HapiHibernateDialectSettingsService implements Service {
 	 */
 	public void setDatabasePartitionMode(boolean theDatabasePartitionMode) {
 		myDatabasePartitionMode = theDatabasePartitionMode;
+	}
+
+	/**
+	 * The strategy the id sequence generator uses to allocate new resource ids. Defaults to
+	 * {@link IdSequencePoolingStrategy#SHARED_POOL} (the legacy single shared pool).
+	 */
+	public IdSequencePoolingStrategy getIdSequencePoolingStrategy() {
+		return myIdSequencePoolingStrategy;
+	}
+
+	/**
+	 * The strategy the id sequence generator uses to allocate new resource ids. Defaults to
+	 * {@link IdSequencePoolingStrategy#SHARED_POOL} (the legacy single shared pool).
+	 */
+	public void setIdSequencePoolingStrategy(IdSequencePoolingStrategy theIdSequencePoolingStrategy) {
+		myIdSequencePoolingStrategy = theIdSequencePoolingStrategy;
 	}
 }

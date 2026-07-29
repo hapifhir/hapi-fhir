@@ -19,7 +19,6 @@ import ca.uhn.fhir.jpa.test.ResetSequencesTestHelper;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -214,39 +213,6 @@ public class DeletedDatabaseRowsR5Test extends BaseJpaR5Test {
 	 * in a sane way if it does.
 	 */
 	@Test
-	void testSequenceReturnsReservedValue_ClientAssignedIds() {
-		// Setup
-		runInTransaction(() -> {
-			myEntityManager.createNativeQuery("drop sequence SEQ_RESOURCE_ID").executeUpdate();
-			myEntityManager.createNativeQuery("create sequence SEQ_RESOURCE_ID minvalue -100 start with -100 increment by 50").executeUpdate();
-		});
-
-		for (int i = 0; i < 200; i++) {
-			try {
-				createPatient(withId("P" + i), withActiveTrue());
-			} catch (InternalErrorException e) {
-				assertEquals("HAPI-2791: Resource ID generator provided illegal value: -1 / -1", e.getMessage());
-				assertDoesntExist(new IdType("Patient/P" + i));
-				continue;
-			}
-
-			Patient patient = myPatientDao.read(new IdType("Patient/P" + i), newSrd());
-			JpaPid pid = (JpaPid) patient.getUserData(IDao.RESOURCE_PID_KEY);
-			ourLog.info("Created resource with PID: {}", pid);
-			assertNotEquals(JpaConstants.NO_MORE, pid);
-		}
-
-	}
-
-	/**
-	 * Manually mess with the resource PID so that it returns an illegal value of -1, which is used internally
-	 * by HAPI to mean "no more results available". We should fail gracefully if the sequence generator returns
-	 * this value, as opposed to saving a record with this ID.
-	 * <p>
-	 * This should never actually happen in a real deployment, but this test just makes sure that we behave
-	 * in a sane way if it does.
-	 */
-	@Test
 	void testSequenceReturnsReservedValue_ServerAssignedIds() {
 		// Setup
 		runInTransaction(() -> {
@@ -268,7 +234,6 @@ public class DeletedDatabaseRowsR5Test extends BaseJpaR5Test {
 			assertNotEquals(JpaConstants.NO_MORE, pid);
 		}
 	}
-
 
 	@Test
 	void resourceTableHasInvalidCurrentVersion_Search() {

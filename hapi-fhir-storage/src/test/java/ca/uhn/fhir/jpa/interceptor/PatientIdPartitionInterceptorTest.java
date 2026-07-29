@@ -13,12 +13,18 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.interceptor.model.TransactionWriteAfterPrefetchDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.test.junit.StringToIntegerListArgumentConverter;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
@@ -36,6 +42,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -45,6 +52,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class PatientIdPartitionInterceptorTest {
@@ -64,8 +72,9 @@ class PatientIdPartitionInterceptorTest {
 	void beforeEach() {
 		ISearchParamRegistry searchParamRegistry = new FhirContextSearchParamRegistry(myFhirContext);
 		StorageSettings storageSettings = new StorageSettings();
-		ISearchParamExtractor searchParamExtractor = new SearchParamExtractorR4(storageSettings, myPartitionSettings, myFhirContext, searchParamRegistry);
-		mySvc = new PatientIdPartitionInterceptor(myFhirContext, searchParamExtractor, myPartitionSettings, myDaoRegistry);
+		ISearchParamExtractor myRealSearchParamExtractor =
+				new SearchParamExtractorR4(storageSettings, myPartitionSettings, myFhirContext, searchParamRegistry);
+		mySvc = new PatientIdPartitionInterceptor(myFhirContext, myRealSearchParamExtractor, myPartitionSettings, myDaoRegistry);
 
 		myMatchUrlSvc = new MatchUrlService(myFhirContext, new FhirContextSearchParamRegistry(myFhirContext));
 	}
@@ -268,7 +277,9 @@ class PatientIdPartitionInterceptorTest {
 		Encounter?subject.identifier=http://patient|1&subject.gender=female
 		Encounter?subject.gender=male&subject.identifier=http://patient|1
 		""")
-	void testSearch_ChainedParamWithNonResolvedParameter_throwsException(String theValue) {
+	void testSearch_ChainedParamWithNonResolvedParameter_allPartitionsSearchNotSupported_throwsException(String theValue) {
+		myPartitionSettings.setAllPartitionSearchSupported(false);
+
 		MatchUrlService.ResourceTypeAndSearchParameterMap parsedMatchUrl = myMatchUrlSvc.parseAndTranslateMatchUrl(theValue);
 		SearchParameterMap params = parsedMatchUrl.searchParameterMap();
 		String resourceType = parsedMatchUrl.resourceType();
@@ -277,6 +288,24 @@ class PatientIdPartitionInterceptorTest {
 		assertThatThrownBy(() -> mySvc.identifyForRead(readDetails, new ServletRequestDetails()))
 			.isInstanceOf(MethodNotAllowedException.class)
 			.hasMessageContaining(Msg.code(2928));
+	}
+
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		Encounter?subject.identifier=http://patient|1
+		Encounter?subject.identifier=http://patient|1&subject.gender=female
+		Encounter?subject.gender=male&subject.identifier=http://patient|1
+		""")
+	void testSearch_ChainedParamWithNonResolvedParameter_allPartitionsSearchSupported_returnsAllPartitions(String theValue) {
+		MatchUrlService.ResourceTypeAndSearchParameterMap parsedMatchUrl = myMatchUrlSvc.parseAndTranslateMatchUrl(theValue);
+		SearchParameterMap params = parsedMatchUrl.searchParameterMap();
+		String resourceType = parsedMatchUrl.resourceType();
+		ReadPartitionIdRequestDetails readDetails = ReadPartitionIdRequestDetails.forSearchType(resourceType, params, null);
+
+		// myPartitionSettings.isAllPartitionSearchSupported() defaults to true
+		RequestPartitionId actual = mySvc.identifyForRead(readDetails, new ServletRequestDetails());
+
+		assertTrue(actual.isAllPartitions());
 	}
 
 	@ParameterizedTest
@@ -427,6 +456,171 @@ class PatientIdPartitionInterceptorTest {
 				case "DEFAULT" -> myPartitionSettings.getDefaultPartitionId();
 				default -> Integer.parseInt(theExpected);
 			};
+		}
+	}
+
+	/**
+	 * Rewriting of Patient inline match URLs in a transaction body: after the pre-fetch has run, the
+	 * {@code STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH} hook rewrites a {@code "Patient?identifier=..."} body
+	 * reference to a literal {@code Patient/<id>} by reusing what the pre-fetch resolved into
+	 * {@link TransactionDetails#getResolvedMatchUrls()}, so that per-entry partition determination can route the
+	 * resource. No live search is performed here.
+	 */
+	@Nested
+	class PatientInlineMatchUrlRewriteInTransactionBundle {
+
+		private static final String PATIENT_IDENTIFIER_MATCH_URL = "Patient?identifier=http://acme.org/mrn|PT00062";
+
+		private Bundle bundleWithObservationSubjectReference(String theReferenceValue) {
+			Observation obs = new Observation();
+			obs.getSubject().setReference(theReferenceValue);
+			BundleBuilder bb = new BundleBuilder(myFhirContext);
+			bb.addTransactionCreateEntry(obs);
+			return bb.getBundleTyped();
+		}
+
+		/** The raw bundle entries, as the transaction processor passes them to the hook. */
+		private List<IBase> entriesOf(Bundle theBundle) {
+			return new ArrayList<>(theBundle.getEntry());
+		}
+
+		private void fireHook(Bundle theBundle, TransactionDetails theTransactionDetails) {
+			mySvc.onTransactionWriteAfterPrefetch(
+					new TransactionWriteAfterPrefetchDetails(entriesOf(theBundle)), theTransactionDetails);
+		}
+
+		@Test
+		void testAfterPrefetch_resolvedInForwardMap_rewritesReferenceToLiteralPatientId() {
+			JpaPid pid = mock();
+
+			Bundle bundle = bundleWithObservationSubjectReference(PATIENT_IDENTIFIER_MATCH_URL);
+			Observation obs = (Observation) bundle.getEntry().get(0).getResource();
+
+			// The pre-fetch populates both the match-URL map and the resolved-id (reverse) map; the hook reads both.
+			TransactionDetails transactionDetails = new TransactionDetails();
+			transactionDetails.addResolvedMatchUrl(myFhirContext, PATIENT_IDENTIFIER_MATCH_URL, pid);
+			transactionDetails.addResolvedResourceId(new IdType("Patient/A"), pid);
+
+			fireHook(bundle, transactionDetails);
+
+			assertThat(obs.getSubject().getReference()).isEqualTo("Patient/A");
+		}
+
+		@Test
+		void testAfterPrefetch_absentFromTransactionMap_leftUntouched() {
+			// Not in the pre-fetch's resolved map, so left untouched.
+			Bundle bundle = bundleWithObservationSubjectReference(PATIENT_IDENTIFIER_MATCH_URL);
+			Observation obs = (Observation) bundle.getEntry().get(0).getResource();
+
+			fireHook(bundle, new TransactionDetails());
+
+			assertThat(obs.getSubject().getReference()).isEqualTo(PATIENT_IDENTIFIER_MATCH_URL);
+		}
+
+		@Test
+		void testAfterPrefetch_resolvedToNotFound_leftUntouched() {
+			// The pre-fetch marked the match URL as NOT_FOUND.
+			Bundle bundle = bundleWithObservationSubjectReference(PATIENT_IDENTIFIER_MATCH_URL);
+			Observation obs = (Observation) bundle.getEntry().get(0).getResource();
+			TransactionDetails transactionDetails = new TransactionDetails();
+			transactionDetails.addResolvedMatchUrl(myFhirContext, PATIENT_IDENTIFIER_MATCH_URL, TransactionDetails.NOT_FOUND);
+
+			fireHook(bundle, transactionDetails);
+
+			assertThat(obs.getSubject().getReference()).isEqualTo(PATIENT_IDENTIFIER_MATCH_URL);
+		}
+
+		@Test
+		void testAfterPrefetch_literalReference_isLeftUntouchedAndNotResolved() {
+			Bundle bundle = bundleWithObservationSubjectReference("Patient/A");
+			Observation obs = (Observation) bundle.getEntry().get(0).getResource();
+
+			fireHook(bundle, new TransactionDetails());
+
+			// A literal reference is not a match URL.
+			assertThat(obs.getSubject().getReference()).isEqualTo("Patient/A");
+		}
+
+		@Test
+		void testAfterPrefetch_multipleEntries_rewritesEachInlineMatchUrl() {
+			String matchUrlA = "Patient?identifier=http://acme.org/mrn|A";
+			String matchUrlB = "Patient?identifier=http://acme.org/mrn|B";
+			JpaPid pidA = mock();
+			JpaPid pidB = mock();
+
+			Observation obsA = new Observation();
+			obsA.getSubject().setReference(matchUrlA);
+			Observation obsB = new Observation();
+			obsB.getSubject().setReference(matchUrlB);
+			BundleBuilder bb = new BundleBuilder(myFhirContext);
+			bb.addTransactionCreateEntry(obsA);
+			bb.addTransactionCreateEntry(obsB);
+			Bundle bundle = bb.getBundleTyped();
+
+			TransactionDetails transactionDetails = new TransactionDetails();
+			transactionDetails.addResolvedMatchUrl(myFhirContext, matchUrlA, pidA);
+			transactionDetails.addResolvedMatchUrl(myFhirContext, matchUrlB, pidB);
+			transactionDetails.addResolvedResourceId(new IdType("Patient/A"), pidA);
+			transactionDetails.addResolvedResourceId(new IdType("Patient/B"), pidB);
+
+			fireHook(bundle, transactionDetails);
+
+			assertThat(obsA.getSubject().getReference()).isEqualTo("Patient/A");
+			assertThat(obsB.getSubject().getReference()).isEqualTo("Patient/B");
+		}
+
+		@Test
+		void testAfterPrefetch_multipleCompartmentReferencesInOneResource_eachResolvedToItsPatient() {
+			// subject and performer are both Patient-compartment params, so each is rewritten independently.
+			String subjectMatchUrl = "Patient?identifier=http://acme.org/mrn|A";
+			String performerMatchUrl = "Patient?identifier=http://acme.org/mrn|B";
+			JpaPid pidA = mock();
+			JpaPid pidB = mock();
+
+			Observation obs = new Observation();
+			obs.getSubject().setReference(subjectMatchUrl);
+			obs.addPerformer().setReference(performerMatchUrl);
+			BundleBuilder bb = new BundleBuilder(myFhirContext);
+			bb.addTransactionCreateEntry(obs);
+			Bundle bundle = bb.getBundleTyped();
+
+			TransactionDetails transactionDetails = new TransactionDetails();
+			transactionDetails.addResolvedMatchUrl(myFhirContext, subjectMatchUrl, pidA);
+			transactionDetails.addResolvedMatchUrl(myFhirContext, performerMatchUrl, pidB);
+			transactionDetails.addResolvedResourceId(new IdType("Patient/A"), pidA);
+			transactionDetails.addResolvedResourceId(new IdType("Patient/B"), pidB);
+
+			fireHook(bundle, transactionDetails);
+
+			assertThat(obs.getSubject().getReference()).isEqualTo("Patient/A");
+			assertThat(obs.getPerformerFirstRep().getReference()).isEqualTo("Patient/B");
+		}
+
+		@Test
+		void testAfterPrefetch_nonPatientInlineMatchUrl_isLeftUntouchedAndNotResolved() {
+			String groupInlineMatchUrl = "Group?identifier=http://acme.org/grp|G1";
+			Observation obs = new Observation();
+			obs.getSubject().setReference(groupInlineMatchUrl);
+			BundleBuilder bb = new BundleBuilder(myFhirContext);
+			bb.addTransactionCreateEntry(obs);
+
+			// Only Patient inline match URLs are rewritten.
+			fireHook(bb.getBundleTyped(), new TransactionDetails());
+
+			assertThat(obs.getSubject().getReference()).isEqualTo(groupInlineMatchUrl);
+		}
+
+		@Test
+		void testAfterPrefetch_nonCompartmentPatientInlineMatchUrl_isLeftUntouchedAndNotResolved() {
+			// 'focus' is not a Patient-compartment search param for Observation, so it is not rewritten.
+			Observation obs = new Observation();
+			obs.addFocus().setReference(PATIENT_IDENTIFIER_MATCH_URL);
+			BundleBuilder bb = new BundleBuilder(myFhirContext);
+			bb.addTransactionCreateEntry(obs);
+
+			fireHook(bb.getBundleTyped(), new TransactionDetails());
+
+			assertThat(obs.getFocusFirstRep().getReference()).isEqualTo(PATIENT_IDENTIFIER_MATCH_URL);
 		}
 	}
 

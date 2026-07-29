@@ -86,7 +86,9 @@ import ca.uhn.fhir.jpa.dao.expunge.JpaResourceExpungeService;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
 import ca.uhn.fhir.jpa.dao.index.DaoResourceLinkResolver;
 import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
+import ca.uhn.fhir.jpa.dao.index.ISearchParamIndexProvider;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.index.SearchParamIndexProviderRegistry;
 import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
@@ -95,7 +97,6 @@ import ca.uhn.fhir.jpa.delete.DeleteConflictFinderService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceServiceRegistry;
 import ca.uhn.fhir.jpa.graphql.DaoRegistryGraphQLStorageServices;
 import ca.uhn.fhir.jpa.interceptor.AuthResourceResolver;
@@ -187,12 +188,12 @@ import ca.uhn.fhir.jpa.term.TermCodeSystemStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
-import ca.uhn.fhir.jpa.term.ValueSetConceptAccumulator;
-import ca.uhn.fhir.jpa.term.ValueSetConceptAccumulatorFactory;
+import ca.uhn.fhir.jpa.term.TermValueSetStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReindexingSvc;
+import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
 import ca.uhn.fhir.jpa.term.config.TermCodeSystemConfig;
 import ca.uhn.fhir.jpa.util.DialectSvc;
 import ca.uhn.fhir.jpa.util.JpaHapiTransactionService;
@@ -229,6 +230,7 @@ import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValid
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.WorkerContextValidationSupportAdapter;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -259,7 +261,6 @@ import java.util.List;
 	ValidationSupportConfig.class,
 	Batch2SupportConfig.class,
 	JpaBulkExportConfig.class,
-	SearchConfig.class,
 	PackageLoaderConfig.class,
 	EnversAuditConfig.class,
 	MdmJpaConfig.class
@@ -280,17 +281,20 @@ public class JpaConfig {
 	private static final String HAPI_DEFAULT_SCHEDULER_GROUP = "HAPI";
 
 	@Autowired
-	public JpaStorageSettings myStorageSettings;
+	protected JpaStorageSettings myStorageSettings;
 
 	@Autowired
-	private PartitionSettings myPartitionSettings;
-
-	@Autowired
-	private FhirContext myFhirContext;
+	protected FhirContext myFhirContext;
 
 	@Bean
 	public ValidationSupportChain.CacheConfiguration validationSupportChainCacheConfiguration() {
 		return ValidationSupportChain.CacheConfiguration.defaultValues();
+	}
+
+	@Bean
+	public SearchParamIndexProviderRegistry searchParamIndexProviderRegistry(
+			ObjectProvider<ISearchParamIndexProvider> theProviders) {
+		return new SearchParamIndexProviderRegistry(theProviders.stream().toList());
 	}
 
 	/**
@@ -321,11 +325,6 @@ public class JpaConfig {
 	public IValidationSupport jpaValidationSupportChain() {
 		return new JpaValidationSupportChain(
 				myFhirContext, validationSupportChainCacheConfiguration(), workerContextValidationSupportAdapter());
-	}
-
-	@Bean("myDaoRegistry")
-	public DaoRegistry daoRegistry() {
-		return new DaoRegistry();
 	}
 
 	@Lazy
@@ -897,8 +896,8 @@ public class JpaConfig {
 
 	@Bean
 	@Primary
-	public ISearchParamProvider searchParamProvider() {
-		return new DaoSearchParamProvider();
+	public ISearchParamProvider searchParamProvider(DaoRegistry theDaoRegistry) {
+		return new DaoSearchParamProvider(theDaoRegistry);
 	}
 
 	@Bean
@@ -1016,19 +1015,13 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public ValueSetConceptAccumulatorFactory valueSetConceptAccumulatorFactory() {
-		return new ValueSetConceptAccumulatorFactory();
-	}
-
-	@Bean
-	@Scope("prototype")
-	public ValueSetConceptAccumulator valueSetConceptAccumulator(TermValueSet theTermValueSet) {
-		return valueSetConceptAccumulatorFactory().create(theTermValueSet);
-	}
-
-	@Bean
 	public ITermCodeSystemStorageSvc termCodeSystemStorageSvc() {
 		return new TermCodeSystemStorageSvcImpl();
+	}
+
+	@Bean
+	public ITermValueSetStorageSvc termValueSetStorageSvc() {
+		return new TermValueSetStorageSvcImpl();
 	}
 
 	@Bean
@@ -1121,8 +1114,9 @@ public class JpaConfig {
 
 	@Primary
 	@Bean
-	public ReplaceReferencesProvenanceSvc replaceReferencesProvenanceSvc(DaoRegistry theDaoRegistry) {
-		return new ReplaceReferencesProvenanceSvc(theDaoRegistry);
+	public ReplaceReferencesProvenanceSvc replaceReferencesProvenanceSvc(
+			FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
+		return new ReplaceReferencesProvenanceSvc(theFhirContext, theDaoRegistry);
 	}
 
 	@Bean
@@ -1132,8 +1126,10 @@ public class JpaConfig {
 
 	@Bean
 	public PreviousResourceVersionRestorer resourceVersionRestorer(
-			DaoRegistry theDaoRegistry, HapiTransactionService theHapiTransactionService) {
-		return new PreviousResourceVersionRestorer(theDaoRegistry, theHapiTransactionService);
+			DaoRegistry theDaoRegistry,
+			HapiTransactionService theHapiTransactionService,
+			PartitionSettings thePartitionSettings) {
+		return new PreviousResourceVersionRestorer(theDaoRegistry, theHapiTransactionService, thePartitionSettings);
 	}
 
 	@Bean

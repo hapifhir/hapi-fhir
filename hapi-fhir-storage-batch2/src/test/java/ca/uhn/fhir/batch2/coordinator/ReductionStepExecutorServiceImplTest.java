@@ -8,6 +8,7 @@ import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.batch2.maintenance.WorkChunkHeartbeatService;
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
@@ -71,12 +72,19 @@ public class ReductionStepExecutorServiceImplTest {
 	private IReductionStepWorker<TestJobParameters, StepInputData, StepOutputData> myReductionStepWorker;
 	@Mock
 	private IInterceptorService myInterceptorService;
+	@Mock
+	private WorkChunkHeartbeatService myWorkChunkHeartbeatService;
+	@Mock
+	private JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor;
+	@Mock
+	private IJobStepWorker<TestJobParameters, VoidModel, StepInputData> myStepWorker;
+
 	private ReductionStepExecutorServiceImpl mySvc;
 	private final JobDefinitionRegistry myJobDefinitionRegistry = new JobDefinitionRegistry();
 
 	@BeforeEach
 	public void before() {
-		mySvc = new ReductionStepExecutorServiceImpl(myJobPersistence, myTransactionService, myJobDefinitionRegistry, myJobStepExecutionServices , myInterceptorService);
+		mySvc = new ReductionStepExecutorServiceImpl(myJobPersistence, myTransactionService, myJobDefinitionRegistry, myJobStepExecutionServices , myInterceptorService, myWorkChunkHeartbeatService);
 	}
 
 	// QUEUED, IN_PROGRESS are supported because of backwards compatibility
@@ -95,7 +103,6 @@ public class ReductionStepExecutorServiceImplTest {
 		}
 		JobInstance jobInstance = getTestJobInstance();
 		jobInstance.setStatus(StatusEnum.IN_PROGRESS);
-		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
 
 		// when
 		when(workCursor.getCurrentStep()).thenReturn((JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData>) createJobDefinition().getSteps().get(1));
@@ -150,7 +157,6 @@ public class ReductionStepExecutorServiceImplTest {
 		}
 		JobInstance jobInstance = getTestJobInstance();
 		jobInstance.setStatus(StatusEnum.IN_PROGRESS);
-		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
 
 		// when
 		when(workCursor.getCurrentStep()).thenReturn((JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData>) createJobDefinition().getSteps().get(1));
@@ -204,7 +210,6 @@ public class ReductionStepExecutorServiceImplTest {
 		}
 		JobInstance jobInstance = getTestJobInstance();
 		jobInstance.setStatus(StatusEnum.IN_PROGRESS);
-		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
 
 		// when
 		when(workCursor.getCurrentStep()).thenReturn((JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData>) createJobDefinition().getSteps().get(1));
@@ -239,6 +244,22 @@ public class ReductionStepExecutorServiceImplTest {
 			.run(any(), any());
 	}
 
+	@Test
+	public void doExecution_reductionStep_NotFound() {
+		// setup
+
+		// when
+		when(workCursor.getCurrentStep()).thenReturn((JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData>) createJobDefinition().getSteps().get(1));
+		when(workCursor.getJobDefinition()).thenReturn(createJobDefinition());
+		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.empty());
+
+		// test
+		ReductionStepChunkProcessingResponse result = mySvc.executeReductionStep(INSTANCE_ID, workCursor);
+
+		// verify
+		assertFalse(result.isSuccessful());
+	}
+
 	@SuppressWarnings("unchecked")
 	private JobDefinition<TestJobParameters> createJobDefinition() {
 		return JobDefinition.newBuilder()
@@ -250,8 +271,8 @@ public class ReductionStepExecutorServiceImplTest {
 			.addFirstStep(
 				"step 1",
 				"description 1",
-				VoidModel.class,
-				mock(IJobStepWorker.class) // we don't care about this step - we just need it
+				StepInputData.class,
+				myStepWorker
 			)
 			.addFinalReducerStep(
 				REDUCTION_STEP_ID,

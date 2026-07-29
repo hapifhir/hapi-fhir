@@ -29,12 +29,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
@@ -55,8 +56,11 @@ import static org.mockito.Mockito.when;
 /**
  * Tests copied from jpa.subscription.resthook.RestHookTestDstu3Test
  */
+@ExtendWith(MockitoExtension.class)
 public class SubscriptionMatchingListenerTest extends BaseBlockingQueueSubscribableChannelDstu3Test {
-	private final IFhirResourceDao<Subscription> myMockSubscriptionDao = Mockito.mock(IFhirResourceDao.class);
+
+	@Autowired
+	private IFhirResourceDao<Subscription> myMockSubscriptionDao;
 
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
@@ -64,8 +68,6 @@ public class SubscriptionMatchingListenerTest extends BaseBlockingQueueSubscriba
 	@BeforeEach
 	public void beforeEach() {
 		when(myRequestPartitionHelperSvc.isDefaultPartition(any(RequestPartitionId.class))).thenReturn(Boolean.TRUE);
-		when(myMockSubscriptionDao.getResourceType()).thenReturn(Subscription.class);
-		myDaoRegistry.register(myMockSubscriptionDao);
 	}
 
 	@AfterEach
@@ -397,7 +399,6 @@ public class SubscriptionMatchingListenerTest extends BaseBlockingQueueSubscriba
 			when(message.getOperationType()).thenReturn(BaseResourceModifiedMessage.OperationTypeEnum.DELETE);
 			when(myInterceptorBroadcaster.callHooks(
 				eq(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED), any(HookParams.class))).thenReturn(true);
-			when(mySubscriptionRegistry.getAll()).thenReturn(Collections.emptyList());
 			when(myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(any())).thenReturn(Optional.ofNullable(message));
 
 			subscriber.matchActiveSubscriptionsAndDeliver(message);

@@ -24,8 +24,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 public class UploadStatistics {
-	private final IIdType myTarget;
-
+	private IIdType myTarget;
 	private int myUpdatedConceptCount;
 	private int myAddedConceptCount = 0;
 	private int myAddedDesignationCount = 0;
@@ -37,12 +36,20 @@ public class UploadStatistics {
 	private int myRemovedPropertyCount = 0;
 	private int myRemovedConceptLinkCount = 0;
 
+	public UploadStatistics() {
+		// nothing
+	}
+
 	public UploadStatistics(IIdType theTarget) {
 		this(0, theTarget);
 	}
 
 	public UploadStatistics(int theUpdatedConceptCount, IIdType theTarget) {
 		myUpdatedConceptCount = theUpdatedConceptCount;
+		myTarget = theTarget;
+	}
+
+	public void setTarget(IIdType theTarget) {
 		myTarget = theTarget;
 	}
 

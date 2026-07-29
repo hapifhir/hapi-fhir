@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7954
+title: "Previously, resources installed via package installer from an additional resource folder using parameter 
+`additionalResourceFolders` ignored the `installResourceTypes` parameter and installed the default resource types. 
+This has been fixed."

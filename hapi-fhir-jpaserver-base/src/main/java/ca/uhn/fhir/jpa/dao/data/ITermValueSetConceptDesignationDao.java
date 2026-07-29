@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -29,10 +30,10 @@ import org.springframework.data.repository.query.Param;
 public interface ITermValueSetConceptDesignationDao
 		extends JpaRepository<TermValueSetConceptDesignation, IdAndPartitionId>, IHapiFhirJpaRepository {
 
-	@Query("SELECT COUNT(vscd) FROM TermValueSetConceptDesignation vscd WHERE vscd.myValueSetPid = :pid")
-	Integer countByTermValueSetId(@Param("pid") Long theValueSetId);
+	@Query("SELECT COUNT(vscd) FROM TermValueSetConceptDesignation vscd WHERE vscd.myValueSet = :vs")
+	Integer countByTermValueSet(@Param("vs") TermValueSet theValueSet);
 
-	@Query("DELETE FROM TermValueSetConceptDesignation vscd WHERE vscd.myValueSetPid = :pid")
+	@Query("DELETE FROM TermValueSetConceptDesignation vscd WHERE vscd.myValueSet = :vs")
 	@Modifying
-	void deleteByTermValueSetId(@Param("pid") Long theValueSetId);
+	void deleteByTermValueSet(@Param("vs") TermValueSet theValueSet);
 }

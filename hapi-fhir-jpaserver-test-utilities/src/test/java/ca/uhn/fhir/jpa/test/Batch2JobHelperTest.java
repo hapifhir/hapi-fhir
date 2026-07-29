@@ -100,14 +100,17 @@ class Batch2JobHelperTest {
 		// setup
 		JobInstance failedJob = createInstance("failed-1", StatusEnum.FAILED);
 		JobInstance completedJob = createInstance("completed-1", StatusEnum.COMPLETED);
-		when(myJobCoordinator.getInstances(1000, 1))
+		when(myJobCoordinator.getInstances(1000, 0))
 			.thenReturn(List.of(failedJob, completedJob));
+		when(myJobCoordinator.getInstances(1000, 1))
+			.thenReturn(List.of());
 
 		// execute - should not hang or throw
 		myBatch2JobHelper.awaitNoJobsRunning();
 
 		// verify
-		verify(myJobCoordinator, atLeastOnce()).getInstances(1000, 1);
+		verify(myJobCoordinator, times(1)).getInstances(1000, 0);
+		verify(myJobCoordinator, times(1)).getInstances(1000, 1);
 		verify(myJobMaintenanceService, atLeastOnce()).runActiveJobMaintenancePass();
 	}
 

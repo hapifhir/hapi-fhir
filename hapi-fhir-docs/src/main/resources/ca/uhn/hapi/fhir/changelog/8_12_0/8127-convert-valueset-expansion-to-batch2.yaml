@@ -1,0 +1,4 @@
+---
+type: add
+issue: 8127
+title: "The terminology service ValueSet pre-expander has been converted from an anonymous scheduled background job into a Batch2 job. This makes the process more stable, easier to monitor, and means that the $invalidate-expansion operation now returns ongoing status information and produces a report when the pre-expansion is complete."

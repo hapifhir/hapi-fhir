@@ -122,6 +122,11 @@ public interface IHapiTransactionService {
 		return false;
 	}
 
+	@Beta
+	default boolean isRequiresNewTransactionWhenChangingPartitions() {
+		return false;
+	}
+
 	interface IExecutionBuilder extends TransactionOperations {
 
 		IExecutionBuilder withIsolation(Isolation theIsolation);

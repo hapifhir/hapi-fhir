@@ -178,7 +178,7 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 		}
 
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-		startRequest.setJobDefinitionId(getJobId());
+		startRequest.setJobDefinitionId(getJobDefinitionId());
 		startRequest.setParameters(theJobParameters);
 
 		Batch2JobStartResponse outcome = myJobCoordinator.startInstance(theRequestDetails, startRequest);
@@ -263,7 +263,7 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 		}
 
 		IJobCoordinator jobCoordinator = myJobCoordinator;
-		String jobId = getJobId();
+		String jobId = getJobDefinitionId();
 		String operationName = getOperationName();
 
 		JobInstance instance = AsyncRequestUtil.getJobInstance(jobCoordinator, jobId, theJobInstanceId, operationName);
@@ -304,19 +304,20 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 			}
 		}
 
-		handleAsyncJobPollForStatusResponse(theRequestDetails, instance, operationName, returnValue);
+		handleAsyncJobPollForStatusResponse(theRequestDetails, instance, returnValue);
 	}
 
 	private void handleAsyncJobPollForStatusResponse(
-			ServletRequestDetails theRequestDetails,
-			JobInstance theJobInstance,
-			String theOperationName,
-			String theReturnParameterValue)
+			ServletRequestDetails theRequestDetails, JobInstance theJobInstance, String theReturnParameterValue)
 			throws IOException {
 		Function<JobInstance, AsyncRequestUtil.CompletedJobPollResponse> createCompletionPollResponse =
 				theInstance -> createCompletedJobPollResponse(theRequestDetails, theInstance, theReturnParameterValue);
 		AsyncRequestUtil.handleAsyncJobPollForStatusResponse(
-				theRequestDetails, theJobInstance, theOperationName, createCompletionPollResponse);
+				theRequestDetails,
+				theJobInstance,
+				getOperationName(),
+				getJobDefinitionId(),
+				createCompletionPollResponse);
 	}
 
 	private AsyncRequestUtil.CompletedJobPollResponse createCompletedJobPollResponse(
@@ -370,7 +371,7 @@ public abstract class BaseBulkModifyOrRewriteProvider {
 	protected abstract String getOperationPollForStatusStatus();
 
 	@Nonnull
-	protected abstract String getJobId();
+	protected abstract String getJobDefinitionId();
 
 	@Nonnull
 	protected abstract String getOperationName();

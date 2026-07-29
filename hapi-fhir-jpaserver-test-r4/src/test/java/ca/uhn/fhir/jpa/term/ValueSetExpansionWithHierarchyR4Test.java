@@ -99,7 +99,7 @@ public class ValueSetExpansionWithHierarchyR4Test extends BaseTermR4Test {
    @MethodSource(value = "parametersValueSets")
    public void testExpandValueSet_whenUsingHierarchicalCodeSystem_willExpandSuccessfully(ValueSet theValueSet, int theExpectedConceptExpansionCount) {
       myValueSetDao.create(theValueSet, mySrd);
-      myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+      myBatch2JobHelper.awaitNoJobsRunning();
       Optional<TermValueSet> optionalTermValueSet = runInTransaction(() -> myTermValueSetDao.findTermValueSetByUrlAndNullVersion(theValueSet.getUrl()));
 		 assertThat(optionalTermValueSet).isPresent();
       TermValueSet expandedTermValueSet = optionalTermValueSet.get();

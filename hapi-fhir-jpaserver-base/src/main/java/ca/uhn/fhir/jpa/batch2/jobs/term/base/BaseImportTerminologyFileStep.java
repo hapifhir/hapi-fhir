@@ -27,7 +27,6 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.BaseImportLoincStep;
-import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
@@ -35,8 +34,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
-import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.collect.MultimapBuilder;
@@ -45,7 +42,6 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
@@ -59,7 +55,6 @@ import java.util.*;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.STEP_ID_FINALIZE_IMPORT;
 import static ca.uhn.fhir.jpa.term.TermCodeSystemStorageSvcImpl.DONT_POPULATE_PARENT_PIDS_CS_USERDATA_KEY;
-import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.*;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_GENERIC_CODE_SYSTEM_URL;
 
@@ -81,9 +76,6 @@ public abstract class BaseImportTerminologyFileStep<
 
 	@Autowired
 	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
-
-	@Autowired
-	private IHapiTransactionService myTransactionService;
 
 	@Autowired
 	private IValidationSupport myValidationSupport;
@@ -166,43 +158,6 @@ public abstract class BaseImportTerminologyFileStep<
 			CodeSystem codeSystemToPopulate,
 			TerminologyFileSetJson theData,
 			String sourceFilename);
-
-	protected <T> T executeInNewTransactionWithRetry(
-			Callable<T> theFunction, StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails) {
-		int retryCount = 0;
-		while (true) {
-			try {
-				return myTransactionService
-						.withSystemRequestOnDefaultPartition()
-						.execute(theFunction);
-			} catch (ResourceVersionConflictException e) {
-				retryCount++;
-				int maxRetries = 10;
-				if (retryCount > maxRetries) {
-					ourLog.atError()
-							.setMessage("Failed to saver terminology due to version conflict after {} retries: {}")
-							.addArgument(retryCount)
-							.addArgument(e.getMessage())
-							.log();
-					throw e;
-				}
-				ourLog.atWarn()
-						.setMessage("Failed to save terminology for step {}, retry {}/{} in 5 seconds: {}")
-						.addArgument(theStepExecutionDetails.getCurrentStepId())
-						.addArgument(retryCount)
-						.addArgument(maxRetries)
-						.addArgument(e.getMessage())
-						.log();
-
-				long sleepTime = 5 * DateUtils.MILLIS_PER_SECOND;
-				if (HapiSystemProperties.isUnitTestModeEnabled()) {
-					sleepTime = 10;
-				}
-
-				sleepAtLeast(sleepTime);
-			}
-		}
-	}
 
 	protected abstract CT newContextObject(StepExecutionDetails<PT, TerminologyFileSetJson> theStepExecutionDetails);
 
@@ -420,14 +375,7 @@ public abstract class BaseImportTerminologyFileStep<
 
 		TerminologyFileSetJson.RecordsAddedCounter recordsAddedCounter =
 				getRecordsAddedCounter(theStepExecutionDetails);
-		recordsAddedCounter.incrementConceptsAdded(uploadStatistics.getAddedConceptCount());
-		recordsAddedCounter.incrementConceptLinksAdded(uploadStatistics.getAddedConceptLinkCount());
-		recordsAddedCounter.incrementPropertiesAdded(uploadStatistics.getAddedPropertyCount());
-		recordsAddedCounter.incrementDesignationsAdded(uploadStatistics.getAddedDesignationCount());
-		recordsAddedCounter.incrementConceptsRemoved(uploadStatistics.getRemovedConceptCount());
-		recordsAddedCounter.incrementConceptLinksRemoved(uploadStatistics.getRemovedConceptLinkCount());
-		recordsAddedCounter.incrementPropertiesRemoved(uploadStatistics.getRemovedPropertyCount());
-		recordsAddedCounter.incrementDesignationsRemoved(uploadStatistics.getRemovedDesignationCount());
+		recordsAddedCounter.increment(uploadStatistics);
 
 		retVal += uploadStatistics.getAddedConceptCount();
 		retVal += uploadStatistics.getAddedConceptLinkCount();

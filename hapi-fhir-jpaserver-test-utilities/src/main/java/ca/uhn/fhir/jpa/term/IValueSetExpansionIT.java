@@ -27,7 +27,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ch.qos.logback.classic.Level;
@@ -57,10 +57,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 public interface IValueSetExpansionIT {
-	static final String CODE_SYSTEM_CODE = "PRODUCT-MULTI-SOURCE";
-	static final String PROPERTY_NAME = "ACTIVE";
+	String CODE_SYSTEM_CODE = "PRODUCT-MULTI-SOURCE";
+	String PROPERTY_NAME = "ACTIVE";
 
-	static final String CODE_SYSTEM_STR_BASE =
+	String CODE_SYSTEM_STR_BASE =
 			"""
 								{
 								"resourceType": "CodeSystem",
@@ -97,7 +97,7 @@ public interface IValueSetExpansionIT {
 							}
 					""";
 
-	static final String VALUE_SET_STR_BASE =
+	String VALUE_SET_STR_BASE =
 			"""
 						{
 							"resourceType": "ValueSet",
@@ -137,13 +137,13 @@ public interface IValueSetExpansionIT {
 
 	ITermDeferredStorageSvc getTerminologyDefferedStorageService();
 
-	ITermReadSvc getTerminologyReadSvc();
-
 	DaoRegistry getDaoRegistry();
 
 	IFhirResourceDaoValueSet<ValueSet> getValueSetDao();
 
 	JpaStorageSettings getJpaStorageSettings();
+
+	Batch2JobHelper getBatch2JobHelper();
 
 	@ParameterizedTest
 	@EnumSource(
@@ -678,7 +678,7 @@ public interface IValueSetExpansionIT {
 			IFhirResourceDao<ValueSet> valueSetDao = getDaoRegistry().getResourceDao("ValueSet");
 			DaoMethodOutcome outcome = valueSetDao.create(theValueSet, requestDetails);
 			theValueSet.setId(outcome.getId());
-			getTerminologyReadSvc().preExpandDeferredValueSetsToTerminologyTables();
+			getBatch2JobHelper().awaitNoJobsRunning();
 		}
 
 		// test

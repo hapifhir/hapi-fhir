@@ -4465,7 +4465,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	public void testValueSetExpand_PreExpanded_UseHibernateSearch() {
 		createLocalCsAndVs();
 
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		runInTransaction(() -> {
 			Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
 			assertEquals(1, page.getContent().size());
@@ -4961,7 +4961,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
 
 		// Now pre-expand the VS and try again (should use disk because we're fetching from pre-expansion)
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		myCaptureQueriesListener.clear();
 		result = myValidationSupport.validateCode(ctx, options, csUrl, code, null, vsUrl);
 		assertNotNull(result);

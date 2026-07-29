@@ -32,12 +32,17 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
+import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.ValidateUtil;
 import jakarta.annotation.Nonnull;
@@ -50,6 +55,7 @@ import org.springframework.transaction.annotation.Propagation;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -93,6 +99,31 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		}
 		Validate.notBlank(theStartRequest.getJobDefinitionId(), "No job definition ID supplied in start request");
 
+		// Interceptor call: STORAGE_PRECREATE_BATCH_JOB_INSTANCE
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorService, theRequestDetails);
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRECREATE_BATCH_JOB_INSTANCE)) {
+			String originalJobDefinition = theStartRequest.getJobDefinitionId();
+			String originalParametersSerialized = JsonUtil.serialize(theStartRequest.getParameters());
+			compositeBroadcaster.ifHasCallHooks(Pointcut.STORAGE_PRECREATE_BATCH_JOB_INSTANCE, () -> new HookParams()
+					.add(RequestDetails.class, theRequestDetails)
+					.add(JobInstanceStartRequest.class, theStartRequest));
+
+			if (!originalJobDefinition.equals(theStartRequest.getJobDefinitionId())) {
+				ourLog.info(
+						"Requested Batch2 Job Definition ID has been overridden from {} to {}",
+						originalJobDefinition,
+						theStartRequest.getJobDefinitionId());
+			}
+
+			String newParametersSerialized = JsonUtil.serialize(theStartRequest.getParameters());
+			if (!Objects.equals(originalParametersSerialized, newParametersSerialized)) {
+				ourLog.info(
+						"Requested Batch2 Job Parameters for job of type {} have been overridden",
+						theStartRequest.getJobDefinitionId());
+			}
+		}
+
 		// if cache - use that first
 		if (theStartRequest.isUseCache()) {
 			FetchJobInstancesRequest request = new FetchJobInstancesRequest(
@@ -116,6 +147,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 						first.getStatus(),
 						first.getInstanceId());
 
+				storeJobInstanceIdInRequestDetails(theRequestDetails, response);
 				return response;
 			}
 		}
@@ -137,7 +169,15 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 
 		Batch2JobStartResponse response = new Batch2JobStartResponse();
 		response.setInstanceId(instanceAndFirstChunk.jobInstanceId);
+		storeJobInstanceIdInRequestDetails(theRequestDetails, response);
 		return response;
+	}
+
+	private static void storeJobInstanceIdInRequestDetails(
+			RequestDetails theRequestDetails, Batch2JobStartResponse theResponse) {
+		if (theRequestDetails != null) {
+			theRequestDetails.getUserData().put(USER_DATA_KEY_JOB_INSTANCE_ID, theResponse.getInstanceId());
+		}
 	}
 
 	/**

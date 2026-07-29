@@ -330,20 +330,31 @@ public class Batch2JobHelper {
 			.until(() -> {
 				myJobMaintenanceService.runActiveJobMaintenancePass();
 
-				List<JobInstance> jobs = myJobCoordinator.getInstances(1000, 1);
+				boolean foundAtLeastOneJob = false;
+				for (int pageIndex = 0; ; pageIndex++) {
+
+					List<JobInstance> jobs = myJobCoordinator.getInstances(1000, pageIndex);
+					for (JobInstance job : jobs) {
+						foundAtLeastOneJob = true;
+						if (!job.getStatus().isEnded()) {
+							map.put(job.getInstanceId(), job.getStatus().name());
+						} else {
+							map.remove(job.getInstanceId());
+						}
+					}
+
+					if (jobs.isEmpty()) {
+						break;
+					}
+
+				}
+
 				// "All Jobs" assumes at least one job exists
-				if (theExpectAtLeastOneJobToExist && jobs.isEmpty()) {
+				if (theExpectAtLeastOneJobToExist && !foundAtLeastOneJob) {
 					ourLog.warn("No jobs found yet...");
 					return false;
 				}
 
-				for (JobInstance job : jobs) {
-					if (!job.getStatus().isEnded()) {
-						map.put(job.getInstanceId(), job.getStatus().name());
-					} else {
-						map.remove(job.getInstanceId());
-					}
-				}
 				return map.isEmpty();
 			});
 

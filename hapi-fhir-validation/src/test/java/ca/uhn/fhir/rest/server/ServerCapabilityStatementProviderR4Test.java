@@ -40,7 +40,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.server.method.IMethodBinding;
 import ca.uhn.fhir.rest.server.method.IParameter;
 import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchParameter;
@@ -82,7 +82,6 @@ import org.hl7.fhir.r4.model.OperationDefinition.OperationKind;
 import org.hl7.fhir.r4.model.OperationDefinition.OperationParameterUse;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -336,7 +335,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			if (resourceBinding.getResourceName().equals("Patient")) {
-				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
+				List<IMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().iterator().next();
 				assertEquals("The patient's identifier", param.getDescription());
@@ -570,7 +569,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			if (resourceBinding.getResourceName().equals("Patient")) {
-				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
+				List<IMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				for (IParameter next : binding.getParameters()) {
 					SearchParameter param = (SearchParameter) next;
@@ -628,7 +627,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			if (resourceBinding.getResourceName().equals("Patient")) {
-				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
+				List<IMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().get(25);
 				assertEquals("The organization at which this person is a patient", param.getDescription());
@@ -660,7 +659,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			if (resourceBinding.getResourceName().equals("Patient")) {
-				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
+				List<IMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().get(0);
 				assertEquals("The organization at which this person is a patient", param.getDescription());

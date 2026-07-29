@@ -255,8 +255,9 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 						? myFhirContext.newTerser().getSinglePrimitiveValueOrNull(theResource, "url")
 						: null;
 				if (isNotBlank(codeSystemUrl)) {
-					int invalidated = myTerminologySvc.invalidatePreCalculatedExpansionOfValueSetsContainingCodeSystem(
-							codeSystemUrl);
+					int invalidated =
+							myTermValueSetStorageSvc.invalidatePreCalculatedExpansionOfValueSetsContainingCodeSystem(
+									codeSystemUrl);
 					if (invalidated > 0) {
 						ourLog.info(
 								"Invalidated {} pre-calculated ValueSet expansion(s) due to update of CodeSystem: {}",

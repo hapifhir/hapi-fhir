@@ -31,6 +31,16 @@ HAPI FHIR also supports installing a package asynchronously using a batch proces
 myPackageInstallerSvc.installAsynchronously(spec);
 ```
 
+# Install Mode
+
+The `installMode` field on `PackageInstallationSpec` controls what is persisted during installation:
+
+| Mode | Behaviour |
+|---|---|
+| `STORE_ONLY` | Conformance resources are stored in dedicated package tables and made available to the validator. Resources are **not** stored as queryable FHIR resources. Use this when the package is needed for validation only. |
+| `STORE_AND_INSTALL` | Same as `STORE_ONLY`, plus resources are stored as individual FHIR resources queryable via the FHIR API. |
+| `INSTALL_ONLY` | Resources are stored as individual FHIR resources (like `STORE_AND_INSTALL`), but the package itself is **not** retained in the local package cache. Use this when you want the resources available for FHIR operations but do not need the package for validation or a package registry endpoint. |
+
 # Fetching Transitive Dependencies
 
 When `setFetchDependencies(true)` is set on the `PackageInstallationSpec`, the installer recursively fetches and installs all transitive dependencies declared in each package's `package.json` file. Dependencies are resolved from the local package cache first, then fetched from the [packages.fhir.org](https://packages.fhir.org) registry if not found locally.
@@ -111,12 +121,14 @@ The following version pairs are treated as compatible:
 
 # Version Policy
 
-The `versionPolicy` parameter on `PackageInstallationSpec` controls how the installer matches existing resources during installation The default is `MULTI_VERSION`.
+The `versionPolicy` parameter on `PackageInstallationSpec` controls how the installer matches existing canonical resources during installation. The default is `MULTI_VERSION`.
+
+> **Note:** `versionPolicy` applies only to canonical resources (e.g. StructureDefinition, ValueSet, CodeSystem, ConceptMap, SearchParameter). Non-conformance instance resources (e.g. Patient, Organization) are always installed per-resource using their original IDs and are not affected by this setting.
 
 | Policy | Resource Matching | Behavior |
 |--------|------------------|----------|
-| `MULTI_VERSION` (default) | Matches by canonical URL **and** version | Multiple versions of the same resource can coexist in the repository. Server-assigned IDs are used. |
-| `SINGLE_VERSION` | Matches by canonical URL only (ignoring version) | Only one version of each resource exists. Installing a new version overwrites the previous one. Client-assigned IDs from the package are used. |
+| `MULTI_VERSION` (default) | Matches by canonical URL **and** version | Multiple versions of the same conformance resource can coexist in the repository. Server-assigned IDs are used. |
+| `SINGLE_VERSION` | Matches by canonical URL only (ignoring version) | Only one version of each conformance resource exists. Installing a new version overwrites the previous one. Client-assigned IDs from the package are used. |
 
 ```java
 PackageInstallationSpec spec = new PackageInstallationSpec()
@@ -150,6 +162,20 @@ Once a package is installed, its conformance resources (StructureDefinitions, Va
 
 See [Validating Using Packages](../validation/instance_validator.html#packages) for details on how validation uses package content.
 
+# Resource Matching
+
+During installation, the installer searches for an existing resource before deciding whether to create or update. The search criteria vary by resource type:
+
+| Resource type | Matched by |
+|---|---|
+| Canonical resources (those with a `url` element, e.g. StructureDefinition, ValueSet, CodeSystem) | Canonical URL — see [Version Policy](#version-policy) for how `versionPolicy` further affects this |
+| `SearchParameter` | Canonical form (code + base resource types), falling back to URL or identifier |
+| `Subscription` | Resource ID |
+| `NamingSystem` | Unique ID value |
+| Non-conformance resources (e.g. Patient, Organization) | `identifier` — **must be present**; resources without an identifier will fail to install with `HAPI-1292` |
+
+When an existing resource is found, the installer uses its server-assigned ID for the update, discarding any ID supplied in the package.
+
 # Installed Resource Types
 
 By default, the following resource types are installed from a package: `NamingSystem`, `CodeSystem`, `ValueSet`, `StructureDefinition`, `ConceptMap`, `SearchParameter`, `Subscription`. To install a different set of resource types, use `setInstallResourceTypes()` on the `PackageInstallationSpec`:
@@ -175,3 +201,19 @@ PackageInstallationSpec spec = new PackageInstallationSpec()
 ```
 
 Resources from additional folders are installed the same way as resources from the standard `package` folder.
+
+Non-conformance resources in additional folders (e.g. `Patient`, `Organization`) may reference each other or resources not yet present in the repository. If referential integrity enforcement is enabled on the server, these writes will fail with `HAPI-1094` unless auto-creation of placeholder reference targets is enabled. When enabled, the server automatically creates an empty stub for any missing reference target; the stub is overwritten when the referenced resource is installed later.
+
+# Resource Status Validation
+
+By default, the installer accepts resources regardless of their `status` value. When resource status validation is enabled, resources are filtered during installation based on the following rules:
+
+| Resource type | Accepted status values |
+|---|---|
+| `Subscription` | `requested` |
+| `DocumentReference`, `Communication` | Any value except `?` |
+| All other types | `active` |
+
+Resources whose status does not match the accepted values for their type are skipped during installation.
+
+To enable this behaviour, set `validateResourceStatusForPackageUpload` to `true` on `JpaStorageSettings`.

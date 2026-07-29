@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.google.common.collect.ImmutableMap;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -77,6 +78,13 @@ public class SearchMethodBindingTest {
 			mockSearchRequest(ImmutableMap.of("refChainBlacklist.goodChain", new String[]{"foo"})))).isEqualTo(MethodMatchEnum.EXACT);
 	}
 
+	@Test
+	public void searchMayReturnSimpleBundleProvider() throws NoSuchMethodException {
+		SearchMethodBinding binding = getBinding("returnsSimpleBundleProvider");
+
+		assertThat(binding).isNotNull();
+	}
+
 	private SearchMethodBinding getBinding(String name, Class<?>... parameters) throws NoSuchMethodException {
 		return new SearchMethodBinding(IBaseResource.class,
 			IBaseResource.class,
@@ -119,6 +127,11 @@ public class SearchMethodBindingTest {
 
 		@Search
 		public IBaseResource withChainBlacklist(@OptionalParam(name = "refChainBlacklist", chainWhitelist = "goodChain", chainBlacklist = "badChain") ReferenceParam param) {
+			return null;
+		}
+
+		@Search
+		public SimpleBundleProvider returnsSimpleBundleProvider() {
 			return null;
 		}
 

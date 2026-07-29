@@ -32,7 +32,9 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceEnabledByTypeInterceptor;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -99,6 +101,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -149,6 +152,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		myPartitionSettings.setUnnamedPartitionMode(defaultSettings.isUnnamedPartitionMode());
 		myPartitionSettings.setDefaultPartitionId(defaultSettings.getDefaultPartitionId());
 		myPartitionSettings.setAllowReferencesAcrossPartitions(defaultSettings.getAllowReferencesAcrossPartitions());
+		myPartitionSettings.setAllPartitionSearchSupported(defaultSettings.isAllPartitionSearchSupported());
 
 		myTransactionService.setTransactionPropagationWhenChangingPartitions(HapiTransactionService.DEFAULT_TRANSACTION_PROPAGATION_WHEN_CHANGING_PARTITIONS);
 	}
@@ -678,19 +682,45 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		myTestDaoSearch.assertSearchFinds("find patient Observation", "Observation?subject.active=true&subject=Patient/A", patAObsId);
 	}
 
-	@Test
-	public void testSearchChainedValue_noResolvedReference_fails() {
-		createPatientA();
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void testSearchChainedValue_noResolvedReference(boolean theSupportsAllPartitionSearch) {
+		myPartitionSettings.setAllPartitionSearchSupported(theSupportsAllPartitionSearch);
+
+		createPatientA(); // Patient/A has no identifier, so the chained identifier below matches nothing
 		createObservationB();
 
-		// Chain
-		try {
-			myObservationDao.search(SearchParameterMap.newSynchronous().add("subject", new ReferenceParam("identifier", "http://foo|123")), mySrd);
-			fail();
-		} catch (MethodNotAllowedException e) {
-			assertEquals("HAPI-2928: Could not resolve chained parameter(s) [identifier] on parameter subject. Consider adding a direct Patient reference to your search (?subject=Patient/abc&subject.identifier=...)", e.getMessage());
-		}
+		SearchParameterMap map = SearchParameterMap.newSynchronous()
+				.add("subject", new ReferenceParam("identifier", "http://foo|123"));
 
+		if (theSupportsAllPartitionSearch) {
+			// Can fan out: the search runs across all partitions, matches no Patient, and returns an empty bundle.
+			IBundleProvider outcome = myObservationDao.search(map, mySrd);
+			assertEquals(0, outcome.size());
+		} else {
+			// Cannot fan out: the unresolved chained parameter is rejected up front, before any search runs.
+			MethodNotAllowedException e =
+					assertThrows(MethodNotAllowedException.class, () -> myObservationDao.search(map, mySrd));
+			assertEquals(
+					"HAPI-2928: Could not resolve chained parameter(s) [identifier] on parameter subject. Consider adding a direct Patient reference to your search (?subject=Patient/abc&subject.identifier=...)",
+					e.getMessage());
+		}
+	}
+
+	@Test
+	void testSearchChainedValue_resolvedByIdentifier_searchesAllPartitionsAndFinds() {
+		// Default all-partition search (isAllPartitionSearchSupported() == true): a chained
+		// subject.identifier with no direct reference searches all partitions and resolves to the
+		// matching Patient's Observation.
+		myPartitionSettings.setAllPartitionSearchSupported(true);
+
+		createPatient(withId("A"), withIdentifier("http://acme.org/mrn", "PT00062"), withActiveTrue());
+		IIdType obsId = createObservation(withSubject("Patient/A"), withStatus("final"));
+
+		myTestDaoSearch.assertSearchFinds(
+				"find Observation by patient identifier chain",
+				"Observation?subject.identifier=http://acme.org/mrn|PT00062",
+				obsId);
 	}
 
 	@Test
@@ -942,6 +972,168 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		}
 	}
 
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void testTransaction_CreateObservationWithPatientInlineMatchUrl(boolean theSupportsAllPartitionSearch) {
+		myPartitionSettings.setAllPartitionSearchSupported(theSupportsAllPartitionSearch);
+
+		// Patient already exists, identified by a business (MRN) identifier
+		createPatient(withId("A"), withIdentifier("http://acme.org/mrn", "PT00062"), withActiveTrue());
+
+		Observation obs = new Observation();
+		obs.getSubject().setReference("Patient?identifier=http://acme.org/mrn|PT00062");
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(obs);
+
+		if (theSupportsAllPartitionSearch) {
+			Bundle response = mySystemDao.transaction(mySrd, bb.getBundleTyped());
+
+			// The inline match URL was resolved to a literal Patient/A reference before storage
+			IIdType obsId = new IdType(response.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless();
+			Observation stored = myObservationDao.read(obsId, mySrd);
+			assertEquals("Patient/A", stored.getSubject().getReference());
+		} else {
+			MethodNotAllowedException e = assertThrows(
+					MethodNotAllowedException.class, () -> mySystemDao.transaction(mySrd, bb.getBundleTyped()));
+			assertEquals(
+					"HAPI-1326: Resource of type Observation has no values placing it in the Patient compartment",
+					e.getMessage());
+		}
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testTransaction_UpdateObservationWithPatientInlineMatchUrl(boolean theSupportsAllPartitionSearch) {
+		myPartitionSettings.setAllPartitionSearchSupported(theSupportsAllPartitionSearch);
+
+		// Patient and Observation already exist, linked by a literal Patient/A reference
+		createPatient(withId("A"), withIdentifier("http://acme.org/mrn", "PT00062"), withActiveTrue());
+		IIdType obsId = createObservation(withId("O"), withSubject("Patient/A"), withStatus("final"));
+
+		// Update the Observation, re-expressing the same subject as an inline match URL
+		Observation update = new Observation();
+		update.setId(obsId.toUnqualifiedVersionless().getIdPart());
+		update.setStatus(Observation.ObservationStatus.AMENDED);
+		update.getSubject().setReference("Patient?identifier=http://acme.org/mrn|PT00062");
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionUpdateEntry(update);
+
+		if (theSupportsAllPartitionSearch) {
+			mySystemDao.transaction(mySrd, bb.getBundleTyped());
+
+			// The inline match URL was resolved back to the literal Patient/A reference
+			Observation stored = myObservationDao.read(obsId.toUnqualifiedVersionless(), mySrd);
+			assertEquals("Patient/A", stored.getSubject().getReference());
+			assertEquals(Observation.ObservationStatus.AMENDED, stored.getStatus());
+		} else {
+			MethodNotAllowedException e = assertThrows(
+					MethodNotAllowedException.class, () -> mySystemDao.transaction(mySrd, bb.getBundleTyped()));
+			assertEquals(
+					"HAPI-1326: Resource of type Observation has no values placing it in the Patient compartment",
+					e.getMessage());
+		}
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void testTransaction_CreateObservationWithPatientInlineMatchUrl_noMatch_fails(boolean theSupportsAllPartitionSearch) {
+		myPartitionSettings.setAllPartitionSearchSupported(theSupportsAllPartitionSearch);
+
+		// No Patient carries this identifier
+		Observation obs = new Observation();
+		obs.getSubject().setReference("Patient?identifier=http://acme.org/mrn|NO_SUCH_PATIENT");
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(obs);
+
+		// With no matching Patient the inline match URL is never resolved, so the reference stays unroutable and
+		// per-entry partition determination rejects the resource with HAPI-1326 — under both configs.
+		MethodNotAllowedException e = assertThrows(
+				MethodNotAllowedException.class, () -> mySystemDao.transaction(mySrd, bb.getBundleTyped()));
+		assertEquals(
+				"HAPI-1326: Resource of type Observation has no values placing it in the Patient compartment",
+				e.getMessage());
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void testTransaction_CreateObservationWithPatientInlineMatchUrl_multipleMatches_fails(boolean theSupportsAllPartitionSearch) {
+		myPartitionSettings.setAllPartitionSearchSupported(theSupportsAllPartitionSearch);
+
+		// Two Patients carry the same identifier
+		createPatient(withId("A"), withIdentifier("http://acme.org/mrn", "PT00062"), withActiveTrue());
+		createPatient(withId("B"), withIdentifier("http://acme.org/mrn", "PT00062"), withActiveTrue());
+
+		Observation obs = new Observation();
+		obs.getSubject().setReference("Patient?identifier=http://acme.org/mrn|PT00062");
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(obs);
+
+		if (theSupportsAllPartitionSearch) {
+			// The pre-fetch resolves the inline match URL across partitions and rejects the ambiguous
+			// match with HAPI-2207 before any entry is written.
+			PreconditionFailedException e = assertThrows(
+					PreconditionFailedException.class, () -> mySystemDao.transaction(mySrd, bb.getBundleTyped()));
+			assertEquals(
+					Msg.code(2207)
+							+ "Invalid match URL \"Patient?identifier=http://acme.org/mrn|PT00062\" - Multiple resources match this search",
+					e.getMessage());
+		} else {
+			// When all-partition search is not supported, the inline match URL cannot be routed to a Patient
+			// compartment and the resource is rejected with HAPI-1326.
+			MethodNotAllowedException e = assertThrows(
+					MethodNotAllowedException.class, () -> mySystemDao.transaction(mySrd, bb.getBundleTyped()));
+			assertEquals(
+					"HAPI-1326: Resource of type Observation has no values placing it in the Patient compartment",
+					e.getMessage());
+		}
+	}
+
+	@Test
+	void testTransaction_ConditionalUpdatePatientByIdentifier_differentBodyId_rejectedWith2279_noDuplicate() {
+		myPartitionSettings.setAllPartitionSearchSupported(true);
+
+		createPatient(withId("A"), withIdentifier("http://acme.org/mrn", "PT00062"), withActiveTrue());
+
+		Patient update = new Patient();
+		update.setId("B");
+		update.addIdentifier().setSystem("http://acme.org/mrn").setValue("PT00062");
+		update.setActive(false);
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionUpdateEntry(update).conditional("Patient?identifier=http://acme.org/mrn|PT00062");
+
+		assertThatThrownBy(() -> mySystemDao.transaction(mySrd, bb.getBundleTyped()))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessage(
+				"HAPI-2279: Failed to UPDATE resource with match URL \"Patient?identifier=http://acme.org/mrn|PT00062\" because the matching resource does not match the provided ID");
+
+		// Only the original Patient A carries the MRN — no duplicate was created.
+		assertThat(myTestDaoSearch.searchForIds("Patient?identifier=http://acme.org/mrn|PT00062"))
+			.containsExactly("A");
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void testTransaction_ConditionalUpdatePatientByIdentifier_updatesInPlace(boolean theBodyCarriesMatchingId) {
+		myPartitionSettings.setAllPartitionSearchSupported(true);
+
+		createPatient(withId("A"), withIdentifier("http://acme.org/mrn", "PT00062"), withActiveTrue());
+
+		Patient update = new Patient();
+		if (theBodyCarriesMatchingId) {
+			update.setId("A");
+		}
+		update.addIdentifier().setSystem("http://acme.org/mrn").setValue("PT00062");
+		update.setActive(false);
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionUpdateEntry(update).conditional("Patient?identifier=http://acme.org/mrn|PT00062");
+
+		mySystemDao.transaction(mySrd, bb.getBundleTyped());
+
+		assertThat(myTestDaoSearch.searchForIds("Patient?identifier=http://acme.org/mrn|PT00062"))
+			.containsExactly("A");
+		assertThat(myPatientDao.read(new IdType("Patient/A"), mySrd).getActive()).isFalse();
+	}
 
 	@Test
 	public void testTransaction_SplitAncillaryAndPatient_NewTransactionPerPartition() {
