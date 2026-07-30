@@ -1,11 +1,13 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.TransactionResponseFinalizedDetails;
+import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
-import ca.uhn.fhir.storage.TransactionBundleNormalizer;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
@@ -477,7 +479,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		addObservation(request, "obs-batch-2", matchUrl);
 
 		// Normalization is requested, but the bundle is a batch: the transaction-only gate keeps it inert
-		IAnonymousInterceptor normalizationRequest = registerNormalizationRequestInterceptor();
+		BundleNormalizingTestInterceptor normalizationRequest = registerBundleNormalizingInterceptor();
 		Bundle response;
 		try {
 			response = mySystemDao.transaction(mySrd, request);
@@ -1528,7 +1530,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		addObservation(request, "obs-D", "Patient?identifier=" + system + "|" + newValue2);
 
 		// execute
-		IAnonymousInterceptor normalizationRequest = registerNormalizationRequestInterceptor();
+		BundleNormalizingTestInterceptor normalizationRequest = registerBundleNormalizingInterceptor();
 		Bundle resp;
 		try {
 			resp = mySystemDao.transaction(mySrd, request);
@@ -1577,9 +1579,9 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	// Created by Claude Fable 5
 	@Test
-	public void testTransactionInlineMatchUrl_notNormalizedWithoutRequestMarker() {
-		// Without a registered interceptor requesting bundle normalization, the normalizer stays
-		// inert regardless of the storage settings: inline match URL references resolve at write
+	public void testTransactionInlineMatchUrl_notNormalizedWithoutRegisteredInterceptor() {
+		// Without a registered interceptor invoking the normalizer, the bundle is never normalized
+		// regardless of the storage settings: inline match URL references resolve at write
 		// time (extractor auto-creates a placeholder) exactly as before the normalizer existed.
 		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
@@ -1602,12 +1604,37 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals("no-marker", placeholder.getIdentifierFirstRep().getValue());
 	}
 
+	/**
+	 * Registers a test interceptor wired like {@code PatientIdPartitionInterceptor}: normalize the bundle after
+	 * the other STORAGE_TRANSACTION_PROCESSING hooks (skipping server-constructed batch sub-requests), and strip
+	 * the synthetic response entries once the response is finalized.
+	 */
 	// Created by Claude Fable 5
-	private IAnonymousInterceptor registerNormalizationRequestInterceptor() {
-		IAnonymousInterceptor interceptor = (thePointcut, theArgs) -> theArgs.get(TransactionDetails.class)
-				.putUserData(TransactionBundleNormalizer.NORMALIZATION_REQUESTED_KEY, Boolean.TRUE);
-		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_TRANSACTION_PROCESSING, interceptor);
+	private BundleNormalizingTestInterceptor registerBundleNormalizingInterceptor() {
+		BundleNormalizingTestInterceptor interceptor = new BundleNormalizingTestInterceptor();
+		myInterceptorRegistry.registerInterceptor(interceptor);
 		return interceptor;
+	}
+
+	// Created by Claude Fable 5
+	@Interceptor
+	public class BundleNormalizingTestInterceptor {
+
+		@Hook(
+				value = Pointcut.STORAGE_TRANSACTION_PROCESSING,
+				order = PatientIdPartitionInterceptor.STORAGE_TRANSACTION_PROCESSING_ORDER_NORMALIZE)
+		public void normalize(IBaseBundle theBundle, TransactionDetails theTransactionDetails) {
+			if (!theTransactionDetails.isServerConstructedBatchSubRequest()) {
+				myTransactionBundleNormalizer.normalize(theBundle, theTransactionDetails);
+			}
+		}
+
+		@Hook(Pointcut.STORAGE_TRANSACTION_RESPONSE_FINALIZED)
+		public void strip(
+				TransactionResponseFinalizedDetails theFinalizedDetails, TransactionDetails theTransactionDetails) {
+			myTransactionBundleNormalizer.stripSyntheticResponseEntries(
+					theFinalizedDetails.getResponseBundle(), theTransactionDetails);
+		}
 	}
 
 	// Created by Claude Opus 4.7
@@ -1646,7 +1673,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			subjectRefAtHook.set(obsAtHook.getSubject().getReference());
 		};
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_TRANSACTION_PROCESSING, interceptor);
-		IAnonymousInterceptor normalizationRequest = registerNormalizationRequestInterceptor();
+		BundleNormalizingTestInterceptor normalizationRequest = registerBundleNormalizingInterceptor();
 		try {
 			Bundle resp = mySystemDao.transaction(mySrd, request);
 

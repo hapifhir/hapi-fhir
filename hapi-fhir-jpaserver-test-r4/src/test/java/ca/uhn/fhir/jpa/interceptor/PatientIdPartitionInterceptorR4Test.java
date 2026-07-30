@@ -149,7 +149,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	public void before() throws Exception {
 		super.before();
 		myForceOffsetSearchModeInterceptor = new ForceOffsetSearchModeInterceptor();
-		mySvc = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
+		mySvc = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry, myTransactionBundleNormalizer);
 
 		myInterceptorRegistry.registerInterceptor(mySvc);
 		myInterceptorRegistry.registerInterceptor(myForceOffsetSearchModeInterceptor);
@@ -1860,6 +1860,29 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 			myInterceptorRegistry.unregisterInterceptor(finalized);
 			myInterceptorRegistry.unregisterInterceptor(assembled);
 		}
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	public void testBatch_entryWithUnresolvableInlineMatchUrl_notNormalized() {
+		// The server processes each batch entry as its own single-entry "transaction" bundle. Those
+		// server-constructed sub-requests must NOT be normalized (master parity): if the normalizer ran,
+		// it would mint a synthetic conditional create for the match URL and the entry would succeed,
+		// creating a patient the client never asked for.
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		Bundle batch = new Bundle();
+		batch.setType(Bundle.BundleType.BATCH);
+		Observation obs = new Observation();
+		obs.getSubject().setReference("Patient?identifier=old-sys|no-such-patient");
+		batch.addEntry().setResource(obs).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Observation");
+
+		Bundle response = mySystemDao.transaction(mySrd, batch);
+
+		assertThat(response.getEntry()).hasSize(1);
+		assertThat(response.getEntry().get(0).getResponse().getStatus()).startsWith("405");
+		assertPatientCountInDatabase(0);
 	}
 
 	/**

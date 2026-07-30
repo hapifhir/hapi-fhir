@@ -33,6 +33,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.interceptor.model.TransactionResponseAssembledDetails;
+import ca.uhn.fhir.interceptor.model.TransactionResponseFinalizedDetails;
 import ca.uhn.fhir.interceptor.model.TransactionWriteAfterPrefetchDetails;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -116,6 +117,15 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Interceptor
 public class PatientIdPartitionInterceptor {
 	public static final String PATIENT_COMPARTMENT_NONE = "NONE";
+
+	/**
+	 * Order of {@link #normalizeTransactionBundle} within {@link Pointcut#STORAGE_TRANSACTION_PROCESSING}: it
+	 * mutates the bundle, so it runs after the other hooks at this pointcut, which thereby observe the bundle
+	 * as the client submitted it.
+	 */
+	// Created by Claude Fable 5
+	public static final int STORAGE_TRANSACTION_PROCESSING_ORDER_NORMALIZE = 1000;
+
 	private static final Logger ourLog = LoggerFactory.getLogger(PatientIdPartitionInterceptor.class);
 	private static final String PATIENT_STR = "Patient";
 
@@ -157,6 +167,9 @@ public class PatientIdPartitionInterceptor {
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
+	@Autowired
+	private TransactionBundleNormalizer myTransactionBundleNormalizer;
+
 	private Map<String, ResourceCompartmentStoragePolicy> myResourceTypeToCompartmentPolicy = Map.of();
 
 	/**
@@ -166,11 +179,13 @@ public class PatientIdPartitionInterceptor {
 			FhirContext theFhirContext,
 			ISearchParamExtractor theSearchParamExtractor,
 			PartitionSettings thePartitionSettings,
-			DaoRegistry theDaoRegistry) {
+			DaoRegistry theDaoRegistry,
+			TransactionBundleNormalizer theTransactionBundleNormalizer) {
 		myFhirContext = theFhirContext;
 		mySearchParamExtractor = theSearchParamExtractor;
 		myPartitionSettings = thePartitionSettings;
 		myDaoRegistry = theDaoRegistry;
+		myTransactionBundleNormalizer = theTransactionBundleNormalizer;
 	}
 
 	/**
@@ -745,16 +760,39 @@ public class PatientIdPartitionInterceptor {
 	}
 
 	/**
-	 * Requests transaction bundle normalization for the current transaction: the normalizer pre-shapes the bundle
-	 * (placeholder fullUrls, identifier-bound in-bundle references, synthetic conditional creates for inline match
-	 * URL references) so {@link #resolvePatientReferencesAfterPreFetch} can resolve every Patient entry to a
-	 * concrete id for compartment routing. Normalization only runs for transactions where a registered interceptor
-	 * requests it this way.
+	 * Normalizes the transaction bundle: the normalizer pre-shapes it (placeholder fullUrls, identifier-bound
+	 * in-bundle references, synthetic conditional creates for inline match URL references) so
+	 * {@link #resolvePatientReferencesAfterPreFetch} can resolve every Patient entry to a concrete id for
+	 * compartment routing. Runs after the other hooks at this pointcut (see
+	 * {@link #STORAGE_TRANSACTION_PROCESSING_ORDER_NORMALIZE}), and skips the single-entry transaction bundles
+	 * the server constructs to process client batch entries — those are processed in isolation, where the
+	 * normalizer's synthetics would change what the batch entry alone does. The normalizer itself is a no-op
+	 * for non-transaction bundles and when the settings it depends on are disabled.
 	 */
 	// Created by Claude Fable 5
-	@Hook(Pointcut.STORAGE_TRANSACTION_PROCESSING)
-	public void requestTransactionBundleNormalization(@Nonnull TransactionDetails theTransactionDetails) {
-		theTransactionDetails.putUserData(TransactionBundleNormalizer.NORMALIZATION_REQUESTED_KEY, Boolean.TRUE);
+	@Hook(value = Pointcut.STORAGE_TRANSACTION_PROCESSING, order = STORAGE_TRANSACTION_PROCESSING_ORDER_NORMALIZE)
+	public void normalizeTransactionBundle(
+			@Nonnull IBaseBundle theBundle, @Nonnull TransactionDetails theTransactionDetails) {
+		if (theTransactionDetails.isServerConstructedBatchSubRequest()) {
+			return;
+		}
+		myTransactionBundleNormalizer.normalize(theBundle, theTransactionDetails);
+	}
+
+	/**
+	 * Once the finalized response bundle has been assembled — aggregated across partition sub-transactions —
+	 * removes the response entries of the synthetic conditional creates {@link #normalizeTransactionBundle}
+	 * introduced, so the response aligns 1:1 with the caller's original bundle. This must not happen any
+	 * earlier: each sub-transaction's response is parsed for placeholder-id substitutions that later
+	 * sub-transactions need, synthetic entries included.
+	 */
+	// Created by Claude Fable 5
+	@Hook(Pointcut.STORAGE_TRANSACTION_RESPONSE_FINALIZED)
+	public void stripSyntheticResponseEntries(
+			@Nonnull TransactionResponseFinalizedDetails theFinalizedDetails,
+			@Nonnull TransactionDetails theTransactionDetails) {
+		myTransactionBundleNormalizer.stripSyntheticResponseEntries(
+				theFinalizedDetails.getResponseBundle(), theTransactionDetails);
 	}
 
 	/**

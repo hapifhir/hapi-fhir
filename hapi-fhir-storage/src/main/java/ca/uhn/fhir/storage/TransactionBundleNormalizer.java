@@ -23,10 +23,12 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.util.MatchUrlUtil;
@@ -66,20 +68,17 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class TransactionBundleNormalizer {
 
 	/**
-	 * {@link ca.uhn.fhir.rest.api.server.storage.TransactionDetails} user-data key through which an
-	 * interceptor requests bundle normalization for the current transaction, by setting it to
-	 * {@link Boolean#TRUE} from a
-	 * {@link ca.uhn.fhir.interceptor.api.Pointcut#STORAGE_TRANSACTION_PROCESSING} hook. Without a
-	 * requester the normalizer is never invoked: normalization exists to pre-shape bundles for
-	 * components that resolve the placeholders it introduces (e.g.
-	 * {@code PatientIdPartitionInterceptor}), and would otherwise alter transaction processing for
-	 * deployments that gain nothing from it.
+	 * {@link ca.uhn.fhir.rest.api.server.storage.TransactionDetails} user-data key under which
+	 * {@link #normalize(IBaseBundle, TransactionDetails)} records the number of synthetic entries it prepended
+	 * to the request bundle, for {@link #stripSyntheticResponseEntries(IBaseBundle, TransactionDetails)} to
+	 * consume once the response has been finalized.
 	 */
-	public static final String NORMALIZATION_REQUESTED_KEY =
-			TransactionBundleNormalizer.class.getName() + "_normalizationRequested";
+	public static final String SYNTHETIC_ENTRY_COUNT_KEY =
+			TransactionBundleNormalizer.class.getName() + "_syntheticEntryCount";
 
 	private final FhirContext myFhirContext;
 	private final MatchUrlService myMatchUrlService;
+	private final StorageSettings myStorageSettings;
 
 	@SuppressWarnings("rawtypes")
 	private final ITransactionProcessorVersionAdapter myVersionAdapter;
@@ -87,22 +86,43 @@ public class TransactionBundleNormalizer {
 	public TransactionBundleNormalizer(
 			@Nonnull FhirContext theFhirContext,
 			@Nonnull MatchUrlService theMatchUrlService,
-			@Nonnull @SuppressWarnings("rawtypes") ITransactionProcessorVersionAdapter theVersionAdapter) {
+			@Nonnull @SuppressWarnings("rawtypes") ITransactionProcessorVersionAdapter theVersionAdapter,
+			@Nonnull StorageSettings theStorageSettings) {
 		myFhirContext = theFhirContext;
 		myMatchUrlService = theMatchUrlService;
 		myVersionAdapter = theVersionAdapter;
+		myStorageSettings = theStorageSettings;
 	}
 
 	/**
 	 * Scans a transaction bundle for resources that have references in the form of identifier inline match URLs,
 	 * inserts conditional-create entries at the beginning of the bundle for each unique match URL found, and replace
-	 * the URLs with placeholder ids.
+	 * the URLs with placeholder ids. The count of inserted entries is recorded on the supplied
+	 * {@link TransactionDetails} under {@link #SYNTHETIC_ENTRY_COUNT_KEY}.
+	 * <p>
+	 * No-op unless the bundle is a transaction bundle and both {@code allowInlineMatchUrlReferences} and
+	 * {@code autoCreatePlaceholderReferenceTargets} are enabled — the synthetic entries this method introduces
+	 * are conditional creates for reference targets, which is exactly placeholder auto-creation.
 	 *
 	 * @param theBundle the transaction bundle to process
-	 * @return the number of synthetic placeholder entries prepended to the bundle (0 if no inline match URLs found)
+	 * @param theTransactionDetails the transaction details of the transaction processing this bundle
 	 */
+	public void normalize(@Nonnull IBaseBundle theBundle, @Nonnull TransactionDetails theTransactionDetails) {
+		int syntheticEntryCount = normalizeIfEnabled(theBundle);
+		theTransactionDetails.putUserData(SYNTHETIC_ENTRY_COUNT_KEY, syntheticEntryCount);
+	}
+
 	@SuppressWarnings("unchecked")
-	public int normalize(@Nonnull IBaseBundle theBundle) {
+	private int normalizeIfEnabled(IBaseBundle theBundle) {
+		String bundleTypeCode = myVersionAdapter.getBundleType(theBundle);
+		boolean isTransactionBundle = bundleTypeCode == null
+				|| org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION.toCode().equals(bundleTypeCode);
+		if (!isTransactionBundle
+				|| !myStorageSettings.isAllowInlineMatchUrlReferences()
+				|| !myStorageSettings.isAutoCreatePlaceholderReferenceTargets()) {
+			return 0;
+		}
+
 		List<IBase> bundleEntries = myVersionAdapter.getEntries(theBundle);
 
 		if (bundleEntries.isEmpty()) {
@@ -260,14 +280,17 @@ public class TransactionBundleNormalizer {
 	 * prepended to the request bundle, so the response aligns 1:1 with the caller's original bundle.
 	 *
 	 * @param theResponse the transaction response bundle
-	 * @param theSyntheticEntryCount the count returned by {@link #normalize(IBaseBundle)} for the request
+	 * @param theTransactionDetails the transaction details on which {@link #normalize(IBaseBundle,
+	 *            TransactionDetails)} recorded the synthetic entry count for the request
 	 */
 	// Created by Claude Fable 5
 	@SuppressWarnings("unchecked")
-	public void stripSyntheticResponseEntries(@Nonnull IBaseBundle theResponse, int theSyntheticEntryCount) {
-		if (theSyntheticEntryCount > 0) {
+	public void stripSyntheticResponseEntries(
+			@Nonnull IBaseBundle theResponse, @Nonnull TransactionDetails theTransactionDetails) {
+		Integer syntheticEntryCount = theTransactionDetails.getUserData(SYNTHETIC_ENTRY_COUNT_KEY);
+		if (syntheticEntryCount != null && syntheticEntryCount > 0) {
 			List<IBase> entries = myVersionAdapter.getEntries(theResponse);
-			entries.subList(0, theSyntheticEntryCount).clear();
+			entries.subList(0, syntheticEntryCount).clear();
 		}
 	}
 

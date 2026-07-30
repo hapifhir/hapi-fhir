@@ -429,8 +429,10 @@ public class JpaConfig {
 	public TransactionBundleNormalizer transactionBundleNormalizer(
 			FhirContext theFhirContext,
 			MatchUrlService theMatchUrlService,
-			@SuppressWarnings("rawtypes") ITransactionProcessorVersionAdapter theVersionAdapter) {
-		return new TransactionBundleNormalizer(theFhirContext, theMatchUrlService, theVersionAdapter);
+			@SuppressWarnings("rawtypes") ITransactionProcessorVersionAdapter theVersionAdapter,
+			JpaStorageSettings theStorageSettings) {
+		return new TransactionBundleNormalizer(
+				theFhirContext, theMatchUrlService, theVersionAdapter, theStorageSettings);
 	}
 
 	@Bean(name = "myAttachmentBinaryAccessProvider")

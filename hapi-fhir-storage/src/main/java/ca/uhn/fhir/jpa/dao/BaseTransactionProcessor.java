@@ -87,7 +87,6 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletSubRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ServletRequestUtil;
-import ca.uhn.fhir.storage.TransactionBundleNormalizer;
 import ca.uhn.fhir.util.AsyncUtil;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ElementUtil;
@@ -218,9 +217,6 @@ public abstract class BaseTransactionProcessor {
 	@Autowired
 	private IResourceVersionSvc myResourceVersionSvc;
 
-	@Autowired
-	private TransactionBundleNormalizer myTransactionBundleNormalizer;
-
 	@VisibleForTesting
 	public void setStorageSettings(StorageSettings theStorageSettings) {
 		myStorageSettings = theStorageSettings;
@@ -264,20 +260,6 @@ public abstract class BaseTransactionProcessor {
 			compositeBroadcaster.callHooks(Pointcut.STORAGE_TRANSACTION_PROCESSING, params);
 		}
 
-		// Normalize the transaction bundle if requested & required settings are true.
-		String bundleTypeCode = myVersionAdapter.getBundleType(theRequest);
-		boolean isTransactionBundle = bundleTypeCode == null
-				|| org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION.toCode().equals(bundleTypeCode);
-		boolean normalizationRequested = Boolean.TRUE.equals(
-				transactionDetails.getUserData(TransactionBundleNormalizer.NORMALIZATION_REQUESTED_KEY));
-		int syntheticEntryCount = 0;
-		if (normalizationRequested
-				&& isTransactionBundle
-				&& myStorageSettings.isAllowInlineMatchUrlReferences()
-				&& myStorageSettings.isAutoCreatePlaceholderReferenceTargets()) {
-			syntheticEntryCount = myTransactionBundleNormalizer.normalize(theRequest);
-		}
-
 		IBaseBundle response;
 		// Interceptor call: STORAGE_TRANSACTION_PRE_PARTITION
 		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_PRE_PARTITION)) {
@@ -293,10 +275,6 @@ public abstract class BaseTransactionProcessor {
 		} else {
 			response = processTransactionAsSubRequest(
 					theRequestDetails, transactionDetails, theRequest, actionName, theNestedMode);
-		}
-
-		if (syntheticEntryCount > 0) {
-			myTransactionBundleNormalizer.stripSyntheticResponseEntries(response, syntheticEntryCount);
 		}
 
 		List<IBase> entries = myVersionAdapter.getEntries(response);

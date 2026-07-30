@@ -2,7 +2,9 @@ package ca.uhn.fhir.storage;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DomainResource;
@@ -26,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 // Created by Claude Opus 4.7
 class TransactionBundleNormalizerTest {
@@ -36,12 +39,27 @@ class TransactionBundleNormalizerTest {
 
 	private TransactionBundleNormalizer mySvc;
 
+	private StorageSettings myStorageSettings;
+
 	@BeforeEach
 	void setUp() {
 		FhirContextSearchParamRegistry searchParamRegistry = new FhirContextSearchParamRegistry(ourFhirContext);
 		MatchUrlService matchUrlService = new MatchUrlService(ourFhirContext, searchParamRegistry);
+		myStorageSettings = new StorageSettings();
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 		mySvc = new TransactionBundleNormalizer(
-				ourFhirContext, matchUrlService, new TransactionProcessorVersionAdapterR4());
+				ourFhirContext, matchUrlService, new TransactionProcessorVersionAdapterR4(), myStorageSettings);
+	}
+
+	private static TransactionDetails withSyntheticEntryCount(int theCount) {
+		TransactionDetails transactionDetails = new TransactionDetails();
+		transactionDetails.putUserData(TransactionBundleNormalizer.SYNTHETIC_ENTRY_COUNT_KEY, theCount);
+		return transactionDetails;
+	}
+
+	// Created by Claude Fable 5
+	private static int recordedSyntheticEntryCount(TransactionDetails theTransactionDetails) {
+		return theTransactionDetails.getUserData(TransactionBundleNormalizer.SYNTHETIC_ENTRY_COUNT_KEY);
 	}
 
 	@Test
@@ -51,7 +69,7 @@ class TransactionBundleNormalizerTest {
 		response.addEntry().setFullUrl("urn:uuid:synthetic-2");
 		response.addEntry().setFullUrl("urn:uuid:original");
 
-		mySvc.stripSyntheticResponseEntries(response, 2);
+		mySvc.stripSyntheticResponseEntries(response, withSyntheticEntryCount(2));
 
 		assertThat(response.getEntry()).hasSize(1);
 		assertEquals("urn:uuid:original", response.getEntry().get(0).getFullUrl());
@@ -62,9 +80,72 @@ class TransactionBundleNormalizerTest {
 		Bundle response = new Bundle();
 		response.addEntry().setFullUrl("urn:uuid:original");
 
-		mySvc.stripSyntheticResponseEntries(response, 0);
+		mySvc.stripSyntheticResponseEntries(response, withSyntheticEntryCount(0));
 
 		assertThat(response.getEntry()).hasSize(1);
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	void testStripSyntheticResponseEntries_noRecordedCountLeavesResponseUntouched() {
+		Bundle response = new Bundle();
+		response.addEntry().setFullUrl("urn:uuid:original");
+
+		mySvc.stripSyntheticResponseEntries(response, new TransactionDetails());
+
+		assertThat(response.getEntry()).hasSize(1);
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	void testNormalize_recordsSyntheticEntryCountOnTransactionDetails() {
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.TRANSACTION);
+		Observation obs = new Observation();
+		obs.getSubject().setReference("Patient?identifier=http://foo|bar");
+		bundle.addEntry().setResource(obs).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Observation");
+		TransactionDetails transactionDetails = new TransactionDetails();
+
+		mySvc.normalize(bundle, transactionDetails);
+
+		assertEquals(1, recordedSyntheticEntryCount(transactionDetails));
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	void testNormalize_batchBundleLeftUntouched() {
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.BATCH);
+		Observation obs = new Observation();
+		obs.getSubject().setReference("Patient?identifier=http://foo|bar");
+		bundle.addEntry().setResource(obs).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Observation");
+		TransactionDetails transactionDetails = new TransactionDetails();
+
+		mySvc.normalize(bundle, transactionDetails);
+
+		assertEquals(0, recordedSyntheticEntryCount(transactionDetails));
+		assertThat(bundle.getEntry()).hasSize(1);
+		assertNull(bundle.getEntry().get(0).getFullUrl());
+		assertEquals("Patient?identifier=http://foo|bar", obs.getSubject().getReference());
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	void testNormalize_autoCreatePlaceholdersDisabledLeavesBundleUntouched() {
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(false);
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.TRANSACTION);
+		Observation obs = new Observation();
+		obs.getSubject().setReference("Patient?identifier=http://foo|bar");
+		bundle.addEntry().setResource(obs).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Observation");
+		TransactionDetails transactionDetails = new TransactionDetails();
+
+		mySvc.normalize(bundle, transactionDetails);
+
+		assertEquals(0, recordedSyntheticEntryCount(transactionDetails));
+		assertThat(bundle.getEntry()).hasSize(1);
+		assertNull(bundle.getEntry().get(0).getFullUrl());
+		assertEquals("Patient?identifier=http://foo|bar", obs.getSubject().getReference());
 	}
 
 	@ParameterizedTest
@@ -73,13 +154,14 @@ class TransactionBundleNormalizerTest {
 			String theComment, String theBundle, int theExpectedSyntheticCount, Consumer<Bundle> theAssertions) {
 		// fixed setup
 		Bundle requestBundle = ourFhirContext.newJsonParser().parseResource(Bundle.class, theBundle);
+		TransactionDetails transactionDetails = new TransactionDetails();
 
 		// then
-		int actualSyntheticCount = mySvc.normalize(requestBundle);
+		mySvc.normalize(requestBundle, transactionDetails);
 		ourLog.info(ourFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(requestBundle));
 
 		// expectations
-		assertThat(actualSyntheticCount).isEqualTo(theExpectedSyntheticCount);
+		assertThat(recordedSyntheticEntryCount(transactionDetails)).isEqualTo(theExpectedSyntheticCount);
 		assertNotNull(requestBundle);
 		assertNotNull(theAssertions);
 		theAssertions.accept(requestBundle);
@@ -94,7 +176,7 @@ class TransactionBundleNormalizerTest {
 			String theExpectedMessage) {
 		Bundle requestBundle = ourFhirContext.newJsonParser().parseResource(Bundle.class, theBundle);
 
-		assertThatThrownBy(() -> mySvc.normalize(requestBundle))
+		assertThatThrownBy(() -> mySvc.normalize(requestBundle, new TransactionDetails()))
 				.isInstanceOf(theExpectedException)
 				.hasMessage(theExpectedMessage);
 	}
@@ -104,10 +186,11 @@ class TransactionBundleNormalizerTest {
 	void testTransaction_multiResourceRefScenarios(
 			String theComment, String theBundle, int theExpectedSyntheticCount, Consumer<Bundle> theAssertions) {
 		Bundle requestBundle = ourFhirContext.newJsonParser().parseResource(Bundle.class, theBundle);
+		TransactionDetails transactionDetails = new TransactionDetails();
 
-		int actualSyntheticCount = mySvc.normalize(requestBundle);
+		mySvc.normalize(requestBundle, transactionDetails);
 
-		assertThat(actualSyntheticCount).isEqualTo(theExpectedSyntheticCount);
+		assertThat(recordedSyntheticEntryCount(transactionDetails)).isEqualTo(theExpectedSyntheticCount);
 		assertNotNull(requestBundle);
 		assertNotNull(theAssertions);
 		theAssertions.accept(requestBundle);
@@ -128,9 +211,10 @@ class TransactionBundleNormalizerTest {
 				.setMethod(Bundle.HTTPVerb.POST)
 				.setUrl("Observation");
 
-		int syntheticCount = mySvc.normalize(bundle);
+		TransactionDetails transactionDetails = new TransactionDetails();
+		mySvc.normalize(bundle, transactionDetails);
 
-		assertThat(syntheticCount).isZero();
+		assertThat(recordedSyntheticEntryCount(transactionDetails)).isZero();
 		assertThat(bundle.getEntry())
 				.allSatisfy(entry -> assertThat(entry.getFullUrl()).startsWith("urn:uuid:"));
 	}
@@ -144,7 +228,7 @@ class TransactionBundleNormalizerTest {
 		bundle.setType(Bundle.BundleType.TRANSACTION);
 		bundle.addEntry().setResource(patient).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Patient");
 
-		mySvc.normalize(bundle);
+		mySvc.normalize(bundle, new TransactionDetails());
 
 		assertThat(bundle.getEntryFirstRep().getFullUrl()).isEqualTo(urnId);
 	}
@@ -161,7 +245,7 @@ class TransactionBundleNormalizerTest {
 				.setMethod(Bundle.HTTPVerb.PUT)
 				.setUrl("Patient/237643");
 
-		mySvc.normalize(bundle);
+		mySvc.normalize(bundle, new TransactionDetails());
 
 		// A urn fullUrl here would displace the concrete id as the entry's identity in the
 		// transaction processor (reference substitution keys, duplicate-id detection)
@@ -180,7 +264,7 @@ class TransactionBundleNormalizerTest {
 				.setMethod(Bundle.HTTPVerb.POST)
 				.setUrl("Patient");
 
-		mySvc.normalize(bundle);
+		mySvc.normalize(bundle, new TransactionDetails());
 
 		assertThat(bundle.getEntryFirstRep().getFullUrl()).isEqualTo(existing);
 	}
@@ -204,9 +288,10 @@ class TransactionBundleNormalizerTest {
 				.setMethod(Bundle.HTTPVerb.POST)
 				.setUrl("Observation");
 
-		int syntheticCount = mySvc.normalize(bundle);
+		TransactionDetails transactionDetails = new TransactionDetails();
+		mySvc.normalize(bundle, transactionDetails);
 
-		assertThat(syntheticCount).isZero();
+		assertThat(recordedSyntheticEntryCount(transactionDetails)).isZero();
 		assertThat(bundle.getEntry()).hasSize(2);
 		Observation obs = (Observation) bundle.getEntry().get(1).getResource();
 		assertThat(obs.getSubject().getReference()).isEqualTo(patientFullUrl);
