@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.subscription.api.IResourceModifiedConsumerWithRetries;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import ca.uhn.fhir.util.IoUtils;
@@ -46,6 +47,10 @@ import org.springframework.context.event.EventListener;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.TransactionCallback;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingListener.SUBSCRIPTION_MATCHING_CHANNEL_NAME;
 
@@ -113,6 +118,23 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 	}
 
 	/**
+	 * Submit a whole batch of messages to the broker in a single call so that the cost of synchronizing with the broker
+	 * is paid once for the batch rather than once per message.
+	 *
+	 * @param theMessages the messages to submit
+	 * @return the result of each send operation, in the same order as <code>theMessages</code>
+	 */
+	protected List<ISendResult> submitResourceModifiedBatch(List<IMessage<ResourceModifiedMessage>> theMessages) {
+		startIfNeeded();
+
+		ourLog.trace("Sending {} resource modified messages to processing channel", theMessages.size());
+		Validate.notNull(
+				myMatchingChannelProducer,
+				"A SubscriptionMatcherInterceptor has been registered without calling start() on it.");
+		return myMatchingChannelProducer.sendAll(theMessages);
+	}
+
+	/**
 	 * This method will inflate the ResourceModifiedMessage represented by the IPersistedResourceModifiedMessage and attempts
 	 * to submit it to the subscription processing pipeline.
 	 *
@@ -129,6 +151,102 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 				.withSystemRequest()
 				.withPropagation(Propagation.REQUIRES_NEW)
 				.execute(doProcessResourceModifiedInTransaction(thePersistedResourceModifiedMessage));
+	}
+
+	/**
+	 * This method drains a whole batch of IPersistedResourceModifiedMessage in a single unit of work: one transaction,
+	 * one batched delete and one batched submission to the broker.  It is the batched counterpart of
+	 * {@link #submitPersisedResourceModifiedMessage(IPersistedResourceModifiedMessage)}.
+	 * <p>
+	 * The batch is all-or-nothing.  If the broker rejects any message of the batch, whether by throwing or by returning
+	 * an unsuccessful {@link ISendResult}, the transaction is rolled back so that every row remains available for
+	 * re-submission at a later time.  Rows are never deleted unless the whole batch was acknowledged by the broker,
+	 * since the pipeline tolerates delivering a message more than once but never tolerates losing one.
+	 * </p>
+	 *
+	 * @param thePersistedResourceModifiedMessages the batch of messages requiring submission
+	 * @return the number of messages which were successfully processed, which is <code>0</code> when the batch was
+	 * rolled back.
+	 */
+	@Override
+	public int submitPersistedResourceModifiedMessages(
+			List<IPersistedResourceModifiedMessage> thePersistedResourceModifiedMessages) {
+		if (thePersistedResourceModifiedMessages.isEmpty()) {
+			// nothing to do: never open a transaction, hit the database or talk to the broker for an empty batch
+			return 0;
+		}
+
+		return myHapiTransactionService
+				.withSystemRequest()
+				.withPropagation(Propagation.REQUIRES_NEW)
+				.execute(doProcessResourceModifiedBatchInTransaction(thePersistedResourceModifiedMessages));
+	}
+
+	/**
+	 * The batched counterpart of {@link #doProcessResourceModifiedInTransaction(IPersistedResourceModifiedMessage)}.  It
+	 * requires execution in a transaction so that the batched deletion of the persistedResourceModifiedMessage pointed
+	 * to by <code>thePersistedResourceModifiedMessages</code> can be rolled back in the event where submission fails.
+	 *
+	 * @param thePersistedResourceModifiedMessages the batch of messages requiring submission
+	 * @return the number of messages which were successfully processed, which is <code>0</code> when the batch was
+	 * rolled back.
+	 */
+	protected TransactionCallback<Integer> doProcessResourceModifiedBatchInTransaction(
+			List<IPersistedResourceModifiedMessage> thePersistedResourceModifiedMessages) {
+		return theStatus -> {
+			int batchSize = thePersistedResourceModifiedMessages.size();
+			List<IMessage<ResourceModifiedMessage>> messagesToSend;
+
+			try {
+				// delete the entries to lock the rows to ensure unique processing.  A count smaller than the batch size
+				// would mean somebody else deleted some of the rows already; we send the whole batch regardless because
+				// the delivery pass is single threaded cluster wide and at-least-once delivery is tolerated whereas
+				// silent loss is not.
+				deletePersistedResourceModifiedMessages(thePersistedResourceModifiedMessages);
+
+				// submit the resource modified messages with empty payload, actual inflation is done by the matcher.
+				messagesToSend = createMessagesToSend(thePersistedResourceModifiedMessages);
+			} catch (Exception ex) {
+				ourLog.error(
+						"Failed to prepare a batch of {} resource modified messages for submission.  Further attempts will be performed at later time.",
+						batchSize,
+						ex);
+				theStatus.setRollbackOnly();
+				return 0;
+			}
+
+			if (messagesToSend.isEmpty()) {
+				// every row of the batch was unusable, but they have been deleted, so the pass may keep going
+				return batchSize;
+			}
+
+			try {
+				List<ISendResult> sendResults = submitResourceModifiedBatch(messagesToSend);
+
+				if (!isEverySendSuccessful(sendResults, messagesToSend.size())) {
+					// a producer is allowed to report a failed send without throwing.  The single message path discards
+					// its ISendResult, so this is a failure mode which only the batch API can observe; it means the
+					// broker did not acknowledge the messages, so it is handled exactly like a
+					// MessageDeliveryException.
+					ourLog.error(
+							"Channel submission was not acknowledged for a batch of {} resource modified messages.  Further attempts will be performed at later time.",
+							batchSize);
+					theStatus.setRollbackOnly();
+					return 0;
+				}
+			} catch (Exception exception) {
+				// we encountered an issue when trying to send the batch so mark the transaction for rollback.  We
+				// cannot tell which messages of the batch were acknowledged, so no row of the batch may be deleted.
+				ourLog.error(
+						"Channel submission failed for a batch of {} resource modified messages.  Further attempts will be performed at later time.",
+						batchSize,
+						exception);
+				theStatus.setRollbackOnly();
+				return 0;
+			}
+
+			return batchSize;
+		};
 	}
 
 	/**
@@ -188,6 +306,58 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 			IPersistedResourceModifiedMessage thePersistedResourceModifiedMessage) {
 		return myResourceModifiedMessagePersistenceSvc.createResourceModifiedMessageFromEntityWithoutInflation(
 				thePersistedResourceModifiedMessage);
+	}
+
+	/**
+	 * Build the outgoing message for every row of the batch.  A row whose stored summary cannot be turned into a
+	 * message can never be submitted, so it is dropped from the batch and left deleted - exactly what the single
+	 * message path does - rather than blocking every other message of the batch forever.
+	 */
+	private List<IMessage<ResourceModifiedMessage>> createMessagesToSend(
+			List<IPersistedResourceModifiedMessage> thePersistedResourceModifiedMessages) {
+		List<IMessage<ResourceModifiedMessage>> retVal = new ArrayList<>(thePersistedResourceModifiedMessages.size());
+
+		for (IPersistedResourceModifiedMessage nextPersistedResourceModifiedMessage :
+				thePersistedResourceModifiedMessages) {
+			try {
+				retVal.add(new ResourceModifiedJsonMessage(
+						createResourceModifiedMessageWithoutInflation(nextPersistedResourceModifiedMessage)));
+			} catch (Exception ex) {
+				ourLog.error(
+						"Unexpected error encountered while processing resource modified message {}. Marking as processed to prevent further errors.",
+						nextPersistedResourceModifiedMessage.getPersistedResourceModifiedMessagePk(),
+						ex);
+			}
+		}
+
+		return retVal;
+	}
+
+	private static boolean isEverySendSuccessful(List<ISendResult> theSendResults, int theExpectedResultCount) {
+		if (theSendResults == null || theSendResults.size() != theExpectedResultCount) {
+			return false;
+		}
+		return theSendResults.stream().allMatch(ISendResult::isSuccessful);
+	}
+
+	private void deletePersistedResourceModifiedMessages(
+			List<IPersistedResourceModifiedMessage> thePersistedResourceModifiedMessages) {
+		List<IPersistedResourceModifiedMessagePK> pks = thePersistedResourceModifiedMessages.stream()
+				.map(IPersistedResourceModifiedMessage::getPersistedResourceModifiedMessagePk)
+				.collect(Collectors.toList());
+
+		int deletedCount = myResourceModifiedMessagePersistenceSvc.deleteByPKs(pks);
+
+		if (deletedCount < pks.size()) {
+			// the batch delete reports a count rather than a per row verdict, so unlike the single message path we
+			// cannot tell which rows somebody else had already processed.  The whole batch is submitted anyway: the
+			// delivery pass is single threaded cluster wide, and the pipeline tolerates delivering a message more than
+			// once but never tolerates losing one.
+			ourLog.warn(
+					"Only {} of {} persisted resource modified messages were deleted, the remainder had already been deleted.  The whole batch will be submitted.",
+					deletedCount,
+					pks.size());
+		}
 	}
 
 	private boolean deletePersistedResourceModifiedMessage(IPersistedResourceModifiedMessagePK theResourceModifiedPK) {

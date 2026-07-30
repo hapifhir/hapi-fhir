@@ -66,10 +66,17 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Test {
 
 	/**
-	 * A page of persisted rows small enough to stay well under {@link AsyncResourceModifiedSubmitterSvc#MAX_LIMIT},
-	 * so that a single delivery pass fetches all of them in one page.
+	 * A page of persisted rows small enough to stay well under the default
+	 * {@link SubscriptionSettings#getSubscriptionSubmissionBatchSize()}, so that a single delivery pass fetches all of
+	 * them in one page.
 	 */
 	private static final int NUMBER_OF_ROWS_TO_SEED = 5;
+
+	/**
+	 * A batch size deliberately smaller than {@link #NUMBER_OF_ROWS_TO_SEED} so that a single delivery pass has to
+	 * drain the seeded rows over several batches.
+	 */
+	private static final int SMALL_SUBMISSION_BATCH_SIZE = 2;
 
 	private static final String RESOURCE_MODIFIED_TABLE_NAME = "HFJ_RESOURCE_MODIFIED";
 
@@ -100,6 +107,7 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 		myStoppableSubscriptionDeliveringRestHookListener.setCountDownLatch(null);
 		myStoppableSubscriptionDeliveringRestHookListener.resume();
 		mySubscriptionSettings.setTriggerSubscriptionsForNonVersioningChanges(new SubscriptionSettings().isTriggerSubscriptionsForNonVersioningChanges());
+		mySubscriptionSettings.setSubscriptionSubmissionBatchSize(new SubscriptionSettings().getSubscriptionSubmissionBatchSize());
 		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
 		myConsumer.close();
 	}
@@ -124,7 +132,7 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 		// setup
 		String resourceType = "Patient";
 		int factor = 5;
-		int numberOfResourcesToCreate = factor * AsyncResourceModifiedSubmitterSvc.MAX_LIMIT;
+		int numberOfResourcesToCreate = factor * mySubscriptionSettings.getSubscriptionSubmissionBatchSize();
 
 		ResourceModifiedEntity entity = new ResourceModifiedEntity();
 		PersistedResourceModifiedMessageEntityPK rpm = new PersistedResourceModifiedMessageEntityPK();
@@ -206,6 +214,42 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 		// row, but inside one batched transaction, would collapse to one SqlQuery and pass the check above while
 		// performing N round trips - exactly the defect this test exists to catch.
 		assertThat(resourceModifiedDeletes.get(0).getSize()).isEqualTo(1);
+	}
+
+	@Test
+	// the purpose of this test is to assert that the configured submission batch size is what drives how many rows a
+	// single delivery pass drains at a time: a batch size smaller than the number of waiting rows must make the pass
+	// drain them over several batches, while still emptying the table.
+	void runDeliveryPass_withSmallConfiguredBatchSize_drainsPersistedRowsInSeveralBatches() throws Exception {
+		// given a configured batch size smaller than the number of rows waiting for submission
+		mySubscriptionSettings.setSubscriptionSubmissionBatchSize(SMALL_SUBMISSION_BATCH_SIZE);
+		myResourceModifiedDao.deleteAll();
+
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		for (int i = 0; i < NUMBER_OF_ROWS_TO_SEED; i++) {
+			myPatientDao.create(new Patient(), requestDetails);
+		}
+		assertThat(myResourceModifiedDao.count()).isEqualTo(NUMBER_OF_ROWS_TO_SEED);
+
+		// when
+		myCaptureQueriesListener.clear();
+		myAsyncResourceModifiedSubmitterSvc.runDeliveryPass();
+
+		// then - the pass still drains every row
+		assertThat(myResourceModifiedDao.count()).isZero();
+
+		// then - the rows left HFJ_RESOURCE_MODIFIED one batch at a time.  The very same rows are removed by a single
+		// DELETE when the batch size is left at its default (see
+		// runDeliveryPass_withPageOfPersistedRows_drainsRowsInOneBatchAndDeliversEveryMessage), so this count is only
+		// reachable if the configured value really is the page and batch size the delivery pass works with.
+		int expectedNumberOfBatches =
+			(NUMBER_OF_ROWS_TO_SEED + SMALL_SUBMISSION_BATCH_SIZE - 1) / SMALL_SUBMISSION_BATCH_SIZE;
+		List<SqlQuery> resourceModifiedDeletes = myCaptureQueriesListener.getDeleteQueries().stream()
+			.filter(theQuery -> theQuery.getSql(false, false).toUpperCase(Locale.ROOT).contains(RESOURCE_MODIFIED_TABLE_NAME))
+			.toList();
+		assertThat(resourceModifiedDeletes).hasSize(expectedNumberOfBatches);
+
+		waitForQueueToDrain();
 	}
 
 	@Test
