@@ -1183,7 +1183,6 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 
 	@ParameterizedTest
 	@MethodSource("numResourcesParams")
-	@Disabled//TODO Nathan, this is failing intermittently in CI.
 	public void testReindex(int theNumResources){
 		myPatientReindexTestHelper.testReindex(theNumResources);
 	}
@@ -1197,7 +1196,6 @@ public class ReindexTaskTest extends BaseJpaR4Test {
 
 	@ParameterizedTest
 	@MethodSource("numResourcesParams")
-	@Disabled//TODO Nathan, this is failing intermittently in CI.
 	public void testParallelReindexOperation(int theNumResources){
 		myPatientReindexTestHelper.testParallelReindexOperation(theNumResources);
 	}

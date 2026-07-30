@@ -33,14 +33,14 @@ public class IntCounter {
 	 * Constructor
 	 */
 	public IntCounter() {
-		myCount = 0;
+		set(0);
 	}
 
 	/**
 	 * Constructor
 	 */
 	public IntCounter(int theStartingCount) {
-		myCount = theStartingCount;
+		set(theStartingCount);
 	}
 
 	public int get() {
@@ -57,5 +57,13 @@ public class IntCounter {
 
 	public void increment(int theDelta) {
 		myCount += theDelta;
+	}
+
+	public void decrement(int theDelta) {
+		myCount -= theDelta;
+	}
+
+	public void set(int theValue) {
+		myCount = theValue;
 	}
 }

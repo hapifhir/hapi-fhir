@@ -79,8 +79,8 @@ import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
 import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
+import ca.uhn.fhir.rest.server.method.IMethodBinding;
 import ca.uhn.fhir.rest.server.method.UpdateMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletSubRequestDetails;
@@ -777,7 +777,7 @@ public abstract class BaseTransactionProcessor {
 
 				String url = requestDetailsForEntry.getRequestPath();
 
-				BaseMethodBinding method = srd.getServer().determineResourceMethod(requestDetailsForEntry, url);
+				IMethodBinding method = srd.getServer().determineResourceMethod(requestDetailsForEntry, url);
 				if (method == null) {
 					throw new IllegalArgumentException(Msg.code(532) + "Unable to handle GET " + url);
 				}

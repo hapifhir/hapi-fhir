@@ -28,12 +28,15 @@ import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.interceptor.model.TransactionWriteAfterPrefetchDetails;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
+import ca.uhn.fhir.jpa.dao.index.SearchParamIndexProviderRegistry;
+import ca.uhn.fhir.jpa.dao.index.SearchParamIndexRouting;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.JpaResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -49,6 +52,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -153,6 +157,9 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+
+	@Autowired(required = false)
+	private SearchParamIndexProviderRegistry mySearchParamIndexProviderRegistry;
 
 	public void setEntityManagerForUnitTest(EntityManager theEntityManager) {
 		myEntityManager = theEntityManager;
@@ -277,7 +284,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		 * Pre-Fetch Resource Bodies (this will happen for any resources we are potentially
 		 * going to update)
 		 */
-		IFhirSystemDao<?, ?> systemDao = myApplicationContext.getBean(IFhirSystemDao.class);
+		IFhirSystemDao<?, ?> systemDao =
+				myApplicationContext.getBean(DaoRegistry.class).getSystemDao();
 		systemDao.preFetchResources(List.copyOf(idsToPreFetchBodiesFor), true);
 
 		/*
@@ -1146,6 +1154,12 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			MatchUrlToResolve theMatchUrl,
 			Set<Long> theOutputSysAndValuePredicates,
 			Set<Long> theOutputValuePredicates) {
+		// Skip the HFJ_SPIDX_TOKEN batch optimization if write to HFJ_SPIDX_TOKEN is suppressed
+		if (mySearchParamIndexProviderRegistry != null
+				&& mySearchParamIndexProviderRegistry.isBuiltInIndexWriteSuppressed(
+						SearchParamIndexRouting.forParamType(RestSearchParameterTypeEnum.TOKEN))) {
+			return false;
+		}
 		if (isNotBlank(theTokenParam.getValue()) && isNotBlank(theTokenParam.getSystem())) {
 			theMatchUrl.myHashSystemAndValue = ResourceIndexedSearchParamToken.calculateHashSystemAndValue(
 					myPartitionSettings,

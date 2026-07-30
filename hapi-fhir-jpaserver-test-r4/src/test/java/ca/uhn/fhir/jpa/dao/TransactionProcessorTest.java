@@ -176,6 +176,8 @@ public class TransactionProcessorTest {
 
 	@BeforeEach
 	void before() {
+		myDaoRegistry.unregisterAll();
+
 		myTransactionProcessor.setEntityManagerForUnitTest(myEntityManager);
 		when(myEntityManager.unwrap(eq(Session.class))).thenReturn(mySession);
 
@@ -186,6 +188,7 @@ public class TransactionProcessorTest {
 		when(myPatientDao.getResourceType()).thenReturn(Patient.class);
 		when(myPatientDao.getContext()).thenReturn(myFhirContext);
 		myDaoRegistry.register(myPatientDao);
+		myDaoRegistry.register(mySystemDao);
 	}
 
 	@AfterEach
@@ -544,9 +547,7 @@ public class TransactionProcessorTest {
 
 		@Bean
 		public DaoRegistry daoRegistry() {
-			DaoRegistry retVal = new DaoRegistry(fhirContext());
-			retVal.setResourceDaos(List.of());
-			return retVal;
+			return new DaoRegistry(fhirContext());
 		}
 
 		@Bean
