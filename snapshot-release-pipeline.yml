@@ -12,7 +12,7 @@ schedules:
     timeoutInMinutes: 90
     branches:
       include:
-        - rel_8_10               # <-- UPDATE THIS EACH CYCLE
+        - rel_8_12               # <-- UPDATE THIS EACH CYCLE
     always: false
 
 # This is manually run to deploy SNAPSHOT versions of HAPI to oss.sonaypte.org
