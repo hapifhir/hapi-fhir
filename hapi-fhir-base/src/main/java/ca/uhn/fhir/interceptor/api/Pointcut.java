@@ -2126,6 +2126,41 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
+	 * Invoked once processing of a FHIR transaction or batch bundle has fully completed and the final response
+	 * bundle is about to be returned to the caller. Unlike {@link #STORAGE_TRANSACTION_RESPONSE_ASSEMBLED}, which
+	 * is invoked once per sub-transaction with that sub-transaction's response, this pointcut is invoked exactly
+	 * once per top-level operation, with the complete response — after any sub-transaction responses (e.g.
+	 * partition slices) have been aggregated. Hooks may mutate the response bundle, for example to remove response
+	 * entries corresponding to request entries a hook injected at {@link #STORAGE_TRANSACTION_PROCESSING}. A
+	 * nested transaction (one submitted while another is being processed) completes its own processing and so
+	 * invokes this pointcut for its own response.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>ca.uhn.fhir.interceptor.model.TransactionResponseFinalizedDetails - Carries the finalized response
+	 * bundle, along with the version adapter for reading and mutating its entries in a FHIR-version-agnostic
+	 * way.</li>
+	 * <li>ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is being
+	 * processed.</li>
+	 * <li>ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - The same details as the RequestDetails parameter, but
+	 * only populated when operating in a RestfulServer. Provided as a convenience.</li>
+	 * <li>ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object.</li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 *
+	 * @since FIXME-TG update after version bump
+	 */
+	STORAGE_TRANSACTION_RESPONSE_FINALIZED(
+			void.class,
+			"ca.uhn.fhir.interceptor.model.TransactionResponseFinalizedDetails",
+			"ca.uhn.fhir.rest.api.server.RequestDetails",
+			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+			"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"),
+
+	/**
+	 * <b>Storage Hook:</b>
 	 * Invoked after all entries in a transaction bundle have been executed
 	 * <p>
 	 * Hooks will have access to the original bundle, as well as all the deferred interceptor broadcasts related to the

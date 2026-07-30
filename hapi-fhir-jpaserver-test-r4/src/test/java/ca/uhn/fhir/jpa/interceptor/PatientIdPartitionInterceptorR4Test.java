@@ -2,11 +2,13 @@ package ca.uhn.fhir.jpa.interceptor;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.interceptor.model.TransactionResponseFinalizedDetails;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.cache.IResourceIdentifierCacheSvc;
@@ -100,6 +102,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.function.Consumer;
@@ -1814,6 +1818,48 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 			.hasMessage(theExpectedError);
 		// Nothing from the failed bundle persisted — only the fixture's two patients exist.
 		assertPatientCountInDatabase(2);
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	public void testTransaction_splitIntoSubTransactions_responseFinalizedFiresOnceWithAggregatedResponse() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		registerInterceptor(new MyTransactionSplitInterceptor());
+
+		String practitionerFullUrl = IdType.newRandomUuid().getValue();
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(
+			buildPractitioner(withIdentifier("http://practitioner", "1")),
+			practitionerFullUrl
+		);
+		bb.addTransactionCreateEntry(buildPatient(
+			withIdentifier("http://patient", "1"),
+			withReference("generalPractitioner", practitionerFullUrl)
+		));
+
+		AtomicInteger finalizedCount = new AtomicInteger();
+		AtomicInteger assembledCount = new AtomicInteger();
+		AtomicReference<IBaseBundle> finalizedBundle = new AtomicReference<>();
+		IAnonymousInterceptor finalized = (thePointcut, theArgs) -> {
+			finalizedCount.incrementAndGet();
+			finalizedBundle.set(theArgs.get(TransactionResponseFinalizedDetails.class).getResponseBundle());
+		};
+		IAnonymousInterceptor assembled = (thePointcut, theArgs) -> assembledCount.incrementAndGet();
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_TRANSACTION_RESPONSE_FINALIZED, finalized);
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_TRANSACTION_RESPONSE_ASSEMBLED, assembled);
+		try {
+			Bundle response = mySystemDao.transaction(mySrd, bb.getBundleTyped());
+
+			// The split interceptor slices the bundle into two sub-transactions (ancillary + patient),
+			// each firing ASSEMBLED; FINALIZED fires once, with the aggregated response the caller receives.
+			assertEquals(2, assembledCount.get());
+			assertEquals(1, finalizedCount.get());
+			assertThat(finalizedBundle.get()).isSameAs(response);
+			assertThat(response.getEntry()).hasSize(2);
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(finalized);
+			myInterceptorRegistry.unregisterInterceptor(assembled);
+		}
 	}
 
 	/**

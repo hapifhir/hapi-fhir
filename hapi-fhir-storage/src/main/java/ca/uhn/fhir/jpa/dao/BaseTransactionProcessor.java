@@ -29,6 +29,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.interceptor.model.TransactionResponseAssembledDetails;
+import ca.uhn.fhir.interceptor.model.TransactionResponseFinalizedDetails;
 import ca.uhn.fhir.interceptor.model.TransactionWriteOperationsDetails;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -305,6 +306,20 @@ public abstract class BaseTransactionProcessor {
 				entries.remove(i);
 				i--;
 			}
+		}
+
+		// Interceptor broadcast: STORAGE_TRANSACTION_RESPONSE_FINALIZED
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_RESPONSE_FINALIZED)) {
+			@SuppressWarnings("unchecked")
+			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> versionAdapter = myVersionAdapter;
+			HookParams params = new HookParams()
+					.add(
+							TransactionResponseFinalizedDetails.class,
+							new TransactionResponseFinalizedDetails(response, versionAdapter))
+					.add(RequestDetails.class, theRequestDetails)
+					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+					.add(TransactionDetails.class, transactionDetails);
+			compositeBroadcaster.callHooks(Pointcut.STORAGE_TRANSACTION_RESPONSE_FINALIZED, params);
 		}
 
 		return (BUNDLE) response;

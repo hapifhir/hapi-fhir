@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.TransactionResponseFinalizedDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.storage.TransactionBundleNormalizer;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -1658,6 +1659,34 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
 			myInterceptorRegistry.unregisterInterceptor(normalizationRequest);
+		}
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	public void testTransaction_responseFinalizedPointcutFiresOnceWithFinalResponse() {
+		Bundle request = new Bundle();
+		request.setType(BundleType.TRANSACTION);
+		Patient p = new Patient();
+		p.setActive(true);
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
+
+		AtomicInteger fireCount = new AtomicInteger();
+		AtomicReference<IBaseBundle> finalizedBundle = new AtomicReference<>();
+		IAnonymousInterceptor interceptor = (thePointcut, theArgs) -> {
+			fireCount.incrementAndGet();
+			finalizedBundle.set(
+					theArgs.get(TransactionResponseFinalizedDetails.class).getResponseBundle());
+		};
+		myInterceptorRegistry.registerAnonymousInterceptor(
+				Pointcut.STORAGE_TRANSACTION_RESPONSE_FINALIZED, interceptor);
+		try {
+			Bundle resp = mySystemDao.transaction(mySrd, request);
+
+			assertEquals(1, fireCount.get());
+			assertThat(finalizedBundle.get()).isSameAs(resp);
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
 		}
 	}
 
