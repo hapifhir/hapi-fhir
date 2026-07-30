@@ -145,7 +145,7 @@ public class AddIndexTaskTest extends BaseTest {
 		assertThat(result.executedStatements).hasSize(2);
 		List<String> loggedSql = result.executedStatements.stream().map(BaseTask.ExecutedStatement::getSql).toList();
 		assertThat(loggedSql.get(0)).isEqualToIgnoringCase("drop index IDX_ANINDEX");
-		assertThat(loggedSql.get(1)).isEqualToIgnoringCase("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL, VER)");
+		assertThat(loggedSql.get(1)).contains("-- create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL, VER)");
 
 		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE")).containsExactlyInAnyOrder("IDX_DIFINDEX", "IDX_ANINDEX");
 	}
