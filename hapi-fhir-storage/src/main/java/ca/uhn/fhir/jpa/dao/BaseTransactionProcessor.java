@@ -2884,6 +2884,7 @@ public abstract class BaseTransactionProcessor {
 					CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, myRequestDetails);
 
 			TransactionDetails transactionDetails = new TransactionDetails(subRequestBundle);
+			transactionDetails.setServerConstructedBatchSubRequest(true);
 
 			// Interceptor call: STORAGE_TRANSACTION_PROCESSING
 			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_PROCESSING)) {

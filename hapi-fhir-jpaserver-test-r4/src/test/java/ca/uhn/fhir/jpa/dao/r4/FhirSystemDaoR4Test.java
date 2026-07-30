@@ -121,6 +121,7 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -1685,6 +1686,59 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 			assertEquals(1, fireCount.get());
 			assertThat(finalizedBundle.get()).isSameAs(resp);
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+		}
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	public void testTransaction_processingPointcut_notServerConstructedBatchSubRequest() {
+		Bundle request = new Bundle();
+		request.setType(BundleType.TRANSACTION);
+		Patient p = new Patient();
+		p.setActive(true);
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
+
+		AtomicReference<TransactionDetails> details = new AtomicReference<>();
+		IAnonymousInterceptor interceptor =
+				(thePointcut, theArgs) -> details.set(theArgs.get(TransactionDetails.class));
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_TRANSACTION_PROCESSING, interceptor);
+		try {
+			mySystemDao.transaction(mySrd, request);
+
+			assertNotNull(details.get());
+			assertFalse(details.get().isServerConstructedBatchSubRequest());
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+		}
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	public void testBatch_processingPointcut_marksServerConstructedBatchSubRequests() {
+		Bundle request = new Bundle();
+		request.setType(BundleType.BATCH);
+		Patient p1 = new Patient();
+		p1.setActive(true);
+		request.addEntry().setResource(p1).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
+		Patient p2 = new Patient();
+		p2.setActive(false);
+		request.addEntry().setResource(p2).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
+
+		// Batch entries may be processed concurrently on the bundle-batch pool
+		List<TransactionDetails> details = Collections.synchronizedList(new ArrayList<>());
+		IAnonymousInterceptor interceptor =
+				(thePointcut, theArgs) -> details.add(theArgs.get(TransactionDetails.class));
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_TRANSACTION_PROCESSING, interceptor);
+		try {
+			mySystemDao.transaction(mySrd, request);
+
+			// One top-level fire for the client's batch bundle, then one per entry for the
+			// server-constructed single-entry transaction bundles
+			assertThat(details).hasSize(3).doesNotContainNull();
+			assertEquals(1, details.stream().filter(d -> !d.isServerConstructedBatchSubRequest()).count());
+			assertEquals(2, details.stream().filter(TransactionDetails::isServerConstructedBatchSubRequest).count());
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
 		}

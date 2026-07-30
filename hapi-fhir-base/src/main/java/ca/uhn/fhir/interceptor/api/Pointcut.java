@@ -2043,7 +2043,10 @@ public enum Pointcut implements IPointcut {
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
 	 * <li>
-	 * ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object (since 8.10.0)
+	 * ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object (since 8.10.0).
+	 * Note that this pointcut is also invoked for transaction bundles the server constructs internally to process
+	 * a single entry of a client batch; {@code TransactionDetails#isServerConstructedBatchSubRequest()}
+	 * distinguishes those from client-submitted bundles.
 	 * </li>
 	 * </ul>
 	 * <p>
