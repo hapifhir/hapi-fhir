@@ -24,7 +24,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.server.method.IMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchParameter;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -181,7 +181,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			if (resourceBinding.getResourceName().equals("Patient")) {
-				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
+				List<IMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().iterator().next();
 				assertEquals("The patient's identifier", param.getDescription());
@@ -237,7 +237,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			if (resourceBinding.getResourceName().equals("Patient")) {
-				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
+				List<IMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().iterator().next();
 				assertEquals("The patient's identifier (MRN or other card number)", param.getDescription());
@@ -340,7 +340,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			if (resourceBinding.getResourceName().equals("Patient")) {
-				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
+				List<IMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().iterator().next();
 				assertEquals("The patient's identifier (MRN or other card number)", param.getDescription());

@@ -57,6 +57,10 @@ Once you have defined your plain providers, they are passed to the server in a s
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/ExampleProviders.java|plainProviderServer}}
 ```
+# Non-Annotation Providers
+
+As an experimental internal implementation feature, the server now accepts manual registration of operation providers that implement the IMethodBinding interface directly instead of requiring an annotated class.  This can be useful for automatic generation of providers without having to generate or mock annotated classes.
+These have limited capacity for contributing to the conformance document at this time.
 
 # Common Method Parameters
 
