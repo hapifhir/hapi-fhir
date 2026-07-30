@@ -1,0 +1,4 @@
+---
+type: change
+issue: 8194
+title: "Introduce interface for RestfulServer bindings to allow custom binding handlers."

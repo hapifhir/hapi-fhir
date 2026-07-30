@@ -254,14 +254,16 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		assertEquals("2", myOrganizationDao.read(new IdType("Organization/A"), mySrd).getName());
 		assertTrue(myOrganizationDao.read(new IdType("Organization/A"), mySrd).getActive());
 
-		logAllStringIndexes();
+		String stringIndexesMessage = logAllStringIndexes();
+		String tokenIndexesMessage = logAllTokenIndexes();
+
 		runInTransaction(()->{
 			List<String> stringIndexes = getAllStringIndexes("name")
 				.stream().map(ResourceIndexedSearchParamString::getValueExact).toList();
-			assertThat(stringIndexes).asList().containsExactly("2");
+			assertThat(stringIndexes).asList().as(stringIndexesMessage).containsExactly("2");
 			List<String> tokenIndexes = getAllTokenIndexes("active")
 				.stream().map(ResourceIndexedSearchParamToken::getValue).toList();
-			assertThat(tokenIndexes).asList().containsExactly("true");
+			assertThat(tokenIndexes).asList().as(tokenIndexesMessage).containsExactly("true");
 		});
 
 		runInTransaction(()->{
