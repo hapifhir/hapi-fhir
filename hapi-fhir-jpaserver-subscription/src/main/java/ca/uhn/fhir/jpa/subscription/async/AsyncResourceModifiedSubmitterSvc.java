@@ -78,7 +78,6 @@ public class AsyncResourceModifiedSubmitterSvc {
 			int processedCount = myResourceModifiedConsumer.submitPersistedResourceModifiedMessages(batch);
 
 			if (processedCount < batch.size()) {
-				// we're not fetching anymore no matter what
 				hasMoreToFetch = false;
 			}
 		} while (hasMoreToFetch);

@@ -55,6 +55,7 @@ public interface IChannelProducer<T> {
 	 *
 	 * @param theMessages the messages to send, in the order in which they should be sent
 	 * @return the result of each send operation, in the same order as <code>theMessages</code>
+	 * @since 8.12.0
 	 */
 	default List<ISendResult> sendAll(List<IMessage<T>> theMessages) {
 		return theMessages.stream().map(this::send).collect(Collectors.toList());

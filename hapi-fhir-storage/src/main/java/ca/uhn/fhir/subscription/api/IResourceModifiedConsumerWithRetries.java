@@ -56,6 +56,7 @@ public interface IResourceModifiedConsumerWithRetries {
 	 *                                             order in which they should be submitted.
 	 * @return The number of IPersistedResourceModifiedMessage which were successfully processed, which is
 	 * <code>0</code> when the batch was rolled back.
+	 * @since 8.12.0
 	 */
 	int submitPersistedResourceModifiedMessages(
 			List<IPersistedResourceModifiedMessage> thePersistedResourceModifiedMessages);

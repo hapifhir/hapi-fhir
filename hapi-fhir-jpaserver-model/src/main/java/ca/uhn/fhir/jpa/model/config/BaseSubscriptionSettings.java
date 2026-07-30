@@ -336,7 +336,7 @@ public abstract class BaseSubscriptionSettings {
 	 * left in the database and re-submitted on a later delivery pass.
 	 * </p>
 	 *
-	 * @since 8.11.20
+	 * @since 8.12.0
 	 */
 	public int getSubscriptionSubmissionBatchSize() {
 		return mySubmissionBatchSize;
@@ -354,7 +354,7 @@ public abstract class BaseSubscriptionSettings {
 	 *
 	 * @param theSubscriptionSubmissionBatchSize the number of rows to submit per batch, which must be greater than zero
 	 * @throws IllegalArgumentException if <code>theSubscriptionSubmissionBatchSize</code> is not greater than zero
-	 * @since 8.11.20
+	 * @since 8.12.0
 	 */
 	public void setSubscriptionSubmissionBatchSize(int theSubscriptionSubmissionBatchSize) {
 		Validate.isTrue(

@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.subscription.submit.svc;
 import ca.uhn.fhir.broker.api.ChannelProducerSettings;
 import ca.uhn.fhir.broker.api.IChannelProducer;
 import ca.uhn.fhir.broker.api.ISendResult;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessage;
@@ -198,17 +199,16 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 			List<IMessage<ResourceModifiedMessage>> messagesToSend;
 
 			try {
-				// delete the entries to lock the rows to ensure unique processing.  A count smaller than the batch size
-				// would mean somebody else deleted some of the rows already; we send the whole batch regardless because
-				// the delivery pass is single threaded cluster wide and at-least-once delivery is tolerated whereas
-				// silent loss is not.
 				deletePersistedResourceModifiedMessages(thePersistedResourceModifiedMessages);
 
-				// submit the resource modified messages with empty payload, actual inflation is done by the matcher.
 				messagesToSend = createMessagesToSend(thePersistedResourceModifiedMessages);
 			} catch (Exception ex) {
+				// catching Exception is deliberate here, despite this generally being frowned upon: any failure while
+				// preparing the batch must roll the transaction back, since we cannot tell how much of the batch was
+				// affected and losing a row is not acceptable.
 				ourLog.error(
-						"Failed to prepare a batch of {} resource modified messages for submission.  Further attempts will be performed at later time.",
+						Msg.code(3017)
+								+ "Failed to prepare a batch of {} resource modified messages for submission.  Further attempts will be performed at later time.",
 						batchSize,
 						ex);
 				theStatus.setRollbackOnly();
@@ -229,7 +229,8 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 					// broker did not acknowledge the messages, so it is handled exactly like a
 					// MessageDeliveryException.
 					ourLog.error(
-							"Channel submission was not acknowledged for a batch of {} resource modified messages.  Further attempts will be performed at later time.",
+							Msg.code(3018)
+									+ "Channel submission was not acknowledged for a batch of {} resource modified messages.  Further attempts will be performed at later time.",
 							batchSize);
 					theStatus.setRollbackOnly();
 					return 0;
@@ -238,7 +239,8 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 				// we encountered an issue when trying to send the batch so mark the transaction for rollback.  We
 				// cannot tell which messages of the batch were acknowledged, so no row of the batch may be deleted.
 				ourLog.error(
-						"Channel submission failed for a batch of {} resource modified messages.  Further attempts will be performed at later time.",
+						Msg.code(3019)
+								+ "Channel submission failed for a batch of {} resource modified messages.  Further attempts will be performed at later time.",
 						batchSize,
 						exception);
 				theStatus.setRollbackOnly();
@@ -324,7 +326,8 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 						createResourceModifiedMessageWithoutInflation(nextPersistedResourceModifiedMessage)));
 			} catch (Exception ex) {
 				ourLog.error(
-						"Unexpected error encountered while processing resource modified message {}. Marking as processed to prevent further errors.",
+						Msg.code(3020)
+								+ "Unexpected error encountered while processing resource modified message {}. Marking as processed to prevent further errors.",
 						nextPersistedResourceModifiedMessage.getPersistedResourceModifiedMessagePk(),
 						ex);
 			}
@@ -349,10 +352,6 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 		int deletedCount = myResourceModifiedMessagePersistenceSvc.deleteByPKs(pks);
 
 		if (deletedCount < pks.size()) {
-			// the batch delete reports a count rather than a per row verdict, so unlike the single message path we
-			// cannot tell which rows somebody else had already processed.  The whole batch is submitted anyway: the
-			// delivery pass is single threaded cluster wide, and the pipeline tolerates delivering a message more than
-			// once but never tolerates losing one.
 			ourLog.warn(
 					"Only {} of {} persisted resource modified messages were deleted, the remainder had already been deleted.  The whole batch will be submitted.",
 					deletedCount,

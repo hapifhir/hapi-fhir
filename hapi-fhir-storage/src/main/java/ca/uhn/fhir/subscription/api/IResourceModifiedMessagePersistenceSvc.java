@@ -64,6 +64,7 @@ public interface IResourceModifiedMessagePersistenceSvc {
 	 * @param thePersistedResourceModifiedMessagePKs The primary keys of the persistedResourceModifiedMessage to delete.
 	 * @return The number of persistedResourceModifiedMessage which were deleted.  This can be smaller than the number of
 	 * primary keys provided when some of them had already been deleted.
+	 * @since 8.12.0
 	 */
 	default int deleteByPKs(Collection<IPersistedResourceModifiedMessagePK> thePersistedResourceModifiedMessagePKs) {
 		return (int) thePersistedResourceModifiedMessagePKs.stream()

@@ -39,6 +39,7 @@ public interface ISpringMessagingChannelProducer extends MessageChannel, Interce
 	 *
 	 * @param theMessages the messages to send, in the order in which they should be sent
 	 * @return whether each message was sent, in the same order as <code>theMessages</code>
+	 * @since 8.12.0
 	 */
 	default List<Boolean> sendAll(List<Message<?>> theMessages) {
 		return theMessages.stream().map(this::send).collect(Collectors.toList());
