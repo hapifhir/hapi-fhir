@@ -21,8 +21,8 @@ package ca.uhn.fhir.broker.api;
 
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Sends messages to a Message Broker.
@@ -57,10 +57,6 @@ public interface IChannelProducer<T> {
 	 * @return the result of each send operation, in the same order as <code>theMessages</code>
 	 */
 	default List<ISendResult> sendAll(List<IMessage<T>> theMessages) {
-		List<ISendResult> retVal = new ArrayList<>(theMessages.size());
-		for (IMessage<T> nextMessage : theMessages) {
-			retVal.add(send(nextMessage));
-		}
-		return retVal;
+		return theMessages.stream().map(this::send).collect(Collectors.toList());
 	}
 }
