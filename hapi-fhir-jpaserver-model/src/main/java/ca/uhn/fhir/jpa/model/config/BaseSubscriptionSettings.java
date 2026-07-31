@@ -46,7 +46,7 @@ public abstract class BaseSubscriptionSettings {
 	private boolean myEnableInMemorySubscriptionMatching = true;
 	private boolean myTriggerSubscriptionsForNonVersioningChanges;
 	private long mySubmissionIntervalInMs = DEFAULT_SUBMISSION_INTERVAL_IN_MS;
-	private int mySubmissionBatchSize = DEFAULT_SUBMISSION_BATCH_SIZE;
+	private int mySubscriptionSubmissionBatchSize = DEFAULT_SUBMISSION_BATCH_SIZE;
 
 	/**
 	 * @since 6.8.0
@@ -339,7 +339,7 @@ public abstract class BaseSubscriptionSettings {
 	 * @since 8.12.0
 	 */
 	public int getSubscriptionSubmissionBatchSize() {
-		return mySubmissionBatchSize;
+		return mySubscriptionSubmissionBatchSize;
 	}
 
 	/**
@@ -359,6 +359,6 @@ public abstract class BaseSubscriptionSettings {
 	public void setSubscriptionSubmissionBatchSize(int theSubscriptionSubmissionBatchSize) {
 		Validate.isTrue(
 				theSubscriptionSubmissionBatchSize > 0, "theSubscriptionSubmissionBatchSize must be greater than 0");
-		mySubmissionBatchSize = theSubscriptionSubmissionBatchSize;
+		mySubscriptionSubmissionBatchSize = theSubscriptionSubmissionBatchSize;
 	}
 }
