@@ -43,6 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -56,8 +57,9 @@ class JobDataSinkTest {
 	private static final int PID_COUNT = 729;
 	private static final String JOB_INSTANCE_ID = "17";
 	private static final String CHUNK_ID = "289";
+	private static final String PARENT_CHUNK_ID = "288";
 	public static final String FIRST_STEP_ID = "firstStep";
-	public static final String MIDDLE_STEP_ID = "middleStep";
+	private static final String MIDDLE_STEP_ID = "middleStep";
 	public static final String LAST_STEP_ID = "lastStep";
 
 	@Mock
@@ -159,8 +161,6 @@ class JobDataSinkTest {
 	}
 
 	/**
-	 * Primary reproduction for the {@literal JobDataSink} transaction demarcation defect.
-	 * <p>
 	 * A non-gated step (e.g. {@literal ResourceIdListStep} on the {@literal MDM_SUBMIT} job) sinks its child
 	 * chunks from inside a long-lived caller transaction, because the resource id stream is wrapped in
 	 * transaction advice so its {@literal ResultSet} stays open. The {@literal READY -> QUEUED} state update
@@ -193,24 +193,27 @@ class JobDataSinkTest {
 		assertThat(myFrameAtEnqueue)
 			.as("enqueueWorkChunkForProcessing must be invoked inside a transaction")
 			.isNotNull();
-		assertThat(myFrameAtEnqueue.getPropagation())
+		assertThat(myFrameAtEnqueue.propagation())
 			.as("enqueueWorkChunkForProcessing must run in its own REQUIRES_NEW transaction, not the caller's")
 			.isEqualTo(Propagation.REQUIRES_NEW);
 
 		assertThat(myFrameAtSend)
 			.as("sendWorkChannelMessage must be invoked inside a transaction (transactional outbox)")
 			.isNotNull();
-		assertThat(myFrameAtSend.getPropagation())
+		assertThat(myFrameAtSend.propagation())
 			.as("sendWorkChannelMessage must stay inside the REQUIRES_NEW enqueue transaction")
 			.isEqualTo(Propagation.REQUIRES_NEW);
 
-		assertThat(myFrameAtEnqueue.getRequestPartitionId())
+		assertThat(myFrameAtEnqueue.requestPartitionId())
 			.as("the enqueue must target the default partition, exactly as the chunk-creation call does")
 			.isEqualTo(RequestPartitionId.defaultPartition(new PartitionSettings()));
+
+		verify(myJobPersistence)
+			.enqueueWorkChunkForProcessing(eq(CHUNK_ID), any());
 	}
 
 	/**
-	 * Adjacent case A1: a gated job must not enqueue the chunk at all - the maintenance pass does that
+	 * A gated job must not enqueue the chunk at all - the maintenance pass does that
 	 * later - but the chunk creation must still happen in its own REQUIRES_NEW transaction.
 	 */
 	@Test
@@ -240,7 +243,7 @@ class JobDataSinkTest {
 		assertThat(myFrameAtCreate)
 			.as("onWorkChunkCreate must be invoked inside a transaction")
 			.isNotNull();
-		assertThat(myFrameAtCreate.getPropagation())
+		assertThat(myFrameAtCreate.propagation())
 			.as("onWorkChunkCreate must run in its own REQUIRES_NEW transaction")
 			.isEqualTo(Propagation.REQUIRES_NEW);
 		assertThat(myBatchWorkChunkCaptor.getValue().isGatedExecution)
@@ -249,7 +252,7 @@ class JobDataSinkTest {
 	}
 
 	/**
-	 * Adjacent case A2: {@literal acceptForFutureStep} is the second entry point into
+	 * {@literal acceptForFutureStep} is the second entry point into
 	 * {@literal acceptForStepId} and must get the same transaction demarcation as {@literal accept}.
 	 */
 	@Test
@@ -274,20 +277,20 @@ class JobDataSinkTest {
 		assertThat(myFrameAtEnqueue)
 			.as("enqueueWorkChunkForProcessing must be invoked inside a transaction")
 			.isNotNull();
-		assertThat(myFrameAtEnqueue.getPropagation())
+		assertThat(myFrameAtEnqueue.propagation())
 			.as("acceptForFutureStep must enqueue in its own REQUIRES_NEW transaction, not the caller's")
 			.isEqualTo(Propagation.REQUIRES_NEW);
 
 		assertThat(myFrameAtSend)
 			.as("sendWorkChannelMessage must be invoked inside a transaction (transactional outbox)")
 			.isNotNull();
-		assertThat(myFrameAtSend.getPropagation())
+		assertThat(myFrameAtSend.propagation())
 			.as("sendWorkChannelMessage must stay inside the REQUIRES_NEW enqueue transaction")
 			.isEqualTo(Propagation.REQUIRES_NEW);
 	}
 
 	/**
-	 * Adjacent case A4: the transactional-outbox ordering tripwire. The work channel message is
+	 * The transactional-outbox ordering tripwire: the work channel message is
 	 * deliberately sent from inside the {@literal enqueueWorkChunkForProcessing} callback, i.e. before the
 	 * {@literal READY -> QUEUED} transition commits. Hoisting the send out of the callback would break
 	 * at-least-once delivery.
@@ -388,7 +391,7 @@ class JobDataSinkTest {
 			(JobDefinitionStep<TestJobParameters, Step1Output, ?>) theJobDefinition.getSteps().get(1);
 		JobWorkCursor<TestJobParameters, VoidModel, Step1Output> cursor =
 			new JobWorkCursor<>(theJobDefinition, true, currentStep, nextStep);
-		WorkChunk chunk = new WorkChunk().setId(CHUNK_ID);
+		WorkChunk chunk = new WorkChunk().setId(PARENT_CHUNK_ID);
 		return new JobDataSink<>(myBatchJobSender, myJobPersistence, theJobDefinition, JOB_INSTANCE_ID, cursor, chunk, myHapiTransactionService);
 	}
 
@@ -428,25 +431,7 @@ class JobDataSinkTest {
 	/**
 	 * The demarcation of a single in-flight {@literal IHapiTransactionService} execution.
 	 */
-	private static class TransactionFrame {
-		private final Propagation myPropagation;
-		private final RequestPartitionId myRequestPartitionId;
-
-		TransactionFrame(@Nullable Propagation thePropagation, @Nullable RequestPartitionId theRequestPartitionId) {
-			myPropagation = thePropagation;
-			myRequestPartitionId = theRequestPartitionId;
-		}
-
-		@Nullable
-		Propagation getPropagation() {
-			return myPropagation;
-		}
-
-		@Nullable
-		RequestPartitionId getRequestPartitionId() {
-			return myRequestPartitionId;
-		}
-	}
+	private record TransactionFrame(@Nullable Propagation propagation, @Nullable RequestPartitionId requestPartitionId) {}
 
 	private static class Step1Output implements IModelJson {
 		@JsonProperty("pids")
