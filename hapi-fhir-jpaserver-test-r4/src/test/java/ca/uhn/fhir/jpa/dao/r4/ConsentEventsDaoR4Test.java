@@ -121,13 +121,12 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setSort(new SortSpec(Observation.SP_IDENTIFIER, SortOrderEnum.ASC));
 		IBundleProvider outcome = myObservationDao.search(map, mySrd);
-		ourLog.info("Search UUID: {}", outcome.getUuid());
 
 		// Fetch the first 10 (don't cross a fetch boundary)
 		List<IBaseResource> resources = outcome.getResources(0, 10);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(myObservationIdsEvenOnly.subList(0, 10), returnedIdValues);
-		assertEquals(2, preAccessInterceptorCallCount.get());
+		assertEquals(1, preAccessInterceptorCallCount.get());
 		assertThat(interceptedResourceIds).as("Wrong response from " + outcome.getClass()).isEqualTo(myObservationIds.subList(0, 21));
 
 		// Fetch the next 30 (do cross a fetch boundary)

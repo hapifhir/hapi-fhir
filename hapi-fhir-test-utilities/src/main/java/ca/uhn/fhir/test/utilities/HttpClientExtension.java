@@ -59,7 +59,8 @@ public class HttpClientExtension implements BeforeEachCallback, AfterEachCallbac
 
 		SocketConfig socketConfig = SocketConfig
 			.copy(SocketConfig.DEFAULT)
-			.setSoTimeout((int) (30 * DateUtils.MILLIS_PER_SECOND))
+			// FIXME: restore
+			.setSoTimeout((int) (3000 * DateUtils.MILLIS_PER_SECOND))
 			.build();
 		connectionManager.setDefaultSocketConfig(socketConfig);
 

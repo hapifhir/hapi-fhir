@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.time.DateUtils;
@@ -95,7 +96,10 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc, IHasScheduledJobs 
 		String queryPart = parseWarmUrlParamPart(nextUrl);
 		SearchParameterMap responseCriteriaUrl = myMatchUrlService.translateMatchUrl(queryPart, resourceDef);
 
-		callingDao.search(responseCriteriaUrl);
+		IBundleProvider search = callingDao.search(responseCriteriaUrl);
+
+		// Fetch the first 50 resources to get them into the cache.
+		search.getResources(0, 50);
 	}
 
 	private String parseWarmUrlParamPart(String theNextUrl) {

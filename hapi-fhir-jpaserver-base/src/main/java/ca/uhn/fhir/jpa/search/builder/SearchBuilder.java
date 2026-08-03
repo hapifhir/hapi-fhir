@@ -1048,7 +1048,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					theSearchQueryProperties.isDoCountOnlyFlag(),
 					false);
 			GeneratedSql allTargetsSql = fetchPidsSqlBuilder.generate(
-					theSearchQueryProperties.getOffset(), mySearchProperties.getMaxResultsRequested());
+					theSearchQueryProperties.getOffset(), theSearchQueryProperties.getMaxResultsRequested());
 			String sql = allTargetsSql.getSql();
 			Object[] args = allTargetsSql.getBindVariables().toArray(new Object[0]);
 
@@ -3400,6 +3400,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		private void initializeIteratorQuery(Integer theOffset, Integer theMaxResultsToFetch) {
 			Integer offset = theOffset;
+			Integer maxResultsToFetch = theMaxResultsToFetch;
 			if (myQueryList.isEmpty()) {
 				// Capture times for Lucene/Elasticsearch queries as well
 				mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());
@@ -3408,12 +3409,15 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				// correct output result for everything operation during paging
 				if (myParams.getEverythingMode() != null) {
 					offset = 0;
+					if (maxResultsToFetch != null && !myPidSet.isEmpty()) {
+						maxResultsToFetch += myPidSet.size();
+					}
 				}
 
 				SearchQueryProperties properties = mySearchProperties.clone();
 				properties
 						.setOffset(offset)
-						.setMaxResultsRequested(theMaxResultsToFetch)
+						.setMaxResultsRequested(maxResultsToFetch)
 						.setDoCountOnlyFlag(false)
 						.setDeduplicateInDatabase(properties.isDeduplicateInDatabase() || offset != null);
 				myQueryList = createQuery(myParams, properties, myRequest, mySearchRuntimeDetails);
