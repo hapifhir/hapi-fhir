@@ -138,6 +138,7 @@ public class HapiClearMigrationLockCommandTest extends ConsoleOutputCapturingBas
 			"-u", url,
 			"-n", "",
 			"-p", "",
+			"--baseline-version", "3.4.0",
 			"-r"
 		};
 		App.main(args);
@@ -313,4 +314,3 @@ public class HapiClearMigrationLockCommandTest extends ConsoleOutputCapturingBas
 	}
 
 }
-
