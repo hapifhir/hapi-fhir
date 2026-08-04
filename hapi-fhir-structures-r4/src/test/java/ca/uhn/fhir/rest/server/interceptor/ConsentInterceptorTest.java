@@ -38,12 +38,15 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.PlanDefinition;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -92,12 +95,15 @@ public class ConsentInterceptorTest {
 	private static final DummySystemProvider ourSystemProvider = new DummySystemProvider();
 	private static final HashMapResourceProvider<Bundle> ourBundleProvider =
 		 new HashMapResourceProvider<>(ourCtx, Bundle.class);
+	private static final HashMapResourceProvider<PlanDefinition> ourPlanDefinitionProvider =
+		 new HashMapResourceProvider<>(ourCtx, PlanDefinition.class);
 
 	@RegisterExtension
 	static final RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
 		.registerProvider(ourPatientProvider)
 		.registerProvider(ourSystemProvider)
 		.registerProvider(ourBundleProvider)
+		.registerProvider(ourPlanDefinitionProvider)
 		.withPagingProvider(new FifoMemoryPagingProvider(10));
 
 	@Mock(answer = Answers.CALLS_REAL_METHODS)
@@ -124,6 +130,7 @@ public class ConsentInterceptorTest {
 		ourServer.registerInterceptor(myInterceptor);
 		ourPatientProvider.clear();
 		ourBundleProvider.clear();
+		ourPlanDefinitionProvider.clear();
 	}
 
 	@Test
@@ -1089,6 +1096,75 @@ public class ConsentInterceptorTest {
 	}
 
 
+
+	@Nested
+	class ContainedResources {
+
+		@BeforeEach
+		void storePlanDefinitionAndAllowConsentToSeeIt() {
+			PlanDefinition planDefinition = new PlanDefinition();
+			planDefinition.setId("plan-1");
+			planDefinition.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			for (String id : new String[] {"activity-1", "activity-2", "activity-3"}) {
+				ActivityDefinition activityDefinition = new ActivityDefinition();
+				activityDefinition.setId(id);
+				activityDefinition.setStatus(Enumerations.PublicationStatus.DRAFT);
+				activityDefinition.setKind(ActivityDefinition.ActivityDefinitionKind.TASK);
+				planDefinition.addContained(activityDefinition);
+			}
+			ourPlanDefinitionProvider.store(planDefinition);
+
+			when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		}
+
+		private PlanDefinition fetchPlanDefinition() throws IOException {
+			HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/PlanDefinition/plan-1");
+			try (CloseableHttpResponse status = myClient.execute(httpGet)) {
+				assertEquals(200, status.getStatusLine().getStatusCode());
+				String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+				return ourCtx.newJsonParser().parseResource(PlanDefinition.class, responseContent);
+			}
+		}
+
+		/**
+		 * A consent service that returns a resource unchanged from willSeeResource (e.g. just to record that it
+		 * was "seen") used to be misread by ConsentInterceptor as "replace this element", which cleared the whole
+		 * `contained` list before adding the single replacement back.
+		 */
+		@Test
+		void allContainedResourcesSurviveWhenConsentServiceReportsResourceUnchanged() throws IOException {
+			when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any()))
+				 .thenAnswer(t -> new ConsentOutcome(ConsentOperationStatusEnum.PROCEED, (IBaseResource) t.getArguments()[1]));
+
+			assertThat(fetchPlanDefinition().getContained()).hasSize(3);
+		}
+
+		/**
+		 * When a consent service genuinely replaces one contained resource, only that entry should change --
+		 * its siblings must stay in place, and the replacement must land at the original position.
+		 */
+		@Test
+		void subsettedContainedResourceIsReplacedInPlaceAmongSiblings() throws IOException {
+			when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t -> {
+				IBaseResource resource = (IBaseResource) t.getArguments()[1];
+				if (resource instanceof ActivityDefinition && "activity-2".equals(resource.getIdElement().getIdPart())) {
+					ActivityDefinition replacement = new ActivityDefinition();
+					replacement.setId("activity-2");
+					replacement.setStatus(Enumerations.PublicationStatus.RETIRED);
+					return new ConsentOutcome(ConsentOperationStatusEnum.PROCEED, replacement);
+				}
+				return ConsentOutcome.PROCEED;
+			});
+
+			PlanDefinition response = fetchPlanDefinition();
+			assertThat(response.getContained()).hasSize(3);
+			assertThat(response.getContained().get(0).getIdElement().getIdPart()).isEqualTo("activity-1");
+			assertThat(response.getContained().get(1).getIdElement().getIdPart()).isEqualTo("activity-2");
+			assertThat(((ActivityDefinition) response.getContained().get(1)).getStatus())
+				 .isEqualTo(Enumerations.PublicationStatus.RETIRED);
+			assertThat(response.getContained().get(2).getIdElement().getIdPart()).isEqualTo("activity-3");
+		}
+	}
 
 	public static class DummyPatientResourceProvider extends HashMapResourceProvider<Patient> {
 
