@@ -469,7 +469,6 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 				validateSearchEntityNotFailed();
 				throw e;
 			} catch (ResourceVersionConflictException e) {
-				// FIXME: is this the right exception?
 				if (i == 5) {
 					throw e;
 				}
@@ -557,12 +556,6 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 
 		int numWanted = theToIndex - mySearchEntity.getNumFound();
 
-		// FIXME: set these?
-		/*
-		searchBuilder.setFetchSize(0);
-		searchBuilder.setRequireTotal(true);
-		*/
-
 		final IntCounter numToSkip = new IntCounter(0);
 		if (theFromIndex > mySearchEntity.getNumFound()) {
 			numToSkip.set(theFromIndex - mySearchEntity.getNumFound());
@@ -573,9 +566,11 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 		int lastSkipCount = 0;
 		while (true) {
 			haveMoreResults = false;
-			// FIXME: format /* In order to ensure that the every individual page load doesn't need to turn around and
-			// perform the search again, we pre-fetch a set of sensible thresholds. So for example, if the client wants
-			// the first 10 results we might fetch the first 30 */
+			/*
+			 * To ensure that every individual page load doesn't need to turn around and perform the
+			 * search again, we pre-fetch a set of sensible thresholds. So for example, if the client
+			 * wants the first 10 results, we might fetch the first 30
+			 */
 			SearchThreshold searchThreshold = calculateNextSearchThreshold(numWanted + lastSkipCount, searchBuilder);
 			searchBuilder.setMaxResultsToFetch(searchThreshold.threshold());
 
