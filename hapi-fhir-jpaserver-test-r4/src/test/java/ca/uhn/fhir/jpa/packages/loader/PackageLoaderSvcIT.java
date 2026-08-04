@@ -30,7 +30,7 @@ public class PackageLoaderSvcIT {
 	@Spy
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
 	private final FakeNpmServlet myFakeNpmServlet = new FakeNpmServlet();
-	private final PackageLoaderSvc myPackageLoaderSvc = new PackageLoaderSvc();
+	private final PackageLoaderSvc myPackageLoaderSvc = new PackageLoaderSvc(new PackageLoaderSettings());
 	private final PackageResourceParsingSvc myResourceParsingSvc = new PackageResourceParsingSvc(myFhirContext);
 
 	@RegisterExtension
