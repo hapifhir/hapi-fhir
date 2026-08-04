@@ -5213,34 +5213,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	@Disabled("No longer relevant") // FIXME: remove this test?
-	public void testSearchWithCountSearchResultsUpTo20() {
-		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(1);
-		myStorageSettings.setCountSearchResultsUpTo(20);
-
-		for (int i = 0; i < 10; i++) {
-			Patient pat = new Patient();
-			pat.addIdentifier().setSystem("urn:system:rpr4").setValue("test" + i);
-			myClient.create().resource(pat).execute();
-		}
-
-		StopWatch sw = new StopWatch();
-
-		Bundle found = myClient
-			.search()
-			.forResource(Patient.class)
-			.returnBundle(Bundle.class)
-			.count(1)
-			.execute();
-
-		assertThat(sw.getMillis()).isGreaterThanOrEqualTo(1000L);
-
-		assertEquals(10, found.getTotalElement().getValue().intValue());
-		assertThat(found.getEntry()).hasSize(1);
-
-	}
-
-	@Test
 	@Disabled("Not useful with the search coordinator thread pool removed")
 	public void testSearchWithCountSearchResultsUpTo5() {
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(1);

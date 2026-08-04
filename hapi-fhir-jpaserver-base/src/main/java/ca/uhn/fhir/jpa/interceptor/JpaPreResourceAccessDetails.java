@@ -19,10 +19,8 @@
  */
 package ca.uhn.fhir.jpa.interceptor;
 
-import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
-import ca.uhn.fhir.util.ICallable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -39,14 +37,9 @@ public class JpaPreResourceAccessDetails implements IPreResourceAccessDetails {
 	private final boolean[] myBlocked;
 	private List<IBaseResource> myResources;
 
-	// FIXME: remove
-	public JpaPreResourceAccessDetails(
-			List<JpaPid> theResourcePids, ICallable<ISearchBuilder> theSearchBuilderSupplier) {
-		myResourcePids = theResourcePids;
-		myBlocked = new boolean[myResourcePids.size()];
-		myResources = null;
-	}
-
+	/**
+	 * Constructor
+	 */
 	public JpaPreResourceAccessDetails(List<JpaPid> theResourcePids, List<IBaseResource> theUnsyncedResources) {
 		Validate.isTrue(
 				theResourcePids.size() == theUnsyncedResources.size(),

@@ -7,10 +7,7 @@ import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
-import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
-import ca.uhn.fhir.jpa.search.builder.tasks.SearchTask;
-import ca.uhn.fhir.jpa.search.exec.CacheAwareSearchSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -55,8 +52,6 @@ import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
 
@@ -64,7 +59,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.regex.Matcher;
@@ -81,7 +75,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-
 
 
 public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
