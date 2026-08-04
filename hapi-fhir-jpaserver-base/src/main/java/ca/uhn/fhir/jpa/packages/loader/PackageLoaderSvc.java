@@ -52,6 +52,12 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(PackageLoaderSvc.class);
 
+	private PackageLoaderSettings mySettings;
+
+	public PackageLoaderSvc(PackageLoaderSettings theLoaderSettings) {
+		mySettings = theLoaderSettings;
+	}
+
 	public NpmPackageData fetchPackageFromPackageSpec(PackageInstallationSpec theSpec) throws IOException {
 		if (isNotBlank(theSpec.getPackageUrl())) {
 			byte[] contents = loadPackageUrlContents(theSpec.getPackageUrl());
