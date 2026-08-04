@@ -29,7 +29,6 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.jpa.util.SearchParameterMapCalculator;
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -64,41 +63,47 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * This class handles search results for <b>FHIR Search</b> operations leveraging the {@link ISearchCacheSvc search cache}. It has 2 concrete subclasses:
+ * <ul>
+ *     <li>{@link JpaSearchBundleProviderFirstPage}</li> is used for the initial search
+ *     <li>{@link JpaSearchBundleProviderSubsequentPage}</li> is used for the following page loads from the query cache
+ * </ul>
+ *
+ * @see ISynchronousSearchSvc The Synchronous Search Service is used instead of this class for searches which don't use the search cache
+ * @see ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider The search result for <b>FHIR History</b> operations.
+ * @since 8.14.0
+ */
 public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 
-	private static final int SEARCH_EXPIRY_OFFSET_MINUTES = 10;
 	public static final SearchCacheStatus CACHE_STATUS_BYPASS = SearchCacheStatus.builder()
 			.withCacheName("HapiFhirQueryCache")
 			.setStatus(SearchCacheStatus.SearchCacheStatusEnum.FWD_BYPASS)
 			.build();
-
+	private static final int SEARCH_EXPIRY_OFFSET_MINUTES = 10;
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseJpaSearchBundleProvider.class);
-
-	private final Map<JpaPid, IBaseResource> myFetchedResources = new HashMap<>();
 	protected final RequestDetails myRequestDetails;
-	protected final IInterceptorBroadcaster myCompositeBroadcaster;
-	private final FhirContext myFhirContext;
-	private final IPagingProvider myPagingProvider;
-	protected final JpaStorageSettings myStorageSettings;
-	private final EntityManager myEntityManager;
-	private final IHapiTransactionService myTxService;
 	protected final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	protected final ISearchCacheSvc mySearchCacheSvc;
-	private final ISearchResultCacheSvc mySearchResultCacheSvc;
 	protected final ExceptionService myExceptionService;
+	protected final JpaStorageSettings myStorageSettings;
+	protected final IInterceptorBroadcaster myCompositeBroadcaster;
+	private final Map<JpaPid, IBaseResource> myFetchedResources = new HashMap<>();
+	private final FhirContext myFhirContext;
+	private final IPagingProvider myPagingProvider;
+	private final EntityManager myEntityManager;
+	private final IHapiTransactionService myTxService;
+	private final ISearchResultCacheSvc mySearchResultCacheSvc;
 	private final SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
 	private final BaseRuntimeElementDefinition<IPrimitiveType<Date>> myInstantDefinition;
+
 	protected SearchParameterMap myParams;
 	protected RequestPartitionId myRequestPartitionId;
-	protected String mySearchUuid;
-	private Search mySearchEntity;
-	private List<JpaPid> myCachedPidsFromMatches;
-	private List<JpaPid> myCachedPidsFromMatchesAndIncludes;
-	private Integer myCachedPidsFromMatchesStartingIndex;
-	private Integer myCachedPidsFromMatchesEndingIndex;
-	private Integer myCachedPidsFromMatchesAndIncludesStartingIndex;
-	private Integer myCachedPidsFromMatchesAndIncludesEndingIndex;
 	protected SearchCacheStatus myCacheStatus;
+
+	private Search mySearchEntity;
+	private CachedPids myCachedPidsFromMatches;
+	private CachedPids myCachedPidsFromMatchesAndIncludes;
 
 	/**
 	 * Constructor
@@ -121,7 +126,6 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 		this(
 				theFhirContext,
 				theRequestDetails,
-				null,
 				theInterceptorBroadcaster,
 				thePagingProvider,
 				theStorageSettings,
@@ -143,7 +147,6 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 	protected BaseJpaSearchBundleProvider(
 			FhirContext theFhirContext,
 			RequestDetails theRequestDetails,
-			String theSearchUuid,
 			IInterceptorBroadcaster theInterceptorBroadcaster,
 			IPagingProvider thePagingProvider,
 			JpaStorageSettings theStorageSettings,
@@ -157,7 +160,6 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 		myPagingProvider = thePagingProvider;
 		myFhirContext = theFhirContext;
 		myRequestDetails = theRequestDetails;
-		mySearchUuid = theSearchUuid;
 		myStorageSettings = theStorageSettings;
 		myEntityManager = theEntityManager;
 		myTxService = theTxService;
@@ -184,15 +186,12 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 	@Override
 	public String getUuid() {
 		ensureSearchPerformed();
-		if (mySearchEntity == null) {
-			return mySearchUuid;
-		}
 		return mySearchEntity.getUuid();
 	}
 
 	@Override
 	public Integer preferredPageSize() {
-		if (mySearchEntity != null) {
+		if (hasLoadedSearchEntity()) {
 			return mySearchEntity.getPreferredPageSize();
 		}
 		return null;
@@ -206,9 +205,6 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 	@Nullable
 	@Override
 	public Integer size() {
-		if (mySearchEntity == null && mySearchUuid != null) {
-			ensureSearchPerformed();
-		}
 		if (mySearchEntity != null && mySearchEntity.getId() != null) {
 			return mySearchEntity.getTotalCount();
 		}
@@ -234,7 +230,7 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 		ensureSearchPerformed(theFromIndex, theToIndex);
 
 		List<IBaseResource> retVal = new ArrayList<>();
-		for (JpaPid nextPid : myCachedPidsFromMatchesAndIncludes) {
+		for (JpaPid nextPid : myCachedPidsFromMatchesAndIncludes.pids()) {
 			IBaseResource resource = myFetchedResources.get(nextPid);
 			if (resource != null) {
 				retVal.add(resource);
@@ -273,9 +269,7 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 	protected void fetchResourcesAndIncludes(
 			ISearchBuilder<JpaPid> theSearchBuilder, List<JpaPid> thePids, int theFromIndex, int theToIndex) {
 
-		myCachedPidsFromMatches = List.copyOf(thePids);
-		myCachedPidsFromMatchesStartingIndex = theFromIndex;
-		myCachedPidsFromMatchesEndingIndex = theToIndex;
+		List<JpaPid> cachedPidsFromMatches = List.copyOf(thePids);
 
 		List<JpaPid> includedPidList = new ArrayList<>();
 		if (mySearchEntity.getSearchType() == SearchTypeEnum.SEARCH) {
@@ -348,9 +342,8 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 			}
 		}
 
-		myCachedPidsFromMatchesAndIncludes = thePids;
-		myCachedPidsFromMatchesAndIncludesStartingIndex = theFromIndex;
-		myCachedPidsFromMatchesAndIncludesEndingIndex = theToIndex;
+		myCachedPidsFromMatches = new CachedPids(theFromIndex, theToIndex, cachedPidsFromMatches);
+		myCachedPidsFromMatchesAndIncludes = new CachedPids(theFromIndex, theToIndex, thePids);
 	}
 
 	private Integer fetchRevIncludes(
@@ -396,7 +389,7 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 	 * a method other than {@link #getResources(int, int, ResponsePage.ResponsePageBuilder)}
 	 * first, which won't happen during normal search scenarios.
 	 */
-	private void ensureSearchPerformed() {
+	protected void ensureSearchPerformed() {
 		if (myCachedPidsFromMatches == null) {
 			int to;
 			if (myParams != null && myParams.getCount() != null) {
@@ -409,52 +402,80 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 		validateSearchEntityNotFailed();
 	}
 
+	/**
+	 * Prepare to return resources for the search result range from {@literal theFromIndex} to
+	 * {@literal theToIndex}.
+	 *
+	 * @param theFromIndex The start of the search range (inclusive)
+	 * @param theToIndex   The end of the search range (exclusive)
+	 */
 	private void ensureSearchPerformed(int theFromIndex, int theToIndex) {
 
+		/*
+		 * We're not yet in a database transaction here, so we'll first make a few
+		 * attempts to avoid opening one.
+		 */
+
 		if (myCachedPidsFromMatchesAndIncludes != null) {
-			if (myCachedPidsFromMatchesAndIncludesStartingIndex == theFromIndex) {
-				if (myCachedPidsFromMatchesAndIncludesEndingIndex == theToIndex) {
+			if (myCachedPidsFromMatchesAndIncludes.fromIndex() == theFromIndex) {
+				/*
+				 * If we've already fetched the exact range we want, we are done
+				 */
+				if (myCachedPidsFromMatchesAndIncludes.toIndex() == theToIndex) {
 					return;
 				}
+
+				/*
+				 * If we've finished the search, and the currently fetched range has the same
+				 * start as the one we want, and the end exceeds the end of the fetched results,
+				 * then the fetched range is fine to return.
+				 */
 				if (mySearchEntity != null
 						&& mySearchEntity.getStatus() == SearchStatusEnum.FINISHED
 						&& mySearchEntity.getTotalCount() != null
 						&& mySearchEntity.getTotalCount() <= theToIndex
-						&& theToIndex < myCachedPidsFromMatchesAndIncludesEndingIndex) {
+						&& theToIndex <= myCachedPidsFromMatchesAndIncludes.toIndex()) {
 					return;
 				}
 			}
 		}
 
+		/*
+		 * If we don't have any _include or _revinclude parameters, and we've already
+		 * fetched a collection of matched resources for a range that is equivalent or
+		 * exceeding the range we actually want, we can just use a subsection of the
+		 * already fetched resources
+		 */
 		if (myCachedPidsFromMatches != null) {
-			/*
-			 * If we don't have any _include or _revinclude parameters, and we've already
-			 * fetched a collection of matched resources for a window equivalent to or
-			 * exceeding the window we want, we can just return that window.
-			 */
 			if (myParams.getIncludes().isEmpty() && myParams.getRevIncludes().isEmpty()) {
-				if (myCachedPidsFromMatchesStartingIndex <= theFromIndex
-						&& myCachedPidsFromMatchesEndingIndex >= theToIndex) {
-					int rangeStart = theFromIndex - myCachedPidsFromMatchesStartingIndex;
+				if (myCachedPidsFromMatches.fromIndex() <= theFromIndex
+						&& myCachedPidsFromMatches.toIndex() >= theToIndex) {
+					int rangeStart = theFromIndex - myCachedPidsFromMatches.fromIndex();
 					int rangeEnd = (theToIndex - theFromIndex) + rangeStart;
 					rangeEnd = Math.min(rangeEnd, myCachedPidsFromMatches.size());
-					myCachedPidsFromMatchesAndIncludes = myCachedPidsFromMatches.subList(rangeStart, rangeEnd);
-					myCachedPidsFromMatchesAndIncludesStartingIndex = theFromIndex;
-					myCachedPidsFromMatchesAndIncludesEndingIndex = theToIndex;
+					List<JpaPid> rangePids = myCachedPidsFromMatches.pids().subList(rangeStart, rangeEnd);
+					myCachedPidsFromMatchesAndIncludes = new CachedPids(theFromIndex, theToIndex, rangePids);
 					return;
 				}
 			}
 		}
 
-		if (myParams != null && mySearchEntity != null && myParams.getSummaryMode() == SummaryEnum.COUNT) {
+		/*
+		 * If we only want to fetch the count, and we already know it, there is nothing else to do.
+		 */
+		if (myParams != null && mySearchEntity != null && SearchParameterMapCalculator.isWantOnlyCount(myParams)) {
 			if (mySearchEntity.getTotalCount() != null) {
-				myCachedPidsFromMatchesAndIncludes = List.of();
-				myCachedPidsFromMatchesAndIncludesStartingIndex = theFromIndex;
-				myCachedPidsFromMatchesAndIncludesEndingIndex = theToIndex;
+				myCachedPidsFromMatchesAndIncludes = new CachedPids(theFromIndex, theToIndex, List.of());
 				return;
 			}
 		}
 
+		/*
+		 * Ok, so we need to actually open a database transaction and perform the search. We do this in a loop to
+		 * defend against the case where multiple client threads are all fetching new pages of search results
+		 * concurrently (since they will all try to write new pages of results to the query cache, and only
+		 * one will succeed while the others fail with a constraint error.
+		 */
 		for (int i = 0; ; i++) {
 			try {
 				myTxService
@@ -462,45 +483,36 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 						.withRequestPartitionId(myRequestPartitionId)
 						.execute(() -> ensureSearchPerformedInsideTransaction(theFromIndex, theToIndex));
 				break;
-			} catch (ResourceGoneException e) {
-				ourLog.info("Attempting to access search with unknown UUID: {}", mySearchUuid);
-				throw e;
-			} catch (UnexpectedRollbackException e) {
-				validateSearchEntityNotFailed();
-				throw e;
 			} catch (ResourceVersionConflictException e) {
+				// We failed to write to the query cache. We'll retry the search a few times since presumably
+				// some other thread is also performing the search. If the error just keeps happening, we must
+				// have a deeper problem so we should bail.
 				if (i == 5) {
 					throw e;
 				}
 				ourLog.warn("Constraint error while writing search results to query cache: {}", e.toString());
 				new SleepUtil().sleepAtLeast(500, false);
-				resetState();
+			} catch (ResourceGoneException e) {
+				ourLog.info("Attempting to access search with unknown UUID: {}", mySearchEntity.getUuid());
+				throw e;
+			} catch (UnexpectedRollbackException e) {
+				validateSearchEntityNotFailed();
+				throw e;
 			}
 		}
 
 		validateSearchEntityNotFailed();
 	}
 
-	private void resetState() {
-		if (mySearchEntity != null && mySearchEntity.getId() != null) {
-			mySearchUuid = mySearchEntity.getUuid();
-			mySearchEntity = null;
-			myFetchedResources.clear();
-		}
-	}
-
-	@Nullable
-	@Override
-	public SearchCacheStatus getCacheStatus() {
-		ensureSearchPerformed();
-		return myCacheStatus;
-	}
-
+	/**
+	 *
+	 * @param theFromIndex The start of the search range (inclusive)
+	 * @param theToIndex   The end of the search range (exclusive)
+	 */
 	private void ensureSearchPerformedInsideTransaction(int theFromIndex, int theToIndex) {
 		final List<JpaPid> pidsToReturn = new ArrayList<>();
 
 		mySearchEntity = provideSearchEntity();
-		mySearchUuid = mySearchEntity.getUuid();
 		if (myParams == null) {
 			myParams = extractSearchParameterMapFromSearchEntity();
 		}
@@ -515,9 +527,7 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 				mySearchEntity.setStatus(SearchStatusEnum.FINISHED);
 				mySearchCacheSvc.save(mySearchEntity, myRequestPartitionId);
 			}
-			myCachedPidsFromMatchesAndIncludes = List.of();
-			myCachedPidsFromMatchesAndIncludesStartingIndex = theFromIndex;
-			myCachedPidsFromMatchesAndIncludesEndingIndex = theToIndex;
+			myCachedPidsFromMatchesAndIncludes = new CachedPids(theFromIndex, theToIndex, List.of());
 			return;
 		}
 
@@ -710,6 +720,13 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 		fetchResourcesAndIncludes(searchBuilder, pidsToReturn, theFromIndex, theToIndex);
 	}
 
+	@Nullable
+	@Override
+	public SearchCacheStatus getCacheStatus() {
+		ensureSearchPerformed();
+		return myCacheStatus;
+	}
+
 	private void updateSearchExpiryIfNecessary() {
 		// The created time may be null in some unit tests
 		if (mySearchEntity.getCreated() != null) {
@@ -796,6 +813,14 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 		return mySearchBuilderFactory.newSearchBuilder(mySearchEntity.getResourceType(), resourceType);
 	}
 
+	protected boolean hasLoadedSearchEntity() {
+		return mySearchEntity != null;
+	}
+
+	protected Search provideLoadedSearchEntity() {
+		return mySearchEntity;
+	}
+
 	private record SearchThreshold(@Nullable Integer threshold, boolean isLastThreshold) {}
 
 	@SuppressWarnings("ClassCanBeRecord")
@@ -832,6 +857,12 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 			}
 
 			return ISearchResultConsumer.CONTINUE;
+		}
+	}
+
+	private record CachedPids(int fromIndex, int toIndex, List<JpaPid> pids) {
+		public int size() {
+			return pids.size();
 		}
 	}
 }

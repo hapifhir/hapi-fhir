@@ -134,8 +134,9 @@ public class JpaSearchBundleProviderFirstPage extends BaseJpaSearchBundleProvide
 			/// entity so we have a fresh copy attached to the session for when we go to commit it.
 
 			retVal = mySearchCacheSvc
-					.fetchByUuid(mySearchUuid, myRequestPartitionId)
-					.orElseThrow(() -> myExceptionService.newUnknownSearchException(mySearchUuid));
+					.fetchByUuid(provideLoadedSearchEntity().getUuid(), myRequestPartitionId)
+					.orElseThrow(() -> myExceptionService.newUnknownSearchException(
+							provideLoadedSearchEntity().getUuid()));
 		}
 
 		return retVal;

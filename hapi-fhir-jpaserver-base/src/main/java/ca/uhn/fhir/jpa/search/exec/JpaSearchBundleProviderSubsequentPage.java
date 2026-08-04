@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.IPagingProvider;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,8 @@ import java.util.Optional;
 
 public class JpaSearchBundleProviderSubsequentPage extends BaseJpaSearchBundleProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaSearchBundleProviderSubsequentPage.class);
+
+	private final String mySearchUuid;
 
 	/**
 	 * Constructor
@@ -43,7 +46,6 @@ public class JpaSearchBundleProviderSubsequentPage extends BaseJpaSearchBundlePr
 		super(
 				theFhirContext,
 				theRequestDetails,
-				theSearchUuid,
 				theInterceptorBroadcaster,
 				thePagingProvider,
 				theStorageSettings,
@@ -54,6 +56,8 @@ public class JpaSearchBundleProviderSubsequentPage extends BaseJpaSearchBundlePr
 				theSearchResultCacheSvc,
 				theExceptionService,
 				theSearchBuilderFactory);
+
+		mySearchUuid = theSearchUuid;
 	}
 
 	@Override
@@ -65,5 +69,17 @@ public class JpaSearchBundleProviderSubsequentPage extends BaseJpaSearchBundlePr
 
 		Optional<Search> searchEntityOpt = mySearchCacheSvc.fetchByUuid(mySearchUuid, myRequestPartitionId);
 		return searchEntityOpt.orElseThrow(() -> myExceptionService.newUnknownSearchException(mySearchUuid));
+	}
+
+	@Nullable
+	@Override
+	public Integer size() {
+
+		/// In case someone calls this before calling {@link #getResources(int, int, ResponsePage.ResponsePageBuilder)}
+		if (!super.hasLoadedSearchEntity() && mySearchUuid != null) {
+			ensureSearchPerformed();
+		}
+
+		return super.size();
 	}
 }

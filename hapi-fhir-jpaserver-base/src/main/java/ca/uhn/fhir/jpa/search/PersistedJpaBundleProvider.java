@@ -28,11 +28,9 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.HistoryBuilder;
 import ca.uhn.fhir.jpa.dao.HistoryBuilderFactory;
 import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
-import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
@@ -47,7 +45,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SearchCacheStatus;
 import ca.uhn.fhir.rest.api.server.SimplePreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.SimplePreResourceShowDetails;
-import ca.uhn.fhir.rest.server.interceptor.ServerInterceptorUtil;
 import ca.uhn.fhir.rest.server.method.ResponsePage;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
@@ -110,14 +107,6 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	/**
 	 * Constructor
 	 */
-	public PersistedJpaBundleProvider(RequestDetails theRequest, String theSearchUuid) {
-		myRequest = theRequest;
-		myUuid = theSearchUuid;
-	}
-
-	/**
-	 * Constructor
-	 */
 	public PersistedJpaBundleProvider(RequestDetails theRequest, Search theSearch) {
 		Validate.isTrue(
 				theSearch.getSearchType() == SearchTypeEnum.HISTORY,
@@ -125,10 +114,6 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		myRequest = theRequest;
 		mySearchEntity = theSearch;
 		myUuid = theSearch.getUuid();
-	}
-
-	protected Search getSearchEntity() {
-		return mySearchEntity;
 	}
 
 	// Note: Leave as protected, HSPC depends on this
@@ -348,30 +333,6 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		}
 
 		return null;
-	}
-
-	// Note: Leave as protected, HSPC depends on this
-	@SuppressWarnings("WeakerAccess")
-	protected List<IBaseResource> toResourceList(
-			ISearchBuilder<JpaPid> theSearchBuilder,
-			List<JpaPid> thePids,
-			ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
-		List<JpaPid> includedPidList = new ArrayList<>();
-
-		// Execute the query and make sure we return distinct results
-		List<IBaseResource> resources = new ArrayList<>();
-		theSearchBuilder.loadResourcesByPid(thePids, includedPidList, resources, false, myRequest);
-
-		// we will send the resource list to our interceptors
-		// this can (potentially) change the results being returned.
-		int precount = resources.size();
-		resources = ServerInterceptorUtil.fireStoragePreshowResource(resources, myRequest, myInterceptorBroadcaster);
-		// we only care about omitted results from this page
-		theResponsePageBuilder.setOmittedResourceCount(precount - resources.size());
-		theResponsePageBuilder.setResources(resources);
-		theResponsePageBuilder.setIncludedResourceCount(includedPidList.size());
-
-		return resources;
 	}
 
 	@VisibleForTesting
