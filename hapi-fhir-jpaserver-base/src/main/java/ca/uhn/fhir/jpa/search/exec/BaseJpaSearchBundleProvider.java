@@ -545,10 +545,6 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 
 		ISearchBuilder<JpaPid> searchBuilder = newSearchBuilder();
 
-		int initialNumFound = mySearchEntity.getNumFound();
-		int initialNumBlocked = mySearchEntity.getNumBlocked();
-		int countFoundThisPass = 0;
-		int countBlockedThisPass = 0;
 		List<JpaPid> previouslyFoundPids = List.of();
 		SearchRuntimeDetails searchDetails = new SearchRuntimeDetails(myRequestDetails, mySearchEntity.getUuid());
 
@@ -586,69 +582,39 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 
 			List<JpaPid> newPidsThisPass = new ArrayList<>();
 
-			ISearchResultConsumer<JpaPid> consumer =
-					new PidConsumer(newPidsThisPass, numToSkip, pidsToReturn, searchThreshold);
+			/*
+			 * Actually perform the search
+			 */
 
+			PidConsumer consumer = new PidConsumer(
+					myRequestDetails,
+					newPidsThisPass,
+					numToSkip,
+					pidsToReturn,
+					searchThreshold,
+					searchBuilder,
+					myCompositeBroadcaster,
+					myFetchedResources);
 			SearchProgressTracker outcome;
 			try {
 				outcome = searchBuilder.performSearchForPids(
 						consumer, myParams, searchDetails, myRequestDetails, myRequestPartitionId);
+				consumer.firePreAccessHooksOnNewPids();
 			} catch (Exception e) {
 				SearchCoordinatorSvcImpl.markSearchAsFailedWithExceptionDetails(mySearchEntity, e);
 				mySearchCacheSvc.save(mySearchEntity, myRequestPartitionId);
 				return;
 			}
 
-			lastSkipCount = outcome.getSkippedCount();
+			lastSkipCount = outcome.getSkippedCount() + consumer.getBlockedCount();
 
-			int pidsCountThisPass = newPidsThisPass.size() + outcome.getSkippedCount();
+			int pidsCountThisPass = newPidsThisPass.size() + lastSkipCount;
 			if (searchThreshold.threshold() != null && pidsCountThisPass >= searchThreshold.threshold()) {
 				haveMoreResults = true;
 			}
 
-			countFoundThisPass += newPidsThisPass.size();
-			boolean blockedResults = countFoundThisPass < numWanted && haveMoreResults;
-
-			// Interceptor call: STORAGE_PREACCESS_RESOURCES
-			// This can be used to remove results from the search result details before
-			// the user has a chance to know that they were in the results
-			if (myCompositeBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES) && !newPidsThisPass.isEmpty()) {
-				Set<JpaPid> blockedPids = new HashSet<>();
-
-				List<IBaseResource> newResources = searchBuilder.loadResourcesByPid(newPidsThisPass, myRequestDetails);
-				JpaPreResourceAccessDetails accessDetails =
-						new JpaPreResourceAccessDetails(newPidsThisPass, newResources);
-				HookParams params = new HookParams()
-						.add(IPreResourceAccessDetails.class, accessDetails)
-						.add(RequestDetails.class, myRequestDetails)
-						.addIfMatchesType(ServletRequestDetails.class, myRequestDetails);
-				myCompositeBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
-
-				for (int i = newPidsThisPass.size() - 1; i >= 0; i--) {
-					if (accessDetails.isDontReturnResourceAtIndex(i)) {
-						blockedResults = true;
-						JpaPid blockedPid = newPidsThisPass.remove(i);
-						newResources.remove(i);
-						blockedPids.add(blockedPid);
-						countFoundThisPass--;
-						countBlockedThisPass++;
-					}
-				}
-
-				if (!blockedPids.isEmpty()) {
-					pidsToReturn.removeIf(blockedPids::contains);
-					lastSkipCount += blockedPids.size();
-				}
-
-				for (int i = 0; i < newPidsThisPass.size(); i++) {
-					JpaPid pid = newPidsThisPass.get(i);
-					IBaseResource resource = newResources.get(i);
-					myFetchedResources.put(pid, resource);
-				}
-			}
-
-			mySearchEntity.setNumFound(initialNumFound + countFoundThisPass);
-			mySearchEntity.setNumBlocked(initialNumBlocked + countBlockedThisPass);
+			mySearchEntity.setNumFound(mySearchEntity.getNumFound() + consumer.getFoundCount());
+			mySearchEntity.setNumBlocked(mySearchEntity.getNumBlocked() + consumer.getBlockedCount());
 
 			newPids.addAll(newPidsThisPass);
 
@@ -661,7 +627,7 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 				break;
 			}
 
-			if (!blockedResults || mySearchEntity.getNumFound() >= theToIndex) {
+			if (consumer.getBlockedCount() == 0 || mySearchEntity.getNumFound() >= theToIndex) {
 				break;
 			}
 		}
@@ -823,28 +789,43 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 
 	private record SearchThreshold(@Nullable Integer threshold, boolean isLastThreshold) {}
 
-	@SuppressWarnings("ClassCanBeRecord")
 	private static class PidConsumer implements ISearchResultConsumer<JpaPid> {
 		private final List<JpaPid> myNewPidsThisPass;
 		private final IntCounter myNumToSkip;
 		private final List<JpaPid> myPidsToReturn;
 		private final SearchThreshold mySearchThreshold;
+		private final ISearchBuilder<JpaPid> mySearchBuilder;
+		private final IInterceptorBroadcaster myCompositeBroadcaster;
+		private final RequestDetails myRequestDetails;
+		private final Map<JpaPid, IBaseResource> myFetchedResources;
+
+		private int myCountFoundThisPass;
+		private int myCountBlockedThisPass;
 
 		public PidConsumer(
+				RequestDetails theRequestDetails,
 				List<JpaPid> theNewPidsThisPass,
 				IntCounter theNumToSkip,
 				List<JpaPid> thePidsToReturn,
-				SearchThreshold theSearchThreshold) {
+				SearchThreshold theSearchThreshold,
+				ISearchBuilder<JpaPid> theSearchBuilder,
+				IInterceptorBroadcaster theCompositeBroadcaster,
+				Map<JpaPid, IBaseResource> theFetchedResources) {
+			myRequestDetails = theRequestDetails;
 			myNewPidsThisPass = theNewPidsThisPass;
 			myNumToSkip = theNumToSkip;
 			myPidsToReturn = thePidsToReturn;
 			mySearchThreshold = theSearchThreshold;
+			mySearchBuilder = theSearchBuilder;
+			myCompositeBroadcaster = theCompositeBroadcaster;
+			myFetchedResources = theFetchedResources;
 		}
 
 		@Nonnull
 		@Override
 		public Outcome consume(SearchProgressTracker theProgressTracker, JpaPid theResult) {
 			myNewPidsThisPass.add(theResult);
+			myCountFoundThisPass++;
 
 			if (myNumToSkip.get() == 0) {
 				myPidsToReturn.add(theResult);
@@ -857,6 +838,54 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 			}
 
 			return ISearchResultConsumer.CONTINUE;
+		}
+
+		public void firePreAccessHooksOnNewPids() {
+
+			// Interceptor call: STORAGE_PREACCESS_RESOURCES
+			// This can be used to remove results from the search result details before
+			// the user has a chance to know that they were in the results
+			if (myCompositeBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES) && !myNewPidsThisPass.isEmpty()) {
+				Set<JpaPid> blockedPids = new HashSet<>();
+
+				List<IBaseResource> newResources =
+						mySearchBuilder.loadResourcesByPid(myNewPidsThisPass, myRequestDetails);
+				JpaPreResourceAccessDetails accessDetails =
+						new JpaPreResourceAccessDetails(myNewPidsThisPass, newResources);
+				HookParams params = new HookParams()
+						.add(IPreResourceAccessDetails.class, accessDetails)
+						.add(RequestDetails.class, myRequestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, myRequestDetails);
+				myCompositeBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+
+				for (int i = myNewPidsThisPass.size() - 1; i >= 0; i--) {
+					if (accessDetails.isDontReturnResourceAtIndex(i)) {
+						JpaPid blockedPid = myNewPidsThisPass.remove(i);
+						newResources.remove(i);
+						blockedPids.add(blockedPid);
+						myCountFoundThisPass--;
+						myCountBlockedThisPass++;
+					}
+				}
+
+				if (!blockedPids.isEmpty()) {
+					myPidsToReturn.removeIf(blockedPids::contains);
+				}
+
+				for (int i = 0; i < myNewPidsThisPass.size(); i++) {
+					JpaPid pid = myNewPidsThisPass.get(i);
+					IBaseResource resource = newResources.get(i);
+					myFetchedResources.put(pid, resource);
+				}
+			}
+		}
+
+		public int getBlockedCount() {
+			return myCountBlockedThisPass;
+		}
+
+		public int getFoundCount() {
+			return myCountFoundThisPass;
 		}
 	}
 
