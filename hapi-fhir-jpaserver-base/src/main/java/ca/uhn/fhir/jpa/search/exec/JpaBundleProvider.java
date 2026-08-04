@@ -47,6 +47,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
@@ -65,6 +66,7 @@ import java.util.Set;
 
 public abstract class JpaBundleProvider implements IBundleProvider {
 
+	private static final int SEARCH_EXPIRY_OFFSET_MINUTES = 10;
 	public static final SearchCacheStatus CACHE_STATUS_BYPASS = SearchCacheStatus.builder()
 			.withCacheName("HapiFhirQueryCache")
 			.setStatus(SearchCacheStatus.SearchCacheStatusEnum.FWD_BYPASS)
@@ -694,6 +696,7 @@ public abstract class JpaBundleProvider implements IBundleProvider {
 		}
 
 		mySearchEntity.setSearchParameterMap(myParams);
+		updateSearchExpiryIfNecessary();
 
 		mySearchCacheSvc.save(mySearchEntity, myRequestPartitionId);
 		mySearchResultCacheSvc.storeResults(
@@ -706,6 +709,20 @@ public abstract class JpaBundleProvider implements IBundleProvider {
 
 		fetchResourcesAndIncludes(searchBuilder, pidsToReturn, theFromIndex, theToIndex);
 	}
+
+	private void updateSearchExpiryIfNecessary() {
+		// The created time may be null in some unit tests
+		if (mySearchEntity.getCreated() != null) {
+			// start tracking last-access-time for this search when it is more than halfway to expire by created time
+			// we do this to avoid generating excessive write traffic on busy cached searches.
+			long expireAfterMillis = myStorageSettings.getExpireSearchResultsAfterMillis();
+			long createdCutoff = mySearchEntity.getCreated().getTime() + expireAfterMillis;
+			if (createdCutoff - System.currentTimeMillis() < expireAfterMillis / 2) {
+				mySearchEntity.setExpiryOrNull(DateUtils.addMinutes(new Date(), SEARCH_EXPIRY_OFFSET_MINUTES));
+			}
+		}
+	}
+
 
 	protected abstract Search provideSearchEntity();
 

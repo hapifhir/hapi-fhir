@@ -33,14 +33,6 @@ import java.util.Optional;
 
 public interface ISearchCoordinatorSvc<T extends IResourcePersistentId> {
 
-	// FIXME: remove
-	List<T> getResources(
-			String theUuid,
-			int theFrom,
-			int theTo,
-			@Nullable RequestDetails theRequestDetails,
-			RequestPartitionId theRequestPartitionId);
-
 	/**
 	 * Create a new search for the given search parameters
 	 *
@@ -65,11 +57,4 @@ public interface ISearchCoordinatorSvc<T extends IResourcePersistentId> {
 	 */
 	IBundleProvider continueExistingSearch(String theSearchUuid, @Nullable RequestDetails theRequestDetails);
 
-	/**
-	 * Fetch the total number of search results for the given currently executing search, if one is currently executing and
-	 * the total is known. Will return empty otherwise
-	 */
-	// FIXME: remove
-	Optional<Integer> getSearchTotal(
-			String theUuid, @Nullable RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId);
 }

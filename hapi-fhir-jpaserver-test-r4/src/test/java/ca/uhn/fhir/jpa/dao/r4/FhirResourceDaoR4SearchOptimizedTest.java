@@ -100,7 +100,6 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	public void before() throws Exception {
 		super.before();
 		mySearchCoordinatorSvcImpl = ProxyUtil.getSingletonTarget(mySearchCoordinatorSvc, SearchCoordinatorSvcImpl.class);
-		mySearchCoordinatorSvcImpl.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcImpl.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
 //		myCaptureQueriesListener.setCaptureQueryStackTrace(true);
 		myStorageSettings.setHibernateSearchIndexSearchParams(false);
@@ -109,9 +108,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 	@AfterEach
 	public final void after() {
-		mySearchCoordinatorSvcImpl.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcImpl.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
-		mySearchCoordinatorSvcImpl.setIdToSearchTaskMapForUnitTests(new ConcurrentHashMap<>());
 		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 		myCaptureQueriesListener.setCaptureQueryStackTrace(false);
 		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
@@ -238,7 +235,6 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	public void testFetchTotalAccurateForSlowLoading() {
 		create200Patients();
 
-		mySearchCoordinatorSvcImpl.setLoadingThrottleForUnitTests(25);
 		mySearchCoordinatorSvcImpl.setSyncSizeForUnitTests(10);
 
 		myStorageSettings.setSearchPreFetchThresholds(Arrays.asList(1000, -1));

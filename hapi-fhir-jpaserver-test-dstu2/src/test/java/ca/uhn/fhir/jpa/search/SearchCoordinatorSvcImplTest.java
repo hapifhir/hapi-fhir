@@ -121,18 +121,12 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 			myContext,
 			myStorageSettings,
 			myInterceptorBroadcaster,
-			myTransactionService,
-			mySearchCacheSvc,
-			mySearchResultCacheSvc,
 			myDaoRegistry,
 			mySearchBuilderFactory,
 			mySynchronousSearchSvc,
 			myCacheAwareSearchSvc,
-			myPersistedJpaBundleProviderFactory,
 			// search param registry
 			mySearchStrategyFactory,
-			myExceptionSvc,
-			myBeanFactory,
 			myPartitionHelperSvc,
 			myPagingProvider);
 

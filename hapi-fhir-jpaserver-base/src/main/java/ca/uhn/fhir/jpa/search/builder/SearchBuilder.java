@@ -1906,8 +1906,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES)) {
 				List<JpaPid> includedPidList = new ArrayList<>(allAdded);
-				JpaPreResourceAccessDetails accessDetails =
-						new JpaPreResourceAccessDetails(includedPidList, () -> this);
+
+				List<IBaseResource> resourceList = new ArrayList<>();
+				loadResourcesByPid(includedPidList, Collections.emptySet(), resourceList, false, null);
+				JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(includedPidList, resourceList);
+
 				HookParams params = new HookParams()
 						.add(IPreResourceAccessDetails.class, accessDetails)
 						.add(RequestDetails.class, request)

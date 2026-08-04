@@ -51,6 +51,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -158,7 +159,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 						}
 						return ISearchResultConsumer.CONTINUE;
 					};
-					SearchProgressTracker progressTracker = theSb.performSearchForPids(
+					theSb.performSearchForPids(
 							searchResultConsumer,
 							clonedParams,
 							searchRuntimeDetails,
@@ -175,22 +176,27 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 						pids = pids.subList(0, resourcesToReturn);
 					}
 
-					JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(pids, () -> theSb);
 					IInterceptorBroadcaster compositeBroadcaster =
 							CompositeInterceptorBroadcaster.newCompositeBroadcaster(
 									myInterceptorBroadcaster, theRequestDetails);
 					if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES)) {
+
+						List<IBaseResource> resourceList = new ArrayList<>();
+						theSb.loadResourcesByPid(pids, Collections.emptySet(), resourceList, false, null);
+						JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(pids, resourceList);
+
 						HookParams params = new HookParams()
 								.add(IPreResourceAccessDetails.class, accessDetails)
 								.add(RequestDetails.class, theRequestDetails)
 								.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
 						compositeBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
-					}
 
-					for (int i = pids.size() - 1; i >= 0; i--) {
-						if (accessDetails.isDontReturnResourceAtIndex(i)) {
-							pids.remove(i);
+						for (int i = pids.size() - 1; i >= 0; i--) {
+							if (accessDetails.isDontReturnResourceAtIndex(i)) {
+								pids.remove(i);
+							}
 						}
+
 					}
 
 					/*

@@ -261,9 +261,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		myStorageSettings.setIndexOnContainedResources(new JpaStorageSettings().isIndexOnContainedResources());
 
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
-		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(false);
 		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 
 		myClient.unregisterInterceptor(myCapturingInterceptor);
@@ -761,7 +759,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@MethodSource("createFhirSearchWithChainingAndCountParams")
 	public void testFhirSearch_withChainingAndPagination_searchFinishes(Map<Integer, Integer> theRefCountToResourceCount, Integer theMaxPageSize, List<Integer> thePrefetchThresholds) {
 		// Given
-		mySearchCoordinatorSvcRaw.setMaxMillisToWaitForRemoteResultsForUnitTest(30000);
 		if (theMaxPageSize != null) {
 			myPagingProvider.setMaximumPageSize(theMaxPageSize);
 		}
@@ -5181,7 +5178,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Disabled("Not useful with the search coordinator thread pool removed")
 	public void testSearchWithCountNotSet() {
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(1);
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(200);
 
 		for (int i = 0; i < 10; i++) {
 			Patient pat = new Patient();
@@ -5222,7 +5218,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Disabled("No longer relevant") // FIXME: remove this test?
 	public void testSearchWithCountSearchResultsUpTo20() {
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(1);
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(200);
 		myStorageSettings.setCountSearchResultsUpTo(20);
 
 		for (int i = 0; i < 10; i++) {
@@ -5251,7 +5246,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Disabled("Not useful with the search coordinator thread pool removed")
 	public void testSearchWithCountSearchResultsUpTo5() {
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(1);
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(200);
 		myStorageSettings.setCountSearchResultsUpTo(5);
 
 		for (int i = 0; i < 10; i++) {

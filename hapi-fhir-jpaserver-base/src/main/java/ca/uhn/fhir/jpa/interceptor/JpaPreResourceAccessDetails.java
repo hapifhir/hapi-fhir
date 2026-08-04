@@ -26,10 +26,8 @@ import ca.uhn.fhir.util.ICallable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import javax.annotation.concurrent.NotThreadSafe;
+import java.util.List;
 
 /**
  * THIS CLASS IS NOT THREAD SAFE
@@ -39,15 +37,14 @@ public class JpaPreResourceAccessDetails implements IPreResourceAccessDetails {
 
 	private final List<JpaPid> myResourcePids;
 	private final boolean[] myBlocked;
-	private final ICallable<ISearchBuilder> mySearchBuilderSupplier;
 	private List<IBaseResource> myResources;
 
-	// FIXME: needed?
+	// FIXME: remove
 	public JpaPreResourceAccessDetails(
 			List<JpaPid> theResourcePids, ICallable<ISearchBuilder> theSearchBuilderSupplier) {
 		myResourcePids = theResourcePids;
 		myBlocked = new boolean[myResourcePids.size()];
-		mySearchBuilderSupplier = theSearchBuilderSupplier;
+		myResources = null;
 	}
 
 	public JpaPreResourceAccessDetails(List<JpaPid> theResourcePids, List<IBaseResource> theUnsyncedResources) {
@@ -59,7 +56,6 @@ public class JpaPreResourceAccessDetails implements IPreResourceAccessDetails {
 		myResourcePids = theResourcePids;
 		myBlocked = new boolean[theResourcePids.size()];
 		myResources = theUnsyncedResources;
-		mySearchBuilderSupplier = null;
 	}
 
 	@Override
@@ -69,13 +65,6 @@ public class JpaPreResourceAccessDetails implements IPreResourceAccessDetails {
 
 	@Override
 	public IBaseResource getResource(int theIndex) {
-		if (myResources == null) {
-			// FIXME: needed?
-			myResources = new ArrayList<>(myResourcePids.size());
-			mySearchBuilderSupplier
-					.call()
-					.loadResourcesByPid(myResourcePids, Collections.emptySet(), myResources, false, null);
-		}
 		return myResources.get(theIndex);
 	}
 
