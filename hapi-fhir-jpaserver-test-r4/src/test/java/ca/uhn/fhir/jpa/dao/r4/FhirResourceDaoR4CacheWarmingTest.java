@@ -5,7 +5,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
-import ca.uhn.fhir.jpa.search.exec.JpaSearchBundleProvider;
+import ca.uhn.fhir.jpa.search.exec.BaseJpaSearchBundleProvider;
 import ca.uhn.fhir.jpa.search.exec.JpaSearchBundleProviderFirstPage;
 import ca.uhn.fhir.jpa.search.warm.CacheWarmingSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -110,7 +110,7 @@ public class FhirResourceDaoR4CacheWarmingTest extends BaseJpaR4Test {
 		result.getResources(0, 10);
 		myCaptureQueriesListener.logSelectQueries();
 
-		JpaSearchBundleProvider resultCasted = (JpaSearchBundleProvider) result;
+		BaseJpaSearchBundleProvider resultCasted = (BaseJpaSearchBundleProvider) result;
 		assertEquals(SearchCacheStatus.SearchCacheStatusEnum.HIT, Objects.requireNonNull(resultCasted.getCacheStatus()).getStatus());
 	}
 

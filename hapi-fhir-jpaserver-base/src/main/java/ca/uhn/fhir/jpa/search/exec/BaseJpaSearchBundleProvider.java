@@ -64,7 +64,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public abstract class JpaSearchBundleProvider implements IBundleProvider {
+public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 
 	private static final int SEARCH_EXPIRY_OFFSET_MINUTES = 10;
 	public static final SearchCacheStatus CACHE_STATUS_BYPASS = SearchCacheStatus.builder()
@@ -72,7 +72,7 @@ public abstract class JpaSearchBundleProvider implements IBundleProvider {
 			.setStatus(SearchCacheStatus.SearchCacheStatusEnum.FWD_BYPASS)
 			.build();
 
-	private static final Logger ourLog = LoggerFactory.getLogger(JpaSearchBundleProvider.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseJpaSearchBundleProvider.class);
 
 	private final Map<JpaPid, IBaseResource> myFetchedResources = new HashMap<>();
 	protected final RequestDetails myRequestDetails;
@@ -103,7 +103,7 @@ public abstract class JpaSearchBundleProvider implements IBundleProvider {
 	/**
 	 * Constructor
 	 */
-	protected JpaSearchBundleProvider(
+	protected BaseJpaSearchBundleProvider(
 			FhirContext theFhirContext,
 			SearchParameterMap theParams,
 			RequestDetails theRequestDetails,
@@ -140,7 +140,7 @@ public abstract class JpaSearchBundleProvider implements IBundleProvider {
 	 * Constructor
 	 */
 	@SuppressWarnings("unchecked")
-	protected JpaSearchBundleProvider(
+	protected BaseJpaSearchBundleProvider(
 			FhirContext theFhirContext,
 			RequestDetails theRequestDetails,
 			String theSearchUuid,
@@ -235,7 +235,10 @@ public abstract class JpaSearchBundleProvider implements IBundleProvider {
 
 		List<IBaseResource> retVal = new ArrayList<>();
 		for (JpaPid nextPid : myCachedPidsFromMatchesAndIncludes) {
-			retVal.add(myFetchedResources.get(nextPid));
+			IBaseResource resource = myFetchedResources.get(nextPid);
+			if (resource != null) {
+				retVal.add(resource);
+			}
 		}
 
 		// we will send the resource list to our interceptors
@@ -255,7 +258,9 @@ public abstract class JpaSearchBundleProvider implements IBundleProvider {
 		return retVal;
 	}
 
-	// FIXME: drop this
+	/**
+	 * This is really only intended for unit tests, the regular search paths don't call this methos
+	 */
 	@Nonnull
 	@Override
 	public List<IBaseResource> getAllResources() {

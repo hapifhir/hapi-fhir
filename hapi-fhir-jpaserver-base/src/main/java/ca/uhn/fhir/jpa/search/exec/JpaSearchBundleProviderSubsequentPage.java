@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
-public class JpaSearchBundleProviderSubsequentPage extends JpaSearchBundleProvider {
+public class JpaSearchBundleProviderSubsequentPage extends BaseJpaSearchBundleProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaSearchBundleProviderSubsequentPage.class);
 
 	/**

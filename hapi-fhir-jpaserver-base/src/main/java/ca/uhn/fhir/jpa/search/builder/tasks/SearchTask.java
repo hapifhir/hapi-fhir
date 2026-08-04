@@ -84,6 +84,7 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
  * but keep the search going in the background (and have
  * the next page of results ready to go when the client asks).
  */
+// FIXME: delete?
 public class SearchTask implements Callable<Void> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchTask.class);

@@ -40,7 +40,6 @@ import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
-// FIXME: drop or rename
 public class PersistedJpaBundleProviderFactory {
 
 	@Autowired

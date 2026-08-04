@@ -30,7 +30,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
-public class JpaSearchBundleProviderFirstPage extends JpaSearchBundleProvider {
+public class JpaSearchBundleProviderFirstPage extends BaseJpaSearchBundleProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaSearchBundleProviderFirstPage.class);
 
 	private final CacheControlDirective myCacheControlDirective;

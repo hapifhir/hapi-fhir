@@ -570,9 +570,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		Bundle response = myClient
 			.search()
-			// FIXME: restore
-//			.byUrl("Observation?part-of=" + procedureId + "&derived-from:DocumentReference.contenttype=application/vnd.mfer&_total=accurate&_sort=_id&_count=2")
-			.byUrl("Observation?_total=accurate&_sort=_id&_count=2")
+			.byUrl("Observation?part-of=" + procedureId + "&derived-from:DocumentReference.contenttype=application/vnd.mfer&_total=accurate&_sort=_id&_count=2")
 			.returnBundle(Bundle.class)
 			.execute();
 

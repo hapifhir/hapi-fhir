@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.search.exec.JpaSearchBundleProvider;
+import ca.uhn.fhir.jpa.search.exec.BaseJpaSearchBundleProvider;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.BasePagingProvider;
@@ -56,8 +56,8 @@ public class DatabaseBackedPagingProvider extends BasePagingProvider {
 
 	@Override
 	public IBundleProvider retrieveResultList(RequestDetails theRequestDetails, @Nonnull String theId) {
-		JpaSearchBundleProvider retVal =
-				(JpaSearchBundleProvider) mySearchCoordinatorSvc.continueExistingSearch(theId, theRequestDetails);
+		BaseJpaSearchBundleProvider retVal =
+				(BaseJpaSearchBundleProvider) mySearchCoordinatorSvc.continueExistingSearch(theId, theRequestDetails);
 		retVal = validateAndReturnBundleProvider(retVal);
 		return retVal;
 	}
@@ -66,7 +66,7 @@ public class DatabaseBackedPagingProvider extends BasePagingProvider {
 	 * Subclasses may override and modify or replace the bundle provider being returned
 	 */
 	@Nullable
-	protected JpaSearchBundleProvider validateAndReturnBundleProvider(JpaSearchBundleProvider theBundleProvider) {
+	protected BaseJpaSearchBundleProvider validateAndReturnBundleProvider(BaseJpaSearchBundleProvider theBundleProvider) {
 		return theBundleProvider;
 	}
 
