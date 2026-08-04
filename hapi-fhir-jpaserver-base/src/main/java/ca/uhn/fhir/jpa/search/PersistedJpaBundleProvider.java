@@ -26,8 +26,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.HistoryBuilder;
 import ca.uhn.fhir.jpa.dao.HistoryBuilderFactory;
 import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
@@ -100,13 +98,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	private HistoryBuilderFactory myHistoryBuilderFactory;
 
 	@Autowired
-	private DaoRegistry myDaoRegistry;
-
-	@Autowired
 	private FhirContext myContext;
-
-	@Autowired
-	private ISearchCoordinatorSvc<JpaPid> mySearchCoordinatorSvc;
 
 	@Autowired
 	private ISearchCacheSvc mySearchCacheSvc;
@@ -128,7 +120,6 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	 */
 	private Search mySearchEntity;
 	private final String myUuid;
-	private SearchCacheStatus.SearchCacheStatusEnum myCacheStatus;
 	private RequestPartitionId myRequestPartitionId;
 
 	/**
@@ -146,16 +137,6 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		myRequest = theRequest;
 		mySearchEntity = theSearch;
 		myUuid = theSearch.getUuid();
-	}
-
-	@VisibleForTesting
-	public void setRequestPartitionHelperSvcForUnitTest(IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
-		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
-	}
-
-	@VisibleForTesting
-	public Search getSearchEntityForTesting() {
-		return getSearchEntity();
 	}
 
 	protected Search getSearchEntity() {
@@ -415,11 +396,6 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		return null;
 	}
 
-	// FIXME: make protected after we move this class
-	public void setCacheStatus(SearchCacheStatus.SearchCacheStatusEnum theSearchCacheStatusEnum) {
-		myCacheStatus = theSearchCacheStatusEnum;
-	}
-
 	@Override
 	public Integer preferredPageSize() {
 		ensureSearchEntityLoaded();
@@ -428,15 +404,6 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 	public void setContext(FhirContext theContext) {
 		myContext = theContext;
-	}
-
-	public void setEntityManager(EntityManager theEntityManager) {
-		myEntityManager = theEntityManager;
-	}
-
-	@VisibleForTesting
-	public void setSearchCoordinatorSvcForUnitTest(ISearchCoordinatorSvc theSearchCoordinatorSvc) {
-		mySearchCoordinatorSvc = theSearchCoordinatorSvc;
 	}
 
 	@VisibleForTesting
@@ -459,11 +426,6 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		} else {
 			return null;
 		}
-	}
-
-	protected boolean hasIncludes() {
-		ensureSearchEntityLoaded();
-		return !mySearchEntity.getIncludes().isEmpty();
 	}
 
 	// Note: Leave as protected, HSPC depends on this
@@ -583,11 +545,6 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	@VisibleForTesting
 	public void setSearchCacheSvcForUnitTest(ISearchCacheSvc theSearchCacheSvc) {
 		mySearchCacheSvc = theSearchCacheSvc;
-	}
-
-	@VisibleForTesting
-	public void setDaoRegistryForUnitTest(DaoRegistry theDaoRegistry) {
-		myDaoRegistry = theDaoRegistry;
 	}
 
 	@VisibleForTesting

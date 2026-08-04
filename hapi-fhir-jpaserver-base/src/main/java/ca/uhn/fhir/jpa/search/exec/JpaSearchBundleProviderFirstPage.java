@@ -30,8 +30,8 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
-public class JpaBundleProviderFirstPage extends JpaBundleProvider {
-	private static final Logger ourLog = LoggerFactory.getLogger(JpaBundleProviderFirstPage.class);
+public class JpaSearchBundleProviderFirstPage extends JpaSearchBundleProvider {
+	private static final Logger ourLog = LoggerFactory.getLogger(JpaSearchBundleProviderFirstPage.class);
 
 	private final CacheControlDirective myCacheControlDirective;
 	private Search myCandidateSearchEntity;
@@ -39,7 +39,7 @@ public class JpaBundleProviderFirstPage extends JpaBundleProvider {
 	/**
 	 * Constructor
 	 */
-	public JpaBundleProviderFirstPage(
+	public JpaSearchBundleProviderFirstPage(
 			FhirContext theFhirContext,
 			SearchParameterMap theParams,
 			RequestDetails theRequestDetails,

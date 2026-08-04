@@ -42,34 +42,16 @@ import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
-// FIXME: drop
+// FIXME: drop or rename
 public class PersistedJpaBundleProviderFactory {
 
 	@Autowired
 	private ApplicationContext myApplicationContext;
 
-	public PersistedJpaBundleProvider newInstance(RequestDetails theRequest, String theUuid) {
-		Object retVal = myApplicationContext.getBean(JpaConfig.PERSISTED_JPA_BUNDLE_PROVIDER, theRequest, theUuid);
-		return (PersistedJpaBundleProvider) retVal;
-	}
-
 	public PersistedJpaBundleProvider newInstance(RequestDetails theRequest, Search theSearch) {
 		Object retVal =
 				myApplicationContext.getBean(JpaConfig.PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH, theRequest, theSearch);
 		return (PersistedJpaBundleProvider) retVal;
-	}
-
-	public PersistedJpaSearchFirstPageBundleProvider newInstanceFirstPage(
-			RequestDetails theRequestDetails,
-			SearchTask theTask,
-			ISearchBuilder<JpaPid> theSearchBuilder,
-			RequestPartitionId theRequestPartitionId) {
-		return (PersistedJpaSearchFirstPageBundleProvider) myApplicationContext.getBean(
-				JpaConfig.PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER,
-				theRequestDetails,
-				theTask,
-				theSearchBuilder,
-				theRequestPartitionId);
 	}
 
 	public IBundleProvider history(

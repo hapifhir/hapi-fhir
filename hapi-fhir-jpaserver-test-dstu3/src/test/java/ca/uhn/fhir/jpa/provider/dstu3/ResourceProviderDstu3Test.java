@@ -181,9 +181,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
 		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
 
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
-		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(false);
 	}
 
 	@Test
@@ -2592,9 +2590,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			myObservationDao.create(o);
 		}
 
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(50);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(10);
-		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(true);
 
 		Bundle response = myClient
 			.operation()
@@ -2651,9 +2647,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 				myObservationDao.create(o);
 			}
 
-			mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(50);
 			mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(10);
-			mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(true);
 
 			Bundle response = myClient
 				.operation()

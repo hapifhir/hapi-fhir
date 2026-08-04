@@ -26,9 +26,7 @@ public class PagingMultinodeProviderDstu3Test extends BaseResourceProviderDstu3T
 		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
 
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
-		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(false);
 	}
 
 	@Override
@@ -57,9 +55,7 @@ public class PagingMultinodeProviderDstu3Test extends BaseResourceProviderDstu3T
 
 		Bundle found;
 
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(50);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(10);
-		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(true);
 
 		found = myClient
 			.search()
@@ -104,9 +100,7 @@ public class PagingMultinodeProviderDstu3Test extends BaseResourceProviderDstu3T
 
 		Bundle found;
 
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(50);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(10);
-		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(true);
 
 		found = myClient
 			.search()

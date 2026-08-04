@@ -342,22 +342,6 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		assertEquals(23, page.getPageSize());
 	}
 
-	@Nonnull
-	private PersistedJpaBundleProvider newPersistedJpaBundleProvider(String theUuid) {
-		PersistedJpaBundleProvider provider;
-		provider = new PersistedJpaBundleProvider(null, theUuid);
-		provider.setTxServiceForUnitTest(myTransactionService);
-		provider.setSearchCacheSvcForUnitTest(mySearchCacheSvc);
-		provider.setContext(ourCtx);
-		provider.setSearchBuilderFactoryForUnitTest(mySearchBuilderFactory);
-		provider.setDaoRegistryForUnitTest(myDaoRegistry);
-		provider.setSearchCoordinatorSvcForUnitTest(mySvc);
-		provider.setStorageSettingsForUnitTest(new JpaStorageSettings());
-		provider.setRequestPartitionId(RequestPartitionId.allPartitions());
-		provider.setInterceptorBroadcaster(myInterceptorBroadcaster);
-		return provider;
-	}
-
 	@Test
 	public void testSynchronousSearch() {
 		initPartitionHelperSearchType();

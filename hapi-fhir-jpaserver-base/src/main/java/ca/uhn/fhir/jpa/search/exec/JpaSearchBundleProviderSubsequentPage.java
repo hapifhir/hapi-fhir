@@ -20,13 +20,13 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
-public class JpaBundleProviderSubsequentPage extends JpaBundleProvider {
-	private static final Logger ourLog = LoggerFactory.getLogger(JpaBundleProviderSubsequentPage.class);
+public class JpaSearchBundleProviderSubsequentPage extends JpaSearchBundleProvider {
+	private static final Logger ourLog = LoggerFactory.getLogger(JpaSearchBundleProviderSubsequentPage.class);
 
 	/**
 	 * Constructor
 	 */
-	public JpaBundleProviderSubsequentPage(
+	public JpaSearchBundleProviderSubsequentPage(
 			FhirContext theFhirContext,
 			RequestDetails theRequestDetails,
 			String theSearchUuid,
