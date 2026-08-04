@@ -248,7 +248,8 @@ public class JpaBundleProvider implements IBundleProvider {
 		theResponsePageBuilder.setResources(retVal);
 		theResponsePageBuilder.setIncludedResourceCount(retVal.size());
 		theResponsePageBuilder.setTotalRequestedResourcesFetched(mySearchEntity.getNumFound());
-		theResponsePageBuilder.setHasNextPage(theToIndex < mySearchEntity.getNumFound() || mySearchEntity.getStatus() == SearchStatusEnum.PASSCMPLET);
+		theResponsePageBuilder.setHasNextPage(
+				theToIndex < mySearchEntity.getNumFound() || mySearchEntity.getStatus() == SearchStatusEnum.PASSCMPLET);
 
 		return retVal;
 	}
