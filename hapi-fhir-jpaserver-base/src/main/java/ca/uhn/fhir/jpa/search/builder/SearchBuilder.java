@@ -1909,7 +1909,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 				List<IBaseResource> resourceList = new ArrayList<>();
 				loadResourcesByPid(includedPidList, Collections.emptySet(), resourceList, false, null);
-				JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(includedPidList, resourceList);
+				JpaPreResourceAccessDetails accessDetails =
+						new JpaPreResourceAccessDetails(includedPidList, resourceList);
 
 				HookParams params = new HookParams()
 						.add(IPreResourceAccessDetails.class, accessDetails)

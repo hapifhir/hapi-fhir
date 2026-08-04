@@ -29,7 +29,6 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.ISearchResultConsumer;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
-import ca.uhn.fhir.jpa.dao.SearchProgressTracker;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -196,7 +195,6 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 								pids.remove(i);
 							}
 						}
-
 					}
 
 					/*

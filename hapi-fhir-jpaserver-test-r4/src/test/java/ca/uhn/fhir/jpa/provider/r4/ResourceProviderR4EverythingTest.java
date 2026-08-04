@@ -478,56 +478,55 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		//No Patient Stuff
 		IIdType c5Id = createConditionForPatient(methodName, "4", null);
 
-		// FIXME: restore
-//
-//		{
-//			//Test for only one patient
-//			Parameters parameters = new Parameters();
-//			parameters.addParameter("_id", p1Id.getIdPart());
-//
-//			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
-//			Bundle b = (Bundle) output.getParameter().get(0).getResource();
-//
-//			assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
-//			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
-//
-//			assertThat(ids).containsExactlyInAnyOrder(o1Id, p1Id, c1Id);
-//			assertThat(ids).isNotEqualTo((o2Id));
-//			assertThat(ids).doesNotContain(c2Id);
-//			assertThat(ids).doesNotContain(p2Id);
-//		}
-//
-//		{
-//			// Test for Patient 1 and 2
-//			// e.g. _id=1&_id=2
-//			Parameters parameters = new Parameters();
-//			parameters.addParameter("_id", p1Id.getIdPart());
-//			parameters.addParameter("_id", p2Id.getIdPart());
-//
-//			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
-//			Bundle b = (Bundle) output.getParameter().get(0).getResource();
-//
-//			assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
-//			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
-//
-//			assertThat(ids).containsExactlyInAnyOrder(o1Id, p1Id, c1Id, o2Id, c2Id, p2Id);
-//		}
-//
-//		{
-//			// Test for both patients using orList
-//			// e.g. _id=1,2
-//			Parameters parameters = new Parameters();
-//			parameters.addParameter("_id", p1Id.getIdPart() + "," + p2Id.getIdPart());
-//
-//			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
-//			Bundle b = (Bundle) output.getParameter().get(0).getResource();
-//
-//			assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
-//			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
-//
-//			assertThat(ids).containsExactlyInAnyOrder(o1Id, p1Id, c1Id, o2Id, c2Id, p2Id);
-//			assertThat(ids).doesNotContain(c5Id);
-//		}
+
+		{
+			//Test for only one patient
+			Parameters parameters = new Parameters();
+			parameters.addParameter("_id", p1Id.getIdPart());
+
+			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+			Bundle b = (Bundle) output.getParameter().get(0).getResource();
+
+			assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
+			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+
+			assertThat(ids).containsExactlyInAnyOrder(o1Id, p1Id, c1Id);
+			assertThat(ids).isNotEqualTo((o2Id));
+			assertThat(ids).doesNotContain(c2Id);
+			assertThat(ids).doesNotContain(p2Id);
+		}
+
+		{
+			// Test for Patient 1 and 2
+			// e.g. _id=1&_id=2
+			Parameters parameters = new Parameters();
+			parameters.addParameter("_id", p1Id.getIdPart());
+			parameters.addParameter("_id", p2Id.getIdPart());
+
+			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+			Bundle b = (Bundle) output.getParameter().get(0).getResource();
+
+			assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
+			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+
+			assertThat(ids).containsExactlyInAnyOrder(o1Id, p1Id, c1Id, o2Id, c2Id, p2Id);
+		}
+
+		{
+			// Test for both patients using orList
+			// e.g. _id=1,2
+			Parameters parameters = new Parameters();
+			parameters.addParameter("_id", p1Id.getIdPart() + "," + p2Id.getIdPart());
+
+			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+			Bundle b = (Bundle) output.getParameter().get(0).getResource();
+
+			assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
+			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+
+			assertThat(ids).containsExactlyInAnyOrder(o1Id, p1Id, c1Id, o2Id, c2Id, p2Id);
+			assertThat(ids).doesNotContain(c5Id);
+		}
 
 		{
 			// Test combining 2 or-listed params

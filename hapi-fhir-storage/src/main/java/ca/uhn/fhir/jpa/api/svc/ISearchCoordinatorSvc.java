@@ -28,9 +28,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import jakarta.annotation.Nullable;
 
-import java.util.List;
-import java.util.Optional;
-
 public interface ISearchCoordinatorSvc<T extends IResourcePersistentId> {
 
 	/**
@@ -56,5 +53,4 @@ public interface ISearchCoordinatorSvc<T extends IResourcePersistentId> {
 	 *                          and supply it there.
 	 */
 	IBundleProvider continueExistingSearch(String theSearchUuid, @Nullable RequestDetails theRequestDetails);
-
 }

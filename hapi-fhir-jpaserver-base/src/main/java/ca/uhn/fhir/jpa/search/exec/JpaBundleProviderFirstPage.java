@@ -193,4 +193,12 @@ public class JpaBundleProviderFirstPage extends JpaBundleProvider {
 				theResourceType, theQueryString, createdCutoff, theRequestPartitionId);
 		return candidate.orElse(null);
 	}
+
+	@Override
+	public Integer preferredPageSize() {
+		if (myCandidateSearchEntity != null) {
+			return myCandidateSearchEntity.getPreferredPageSize();
+		}
+		return super.preferredPageSize();
+	}
 }

@@ -164,7 +164,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		mySyncSize = theSyncSize;
 	}
 
-
 	@Override
 	public IBundleProvider createNewSearch(
 			final IFhirResourceDao<?> theCallingDao,
@@ -401,8 +400,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 			}
 		}
 	}
-
-
 
 	@Nullable
 	private Integer getLoadSynchronousUpToOrNull(CacheControlDirective theCacheControlDirective) {

@@ -723,7 +723,6 @@ public abstract class JpaBundleProvider implements IBundleProvider {
 		}
 	}
 
-
 	protected abstract Search provideSearchEntity();
 
 	@Nonnull
