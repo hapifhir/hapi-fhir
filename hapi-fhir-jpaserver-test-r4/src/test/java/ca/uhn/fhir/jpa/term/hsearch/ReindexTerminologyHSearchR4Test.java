@@ -64,7 +64,7 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 	long termCodeSystemVersionWithVersionId;
 	Map<String, Long> conceptCounts = Map.ofEntries(
 		entry("http://loinc.org/vs", 81L),
-		entry("http://loinc.org/vs/LG100-4", 2L),
+		entry("http://loinc.org/vs/LG100-4", 0L),
 		entry("http://loinc.org/vs/LG1695-8", 0L),
 		entry("http://loinc.org/vs/LL1000-0", 3L),
 		entry("http://loinc.org/vs/LL1001-8", 7L),

@@ -98,7 +98,7 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 			Search theSearchEntity,
 			ISearchBuilder<JpaPid> theSearchBuilder,
 			RequestPartitionId theRequestPartitionId) {
-		return new JpaBundleProvider(
+		return new JpaBundleProviderFirstPage(
 				myFhirContext,
 				theParams,
 				theRequestDetails,
@@ -119,7 +119,7 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 
 	@Override
 	public IBundleProvider continueExistingSearch(String theId, RequestDetails theRequestDetails) {
-		return new JpaBundleProvider(
+		return new JpaBundleProviderSubsequentPage(
 				myFhirContext,
 				theRequestDetails,
 				theId,
