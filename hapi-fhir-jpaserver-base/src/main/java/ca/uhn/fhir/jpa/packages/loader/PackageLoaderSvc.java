@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.packages.loader;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ClasspathUtil;
 import jakarta.annotation.Nullable;
@@ -33,8 +34,11 @@ import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.utilities.http.ManagedWebAccess;
 import org.hl7.fhir.utilities.npm.BasePackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
+import org.hl7.fhir.utilities.settings.FhirSettingsPOJO;
+import org.hl7.fhir.utilities.settings.ServerDetailsPOJO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,13 +48,19 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class PackageLoaderSvc extends BasePackageCacheManager {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(PackageLoaderSvc.class);
+
+	private static List<String> ourApplied;
 
 	private PackageLoaderSettings mySettings;
 
@@ -58,8 +68,61 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 		mySettings = theLoaderSettings;
 	}
 
+	/**
+	 * Inits the settings into the core libraries.
+	 * this kinda sucks... but it's the required contract.
+	 *
+	 * We only do this for web based urls
+	 * since only web urls are handled by BasePackageLoader
+	 * (this class will handle locals only).
+	 *
+	 * Syncronoized because module contexts can start concurrently, and this is read-modify-write on shared static state.
+	 */
+	public static synchronized void initSettings(PackageLoaderSettings theSettings) {
+		if (ourApplied != null && !ourApplied.equals(theSettings.getRemotePrefixes())) {
+			ourLog.warn(
+					"Remote package URL allow-list is being changed from {} to {}; this config is cluster-wide and cannot vary per module!",
+					ourApplied,
+					theSettings.getRemotePrefixes());
+		} else if (ourApplied != null && ourApplied.equals(theSettings.getRemotePrefixes())) {
+			return; // already applied
+		} else {
+			ourLog.info("Applying remote package URL allow-list with {} entries", theSettings.getRemotePrefixes());
+		}
+
+		// last in wins
+		ourApplied = theSettings.getRemotePrefixes();
+
+		if (ourApplied.contains(PackageLoaderSettings.WILDCARD)) {
+			ourLog.warn("Allowing all. This shouldn't ever be in production code.");
+			ManagedWebAccess.setSsrfProtectionEnabled(false);
+			return;
+		}
+
+		List<ServerDetailsPOJO> servers = theSettings.getRemotePrefixes().stream()
+				.map(url -> {
+					return ServerDetailsPOJO.builder()
+							.url(url)
+							.authenticationType("none")
+							.type("web")
+							.allowHttp(url.startsWith("http:"))
+							.allowPrivateNetwork(url.contains("localhost"))
+							.headers(Collections.emptyMap())
+							.build();
+				})
+				.collect(Collectors.toList());
+
+		ManagedWebAccess.loadFromFHIRSettings(
+				FhirSettingsPOJO.builder().servers(servers).build());
+	}
+
 	public NpmPackageData fetchPackageFromPackageSpec(PackageInstallationSpec theSpec) throws IOException {
-		if (isNotBlank(theSpec.getPackageUrl())) {
+		if (!isValidUrl(theSpec.getPackageUrl())) {
+			throw new InvalidRequestException(
+					"Attempting to fetch resources from dissallowed url " + theSpec.getPackageUrl());
+		}
+
+		if (isFilePath(theSpec.getPackageUrl())) {
 			byte[] contents = loadPackageUrlContents(theSpec.getPackageUrl());
 			return createNpmPackageDataFromData(
 					theSpec.getName(),
@@ -69,6 +132,32 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 		}
 
 		return fetchPackageFromServerInternal(theSpec.getName(), theSpec.getVersion());
+	}
+
+	private boolean isValidUrl(String theUrl) {
+		if (isBlank(theUrl)) {
+			return false;
+		}
+		if (isFilePath(theUrl)) {
+			// normalize the path so that it's not something like "file:/valid/../invalid/path"
+			Path base = Paths.get(theUrl).toAbsolutePath().normalize();
+			for (String url : mySettings.getLocalPrefixes()) {
+				if (base.startsWith(url)) {
+					return true;
+				}
+			}
+		} else if (theUrl.startsWith("http")) {
+			for (String url : mySettings.getRemotePrefixes()) {
+				if (theUrl.startsWith(url)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private boolean isFilePath(String theUrl) {
+		return theUrl.startsWith("file:") || theUrl.startsWith("classpath:");
 	}
 
 	/**
