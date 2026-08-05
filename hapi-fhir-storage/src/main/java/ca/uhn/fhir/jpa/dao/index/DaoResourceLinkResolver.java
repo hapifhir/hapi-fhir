@@ -54,11 +54,10 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
+import ca.uhn.fhir.storage.PlaceholderResourceUtil;
 import ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceTargetRequest;
 import ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceTargetResponse;
 import ca.uhn.fhir.util.CanonicalIdentifier;
-import ca.uhn.fhir.util.ExtensionUtil;
-import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.TerserUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
@@ -294,10 +293,8 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 			String resName = missingResourceDef.getName();
 
 			@SuppressWarnings("unchecked")
-			T newResource = (T) missingResourceDef.newInstance();
-
-			ExtensionUtil.addExtensionIfSupported(
-					myContext, newResource, HapiExtensions.EXT_RESOURCE_PLACEHOLDER, "boolean", Boolean.TRUE);
+			T newResource =
+					(T) PlaceholderResourceUtil.buildPlaceholderResource(myContext, missingResourceDef, List.of());
 
 			IFhirResourceDao<T> placeholderResourceDao = myDaoRegistry.getResourceDao(theType);
 			ourLog.debug(

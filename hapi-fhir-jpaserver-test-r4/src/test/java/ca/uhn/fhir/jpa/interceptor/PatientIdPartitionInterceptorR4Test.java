@@ -1839,9 +1839,10 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, theBundle);
 		ourLog.info("Test case: {}", theComment);
 
+		// Prefix match: the 1094 path suffix depends on which reference search param is extracted first.
 		assertThatThrownBy(() -> mySystemDao.transaction(mySrd, requestBundle))
 			.isInstanceOf(BaseServerResponseException.class)
-			.hasMessage(theExpectedError);
+			.hasMessageStartingWith(theExpectedError);
 		// Nothing from the failed bundle persisted — only the fixture's two patients exist.
 		assertPatientCountInDatabase(2);
 	}

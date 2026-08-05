@@ -34,10 +34,7 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.util.MatchUrlUtil;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.CanonicalIdentifier;
-import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.util.HapiExtensions;
-import ca.uhn.fhir.util.TerserUtil;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -266,7 +263,8 @@ public class TransactionBundleNormalizer {
 		for (Map.Entry<String, MatchUrlInfo> e : theMatchUrlToInfo.entrySet()) {
 			String matchUrl = e.getKey();
 			MatchUrlInfo info = e.getValue();
-			IBaseResource placeholder = buildPlaceholder(info);
+			IBaseResource placeholder = PlaceholderResourceUtil.buildPlaceholderResource(
+					myFhirContext, info.resourceDef(), info.identifiers());
 			builder.addTransactionCreateEntry(placeholder, info.urnUuid()).conditional(matchUrl);
 		}
 
@@ -342,20 +340,6 @@ public class TransactionBundleNormalizer {
 			}
 		}
 		return identifiers;
-	}
-
-	private IBaseResource buildPlaceholder(MatchUrlInfo theInfo) {
-		IBaseResource placeholder = theInfo.resourceDef().newInstance();
-		for (CanonicalIdentifier identifier : theInfo.identifiers()) {
-			TerserUtil.addIdentifierToResource(
-					myFhirContext,
-					placeholder,
-					identifier.getSystemElement().getValueAsString(),
-					identifier.getValueElement().getValueAsString());
-		}
-		ExtensionUtil.addExtensionIfSupported(
-				myFhirContext, placeholder, HapiExtensions.EXT_RESOURCE_PLACEHOLDER, "boolean", Boolean.TRUE);
-		return placeholder;
 	}
 
 	private record MatchUrlInfo(
