@@ -13,10 +13,33 @@ import static ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptorR4Test.AL
 /**
  * Transaction bundle scenarios for
  * {@code PatientIdPartitionInterceptorR4Test#testTransaction_allReferenceScenarios}: each argument set is
- * (display name, request bundle JSON, per-entry expectations).
+ * (allPartitionSearchSupported, display name, request bundle JSON, per-entry expectations). When the flag
+ * is off, the transaction machinery cannot fall back to an all-partitions write transaction, so only
+ * entries routable purely from their own content (client-assigned Patient ids, direct references) can
+ * ingest — scenarios that instead depend on pre-fetch resolution or hook-minted ids declare the rejection
+ * they must produce as an optional fourth row element and run through
+ * {@link RejectedWithoutAllPartitionSearch} instead of the false-mode success pass.
  */
 // Created by claude-fable-5
 class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
+
+	/**
+	 * Rejection for bundles whose first unroutable entry is an id-less Patient: without the
+	 * all-partitions fallback the hook never gets a chance to mint or stamp an id.
+	 */
+	private static String allPartitionSearchOffModeRejectIdlessPatient() {
+		return "HAPI-1321: Patient resource IDs must be client-assigned in patient compartment mode, "
+				+ "or server id strategy must be UUID";
+	}
+
+	/**
+	 * Rejection for bundles whose first unroutable entry is a referencer whose reference (inline
+	 * match URL or urn placeholder) is only resolvable after pre-fetch.
+	 */
+	private static String allPartitionSearchOffModeRejectNoCompartment(String theResourceType) {
+		return "HAPI-1326: Resource of type " + theResourceType
+				+ " has no values placing it in the Patient compartment";
+	}
 
 	/**
 	 * Expectation for a single transaction response entry (in input order).
@@ -77,6 +100,31 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 
 	@Override
 	public Stream<? extends Arguments> provideArguments(ExtensionContext theContext) {
+		// False mode only re-runs the scenarios whose expectations hold without the all-partitions
+		// fallback; the annotated rest are covered by RejectedWithoutAllPartitionSearch.
+		return Stream.of(true, false).flatMap(supported -> scenarios()
+				.map(Arguments::get)
+				.filter(args -> supported || args.length == 3)
+				.map(args -> Arguments.of(supported, args[0], args[1], args[2])));
+	}
+
+	/**
+	 * The scenarios that declare a false-mode rejection, as (display name, request bundle JSON, expected
+	 * error) — for
+	 * {@code PatientIdPartitionInterceptorR4Test#testTransaction_allReferenceScenarios_rejectedWithoutAllPartitionSearch}.
+	 */
+	// Created by Claude Fable 5
+	static class RejectedWithoutAllPartitionSearch implements ArgumentsProvider {
+		@Override
+		public Stream<? extends Arguments> provideArguments(ExtensionContext theContext) {
+			return scenarios()
+					.map(Arguments::get)
+					.filter(args -> args.length > 3)
+					.map(args -> Arguments.of(args[0], args[1], args[3]));
+		}
+	}
+
+	private static Stream<Arguments> scenarios() {
 		// "two conditional-create Patients with the same identifier" is covered by the
 		// testTransaction_*InBundle_dedup tests in PatientIdPartitionInterceptorR4Test.
 		return Stream.of(
@@ -99,7 +147,8 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				// The hook rewrites the POST to a direct PUT with a minted UUID id; the restored outcome is a plain create.
 				List.of(
 					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
-				)
+				),
+				allPartitionSearchOffModeRejectIdlessPatient()
 			),
 			Arguments.of(
 				"Conditionally Create Patient | no match → created",
@@ -119,7 +168,8 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				// Rewritten to a conditional PUT with a minted body id; the restored outcome is the POST-origin code.
 				List.of(
 					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH)
-				)
+				),
+				allPartitionSearchOffModeRejectIdlessPatient()
 			),
 			Arguments.of(
 				"Conditionally Create Patient | matches existing → no-op create",
@@ -139,7 +189,8 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				// Matched conditional POSTs are left untouched → native no-op create outcome.
 				List.of(
 					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH)
-				)
+				),
+				allPartitionSearchOffModeRejectIdlessPatient()
 			),
 			Arguments.of(
 				"Conditionally Update Patient | matches existing, identical body → no-change update",
@@ -160,7 +211,8 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				List.of(
 					inCompartmentOf(
 						"Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH_NO_CHANGE, "pat1")
-				)
+				),
+				allPartitionSearchOffModeRejectIdlessPatient()
 			),
 			Arguments.of(
 				"Update Patient | explicit-id PUT to existing patient stays a plain update",
@@ -248,7 +300,8 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				// 1 synthetic stripped; response has 1 entry. Observation in pat1's compartment.
 				List.of(
 					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat1")
-				)
+				),
+				allPartitionSearchOffModeRejectNoCompartment("Observation")
 			),
 			Arguments.of(
 				"Create Observation | inline match URL reference to a new patient → synthetic conditional create",
@@ -270,7 +323,8 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				// 1 synthetic stripped; response has 1 entry. Observation in the new patient's compartment.
 				List.of(
 					inAnyPartitionExceptDefault("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
-				)
+				),
+				allPartitionSearchOffModeRejectNoCompartment("Observation")
 			),
 			Arguments.of(
 				"Create Observation ×2 | inline match URL references to two existing patients, one partition slice each",
@@ -300,7 +354,8 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				List.of(
 					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat1"),
 					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat2")
-				)
+				),
+				allPartitionSearchOffModeRejectNoCompartment("Observation")
 			),
 			Arguments.of(
 				"Create Observation ×2 | same existing patient via two different identifiers → two synthetics, co-located",
@@ -329,7 +384,8 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				List.of(
 					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat1"),
 					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat1")
-				)
+				),
+				allPartitionSearchOffModeRejectNoCompartment("Observation")
 			),
 			Arguments.of(
 				"Conditionally Update Observation | inline match URL reference to existing patient, no obs match → created",
@@ -351,7 +407,8 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				// Conditional PUT Observation: obs1 doesn't exist → creates new.
 				List.of(
 					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH, "pat1")
-				)
+				),
+				allPartitionSearchOffModeRejectIdlessPatient()
 			),
 			Arguments.of(
 				"Conditionally Update Observation | direct patient reference inside the match URL itself",
@@ -373,6 +430,117 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				// No match found → creates new Observation in pat1's compartment.
 				List.of(
 					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH, "pat1")
+				)
+			),
+			Arguments.of(
+				"Conditionally Create Observation | inline match URL subject, no observation match → created",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obsCondNew"} ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|ident1" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation", "ifNoneExist" : "Observation?identifier=observation-system|obsCondNew"}
+							}
+						]
+					}
+					""",
+				// The ifNoneExist URL pre-fetches while the subject is still an inline match URL; the synthetic
+				// for pat1 NOPs and is stripped. No observation matches → conditional create in pat1's compartment.
+				List.of(
+					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH, "pat1")
+				),
+				allPartitionSearchOffModeRejectIdlessPatient()
+			),
+			Arguments.of(
+				"Conditionally Create Observation | inline match URL subject, matches existing observation → no-op",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obsExisting"} ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|ident1" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation", "ifNoneExist" : "Observation?identifier=observation-system|obsExisting"}
+							}
+						]
+					}
+					""",
+				// The ifNoneExist URL matches the fixture Observation in pat1's compartment → no-op create.
+				List.of(
+					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH, "pat1")
+				),
+				allPartitionSearchOffModeRejectIdlessPatient()
+			),
+			Arguments.of(
+				"Conditionally Update Observation | matches existing observation, changed body → updated in place",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obsExisting"} ],
+									"status" : "final",
+									"subject" : { "reference" : "Patient/pat1" }
+								},
+								"request" : { "method" : "PUT", "url" : "Observation?identifier=observation-system|obsExisting"}
+							}
+						]
+					}
+					""",
+				// The conditional PUT matches the fixture Observation, resolved against its existing partition.
+				List.of(
+					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH, "pat1")
+				)
+			),
+			Arguments.of(
+				"Conditionally Update Observation | matches existing observation, identical body → no-change update",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obsExisting"} ],
+									"subject" : { "reference" : "Patient/pat1" }
+								},
+								"request" : { "method" : "PUT", "url" : "Observation?identifier=observation-system|obsExisting"}
+							}
+						]
+					}
+					""",
+				// Body identical to the fixture Observation → native no-change conditional-match outcome.
+				List.of(
+					inCompartmentOf(
+						"Observation", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH_NO_CHANGE, "pat1")
+				)
+			),
+			Arguments.of(
+				"Create Observation | direct reference to a nonexistent patient id → placeholder auto-created",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obsPh"} ],
+									"subject" : { "reference" : "Patient/patNewDirect" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation"}
+							}
+						]
+					}
+					""",
+				// The plain auto-placeholder shape: the id routes the entry, DaoResourceLinkResolver mints the
+				// placeholder Patient in the same compartment, and the response stays a single entry.
+				List.of(
+					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "patNewDirect")
 				)
 			),
 			Arguments.of(
@@ -408,7 +576,8 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				List.of(
 					inAnyPartitionExceptDefault("Encounter", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0)
-				)
+				),
+				allPartitionSearchOffModeRejectNoCompartment("Encounter")
 			),
 
 			// --- Patient + referencer, placeholder (urn) references ---
@@ -439,7 +608,8 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				List.of(
 					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0)
-				)
+				),
+				allPartitionSearchOffModeRejectIdlessPatient()
 			),
 			Arguments.of(
 				"Create Observation + Patient | placeholder reference, patient entry second",
@@ -468,7 +638,8 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				List.of(
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 1),
 					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
-				)
+				),
+				allPartitionSearchOffModeRejectNoCompartment("Observation")
 			),
 			Arguments.of(
 				"Conditionally Create Patient + Observation | placeholder reference, patient is new",
@@ -497,7 +668,8 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				List.of(
 					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0)
-				)
+				),
+				allPartitionSearchOffModeRejectNoCompartment("Observation")
 			),
 			Arguments.of(
 				"Create Observation + Conditionally Create Patient | placeholder reference, patient entry second",
@@ -528,7 +700,8 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				List.of(
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 1),
 					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH)
-				)
+				),
+				allPartitionSearchOffModeRejectNoCompartment("Observation")
 			),
 			Arguments.of(
 				"Conditionally Create Patient + Observation | placeholder reference, patient matches existing",
@@ -558,7 +731,8 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				List.of(
 					inCompartmentOf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH, "pat1"),
 					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat1")
-				)
+				),
+				allPartitionSearchOffModeRejectNoCompartment("Observation")
 			),
 			Arguments.of(
 				"Create Patient + Conditionally Update Observation | placeholder reference",
@@ -587,7 +761,8 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				List.of(
 					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH, 0)
-				)
+				),
+				allPartitionSearchOffModeRejectIdlessPatient()
 			),
 			Arguments.of(
 				"Conditionally Create Patient + Conditionally Update Observation | placeholder reference",
@@ -616,7 +791,8 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				List.of(
 					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH, 0)
-				)
+				),
+				allPartitionSearchOffModeRejectIdlessPatient()
 			),
 			Arguments.of(
 				"Conditionally Update Patient + Observation | placeholder reference, patient is new",
@@ -645,7 +821,8 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				List.of(
 					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0)
-				)
+				),
+				allPartitionSearchOffModeRejectNoCompartment("Observation")
 			),
 			Arguments.of(
 				"Conditionally Update Patient + Observation | placeholder reference, patient matches existing",
@@ -675,7 +852,104 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				List.of(
 					inCompartmentOf("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH, "pat1"),
 					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat1")
-				)
+				),
+				allPartitionSearchOffModeRejectNoCompartment("Observation")
+			),
+			Arguments.of(
+				"Conditionally Create Patient + Conditionally Create Observation | placeholder reference, neither matches",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"fullUrl" : "urn:uuid:e1533333-3333-3333-3333-333333333333",
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "identCondPost"} ]
+								},
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|identCondPost"}
+							}, {
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obsUrnCond"} ],
+									"subject" : { "reference" : "urn:uuid:e1533333-3333-3333-3333-333333333333" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation", "ifNoneExist" : "Observation?identifier=observation-system|obsUrnCond"}
+							}
+						]
+					}
+					""",
+				// The Observation's ifNoneExist URL pre-fetches while its subject is still the urn placeholder;
+				// both conditional creates find no match.
+				List.of(
+					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
+					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH, 0)
+				),
+				allPartitionSearchOffModeRejectIdlessPatient()
+			),
+			Arguments.of(
+				"Update Patient + Observation | urn fullUrl on explicit-id PUT to existing patient",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"fullUrl" : "urn:uuid:f2644444-4444-4444-4444-444444444444",
+								"resource" : {
+									"resourceType" : "Patient",
+									"id" : "pat1",
+									"identifier" : [ { "system" : "old-sys", "value" : "ident1"} ],
+									"active" : true
+								},
+								"request" : { "method" : "PUT", "url" : "Patient/pat1"}
+							}, {
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obsUrnPut"} ],
+									"subject" : { "reference" : "urn:uuid:f2644444-4444-4444-4444-444444444444" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation"}
+							}
+						]
+					}
+					""",
+				// The urn fullUrl differs from the explicit-id PUT url → the hook substitutes urn → Patient/pat1
+				// without rewriting the entry; the update itself stays native.
+				List.of(
+					inCompartmentOf("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE, "pat1"),
+					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat1")
+				),
+				allPartitionSearchOffModeRejectNoCompartment("Observation")
+			),
+			Arguments.of(
+				"Update-as-create Patient + Observation | urn fullUrl on explicit-id PUT with a new client id",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"fullUrl" : "urn:uuid:a3755555-5555-5555-5555-555555555555",
+								"resource" : {
+									"resourceType" : "Patient",
+									"id" : "patUacUrn",
+									"identifier" : [ { "system" : "old-sys", "value" : "identUacUrn"} ]
+								},
+								"request" : { "method" : "PUT", "url" : "Patient/patUacUrn"}
+							}, {
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obsUacUrn"} ],
+									"subject" : { "reference" : "urn:uuid:a3755555-5555-5555-5555-555555555555" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation"}
+							}
+						]
+					}
+					""",
+				// Same substitution branch, update-as-create flavor: patUacUrn doesn't exist → created with the
+				// client id; the urn subject resolves to its deterministic compartment.
+				List.of(
+					inCompartmentOf("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_AS_CREATE, "patUacUrn"),
+					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "patUacUrn")
+				),
+				allPartitionSearchOffModeRejectNoCompartment("Observation")
 			),
 
 			// --- Patient + referencer, inline match URL references ---
@@ -706,7 +980,8 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				List.of(
 					inCompartmentOf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH, "pat1"),
 					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH, "pat1")
-				)
+				),
+				allPartitionSearchOffModeRejectIdlessPatient()
 			),
 			Arguments.of(
 				"Conditionally Create Patient + Conditionally Update Observation | inline match URL binds to in-bundle entry, patient is new",
@@ -735,7 +1010,8 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				List.of(
 					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH, 0)
-				)
+				),
+				allPartitionSearchOffModeRejectIdlessPatient()
 			),
 			Arguments.of(
 				"Create Observation + Conditionally Create Patient | inline match URL binds to the later in-bundle patient entry",
@@ -763,7 +1039,8 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				List.of(
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 1),
 					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH)
-				)
+				),
+				allPartitionSearchOffModeRejectNoCompartment("Observation")
 			),
 			Arguments.of(
 				"Conditionally Update Patient + Observation | inline match URL binds to in-bundle entry, patient matches existing",
@@ -793,7 +1070,8 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				List.of(
 					inCompartmentOf("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH, "pat1"),
 					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat1")
-				)
+				),
+				allPartitionSearchOffModeRejectNoCompartment("Observation")
 			),
 			Arguments.of(
 				"Conditionally Update Patient + Observation | inline match URL binds to in-bundle entry, patient is new",
@@ -821,7 +1099,8 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				List.of(
 					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0)
-				)
+				),
+				allPartitionSearchOffModeRejectNoCompartment("Observation")
 			),
 			Arguments.of(
 				"Create Patient + Observation | inline match URL binds to the unconditional in-bundle patient",
@@ -850,7 +1129,8 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				List.of(
 					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0)
-				)
+				),
+				allPartitionSearchOffModeRejectIdlessPatient()
 			),
 			Arguments.of(
 				"Create Patient + Conditionally Update Observation | inline match URL binds to the unconditional in-bundle patient",
@@ -878,7 +1158,8 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				List.of(
 					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH, 0)
-				)
+				),
+				allPartitionSearchOffModeRejectIdlessPatient()
 			),
 			Arguments.of(
 				"Conditionally Create Patient ×2 + Observation ×2 | two new patients, one partition slice each",
@@ -922,7 +1203,8 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 1)
-				)
+				),
+				allPartitionSearchOffModeRejectNoCompartment("Observation")
 			),
 			Arguments.of(
 				"Update Patient + Observation | update-as-create via new client id, direct reference",
@@ -1004,7 +1286,8 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				List.of(
 					inDefaultPartition("Organization", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
 					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat1")
-				)
+				),
+				allPartitionSearchOffModeRejectNoCompartment("Observation")
 			)
 		);
 	}

@@ -198,6 +198,25 @@ class PatientIdPartitionNormalizerOffScenarios {
 					// Pre-fetch only sees committed data; the in-bundle patient cannot satisfy the URL without
 					// the normalizer's in-bundle index.
 					"HAPI-1326: Resource of type Observation has no values placing it in the Patient compartment"
+				),
+				Arguments.of(
+					"Create Observation | direct reference to a nonexistent patient — no placeholder auto-creation",
+					"""
+						{ "resourceType" : "Bundle", "type" : "transaction",
+							"entry" : [
+								{
+									"resource" : {
+										"resourceType" : "Observation",
+										"subject" : { "reference" : "Patient/patNoPh" }
+									},
+									"request" : { "method" : "POST", "url" : "Observation"}
+								}
+							]
+						}
+						""",
+					// The direct id still routes the entry to patNoPh's compartment; reference resolution then
+					// finds no target and placeholder auto-creation is off.
+					"HAPI-1094: Resource Patient/patNoPh not found, specified in path: Observation.subject"
 				)
 			);
 		}

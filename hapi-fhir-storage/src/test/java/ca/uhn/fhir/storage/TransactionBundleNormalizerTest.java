@@ -148,6 +148,25 @@ class TransactionBundleNormalizerTest {
 		assertEquals("Patient?identifier=http://foo|bar", obs.getSubject().getReference());
 	}
 
+	// Created by Claude Fable 5
+	@Test
+	void testNormalize_inlineMatchUrlReferencesDisabledLeavesBundleUntouched() {
+		myStorageSettings.setAllowInlineMatchUrlReferences(false);
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.TRANSACTION);
+		Observation obs = new Observation();
+		obs.getSubject().setReference("Patient?identifier=http://foo|bar");
+		bundle.addEntry().setResource(obs).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Observation");
+		TransactionDetails transactionDetails = new TransactionDetails();
+
+		mySvc.normalize(bundle, transactionDetails);
+
+		assertEquals(0, recordedSyntheticEntryCount(transactionDetails));
+		assertThat(bundle.getEntry()).hasSize(1);
+		assertNull(bundle.getEntry().get(0).getFullUrl());
+		assertEquals("Patient?identifier=http://foo|bar", obs.getSubject().getReference());
+	}
+
 	@ParameterizedTest
 	@ArgumentsSource(SingleResourceRefScenarios.class)
 	void testTransaction_singleResourceRefScenarios(
