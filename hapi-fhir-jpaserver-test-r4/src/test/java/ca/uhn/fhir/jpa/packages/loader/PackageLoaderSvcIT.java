@@ -30,7 +30,7 @@ public class PackageLoaderSvcIT {
 	@Spy
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
 	private final FakeNpmServlet myFakeNpmServlet = new FakeNpmServlet();
-	private final PackageLoaderSvc myPackageLoaderSvc = new PackageLoaderSvc(new PackageLoaderSettings());
+	private PackageLoaderSvc myPackageLoaderSvc;
 	private final PackageResourceParsingSvc myResourceParsingSvc = new PackageResourceParsingSvc(myFhirContext);
 
 	@RegisterExtension
@@ -39,6 +39,15 @@ public class PackageLoaderSvcIT {
 
 	@BeforeEach
 	public void before() throws Exception {
+		String baseUrl = myServer.getBaseUrl();
+		if (!baseUrl.startsWith("http")) {
+			baseUrl = "http://" + baseUrl;
+		}
+		PackageLoaderSettings settings = PackageLoaderSettings.unrestricted(); // PackageLoaderSettings.restricted(
+//			List.of(baseUrl), new ArrayList<>()
+//		);
+		PackageLoaderSvc.initSettings(settings);
+		myPackageLoaderSvc = new PackageLoaderSvc(settings);
 
 		myPackageLoaderSvc.getPackageServers().clear();
 		myPackageLoaderSvc.addPackageServer(new PackageServer(myServer.getBaseUrl()));
