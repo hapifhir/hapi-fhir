@@ -78,6 +78,8 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 			String theType, StorageResponseCodeEnum theOutcome, String thePatientIdPart, String theOtherPatientIdPart) {
 		int partition = PatientIdPartitionInterceptor.defaultPartitionAlgorithm(thePatientIdPart);
 		int otherPartition = PatientIdPartitionInterceptor.defaultPartitionAlgorithm(theOtherPatientIdPart);
+		// otherPartition feeds only this guard: once the two ids are known to hash apart, asserting the
+		// exact partition below already implies "not in the other patient's partition".
 		if (partition == otherPartition) {
 			throw new IllegalArgumentException("Ids '%s' and '%s' hash to the same partition (%d); pick a different id"
 					.formatted(thePatientIdPart, theOtherPatientIdPart, partition));
