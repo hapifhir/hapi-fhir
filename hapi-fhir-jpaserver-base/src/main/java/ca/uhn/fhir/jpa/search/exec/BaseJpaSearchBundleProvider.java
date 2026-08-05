@@ -91,6 +91,7 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 	 */
 	// FIXME: lower level
 	private static final Level DEBUG_LOG_LEVEL = Level.INFO;
+
 	protected final RequestDetails myRequestDetails;
 	protected final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	protected final ISearchCacheSvc mySearchCacheSvc;
@@ -261,11 +262,11 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 				theToIndex < mySearchEntity.getNumFound() || mySearchEntity.getStatus() == SearchStatusEnum.PASSCMPLET);
 
 		ourLog.atLevel(DEBUG_LOG_LEVEL)
-			.setMessage("Returning {} results for range {}-{}")
-			.addArgument(retVal.size())
-			.addArgument(theFromIndex)
-			.addArgument(theToIndex)
-			.log();
+				.setMessage("Returning {} results for range {}-{}")
+				.addArgument(retVal.size())
+				.addArgument(theFromIndex)
+				.addArgument(theToIndex)
+				.log();
 
 		return retVal;
 	}
@@ -527,10 +528,10 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 	 */
 	private void ensureSearchPerformedInsideTransaction(int theFromIndex, int theToIndex) {
 		ourLog.atLevel(DEBUG_LOG_LEVEL)
-			.setMessage("About to ensure search performed for results {}-{}")
-			.addArgument(theFromIndex)
-			.addArgument(theToIndex)
-			.log();
+				.setMessage("About to ensure search performed for results {}-{}")
+				.addArgument(theFromIndex)
+				.addArgument(theToIndex)
+				.log();
 
 		final List<JpaPid> pidsToReturn = new ArrayList<>();
 
@@ -601,12 +602,11 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 			SearchThreshold searchThreshold = calculateNextSearchThreshold(numWanted + lastSkipCount, searchBuilder);
 			searchBuilder.setMaxResultsToFetch(searchThreshold.threshold());
 			ourLog.atLevel(DEBUG_LOG_LEVEL)
-				.setMessage("About to perform search with threshold {} for results {}-{}")
-				.addArgument(searchThreshold)
-				.addArgument(theFromIndex)
-				.addArgument(theToIndex)
-				.log();
-
+					.setMessage("About to perform search with threshold {} for results {}-{}")
+					.addArgument(searchThreshold)
+					.addArgument(theFromIndex)
+					.addArgument(theToIndex)
+					.log();
 
 			/*
 			 * Actually perform the search
@@ -653,7 +653,7 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 			}
 
 			// FIXME: remove
-//			if (consumer.getBlockedCount() == 0 || mySearchEntity.getNumFound() >= theToIndex) {
+			//			if (consumer.getBlockedCount() == 0 || mySearchEntity.getNumFound() >= theToIndex) {
 			if (mySearchEntity.getNumFound() >= theToIndex) {
 				break;
 			}
