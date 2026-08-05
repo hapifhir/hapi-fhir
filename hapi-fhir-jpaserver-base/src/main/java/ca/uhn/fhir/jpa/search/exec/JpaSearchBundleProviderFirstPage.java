@@ -83,9 +83,7 @@ public class JpaSearchBundleProviderFirstPage extends BaseJpaSearchBundleProvide
 			SearchBuilderFactory<JpaPid> theSearchBuilderFactory) {
 		super(
 				theFhirContext,
-				theParams,
 				theRequestDetails,
-				theRequestPartitionId,
 				theInterceptorBroadcaster,
 				thePagingProvider,
 				theStorageSettings,
@@ -95,7 +93,9 @@ public class JpaSearchBundleProviderFirstPage extends BaseJpaSearchBundleProvide
 				theSearchCacheSvc,
 				theSearchResultCacheSvc,
 				theExceptionService,
-				theSearchBuilderFactory);
+				theSearchBuilderFactory,
+				theParams,
+				theRequestPartitionId);
 
 		myCacheControlDirective = theCacheControlDirective;
 		myCandidateSearchEntity = theCandidateSearchEntity;

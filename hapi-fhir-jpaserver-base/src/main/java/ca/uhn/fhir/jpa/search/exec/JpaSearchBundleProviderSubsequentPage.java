@@ -80,7 +80,9 @@ public class JpaSearchBundleProviderSubsequentPage extends BaseJpaSearchBundlePr
 				theSearchCacheSvc,
 				theSearchResultCacheSvc,
 				theExceptionService,
-				theSearchBuilderFactory);
+				theSearchBuilderFactory,
+				null,
+				null);
 
 		mySearchUuid = theSearchUuid;
 	}

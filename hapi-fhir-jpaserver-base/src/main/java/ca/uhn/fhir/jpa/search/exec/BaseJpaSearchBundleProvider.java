@@ -158,41 +158,6 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 	/**
 	 * Constructor
 	 */
-	protected BaseJpaSearchBundleProvider(
-			FhirContext theFhirContext,
-			SearchParameterMap theParams,
-			RequestDetails theRequestDetails,
-			RequestPartitionId theRequestPartitionId,
-			IInterceptorBroadcaster theInterceptorBroadcaster,
-			IPagingProvider thePagingProvider,
-			JpaStorageSettings theStorageSettings,
-			EntityManager theEntityManager,
-			IHapiTransactionService theTxService,
-			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
-			ISearchCacheSvc theSearchCacheSvc,
-			ISearchResultCacheSvc theSearchResultCacheSvc,
-			ExceptionService theExceptionService,
-			SearchBuilderFactory<JpaPid> theSearchBuilderFactory) {
-		this(
-				theFhirContext,
-				theRequestDetails,
-				theInterceptorBroadcaster,
-				thePagingProvider,
-				theStorageSettings,
-				theEntityManager,
-				theTxService,
-				theRequestPartitionHelperSvc,
-				theSearchCacheSvc,
-				theSearchResultCacheSvc,
-				theExceptionService,
-				theSearchBuilderFactory);
-		myParams = theParams;
-		myRequestPartitionId = theRequestPartitionId;
-	}
-
-	/**
-	 * Constructor
-	 */
 	@SuppressWarnings("unchecked")
 	protected BaseJpaSearchBundleProvider(
 			FhirContext theFhirContext,
@@ -206,7 +171,9 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 			ISearchCacheSvc theSearchCacheSvc,
 			ISearchResultCacheSvc theSearchResultCacheSvc,
 			ExceptionService theExceptionService,
-			SearchBuilderFactory<JpaPid> theSearchBuilderFactory) {
+			SearchBuilderFactory<JpaPid> theSearchBuilderFactory,
+			SearchParameterMap theParams,
+			RequestPartitionId theRequestPartitionId) {
 		myPagingProvider = thePagingProvider;
 		myFhirContext = theFhirContext;
 		myRequestDetails = theRequestDetails;
@@ -222,6 +189,8 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 				CompositeInterceptorBroadcaster.newCompositeBroadcaster(theInterceptorBroadcaster, myRequestDetails);
 		myInstantDefinition =
 				(BaseRuntimeElementDefinition<IPrimitiveType<Date>>) myFhirContext.getElementDefinition("instant");
+		myParams = theParams;
+		setRequestPartitionId(theRequestPartitionId);
 	}
 
 	@Override
@@ -919,6 +888,10 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 
 	protected Search provideLoadedSearchEntity() {
 		return mySearchEntity;
+	}
+
+	public void setRequestPartitionId(RequestPartitionId theRequestPartitionId) {
+		myRequestPartitionId = theRequestPartitionId;
 	}
 
 	private record SearchThreshold(
