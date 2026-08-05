@@ -109,25 +109,27 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 		myBiggerPreFetchThresholds.add(1000);
 		myBiggerPreFetchThresholds.add(-1);
 		myStorageSettings.setSearchPreFetchThresholds(myBiggerPreFetchThresholds);
+		myMemoryCacheService.invalidateAllCaches();
 
 		myCaptureQueriesListener.clear();
 		List<String> results = toUnqualifiedVersionlessIdValues(myObservationDao.observationsLastN(params, mockSrd(), null));
 		assertThat(results).hasSize(75);
 
+		// 1 query to resolve resource FHIR IDs to PIDs
 		// 1 query to look up the Search from cache
 		// 1 query to resolve the subject PIDs
 		// 3 queries to actually perform the search
 		assertThat(myCaptureQueriesListener).has(
 			onAllThreads()
-				.selectCount(5)
+				.selectCount(6)
 				.insertCount(76)
 				.commitCount(2)
 				.connectionCount(2)
 				.noOtherCounts()
 				// The first chunked query should have a full complement of PIDs
-				.selectSqlAtIndex(3).matches(".* in \\('[0-9]+'(,'[0-9]+'){49}\\).*")
+				.selectSqlAtIndex(4).matches(".* in \\('[0-9]+'(,'[0-9]+'){49}\\).*")
 				// The second chunked query should be padded with "-1".
-				.selectSqlAtIndex(4).matches(".* in \\('[0-9]+'(,'[0-9]+')+(,'-1')+\\).*")
+				.selectSqlAtIndex(5).matches(".* in \\('[0-9]+'(,'[0-9]+')+(,'-1')+\\).*")
 		);
 
 	}

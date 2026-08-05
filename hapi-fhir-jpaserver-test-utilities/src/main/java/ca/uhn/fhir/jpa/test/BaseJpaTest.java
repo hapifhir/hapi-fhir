@@ -307,7 +307,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Autowired
 	protected ITermConceptPropertyDao myTermConceptPropertyDao;
 	@Autowired
-	private MemoryCacheService myMemoryCacheService;
+	protected MemoryCacheService myMemoryCacheService;
 	@Autowired
 	protected ISchedulerService mySchedulerService;
 	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT)
