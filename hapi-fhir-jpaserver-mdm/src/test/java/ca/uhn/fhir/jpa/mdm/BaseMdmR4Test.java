@@ -482,6 +482,16 @@ abstract public class BaseMdmR4Test extends BaseResourceProviderR4Test {
 		return thePatient;
 	}
 
+	protected Practitioner createPractitionerOnPartition(Practitioner thePractitioner, RequestPartitionId theRequestPartitionId) {
+		thePractitioner.setActive(true);
+		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
+		systemRequestDetails.setRequestPartitionId(theRequestPartitionId);
+		DaoMethodOutcome daoMethodOutcome = myPractitionerDao.create(thePractitioner, systemRequestDetails);
+		thePractitioner.setId(daoMethodOutcome.getId());
+		thePractitioner.setUserData(Constants.RESOURCE_PARTITION_ID, theRequestPartitionId);
+		return thePractitioner;
+	}
+
 	protected Practitioner createPractitionerAndUpdateLinks(Practitioner thePractitioner) {
 		thePractitioner.setActive(true);
 		DaoMethodOutcome daoMethodOutcome = myPractitionerDao.create(thePractitioner);
