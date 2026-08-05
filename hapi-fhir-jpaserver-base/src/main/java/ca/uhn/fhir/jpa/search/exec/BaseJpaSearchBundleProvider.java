@@ -49,8 +49,10 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 import org.springframework.transaction.UnexpectedRollbackException;
 
 import java.util.ArrayList;
@@ -82,6 +84,13 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 			.build();
 	private static final int SEARCH_EXPIRY_OFFSET_MINUTES = 10;
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseJpaSearchBundleProvider.class);
+
+	/**
+	 * Adjust this to raise the level of the debuga logs if you are
+	 * troubleshooting something.
+	 */
+	// FIXME: lower level
+	private static final Level DEBUG_LOG_LEVEL = Level.INFO;
 	protected final RequestDetails myRequestDetails;
 	protected final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	protected final ISearchCacheSvc mySearchCacheSvc;
@@ -250,6 +259,13 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 		theResponsePageBuilder.setTotalRequestedResourcesFetched(mySearchEntity.getNumFound());
 		theResponsePageBuilder.setHasNextPage(
 				theToIndex < mySearchEntity.getNumFound() || mySearchEntity.getStatus() == SearchStatusEnum.PASSCMPLET);
+
+		ourLog.atLevel(DEBUG_LOG_LEVEL)
+			.setMessage("Returning {} results for range {}-{}")
+			.addArgument(retVal.size())
+			.addArgument(theFromIndex)
+			.addArgument(theToIndex)
+			.log();
 
 		return retVal;
 	}
@@ -510,6 +526,12 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 	 * @param theToIndex   The end of the search range (exclusive)
 	 */
 	private void ensureSearchPerformedInsideTransaction(int theFromIndex, int theToIndex) {
+		ourLog.atLevel(DEBUG_LOG_LEVEL)
+			.setMessage("About to ensure search performed for results {}-{}")
+			.addArgument(theFromIndex)
+			.addArgument(theToIndex)
+			.log();
+
 		final List<JpaPid> pidsToReturn = new ArrayList<>();
 
 		mySearchEntity = provideSearchEntity();
@@ -567,11 +589,10 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 			numToSkip.set(theFromIndex - mySearchEntity.getNumFound());
 		}
 
-		List<JpaPid> newPids = new ArrayList<>();
-		boolean haveMoreResults;
+		List<JpaPid> foundPidsToStore = new ArrayList<>();
+		boolean haveMoreResults = true;
 		int lastSkipCount = 0;
-		while (true) {
-			haveMoreResults = false;
+		while (haveMoreResults) {
 			/*
 			 * To ensure that every individual page load doesn't need to turn around and perform the
 			 * search again, we pre-fetch a set of sensible thresholds. So for example, if the client
@@ -579,13 +600,18 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 			 */
 			SearchThreshold searchThreshold = calculateNextSearchThreshold(numWanted + lastSkipCount, searchBuilder);
 			searchBuilder.setMaxResultsToFetch(searchThreshold.threshold());
+			ourLog.atLevel(DEBUG_LOG_LEVEL)
+				.setMessage("About to perform search with threshold {} for results {}-{}")
+				.addArgument(searchThreshold)
+				.addArgument(theFromIndex)
+				.addArgument(theToIndex)
+				.log();
 
-			List<JpaPid> newPidsThisPass = new ArrayList<>();
 
 			/*
 			 * Actually perform the search
 			 */
-
+			List<JpaPid> newPidsThisPass = new ArrayList<>();
 			PidConsumer consumer = new PidConsumer(
 					myRequestDetails,
 					newPidsThisPass,
@@ -607,16 +633,15 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 			}
 
 			lastSkipCount = outcome.getSkippedCount() + consumer.getBlockedCount();
-
 			int pidsCountThisPass = newPidsThisPass.size() + lastSkipCount;
-			if (searchThreshold.threshold() != null && pidsCountThisPass >= searchThreshold.threshold()) {
-				haveMoreResults = true;
+			if (searchThreshold.threshold() == null || pidsCountThisPass < searchThreshold.threshold()) {
+				haveMoreResults = false;
 			}
 
 			mySearchEntity.setNumFound(mySearchEntity.getNumFound() + consumer.getFoundCount());
 			mySearchEntity.setNumBlocked(mySearchEntity.getNumBlocked() + consumer.getBlockedCount());
 
-			newPids.addAll(newPidsThisPass);
+			foundPidsToStore.addAll(newPidsThisPass);
 
 			// If our last prefetch threshold specifies a specific maximum count, force the search
 			// to be over when we hit that count.
@@ -627,7 +652,9 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 				break;
 			}
 
-			if (consumer.getBlockedCount() == 0 || mySearchEntity.getNumFound() >= theToIndex) {
+			// FIXME: remove
+//			if (consumer.getBlockedCount() == 0 || mySearchEntity.getNumFound() >= theToIndex) {
+			if (mySearchEntity.getNumFound() >= theToIndex) {
 				break;
 			}
 		}
@@ -674,9 +701,15 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 		mySearchEntity.setSearchParameterMap(myParams);
 		updateSearchExpiryIfNecessary();
 
+		ourLog.atLevel(DEBUG_LOG_LEVEL)
+				.setMessage("Now have {} results and {} blocked in query cache")
+				.addArgument(mySearchEntity.getNumFound())
+				.addArgument(mySearchEntity.getNumBlocked())
+				.log();
+
 		mySearchCacheSvc.save(mySearchEntity, myRequestPartitionId);
 		mySearchResultCacheSvc.storeResults(
-				mySearchEntity, previouslyFoundPids, newPids, myRequestDetails, myRequestPartitionId);
+				mySearchEntity, previouslyFoundPids, foundPidsToStore, myRequestDetails, myRequestPartitionId);
 
 		int numberToReturn = theToIndex - theFromIndex;
 		while (pidsToReturn.size() > numberToReturn) {
@@ -787,7 +820,15 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 		return mySearchEntity;
 	}
 
-	private record SearchThreshold(@Nullable Integer threshold, boolean isLastThreshold) {}
+	private record SearchThreshold(@Nullable Integer threshold, boolean isLastThreshold) {
+		@Override
+		public @NotNull String toString() {
+			if (isLastThreshold()) {
+				return "LastThreshold[" + threshold() + "]";
+			}
+			return "Threshold[" + threshold() + "]";
+		}
+	}
 
 	private static class PidConsumer implements ISearchResultConsumer<JpaPid> {
 		private final List<JpaPid> myNewPidsThisPass;
