@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.search;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.ISearchResultConsumer;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.SearchProgressTracker;
@@ -15,7 +14,7 @@ import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.exec.CacheAwareSearchSvcImpl;
 import ca.uhn.fhir.jpa.search.exec.ICacheAwareSearchSvc;
-import ca.uhn.fhir.jpa.search.exec.ISynchronousSearchSvc;
+import ca.uhn.fhir.jpa.search.exec.IStatelessSearchSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
@@ -24,7 +23,6 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.system.HapiSystemProperties;
-import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterEach;
@@ -83,7 +81,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 	@Mock
 	private IRequestPartitionHelperSvc myPartitionHelperSvc;
 	@Mock
-	private ISynchronousSearchSvc mySynchronousSearchSvc;
+	private IStatelessSearchSvc mySynchronousSearchSvc;
 	@Spy
 	private ExceptionService myExceptionSvc = new ExceptionService(myContext);
 	@Mock

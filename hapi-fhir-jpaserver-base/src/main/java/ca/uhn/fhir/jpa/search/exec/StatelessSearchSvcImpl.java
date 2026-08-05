@@ -59,9 +59,9 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantOnlyCount;
 
-public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
+public class StatelessSearchSvcImpl implements IStatelessSearchSvc {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SynchronousSearchSvcImpl.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StatelessSearchSvcImpl.class);
 
 	private FhirContext myContext;
 

@@ -49,6 +49,12 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
+/**
+ * Search result provider for the first page of a cache-aware search.
+ *
+ * @see CacheAwareSearchSvcImpl
+ * @since 8.14.0
+ */
 public class JpaSearchBundleProviderFirstPage extends BaseJpaSearchBundleProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaSearchBundleProviderFirstPage.class);
 

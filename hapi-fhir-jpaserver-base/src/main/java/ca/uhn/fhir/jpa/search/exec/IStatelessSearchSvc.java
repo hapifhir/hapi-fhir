@@ -26,8 +26,19 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 
-public interface ISynchronousSearchSvc extends ISearchSvc {
+/**
+ * This service performs stateless searches, which are searches that do not interact with
+ * the {@link ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc Search Cache} at all. Paging across
+ * results is always done by re-executing the search using offsets
+ * ({@link SearchParameterMap#getOffset()} and {@link SearchParameterMap#getCount()}).
+ *
+ * @see ICacheAwareSearchSvc The equivalent service for cache-aware searches.
+ */
+public interface IStatelessSearchSvc extends ISearchSvc {
 
+	/**
+	 * Executes a search.
+	 */
 	IBundleProvider createNewSearch(
 			SearchParameterMap theParams,
 			RequestDetails theRequestDetails,

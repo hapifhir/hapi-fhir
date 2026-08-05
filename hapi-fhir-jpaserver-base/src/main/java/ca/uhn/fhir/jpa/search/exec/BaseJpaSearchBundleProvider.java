@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.ISearchResultConsumer;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.SearchProgressTracker;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
@@ -91,7 +92,7 @@ import java.util.Set;
  *     <li>{@link JpaSearchBundleProviderSubsequentPage}</li> is used for the following page loads from the query cache
  * </ul>
  *
- * @see ISynchronousSearchSvc The Synchronous Search Service is used instead of this class for searches which don't use the search cache
+ * @see IStatelessSearchSvc The Synchronous Search Service is used instead of this class for searches which don't use the search cache
  * @see ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider The search result for <b>FHIR History</b> operations.
  * @since 8.14.0
  */
@@ -129,8 +130,29 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 	protected RequestPartitionId myRequestPartitionId;
 	protected SearchCacheStatus myCacheStatus;
 
+	/**
+	 * If the search has been
+	 * {@link #initializeSearchInsideTransaction(int, int) initialized},
+	 * this is the search entity associated with the search.
+	 */
 	private Search mySearchEntity;
+
+	/**
+	 * If the search has been
+	 * {@link #initializeSearchInsideTransaction(int, int) initialized},
+	 * this is the search match results (i.e. any resource PIDs that were found
+	 * for the given search parameters, <b>not including</b> any <code>_include</code>
+	 * or <code>_revinclude</code> results.
+	 */
 	private CachedPids myCachedPidsFromMatches;
+
+	/**
+	 * If the search has been
+	 * {@link #initializeSearchInsideTransaction(int, int) initialized},
+	 * this is the search match results (i.e. any resource PIDs that were found
+	 * for the given search parameters, <b>including</b> any <code>_include</code>
+	 * or <code>_revinclude</code> results.
+	 */
 	private CachedPids myCachedPidsFromMatchesAndIncludes;
 
 	/**
@@ -204,7 +226,7 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 
 	@Override
 	public IPrimitiveType<Date> getPublished() {
-		ensureSearchPerformed();
+		initializeSearchIfNecessary();
 		IPrimitiveType<Date> retVal = myInstantDefinition.newInstance();
 		retVal.setValue(mySearchEntity.getCreated());
 		return retVal;
@@ -213,7 +235,7 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 	@Nullable
 	@Override
 	public String getUuid() {
-		ensureSearchPerformed();
+		initializeSearchIfNecessary();
 		return mySearchEntity.getUuid();
 	}
 
@@ -246,19 +268,33 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 			if (myParams.getCount() != null) {
 				to = myParams.getCount();
 			}
-			ensureSearchPerformed(from, to);
+			initializeSearchIfNecessary(from, to);
 			return mySearchEntity.getTotalCount();
 		}
 		return null;
 	}
 
+	@Nullable
+	@Override
+	public SearchCacheStatus getCacheStatus() {
+		initializeSearchIfNecessary();
+		return myCacheStatus;
+	}
+
+	/**
+	 * Fetch a range of search results
+	 *
+	 * @param theFromIndex           The low index (inclusive) to return
+	 * @param theToIndex             The high index (exclusive) to return
+	 * @param theResponsePageBuilder The ResponsePageBuilder. The builder will add values needed for the response page.
+	 */
 	@Override
 	public List<IBaseResource> getResources(
 			int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
-		ensureSearchPerformed(theFromIndex, theToIndex);
+		CachedPids searchResults = initializeSearchIfNecessary(theFromIndex, theToIndex);
 
 		List<IBaseResource> retVal = new ArrayList<>();
-		for (JpaPid nextPid : myCachedPidsFromMatchesAndIncludes.pids()) {
+		for (JpaPid nextPid : searchResults.pids()) {
 			IBaseResource resource = myFetchedResources.get(nextPid);
 			if (resource != null) {
 				retVal.add(resource);
@@ -290,7 +326,7 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 	}
 
 	/**
-	 * This is really only intended for unit tests, the regular search paths don't call this methos
+	 * This is really only intended for unit tests, the regular search paths don't call this method.
 	 */
 	@Nonnull
 	@Override
@@ -301,138 +337,28 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 		return resources;
 	}
 
-	protected void fetchResourcesAndIncludes(
-			ISearchBuilder<JpaPid> theSearchBuilder, List<JpaPid> thePids, int theFromIndex, int theToIndex) {
-
-		List<JpaPid> cachedPidsFromMatches = List.copyOf(thePids);
-
-		List<JpaPid> includedPidList = new ArrayList<>();
-		if (mySearchEntity.getSearchType() == SearchTypeEnum.SEARCH) {
-			Integer remainingIncludesUntilMax = myStorageSettings.getMaximumIncludesToLoadPerPage();
-
-			// Save original search result PIDs — non-iterate `_include` must apply only to initial results, not to
-			// `_revinclude` results
-			Set<JpaPid> originalPids = new HashSet<>(thePids);
-
-			// Load non-iterate `_revinclude`
-			{
-				Collection<Include> includes = mySearchEntity.toRevIncludesList(false);
-				remainingIncludesUntilMax = fetchRevIncludes(
-						theSearchBuilder, thePids, includedPidList, remainingIncludesUntilMax, includes);
-			}
-
-			// Load non-iterate `_include` (use originalPids so `_include` only applies to the
-			// initial search results, not to revincluded resources — per FHIR spec, without `:iterate`)
-			{
-				Collection<Include> includes = mySearchEntity.toIncludesList(false);
-				SearchBuilderLoadIncludesParameters<JpaPid> parameters =
-						createLoadIncludeParameters(originalPids, includes, false, remainingIncludesUntilMax);
-				Set<JpaPid> nonIterateIncludedPids = theSearchBuilder.loadIncludes(parameters);
-				if (remainingIncludesUntilMax != null) {
-					remainingIncludesUntilMax -= nonIterateIncludedPids.size();
-				}
-				thePids.addAll(nonIterateIncludedPids);
-				includedPidList.addAll(nonIterateIncludedPids);
-			}
-
-			// Load `_revinclude:iterate`
-			{
-				Collection<Include> includes = mySearchEntity.toRevIncludesList(true);
-				remainingIncludesUntilMax = fetchRevIncludes(
-						theSearchBuilder, thePids, includedPidList, remainingIncludesUntilMax, includes);
-			}
-
-			// Load `_include:iterate`
-			{
-				Collection<Include> includes = mySearchEntity.toIncludesList(true);
-				SearchBuilderLoadIncludesParameters<JpaPid> parameters =
-						createLoadIncludeParameters(thePids, includes, false, remainingIncludesUntilMax);
-				Set<JpaPid> iterateIncludedPids = theSearchBuilder.loadIncludes(parameters);
-				thePids.addAll(iterateIncludedPids);
-				includedPidList.addAll(iterateIncludedPids);
-			}
-		}
-
-		// Fetch the resource bodies
-
-		List<JpaPid> pidsToFetch;
-		if (!myFetchedResources.isEmpty()) {
-			pidsToFetch = thePids.stream()
-					.filter(p -> !myFetchedResources.containsKey(p))
-					.toList();
-		} else {
-			pidsToFetch = thePids;
-		}
-
-		if (!pidsToFetch.isEmpty()) {
-			List<IBaseResource> includeResources = new ArrayList<>(pidsToFetch.size());
-			theSearchBuilder.loadResourcesByPid(
-					pidsToFetch, includedPidList, includeResources, false, myRequestDetails);
-
-			int limit = Math.min(pidsToFetch.size(), includeResources.size());
-			for (int i = 0; i < limit; i++) {
-				JpaPid pid = pidsToFetch.get(i);
-				IBaseResource resource = includeResources.get(i);
-				myFetchedResources.put(pid, resource);
-			}
-		}
-
-		myCachedPidsFromMatches = new CachedPids(theFromIndex, theToIndex, cachedPidsFromMatches);
-		myCachedPidsFromMatchesAndIncludes = new CachedPids(theFromIndex, theToIndex, thePids);
-	}
-
-	private Integer fetchRevIncludes(
-			ISearchBuilder<JpaPid> theSearchBuilder,
-			List<JpaPid> thePids,
-			List<JpaPid> theIncludedPidList,
-			Integer theMaxIncludes,
-			Collection<Include> theIncludes) {
-		SearchBuilderLoadIncludesParameters<JpaPid> parameters =
-				createLoadIncludeParameters(thePids, theIncludes, true, theMaxIncludes);
-		Set<JpaPid> nonIterateRevIncludedPids = theSearchBuilder.loadIncludes(parameters);
-		if (theMaxIncludes != null) {
-			theMaxIncludes -= nonIterateRevIncludedPids.size();
-		}
-		thePids.addAll(nonIterateRevIncludedPids);
-		theIncludedPidList.addAll(nonIterateRevIncludedPids);
-		return theMaxIncludes;
-	}
-
-	@Nonnull
-	private SearchBuilderLoadIncludesParameters<JpaPid> createLoadIncludeParameters(
-			Collection<JpaPid> thePids,
-			Collection<Include> theIncludesToLoad,
-			boolean theReverse,
-			Integer theMaxIncludes) {
-		SearchBuilderLoadIncludesParameters<JpaPid> parameters = new SearchBuilderLoadIncludesParameters<>();
-		parameters.setFhirContext(myFhirContext);
-		parameters.setEntityManager(myEntityManager);
-		parameters.setMatches(thePids);
-		parameters.setIncludeFilters(theIncludesToLoad);
-		parameters.setReverseMode(theReverse);
-		parameters.setLastUpdated(mySearchEntity.getLastUpdated());
-		parameters.setSearchIdOrDescription(mySearchEntity.getUuid());
-		parameters.setRequestDetails(myRequestDetails);
-		parameters.setMaxCount(theMaxIncludes);
-		return parameters;
-	}
-
 	/**
 	 * Initializes the search, assuming that the first search threshold is the
 	 * desired number of resources if the search hasn't already been initialized.
+	 * <p>
 	 * This should only happen if a consumer of the {@link IBundleProvider} calls
 	 * a method other than {@link #getResources(int, int, ResponsePage.ResponsePageBuilder)}
 	 * first, which won't happen during normal search scenarios.
+	 * In other words, this method should not do any work in any normal scenatios
+	 * where it will be called (but older unit tests may cause it to be called first).
+	 * </p>
 	 */
-	protected void ensureSearchPerformed() {
+	protected void initializeSearchIfNecessary() {
 		if (myCachedPidsFromMatches == null) {
+			ourLog.warn(
+					"Initializing search without an explicit range specified. This is inefficient and should be avoided.");
 			int to;
 			if (myParams != null && myParams.getCount() != null) {
 				to = myParams.getCount();
 			} else {
 				to = myStorageSettings.getSearchPreFetchThresholds().get(0);
 			}
-			ensureSearchPerformed(0, to);
+			initializeSearchIfNecessary(0, to);
 		}
 		validateSearchEntityNotFailed();
 	}
@@ -443,8 +369,10 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 	 *
 	 * @param theFromIndex The start of the search range (inclusive)
 	 * @param theToIndex   The end of the search range (exclusive)
+	 * @return Returns the PIDs associated with the given range of search results.
 	 */
-	private void ensureSearchPerformed(int theFromIndex, int theToIndex) {
+	@Nonnull
+	private CachedPids initializeSearchIfNecessary(int theFromIndex, int theToIndex) {
 
 		/*
 		 * We're not yet in a database transaction here, so we'll first make a few
@@ -457,7 +385,7 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 				 * If we've already fetched the exact range we want, we are done
 				 */
 				if (myCachedPidsFromMatchesAndIncludes.toIndex() == theToIndex) {
-					return;
+					return myCachedPidsFromMatchesAndIncludes;
 				}
 
 				/*
@@ -470,7 +398,7 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 						&& mySearchEntity.getTotalCount() != null
 						&& mySearchEntity.getTotalCount() <= theToIndex
 						&& theToIndex <= myCachedPidsFromMatchesAndIncludes.toIndex()) {
-					return;
+					return myCachedPidsFromMatchesAndIncludes;
 				}
 			}
 		}
@@ -490,7 +418,7 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 					rangeEnd = Math.min(rangeEnd, myCachedPidsFromMatches.size());
 					List<JpaPid> rangePids = myCachedPidsFromMatches.pids().subList(rangeStart, rangeEnd);
 					myCachedPidsFromMatchesAndIncludes = new CachedPids(theFromIndex, theToIndex, rangePids);
-					return;
+					return myCachedPidsFromMatchesAndIncludes;
 				}
 			}
 		}
@@ -501,7 +429,7 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 		if (myParams != null && mySearchEntity != null && SearchParameterMapCalculator.isWantOnlyCount(myParams)) {
 			if (mySearchEntity.getTotalCount() != null) {
 				myCachedPidsFromMatchesAndIncludes = new CachedPids(theFromIndex, theToIndex, List.of());
-				return;
+				return myCachedPidsFromMatchesAndIncludes;
 			}
 		}
 
@@ -516,7 +444,7 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 				myTxService
 						.withRequest(myRequestDetails)
 						.withRequestPartitionId(myRequestPartitionId)
-						.execute(() -> ensureSearchPerformedInsideTransaction(theFromIndex, theToIndex));
+						.execute(() -> initializeSearchInsideTransaction(theFromIndex, theToIndex));
 				break;
 			} catch (ResourceVersionConflictException e) {
 				// We failed to write to the query cache. We'll retry the search a few times since presumably
@@ -537,16 +465,21 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 		}
 
 		validateSearchEntityNotFailed();
+		return myCachedPidsFromMatchesAndIncludes;
 	}
 
 	/**
+	 * This method performs the "in database transaction" portion of performing
+	 * a search, meaning fetching result PIDs and hydrating the responses.
 	 *
 	 * @param theFromIndex The start of the search range (inclusive)
 	 * @param theToIndex   The end of the search range (exclusive)
 	 */
-	private void ensureSearchPerformedInsideTransaction(int theFromIndex, int theToIndex) {
+	private void initializeSearchInsideTransaction(int theFromIndex, int theToIndex) {
+		HapiTransactionService.requireTransaction();
+
 		ourLog.atLevel(DEBUG_LOG_LEVEL)
-				.setMessage("About to ensure search performed for results {}-{}")
+				.setMessage("About to initialize search results {}-{}")
 				.addArgument(theFromIndex)
 				.addArgument(theToIndex)
 				.log();
@@ -573,7 +506,7 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 		}
 
 		/*
-		 * If the previously found search is either finished, or has already found enough results to
+		 * If the previously found search is either finished or has already found enough results to
 		 * satisfy the currently wanted count, then we can just return previously fetched results.
 		 */
 		if (mySearchEntity.getStatus() == SearchStatusEnum.FINISHED || mySearchEntity.getNumFound() >= theToIndex) {
@@ -617,8 +550,9 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 			 * search again, we pre-fetch a set of sensible thresholds. So for example, if the client
 			 * wants the first 10 results, we might fetch the first 30
 			 */
-			SearchThreshold searchThreshold = calculateNextSearchThreshold(numWanted + lastSkipCount, searchBuilder);
+			SearchThreshold searchThreshold = calculateNextSearchThreshold(numWanted + lastSkipCount);
 			searchBuilder.setMaxResultsToFetch(searchThreshold.threshold());
+			searchBuilder.setDeduplicateInDatabase(searchThreshold.deduplicateInDatabase());
 			ourLog.atLevel(DEBUG_LOG_LEVEL)
 					.setMessage("About to perform search with threshold {} for results {}-{}")
 					.addArgument(searchThreshold)
@@ -735,11 +669,198 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 		fetchResourcesAndIncludes(searchBuilder, pidsToReturn, theFromIndex, theToIndex);
 	}
 
-	@Nullable
-	@Override
-	public SearchCacheStatus getCacheStatus() {
-		ensureSearchPerformed();
-		return myCacheStatus;
+	/**
+	 * Using the {@link JpaStorageSettings#getSearchPreFetchThresholds() pre-fetch thresholds},
+	 * determines the next search threshold to use.
+	 *
+	 * @param theNumWanted The minimum number of results we want to fetch.
+	 */
+	@Nonnull
+	private SearchThreshold calculateNextSearchThreshold(int theNumWanted) {
+		Integer threshold;
+		boolean isLastThreshold;
+		boolean deduplicateInDatabase;
+
+		List<Integer> thresholds = myStorageSettings.getSearchPreFetchThresholds();
+		int firstThreshold = thresholds.get(0);
+		int lastThreshold = thresholds.get(thresholds.size() - 1);
+
+		/*
+		 * If we're searching for the first page of results:
+		 *
+		 * - If the requested count is greater than the first threshold, just search
+		 *   for exactly the requested count instead of advancing to the next threshold.
+		 * - If the requested count is greater than the last threshold, just search
+		 *   for exactly the last threshold, and don't exceed it.
+		 */
+		boolean firstSearch = mySearchEntity.getNumFound() == 0 && mySearchEntity.getNumBlocked() == 0;
+		if (firstSearch && theNumWanted > firstThreshold) {
+			if (lastThreshold > 0 && theNumWanted > lastThreshold) {
+				threshold = lastThreshold;
+				isLastThreshold = true;
+				deduplicateInDatabase = false;
+			} else {
+				threshold = theNumWanted + 1;
+				isLastThreshold = false;
+				deduplicateInDatabase = false;
+			}
+		} else {
+
+			/*
+			 * For subsequent pages, we'll use the predetermined search thresholds
+			 */
+
+			threshold = null;
+			isLastThreshold = true;
+			deduplicateInDatabase = true;
+
+			for (Iterator<Integer> iterator = thresholds.iterator(); iterator.hasNext(); ) {
+				int nextThreshold = iterator.next();
+
+				/*
+				 * If we're past the last prefetch threshold then
+				 * we're potentially fetching unlimited amounts of data.
+				 * We'll move responsibility for deduplication to the database in this case
+				 * so that we don't run the risk of blowing out the memory
+				 * in the app server
+				 */
+				if (nextThreshold == -1) {
+					break;
+				} else {
+					if ((theNumWanted + mySearchEntity.getNumFound()) <= nextThreshold) {
+						threshold = (nextThreshold - mySearchEntity.getNumFound()) + 1;
+						isLastThreshold = !iterator.hasNext();
+						deduplicateInDatabase = false;
+						break;
+					}
+				}
+			}
+		}
+
+		return new SearchThreshold(threshold, isLastThreshold, deduplicateInDatabase);
+	}
+
+	/**
+	 * Given a set of search result PIDs, query the database for the associated
+	 * <code>_include</code> and <code>_revinclude</code> PIDs, and fetch the
+	 * resources associated with those PIDs.
+	 * This method populates {@link #myCachedPidsFromMatches} and
+	 * {@link #myCachedPidsFromMatchesAndIncludes}.
+	 */
+	protected void fetchResourcesAndIncludes(
+			ISearchBuilder<JpaPid> theSearchBuilder, List<JpaPid> theMatchPids, int theFromIndex, int theToIndex) {
+
+		List<JpaPid> cachedPidsFromMatches = List.copyOf(theMatchPids);
+
+		List<JpaPid> includedPidList = new ArrayList<>();
+		if (mySearchEntity.getSearchType() == SearchTypeEnum.SEARCH) {
+			Integer remainingIncludesUntilMax = myStorageSettings.getMaximumIncludesToLoadPerPage();
+
+			// Save original search result PIDs — non-iterate `_include` must apply only to initial results, not to
+			// `_revinclude` results
+			Set<JpaPid> originalPids = new HashSet<>(theMatchPids);
+
+			// Load non-iterate `_revinclude`
+			{
+				Collection<Include> includes = mySearchEntity.toRevIncludesList(false);
+				remainingIncludesUntilMax = fetchRevIncludes(
+						theSearchBuilder, theMatchPids, includedPidList, remainingIncludesUntilMax, includes);
+			}
+
+			// Load non-iterate `_include` (use originalPids so `_include` only applies to the
+			// initial search results, not to revincluded resources — per FHIR spec, without `:iterate`)
+			{
+				Collection<Include> includes = mySearchEntity.toIncludesList(false);
+				SearchBuilderLoadIncludesParameters<JpaPid> parameters =
+						createLoadIncludeParameters(originalPids, includes, false, remainingIncludesUntilMax);
+				Set<JpaPid> nonIterateIncludedPids = theSearchBuilder.loadIncludes(parameters);
+				if (remainingIncludesUntilMax != null) {
+					remainingIncludesUntilMax -= nonIterateIncludedPids.size();
+				}
+				theMatchPids.addAll(nonIterateIncludedPids);
+				includedPidList.addAll(nonIterateIncludedPids);
+			}
+
+			// Load `_revinclude:iterate`
+			{
+				Collection<Include> includes = mySearchEntity.toRevIncludesList(true);
+				remainingIncludesUntilMax = fetchRevIncludes(
+						theSearchBuilder, theMatchPids, includedPidList, remainingIncludesUntilMax, includes);
+			}
+
+			// Load `_include:iterate`
+			{
+				Collection<Include> includes = mySearchEntity.toIncludesList(true);
+				SearchBuilderLoadIncludesParameters<JpaPid> parameters =
+						createLoadIncludeParameters(theMatchPids, includes, false, remainingIncludesUntilMax);
+				Set<JpaPid> iterateIncludedPids = theSearchBuilder.loadIncludes(parameters);
+				theMatchPids.addAll(iterateIncludedPids);
+				includedPidList.addAll(iterateIncludedPids);
+			}
+		}
+
+		// Fetch the resource bodies
+
+		List<JpaPid> pidsToFetch;
+		if (!myFetchedResources.isEmpty()) {
+			pidsToFetch = theMatchPids.stream()
+					.filter(p -> !myFetchedResources.containsKey(p))
+					.toList();
+		} else {
+			pidsToFetch = theMatchPids;
+		}
+
+		if (!pidsToFetch.isEmpty()) {
+			List<IBaseResource> includeResources = new ArrayList<>(pidsToFetch.size());
+			theSearchBuilder.loadResourcesByPid(
+					pidsToFetch, includedPidList, includeResources, false, myRequestDetails);
+
+			int limit = Math.min(pidsToFetch.size(), includeResources.size());
+			for (int i = 0; i < limit; i++) {
+				JpaPid pid = pidsToFetch.get(i);
+				IBaseResource resource = includeResources.get(i);
+				myFetchedResources.put(pid, resource);
+			}
+		}
+
+		myCachedPidsFromMatches = new CachedPids(theFromIndex, theToIndex, cachedPidsFromMatches);
+		myCachedPidsFromMatchesAndIncludes = new CachedPids(theFromIndex, theToIndex, theMatchPids);
+	}
+
+	private Integer fetchRevIncludes(
+			ISearchBuilder<JpaPid> theSearchBuilder,
+			List<JpaPid> thePids,
+			List<JpaPid> theIncludedPidList,
+			Integer theMaxIncludes,
+			Collection<Include> theIncludes) {
+		SearchBuilderLoadIncludesParameters<JpaPid> parameters =
+				createLoadIncludeParameters(thePids, theIncludes, true, theMaxIncludes);
+		Set<JpaPid> nonIterateRevIncludedPids = theSearchBuilder.loadIncludes(parameters);
+		if (theMaxIncludes != null) {
+			theMaxIncludes -= nonIterateRevIncludedPids.size();
+		}
+		thePids.addAll(nonIterateRevIncludedPids);
+		theIncludedPidList.addAll(nonIterateRevIncludedPids);
+		return theMaxIncludes;
+	}
+
+	@Nonnull
+	private SearchBuilderLoadIncludesParameters<JpaPid> createLoadIncludeParameters(
+			Collection<JpaPid> thePids,
+			Collection<Include> theIncludesToLoad,
+			boolean theReverse,
+			Integer theMaxIncludes) {
+		SearchBuilderLoadIncludesParameters<JpaPid> parameters = new SearchBuilderLoadIncludesParameters<>();
+		parameters.setFhirContext(myFhirContext);
+		parameters.setEntityManager(myEntityManager);
+		parameters.setMatches(thePids);
+		parameters.setIncludeFilters(theIncludesToLoad);
+		parameters.setReverseMode(theReverse);
+		parameters.setLastUpdated(mySearchEntity.getLastUpdated());
+		parameters.setSearchIdOrDescription(mySearchEntity.getUuid());
+		parameters.setRequestDetails(myRequestDetails);
+		parameters.setMaxCount(theMaxIncludes);
+		return parameters;
 	}
 
 	private void updateSearchExpiryIfNecessary() {
@@ -755,8 +876,17 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 		}
 	}
 
+	/**
+	 * Subclasses should return a search entity that will be used to satisfy the search request.
+	 * This method will be called once per database transaction, from within an existing
+	 * transaction.
+	 */
 	protected abstract Search provideSearchEntity();
 
+	/**
+	 * Extract the {@link SearchParameterMap} from the search entity, and throw
+	 * an exception if it is not present (which should never happen and would be a bug).
+	 */
 	@Nonnull
 	private SearchParameterMap extractSearchParameterMapFromSearchEntity() {
 		return mySearchEntity
@@ -765,60 +895,15 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 						Msg.code(3021) + "Search entity eas stored without a SearchParameterMap"));
 	}
 
+	/**
+	 * Validate that the search entity has not failed and throw an exception if it has.
+	 * The specific exception will depend on the {@link Search#getFailureCode() failure code}
+	 * in the search entity.
+	 */
 	private void validateSearchEntityNotFailed() {
 		if (mySearchEntity != null) {
 			QueryParameterUtils.verifySearchHasntFailedOrThrowInternalErrorException(mySearchEntity);
 		}
-	}
-
-	@Nonnull
-	private SearchThreshold calculateNextSearchThreshold(int theNumWanted, ISearchBuilder<JpaPid> searchBuilder) {
-		List<Integer> thresholds = myStorageSettings.getSearchPreFetchThresholds();
-		int firstThreshold = thresholds.get(0);
-		int lastThreshold = thresholds.get(thresholds.size() - 1);
-
-		/*
-		 * If we're searching for the first page of results:
-		 *
-		 * - If the requested count is greater than the first threshold, just search
-		 *   for exactly the requested count instead of advancing to the next threshold.
-		 * - If the requested count is greater than the last threshold, just search
-		 *   for exactly the last threshold, and don't exceed it.
-		 */
-		boolean firstSearch = mySearchEntity.getNumFound() == 0 && mySearchEntity.getNumBlocked() == 0;
-		if (firstSearch) {
-			if (theNumWanted > firstThreshold) {
-				if (lastThreshold > 0 && theNumWanted > lastThreshold) {
-					return new SearchThreshold(lastThreshold, true);
-				}
-				return new SearchThreshold(theNumWanted + 1, false);
-			}
-		}
-
-		// For subsequent pages, we'll use the predetermined search thresholds
-		for (Iterator<Integer> iterator = thresholds.iterator(); iterator.hasNext(); ) {
-			int nextThreshold = iterator.next();
-
-			/*
-			 * If we're past the last prefetch threshold then
-			 * we're potentially fetching unlimited amounts of data.
-			 * We'll move responsibility for deduplication to the database in this case
-			 * so that we don't run the risk of blowing out the memory
-			 * in the app server
-			 */
-			if (nextThreshold == -1) {
-				break;
-			} else {
-				if ((theNumWanted + mySearchEntity.getNumFound()) <= nextThreshold) {
-					int numToFetch = (nextThreshold - mySearchEntity.getNumFound()) + 1;
-					boolean isLastThreshold = !iterator.hasNext();
-					return new SearchThreshold(numToFetch, isLastThreshold);
-				}
-			}
-		}
-
-		searchBuilder.setDeduplicateInDatabase(true);
-		return new SearchThreshold(null, true);
 	}
 
 	private ISearchBuilder<JpaPid> newSearchBuilder() {
@@ -836,7 +921,8 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 		return mySearchEntity;
 	}
 
-	private record SearchThreshold(@Nullable Integer threshold, boolean isLastThreshold) {
+	private record SearchThreshold(
+			@Nullable Integer threshold, boolean isLastThreshold, boolean deduplicateInDatabase) {
 		@Override
 		public @NotNull String toString() {
 			if (isLastThreshold()) {

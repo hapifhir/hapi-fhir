@@ -38,7 +38,7 @@ import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.builder.StorageInterceptorHooksFacade;
 import ca.uhn.fhir.jpa.search.exec.ICacheAwareSearchSvc;
-import ca.uhn.fhir.jpa.search.exec.ISynchronousSearchSvc;
+import ca.uhn.fhir.jpa.search.exec.IStatelessSearchSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -104,7 +104,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	private SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
 
 	@Autowired
-	private ISynchronousSearchSvc mySynchronousSearchSvc;
+	private IStatelessSearchSvc myStatelessSearchSvc;
 
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
@@ -135,7 +135,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 			IInterceptorBroadcaster theInterceptorBroadcaster,
 			DaoRegistry theDaoRegistry,
 			SearchBuilderFactory<JpaPid> theSearchBuilderFactory,
-			ISynchronousSearchSvc theSynchronousSearchSvc,
+			IStatelessSearchSvc theStatelessSearchSvc,
 			ICacheAwareSearchSvc theCacheAwareSearchSvc,
 			SearchStrategyFactory theSearchStrategyFactory,
 			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
@@ -145,7 +145,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		myStorageSettings = theStorageSettings;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
 		mySearchBuilderFactory = theSearchBuilderFactory;
-		mySynchronousSearchSvc = theSynchronousSearchSvc;
+		myStatelessSearchSvc = theStatelessSearchSvc;
 		mySearchStrategyFactory = theSearchStrategyFactory;
 		myDaoRegistry = theDaoRegistry;
 		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
@@ -241,7 +241,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 			sb.setMaxResultsToFetch(maxToLoad);
 
 			ourLog.debug("Search {} is loading in synchronous mode", searchUuid);
-			return mySynchronousSearchSvc.createNewSearch(
+			return myStatelessSearchSvc.createNewSearch(
 					theParams, theRequestDetails, searchUuid, sb, loadSynchronousUpTo, requestPartitionId);
 		}
 

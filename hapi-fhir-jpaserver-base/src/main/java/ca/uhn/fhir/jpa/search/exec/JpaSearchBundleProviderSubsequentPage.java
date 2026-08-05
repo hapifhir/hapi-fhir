@@ -40,6 +40,12 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
+/**
+ * Search result provider for fetching pages of a previously executed cache-aware search.
+ *
+ * @see CacheAwareSearchSvcImpl
+ * @since 8.14.0
+ */
 public class JpaSearchBundleProviderSubsequentPage extends BaseJpaSearchBundleProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaSearchBundleProviderSubsequentPage.class);
 
@@ -96,7 +102,7 @@ public class JpaSearchBundleProviderSubsequentPage extends BaseJpaSearchBundlePr
 
 		/// In case someone calls this before calling {@link #getResources(int, int, ResponsePage.ResponsePageBuilder)}
 		if (!super.hasLoadedSearchEntity() && mySearchUuid != null) {
-			ensureSearchPerformed();
+			initializeSearchIfNecessary();
 		}
 
 		return super.size();

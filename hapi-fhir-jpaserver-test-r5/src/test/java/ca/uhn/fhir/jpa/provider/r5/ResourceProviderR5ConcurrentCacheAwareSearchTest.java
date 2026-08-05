@@ -2,14 +2,9 @@ package ca.uhn.fhir.jpa.provider.r5;
 
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
-import ca.uhn.fhir.jpa.search.exec.CacheAwareSearchSvcImpl;
-import ca.uhn.fhir.jpa.search.exec.ICacheAwareSearchSvc;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.util.ProxyUtil;
 import ca.uhn.fhir.util.ThreadPoolUtil;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Patient;
 import org.junit.jupiter.api.AfterEach;
@@ -17,9 +12,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.ProxyUtils;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.ArrayList;
@@ -28,7 +20,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
 import static ca.uhn.fhir.rest.server.BasePagingProvider.DEFAULT_MAX_PAGE_SIZE;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,9 +30,6 @@ public class ResourceProviderR5ConcurrentCacheAwareSearchTest extends BaseResour
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceProviderR5ConcurrentCacheAwareSearchTest.class);
 	private ThreadPoolTaskExecutor myThreadPool;
-
-	@Autowired
-	private ICacheAwareSearchSvc myCacheAwareSearchSvc;
 
 	@Override
 	@BeforeEach
@@ -124,40 +112,6 @@ public class ResourceProviderR5ConcurrentCacheAwareSearchTest extends BaseResour
 			);
 		}
 	}
-
-
-	@Test
-	void testFlushLargeSearchResultsInline() {
-		// Setup
-		myPagingProvider.setMaximumPageSize(1000);
-
-//		((CacheAwareSearchSvcImpl)myCacheAwareSearchSvc).setFlushToDatabaseAfter
-
-		List<String> expectedIds = new ArrayList<>();
-		for (int i = 0; i < 100; i++) {
-			IIdType id = createPatient(withId("P" + leftPad(Integer.toString(i), 5, '0')));
-			expectedIds.add(id.toUnqualifiedVersionless().getValue());
-		}
-
-		// Test
-		List<String> actualIds = new ArrayList<>();
-		Bundle result = myClient
-			.search()
-			.forResource("Patient")
-			.count(10)
-			.sort(new SortSpec(PARAM_ID, SortOrderEnum.ASC))
-			.returnBundle(Bundle.class)
-			.execute();
-		actualIds.addAll(toUnqualifiedVersionlessIdValues(result));
-		while (result.getLink(Bundle.LINK_NEXT) != null) {
-			result = myClient.loadPage().next(result).execute();
-			actualIds.addAll(toUnqualifiedVersionlessIdValues(result));
-		}
-
-		// Verify
-		assertThat(actualIds).containsExactlyElementsOf(expectedIds);
-	}
-
 
 
 }

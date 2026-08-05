@@ -38,12 +38,14 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import jakarta.persistence.EntityManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+/**
+ * This service performs cache-aware searches. In other words, when executing a search
+ * it will check the {@link ISearchCacheSvc} for any existing cached searches, and if appropriate will store any results it finds back in the
+ * search cache.
+ */
 public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
-	private static final Logger ourLog = LoggerFactory.getLogger(CacheAwareSearchSvcImpl.class);
 
 	@Autowired
 	private ExceptionService myExceptionSvc;

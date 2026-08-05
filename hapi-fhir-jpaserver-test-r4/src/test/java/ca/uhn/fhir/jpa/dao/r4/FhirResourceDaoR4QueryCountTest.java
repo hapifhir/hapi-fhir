@@ -1876,15 +1876,15 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@ParameterizedTest
 	@CsvSource(useHeadersInDisplayName = true, textBlock = """
-		UseQueryCache , UseConsentInterceptor, ExpectConnection, ExpectCommit, ExpectSelect, ExpectInsert, ExpectUpdate
-		HIT           , false                , 1               , 1           , 4           , 0           , 0
-		MISS          , false                , 1               , 1           , 3           , 15          , 0
-		SKIP          , false                , 1               , 1           , 2           , 0           , 0
-		HIT           , true                 , 1               , 1           , 2           , 15          , 0
-		MISS          , true                 , 1               , 1           , 2           , 15          , 0
-		SKIP          , true                 , 1               , 1           , 3           , 0           , 0
+		UseQueryCache , UseConsentInterceptor, ExpectSelect, ExpectInsert
+		HIT           , false                , 4           , 0
+		MISS          , false                , 3           , 15
+		SKIP          , false                , 2           , 0
+		HIT           , true                 , 2           , 15
+		MISS          , true                 , 2           , 15
+		SKIP          , true                 , 3           , 0
 		""")
-	void testSearch_FirstPage(QueryCacheMode theUseQueryCache, boolean theUseConsentInterceptor, int theExpectConnection, int theExpectCommit, int theExpectSelect, int theExpectInsert, int theExpectUpdate) {
+	void testSearch_FirstPage(QueryCacheMode theUseQueryCache, boolean theUseConsentInterceptor, int theExpectSelect, int theExpectInsert) {
 		// Setup
 		create150Patients();
 
@@ -1924,25 +1924,25 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(10, outcome.getEntry().size());
 		assertThat(myCaptureQueriesListener).has(
 			onAllThreads()
-				.connectionCount(theExpectConnection)
-				.commitCount(theExpectCommit)
 				.selectCount(theExpectSelect)
-				.updateCount(theExpectUpdate)
 				.insertCount(theExpectInsert)
+				.connectionCount(1)
+				.commitCount(1)
+				.updateCount(0)
 		);
 	}
 
 	@ParameterizedTest
 	@CsvSource(useHeadersInDisplayName = true, textBlock = """
-		UseQueryCache , UseConsentInterceptor, ExpectConnection, ExpectCommit, ExpectSelect, ExpectInsert, ExpectUpdate
-		HIT           , false                , 1               , 1           , 3           , 0           , 0
-		MISS          , false                , 1               , 1           , 4           , 136         , 1
-		SKIP          , false                , 1               , 1           , 2           , 0           , 0
-		HIT           , true                 , 1               , 1           , 5           , 136         , 1
-		MISS          , true                 , 1               , 1           , 5           , 136         , 1
-		SKIP          , true                 , 1               , 1           , 3           , 0           , 0
+		UseQueryCache , UseConsentInterceptor, ExpectSelect, ExpectInsert, ExpectUpdate
+		HIT           , false                , 3           , 0           , 0
+		MISS          , false                , 4           , 136         , 1
+		SKIP          , false                , 2           , 0           , 0
+		HIT           , true                 , 5           , 136         , 1
+		MISS          , true                 , 5           , 136         , 1
+		SKIP          , true                 , 3           , 0           , 0
 		""")
-	void testSearch_SecondPage(QueryCacheMode theUseQueryCache, boolean theUseConsentInterceptor, int theExpectConnection, int theExpectCommit, int theExpectSelect, int theExpectInsert, int theExpectUpdate) {
+	void testSearch_SecondPage(QueryCacheMode theUseQueryCache, boolean theUseConsentInterceptor, int theExpectSelect, int theExpectInsert, int theExpectUpdate) {
 		// Setup
 		create150Patients();
 
@@ -1992,8 +1992,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(10, outcome.getEntry().size());
 		assertThat(myCaptureQueriesListener).has(
 			onAllThreads()
-				.connectionCount(theExpectConnection)
-				.commitCount(theExpectCommit)
+				.connectionCount(1)
+				.commitCount(1)
 				.selectCount(theExpectSelect)
 				.updateCount(theExpectUpdate)
 				.insertCount(theExpectInsert)

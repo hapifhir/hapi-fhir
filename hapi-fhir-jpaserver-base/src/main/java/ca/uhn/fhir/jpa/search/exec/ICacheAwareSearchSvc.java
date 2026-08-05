@@ -28,8 +28,20 @@ import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 
+/**
+ * This service performs cache-aware searches. In other words, when executing a search
+ * it will check the {@link ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc} for any existing
+ * cached searches, and if appropriate will store any results it finds back in the
+ * search cache.
+ *
+ * @see IStatelessSearchSvc The equivalent service for non-cache-aware searches.
+ */
 public interface ICacheAwareSearchSvc {
 
+	/**
+	 * Perform a new search using a set of search parameters, either by finding an
+	 * existing cached search or by executing a new search.
+	 */
 	IBundleProvider createNewSearch(
 			SearchParameterMap theParams,
 			RequestDetails theRequestDetails,
@@ -38,5 +50,9 @@ public interface ICacheAwareSearchSvc {
 			ISearchBuilder<JpaPid> theSearchBuilder,
 			RequestPartitionId theRequestPartitionId);
 
+	/**
+	 * Continue a previously returned search, fetching existing results from the
+	 * search cache if possible or fetching new search results if necessary.
+	 */
 	IBundleProvider continueExistingSearch(String theId, RequestDetails theRequestDetails);
 }

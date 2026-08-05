@@ -6,7 +6,6 @@ import ca.uhn.fhir.jpa.dao.ISearchResultConsumer;
 import ca.uhn.fhir.jpa.dao.SearchProgressTracker;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.search.BaseSearchSvc;
-import ca.uhn.fhir.jpa.search.exec.SynchronousSearchSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -41,7 +40,7 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@InjectMocks
-	private SynchronousSearchSvcImpl mySynchronousSearchSvc;
+	private StatelessSearchSvcImpl mySynchronousSearchSvc;
 
 	@BeforeEach
 	public void before() {
