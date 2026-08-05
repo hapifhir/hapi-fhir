@@ -34,7 +34,6 @@ import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SearchCacheStatus;
 import ca.uhn.fhir.rest.server.IPagingProvider;
-import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.interceptor.ServerInterceptorUtil;
 import ca.uhn.fhir.rest.server.method.ResponsePage;
@@ -492,9 +491,6 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 				}
 				ourLog.warn("Constraint error while writing search results to query cache: {}", e.toString());
 				new SleepUtil().sleepAtLeast(500, false);
-			} catch (ResourceGoneException e) {
-				ourLog.info("Attempting to access search with unknown UUID: {}", mySearchEntity.getUuid());
-				throw e;
 			} catch (UnexpectedRollbackException e) {
 				validateSearchEntityNotFailed();
 				throw e;
