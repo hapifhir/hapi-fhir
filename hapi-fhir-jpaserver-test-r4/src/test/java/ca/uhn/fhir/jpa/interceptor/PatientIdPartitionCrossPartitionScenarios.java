@@ -34,7 +34,7 @@ class PatientIdPartitionCrossPartitionScenarios implements ArgumentsProvider {
 		return Stream.of(CrossPartitionReferenceMode.NOT_ALLOWED, CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED)
 			.flatMap(mode -> scenarios().map(scenario -> {
 				Object[] args = scenario.get();
-				return Arguments.of(mode, args[0], args[1], args[2]);
+				return Arguments.of(mode, args[0], args[1], args[2], args[3]);
 			}));
 	}
 
@@ -63,8 +63,7 @@ class PatientIdPartitionCrossPartitionScenarios implements ArgumentsProvider {
 						]
 					}
 					""",
-				// Practitioner (ancillary) → default partition. Patient's generalPractitioner crosses partitions:
-				// the urn is substituted with the Practitioner's concrete id.
+				"Practitioner (ancillary) → default partition. Patient's generalPractitioner crosses partitions: the urn is substituted with the Practitioner's concrete id.",
 				List.of(
 					inDefaultPartition("Practitioner", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
 					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
@@ -95,8 +94,7 @@ class PatientIdPartitionCrossPartitionScenarios implements ArgumentsProvider {
 						]
 					}
 					""",
-				// Subject inline match URL → synthetic (pat1 NOP); 1 stripped. Performer keeps its reference
-				// to the default-partition Organization in the same entry the normalizer rewrote.
+				"Subject inline match URL → synthetic (pat1 NOP); 1 stripped. Performer keeps its reference to the default-partition Organization in the same entry the normalizer rewrote.",
 				List.of(
 					inDefaultPartition("Organization", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
 					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat1")
@@ -126,8 +124,7 @@ class PatientIdPartitionCrossPartitionScenarios implements ArgumentsProvider {
 						]
 					}
 					""",
-				// Performer match URL binds to the in-bundle Organization entry's normalizer-assigned fullUrl
-				// (no synthetic minted) — a cross-partition reference resolved through the in-bundle index.
+				"Performer match URL binds to the in-bundle Organization entry's normalizer-assigned fullUrl (no synthetic minted) — a cross-partition reference resolved through the in-bundle index.",
 				List.of(
 					inDefaultPartition("Organization", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
 					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat1")
@@ -160,8 +157,7 @@ class PatientIdPartitionCrossPartitionScenarios implements ArgumentsProvider {
 						]
 					}
 					""",
-				// Group is always stored in the default partition; its members reference pat1's compartment and
-				// the new patient's — the reverse direction (default → compartment).
+				"Group is always stored in the default partition; its members reference pat1's compartment and the new patient's — the reverse direction (default → compartment).",
 				List.of(
 					inDefaultPartition("Group", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
 					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
@@ -185,10 +181,7 @@ class PatientIdPartitionCrossPartitionScenarios implements ArgumentsProvider {
 						]
 					}
 					""",
-				// link.other inline match URL → synthetic conditional-create NOPs against pat2 in pat2's
-				// partition (stripped), and the minted patient carries the rewritten outbound link. With a random
-				// minted UUID the placement can only be pinned to "not default" — the deterministic
-				// cross-compartment claim is pinned by the update-as-create variant below.
+				"link.other inline match URL → synthetic conditional-create NOPs against pat2 in pat2's partition (stripped), and the minted patient carries the rewritten outbound link. With a random minted UUID the placement can only be pinned to \"not default\" — the deterministic cross-compartment claim is pinned by the update-as-create variant below.",
 				List.of(
 					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
 				)
@@ -212,9 +205,7 @@ class PatientIdPartitionCrossPartitionScenarios implements ArgumentsProvider {
 						]
 					}
 					""",
-				// Same link rewrite as above, but the client id pat3 makes the new patient's partition
-				// deterministic — the assertion pins that it lands in its own compartment, distinct from pat2's:
-				// a reference between two patient-compartment partitions, neither of them default.
+				"Same link rewrite as above, but the client id pat3 makes the new patient's partition deterministic — the assertion pins that it lands in its own compartment, distinct from pat2's: a reference between two patient-compartment partitions, neither of them default.",
 				List.of(
 					inCompartmentOfDistinctFrom("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_AS_CREATE, "pat3", "pat2")
 				)
@@ -239,8 +230,7 @@ class PatientIdPartitionCrossPartitionScenarios implements ArgumentsProvider {
 						]
 					}
 					""",
-				// Two patient targets → no single compartment; the NON_UNIQUE_COMPARTMENT_IN_DEFAULT policy
-				// routes the Provenance to the default partition, referencing into both compartments.
+				"Two patient targets → no single compartment; the NON_UNIQUE_COMPARTMENT_IN_DEFAULT policy routes the Provenance to the default partition, referencing into both compartments.",
 				List.of(
 					inDefaultPartition("Provenance", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
 				)

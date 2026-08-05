@@ -1781,9 +1781,13 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	@ParameterizedTest
 	@ArgumentsSource(PatientIdPartitionReferenceScenarios.class)
 	void testTransaction_allReferenceScenarios(
-			boolean theSupportsAllPartitionSearch, String theComment, String theBundle, List<ExpectedEntry> theExpectedEntries) {
+			boolean theSupportsAllPartitionSearch,
+			String theComment,
+			String theBundle,
+			String theExplanation,
+			List<ExpectedEntry> theExpectedEntries) {
 		myPartitionSettings.setAllPartitionSearchSupported(theSupportsAllPartitionSearch);
-		runReferenceScenario(theComment, theBundle, theExpectedEntries);
+		runReferenceScenario(theComment, theBundle, theExplanation, theExpectedEntries);
 	}
 
 	/**
@@ -1795,12 +1799,13 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	@ParameterizedTest
 	@ArgumentsSource(PatientIdPartitionReferenceScenarios.RejectedWithoutAllPartitionSearch.class)
 	void testTransaction_allReferenceScenarios_rejectedWithoutAllPartitionSearch(
-			String theComment, String theBundle, String theExpectedError) {
+			String theComment, String theBundle, String theExplanation, String theExpectedError) {
 		myPartitionSettings.setAllPartitionSearchSupported(false);
 		setupReferenceScenarioFixture();
 
 		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, theBundle);
 		ourLog.info("Test case: {}", theComment);
+		ourLog.info("Scenario explanation (with all-partition search): {}", theExplanation);
 
 		assertThatThrownBy(() -> mySystemDao.transaction(mySrd, requestBundle))
 			.isInstanceOf(BaseServerResponseException.class)
@@ -1811,18 +1816,25 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 
 	@ParameterizedTest
 	@ArgumentsSource(PatientIdPartitionCrossPartitionScenarios.class)
-	void testTransaction_crossPartitionReferenceScenarios(PartitionSettings.CrossPartitionReferenceMode theMode, String theComment, String theBundle, List<ExpectedEntry> theExpectedEntries) {
+	void testTransaction_crossPartitionReferenceScenarios(
+			PartitionSettings.CrossPartitionReferenceMode theMode,
+			String theComment,
+			String theBundle,
+			String theExplanation,
+			List<ExpectedEntry> theExpectedEntries) {
 		myPartitionSettings.setAllowReferencesAcrossPartitions(theMode);
-		runReferenceScenario(theComment, theBundle, theExpectedEntries);
+		runReferenceScenario(theComment, theBundle, theExplanation, theExpectedEntries);
 	}
 
 	@ParameterizedTest
 	@ArgumentsSource(PatientIdPartitionNormalizerOffScenarios.Accepted.class)
-	void testTransaction_normalizerOffScenarios(String theComment, String theBundle, List<ExpectedEntry> theExpectedEntries) {
+	void testTransaction_normalizerOffScenarios(
+			String theComment, String theBundle, String theExplanation, List<ExpectedEntry> theExpectedEntries) {
 		setupNormalizerOffFixture();
 
 		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, theBundle);
 		ourLog.info("Test case: {}", theComment);
+		ourLog.info("Scenario explanation: {}", theExplanation);
 
 		Bundle resultBundle = mySystemDao.transaction(mySrd, requestBundle);
 		ourLog.info("Response bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resultBundle));
@@ -2224,11 +2236,13 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	}
 
 	// Created by Claude Fable 5
-	private void runReferenceScenario(String theComment, String theBundle, List<ExpectedEntry> theExpectedEntries) {
+	private void runReferenceScenario(
+			String theComment, String theBundle, String theExplanation, List<ExpectedEntry> theExpectedEntries) {
 		setupReferenceScenarioFixture();
 
 		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, theBundle);
 		ourLog.info("Test case: {}", theComment);
+		ourLog.info("Scenario explanation: {}", theExplanation);
 		ourLog.info("Request bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(requestBundle));
 
 		Bundle resultBundle = mySystemDao.transaction(mySrd, requestBundle);

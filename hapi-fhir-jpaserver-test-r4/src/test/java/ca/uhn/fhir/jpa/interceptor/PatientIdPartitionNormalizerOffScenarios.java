@@ -45,7 +45,7 @@ class PatientIdPartitionNormalizerOffScenarios {
 							]
 						}
 						""",
-					// Pre-fetch resolves the URL to pat1; the hook substitutes the literal reference. No synthetic.
+					"Pre-fetch resolves the URL to pat1; the hook substitutes the literal reference. No synthetic.",
 					List.of(
 						inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat1")
 					)
@@ -73,7 +73,7 @@ class PatientIdPartitionNormalizerOffScenarios {
 							]
 						}
 						""",
-					// The post-prefetch hook mints and rewrites off the client's urn fullUrl — no normalizer involved.
+					"The post-prefetch hook mints and rewrites off the client's urn fullUrl — no normalizer involved.",
 					List.of(
 						inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
 						inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0)
@@ -102,6 +102,7 @@ class PatientIdPartitionNormalizerOffScenarios {
 							]
 						}
 						""",
+					"Client-assigned ids and direct references need neither the normalizer nor pre-fetch.",
 					List.of(
 						inCompartmentOf("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_AS_CREATE, "pat9"),
 						inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0)
@@ -123,7 +124,7 @@ class PatientIdPartitionNormalizerOffScenarios {
 							]
 						}
 						""",
-					// No normalizer-assigned fullUrl: the hook's id-less-matched-conditional-update branch stamps pat1.
+					"No normalizer-assigned fullUrl: the hook's id-less-matched-conditional-update branch stamps pat1.",
 					List.of(
 						inCompartmentOf("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH, "pat1")
 					)
@@ -143,6 +144,7 @@ class PatientIdPartitionNormalizerOffScenarios {
 							]
 						}
 						""",
+					"The post-prefetch hook mints a UUID id and rewrites the POST; no normalizer involved.",
 					List.of(
 						inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
 					)
