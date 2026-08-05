@@ -1614,7 +1614,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			myCaptureQueriesListener.clear();
 			myHSearchEventDispatcher.register(mySearchEventListener);
 
-			myTestDaoSearch.searchForBundleProvider("Observation?code=code-1,code-2,code-3", false);
+			IBundleProvider provider = myTestDaoSearch.searchForBundleProvider("Observation?code=code-1,code-2,code-3", false);
+			provider.getResources(0, 10);
 
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 

@@ -69,7 +69,6 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
@@ -896,8 +895,9 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 
 	private record SearchThreshold(
 			@Nullable Integer threshold, boolean isLastThreshold, boolean deduplicateInDatabase) {
+		@Nonnull
 		@Override
-		public @NotNull String toString() {
+		public String toString() {
 			if (isLastThreshold()) {
 				return "LastThreshold[" + threshold() + "]";
 			}
