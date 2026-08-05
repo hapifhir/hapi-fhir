@@ -3157,6 +3157,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		private final Integer myOffset;
 		private final IInterceptorBroadcaster myCompositeBroadcaster;
 		private boolean myFirst = true;
+		private boolean myHaveFiredSelectComplete;
 		private IncludesIterator myIncludesIterator;
 		/**
 		 * The next JpaPid value of the next result in this query.
@@ -3188,8 +3189,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		 * The $everything operation also jams some extra results in.
 		 */
 		private List<ISearchQueryExecutor> myQueryList = new ArrayList<>();
-
-		private boolean myHaveFiredSelectComplete;
 
 		private QueryIterator(SearchRuntimeDetails theSearchRuntimeDetails, RequestDetails theRequest) {
 			mySearchRuntimeDetails = theSearchRuntimeDetails;

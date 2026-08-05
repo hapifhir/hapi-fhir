@@ -108,8 +108,7 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 	 * Adjust this to raise the level of the debuga logs if you are
 	 * troubleshooting something.
 	 */
-	// FIXME: lower level
-	private static final Level DEBUG_LOG_LEVEL = Level.INFO;
+	private static final Level DEBUG_LOG_LEVEL = Level.DEBUG;
 
 	protected final RequestDetails myRequestDetails;
 	protected final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
@@ -671,8 +670,6 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 				break;
 			}
 
-			// FIXME: remove
-			//			if (consumer.getBlockedCount() == 0 || mySearchEntity.getNumFound() >= theToIndex) {
 			if (mySearchEntity.getNumFound() >= theToIndex) {
 				break;
 			}
