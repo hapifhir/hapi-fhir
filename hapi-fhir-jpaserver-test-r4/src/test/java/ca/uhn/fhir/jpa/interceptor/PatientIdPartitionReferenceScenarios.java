@@ -46,7 +46,8 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 	 * The two nullable partition fields encode three cases:
 	 * <ul>
 	 *   <li>{@code expectedPartition} (non-null) — exact partition id</li>
-	 *   <li>{@code sameAsEntryIndex} (non-null) — must co-locate with that response entry</li>
+	 *   <li>{@code samePartitionAsEntryIndex} (non-null) — must land in the same partition as the response
+	 *       entry at this index (whichever partition that turns out to be)</li>
 	 *   <li>both null — "any compartment", partition must be {@code > 0}</li>
 	 * </ul>
 	 */
@@ -54,7 +55,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 			String resourceType,
 			StorageResponseCodeEnum outcome,
 			Integer expectedPartition,
-			Integer sameAsEntryIndex) {}
+			Integer samePartitionAsEntryIndex) {}
 
 	/** Resource in the configured default partition (ALTERNATE_DEFAULT_ID = -1). */
 	static ExpectedEntry inDefaultPartition(String theType, StorageResponseCodeEnum theOutcome) {

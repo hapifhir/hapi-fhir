@@ -1754,9 +1754,9 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 			// Partition
 			if (expected.expectedPartition() != null) {
 				assertResourceIsInPartition(expected.expectedPartition(), resourceId);
-			} else if (expected.sameAsEntryIndex() != null) {
+			} else if (expected.samePartitionAsEntryIndex() != null) {
 				String otherLocation =
-						theResultBundle.getEntry().get(expected.sameAsEntryIndex()).getResponse().getLocation();
+						theResultBundle.getEntry().get(expected.samePartitionAsEntryIndex()).getResponse().getLocation();
 				IIdType otherId = new IdType(otherLocation).toUnqualifiedVersionless();
 				assertResourceIsInPartition(getResourcePartition(otherId), resourceId);
 			} else {
