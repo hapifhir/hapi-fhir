@@ -1760,10 +1760,11 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 				IIdType otherId = new IdType(otherLocation).toUnqualifiedVersionless();
 				assertResourceIsInPartition(getResourcePartition(otherId), resourceId);
 			} else {
-				// compartments span [0,14999] so we can't assert > 0; assert != default partition instead
+				// In-range implies "not the default": compartment hashes span [0,14999]
+				// (defaultPartitionAlgorithm) while the configured default partition is -1.
 				assertThat(getResourcePartition(resourceId))
 						.as("entry[%d] (%s) must be in a patient-compartment partition, not the default", i, resourceId)
-						.isNotEqualTo(ALTERNATE_DEFAULT_ID);
+						.isBetween(0, 14999);
 			}
 		}
 	}

@@ -49,7 +49,8 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 	 *   <li>{@code expectedPartition} (non-null) — exact partition id</li>
 	 *   <li>{@code samePartitionAsEntryIndex} (non-null) — must land in the same partition as the response
 	 *       entry at this index (whichever partition that turns out to be)</li>
-	 *   <li>both null — "any compartment", partition must be {@code > 0}</li>
+	 *   <li>both null — "any compartment": the partition must fall in the compartment hash range
+	 *       {@code [0, 14999]} (which includes 0 and excludes the default partition, -1)</li>
 	 * </ul>
 	 */
 	record ExpectedEntry(
