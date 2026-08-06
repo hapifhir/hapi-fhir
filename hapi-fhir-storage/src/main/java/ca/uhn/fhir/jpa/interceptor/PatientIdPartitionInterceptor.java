@@ -40,6 +40,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
+import ca.uhn.fhir.jpa.dao.PreFetchSkippableMethodNotAllowedException;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.BaseRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -290,7 +291,7 @@ public class PatientIdPartitionInterceptor {
 		if (resourceDef.getName().equals(PATIENT_STR)) {
 			IIdType idElement = theResource.getIdElement();
 			if (idElement.getIdPart() == null || idElement.isUuid()) {
-				throw new MethodNotAllowedException(
+				throw new PreFetchSkippableMethodNotAllowedException(
 						Msg.code(1321)
 								+ "Patient resource IDs must be client-assigned in patient compartment mode, or server id strategy must be UUID");
 			}
@@ -1366,7 +1367,7 @@ public class PatientIdPartitionInterceptor {
 	 */
 	@Nonnull
 	protected RequestPartitionId throwNonCompartmentMemberInstanceFailureResponse(IBaseResource theResource) {
-		throw new MethodNotAllowedException(Msg.code(1326) + "Resource of type "
+		throw new PreFetchSkippableMethodNotAllowedException(Msg.code(1326) + "Resource of type "
 				+ myFhirContext.getResourceType(theResource) + " has no values placing it in the Patient compartment");
 	}
 

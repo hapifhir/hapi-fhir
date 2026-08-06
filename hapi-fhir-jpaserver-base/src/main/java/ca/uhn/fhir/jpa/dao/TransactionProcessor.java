@@ -780,10 +780,10 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 							next.myMatchUrlSearchMap,
 							next.getAssociatedResource());
 				} catch (MethodNotAllowedException e) {
-					// Msg 1321/1326 means the patient reference isn't resolvable yet; leave the partition as
-					// allPartitions and let the block below settle it. The real compartment is enforced at
-					// create time.
-					if (!messageStartsWithAnyCode(e, 1321, 1326)) {
+					// A pre-fetch-skippable rejection means the patient reference isn't resolvable yet; leave
+					// the partition as allPartitions and let the block below settle it. The real compartment
+					// is enforced at create time.
+					if (!(e instanceof ITransactionPreFetchSkippable)) {
 						throw e;
 					}
 				}

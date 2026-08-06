@@ -1126,8 +1126,8 @@ public abstract class BaseTransactionProcessor {
 	 * gate. Where all-partition search is unsupported the partition must be fixed up front, so the rejection
 	 * bubbles up instead.
 	 * <p>
-	 * Deferral is keyed off Msg 1321/1326, codes raised by {@code PatientIdPartitionInterceptor}, which couples this
-	 * method to interceptor-specific codes. Pragmatic interim approach; a cleaner contract can follow.
+	 * Deferral is keyed off {@link ITransactionPreFetchSkippable}, which partition interceptors implement on
+	 * rejections that only reflect not-yet-resolved entry content.
 	 */
 	private RequestPartitionId tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
 			RequestDetails theRequestDetails, IBaseResource theResource, String theResourceType) {
@@ -1135,24 +1135,11 @@ public abstract class BaseTransactionProcessor {
 			return myRequestPartitionHelperService.determineCreatePartitionForRequest(
 					theRequestDetails, theResource, theResourceType);
 		} catch (MethodNotAllowedException e) {
-			if (myPartitionSettings.isAllPartitionSearchSupported() && messageStartsWithAnyCode(e, 1321, 1326)) {
+			if (myPartitionSettings.isAllPartitionSearchSupported() && e instanceof ITransactionPreFetchSkippable) {
 				return RequestPartitionId.allPartitions();
 			}
 			throw e;
 		}
-	}
-
-	protected static boolean messageStartsWithAnyCode(Throwable theException, int... theCodes) {
-		String message = theException.getMessage();
-		if (message == null) {
-			return false;
-		}
-		for (int code : theCodes) {
-			if (message.startsWith(Msg.code(code))) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	private boolean haveWriteOperationsHooks(RequestDetails theRequestDetails) {
