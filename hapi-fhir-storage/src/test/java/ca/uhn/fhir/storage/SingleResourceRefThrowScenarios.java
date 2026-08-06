@@ -29,7 +29,7 @@ class SingleResourceRefThrowScenarios implements ArgumentsProvider {
 					}
 					""",
 				PreconditionFailedException.class,
-				"HAPI-2995: Inline match URL identifier must have both a system and a value: Patient?identifier=value1"
+				"HAPI-2995: Inline match URL identifier must have both a system and a value in patient id partition mode: Patient?identifier=value1"
 			),
 			Arguments.of(
 				"identifier with blank value | throws PreconditionFailed",
@@ -47,7 +47,7 @@ class SingleResourceRefThrowScenarios implements ArgumentsProvider {
 					}
 					""",
 				PreconditionFailedException.class,
-				"HAPI-2995: Inline match URL identifier must have both a system and a value: Patient?identifier=http://system|"
+				"HAPI-2995: Inline match URL identifier must have both a system and a value in patient id partition mode: Patient?identifier=http://system|"
 			),
 			Arguments.of(
 				"multiple search parameters | throws PreconditionFailed",
@@ -65,7 +65,7 @@ class SingleResourceRefThrowScenarios implements ArgumentsProvider {
 					}
 					""",
 				PreconditionFailedException.class,
-				"HAPI-2996: Inline match URL matching only supports identifier search parameters: Patient?identifier=http://system|value1&active=true"
+				"HAPI-2996: Inline match URL matching only supports identifier search parameters in patient id partition mode: Patient?identifier=http://system|value1&active=true"
 			),
 			Arguments.of(
 				"identifier without system, matching no-system identifier in bundle | still throws PreconditionFailed",
@@ -90,7 +90,7 @@ class SingleResourceRefThrowScenarios implements ArgumentsProvider {
 					}
 					""",
 				PreconditionFailedException.class,
-				"HAPI-2995: Inline match URL identifier must have both a system and a value: Patient?identifier=value1"
+				"HAPI-2995: Inline match URL identifier must have both a system and a value in patient id partition mode: Patient?identifier=value1"
 			),
 			Arguments.of(
 				"identifier with :not modifier, matching identifier in bundle | throws PreconditionFailed",
@@ -115,7 +115,7 @@ class SingleResourceRefThrowScenarios implements ArgumentsProvider {
 					}
 					""",
 				PreconditionFailedException.class,
-				"HAPI-2997: Inline match URL identifier must not use a search modifier: Patient?identifier:not=sys|val"
+				"HAPI-3024: Inline match URL identifier must not use a search modifier in patient id partition mode: Patient?identifier:not=sys|val"
 			),
 			Arguments.of(
 				"identifier with blank value, matching value-less identifier in bundle | throws PreconditionFailed",
@@ -140,7 +140,7 @@ class SingleResourceRefThrowScenarios implements ArgumentsProvider {
 					}
 					""",
 				PreconditionFailedException.class,
-				"HAPI-2995: Inline match URL identifier must have both a system and a value: Patient?identifier=http://system|"
+				"HAPI-2995: Inline match URL identifier must have both a system and a value in patient id partition mode: Patient?identifier=http://system|"
 			),
 			Arguments.of(
 				"multiple search parameters, matching identifier in bundle | throws PreconditionFailed",
@@ -166,7 +166,7 @@ class SingleResourceRefThrowScenarios implements ArgumentsProvider {
 					}
 					""",
 				PreconditionFailedException.class,
-				"HAPI-2996: Inline match URL matching only supports identifier search parameters: Patient?identifier=http://system|value1&active=true"
+				"HAPI-2996: Inline match URL matching only supports identifier search parameters in patient id partition mode: Patient?identifier=http://system|value1&active=true"
 			),
 			Arguments.of(
 				"identifier with explicitly empty system | throws PreconditionFailed",
@@ -184,7 +184,71 @@ class SingleResourceRefThrowScenarios implements ArgumentsProvider {
 					}
 					""",
 				PreconditionFailedException.class,
-				"HAPI-2995: Inline match URL identifier must have both a system and a value: Patient?identifier=|value1"
+				"HAPI-2995: Inline match URL identifier must have both a system and a value in patient id partition mode: Patient?identifier=|value1"
+			),
+			Arguments.of(
+				"repeated identifier parameter | throws PreconditionFailed",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"subject" : { "reference": "Patient?identifier=http://system|value1&identifier=http://system|value2" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation" }
+							}
+						]
+					}
+					""",
+				PreconditionFailedException.class,
+				"HAPI-3025: Inline match URL matching only supports a single identifier in patient id partition mode: Patient?identifier=http://system|value1&identifier=http://system|value2"
+			),
+			Arguments.of(
+				"repeated identifier parameter, matching identifiers in bundle | still throws PreconditionFailed",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [
+										{ "system" : "http://system", "value" : "value1" },
+										{ "system" : "http://system", "value" : "value2" }
+									]
+								},
+								"request" : { "method" : "POST", "url" : "Patient" }
+							},
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"subject" : { "reference": "Patient?identifier=http://system|value1&identifier=http://system|value2" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation" }
+							}
+						]
+					}
+					""",
+				PreconditionFailedException.class,
+				"HAPI-3025: Inline match URL matching only supports a single identifier in patient id partition mode: Patient?identifier=http://system|value1&identifier=http://system|value2"
+			),
+			Arguments.of(
+				"identifier with OR values | throws PreconditionFailed",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"subject" : { "reference": "Patient?identifier=http://system|value1,http://system|value2" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation" }
+							}
+						]
+					}
+					""",
+				PreconditionFailedException.class,
+				"HAPI-3025: Inline match URL matching only supports a single identifier in patient id partition mode: Patient?identifier=http://system|value1,http://system|value2"
 			)
 		);
 	}

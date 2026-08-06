@@ -2225,6 +2225,51 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	}
 
 	/**
+	 * The normalizer only supports single-identifier inline match URLs; a multi-and-group URL is rejected up
+	 * front (like any other unsupported search parameter shape), before anything is written — even when an
+	 * in-bundle patient carries both identifiers.
+	 */
+	// Created by Claude Fable 5
+	@Test
+	void testTransaction_multiGroupInlineMatchUrl_rejectedAsUnsupported() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myPartitionSettings.setAllPartitionSearchSupported(true);
+		Map<String, Integer> countsBeforeTransaction = countResourcesByType();
+
+		String bundle = """
+			{ "resourceType" : "Bundle", "type" : "transaction",
+				"entry" : [
+					{
+						"resource" : {
+							"resourceType" : "Patient",
+							"identifier" : [
+								{ "system" : "old-sys", "value" : "multiGroupPatientIdent1" },
+								{ "system" : "new-sys", "value" : "multiGroupPatientIdent2" }
+							]
+						},
+						"request" : { "method" : "POST", "url" : "Patient" }
+					}, {
+						"resource" : {
+							"resourceType" : "Observation",
+							"identifier" : [ { "system" : "observation-system", "value" : "obsWithMatchUrlRef" } ],
+							"subject" : { "reference" : "Patient?identifier=old-sys|multiGroupPatientIdent1&identifier=new-sys|multiGroupPatientIdent2" }
+						},
+						"request" : { "method" : "POST", "url" : "Observation" }
+					}
+				]
+			}
+			""";
+		assertThatThrownBy(() -> mySystemDao.transaction(
+				mySrd, myFhirContext.newJsonParser().parseResource(Bundle.class, bundle)))
+			.isInstanceOf(PreconditionFailedException.class)
+			.hasMessage("HAPI-3025: Inline match URL matching only supports a single identifier in patient id partition mode: "
+				+ "Patient?identifier=old-sys|multiGroupPatientIdent1&identifier=new-sys|multiGroupPatientIdent2");
+
+		assertThat(countResourcesByType()).as("resource counts by type").isEqualTo(countsBeforeTransaction);
+	}
+
+	/**
 	 * Same fixture as {@link #runReferenceScenario} except {@code autoCreatePlaceholderReferenceTargets} stays
 	 * {@code false}, which keeps the {@code TransactionBundleNormalizer} disabled. All-partition search is
 	 * enabled because without the normalizer, inline match URLs resolve only through the pre-fetch search.

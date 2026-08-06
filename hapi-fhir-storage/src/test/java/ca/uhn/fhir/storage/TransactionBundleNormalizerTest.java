@@ -418,12 +418,7 @@ class TransactionBundleNormalizerTest {
 	}
 
 	/**
-	 * Expected (system, value) pair for an identifier on a synthetic placeholder.
-	 */
-	record SysVal(String system, String value) {}
-
-	/**
-	 * Convenience overload for the common single-identifier case.
+	 * Assert that the synthetic entry at the given index is correctly created, and return its fullUrl.
 	 */
 	static String assertSyntheticEntryAt(
 			Bundle theBundle,
@@ -432,23 +427,6 @@ class TransactionBundleNormalizerTest {
 			String theExpectedMatchUrl,
 			String theExpectedSystem,
 			String theExpectedValue) {
-		return assertSyntheticEntryAt(
-				theBundle,
-				theIndex,
-				theExpectedResourceType,
-				theExpectedMatchUrl,
-				List.of(new SysVal(theExpectedSystem, theExpectedValue)));
-	}
-
-	/**
-	 * Assert that the synthetic entry at the given index is correctly created, and return its fullUrl.
-	 */
-	static String assertSyntheticEntryAt(
-			Bundle theBundle,
-			int theIndex,
-			ResourceType theExpectedResourceType,
-			String theExpectedMatchUrl,
-			List<SysVal> theExpectedIdentifiers) {
 		Bundle.BundleEntryComponent entry = theBundle.getEntry().get(theIndex);
 
 		// assert resource type
@@ -469,14 +447,12 @@ class TransactionBundleNormalizerTest {
 			.getValueAsString())
 			.isEqualTo("true");
 
-		// assert identifiers — count matches list size, each pair present (order-agnostic)
+		// assert the single identifier the placeholder carries
 		List<Identifier> identifiers =
 			ourFhirContext.newTerser().getAllPopulatedChildElementsOfType(resource, Identifier.class);
-		assertThat(identifiers).hasSize(theExpectedIdentifiers.size());
-		List<SysVal> actualIdentifiers = identifiers.stream()
-				.map(id -> new SysVal(id.getSystem(), id.getValue()))
-				.toList();
-		assertThat(actualIdentifiers).containsExactlyInAnyOrderElementsOf(theExpectedIdentifiers);
+		assertThat(identifiers).hasSize(1);
+		assertThat(identifiers.get(0).getSystem()).isEqualTo(theExpectedSystem);
+		assertThat(identifiers.get(0).getValue()).isEqualTo(theExpectedValue);
 
 		return entry.getFullUrl();
 	}

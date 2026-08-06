@@ -56,8 +56,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * This service processes a FHIR transaction bundle and transforms all identifier inline match URL references into
  * placeholder IDs with conditional create entries.
  * <p>
- * It looks for resources that have references in the form of inline match URLs with the identifier search parameter.
- * (e.g. {@code Patient?identifier=http://some-system|some-value}) For each unique inline match URL found, it
+ * It looks for resources that have references in the form of inline match URLs with a single identifier search
+ * parameter. (e.g. {@code Patient?identifier=http://some-system|some-value}) For each unique inline match URL found, it
  * <b>prepends</b> a conditional-create entry with placeholder IDs to the bundle with fields matching the identifier
  * search param.
  * <p>
@@ -236,17 +236,15 @@ public class TransactionBundleNormalizer {
 						myMatchUrlService.parseAndTranslateMatchUrl(refValue);
 				// Validate before any resolution so a URL's acceptance never depends on what else the
 				// bundle happens to contain (an invalid URL must not slip through by binding in-bundle).
-				List<CanonicalIdentifier> identifiers = extractAndValidateIdentifiers(refValue, parsed);
+				CanonicalIdentifier identifier = extractAndValidateIdentifier(refValue, parsed);
 
 				// If an in-bundle entry already carries this (type, identifier), point the inline ref at its
 				// fullUrl (assigned in the first pass) instead of minting a duplicate synthetic placeholder.
-				IdentifierKey refKey = identifierKey(parsed.resourceDefinition().getName(), identifiers);
-				if (refKey != null) {
-					String existingFullUrl = theInBundleFullUrlByIdentifier.get(refKey);
-					if (existingFullUrl != null) {
-						ref.setReference(existingFullUrl);
-						continue;
-					}
+				IdentifierKey refKey = identifierKey(parsed.resourceDefinition().getName(), identifier);
+				String existingFullUrl = theInBundleFullUrlByIdentifier.get(refKey);
+				if (existingFullUrl != null) {
+					ref.setReference(existingFullUrl);
+					continue;
 				}
 
 				// Otherwise, generate a synthetic conditional-create on first encounter; reuse for duplicates.
@@ -255,7 +253,7 @@ public class TransactionBundleNormalizer {
 						url -> new MatchUrlInfo(
 								IdDt.newRandomUuid().getValue(),
 								parsed.resourceDefinition(),
-								identifiers,
+								identifier,
 								firstReferencerEntryIndex));
 				ref.setReference(info.urnUuid());
 			}
@@ -285,7 +283,7 @@ public class TransactionBundleNormalizer {
 			String matchUrl = e.getKey();
 			MatchUrlInfo info = e.getValue();
 			IBaseResource placeholder = PlaceholderResourceUtil.buildPlaceholderResource(
-					myFhirContext, info.resourceDef(), info.identifiers());
+					myFhirContext, info.resourceDef(), List.of(info.identifier()));
 			builder.addTransactionCreateEntry(placeholder, info.urnUuid()).conditional(matchUrl);
 			// Original entries shift right when the synthetics rotate to the front.
 			firstReferencerIndices.add(info.firstReferencerEntryIndex() + n);
@@ -350,60 +348,58 @@ public class TransactionBundleNormalizer {
 		}
 	}
 
-	/**
-	 * Build the {@link IdentifierKey} for an inline match URL of the form {@code Type?identifier=system|value},
-	 * or {@code null} if the URL has more than one identifier token (those fall through to synthetic creation).
-	 */
-	private static IdentifierKey identifierKey(String theResourceType, List<CanonicalIdentifier> theIdentifiers) {
-		if (theIdentifiers.size() != 1) {
-			return null;
-		}
-		CanonicalIdentifier identifier = theIdentifiers.get(0);
+	/** Build the {@link IdentifierKey} for an inline match URL of the form {@code Type?identifier=system|value}. */
+	private static IdentifierKey identifierKey(String theResourceType, CanonicalIdentifier theIdentifier) {
 		return new IdentifierKey(
 				theResourceType,
-				identifier.getSystemElement().getValueAsString(),
-				identifier.getValueElement().getValueAsString());
+				theIdentifier.getSystemElement().getValueAsString(),
+				theIdentifier.getValueElement().getValueAsString());
 	}
 
 	/**
-	 * Walks the parsed match URL once: enforces the identifier-equality-only contract and returns the
-	 * identifier tokens the URL consists of.
+	 * Walks the parsed match URL once: enforces the single-identifier-equality-only contract and returns the
+	 * identifier token the URL consists of.
 	 */
-	private List<CanonicalIdentifier> extractAndValidateIdentifiers(
+	private CanonicalIdentifier extractAndValidateIdentifier(
 			String theMatchUrl, MatchUrlService.ResourceTypeAndSearchParameterMap theParsed) {
 		SearchParameterMap params = theParsed.searchParameterMap();
 
 		if (params.keySet().size() != 1 || !params.containsKey("identifier")) {
 			throw new PreconditionFailedException(Msg.code(2996)
-					+ "Inline match URL matching only supports identifier search parameters: " + theMatchUrl);
+					+ "Inline match URL matching only supports identifier search parameters in patient id partition mode: "
+					+ theMatchUrl);
 		}
 
-		List<CanonicalIdentifier> identifiers = new ArrayList<>();
-		for (List<IQueryParameterType> andGroup : params.get("identifier")) {
-			for (IQueryParameterType paramType : andGroup) {
-				if (paramType instanceof TokenParam tokenParam) {
-					if (tokenParam.getModifier() != null) {
-						throw new PreconditionFailedException(Msg.code(2997)
-								+ "Inline match URL identifier must not use a search modifier: " + theMatchUrl);
-					}
-					if (isBlank(tokenParam.getSystem()) || isBlank(tokenParam.getValue())) {
-						throw new PreconditionFailedException(Msg.code(2995)
-								+ "Inline match URL identifier must have both a system and a value: " + theMatchUrl);
-					}
-					CanonicalIdentifier identifier = new CanonicalIdentifier();
-					identifier.setSystem(tokenParam.getSystem());
-					identifier.setValue(tokenParam.getValue());
-					identifiers.add(identifier);
-				}
-			}
+		List<List<IQueryParameterType>> andGroups = params.get("identifier");
+		if (andGroups.size() != 1
+				|| andGroups.get(0).size() != 1
+				|| !(andGroups.get(0).get(0) instanceof TokenParam tokenParam)) {
+			throw new PreconditionFailedException(Msg.code(3025)
+					+ "Inline match URL matching only supports a single identifier in patient id partition mode: "
+					+ theMatchUrl);
 		}
-		return identifiers;
+
+		if (tokenParam.getModifier() != null) {
+			throw new PreconditionFailedException(Msg.code(3024)
+					+ "Inline match URL identifier must not use a search modifier in patient id partition mode: "
+					+ theMatchUrl);
+		}
+		if (isBlank(tokenParam.getSystem()) || isBlank(tokenParam.getValue())) {
+			throw new PreconditionFailedException(Msg.code(2995)
+					+ "Inline match URL identifier must have both a system and a value in patient id partition mode: "
+					+ theMatchUrl);
+		}
+
+		CanonicalIdentifier identifier = new CanonicalIdentifier();
+		identifier.setSystem(tokenParam.getSystem());
+		identifier.setValue(tokenParam.getValue());
+		return identifier;
 	}
 
 	private record MatchUrlInfo(
 			String urnUuid,
 			RuntimeResourceDefinition resourceDef,
-			List<CanonicalIdentifier> identifiers,
+			CanonicalIdentifier identifier,
 			int firstReferencerEntryIndex) {}
 
 	/** Key matching an inline match URL reference to an in-bundle entry by resource type + identifier token. */

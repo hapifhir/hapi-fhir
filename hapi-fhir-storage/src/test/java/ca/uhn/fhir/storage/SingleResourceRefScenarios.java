@@ -1,6 +1,5 @@
 package ca.uhn.fhir.storage;
 
-import ca.uhn.fhir.storage.TransactionBundleNormalizerTest.SysVal;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
@@ -123,29 +122,6 @@ class SingleResourceRefScenarios implements ArgumentsProvider {
 					String urn = assertSyntheticEntryAt(theBundle, 0, ResourceType.Patient, "Patient?identifier=system|value", "system", "value");
 					assertSourceEntryAt(theBundle, 1, Observation.class, urn, obs -> obs.getSubject().getReference());
 					assertSourceEntryAt(theBundle, 1, Observation.class, urn, obs -> obs.getPerformerFirstRep().getReference());
-				})
-			),
-			Arguments.of(
-				"repeated identifier parameter in one match URL | placeholder has multiple identifiers",
-				"""
-					{ "resourceType" : "Bundle", "type" : "transaction",
-						"entry" : [
-							{
-								"resource" : {
-									"resourceType" : "Observation",
-									"subject" : { "reference": "Patient?identifier=system|val1&identifier=system|val2" }
-								},
-								"request" : { "method" : "POST", "url" : "Observation" }
-							}
-						]
-					}
-					""",
-				1,
-				bundleAssert(2, theBundle -> {
-					String urn = assertSyntheticEntryAt(theBundle, 0, ResourceType.Patient,
-							"Patient?identifier=system|val1&identifier=system|val2",
-							List.of(new SysVal("system", "val1"), new SysVal("system", "val2")));
-					assertSourceEntryAt(theBundle, 1, Observation.class, urn, obs -> obs.getSubject().getReference());
 				})
 			),
 			Arguments.of(
