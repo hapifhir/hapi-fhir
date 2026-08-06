@@ -4,12 +4,16 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
+import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
@@ -94,6 +98,66 @@ class TransactionBundleNormalizerTest {
 		mySvc.stripSyntheticResponseEntries(response, new TransactionDetails());
 
 		assertThat(response.getEntry()).hasSize(1);
+	}
+
+	/**
+	 * A synthetic that actually created its placeholder must be reported on the first referencing entry's
+	 * outcome before the synthetic response entry is stripped, matching the notification the resolver's
+	 * auto-create path produces.
+	 */
+	// Created by Claude Fable 5
+	@Test
+	void testStripSyntheticResponseEntries_createdSynthetic_reportsPlaceholderOnFirstReferencer() {
+		Bundle request = new Bundle();
+		request.setType(Bundle.BundleType.TRANSACTION);
+		Observation obs = new Observation();
+		obs.getSubject().setReference("Patient?identifier=http://foo|bar");
+		request.addEntry().setResource(obs).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Observation");
+		TransactionDetails transactionDetails = new TransactionDetails();
+		mySvc.normalize(request, transactionDetails);
+
+		Bundle response = new Bundle();
+		response.addEntry().getResponse().setStatus("201 Created").setLocation("Patient/synthetic-created/_history/1");
+		Bundle.BundleEntryComponent obsResponse = response.addEntry();
+		obsResponse.getResponse().setStatus("201 Created");
+		obsResponse.getResponse().setOutcome(new OperationOutcome());
+
+		mySvc.stripSyntheticResponseEntries(response, transactionDetails);
+
+		assertThat(response.getEntry()).hasSize(1);
+		OperationOutcome oo =
+				(OperationOutcome) response.getEntry().get(0).getResponse().getOutcome();
+		assertThat(oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode())
+				.isEqualTo(StorageResponseCodeEnum.AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE.name());
+		IdType placeholderId = (IdType) oo.getIssueFirstRep()
+				.getExtensionByUrl(HapiExtensions.EXTENSION_PLACEHOLDER_ID)
+				.getValue();
+		assertThat(placeholderId.getValue()).contains("Patient/synthetic-created");
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	void testStripSyntheticResponseEntries_matchedSynthetic_addsNoIssue() {
+		Bundle request = new Bundle();
+		request.setType(Bundle.BundleType.TRANSACTION);
+		Observation obs = new Observation();
+		obs.getSubject().setReference("Patient?identifier=http://foo|bar");
+		request.addEntry().setResource(obs).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Observation");
+		TransactionDetails transactionDetails = new TransactionDetails();
+		mySvc.normalize(request, transactionDetails);
+
+		Bundle response = new Bundle();
+		response.addEntry().getResponse().setStatus("200 OK").setLocation("Patient/already-there/_history/1");
+		Bundle.BundleEntryComponent obsResponse = response.addEntry();
+		obsResponse.getResponse().setStatus("201 Created");
+		obsResponse.getResponse().setOutcome(new OperationOutcome());
+
+		mySvc.stripSyntheticResponseEntries(response, transactionDetails);
+
+		assertThat(response.getEntry()).hasSize(1);
+		OperationOutcome oo =
+				(OperationOutcome) response.getEntry().get(0).getResponse().getOutcome();
+		assertThat(oo.getIssue()).as("matched synthetic created nothing to report").isEmpty();
 	}
 
 	// Created by Claude Fable 5

@@ -1751,6 +1751,32 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 					.doesNotContain("{0}")
 					.doesNotContain("{1}");
 
+			// Auto-created placeholder reporting
+			List<OperationOutcome.OperationOutcomeIssueComponent> placeholderIssues = oo.getIssue().stream()
+					.filter(t -> StorageResponseCodeEnum.AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE
+							.name()
+							.equals(t.getDetails().getCodingFirstRep().getCode()))
+					.toList();
+			if (expected.createdPlaceholderType() == null) {
+				assertThat(placeholderIssues)
+						.as("entry[%d] must not report an auto-created placeholder", i)
+						.isEmpty();
+			} else {
+				assertThat(placeholderIssues)
+						.as("entry[%d] must report exactly one auto-created placeholder", i)
+						.hasSize(1);
+				IdType placeholderId = (IdType) placeholderIssues
+						.get(0)
+						.getExtensionByUrl(HapiExtensions.EXTENSION_PLACEHOLDER_ID)
+						.getValue();
+				assertThat(placeholderId.getResourceType())
+						.as("entry[%d] placeholder type", i)
+						.isEqualTo(expected.createdPlaceholderType());
+				// The created placeholder must co-locate with the entry that referenced it.
+				assertResourceIsInPartition(
+						getResourcePartition(resourceId), placeholderId.toUnqualifiedVersionless());
+			}
+
 			// Partition
 			if (expected.expectedPartition() != null) {
 				assertResourceIsInPartition(expected.expectedPartition(), resourceId);
@@ -2435,6 +2461,98 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 				.getExtensionByUrl(HapiExtensions.EXTENSION_PLACEHOLDER_ID)
 				.getValue();
 		assertThat(placeholderId.getValue()).contains("Organization/auto-created-org");
+	}
+
+	/**
+	 * The normalizer's synthetic conditional create is placeholder auto-creation: when it actually creates
+	 * the target, the client must be told, exactly as {@code DaoResourceLinkResolver} reports the
+	 * placeholders it creates. The synthetic's own response entry is stripped, so the issue must land on
+	 * the first referencing entry.
+	 */
+	// Created by Claude Fable 5
+	@Test
+	void testTransaction_createdSyntheticPlaceholder_reportedOnFirstReferencingEntry() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		String bundle =
+				"""
+				{ "resourceType" : "Bundle", "type" : "transaction",
+					"entry" : [
+						{
+							"resource" : {
+								"resourceType" : "Encounter",
+								"status" : "finished",
+								"subject" : { "reference" : "Patient?identifier=old-sys|syntheticCreatePatient" }
+							},
+							"request" : { "method" : "POST", "url" : "Encounter"}
+						}, {
+							"resource" : {
+								"resourceType" : "Observation",
+								"identifier" : [ { "system" : "observation-system", "value" : "obsWithMatchUrlRef"} ],
+								"subject" : { "reference" : "Patient?identifier=old-sys|syntheticCreatePatient" }
+							},
+							"request" : { "method" : "POST", "url" : "Observation"}
+						}
+					]
+				}
+				""";
+
+		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, bundle);
+		Bundle output = mySystemDao.transaction(mySrd, requestBundle);
+
+		// The shared match URL minted one synthetic that created one patient: the first referencing entry
+		// carries the placeholder issue, and later referencers are not separately notified.
+		OperationOutcome encounterOutcome =
+				(OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
+		assertThat(encounterOutcome.getIssue())
+				.as("first referencer reports the placeholder")
+				.hasSize(2);
+		OperationOutcome.OperationOutcomeIssueComponent placeholderIssue =
+				encounterOutcome.getIssue().get(1);
+		assertThat(placeholderIssue.getDetails().getCodingFirstRep().getCode())
+				.isEqualTo(StorageResponseCodeEnum.AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE.name());
+		IdType placeholderId = (IdType) placeholderIssue
+				.getExtensionByUrl(HapiExtensions.EXTENSION_PLACEHOLDER_ID)
+				.getValue();
+		assertThat(placeholderId.getValue()).contains("Patient/");
+
+		OperationOutcome observationOutcome =
+				(OperationOutcome) output.getEntry().get(1).getResponse().getOutcome();
+		assertThat(observationOutcome.getIssue())
+				.as("later referencers are not separately notified")
+				.hasSize(1);
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	void testTransaction_matchedSyntheticPlaceholder_noPlaceholderIssue() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		createPatient(withId("pat1"), withIdentifier("old-sys", "existingPat1Ident1"));
+
+		String bundle =
+				"""
+				{ "resourceType" : "Bundle", "type" : "transaction",
+					"entry" : [
+						{
+							"resource" : {
+								"resourceType" : "Observation",
+								"identifier" : [ { "system" : "observation-system", "value" : "obsWithMatchUrlRef"} ],
+								"subject" : { "reference" : "Patient?identifier=old-sys|existingPat1Ident1" }
+							},
+							"request" : { "method" : "POST", "url" : "Observation"}
+						}
+					]
+				}
+				""";
+
+		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, bundle);
+		Bundle output = mySystemDao.transaction(mySrd, requestBundle);
+
+		// The synthetic matched the existing patient — nothing was created, so nothing is reported.
+		OperationOutcome oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
+		assertThat(oo.getIssue()).hasSize(1);
 	}
 
 	private void assertPatientCountInDatabase(int theExpectedCount) {

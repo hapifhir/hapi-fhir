@@ -22,6 +22,7 @@ package ca.uhn.fhir.storage;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -38,12 +39,14 @@ import ca.uhn.fhir.util.FhirTerser;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -72,6 +75,14 @@ public class TransactionBundleNormalizer {
 	 */
 	public static final String SYNTHETIC_ENTRY_COUNT_KEY =
 			TransactionBundleNormalizer.class.getName() + "_syntheticEntryCount";
+
+	/**
+	 * {@link ca.uhn.fhir.rest.api.server.storage.TransactionDetails} user-data key holding, per synthetic
+	 * entry, the post-normalization index of the first entry referencing it — the entry that gets the
+	 * placeholder-created issue when the synthetic actually creates its target.
+	 */
+	private static final String SYNTHETIC_FIRST_REFERENCER_INDICES_KEY =
+			TransactionBundleNormalizer.class.getName() + "_syntheticFirstReferencerIndices";
 
 	private final FhirContext myFhirContext;
 	private final MatchUrlService myMatchUrlService;
@@ -105,12 +116,12 @@ public class TransactionBundleNormalizer {
 	 * @param theTransactionDetails the transaction details of the transaction processing this bundle
 	 */
 	public void normalize(@Nonnull IBaseBundle theBundle, @Nonnull TransactionDetails theTransactionDetails) {
-		int syntheticEntryCount = normalizeIfEnabled(theBundle);
+		int syntheticEntryCount = normalizeIfEnabled(theBundle, theTransactionDetails);
 		theTransactionDetails.putUserData(SYNTHETIC_ENTRY_COUNT_KEY, syntheticEntryCount);
 	}
 
 	@SuppressWarnings("unchecked")
-	private int normalizeIfEnabled(IBaseBundle theBundle) {
+	private int normalizeIfEnabled(IBaseBundle theBundle, TransactionDetails theTransactionDetails) {
 		String bundleTypeCode = myVersionAdapter.getBundleType(theBundle);
 		boolean isTransactionBundle = bundleTypeCode == null
 				|| org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION.toCode().equals(bundleTypeCode);
@@ -129,7 +140,7 @@ public class TransactionBundleNormalizer {
 		Map<IdentifierKey, String> inBundleFullUrlByIdentifier = assignFullUrlsAndIndexIdentifiers(bundleEntries);
 		Map<String, MatchUrlInfo> matchUrlToInfo =
 				rewriteInlineMatchUrlReferences(bundleEntries, inBundleFullUrlByIdentifier);
-		return prependSyntheticEntries(theBundle, bundleEntries, matchUrlToInfo);
+		return prependSyntheticEntries(theBundle, bundleEntries, matchUrlToInfo, theTransactionDetails);
 	}
 
 	/**
@@ -202,8 +213,10 @@ public class TransactionBundleNormalizer {
 	private Map<String, MatchUrlInfo> rewriteInlineMatchUrlReferences(
 			List<IBase> theBundleEntries, Map<IdentifierKey, String> theInBundleFullUrlByIdentifier) {
 		FhirTerser terser = myFhirContext.newTerser();
-		Map<String, MatchUrlInfo> matchUrlToInfo = new HashMap<>();
-		for (IBase entry : theBundleEntries) {
+		Map<String, MatchUrlInfo> matchUrlToInfo = new LinkedHashMap<>();
+		for (int entryIndex = 0; entryIndex < theBundleEntries.size(); entryIndex++) {
+			IBase entry = theBundleEntries.get(entryIndex);
+			int firstReferencerEntryIndex = entryIndex;
 			// Only process write entries (POST/PUT/PATCH); GET and DELETE entries carry no resource body to walk.
 			String verb = myVersionAdapter.getEntryRequestVerb(myFhirContext, entry);
 			if (!"POST".equals(verb) && !"PUT".equals(verb) && !"PATCH".equals(verb)) {
@@ -240,7 +253,10 @@ public class TransactionBundleNormalizer {
 				MatchUrlInfo info = matchUrlToInfo.computeIfAbsent(
 						refValue,
 						url -> new MatchUrlInfo(
-								IdDt.newRandomUuid().getValue(), parsed.resourceDefinition(), identifiers));
+								IdDt.newRandomUuid().getValue(),
+								parsed.resourceDefinition(),
+								identifiers,
+								firstReferencerEntryIndex));
 				ref.setReference(info.urnUuid());
 			}
 		}
@@ -253,22 +269,29 @@ public class TransactionBundleNormalizer {
 	 * [0, N) range. Returns the number of entries prepended.
 	 */
 	private int prependSyntheticEntries(
-			IBaseBundle theBundle, List<IBase> theBundleEntries, Map<String, MatchUrlInfo> theMatchUrlToInfo) {
+			IBaseBundle theBundle,
+			List<IBase> theBundleEntries,
+			Map<String, MatchUrlInfo> theMatchUrlToInfo,
+			TransactionDetails theTransactionDetails) {
 		if (theMatchUrlToInfo.isEmpty()) {
 			return 0;
 		}
 
 		// BundleBuilder preserves existing entries, so this just adds at the end.
+		int n = theMatchUrlToInfo.size();
 		BundleBuilder builder = new BundleBuilder(myFhirContext, theBundle);
+		List<Integer> firstReferencerIndices = new ArrayList<>(n);
 		for (Map.Entry<String, MatchUrlInfo> e : theMatchUrlToInfo.entrySet()) {
 			String matchUrl = e.getKey();
 			MatchUrlInfo info = e.getValue();
 			IBaseResource placeholder = PlaceholderResourceUtil.buildPlaceholderResource(
 					myFhirContext, info.resourceDef(), info.identifiers());
 			builder.addTransactionCreateEntry(placeholder, info.urnUuid()).conditional(matchUrl);
+			// Original entries shift right when the synthetics rotate to the front.
+			firstReferencerIndices.add(info.firstReferencerEntryIndex() + n);
 		}
+		theTransactionDetails.putUserData(SYNTHETIC_FIRST_REFERENCER_INDICES_KEY, firstReferencerIndices);
 
-		int n = theMatchUrlToInfo.size();
 		Collections.rotate(theBundleEntries, n);
 		return n;
 	}
@@ -286,9 +309,44 @@ public class TransactionBundleNormalizer {
 	public void stripSyntheticResponseEntries(
 			@Nonnull IBaseBundle theResponse, @Nonnull TransactionDetails theTransactionDetails) {
 		Integer syntheticEntryCount = theTransactionDetails.getUserData(SYNTHETIC_ENTRY_COUNT_KEY);
-		if (syntheticEntryCount != null && syntheticEntryCount > 0) {
-			List<IBase> entries = myVersionAdapter.getEntries(theResponse);
-			entries.subList(0, syntheticEntryCount).clear();
+		if (syntheticEntryCount == null || syntheticEntryCount == 0) {
+			return;
+		}
+		List<IBase> entries = myVersionAdapter.getEntries(theResponse);
+		reportCreatedPlaceholders(theTransactionDetails, entries, syntheticEntryCount);
+		entries.subList(0, syntheticEntryCount).clear();
+	}
+
+	/**
+	 * A synthetic that actually created its placeholder (201, vs a no-op conditional match) is placeholder
+	 * auto-creation the client must hear about, matching the notification the resolver's auto-create path
+	 * produces. Since the synthetic's own response entry is about to be stripped, the issue goes on the
+	 * first referencing entry's outcome.
+	 */
+	// Created by Claude Fable 5
+	@SuppressWarnings("unchecked")
+	private void reportCreatedPlaceholders(
+			TransactionDetails theTransactionDetails, List<IBase> theResponseEntries, int theSyntheticEntryCount) {
+		List<Integer> firstReferencerIndices =
+				theTransactionDetails.getUserData(SYNTHETIC_FIRST_REFERENCER_INDICES_KEY);
+		if (firstReferencerIndices == null) {
+			return;
+		}
+		FhirTerser terser = myFhirContext.newTerser();
+		for (int i = 0; i < theSyntheticEntryCount; i++) {
+			IBase syntheticEntry = theResponseEntries.get(i);
+			String status = terser.getSinglePrimitiveValueOrNull(syntheticEntry, "response.status");
+			if (status == null || !status.startsWith("201")) {
+				continue;
+			}
+			IBaseOperationOutcome referencerOutcome =
+					myVersionAdapter.getResponseOutcome(theResponseEntries.get(firstReferencerIndices.get(i)));
+			if (referencerOutcome == null) {
+				continue;
+			}
+			String location = myVersionAdapter.getResponseLocation(syntheticEntry);
+			BaseStorageDao.addIssueToOperationOutcomeForAutoCreatedPlaceholder(
+					myFhirContext, new IdDt(location).toUnqualifiedVersionless(), referencerOutcome);
 		}
 	}
 
@@ -343,7 +401,10 @@ public class TransactionBundleNormalizer {
 	}
 
 	private record MatchUrlInfo(
-			String urnUuid, RuntimeResourceDefinition resourceDef, List<CanonicalIdentifier> identifiers) {}
+			String urnUuid,
+			RuntimeResourceDefinition resourceDef,
+			List<CanonicalIdentifier> identifiers,
+			int firstReferencerEntryIndex) {}
 
 	/** Key matching an inline match URL reference to an in-bundle entry by resource type + identifier token. */
 	private record IdentifierKey(String resourceType, String system, String value) {
