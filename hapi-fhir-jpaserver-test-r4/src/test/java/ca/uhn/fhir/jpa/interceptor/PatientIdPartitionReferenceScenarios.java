@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.interceptor;
 
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
+import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
@@ -40,6 +41,23 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 	private static String allPartitionSearchOffModeRejectNoCompartment(String theResourceType) {
 		return "HAPI-1326: Resource of type " + theResourceType
 				+ " has no values placing it in the Patient compartment";
+	}
+
+	/**
+	 * Creates the pre-existing resources every scenario row assumes, the drivers run this before each
+	 * scenario.
+	 */
+	static void createTestFixture(ITestDataBuilder theTestData) {
+		theTestData.createPatient(
+				theTestData.withId("pat1"),
+				theTestData.withIdentifier("old-sys", "existingPat1Ident1"),
+				theTestData.withIdentifier("new-sys", "existingPat1Ident2"));
+		theTestData.createPatient(
+				theTestData.withId("pat2"), theTestData.withIdentifier("old-sys", "existingPat2Ident1"));
+		theTestData.createObservation(
+				theTestData.withId("obsFix"),
+				theTestData.withSubject("Patient/pat1"),
+				theTestData.withIdentifier("observation-system", "obsExisting"));
 	}
 
 	/**

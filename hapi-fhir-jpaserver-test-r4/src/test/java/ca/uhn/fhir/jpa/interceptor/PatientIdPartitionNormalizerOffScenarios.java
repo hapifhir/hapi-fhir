@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.interceptor;
 
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
+import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
@@ -23,6 +24,15 @@ import static ca.uhn.fhir.jpa.interceptor.PatientIdPartitionReferenceScenarios.i
  */
 // Created by Claude Fable 5
 class PatientIdPartitionNormalizerOffScenarios {
+
+	static void createTestFixture(ITestDataBuilder theTestData) {
+		theTestData.createPatient(
+				theTestData.withId("pat1"),
+				theTestData.withIdentifier("old-sys", "existingPat1Ident1"),
+				theTestData.withIdentifier("new-sys", "existingPat1Ident2"));
+		theTestData.createPatient(
+				theTestData.withId("pat2"), theTestData.withIdentifier("old-sys", "existingPat2Ident1"));
+	}
 
 	// Created by Claude Fable 5
 	static class Accepted implements ArgumentsProvider {

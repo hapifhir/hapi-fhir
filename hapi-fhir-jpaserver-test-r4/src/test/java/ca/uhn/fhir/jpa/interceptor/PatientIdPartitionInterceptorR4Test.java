@@ -2201,39 +2201,14 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(false);
 		myPartitionSettings.setAllPartitionSearchSupported(true);
-
-		createPatient(
-			withId("pat1"),
-			withIdentifier("old-sys", "existingPat1Ident1"),
-			withIdentifier("new-sys", "existingPat1Ident2")
-		);
-		createPatient(
-			withId("pat2"),
-			withIdentifier("old-sys", "existingPat2Ident1")
-		);
+		PatientIdPartitionNormalizerOffScenarios.createTestFixture(this);
 	}
 
 	// Created by Claude Fable 5
 	private void setupReferenceScenarioFixture() {
 		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
-
-		createPatient(
-			withId("pat1"),
-			withIdentifier("old-sys", "existingPat1Ident1"),
-			withIdentifier("new-sys", "existingPat1Ident2")
-		);
-		// Second patient enables cross-partition scenarios in the supplier (e.g. one bundle, two patients).
-		createPatient(
-			withId("pat2"),
-			withIdentifier("old-sys", "existingPat2Ident1")
-		);
-		// Existing Observation in pat1's compartment: match target for conditional-write referencer scenarios.
-		createObservation(
-			withId("obsFix"),
-			withSubject("Patient/pat1"),
-			withIdentifier("observation-system", "obsExisting")
-		);
+		PatientIdPartitionReferenceScenarios.createTestFixture(this);
 	}
 
 	// Created by Claude Fable 5
