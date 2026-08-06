@@ -20,6 +20,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,10 +81,16 @@ class HapiMigratorIT {
 	}
 
 	/** We test initialization in two cases: an empty database, and one that has been manually filled by running the schema sql. */
-			@ParameterizedTest
-		@ValueSource(booleans = {true, false})
+	@ParameterizedTest
+	@CsvSource(useHeadersInDisplayName = true, textBlock = """
+		PreCreateSchema, EnableBaselineCheck, ExpectFailureWithoutExplicitBaseline
+		true           , true               , true
+		false          , true               , false
+		false          , false              , false
+		true           , false              , false
+		""")
 	public void testInitializeSchema_existingSchemaRequiresBaselineAndSkipsBaselinedMigrations(
-			boolean thePreCreateSchema) {
+			boolean thePreCreateSchema, boolean theEnableBaselineCheck, boolean theExpectFailureWithoutExplicitBaseline) {
 		if (thePreCreateSchema) {
 			String sql = ClasspathUtil.loadResource("/hapi-migrator-it-init-schema/h2.sql");
 			List<String> statements = SqlUtil.splitSqlFileIntoStatements(sql);
@@ -122,7 +129,8 @@ class HapiMigratorIT {
 		 * 2 should not run.
 		 */
 		migrator = buildMigrator(taskList.toTaskArray());
-		if (thePreCreateSchema) {
+		migrator.setEnableBaselineCheck(theEnableBaselineCheck);
+		if (theExpectFailureWithoutExplicitBaseline) {
 			assertThatThrownBy(migrator::migrate)
 					.isInstanceOf(HapiMigrationException.class)
 					.hasMessageContaining("--baseline-version");
@@ -136,9 +144,15 @@ class HapiMigratorIT {
 					.containsExactly("20250101.2", "20250101.3");
 		} else {
 			outcome = migrator.migrate();
-			assertThat(toTaskVersionList(outcome))
+			if (thePreCreateSchema) {
+				assertThat(toTaskVersionList(outcome))
+					.as(toTaskStatementDescriptions(outcome))
+					.containsExactly("20250101.2", "20250101.3");
+			} else {
+				assertThat(toTaskVersionList(outcome))
 					.as(toTaskStatementDescriptions(outcome))
 					.containsExactly("20250101.1", "20250101.3");
+			}
 		}
 
 		/*
@@ -198,6 +212,7 @@ class HapiMigratorIT {
 		migrator.migrate();
 
 		migrator = buildMigrator(taskList.toTaskArray());
+		migrator.setEnableBaselineCheck(true);
 		migrator.setBaselineVersion("1.0.0");
 		assertThatThrownBy(migrator::migrate)
 				.isInstanceOf(HapiMigrationException.class)
