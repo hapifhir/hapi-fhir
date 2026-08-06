@@ -149,7 +149,6 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 			HapiMigrator migrator =
 					new HapiMigrator(myMigrationTableName, connectionProperties.getDataSource(), driverType);
 
-			migrator.setEnableBaselineCheck(true);
 			migrator.createMigrationTableIfRequired();
 			migrator.setDryRun(dryRun);
 			migrator.setRunHeavyweightSkippableTasks(runHeavyweight);
