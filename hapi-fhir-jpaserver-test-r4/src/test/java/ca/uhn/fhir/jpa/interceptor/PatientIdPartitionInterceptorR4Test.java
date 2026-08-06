@@ -97,6 +97,7 @@ import org.springframework.transaction.annotation.Propagation;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -1829,6 +1830,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 			String theComment, String theBundle, String theExplanation, String theExpectedError) {
 		myPartitionSettings.setAllPartitionSearchSupported(false);
 		setupReferenceScenarioFixture();
+		Map<String, Integer> countsBeforeTransaction = countResourcesByType();
 
 		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, theBundle);
 		ourLog.info("Test case: {}", theComment);
@@ -1837,8 +1839,8 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		assertThatThrownBy(() -> mySystemDao.transaction(mySrd, requestBundle))
 			.isInstanceOf(BaseServerResponseException.class)
 			.hasMessage(theExpectedError);
-		// Nothing from the rejected bundle persisted — only the fixture's two patients exist.
-		assertPatientCountInDatabase(2);
+		// Nothing from the rejected bundle persisted — only the fixture resources exist.
+		assertThat(countResourcesByType()).isEqualTo(countsBeforeTransaction);
 	}
 
 	@ParameterizedTest
@@ -1858,6 +1860,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	void testTransaction_normalizerOffScenarios(
 			String theComment, String theBundle, String theExplanation, List<ExpectedEntry> theExpectedEntries) {
 		setupNormalizerOffFixture();
+		Map<String, Integer> countsBeforeTransaction = countResourcesByType();
 
 		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, theBundle);
 		ourLog.info("Test case: {}", theComment);
@@ -1868,12 +1871,14 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 
 		assertNotNull(resultBundle);
 		assertReferenceScenario(resultBundle, theExpectedEntries);
+		assertNoStrayResources(countsBeforeTransaction, theExpectedEntries);
 	}
 
 	@ParameterizedTest
 	@ArgumentsSource(PatientIdPartitionNormalizerOffScenarios.Rejected.class)
 	void testTransaction_normalizerOffScenarios_rejected(String theComment, String theBundle, String theExpectedError) {
 		setupNormalizerOffFixture();
+		Map<String, Integer> countsBeforeTransaction = countResourcesByType();
 
 		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, theBundle);
 		ourLog.info("Test case: {}", theComment);
@@ -1882,8 +1887,8 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		assertThatThrownBy(() -> mySystemDao.transaction(mySrd, requestBundle))
 			.isInstanceOf(BaseServerResponseException.class)
 			.hasMessageStartingWith(theExpectedError);
-		// Nothing from the failed bundle persisted — only the fixture's two patients exist.
-		assertPatientCountInDatabase(2);
+		// Nothing from the failed bundle persisted — only the fixture resources exist.
+		assertThat(countResourcesByType()).isEqualTo(countsBeforeTransaction);
 	}
 
 	// Created by Claude Fable 5
@@ -2046,8 +2051,10 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		Bundle response = mySystemDao.transaction(mySrd, myFhirContext.newJsonParser().parseResource(Bundle.class, bundle));
 
 		assertReferenceScenario(response, List.of(
-			inAnyPartitionExceptDefault("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
-			inAnyPartitionExceptDefault("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE)));
+			inAnyPartitionExceptDefault("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
+					.reportingCreatedPlaceholder("Patient"),
+			inAnyPartitionExceptDefault("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
+					.reportingCreatedPlaceholder("Patient")));
 		assertPatientCountInDatabase(2);
 
 		Observation obsA = myObservationDao.read(
@@ -2241,6 +2248,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	private void runReferenceScenario(
 			String theComment, String theBundle, String theExplanation, List<ExpectedEntry> theExpectedEntries) {
 		setupReferenceScenarioFixture();
+		Map<String, Integer> countsBeforeTransaction = countResourcesByType();
 
 		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, theBundle);
 		ourLog.info("Test case: {}", theComment);
@@ -2252,6 +2260,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 
 		assertNotNull(resultBundle);
 		assertReferenceScenario(resultBundle, theExpectedEntries);
+		assertNoStrayResources(countsBeforeTransaction, theExpectedEntries);
 	}
 
 	/**
@@ -2561,6 +2570,32 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 				.map(t -> t.getIdDt().toUnqualifiedVersionless().getValue())
 				.toList());
 		assertThat(patientIds).as("patients in database").hasSize(theExpectedCount);
+	}
+
+	// Created by Claude Fable 5
+	private Map<String, Integer> countResourcesByType() {
+		return runInTransaction(() -> myResourceTableDao.findAll().stream()
+				.filter(t -> t.getDeleted() == null)
+				.collect(Collectors.groupingBy(ResourceTable::getResourceType, Collectors.summingInt(t -> 1))));
+	}
+
+	/**
+	 * Every resource in the database must be a fixture resource or a creation the scenario declares: one per
+	 * created-outcome entry, plus one per reported auto-created placeholder.
+	 */
+	// Created by Claude Fable 5
+	private void assertNoStrayResources(
+			Map<String, Integer> theCountsBeforeTransaction, List<ExpectedEntry> theExpectedEntries) {
+		Map<String, Integer> expectedCounts = new HashMap<>(theCountsBeforeTransaction);
+		for (ExpectedEntry entry : theExpectedEntries) {
+			if (isCreatedOutcome(entry.outcome())) {
+				expectedCounts.merge(entry.resourceType(), 1, Integer::sum);
+			}
+			if (entry.createdPlaceholderType() != null) {
+				expectedCounts.merge(entry.createdPlaceholderType(), 1, Integer::sum);
+			}
+		}
+		assertThat(countResourcesByType()).as("resource counts by type").isEqualTo(expectedCounts);
 	}
 
 	@Interceptor
