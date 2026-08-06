@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
+import ca.uhn.fhir.jpa.migrate.HapiMigrator;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.tasks.api.ISchemaInitializationProvider;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -37,8 +38,7 @@ public class InitializeSchemaTaskTest extends BaseTest {
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
-	public void testExistingIndicatorTableDoesNotMarkSchemaInitialized(Supplier<TestDatabaseDetails> theTestDatabaseDetails)
-			throws SQLException {
+	public void testExistingIndicatorTableDoesNotMarkSchemaInitialized(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
 		before(theTestDatabaseDetails);
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
 
@@ -53,7 +53,7 @@ public class InitializeSchemaTaskTest extends BaseTest {
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
 	public void testExistingSchemaWithoutHistory_dryRun_stillRequiresBaseline(
-		Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
 		before(theTestDatabaseDetails);
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
 
@@ -61,7 +61,9 @@ public class InitializeSchemaTaskTest extends BaseTest {
 		getMigrator().addTask(task);
 		getMigrator().setDryRun(true);
 
-		assertThatThrownBy(() -> getMigrator().migrate())
+		HapiMigrator migrator = getMigrator();
+		migrator.setEnableBaselineCheck(true);
+		assertThatThrownBy(migrator::migrate)
 			.isInstanceOf(HapiMigrationException.class)
 			.hasMessageContaining("--baseline-version");
 	}
@@ -69,7 +71,7 @@ public class InitializeSchemaTaskTest extends BaseTest {
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
 	public void testExistingSchema_invalidBaselineVersion_isRejected(
-		Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
 		before(theTestDatabaseDetails);
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
 
@@ -77,7 +79,9 @@ public class InitializeSchemaTaskTest extends BaseTest {
 		getMigrator().addTask(task);
 		getMigrator().setBaselineVersion("not-a-version");
 
-		assertThatThrownBy(() -> getMigrator().migrate())
+		HapiMigrator migrator = getMigrator();
+		migrator.setEnableBaselineCheck(true);
+		assertThatThrownBy(migrator::migrate)
 			.isInstanceOf(HapiMigrationException.class)
 			.hasMessageContaining("Invalid --baseline-version");
 	}
