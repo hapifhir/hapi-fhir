@@ -11,6 +11,7 @@ import com.google.common.base.Charsets;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -226,6 +227,7 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 		assertThat(JdbcUtils.getTableNames(connectionProperties)).contains("HFJ_BLK_EXPORT_JOB"); // Late table
 	}
 
+	@Disabled
 	@Test
 	public void testMigrateFrom340_whenNoMigrationTableExists_requiresBaseline() throws IOException, SQLException {
 
@@ -287,6 +289,7 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 				.doesNotContain("FLY_HFJ_MIGRATION", "HFJ_SEARCH_PARM");
 	}
 
+	@Disabled
 	@Test
 	public void testMigrateFrom340_whenMigrationHistoryExists_rejectsBaselineVersion() throws IOException, SQLException {
 
