@@ -190,9 +190,9 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 						]
 					}
 					""",
-				"Matched conditional POSTs are left untouched → native no-op create outcome.",
+				"Matched conditional POSTs are left untouched → native no-op create outcome against pat1.",
 				List.of(
-					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH)
+					inCompartmentOf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH, "pat1")
 				),
 				allPartitionSearchOffModeRejectIdlessPatient()
 			),
