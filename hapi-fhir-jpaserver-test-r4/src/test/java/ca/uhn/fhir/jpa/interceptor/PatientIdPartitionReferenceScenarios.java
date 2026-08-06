@@ -1149,7 +1149,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				allPartitionSearchOffModeRejectIdlessPatient()
 			),
 			Arguments.of(
-				"Conditionally Create Patient ×2 + Observation ×2 | two new patients, one partition slice each",
+				"Conditionally Create Patient ×2 + Observation ×2 | each observation follows its own new patient",
 				"""
 					{ "resourceType" : "Bundle", "type" : "transaction",
 						"entry" : [
