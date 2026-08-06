@@ -315,8 +315,8 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 	/**
 	 * A transaction opened for all partitions is partition-unscoped, so it can host work for any
-	 * single partition. Implementations that map partitions to separate databases (e.g. MegaScale)
-	 * override this method with stricter shard-based rules.
+	 * single partition. Implementations that map partitions to separate databases override this
+	 * method with stricter shard-based rules.
 	 */
 	@Override
 	public boolean isCompatiblePartition(
