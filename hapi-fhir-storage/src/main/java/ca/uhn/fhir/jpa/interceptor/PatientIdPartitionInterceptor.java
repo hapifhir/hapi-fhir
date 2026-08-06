@@ -769,6 +769,10 @@ public class PatientIdPartitionInterceptor {
 	 * the server constructs to process client batch entries — those are processed in isolation, where the
 	 * normalizer's synthetics would change what the batch entry alone does. The normalizer itself is a no-op
 	 * for non-transaction bundles and when the settings it depends on are disabled.
+	 * <p>
+	 * Wiring normalization through this interceptor confines the new path to patient-id partition mode to
+	 * limit risk: creating placeholders up front is faster than creating them during reference indexing, so
+	 * this is a candidate to become the transaction processor's default path once we are more confident.
 	 */
 	// Created by Claude Fable 5
 	@Hook(value = Pointcut.STORAGE_TRANSACTION_PROCESSING, order = STORAGE_TRANSACTION_PROCESSING_ORDER_NORMALIZE)
