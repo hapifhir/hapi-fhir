@@ -34,14 +34,14 @@ class MultiResourceRefScenarios implements ArgumentsProvider {
 							{
 								"resource" : {
 									"resourceType" : "Observation",
-									"subject" : { "reference": "Patient?identifier=http://system|value1" }
+									"subject" : { "reference": "Patient?identifier=http://system|sharedPatient" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation" }
 							},
 							{
 								"resource" : {
 									"resourceType" : "Observation",
-									"subject" : { "reference": "Patient?identifier=http://system|value1" }
+									"subject" : { "reference": "Patient?identifier=http://system|sharedPatient" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation" }
 							}
@@ -51,7 +51,7 @@ class MultiResourceRefScenarios implements ArgumentsProvider {
 				1,
 				bundleAssert(3, theBundle -> {
 					String urn = assertSyntheticEntryAt(theBundle, 0, ResourceType.Patient,
-							"Patient?identifier=http://system|value1", "http://system", "value1");
+							"Patient?identifier=http://system|sharedPatient", "http://system", "sharedPatient");
 					assertSourceEntryAt(theBundle, 1, Observation.class, urn, obs -> obs.getSubject().getReference());
 					assertSourceEntryAt(theBundle, 2, Observation.class, urn, obs -> obs.getSubject().getReference());
 				})
@@ -64,14 +64,14 @@ class MultiResourceRefScenarios implements ArgumentsProvider {
 							{
 								"resource" : {
 									"resourceType" : "Observation",
-									"subject" : { "reference": "Patient?identifier=http://system|value1" }
+									"subject" : { "reference": "Patient?identifier=http://system|patientForObs" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation" }
 							},
 							{
 								"resource" : {
 									"resourceType" : "Encounter",
-									"subject" : { "reference": "Patient?identifier=http://system|value2" }
+									"subject" : { "reference": "Patient?identifier=http://system|patientForEncounter" }
 								},
 								"request" : { "method" : "POST", "url" : "Encounter" }
 							}
@@ -81,13 +81,13 @@ class MultiResourceRefScenarios implements ArgumentsProvider {
 				2,
 				bundleAssert(4, theBundle -> {
 					List<Bundle.BundleEntryComponent> entries = theBundle.getEntry();
-					int val1Idx = findSyntheticEntryIndex(entries.subList(0, 2), "Patient?identifier=http://system|value1");
-					int val2Idx = findSyntheticEntryIndex(entries.subList(0, 2), "Patient?identifier=http://system|value2");
+					int val1Idx = findSyntheticEntryIndex(entries.subList(0, 2), "Patient?identifier=http://system|patientForObs");
+					int val2Idx = findSyntheticEntryIndex(entries.subList(0, 2), "Patient?identifier=http://system|patientForEncounter");
 
 					String val1Urn = assertSyntheticEntryAt(theBundle, val1Idx, ResourceType.Patient,
-							"Patient?identifier=http://system|value1", "http://system", "value1");
+							"Patient?identifier=http://system|patientForObs", "http://system", "patientForObs");
 					String val2Urn = assertSyntheticEntryAt(theBundle, val2Idx, ResourceType.Patient,
-							"Patient?identifier=http://system|value2", "http://system", "value2");
+							"Patient?identifier=http://system|patientForEncounter", "http://system", "patientForEncounter");
 
 					assertSourceEntryAt(theBundle, 2, Observation.class, val1Urn, obs -> obs.getSubject().getReference());
 					assertSourceEntryAt(theBundle, 3, Encounter.class, val2Urn, enc -> enc.getSubject().getReference());
@@ -101,7 +101,7 @@ class MultiResourceRefScenarios implements ArgumentsProvider {
 							{
 								"resource" : {
 									"resourceType" : "Observation",
-									"subject" : { "reference": "Patient?identifier=http://system|value1" }
+									"subject" : { "reference": "Patient?identifier=http://system|matchUrlPatient" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation" }
 							},
@@ -118,7 +118,7 @@ class MultiResourceRefScenarios implements ArgumentsProvider {
 				1,
 				bundleAssert(3, theBundle -> {
 					String urn = assertSyntheticEntryAt(theBundle, 0, ResourceType.Patient,
-							"Patient?identifier=http://system|value1", "http://system", "value1");
+							"Patient?identifier=http://system|matchUrlPatient", "http://system", "matchUrlPatient");
 					assertSourceEntryAt(theBundle, 1, Observation.class, urn, obs -> obs.getSubject().getReference());
 					assertSourceEntryAt(theBundle, 2, Observation.class, "Patient/123", obs -> obs.getSubject().getReference());
 				})
@@ -205,19 +205,19 @@ class MultiResourceRefScenarios implements ArgumentsProvider {
 								"fullUrl" : "urn:uuid:patient-1",
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [{ "system" : "sys", "value" : "val1" }],
+									"identifier" : [{ "system" : "sys", "value" : "inBundlePatient" }],
 									"name" : [{ "family" : "Doe", "given" : ["Jane"] }]
 								},
 								"request" : {
 									"method" : "POST",
 									"url" : "Patient",
-									"ifNoneExist" : "Patient?identifier=sys|val1"
+									"ifNoneExist" : "Patient?identifier=sys|inBundlePatient"
 								}
 							},
 							{
 								"resource" : {
 									"resourceType" : "Observation",
-									"subject" : { "reference": "Patient?identifier=sys|val1" }
+									"subject" : { "reference": "Patient?identifier=sys|inBundlePatient" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation" }
 							}
@@ -233,13 +233,13 @@ class MultiResourceRefScenarios implements ArgumentsProvider {
 					assertThat(patientEntry.getResource().getResourceType()).isEqualTo(ResourceType.Patient);
 					assertThat(patientEntry.getFullUrl()).isEqualTo("urn:uuid:patient-1");
 					assertThat(patientEntry.getRequest().getMethod()).isEqualTo(Bundle.HTTPVerb.POST);
-					assertThat(patientEntry.getRequest().getIfNoneExist()).isEqualTo("Patient?identifier=sys|val1");
+					assertThat(patientEntry.getRequest().getIfNoneExist()).isEqualTo("Patient?identifier=sys|inBundlePatient");
 
 					Patient patient = (Patient) patientEntry.getResource();
 					// user-supplied body preserved
 					assertThat(patient.getNameFirstRep().getFamily()).isEqualTo("Doe");
 					assertThat(patient.getIdentifierFirstRep().getSystem()).isEqualTo("sys");
-					assertThat(patient.getIdentifierFirstRep().getValue()).isEqualTo("val1");
+					assertThat(patient.getIdentifierFirstRep().getValue()).isEqualTo("inBundlePatient");
 					// NOT marked as a synthetic placeholder
 					assertThat(patient.getExtensionByUrl(EXT_RESOURCE_PLACEHOLDER)).isNull();
 
@@ -256,19 +256,19 @@ class MultiResourceRefScenarios implements ArgumentsProvider {
 							{
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [{ "system" : "sys", "value" : "val1" }],
+									"identifier" : [{ "system" : "sys", "value" : "inBundlePatient" }],
 									"name" : [{ "family" : "Doe", "given" : ["Jane"] }]
 								},
 								"request" : {
 									"method" : "POST",
 									"url" : "Patient",
-									"ifNoneExist" : "Patient?identifier=sys|val1"
+									"ifNoneExist" : "Patient?identifier=sys|inBundlePatient"
 								}
 							},
 							{
 								"resource" : {
 									"resourceType" : "Observation",
-									"subject" : { "reference": "Patient?identifier=sys|val1" }
+									"subject" : { "reference": "Patient?identifier=sys|inBundlePatient" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation" }
 							}
@@ -285,13 +285,13 @@ class MultiResourceRefScenarios implements ArgumentsProvider {
 					assertThat(patientEntry.getFullUrl()).startsWith("urn:uuid:");
 					String assignedFullUrl = patientEntry.getFullUrl();
 					assertThat(patientEntry.getRequest().getMethod()).isEqualTo(Bundle.HTTPVerb.POST);
-					assertThat(patientEntry.getRequest().getIfNoneExist()).isEqualTo("Patient?identifier=sys|val1");
+					assertThat(patientEntry.getRequest().getIfNoneExist()).isEqualTo("Patient?identifier=sys|inBundlePatient");
 
 					Patient patient = (Patient) patientEntry.getResource();
 					// user-supplied body preserved
 					assertThat(patient.getNameFirstRep().getFamily()).isEqualTo("Doe");
 					assertThat(patient.getIdentifierFirstRep().getSystem()).isEqualTo("sys");
-					assertThat(patient.getIdentifierFirstRep().getValue()).isEqualTo("val1");
+					assertThat(patient.getIdentifierFirstRep().getValue()).isEqualTo("inBundlePatient");
 					// NOT marked as a synthetic placeholder
 					assertThat(patient.getExtensionByUrl(EXT_RESOURCE_PLACEHOLDER)).isNull();
 
@@ -309,18 +309,18 @@ class MultiResourceRefScenarios implements ArgumentsProvider {
 								"fullUrl" : "urn:uuid:patient-1",
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [{ "system" : "sys", "value" : "val1" }],
+									"identifier" : [{ "system" : "sys", "value" : "inBundlePatient" }],
 									"name" : [{ "family" : "Doe", "given" : ["Jane"] }]
 								},
 								"request" : {
 									"method" : "PUT",
-									"url" : "Patient?identifier=sys|val1"
+									"url" : "Patient?identifier=sys|inBundlePatient"
 								}
 							},
 							{
 								"resource" : {
 									"resourceType" : "Observation",
-									"subject" : { "reference": "Patient?identifier=sys|val1" }
+									"subject" : { "reference": "Patient?identifier=sys|inBundlePatient" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation" }
 							}
@@ -336,13 +336,13 @@ class MultiResourceRefScenarios implements ArgumentsProvider {
 					assertThat(patientEntry.getResource().getResourceType()).isEqualTo(ResourceType.Patient);
 					assertThat(patientEntry.getFullUrl()).isEqualTo("urn:uuid:patient-1");
 					assertThat(patientEntry.getRequest().getMethod()).isEqualTo(Bundle.HTTPVerb.PUT);
-					assertThat(patientEntry.getRequest().getUrl()).isEqualTo("Patient?identifier=sys|val1");
+					assertThat(patientEntry.getRequest().getUrl()).isEqualTo("Patient?identifier=sys|inBundlePatient");
 
 					Patient patient = (Patient) patientEntry.getResource();
 					// user-supplied body preserved
 					assertThat(patient.getNameFirstRep().getFamily()).isEqualTo("Doe");
 					assertThat(patient.getIdentifierFirstRep().getSystem()).isEqualTo("sys");
-					assertThat(patient.getIdentifierFirstRep().getValue()).isEqualTo("val1");
+					assertThat(patient.getIdentifierFirstRep().getValue()).isEqualTo("inBundlePatient");
 					// NOT marked as a synthetic placeholder
 					assertThat(patient.getExtensionByUrl(EXT_RESOURCE_PLACEHOLDER)).isNull();
 
@@ -360,19 +360,19 @@ class MultiResourceRefScenarios implements ArgumentsProvider {
 								"resource" : {
 									"resourceType" : "Patient",
 									"id" : "urn:uuid:patient-1",
-									"identifier" : [{ "system" : "sys", "value" : "val1" }],
+									"identifier" : [{ "system" : "sys", "value" : "inBundlePatient" }],
 									"name" : [{ "family" : "Doe", "given" : ["Jane"] }]
 								},
 								"request" : {
 									"method" : "PUT",
-									"url" : "Patient?identifier=sys|val1"
+									"url" : "Patient?identifier=sys|inBundlePatient"
 								}
 							},
 							{
 								"resource" : {
 									"resourceType" : "Observation",
 									"subject" : { "reference": "urn:uuid:patient-1" },
-									"performer" : [{ "reference": "Patient?identifier=sys|val1" }]
+									"performer" : [{ "reference": "Patient?identifier=sys|inBundlePatient" }]
 								},
 								"request" : { "method" : "POST", "url" : "Observation" }
 							}
@@ -390,7 +390,7 @@ class MultiResourceRefScenarios implements ArgumentsProvider {
 					assertThat(patientEntry.getResource().getResourceType()).isEqualTo(ResourceType.Patient);
 					assertThat(patientEntry.getFullUrl()).isEqualTo("urn:uuid:patient-1");
 					assertThat(patientEntry.getRequest().getMethod()).isEqualTo(Bundle.HTTPVerb.PUT);
-					assertThat(patientEntry.getRequest().getUrl()).isEqualTo("Patient?identifier=sys|val1");
+					assertThat(patientEntry.getRequest().getUrl()).isEqualTo("Patient?identifier=sys|inBundlePatient");
 
 					Patient patient = (Patient) patientEntry.getResource();
 					assertThat(patient.getIdElement().getValue()).isEqualTo("urn:uuid:patient-1");
@@ -484,14 +484,14 @@ class MultiResourceRefScenarios implements ArgumentsProvider {
 							{
 								"resource" : {
 									"resourceType" : "Practitioner",
-									"identifier" : [{ "system" : "sys", "value" : "val" }]
+									"identifier" : [{ "system" : "sys", "value" : "sharedIdent" }]
 								},
 								"request" : { "method" : "POST", "url" : "Practitioner" }
 							},
 							{
 								"resource" : {
 									"resourceType" : "Observation",
-									"subject" : { "reference": "Patient?identifier=sys|val" }
+									"subject" : { "reference": "Patient?identifier=sys|sharedIdent" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation" }
 							}
@@ -501,7 +501,7 @@ class MultiResourceRefScenarios implements ArgumentsProvider {
 				1,
 				bundleAssert(3, theBundle -> {
 					String urn = assertSyntheticEntryAt(theBundle, 0, ResourceType.Patient,
-							"Patient?identifier=sys|val", "sys", "val");
+							"Patient?identifier=sys|sharedIdent", "sys", "sharedIdent");
 
 					// The Practitioner's identifier must not satisfy a Patient match URL
 					Bundle.BundleEntryComponent practitionerEntry = theBundle.getEntry().get(1);
@@ -520,7 +520,7 @@ class MultiResourceRefScenarios implements ArgumentsProvider {
 								"fullUrl" : "urn:uuid:patient-a",
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [{ "system" : "sys", "value" : "val" }]
+									"identifier" : [{ "system" : "sys", "value" : "duplicatedIdent" }]
 								},
 								"request" : { "method" : "POST", "url" : "Patient" }
 							},
@@ -528,14 +528,14 @@ class MultiResourceRefScenarios implements ArgumentsProvider {
 								"fullUrl" : "urn:uuid:patient-b",
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [{ "system" : "sys", "value" : "val" }]
+									"identifier" : [{ "system" : "sys", "value" : "duplicatedIdent" }]
 								},
 								"request" : { "method" : "POST", "url" : "Patient" }
 							},
 							{
 								"resource" : {
 									"resourceType" : "Observation",
-									"subject" : { "reference": "Patient?identifier=sys|val" }
+									"subject" : { "reference": "Patient?identifier=sys|duplicatedIdent" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation" }
 							}

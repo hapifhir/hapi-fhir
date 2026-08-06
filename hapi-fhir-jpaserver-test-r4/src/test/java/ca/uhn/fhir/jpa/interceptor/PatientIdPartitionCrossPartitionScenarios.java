@@ -49,13 +49,13 @@ class PatientIdPartitionCrossPartitionScenarios implements ArgumentsProvider {
 								"fullUrl": "urn:uuid:0b6a3f5c-3c86-46f7-9c62-11b45e7f2a91",
 								"resource" : {
 									"resourceType" : "Practitioner",
-									"identifier" : [ { "system" : "practitioner-system", "value" : "prac1"} ]
+									"identifier" : [ { "system" : "practitioner-system", "value" : "newPractitioner"} ]
 								},
 								"request" : { "method" : "POST", "url" : "Practitioner"}
 							}, {
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "identNew"} ],
+									"identifier" : [ { "system" : "old-sys", "value" : "newPatient"} ],
 									"generalPractitioner" : [ { "reference" : "urn:uuid:0b6a3f5c-3c86-46f7-9c62-11b45e7f2a91" } ]
 								},
 								"request" : { "method" : "POST", "url" : "Patient"}
@@ -78,15 +78,15 @@ class PatientIdPartitionCrossPartitionScenarios implements ArgumentsProvider {
 								"fullUrl": "urn:uuid:8f3a2e17-6f5d-4f89-b2ea-52c9d1a5b0c4",
 								"resource" : {
 									"resourceType" : "Organization",
-									"identifier" : [ { "system" : "org-sys", "value" : "org-perf"} ],
+									"identifier" : [ { "system" : "org-sys", "value" : "performerOrg"} ],
 									"name" : "Performing Lab"
 								},
 								"request" : { "method" : "POST", "url" : "Organization"}
 							}, {
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obs-perf"} ],
-									"subject" : { "reference" : "Patient?identifier=old-sys|ident1" },
+									"identifier" : [ { "system" : "observation-system", "value" : "obsWithMatchUrlRef"} ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|existingPat1Ident1" },
 									"performer" : [ { "reference" : "urn:uuid:8f3a2e17-6f5d-4f89-b2ea-52c9d1a5b0c4" } ]
 								},
 								"request" : { "method" : "POST", "url" : "Observation"}
@@ -108,16 +108,16 @@ class PatientIdPartitionCrossPartitionScenarios implements ArgumentsProvider {
 							{
 								"resource" : {
 									"resourceType" : "Organization",
-									"identifier" : [ { "system" : "org-sys", "value" : "org-inb"} ],
+									"identifier" : [ { "system" : "org-sys", "value" : "inBundleOrg"} ],
 									"name" : "In-Bundle Lab"
 								},
 								"request" : { "method" : "POST", "url" : "Organization"}
 							}, {
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obs-inb"} ],
+									"identifier" : [ { "system" : "observation-system", "value" : "obsWithMatchUrlRef"} ],
 									"subject" : { "reference" : "Patient/pat1" },
-									"performer" : [ { "reference" : "Organization?identifier=org-sys|org-inb" } ]
+									"performer" : [ { "reference" : "Organization?identifier=org-sys|inBundleOrg" } ]
 								},
 								"request" : { "method" : "POST", "url" : "Observation"}
 							}
@@ -150,7 +150,7 @@ class PatientIdPartitionCrossPartitionScenarios implements ArgumentsProvider {
 								"fullUrl": "urn:uuid:6c2f4b8a-9d1e-4c35-8a7f-3e5d2b190c44",
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "identNew"} ]
+									"identifier" : [ { "system" : "old-sys", "value" : "groupMemberPatient"} ]
 								},
 								"request" : { "method" : "POST", "url" : "Patient"}
 							}
@@ -171,9 +171,9 @@ class PatientIdPartitionCrossPartitionScenarios implements ArgumentsProvider {
 							{
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "identNew"} ],
+									"identifier" : [ { "system" : "old-sys", "value" : "linkingPatient"} ],
 									"link" : [
-										{ "other" : { "reference" : "Patient?identifier=old-sys|ident2" }, "type" : "seealso" }
+										{ "other" : { "reference" : "Patient?identifier=old-sys|existingPat2Ident1" }, "type" : "seealso" }
 									]
 								},
 								"request" : { "method" : "POST", "url" : "Patient"}
@@ -195,9 +195,9 @@ class PatientIdPartitionCrossPartitionScenarios implements ArgumentsProvider {
 								"resource" : {
 									"resourceType" : "Patient",
 									"id" : "pat3",
-									"identifier" : [ { "system" : "old-sys", "value" : "identNew"} ],
+									"identifier" : [ { "system" : "old-sys", "value" : "linkingPatient"} ],
 									"link" : [
-										{ "other" : { "reference" : "Patient?identifier=old-sys|ident2" }, "type" : "seealso" }
+										{ "other" : { "reference" : "Patient?identifier=old-sys|existingPat2Ident1" }, "type" : "seealso" }
 									]
 								},
 								"request" : { "method" : "PUT", "url" : "Patient/pat3"}

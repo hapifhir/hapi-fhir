@@ -1927,7 +1927,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	// Created by Claude Fable 5
 	@Test
 	void testBatch_createObservationWithDirectReference_routedToCompartment() {
-		createPatient(withId("pat1"), withIdentifier("old-sys", "ident1"));
+		createPatient(withId("pat1"), withIdentifier("old-sys", "existingPat1Ident1"));
 
 		Bundle batch = new Bundle();
 		batch.setType(Bundle.BundleType.BATCH);
@@ -2040,7 +2040,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	void testTransaction_unconditionalInBundlePatient_shadowsExistingDbPatient() {
 		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
-		createPatient(withId("pat1"), withIdentifier("old-sys", "ident1"));
+		createPatient(withId("pat1"), withIdentifier("old-sys", "existingPat1Ident1"));
 
 		String bundle = """
 			{ "resourceType" : "Bundle", "type" : "transaction",
@@ -2048,14 +2048,14 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 					{
 						"resource" : {
 							"resourceType" : "Patient",
-							"identifier" : [ { "system" : "old-sys", "value" : "ident1"} ]
+							"identifier" : [ { "system" : "old-sys", "value" : "existingPat1Ident1"} ]
 						},
 						"request" : { "method" : "POST", "url" : "Patient"}
 					}, {
 						"resource" : {
 							"resourceType" : "Observation",
 							"identifier" : [ { "system" : "observation-system", "value" : "obsShadow"} ],
-							"subject" : { "reference" : "Patient?identifier=old-sys|ident1" }
+							"subject" : { "reference" : "Patient?identifier=old-sys|existingPat1Ident1" }
 						},
 						"request" : { "method" : "POST", "url" : "Observation"}
 					}
@@ -2115,7 +2115,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 					}, {
 						"resource" : {
 							"resourceType" : "Observation",
-							"identifier" : [ { "system" : "observation-system", "value" : "obsNonToken"} ],
+							"identifier" : [ { "system" : "observation-system", "value" : "obsWithUrnRef"} ],
 							"subject" : { "reference" : "urn:uuid:aaaa1111-1111-1111-1111-111111111111" }
 						},
 						"request" : { "method" : "POST", "url" : "Observation"}
@@ -2138,7 +2138,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 					}, {
 						"resource" : {
 							"resourceType" : "Observation",
-							"identifier" : [ { "system" : "observation-system", "value" : "obsNonToken2"} ],
+							"identifier" : [ { "system" : "observation-system", "value" : "obsWithUrnRef"} ],
 							"subject" : { "reference" : "urn:uuid:cccc3333-3333-3333-3333-333333333333" }
 						},
 						"request" : { "method" : "POST", "url" : "Observation"}
@@ -2175,7 +2175,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 					}, {
 						"resource" : {
 							"resourceType" : "Observation",
-							"identifier" : [ { "system" : "observation-system", "value" : "obsNonTokenNew"} ],
+							"identifier" : [ { "system" : "observation-system", "value" : "obsWithUrnRef"} ],
 							"subject" : { "reference" : "urn:uuid:bbbb2222-2222-2222-2222-222222222222" }
 						},
 						"request" : { "method" : "POST", "url" : "Observation"}
@@ -2203,12 +2203,12 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 
 		createPatient(
 			withId("pat1"),
-			withIdentifier("old-sys", "ident1"),
-			withIdentifier("new-sys", "newId1")
+			withIdentifier("old-sys", "existingPat1Ident1"),
+			withIdentifier("new-sys", "existingPat1Ident2")
 		);
 		createPatient(
 			withId("pat2"),
-			withIdentifier("old-sys", "ident2")
+			withIdentifier("old-sys", "existingPat2Ident1")
 		);
 	}
 
@@ -2219,13 +2219,13 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 
 		createPatient(
 			withId("pat1"),
-			withIdentifier("old-sys", "ident1"),
-			withIdentifier("new-sys", "newId1")
+			withIdentifier("old-sys", "existingPat1Ident1"),
+			withIdentifier("new-sys", "existingPat1Ident2")
 		);
 		// Second patient enables cross-partition scenarios in the supplier (e.g. one bundle, two patients).
 		createPatient(
 			withId("pat2"),
-			withIdentifier("old-sys", "ident2")
+			withIdentifier("old-sys", "existingPat2Ident1")
 		);
 		// Existing Observation in pat1's compartment: match target for conditional-write referencer scenarios.
 		createObservation(

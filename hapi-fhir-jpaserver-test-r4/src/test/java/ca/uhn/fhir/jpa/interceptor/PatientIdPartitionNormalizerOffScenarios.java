@@ -37,8 +37,8 @@ class PatientIdPartitionNormalizerOffScenarios {
 								{
 									"resource" : {
 										"resourceType" : "Observation",
-										"identifier" : [ { "system" : "observation-system", "value" : "obs-off-1"} ],
-										"subject" : { "reference" : "Patient?identifier=old-sys|ident1" }
+										"identifier" : [ { "system" : "observation-system", "value" : "obsWithMatchUrlRef"} ],
+										"subject" : { "reference" : "Patient?identifier=old-sys|existingPat1Ident1" }
 									},
 									"request" : { "method" : "POST", "url" : "Observation"}
 								}
@@ -59,13 +59,13 @@ class PatientIdPartitionNormalizerOffScenarios {
 									"fullUrl": "urn:uuid:5b3f0a91-2f6c-4f27-9d84-c1a7e02b6633",
 									"resource" : {
 										"resourceType" : "Patient",
-										"identifier" : [ { "system" : "old-sys", "value" : "identNew"} ]
+										"identifier" : [ { "system" : "old-sys", "value" : "condCreatePatient"} ]
 									},
-									"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|identNew"}
+									"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|condCreatePatient"}
 								}, {
 									"resource" : {
 										"resourceType" : "Observation",
-										"identifier" : [ { "system" : "observation-system", "value" : "obs-off-2"} ],
+										"identifier" : [ { "system" : "observation-system", "value" : "obsWithUrnRef"} ],
 										"subject" : { "reference" : "urn:uuid:5b3f0a91-2f6c-4f27-9d84-c1a7e02b6633" }
 									},
 									"request" : { "method" : "POST", "url" : "Observation"}
@@ -88,13 +88,13 @@ class PatientIdPartitionNormalizerOffScenarios {
 									"resource" : {
 										"resourceType" : "Patient",
 										"id" : "pat9",
-										"identifier" : [ { "system" : "old-sys", "value" : "identNew"} ]
+										"identifier" : [ { "system" : "old-sys", "value" : "newPatient"} ]
 									},
 									"request" : { "method" : "PUT", "url" : "Patient/pat9"}
 								}, {
 									"resource" : {
 										"resourceType" : "Observation",
-										"identifier" : [ { "system" : "observation-system", "value" : "obs-off-3"} ],
+										"identifier" : [ { "system" : "observation-system", "value" : "obsWithDirectRef"} ],
 										"subject" : { "reference" : "Patient/pat9" }
 									},
 									"request" : { "method" : "POST", "url" : "Observation"}
@@ -116,10 +116,10 @@ class PatientIdPartitionNormalizerOffScenarios {
 								{
 									"resource" : {
 										"resourceType" : "Patient",
-										"identifier" : [ { "system" : "old-sys", "value" : "ident1"}, { "system" : "new-sys", "value" : "newId1"} ],
+										"identifier" : [ { "system" : "old-sys", "value" : "existingPat1Ident1"}, { "system" : "new-sys", "value" : "existingPat1Ident2"} ],
 										"active" : true
 									},
-									"request" : { "method" : "PUT", "url" : "Patient?identifier=old-sys|ident1"}
+									"request" : { "method" : "PUT", "url" : "Patient?identifier=old-sys|existingPat1Ident1"}
 								}
 							]
 						}
@@ -137,7 +137,7 @@ class PatientIdPartitionNormalizerOffScenarios {
 								{
 									"resource" : {
 										"resourceType" : "Patient",
-										"identifier" : [ { "system" : "old-sys", "value" : "identNew"} ]
+										"identifier" : [ { "system" : "old-sys", "value" : "newPatient"} ]
 									},
 									"request" : { "method" : "POST", "url" : "Patient"}
 								}
@@ -184,13 +184,13 @@ class PatientIdPartitionNormalizerOffScenarios {
 								{
 									"resource" : {
 										"resourceType" : "Patient",
-										"identifier" : [ { "system" : "old-sys", "value" : "identNew"} ]
+										"identifier" : [ { "system" : "old-sys", "value" : "inBundlePatient"} ]
 									},
 									"request" : { "method" : "POST", "url" : "Patient"}
 								}, {
 									"resource" : {
 										"resourceType" : "Observation",
-										"subject" : { "reference" : "Patient?identifier=old-sys|identNew" }
+										"subject" : { "reference" : "Patient?identifier=old-sys|inBundlePatient" }
 									},
 									"request" : { "method" : "POST", "url" : "Observation"}
 								}

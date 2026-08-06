@@ -141,7 +141,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 							{
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "identNew"} ]
+									"identifier" : [ { "system" : "old-sys", "value" : "newPatient"} ]
 								},
 								"request" : { "method" : "POST", "url" : "Patient"}
 							}
@@ -162,9 +162,9 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 							{
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "identNew"} ]
+									"identifier" : [ { "system" : "old-sys", "value" : "condCreatePatient"} ]
 								},
-								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|identNew"}
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|condCreatePatient"}
 							}
 						]
 					}
@@ -183,9 +183,9 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 							{
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "ident1"} ]
+									"identifier" : [ { "system" : "old-sys", "value" : "existingPat1Ident1"} ]
 								},
-								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|ident1"}
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|existingPat1Ident1"}
 							}
 						]
 					}
@@ -204,9 +204,9 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 							{
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "ident1"}, { "system" : "new-sys", "value" : "newId1"} ]
+									"identifier" : [ { "system" : "old-sys", "value" : "existingPat1Ident1"}, { "system" : "new-sys", "value" : "existingPat1Ident2"} ]
 								},
-								"request" : { "method" : "PUT", "url" : "Patient?identifier=old-sys|ident1"}
+								"request" : { "method" : "PUT", "url" : "Patient?identifier=old-sys|existingPat1Ident1"}
 							}
 						]
 					}
@@ -227,7 +227,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 								"resource" : {
 									"resourceType" : "Patient",
 									"id" : "pat1",
-									"identifier" : [ { "system" : "old-sys", "value" : "ident1"} ],
+									"identifier" : [ { "system" : "old-sys", "value" : "existingPat1Ident1"} ],
 									"active" : true
 								},
 								"request" : { "method" : "PUT", "url" : "Patient/pat1"}
@@ -249,7 +249,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 								"resource" : {
 									"resourceType" : "Patient",
 									"id" : "pat2",
-									"identifier" : [ { "system" : "old-sys", "value" : "ident2"} ]
+									"identifier" : [ { "system" : "old-sys", "value" : "existingPat2Ident1"} ]
 								},
 								"request" : { "method" : "PUT", "url" : "Patient/pat2"}
 							}
@@ -271,7 +271,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 							{
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obs1"} ],
+									"identifier" : [ { "system" : "observation-system", "value" : "obsWithDirectRef"} ],
 									"subject" : { "reference" : "Patient/pat1" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation"}
@@ -292,8 +292,8 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 							{
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obs1"} ],
-									"subject" : { "reference" : "Patient?identifier=old-sys|ident1" }
+									"identifier" : [ { "system" : "observation-system", "value" : "obsWithMatchUrlRef"} ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|existingPat1Ident1" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation"}
 							}
@@ -314,15 +314,15 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 							{
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obs1"} ],
-									"subject" : { "reference" : "Patient?identifier=new-sys|new-val" }
+									"identifier" : [ { "system" : "observation-system", "value" : "obsWithMatchUrlRef"} ],
+									"subject" : { "reference" : "Patient?identifier=new-sys|syntheticCreatePatient" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation"}
 							}
 						]
 					}
 					""",
-				"Inline match URL → synthetic conditional-create for new-sys|new-val (doesn't exist → creates with UUID). 1 synthetic stripped; response has 1 entry. Observation in the new patient's compartment.",
+				"Inline match URL → synthetic conditional-create for new-sys|syntheticCreatePatient (doesn't exist → creates with UUID). 1 synthetic stripped; response has 1 entry. Observation in the new patient's compartment.",
 				List.of(
 					inAnyPartitionExceptDefault("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
 				),
@@ -336,22 +336,22 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 							{
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obs1"} ],
-									"subject" : { "reference" : "Patient?identifier=old-sys|ident1" }
+									"identifier" : [ { "system" : "observation-system", "value" : "obsForPat1"} ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|existingPat1Ident1" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation"}
 							}, {
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obs2"} ],
-									"subject" : { "reference" : "Patient?identifier=old-sys|ident2" }
+									"identifier" : [ { "system" : "observation-system", "value" : "obsForPat2"} ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|existingPat2Ident1" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation"}
 							}
 						]
 					}
 					""",
-				"Two inline match URLs → two synthetics prepended (both NOP: pat1 and pat2 exist). Both stripped. obs1 → pat1's compartment; obs2 → pat2's compartment.",
+				"Two inline match URLs → two synthetics prepended (both NOP: pat1 and pat2 exist). Both stripped. obsForPat1 → pat1's compartment; obsForPat2 → pat2's compartment.",
 				List.of(
 					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat1"),
 					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat2")
@@ -366,15 +366,15 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 							{
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obsTwoIdentA"} ],
-									"subject" : { "reference" : "Patient?identifier=old-sys|ident1" }
+									"identifier" : [ { "system" : "observation-system", "value" : "obsViaIdent1"} ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|existingPat1Ident1" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation"}
 							}, {
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obsTwoIdentB"} ],
-									"subject" : { "reference" : "Patient?identifier=new-sys|newId1" }
+									"identifier" : [ { "system" : "observation-system", "value" : "obsViaIdent2"} ],
+									"subject" : { "reference" : "Patient?identifier=new-sys|existingPat1Ident2" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation"}
 							}
@@ -396,15 +396,15 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 							{
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obs1"} ],
-									"subject" : { "reference" : "Patient?identifier=old-sys|ident1"}
+									"identifier" : [ { "system" : "observation-system", "value" : "condUpdateObs"} ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|existingPat1Ident1"}
 								},
-								"request" : { "method" : "PUT", "url" : "Observation?identifier=observation-system|obs1"}
+								"request" : { "method" : "PUT", "url" : "Observation?identifier=observation-system|condUpdateObs"}
 							}
 						]
 					}
 					""",
-				"Inline match URL → synthetic for pat1 (NOP). 1 synthetic stripped. Conditional PUT Observation: obs1 doesn't exist → creates new.",
+				"Inline match URL → synthetic for pat1 (NOP). 1 synthetic stripped. Conditional PUT Observation: condUpdateObs doesn't exist → creates new.",
 				List.of(
 					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH, "pat1")
 				),
@@ -439,10 +439,10 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 							{
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obsCondNew"} ],
-									"subject" : { "reference" : "Patient?identifier=old-sys|ident1" }
+									"identifier" : [ { "system" : "observation-system", "value" : "condCreateObs"} ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|existingPat1Ident1" }
 								},
-								"request" : { "method" : "POST", "url" : "Observation", "ifNoneExist" : "Observation?identifier=observation-system|obsCondNew"}
+								"request" : { "method" : "POST", "url" : "Observation", "ifNoneExist" : "Observation?identifier=observation-system|condCreateObs"}
 							}
 						]
 					}
@@ -462,7 +462,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 								"resource" : {
 									"resourceType" : "Observation",
 									"identifier" : [ { "system" : "observation-system", "value" : "obsExisting"} ],
-									"subject" : { "reference" : "Patient?identifier=old-sys|ident1" }
+									"subject" : { "reference" : "Patient?identifier=old-sys|existingPat1Ident1" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation", "ifNoneExist" : "Observation?identifier=observation-system|obsExisting"}
 							}
@@ -527,7 +527,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 							{
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obsPh"} ],
+									"identifier" : [ { "system" : "observation-system", "value" : "obsWithPlaceholderRef"} ],
 									"subject" : { "reference" : "Patient/patNewDirect" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation"}
@@ -554,21 +554,21 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 										"code" : "AMB",
 										"display" : "ambulatory"
 									},
-									"subject" : { "reference" : "Patient?identifier=old-sys|identChain" }
+									"subject" : { "reference" : "Patient?identifier=old-sys|sharedMatchUrlPatient" }
 								},
 								"request" : { "method" : "POST", "url" : "Encounter"}
 							}, {
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obsChain"} ],
-									"subject" : { "reference" : "Patient?identifier=old-sys|identChain" }
+									"identifier" : [ { "system" : "observation-system", "value" : "obsWithMatchUrlRef"} ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|sharedMatchUrlPatient" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation"}
 							}
 						]
 					}
 					""",
-				"Both inline match URLs → one shared synthetic (de-duplicated by normalizer). identChain doesn't exist → creates with UUID. 1 synthetic stripped; response has 2 entries. Both in the new patient's compartment.",
+				"Both inline match URLs → one shared synthetic (de-duplicated by normalizer). sharedMatchUrlPatient doesn't exist → creates with UUID. 1 synthetic stripped; response has 2 entries. Both in the new patient's compartment.",
 				List.of(
 					inAnyPartitionExceptDefault("Encounter", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0)
@@ -586,13 +586,13 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 								"fullUrl": "urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3",
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "identNew"} ]
+									"identifier" : [ { "system" : "old-sys", "value" : "newPatient"} ]
 								},
 								"request" : { "method" : "POST", "url" : "Patient"}
 							}, {
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obs1"} ],
+									"identifier" : [ { "system" : "observation-system", "value" : "obsWithUrnRef"} ],
 									"subject" : { "reference" : "urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation"}
@@ -615,7 +615,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 							{
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obs1"} ],
+									"identifier" : [ { "system" : "observation-system", "value" : "obsWithUrnRef"} ],
 									"subject" : { "reference" : "urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation"}
@@ -623,7 +623,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 							    "fullUrl": "urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3",
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "identNew"} ]
+									"identifier" : [ { "system" : "old-sys", "value" : "newPatient"} ]
 								},
 								"request" : { "method" : "POST", "url" : "Patient"}
 							}
@@ -646,13 +646,13 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 								"fullUrl": "urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3",
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "identNew"} ]
+									"identifier" : [ { "system" : "old-sys", "value" : "condCreatePatient"} ]
 								},
-								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|identNew"}
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|condCreatePatient"}
 							}, {
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obs1"} ],
+									"identifier" : [ { "system" : "observation-system", "value" : "obsWithUrnRef"} ],
 									"subject" : { "reference" : "urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation"}
@@ -660,7 +660,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 						]
 					}
 					""",
-				"Patient conditional create: identNew doesn't exist → creates with server-assigned UUID.",
+				"Patient conditional create: condCreatePatient doesn't exist → creates with server-assigned UUID.",
 				List.of(
 					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0)
@@ -675,7 +675,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 							{
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obs1"} ],
+									"identifier" : [ { "system" : "observation-system", "value" : "obsWithUrnRef"} ],
 									"subject" : { "reference" : "urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation"}
@@ -684,14 +684,14 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 								"fullUrl": "urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3",
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "identNew"} ]
+									"identifier" : [ { "system" : "old-sys", "value" : "condCreatePatient"} ]
 								},
-								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|identNew"}
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|condCreatePatient"}
 							}
 						]
 					}
 					""",
-				"Patient conditional create: identNew doesn't exist → creates with server-assigned UUID. Input order preserved in response: [0]=Observation, [1]=Patient.",
+				"Patient conditional create: condCreatePatient doesn't exist → creates with server-assigned UUID. Input order preserved in response: [0]=Observation, [1]=Patient.",
 				List.of(
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 1),
 					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH)
@@ -707,13 +707,13 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 							    "fullUrl": "urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3",
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "ident1"} ]
+									"identifier" : [ { "system" : "old-sys", "value" : "existingPat1Ident1"} ]
 								},
-								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|ident1"}
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|existingPat1Ident1"}
 							}, {
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obs1"} ],
+									"identifier" : [ { "system" : "observation-system", "value" : "obsWithUrnRef"} ],
 									"subject" : { "reference" : "urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation"}
@@ -721,7 +721,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 						]
 					}
 					""",
-				"Patient conditional create: ident1=pat1 exists → NOP (200 OK). The post-preFetch hook substitutes the Observation's urn subject → Patient/pat1 before create.",
+				"Patient conditional create: existingPat1Ident1=pat1 exists → NOP (200 OK). The post-preFetch hook substitutes the Observation's urn subject → Patient/pat1 before create.",
 				List.of(
 					inCompartmentOf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH, "pat1"),
 					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat1")
@@ -737,16 +737,16 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 								"fullUrl" : "urn:uuid:c1111111-1111-1111-1111-111111111111",
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "c11" } ]
+									"identifier" : [ { "system" : "old-sys", "value" : "newPatient" } ]
 								},
 								"request" : { "method" : "POST", "url" : "Patient" }
 							}, {
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obsC11" } ],
+									"identifier" : [ { "system" : "observation-system", "value" : "condUpdateObs" } ],
 									"subject" : { "reference" : "urn:uuid:c1111111-1111-1111-1111-111111111111" }
 								},
-								"request" : { "method" : "PUT", "url" : "Observation?identifier=observation-system|obsC11" }
+								"request" : { "method" : "PUT", "url" : "Observation?identifier=observation-system|condUpdateObs" }
 							}
 						]
 					}
@@ -767,16 +767,16 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 								"fullUrl" : "urn:uuid:c1222222-2222-2222-2222-222222222222",
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "c12" } ]
+									"identifier" : [ { "system" : "old-sys", "value" : "condCreatePatient" } ]
 								},
-								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|c12" }
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|condCreatePatient" }
 							}, {
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obsC12" } ],
+									"identifier" : [ { "system" : "observation-system", "value" : "condUpdateObs" } ],
 									"subject" : { "reference" : "urn:uuid:c1222222-2222-2222-2222-222222222222" }
 								},
-								"request" : { "method" : "PUT", "url" : "Observation?identifier=observation-system|obsC12" }
+								"request" : { "method" : "PUT", "url" : "Observation?identifier=observation-system|condUpdateObs" }
 							}
 						]
 					}
@@ -797,13 +797,13 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 								"fullUrl" : "urn:uuid:cd0a1111-1111-1111-1111-111111111111",
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "condPutUrnNew"} ]
+									"identifier" : [ { "system" : "old-sys", "value" : "condUpdatePatient"} ]
 								},
-								"request" : { "method" : "PUT", "url" : "Patient?identifier=old-sys|condPutUrnNew"}
+								"request" : { "method" : "PUT", "url" : "Patient?identifier=old-sys|condUpdatePatient"}
 							}, {
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obsCondPutUrnNew"} ],
+									"identifier" : [ { "system" : "observation-system", "value" : "obsWithUrnRef"} ],
 									"subject" : { "reference" : "urn:uuid:cd0a1111-1111-1111-1111-111111111111" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation"}
@@ -827,14 +827,14 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 								"fullUrl" : "urn:uuid:cd0b2222-2222-2222-2222-222222222222",
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "ident1"} ],
+									"identifier" : [ { "system" : "old-sys", "value" : "existingPat1Ident1"} ],
 									"active" : true
 								},
-								"request" : { "method" : "PUT", "url" : "Patient?identifier=old-sys|ident1"}
+								"request" : { "method" : "PUT", "url" : "Patient?identifier=old-sys|existingPat1Ident1"}
 							}, {
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obsCondPutUrnMatch"} ],
+									"identifier" : [ { "system" : "observation-system", "value" : "obsWithUrnRef"} ],
 									"subject" : { "reference" : "urn:uuid:cd0b2222-2222-2222-2222-222222222222" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation"}
@@ -858,16 +858,16 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 								"fullUrl" : "urn:uuid:e1533333-3333-3333-3333-333333333333",
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "identCondPost"} ]
+									"identifier" : [ { "system" : "old-sys", "value" : "condCreatePatient"} ]
 								},
-								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|identCondPost"}
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|condCreatePatient"}
 							}, {
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obsUrnCond"} ],
+									"identifier" : [ { "system" : "observation-system", "value" : "condCreateObs"} ],
 									"subject" : { "reference" : "urn:uuid:e1533333-3333-3333-3333-333333333333" }
 								},
-								"request" : { "method" : "POST", "url" : "Observation", "ifNoneExist" : "Observation?identifier=observation-system|obsUrnCond"}
+								"request" : { "method" : "POST", "url" : "Observation", "ifNoneExist" : "Observation?identifier=observation-system|condCreateObs"}
 							}
 						]
 					}
@@ -889,14 +889,14 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 								"resource" : {
 									"resourceType" : "Patient",
 									"id" : "pat1",
-									"identifier" : [ { "system" : "old-sys", "value" : "ident1"} ],
+									"identifier" : [ { "system" : "old-sys", "value" : "existingPat1Ident1"} ],
 									"active" : true
 								},
 								"request" : { "method" : "PUT", "url" : "Patient/pat1"}
 							}, {
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obsUrnPut"} ],
+									"identifier" : [ { "system" : "observation-system", "value" : "obsWithUrnRef"} ],
 									"subject" : { "reference" : "urn:uuid:f2644444-4444-4444-4444-444444444444" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation"}
@@ -921,13 +921,13 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 								"resource" : {
 									"resourceType" : "Patient",
 									"id" : "patUacUrn",
-									"identifier" : [ { "system" : "old-sys", "value" : "identUacUrn"} ]
+									"identifier" : [ { "system" : "old-sys", "value" : "newPatient"} ]
 								},
 								"request" : { "method" : "PUT", "url" : "Patient/patUacUrn"}
 							}, {
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obsUacUrn"} ],
+									"identifier" : [ { "system" : "observation-system", "value" : "obsWithUrnRef"} ],
 									"subject" : { "reference" : "urn:uuid:a3755555-5555-5555-5555-555555555555" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation"}
@@ -952,21 +952,21 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 							{
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "ident1"} ]
+									"identifier" : [ { "system" : "old-sys", "value" : "existingPat1Ident1"} ]
 								},
-								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|ident1"}
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|existingPat1Ident1"}
 							}, {
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obs1"} ],
-									"subject" : { "reference" : "Patient?identifier=old-sys|ident1" }
+									"identifier" : [ { "system" : "observation-system", "value" : "condUpdateObs"} ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|existingPat1Ident1" }
 								},
-								"request" : { "method" : "PUT", "url" : "Observation?identifier=observation-system|obs1"}
+								"request" : { "method" : "PUT", "url" : "Observation?identifier=observation-system|condUpdateObs"}
 							}
 						]
 					}
 					""",
-				"Normalizer rewrites Obs subject (inline match URL) using Patient conditional-create entry's fullUrl. Patient: NOP (ident1=pat1 exists). Obs: PUT no match → creates new.",
+				"Normalizer rewrites Obs subject (inline match URL) using Patient conditional-create entry's fullUrl. Patient: NOP (existingPat1Ident1=pat1 exists). Obs: PUT no match → creates new.",
 				List.of(
 					inCompartmentOf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH, "pat1"),
 					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH, "pat1")
@@ -981,21 +981,21 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 							{
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "newCreate"} ]
+									"identifier" : [ { "system" : "old-sys", "value" : "inBundlePatient"} ]
 								},
-								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|newCreate"}
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|inBundlePatient"}
 							}, {
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obsCC"} ],
-									"subject" : { "reference" : "Patient?identifier=old-sys|newCreate" }
+									"identifier" : [ { "system" : "observation-system", "value" : "condUpdateObs"} ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|inBundlePatient" }
 								},
-								"request" : { "method" : "PUT", "url" : "Observation?identifier=observation-system|obsCC"}
+								"request" : { "method" : "PUT", "url" : "Observation?identifier=observation-system|condUpdateObs"}
 							}
 						]
 					}
 					""",
-				"Normalizer rewrites Obs subject using Patient conditional-create entry's fullUrl. Patient creates new (newCreate doesn't exist). Obs conditional PUT: obsCC doesn't exist → creates.",
+				"Normalizer rewrites Obs subject using Patient conditional-create entry's fullUrl. Patient creates new (inBundlePatient doesn't exist). Obs conditional PUT: condUpdateObs doesn't exist → creates.",
 				List.of(
 					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH, 0)
@@ -1010,16 +1010,16 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 							{
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obsRevBind"} ],
-									"subject" : { "reference" : "Patient?identifier=old-sys|revBind" }
+									"identifier" : [ { "system" : "observation-system", "value" : "obsWithMatchUrlRef"} ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|inBundlePatient" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation"}
 							}, {
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "revBind"} ]
+									"identifier" : [ { "system" : "old-sys", "value" : "inBundlePatient"} ]
 								},
-								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|revBind"}
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|inBundlePatient"}
 							}
 						]
 					}
@@ -1039,15 +1039,15 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 							{
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "ident1"} ],
+									"identifier" : [ { "system" : "old-sys", "value" : "existingPat1Ident1"} ],
 									"active" : true
 								},
-								"request" : { "method" : "PUT", "url" : "Patient?identifier=old-sys|ident1"}
+								"request" : { "method" : "PUT", "url" : "Patient?identifier=old-sys|existingPat1Ident1"}
 							}, {
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obsCondUpdMatched"} ],
-									"subject" : { "reference" : "Patient?identifier=old-sys|ident1" }
+									"identifier" : [ { "system" : "observation-system", "value" : "obsWithMatchUrlRef"} ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|existingPat1Ident1" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation"}
 							}
@@ -1069,21 +1069,21 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 							{
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "brand-new-cu"} ]
+									"identifier" : [ { "system" : "old-sys", "value" : "inBundlePatient"} ]
 								},
-								"request" : { "method" : "PUT", "url" : "Patient?identifier=old-sys|brand-new-cu"}
+								"request" : { "method" : "PUT", "url" : "Patient?identifier=old-sys|inBundlePatient"}
 							}, {
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obsCondUpdNew"} ],
-									"subject" : { "reference" : "Patient?identifier=old-sys|brand-new-cu" }
+									"identifier" : [ { "system" : "observation-system", "value" : "obsWithMatchUrlRef"} ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|inBundlePatient" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation"}
 							}
 						]
 					}
 					""",
-				"Patient PUT: brand-new-cu doesn't exist → creates with server-assigned UUID. Obs references it.",
+				"Patient PUT: inBundlePatient doesn't exist → creates with server-assigned UUID. Obs references it.",
 				List.of(
 					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0)
@@ -1098,14 +1098,14 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 							{
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "c7" } ]
+									"identifier" : [ { "system" : "old-sys", "value" : "inBundlePatient" } ]
 								},
 								"request" : { "method" : "POST", "url" : "Patient" }
 							}, {
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obsC7" } ],
-									"subject" : { "reference" : "Patient?identifier=old-sys|c7" }
+									"identifier" : [ { "system" : "observation-system", "value" : "obsWithMatchUrlRef" } ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|inBundlePatient" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation" }
 							}
@@ -1127,16 +1127,16 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 							{
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "c13" } ]
+									"identifier" : [ { "system" : "old-sys", "value" : "inBundlePatient" } ]
 								},
 								"request" : { "method" : "POST", "url" : "Patient" }
 							}, {
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obsC13" } ],
-									"subject" : { "reference" : "Patient?identifier=old-sys|c13" }
+									"identifier" : [ { "system" : "observation-system", "value" : "condUpdateObs" } ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|inBundlePatient" }
 								},
-								"request" : { "method" : "PUT", "url" : "Observation?identifier=observation-system|obsC13" }
+								"request" : { "method" : "PUT", "url" : "Observation?identifier=observation-system|condUpdateObs" }
 							}
 						]
 					}
@@ -1156,27 +1156,27 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 							{
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "newA"} ]
+									"identifier" : [ { "system" : "old-sys", "value" : "newPatientA"} ]
 								},
-								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|newA"}
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|newPatientA"}
 							}, {
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "newB"} ]
+									"identifier" : [ { "system" : "old-sys", "value" : "newPatientB"} ]
 								},
-								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|newB"}
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|newPatientB"}
 							}, {
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obsA"} ],
-									"subject" : { "reference" : "Patient?identifier=old-sys|newA" }
+									"identifier" : [ { "system" : "observation-system", "value" : "obsForPatientA"} ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|newPatientA" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation"}
 							}, {
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obsB"} ],
-									"subject" : { "reference" : "Patient?identifier=old-sys|newB" }
+									"identifier" : [ { "system" : "observation-system", "value" : "obsForPatientB"} ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|newPatientB" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation"}
 							}
@@ -1201,13 +1201,13 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 								"resource" : {
 									"resourceType" : "Patient",
 									"id" : "pat-uac",
-									"identifier" : [ { "system" : "old-sys", "value" : "uac"} ]
+									"identifier" : [ { "system" : "old-sys", "value" : "newPatient"} ]
 								},
 								"request" : { "method" : "PUT", "url" : "Patient/pat-uac"}
 							}, {
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obsUac"} ],
+									"identifier" : [ { "system" : "observation-system", "value" : "obsWithDirectRef"} ],
 									"subject" : { "reference" : "Patient/pat-uac" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation"}
@@ -1231,7 +1231,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 							{
 								"resource" : {
 									"resourceType" : "Organization",
-									"identifier" : [ { "system" : "org-sys", "value" : "org1"} ],
+									"identifier" : [ { "system" : "org-sys", "value" : "newOrg"} ],
 									"name" : "Acme Hospital"
 								},
 								"request" : { "method" : "POST", "url" : "Organization"}
@@ -1252,15 +1252,15 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 							{
 								"resource" : {
 									"resourceType" : "Organization",
-									"identifier" : [ { "system" : "org-sys", "value" : "org-mixed"} ],
+									"identifier" : [ { "system" : "org-sys", "value" : "newOrg"} ],
 									"name" : "Mixed Bundle Hospital"
 								},
 								"request" : { "method" : "POST", "url" : "Organization"}
 							}, {
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "obs-mixed"} ],
-									"subject" : { "reference" : "Patient?identifier=old-sys|ident1" }
+									"identifier" : [ { "system" : "observation-system", "value" : "obsWithMatchUrlRef"} ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|existingPat1Ident1" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation"}
 							}

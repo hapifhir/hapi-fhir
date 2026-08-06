@@ -32,7 +32,7 @@ class SingleResourceRefScenarios implements ArgumentsProvider {
 							{
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "old-sys", "value" : "identNew"} ],
+									"identifier" : [ { "system" : "old-sys", "value" : "obsWithMatchUrlRef"} ],
 									"subject" : {
 										"reference": "Patient?identifier=system|value"
 										}
