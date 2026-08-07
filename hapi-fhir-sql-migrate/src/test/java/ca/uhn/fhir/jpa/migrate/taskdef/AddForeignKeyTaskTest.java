@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
@@ -12,6 +13,10 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AddForeignKeyTaskTest extends BaseTest {
 
@@ -75,6 +80,39 @@ public class AddForeignKeyTaskTest extends BaseTest {
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
+	public void addForeignKey_multipleMigrationsWithSameFKbutDifferentCascadeOptions_shouldFail(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		// setup
+		before(theTestDatabaseDetails);
+
+		executeSql("CREATE TABLE CUSTOMERS (ID int not null, NAME varchar(255), primary key (ID))");
+		executeSql("CREATE TABLE ORDERS (ID int not null, CUSTOMERID int)");
+
+		// add one migration
+		getMigrator()
+			.addTasks(
+				new MyMigrationTasks(VersionEnum.V3_4_0, false).getTaskList(VersionEnum.V3_3_0, VersionEnum.V3_4_0)
+			);
+		getMigrator().migrate();
+
+		getMigrator()
+			.addTasks(
+				new MyMigrationTasks(VersionEnum.V3_5_0, true).getTaskList(VersionEnum.V3_4_0, VersionEnum.V3_5_0)
+			);
+
+		try {
+			getMigrator()
+				.migrate();
+			fail("Migration should've failed to try and add cascade onto existing constraint");
+		} catch (HapiMigrationException ex) {
+			assertTrue(
+				ex.getCause()
+					.getMessage().contains("Can not add foreign key FK_CO_FOREIGN")
+			);
+		}
+	}
+
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
 	public void addFoeignKey_viaBuilderWithDeleteCascade_cascadesOnPArentDelete(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
 		// setup
 		before(theTestDatabaseDetails);
@@ -82,7 +120,7 @@ public class AddForeignKeyTaskTest extends BaseTest {
 		executeSql("CREATE TABLE CUSTOMERS (ID int not null, NAME varchar(255), primary key (ID))");
 		executeSql("CREATE TABLE ORDERS (ID int not null, CUSTOMERID int)");
 
-		getMigrator().addTasks(new MyMigrationTasks().getTaskList(VersionEnum.V3_3_0, VersionEnum.V3_5_0));
+		getMigrator().addTasks(new MyMigrationTasks(VersionEnum.V3_5_0, true).getTaskList(VersionEnum.V3_3_0, VersionEnum.V3_5_0));
 
 		getMigrator().migrate();
 
@@ -124,12 +162,13 @@ public class AddForeignKeyTaskTest extends BaseTest {
 	}
 
 	private static class MyMigrationTasks extends BaseMigrationTasks<VersionEnum> {
-		MyMigrationTasks() {
-			Builder v = forVersion(VersionEnum.V3_5_0);
+
+		public MyMigrationTasks(VersionEnum theVersionEnum, boolean theWithDeleteCascade) {
+			Builder v = forVersion(theVersionEnum);
 			v.onTable("ORDERS")
 				.addForeignKey("1", "FK_CO_FOREIGN")
 				.toColumn("CUSTOMERID")
-				.withDeleteCascade()
+				.withDeleteCascade(theWithDeleteCascade)
 				.references("CUSTOMERS", "ID");
 		}
 	}

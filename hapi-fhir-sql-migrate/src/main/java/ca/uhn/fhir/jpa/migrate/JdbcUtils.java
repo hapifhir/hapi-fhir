@@ -60,6 +60,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -291,6 +292,21 @@ public class JdbcUtils {
 			String theTableName,
 			@Nullable String theForeignTable)
 			throws SQLException {
+		// so as not to break existing users
+		return getForeignKeysAndRuleset(theConnectionProperties, theTableName, theForeignTable)
+				.keySet();
+	}
+
+	/**
+	 * Same as the above (getForeignKeys)
+	 * but retrieves all index names and
+	 * whether or not that index is declared "on delete cascade".
+	 */
+	public static Map<String, Boolean> getForeignKeysAndRuleset(
+			DriverTypeEnum.ConnectionProperties theConnectionProperties,
+			String theTableName,
+			@Nullable String theForeignTable)
+			throws SQLException {
 		DataSource dataSource = Objects.requireNonNull(theConnectionProperties.getDataSource());
 
 		try (Connection connection = dataSource.getConnection()) {
@@ -312,14 +328,16 @@ public class JdbcUtils {
 
 					String foreignTable = massageIdentifier(metadata, theForeignTable);
 
-					Set<String> fkNames = new HashSet<>();
+					Map<String, Boolean> fkNames = new HashMap<>();
 					for (String nextParentTable : parentTables) {
 						try (ResultSet indexes = metadata.getCrossReference(
 								catalog, schema, nextParentTable, catalog, schema, foreignTable)) {
 							while (indexes.next()) {
 								String fkName = indexes.getString("FK_NAME");
+								boolean cascades =
+										indexes.getShort("DELETE_RULE") == DatabaseMetaData.importedKeyCascade;
 								fkName = fkName.toUpperCase(Locale.US);
-								fkNames.add(fkName);
+								fkNames.put(fkName, cascades);
 							}
 						}
 					}

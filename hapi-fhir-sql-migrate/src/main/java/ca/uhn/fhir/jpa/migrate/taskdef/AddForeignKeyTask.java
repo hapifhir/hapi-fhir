@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -29,7 +30,8 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Set;
+import java.util.Locale;
+import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -74,6 +76,10 @@ public class AddForeignKeyTask extends BaseTableTask {
 		myWithDeleteCascade = true;
 	}
 
+	public void removeDeleteCascade() {
+		myWithDeleteCascade = false;
+	}
+
 	@Override
 	public void validate() {
 		super.validate();
@@ -93,9 +99,19 @@ public class AddForeignKeyTask extends BaseTableTask {
 
 	@Override
 	public void doExecute() throws SQLException {
-
-		Set<String> existing = JdbcUtils.getForeignKeys(getConnectionProperties(), myForeignTableName, getTableName());
-		if (existing.contains(myConstraintName)) {
+		Map<String, Boolean> existing =
+				JdbcUtils.getForeignKeysAndRuleset(getConnectionProperties(), myForeignTableName, getTableName());
+		String constraintName = myConstraintName.toUpperCase(Locale.US);
+		if (existing.containsKey(constraintName)) {
+			// if trying to add delete cascade with same fk constraint,
+			// but on an existing constraint, we throw
+			if (myWithDeleteCascade && !existing.get(constraintName)) {
+				throw new SQLException(Msg.code(3027) + "Can not add foreign key " + myConstraintName
+						+ " to table " + getTableName()
+						+ " with delete cascade because the constraint already exists without it."
+						+ " Add a DropForeignKeyTask for " + myConstraintName
+						+ " at an earlier version in this release.");
+			}
 			logInfo(ourLog, "Already have constraint named {} - No action performed", myConstraintName);
 			return;
 		}
