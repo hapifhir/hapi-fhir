@@ -34,12 +34,23 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Default implementation which provides the {@link PartitionedUrl} list for a certain operation request.
+ * Default {@link IJobPartitionProvider} used by batch2 bulk operations ({@code $reindex},
+ * {@code $delete-expunge}, {@code $mdm-submit}, etc.) to resolve FHIR search URLs into
+ * partition-aware {@link PartitionedUrl} entries.
+ *
+ * <p>For each URL the provider parses the resource type and search parameters via
+ * {@link MatchUrlService}, then delegates to
+ * {@link IRequestPartitionHelperSvc#determineReadPartitionForRequestForSearchType} to
+ * obtain the {@link RequestPartitionId}.  If a resolved partition is
+ * {@link RequestPartitionId#isAllPartitions() allPartitions} and the system knows the
+ * concrete partition list, the single entry is expanded into one {@link PartitionedUrl}
+ * per concrete partition so that downstream job steps can process each partition
+ * independently.</p>
  */
 public class DefaultJobPartitionProvider implements IJobPartitionProvider {
 	protected final IRequestPartitionHelperSvc myRequestPartitionHelper;
 	protected FhirContext myFhirContext;
-	private MatchUrlService myMatchUrlService;
+	private final MatchUrlService myMatchUrlService;
 
 	public DefaultJobPartitionProvider(
 			FhirContext theFhirContext,
@@ -48,12 +59,6 @@ public class DefaultJobPartitionProvider implements IJobPartitionProvider {
 		myFhirContext = theFhirContext;
 		myRequestPartitionHelper = theRequestPartitionHelperSvc;
 		myMatchUrlService = theMatchUrlService;
-	}
-
-	public List<RequestPartitionId> getPartitions(RequestDetails theRequestDetails, String theOperation) {
-		RequestPartitionId partitionId = myRequestPartitionHelper.determineReadPartitionForRequestForServerOperation(
-				theRequestDetails, theOperation);
-		return List.of(partitionId);
 	}
 
 	@Override

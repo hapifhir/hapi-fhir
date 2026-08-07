@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 8083
+title: "The `$delete-expunge`, `$mdm-clear`, and `$mdm-submit` operations
+   did not honor custom partition mappings in multi-tenant environments.
+   This has been fixed so that these operations now correctly resolve and
+   expand partitions per request."

@@ -28,9 +28,11 @@ public class MdmJobDefinitionLoader {
 	public MdmJobDefinitionLoader(
 			JobDefinitionRegistry theJobDefinitionRegistry,
 			JobDefinition<MdmClearJobParameters> theClearJobDefinition,
+			JobDefinition<MdmClearJobParameters> theClearJobDefinitionV2,
 			JobDefinition<MdmSubmitJobParameters> theSubmitJobDefinition) {
 
 		theJobDefinitionRegistry.addJobDefinitionIfNotRegistered(theClearJobDefinition);
+		theJobDefinitionRegistry.addJobDefinitionIfNotRegistered(theClearJobDefinitionV2);
 		theJobDefinitionRegistry.addJobDefinitionIfNotRegistered(theSubmitJobDefinition);
 	}
 }
