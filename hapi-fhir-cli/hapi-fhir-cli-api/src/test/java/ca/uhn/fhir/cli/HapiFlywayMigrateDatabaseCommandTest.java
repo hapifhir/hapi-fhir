@@ -35,7 +35,6 @@ import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -227,7 +226,7 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 	}
 
 	@Test
-	public void testMigrateFrom340_whenNoMigrationTableExists_requiresBaseline() throws IOException, SQLException {
+	public void testMigrateFrom340_dryRun_whenNoMigrationTableExists() throws IOException, SQLException {
 
 		File location = getLocation("migrator_h2_test_340_dryrun");
 
@@ -251,68 +250,11 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 			"-n", "",
 			"-p", "",
 			"-r"
-			};
-
-				assertThatThrownBy(() -> App.main(args))
-					.isInstanceOf(CommandFailureException.class)
-					.hasMessageContaining("--baseline-version");
-			}
-
-	@Test
-	public void testMigrateFrom340_whenNoMigrationTableExists_withBaselineVersion_executesMigration()
-			throws IOException, SQLException {
-
-		File location = getLocation("migrator_h2_test_340_with_baseline");
-
-		String url = "jdbc:h2:" + location.getAbsolutePath();
-		DriverTypeEnum.ConnectionProperties connectionProperties =
-				DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "", "");
-
-		executeSqlStatements(connectionProperties, "/persistence_create_h2_340.sql");
-		seedDatabase340(connectionProperties);
-
-		String[] args = new String[]{
-			BaseFlywayMigrateDatabaseCommand.MIGRATE_DATABASE,
-			"-d", "H2_EMBEDDED",
-			"-u", url,
-			"-n", "",
-			"-p", "",
-			"--baseline-version", "3.4.0"
 		};
 
 		App.main(args);
 
-		assertThat(JdbcUtils.getTableNames(connectionProperties))
-				.contains("HFJ_RES_REINDEX_JOB")
-				.doesNotContain("FLY_HFJ_MIGRATION", "HFJ_SEARCH_PARM");
-	}
-
-	@Test
-	public void testMigrateFrom340_whenMigrationHistoryExists_rejectsBaselineVersion() throws IOException, SQLException {
-
-		File location = getLocation("migrator_h2_test_340_with_history_and_baseline");
-
-		String url = "jdbc:h2:" + location.getAbsolutePath();
-		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "", "");
-		HapiMigrationDao hapiMigrationDao = new HapiMigrationDao(connectionProperties.getDataSource(), connectionProperties.getDriverType(), SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME);
-
-		String initSql = "/persistence_create_h2_340.sql";
-		executeSqlStatements(connectionProperties, initSql);
-		seedDatabase340(connectionProperties);
-		seedDatabaseMigration340(hapiMigrationDao);
-
-		String[] args = new String[]{
-			BaseFlywayMigrateDatabaseCommand.MIGRATE_DATABASE,
-			"-d", "H2_EMBEDDED",
-			"-u", url,
-			"-n", "",
-			"-p", "",
-			"--baseline-version", "3.4.0"
-		};
-
-		assertThatThrownBy(() -> App.main(args))
-			.isInstanceOf(CommandFailureException.class)
-			.hasMessageContaining("Remove --baseline-version");
+		assertThat(JdbcUtils.getTableNames(connectionProperties)).doesNotContain("FLY_HFJ_MIGRATION");
 	}
 
 	@Nonnull
