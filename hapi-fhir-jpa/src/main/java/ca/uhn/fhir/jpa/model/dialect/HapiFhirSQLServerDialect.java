@@ -58,4 +58,15 @@ public class HapiFhirSQLServerDialect extends SQLServerDialect implements IHapiF
 	public DriverTypeEnum getDriverType() {
 		return DriverTypeEnum.MSSQL_2012;
 	}
+
+	/**
+	 * Hibernate 7 raised the default timestamp precision for SQL Server from 6 to 7, which would render
+	 * every timestamp column as {@code datetime2(7)} instead of the {@code datetime2(6)} that HAPI FHIR
+	 * schemas have always used. We keep 6 so that a freshly created schema still matches an existing,
+	 * migrated one.
+	 */
+	@Override
+	public int getDefaultTimestampPrecision() {
+		return 6;
+	}
 }

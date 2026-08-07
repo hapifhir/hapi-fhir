@@ -80,12 +80,13 @@ public class ResetSequencesTestHelper implements AfterEachCallback {
 
 		MappingMetamodelImpl metamodel = (MappingMetamodelImpl)entityManager.getMetamodel();
 
-		EntityPersister persister = metamodel.entityPersister(ResourceTable.class);
+		EntityPersister persister = metamodel.getEntityDescriptor(ResourceTable.class);
 
 		List<Component.ValueGenerationPlan> generationPlans = getFieldValue(persister.getGenerator(), "generationPlans");
 		Component.ValueGenerationPlan plan = generationPlans.get(0);
 
-		HapiSequenceStyleGenerator subGenerator = getFieldValue(plan, "subgenerator");
+		// Hibernate 7 renamed Component.ValueGenerationPlan#subgenerator to #generator.
+		HapiSequenceStyleGenerator subGenerator = getFieldValue(plan, "generator");
 
 		Optimizer optimizer = subGenerator.getOptimizer();
 		if (optimizer instanceof PooledLoThreadLocalOptimizer) {

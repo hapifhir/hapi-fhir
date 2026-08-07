@@ -21,6 +21,26 @@
 			<artifactId>spring-boot-autoconfigure</artifactId>
 			<version>${spring_boot_version}</version>
 		</dependency>
+		<!--
+		Spring Boot 4 split the monolithic spring-boot-autoconfigure into per-technology modules. The JDBC,
+		Hibernate and persistence auto-configuration classes that FhirAutoConfiguration references now live in
+		these modules.
+		-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-jdbc</artifactId>
+			<version>${spring_boot_version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-hibernate</artifactId>
+			<version>${spring_boot_version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-persistence</artifactId>
+			<version>${spring_boot_version}</version>
+		</dependency>
 
 		<!-- Optional dependencies -->
 		<dependency>
