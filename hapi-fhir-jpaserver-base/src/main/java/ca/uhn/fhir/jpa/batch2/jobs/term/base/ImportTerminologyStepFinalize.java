@@ -108,6 +108,7 @@ public class ImportTerminologyStepFinalize<PT extends ImportTerminologyJobParame
 		ImportTerminologyMetadataAttachmentJson jobMetadata =
 				getJobMetadata(theStepExecutionDetails.getInstance().getInstanceId(), myJobPersistence);
 		String codeSystemUrl = jobMetadata.getCodeSystem().getUrl();
+		String codeSystemVersion = jobMetadata.getCodeSystem().getVersion();
 		String stagingVersionId = jobMetadata.getCodeSystemStagingVersionId();
 
 		for (String resourceToActivate : myResourcesToActivate) {
@@ -119,6 +120,8 @@ public class ImportTerminologyStepFinalize<PT extends ImportTerminologyJobParame
 
 		if (theStepExecutionDetails.getParameters().getMode() == ImportTerminologyModeEnum.SNAPSHOT) {
 			myTermCodeSystemStorageSvc.activateStagingCodeSystemVersion(codeSystemUrl, stagingVersionId, makeCurrent);
+		} else if (makeCurrent) {
+			myTermCodeSystemStorageSvc.makeCodeSystemCurrent(codeSystemUrl, codeSystemVersion);
 		}
 
 		ImportTerminologyResultJson resultJson = new ImportTerminologyResultJson();

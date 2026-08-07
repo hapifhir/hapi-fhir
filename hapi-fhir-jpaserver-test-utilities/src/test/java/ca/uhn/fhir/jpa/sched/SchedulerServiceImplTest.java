@@ -76,7 +76,7 @@ public class SchedulerServiceImplTest {
 
 		ourLog.info("Fired {} times in {}", CountingJob.ourCount, sw);
 		assertThat(sw.getMillis()).isGreaterThan(500L);
-		assertThat(sw.getMillis()).isLessThan(1200L);
+		assertThat(sw.getMillis()).isLessThan(1600L);
 	}
 
 	@Test

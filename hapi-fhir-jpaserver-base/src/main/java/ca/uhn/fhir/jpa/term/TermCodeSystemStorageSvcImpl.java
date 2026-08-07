@@ -424,6 +424,22 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	}
 
 	@Override
+	public void makeCodeSystemCurrent(String theSystemUri, String theSystemVersionId) {
+		myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
+			TermCodeSystemVersion codeSystemVersion;
+			if (isBlank(theSystemVersionId)) {
+				codeSystemVersion = myCodeSystemVersionDao.findByCodeSystemUriAndNullVersion(theSystemUri);
+			} else {
+				codeSystemVersion =
+						myCodeSystemVersionDao.findByCodeSystemUriAndVersion(theSystemUri, theSystemVersionId);
+			}
+
+			TermCodeSystem codeSystem = codeSystemVersion.getCodeSystem();
+			codeSystem.setCurrentVersionPid(codeSystemVersion);
+		});
+	}
+
+	@Override
 	@Transactional
 	public void storeNewCodeSystemVersion(
 			String theSystemUri,
@@ -491,6 +507,12 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		if (codeSystemToStore.getPid() == null) {
 			myEntityManager.persist(codeSystemToStore);
+		}
+
+		// Populate the new version as the current version if no other version
+		// is already marked as current.
+		if (codeSystem.getCurrentVersion() == null) {
+			codeSystem.setCurrentVersionPid(codeSystemToStore);
 		}
 
 		ourLog.debug("Validating all codes in CodeSystem for storage (this can take some time for large sets)");

@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 8136
+title: "An issue in the redesigned terminology delta mechanism was fixed where the initial version of a CodeSystem isn't always marked as current."
