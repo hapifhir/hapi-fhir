@@ -111,6 +111,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.interceptor.PatientIdPartitionReferenceScenarios.inAnyPartitionExceptDefault;
+import static ca.uhn.fhir.jpa.interceptor.PatientIdPartitionReferenceScenarios.inCompartmentOf;
 import static ca.uhn.fhir.jpa.interceptor.PatientIdPartitionReferenceScenarios.inSamePartitionAsEntry;
 import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onAllThreads;
 import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onCurrentThread;
@@ -1843,6 +1844,26 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		assertThat(countResourcesByType()).isEqualTo(countsBeforeTransaction);
 	}
 
+	// Created by Claude Fable 5
+	@ParameterizedTest
+	@ArgumentsSource(PatientIdPartitionReferenceScenarios.RejectedWithAllPartitionSearch.class)
+	void testTransaction_allReferenceScenarios_rejectedWithAllPartitionSearch(
+			String theComment, String theBundle, String theExplanation, String theExpectedError) {
+		myPartitionSettings.setAllPartitionSearchSupported(true);
+		setupReferenceScenarioFixture();
+		Map<String, Integer> countsBeforeTransaction = countResourcesByType();
+
+		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, theBundle);
+		ourLog.info("Test case: {}", theComment);
+		ourLog.info("Scenario explanation: {}", theExplanation);
+
+		assertThatThrownBy(() -> mySystemDao.transaction(mySrd, requestBundle))
+			.isInstanceOf(BaseServerResponseException.class)
+			.hasMessage(theExpectedError);
+		// Nothing from the rejected bundle persisted — only the fixture resources exist.
+		assertThat(countResourcesByType()).isEqualTo(countsBeforeTransaction);
+	}
+
 	@ParameterizedTest
 	@ArgumentsSource(PatientIdPartitionCrossPartitionScenarios.class)
 	void testTransaction_crossPartitionReferenceScenarios(
@@ -2065,15 +2086,17 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	}
 
 	/**
-	 * The normalizer's in-bundle identifier index includes unconditional entries and takes precedence over
-	 * any committed match: the inline match URL binds to the in-bundle POST, silently creating a second
-	 * patient with a duplicate identifier, and the observation follows the new patient — not the existing one.
+	 * An unconditional in-bundle patient never shadows the store: the inline match URL resolves to the
+	 * existing patient (the synthetic conditional create no-ops on it), the POST twin is created as a
+	 * separate duplicate-identifier patient, and the observation follows the existing patient — the same
+	 * linkage this bundle produces outside patient id partition mode.
 	 */
 	// Created by Claude Fable 5
 	@Test
-	void testTransaction_unconditionalInBundlePatient_shadowsExistingDbPatient() {
+	void testTransaction_unconditionalTwinWithInlineMatchUrl_existingPatient_referencesExistingNotTwin() {
 		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myPartitionSettings.setAllPartitionSearchSupported(true);
 		createPatient(withId("pat1"), withIdentifier("old-sys", "existingPat1Ident1"));
 
 		String bundle = """
@@ -2100,14 +2123,14 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 
 		assertReferenceScenario(response, List.of(
 			inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
-			inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0)));
+			inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat1")));
 		assertPatientCountInDatabase(2);
 
 		String newPatientId = new IdType(response.getEntry().get(0).getResponse().getLocation())
 			.toUnqualifiedVersionless().getValue();
 		Observation obs = myObservationDao.read(
 			new IdType(response.getEntry().get(1).getResponse().getLocation()).toUnqualifiedVersionless(), mySrd);
-		assertThat(obs.getSubject().getReference()).isEqualTo(newPatientId).isNotEqualTo("Patient/pat1");
+		assertThat(obs.getSubject().getReference()).isEqualTo("Patient/pat1").isNotEqualTo(newPatientId);
 	}
 
 	/**
@@ -2224,50 +2247,10 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 			inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0)));
 	}
 
-	/**
-	 * The normalizer only supports single-identifier inline match URLs; a multi-and-group URL is rejected up
-	 * front (like any other unsupported search parameter shape), before anything is written — even when an
-	 * in-bundle patient carries both identifiers.
-	 */
-	// Created by Claude Fable 5
-	@Test
-	void testTransaction_multiGroupInlineMatchUrl_rejectedAsUnsupported() {
-		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
-		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
-		myPartitionSettings.setAllPartitionSearchSupported(true);
-		Map<String, Integer> countsBeforeTransaction = countResourcesByType();
 
-		String bundle = """
-			{ "resourceType" : "Bundle", "type" : "transaction",
-				"entry" : [
-					{
-						"resource" : {
-							"resourceType" : "Patient",
-							"identifier" : [
-								{ "system" : "old-sys", "value" : "multiGroupPatientIdent1" },
-								{ "system" : "new-sys", "value" : "multiGroupPatientIdent2" }
-							]
-						},
-						"request" : { "method" : "POST", "url" : "Patient" }
-					}, {
-						"resource" : {
-							"resourceType" : "Observation",
-							"identifier" : [ { "system" : "observation-system", "value" : "obsWithMatchUrlRef" } ],
-							"subject" : { "reference" : "Patient?identifier=old-sys|multiGroupPatientIdent1&identifier=new-sys|multiGroupPatientIdent2" }
-						},
-						"request" : { "method" : "POST", "url" : "Observation" }
-					}
-				]
-			}
-			""";
-		assertThatThrownBy(() -> mySystemDao.transaction(
-				mySrd, myFhirContext.newJsonParser().parseResource(Bundle.class, bundle)))
-			.isInstanceOf(PreconditionFailedException.class)
-			.hasMessage("HAPI-3025: Inline match URL matching only supports a single identifier in patient id partition mode: "
-				+ "Patient?identifier=old-sys|multiGroupPatientIdent1&identifier=new-sys|multiGroupPatientIdent2");
 
-		assertThat(countResourcesByType()).as("resource counts by type").isEqualTo(countsBeforeTransaction);
-	}
+
+
 
 	/**
 	 * Same fixture as {@link #runReferenceScenario} except {@code autoCreatePlaceholderReferenceTargets} stays

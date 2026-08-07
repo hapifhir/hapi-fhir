@@ -137,22 +137,23 @@ public class TransactionBundleNormalizer {
 			return 0;
 		}
 
-		Map<IdentifierKey, String> inBundleFullUrlByIdentifier = assignFullUrlsAndIndexIdentifiers(bundleEntries);
+		Map<String, String> inBundleFullUrlByConditionalUrl = assignFullUrlsAndIndexConditionalUrls(bundleEntries);
 		Map<String, MatchUrlInfo> matchUrlToInfo =
-				rewriteInlineMatchUrlReferences(bundleEntries, inBundleFullUrlByIdentifier);
+				rewriteInlineMatchUrlReferences(bundleEntries, inBundleFullUrlByConditionalUrl);
 		return prependSyntheticEntries(theBundle, bundleEntries, matchUrlToInfo, theTransactionDetails);
 	}
 
 	/**
 	 * First pass: ensures every resource-bearing entry has a fullUrl (Patient ID Partition mode keys on it to
-	 * pre-assign Patient POST-creates an id), and indexes in-bundle entries by resource identifier -> fullUrl.
-	 * An inline match URL ref resolves against this index, so it reuses an in-bundle entry (conditional OR
-	 * unconditional) instead of minting a duplicate synthetic.
+	 * pre-assign Patient POST-creates an id), and indexes conditional write entries by conditional URL ->
+	 * fullUrl. An inline match URL ref that is the same question as an in-bundle conditional write — same URL,
+	 * hence necessarily the same referent — reuses that entry instead of minting a duplicate synthetic.
+	 * Resource bodies are deliberately not consulted: an entry only binds a reference through its request URL,
+	 * so references resolve against the store the same way they would outside patient id partition mode.
 	 */
 	@SuppressWarnings("unchecked")
-	private Map<IdentifierKey, String> assignFullUrlsAndIndexIdentifiers(List<IBase> theBundleEntries) {
-		FhirTerser terser = myFhirContext.newTerser();
-		Map<IdentifierKey, String> inBundleFullUrlByIdentifier = new HashMap<>();
+	private Map<String, String> assignFullUrlsAndIndexConditionalUrls(List<IBase> theBundleEntries) {
+		Map<String, String> inBundleFullUrlByConditionalUrl = new HashMap<>();
 		for (IBase entry : theBundleEntries) {
 			IBaseResource resource = myVersionAdapter.getResource(entry);
 			if (resource == null) {
@@ -160,23 +161,27 @@ public class TransactionBundleNormalizer {
 			}
 			String fullUrl = ensureEntryFullUrl(entry, resource);
 
-			// Key on (resourceType, system|value), first-wins. Type-aware so e.g. Patient?identifier=sys|x
-			// can't resolve to a non-Patient entry that happens to carry sys|x.
-			String resourceType = myFhirContext.getResourceType(resource);
-			RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(resource);
-			if (resourceDef.getChildByName("identifier") == null) {
+			String verb = myVersionAdapter.getEntryRequestVerb(myFhirContext, entry);
+			String conditionalUrl = null;
+			if ("POST".equals(verb)) {
+				conditionalUrl = myVersionAdapter.getEntryIfNoneExist(entry);
+			} else if ("PUT".equals(verb)) {
+				String requestUrl = myVersionAdapter.getEntryRequestUrl(entry);
+				if (requestUrl != null && requestUrl.contains("?")) {
+					conditionalUrl = requestUrl;
+				}
+			}
+			if (isBlank(conditionalUrl)) {
 				continue;
 			}
-			for (IBase identifier : terser.getValues(resource, "identifier")) {
-				String value = terser.getSinglePrimitiveValueOrNull(identifier, "value");
-				if (isBlank(value)) {
-					continue;
-				}
-				String system = terser.getSinglePrimitiveValueOrNull(identifier, "system");
-				inBundleFullUrlByIdentifier.putIfAbsent(new IdentifierKey(resourceType, system, value), fullUrl);
+			// A spec-form ifNoneExist may carry only the query part; qualify it with the entry's resource type
+			// so it compares against inline references, which always start with the type.
+			if (!conditionalUrl.contains("?")) {
+				conditionalUrl = myFhirContext.getResourceType(resource) + "?" + conditionalUrl;
 			}
+			inBundleFullUrlByConditionalUrl.putIfAbsent(conditionalUrl, fullUrl);
 		}
-		return inBundleFullUrlByIdentifier;
+		return inBundleFullUrlByConditionalUrl;
 	}
 
 	/**
@@ -206,12 +211,12 @@ public class TransactionBundleNormalizer {
 
 	/**
 	 * Second pass: rewrites each inline match URL reference in a write entry, either to the fullUrl of an
-	 * in-bundle entry carrying the same (type, identifier), or to a synthetic placeholder minted on first
-	 * encounter and reused for duplicates. Returns the minted placeholders, keyed on the raw URL string.
+	 * in-bundle conditional write entry on the same conditional URL, or to a synthetic placeholder minted on
+	 * first encounter and reused for duplicates. Returns the minted placeholders, keyed on the raw URL string.
 	 */
 	@SuppressWarnings("unchecked")
 	private Map<String, MatchUrlInfo> rewriteInlineMatchUrlReferences(
-			List<IBase> theBundleEntries, Map<IdentifierKey, String> theInBundleFullUrlByIdentifier) {
+			List<IBase> theBundleEntries, Map<String, String> theInBundleFullUrlByConditionalUrl) {
 		FhirTerser terser = myFhirContext.newTerser();
 		Map<String, MatchUrlInfo> matchUrlToInfo = new LinkedHashMap<>();
 		for (int entryIndex = 0; entryIndex < theBundleEntries.size(); entryIndex++) {
@@ -238,10 +243,9 @@ public class TransactionBundleNormalizer {
 				// bundle happens to contain (an invalid URL must not slip through by binding in-bundle).
 				CanonicalIdentifier identifier = extractAndValidateIdentifier(refValue, parsed);
 
-				// If an in-bundle entry already carries this (type, identifier), point the inline ref at its
-				// fullUrl (assigned in the first pass) instead of minting a duplicate synthetic placeholder.
-				IdentifierKey refKey = identifierKey(parsed.resourceDefinition().getName(), identifier);
-				String existingFullUrl = theInBundleFullUrlByIdentifier.get(refKey);
+				// If an in-bundle conditional write already asks this exact conditional URL, point the inline
+				// ref at its fullUrl (assigned in the first pass) instead of minting a duplicate synthetic.
+				String existingFullUrl = theInBundleFullUrlByConditionalUrl.get(refValue);
 				if (existingFullUrl != null) {
 					ref.setReference(existingFullUrl);
 					continue;
@@ -348,14 +352,6 @@ public class TransactionBundleNormalizer {
 		}
 	}
 
-	/** Build the {@link IdentifierKey} for an inline match URL of the form {@code Type?identifier=system|value}. */
-	private static IdentifierKey identifierKey(String theResourceType, CanonicalIdentifier theIdentifier) {
-		return new IdentifierKey(
-				theResourceType,
-				theIdentifier.getSystemElement().getValueAsString(),
-				theIdentifier.getValueElement().getValueAsString());
-	}
-
 	/**
 	 * Walks the parsed match URL once: enforces the single-identifier-equality-only contract and returns the
 	 * identifier token the URL consists of.
@@ -401,12 +397,4 @@ public class TransactionBundleNormalizer {
 			RuntimeResourceDefinition resourceDef,
 			CanonicalIdentifier identifier,
 			int firstReferencerEntryIndex) {}
-
-	/** Key matching an inline match URL reference to an in-bundle entry by resource type + identifier token. */
-	private record IdentifierKey(String resourceType, String system, String value) {
-		private IdentifierKey {
-			// Normalise a blank system to null so absent/"" compare equal across resource identifiers and refs.
-			system = isBlank(system) ? null : system;
-		}
-	}
 }

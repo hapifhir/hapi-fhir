@@ -157,6 +157,76 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 		}
 	}
 
+	/**
+	 * Bundles rejected even when all-partition search is supported, as (display name, request bundle JSON,
+	 * explanation, expected error) — for
+	 * {@code PatientIdPartitionInterceptorR4Test#testTransaction_allReferenceScenarios_rejectedWithAllPartitionSearch}.
+	 * These rejections roll back completely.
+	 */
+	// Created by Claude Fable 5
+	static class RejectedWithAllPartitionSearch implements ArgumentsProvider {
+		@Override
+		public Stream<? extends Arguments> provideArguments(ExtensionContext theContext) {
+			return Stream.of(
+				Arguments.of(
+					"Create Patient + Observation | unconditional twin with a matching inline match URL, no existing match",
+					"""
+						{ "resourceType" : "Bundle", "type" : "transaction",
+							"entry" : [
+								{
+									"resource" : {
+										"resourceType" : "Patient",
+										"identifier" : [ { "system" : "old-sys", "value" : "unmatchedTwinPatient" } ]
+									},
+									"request" : { "method" : "POST", "url" : "Patient" }
+								}, {
+									"resource" : {
+										"resourceType" : "Observation",
+										"identifier" : [ { "system" : "observation-system", "value" : "obsWithMatchUrlRef" } ],
+										"subject" : { "reference" : "Patient?identifier=old-sys|unmatchedTwinPatient" }
+									},
+									"request" : { "method" : "POST", "url" : "Observation" }
+								}
+							]
+						}
+						""",
+					"An unconditional POST never binds an inline match URL (references resolve against the store, not entry bodies), so the synthetic conditional create writes a placeholder — and the just-written twin is a second match for the conditional URL, which the post-write duplicate guard rejects. The client's remedies are a urn reference to the twin or a conditional create; the matched variant of this shape is a success scenario (Observation → existing patient).",
+					"HAPI-0542: Unable to process Transaction - Request would cause multiple resources to match URL: "
+							+ "\"Patient?identifier=old-sys|unmatchedTwinPatient\". Does transaction request contain duplicates?"
+				),
+				Arguments.of(
+					"Create Patient + Observation | multi-identifier inline match URL",
+					"""
+						{ "resourceType" : "Bundle", "type" : "transaction",
+							"entry" : [
+								{
+									"resource" : {
+										"resourceType" : "Patient",
+										"identifier" : [
+											{ "system" : "old-sys", "value" : "multiGroupPatientIdent1" },
+											{ "system" : "new-sys", "value" : "multiGroupPatientIdent2" }
+										]
+									},
+									"request" : { "method" : "POST", "url" : "Patient" }
+								}, {
+									"resource" : {
+										"resourceType" : "Observation",
+										"identifier" : [ { "system" : "observation-system", "value" : "obsWithMatchUrlRef" } ],
+										"subject" : { "reference" : "Patient?identifier=old-sys|multiGroupPatientIdent1&identifier=new-sys|multiGroupPatientIdent2" }
+									},
+									"request" : { "method" : "POST", "url" : "Observation" }
+								}
+							]
+						}
+						""",
+					"The normalizer only supports single-identifier inline match URLs; a multi-and-group URL is rejected up front (like any other unsupported search parameter shape), before anything is written — even when an in-bundle patient carries both identifiers.",
+					"HAPI-3025: Inline match URL matching only supports a single identifier in patient id partition mode: "
+							+ "Patient?identifier=old-sys|multiGroupPatientIdent1&identifier=new-sys|multiGroupPatientIdent2"
+				)
+			);
+		}
+	}
+
 	private static Stream<Arguments> scenarios() {
 		// "two conditional-create Patients with the same identifier" is covered by the
 		// testTransaction_*InBundle_dedup tests in PatientIdPartitionInterceptorR4Test.
@@ -1123,62 +1193,95 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				allPartitionSearchOffModeRejectNoCompartment("Observation")
 			),
 			Arguments.of(
-				"Create Patient + Observation | inline match URL binds to the unconditional in-bundle patient",
+				"Create Patient + Observation | inline match URL matches the existing patient, not the identical in-bundle twin",
 				"""
 					{ "resourceType" : "Bundle", "type" : "transaction",
 						"entry" : [
 							{
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "inBundlePatient" } ]
+									"identifier" : [ { "system" : "old-sys", "value" : "existingPat1Ident1" } ]
 								},
 								"request" : { "method" : "POST", "url" : "Patient" }
 							}, {
 								"resource" : {
 									"resourceType" : "Observation",
 									"identifier" : [ { "system" : "observation-system", "value" : "obsWithMatchUrlRef" } ],
-									"subject" : { "reference" : "Patient?identifier=old-sys|inBundlePatient" }
+									"subject" : { "reference" : "Patient?identifier=old-sys|existingPat1Ident1" }
 								},
 								"request" : { "method" : "POST", "url" : "Observation" }
 							}
 						]
 					}
 					""",
-				"The identifier index includes unconditional entries: the ref binds to the in-bundle Patient, no synthetic is minted, and the Observation co-locates with it.",
+				"References resolve against the store, never against entry bodies: the synthetic conditional create matches pat1 (no-op) and the Observation lands in pat1's compartment. The unconditional POST still creates a second patient carrying pat1's identifier, in its own compartment.",
 				List.of(
 					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
-					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0)
+					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat1")
 				),
 				allPartitionSearchOffModeRejectIdlessPatient()
 			),
 			Arguments.of(
-				"Create Patient + Conditionally Update Observation | inline match URL binds to the unconditional in-bundle patient",
+				"Conditionally Create Patient (body without the URL identifier) + Observation | inline match URL binds the same-URL conditional entry, patient matches existing",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"resource" : { "resourceType" : "Patient" },
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|existingPat1Ident1" }
+							}, {
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obsWithMatchUrlRef" } ],
+									"subject" : { "reference" : "Patient?identifier=old-sys|existingPat1Ident1" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation" }
+							}
+						]
+					}
+					""",
+				"Same conditional-URL binding; existingPat1Ident1 = pat1 exists → the conditional create no-ops and both entries land in pat1's compartment.",
+				List.of(
+					inCompartmentOf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH, "pat1"),
+					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat1")
+				),
+				allPartitionSearchOffModeRejectNoCompartment("Observation")
+			),
+			Arguments.of(
+				"Conditionally Create Patient ×2 (duplicates) + Observation | placeholder notice survives the consolidated response",
 				"""
 					{ "resourceType" : "Bundle", "type" : "transaction",
 						"entry" : [
 							{
 								"resource" : {
 									"resourceType" : "Patient",
-									"identifier" : [ { "system" : "old-sys", "value" : "inBundlePatient" } ]
+									"identifier" : [ { "system" : "old-sys", "value" : "dupCondPatient" } ]
 								},
-								"request" : { "method" : "POST", "url" : "Patient" }
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|dupCondPatient" }
+							}, {
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "dupCondPatient" } ]
+								},
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|dupCondPatient" }
 							}, {
 								"resource" : {
 									"resourceType" : "Observation",
-									"identifier" : [ { "system" : "observation-system", "value" : "condUpdateObs" } ],
-									"subject" : { "reference" : "Patient?identifier=old-sys|inBundlePatient" }
+									"identifier" : [ { "system" : "observation-system", "value" : "obsWithMatchUrlRef" } ],
+									"subject" : { "reference" : "Patient?identifier=new-sys|unrelatedNewPatient" }
 								},
-								"request" : { "method" : "PUT", "url" : "Observation?identifier=observation-system|condUpdateObs" }
+								"request" : { "method" : "POST", "url" : "Observation" }
 							}
 						]
 					}
 					""",
-				"Same unconditional-entry binding, with a conditional-PUT Observation.",
+				"The duplicate conditional create consolidates away — the response has one entry fewer than the request, shifting later response positions — and the placeholder-created notice must still land on the Observation.",
 				List.of(
-					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
-					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH, 0)
+					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
+					inAnyPartitionExceptDefault("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
+							.reportingCreatedPlaceholder("Patient")
 				),
-				allPartitionSearchOffModeRejectIdlessPatient()
+				allPartitionSearchOffModeRejectNoCompartment("Observation")
 			),
 			Arguments.of(
 				"Conditionally Create Patient ×2 + Observation ×2 | each observation follows its own new patient",

@@ -511,7 +511,7 @@ class MultiResourceRefScenarios implements ArgumentsProvider {
 				})
 			),
 			Arguments.of(
-				"two in-bundle Patients carrying the same identifier | ref binds the first, no synthetic",
+				"two in-bundle Patients carrying the same identifier | body identifiers never bind, synthetic added",
 				"""
 					{ "resourceType" : "Bundle", "type" : "transaction",
 						"entry" : [
@@ -541,8 +541,91 @@ class MultiResourceRefScenarios implements ArgumentsProvider {
 						]
 					}
 					""",
+				1,
+				bundleAssert(4, theBundle -> {
+					String urn = assertSyntheticEntryAt(theBundle, 0, ResourceType.Patient,
+							"Patient?identifier=sys|duplicatedIdent", "sys", "duplicatedIdent");
+					assertThat(urn).isNotEqualTo("urn:uuid:patient-a").isNotEqualTo("urn:uuid:patient-b");
+					assertSourceEntryAt(theBundle, 3, Observation.class, urn, obs -> obs.getSubject().getReference());
+				})
+			),
+			Arguments.of(
+				"unconditional POST Patient carrying the ref's identifier | body identifiers never bind, synthetic added",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"fullUrl" : "urn:uuid:patient-1",
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [{ "system" : "sys", "value" : "twinIdent" }]
+								},
+								"request" : { "method" : "POST", "url" : "Patient" }
+							},
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"subject" : { "reference": "Patient?identifier=sys|twinIdent" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation" }
+							}
+						]
+					}
+					""",
+				1,
+				bundleAssert(3, theBundle -> {
+					String urn = assertSyntheticEntryAt(theBundle, 0, ResourceType.Patient,
+							"Patient?identifier=sys|twinIdent", "sys", "twinIdent");
+					assertThat(urn).isNotEqualTo("urn:uuid:patient-1");
+					assertSourceEntryAt(theBundle, 2, Observation.class, urn, obs -> obs.getSubject().getReference());
+				})
+			),
+			Arguments.of(
+				"conditional POST Patient whose body lacks the URL's identifier + matching inline match URL | binds by conditional URL",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"fullUrl" : "urn:uuid:patient-1",
+								"resource" : { "resourceType" : "Patient" },
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=sys|condUrlPatient" }
+							},
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"subject" : { "reference": "Patient?identifier=sys|condUrlPatient" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation" }
+							}
+						]
+					}
+					""",
 				0,
-				bundleAssert(3, theBundle -> assertSourceEntryAt(theBundle, 2, Observation.class, "urn:uuid:patient-a",
+				bundleAssert(2, theBundle -> assertSourceEntryAt(theBundle, 1, Observation.class, "urn:uuid:patient-1",
+						obs -> obs.getSubject().getReference()))
+			),
+			Arguments.of(
+				"params-only ifNoneExist + matching inline match URL | binds by the normalized conditional URL",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"fullUrl" : "urn:uuid:patient-1",
+								"resource" : { "resourceType" : "Patient" },
+								"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "identifier=sys|paramsOnlyPatient" }
+							},
+							{
+								"resource" : {
+									"resourceType" : "Observation",
+									"subject" : { "reference": "Patient?identifier=sys|paramsOnlyPatient" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation" }
+							}
+						]
+					}
+					""",
+				0,
+				bundleAssert(2, theBundle -> assertSourceEntryAt(theBundle, 1, Observation.class, "urn:uuid:patient-1",
 						obs -> obs.getSubject().getReference()))
 			)
 		);

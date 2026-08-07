@@ -352,33 +352,6 @@ class TransactionBundleNormalizerTest {
 		assertThat(bundle.getEntryFirstRep().getFullUrl()).isEqualTo(existing);
 	}
 
-	@Test
-	void testNormalize_inlineRefResolvesToExplicitInBundlePatient_noSynthetic() {
-		// An explicit (unconditional) in-bundle Patient + an Observation whose inline match URL targets that
-		// Patient's identifier should resolve to the Patient's fullUrl WITHOUT minting a synthetic conditional-create.
-		String patientFullUrl = "urn:uuid:33333333-3333-3333-3333-333333333333";
-		Bundle bundle = new Bundle();
-		bundle.setType(Bundle.BundleType.TRANSACTION);
-		bundle.addEntry()
-				.setFullUrl(patientFullUrl)
-				.setResource(new Patient().addIdentifier(new Identifier().setSystem("sys").setValue("p7")))
-				.getRequest()
-				.setMethod(Bundle.HTTPVerb.POST)
-				.setUrl("Patient");
-		bundle.addEntry()
-				.setResource(new Observation().setSubject(new Reference("Patient?identifier=sys|p7")))
-				.getRequest()
-				.setMethod(Bundle.HTTPVerb.POST)
-				.setUrl("Observation");
-
-		TransactionDetails transactionDetails = new TransactionDetails();
-		mySvc.normalize(bundle, transactionDetails);
-
-		assertThat(recordedSyntheticEntryCount(transactionDetails)).isZero();
-		assertThat(bundle.getEntry()).hasSize(2);
-		Observation obs = (Observation) bundle.getEntry().get(1).getResource();
-		assertThat(obs.getSubject().getReference()).isEqualTo(patientFullUrl);
-	}
 
 	@SafeVarargs
 	static Consumer<Bundle> bundleAssert(int theExpectedSize, Consumer<Bundle>... theOtherAssertions) {

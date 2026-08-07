@@ -101,7 +101,7 @@ class PatientIdPartitionCrossPartitionScenarios implements ArgumentsProvider {
 				)
 			),
 			Arguments.of(
-				"Create Organization + Observation | performer inline match URL binding the in-bundle Organization entry",
+				"Conditionally Create Organization + Observation | performer inline match URL binds the same-URL in-bundle conditional entry",
 				"""
 					{ "resourceType" : "Bundle", "type" : "transaction",
 						"entry" : [
@@ -111,7 +111,7 @@ class PatientIdPartitionCrossPartitionScenarios implements ArgumentsProvider {
 									"identifier" : [ { "system" : "org-sys", "value" : "inBundleOrg"} ],
 									"name" : "In-Bundle Lab"
 								},
-								"request" : { "method" : "POST", "url" : "Organization"}
+								"request" : { "method" : "POST", "url" : "Organization", "ifNoneExist" : "Organization?identifier=org-sys|inBundleOrg"}
 							}, {
 								"resource" : {
 									"resourceType" : "Observation",
@@ -124,9 +124,9 @@ class PatientIdPartitionCrossPartitionScenarios implements ArgumentsProvider {
 						]
 					}
 					""",
-				"Performer match URL binds to the in-bundle Organization entry's normalizer-assigned fullUrl (no synthetic minted) — a cross-partition reference resolved through the in-bundle index.",
+				"Performer match URL binds to the in-bundle conditional Organization entry carrying the same conditional URL (no synthetic minted) — a cross-partition reference resolved through the in-bundle conditional-URL index.",
 				List.of(
-					inDefaultPartition("Organization", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
+					inDefaultPartition("Organization", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
 					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat1")
 				)
 			),

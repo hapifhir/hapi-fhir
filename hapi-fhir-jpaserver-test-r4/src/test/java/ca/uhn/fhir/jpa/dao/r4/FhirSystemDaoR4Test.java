@@ -1605,6 +1605,41 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	/**
+	 * An inline match URL resolves against the store's pre-transaction state, never against other bundle
+	 * entries: with a matching patient already stored, the observation references it — not the in-bundle
+	 * twin the same transaction POSTs.
+	 */
+	// Created by Claude Fable 5
+	@Test
+	public void testTransactionInlineMatchUrl_inBundleTwinDoesNotShadowExistingPatient() {
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		Patient existing = new Patient();
+		existing.addIdentifier().setSystem("urn:system-a").setValue("twin-1");
+		String existingId = myPatientDao.create(existing, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		Bundle request = new Bundle();
+		request.setType(BundleType.TRANSACTION);
+		Patient twin = new Patient();
+		twin.addIdentifier().setSystem("urn:system-a").setValue("twin-1");
+		request.addEntry().setResource(twin).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
+		addObservation(request, "obs-twin", "Patient?identifier=urn:system-a|twin-1");
+
+		Bundle resp = mySystemDao.transaction(mySrd, request);
+
+		assertThat(resp.getEntry()).hasSize(2);
+		String postedPatientRef = new IdType(resp.getEntry().get(0).getResponse().getLocation())
+			.toUnqualifiedVersionless().getValue();
+		Observation obs = readObservation(resp.getEntry().get(1));
+
+		assertThat(obs.getSubject().getReference()).isEqualTo(existingId).isNotEqualTo(postedPatientRef);
+		SearchParameterMap allPatients = new SearchParameterMap();
+		allPatients.setLoadSynchronous(true);
+		assertEquals(2, myPatientDao.search(allPatients).size().intValue());
+	}
+
+	/**
 	 * Registers a test interceptor wired like {@code PatientIdPartitionInterceptor}: normalize the bundle after
 	 * the other STORAGE_TRANSACTION_PROCESSING hooks (skipping server-constructed batch sub-requests), and strip
 	 * the synthetic response entries once the response is finalized.
