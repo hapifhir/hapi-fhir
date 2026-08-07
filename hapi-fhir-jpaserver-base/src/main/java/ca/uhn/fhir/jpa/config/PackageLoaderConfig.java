@@ -20,18 +20,31 @@
 package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.packages.loader.IPackageUrlAllowListProvider;
+import ca.uhn.fhir.jpa.packages.loader.PackageLoaderSettings;
 import ca.uhn.fhir.jpa.packages.loader.PackageLoaderSvc;
 import ca.uhn.fhir.jpa.packages.loader.PackageResourceParsingSvc;
 import org.hl7.fhir.utilities.npm.PackageServer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Optional;
+
 @Configuration
 public class PackageLoaderConfig {
 
 	@Bean
-	public PackageLoaderSvc packageLoaderSvc() {
-		PackageLoaderSvc svc = new PackageLoaderSvc();
+	public PackageLoaderSettings loaderSettings(Optional<IPackageUrlAllowListProvider> theProvider) {
+		return theProvider
+				.map(t -> PackageLoaderSettings.restricted(
+						theProvider.get().getRemotePrefixes(), theProvider.get().getLocalPrefixes()))
+				.orElse(PackageLoaderSettings.unrestricted());
+	}
+
+	@Bean
+	public PackageLoaderSvc packageLoaderSvc(PackageLoaderSettings theLoaderSettings) {
+		PackageLoaderSvc.initSettings(theLoaderSettings);
+		PackageLoaderSvc svc = new PackageLoaderSvc(theLoaderSettings);
 		svc.getPackageServers().clear();
 		svc.getPackageServers().add(PackageServer.primaryServer());
 		svc.getPackageServers().add(PackageServer.secondaryServer());

@@ -28,6 +28,9 @@ import ca.uhn.fhir.rest.server.messaging.IMessage;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.ChannelInterceptor;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * Adapt a Spring Messaging (JMS) Queue to {@link IChannelProducer}
  *
@@ -51,6 +54,27 @@ public class SpringMessagingProducerAdapter<T> implements IChannelProducer<T> {
 
 	@Override
 	public ISendResult send(IMessage<T> theMessage) {
+		Message<?> message = validateAndCastToSpringMessage(theMessage);
+
+		return new SpringMessagingSendResult(mySpringMessagingChannelProducer.send(message));
+	}
+
+	/**
+	 * Delegate the whole batch to the underlying Spring Messaging producer in a single call so that producers able to
+	 * amortize the cost of a batch (for example over a single transacted JMS session) can do so. Every message is
+	 * validated first, exactly as {@link #send(IMessage)} validates a single message.
+	 */
+	@Override
+	public List<ISendResult> sendAll(List<IMessage<T>> theMessages) {
+		List<Message<?>> messages =
+				theMessages.stream().map(this::validateAndCastToSpringMessage).collect(Collectors.toList());
+
+		return mySpringMessagingChannelProducer.sendAll(messages).stream()
+				.map(SpringMessagingSendResult::new)
+				.collect(Collectors.toList());
+	}
+
+	private Message<?> validateAndCastToSpringMessage(IMessage<T> theMessage) {
 		if (!myMessageType.isAssignableFrom(theMessage.getClass())) {
 			throw new ConfigurationException(Msg.code(2665) + "Expecting message of type " + myMessageType
 					+ ". But received message of type: " + theMessage.getClass());
@@ -60,9 +84,8 @@ public class SpringMessagingProducerAdapter<T> implements IChannelProducer<T> {
 			throw new ConfigurationException(Msg.code(2664) + "Expecting message of type " + Message.class
 					+ ". But received message of type: " + theMessage.getClass());
 		}
-		Message<?> message = (Message<?>) theMessage;
 
-		return new SpringMessagingSendResult(mySpringMessagingChannelProducer.send(message));
+		return (Message<?>) theMessage;
 	}
 
 	public void addInterceptor(ChannelInterceptor theInterceptor) {
