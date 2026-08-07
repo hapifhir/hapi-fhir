@@ -2,7 +2,4 @@
 type: add
 issue: 8170
 jira: SMILE-11705
-title: "In Patient ID partition mode, when the underlying storage supports an all-partition search, transaction
-  bundles containing placeholder or conditional Patients are now fully supported. Patient entries referenced by
-  urn placeholders or by inline match URLs are resolved to a concrete Patient regardless of the order of entries
-  in the bundle."
+title: "Patient ID partition mode now supports conditional references to Patient resources in transaction Bundles, as well as auto-creating placeholders for these references when there is no matching Patient.  This support requires storage that supports all-partition search."
