@@ -39,6 +39,8 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -219,6 +221,7 @@ import static ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick;
 import static ca.uhn.fhir.rest.param.BaseParamWithPrefix.MSG_PREFIX_INVALID_FORMAT;
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -258,10 +261,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		myStorageSettings.setIndexOnContainedResources(new JpaStorageSettings().isIndexOnContainedResources());
 
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
-		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(false);
-		mySearchCoordinatorSvcRaw.cancelAllActiveSearches();
 		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 
 		myClient.unregisterInterceptor(myCapturingInterceptor);
@@ -570,7 +570,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		Bundle response = myClient
 			.search()
-			.byUrl("Observation?part-of=" + procedureId + "&derived-from:DocumentReference.contenttype=application/vnd.mfer&_total=accurate&_count=2")
+			.byUrl("Observation?part-of=" + procedureId + "&derived-from:DocumentReference.contenttype=application/vnd.mfer&_total=accurate&_sort=_id&_count=2")
 			.returnBundle(Bundle.class)
 			.execute();
 
@@ -578,9 +578,13 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		int pageCount = 0;
 		while (response != null) {
 			obsCount += response.getEntry().size();
+			List<String> nextIds = toUnqualifiedVersionlessIdValues(response);
+			ourLog.info("Loaded page of IDs: {}", nextIds);
 			pageCount++;
 			if (response.getLink("next") != null) {
+				myCaptureQueriesListener.clear();
 				response = myClient.loadPage().next(response).execute();
+				myCaptureQueriesListener.logSelectQueries();
 			} else {
 				response = null;
 			}
@@ -680,6 +684,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.forResource("Patient")
 			.include(IBaseResource.INCLUDE_ALL)
 			.count(2)
+			.totalMode(SearchTotalModeEnum.ACCURATE)
 			.returnBundle(Bundle.class)
 			.execute();
 		assertNotNull(output);
@@ -693,6 +698,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.include(IBaseResource.INCLUDE_ALL)
 			.offset(2)
 			.cacheControl(CacheControlDirective.noCache())
+			.totalMode(SearchTotalModeEnum.ACCURATE)
 			.returnBundle(Bundle.class)
 			.execute();
 		assertNotNull(output);
@@ -751,7 +757,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@MethodSource("createFhirSearchWithChainingAndCountParams")
 	public void testFhirSearch_withChainingAndPagination_searchFinishes(Map<Integer, Integer> theRefCountToResourceCount, Integer theMaxPageSize, List<Integer> thePrefetchThresholds) {
 		// Given
-		mySearchCoordinatorSvcRaw.setMaxMillisToWaitForRemoteResultsForUnitTest(30000);
 		if (theMaxPageSize != null) {
 			myPagingProvider.setMaximumPageSize(theMaxPageSize);
 		}
@@ -784,7 +789,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.execute();
 
 		List<String> ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
-		ourLog.info("Loaded page 1 with ids: {}", ids);
+		ourLog.info("Loaded page 1 with requested count {} and got {} ids: {}", count, ids.size(), ids);
 		assertThat(output.getEntry()).hasSize(Math.min(count, totalNumberOfPatientsCreated));
 
 		// When: loading the next page
@@ -942,29 +947,49 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testSearchFetchPageBeyondEnd() {
 		for (int i = 0; i < 10; i++) {
-			Organization o = new Organization();
-			o.setId("O" + i);
-			o.setName("O" + i);
-			IIdType oid = myClient.update().resource(o).execute().getId().toUnqualifiedVersionless();
+			Patient p = new Patient();
+			p.setId("P" + i);
+			p.getNameFirstRep().setFamily(leftPad(Integer.toString(i), 5, '0'));
+			myClient.update().resource(p).execute().getId().toUnqualifiedVersionless();
 		}
+
+		// Load the 0-2 page
 
 		Bundle output = myClient
 			.search()
-			.forResource("Organization")
+			.forResource("Patient")
 			.count(3)
+			.sort(new SortSpec(Patient.SP_FAMILY, SortOrderEnum.ASC))
 			.returnBundle(Bundle.class)
 			.execute();
 
+		assertThat(extractFamilyNamesFromPatientsInBundle(output)).containsExactly(
+			"00000", "00001", "00002"
+		);
+
+		// Try to load an offset past the end
+
 		String nextPageUrl = output.getLink("next").getUrl();
-		String url = nextPageUrl.replace("_getpagesoffset=3", "_getpagesoffset=999");
-		ourLog.info("Going to request URL: {}", url);
+		String pastTheEndUrl = nextPageUrl.replace("_getpagesoffset=3", "_getpagesoffset=999");
+		ourLog.info("Going to request URL: {}", pastTheEndUrl);
 
 		output = myClient
 			.loadPage()
-			.byUrl(url)
+			.byUrl(pastTheEndUrl)
 			.andReturnBundle(Bundle.class)
 			.execute();
 		assertThat(output.getEntry()).isEmpty();
+
+		// Now load the original 3-5 page
+
+		output = myClient
+			.loadPage()
+			.byUrl(nextPageUrl)
+			.andReturnBundle(Bundle.class)
+			.execute();
+		assertThat(extractFamilyNamesFromPatientsInBundle(output)).containsExactly(
+			"00003", "00004", "00005"
+		);
 
 	}
 
@@ -3302,7 +3327,17 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals("Patient", bundle.getEntry().get(0).getResource().getIdElement().getResourceType());
 		assertEquals("Patient", bundle.getEntry().get(1).getResource().getIdElement().getResourceType());
 		assertEquals("Organization", bundle.getEntry().get(2).getResource().getIdElement().getResourceType());
-		assertEquals(10, bundle.getTotal());
+
+		// Load the next page
+		bundle = myClient
+			.loadPage()
+			.next(bundle)
+			.execute();
+
+		assertEquals("Patient", bundle.getEntry().get(0).getResource().getIdElement().getResourceType());
+		assertEquals("Patient", bundle.getEntry().get(1).getResource().getIdElement().getResourceType());
+		assertEquals("Organization", bundle.getEntry().get(2).getResource().getIdElement().getResourceType());
+		assertEquals(10, bundle.getTotalElement().getValue());
 	}
 
 	@Test
@@ -3746,9 +3781,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 		ourLog.debug("Result: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
-		assertEquals(1, bundle.getTotal());
 		assertThat(bundle.getEntry()).hasSize(1);
-		assertEquals(id2.getIdPart(), bundle.getEntry().get(0).getResource().getIdElement().getIdPart());
+			assertEquals(id2.getIdPart(), bundle.getEntry().get(0).getResource().getIdElement().getIdPart());
 	}
 
 	@Test
@@ -4560,23 +4594,37 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		for (int i = 1; i <= 20; i++) {
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue(Integer.toString(i));
-			patient.addName().setFamily(methodName).addGiven("Joe");
+			patient.addName().setFamily("foo" + leftPad(Integer.toString(i), 2, '0')).addGiven("Joe");
 			myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		List<String> linkNext = Lists.newArrayList();
+		Set<String> linkNext = new HashSet<>();
 		for (int i = 0; i < 100; i++) {
-			Bundle bundle = myClient.search().forResource(Patient.class).where(Patient.NAME.matches().value("testSearchPagingKeepsOldSearches")).count(5).returnBundle(Bundle.class).execute();
+			Bundle bundle = myClient
+				.search()
+				.forResource(Patient.class)
+				.where(Patient.NAME.matches().value("foo"))
+				.count(5)
+				.sort(new SortSpec(Patient.SP_FAMILY, SortOrderEnum.ASC))
+				.returnBundle(Bundle.class).execute();
 			assertTrue(isNotBlank(bundle.getLink("next").getUrl()));
 			assertThat(bundle.getEntry()).hasSize(5);
+			List<String> familyNames = extractFamilyNamesFromPatientsInBundle(bundle);
+			assertThat(familyNames).containsExactly("foo01", "foo02", "foo03", "foo04", "foo05");
 			linkNext.add(bundle.getLink("next").getUrl());
 		}
+		assertThat(linkNext).hasSize(100);
+
+		logAllSearches();
+		logAllSearchResults();
 
 		int index = 0;
 		for (String nextLink : linkNext) {
 			ourLog.info("Fetching index {}", index++);
 			Bundle b = myClient.fetchResourceFromUrl(Bundle.class, nextLink);
 			assertThat(b.getEntry()).hasSize(5);
+			List<String> familyNames = extractFamilyNamesFromPatientsInBundle(b);
+			assertThat(familyNames).containsExactly("foo06", "foo07", "foo08", "foo09", "foo10");
 		}
 	}
 
@@ -5127,7 +5175,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Disabled("Not useful with the search coordinator thread pool removed")
 	public void testSearchWithCountNotSet() {
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(1);
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(200);
 
 		for (int i = 0; i < 10; i++) {
 			Patient pat = new Patient();
@@ -5165,38 +5212,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testSearchWithCountSearchResultsUpTo20() {
-		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(1);
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(200);
-		myStorageSettings.setCountSearchResultsUpTo(20);
-
-		for (int i = 0; i < 10; i++) {
-			Patient pat = new Patient();
-			pat.addIdentifier().setSystem("urn:system:rpr4").setValue("test" + i);
-			myClient.create().resource(pat).execute();
-		}
-
-		StopWatch sw = new StopWatch();
-
-		Bundle found = myClient
-			.search()
-			.forResource(Patient.class)
-			.returnBundle(Bundle.class)
-			.count(1)
-			.execute();
-
-		assertThat(sw.getMillis()).isGreaterThanOrEqualTo(1000L);
-
-		assertEquals(10, found.getTotalElement().getValue().intValue());
-		assertThat(found.getEntry()).hasSize(1);
-
-	}
-
-	@Test
 	@Disabled("Not useful with the search coordinator thread pool removed")
 	public void testSearchWithCountSearchResultsUpTo5() {
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(1);
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(200);
 		myStorageSettings.setCountSearchResultsUpTo(5);
 
 		for (int i = 0; i < 10; i++) {
@@ -6659,7 +6677,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	public void testValidateResourceHuge() throws IOException {
 
 		Patient patient = new Patient();
-		patient.addName().addGiven("James" + StringUtils.leftPad("James", 1000000, 'A'));
+		patient.addName().addGiven("James" + leftPad("James", 1000000, 'A'));
 		patient.setBirthDateElement(new DateType("2011-02-02"));
 
 		Parameters input = new Parameters();
@@ -8075,4 +8093,12 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.hasMessage("HTTP 400 Bad Request: HAPI-2498: Unsupported search modifier(s): \"[:identifier]\" for resource type \"Observation\". Valid search modifiers are: [:contains, :exact, :in, :iterate, :missing, :not-in, :of-type, :recurse, :text]");
 		}
 	}
+
+
+	@Nonnull
+	private static List<String> extractFamilyNamesFromPatientsInBundle(Bundle bundle) {
+		List<String> familyNames = bundle.getEntry().stream().map(t -> ((Patient)t.getResource()).getName().get(0).getFamily()).toList();
+		return familyNames;
+	}
+
 }

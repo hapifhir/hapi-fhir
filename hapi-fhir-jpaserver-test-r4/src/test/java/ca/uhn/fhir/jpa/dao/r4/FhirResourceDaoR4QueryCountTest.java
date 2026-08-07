@@ -38,7 +38,7 @@ import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.reindex.ReindexTestHelper;
-import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
+import ca.uhn.fhir.jpa.search.exec.JpaSearchBundleProviderFirstPage;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
@@ -46,6 +46,7 @@ import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.test.util.ComboSearchParameterTestHelper;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.util.SqlQuery;
+import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -55,6 +56,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -66,6 +68,8 @@ import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.consent.ConsentOperationStatusEnum;
+import ca.uhn.fhir.rest.server.interceptor.consent.ConsentOutcome;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
@@ -76,6 +80,7 @@ import jakarta.annotation.Nonnull;
 import org.assertj.core.api.Condition;
 import org.assertj.core.data.Index;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -158,6 +163,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -208,6 +214,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	private AuthorizationInterceptor myAuthInterceptor;
 	private ConsentInterceptor myConsentInterceptor;
 	private ComboSearchParameterTestHelper myComboSearchParameterTestHelper;
+	@Mock
+	private IConsentService myConsentService;
 
 	@AfterEach
 	public void afterResetDao() {
@@ -1215,20 +1223,20 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		params.setCount(new IntegerType(10));
 		IBundleProvider outcome = myPatientDao.patientInstanceEverything(null, mySrd, params, pid);
 		assertEquals(10, outcome.getResources(0, 10).size());
-		assertEquals(5, myCaptureQueriesListener.countSelectQueries());
-		assertEquals(17, myCaptureQueriesListener.countInsertQueries());
-		assertEquals(1, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(3, myCaptureQueriesListener.countCommits());
+		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(16, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
 
 		// Page 2
 		myCaptureQueriesListener.clear();
 		outcome = myPagingProvider.retrieveResultList(new SystemRequestDetails(), outcome.getUuid());
 		assertEquals(10, outcome.getResources(0, 10).size());
 		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(4, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(4, myCaptureQueriesListener.countCommits());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
 
 	}
 
@@ -1866,6 +1874,133 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 
+	@ParameterizedTest
+	@CsvSource(useHeadersInDisplayName = true, textBlock = """
+		UseQueryCache , UseConsentInterceptor, ExpectSelect, ExpectInsert
+		HIT           , false                , 4           , 0
+		MISS          , false                , 3           , 15
+		SKIP          , false                , 2           , 0
+		HIT           , true                 , 2           , 15
+		MISS          , true                 , 2           , 15
+		SKIP          , true                 , 3           , 0
+		""")
+	void testSearch_FirstPage(QueryCacheMode theUseQueryCache, boolean theUseConsentInterceptor, int theExpectSelect, int theExpectInsert) {
+		// Setup
+		create150Patients();
+
+		if (theUseQueryCache == QueryCacheMode.HIT) {
+			// Perform the search once to warm the cache
+			Bundle outcome = myClient
+				.search()
+				.forResource("Patient")
+				.returnBundle(Bundle.class)
+				.execute();
+			assertEquals(10, outcome.getEntry().size());
+		}
+
+		if (theUseConsentInterceptor) {
+			when(myConsentService.shouldProcessCanSeeResource(any(), any())).thenReturn(true);
+			when(myConsentService.startOperation(any(), any())).thenReturn(new ConsentOutcome(ConsentOperationStatusEnum.PROCEED));
+			when(myConsentService.canSeeResource(any(), any(), any())).thenReturn(new ConsentOutcome(ConsentOperationStatusEnum.PROCEED));
+			when(myConsentService.willSeeResource(any(), any(), any())).thenReturn(new ConsentOutcome(ConsentOperationStatusEnum.PROCEED));
+			registerInterceptor(new ConsentInterceptor(myConsentService));
+		}
+
+		// Test
+		CacheControlDirective cacheControl = switch (theUseQueryCache) {
+			case HIT, MISS -> new CacheControlDirective();
+			case SKIP -> new CacheControlDirective().setNoCache(true).setNoStore(true).setMaxResults(10);
+		};
+
+		myCaptureQueriesListener.clear();
+		Bundle outcome = myClient
+			.search()
+			.forResource("Patient")
+			.cacheControl(cacheControl)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		// Verify
+		assertEquals(10, outcome.getEntry().size());
+		assertThat(myCaptureQueriesListener).has(
+			onAllThreads()
+				.selectCount(theExpectSelect)
+				.insertCount(theExpectInsert)
+				.connectionCount(1)
+				.commitCount(1)
+				.updateCount(0)
+		);
+	}
+
+	@ParameterizedTest
+	@CsvSource(useHeadersInDisplayName = true, textBlock = """
+		UseQueryCache , UseConsentInterceptor, ExpectSelect, ExpectInsert, ExpectUpdate
+		HIT           , false                , 3           , 0           , 0
+		MISS          , false                , 4           , 136         , 1
+		SKIP          , false                , 2           , 0           , 0
+		HIT           , true                 , 5           , 136         , 1
+		MISS          , true                 , 5           , 136         , 1
+		SKIP          , true                 , 3           , 0           , 0
+		""")
+	void testSearch_SecondPage(QueryCacheMode theUseQueryCache, boolean theUseConsentInterceptor, int theExpectSelect, int theExpectInsert, int theExpectUpdate) {
+		// Setup
+		create150Patients();
+
+		if (theUseQueryCache == QueryCacheMode.HIT) {
+			// Perform the search once to warm the cache
+			Bundle outcome = myClient
+				.search()
+				.forResource("Patient")
+				.returnBundle(Bundle.class)
+				.execute();
+			assertEquals(10, outcome.getEntry().size());
+
+			outcome = myClient
+				.loadPage()
+				.next(outcome)
+				.execute();
+			assertEquals(10, outcome.getEntry().size());
+		}
+
+		if (theUseConsentInterceptor) {
+			when(myConsentService.shouldProcessCanSeeResource(any(), any())).thenReturn(true);
+			when(myConsentService.startOperation(any(), any())).thenReturn(new ConsentOutcome(ConsentOperationStatusEnum.PROCEED));
+			when(myConsentService.canSeeResource(any(), any(), any())).thenReturn(new ConsentOutcome(ConsentOperationStatusEnum.PROCEED));
+			when(myConsentService.willSeeResource(any(), any(), any())).thenReturn(new ConsentOutcome(ConsentOperationStatusEnum.PROCEED));
+			registerInterceptor(new ConsentInterceptor(myConsentService));
+		}
+
+		// Test
+
+		IQuery<IBaseBundle> search = myClient
+			.search()
+			.forResource("Patient");
+		if (theUseQueryCache == QueryCacheMode.SKIP) {
+			search = search.offset(0).count(10);
+		}
+
+		Bundle outcome = search
+			.returnBundle(Bundle.class)
+			.execute();
+		myCaptureQueriesListener.clear();
+		outcome = myClient
+			.loadPage()
+			.next(outcome)
+			.execute();
+
+		// Verify
+		assertEquals(10, outcome.getEntry().size());
+		assertThat(myCaptureQueriesListener).has(
+			onAllThreads()
+				.connectionCount(1)
+				.commitCount(1)
+				.selectCount(theExpectSelect)
+				.updateCount(theExpectUpdate)
+				.insertCount(theExpectInsert)
+		);
+	}
+
+
 	/**
 	 * See the class javadoc before changing the counts in this test!
 	 */
@@ -1890,10 +2025,10 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		// could stand to reduce this!
 		assertThat(myCaptureQueriesListener).has(
 			onAllThreads()
-				.selectCount(56)
+				.selectCount(50)
 				.insertCount(151)
-				.updateCount(3)
-				.commitCount(71)
+				.updateCount(1)
+				.commitCount(17)
 				.noOtherCounts()
 		);
 	}
@@ -1918,8 +2053,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		foundIds.sort(Comparator.naturalOrder());
 		assertEquals(ids, foundIds);
 
-		assertEquals(22, myCaptureQueriesListener.countSelectQueries());
-		assertEquals(21, myCaptureQueriesListener.countCommits());
+		assertEquals(10, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(3, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 	}
 
@@ -2280,15 +2415,15 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		map.addInclude(Observation.INCLUDE_PATIENT);
 		map.addInclude(Observation.INCLUDE_SUBJECT);
 		IBundleProvider results = myObservationDao.search(map, mySrd);
-		assertEquals(PersistedJpaSearchFirstPageBundleProvider.class, results.getClass());
+		assertEquals(JpaSearchBundleProviderFirstPage.class, results.getClass());
 		ids = toUnqualifiedVersionlessIdValues(results);
 		assertThat(ids).containsExactlyInAnyOrder("Patient/A", "Encounter/E", "Observation/O");
 
 		// Verify
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(7);
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(6);
 		assertThat(myCaptureQueriesListener.getInsertQueriesForCurrentThread()).hasSize(3);
-		assertThat(myCaptureQueriesListener.getUpdateQueriesForCurrentThread()).hasSize(1);
+		assertThat(myCaptureQueriesListener.getUpdateQueriesForCurrentThread()).hasSize(0);
 		assertThat(myCaptureQueriesListener.getDeleteQueriesForCurrentThread()).isEmpty();
 		runInTransaction(() -> {
 			assertEquals(1, mySearchEntityDao.count());
@@ -2318,9 +2453,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		// Verify
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(10);
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(9);
 		assertThat(myCaptureQueriesListener.getInsertQueriesForCurrentThread()).hasSize(3);
-		assertThat(myCaptureQueriesListener.getUpdateQueriesForCurrentThread()).hasSize(1);
+		assertThat(myCaptureQueriesListener.getUpdateQueriesForCurrentThread()).hasSize(0);
 		assertThat(myCaptureQueriesListener.getDeleteQueriesForCurrentThread()).isEmpty();
 	}
 
@@ -4301,10 +4436,13 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			ourPatientProvider.waitForUpdateCount(200);
 
 			// Validate
-			assertEquals(7, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-			assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
-			assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-			assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+			assertThat(myCaptureQueriesListener).has(
+				onCurrentThread()
+					.selectCount(7)
+					.commitCount(3)
+					.connectionCount(3)
+					.noOtherCounts()
+			);
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
 		}
@@ -4343,33 +4481,40 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		mySubscriptionTriggeringSvc.runDeliveryPass();
 
-		myCaptureQueriesListener.logInsertQueries();
-		assertEquals(15, myCaptureQueriesListener.countSelectQueries());
-		assertEquals(201, myCaptureQueriesListener.countInsertQueries());
-		assertEquals(3, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertThat(myCaptureQueriesListener).has(
+			onCurrentThread()
+				.selectCount(9)
+				.insertCount(201)
+				.commitCount(2)
+				.updateCount(1)
+				.connectionCount(2)
+				.noOtherCounts()
+		);
 
 		myCaptureQueriesListener.clear();
 		mySubscriptionTriggeringSvc.runDeliveryPass();
 
-		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
-		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertThat(myCaptureQueriesListener).has(
+			onCurrentThread()
+				.selectCount(2)
+				.commitCount(1)
+				.connectionCount(1)
+				.noOtherCounts()
+		);
 
 		myCaptureQueriesListener.clear();
 		mySubscriptionTriggeringSvc.runDeliveryPass();
 
-		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
-		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertThat(myCaptureQueriesListener).has(
+			onCurrentThread()
+				.noOtherCounts()
+		);
 
 		SubscriptionTriggeringSvcImpl svc = ProxyUtil.getSingletonTarget(mySubscriptionTriggeringSvc, SubscriptionTriggeringSvcImpl.class);
 		assertEquals(0, svc.getActiveJobCount());
 
 		assertEquals(0, ourPatientProvider.getCountCreate());
-		await().until(() -> ourPatientProvider.getCountUpdate() == 200);
+		await().until(ourPatientProvider::getCountUpdate, t -> t == 200);
 
 	}
 
@@ -5180,4 +5325,11 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myConsentInterceptor = new ConsentInterceptor(new IConsentService() {});
 		myInterceptorRegistry.registerInterceptor(myConsentInterceptor);
 	}
+
+	enum QueryCacheMode {
+		HIT,
+		MISS,
+		SKIP
+	}
+
 }

@@ -1646,8 +1646,8 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		range.setUpperBound(new DateParam(ParamPrefixEnum.LESSTHAN, 2000000));
 		criteriaUrl.setLastUpdated(range);
 		criteriaUrl.setSort(new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.ASC));
-		IBundleProvider results = myObservationDao.search(criteriaUrl);
-		assertEquals(0, results.size().intValue());
+		IBundleProvider results = myObservationDao.search(criteriaUrl, newSrd());
+		assertThat(results.getAllResources()).isEmpty();
 	}
 
 	@Test
@@ -2159,19 +2159,16 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		dev.addIdentifier().setSystem("Foo");
 		myDeviceDao.create(dev, mySrd);
 
-		IBundleProvider value = myDeviceDao.search(new SearchParameterMap());
+		IBundleProvider value = myDeviceDao.search(new SearchParameterMap(), newSrd());
 		ourLog.info("Initial size: " + value.size());
-		for (IBaseResource next : value.getResources(0, value.size())) {
+		for (IBaseResource next : value.getAllResources()) {
 			ourLog.info("Deleting: {}", next.getIdElement());
-			myDeviceDao.delete((IIdType) next.getIdElement(), mySrd);
+			myDeviceDao.delete(next.getIdElement(), mySrd);
 		}
 
-		value = myDeviceDao.search(new SearchParameterMap());
-		if (value.size() > 0) {
-			ourLog.info("Found: " + (value.getResources(0, 1).get(0).getIdElement()));
-			fail(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(value.getResources(0, 1).get(0)));
-		}
-		assertEquals(0, value.size().intValue());
+		value = myDeviceDao.search(new SearchParameterMap(), newSrd());
+		assertThat(value.getAllResources()).isEmpty();
+		assertEquals(0, value.sizeOrThrowNpe());
 
 		List<IBaseResource> res = value.getResources(0, 0);
 		assertThat(res).isEmpty();

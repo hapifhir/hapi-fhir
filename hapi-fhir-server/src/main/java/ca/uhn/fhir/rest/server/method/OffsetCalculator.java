@@ -37,6 +37,10 @@ public class OffsetCalculator {
 			offset = 0;
 		}
 
+		if (theBundleProvider.isShouldFetchResourcesBeforeOtherProperties()) {
+			return offset;
+		}
+
 		Integer resultSize = theBundleProvider.containsAllResources()
 				? (Integer) theBundleProvider.getResourceListComplete().size()
 				: theBundleProvider.size();

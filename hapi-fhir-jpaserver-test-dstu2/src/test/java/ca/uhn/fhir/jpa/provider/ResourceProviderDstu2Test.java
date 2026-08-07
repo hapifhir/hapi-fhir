@@ -135,10 +135,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
 		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
 
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
-		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(false);
-
 	}
 
 	@BeforeEach
@@ -1605,9 +1602,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			myObservationDao.create(o);
 		}
 
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(50);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(10);
-		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(true);
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle response = myClient
 			.operation()
@@ -1665,9 +1660,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 				myObservationDao.create(o);
 			}
 
-			mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(50);
 			mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(10);
-			mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(true);
 
 			ca.uhn.fhir.model.dstu2.resource.Bundle response = myClient
 				.operation()

@@ -188,7 +188,8 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 		Bundle results2 = myClient.search().forResource("Patient").where(Patient.FAMILY.matches().value("FAM")).returnBundle(Bundle.class).execute();
 		assertThat(results2.getEntry()).hasSize(1);
 		runInTransaction(() -> assertEquals(1, mySearchEntityDao.count()));
-		assertEquals("HIT from " + myServerBase, myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE).get(0));
+		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE).get(0))
+			.startsWith("HIT from " + myServerBase + " - Cache entry dated 2");
 		assertEquals(results1.getMeta().getLastUpdated(), results2.getMeta().getLastUpdated());
 		assertEquals(results1.getId(), results2.getId());
 	}

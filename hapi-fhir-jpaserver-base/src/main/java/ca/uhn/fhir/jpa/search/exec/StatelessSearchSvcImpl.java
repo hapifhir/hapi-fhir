@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.search;
+package ca.uhn.fhir.jpa.search.exec;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -29,13 +29,12 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.ISearchResultConsumer;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
-import ca.uhn.fhir.jpa.dao.SearchProgressTracker;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
-import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.util.SearchParameterMapCalculator;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.Constants;
@@ -51,19 +50,18 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantCount;
 import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantOnlyCount;
-import static java.util.Objects.nonNull;
 
-public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
+public class StatelessSearchSvcImpl implements IStatelessSearchSvc {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SynchronousSearchSvcImpl.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StatelessSearchSvcImpl.class);
 
 	private FhirContext myContext;
 
@@ -85,14 +83,11 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 	@Autowired
 	private EntityManager myEntityManager;
 
-	@Autowired
-	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
-
 	private int mySyncSize = 250;
 
 	@Override
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	public IBundleProvider executeQuery(
+	public IBundleProvider createNewSearch(
 			SearchParameterMap theParams,
 			RequestDetails theRequestDetails,
 			String theSearchUuid,
@@ -103,9 +98,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 		searchRuntimeDetails.setLoadSynchronous(true);
 
 		boolean theParamWantOnlyCount = isWantOnlyCount(theParams);
-		boolean theParamOrConfigWantCount = nonNull(theParams.getSearchTotalMode())
-				? isWantCount(theParams)
-				: isWantCount(myStorageSettings.getDefaultTotalMode());
+		boolean theParamOrConfigWantCount = SearchParameterMapCalculator.isWantCount(theParams, myStorageSettings);
 		boolean wantCount = theParamWantOnlyCount || theParamOrConfigWantCount;
 
 		// Execute the query and make sure we return distinct results
@@ -165,7 +158,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 						}
 						return ISearchResultConsumer.CONTINUE;
 					};
-					SearchProgressTracker progressTracker = theSb.performSearchForPids(
+					theSb.performSearchForPids(
 							searchResultConsumer,
 							clonedParams,
 							searchRuntimeDetails,
@@ -182,21 +175,25 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 						pids = pids.subList(0, resourcesToReturn);
 					}
 
-					JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(pids, () -> theSb);
 					IInterceptorBroadcaster compositeBroadcaster =
 							CompositeInterceptorBroadcaster.newCompositeBroadcaster(
 									myInterceptorBroadcaster, theRequestDetails);
 					if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES)) {
+
+						List<IBaseResource> resourceList = new ArrayList<>();
+						theSb.loadResourcesByPid(pids, Collections.emptySet(), resourceList, false, null);
+						JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(pids, resourceList);
+
 						HookParams params = new HookParams()
 								.add(IPreResourceAccessDetails.class, accessDetails)
 								.add(RequestDetails.class, theRequestDetails)
 								.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
 						compositeBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
-					}
 
-					for (int i = pids.size() - 1; i >= 0; i--) {
-						if (accessDetails.isDontReturnResourceAtIndex(i)) {
-							pids.remove(i);
+						for (int i = pids.size() - 1; i >= 0; i--) {
+							if (accessDetails.isDontReturnResourceAtIndex(i)) {
+								pids.remove(i);
+							}
 						}
 					}
 
@@ -356,7 +353,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 				myContext.getResourceDefinition(theResourceType).getImplementingClass();
 		final ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(theResourceType, resourceTypeClass);
 		sb.setFetchSize(mySyncSize);
-		return executeQuery(
+		return createNewSearch(
 				theSearchParameterMap,
 				null,
 				searchUuid,

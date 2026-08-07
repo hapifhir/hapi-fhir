@@ -67,12 +67,10 @@ import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
-import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
 import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.search.builder.StorageInterceptorHooksFacade;
-import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -2398,26 +2396,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			cacheControlDirective.parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL));
 		}
 
-		IBundleProvider retVal = mySearchCoordinatorSvc.registerSearch(
+		return mySearchCoordinatorSvc.createNewSearch(
 				this, theParams, getResourceName(), cacheControlDirective, theRequest);
-
-		if (retVal instanceof PersistedJpaBundleProvider provider) {
-			// Note: we calculate the partition -after- calling registerSearch, since that
-			// method invokes several interceptors that can affect the partition selection.
-			RequestPartitionId requestPartitionId =
-					myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
-							theRequest, getResourceName(), theParams);
-
-			provider.setRequestPartitionId(requestPartitionId);
-			if (provider.getCacheStatus() == SearchCacheStatusEnum.HIT) {
-				if (theServletResponse != null && theRequest != null) {
-					String value = "HIT from " + theRequest.getFhirServerBase();
-					theServletResponse.addHeader(Constants.HEADER_X_CACHE, value);
-				}
-			}
-		}
-
-		return retVal;
 	}
 
 	private void translateListSearchParams(SearchParameterMap theParams) {

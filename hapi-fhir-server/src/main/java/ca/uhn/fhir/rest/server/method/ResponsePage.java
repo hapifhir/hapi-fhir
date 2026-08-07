@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.server.method;
 import ca.uhn.fhir.rest.api.BundleLinks;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -87,6 +88,9 @@ public class ResponsePage {
 	 */
 	private final IBundleProvider myBundleProvider;
 
+	@Nullable
+	private final Boolean myHasNextPage;
+
 	// Properties below here are set for calculation of pages;
 	// not part of the response pages in and of themselves
 
@@ -120,7 +124,8 @@ public class ResponsePage {
 			int theIncludedResourceCount,
 			int theOmittedResourceCount,
 			int theTotalRequestedResourcesFetched,
-			IBundleProvider theBundleProvider) {
+			IBundleProvider theBundleProvider,
+			@Nullable Boolean theHasNextPage) {
 		mySearchId = theSearchId;
 		myResourceList = theResourceList;
 		myPageSize = thePageSize;
@@ -129,6 +134,7 @@ public class ResponsePage {
 		myOmittedResourceCount = theOmittedResourceCount;
 		myTotalRequestedResourcesFetched = theTotalRequestedResourcesFetched;
 		myBundleProvider = theBundleProvider;
+		myHasNextPage = theHasNextPage;
 
 		myNumTotalResults = myBundleProvider.size();
 	}
@@ -139,6 +145,10 @@ public class ResponsePage {
 
 	public List<IBaseResource> getResourceList() {
 		return myResourceList;
+	}
+
+	public boolean isHasNextPage() {
+		return myHasNextPage;
 	}
 
 	private boolean isBundleProviderOffsetPaging() {
@@ -196,6 +206,11 @@ public class ResponsePage {
 
 	private boolean hasNextPage() {
 		determinePagingStyle();
+
+		if (myHasNextPage != null) {
+			return myHasNextPage;
+		}
+
 		switch (myPagingStyle) {
 			case BUNDLE_PROVIDER_OFFSETS:
 			case BUNDLE_PROVIDER_PAGE_IDS:
@@ -413,6 +428,9 @@ public class ResponsePage {
 		private IBundleProvider myBundleProvider;
 		private int myTotalRequestedResourcesFetched = -1;
 
+		@Nullable
+		private Boolean myHasNextPage;
+
 		public ResponsePageBuilder setOmittedResourceCount(int theOmittedResourceCount) {
 			myOmittedResourceCount = theOmittedResourceCount;
 			return this;
@@ -453,6 +471,11 @@ public class ResponsePage {
 			return this;
 		}
 
+		public ResponsePageBuilder setHasNextPage(boolean theHasNextPage) {
+			myHasNextPage = theHasNextPage;
+			return this;
+		}
+
 		/**
 		 * Combine this builder with a second buider.
 		 * Useful if a second page is requested, but you do not wish to
@@ -487,8 +510,8 @@ public class ResponsePage {
 					myIncludedResourceCount, // included count
 					myOmittedResourceCount, // omitted resources
 					myTotalRequestedResourcesFetched, // total count of requested resources
-					myBundleProvider // the bundle provider
-					);
+					myBundleProvider, // the bundle provider
+					myHasNextPage);
 		}
 	}
 

@@ -631,7 +631,7 @@ class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 		} else {
 			String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.HASH_COMPLETE = '-53995296465088005') fetch first '10000' rows only";
 			assertThat(myCaptureQueriesListener).has(
-				onCurrentThread().selectSqlAtIndex(0).matches(expected)
+				onCurrentThread().selectSqlAtIndex(0).contains(expected)
 			);
 		}
 

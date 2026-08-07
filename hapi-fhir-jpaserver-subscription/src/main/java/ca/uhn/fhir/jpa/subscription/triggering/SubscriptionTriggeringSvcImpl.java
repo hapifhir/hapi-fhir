@@ -27,7 +27,6 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.api.svc.ISearchSvc;
-import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
@@ -302,7 +301,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
 			systemRequestDetails.setRequestPartitionId(theJobDetails.getRequestPartitionId());
 
-			search = mySearchCoordinatorSvc.registerSearch(
+			search = mySearchCoordinatorSvc.createNewSearch(
 					callingDao, params, resourceType, new CacheControlDirective(), systemRequestDetails);
 
 			if (isNull(search.getUuid())) {
@@ -310,7 +309,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 				theJobDetails.setCurrentSearchUrl(nextSearchUrl);
 				theJobDetails.setCurrentOffset(params.getOffset());
 			} else {
-				// populate properties for asynchronous path
+				// This is the asynchronous path
 				theJobDetails.setCurrentSearchUuid(search.getUuid());
 			}
 
@@ -363,35 +362,23 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 				toIndex,
 				theJobDetails.getRequestPartitionId());
 
-		List<? extends IResourcePersistentId<?>> allResourceIds;
-		RequestPartitionId requestPartitionId = theJobDetails.getRequestPartitionId();
+		List<IBaseResource> allResources;
 		try {
-			allResourceIds = mySearchCoordinatorSvc.getResources(
-					theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex, null, requestPartitionId);
+			IBundleProvider search = mySearchCoordinatorSvc.continueExistingSearch(
+					theJobDetails.getCurrentSearchUuid(), new SystemRequestDetails());
+			allResources = search.getResources(fromIndex, toIndex);
 		} catch (ResourceGoneException e) {
 			ourLog.debug("Search has expired, submission is done with error: {}", e.getMessage());
-			allResourceIds = new ArrayList<>();
+			allResources = new ArrayList<>();
 		}
 
-		ourLog.info("Triggering job[{}] delivering {} resources", theJobDetails.getJobId(), allResourceIds.size());
+		ourLog.info("Triggering job[{}] delivering {} resources", theJobDetails.getJobId(), allResources.size());
 		AtomicInteger highestIndexSubmitted = new AtomicInteger(theJobDetails.getCurrentSearchLastUploadedIndex());
 
-		List<? extends List<? extends IResourcePersistentId<?>>> partitions = Lists.partition(allResourceIds, 100);
-		for (List<? extends IResourcePersistentId<?>> resourceIds : partitions) {
+		List<List<IBaseResource>> partitions = Lists.partition(allResources, 100);
+		for (List<IBaseResource> resourceIds : partitions) {
 			Runnable job = () -> {
-				String resourceType = myFhirContext.getResourceType(theJobDetails.getCurrentSearchResourceType());
-				RuntimeResourceDefinition resourceDef =
-						myFhirContext.getResourceDefinition(theJobDetails.getCurrentSearchResourceType());
-				ISearchBuilder searchBuilder =
-						mySearchBuilderFactory.newSearchBuilder(resourceType, resourceDef.getImplementingClass());
-				List<IBaseResource> listToPopulate = new ArrayList<>();
-
-				myTransactionService.withRequest(null).execute(() -> {
-					searchBuilder.loadResourcesByPid(
-							resourceIds, Collections.emptyList(), listToPopulate, false, new SystemRequestDetails());
-				});
-
-				for (IBaseResource nextResource : listToPopulate) {
+				for (IBaseResource nextResource : resourceIds) {
 					submitResource(
 							theJobDetails.getSubscriptionId(), theJobDetails.getRequestPartitionId(), nextResource);
 					totalSubmitted.incrementAndGet();
@@ -407,7 +394,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 			theJobDetails.setCurrentSearchLastUploadedIndex(highestIndexSubmitted.get());
 
-			if (allResourceIds.isEmpty()
+			if (allResources.isEmpty()
 					|| (theJobDetails.getCurrentSearchCount() != null
 							&& toIndex >= theJobDetails.getCurrentSearchCount())) {
 				ourLog.info(

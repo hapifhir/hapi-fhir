@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hl7.fhir.instance.model.api.IBaseBundle.LINK_NEXT;
@@ -133,20 +134,19 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 			List<Patient> patientsPage = BundleUtil.toListOfResourcesOfType(myFhirContext, bundle, Patient.class);
 			assertThat(patientsPage).hasSize(defaultPageSize);
 
-			for (Patient p : patientsPage) {
-				assertTrue(ids.add(p.getId()));
-			}
+			addPatientIdsToCollection(patientsPage, ids, url);
 			nextUrl = BundleUtil.getLinkUrlOfType(myFhirContext, bundle, LINK_NEXT);
 			assertNotNull(nextUrl);
 
 			// all future pages
 			do {
+
+				myCaptureQueriesListener.clear();
 				bundle = fetchBundle(nextUrl);
+				myCaptureQueriesListener.logSelectQueries();
 				assertNotNull(bundle);
 				patientsPage = BundleUtil.toListOfResourcesOfType(myFhirContext, bundle, Patient.class);
-				for (Patient p : patientsPage) {
-					assertTrue(ids.add(p.getId()));
-				}
+				addPatientIdsToCollection(patientsPage, ids, nextUrl);
 				nextUrl = BundleUtil.getLinkUrlOfType(myFhirContext, bundle, LINK_NEXT);
 				if (nextUrl != null) {
 					assertThat(patientsPage).hasSize(defaultPageSize);
@@ -163,6 +163,17 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 			myPagingProvider.setDefaultPageSize(pageSize);
 			myServer.setDefaultPageSize(serverPageSize);
 		}
+	}
+
+	private static void addPatientIdsToCollection(List<Patient> patientsPage, Set<String> ids, String theUrl) {
+		TreeSet<String> newIds = new TreeSet<>();
+		for (Patient p : patientsPage) {
+			String id = p.getIdElement().toUnqualifiedVersionless().getValue();
+			assertTrue(ids.add(id));
+			newIds.add(id);
+		}
+
+		ourLog.info("{} Search added {} IDs this round: {}", theUrl, newIds.size(), newIds);
 	}
 
 	private void createPatients(int theCount) {
