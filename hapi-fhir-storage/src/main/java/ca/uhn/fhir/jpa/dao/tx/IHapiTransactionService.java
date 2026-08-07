@@ -104,8 +104,10 @@ public interface IHapiTransactionService {
 	 * </p>
 	 * <p>
 	 * For two concrete partitions the relation is symmetric. It is directional when all partitions are
-	 * involved: a transaction opened for all partitions is partition-unscoped and can host work for any
-	 * partition, while all-partition work cannot execute inside a transaction scoped to a single partition.
+	 * involved: a transaction opened for all partitions with no explicit partition id list is
+	 * partition-unscoped and can host work for any partition, while all-partition work cannot execute
+	 * inside a transaction scoped to a single partition. All-partitions with an explicit id list (e.g.
+	 * all partitions on a given shard) is a bounded scope, not an unscoped host.
 	 * </p>
 	 *
 	 * @since 7.4.0
