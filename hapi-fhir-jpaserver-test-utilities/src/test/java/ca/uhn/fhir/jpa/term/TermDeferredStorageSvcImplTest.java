@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,14 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -72,18 +68,25 @@ public class TermDeferredStorageSvcImplTest {
 
 		ReflectionTestUtils.setField(mySvc, "myJobExecutions", mockExecutions);
 
-		when(myJobCoordinator.getInstancesbyJobDefinitionIdAndEndedStatus(
-			eq(TERM_CODE_SYSTEM_DELETE_JOB_NAME),
-			eq(true),
-			anyInt(),
-			eq(0)
-		))
-			.thenReturn(List.of()) // first nothing
-			.thenReturn(List.of(instance)); // then the list with the instance
+		when(myJobCoordinator.getInstance(jobId)).thenReturn(instance);
 
 		assertFalse(mySvc.isStorageQueueEmpty(true));
 		instance.setStatus(StatusEnum.COMPLETED);
 		assertTrue(mySvc.isStorageQueueEmpty(true));
+	}
+
+	@Test
+	public void testStorageQueueEmptyWhenTrackedJobIsMissingFromDb() {
+		String missingJobId = "missing-job-id";
+		ArrayList<String> mockExecutions = new ArrayList<>();
+		mockExecutions.add(missingJobId);
+		ReflectionTestUtils.setField(mySvc, "myJobExecutions", mockExecutions);
+
+		when(myJobCoordinator.getInstance(missingJobId))
+			.thenThrow(new ResourceNotFoundException("Unknown job instance: " + missingJobId));
+
+		assertTrue(mySvc.isStorageQueueEmpty(true));
+		assertTrue(mockExecutions.isEmpty());
 	}
 
 
