@@ -40,6 +40,7 @@ public class AddForeignKeyTask extends BaseTableTask {
 	private String myForeignTableName;
 	private List<String> myForeignColumnNames;
 	private List<String> myColumnNames;
+	private boolean myWithDeleteCascade;
 
 	public AddForeignKeyTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
@@ -69,6 +70,10 @@ public class AddForeignKeyTask extends BaseTableTask {
 		return myColumnNames;
 	}
 
+	public void withDeleteCascade() {
+		myWithDeleteCascade = true;
+	}
+
 	@Override
 	public void validate() {
 		super.validate();
@@ -82,7 +87,8 @@ public class AddForeignKeyTask extends BaseTableTask {
 				"Number of column names must match for foreign key %s",
 				myConstraintName);
 		setDescription("Add foreign key " + myConstraintName + " from column(s) " + getColumnNames() + " of table "
-				+ getTableName() + " to column(s) " + getForeignColumnNames() + " of table " + myForeignTableName);
+				+ getTableName() + " to column(s) " + getForeignColumnNames() + " of table " + myForeignTableName
+				+ (myWithDeleteCascade ? " with delete cascade" : ""));
 	}
 
 	@Override
@@ -115,6 +121,9 @@ public class AddForeignKeyTask extends BaseTableTask {
 		b.append(" (");
 		appendColumnList(getForeignColumnNames(), quoteNames, b);
 		b.append(")");
+		if (myWithDeleteCascade) {
+			b.append(" ON DELETE CASCADE");
+		}
 
 		@Language("SQL")
 		String sql = b.toString();
@@ -142,6 +151,13 @@ public class AddForeignKeyTask extends BaseTableTask {
 		} else {
 			theBuilder.append(myForeignColumnNames);
 		}
+		// we only add this to the hash if true
+		// so we don't change the hash of previously existing
+		// non "with delete cascade" tasks (which
+		// existed before this bool was added)
+		if (myWithDeleteCascade) {
+			theBuilder.append(myWithDeleteCascade);
+		}
 	}
 
 	@Override
@@ -151,6 +167,7 @@ public class AddForeignKeyTask extends BaseTableTask {
 		theBuilder.append(myConstraintName, otherObject.myConstraintName);
 		theBuilder.append(myForeignTableName, otherObject.myForeignTableName);
 		theBuilder.append(myForeignColumnNames, otherObject.myForeignColumnNames);
+		theBuilder.append(myWithDeleteCascade, otherObject.myWithDeleteCascade);
 	}
 
 	private static void appendColumnList(

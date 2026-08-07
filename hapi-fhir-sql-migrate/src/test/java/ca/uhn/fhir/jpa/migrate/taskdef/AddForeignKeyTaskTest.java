@@ -1,6 +1,9 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
+import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
+import ca.uhn.fhir.util.VersionEnum;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -11,7 +14,6 @@ import java.util.function.Supplier;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class AddForeignKeyTaskTest extends BaseTest {
-
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
@@ -41,6 +43,62 @@ public class AddForeignKeyTaskTest extends BaseTest {
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
+	public void addForeignKey_withDeleteCascade_worksAndIsRerunable(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		// setup
+		before(theTestDatabaseDetails);
+
+		executeSql("CREATE TABLE CUSTOMERS (ID int not null, NAME varchar(255), primary key (ID))");
+		executeSql("CREATE TABLE ORDERS (ID int not null, CUSTOMERID int)");
+		// no current fks
+		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "CUSTOMERS", "ORDERS")).isEmpty();
+
+		// test
+		AddForeignKeyTask task = new AddForeignKeyTask("1", "1");
+		task.setTableName("ORDERS");
+		task.setColumnNames(List.of("CUSTOMERID"));
+		task.setConstraintName("FK_CO_FOREIGN");
+		task.setForeignColumnNames(List.of("ID"));
+		task.setForeignTableName("CUSTOMERS");
+		task.withDeleteCascade();
+		getMigrator().addTask(task);
+
+		getMigrator().migrate();
+
+		// validate
+		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "CUSTOMERS", "ORDERS"))
+			.containsExactly("FK_CO_FOREIGN");
+
+		// Make sure additional calls don't crash
+		getMigrator().migrate();
+		getMigrator().migrate();
+	}
+
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void addFoeignKey_viaBuilderWithDeleteCascade_cascadesOnPArentDelete(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		// setup
+		before(theTestDatabaseDetails);
+
+		executeSql("CREATE TABLE CUSTOMERS (ID int not null, NAME varchar(255), primary key (ID))");
+		executeSql("CREATE TABLE ORDERS (ID int not null, CUSTOMERID int)");
+
+		getMigrator().addTasks(new MyMigrationTasks().getTaskList(VersionEnum.V3_3_0, VersionEnum.V3_5_0));
+
+		getMigrator().migrate();
+
+		// validate
+		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "CUSTOMERS", "ORDERS"))
+			.containsExactly("FK_CO_FOREIGN");
+
+		// test and make sure it works
+		executeSql("INSERT INTO CUSTOMERS (ID, NAME) VALUES (1, 'foo')");
+		executeSql("INSERT INTO ORDERS (ID, CUSTOMERID) VALUES (10, 1)");
+		executeSql("DELETE FROM CUSTOMERS WHERE ID = 1");
+		assertThat(executeQuery("SELECT ID FROM ORDERS")).isEmpty();
+	}
+
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
 	public void testAddForeignKey_MultipleColumns(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
 		before(theTestDatabaseDetails);
 
@@ -65,5 +123,14 @@ public class AddForeignKeyTaskTest extends BaseTest {
 		getMigrator().migrate();
 	}
 
-
+	private static class MyMigrationTasks extends BaseMigrationTasks<VersionEnum> {
+		MyMigrationTasks() {
+			Builder v = forVersion(VersionEnum.V3_5_0);
+			v.onTable("ORDERS")
+				.addForeignKey("1", "FK_CO_FOREIGN")
+				.toColumn("CUSTOMERID")
+				.withDeleteCascade()
+				.references("CUSTOMERS", "ID");
+		}
+	}
 }
