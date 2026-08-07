@@ -1,0 +1,6 @@
+---
+type: add
+issue: 8226
+title: "Added ability for the hapi fhir migrator to add \"ON DELETE CASCADE\"
+      to foreign key constraints.
+"
