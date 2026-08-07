@@ -13,6 +13,8 @@ import ca.uhn.fhir.jpa.topic.SubscriptionTopicDispatchRequest;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicDispatcher;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.Enumerations;
@@ -221,6 +223,40 @@ class SubscriptionTopicPartitionR5IT extends BaseSubscriptionsR5Test {
 				.isEqualTo(1);
 	}
 
+	/**
+	 * Creating a topic-based Subscription on a partitioned server must work even when the partition
+	 * interceptor only assigns a partition to incoming client requests, not to the server's own
+	 * internal lookups. This mirrors the real {@code RequestTenantPartitionInterceptor}, which reads
+	 * the partition from the request tenant and is registered on the RestfulServer.
+	 *
+	 * <p>While validating the Subscription, {@code SubscriptionValidatingInterceptor} looks up the
+	 * referenced {@link SubscriptionTopic} using an internal request that has no tenant. That lookup
+	 * must find the topic on its own; if it instead relied on the partition interceptor, no partition
+	 * would be assigned and the create would fail with HAPI-1319.
+	 *
+	 * <p>{@link MyPartitionInterceptor} cannot reproduce this: it answers every call with a fixed
+	 * partition, so the internal lookup always gets one and the bug stays hidden.
+	 */
+	@Test
+	void testTopicSubscriptionCreate_whenPartitionInterceptorDoesNotServeInternalRequests_succeeds() throws Exception {
+		// Use an interceptor that behaves like the real tenant interceptor: it assigns PART-1 to
+		// incoming client requests but leaves the server's internal lookups without a partition.
+		myInterceptorRegistry.unregisterInterceptor(myPartitionInterceptor);
+		RequestScopedPartitionInterceptor requestScopedInterceptor = new RequestScopedPartitionInterceptor(REQ_PART_1);
+		myInterceptorRegistry.registerInterceptor(requestScopedInterceptor);
+		try {
+			createSubscriptionTopic(buildPatientSubscriptionTopic());
+			waitForRegisteredSubscriptionTopicCount(1);
+
+			// Validating this Subscription looks up the topic internally; that lookup must succeed on
+			// its own, otherwise the create fails with HAPI-1319.
+			postSubscription(newTopicSubscription(PATIENT_TOPIC_URL, Constants.CT_FHIR_JSON_NEW));
+			waitForActivatedSubscriptionCount(1);
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(requestScopedInterceptor);
+		}
+	}
+
 	private static SubscriptionTopic buildPatientSubscriptionTopic() {
 		SubscriptionTopic topic = new SubscriptionTopic();
 		topic.setUrl(PATIENT_TOPIC_URL);
@@ -243,6 +279,33 @@ class SubscriptionTopicPartitionR5IT extends BaseSubscriptionsR5Test {
 
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY)
 		public RequestPartitionId identify() {
+			return myPartitionId;
+		}
+	}
+
+	/**
+	 * Behaves like {@code RequestTenantPartitionInterceptor} on the RestfulServer: it assigns a
+	 * partition to incoming client requests (which carry a tenant) but leaves the server's own
+	 * internal lookups — a {@link SystemRequestDetails} with no tenant — without one.
+	 */
+	@Interceptor
+	static class RequestScopedPartitionInterceptor {
+
+		private final RequestPartitionId myPartitionId;
+
+		RequestScopedPartitionInterceptor(RequestPartitionId thePartitionId) {
+			myPartitionId = thePartitionId;
+		}
+
+		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY)
+		public RequestPartitionId identify(RequestDetails theRequestDetails) {
+			// An internal lookup (a SystemRequestDetails with no tenant or partition) gets no
+			// partition; only incoming client requests do.
+			if (theRequestDetails instanceof SystemRequestDetails srd
+					&& srd.getRequestPartitionId() == null
+					&& srd.getTenantId() == null) {
+				return null;
+			}
 			return myPartitionId;
 		}
 	}

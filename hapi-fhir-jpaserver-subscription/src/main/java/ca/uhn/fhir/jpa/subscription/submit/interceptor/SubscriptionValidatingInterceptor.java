@@ -292,7 +292,7 @@ public class SubscriptionValidatingInterceptor {
 		SearchParameterMap map = SearchParameterMap.newSynchronous();
 		map.add(SubscriptionTopic.SP_URL, new UriParam(theCriteria));
 		IFhirResourceDao subscriptionTopicDao = myDaoRegistry.getResourceDao("SubscriptionTopic");
-		IBundleProvider search = subscriptionTopicDao.search(map, new SystemRequestDetails());
+		IBundleProvider search = subscriptionTopicDao.search(map, SystemRequestDetails.forAllPartitions());
 		return search.getResources(0, 1).stream().findFirst();
 	}
 
