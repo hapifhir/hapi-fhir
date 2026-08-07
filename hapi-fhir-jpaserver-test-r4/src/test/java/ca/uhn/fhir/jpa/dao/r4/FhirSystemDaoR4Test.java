@@ -1039,6 +1039,92 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	}
 
+	/**
+	 * A bare-form (FHIR-spec-form) conditional-create ifNoneExist — i.e. just the query portion
+	 * ("identifier=sys|val") with NO "Type?" prefix and NO "?" — must be pre-fetched by
+	 * {@link ca.uhn.fhir.jpa.dao.TransactionProcessor}'s preFetchConditionalUrls exactly like the
+	 * full-form ("Patient?identifier=sys|val"), so that multiple single-token conditional creates in
+	 * one transaction are batched into a single aggregate token query rather than running one search
+	 * per entry at write time.
+	 */
+	@Test
+	public void testTransactionMultipleBareConditionalCreates_ArePreFetchedLikeFullForm() {
+		int entryCount = 5;
+
+		// Pre-create matching Patients so all conditional creates resolve to existing resources (NOP).
+		for (int i = 0; i < entryCount; i++) {
+			Patient existing = new Patient();
+			existing.addIdentifier().setSystem("http://sys").setValue("full" + i);
+			myPatientDao.create(existing, mySrd);
+			existing = new Patient();
+			existing.addIdentifier().setSystem("http://sys").setValue("bare" + i);
+			myPatientDao.create(existing, mySrd);
+		}
+
+		// ---- FULL FORM ("Type?query") ----
+		BundleBuilder fullBuilder = new BundleBuilder(myFhirContext);
+		for (int i = 0; i < entryCount; i++) {
+			Patient pt = new Patient();
+			pt.addIdentifier().setSystem("http://sys").setValue("full" + i);
+			fullBuilder.addTransactionCreateEntry(pt).conditional("Patient?identifier=http://sys|full" + i);
+		}
+		myCaptureQueriesListener.clear();
+		Bundle fullOutcome = mySystemDao.transaction(mySrd, (Bundle) fullBuilder.getBundle());
+		int fullSelectCount = myCaptureQueriesListener.countSelectQueries();
+
+		// ---- BARE FORM (spec form, just the query portion, no "?") ----
+		BundleBuilder bareBuilder = new BundleBuilder(myFhirContext);
+		for (int i = 0; i < entryCount; i++) {
+			Patient pt = new Patient();
+			pt.addIdentifier().setSystem("http://sys").setValue("bare" + i);
+			bareBuilder.addTransactionCreateEntry(pt).conditional("identifier=http://sys|bare" + i);
+		}
+		myCaptureQueriesListener.clear();
+		Bundle bareOutcome = mySystemDao.transaction(mySrd, (Bundle) bareBuilder.getBundle());
+		int bareSelectCount = myCaptureQueriesListener.countSelectQueries();
+
+		ourLog.info("Conditional-match SELECTs: full-form={}, bare-form={}", fullSelectCount, bareSelectCount);
+
+		// Both forms must NOP against the pre-existing resources (200 OK, not 201 Created).
+		for (int i = 0; i < entryCount; i++) {
+			assertThat(fullOutcome.getEntry().get(i).getResponse().getStatus())
+					.as("full-form entry %s must NOP against the pre-existing resource", i)
+					.isEqualTo("200 OK");
+			assertThat(bareOutcome.getEntry().get(i).getResponse().getStatus())
+					.as("bare-form entry %s must NOP against the pre-existing resource", i)
+					.isEqualTo("200 OK");
+		}
+
+		// No duplicate resources were created: exactly one Patient exists per identifier value.
+		for (int i = 0; i < entryCount; i++) {
+			assertThat(countPatientsByIdentifier("http://sys", "full" + i))
+					.as("exactly one Patient must exist for full-form identifier %s (no duplicate created)", i)
+					.isEqualTo(1);
+			assertThat(countPatientsByIdentifier("http://sys", "bare" + i))
+					.as("exactly one Patient must exist for bare-form identifier %s (no duplicate created)", i)
+					.isEqualTo(1);
+		}
+
+		// The bare form is pre-fetched and batched exactly like the full form, so it issues no more
+		// conditional-match queries than the full form.
+		assertThat(bareSelectCount)
+				.as("bare-form conditional creates must be pre-fetched/batched like full-form")
+				.isLessThanOrEqualTo(fullSelectCount);
+
+		// Absolute "batched, not N+1" guarantee: the bare form must NOT issue one match-search per
+		// entry. This catches a future regression that inflates both paths equally (which the
+		// relative assertion above would miss).
+		assertThat(bareSelectCount)
+				.as("bare-form conditional creates must be batched (not one match-search per entry)")
+				.isLessThan(entryCount);
+	}
+
+	private int countPatientsByIdentifier(String theSystem, String theValue) {
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Patient.SP_IDENTIFIER, new TokenParam(theSystem, theValue));
+		return myPatientDao.search(map, mySrd).size().intValue();
+	}
+
 
 	@Test
 	public void testTransactionWithConditionalCreates_IdenticalMatchUrlsDifferentTypes_Qualified() {
