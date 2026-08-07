@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import ca.uhn.fhir.jpa.migrate.MigrationResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -112,6 +114,38 @@ public class AddIndexTaskTest extends BaseTest {
 		getMigrator().addTask(task);
 
 		getMigrator().migrate();
+
+		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE")).containsExactlyInAnyOrder("IDX_DIFINDEX", "IDX_ANINDEX");
+	}
+
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testNonUniqueIndex_dropAndReAdd(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+
+		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255), VER bigint not null)");
+		executeSql("create index IDX_ANINDEX on SOMETABLE (PID, TEXTCOL)");
+		executeSql("create index IDX_DIFINDEX on SOMETABLE (TEXTCOL)");
+
+		DropIndexTask dropTask = new DropIndexTask("1", "1");
+		dropTask.setIndexName("IDX_ANINDEX");
+		dropTask.setTableName("SOMETABLE");
+		getMigrator().addTask(dropTask);
+
+		AddIndexTask addTask = new AddIndexTask("1", "1");
+		addTask.setIndexName("IDX_ANINDEX");
+		addTask.setTableName("SOMETABLE");
+		addTask.setColumns("PID", "TEXTCOL", "VER");
+		addTask.setUnique(false);
+		getMigrator().addTask(addTask);
+
+		getMigrator().setDryRun(true);
+		MigrationResult result = getMigrator().migrate();
+
+		assertThat(result.executedStatements).hasSize(2);
+		List<String> loggedSql = result.executedStatements.stream().map(BaseTask.ExecutedStatement::getSql).toList();
+		assertThat(loggedSql.get(0)).isEqualToIgnoringCase("drop index IDX_ANINDEX");
+		assertThat(loggedSql.get(1)).contains("-- create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL, VER)");
 
 		assertThat(JdbcUtils.getIndexNames(getConnectionProperties(), "SOMETABLE")).containsExactlyInAnyOrder("IDX_DIFINDEX", "IDX_ANINDEX");
 	}
