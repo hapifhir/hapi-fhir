@@ -194,6 +194,18 @@ public interface IValidationSupport {
 	}
 
 	/**
+	 * Fetches a canonical resource using a formal business identifier.
+	 *
+	 * <p>This method represents an optional backend capability. Implementations
+	 * should use the lookup mechanism appropriate to their storage context, such
+	 * as an in-memory index, JPA search, package index, or remote FHIR search.</p>
+	 */
+	@Nullable
+	default IBaseResource fetchCanonicalResourceByIdentifier(@Nonnull CanonicalResourceIdentifierRequest theRequest) {
+		return null;
+	}
+
+	/**
 	 * Loads a resource needed by the validation (a StructureDefinition, or a
 	 * ValueSet)
 	 *

@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.support.CanonicalResourceIdentifierMatcher;
+import ca.uhn.fhir.context.support.CanonicalResourceIdentifierRequest;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -53,6 +55,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 import static org.hl7.fhir.instance.model.api.IAnyResource.SP_RES_LAST_UPDATED;
 
@@ -105,6 +108,41 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 		}
 
 		return retVal;
+	}
+
+	@Override
+	@Nullable
+	public IBaseResource fetchCanonicalResourceByIdentifier(@Nonnull CanonicalResourceIdentifierRequest theRequest) {
+
+		String resourceType =
+				switch (theRequest.resourceType()) {
+					case "CodeSystem" -> "CodeSystem";
+					case "ValueSet" -> "ValueSet";
+					default -> null;
+				};
+
+		if (resourceType == null || !myDaoRegistry.isResourceTypeSupported(resourceType)) {
+			return null;
+		}
+
+		SearchParameterMap params = SearchParameterMap.newSynchronous()
+				.add("identifier", new TokenParam(theRequest.identifierSystem(), theRequest.identifierValue()));
+
+		if (isNotBlank(theRequest.version())) {
+			params.add("version", new TokenParam(theRequest.version()));
+		}
+
+		IBundleProvider search = myDaoRegistry.getResourceDao(resourceType).search(params, new SystemRequestDetails());
+
+		Integer size = search.size();
+
+		if (size == null || size == 0) {
+			return null;
+		}
+
+		List<IBaseResource> resources = search.getResources(0, size);
+
+		return CanonicalResourceIdentifierMatcher.findMatch(myFhirContext, resources, theRequest);
 	}
 
 	@Override

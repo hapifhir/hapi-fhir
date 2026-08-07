@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.support.CanonicalResourceIdentifierRequest;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -30,7 +31,9 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -44,8 +47,11 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -183,5 +189,138 @@ class JpaPersistedResourceValidationSupportTest {
 
 	}
 
+	@Nested
+	class FetchCanonicalResourceByIdentifierTests {
+
+		private static final String IDENTIFIER_SYSTEM = "urn:ietf:rfc:3986";
+		private static final String IDENTIFIER_VALUE = "urn:oid:1.2.3.4";
+		private static final String VERSION = "4.0.0";
+
+		@Mock
+		private IFhirResourceDao<IBaseResource> myResourceDao;
+
+		@Captor
+		private ArgumentCaptor<SearchParameterMap> mySearchParameterMapCaptor;
+
+		private JpaPersistedResourceValidationSupport myTestClass;
+
+		@BeforeEach
+		void beforeEach() {
+			myTestClass =
+					new JpaPersistedResourceValidationSupport(
+							FhirContext.forR4Cached(),
+							myDaoRegistry);
+		}
+
+		@Test
+		void fetchCodeSystemByIdentifier() {
+			CodeSystem codeSystem = new CodeSystem()
+					.setUrl("https://example.org/CodeSystem/example")
+					.setVersion(VERSION);
+
+			codeSystem.addIdentifier()
+					.setSystem(IDENTIFIER_SYSTEM)
+					.setValue(IDENTIFIER_VALUE);
+
+			prepareSearch("CodeSystem", codeSystem);
+
+			IBaseResource result =
+					myTestClass.fetchCanonicalResourceByIdentifier(
+							new CanonicalResourceIdentifierRequest(
+									"CodeSystem",
+									IDENTIFIER_SYSTEM,
+									IDENTIFIER_VALUE,
+									VERSION));
+
+			assertSame(codeSystem, result);
+
+			assertSearchParameters();
+		}
+
+		@Test
+		void fetchValueSetByIdentifier() {
+			ValueSet valueSet = new ValueSet()
+					.setUrl("https://example.org/ValueSet/example")
+					.setVersion(VERSION);
+
+			valueSet.addIdentifier()
+					.setSystem(IDENTIFIER_SYSTEM)
+					.setValue(IDENTIFIER_VALUE);
+
+			prepareSearch("ValueSet", valueSet);
+
+			IBaseResource result =
+					myTestClass.fetchCanonicalResourceByIdentifier(
+							new CanonicalResourceIdentifierRequest(
+									"ValueSet",
+									IDENTIFIER_SYSTEM,
+									IDENTIFIER_VALUE,
+									VERSION));
+
+			assertSame(valueSet, result);
+
+			assertSearchParameters();
+		}
+
+		@Test
+		void unsupportedResourceTypeReturnsNull() {
+			IBaseResource result =
+					myTestClass.fetchCanonicalResourceByIdentifier(
+							new CanonicalResourceIdentifierRequest(
+									"ConceptMap",
+									IDENTIFIER_SYSTEM,
+									IDENTIFIER_VALUE,
+									null));
+
+			assertNull(result);
+		}
+
+		private void prepareSearch(
+				String theResourceType,
+				IBaseResource theResource) {
+
+			when(myDaoRegistry.isResourceTypeSupported(theResourceType))
+					.thenReturn(true);
+
+			when(myDaoRegistry.getResourceDao(theResourceType))
+					.thenReturn(myResourceDao);
+
+			when(myResourceDao.search(any(), any()))
+					.thenReturn(
+							new SimpleBundleProvider(
+									List.of(theResource)));
+		}
+
+		private void assertSearchParameters() {
+			verify(myResourceDao)
+					.search(
+							mySearchParameterMapCaptor.capture(),
+							any());
+
+			SearchParameterMap searchParameters =
+					mySearchParameterMapCaptor.getValue();
+
+			TokenParam identifier =
+					(TokenParam) searchParameters
+							.get("identifier")
+							.get(0)
+							.get(0);
+
+			assertThat(identifier.getSystem())
+					.isEqualTo(IDENTIFIER_SYSTEM);
+
+			assertThat(identifier.getValue())
+					.isEqualTo(IDENTIFIER_VALUE);
+
+			TokenParam version =
+					(TokenParam) searchParameters
+							.get("version")
+							.get(0)
+							.get(0);
+
+			assertThat(version.getValue())
+					.isEqualTo(VERSION);
+		}
+	}
 
 }
