@@ -2134,9 +2134,11 @@ public enum Pointcut implements IPointcut {
 	 * is invoked once per sub-transaction with that sub-transaction's response, this pointcut is invoked exactly
 	 * once per top-level operation, with the complete response — after any sub-transaction responses (e.g.
 	 * partition slices) have been aggregated. Hooks may mutate the response bundle, for example to remove response
-	 * entries corresponding to request entries a hook injected at {@link #STORAGE_TRANSACTION_PROCESSING}. A
-	 * nested transaction (one submitted while another is being processed) completes its own processing and so
-	 * invokes this pointcut for its own response.
+	 * entries corresponding to request entries a hook injected at {@link #STORAGE_TRANSACTION_PROCESSING}. The
+	 * response still carries one entry slot per request entry at this point: the empty slots left by consolidated
+	 * duplicate conditional writes are dropped after this pointcut returns, so positional bookkeeping against the
+	 * request remains valid inside hooks. A nested transaction (one submitted while another is being processed)
+	 * completes its own processing and so invokes this pointcut for its own response.
 	 * <p>
 	 * Hooks may accept the following parameters:
 	 * <ul>

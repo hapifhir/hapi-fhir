@@ -277,16 +277,9 @@ public abstract class BaseTransactionProcessor {
 					theRequestDetails, transactionDetails, theRequest, actionName, theNestedMode);
 		}
 
-		List<IBase> entries = myVersionAdapter.getEntries(response);
-
-		for (int i = 0; i < entries.size(); i++) {
-			if (ElementUtil.isEmpty(entries.get(i))) {
-				entries.remove(i);
-				i--;
-			}
-		}
-
 		// Interceptor broadcast: STORAGE_TRANSACTION_RESPONSE_FINALIZED
+		// Fired before the empty response slots of consolidated duplicate conditionals are dropped below, so
+		// hooks tracking entries by request position still see one response slot per request entry.
 		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_RESPONSE_FINALIZED)) {
 			@SuppressWarnings("unchecked")
 			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> versionAdapter = myVersionAdapter;
@@ -298,6 +291,15 @@ public abstract class BaseTransactionProcessor {
 					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 					.add(TransactionDetails.class, transactionDetails);
 			compositeBroadcaster.callHooks(Pointcut.STORAGE_TRANSACTION_RESPONSE_FINALIZED, params);
+		}
+
+		List<IBase> entries = myVersionAdapter.getEntries(response);
+
+		for (int i = 0; i < entries.size(); i++) {
+			if (ElementUtil.isEmpty(entries.get(i))) {
+				entries.remove(i);
+				i--;
+			}
 		}
 
 		return (BUNDLE) response;
