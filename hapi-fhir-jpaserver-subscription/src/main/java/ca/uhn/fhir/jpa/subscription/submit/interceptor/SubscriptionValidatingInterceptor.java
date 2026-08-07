@@ -208,9 +208,8 @@ public class SubscriptionValidatingInterceptor {
 	 * @return true if the current user is authorized to perform the requested action on the specified partition
 	 */
 	@SuppressWarnings("unused")
-	public boolean isUserAuthorizedToManageSubscriptions(RequestDetails theRequestDetails,
-	                                                     RequestPartitionId theRequestPartitionId,
-	                                                     Pointcut thePointcut) {
+	public boolean isUserAuthorizedToManageSubscriptions(
+			RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId, Pointcut thePointcut) {
 		return true;
 	}
 
