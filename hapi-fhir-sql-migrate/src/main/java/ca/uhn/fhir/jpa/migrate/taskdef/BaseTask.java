@@ -52,15 +52,7 @@ import java.util.regex.Pattern;
 
 public abstract class BaseTask {
 
-	public static final int MIGRATION_DATE_LENGTH = 8;
-	public static final int MIGRATION_SEQUENCE_MAX_LENGTH = 6;
-	/**
-	 * Matches the date and sequence components of a migration version. The component lengths are also used to construct
-	 * a product-version baseline in {@link ca.uhn.fhir.jpa.migrate.HapiMigrator#normalizeBaselineVersion(String)}.
-	 */
-	public static final String MIGRATION_VERSION_PATTERN =
-			"\\d{" + MIGRATION_DATE_LENGTH + "}\\.\\d{1," + MIGRATION_SEQUENCE_MAX_LENGTH + "}";
-
+	public static final String MIGRATION_VERSION_PATTERN = "\\d{8}\\.\\d+";
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseTask.class);
 	private static final Pattern versionPattern = Pattern.compile(MIGRATION_VERSION_PATTERN);
 	private final String myProductVersion;
