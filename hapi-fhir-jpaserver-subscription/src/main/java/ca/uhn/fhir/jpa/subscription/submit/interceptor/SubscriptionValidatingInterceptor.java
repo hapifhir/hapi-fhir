@@ -43,6 +43,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -127,6 +128,10 @@ public class SubscriptionValidatingInterceptor {
 					+ thePointcut);
 		}
 
+		if (!isUserAuthorizedToManageSubscriptions()) {
+			throw new AuthenticationException(Msg.code(3026) + "User is not authorized to manage subscriptions");
+		}
+
 		if (!"Subscription".equals(myFhirContext.getResourceType(theSubscription))) {
 			return;
 		}
@@ -191,6 +196,10 @@ public class SubscriptionValidatingInterceptor {
 				validateMessageSubscriptionEndpoint(subscription.getEndpointUrl());
 			}
 		}
+	}
+
+	public boolean isUserAuthorizedToManageSubscriptions() {
+		return true;
 	}
 
 	private void validateCriteria(IBaseResource theSubscription, CanonicalSubscription theCanonicalSubscription) {
@@ -291,7 +300,7 @@ public class SubscriptionValidatingInterceptor {
 		myDaoRegistry.getResourceDao("SubscriptionTopic");
 		SearchParameterMap map = SearchParameterMap.newSynchronous();
 		map.add(SubscriptionTopic.SP_URL, new UriParam(theCriteria));
-		IFhirResourceDao subscriptionTopicDao = myDaoRegistry.getResourceDao("SubscriptionTopic");
+		IFhirResourceDao<?> subscriptionTopicDao = myDaoRegistry.getResourceDao("SubscriptionTopic");
 		IBundleProvider search = subscriptionTopicDao.search(map, new SystemRequestDetails());
 		return search.getResources(0, 1).stream().findFirst();
 	}

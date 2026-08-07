@@ -22,6 +22,7 @@ import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.SubscriptionQue
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
+import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.util.ExtensionUtil;
@@ -42,10 +43,10 @@ import org.mockito.Mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.net.URI;
@@ -58,6 +59,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -71,20 +73,20 @@ public class SubscriptionValidatingInterceptorTest {
 
 	@Autowired
 	private SubscriptionValidatingInterceptor mySubscriptionValidatingInterceptor;
-	@MockBean
+	@MockitoBean
 	private DaoRegistry myDaoRegistry;
-	@MockBean
+	@MockitoBean
 	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
-	@MockBean
+	@MockitoBean
 	private SubscriptionSettings mySubscriptionSettings;
-	@MockBean
+	@MockitoBean
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@Mock
 	private IFhirResourceDao<SubscriptionTopic> mySubscriptionTopicDao;
 	private FhirContext myFhirContext;
 
 	private PartitionSettings myPartitionSettings = new PartitionSettings();
-	@SpyBean
+	@MockitoSpyBean
 	private SubscriptionChannelTypeValidatorFactory mySubscriptionChannelTypeValidatorFactory;
 
 	@BeforeEach
@@ -235,6 +237,23 @@ public class SubscriptionValidatingInterceptorTest {
 		} catch (UnprocessableEntityException e) {
 			assertEquals(Msg.code(2267) + "Expected Pointcut to be either STORAGE_PRESTORAGE_RESOURCE_CREATED or STORAGE_PRESTORAGE_RESOURCE_UPDATED but was: " + Pointcut.TEST_RB, e.getMessage());
 		}
+	}
+
+	@Test
+	void testValidateSubmittedSubscription_userAuthorizationCanBeDenied() {
+		// set up
+		final Subscription subscription = createSubscription();
+		SubscriptionValidatingInterceptor overrideInterceptor = new SubscriptionValidatingInterceptor() {
+			@Override
+			public boolean isUserAuthorizedToManageSubscriptions() {
+				return false;
+			}
+		};
+
+		assertThrows(AuthenticationException.class, () ->
+			overrideInterceptor.validateSubmittedSubscription(
+				subscription, null, null, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED),
+			Msg.code(3026) + "User is not authorized to manage subscriptions");
 	}
 
 	@Test
