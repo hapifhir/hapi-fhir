@@ -20,8 +20,10 @@
 package ca.uhn.fhir.jpa.packages.loader;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.model.PackageUrlScheme;
 import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ClasspathUtil;
 import jakarta.annotation.Nullable;
@@ -33,8 +35,11 @@ import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.utilities.http.ManagedWebAccess;
 import org.hl7.fhir.utilities.npm.BasePackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
+import org.hl7.fhir.utilities.settings.FhirSettingsPOJO;
+import org.hl7.fhir.utilities.settings.ServerDetailsPOJO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,12 +50,82 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class PackageLoaderSvc extends BasePackageCacheManager {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(PackageLoaderSvc.class);
+
+	private static List<String> ourApplied;
+
+	private PackageLoaderSettings mySettings;
+
+	public PackageLoaderSvc(PackageLoaderSettings theLoaderSettings) {
+		mySettings = theLoaderSettings;
+	}
+
+	public static synchronized void resetSettings() {
+		ourApplied = null;
+		ManagedWebAccess.setSsrfProtectionEnabled(true);
+		ManagedWebAccess.loadFromFHIRSettings();
+	}
+
+	/**
+	 * Inits the settings into the core libraries.
+	 * this kinda sucks... but it's the required contract.
+	 *
+	 * We only do this for web based urls
+	 * since only web urls are handled by BasePackageLoader
+	 * (this class will handle locals only).
+	 *
+	 * Syncronoized because module contexts can start concurrently, and this is read-modify-write on shared static state.
+	 */
+	public static synchronized void initSettings(PackageLoaderSettings theSettings) {
+		if (ourApplied != null
+				&& !ourApplied.equals(theSettings.getPackageUrlAllowList().getRemotePrefixes())) {
+			ourLog.warn(
+					"Remote package URL allow-list is being changed from {} to {}; this config is cluster-wide and cannot vary per module!",
+					ourApplied,
+					theSettings.getPackageUrlAllowList().getRemotePrefixes());
+		} else if (ourApplied != null
+				&& ourApplied.equals(theSettings.getPackageUrlAllowList().getRemotePrefixes())) {
+			return; // already applied
+		} else {
+			ourLog.info(
+					"Applying remote package URL allow-list with {} entries",
+					theSettings.getPackageUrlAllowList().getRemotePrefixes());
+		}
+
+		// last in wins
+		ourApplied = theSettings.getPackageUrlAllowList().getRemotePrefixes();
+
+		if (ourApplied.contains(PackageUrlAllowList.WILDCARD)) {
+			ourLog.warn("Allowing all. This shouldn't ever be in production code.");
+			ManagedWebAccess.setSsrfProtectionEnabled(false);
+			return;
+		}
+		ManagedWebAccess.setSsrfProtectionEnabled(true);
+
+		List<ServerDetailsPOJO> servers = theSettings.getPackageUrlAllowList().getRemotePrefixes().stream()
+				.map(url -> {
+					return ServerDetailsPOJO.builder()
+							.url(url)
+							.authenticationType("none")
+							.type("web")
+							.allowHttp(url.startsWith("http:"))
+							.allowPrivateNetwork(url.contains("localhost"))
+							.headers(Collections.emptyMap())
+							.build();
+				})
+				.collect(Collectors.toList());
+
+		ManagedWebAccess.loadFromFHIRSettings(
+				FhirSettingsPOJO.builder().servers(servers).build());
+	}
 
 	public NpmPackageData fetchPackageFromPackageSpec(PackageInstallationSpec theSpec) throws IOException {
 		if (isNotBlank(theSpec.getPackageUrl())) {
@@ -150,29 +225,43 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 	}
 
 	public byte[] loadPackageUrlContents(String thePackageUrl) {
-		if (thePackageUrl.startsWith("classpath:")) {
-			return ClasspathUtil.loadResourceAsByteArray(thePackageUrl.substring("classpath:".length()));
-		} else if (thePackageUrl.startsWith("file:")) {
-			try {
-				return Files.readAllBytes(Paths.get(new URI(thePackageUrl)));
-			} catch (IOException | URISyntaxException e) {
-				throw new InternalErrorException(
-						Msg.code(2031) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());
+		if (!mySettings.getPackageUrlAllowList().isAllowed(thePackageUrl)) {
+			throw new InvalidRequestException("Attempting to request from non-whitelisted path " + thePackageUrl);
+		}
+
+		PackageUrlScheme scheme = PackageUrlScheme.parseScheme(thePackageUrl);
+
+		switch (scheme) {
+			case CLASSPATH -> {
+				return ClasspathUtil.loadResourceAsByteArray(thePackageUrl.substring("classpath:".length()));
 			}
-		} else {
-			HttpClientConnectionManager connManager = new BasicHttpClientConnectionManager();
-			try (CloseableHttpResponse request = HttpClientBuilder.create()
-					.setConnectionManager(connManager)
-					.build()
-					.execute(new HttpGet(thePackageUrl))) {
-				if (request.getStatusLine().getStatusCode() != 200) {
-					throw new ResourceNotFoundException(Msg.code(1303) + "Received HTTP "
-							+ request.getStatusLine().getStatusCode() + " from URL: " + thePackageUrl);
+			case FILE -> {
+				try {
+					return Files.readAllBytes(Paths.get(new URI(thePackageUrl)));
+				} catch (IOException | URISyntaxException e) {
+					throw new InternalErrorException(
+							Msg.code(2031) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());
 				}
-				return IOUtils.toByteArray(request.getEntity().getContent());
-			} catch (IOException e) {
-				throw new InternalErrorException(
-						Msg.code(1304) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());
+			}
+			case HTTPS, HTTP -> {
+				HttpClientConnectionManager connManager = new BasicHttpClientConnectionManager();
+				try (CloseableHttpResponse request = HttpClientBuilder.create()
+						.setConnectionManager(connManager)
+						.build()
+						.execute(new HttpGet(thePackageUrl))) {
+					if (request.getStatusLine().getStatusCode() != 200) {
+						throw new ResourceNotFoundException(Msg.code(1303) + "Received HTTP "
+								+ request.getStatusLine().getStatusCode() + " from URL: " + thePackageUrl);
+					}
+					return IOUtils.toByteArray(request.getEntity().getContent());
+				} catch (IOException e) {
+					throw new InternalErrorException(
+							Msg.code(1304) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());
+				}
+			}
+			default -> {
+				// we won't ever see this - the scheme is validated in
+				throw new InvalidRequestException("Unrecognized scheme");
 			}
 		}
 	}
