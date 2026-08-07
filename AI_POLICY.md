@@ -29,7 +29,7 @@ any code that is merged and released.
 
 **All AI usage in any form must be disclosed.** You must state the tool you
 used (e.g. Claude Code, Cursor, Amp) along with the extent that the work was
-AI-assisted. Any Pull Request that is built with AI assistance submitted must attach the `AI Assisted`
+AI-assisted. Any Pull Request that is built with AI assistance submitted must attach the `ai-generated`
 Github label.
 
 **AI should not be used to generate comments or Pull Request descriptions when communicating with
