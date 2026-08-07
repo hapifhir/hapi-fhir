@@ -313,12 +313,19 @@ public class HapiTransactionService implements IHapiTransactionService {
 		return myTransactionPropagationWhenChangingPartitions == Propagation.REQUIRES_NEW;
 	}
 
+	/**
+	 * A transaction opened for all partitions is partition-unscoped, so it can host work for any
+	 * single partition; the reverse does not hold, so only the transaction side is checked for
+	 * all partitions. Implementations that map partitions to separate databases override this
+	 * method with stricter shard-based rules.
+	 */
 	@Override
 	public boolean isCompatiblePartition(
-			RequestPartitionId theRequestPartitionId, RequestPartitionId theOtherRequestPartitionId) {
+			RequestPartitionId theTransactionPartitionId, RequestPartitionId theCandidatePartitionId) {
 		return !myPartitionSettings.isPartitioningEnabled()
 				|| !isRequiresNewTransactionWhenChangingPartitions()
-				|| Objects.equals(theRequestPartitionId, theOtherRequestPartitionId);
+				|| Objects.equals(theTransactionPartitionId, theCandidatePartitionId)
+				|| (theTransactionPartitionId != null && theTransactionPartitionId.isAllPartitions());
 	}
 
 	@Nullable
