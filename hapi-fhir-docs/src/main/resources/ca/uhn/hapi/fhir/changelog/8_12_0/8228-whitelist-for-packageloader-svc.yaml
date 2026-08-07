@@ -1,0 +1,7 @@
+---
+type: security
+issue: 8228
+title: "PackageLoaderSvc now requires a whitelist to be configured
+      before attempting to fetch resources from remote (or local)
+      urls.
+"

@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.packages.loader;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.model.PackageUrlScheme;
 import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -48,13 +49,12 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class PackageLoaderSvc extends BasePackageCacheManager {
 
@@ -68,6 +68,12 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 		mySettings = theLoaderSettings;
 	}
 
+	public static synchronized void resetSettings() {
+		ourApplied = null;
+		ManagedWebAccess.setSsrfProtectionEnabled(true);
+		ManagedWebAccess.loadFromFHIRSettings();
+	}
+
 	/**
 	 * Inits the settings into the core libraries.
 	 * this kinda sucks... but it's the required contract.
@@ -79,27 +85,32 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 	 * Syncronoized because module contexts can start concurrently, and this is read-modify-write on shared static state.
 	 */
 	public static synchronized void initSettings(PackageLoaderSettings theSettings) {
-		if (ourApplied != null && !ourApplied.equals(theSettings.getRemotePrefixes())) {
+		if (ourApplied != null
+				&& !ourApplied.equals(theSettings.getPackageUrlAllowList().getRemotePrefixes())) {
 			ourLog.warn(
 					"Remote package URL allow-list is being changed from {} to {}; this config is cluster-wide and cannot vary per module!",
 					ourApplied,
-					theSettings.getRemotePrefixes());
-		} else if (ourApplied != null && ourApplied.equals(theSettings.getRemotePrefixes())) {
+					theSettings.getPackageUrlAllowList().getRemotePrefixes());
+		} else if (ourApplied != null
+				&& ourApplied.equals(theSettings.getPackageUrlAllowList().getRemotePrefixes())) {
 			return; // already applied
 		} else {
-			ourLog.info("Applying remote package URL allow-list with {} entries", theSettings.getRemotePrefixes());
+			ourLog.info(
+					"Applying remote package URL allow-list with {} entries",
+					theSettings.getPackageUrlAllowList().getRemotePrefixes());
 		}
 
 		// last in wins
-		ourApplied = theSettings.getRemotePrefixes();
+		ourApplied = theSettings.getPackageUrlAllowList().getRemotePrefixes();
 
-		if (ourApplied.contains(PackageLoaderSettings.WILDCARD)) {
+		if (ourApplied.contains(PackageUrlAllowList.WILDCARD)) {
 			ourLog.warn("Allowing all. This shouldn't ever be in production code.");
 			ManagedWebAccess.setSsrfProtectionEnabled(false);
 			return;
 		}
+		ManagedWebAccess.setSsrfProtectionEnabled(true);
 
-		List<ServerDetailsPOJO> servers = theSettings.getRemotePrefixes().stream()
+		List<ServerDetailsPOJO> servers = theSettings.getPackageUrlAllowList().getRemotePrefixes().stream()
 				.map(url -> {
 					return ServerDetailsPOJO.builder()
 							.url(url)
@@ -117,12 +128,7 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 	}
 
 	public NpmPackageData fetchPackageFromPackageSpec(PackageInstallationSpec theSpec) throws IOException {
-		if (!isValidUrl(theSpec.getPackageUrl())) {
-			throw new InvalidRequestException(
-					"Attempting to fetch resources from dissallowed url " + theSpec.getPackageUrl());
-		}
-
-		if (isFilePath(theSpec.getPackageUrl())) {
+		if (isNotBlank(theSpec.getPackageUrl())) {
 			byte[] contents = loadPackageUrlContents(theSpec.getPackageUrl());
 			return createNpmPackageDataFromData(
 					theSpec.getName(),
@@ -132,32 +138,6 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 		}
 
 		return fetchPackageFromServerInternal(theSpec.getName(), theSpec.getVersion());
-	}
-
-	private boolean isValidUrl(String theUrl) {
-		if (isBlank(theUrl)) {
-			return false;
-		}
-		if (isFilePath(theUrl)) {
-			// normalize the path so that it's not something like "file:/valid/../invalid/path"
-			Path base = Paths.get(theUrl).toAbsolutePath().normalize();
-			for (String url : mySettings.getLocalPrefixes()) {
-				if (base.startsWith(url)) {
-					return true;
-				}
-			}
-		} else if (theUrl.startsWith("http")) {
-			for (String url : mySettings.getRemotePrefixes()) {
-				if (theUrl.startsWith(url)) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	private boolean isFilePath(String theUrl) {
-		return theUrl.startsWith("file:") || theUrl.startsWith("classpath:");
 	}
 
 	/**
@@ -245,29 +225,43 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 	}
 
 	public byte[] loadPackageUrlContents(String thePackageUrl) {
-		if (thePackageUrl.startsWith("classpath:")) {
-			return ClasspathUtil.loadResourceAsByteArray(thePackageUrl.substring("classpath:".length()));
-		} else if (thePackageUrl.startsWith("file:")) {
-			try {
-				return Files.readAllBytes(Paths.get(new URI(thePackageUrl)));
-			} catch (IOException | URISyntaxException e) {
-				throw new InternalErrorException(
-						Msg.code(2031) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());
+		if (!mySettings.getPackageUrlAllowList().isAllowed(thePackageUrl)) {
+			throw new InvalidRequestException("Attempting to request from non-whitelisted path " + thePackageUrl);
+		}
+
+		PackageUrlScheme scheme = PackageUrlScheme.parseScheme(thePackageUrl);
+
+		switch (scheme) {
+			case CLASSPATH -> {
+				return ClasspathUtil.loadResourceAsByteArray(thePackageUrl.substring("classpath:".length()));
 			}
-		} else {
-			HttpClientConnectionManager connManager = new BasicHttpClientConnectionManager();
-			try (CloseableHttpResponse request = HttpClientBuilder.create()
-					.setConnectionManager(connManager)
-					.build()
-					.execute(new HttpGet(thePackageUrl))) {
-				if (request.getStatusLine().getStatusCode() != 200) {
-					throw new ResourceNotFoundException(Msg.code(1303) + "Received HTTP "
-							+ request.getStatusLine().getStatusCode() + " from URL: " + thePackageUrl);
+			case FILE -> {
+				try {
+					return Files.readAllBytes(Paths.get(new URI(thePackageUrl)));
+				} catch (IOException | URISyntaxException e) {
+					throw new InternalErrorException(
+							Msg.code(2031) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());
 				}
-				return IOUtils.toByteArray(request.getEntity().getContent());
-			} catch (IOException e) {
-				throw new InternalErrorException(
-						Msg.code(1304) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());
+			}
+			case HTTPS, HTTP -> {
+				HttpClientConnectionManager connManager = new BasicHttpClientConnectionManager();
+				try (CloseableHttpResponse request = HttpClientBuilder.create()
+						.setConnectionManager(connManager)
+						.build()
+						.execute(new HttpGet(thePackageUrl))) {
+					if (request.getStatusLine().getStatusCode() != 200) {
+						throw new ResourceNotFoundException(Msg.code(1303) + "Received HTTP "
+								+ request.getStatusLine().getStatusCode() + " from URL: " + thePackageUrl);
+					}
+					return IOUtils.toByteArray(request.getEntity().getContent());
+				} catch (IOException e) {
+					throw new InternalErrorException(
+							Msg.code(1304) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());
+				}
+			}
+			default -> {
+				// we won't ever see this - the scheme is validated in
+				throw new InvalidRequestException("Unrecognized scheme");
 			}
 		}
 	}

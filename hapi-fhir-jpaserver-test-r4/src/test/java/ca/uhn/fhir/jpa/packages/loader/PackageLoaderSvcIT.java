@@ -8,6 +8,7 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.npm.PackageServer;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -43,16 +44,22 @@ public class PackageLoaderSvcIT {
 		if (!baseUrl.startsWith("http")) {
 			baseUrl = "http://" + baseUrl;
 		}
-		PackageLoaderSettings settings = PackageLoaderSettings.unrestricted(); // PackageLoaderSettings.restricted(
-//			List.of(baseUrl), new ArrayList<>()
-//		);
+		PackageLoaderSettings settings = new PackageLoaderSettings(
+			PackageUrlAllowList.of(List.of(baseUrl), new ArrayList<>())
+		);
 		PackageLoaderSvc.initSettings(settings);
 		myPackageLoaderSvc = new PackageLoaderSvc(settings);
 
 		myPackageLoaderSvc.getPackageServers().clear();
-		myPackageLoaderSvc.addPackageServer(new PackageServer(myServer.getBaseUrl()));
+		myPackageLoaderSvc.addPackageServer(
+			new PackageServer(myServer.getBaseUrl()).withAllowHttp(true).withAllowPrivateNetwork(true));
 
 		myFakeNpmServlet.getResponses().clear();
+	}
+
+	@AfterEach
+	public void after() {
+		PackageLoaderSvc.resetSettings();
 	}
 
 	@Test
