@@ -59,7 +59,6 @@ public class HapiMigrator {
 	private final HapiMigrationStorageSvc myHapiMigrationStorageSvc;
 	private List<IHapiMigrationCallback> myCallbacks = Collections.emptyList();
 	private String myBaselineVersion;
-	private boolean myEnableBaselineCheck;
 
 	public HapiMigrator(String theMigrationTableName, DataSource theDataSource, DriverTypeEnum theDriverType) {
 		myDriverType = theDriverType;
@@ -88,7 +87,7 @@ public class HapiMigrator {
 	}
 
 	/**
-	 * Should we run the tasks marked with {@link TaskFlagEnum#HEAVYWEIGHT_SKIP_BY_DEFAULT}
+	 * Should we run the tasks marked with {@link ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum#HEAVYWEIGHT_SKIP_BY_DEFAULT}
 	 *
 	 * @since 7.4.0
 	 */
@@ -97,7 +96,7 @@ public class HapiMigrator {
 	}
 
 	/**
-	 * Should we run the tasks marked with {@link TaskFlagEnum#HEAVYWEIGHT_SKIP_BY_DEFAULT}
+	 * Should we run the tasks marked with {@link ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum#HEAVYWEIGHT_SKIP_BY_DEFAULT}
 	 *
 	 * @since 7.4.0
 	 */
@@ -166,13 +165,9 @@ public class HapiMigrator {
 					getDriverType().newConnectionProperties(getDataSource())) {
 				Set<MigrationVersion> appliedMigrationVersions =
 						myHapiMigrationStorageSvc.fetchAppliedMigrationVersions();
+				Set<MigrationVersion> baselineMigrationVersions = applyBaselineIfRequired(connectionProperties);
 				Set<MigrationVersion> effectiveAppliedMigrationVersions = new HashSet<>(appliedMigrationVersions);
-
-				if (myEnableBaselineCheck) {
-					Set<MigrationVersion> baselineMigrationVersions = applyBaselineIfRequired(connectionProperties);
-					effectiveAppliedMigrationVersions.addAll(baselineMigrationVersions);
-				}
-
+				effectiveAppliedMigrationVersions.addAll(baselineMigrationVersions);
 				MigrationTaskList newTaskList = myTaskList.diff(effectiveAppliedMigrationVersions);
 				ourLog.info(
 						"{} of these {} migration tasks are new.  Executing them now.",
@@ -385,9 +380,5 @@ public class HapiMigrator {
 		if (!myDryRun) {
 			myHapiMigrationStorageSvc.createMigrationTableIfRequired();
 		}
-	}
-
-	public void setEnableBaselineCheck(boolean theEnableBaselineCheck) {
-		myEnableBaselineCheck = theEnableBaselineCheck;
 	}
 }

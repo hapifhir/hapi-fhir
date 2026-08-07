@@ -123,7 +123,7 @@ public class Batch2JobHelper {
 		} catch (ConditionTimeoutException e) {
 			String statuses = myJobPersistence.fetchInstances(100, 0)
 				.stream()
-				.map(Batch2JobHelper::toStatus)
+				.map(t -> t.getInstanceId() + " " + t.getJobDefinitionId() + "/" + t.getStatus().name())
 				.collect(Collectors.joining("\n"));
 			JobInstance instance = myJobCoordinator.getInstance(theInstanceId);
 			String currentStatus = instance.getStatus().name();
@@ -417,20 +417,5 @@ public class Batch2JobHelper {
 	@Nonnull
 	public static String getJobIdFromPollingLocation(MethodOutcome theMethodOutcome) {
 		return getJobIdFromPollingLocation(theMethodOutcome.getFirstResponseHeader(Constants.HEADER_CONTENT_LOCATION).orElseThrow());
-	}
-
-	private static String toStatus(JobInstance t) {
-		StringBuilder b = new StringBuilder();
-		b.append(t.getInstanceId());
-		b.append(" ");
-		b.append(t.getJobDefinitionId());
-		b.append("/");
-		b.append(t.getStatus().name());
-		if (t.getStatus() == StatusEnum.FAILED) {
-			b.append("Error: '");
-			b.append(t.getErrorMessage());
-			b.append("'");
-		}
-		return b.toString();
 	}
 }
