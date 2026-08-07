@@ -22,7 +22,7 @@ import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.SubscriptionQue
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
-import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.util.ExtensionUtil;
@@ -31,6 +31,7 @@ import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4b.model.CanonicalType;
 import org.hl7.fhir.r4b.model.Enumerations;
+import org.hl7.fhir.r4b.model.Patient;
 import org.hl7.fhir.r4b.model.Subscription;
 import org.hl7.fhir.r4b.model.SubscriptionTopic;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,6 +59,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -245,15 +247,37 @@ public class SubscriptionValidatingInterceptorTest {
 		final Subscription subscription = createSubscription();
 		SubscriptionValidatingInterceptor overrideInterceptor = new SubscriptionValidatingInterceptor() {
 			@Override
-			public boolean isUserAuthorizedToManageSubscriptions() {
+			public boolean isUserAuthorizedToManageSubscriptions(RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId, Pointcut thePointcut) {
 				return false;
 			}
 		};
 
-		assertThrows(AuthenticationException.class, () ->
+		overrideInterceptor.setFhirContext(myFhirContext);
+
+		// execute and validate
+		assertThatThrownBy(() ->
 			overrideInterceptor.validateSubmittedSubscription(
-				subscription, null, null, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED),
-			Msg.code(3026) + "User is not authorized to manage subscriptions");
+				subscription, null, null, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED))
+			.isInstanceOf(ForbiddenOperationException.class)
+				.hasMessage(Msg.code(3026) + "User is not authorized to manage subscriptions");
+	}
+
+	@Test
+	void testValidateSubmittedSubscription_userAuthorizationDoesNotBlockOtherResourceTypes() {
+		// set up
+		final Patient patient = new Patient();
+		SubscriptionValidatingInterceptor overrideInterceptor = new SubscriptionValidatingInterceptor() {
+			@Override
+			public boolean isUserAuthorizedToManageSubscriptions(RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId, Pointcut thePointcut) {
+				return false;
+			}
+		};
+		overrideInterceptor.setFhirContext(myFhirContext);
+
+		// execute and validate
+		assertThatNoException().isThrownBy(
+			() -> overrideInterceptor.validateSubmittedSubscription(
+					patient, null, null, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED));
 	}
 
 	@Test

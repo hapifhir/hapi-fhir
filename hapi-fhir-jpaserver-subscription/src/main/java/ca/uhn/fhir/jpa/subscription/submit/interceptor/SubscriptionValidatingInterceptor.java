@@ -43,7 +43,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.UriParam;
-import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -128,12 +128,12 @@ public class SubscriptionValidatingInterceptor {
 					+ thePointcut);
 		}
 
-		if (!isUserAuthorizedToManageSubscriptions()) {
-			throw new AuthenticationException(Msg.code(3026) + "User is not authorized to manage subscriptions");
-		}
-
 		if (!"Subscription".equals(myFhirContext.getResourceType(theSubscription))) {
 			return;
+		}
+
+		if (!isUserAuthorizedToManageSubscriptions(theRequestDetails, theRequestPartitionId, thePointcut)) {
+			throw new ForbiddenOperationException(Msg.code(3026) + "User is not authorized to manage subscriptions");
 		}
 
 		CanonicalSubscription subscription;
@@ -198,7 +198,19 @@ public class SubscriptionValidatingInterceptor {
 		}
 	}
 
-	public boolean isUserAuthorizedToManageSubscriptions() {
+	/**
+	 * An override hook allowing an implementer to provide custom logic for authorizing a user to perform
+	 * subscription management operations.
+	 *
+	 * @param theRequestDetails     the details of the current request
+	 * @param theRequestPartitionId the id of the partition being accessed
+	 * @param thePointcut           the pointcut being invoked
+	 * @return true if the current user is authorized to perform the requested action on the specified partition
+	 */
+	@SuppressWarnings("unused")
+	public boolean isUserAuthorizedToManageSubscriptions(RequestDetails theRequestDetails,
+	                                                     RequestPartitionId theRequestPartitionId,
+	                                                     Pointcut thePointcut) {
 		return true;
 	}
 
@@ -297,7 +309,6 @@ public class SubscriptionValidatingInterceptor {
 	}
 
 	private Optional<IBaseResource> findSubscriptionTopicByUrl(String theCriteria) {
-		myDaoRegistry.getResourceDao("SubscriptionTopic");
 		SearchParameterMap map = SearchParameterMap.newSynchronous();
 		map.add(SubscriptionTopic.SP_URL, new UriParam(theCriteria));
 		IFhirResourceDao<?> subscriptionTopicDao = myDaoRegistry.getResourceDao("SubscriptionTopic");
