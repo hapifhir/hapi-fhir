@@ -23,10 +23,12 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -121,5 +123,25 @@ public class JpaResourceExpungeServiceTest {
 		verify(myExternalStorageProvider, never()).deleteResource(any());
 		verify(myResourceHistoryTagDao, times(1)).deleteByPid(historyPk);
 		verify(myResourceHistoryTableDao, times(1)).deleteByPid(historyPk);
+	}
+
+
+	@Test
+	public void testExpungeHistoricalVersions_missingEntry_throwsWithContextualMessage() {
+
+		ResourceHistoryTablePk pk = new ResourceHistoryTablePk();
+		pk.setPartitionIdValue(42);
+		pk.setId(123L);
+
+		when(myResourceHistoryTableDao.findById(pk)).thenReturn(Optional.empty());
+
+		AtomicInteger remaining = new AtomicInteger(1);
+
+		assertThatThrownBy(() ->
+			myService.expungeHistoricalVersions(myRequestDetails, Collections.singletonList(pk), remaining))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("No historical version found")
+			.hasMessageContaining("ResourceHistoryTablePk: 123")
+			.hasMessageContaining("partition 42");
 	}
 }
