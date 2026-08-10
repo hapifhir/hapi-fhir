@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.model.util.PackageUrlConstants.WILDCARD;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class PackageLoaderSvc extends BasePackageCacheManager {
@@ -103,7 +104,7 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 		// last in wins
 		ourApplied = theSettings.getPackageUrlAllowList().getRemotePrefixes();
 
-		if (ourApplied.contains(PackageUrlAllowList.WILDCARD)) {
+		if (ourApplied.contains(WILDCARD)) {
 			ourLog.warn("Allowing all. This shouldn't ever be in production code.");
 			ManagedWebAccess.setSsrfProtectionEnabled(false);
 			return;

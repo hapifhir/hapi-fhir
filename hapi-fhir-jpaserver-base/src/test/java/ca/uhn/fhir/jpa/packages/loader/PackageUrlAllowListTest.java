@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.packages.loader;
 
+import ca.uhn.fhir.jpa.model.util.PackageUrlConstants;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -241,7 +242,7 @@ class PackageUrlAllowListTest {
 	void isAllowed_withWildcardAlongsideUnsupportedEntry_stillAllowsSupportedSchemes() {
 		// the wildcard is absolute; a junk entry beside it neither helps nor hinders
 		PackageUrlAllowList allowList =
-				PackageUrlAllowList.of(List.of(PackageUrlAllowList.WILDCARD, "ftp://x"), List.of(PackageUrlAllowList.WILDCARD, "ftp://x"));
+				PackageUrlAllowList.of(List.of(PackageUrlConstants.WILDCARD, "ftp://x"), List.of(PackageUrlConstants.WILDCARD, "ftp://x"));
 
 		assertThat(allowList.isAllowed("file:/anywhere/pkg.tgz")).isTrue();
 		assertThat(allowList.isAllowed("https://anywhere.example.com/pkg.tgz")).isTrue();
