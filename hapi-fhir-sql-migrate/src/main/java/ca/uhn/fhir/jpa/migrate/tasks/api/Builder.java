@@ -581,9 +581,6 @@ public class Builder {
 					task.setForeignColumnNames(Arrays.asList(theForeignColumns));
 					if (myWithDeleteCascade) {
 						task.withDeleteCascade();
-					} else {
-						// just in case
-						task.removeDeleteCascade();
 					}
 					addTask(task);
 					return new BuilderCompleteTask(task);

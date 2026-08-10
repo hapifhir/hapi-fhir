@@ -80,6 +80,27 @@ public class AddForeignKeyTaskTest extends BaseTest {
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
+	public void addForeignKey_withoutDeleteCascadeWhenExistsWith_throws(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
+		// setup
+		before(theTestDatabaseDetails);
+
+		executeSql("CREATE TABLE CUSTOMERS (ID int not null, NAME varchar(255), primary key (ID))");
+		executeSql("CREATE TABLE ORDERS (ID int not null, CUSTOMERID int)");
+		executeSql("ALTER TABLE ORDERS ADD CONSTRAINT FK_CO_FOREIGN FOREIGN KEY (CUSTOMERID) REFERENCES CUSTOMERS (ID) ON DELETE CASCADE");
+
+		// add a migration that adds foreign key but not with delete cascade
+		getMigrator()
+			.addTasks(
+				new MyMigrationTasks(VersionEnum.V3_4_0, false).getTaskList(VersionEnum.V3_3_0, VersionEnum.V3_4_0)
+			);
+
+		assertThatThrownBy(() -> getMigrator().migrate())
+			.isInstanceOf(HapiMigrationException.class)
+			.getCause().hasMessageContaining("Can not add foreign key FK_CO_FOREIGN");
+	}
+
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
 	public void addForeignKey_multipleMigrationsWithSameFKbutDifferentCascadeOptions_shouldFail(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
 		// setup
 		before(theTestDatabaseDetails);
@@ -99,21 +120,15 @@ public class AddForeignKeyTaskTest extends BaseTest {
 				new MyMigrationTasks(VersionEnum.V3_5_0, true).getTaskList(VersionEnum.V3_4_0, VersionEnum.V3_5_0)
 			);
 
-		try {
-			getMigrator()
-				.migrate();
-			fail("Migration should've failed to try and add cascade onto existing constraint");
-		} catch (HapiMigrationException ex) {
-			assertTrue(
-				ex.getCause()
-					.getMessage().contains("Can not add foreign key FK_CO_FOREIGN")
-			);
-		}
+		assertThatThrownBy(() -> getMigrator().migrate())
+			.isInstanceOf(HapiMigrationException.class)
+			.getCause()
+			.hasMessageContaining("Can not add foreign key FK_CO_FOREIGN");
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
-	public void addFoeignKey_viaBuilderWithDeleteCascade_cascadesOnPArentDelete(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+	public void addForeignKey_viaBuilderWithDeleteCascade_cascadesOnParentDelete(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
 		// setup
 		before(theTestDatabaseDetails);
 

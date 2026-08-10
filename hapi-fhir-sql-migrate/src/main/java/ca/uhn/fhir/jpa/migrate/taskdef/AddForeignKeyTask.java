@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -76,10 +77,6 @@ public class AddForeignKeyTask extends BaseTableTask {
 		myWithDeleteCascade = true;
 	}
 
-	public void removeDeleteCascade() {
-		myWithDeleteCascade = false;
-	}
-
 	@Override
 	public void validate() {
 		super.validate();
@@ -105,10 +102,13 @@ public class AddForeignKeyTask extends BaseTableTask {
 		if (existing.containsKey(constraintName)) {
 			// if trying to add delete cascade with same fk constraint,
 			// but on an existing constraint, we throw
-			if (myWithDeleteCascade && !existing.get(constraintName)) {
-				throw new SQLException(Msg.code(3027) + "Can not add foreign key " + myConstraintName
-						+ " to table " + getTableName()
-						+ " with delete cascade because the constraint already exists without it."
+			// likewise if trying to add a constraint that doesn't have on delete cascade
+			// where it already has it will also throw
+			if (myWithDeleteCascade != existing.get(constraintName)) {
+				throw new HapiMigrationException(Msg.code(3027) + "Can not add foreign key " + myConstraintName
+						+ " to table " + getTableName() + "."
+						+ " The constraint already exists " + (myWithDeleteCascade ? "without" : "with")
+						+ " delete cascade."
 						+ " Add a DropForeignKeyTask for " + myConstraintName
 						+ " at an earlier version in this release.");
 			}

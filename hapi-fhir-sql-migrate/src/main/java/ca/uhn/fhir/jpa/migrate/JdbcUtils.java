@@ -299,8 +299,10 @@ public class JdbcUtils {
 
 	/**
 	 * Same as the above (getForeignKeys)
-	 * but retrieves all index names and
-	 * whether or not that index is declared "on delete cascade".
+	 * but retrieves all foreignkey names and
+	 * whether or not "on delete cascade" is declared.
+	 *
+	 * Of note, the foreign key names will all be uppercase.
 	 */
 	public static Map<String, Boolean> getForeignKeysAndRuleset(
 			DriverTypeEnum.ConnectionProperties theConnectionProperties,
@@ -334,8 +336,19 @@ public class JdbcUtils {
 								catalog, schema, nextParentTable, catalog, schema, foreignTable)) {
 							while (indexes.next()) {
 								String fkName = indexes.getString("FK_NAME");
+								if (fkName == null) {
+									// if a constraint exists and is unnamed, fkName will be null
+									ourLog.warn(
+											"Ignoring unnamed foreign key between {} and {}",
+											nextParentTable,
+											foreignTable);
+									continue;
+								}
+								short deleteRule = indexes.getShort("DELETE_RULE");
+								// wasNull is in regards to previous column read, so we read the DELETE_RULE
+								// first, then check
 								boolean cascades =
-										indexes.getShort("DELETE_RULE") == DatabaseMetaData.importedKeyCascade;
+										!indexes.wasNull() && deleteRule == DatabaseMetaData.importedKeyCascade;
 								fkName = fkName.toUpperCase(Locale.US);
 								fkNames.put(fkName, cascades);
 							}
