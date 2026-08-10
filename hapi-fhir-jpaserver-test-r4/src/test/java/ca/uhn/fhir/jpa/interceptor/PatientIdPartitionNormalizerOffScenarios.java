@@ -9,7 +9,7 @@ import org.junit.jupiter.params.provider.ArgumentsProvider;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static ca.uhn.fhir.jpa.interceptor.PatientIdPartitionReferenceScenarios.inAnyPartitionExceptDefault;
+import static ca.uhn.fhir.jpa.interceptor.PatientIdPartitionReferenceScenarios.inCompartmentOfSelf;
 import static ca.uhn.fhir.jpa.interceptor.PatientIdPartitionReferenceScenarios.inCompartmentOf;
 import static ca.uhn.fhir.jpa.interceptor.PatientIdPartitionReferenceScenarios.inSamePartitionAsEntry;
 
@@ -85,7 +85,7 @@ class PatientIdPartitionNormalizerOffScenarios {
 						""",
 					"The post-prefetch hook mints and rewrites off the client's urn fullUrl — no normalizer involved.",
 					List.of(
-						inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
+						inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
 						inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0)
 					)
 				),
@@ -156,7 +156,7 @@ class PatientIdPartitionNormalizerOffScenarios {
 						""",
 					"The post-prefetch hook mints a UUID id and rewrites the POST; no normalizer involved.",
 					List.of(
-						inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
+						inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
 					)
 				)
 			);

@@ -9,7 +9,7 @@ import org.junit.jupiter.params.provider.ArgumentsProvider;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static ca.uhn.fhir.jpa.interceptor.PatientIdPartitionReferenceScenarios.inAnyPartitionExceptDefault;
+import static ca.uhn.fhir.jpa.interceptor.PatientIdPartitionReferenceScenarios.inCompartmentOfSelf;
 import static ca.uhn.fhir.jpa.interceptor.PatientIdPartitionReferenceScenarios.inCompartmentOf;
 import static ca.uhn.fhir.jpa.interceptor.PatientIdPartitionReferenceScenarios.inCompartmentOfDistinctFrom;
 import static ca.uhn.fhir.jpa.interceptor.PatientIdPartitionReferenceScenarios.inDefaultPartition;
@@ -66,7 +66,7 @@ class PatientIdPartitionCrossPartitionScenarios implements ArgumentsProvider {
 				"Practitioner (ancillary) → default partition. Patient's generalPractitioner crosses partitions: the urn is substituted with the Practitioner's concrete id.",
 				List.of(
 					inDefaultPartition("Practitioner", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
-					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
+					inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
 				)
 			),
 			Arguments.of(
@@ -160,7 +160,7 @@ class PatientIdPartitionCrossPartitionScenarios implements ArgumentsProvider {
 				"Group is always stored in the default partition; its members reference pat1's compartment and the new patient's — the reverse direction (default → compartment).",
 				List.of(
 					inDefaultPartition("Group", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
-					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
+					inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
 				)
 			),
 			Arguments.of(
@@ -183,7 +183,7 @@ class PatientIdPartitionCrossPartitionScenarios implements ArgumentsProvider {
 					""",
 				"link.other inline match URL → synthetic conditional-create NOPs against pat2 in pat2's partition (stripped), and the minted patient carries the rewritten outbound link. With a random minted UUID the placement can only be pinned to \"not default\" — the deterministic cross-compartment claim is pinned by the update-as-create variant below.",
 				List.of(
-					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
+					inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
 				)
 			),
 			Arguments.of(

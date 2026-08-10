@@ -60,6 +60,8 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coverage;
@@ -110,7 +112,8 @@ import java.util.regex.Pattern;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.interceptor.PatientIdPartitionReferenceScenarios.inAnyPartitionExceptDefault;
+import static ca.uhn.fhir.jpa.interceptor.PatientIdPartitionReferenceScenarios.inCompartmentOfOwnSubject;
+import static ca.uhn.fhir.jpa.interceptor.PatientIdPartitionReferenceScenarios.inCompartmentOfSelf;
 import static ca.uhn.fhir.jpa.interceptor.PatientIdPartitionReferenceScenarios.inCompartmentOf;
 import static ca.uhn.fhir.jpa.interceptor.PatientIdPartitionReferenceScenarios.inSamePartitionAsEntry;
 import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onAllThreads;
@@ -1777,24 +1780,51 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 				// The created placeholder must co-locate with the entry that referenced it.
 				assertResourceIsInPartition(
 						getResourcePartition(resourceId), placeholderId.toUnqualifiedVersionless());
+				// A Patient placeholder is a compartment owner created under its own minted id, so it
+				// must additionally land in that id's compartment (co-location alone would also pass
+				// with both resources consistently misplaced).
+				if ("Patient".equals(expected.createdPlaceholderType())) {
+					assertResourceIsInPartition(
+							PatientIdPartitionInterceptor.defaultPartitionAlgorithm(placeholderId.getIdPart()),
+							placeholderId.toUnqualifiedVersionless());
+				}
 			}
 
 			// Partition
-			if (expected.expectedPartition() != null) {
-				assertResourceIsInPartition(expected.expectedPartition(), resourceId);
-			} else if (expected.samePartitionAsEntryIndex() != null) {
-				String otherLocation =
-						theResultBundle.getEntry().get(expected.samePartitionAsEntryIndex()).getResponse().getLocation();
-				IIdType otherId = new IdType(otherLocation).toUnqualifiedVersionless();
-				assertResourceIsInPartition(getResourcePartition(otherId), resourceId);
-			} else {
-				// In-range implies "not the default": compartment hashes span [0,14999]
-				// (defaultPartitionAlgorithm) while the configured default partition is -1.
-				assertThat(getResourcePartition(resourceId))
-						.as("entry[%d] (%s) must be in a patient-compartment partition, not the default", i, resourceId)
-						.isBetween(0, 14999);
+			switch (expected.partitionExpectation()) {
+				case EXACT -> assertResourceIsInPartition(expected.expectedPartition(), resourceId);
+				case SAME_AS_ENTRY -> {
+					String otherLocation = theResultBundle
+							.getEntry()
+							.get(expected.samePartitionAsEntryIndex())
+							.getResponse()
+							.getLocation();
+					IIdType otherId = new IdType(otherLocation).toUnqualifiedVersionless();
+					assertResourceIsInPartition(getResourcePartition(otherId), resourceId);
+				}
+				case OWN_ID -> assertResourceIsInPartition(
+						PatientIdPartitionInterceptor.defaultPartitionAlgorithm(resourceId.getIdPart()), resourceId);
+				case OWN_SUBJECT -> {
+					IIdType subjectId = readStoredSubject(resourceId);
+					assertThat(subjectId.getResourceType())
+							.as("entry[%d] (%s) stored subject must reference a Patient", i, resourceId)
+							.isEqualTo("Patient");
+					assertResourceIsInPartition(
+							PatientIdPartitionInterceptor.defaultPartitionAlgorithm(subjectId.getIdPart()), resourceId);
+				}
 			}
 		}
+	}
+
+	/** Reads the stored resource and returns its subject reference. */
+	// Created by Claude Fable 5
+	private IIdType readStoredSubject(IIdType theResourceId) {
+		IBaseResource resource =
+				myDaoRegistry.getResourceDao(theResourceId.getResourceType()).read(theResourceId, mySrd);
+		IBaseReference subject =
+				myFhirContext.newTerser().getSingleValueOrNull(resource, "subject", IBaseReference.class);
+		assertThat(subject).as("%s must have a subject", theResourceId).isNotNull();
+		return subject.getReferenceElement();
 	}
 
 	private static boolean isCreatedOutcome(StorageResponseCodeEnum theCode) {
@@ -2072,9 +2102,9 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		Bundle response = mySystemDao.transaction(mySrd, myFhirContext.newJsonParser().parseResource(Bundle.class, bundle));
 
 		assertReferenceScenario(response, List.of(
-			inAnyPartitionExceptDefault("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
+			inCompartmentOfOwnSubject("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
 					.reportingCreatedPlaceholder("Patient"),
-			inAnyPartitionExceptDefault("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
+			inCompartmentOfOwnSubject("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
 					.reportingCreatedPlaceholder("Patient")));
 		assertPatientCountInDatabase(2);
 
@@ -2122,7 +2152,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		Bundle response = mySystemDao.transaction(mySrd, myFhirContext.newJsonParser().parseResource(Bundle.class, bundle));
 
 		assertReferenceScenario(response, List.of(
-			inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
+			inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
 			inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat1")));
 		assertPatientCountInDatabase(2);
 
@@ -2243,7 +2273,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		Bundle response = mySystemDao.transaction(mySrd, myFhirContext.newJsonParser().parseResource(Bundle.class, bundle));
 
 		assertReferenceScenario(response, List.of(
-			inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH),
+			inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH),
 			inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0)));
 	}
 
@@ -2328,7 +2358,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 
 		assertReferenceScenario(
 				resultBundle,
-				List.of(inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH)));
+				List.of(inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH)));
 		assertPatientCountInDatabase(1);
 	}
 
@@ -2367,7 +2397,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 
 		assertReferenceScenario(
 				resultBundle,
-				List.of(inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH)));
+				List.of(inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH)));
 		assertPatientCountInDatabase(1);
 
 		// The restored message fills the match-URL slot the native message leaves as a literal "{1}"
@@ -2414,7 +2444,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 
 		assertReferenceScenario(
 				resultBundle,
-				List.of(inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH)));
+				List.of(inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH)));
 		assertPatientCountInDatabase(1);
 	}
 
@@ -2448,7 +2478,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 
 		assertReferenceScenario(
 				resultBundle,
-				List.of(inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH)));
+				List.of(inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH)));
 		assertPatientCountInDatabase(1);
 
 		List<String> searchUrls = runInTransaction(() -> myResourceSearchUrlDao.findAll().stream()

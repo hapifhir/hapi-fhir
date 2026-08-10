@@ -60,22 +60,30 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				theTestData.withIdentifier("observation-system", "obsExisting"));
 	}
 
+	/** How an entry's stored partition is derived and checked. */
+	// Created by Claude Fable 5
+	enum PartitionExpectation {
+		/** Exact partition id, computed at provider time ({@code expectedPartition}). */
+		EXACT,
+		/** Same partition as the response entry at {@code samePartitionAsEntryIndex}. */
+		SAME_AS_ENTRY,
+		/** Compartment of the resource's own server-assigned id: hash of the response location's id part. */
+		OWN_ID,
+		/** Compartment of the stored resource's own subject: hash of the subject reference's id part. */
+		OWN_SUBJECT
+	}
+
 	/**
-	 * Expectation for a single transaction response entry (in input order).
-	 * The two nullable partition fields encode three cases:
-	 * <ul>
-	 *   <li>{@code expectedPartition} (non-null) — exact partition id</li>
-	 *   <li>{@code samePartitionAsEntryIndex} (non-null) — must land in the same partition as the response
-	 *       entry at this index (whichever partition that turns out to be)</li>
-	 *   <li>both null — "any compartment": the partition must fall in the compartment hash range
-	 *       {@code [0, 14999]} (which includes 0 and excludes the default partition, -1)</li>
-	 * </ul>
+	 * Expectation for a single transaction response entry (in input order). {@code partitionExpectation}
+	 * selects how the stored partition is derived; {@code expectedPartition} and
+	 * {@code samePartitionAsEntryIndex} feed the {@code EXACT} and {@code SAME_AS_ENTRY} modes respectively.
 	 * {@code createdPlaceholderType} non-null means the entry's outcome must report exactly one auto-created
 	 * placeholder of that type; null means it must report none.
 	 */
 	record ExpectedEntry(
 			String resourceType,
 			StorageResponseCodeEnum outcome,
+			PartitionExpectation partitionExpectation,
 			Integer expectedPartition,
 			Integer samePartitionAsEntryIndex,
 			String createdPlaceholderType) {
@@ -83,19 +91,25 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 		/** This entry's outcome must report exactly one auto-created placeholder of the given type. */
 		ExpectedEntry reportingCreatedPlaceholder(String thePlaceholderType) {
 			return new ExpectedEntry(
-					resourceType, outcome, expectedPartition, samePartitionAsEntryIndex, thePlaceholderType);
+					resourceType,
+					outcome,
+					partitionExpectation,
+					expectedPartition,
+					samePartitionAsEntryIndex,
+					thePlaceholderType);
 		}
 	}
 
 	/** Resource in the configured default partition (ALTERNATE_DEFAULT_ID = -1). */
 	static ExpectedEntry inDefaultPartition(String theType, StorageResponseCodeEnum theOutcome) {
-		return new ExpectedEntry(theType, theOutcome, ALTERNATE_DEFAULT_ID, null, null);
+		return new ExpectedEntry(
+				theType, theOutcome, PartitionExpectation.EXACT, ALTERNATE_DEFAULT_ID, null, null);
 	}
 
 	/** Resource in the compartment of the patient whose id-part is {@code thePatientIdPart}. */
 	static ExpectedEntry inCompartmentOf(String theType, StorageResponseCodeEnum theOutcome, String thePatientIdPart) {
 		int partition = PatientIdPartitionInterceptor.defaultPartitionAlgorithm(thePatientIdPart);
-		return new ExpectedEntry(theType, theOutcome, partition, null, null);
+		return new ExpectedEntry(theType, theOutcome, PartitionExpectation.EXACT, partition, null, null);
 	}
 
 	/**
@@ -114,21 +128,36 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 			throw new IllegalArgumentException("Ids '%s' and '%s' hash to the same partition (%d); pick a different id"
 					.formatted(thePatientIdPart, theOtherPatientIdPart, partition));
 		}
-		return new ExpectedEntry(theType, theOutcome, partition, null, null);
-	}
-
-	/** Resource must co-locate with the response entry at {@code theOtherEntryIndex}. */
-	static ExpectedEntry inSamePartitionAsEntry(String theType, StorageResponseCodeEnum theOutcome, int theOtherEntryIndex) {
-		return new ExpectedEntry(theType, theOutcome, null, theOtherEntryIndex, null);
+		return new ExpectedEntry(theType, theOutcome, PartitionExpectation.EXACT, partition, null, null);
 	}
 
 	/**
-	 * Resource in some partition other than the default. In patient-id mode every non-default partition is a
-	 * patient compartment, but the assertion itself can only check "not the default partition" — it cannot
-	 * pin which compartment; use {@link #inCompartmentOf} or {@link #inCompartmentOfDistinctFrom} for that.
+	 * Resource must co-locate with the response entry at {@code theOtherEntryIndex}. Complementary to
+	 * {@link #inCompartmentOfOwnSubject}: co-location pins that the resource followed the intended entry,
+	 * while own-subject pins correct placement for whatever the resource ended up referencing.
 	 */
-	static ExpectedEntry inAnyPartitionExceptDefault(String theType, StorageResponseCodeEnum theOutcome) {
-		return new ExpectedEntry(theType, theOutcome, null, null, null);
+	static ExpectedEntry inSamePartitionAsEntry(String theType, StorageResponseCodeEnum theOutcome, int theOtherEntryIndex) {
+		return new ExpectedEntry(theType, theOutcome, PartitionExpectation.SAME_AS_ENTRY, null, theOtherEntryIndex, null);
+	}
+
+	/**
+	 * Resource in the compartment of its own server-assigned id — the partition must equal the hash of the
+	 * id part in the entry's response location. For Patient entries whose id is minted during the
+	 * transaction and so unknowable at provider time.
+	 */
+	// Created by Claude Fable 5
+	static ExpectedEntry inCompartmentOfSelf(String theType, StorageResponseCodeEnum theOutcome) {
+		return new ExpectedEntry(theType, theOutcome, PartitionExpectation.OWN_ID, null, null, null);
+	}
+
+	/**
+	 * Resource in the compartment of its own stored subject — the partition must equal the hash of the id
+	 * part of the subject reference read back from the stored resource. For compartment resources whose
+	 * patient's id is minted during the transaction and so unknowable at provider time.
+	 */
+	// Created by Claude Fable 5
+	static ExpectedEntry inCompartmentOfOwnSubject(String theType, StorageResponseCodeEnum theOutcome) {
+		return new ExpectedEntry(theType, theOutcome, PartitionExpectation.OWN_SUBJECT, null, null, null);
 	}
 
 	@Override
@@ -249,7 +278,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 					""",
 				"The hook rewrites the POST to a direct PUT with a minted UUID id; the restored outcome is a plain create.",
 				List.of(
-					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
+					inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
 				),
 				allPartitionSearchOffModeRejectIdlessPatient()
 			),
@@ -270,7 +299,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 					""",
 				"Rewritten to a conditional PUT with a minted body id; the restored outcome is the POST-origin code.",
 				List.of(
-					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH)
+					inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH)
 				),
 				allPartitionSearchOffModeRejectIdlessPatient()
 			),
@@ -423,7 +452,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 					""",
 				"Inline match URL → synthetic conditional-create for new-sys|syntheticCreatePatient (doesn't exist → creates with UUID). 1 synthetic stripped; response has 1 entry. Observation in the new patient's compartment.",
 				List.of(
-					inAnyPartitionExceptDefault("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
+					inCompartmentOfOwnSubject("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
 							.reportingCreatedPlaceholder("Patient")
 				),
 				allPartitionSearchOffModeRejectNoCompartment("Observation")
@@ -671,7 +700,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 					""",
 				"Both inline match URLs → one shared synthetic (de-duplicated by normalizer). sharedMatchUrlPatient doesn't exist → creates with UUID. 1 synthetic stripped; response has 2 entries. Both in the new patient's compartment; only the first referencer reports the created placeholder.",
 				List.of(
-					inAnyPartitionExceptDefault("Encounter", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
+					inCompartmentOfOwnSubject("Encounter", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
 							.reportingCreatedPlaceholder("Patient"),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0)
 				),
@@ -704,7 +733,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 					""",
 				"The hook assigns the patient a minted UUID id and substitutes the urn subject → same compartment.",
 				List.of(
-					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
+					inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0)
 				),
 				allPartitionSearchOffModeRejectIdlessPatient()
@@ -735,7 +764,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				"Input order [Obs, Patient]; response preserves order.",
 				List.of(
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 1),
-					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
+					inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
 				),
 				allPartitionSearchOffModeRejectNoCompartment("Observation")
 			),
@@ -764,7 +793,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 					""",
 				"Patient conditional create: condCreatePatient doesn't exist → creates with server-assigned UUID.",
 				List.of(
-					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
+					inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0)
 				),
 				allPartitionSearchOffModeRejectNoCompartment("Observation")
@@ -796,7 +825,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				"Patient conditional create: condCreatePatient doesn't exist → creates with server-assigned UUID. Input order preserved in response: [0]=Observation, [1]=Patient.",
 				List.of(
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 1),
-					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH)
+					inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH)
 				),
 				allPartitionSearchOffModeRejectNoCompartment("Observation")
 			),
@@ -855,7 +884,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 					""",
 				"The hook assigns the unconditional patient an id and substitutes the urn ref → Observation routes to its compartment.",
 				List.of(
-					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
+					inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH, 0)
 				),
 				allPartitionSearchOffModeRejectIdlessPatient()
@@ -885,7 +914,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 					""",
 				"The conditional patient has no id at routing time (allPartitions fallback); the hook resolves the urn ref after preFetch.",
 				List.of(
-					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
+					inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH, 0)
 				),
 				allPartitionSearchOffModeRejectIdlessPatient()
@@ -915,7 +944,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 					""",
 				"Conditional PUT with no match → created with a minted id; the urn subject substitutes to it.",
 				List.of(
-					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH),
+					inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0)
 				),
 				allPartitionSearchOffModeRejectNoCompartment("Observation")
@@ -976,7 +1005,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 					""",
 				"The Observation's ifNoneExist URL pre-fetches while its subject is still the urn placeholder; both conditional creates find no match.",
 				List.of(
-					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
+					inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH, 0)
 				),
 				allPartitionSearchOffModeRejectIdlessPatient()
@@ -1099,7 +1128,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 					""",
 				"Normalizer rewrites Obs subject using Patient conditional-create entry's fullUrl. Patient creates new (inBundlePatient doesn't exist). Obs conditional PUT: condUpdateObs doesn't exist → creates.",
 				List.of(
-					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
+					inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH, 0)
 				),
 				allPartitionSearchOffModeRejectIdlessPatient()
@@ -1129,7 +1158,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				"The identifier index is order-independent: the inline ref binds to the later Patient entry, no synthetic.",
 				List.of(
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 1),
-					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH)
+					inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH)
 				),
 				allPartitionSearchOffModeRejectNoCompartment("Observation")
 			),
@@ -1187,7 +1216,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 					""",
 				"Patient PUT: inBundlePatient doesn't exist → creates with server-assigned UUID. Obs references it.",
 				List.of(
-					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH),
+					inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0)
 				),
 				allPartitionSearchOffModeRejectNoCompartment("Observation")
@@ -1216,7 +1245,7 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 					""",
 				"References resolve against the store, never against entry bodies: the synthetic conditional create matches pat1 (no-op) and the Observation lands in pat1's compartment. The unconditional POST still creates a second patient carrying pat1's identifier, in its own compartment.",
 				List.of(
-					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
+					inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
 					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat1")
 				),
 				allPartitionSearchOffModeRejectIdlessPatient()
@@ -1277,8 +1306,8 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 					""",
 				"The duplicate conditional create consolidates away — the response has one entry fewer than the request, shifting later response positions — and the placeholder-created notice must still land on the Observation.",
 				List.of(
-					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
-					inAnyPartitionExceptDefault("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
+					inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
+					inCompartmentOfOwnSubject("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
 							.reportingCreatedPlaceholder("Patient")
 				),
 				allPartitionSearchOffModeRejectNoCompartment("Observation")
@@ -1320,8 +1349,8 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 					""",
 				"Normalizer rewrites ObsA/ObsB subjects using PatA/PatB fullUrls. Both patients created new. All 4 entries remain in response. Cross-partition writes land in each patient's own compartment.",
 				List.of(
-					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
-					inAnyPartitionExceptDefault("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
+					inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
+					inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0),
 					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 1)
 				),
