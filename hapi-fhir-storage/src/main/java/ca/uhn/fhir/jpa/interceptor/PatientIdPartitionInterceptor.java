@@ -1049,7 +1049,7 @@ public class PatientIdPartitionInterceptor {
 					"successfulCreateConditionalNoMatch",
 					theId,
 					UrlUtil.sanitizeUrlPart(theConditionalUrl));
-				// Unlike the native message, fill the {1} match-URL slot the DAO leaves unformatted
+				// Ensure the match URL is included in diagnostics
 			case SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH -> localizer.getMessageSanitized(
 					BaseStorageDao.class,
 					"successfulUpdateConditionalNoMatch",
