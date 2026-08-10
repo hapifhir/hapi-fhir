@@ -116,7 +116,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  *
  * @since 8.14.0
  */
-
 public class JavaScriptExecutionProvider {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(JavaScriptExecutionProvider.class);
