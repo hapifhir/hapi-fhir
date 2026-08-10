@@ -15,6 +15,9 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
 
+import static ca.uhn.fhir.jpa.model.util.PackageUrlConstants.CLASSPATH_PREFIX;
+import static ca.uhn.fhir.jpa.model.util.PackageUrlConstants.FILE_PREFIX;
+import static ca.uhn.fhir.jpa.model.util.PackageUrlConstants.WILDCARD;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class PackageUrlAllowList {
@@ -38,12 +41,6 @@ public class PackageUrlAllowList {
 	public static PackageUrlAllowList allowAll() {
 		return new PackageUrlAllowList(List.of(WILDCARD), List.of(WILDCARD));
 	}
-
-	// allow all
-	public static final String WILDCARD = "*";
-
-	static final String FILE_PREFIX = "file:";
-	static final String CLASSPATH_PREFIX = "classpath:";
 
 	/**
 	 * A list of url (prefixes) that are allowed
