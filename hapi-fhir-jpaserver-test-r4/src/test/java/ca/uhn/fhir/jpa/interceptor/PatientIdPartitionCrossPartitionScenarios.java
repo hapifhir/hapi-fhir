@@ -23,7 +23,7 @@ import static ca.uhn.fhir.jpa.interceptor.PatientIdPartitionReferenceScenarios.i
  * {@code ALLOWED_UNQUALIFIED}) — within a transaction, reference targets are pre-resolved on their own
  * read partition, so these bundles ingest identically in either mode.
  *
- * TODO-TG: Pining this behaviour for now. In future, may need to change this so that it is rejected in
+ * TODO-TG: Pinning this behaviour for now. In future, may need to change this so that it is rejected in
  * 	NOT_ALLOWED mode.
  */
 // Created by Claude Fable 5
