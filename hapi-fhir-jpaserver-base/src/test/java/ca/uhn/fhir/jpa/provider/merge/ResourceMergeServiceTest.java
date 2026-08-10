@@ -20,7 +20,7 @@ import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
-import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
+import ca.uhn.fhir.jpa.provider.ReferencingResourcesQuerySvc;
 import ca.uhn.fhir.jpa.provider.PartitionAwareReplaceReferencesResult;
 import ca.uhn.fhir.jpa.provider.PartitionAwareReplaceReferencesSvc;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -71,9 +71,9 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -83,7 +83,8 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ResourceMergeServiceTest {
-	private static final Integer PAGE_SIZE = 1024;
+	private static final Integer RESOURCE_LIMIT = 2000;
+	private static final Integer EXPECTED_JOB_BATCH_SIZE = 1024;
 
 	private static final String SUCCESSFUL_SYNC_MERGE_MSG = "Merge operation completed successfully";
 	private static final String SUCCESSFUL_ASYNC_MERGE_MSG = "Merge request is accepted, and will be " +
@@ -113,7 +114,7 @@ public class ResourceMergeServiceTest {
 	ReplaceReferencesPatchBundleSvc myReplaceReferencesPatchBundleSvcMock;
 
 	@Mock
-	IResourceLinkDao myResourceLinkDaoMock;
+	ReferencingResourcesQuerySvc myReferencingResourcesQuerySvcMock;
 
 	@Mock
 	RequestDetails myRequestDetailsMock;
@@ -181,7 +182,7 @@ public class ResourceMergeServiceTest {
 			myStorageSettingsMock,
 			myDaoRegistryMock,
 			myReplaceReferencesPatchBundleSvcMock,
-			myResourceLinkDaoMock,
+	     	myReferencingResourcesQuerySvcMock,
 			myTransactionServiceMock,
 			myRequestPartitionHelperSvcMock,
 			myJobCoordinatorMock,
@@ -199,7 +200,7 @@ public class ResourceMergeServiceTest {
 		void testMerge_WithoutResultResource_Success() {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
-		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
+		mergeOperationParameters.setResourceLimit(RESOURCE_LIMIT);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
 		setOriginalInputParameters(mergeOperationParameters);
@@ -252,7 +253,7 @@ public class ResourceMergeServiceTest {
 			Boolean isSourceActive, Boolean isTargetActive) {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
-		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
+		mergeOperationParameters.setResourceLimit(RESOURCE_LIMIT);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
 		setOriginalInputParameters(mergeOperationParameters);
@@ -294,7 +295,7 @@ public class ResourceMergeServiceTest {
 	void testMerge_WithResultResource_Success() {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
-		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
+		mergeOperationParameters.setResourceLimit(RESOURCE_LIMIT);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
 		Patient resultPatient = createPatient(TARGET_PATIENT_TEST_ID);
@@ -331,7 +332,7 @@ public class ResourceMergeServiceTest {
 	void testMerge_WithResultResource_ResultHasAllTargetIdentifiers_Success() {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
-		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
+		mergeOperationParameters.setResourceLimit(RESOURCE_LIMIT);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResourceIdentifiers(List.of(
 			new CanonicalIdentifier().setSystem("sys").setValue("val1"),
@@ -374,7 +375,7 @@ public class ResourceMergeServiceTest {
 	void testMerge_WithDeleteSourceTrue_Success() {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
-		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
+		mergeOperationParameters.setResourceLimit(RESOURCE_LIMIT);
 		mergeOperationParameters.setDeleteSource(true);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
@@ -405,7 +406,7 @@ public class ResourceMergeServiceTest {
 	void testMerge_WithDeleteSourceTrue_And_WithResultResource_Success() {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
-		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
+		mergeOperationParameters.setResourceLimit(RESOURCE_LIMIT);
 		mergeOperationParameters.setDeleteSource(true);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
@@ -438,7 +439,7 @@ public class ResourceMergeServiceTest {
 	void testMerge_WithPreviewTrue_Success() {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
-		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
+		mergeOperationParameters.setResourceLimit(RESOURCE_LIMIT);
 		mergeOperationParameters.setPreview(true);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
@@ -446,7 +447,8 @@ public class ResourceMergeServiceTest {
 		Patient targetPatient = createPatient(TARGET_PATIENT_TEST_ID_WITH_VERSION_1);
 		setupValidationMockForSuccess(sourcePatient, targetPatient);
 		setupTransactionServiceMock();
-		when(myResourceLinkDaoMock.countResourcesTargetingFhirTypeAndFhirId("Patient", "123")).thenReturn(10);
+		when(myReferencingResourcesQuerySvcMock.countReferencingResourcesAcrossAllPartitions(
+			sourcePatientIdMatcher(), eq(myRequestDetailsMock))).thenReturn(10);
 
 		// When
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
@@ -468,7 +470,7 @@ public class ResourceMergeServiceTest {
 	void testMerge_ResolvesResourcesByReferenceThatHasVersions_CurrentResourceVersionAreTheSame_Success() {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
-		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
+		mergeOperationParameters.setResourceLimit(RESOURCE_LIMIT);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID_WITH_VERSION_2));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID_WITH_VERSION_2));
 		setOriginalInputParameters(mergeOperationParameters);
@@ -504,7 +506,7 @@ public class ResourceMergeServiceTest {
 	void testMerge_Async_Success(boolean theWithResultResource, boolean theWithDeleteSource) {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
-		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
+		mergeOperationParameters.setResourceLimit(RESOURCE_LIMIT);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
 		mergeOperationParameters.setDeleteSource(theWithDeleteSource);
@@ -542,7 +544,7 @@ public class ResourceMergeServiceTest {
 		void testMerge_ValidationReturnsInvalid_ReturnsValidationStatusCodeAndNoMergeExecuted() {
 			// Given
 			MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
-			mergeOperationParameters.setResourceLimit(PAGE_SIZE);
+			mergeOperationParameters.setResourceLimit(RESOURCE_LIMIT);
 			mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 			mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
 
@@ -574,7 +576,7 @@ public class ResourceMergeServiceTest {
 																															boolean theWithDeleteSource) {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
-		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
+		mergeOperationParameters.setResourceLimit(RESOURCE_LIMIT);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
 		mergeOperationParameters.setDeleteSource(theWithDeleteSource);
@@ -588,9 +590,9 @@ public class ResourceMergeServiceTest {
 		}
 
 		setupTransactionServiceMock();
-		when(myResourceLinkDaoMock.countResourcesTargetingFhirTypeAndFhirId(any(), any())).thenReturn(0);
-		when(myResourceLinkDaoMock.streamSourceIdsForTargetFhirId(any(), any()))
-			.thenReturn(Stream.empty());
+		when(myReferencingResourcesQuerySvcMock.countReferencingResourcesAcrossAllPartitions(any(), any())).thenReturn(0);
+		when(myReferencingResourcesQuerySvcMock.findReferencingResourcePidsAcrossAllPartitions(any(), any()))
+			.thenReturn(List.of());
 		when(myReplaceReferencesPatchBundleSvcMock.patchReferencingResourcesInNestedTransaction(any(), any(), any()))
 			.thenThrow(new PreconditionFailedException(PRECONDITION_FAILED_MESSAGE));
 
@@ -613,7 +615,8 @@ public class ResourceMergeServiceTest {
 		Patient targetPatient = createPatient(TARGET_PATIENT_TEST_ID_WITH_VERSION_1);
 		setupValidationMockForSuccess(sourcePatient, targetPatient);
 		setupTransactionServiceMock();
-		when(myResourceLinkDaoMock.countResourcesTargetingFhirTypeAndFhirId("Patient", "123")).thenReturn(10);
+		when(myReferencingResourcesQuerySvcMock.countReferencingResourcesAcrossAllPartitions(
+			sourcePatientIdMatcher(), eq(myRequestDetailsMock))).thenReturn(10);
 
 		// When
 		MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
@@ -633,7 +636,7 @@ public class ResourceMergeServiceTest {
 	void testMerge_UnhandledServerResponseExceptionThrown_UsesStatusCodeOfTheException(boolean thePreview) {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
-		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
+		mergeOperationParameters.setResourceLimit(RESOURCE_LIMIT);
 		mergeOperationParameters.setPreview(thePreview);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
@@ -654,7 +657,7 @@ public class ResourceMergeServiceTest {
 	void testMerge_UnhandledExceptionThrown_Uses500StatusCode(boolean thePreview) {
 		// Given
 		MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
-		mergeOperationParameters.setResourceLimit(PAGE_SIZE);
+		mergeOperationParameters.setResourceLimit(RESOURCE_LIMIT);
 		mergeOperationParameters.setPreview(thePreview);
 		mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 		mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
@@ -707,7 +710,7 @@ public class ResourceMergeServiceTest {
 		void testMerge_AsyncRequest_ThrowsNotImplementedOperationException(boolean thePreview) {
 			// Given
 			MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
-			mergeOperationParameters.setResourceLimit(PAGE_SIZE);
+			mergeOperationParameters.setResourceLimit(RESOURCE_LIMIT);
 			mergeOperationParameters.setPreview(thePreview);
 			mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 			mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
@@ -726,10 +729,43 @@ public class ResourceMergeServiceTest {
 		}
 
 		@Test
+		void testMerge_PreviewOfPartitionAwareMerge_ReportsCountAsLowerBound() {
+			// Given
+			MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
+			mergeOperationParameters.setResourceLimit(RESOURCE_LIMIT);
+			mergeOperationParameters.setPreview(true);
+			mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
+			mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
+
+			setupCrossPartitionPatients();
+			setupTransactionServiceMock();
+			when(myReferencingResourcesQuerySvcMock.countReferencingResourcesAcrossAllPartitions(
+				sourcePatientIdMatcher(), eq(myRequestDetailsMock))).thenReturn(10);
+
+			// When
+			MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
+
+			// Then
+			OperationOutcome operationOutcome = (OperationOutcome) mergeOutcome.getOperationOutcome();
+			assertThat(mergeOutcome.getHttpStatusCode()).isEqualTo(200);
+			assertThat(mergeOutcome.getUpdatedTargetResource()).isEqualTo(myTargetPatient);
+			assertThat(operationOutcome.getIssue()).hasSize(1);
+			OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcome.getIssueFirstRep();
+			assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
+			assertThat(issue.getDetails().getText()).contains("Preview only merge operation - no issues detected");
+			assertThat(issue.getDiagnostics())
+				.as("a partition-aware merge may change more than the direct referrers, so the count is a lower bound")
+				.contains("Merge would update at least 12 resources")
+				.contains("this merge may require moving resources across partitions");
+
+			verifyNoMoreInteractions(myPatientDaoMock, myTaskDaoMock, myProvenanceDaoMock, myBatch2TaskHelperMock, mySystemDaoMock);
+		}
+
+		@Test
 		void testMerge_WithDeleteSource_Success() {
 			// Given
 			MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
-			mergeOperationParameters.setResourceLimit(PAGE_SIZE);
+			mergeOperationParameters.setResourceLimit(RESOURCE_LIMIT);
 			mergeOperationParameters.setDeleteSource(true);
 			mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 			mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
@@ -739,9 +775,10 @@ public class ResourceMergeServiceTest {
 			Patient patientToBeReturnedFromDaoAfterTargetUpdate = createPatient(TARGET_PATIENT_TEST_ID_WITH_VERSION_2);
 			setupDaoMockForSuccessfulTargetPatientUpdate(myTargetPatient, patientToBeReturnedFromDaoAfterTargetUpdate);
 			setupTransactionServiceMock();
-			when(myResourceLinkDaoMock.countResourcesTargetingFhirTypeAndFhirId(any(), any())).thenReturn(0);
+			when(myReferencingResourcesQuerySvcMock.countReferencingResourcesAcrossAllPartitions(any(), any())).thenReturn(0);
 			when(myPartitionAwareReplaceReferencesSvcMock
-				.copyCompartmentResourcesAndReplaceReferences(mySourcePatient, myTargetPatient, myRequestDetailsMock))
+				.copyCompartmentResourcesAndReplaceReferences(
+				eq(mySourcePatient), eq(myTargetPatient), eq(RESOURCE_LIMIT), eq(myRequestDetailsMock)))
 				.thenReturn(new PartitionAwareReplaceReferencesResult(Map.of(), Map.of(), Map.of()));
 
 			// When
@@ -749,7 +786,10 @@ public class ResourceMergeServiceTest {
 
 			// Then
 			verifySuccessfulOutcomeForSync(mergeOutcome, patientToBeReturnedFromDaoAfterTargetUpdate);
-			verify(myPartitionAwareReplaceReferencesSvcMock).copyCompartmentResourcesAndReplaceReferences(mySourcePatient, myTargetPatient, myRequestDetailsMock);
+			verify(myReferencingResourcesQuerySvcMock)
+				.countReferencingResourcesAcrossAllPartitions(sourcePatientIdMatcher(), eq(myRequestDetailsMock));
+			verify(myPartitionAwareReplaceReferencesSvcMock).copyCompartmentResourcesAndReplaceReferences(
+				eq(mySourcePatient), eq(myTargetPatient), eq(RESOURCE_LIMIT), eq(myRequestDetailsMock));
 			verifyNoMoreInteractions(myReplaceReferencesPatchBundleSvcMock);
 			verifyDeletedInSourcePartition(myPatientDaoMock, SOURCE_PATIENT_TEST_ID);
 		}
@@ -758,7 +798,7 @@ public class ResourceMergeServiceTest {
 		void testMerge_WithoutDeleteSource_Success() {
 			// Given
 			MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
-			mergeOperationParameters.setResourceLimit(PAGE_SIZE);
+			mergeOperationParameters.setResourceLimit(RESOURCE_LIMIT);
 			mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 			mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
 			setOriginalInputParameters(mergeOperationParameters);
@@ -768,9 +808,10 @@ public class ResourceMergeServiceTest {
 			setupDaoMockForSuccessfulSourcePatientUpdate(mySourcePatient, createPatient(SOURCE_PATIENT_TEST_ID_WITH_VERSION_2));
 			setupDaoMockForSuccessfulTargetPatientUpdate(myTargetPatient, patientToBeReturnedFromDaoAfterTargetUpdate);
 			setupTransactionServiceMock();
-			when(myResourceLinkDaoMock.countResourcesTargetingFhirTypeAndFhirId(any(), any())).thenReturn(0);
+			when(myReferencingResourcesQuerySvcMock.countReferencingResourcesAcrossAllPartitions(any(), any())).thenReturn(0);
 			when(myPartitionAwareReplaceReferencesSvcMock
-				.copyCompartmentResourcesAndReplaceReferences(mySourcePatient, myTargetPatient, myRequestDetailsMock))
+				.copyCompartmentResourcesAndReplaceReferences(
+				eq(mySourcePatient), eq(myTargetPatient), eq(RESOURCE_LIMIT), eq(myRequestDetailsMock)))
 				.thenReturn(new PartitionAwareReplaceReferencesResult(Map.of(), Map.of(), Map.of()));
 
 			// When
@@ -778,7 +819,10 @@ public class ResourceMergeServiceTest {
 
 			// Then
 			verifySuccessfulOutcomeForSync(mergeOutcome, patientToBeReturnedFromDaoAfterTargetUpdate);
-			verify(myPartitionAwareReplaceReferencesSvcMock).copyCompartmentResourcesAndReplaceReferences(mySourcePatient, myTargetPatient, myRequestDetailsMock);
+			verify(myReferencingResourcesQuerySvcMock)
+				.countReferencingResourcesAcrossAllPartitions(sourcePatientIdMatcher(), eq(myRequestDetailsMock));
+			verify(myPartitionAwareReplaceReferencesSvcMock).copyCompartmentResourcesAndReplaceReferences(
+				eq(mySourcePatient), eq(myTargetPatient), eq(RESOURCE_LIMIT), eq(myRequestDetailsMock));
 			verifyNoMoreInteractions(myReplaceReferencesPatchBundleSvcMock);
 		}
 
@@ -792,7 +836,8 @@ public class ResourceMergeServiceTest {
 
 			setupCrossPartitionPatients();
 			setupTransactionServiceMock();
-			when(myResourceLinkDaoMock.countResourcesTargetingFhirTypeAndFhirId("Patient", "123")).thenReturn(10);
+			when(myReferencingResourcesQuerySvcMock.countReferencingResourcesAcrossAllPartitions(
+			sourcePatientIdMatcher(), eq(myRequestDetailsMock))).thenReturn(10);
 
 			// When
 			MergeOperationOutcome mergeOutcome = myResourceMergeService.merge(mergeOperationParameters, myRequestDetailsMock);
@@ -810,7 +855,7 @@ public class ResourceMergeServiceTest {
 		void testMerge_WithCopiedResources_DeletesOriginalsAndSource() {
 			// Given
 			MergeOperationInputParameters mergeOperationParameters = new MergeOperationInputParameters();
-			mergeOperationParameters.setResourceLimit(PAGE_SIZE);
+			mergeOperationParameters.setResourceLimit(RESOURCE_LIMIT);
 			mergeOperationParameters.setDeleteSource(true);
 			mergeOperationParameters.setSourceResource(new Reference(SOURCE_PATIENT_TEST_ID));
 			mergeOperationParameters.setTargetResource(new Reference(TARGET_PATIENT_TEST_ID));
@@ -820,13 +865,16 @@ public class ResourceMergeServiceTest {
 			Patient patientToBeReturnedFromDaoAfterTargetUpdate = createPatient(TARGET_PATIENT_TEST_ID_WITH_VERSION_2);
 			setupDaoMockForSuccessfulTargetPatientUpdate(myTargetPatient, patientToBeReturnedFromDaoAfterTargetUpdate);
 			setupTransactionServiceMock();
-			when(myResourceLinkDaoMock.countResourcesTargetingFhirTypeAndFhirId(any(), any())).thenReturn(2);
+			when(myReferencingResourcesQuerySvcMock.countReferencingResourcesAcrossAllPartitions(
+				sourcePatientIdMatcher(), eq(myRequestDetailsMock)))
+			.thenReturn(2);
 
 			IdDt changedObservationId = new IdDt("Observation", "new-obs1", "1");
 			IdDt changedListId = new IdDt("List", "new-list1", "1");
 			IdDt copiedOriginalId = new IdDt("Observation", "obs1", "1");
 			when(myPartitionAwareReplaceReferencesSvcMock
-				.copyCompartmentResourcesAndReplaceReferences(mySourcePatient, myTargetPatient, myRequestDetailsMock))
+				.copyCompartmentResourcesAndReplaceReferences(
+				eq(mySourcePatient), eq(myTargetPatient), eq(RESOURCE_LIMIT), eq(myRequestDetailsMock)))
 				.thenReturn(new PartitionAwareReplaceReferencesResult(
 					Map.of(RequestPartitionId.fromPartitionId(TARGET_PARTITION_ID), List.of(changedObservationId, changedListId)),
 					Map.of(),
@@ -897,11 +945,15 @@ public class ResourceMergeServiceTest {
 		return resultPatient;
 	}
 
+	private static IIdType sourcePatientIdMatcher() {
+		return argThat(theId -> SOURCE_PATIENT_TEST_ID.equals(theId.getValue()));
+	}
+
 	private void setupTransactionServiceMock() {
 		lenient().when(myRequestPartitionHelperSvcMock.determineReadPartitionForRequest(eq(myRequestDetailsMock), any())).thenReturn(myRequestPartitionIdMock);
 		IHapiTransactionService.IExecutionBuilder executionBuilderMock =
 			mock(IHapiTransactionService.IExecutionBuilder.class);
-		when(myTransactionServiceMock.withRequest(any(RequestDetails.class))).thenReturn(executionBuilderMock);
+		lenient().when(myTransactionServiceMock.withRequest(any(RequestDetails.class))).thenReturn(executionBuilderMock);
 		lenient()
 				.when(executionBuilderMock.withRequestPartitionId(any(RequestPartitionId.class)))
 				.thenReturn(executionBuilderMock);
@@ -1026,9 +1078,9 @@ public class ResourceMergeServiceTest {
 	}
 
 	private void setupReplaceReferencesForSuccessForSync() {
-		when(myResourceLinkDaoMock.countResourcesTargetingFhirTypeAndFhirId(any(), any())).thenReturn(0);
-		when(myResourceLinkDaoMock.streamSourceIdsForTargetFhirId(any(), any()))
-			.thenReturn(Stream.empty());
+		when(myReferencingResourcesQuerySvcMock.countReferencingResourcesAcrossAllPartitions(any(), any())).thenReturn(0);
+		when(myReferencingResourcesQuerySvcMock.findReferencingResourcePidsAcrossAllPartitions(any(), any()))
+			.thenReturn(List.of());
 		when(myReplaceReferencesPatchBundleSvcMock.patchReferencingResourcesInNestedTransaction(
 			isA(ReplaceReferencesRequest.class), any(), eq(myRequestDetailsMock)))
 			.thenReturn(new Bundle());
@@ -1055,7 +1107,7 @@ public class ResourceMergeServiceTest {
 
 		assertThat(jobParametersCaptor.getValue()).isInstanceOf(MergeJobParameters.class);
 		MergeJobParameters capturedJobParams = (MergeJobParameters) jobParametersCaptor.getValue();
-		assertThat(capturedJobParams.getBatchSize()).isEqualTo(PAGE_SIZE);
+		assertThat(capturedJobParams.getBatchSize()).isEqualTo(EXPECTED_JOB_BATCH_SIZE);
 		assertThat(capturedJobParams.getSourceId()).hasToString(SOURCE_PATIENT_TEST_ID);
 		assertThat(capturedJobParams.getTargetId()).hasToString(TARGET_PATIENT_TEST_ID);
 		assertThat(capturedJobParams.getPartitionId()).isEqualTo(myRequestPartitionIdMock);
