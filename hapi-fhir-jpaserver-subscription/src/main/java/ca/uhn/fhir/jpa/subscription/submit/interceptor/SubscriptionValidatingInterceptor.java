@@ -134,7 +134,7 @@ public class SubscriptionValidatingInterceptor {
 			return;
 		}
 
-		validateAuthorization(theSubscription, theRequestDetails, theRequestPartitionId, thePointcut);
+		checkSubscriptionWriteAuthorized(theSubscription, theRequestDetails, theRequestPartitionId, thePointcut);
 
 		CanonicalSubscription subscription;
 		try {
@@ -198,20 +198,19 @@ public class SubscriptionValidatingInterceptor {
 		}
 	}
 
-	private void validateAuthorization(
+	private void checkSubscriptionWriteAuthorized(
 			IBaseResource theSubscription,
 			RequestDetails theRequestDetails,
 			RequestPartitionId theRequestPartitionId,
 			Pointcut thePointcut) {
-		// The system itself must be authorized to update subscriptions in order to activate them.
-		// See SubscriptionActivatingListener for an example. This must be allowed, regardless of any rules the
-		// implementor may define.
+		// The system itself must be authorized to update subscriptions, for example to activate them.
+		// Implementors must be prevented from accidentally disallowing this.
 		if (thePointcut == Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED
 				&& theRequestDetails instanceof SystemRequestDetails) {
 			return;
 		}
 
-		if (!isUserAuthorizedToManageSubscriptions(
+		if (!isUserAuthorizedToWriteSubscriptions(
 				theSubscription, theRequestDetails, theRequestPartitionId, thePointcut)) {
 			throw new ForbiddenOperationException(Msg.code(3026) + "User is not authorized to manage subscriptions");
 		}
@@ -219,21 +218,23 @@ public class SubscriptionValidatingInterceptor {
 
 	/**
 	 * An override hook allowing an implementer to provide custom logic for authorizing a user to perform
-	 * subscription management operations.
+	 * subscription management operations. The default implementation returns true unconditionally, allowing
+	 * all calls. Note that calls on the pointcut STORAGE_PRESTORAGE_RESOURCE_UPDATED with a
+	 * {@link SystemRequestDetails} will not invoke this method.
 	 *
 	 * @param theSubscription       allows implementers to define authorization rules dependent on the
 	 *                              subscription resource being manipulated
 	 * @param theRequestDetails     allows implementers to define authorization rules dependent on the
 	 *                              details of the original request, including whether it is a user request
-	 *                              or a system request, and user session information is applicable
+	 *                              or a system request, and user session information if applicable
 	 * @param theRequestPartitionId allows implementers to define authorization rules dependent on the
-	 *                              partition being accessed, is any
+	 *                              partition being accessed, if any
 	 * @param thePointcut           allows implementers to define authorization rules dependent on the
 	 *                              operation implied by the current pointcut
 	 * @return true if the current user is authorized to proceed with the operation, otherwise the operation
 	 *         will be rejected with a 403 Forbidden response code
 	 */
-	protected boolean isUserAuthorizedToManageSubscriptions(
+	protected boolean isUserAuthorizedToWriteSubscriptions(
 			@Nonnull IBaseResource theSubscription,
 			@Nullable RequestDetails theRequestDetails,
 			@Nullable RequestPartitionId theRequestPartitionId,

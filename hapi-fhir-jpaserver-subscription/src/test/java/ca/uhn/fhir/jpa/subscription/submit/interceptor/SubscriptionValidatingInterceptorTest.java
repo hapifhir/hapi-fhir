@@ -249,7 +249,7 @@ public class SubscriptionValidatingInterceptorTest {
 		final Subscription subscription = createSubscription();
 		SubscriptionValidatingInterceptor overrideInterceptor = new SubscriptionValidatingInterceptor() {
 			@Override
-			public boolean isUserAuthorizedToManageSubscriptions(IBaseResource theSubscription, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId, Pointcut thePointcut) {
+			public boolean isUserAuthorizedToWriteSubscriptions(IBaseResource theSubscription, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId, Pointcut thePointcut) {
 				return false;
 			}
 		};
@@ -270,7 +270,7 @@ public class SubscriptionValidatingInterceptorTest {
 		final Patient patient = new Patient();
 		SubscriptionValidatingInterceptor overrideInterceptor = new SubscriptionValidatingInterceptor() {
 			@Override
-			public boolean isUserAuthorizedToManageSubscriptions(IBaseResource theSubscription, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId, Pointcut thePointcut) {
+			public boolean isUserAuthorizedToWriteSubscriptions(IBaseResource theSubscription, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId, Pointcut thePointcut) {
 				return false;
 			}
 		};
@@ -288,13 +288,14 @@ public class SubscriptionValidatingInterceptorTest {
 	 */
 	@ParameterizedTest
 	@MethodSource("operationsByRequestType")
-	void testValidateSubmittedSubscription_operationsByRequestType(Pointcut theOperation, RequestDetails theRequestDetails) {
+	void testValidateSubmittedSubscription_operationsByRequestType(
+		Pointcut theOperation, RequestDetails theRequestDetails, boolean theExpectAllowed) {
 		// set up
 		final Subscription subscription = createSubscription();
 
 		SubscriptionValidatingInterceptor overrideInterceptor = new SubscriptionValidatingInterceptor() {
 			@Override
-			public boolean isUserAuthorizedToManageSubscriptions(IBaseResource theSubscription, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId, Pointcut thePointcut) {
+			public boolean isUserAuthorizedToWriteSubscriptions(IBaseResource theSubscription, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId, Pointcut thePointcut) {
 				return false;
 			}
 		};
@@ -305,7 +306,7 @@ public class SubscriptionValidatingInterceptorTest {
 		overrideInterceptor.setSubscriptionChannelTypeValidatorFactoryForUnitTest(mySubscriptionChannelTypeValidatorFactory);
 		overrideInterceptor.setSubscriptionSettingsForUnitTest(mySubscriptionSettings);
 
-		if (theOperation == Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED && theRequestDetails instanceof SystemRequestDetails) {
+		if (theExpectAllowed) {
 			assertThatNoException().isThrownBy(() -> overrideInterceptor.validateSubmittedSubscription(
 					subscription, theRequestDetails, null, theOperation));
 		} else {
@@ -318,16 +319,16 @@ public class SubscriptionValidatingInterceptorTest {
 		}
 	}
 
-public static Stream<Arguments> operationsByRequestType() {
-	return Stream.of(
-		Arguments.of(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, RequestDetailsHelper.newServletRequestDetails()),
-		Arguments.of(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, new SystemRequestDetails()),
-		Arguments.of(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, RequestDetailsHelper.newServletRequestDetails()),
-		Arguments.of(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, new SystemRequestDetails())
-	);
-}
+	public static Stream<Arguments> operationsByRequestType() {
+		return Stream.of(
+			Arguments.of(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, RequestDetailsHelper.newServletRequestDetails(), false),
+			Arguments.of(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, new SystemRequestDetails(), false),
+			Arguments.of(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, RequestDetailsHelper.newServletRequestDetails(), false),
+			Arguments.of(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, new SystemRequestDetails(), true)
+		);
+	}
 
-@Test
+	@Test
 	public void testInvalidTopic() throws URISyntaxException {
 		when(myDaoRegistry.getResourceDao("SubscriptionTopic")).thenReturn(mySubscriptionTopicDao);
 
