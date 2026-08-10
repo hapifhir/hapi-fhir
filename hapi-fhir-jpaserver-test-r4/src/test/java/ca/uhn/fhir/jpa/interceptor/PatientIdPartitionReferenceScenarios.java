@@ -58,6 +58,10 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				theTestData.withId("obsFix"),
 				theTestData.withSubject("Patient/pat1"),
 				theTestData.withIdentifier("observation-system", "obsExisting"));
+		theTestData.createEncounter(
+				theTestData.withId("encFix"),
+				theTestData.withSubject("Patient/pat1"),
+				theTestData.withIdentifier("enc-sys", "encExisting"));
 	}
 
 	/** How an entry's stored partition is derived and checked. */
@@ -251,6 +255,54 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 					"The normalizer only supports single-identifier inline match URLs; a multi-and-group URL is rejected up front (like any other unsupported search parameter shape), before anything is written — even when an in-bundle patient carries both identifiers.",
 					"HAPI-3025: Inline match URL matching only supports a single identifier in patient id partition mode: "
 							+ "Patient?identifier=old-sys|multiGroupPatientIdent1&identifier=new-sys|multiGroupPatientIdent2"
+				),
+				// TODO-TG: Add support to inline match url non-patient placeholder creation.
+				Arguments.of(
+					"Create Patient + Observation | inline match URL to a nonexistent Encounter",
+					"""
+						{ "resourceType" : "Bundle", "type" : "transaction",
+							"entry" : [
+								{
+									"fullUrl" : "urn:uuid:bbbb2222-2222-2222-2222-222222222222",
+									"resource" : {
+										"resourceType" : "Patient",
+										"identifier" : [ { "system" : "old-sys", "value" : "newPatientWithEncUrl" } ]
+									},
+									"request" : { "method" : "POST", "url" : "Patient" }
+								}, {
+									"resource" : {
+										"resourceType" : "Observation",
+										"identifier" : [ { "system" : "observation-system", "value" : "obsWithDanglingEncUrl" } ],
+										"subject" : { "reference" : "urn:uuid:bbbb2222-2222-2222-2222-222222222222" },
+										"encounter" : { "reference" : "Encounter?identifier=enc-sys|danglingEnc" }
+									},
+									"request" : { "method" : "POST", "url" : "Observation" }
+								}
+							]
+						}
+						""",
+					"The synthetic conditional create minted for a non-Patient compartment type carries only the match URL's identifier — no subject — so it cannot be routed to a compartment. Outside patient id partition mode the same bundle succeeds through the resolver's placeholder path; the equivalent direct-reference shape also succeeds in this mode (the auto-create-placeholder hook stamps the referencer's compartment). Candidate fix, tracked separately: give synthetic compartment-type placeholders their first referencer's subject.",
+					"HAPI-1326: Resource of type Encounter has no values placing it in the Patient compartment"
+				),
+				Arguments.of(
+					"Create Observation | inline match URL to an existing Encounter",
+					"""
+						{ "resourceType" : "Bundle", "type" : "transaction",
+							"entry" : [
+								{
+									"resource" : {
+										"resourceType" : "Observation",
+										"identifier" : [ { "system" : "observation-system", "value" : "obsWithEncUrl" } ],
+										"subject" : { "reference" : "Patient/pat1" },
+										"encounter" : { "reference" : "Encounter?identifier=enc-sys|encExisting" }
+									},
+									"request" : { "method" : "POST", "url" : "Observation" }
+								}
+							]
+						}
+						""",
+					"Even a MATCHED non-Patient inline match URL fails: create-time partition determination runs before the conditional match can no-op, and the subject-less synthetic Encounter cannot be routed. (Patient synthetics survive the same ordering only because the UUID id strategy pre-assigns an id the Patient branch routes by.) Same candidate fix as the nonexistent-Encounter case.",
+					"HAPI-1326: Resource of type Encounter has no values placing it in the Patient compartment"
 				)
 			);
 		}
@@ -669,6 +721,38 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "patNewDirect")
 							.reportingCreatedPlaceholder("Patient")
 				)
+			),
+			Arguments.of(
+				"Create Patient + Observation | direct reference to a nonexistent Encounter → non-Patient placeholder in the patient's compartment",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"fullUrl" : "urn:uuid:aaaa1111-1111-1111-1111-111111111111",
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "newPatientWithEnc" } ]
+								},
+								"request" : { "method" : "POST", "url" : "Patient" }
+							}, {
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "obsWithDanglingEnc" } ],
+									"subject" : { "reference" : "urn:uuid:aaaa1111-1111-1111-1111-111111111111" },
+									"encounter" : { "reference" : "Encounter/enc-dangling" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation" }
+							}
+						]
+					}
+					""",
+				"A dangling direct reference to a non-Patient compartment type: DaoResourceLinkResolver mints the placeholder Encounter and the auto-create-placeholder hook stamps the referencing Observation's compartment onto it, so patient, observation, and placeholder all co-locate.",
+				List.of(
+					inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
+					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0)
+							.reportingCreatedPlaceholder("Encounter")
+				),
+				allPartitionSearchOffModeRejectIdlessPatient()
 			),
 			Arguments.of(
 				"Create Encounter + Observation | shared inline match URL → one deduped synthetic, new patient",
