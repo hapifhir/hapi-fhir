@@ -47,6 +47,12 @@ public class HapiEmbeddedDbSupportCompatibilityTest {
 		}
 	}
 
+	/**
+	 * This test is to check a contract that dbs we support should fulfill.
+	 * Namely, that DELETE_RULE is *always* populated and matches what
+	 * is set on the fk constraints.
+	 * See {@link JdbcUtils#getForeignKeysAndRuleset(DriverTypeEnum.ConnectionProperties, String, String)}
+	 */
 	@ParameterizedTest
 	@MethodSource("getEmbeddedDatabases")
 	public void getForeignKeysAndRuleset_singleColumnForeignKeys_reportsDeleteCascadeAccurately(
