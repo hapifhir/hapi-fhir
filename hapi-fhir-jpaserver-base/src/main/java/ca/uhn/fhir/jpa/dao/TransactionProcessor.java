@@ -782,7 +782,10 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				} catch (MethodNotAllowedException e) {
 					// A pre-fetch-skippable rejection means the patient reference isn't resolvable yet; leave
 					// the partition as allPartitions and let the block below settle it. The real compartment
-					// is enforced at create time.
+					// is enforced at create time. Demonstrated by
+					// PatientIdPartitionInterceptorR4Test#testTransaction_ConditionallyCreatedPatientAndConditionallyCreatedObservation:
+					// the Observation's conditional URL cannot be partition-determined before its patient
+					// exists, yet the transaction succeeds and both resources land in the patient's compartment.
 					if (!(e instanceof ITransactionPreFetchSkippable)) {
 						throw e;
 					}
