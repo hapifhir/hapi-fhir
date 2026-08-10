@@ -1819,6 +1819,85 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 
 
 
+	@Test
+	void testTransaction_organizationInlineMatchUrlUnmatched_placeholderInDefaultPartition() {
+		setupOrganizationReferenceFixture();
+
+		Observation obs = executeAndReadObservation(
+			organizationBundle("Organization?identifier=org-sys|danglingOrg"));
+
+		IIdType placeholderOrgId = new IdType(obs.getPerformerFirstRep().getReference());
+		assertThat(placeholderOrgId.getResourceType()).isEqualTo("Organization");
+		assertResourceIsInPartition(ALTERNATE_DEFAULT_ID, placeholderOrgId);
+		assertResourceIsInPartition(
+			PatientIdPartitionInterceptor.defaultPartitionAlgorithm("pat1"),
+			obs.getIdElement().toUnqualifiedVersionless());
+		Organization placeholderOrg = myOrganizationDao.read(placeholderOrgId, mySrd);
+		assertThat(placeholderOrg.getExtensionByUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER)).isNotNull();
+	}
+
+	@Test
+	void testTransaction_organizationInlineMatchUrlMatched_referencesExistingOrganization() {
+		setupOrganizationReferenceFixture();
+		Map<String, Integer> countsBeforeTransaction = countResourcesByType();
+
+		Observation obs = executeAndReadObservation(
+			organizationBundle("Organization?identifier=org-sys|existingOrg"));
+
+		assertThat(obs.getPerformerFirstRep().getReference()).isEqualTo("Organization/orgFix");
+		Map<String, Integer> expectedCounts = new HashMap<>(countsBeforeTransaction);
+		expectedCounts.merge("Observation", 1, Integer::sum);
+		assertThat(countResourcesByType()).isEqualTo(expectedCounts);
+	}
+
+	@Test
+	void testTransaction_organizationDirectReferenceUnmatched_placeholderInDefaultPartition() {
+		setupOrganizationReferenceFixture();
+
+		Observation obs = executeAndReadObservation(organizationBundle("Organization/org-dangling"));
+
+		assertThat(obs.getPerformerFirstRep().getReference()).isEqualTo("Organization/org-dangling");
+		assertResourceIsInPartition(ALTERNATE_DEFAULT_ID, new IdType("Organization/org-dangling"));
+		Organization placeholderOrg = myOrganizationDao.read(new IdType("Organization/org-dangling"), mySrd);
+		assertThat(placeholderOrg.getExtensionByUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER)).isNotNull();
+	}
+
+	// Created by Claude Fable 5
+	private void setupOrganizationReferenceFixture() {
+		setupReferenceScenarioFixture();
+		myPartitionSettings.setAllPartitionSearchSupported(true);
+		myPartitionSettings.setAllowReferencesAcrossPartitions(
+			PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+		createOrganization(withId("orgFix"), withIdentifier("org-sys", "existingOrg"));
+	}
+
+	// Created by Claude Fable 5
+	private static String organizationBundle(String thePerformerReference) {
+		return """
+			{ "resourceType" : "Bundle", "type" : "transaction",
+				"entry" : [ {
+					"resource" : {
+						"resourceType" : "Observation",
+						"identifier" : [ { "system" : "observation-system", "value" : "obsWithOrgRef" } ],
+						"subject" : { "reference" : "Patient/pat1" },
+						"performer" : [ { "reference" : "%s" } ]
+					},
+					"request" : { "method" : "POST", "url" : "Observation" }
+				} ]
+			}
+			"""
+			.formatted(thePerformerReference);
+	}
+
+	// Created by Claude Fable 5
+	private Observation executeAndReadObservation(String theBundleJson) {
+		Bundle response = mySystemDao.transaction(
+			mySrd, myFhirContext.newJsonParser().parseResource(Bundle.class, theBundleJson));
+		assertThat(response.getEntry()).hasSize(1);
+		return myObservationDao.read(
+			new IdType(response.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless(), mySrd);
+	}
+
 	/** Reads the stored resource and returns its subject reference. */
 	// Created by Claude Fable 5
 	private IIdType readStoredSubject(IIdType theResourceId) {
