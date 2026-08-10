@@ -786,7 +786,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					// PatientIdPartitionInterceptorR4Test#testTransaction_ConditionallyCreatedPatientAndConditionallyCreatedObservation:
 					// the Observation's conditional URL cannot be partition-determined before its patient
 					// exists, yet the transaction succeeds and both resources land in the patient's compartment.
-					if (!(e instanceof ITransactionPreFetchSkippable)) {
+					if (!(e instanceof PreFetchSkippableMethodNotAllowedException)) {
 						throw e;
 					}
 				}

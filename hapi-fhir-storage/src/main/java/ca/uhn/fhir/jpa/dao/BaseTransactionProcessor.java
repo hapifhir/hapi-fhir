@@ -1128,8 +1128,8 @@ public abstract class BaseTransactionProcessor {
 	 * gate. Where all-partition search is unsupported the partition must be fixed up front, so the rejection
 	 * bubbles up instead.
 	 * <p>
-	 * Deferral is keyed off {@link ITransactionPreFetchSkippable}, which partition interceptors implement on
-	 * rejections that only reflect not-yet-resolved entry content.
+	 * Deferral is keyed off {@link PreFetchSkippableMethodNotAllowedException}, which partition interceptors
+	 * throw for rejections that only reflect not-yet-resolved entry content.
 	 */
 	private RequestPartitionId tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
 			RequestDetails theRequestDetails, IBaseResource theResource, String theResourceType) {
@@ -1137,7 +1137,8 @@ public abstract class BaseTransactionProcessor {
 			return myRequestPartitionHelperService.determineCreatePartitionForRequest(
 					theRequestDetails, theResource, theResourceType);
 		} catch (MethodNotAllowedException e) {
-			if (myPartitionSettings.isAllPartitionSearchSupported() && e instanceof ITransactionPreFetchSkippable) {
+			if (myPartitionSettings.isAllPartitionSearchSupported()
+					&& e instanceof PreFetchSkippableMethodNotAllowedException) {
 				return RequestPartitionId.allPartitions();
 			}
 			throw e;

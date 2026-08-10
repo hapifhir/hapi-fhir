@@ -22,12 +22,13 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 
 /**
- * A {@link MethodNotAllowedException} whose partition-determination failure may be skipped before
- * transaction pre-fetch and retried afterward.
+ * A {@link MethodNotAllowedException} raised while determining a transaction entry's partition before
+ * pre-fetch, indicating the failure only reflects entry content that is not resolvable yet (an unresolved
+ * reference, an id the server has not assigned). The transaction processor may skip such failures and retry
+ * partition resolution once pre-fetch and the after-prefetch hooks have resolved the entries.
  */
 // Created by Claude Fable 5
-public class PreFetchSkippableMethodNotAllowedException extends MethodNotAllowedException
-		implements ITransactionPreFetchSkippable {
+public class PreFetchSkippableMethodNotAllowedException extends MethodNotAllowedException {
 
 	public PreFetchSkippableMethodNotAllowedException(String theMessage) {
 		super(theMessage);
