@@ -60,6 +60,13 @@ public class ProviderConstants {
 	 */
 	public static final String DIFF_OPERATION_NAME = "$diff";
 
+	/**
+	 * Operation name: execute-javascript
+	 *
+	 * @since 8.14.0
+	 */
+	public static final String OPERATION_EXECUTE_JAVASCRIPT = "$execute-javascript";
+
 	public static final String DIFF_FROM_VERSION_PARAMETER = "fromVersion";
 
 	public static final String DIFF_FROM_PARAMETER = "from";
