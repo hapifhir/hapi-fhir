@@ -619,6 +619,60 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 	}
 
 	@Nested
+	class ResourceLimitAcrossPartitions {
+
+		// Obs(subject=PatientSrc) in PatientSrc's partition + Group(member=PatientSrc) in the default partition.
+		// Two resources reference PatientSrc, so a resource-limit of 1 must be exceeded and the merge rejected.
+		@Test
+		void testMerge_directReferrersAcrossPartitionsExceedResourceLimit_mergeRejected() {
+			// Setup
+			createObservation(myPatientIdSrc, null, null, "obs-src");
+			createGroup(myPatientIdSrc);
+
+			// Execute & verify
+			MergeTestParameters mergeParams = new MergeTestParameters()
+				.sourceResource(new Reference(myPatientIdSrc))
+				.targetResource(new Reference(myPatientIdTgt))
+				.resourceLimit(1);
+
+			String diagnosticMessage = myMergeHelper.callMergeAndExtractDiagnosticMessage(
+				"Patient", mergeParams, PreconditionFailedException.class);
+
+			assertThat(diagnosticMessage)
+				.as("both direct referrers count against the limit, even though they live in different partitions")
+				.contains("HAPI-2880")
+				.contains("exceeds the resource-limit");
+		}
+
+		// Enc(subject=PatientSrc) is the only direct referrer of PatientSrc, so it alone does not exceed a limit of 1.
+		// Obs(subject=PatientC, encounter=Enc) does not reference PatientSrc at all, but the merge still updates it
+		// because Enc moves partition and gets a new id. Two resources are therefore updated, and the limit of 1
+		// must be exceeded.
+		@Test
+		void testMerge_indirectReferrerPushesCountOverResourceLimit_mergeRejected() {
+			// Setup
+			IIdType patientIdC = createPatient("Patient/C", List.of(createTestIdentifier("patient-c")))
+				.getIdElement().toUnqualifiedVersionless();
+			IIdType encId = createEncounter(myPatientIdSrc, "enc-src");
+			createObservation(patientIdC, encId, null, "obs-c");
+
+			// Execute & verify
+			MergeTestParameters mergeParams = new MergeTestParameters()
+				.sourceResource(new Reference(myPatientIdSrc))
+				.targetResource(new Reference(myPatientIdTgt))
+				.resourceLimit(1);
+
+			String diagnosticMessage = myMergeHelper.callMergeAndExtractDiagnosticMessage(
+				"Patient", mergeParams, PreconditionFailedException.class);
+
+			assertThat(diagnosticMessage)
+				.as("an indirect referrer, which only references a moved resource, still counts against the limit")
+				.contains("HAPI-3023")
+				.contains("exceeds the resource-limit");
+		}
+	}
+
+	@Nested
 	class VersionedReferences {
 
 		// Provenance(target=PatientSrc/_history/1). Merges PatientSrc→PatientTgt: Provenance.target is in

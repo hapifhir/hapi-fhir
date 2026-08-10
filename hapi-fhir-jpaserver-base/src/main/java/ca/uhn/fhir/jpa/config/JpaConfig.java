@@ -125,6 +125,7 @@ import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
 import ca.uhn.fhir.jpa.provider.InstanceReindexProvider;
 import ca.uhn.fhir.jpa.provider.ProcessMessageProvider;
+import ca.uhn.fhir.jpa.provider.ReferencingResourcesQuerySvc;
 import ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
@@ -1099,6 +1100,12 @@ public class JpaConfig {
 	@Bean
 	public Batch2TaskHelper batch2TaskHelper() {
 		return new Batch2TaskHelper();
+	}
+
+	@Bean
+	public ReferencingResourcesQuerySvc referencingResourcesQuerySvc(
+			IResourceLinkDao theResourceLinkDao, HapiTransactionService theHapiTransactionService) {
+		return new ReferencingResourcesQuerySvc(theResourceLinkDao, theHapiTransactionService);
 	}
 
 	@Bean
