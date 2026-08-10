@@ -51,6 +51,8 @@ import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.SubscriptionUtil;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.StringType;
@@ -132,9 +134,7 @@ public class SubscriptionValidatingInterceptor {
 			return;
 		}
 
-		if (!isUserAuthorizedToManageSubscriptions(theRequestDetails, theRequestPartitionId, thePointcut)) {
-			throw new ForbiddenOperationException(Msg.code(3026) + "User is not authorized to manage subscriptions");
-		}
+		validateAuthorization(theSubscription, theRequestDetails, theRequestPartitionId, thePointcut);
 
 		CanonicalSubscription subscription;
 		try {
@@ -198,18 +198,46 @@ public class SubscriptionValidatingInterceptor {
 		}
 	}
 
+	private void validateAuthorization(
+			IBaseResource theSubscription,
+			RequestDetails theRequestDetails,
+			RequestPartitionId theRequestPartitionId,
+			Pointcut thePointcut) {
+		// The system itself must be authorized to update subscriptions in order to activate them.
+		// See SubscriptionActivatingListener for an example. This must be allowed, regardless of any rules the
+		// implementor may define.
+		if (thePointcut == Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED
+				&& theRequestDetails instanceof SystemRequestDetails) {
+			return;
+		}
+
+		if (!isUserAuthorizedToManageSubscriptions(
+				theSubscription, theRequestDetails, theRequestPartitionId, thePointcut)) {
+			throw new ForbiddenOperationException(Msg.code(3026) + "User is not authorized to manage subscriptions");
+		}
+	}
+
 	/**
 	 * An override hook allowing an implementer to provide custom logic for authorizing a user to perform
 	 * subscription management operations.
 	 *
-	 * @param theRequestDetails     the details of the current request
-	 * @param theRequestPartitionId the id of the partition being accessed
-	 * @param thePointcut           the pointcut being invoked
-	 * @return true if the current user is authorized to perform the requested action on the specified partition
+	 * @param theSubscription       allows implementers to define authorization rules dependent on the
+	 *                              subscription resource being manipulated
+	 * @param theRequestDetails     allows implementers to define authorization rules dependent on the
+	 *                              details of the original request, including whether it is a user request
+	 *                              or a system request, and user session information is applicable
+	 * @param theRequestPartitionId allows implementers to define authorization rules dependent on the
+	 *                              partition being accessed, is any
+	 * @param thePointcut           allows implementers to define authorization rules dependent on the
+	 *                              operation implied by the current pointcut
+	 * @return true if the current user is authorized to proceed with the operation, otherwise the operation
+	 *         will be rejected with a 403 Forbidden response code
 	 */
-	@SuppressWarnings("unused")
-	public boolean isUserAuthorizedToManageSubscriptions(
-			RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId, Pointcut thePointcut) {
+	protected boolean isUserAuthorizedToManageSubscriptions(
+			@Nonnull IBaseResource theSubscription,
+			@Nullable RequestDetails theRequestDetails,
+			@Nullable RequestPartitionId theRequestPartitionId,
+			@Nonnull Pointcut thePointcut) {
 		return true;
 	}
 

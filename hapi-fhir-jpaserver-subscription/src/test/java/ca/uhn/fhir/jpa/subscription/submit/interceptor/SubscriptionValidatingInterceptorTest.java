@@ -21,10 +21,12 @@ import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.SubscriptionCha
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.SubscriptionQueryValidator;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
+import ca.uhn.fhir.test.utilities.RequestDetailsHelper;
 import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.HapiExtensions;
 import jakarta.annotation.Nonnull;
@@ -38,6 +40,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
@@ -61,7 +64,6 @@ import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -247,7 +249,7 @@ public class SubscriptionValidatingInterceptorTest {
 		final Subscription subscription = createSubscription();
 		SubscriptionValidatingInterceptor overrideInterceptor = new SubscriptionValidatingInterceptor() {
 			@Override
-			public boolean isUserAuthorizedToManageSubscriptions(RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId, Pointcut thePointcut) {
+			public boolean isUserAuthorizedToManageSubscriptions(IBaseResource theSubscription, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId, Pointcut thePointcut) {
 				return false;
 			}
 		};
@@ -268,7 +270,7 @@ public class SubscriptionValidatingInterceptorTest {
 		final Patient patient = new Patient();
 		SubscriptionValidatingInterceptor overrideInterceptor = new SubscriptionValidatingInterceptor() {
 			@Override
-			public boolean isUserAuthorizedToManageSubscriptions(RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId, Pointcut thePointcut) {
+			public boolean isUserAuthorizedToManageSubscriptions(IBaseResource theSubscription, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId, Pointcut thePointcut) {
 				return false;
 			}
 		};
@@ -280,7 +282,52 @@ public class SubscriptionValidatingInterceptorTest {
 					patient, null, null, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED));
 	}
 
-	@Test
+	/*
+	 * Ensure that, even if the implementer has overridden the authorization rules, the system will still be able to
+	 * update subscriptions in order to activate them
+	 */
+	@ParameterizedTest
+	@MethodSource("operationsByRequestType")
+	void testValidateSubmittedSubscription_operationsByRequestType(Pointcut theOperation, RequestDetails theRequestDetails) {
+		// set up
+		final Subscription subscription = createSubscription();
+
+		SubscriptionValidatingInterceptor overrideInterceptor = new SubscriptionValidatingInterceptor() {
+			@Override
+			public boolean isUserAuthorizedToManageSubscriptions(IBaseResource theSubscription, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId, Pointcut thePointcut) {
+				return false;
+			}
+		};
+		overrideInterceptor.setFhirContext(myFhirContext);
+		overrideInterceptor.setDaoRegistryForUnitTest(myDaoRegistry);
+		overrideInterceptor.setSubscriptionCanonicalizerForUnitTest(new SubscriptionCanonicalizer(myFhirContext, mySubscriptionSettings, myPartitionSettings));
+		overrideInterceptor.setSubscriptionStrategyEvaluatorForUnitTest(mySubscriptionStrategyEvaluator);
+		overrideInterceptor.setSubscriptionChannelTypeValidatorFactoryForUnitTest(mySubscriptionChannelTypeValidatorFactory);
+		overrideInterceptor.setSubscriptionSettingsForUnitTest(mySubscriptionSettings);
+
+		if (theOperation == Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED && theRequestDetails instanceof SystemRequestDetails) {
+			assertThatNoException().isThrownBy(() -> overrideInterceptor.validateSubmittedSubscription(
+					subscription, theRequestDetails, null, theOperation));
+		} else {
+			// execute and validate
+			assertThatThrownBy(() ->
+				overrideInterceptor.validateSubmittedSubscription(
+					subscription, theRequestDetails, null, theOperation))
+				.isInstanceOf(ForbiddenOperationException.class)
+				.hasMessage(Msg.code(3026) + "User is not authorized to manage subscriptions");
+		}
+	}
+
+public static Stream<Arguments> operationsByRequestType() {
+	return Stream.of(
+		Arguments.of(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, RequestDetailsHelper.newServletRequestDetails()),
+		Arguments.of(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, new SystemRequestDetails()),
+		Arguments.of(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, RequestDetailsHelper.newServletRequestDetails()),
+		Arguments.of(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, new SystemRequestDetails())
+	);
+}
+
+@Test
 	public void testInvalidTopic() throws URISyntaxException {
 		when(myDaoRegistry.getResourceDao("SubscriptionTopic")).thenReturn(mySubscriptionTopicDao);
 
