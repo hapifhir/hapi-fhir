@@ -1231,7 +1231,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	 * even under the default {@code NOT_ALLOWED} cross-partition reference mode: in-bundle targets resolve
 	 * from {@code TransactionDetails} before any partition-scoped lookup.
 	 *
-	 * TODO-TG: Pining this behaviour for now. In future, may need to change this so that it is rejected in
+	 * TODO-TG: Pinning this behaviour for now. In future, may need to change this so that it is rejected in
 	 *  NOT_ALLOWED mode.
 	 */
 	// Created by Claude Fable 5
