@@ -97,7 +97,7 @@ public class AddForeignKeyTask extends BaseTableTask {
 	@Override
 	public void doExecute() throws SQLException {
 		Map<String, Boolean> existing =
-				JdbcUtils.getForeignKeysAndRuleset(getConnectionProperties(), myForeignTableName, getTableName());
+				JdbcUtils.getForeignKeysAndDeelteCascadeRule(getConnectionProperties(), myForeignTableName, getTableName());
 		String constraintName = myConstraintName.toUpperCase(Locale.US);
 		if (existing.containsKey(constraintName)) {
 			// if trying to add delete cascade with same fk constraint,

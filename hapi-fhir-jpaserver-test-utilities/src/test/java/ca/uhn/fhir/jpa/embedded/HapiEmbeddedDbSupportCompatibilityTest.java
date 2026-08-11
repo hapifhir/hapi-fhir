@@ -51,7 +51,7 @@ public class HapiEmbeddedDbSupportCompatibilityTest {
 	 * This test is to check a contract that dbs we support should fulfill.
 	 * Namely, that DELETE_RULE is *always* populated and matches what
 	 * is set on the fk constraints.
-	 * See {@link JdbcUtils#getForeignKeysAndRuleset(DriverTypeEnum.ConnectionProperties, String, String)}
+	 * See {@link JdbcUtils#getForeignKeysAndDeelteCascadeRule(DriverTypeEnum.ConnectionProperties, String, String)}
 	 */
 	@ParameterizedTest
 	@MethodSource("getEmbeddedDatabases")
@@ -73,9 +73,9 @@ public class HapiEmbeddedDbSupportCompatibilityTest {
 
 		// execute
 		Map<String, Boolean> cascading =
-				JdbcUtils.getForeignKeysAndRuleset(getConnectionProperties(theDatabase), "CUSTOMERS", "ORDERS_CASCADE");
+				JdbcUtils.getForeignKeysAndDeelteCascadeRule(getConnectionProperties(theDatabase), "CUSTOMERS", "ORDERS_CASCADE");
 		Map<String, Boolean> nonCascading =
-				JdbcUtils.getForeignKeysAndRuleset(getConnectionProperties(theDatabase), "CUSTOMERS", "ORDERS_PLAIN");
+				JdbcUtils.getForeignKeysAndDeelteCascadeRule(getConnectionProperties(theDatabase), "CUSTOMERS", "ORDERS_PLAIN");
 
 		// validate
 		assertThat(cascading)
@@ -102,7 +102,7 @@ public class HapiEmbeddedDbSupportCompatibilityTest {
 
 		// execute
 		// a multi-column foreign key yields one metadata row per column, all carrying the same delete rule
-		Map<String, Boolean> foreignKeys = JdbcUtils.getForeignKeysAndRuleset(
+		Map<String, Boolean> foreignKeys = JdbcUtils.getForeignKeysAndDeelteCascadeRule(
 				getConnectionProperties(theDatabase), "COMPOSITE_PARENT", "COMPOSITE_CHILD");
 
 		// validate

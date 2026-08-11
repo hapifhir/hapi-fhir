@@ -293,7 +293,7 @@ public class JdbcUtils {
 			@Nullable String theForeignTable)
 			throws SQLException {
 		// so as not to break existing users
-		return getForeignKeysAndRuleset(theConnectionProperties, theTableName, theForeignTable)
+		return getForeignKeysAndDeelteCascadeRule(theConnectionProperties, theTableName, theForeignTable)
 				.keySet();
 	}
 
@@ -304,7 +304,7 @@ public class JdbcUtils {
 	 *
 	 * Of note, the foreign key names will all be uppercase.
 	 */
-	public static Map<String, Boolean> getForeignKeysAndRuleset(
+	public static Map<String, Boolean> getForeignKeysAndDeelteCascadeRule(
 			DriverTypeEnum.ConnectionProperties theConnectionProperties,
 			String theTableName,
 			@Nullable String theForeignTable)
