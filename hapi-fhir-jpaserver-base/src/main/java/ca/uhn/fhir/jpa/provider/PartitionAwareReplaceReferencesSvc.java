@@ -302,18 +302,15 @@ public class PartitionAwareReplaceReferencesSvc {
 			List<IBaseResource> theUpdateList) {
 
 		for (IBaseResource resource : theResources) {
-			Integer currentPartitionId = RequestPartitionId.getPartitionFromUserDataIfPresent(resource)
-					.map(RequestPartitionId::getFirstPartitionIdOrNull)
-					.orElse(null);
+			RequestPartitionId currentPartition = determinePartition(resource, theRequestDetails);
 
 			// Rewrite source→target references so determineCreatePartitionForRequest
 			// routes based on the post-merge state.
 			replaceVersionlessReferences(resource, Map.of(theSourceRef, theTargetRef));
 
 			RequestPartitionId newPartition = determinePartition(resource, theRequestDetails);
-			Integer newPartitionId = newPartition.getFirstPartitionIdOrNull();
 
-			if (Objects.equals(currentPartitionId, newPartitionId)) {
+			if (Objects.equals(currentPartition, newPartition)) {
 				theUpdateList.add(resource);
 			} else {
 				theCopiesByDestPartition
@@ -323,21 +320,9 @@ public class PartitionAwareReplaceReferencesSvc {
 		}
 	}
 
-	/**
-	 * Determines the partition for a resource by temporarily clearing its existing
-	 * RESOURCE_PARTITION_ID and asking the partition helper to compute a fresh partition
-	 * based on the resource's current references. The original partition is restored afterward.
-	 */
 	private RequestPartitionId determinePartition(IBaseResource theResource, RequestDetails theRequestDetails) {
-		Object savedPartitionUserData = theResource.getUserData(Constants.RESOURCE_PARTITION_ID);
-		try {
-			theResource.setUserData(Constants.RESOURCE_PARTITION_ID, null);
-			String resourceType = myFhirContext.getResourceType(theResource);
-			return myRequestPartitionHelperSvc.determineCreatePartitionForRequest(
-					theRequestDetails, theResource, resourceType);
-		} finally {
-			theResource.setUserData(Constants.RESOURCE_PARTITION_ID, savedPartitionUserData);
-		}
+		return myRequestPartitionHelperSvc.determineCreatePartitionForRequestIgnoringCachedPartition(
+				theRequestDetails, theResource, myFhirContext.getResourceType(theResource));
 	}
 
 	private enum ChangeType {

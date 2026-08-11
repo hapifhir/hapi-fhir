@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 8200
+title: "Previously, when the Patient ID Partitioning Interceptor was used together with the Patient Compartment Enforcing Interceptor, a Patient $merge could fail with an HTTP 412 error, because the merge tried to update patient compartment resources in place. This is now fixed by creating copies of those resources in the target Patient's compartment during the merge operation, similar to a cross-partition merge."

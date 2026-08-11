@@ -66,7 +66,7 @@ import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
 
 import static ca.uhn.fhir.batch2.jobs.merge.MergeAppCtx.JOB_MERGE;
 import static ca.uhn.fhir.merge.MergeResourceHelper.addErrorToOperationOutcome;
@@ -174,7 +174,8 @@ public class ResourceMergeService {
 			IBaseResource sourceResource = mergeValidationResult.sourceResource;
 			IBaseResource targetResource = mergeValidationResult.targetResource;
 
-			boolean isPartitionAwareMerge = requiresPartitionAwareMerge(sourceResource, targetResource);
+			boolean isPartitionAwareMerge =
+					requiresPartitionAwareMerge(sourceResource, targetResource, theRequestDetails);
 			validatePartitionAwareMergeAsyncNotSupported(isPartitionAwareMerge, theRequestDetails);
 
 			if (theMergeOperationParameters.getPreview()) {
@@ -269,7 +270,8 @@ public class ResourceMergeService {
 
 		Date startTime = new Date();
 
-		boolean partitionAwareMerge = requiresPartitionAwareMerge(theSourceResource, theTargetResource);
+		boolean partitionAwareMerge =
+				requiresPartitionAwareMerge(theSourceResource, theTargetResource, theRequestDetails);
 
 		validateResourceLimit(theMergeOperationParameters, theSourceResource, theRequestDetails, partitionAwareMerge);
 
@@ -740,7 +742,8 @@ public class ResourceMergeService {
 		}
 	}
 
-	private boolean requiresPartitionAwareMerge(IBaseResource theSourceResource, IBaseResource theTargetResource) {
+	private boolean requiresPartitionAwareMerge(
+			IBaseResource theSourceResource, IBaseResource theTargetResource, RequestDetails theRequestDetails) {
 		if (!myPartitionSettings.isPartitioningEnabled()) {
 			return false;
 		}
@@ -750,16 +753,20 @@ public class ResourceMergeService {
 		// every merge through it, not just cross-partition ones.
 		// TODO: either add all-partition support to the regular replace-references path, or merge the
 		// two paths so that the partition-aware path handles all cases.
-		return isCrossPartitionMerge(theSourceResource, theTargetResource)
-				|| !myPartitionSettings.isAllPartitionSearchSupported();
-	}
-
-	private boolean isCrossPartitionMerge(IBaseResource theSourceResource, IBaseResource theTargetResource) {
-		if (!myPartitionSettings.isPartitioningEnabled()) {
-			return false;
+		if (!myPartitionSettings.isAllPartitionSearchSupported()) {
+			return true;
 		}
-		Optional<RequestPartitionId> srcPart = RequestPartitionId.getPartitionFromUserDataIfPresent(theSourceResource);
-		Optional<RequestPartitionId> tgtPart = RequestPartitionId.getPartitionFromUserDataIfPresent(theTargetResource);
-		return srcPart.isPresent() && tgtPart.isPresent() && !srcPart.get().equals(tgtPart.get());
+		// This is the same computation PatientCompartmentEnforcingInterceptor performs, so in Patient ID mode it
+		// detects not only a change of partition but also a change of patient compartment within the same
+		// partition. Such a compartment change requires copying the referring resources too, since otherwise the
+		// enforcer rejects the in-place update.
+		String resourceType = myFhirContext.getResourceType(theSourceResource);
+		RequestPartitionId sourcePartition =
+				myRequestPartitionHelperSvc.determineCreatePartitionForRequestIgnoringCachedPartition(
+						theRequestDetails, theSourceResource, resourceType);
+		RequestPartitionId targetPartition =
+				myRequestPartitionHelperSvc.determineCreatePartitionForRequestIgnoringCachedPartition(
+						theRequestDetails, theTargetResource, resourceType);
+		return !Objects.equals(sourcePartition, targetPartition);
 	}
 }
