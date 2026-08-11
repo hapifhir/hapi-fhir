@@ -3,8 +3,6 @@ package ca.uhn.fhir.jpa.provider.merge;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.dao.TransactionPrePartitionResponse;
-import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.interceptor.PatientCompartmentEnforcingInterceptor;
 import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
 import ca.uhn.fhir.jpa.merge.MergeOperationTestHelper;
@@ -78,8 +76,6 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 	private ISearchParamExtractor mySearchParamExtractor;
 	@Autowired
 	private ResourceLinkServiceFactory myResourceLinkServiceFactory;
-	@Autowired
-	private HapiTransactionService myHapiTransactionService;
 	@Autowired
 	private PatientCompartmentEnforcingInterceptor myPatientCompartmentEnforcingInterceptor;
 	private PatientIdPartitionInterceptor myPartitionInterceptor;
