@@ -1,7 +1,12 @@
 ---
 type: security
 issue: 8228
-title: "PackageLoaderSvc now requires a whitelist to be configured
-      before attempting to fetch resources from remote (or local)
-      urls.
+title: "PackageLoaderSvc now has the ability to configure a whitelist for
+    allowed URLs (prefixes) for loading IGs and other npm packages.
+    By default (ie, without configuration), this is set to \"*\" (all
+    urls).
+    But a configurer can (and should!) configure a proper allow list
+    by implementing new IPackageUrlAllowListProvider bean.
+    NB: even if provided, urls are constricted to only allow
+    'file:', 'classpath:', and 'http/https:' for security reasons.
 "

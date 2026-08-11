@@ -31,6 +31,39 @@ HAPI FHIR also supports installing a package asynchronously using a batch proces
 myPackageInstallerSvc.installAsynchronously(spec);
 ```
 
+# Restricting Package URLs
+
+By default the package loader will fetch from any URL.
+
+To restrict it, supply a bean implementing `IPackageUrlAllowListProvider`:
+
+```java
+@Bean
+public IPackageUrlAllowListProvider packageUrlAllowListProvider() {
+	return new IPackageUrlAllowListProvider() {
+		@Override
+		public List<String> getRemotePrefixes() {
+			return List.of("https://packages2.fhir.org");
+		}
+
+		@Override
+		public List<String> getLocalPrefixes() {
+			return List.of("file:/opt/packages");
+		}
+	};
+}
+```
+
+Remote prefixes are matched by origin and local prefixes by resolved path, so the example above permits any package beneath `/opt/packages` but not one in `/opt/packages-other`.
+
+Write `file:` prefixes as `file:/opt/packages` or `file:///opt/packages`; the two-slash spelling `file://opt/packages` parses `opt` as a hostname and restricts to `/packages` instead.
+
+When such a bean is present, `PackageLoaderSvc` rejects any package URL that does not match a configured prefix with `HAPI-3028`.
+
+Regardless of what is configured, only the `http:`, `https:`, `file:` and `classpath:` schemes are supported; any other scheme is rejected with `HAPI-3029`.
+
+When no such bean is present, all URLs are permitted and behaviour is unchanged.
+
 # Install Mode
 
 The `installMode` field on `PackageInstallationSpec` controls what is persisted during installation:

@@ -35,8 +35,10 @@ public class PackageUrlAllowList {
 	/**
 	 * Create a PackageUrlAllowList that allows all remote and all local
 	 * prefixes.
-	 * NB: This is provided for testing and completeness only.
-	 * There should be no reason to use this for production ready code.
+	 * Consider carefully if you actually need this. Allowing "all" should
+	 * only be required in very select cases:
+	 * * testing
+	 * * user-driven flows where the 'configurer' and 'user' are the one and the same
 	 */
 	public static PackageUrlAllowList allowAll() {
 		return new PackageUrlAllowList(List.of(WILDCARD), List.of(WILDCARD));
@@ -62,7 +64,7 @@ public class PackageUrlAllowList {
 		return myRemotePrefixes;
 	}
 
-	public List<String> getLocalPrefixees() {
+	public List<String> getLocalPrefixes() {
 		return myLocalPrefixes;
 	}
 
