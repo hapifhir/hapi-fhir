@@ -48,13 +48,17 @@ public class PackageLoaderSvcIT {
 			PackageUrlAllowList.of(List.of(baseUrl), new ArrayList<>())
 		);
 		PackageLoaderSvc.initSettings(settings);
-		myPackageLoaderSvc = new PackageLoaderSvc(settings);
+		try {
+			myPackageLoaderSvc = new PackageLoaderSvc(settings);
 
-		myPackageLoaderSvc.getPackageServers().clear();
-		myPackageLoaderSvc.addPackageServer(
-			new PackageServer(myServer.getBaseUrl()).withAllowHttp(true).withAllowPrivateNetwork(true));
+			myPackageLoaderSvc.getPackageServers().clear();
+			myPackageLoaderSvc.addPackageServer(
+				new PackageServer(myServer.getBaseUrl()).withAllowHttp(true).withAllowPrivateNetwork(true));
 
-		myFakeNpmServlet.getResponses().clear();
+			myFakeNpmServlet.getResponses().clear();
+		} finally {
+			PackageLoaderSvc.resetSettings();
+		}
 	}
 
 	@AfterEach
