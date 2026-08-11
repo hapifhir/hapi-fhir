@@ -227,7 +227,7 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 
 	public byte[] loadPackageUrlContents(String thePackageUrl) {
 		if (!mySettings.getPackageUrlAllowList().isAllowed(thePackageUrl)) {
-			throw new InvalidRequestException("Attempting to request from non-whitelisted path " + thePackageUrl);
+			throw new InvalidRequestException(Msg.code(3028) + "Attempting to request from non-whitelisted path " + thePackageUrl);
 		}
 
 		PackageUrlScheme scheme = PackageUrlScheme.parseScheme(thePackageUrl);
@@ -262,7 +262,7 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 			}
 			default -> {
 				// we won't ever see this - the scheme is validated in
-				throw new InvalidRequestException("Unrecognized scheme");
+				throw new InvalidRequestException(Msg.code(3029) + "Unrecognized scheme");
 			}
 		}
 	}
