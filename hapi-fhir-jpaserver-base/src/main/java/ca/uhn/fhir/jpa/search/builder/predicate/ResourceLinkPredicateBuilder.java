@@ -104,6 +104,7 @@ import static ca.uhn.fhir.rest.api.Constants.PARAM_TYPE;
 import static ca.uhn.fhir.rest.api.Constants.VALID_MODIFIERS;
 import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.startsWith;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder implements ICanMakeMissingParamPredicate {
@@ -256,6 +257,13 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 						} else {
 							targetQualifiedUrls.add(dt.getValue());
 						}
+					} else if (startsWith(ref.getValue(), "urn:")) {
+						/*
+						 * A URN-shaped value (e.g. urn:oid:..., urn:uuid:...) can never be a
+						 * local resource ID, but it is a legal canonical URL so we match it
+						 * against indexed canonical target URLs.
+						 */
+						targetQualifiedUrls.add(ref.getValue());
 					} else {
 						validateModifierUse(theRequest, theResourceType, ref);
 						validateResourceTypeInReferenceParam(ref.getResourceType());
