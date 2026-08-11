@@ -227,7 +227,8 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 
 	public byte[] loadPackageUrlContents(String thePackageUrl) {
 		if (!mySettings.getPackageUrlAllowList().isAllowed(thePackageUrl)) {
-			throw new InvalidRequestException(Msg.code(3028) + "Attempting to request from non-whitelisted path " + thePackageUrl);
+			throw new InvalidRequestException(
+					Msg.code(3028) + "Attempting to request from non-whitelisted path " + thePackageUrl);
 		}
 
 		PackageUrlScheme scheme = PackageUrlScheme.parseScheme(thePackageUrl);
