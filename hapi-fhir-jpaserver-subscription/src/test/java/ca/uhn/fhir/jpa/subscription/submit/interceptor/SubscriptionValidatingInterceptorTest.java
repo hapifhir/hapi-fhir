@@ -243,10 +243,11 @@ public class SubscriptionValidatingInterceptorTest {
 		}
 	}
 
-	@Test
-	void testValidateSubmittedSubscription_userAuthorizationCanBeDenied() {
+	@ParameterizedTest
+	@MethodSource("subscriptionByFhirVersion345")
+	void testValidateSubmittedSubscription_userAuthorizationCanBeDenied(IBaseResource theSubscription) {
 		// set up
-		final Subscription subscription = createSubscription();
+		initSubscription(theSubscription);
 		SubscriptionValidatingInterceptor overrideInterceptor = new SubscriptionValidatingInterceptor() {
 			@Override
 			public boolean isUserAuthorizedToWriteSubscriptions(IBaseResource theSubscription, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId, Pointcut thePointcut) {
@@ -259,7 +260,7 @@ public class SubscriptionValidatingInterceptorTest {
 		// execute and validate
 		assertThatThrownBy(() ->
 			overrideInterceptor.validateSubmittedSubscription(
-				subscription, null, null, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED))
+				theSubscription, null, null, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED))
 			.isInstanceOf(ForbiddenOperationException.class)
 				.hasMessage(Msg.code(3026) + "User is not authorized to manage subscriptions");
 	}
