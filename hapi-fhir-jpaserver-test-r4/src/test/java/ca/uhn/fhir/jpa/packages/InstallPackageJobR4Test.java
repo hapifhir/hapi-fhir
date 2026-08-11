@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * <p>
  * This class runs with the default package URL allow-list (no IPackageUrlAllowListProvider bean is
  * present, so all URLs are permitted). For allow-list enforcement see
- * {@link InstallPackageJobAllowListR4Test}.
+ * {@link InstallPackageJobAllowListR4IT}.
  */
 // Created by claude-opus-5
 public class InstallPackageJobR4Test extends BaseJpaR4Test {

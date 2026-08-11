@@ -3,7 +3,9 @@ package ca.uhn.fhir.jpa.packages;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.packages.loader.IPackageUrlAllowListProvider;
+import ca.uhn.fhir.jpa.packages.loader.PackageLoaderSettings;
 import ca.uhn.fhir.jpa.packages.loader.PackageLoaderSvc;
+import ca.uhn.fhir.jpa.packages.loader.PackageUrlAllowList;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.packages.NpmPackageFactory;
@@ -37,10 +39,13 @@ import static org.junit.jupiter.api.Assertions.fail;
  * <p>
  * The nested {@link AllowListConfig} contributes an {@link IPackageUrlAllowListProvider}, which makes
  * PackageLoaderConfig#loaderSettings build restricted settings rather than the permissive default.
+ *
+ * This *must* be an IT because Tests run concurrently (and the JVM state of the PackageLoaderSvc
+ * is per jvm). We need it to be
  */
 // Created by claude-opus-5
-@ContextConfiguration(classes = InstallPackageJobAllowListR4Test.AllowListConfig.class)
-public class InstallPackageJobAllowListR4Test extends BaseJpaR4Test {
+@ContextConfiguration(classes = InstallPackageJobAllowListR4IT.AllowListConfig.class)
+public class InstallPackageJobAllowListR4IT extends BaseJpaR4Test {
 
 	/**
 	 * Cannot be a {@code @TempDir}: the allow-list is read while the Spring context is being built, and
@@ -70,8 +75,10 @@ public class InstallPackageJobAllowListR4Test extends BaseJpaR4Test {
 
 	@AfterEach
 	void resetPackageLoaderStatics() {
-		// initSettings writes JVM-global library state; without this it leaks into later tests in the fork
+		// reset to baseline (ie, allow everything), not default
 		PackageLoaderSvc.resetSettings();
+		PackageLoaderSettings settings = new PackageLoaderSettings(PackageUrlAllowList.allowAll());
+		PackageLoaderSvc.initSettings(settings);
 	}
 
 	@Test

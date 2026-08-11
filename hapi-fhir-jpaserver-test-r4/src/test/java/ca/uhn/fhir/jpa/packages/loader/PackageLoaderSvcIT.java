@@ -38,6 +38,8 @@ public class PackageLoaderSvcIT {
 	public HttpServletExtension myServer = new HttpServletExtension()
 		.withServlet(myFakeNpmServlet);
 
+	private PackageLoaderSettingsScope myScope;
+
 	@BeforeEach
 	public void before() throws Exception {
 		String baseUrl = myServer.getBaseUrl();
@@ -47,23 +49,21 @@ public class PackageLoaderSvcIT {
 		PackageLoaderSettings settings = new PackageLoaderSettings(
 			PackageUrlAllowList.of(List.of(baseUrl), new ArrayList<>())
 		);
-		PackageLoaderSvc.initSettings(settings);
-		try {
-			myPackageLoaderSvc = new PackageLoaderSvc(settings);
+		myScope = PackageLoaderSvc.applySettings(settings);
+		myPackageLoaderSvc = new PackageLoaderSvc(settings);
 
-			myPackageLoaderSvc.getPackageServers().clear();
-			myPackageLoaderSvc.addPackageServer(
-				new PackageServer(myServer.getBaseUrl()).withAllowHttp(true).withAllowPrivateNetwork(true));
+		myPackageLoaderSvc.getPackageServers().clear();
+		myPackageLoaderSvc.addPackageServer(
+			new PackageServer(myServer.getBaseUrl()).withAllowHttp(true).withAllowPrivateNetwork(true));
 
-			myFakeNpmServlet.getResponses().clear();
-		} finally {
-			PackageLoaderSvc.resetSettings();
-		}
+		myFakeNpmServlet.getResponses().clear();
 	}
 
 	@AfterEach
 	public void after() {
-		PackageLoaderSvc.resetSettings();
+		if (myScope != null) {
+			myScope.close();
+		}
 	}
 
 	@Test

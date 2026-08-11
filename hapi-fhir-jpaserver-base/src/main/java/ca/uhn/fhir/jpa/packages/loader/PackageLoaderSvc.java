@@ -61,7 +61,7 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(PackageLoaderSvc.class);
 
-	private static List<String> ourApplied;
+	private static PackageLoaderSettings ourApplied;
 
 	private PackageLoaderSettings mySettings;
 
@@ -69,6 +69,15 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 		mySettings = theLoaderSettings;
 	}
 
+	public static PackageLoaderSettings getAppliedSettings() {
+		return ourApplied;
+	}
+
+	/**
+	 * Returns the loader to the core library's default state. Note that the library defaults SSRF protection
+	 * to on, so this is a reset to "protected", not to whatever this JVM happened to have in effect. Callers
+	 * that need the latter should use {@link #applySettings(PackageLoaderSettings)} and close the scope.
+	 */
 	public static synchronized void resetSettings() {
 		ourApplied = null;
 		ManagedWebAccess.setSsrfProtectionEnabled(true);
@@ -86,25 +95,30 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 	 * Syncronoized because module contexts can start concurrently, and this is read-modify-write on shared static state.
 	 */
 	public static synchronized void initSettings(PackageLoaderSettings theSettings) {
-		if (ourApplied != null
-				&& !ourApplied.equals(theSettings.getPackageUrlAllowList().getRemotePrefixes())) {
+		List<String> newPrefixes = theSettings.getPackageUrlAllowList().getRemotePrefixes();
+		List<String> appliedPrefixes =
+				ourApplied == null ? null : ourApplied.getPackageUrlAllowList().getRemotePrefixes();
+
+		if (appliedPrefixes != null && !appliedPrefixes.equals(newPrefixes)) {
 			ourLog.warn(
 					"Remote package URL allow-list is being changed from {} to {}; this config is cluster-wide and cannot vary per module!",
-					ourApplied,
-					theSettings.getPackageUrlAllowList().getRemotePrefixes());
-		} else if (ourApplied != null
-				&& ourApplied.equals(theSettings.getPackageUrlAllowList().getRemotePrefixes())) {
+					appliedPrefixes,
+					newPrefixes);
+		} else if (appliedPrefixes != null) {
 			return; // already applied
 		} else {
-			ourLog.info(
-					"Applying remote package URL allow-list with {} entries",
-					theSettings.getPackageUrlAllowList().getRemotePrefixes());
+			ourLog.info("Applying remote package URL allow-list with {} entries", newPrefixes);
 		}
 
-		// last in wins
-		ourApplied = theSettings.getPackageUrlAllowList().getRemotePrefixes();
+		doApplySettings(theSettings);
+	}
 
-		if (ourApplied.contains(WILDCARD)) {
+	static synchronized void doApplySettings(PackageLoaderSettings theSettings) {
+		// last in wins
+		ourApplied = theSettings;
+
+		if (ourApplied.getPackageUrlAllowList().getLocalPrefixes().contains(WILDCARD)
+				|| ourApplied.getPackageUrlAllowList().getRemotePrefixes().contains(WILDCARD)) {
 			ourLog.warn("Allowing all. This shouldn't ever be in production code.");
 			ManagedWebAccess.setSsrfProtectionEnabled(false);
 			return;
@@ -126,6 +140,22 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 
 		ManagedWebAccess.loadFromFHIRSettings(
 				FhirSettingsPOJO.builder().servers(servers).build());
+	}
+
+	/**
+	 * Applies the given settings and returns a scope which restores the previous ones when closed.
+	 * <p>
+	 * The SSRF flag is captured directly from the core library rather than inferred, because when nothing
+	 * has been applied yet there is no {@link PackageLoaderSettings} to derive it from.
+	 *
+	 * @return a scope to be closed once the settings are no longer needed
+	 */
+	public static synchronized PackageLoaderSettingsScope applySettings(PackageLoaderSettings theSettings) {
+		PackageLoaderSettings previous = ourApplied;
+		boolean previousSsrfProtectionEnabled = ManagedWebAccess.isSsrfProtectionEnabled();
+
+		doApplySettings(theSettings);
+		return new PackageLoaderSettingsScope(previous, ourApplied, previousSsrfProtectionEnabled);
 	}
 
 	public NpmPackageData fetchPackageFromPackageSpec(PackageInstallationSpec theSpec) throws IOException {
