@@ -5,6 +5,7 @@ import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.TransactionPrePartitionResponse;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.interceptor.PatientCompartmentEnforcingInterceptor;
 import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
 import ca.uhn.fhir.jpa.merge.MergeOperationTestHelper;
 import ca.uhn.fhir.jpa.merge.MergeTestParameters;
@@ -86,6 +87,8 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 	private ResourceLinkServiceFactory myResourceLinkServiceFactory;
 	@Autowired
 	private HapiTransactionService myHapiTransactionService;
+	@Autowired
+	private PatientCompartmentEnforcingInterceptor myPatientCompartmentEnforcingInterceptor;
 	private PatientIdPartitionInterceptor myPartitionInterceptor;
 	private MergeOperationTestHelper myMergeHelper;
 	private IIdType myPatientIdSrc;
@@ -101,6 +104,7 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 		myPartitionInterceptor = new PatientIdPartitionInterceptor(
 			getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
 		registerInterceptor(myPartitionInterceptor);
+		registerInterceptor(myPatientCompartmentEnforcingInterceptor);
 
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setUnnamedPartitionMode(true);
@@ -615,6 +619,133 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 				expectedVersionedSourceId, expectedVersionedTargetId,
 				idsExpectedToReferenceTarget, expectedProvenanceTargets,
 				expectedTargetIdentifiers, null);
+		}
+	}
+
+	@Nested
+	class ResourceLimitAcrossPartitions {
+
+		// Obs(subject=PatientSrc) in PatientSrc's partition + Group(member=PatientSrc) in the default partition.
+		// Two resources reference PatientSrc, so a resource-limit of 1 must be exceeded and the merge rejected.
+		@Test
+		void testMerge_directReferrersAcrossPartitionsExceedResourceLimit_mergeRejected() {
+			// Setup
+			createObservation(myPatientIdSrc, null, null, "obs-src");
+			createGroup(myPatientIdSrc);
+
+			// Execute & verify
+			MergeTestParameters mergeParams = new MergeTestParameters()
+				.sourceResource(new Reference(myPatientIdSrc))
+				.targetResource(new Reference(myPatientIdTgt))
+				.resourceLimit(1);
+
+			String diagnosticMessage = myMergeHelper.callMergeAndExtractDiagnosticMessage(
+				"Patient", mergeParams, PreconditionFailedException.class);
+
+			assertThat(diagnosticMessage)
+				.as("both direct referrers count against the limit, even though they live in different partitions")
+				.contains("HAPI-2880")
+				.contains("exceeds the resource-limit");
+		}
+
+		// Enc(subject=PatientSrc) is the only direct referrer of PatientSrc, so it alone does not exceed a limit of 1.
+		// Obs(subject=PatientC, encounter=Enc) does not reference PatientSrc at all, but the merge still updates it
+		// because Enc moves partition and gets a new id. Two resources are therefore updated, and the limit of 1
+		// must be exceeded.
+		@Test
+		void testMerge_indirectReferrerPushesCountOverResourceLimit_mergeRejected() {
+			// Setup
+			IIdType patientIdC = createPatient("Patient/C", List.of(createTestIdentifier("patient-c")))
+				.getIdElement().toUnqualifiedVersionless();
+			IIdType encId = createEncounter(myPatientIdSrc, "enc-src");
+			createObservation(patientIdC, encId, null, "obs-c");
+
+			// Execute & verify
+			MergeTestParameters mergeParams = new MergeTestParameters()
+				.sourceResource(new Reference(myPatientIdSrc))
+				.targetResource(new Reference(myPatientIdTgt))
+				.resourceLimit(1);
+
+			String diagnosticMessage = myMergeHelper.callMergeAndExtractDiagnosticMessage(
+				"Patient", mergeParams, PreconditionFailedException.class);
+
+			assertThat(diagnosticMessage)
+				.as("an indirect referrer, which only references a moved resource, still counts against the limit")
+				.contains("HAPI-3023")
+				.contains("exceeds the resource-limit");
+		}
+	}
+
+	@Nested
+	class SamePartitionMergeWithCompartmentEnforcement {
+
+		// "src-4963" and "tgt-1" both hash to partition 14829 under
+		// PatientIdPartitionInterceptor.defaultPartitionAlgorithm
+		private static final String SAME_PARTITION_SOURCE_ID_PART = "src-4963";
+		private static final String SAME_PARTITION_TARGET_ID_PART = "tgt-1";
+
+		private IIdType mySamePartitionSrc;
+		private IIdType mySamePartitionTgt;
+
+		@BeforeEach
+		void beforeEach() {
+			mySamePartitionSrc = createPatient("Patient/" + SAME_PARTITION_SOURCE_ID_PART, List.of())
+				.getIdElement().toUnqualifiedVersionless();
+			mySamePartitionTgt = createPatient("Patient/" + SAME_PARTITION_TARGET_ID_PART, List.of())
+				.getIdElement().toUnqualifiedVersionless();
+			assertInSamePartition(mySamePartitionSrc, mySamePartitionTgt);
+		}
+
+		// Observation(subject=PatientSrc) where PatientSrc and PatientTgt are in the SAME partition, with
+		// PatientCompartmentEnforcingInterceptor registered. The merge causes the Observation to change to the
+		// target Patient's compartment, so it needs to be moved rather than updated in place. The undo must
+		// then move it back under its original ID.
+		@Test
+		void testMergeThenUndo_compartmentResourceReferencingSource_whenPatientsInSamePartition_resourceIsMovedAndRestored() {
+			// Setup
+			IIdType obsId = createObservation(mySamePartitionSrc, null, null, "obs-same-partition");
+
+			IBaseResource patientSrcBefore = readResource(Patient.class, mySamePartitionSrc);
+			IBaseResource patientTgtBefore = readResource(Patient.class, mySamePartitionTgt);
+			IBaseResource obsBefore = readResource(Observation.class, obsId);
+
+			// Execute
+			MergeTestParameters mergeParams = new MergeTestParameters()
+				.sourceResource(new Reference(mySamePartitionSrc))
+				.targetResource(new Reference(mySamePartitionTgt));
+			Parameters result = callMerge(mergeParams);
+			myMergeHelper.validateSyncMergeOutcome(result, mergeParams.asParametersResource(), mySamePartitionTgt);
+
+			// Verify: Obs moved to the target patient's compartment, old ID deleted
+			Observation movedObs = assertSingleResourceMovedToTarget(
+				Observation.class, Map.of("obs-same-partition", obsId), mySamePartitionTgt, Observation::getIdentifier);
+			IIdType movedObsId = movedObs.getIdElement().toUnqualifiedVersionless();
+
+			// Undo merge
+			Parameters undoParams = new Parameters();
+			undoParams.addParameter().setName("source-resource").setValue(new Reference(mySamePartitionSrc));
+			undoParams.addParameter().setName("target-resource").setValue(new Reference(mySamePartitionTgt));
+			myMergeHelper.callUndoMergeOperation("Patient", undoParams);
+
+			// Verify: Obs restored under its original ID in the source patient's compartment
+			List<Observation> restoredObs = searchBySubject(Observation.class, mySamePartitionSrc.getValue());
+			assertThat(restoredObs).hasSize(1);
+			assertThat(restoredObs.get(0).getIdElement().toUnqualifiedVersionless())
+				.as("undo must restore the Observation under its original ID")
+				.isEqualTo(obsId);
+
+			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
+				patientSrcBefore, readResource(Patient.class, mySamePartitionSrc));
+			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
+				patientTgtBefore, readResource(Patient.class, mySamePartitionTgt));
+			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
+				obsBefore, readResource(Observation.class, obsId));
+
+			assertResourceDeleted(movedObsId);
+
+			assertThat(searchBySubject(Observation.class, mySamePartitionTgt.getValue()))
+				.as("no Observation should reference the target after undo")
+				.isEmpty();
 		}
 	}
 
