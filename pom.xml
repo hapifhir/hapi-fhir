@@ -1098,7 +1098,7 @@
 		<jackson_databind_version>2.21.5</jackson_databind_version>
 		<jackson_annotations_version>2.21</jackson_annotations_version>
 		<httpclient5_version>5.4.3</httpclient5_version>
-		<httpcore5_version>5.3.1</httpcore5_version>
+		<httpcore5_version>5.4.3</httpcore5_version>
 		<maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
 		<okhttp_version>5.3.2</okhttp_version>
