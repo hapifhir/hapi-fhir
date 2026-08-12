@@ -2435,7 +2435,7 @@
 			<dependency>
 				<groupId>org.webjars</groupId>
 				<artifactId>swagger-ui</artifactId>
-				<version>5.32.5</version>
+				<version>5.32.13</version>
 			</dependency>
 			<dependency>
 				<groupId>org.xmlunit</groupId>
