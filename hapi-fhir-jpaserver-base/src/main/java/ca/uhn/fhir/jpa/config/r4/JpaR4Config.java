@@ -32,7 +32,6 @@ import ca.uhn.fhir.jpa.api.svc.IMergeOperationProviderSvc;
 import ca.uhn.fhir.jpa.config.GeneratedDaoAndResourceProviderConfigR4;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
-import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
@@ -42,6 +41,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.jpa.provider.PartitionAwareReplaceReferencesSvc;
+import ca.uhn.fhir.jpa.provider.ReferencingResourcesQuerySvc;
 import ca.uhn.fhir.jpa.provider.merge.MergeOperationProviderSvc;
 import ca.uhn.fhir.jpa.provider.merge.MergeValidationService;
 import ca.uhn.fhir.jpa.provider.merge.PatientMergeProvider;
@@ -154,18 +154,21 @@ public class JpaR4Config {
 	@Bean
 	public PartitionAwareReplaceReferencesSvc partitionAwareReplaceReferencesSvc(
 			DaoRegistry theDaoRegistry,
-			IResourceLinkDao theResourceLinkDao,
+			ReferencingResourcesQuerySvc theReferencingResourcesQuerySvc,
 			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
 			HapiTransactionService theHapiTransactionService) {
 		return new PartitionAwareReplaceReferencesSvc(
-				theDaoRegistry, theResourceLinkDao, theRequestPartitionHelperSvc, theHapiTransactionService);
+				theDaoRegistry,
+				theReferencingResourcesQuerySvc,
+				theRequestPartitionHelperSvc,
+				theHapiTransactionService);
 	}
 
 	@Bean
 	public ResourceMergeService resourceMergeService(
 			DaoRegistry theDaoRegistry,
 			ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundleSvc,
-			IResourceLinkDao theResourceLinkDao,
+			ReferencingResourcesQuerySvc theReferencingResourcesQuerySvc,
 			HapiTransactionService theHapiTransactionService,
 			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
 			IJobCoordinator theJobCoordinator,
@@ -180,7 +183,7 @@ public class JpaR4Config {
 				theStorageSettings,
 				theDaoRegistry,
 				theReplaceReferencesPatchBundleSvc,
-				theResourceLinkDao,
+				theReferencingResourcesQuerySvc,
 				theHapiTransactionService,
 				theRequestPartitionHelperSvc,
 				theJobCoordinator,

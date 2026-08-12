@@ -31,13 +31,12 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.PartitionedTransactionPartialFailureException;
-import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.PartitionAwareReplaceReferencesResult;
 import ca.uhn.fhir.jpa.provider.PartitionAwareReplaceReferencesSvc;
+import ca.uhn.fhir.jpa.provider.ReferencingResourcesQuerySvc;
 import ca.uhn.fhir.merge.MergeChangeType;
 import ca.uhn.fhir.merge.MergeProvenanceGroupValue;
 import ca.uhn.fhir.merge.MergeResourceHelper;
@@ -67,8 +66,7 @@ import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Stream;
+import java.util.Objects;
 
 import static ca.uhn.fhir.batch2.jobs.merge.MergeAppCtx.JOB_MERGE;
 import static ca.uhn.fhir.merge.MergeResourceHelper.addErrorToOperationOutcome;
@@ -91,7 +89,7 @@ public class ResourceMergeService {
 	private final JpaStorageSettings myStorageSettings;
 	private final DaoRegistry myDaoRegistry;
 	private final ReplaceReferencesPatchBundleSvc myReplaceReferencesPatchBundleSvc;
-	private final IResourceLinkDao myResourceLinkDao;
+	private final ReferencingResourcesQuerySvc myReferencingResourcesQuerySvc;
 	private final IHapiTransactionService myHapiTransactionService;
 	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	private final IFhirResourceDao<Task> myTaskDao;
@@ -106,7 +104,7 @@ public class ResourceMergeService {
 			JpaStorageSettings theStorageSettings,
 			DaoRegistry theDaoRegistry,
 			ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundleSvc,
-			IResourceLinkDao theResourceLinkDao,
+			ReferencingResourcesQuerySvc theReferencingResourcesQuerySvc,
 			IHapiTransactionService theHapiTransactionService,
 			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
 			IJobCoordinator theJobCoordinator,
@@ -120,7 +118,7 @@ public class ResourceMergeService {
 
 		myTaskDao = theDaoRegistry.getResourceDao(Task.class);
 		myReplaceReferencesPatchBundleSvc = theReplaceReferencesPatchBundleSvc;
-		myResourceLinkDao = theResourceLinkDao;
+		myReferencingResourcesQuerySvc = theReferencingResourcesQuerySvc;
 		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 		myJobCoordinator = theJobCoordinator;
 		myBatch2TaskHelper = theBatch2TaskHelper;
@@ -176,13 +174,16 @@ public class ResourceMergeService {
 			IBaseResource sourceResource = mergeValidationResult.sourceResource;
 			IBaseResource targetResource = mergeValidationResult.targetResource;
 
-			validatePartitionAwareMergeAsyncNotSupported(sourceResource, targetResource, theRequestDetails);
+			boolean isPartitionAwareMerge =
+					requiresPartitionAwareMerge(sourceResource, targetResource, theRequestDetails);
+			validatePartitionAwareMergeAsyncNotSupported(isPartitionAwareMerge, theRequestDetails);
 
 			if (theMergeOperationParameters.getPreview()) {
 				handlePreview(
 						sourceResource,
 						targetResource,
 						theMergeOperationParameters,
+						isPartitionAwareMerge,
 						theRequestDetails,
 						theMergeOutcome);
 			} else {
@@ -202,10 +203,11 @@ public class ResourceMergeService {
 			IBaseResource theSourceResource,
 			IBaseResource theTargetResource,
 			MergeOperationInputParameters theMergeOperationParameters,
+			boolean thePartitionAwareMerge,
 			RequestDetails theRequestDetails,
 			MergeOperationOutcome theMergeOutcome) {
 
-		Integer referencingResourceCount = countResourcesReferencingResource(
+		int referencingResourceCount = myReferencingResourcesQuerySvc.countReferencingResourcesAcrossAllPartitions(
 				theSourceResource.getIdElement().toVersionless(), theRequestDetails);
 
 		// in preview mode, we should also return what the target would look like
@@ -215,7 +217,16 @@ public class ResourceMergeService {
 		theMergeOutcome.setUpdatedTargetResource(targetPatientAsIfUpdated);
 
 		// adding +2 because the source and the target resources would be updated as well
-		String diagnosticsMsg = String.format("Merge would update %d resources", referencingResourceCount + 2);
+		String diagnosticsMsg;
+		if (thePartitionAwareMerge) {
+			diagnosticsMsg = String.format(
+					"Merge would update at least %d resources. This counts resources that directly reference the"
+							+ " source resource, plus the source and the target. Additional resources might also be"
+							+ " changed, since this merge may require moving resources across partitions.",
+					referencingResourceCount + 2);
+		} else {
+			diagnosticsMsg = String.format("Merge would update %d resources", referencingResourceCount + 2);
+		}
 		String detailsText = "Preview only merge operation - no issues detected";
 		addInfoToOperationOutcome(myFhirContext, theMergeOutcome.getOperationOutcome(), diagnosticsMsg, detailsText);
 	}
@@ -259,7 +270,8 @@ public class ResourceMergeService {
 
 		Date startTime = new Date();
 
-		boolean partitionAwareMerge = requiresPartitionAwareMerge(theSourceResource, theTargetResource);
+		boolean partitionAwareMerge =
+				requiresPartitionAwareMerge(theSourceResource, theTargetResource, theRequestDetails);
 
 		validateResourceLimit(theMergeOperationParameters, theSourceResource, theRequestDetails, partitionAwareMerge);
 
@@ -415,7 +427,10 @@ public class ResourceMergeService {
 
 		PartitionAwareReplaceReferencesResult copyResult =
 				myPartitionAwareReplaceReferencesSvc.copyCompartmentResourcesAndReplaceReferences(
-						theSourceResource, theTargetResource, theRequestDetails);
+						theSourceResource,
+						theTargetResource,
+						theMergeOperationParameters.getResourceLimit(),
+						theRequestDetails);
 		copyResult.getCreatedResourceIdsByPartition().values().forEach(thePossiblyCommittedResourceIds::addAll);
 		copyResult.getUpdatedResourceIdsByPartition().values().forEach(thePossiblyCommittedResourceIds::addAll);
 
@@ -669,13 +684,6 @@ public class ResourceMergeService {
 		addInfoToOperationOutcome(myFhirContext, theMergeOutcome.getOperationOutcome(), null, detailsText);
 	}
 
-	private Integer countResourcesReferencingResource(IIdType theResourceId, RequestDetails theRequestDetails) {
-		return myHapiTransactionService
-				.withRequest(theRequestDetails)
-				.execute(() -> myResourceLinkDao.countResourcesTargetingFhirTypeAndFhirId(
-						theResourceId.getResourceType(), theResourceId.getIdPart()));
-	}
-
 	private List<Bundle> replaceReferencesInNestedTransaction(
 			IBaseResource theSourceResource,
 			IBaseResource theTargetResource,
@@ -689,12 +697,11 @@ public class ResourceMergeService {
 				thePartitionId,
 				false,
 				null);
-		List<IdDt> resourceIds;
-		try (Stream<JpaPid> stream = myResourceLinkDao.streamSourceIdsForTargetFhirId(
-				replaceReferencesRequest.sourceId.getResourceType(), replaceReferencesRequest.sourceId.getIdPart())) {
-			resourceIds =
-					stream.map(pid -> new IdDt(pid.getAssociatedResourceId())).toList();
-		}
+		List<IdDt> resourceIds = myReferencingResourcesQuerySvc
+				.findReferencingResourcePidsAcrossAllPartitions(replaceReferencesRequest.sourceId, theRequestDetails)
+				.stream()
+				.map(pid -> new IdDt(pid.getAssociatedResourceId()))
+				.toList();
 		Bundle result = myReplaceReferencesPatchBundleSvc.patchReferencingResourcesInNestedTransaction(
 				replaceReferencesRequest, resourceIds, theRequestDetails);
 		return List.of(result);
@@ -709,8 +716,8 @@ public class ResourceMergeService {
 	}
 
 	private void validatePartitionAwareMergeAsyncNotSupported(
-			IBaseResource theSourceResource, IBaseResource theTargetResource, RequestDetails theRequestDetails) {
-		if (requiresPartitionAwareMerge(theSourceResource, theTargetResource) && theRequestDetails.isPreferAsync()) {
+			boolean thePartitionAwareMerge, RequestDetails theRequestDetails) {
+		if (thePartitionAwareMerge && theRequestDetails.isPreferAsync()) {
 			throw new NotImplementedOperationException(Msg.code(2881)
 					+ "This merge must be performed synchronously and does not support asynchronous processing.");
 		}
@@ -721,7 +728,7 @@ public class ResourceMergeService {
 			IBaseResource theSourceResource,
 			RequestDetails theRequestDetails,
 			boolean thePartitionAwareMerge) {
-		Integer referencingResourceCount = countResourcesReferencingResource(
+		int referencingResourceCount = myReferencingResourcesQuerySvc.countReferencingResourcesAcrossAllPartitions(
 				theSourceResource.getIdElement().toVersionless(), theRequestDetails);
 		if (referencingResourceCount > theMergeOperationParameters.getResourceLimit()) {
 			String message = "Number of resources with references to "
@@ -735,23 +742,31 @@ public class ResourceMergeService {
 		}
 	}
 
-	private boolean requiresPartitionAwareMerge(IBaseResource theSourceResource, IBaseResource theTargetResource) {
+	private boolean requiresPartitionAwareMerge(
+			IBaseResource theSourceResource, IBaseResource theTargetResource, RequestDetails theRequestDetails) {
 		if (!myPartitionSettings.isPartitioningEnabled()) {
 			return false;
 		}
-		// The regular replace-references path only discovers referrers within a single partition. When
-		// all-partition search is not supported, referrers can live on shards it never queries, so for now we
-		// route even same-partition merges through the partition-aware path.
-		return isCrossPartitionMerge(theSourceResource, theTargetResource)
-				|| !myPartitionSettings.isAllPartitionSearchSupported();
-	}
-
-	private boolean isCrossPartitionMerge(IBaseResource theSourceResource, IBaseResource theTargetResource) {
-		if (!myPartitionSettings.isPartitioningEnabled()) {
-			return false;
+		// When all-partition search is unsupported, the regular replace-references path reaches only one
+		// database, so it misses referrers in the others, and it patches in place though a compartment referrer
+		// must change partitions once its reference is rewritten. Both need the partition-aware path, so route
+		// every merge through it, not just cross-partition ones.
+		// TODO: either add all-partition support to the regular replace-references path, or merge the
+		// two paths so that the partition-aware path handles all cases.
+		if (!myPartitionSettings.isAllPartitionSearchSupported()) {
+			return true;
 		}
-		Optional<RequestPartitionId> srcPart = RequestPartitionId.getPartitionFromUserDataIfPresent(theSourceResource);
-		Optional<RequestPartitionId> tgtPart = RequestPartitionId.getPartitionFromUserDataIfPresent(theTargetResource);
-		return srcPart.isPresent() && tgtPart.isPresent() && !srcPart.get().equals(tgtPart.get());
+		// This is the same computation PatientCompartmentEnforcingInterceptor performs, so in Patient ID mode it
+		// detects not only a change of partition but also a change of patient compartment within the same
+		// partition. Such a compartment change requires copying the referring resources too, since otherwise the
+		// enforcer rejects the in-place update.
+		String resourceType = myFhirContext.getResourceType(theSourceResource);
+		RequestPartitionId sourcePartition =
+				myRequestPartitionHelperSvc.determineCreatePartitionForRequestIgnoringCachedPartition(
+						theRequestDetails, theSourceResource, resourceType);
+		RequestPartitionId targetPartition =
+				myRequestPartitionHelperSvc.determineCreatePartitionForRequestIgnoringCachedPartition(
+						theRequestDetails, theTargetResource, resourceType);
+		return !Objects.equals(sourcePartition, targetPartition);
 	}
 }
