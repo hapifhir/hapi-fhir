@@ -1,0 +1,5 @@
+---
+type: security
+issue: 8246
+title: "The `SubscriptionValidationInterceptor` can be subclassed to support custom authorization rules restricting
+who can create or update `Subscription` resources."
