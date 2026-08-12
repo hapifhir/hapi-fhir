@@ -109,6 +109,24 @@ public class ExtensionUtil {
 		setExtension(theFhirContext, ext, theValueType, theValue);
 	}
 
+	// Created by Claude Fable 5
+	/**
+	 * Adds an extension with the specified value if the instance supports extensions; does nothing otherwise,
+	 * unlike {@link #addExtension(FhirContext, IBase, String, String, Object)} which throws.
+	 *
+	 * @param theBase        The resource to update extension on
+	 * @param theUrl         Extension URL
+	 * @param theValueType   Type of the value to set in the extension
+	 * @param theValue       Extension value
+	 * @param theFhirContext The context containing FHIR resource definitions
+	 */
+	public static void addExtensionIfSupported(
+			FhirContext theFhirContext, IBase theBase, String theUrl, String theValueType, Object theValue) {
+		if (theBase instanceof IBaseHasExtensions) {
+			addExtension(theFhirContext, theBase, theUrl, theValueType, theValue);
+		}
+	}
+
 	private static IBaseHasExtensions validateExtensionSupport(IBase theBase) {
 		if (!(theBase instanceof IBaseHasExtensions)) {
 			throw new IllegalArgumentException(

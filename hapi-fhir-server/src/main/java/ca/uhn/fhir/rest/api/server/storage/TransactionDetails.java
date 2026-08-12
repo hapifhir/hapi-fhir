@@ -80,6 +80,7 @@ public class TransactionDetails {
 	private ListMultimap<Pointcut, HookParams> myDeferredInterceptorBroadcasts;
 	private EnumSet<Pointcut> myDeferredInterceptorBroadcastPointcuts;
 	private boolean myFhirTransaction;
+	private boolean myServerConstructedBatchSubRequest;
 	private List<IIdType> myAutoCreatedPlaceholderResources = Collections.emptyList();
 	private IBaseBundle myTransactionBundle;
 
@@ -525,6 +526,19 @@ public class TransactionDetails {
 
 	public void setFhirTransaction(boolean theFhirTransaction) {
 		myFhirTransaction = theFhirTransaction;
+	}
+
+	/**
+	 * Returns {@code true} when the bundle being processed is not the client's own request, but a single-entry
+	 * transaction bundle the server constructed internally to process one entry of a client batch. Hooks that
+	 * reshape client transaction bundles should typically skip such transactions.
+	 */
+	public boolean isServerConstructedBatchSubRequest() {
+		return myServerConstructedBatchSubRequest;
+	}
+
+	public void setServerConstructedBatchSubRequest(boolean theServerConstructedBatchSubRequest) {
+		myServerConstructedBatchSubRequest = theServerConstructedBatchSubRequest;
 	}
 
 	public void addAutoCreatedPlaceholderResource(IIdType theResource) {
