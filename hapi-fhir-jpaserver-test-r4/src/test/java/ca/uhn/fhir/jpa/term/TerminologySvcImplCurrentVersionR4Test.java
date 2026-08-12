@@ -37,10 +37,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -508,29 +508,50 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 	}
 
 	/**
-	 * Validates TermConcepts were created in the sequence indicated by the parameters,
-	 * and their displays match the expected versions
+	 * Validates that exactly one TermConcept exists per expected CodeSystem version, and that each one's
+	 * display matches its version.
+	 * <p>
+	 * Concepts are keyed by CodeSystem version rather than by PID, because they are persisted
+	 * asynchronously by {@link ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl} on a scheduled drain, in a
+	 * different session from the import job. PID order therefore does not necessarily follow upload order.
 	 */
-	private void validateTermConcepts(ArrayList<String> theExpectedVersions) {
-		runInTransaction(() -> {
-		@SuppressWarnings("unchecked")
-			List<TermConcept> termConceptNoVerList = (List<TermConcept>) myEntityManager.createQuery(
-				"from TermConcept where myCode = '" + VS_NO_VERSIONED_ON_UPLOAD_FIRST_CODE + "' order by myId.myId").getResultList();
-			assertEquals(theExpectedVersions.size(), termConceptNoVerList.size());
-			for (int i = 0; i < theExpectedVersions.size(); i++) {
-				assertEquals( prefixWithVersion(theExpectedVersions.get(i), VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY),
-					termConceptNoVerList.get(i).getDisplay(), "TermCode with id: " + i + " display");
-			}
+	private void validateTermConcepts(List<String> theExpectedVersions) {
+		validateTermConceptDisplaysByVersion(
+			VS_NO_VERSIONED_ON_UPLOAD_FIRST_CODE, VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY, theExpectedVersions);
 
+		validateTermConceptDisplaysByVersion(
+			VS_VERSIONED_ON_UPLOAD_FIRST_CODE, VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY, theExpectedVersions);
+	}
+
+	/**
+	 * Asserts that the TermConcepts for theCode are exactly one per expected version, each displaying
+	 * theDisplay prefixed with its own version. Displays are collected into lists per version so that a
+	 * duplicated version surfaces as a readable map difference rather than an exception.
+	 */
+	private void validateTermConceptDisplaysByVersion(
+			String theCode, String theDisplay, List<String> theExpectedVersions) {
+
+		Map<String, List<String>> expectedDisplaysByVersion = theExpectedVersions.stream()
+			.collect(Collectors.toMap(
+				version -> version,
+				version -> List.of(prefixWithVersion(version, theDisplay))));
+
+		Map<String, List<String>> actualDisplaysByVersion = runInTransaction(() -> {
 			@SuppressWarnings("unchecked")
-			List<TermConcept> termConceptWithVerList = (List<TermConcept>) myEntityManager.createQuery(
-				"from TermConcept where myCode = '" + VS_VERSIONED_ON_UPLOAD_FIRST_CODE + "' order by myId.myId").getResultList();
-			assertEquals(theExpectedVersions.size(), termConceptWithVerList.size());
-			for (int i = 0; i < theExpectedVersions.size(); i++) {
-				assertEquals( prefixWithVersion(theExpectedVersions.get(i), VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY),
-					termConceptWithVerList.get(i).getDisplay(), "TermCode with id: " + i + " display");
-			}
+			List<TermConcept> concepts = myEntityManager.createQuery(
+					"select tc from TermConcept tc join fetch tc.myCodeSystem tcsv where tc.myCode = :code")
+				.setParameter("code", theCode)
+				.getResultList();
+
+			return concepts.stream()
+				.collect(Collectors.groupingBy(
+					concept -> concept.getCodeSystemVersion().getCodeSystemVersionId(),
+					Collectors.mapping(TermConcept::getDisplay, Collectors.toList())));
 		});
+
+		assertThat(actualDisplaysByVersion)
+			.as("TermConcept displays by CodeSystem version for code: %s", theCode)
+			.containsExactlyInAnyOrderEntriesOf(expectedDisplaysByVersion);
 	}
 
 
