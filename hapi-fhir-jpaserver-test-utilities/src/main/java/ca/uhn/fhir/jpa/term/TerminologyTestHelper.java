@@ -97,8 +97,7 @@ public class TerminologyTestHelper {
 			Batch2JobHelper theBatch2JobHelper,
 			MemoryCacheService theMemoryCacheService,
 			IValidationSupport theValidationSupport,
-			ITermDeferredStorageSvc theITermDeferredStorageSvc
-	) {
+			ITermDeferredStorageSvc theITermDeferredStorageSvc) {
 		myJobPersistence = theJobPersistence;
 		myJobCoordinator = theJobCoordinator;
 		myBatch2JobHelper = theBatch2JobHelper;
