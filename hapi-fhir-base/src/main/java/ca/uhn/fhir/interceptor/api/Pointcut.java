@@ -2118,7 +2118,7 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 *
-	 * @since FIXME-TG update after version bump
+	 * @since 8.11.20
 	 */
 	STORAGE_TRANSACTION_RESPONSE_ASSEMBLED(
 			void.class,
@@ -2155,7 +2155,7 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 *
-	 * @since FIXME-TG update after version bump
+	 * @since 8.11.20
 	 */
 	STORAGE_TRANSACTION_RESPONSE_FINALIZED(
 			void.class,

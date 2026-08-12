@@ -31,7 +31,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
  * fully assembled response bundle, so hooks can inspect or adjust the response entries before the response is
  * returned to the caller.
  *
- * @since FIXME-TG update after version bump
+ * @since 8.11.20
  */
 public class TransactionResponseAssembledDetails {
 

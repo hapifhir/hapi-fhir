@@ -31,7 +31,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
  * finalized response bundle — aggregated across sub-transactions when processing was split — so hooks can inspect
  * or adjust the complete response before it is returned to the caller.
  *
- * @since FIXME-TG update after version bump
+ * @since 8.11.20
  */
 public class TransactionResponseFinalizedDetails {
 
