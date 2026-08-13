@@ -54,18 +54,16 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
+import ca.uhn.fhir.storage.PlaceholderResourceUtil;
 import ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceTargetRequest;
 import ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceTargetResponse;
 import ca.uhn.fhir.util.CanonicalIdentifier;
-import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.TerserUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -295,9 +293,8 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 			String resName = missingResourceDef.getName();
 
 			@SuppressWarnings("unchecked")
-			T newResource = (T) missingResourceDef.newInstance();
-
-			tryToAddPlaceholderExtensionToResource(newResource);
+			T newResource =
+					(T) PlaceholderResourceUtil.buildPlaceholderResource(myContext, missingResourceDef, List.of());
 
 			IFhirResourceDao<T> placeholderResourceDao = myDaoRegistry.getResourceDao(theType);
 			ourLog.debug(
@@ -403,14 +400,6 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 				+ UrlUtil.escapeUrlParam(theIdentifier.getValueElement().getValue());
 	}
 
-	private <T extends IBaseResource> void tryToAddPlaceholderExtensionToResource(T newResource) {
-		if (newResource instanceof IBaseHasExtensions) {
-			IBaseExtension<?, ?> extension = ((IBaseHasExtensions) newResource).addExtension();
-			extension.setUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER);
-			extension.setValue(myContext.newPrimitiveBoolean(true));
-		}
-	}
-
 	/**
 	 * This method returns false if the reference contained a conditional reference, but
 	 * the reference couldn't be resolved into one or more identifiers (and only one or
@@ -423,7 +412,11 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 		if (urlValue.contains("?")) {
 			referenceMatchUrlIdentifiers = extractIdentifierFromUrl(urlValue);
 			for (CanonicalIdentifier identifier : referenceMatchUrlIdentifiers) {
-				addMatchUrlIdentifierToTargetResource(theTargetResourceDef, theTargetResource, identifier);
+				TerserUtil.addIdentifierToResource(
+						myContext,
+						theTargetResource,
+						identifier.getSystemElement().getValueAsString(),
+						identifier.getValueElement().getValueAsString());
 			}
 
 			if (referenceMatchUrlIdentifiers.isEmpty()) {
@@ -460,34 +453,6 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId<?>> impleme
 						theIBase -> targetIdentifier.getMutator().addValue(theTargetResource, theIBase));
 			}
 		}
-	}
-
-	private <T extends IBaseResource> void addMatchUrlIdentifierToTargetResource(
-			RuntimeResourceDefinition theTargetResourceDef,
-			T theTargetResource,
-			CanonicalIdentifier referenceMatchUrlIdentifier) {
-		BaseRuntimeChildDefinition identifierDefinition = theTargetResourceDef.getChildByName("identifier");
-		IBase identifierIBase = identifierDefinition
-				.getChildByName("identifier")
-				.newInstance(identifierDefinition.getInstanceConstructorArguments());
-		IBase systemIBase = TerserUtil.newElement(
-				myContext, "uri", referenceMatchUrlIdentifier.getSystemElement().getValueAsString());
-		IBase valueIBase = TerserUtil.newElement(
-				myContext,
-				"string",
-				referenceMatchUrlIdentifier.getValueElement().getValueAsString());
-		// Set system in the IBase Identifier
-
-		BaseRuntimeElementDefinition<?> elementDefinition = myContext.getElementDefinition(identifierIBase.getClass());
-
-		BaseRuntimeChildDefinition systemDefinition = elementDefinition.getChildByName("system");
-		systemDefinition.getMutator().setValue(identifierIBase, systemIBase);
-
-		BaseRuntimeChildDefinition valueDefinition = elementDefinition.getChildByName("value");
-		valueDefinition.getMutator().setValue(identifierIBase, valueIBase);
-
-		// Set Value in the IBase identifier
-		identifierDefinition.getMutator().addValue(theTargetResource, identifierIBase);
 	}
 
 	private CanonicalIdentifier extractIdentifierReference(IBaseReference theSourceReference) {
