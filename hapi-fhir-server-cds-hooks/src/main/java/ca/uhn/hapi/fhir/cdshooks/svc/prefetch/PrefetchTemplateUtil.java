@@ -201,8 +201,11 @@ public class PrefetchTemplateUtil {
 		final String key = m.group(1);
 		final String expression = m.group(2);
 		try {
-			final List<IBase> results =
-					evaluateFhirPathOnKey(theContext.getResource(key), key, expression, theFhirContext);
+			final IBaseResource resource = theContext.getResource(key);
+			if (resource == null) {
+				return new PartResolutionResult.Success(List.of());
+			}
+			final List<IBase> results = evaluateFhirPathOnKey(resource, key, expression, theFhirContext);
 			final List<String> values = convertPrimitiveResultsToString(results, key);
 			return new PartResolutionResult.Success(values);
 		} catch (ClassCastException e) {
