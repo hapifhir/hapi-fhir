@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
+import ca.uhn.fhir.storage.TransactionBundleNormalizer;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
@@ -679,7 +680,7 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 			myPartitionSettings.setDefaultPartitionId(-1);
 			// PATIENT_ID mode: partition derived from patient ID via default algorithm
 			myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(
-					getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
+					getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry, myTransactionBundleNormalizer);
 			myInterceptorRegistry.registerInterceptor(myPatientIdPartitionInterceptor);
 		}
 
@@ -757,7 +758,7 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 			myPartitionSettings.setDefaultPartitionId(-1);
 			// BUCKETED_PATIENT_ID mode: patients hashed into a small number of buckets
 			myPatientIdPartitionInterceptor = new SmallBucketPatientIdPartitionInterceptor(
-					getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
+					getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry, myTransactionBundleNormalizer);
 			myInterceptorRegistry.registerInterceptor(myPatientIdPartitionInterceptor);
 		}
 
@@ -834,8 +835,14 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 				FhirContext theFhirContext,
 				ISearchParamExtractor theSearchParamExtractor,
 				PartitionSettings thePartitionSettings,
-				DaoRegistry theDaoRegistry) {
-			super(theFhirContext, theSearchParamExtractor, thePartitionSettings, theDaoRegistry);
+				DaoRegistry theDaoRegistry,
+				TransactionBundleNormalizer theTransactionBundleNormalizer) {
+			super(
+					theFhirContext,
+					theSearchParamExtractor,
+					thePartitionSettings,
+					theDaoRegistry,
+					theTransactionBundleNormalizer);
 		}
 
 		@Override
