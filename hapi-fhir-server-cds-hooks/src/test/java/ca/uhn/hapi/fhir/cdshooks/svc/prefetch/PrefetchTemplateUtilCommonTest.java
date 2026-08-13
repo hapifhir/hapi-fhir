@@ -118,9 +118,11 @@ class PrefetchTemplateUtilCommonTest {
 		final String template = "Patient?id={{context.encounter.id}}";
 		final CdsServiceRequestJson request = new CdsServiceRequestJson();
 		request.addContext("encounter", "not-a-resource");
-		// execute & validate — getResource() does a raw cast; ClassCastException propagates as-is
+		// execute & validate
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, request, ourFhirContext))
-				.isInstanceOf(ClassCastException.class);
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining("did not provide a valid")
+				.hasMessageContaining("encounter");
 	}
 
 }

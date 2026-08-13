@@ -347,6 +347,7 @@ class PrefetchTemplateUtilR4Test {
 		// execute & validate
 		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, request, ourFhirContext))
 				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining(Msg.code(2856))
 				.hasMessageContaining("No result was found for the prefetch query.");
 	}
 
@@ -522,6 +523,24 @@ class PrefetchTemplateUtilR4Test {
 		final String actual = PrefetchTemplateUtil.substituteTemplate(template, cdsServiceRequestJson, ourFhirContext);
 		// validate
 		assertThat(actual).isEqualTo("PractitionerRole?_id=" + PRACTITIONER_ROLE_ID);
+	}
+
+	@Test
+	@DisplayName("Should throw no-result error when a resolve() reference contains an unknown resource type")
+	void substituteTemplate_withContextResourceReferencingUnknownResourceType_shouldThrow() {
+		// setup — DeviceRequest references UnknownResource/1; resolve() triggers resolveAsIdOnlyStub
+		// which returns null for unknown types (matching the IFhirPathEvaluationContext contract),
+		// so the FhirPath engine produces no result and the template throws the generic no-result error.
+		final DeviceRequest deviceRequest = new DeviceRequest();
+		deviceRequest.setCode(new Reference("UnknownResource/1"));
+		final String template = "Device?_id={{context.deviceRequest.code.resolve().as(Device).id}}";
+		final CdsServiceRequestJson request = new CdsServiceRequestJson();
+		request.addContext("deviceRequest", deviceRequest);
+		// execute & validate
+		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, request, ourFhirContext))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining(Msg.code(2856))
+				.hasMessageContaining("No result was found for the prefetch query.");
 	}
 
 	@Nonnull

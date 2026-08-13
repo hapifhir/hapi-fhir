@@ -37,6 +37,8 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +46,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PrefetchTemplateUtil {
+	private static final Logger ourLog = LoggerFactory.getLogger(PrefetchTemplateUtil.class);
 	private static final Pattern SURROUNDING_CURLY_BRACES_PART = Pattern.compile("\\{\\{([^}]+)}}");
 	private static final Pattern DA_VINCI_PART = Pattern.compile("^context\\.(\\w+)\\.(\\w+)\\.id$");
 	private static final Pattern DEFAULT_PART = Pattern.compile("^context\\.(\\w+)$");
@@ -105,7 +108,7 @@ public class PrefetchTemplateUtil {
 					+ m.key() + ">.  Available keys in context are: " + m.availableKeys());
 		}
 		if (firstMissingKey instanceof PartResolutionResult.MissingPrefetchKey m) {
-			throw new InvalidRequestException(Msg.code(2861) + "Prefetch did not provide a value for key <" + m.key()
+			throw new InvalidRequestException(Msg.code(3030) + "Prefetch did not provide a value for key <" + m.key()
 					+ ">.  Available keys in prefetch are: " + m.availableKeys());
 		}
 		throw new InvalidRequestException(Msg.code(2856) + "Unable to resolve prefetch template : " + theRawExpression
@@ -197,9 +200,15 @@ public class PrefetchTemplateUtil {
 		}
 		final String key = m.group(1);
 		final String expression = m.group(2);
-		final List<IBase> results = evaluateFhirPathOnKey(theContext.getResource(key), key, expression, theFhirContext);
-		final List<String> values = convertPrimitiveResultsToString(results, key);
-		return new PartResolutionResult.Success(values);
+		try {
+			final List<IBase> results =
+					evaluateFhirPathOnKey(theContext.getResource(key), key, expression, theFhirContext);
+			final List<String> values = convertPrimitiveResultsToString(results, key);
+			return new PartResolutionResult.Success(values);
+		} catch (ClassCastException e) {
+			throw new InvalidRequestException(Msg.code(2858) + "Request context did not provide a valid "
+					+ theFhirContext.getVersion().getVersion() + " resource for template key <" + key + ">");
+		}
 	}
 
 	@Nonnull
@@ -310,9 +319,11 @@ public class PrefetchTemplateUtil {
 			stub.setId(theReference);
 			return stub;
 		} catch (DataFormatException e) {
-			throw new InvalidRequestException(Msg.code(2862)
-					+ "Unknown resource type '" + resourceType + "' encountered while resolving reference: "
-					+ theReference.getValue());
+			ourLog.warn(
+					"Unknown resource type '{}' encountered while resolving reference: {}. Returning null.",
+					resourceType,
+					theReference.getValue());
+			return null;
 		}
 	}
 }

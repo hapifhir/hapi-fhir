@@ -34,6 +34,7 @@ import ca.uhn.hapi.fhir.cdshooks.api.ICdsHooksDaoAuthorizationSvc;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceMethod;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.prefetch.CdsHookPrefetchPointcutContextJson;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -264,8 +265,9 @@ public class CdsPrefetchSvc {
 		return resource;
 	}
 
+	@Nonnull
 	public Set<String> findMissingPrefetch(
-			CdsServiceJson theServiceSpec, CdsServiceRequestJson theCdsServiceRequestJson) {
+			@Nonnull CdsServiceJson theServiceSpec, @Nonnull CdsServiceRequestJson theCdsServiceRequestJson) {
 		Set<String> expectedPrefetchKeys = theServiceSpec.getPrefetch().keySet();
 		Set<String> actualPrefetchKeys = theCdsServiceRequestJson.getPrefetchKeys();
 		Set<String> retval = new LinkedHashSet<>(expectedPrefetchKeys);
