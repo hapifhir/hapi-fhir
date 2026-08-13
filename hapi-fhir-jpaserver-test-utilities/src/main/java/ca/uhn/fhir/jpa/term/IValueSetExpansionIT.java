@@ -436,13 +436,13 @@ public interface IValueSetExpansionIT {
 			ValueSet expanded = doSuccessfulValueSetExpansionTest(codeSystem, valueSet);
 
 			assertTrue(
-				expanded.getExpansion().getContains().stream()
-					.anyMatch(c -> c.getCode().equals(CODE_SYSTEM_CODE)),
-				String.join(
-					", ",
 					expanded.getExpansion().getContains().stream()
-						.map(c -> c.getSystem() + "|" + c.getCode())
-						.collect(Collectors.toSet())));
+							.anyMatch(c -> c.getCode().equals(CODE_SYSTEM_CODE)),
+					String.join(
+							", ",
+							expanded.getExpansion().getContains().stream()
+									.map(c -> c.getSystem() + "|" + c.getCode())
+									.collect(Collectors.toSet())));
 		} finally {
 			getJpaStorageSettings().setPreExpandValueSets(preExpand);
 		}
