@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 9139
+title: "CDS Hooks prefetch templates using the %prefetchKey.fhirpath syntax to reference a previously-resolved
+  prefetch entry now correctly resolve. Previously, these expressions always produced no result because
+  the template substitution was looking into CDS hook request context."
