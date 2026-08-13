@@ -1,12 +1,9 @@
 ---
 type: security
 issue: 8228
-title: "PackageLoaderSvc now has the ability to configure a whitelist for
-    allowed URLs (prefixes) for loading IGs and other npm packages.
-    By default (ie, without configuration), this is set to \"*\" (all
-    urls).
-    But a configurer can (and should!) configure a proper allow list
-    by implementing new IPackageUrlAllowListProvider bean.
-    NB: even if provided, urls are constricted to only allow
-    'file:', 'classpath:', and 'http/https:' for security reasons.
+title: "`PackageLoaderSvc` can now be configured with an allow list of URL prefixes that
+  are permitted when loading Implementation Guides and other NPM packages. The allow list
+  is supplied by providing an `IPackageUrlAllowListProvider` bean; when none is provided,
+  all URLs are permitted (equivalent to `*`). Regardless of the configured allow list, package URLs are
+  always restricted to the `file:`, `classpath:`, `http:`, and `https:` schemes.
 "
