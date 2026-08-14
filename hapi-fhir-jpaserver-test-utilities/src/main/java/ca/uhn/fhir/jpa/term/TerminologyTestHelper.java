@@ -309,7 +309,6 @@ public class TerminologyTestHelper {
 
 		if (expectSuccess) {
 			myBatch2JobHelper.awaitJobCompletion(instanceId);
-			myITerminologyDeferredSvc.saveAllDeferred();
 		} else {
 			myBatch2JobHelper.awaitJobFailure(instanceId);
 		}
