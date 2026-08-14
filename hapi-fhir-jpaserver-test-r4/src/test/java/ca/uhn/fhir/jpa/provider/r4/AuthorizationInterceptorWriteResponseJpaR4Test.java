@@ -62,7 +62,8 @@ class AuthorizationInterceptorWriteResponseJpaR4Test extends BaseResourceProvide
 	}
 
 	private FhirHttpRequest request(String thePath) {
-		return FhirHttpRequest.to(ourHttpClient.getClient(), myFhirContext, myServerBase + thePath);
+		return FhirHttpRequest.to(ourHttpClient.getClient(), myFhirContext, myServerBase + thePath)
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
 	}
 
 	private FhirHttpResponse patchObservation(String thePreferReturn) {
@@ -113,15 +114,23 @@ class AuthorizationInterceptorWriteResponseJpaR4Test extends BaseResourceProvide
 			}
 
 			@Test
-			void patch_writeOnlyOnStoredBundleResource_returnsForbidden() {
+			void patch_writeOnlyOnStoredBundleResource_returnsSameVerdictAsReadOfSameBundle() {
 				IIdType bundleId = setupBundle();
 
-				String body  = request("/Bundle/" + bundleId.getIdPart()).patch("""
+				FhirHttpResponse patchResponse = request("/Bundle/" + bundleId.getIdPart()).patch("""
 						[ { "op": "replace", "path": "/entry/0/resource/status", "value": "amended" } ]
-					""").assertStatus(403).getBody();
+					""");
+				FhirHttpResponse readResponse = request("/Bundle/" + bundleId.getIdPart()).get();
 
-				assertThat(body)
-					.as("the stored resource body must not be disclosed to a caller without read scope")
+				assertThat(patchResponse.getStatusCode())
+					.as("a PATCH of a stored Bundle must be authorized exactly as a plain read of it")
+					.isEqualTo(readResponse.getStatusCode())
+					.isEqualTo(403);
+				assertThat(patchResponse.getBody())
+					.as("the stored resource body must not be disclosed via PATCH to a caller without read scope")
+					.doesNotContain(BUNDLE_OBSERVATION_SECRET_CODE);
+				assertThat(readResponse.getBody())
+					.as("nor via a plain read")
 					.doesNotContain(BUNDLE_OBSERVATION_SECRET_CODE);
 			}
 		}
@@ -140,21 +149,29 @@ class AuthorizationInterceptorWriteResponseJpaR4Test extends BaseResourceProvide
 
 				assertThat(body)
 					.as("the returned body should be the full Observation resource")
-					.startsWith("<Observation")
+					.contains("\"resourceType\":\"Observation\"")
 					.contains("SECRET-DIAGNOSIS")
 					.contains(myPatientId.getIdPart());
 			}
 
 			@Test
-			void patch_readAndWriteOnStoredBundleResource_returnsSuccess() {
+			void patch_readAndWriteOnStoredBundleResource_returnsSameVerdictAsReadOfSameBundle() {
 				IIdType bundleId = setupBundle();
 
-				String body  = request("/Bundle/" + bundleId.getIdPart()).patch("""
+				FhirHttpResponse patchResponse = request("/Bundle/" + bundleId.getIdPart()).patch("""
 						[ { "op": "replace", "path": "/entry/0/resource/status", "value": "amended" } ]
-					""").assertStatus(200).getBody();
+					""");
+				FhirHttpResponse readResponse = request("/Bundle/" + bundleId.getIdPart()).get();
 
-				assertThat(body)
-					.as("The returned body should be the full Bundle resource")
+				assertThat(patchResponse.getStatusCode())
+					.as("a PATCH of a stored Bundle must be authorized exactly as a plain read of it")
+					.isEqualTo(readResponse.getStatusCode())
+					.isEqualTo(200);
+				assertThat(patchResponse.getBody())
+					.as("the PATCH response should contain the full Bundle resource")
+					.contains(BUNDLE_OBSERVATION_SECRET_CODE);
+				assertThat(readResponse.getBody())
+					.as("as should a plain read")
 					.contains(BUNDLE_OBSERVATION_SECRET_CODE);
 			}
 		}
@@ -280,8 +297,8 @@ class AuthorizationInterceptorWriteResponseJpaR4Test extends BaseResourceProvide
 				String body = patchObservation(Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME).assertStatus(200).getBody();
 
 				assertThat(body)
-					.as("the returned body should be the full Observation resource")
-					.startsWith("<OperationOutcome")
+					.as("the returned body should be a status-only OperationOutcome, not the merged resource")
+					.contains("\"resourceType\":\"OperationOutcome\"")
 					.doesNotContain("SECRET-DIAGNOSIS");
 			}
 
