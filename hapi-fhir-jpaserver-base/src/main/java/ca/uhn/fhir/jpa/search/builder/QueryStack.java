@@ -2362,13 +2362,7 @@ public class QueryStack {
 			RuntimeSearchParam theSearchParam,
 			List<? extends IQueryParameterType> theList,
 			RequestPartitionId theRequestPartitionId) {
-
-		if (myPartitionSettings.isPartitioningEnabled() && myPartitionSettings.isIncludePartitionInSearchHashes()) {
-			if (theRequestPartitionId.isAllPartitions()) {
-				throw new PreconditionFailedException(
-						Msg.code(1220) + "This server is not configured to support search against all partitions");
-			}
-		}
+		validateRequestPartition(theRequestPartitionId);
 
 		List<IQueryParameterType> tokens = new ArrayList<>(theList.size());
 		for (IQueryParameterType nextOr : theList) {
@@ -2579,13 +2573,7 @@ public class QueryStack {
 		RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(
 				theResourceName, theParamName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 		if (nextParamDef != null) {
-
-			if (myPartitionSettings.isPartitioningEnabled() && myPartitionSettings.isIncludePartitionInSearchHashes()) {
-				if (theRequestPartitionId.isAllPartitions()) {
-					throw new PreconditionFailedException(
-							Msg.code(1220) + "This server is not configured to support search against all partitions");
-				}
-			}
+			validateRequestPartition(theRequestPartitionId);
 
 			switch (nextParamDef.getParamType()) {
 				case DATE:
@@ -2818,6 +2806,15 @@ public class QueryStack {
 		}
 
 		return toAndPredicate(andPredicates);
+	}
+
+	private void validateRequestPartition(RequestPartitionId theRequestPartitionId) {
+		if (myPartitionSettings.isPartitioningEnabled() && myPartitionSettings.isIncludePartitionInSearchHashes()) {
+			if (theRequestPartitionId.isAllPartitions()) {
+				throw new PreconditionFailedException(
+						Msg.code(1220) + "This server is not configured to support search against all partitions");
+			}
+		}
 	}
 
 	/**
