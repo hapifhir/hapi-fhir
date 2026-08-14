@@ -1121,7 +1121,7 @@
 		<swagger_jakarta_version>2.2.30</swagger_jakarta_version>
 		<slf4j_version>2.0.16</slf4j_version>
 		<log4j_to_slf4j_version>2.24.1</log4j_to_slf4j_version>
-		<spring_version>6.2.18</spring_version>
+		<spring_version>6.2.19</spring_version>
 		<spring_data_bom_version>2025.0.13</spring_data_bom_version>
 		<spring_framework_bom_version>6.2.19</spring_framework_bom_version>
 		<spring_boot_version>3.5.15</spring_boot_version>
@@ -1572,13 +1572,13 @@
 			<dependency>
 				<groupId>org.elasticsearch.client</groupId>
 				<artifactId>elasticsearch-rest-client</artifactId>
-				<version>8.19.9</version>
+				<version>8.19.19</version>
 			</dependency>
 			<!-- Pinned for CVE-2025-68384, used by hibernate_search v7.2.1 -->
 			<dependency>
 				<groupId>org.elasticsearch.client</groupId>
 				<artifactId>elasticsearch-rest-client-sniffer</artifactId>
-				<version>8.19.9</version>
+				<version>8.19.19</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.code.gson</groupId>
