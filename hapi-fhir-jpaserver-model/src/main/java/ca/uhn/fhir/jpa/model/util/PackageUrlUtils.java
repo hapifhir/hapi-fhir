@@ -19,6 +19,10 @@
  */
 package ca.uhn.fhir.jpa.model.util;
 
+import org.hl7.fhir.utilities.http.ManagedWebAccessUtils;
+
+import java.io.IOException;
+
 /**
  * Vocabulary for the entries of a package URL allow list, as consumed by the
  * package loader.
@@ -29,7 +33,7 @@ package ca.uhn.fhir.jpa.model.util;
  * loader implementation.
  */
 // Created by Claude Opus 5
-public class PackageUrlConstants {
+public class PackageUrlUtils {
 
 	/**
 	 * An allow list entry which permits every URL, both local and remote.
@@ -50,5 +54,29 @@ public class PackageUrlConstants {
 	 */
 	public static final String CLASSPATH_PREFIX = "classpath:";
 
-	private PackageUrlConstants() {}
+	/**
+	 * Check if a given URL is a private network url or not.
+	 * *
+	 * NB: do not use this method if it's to be called frequently.
+	 * Try to minimize to only low-traffic paths
+	 *
+	 * @param theUrl - the url to check
+	 * @return - true if a local address; false otherwise
+	 */
+	public static boolean isUrlPrivateNetwork(String theUrl) {
+		try {
+			/*
+			 * underlying method uses "throw exception"...
+			 * we're doing a try catch which is an anti-pattern.
+			 *
+			 * but the only caller of this method is done at setup so maybe ok
+			 */
+			ManagedWebAccessUtils.throwExceptionIfLiteralIpAndNonPublicAddress(theUrl);
+		} catch (IOException ex) {
+			return false;
+		}
+		return true;
+	}
+
+	private PackageUrlUtils() {}
 }

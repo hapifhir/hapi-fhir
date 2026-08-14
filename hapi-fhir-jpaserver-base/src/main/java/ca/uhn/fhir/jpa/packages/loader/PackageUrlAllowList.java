@@ -34,9 +34,9 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
 
-import static ca.uhn.fhir.jpa.model.util.PackageUrlConstants.CLASSPATH_PREFIX;
-import static ca.uhn.fhir.jpa.model.util.PackageUrlConstants.FILE_PREFIX;
-import static ca.uhn.fhir.jpa.model.util.PackageUrlConstants.WILDCARD;
+import static ca.uhn.fhir.jpa.model.util.PackageUrlUtils.CLASSPATH_PREFIX;
+import static ca.uhn.fhir.jpa.model.util.PackageUrlUtils.FILE_PREFIX;
+import static ca.uhn.fhir.jpa.model.util.PackageUrlUtils.WILDCARD;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class PackageUrlAllowList {
@@ -88,9 +88,6 @@ public class PackageUrlAllowList {
 	}
 
 	/**
-	 * Checks if the url is:
-	 * * not blank
-	 * * in
 	 * returns true if it's in the whitelist (and not blank), or if the
 	 * whitelist includes all urls.
 	 * returns false otherwise
@@ -128,9 +125,7 @@ public class PackageUrlAllowList {
 		if (theUrl.toLowerCase().startsWith(CLASSPATH_PREFIX)) {
 			return myLocalPrefixes.stream()
 					.filter(url -> url.startsWith(CLASSPATH_PREFIX))
-					.anyMatch(url -> {
-						return isPathPrefix(url, theUrl);
-					});
+					.anyMatch(url -> isPathPrefix(url, theUrl));
 		}
 
 		try {
@@ -142,6 +137,7 @@ public class PackageUrlAllowList {
 			return myLocalPrefixes.stream()
 					.filter(url -> !url.startsWith(CLASSPATH_PREFIX))
 					.map(this::toNormalizedPath)
+					.filter(Objects::nonNull)
 					.anyMatch(candidate::startsWith);
 		} catch (IllegalArgumentException ex) {
 			// we hit an invalid url
@@ -161,10 +157,10 @@ public class PackageUrlAllowList {
 		return Paths.get(candidate).toAbsolutePath().normalize();
 	}
 
-	private boolean isPathPrefix(String thePrefixPath, String theCanddiatePath) {
+	private boolean isPathPrefix(String thePrefixPath, String theCandidatePath) {
 		// remove the trailing "/" if present
 		String prefix = Strings.CS.removeEnd(thePrefixPath, "/");
-		String candidate = Strings.CS.removeEnd(StringUtils.defaultIfEmpty(theCanddiatePath, "/"), "/");
+		String candidate = Strings.CS.removeEnd(StringUtils.defaultIfEmpty(theCandidatePath, "/"), "/");
 
 		String canonPrefix = canonicalizeClasspath(prefix);
 		String canonCandidate = canonicalizeClasspath(candidate);

@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.packages.loader;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.PackageUrlScheme;
+import ca.uhn.fhir.jpa.model.util.PackageUrlUtils;
 import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -54,7 +55,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.model.util.PackageUrlConstants.WILDCARD;
+import static ca.uhn.fhir.jpa.model.util.PackageUrlUtils.WILDCARD;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class PackageLoaderSvc extends BasePackageCacheManager {
@@ -132,7 +133,7 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 							.authenticationType("none")
 							.type("web")
 							.allowHttp(url.startsWith("http:"))
-							.allowPrivateNetwork(url.contains("localhost"))
+							.allowPrivateNetwork(PackageUrlUtils.isUrlPrivateNetwork(url))
 							.headers(Collections.emptyMap())
 							.build();
 				})
