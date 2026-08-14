@@ -11,6 +11,8 @@ import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.MockInvoker;
+import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.BeforeEach;
@@ -125,5 +127,62 @@ public class SearchParamExtractorServiceTest {
 	@SuppressWarnings("unchecked")
 	private static <T> T unsafeCast(Object theObject) {
 		return (T) theObject;
+	}
+
+	/**
+	 * Test that findContainedResource skips a candidate resource that has no id instead of
+	 * throwing an NPE. This can happen when a resource is embedded in another resource (e.g.
+	 * as a Bundle entry) without ever being assigned an id of its own - which is valid, since
+	 * such a resource can still have its own identity established another way (e.g. a
+	 * Bundle.entry.fullUrl). The candidate should simply be treated as a non-match instead of
+	 * blowing up the whole lookup.
+	 */
+	// Created by Claude Sonnet 5
+	@Test
+	void testFindContainedResource_whenCandidateHasNoId_returnsNullInsteadOfThrowing() throws Exception {
+		// Setup
+		SearchParamExtractorService svc = new SearchParamExtractorService();
+
+		Group candidateWithNoId = new Group();
+		Reference reference = new Reference("Patient/123");
+
+		// Execute - should not throw NullPointerException
+		IBaseResource result = invokeFindContainedResource(svc, List.of(candidateWithNoId), reference);
+
+		// Verify - should return null since no match was found
+		assertThat(result).isNull();
+	}
+
+	/**
+	 * Sanity check that a genuine match is still found correctly, including when it isn't the
+	 * first candidate and an earlier, id-less candidate had to be skipped along the way.
+	 */
+	// Created by Claude Sonnet 5
+	@Test
+	void testFindContainedResource_whenCandidateIdMatchesReference_returnsCandidate() throws Exception {
+		// Setup
+		SearchParamExtractorService svc = new SearchParamExtractorService();
+
+		Group candidateWithNoId = new Group();
+		Group matchingCandidate = new Group();
+		matchingCandidate.setId("123");
+		Reference reference = new Reference("#123");
+
+		// Execute
+		IBaseResource result = invokeFindContainedResource(svc, List.of(candidateWithNoId, matchingCandidate), reference);
+
+		// Verify
+		assertThat(result).isSameAs(matchingCandidate);
+	}
+
+	private static IBaseResource invokeFindContainedResource(
+			SearchParamExtractorService theSvc, Collection<IBaseResource> theResources, IBaseReference theReference) throws Exception {
+		Method method = SearchParamExtractorService.class.getDeclaredMethod(
+			"findContainedResource",
+			Collection.class,
+			IBaseReference.class
+		);
+		method.setAccessible(true);
+		return unsafeCast(method.invoke(theSvc, theResources, theReference));
 	}
 }

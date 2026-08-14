@@ -503,7 +503,7 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 			String referenceString = reference.getReferenceElement().getValue();
 			if (referenceString != null && referenceString.length() > 1) {
 				referenceString = referenceString.substring(1);
-				if (resource.getIdElement().getValue().equals(referenceString)) {
+				if (referenceString.equals(resource.getIdElement().getValue())) {
 					return resource;
 				}
 			}
