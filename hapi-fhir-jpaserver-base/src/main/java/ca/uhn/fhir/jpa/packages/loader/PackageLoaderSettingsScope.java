@@ -50,7 +50,7 @@ public class PackageLoaderSettingsScope implements AutoCloseable {
 	/**
 	 * Never construct directly
 	 * This is created by PackageLoaderSvc.applySettings.
-	 * So this should be always in teh same package as PackageLoaderSvc
+	 * So this should be always in the same package as PackageLoaderSvc
 	 */
 	PackageLoaderSettingsScope(
 			PackageLoaderSettings thePrevious,
