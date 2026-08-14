@@ -127,11 +127,10 @@ public abstract class BaseTokenPredicateBuilder extends BaseSearchParamPredicate
 	}
 
 	/**
-	 * Builds a SQL predicate for a token search parameter indexed against any of several resource
-	 * types, e.g. an unqualified chained search ({@code Provenance?target.identifier=sys|val}).
-	 * Token hashes are resource type qualified, so resolving all types in one call collapses them
-	 * into a single {@code IN (...)} clause instead of one OR'ed equality per type.
-	 *
+	 * Builds a SQL predicate for a token search parameter indexed against several resource types, e.g. an
+	 * unqualified chained search ({@code Provenance?target.identifier=sys|val}). Token hashes are resource
+	 * type qualified, so resolving all types in one call collapses them into a single {@code IN (...)}
+	 * clause instead of one OR'ed equality per type.
 	 */
 	public final Condition createPredicateToken(
 			Collection<IQueryParameterType> theParameters,
