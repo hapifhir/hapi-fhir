@@ -1,0 +1,9 @@
+---
+type: perf
+issue: 8247
+jira: SMILE-12634
+title: "Previously, an unqualified chained token search (e.g. `Provenance?target.identifier=system|value`) generated one
+equality comparison per candidate target type, OR'ed together - over a hundred of them for a `Reference(Any)` search
+parameter. On a large token index this could lead the database to discard the index and read the whole table. All of the
+candidate types are now matched with a single `IN (...)` clause. Token searches supplying several values that share a
+hash column now collapse into one `IN (...)` clause as well."

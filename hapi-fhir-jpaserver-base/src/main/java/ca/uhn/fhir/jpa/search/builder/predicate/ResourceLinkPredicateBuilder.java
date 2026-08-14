@@ -644,6 +644,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		}
 
 		boolean isMeta = ResourceMetaParams.RESOURCE_META_PARAMS.containsKey(chain);
+		List<ChainedTargetType> chainTargets = new ArrayList<>(resourceTypes.size());
 
 		for (String nextType : resourceTypes) {
 
@@ -697,19 +698,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			}
 
 			candidateTargetTypes.add(nextType);
-
-			List<Condition> andPredicates = new ArrayList<>();
-
-			List<List<IQueryParameterType>> chainParamValues = Collections.singletonList(orValues);
-			andPredicates.add(
-					childQueryFactory.searchForIdsWithAndOr(with().setSourceJoinColumn(getJoinColumnsForTarget())
-							.setResourceName(subResourceName)
-							.setParamName(chain)
-							.setAndOrParams(chainParamValues)
-							.setRequest(theRequest)
-							.setRequestPartitionId(theRequestPartitionId)));
-
-			orPredicates.add(QueryParameterUtils.toAndPredicate(andPredicates));
+			chainTargets.add(new ChainedTargetType(subResourceName, param, orValues));
 		}
 
 		if (candidateTargetTypes.isEmpty()) {
@@ -726,17 +715,78 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			warnAboutPerformanceOnUnqualifiedResources(theParamName, theRequest, candidateTargetTypes);
 		}
 
-		// If :not modifier for a token, switch OR with AND in the multi-type case
 		Condition multiTypePredicate;
-		if (paramInverted) {
-			multiTypePredicate = QueryParameterUtils.toAndPredicate(orPredicates);
+		if (canMatchAllTargetTypesWithOneTokenPredicate(remainingChain, isMeta, paramInverted, chainTargets)) {
+			List<String> targetResourceNames =
+					chainTargets.stream().map(ChainedTargetType::resourceName).collect(Collectors.toList());
+			multiTypePredicate = childQueryFactory.createPredicateTokenForMultipleResourceTypes(
+					getJoinColumnsForTarget(),
+					targetResourceNames,
+					chainTargets.get(0).searchParam(),
+					chainTargets.get(0).values(),
+					theRequestPartitionId);
 		} else {
-			multiTypePredicate = QueryParameterUtils.toOrPredicate(orPredicates);
+			for (ChainedTargetType nextTarget : chainTargets) {
+				List<Condition> andPredicates = new ArrayList<>();
+
+				List<List<IQueryParameterType>> chainParamValues = Collections.singletonList(nextTarget.values());
+				andPredicates.add(
+						childQueryFactory.searchForIdsWithAndOr(with().setSourceJoinColumn(getJoinColumnsForTarget())
+								.setResourceName(nextTarget.resourceName())
+								.setParamName(chain)
+								.setAndOrParams(chainParamValues)
+								.setRequest(theRequest)
+								.setRequestPartitionId(theRequestPartitionId)));
+
+				orPredicates.add(QueryParameterUtils.toAndPredicate(andPredicates));
+			}
+
+			// If :not modifier for a token, switch OR with AND in the multi-type case
+			if (paramInverted) {
+				multiTypePredicate = QueryParameterUtils.toAndPredicate(orPredicates);
+			} else {
+				multiTypePredicate = QueryParameterUtils.toOrPredicate(orPredicates);
+			}
 		}
 
 		List<String> pathsToMatch = createResourceLinkPaths(theResourceName, theParamName, theQualifiers);
 		Condition pathPredicate = createPredicateSourcePaths(pathsToMatch);
 		return QueryParameterUtils.toAndPredicate(pathPredicate, multiTypePredicate);
+	}
+
+	/**
+	 * Returns {@code true} when every chain target indexes the chained parameter as a plain token,
+	 * so the whole set can be matched with one token predicate (a single {@code IN (...)} clause).
+	 * Anything needing a different predicate shape (nested chain, meta or non-token parameter, or a modifier
+	 * such as {@code :not} or {@code :text}) falls back to resolving each target type on its own.
+	 */
+	private boolean canMatchAllTargetTypesWithOneTokenPredicate(
+			String theRemainingChain,
+			boolean theIsMeta,
+			boolean theParamInverted,
+			List<ChainedTargetType> theChainTargets) {
+
+		if (theRemainingChain != null || theIsMeta || theParamInverted || theChainTargets.size() <= 1) {
+			return false;
+		}
+
+		for (ChainedTargetType nextTarget : theChainTargets) {
+			RuntimeSearchParam param = nextTarget.searchParam();
+			if (param == null
+					|| param.getParamType() != RestSearchParameterTypeEnum.TOKEN
+					|| QueryStack.LOCATION_POSITION.equals(param.getPath())) {
+				return false;
+			}
+			for (IQueryParameterType nextValue : nextTarget.values()) {
+				if (!(nextValue instanceof TokenParam tokenParam)
+						|| tokenParam.getModifier() != null
+						|| tokenParam.getMissing() != null) {
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 
 	@Nonnull
@@ -1031,4 +1081,10 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 	void setIdHelperServiceForUnitTest(IIdHelperService theIdHelperService) {
 		myIdHelperService = theIdHelperService;
 	}
+
+	/**
+	 * Target type of a chained search, with the chained parameter and values resolved against it.
+	 */
+	private record ChainedTargetType(
+			String resourceName, RuntimeSearchParam searchParam, List<IQueryParameterType> values) {}
 }

@@ -69,6 +69,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
+import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -2975,6 +2976,47 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	}
 
+
+	/**
+	 * An unqualified chained token search fans out to every candidate target type
+	 * ({@code Provenance.target} is a {@code Reference(Any)}). On a partitioned server all of those
+	 * types must still collapse into one {@code PARTITION_ID} predicate plus one {@code IN (...)}
+	 * clause on the token table
+	 */
+	@Test
+	void testSearch_UnqualifiedChainedTokenParam_SearchOnePartitionWithInClause() {
+		IIdType encounterId1 = createEncounter(withCreatePartition(1), withIdentifier("http://system", "123"));
+		IIdType provenanceId1 = createResource("Provenance", withCreatePartition(1), withProvenanceTarget(encounterId1));
+		IIdType encounterId2 = createEncounter(withCreatePartition(2), withIdentifier("http://system", "123"));
+		createResource("Provenance", withCreatePartition(2), withProvenanceTarget(encounterId2));
+
+		addNextTargetPartitionsForRead(1);
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		ReferenceParam target = new ReferenceParam();
+		target.setValueAsQueryToken(myFhirContext, Provenance.SP_TARGET, ".identifier", "http://system|123");
+		map.add(Provenance.SP_TARGET, target);
+
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myProvenanceDao.search(map, mySrd);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
+		assertThat(ids).containsExactly(provenanceId1);
+
+		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().stream()
+			.map(t -> t.getSql(true, false))
+			.filter(t -> t.contains("HFJ_SPIDX_TOKEN"))
+			.findFirst()
+			.orElseThrow(() -> new AssertionError("No query joining HFJ_SPIDX_TOKEN was captured"));
+		ourLog.info("Search SQL:\n{}", searchSql);
+
+		assertThat(searchSql).contains("HASH_SYS_AND_VALUE IN (");
+		assertEquals(1, StringUtils.countMatches(searchSql, "HASH_SYS_AND_VALUE"));
+		// a single partition predicate on the token table, applied once to the whole IN clause
+		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID = '1'"));
+		assertEquals(0, StringUtils.countMatches(searchSql, " OR "));
+	}
 
 	@Test
 	void testSearch_TokenParam_CodeInValueSet() {

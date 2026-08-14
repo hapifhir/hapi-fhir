@@ -71,7 +71,7 @@ public abstract class BasePredicateBuilder {
 	}
 
 	@Nonnull
-	List<String> generatePlaceholders(Collection<?> theValues) {
+	protected List<String> generatePlaceholders(Collection<?> theValues) {
 		return mySearchSqlBuilder.generatePlaceholders(theValues);
 	}
 
