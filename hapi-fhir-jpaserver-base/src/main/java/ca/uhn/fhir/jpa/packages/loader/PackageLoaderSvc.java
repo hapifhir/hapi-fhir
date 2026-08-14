@@ -30,6 +30,7 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import jakarta.annotation.Nullable;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.HttpClientConnectionManager;
@@ -278,13 +279,25 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 			}
 			case HTTPS, HTTP -> {
 				HttpClientConnectionManager connManager = new BasicHttpClientConnectionManager();
+				/*
+				 * we block redirects so that bad actors don't just redirect a 'valid' url
+				 * to a sketchy one
+				 */
 				try (CloseableHttpResponse request = HttpClientBuilder.create()
 						.setConnectionManager(connManager)
+						.disableRedirectHandling()
 						.build()
 						.execute(new HttpGet(thePackageUrl))) {
-					if (request.getStatusLine().getStatusCode() != 200) {
-						throw new ResourceNotFoundException(Msg.code(1303) + "Received HTTP "
-								+ request.getStatusLine().getStatusCode() + " from URL: " + thePackageUrl);
+					int status = request.getStatusLine().getStatusCode();
+					// 308 == permanent redirect + anything later isn't
+					// in our library for codes, so we use 400
+					if (status >= HttpStatus.SC_MULTIPLE_CHOICES && status < HttpStatus.SC_BAD_REQUEST) {
+						throw new InvalidRequestException(Msg.code(3031) + "Received HTTP "
+								+ status + " from url " + thePackageUrl
+								+ ". Redirection is strictly forbidden for package loading.");
+					} else if (status != HttpStatus.SC_OK) {
+						throw new ResourceNotFoundException(
+								Msg.code(1303) + "Received HTTP " + status + " from URL: " + thePackageUrl);
 					}
 					return IOUtils.toByteArray(request.getEntity().getContent());
 				} catch (IOException e) {
