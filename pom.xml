@@ -1960,10 +1960,15 @@
 				<version>1.1.0</version>
 				<scope>test</scope>
 			</dependency>
+			<!--
+				Must stay version-aligned with org.jline:jline, which is pinned in Smile CDR's root pom
+				(Spark Connect pulls jline in transitively there, and both jars ship the same org.jline.* classes).
+				Bump the two together; jline may be pinned forward even when Spark lags behind.
+			-->
 			<dependency>
-				<groupId>org.fusesource.jansi</groupId>
+				<groupId>org.jline</groupId>
 				<artifactId>jansi</artifactId>
-				<version>2.4.1</version>
+				<version>3.29.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.tomcat.embed</groupId>
