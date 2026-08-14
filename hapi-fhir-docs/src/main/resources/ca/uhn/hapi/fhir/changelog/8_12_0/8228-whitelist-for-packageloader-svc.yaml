@@ -6,4 +6,5 @@ title: "The Cluster Manager now restricts the locations from which NPM
       could be loaded from any file, classpath, or remote URL. Administrators
       must now configure an allowlist of permitted URL prefixes via the
       `module.clustermgr.config.package.url.whitelist` setting.
+      
 "

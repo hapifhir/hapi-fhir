@@ -19,9 +19,12 @@
  */
 package ca.uhn.fhir.jpa.model.util;
 
+import okhttp3.Dns;
 import org.hl7.fhir.utilities.http.ManagedWebAccessUtils;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.util.List;
 
 /**
  * Vocabulary for the entries of a package URL allow list, as consumed by the
@@ -71,7 +74,10 @@ public class PackageUrlUtils {
 			 *
 			 * but the only caller of this method is done at setup so maybe ok
 			 */
-			ManagedWebAccessUtils.throwExceptionIfLiteralIpAndNonPublicAddress(theUrl);
+			List<InetAddress> addresses = Dns.SYSTEM.lookup(theUrl);
+			for (InetAddress address : addresses) {
+				ManagedWebAccessUtils.throwExceptionIfNonPublicAddress(address, theUrl);
+			}
 		} catch (IOException ex) {
 			return false;
 		}

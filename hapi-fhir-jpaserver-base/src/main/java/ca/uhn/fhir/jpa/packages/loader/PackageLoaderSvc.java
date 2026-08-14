@@ -290,10 +290,10 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 						.execute(new HttpGet(thePackageUrl))) {
 					int status = request.getStatusLine().getStatusCode();
 					// 308 == permanent redirect + anything later isn't
-					// in our library for codes, so we use 400
+					// in our library for codes, so we use < 400 to catch them instead
 					if (status >= HttpStatus.SC_MULTIPLE_CHOICES && status < HttpStatus.SC_BAD_REQUEST) {
 						throw new InvalidRequestException(Msg.code(3031) + "Received HTTP "
-								+ status + " from url " + thePackageUrl
+								+ status + " from URL " + thePackageUrl
 								+ ". Redirection is strictly forbidden for package loading.");
 					} else if (status != HttpStatus.SC_OK) {
 						throw new ResourceNotFoundException(

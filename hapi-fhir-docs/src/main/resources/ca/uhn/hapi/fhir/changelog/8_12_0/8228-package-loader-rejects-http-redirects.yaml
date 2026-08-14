@@ -1,0 +1,9 @@
+---
+type: security
+issue: 8228
+title: "Package loading no longer follows HTTP redirects. The allowlist is only checked against
+      the URL that is requested, so a redirect from an allowlisted URL could previously fetch the
+      package from a location that is not on the allowlist. Redirect responses now fail with
+      `HAPI-3031` rather than being followed. A registry or mirror that redirects (for example to
+      a CDN) must have the final URL added to the allowlist.
+"
