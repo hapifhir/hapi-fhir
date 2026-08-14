@@ -1,6 +1,6 @@
 ---
-type: fix
+type: security
 issue: 9148
-title: "The HAPI FHIR CLI's console colour library has been migrated from the deprecated org.fusesource.jansi:jansi
-  to its maintained successor, org.jline:jansi, resolving CVE-2026-8484. CLI console output and colour
-  formatting are unchanged."
+title: "The HAPI FHIR CLI's console colour library has been migrated from the deprecated
+  `org.fusesource.jansi:jansi` to its maintained successor, `org.jline:jansi`, resolving CVE-2026-8484. On legacy
+  Windows consoles that relied on logback's Jansi stream wrapping, log colour is no longer translated."

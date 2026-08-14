@@ -1961,9 +1961,9 @@
 				<scope>test</scope>
 			</dependency>
 			<!--
-				Must stay version-aligned with org.jline:jline, which is pinned in Smile CDR's root pom
-				(Spark Connect pulls jline in transitively there, and both jars ship the same org.jline.* classes).
-				Bump the two together; jline may be pinned forward even when Spark lags behind.
+				org.jline:jansi and org.jline:jline ship overlapping copies of org.jline.* classes. Downstream
+				builds that also resolve org.jline:jline must keep the two artifacts at the same version - bump
+				them together. See GL-9148.
 			-->
 			<dependency>
 				<groupId>org.jline</groupId>
