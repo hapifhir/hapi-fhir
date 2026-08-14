@@ -399,6 +399,8 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 		if (resource == null || resource.isHasLinks()) {
 			myResourceLinkDao.deleteByResourceId(theResourceId);
 		}
+
+		myIndexProviderRegistry.getProviders().forEach(provider -> provider.deleteByResourceId(theResourceId));
 	}
 
 	private void expungeHistoricalVersionsOfId(
