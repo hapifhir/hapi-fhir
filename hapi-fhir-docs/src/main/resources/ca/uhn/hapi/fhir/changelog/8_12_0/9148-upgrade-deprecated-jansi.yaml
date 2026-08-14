@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 9148
+title: "The HAPI FHIR CLI's console colour library has been migrated from the deprecated org.fusesource.jansi:jansi
+  to its maintained successor, org.jline:jansi, resolving CVE-2026-8484. CLI console output and colour
+  formatting are unchanged."
