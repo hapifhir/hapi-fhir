@@ -1080,6 +1080,9 @@
 		<jena_version>5.5.0</jena_version>
 		<jersey_version>3.1.11</jersey_version>
 		<jetty_version>12.0.34</jetty_version>
+		<!-- Single bump point for the org.jline artifacts: org.jline:jansi (managed below) and any downstream
+		     pin of org.jline:jline must stay at the same version - see the comment at the jansi entry. -->
+		<jline_version>3.29.0</jline_version>
 		<jsr305_version>3.0.2</jsr305_version>
 		<junit_version>5.11.4</junit_version>
 		<flexmark_version>0.64.8</flexmark_version>
@@ -1963,12 +1966,13 @@
 			<!--
 				org.jline:jansi and org.jline:jline ship overlapping copies of org.jline.* classes. Downstream
 				builds that also resolve org.jline:jline must keep the two artifacts at the same version - bump
-				them together. See GL-9148.
+				them together via the jline_version property (inherited by child builds, so it is the single
+				bump point). See GL-9148.
 			-->
 			<dependency>
 				<groupId>org.jline</groupId>
 				<artifactId>jansi</artifactId>
-				<version>3.29.0</version>
+				<version>${jline_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.tomcat.embed</groupId>
