@@ -15,7 +15,6 @@ HAPI FHIR - Java API for HL7 FHIR Clients and Servers
 [![codecov][Badge-CodeCov]][Link-CodeCov]
 [![Language grade: Java](https://img.shields.io/lgtm/grade/java/g/hapifhir/hapi-fhir.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/hapifhir/hapi-fhir/context:java)
 
-
 ## Documentation and wiki
 
 Complete project documentation is available here:
