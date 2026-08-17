@@ -557,8 +557,19 @@ public class Builder {
 			public class BuilderAddForeignKeyToColumn {
 				private final List<String> myColumnNames;
 
+				private boolean myWithDeleteCascade;
+
 				public BuilderAddForeignKeyToColumn(List<String> theColumnNames) {
 					myColumnNames = theColumnNames;
+				}
+
+				public BuilderAddForeignKeyToColumn withDeleteCascade() {
+					return withDeleteCascade(true);
+				}
+
+				public BuilderAddForeignKeyToColumn withDeleteCascade(boolean theDeleteCascade) {
+					myWithDeleteCascade = theDeleteCascade;
+					return this;
 				}
 
 				public BuilderCompleteTask references(String theForeignTable, String... theForeignColumns) {
@@ -568,6 +579,9 @@ public class Builder {
 					task.setColumnNames(myColumnNames);
 					task.setForeignTableName(theForeignTable);
 					task.setForeignColumnNames(Arrays.asList(theForeignColumns));
+					if (myWithDeleteCascade) {
+						task.withDeleteCascade();
+					}
 					addTask(task);
 					return new BuilderCompleteTask(task);
 				}

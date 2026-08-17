@@ -60,6 +60,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -291,6 +292,23 @@ public class JdbcUtils {
 			String theTableName,
 			@Nullable String theForeignTable)
 			throws SQLException {
+		// so as not to break existing users
+		return getForeignKeysAndDeelteCascadeRule(theConnectionProperties, theTableName, theForeignTable)
+				.keySet();
+	}
+
+	/**
+	 * Same as the above (getForeignKeys)
+	 * but retrieves all foreignkey names and
+	 * whether or not "on delete cascade" is declared.
+	 *
+	 * Of note, the foreign key names will all be uppercase.
+	 */
+	public static Map<String, Boolean> getForeignKeysAndDeelteCascadeRule(
+			DriverTypeEnum.ConnectionProperties theConnectionProperties,
+			String theTableName,
+			@Nullable String theForeignTable)
+			throws SQLException {
 		DataSource dataSource = Objects.requireNonNull(theConnectionProperties.getDataSource());
 
 		try (Connection connection = dataSource.getConnection()) {
@@ -312,14 +330,27 @@ public class JdbcUtils {
 
 					String foreignTable = massageIdentifier(metadata, theForeignTable);
 
-					Set<String> fkNames = new HashSet<>();
+					Map<String, Boolean> fkNames = new HashMap<>();
 					for (String nextParentTable : parentTables) {
 						try (ResultSet indexes = metadata.getCrossReference(
 								catalog, schema, nextParentTable, catalog, schema, foreignTable)) {
 							while (indexes.next()) {
 								String fkName = indexes.getString("FK_NAME");
+								if (fkName == null) {
+									// if a constraint exists and is unnamed, fkName will be null
+									ourLog.warn(
+											"Ignoring unnamed foreign key between {} and {}",
+											nextParentTable,
+											foreignTable);
+									continue;
+								}
+								short deleteRule = indexes.getShort("DELETE_RULE");
+								// wasNull is in regards to previous column read, so we read the DELETE_RULE
+								// first, then check
+								boolean cascades =
+										!indexes.wasNull() && deleteRule == DatabaseMetaData.importedKeyCascade;
 								fkName = fkName.toUpperCase(Locale.US);
-								fkNames.add(fkName);
+								fkNames.put(fkName, cascades);
 							}
 						}
 					}

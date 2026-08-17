@@ -24,7 +24,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
@@ -32,6 +31,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.FhirTerser;
@@ -63,18 +63,18 @@ public class PartitionAwareReplaceReferencesSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(PartitionAwareReplaceReferencesSvc.class);
 
 	private final DaoRegistry myDaoRegistry;
-	private final IResourceLinkDao myResourceLinkDao;
+	private final ReferencingResourcesQuerySvc myReferencingResourcesQuerySvc;
 	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	private final IHapiTransactionService myHapiTransactionService;
 	private final FhirContext myFhirContext;
 
 	public PartitionAwareReplaceReferencesSvc(
 			DaoRegistry theDaoRegistry,
-			IResourceLinkDao theResourceLinkDao,
+			ReferencingResourcesQuerySvc theReferencingResourcesQuerySvc,
 			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
 			IHapiTransactionService theHapiTransactionService) {
 		myDaoRegistry = theDaoRegistry;
-		myResourceLinkDao = theResourceLinkDao;
+		myReferencingResourcesQuerySvc = theReferencingResourcesQuerySvc;
 		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 		myHapiTransactionService = theHapiTransactionService;
 		myFhirContext = theDaoRegistry.getFhirContext();
@@ -94,7 +94,10 @@ public class PartitionAwareReplaceReferencesSvc {
 	 *         and versioned references to the original source copies for deferred deletion.
 	 */
 	public PartitionAwareReplaceReferencesResult copyCompartmentResourcesAndReplaceReferences(
-			IBaseResource theSourceResource, IBaseResource theTargetResource, RequestDetails theRequestDetails) {
+			IBaseResource theSourceResource,
+			IBaseResource theTargetResource,
+			int theResourceLimit,
+			RequestDetails theRequestDetails) {
 
 		IIdType sourceId = theSourceResource.getIdElement().toUnqualifiedVersionless();
 		IIdType targetId = theTargetResource.getIdElement().toUnqualifiedVersionless();
@@ -160,6 +163,14 @@ public class PartitionAwareReplaceReferencesSvc {
 		updateList.forEach(
 				resource -> plan.add(new PlannedEntry(resource, getRequiredPartition(resource), ChangeType.UPDATE)));
 
+		if (plan.size() > theResourceLimit) {
+			throw new PreconditionFailedException(Msg.code(3023)
+					+ String.format(
+							"Number of resources that would be moved or updated by merging %s into %s exceeds the"
+									+ " resource-limit %d.",
+							sourceId.getValue(), targetId.getValue(), theResourceLimit));
+		}
+
 		Bundle combinedResponse =
 				(Bundle) myDaoRegistry.getSystemDao().transactionNested(theRequestDetails, buildCombinedBundle(plan));
 
@@ -189,17 +200,9 @@ public class PartitionAwareReplaceReferencesSvc {
 	 * then loads and returns those resources.
 	 */
 	private List<IBaseResource> discoverReferencingResources(IIdType theSourceId, RequestDetails theRequestDetails) {
-		List<JpaPid> ids = findReferencingResourceIds(theSourceId, theRequestDetails);
+		List<JpaPid> ids = myReferencingResourcesQuerySvc.findReferencingResourcePidsAcrossAllPartitions(
+				theSourceId, theRequestDetails);
 		return loadResources(ids, theRequestDetails);
-	}
-
-	private List<JpaPid> findReferencingResourceIds(IIdType theTargetId, RequestDetails theRequestDetails) {
-		return myHapiTransactionService
-				.withRequest(theRequestDetails)
-				.withRequestPartitionId(RequestPartitionId.allPartitions())
-				.searchList(partition -> myResourceLinkDao
-						.streamSourceIdsForTargetFhirId(theTargetId.getResourceType(), theTargetId.getIdPart())
-						.toList());
 	}
 
 	/**
@@ -227,7 +230,8 @@ public class PartitionAwareReplaceReferencesSvc {
 		List<JpaPid> additionalIds = new ArrayList<>();
 		for (IBaseResource resource : theCopyList) {
 			IIdType oldId = resource.getIdElement();
-			List<JpaPid> referrers = findReferencingResourceIds(oldId, theRequestDetails);
+			List<JpaPid> referrers = myReferencingResourcesQuerySvc.findReferencingResourcePidsAcrossAllPartitions(
+					oldId, theRequestDetails);
 			for (JpaPid referrer : referrers) {
 				if (alreadyDiscoveredIds.add(referrer.getAssociatedResourceId()
 						.toUnqualifiedVersionless()
@@ -298,18 +302,15 @@ public class PartitionAwareReplaceReferencesSvc {
 			List<IBaseResource> theUpdateList) {
 
 		for (IBaseResource resource : theResources) {
-			Integer currentPartitionId = RequestPartitionId.getPartitionFromUserDataIfPresent(resource)
-					.map(RequestPartitionId::getFirstPartitionIdOrNull)
-					.orElse(null);
+			RequestPartitionId currentPartition = determinePartition(resource, theRequestDetails);
 
 			// Rewrite source→target references so determineCreatePartitionForRequest
 			// routes based on the post-merge state.
 			replaceVersionlessReferences(resource, Map.of(theSourceRef, theTargetRef));
 
 			RequestPartitionId newPartition = determinePartition(resource, theRequestDetails);
-			Integer newPartitionId = newPartition.getFirstPartitionIdOrNull();
 
-			if (Objects.equals(currentPartitionId, newPartitionId)) {
+			if (Objects.equals(currentPartition, newPartition)) {
 				theUpdateList.add(resource);
 			} else {
 				theCopiesByDestPartition
@@ -319,21 +320,9 @@ public class PartitionAwareReplaceReferencesSvc {
 		}
 	}
 
-	/**
-	 * Determines the partition for a resource by temporarily clearing its existing
-	 * RESOURCE_PARTITION_ID and asking the partition helper to compute a fresh partition
-	 * based on the resource's current references. The original partition is restored afterward.
-	 */
 	private RequestPartitionId determinePartition(IBaseResource theResource, RequestDetails theRequestDetails) {
-		Object savedPartitionUserData = theResource.getUserData(Constants.RESOURCE_PARTITION_ID);
-		try {
-			theResource.setUserData(Constants.RESOURCE_PARTITION_ID, null);
-			String resourceType = myFhirContext.getResourceType(theResource);
-			return myRequestPartitionHelperSvc.determineCreatePartitionForRequest(
-					theRequestDetails, theResource, resourceType);
-		} finally {
-			theResource.setUserData(Constants.RESOURCE_PARTITION_ID, savedPartitionUserData);
-		}
+		return myRequestPartitionHelperSvc.determineCreatePartitionForRequestIgnoringCachedPartition(
+				theRequestDetails, theResource, myFhirContext.getResourceType(theResource));
 	}
 
 	private enum ChangeType {
