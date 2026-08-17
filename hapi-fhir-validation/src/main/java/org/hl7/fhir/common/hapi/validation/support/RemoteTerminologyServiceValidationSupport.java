@@ -76,6 +76,13 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 	private String myBaseUrl;
 	private final List<Object> myClientInterceptors = new ArrayList<>();
 
+	/**
+	 * Override for sending {@code inferSystem} on remote {@code $validate-code}:
+	 * {@code null} (default) sends it only for R5+, {@code TRUE} always sends it, {@code FALSE} never does.
+	 */
+	@Nullable
+	private Boolean myInferSystemEnabled = null;
+
 	@Nullable
 	private final IRestfulClientFactory myRestfulClientFactory;
 
@@ -1030,7 +1037,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 		ParametersUtil.addParameterToParametersString(fhirContext, params, "code", theCode);
 		if (isNotBlank(theCodeSystem)) {
 			ParametersUtil.addParameterToParametersUri(fhirContext, params, "system", theCodeSystem);
-		} else {
+		} else if (shouldInferSystem(fhirContext)) {
 			// system could not be determined locally — ask the remote server to infer it
 			ParametersUtil.addParameterToParametersBoolean(fhirContext, params, "inferSystem", true);
 		}
@@ -1041,6 +1048,27 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 			ParametersUtil.addParameterToParameters(fhirContext, params, "valueSet", theValueSet);
 		}
 		return params;
+	}
+
+	/**
+	 * {@code inferSystem} is an R5+ {@code $validate-code} parameter that strict R4/DSTU3 servers
+	 * (e.g. VSAC, CMS) reject, so by default it is only sent for R5+; see {@link #setInferSystemEnabled(Boolean)}.
+	 */
+	private boolean shouldInferSystem(FhirContext theFhirContext) {
+		if (myInferSystemEnabled != null) {
+			return myInferSystemEnabled;
+		}
+		return theFhirContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.R4);
+	}
+
+	@Nullable
+	public Boolean getInferSystemEnabled() {
+		return myInferSystemEnabled;
+	}
+
+	public RemoteTerminologyServiceValidationSupport setInferSystemEnabled(@Nullable Boolean theInferSystemEnabled) {
+		myInferSystemEnabled = theInferSystemEnabled;
+		return this;
 	}
 
 	/**

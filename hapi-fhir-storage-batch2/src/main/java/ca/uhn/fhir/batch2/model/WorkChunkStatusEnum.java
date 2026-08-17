@@ -41,13 +41,13 @@ public enum WorkChunkStatusEnum {
 	GATE_WAITING,
 	/**
 	 * Workchunk is ready for reduction pass.
-	 * It will not be QUEUED, but consumed inline by reduction pass.
+	 * These chunks are not sent to the queue.
+	 * Instead a custom 'driver' workchunk is created (in READY state)
+	 * and sent to the queue to trigger the reduction.
 	 */
 	REDUCTION_READY,
 	/**
-	 * The state of workchunks that have been sent to the queue;
-	 * or of workchunks that are about to be processed in a final
-	 * reduction step (these workchunks are never queued)
+	 * The state of workchunks that have been sent to the queue.
 	 */
 	QUEUED,
 	/**

@@ -996,7 +996,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		@ValueSource(strings = {
 			TENANT_A, TENANT_B, JpaConstants.DEFAULT_PARTITION_NAME
 		})
-		public void testBulkExportForDifferentPartitions(String theTenantName) throws IOException {
+		public void testBulkExportForDifferentPartitions(String theTenantName) {
 			setBulkDataExportProvider();
 			testBulkExport(theTenantName);
 		}

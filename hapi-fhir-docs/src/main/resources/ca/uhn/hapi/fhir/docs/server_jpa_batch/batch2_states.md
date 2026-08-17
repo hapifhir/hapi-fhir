@@ -14,7 +14,7 @@ stateDiagram-v2
   IN_PROGRESS --> in_progress_poll : on poll \n(count acomplete/failed/errored chunks)
   in_progress_poll --> COMPLETED   : 0 failures, errored, or incomplete\n AND at least 1 chunk complete
   in_progress_poll --> ERRORED   : no failed but errored chunks
-  in_progress_poll --> FINALIZE   : none failed, gated execution\n last step\n queue REDUCER chunk
+  in_progress_poll --> FINALIZE   : none failed, gated execution\n last step\n queue reduction step's driver chunk
   in_progress_poll --> IN_PROGRESS : still work to do
   in_progress_poll --> CANCELLED : user requested cancel.
   %% ERRORED is just like IN_PROGRESS, but it is a one-way trip from IN_PROGRESS to ERRORED.
@@ -27,11 +27,11 @@ stateDiagram-v2
   ERRORED --> error_progress_poll : on poll \n(count acomplete/failed/errored chunks)
   error_progress_poll --> FAILED   : any failed chunks
   error_progress_poll --> ERRORED   : no failed but errored chunks
-  error_progress_poll --> FINALIZE   : none failed, gated execution\n last step\n queue REDUCER chunk
+  error_progress_poll --> FINALIZE   : none failed, gated execution\n last step\n queue reduction step's driver chunk
   error_progress_poll --> COMPLETED   : 0 failures, errored, or incomplete AND at least 1 chunk complete
   error_progress_poll --> CANCELLED : user requested cancel.
   state do_report <<choice>>
-  FINALIZE --> do_reduction: poll util worker marks REDUCER chunk yes or no.
+  FINALIZE --> do_reduction: reduction step's driver chunk is dequeued and sent to reduction service
   do_reduction --> COMPLETED : success
   do_reduction --> FAILED : fail
   in_progress_poll --> FAILED   : any failed chunks
@@ -59,13 +59,14 @@ stateDiagram-v2
     state FAILED
     state COMPLETED
    direction LR
-   [*]             --> READY            : on create - normal or gated jobs first chunks
+   [*]             --> READY            : on create - normal or gated jobs first chunks; additionally, reduction steps will create a single data-less 'driver' 
    [*]             --> GATE_WAITING     : on create - gated jobs for all but the first chunks of the first step
    GATE_WAITING    --> READY            : on gate release - gated
    GATE_WAITING    --> REDUCTION_READY  : on gate release for the final reduction step (all reduction jobs are gated)
    QUEUED          --> READY            : on gate release - gated (for compatibility with legacy QUEUED state up to Hapi-fhir version 7.1)
    READY           --> QUEUED           : placed on kafka (maint.)
    POLL_WAITING    --> READY            : after a poll delay on a POLL_WAITING work chunk has elapsed
+   REDUCTION_READY --> COMPLETED / FAILED : the input chunks are finalized by the reducer
   
   %% worker processing states
   QUEUED     --> on_receive : on deque by worker

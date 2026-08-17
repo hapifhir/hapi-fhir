@@ -17,6 +17,7 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.coordinator.WorkChannelMessageListener;
 import ca.uhn.fhir.batch2.maintenance.JobMaintenanceServiceImpl;
+import ca.uhn.fhir.batch2.model.BatchInstanceStatusDTO;
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -67,7 +68,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.retry.RetryPolicy;
 import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.retry.backoff.NoBackOffPolicy;
@@ -89,6 +93,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.batch2.config.BaseBatch2Config.CHANNEL_NAME;
@@ -221,6 +226,60 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	@AfterEach
 	public void after() {
 		myWorkChannel.clearInterceptorsForUnitTest();
+	}
+
+	@Test
+	public void startInstance_hookOverridesJobDefinitionIdAndParameters_overriddenJobRunsToCompletion() throws InterruptedException {
+		// setup - two registered job definitions: the one the caller requests (which must
+		// never run), and the one the hook swaps in
+		String requestedJobId = getMethodNameForJobId();
+		String overrideJobId = requestedJobId + "-override";
+
+		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> requestedJobFirstStep = (step, sink) -> {
+			fail("The requested job definition must not run when a hook overrides it");
+			return RunOutcome.SUCCESS;
+		};
+		myJobDefinitionRegistry.addJobDefinition(
+			buildGatedJobDefinition(requestedJobId, requestedJobFirstStep, (step, sink) -> fail()));
+
+		AtomicReference<String> param1SeenByWorker = new AtomicReference<>();
+		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> overrideJobFirstStep = (step, sink) -> {
+			param1SeenByWorker.set(step.getParameters().getParam1());
+			return callLatch(myFirstStepLatch, step);
+		};
+		myJobDefinitionRegistry.addJobDefinition(
+			buildGatedJobDefinition(overrideJobId, overrideJobFirstStep, (step, sink) -> fail()));
+
+		// the pointcut fires for every batch2 job start, so a real interceptor must
+		// filter before acting - model that here
+		IAnonymousInterceptor hook = (pointcut, params) -> {
+			JobInstanceStartRequest startRequest = params.get(JobInstanceStartRequest.class);
+			if (!requestedJobId.equals(startRequest.getJobDefinitionId())) {
+				return;
+			}
+			startRequest.setJobDefinitionId(overrideJobId);
+			TestJobParameters parameters = startRequest.getParameters(TestJobParameters.class);
+			parameters.setParam1("set-by-hook");
+			startRequest.setParameters(parameters);
+		};
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRECREATE_BATCH_JOB_INSTANCE, hook);
+		try {
+			// test
+			JobInstanceStartRequest request = buildRequest(requestedJobId);
+			myFirstStepLatch.setExpectedCount(1);
+			Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
+			myBatch2JobHelper.runActiveJobMaintenancePass();
+			myFirstStepLatch.awaitExpected();
+			myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId());
+
+			// verify - the persisted instance belongs to the override definition, and the
+			// parameter rewrite made by the hook reached the running worker
+			JobInstance instance = myJobCoordinator.getInstance(startResponse.getInstanceId());
+			assertEquals(overrideJobId, instance.getJobDefinitionId());
+			assertEquals("set-by-hook", param1SeenByWorker.get());
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(hook);
+		}
 	}
 
 	@Test
@@ -532,6 +591,107 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		} finally {
 			myWorkChannel.unsubscribe(handler);
 			myBatch2JobHelper.enableMaintenanceRunner(true);
+		}
+	}
+
+	@Test
+	public void reductionStep_withInterruptedExecution_restarts() {
+		// setup
+		// we'll manually run this to simulate shutdown/restart/redelivery
+		myBatch2JobHelper.enableMaintenanceRunner(false);
+		String jobId = getMethodNameForJobId();
+		int totalChunks = 3;
+
+		AtomicInteger counter = new AtomicInteger();
+		AtomicBoolean reductionComplete = new AtomicBoolean();
+
+		buildAndDefine3StepReductionJob(jobId, new IReductionStepHandler() {
+			@Override
+			public void firstStep(StepExecutionDetails<TestJobParameters, VoidModel> theStep, IJobDataSink<FirstStepOutput> theDataSink) {
+				for (int i = 0; i < totalChunks; i++) {
+					theDataSink.accept(new FirstStepOutput().setValue(i + ""));
+				}
+			}
+
+			@Override
+			public void secondStep(StepExecutionDetails<TestJobParameters, FirstStepOutput> theStep, IJobDataSink<SecondStepOutput> theDataSink) {
+				SecondStepOutput output = new SecondStepOutput();
+				output.setValue(theStep.getData().getValue());
+				theDataSink.accept(output);
+			}
+
+			@Override
+			public void reductionStepConsume(ChunkExecutionDetails<TestJobParameters, SecondStepOutput> theChunkDetails, IJobDataSink<ReductionStepOutput> theDataSink) {
+				counter.getAndIncrement();
+			}
+
+			@Override
+			public void reductionStepRun(StepExecutionDetails<TestJobParameters, SecondStepOutput> theStepExecutionDetails, IJobDataSink<ReductionStepOutput> theDataSink) {
+				theDataSink.accept(new ReductionStepOutput(new ArrayList<>()));
+				reductionComplete.set(true);
+			}
+		});
+
+
+		AtomicReference<Message<?>> gate = new AtomicReference<>();
+		ChannelInterceptor dropReduction = new ChannelInterceptor() {
+			@Override
+			public Message<?> preSend(Message<?> message, MessageChannel channel) {
+				JobWorkNotification notification = (JobWorkNotification) message.getPayload();
+				if (notification.getTargetStepId().equals(LAST_STEP_ID) && gate.get() == null) {
+					gate.set(message);
+					ourLog.info("Swallowing reduction step notification for job instance {}", notification.getInstanceId());
+					// return null means not sent to other channels
+					return null;
+				}
+				return message;
+			}
+		};
+		try {
+			myWorkChannel.addInterceptor(dropReduction);
+
+			Batch2JobStartResponse request = myJobCoordinator.startInstance(new SystemRequestDetails(),
+				buildRequest(jobId));
+
+			// wait for our swallowed message
+			// (ie, this means our job is down)
+			await()
+				.atMost(Duration.of(10, ChronoUnit.SECONDS))
+				.until(() -> {
+					// we have to force it because we deactivated it on purpose
+					myBatch2JobHelper.forceRunActiveJobMaintenancePass();
+					return gate.get() != null;
+				});
+
+			// we should still be in FINALIZE status
+			BatchInstanceStatusDTO status = myJobPersistence.fetchBatchInstanceStatus(request.getInstanceId());
+			assertEquals(StatusEnum.IN_PROGRESS, status.status());
+
+			/*
+			 * Simulate the redelivery;
+			 * Kafka, Pulsar, ActiveMQ will all redeliver.
+			 * But these tests use a LinkedBlockingChannel,
+			 * which has no 'redelivery' mechanism, so we'll do it
+			 * manually
+			 */
+			assertNotNull(gate.get());
+			myWorkChannel.send(gate.get());
+
+			// now wait until it actually completes
+			// (this also continues to force run the maintenance pass and
+			// redeliver the message
+			myBatch2JobHelper.awaitJobCompletion(request.getInstanceId());
+
+			// verify it completed fine
+			status = myJobPersistence.fetchBatchInstanceStatus(request.getInstanceId());
+			assertEquals(StatusEnum.COMPLETED, status.status());
+
+			// verify it consumed the correct number
+			assertEquals(totalChunks, counter.get());
+			assertTrue(reductionComplete.get());
+		} finally {
+			myBatch2JobHelper.enableMaintenanceRunner(true);
+			myWorkChannel.removeInterceptor(dropReduction);
 		}
 	}
 
@@ -1240,7 +1400,19 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	}
 
 	static class TestJobParameters implements IModelJson {
+
+		@JsonProperty("param1")
+		private String myParam1;
+
 		TestJobParameters() {
+		}
+
+		public String getParam1() {
+			return myParam1;
+		}
+
+		public void setParam1(String theParam1) {
+			myParam1 = theParam1;
 		}
 	}
 
