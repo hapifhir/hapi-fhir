@@ -2,5 +2,7 @@
 type: security
 issue: 9148
 title: "The HAPI FHIR CLI's console colour library has been migrated from the deprecated
-  `org.fusesource.jansi:jansi` to its maintained successor, `org.jline:jansi`, resolving CVE-2026-8484. On legacy
-  Windows consoles that relied on logback's Jansi stream wrapping, log colour is no longer translated."
+  `org.fusesource.jansi:jansi` to its maintained successor, `org.jline:jansi`, resolving CVE-2026-8484.
+  Logback has been upgraded from 1.5.25 to 1.6.3, and the CLI's colour logging configuration now uses
+  logback's new `JansiConsoleAppender` in place of `withJansi` on `ConsoleAppender`, which only ever
+  supported the old library. Console colour handling is unchanged, including on legacy Windows consoles."

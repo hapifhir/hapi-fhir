@@ -1082,13 +1082,13 @@
 		<jetty_version>12.0.34</jetty_version>
 		<!-- Single bump point for the org.jline artifacts: org.jline:jansi (managed below) and any downstream
 		     pin of org.jline:jline must stay at the same version - see the comment at the jansi entry. -->
-		<jline_version>3.29.0</jline_version>
+		<jline_version>3.30.16</jline_version>
 		<jsr305_version>3.0.2</jsr305_version>
 		<junit_version>5.11.4</junit_version>
 		<flexmark_version>0.64.8</flexmark_version>
 		<flyway_version>10.20.1</flyway_version>
 		<hibernate_version>6.6.4.Final</hibernate_version>
-		<logback_version>1.5.25</logback_version>
+		<logback_version>1.6.3</logback_version>
 		<!-- Update lucene version when you update hibernate-search version - These go together! -->
 		<hibernate_search_version>7.2.1.Final</hibernate_search_version>
 		<!-- Update lucene version when you update hibernate-search version - These go together! -->
