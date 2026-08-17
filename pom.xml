@@ -1139,7 +1139,7 @@
 		<elasticsearch_version>8.19.19</elasticsearch_version>
 		<!-- Jackson 3, used only by elasticsearch-java at runtime; CDR itself is on Jackson 2.
 		     Pinned for CVE-2026-19032, CVE-2026-68497, CVE-2026-59888, CVE-2026-29062 and
-		     CVE-2026-54512 through CVE-2026-54518. Remove once elasticsearch-java ships a
+		     CVE-2026-54512 through CVE-2026-54518. Remove once elasticsearch-java 8.x.x ships a
 		     patched Jackson 3 itself. -->
 		<jackson3_version>3.1.6</jackson3_version>
 		<ucum_version>1.0.9</ucum_version>
