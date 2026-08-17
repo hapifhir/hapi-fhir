@@ -1094,8 +1094,8 @@
 		<hibernate_validator_version>8.0.0.Final</hibernate_validator_version>
 		<httpcore_version>4.4.16</httpcore_version>
 		<httpclient_version>4.5.14</httpclient_version>
-		<jackson_version>2.21.5</jackson_version>
-		<jackson_databind_version>2.21.5</jackson_databind_version>
+		<jackson_version>2.21.6</jackson_version>
+		<jackson_databind_version>2.21.6</jackson_databind_version>
 		<jackson_annotations_version>2.21</jackson_annotations_version>
 		<httpclient5_version>5.4.3</httpclient5_version>
 		<httpcore5_version>5.4.3</httpcore5_version>
@@ -1137,6 +1137,11 @@
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 		<elastic_apm_version>1.52.0</elastic_apm_version>
 		<elasticsearch_version>8.19.19</elasticsearch_version>
+		<!-- Jackson 3, used only by elasticsearch-java at runtime; CDR itself is on Jackson 2.
+		     Pinned for CVE-2026-19032, CVE-2026-68497, CVE-2026-59888, CVE-2026-29062 and
+		     CVE-2026-54512 through CVE-2026-54518. Remove once elasticsearch-java ships a
+		     patched Jackson 3 itself. -->
+		<jackson3_version>3.1.6</jackson3_version>
 		<ucum_version>1.0.9</ucum_version>
 		<!-- only required for third party libraries when generating JavaDoc. Not to be used internally. -->
 		<spotbugs_annotations_version>4.9.8</spotbugs_annotations_version>
@@ -1579,6 +1584,16 @@
 				<groupId>org.elasticsearch.client</groupId>
 				<artifactId>elasticsearch-rest-client-sniffer</artifactId>
 				<version>8.19.19</version>
+			</dependency>
+			<dependency>
+				<groupId>tools.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>${jackson3_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>tools.jackson.core</groupId>
+				<artifactId>jackson-core</artifactId>
+				<version>${jackson3_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.code.gson</groupId>
