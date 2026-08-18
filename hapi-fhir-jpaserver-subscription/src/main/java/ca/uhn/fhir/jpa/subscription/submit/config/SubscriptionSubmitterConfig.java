@@ -108,9 +108,10 @@ public class SubscriptionSubmitterConfig {
 	@Bean
 	public AsyncResourceModifiedSubmitterSvc asyncResourceModifiedSubmitterSvc(
 			IResourceModifiedMessagePersistenceSvc theIResourceModifiedMessagePersistenceSvc,
-			IResourceModifiedConsumerWithRetries theResourceModifiedConsumer) {
+			IResourceModifiedConsumerWithRetries theResourceModifiedConsumer,
+			SubscriptionSettings theSubscriptionSettings) {
 		return new AsyncResourceModifiedSubmitterSvc(
-				theIResourceModifiedMessagePersistenceSvc, theResourceModifiedConsumer);
+				theIResourceModifiedMessagePersistenceSvc, theResourceModifiedConsumer, theSubscriptionSettings);
 	}
 
 	@Bean
