@@ -367,8 +367,7 @@ public class ResourceUndoMergeService {
 
 		if (theCompletedRestores.isEmpty()) {
 			String msg = format(
-					"Undo-merge failed. No resources could be restored; the merge remains fully in effect. "
-							+ "Undo failure cause: %s",
+					"Undo-merge failed. No resources could be restored. Undo failure cause: %s",
 					theFailure.getMessage());
 			addErrorToOperationOutcome(myFhirContext, opOutcome, msg, ISSUE_TYPE_EXCEPTION);
 			return;

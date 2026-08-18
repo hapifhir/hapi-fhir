@@ -24,7 +24,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -74,7 +73,7 @@ class CdsPrefetchSvcTest {
 		CdsServiceRequestJson input = new CdsServiceRequestJson();
 
 		result = myCdsPrefetchSvc.findMissingPrefetch(spec, input);
-		assertThat(result).hasSize(0);
+		assertThat(result).isEmpty();
 
 		spec.addPrefetch("foo", "fooval");
 		result = myCdsPrefetchSvc.findMissingPrefetch(spec, input);
@@ -82,7 +81,7 @@ class CdsPrefetchSvcTest {
 
 		input.addPrefetch("foo", new Patient());
 		result = myCdsPrefetchSvc.findMissingPrefetch(spec, input);
-		assertThat(result).hasSize(0);
+		assertThat(result).isEmpty();
 
 		spec.addPrefetch("bar", "barval");
 		spec.addPrefetch("baz", "bazval");
@@ -104,6 +103,26 @@ class CdsPrefetchSvcTest {
 		input.addPrefetch("baz", null);
 		result = myCdsPrefetchSvc.findMissingPrefetch(spec, input);
 		assertThat(result).containsExactly("bar");
+	}
+
+	@Test
+	void testFindMissingPrefetchMaintainsOrder() {
+		// setup
+		final CdsServiceJson cdsServiceJson = new CdsServiceJson();
+		cdsServiceJson.addPrefetch("foo-1", "some-query-1");
+		cdsServiceJson.addPrefetch("foo-2", "some-query-2");
+		cdsServiceJson.addPrefetch("foo-3", "some-query-3");
+		cdsServiceJson.addPrefetch("foo-4", "some-query-4");
+		cdsServiceJson.addPrefetch("foo-5", "some-query-5");
+		cdsServiceJson.addPrefetch("foo-6", "some-query-6");
+		final CdsServiceRequestJson input = new CdsServiceRequestJson();
+		input.addPrefetch("foo-1", null);
+		input.addPrefetch("foo-3", null);
+		input.addPrefetch("foo-4", null);
+		// execute
+		final Set<String> actual = myCdsPrefetchSvc.findMissingPrefetch(cdsServiceJson, input);
+		// validate
+		assertThat(actual).containsSequence("foo-2", "foo-5", "foo-6");
 	}
 
 

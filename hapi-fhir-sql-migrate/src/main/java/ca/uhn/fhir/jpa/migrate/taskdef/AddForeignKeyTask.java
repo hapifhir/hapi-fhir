@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -29,7 +31,8 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Set;
+import java.util.Locale;
+import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -40,6 +43,7 @@ public class AddForeignKeyTask extends BaseTableTask {
 	private String myForeignTableName;
 	private List<String> myForeignColumnNames;
 	private List<String> myColumnNames;
+	private boolean myWithDeleteCascade;
 
 	public AddForeignKeyTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
@@ -69,6 +73,10 @@ public class AddForeignKeyTask extends BaseTableTask {
 		return myColumnNames;
 	}
 
+	public void withDeleteCascade() {
+		myWithDeleteCascade = true;
+	}
+
 	@Override
 	public void validate() {
 		super.validate();
@@ -82,14 +90,28 @@ public class AddForeignKeyTask extends BaseTableTask {
 				"Number of column names must match for foreign key %s",
 				myConstraintName);
 		setDescription("Add foreign key " + myConstraintName + " from column(s) " + getColumnNames() + " of table "
-				+ getTableName() + " to column(s) " + getForeignColumnNames() + " of table " + myForeignTableName);
+				+ getTableName() + " to column(s) " + getForeignColumnNames() + " of table " + myForeignTableName
+				+ (myWithDeleteCascade ? " with delete cascade" : ""));
 	}
 
 	@Override
 	public void doExecute() throws SQLException {
-
-		Set<String> existing = JdbcUtils.getForeignKeys(getConnectionProperties(), myForeignTableName, getTableName());
-		if (existing.contains(myConstraintName)) {
+		Map<String, Boolean> existing = JdbcUtils.getForeignKeysAndDeelteCascadeRule(
+				getConnectionProperties(), myForeignTableName, getTableName());
+		String constraintName = myConstraintName.toUpperCase(Locale.US);
+		if (existing.containsKey(constraintName)) {
+			// if trying to add delete cascade with same fk constraint,
+			// but on an existing constraint, we throw
+			// likewise if trying to add a constraint that doesn't have on delete cascade
+			// where it already has it will also throw
+			if (myWithDeleteCascade != existing.get(constraintName)) {
+				throw new HapiMigrationException(Msg.code(3027) + "Can not add foreign key " + myConstraintName
+						+ " to table " + getTableName() + "."
+						+ " The constraint already exists " + (myWithDeleteCascade ? "without" : "with")
+						+ " delete cascade."
+						+ " Add a DropForeignKeyTask for " + myConstraintName
+						+ " at an earlier version in this release.");
+			}
 			logInfo(ourLog, "Already have constraint named {} - No action performed", myConstraintName);
 			return;
 		}
@@ -115,6 +137,9 @@ public class AddForeignKeyTask extends BaseTableTask {
 		b.append(" (");
 		appendColumnList(getForeignColumnNames(), quoteNames, b);
 		b.append(")");
+		if (myWithDeleteCascade) {
+			b.append(" ON DELETE CASCADE");
+		}
 
 		@Language("SQL")
 		String sql = b.toString();
@@ -142,6 +167,13 @@ public class AddForeignKeyTask extends BaseTableTask {
 		} else {
 			theBuilder.append(myForeignColumnNames);
 		}
+		// we only add this to the hash if true
+		// so we don't change the hash of previously existing
+		// non "with delete cascade" tasks (which
+		// existed before this bool was added)
+		if (myWithDeleteCascade) {
+			theBuilder.append(myWithDeleteCascade);
+		}
 	}
 
 	@Override
@@ -151,6 +183,7 @@ public class AddForeignKeyTask extends BaseTableTask {
 		theBuilder.append(myConstraintName, otherObject.myConstraintName);
 		theBuilder.append(myForeignTableName, otherObject.myForeignTableName);
 		theBuilder.append(myForeignColumnNames, otherObject.myForeignColumnNames);
+		theBuilder.append(myWithDeleteCascade, otherObject.myWithDeleteCascade);
 	}
 
 	private static void appendColumnList(

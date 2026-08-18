@@ -54,10 +54,10 @@ public class NonTransactionalHapiTransactionService extends HapiTransactionServi
 
 	@Override
 	public boolean isCompatiblePartition(
-			RequestPartitionId theRequestPartitionId, RequestPartitionId theOtherRequestPartitionId) {
-		if (myNonCompatiblePartitions.contains(Pair.of(theRequestPartitionId, theOtherRequestPartitionId))) {
+			RequestPartitionId theTransactionPartitionId, RequestPartitionId theCandidatePartitionId) {
+		if (myNonCompatiblePartitions.contains(Pair.of(theTransactionPartitionId, theCandidatePartitionId))) {
 			return false;
-		} else return !myNonCompatiblePartitions.contains(Pair.of(theOtherRequestPartitionId, theRequestPartitionId));
+		} else return !myNonCompatiblePartitions.contains(Pair.of(theCandidatePartitionId, theTransactionPartitionId));
 	}
 
 	public void clearNonCompatiblePartitions() {
