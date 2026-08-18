@@ -88,13 +88,9 @@ public class PackageUrlAllowList {
 	}
 
 	public boolean allowsAll() {
-		return getLocalPrefixes()
-			.stream()
-			.anyMatch(prefix -> prefix.getUrl().equals(WILDCARD))
-			||
-			getRemotePrefixes()
-				.stream()
-				.anyMatch(prefix -> prefix.getUrl().equals(WILDCARD));
+		return getLocalPrefixes().stream().anyMatch(prefix -> prefix.getUrl().equals(WILDCARD))
+				|| getRemotePrefixes().stream()
+						.anyMatch(prefix -> prefix.getUrl().equals(WILDCARD));
 	}
 
 	/**
@@ -133,8 +129,7 @@ public class PackageUrlAllowList {
 	}
 
 	private boolean isLocalAllowed(String theUrl) {
-		if (myLocalPrefixes.stream()
-			.anyMatch(url -> url.getUrl().equals(WILDCARD))) {
+		if (myLocalPrefixes.stream().anyMatch(url -> url.getUrl().equals(WILDCARD))) {
 			return true;
 		}
 
@@ -195,8 +190,7 @@ public class PackageUrlAllowList {
 	}
 
 	private boolean isRemoteAllowed(String theUrl) {
-		if (myRemotePrefixes.stream()
-			.anyMatch(url -> url.getUrl().equals(WILDCARD))) {
+		if (myRemotePrefixes.stream().anyMatch(url -> url.getUrl().equals(WILDCARD))) {
 			return true;
 		}
 		URI candidate = parseHttpUri(theUrl);

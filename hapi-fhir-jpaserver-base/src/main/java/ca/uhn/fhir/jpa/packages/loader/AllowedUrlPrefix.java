@@ -28,8 +28,7 @@ public class AllowedUrlPrefix {
 
 	@Override
 	public String toString() {
-		return "url:" + myUrl + "|"
-			+ "private:" + myIsPrivateNetwork;
+		return "url:" + myUrl + "|" + "private:" + myIsPrivateNetwork;
 	}
 
 	@Override
@@ -38,8 +37,7 @@ public class AllowedUrlPrefix {
 			return false;
 		}
 		if (theOther instanceof AllowedUrlPrefix that) {
-			return Objects.equals(getUrl(), that.getUrl())
-				&& this.isPrivateNetwork() == that.isPrivateNetwork();
+			return Objects.equals(getUrl(), that.getUrl()) && this.isPrivateNetwork() == that.isPrivateNetwork();
 		}
 
 		return false;

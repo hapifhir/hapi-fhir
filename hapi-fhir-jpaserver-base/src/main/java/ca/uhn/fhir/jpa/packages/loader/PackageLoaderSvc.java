@@ -104,15 +104,20 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 	 * Syncronoized because module contexts can start concurrently, and this is read-modify-write on shared static state.
 	 */
 	public static synchronized void initSettings(PackageLoaderSettings theSettings) {
-		List<AllowedUrlPrefix> newPrefixes = theSettings.getPackageUrlAllowList().getRemotePrefixes();
+		List<AllowedUrlPrefix> newPrefixes =
+				theSettings.getPackageUrlAllowList().getRemotePrefixes();
 		List<AllowedUrlPrefix> appliedPrefixes =
 				ourApplied == null ? null : ourApplied.getPackageUrlAllowList().getRemotePrefixes();
 
 		if (appliedPrefixes != null && !ListUtils.isEqualList(appliedPrefixes, newPrefixes)) {
 			ourLog.warn(
 					"Remote package URL allow-list is being changed from {} to {}; this config is cluster-wide and cannot vary per module!",
-					String.join(", ", appliedPrefixes.stream().map(url -> url.toString()).collect(Collectors.toSet())),
-					String.join(", ", newPrefixes.stream().map(url -> url.toString()).collect(Collectors.toSet())));
+					String.join(
+							", ",
+							appliedPrefixes.stream().map(url -> url.toString()).collect(Collectors.toSet())),
+					String.join(
+							", ",
+							newPrefixes.stream().map(url -> url.toString()).collect(Collectors.toSet())));
 		} else if (appliedPrefixes != null) {
 			return; // already applied
 		} else {
@@ -133,8 +138,7 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 		}
 		ManagedWebAccess.setSsrfProtectionEnabled(true);
 
-		List<ServerDetailsPOJO> servers = theSettings.getPackageUrlAllowList().getRemotePrefixes()
-			.stream()
+		List<ServerDetailsPOJO> servers = theSettings.getPackageUrlAllowList().getRemotePrefixes().stream()
 				.map(prefix -> {
 					return ServerDetailsPOJO.builder()
 							.url(prefix.getUrl())
@@ -296,7 +300,7 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 						return Files.readAllBytes(Paths.get(new URI(thePackageUrl)));
 					} catch (IOException | URISyntaxException e) {
 						throw new InternalErrorException(
-							Msg.code(2031) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());
+								Msg.code(2031) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());
 					}
 				}
 				case HTTPS, HTTP -> {
@@ -336,39 +340,40 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 						continue;
 					} else if (status != HttpStatus.SC_OK) {
 						throw new ResourceNotFoundException(
-							Msg.code(1303) + "Received HTTP " + status + " from URL: " + thePackageUrl);
+								Msg.code(1303) + "Received HTTP " + status + " from URL: " + thePackageUrl);
 					}
 					return IOUtils.toByteArray(request.getEntity().getContent());
 				}
 			}
 
 			throw new InvalidRequestException(Msg.code(3032) + "Exceeded " + PackageUrlConstants.MAX_REDIRECTS
-				+ " redirects loading a package; chain was " + String.join(" -> ", visited));
+					+ " redirects loading a package; chain was " + String.join(" -> ", visited));
 		} catch (IOException e) {
 			throw new InternalErrorException(
-				Msg.code(1304) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());
+					Msg.code(1304) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());
 		}
 	}
 
 	/**
 	 * Manually check the redirect to make sure it, too, is within the whitelist
 	 */
-	private String resolveAllowedRedirect(String theCurrentUrl, CloseableHttpResponse theResponse, Set<String> theVisited) {
+	private String resolveAllowedRedirect(
+			String theCurrentUrl, CloseableHttpResponse theResponse, Set<String> theVisited) {
 		int status = theResponse.getStatusLine().getStatusCode();
 
 		// check the location header
 		Header location = theResponse.getFirstHeader(HttpHeaders.LOCATION);
 		if (location == null || isBlank(location.getValue())) {
-			throw new InvalidRequestException(Msg.code(3033) + "Received HTTP status " + status
-				+ " from URL " + theCurrentUrl + " with no Location header");
+			throw new InvalidRequestException(Msg.code(3033) + "Received HTTP status " + status + " from URL "
+					+ theCurrentUrl + " with no Location header");
 		}
 
 		URI target;
 		try {
 			target = URI.create(theCurrentUrl).resolve(location.getValue().trim());
 		} catch (IllegalArgumentException ex) {
-			throw new InvalidRequestException(Msg.code(3034) + "Received HTTP " + status
-				+ " from URL " + theCurrentUrl + " with an unusable Location: " + location.getValue());
+			throw new InvalidRequestException(Msg.code(3034) + "Received HTTP " + status + " from URL " + theCurrentUrl
+					+ " with an unusable Location: " + location.getValue());
 		}
 
 		// check the scheme
@@ -379,18 +384,18 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 		boolean schemeAllowed = isSchemeAllowed(targetScheme, currentScheme);
 		if (!schemeAllowed) {
 			throw new InvalidRequestException(
-				Msg.code(3035) + "Refusing redirect from " + theCurrentUrl + " to " + targetUrl);
+					Msg.code(3035) + "Refusing redirect from " + theCurrentUrl + " to " + targetUrl);
 		}
 
 		// check the target is in the whitelist
 		if (!mySettings.getPackageUrlAllowList().isAllowed(targetUrl)) {
 			throw new InvalidRequestException(Msg.code(3036) + "Refusing redirect from " + theCurrentUrl
-				+ " to non-whitelisted URL " + targetUrl);
+					+ " to non-whitelisted URL " + targetUrl);
 		}
 
 		if (!theVisited.add(targetUrl)) {
 			throw new InvalidRequestException(Msg.code(3037) + "Redirect loop loading a package; chain was "
-				+ String.join(", ", theVisited) + " -> " + targetUrl);
+					+ String.join(", ", theVisited) + " -> " + targetUrl);
 		}
 
 		// everything's good - we can pass back the (approved) url
@@ -398,12 +403,12 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 	}
 
 	/**
-	* we do not allow HTTPS -> HTTP urls no matter what
-	* (ie, no downgrading security in a redirect hop)
-	*/
+	 * we do not allow HTTPS -> HTTP urls no matter what
+	 * (ie, no downgrading security in a redirect hop)
+	 */
 	private static boolean isSchemeAllowed(PackageUrlScheme targetScheme, PackageUrlScheme currentScheme) {
 		return targetScheme == PackageUrlScheme.HTTPS
-			|| (targetScheme == PackageUrlScheme.HTTP && currentScheme == PackageUrlScheme.HTTP);
+				|| (targetScheme == PackageUrlScheme.HTTP && currentScheme == PackageUrlScheme.HTTP);
 	}
 
 	@Override
