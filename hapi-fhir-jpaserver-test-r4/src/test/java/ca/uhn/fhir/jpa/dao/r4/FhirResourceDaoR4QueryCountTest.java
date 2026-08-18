@@ -1876,26 +1876,50 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@ParameterizedTest
 	@CsvSource(useHeadersInDisplayName = true, textBlock = """
-		UseQueryCache , UseConsentInterceptor, ExpectSelect, ExpectInsert
-		HIT           , false                , 4           , 0
-		MISS          , false                , 3           , 15
-		SKIP          , false                , 2           , 0
-		HIT           , true                 , 2           , 15
-		MISS          , true                 , 2           , 15
-		SKIP          , true                 , 3           , 0
+		UseQueryCache , UseConsentInterceptor, UseIncludes, ExpectSelect, ExpectInsert
+		HIT           , false                , false      , 4           , 0
+		MISS          , false                , false      , 3           , 15
+		SKIP          , false                , false      , 2           , 0
+		HIT           , true                 , false      , 2           , 15
+		MISS          , true                 , false      , 2           , 15
+		SKIP          , true                 , false      , 2           , 0
+		HIT           , false                , true       , 6           , 0
+		MISS          , false                , true       , 5           , 17
+		SKIP          , false                , true       , 2           , 0
+		HIT           , true                 , true       , 7           , 17
+		MISS          , true                 , true       , 7           , 17
+		SKIP          , true                 , true       , 3           , 0
 		""")
-	void testSearch_FirstPage(QueryCacheMode theUseQueryCache, boolean theUseConsentInterceptor, int theExpectSelect, int theExpectInsert) {
+	void testSearch_FirstPage(QueryCacheMode theUseQueryCache, boolean theUseConsentInterceptor, boolean theUseIncludes, int theExpectSelect, int theExpectInsert) {
 		// Setup
-		create150Patients();
+		BundleBuilder b = new BundleBuilder(myFhirContext);
+		List<String> ids = new ArrayList<>();
+		for (int i = 0; i < 15; i++) {
+			IBaseResource org = buildOrganization(withId("ORG" + i));
+			b.addTransactionUpdateEntry(org);
+			IBaseResource patient = buildPatient(withId("A" + i), withOrganization("Organization/ORG" + i));
+			b.addTransactionUpdateEntry(patient);
+			IBaseResource observation = buildObservation(withId("OBS" + i), withSubject("Patient/A" + i));
+			b.addTransactionUpdateEntry(observation);
+		}
+		mySystemDao.transaction(mySrd, b.getBundleTyped());
 
 		if (theUseQueryCache == QueryCacheMode.HIT) {
 			// Perform the search once to warm the cache
-			Bundle outcome = myClient
+			IQuery<Bundle> search = myClient
 				.search()
 				.forResource("Patient")
-				.returnBundle(Bundle.class)
-				.execute();
-			assertEquals(10, outcome.getEntry().size());
+				.returnBundle(Bundle.class);
+			if (theUseIncludes) {
+				search.include(Patient.INCLUDE_ORGANIZATION);
+				search.revInclude(Observation.INCLUDE_PATIENT);
+			}
+			Bundle outcome = search.execute();
+			if (theUseIncludes) {
+				assertEquals(30, outcome.getEntry().size());
+			} else {
+				assertEquals(10, outcome.getEntry().size());
+			}
 		}
 
 		if (theUseConsentInterceptor) {
@@ -1913,15 +1937,24 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		};
 
 		myCaptureQueriesListener.clear();
-		Bundle outcome = myClient
+		IQuery<IBaseBundle> search = myClient
 			.search()
-			.forResource("Patient")
+			.forResource("Patient");
+		if (theUseIncludes) {
+			search.include(Patient.INCLUDE_ORGANIZATION);
+			search.revInclude(Observation.INCLUDE_PATIENT);
+		}
+		Bundle outcome = search
 			.cacheControl(cacheControl)
 			.returnBundle(Bundle.class)
 			.execute();
 
 		// Verify
-		assertEquals(10, outcome.getEntry().size());
+		if (theUseIncludes) {
+			assertEquals(30, outcome.getEntry().size());
+		} else {
+			assertEquals(10, outcome.getEntry().size());
+		}
 		assertThat(myCaptureQueriesListener).has(
 			onAllThreads()
 				.selectCount(theExpectSelect)
