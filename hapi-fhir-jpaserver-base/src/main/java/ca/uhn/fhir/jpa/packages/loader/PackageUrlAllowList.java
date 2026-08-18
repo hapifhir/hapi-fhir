@@ -60,9 +60,7 @@ public class PackageUrlAllowList {
 	 * * user-driven flows where the 'configurer' and 'user' are the one and the same
 	 */
 	public static PackageUrlAllowList allowAll() {
-		AllowedUrlPrefix localAll = new AllowedUrlPrefix(WILDCARD, false, true);
-		AllowedUrlPrefix remoteAll = new AllowedUrlPrefix(WILDCARD, false, false);
-		return new PackageUrlAllowList(List.of(localAll), List.of(remoteAll));
+		return new PackageUrlAllowList(List.of(AllowedUrlPrefix.all()), List.of(AllowedUrlPrefix.all()));
 	}
 
 	/**
@@ -89,6 +87,16 @@ public class PackageUrlAllowList {
 		return myLocalPrefixes;
 	}
 
+	public boolean allowsAll() {
+		return getLocalPrefixes()
+			.stream()
+			.anyMatch(prefix -> prefix.getUrl().equals(WILDCARD))
+			||
+			getRemotePrefixes()
+				.stream()
+				.anyMatch(prefix -> prefix.getUrl().equals(WILDCARD));
+	}
+
 	/**
 	 * returns true if it's in the whitelist (and not blank), or if the
 	 * whitelist includes all urls.
@@ -99,6 +107,11 @@ public class PackageUrlAllowList {
 			return false;
 		}
 		String urlToTest = theUrl.trim();
+
+		if (theUrl.equals(WILDCARD)) {
+			return allowsAll();
+		}
+
 		PackageUrlScheme scheme = PackageUrlScheme.parseScheme(urlToTest);
 		if (scheme == null) {
 			return false;
@@ -120,13 +133,14 @@ public class PackageUrlAllowList {
 	}
 
 	private boolean isLocalAllowed(String theUrl) {
-		if (myLocalPrefixes.contains(WILDCARD)) {
+		if (myLocalPrefixes.stream()
+			.anyMatch(url -> url.getUrl().equals(WILDCARD))) {
 			return true;
 		}
 
 		if (theUrl.toLowerCase().startsWith(CLASSPATH_PREFIX)) {
 			return myLocalPrefixes.stream()
-					.map(prefix -> prefix.getUrl())
+					.map(AllowedUrlPrefix::getUrl)
 					.filter(url -> url.startsWith(CLASSPATH_PREFIX))
 					.anyMatch(url -> isPathPrefix(url, theUrl));
 		}
@@ -138,7 +152,7 @@ public class PackageUrlAllowList {
 			}
 
 			return myLocalPrefixes.stream()
-					.map(prefix -> prefix.getUrl())
+					.map(AllowedUrlPrefix::getUrl)
 					.filter(url -> !url.startsWith(CLASSPATH_PREFIX))
 					.map(this::toNormalizedPath)
 					.filter(Objects::nonNull)
@@ -181,7 +195,8 @@ public class PackageUrlAllowList {
 	}
 
 	private boolean isRemoteAllowed(String theUrl) {
-		if (myRemotePrefixes.contains(WILDCARD)) {
+		if (myRemotePrefixes.stream()
+			.anyMatch(url -> url.getUrl().equals(WILDCARD))) {
 			return true;
 		}
 		URI candidate = parseHttpUri(theUrl);
@@ -192,7 +207,7 @@ public class PackageUrlAllowList {
 		}
 
 		return myRemotePrefixes.stream()
-				.map(prefix -> prefix.getUrl())
+				.map(AllowedUrlPrefix::getUrl)
 				.map(this::parseHttpUri)
 				.filter(Objects::nonNull)
 				.anyMatch(url -> {

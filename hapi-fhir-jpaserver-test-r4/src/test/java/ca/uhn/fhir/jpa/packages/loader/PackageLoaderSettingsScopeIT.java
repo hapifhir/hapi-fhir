@@ -32,7 +32,7 @@ class PackageLoaderSettingsScopeIT {
 	}
 
 	private static PackageLoaderSettings settingsFor(String theRemotePrefix) {
-		AllowedUrlPrefix pref = new AllowedUrlPrefix(theRemotePrefix, false, false);
+		AllowedUrlPrefix pref = new AllowedUrlPrefix(theRemotePrefix, false);
 		return new PackageLoaderSettings(PackageUrlAllowList.of(List.of(pref), List.of()));
 	}
 

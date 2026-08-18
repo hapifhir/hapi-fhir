@@ -47,7 +47,7 @@ public class PackageLoaderSvcIT {
 			baseUrl = "http://" + baseUrl;
 		}
 		PackageLoaderSettings settings = new PackageLoaderSettings(
-			PackageUrlAllowList.of(List.of(baseUrl), new ArrayList<>())
+			PackageUrlAllowList.of(List.of(new AllowedUrlPrefix(baseUrl, false)), new ArrayList<>())
 		);
 		myScope = PackageLoaderSvc.applySettings(settings);
 		myPackageLoaderSvc = new PackageLoaderSvc(settings);

@@ -155,7 +155,7 @@ public class InstallPackageJobAllowListR4IT extends BaseJpaR4Test {
 				@Override
 				public List<AllowedUrlPrefix> getLocalPrefixes() {
 					return List.of(
-						new AllowedUrlPrefix(ALLOWED_PACKAGE_DIR.toString(), false, false));
+						new AllowedUrlPrefix(ALLOWED_PACKAGE_DIR.toString(), false));
 				}
 			};
 		}

@@ -43,21 +43,20 @@ public IPackageUrlAllowListProvider packageUrlAllowListProvider() {
 	return new IPackageUrlAllowListProvider() {
 		@Override
 		public List<AllowedUrlPrefix> getRemotePrefixes() {
-			return List.of(new AllowedUrlPrefix("https://packages2.fhir.org", true, false));
+			return List.of(new AllowedUrlPrefix("https://packages2.fhir.org", false));
 		}
 
 		@Override
 		public List<AllowedUrlPrefix> getLocalPrefixes() {
-			return List.of(new AllowedUrlPrefix("file:/opt/packages", false, false));
+			return List.of(new AllowedUrlPrefix("file:/opt/packages", false));
 		}
 	};
 }
 ```
 
-The `AllowedUrlPrefix` constructor takes the prefix followed by two flags, which apply to remote prefixes only and are ignored for `file:` and `classpath:` prefixes:
+The `AllowedUrlPrefix` constructor takes the prefix followed by `theIsPrivateNetwork`. When that is `true`, fetches against the host may resolve to an address on a private network; SSRF protection otherwise blocks them, so an internal mirror or registry needs it set. It applies to remote prefixes only and is ignored for `file:` and `classpath:` prefixes.
 
-* `theIsSecure` &ndash; When `true`, plain-HTTP fetches against that host are refused. Set it on `https:` prefixes; leave it `false` on an `http:` prefix, otherwise no fetch against it will succeed.
-* `theIsPrivateNetwork` &ndash; When `true`, fetches against that host may resolve to an address on a private network. SSRF protection otherwise blocks them, so an internal mirror or registry needs this set.
+Whether plain HTTP is permitted is derived from the prefix rather than configured: a prefix beginning `https:` refuses plain-HTTP fetches against that host, and one beginning `http:` permits them. Allow list matching requires a candidate URL's scheme to equal the scheme of the prefix it matches, so the two can never disagree.
 
 Remote prefixes are matched by origin and local prefixes by resolved path, so the example above permits any package beneath `/opt/packages` but not one in `/opt/packages-other`.
 

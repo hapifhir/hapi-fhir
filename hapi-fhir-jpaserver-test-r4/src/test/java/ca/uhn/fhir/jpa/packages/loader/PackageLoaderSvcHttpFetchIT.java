@@ -63,7 +63,7 @@ public class PackageLoaderSvcHttpFetchIT {
 	@BeforeEach
 	void before() {
 		myAllowList = PackageUrlAllowList.of(List.of(
-			new AllowedUrlPrefix(myServer.getBaseUrl() + ALLOWED_PATH_PREFIX, false, false)), List.of());
+			new AllowedUrlPrefix(myServer.getBaseUrl() + ALLOWED_PATH_PREFIX, false)), List.of());
 		myPackageLoaderSvc = new PackageLoaderSvc(new PackageLoaderSettings(myAllowList));
 
 		myPackageContents = ClasspathUtil.loadResourceAsByteArray(PACKAGE_CLASSPATH);
@@ -171,8 +171,8 @@ public class PackageLoaderSvcHttpFetchIT {
 		String classpathTarget = "classpath://packages" + PACKAGE_CLASSPATH;
 		PackageUrlAllowList allowListWithLocalPrefix = PackageUrlAllowList.of(
 				List.of(
-					new AllowedUrlPrefix(myServer.getBaseUrl() + ALLOWED_PATH_PREFIX, false, false)),
-			List.of(new AllowedUrlPrefix("classpath://packages", false, false)));
+					new AllowedUrlPrefix(myServer.getBaseUrl() + ALLOWED_PATH_PREFIX, false)),
+			List.of(new AllowedUrlPrefix("classpath://packages", false)));
 		PackageLoaderSvc loaderSvc = new PackageLoaderSvc(new PackageLoaderSettings(allowListWithLocalPrefix));
 
 		// the allow-list permits this target, so only the scheme check can refuse it

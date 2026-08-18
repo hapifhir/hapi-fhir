@@ -25,9 +25,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 // Created by claude-opus-5
 class PackageUrlAllowListTest {
 
-	private static final AllowedUrlPrefix LOCAL_DIR = new AllowedUrlPrefix("file:/opt/packages", false, false);
-	private static final AllowedUrlPrefix CLASSPATH_DIR = new AllowedUrlPrefix("classpath:/package-loading", false, false);
-	private static final AllowedUrlPrefix REMOTE_HOST = new AllowedUrlPrefix("https://packages.fhir.org", true, false);
+	private static final AllowedUrlPrefix LOCAL_DIR = new AllowedUrlPrefix("file:/opt/packages", false);
+	private static final AllowedUrlPrefix CLASSPATH_DIR = new AllowedUrlPrefix("classpath:/package-loading", false);
+	private static final AllowedUrlPrefix REMOTE_HOST = new AllowedUrlPrefix("https://packages.fhir.org", false);
 
 	private static PackageUrlAllowList localAllowList() {
 		return PackageUrlAllowList.of(List.of(), List.of(LOCAL_DIR));
@@ -104,10 +104,14 @@ class PackageUrlAllowListTest {
 		assertThat(localAllowList().isAllowed("\tfile:/opt/packages/pkg.tgz ")).isTrue();
 	}
 
+	/**
+	 * Config normally writes local prefixes with the scheme attached, e.g. {@code file:/opt/packages},
+	 * which {@link #LOCAL_DIR} covers. A bare path is accepted too and resolves to the same directory.
+	 */
 	@Test
-	void isAllowed_withSchemeQualifiedLocalPrefix_matches() {
-		// the shipped default config writes prefixes with the scheme attached, e.g. file:/opt/smilecdr/packages
-		PackageUrlAllowList allowList = PackageUrlAllowList.of(List.of(), List.of("file:" + LOCAL_DIR));
+	void isAllowed_withBarePathLocalPrefix_matchesTheSameDirectoryAsTheSchemeQualifiedForm() {
+		PackageUrlAllowList allowList =
+				PackageUrlAllowList.of(List.of(), List.of(new AllowedUrlPrefix("/opt/packages", false)));
 
 		assertThat(allowList.isAllowed("file:/opt/packages/pkg.tgz")).isTrue();
 		assertThat(allowList.isAllowed("file:/opt/packages-evil/pkg.tgz")).isFalse();
@@ -208,8 +212,8 @@ class PackageUrlAllowListTest {
 	@Test
 	void isAllowed_withUnsupportedSchemeInPrefix_grantsNothing() {
 		PackageUrlAllowList allowList =
-				PackageUrlAllowList.of(List.of(new AllowedUrlPrefix("ftp://packages.fhir.org", false, false)),
-					List.of(new AllowedUrlPrefix("netdoc:/opt/packages", false, false)));
+				PackageUrlAllowList.of(List.of(new AllowedUrlPrefix("ftp://packages.fhir.org", false)),
+					List.of(new AllowedUrlPrefix("netdoc:/opt/packages", false)));
 
 		// not by way of the unsupported scheme itself
 		assertThat(allowList.isAllowed("ftp://packages.fhir.org/pkg.tgz")).isFalse();
@@ -224,7 +228,7 @@ class PackageUrlAllowListTest {
 	void isAllowed_withJarPrefixWrappingPermittedPath_grantsNothing() {
 		// "jar:file:/opt/packages" contains a permitted path but must not be read as one
 		PackageUrlAllowList allowList = PackageUrlAllowList.of(List.of(), List.of(
-			new AllowedUrlPrefix("jar:file:/opt/packages", false, false)));
+			new AllowedUrlPrefix("jar:file:/opt/packages", false)));
 
 		assertThat(allowList.isAllowed("file:/opt/packages/pkg.tgz")).isFalse();
 		assertThat(allowList.isAllowed("jar:file:/opt/packages/pkg.tgz")).isFalse();
@@ -233,8 +237,8 @@ class PackageUrlAllowListTest {
 	@Test
 	void isAllowed_withBlankPrefixEntry_grantsNothingOutsideIt() {
 		// blank entries are filtered upstream, but this class must not depend on that
-		PackageUrlAllowList allowList = PackageUrlAllowList.of(List.of(new AllowedUrlPrefix("  ", false, false)),
-			List.of(new AllowedUrlPrefix("  ", false, false)));
+		PackageUrlAllowList allowList = PackageUrlAllowList.of(List.of(new AllowedUrlPrefix("  ", false)),
+			List.of(new AllowedUrlPrefix("  ", false)));
 
 		assertThat(allowList.isAllowed("file:/opt/packages/pkg.tgz")).isFalse();
 		assertThat(allowList.isAllowed("https://packages.fhir.org/pkg.tgz")).isFalse();
@@ -245,8 +249,8 @@ class PackageUrlAllowListTest {
 		// the wildcard is absolute; a junk entry beside it neither helps nor hinders
 		PackageUrlAllowList allowList =
 				PackageUrlAllowList.of(
-					List.of(AllowedUrlPrefix.all(), new AllowedUrlPrefix("ftp://x", false, false)),
-					List.of(AllowedUrlPrefix.all(), new AllowedUrlPrefix("ftp://x", false, false)));
+					List.of(AllowedUrlPrefix.all(), new AllowedUrlPrefix("ftp://x", false)),
+					List.of(AllowedUrlPrefix.all(), new AllowedUrlPrefix("ftp://x", false)));
 
 		assertThat(allowList.isAllowed("file:/anywhere/pkg.tgz")).isTrue();
 		assertThat(allowList.isAllowed("https://anywhere.example.com/pkg.tgz")).isTrue();
@@ -261,7 +265,7 @@ class PackageUrlAllowListTest {
 	@Test
 	void isAllowed_withFilesystemRootAsPrefix_permitsAnyFile() {
 		PackageUrlAllowList allowList = PackageUrlAllowList.of(List.of(), List.of(
-			new AllowedUrlPrefix("/", false, false)));
+			new AllowedUrlPrefix("/", false)));
 
 		assertThat(allowList.isAllowed("file:/etc/shadow")).isTrue();
 	}

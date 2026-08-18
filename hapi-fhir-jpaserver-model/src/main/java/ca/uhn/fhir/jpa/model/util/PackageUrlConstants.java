@@ -51,6 +51,14 @@ public class PackageUrlConstants {
 	public static final String CLASSPATH_PREFIX = "classpath:";
 
 	/**
+	 * Prefix identifying an allow list entry which refers to a remote server over TLS.
+	 * <p>
+	 * A remote entry which does not carry this prefix is served over plain HTTP, which is
+	 * how the loader decides whether plain HTTP is permitted for that entry.
+	 */
+	public static final String HTTPS_PREFIX = "https:";
+
+	/**
 	 * Max redirects allowed for package url imports
 	 */
 	public static final int MAX_REDIRECTS = 5;

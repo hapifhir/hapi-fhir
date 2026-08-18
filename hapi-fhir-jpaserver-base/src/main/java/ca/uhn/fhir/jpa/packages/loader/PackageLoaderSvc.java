@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ClasspathUtil;
 import jakarta.annotation.Nullable;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.Header;
@@ -62,7 +63,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.model.util.PackageUrlConstants.WILDCARD;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -108,15 +108,15 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 		List<AllowedUrlPrefix> appliedPrefixes =
 				ourApplied == null ? null : ourApplied.getPackageUrlAllowList().getRemotePrefixes();
 
-		if (appliedPrefixes != null && !appliedPrefixes.equals(newPrefixes)) {
+		if (appliedPrefixes != null && !ListUtils.isEqualList(appliedPrefixes, newPrefixes)) {
 			ourLog.warn(
 					"Remote package URL allow-list is being changed from {} to {}; this config is cluster-wide and cannot vary per module!",
-					appliedPrefixes,
-					newPrefixes);
+					String.join(", ", appliedPrefixes.stream().map(url -> url.toString()).collect(Collectors.toSet())),
+					String.join(", ", newPrefixes.stream().map(url -> url.toString()).collect(Collectors.toSet())));
 		} else if (appliedPrefixes != null) {
 			return; // already applied
 		} else {
-			ourLog.info("Applying remote package URL allow-list with {} entries", newPrefixes);
+			ourLog.info("Applying remote package URL allow-list with {} entries", newPrefixes.size());
 		}
 
 		doApplySettings(theSettings);
@@ -126,8 +126,7 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 		// last in wins
 		ourApplied = theSettings;
 
-		if (ourApplied.getPackageUrlAllowList().getLocalPrefixes().contains(WILDCARD)
-				|| ourApplied.getPackageUrlAllowList().getRemotePrefixes().contains(WILDCARD)) {
+		if (ourApplied.getPackageUrlAllowList().allowsAll()) {
 			ourLog.warn("Allowing all. This shouldn't ever be in production code.");
 			ManagedWebAccess.setSsrfProtectionEnabled(false);
 			return;
@@ -141,7 +140,7 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 							.url(prefix.getUrl())
 							.authenticationType("none")
 							.type("web")
-							.allowHttp(!prefix.isSecure())
+							.allowHttp(isPlainHttpPrefix(prefix))
 							.allowPrivateNetwork(prefix.isPrivateNetwork())
 							.headers(Collections.emptyMap())
 							.build();
@@ -150,6 +149,20 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 
 		ManagedWebAccess.loadFromFHIRSettings(
 				FhirSettingsPOJO.builder().servers(servers).build());
+	}
+
+	/**
+	 * Whether plain HTTP is permitted for a remote allow list entry.
+	 * <p>
+	 * This is derived from the entry rather than configured alongside it. Allow list matching
+	 * requires the scheme of a candidate URL to equal the scheme of the entry it matches, so an
+	 * {@code https:} entry can never serve a plain HTTP fetch and an {@code http:} entry can never
+	 * serve anything else. A separately configured flag could only ever agree with the scheme or
+	 * contradict it.
+	 */
+	private static boolean isPlainHttpPrefix(AllowedUrlPrefix thePrefix) {
+		String url = thePrefix.getUrl();
+		return url != null && !url.trim().toLowerCase().startsWith(PackageUrlConstants.HTTPS_PREFIX);
 	}
 
 	/**
@@ -273,32 +286,33 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 
 		PackageUrlScheme scheme = PackageUrlScheme.parseScheme(thePackageUrl);
 
-		switch (scheme) {
-			case CLASSPATH -> {
-				return ClasspathUtil.loadResourceAsByteArray(thePackageUrl.substring("classpath:".length()));
-			}
-			case FILE -> {
-				try {
-					return Files.readAllBytes(Paths.get(new URI(thePackageUrl)));
-				} catch (IOException | URISyntaxException e) {
-					throw new InternalErrorException(
+		if (scheme != null) {
+			switch (scheme) {
+				case CLASSPATH -> {
+					return ClasspathUtil.loadResourceAsByteArray(thePackageUrl.substring("classpath:".length()));
+				}
+				case FILE -> {
+					try {
+						return Files.readAllBytes(Paths.get(new URI(thePackageUrl)));
+					} catch (IOException | URISyntaxException e) {
+						throw new InternalErrorException(
 							Msg.code(2031) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());
+					}
+				}
+				case HTTPS, HTTP -> {
+					return fetchHttpPackageContents(thePackageUrl);
 				}
 			}
-			case HTTPS, HTTP -> {
-				return fetchHttpPackageContents(thePackageUrl);
-			}
-			default -> {
-				// we won't ever see this - the scheme is validated in
-				throw new InvalidRequestException(Msg.code(3029) + "Unrecognized scheme");
-			}
 		}
+
+		// reachable only when the allow list is a wildcard, which lets a URL through without a scheme
+		throw new InvalidRequestException(Msg.code(3029) + "Unrecognized scheme: " + thePackageUrl);
 	}
 
 	private byte[] fetchHttpPackageContents(String thePackageUrl) {
 		String currentUrl = thePackageUrl;
-		Set<String> visisted = new LinkedHashSet<>();
-		visisted.add(currentUrl);
+		Set<String> visited = new LinkedHashSet<>();
+		visited.add(currentUrl);
 
 		HttpClientConnectionManager connManager = new BasicHttpClientConnectionManager();
 		/*
@@ -315,7 +329,7 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 					// 308 == permanent redirect + anything later isn't
 					// in our library for codes, so we use < 400 to catch them instead
 					if (status >= HttpStatus.SC_MULTIPLE_CHOICES && status < HttpStatus.SC_BAD_REQUEST) {
-						String target = resoleAllowedRedirect(currentUrl, request, visisted);
+						String target = resolveAllowedRedirect(currentUrl, request, visited);
 						// discard the redirect response
 						EntityUtils.consumeQuietly(request.getEntity());
 						currentUrl = target;
@@ -328,8 +342,8 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 				}
 			}
 
-			throw new InvalidRequestException("Exceeded " + PackageUrlConstants.MAX_REDIRECTS
-				+ " redirects loading a package; chain was " + String.join(" -> ", visisted));
+			throw new InvalidRequestException(Msg.code(3032) + "Exceeded " + PackageUrlConstants.MAX_REDIRECTS
+				+ " redirects loading a package; chain was " + String.join(" -> ", visited));
 		} catch (IOException e) {
 			throw new InternalErrorException(
 				Msg.code(1304) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());
@@ -339,13 +353,13 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 	/**
 	 * Manually check the redirect to make sure it, too, is within the whitelist
 	 */
-	private String resoleAllowedRedirect(String theCurrentUrl, CloseableHttpResponse theResponse, Set<String> theVisisted) {
+	private String resolveAllowedRedirect(String theCurrentUrl, CloseableHttpResponse theResponse, Set<String> theVisited) {
 		int status = theResponse.getStatusLine().getStatusCode();
 
 		// check the location header
 		Header location = theResponse.getFirstHeader(HttpHeaders.LOCATION);
 		if (location == null || isBlank(location.getValue())) {
-			throw new InvalidRequestException("Received HTTP status " + status
+			throw new InvalidRequestException(Msg.code(3033) + "Received HTTP status " + status
 				+ " from URL " + theCurrentUrl + " with no Location header");
 		}
 
@@ -353,8 +367,8 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 		try {
 			target = URI.create(theCurrentUrl).resolve(location.getValue().trim());
 		} catch (IllegalArgumentException ex) {
-			throw new InvalidRequestException("Received HTTP " + status
-				+ " from URL " + theCurrentUrl + " with an unusuable Location: " + location.getValue());
+			throw new InvalidRequestException(Msg.code(3034) + "Received HTTP " + status
+				+ " from URL " + theCurrentUrl + " with an unusable Location: " + location.getValue());
 		}
 
 		// check the scheme
@@ -364,16 +378,19 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 
 		boolean schemeAllowed = isSchemeAllowed(targetScheme, currentScheme);
 		if (!schemeAllowed) {
-			throw new InvalidRequestException("Refusing redirect from " + theCurrentUrl + " to " + targetUrl);
+			throw new InvalidRequestException(
+				Msg.code(3035) + "Refusing redirect from " + theCurrentUrl + " to " + targetUrl);
 		}
 
 		// check the target is in the whitelist
 		if (!mySettings.getPackageUrlAllowList().isAllowed(targetUrl)) {
-			throw new InvalidRequestException("Refusing redirect from " + theCurrentUrl + " to non-whitelisted URL " + targetUrl);
+			throw new InvalidRequestException(Msg.code(3036) + "Refusing redirect from " + theCurrentUrl
+				+ " to non-whitelisted URL " + targetUrl);
 		}
 
-		if (!theVisisted.add(targetUrl)) {
-			throw new InvalidRequestException("Redirect loop loading a package; chain was " + String.join(", ", theVisisted) + " -> " + targetUrl);
+		if (!theVisited.add(targetUrl)) {
+			throw new InvalidRequestException(Msg.code(3037) + "Redirect loop loading a package; chain was "
+				+ String.join(", ", theVisited) + " -> " + targetUrl);
 		}
 
 		// everything's good - we can pass back the (approved) url
