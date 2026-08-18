@@ -30,6 +30,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
+
 public interface IResourceModifiedDao
 		extends JpaRepository<ResourceModifiedEntity, PersistedResourceModifiedMessageEntityPK>,
 				IHapiFhirJpaRepository {
@@ -40,4 +42,15 @@ public interface IResourceModifiedDao
 	@Modifying
 	@Query("delete from ResourceModifiedEntity r where r.myResourceModifiedEntityPK =:pk")
 	int removeById(@Param("pk") PersistedResourceModifiedMessageEntityPK thePK);
+
+	/**
+	 * Delete a whole batch of rows with a single statement so that draining a page of
+	 * HFJ_RESOURCE_MODIFIED costs one database round trip instead of one per row.
+	 *
+	 * @param thePKs the primary keys of the rows to delete
+	 * @return the number of rows deleted
+	 */
+	@Modifying
+	@Query("delete from ResourceModifiedEntity r where r.myResourceModifiedEntityPK in :pks")
+	int removeByPks(@Param("pks") Collection<PersistedResourceModifiedMessageEntityPK> thePKs);
 }
