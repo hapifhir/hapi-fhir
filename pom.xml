@@ -1967,7 +1967,7 @@
 				org.jline:jansi and org.jline:jline ship overlapping copies of org.jline.* classes. Downstream
 				builds that also resolve org.jline:jline must keep the two artifacts at the same version - bump
 				them together via the jline_version property (inherited by child builds, so it is the single
-				bump point). See GL-9148.
+				bump point).
 			-->
 			<dependency>
 				<groupId>org.jline</groupId>
