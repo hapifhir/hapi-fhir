@@ -1137,10 +1137,10 @@
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 		<elastic_apm_version>1.52.0</elastic_apm_version>
 		<elasticsearch_version>8.19.19</elasticsearch_version>
-		<!-- Jackson 3, used only by elasticsearch-java at runtime; CDR itself is on Jackson 2.
+		<!-- Jackson 3, used only by elasticsearch-java at runtime
 		     Pinned for CVE-2026-19032, CVE-2026-68497, CVE-2026-59888, CVE-2026-29062 and
-		     CVE-2026-54512 through CVE-2026-54518. Remove once elasticsearch-java 8.x.x ships a
-		     patched Jackson 3 itself. -->
+		     CVE-2026-54512 through CVE-2026-54518. Transitive via elasticsearch-java, remove
+		     once the 8.x.x version ships a patched Jackson 3 itself. -->
 		<jackson3_version>3.1.6</jackson3_version>
 		<ucum_version>1.0.9</ucum_version>
 		<!-- only required for third party libraries when generating JavaDoc. Not to be used internally. -->
@@ -1577,13 +1577,13 @@
 			<dependency>
 				<groupId>org.elasticsearch.client</groupId>
 				<artifactId>elasticsearch-rest-client</artifactId>
-				<version>8.19.19</version>
+				<version>${elasticsearch_version}</version>
 			</dependency>
 			<!-- Pinned for CVE-2025-68384, used by hibernate_search v7.2.1 -->
 			<dependency>
 				<groupId>org.elasticsearch.client</groupId>
 				<artifactId>elasticsearch-rest-client-sniffer</artifactId>
-				<version>8.19.19</version>
+				<version>${elasticsearch_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>tools.jackson.core</groupId>
