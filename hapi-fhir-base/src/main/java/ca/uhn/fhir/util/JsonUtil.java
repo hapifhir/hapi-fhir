@@ -56,7 +56,7 @@ public class JsonUtil {
 			.addFilter(IModelJson.SENSITIVE_DATA_FILTER_NAME, SimpleBeanPropertyFilter.serializeAll());
 
 	static {
-		ourMapperPrettyPrint = JsonMapper.builder()
+		ourMapperPrettyPrint = JsonMapper.builderWithJackson2Defaults()
 				.changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL)
 						.withContentInclusion(JsonInclude.Include.NON_NULL))
 				.changeDefaultVisibility(vc -> vc.withFieldVisibility(JsonAutoDetect.Visibility.PUBLIC_ONLY))
@@ -66,7 +66,7 @@ public class JsonUtil {
 				.enable(SerializationFeature.INDENT_OUTPUT)
 				.build();
 
-		ourMapperNonPrettyPrint = JsonMapper.builder()
+		ourMapperNonPrettyPrint = JsonMapper.builderWithJackson2Defaults()
 				.changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL)
 						.withContentInclusion(JsonInclude.Include.NON_NULL))
 				.changeDefaultVisibility(vc -> vc.withFieldVisibility(JsonAutoDetect.Visibility.PUBLIC_ONLY))
@@ -76,7 +76,7 @@ public class JsonUtil {
 				.disable(SerializationFeature.INDENT_OUTPUT)
 				.build();
 
-		ourMapperIncludeSensitive = JsonMapper.builder()
+		ourMapperIncludeSensitive = JsonMapper.builderWithJackson2Defaults()
 				.filterProvider(SHOW_ALL_DATA_FILTER_PROVIDER)
 				.changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL)
 						.withContentInclusion(JsonInclude.Include.NON_NULL))
