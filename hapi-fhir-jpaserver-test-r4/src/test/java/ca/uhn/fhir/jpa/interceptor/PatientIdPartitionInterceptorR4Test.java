@@ -1239,7 +1239,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("{}\n{}", status.getStatusLine(), responseContent);
 
-		// verify
+			// verify
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		}
 
