@@ -54,7 +54,9 @@ public IPackageUrlAllowListProvider packageUrlAllowListProvider() {
 }
 ```
 
-The `AllowedUrlPrefix` constructor takes the prefix followed by `theIsPrivateNetwork`. When that is `true`, fetches against the host may resolve to an address on a private network; SSRF protection otherwise blocks them, so an internal mirror or registry needs it set. It applies to remote prefixes only and is ignored for `file:` and `classpath:` prefixes.
+The `AllowedUrlPrefix` constructor takes the prefix followed by `theIsPrivateNetwork` boolean. When `theIsPrivateNetwork` is set to `true`, fetching from an address on a private network is permitted (otherwise SSRF protection blocks this).
+
+`theIsPrivateNetwork` only applies to remote prefixes and is ignored for `file:` and `classpath:` prefixes.
 
 Whether plain HTTP is permitted is derived from the prefix rather than configured: a prefix beginning `https:` refuses plain-HTTP fetches against that host, and one beginning `http:` permits them. Allow list matching requires a candidate URL's scheme to equal the scheme of the prefix it matches, so the two can never disagree.
 
@@ -62,11 +64,11 @@ Remote prefixes are matched by origin and local prefixes by resolved path, so th
 
 Write `file:` prefixes as `file:/opt/packages` or `file:///opt/packages`; the two-slash spelling `file://opt/packages` parses `opt` as a hostname and restricts to `/packages` instead.
 
-When such a bean is present, `PackageLoaderSvc` rejects any package URL that does not match a configured prefix with `HAPI-3028`.
+When the `IPackageUrlAllowListProvider` bean is present, `PackageLoaderSvc` rejects any package URL that does not match a configured prefix with `HAPI-3028`.
 
 Regardless of what is configured, only the `http:`, `https:`, `file:` and `classpath:` schemes are supported; any other scheme is rejected with `HAPI-3029`.
 
-When no such bean is present, all URLs are permitted and behaviour is unchanged.
+When no such bean is present (or if the provided bean includes in the list `AllowedUrlPrefix.all()`), all URLs are permitted and behaviour is unchanged.
 
 ## Redirects
 

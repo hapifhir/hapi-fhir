@@ -6,11 +6,21 @@ import static ca.uhn.fhir.jpa.model.util.PackageUrlConstants.WILDCARD;
 
 public class AllowedUrlPrefix {
 
+	/**
+	 * Creator for AllowAll for Url Prefix Whitelist.
+	 * Do not use in production.
+	 */
 	public static AllowedUrlPrefix all() {
 		return new AllowedUrlPrefix(WILDCARD, false);
 	}
 
+	/**
+	 * The URL (prefix) to whitelist/allow
+	 */
 	private final String myUrl;
+	/**
+	 * Whether or not the url is on a private network
+	 */
 	private final boolean myIsPrivateNetwork;
 
 	public AllowedUrlPrefix(String theUrl, boolean theIsPrivateNetwork) {

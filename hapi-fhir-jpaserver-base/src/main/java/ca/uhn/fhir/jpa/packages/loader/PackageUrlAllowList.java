@@ -79,17 +79,26 @@ public class PackageUrlAllowList {
 		myLocalPrefixes = ImmutableList.copyOf(theLocalPrefixes);
 	}
 
+	/**
+	 * Returns the allowed remote prefixes
+	 */
 	public List<AllowedUrlPrefix> getRemotePrefixes() {
 		return myRemotePrefixes;
 	}
 
+	/**
+	 * Returns the allowed local prefixes
+	 */
 	public List<AllowedUrlPrefix> getLocalPrefixes() {
 		return myLocalPrefixes;
 	}
 
+	/**
+	 * Returns true if both local and remote contain the "*" wildcard
+	 */
 	public boolean allowsAll() {
 		return getLocalPrefixes().stream().anyMatch(prefix -> prefix.getUrl().equals(WILDCARD))
-				|| getRemotePrefixes().stream()
+				&& getRemotePrefixes().stream()
 						.anyMatch(prefix -> prefix.getUrl().equals(WILDCARD));
 	}
 

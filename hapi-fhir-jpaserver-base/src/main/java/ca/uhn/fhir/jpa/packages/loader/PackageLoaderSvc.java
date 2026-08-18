@@ -260,8 +260,7 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 	}
 
 	@Override
-	public NpmPackage addPackageToCache(String theS, String theS1, InputStream theInputStream, String theS2)
-			throws IOException {
+	public NpmPackage addPackageToCache(String theS, String theS1, InputStream theInputStream, String theS2) {
 		throw new UnsupportedOperationException(Msg.code(2216)
 				+ "Cannot add to cache. "
 				+ "Caching not supported in PackageLoaderSvc. Use JpaPackageCache instead.");
@@ -309,8 +308,7 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 			}
 		}
 
-		// reachable only when the allow list is a wildcard, which lets a URL through without a scheme
-		throw new InvalidRequestException(Msg.code(3029) + "Unrecognized scheme: " + thePackageUrl);
+		throw new InvalidRequestException(Msg.code(3029) + "Unrecognized scheme for whitelist URL: " + thePackageUrl);
 	}
 
 	private byte[] fetchHttpPackageContents(String thePackageUrl) {
@@ -320,8 +318,7 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 
 		HttpClientConnectionManager connManager = new BasicHttpClientConnectionManager();
 		/*
-		 * we block redirects so that bad actors don't just redirect a 'valid' url
-		 * to a sketchy one
+		 * we filter redirects up to a maximum # of hops {@link PackageUrlConstants#MAX_REDIRECTS}
 		 */
 		try (CloseableHttpClient client = HttpClientBuilder.create()
 				.setConnectionManager(connManager)
