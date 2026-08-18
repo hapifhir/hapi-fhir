@@ -1,6 +1,7 @@
 package ca.uhn.fhir.test.utilities;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.JsonParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PreferHandlingEnum;
 import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
@@ -19,14 +20,16 @@ import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 // Created by claude-opus-5
 class FhirHttpRequestTest {
 
-	private static final FhirContext ourFhirContext = FhirContext.forR4Cached();
+	private static final FhirContext ourFhirContext = mock(FhirContext.class);
 
 	@RegisterExtension
-	private final HttpServletExtension myServer = new HttpServletExtension().withServlet(new EchoServlet());
+	private static final HttpServletExtension ourServer = new HttpServletExtension().withServlet(new EchoServlet());
 
 	@Test
 	void withBasicAuth_sendsBase64EncodedAuthorizationHeader() {
@@ -65,15 +68,19 @@ class FhirHttpRequestTest {
 		Patient patient = new Patient();
 		patient.setActive(true);
 
+		String encoded = "{\"resourceType\":\"Patient\"}";
+		JsonParser jsonParser = mock(JsonParser.class);
+		when(ourFhirContext.newJsonParser()).thenReturn(jsonParser);
+		when(jsonParser.encodeResourceToString(patient)).thenReturn(encoded);
 		String body = request("/Patient").post(patient).assertStatus(200).getBody();
 
-		assertThat(body).contains("method=POST").contains("\"resourceType\":\"Patient\"");
-		assertThat(body).contains("contentType=" + Constants.CT_FHIR_JSON_NEW);
+		assertThat(body).contains("method=POST").contains(encoded)
+			.contains("contentType=" + Constants.CT_FHIR_JSON_NEW);
 	}
 
 	@Test
 	void post_withResourceBodyAndNoFhirContext_throwsWithActionableMessage() {
-		assertThatThrownBy(() -> FhirHttpRequest.to(myServer.getHttpClient(), myServer.getBaseUrl() + "/Patient")
+		assertThatThrownBy(() -> FhirHttpRequest.to(ourServer.getHttpClient(), ourServer.getBaseUrl() + "/Patient")
 						.post(new Patient()))
 				.isInstanceOf(NullPointerException.class)
 				.hasMessageContaining("FhirContext");
@@ -88,7 +95,13 @@ class FhirHttpRequestTest {
 
 	@Test
 	void put_withResourceBody_sendsFhirJson() {
-		String body = request("/Patient/123").put(new Patient()).getBody();
+		Patient patient = new Patient();
+
+		String encoded = "{\"resourceType\":\"Patient\"}";
+		JsonParser jsonParser = mock(JsonParser.class);
+		when(ourFhirContext.newJsonParser()).thenReturn(jsonParser);
+		when(jsonParser.encodeResourceToString(patient)).thenReturn(encoded);
+		String body = request("/Patient/123").put(patient).getBody();
 
 		assertThat(body).contains("method=PUT").contains("contentType=" + Constants.CT_FHIR_JSON_NEW);
 	}
@@ -99,8 +112,8 @@ class FhirHttpRequestTest {
 
 		String body = request("/Observation/456").patch(patchBody).getBody();
 
-		assertThat(body).contains("method=PATCH").contains("body=" + patchBody);
-		assertThat(body).contains("contentType=" + Constants.CT_JSON_PATCH);
+		assertThat(body).contains("method=PATCH").contains("body=" + patchBody)
+			.contains("contentType=" + Constants.CT_JSON_PATCH);
 	}
 
 	@Test
@@ -114,7 +127,7 @@ class FhirHttpRequestTest {
 	void execute_customRequest_appliesAccumulatedHeaders() {
 		String body = request("/foo")
 				.withHeader("X-Custom", "custom-value")
-				.execute(new HttpGet(myServer.getBaseUrl() + "/foo"))
+				.execute(new HttpGet(ourServer.getBaseUrl() + "/foo"))
 				.getBody();
 
 		assertThat(body).contains("method=GET").contains("custom=custom-value");
@@ -144,7 +157,7 @@ class FhirHttpRequestTest {
 	}
 
 	private FhirHttpRequest request(String thePath) {
-		return FhirHttpRequest.to(myServer.getHttpClient(), ourFhirContext, myServer.getBaseUrl() + thePath);
+		return FhirHttpRequest.to(ourServer.getHttpClient(), ourFhirContext, ourServer.getBaseUrl() + thePath);
 	}
 
 	private static class EchoServlet extends HttpServlet {
