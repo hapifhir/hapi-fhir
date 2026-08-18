@@ -26,7 +26,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.ISearchResultConsumer;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
@@ -52,13 +51,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantOnlyCount;
@@ -188,7 +184,8 @@ public class StatelessSearchSvcImpl implements IStatelessSearchSvc {
 
 						loadedResources = new ArrayList<>();
 						theSb.loadResourcesByPid(pids, Collections.emptySet(), loadedResources, false, null);
-						JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(pids, loadedResources);
+						JpaPreResourceAccessDetails accessDetails =
+								new JpaPreResourceAccessDetails(pids, loadedResources);
 
 						HookParams params = new HookParams()
 								.add(IPreResourceAccessDetails.class, accessDetails)
@@ -224,30 +221,30 @@ public class StatelessSearchSvcImpl implements IStatelessSearchSvc {
 
 						// Separate non-iterate and iterate includes/revincludes
 						Set<Include> nonIterateRevIncludes = theParams.getRevIncludes().stream()
-							.filter(i -> !i.isRecurse())
-							.collect(Collectors.toSet());
+								.filter(i -> !i.isRecurse())
+								.collect(Collectors.toSet());
 						Set<Include> iterateRevIncludes = theParams.getRevIncludes().stream()
-							.filter(Include::isRecurse)
-							.collect(Collectors.toSet());
+								.filter(Include::isRecurse)
+								.collect(Collectors.toSet());
 						Set<Include> nonIterateIncludes = theParams.getIncludes().stream()
-							.filter(i -> !i.isRecurse())
-							.collect(Collectors.toSet());
+								.filter(i -> !i.isRecurse())
+								.collect(Collectors.toSet());
 						Set<Include> iterateIncludes = theParams.getIncludes().stream()
-							.filter(Include::isRecurse)
-							.collect(Collectors.toSet());
+								.filter(Include::isRecurse)
+								.collect(Collectors.toSet());
 
 						// Phase 1: non-iterate `_revinclude` on original search result PIDs
 						if (!nonIterateRevIncludes.isEmpty()) {
 							Set<JpaPid> revIncludedPids = theSb.loadIncludes(
-								myContext,
-								myEntityManager,
-								originalPids,
-								nonIterateRevIncludes,
-								true,
-								theParams.getLastUpdated(),
-								"(synchronous)",
-								theRequestDetails,
-								maxIncludes);
+									myContext,
+									myEntityManager,
+									originalPids,
+									nonIterateRevIncludes,
+									true,
+									theParams.getLastUpdated(),
+									"(synchronous)",
+									theRequestDetails,
+									maxIncludes);
 							if (maxIncludes != null) {
 								maxIncludes -= revIncludedPids.size();
 							}
@@ -259,18 +256,18 @@ public class StatelessSearchSvcImpl implements IStatelessSearchSvc {
 						// (use originalPids so `_include` only applies to the initial search results,
 						// not to revincluded resources — per FHIR spec, without `:iterate`)
 						if (theParams.getEverythingMode() == null
-							&& !nonIterateIncludes.isEmpty()
-							&& (maxIncludes == null || maxIncludes > 0)) {
+								&& !nonIterateIncludes.isEmpty()
+								&& (maxIncludes == null || maxIncludes > 0)) {
 							Set<JpaPid> forwardIncludedPids = theSb.loadIncludes(
-								myContext,
-								myEntityManager,
-								originalPids,
-								nonIterateIncludes,
-								false,
-								theParams.getLastUpdated(),
-								"(synchronous)",
-								theRequestDetails,
-								maxIncludes);
+									myContext,
+									myEntityManager,
+									originalPids,
+									nonIterateIncludes,
+									false,
+									theParams.getLastUpdated(),
+									"(synchronous)",
+									theRequestDetails,
+									maxIncludes);
 							if (maxIncludes != null) {
 								maxIncludes -= forwardIncludedPids.size();
 							}
@@ -281,15 +278,15 @@ public class StatelessSearchSvcImpl implements IStatelessSearchSvc {
 						// Phase 3: `_revinclude:iterate` on expanded PIDs (including non-iterate revinclude results)
 						if (!iterateRevIncludes.isEmpty() && (maxIncludes == null || maxIncludes > 0)) {
 							Set<JpaPid> iterateRevIncludedPids = theSb.loadIncludes(
-								myContext,
-								myEntityManager,
-								pids,
-								iterateRevIncludes,
-								true,
-								theParams.getLastUpdated(),
-								"(synchronous)",
-								theRequestDetails,
-								maxIncludes);
+									myContext,
+									myEntityManager,
+									pids,
+									iterateRevIncludes,
+									true,
+									theParams.getLastUpdated(),
+									"(synchronous)",
+									theRequestDetails,
+									maxIncludes);
 							if (maxIncludes != null) {
 								maxIncludes -= iterateRevIncludedPids.size();
 							}
@@ -299,34 +296,36 @@ public class StatelessSearchSvcImpl implements IStatelessSearchSvc {
 
 						// Phase 4: `_include:iterate` on all expanded PIDs (including revinclude results)
 						if (theParams.getEverythingMode() == null
-							&& !iterateIncludes.isEmpty()
-							&& (maxIncludes == null || maxIncludes > 0)) {
+								&& !iterateIncludes.isEmpty()
+								&& (maxIncludes == null || maxIncludes > 0)) {
 							Set<JpaPid> iterateForwardIncludedPids = theSb.loadIncludes(
-								myContext,
-								myEntityManager,
-								pids,
-								iterateIncludes,
-								false,
-								theParams.getLastUpdated(),
-								"(synchronous)",
-								theRequestDetails,
-								maxIncludes);
+									myContext,
+									myEntityManager,
+									pids,
+									iterateIncludes,
+									false,
+									theParams.getLastUpdated(),
+									"(synchronous)",
+									theRequestDetails,
+									maxIncludes);
 							pids.addAll(iterateForwardIncludedPids);
 							allIncludedPidsList.addAll(iterateForwardIncludedPids);
 						}
-
 					}
 
 					if (loadedResources == null) {
 						loadedResources = new ArrayList<>();
 						theSb.loadResourcesByPid(pids, allIncludedPidsList, loadedResources, false, theRequestDetails);
 					} else if (!allIncludedPidsList.isEmpty()) {
-						theSb.loadResourcesByPid(allIncludedPidsList, allIncludedPidsList, loadedResources, false, theRequestDetails);
+						List<IBaseResource> includeResources = new ArrayList<>();
+						theSb.loadResourcesByPid(
+								allIncludedPidsList, allIncludedPidsList, includeResources, false, theRequestDetails);
+						loadedResources.addAll(includeResources);
 					}
 
 					// Hook: STORAGE_PRESHOW_RESOURCES
 					List<IBaseResource> resources = ServerInterceptorUtil.fireStoragePreshowResource(
-						loadedResources, theRequestDetails, myInterceptorBroadcaster);
+							loadedResources, theRequestDetails, myInterceptorBroadcaster);
 
 					SimpleBundleProvider bundleProvider = new SimpleBundleProvider(resources);
 
@@ -352,7 +351,7 @@ public class StatelessSearchSvcImpl implements IStatelessSearchSvc {
 						}
 					}
 
-					bundleProvider.setPreferredPageSize(theParams.getCount());
+					bundleProvider.setPreferredPageSize(resources.size());
 
 					return bundleProvider;
 				});

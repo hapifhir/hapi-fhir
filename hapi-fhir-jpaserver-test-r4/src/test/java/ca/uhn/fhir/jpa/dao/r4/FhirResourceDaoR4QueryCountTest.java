@@ -77,10 +77,10 @@ import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.BundleBuilder;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.assertj.core.api.Condition;
 import org.assertj.core.data.Index;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -1885,76 +1885,32 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		SKIP          , true                 , false      , 2           , 0
 		HIT           , false                , true       , 6           , 0
 		MISS          , false                , true       , 5           , 17
-		SKIP          , false                , true       , 2           , 0
+		SKIP          , false                , true       , 4           , 0
 		HIT           , true                 , true       , 7           , 17
 		MISS          , true                 , true       , 7           , 17
-		SKIP          , true                 , true       , 3           , 0
+		SKIP          , true                 , true       , 7           , 0
 		""")
 	void testSearch_FirstPage(QueryCacheMode theUseQueryCache, boolean theUseConsentInterceptor, boolean theUseIncludes, int theExpectSelect, int theExpectInsert) {
 		// Setup
-		BundleBuilder b = new BundleBuilder(myFhirContext);
-		List<String> ids = new ArrayList<>();
-		for (int i = 0; i < 15; i++) {
-			IBaseResource org = buildOrganization(withId("ORG" + i));
-			b.addTransactionUpdateEntry(org);
-			IBaseResource patient = buildPatient(withId("A" + i), withOrganization("Organization/ORG" + i));
-			b.addTransactionUpdateEntry(patient);
-			IBaseResource observation = buildObservation(withId("OBS" + i), withSubject("Patient/A" + i));
-			b.addTransactionUpdateEntry(observation);
-		}
-		mySystemDao.transaction(mySrd, b.getBundleTyped());
+		create150PatientsWithLinkedOrganizationsAndObservations();
 
+		int expectedResultsPerPage = theUseIncludes ? 30 : 10;
 		if (theUseQueryCache == QueryCacheMode.HIT) {
 			// Perform the search once to warm the cache
-			IQuery<Bundle> search = myClient
-				.search()
-				.forResource("Patient")
-				.returnBundle(Bundle.class);
-			if (theUseIncludes) {
-				search.include(Patient.INCLUDE_ORGANIZATION);
-				search.revInclude(Observation.INCLUDE_PATIENT);
-			}
-			Bundle outcome = search.execute();
-			if (theUseIncludes) {
-				assertEquals(30, outcome.getEntry().size());
-			} else {
-				assertEquals(10, outcome.getEntry().size());
-			}
+			Bundle outcome = performSearchForPatients(theUseQueryCache, theUseIncludes);
+			assertEquals(expectedResultsPerPage, outcome.getEntry().size());
 		}
 
 		if (theUseConsentInterceptor) {
-			when(myConsentService.shouldProcessCanSeeResource(any(), any())).thenReturn(true);
-			when(myConsentService.startOperation(any(), any())).thenReturn(new ConsentOutcome(ConsentOperationStatusEnum.PROCEED));
-			when(myConsentService.canSeeResource(any(), any(), any())).thenReturn(new ConsentOutcome(ConsentOperationStatusEnum.PROCEED));
-			when(myConsentService.willSeeResource(any(), any(), any())).thenReturn(new ConsentOutcome(ConsentOperationStatusEnum.PROCEED));
-			registerInterceptor(new ConsentInterceptor(myConsentService));
+			registerMockConsentInterceptorWithNoBlocking();
 		}
 
 		// Test
-		CacheControlDirective cacheControl = switch (theUseQueryCache) {
-			case HIT, MISS -> new CacheControlDirective();
-			case SKIP -> new CacheControlDirective().setNoCache(true).setNoStore(true).setMaxResults(10);
-		};
-
 		myCaptureQueriesListener.clear();
-		IQuery<IBaseBundle> search = myClient
-			.search()
-			.forResource("Patient");
-		if (theUseIncludes) {
-			search.include(Patient.INCLUDE_ORGANIZATION);
-			search.revInclude(Observation.INCLUDE_PATIENT);
-		}
-		Bundle outcome = search
-			.cacheControl(cacheControl)
-			.returnBundle(Bundle.class)
-			.execute();
+		Bundle outcome = performSearchForPatients(theUseQueryCache, theUseIncludes);
 
 		// Verify
-		if (theUseIncludes) {
-			assertEquals(30, outcome.getEntry().size());
-		} else {
-			assertEquals(10, outcome.getEntry().size());
-		}
+		assertEquals(expectedResultsPerPage, outcome.getEntry().size());
 		assertThat(myCaptureQueriesListener).has(
 			onAllThreads()
 				.selectCount(theExpectSelect)
@@ -1967,54 +1923,46 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@ParameterizedTest
 	@CsvSource(useHeadersInDisplayName = true, textBlock = """
-		UseQueryCache , UseConsentInterceptor, ExpectSelect, ExpectInsert, ExpectUpdate
-		HIT           , false                , 3           , 0           , 0
-		MISS          , false                , 4           , 136         , 1
-		SKIP          , false                , 2           , 0           , 0
-		HIT           , true                 , 5           , 136         , 1
-		MISS          , true                 , 5           , 136         , 1
-		SKIP          , true                 , 3           , 0           , 0
+		UseQueryCache , UseConsentInterceptor, UseIncludes , ExpectSelect, ExpectInsert, ExpectUpdate
+		HIT           , false                , false       , 3           , 0           , 0
+		MISS          , false                , false       , 4           , 136         , 1
+		SKIP          , false                , false       , 2           , 0           , 0
+		HIT           , true                 , false       , 5           , 136         , 1
+		MISS          , true                 , false       , 5           , 136         , 1
+		SKIP          , true                 , false       , 2           , 0           , 0
+		HIT           , false                , true        , 5           , 0           , 0
+		MISS          , false                , true        , 6           , 136         , 1
+		SKIP          , false                , true        , 4           , 0           , 0
+		HIT           , true                 , true        , 9           , 136         , 1
+		MISS          , true                 , true        , 9           , 136         , 1
+		SKIP          , true                 , true        , 7           , 0           , 0
 		""")
-	void testSearch_SecondPage(QueryCacheMode theUseQueryCache, boolean theUseConsentInterceptor, int theExpectSelect, int theExpectInsert, int theExpectUpdate) {
+	void testSearch_SecondPage(QueryCacheMode theUseQueryCache, boolean theUseConsentInterceptor, boolean theUseIncludes, int theExpectSelect, int theExpectInsert, int theExpectUpdate) {
 		// Setup
-		create150Patients();
+		create150PatientsWithLinkedOrganizationsAndObservations();
+		int expectedResultsPerPage = theUseIncludes ? 30 : 10;
 
 		if (theUseQueryCache == QueryCacheMode.HIT) {
 			// Perform the search once to warm the cache
-			Bundle outcome = myClient
-				.search()
-				.forResource("Patient")
-				.returnBundle(Bundle.class)
-				.execute();
-			assertEquals(10, outcome.getEntry().size());
+			Bundle outcome = performSearchForPatients(theUseQueryCache, theUseIncludes);
+			assertEquals(expectedResultsPerPage, outcome.getEntry().size());
 
 			outcome = myClient
 				.loadPage()
 				.next(outcome)
 				.execute();
-			assertEquals(10, outcome.getEntry().size());
+			assertEquals(expectedResultsPerPage, outcome.getEntry().size());
 		}
 
 		if (theUseConsentInterceptor) {
-			when(myConsentService.shouldProcessCanSeeResource(any(), any())).thenReturn(true);
-			when(myConsentService.startOperation(any(), any())).thenReturn(new ConsentOutcome(ConsentOperationStatusEnum.PROCEED));
-			when(myConsentService.canSeeResource(any(), any(), any())).thenReturn(new ConsentOutcome(ConsentOperationStatusEnum.PROCEED));
-			when(myConsentService.willSeeResource(any(), any(), any())).thenReturn(new ConsentOutcome(ConsentOperationStatusEnum.PROCEED));
-			registerInterceptor(new ConsentInterceptor(myConsentService));
+			registerMockConsentInterceptorWithNoBlocking();
 		}
 
-		// Test
+		// Load the first page
 
-		IQuery<IBaseBundle> search = myClient
-			.search()
-			.forResource("Patient");
-		if (theUseQueryCache == QueryCacheMode.SKIP) {
-			search = search.offset(0).count(10);
-		}
+		Bundle outcome = performSearchForPatients(theUseQueryCache, theUseIncludes);
 
-		Bundle outcome = search
-			.returnBundle(Bundle.class)
-			.execute();
+		// Test: Load the second page
 		myCaptureQueriesListener.clear();
 		outcome = myClient
 			.loadPage()
@@ -2022,7 +1970,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			.execute();
 
 		// Verify
-		assertEquals(10, outcome.getEntry().size());
+		assertEquals(expectedResultsPerPage, outcome.getEntry().size());
 		assertThat(myCaptureQueriesListener).has(
 			onAllThreads()
 				.connectionCount(1)
@@ -2128,6 +2076,47 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		}
 		mySystemDao.transaction(mySrd, b.getBundleTyped());
 		return ids;
+	}
+
+	private void create150PatientsWithLinkedOrganizationsAndObservations() {
+		BundleBuilder b = new BundleBuilder(myFhirContext);
+		for (int i = 0; i < 150; i++) {
+			IBaseResource org = buildOrganization(withId("ORG" + i));
+			b.addTransactionUpdateEntry(org);
+			IBaseResource patient = buildPatient(withId("A" + i), withOrganization("Organization/ORG" + i));
+			b.addTransactionUpdateEntry(patient);
+			IBaseResource observation = buildObservation(withId("OBS" + i), withSubject("Patient/A" + i));
+			b.addTransactionUpdateEntry(observation);
+		}
+		mySystemDao.transaction(mySrd, b.getBundleTyped());
+	}
+
+	private void registerMockConsentInterceptorWithNoBlocking() {
+		when(myConsentService.shouldProcessCanSeeResource(any(), any())).thenReturn(true);
+		when(myConsentService.startOperation(any(), any())).thenReturn(new ConsentOutcome(ConsentOperationStatusEnum.PROCEED));
+		when(myConsentService.canSeeResource(any(), any(), any())).thenReturn(new ConsentOutcome(ConsentOperationStatusEnum.PROCEED));
+		when(myConsentService.willSeeResource(any(), any(), any())).thenReturn(new ConsentOutcome(ConsentOperationStatusEnum.PROCEED));
+		registerInterceptor(new ConsentInterceptor(myConsentService));
+	}
+
+	private Bundle performSearchForPatients(@Nullable QueryCacheMode theCacheControl, boolean theUseIncludes) {
+		IQuery<Bundle> search = myClient
+			.search()
+			.forResource("Patient")
+			.returnBundle(Bundle.class);
+
+		if (theUseIncludes) {
+			search.include(Patient.INCLUDE_ORGANIZATION);
+			search.revInclude(Observation.INCLUDE_PATIENT);
+		}
+
+		if (theCacheControl == QueryCacheMode.SKIP) {
+			search.offset(0);
+			search.count(10);
+		}
+
+		Bundle outcome = search.execute();
+		return outcome;
 	}
 
 	@Test
