@@ -35,24 +35,29 @@ myPackageInstallerSvc.installAsynchronously(spec);
 
 By default the package loader will fetch from any URL.
 
-To restrict it, supply a bean implementing `IPackageUrlAllowListProvider`:
+To restrict it, supply a bean implementing `IPackageUrlAllowListProvider`. Each allowed prefix is an `AllowedUrlPrefix`:
 
 ```java
 @Bean
 public IPackageUrlAllowListProvider packageUrlAllowListProvider() {
 	return new IPackageUrlAllowListProvider() {
 		@Override
-		public List<String> getRemotePrefixes() {
-			return List.of("https://packages2.fhir.org");
+		public List<AllowedUrlPrefix> getRemotePrefixes() {
+			return List.of(new AllowedUrlPrefix("https://packages2.fhir.org", true, false));
 		}
 
 		@Override
-		public List<String> getLocalPrefixes() {
-			return List.of("file:/opt/packages");
+		public List<AllowedUrlPrefix> getLocalPrefixes() {
+			return List.of(new AllowedUrlPrefix("file:/opt/packages", false, false));
 		}
 	};
 }
 ```
+
+The `AllowedUrlPrefix` constructor takes the prefix followed by two flags, which apply to remote prefixes only and are ignored for `file:` and `classpath:` prefixes:
+
+* `theIsSecure` &ndash; When `true`, plain-HTTP fetches against that host are refused. Set it on `https:` prefixes; leave it `false` on an `http:` prefix, otherwise no fetch against it will succeed.
+* `theIsPrivateNetwork` &ndash; When `true`, fetches against that host may resolve to an address on a private network. SSRF protection otherwise blocks them, so an internal mirror or registry needs this set.
 
 Remote prefixes are matched by origin and local prefixes by resolved path, so the example above permits any package beneath `/opt/packages` but not one in `/opt/packages-other`.
 
@@ -63,6 +68,14 @@ When such a bean is present, `PackageLoaderSvc` rejects any package URL that doe
 Regardless of what is configured, only the `http:`, `https:`, `file:` and `classpath:` schemes are supported; any other scheme is rejected with `HAPI-3029`.
 
 When no such bean is present, all URLs are permitted and behaviour is unchanged.
+
+## Redirects
+
+A prefix is matched against the URL that is requested. If the server answers with a redirect, the redirect target is matched against the allow list in turn before it is followed.
+
+Up to `PackageUrlConstants.MAX_REDIRECTS` (5) hops are followed. A redirect is refused if the target does not match a configured prefix, if it would downgrade `https:` to `http:`, if it repeats a URL already visited in the chain, or if the response carries no usable `Location` header.
+
+A registry or mirror that redirects — for example to a CDN — therefore needs both the URL that is requested and the URL it redirects to on the allow list.
 
 # Install Mode
 

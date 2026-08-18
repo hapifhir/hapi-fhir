@@ -34,9 +34,9 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
 
-import static ca.uhn.fhir.jpa.model.util.PackageUrlUtils.CLASSPATH_PREFIX;
-import static ca.uhn.fhir.jpa.model.util.PackageUrlUtils.FILE_PREFIX;
-import static ca.uhn.fhir.jpa.model.util.PackageUrlUtils.WILDCARD;
+import static ca.uhn.fhir.jpa.model.util.PackageUrlConstants.CLASSPATH_PREFIX;
+import static ca.uhn.fhir.jpa.model.util.PackageUrlConstants.FILE_PREFIX;
+import static ca.uhn.fhir.jpa.model.util.PackageUrlConstants.WILDCARD;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class PackageUrlAllowList {
@@ -47,7 +47,7 @@ public class PackageUrlAllowList {
 	 * remote prefixes and local prefixes
 	 */
 	public static PackageUrlAllowList of(
-			@Nonnull List<String> theRemotePrefixes, @Nonnull List<String> theLocalPrefixes) {
+			@Nonnull List<AllowedUrlPrefix> theRemotePrefixes, @Nonnull List<AllowedUrlPrefix> theLocalPrefixes) {
 		return new PackageUrlAllowList(theRemotePrefixes, theLocalPrefixes);
 	}
 
@@ -60,30 +60,32 @@ public class PackageUrlAllowList {
 	 * * user-driven flows where the 'configurer' and 'user' are the one and the same
 	 */
 	public static PackageUrlAllowList allowAll() {
-		return new PackageUrlAllowList(List.of(WILDCARD), List.of(WILDCARD));
+		AllowedUrlPrefix localAll = new AllowedUrlPrefix(WILDCARD, false, true);
+		AllowedUrlPrefix remoteAll = new AllowedUrlPrefix(WILDCARD, false, false);
+		return new PackageUrlAllowList(List.of(localAll), List.of(remoteAll));
 	}
 
 	/**
 	 * A list of url (prefixes) that are allowed
 	 * for packageloader.
 	 */
-	private final List<String> myRemotePrefixes;
+	private final List<AllowedUrlPrefix> myRemotePrefixes;
 
 	/**
 	 * A list of prefixes allowed (for file/classpath: 'urls')
 	 */
-	private final List<String> myLocalPrefixes;
+	private final List<AllowedUrlPrefix> myLocalPrefixes;
 
-	private PackageUrlAllowList(List<String> theRemotePrefixes, List<String> theLocalPrefixes) {
+	private PackageUrlAllowList(List<AllowedUrlPrefix> theRemotePrefixes, List<AllowedUrlPrefix> theLocalPrefixes) {
 		myRemotePrefixes = ImmutableList.copyOf(theRemotePrefixes);
 		myLocalPrefixes = ImmutableList.copyOf(theLocalPrefixes);
 	}
 
-	public List<String> getRemotePrefixes() {
+	public List<AllowedUrlPrefix> getRemotePrefixes() {
 		return myRemotePrefixes;
 	}
 
-	public List<String> getLocalPrefixes() {
+	public List<AllowedUrlPrefix> getLocalPrefixes() {
 		return myLocalPrefixes;
 	}
 
@@ -124,6 +126,7 @@ public class PackageUrlAllowList {
 
 		if (theUrl.toLowerCase().startsWith(CLASSPATH_PREFIX)) {
 			return myLocalPrefixes.stream()
+					.map(prefix -> prefix.getUrl())
 					.filter(url -> url.startsWith(CLASSPATH_PREFIX))
 					.anyMatch(url -> isPathPrefix(url, theUrl));
 		}
@@ -135,6 +138,7 @@ public class PackageUrlAllowList {
 			}
 
 			return myLocalPrefixes.stream()
+					.map(prefix -> prefix.getUrl())
 					.filter(url -> !url.startsWith(CLASSPATH_PREFIX))
 					.map(this::toNormalizedPath)
 					.filter(Objects::nonNull)
@@ -188,6 +192,7 @@ public class PackageUrlAllowList {
 		}
 
 		return myRemotePrefixes.stream()
+				.map(prefix -> prefix.getUrl())
 				.map(this::parseHttpUri)
 				.filter(Objects::nonNull)
 				.anyMatch(url -> {

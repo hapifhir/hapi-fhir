@@ -26,11 +26,11 @@ public interface IPackageUrlAllowListProvider {
 	 * whitelist of remote url prefixes to allow for package import.
 	 * These are urls that are prefixed with http: or https:
 	 */
-	List<String> getRemotePrefixes();
+	List<AllowedUrlPrefix> getRemotePrefixes();
 
 	/**
 	 * whitelist of local url prefixes to allow for package import.
 	 * These are urls that are prefixed with file: or classpath:
 	 */
-	List<String> getLocalPrefixes();
+	List<AllowedUrlPrefix> getLocalPrefixes();
 }

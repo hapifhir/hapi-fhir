@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.jpa.packages.loader.AllowedUrlPrefix;
 import ca.uhn.fhir.jpa.packages.loader.IPackageUrlAllowListProvider;
 import ca.uhn.fhir.jpa.packages.loader.PackageLoaderSettings;
 import ca.uhn.fhir.jpa.packages.loader.PackageLoaderSvc;
@@ -147,13 +148,14 @@ public class InstallPackageJobAllowListR4IT extends BaseJpaR4Test {
 			return new IPackageUrlAllowListProvider() {
 
 				@Override
-				public List<String> getRemotePrefixes() {
+				public List<AllowedUrlPrefix> getRemotePrefixes() {
 					return List.of();
 				}
 
 				@Override
-				public List<String> getLocalPrefixes() {
-					return List.of(ALLOWED_PACKAGE_DIR.toString());
+				public List<AllowedUrlPrefix> getLocalPrefixes() {
+					return List.of(
+						new AllowedUrlPrefix(ALLOWED_PACKAGE_DIR.toString(), false, false));
 				}
 			};
 		}

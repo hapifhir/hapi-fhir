@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.packages.loader;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.PackageUrlScheme;
-import ca.uhn.fhir.jpa.model.util.PackageUrlUtils;
+import ca.uhn.fhir.jpa.model.util.PackageUrlConstants;
 import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -30,12 +30,16 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import jakarta.annotation.Nullable;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.http.Header;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.HttpClientConnectionManager;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
+import org.apache.http.util.EntityUtils;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.utilities.http.ManagedWebAccess;
 import org.hl7.fhir.utilities.npm.BasePackageCacheManager;
@@ -53,10 +57,13 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.model.util.PackageUrlUtils.WILDCARD;
+import static ca.uhn.fhir.jpa.model.util.PackageUrlConstants.WILDCARD;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class PackageLoaderSvc extends BasePackageCacheManager {
@@ -97,8 +104,8 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 	 * Syncronoized because module contexts can start concurrently, and this is read-modify-write on shared static state.
 	 */
 	public static synchronized void initSettings(PackageLoaderSettings theSettings) {
-		List<String> newPrefixes = theSettings.getPackageUrlAllowList().getRemotePrefixes();
-		List<String> appliedPrefixes =
+		List<AllowedUrlPrefix> newPrefixes = theSettings.getPackageUrlAllowList().getRemotePrefixes();
+		List<AllowedUrlPrefix> appliedPrefixes =
 				ourApplied == null ? null : ourApplied.getPackageUrlAllowList().getRemotePrefixes();
 
 		if (appliedPrefixes != null && !appliedPrefixes.equals(newPrefixes)) {
@@ -127,14 +134,15 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 		}
 		ManagedWebAccess.setSsrfProtectionEnabled(true);
 
-		List<ServerDetailsPOJO> servers = theSettings.getPackageUrlAllowList().getRemotePrefixes().stream()
-				.map(url -> {
+		List<ServerDetailsPOJO> servers = theSettings.getPackageUrlAllowList().getRemotePrefixes()
+			.stream()
+				.map(prefix -> {
 					return ServerDetailsPOJO.builder()
-							.url(url)
+							.url(prefix.getUrl())
 							.authenticationType("none")
 							.type("web")
-							.allowHttp(url.startsWith("http:"))
-							.allowPrivateNetwork(PackageUrlUtils.isUrlPrivateNetwork(url))
+							.allowHttp(!prefix.isSecure())
+							.allowPrivateNetwork(prefix.isPrivateNetwork())
 							.headers(Collections.emptyMap())
 							.build();
 				})
@@ -278,38 +286,107 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 				}
 			}
 			case HTTPS, HTTP -> {
-				HttpClientConnectionManager connManager = new BasicHttpClientConnectionManager();
-				/*
-				 * we block redirects so that bad actors don't just redirect a 'valid' url
-				 * to a sketchy one
-				 */
-				try (CloseableHttpResponse request = HttpClientBuilder.create()
-						.setConnectionManager(connManager)
-						.disableRedirectHandling()
-						.build()
-						.execute(new HttpGet(thePackageUrl))) {
-					int status = request.getStatusLine().getStatusCode();
-					// 308 == permanent redirect + anything later isn't
-					// in our library for codes, so we use < 400 to catch them instead
-					if (status >= HttpStatus.SC_MULTIPLE_CHOICES && status < HttpStatus.SC_BAD_REQUEST) {
-						throw new InvalidRequestException(Msg.code(3031) + "Received HTTP "
-								+ status + " from URL " + thePackageUrl
-								+ ". Redirection is strictly forbidden for package loading.");
-					} else if (status != HttpStatus.SC_OK) {
-						throw new ResourceNotFoundException(
-								Msg.code(1303) + "Received HTTP " + status + " from URL: " + thePackageUrl);
-					}
-					return IOUtils.toByteArray(request.getEntity().getContent());
-				} catch (IOException e) {
-					throw new InternalErrorException(
-							Msg.code(1304) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());
-				}
+				return fetchHttpPackageContents(thePackageUrl);
 			}
 			default -> {
 				// we won't ever see this - the scheme is validated in
 				throw new InvalidRequestException(Msg.code(3029) + "Unrecognized scheme");
 			}
 		}
+	}
+
+	private byte[] fetchHttpPackageContents(String thePackageUrl) {
+		String currentUrl = thePackageUrl;
+		Set<String> visisted = new LinkedHashSet<>();
+		visisted.add(currentUrl);
+
+		HttpClientConnectionManager connManager = new BasicHttpClientConnectionManager();
+		/*
+		 * we block redirects so that bad actors don't just redirect a 'valid' url
+		 * to a sketchy one
+		 */
+		try (CloseableHttpClient client = HttpClientBuilder.create()
+				.setConnectionManager(connManager)
+				.disableRedirectHandling()
+				.build()) {
+			for (int hop = 0; hop <= PackageUrlConstants.MAX_REDIRECTS; hop++) {
+				try (CloseableHttpResponse request = client.execute(new HttpGet(currentUrl))) {
+					int status = request.getStatusLine().getStatusCode();
+					// 308 == permanent redirect + anything later isn't
+					// in our library for codes, so we use < 400 to catch them instead
+					if (status >= HttpStatus.SC_MULTIPLE_CHOICES && status < HttpStatus.SC_BAD_REQUEST) {
+						String target = resoleAllowedRedirect(currentUrl, request, visisted);
+						// discard the redirect response
+						EntityUtils.consumeQuietly(request.getEntity());
+						currentUrl = target;
+						continue;
+					} else if (status != HttpStatus.SC_OK) {
+						throw new ResourceNotFoundException(
+							Msg.code(1303) + "Received HTTP " + status + " from URL: " + thePackageUrl);
+					}
+					return IOUtils.toByteArray(request.getEntity().getContent());
+				}
+			}
+
+			throw new InvalidRequestException("Exceeded " + PackageUrlConstants.MAX_REDIRECTS
+				+ " redirects loading a package; chain was " + String.join(" -> ", visisted));
+		} catch (IOException e) {
+			throw new InternalErrorException(
+				Msg.code(1304) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Manually check the redirect to make sure it, too, is within the whitelist
+	 */
+	private String resoleAllowedRedirect(String theCurrentUrl, CloseableHttpResponse theResponse, Set<String> theVisisted) {
+		int status = theResponse.getStatusLine().getStatusCode();
+
+		// check the location header
+		Header location = theResponse.getFirstHeader(HttpHeaders.LOCATION);
+		if (location == null || isBlank(location.getValue())) {
+			throw new InvalidRequestException("Received HTTP status " + status
+				+ " from URL " + theCurrentUrl + " with no Location header");
+		}
+
+		URI target;
+		try {
+			target = URI.create(theCurrentUrl).resolve(location.getValue().trim());
+		} catch (IllegalArgumentException ex) {
+			throw new InvalidRequestException("Received HTTP " + status
+				+ " from URL " + theCurrentUrl + " with an unusuable Location: " + location.getValue());
+		}
+
+		// check the scheme
+		String targetUrl = target.toString();
+		PackageUrlScheme currentScheme = PackageUrlScheme.parseScheme(theCurrentUrl);
+		PackageUrlScheme targetScheme = PackageUrlScheme.parseScheme(targetUrl);
+
+		boolean schemeAllowed = isSchemeAllowed(targetScheme, currentScheme);
+		if (!schemeAllowed) {
+			throw new InvalidRequestException("Refusing redirect from " + theCurrentUrl + " to " + targetUrl);
+		}
+
+		// check the target is in the whitelist
+		if (!mySettings.getPackageUrlAllowList().isAllowed(targetUrl)) {
+			throw new InvalidRequestException("Refusing redirect from " + theCurrentUrl + " to non-whitelisted URL " + targetUrl);
+		}
+
+		if (!theVisisted.add(targetUrl)) {
+			throw new InvalidRequestException("Redirect loop loading a package; chain was " + String.join(", ", theVisisted) + " -> " + targetUrl);
+		}
+
+		// everything's good - we can pass back the (approved) url
+		return targetUrl;
+	}
+
+	/**
+	* we do not allow HTTPS -> HTTP urls no matter what
+	* (ie, no downgrading security in a redirect hop)
+	*/
+	private static boolean isSchemeAllowed(PackageUrlScheme targetScheme, PackageUrlScheme currentScheme) {
+		return targetScheme == PackageUrlScheme.HTTPS
+			|| (targetScheme == PackageUrlScheme.HTTP && currentScheme == PackageUrlScheme.HTTP);
 	}
 
 	@Override

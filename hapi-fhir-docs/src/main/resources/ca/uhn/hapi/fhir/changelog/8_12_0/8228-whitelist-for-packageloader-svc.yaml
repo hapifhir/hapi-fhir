@@ -1,10 +1,10 @@
 ---
 type: security
 issue: 8228
-title: "The Cluster Manager now restricts the locations from which NPM
-      packages (Implementation Guides) can be loaded. Previously packages
-      could be loaded from any file, classpath, or remote URL. Administrators
-      must now configure an allowlist of permitted URL prefixes via the
-      `module.clustermgr.config.package.url.whitelist` setting.
-      
+title: "The package loader can now restrict the locations from which NPM packages
+      (Implementation Guides) may be loaded. Previously packages could be loaded from any file,
+      classpath, or remote URL. Supplying a bean implementing `IPackageUrlAllowListProvider`
+      restricts fetches to the configured `AllowedUrlPrefix` entries; a URL that matches no entry
+      is rejected with `HAPI-3028`, and an unsupported scheme with `HAPI-3029`. When no such bean
+      is present all URLs remain permitted, so existing behaviour is unchanged.
 "

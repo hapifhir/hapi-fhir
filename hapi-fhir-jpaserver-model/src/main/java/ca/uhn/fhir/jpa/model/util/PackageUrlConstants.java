@@ -19,13 +19,6 @@
  */
 package ca.uhn.fhir.jpa.model.util;
 
-import okhttp3.Dns;
-import org.hl7.fhir.utilities.http.ManagedWebAccessUtils;
-
-import java.io.IOException;
-import java.net.InetAddress;
-import java.util.List;
-
 /**
  * Vocabulary for the entries of a package URL allow list, as consumed by the
  * package loader.
@@ -36,7 +29,7 @@ import java.util.List;
  * loader implementation.
  */
 // Created by Claude Opus 5
-public class PackageUrlUtils {
+public class PackageUrlConstants {
 
 	/**
 	 * An allow list entry which permits every URL, both local and remote.
@@ -58,31 +51,9 @@ public class PackageUrlUtils {
 	public static final String CLASSPATH_PREFIX = "classpath:";
 
 	/**
-	 * Check if a given URL is a private network url or not.
-	 * *
-	 * NB: do not use this method if it's to be called frequently.
-	 * Try to minimize to only low-traffic paths
-	 *
-	 * @param theUrl - the url to check
-	 * @return - true if a local address; false otherwise
+	 * Max redirects allowed for package url imports
 	 */
-	public static boolean isUrlPrivateNetwork(String theUrl) {
-		try {
-			/*
-			 * underlying method uses "throw exception"...
-			 * we're doing a try catch which is an anti-pattern.
-			 *
-			 * but the only caller of this method is done at setup so maybe ok
-			 */
-			List<InetAddress> addresses = Dns.SYSTEM.lookup(theUrl);
-			for (InetAddress address : addresses) {
-				ManagedWebAccessUtils.throwExceptionIfNonPublicAddress(address, theUrl);
-			}
-		} catch (IOException ex) {
-			return false;
-		}
-		return true;
-	}
+	public static final int MAX_REDIRECTS = 5;
 
-	private PackageUrlUtils() {}
+	private PackageUrlConstants() {}
 }
