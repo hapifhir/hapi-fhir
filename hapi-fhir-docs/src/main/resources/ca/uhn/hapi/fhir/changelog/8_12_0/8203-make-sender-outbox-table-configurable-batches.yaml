@@ -1,0 +1,4 @@
+---
+type: perf
+issue: 8203
+title: "Previously, a bottleneck existed in the Subscription Matching service such that messages could only be sent one at a time. This has been changed, and by default, batches of 1000 messages are sent to the matching topic/queue. This is configurable via the `SubscriptionSettings#setSubscriptionSubmissionBatchSize(int theSubscriptionSubmissionBatchSize)`."

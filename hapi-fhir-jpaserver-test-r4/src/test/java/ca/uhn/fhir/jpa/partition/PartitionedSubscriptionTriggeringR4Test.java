@@ -8,7 +8,6 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
-import ca.uhn.fhir.jpa.dao.r4.BasePartitioningR4Test;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
@@ -323,6 +322,42 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		waitForQueueToDrain();
 		assertEquals(1, BaseSubscriptionsR4Test.ourObservationProvider.getCountUpdate());
 
+		String responseValue = resultParameters.getParameter().get(0).getValue().primitiveValue();
+		assertThat(responseValue).contains("Subscription triggering job submitted as JOB ID");
+	}
+
+	@Test
+	public void testManualTriggeredSubscriptionByResourceIdDoesNotCrossPartitions() throws Exception {
+		String payload = "application/fhir+json";
+		String code = "1000000050";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+
+		// create resource in partition 1
+		myPartitionInterceptor.setRequestPartitionId(REQ_PART_1);
+		IIdType observation1 = myDaoRegistry.getResourceDao("Observation")
+			.create(buildBaseObservation(code, "SNOMED-CT"), mySrd).getId().toUnqualifiedVersionless();
+
+		// create resource in partition 2
+		myPartitionInterceptor.setRequestPartitionId(REQ_PART_2);
+		IIdType observation2 = myDaoRegistry.getResourceDao("Observation")
+			.create(buildBaseObservation(code, "SNOMED-CT"), mySrd).getId().toUnqualifiedVersionless();
+
+		// create subscription in partition 1, no cross-partition
+		myPartitionInterceptor.setRequestPartitionId(REQ_PART_1);
+		IIdType subscriptionId = myDaoRegistry.getResourceDao("Subscription")
+			.create(newSubscription(criteria1, payload), mySrd).getId();
+		waitForActivatedSubscriptionCount(1);
+
+		// trigger for both resources from the partition-1 job context
+		ArrayList<IPrimitiveType<String>> resourceIdList = new ArrayList<>();
+		resourceIdList.add(new StringDt(observation1.getValue()));
+		resourceIdList.add(new StringDt(observation2.getValue()));
+		Parameters resultParameters = (Parameters) mySubscriptionTriggeringSvc.triggerSubscription(resourceIdList, null, subscriptionId, mySrd);
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+		waitForQueueToDrain();
+
+		// only the partition-1 resource should be delivered
+		assertEquals(1, BaseSubscriptionsR4Test.ourObservationProvider.getCountUpdate());
 		String responseValue = resultParameters.getParameter().get(0).getValue().primitiveValue();
 		assertThat(responseValue).contains("Subscription triggering job submitted as JOB ID");
 	}

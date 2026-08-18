@@ -361,7 +361,8 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 		if (hasBatchSize) {
 			params.setBatchSize(theBatchSize.getValue().intValue());
 		}
-		RequestPartitionId partitionId = RequestPartitionId.allPartitions();
+		RequestPartitionId partitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(
+				theRequestDetails, ProviderConstants.OPERATION_MDM_SUBMIT);
 		theUrls.forEach(
 				url -> params.addPartitionedUrl(new PartitionedUrl().setUrl(url).setRequestPartitionId(partitionId)));
 
