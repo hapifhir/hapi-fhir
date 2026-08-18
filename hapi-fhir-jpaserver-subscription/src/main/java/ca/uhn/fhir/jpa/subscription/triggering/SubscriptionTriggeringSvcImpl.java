@@ -49,6 +49,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
@@ -529,7 +530,19 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			String theSubscriptionId, RequestPartitionId theRequestPartitionId, String theResourceIdToTrigger) {
 		org.hl7.fhir.r4.model.IdType resourceId = new org.hl7.fhir.r4.model.IdType(theResourceIdToTrigger);
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceId.getResourceType());
-		IBaseResource resourceToTrigger = dao.read(resourceId, SystemRequestDetails.forAllPartitions());
+		SystemRequestDetails requestDetails = SystemRequestDetails.forRequestPartitionId(theRequestPartitionId);
+		IBaseResource resourceToTrigger;
+		try {
+			resourceToTrigger = dao.read(resourceId, requestDetails);
+		} catch (ResourceNotFoundException e) {
+			// if requested resource cannot be resolved - skip it
+			ourLog.warn(
+					"Resource {} cannot be found and will not be submitted for subscription {} on partition {}",
+					resourceId.getIdPart(),
+					theSubscriptionId,
+					theRequestPartitionId);
+			return;
+		}
 
 		submitResource(theSubscriptionId, theRequestPartitionId, resourceToTrigger);
 	}

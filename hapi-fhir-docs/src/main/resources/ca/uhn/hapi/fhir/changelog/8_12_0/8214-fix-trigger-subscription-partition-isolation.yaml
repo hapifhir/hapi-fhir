@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 8214
+title: "Previously, executing the `$trigger-subscription` operation on a partitioned server would read the requested
+resources across all partitions. It is now scoped to the triggering job's partition."
