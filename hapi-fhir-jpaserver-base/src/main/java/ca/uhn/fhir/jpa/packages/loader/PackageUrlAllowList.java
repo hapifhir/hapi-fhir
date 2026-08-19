@@ -102,6 +102,27 @@ public class PackageUrlAllowList {
 						.anyMatch(prefix -> prefix.getUrl().equals(WILDCARD));
 	}
 
+	public boolean isPrivateNetworkAllowedForHost(String theHost) {
+		// technically this is only for remotes
+		// but 'locals' are vacuously always private i suppose
+		if (allowsAll()) {
+			return true;
+		}
+
+		List<AllowedUrlPrefix> prefixes = myRemotePrefixes.stream()
+			.filter(p -> {
+				URI uri = parseHttpUri(p.getUrl());
+				if (uri == null) {
+					return false;
+				}
+				String host = uri.getHost();
+				return host.equalsIgnoreCase(theHost);
+			})
+			.toList();
+
+		return !prefixes.isEmpty() && prefixes.stream().allMatch(AllowedUrlPrefix::isPrivateNetwork);
+	}
+
 	/**
 	 * returns true if it's in the whitelist (and not blank), or if the
 	 * whitelist includes all urls.
@@ -202,10 +223,8 @@ public class PackageUrlAllowList {
 		if (myRemotePrefixes.stream().anyMatch(url -> url.getUrl().equals(WILDCARD))) {
 			return true;
 		}
-		URI candidate = parseHttpUri(theUrl);
+		URI candidate = getCandidateURI(theUrl);
 		if (candidate == null) {
-			// parsing failure
-			// not a valid uri
 			return false;
 		}
 
@@ -216,6 +235,16 @@ public class PackageUrlAllowList {
 				.anyMatch(url -> {
 					return isPrefixUrl(url, candidate);
 				});
+	}
+
+	private URI getCandidateURI(String theUrl) {
+		URI candidate = parseHttpUri(theUrl);
+		if (candidate == null) {
+			// parsing failure
+			// not a valid uri
+			return null;
+		}
+		return candidate;
 	}
 
 	private boolean isPrefixUrl(URI theAllowed, URI theCandidate) {

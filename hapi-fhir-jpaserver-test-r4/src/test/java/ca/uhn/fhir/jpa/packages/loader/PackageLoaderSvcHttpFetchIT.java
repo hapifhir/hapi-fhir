@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -29,6 +30,20 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * <p>
  * A single server serves every path. The allow-list is scoped to a path prefix, so a redirect target can be on
  * or off the list while sharing an origin with the URL that redirected to it.
+ * <p>
+ * The private-network tests at the end of this class cover a second dimension: the allow list matches on scheme,
+ * host and path, which says nothing about where the host resolves to, so an entry which does not declare itself
+ * private must be refused when its host resolves to a non-public address. Those tests need two entries with
+ * differing {@link AllowedUrlPrefix#isPrivateNetwork()} flags reaching the same server, and since the server binds
+ * every interface and the allow list matches hosts as strings, {@code localhost} and {@code 127.0.0.1} serve as
+ * two distinct entries for it. Every address in play is loopback, so a refusal there can only come from the flag.
+ * <p>
+ * The blocked-address tests cover a third dimension, which the first two cannot reach. The allow list and the
+ * private-network flag are both configuration, so a deployment can permit any address it likes; some addresses
+ * must be refused regardless of what configuration says. Those tests use a literal address in the URL, which is
+ * the shape an SSRF attempt against a package loader takes. Denial of a <em>hostname</em> which resolves to a
+ * blocked address is not covered here: it needs a resolver seam the loader does not yet expose, since the
+ * resolution has to be both screened and pinned for the check to mean anything.
  */
 // Created by Claude Opus 5
 public class PackageLoaderSvcHttpFetchIT {
@@ -51,6 +66,22 @@ public class PackageLoaderSvcHttpFetchIT {
 	private static final String CHAIN_PATH_PREFIX = ALLOWED_PATH_PREFIX + "/chain/";
 	private static final String BLOCKED_PACKAGE_PATH = "/blocked/package.tgz";
 
+	/**
+	 * The cloud instance metadata endpoint used by AWS, Azure and GCP. This is the address an SSRF against a
+	 * package loader is aiming at, since reaching it yields the instance's credentials.
+	 */
+	private static final String CLOUD_METADATA_ADDRESS = "169.254.169.254";
+	/**
+	 * Carrier-grade NAT space (100.64.0.0/10). Reachable from a host on such a network, and never a legitimate
+	 * package server.
+	 */
+	private static final String CARRIER_GRADE_NAT_ADDRESS = "100.64.0.1";
+	/**
+	 * The Oracle Cloud instance metadata endpoint. Serves the same purpose as {@link #CLOUD_METADATA_ADDRESS} on
+	 * a different address, and unlike that one it is not caught by any JDK address predicate.
+	 */
+	private static final String ORACLE_CLOUD_METADATA_ADDRESS = "192.0.0.192";
+
 	private final PackageServingServlet myServlet = new PackageServingServlet();
 
 	@RegisterExtension
@@ -60,10 +91,15 @@ public class PackageLoaderSvcHttpFetchIT {
 	private PackageUrlAllowList myAllowList;
 	private PackageLoaderSvc myPackageLoaderSvc;
 
+	/**
+	 * The shared prefix declares itself private because the test server is on loopback, which keeps the
+	 * private-network dimension out of play for the path, scheme and redirect tests. The private-network tests
+	 * build their own allow lists rather than using this one.
+	 */
 	@BeforeEach
 	void before() {
 		myAllowList = PackageUrlAllowList.of(List.of(
-			new AllowedUrlPrefix(myServer.getBaseUrl() + ALLOWED_PATH_PREFIX, false)), List.of());
+			new AllowedUrlPrefix(myServer.getBaseUrl() + ALLOWED_PATH_PREFIX, true)), List.of());
 		myPackageLoaderSvc = new PackageLoaderSvc(new PackageLoaderSettings(myAllowList));
 
 		myPackageContents = ClasspathUtil.loadResourceAsByteArray(PACKAGE_CLASSPATH);
@@ -171,7 +207,7 @@ public class PackageLoaderSvcHttpFetchIT {
 		String classpathTarget = "classpath://packages" + PACKAGE_CLASSPATH;
 		PackageUrlAllowList allowListWithLocalPrefix = PackageUrlAllowList.of(
 				List.of(
-					new AllowedUrlPrefix(myServer.getBaseUrl() + ALLOWED_PATH_PREFIX, false)),
+					new AllowedUrlPrefix(myServer.getBaseUrl() + ALLOWED_PATH_PREFIX, true)),
 			List.of(new AllowedUrlPrefix("classpath://packages", false)));
 		PackageLoaderSvc loaderSvc = new PackageLoaderSvc(new PackageLoaderSettings(allowListWithLocalPrefix));
 
@@ -241,6 +277,188 @@ public class PackageLoaderSvcHttpFetchIT {
 	}
 
 	/**
+	 * The control for the test below: the same loopback fetch, differing only in the flag.
+	 */
+	@Test
+	void loadPackageUrlContents_whenPrefixPermitsPrivateNetwork_returnsThePackageBytes() {
+		PackageLoaderSvc loaderSvc = newLoaderSvc(remoteAllowList(allowedPrefix(myServer.getBaseUrl(), true)));
+
+		byte[] contents = loaderSvc.loadPackageUrlContents(myServer.getBaseUrl() + ALLOWED_PACKAGE_PATH);
+
+		assertThat(contents).isEqualTo(myPackageContents);
+	}
+
+	@Test
+	void loadPackageUrlContents_whenPrefixForbidsPrivateNetwork_refusesTheFetch() {
+		PackageUrlAllowList allowList = remoteAllowList(allowedPrefix(myServer.getBaseUrl(), false));
+		PackageLoaderSvc loaderSvc = newLoaderSvc(allowList);
+
+		String packageUrl = myServer.getBaseUrl() + ALLOWED_PACKAGE_PATH;
+
+		// the allow list permits this URL, so only the private-network check can refuse it
+		assertThat(allowList.isAllowed(packageUrl)).isTrue();
+
+		assertThatThrownBy(() -> loaderSvc.loadPackageUrlContents(packageUrl))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining(packageUrl);
+
+		assertThat(myServlet.getAllowedPackageHitCount())
+				.as("the package must not be fetched from a host which is not permitted to be private")
+				.isZero();
+	}
+
+	/**
+	 * The control for the test below: the same redirect, differing only in the target host's flag.
+	 */
+	@Test
+	void loadPackageUrlContents_whenRedirectTargetHostPermitsPrivateNetwork_followsTheRedirect() {
+		PackageLoaderSvc loaderSvc = newLoaderSvc(remoteAllowList(
+				allowedPrefix(loopbackIpBaseUrl(), true), allowedPrefix(myServer.getBaseUrl(), true)));
+
+		myServlet.setRedirectStatus(302);
+		myServlet.setRedirectTarget(myServer.getBaseUrl() + ALLOWED_TARGET_PATH);
+
+		byte[] contents = loaderSvc.loadPackageUrlContents(loopbackIpBaseUrl() + REDIRECTING_PACKAGE_PATH);
+
+		assertThat(contents).isEqualTo(myPackageContents);
+		assertThat(myServlet.getAllowedTargetHitCount()).isEqualTo(1);
+	}
+
+	/**
+	 * The first hop is permitted to be private and the second is not, so the flag has to be consulted for the
+	 * redirect target rather than only for the URL the caller supplied.
+	 */
+	@Test
+	void loadPackageUrlContents_whenRedirectTargetHostForbidsPrivateNetwork_refusesTheRedirect() {
+		PackageUrlAllowList allowList = remoteAllowList(
+				allowedPrefix(loopbackIpBaseUrl(), true), allowedPrefix(myServer.getBaseUrl(), false));
+		PackageLoaderSvc loaderSvc = newLoaderSvc(allowList);
+
+		String redirectingUrl = loopbackIpBaseUrl() + REDIRECTING_PACKAGE_PATH;
+		String targetUrl = myServer.getBaseUrl() + ALLOWED_TARGET_PATH;
+		myServlet.setRedirectStatus(302);
+		myServlet.setRedirectTarget(targetUrl);
+
+		// both hops are on the allow list, so only the private-network check can refuse the second
+		assertThat(allowList.isAllowed(redirectingUrl)).isTrue();
+		assertThat(allowList.isAllowed(targetUrl)).isTrue();
+
+		assertThatThrownBy(() -> loaderSvc.loadPackageUrlContents(redirectingUrl))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining(targetUrl);
+
+		assertThat(myServlet.getAllowedTargetHitCount())
+				.as("the redirect must not be followed to a host which is not permitted to be private")
+				.isZero();
+	}
+
+	/**
+	 * A deployment which fetches packages from its own private network sets {@code privateNetwork}, and that flag
+	 * suppresses the address check entirely. Nothing about that configuration is unreasonable, yet it currently
+	 * leaves the cloud metadata endpoint reachable - so the flag has to stop short of these addresses.
+	 * <p>
+	 * Pairs with {@link #loadPackageUrlContents_whenPrefixPermitsPrivateNetwork_returnsThePackageBytes()}, which
+	 * sets the same flag against an address that is merely private rather than blocked and still fetches. The two
+	 * together say the flag is honoured everywhere except here.
+	 * <p>
+	 * Timed out because the failure mode is an attempted connection to the blocked address, which on some
+	 * networks hangs rather than failing - and on a cloud CI runner would succeed.
+	 */
+	@Timeout(30)
+	@ParameterizedTest
+	@ValueSource(strings = {CLOUD_METADATA_ADDRESS, CARRIER_GRADE_NAT_ADDRESS, ORACLE_CLOUD_METADATA_ADDRESS})
+	void loadPackageUrlContents_whenAddressIsBlockedAndPrefixPermitsPrivateNetwork_refusesTheFetch(
+			String theBlockedAddress) {
+		PackageUrlAllowList allowList = remoteAllowList(allowedPrefix(baseUrlForAddress(theBlockedAddress), true));
+		PackageLoaderSvc loaderSvc = newLoaderSvc(allowList);
+
+		String packageUrl = baseUrlForAddress(theBlockedAddress) + ALLOWED_PACKAGE_PATH;
+
+		// the allow list permits this URL and permits it to be private, so only an unconditional block can refuse it
+		assertThat(allowList.isAllowed(packageUrl)).isTrue();
+		assertThat(allowList.isPrivateNetworkAllowedForHost(theBlockedAddress)).isTrue();
+
+		assertThatThrownBy(() -> loaderSvc.loadPackageUrlContents(packageUrl))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining(theBlockedAddress);
+	}
+
+	/**
+	 * The control for the test above: with the flag off, the existing private-address check already refuses these
+	 * addresses. The pair separates the two mechanisms, so that a regression in either is attributable.
+	 */
+	@Timeout(30)
+	@ParameterizedTest
+	@ValueSource(strings = {CLOUD_METADATA_ADDRESS, CARRIER_GRADE_NAT_ADDRESS, ORACLE_CLOUD_METADATA_ADDRESS})
+	void loadPackageUrlContents_whenAddressIsBlockedAndPrefixForbidsPrivateNetwork_refusesTheFetch(
+			String theBlockedAddress) {
+		PackageUrlAllowList allowList = remoteAllowList(allowedPrefix(baseUrlForAddress(theBlockedAddress), false));
+		PackageLoaderSvc loaderSvc = newLoaderSvc(allowList);
+
+		String packageUrl = baseUrlForAddress(theBlockedAddress) + ALLOWED_PACKAGE_PATH;
+
+		assertThat(allowList.isAllowed(packageUrl)).isTrue();
+
+		assertThatThrownBy(() -> loaderSvc.loadPackageUrlContents(packageUrl))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining(theBlockedAddress);
+	}
+
+	/**
+	 * A redirect reaches the blocked address without it appearing in the URL the caller supplied, so the check
+	 * has to run per hop rather than once on entry. The first hop is an ordinary allow-listed loopback fetch, and
+	 * both prefixes permit private addresses, so only the unconditional block can refuse the second hop.
+	 */
+	@Timeout(30)
+	@Test
+	void loadPackageUrlContents_whenRedirectTargetIsBlocked_refusesTheRedirect() {
+		String blockedTargetUrl = baseUrlForAddress(CLOUD_METADATA_ADDRESS) + ALLOWED_TARGET_PATH;
+		PackageUrlAllowList allowList = remoteAllowList(
+				allowedPrefix(myServer.getBaseUrl(), true),
+				allowedPrefix(baseUrlForAddress(CLOUD_METADATA_ADDRESS), true));
+		PackageLoaderSvc loaderSvc = newLoaderSvc(allowList);
+
+		myServlet.setRedirectStatus(302);
+		myServlet.setRedirectTarget(blockedTargetUrl);
+
+		String redirectingUrl = myServer.getBaseUrl() + REDIRECTING_PACKAGE_PATH;
+
+		assertThat(allowList.isAllowed(blockedTargetUrl)).isTrue();
+
+		assertThatThrownBy(() -> loaderSvc.loadPackageUrlContents(redirectingUrl))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining(CLOUD_METADATA_ADDRESS);
+	}
+
+	/**
+	 * The same server under a host spelling the allow list treats as distinct from the {@code localhost} of
+	 * {@link HttpServletExtension#getBaseUrl()}, since it matches hosts as strings.
+	 */
+	private String loopbackIpBaseUrl() {
+		return baseUrlForAddress("127.0.0.1");
+	}
+
+	/**
+	 * A base URL naming a literal address. The blocked-address tests are refused before a connection is attempted,
+	 * so nothing has to be listening on it; the server's port only keeps the URL the same shape as the others.
+	 */
+	private String baseUrlForAddress(String theAddress) {
+		return "http://" + theAddress + ":" + myServer.getPort();
+	}
+
+	private AllowedUrlPrefix allowedPrefix(String theBaseUrl, boolean theIsPrivateNetwork) {
+		return new AllowedUrlPrefix(theBaseUrl + ALLOWED_PATH_PREFIX, theIsPrivateNetwork);
+	}
+
+	private PackageUrlAllowList remoteAllowList(AllowedUrlPrefix... thePrefixes) {
+		return PackageUrlAllowList.of(List.of(thePrefixes), List.of());
+	}
+
+	private PackageLoaderSvc newLoaderSvc(PackageUrlAllowList theAllowList) {
+		return new PackageLoaderSvc(new PackageLoaderSettings(theAllowList));
+	}
+
+	/**
 	 * Serves the package on an allow-listed path, on an allow-listed redirect target, and on a blocked path.
 	 * The blocked path serves the package too, so that a followed redirect would succeed rather than merely
 	 * fail differently, and the hit counts show which target the bytes came from.
@@ -253,6 +471,7 @@ public class PackageLoaderSvcHttpFetchIT {
 
 		private final AtomicInteger myBlockedPathHitCount = new AtomicInteger();
 		private final AtomicInteger myAllowedTargetHitCount = new AtomicInteger();
+		private final AtomicInteger myAllowedPackageHitCount = new AtomicInteger();
 		private String myRedirectTarget;
 		private byte[] myPackageContents;
 		private int myRedirectStatus;
@@ -286,6 +505,10 @@ public class PackageLoaderSvcHttpFetchIT {
 			return myAllowedTargetHitCount.get();
 		}
 
+		int getAllowedPackageHitCount() {
+			return myAllowedPackageHitCount.get();
+		}
+
 		@Override
 		protected void doGet(HttpServletRequest theRequest, HttpServletResponse theResponse) throws IOException {
 			String requestUri = theRequest.getRequestURI();
@@ -310,7 +533,10 @@ public class PackageLoaderSvcHttpFetchIT {
 					myAllowedTargetHitCount.incrementAndGet();
 					writePackage(theResponse);
 				}
-				case ALLOWED_PACKAGE_PATH -> writePackage(theResponse);
+				case ALLOWED_PACKAGE_PATH -> {
+					myAllowedPackageHitCount.incrementAndGet();
+					writePackage(theResponse);
+				}
 				default -> theResponse.sendError(404);
 			}
 		}

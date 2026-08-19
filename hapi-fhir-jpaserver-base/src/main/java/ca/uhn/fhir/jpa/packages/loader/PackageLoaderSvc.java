@@ -36,10 +36,8 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.utilities.http.ManagedWebAccess;
@@ -316,12 +314,11 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 		Set<String> visited = new LinkedHashSet<>();
 		visited.add(currentUrl);
 
-		HttpClientConnectionManager connManager = new BasicHttpClientConnectionManager();
 		/*
 		 * we filter redirects up to a maximum # of hops {@link PackageUrlConstants#MAX_REDIRECTS}
 		 */
 		try (CloseableHttpClient client = HttpClientBuilder.create()
-				.setConnectionManager(connManager)
+				.setDnsResolver(new PackageLoaderDnsResolver(mySettings.getPackageUrlAllowList()))
 				.disableRedirectHandling()
 				.build()) {
 			for (int hop = 0; hop <= PackageUrlConstants.MAX_REDIRECTS; hop++) {
@@ -346,8 +343,8 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 			throw new InvalidRequestException(Msg.code(3032) + "Exceeded " + PackageUrlConstants.MAX_REDIRECTS
 					+ " redirects loading a package; chain was " + String.join(" -> ", visited));
 		} catch (IOException e) {
-			throw new InternalErrorException(
-					Msg.code(1304) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());
+			throw new InvalidRequestException(
+					Msg.code(1304) + "Error loading \"" + currentUrl + "\": " + e.getMessage());
 		}
 	}
 
