@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 8266
+title: "Previously, in Patient ID partition mode, a conditional update outside a transaction Bundle failed with
+  HAPI-1321 when the resource body carried no id. This is now fixed for systems that support all-partition search."

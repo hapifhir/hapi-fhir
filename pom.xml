@@ -7,7 +7,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>8.11.21-SNAPSHOT</version>
+	<version>8.11.22-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -1079,10 +1079,10 @@
 		<jaxb_runtime_version>4.0.4</jaxb_runtime_version>
 		<jena_version>5.5.0</jena_version>
 		<jersey_version>3.1.11</jersey_version>
-		<jetty_version>12.0.34</jetty_version>
 		<!-- Single bump point for the org.jline artifacts: org.jline:jansi (managed below) and any downstream
 		     pin of org.jline:jline must stay at the same version - see the comment at the jansi entry. -->
 		<jline_version>3.30.16</jline_version>
+		<jetty_version>12.0.36</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
 		<junit_version>5.11.4</junit_version>
 		<flexmark_version>0.64.8</flexmark_version>
@@ -1097,11 +1097,11 @@
 		<hibernate_validator_version>8.0.0.Final</hibernate_validator_version>
 		<httpcore_version>4.4.16</httpcore_version>
 		<httpclient_version>4.5.14</httpclient_version>
-		<jackson_version>2.21.1</jackson_version>
-		<jackson_databind_version>2.21.1</jackson_databind_version>
+		<jackson_version>2.21.6</jackson_version>
+		<jackson_databind_version>2.21.6</jackson_databind_version>
 		<jackson_annotations_version>2.21</jackson_annotations_version>
-		<httpclient5_version>5.4.3</httpclient5_version>
-		<httpcore5_version>5.3.1</httpcore5_version>
+		<httpclient5_version>5.6.4</httpclient5_version>
+		<httpcore5_version>5.4.3</httpcore5_version>
 		<maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
 		<okhttp_version>5.3.2</okhttp_version>
@@ -1110,9 +1110,8 @@
 		uses a version which lines up with the OTEL instrumentation version, but with "-alpha"
 		appended to it. So we do that too here. This could change in the future.
 		-->
-		<otel_instrumentation.version>2.26.1</otel_instrumentation.version>
+		<otel_instrumentation.version>2.28.0</otel_instrumentation.version>
 		<otel_agent_for_testing.version>${otel_instrumentation.version}-alpha</otel_agent_for_testing.version>
-		<otel_api.version>1.60.1-alpha</otel_api.version>
 		<poi_version>4.1.2</poi_version>
 		<poi_ooxml_schemas_version>1.4</poi_ooxml_schemas_version>
 		<resteasy_version>6.2.10.Final</resteasy_version>
@@ -1125,12 +1124,12 @@
 		<swagger_jakarta_version>2.2.30</swagger_jakarta_version>
 		<slf4j_version>2.0.16</slf4j_version>
 		<log4j_to_slf4j_version>2.24.1</log4j_to_slf4j_version>
-		<spring_version>6.2.18</spring_version>
-		<spring_data_bom_version>2024.0.5</spring_data_bom_version>
-		<spring_framework_bom_version>6.2.18</spring_framework_bom_version>
-		<spring_boot_version>3.5.14</spring_boot_version>
+		<spring_version>6.2.19</spring_version>
+		<spring_data_bom_version>2025.0.13</spring_data_bom_version>
+		<spring_framework_bom_version>6.2.19</spring_framework_bom_version>
+		<spring_boot_version>3.5.15</spring_boot_version>
 		<tomcat_embed_version>10.1.53</tomcat_embed_version>
-		<spring_retry_version>2.0.10</spring_retry_version>
+		<spring_retry_version>2.0.13</spring_retry_version>
 		<json_path_version>2.9.0</json_path_version>
 		<jboss_logging_version>3.6.1.Final</jboss_logging_version>
 		<stax2_api_version>3.1.4</stax2_api_version>
@@ -1140,7 +1139,12 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 		<elastic_apm_version>1.52.0</elastic_apm_version>
-		<elasticsearch_version>8.19.9</elasticsearch_version>
+		<elasticsearch_version>8.19.19</elasticsearch_version>
+		<!-- Jackson 3, used only by elasticsearch-java at runtime
+		     Pinned for CVE-2026-19032, CVE-2026-68497, CVE-2026-59888, CVE-2026-29062 and
+		     CVE-2026-54512 through CVE-2026-54518. Transitive via elasticsearch-java, remove
+		     once the 8.x.x version ships a patched Jackson 3 itself. -->
+		<jackson3_version>3.1.6</jackson3_version>
 		<ucum_version>1.0.9</ucum_version>
 		<!-- only required for third party libraries when generating JavaDoc. Not to be used internally. -->
 		<spotbugs_annotations_version>4.9.8</spotbugs_annotations_version>
@@ -1526,6 +1530,13 @@
 				<version>2.1.0</version>
 			</dependency>
 			<dependency>
+				<!-- 2.1.x is required by parsson 1.1.9, which arrives via elasticsearch-java.
+					 See the org.glassfish:jakarta.json exclusion on jena-arq below. -->
+				<groupId>jakarta.json</groupId>
+				<artifactId>jakarta.json-api</artifactId>
+				<version>2.1.3</version>
+			</dependency>
+			<dependency>
 				<groupId>jakarta.servlet</groupId>
 				<artifactId>jakarta.servlet-api</artifactId>
 				<version>6.0.0</version>
@@ -1569,13 +1580,23 @@
 			<dependency>
 				<groupId>org.elasticsearch.client</groupId>
 				<artifactId>elasticsearch-rest-client</artifactId>
-				<version>8.19.9</version>
+				<version>${elasticsearch_version}</version>
 			</dependency>
 			<!-- Pinned for CVE-2025-68384, used by hibernate_search v7.2.1 -->
 			<dependency>
 				<groupId>org.elasticsearch.client</groupId>
 				<artifactId>elasticsearch-rest-client-sniffer</artifactId>
-				<version>8.19.9</version>
+				<version>${elasticsearch_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>tools.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>${jackson3_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>tools.jackson.core</groupId>
+				<artifactId>jackson-core</artifactId>
+				<version>${jackson3_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.code.gson</groupId>
@@ -1765,6 +1786,15 @@
 				<groupId>org.apache.jena</groupId>
 				<artifactId>jena-arq</artifactId>
 				<version>${jena_version}</version>
+				<exclusions>
+					<!-- Old JSON-P 2.0 bundle, stops at 2.0.1. Conflicts with parsson 1.1.9 (JSON-P 2.1,
+						 via elasticsearch-java), which needs JsonConfig.KeyStrategy from the 2.1 API.
+						 Excluded so managed jakarta.json-api 2.1.3 is the only JSON-P API present. -->
+					<exclusion>
+						<groupId>org.glassfish</groupId>
+						<artifactId>jakarta.json</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.jena</groupId>
@@ -2123,11 +2153,14 @@
 				<version>${log4j_to_slf4j_version}</version>
 			</dependency>
 			<!-- Pinned for CVE-2026-41607, CVE-2026-41606, CVE-2026-41605, CVE-2026-41604, CVE-2026-41603, CVE-2026-41636,
-				  CVE-2026-41602, CVE-2025-48431, this is transitive via jena-arq 5.5.0 -->
+				  CVE-2026-41602, CVE-2025-48431, this is transitive via jena-arq 5.5.0.
+				  Bumped 0.23.0 -> 0.24.0 for CVE-2026-55971, CVE-2026-48144, CVE-2026-58023, CVE-2026-58662, CVE-2026-41608,
+				  CVE-2026-43871, CVE-2026-45112, CVE-2026-48145, CVE-2026-48586, CVE-2026-49158, CVE-2026-55968,
+				  CVE-2026-55969, CVE-2026-58389, CVE-2026-55970, CVE-2026-66053 -->
 			<dependency>
 				<groupId>org.apache.thrift</groupId>
 				<artifactId>libthrift</artifactId>
-				<version>0.23.0</version>
+				<version>0.24.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate.search</groupId>
@@ -2204,7 +2237,7 @@
 			<dependency>
 				<groupId>org.mariadb.jdbc</groupId>
 				<artifactId>mariadb-java-client</artifactId>
-				<version>3.0.4</version>
+				<version>3.3.5</version>
 			</dependency>
 			<dependency>
 				<groupId>org.mockito</groupId>
@@ -2219,7 +2252,7 @@
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.7.11</version>
+				<version>42.7.12</version>
 			</dependency>
 			<dependency>
 				<groupId>com.oracle.database.jdbc</groupId>
@@ -2425,7 +2458,7 @@
 			<dependency>
 				<groupId>org.webjars</groupId>
 				<artifactId>swagger-ui</artifactId>
-				<version>5.32.5</version>
+				<version>5.32.13</version>
 			</dependency>
 			<dependency>
 				<groupId>org.xmlunit</groupId>
@@ -2480,13 +2513,6 @@
 				<artifactId>opentelemetry-agent-for-testing</artifactId>
 				<version>${otel_agent_for_testing.version}</version>
 			</dependency>
-			<!-- Pulsar brings in a different version, which is incompatible with otel_agent_for_testing.version -->
-			<dependency>
-				<groupId>io.opentelemetry</groupId>
-				<artifactId>opentelemetry-api-incubator</artifactId>
-				<version>${otel_api.version}</version>
-			</dependency>
-
 			<dependency>
 				<groupId>org.assertj</groupId>
 				<artifactId>assertj-core</artifactId>
