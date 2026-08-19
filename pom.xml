@@ -1079,13 +1079,16 @@
 		<jaxb_runtime_version>4.0.4</jaxb_runtime_version>
 		<jena_version>5.5.0</jena_version>
 		<jersey_version>3.1.11</jersey_version>
+		<!-- Single bump point for the org.jline artifacts: org.jline:jansi (managed below) and any downstream
+		     pin of org.jline:jline must stay at the same version - see the comment at the jansi entry. -->
+		<jline_version>3.30.16</jline_version>
 		<jetty_version>12.0.36</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
 		<junit_version>5.11.4</junit_version>
 		<flexmark_version>0.64.8</flexmark_version>
 		<flyway_version>10.20.1</flyway_version>
 		<hibernate_version>6.6.4.Final</hibernate_version>
-		<logback_version>1.5.37</logback_version>
+		<logback_version>1.6.3</logback_version>
 		<!-- Update lucene version when you update hibernate-search version - These go together! -->
 		<hibernate_search_version>7.2.1.Final</hibernate_search_version>
 		<!-- Update lucene version when you update hibernate-search version - These go together! -->
@@ -1990,10 +1993,16 @@
 				<version>1.1.0</version>
 				<scope>test</scope>
 			</dependency>
+			<!--
+				org.jline:jansi and org.jline:jline ship overlapping copies of org.jline.* classes. Downstream
+				builds that also resolve org.jline:jline must keep the two artifacts at the same version - bump
+				them together via the jline_version property (inherited by child builds, so it is the single
+				bump point).
+			-->
 			<dependency>
-				<groupId>org.fusesource.jansi</groupId>
+				<groupId>org.jline</groupId>
 				<artifactId>jansi</artifactId>
-				<version>2.4.1</version>
+				<version>${jline_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.tomcat.embed</groupId>
