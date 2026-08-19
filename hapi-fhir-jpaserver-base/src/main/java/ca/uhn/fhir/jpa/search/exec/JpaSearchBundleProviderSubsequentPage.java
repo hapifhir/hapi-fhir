@@ -89,13 +89,22 @@ public class JpaSearchBundleProviderSubsequentPage extends BaseJpaSearchBundlePr
 
 	@Override
 	protected Search provideSearchEntity() {
-		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forSearchUuid(mySearchUuid);
-		myRequestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(myRequestDetails, details);
+		if (myRequestPartitionId == null) {
+			ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forSearchUuid(mySearchUuid);
+			myRequestPartitionId =
+					myRequestPartitionHelperSvc.determineReadPartitionForRequest(myRequestDetails, details);
+		}
 
 		ourLog.debug("Fetching cached search with UUID: {}", mySearchUuid);
 
 		Optional<Search> searchEntityOpt = mySearchCacheSvc.fetchByUuid(mySearchUuid, myRequestPartitionId);
 		return searchEntityOpt.orElseThrow(() -> myExceptionService.newUnknownSearchException(mySearchUuid));
+	}
+
+	@Nullable
+	@Override
+	public String getUuid() {
+		return mySearchUuid;
 	}
 
 	@Nullable
