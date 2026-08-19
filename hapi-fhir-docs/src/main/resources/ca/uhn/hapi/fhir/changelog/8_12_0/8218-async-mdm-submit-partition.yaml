@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 8218
+title: "Previously, when the `$mdm-submit` operation was invoked in asynchronous mode,
+it would perform MDM matching on all partitions, regardless of any partition specified
+in the request. This has been fixed."

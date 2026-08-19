@@ -23,16 +23,6 @@ Note the arguments:
 * `-d [dialect]` &ndash; This indicates the database dialect to use. See the detailed help for a list of options.
 * `--enable-heavyweight-migrations` &ndash; If this flag is set, additional migration tasks will be executed that are considered unnecessary to execute on a database with a significant amount of data loaded. This option is not generally necessary.
 
-## Migrating an Existing Schema Without Migration History
-
-If the database schema was created or migrated outside of HAPI FHIR and therefore does not contain successful entries in `FLY_HFJ_MIGRATION`, specify the HAPI FHIR release that matches the existing schema with `--baseline-version`. The migrator records all migrations through that release as already applied, then executes the remaining migrations. For example, to migrate a database whose schema is already at HAPI FHIR 8.4.0:
-
-```bash
-./hapi-fhir-cli migrate-database --baseline-version 8.4.0 -d H2_EMBEDDED -u "jdbc:h2:directory:target/jpaserver_h2_files;create=true" -n "" -p ""
-```
-
-Use `--baseline-version` only when the existing schema has no successful migration history. Do not use it for an empty database or a database that already contains successful entries in `FLY_HFJ_MIGRATION`.
-
 <a id="database-partition-mode"></a>
 
 # Database Partition Mode

@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Collection;
 import java.util.Optional;
 
 /**
@@ -51,6 +52,25 @@ public interface IResourceModifiedMessagePersistenceSvc {
 	 * @return Whether the persistedResourceModifiedMessage pointed to by <code>theResourceModifiedPK</code> was deleted.
 	 */
 	boolean deleteByPK(IPersistedResourceModifiedMessagePK thePersistedResourceModifiedMessagePK);
+
+	/**
+	 * Delete a batch of persistedResourceModifiedMessage by their primary keys.
+	 * <p>
+	 * The default implementation simply deletes each primary key in turn, which preserves the semantics of
+	 * {@link #deleteByPK(IPersistedResourceModifiedMessagePK)} exactly.  Implementations backed by a store which can
+	 * delete many rows in a single round trip are expected to override this method.
+	 * </p>
+	 *
+	 * @param thePersistedResourceModifiedMessagePKs The primary keys of the persistedResourceModifiedMessage to delete.
+	 * @return The number of persistedResourceModifiedMessage which were deleted.  This can be smaller than the number of
+	 * primary keys provided when some of them had already been deleted.
+	 * @since 8.12.0
+	 */
+	default int deleteByPKs(Collection<IPersistedResourceModifiedMessagePK> thePersistedResourceModifiedMessagePKs) {
+		return (int) thePersistedResourceModifiedMessagePKs.stream()
+				.filter(this::deleteByPK)
+				.count();
+	}
 
 	/**
 	 * Persist a resourceModifiedMessage and return its resulting persisted representation.
