@@ -55,8 +55,8 @@ import java.util.Optional;
  * @see CacheAwareSearchSvcImpl
  * @since 8.14.0
  */
-public class JpaSearchBundleProviderFirstPage extends BaseJpaSearchBundleProvider {
-	private static final Logger ourLog = LoggerFactory.getLogger(JpaSearchBundleProviderFirstPage.class);
+public class CacheAwareJpaSearchBundleProviderFirstPage extends BaseCacheAwareJpaSearchBundleProvider {
+	private static final Logger ourLog = LoggerFactory.getLogger(CacheAwareJpaSearchBundleProviderFirstPage.class);
 
 	private final CacheControlDirective myCacheControlDirective;
 	private Search myCandidateSearchEntity;
@@ -64,7 +64,7 @@ public class JpaSearchBundleProviderFirstPage extends BaseJpaSearchBundleProvide
 	/**
 	 * Constructor
 	 */
-	public JpaSearchBundleProviderFirstPage(
+	public CacheAwareJpaSearchBundleProviderFirstPage(
 			FhirContext theFhirContext,
 			SearchParameterMap theParams,
 			RequestDetails theRequestDetails,

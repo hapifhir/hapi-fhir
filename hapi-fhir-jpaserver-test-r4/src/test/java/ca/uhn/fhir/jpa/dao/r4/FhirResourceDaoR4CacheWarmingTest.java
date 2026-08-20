@@ -5,8 +5,8 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
-import ca.uhn.fhir.jpa.search.exec.BaseJpaSearchBundleProvider;
-import ca.uhn.fhir.jpa.search.exec.JpaSearchBundleProviderFirstPage;
+import ca.uhn.fhir.jpa.search.exec.BaseCacheAwareJpaSearchBundleProvider;
+import ca.uhn.fhir.jpa.search.exec.CacheAwareJpaSearchBundleProviderFirstPage;
 import ca.uhn.fhir.jpa.search.warm.CacheWarmingSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -106,11 +106,11 @@ public class FhirResourceDaoR4CacheWarmingTest extends BaseJpaR4Test {
 		params.add("name", new StringParam("smith"));
 		myCaptureQueriesListener.clear();
 		IBundleProvider result = myPatientDao.search(params);
-		assertEquals(JpaSearchBundleProviderFirstPage.class, result.getClass());
+		assertEquals(CacheAwareJpaSearchBundleProviderFirstPage.class, result.getClass());
 		result.getResources(0, 10);
 		myCaptureQueriesListener.logSelectQueries();
 
-		BaseJpaSearchBundleProvider resultCasted = (BaseJpaSearchBundleProvider) result;
+		BaseCacheAwareJpaSearchBundleProvider resultCasted = (BaseCacheAwareJpaSearchBundleProvider) result;
 		assertEquals(SearchCacheStatus.SearchCacheStatusEnum.HIT, Objects.requireNonNull(resultCasted.getCacheStatus()).getStatus());
 	}
 

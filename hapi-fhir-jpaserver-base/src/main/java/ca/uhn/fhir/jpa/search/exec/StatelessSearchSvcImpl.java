@@ -25,7 +25,6 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.ISearchResultConsumer;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
@@ -69,10 +68,7 @@ public class StatelessSearchSvcImpl implements IStatelessSearchSvc {
 	private JpaStorageSettings myStorageSettings;
 
 	@Autowired
-	protected SearchBuilderFactory mySearchBuilderFactory;
-
-	@Autowired
-	private DaoRegistry myDaoRegistry;
+	protected SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
 
 	@Autowired
 	private HapiTransactionService myTxService;
@@ -141,7 +137,7 @@ public class StatelessSearchSvcImpl implements IStatelessSearchSvc {
 					Integer requestedCount = clonedParams.getCount();
 					boolean hasACount = requestedCount != null;
 					if (hasACount) {
-						clonedParams.setCount(requestedCount.intValue() + 1);
+						clonedParams.setCount(requestedCount + 1);
 					}
 
 					// Perform the actual search
@@ -366,7 +362,7 @@ public class StatelessSearchSvcImpl implements IStatelessSearchSvc {
 
 		Class<? extends IBaseResource> resourceTypeClass =
 				myContext.getResourceDefinition(theResourceType).getImplementingClass();
-		final ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(theResourceType, resourceTypeClass);
+		final ISearchBuilder<JpaPid> sb = mySearchBuilderFactory.newSearchBuilder(theResourceType, resourceTypeClass);
 		sb.setFetchSize(mySyncSize);
 		return createNewSearch(
 				theSearchParameterMap,

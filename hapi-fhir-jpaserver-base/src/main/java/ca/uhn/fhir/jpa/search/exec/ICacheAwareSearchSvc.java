@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.method.ResponsePage;
 
 /**
  * This service performs cache-aware searches. In other words, when executing a search
@@ -41,6 +42,12 @@ public interface ICacheAwareSearchSvc {
 	/**
 	 * Perform a new search using a set of search parameters, either by finding an
 	 * existing cached search or by executing a new search.
+	 * <p>
+	 * <b>Performance Note:</b> Callers of this method should try to call {@link IBundleProvider#getResources(int, int)} or
+	 * {@link IBundleProvider#getResources(int, int, ResponsePage.ResponsePageBuilder)} before calling
+	 * any other method on the returned bundle provider. This ensures that an appropriate number of
+	 * results are fetched from the database during the initial call, avoiding additional round-trips.
+	 * </p>
 	 */
 	IBundleProvider createNewSearch(
 			SearchParameterMap theParams,
@@ -53,6 +60,9 @@ public interface ICacheAwareSearchSvc {
 	/**
 	 * Continue a previously returned search, fetching existing results from the
 	 * search cache if possible or fetching new search results if necessary.
+	 *
+	 * @param theUuid The UUID associated with the initial search request. This is the value returned by {@link IBundleProvider#getUuid()}.
+	 * @param theRequestDetails The request details for the current request
 	 */
-	IBundleProvider continueExistingSearch(String theId, RequestDetails theRequestDetails);
+	IBundleProvider continueExistingSearch(String theUuid, RequestDetails theRequestDetails);
 }

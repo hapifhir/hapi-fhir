@@ -37,7 +37,9 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 public interface IStatelessSearchSvc extends ISearchSvc {
 
 	/**
-	 * Executes a search.
+	 * Executes a search. The returned bundle provider will contain all fetched results matching the
+	 * {@link SearchParameterMap#getOffset()} and {@link SearchParameterMap#getCount()}, and will not
+	 * be able to page beyond that range.
 	 */
 	IBundleProvider createNewSearch(
 			SearchParameterMap theParams,

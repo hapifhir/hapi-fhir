@@ -46,15 +46,15 @@ import java.util.Optional;
  * @see CacheAwareSearchSvcImpl
  * @since 8.14.0
  */
-public class JpaSearchBundleProviderSubsequentPage extends BaseJpaSearchBundleProvider {
-	private static final Logger ourLog = LoggerFactory.getLogger(JpaSearchBundleProviderSubsequentPage.class);
+public class CacheAwareJpaSearchBundleProviderSubsequentPage extends BaseCacheAwareJpaSearchBundleProvider {
+	private static final Logger ourLog = LoggerFactory.getLogger(CacheAwareJpaSearchBundleProviderSubsequentPage.class);
 
 	private final String mySearchUuid;
 
 	/**
 	 * Constructor
 	 */
-	public JpaSearchBundleProviderSubsequentPage(
+	public CacheAwareJpaSearchBundleProviderSubsequentPage(
 			FhirContext theFhirContext,
 			RequestDetails theRequestDetails,
 			String theSearchUuid,

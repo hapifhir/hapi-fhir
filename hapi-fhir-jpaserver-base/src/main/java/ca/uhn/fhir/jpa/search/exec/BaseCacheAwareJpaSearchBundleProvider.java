@@ -87,22 +87,22 @@ import java.util.Set;
 /**
  * This class handles search results for <b>FHIR Search</b> operations leveraging the {@link ISearchCacheSvc search cache}. It has 2 concrete subclasses:
  * <ul>
- *     <li>{@link JpaSearchBundleProviderFirstPage}</li> is used for the initial search
- *     <li>{@link JpaSearchBundleProviderSubsequentPage}</li> is used for the following page loads from the query cache
+ *     <li>{@link CacheAwareJpaSearchBundleProviderFirstPage}</li> is used for the initial search
+ *     <li>{@link CacheAwareJpaSearchBundleProviderSubsequentPage}</li> is used for the following page loads from the query cache
  * </ul>
  *
  * @see IStatelessSearchSvc The Synchronous Search Service is used instead of this class for searches which don't use the search cache
  * @see ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider The search result for <b>FHIR History</b> operations.
  * @since 8.14.0
  */
-public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
+public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundleProvider {
 
 	public static final SearchCacheStatus CACHE_STATUS_BYPASS = SearchCacheStatus.builder()
 			.withCacheName("HapiFhirQueryCache")
 			.setStatus(SearchCacheStatus.SearchCacheStatusEnum.FWD_BYPASS)
 			.build();
 	private static final int SEARCH_EXPIRY_OFFSET_MINUTES = 10;
-	private static final Logger ourLog = LoggerFactory.getLogger(BaseJpaSearchBundleProvider.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseCacheAwareJpaSearchBundleProvider.class);
 
 	/**
 	 * Adjust this to raise the level of the debuga logs if you are
@@ -158,7 +158,7 @@ public abstract class BaseJpaSearchBundleProvider implements IBundleProvider {
 	 * Constructor
 	 */
 	@SuppressWarnings("unchecked")
-	protected BaseJpaSearchBundleProvider(
+	protected BaseCacheAwareJpaSearchBundleProvider(
 			FhirContext theFhirContext,
 			RequestDetails theRequestDetails,
 			IInterceptorBroadcaster theInterceptorBroadcaster,

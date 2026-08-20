@@ -4,7 +4,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.search.exec.JpaSearchBundleProviderFirstPage;
+import ca.uhn.fhir.jpa.search.exec.CacheAwareJpaSearchBundleProviderFirstPage;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
@@ -60,7 +60,7 @@ public class StorageInterceptorEventsR5Test extends BaseJpaR5Test {
 		// Initial search returns all
 		SearchParameterMap params = new SearchParameterMap();
 		IBundleProvider search = myPatientDao.search(params, mySrd);
-		assertEquals(JpaSearchBundleProviderFirstPage.class, search.getClass());
+		assertEquals(CacheAwareJpaSearchBundleProviderFirstPage.class, search.getClass());
 		List<IBaseResource> found = search.getResources(0, 100);
 		assertThat(found).hasSize(3);
 		assertEquals(3, showedCounter.get());

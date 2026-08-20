@@ -6,7 +6,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
-import ca.uhn.fhir.jpa.search.exec.JpaSearchBundleProviderFirstPage;
+import ca.uhn.fhir.jpa.search.exec.CacheAwareJpaSearchBundleProviderFirstPage;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.model.api.Include;
@@ -356,7 +356,7 @@ public class FhirResourceDaoR5SearchIncludeTest extends BaseJpaR5Test {
 		map.addRevInclude(new Include("Procedure:part-of"));
 		map.addInclude(new Include("Procedure:focalAccess").asRecursive());
 		IBundleProvider outcome = myProcedureDao.search(map, mySrd);
-		assertEquals(JpaSearchBundleProviderFirstPage.class, outcome.getClass());
+		assertEquals(CacheAwareJpaSearchBundleProviderFirstPage.class, outcome.getClass());
 		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
 		assertThat(ids).as(ids.toString()).containsExactlyInAnyOrder("Procedure/PRA8780542726", "Procedure/PRA8780542785", "BodyStructure/B51936689");
 
