@@ -57,6 +57,10 @@ public interface ITermCodeSystemVersionDao
 			@Param("code_system_uri") String theCodeSystemUri,
 			@Param("codesystem_version_id") String theCodeSystemVersionId);
 
+	@Query("SELECT tcsv FROM TermCodeSystemVersion tcsv INNER JOIN FETCH TermCodeSystem tcs on tcs = tcsv.myCodeSystem "
+			+ "WHERE tcs.myCodeSystemUri = :code_system_uri AND tcsv.myCodeSystemVersionId IS NULL")
+	TermCodeSystemVersion findByCodeSystemUriAndNullVersion(@Param("code_system_uri") String theCodeSystemUri);
+
 	@Query(
 			"SELECT cs FROM TermCodeSystemVersion cs WHERE cs.myCodeSystemPid = :codesystem_pid AND cs.myCodeSystemVersionId IS NULL")
 	TermCodeSystemVersion findByCodeSystemPidVersionIsNull(@Param("codesystem_pid") Long theCodeSystemPid);
