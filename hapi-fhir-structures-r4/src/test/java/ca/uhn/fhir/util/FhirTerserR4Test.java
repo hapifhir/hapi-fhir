@@ -1601,13 +1601,6 @@ public class FhirTerserR4Test {
 		}
 	}
 
-	/**
-	 * Unlike {@link #testConcurrentTerserCalls()}, which goes through the deprecated Set overload and so
-	 * builds a fresh CompartmentSearchParameterModifications per call, this shares a single instance across
-	 * all the threads. That is what production does: AuthorizationInterceptor caches its rule list on the
-	 * RequestDetails, and each rule holds one CompartmentSearchParameterModifications.
-	 * See CDR #8555 / SMILE-11895.
-	 */
 	@Test
 	public void testConcurrentTerserCallsWithSharedCompartmentModifications()
 			throws ExecutionException, InterruptedException {

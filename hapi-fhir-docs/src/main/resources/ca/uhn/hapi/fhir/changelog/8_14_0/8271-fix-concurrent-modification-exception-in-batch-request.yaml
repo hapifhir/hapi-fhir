@@ -2,11 +2,5 @@
 type: fix
 issue: 8271
 jira: SMILE-11895
-title: "Previously, the getter methods on `CompartmentSearchParameterModifications` inserted an empty entry
-  into their backing map when asked about a resource type that had no modifications registered. Because a
-  single instance is shared by every thread evaluating an AuthorizationInterceptor rule list for a given
-  request, this could throw a `ConcurrentModificationException`, corrupt the shared map, or accumulate empty
-  entries. The getters no longer modify any state, the backing maps are now concurrent, and the returned Sets
-  are immutable. Note that callers who previously mutated a Set returned by
-  `getAdditionalSearchParamNamesForResourceType(..)` or `getOmittedSPNamesForResourceType(..)` must instead
-  use `addSPToIncludeInCompartment(..)` or `addSPToOmitFromCompartment(..)`."
+title: "Fixed a `ConcurrentModificationException` that could be thrown when concurrent threads evaluated a
+  shared AuthorizationInterceptor rule list."
