@@ -57,9 +57,7 @@ public class TestSubscriptionDstu3Config {
 	@Bean
 	public DaoRegistry daoRegistry() {
 		DaoRegistry retVal = new DaoRegistry(fhirContext());
-		retVal.setResourceDaos(Lists.newArrayList(
-			subscriptionDao()
-		));
+		retVal.register(subscriptionDao());
 		return retVal;
 	}
 

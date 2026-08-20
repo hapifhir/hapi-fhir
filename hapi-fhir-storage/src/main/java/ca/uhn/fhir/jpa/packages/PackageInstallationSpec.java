@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.model.api.annotation.ExampleSupplier;
+import ca.uhn.fhir.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -28,6 +29,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -39,11 +41,14 @@ import java.util.function.Supplier;
 	"packageUrl",
 	"installMode",
 	"installResourceTypes",
+	"fetchDependencies",
+	"dependencyExcludes",
 	"validationMode",
 	"reloadExisting",
 	"additionalResourceFolders",
 	"versionPolicy",
-	"dryRun"
+	"dryRun",
+	"overwriteContentNotPresentCodeSystems"
 })
 @ExampleSupplier({PackageInstallationSpec.ExampleSupplier.class, PackageInstallationSpec.ExampleSupplier2.class})
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -92,6 +97,7 @@ public class PackageInstallationSpec {
 	@Schema(
 			description =
 					"Any values provided here will be interpreted as a regex. Dependencies with an ID matching any regex will be skipped.")
+	@JsonProperty("dependencyExcludes")
 	private List<String> myDependencyExcludes;
 
 	@Schema(
@@ -102,7 +108,7 @@ public class PackageInstallationSpec {
 
 	@Schema(
 			description =
-					"Controls whether multiple versions of installed resources can coexist in the repository during STORE_AND_INSTALL installation")
+					"Controls whether multiple versions of canonical resources (e.g. StructureDefinition, ValueSet, CodeSystem) can coexist in the repository during STORE_AND_INSTALL installation. Applies only to canonical resources; non-canonical instance resources are always installed using their original IDs regardless of this setting.")
 	@JsonProperty("versionPolicy")
 	private VersionPolicyEnum myVersionPolicy = VersionPolicyEnum.MULTI_VERSION;
 
@@ -112,8 +118,22 @@ public class PackageInstallationSpec {
 	@JsonProperty("dryRun")
 	private boolean myDryRun = false;
 
+	@Schema(
+			description =
+					"When true, a `CodeSystem` with `content=not-present` will be overwritten by a `CodeSystem` from the package. "
+							+ "Defaults to false, which protects an externally loaded `CodeSystem` from being replaced by IG packages.")
+	@JsonProperty("overwriteContentNotPresentCodeSystems")
+	private boolean myOverwriteContentNotPresentCodeSystems = false;
+
 	@JsonIgnore
 	private byte[] myPackageContents;
+
+	public PackageInstallationSpec() {}
+
+	public static PackageInstallationSpec copyOf(PackageInstallationSpec theOriginalSpec) {
+		String json = JsonUtil.serialize(theOriginalSpec);
+		return JsonUtil.deserialize(json, PackageInstallationSpec.class);
+	}
 
 	public List<String> getDependencyExcludes() {
 		if (myDependencyExcludes == null) {
@@ -160,8 +180,9 @@ public class PackageInstallationSpec {
 		return myInstallResourceTypes;
 	}
 
-	public void setInstallResourceTypes(List<String> theInstallResourceTypes) {
+	public PackageInstallationSpec setInstallResourceTypes(List<String> theInstallResourceTypes) {
 		myInstallResourceTypes = theInstallResourceTypes;
+		return this;
 	}
 
 	public String getName() {
@@ -200,11 +221,15 @@ public class PackageInstallationSpec {
 	}
 
 	public Set<String> getAdditionalResourceFolders() {
+		if (myAdditionalResourceFolders == null) {
+			myAdditionalResourceFolders = new HashSet<>();
+		}
 		return myAdditionalResourceFolders;
 	}
 
-	public void setAdditionalResourceFolders(Set<String> additionalResourceFolders) {
-		this.myAdditionalResourceFolders = additionalResourceFolders;
+	public PackageInstallationSpec setAdditionalResourceFolders(Set<String> theAdditionalResourceFolders) {
+		myAdditionalResourceFolders = theAdditionalResourceFolders;
+		return this;
 	}
 
 	public PackageInstallationSpec addDependencyExclude(String theExclude) {
@@ -237,6 +262,15 @@ public class PackageInstallationSpec {
 		return myDryRun;
 	}
 
+	public boolean isOverwriteContentNotPresentCodeSystems() {
+		return myOverwriteContentNotPresentCodeSystems;
+	}
+
+	public PackageInstallationSpec setOverwriteContentNotPresentCodeSystems(boolean theOverwriteNotPresentCodeSystems) {
+		myOverwriteContentNotPresentCodeSystems = theOverwriteNotPresentCodeSystems;
+		return this;
+	}
+
 	public enum InstallModeEnum {
 		/**
 		 * Downloads the package from NPM, but doesn't persist any of the resources into the database.
@@ -260,15 +294,15 @@ public class PackageInstallationSpec {
 
 	public enum VersionPolicyEnum {
 		/**
-		 * Default. Uses server-assigned IDs for new resources. Existing resources matched
-		 * by canonical URL + version. Supports multiple versions of installed resources.
+		 * Default. Uses server-assigned IDs for new canonical resources. Existing resources are matched
+		 * by canonical URL + version. Supports multiple versions of installed canonical resources.
 		 */
 		MULTI_VERSION,
 
 		/**
-		 * Uses client-assigned IDs from package. Existing resources
+		 * Uses client-assigned IDs from package for canonical resources. Existing canonical resources
 		 * matched by canonical URL only (ignoring version), so installing a new version
-		 * of the same resource will overwrite the existing one.
+		 * of the same canonical resource will overwrite the existing one.
 		 */
 		SINGLE_VERSION
 	}

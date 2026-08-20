@@ -1,19 +1,20 @@
 package ca.uhn.fhir.jpa.term.hsearch;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
-import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
+import ca.uhn.fhir.jpa.term.TerminologyTestHelper;
+import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.util.ClasspathUtil;
+import jakarta.persistence.EntityManager;
 import net.ttddyy.dsproxy.ExecutionInfo;
 import net.ttddyy.dsproxy.QueryInfo;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
@@ -33,17 +34,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.util.ResourceUtils;
 
-import jakarta.persistence.EntityManager;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import static java.util.Map.entry;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(SpringExtension.class)
@@ -58,13 +59,8 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 	public static final boolean CLEANUP_DATA = true;
 	public static final String CS_VERSION = "2.68";
 	public static final int CS_CONCEPTS_NUMBER = 81;
-	public static final String LOINC_PROPERTIES_CLASSPATH =
-		ResourceUtils.CLASSPATH_URL_PREFIX + TEST_FILES_CLASSPATH + "Loinc_small_v68.zip";
-	public static final String LOINC_ZIP_CLASSPATH =
-		ResourceUtils.CLASSPATH_URL_PREFIX + TEST_FILES_CLASSPATH + "v268_loincupload.properties";
 	private static final Logger ourLog = LoggerFactory.getLogger(ReindexTerminologyHSearchR4Test.class);
 	long termCodeSystemVersionWithVersionId;
-	long termCodeSystemVersionWithNoVersionId;
 	Map<String, Long> conceptCounts = Map.ofEntries(
 		entry("http://loinc.org/vs", 81L),
 		entry("http://loinc.org/vs/LG100-4", 0L),
@@ -96,28 +92,30 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 	@Autowired
 	private EntityManager myEntityManager;
 	@Autowired
-	private TermLoaderSvcImpl myTermLoaderSvc;
-	@Autowired
 	private ITermConceptDao myTermConceptDao;
 	@Autowired
 	private ITermReadSvc myTermReadSvc;
+	@Autowired
+	private TerminologyTestHelper myTerminologyTestHelper;
 
 	@Test
-	public void uploadLoincCodeSystem() throws FileNotFoundException, InterruptedException {
-		List<ITermLoaderSvc.FileDescriptor> myFileDescriptors = buildFileDescriptors();
+	public void uploadLoincCodeSystem() throws IOException, InterruptedException {
+		ZipCollectionBuilder fileDescriptors = buildFileDescriptors();
+
+		Properties properties = new Properties();
+		properties.load(ClasspathUtil.loadResourceAsStream(TEST_FILES_CLASSPATH + "v268_loincupload.properties"));
 
 		// upload terminology
-		myTermLoaderSvc.loadLoinc(myFileDescriptors, mySrd);
+		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion("2.68", fileDescriptors, false, properties);
 
 		// save all deferred concepts, properties, links, etc
-		myTerminologyDeferredStorageSvc.saveAllDeferred();
 		validateSavedConceptsCount();
 
 		// check the number of freetext-indexed TermConcepts
 		validateFreetextCounts();
 
 		// pre-expand  ValueSets
-		myTermReadSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		// pre-expansion uses freetext so check is to make sure all valuesets have the right number of concepts
 		validateValueSetPreexpansion();
@@ -132,7 +130,7 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 		removeValueSetPreExpansions();
 
 		// pre-expand  ValueSets again, after freetext reindexing
-		myTermReadSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		// pre-expansion uses freetext so check is to make sure all valuesets have the right number of concepts
 		validateValueSetPreexpansion();
@@ -142,7 +140,9 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 	private void removeValueSetPreExpansions() {
 		List<TermValueSet> termValueSets = myTermValueSetDao.findAll();
 		for (TermValueSet termValueSet : termValueSets) {
-			myTermReadSvc.invalidatePreCalculatedExpansion(termValueSet.getResource().getIdDt(), new SystemRequestDetails());
+			if (termValueSet.getIntendedVersionId() == null) {
+				myTerminologyTestHelper.startValueSetExpansionJobAndWaitForCompletion(termValueSet.getUrl(), termValueSet.getVersion());
+			}
 		}
 	}
 
@@ -159,26 +159,8 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 		ourLog.info("=================> Number of freetext found concepts after re-indexing for version {}: {}",
 			CS_VERSION, termConceptCountForVersion);
 		assertEquals(CS_CONCEPTS_NUMBER, termConceptCountForVersion);
-
-
-		int dbTermConceptCountForNullVersion = runInTransaction(() ->
-			myTermConceptDao.countByCodeSystemVersion(termCodeSystemVersionWithNoVersionId));
-		assertEquals(CS_CONCEPTS_NUMBER, dbTermConceptCountForNullVersion);
-
-		long termConceptCountNullVersion = searchAllIndexedTermConceptCount(termCodeSystemVersionWithNoVersionId);
-		ourLog.info("=================> Number of freetext found concepts after re-indexing for version {}: {}",
-			NULL, termConceptCountNullVersion);
-		assertEquals(CS_CONCEPTS_NUMBER, termConceptCountNullVersion);
 	}
 
-
-	private void validateFreetextIndexesEmpty() {
-		long termConceptCountVersioned = searchAllIndexedTermConceptCount(termCodeSystemVersionWithVersionId);
-		assertEquals(0, termConceptCountVersioned);
-
-		long termConceptCountNotVersioned = searchAllIndexedTermConceptCount(termCodeSystemVersionWithNoVersionId);
-		assertEquals(0, termConceptCountNotVersioned);
-	}
 
 	/**
 	 * Checks the number of VS Concepts and ConceptDesignations against test pre-specified values
@@ -197,16 +179,21 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 
 	private void validateSavedConceptsCount() {
 		termCodeSystemVersionWithVersionId = getTermCodeSystemVersionNotNullId();
-		int dbVersionedTermConceptCount = runInTransaction(() ->
-			myTermConceptDao.countByCodeSystemVersion(termCodeSystemVersionWithVersionId));
+		int dbVersionedTermConceptCount = runInTransaction(() -> {
+			TermCodeSystemVersion csv = myTermCodeSystemVersionDao.findById(new IdAndPartitionId(termCodeSystemVersionWithVersionId)).orElseThrow();
+			List<TermConcept> allConcepts = myTermConceptDao.findByCodeSystemVersion(csv);
+
+			Set<String> allConceptsSet = allConcepts
+				.stream()
+				.map(TermConcept::getCode)
+				.collect(Collectors.toCollection(TreeSet::new));
+			ourLog.info("All Concepts: {}", allConceptsSet);
+
+			return allConceptsSet.size();
+		});
 		ourLog.info("=================> Number of stored concepts for version {}: {}", CS_VERSION, dbVersionedTermConceptCount);
 		assertEquals(CS_CONCEPTS_NUMBER, dbVersionedTermConceptCount);
 
-		termCodeSystemVersionWithNoVersionId = getTermCodeSystemVersionNullId();
-		int dbNotVersionedTermConceptCount = runInTransaction(() ->
-			myTermConceptDao.countByCodeSystemVersion(termCodeSystemVersionWithNoVersionId));
-		ourLog.info("=================> Number of stored concepts for version {}: {}", NULL, dbNotVersionedTermConceptCount);
-		assertEquals(CS_CONCEPTS_NUMBER, dbNotVersionedTermConceptCount);
 	}
 
 
@@ -226,27 +213,9 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 	}
 
 
-	private long getTermCodeSystemVersionNullId() {
-		return runInTransaction(() -> {
-			TermCodeSystem myTermCodeSystem = myTermCodeSystemDao.findByCodeSystemUri(LOINC_URL);
-			TermCodeSystemVersion termCodeSystemVersion = myTermCodeSystemVersionDao
-				.findByCodeSystemPidVersionIsNull(myTermCodeSystem.getPid());
-			assertNotNull(termCodeSystemVersion);
-			return termCodeSystemVersion.getPid();
-		});
-	}
 
-
-	private List<ITermLoaderSvc.FileDescriptor> buildFileDescriptors() throws FileNotFoundException {
-		List<ITermLoaderSvc.FileDescriptor> fileDescriptors = new ArrayList<>();
-
-		File propsFile = ResourceUtils.getFile(LOINC_PROPERTIES_CLASSPATH);
-		fileDescriptors.add(new TerminologyUploaderProvider.FileBackedFileDescriptor(propsFile));
-
-		File zipFile = ResourceUtils.getFile(LOINC_ZIP_CLASSPATH);
-		fileDescriptors.add(new TerminologyUploaderProvider.FileBackedFileDescriptor(zipFile));
-
-		return fileDescriptors;
+	private ZipCollectionBuilder buildFileDescriptors() throws IOException {
+		return new ZipCollectionBuilder(ClasspathUtil.loadResourceAsByteArray(TEST_FILES_CLASSPATH + "Loinc_small_v68.zip"));
 	}
 
 

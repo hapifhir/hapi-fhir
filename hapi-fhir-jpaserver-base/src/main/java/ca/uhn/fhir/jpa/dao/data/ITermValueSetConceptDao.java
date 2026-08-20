@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import org.springframework.data.domain.Pageable;
@@ -27,22 +28,40 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public interface ITermValueSetConceptDao
 		extends JpaRepository<TermValueSetConcept, IdAndPartitionId>, IHapiFhirJpaRepository {
 
+	@Query("SELECT COUNT(*) FROM TermValueSetConcept WHERE myValueSet = :vs")
+	Integer countByTermValueSet(@Param("vs") TermValueSet theValueSet);
+
+	/**
+	 * @deprecated Use {@link #countByTermValueSet(TermValueSet)}
+	 */
+	@Deprecated
 	@Query("SELECT COUNT(*) FROM TermValueSetConcept vsc WHERE vsc.myValueSetPid = :pid")
 	Integer countByTermValueSetId(@Param("pid") Long theValueSetId);
 
-	@Query("DELETE FROM TermValueSetConcept vsc WHERE vsc.myValueSetPid = :pid")
+	@Query("DELETE FROM TermValueSetConcept vsc WHERE vsc.myValueSet = :vs")
 	@Modifying
-	void deleteByTermValueSetId(@Param("pid") Long theValueSetId);
+	void deleteByTermValueSet(@Param("vs") TermValueSet theValueSet);
 
 	@Query("SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSetPid = :pid AND vsc.mySystem = :system_url")
 	List<TermValueSetConcept> findByTermValueSetIdSystemOnly(
 			Pageable thePage, @Param("pid") Long theValueSetId, @Param("system_url") String theSystem);
+
+	@Query("SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSet = :vs ORDER BY vsc.myOrder")
+	Stream<TermValueSetConcept> streamAllByTermValueSetOrdered(@Param("vs") TermValueSet theValueSet);
+
+	@Query("FROM TermValueSetConcept WHERE myValueSet = :vs AND mySystem = :system_url AND myCode IN (:codes)")
+	List<TermValueSetConcept> findByCodesForTermValueSet(
+			@Param("vs") TermValueSet theValueSet,
+			@Param("system_url") String theSystem,
+			@Param("codes") Collection<String> theCodes);
 
 	@Query(
 			"SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSetPid = :pid AND vsc.mySystem = :system_url AND vsc.myCode = :codeval")
@@ -77,6 +96,10 @@ public interface ITermValueSetConceptDao
 			@Param("system_version") String theSystemVersion,
 			@Param("codeval") String theCode);
 
+	/**
+	 * @deprecated We shouldn't use a non-partitioned PID as a lookup, since this table is partitioned
+	 */
+	@Deprecated
 	@Query("SELECT vsc.myId FROM TermValueSetConcept vsc WHERE vsc.myValueSetPid = :pid ORDER BY vsc.myId")
 	List<Long> findIdsByTermValueSetId(@Param("pid") Long theValueSetId);
 

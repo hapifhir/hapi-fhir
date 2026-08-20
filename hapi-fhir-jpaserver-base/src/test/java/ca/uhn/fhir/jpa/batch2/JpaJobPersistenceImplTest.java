@@ -4,6 +4,8 @@ import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.jpa.dao.data.IBatch2AttachmentChunkRepository;
+import ca.uhn.fhir.jpa.dao.data.IBatch2AttachmentRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
@@ -37,6 +39,10 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class JpaJobPersistenceImplTest {
 	private static final String TEST_INSTANCE_ID = "test-instance-id";
+	@Mock
+	IBatch2AttachmentRepository myAttachmentRepository;
+	@Mock
+	IBatch2AttachmentChunkRepository myAttachmentChunkRepository;
 	@Mock
 	IBatch2JobInstanceRepository myJobInstanceRepository;
 	@Mock

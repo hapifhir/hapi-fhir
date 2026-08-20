@@ -9,6 +9,7 @@ import org.hl7.fhir.common.hapi.validation.validator.WorkerContextValidationSupp
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ElementDefinition;
+import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
@@ -104,6 +105,36 @@ public class VersionSpecificWorkerContextR4Test extends BaseResourceProviderR4Te
 			// verify that the sub-subsequent fetchResource returns the same resource instance from the cache
 			org.hl7.fhir.r5.model.ValueSet fetchedCodeSystem2 = myWorkerContext.fetchResource(org.hl7.fhir.r5.model.ValueSet.class, resourceUrl);
 			assertThat(fetchedCodeSystem2).isSameAs(fetchedCodeSystem1);
+		}
+
+		@Test
+		void fetchResourceVersions_withMeasure_returnsMatchingResource() {
+			// setup
+			final String measureUrl = "http://example.com/Measure/example-measure";
+			final String measureVersion = "1.0.0";
+			Measure measure = new Measure();
+			measure.setUrl(measureUrl);
+			measure.setVersion(measureVersion);
+			measure.setName("ExampleMeasure");
+			myDaoRegistry.getResourceDao(Measure.class).create(measure, mySrd);
+
+			// execute
+			List<org.hl7.fhir.r5.model.Measure> results = myWorkerContext.fetchResourceVersions(
+				org.hl7.fhir.r5.model.Measure.class, measureUrl);
+
+			// validate
+			assertThat(results).hasSize(1);
+			assertThat(results.get(0).getVersion()).isEqualTo(measureVersion);
+		}
+
+		@Test
+		void fetchResourceVersions_withNonExistentResource_returnsEmptyList() {
+			// execute
+			List<org.hl7.fhir.r5.model.Measure> results = myWorkerContext.fetchResourceVersions(
+				org.hl7.fhir.r5.model.Measure.class, "http://example.com/Measure/non-existent");
+
+			// validate
+			assertThat(results).isEmpty();
 		}
 
 		@Test

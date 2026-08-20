@@ -163,6 +163,8 @@ public class FhirPatch {
 	private void handleAddOperation(@Nullable IBaseResource theResource, IBase theParameters, PatchOutcome theOutcome) {
 
 		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
+		path = defaultString(path);
+		path = prefixResourceTypeToPathIfneeded(path, theResource);
 		String elementName = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_NAME);
 
 		String containingPath = defaultString(path);
@@ -192,6 +194,7 @@ public class FhirPatch {
 
 		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
 		path = defaultString(path);
+		path = prefixResourceTypeToPathIfneeded(path, theResource);
 
 		int lastDot = path.lastIndexOf(".");
 		if (lastDot == -1) {
@@ -242,6 +245,7 @@ public class FhirPatch {
 			@Nullable IBaseResource theResource, IBase theParameters, PatchOutcome theOutcome) {
 		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
 		path = defaultString(path);
+		path = prefixResourceTypeToPathIfneeded(path, theResource);
 
 		boolean allowMultiDelete = ParametersUtil.getParameterPartValueAsBoolean(
 						myContext, theParameters, PARAMETER_ALLOW_MULTIPLE_MATCHES)
@@ -306,6 +310,7 @@ public class FhirPatch {
 		String path = ParametersUtil.getParameterPartValueAsString(myContext, theParameters, PARAMETER_PATH);
 		path = defaultString(path);
 		path = normalizeExtensionFunctionSyntax(path);
+		path = prefixResourceTypeToPathIfneeded(path, theResource);
 
 		// TODO
 		/*
@@ -345,6 +350,13 @@ public class FhirPatch {
 
 		// replace the value
 		replaceValuesByPath(cd, theParameters, fhirPath, parsedFhirPath, theOutcome);
+	}
+
+	private String prefixResourceTypeToPathIfneeded(String thePath, IBaseResource theResource) {
+		if (isNotBlank(thePath) && Character.isLowerCase(thePath.charAt(0))) {
+			return myContext.getResourceType(theResource) + "." + thePath;
+		}
+		return thePath;
 	}
 
 	private void replaceValuesByPath(
@@ -389,6 +401,10 @@ public class FhirPatch {
 
 					BaseRuntimeChildDefinition subChild =
 							childDefinitionToUse.getElementDefinition().getChildByName(name);
+
+					if (subChild == null) {
+						throwUnknownChildElementException(name, theParsedFhirPath.getRawPath());
+					}
 
 					subChild.getMutator().setValue(childDefinitionToUse.getBase(), optionalValue.get());
 				}
@@ -932,6 +948,9 @@ public class FhirPatch {
 		if (childDef == null) {
 			childName = theElementName + "[x]";
 			childDef = elementDef.getChildByName(childName);
+			if (childDef == null) {
+				throwUnknownChildElementException(theElementName, null);
+			}
 			childElement = childDef.getChildByName(
 					childDef.getValidChildNames().iterator().next());
 		} else {
@@ -939,6 +958,14 @@ public class FhirPatch {
 		}
 
 		return new ChildDefinition(childDef, childElement);
+	}
+
+	private static void throwUnknownChildElementException(String theFieldName, @Nullable String thePath) {
+		String errorMsg = "Unknown child element '" + theFieldName + "' for patch operation";
+		if (StringUtils.isNotBlank(thePath)) {
+			errorMsg += " on path '" + thePath + "'";
+		}
+		throw new InvalidRequestException(Msg.code(2930) + errorMsg);
 	}
 
 	private IBase getNewValue(IBase theParameters, ChildDefinition theChildDefinition) {

@@ -367,9 +367,9 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	@Test
 	void testDeliveryMessage_withSharedDeliveryQueue_deliversMessageOnCorrectChannels() throws Exception {
 		// Given: Simulate a shared delivery channel that has multiple configured delivery endpoints
+		doReturn("my-shared-delivery-channel").when(mySubscriptionDeliveryChannelNamer).nameFromSubscription(any());
 		createSubscriptionWithCriteriaOnQueue("[Patient]", "channel:" + PATIENT_CHANNEL_NAME);
 		createSubscriptionWithCriteriaOnQueue("[Organization]", "channel:" + ORGANIZATION_CHANNEL_NAME);
-		doReturn("my-shared-delivery-channel").when(mySubscriptionDeliveryChannelNamer).nameFromSubscription(any());
 
 		waitForActivatedSubscriptionCount(2);
 

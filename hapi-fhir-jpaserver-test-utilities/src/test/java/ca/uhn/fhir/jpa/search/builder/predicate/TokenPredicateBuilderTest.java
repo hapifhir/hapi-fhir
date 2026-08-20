@@ -46,7 +46,7 @@ public class TokenPredicateBuilderTest {
 
 	@BeforeEach
 	public void beforeEach() {
-		myLogger = (Logger) LoggerFactory.getLogger(TokenPredicateBuilder.class);
+		myLogger = (Logger) LoggerFactory.getLogger(BaseTokenPredicateBuilder.class);
 		myListAppender = new ListAppender<>();
 		myListAppender.setContext((LoggerContext) LoggerFactory.getILoggerFactory());
 		myLogger.setLevel(Level.ALL);
@@ -63,7 +63,7 @@ public class TokenPredicateBuilderTest {
 	}
 
 	@AfterEach
-	public void afterEach(){
+	public void afterEach() {
 		myListAppender.stop();
 		myLogger.detachAppender(myListAppender);
 	}
@@ -78,7 +78,7 @@ public class TokenPredicateBuilderTest {
 		RuntimeSearchParam runtimeSearchParam = new RuntimeSearchParam(null, null, "SearchParameter", null, null, null, null, null, null, null);
 
 		// execute
-		myTokenPredicateBuilder.createPredicateToken(tokenParams, "SearchParameter", "SPPrefix", runtimeSearchParam, RequestPartitionId.defaultPartition());
+		myTokenPredicateBuilder.createPredicateToken(tokenParams, "SearchParameter", "SPPrefix", runtimeSearchParam, RequestPartitionId.fromPartitionId(null));
 
 		// verify
 		List<ILoggingEvent> logList = myListAppender.list;

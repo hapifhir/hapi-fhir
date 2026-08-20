@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -19,6 +20,7 @@ import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Sets;
@@ -28,21 +30,26 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Consent;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
+import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Timing;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -53,8 +60,9 @@ import java.util.stream.Collectors;
 import static java.util.Comparator.comparing;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class SearchParamExtractorR4Test implements ITestDataBuilder {
+class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamExtractorR4Test.class);
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
@@ -63,7 +71,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	final StorageSettings myStorageSettings = new StorageSettings();
 
 	@Test
-	public void testParamWithOrInPath() {
+	void testParamWithOrInPath() {
 		Observation obs = new Observation();
 		obs.addCategory().addCoding().setSystem("SYSTEM").setCode("CODE");
 
@@ -77,7 +85,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	}
 
 	@Test
-	public void testName() {
+	void testName() {
 		Patient patient = new Patient();
 		List<StringType> suffixStrings = Arrays.asList(new StringType("the Great"));
 		List<StringType> prefixStrings = Arrays.asList(new StringType("King"));
@@ -94,7 +102,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	}
 
 	@Test
-	public void testTokenOnSearchParamContext() {
+	void testTokenOnSearchParamContext() {
 		SearchParameter sp = new SearchParameter();
 		sp.addUseContext().setCode(new Coding().setSystem("http://system").setCode("code"));
 
@@ -108,7 +116,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	}
 
 	@Test
-	public void testTokenText_Enabled_Coding() {
+	void testTokenText_Enabled_Coding() {
 		Observation obs = new Observation();
 		obs.getCode().addCoding().setSystem("http://system").setCode("code").setDisplay("Help Im a Bug");
 
@@ -132,8 +140,8 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	}
 
 	@Test
-	public void testTokenText_DisabledInSearchParam_Coding() {
-		RuntimeSearchParam existingCodeSp = mySearchParamRegistry.getActiveSearchParams("Observation", null).get("code");
+	void testTokenText_DisabledInSearchParam_Coding() {
+		RuntimeSearchParam existingCodeSp = mySearchParamRegistry.getActiveSearchParams("Observation", ISearchParamRegistry.SearchParamLookupContextEnum.ALL).get("code");
 		RuntimeSearchParam codeSearchParam = new RuntimeSearchParam(existingCodeSp);
 		codeSearchParam.addExtension(HapiExtensions.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING, new Extension(HapiExtensions.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING, new BooleanType(true)));
 		mySearchParamRegistry.addSearchParam(codeSearchParam);
@@ -158,7 +166,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	}
 
 	@Test
-	public void testTokenText_DisabledInStorageSettings_Coding() {
+	void testTokenText_DisabledInStorageSettings_Coding() {
 		StorageSettings storageSettings = new StorageSettings();
 		storageSettings.setSuppressStringIndexingInTokens(true);
 
@@ -182,11 +190,11 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	}
 
 	@Test
-	public void testTokenText_DisabledInStorageSettingsButForcedInSearchParam_Coding() {
+	void testTokenText_DisabledInStorageSettingsButForcedInSearchParam_Coding() {
 		StorageSettings storageSettings = new StorageSettings();
 		storageSettings.setSuppressStringIndexingInTokens(true);
 
-		RuntimeSearchParam existingCodeSp = mySearchParamRegistry.getActiveSearchParams("Observation", null).get("code");
+		RuntimeSearchParam existingCodeSp = mySearchParamRegistry.getActiveSearchParams("Observation", ISearchParamRegistry.SearchParamLookupContextEnum.ALL).get("code");
 		RuntimeSearchParam codeSearchParam = new RuntimeSearchParam(existingCodeSp);
 		codeSearchParam.addExtension(HapiExtensions.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING, new Extension(HapiExtensions.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING, new BooleanType(false)));
 		mySearchParamRegistry.addSearchParam(codeSearchParam);
@@ -215,12 +223,12 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 
 	@Test
-	public void testReferenceWithResolve() {
+	void testReferenceWithResolve() {
 		Encounter enc = new Encounter();
 		enc.addLocation().setLocation(new Reference("Location/123"));
 
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
-		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Encounter", "location", null);
+		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Encounter", "location", ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
 		assertNotNull(param);
 		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(enc, false);
 		assertThat(links).hasSize(1);
@@ -230,12 +238,12 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	}
 
 	@Test
-	public void testReferenceWithResolveMulti() {
+	void testReferenceWithResolveMulti() {
 		Consent consent = new Consent();
 		consent.setSource(new Reference().setReference("Consent/999"));
 
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
-		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Consent", Consent.SP_SOURCE_REFERENCE, null);
+		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Consent", Consent.SP_SOURCE_REFERENCE, ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
 		assertNotNull(param);
 		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(consent, false);
 		assertThat(links).hasSize(1);
@@ -245,12 +253,12 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 
 	@Test
-	public void testExtractSearchParamTokenTest() {
+	void testExtractSearchParamTokenTest() {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("sys").setValue("val");
 
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
-		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Patient", Patient.SP_IDENTIFIER, null);
+		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Patient", Patient.SP_IDENTIFIER, ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
 		assertNotNull(param);
 		ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> params = extractor.extractSearchParamTokens(p, param);
 		assertThat(params).hasSize(1);
@@ -262,7 +270,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 
 	@Test
-	public void testExtensionContainingReference() {
+	void testExtensionContainingReference() {
 		String path = "Patient.extension('http://patext').value.as(Reference)";
 
 		RuntimeSearchParam sp = new RuntimeSearchParam(null, null, "extpat", "Patient SP", path, RestSearchParameterTypeEnum.REFERENCE, new HashSet<>(), Sets.newHashSet("Patient"), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, null);
@@ -278,7 +286,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	}
 
 	@Test
-	public void testExtractComponentQuantities() {
+	void testExtractComponentQuantities() {
 		Observation o1 = new Observation();
 		o1.addComponent()
 			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("code1")))
@@ -294,7 +302,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	}
 
 	@Test
-	public void testExtractComponentQuantityWithNormalizedQuantitySearchSupported() {
+	void testExtractComponentQuantityWithNormalizedQuantitySearchSupported() {
 
 		StorageSettings storageSettings = new StorageSettings();
 
@@ -313,7 +321,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	}
 
 	@Test
-	public void testExtractComponentQuantityValueWithNormalizedQuantitySearchSupported() {
+	void testExtractComponentQuantityValueWithNormalizedQuantitySearchSupported() {
 
 		StorageSettings storageSettings = new StorageSettings();
 
@@ -325,7 +333,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("code1")))
 			.setValue(new Quantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm").setValue(200));
 
-		RuntimeSearchParam existingCodeSp = mySearchParamRegistry.getActiveSearchParams("Observation", null).get("component-value-quantity");
+		RuntimeSearchParam existingCodeSp = mySearchParamRegistry.getActiveSearchParams("Observation", ISearchParamRegistry.SearchParamLookupContextEnum.ALL).get("component-value-quantity");
 
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(storageSettings, new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		List<String> list = extractor.extractParamValuesAsStrings(existingCodeSp, o1);
@@ -334,7 +342,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	}
 
 	@Test
-	public void testExtractIdentifierOfType() {
+	void testExtractIdentifierOfType() {
 
 		StorageSettings storageSettings = new StorageSettings();
 		storageSettings.setIndexIdentifierOfType(true);
@@ -382,7 +390,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		 * @see ca.uhn.fhir.model.api.annotation.SearchParamDefinition#compositeOf
 		 */
 		@BeforeEach
-		public void setUp() {
+		void setUp() {
 			String spJson = """
 				{
 				  "resourceType": "SearchParameter",
@@ -525,6 +533,91 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 			assertEquals("component-code", tokenDisplayIdx0.getParamName());
 			assertEquals("Observation", tokenDisplayIdx0.getResourceType());
 			assertEquals("display value", tokenDisplayIdx0.getValueExact());
+		}
+	}
+
+	@Nested
+	class TimingOccurrenceDateExtraction {
+
+		private SearchParamExtractorR4 myExtractor;
+
+		@BeforeEach
+		void setUp() {
+			myExtractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
+		}
+
+		private ResourceIndexedSearchParamDate extractOccurrenceParam(ServiceRequest theServiceRequest) {
+			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> dates = myExtractor.extractSearchParamDates(theServiceRequest);
+			return dates.stream()
+					.filter(p -> "occurrence".equals(p.getParamName()))
+					.findFirst()
+					.orElse(null);
+		}
+
+		@Test
+		void testBoundsPeriodStartOnlyProducesNullHighValue() {
+			// FHIR spec: absent period.end means open-ended — sp_value_high must be null, not a copy of start
+			ServiceRequest serviceRequest = new ServiceRequest();
+			serviceRequest.setOccurrence(new Timing()
+					.addEvent(null)
+					.setRepeat(new Timing.TimingRepeatComponent()
+							.setBounds(new Period().setStartElement(new DateTimeType("2025-09-17T02:25:28-04:00")))));
+
+			ResourceIndexedSearchParamDate result = extractOccurrenceParam(serviceRequest);
+
+			assertNotNull(result);
+			assertNotNull(result.getValueLow());
+			assertNull(result.getValueHigh(), "Open-ended period must not populate sp_value_high");
+		}
+
+		@Test
+		void testBoundsPeriodWithStartAndEndPopulatesBothValues() {
+			ServiceRequest serviceRequest = new ServiceRequest();
+			serviceRequest.setOccurrence(new Timing()
+					.setRepeat(new Timing.TimingRepeatComponent()
+							.setBounds(new Period()
+									.setStartElement(new DateTimeType("2025-09-17T00:00:00-04:00"))
+									.setEndElement(new DateTimeType("2025-12-31T00:00:00-05:00")))));
+
+			ResourceIndexedSearchParamDate result = extractOccurrenceParam(serviceRequest);
+
+			assertNotNull(result);
+			assertNotNull(result.getValueLow());
+			assertNotNull(result.getValueHigh());
+			assertThat(result.getValueHigh()).isAfter(result.getValueLow());
+		}
+
+		@Test
+		void testTimingEventsOnlyUseFirstAndLastEventDates() {
+			List<DateTimeType> eventList = new ArrayList<>();
+			eventList.add(new DateTimeType("2025-01-01T00:00:00Z"));
+			eventList.add(new DateTimeType("2025-06-01T00:00:00Z"));
+			eventList.add(new DateTimeType("2025-12-01T00:00:00Z"));
+			ServiceRequest serviceRequest = new ServiceRequest();
+			serviceRequest.setOccurrence(new Timing().setEvent(eventList));
+
+			ResourceIndexedSearchParamDate result = extractOccurrenceParam(serviceRequest);
+
+			assertNotNull(result);
+			assertNotNull(result.getValueLow());
+			assertNotNull(result.getValueHigh());
+			assertThat(result.getValueHigh()).isAfter(result.getValueLow());
+		}
+
+		@Test
+		void testSingleTimingEventProducesSameLowAndHighValue() {
+			// A single point-in-time event is unambiguous: low == high is correct
+			List<DateTimeType> eventList = new ArrayList<>();
+			eventList.add(new DateTimeType("2025-09-17T02:25:28Z"));
+			ServiceRequest serviceRequest = new ServiceRequest();
+			serviceRequest.setOccurrence(new Timing().setEvent(eventList));
+
+			ResourceIndexedSearchParamDate result = extractOccurrenceParam(serviceRequest);
+
+			assertNotNull(result);
+			assertNotNull(result.getValueLow());
+			assertNotNull(result.getValueHigh());
+			assertEquals(result.getValueLow(), result.getValueHigh());
 		}
 	}
 

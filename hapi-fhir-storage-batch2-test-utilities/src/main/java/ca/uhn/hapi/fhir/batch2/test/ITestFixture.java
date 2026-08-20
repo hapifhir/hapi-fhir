@@ -29,6 +29,8 @@ import ca.uhn.test.concurrency.PointcutLatch;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.concurrent.Callable;
+
 public interface ITestFixture {
 
 	String createAndStoreJobInstance(JobDefinition<?> theJobDefinition);
@@ -41,6 +43,8 @@ public interface ITestFixture {
 
 	void runInTransaction(Runnable theRunnable);
 
+	<T> T runInTransaction(Callable<T> theRunnable);
+
 	void sleepUntilTimeChanges();
 
 	JobDefinition<TestJobParameters> withJobDefinitionWithReductionStep();
@@ -51,7 +55,7 @@ public interface ITestFixture {
 
 	JobInstance freshFetchJobInstance(String theInstanceId);
 
-	void runMaintenancePass();
+	void runActiveJobMaintenancePass();
 
 	PlatformTransactionManager getTransactionManager();
 

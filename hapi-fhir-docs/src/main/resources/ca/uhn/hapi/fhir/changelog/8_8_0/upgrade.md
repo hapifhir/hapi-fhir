@@ -37,3 +37,16 @@ Users who see:
 If the case-sensitive FHIR ID behaviour is not required for your use case, and you wish to preserve zero-downtime upgrades, you may bypass this migration by using the following `hapi-fhir-cli` command:
 ```bin/hapi-fhir-cli migrate-database ...<args>... --skip-versions 8_8_0.20251208.10,8_8_0.20251208.20,8_8_0.20251208.30,8_8_0.20251208.40,8_8_0.20251208.50```
 See the [migrate database docs](/hapi-fhir/docs/server_jpa/upgrading.html) for more information.
+
+## Consent REJECT Now Also Blocks Write Operations
+This release introduces a change in behavior of write operations (POST, PUT, PATCH) when using Consent Management.
+
+### The Issue
+When write operations were being processed, a REJECT from the [ConsentInterceptor](https://hapifhir.io/hapi-fhir/docs/v/7.4.0/security/consent_interceptor.html)
+would cause inconsistencies in the database.
+
+### The Solution
+Write operations that cause a REJECT from the  [ConsentInterceptor](https://hapifhir.io/hapi-fhir/docs/v/7.4.0/security/consent_interceptor.html)
+will be aborted with no changes in the database. The result code will be a 403 with a proper error message.
+
+

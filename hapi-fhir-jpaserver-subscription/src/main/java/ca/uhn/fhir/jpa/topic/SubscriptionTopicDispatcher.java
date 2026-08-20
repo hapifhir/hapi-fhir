@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.topic;
 
 import ca.uhn.fhir.broker.api.ISendResult;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionDeliveryRequest;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchDeliverer;
@@ -115,6 +116,15 @@ public class SubscriptionTopicDispatcher {
 			SubscriptionTopicDispatchRequest theSubscriptionTopicDispatchRequest,
 			ActiveSubscription theActiveSubscription) {
 
+		CanonicalSubscription subscription = theActiveSubscription.getSubscription();
+		RequestPartitionId requestPartitionId = theSubscriptionTopicDispatchRequest.getRequestPartitionId();
+		if (requestPartitionId != null
+				&& requestPartitionId.hasPartitionIds()
+				&& !subscription.isCrossPartitionEnabled()
+				&& !requestPartitionId.hasPartitionId(subscription.getRequestPartitionId())) {
+			return ISendResult.FAILURE;
+		}
+
 		String topicUrl = theSubscriptionTopicDispatchRequest.getTopicUrl();
 		List<IBaseResource> resources = theSubscriptionTopicDispatchRequest.getResources();
 		ISubscriptionTopicFilterMatcher subscriptionTopicFilterMatcher =
@@ -123,7 +133,6 @@ public class SubscriptionTopicDispatcher {
 		if (resources.size() > 0) {
 			IBaseResource firstResource = resources.get(0);
 			String resourceType = myFhirContext.getResourceType(firstResource);
-			CanonicalSubscription subscription = theActiveSubscription.getSubscription();
 			CanonicalTopicSubscription topicSubscription = subscription.getTopicSubscription();
 			if (topicSubscription.hasFilters()) {
 				ourLog.debug(

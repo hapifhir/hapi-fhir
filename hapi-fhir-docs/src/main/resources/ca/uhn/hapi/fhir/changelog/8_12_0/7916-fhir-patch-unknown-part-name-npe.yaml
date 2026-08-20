@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7916
+title: "Fixed a `NullPointerException` when a FHIR patch operation contains an invalid
+  element name in a nested `value.part` sub-field. The server now returns an
+  `InvalidRequestException` with a clear error message identifying the unknown field name."

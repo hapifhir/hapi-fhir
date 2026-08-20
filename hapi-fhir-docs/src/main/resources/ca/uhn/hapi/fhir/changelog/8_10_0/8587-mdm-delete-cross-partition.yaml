@@ -1,0 +1,7 @@
+---
+type: fix
+title: "Previously, when MDM was configured with golden_resource_partition set to a different partition
+  than the source resource, deleting the last source resource linked to a golden resource would fail
+  with a 404 error because the golden resource could not be found. The MDM delete logic now uses
+  an all-partitions request when looking up the golden resource, allowing cross-partition MDM
+  deletion to succeed."

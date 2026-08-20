@@ -76,7 +76,7 @@ public class ReadPartitionIdRequestDetails extends PartitionIdRequestDetails {
 				null,
 				null,
 				null,
-				null);
+				theRequestDetails.getOperation());
 	}
 
 	@Nullable

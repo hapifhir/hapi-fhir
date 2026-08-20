@@ -254,7 +254,7 @@ public abstract class BaseServerResponseException extends RuntimeException {
 
 	/**
 	 * Returns a map containing any headers which should be added to the outgoing
-	 * response. This methos creates the map if none exists, so it will never
+	 * response. This method creates the map if none exists, so it will never
 	 * return <code>null</code>
 	 *
 	 * @since 2.0 (note that this method existed in previous versions of HAPI but the method

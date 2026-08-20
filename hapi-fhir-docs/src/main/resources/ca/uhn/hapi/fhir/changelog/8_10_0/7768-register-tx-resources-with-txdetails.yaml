@@ -1,0 +1,6 @@
+---
+type: add
+jira: SMILE-11786
+issue: 7768
+title: "While processing a FHIR Transaction, stored resources are added to the TransactionDetails so that
+  interceptors have a way of resolving them for pointcuts which occur during the transaction processing."

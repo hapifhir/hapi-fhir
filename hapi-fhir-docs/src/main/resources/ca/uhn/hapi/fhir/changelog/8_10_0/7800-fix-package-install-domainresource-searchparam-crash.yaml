@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 7800
+title: "Previously, installing an IG package containing a `SearchParameter` with `base` of
+  `DomainResource` failed with `HAPI-1684: Unknown resource name 'DomainResource'` during
+  reindex job URL construction, preventing the package install from completing. This has
+  been fixed."

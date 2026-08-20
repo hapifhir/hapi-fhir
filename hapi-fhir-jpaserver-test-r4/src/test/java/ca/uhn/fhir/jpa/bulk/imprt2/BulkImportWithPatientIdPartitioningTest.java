@@ -84,7 +84,7 @@ public class BulkImportWithPatientIdPartitioningTest extends BaseJpaR4Test {
 
 		// Execute
 
-		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(newSrd(), request);
 		String instanceId = startResponse.getInstanceId();
 		assertThat(instanceId).isNotBlank();
 		ourLog.info("Execution got ID: {}", instanceId);
@@ -92,7 +92,7 @@ public class BulkImportWithPatientIdPartitioningTest extends BaseJpaR4Test {
 		// Verify
 
 		await().atMost(120, TimeUnit.SECONDS).until(() -> {
-			myJobCleanerService.runMaintenancePass();
+			myJobCleanerService.runActiveJobMaintenancePass();
 			JobInstance instance = myJobCoordinator.getInstance(instanceId);
 			return instance.getStatus() == StatusEnum.COMPLETED;
 		});

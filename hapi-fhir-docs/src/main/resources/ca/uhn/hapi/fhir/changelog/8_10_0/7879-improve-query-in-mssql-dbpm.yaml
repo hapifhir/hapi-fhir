@@ -1,0 +1,4 @@
+---
+type: perf
+issue: 7879
+title: "In MSSQL/SQL Server, when running in DB Partition Mode the query for fetching resource bodies during a search is inefficient because MSSQL does not properly support tuples. This query has been reworked for better performance."

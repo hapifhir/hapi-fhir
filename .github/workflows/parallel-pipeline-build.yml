@@ -23,7 +23,7 @@ jobs:
         id: cache-maven
         uses: ./.github/actions/build-cache
         with:
-          java-version: '17'
+          java-version: '21'
           cache-path: $HOME/.m2/repository
 
   checkstyle:
@@ -37,7 +37,7 @@ jobs:
       - name: Run Checkstyle Validation
         uses: ./.github/actions/checkstyle-validation
         with:
-          java-version: '17'
+          java-version: '21'
           maven-cache-key: ${{ github.ref_name }}-maven-${{ hashFiles('**/pom.xml') }}
           hapi-cache-key: ${{ github.ref_name }}-hapi-${{ github.run_id }}
 
@@ -87,7 +87,7 @@ jobs:
       - name: Run Tests and Archive Results
         uses: ./.github/actions/run-tests-and-archive-results
         with:
-          java-version: '17'
+          java-version: '21'
           maven-cache-folder: $HOME/.m2/repository
           module-name: ${{ matrix.module }}
 

@@ -23,6 +23,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import jakarta.annotation.Nonnull;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class CrossPartitionReferenceDetails {
 
@@ -41,20 +42,30 @@ public class CrossPartitionReferenceDetails {
 	@Nonnull
 	private final String mySourceResourceName;
 
+	@Nonnull
+	private final IBaseResource mySourceResource;
+
 	/**
 	 * Constructor
 	 */
 	public CrossPartitionReferenceDetails(
+			@Nonnull IBaseResource theSourceResource,
 			@Nonnull RequestPartitionId theSourceResourcePartitionId,
 			@Nonnull String theSourceResourceName,
 			@Nonnull PathAndRef thePathAndRef,
 			@Nonnull RequestDetails theRequestDetails,
 			@Nonnull TransactionDetails theTransactionDetails) {
+		mySourceResource = theSourceResource;
 		mySourceResourcePartitionId = theSourceResourcePartitionId;
 		mySourceResourceName = theSourceResourceName;
 		myPathAndRef = thePathAndRef;
 		myRequestDetails = theRequestDetails;
 		myTransactionDetails = theTransactionDetails;
+	}
+
+	@Nonnull
+	public IBaseResource getSourceResource() {
+		return mySourceResource;
 	}
 
 	@Nonnull

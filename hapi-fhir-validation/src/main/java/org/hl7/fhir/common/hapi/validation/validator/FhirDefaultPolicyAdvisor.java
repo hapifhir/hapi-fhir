@@ -95,7 +95,19 @@ public class FhirDefaultPolicyAdvisor implements IValidationPolicyAdvisor {
 	}
 
 	@Override
+	public String relativeDatePlaceHolder() {
+		// We don't require a placeholder value. null in this return ensures real values are returned.
+		return null;
+	}
+
+	@Override
 	public boolean isSuppressMessageId(String path, String messageId) {
+		// Call this instead of the org.hl7.fhir.core default implementation, which always returns false
+		return this.isSuppressMessageId(path, messageId, null);
+	}
+
+	@Override
+	public boolean isSuppressMessageId(String path, String messageId, Object... theMessageArguments) {
 		// Note: getReferencePolicy() currently returns IGNORE unconditionally, so this condition
 		// is always true. The guard is retained for correctness if a subclass overrides
 		// getReferencePolicy() to return CHECK_VALID, in which case suppression should not apply.

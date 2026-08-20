@@ -75,6 +75,12 @@ public class TermConceptDaoSvc {
 			for (TermConceptDesignation next : theConcept.getDesignations()) {
 				myEntityManager.persist(next);
 			}
+
+			for (TermConceptParentChildLink next : theConcept.getParents()) {
+				if (next.getId() == null) {
+					myEntityManager.persist(next);
+				}
+			}
 		}
 
 		ourLog.trace("Saved {} and got PID {}", theConcept.getCode(), theConcept.getId());

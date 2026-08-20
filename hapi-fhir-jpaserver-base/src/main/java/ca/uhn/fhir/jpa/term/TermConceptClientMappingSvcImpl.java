@@ -23,7 +23,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.TranslateConceptResult;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.TranslationQuery;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
@@ -32,6 +31,7 @@ import ca.uhn.fhir.jpa.entity.TermConceptMap;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroup;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.term.api.ITermConceptClientMappingSvc;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
@@ -84,6 +84,9 @@ public class TermConceptClientMappingSvcImpl implements ITermConceptClientMappin
 
 	@Autowired
 	protected ITermConceptMapDao myConceptMapDao;
+
+	@Autowired
+	protected PartitionSettings myPartitionSettings;
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
@@ -159,8 +162,8 @@ public class TermConceptClientMappingSvcImpl implements ITermConceptClientMappin
 
 			if (translationQuery.hasResourceId()) {
 				IIdType resourceId = translationQuery.getResourceId();
-				JpaPid resourcePid =
-						myIdHelperService.getPidOrThrowException(RequestPartitionId.defaultPartition(), resourceId);
+				JpaPid resourcePid = myIdHelperService.getPidOrThrowException(
+						myPartitionSettings.getDefaultRequestPartitionId(), resourceId);
 				predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myResourcePid"), resourcePid.getId()));
 			}
 
@@ -286,8 +289,8 @@ public class TermConceptClientMappingSvcImpl implements ITermConceptClientMappin
 
 			if (translationQuery.hasResourceId()) {
 				IIdType resourceId = translationQuery.getResourceId();
-				JpaPid resourcePid =
-						myIdHelperService.getPidOrThrowException(RequestPartitionId.defaultPartition(), resourceId);
+				JpaPid resourcePid = myIdHelperService.getPidOrThrowException(
+						myPartitionSettings.getDefaultRequestPartitionId(), resourceId);
 				predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myResourcePid"), resourcePid.getId()));
 			}
 

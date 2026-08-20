@@ -162,6 +162,14 @@ None of the limitations listed here are considered permanent. Over time the HAPI
 
 * **Group Resources**: In Patient ID partitioning, Group resources are treated as if they aren't in the patient compartment. Due to the fact that Group resources can have many patient members, this may lead to creation errors therefore all Group resources are added to the default partition.
 
+* **Chained search in Patient ID partition mode is restricted**: For the `patient` and `subject` search parameters, chained qualifiers are only supported when combined with a direct patient reference on the same parameter. For example, the following search is supported:
+
+  ```
+  Observation?subject=Patient/abc&subject.gender=female
+  ```
+
+  Chain-only queries on `patient` or `subject` (e.g. `Observation?subject.gender=female`) and chained qualifiers on any other compartment search parameter (e.g. `Observation?performer.identifier=http://example.org/users|123`) are not supported and will result in an error.
+
 * **Server Capability Statement is not partition aware**: The server creates and exposes a single server capability statement, covering all partitions. This can be misleading when partitioning us used as a multitenancy strategy.
 
 * **Conformance resources may not be partitioned**: Conformance resources must be placed in the default partition, and will be shared for any validation activities across all partitions.

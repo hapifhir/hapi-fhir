@@ -112,9 +112,10 @@ class JobDataSinkTest {
 			return 1;
 		}).when(myJobPersistence).enqueueWorkChunkForProcessing(anyString(), any());
 		JobInstance instance = JobInstance.fromInstanceId(JOB_INSTANCE_ID);
-		StepExecutionDetails<TestJobParameters, VoidModel> details = new StepExecutionDetails<>(new TestJobParameters().setParam1("" + PID_COUNT), null, instance, new WorkChunk().setId(CHUNK_ID), myJobStepExecutionServices);
+		WorkChunk chunk = new WorkChunk().setId(CHUNK_ID);
+		StepExecutionDetails<TestJobParameters, VoidModel> details = new StepExecutionDetails<>(new TestJobParameters().setParam1("" + PID_COUNT), null, instance, chunk, myJobStepExecutionServices);
 		JobWorkCursor<TestJobParameters, VoidModel, Step1Output> cursor = new JobWorkCursor<>(job, true, firstStep, lastStep);
-		JobDataSink<TestJobParameters, VoidModel, Step1Output> sink = new JobDataSink<>(myBatchJobSender, myJobPersistence, job, JOB_INSTANCE_ID, cursor, myHapiTransactionService);
+		JobDataSink<TestJobParameters, VoidModel, Step1Output> sink = new JobDataSink<>(myBatchJobSender, myJobPersistence, job, JOB_INSTANCE_ID, cursor, chunk, myHapiTransactionService);
 
 		RunOutcome result = firstStepWorker.run(details, sink);
 

@@ -21,8 +21,11 @@ package ca.uhn.fhir.jpa.model.dialect;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.util.ISequenceValueMassager;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.HapiHibernateDialectSettingsService;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.IdSequencePoolingStrategy;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.HibernateException;
 import org.hibernate.MappingException;
@@ -43,6 +46,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
 import java.util.Properties;
+import java.util.function.Supplier;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.NO_MORE_PID;
 
@@ -76,15 +80,20 @@ public class HapiSequenceStyleGenerator
 	@Override
 	public Serializable generate(SharedSessionContractImplementor theSession, Object theObject)
 			throws HibernateException {
-		Long nextVal = doGenerate(theSession, theObject);
-		/*
-		 * This should never happen since the sequence starts at 1, but if someone ever manually messes with sequences
-		 * or the sequence otherwise gets messed up, we don't want to end up with a resource using this PID which has
-		 * a special meaning to HAPI.
-		 */
+		return generateNonReservedValue(() -> doGenerate(theSession, theObject));
+	}
+
+	/**
+	 * Pulls an id from the supplied id source, guarding against the reserved {@link JpaConstants#NO_MORE_PID} value which
+	 * has a special internal meaning to HAPI and must never be persisted as a resource id. This should never
+	 * happen since the sequence starts at 1, but if someone ever manually messes with sequences or the
+	 * sequence otherwise gets messed up, we retry once and then fail rather than persisting the reserved value.
+	 */
+	static Long generateNonReservedValue(Supplier<Long> theIdSupplier) {
+		Long nextVal = theIdSupplier.get();
 		if (NO_MORE_PID.equals(nextVal)) {
 			// retry once
-			nextVal = doGenerate(theSession, theObject);
+			nextVal = theIdSupplier.get();
 		}
 
 		if (NO_MORE_PID.equals(nextVal)) {
@@ -120,10 +129,13 @@ public class HapiSequenceStyleGenerator
 
 		Properties props = new Properties(theParams);
 
-		// We start the sequence with an initial value larger than the increment value to avoid
-		// a an interaction between the pooled_lo optimizer and out-of-order sequence reads on AWS limitless
-		// that generate negative values.  We can't switch to pooled_hi in a backwards-compatible way.
-		props.put(OptimizableGenerator.OPT_PARAM, StandardOptimizerDescriptor.POOLED.getExternalName());
+		// The legacy pooled optimizer (SHARED_POOL, the default) keeps a single node-wide id pool behind a
+		// lock. The opt-in thread-local optimizer (PER_THREAD_POOL / pooled-lotl) keeps the pool in a
+		// ThreadLocal so concurrent writers each allocate from their own block instead of serializing on that
+		// lock during refills. Initial value is kept larger than the increment for backwards-compatible schema
+		// export.
+		IdSequencePoolingStrategy poolingStrategy = determineIdSequencePoolingStrategy(theServiceRegistry);
+		props.put(OptimizableGenerator.OPT_PARAM, determineOptimizerExternalName(poolingStrategy));
 		props.put(OptimizableGenerator.INITIAL_PARAM, 1000);
 		props.put(OptimizableGenerator.INCREMENT_PARAM, 50);
 		props.put(IdentifierGenerator.GENERATOR_NAME, myGeneratorName);
@@ -151,5 +163,31 @@ public class HapiSequenceStyleGenerator
 	@Override
 	public Optimizer getOptimizer() {
 		return myGen.getOptimizer();
+	}
+
+	/**
+	 * Returns the Hibernate optimizer external name to use for the given id-sequence pooling strategy: the
+	 * thread-local pooled optimizer for {@link IdSequencePoolingStrategy#PER_THREAD_POOL}, or the legacy single
+	 * shared pooled optimizer for {@link IdSequencePoolingStrategy#SHARED_POOL}.
+	 */
+	static String determineOptimizerExternalName(IdSequencePoolingStrategy theStrategy) {
+		StandardOptimizerDescriptor descriptor =
+				switch (theStrategy) {
+					case PER_THREAD_POOL -> StandardOptimizerDescriptor.POOLED_LOTL;
+					case SHARED_POOL -> StandardOptimizerDescriptor.POOLED;
+				};
+		return descriptor.getExternalName();
+	}
+
+	/**
+	 * Reads the id-sequence pooling strategy from the {@link HapiHibernateDialectSettingsService} registered in
+	 * the Hibernate {@link ServiceRegistry}. Defaults to {@link IdSequencePoolingStrategy#SHARED_POOL} (the
+	 * legacy single shared pool) when the service is not registered (e.g. in lightweight bootstrap contexts),
+	 * matching the production default.
+	 */
+	private static IdSequencePoolingStrategy determineIdSequencePoolingStrategy(ServiceRegistry theServiceRegistry) {
+		HapiHibernateDialectSettingsService settings =
+				theServiceRegistry.getService(HapiHibernateDialectSettingsService.class);
+		return settings != null ? settings.getIdSequencePoolingStrategy() : IdSequencePoolingStrategy.SHARED_POOL;
 	}
 }

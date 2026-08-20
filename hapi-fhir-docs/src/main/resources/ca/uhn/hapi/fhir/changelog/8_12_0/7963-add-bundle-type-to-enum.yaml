@@ -1,0 +1,5 @@
+---
+type: add
+issue: 7963
+title: "The enumerated type `BundleTypeEnum` was missing a value for `batch`.
+  Thanks to Jens Kristian Villadsen!"

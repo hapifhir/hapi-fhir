@@ -33,6 +33,8 @@ public enum BundleTypeEnum {
 
 	MESSAGE("message", "http://hl7.org/fhir/bundle-type"),
 
+	BATCH("batch", "http://hl7.org/fhir/bundle-type"),
+
 	BATCH_RESPONSE("batch-response", "http://hl7.org/fhir/bundle-type"),
 
 	TRANSACTION_RESPONSE("transaction-response", "http://hl7.org/fhir/bundle-type"),
@@ -46,7 +48,7 @@ public enum BundleTypeEnum {
 
 	/**
 	 * Identifier for this Value Set:
-	 * http://hl7.org/fhir/vs/address-use
+	 * http://hl7.org/fhir/ValueSet/bundle-type
 	 */
 	public static final String VALUESET_IDENTIFIER = "http://hl7.org/fhir/bundle-type";
 

@@ -6,7 +6,7 @@ There are two types of providers that can be registered against a HAPI FHIR Plai
 
 * Plain Providers are POJO classes that implement operations for multiple resource types, or for system-level operations.
  
-<a name="resource-providers"/>
+<a id="resource-providers"></a>
 
 # Resource Providers
 
@@ -32,7 +32,7 @@ HAPI provides a class called [RestfulServer](/hapi-fhir/apidocs/hapi-fhir-server
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/ExampleRestfulServlet.java|servlet}}
 ``` 
 
-<a name="plain-providers"/>
+<a id="plain-providers"></a>
 
 # Plain Providers
 
@@ -57,6 +57,10 @@ Once you have defined your plain providers, they are passed to the server in a s
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/ExampleProviders.java|plainProviderServer}}
 ```
+# Non-Annotation Providers
+
+As an experimental internal implementation feature, the server now accepts manual registration of operation providers that implement the IMethodBinding interface directly instead of requiring an annotated class.  This can be useful for automatic generation of providers without having to generate or mock annotated classes.
+These have limited capacity for contributing to the conformance document at this time.
 
 # Common Method Parameters
 
@@ -113,7 +117,7 @@ if (theRequestDetails instanceof ServletRequestDetails) {
 }
 ```
 
-<a name="exceptions"/>
+<a id="exceptions"></a>
 
 # REST Exception/Error Handling
 

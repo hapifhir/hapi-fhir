@@ -154845,7 +154845,8 @@
        </extension>
        <strength value="example"></strength>
        <description value="The timeliness with which processing is required: stat, normal, deferred."></description>
-       <valueSet value="http://terminology.hl7.org/CodeSystem/processpriority"></valueSet>
+       <!-- corrected from CodeSystem URL to ValueSet URL due to error in FHIR R4 specification, see https://jira.hl7.org/browse/FHIR-27949 -->
+       <valueSet value="http://hl7.org/fhir/ValueSet/process-priority"></valueSet>
       </binding>
       <mapping>
        <identity value="v2"></identity>
@@ -162626,7 +162627,8 @@
        </extension>
        <strength value="example"></strength>
        <description value="The timeliness with which processing is required: stat, normal, deferred."></description>
-       <valueSet value="http://terminology.hl7.org/CodeSystem/processpriority"></valueSet>
+       <!-- corrected from CodeSystem URL to ValueSet URL due to error in FHIR R4 specification, see https://jira.hl7.org/browse/FHIR-27949 -->
+       <valueSet value="http://hl7.org/fhir/ValueSet/process-priority"></valueSet>
       </binding>
       <mapping>
        <identity value="v2"></identity>

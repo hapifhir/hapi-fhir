@@ -113,7 +113,7 @@ class Batch2DaoSvcImplTest extends BaseJpaR4Test {
 			.mapToObj(num -> createPatient())
 			.toList();
 
-		final IResourcePidStream resourcePidList = mySvc.fetchResourceIdStream(PREVIOUS_MILLENNIUM, TOMORROW, RequestPartitionId.defaultPartition(), "Patient?_expunge=true");
+		final IResourcePidStream resourcePidList = mySvc.fetchResourceIdStream(PREVIOUS_MILLENNIUM, TOMORROW, RequestPartitionId.fromPartitionId(null), "Patient?_expunge=true");
 
 		final List<? extends IIdType> actualPatientIds =
 			resourcePidList.visitStream(s-> s.map(typePid -> new IdDt(typePid.resourceType, (Long) typePid.id.getId()))
@@ -173,7 +173,7 @@ class Batch2DaoSvcImplTest extends BaseJpaR4Test {
 
 		// at the moment there is no Prod use-case for noUrl use-case
 		// reindex will always have urls as well (see https://github.com/hapifhir/hapi-fhir/issues/6179)
-		final IResourcePidStream resourcePidList = mySvc.fetchResourceIdStream(PREVIOUS_MILLENNIUM, TOMORROW, RequestPartitionId.defaultPartition(), null);
+		final IResourcePidStream resourcePidList = mySvc.fetchResourceIdStream(PREVIOUS_MILLENNIUM, TOMORROW, RequestPartitionId.fromPartitionId(null), null);
 
 		final List<? extends IIdType> actualPatientIds =
 			resourcePidList.visitStream(s-> s.map(typePid -> new IdDt(typePid.resourceType, (Long) typePid.id.getId()))
@@ -282,7 +282,7 @@ class Batch2DaoSvcImplTest extends BaseJpaR4Test {
 
 		// When
 		String theUrl = "?" + theSearchParam + "=" + theParamValue;
-		final IResourcePidStream resourcePidList = mySvc.fetchResourceIdStream(PREVIOUS_MILLENNIUM, TOMORROW, RequestPartitionId.defaultPartition(), theUrl);
+		final IResourcePidStream resourcePidList = mySvc.fetchResourceIdStream(PREVIOUS_MILLENNIUM, TOMORROW, RequestPartitionId.fromPartitionId(null), theUrl);
 		final List<? extends IIdType> actualPatientIds =
 			resourcePidList.visitStream(s-> s.map(typePid -> new IdDt(typePid.resourceType, (Long) typePid.id.getId()))
 				.toList());
@@ -321,7 +321,7 @@ class Batch2DaoSvcImplTest extends BaseJpaR4Test {
 		BaseDateTimeDt d = new DateTimeDt().setValue(lastUpdated);
 
 		String theUrl = "?" + Constants.PARAM_LASTUPDATED + "=eq" + d.getValueAsString();
-		final IResourcePidStream resourcePidList = mySvc.fetchResourceIdStream(PREVIOUS_MILLENNIUM, TOMORROW, RequestPartitionId.defaultPartition(), theUrl);
+		final IResourcePidStream resourcePidList = mySvc.fetchResourceIdStream(PREVIOUS_MILLENNIUM, TOMORROW, RequestPartitionId.fromPartitionId(null), theUrl);
 
 		final List<? extends IIdType> actualPatientIds =
 			resourcePidList.visitStream(s-> s.map(typePid -> new IdDt(typePid.resourceType, (Long) typePid.id.getId()))
@@ -343,7 +343,7 @@ class Batch2DaoSvcImplTest extends BaseJpaR4Test {
 	void fetchResourceIds_ByUrlMetaParamsOnServerBase_failsWithRequiresResourceType(String theSearchParam) {
 		// Given
 		String theUrl = "?" + theSearchParam + "=abc";
-		final IResourcePidStream resourcePidList = mySvc.fetchResourceIdStream(PREVIOUS_MILLENNIUM, TOMORROW, RequestPartitionId.defaultPartition(), theUrl);
+		final IResourcePidStream resourcePidList = mySvc.fetchResourceIdStream(PREVIOUS_MILLENNIUM, TOMORROW, RequestPartitionId.fromPartitionId(null), theUrl);
 
 		// When
 		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> resourcePidList.visitStream(s-> s.map(typePid -> new IdDt(typePid.resourceType, (Long) typePid.id.getId())).toList()));
@@ -406,7 +406,7 @@ class Batch2DaoSvcImplTest extends BaseJpaR4Test {
 		ourLog.info("Reindexing with URL: " + theFullUrl);
 
 		// When
-		final IResourcePidStream resourcePidList = mySvc.fetchResourceIdStream(PREVIOUS_MILLENNIUM, TOMORROW, RequestPartitionId.defaultPartition(), theFullUrl);
+		final IResourcePidStream resourcePidList = mySvc.fetchResourceIdStream(PREVIOUS_MILLENNIUM, TOMORROW, RequestPartitionId.fromPartitionId(null), theFullUrl);
 
 		final List<? extends IIdType> actualPatientIds =
 			resourcePidList.visitStream(s-> s.map(typePid -> new IdDt(typePid.resourceType, (Long) typePid.id.getId()))
@@ -508,7 +508,7 @@ class Batch2DaoSvcImplTest extends BaseJpaR4Test {
 		// When
 		String theFullUrl = "Patient?_includeDeleted=" + theIncludeDeleted.getCode() + buildAdditionalSearchParams(theIncludeDeleted, theLastUpdatedParam, theIdParam, date);
 
-		final IResourcePidStream resourcePidList = mySvc.fetchResourceIdStream(PREVIOUS_MILLENNIUM, TOMORROW, RequestPartitionId.defaultPartition(), theFullUrl);
+		final IResourcePidStream resourcePidList = mySvc.fetchResourceIdStream(PREVIOUS_MILLENNIUM, TOMORROW, RequestPartitionId.fromPartitionId(null), theFullUrl);
 
 		final List<? extends IIdType> actualPatientIds =
 			resourcePidList.visitStream(s-> s.map(typePid -> new IdDt(typePid.resourceType, (Long) typePid.id.getId()))

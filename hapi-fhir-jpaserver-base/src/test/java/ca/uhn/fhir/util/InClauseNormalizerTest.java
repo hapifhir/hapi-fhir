@@ -1,7 +1,9 @@
 package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.util.InClauseNormalizer;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -16,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class InClauseNormalizerTest {
 	private static final JpaPid ourResourceId = JpaPid.fromId(1L);
-	private static final JpaPid ourPaddingValue = JpaPid.fromId(-1L);
+	private static final JpaPid ourPaddingValue = JpaConstants.NO_MORE;
 
 	@ParameterizedTest
 	@MethodSource("arguments")
@@ -49,6 +51,14 @@ public class InClauseNormalizerTest {
 
 	static JpaPid[] listToArray(List<JpaPid> theList) {
 		return theList.toArray(new JpaPid[0]);
+	}
+
+	@Test
+	void testNoMoreSentinel_hasNonNullTypedPartitionId() {
+		// The padded slot must bind concrete typed values to both RES_ID and PARTITION_ID so
+		// MSSQL sp_executesql parameter declarations stay uniform between real and padded slots.
+		assertThat(JpaConstants.NO_MORE.getId()).isEqualTo(JpaConstants.NO_MORE_PID);
+		assertThat(JpaConstants.NO_MORE.getPartitionId()).isNotNull();
 	}
 
 	private static Stream<Arguments> arguments(){

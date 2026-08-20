@@ -76,7 +76,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		// ensure all terms are loaded
 		await().atMost(5, TimeUnit.SECONDS)
 				.until(() -> {
-					myBatch2JobHelper.forceRunMaintenancePass();
+					myBatch2JobHelper.forceRunActiveJobMaintenancePass();
 					myITermDeferredStorageSvc.saveDeferred();
 					return myITermDeferredStorageSvc.isStorageQueueEmpty(true);
 				});

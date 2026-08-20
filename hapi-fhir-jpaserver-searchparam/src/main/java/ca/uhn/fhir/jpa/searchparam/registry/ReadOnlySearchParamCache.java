@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
+import ca.uhn.fhir.util.SearchParameterUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
@@ -126,9 +127,7 @@ public class ReadOnlySearchParamCache {
 						nextCanonical.getBase());
 
 				Collection<String> base = nextCanonical.getBase();
-				if (base.contains("Resource") || base.contains("DomainResource")) {
-					base = resourceNames;
-				}
+				base = SearchParameterUtil.expandBaseWhenNeeded(theFhirContext, base);
 
 				// Add it to our return value if permitted by the pattern parameters
 				for (String nextResourceName : base) {

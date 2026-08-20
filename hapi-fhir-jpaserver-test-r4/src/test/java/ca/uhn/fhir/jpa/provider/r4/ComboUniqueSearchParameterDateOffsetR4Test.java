@@ -72,6 +72,9 @@ public class ComboUniqueSearchParameterDateOffsetR4Test extends BaseResourceProv
 		Bundle document = makeMedicationDispenseBundle(IDENTIFIER_SYSTEM, IDENTIFIER_VALUE, WHEN_PREPARED_OFFSET);
 		String bundleId = myClient.create().resource(document).execute().getId().toUnqualifiedVersionless().getValue();
 
+		logAllResources();
+		logAllUniqueIndexes();
+
 		// Conditional update with date offset — should find and update, not 409
 		Bundle updatedDocument = makeMedicationDispenseBundle(IDENTIFIER_SYSTEM, IDENTIFIER_VALUE, WHEN_PREPARED_OFFSET);
 		((Composition) updatedDocument.getEntry().get(0).getResource()).setTitle("Updated medication dispensed");

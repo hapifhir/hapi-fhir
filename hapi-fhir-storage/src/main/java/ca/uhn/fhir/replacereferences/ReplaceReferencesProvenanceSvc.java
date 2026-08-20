@@ -22,6 +22,7 @@ package ca.uhn.fhir.replacereferences;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
@@ -32,7 +33,9 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.HapiExtensions;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -50,6 +53,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * This service is used to create a Provenance resource for the $replace-references operation
@@ -64,12 +68,12 @@ public class ReplaceReferencesProvenanceSvc {
 	private static final String ACT_REASON_RECORDS_MANAGEMENT_CODE = "RECORDMGT";
 	protected static final String ACTIVITY_CODE_SYSTEM = "http://terminology.hl7.org/CodeSystem/iso-21089-lifecycle";
 	private static final String ACTIVITY_CODE_LINK = "link";
-	private final IFhirResourceDao<IBaseResource> myProvenanceDao;
 	private final FhirContext myFhirContext;
+	private final DaoRegistry myDaoRegistry;
 
-	public ReplaceReferencesProvenanceSvc(DaoRegistry theDaoRegistry) {
-		myProvenanceDao = theDaoRegistry.getResourceDao("Provenance");
-		myFhirContext = theDaoRegistry.getFhirContext();
+	public ReplaceReferencesProvenanceSvc(FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
+		myDaoRegistry = theDaoRegistry;
+		myFhirContext = theFhirContext;
 	}
 
 	protected CodeableConcept getActivityCodeableConcept() {
@@ -94,7 +98,7 @@ public class ReplaceReferencesProvenanceSvc {
 
 	protected Provenance createProvenanceObject(
 			IIdType theTargetId,
-			@Nullable IIdType theSourceId,
+			IIdType theSourceId,
 			List<IIdType> theUpdatedReferencingResourceIds,
 			Date theStartTime,
 			List<IProvenanceAgent> theProvenanceAgents,
@@ -124,13 +128,41 @@ public class ReplaceReferencesProvenanceSvc {
 		provenance.addReason(activityReasonCodeableConcept);
 
 		provenance.addTarget(new Reference(theTargetId));
-		if (theSourceId != null) {
-			provenance.addTarget(new Reference(theSourceId));
-		}
+		provenance.addTarget(new Reference(theSourceId));
 
 		theUpdatedReferencingResourceIds.forEach(id -> provenance.addTarget(new Reference(id)));
 		theContainedResources.forEach(c -> provenance.addContained((Resource) c));
+
+		addPatientCompartmentExtension(provenance, theTargetId);
+
 		return provenance;
+	}
+
+	/**
+	 * Sets the {@link HapiExtensions#EXT_PATIENT_COMPARTMENT} extension on the Provenance to control
+	 * which partition it is stored in. The Provenance targets multiple resources that may span
+	 * Patient compartments, so the extension tells PatientIdPartitionInterceptor which partition to use.
+	 */
+	private void addPatientCompartmentExtension(Provenance theProvenance, IIdType theTargetId) {
+		if ("Patient".equals(theTargetId.getResourceType())) {
+			// operation on Patients: route to the target Patient's partition
+			ExtensionUtil.setExtensionAsString(
+					myFhirContext,
+					theProvenance,
+					HapiExtensions.EXT_PATIENT_COMPARTMENT,
+					theTargetId.toUnqualifiedVersionless().getValue());
+		} else {
+			// Non-Patient target: could be a compartmental resource (e.g., Observation) or a
+			// non-compartmental resource (e.g., Organization). In both cases we route the Provenance
+			// to the default partition. Even for compartmental resources, storing the Provenance in
+			// a specific Patient's partition would make it unfindable during undo — the undo search
+			// (e.g., Provenance?target=Observation/B) can't derive which Patient partition to look in.
+			ExtensionUtil.setExtensionAsString(
+					myFhirContext,
+					theProvenance,
+					HapiExtensions.EXT_PATIENT_COMPARTMENT,
+					PatientIdPartitionInterceptor.PATIENT_COMPARTMENT_NONE);
+		}
 	}
 
 	/**
@@ -143,48 +175,52 @@ public class ReplaceReferencesProvenanceSvc {
 	 * @param theRequestDetails     the request details
 	 * @param theProvenanceAgents   the list of agents to be included in the Provenance resource.
 	 */
-	public void createProvenance(
+	public IIdType createProvenance(
 			IIdType theTargetId,
 			IIdType theSourceId,
 			List<IIdType> theChangedResourceIds,
+			@Nullable String theProvenanceGroupExtensionValue,
 			Date theStartTime,
 			RequestDetails theRequestDetails,
 			List<IProvenanceAgent> theProvenanceAgents,
 			List<IBaseResource> theContainedResources) {
-		createProvenance(
+		Provenance provenance = buildProvenance(
+				theTargetId,
+				theSourceId,
+				theChangedResourceIds,
+				theProvenanceGroupExtensionValue,
+				theStartTime,
+				theProvenanceAgents,
+				theContainedResources);
+		return provideProvenanceDao().create(provenance, theRequestDetails).getId();
+	}
+
+	public Provenance buildProvenance(
+			IIdType theTargetId,
+			IIdType theSourceId,
+			List<IIdType> theChangedResourceIds,
+			@Nullable String theProvenanceGroupExtensionValue,
+			Date theStartTime,
+			List<IProvenanceAgent> theProvenanceAgents,
+			List<IBaseResource> theContainedResources) {
+		String resourceType = theTargetId.getResourceType();
+		Provenance provenance = createProvenanceObject(
 				theTargetId,
 				theSourceId,
 				theChangedResourceIds,
 				theStartTime,
-				theRequestDetails,
 				theProvenanceAgents,
 				theContainedResources,
-				// if no referencing resource were updated, we don't need to create a Provenance resource, because
-				// replace-references doesn't update the src and target resources, unlike the $merge operation
-				false);
+				resourceType);
+		if (theProvenanceGroupExtensionValue != null) {
+			ExtensionUtil.setExtensionAsString(
+					myFhirContext, provenance, HapiExtensions.EXT_PROVENANCE_GROUP, theProvenanceGroupExtensionValue);
+		}
+		return provenance;
 	}
 
-	protected void createProvenance(
-			IIdType theTargetId,
-			IIdType theSourceId,
-			List<IIdType> theChangedResourceIds,
-			Date theStartTime,
-			RequestDetails theRequestDetails,
-			List<IProvenanceAgent> theProvenanceAgents,
-			List<IBaseResource> theContainedResources,
-			boolean theCreateEvenWhenNoReferencesWereUpdated) {
-		String resourceType = theTargetId.getResourceType();
-		if (!theChangedResourceIds.isEmpty() || theCreateEvenWhenNoReferencesWereUpdated) {
-			Provenance provenance = createProvenanceObject(
-					theTargetId,
-					theSourceId,
-					theChangedResourceIds,
-					theStartTime,
-					theProvenanceAgents,
-					theContainedResources,
-					resourceType);
-			myProvenanceDao.create(provenance, theRequestDetails);
-		}
+	private IFhirResourceDao<Provenance> provideProvenanceDao() {
+		return myDaoRegistry.getResourceDao("Provenance");
 	}
 
 	/**
@@ -237,7 +273,7 @@ public class ReplaceReferencesProvenanceSvc {
 		// we want the most recent one.
 		map.setSort(new SortSpec("recorded", SortOrderEnum.DESC));
 
-		IBundleProvider searchBundle = myProvenanceDao.search(map, theRequestDetails);
+		IBundleProvider searchBundle = provideProvenanceDao().search(map, theRequestDetails);
 		// 'activity' is not available as a search parameter in r4, was added in r5,
 		// so we need to filter the results manually.
 		return filterByActivity(searchBundle.getAllResources());
@@ -292,7 +328,7 @@ public class ReplaceReferencesProvenanceSvc {
 		return result;
 	}
 
-	private boolean isEqualVersionlessId(IIdType theId, Reference theReference) {
+	protected boolean isEqualVersionlessId(IIdType theId, Reference theReference) {
 		if (!theReference.hasReference()) {
 			return false;
 		}
@@ -305,23 +341,26 @@ public class ReplaceReferencesProvenanceSvc {
 
 	public static List<IIdType> extractChangedResourceIds(List<Bundle> theResponseBundles) {
 		List<IIdType> changedResourceIds = new ArrayList<>();
-		theResponseBundles.forEach(outputBundle -> {
-			outputBundle.getEntry().forEach(entry -> {
-				if (entry.getResponse() != null && entry.getResponse().hasLocation()) {
-					if (isNoChangeResponse(entry.getResponse())) {
-						ourLog.warn(
-								"Skipping reference {} because the operation resulted in no change",
-								entry.getResponse().getLocation());
-						return;
-					}
-					changedResourceIds.add(new IdDt(entry.getResponse().getLocation()));
-				}
-			});
-		});
+		theResponseBundles.forEach(
+				outputBundle -> outputBundle.getEntry().forEach(entry -> extractChangedResourceId(entry)
+						.ifPresent(changedResourceIds::add)));
 		return changedResourceIds;
 	}
 
-	private static boolean isNoChangeResponse(Bundle.BundleEntryResponseComponent theResponse) {
+	public static Optional<IIdType> extractChangedResourceId(Bundle.BundleEntryComponent theEntry) {
+		if (theEntry.getResponse() == null || !theEntry.getResponse().hasLocation()) {
+			return Optional.empty();
+		}
+		if (isNoChangeResponse(theEntry.getResponse())) {
+			ourLog.warn(
+					"Skipping reference {} because the operation resulted in no change",
+					theEntry.getResponse().getLocation());
+			return Optional.empty();
+		}
+		return Optional.of(new IdDt(theEntry.getResponse().getLocation()));
+	}
+
+	public static boolean isNoChangeResponse(Bundle.BundleEntryResponseComponent theResponse) {
 		if (!theResponse.hasOutcome()) {
 			return false;
 		}

@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 8159
+title: "Fixed a bug where enabling Hibernate SQL logging caused a `FileNotFoundException` and failed to load 
+the SQL log filters when running from a packaged JAR. The filter file is now read as a classpath stream rather 
+than as a filesystem file."

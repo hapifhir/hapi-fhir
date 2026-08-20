@@ -22,8 +22,12 @@ package ca.uhn.fhir.rest.server.util;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerConfiguration;
+import ca.uhn.fhir.rest.server.method.IMethodBinding;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
+
+import java.util.List;
+import java.util.Map;
 
 public abstract class BaseServerCapabilityStatementProvider {
 
@@ -47,5 +51,9 @@ public abstract class BaseServerCapabilityStatementProvider {
 			Validate.notNull(retVal);
 		}
 		return retVal;
+	}
+
+	protected Map<String, List<IMethodBinding>> collectMethodBindings(RequestDetails theRequestDetails) {
+		return getServerConfiguration(theRequestDetails).collectMethodBindings();
 	}
 }

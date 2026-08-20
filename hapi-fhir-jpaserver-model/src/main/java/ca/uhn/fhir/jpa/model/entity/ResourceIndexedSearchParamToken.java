@@ -371,7 +371,8 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 			String theResourceType,
 			String theParamName,
 			String theSystem) {
-		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
+		RequestPartitionId requestPartitionId =
+				PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId, thePartitionSettings);
 		return calculateHashSystem(thePartitionSettings, requestPartitionId, theResourceType, theParamName, theSystem);
 	}
 
@@ -392,7 +393,8 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 			String theParamName,
 			String theSystem,
 			String theValue) {
-		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
+		RequestPartitionId requestPartitionId =
+				PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId, thePartitionSettings);
 		return calculateHashSystemAndValue(
 				thePartitionSettings, requestPartitionId, theResourceType, theParamName, theSystem, theValue);
 	}
@@ -419,7 +421,8 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 			String theResourceType,
 			String theParamName,
 			String theValue) {
-		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
+		RequestPartitionId requestPartitionId =
+				PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId, thePartitionSettings);
 		return calculateHashValue(thePartitionSettings, requestPartitionId, theResourceType, theParamName, theValue);
 	}
 

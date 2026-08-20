@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.ips.jpa;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.ips.api.Section;
 import ca.uhn.fhir.jpa.ips.jpa.section.AdvanceDirectivesJpaSectionSearchStrategy;
 import ca.uhn.fhir.jpa.ips.jpa.section.AllergyIntoleranceJpaSectionSearchStrategy;
@@ -45,7 +46,6 @@ import ca.uhn.fhir.jpa.ips.strategy.BaseIpsGenerationStrategy;
 import ca.uhn.fhir.jpa.ips.strategy.MedicationNoInfoR4Generator;
 import ca.uhn.fhir.jpa.ips.strategy.ProblemNoInfoR4Generator;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -105,7 +105,7 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 	public static final String SECTION_CODE_FUNCTIONAL_STATUS = "47420-5";
 	public static final String SECTION_CODE_PLAN_OF_CARE = "18776-5";
 	public static final String SECTION_CODE_ADVANCE_DIRECTIVES = "42348-3";
-	public static final String SECTION_SYSTEM_LOINC = ITermLoaderSvc.LOINC_URI;
+	public static final String SECTION_SYSTEM_LOINC = TerminologyConstants.LOINC_URI;
 	private final List<Function<Section, Section>> myGlobalSectionCustomizers = new ArrayList<>();
 
 	@Autowired

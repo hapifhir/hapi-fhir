@@ -1,0 +1,5 @@
+---
+type: add
+issue: 7734
+title: "The `$meta-add` and `$meta-delete` operations can now be invoked from
+  within a FHIR Transaction Bundle."

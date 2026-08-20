@@ -45,6 +45,7 @@ import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
 import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -163,6 +164,8 @@ public class GiantTransactionPerfTest {
 	private IMetaTagSorter myMetaTagSorter;
 	@Mock
 	private IResourceTypeCacheSvc myResourceTypeCacheSvc;
+	@Mock
+	private MemoryCacheService myMemoryCacheService;
 
 	@AfterEach
 	public void afterEach() {
@@ -215,9 +218,10 @@ public class GiantTransactionPerfTest {
 		mySystemDao.setTransactionProcessorForUnitTest(myTransactionProcessor);
 		mySystemDao.setStorageSettingsForUnitTest(myStorageSettings);
 		mySystemDao.setInterceptorBroadcasterForUnitTest(myInterceptorSvc);
+		myDaoRegistry.register(mySystemDao);
 
 		when(myAppCtx.getBean(eq(IInstanceValidatorModule.class))).thenReturn(myInstanceValidatorSvc);
-		when(myAppCtx.getBean(eq(IFhirSystemDao.class))).thenReturn(mySystemDao);
+		when(myAppCtx.getBean(eq(DaoRegistry.class))).thenReturn(myDaoRegistry);
 
 		myInMemoryResourceMatcher = new InMemoryResourceMatcher();
 
@@ -293,9 +297,9 @@ public class GiantTransactionPerfTest {
 		myEobDao.setResourceHistoryCalculator(myResourceHistoryCalculator);
 		myEobDao.setResourceTypeCacheSvc(myResourceTypeCacheSvc);
 		myEobDao.setInterceptorBroadcasterForUnitTest(myInterceptorSvc);
+		myEobDao.setMemoryCacheService(myMemoryCacheService);
+		myEobDao.setDaoRegistryForUnitTest(myDaoRegistry);
 		myEobDao.start();
-
-		myDaoRegistry.setResourceDaos(Lists.newArrayList(myEobDao));
 
 		when(myResourceTypeCacheSvc.getResourceTypeId(anyString())).thenReturn((short)100);
 
@@ -899,18 +903,18 @@ public class GiantTransactionPerfTest {
 		@Nonnull
 		@Override
 		public RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull ReadPartitionIdRequestDetails theDetails) {
-			return RequestPartitionId.defaultPartition();
+			return RequestPartitionId.fromPartitionId(null);
 		}
 
 		@Override
 		public RequestPartitionId determineGenericPartitionForRequest(RequestDetails theRequestDetails) {
-			return RequestPartitionId.defaultPartition();
+			return RequestPartitionId.fromPartitionId(null);
 		}
 
 		@Nonnull
 		@Override
 		public RequestPartitionId determineCreatePartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull IBaseResource theResource, @Nonnull String theResourceType) {
-			return RequestPartitionId.defaultPartition();
+			return RequestPartitionId.fromPartitionId(null);
 		}
 
 		@Nonnull
@@ -927,12 +931,12 @@ public class GiantTransactionPerfTest {
 
 		@Override
 		public RequestPartitionId validateAndNormalizePartitionIds(RequestPartitionId theRequestPartitionId) {
-			return RequestPartitionId.defaultPartition();
+			return RequestPartitionId.fromPartitionId(null);
 		}
 
 		@Override
 		public RequestPartitionId validateAndNormalizePartitionNames(RequestPartitionId theRequestPartitionId) {
-			return RequestPartitionId.defaultPartition();
+			return RequestPartitionId.fromPartitionId(null);
 		}
 
 

@@ -10,6 +10,7 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r5.conformance.profile.BindingResolution;
 import org.hl7.fhir.r5.conformance.profile.ProfileKnowledgeProvider;
+import org.hl7.fhir.r5.model.Element;
 import org.hl7.fhir.r5.model.ElementDefinition;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.StructureDefinition;
@@ -63,7 +64,8 @@ public class ProfileKnowledgeWorkerR5 implements ProfileKnowledgeProvider {
 	}
 
 	@Override
-	public BindingResolution resolveBinding(StructureDefinition theStructureDefinition, String theS, String theS1)
+	public BindingResolution resolveBinding(
+			StructureDefinition theStructureDefinition, String theS, String theS1, Element theElement)
 			throws FHIRException {
 		return null;
 	}

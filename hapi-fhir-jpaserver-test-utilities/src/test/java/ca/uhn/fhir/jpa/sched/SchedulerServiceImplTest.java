@@ -4,13 +4,18 @@ import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.test.concurrency.PointcutLatch;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.quartz.JobKey;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,11 +31,19 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.AopTestUtils;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.DURATION;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @ContextConfiguration(classes = SchedulerServiceImplTest.TestConfiguration.class)
@@ -44,6 +57,8 @@ public class SchedulerServiceImplTest {
 	private static long ourTaskDelay;
 	@Autowired
 	private ISchedulerService mySvc;
+
+	static PointcutLatch ourLatch = new PointcutLatch("schedulersvcimpltest-latch");
 
 	@BeforeEach
 	public void before() {
@@ -61,12 +76,11 @@ public class SchedulerServiceImplTest {
 
 		ourLog.info("Fired {} times in {}", CountingJob.ourCount, sw);
 		assertThat(sw.getMillis()).isGreaterThan(500L);
-		assertThat(sw.getMillis()).isLessThan(1200L);
+		assertThat(sw.getMillis()).isLessThan(1600L);
 	}
 
 	@Test
 	public void triggerImmediately_runsJob() {
-
 		ScheduledJobDefinition def = buildJobDefinition();
 
 		StopWatch sw = new StopWatch();
@@ -141,6 +155,83 @@ public class SchedulerServiceImplTest {
 		assertThat(sw.getMillis()).isLessThan(3500L);
 	}
 
+	@ParameterizedTest
+	@ValueSource(booleans = { true, false })
+	public void scheduleJob_withInvalidCronExpression_throws(boolean theUseClustered) {
+		String cronExpression = "1";
+		String methodName = new Exception()
+			.getStackTrace()[0]
+			.getMethodName();
+
+		ScheduledJobDefinition definition = new ScheduledJobDefinition();
+		definition.setId(methodName);
+		definition.setJobClass(CronJob.class);
+
+		// test
+		try {
+			if (theUseClustered) {
+				mySvc.scheduleClusteredJob(cronExpression, definition);
+			} else {
+				mySvc.scheduleLocalJob(cronExpression, definition);
+			}
+		} catch (Exception ex) {
+			assertTrue(ex.getMessage().contains("Invalid cron expression"));
+		}
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = { true, false })
+	public void scheduleJob_withCronExpression_works(boolean theUseClustered) throws InterruptedException, SchedulerException {
+		// setup
+		String cronExpression = "0/1 * * * * ?"; // every second interval
+		String methodName = new Exception()
+			.getStackTrace()[0]
+			.getMethodName();
+
+		ScheduledJobDefinition definition = new ScheduledJobDefinition();
+		definition.setId(methodName);
+		definition.setJobClass(CronJob.class);
+
+		// test
+		ourLatch.setExpectAtLeast(1);
+
+		if (theUseClustered) {
+			mySvc.scheduleClusteredJob(cronExpression, definition);
+		} else {
+			mySvc.scheduleLocalJob(cronExpression, definition);
+		}
+
+		// verify
+		/*
+		 * We're ignoring the first call because
+		 * we set it to fire "now", and that might be < 1 second.
+		 *
+		 * We also have to be careful because scheduler will fire
+		 * once immediately upon scheduling, and then on the exact second (.000ms) afterwards.
+		 * This means that the first 'wait' is not enough.
+		 *
+		 * it also means that our gap should be tolerant of a little bit of time before or after.
+		 * So we'll verify to within 1s around the expected next second.
+		 */
+		ourLatch.awaitExpected();
+
+		ourLatch.setExpectAtLeast(1);
+		ourLatch.awaitExpected();
+
+		Instant now = Instant.now();
+
+		ourLatch.setExpectAtLeast(1);
+		ourLatch.awaitExpected();
+		long elapsedTime = Duration.between(now, Instant.now()).toMillis();
+		assertThat(elapsedTime).isBetween(500L, 1500L);
+
+		// verify correct scheduler
+		Set<JobKey> keys = theUseClustered ? mySvc.getClusteredJobKeysForUnitTest()
+			: mySvc.getLocalJobKeysForUnitTest();
+		assertFalse(keys.isEmpty());
+		assertTrue(keys.stream()
+			.anyMatch(key -> key.getName().equals(methodName)));
+	}
 
 	@Test
 	public void testIntervalJob() {
@@ -165,6 +256,8 @@ public class SchedulerServiceImplTest {
 		CountingJob.resetCount();
 		CountingIntervalJob.ourCount = 0;
 		mySvc.purgeAllScheduledJobsForUnitTest();
+		CronJob.ourCount.set(0);
+		ourLatch.clear();
 	}
 
 	@DisallowConcurrentExecution
@@ -208,6 +301,17 @@ public class SchedulerServiceImplTest {
 		@Override
 		public void setApplicationContext(ApplicationContext theAppCtx) throws BeansException {
 			myAppCtx = theAppCtx;
+		}
+	}
+
+	public static class CronJob implements HapiJob {
+
+		static AtomicInteger ourCount = new AtomicInteger();
+
+		@Override
+		public void execute(JobExecutionContext context) throws JobExecutionException {
+			ourLog.info("Cron job has fired");
+			ourLatch.call(ourCount.incrementAndGet());
 		}
 	}
 

@@ -1,0 +1,4 @@
+---
+type: add
+issue: 8107
+title: "When uploading terminology distribution files over the network, the files can now be send in smaller chunks to avoid ever loading a huger file into memory or having to transmit a huge file as a single HTTP POST over the network."

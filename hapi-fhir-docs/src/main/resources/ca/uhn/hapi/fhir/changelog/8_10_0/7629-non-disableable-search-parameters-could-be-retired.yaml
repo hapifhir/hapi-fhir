@@ -1,0 +1,11 @@
+---
+type: fix
+issue: 7629
+jira: SMILE-11357
+title: "Previously, marking a built-in SearchParameter required for core
+  system operation (`*:url`, or any SearchParameter on `Basic`,
+  `Subscription`, or `SearchParameter`) as retired in the database would
+  disable it in the in-memory registry cache and break dependent features
+  such as validation, subscription delivery, and the SubscriptionTopic
+  registry. These SearchParameters are now always kept active in the
+  registry."

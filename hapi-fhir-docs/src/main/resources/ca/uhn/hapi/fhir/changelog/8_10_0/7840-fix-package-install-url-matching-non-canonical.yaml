@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7840
+title: "The package installer matching logic (to determine if resource should be updated or created) 
+searched by url for resource types that define a url element even when the value was not populated, 
+causing unwanted silent duplicates. Fixed by only using url-based matching when the url value is actually populated."

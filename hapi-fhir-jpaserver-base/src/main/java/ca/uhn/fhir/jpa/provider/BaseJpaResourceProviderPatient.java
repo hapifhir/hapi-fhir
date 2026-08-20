@@ -109,7 +109,7 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 					List<IPrimitiveType<String>> theFilter,
 			@Description(
 							shortDefinition =
-									"Filter the resources to return only resources matching the given _type filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
+									"Filter the resources to return only resources matching the given _type filter. When _type is specified, only resources of the listed types are returned; the patient anchor resource itself is also subject to this filter and is omitted unless Patient is included in _type.")
 					@OperationParam(
 							name = Constants.PARAM_TYPE,
 							min = 0,
@@ -118,7 +118,7 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 					List<IPrimitiveType<String>> theTypes,
 			@Description(
 							shortDefinition =
-									"Filter the resources to return only resources matching the given _type filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
+									"If set to true, expands the patient set to include all patients linked via MDM before returning results. Requires MDM to be enabled on the server.")
 					@OperationParam(name = Constants.PARAM_MDM, min = 0, max = 1, typeName = "boolean")
 					IPrimitiveType<Boolean> theMdmExpand,
 			@Sort SortSpec theSortSpec,
@@ -198,7 +198,7 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 					List<IPrimitiveType<String>> theFilter,
 			@Description(
 							shortDefinition =
-									"Filter the resources to return only resources matching the given _type filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
+									"Filter the resources to return only resources matching the given _type filter. When _type is specified, only resources of the listed types are returned; the patient anchor resource itself is also subject to this filter and is omitted unless Patient is included in _type.")
 					@OperationParam(
 							name = Constants.PARAM_TYPE,
 							min = 0,
@@ -214,7 +214,7 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 					List<IIdType> theId,
 			@Description(
 							shortDefinition =
-									"Filter the resources to return only resources matching the given _type filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
+									"If set to true, expands the patient set to include all patients linked via MDM before returning results. Requires MDM to be enabled on the server.")
 					@OperationParam(name = Constants.PARAM_MDM, min = 0, max = 1, typeName = "boolean")
 					IPrimitiveType<Boolean> theMdmExpand,
 			@Sort SortSpec theSortSpec,

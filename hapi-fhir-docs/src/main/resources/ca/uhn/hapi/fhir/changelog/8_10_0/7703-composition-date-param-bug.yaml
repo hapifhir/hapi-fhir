@@ -1,6 +1,7 @@
 ---
 type: fix
 issue: 7703
+backport: 8.6.8
 title: "Previously, when a composite unique SearchParameter included a Date-type component with an
   uplifted refchain SearchParameter (e.g. composition.medicationdispense.whenprepared),
   searching with a date-time value containing a timezone offset (e.g. -04:00) would return

@@ -15,8 +15,12 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.search.builder.predicate.BaseSearchParamPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +29,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -85,9 +92,100 @@ public class DaoSearchParamSynchronizerTest {
 	}
 
 	@Test
+	void synchronize_invokesRegisteredProviderForItsType() {
+		TestIndexProvider provider = new TestIndexProvider(RestSearchParameterTypeEnum.TOKEN, null);
+		subject.setSearchParamIndexProviderRegistry(new SearchParamIndexProviderRegistry(List.of(provider)));
+		ResourceIndexedSearchParams newParams = ResourceIndexedSearchParams.withSets();
+		ResourceIndexedSearchParamToken tokenParam = new ResourceIndexedSearchParamToken(
+			new PartitionSettings(), "Patient", "status", "http://hl7.org/fhir/patient-status", "active");
+		newParams.myTokenParams.add(tokenParam);
+
+		subject.synchronizeSearchParamsToDatabase(
+			null, null, newParams, theEntity, ResourceIndexedSearchParams.empty(), false);
+
+		// invoked exactly once with token params of the resource
+		assertThat(provider.mySynchronizeCount).isEqualTo(1);
+		assertThat(provider.myLastNewParams).singleElement().isSameAs(tokenParam);
+		assertThat(provider.myLastEntity).isSameAs(theEntity);
+		assertThat(provider.myLastResourceIsBeingCreated).isFalse();
+	}
+
+	@Test
+	void synchronize_addsProviderCountsToTotal() {
+		AddRemoveCount customDelta = new AddRemoveCount();
+		customDelta.addToAddCount(3);
+		customDelta.addToRemoveCount(2);
+		TestIndexProvider provider =
+			new TestIndexProvider(RestSearchParameterTypeEnum.TOKEN, null).withDelta(customDelta);
+		subject.setSearchParamIndexProviderRegistry(new SearchParamIndexProviderRegistry(List.of(provider)));
+		ResourceIndexedSearchParams newParams = ResourceIndexedSearchParams.withSets();
+		newParams.myTokenParams.add(new ResourceIndexedSearchParamToken(
+			new PartitionSettings(), "Patient", "status", "http://hl7.org/fhir/patient-status", "active"));
+
+		AddRemoveCount retVal = subject.synchronizeSearchParamsToDatabase(
+			null, null, newParams, theEntity, ResourceIndexedSearchParams.empty(), false);
+
+		assertThat(retVal.getAddCount()).isEqualTo(4);
+		assertThat(retVal.getRemoveCount()).isEqualTo(2);
+	}
+
+	@Test
+	void synchronize_withNoCustomProvider_writesBuiltInTokenIndex() {
+		when(theEntity.getResourceType()).thenReturn("Patient");
+		ResourceIndexedSearchParamToken tokenParam = new ResourceIndexedSearchParamToken(
+			new PartitionSettings(), "Patient", "status", "http://hl7.org/fhir/patient-status", "active");
+		ResourceIndexedSearchParams newParams = ResourceIndexedSearchParams.withSets();
+		newParams.myTokenParams.add(tokenParam);
+
+		subject.synchronizeSearchParamsToDatabase(
+			null, null, newParams, theEntity, ResourceIndexedSearchParams.empty(), false);
+
+		// Built-in token index written by default → the new token row is persisted.
+		verify(entityManager, times(1)).persist(tokenParam);
+	}
+
+	@Test
+	void synchronize_whenProviderSuppressesTokenIndex_skipsTokenButWritesOtherTypes() {
+		when(theEntity.getResourceType()).thenReturn("Patient");
+		TestIndexProvider suppressTokens = new TestIndexProvider(null, RestSearchParameterTypeEnum.TOKEN);
+		subject.setSearchParamIndexProviderRegistry(new SearchParamIndexProviderRegistry(List.of(suppressTokens)));
+
+		ResourceIndexedSearchParamToken tokenParam = new ResourceIndexedSearchParamToken(
+			new PartitionSettings(), "Patient", "status", "http://hl7.org/fhir/patient-status", "active");
+		ResourceIndexedSearchParamString stringParam = new ResourceIndexedSearchParamString(
+			new PartitionSettings(), new StorageSettings(), "Patient", "name", "smith", "SMITH");
+		ResourceIndexedSearchParams newParams = ResourceIndexedSearchParams.withSets();
+		newParams.myTokenParams.add(tokenParam);
+		newParams.myStringParams.add(stringParam);
+
+		subject.synchronizeSearchParamsToDatabase(
+			null, null, newParams, theEntity, ResourceIndexedSearchParams.empty(), false);
+
+		verify(entityManager, never()).persist(tokenParam);
+		verify(entityManager, times(1)).persist(stringParam);
+	}
+
+	@Test
+	void synchronize_builtInSuppressionConsultedForTokenOnly() {
+		when(theEntity.getResourceType()).thenReturn("Patient");
+		TestIndexProvider testIndexProvider = new TestIndexProvider(null, null);
+		subject.setSearchParamIndexProviderRegistry(new SearchParamIndexProviderRegistry(List.of(testIndexProvider)));
+
+		ResourceIndexedSearchParams newParams = ResourceIndexedSearchParams.withSets();
+		newParams.myTokenParams.add(new ResourceIndexedSearchParamToken(
+			new PartitionSettings(), "Patient", "status", "http://hl7.org/fhir/patient-status", "active"));
+
+		subject.synchronizeSearchParamsToDatabase(
+			null, null, newParams, theEntity, ResourceIndexedSearchParams.empty(), false);
+
+		assertThat(testIndexProvider.mySuppressQueries).containsExactly(RestSearchParameterTypeEnum.TOKEN);
+	}
+
+	@Test
 	void synchronizeSearchParamsNumberOnlyValuesDifferent() {
 		when(theEntity.getResourceType()).thenReturn("Patient");
-		final AddRemoveCount addRemoveCount = subject.synchronizeSearchParamsToDatabase(null, null, theParams, theEntity, existingParams);
+		final AddRemoveCount addRemoveCount =
+			subject.synchronizeSearchParamsToDatabase(null, null, theParams, theEntity, existingParams, false);
 
 		assertEquals(0, addRemoveCount.getRemoveCount());
 		assertEquals(1, addRemoveCount.getAddCount());
@@ -115,7 +213,8 @@ public class DaoSearchParamSynchronizerTest {
 		ResourceIndexedSearchParams newParams = ResourceIndexedSearchParams.withSets();
 		newParams.myTokenParams.add(tokenParam);
 
-		subject.synchronizeSearchParamsToDatabase(null, null, newParams, theEntity, ResourceIndexedSearchParams.empty());
+		subject.synchronizeSearchParamsToDatabase(
+			null, null, newParams, theEntity, ResourceIndexedSearchParams.empty(), false);
 
 		assertThat(tokenParam.getResource()).isSameAs(theEntity);
 	}
@@ -135,7 +234,8 @@ public class DaoSearchParamSynchronizerTest {
 		ResourceIndexedSearchParams newParams = ResourceIndexedSearchParams.withSets();
 		newParams.myStringParams.add(stringParam);
 
-		subject.synchronizeSearchParamsToDatabase(null, null, newParams, theEntity, ResourceIndexedSearchParams.empty());
+		subject.synchronizeSearchParamsToDatabase(
+			null, null, newParams, theEntity, ResourceIndexedSearchParams.empty(), false);
 
 		assertThat(stringParam.getResource()).isSameAs(theEntity);
 	}
@@ -155,7 +255,8 @@ public class DaoSearchParamSynchronizerTest {
 		ResourceIndexedSearchParams newParams = ResourceIndexedSearchParams.withSets();
 		newParams.myUriParams.add(uriParam);
 
-		subject.synchronizeSearchParamsToDatabase(null, null, newParams, theEntity, ResourceIndexedSearchParams.empty());
+		subject.synchronizeSearchParamsToDatabase(
+			null, null, newParams, theEntity, ResourceIndexedSearchParams.empty(), false);
 
 		assertThat(uriParam.getResource()).isSameAs(theEntity);
 	}
@@ -174,11 +275,73 @@ public class DaoSearchParamSynchronizerTest {
 		ResourceIndexedSearchParams newParams = ResourceIndexedSearchParams.withSets();
 		newParams.myLinks.add(link);
 
-		subject.synchronizeSearchParamsToDatabase(null, null, newParams, theEntity, ResourceIndexedSearchParams.empty());
+		subject.synchronizeSearchParamsToDatabase(
+			null, null, newParams, theEntity, ResourceIndexedSearchParams.empty(), false);
 
 		// Verify getReference() was called with the correct target PID — this is how we confirm
 		// that setTargetResourceTable() was invoked, since myTargetResource has no public getter
 		// (it is the @ManyToOne field inspected internally by Hibernate's InsertActionSorter).
 		verify(entityManager).getReference(ResourceTable.class, JpaPid.fromId(42L, (Integer) null));
+	}
+
+	/**
+	 * Test {@link ISearchParamIndexProvider} that records how it was invoked. It supports (for writes)
+	 * a single configurable param type and optionally suppresses the built-in index for another.
+	 */
+	private static class TestIndexProvider implements ISearchParamIndexProvider {
+		private final RestSearchParameterTypeEnum myHandledType;
+		private final RestSearchParameterTypeEnum mySuppressedType;
+		private AddRemoveCount myDelta = new AddRemoveCount();
+
+		private int mySynchronizeCount = 0;
+		private Collection<? extends BaseResourceIndex> myLastNewParams;
+		private ResourceTable myLastEntity;
+		private boolean myLastResourceIsBeingCreated;
+		private final List<RestSearchParameterTypeEnum> mySuppressQueries = new ArrayList<>();
+
+		TestIndexProvider(RestSearchParameterTypeEnum theHandledType, RestSearchParameterTypeEnum theSuppressedType) {
+			myHandledType = theHandledType;
+			mySuppressedType = theSuppressedType;
+		}
+
+		TestIndexProvider withDelta(AddRemoveCount theDelta) {
+			myDelta = theDelta;
+			return this;
+		}
+
+		@Override
+		public boolean supports(SearchParamIndexRouting theRouting) {
+			return myHandledType != null && theRouting.getParamType() == myHandledType;
+		}
+
+		@Override
+		public Optional<BaseSearchParamPredicateBuilder> createPredicateBuilder(
+				SearchQueryBuilder theSqlBuilder, String theParamName) {
+			return Optional.empty();
+		}
+
+		@Override
+		public AddRemoveCount synchronize(
+				RequestDetails theRequestDetails,
+				Collection<? extends BaseResourceIndex> theExtractedParams,
+				ResourceTable theEntity,
+				boolean theResourceIsBeingCreated) {
+			mySynchronizeCount++;
+			myLastNewParams = theExtractedParams;
+			myLastEntity = theEntity;
+			myLastResourceIsBeingCreated = theResourceIsBeingCreated;
+			return myDelta;
+		}
+
+		@Override
+		public void deleteByResourceId(JpaPid theResourceId) {
+			// no-op test provider
+		}
+
+		@Override
+		public boolean suppressesBuiltInIndex(SearchParamIndexRouting theRouting) {
+			mySuppressQueries.add(theRouting.getParamType());
+			return mySuppressedType != null && theRouting.getParamType() == mySuppressedType;
+		}
 	}
 }

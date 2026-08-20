@@ -109,7 +109,7 @@ public class CanonicalSubscriptionTest {
 			Arguments.of(null, false),
 			Arguments.of(RequestPartitionId.allPartitions(), false),
 			Arguments.of(RequestPartitionId.fromPartitionIds(1), false),
-			Arguments.of(RequestPartitionId.defaultPartition(), true)
+			Arguments.of(RequestPartitionId.fromPartitionId(null), true)
 			);
 	}
 

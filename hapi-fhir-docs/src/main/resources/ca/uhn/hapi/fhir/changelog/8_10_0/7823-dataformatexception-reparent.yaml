@@ -1,0 +1,5 @@
+---
+type: fix
+jira: SMILE-11695
+title: "DataFormatException now inherits from InvalidRequestException, allowing code that catches
+  BaseServerResponseException to catch it and handle it however they like."

@@ -19,11 +19,15 @@
  */
 package ca.uhn.fhir.jpa.term.config;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.term.TermConceptDaoSvc;
 import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
+import ca.uhn.fhir.jpa.term.TermValueSetExpansionSvc;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermValueSetExpansionSvc;
 import ca.uhn.fhir.jpa.term.api.TermCodeSystemDeleteJobSvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,5 +48,11 @@ public class TermCodeSystemConfig {
 	@Bean
 	public TermConceptDaoSvc termConceptDaoSvc(JpaStorageSettings theJpaStorageSettings) {
 		return new TermConceptDaoSvc().setSupportLegacyLob(theJpaStorageSettings.isWriteToLegacyLobColumns());
+	}
+
+	@Bean
+	public ITermValueSetExpansionSvc termValueSetExpansionSvc(
+			ITermValueSetDao theTermValueSetDao, FhirContext theFhirContext) {
+		return new TermValueSetExpansionSvc(theTermValueSetDao, theFhirContext);
 	}
 }

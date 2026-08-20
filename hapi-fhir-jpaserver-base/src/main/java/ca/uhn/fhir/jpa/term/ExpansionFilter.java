@@ -32,7 +32,7 @@ import java.util.List;
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-class ExpansionFilter {
+public class ExpansionFilter {
 
 	public static final ExpansionFilter NO_FILTER = new ExpansionFilter(null, null);
 	private final String myCode;

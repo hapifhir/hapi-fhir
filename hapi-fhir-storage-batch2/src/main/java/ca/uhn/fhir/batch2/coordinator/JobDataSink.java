@@ -20,11 +20,13 @@
 package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
 import ca.uhn.fhir.i18n.Msg;
@@ -47,12 +49,13 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 	private final IJobPersistence myJobPersistence;
 	private final String myJobDefinitionId;
 	private final int myJobDefinitionVersion;
+	private final JobDefinitionStep<PT, IT, OT> myCurrentStep;
 	private final JobDefinitionStep<PT, OT, ?> myTargetStep;
 	private final AtomicInteger myChunkCounter = new AtomicInteger(0);
 	private final AtomicReference<String> myLastChunkId = new AtomicReference<>();
 	private final IHapiTransactionService myHapiTransactionService;
-
 	private final boolean myGatedExecution;
+	private final JobDefinition<?> myJobDefinition;
 
 	JobDataSink(
 			@Nonnull BatchJobSender theBatchJobSender,
@@ -60,12 +63,15 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 			@Nonnull JobDefinition<?> theDefinition,
 			@Nonnull String theInstanceId,
 			@Nonnull JobWorkCursor<PT, IT, OT> theJobWorkCursor,
+			@Nonnull WorkChunk theWorkChunk,
 			IHapiTransactionService theHapiTransactionService) {
-		super(theInstanceId, theJobWorkCursor);
+		super(theInstanceId, theWorkChunk, theJobWorkCursor);
 		myBatchJobSender = theBatchJobSender;
 		myJobPersistence = theJobPersistence;
+		myJobDefinition = theDefinition;
 		myJobDefinitionId = theDefinition.getJobDefinitionId();
 		myJobDefinitionVersion = theDefinition.getJobDefinitionVersion();
+		myCurrentStep = theJobWorkCursor.currentStep;
 		myTargetStep = theJobWorkCursor.nextStep;
 		myHapiTransactionService = theHapiTransactionService;
 		myGatedExecution = theDefinition.isGatedExecution();
@@ -73,18 +79,43 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 
 	@Override
 	public void accept(WorkChunkData<OT> theData) {
+		acceptForStepId(myTargetStep.getStepId(), theData);
+	}
+
+	@Override
+	public void acceptForFutureStep(String theStepId, WorkChunkData<?> theData) {
+		acceptForStepId(theStepId, theData);
+	}
+
+	private void acceptForStepId(String theTargetStepId, WorkChunkData<?> theData) {
 		String instanceId = getInstanceId();
-		String targetStepId = myTargetStep.getStepId();
 
 		int sequence = myChunkCounter.getAndIncrement();
-		OT dataValue = theData.getData();
+		IModelJson dataValue = theData.getData();
+		String currentStepId = myCurrentStep.getStepId();
+
+		int currentStepIndex = myJobDefinition.getStepIndex(currentStepId);
+		int targetStepIndex = myJobDefinition.getStepIndex(theTargetStepId);
+		if (currentStepIndex >= targetStepIndex) {
+			throw new JobExecutionFailedException(
+					Msg.code(2932) + "Step " + theTargetStepId + " is not after step " + currentStepId);
+		}
+
+		Class<?> expectedType = myJobDefinition.getStepById(theTargetStepId).getInputType();
+
+		if (!expectedType.isAssignableFrom(dataValue.getClass())) {
+			throw new JobExecutionFailedException(Msg.code(2933) + "Data type "
+					+ dataValue.getClass().getSimpleName() + " for step " + theTargetStepId
+					+ " is not compatible with expected type " + expectedType.getSimpleName());
+		}
+
 		String dataValueString = JsonUtil.serialize(dataValue, false);
 
-		// once finished, create workchunks in READY state
+		// once finished, create work chunks in READY state
 		WorkChunkCreateEvent batchWorkChunk = new WorkChunkCreateEvent(
 				myJobDefinitionId,
 				myJobDefinitionVersion,
-				targetStepId,
+				theTargetStepId,
 				instanceId,
 				sequence,
 				dataValueString,
@@ -100,7 +131,7 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 			myJobPersistence.enqueueWorkChunkForProcessing(chunkId, updated -> {
 				if (updated == 1) {
 					JobWorkNotification workNotification = new JobWorkNotification(
-							myJobDefinitionId, myJobDefinitionVersion, instanceId, targetStepId, chunkId);
+							myJobDefinitionId, myJobDefinitionVersion, instanceId, theTargetStepId, chunkId);
 					myBatchJobSender.sendWorkChannelMessage(workNotification);
 				} else {
 					ourLog.error(

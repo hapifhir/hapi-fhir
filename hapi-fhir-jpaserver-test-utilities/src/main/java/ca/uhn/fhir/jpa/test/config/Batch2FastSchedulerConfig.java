@@ -37,6 +37,6 @@ public class Batch2FastSchedulerConfig {
 
 	@PostConstruct
 	void fastScheduler() {
-		((JobMaintenanceServiceImpl)myJobMaintenanceService).setScheduledJobFrequencyMillis(200);
+		((JobMaintenanceServiceImpl)myJobMaintenanceService).setScheduledJobFrequencyMillis(200L);
 	}
 }

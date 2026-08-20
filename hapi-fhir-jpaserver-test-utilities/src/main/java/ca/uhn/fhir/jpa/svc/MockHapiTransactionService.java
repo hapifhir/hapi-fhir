@@ -24,10 +24,12 @@ import jakarta.annotation.Nullable;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.SimpleTransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 public class MockHapiTransactionService extends HapiTransactionService {
 
-	private TransactionStatus myTransactionStatus;
+	private final TransactionStatus myTransactionStatus;
 
 	public MockHapiTransactionService() {
 		this(new SimpleTransactionStatus());
@@ -37,9 +39,29 @@ public class MockHapiTransactionService extends HapiTransactionService {
 		myTransactionStatus = theTransactionStatus;
 	}
 
+	@SuppressWarnings("ClassEscapesDefinedScope")
 	@Nullable
 	@Override
 	public <T> T doExecute(ExecutionBuilder theExecutionBuilder, TransactionCallback<T> theCallback) {
-		return theCallback.doInTransaction(myTransactionStatus);
+		boolean initial = TransactionSynchronizationManager.isActualTransactionActive();
+		try {
+			if (!initial) {
+				TransactionSynchronizationManager.initSynchronization();
+				TransactionSynchronizationManager.setActualTransactionActive(true);
+			}
+			return theCallback.doInTransaction(myTransactionStatus);
+		} finally {
+			if (!initial) {
+				TransactionSynchronizationManager.getSynchronizations()
+						.forEach(TransactionSynchronization::afterCommit);
+				TransactionSynchronizationManager.clearSynchronization();
+				TransactionSynchronizationManager.setActualTransactionActive(initial);
+			}
+		}
+	}
+
+	@Override
+	public IExecutionBuilder withSystemRequestOnDefaultPartition() {
+		return withSystemRequest();
 	}
 }

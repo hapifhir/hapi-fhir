@@ -65,4 +65,5 @@ public class PackageInstallationSpecTest {
 			Arguments.of(null, PackageInstallationSpec.VersionPolicyEnum.MULTI_VERSION)  // missing defaults to MULTI_VERSION
 		);
 	}
+
 }

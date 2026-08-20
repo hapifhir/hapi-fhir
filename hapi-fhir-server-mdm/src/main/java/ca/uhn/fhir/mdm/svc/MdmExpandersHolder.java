@@ -130,6 +130,14 @@ public class MdmExpandersHolder {
 	 */
 	public IBulkExportMdmResourceExpander determineBulkExportMDMResourceExpanderInstanceToUse() {
 		if (isMatchOnlyWithEidSystems()) {
+			// The EID-match-only bulk-export expander is null on persistence backends that do not
+			// support MDM bulk export (e.g. Mongo passes null for it, while still supporting
+			// EID-match-only search). Guard the settings cascade; returning the (possibly null)
+			// instance preserves the pre-existing contract — it is only ever dereferenced on
+			// backends where bulk export is supported and the expander is non-null.
+			if (myBulkExportMDMEidMatchOnlyResourceExpander != null) {
+				myBulkExportMDMEidMatchOnlyResourceExpander.setMdmSettings(myMdmSettings);
+			}
 			return myBulkExportMDMEidMatchOnlyResourceExpander;
 		} else {
 			return myBulkExportMDMResourceExpander;

@@ -32,8 +32,13 @@ import jakarta.persistence.EntityManager;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Collection;
 import java.util.Date;
@@ -45,10 +50,23 @@ import java.util.stream.Collectors;
  *
  * @see SearchUrlJobMaintenanceSvcImpl which deletes stale entities
  */
-@Transactional
 @Service
 public class ResourceSearchUrlSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceSearchUrlSvc.class);
+
+	/**
+	 * Stale-entry deletion is paged so no single statement scans the whole table — that's what
+	 * trips MSSQL's per-statement timeout on MegaScale deployments. Capped under MSSQL's
+	 * 2,100-parameter-per-statement limit so the {@code DELETE … WHERE RES_ID IN (?, …)} doesn't overflow.
+	 */
+	static final int DELETE_PAGE_SIZE = 1_800;
+
+	/**
+	 * Safety cap on page iterations per sweep (10,000 pages of 1,800 rows = 18M rows).
+	 * ({@link SearchUrlJobMaintenanceSvcImpl}).
+	 */
+	static final int MAX_DELETE_PAGES = 10_000;
+
 	private final EntityManager myEntityManager;
 
 	private final IResourceSearchUrlDao myResourceSearchUrlDao;
@@ -57,33 +75,80 @@ public class ResourceSearchUrlSvc {
 
 	private final FhirContext myFhirContext;
 	private final PartitionSettings myPartitionSettings;
+	private final TransactionTemplate myPageTxTemplate;
 
 	public ResourceSearchUrlSvc(
 			EntityManager theEntityManager,
 			IResourceSearchUrlDao theResourceSearchUrlDao,
 			MatchUrlService theMatchUrlService,
 			FhirContext theFhirContext,
-			PartitionSettings thePartitionSettings) {
+			PartitionSettings thePartitionSettings,
+			PlatformTransactionManager theTxManager) {
 		myEntityManager = theEntityManager;
 		myResourceSearchUrlDao = theResourceSearchUrlDao;
 		myMatchUrlService = theMatchUrlService;
 		myFhirContext = theFhirContext;
 		myPartitionSettings = thePartitionSettings;
+		myPageTxTemplate = new TransactionTemplate(theTxManager);
 	}
 
 	/**
-	 * Perform removal of entries older than {@code theCutoffDate} since the create operations are done.
+	 * Deletes search URL entries created before {@code theCutoffDate}, in fixed-size pages that each
+	 * commit in their own transaction. A single sweep is capped at {@link #MAX_DELETE_PAGES} pages;
+	 * any remaining stale entries are removed by the next scheduled run
+	 * ({@link SearchUrlJobMaintenanceSvcImpl}).
 	 */
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void deleteEntriesOlderThan(Date theCutoffDate) {
-		ourLog.debug("About to delete SearchUrl which are older than {}", theCutoffDate);
-		int deletedCount = myResourceSearchUrlDao.deleteAllWhereCreatedBefore(theCutoffDate);
-		ourLog.debug("Deleted {} SearchUrls", deletedCount);
+		ourLog.debug("Deleting SearchUrls older than {}", theCutoffDate);
+
+		long totalDeleted = 0;
+		boolean moreStaleRemain = true;
+		for (int pageIndex = 0; moreStaleRemain && pageIndex < MAX_DELETE_PAGES; pageIndex++) {
+			StalePageOutcome outcome = deletePageOfStaleEntries(theCutoffDate);
+			totalDeleted += outcome.deletedCount();
+			moreStaleRemain = outcome.moreStaleRemain();
+		}
+
+		if (moreStaleRemain) {
+			ourLog.warn(
+					"Reached the maximum of {} delete pages after removing {} SearchUrls; remaining stale entries"
+							+ " will be removed by the next scheduled run",
+					MAX_DELETE_PAGES,
+					totalDeleted);
+		}
+		if (totalDeleted > 0) {
+			ourLog.info("Deleted {} SearchUrls", totalDeleted);
+		} else {
+			ourLog.debug("Deleted {} SearchUrls", totalDeleted);
+		}
 	}
+
+	/**
+	 * Deletes one page of stale entries in its own transaction — the repository is
+	 * {@code @Transactional(MANDATORY)}, so it needs an enclosing tx, and we want that tx to commit
+	 * between pages, not span the sweep.
+	 */
+	private StalePageOutcome deletePageOfStaleEntries(Date theCutoffDate) {
+		PageRequest page = PageRequest.of(0, DELETE_PAGE_SIZE);
+		return myPageTxTemplate.execute(theStatus -> {
+			Slice<Long> stale = myResourceSearchUrlDao.findStaleIds(theCutoffDate, page);
+			if (stale.isEmpty()) {
+				return new StalePageOutcome(0, false);
+			}
+			int deleted = myResourceSearchUrlDao.deleteByResIds(stale.getContent());
+			ourLog.debug("Deleted page of {} stale SearchUrls", deleted);
+			return new StalePageOutcome(deleted, stale.hasNext());
+		});
+	}
+
+	private record StalePageOutcome(int deletedCount, boolean moreStaleRemain) {}
 
 	/**
 	 * Once a resource is updated or deleted, we can trust that future match checks will find the committed resource in the db.
 	 * The use of the constraint table is done, and we can delete it to keep the table small.
 	 */
+	@Transactional
 	public void deleteByResId(JpaPid theResId) {
 		myResourceSearchUrlDao.deleteByResId(theResId.getId());
 	}
@@ -92,6 +157,7 @@ public class ResourceSearchUrlSvc {
 	 * Once a resource is updated or deleted, we can trust that future match checks will find the committed resource in the db.
 	 * The use of the constraint table is done, and we can delete it to keep the table small.
 	 */
+	@Transactional
 	public void deleteByResIds(Collection<JpaPid> theResId) {
 		myResourceSearchUrlDao.deleteByResIds(
 				theResId.stream().map(JpaPid::getId).collect(Collectors.toList()));
@@ -103,6 +169,7 @@ public class ResourceSearchUrlSvc {
 	 *
 	 *  We store a record of match urls with res_id so a db constraint can catch simultaneous creates that slip through.
 	 */
+	@Transactional
 	public void enforceMatchUrlResourceUniqueness(
 			String theResourceName, String theMatchUrl, ResourceTable theResourceTable) {
 		Validate.notBlank(theResourceName, "theResourceName must not be blank");

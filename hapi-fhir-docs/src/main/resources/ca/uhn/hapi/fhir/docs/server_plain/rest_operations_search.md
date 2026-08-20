@@ -72,7 +72,7 @@ Invoking a client of this type involves the following syntax:
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/RestfulPatientResourceProviderMore.java|dateClient}}
 ``` 
 
-<a name="DATE_RANGES" />
+<a id="DATE_RANGES"></a>
 
 # Search Parameters: Date (Ranges)
 
@@ -136,7 +136,7 @@ Reference parameters use the [ReferenceParam](/hapi-fhir/apidocs/hapi-fhir-base/
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/RestfulPatientResourceProviderMore.java|referenceSimple}}
 ``` 
 
-<a name="filter"/>
+<a id="filter"></a>
 
 # Search Parameters: Filter
 
@@ -161,7 +161,7 @@ What this query says is "fetch me all of the DiagnosticReport resources where th
 
 There are two ways of dealing with chained parameters in your methods: static chains and dynamic chains. Both are equally valid, although dynamic chains might lead to somewhat more compact and readable code.
 
-<a name="dynamic_chains"/>
+<a id="dynamic_chains"></a>
 
 ## Dynamic Chains
 
@@ -349,7 +349,7 @@ Example URL to invoke this method:
 http://fhir.example.com/Patient?identifier=urn:foo|123&_sort=given
 ```
 
-<a name="limiting-results"/>
+<a id="limiting-results"></a>
 
 # Limiting results (`_count`)
 

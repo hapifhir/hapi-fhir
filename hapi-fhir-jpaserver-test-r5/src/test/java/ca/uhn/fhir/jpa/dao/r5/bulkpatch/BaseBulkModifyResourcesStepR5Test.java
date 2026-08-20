@@ -56,7 +56,6 @@ public class BaseBulkModifyResourcesStepR5Test extends BaseJpaR5Test {
 	@BeforeEach
 	public void before() {
 		myStep = new MyBulkModifyResourcesStep();
-		myStep.setSystemDaoForUnitTest(mySystemDao);
 		myStep.setDaoRegistryForUnitTest(myDaoRegistry);
 		myStep.setTransactionServiceForUnitTest(myTxService);
 		myStep.setFhirContextForUnitTest(myFhirCtx);

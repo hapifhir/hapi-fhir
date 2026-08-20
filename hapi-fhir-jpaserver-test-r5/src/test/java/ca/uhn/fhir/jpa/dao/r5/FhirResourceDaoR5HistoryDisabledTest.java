@@ -1,34 +1,34 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleBuilder;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.IdType;
-import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Meta;
+import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import jakarta.annotation.Nonnull;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.when;
 
+@SuppressWarnings("LoggingSimilarMessage")
 public class FhirResourceDaoR5HistoryDisabledTest extends BaseJpaR5Test {
 
     @BeforeEach
@@ -225,7 +225,7 @@ public class FhirResourceDaoR5HistoryDisabledTest extends BaseJpaR5Test {
 		// Test
 		Meta meta = new Meta();
 		meta.addTag().setSystem("http://foo").setCode("bar2");
-		myPatientDao.metaDeleteOperation(id1.toVersionless(), meta, mySrd);
+		myPatientDao.metaDeleteOperation(id1.toVersionless(), meta, newSrd(), newTd());
 
 		// Verify
 		p = myPatientDao.read(id1.toVersionless(), mySrd);
@@ -287,7 +287,7 @@ public class FhirResourceDaoR5HistoryDisabledTest extends BaseJpaR5Test {
 		// Test
 		Meta meta = new Meta();
 		meta.addTag().setSystem("http://foo").setCode("bar2");
-		myPatientDao.metaDeleteOperation(id1.toVersionless(), meta, mySrd);
+		myPatientDao.metaDeleteOperation(id1.toVersionless(), meta, newSrd(), newTd());
 
 		// Verify
 		p = myPatientDao.read(id1.toVersionless(), mySrd);
@@ -326,12 +326,11 @@ public class FhirResourceDaoR5HistoryDisabledTest extends BaseJpaR5Test {
 
 	@Nonnull
 	private static List<String> toTagTokens(IBaseResource resource) {
-		List<String> tags = resource.getMeta()
+		return resource.getMeta()
 				.getTag()
 				.stream()
 				.map(t -> t.getSystem() + "|" + t.getCode())
 				.toList();
-		return tags;
 	}
 
 

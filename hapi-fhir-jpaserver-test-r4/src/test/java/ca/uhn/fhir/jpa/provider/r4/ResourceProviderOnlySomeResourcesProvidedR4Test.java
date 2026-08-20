@@ -49,12 +49,9 @@ public class ResourceProviderOnlySomeResourcesProvidedR4Test extends BaseResourc
 	@org.springframework.context.annotation.Configuration
 	public static class OnlySomeResourcesProvidedCtxConfig {
 
-		@Autowired
-		private DaoRegistry myDaoRegistry;
-
 		@Bean
-		public RegistryConfigurer registryConfigurer() {
-			return new RegistryConfigurer(myDaoRegistry);
+		public RegistryConfigurer registryConfigurer(DaoRegistry theDaoRegistry) {
+			return new RegistryConfigurer(theDaoRegistry);
 		}
 
 
@@ -70,12 +67,13 @@ public class ResourceProviderOnlySomeResourcesProvidedR4Test extends BaseResourc
 				myDaoRegistry.setSupportedResourceTypes("Patient", "Person", "SearchParameter");
 			}
 
+			@PreDestroy
+			public void stop() {
+				myDaoRegistry.setSupportedResourceTypes();
+			}
+
 		}
 
-		@PreDestroy
-		public void stop() {
-			myDaoRegistry.setSupportedResourceTypes();
-		}
 
 
 	}

@@ -5,7 +5,7 @@ If you are intending to support JavaScript clients in your server application, y
 * An approach using a HAPI FHIR Server Interceptor (Requires SpringFramework)
 * An approach using a servlet Filter (Container Specific)
 
-<a name="cors_interceptor"/>
+<a id="cors_interceptor"></a>
 
 # HAPI FHIR CORS Interceptor
 

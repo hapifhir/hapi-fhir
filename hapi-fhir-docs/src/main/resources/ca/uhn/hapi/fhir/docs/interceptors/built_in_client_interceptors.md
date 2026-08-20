@@ -2,7 +2,7 @@
 
 This page describes some client interceptors that are shipped with HAPI FHIR out of the box. Of course, you are also welcome to create your own.
 
-<a name="logging_interceptor"/>
+<a id="logging_interceptor"></a>
 
 # Logging: Logging Interceptor
 

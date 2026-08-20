@@ -184,7 +184,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 		if (thePartitioned) {
 			return RequestPartitionId.fromPartitionName("Partition-A");
 		} else {
-			return RequestPartitionId.defaultPartition();
+			return RequestPartitionId.fromPartitionId(null);
 		}
 	}
 

@@ -23,6 +23,8 @@ import ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
+import org.hibernate.id.enhanced.Optimizer;
+import org.hibernate.id.enhanced.PooledLoThreadLocalOptimizer;
 import org.hibernate.id.enhanced.PooledOptimizer;
 import org.hibernate.mapping.Component;
 import org.hibernate.metamodel.model.domain.internal.MappingMetamodelImpl;
@@ -85,10 +87,24 @@ public class ResetSequencesTestHelper implements AfterEachCallback {
 
 		HapiSequenceStyleGenerator subGenerator = getFieldValue(plan, "subgenerator");
 
-		PooledOptimizer optimizer = (PooledOptimizer) subGenerator.getOptimizer();
-		Field noTenantStateField = findField(optimizer, "noTenantState");
-		noTenantStateField.set(optimizer, null);
+		Optimizer optimizer = subGenerator.getOptimizer();
+		if (optimizer instanceof PooledLoThreadLocalOptimizer) {
+			/*
+			 * The thread-local pooled optimizer keeps each thread's cached id block in a ThreadLocal. Tests
+			 * generate ids synchronously on this thread, so removing this thread's cached block is enough to
+			 * force the next id to be pulled from the freshly reset sequence.
+			 */
+			clearThreadLocalState(optimizer, "singleTenantState");
+			clearThreadLocalState(optimizer, "multiTenantStates");
+		} else if (optimizer instanceof PooledOptimizer) {
+			Field noTenantStateField = findField(optimizer, "noTenantState");
+			noTenantStateField.set(optimizer, null);
+		}
+	}
 
+	private static void clearThreadLocalState(Object theObject, String theFieldName) throws IllegalAccessException {
+		ThreadLocal<?> threadLocal = getFieldValue(theObject, theFieldName);
+		threadLocal.remove();
 	}
 
 	@SuppressWarnings("unchecked")

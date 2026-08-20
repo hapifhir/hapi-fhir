@@ -56,7 +56,7 @@ GET [base]/Observation?_content:contains=[Moles/volume]
 Using `:contains` on the `_text` or `_content` modifies the search engine to perform a direct substring match anywhere within the field.
 
 
-<a name="customizing-fulltext"/>
+<a id="customizing-fulltext"></a>
 
 # Customizing Content and Text Indexing
 
@@ -66,7 +66,7 @@ By default, HAPI FHIR JPA will index the two FullText parameters using the follo
 * For all domain resources (all resources with a narrative), the `_text` parameter is indexed by aggregating all non-tag text in the resource narrative into a document which is passed to the indexer.
 
 
-<a name="selective-enabling"/>
+<a id="selective-enabling"></a>
 
 # Selectively Enabling Content and Text Indexing
 
@@ -78,7 +78,7 @@ Note that for this approach to work correctly:
 * The status (SearchParameter.status) value must be set to `active`.
 
 
-<a name="ex_selective_content_indexing"/>
+<a id="ex_selective_content_indexing"></a>
 
 ## Example: Selective Content Indexing
 
@@ -99,7 +99,7 @@ The following example shows a SearchParameter which limits the `_content` Search
 ```
 
 
-<a name="ex_selective_text_indexing"/>
+<a id="ex_selective_text_indexing"></a>
 
 ## Example: Selective Text Indexing
 
@@ -119,7 +119,7 @@ The following example shows a SearchParameter which limits the `_text` SearchPar
 }
 ```
 
-<a name="ex_completely_disable_individual"/>
+<a id="ex_completely_disable_individual"></a>
 
 ## Example: Completely Disable Parameter
 
@@ -155,7 +155,7 @@ If you want to completely disable Text indexing (i.e. indexing the `_text` Searc
 }
 ```
 
-<a name="fulltext-interceptor"/>
+<a id="fulltext-interceptor"></a>
 
 # Customizing Content and Text Indexing by Interceptor
 

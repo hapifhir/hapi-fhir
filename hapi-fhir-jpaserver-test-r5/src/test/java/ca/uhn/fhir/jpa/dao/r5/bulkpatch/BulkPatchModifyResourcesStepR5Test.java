@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static ca.uhn.fhir.jpa.dao.r5.bulkpatch.BulkPatchJobR5Test.createPatchWithModifyPatientIdentifierSystem;
+import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onAllThreads;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -84,11 +85,13 @@ public class BulkPatchModifyResourcesStepR5Test extends BaseBulkPatchR5Test {
 		myStorageSettings.setUpdateWithHistoryRewriteEnabled(true);
 		TypedPidAndVersionListWorkChunkJson data = new TypedPidAndVersionListWorkChunkJson();
 		List<IIdType> ids = new ArrayList<>();
-		for (int resIdx = 0; resIdx < 10; resIdx++) {
+		int patientCount = 10;
+		int versionCount = 5;
+		for (int resIdx = 0; resIdx < patientCount; resIdx++) {
 			IIdType id = createPatient(withIdentifier("http://blah", "bar" + resIdx));
 			ids.add(id);
 			data.addTypedPidWithNullPartitionForUnitTest("Patient", id.getIdPartAsLong(), 1L);
-			for (long versionIdx = 2; versionIdx <= 5; versionIdx++) {
+			for (long versionIdx = 2; versionIdx <= versionCount; versionIdx++) {
 				createPatient(withId(id.getIdPart()), withIdentifier("http://blah", "bar" + resIdx + "v" + versionIdx));
 				data.addTypedPidWithNullPartitionForUnitTest("Patient", id.getIdPartAsLong(), versionIdx);
 			}
@@ -107,11 +110,14 @@ public class BulkPatchModifyResourcesStepR5Test extends BaseBulkPatchR5Test {
 
 		// Verify
 
-		// This could definitely be optimized more
-		assertEquals(82, myCaptureQueriesListener.countSelectQueries());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
-		assertEquals(70, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertThat(myCaptureQueriesListener).has(
+			onAllThreads()
+				// This could definitely be optimized more
+				.selectCount(92)
+				.updateCount(70)
+				.commitCount(1)
+				.noOtherCounts()
+		);
 
 		Patient actualPatient = myPatientDao.read(ids.get(0).withVersion("4"), newSrd());
 		assertEquals("4", actualPatient.getIdElement().getVersionIdPart());

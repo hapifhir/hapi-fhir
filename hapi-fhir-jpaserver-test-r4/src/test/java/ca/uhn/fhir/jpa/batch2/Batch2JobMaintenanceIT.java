@@ -9,6 +9,7 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
+import ca.uhn.fhir.batch2.maintenance.ActiveJobInstanceProcessor;
 import ca.uhn.fhir.batch2.maintenance.JobMaintenanceServiceImpl;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -48,7 +49,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * The on-enter actions are defined in
  * {@link ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater#handleStatusChange(JobInstance)}}
  * {@link ca.uhn.fhir.batch2.progress.InstanceProgress#updateStatus(JobInstance)}
- * {@link ca.uhn.fhir.batch2.maintenance.JobInstanceProcessor#cleanupInstance()}
+ * {@link ActiveJobInstanceProcessor#cleanupInstance()}
 
  * For chunks:
  *   {@link JpaJobPersistenceImpl#onWorkChunkCreate}

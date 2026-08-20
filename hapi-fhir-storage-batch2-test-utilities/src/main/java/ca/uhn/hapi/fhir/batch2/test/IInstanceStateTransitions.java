@@ -21,8 +21,7 @@ package ca.uhn.hapi.fhir.batch2.test;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
-import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
-import ca.uhn.fhir.batch2.maintenance.JobInstanceProcessor;
+import ca.uhn.fhir.batch2.maintenance.ActiveJobInstanceProcessor;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -107,11 +106,10 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 
 		// when
 		getTestManager().runInTransaction(()-> {
-			new JobInstanceProcessor(
+			new ActiveJobInstanceProcessor(
 				getTestManager().getSvc(),
 				null,
 				instanceId1,
-				new JobChunkProgressAccumulator(),
 				null,
 				jobDefinitionRegistry,
 				interceptorService

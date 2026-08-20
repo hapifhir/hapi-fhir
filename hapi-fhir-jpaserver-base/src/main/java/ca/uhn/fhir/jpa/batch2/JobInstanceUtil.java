@@ -130,6 +130,7 @@ class JobInstanceUtil {
 		// note: may be null out if queried NoData
 		retVal.setData(theEntity.getSerializedData());
 		retVal.setWarningMessage(theEntity.getWarningMessage());
+		retVal.setLastHeartbeat(theEntity.getLastHeartbeat());
 		return retVal;
 	}
 }

@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.util;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.search.SearchConstants;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,24 +37,32 @@ import java.util.List;
 */
 public class InClauseNormalizer {
 
+	/**
+	 * This method adds a bunch of extra params to the end of the parameter list
+	 * which are for a resource PID that will never exist (-1 / NO_MORE). We do this
+	 * so that the database can rely on a cached execution plan since we're not
+	 * generating a new SQL query for every possible number of resources.
+	 */
 	public static List<JpaPid> normalizeIdListForInClause(List<JpaPid> theResourceIds) {
 
 		List<JpaPid> retVal = theResourceIds;
 
-		int listSize = theResourceIds.size();
+		if (theResourceIds.size() < SearchConstants.MAX_PAGE_SIZE) {
+			int listSize = theResourceIds.size();
 
-		if (listSize > 1 && listSize < 10) {
-			retVal = padIdListWithPlaceholders(theResourceIds, 10);
-		} else if (listSize > 10 && listSize < 50) {
-			retVal = padIdListWithPlaceholders(theResourceIds, 50);
-		} else if (listSize > 50 && listSize < 100) {
-			retVal = padIdListWithPlaceholders(theResourceIds, 100);
-		} else if (listSize > 100 && listSize < 200) {
-			retVal = padIdListWithPlaceholders(theResourceIds, 200);
-		} else if (listSize > 200 && listSize < 500) {
-			retVal = padIdListWithPlaceholders(theResourceIds, 500);
-		} else if (listSize > 500 && listSize < 800) {
-			retVal = padIdListWithPlaceholders(theResourceIds, 800);
+			if (listSize > 1 && listSize < 10) {
+				retVal = padIdListWithPlaceholders(theResourceIds, 10);
+			} else if (listSize > 10 && listSize < 50) {
+				retVal = padIdListWithPlaceholders(theResourceIds, 50);
+			} else if (listSize > 50 && listSize < 100) {
+				retVal = padIdListWithPlaceholders(theResourceIds, 100);
+			} else if (listSize > 100 && listSize < 200) {
+				retVal = padIdListWithPlaceholders(theResourceIds, 200);
+			} else if (listSize > 200 && listSize < 500) {
+				retVal = padIdListWithPlaceholders(theResourceIds, 500);
+			} else if (listSize > 500) {
+				retVal = padIdListWithPlaceholders(theResourceIds, 800);
+			}
 		}
 
 		return retVal;

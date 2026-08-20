@@ -104,6 +104,13 @@ public class JobWorkCursor<PT extends IModelJson, IT extends IModelJson, OT exte
 		return currentStep.getStepId();
 	}
 
+	public String getNextStepId() {
+		if (nextStep == null) {
+			return null;
+		}
+		return nextStep.getStepId();
+	}
+
 	public boolean isFirstStep() {
 		return isFirstStep;
 	}

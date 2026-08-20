@@ -380,7 +380,7 @@ function addSearchControlDate(theSearchParamName, theContainerRowNum, theRowNum,
 	);
 
 	dateTimePicker.datetimepicker({
-		format: "YYYY-MM-DD",
+		format: input.attr('data-bs-toggledate-format'),
 		showTodayButton: true
 	});
 

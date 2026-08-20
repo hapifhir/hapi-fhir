@@ -49,6 +49,7 @@ import ca.uhn.fhirtest.config.TestDstu3Config;
 import ca.uhn.fhirtest.config.TestR4BConfig;
 import ca.uhn.fhirtest.config.TestR4Config;
 import ca.uhn.fhirtest.config.TestR5Config;
+import ca.uhn.fhirtest.interceptor.PatientLockingInterceptor;
 import ca.uhn.hapi.converters.server.VersionedApiConverterInterceptor;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
@@ -173,6 +174,7 @@ public class TestRestfulServer extends RestfulServer {
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
 				providers.add(myAppCtx.getBean(GraphQLProvider.class));
 				providers.add(myAppCtx.getBean(IpsOperationProvider.class));
+				registerInterceptor(new PatientLockingInterceptor());
 				break;
 			}
 			case "R4B": {

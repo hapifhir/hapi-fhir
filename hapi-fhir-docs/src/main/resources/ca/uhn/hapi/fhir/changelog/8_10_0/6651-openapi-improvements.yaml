@@ -1,0 +1,6 @@
+---
+type: add
+issue: 6651
+title: "The OpenApiInterceptor has been enhanced to add several new
+   customization points which can be used to enhance the generated
+   OpenAPI spec. Thanks to Nathan Loyer for the contribution!"

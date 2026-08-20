@@ -28,14 +28,6 @@ public interface IValueSetConceptAccumulator {
 
 	void addMessage(String theMessage);
 
-	void includeConcept(
-			String theSystem,
-			String theCode,
-			String theDisplay,
-			Long theSourceConceptPid,
-			String theSourceConceptDirectParentPids,
-			@Nullable String theSystemVersion);
-
 	void includeConceptWithDesignations(
 			String theSystem,
 			String theCode,
@@ -45,10 +37,7 @@ public interface IValueSetConceptAccumulator {
 			String theSourceConceptDirectParentPids,
 			@Nullable String theSystemVersion);
 
-	/**
-	 * @return Returns <code>true</code> if the code was actually present and was removed
-	 */
-	boolean excludeConcept(String theSystem, String theCode);
+	void excludeConcept(String theSystem, String theCode);
 
 	@Nullable
 	default Integer getCapacityRemaining() {
@@ -64,7 +53,6 @@ public interface IValueSetConceptAccumulator {
 		return true;
 	}
 
-	@Nullable
 	default void consumeSkipCount(int theSkipCountToConsume) {
 		// nothing
 	}

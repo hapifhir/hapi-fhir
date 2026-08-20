@@ -26,7 +26,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.SubscriptionQueryValidator;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -130,7 +129,7 @@ public class SubscriptionTopicValidatingInterceptor {
 				ourLog.warn(
 						"Warning: Query Criteria '{}' in {} cannot be evaluated in-memory", theCriteria, theFieldName);
 			}
-		} catch (InvalidRequestException | DataFormatException e) {
+		} catch (InvalidRequestException e) {
 			throw new UnprocessableEntityException(Msg.code(2339) + "Invalid SubscriptionTopic criteria '" + theCriteria
 					+ "' in " + theFieldName + ": " + e.getMessage());
 		}

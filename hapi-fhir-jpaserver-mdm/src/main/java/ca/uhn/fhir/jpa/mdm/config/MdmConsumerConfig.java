@@ -98,7 +98,7 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	MdmMessageListener mdmMessageHandler() {
+	protected MdmMessageListener mdmMessageHandler() {
 		return new MdmMessageListener();
 	}
 
@@ -230,7 +230,7 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	MdmLoader mdmLoader() {
+	protected MdmLoader mdmLoader() {
 		return new MdmLoader();
 	}
 

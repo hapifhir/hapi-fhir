@@ -269,7 +269,7 @@ class TuplePredicateBuilderTest {
 		HibernatePropertiesProvider dialectProvider = new HibernatePropertiesProvider();
 		dialectProvider.setDialectForUnitTest(theDialect);
 		return new SearchQueryBuilder(myFhirContext, myStorageSettings, nonPartitionSettings,
-			RequestPartitionId.defaultPartition(), "Patient", mySqlBuilderFactory, dialectProvider, false, false);
+			RequestPartitionId.fromPartitionId(null), "Patient", mySqlBuilderFactory, dialectProvider, false, false);
 	}
 
 	/**

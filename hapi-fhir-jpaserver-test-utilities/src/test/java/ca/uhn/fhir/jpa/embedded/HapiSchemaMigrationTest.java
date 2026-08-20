@@ -18,6 +18,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,11 +49,13 @@ import java.util.stream.Stream;
 import static ca.uhn.fhir.jpa.embedded.HapiEmbeddedDatabasesExtension.FIRST_TESTED_VERSION;
 import static ca.uhn.fhir.jpa.migrate.DriverTypeEnum.MSSQL_2012;
 import static ca.uhn.fhir.jpa.migrate.SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME;
+import static ca.uhn.fhir.jpa.migrate.tasks.HapiFhirJpaMigrationTasks.FlagEnum.DB_PARTITION_MODE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
+@SuppressWarnings("LoggingSimilarMessage")
 @RequiresDocker
 public class HapiSchemaMigrationTest {
 
@@ -68,9 +71,13 @@ public class HapiSchemaMigrationTest {
 
 	private static final String TABLE_HFJ_RES_SEARCH_URL = "HFJ_RES_SEARCH_URL";
 	private static final String TABLE_TRM_CONCEPT_DESIG = "TRM_CONCEPT_DESIG";
+	private static final String TABLE_HFJ_RESOURCE = "HFJ_RESOURCE";
+	private static final String INDEX_RES_TYPE_FHIR_ID = "IDX_RES_TYPE_FHIR_ID";
 	private static final String COLUMN_RES_SEARCH_URL = "RES_SEARCH_URL";
 	private static final String COLUMN_PARTITION_ID = "PARTITION_ID";
 	private static final String COLUMN_PARTITION_DATE = "PARTITION_DATE";
+	private static final String COLUMN_RES_TYPE = "RES_TYPE";
+	private static final String COLUMN_FHIR_ID = "FHIR_ID";
 
 	private static final String COLUMN_VAL = "VAL";
 	private static final String COLUMN_VAL_VC = "VAL_VC";
@@ -88,7 +95,7 @@ public class HapiSchemaMigrationTest {
 
 	private JpaEmbeddedDatabase myCurrentDatabase;
 
-	private HapiFhirJpaMigrationTasks myHapiFhirJpaMigrationTasks = new HapiFhirJpaMigrationTasks(Collections.emptySet());
+	private final HapiFhirJpaMigrationTasks myHapiFhirJpaMigrationTasks = new HapiFhirJpaMigrationTasks(Collections.emptySet());
 
 	@AfterEach
 	public void afterEach() {
@@ -153,6 +160,7 @@ public class HapiSchemaMigrationTest {
 		verifyTrm_Concept_Design(myCurrentDatabase);
 
 		verifyHfjResourceFhirIdCollation(myCurrentDatabase);
+
 	}
 
 	@Test
@@ -200,6 +208,89 @@ public class HapiSchemaMigrationTest {
 		verifyHfjResourceFhirIdCollation(myCurrentDatabase);
 	}
 
+	/**
+	 * SCENARIO 1 - FRESH INSTALL: a brand-new database runs all migrations from scratch
+	 * (including the 8.8.0 collation fix and the V8_12_0 corrective rebuild). The unique index
+	 * {@code IDX_RES_TYPE_FHIR_ID} must end up {@code (PARTITION_ID, RES_TYPE, FHIR_ID)} in database
+	 * partition mode, and {@code (RES_TYPE, FHIR_ID)} when partitioning is disabled.
+	 */
+	@ParameterizedTest(name = "flags={0}")
+	@MethodSource("mssqlCollationFixIndexColumnParams")
+	public void testMssqlCollationFix_fhirIdUniqueIndexColumnsMatchPartitionMode(
+			Set<String> thePartitionModeFlags, List<String> theExpectedIndexColumns) {
+		HapiSystemProperties.disableUnitTestMode();
+		myCurrentDatabase = myEmbeddedServersExtension.mssql2012Database;
+
+		// given + when
+		HapiFhirJpaMigrationTasks tasks = new HapiFhirJpaMigrationTasks(thePartitionModeFlags);
+		migrate(myCurrentDatabase, tasks.getAllTasks(VersionEnum.values()));
+
+		// then: the collation-fix rebuild process must land the expected index columns in the correct order
+		List<String> indexColumns =
+				getIndexColumnsInKeyOrder(myCurrentDatabase, TABLE_HFJ_RESOURCE, INDEX_RES_TYPE_FHIR_ID);
+		assertThat(indexColumns).containsExactlyElementsOf(theExpectedIndexColumns);
+	}
+
+	static Stream<Arguments> mssqlCollationFixIndexColumnParams() {
+		return Stream.of(
+				Arguments.of(
+						Set.of(DB_PARTITION_MODE.getCommandLineValue()),
+						List.of(COLUMN_PARTITION_ID, COLUMN_RES_TYPE, COLUMN_FHIR_ID)),
+				Arguments.of(Collections.emptySet(), List.of(COLUMN_RES_TYPE, COLUMN_FHIR_ID)));  // non partitioned mode
+	}
+
+	/**
+	 * SCENARIO 2 - UPGRADE OF AN EXISTING (8.8.0+) DATABASE: the 8.8.0 collation fix already
+	 * ran, leaving a case-SENSITIVE FHIR_ID collation and the 2-column {@code IDX_RES_TYPE_FHIR_ID}.
+	 * The V8_12_0 corrective migration must still rebuild that index as
+	 * {@code (PARTITION_ID, RES_TYPE, FHIR_ID)} in database partition mode - i.e. the index rebuild
+	 * must not be gated behind the case-insensitive collation check, otherwise the databases that
+	 * were actually broken (already case-sensitive) are never repaired.
+	 */
+	@Test
+	public void testMssqlCollationFix_upgradeFromAlreadyFixedCollation_rebuildsPartitionScopedIndex() {
+		HapiSystemProperties.disableUnitTestMode();
+		myCurrentDatabase = myEmbeddedServersExtension.mssql2012Database;
+
+		HapiFhirJpaMigrationTasks tasks =
+				new HapiFhirJpaMigrationTasks(Set.of(DB_PARTITION_MODE.getCommandLineValue()));
+
+		// given: migrate everything before the V8_12_0 corrective release to build the schema
+		List<VersionEnum> versionsBeforeFix =
+				getAllVersionsMatching(theVersion -> !theVersion.isEqualOrNewerThan(VersionEnum.V8_12_0));
+		migrate(myCurrentDatabase, tasks.getAllTasks(versionsBeforeFix.toArray(new VersionEnum[0])));
+
+		// and: the 8.8.0 collation fix (20251208) has left the index in its 2-column form, missing
+		//   PARTITION_ID - the "already broken" state the corrective migration must repair.
+		assertThat(getIndexColumnsInKeyOrder(myCurrentDatabase, TABLE_HFJ_RESOURCE, INDEX_RES_TYPE_FHIR_ID))
+				.containsExactly(COLUMN_RES_TYPE, COLUMN_FHIR_ID);
+
+		// when: the V8_12_0 corrective migration runs
+		migrate(myCurrentDatabase, tasks.getAllTasks(VersionEnum.V8_12_0));
+
+		// then: the unique index must be rebuilt to include PARTITION_ID
+		List<String> indexColumns =
+				getIndexColumnsInKeyOrder(myCurrentDatabase, TABLE_HFJ_RESOURCE, INDEX_RES_TYPE_FHIR_ID);
+		assertThat(indexColumns).containsExactly(COLUMN_PARTITION_ID, COLUMN_RES_TYPE, COLUMN_FHIR_ID);
+	}
+
+	/**
+	 * Returns the key columns of a SQL Server index in key order (excludes INCLUDE columns).
+	 */
+	private List<String> getIndexColumnsInKeyOrder(
+			JpaEmbeddedDatabase theDatabase, String theTableName, String theIndexName) {
+		String sql = String.format(
+				"SELECT c.name FROM sys.indexes i "
+						+ "JOIN sys.index_columns ic ON ic.object_id = i.object_id AND ic.index_id = i.index_id "
+						+ "JOIN sys.columns c ON c.object_id = ic.object_id AND c.column_id = ic.column_id "
+						+ "WHERE i.name = '%s' AND i.object_id = OBJECT_ID('%s') AND ic.is_included_column = 0 "
+						+ "ORDER BY ic.key_ordinal",
+				theIndexName, theTableName);
+		return theDatabase.query(sql).stream()
+				.map(row -> (String) row.values().iterator().next())
+				.collect(Collectors.toList());
+	}
+
 	private List<VersionEnum> getAllVersionsMatching(Predicate<VersionEnum> thePredicate) {
 		return Arrays.stream(VersionEnum.values())
 			.filter(thePredicate)
@@ -221,7 +312,7 @@ public class HapiSchemaMigrationTest {
 	 * We start with a single record in HFJ_RES_SEARCH_URL:
 	 * <p/>
 	 * <ul>
-	 *     <li>Primary key:  ONLY RES_SEARCH_URL</li>
+	 *     <li>Primary key: ONLY RES_SEARCH_URL</li>
 	 *     <li>PK: RES_SEARCH_URL: https://example.com</li>
 	 *     <li>CREATED_TIME: 2023-06-29 10:14:39.69</li>
 	 *     <li>RES_ID: 1678</li>
@@ -229,7 +320,7 @@ public class HapiSchemaMigrationTest {
 	 * <p/>
 	 * Once the migration is complete, we should have:
 	 * <ul>
-	 *     <li>Primary key:  RES_SEARCH_URL, PARTITION_ID</li>
+	 *     <li>Primary key: RES_SEARCH_URL, PARTITION_ID</li>
 	 *     <li>PK: RES_SEARCH_URL: https://example.com</li>
 	 *     <li>PK: PARTITION_ID: -1</li>
 	 *     <li>CREATED_TIME: 2023-06-29 10:14:39.69</li>
@@ -426,7 +517,7 @@ public class HapiSchemaMigrationTest {
 		@SuppressWarnings("DataFlowIssue")
 		int nullCount = jdbcTemplate.queryForObject("select count(1) from hfj_resource where fhir_id is null", Integer.class);
 		assertThat(nullCount).as("no fhir_id should be null").isZero();
-		int trailingSpaceCount = jdbcTemplate.queryForObject("select count(1) from hfj_resource where fhir_id <> trim(fhir_id)", Integer.class);
+		Integer trailingSpaceCount = jdbcTemplate.queryForObject("select count(1) from hfj_resource where fhir_id <> trim(fhir_id)", Integer.class);
 		assertThat(trailingSpaceCount).as("no fhir_id should contain a space").isZero();
 	}
 
@@ -486,11 +577,11 @@ public class HapiSchemaMigrationTest {
 				assertThat(tableColumnCollationRow).containsEntry("collation_name",COLLATION_CASE_SENSITIVE);
 
 				// We have not changed the database collation, so we can reference the table and column names with the wrong
-				// case and the query will work
+				// case, and the query will work
 				@Language("SQL")
 				final String fhirIdSql = """
-					SELECT fhir_id 
-					FROM hFj_ReSoUrCe  -- db must be case insensitive for the table name to be recognized 
+					SELECT fhir_id
+					FROM hFj_ReSoUrCe  -- db must be case-insensitive for the table name to be recognized
 					WHERE fhir_ID = 'PatientId22'
 				""";
 

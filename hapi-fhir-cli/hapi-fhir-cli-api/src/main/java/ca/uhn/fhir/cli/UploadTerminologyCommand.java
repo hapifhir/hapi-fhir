@@ -21,52 +21,60 @@ package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyModeEnum;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.gclient.IEntityResult;
+import ca.uhn.fhir.rest.gclient.RawRequestEntity;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.system.HapiSystemProperties;
-import ca.uhn.fhir.util.AttachmentUtil;
-import ca.uhn.fhir.util.FileUtil;
+import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.ParametersUtil;
+import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Charsets;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.input.CountingInputStream;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.ThreadUtils;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.springframework.util.unit.DataSize;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
+import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.SCT_URI;
+import static ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider.PARAM_APPEND_TO_JOB_ATTACHMENT_ID;
+import static ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider.PARAM_FILENAME;
+import static ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider.PARAM_JOB_ATTACHMENT_ID;
+import static ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID;
+import static ca.uhn.fhir.util.FileUtil.formatFileSize;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.http.HttpStatus.SC_ACCEPTED;
 
 public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 	static final String UPLOAD_TERMINOLOGY = "upload-terminology";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UploadTerminologyCommand.class);
 	private static final long DEFAULT_TRANSFER_SIZE_LIMIT = 10 * FileUtils.ONE_MB;
-	private long ourTransferSizeLimit = DEFAULT_TRANSFER_SIZE_LIMIT;
-
-	public long getTransferSizeLimit() {
-		return ourTransferSizeLimit;
-	}
+	private long myTransferSizeLimit = DEFAULT_TRANSFER_SIZE_LIMIT;
 
 	@Override
 	public String getCommandDescription() {
@@ -87,7 +95,7 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 				"u",
 				"url",
 				true,
-				"The code system URL associated with this upload (e.g. " + ITermLoaderSvc.SCT_URI + ")");
+				"The code system URL associated with this upload (e.g. \"" + SCT_URI + "|20260501\")");
 		addOptionalOption(
 				options,
 				"d",
@@ -100,7 +108,13 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 				"s",
 				"size",
 				true,
-				"The maximum size of a single upload (default: 10MB). Examples: 150 kb, 3 mb, 1GB");
+				"The maximum size of a single upload (default: 10MB). If a file to upload exceeds this size, it will be split into smaller chunks before sending over the network. Examples: 150KB, 3MB, 1GB.");
+		addOptionalOption(
+				options,
+				null,
+				"dont-make-current",
+				false,
+				"If specified, the terminology version being uploaded will not be marked as the current version. This option can only be specified on certain CodeSystem URLs.");
 
 		return options;
 	}
@@ -109,10 +123,10 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 	public void run(CommandLine theCommandLine) throws ParseException {
 		parseFhirContext(theCommandLine);
 
-		ModeEnum mode;
+		ImportTerminologyModeEnum mode;
 		String modeString = theCommandLine.getOptionValue("m", "SNAPSHOT");
 		try {
-			mode = ModeEnum.valueOf(modeString);
+			mode = ImportTerminologyModeEnum.valueOf(modeString);
 		} catch (IllegalArgumentException e) {
 			throw new ParseException(Msg.code(1538) + "Invalid mode: " + modeString);
 		}
@@ -130,232 +144,277 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 		String sizeString = theCommandLine.getOptionValue("s");
 		this.setTransferSizeLimitHuman(sizeString);
 
+		boolean dontMakeCurrent = theCommandLine.hasOption("dont-make-current");
+
 		IGenericClient client = newClient(theCommandLine);
 
 		if (theCommandLine.hasOption(VERBOSE_LOGGING_PARAM)) {
 			client.registerInterceptor(new LoggingInterceptor(true));
 		}
 
-		String requestName = null;
-		switch (mode) {
-			case SNAPSHOT:
-				requestName = JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM;
-				break;
-			case ADD:
-				requestName = JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD;
-				break;
-			case REMOVE:
-				requestName = JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE;
-				break;
-		}
-		invokeOperation(termUrl, datafile, client, requestName);
+		invokeOperationAsyncJob(termUrl, datafile, client, dontMakeCurrent, mode);
 	}
 
-	private void invokeOperation(
-			String theTermUrl, String[] theDatafile, IGenericClient theClient, String theOperationName)
-			throws ParseException {
-		IBaseParameters inputParameters = ParametersUtil.newInstance(myFhirCtx);
+	private void invokeOperationAsyncJob(
+			String theUrl,
+			String[] theDatafiles,
+			IGenericClient theClient,
+			boolean theDontMakeCurrent,
+			ImportTerminologyModeEnum theMode) {
+		ourLog.info("Beginning upload process for terminology system: {}", theUrl);
 
-		boolean isDeltaOperation = theOperationName.equals(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
-				|| theOperationName.equals(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE);
+		// Step 1: Create staging job
+		String jobInstanceId = createJob(theUrl, theClient, theDontMakeCurrent, theMode);
 
+		// Step 2: Attach Files
+		for (String datafile : theDatafiles) {
+			attachFileToJob(theClient, datafile, jobInstanceId);
+		}
+
+		// Step 3 - Start job
+		String pollUrl = startJob(theClient, jobInstanceId);
+
+		// Step 4 - Poll for progress
+		pollForJobStatusUntilComplete(theClient, pollUrl);
+	}
+
+	/**
+	 * Step 1: Create a new terminology upload job but don't start it yet
+	 *
+	 * @return The job instance ID
+	 */
+	@Nonnull
+	private String createJob(
+			String theUrl, IGenericClient theClient, boolean theDontMakeCurrent, ImportTerminologyModeEnum theMode) {
+		ourLog.info("Requesting server to create staging job for terminology system");
+		IBaseParameters createStagingRequest = ParametersUtil.newInstance(myFhirCtx);
 		ParametersUtil.addParameterToParametersUri(
-				myFhirCtx, inputParameters, TerminologyUploaderProvider.PARAM_SYSTEM, theTermUrl);
+				myFhirCtx, createStagingRequest, TerminologyUploaderProvider.PARAM_SYSTEM, theUrl);
 
-		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-		ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream, Charsets.UTF_8);
-		int compressedSourceBytesCount = 0;
-		int compressedFileCount = 0;
-		boolean haveCompressedContents = false;
+		if (theDontMakeCurrent) {
+			ParametersUtil.addParameterToParametersBoolean(
+					myFhirCtx, createStagingRequest, TerminologyUploaderProvider.PARAM_MAKE_CURRENT, false);
+		}
+
+		ParametersUtil.addParameterToParametersCode(
+				myFhirCtx, createStagingRequest, TerminologyUploaderProvider.PARAM_MODE, theMode.name());
+
+		IBaseParameters createStagingResponse;
 		try {
-			for (String nextDataFile : theDatafile) {
-				File dataFile = new File(nextDataFile);
-				ourLog.info("Reading {}", dataFile.getAbsolutePath());
-
-				try (FileInputStream fileInputStream = new FileInputStream(dataFile)) {
-					boolean isFhirType = nextDataFile.endsWith(".json") || nextDataFile.endsWith(".xml");
-					if (nextDataFile.endsWith(".csv") || nextDataFile.endsWith(".properties") || isFhirType) {
-
-						if (isDeltaOperation && isFhirType) {
-
-							ourLog.info("Adding CodeSystem resource file: {}", nextDataFile);
-
-							String contents = IOUtils.toString(fileInputStream, Charsets.UTF_8);
-							EncodingEnum encoding = EncodingEnum.detectEncodingNoDefault(contents);
-							if (encoding == null) {
-								throw new ParseException(
-										Msg.code(1541) + "Could not detect FHIR encoding for file: " + nextDataFile);
-							}
-
-							IBaseResource resource =
-									encoding.newParser(myFhirCtx).parseResource(contents);
-							ParametersUtil.addParameterToParameters(
-									myFhirCtx, inputParameters, TerminologyUploaderProvider.PARAM_CODESYSTEM, resource);
-
-						} else {
-
-							ourLog.info("Compressing and adding file: {}", nextDataFile);
-							ZipEntry nextEntry = new ZipEntry(stripPath(nextDataFile));
-							zipOutputStream.putNextEntry(nextEntry);
-
-							CountingInputStream countingInputStream = new CountingInputStream(fileInputStream);
-							IOUtils.copy(countingInputStream, zipOutputStream);
-							haveCompressedContents = true;
-							compressedSourceBytesCount += countingInputStream.getCount();
-							++compressedFileCount;
-
-							zipOutputStream.flush();
-							ourLog.info("Finished compressing {}", nextDataFile);
-						}
-
-					} else if (nextDataFile.endsWith(".zip")) {
-
-						ourLog.info("Adding ZIP file: {}", nextDataFile);
-						String fileName = "file:" + nextDataFile;
-						addFileToRequestBundle(inputParameters, fileName, IOUtils.toByteArray(fileInputStream));
-
-					} else {
-
-						throw new ParseException(Msg.code(1542) + "Don't know how to handle file: " + nextDataFile);
-					}
-				}
-			}
-			zipOutputStream.flush();
-			zipOutputStream.close();
-		} catch (IOException e) {
-			throw new ParseException(Msg.code(1543) + e.toString());
-		}
-
-		if (haveCompressedContents) {
-			byte[] compressedBytes = byteArrayOutputStream.toByteArray();
-			ourLog.info(
-					"Compressed {} bytes in {} file(s) into {} bytes",
-					FileUtil.formatFileSize(compressedSourceBytesCount),
-					compressedFileCount,
-					FileUtil.formatFileSize(compressedBytes.length));
-
-			addFileToRequestBundle(inputParameters, "file:/files.zip", compressedBytes);
-		}
-
-		ourLog.info("Beginning upload - This may take a while...");
-
-		if (ourLog.isDebugEnabled() || HapiSystemProperties.isTestModeEnabled()) {
-			ourLog.debug(
-					"Submitting parameters: {}",
-					myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inputParameters));
-		}
-
-		IBaseParameters response;
-		try {
-			response = theClient
+			createStagingResponse = theClient
 					.operation()
-					.onType(myFhirCtx.getResourceDefinition("CodeSystem").getImplementingClass())
-					.named(theOperationName)
-					.withParameters(inputParameters)
+					.onType("CodeSystem")
+					.named(JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_CREATE_JOB)
+					.withParameters(createStagingRequest)
 					.execute();
 		} catch (BaseServerResponseException e) {
-			if (e.getOperationOutcome() != null) {
-				ourLog.error(
-						"Received the following response:\n{}",
-						myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
-			}
-			throw e;
+			throw new CommandFailureException(
+					Msg.code(2934) + "Failed to create terminology staging job: " + e.getMessage());
 		}
-
-		ourLog.info("Upload complete!");
-		ourLog.debug(
-				"Response:\n{}", myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
+		String outcome = ParametersUtil.getNamedParameterValueAsString(
+						myFhirCtx, createStagingResponse, TerminologyUploaderProvider.RESP_PARAM_OUTCOME)
+				.orElseThrow();
+		ourLog.info("Server responded: {}", outcome);
+		String jobInstanceId = ParametersUtil.getNamedParameterValueAsString(
+						myFhirCtx, createStagingResponse, PARAM_JOB_INSTANCE_ID)
+				.orElseThrow();
+		return jobInstanceId;
 	}
 
-	protected void addFileToRequestBundle(IBaseParameters theInputParameters, String theFileName, byte[] theBytes) {
-
-		byte[] bytes = theBytes;
-		String fileName = theFileName;
-		String suffix = FilenameUtils.getExtension(fileName);
-
-		if (bytes.length > ourTransferSizeLimit) {
-			ourLog.info(
-					"File size is greater than {} - Going to use a local file reference instead of a direct HTTP transfer. Note that this will only work when executing this command on the same server as the FHIR server itself.",
-					FileUtil.formatFileSize(ourTransferSizeLimit));
-
-			try {
-				File tempFile = File.createTempFile("hapi-fhir-cli", "." + suffix);
-				tempFile.deleteOnExit();
-				try (OutputStream fileOutputStream = new FileOutputStream(tempFile, false)) {
-					fileOutputStream.write(bytes);
-					bytes = null;
-					fileName = "localfile:" + tempFile.getAbsolutePath();
-				}
-			} catch (IOException e) {
-				throw new CommandFailureException(Msg.code(1544) + e);
-			}
-		}
-
-		ICompositeType attachment = AttachmentUtil.newInstance(myFhirCtx);
-		AttachmentUtil.setContentType(myFhirCtx, attachment, getContentType(suffix));
-		AttachmentUtil.setUrl(myFhirCtx, attachment, fileName);
-		if (bytes != null) {
-			AttachmentUtil.setData(myFhirCtx, attachment, bytes);
-		}
-		ParametersUtil.addParameterToParameters(
-				myFhirCtx, theInputParameters, TerminologyUploaderProvider.PARAM_FILE, attachment);
-	}
-
-	/*
-	 * Files may be included in the attachment as raw CSV/JSON/XML files, or may also be combined into a compressed ZIP file.
-	 * Content Type reference: https://smilecdr.com/docs/terminology/uploading.html#delta-add-operation
+	/**
+	 * Step 2: Attach Files
 	 */
-	private String getContentType(String theSuffix) {
-		String retVal = "";
-		if (StringUtils.isNotBlank(theSuffix)) {
-			switch (theSuffix.toLowerCase()) {
-				case "csv":
-					retVal = "text/csv";
-					break;
-				case "xml":
-					retVal = "application/xml";
-					break;
-				case "json":
-					retVal = "application/json";
-					break;
-				case "zip":
-					retVal = "application/zip";
-					break;
-				default:
-					retVal = "text/plain";
-			}
+	private void attachFileToJob(IGenericClient theClient, String theFilename, String theJobInstanceId) {
+		File dataFile = new File(theFilename);
+
+		if (!dataFile.exists() || !dataFile.isFile() || !dataFile.canRead()) {
+			throw new CommandFailureException(Msg.code(2935) + "File does not exist or can't be read: " + theFilename);
 		}
-		ourLog.debug(
-				"File suffix given was {} and contentType is {}, defaulting to content type text/plain",
-				theSuffix,
-				retVal);
-		return retVal;
+
+		long size = FileUtils.sizeOf(dataFile);
+		ourLog.info("Attaching file ({}) to job: {}", formatFileSize(size), theFilename);
+		StopWatch sw = new StopWatch();
+
+		String attachFileUrlBase = "CodeSystem/" + JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE
+				+ "?"
+				+ PARAM_JOB_INSTANCE_ID
+				+ "="
+				+ theJobInstanceId;
+
+		try (FileInputStream fileInputStream = new FileInputStream(dataFile)) {
+
+			String attachmentId = null;
+
+			/*
+			 * We will loop through chunks of the file contents without ever loading the entire file into memory.
+			 * Each chunk is uploaded to the server in a separate request. The first chunk creates a new
+			 * job attachment, and subsequent chunks append to the same attachment.
+			 */
+			int attachmentChunkIndexForLogs = 1;
+			while (true) {
+				ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+				byte[] bytes;
+				try {
+					IOUtils.copyLarge(fileInputStream, buffer, 0, myTransferSizeLimit);
+					bytes = buffer.toByteArray();
+				} catch (IOException e) {
+					throw new CommandFailureException(
+							Msg.code(2936) + "Failed to read file '" + theFilename + "': " + e.getMessage());
+				}
+
+				if (bytes.length == 0) {
+					break;
+				}
+
+				String url;
+				if (attachmentId == null) {
+					url = attachFileUrlBase + "&" + PARAM_FILENAME + "=" + UrlUtil.escapeUrlParam(dataFile.getName());
+				} else {
+					ourLog.info(" * Uploading chunk {} of file {}", attachmentChunkIndexForLogs, dataFile.getName());
+					url = attachFileUrlBase + "&" + PARAM_APPEND_TO_JOB_ATTACHMENT_ID + "="
+							+ UrlUtil.escapeUrlParam(attachmentId);
+				}
+
+				RawRequestEntity requestEntity = new RawRequestEntity(Constants.CT_OCTET_STREAM, bytes);
+				IEntityResult response;
+				try {
+					StopWatch requestStopwatch = new StopWatch();
+
+					response =
+							theClient.rawHttpRequest().post(url, requestEntity).execute();
+
+					ourLog.info(
+							" * Uploaded and stored {} in {} ({}/sec)",
+							formatFileSize(bytes.length),
+							requestStopwatch,
+							formatFileSize((long) sw.getThroughput(bytes.length, TimeUnit.SECONDS)));
+
+				} catch (InvalidRequestException e) {
+					throw new CommandFailureException(Msg.code(2959) + "Failed to attach file \"" + dataFile.getName()
+							+ "\" to job, got " + e.getMessage());
+				}
+				if (response.getStatusCode() != 200) {
+					throw new CommandFailureException(Msg.code(2937) + "Failed to attach file \"" + dataFile.getName()
+							+ "\" to job, got HTTP " + response.getStatusCode());
+				}
+
+				if (attachmentId == null) {
+					EncodingEnum responseEncoding = EncodingEnum.forContentTypeStrict(response.getMimeType());
+					Validate.notNull(
+							responseEncoding,
+							"Failed to determine encoding for response from content-type: %s",
+							response.getMimeType());
+					String responseBody = IOUtils.toString(response.getInputStream(), StandardCharsets.UTF_8);
+					IBaseParameters parameters = (IBaseParameters)
+							responseEncoding.newParser(myFhirCtx).parseResource(responseBody);
+					attachmentId = ParametersUtil.getNamedParameterValueAsString(
+									myFhirCtx, parameters, PARAM_JOB_ATTACHMENT_ID)
+							.orElseThrow(() -> new CommandFailureException(
+									Msg.code(2981) + "Response Parameters from server didn't include parameter "
+											+ PARAM_JOB_ATTACHMENT_ID));
+				}
+
+				attachmentChunkIndexForLogs++;
+			}
+
+		} catch (IOException e) {
+			throw new CommandFailureException(
+					Msg.code(2982) + "Failed to read file '" + theFilename + "': " + e.getMessage());
+		}
+
+		ourLog.info("Attached file in {}", sw);
 	}
 
-	private enum ModeEnum {
-		SNAPSHOT,
-		ADD,
-		REMOVE
+	/**
+	 * Step 3 - Start job
+	 */
+	@Nonnull
+	private String startJob(IGenericClient theClient, String theJobInstanceId) {
+		ourLog.info("Starting staged upload job");
+		IBaseParameters startRequest = ParametersUtil.newInstance(myFhirCtx);
+		ParametersUtil.addParameterToParametersCode(
+				myFhirCtx, startRequest, TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID, theJobInstanceId);
+		MethodOutcome startResponse = theClient
+				.operation()
+				.onType("CodeSystem")
+				.named(JpaConstants.OPERATION_UPLOAD_TERMINOLOGY_START_JOB)
+				.withParameters(startRequest)
+				.returnMethodOutcome()
+				.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+				.execute();
+
+		String pollUrl = startResponse
+				.getFirstResponseHeader(Constants.HEADER_CONTENT_LOCATION)
+				.orElseThrow();
+		ourLog.info("Job is started. Server responded with poll URL: {}", pollUrl);
+		return pollUrl;
+	}
+
+	/**
+	 * Step 4 - Poll for progress
+	 */
+	private void pollForJobStatusUntilComplete(IGenericClient theClient, String thePollingUrl) {
+		IEntityResult pollResponse;
+		while (true) {
+			ourLog.info("Polling for job status...");
+			pollResponse = theClient.rawHttpRequest().get(thePollingUrl).execute();
+			if (pollResponse.getStatusCode() != SC_ACCEPTED) {
+				break;
+			}
+
+			EncodingEnum encoding = EncodingEnum.forContentType(pollResponse.getMimeType());
+			Validate.notNull(encoding, "Unknown encoding: %s", pollResponse.getMimeType());
+			IBaseOperationOutcome oo =
+					(IBaseOperationOutcome) encoding.newParser(myFhirCtx).parseResource(pollResponse.getInputStream());
+			String diagnostics = OperationOutcomeUtil.getFirstIssueDiagnostics(myFhirCtx, oo);
+			ourLog.info(" - Server response: {}", diagnostics);
+
+			// Sleep
+			Duration pollFrequency = Duration.ofSeconds(10);
+			if (HapiSystemProperties.isTestModeEnabled()) {
+				pollFrequency = Duration.ofMillis(100);
+			}
+			ThreadUtils.sleepQuietly(pollFrequency);
+		}
+
+		ourLog.info("Job completed with status code: {}", pollResponse.getStatusCode());
+
+		EncodingEnum encoding = EncodingEnum.forContentType(pollResponse.getMimeType());
+		Validate.notNull(encoding, "Unknown encoding: %s", pollResponse.getMimeType());
+		IBaseBundle bundle = (IBaseBundle) encoding.newParser(myFhirCtx).parseResource(pollResponse.getInputStream());
+		String report = myFhirCtx
+				.newTerser()
+				.getSinglePrimitiveValue(bundle, "Bundle.entry.response.outcome.issue.diagnostics")
+				.orElse(null);
+		ourLog.info("Job completed with report:\n{}", report);
 	}
 
 	public void setTransferSizeBytes(long theTransferSizeBytes) {
-		if (ourTransferSizeLimit < 0) {
-			ourTransferSizeLimit = DEFAULT_TRANSFER_SIZE_LIMIT;
+		if (myTransferSizeLimit < 0) {
+			myTransferSizeLimit = DEFAULT_TRANSFER_SIZE_LIMIT;
 		} else {
-			ourTransferSizeLimit = theTransferSizeBytes;
+			myTransferSizeLimit = theTransferSizeBytes;
 		}
 	}
 
-	public void setTransferSizeLimitHuman(String sizeString) {
-		if (isBlank(sizeString)) {
+	public void setTransferSizeLimitHuman(String theSize) {
+		String size = theSize;
+		if (isBlank(size)) {
 			setTransferSizeBytes(DEFAULT_TRANSFER_SIZE_LIMIT);
 		} else {
-			long bytes = DataSize.parse(sizeString).toBytes();
+			if (size.matches("[0-9]+\\s*[a-zA-Z]+")) {
+				size = size.replace(" ", "").toUpperCase(Locale.US);
+			}
+			long bytes = DataSize.parse(size).toBytes();
 			if (bytes < 0) {
 				bytes = DEFAULT_TRANSFER_SIZE_LIMIT;
 			}
 			setTransferSizeBytes(bytes);
 		}
+	}
+
+	public long getTransferSizeLimit() {
+		return myTransferSizeLimit;
 	}
 
 	static String stripPath(String thePath) {

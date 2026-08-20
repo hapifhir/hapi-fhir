@@ -34,6 +34,8 @@ import java.util.Set;
 
 public interface IJobCoordinator {
 
+	String USER_DATA_KEY_JOB_INSTANCE_ID = "jobInstanceId";
+
 	/**
 	 * Starts a new job instance
 	 *
@@ -49,7 +51,10 @@ public interface IJobCoordinator {
 	}
 
 	/**
-	 * Starts a new job instance
+	 * Creates a new job instance and prepares it for execution. The job will automatically begin
+	 * execution if the job definition has an initial status of {@link StatusEnum#QUEUED}. If the job
+	 * definition has an initial status of {@link StatusEnum#BUILDING}, the job will not be started until
+	 * it is explicitly started by calling {@link #enqueueBuildingJobForExecution(String)}.
 	 *
 	 * @param theRequestDetails The request details associated with the request. This will get used to validate that the
 	 *                          request is appropriate for the given user, so if at all possible it should be the
@@ -107,4 +112,20 @@ public interface IJobCoordinator {
 	List<BatchWorkChunkStatusDTO> getWorkChunkStatus(String theInstanceId);
 
 	BatchInstanceStatusDTO getBatchInstanceStatus(String theInstanceId);
+
+	/**
+	 * Moves a job currently in BUILDING status to the QUEUED status so that it can
+	 * start execution.
+	 *
+	 * @since 8.10.0
+	 */
+	void enqueueBuildingJobForExecution(String theInstanceId);
+
+	/**
+	 * Adds an attachment to a job currently in BUILDING status. This should not be called after the job has been queued for execution.
+	 *
+	 * @param theAttachmentDetails The attachment contents and metadata
+	 * @since 8.10.0
+	 */
+	void addAttachmentToBuildingJob(String theInstanceId, AttachmentDetails theAttachmentDetails);
 }

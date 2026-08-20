@@ -35,9 +35,9 @@ public class FhirSystemDaoR4SearchTest extends BaseJpaR4SystemTest {
 
 		// verify hash
 		final long tokensHashSystem = resultSearchTokens.getHashSystem();
-		final long expectedHashSystem = ResourceIndexedSearchParamToken.calculateHashValue(new PartitionSettings(), RequestPartitionId.defaultPartition(), "Organization", "identifier", identifierSystem);
+		final long expectedHashSystem = ResourceIndexedSearchParamToken.calculateHashValue(new PartitionSettings(), RequestPartitionId.fromPartitionId(null), "Organization", "identifier", identifierSystem);
 		final long tokensHashValue = resultSearchTokens.getHashValue();
-		final long expectedHashValue = ResourceIndexedSearchParamToken.calculateHashValue(new PartitionSettings(), RequestPartitionId.defaultPartition(), "Organization", "identifier", identifierValue);
+		final long expectedHashValue = ResourceIndexedSearchParamToken.calculateHashValue(new PartitionSettings(), RequestPartitionId.fromPartitionId(null), "Organization", "identifier", identifierValue);
 
 		assertEquals(expectedHashSystem, tokensHashSystem);
 		assertEquals(expectedHashValue, tokensHashValue);
@@ -66,9 +66,9 @@ public class FhirSystemDaoR4SearchTest extends BaseJpaR4SystemTest {
 
 		// verify hash
 		final long tokensHashSystem = resultSearchTokens.getHashSystem();
-		final long expectedHashSystem = ResourceIndexedSearchParamToken.calculateHashValue(new PartitionSettings(), RequestPartitionId.defaultPartition(), "Organization", "identifier", identifierSystem);
+		final long expectedHashSystem = ResourceIndexedSearchParamToken.calculateHashValue(new PartitionSettings(), RequestPartitionId.fromPartitionId(null), "Organization", "identifier", identifierSystem);
 		final long tokensHashValue = resultSearchTokens.getHashValue();
-		final long expectedHashValue = ResourceIndexedSearchParamToken.calculateHashValue(new PartitionSettings(), RequestPartitionId.defaultPartition(), "Organization", "identifier", identifierValue);
+		final long expectedHashValue = ResourceIndexedSearchParamToken.calculateHashValue(new PartitionSettings(), RequestPartitionId.fromPartitionId(null), "Organization", "identifier", identifierValue);
 
 		assertEquals(expectedHashSystem, tokensHashSystem);
 		assertEquals(expectedHashValue, tokensHashValue);

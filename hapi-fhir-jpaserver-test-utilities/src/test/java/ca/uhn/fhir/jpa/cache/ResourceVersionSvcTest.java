@@ -176,7 +176,7 @@ public class ResourceVersionSvcTest {
 		partitionSettings.setDefaultPartitionId(1);
 		svc.setPartitionSettingsForUnitTest(partitionSettings);
 
-		RequestPartitionId outcome = svc.replaceDefault(RequestPartitionId.defaultPartition());
+		RequestPartitionId outcome = svc.replaceDefault(RequestPartitionId.fromPartitionId(null));
 		assertEquals(1, outcome.getPartitionIds().get(0));
 	}
 

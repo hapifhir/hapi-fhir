@@ -1,0 +1,10 @@
+<CodeSystem xmlns="http://hl7.org/fhir">
+	<id value="exampleLabCodes"/>
+	<url value="http://example.com/labCodes"/>
+	<name value="Example Lab Codes"/>
+	<description value="A set of lab codes"/>
+	<status value="active"/>
+	<publisher value="Example Organization Corporation Worldwide"/>
+	<date value="2019-07-30"/>
+	<content value="not-present"/>
+</CodeSystem>

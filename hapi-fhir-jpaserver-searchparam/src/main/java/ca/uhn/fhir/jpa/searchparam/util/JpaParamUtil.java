@@ -67,41 +67,19 @@ public enum JpaParamUtil {
 			RestSearchParameterTypeEnum paramType,
 			String theUnqualifiedParamName,
 			List<QualifiedParamList> theParameters) {
-		QueryParameterAndBinder binder;
-		switch (paramType) {
-			case COMPOSITE:
-				throw new UnsupportedOperationException(Msg.code(496));
-			case DATE:
-				binder = new QueryParameterAndBinder(DateAndListParam.class, Collections.emptyList());
-				break;
-			case NUMBER:
-				binder = new QueryParameterAndBinder(NumberAndListParam.class, Collections.emptyList());
-				break;
-			case QUANTITY:
-				binder = new QueryParameterAndBinder(QuantityAndListParam.class, Collections.emptyList());
-				break;
-			case REFERENCE:
-				binder = new QueryParameterAndBinder(ReferenceAndListParam.class, Collections.emptyList());
-				break;
-			case STRING:
-				binder = new QueryParameterAndBinder(StringAndListParam.class, Collections.emptyList());
-				break;
-			case TOKEN:
-				binder = new QueryParameterAndBinder(TokenAndListParam.class, Collections.emptyList());
-				break;
-			case URI:
-				binder = new QueryParameterAndBinder(UriAndListParam.class, Collections.emptyList());
-				break;
-			case HAS:
-				binder = new QueryParameterAndBinder(HasAndListParam.class, Collections.emptyList());
-				break;
-			case SPECIAL:
-				binder = new QueryParameterAndBinder(SpecialAndListParam.class, Collections.emptyList());
-				break;
-			default:
-				throw new IllegalArgumentException(Msg.code(497) + "Parameter '" + theUnqualifiedParamName
-						+ "' has type " + paramType + " which is currently not supported.");
-		}
+		QueryParameterAndBinder binder =
+				switch (paramType) {
+					case COMPOSITE -> throw new UnsupportedOperationException(Msg.code(496));
+					case DATE -> new QueryParameterAndBinder(DateAndListParam.class, Collections.emptyList());
+					case NUMBER -> new QueryParameterAndBinder(NumberAndListParam.class, Collections.emptyList());
+					case QUANTITY -> new QueryParameterAndBinder(QuantityAndListParam.class, Collections.emptyList());
+					case REFERENCE -> new QueryParameterAndBinder(ReferenceAndListParam.class, Collections.emptyList());
+					case STRING -> new QueryParameterAndBinder(StringAndListParam.class, Collections.emptyList());
+					case TOKEN -> new QueryParameterAndBinder(TokenAndListParam.class, Collections.emptyList());
+					case URI -> new QueryParameterAndBinder(UriAndListParam.class, Collections.emptyList());
+					case HAS -> new QueryParameterAndBinder(HasAndListParam.class, Collections.emptyList());
+					case SPECIAL -> new QueryParameterAndBinder(SpecialAndListParam.class, Collections.emptyList());
+				};
 
 		return binder.parse(theContext, theUnqualifiedParamName, theParameters);
 	}
@@ -166,6 +144,7 @@ public enum JpaParamUtil {
 			if (componentParam == null) {
 				throw new InternalErrorException(Msg.code(499) + "Can not find SearchParameter: " + url);
 			}
+			boolean comboRangedDate = next.isComboRangedDate();
 			compositeList.add(new ComponentAndCorrespondingParam(next, componentParam));
 		}
 		return compositeList;
@@ -174,31 +153,19 @@ public enum JpaParamUtil {
 	private static Class<?> getCompositeBindingClass(
 			RestSearchParameterTypeEnum paramType, String theUnqualifiedParamName) {
 
-		switch (paramType) {
-			case DATE:
-				return DateParam.class;
-			case NUMBER:
-				return NumberParam.class;
-			case QUANTITY:
-				return QuantityParam.class;
-			case REFERENCE:
-				return ReferenceParam.class;
-			case STRING:
-				return StringParam.class;
-			case TOKEN:
-				return TokenParam.class;
-			case URI:
-				return UriParam.class;
-			case HAS:
-				return HasParam.class;
-			case SPECIAL:
-				return SpecialParam.class;
-
-			case COMPOSITE:
-			default:
-				throw new IllegalArgumentException(Msg.code(500) + "Parameter '" + theUnqualifiedParamName
-						+ "' has type " + paramType + " which is currently not supported.");
-		}
+		return switch (paramType) {
+			case DATE -> DateParam.class;
+			case NUMBER -> NumberParam.class;
+			case QUANTITY -> QuantityParam.class;
+			case REFERENCE -> ReferenceParam.class;
+			case STRING -> StringParam.class;
+			case TOKEN -> TokenParam.class;
+			case URI -> UriParam.class;
+			case HAS -> HasParam.class;
+			case SPECIAL -> SpecialParam.class;
+			default -> throw new IllegalArgumentException(Msg.code(500) + "Parameter '" + theUnqualifiedParamName
+					+ "' has type " + paramType + " which is currently not supported.");
+		};
 	}
 
 	/**
@@ -300,6 +267,19 @@ public enum JpaParamUtil {
 		@Nonnull
 		public String getCombinedParamName() {
 			return myCombinedParamName;
+		}
+
+		/**
+		 * Is this component a ranged date? A maximum of one component per combo search param can
+		 * be a ranged date parameter, which will be stored in a dedicated column in the
+		 * combo index table as opposed to being added to the regular search string. We do this
+		 * so that the date can be searched using comparators (e.g. gt2022).
+		 *
+		 * @see RuntimeSearchParam.Component#isComboRangedDate()
+		 * @since 8.10.0
+		 */
+		public boolean isComboRangedDate() {
+			return myComponent.isComboRangedDate();
 		}
 	}
 }

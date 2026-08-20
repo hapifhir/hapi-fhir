@@ -95,7 +95,7 @@ This will give the following output:
 </Bundle>
 ````
 
-<a name="contained"/>
+<a id="contained"></a>
 
 # Contained Resources
 

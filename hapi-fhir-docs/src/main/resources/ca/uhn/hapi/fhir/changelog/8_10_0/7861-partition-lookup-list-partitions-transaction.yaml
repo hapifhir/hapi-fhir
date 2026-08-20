@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 7861
+title: "Previously, `PartitionLookupSvcImpl.listPartitions` could return an empty list when invoked without 
+an active transaction bound to the partition-owning `EntityManager`. This has been fixed."

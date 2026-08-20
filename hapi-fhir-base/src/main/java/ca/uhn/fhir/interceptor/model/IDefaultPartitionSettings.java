@@ -63,6 +63,7 @@ public interface IDefaultPartitionSettings {
 	 *
 	 * @return a RequestPartitionId for the default partition
 	 */
+	@Nonnull
 	default RequestPartitionId getDefaultRequestPartitionId() {
 		return RequestPartitionId.fromPartitionId(getDefaultPartitionId());
 	}

@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7968
+title: "During async package installation, the `overwriteContentNotPresentCodeSystems` setting was not
+propagated to dependency packages. This could cause existing `content=not-present` CodeSystems to
+remain unchanged when dependencies were expected to overwrite them. This has been fixed."

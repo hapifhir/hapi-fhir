@@ -1,0 +1,6 @@
+---
+type: add
+issue: 8074
+title: "Documentation has been added recommending the `sendStringParametersAsUnicode=false` 
+JDBC connection parameter for MS SQL Server, which avoids implicit NVARCHAR conversions that 
+prevent index usage and can significantly degrade performance."

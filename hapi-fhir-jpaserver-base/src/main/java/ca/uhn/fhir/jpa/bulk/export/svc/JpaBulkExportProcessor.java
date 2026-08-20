@@ -159,48 +159,84 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 		Set<String> expandedPatientIds = getPatientSetForPatientExport(theParams);
 
-		Set<String> patientSearchParams = getPatientActiveSearchParamsForResourceType(theParams.getResourceType());
-		for (String patientSearchParam : patientSearchParams) {
+		if (resourceType.equalsIgnoreCase("Patient")) {
+			// If we are in a patient-style export, and finding PIDs of patients, we don't need to bother with checking
+			// compartment membership, we can simply perform the searches.
 			List<SearchParameterMap> maps =
-					myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParams, false);
+					myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParams, true);
 			for (SearchParameterMap map : maps) {
-				// Ensure users did not monkey with the patient compartment search parameter.
-				validateSearchParametersForPatient(map, theParams);
-
-				ISearchBuilder<JpaPid> searchBuilder = getSearchBuilderForResourceType(theParams.getResourceType());
-
-				filterBySpecificPatient(expandedPatientIds, resourceType, patientSearchParam, map);
-
-				SearchRuntimeDetails searchRuntime = new SearchRuntimeDetails(null, theJobId);
-
-				Logs.getBatchTroubleshootingLog()
-						.atDebug()
-						.setMessage("Executing query for bulk export job[{}] chunk[{}]: {}")
-						.addArgument(theJobId)
-						.addArgument(theChunkId)
-						.addArgument(map.toNormalizedQueryString())
-						.log();
-
-				try (IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(
-						map, searchRuntime, new SystemRequestDetails(), theParams.getPartitionIdOrAllPartitions())) {
-					int pidCount = 0;
-					while (resultIterator.hasNext()) {
-						if (pidCount % 10000 == 0) {
-							Logs.getBatchTroubleshootingLog()
-									.atDebug()
-									.setMessage("Bulk export job[{}] chunk[{}] has loaded {} pids")
-									.addArgument(theJobId)
-									.addArgument(theChunkId)
-									.addArgument(pidCount)
-									.log();
-						}
-						pidCount++;
-						pids.add(resultIterator.next());
-					}
+				validateAndEvaluateSearch(
+						theParams, resourceType, theJobId, theChunkId, null, map, expandedPatientIds, pids);
+			}
+		} else {
+			Set<String> patientSearchParams = getPatientActiveSearchParamsForResourceType(theParams.getResourceType());
+			for (String patientSearchParam : patientSearchParams) {
+				// Rebuild maps per iteration: validateAndEvaluateSearch mutates each map by adding the patient
+				// compartment search param, and reusing a mutated map on the next iteration trips HAPI-0796.
+				List<SearchParameterMap> maps =
+						myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParams, true);
+				for (SearchParameterMap map : maps) {
+					validateAndEvaluateSearch(
+							theParams,
+							resourceType,
+							theJobId,
+							theChunkId,
+							patientSearchParam,
+							map,
+							expandedPatientIds,
+							pids);
 				}
 			}
 		}
 		return pids;
+	}
+
+	// TODO GGG: fix up the API of this method for 8.12.0
+	private void validateAndEvaluateSearch(
+			ExportPIDIteratorParameters theParams,
+			String resourceType,
+			String theJobId,
+			String theChunkId,
+			String patientSearchParam,
+			SearchParameterMap map,
+			Set<String> expandedPatientIds,
+			LinkedHashSet<JpaPid> pids)
+			throws IOException {
+		// Ensure users did not monkey with the patient compartment search parameter.
+		validateSearchParametersForPatient(map, theParams);
+
+		ISearchBuilder<JpaPid> searchBuilder = getSearchBuilderForResourceType(theParams.getResourceType());
+
+		filterBySpecificPatient(expandedPatientIds, resourceType, patientSearchParam, map);
+
+		SearchRuntimeDetails searchRuntime = new SearchRuntimeDetails(null, theJobId);
+
+		Logs.getBatchTroubleshootingLog()
+				.atInfo()
+				.setMessage("Executing query for bulk export job[{}] chunk[{}]: {}{}")
+				.addArgument(theJobId)
+				.addArgument(theChunkId)
+				.addArgument(resourceType)
+				.addArgument(map.toNormalizedQueryString())
+				.log();
+
+		try (IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(
+				map, searchRuntime, new SystemRequestDetails(), theParams.getPartitionIdOrAllPartitions())) {
+			int pidCount = 0;
+			while (resultIterator.hasNext()) {
+				if (pidCount % 10000 == 0) {
+					Logs.getBatchTroubleshootingLog()
+							.atDebug()
+							.setMessage("Bulk export job[{}] chunk[{}] has loaded {} pids")
+							.addArgument(theJobId)
+							.addArgument(theChunkId)
+							.addArgument(pidCount)
+							.log();
+				}
+				pidCount++;
+				pids.add(resultIterator.next());
+			}
+		}
 	}
 
 	private void filterBySpecificPatient(
@@ -692,9 +728,10 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 				.filter(s -> mySearchParamRegistry.hasActiveSearchParam(
 						theResourceType, s, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH))
 				.collect(Collectors.toSet());
+
 		if (patientSearchParams.isEmpty()) {
 			String errorMessage = String.format(
-					"Resource type [%s] is not eligible for this type of export, as it contains no active search parameters.",
+					"Resource type [%s] is not eligible for this type of export, as it contains no active patient compartment search parameters.",
 					theResourceType);
 			throw new IllegalArgumentException(Msg.code(2817) + errorMessage);
 		}

@@ -14,15 +14,61 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class ChangelogFilesTest {
+class ChangelogFilesTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ChangelogFilesTest.class);
+
+	private static final Pattern SELF_CLOSING_ANCHOR_PATTERN = Pattern.compile("<a\\s[^>]*/\\s*>");
+
+	@Test
+	void testDocAnchors_validFormat() throws Exception {
+		List<Path> directories = List.of(
+			Paths.get("src/main/resources/ca/uhn/hapi/fhir/docs"),
+			Paths.get("src/main/resources/ca/uhn/hapi/fhir/changelog")
+		);
+		List<String> nameViolations = new ArrayList<>();
+		List<String> selfClosingViolations = new ArrayList<>();
+
+		for (Path dir : directories) {
+			try (Stream<Path> paths = Files.walk(dir)) {
+				paths.filter(p -> p.toString().endsWith(".md") || p.toString().endsWith(".yaml")).forEach(p -> {
+					try {
+						List<String> lines = Files.readAllLines(p);
+						for (int i = 0; i < lines.size(); i++) {
+							String line = lines.get(i);
+							if (line.contains("<a name=")) {
+								nameViolations.add(p + ":" + (i + 1) + " - " + line.trim());
+							}
+							if (SELF_CLOSING_ANCHOR_PATTERN.matcher(line).find()) {
+								selfClosingViolations.add(p + ":" + (i + 1) + " - " + line.trim());
+							}
+						}
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
+			}
+		}
+
+		assertThat(nameViolations)
+			.as("Found deprecated <a name=\"...\"> anchors — use <a id=\"...\"></a> instead")
+			.isEmpty();
+		assertThat(selfClosingViolations)
+			.as("Found self-closing <a .../> anchors — use <a id=\"...\"></a> instead")
+			.isEmpty();
+	}
 
 	@Test
 	public void testChangelogFiles() {

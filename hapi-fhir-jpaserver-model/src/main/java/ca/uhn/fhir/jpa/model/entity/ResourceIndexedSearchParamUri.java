@@ -254,7 +254,8 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 			String theResourceType,
 			String theParamName,
 			String theUri) {
-		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
+		RequestPartitionId requestPartitionId =
+				PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId, thePartitionSettings);
 		return calculateHashUri(thePartitionSettings, requestPartitionId, theResourceType, theParamName, theUri);
 	}
 

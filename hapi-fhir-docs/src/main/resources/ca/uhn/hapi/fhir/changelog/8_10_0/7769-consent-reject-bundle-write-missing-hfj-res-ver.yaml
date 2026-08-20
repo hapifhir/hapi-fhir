@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 7769
+title: "Previously, when a ConsentInterceptor returned `REJECT` from canSeeResource during a
+  FHIR batch or transaction bundle write (`PUT`, `POST`, or `PATCH`), the resource was silently
+  written to the database but left in an inconsistent state. Now consent `REJECT` during a
+  write now returns a 403 Forbidden response without modifying the database."

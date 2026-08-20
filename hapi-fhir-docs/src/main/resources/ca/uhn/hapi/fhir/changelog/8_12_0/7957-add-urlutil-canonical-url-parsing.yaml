@@ -1,0 +1,5 @@
+---
+type: add
+issue: 7957
+title: "A new method on the `UrlUtil` class provides the ability to
+   parse a canonical URL into the URL and version components."

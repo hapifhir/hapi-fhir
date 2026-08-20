@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7820
+title: "Previously, updating a `CodeSystem` to claim a version already owned by a different `CodeSystem` 
+  would fail with a `HAPI-0848` duplicate version error. The terminology storage layer now detects that the incoming
+  resource is an update (not a create) and releases the conflicting version slot instead of rejecting the request."

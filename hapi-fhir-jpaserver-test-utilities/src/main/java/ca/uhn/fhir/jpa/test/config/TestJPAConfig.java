@@ -23,6 +23,7 @@ import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.config.ThreadPoolFactoryConfig;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
@@ -37,11 +38,13 @@ import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookListener;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
 import ca.uhn.fhir.jpa.term.TermCodeSystemDeleteJobSvcWithUniTestFailures;
+import ca.uhn.fhir.jpa.term.TerminologyTestHelper;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookListener;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.util.LoggingEmailSender;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.mdm.api.IMdmRuleValidator;
 import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -82,6 +85,11 @@ public class TestJPAConfig {
 	@Bean
 	public SubscriptionSettings subscriptionSettings() {
 		return new SubscriptionSettings();
+	}
+
+	@Bean
+	public TerminologyTestHelper terminologyTestHelper(IJobPersistence theJobPersistence, IJobCoordinator theJobCoordinator, Batch2JobHelper theBatch2JobHelper, MemoryCacheService theMemoryCacheSvc, IValidationSupport theValidationSupport) {
+		return new TerminologyTestHelper(theJobPersistence, theJobCoordinator, theBatch2JobHelper, theMemoryCacheSvc, theValidationSupport);
 	}
 
 	@Bean

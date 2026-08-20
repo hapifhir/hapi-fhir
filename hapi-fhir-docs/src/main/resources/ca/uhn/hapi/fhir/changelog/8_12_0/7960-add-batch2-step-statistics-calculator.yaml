@@ -1,0 +1,4 @@
+---
+type: add
+issue: 7960
+title: "A new method has been added to the batch2 job persistence that calculates on-the-fly statistics about the associated work chunks."

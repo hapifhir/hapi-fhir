@@ -24,5 +24,8 @@ public class Batch2JobDefinitionConstants {
 	// Bulk Export job
 	public static final String BULK_EXPORT = "BULK_EXPORT";
 
+	// Install Package
+	public static final String INSTALL_PACKAGE = "INSTALL_PACKAGE";
+
 	private Batch2JobDefinitionConstants() {}
 }

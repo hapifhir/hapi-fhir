@@ -75,37 +75,45 @@ public class SubscriptionChannelFactory {
 	}
 
 	protected ChannelProducerSettings newProducerConfigForDeliveryChannel(ChannelProducerSettings theOptions) {
-		ChannelProducerSettings config = new ChannelProducerSettings();
+		ChannelProducerSettings config = nullProofProducerConfigCopy(theOptions);
 		config.setConcurrentConsumers(getDeliveryChannelConcurrentConsumers());
-		config.setRetryConfiguration(theOptions.getRetryConfigurationParameters());
 		return config;
 	}
 
 	protected ChannelConsumerSettings newConsumerConfigForDeliveryChannel(ChannelConsumerSettings theOptions) {
-		ChannelConsumerSettings config = new ChannelConsumerSettings();
+		ChannelConsumerSettings config = nullProofConsumerConfigCopy(theOptions);
 		config.setConcurrentConsumers(getDeliveryChannelConcurrentConsumers());
-		if (theOptions != null) {
-			config.setRetryConfiguration(theOptions.getRetryConfigurationParameters());
-		}
 		return config;
 	}
 
 	protected ChannelProducerSettings newProducerConfigForMatchingChannel(ChannelProducerSettings theOptions) {
-		ChannelProducerSettings config = new ChannelProducerSettings();
-		if (theOptions != null) {
-			config.setRetryConfiguration(theOptions.getRetryConfigurationParameters());
-			config.setQualifyChannelName(theOptions.isQualifyChannelName());
-		}
+		ChannelProducerSettings config = nullProofProducerConfigCopy(theOptions);
 		config.setConcurrentConsumers(getMatchingChannelConcurrentConsumers());
 		return config;
 	}
 
 	protected ChannelConsumerSettings newConsumerConfigForMatchingChannel(ChannelConsumerSettings theOptions) {
-		ChannelConsumerSettings config = new ChannelConsumerSettings();
+		ChannelConsumerSettings config = nullProofConsumerConfigCopy(theOptions);
 		config.setConcurrentConsumers(getMatchingChannelConcurrentConsumers());
+		return config;
+	}
+
+	private ChannelProducerSettings nullProofProducerConfigCopy(ChannelProducerSettings theSettings) {
+		ChannelProducerSettings config;
+		if (theSettings != null) {
+			config = new ChannelProducerSettings(theSettings);
+		} else {
+			config = new ChannelProducerSettings();
+		}
+		return config;
+	}
+
+	private ChannelConsumerSettings nullProofConsumerConfigCopy(ChannelConsumerSettings theOptions) {
+		ChannelConsumerSettings config;
 		if (theOptions != null) {
-			config.setQualifyChannelName(theOptions.isQualifyChannelName());
-			config.setRetryConfiguration(theOptions.getRetryConfigurationParameters());
+			config = new ChannelConsumerSettings(theOptions);
+		} else {
+			config = new ChannelConsumerSettings();
 		}
 		return config;
 	}

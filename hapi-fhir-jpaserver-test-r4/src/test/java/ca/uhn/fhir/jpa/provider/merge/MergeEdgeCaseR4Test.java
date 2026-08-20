@@ -75,7 +75,7 @@ public class MergeEdgeCaseR4Test extends BaseResourceProviderR4Test {
 
 	@BeforeEach
 	public void beforeMergeEdgeCase() {
-		myHelper = new MergeOperationTestHelper(myClient, myBatch2JobHelper, myFhirContext, myLinkServiceFactory, myDaoRegistry);
+		myHelper = new MergeOperationTestHelper(myClient, myBatch2JobHelper, myFhirContext, myLinkServiceFactory);
 	}
 
 	@Test

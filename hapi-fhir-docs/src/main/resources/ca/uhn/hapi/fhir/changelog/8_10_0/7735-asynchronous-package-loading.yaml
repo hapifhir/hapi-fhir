@@ -1,0 +1,9 @@
+---
+type: add
+issue: 7735
+jira: SMILE-11429
+title: "HAPI FHIR supports asynchronous package installation using a batch job.
+An asynchronous package installation job can be started by calling
+`myPackageInstallerSvc.installAsynchronously(PackageInstallationSpec)`. This method returns a job
+identifier, which can be passed to `myPackageInstallerSvc.checkInstallationStatus(String)`
+to retrieve a job status report."

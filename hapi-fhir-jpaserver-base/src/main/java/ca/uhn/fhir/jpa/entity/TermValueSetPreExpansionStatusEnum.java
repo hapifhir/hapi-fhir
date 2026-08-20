@@ -32,6 +32,7 @@ public enum TermValueSetPreExpansionStatusEnum {
 	 * Sorting agnostic.
 	 */
 
+	NOT_ACTIVE("notActive", "The ValueSet is not active and will not be pre-expanded until it is activated."),
 	NOT_EXPANDED("notExpanded", "The ValueSet is waiting to be picked up and pre-expanded by a scheduled task."),
 	EXPANSION_IN_PROGRESS(
 			"expansionInProgress",

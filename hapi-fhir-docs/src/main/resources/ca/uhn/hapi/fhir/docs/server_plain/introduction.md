@@ -58,7 +58,7 @@ This strategy is shown in the following example:
 
 See the	[IServerAddressStrategy](/hapi-fhir/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/IServerAddressStrategy.html)	JavaDoc (specifically the list of "All Known Implementing Classes") to see	other strategies that are available.
 
-<a name="capabilities"/>
+<a id="capabilities"></a>
 
 # Capability Statement / Server Metadata
 

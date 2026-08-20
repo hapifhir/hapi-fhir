@@ -1,0 +1,6 @@
+---
+type: add
+issue: 7957
+title: "A new experimental class called `AsyncRequestUtil` provides utilities
+  for operation providers which provide async batch2 job kickoff and status
+  polling."

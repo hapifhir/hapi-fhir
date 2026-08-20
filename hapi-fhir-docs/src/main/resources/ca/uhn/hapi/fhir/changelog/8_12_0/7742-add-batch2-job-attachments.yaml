@@ -1,0 +1,5 @@
+---
+type: add
+issue: 7742
+title: "Batch2 jobs can now optionally have binary attachments which are
+  attached to the job before it begins execution."

@@ -1,0 +1,8 @@
+---
+type: perf
+issue: 7948
+title: "The Batch2 job progress calculator now tracks per-step throughput metrics
+   including records processed per second, chunk completion rates, and elapsed time
+   for each individual step. This enables operators to identify bottleneck steps in
+   long-running batch jobs (bulk export, reindex, MDM). Per-step metrics are logged
+   at DEBUG level for operational visibility. Thanks to GitHub user @RohithVangalla1 for the contribution!"

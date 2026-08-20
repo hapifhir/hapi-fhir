@@ -13,7 +13,6 @@ import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu2.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -47,11 +46,9 @@ import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTermi
  * external term service API)
  */
 @SuppressWarnings("EnhancedSwitchMigration")
-public class InMemoryTerminologyServerValidationSupport implements IValidationSupport {
+public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyServerValidationSupport {
 	private static final String OUR_PIPE_CHARACTER = "|";
-	private final FhirContext myCtx;
 	private VersionCanonicalizer myVersionCanonicalizer;
-	private IssueSeverity myIssueSeverityForCodeDisplayMismatch = IssueSeverity.WARNING;
 
 	/**
 	 * Constructor
@@ -59,8 +56,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	 * @param theCtx A FhirContext for the FHIR version being validated
 	 */
 	public InMemoryTerminologyServerValidationSupport(FhirContext theCtx) {
-		Validate.notNull(theCtx, "theCtx must not be null");
-		myCtx = theCtx;
+		super(theCtx);
 		myVersionCanonicalizer = new VersionCanonicalizer(theCtx);
 	}
 
@@ -72,44 +68,6 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	@Override
 	public String getName() {
 		return myCtx.getVersion().getVersion() + " In-Memory Validation Support";
-	}
-
-	/**
-	 * This setting controls the validation issue severity to report when a code validation
-	 * finds that the code is present in the given CodeSystem, but the display name being
-	 * validated doesn't match the expected value(s). Defaults to
-	 * {@link ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity#WARNING}. Set this
-	 * value to {@link ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity#INFORMATION}
-	 * if you don't want to see display name validation issues at all in resource validation
-	 * outcomes.
-	 *
-	 * @since 7.0.0
-	 */
-	public IssueSeverity getIssueSeverityForCodeDisplayMismatch() {
-		return myIssueSeverityForCodeDisplayMismatch;
-	}
-
-	/**
-	 * This setting controls the validation issue severity to report when a code validation
-	 * finds that the code is present in the given CodeSystem, but the display name being
-	 * validated doesn't match the expected value(s). Defaults to
-	 * {@link ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity#WARNING}. Set this
-	 * value to {@link ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity#INFORMATION}
-	 * if you don't want to see display name validation issues at all in resource validation
-	 * outcomes.
-	 *
-	 * @param theIssueSeverityForCodeDisplayMismatch The severity. Must not be {@literal null}.
-	 * @since 7.0.0
-	 */
-	public void setIssueSeverityForCodeDisplayMismatch(@Nonnull IssueSeverity theIssueSeverityForCodeDisplayMismatch) {
-		Validate.notNull(
-				theIssueSeverityForCodeDisplayMismatch, "theIssueSeverityForCodeDisplayMismatch must not be null");
-		myIssueSeverityForCodeDisplayMismatch = theIssueSeverityForCodeDisplayMismatch;
-	}
-
-	@Override
-	public FhirContext getFhirContext() {
-		return myCtx;
 	}
 
 	@Override
@@ -1043,21 +1001,35 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		ValueSetExpansionFilterContext valueSetExpansionFilterContext =
 				new ValueSetExpansionFilterContext(includeOrExcludeSystemResource, theInclude.getFilter());
 
-		for (FhirVersionIndependentConcept next : nextCodeList) {
-			if (includeOrExcludeSystemResource != null && theWantCode != null) {
-				boolean matches = includeOrExcludeSystemResource.getCaseSensitive()
-						? theWantCode.equals(next.getCode())
-						: theWantCode.equalsIgnoreCase(next.getCode());
+		try {
+			for (FhirVersionIndependentConcept next : nextCodeList) {
+				if (includeOrExcludeSystemResource != null && theWantCode != null) {
+					boolean matches = includeOrExcludeSystemResource.getCaseSensitive()
+							? theWantCode.equals(next.getCode())
+							: theWantCode.equalsIgnoreCase(next.getCode());
 
-				if (!matches) {
-					continue;
+					if (!matches) {
+						continue;
+					}
+				}
+
+				if (!valueSetExpansionFilterContext.isFiltered(next)) {
+					theConsumer.accept(next);
+					retVal = true;
 				}
 			}
-
-			if (!valueSetExpansionFilterContext.isFiltered(next)) {
-				theConsumer.accept(next);
-				retVal = true;
-			}
+		} catch (ValueSetExpansionFilterContext.UnsupportedFilterException e) {
+			// The in-memory engine cannot evaluate this filter. Surface it as an expansion failure rather
+			// than silently returning an incomplete/empty expansion, so the caller can report an error or
+			// delegate to another terminology service in the chain. The message already carries the
+			// originating Msg.code from ValueSetExpansionFilterContext.
+			throw new ExpansionCouldNotBeCompletedInternallyException(
+					Msg.code(3007) + e.getMessage(),
+					new CodeValidationIssue(
+							e.getMessage(),
+							IssueSeverity.ERROR,
+							CodeValidationIssueCode.INVALID,
+							CodeValidationIssueCoding.VS_INVALID));
 		}
 
 		return retVal;

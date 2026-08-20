@@ -115,11 +115,6 @@ public class IpsGeneratorSvcImplTest {
 	private IIpsGeneratorSvc mySvc;
 	private DefaultJpaIpsGenerationStrategy myStrategy;
 
-	@BeforeEach
-	public void beforeEach() {
-		myDaoRegistry.setResourceDaos(Collections.emptyList());
-	}
-
 	private void initializeGenerationStrategy() {
 		initializeGenerationStrategy(List.of());
 	}

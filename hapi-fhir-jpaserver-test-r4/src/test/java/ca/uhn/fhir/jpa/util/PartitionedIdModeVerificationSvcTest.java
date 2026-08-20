@@ -64,7 +64,7 @@ class PartitionedIdModeVerificationSvcTest {
 
 		PartitionSettings partitionedSettings = new PartitionSettings();
 		partitionedSettings.setDatabasePartitionMode(thePartitionedIdModeForSettings);
-		PartitionedIdModeVerificationSvc svc = new PartitionedIdModeVerificationSvc(partitionedSettings, myHibernatePropertiesProvider, txManager);
+		PartitionedIdModeVerificationSvc svc = new PartitionedIdModeVerificationSvc(partitionedSettings, myHibernatePropertiesProvider, txManager, new DialectSvc(myHibernatePropertiesProvider));
 
 		if (thePartitionedIdModeForSchema == thePartitionedIdModeForSettings) {
 			assertDoesNotThrow(svc::verifyPartitionedIdMode);
@@ -87,7 +87,7 @@ class PartitionedIdModeVerificationSvcTest {
 		when(myHibernatePropertiesProvider.getDialect()).thenReturn(new HapiFhirH2Dialect());
 
 		PartitionSettings partitionedSettings = new PartitionSettings();
-		PartitionedIdModeVerificationSvc svc = new PartitionedIdModeVerificationSvc(partitionedSettings, myHibernatePropertiesProvider, txManager);
+		PartitionedIdModeVerificationSvc svc = new PartitionedIdModeVerificationSvc(partitionedSettings, myHibernatePropertiesProvider, txManager, new DialectSvc(myHibernatePropertiesProvider));
 
 		assertDoesNotThrow(svc::verifyPartitionedIdMode);
 	}

@@ -61,6 +61,15 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		assertThat(toTags(meta)).as(toTags(meta).toString()).containsExactlyInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2");
 		assertEquals("3", meta.getVersionId());
 
+		// Make sure $meta-get can fetch the tags of the deleted resource by versioned ID
+
+		for (int i = 1; i <= 3; i++) {
+			meta = myPatientDao.metaGetOperation(Meta.class, new IdType("Patient/A/_history/" + i), mySrd);
+			assertThat(toProfiles(meta)).as(toProfiles(meta).toString()).containsExactly("http://profile2");
+			assertThat(toTags(meta)).as(toTags(meta).toString()).containsExactlyInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2");
+			assertEquals(Integer.toString(i), meta.getVersionId());
+		}
+
 		// Revive and verify
 
 		Patient patient = new Patient();

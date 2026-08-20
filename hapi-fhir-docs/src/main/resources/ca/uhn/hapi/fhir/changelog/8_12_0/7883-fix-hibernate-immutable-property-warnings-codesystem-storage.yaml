@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 7883
+title: "Hibernate HHH000502 warnings (immutable property modified) were emitted in the logs during
+  CodeSystem create/update operations. This has been fixed."

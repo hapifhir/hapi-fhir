@@ -3826,6 +3826,40 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 	}
 
 	@Test
+	void transactionWithPatchOnExistingPatient_writeOnlyPermissions_returnsForbidden() throws IOException {
+		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("transactions").transaction().withAnyOperation().andApplyNormalRules().andThen()
+					.allow("write patient").write().resourcesOfType(Patient.class).withAnyId().andThen()
+					.denyAll("deny all")
+					.build();
+			}
+		});
+		Bundle input = new Bundle();
+		input.setType(Bundle.BundleType.TRANSACTION);
+		input.addEntry().getRequest().setUrl("Patient/1").setMethod(Bundle.HTTPVerb.PATCH);
+
+		Bundle output = new Bundle();
+		output.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
+		Patient echoedPatient = new Patient();
+		echoedPatient.setActive(true);
+		echoedPatient.addIdentifier().setValue("SECRET-MRN");
+		output.addEntry().setResource(echoedPatient).getResponse().setLocation("/Patient/1");
+
+		ourReturn = Collections.singletonList(output);
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/");
+		httpPost.setEntity(createFhirResourceEntity(input));
+		CloseableHttpResponse status = ourClient.execute(httpPost);
+		String resp = extractResponseAndClose(status);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertThat(resp)
+			.as("a transaction response must not disclose an embedded resource the caller cannot read")
+			.doesNotContain("SECRET-MRN");
+	}
+
+		@Test
 	public void testWriteByCompartmentCreate() throws Exception {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -4595,7 +4629,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 				params.add(RequestDetails.class, theRequestDetails);
 				params.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
 				params.add(TransactionDetails.class, new TransactionDetails());
-				params.add(RequestPartitionId.class, RequestPartitionId.defaultPartition());
+				params.add(RequestPartitionId.class, RequestPartitionId.fromPartitionId(null));
 				ourServer.getInterceptorService().callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, params);
 			}
 
@@ -4775,7 +4809,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 				params.add(RequestDetails.class, theRequestDetails);
 				params.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
 				params.add(TransactionDetails.class, new TransactionDetails());
-				params.add(RequestPartitionId.class, RequestPartitionId.defaultPartition());
+				params.add(RequestPartitionId.class, RequestPartitionId.fromPartitionId(null));
 				ourServer.getInterceptorService().callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, params);
 			}
 			{

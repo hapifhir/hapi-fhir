@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 7824
+jira: SMILE-11913
+title: "Previously, when performing a delete-expunge operation with cascade enabled
+  (DELETE ?_expunge=true&_cascade=delete) on a server with `referential integrity on
+  delete` disabled, only the root resource was expunged and referenced child resources
+  were silently left behind. This issue has been fixed."

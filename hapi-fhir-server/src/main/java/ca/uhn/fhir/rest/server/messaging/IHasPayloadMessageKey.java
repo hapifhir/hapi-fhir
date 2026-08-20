@@ -30,7 +30,5 @@ public interface IHasPayloadMessageKey {
 	 * @return a message key derived from the payload
 	 */
 	@Nullable
-	default String getPayloadMessageKey() {
-		return null;
-	}
+	String getPayloadMessageKey();
 }

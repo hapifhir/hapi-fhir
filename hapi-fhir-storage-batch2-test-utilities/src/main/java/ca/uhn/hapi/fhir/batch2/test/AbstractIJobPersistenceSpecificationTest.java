@@ -45,7 +45,6 @@ import ca.uhn.hapi.fhir.batch2.test.support.TestJobStep2InputType;
 import ca.uhn.hapi.fhir.batch2.test.support.TestJobStep3InputType;
 import ca.uhn.test.concurrency.PointcutLatch;
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
 import org.mockito.ArgumentCaptor;
@@ -98,6 +97,15 @@ public abstract class AbstractIJobPersistenceSpecificationTest
 
 	public IJobPersistence getSvc() {
 		return mySvc;
+	}
+
+	public boolean isInlineReduction() {
+		// Default to inline reduction (no 'driver' work chunk). This matches implementations
+		// that run reduction inline during the maintenance pass (e.g. the Mongo-backed CDR
+		// implementation) so they pass the shared spec without needing to override this.
+		// Implementations that create a data-free 'driver' work chunk (the JPA implementation)
+		// override this to return false.
+		return true;
 	}
 
 	@Nonnull
@@ -157,7 +165,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest
 		myJobDefinitionRegistry.removeJobDefinition(JOB_DEFINITION_ID, JOB_DEF_VER);
 
 		// re-enable our runner after every test (just in case)
-		myMaintenanceService.enableMaintenancePass(true);
+		myMaintenanceService.enableMaintenance(true);
 
 		// clear invocations on the batch sender from previous jobs that might be
 		// kicking around
@@ -174,6 +182,11 @@ public abstract class AbstractIJobPersistenceSpecificationTest
 
 		@Nested
 		class StateTransitions implements IWorkChunkStateTransitions {
+
+			@Override
+			public boolean isInlineReduction() {
+				return AbstractIJobPersistenceSpecificationTest.this.isInlineReduction();
+			}
 
 			@Override
 			public ITestFixture getTestManager() {
@@ -229,7 +242,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest
 	}
 
 	@Override
-	public abstract void runMaintenancePass();
+	public abstract void runActiveJobMaintenancePass();
 
 	public TransactionTemplate newTxTemplate() {
 		TransactionTemplate retVal = new TransactionTemplate(getTxManager());
@@ -238,6 +251,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest
 		return retVal;
 	}
 
+	@Override
 	public void runInTransaction(Runnable theRunnable) {
 		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -247,6 +261,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest
 		});
 	}
 
+	@Override
 	public <T> T runInTransaction(Callable<T> theRunnable) {
 		return newTxTemplate().execute(t -> {
 			try {
@@ -272,7 +287,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest
 	}
 
 	public String createAndDequeueWorkChunk(String theJobInstanceId) {
-		String chunkId = createChunk(theJobInstanceId);
+		String chunkId = runInTransaction(() -> createChunk(theJobInstanceId));
 		mySvc.onWorkChunkDequeue(chunkId);
 		return chunkId;
 	}
@@ -290,7 +305,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest
 	}
 
 	public void enableMaintenanceRunner(boolean theToEnable) {
-		myMaintenanceService.enableMaintenancePass(theToEnable);
+		myMaintenanceService.enableMaintenance(theToEnable);
 	}
 
 	public PointcutLatch disableWorkChunkMessageHandler() {

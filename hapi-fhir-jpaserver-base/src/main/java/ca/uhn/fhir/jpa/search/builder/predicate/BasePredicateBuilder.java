@@ -53,11 +53,11 @@ public abstract class BasePredicateBuilder {
 		return myPartitionSettings;
 	}
 
-	RequestPartitionId getRequestPartitionId() {
+	protected RequestPartitionId getRequestPartitionId() {
 		return mySearchSqlBuilder.getRequestPartitionId();
 	}
 
-	String getResourceType() {
+	public String getResourceType() {
 		return mySearchSqlBuilder.getResourceType();
 	}
 
@@ -66,7 +66,7 @@ public abstract class BasePredicateBuilder {
 	}
 
 	@Nonnull
-	String generatePlaceholder(Object theInput) {
+	protected String generatePlaceholder(Object theInput) {
 		return mySearchSqlBuilder.generatePlaceholder(theInput);
 	}
 

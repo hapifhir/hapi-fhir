@@ -32,9 +32,13 @@ import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.Enumerations;
+import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.SearchParameter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -50,7 +54,7 @@ import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.URI;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SearchParameterDaoValidator {
-
+	private static final Logger ourLog = LoggerFactory.getLogger(SearchParameterDaoValidator.class);
 	private static final Pattern REGEX_SP_EXPRESSION_HAS_PATH = Pattern.compile("[( ]*([A-Z][a-zA-Z]+\\.)?[a-z].*");
 
 	private final FhirContext myFhirContext;
@@ -71,14 +75,14 @@ public class SearchParameterDaoValidator {
 		 * If overriding built-in SPs is disabled on this server, make sure we aren't
 		 * doing that
 		 */
-		if (myStorageSettings.isDefaultSearchParamsCanBeOverridden() == false) {
+		if (!myStorageSettings.isDefaultSearchParamsCanBeOverridden()) {
 			for (IPrimitiveType<?> nextBaseType : searchParameter.getBase()) {
 				String nextBase = nextBaseType.getValueAsString();
 				RuntimeSearchParam existingSearchParam = mySearchParamRegistry.getActiveSearchParam(
 						nextBase, searchParameter.getCode(), ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
 				if (existingSearchParam != null) {
 					boolean isBuiltIn = existingSearchParam.getId() == null;
-					isBuiltIn |= existingSearchParam.getUri().startsWith("http://hl7.org/fhir/SearchParameter/");
+					isBuiltIn |= existingSearchParam.getUri().startsWith(Constants.BUILT_IN_SEARCH_PARAM_URI_PREFIX);
 					if (isBuiltIn) {
 						throw new UnprocessableEntityException(
 								Msg.code(1111) + "Can not override built-in search parameter " + nextBase + ":"
@@ -104,10 +108,13 @@ public class SearchParameterDaoValidator {
 			throw new UnprocessableEntityException(Msg.code(1113) + "SearchParameter.base is missing");
 		}
 
-		// Do we have a valid expression
+		// Do we have a valid expression?
 		if (isCompositeWithoutExpression(searchParameter)) {
 
 			// this is ok
+			ourLog.atTrace()
+					.setMessage("Composite search parameter allowed without expression")
+					.log();
 
 		} else if (isBlank(searchParameter.getExpression())) {
 
@@ -120,9 +127,17 @@ public class SearchParameterDaoValidator {
 
 			FhirVersionEnum fhirVersion = myFhirContext.getVersion().getVersion();
 			if (fhirVersion.isOlderThan(FhirVersionEnum.DSTU3)) {
+
 				// omitting validation for DSTU2_HL7ORG, DSTU2_1 and DSTU2
+				ourLog.atTrace()
+						.setMessage("Skipping validation of composite search parameter expression for FHIR version {}")
+						.addArgument(() -> fhirVersion)
+						.log();
+
 			} else {
-				maybeValidateCompositeSpForUniqueIndexing(searchParameter);
+
+				maybeValidateComboSpForUniqueIndexing(searchParameter);
+				maybeValidateComboSpForNonUniqueIndexing(searchParameter);
 				maybeValidateSearchParameterExpressionsOnSave(searchParameter);
 				maybeValidateCompositeWithComponent(searchParameter);
 			}
@@ -149,12 +164,52 @@ public class SearchParameterDaoValidator {
 		return isCompositeSp(theSearchParameter) && theSearchParameter.hasComponent();
 	}
 
-	private boolean isCompositeSpForUniqueIndexing(SearchParameter theSearchParameter) {
+	private boolean isComboSpForUniqueIndexing(SearchParameter theSearchParameter) {
 		return isCompositeSp(theSearchParameter) && hasAnyExtensionUniqueSetTo(theSearchParameter, true);
 	}
 
-	private void maybeValidateCompositeSpForUniqueIndexing(SearchParameter theSearchParameter) {
-		if (isCompositeSpForUniqueIndexing(theSearchParameter)) {
+	private boolean isComboSpForNonUniqueIndexing(SearchParameter theSearchParameter) {
+		return isCompositeSp(theSearchParameter) && hasAnyExtensionUniqueSetTo(theSearchParameter, false);
+	}
+
+	private void maybeValidateComboSpForNonUniqueIndexing(SearchParameter theSearchParameter) {
+		if (!isComboSpForNonUniqueIndexing(theSearchParameter)) {
+			return;
+		}
+
+		// Make sure we don't have multiple ranged date parameters
+		int rangedDateParams = 0;
+		for (SearchParameter.SearchParameterComponentComponent component : theSearchParameter.getComponent()) {
+
+			if (!component
+					.getExtensionsByUrl(HapiExtensions.EXT_SP_COMBO_DATE_RANGED)
+					.isEmpty()) {
+				rangedDateParams++;
+
+				String definition = component.getDefinition();
+				RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParamByUrl(
+						definition, ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
+				if (sp == null) {
+					throw new UnprocessableEntityException(
+							Msg.code(2922) + "SearchParameter component can not be found: " + definition);
+				}
+				if (sp.getParamType() != RestSearchParameterTypeEnum.DATE) {
+					throw new UnprocessableEntityException(Msg.code(2921)
+							+ "SearchParameter must not have component with extension[url="
+							+ HapiExtensions.EXT_SP_COMBO_DATE_RANGED + "] for non-date type search parameter");
+				}
+			}
+		}
+
+		if (rangedDateParams > 1) {
+			throw new UnprocessableEntityException(
+					Msg.code(2919) + "SearchParameter must not have multiple components with extension: "
+							+ HapiExtensions.EXT_SP_COMBO_DATE_RANGED);
+		}
+	}
+
+	private void maybeValidateComboSpForUniqueIndexing(SearchParameter theSearchParameter) {
+		if (isComboSpForUniqueIndexing(theSearchParameter)) {
 			if (!theSearchParameter.hasComponent()) {
 				throw new UnprocessableEntityException(
 						Msg.code(1115) + "SearchParameter is marked as unique but has no components");
@@ -163,6 +218,13 @@ public class SearchParameterDaoValidator {
 				if (isBlank(next.getDefinition())) {
 					throw new UnprocessableEntityException(
 							Msg.code(1116) + "SearchParameter is marked as unique but is missing component.definition");
+				}
+
+				List<Extension> dateRangedExtension = next.getExtensionsByUrl(HapiExtensions.EXT_SP_COMBO_DATE_RANGED);
+				if (!dateRangedExtension.isEmpty()) {
+					throw new UnprocessableEntityException(
+							Msg.code(2920) + "Unique Combo SearchParameter instances may not use extension: "
+									+ HapiExtensions.EXT_SP_COMBO_DATE_RANGED);
 				}
 			}
 		}
@@ -266,7 +328,8 @@ public class SearchParameterDaoValidator {
 			// combo non-unique search parameter or composite Search Parameter with HSearch indexing
 		} else if (hasAnyExtensionUniqueSetTo(theSearchParameter, false)
 				|| // combo non-unique search parameter
-				myStorageSettings.isAdvancedHSearchIndexing()) { // composite Search Parameter with HSearch indexing
+				myStorageSettings
+						.isHibernateSearchIndexSearchParams()) { // composite Search Parameter with HSearch indexing
 			return Set.of(STRING, TOKEN, DATE, QUANTITY, URI, NUMBER, REFERENCE);
 		} else { // composite Search Parameter (JPA only)
 			return Set.of(STRING, TOKEN, DATE, QUANTITY);

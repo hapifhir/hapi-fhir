@@ -40,7 +40,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.server.method.IMethodBinding;
 import ca.uhn.fhir.rest.server.method.IParameter;
 import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchParameter;
@@ -82,7 +82,6 @@ import org.hl7.fhir.r4.model.OperationDefinition.OperationKind;
 import org.hl7.fhir.r4.model.OperationDefinition.OperationParameterUse;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -336,7 +335,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			if (resourceBinding.getResourceName().equals("Patient")) {
-				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
+				List<IMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().iterator().next();
 				assertEquals("The patient's identifier", param.getDescription());
@@ -570,7 +569,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			if (resourceBinding.getResourceName().equals("Patient")) {
-				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
+				List<IMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				for (IParameter next : binding.getParameters()) {
 					SearchParameter param = (SearchParameter) next;
@@ -628,7 +627,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			if (resourceBinding.getResourceName().equals("Patient")) {
-				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
+				List<IMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().get(25);
 				assertEquals("The organization at which this person is a patient", param.getDescription());
@@ -660,7 +659,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			if (resourceBinding.getResourceName().equals("Patient")) {
-				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
+				List<IMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().get(0);
 				assertEquals("The organization at which this person is a patient", param.getDescription());
@@ -1302,6 +1301,288 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 			.filter(resource -> "Patient".equals(resource.getType()))
 			.findFirst().get();
 		assertThat(toStrings(patientResource.getSearchRevInclude())).containsExactlyInAnyOrder("Observation:subject");
+	}
+
+	@Test
+	public void testRevIncludes_NotSpecifiedReturnsEmptyList() throws Exception {
+
+		class PatientResourceProvider implements IResourceProvider {
+
+			@Override
+			public Class<Patient> getResourceType() {
+				return Patient.class;
+			}
+
+			@Search
+			public List<Patient> search(@OptionalParam(name = "name") StringParam theName) {
+				return Collections.emptyList();
+			}
+
+		}
+
+		class ObservationResourceProvider implements IResourceProvider {
+
+			@Override
+			public Class<Observation> getResourceType() {
+				return Observation.class;
+			}
+
+			@Search
+			public List<Observation> search(@OptionalParam(name = "subject") ReferenceParam theSubject) {
+				return Collections.emptyList();
+			}
+
+		}
+
+		RestfulServer rs = new RestfulServer(myCtx);
+		rs.setResourceProviders(new PatientResourceProvider(), new ObservationResourceProvider());
+
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		sc.setRestResourceRevIncludesEnabled(true);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+
+		List<CapabilityStatementRestResourceComponent> resources = conformance.getRestFirstRep().getResource();
+		CapabilityStatementRestResourceComponent patientResource = resources.stream()
+			.filter(resource -> "Patient".equals(resource.getType()))
+			.findFirst().get();
+		assertThat(patientResource.getSearchRevInclude()).isEmpty();
+	}
+
+	@Test
+	public void testIncludes_NotSpecifiedReturnsEmptyList() throws Exception {
+
+		class PatientResourceProvider implements IResourceProvider {
+
+			@Override
+			public Class<Patient> getResourceType() {
+				return Patient.class;
+			}
+
+			@Search
+			public List<Patient> search(@OptionalParam(name = "name") StringParam theName) {
+				return Collections.emptyList();
+			}
+
+		}
+
+		class ObservationResourceProvider implements IResourceProvider {
+
+			@Override
+			public Class<Observation> getResourceType() {
+				return Observation.class;
+			}
+
+			@Search
+			public List<Observation> search(@OptionalParam(name = "subject") ReferenceParam theSubject) {
+				return Collections.emptyList();
+			}
+
+		}
+
+		RestfulServer rs = new RestfulServer(myCtx);
+		rs.setResourceProviders(new PatientResourceProvider(), new ObservationResourceProvider());
+
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+
+		List<CapabilityStatementRestResourceComponent> resources = conformance.getRestFirstRep().getResource();
+		CapabilityStatementRestResourceComponent patientResource = resources.stream()
+			.filter(resource -> "Patient".equals(resource.getType()))
+			.findFirst().get();
+		assertThat(patientResource.getSearchInclude()).isEmpty();
+	}
+
+	@Test
+	public void testIncludes_Inferred() throws Exception {
+
+		class PatientResourceProvider implements IResourceProvider {
+
+			@Override
+			public Class<Patient> getResourceType() {
+				return Patient.class;
+			}
+
+			@Search
+			public List<Patient> search(
+				@IncludeParam Set<Include> theIncludes,
+				@OptionalParam(name = "general-practitioner") ReferenceParam theGp,
+				@OptionalParam(name = "organization") ReferenceParam theOrg,
+				@OptionalParam(name = "name") StringParam theName) {
+				return Collections.emptyList();
+			}
+
+		}
+
+		RestfulServer rs = new RestfulServer(myCtx);
+		rs.setResourceProviders(new PatientResourceProvider());
+
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+
+		List<CapabilityStatementRestResourceComponent> resources = conformance.getRestFirstRep().getResource();
+		CapabilityStatementRestResourceComponent patientResource = resources.stream()
+			.filter(resource -> "Patient".equals(resource.getType()))
+			.findFirst().get();
+		Set<String> searchIncludes = toStrings(patientResource.getSearchInclude());
+		assertThat(searchIncludes).containsExactlyInAnyOrder("*", "Patient:general-practitioner", "Patient:organization");
+	}
+
+	@Test
+	public void testIncludes_PresentDoesNotEmitRevIncludes() throws Exception {
+
+		class PatientResourceProvider implements IResourceProvider {
+
+			@Override
+			public Class<Patient> getResourceType() {
+				return Patient.class;
+			}
+
+			@Search
+			public List<Patient> search(@IncludeParam(allow = {"Patient:organization"}) Set<Include> theIncludes) {
+				return Collections.emptyList();
+			}
+
+		}
+
+		RestfulServer rs = new RestfulServer(myCtx);
+		rs.setResourceProviders(new PatientResourceProvider());
+
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		sc.setRestResourceRevIncludesEnabled(true);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+
+		List<CapabilityStatementRestResourceComponent> resources = conformance.getRestFirstRep().getResource();
+		CapabilityStatementRestResourceComponent patientResource = resources.stream()
+			.filter(resource -> "Patient".equals(resource.getType()))
+			.findFirst().get();
+		assertThat(toStrings(patientResource.getSearchInclude())).containsExactlyInAnyOrder("Patient:organization");
+		assertThat(patientResource.getSearchRevInclude()).isEmpty();
+	}
+
+	@Test
+	public void testRevIncludes_PresentDoesNotEmitIncludes() throws Exception {
+
+		class PatientResourceProvider implements IResourceProvider {
+
+			@Override
+			public Class<Patient> getResourceType() {
+				return Patient.class;
+			}
+
+			@Search
+			public List<Patient> search(@IncludeParam(reverse = true, allow = {"Observation:subject"}) Set<Include> theRevIncludes) {
+				return Collections.emptyList();
+			}
+
+		}
+
+		RestfulServer rs = new RestfulServer(myCtx);
+		rs.setResourceProviders(new PatientResourceProvider());
+
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		sc.setRestResourceRevIncludesEnabled(true);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+
+		List<CapabilityStatementRestResourceComponent> resources = conformance.getRestFirstRep().getResource();
+		CapabilityStatementRestResourceComponent patientResource = resources.stream()
+			.filter(resource -> "Patient".equals(resource.getType()))
+			.findFirst().get();
+		assertThat(patientResource.getSearchInclude()).isEmpty();
+		assertThat(toStrings(patientResource.getSearchRevInclude())).containsExactlyInAnyOrder("Observation:subject");
+	}
+
+	@Test
+	public void testIncludes_Explicit() throws Exception {
+
+		class PatientResourceProvider implements IResourceProvider {
+
+			@Override
+			public Class<Patient> getResourceType() {
+				return Patient.class;
+			}
+
+			@Search
+			public List<Patient> search(@IncludeParam(allow = {"Patient:general-practitioner", "Patient:organization"}) Set<Include> theIncludes) {
+				return Collections.emptyList();
+			}
+
+		}
+
+		RestfulServer rs = new RestfulServer(myCtx);
+		rs.setResourceProviders(new PatientResourceProvider());
+
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+
+		List<CapabilityStatementRestResourceComponent> resources = conformance.getRestFirstRep().getResource();
+		CapabilityStatementRestResourceComponent patientResource = resources.stream()
+			.filter(resource -> "Patient".equals(resource.getType()))
+			.findFirst().get();
+		assertThat(toStrings(patientResource.getSearchInclude())).containsExactlyInAnyOrder("Patient:general-practitioner", "Patient:organization");
+	}
+
+	@Test
+	public void testRevIncludes_DisabledReturnsEmpty() throws Exception {
+
+		class PatientResourceProvider implements IResourceProvider {
+
+			@Override
+			public Class<Patient> getResourceType() {
+				return Patient.class;
+			}
+
+			@Search
+			public List<Patient> search(@IncludeParam(reverse = true, allow = {"Observation:subject"}) Set<Include> theRevIncludes) {
+				return Collections.emptyList();
+			}
+
+		}
+
+		RestfulServer rs = new RestfulServer(myCtx);
+		rs.setResourceProviders(new PatientResourceProvider());
+
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		sc.setRestResourceRevIncludesEnabled(false);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+
+		List<CapabilityStatementRestResourceComponent> resources = conformance.getRestFirstRep().getResource();
+		CapabilityStatementRestResourceComponent patientResource = resources.stream()
+			.filter(resource -> "Patient".equals(resource.getType()))
+			.findFirst().get();
+		assertThat(patientResource.getSearchRevInclude()).isEmpty();
 	}
 
 	@Test

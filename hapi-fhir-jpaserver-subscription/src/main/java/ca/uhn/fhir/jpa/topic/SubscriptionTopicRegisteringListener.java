@@ -123,7 +123,7 @@ public class SubscriptionTopicRegisteringListener implements IMessageListener<Re
 	 * There were some situations where the RequestDetails attempted to use the default partition
 	 * and the partition name was a list containing null values (i.e. using the package installer to STORE_AND_INSTALL
 	 * Subscriptions while partitioning was enabled). If any partition matches these criteria,
-	 * {@link RequestPartitionId#defaultPartition()} is used to obtain the default partition.
+	 * the configured default partition (via {@link RequestPartitionId#fromPartitionId(Integer)}) is used.
 	 */
 	private RequestDetails getPartitionAwareRequestDetails(ResourceModifiedMessage payload) {
 		RequestPartitionId payloadPartitionId = payload.getPartitionId();
@@ -131,7 +131,7 @@ public class SubscriptionTopicRegisteringListener implements IMessageListener<Re
 			// This may look redundant but the package installer STORE_AND_INSTALL Subscriptions when partitioning is
 			// enabled
 			// creates a corrupt default partition.  This resets it to a clean one.
-			payloadPartitionId = RequestPartitionId.defaultPartition();
+			payloadPartitionId = RequestPartitionId.fromPartitionId(getDefaultPartitionId());
 		}
 		return new SystemRequestDetails().setRequestPartitionId(payloadPartitionId);
 	}

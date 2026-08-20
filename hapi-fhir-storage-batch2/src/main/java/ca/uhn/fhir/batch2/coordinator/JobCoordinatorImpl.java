@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.batch2.coordinator;
 
+import ca.uhn.fhir.batch2.api.AttachmentDetails;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
@@ -31,13 +32,19 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
+import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.Logs;
+import ca.uhn.fhir.util.ValidateUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
@@ -48,6 +55,8 @@ import org.springframework.transaction.annotation.Propagation;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -90,6 +99,31 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		}
 		Validate.notBlank(theStartRequest.getJobDefinitionId(), "No job definition ID supplied in start request");
 
+		// Interceptor call: STORAGE_PRECREATE_BATCH_JOB_INSTANCE
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorService, theRequestDetails);
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRECREATE_BATCH_JOB_INSTANCE)) {
+			String originalJobDefinition = theStartRequest.getJobDefinitionId();
+			String originalParametersSerialized = JsonUtil.serialize(theStartRequest.getParameters());
+			compositeBroadcaster.ifHasCallHooks(Pointcut.STORAGE_PRECREATE_BATCH_JOB_INSTANCE, () -> new HookParams()
+					.add(RequestDetails.class, theRequestDetails)
+					.add(JobInstanceStartRequest.class, theStartRequest));
+
+			if (!originalJobDefinition.equals(theStartRequest.getJobDefinitionId())) {
+				ourLog.info(
+						"Requested Batch2 Job Definition ID has been overridden from {} to {}",
+						originalJobDefinition,
+						theStartRequest.getJobDefinitionId());
+			}
+
+			String newParametersSerialized = JsonUtil.serialize(theStartRequest.getParameters());
+			if (!Objects.equals(originalParametersSerialized, newParametersSerialized)) {
+				ourLog.info(
+						"Requested Batch2 Job Parameters for job of type {} have been overridden",
+						theStartRequest.getJobDefinitionId());
+			}
+		}
+
 		// if cache - use that first
 		if (theStartRequest.isUseCache()) {
 			FetchJobInstancesRequest request = new FetchJobInstancesRequest(
@@ -113,6 +147,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 						first.getStatus(),
 						first.getInstanceId());
 
+				storeJobInstanceIdInRequestDetails(theRequestDetails, response);
 				return response;
 			}
 		}
@@ -124,7 +159,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 
 		myJobParameterJsonValidator.validateJobParameters(theRequestDetails, theStartRequest, jobDefinition);
 
-		// we only create the first chunk amd job here
+		// we only create the first chunk and job here
 		// JobMaintenanceServiceImpl.doMaintenancePass will handle the rest
 		IJobPersistence.CreateResult instanceAndFirstChunk = myTransactionService
 				.withSystemRequestOnDefaultPartition()
@@ -134,7 +169,15 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 
 		Batch2JobStartResponse response = new Batch2JobStartResponse();
 		response.setInstanceId(instanceAndFirstChunk.jobInstanceId);
+		storeJobInstanceIdInRequestDetails(theRequestDetails, response);
 		return response;
+	}
+
+	private static void storeJobInstanceIdInRequestDetails(
+			RequestDetails theRequestDetails, Batch2JobStartResponse theResponse) {
+		if (theRequestDetails != null) {
+			theRequestDetails.getUserData().put(USER_DATA_KEY_JOB_INSTANCE_ID, theResponse.getInstanceId());
+		}
 	}
 
 	/**
@@ -191,6 +234,21 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	}
 
 	@Override
+	public void enqueueBuildingJobForExecution(String theInstanceId) {
+		myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
+			JobInstance instance = getInstance(theInstanceId);
+			boolean changed = myJobPersistence.markInstanceAsStatusWhenStatusIn(
+					theInstanceId, StatusEnum.QUEUED, Set.of(StatusEnum.BUILDING));
+			if (changed) {
+				ourLog.info("Moving job instance[{}] from status BUILDING to QUEUED", theInstanceId);
+			} else {
+				throw new InvalidRequestException(Msg.code(2901) + "Job instance is in " + instance.getStatus()
+						+ " status and cannot be enqueued for execution");
+			}
+		});
+	}
+
+	@Override
 	public Page<JobInstance> fetchAllJobInstances(JobInstanceFetchRequest theFetchRequest) {
 		return myJobQuerySvc.fetchAllInstances(theFetchRequest);
 	}
@@ -200,5 +258,27 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	@Override
 	public JobOperationResultJson cancelInstance(String theInstanceId) throws ResourceNotFoundException {
 		return myJobPersistence.cancelInstance(theInstanceId);
+	}
+
+	@Override
+	public void addAttachmentToBuildingJob(String theInstanceId, AttachmentDetails theAttachmentDetails) {
+
+		/*
+		 * Note that we block any attachments from being added to a job by the outside world
+		 * once the job is no longer in BUILDING status. Step processors can still add attachments
+		 * though by working directly against the job persistence.
+		 */
+		myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
+			Optional<JobInstance> instance = myJobPersistence.fetchInstance(theInstanceId);
+			ValidateUtil.isTrueOrThrowInvalidRequest(
+					instance.isPresent(), "Job instance does not exist: %s", theAttachmentDetails);
+			ValidateUtil.isTrueOrThrowInvalidRequest(
+					instance.get().getStatus() == StatusEnum.BUILDING,
+					"Job instance %s is not in BUILDING status: %s",
+					instance.get().getInstanceId(),
+					instance.get().getStatus());
+
+			myJobPersistence.storeNewAttachment(theInstanceId, theAttachmentDetails);
+		});
 	}
 }

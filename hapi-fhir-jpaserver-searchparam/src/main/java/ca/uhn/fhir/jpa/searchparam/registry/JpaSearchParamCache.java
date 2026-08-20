@@ -25,7 +25,6 @@ import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.model.util.SearchParamHash;
@@ -263,7 +262,7 @@ public class JpaSearchParamCache {
 			Map<Long, IndexedSearchParam> theHashIdentityToIndexedSearchParams,
 			String theSpName) {
 		Long hashIdentity = SearchParamHash.hashSearchParam(
-				myPartitionSettings, RequestPartitionId.defaultPartition(), theResourceName, theSpName);
+				myPartitionSettings, myPartitionSettings.getDefaultRequestPartitionId(), theResourceName, theSpName);
 		theHashIdentityToIndexedSearchParams.put(hashIdentity, new IndexedSearchParam(theSpName, theResourceName));
 	}
 }

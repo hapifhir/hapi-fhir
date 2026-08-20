@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.TransactionUtil;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -1012,6 +1013,36 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		assertEquals(1, outcome.size());
 		assertTrue(outcome.containsAllResources());
 		assertThat(outcome.getResourceListComplete()).hasSize(3);
+	}
+
+	@Test
+	void testAutoCreatePlaceholder_searchUrlRowIsDeletedWhenPlaceholderIsUpdated() {
+		// Setup
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+
+		Observation obsToCreate = new Observation();
+		obsToCreate.setStatus(ObservationStatus.FINAL);
+		obsToCreate.getSubject().setReference("Patient?identifier=http://example.org|abc");
+		myObservationDao.create(obsToCreate, mySrd);
+
+		// The sentinel row must outlive the transaction that auto-created the placeholder, because it
+		// guards against concurrent conditional creates whose match search ran before that transaction
+		// committed
+		List<ResourceSearchUrlEntity> searchUrlsAfterCreate = myResourceSearchUrlDao.findAll();
+		assertThat(searchUrlsAfterCreate).hasSize(1);
+		assertThat(searchUrlsAfterCreate.get(0).getSearchUrl()).isEqualTo("Patient?identifier=http%3A//example.org%7Cabc");
+
+		// Conditionally update the placeholder with the real resource content
+		Patient realPatient = new Patient();
+		realPatient.addIdentifier().setSystem("http://example.org").setValue("abc");
+		realPatient.setActive(true);
+		DaoMethodOutcome updateOutcome = myPatientDao.update(realPatient, "Patient?identifier=http://example.org|abc", mySrd);
+		assertThat(updateOutcome.getCreated()).isFalse();
+
+		// Verify - the update should delete the sentinel row, exactly as it does for ordinary
+		// conditional creates that are subsequently updated
+		assertThat(myResourceSearchUrlDao.findAll()).isEmpty();
 	}
 
 	/**

@@ -21,6 +21,7 @@ package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.maintenance.WorkChunkHeartbeatService;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
@@ -46,6 +47,7 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 	private final WorkChunkProcessor myJobExecutorSvc;
 	private final IJobMaintenanceService myJobMaintenanceService;
 	private final JobInstanceStatusUpdater myJobInstanceStatusUpdater;
+	private final WorkChunkHeartbeatService myWorkChunkHeartbeatService;
 
 	private final JobDefinition<PT> myDefinition;
 	private final JobInstance myInstance;
@@ -61,9 +63,10 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 			@Nonnull WorkChunkProcessor theExecutor,
 			@Nonnull IJobMaintenanceService theJobMaintenanceService,
 			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
-			@Nonnull IInterceptorService theInterceptorService) {
+			@Nonnull IInterceptorService theInterceptorService,
+			@Nonnull WorkChunkHeartbeatService theWorkChunkHeartbeatService) {
 		myJobPersistence = theJobPersistence;
-		myDefinition = theCursor.jobDefinition;
+		myDefinition = theCursor.getJobDefinition();
 		myInstance = theInstance;
 		myInstanceId = theInstance.getInstanceId();
 		myWorkChunk = theWorkChunk;
@@ -71,20 +74,41 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 		myJobExecutorSvc = theExecutor;
 		myJobMaintenanceService = theJobMaintenanceService;
 		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry, theInterceptorService);
+		myWorkChunkHeartbeatService = theWorkChunkHeartbeatService;
 	}
 
 	@WithSpan(JOB_STEP_EXECUTION_SPAN_NAME)
-	public void executeStep() {
-
+	public void processStep() {
+		String workchunkId = myWorkChunk == null ? null : myWorkChunk.getId();
 		BatchJobOpenTelemetryUtils.addAttributesToCurrentSpan(
 				myInstance.getJobDefinitionId(),
 				myInstance.getJobDefinitionVersion(),
 				myInstance.getInstanceId(),
 				myCursor.getCurrentStepId(),
-				myWorkChunk == null ? null : myWorkChunk.getId());
+				workchunkId);
 
-		JobStepExecutorOutput<PT, IT, OT> stepExecutorOutput =
-				myJobExecutorSvc.doExecution(myCursor, myInstance, myWorkChunk);
+		JobStepExecutorOutput<PT, IT, OT> stepExecutorOutput;
+		boolean isReductionStep = myCursor.isReductionStep();
+		/*
+		 * Reduction steps do not produce a proper JobStepExecutorOutput.
+		 * They return "null" and run the job asynchronously
+		 * (so we cannot see, here, if they are successful or not).
+		 *
+		 * Moreover, they schedule their own heartbeat async.
+		 * To avoid this race condition of having 2 heartbeats,
+		 * we'll just not set one here, since 'doExecution' is
+		 * async for reduction steps anyways
+		 */
+		if (isReductionStep) {
+			myJobExecutorSvc.doExecution(myCursor, myInstance, myWorkChunk);
+
+			return;
+		} else {
+			try (WorkChunkHeartbeatService.HeartbeatHandle handle =
+					myWorkChunkHeartbeatService.scheduleHeartbeatJob(myInstanceId, workchunkId)) {
+				stepExecutorOutput = myJobExecutorSvc.doExecution(myCursor, myInstance, myWorkChunk);
+			}
+		}
 
 		if (!stepExecutorOutput.isSuccessful()) {
 			return;
@@ -96,7 +120,8 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 		 * So if there are no COMPLETED work chunks (ie, first step produces no work chunks)
 		 * we must complete it here.
 		 */
-		if (stepExecutorOutput.getDataSink().firstStepProducedNothing() && !myDefinition.isLastStepReduction()) {
+		if (!myDefinition.isLastStepReduction()
+				&& stepExecutorOutput.getDataSink().firstStepProducedNothing()) {
 			ourLog.info(
 					"First step of job myInstance {} produced no work chunks and last step is not a reduction, "
 							+ "marking as completed and setting end date",
@@ -123,7 +148,7 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 			// wipmb 6.8 either delete fast-tracking, or narrow this call to just this instance and step
 			// This runs full maintenance for EVERY job as each chunk completes in a fast tracked job.  That's a LOT of
 			// work.
-			boolean success = myJobMaintenanceService.triggerMaintenancePass();
+			boolean success = myJobMaintenanceService.triggerActiveJobMaintenancePass();
 			if (!success) {
 				myJobPersistence.updateInstance(myInstance.getInstanceId(), instance -> {
 					instance.setFastTracking(false);

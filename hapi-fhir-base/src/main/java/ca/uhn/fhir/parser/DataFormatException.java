@@ -19,12 +19,22 @@
  */
 package ca.uhn.fhir.parser;
 
-public class DataFormatException extends RuntimeException {
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+
+/**
+ * Thrown when client-supplied data cannot be parsed (invalid date, malformed JSON/XML, etc.).
+ * Extends {@link InvalidRequestException} so the HTTP 400 status code is preserved by
+ * status-aware exception interceptors — including those that wrap or replace exceptions before
+ * HAPI's {@code ExceptionHandlingInterceptor} runs (e.g. CDR's
+ * {@code ExceptionDetailsSuppressingInterceptor}). Without this hierarchy such interceptors had
+ * no status code to read and fell back to HTTP 500 for invalid client input.
+ */
+public class DataFormatException extends InvalidRequestException {
 
 	private static final long serialVersionUID = 1L;
 
 	public DataFormatException() {
-		super();
+		super((String) null);
 	}
 
 	public DataFormatException(String theMessage) {

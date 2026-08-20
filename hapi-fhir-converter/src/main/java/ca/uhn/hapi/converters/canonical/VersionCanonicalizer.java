@@ -28,6 +28,7 @@ import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.util.HapiExtensions;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_10_40;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_10_50;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_14_40;
@@ -102,7 +103,8 @@ public class VersionCanonicalizer {
 		this(FhirContext.forCached(theTargetVersion));
 	}
 
-	public VersionCanonicalizer(FhirContext theTargetContext) {
+	public VersionCanonicalizer(@Nonnull FhirContext theTargetContext) {
+		Validate.notNull(theTargetContext, "theTargetContext must not be null");
 		myContext = theTargetContext;
 		FhirVersionEnum targetVersion = theTargetContext.getVersion().getVersion();
 		switch (targetVersion) {

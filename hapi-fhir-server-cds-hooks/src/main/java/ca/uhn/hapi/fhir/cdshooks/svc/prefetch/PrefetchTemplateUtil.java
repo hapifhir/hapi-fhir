@@ -36,10 +36,10 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 public class PrefetchTemplateUtil {
 	private static final Pattern SURROUNDING_CURLY_BRACES_PART = Pattern.compile("\\{\\{([^}]+)}}");
@@ -51,8 +51,21 @@ public class PrefetchTemplateUtil {
 
 	private PrefetchTemplateUtil() {}
 
+	private interface PartResolutionResult {
+		record Proceed() implements PartResolutionResult {}
+
+		record Success(List<String> values) implements PartResolutionResult {}
+
+		record MissingContextKey(String key, String availableKeys) implements PartResolutionResult {}
+
+		record NoMatch() implements PartResolutionResult {}
+	}
+
+	@Nonnull
 	public static String substituteTemplate(
-			String theTemplate, @Nonnull CdsServiceRequestContextJson theContext, @Nonnull FhirContext theFhirContext) {
+			@Nonnull String theTemplate,
+			@Nonnull CdsServiceRequestContextJson theContext,
+			@Nonnull FhirContext theFhirContext) {
 		return SURROUNDING_CURLY_BRACES_PART
 				.matcher(theTemplate)
 				.replaceAll(match ->
@@ -63,22 +76,37 @@ public class PrefetchTemplateUtil {
 			String theRawExpression,
 			@Nonnull CdsServiceRequestContextJson theContext,
 			@Nonnull FhirContext theFhirContext) {
-		final List<String> results = Stream.of(theRawExpression.split(UNION_OPERATOR_REGEX))
-				.map(String::trim)
-				.flatMap(part -> resolvePartResults(part, theContext, theFhirContext).stream())
-				.toList();
-		if (results.isEmpty()) {
-			throw new InvalidRequestException(Msg.code(2856) + "Unable to resolve prefetch template : "
-					+ theRawExpression + ". No result was found for the prefetch query.");
+		final List<String> results = new ArrayList<>();
+		PartResolutionResult.MissingContextKey firstMissingKey = null;
+		for (String rawPart : theRawExpression.split(UNION_OPERATOR_REGEX)) {
+			final PartResolutionResult partResult = resolvePartResults(rawPart.trim(), theContext, theFhirContext);
+			if (partResult instanceof PartResolutionResult.Success s) {
+				results.addAll(s.values());
+			} else if (partResult instanceof PartResolutionResult.MissingContextKey m && firstMissingKey == null) {
+				firstMissingKey = m;
+			}
 		}
-		return String.join(",", results);
+		if (!results.isEmpty()) {
+			return String.join(",", results);
+		}
+		if (firstMissingKey != null) {
+			throw new InvalidRequestException(Msg.code(2372) + "Request context did not provide a value for key <"
+					+ firstMissingKey.key() + ">.  Available keys in context are: " + firstMissingKey.availableKeys());
+		}
+		throw new InvalidRequestException(Msg.code(2856) + "Unable to resolve prefetch template : " + theRawExpression
+				+ ". No result was found for the prefetch query.");
 	}
 
-	private static List<String> resolvePartResults(
+	@Nonnull
+	private static PartResolutionResult resolvePartResults(
 			String thePart, @Nonnull CdsServiceRequestContextJson theContext, @Nonnull FhirContext theFhirContext) {
-		List<String> result = handleDaVinciPart(thePart, theContext, theFhirContext);
-		if (result.isEmpty()) result = handleDefaultPart(thePart, theContext);
-		if (result.isEmpty()) result = handleFhirPathAndReferencedPrefetchPart(thePart, theContext, theFhirContext);
+		PartResolutionResult result = handleDaVinciPart(thePart, theContext, theFhirContext);
+		if (result instanceof PartResolutionResult.NoMatch) {
+			result = handleDefaultPart(thePart, theContext);
+		}
+		if (result instanceof PartResolutionResult.NoMatch) {
+			result = handleFhirPathAndReferencedPrefetchPart(thePart, theContext, theFhirContext);
+		}
 		return result;
 	}
 
@@ -88,13 +116,15 @@ public class PrefetchTemplateUtil {
 	 * This is subject to change as the IG can be updated by the working committee.
 	 */
 	@Nonnull
-	private static List<String> handleDaVinciPart(
+	private static PartResolutionResult handleDaVinciPart(
 			String thePart, @Nonnull CdsServiceRequestContextJson theContext, @Nonnull FhirContext theFhirContext) {
 		final Matcher m = DA_VINCI_PART.matcher(thePart);
-		if (!m.matches()) return List.of();
+		final PartResolutionResult partResolutionResult = matchAndCheckKey(m, theContext);
+		if (!(partResolutionResult instanceof PartResolutionResult.Proceed)) {
+			return partResolutionResult;
+		}
 		final String key = m.group(1);
 		final String resourceType = m.group(2);
-		validateContextKeyExists(key, theContext);
 		try {
 			final IBaseBundle bundle = (IBaseBundle) theContext.getResource(key);
 			final List<String> ids = BundleUtil.toListOfResources(theFhirContext, bundle).stream()
@@ -107,7 +137,7 @@ public class PrefetchTemplateUtil {
 						+ "Request context did not provide for resource(s) matching template. ResourceType missing is: "
 						+ resourceType);
 			}
-			return ids;
+			return new PartResolutionResult.Success(ids);
 		} catch (ClassCastException e) {
 			throw new InvalidRequestException(Msg.code(2374) + "Request context did not provide valid "
 					+ theFhirContext.getVersion().getVersion() + " Bundle resource for template key <" + key + ">");
@@ -115,18 +145,21 @@ public class PrefetchTemplateUtil {
 	}
 
 	@Nonnull
-	private static List<String> handleDefaultPart(String thePart, @Nonnull CdsServiceRequestContextJson theContext) {
+	private static PartResolutionResult handleDefaultPart(
+			String thePart, @Nonnull CdsServiceRequestContextJson theContext) {
 		final Matcher m = DEFAULT_PART.matcher(thePart);
-		if (!m.matches()) return List.of();
+		final PartResolutionResult partResolutionResult = matchAndCheckKey(m, theContext);
+		if (!(partResolutionResult instanceof PartResolutionResult.Proceed)) {
+			return partResolutionResult;
+		}
 		final String key = m.group(1);
-		validateContextKeyExists(key, theContext);
 		try {
 			final String value = theContext.getString(key);
 			if (value == null) {
 				throw new InvalidRequestException(
 						Msg.code(2375) + "Request context value for key <" + key + "> is null or not a string.");
 			}
-			return List.of(value);
+			return new PartResolutionResult.Success(List.of(value));
 		} catch (ClassCastException e) {
 			throw new InvalidRequestException(
 					Msg.code(2857) + "Request context value for key <" + key + "> is null or not a string.");
@@ -134,13 +167,21 @@ public class PrefetchTemplateUtil {
 	}
 
 	@Nonnull
-	private static List<String> handleFhirPathAndReferencedPrefetchPart(
+	private static PartResolutionResult handleFhirPathAndReferencedPrefetchPart(
 			String thePart, @Nonnull CdsServiceRequestContextJson theContext, @Nonnull FhirContext theFhirContext) {
 		Matcher m = FHIR_PATH_PART.matcher(thePart);
-		if (!m.matches()) m = REFERENCED_PREFETCH_PART.matcher(thePart);
-		if (!m.matches()) return List.of();
-		return convertPrimitiveResultsToString(
-				evaluateFhirPathOnContextKey(m.group(1), m.group(2), theContext, theFhirContext), m.group(1));
+		PartResolutionResult partResolutionResult = matchAndCheckKey(m, theContext);
+		if (partResolutionResult instanceof PartResolutionResult.NoMatch) {
+			m = REFERENCED_PREFETCH_PART.matcher(thePart);
+			partResolutionResult = matchAndCheckKey(m, theContext);
+		}
+		if (!(partResolutionResult instanceof PartResolutionResult.Proceed)) {
+			return partResolutionResult;
+		}
+		final String key = m.group(1);
+		final String expression = m.group(2);
+		return new PartResolutionResult.Success(convertPrimitiveResultsToString(
+				evaluateFhirPathOnContextKey(key, expression, theContext, theFhirContext), key));
 	}
 
 	@Nonnull
@@ -149,7 +190,6 @@ public class PrefetchTemplateUtil {
 			String theFhirPathExpression,
 			@Nonnull CdsServiceRequestContextJson theContext,
 			@Nonnull FhirContext theFhirContext) {
-		validateContextKeyExists(thePrefetchKey, theContext);
 		try {
 			final IBaseResource resource = theContext.getResource(thePrefetchKey);
 			final IFhirPath fhirPath = createFhirPathWithReferenceLocalResolution(theFhirContext, resource);
@@ -166,11 +206,18 @@ public class PrefetchTemplateUtil {
 		}
 	}
 
-	private static void validateContextKeyExists(String theKey, @Nonnull CdsServiceRequestContextJson theContext) {
-		if (!theContext.containsKey(theKey)) {
-			throw new InvalidRequestException(Msg.code(2372) + "Request context did not provide a value for key <"
-					+ theKey + ">.  Available keys in context are: " + theContext.getKeys());
+	@Nonnull
+	private static PartResolutionResult matchAndCheckKey(
+			Matcher theMatcher, @Nonnull CdsServiceRequestContextJson theContext) {
+		if (!theMatcher.matches()) {
+			return new PartResolutionResult.NoMatch();
 		}
+		final String key = theMatcher.group(1);
+		if (!theContext.containsKey(key)) {
+			return new PartResolutionResult.MissingContextKey(
+					key, theContext.getKeys().toString());
+		}
+		return new PartResolutionResult.Proceed();
 	}
 
 	@Nonnull

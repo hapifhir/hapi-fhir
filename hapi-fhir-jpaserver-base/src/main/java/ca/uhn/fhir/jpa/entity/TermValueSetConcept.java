@@ -48,6 +48,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.Length;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -74,6 +75,7 @@ import static org.apache.commons.lang3.StringUtils.length;
 @Entity()
 @IdClass(IdAndPartitionId.class)
 public class TermValueSetConcept extends BasePartitionable implements Serializable {
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Id()
@@ -263,11 +265,13 @@ public class TermValueSetConcept extends BasePartitionable implements Serializab
 
 	@Override
 	public boolean equals(Object theO) {
-		if (this == theO) return true;
+		if (this == theO) {
+			return true;
+		}
 
-		if (!(theO instanceof TermValueSetConcept)) return false;
-
-		TermValueSetConcept that = (TermValueSetConcept) theO;
+		if (!(theO instanceof TermValueSetConcept that)) {
+			return false;
+		}
 
 		return new EqualsBuilder()
 				.append(myValueSetPid, that.myValueSetPid)
@@ -315,6 +319,10 @@ public class TermValueSetConcept extends BasePartitionable implements Serializab
 
 	public void setSourceConceptPid(Long theSourceConceptPid) {
 		mySourceConceptPid = theSourceConceptPid;
+	}
+
+	public Long getSourceConceptPid() {
+		return mySourceConceptPid;
 	}
 
 	public void setSourceConceptDirectParentPids(String theSourceConceptDirectParentPids) {

@@ -53,6 +53,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hl7.fhir.r4.model.DateTimeType;
 
+import java.io.Serial;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -60,7 +61,7 @@ import java.util.Date;
 @EntityListeners(IndexStorageOptimizationListener.class)
 @Entity
 @Table(
-		name = "HFJ_SPIDX_DATE",
+		name = ResourceIndexedSearchParamDate.HFJ_SPIDX_DATE,
 		indexes = {
 			// We previously had an index called IDX_SP_DATE - Dont reuse
 			@Index(
@@ -82,6 +83,9 @@ import java.util.Date;
 @IdClass(IdAndPartitionId.class)
 public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchParam {
 
+	public static final String HFJ_SPIDX_DATE = "HFJ_SPIDX_DATE";
+
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Column(name = "SP_VALUE_HIGH", nullable = true)

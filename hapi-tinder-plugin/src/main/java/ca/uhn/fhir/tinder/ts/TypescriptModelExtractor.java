@@ -1,0 +1,404 @@
+package ca.uhn.fhir.tinder.ts;
+
+// Created by Claude Opus 4.8
+
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeChildExtension;
+import ca.uhn.fhir.context.RuntimeChildPrimitiveBoundCodeDatatypeDefinition;
+import ca.uhn.fhir.context.RuntimeChildPrimitiveEnumerationDatatypeDefinition;
+import ca.uhn.fhir.context.RuntimeChildResourceBlockDefinition;
+import ca.uhn.fhir.context.RuntimeChildUndeclaredExtensionDefinition;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+
+/**
+ * Walks HAPI's runtime model ({@link RuntimeResourceDefinition} and friends) for a given
+ * {@link FhirContext} and produces a version-agnostic {@link TsModel} describing the equivalent
+ * TypeScript interfaces and enumerations.
+ *
+ * <p>
+ * Because all traversal goes through the runtime model rather than version-specific spreadsheets, the
+ * same extractor works for DSTU2 through R5.
+ * </p>
+ */
+public class TypescriptModelExtractor {
+
+	private static final Logger ourLog = LoggerFactory.getLogger(TypescriptModelExtractor.class);
+
+	// integer64 is deliberately excluded: its 64-bit range exceeds TypeScript's max safe integer (2^53),
+	// so — like the FHIR spec, which serializes it as a JSON string — it is mapped to string, not number.
+	// See https://hl7.org/fhir/R5/datatypes.html#integer64
+	private static final Set<String> NUMERIC_PRIMITIVES = Set.of("integer", "decimal", "unsignedint", "positiveint");
+
+	/**
+	 * Element names that are supplied by the base interfaces ({@code Element}, {@code BackboneElement},
+	 * {@code Resource}, {@code DomainResource}) and therefore must not be re-declared on concrete
+	 * resources, datatypes or backbone elements.
+	 */
+	private static final Set<String> BASE_FIELD_NAMES =
+			Set.of("id", "extension", "modifierExtension", "meta", "implicitRules", "language", "text", "contained");
+
+	private static final String BASE_ELEMENT = "Element";
+	private static final String BASE_BACKBONE_ELEMENT = "BackboneElement";
+	private static final String BASE_RESOURCE = "Resource";
+	private static final String BASE_DOMAIN_RESOURCE = "DomainResource";
+
+	private static final Set<String> RESERVED_BASE_NAMES =
+			Set.of(BASE_ELEMENT, BASE_BACKBONE_ELEMENT, BASE_RESOURCE, BASE_DOMAIN_RESOURCE);
+
+	/**
+	 * The category of composite being generated, which determines its base interface and which members
+	 * it declares directly.
+	 */
+	private enum Kind {
+		RESOURCE,
+		DATATYPE,
+		BACKBONE
+	}
+
+	private final FhirContext myContext;
+
+	/**
+	 * Maps each composite implementing class to the TypeScript interface name it was assigned. Keyed by
+	 * class rather than name so that recursive backbone elements (e.g. {@code Questionnaire.item.item})
+	 * resolve to a single interface instead of recursing forever.
+	 */
+	private final Map<Class<?>, String> myInterfaceNamesByClass = new HashMap<>();
+
+	public TypescriptModelExtractor(FhirContext theContext) {
+		myContext = theContext;
+	}
+
+	/**
+	 * Extract every resource and complex datatype known to the configured {@link FhirContext}.
+	 */
+	public TsModel extract() {
+		TsModel model = new TsModel(myContext.getVersion().getVersion().name());
+
+		addBaseInterfaces(model);
+
+		List<String> resourceNames = new ArrayList<>(myContext.getResourceTypes());
+		resourceNames.sort(String.CASE_INSENSITIVE_ORDER);
+		for (String nextResourceName : resourceNames) {
+			RuntimeResourceDefinition def = myContext.getResourceDefinition(nextResourceName);
+			processComposite(def, def.getName(), Kind.RESOURCE, model);
+		}
+
+		// Complex datatypes are largely reached transitively, but enumerate them explicitly so that
+		// unreferenced datatypes are still emitted.
+		for (BaseRuntimeElementDefinition<?> nextDef : myContext.getElementDefinitions()) {
+			if (nextDef.getChildType() == ChildTypeEnum.COMPOSITE_DATATYPE
+					&& nextDef instanceof BaseRuntimeElementCompositeDefinition) {
+				processComposite(
+						(BaseRuntimeElementCompositeDefinition<?>) nextDef, nextDef.getName(), Kind.DATATYPE, model);
+			}
+		}
+
+		return model;
+	}
+
+	/**
+	 * Emits the four canonical FHIR base interfaces that every generated type extends. These mirror the
+	 * HAPI/FHIR base hierarchy: {@code Element} ← {@code BackboneElement}, and {@code Resource} ←
+	 * {@code DomainResource}. They are synthesized rather than introspected because HAPI does not expose
+	 * runtime definitions for abstract base classes. Note that {@code Resource} deliberately has no
+	 * {@code resourceType} member — like the Java model, the discriminator lives on each concrete
+	 * resource.
+	 */
+	private void addBaseInterfaces(TsModel theModel) {
+		TsInterface element = new TsInterface(BASE_ELEMENT);
+		element.addProperty(new TsProperty("id", "string", TsTypeKind.PRIMITIVE, false, true));
+		element.addProperty(new TsProperty("extension", "Extension", TsTypeKind.INTERFACE, true, true));
+		theModel.addInterface(element);
+
+		TsInterface backbone = new TsInterface(BASE_BACKBONE_ELEMENT);
+		backbone.setExtendsName(BASE_ELEMENT);
+		backbone.addProperty(new TsProperty("modifierExtension", "Extension", TsTypeKind.INTERFACE, true, true));
+		theModel.addInterface(backbone);
+
+		TsInterface resource = new TsInterface(BASE_RESOURCE);
+		resource.addProperty(new TsProperty("id", "string", TsTypeKind.PRIMITIVE, false, true));
+		resource.addProperty(new TsProperty("meta", "Meta", TsTypeKind.INTERFACE, false, true));
+		resource.addProperty(new TsProperty("implicitRules", "string", TsTypeKind.PRIMITIVE, false, true));
+		resource.addProperty(new TsProperty("language", "string", TsTypeKind.PRIMITIVE, false, true));
+		theModel.addInterface(resource);
+
+		TsInterface domainResource = new TsInterface(BASE_DOMAIN_RESOURCE);
+		domainResource.setExtendsName(BASE_RESOURCE);
+		domainResource.addProperty(new TsProperty("text", "Narrative", TsTypeKind.INTERFACE, false, true));
+		domainResource.addProperty(new TsProperty("contained", "Resource", TsTypeKind.INTERFACE, true, true));
+		domainResource.addProperty(new TsProperty("extension", "Extension", TsTypeKind.INTERFACE, true, true));
+		domainResource.addProperty(new TsProperty("modifierExtension", "Extension", TsTypeKind.INTERFACE, true, true));
+		theModel.addInterface(domainResource);
+	}
+
+	/**
+	 * Builds the interface for a composite definition if it has not already been built, and returns the
+	 * canonical interface name to use when referencing it.
+	 *
+	 * @param theProposedName the name to assign if this is the first time the definition is seen
+	 * @return the interface name actually assigned to this definition's implementing class
+	 */
+	private String processComposite(
+			BaseRuntimeElementCompositeDefinition<?> theDefinition,
+			String theProposedName,
+			Kind theKind,
+			TsModel theModel) {
+		// Never overwrite a synthesized base interface (defensive: no concrete type uses these names).
+		if (RESERVED_BASE_NAMES.contains(theProposedName) && theModel.hasInterface(theProposedName)) {
+			return theProposedName;
+		}
+
+		Class<?> implClass = theDefinition.getImplementingClass();
+		String existing = myInterfaceNamesByClass.get(implClass);
+		if (existing != null) {
+			return existing;
+		}
+
+		// Register the name before recursing so that self-referential structures terminate.
+		myInterfaceNamesByClass.put(implClass, theProposedName);
+
+		TsInterface iface = new TsInterface(theProposedName);
+		iface.setExtendsName(baseInterfaceFor(theDefinition, theKind));
+		theModel.addInterface(iface);
+
+		// Each concrete resource carries a string-literal discriminator, mirroring how the Java model
+		// derives the resource type from the class rather than a field on the Resource base.
+		if (theKind == Kind.RESOURCE) {
+			iface.addProperty(new TsProperty(
+					"resourceType", "'" + theDefinition.getName() + "'", TsTypeKind.PRIMITIVE, false, false));
+		}
+
+		for (BaseRuntimeChildDefinition nextChild : theDefinition.getChildren()) {
+			// Members supplied by the base interfaces are inherited, not re-declared.
+			if (BASE_FIELD_NAMES.contains(nextChild.getElementName())) {
+				continue;
+			}
+			handleChild(nextChild, theProposedName, iface, theModel);
+		}
+
+		return theProposedName;
+	}
+
+	/**
+	 * Determines which base interface a composite extends. Datatypes extend {@code Element}, backbone
+	 * elements extend {@code BackboneElement}, and resources extend {@code DomainResource} when they
+	 * carry the domain members ({@code text}/{@code contained}) or {@code Resource} otherwise (covering
+	 * Bundle/Parameters/Binary, and DSTU2 which has no separate DomainResource class).
+	 */
+	private static String baseInterfaceFor(BaseRuntimeElementCompositeDefinition<?> theDefinition, Kind theKind) {
+		switch (theKind) {
+			case DATATYPE:
+				return BASE_ELEMENT;
+			case BACKBONE:
+				return BASE_BACKBONE_ELEMENT;
+			case RESOURCE:
+			default:
+				boolean domain = theDefinition.getChildren().stream()
+						.anyMatch(t -> "text".equals(t.getElementName()) || "contained".equals(t.getElementName()));
+				return domain ? BASE_DOMAIN_RESOURCE : BASE_RESOURCE;
+		}
+	}
+
+	private void handleChild(
+			BaseRuntimeChildDefinition theChild, String theOwnerName, TsInterface theInterface, TsModel theModel) {
+
+		boolean array = theChild.isMultipleCardinality();
+		boolean optional = theChild.getMin() == 0;
+
+		// Extensions are open-ended, so they are modelled via the Extension datatype rather than by
+		// recursing (their internal child naming does not round-trip through getChildByName).
+		if (theChild instanceof RuntimeChildExtension
+				|| theChild instanceof RuntimeChildUndeclaredExtensionDefinition) {
+			theInterface.addProperty(
+					new TsProperty(theChild.getElementName(), "Extension", TsTypeKind.INTERFACE, array, optional));
+			return;
+		}
+
+		// Backbone (nested) elements become their own interface named <Owner><Element>.
+		if (theChild instanceof RuntimeChildResourceBlockDefinition) {
+			String elementName = theChild.getElementName();
+			String blockName = theOwnerName + StringUtils.capitalize(stripChoiceSuffix(elementName));
+			BaseRuntimeElementDefinition<?> blockDef = theChild.getChildByName(elementName);
+			if (blockDef instanceof BaseRuntimeElementCompositeDefinition) {
+				String resolvedName = processComposite(
+						(BaseRuntimeElementCompositeDefinition<?>) blockDef, blockName, Kind.BACKBONE, theModel);
+				theInterface.addProperty(
+						new TsProperty(elementName, resolvedName, TsTypeKind.INTERFACE, array, optional));
+			}
+			return;
+		}
+
+		// Bound codes (primitive) become a string-literal union alias. Composite bound types (e.g. a
+		// bound CodeableConcept) are intentionally left to the generic path so they keep their structure.
+		Class<? extends Enum<?>> boundEnumType = getBoundEnumType(theChild);
+		if (boundEnumType != null) {
+			String enumName = registerEnum(boundEnumType, theModel);
+			if (enumName != null) {
+				theInterface.addProperty(
+						new TsProperty(theChild.getElementName(), enumName, TsTypeKind.ENUM, array, optional));
+			} else {
+				theInterface.addProperty(
+						new TsProperty(theChild.getElementName(), "string", TsTypeKind.PRIMITIVE, array, optional));
+			}
+			return;
+		}
+
+		// Everything else (primitives, composite datatypes and choice[x] elements) is resolved through
+		// the set of valid child names. A choice element exposes more than one name.
+		Set<String> validNames = new TreeSet<>(theChild.getValidChildNames());
+		boolean isChoice = validNames.size() > 1;
+		for (String nextName : validNames) {
+			BaseRuntimeElementDefinition<?> elementDef = theChild.getChildByName(nextName);
+			if (elementDef == null) {
+				continue;
+			}
+			ResolvedType resolved = resolveType(elementDef, theModel);
+			if (resolved == null) {
+				continue;
+			}
+			theInterface.addProperty(
+					new TsProperty(nextName, resolved.typeName, resolved.kind, array, optional || isChoice));
+		}
+	}
+
+	private ResolvedType resolveType(BaseRuntimeElementDefinition<?> theDefinition, TsModel theModel) {
+		switch (theDefinition.getChildType()) {
+			case PRIMITIVE_DATATYPE:
+			case ID_DATATYPE:
+			case PRIMITIVE_XHTML:
+			case PRIMITIVE_XHTML_HL7ORG:
+				return new ResolvedType(mapPrimitive(theDefinition.getName()), TsTypeKind.PRIMITIVE);
+			case COMPOSITE_DATATYPE:
+				if (theDefinition instanceof BaseRuntimeElementCompositeDefinition) {
+					String resolvedName = processComposite(
+							(BaseRuntimeElementCompositeDefinition<?>) theDefinition,
+							theDefinition.getName(),
+							Kind.DATATYPE,
+							theModel);
+					return new ResolvedType(resolvedName, TsTypeKind.INTERFACE);
+				}
+				return new ResolvedType(theDefinition.getName(), TsTypeKind.INTERFACE);
+			case RESOURCE:
+				return new ResolvedType("any", TsTypeKind.PRIMITIVE);
+			default:
+				// Contained resources, extensions, etc. are not modelled as concrete properties here.
+				return null;
+		}
+	}
+
+	private static String mapPrimitive(String theFhirTypeName) {
+		String name = theFhirTypeName.toLowerCase();
+		if (NUMERIC_PRIMITIVES.contains(name)) {
+			return "number";
+		}
+		if (name.equals("boolean")) {
+			return "boolean";
+		}
+		return "string";
+	}
+
+	/**
+	 * Returns the bound Java enum type for a primitive bound-code child (either the HL7.org-style
+	 * enumeration child or the DSTU2-style bound-code child), or {@code null} if the child is not a
+	 * primitive bound code.
+	 */
+	private static Class<? extends Enum<?>> getBoundEnumType(BaseRuntimeChildDefinition theChild) {
+		if (theChild instanceof RuntimeChildPrimitiveEnumerationDatatypeDefinition) {
+			return ((RuntimeChildPrimitiveEnumerationDatatypeDefinition) theChild).getBoundEnumType();
+		}
+		if (theChild instanceof RuntimeChildPrimitiveBoundCodeDatatypeDefinition) {
+			return ((RuntimeChildPrimitiveBoundCodeDatatypeDefinition) theChild).getBoundEnumType();
+		}
+		return null;
+	}
+
+	/**
+	 * Builds (or reuses) a {@link TsEnum} for a bound-code element by reflecting the code values out of
+	 * the bound Java enum. Returns the enum's TypeScript name, or {@code null} if the codes could not be
+	 * determined (in which case the caller falls back to a plain string).
+	 */
+	private String registerEnum(Class<? extends Enum<?>> theEnumType, TsModel theModel) {
+		Class<? extends Enum<?>> enumType = theEnumType;
+		if (enumType == null) {
+			return null;
+		}
+
+		String enumName = StringUtils.removeEnd(enumType.getSimpleName(), "Enum");
+		if (theModel.hasEnum(enumName)) {
+			return enumName;
+		}
+
+		Collection<String> codes = extractCodes(enumType);
+		if (codes.isEmpty()) {
+			return null;
+		}
+
+		theModel.addEnum(new TsEnum(enumName, codes));
+		return enumName;
+	}
+
+	private static Collection<String> extractCodes(Class<? extends Enum<?>> theEnumType) {
+		// LinkedHashSet so duplicate codes are dropped while generation order stays deterministic.
+		Set<String> codes = new LinkedHashSet<>();
+		Method codeMethod = findCodeMethod(theEnumType);
+		if (codeMethod == null) {
+			return codes;
+		}
+		for (Object constant : theEnumType.getEnumConstants()) {
+			try {
+				Object value = codeMethod.invoke(constant);
+				if (value instanceof String) {
+					String code = (String) value;
+					if (StringUtils.isNotBlank(code) && !code.equals("?")) {
+						codes.add(code);
+					}
+				}
+			} catch (Exception e) {
+				ourLog.debug("Failed to read code from {}: {}", theEnumType.getName(), e.toString());
+			}
+		}
+		return codes;
+	}
+
+	private static Method findCodeMethod(Class<?> theEnumType) {
+		for (String candidate : new String[] {"toCode", "getCode"}) {
+			try {
+				return theEnumType.getMethod(candidate);
+			} catch (NoSuchMethodException e) {
+				// try the next candidate
+			}
+		}
+		return null;
+	}
+
+	private static String stripChoiceSuffix(String theElementName) {
+		return StringUtils.removeEnd(theElementName, "[x]");
+	}
+
+	private static final class ResolvedType {
+		private final String typeName;
+		private final TsTypeKind kind;
+
+		private ResolvedType(String theTypeName, TsTypeKind theKind) {
+			typeName = theTypeName;
+			kind = theKind;
+		}
+	}
+}

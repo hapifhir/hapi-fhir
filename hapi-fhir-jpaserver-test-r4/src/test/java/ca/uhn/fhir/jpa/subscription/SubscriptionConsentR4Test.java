@@ -31,45 +31,6 @@ import static org.assertj.core.api.Assertions.fail;
 public class SubscriptionConsentR4Test extends BaseSubscriptionsR4Test {
 
 	@Nested
-	class WithRejectingConsentInterceptorTest {
-		private final RejectingConsentService myConsentService = new RejectingConsentService();
-		private final ConsentInterceptor myConsentInterceptor = new ConsentInterceptor(myConsentService) {
-			@Override
-			protected boolean isSkipServiceForRequest(RequestDetails theRequestDetails) {
-				return false;
-			}
-		};
-
-		@BeforeEach
-		void beforeRegisterInterceptor() {
-			myInterceptorRegistry.registerInterceptor(myConsentInterceptor);
-		}
-
-		@AfterEach
-		void afterUnregisterInterceptor() {
-			myInterceptorRegistry.unregisterInterceptor(myConsentInterceptor);
-		}
-
-		@Test
-		@Order(1)
-		void testCreateSubscription_throughFhirClient_rejectsReadDuringActivate() throws Exception {
-			// test
-			try {
-				createSubscription();
-			} catch (ResourceNotFoundException e) {
-				fail("Should be able to create a subscription", e);
-			}
-
-			try {
-				waitForActivatedSubscriptionCount(1);
-				fail("Should not be able to activate a subscription");
-			} catch (IllegalStateException e) {
-				// ok
-			}
-		}
-	}
-
-	@Nested
 	class WithDefaultConsentInterceptorTest {
 		private final TestConsentService myConsentService = new TestConsentService();
 		private final ConsentInterceptor myConsentInterceptor = new ConsentInterceptor(myConsentService);

@@ -41,9 +41,10 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.Objects;
 
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.NO_MORE;
+
 public class SearchQueryExecutor implements ISearchQueryExecutor {
 
-	private static final JpaPid NO_MORE = JpaPid.fromId(-1L);
 	private static final SearchQueryExecutor NO_VALUE_EXECUTOR = new SearchQueryExecutor();
 	private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchQueryExecutor.class);

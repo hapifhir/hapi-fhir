@@ -68,7 +68,7 @@ public class SubscriptionTriggerMatcher {
 		myDao = mySubscriptionTopicSupport.getDaoRegistry().getResourceDao(myResourceName);
 		myTrigger = theTrigger;
 		myPreviousVersionReader = new PreviousVersionReader(myDao);
-		mySrd = new SystemRequestDetails();
+		mySrd = SystemRequestDetails.forRequestPartitionId(theMsg.getPartitionId());
 		myMemoryCacheService = theMemoryCacheService;
 	}
 
@@ -106,7 +106,8 @@ public class SubscriptionTriggerMatcher {
 			if (myOperation == ResourceModifiedMessage.OperationTypeEnum.UPDATE
 					|| myOperation == ResourceModifiedMessage.OperationTypeEnum.DELETE) {
 
-				Optional<IBaseResource> oPreviousVersion = myPreviousVersionReader.readPreviousVersion(myResource);
+				Optional<IBaseResource> oPreviousVersion =
+						myPreviousVersionReader.readPreviousVersion(myResource, false, mySrd.getRequestPartitionId());
 				if (oPreviousVersion.isPresent()) {
 					previousMatches = matchResource(oPreviousVersion.get(), previousCriteria);
 				} else {
@@ -140,7 +141,8 @@ public class SubscriptionTriggerMatcher {
 					if ("current".equalsIgnoreCase(theName)) return List.of(myResource);
 
 					if ("previous".equalsIgnoreCase(theName)) {
-						Optional previousResource = myPreviousVersionReader.readPreviousVersion(myResource);
+						Optional previousResource = myPreviousVersionReader.readPreviousVersion(
+								myResource, false, mySrd.getRequestPartitionId());
 						if (previousResource.isPresent()) return List.of((IBase) previousResource.get());
 					}
 

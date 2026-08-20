@@ -39,7 +39,6 @@ import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.IChannelTypeValidator;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.SubscriptionChannelTypeValidatorFactory;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.SubscriptionQueryValidator;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -180,7 +179,7 @@ public class SubscriptionValidatingInterceptor {
 									+ "This server is configured to only allow in-memory subscriptions. This subscription's criteria cannot be evaluated in-memory.");
 				}
 				mySubscriptionCanonicalizer.setMatchingStrategyTag(theSubscription, strategy);
-			} catch (InvalidRequestException | DataFormatException e) {
+			} catch (InvalidRequestException e) {
 				throw new UnprocessableEntityException(Msg.code(9) + "Invalid subscription criteria submitted: "
 						+ subscription.getCriteriaString() + " " + e.getMessage());
 			}

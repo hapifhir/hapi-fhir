@@ -98,6 +98,13 @@ public interface IWorkChunkPersistence {
 	void onWorkChunkPollDelay(String theChunkId, Date theNewDeadline);
 
 	/**
+	 * Updates the workchunk's "lastHeartbeat" value.
+	 * @param theChunkId - the id of the workchunk to update
+	 */
+	@Transactional
+	void onWorkChunkHeartbeat(String theChunkId);
+
+	/**
 	 * An unrecoverable error.
 	 * Transition to {@link WorkChunkStatusEnum#FAILED}
 	 *

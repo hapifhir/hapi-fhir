@@ -23,6 +23,7 @@ import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.util.JsonDateDeserializer;
 import ca.uhn.fhir.rest.server.util.JsonDateSerializer;
 import ca.uhn.fhir.util.JsonUtil;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -89,6 +90,21 @@ public class WorkChunk extends WorkChunkMetadata {
 
 	@JsonProperty(value = "warningMessage", access = JsonProperty.Access.READ_ONLY)
 	private String myWarningMessage;
+
+	/**
+	 * A 'heartbeat' value.
+	 * Set (and updated) during workchunk processing.
+	 *
+	 * Should this value get too great and the workchunk is still in IN_PROGRESS,
+	 * we'll know that the workchunk processor has failed.
+	 */
+	@JsonProperty("lastHeartbeat")
+	@JsonSerialize(using = JsonDateSerializer.class)
+	@JsonDeserialize(using = JsonDateDeserializer.class)
+	private Date myLastHeartbeat;
+
+	@JsonIgnore
+	private WorkChunkStatusEnum myPreviousStatus;
 
 	/**
 	 * Constructor
@@ -238,6 +254,22 @@ public class WorkChunk extends WorkChunkMetadata {
 		return getId() != null && getId().equals(REDUCTION_STEP_CHUNK_ID_PLACEHOLDER);
 	}
 
+	public Date getLastHeartbeat() {
+		return myLastHeartbeat;
+	}
+
+	public void setLastHeartbeat(Date theLastHeartbeat) {
+		myLastHeartbeat = theLastHeartbeat;
+	}
+
+	public WorkChunkStatusEnum getPreviousStatus() {
+		return myPreviousStatus;
+	}
+
+	public void setPreviousStatus(WorkChunkStatusEnum thePreviousStatus) {
+		myPreviousStatus = thePreviousStatus;
+	}
+
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this);
@@ -267,6 +299,7 @@ public class WorkChunk extends WorkChunkMetadata {
 		if (isNotBlank(myWarningMessage)) {
 			b.append("WarningMessage", myWarningMessage);
 		}
+		b.append("LastHeartbeat", myLastHeartbeat);
 		return b.toString();
 	}
 }

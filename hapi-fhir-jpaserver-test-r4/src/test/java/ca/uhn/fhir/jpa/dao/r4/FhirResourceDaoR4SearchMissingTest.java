@@ -329,7 +329,7 @@ public class FhirResourceDaoR4SearchMissingTest {
 			}
 
 			long valueQuantityHashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(new PartitionSettings(),
-				RequestPartitionId.defaultPartition(), "Observation", "value-quantity");
+				RequestPartitionId.fromPartitionId(null), "Observation", "value-quantity");
 			runInTransaction(() -> {
 				ourLog.info("Quantity Indexes:\n * {}",
 					myResourceIndexedSearchParamQuantityDao.findAll().stream()

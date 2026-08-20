@@ -29,12 +29,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
@@ -55,8 +56,11 @@ import static org.mockito.Mockito.when;
 /**
  * Tests copied from jpa.subscription.resthook.RestHookTestDstu3Test
  */
+@ExtendWith(MockitoExtension.class)
 public class SubscriptionMatchingListenerTest extends BaseBlockingQueueSubscribableChannelDstu3Test {
-	private final IFhirResourceDao<Subscription> myMockSubscriptionDao = Mockito.mock(IFhirResourceDao.class);
+
+	@Autowired
+	private IFhirResourceDao<Subscription> myMockSubscriptionDao;
 
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
@@ -64,8 +68,6 @@ public class SubscriptionMatchingListenerTest extends BaseBlockingQueueSubscriba
 	@BeforeEach
 	public void beforeEach() {
 		when(myRequestPartitionHelperSvc.isDefaultPartition(any(RequestPartitionId.class))).thenReturn(Boolean.TRUE);
-		when(myMockSubscriptionDao.getResourceType()).thenReturn(Subscription.class);
-		myDaoRegistry.register(myMockSubscriptionDao);
 	}
 
 	@AfterEach
@@ -228,7 +230,7 @@ public class SubscriptionMatchingListenerTest extends BaseBlockingQueueSubscriba
 		String code = "1000000050";
 		String criteria = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
-		RequestPartitionId requestPartitionId = RequestPartitionId.defaultPartition();
+		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(null);
 		Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
 		subscription.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new org.hl7.fhir.dstu3.model.BooleanType().setValue(true));
 		mockSubscriptionRead(requestPartitionId, subscription);
@@ -273,7 +275,7 @@ public class SubscriptionMatchingListenerTest extends BaseBlockingQueueSubscriba
 		String code = "1000000050";
 		String criteria = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
-		RequestPartitionId requestPartitionId = RequestPartitionId.defaultPartition();
+		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(null);
 		Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
 		subscription.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new org.hl7.fhir.dstu3.model.BooleanType().setValue(true));
 		mockSubscriptionRead(requestPartitionId, subscription);
@@ -297,7 +299,7 @@ public class SubscriptionMatchingListenerTest extends BaseBlockingQueueSubscriba
 		String code = "1000000050";
 		String criteria = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
-		RequestPartitionId subscriptionPartitionId = RequestPartitionId.defaultPartition();
+		RequestPartitionId subscriptionPartitionId = RequestPartitionId.fromPartitionId(null);
 		Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
 		subscription.addExtension().setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION).setValue(new BooleanType(true));
 		mockSubscriptionRead(subscriptionPartitionId, subscription);
@@ -319,7 +321,7 @@ public class SubscriptionMatchingListenerTest extends BaseBlockingQueueSubscriba
 		String code = "1000000050";
 		String criteria = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
-		RequestPartitionId subscriptionPartitionId = RequestPartitionId.defaultPartition();
+		RequestPartitionId subscriptionPartitionId = RequestPartitionId.fromPartitionId(null);
 		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
 		Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
 		subscription.addExtension().setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION).setValue(new BooleanType(true));
@@ -342,7 +344,7 @@ public class SubscriptionMatchingListenerTest extends BaseBlockingQueueSubscriba
 		String code = "1000000050";
 		String criteria = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
-		RequestPartitionId subscriptionPartitionId = RequestPartitionId.defaultPartition();
+		RequestPartitionId subscriptionPartitionId = RequestPartitionId.fromPartitionId(null);
 		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
 		RequestPartitionId requestPartitionId2 = RequestPartitionId.fromPartitionId(2);
 		Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
@@ -397,7 +399,6 @@ public class SubscriptionMatchingListenerTest extends BaseBlockingQueueSubscriba
 			when(message.getOperationType()).thenReturn(BaseResourceModifiedMessage.OperationTypeEnum.DELETE);
 			when(myInterceptorBroadcaster.callHooks(
 				eq(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED), any(HookParams.class))).thenReturn(true);
-			when(mySubscriptionRegistry.getAll()).thenReturn(Collections.emptyList());
 			when(myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(any())).thenReturn(Optional.ofNullable(message));
 
 			subscriber.matchActiveSubscriptionsAndDeliver(message);

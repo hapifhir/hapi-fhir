@@ -25,7 +25,6 @@ import ca.uhn.fhir.tinder.model.SimpleSetter.Parameter;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.apache.maven.plugin.MojoFailureException;
@@ -56,6 +55,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -556,7 +556,7 @@ public abstract class BaseStructureParser {
 		ctx.put("requirements", defaultString(theResource.getRequirement()));
 		ctx.put("children", theResource.getChildren());
 		ctx.put("resourceBlockChildren", theResource.getResourceBlockChildren());
-		ctx.put("childExtensionTypes", ObjectUtils.defaultIfNull(myExtensions, new ArrayList<Extension>()));
+		ctx.put("childExtensionTypes", getIfNull(myExtensions, new ArrayList<Extension>()));
 		ctx.put("searchParams", (theResource.getSearchParameters()));
 		ctx.put("searchParamsReference", (theResource.getSearchParametersResource()));
 		ctx.put("searchParamsWithoutComposite", (theResource.getSearchParametersWithoutComposite()));

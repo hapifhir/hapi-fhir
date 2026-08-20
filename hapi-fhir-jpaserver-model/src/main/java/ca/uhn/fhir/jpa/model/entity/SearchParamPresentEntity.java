@@ -220,7 +220,8 @@ public class SearchParamPresentEntity extends BasePartitionable implements Seria
 			String theResourceType,
 			String theParamName,
 			Boolean thePresent) {
-		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
+		RequestPartitionId requestPartitionId =
+				PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId, thePartitionSettings);
 		return calculateHashPresence(
 				thePartitionSettings, requestPartitionId, theResourceType, theParamName, thePresent);
 	}

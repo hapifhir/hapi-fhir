@@ -50,7 +50,7 @@ This module acts as a simple terminology service that can validate codes against
 This module contains a series of HashMaps that store loaded conformance resources in memory. Typically this is initialized at startup in order to add custom conformance resources into the chain.
 
 
-<a name="npmpackagevalidationsupport"/>
+<a id="npmpackagevalidationsupport"></a>
 
 # NpmPackageValidationSupport
 
@@ -162,6 +162,12 @@ This module will invoke the following operations on the remote terminology serve
 * **POST [base]/CodeSystem/$validate-code** &ndash; Validate codes in fields where no specific ValueSet is bound 
 * **POST [base]/ValueSet/$validate-code** &ndash; Validate codes in fields where a specific ValueSet is bound 
 
+## Inferring the Code System
+
+When a code is validated but its system cannot be determined locally, this module can send the `inferSystem=true` parameter on `$validate-code` to ask the remote server to infer the system. Because `inferSystem` is an R5+ `$validate-code` parameter that strict R4/DSTU3 servers (e.g. VSAC, CMS) reject, it is only sent for R5 and newer FHIR contexts by default.
+
+Use `setInferSystemEnabled(Boolean)` to override this behavior: `null` (default) sends it only for R5+, `TRUE` always sends it (e.g. for an R4 server that does support it), and `FALSE` never sends it.
+
 # UnknownCodeSystemWarningValidationSupport
 
 [JavaDoc](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/support/UnknownCodeSystemWarningValidationSupport.html) / [Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-validation/src/main/java/org/hl7/fhir/common/hapi/validation/support/UnknownCodeSystemWarningValidationSupport.java)
@@ -202,6 +208,12 @@ When this setting is enabled (`true`), the JPA validation support (database-stor
 <p class="doc_info_bubble">
 <b>Note:</b> Enabling this setting means that any CodeSystem or ValueSet you store in the database with the same URL as a built-in HL7 resource will override the built-in version during validation. Use this setting carefully as it can affect validation behavior for standard FHIR resources.
 </p>
+
+## CodeSystems With `CodeSystem.content` value `not-present`
+
+When the JPA terminology validator (`TermReadSvcImpl`) is asked to validate or look up a code against a CodeSystem whose `CodeSystem.content` value is `not-present`, it does not attempt to resolve the code against the (absent) enumerated concepts. Instead, it returns `null` so the `ValidationSupportChain` can fall through to the next validator in the chain that claims support for the CodeSystem URL. This allows algorithmic validators such as the UCUM validator exposed by [CommonCodeSystemsTerminologyService](#commoncodesystemsterminologyservice), or a configured [RemoteTerminologyServiceValidationSupport](#remoteterminologyservicevalidationsupport), to validate the code.
+
+This applies when a code is validated directly against a CodeSystem (`CodeSystem/$validate-code`), when it is validated through a ValueSet that expands to that CodeSystem (`ValueSet/$validate-code`, including JPA pre-expanded ValueSets), and when looked up via `CodeSystem/$lookup`. If no subsequent module in the chain can validate or look up the code, the normal "code not found" result is returned.
 
 # Recipes
 

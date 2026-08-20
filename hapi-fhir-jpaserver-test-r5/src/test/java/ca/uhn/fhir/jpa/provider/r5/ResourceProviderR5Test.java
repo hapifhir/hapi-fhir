@@ -598,7 +598,8 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
-		assertThat(ids).containsExactlyInAnyOrder(p1Id, c1Id, obs1Id);
+		assertThat(ids).containsExactlyInAnyOrder(c1Id, obs1Id);
+		assertThat(ids).doesNotContain(p1Id);
 		assertThat(ids).doesNotContain(o1Id);
 		assertThat(ids).doesNotContain(m1Id);
 	}
@@ -629,7 +630,8 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
-		assertThat(ids).containsExactlyInAnyOrder(p1Id, c1Id, obs1Id);
+		assertThat(ids).containsExactlyInAnyOrder(c1Id, obs1Id);
+		assertThat(ids).doesNotContain(p1Id);
 		assertThat(ids).doesNotContain(o1Id);
 		assertThat(ids).doesNotContain(m1Id);
 	}
@@ -668,7 +670,8 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
-		assertThat(ids).containsExactlyInAnyOrder(p1Id, c1Id, obs1Id);
+		assertThat(ids).containsExactlyInAnyOrder(c1Id, obs1Id);
+		assertThat(ids).doesNotContain(p1Id);
 		assertThat(ids).doesNotContain(o1Id);
 		assertThat(ids).doesNotContain(m1Id);
 		assertThat(ids).doesNotContain(p2Id);

@@ -12,23 +12,23 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOf
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class NDJsonParserTest {
-	private static FhirContext ourCtx = FhirContext.forR4();
+	private final FhirContext myCtx = FhirContext.forR4Cached();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(NDJsonParserTest.class);
 
 	private String toNDJson(IBaseResource bundle) throws DataFormatException {
-		IParser p = ourCtx.newNDJsonParser();
+		IParser p = myCtx.newNDJsonParser();
 		return p.encodeResourceToString(bundle);
 	}
 
 	private IBaseResource fromNDJson(String ndjson) throws DataFormatException {
-		IParser p = ourCtx.newNDJsonParser();
+		IParser p = myCtx.newNDJsonParser();
 		return p.parseResource(ndjson);
 	} 
 
 	private boolean fhirResourcesEqual(IBaseResource expected, IBaseResource actual) {
 		// I would prefer to use, e.g., EqualsBuilder to do this instead.
-		String encoded_expected = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expected);
-		String encoded_actual = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(actual);
+		String encoded_expected = myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expected);
+		String encoded_actual = myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(actual);
 
 		ourLog.info("Expected: {}", encoded_expected);
  		ourLog.info("Actual  : {}", encoded_actual);
@@ -38,7 +38,7 @@ public class NDJsonParserTest {
 
 	@Test
 	public void testSinglePatientEncodeDecode() {
-		BundleBuilder myBuilder = new BundleBuilder(ourCtx);
+		BundleBuilder myBuilder = new BundleBuilder(myCtx);
 
 		Patient p = new Patient();
 		p.setId("Patient/P1");
@@ -51,7 +51,7 @@ public class NDJsonParserTest {
 
 	@Test
 	public void testEmptyBundleEncodeDecode() {
-		BundleBuilder myBuilder = new BundleBuilder(ourCtx);
+		BundleBuilder myBuilder = new BundleBuilder(myCtx);
 
 		myBuilder.setType("collection");
 		IBaseResource myBundle = myBuilder.getBundle();
@@ -62,7 +62,7 @@ public class NDJsonParserTest {
 
 	@Test
 	public void testThreePatientEncodeDecode() {
-		BundleBuilder myBuilder = new BundleBuilder(ourCtx);
+		BundleBuilder myBuilder = new BundleBuilder(myCtx);
 
 		Patient p = new Patient();
 		p.setId("Patient/P1");
@@ -82,7 +82,7 @@ public class NDJsonParserTest {
 
 	@Test
 	public void testHasNewlinesEncodeDecode() {
-		BundleBuilder myBuilder = new BundleBuilder(ourCtx);
+		BundleBuilder myBuilder = new BundleBuilder(myCtx);
 
 		Patient p = new Patient();
 		p.setId("Patient/P1");
@@ -105,14 +105,14 @@ public class NDJsonParserTest {
 
 	@Test
 	public void testOnlyDecodesBundles() {
-		BundleBuilder myBuilder = new BundleBuilder(ourCtx);
+		BundleBuilder myBuilder = new BundleBuilder(myCtx);
 
 		Patient p = new Patient();
 		p.setId("Patient/P1");
 		myBuilder.addCollectionEntry(p);
 		IBaseResource myBundle = myBuilder.getBundle();
  		String myBundleJson = toNDJson(myBundle);
-		IParser parser = ourCtx.newNDJsonParser();
+		IParser parser = myCtx.newNDJsonParser();
 		assertThatExceptionOfType(DataFormatException.class).isThrownBy(() -> {
 			parser.parseResource(Patient.class, myBundleJson);
 		});

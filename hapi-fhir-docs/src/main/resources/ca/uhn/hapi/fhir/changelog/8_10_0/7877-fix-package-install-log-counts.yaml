@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 7877
+title: "Previously, the package installation summary log reported all resources parsed from the
+  package as 'Created or updated', including resources that were actually skipped (e.g.
+  already existing with reloadExisting=false, or CodeSystems with content=not-present).
+  The log now accurately distinguishes between created, updated, and skipped resources."

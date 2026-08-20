@@ -26,6 +26,15 @@ import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
 /**
  * Dialect for MS SQL Server database.
  * Minimum version: 12.0 (SQL Server 2014 and Azure SQL Database)
+ * <p>
+ * The HAPI FHIR schema uses plain {@code VARCHAR} columns, but the Microsoft SQL Server JDBC
+ * driver sends string parameters as Unicode ({@code NVARCHAR}) by default. The resulting implicit
+ * {@code NVARCHAR}-to-{@code VARCHAR} conversions prevent SQL Server from using indexes on those
+ * columns and can severely degrade query performance. Always add
+ * {@code sendStringParametersAsUnicode=false} to the JDBC connection URL, e.g.:
+ * <pre>
+ * jdbc:sqlserver://localhost:1433;databaseName=hapi;sendStringParametersAsUnicode=false
+ * </pre>
  */
 public class HapiFhirSQLServerDialect extends SQLServerDialect implements IHapiFhirDialect {
 

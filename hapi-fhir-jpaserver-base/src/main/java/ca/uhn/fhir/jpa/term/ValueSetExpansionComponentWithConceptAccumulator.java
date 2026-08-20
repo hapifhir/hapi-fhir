@@ -35,8 +35,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -46,6 +48,7 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 		implements IValueSetConceptAccumulator {
 	private final int myMaxCapacity;
 	private final FhirContext myContext;
+	private final Set<SystemAndCode> myAddedCodes = new HashSet<>();
 	private int mySkipCountRemaining;
 	private int myHardExpansionMaximumSize;
 	private List<String> myMessages;
@@ -73,7 +76,7 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 	@Nonnull
 	@Override
 	public Integer getCapacityRemaining() {
-		return (myMaxCapacity - myAddedConcepts) + mySkipCountRemaining;
+		return Math.max(0, (myMaxCapacity - myAddedConcepts) + mySkipCountRemaining);
 	}
 
 	public List<String> getMessages() {
@@ -97,28 +100,6 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 	}
 
 	@Override
-	public void includeConcept(
-			String theSystem,
-			String theCode,
-			String theDisplay,
-			Long theSourceConceptPid,
-			String theSourceConceptDirectParentPids,
-			String theCodeSystemVersion) {
-		if (mySkipCountRemaining > 0) {
-			mySkipCountRemaining--;
-			return;
-		}
-
-		incrementConceptsCount();
-
-		ValueSet.ValueSetExpansionContainsComponent contains = this.addContains();
-		setSystemAndVersion(theSystem, contains);
-		contains.setCode(theCode);
-		contains.setDisplay(theDisplay);
-		contains.setVersion(theCodeSystemVersion);
-	}
-
-	@Override
 	public void includeConceptWithDesignations(
 			String theSystem,
 			String theCode,
@@ -127,8 +108,16 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 			Long theSourceConceptPid,
 			String theSourceConceptDirectParentPids,
 			String theCodeSystemVersion) {
+
+		if (!myAddedCodes.add(new SystemAndCode(theSystem, theCode))) {
+			return;
+		}
+
 		if (mySkipCountRemaining > 0) {
 			mySkipCountRemaining--;
+			return;
+		}
+		if (getCapacityRemaining() == 0) {
 			return;
 		}
 
@@ -176,7 +165,9 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 	}
 
 	@Override
-	public boolean excludeConcept(String theSystem, String theCode) {
+	public void excludeConcept(String theSystem, String theCode) {
+		myAddedCodes.remove(new SystemAndCode(theSystem, theCode));
+
 		String excludeSystem;
 		String excludeSystemVersion;
 		int versionSeparator = theSystem.indexOf("|");
@@ -188,23 +179,16 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 			excludeSystemVersion = null;
 		}
 		if (excludeSystemVersion != null) {
-			return this.getContains()
+			this.getContains()
 					.removeIf(t -> excludeSystem.equals(t.getSystem())
 							&& theCode.equals(t.getCode())
 							&& excludeSystemVersion.equals(t.getVersion()));
 		} else {
-			return this.getContains().removeIf(t -> theSystem.equals(t.getSystem()) && theCode.equals(t.getCode()));
+			this.getContains().removeIf(t -> theSystem.equals(t.getSystem()) && theCode.equals(t.getCode()));
 		}
 	}
 
 	private void incrementConceptsCount() {
-		Integer capacityRemaining = getCapacityRemaining();
-		if (capacityRemaining == 0) {
-			String msg = myContext.getLocalizer().getMessage(TermReadSvcImpl.class, "expansionTooLarge", myMaxCapacity);
-			msg = appendAccumulatorMessages(msg);
-			throw new ExpansionTooCostlyException(Msg.code(831) + msg);
-		}
-
 		if (myHardExpansionMaximumSize > 0 && myAddedConcepts > myHardExpansionMaximumSize) {
 			String msg = myContext
 					.getLocalizer()

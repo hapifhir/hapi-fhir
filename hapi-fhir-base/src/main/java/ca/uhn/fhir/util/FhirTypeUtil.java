@@ -19,6 +19,9 @@
  */
 package ca.uhn.fhir.util;
 
+/**
+ * Utility methods for classifying FHIR types by name.
+ */
 public final class FhirTypeUtil {
 
 	private FhirTypeUtil() {}
@@ -28,31 +31,30 @@ public final class FhirTypeUtil {
 	 * (ie, a type that is IPrimitiveType), false otherwise.
 	 */
 	public static boolean isPrimitiveType(String theFhirType) {
-		switch (theFhirType) {
-			default:
-				// non-primitive type (or unknown type)
-				return false;
-			case "string":
-			case "code":
-			case "markdown":
-			case "id":
-			case "uri":
-			case "url":
-			case "canonical":
-			case "oid":
-			case "uuid":
-			case "boolean":
-			case "unsignedInt":
-			case "positiveInt":
-			case "decimal":
-			case "integer64":
-			case "integer":
-			case "date":
-			case "dateTime":
-			case "time":
-			case "instant":
-			case "base64Binary":
-				return true;
-		}
+		return switch (theFhirType) {
+			case "string",
+					"code",
+					"markdown",
+					"id",
+					"uri",
+					"url",
+					"canonical",
+					"oid",
+					"uuid",
+					"boolean",
+					"unsignedInt",
+					"positiveInt",
+					"decimal",
+					"integer64",
+					"integer",
+					"date",
+					"dateTime",
+					"time",
+					"instant",
+					"base64Binary" -> true;
+			default ->
+			// non-primitive type (or unknown type)
+			false;
+		};
 	}
 }

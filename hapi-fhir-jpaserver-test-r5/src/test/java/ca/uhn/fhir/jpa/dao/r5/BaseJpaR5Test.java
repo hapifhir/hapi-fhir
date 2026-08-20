@@ -64,7 +64,6 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.PreventDanglingInterceptorsExtension;
@@ -235,8 +234,6 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected ITermConceptParentChildLinkDao myTermConceptParentChildLinkDao;
 	@Autowired
-	protected ITermLoaderSvc myTermLoaderSvc;
-	@Autowired
 	protected ITermCodeSystemVersionDao myTermCodeSystemVersionDao;
 	@Autowired
 	@Qualifier("myCompartmentDefinitionDaoR5")
@@ -359,8 +356,6 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	protected IFulltextSearchSvc mySearchDao;
 	@Autowired(required = false)
 	protected ISearchDao mySearchEntityDao;
-	@Autowired
-	protected IResourceReindexJobDao myResourceReindexJobDao;
 	@Autowired
 	@Qualifier("mySearchParameterDaoR5")
 	protected IFhirResourceDao<SearchParameter> mySearchParameterDao;

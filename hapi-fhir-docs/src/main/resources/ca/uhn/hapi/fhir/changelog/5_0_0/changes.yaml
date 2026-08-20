@@ -21,7 +21,7 @@
     The HAPI FHIR Validation infrastructure has changed significantly under the hood. Existing users of the
     validator may need to change package declarations (as FhirInstanceValidator and several other related classes
     have been moved) and potentially add new modules to their Validation Support Chain. See
-    [Migrating to HAPI FHIR 5.x](/hapi-fhir/docs/validation/instance_validator.html#migrating-to-hapi-fhir-5x)
+    [Migrating to HAPI FHIR 5.x](/hapi-fhir/docs/validation/instance_validator.html#migrating-to-5x)
     for details on how to account for this change in your code.
     "
 - item:

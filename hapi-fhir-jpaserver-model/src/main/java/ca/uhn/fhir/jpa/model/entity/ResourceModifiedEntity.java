@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.model.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -38,7 +39,9 @@ import java.util.Date;
  * of the resource Pid and current version.
  */
 @Entity
-@Table(name = "HFJ_RESOURCE_MODIFIED")
+@Table(
+		name = "HFJ_RESOURCE_MODIFIED",
+		indexes = {@Index(name = "IDX_RES_MOD_CREATED", columnList = "CREATED_TIME")})
 public class ResourceModifiedEntity implements IPersistedResourceModifiedMessage, Serializable {
 
 	public static final int MESSAGE_LENGTH = 4000;

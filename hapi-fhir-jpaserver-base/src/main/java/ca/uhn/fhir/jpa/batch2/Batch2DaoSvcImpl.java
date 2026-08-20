@@ -60,7 +60,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 
 public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 	private static final org.slf4j.Logger ourLog = Logs.getBatchTroubleshootingLog();
@@ -122,7 +122,9 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 
 	@Override
 	public Stream<IdDt> streamSourceIdsThatReferenceTargetId(IIdType theTargetId) {
-		return myResourceLinkDao.streamSourceIdsForTargetFhirId(theTargetId.getResourceType(), theTargetId.getIdPart());
+		return myResourceLinkDao
+				.streamSourceIdsForTargetFhirId(theTargetId.getResourceType(), theTargetId.getIdPart())
+				.map(pid -> new IdDt(pid.getAssociatedResourceId()));
 	}
 
 	private Stream<TypedResourcePid> streamResourceIdsWithUrl(
@@ -133,7 +135,7 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 
 		// Search in all partitions if no partition is provided
 		ourLog.debug("No partition id detected in request - searching all partitions");
-		RequestPartitionId thePartitionId = defaultIfNull(theRequestPartitionId, RequestPartitionId.allPartitions());
+		RequestPartitionId thePartitionId = getIfNull(theRequestPartitionId, RequestPartitionId.allPartitions());
 
 		SearchParameterMap searchParamMap;
 		SystemRequestDetails request = new SystemRequestDetails();

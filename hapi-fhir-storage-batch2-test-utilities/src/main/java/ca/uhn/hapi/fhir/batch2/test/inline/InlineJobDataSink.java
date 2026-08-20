@@ -46,5 +46,4 @@ class InlineJobDataSink<OT extends IModelJson> implements IJobDataSink<OT> {
     public void recoveredError(String theMessage) {
 		// not implemented
 	}
-
 }

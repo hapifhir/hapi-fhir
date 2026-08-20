@@ -481,6 +481,45 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testPatientBulkExport_returnsResourcesBasedOnSince() {
+		// Create Patient BEFORE the _since cutoff
+		Patient patient1 = new Patient();
+		patient1.setId("P1");
+		patient1.setActive(true);
+		myClient.update().resource(patient1).execute();
+
+		Encounter encounter1 = new Encounter();
+		encounter1.setSubject(new Reference("Patient/P1"));
+		String encounterId1 = myClient.create().resource(encounter1).execute().getId().toUnqualifiedVersionless().getValue();
+
+		// Sleep to ensure time separation, then capture the _since timestamp
+		TestUtil.sleepAtLeast(1000);
+		Date since = InstantType.now().getValue();
+
+		Patient patient2 = new Patient();
+		patient2.setId("P2");
+		patient2.setActive(true);
+		myClient.update().resource(patient2).execute();
+
+		Encounter encounter2 = new Encounter();
+		encounter2.setSubject(new Reference("Patient/P2"));
+		String encounterId2 = myClient.create().resource(encounter2).execute().getId().toUnqualifiedVersionless().getValue();
+
+		BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setResourceTypes(Sets.newHashSet("Patient", "Encounter"));
+		options.setFilters(new HashSet<>());
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+
+		// Verify - without _since and both patients and encounters are exported
+		verifyBulkExportResults(options, List.of("Patient/P1", encounterId1, "Patient/P2", encounterId2), List.of());
+
+		// Verify - with _since and only the second patient and encounter show up
+		options.setSince(since);
+		verifyBulkExportResults(options, List.of("Patient/P2", encounterId2), List.of("Patient/P1", encounterId1));
+	}
+
+	@Test
 	public void testBulkExportParametersPersistExtraData() {
 		// setup
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);

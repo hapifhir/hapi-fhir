@@ -19,20 +19,24 @@
  */
 package ca.uhn.fhir.interceptor.model;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.JsonUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.commons.text.StringTokenizer;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.time.LocalDate;
@@ -49,12 +53,21 @@ import java.util.stream.Stream;
 import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 
 /**
+ * {@link Comparable Comparability}: This class is comparable to other instances of the same class. The sort order
+ * places the instance with the lowest partition ID first. The {@literal null} partition ID is considered
+ * to be greater than any other partition ID. Instances with no partition IDs (such as {@link #allPartitions()}
+ * are ordered at the very end.
+ *
  * @since 5.0.0
  */
-public class RequestPartitionId implements IModelJson {
+public class RequestPartitionId implements Comparable<RequestPartitionId>, IModelJson {
 	private static final RequestPartitionId ALL_PARTITIONS = new RequestPartitionId();
 	private static final ObjectMapper ourObjectMapper =
 			new ObjectMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+	public static final String STRINGIFIER_ALL = "(all)";
+	public static final char STRINGIFIER_DELIM = '_';
+	public static final String STRINGIFIER_DELIM_STRING = Character.toString(STRINGIFIER_DELIM);
+	public static final String STRINGIFIER_NULL = "null";
 
 	@JsonProperty("partitionDate")
 	private final LocalDate myPartitionDate;
@@ -109,6 +122,33 @@ public class RequestPartitionId implements IModelJson {
 		myPartitionNames = null;
 		myPartitionIds = null;
 		myAllPartitions = true;
+	}
+
+	@Override
+	public int compareTo(@Nonnull RequestPartitionId theOther) {
+		if (!hasPartitionIds() && !theOther.hasPartitionIds()) {
+			return 0;
+		}
+		if (!hasPartitionIds()) {
+			return 1;
+		}
+		if (!theOther.hasPartitionIds()) {
+			return -1;
+		}
+
+		int thisLowest = getLowestPartitionId();
+		int otherLowest = theOther.getLowestPartitionId();
+		return Integer.compare(thisLowest, otherLowest);
+	}
+
+	private int getLowestPartitionId() {
+		int lowest = Integer.MAX_VALUE;
+		for (Integer id : getPartitionIds()) {
+			if (id != null) {
+				lowest = Math.min(lowest, id);
+			}
+		}
+		return lowest;
 	}
 
 	/**
@@ -403,18 +443,9 @@ public class RequestPartitionId implements IModelJson {
 	 * @since 8.8.0
 	 */
 	@Nonnull
-	public static RequestPartitionId allPartitionsWithPartitionIds(List<Integer> thePartitionIds) {
-		return new RequestPartitionId(null, thePartitionIds, null, true);
-	}
-
-	/**
-	 * @deprecated use {@link RequestPartitionId#defaultPartition(IDefaultPartitionSettings)} instead
-	 */
-	@Deprecated
-	@Nonnull
-	//	TODO GGG: This is a now-bad usage and we should remove it. we cannot assume null means default.
-	public static RequestPartitionId defaultPartition() {
-		return fromPartitionIds(Collections.singletonList(null));
+	public static RequestPartitionId allPartitionsWithPartitionIds(@Nullable List<Integer> thePartitionIds) {
+		List<Integer> partitionIds = thePartitionIds != null && !thePartitionIds.isEmpty() ? thePartitionIds : null;
+		return new RequestPartitionId(null, partitionIds, null, true);
 	}
 
 	/**
@@ -427,13 +458,6 @@ public class RequestPartitionId implements IModelJson {
 	@Nonnull
 	public static RequestPartitionId defaultPartition(IDefaultPartitionSettings theDefaultPartitionSettings) {
 		return fromPartitionId(theDefaultPartitionSettings.getDefaultPartitionId());
-	}
-
-	@Deprecated
-	@Nonnull
-	//	TODO GGG: This is a now-bad usage and we should remove it. we cannot assume null means default.
-	public static RequestPartitionId defaultPartition(@Nullable LocalDate thePartitionDate) {
-		return fromPartitionIds(Collections.singletonList(null), thePartitionDate);
 	}
 
 	@Nonnull
@@ -512,24 +536,76 @@ public class RequestPartitionId implements IModelJson {
 	}
 
 	/**
-	 * Create a string representation suitable for use as a cache key. Null aware.
+	 * Create a string representation suitable for use as a cache key.
 	 * <p>
-	 * Returns the partition IDs (numeric) as a joined string with a space between, using the string "null" for any null values
+	 * Returns the partition IDs (numeric) as a joined string with an
+	 * {@link #STRINGIFIER_DELIM underscore} between, using the string {@link #STRINGIFIER_NULL "null"} for any null
+	 * values.
+	 * </p>
+	 * <p>
+	 * The stringified value will not contain any spaces, and can be parsed back into a {@link RequestPartitionId}
+	 * using {@link #fromStringifiedKey(String)}.
+	 * </p>
+	 * <p>
+	 * This method cannot be used on a RequestPartitionId that has partition names present
+	 * but does not have equivalent partition IDs present. Attempting to do so will result in
+	 * an {@link IllegalArgumentException}.
+	 * </p>
 	 */
 	public static String stringifyForKey(@Nonnull RequestPartitionId theRequestPartitionId) {
+		Validate.notNull(theRequestPartitionId, "theRequestPartitionId must not be null");
+
+		Validate.isTrue(
+				theRequestPartitionId.hasPartitionIds() || !theRequestPartitionId.hasPartitionNames(),
+				"Can not stringify a RequestPartitionId that has names and not IDs present");
+
 		String retVal;
 		if (theRequestPartitionId.hasPartitionIds()) {
 			assert theRequestPartitionId.hasPartitionIds();
 			retVal = theRequestPartitionId.getPartitionIds().stream()
-					.map(t -> getIfNull(t, "null").toString())
-					.collect(Collectors.joining(" "));
+					.map(t -> getIfNull(t, STRINGIFIER_NULL).toString())
+					.collect(Collectors.joining(STRINGIFIER_DELIM_STRING));
 			if (theRequestPartitionId.isAllPartitions()) {
-				retVal = "(all) " + retVal;
+				retVal = STRINGIFIER_ALL + STRINGIFIER_DELIM + retVal;
 			}
 		} else {
-			retVal = "(all)";
+			retVal = STRINGIFIER_ALL;
 		}
 		return retVal;
+	}
+
+	/**
+	 * This method parses a stringified key generated by {@link #stringifyForKey(RequestPartitionId)} back into
+	 * a {@link RequestPartitionId}.
+	 */
+	@Nonnull
+	public static RequestPartitionId fromStringifiedKey(@Nonnull String theInput) {
+		StringTokenizer tok = new StringTokenizer(StringUtils.trim(getIfNull(theInput, "")), STRINGIFIER_DELIM);
+		boolean all = false;
+		List<Integer> partitionIds = new ArrayList<>();
+
+		while (tok.hasNext()) {
+			String next = tok.nextToken();
+			if (STRINGIFIER_ALL.equals(next)) {
+				all = true;
+			} else if (STRINGIFIER_NULL.equals(next)) {
+				partitionIds.add(null);
+			} else {
+				try {
+					partitionIds.add(Integer.parseInt(next));
+				} catch (NumberFormatException e) {
+					throw new IllegalArgumentException(
+							Msg.code(3016) + "Failed to parse stringified request partition key part: "
+									+ UrlUtil.sanitizeUrlPart(next));
+				}
+			}
+		}
+
+		if (all) {
+			return RequestPartitionId.allPartitionsWithPartitionIds(partitionIds);
+		} else {
+			return RequestPartitionId.fromPartitionIds(partitionIds);
+		}
 	}
 
 	public String asJson() throws JsonProcessingException {

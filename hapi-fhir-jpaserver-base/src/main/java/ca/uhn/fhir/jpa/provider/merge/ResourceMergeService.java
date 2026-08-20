@@ -30,12 +30,16 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.dao.PartitionedTransactionPartialFailureException;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
-import ca.uhn.fhir.jpa.provider.CrossPartitionReplaceReferencesResult;
-import ca.uhn.fhir.jpa.provider.CrossPartitionReplaceReferencesSvc;
+import ca.uhn.fhir.jpa.provider.PartitionAwareReplaceReferencesResult;
+import ca.uhn.fhir.jpa.provider.PartitionAwareReplaceReferencesSvc;
+import ca.uhn.fhir.merge.MergeChangeType;
+import ca.uhn.fhir.merge.MergeProvenanceGroupValue;
 import ca.uhn.fhir.merge.MergeResourceHelper;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesPatchBundleSvc;
@@ -47,6 +51,8 @@ import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
+import jakarta.annotation.Nullable;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -57,21 +63,29 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.batch2.jobs.merge.MergeAppCtx.JOB_MERGE;
+import static ca.uhn.fhir.merge.MergeResourceHelper.addErrorToOperationOutcome;
 import static ca.uhn.fhir.merge.MergeResourceHelper.addInfoToOperationOutcome;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_200_OK;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_202_ACCEPTED;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_500_INTERNAL_ERROR;
+import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
 
 /**
  * Service for the FHIR Patient/$merge and [ResourceType]/$hapi.fhir.merge (generic merge) operations.
  */
 public class ResourceMergeService {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceMergeService.class);
+
+	private static final String ISSUE_TYPE_EXCEPTION = "exception";
 
 	private final FhirContext myFhirContext;
 	private final JpaStorageSettings myStorageSettings;
@@ -85,7 +99,7 @@ public class ResourceMergeService {
 	private final MergeResourceHelper myMergeResourceHelper;
 	private final Batch2TaskHelper myBatch2TaskHelper;
 	private final MergeValidationService myMergeValidationService;
-	private final CrossPartitionReplaceReferencesSvc myCrossPartitionReplaceReferencesSvc;
+	private final PartitionAwareReplaceReferencesSvc myPartitionAwareReplaceReferencesSvc;
 	private final PartitionSettings myPartitionSettings;
 
 	public ResourceMergeService(
@@ -99,7 +113,7 @@ public class ResourceMergeService {
 			Batch2TaskHelper theBatch2TaskHelper,
 			MergeValidationService theMergeValidationService,
 			MergeResourceHelper theMergeResourceHelper,
-			CrossPartitionReplaceReferencesSvc theCrossPartitionReplaceReferencesSvc,
+			PartitionAwareReplaceReferencesSvc thePartitionAwareReplaceReferencesSvc,
 			PartitionSettings thePartitionSettings) {
 		myStorageSettings = theStorageSettings;
 		myDaoRegistry = theDaoRegistry;
@@ -114,7 +128,7 @@ public class ResourceMergeService {
 		myHapiTransactionService = theHapiTransactionService;
 		myMergeResourceHelper = theMergeResourceHelper;
 		myMergeValidationService = theMergeValidationService;
-		myCrossPartitionReplaceReferencesSvc = theCrossPartitionReplaceReferencesSvc;
+		myPartitionAwareReplaceReferencesSvc = thePartitionAwareReplaceReferencesSvc;
 		myPartitionSettings = thePartitionSettings;
 	}
 
@@ -143,11 +157,7 @@ public class ResourceMergeService {
 			validateAndMerge(theMergeOperationParameters, theRequestDetails, mergeOutcome);
 		} catch (Exception e) {
 			ourLog.error("Resource merge failed", e);
-			if (e instanceof BaseServerResponseException) {
-				mergeOutcome.setHttpStatusCode(((BaseServerResponseException) e).getStatusCode());
-			} else {
-				mergeOutcome.setHttpStatusCode(STATUS_HTTP_500_INTERNAL_ERROR);
-			}
+			mergeOutcome.setHttpStatusCode(resolveHttpStatusCode(e));
 			OperationOutcomeUtil.addIssue(myFhirContext, operationOutcome, "error", e.getMessage(), null, "exception");
 		}
 		return mergeOutcome;
@@ -166,7 +176,7 @@ public class ResourceMergeService {
 			IBaseResource sourceResource = mergeValidationResult.sourceResource;
 			IBaseResource targetResource = mergeValidationResult.targetResource;
 
-			validateCrossPartitionAsyncNotSupported(sourceResource, targetResource, theRequestDetails);
+			validatePartitionAwareMergeAsyncNotSupported(sourceResource, targetResource, theRequestDetails);
 
 			if (theMergeOperationParameters.getPreview()) {
 				handlePreview(
@@ -217,26 +227,27 @@ public class ResourceMergeService {
 			RequestDetails theRequestDetails,
 			MergeOperationOutcome theMergeOutcome) {
 
-		RequestPartitionId partitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(
-				theRequestDetails, ReadPartitionIdRequestDetails.forRead(theTargetResource.getIdElement()));
-
 		if (theRequestDetails.isPreferAsync()) {
 			doMergeAsync(
 					theMergeOperationParameters,
 					theSourceResource,
 					theTargetResource,
 					theRequestDetails,
-					theMergeOutcome,
-					partitionId);
+					theMergeOutcome);
 		} else {
 			doMergeSync(
 					theMergeOperationParameters,
 					theSourceResource,
 					theTargetResource,
 					theRequestDetails,
-					theMergeOutcome,
-					partitionId);
+					theMergeOutcome);
 		}
+	}
+
+	private RequestPartitionId determineTargetReadPartition(
+			IBaseResource theTargetResource, RequestDetails theRequestDetails) {
+		return myRequestPartitionHelperSvc.determineReadPartitionForRequest(
+				theRequestDetails, ReadPartitionIdRequestDetails.forRead(theTargetResource.getIdElement()));
 	}
 
 	private void doMergeSync(
@@ -244,90 +255,393 @@ public class ResourceMergeService {
 			IBaseResource theSourceResource,
 			IBaseResource theTargetResource,
 			RequestDetails theRequestDetails,
-			MergeOperationOutcome theMergeOutcome,
-			RequestPartitionId partitionId) {
+			MergeOperationOutcome theMergeOutcome) {
 
 		Date startTime = new Date();
 
-		boolean crossPartition = isCrossPartitionMerge(theSourceResource, theTargetResource);
+		boolean partitionAwareMerge = requiresPartitionAwareMerge(theSourceResource, theTargetResource);
 
-		validateResourceLimit(theMergeOperationParameters, theSourceResource, theRequestDetails, crossPartition);
+		validateResourceLimit(theMergeOperationParameters, theSourceResource, theRequestDetails, partitionAwareMerge);
+
+		if (partitionAwareMerge) {
+			doMergeSyncCrossPartition(
+					theMergeOperationParameters,
+					theSourceResource,
+					theTargetResource,
+					theRequestDetails,
+					theMergeOutcome,
+					startTime);
+		} else {
+			doMergeSyncSamePartition(
+					theMergeOperationParameters,
+					theSourceResource,
+					theTargetResource,
+					theRequestDetails,
+					theMergeOutcome,
+					startTime);
+		}
+	}
+
+	private void doMergeSyncSamePartition(
+			MergeOperationInputParameters theMergeOperationParameters,
+			IBaseResource theSourceResource,
+			IBaseResource theTargetResource,
+			RequestDetails theRequestDetails,
+			MergeOperationOutcome theMergeOutcome,
+			Date theStartTime) {
+
+		RequestPartitionId partitionId = determineTargetReadPartition(theTargetResource, theRequestDetails);
 
 		myHapiTransactionService
 				.withRequest(theRequestDetails)
 				.withRequestPartitionId(partitionId)
 				.execute(() -> {
-					// 1. Replace references (nested transactions inside)
-					List<IIdType> changedResourceIds;
-					List<IIdType> copiedResourceOriginalIds = List.of();
-					List<IIdType> resourcesToDeleteIds = new ArrayList<>();
+					// Replace references (nested transactions inside)
+					List<Bundle> responseBundles = replaceReferencesInNestedTransaction(
+							theSourceResource,
+							theTargetResource,
+							theMergeOperationParameters.getResourceLimit(),
+							partitionId,
+							theRequestDetails);
+					List<IIdType> changedResourceIds =
+							ReplaceReferencesProvenanceSvc.extractChangedResourceIds(responseBundles);
 
-					if (crossPartition) {
-						CrossPartitionReplaceReferencesResult copyResult =
-								myCrossPartitionReplaceReferencesSvc.copyCompartmentResourcesAndReplaceReferences(
-										theSourceResource, theTargetResource, theRequestDetails);
-						changedResourceIds = new ArrayList<>(copyResult.getChangedResourceIds());
-						copiedResourceOriginalIds = copyResult.getCopiedResourceOriginalIds();
-						resourcesToDeleteIds.addAll(copiedResourceOriginalIds);
-					} else {
-						List<Bundle> responseBundles = replaceReferencesInNestedTransaction(
-								theSourceResource,
-								theTargetResource,
-								theMergeOperationParameters.getResourceLimit(),
-								partitionId,
-								theRequestDetails);
-						changedResourceIds = ReplaceReferencesProvenanceSvc.extractChangedResourceIds(responseBundles);
-					}
-
-					// 2. Update source/target
+					// Update source/target
 					DaoMethodOutcome outcome = myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
 							theSourceResource,
 							theTargetResource,
 							theMergeOperationParameters.getResultResource(),
 							theMergeOperationParameters.getDeleteSource(),
 							theRequestDetails);
+					theMergeOutcome.setUpdatedTargetResource(outcome.getResource());
 
-					IBaseResource updatedTargetResource = outcome.getResource();
-					theMergeOutcome.setUpdatedTargetResource(updatedTargetResource);
-
-					// 3. Add source patient to resourcesToDeleteIds (unified for both paths)
-					if (theMergeOperationParameters.getDeleteSource()) {
-						resourcesToDeleteIds.add(theSourceResource.getIdElement());
-					}
-
-					// 4. Create provenance (if requested)
+					// Create provenance (if requested)
 					if (theMergeOperationParameters.getCreateProvenance()) {
+						IIdType sourcePostMergeId = theSourceResource.getIdElement();
+						// If the source resource is to be deleted, increment the version id of the source resource to
+						// be put in the provenance. Since the resource will be deleted after the provenance is
+						// created, its version will be incremented by the delete operation.
+						if (theMergeOperationParameters.getDeleteSource()) {
+							sourcePostMergeId = sourcePostMergeId.withVersion(
+									Long.toString(sourcePostMergeId.getVersionIdPartAsLong() + 1));
+						}
 						// we store the original input parameters and the operation outcome of updating target as
 						// contained resources in the provenance. undo-merge service uses these to contained resources.
 						List<IBaseResource> containedResources = List.of(
 								theMergeOperationParameters.getOriginalInputParameters(),
 								outcome.getOperationOutcome());
-
-						// Add tombstone IDs for copied resource originals (version+1).
-						// Source patient tombstone is handled separately inside createProvenance.
-						for (IIdType id : copiedResourceOriginalIds) {
-							changedResourceIds.add(id.withVersion(String.valueOf(id.getVersionIdPartAsLong() + 1)));
-						}
-
 						myMergeResourceHelper.createProvenance(
-								theSourceResource,
-								updatedTargetResource,
+								sourcePostMergeId,
+								outcome.getResource().getIdElement(),
 								changedResourceIds,
-								theMergeOperationParameters.getDeleteSource(),
+								null,
 								theRequestDetails,
-								startTime,
+								theStartTime,
 								theMergeOperationParameters.getProvenanceAgents(),
 								containedResources);
 					}
 
-					// 5. Unified delete (AFTER provenance)
-					if (!resourcesToDeleteIds.isEmpty()) {
-						deleteResources(resourcesToDeleteIds, theRequestDetails);
+					if (theMergeOperationParameters.getDeleteSource()) {
+						deleteResources(List.of(theSourceResource.getIdElement()), theRequestDetails);
 					}
 				});
 
-		String detailsText = "Merge operation completed successfully.";
-		addInfoToOperationOutcome(myFhirContext, theMergeOutcome.getOperationOutcome(), null, detailsText);
+		addMergeCompletedSuccessfully(theMergeOutcome);
+	}
+
+	private void addMergeCompletedSuccessfully(MergeOperationOutcome theMergeOutcome) {
+		addInfoToOperationOutcome(
+				myFhirContext, theMergeOutcome.getOperationOutcome(), null, "Merge operation completed successfully.");
+	}
+
+	private void doMergeSyncCrossPartition(
+			MergeOperationInputParameters theMergeOperationParameters,
+			IBaseResource theSourceResource,
+			IBaseResource theTargetResource,
+			RequestDetails theRequestDetails,
+			MergeOperationOutcome theMergeOutcome,
+			Date theStartTime) {
+
+		// accumulates resources that may have committed, to report for manual cleanup if the merge fails partway
+		List<IIdType> possiblyCommittedResourceIds = new ArrayList<>();
+
+		try {
+			myHapiTransactionService
+					.withRequest(theRequestDetails)
+					.execute(() -> doCrossPartitionForwardSteps(
+							theMergeOperationParameters,
+							theSourceResource,
+							theTargetResource,
+							theRequestDetails,
+							theMergeOutcome,
+							theStartTime,
+							possiblyCommittedResourceIds));
+		} catch (Exception theException) {
+			// when changing partitions doesn't require a new transaction, the whole merge ran in one transaction
+			// that rolls back atomically on failure, so nothing was committed and we just rethrow
+			if (!myHapiTransactionService.isRequiresNewTransactionWhenChangingPartitions()) {
+				throw theException;
+			}
+			ourLog.error("Cross-partition merge failed", theException);
+			Throwable failureCause = theException;
+			// this happens when a nested transaction bundle was split by partition and processed as separate
+			// per-partition transactions, some of which may have committed before a later one failed; this
+			// exception carries the resource ids that were committed
+			if (theException instanceof PartitionedTransactionPartialFailureException partialFailure) {
+				possiblyCommittedResourceIds.addAll(extractCommittedResourceIds(partialFailure));
+				if (partialFailure.getCause() != null) {
+					failureCause = partialFailure.getCause();
+				}
+			}
+			reportFailedCrossPartitionMerge(possiblyCommittedResourceIds, failureCause, theMergeOutcome);
+			return;
+		}
+
+		addMergeCompletedSuccessfully(theMergeOutcome);
+	}
+
+	private void doCrossPartitionForwardSteps(
+			MergeOperationInputParameters theMergeOperationParameters,
+			IBaseResource theSourceResource,
+			IBaseResource theTargetResource,
+			RequestDetails theRequestDetails,
+			MergeOperationOutcome theMergeOutcome,
+			Date theStartTime,
+			List<IIdType> thePossiblyCommittedResourceIds) {
+
+		boolean deleteSource = theMergeOperationParameters.getDeleteSource();
+		RequestPartitionId sourcePartition = getRequiredPartition(theSourceResource);
+		RequestPartitionId targetPartition = getRequiredPartition(theTargetResource);
+
+		PartitionAwareReplaceReferencesResult copyResult =
+				myPartitionAwareReplaceReferencesSvc.copyCompartmentResourcesAndReplaceReferences(
+						theSourceResource, theTargetResource, theRequestDetails);
+		copyResult.getCreatedResourceIdsByPartition().values().forEach(thePossiblyCommittedResourceIds::addAll);
+		copyResult.getUpdatedResourceIdsByPartition().values().forEach(thePossiblyCommittedResourceIds::addAll);
+
+		DaoMethodOutcome outcome = myMergeResourceHelper.updateMergedResourcesAfterReferencesReplaced(
+				theSourceResource,
+				theTargetResource,
+				theMergeOperationParameters.getResultResource(),
+				deleteSource,
+				theRequestDetails);
+		theMergeOutcome.setUpdatedTargetResource(outcome.getResource());
+
+		// The provenance records the source at the version it will hold once the merge fully completes.
+		// If the source is kept it was already updated in place to that version; if it is deleted, the later
+		// delete will tombstone it at the next version, so anticipate that here.
+		IIdType sourcePostMergeId = deleteSource
+				? withVersionIncremented(theSourceResource.getIdElement())
+				: theSourceResource.getIdElement();
+		IIdType targetPostMergeId = outcome.getResource().getIdElement();
+
+		thePossiblyCommittedResourceIds.add(targetPostMergeId);
+		if (!deleteSource) {
+			thePossiblyCommittedResourceIds.add(sourcePostMergeId);
+		}
+
+		if (theMergeOperationParameters.getCreateProvenance()) {
+			createProvenanceGroup(
+					theMergeOperationParameters,
+					copyResult,
+					sourcePostMergeId,
+					sourcePartition,
+					targetPostMergeId,
+					targetPartition,
+					outcome,
+					theStartTime,
+					theRequestDetails,
+					thePossiblyCommittedResourceIds);
+		}
+
+		// Deleted AFTER the provenance: the copied resources' originals and, if requested, the source itself.
+		// This map only ever contains the source partition — referencing resources are only copied out of the
+		// source compartment, and the source lives there too — but we key by partition and delete each
+		// partition's entries in its own partition rather than flattening, which reads more clearly.
+		Map<RequestPartitionId, List<IIdType>> resourcesToDeleteByPartition = new LinkedHashMap<>();
+		copyResult
+				.getCopiedResourceOriginalIdsByOriginalPartition()
+				.forEach((partition, originalIds) -> resourcesToDeleteByPartition
+						.computeIfAbsent(partition, k -> new ArrayList<>())
+						.addAll(originalIds));
+		if (deleteSource) {
+			resourcesToDeleteByPartition
+					.computeIfAbsent(sourcePartition, k -> new ArrayList<>())
+					.add(theSourceResource.getIdElement());
+		}
+
+		resourcesToDeleteByPartition.forEach((partition, idsToDelete) -> {
+			List<IIdType> committedIds = MergeResourceHelper.deleteResourcesInPartitionTransaction(
+					idsToDelete, partition, myDaoRegistry, myHapiTransactionService);
+			thePossiblyCommittedResourceIds.addAll(committedIds);
+		});
+	}
+
+	/**
+	 * Writes the merge's Provenance group: a set of Provenances tied together through a group extension. The main
+	 * Provenance carries the operation's contained resources (the input parameters and outcome); each member
+	 * Provenance carries the actual changed resource references, one per partition and change type. Split this way
+	 * so that $undo-merge has enough information to revert the merge properly.
+	 */
+	private void createProvenanceGroup(
+			MergeOperationInputParameters theMergeOperationParameters,
+			PartitionAwareReplaceReferencesResult theCopyResult,
+			IIdType theSourcePostMergeId,
+			RequestPartitionId theSourcePartition,
+			IIdType theTargetPostMergeId,
+			RequestPartitionId theTargetPartition,
+			DaoMethodOutcome theTargetUpdateOutcome,
+			Date theStartTime,
+			RequestDetails theRequestDetails,
+			List<IIdType> thePossiblyCommittedResourceIds) {
+
+		MergeProvenanceGroupValue group =
+				MergeProvenanceGroupValue.newGroup(theSourcePostMergeId, theTargetPostMergeId);
+
+		Map<MergeChangeType, Map<RequestPartitionId, List<IIdType>>> changedResourcesByChangeTypeAndPartition =
+				new EnumMap<>(MergeChangeType.class);
+
+		theCopyResult
+				.getCreatedResourceIdsByPartition()
+				.forEach((partition, ids) -> addChangedResourceIds(
+						changedResourcesByChangeTypeAndPartition, MergeChangeType.CREATE, partition, ids));
+		theCopyResult
+				.getUpdatedResourceIdsByPartition()
+				.forEach((partition, ids) -> addChangedResourceIds(
+						changedResourcesByChangeTypeAndPartition, MergeChangeType.UPDATE, partition, ids));
+		// The copied resources' originals will be deleted, so record them as DELETE at their tombstone version (+1).
+		theCopyResult
+				.getCopiedResourceOriginalIdsByOriginalPartition()
+				.forEach((partition, ids) -> addChangedResourceIds(
+						changedResourcesByChangeTypeAndPartition,
+						MergeChangeType.DELETE,
+						partition,
+						ids.stream()
+								.map(ResourceMergeService::withVersionIncremented)
+								.toList()));
+
+		MergeChangeType sourceChangeType =
+				theMergeOperationParameters.getDeleteSource() ? MergeChangeType.DELETE : MergeChangeType.UPDATE;
+		addChangedResourceIds(
+				changedResourcesByChangeTypeAndPartition,
+				sourceChangeType,
+				theSourcePartition,
+				List.of(theSourcePostMergeId));
+
+		if (!theTargetUpdateOutcome.isNop()) {
+			addChangedResourceIds(
+					changedResourcesByChangeTypeAndPartition,
+					MergeChangeType.UPDATE,
+					theTargetPartition,
+					List.of(theTargetPostMergeId));
+		}
+
+		changedResourcesByChangeTypeAndPartition.forEach(
+				(changeType, idsByPartition) -> idsByPartition.forEach((partition, changedIds) -> {
+					IIdType memberProvenanceId = myMergeResourceHelper.createProvenance(
+							theSourcePostMergeId,
+							theTargetPostMergeId,
+							changedIds,
+							group.member(partition, changeType).encode(),
+							theRequestDetails,
+							theStartTime,
+							theMergeOperationParameters.getProvenanceAgents(),
+							List.of());
+					if (memberProvenanceId != null) {
+						thePossiblyCommittedResourceIds.add(memberProvenanceId);
+					}
+				}));
+
+		List<IBaseResource> containedResources = List.of(
+				theMergeOperationParameters.getOriginalInputParameters(), theTargetUpdateOutcome.getOperationOutcome());
+		IIdType mainProvenanceId = myMergeResourceHelper.createProvenance(
+				theSourcePostMergeId,
+				theTargetPostMergeId,
+				List.of(),
+				group.encode(),
+				theRequestDetails,
+				theStartTime,
+				theMergeOperationParameters.getProvenanceAgents(),
+				containedResources);
+		if (mainProvenanceId != null) {
+			thePossiblyCommittedResourceIds.add(mainProvenanceId);
+		}
+	}
+
+	private static void addChangedResourceIds(
+			Map<MergeChangeType, Map<RequestPartitionId, List<IIdType>>> theChangedResources,
+			MergeChangeType theChangeType,
+			RequestPartitionId thePartition,
+			List<IIdType> theChangedIds) {
+
+		RequestPartitionId partitionKey = RequestPartitionId.fromPartitionId(thePartition.getFirstPartitionIdOrNull());
+		theChangedResources
+				.computeIfAbsent(theChangeType, k -> new LinkedHashMap<>())
+				.computeIfAbsent(partitionKey, k -> new ArrayList<>())
+				.addAll(theChangedIds);
+	}
+
+	private void reportFailedCrossPartitionMerge(
+			List<IIdType> thePossiblyCommittedResourceIds,
+			@Nullable Throwable theFailureCause,
+			OperationOutcomeWithStatusCode theOutcome) {
+
+		String msg;
+		if (thePossiblyCommittedResourceIds.isEmpty()) {
+			theOutcome.setHttpStatusCode(resolveHttpStatusCode(theFailureCause));
+			msg = format(
+					"Cross-partition merge failed; no resources were committed. Merge failure cause: %s",
+					describeFailureCause(theFailureCause));
+		} else {
+			theOutcome.setHttpStatusCode(STATUS_HTTP_500_INTERNAL_ERROR);
+			String possiblyCommittedIds = thePossiblyCommittedResourceIds.stream()
+					.map(id -> id.toUnqualified().getValue())
+					.collect(joining(", "));
+			msg = format(
+					"Cross-partition merge failed partway through and could not be rolled back automatically. The "
+							+ "following resources may have been committed and left in their merged state; they should be "
+							+ "checked and, if necessary, reverted manually: %s. Merge failure cause: %s",
+					possiblyCommittedIds, describeFailureCause(theFailureCause));
+		}
+		ourLog.error("Reporting cross-partition merge failure to caller: {}", msg);
+		addErrorToOperationOutcome(myFhirContext, theOutcome.getOperationOutcome(), msg, ISSUE_TYPE_EXCEPTION);
+	}
+
+	private static int resolveHttpStatusCode(@Nullable Throwable theFailureCause) {
+		if (theFailureCause instanceof BaseServerResponseException serverException) {
+			return serverException.getStatusCode();
+		}
+		return STATUS_HTTP_500_INTERNAL_ERROR;
+	}
+
+	private static String describeFailureCause(@Nullable Throwable theFailureCause) {
+		if (theFailureCause == null) {
+			return "unknown";
+		}
+		String type = theFailureCause.getClass().getSimpleName();
+		String message = theFailureCause.getMessage();
+		return message != null ? type + ": " + message : type;
+	}
+
+	private static IIdType withVersionIncremented(IIdType theId) {
+		return theId.withVersion(Long.toString(theId.getVersionIdPartAsLong() + 1));
+	}
+
+	private static RequestPartitionId getRequiredPartition(IBaseResource theResource) {
+		return RequestPartitionId.getPartitionFromUserDataIfPresent(theResource)
+				.orElseThrow(() -> new IllegalStateException(
+						"Resource " + theResource.getIdElement().getValue() + " has no partition info"));
+	}
+
+	private List<IIdType> extractCommittedResourceIds(PartitionedTransactionPartialFailureException theFailure) {
+		List<IIdType> committed = new ArrayList<>();
+		for (List<IBase> subBundleEntries : theFailure.getCommittedResponseEntriesPerSubBundle()) {
+			for (IBase entry : subBundleEntries) {
+				ReplaceReferencesProvenanceSvc.extractChangedResourceId((Bundle.BundleEntryComponent) entry)
+						.ifPresent(committed::add);
+			}
+		}
+		return committed;
 	}
 
 	private void doMergeAsync(
@@ -335,12 +649,12 @@ public class ResourceMergeService {
 			IBaseResource theSourceResource,
 			IBaseResource theTargetResource,
 			RequestDetails theRequestDetails,
-			MergeOperationOutcome theMergeOutcome,
-			RequestPartitionId thePartitionId) {
+			MergeOperationOutcome theMergeOutcome) {
 
+		RequestPartitionId partitionId = determineTargetReadPartition(theTargetResource, theRequestDetails);
 		String operationName = theRequestDetails.getOperation();
 		MergeJobParameters mergeJobParameters = theMergeOperationParameters.asMergeJobParameters(
-				myFhirContext, myStorageSettings, theSourceResource, theTargetResource, thePartitionId, operationName);
+				myFhirContext, myStorageSettings, theSourceResource, theTargetResource, partitionId, operationName);
 
 		Task task = myBatch2TaskHelper.startJobAndCreateAssociatedTask(
 				myTaskDao, theRequestDetails, myJobCoordinator, JOB_MERGE, mergeJobParameters);
@@ -376,9 +690,10 @@ public class ResourceMergeService {
 				false,
 				null);
 		List<IdDt> resourceIds;
-		try (Stream<IdDt> stream = myResourceLinkDao.streamSourceIdsForTargetFhirId(
+		try (Stream<JpaPid> stream = myResourceLinkDao.streamSourceIdsForTargetFhirId(
 				replaceReferencesRequest.sourceId.getResourceType(), replaceReferencesRequest.sourceId.getIdPart())) {
-			resourceIds = stream.toList();
+			resourceIds =
+					stream.map(pid -> new IdDt(pid.getAssociatedResourceId())).toList();
 		}
 		Bundle result = myReplaceReferencesPatchBundleSvc.patchReferencingResourcesInNestedTransaction(
 				replaceReferencesRequest, resourceIds, theRequestDetails);
@@ -393,11 +708,11 @@ public class ResourceMergeService {
 		myDaoRegistry.getSystemDao().transactionNested(theRequestDetails, deleteBuilder.getBundle());
 	}
 
-	private void validateCrossPartitionAsyncNotSupported(
+	private void validatePartitionAwareMergeAsyncNotSupported(
 			IBaseResource theSourceResource, IBaseResource theTargetResource, RequestDetails theRequestDetails) {
-		if (isCrossPartitionMerge(theSourceResource, theTargetResource) && theRequestDetails.isPreferAsync()) {
-			throw new NotImplementedOperationException(
-					Msg.code(2881) + "Cross-partition merge does not support asynchronous processing.");
+		if (requiresPartitionAwareMerge(theSourceResource, theTargetResource) && theRequestDetails.isPreferAsync()) {
+			throw new NotImplementedOperationException(Msg.code(2881)
+					+ "This merge must be performed synchronously and does not support asynchronous processing.");
 		}
 	}
 
@@ -405,7 +720,7 @@ public class ResourceMergeService {
 			MergeOperationInputParameters theMergeOperationParameters,
 			IBaseResource theSourceResource,
 			RequestDetails theRequestDetails,
-			boolean theCrossPartition) {
+			boolean thePartitionAwareMerge) {
 		Integer referencingResourceCount = countResourcesReferencingResource(
 				theSourceResource.getIdElement().toVersionless(), theRequestDetails);
 		if (referencingResourceCount > theMergeOperationParameters.getResourceLimit()) {
@@ -413,19 +728,30 @@ public class ResourceMergeService {
 					+ theSourceResource.getIdElement().toVersionless()
 					+ " exceeds the resource-limit "
 					+ theMergeOperationParameters.getResourceLimit();
-			if (!theCrossPartition) {
+			if (!thePartitionAwareMerge) {
 				message += ". Submit the request asynchronously by adding the HTTP Header 'Prefer: respond-async'.";
 			}
 			throw new PreconditionFailedException(Msg.code(2880) + message);
 		}
 	}
 
+	private boolean requiresPartitionAwareMerge(IBaseResource theSourceResource, IBaseResource theTargetResource) {
+		if (!myPartitionSettings.isPartitioningEnabled()) {
+			return false;
+		}
+		// The regular replace-references path only discovers referrers within a single partition. When
+		// all-partition search is not supported, referrers can live on shards it never queries, so for now we
+		// route even same-partition merges through the partition-aware path.
+		return isCrossPartitionMerge(theSourceResource, theTargetResource)
+				|| !myPartitionSettings.isAllPartitionSearchSupported();
+	}
+
 	private boolean isCrossPartitionMerge(IBaseResource theSourceResource, IBaseResource theTargetResource) {
 		if (!myPartitionSettings.isPartitioningEnabled()) {
 			return false;
 		}
-		Optional<RequestPartitionId> srcPart = RequestPartitionId.getPartitionIfAssigned(theSourceResource);
-		Optional<RequestPartitionId> tgtPart = RequestPartitionId.getPartitionIfAssigned(theTargetResource);
+		Optional<RequestPartitionId> srcPart = RequestPartitionId.getPartitionFromUserDataIfPresent(theSourceResource);
+		Optional<RequestPartitionId> tgtPart = RequestPartitionId.getPartitionFromUserDataIfPresent(theTargetResource);
 		return srcPart.isPresent() && tgtPart.isPresent() && !srcPart.get().equals(tgtPart.get());
 	}
 }

@@ -28,8 +28,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.TransactionUtil;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.util.TransactionSemanticsHeader;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
@@ -62,7 +62,7 @@ public class ConsumeFilesStepV2
 	private DaoRegistry myDaoRegistry;
 
 	@Autowired
-	private IFhirSystemDao mySystemDao;
+	private PartitionSettings myPartitionSettings;
 
 	@Nonnull
 	@Override
@@ -113,7 +113,7 @@ public class ConsumeFilesStepV2
 			List<IBaseResource> resources, RequestPartitionId thePartitionId) {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setRequestPartitionId(
-				requireNonNullElseGet(thePartitionId, RequestPartitionId::defaultPartition));
+				requireNonNullElseGet(thePartitionId, myPartitionSettings::getDefaultRequestPartitionId));
 
 		TransactionSemanticsHeader transactionSemantics = TransactionSemanticsHeader.newBuilder()
 				.withTryBatchAsTransactionFirst(true)
@@ -135,7 +135,8 @@ public class ConsumeFilesStepV2
 		}
 
 		IBaseBundle requestBundle = bb.getBundleTyped();
-		IBaseBundle responseBundle = (IBaseBundle) mySystemDao.transaction(requestDetails, requestBundle);
+		IBaseBundle responseBundle =
+				(IBaseBundle) myDaoRegistry.getSystemDao().transaction(requestDetails, requestBundle);
 
 		return TransactionUtil.parseTransactionResponse(myCtx, requestBundle, responseBundle);
 	}

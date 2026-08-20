@@ -1,0 +1,11 @@
+---
+type: add
+issue: 7738
+title: "When using PatientIdPartitionInterceptor with compartmental policies
+  (MANDATORY_SINGLE_COMPARTMENT, OPTIONAL_SINGLE_COMPARTMENT, or
+  NON_UNIQUE_COMPARTMENT_IN_DEFAULT), a patient-compartment extension can now be set
+  on resources to control partition assignment. This allows specifying which
+  Patient should determine the partition for resources with multiple Patient
+  references, or routing a resource to the non-compartmental (default) partition.
+  The Provenance resources created during Patient merge and replace-references
+  operations now use this extension automatically."

@@ -28,6 +28,9 @@ public class InterceptorOrders {
 	public static final int RESPONSE_TERMINOLOGY_TRANSLATION_INTERCEPTOR = 100;
 	public static final int RESPONSE_TERMINOLOGY_DISPLAY_POPULATION_INTERCEPTOR = 110;
 
+	public static final int AUTO_CREATE_PLACEHOLDER_MODIFY = 100;
+	public static final int AUTO_CREATE_PLACEHOLDER_DECIDE = 200;
+
 	/**
 	 * Non instantiable
 	 */

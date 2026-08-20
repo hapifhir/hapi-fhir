@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.batch2.api;
 
+import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -37,12 +38,17 @@ public class StepExecutionDetails<PT extends IModelJson, IT extends IModelJson> 
 	private final IJobInstance myInstance;
 	private final WorkChunk myChunk;
 	private final IJobStepExecutionServices myJobStepExecutionServices;
+	private final String myCurrentStepId;
+	private final String myNextStepId;
+	private final JobDefinition<PT> myJobDefinition;
 
 	/**
 	 * Create and returns a step execution details for a reduction job
 	 */
 	public static <P1 extends IModelJson, I1 extends IModelJson>
 			StepExecutionDetails<P1, I1> createReductionStepDetails(
+					JobDefinition<P1> theJobDefinition,
+					String theStepId,
 					P1 theParameters,
 					I1 theIntermediateParams,
 					JobInstance theInstance,
@@ -50,15 +56,41 @@ public class StepExecutionDetails<PT extends IModelJson, IT extends IModelJson> 
 		WorkChunk reductionChunk = new WorkChunk().setId(REDUCTION_STEP_CHUNK_ID_PLACEHOLDER);
 
 		return new StepExecutionDetails<>(
-				theParameters, theIntermediateParams, theInstance, reductionChunk, theJobStepExecutionServices);
+				theParameters,
+				theIntermediateParams,
+				theInstance,
+				reductionChunk,
+				theJobStepExecutionServices,
+				theJobDefinition,
+				theStepId,
+				null);
 	}
 
+	/**
+	 * @deprecated Use the other constructor
+	 */
+	@Deprecated(since = "8.12.0", forRemoval = true)
 	public StepExecutionDetails(
 			@Nonnull PT theParameters,
 			@Nullable IT theData,
 			@Nonnull JobInstance theInstance,
 			@Nonnull WorkChunk theChunk,
 			@Nonnull IJobStepExecutionServices theJobStepExecutionServices) {
+		this(theParameters, theData, theInstance, theChunk, theJobStepExecutionServices, null, null, null);
+	}
+
+	/**
+	 * Constructor
+	 */
+	public StepExecutionDetails(
+			@Nonnull PT theParameters,
+			@Nullable IT theData,
+			@Nonnull JobInstance theInstance,
+			@Nonnull WorkChunk theChunk,
+			@Nonnull IJobStepExecutionServices theJobStepExecutionServices,
+			JobDefinition<PT> theJobDefinition,
+			String theCurrentStepId,
+			String theNextStepId) {
 		Validate.notNull(theParameters, "theParameters must not be null");
 		myParameters = theParameters;
 		myData = theData;
@@ -66,6 +98,18 @@ public class StepExecutionDetails<PT extends IModelJson, IT extends IModelJson> 
 		myInstance = new JobInstance(theInstance);
 		myChunk = theChunk;
 		myJobStepExecutionServices = theJobStepExecutionServices;
+		myJobDefinition = theJobDefinition;
+		myCurrentStepId = theCurrentStepId;
+		myNextStepId = theNextStepId;
+	}
+
+	/**
+	 * Returns the job definition associated with this step execution
+	 *
+	 * @since 8.12.0
+	 */
+	public JobDefinition<PT> getJobDefinition() {
+		return myJobDefinition;
 	}
 
 	/**
@@ -131,5 +175,19 @@ public class StepExecutionDetails<PT extends IModelJson, IT extends IModelJson> 
 	@Beta
 	public SystemRequestDetails newSystemRequestDetails() {
 		return myJobStepExecutionServices.newRequestDetails(myInstance);
+	}
+
+	/**
+	 * @since 8.12.0
+	 */
+	public String getCurrentStepId() {
+		return myCurrentStepId;
+	}
+
+	/**
+	 * @since 8.12.0
+	 */
+	public String getNextStepId() {
+		return myNextStepId;
 	}
 }

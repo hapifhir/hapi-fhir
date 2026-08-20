@@ -23,6 +23,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
 import ca.uhn.fhir.jpa.entity.BulkImportJobEntity;
 import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.ArbitrarySqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateHashesTask;
@@ -39,6 +40,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -132,6 +134,149 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init840();
 		init860();
 		init880();
+		init8_10_0();
+		init8_12_0();
+	}
+
+	protected void init8_12_0() {
+		Builder version = forVersion(VersionEnum.V8_12_0);
+
+		Builder.BuilderAddTableByColumns attachment =
+				version.addTableByColumns("20260407.10", "BT2_JOB_ATTACHMENT", "JOB_INSTANCE_ID", "ATTACHMENT_ID");
+		attachment.addColumn("JOB_INSTANCE_ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		attachment.addColumn("ATTACHMENT_ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		attachment.addColumn("FILENAME").nonNullable().type(ColumnTypeEnum.STRING, 300);
+		attachment.addColumn("CONTENT_TYPE").nonNullable().type(ColumnTypeEnum.STRING, 50);
+		attachment.addColumn("CMP_STATUS").nonNullable().type(ColumnTypeEnum.STRING, 50);
+		attachment.addColumn("ATTACHMENT_DATA").nonNullable().type(ColumnTypeEnum.BINARY);
+		attachment.addColumn("ATTACHMENT_LENGTH_CMP").nonNullable().type(ColumnTypeEnum.LONG);
+		attachment.addColumn("ATTACHMENT_LENGTH_UC").nonNullable().type(ColumnTypeEnum.LONG);
+		attachment.addIndex("20260407.11", "IDX_BT2JA_INST_ID").unique(false).withColumns("JOB_INSTANCE_ID");
+		attachment
+				.addIndex("20260407.12", "IDX_BT2JA_INST_ID_AND_FN")
+				.unique(true)
+				.withColumns("JOB_INSTANCE_ID", "FILENAME");
+		attachment
+				.addForeignKey("20260407.13", "FK_BT2JA_INSTANCE")
+				.toColumn("JOB_INSTANCE_ID")
+				.references("BT2_JOB_INSTANCE", "ID");
+
+		version.onTable(TermCodeSystemVersion.TRM_CODESYSTEM_VER)
+				.addColumn("20260427.10", "CS_INTENDED_VERSION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.STRING, 200);
+
+		Builder.BuilderAddTableByColumns attachmentChunk = version.addTableByColumns(
+				"20260601.10", "BT2_JOB_ATTACHMENT_CHUNK", "JOB_INSTANCE_ID", "ATTACHMENT_ID", "CHUNK_INDEX");
+		attachmentChunk.addColumn("JOB_INSTANCE_ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		attachmentChunk.addColumn("ATTACHMENT_ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		attachmentChunk.addColumn("CHUNK_INDEX").nonNullable().type(ColumnTypeEnum.INT);
+		attachmentChunk.addColumn("ATTACHMENT_DATA").nonNullable().type(ColumnTypeEnum.BINARY);
+		attachmentChunk
+				.addForeignKey("20260601.20", "FK_BT2_JOB_ATTCHNK_PARENT")
+				.toColumns("JOB_INSTANCE_ID", "ATTACHMENT_ID")
+				.references("BT2_JOB_ATTACHMENT", "JOB_INSTANCE_ID", "ATTACHMENT_ID");
+
+		version.onTable("BT2_JOB_ATTACHMENT")
+				.addColumn("20260601.30", "EXTRA_CHUNK_IDX")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+
+		version.onTable("BT2_JOB_INSTANCE")
+				.addIndex("20260610.10", "IDX_BT2JI_STAT_CT_ID")
+				.unique(false)
+				.withColumns("STAT", "CREATE_TIME", "ID");
+
+		version.onTable("TRM_VALUESET")
+				.addColumn("20260627.10", "VS_INTENDED_VERSION_ID")
+				.nullable()
+				.type(ColumnTypeEnum.STRING, 200);
+
+		version.onTable("TRM_VALUESET")
+				.addColumn("20260706.10", "EXPANSION_ERROR")
+				.nullable()
+				.type(ColumnTypeEnum.TEXT);
+
+		version.onTable(Search.HFJ_SEARCH)
+				.modifyColumn("20260716.10", Search.SEARCH_UUID)
+				.nonNullable()
+				.withType(ColumnTypeEnum.STRING, 136);
+
+		// addressing potential missing column PARTITION_ID from index IDX_RES_TYPE_FHIR_ID for MSSQL_2012
+		{
+			if (getFlags().contains(FlagEnum.DB_PARTITION_MODE)) {
+
+				final Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
+
+				// Precondition for the rebuild: returns 1 (run) when IDX_RES_TYPE_FHIR_ID does NOT have
+				// PARTITION_ID as a key column, and 0 (skip) when it does. This limits the rebuild to databases
+				// whose index is still missing PARTITION_ID, so already-correct databases are left untouched.
+				@Language(("SQL"))
+				final String onlyIfSql =
+						"""
+				SELECT CASE WHEN EXISTS (
+					SELECT 1
+					FROM sys.indexes i
+					JOIN sys.index_columns ic ON ic.object_id = i.object_id AND ic.index_id = i.index_id
+					JOIN sys.columns      c  ON c.object_id  = ic.object_id AND c.column_id = ic.column_id
+					WHERE i.object_id = OBJECT_ID('HFJ_RESOURCE')
+						AND i.name = 'IDX_RES_TYPE_FHIR_ID'
+						AND ic.is_included_column = 0          -- key columns only, not INCLUDE
+						AND c.name = 'PARTITION_ID'
+				) THEN 0 ELSE 1 END
+				"""
+								.stripLeading();
+
+				final String onlyfIReason =
+						"Skipping IDX_RES_TYPE_FHIR_ID rebuild, column PARTITION_ID already part of the index";
+
+				hfjResource
+						.dropIndex("20260724.10", "IDX_RES_TYPE_FHIR_ID")
+						.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012)
+						.runEvenDuringSchemaInitialization()
+						.onlyIf(onlyIfSql, onlyfIReason);
+
+				// No onlyIf guard needed on the recreate: AddIndexTask is a no-op if the index already exists, so
+				// this creates the index only when the guarded drop above actually removed it. If the drop was
+				// skipped (PARTITION_ID already a key column), the index is still present and this does nothing.
+				hfjResource
+						.addIndex("20260724.20", "IDX_RES_TYPE_FHIR_ID")
+						.unique(true)
+						.online(true)
+						// include res_id and our deleted_at flag so we can satisfy Observation?_sort=_id from the
+						// index on
+						// platforms that support it.
+						.includeColumns("RES_ID, RES_DELETED_AT")
+						.withColumns("PARTITION_ID", "RES_TYPE", "FHIR_ID")
+						.runEvenDuringSchemaInitialization()
+						.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012);
+			}
+		}
+	}
+
+	protected void init8_10_0() {
+		Builder version = forVersion(VersionEnum.V8_10_0);
+
+		version.onTable(ResourceIndexedComboTokenNonUnique.HFJ_IDX_CMB_TOK_NU)
+				.dropIndex("20260410.10", "IDX_IDXCMBTOKNU_STR");
+		version.onTable(ResourceIndexedComboTokenNonUnique.HFJ_IDX_CMB_TOK_NU)
+				.addColumn("20260410.20", "DATE_ORDINAL")
+				.nullable()
+				.type(ColumnTypeEnum.INT);
+		version.onTable(ResourceIndexedComboTokenNonUnique.HFJ_IDX_CMB_TOK_NU)
+				.addIndex("20260410.30", "IDX_IDXCMBTOKNU_HD")
+				.unique(false)
+				.online(true)
+				.withColumns("HASH_COMPLETE", "DATE_ORDINAL", "RES_ID", "PARTITION_ID");
+
+		// Add index on CREATED_TIME to support ordered polling of subscription messages
+		{
+			version.onTable("HFJ_RESOURCE_MODIFIED")
+					.addIndex("20260424.1", "IDX_RES_MOD_CREATED")
+					.unique(false)
+					.online(true)
+					.withColumns("CREATED_TIME");
+		}
 	}
 
 	protected void init880() {
@@ -193,6 +338,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.runEvenDuringSchemaInitialization()
 					// note that we do not apply the onlyIf() here since we have now fixed the column.
 					.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012);
+		}
+
+		// slow running batch jobs
+		{
+			Builder.BuilderWithTableName resource = version.onTable("BT2_WORK_CHUNK");
+			resource.addColumn("20260407.60", "LAST_HEARTBEAT").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
 		}
 	}
 
@@ -3811,7 +3962,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 							"HASH_IDENTITY",
 							t -> BaseResourceIndexedSearchParam.calculateHashIdentity(
 									new PartitionSettings(),
-									RequestPartitionId.defaultPartition(),
+									RequestPartitionId.fromPartitionId(null),
 									t.getResourceType(),
 									t.getString("SP_NAME")))
 					.setColumnName("HASH_IDENTITY"));
@@ -3834,7 +3985,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 							"HASH_IDENTITY",
 							t -> BaseResourceIndexedSearchParam.calculateHashIdentity(
 									new PartitionSettings(),
-									RequestPartitionId.defaultPartition(),
+									RequestPartitionId.fromPartitionId(null),
 									t.getResourceType(),
 									t.getString("SP_NAME")))
 					.setColumnName("HASH_IDENTITY"));
@@ -3856,7 +4007,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 							"HASH_IDENTITY",
 							t -> BaseResourceIndexedSearchParam.calculateHashIdentity(
 									new PartitionSettings(),
-									RequestPartitionId.defaultPartition(),
+									RequestPartitionId.fromPartitionId(null),
 									t.getResourceType(),
 									t.getString("SP_NAME")))
 					.setColumnName("HASH_IDENTITY"));
@@ -3893,14 +4044,14 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 							"HASH_IDENTITY",
 							t -> BaseResourceIndexedSearchParam.calculateHashIdentity(
 									new PartitionSettings(),
-									RequestPartitionId.defaultPartition(),
+									RequestPartitionId.fromPartitionId(null),
 									t.getResourceType(),
 									t.getString("SP_NAME")))
 					.addCalculator(
 							"HASH_IDENTITY_AND_UNITS",
 							t -> ResourceIndexedSearchParamQuantity.calculateHashUnits(
 									new PartitionSettings(),
-									RequestPartitionId.defaultPartition(),
+									RequestPartitionId.fromPartitionId(null),
 									t.getResourceType(),
 									t.getString("SP_NAME"),
 									t.getString("SP_UNITS")))
@@ -3908,7 +4059,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 							"HASH_IDENTITY_SYS_UNITS",
 							t -> ResourceIndexedSearchParamQuantity.calculateHashSystemAndUnits(
 									new PartitionSettings(),
-									RequestPartitionId.defaultPartition(),
+									RequestPartitionId.fromPartitionId(null),
 									t.getResourceType(),
 									t.getString("SP_NAME"),
 									t.getString("SP_SYSTEM"),
@@ -3937,7 +4088,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 							"HASH_NORM_PREFIX",
 							t -> ResourceIndexedSearchParamString.calculateHashNormalized(
 									new PartitionSettings(),
-									RequestPartitionId.defaultPartition(),
+									RequestPartitionId.fromPartitionId(null),
 									new StorageSettings(),
 									t.getResourceType(),
 									t.getString("SP_NAME"),
@@ -3988,14 +4139,14 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 							"HASH_IDENTITY",
 							t -> BaseResourceIndexedSearchParam.calculateHashIdentity(
 									new PartitionSettings(),
-									RequestPartitionId.defaultPartition(),
+									RequestPartitionId.fromPartitionId(null),
 									t.getResourceType(),
 									t.getString("SP_NAME")))
 					.addCalculator(
 							"HASH_SYS",
 							t -> ResourceIndexedSearchParamToken.calculateHashSystem(
 									new PartitionSettings(),
-									RequestPartitionId.defaultPartition(),
+									RequestPartitionId.fromPartitionId(null),
 									t.getResourceType(),
 									t.getParamName(),
 									t.getString("SP_SYSTEM")))
@@ -4003,7 +4154,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 							"HASH_SYS_AND_VALUE",
 							t -> ResourceIndexedSearchParamToken.calculateHashSystemAndValue(
 									new PartitionSettings(),
-									RequestPartitionId.defaultPartition(),
+									RequestPartitionId.fromPartitionId(null),
 									t.getResourceType(),
 									t.getParamName(),
 									t.getString("SP_SYSTEM"),
@@ -4012,7 +4163,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 							"HASH_VALUE",
 							t -> ResourceIndexedSearchParamToken.calculateHashValue(
 									new PartitionSettings(),
-									RequestPartitionId.defaultPartition(),
+									RequestPartitionId.fromPartitionId(null),
 									t.getResourceType(),
 									t.getParamName(),
 									t.getString("SP_VALUE"))));

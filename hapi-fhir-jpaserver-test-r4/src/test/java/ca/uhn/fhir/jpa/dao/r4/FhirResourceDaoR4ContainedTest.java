@@ -1,13 +1,12 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
-import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -25,7 +24,6 @@ import org.hl7.fhir.r4.model.Encounter.EncounterParticipantComponent;
 import org.hl7.fhir.r4.model.Encounter.EncounterStatus;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -34,7 +32,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.ServiceRequest.ServiceRequestIntent;
 import org.hl7.fhir.r4.model.ServiceRequest.ServiceRequestStatus;
-import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,12 +45,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SuppressWarnings("LoggingSimilarMessage")
 public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ContainedTest.class);
 
@@ -81,12 +78,12 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 
 		IIdType id = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-		Observation createdObs = myObservationDao.read(id);
+		Observation createdObs = myObservationDao.read(id, newSrd());
 		
 		ourLog.debug("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
 		
 		runInTransaction(()->{
-			ourLog.info("String indexes:\n * {}", myResourceIndexedSearchParamStringDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+			ourLog.info("String indexes:\n * {}", myResourceIndexedSearchParamStringDao.findAll().stream().map(ResourceIndexedSearchParamString::toString).collect(Collectors.joining("\n * ")));
 
 			Long i = myEntityManager
 				.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myParamName = 'subject.family' AND s.myResourceType = 'Observation'", Long.class)
@@ -98,7 +95,7 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 
 		map = new SearchParameterMap();
 		map.add("subject", new ReferenceParam("name", "Smith"));
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map, newSrd()))).containsExactlyInAnyOrder(toValues(id));
 	}
 	
 	@Test
@@ -117,7 +114,7 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 
 		IIdType id = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-		Observation createdObs = myObservationDao.read(id);
+		Observation createdObs = myObservationDao.read(id, newSrd());
 		
 		ourLog.debug("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
 		
@@ -134,7 +131,7 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 		map.add("subject", new ReferenceParam("name", "Smith"));
 		map.setLoadSynchronous(true);
 
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).containsExactlyInAnyOrder(toValues(id));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map, newSrd()))).containsExactlyInAnyOrder(toValues(id));
 	}
 
 	@Test
@@ -143,9 +140,6 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 		SystemRequestDetails rd = new SystemRequestDetails();
 
 		Organization org = new Organization();
-//		Location location = new Location();
-//		location.setManagingOrganization(new Reference("#"));
-//		org.addContained(location);
 		org.addIdentifier()
 			.setSystem("http://example.com")
 			.setValue("123456");
@@ -234,7 +228,7 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 			}
 
 			//Then
-			assertPatientSuccesfullyContainedOrganization(theContainedId, theShouldSetReferenceById);
+			assertPatientSuccessfullyContainedOrganization(theContainedId, theShouldSetReferenceById);
 		} catch (Exception e) {
 			//Then, if our test case expects an exception, assert on it.
 			if (!StringUtils.isBlank(theExceptionMessage)) {
@@ -245,8 +239,8 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 		}
 	}
 
-	void assertPatientSuccesfullyContainedOrganization(String theContainedId, boolean theShouldSetReferenceById) {
-		IBundleProvider search = myPatientDao.search(new SearchParameterMap().setLoadSynchronous(true));
+	void assertPatientSuccessfullyContainedOrganization(String theContainedId, boolean theShouldSetReferenceById) {
+		IBundleProvider search = myPatientDao.search(new SearchParameterMap().setLoadSynchronous(true), newSrd());
 		List<IBaseResource> allResources = search.getAllResources();
 		Patient pat = (Patient) allResources.get(0);
 		assertThat(pat.getContained()).hasSize(1);
@@ -297,7 +291,7 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 
 		IIdType id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
-		Patient createdPatient = myPatientDao.read(id);
+		Patient createdPatient = myPatientDao.read(id, newSrd());
 		
 		ourLog.debug("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdPatient));
 		
@@ -323,7 +317,7 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 		map = new SearchParameterMap();
 		map.add("general-practitioner", new ReferenceParam("family", "Smith"));
 
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map))).containsExactlyInAnyOrder(toValues(id));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map, newSrd()))).containsExactlyInAnyOrder(toValues(id));
 	}
 
 	@Test
@@ -351,8 +345,8 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 		prac1.setActive(true);
 		prac1.setGender(AdministrativeGender.FEMALE);
 		prac1.addName().setFamily("Smith").addGiven("John");
-		EncounterParticipantComponent participient = encounter.addParticipant();
-		participient.getIndividual().setReference("#prac1");
+		EncounterParticipantComponent participant = encounter.addParticipant();
+		participant.getIndividual().setReference("#prac1");
 		encounter.getContained().add(prac1);
 		
 		Observation obs = new Observation();
@@ -368,7 +362,7 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 
 		IIdType id = myEncounterDao.create(encounter, mySrd).getId().toUnqualifiedVersionless();
 
-		Encounter createdEncounter = myEncounterDao.read(id);
+		Encounter createdEncounter = myEncounterDao.read(id, newSrd());
 		
 		ourLog.debug("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdEncounter));
 		
@@ -407,20 +401,17 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 		map = new SearchParameterMap();
 		map.add("based-on", new ReferenceParam("authored", "2021-02-23"));
 
-		assertThat(toUnqualifiedVersionlessIdValues(myEncounterDao.search(map))).containsExactlyInAnyOrder(toValues(id));
+		assertThat(toUnqualifiedVersionlessIdValues(myEncounterDao.search(map, newSrd()))).containsExactlyInAnyOrder(toValues(id));
 	}
 
 	@Test
 	public void testSearchWithNotSupportedSearchParameter() {
 
-		SearchParameterMap map;
-
-		map = new SearchParameterMap();
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
 		map.add("subject", new ReferenceParam("marital-status", "M"));
 
 		try {
-			IBundleProvider outcome = myObservationDao.search(map);
-			outcome.getResources(0, 1).get(0);
+			myObservationDao.search(map, newSrd());
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1214) + "Invalid parameter chain: subject.marital-status", e.getMessage());

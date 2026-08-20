@@ -1,0 +1,4 @@
+---
+type: add
+issue: 7958
+title: "The FHIR Patch engine now supports untyped path expressions (e.g. `code` instead of the typed equivalent `Observation.code`). Previously only typed expressions were supported."

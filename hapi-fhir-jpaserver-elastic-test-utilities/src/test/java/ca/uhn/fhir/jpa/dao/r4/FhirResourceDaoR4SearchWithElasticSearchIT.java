@@ -121,6 +121,7 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.model.util.UcumServiceUtil.UCUM_CODESYSTEM_URL;
 import static ca.uhn.fhir.rest.api.Constants.CHARSET_UTF8;
+import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onAllThreads;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -1632,8 +1633,10 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			myCaptureQueriesListener.clear();
 			myHSearchEventDispatcher.register(mySearchEventListener);
 
-			List<String> resultIds = myTestDaoSearch.searchForIds("Observation?code=code-1,code-2,code-3&_offset=1");
-			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+			List<String> resultIds = myTestDaoSearch.searchForIds("Observation?code=code-1,code-2,code-3&_offset=1&_sort=code");
+			assertThat(myCaptureQueriesListener).has(
+				onAllThreads().selectCount(0)
+			);
 
 			assertThat(resultIds).containsExactlyInAnyOrder(idCode2.getIdPart(), idCode3.getIdPart());
 			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);

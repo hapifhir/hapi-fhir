@@ -19,25 +19,27 @@
  */
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class AddForeignKeyTask extends BaseTableColumnTask {
+public class AddForeignKeyTask extends BaseTableTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(AddForeignKeyTask.class);
 	private String myConstraintName;
 	private String myForeignTableName;
-	private String myForeignColumnName;
+	private List<String> myForeignColumnNames;
+	private List<String> myColumnNames;
 
 	public AddForeignKeyTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
@@ -51,8 +53,20 @@ public class AddForeignKeyTask extends BaseTableColumnTask {
 		myForeignTableName = theForeignTableName;
 	}
 
-	public void setForeignColumnName(String theForeignColumnName) {
-		myForeignColumnName = theForeignColumnName;
+	public void setColumnNames(List<String> theForeignColumnName) {
+		myColumnNames = theForeignColumnName;
+	}
+
+	public void setForeignColumnNames(List<String> theForeignColumnName) {
+		myForeignColumnNames = theForeignColumnName;
+	}
+
+	public List<String> getForeignColumnNames() {
+		return myForeignColumnNames;
+	}
+
+	public List<String> getColumnNames() {
+		return myColumnNames;
 	}
 
 	@Override
@@ -61,9 +75,14 @@ public class AddForeignKeyTask extends BaseTableColumnTask {
 
 		Validate.isTrue(isNotBlank(myConstraintName));
 		Validate.isTrue(isNotBlank(myForeignTableName));
-		Validate.isTrue(isNotBlank(myForeignColumnName));
-		setDescription("Add foreign key " + myConstraintName + " from column " + getColumnName() + " of table "
-				+ getTableName() + " to column " + myForeignColumnName + " of table " + myForeignTableName);
+		Validate.notEmpty(myColumnNames, "No column names specified for foreign key %s", myConstraintName);
+		Validate.notEmpty(myForeignColumnNames, "No column names specified for foreign key %s", myConstraintName);
+		Validate.isTrue(
+				myColumnNames.size() == myForeignColumnNames.size(),
+				"Number of column names must match for foreign key %s",
+				myConstraintName);
+		setDescription("Add foreign key " + myConstraintName + " from column(s) " + getColumnNames() + " of table "
+				+ getTableName() + " to column(s) " + getForeignColumnNames() + " of table " + myForeignTableName);
 	}
 
 	@Override
@@ -75,26 +94,30 @@ public class AddForeignKeyTask extends BaseTableColumnTask {
 			return;
 		}
 
-		String sql;
-		switch (getDriverType()) {
-			case MARIADB_10_1:
-			case MYSQL_5_7:
-				// Quote the column names as "SYSTEM" is a reserved word in MySQL
-				sql = "alter table " + getTableName() + " add constraint " + myConstraintName + " foreign key (`"
-						+ getColumnName() + "`) references " + myForeignTableName + " (`" + myForeignColumnName + "`)";
-				break;
-			case COCKROACHDB_21_1:
-			case POSTGRES_9_4:
-			case DERBY_EMBEDDED:
-			case H2_EMBEDDED:
-			case ORACLE_12C:
-			case MSSQL_2012:
-				sql = "alter table " + getTableName() + " add constraint " + myConstraintName + " foreign key ("
-						+ getColumnName() + ") references " + myForeignTableName;
-				break;
-			default:
-				throw new IllegalStateException(Msg.code(68));
-		}
+		boolean quoteNames =
+				switch (getDriverType()) {
+					case MARIADB_10_1, MYSQL_5_7 ->
+					// Quote the column names as "SYSTEM" is a reserved word in MySQL
+					true;
+					case COCKROACHDB_21_1, POSTGRES_9_4, DERBY_EMBEDDED, H2_EMBEDDED, ORACLE_12C, MSSQL_2012 -> false;
+				};
+
+		StringBuilder b = new StringBuilder();
+
+		b.append("alter table ");
+		b.append(getTableName());
+		b.append(" add constraint ");
+		b.append(myConstraintName);
+		b.append(" foreign key (");
+		appendColumnList(getColumnNames(), quoteNames, b);
+		b.append(") references ");
+		b.append(myForeignTableName);
+		b.append(" (");
+		appendColumnList(getForeignColumnNames(), quoteNames, b);
+		b.append(")");
+
+		@Language("SQL")
+		String sql = b.toString();
 
 		try {
 			executeSql(getTableName(), sql);
@@ -112,7 +135,13 @@ public class AddForeignKeyTask extends BaseTableColumnTask {
 		super.generateHashCode(theBuilder);
 		theBuilder.append(myConstraintName);
 		theBuilder.append(myForeignTableName);
-		theBuilder.append(myForeignColumnName);
+		if (myForeignColumnNames.size() == 1) {
+			// This task used to only allow a single column, and we don't want the computed hashcodes
+			// to change since we added the ability to have multiple columns
+			theBuilder.append(myForeignColumnNames.get(0));
+		} else {
+			theBuilder.append(myForeignColumnNames);
+		}
 	}
 
 	@Override
@@ -121,6 +150,22 @@ public class AddForeignKeyTask extends BaseTableColumnTask {
 		super.generateEquals(theBuilder, otherObject);
 		theBuilder.append(myConstraintName, otherObject.myConstraintName);
 		theBuilder.append(myForeignTableName, otherObject.myForeignTableName);
-		theBuilder.append(myForeignColumnName, otherObject.myForeignColumnName);
+		theBuilder.append(myForeignColumnNames, otherObject.myForeignColumnNames);
+	}
+
+	private static void appendColumnList(
+			List<String> theColumnNames, boolean theQuoteNames, StringBuilder theStringBuilder) {
+		for (int i = 0; i < theColumnNames.size(); i++) {
+			if (i > 0) {
+				theStringBuilder.append(", ");
+			}
+			if (theQuoteNames) {
+				theStringBuilder.append("`");
+			}
+			theStringBuilder.append(theColumnNames.get(i));
+			if (theQuoteNames) {
+				theStringBuilder.append("`");
+			}
+		}
 	}
 }

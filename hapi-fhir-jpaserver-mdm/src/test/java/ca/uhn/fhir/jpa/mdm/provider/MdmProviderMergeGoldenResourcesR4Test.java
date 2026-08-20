@@ -75,10 +75,15 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseMdmProviderR4Test
 
 	@Test
 	public void testMerge() {
+		myCaptureQueriesListener.clear();
 		Patient mergedSourcePatient = (Patient) myMdmProvider.mergeGoldenResources(
 			myFromGoldenPatientId, // from
 			myToGoldenPatientId, // to
 			null, myRequestDetails);
+		myCaptureQueriesListener.logSelectQueries();
+		myCaptureQueriesListener.logUpdateQueries();
+		myCaptureQueriesListener.logDeleteQueries();
+		logAllResources();
 
 		// we do not check setActive anymore - as not all types support that
 		assertTrue(MdmResourceUtil.isGoldenRecord(mergedSourcePatient));

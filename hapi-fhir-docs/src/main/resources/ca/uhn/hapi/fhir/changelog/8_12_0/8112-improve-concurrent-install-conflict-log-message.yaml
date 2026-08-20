@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 8112
+title: "Fixed the log message for concurrent IG installation conflicts under `SINGLE_VERSION` mode to accurately describe 
+them as race conditions."

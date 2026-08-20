@@ -1,0 +1,5 @@
+---
+type: security
+issue: 8253
+title: "A client with write but no read access could read protected resource content through 
+PATCH and conditional create responses. This has been fixed."

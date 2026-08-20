@@ -22,6 +22,7 @@ package ca.uhn.fhir.batch2.coordinator;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -38,8 +39,9 @@ class FinalStepDataSink<PT extends IModelJson, IT extends IModelJson> extends Ba
 	FinalStepDataSink(
 			@Nonnull String theJobDefinitionId,
 			@Nonnull String theInstanceId,
+			@Nonnull WorkChunk theWorkChunk,
 			@Nonnull JobWorkCursor<PT, IT, VoidModel> theJobWorkCursor) {
-		super(theInstanceId, theJobWorkCursor);
+		super(theInstanceId, theWorkChunk, theJobWorkCursor);
 	}
 
 	@Override

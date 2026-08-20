@@ -22,6 +22,7 @@ package ca.uhn.fhir.storage.interceptor;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.rest.server.interceptor.InterceptorOrders;
 
 import java.util.Set;
 
@@ -52,7 +53,9 @@ public class AutoCreatePlaceholderReferenceEnabledByTypeInterceptor {
 	 * This method will be called automatically before each auto-created placeholder
 	 * reference target resource.
 	 */
-	@Hook(Pointcut.STORAGE_PRE_AUTO_CREATE_PLACEHOLDER_REFERENCE)
+	@Hook(
+			value = Pointcut.STORAGE_PRE_AUTO_CREATE_PLACEHOLDER_REFERENCE,
+			order = InterceptorOrders.AUTO_CREATE_PLACEHOLDER_DECIDE)
 	public AutoCreatePlaceholderReferenceTargetResponse autoCreatePlaceholderReferenceTarget(
 			AutoCreatePlaceholderReferenceTargetRequest theRequest) {
 

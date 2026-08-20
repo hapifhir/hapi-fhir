@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -13,6 +14,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -24,7 +26,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Date;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -61,13 +62,13 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 
 		Patient p = new Patient();
 		p.setActive(true);
-		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+		IIdType id = myPatientDao.create(p, newSrd()).getId().toUnqualifiedVersionless();
 
-		myPatientDao.delete(id);
+		myPatientDao.delete(id, newSrd());
 
 		// Table should be marked as deleted
 		runInTransaction(() -> {
-			ResourceTable resourceTable = myResourceTableDao.findById(id.getIdPartAsLong()).get();
+			ResourceTable resourceTable = myResourceTableDao.findById(JpaPid.fromId(id.getIdPartAsLong())).orElseThrow();
 			assertNotNull(resourceTable.getDeleted());
 		});
 
@@ -83,16 +84,16 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 		});
 
 		try {
-			myPatientDao.read(id.toUnqualifiedVersionless());
+			myPatientDao.read(id.toUnqualifiedVersionless(), newSrd());
 			fail();
 		} catch (ResourceGoneException e) {
 			// good
 		}
 
-		myPatientDao.read(id.toUnqualifiedVersionless().withVersion("1"));
+		myPatientDao.read(id.toUnqualifiedVersionless().withVersion("1"), newSrd());
 
 		try {
-			myPatientDao.read(id.toUnqualifiedVersionless().withVersion("2"));
+			myPatientDao.read(id.toUnqualifiedVersionless().withVersion("2"), newSrd());
 			fail();
 		} catch (ResourceGoneException e) {
 			// good
@@ -107,10 +108,10 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 
 		Patient p = new Patient();
 		p.setActive(true);
-		IIdType pId = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+		IIdType pId = myPatientDao.create(p, newSrd()).getId().toUnqualifiedVersionless();
 
 		try {
-			myPatientDao.delete(pId);
+			myPatientDao.delete(pId, newSrd());
 			fail();
 		} catch (PreconditionFailedException e) {
 			assertEquals(Msg.code(966) + "Resource deletion is not permitted on this server", e.getMessage());
@@ -154,13 +155,13 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 
 		// Nope, can't delete 'em!
 		try {
-			myOrganizationDao.delete(orgId1);
+			myOrganizationDao.delete(orgId1, newSrd());
 			fail();
 		} catch (ResourceVersionConflictException e) {
 			// good
 		}
 		try {
-			myOrganizationDao.delete(orgId2);
+			myOrganizationDao.delete(orgId2, newSrd());
 			fail();
 		} catch (ResourceVersionConflictException e) {
 			// good
@@ -182,13 +183,13 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 
 		// Make sure they were deleted
 		try {
-			myOrganizationDao.read(orgId1);
+			myOrganizationDao.read(orgId1, newSrd());
 			fail();
 		} catch (ResourceGoneException e) {
 			// good
 		}
 		try {
-			myOrganizationDao.read(orgId2);
+			myOrganizationDao.read(orgId2, newSrd());
 			fail();
 		} catch (ResourceGoneException e) {
 			// good
@@ -202,13 +203,13 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 
 		Patient p = new Patient();
 		p.setActive(true);
-		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+		IIdType id = myPatientDao.create(p, newSrd()).getId().toUnqualifiedVersionless();
 
-		myPatientDao.delete(id);
+		myPatientDao.delete(id, newSrd());
 
 		// Table should be marked as deleted
 		runInTransaction(() -> {
-			ResourceTable resourceTable = myResourceTableDao.findById(id.getIdPartAsLong()).get();
+			ResourceTable resourceTable = myResourceTableDao.findById(JpaPid.fromId(id.getIdPartAsLong())).orElseThrow();
 			assertNotNull(resourceTable.getDeleted());
 		});
 
@@ -221,16 +222,16 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 		});
 
 		try {
-			myPatientDao.read(id.toUnqualifiedVersionless());
+			myPatientDao.read(id.toUnqualifiedVersionless(), newSrd());
 			fail();
 		} catch (ResourceGoneException e) {
 			// good
 		}
 
-		myPatientDao.read(id.toUnqualifiedVersionless().withVersion("1"));
+		myPatientDao.read(id.toUnqualifiedVersionless().withVersion("1"), newSrd());
 
 		try {
-			myPatientDao.read(id.toUnqualifiedVersionless().withVersion("2"));
+			myPatientDao.read(id.toUnqualifiedVersionless().withVersion("2"), newSrd());
 			fail();
 		} catch (ResourceGoneException e) {
 			// good
@@ -259,7 +260,7 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 		logAllResources();
 		logAllResourceSearchUrls();
 		assertNotEquals(originalId, daoMethodOutcome.getId().getIdPartAsLong());
-		assertTrue(daoMethodOutcome.getCreated().booleanValue());
+		assertTrue(daoMethodOutcome.getCreated());
 		assertThat(firstObservationId.getIdPart()).isNotEqualTo(daoMethodOutcome.getId());
 	}
 
@@ -285,56 +286,60 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testDeletedResourceInPrecommitHookHasCorrectLastUpdated() {
+	public void testDeletedResourceInPrecommitHookHasCorrectMetaData() {
 		// Setup - create a patient
 		Patient p = new Patient();
 		p.setActive(true);
 		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		// Register interceptor to capture the resource from the PRECOMMIT hook
-		AtomicReference<Date> hookLastUpdated = new AtomicReference<>();
+		AtomicReference<IBaseMetaType> hookMeta = new AtomicReference<>();
 		myInterceptorRegistry.registerAnonymousInterceptor(
 			Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, (thePointcut, theParams) -> {
 				IBaseResource resource = theParams.get(IBaseResource.class, 0);
-				hookLastUpdated.set(resource.getMeta().getLastUpdated());
+				hookMeta.set(resource.getMeta());
 			});
 
 		// Test - delete the patient
 		myPatientDao.delete(id, mySrd);
 
-		// Verify - the hook resource's lastUpdated should match the DB entity
-		assertNotNull(hookLastUpdated.get(), "Hook should have captured lastUpdated");
+		// Verify - the hook resource's meta data should match the DB entity
+		assertNotNull(hookMeta.get(), "Hook should have captured Meta element");
 		runInTransaction(() -> {
 			ResourceTable entity = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow();
-			assertEquals(entity.getUpdatedDate(), hookLastUpdated.get(),
-				"Resource lastUpdated in STORAGE_PRECOMMIT_RESOURCE_DELETED hook should match the entity's updated timestamp in the DB");
+			assertEquals(entity.getIdDt().getVersionIdPart(), hookMeta.get().getVersionId(),
+				"Resource meta.versionId in STORAGE_PRECOMMIT_RESOURCE_DELETED hook should match the entity's updated version id in the DB");
+			assertEquals(entity.getUpdatedDate(), hookMeta.get().getLastUpdated(),
+				"Resource meta.lastUpdated in STORAGE_PRECOMMIT_RESOURCE_DELETED hook should match the entity's updated timestamp in the DB");
 		});
 	}
 
 	@Test
-	void testDeleteByUrl_PrecommitHookHasCorrectLastUpdated() {
+	void testDeleteByUrl_PrecommitHookHasCorrectMetaData() {
 		// Setup - create a patient with a searchable attribute
 		Patient p = new Patient();
 		p.setActive(true);
 		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		// Register interceptor to capture the resource from the PRECOMMIT hook
-		AtomicReference<Date> hookLastUpdated = new AtomicReference<>();
+		AtomicReference<IBaseMetaType> hookMeta = new AtomicReference<>();
 		myInterceptorRegistry.registerAnonymousInterceptor(
 			Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, (thePointcut, theParams) -> {
 				IBaseResource resource = theParams.get(IBaseResource.class, 0);
-				hookLastUpdated.set(resource.getMeta().getLastUpdated());
+				hookMeta.set(resource.getMeta());
 			});
 
 		// Test - delete by URL (triggers deletePidList path)
 		myPatientDao.deleteByUrl("Patient?active=true", mySrd);
 
-		// Verify - the hook resource's lastUpdated should match the DB entity
-		assertNotNull(hookLastUpdated.get(), "Hook should have captured lastUpdated");
+		// Verify - the hook resource's meta data should match the DB entity
+		assertNotNull(hookMeta.get(), "Hook should have captured Meta element");
 		runInTransaction(() -> {
 			ResourceTable entity = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow();
-			assertEquals(entity.getUpdatedDate(), hookLastUpdated.get(),
-				"Resource lastUpdated in STORAGE_PRECOMMIT_RESOURCE_DELETED hook should match the entity's updated timestamp in the DB");
+			assertEquals(entity.getIdDt().getVersionIdPart(), hookMeta.get().getVersionId(),
+				"Resource meta.versionId in STORAGE_PRECOMMIT_RESOURCE_DELETED hook should match the entity's updated version id in the DB");
+			assertEquals(entity.getUpdatedDate(), hookMeta.get().getLastUpdated(),
+				"Resource meta.lastUpdated in STORAGE_PRECOMMIT_RESOURCE_DELETED hook should match the entity's updated timestamp in the DB");
 		});
 	}
 }

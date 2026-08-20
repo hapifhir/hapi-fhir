@@ -16,6 +16,12 @@ public class SubscriptionStrategyEvaluatorTest extends BaseSubscriptionDstu3Test
 	@Autowired
 	SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 
+	// SMILE-10730: :missing on token param should fall back to DATABASE (not NPE)
+	@Test
+	void testTokenParamMissingModifier() {
+		assertDatabase("MessageHeader?event:missing=true");
+	}
+
 	@Test
 	public void testInMemory() {
 		assertInMemory("Observation?");
@@ -32,6 +38,8 @@ public class SubscriptionStrategyEvaluatorTest extends BaseSubscriptionDstu3Test
 		assertInMemory("EpisodeOfCare?status=active");
 		assertInMemory("Observation?code=111111111&_format=xml");
 		assertInMemory("Observation?code=SNOMED-CT|123&_format=xml");
+		assertInMemory("Observation?code:not=FOO");
+		assertInMemory("Observation?_source:missing=true");
 
 		assertDatabase("Observation?code=17861-6&context.type=IHD");
 		assertDatabase("Observation?context.type=IHD&code=17861-6");

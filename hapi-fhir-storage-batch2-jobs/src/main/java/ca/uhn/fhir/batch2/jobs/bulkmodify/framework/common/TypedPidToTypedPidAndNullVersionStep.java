@@ -29,12 +29,15 @@ import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionJson;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionListWorkChunkJson;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.util.Logs;
 import jakarta.annotation.Nonnull;
+import org.slf4j.Logger;
 
 import java.util.List;
 
 public class TypedPidToTypedPidAndNullVersionStep<PT extends BaseBulkModifyJobParameters>
 		implements IJobStepWorker<PT, ResourceIdListWorkChunkJson, TypedPidAndVersionListWorkChunkJson> {
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	@Nonnull
 	@Override
@@ -42,6 +45,7 @@ public class TypedPidToTypedPidAndNullVersionStep<PT extends BaseBulkModifyJobPa
 			@Nonnull StepExecutionDetails<PT, ResourceIdListWorkChunkJson> theStepExecutionDetails,
 			@Nonnull IJobDataSink<TypedPidAndVersionListWorkChunkJson> theDataSink)
 			throws JobExecutionFailedException {
+		ourLog.trace("Starting step " + theStepExecutionDetails.getCurrentStepId());
 		ResourceIdListWorkChunkJson data = theStepExecutionDetails.getData();
 
 		RequestPartitionId requestPartitionId = data.getRequestPartitionId();

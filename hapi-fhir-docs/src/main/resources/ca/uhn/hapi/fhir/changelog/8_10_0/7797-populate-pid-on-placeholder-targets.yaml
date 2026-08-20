@@ -1,0 +1,13 @@
+---
+type: fix
+issue: 7797
+jira: "SMILE-11985"
+title: "When operating in Patient ID Partition Mode with Auto-create
+   placeholder reference targets enabled (i.e. when 
+   `PatientIdPartitionInterceptor` is in use with 
+   `StroageSettings#isAutoCreatePlaceholderReferenceTargets()`),
+   if a resource in the patient compartment is being stored, and it 
+   results in the creation of a placeholder resource which is also in the 
+   Patient compartment, the placeholder will be assigned the same 
+   patient/subject value as the source resource in order to place it 
+   automatically in the same compartment."

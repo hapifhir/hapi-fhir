@@ -20,7 +20,7 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.server.method.IMethodBinding;
 import ca.uhn.fhir.rest.server.method.ResourceParameter.Mode;
 import ca.uhn.fhir.rest.server.method.TransactionParameter.ParamStyle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -30,17 +30,15 @@ public interface IRestfulServerUtil {
 	Object getResourceParameter(
 			RequestDetails requestDetails,
 			Mode myMode,
-			BaseMethodBinding theMethodBinding,
+			IMethodBinding theMethodBinding,
 			Class<? extends IBaseResource> myResourceType);
 
 	Object getRequestResource(
 			RequestDetails theRequest, ParamStyle myParamStyle, Class<? extends IBaseResource> myResourceBundleType);
 
 	<T extends IBaseResource> T loadResourceFromRequest(
-			RequestDetails theRequest, BaseMethodBinding theMethodBinding, Class<T> theResourceType);
+			RequestDetails theRequest, IMethodBinding theMethodBinding, Class<T> theResourceType);
 
 	IBaseResource parseResourceFromRequest(
-			RequestDetails theRequest,
-			BaseMethodBinding theMethodBinding,
-			Class<? extends IBaseResource> theResourceType);
+			RequestDetails theRequest, IMethodBinding theMethodBinding, Class<? extends IBaseResource> theResourceType);
 }

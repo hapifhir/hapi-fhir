@@ -64,6 +64,9 @@ public class ValidateUtil {
 		}
 	}
 
+	/**
+	 * @param theMessage The failure message (uses {@link String#format(String, Object...)} so substitutions like <code>%s</code> and <code>%d</code> are supported)
+	 */
 	public static void isNotNullOrThrowUnprocessableEntity(Object theObject, String theMessage, Object... theValues) {
 		if (theObject == null) {
 			throw new UnprocessableEntityException(Msg.code(1767) + String.format(theMessage, theValues));
@@ -76,12 +79,18 @@ public class ValidateUtil {
 		}
 	}
 
+	/**
+	 * @param theMessage The failure message (uses {@link String#format(String, Object...)} so substitutions like <code>%s</code> and <code>%d</code> are supported)
+	 */
 	public static void isTrueOrThrowInvalidRequest(boolean theSuccess, String theMessage, Object... theValues) {
 		if (!theSuccess) {
 			throw new InvalidRequestException(Msg.code(1769) + String.format(theMessage, theValues));
 		}
 	}
 
+	/**
+	 * @param theMessage The failure message (uses {@link String#format(String, Object...)} so substitutions like <code>%s</code> and <code>%d</code> are supported)
+	 */
 	public static void isTrueOrThrowResourceNotFound(boolean theSuccess, String theMessage, Object... theValues) {
 		if (!theSuccess) {
 			throw new ResourceNotFoundException(Msg.code(2494) + String.format(theMessage, theValues));

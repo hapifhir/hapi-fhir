@@ -1,0 +1,4 @@
+---
+type: add
+issue: 7956
+title: "The FHIR GenericClient `IRawHttp` interface now has an additional method `post()` which can be used to send a raw (potentially non-FHIR payload) HTTP POST through the client, leveraging interceptors and other functionality from the client."

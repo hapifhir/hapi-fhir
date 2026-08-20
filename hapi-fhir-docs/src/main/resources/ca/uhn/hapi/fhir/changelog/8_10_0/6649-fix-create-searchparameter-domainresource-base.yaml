@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 6649
+title: "Previously, creating `SearchParameter` with an abstract base such as `DomainResource`, `CanonicalResource` or 
+`MetadataResource` would fail with error `HAPI-1684: Unknown resource name`. This has been fixed."
+

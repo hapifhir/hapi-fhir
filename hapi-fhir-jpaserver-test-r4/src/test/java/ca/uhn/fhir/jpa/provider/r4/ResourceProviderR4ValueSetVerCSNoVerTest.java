@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -52,6 +53,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import jakarta.annotation.Nonnull;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -220,8 +222,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet();
-		await().until(() -> clearDeferredStorageQueue());
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		runInTransaction(()->{
 			Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
 			assertEquals(1, page.getContent().size());
@@ -277,8 +278,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet();
-		await().until(() -> clearDeferredStorageQueue());
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		runInTransaction(()->{
 			Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
 			assertEquals(1, page.getContent().size());
@@ -362,8 +362,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet();
-		await().until(() -> clearDeferredStorageQueue());
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		runInTransaction(()->{
 			Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
 			assertEquals(1, page.getContent().size());
@@ -390,7 +389,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet();
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		try {
 			myClient
@@ -432,7 +431,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystem();
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 
@@ -727,8 +726,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 
 		String initialValueSetName = valueSet.getName();
 		validateTermValueSetNotExpanded(initialValueSetName);
-		await().until(() -> clearDeferredStorageQueue());
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		validateTermValueSetExpandedAndChildren(initialValueSetName, codeSystem);
 
 		ValueSet updatedValueSet = valueSet;
@@ -739,7 +737,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 
 		String updatedValueSetName = valueSet.getName();
 		validateTermValueSetNotExpanded(updatedValueSetName);
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		validateTermValueSetExpandedAndChildren(updatedValueSetName, codeSystem);
 	}
 
@@ -757,8 +755,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 
 		String initialValueSetName = valueSet.getName();
 		validateTermValueSetNotExpanded(initialValueSetName);
-		await().until(() -> clearDeferredStorageQueue());
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		validateTermValueSetExpandedAndChildren(initialValueSetName, codeSystem);
 
 		ValueSet updatedValueSet = valueSet;
@@ -782,20 +779,21 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 
 		String updatedValueSetName = valueSet.getName();
 		validateTermValueSetNotExpanded(updatedValueSetName);
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		validateTermValueSetExpandedAndChildren(updatedValueSetName, codeSystem);
 	}
 
 	private void validateTermValueSetNotExpanded(String theValueSetName) {
 		runInTransaction(() -> {
-			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
-			assertTrue(optionalValueSetByResourcePid.isPresent());
+			List<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
+			assertFalse(optionalValueSetByResourcePid.isEmpty());
 
 			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findByUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 			assertTrue(optionalValueSetByUrl.isPresent());
 
 			TermValueSet termValueSet = optionalValueSetByUrl.get();
-			assertSame(optionalValueSetByResourcePid.get(), termValueSet);
+			assertSame(optionalValueSetByResourcePid.get(0), termValueSet);
+			assertThat(optionalValueSetByResourcePid).hasSize(1);
 			ourLog.info("ValueSet:\n" + termValueSet);
 			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
 			assertEquals(theValueSetName, termValueSet.getName());
@@ -806,14 +804,15 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 
 	private void validateTermValueSetExpandedAndChildren(String theValueSetName, CodeSystem theCodeSystem) {
 		runInTransaction(() -> {
-			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
-			assertTrue(optionalValueSetByResourcePid.isPresent());
+			List<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
+			assertFalse(optionalValueSetByResourcePid.isEmpty());
 
 			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findByUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 			assertTrue(optionalValueSetByUrl.isPresent());
 
 			TermValueSet termValueSet = optionalValueSetByUrl.get();
-			assertSame(optionalValueSetByResourcePid.get(), termValueSet);
+			assertSame(optionalValueSetByResourcePid.get(0), termValueSet);
+			assertThat(optionalValueSetByResourcePid).hasSize(1);
 			ourLog.info("ValueSet:\n" + termValueSet);
 			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
 			assertEquals(theValueSetName, termValueSet.getName());
@@ -845,7 +844,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 	@Test
 	public void testValidateCodeOperationByCodeAndSystemInstanceAfterExpand() throws Exception {
 		loadAndPersistCodeSystemAndValueSet();
-		myTermReadSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		testValidateCodeOperationByCodeAndSystemInstance();
 	}
 
@@ -873,7 +872,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 	@Test
 	public void testValidateCodeOperationByCodeAndSystemTypeAfterExpand() throws Exception {
 		loadAndPersistCodeSystemAndValueSet();
-		myTermReadSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		testValidateCodeOperationByCodeAndSystemType();
 	}
 
@@ -902,7 +901,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 	@Test
 	public void testValidateCodeOperationByCodeAndSystemAfterExpand() throws Exception {
 		loadAndPersistCodeSystemAndValueSet();
-		myTermReadSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		testValidateCodeOperationByCodeAndSystem();
 	}
 
@@ -977,7 +976,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 	@Test
 	public void testValidateCodeOperationByCodingAfterExpand() throws Exception {
 		loadAndPersistCodeSystemAndValueSet();
-		myTermReadSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		testValidateCodeOperationByCoding();
 	}
 
@@ -1000,18 +999,6 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 
 	}
 
-
-
-	private boolean clearDeferredStorageQueue() {
-
-		if(!myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true)) {
-			myTerminologyDeferredStorageSvc.saveAllDeferred();
-			return false;
-		} else {
-			return true;
-		}
-
-	}
 
 	@AfterEach
 	public void afterResetPreExpansionDefault() {

@@ -50,7 +50,7 @@ public abstract class BaseSearchParamPredicateBuilder extends BaseJoiningPredica
 	private final DbColumn myColumnHashIdentity;
 
 	@Autowired
-	private ISearchParamIdentityCacheSvc mySearchParamIdentityCacheSvc;
+	protected ISearchParamIdentityCacheSvc mySearchParamIdentityCacheSvc;
 
 	@VisibleForTesting
 	public void setSearchParamIdentityCacheSvcForUnitTest(ISearchParamIdentityCacheSvc theSearchParamIdentityCacheSvc) {

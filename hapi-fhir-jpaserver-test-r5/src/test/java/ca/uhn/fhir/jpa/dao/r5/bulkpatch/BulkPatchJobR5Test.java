@@ -108,9 +108,9 @@ public class BulkPatchJobR5Test extends BaseBulkPatchR5Test {
 		assertEquals("B1", actualPatientB.getIdentifier().get(0).getValue());
 		assertEquals("1", actualPatientB.getMeta().getVersionId());
 
-		myBatch2JobHelper.runMaintenancePass();
-		myBatch2JobHelper.runMaintenancePass();
-		myBatch2JobHelper.runMaintenancePass();
+		myBatch2JobHelper.runActiveJobMaintenancePass();
+		myBatch2JobHelper.runActiveJobMaintenancePass();
+		myBatch2JobHelper.runActiveJobMaintenancePass();
 
 		JobInstance instance = myJobCoordinator.getInstance(jobId);
 		ourLog.info("Instance: {}", instance);

@@ -246,16 +246,18 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 		if (thePerformIndexing) {
 			if (!retVal.isUnchangedInCurrentOperation()) {
 
-				org.hl7.fhir.r4.model.CodeSystem cs = myVersionCanonicalizer.codeSystemToCanonical(theResource);
-				addPidToResource(theEntity, cs);
+				addPidToResource(theEntity, theResource);
 
 				myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(
-						cs, (ResourceTable) theEntity, theRequest);
+						theResource, (ResourceTable) theEntity, theRequest);
 
-				String codeSystemUrl = cs != null ? cs.getUrl() : null;
+				String codeSystemUrl = theResource != null
+						? myFhirContext.newTerser().getSinglePrimitiveValueOrNull(theResource, "url")
+						: null;
 				if (isNotBlank(codeSystemUrl)) {
-					int invalidated = myTerminologySvc.invalidatePreCalculatedExpansionOfValueSetsContainingCodeSystem(
-							codeSystemUrl);
+					int invalidated =
+							myTermValueSetStorageSvc.invalidatePreCalculatedExpansionOfValueSetsContainingCodeSystem(
+									codeSystemUrl);
 					if (invalidated > 0) {
 						ourLog.info(
 								"Invalidated {} pre-calculated ValueSet expansion(s) due to update of CodeSystem: {}",

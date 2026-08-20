@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7920
+title: "Fixed a regression introduced during 8.10.0 development where FHIR reference searches that `AND` together 
+multiple clauses on the same reference search parameter (e.g. `AuditEvent?entity=Patient/A&entity=Patient/B`) 
+incorrectly returned an empty bundle."

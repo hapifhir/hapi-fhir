@@ -73,7 +73,7 @@ Note that this rule alone does not actually enforce validation against the speci
 }
 ```
 
-<a name="require-validation"/>
+<a id="require-validation"></a>
 
 # Rules: Require Validation to Declared Profiles
 
@@ -119,6 +119,35 @@ Rules can declare that a specific profile is not allowed.
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/RepositoryValidatingInterceptorExamples.java|disallowProfiles}}
 ```
+
+# Rules: Implied Profile Validation
+
+Sometimes you may want to enforce validation against a specific profile even when the resource does not explicitly declare conformance to that profile in its `meta.profile` field. This is useful for enforcing organization-wide Implementation Guide requirements.
+
+## Implied Profile If No Explicit Profile
+
+Use the following rule to apply validation against a specific profile only when no profile is explicitly declared in the incoming resource:
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/RepositoryValidatingInterceptorExamples.java|impliedProfileIfNotExplicit}}
+```
+
+This rule will:
+- Apply validation against the specified profile when `Resource.meta.profile` is empty or null
+- Skip the implied validation if the resource already declares any profile in `Resource.meta.profile`
+
+## Implied Profile Always
+
+Use the following rule to apply validation against a specific profile regardless of what profiles are declared in the incoming resource:
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/RepositoryValidatingInterceptorExamples.java|impliedProfileAlways}}
+```
+
+This rule will:
+- Always apply validation against the specified profile
+- Apply validation to the different profiles declared in the resource
+- Effectively enforce a mandatory profile across all resources of the specified type
 
 # Adding Validation Outcome to HTTP Response
 

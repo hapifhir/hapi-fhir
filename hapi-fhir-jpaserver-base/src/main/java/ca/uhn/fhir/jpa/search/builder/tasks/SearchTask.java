@@ -20,15 +20,15 @@
 package ca.uhn.fhir.jpa.search.builder.tasks;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.dao.ISearchResultConsumer;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
+import ca.uhn.fhir.jpa.dao.SearchProgressTracker;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
@@ -56,12 +56,13 @@ import co.elastic.apm.api.ElasticApm;
 import co.elastic.apm.api.Span;
 import co.elastic.apm.api.Transaction;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -91,10 +92,31 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 public class SearchTask implements Callable<Void> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchTask.class);
-	// injected beans
-	protected final HapiTransactionService myTxService;
-	protected final FhirContext myContext;
-	protected final ISearchResultCacheSvc mySearchResultCacheSvc;
+
+	@Autowired
+	protected HapiTransactionService myTxService;
+
+	@Autowired
+	protected FhirContext myContext;
+
+	@Autowired
+	protected ISearchResultCacheSvc mySearchResultCacheSvc;
+
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
+
+	@Autowired
+	private SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
+
+	@Autowired
+	private JpaStorageSettings myStorageSettings;
+
+	@Autowired
+	private ISearchCacheSvc mySearchCacheSvc;
+
+	@Autowired
+	private IPagingProvider myPagingProvider;
+
 	private final SearchParameterMap myParams;
 	private final String myResourceType;
 	private final ArrayList<JpaPid> mySyncedPids = new ArrayList<>();
@@ -108,12 +130,7 @@ public class SearchTask implements Callable<Void> {
 	private final Consumer<String> myOnRemove;
 	private final int mySyncSize;
 	private final Integer myLoadingThrottleForUnitTests;
-	private final IInterceptorBroadcaster myInterceptorBroadcaster;
-	private final SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
-	private final JpaStorageSettings myStorageSettings;
-	private final ISearchCacheSvc mySearchCacheSvc;
-	private final IPagingProvider myPagingProvider;
-	private final IInterceptorBroadcaster myCompositeBroadcaster;
+	private IInterceptorBroadcaster myCompositeBroadcaster;
 	private Search mySearch;
 	private boolean myAbortRequested;
 	private int myCountSavedTotal = 0;
@@ -129,26 +146,7 @@ public class SearchTask implements Callable<Void> {
 	/**
 	 * Constructor
 	 */
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	public SearchTask(
-			SearchTaskParameters theCreationParams,
-			HapiTransactionService theManagedTxManager,
-			FhirContext theContext,
-			IInterceptorBroadcaster theInterceptorBroadcaster,
-			SearchBuilderFactory theSearchBuilderFactory,
-			ISearchResultCacheSvc theSearchResultCacheSvc,
-			JpaStorageSettings theStorageSettings,
-			ISearchCacheSvc theSearchCacheSvc,
-			IPagingProvider thePagingProvider) {
-		// beans
-		myTxService = theManagedTxManager;
-		myContext = theContext;
-		myInterceptorBroadcaster = theInterceptorBroadcaster;
-		mySearchBuilderFactory = theSearchBuilderFactory;
-		mySearchResultCacheSvc = theSearchResultCacheSvc;
-		myStorageSettings = theStorageSettings;
-		mySearchCacheSvc = theSearchCacheSvc;
-		myPagingProvider = thePagingProvider;
+	public SearchTask(SearchTaskParameters theCreationParams) {
 
 		// values
 		myOnRemove = theCreationParams.OnRemove;
@@ -161,9 +159,38 @@ public class SearchTask implements Callable<Void> {
 		myLoadingThrottleForUnitTests = theCreationParams.getLoadingThrottleForUnitTests();
 
 		mySearchRuntimeDetails = new SearchRuntimeDetails(myRequest, mySearch.getUuid());
-		mySearchRuntimeDetails.setQueryString(myParams.toNormalizedQueryString(myContext));
+		mySearchRuntimeDetails.setQueryString(myParams.toNormalizedQueryString());
 		myRequestPartitionId = theCreationParams.RequestPartitionId;
 		myParentTransaction = ElasticApm.currentTransaction();
+	}
+
+	/**
+	 * Unit test constructor
+	 */
+	public SearchTask(
+			SearchTaskParameters theCreationParams,
+			HapiTransactionService theTransactionService,
+			FhirContext theContext,
+			IInterceptorBroadcaster theInterceptorBroadcaster,
+			SearchBuilderFactory<JpaPid> theSearchBuilderFactory,
+			ISearchResultCacheSvc theSearchResultCacheSvc,
+			JpaStorageSettings theStorageSettings,
+			ISearchCacheSvc theSearchCacheSvc,
+			IPagingProvider thePagingProvider) {
+		this(theCreationParams);
+		myTxService = theTransactionService;
+		myContext = theContext;
+		myInterceptorBroadcaster = theInterceptorBroadcaster;
+		mySearchResultCacheSvc = theSearchResultCacheSvc;
+		myPagingProvider = thePagingProvider;
+		mySearchBuilderFactory = theSearchBuilderFactory;
+		myStorageSettings = theStorageSettings;
+		mySearchCacheSvc = theSearchCacheSvc;
+		start();
+	}
+
+	@PostConstruct
+	void start() {
 		myCompositeBroadcaster =
 				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, myRequest);
 	}
@@ -288,8 +315,7 @@ public class SearchTask implements Callable<Void> {
 				.execute(this::doSaveSearch);
 	}
 
-	@SuppressWarnings("rawtypes")
-	private void saveUnsynced(final IResultIterator theResultIter) {
+	private void saveUnsynced(final SearchProgressTracker theSearchProgressTracker, boolean theStillInProgress) {
 		myTxService
 				.withRequest(myRequest)
 				.withRequestPartitionId(myRequestPartitionId)
@@ -333,14 +359,14 @@ public class SearchTask implements Callable<Void> {
 					synchronized (mySyncedPids) {
 						int numSyncedThisPass = unsyncedPids.size();
 						ourLog.trace(
-								"Syncing {} search results - Have more: {}",
+								"Syncing {} search results - In progress: {}",
 								numSyncedThisPass,
-								theResultIter.hasNext());
+								theSearchProgressTracker);
 						mySyncedPids.addAll(unsyncedPids);
 						unsyncedPids.clear();
 
-						if (!theResultIter.hasNext()) {
-							int skippedCount = theResultIter.getSkippedCount();
+						if (!theStillInProgress) {
+							int skippedCount = theSearchProgressTracker.getSkippedCount();
 							ourLog.trace(
 									"MaxToFetch[{}] SkippedCount[{}] CountSavedThisPass[{}] CountSavedThisTotal[{}] AdditionalPrefetchRemaining[{}]",
 									myMaxResultsToFetch,
@@ -349,7 +375,7 @@ public class SearchTask implements Callable<Void> {
 									myCountSavedTotal,
 									myAdditionalPrefetchThresholdsRemaining);
 
-							if (isFinished(theResultIter)) {
+							if (isFinished(theSearchProgressTracker)) {
 								// finished
 								ourLog.trace("Setting search status to FINISHED");
 								mySearch.setStatus(SearchStatusEnum.FINISHED);
@@ -389,17 +415,15 @@ public class SearchTask implements Callable<Void> {
 		ourLog.trace("saveUnsynced() - post-commit");
 	}
 
-	@SuppressWarnings("rawtypes")
-	private boolean isFinished(final IResultIterator theResultIter) {
-		int skippedCount = theResultIter.getSkippedCount();
-		int nonSkippedCount = theResultIter.getNonSkippedCount();
+	private boolean isFinished(final SearchProgressTracker theSearchProgressTracker) {
+		int skippedCount = theSearchProgressTracker.getSkippedCount();
 		int totalFetched = skippedCount + myCountSavedThisPass + myCountBlockedThisPass;
 
-		if (myMaxResultsToFetch != null && totalFetched < myMaxResultsToFetch) {
+		if (myMaxResultsToFetch != null) {
 			// total fetched < max results to fetch -> we've exhausted the search
-			return true;
+			return totalFetched < myMaxResultsToFetch;
 		} else {
-			if (nonSkippedCount == 0) {
+			if (skippedCount == 0) {
 				// no skipped resources in this query
 				if (myParams.getCount() != null) {
 					// count supplied
@@ -660,6 +684,40 @@ public class SearchTask implements Callable<Void> {
 		}
 
 		/*
+		 * The following loop actually loads the PIDs of the resources
+		 * matching the search off of the disk and into memory. After
+		 * every X results, we commit to the HFJ_SEARCH table.
+		 */
+		ISearchResultConsumer<JpaPid> resultConsumer = (progress, pid) -> {
+			myUnsyncedPids.add(pid);
+
+			boolean shouldSync = myUnsyncedPids.size() >= mySyncSize;
+
+			if (myStorageSettings.getCountSearchResultsUpTo() != null
+					&& myStorageSettings.getCountSearchResultsUpTo() > 0
+					&& myStorageSettings.getCountSearchResultsUpTo() < myUnsyncedPids.size()) {
+				shouldSync = false;
+			}
+
+			if (myUnsyncedPids.size() > 50000) {
+				shouldSync = true;
+			}
+
+			// If no abort was requested, bail out
+			Validate.isTrue(isNotAborted(), "Abort has been requested");
+
+			if (shouldSync) {
+				saveUnsynced(progress, true);
+			}
+
+			if (myLoadingThrottleForUnitTests != null) {
+				AsyncUtil.sleep(myLoadingThrottleForUnitTests);
+			}
+
+			return ISearchResultConsumer.CONTINUE;
+		};
+
+		/*
 		 * createQuery
 		 * Construct the SQL query we'll be sending to the database
 		 *
@@ -673,53 +731,14 @@ public class SearchTask implements Callable<Void> {
 		 * This is an odd implementation behaviour, but the change
 		 * for this will require a lot more handling at higher levels
 		 */
-		try (IResultIterator<JpaPid> resultIterator =
-				sb.createQuery(myParams, mySearchRuntimeDetails, myRequest, myRequestPartitionId)) {
-			// resultIterator is SearchBuilder.QueryIterator
-			assert (resultIterator != null);
+		SearchProgressTracker progressTracker = sb.performSearchForPids(
+				resultConsumer, myParams, mySearchRuntimeDetails, myRequest, myRequestPartitionId);
+		assert progressTracker != null;
 
-			/*
-			 * The following loop actually loads the PIDs of the resources
-			 * matching the search off of the disk and into memory. After
-			 * every X results, we commit to the HFJ_SEARCH table.
-			 */
-			int syncSize = mySyncSize;
-			while (resultIterator.hasNext()) {
-				myUnsyncedPids.add(resultIterator.next());
+		// If no abort was requested, bail out
+		Validate.isTrue(isNotAborted(), "Abort has been requested");
 
-				boolean shouldSync = myUnsyncedPids.size() >= syncSize;
-
-				if (myStorageSettings.getCountSearchResultsUpTo() != null
-						&& myStorageSettings.getCountSearchResultsUpTo() > 0
-						&& myStorageSettings.getCountSearchResultsUpTo() < myUnsyncedPids.size()) {
-					shouldSync = false;
-				}
-
-				if (myUnsyncedPids.size() > 50000) {
-					shouldSync = true;
-				}
-
-				// If no abort was requested, bail out
-				Validate.isTrue(isNotAborted(), "Abort has been requested");
-
-				if (shouldSync) {
-					saveUnsynced(resultIterator);
-				}
-
-				if (myLoadingThrottleForUnitTests != null) {
-					AsyncUtil.sleep(myLoadingThrottleForUnitTests);
-				}
-			}
-
-			// If no abort was requested, bail out
-			Validate.isTrue(isNotAborted(), "Abort has been requested");
-
-			saveUnsynced(resultIterator);
-
-		} catch (IOException e) {
-			ourLog.error("IO failure during database access", e);
-			throw new InternalErrorException(Msg.code(1166) + e);
-		}
+		saveUnsynced(progressTracker, false);
 	}
 
 	/**

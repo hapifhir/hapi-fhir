@@ -2,7 +2,7 @@
 
 This page outlines ways that the client can be configured for specific behaviour.
 
-<a name="performance"/>
+<a id="performance"></a>
 
 # Performance
 

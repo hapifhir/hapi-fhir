@@ -29,9 +29,27 @@ def poll_for_pipeline_status(pipe_id):
     pipeline_status_json = resp.json()
     return pipeline_status_json
 
-if not target_cdr_branch:
-    print("Defaulting CDR branch to master as this is an automatic build.")
-    target_cdr_branch = "master"
+def resolve_cdr_branch(hapi_branch, explicit_cdr_branch):
+    if explicit_cdr_branch:
+        return explicit_cdr_branch
+    if hapi_branch and hapi_branch.startswith("rel_"):
+        mapping_path = os.path.join(
+            os.path.dirname(__file__), "hapi_cdr_branch_map.json"
+        )
+        with open(mapping_path) as f:
+            mapping = json.load(f).get("branches", {})
+        if hapi_branch not in mapping:
+            print(
+                f"ERROR: HAPI branch '{hapi_branch}' has no entry in "
+                f"hapi_cdr_branch_map.json. Add the corresponding CDR "
+                f"release branch and re-run."
+            )
+            sys.exit(1)
+        return mapping[hapi_branch]
+    print("Defaulting CDR branch to master (non-release HAPI branch).")
+    return "master"
+
+target_cdr_branch = resolve_cdr_branch(current_hapi_branch, target_cdr_branch)
 
 # Prepare data for Robogary request
 request_data = {

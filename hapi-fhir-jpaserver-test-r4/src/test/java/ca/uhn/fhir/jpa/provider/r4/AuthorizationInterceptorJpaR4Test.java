@@ -578,7 +578,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	@Test
 	public void testReadCodeIn_AllowedInCompartment() throws IOException {
 		myValueSetDao.update(loadResourceFromClasspath(ValueSet.class, "r4/adi-vs2.json"), mySrd);
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		myBatch2JobHelper.awaitNoJobsRunning();
 		logAllValueSetConcepts();
 
 		mySystemDao.transaction(mySrd, loadResourceFromClasspath(Bundle.class, "r4/adi-ptbundle.json"));

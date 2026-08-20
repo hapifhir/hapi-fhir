@@ -1,0 +1,6 @@
+---
+type: perf
+jira: SMILE-11917
+issue: 7813
+title: "A database index has been added to the `CREATED_TIME` column of the `HFJ_RESOURCE_MODIFIED`
+  table to improve performance of the asynchronous subscription delivery pipeline."

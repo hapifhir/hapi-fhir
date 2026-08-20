@@ -178,6 +178,8 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 		}
 
 		Map<String, IIdType> idSubstitutions = new HashMap<>();
+		List<List<IBase>> responseEntriesPerSubBundle = new ArrayList<>();
+
 		for (IBaseBundle singlePartitionRequest : partitionedRequests) {
 
 			/*
@@ -186,9 +188,10 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 			 * and that kind of thing, but there is other state in there that shouldn't be
 			 * preserved, such as tag definitions and rollback items
 			 *
-			 * DO, however, copy user data from the parent transaction details
+			 * DO, however, copy user data from the parent transaction details and the Bundle
+			 * so that it can be used by interceptors
 			 */
-			TransactionDetails transactionDetails = new TransactionDetails();
+			TransactionDetails transactionDetails = new TransactionDetails(myTransactionDetails.getTransactionBundle());
 			myTransactionDetails.getUserData().forEach(transactionDetails::putUserData);
 
 			// Apply any placeholder ID substitutions from previous partition executions
@@ -203,8 +206,21 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 				}
 			}
 
-			IBaseBundle singlePartitionResponse = myTransactionProcessor.processTransactionAsSubRequest(
-					myRequestDetails, transactionDetails, singlePartitionRequest, myActionName, myNestedMode);
+			IBaseBundle singlePartitionResponse;
+			try {
+				singlePartitionResponse = myTransactionProcessor.processTransactionAsSubRequest(
+						myRequestDetails, transactionDetails, singlePartitionRequest, myActionName, myNestedMode);
+			} catch (Exception e) {
+				if (responseEntriesPerSubBundle.isEmpty()) {
+					throw e;
+				}
+				throw new PartitionedTransactionPartialFailureException(
+						Msg.code(2974)
+								+ "Partitioned transaction partially failed: one or more partitions committed before a later partition failed. Cause: "
+								+ e.getMessage(),
+						responseEntriesPerSubBundle,
+						e);
+			}
 
 			// Capture any placeholder ID substitutions from this partition
 			TransactionUtil.TransactionResponse singlePartitionResponseParsed =
@@ -223,14 +239,17 @@ public class TransactionPartitionProcessor<BUNDLE extends IBaseBundle> {
 					partitionRequestEntries.size() == partitionResponseEntries.size(),
 					"Partitioned request and response bundles have different number of entries");
 
+			List<IBase> responseEntriesOfSubBundle = new ArrayList<>();
 			for (int i = 0; i < partitionRequestEntries.size(); i++) {
 				IBase partitionRequestEntry = partitionRequestEntries.get(i);
 				IBase partitionResponseEntry = partitionResponseEntries.get(i);
 				Integer originalIndex = originalEntryToIndex.get(partitionRequestEntry);
 				if (originalIndex != null) {
 					responseEntries.set(originalIndex, partitionResponseEntry);
+					responseEntriesOfSubBundle.add(partitionResponseEntry);
 				}
 			}
+			responseEntriesPerSubBundle.add(responseEntriesOfSubBundle);
 		}
 
 		BUNDLE response = (BUNDLE) bundleDefinition.newInstance();

@@ -630,7 +630,7 @@ public class ComboNonUniqueOnUpliftedRefchainR5Test extends BaseJpaR5Test {
 		sp.setId("SearchParameter/Coverage-patient");
 		sp.setName("patient");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		sp.setUrl("http://hl7.org/fhir/SearchParameter/clinical-patient");
+		sp.setUrl("http://example.org/SearchParameter/clinical-patient");
 		sp.setDescription("The patient for this coverage");
 		sp.setCode("patient");
 		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.COVERAGE);

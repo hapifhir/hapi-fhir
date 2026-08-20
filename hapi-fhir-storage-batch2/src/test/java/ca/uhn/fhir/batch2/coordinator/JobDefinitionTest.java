@@ -1,13 +1,15 @@
 package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.model.JobDefinition;
+import ca.uhn.fhir.model.api.IModelJson;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
-class JobDefinitionTest {
+class JobDefinitionTest extends BaseBatch2Test {
 	private static final String JOB_DEF_ID = "Jeff";
 	private static final String JOB_DESC = "Jeff is curious";
 
@@ -35,4 +37,41 @@ class JobDefinitionTest {
 			assertEquals("At least 2 steps must be supplied", e.getMessage());
 		}
 	}
+
+	@Test
+	void stepWeight_FailOnZeroWeight() {
+		assertThatThrownBy(()->{
+			super.createJobDefinition(b -> {
+				b.setStepWeightForProgressCalculator(STEP_1, 0.0);
+			});
+		}).isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("step weight can not be <= 0.0");
+	}
+
+	@Test
+	void stepWeight_FailOnAllWeightConsumedByNotAllSteps() {
+		assertThatThrownBy(()->{
+			super.createJobDefinition(b -> {
+				b.setStepWeightForProgressCalculator(STEP_1, 0.5);
+				b.setStepWeightForProgressCalculator(STEP_2, 0.5);
+				// Nothing left for step 3
+			});
+		}).isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("no remaining room for steps: [STEP_3]");
+	}
+
+	@Test
+	void stepWeight_FailOnAllWeightAddsUpToMoreThanOne() {
+		// Test
+		assertThatThrownBy(()-> super.createJobDefinition(b -> {
+			b.setStepWeightForProgressCalculator(STEP_1, 0.49);
+			b.setStepWeightForProgressCalculator(STEP_2, 0.49);
+			// Adds up to more than 1.0
+			b.setStepWeightForProgressCalculator(STEP_3, 0.2);
+		}))
+			// Validate
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageMatching("^Combined step weights can not be greater than 1.0, but was 1.1[789].*");
+	}
+
 }

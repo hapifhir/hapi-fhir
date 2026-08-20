@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 7873
+title: "The date/time picker used in the FHIRWeb / Testpage Overlay module is now configured to use
+  a higher level of precision for parameters that support it. Thanks to Markus Heberling for the contribution!"
