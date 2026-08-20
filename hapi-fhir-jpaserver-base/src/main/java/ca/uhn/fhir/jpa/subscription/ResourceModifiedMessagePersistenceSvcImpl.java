@@ -38,6 +38,7 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
+import org.apache.commons.collections4.ListUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -47,8 +48,11 @@ import org.springframework.data.domain.Pageable;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.json.JsonMapper;
 
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.model.entity.PersistedResourceModifiedMessageEntityPK.with;
 
@@ -58,6 +62,12 @@ import static ca.uhn.fhir.jpa.model.entity.PersistedResourceModifiedMessageEntit
  * upon submission failure (see @link {@link AsyncResourceModifiedSubmitterSvc}).
  */
 public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModifiedMessagePersistenceSvc {
+
+	/**
+	 * The maximum number of primary keys deleted by a single statement.  The primary key is composed of three columns,
+	 * so each key costs three bound parameters and Oracle refuses any statement carrying more than 1000 of them.
+	 */
+	static final int DELETE_BATCH_SIZE = 250;
 
 	private final FhirContext myFhirContext;
 
@@ -148,6 +158,23 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 				myResourceModifiedDao.removeById((PersistedResourceModifiedMessageEntityPK) theResourceModifiedPK);
 
 		return removedCount == 1;
+	}
+
+	@Override
+	public int deleteByPKs(Collection<IPersistedResourceModifiedMessagePK> theResourceModifiedPKs) {
+		if (theResourceModifiedPKs.isEmpty()) {
+			return 0;
+		}
+
+		List<PersistedResourceModifiedMessageEntityPK> pks = theResourceModifiedPKs.stream()
+				.map(PersistedResourceModifiedMessageEntityPK.class::cast)
+				.collect(Collectors.toList());
+
+		int retVal = 0;
+		for (List<PersistedResourceModifiedMessageEntityPK> nextChunk : ListUtils.partition(pks, DELETE_BATCH_SIZE)) {
+			retVal += myResourceModifiedDao.removeByPks(nextChunk);
+		}
+		return retVal;
 	}
 
 	protected ResourceModifiedMessage inflateResourceModifiedMessageFromEntity(
