@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.auth.CompartmentSearchParameterModifications;
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
@@ -23,6 +24,7 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DocumentReference;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumeration;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
@@ -1597,6 +1599,57 @@ public class FhirTerserR4Test {
 		}finally {
 			executor.shutdown();
 		}
+	}
+
+	/**
+	 * Unlike {@link #testConcurrentTerserCalls()}, which goes through the deprecated Set overload and so
+	 * builds a fresh CompartmentSearchParameterModifications per call, this shares a single instance across
+	 * all the threads. That is what production does: AuthorizationInterceptor caches its rule list on the
+	 * RequestDetails, and each rule holds one CompartmentSearchParameterModifications.
+	 * See CDR #8555 / SMILE-11895.
+	 */
+	@Test
+	public void testConcurrentTerserCallsWithSharedCompartmentModifications()
+			throws ExecutionException, InterruptedException {
+		FhirContext ctx = FhirContext.forR4();
+		CompartmentSearchParameterModifications sharedModifications = new CompartmentSearchParameterModifications();
+		sharedModifications.addSPToOmitFromCompartment("Group", "member");
+		sharedModifications.addSPToIncludeInCompartment("Observation", "performer");
+
+		ExecutorService executor = Executors.newFixedThreadPool(10);
+		try {
+			List<Future<?>> futures = new ArrayList<>();
+			for (int i = 0; i < 10; i++) {
+				Runnable runnable = () -> {
+					for (int j = 0; j < 500; j++) {
+						Observation observation = new Observation();
+						observation.setSubject(new Reference("Patient/123"));
+						boolean outcome = ctx.newTerser()
+								.isSourceInCompartmentForTarget(
+										"Patient", observation, new IdType("Patient/123"), sharedModifications);
+						assertTrue(outcome);
+
+						Encounter encounter = new Encounter();
+						encounter.setSubject(new Reference("Patient/456"));
+						boolean encounterOutcome = ctx.newTerser()
+								.isSourceInCompartmentForTarget(
+										"Patient", encounter, new IdType("Patient/123"), sharedModifications);
+						assertFalse(encounterOutcome);
+					}
+				};
+				futures.add(executor.submit(runnable));
+			}
+
+			for (var next : futures) {
+				next.get();
+			}
+		} finally {
+			executor.shutdown();
+		}
+
+		assertThat(sharedModifications.getOmittedSPNamesForResourceType("Group")).containsExactly("member");
+		assertThat(sharedModifications.getAdditionalSearchParamNamesForResourceType("Observation"))
+				.containsExactly("performer");
 	}
 
 	@Test
