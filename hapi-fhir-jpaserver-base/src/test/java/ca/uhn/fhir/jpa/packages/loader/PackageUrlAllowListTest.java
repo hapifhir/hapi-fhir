@@ -8,6 +8,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Unit coverage for the package URL allow-list. This is the enforcement point that decides whether a
@@ -293,5 +296,50 @@ class PackageUrlAllowListTest {
 		assertThat(localAllowList().isAllowed(null)).isFalse();
 		assertThat(localAllowList().isAllowed("")).isFalse();
 		assertThat(localAllowList().isAllowed("   ")).isFalse();
+	}
+
+	@Test
+	public void isPrivateNetworkAllowedForHost_allowsAll_returnsTrue() {
+		// setup
+		String host = "pkg.com";
+		PackageUrlAllowList allowList = PackageUrlAllowList.allowAll();
+
+		// test
+		boolean isPrivate = allowList.isPrivateNetworkAllowedForHost(host);
+
+		// validate
+		assertTrue(isPrivate);
+	}
+
+	@Test
+	public void isPrivateNetworkAllowedForHost_hostNotInWhiteList_returnsFalse() {
+		// setup
+		String host = "pkg.com";
+		PackageUrlAllowList allowList = PackageUrlAllowList.of(
+			List.of(), List.of()
+		);
+
+		// test
+		boolean isPrivate = allowList.isPrivateNetworkAllowedForHost(host);
+
+		// validate
+		assertFalse(isPrivate);
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = { true, false })
+	public void isPrivateNetworkAllowedForHost_hostIsPublic_returnsFalse(boolean theIsPrivate) {
+		// setup
+		String host = "pkg.com";
+		AllowedUrlPrefix publicRemote = new AllowedUrlPrefix("http://" + host, theIsPrivate);
+		PackageUrlAllowList allowList = PackageUrlAllowList.of(
+			List.of(publicRemote), List.of()
+		);
+
+		// test
+		boolean isPrivate = allowList.isPrivateNetworkAllowedForHost(host);
+
+		// validate
+		assertEquals(theIsPrivate, isPrivate);
 	}
 }

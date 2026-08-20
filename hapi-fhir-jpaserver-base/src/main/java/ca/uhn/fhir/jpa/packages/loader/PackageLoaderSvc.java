@@ -70,7 +70,7 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 
 	private static PackageLoaderSettings ourApplied;
 
-	private PackageLoaderSettings mySettings;
+	private final PackageLoaderSettings mySettings;
 
 	public PackageLoaderSvc(PackageLoaderSettings theLoaderSettings) {
 		mySettings = theLoaderSettings;
@@ -99,7 +99,7 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 	 * since only web urls are handled by BasePackageLoader
 	 * (this class will handle locals only).
 	 *
-	 * Syncronoized because module contexts can start concurrently, and this is read-modify-write on shared static state.
+	 * synchronized because module contexts can start concurrently, and this is read-modify-write on shared static state.
 	 */
 	public static synchronized void initSettings(PackageLoaderSettings theSettings) {
 		List<AllowedUrlPrefix> newPrefixes =
@@ -316,6 +316,9 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 
 		/*
 		 * we filter redirects up to a maximum # of hops {@link PackageUrlConstants#MAX_REDIRECTS}
+		 *
+		 * Corelibs have their own blocklist for their calls; we add ours to have
+		 * a blocklist of our own
 		 */
 		try (CloseableHttpClient client = HttpClientBuilder.create()
 				.setDnsResolver(new PackageLoaderDnsResolver(mySettings.getPackageUrlAllowList()))
@@ -343,7 +346,7 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 			throw new InvalidRequestException(Msg.code(3032) + "Exceeded " + PackageUrlConstants.MAX_REDIRECTS
 					+ " redirects loading a package; chain was " + String.join(" -> ", visited));
 		} catch (IOException e) {
-			throw new InvalidRequestException(
+			throw new InternalErrorException(
 					Msg.code(1304) + "Error loading \"" + currentUrl + "\": " + e.getMessage());
 		}
 	}

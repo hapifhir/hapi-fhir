@@ -248,8 +248,8 @@ public class PackageUrlAllowList {
 	}
 
 	private boolean isPrefixUrl(URI theAllowed, URI theCandidate) {
-		if (!theAllowed.getScheme().equalsIgnoreCase(theCandidate.getScheme())
-				|| !theAllowed.getHost().equalsIgnoreCase(theCandidate.getHost())) {
+		if ((!theAllowed.getScheme().equalsIgnoreCase(theCandidate.getScheme())
+				|| !theAllowed.getHost().equalsIgnoreCase(theCandidate.getHost()))) {
 			return false;
 		}
 
@@ -261,7 +261,7 @@ public class PackageUrlAllowList {
 	private URI parseHttpUri(String theUri) {
 		try {
 			URI uri = new URI(theUri.trim());
-			return uri.getHost() == null ? null : uri;
+			return (uri.getHost() == null || uri.getScheme() == null) ? null : uri;
 		} catch (URISyntaxException e) {
 			return null;
 		}
