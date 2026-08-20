@@ -96,12 +96,12 @@ public class PackageLoaderDnsResolver implements DnsResolver {
 	}
 
 	private static final List<BlackListEntry> BLACK_LIST = Stream.of(
-			"169.254.169.254", // AWS, Azure, and GCP metadata
-			"100.64.0.0/10", // carrier-grade NAT
-			"192.0.0.192" // azure/oracle cloud metadata
-		)
-		.map(BlackListEntry::parse)
-		.toList();
+					"169.254.169.254", // AWS, Azure, and GCP metadata
+					"100.64.0.0/10", // carrier-grade NAT
+					"192.0.0.192" // azure/oracle cloud metadata
+					)
+			.map(BlackListEntry::parse)
+			.toList();
 
 	private final PackageUrlAllowList myPackageUrlAllowList;
 
@@ -127,11 +127,12 @@ public class PackageLoaderDnsResolver implements DnsResolver {
 
 		for (InetAddress address : addresses) {
 			BlackListEntry entry = BLACK_LIST.stream()
-				.filter(network -> network.contains(address))
-				.findFirst().orElse(null);
+					.filter(network -> network.contains(address))
+					.findFirst()
+					.orElse(null);
 			if (entry != null) {
 				throw new UnknownHostException(Msg.code(3041) + "Refusing to connect to " + theHost
-					+ "; resolved address " + address.getHostAddress() + " is blocked by " + entry);
+						+ "; resolved address " + address.getHostAddress() + " is blocked by " + entry);
 			}
 
 			if (!privateAllowed) {
@@ -139,7 +140,7 @@ public class PackageLoaderDnsResolver implements DnsResolver {
 					ManagedWebAccessUtils.throwExceptionIfNonPublicAddress(address, theHost);
 				} catch (IOException ex) {
 					UnknownHostException toThrow = new UnknownHostException(Msg.code(3042) + "Host " + theHost
-						+ " resolves to a non-public address " + address.getHostAddress());
+							+ " resolves to a non-public address " + address.getHostAddress());
 					toThrow.initCause(ex);
 					throw toThrow;
 				}
@@ -148,5 +149,4 @@ public class PackageLoaderDnsResolver implements DnsResolver {
 
 		return addresses;
 	}
-
 }

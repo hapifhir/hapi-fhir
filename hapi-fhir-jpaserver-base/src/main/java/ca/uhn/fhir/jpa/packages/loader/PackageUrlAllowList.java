@@ -110,15 +110,15 @@ public class PackageUrlAllowList {
 		}
 
 		List<AllowedUrlPrefix> prefixes = myRemotePrefixes.stream()
-			.filter(p -> {
-				URI uri = parseHttpUri(p.getUrl());
-				if (uri == null) {
-					return false;
-				}
-				String host = uri.getHost();
-				return host.equalsIgnoreCase(theHost);
-			})
-			.toList();
+				.filter(p -> {
+					URI uri = parseHttpUri(p.getUrl());
+					if (uri == null) {
+						return false;
+					}
+					String host = uri.getHost();
+					return host.equalsIgnoreCase(theHost);
+				})
+				.toList();
 
 		return !prefixes.isEmpty() && prefixes.stream().allMatch(AllowedUrlPrefix::isPrivateNetwork);
 	}
