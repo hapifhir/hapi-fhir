@@ -26,6 +26,7 @@ import ca.uhn.fhir.serializer.FhirResourceSerializer;
 import ca.uhn.hapi.fhir.cdshooks.serializer.CdsServiceRequestContextDeserializer;
 import ca.uhn.hapi.fhir.cdshooks.serializer.CdsServiceRequestContextSerializer;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.json.JsonMapper;
@@ -42,8 +43,9 @@ import tools.jackson.databind.module.SimpleModule;
 //
 // 2. Jackson2ObjectMapperBuilder REMOVED.
 //    Spring Framework 7.0 deprecated it for removal with no Jackson 3 equivalent.
-//    The single feature used here (indentOutput(true)) maps directly to
-//    JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).
+//    indentOutput(true) was the only setting requested explicitly, but the Spring builder also
+//    applied defaults of its own: it disabled DEFAULT_VIEW_INCLUSION and FAIL_ON_UNKNOWN_PROPERTIES.
+//    newMapperBuilder() below carries those over.
 //
 // 3. Chicken-and-egg: CdsServiceRequestContextSerializer and
 //    CdsServiceRequestContextDeserializer are constructed with the mapper instance
@@ -71,8 +73,7 @@ public class CdsHooksObjectMapperFactory {
 		// constructors that require a mapper reference. These two classes hold onto
 		// this instance, so be aware they will NOT see the custom module registered
 		// in the final mapper below. Refactor those constructors if that matters.
-		JsonMapper tempMapper =
-				JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build();
+		JsonMapper tempMapper = newMapperBuilder().build();
 
 		// Step 2: build the module using the temp mapper where required.
 		SimpleModule module = new SimpleModule();
@@ -85,9 +86,16 @@ public class CdsHooksObjectMapperFactory {
 
 		// Step 3: build the real, immutable mapper with the module registered via the builder.
 		// Jackson 3: module registration belongs in the builder, not on the built mapper.
-		return JsonMapper.builder()
-				.enable(SerializationFeature.INDENT_OUTPUT)
-				.addModule(module)
-				.build();
+		return newMapperBuilder().addModule(module).build();
+	}
+
+	// Jackson 2 defaults, matching the Spring Jackson2ObjectMapperBuilder this replaced.
+	// The two disagree on one setting: Spring disabled FAIL_ON_UNKNOWN_PROPERTIES, Jackson 2 enabled it,
+	// so it is disabled explicitly. To adopt Jackson 3 defaults instead, use builder() and drop that line —
+	// Jackson 3 already ignores unknown properties.
+	private static JsonMapper.Builder newMapperBuilder() {
+		return JsonMapper.builderWithJackson2Defaults()
+				.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+				.enable(SerializationFeature.INDENT_OUTPUT);
 	}
 }
