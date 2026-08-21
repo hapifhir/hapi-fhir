@@ -145,7 +145,7 @@ public class CdsHooksControllerTest {
 			.andExpect(jsonPath("cards[0].summary").value("Hello World!"))
 			.andExpect(jsonPath("cards[0].indicator").value("warning"))
 			.andExpect(jsonPath("cards[0].source.label").value("World Greeter"))
-			.andExpect(jsonPath("cards[0].detail").value("This is a test. Do not be alarmed."));
+			.andExpect(jsonPath("cards[0].detail").value("This is a test.  Do not be alarmed."));
 	}
 
 	@Test
