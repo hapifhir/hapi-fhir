@@ -24,6 +24,8 @@ class CompartmentSearchParameterModificationsTest {
 	private static final int THREAD_COUNT = 16;
 	private static final int ITERATIONS_PER_THREAD = 5_000;
 	private static final int RESOURCE_TYPE_COUNT = 500;
+	private static final Set<String> SEEDED_OMITTED_SPS = Set.of("subject", "source");
+	private static final Set<String> SEEDED_ADDITIONAL_SPS = Set.of("performer", "patient");
 
 	private final CompartmentSearchParameterModifications myModifications =
 			new CompartmentSearchParameterModifications();
@@ -66,7 +68,7 @@ class CompartmentSearchParameterModificationsTest {
 	}
 
 	/**
-	 * The root cause of the reported ConcurrentModificationException: the getters used to call
+	 * The root cause of the reported ConcurrentModificationException(gitlab-8555): the getters used to call
 	 * computeIfAbsent, so a logical read structurally modified the backing map. This asserts the
 	 * getters are side effect free, deterministically and without relying on thread interleaving.
 	 */
@@ -127,25 +129,19 @@ class CompartmentSearchParameterModificationsTest {
 		assertThat(actual.getOmittedSPNamesForResourceType("Device")).isEmpty();
 	}
 
-	/**
-	 * Reproduces the customer scenario from CDR #8555: a single instance is built once while an
-	 * AuthorizationInterceptor rule list is assembled, then read by every thread that evaluates that
-	 * rule list. Most of the resource types looked up here are absent from the maps, since an absent
-	 * key is what used to trigger the structural write.
-	 */
 	@Test
 	@Timeout(value = 120, unit = TimeUnit.SECONDS)
 	void getSPNames_underConcurrentReads_neverThrowAndPreserveState() throws Exception {
 		seedPatientCompartmentOmissions();
+		seedEverySecondResourceType();
 
 		List<Throwable> failures = runConcurrently(theThreadIndex -> {
 			for (int i = 0; i < ITERATIONS_PER_THREAD; i++) {
 				String resourceType = "ResourceType" + ((theThreadIndex + i) % RESOURCE_TYPE_COUNT);
-				myModifications.getOmittedSPNamesForResourceType(resourceType).contains("member");
-				myModifications
-						.getAdditionalSearchParamNamesForResourceType(resourceType)
-						.stream()
-						.count();
+				// forEach rather than contains() or count(), neither of which iterates the Set, and
+				// iteration is where a concurrently mutated Set throws
+				myModifications.getOmittedSPNamesForResourceType(resourceType).forEach(spName -> {});
+				myModifications.getAdditionalSearchParamNamesForResourceType(resourceType).forEach(spName -> {});
 			}
 		});
 
@@ -166,11 +162,10 @@ class CompartmentSearchParameterModificationsTest {
 					myModifications.addSPToOmitFromCompartment(resourceType, "sp" + theThreadIndex);
 					myModifications.addSPToIncludeInCompartment(resourceType, "sp" + theThreadIndex);
 				} else {
-					myModifications.getOmittedSPNamesForResourceType(resourceType).contains("member");
+					myModifications.getOmittedSPNamesForResourceType(resourceType).forEach(spName -> {});
 					myModifications
 							.getAdditionalSearchParamNamesForResourceType(resourceType)
-							.stream()
-							.count();
+							.forEach(spName -> {});
 				}
 			}
 		});
@@ -187,15 +182,24 @@ class CompartmentSearchParameterModificationsTest {
 		}
 	}
 
-	/**
-	 * Mirrors {@literal SearchParameterUtil.RESOURCE_TYPES_TO_SP_TO_OMIT_FROM_PATIENT_COMPARTMENT},
-	 * which is what CdrAuthorizationInterceptor copies into this object in production.
-	 */
 	private void seedPatientCompartmentOmissions() {
 		myModifications.addSPToOmitFromCompartment("Group", "member");
 		myModifications.addSPToOmitFromCompartment("List", "subject");
 		myModifications.addSPToOmitFromCompartment("List", "source");
 		myModifications.addSPToOmitFromCompartment("List", "patient");
+	}
+
+	/**
+	 * Registers SPs on every second resource type, so concurrent reads hit a mix of populated keys - where
+	 * traversal does real work - and absent keys.
+	 */
+	private void seedEverySecondResourceType() {
+		for (int i = 0; i < RESOURCE_TYPE_COUNT; i += 2) {
+			String resourceType = "ResourceType" + i;
+			SEEDED_OMITTED_SPS.forEach(spName -> myModifications.addSPToOmitFromCompartment(resourceType, spName));
+			SEEDED_ADDITIONAL_SPS.forEach(
+					spName -> myModifications.addSPToIncludeInCompartment(resourceType, spName));
+		}
 	}
 
 	private void assertSeededStateIntact() {

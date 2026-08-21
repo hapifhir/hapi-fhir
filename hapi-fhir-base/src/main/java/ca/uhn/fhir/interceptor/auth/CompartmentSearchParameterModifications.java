@@ -32,7 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * This class is used in RuleBuilder, as a way to allow adding or removing certain Search Parameters
  * to the compartment.
  * For example, if you were to add as additional SPs
- * [device -> ["patient", "subject"]
+ * [device -> ["patient", "subject"]]
  * and apply it to compartment Patient/123, then any device with Patient/123 as its patient would be considered "in"
  * the compartment, despite the fact that device is technically not part of the compartment definition for patient.
  * <p>
@@ -53,7 +53,7 @@ public class CompartmentSearchParameterModifications {
 	 * @param theResourceType the resource type the SPs are based on
 	 * @param theAdditionalSPs the additional SP names
 	 * @param theOmittedSps the omitted SP names
-	 * @return
+	 * @return a new instance with the given SP names registered against the given resource type
 	 */
 	public static CompartmentSearchParameterModifications fromAdditionalAndOmittedSPNames(
 			@Nonnull String theResourceType,
@@ -69,8 +69,9 @@ public class CompartmentSearchParameterModifications {
 		return modifications;
 	}
 
+	@Nonnull
 	public static CompartmentSearchParameterModifications fromAdditionalCompartmentParamNames(
-			String theResourceType, @Nonnull Set<String> theAdditionalCompartmentParamNames) {
+			@Nonnull String theResourceType, @Nonnull Set<String> theAdditionalCompartmentParamNames) {
 		return fromAdditionalAndOmittedSPNames(theResourceType, theAdditionalCompartmentParamNames, Set.of());
 	}
 
@@ -89,7 +90,7 @@ public class CompartmentSearchParameterModifications {
 	 * @param theResourceType the resource type on which the SP exists
 	 * @param theSPName the name of the search parameter
 	 */
-	public void addSPToOmitFromCompartment(String theResourceType, String theSPName) {
+	public void addSPToOmitFromCompartment(@Nonnull String theResourceType, @Nonnull String theSPName) {
 		addSPName(myOmittedResourceTypeToParameterCodeMap, theResourceType, theSPName);
 	}
 
@@ -98,7 +99,7 @@ public class CompartmentSearchParameterModifications {
 	 * @param theResourceType the resource type on which the SP exists
 	 * @param theSPName the name of the search parameter
 	 */
-	public void addSPToIncludeInCompartment(String theResourceType, String theSPName) {
+	public void addSPToIncludeInCompartment(@Nonnull String theResourceType, @Nonnull String theSPName) {
 		addSPName(myAdditionalResourceTypeToParameterCodeMap, theResourceType, theSPName);
 	}
 
@@ -140,7 +141,6 @@ public class CompartmentSearchParameterModifications {
 	@Nonnull
 	private static Set<String> getSPNames(
 			Map<String, Set<String>> theResourceTypeToParameterCodeMap, String theResourceType) {
-		// can be called concurrently by every thread evaluating a shared authorization rule list.
 		String normalizedResourceType = normalizeResourceType(theResourceType);
 		return theResourceTypeToParameterCodeMap.getOrDefault(normalizedResourceType, Collections.emptySet());
 	}

@@ -3,4 +3,7 @@ type: fix
 issue: 8271
 jira: SMILE-11895
 title: "Fixed a `ConcurrentModificationException` that could be thrown when concurrent threads evaluated a
-  shared AuthorizationInterceptor rule list."
+  shared AuthorizationInterceptor rule list. Note that the Sets returned by
+  `CompartmentSearchParameterModifications.getAdditionalSearchParamNamesForResourceType(..)` and
+  `getOmittedSPNamesForResourceType(..)` are now immutable. Callers that previously mutated a returned Set
+  must use `addSPToIncludeInCompartment(..)` or `addSPToOmitFromCompartment(..)` instead."
