@@ -62,7 +62,7 @@ class AuthorizationInterceptorWriteResponseJpaR4Test extends BaseResourceProvide
 	}
 
 	private FhirHttpRequest request(String thePath) {
-		return FhirHttpRequest.to(ourHttpClient.getClient(), myFhirContext, myServerBase + thePath)
+		return myServer.fhirRequest(thePath)
 			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
 	}
 

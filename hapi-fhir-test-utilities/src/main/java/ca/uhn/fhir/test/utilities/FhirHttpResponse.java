@@ -104,8 +104,12 @@ public class FhirHttpResponse {
 				.toList();
 	}
 
-	public List<Header> getAllHeaders() {
-		return myHeaders;
+	/**
+	 * @return all response headers, in receipt order, as name/value pairs
+	 */
+	// Created by claude-sonnet-5
+	public List<HeaderEntry> getAllHeaders() {
+		return myHeaders.stream().map(t -> new HeaderEntry(t.getName(), t.getValue())).toList();
 	}
 
 	@Override
@@ -113,4 +117,10 @@ public class FhirHttpResponse {
 		return "HTTP " + myStatusCode + " " + myReasonPhrase + " headers=" + Arrays.toString(myHeaders.toArray())
 				+ " body=" + myBody;
 	}
+
+	/**
+	 * A single response header's name and value, independent of any particular HTTP client library.
+	 */
+	// Created by claude-sonnet-5
+	public record HeaderEntry(String name, String value) {}
 }

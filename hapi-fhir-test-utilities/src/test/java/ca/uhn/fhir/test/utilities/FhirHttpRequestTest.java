@@ -10,7 +10,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.entity.ContentType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -88,7 +87,7 @@ class FhirHttpRequestTest {
 
 	@Test
 	void post_withStringBody_sendsGivenContentType() {
-		String body = request("/foo").post("hello", ContentType.TEXT_PLAIN).getBody();
+		String body = request("/foo").post("hello", "text/plain").getBody();
 
 		assertThat(body).contains("method=POST").contains("body=hello").contains("contentType=text/plain");
 	}
