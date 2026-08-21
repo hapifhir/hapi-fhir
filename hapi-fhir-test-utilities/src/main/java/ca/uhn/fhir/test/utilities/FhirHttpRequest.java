@@ -164,7 +164,6 @@ public class FhirHttpRequest {
 	 *
 	 * @param theContentType the MIME type, e.g. {@literal "text/plain"}
 	 */
-	// Created by claude-sonnet-5
 	public FhirHttpResponse post(String theBody, String theContentType) {
 		return executeWithEntity(new HttpPost(myUrl), new StringEntity(theBody, contentType(theContentType)));
 	}
@@ -181,7 +180,6 @@ public class FhirHttpRequest {
 	 *
 	 * @param theContentType the MIME type, e.g. {@literal "text/plain"}
 	 */
-	// Created by claude-sonnet-5
 	public FhirHttpResponse put(String theBody, String theContentType) {
 		return executeWithEntity(new HttpPut(myUrl), new StringEntity(theBody, contentType(theContentType)));
 	}
@@ -198,12 +196,10 @@ public class FhirHttpRequest {
 	 *
 	 * @param theContentType the MIME type, e.g. {@literal "application/json-patch+json"}
 	 */
-	// Created by claude-sonnet-5
 	public FhirHttpResponse patch(String theBody, String theContentType) {
 		return executeWithEntity(new HttpPatch(myUrl), new StringEntity(theBody, contentType(theContentType)));
 	}
 
-	// Created by claude-sonnet-5
 	private static ContentType contentType(String theMimeType) {
 		return ContentType.create(theMimeType, StandardCharsets.UTF_8);
 	}
