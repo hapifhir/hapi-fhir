@@ -31,10 +31,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class PreferTest {
+public class CreateWithPreferReturnR4Test {
 
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PreferTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CreateWithPreferReturnR4Test.class);
 	private static IBaseOperationOutcome ourReturnOperationOutcome;
 
 	@RegisterExtension
@@ -57,7 +57,7 @@ public class PreferTest {
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
-		
+
 		OperationOutcome oo = new OperationOutcome();
 		oo.addIssue().setDiagnostics("DIAG");
 		ourReturnOperationOutcome = oo;
@@ -83,7 +83,7 @@ public class PreferTest {
 	}
 
 	@Test
-	public void testCreatePreferOperationOutcomeWithOperationOutcome() throws Exception {
+	public void create_withPreferReturnOperationOutcome_returnsOperationOutcome() throws Exception {
 
 		OperationOutcome oo = new OperationOutcome();
 		oo.addIssue().setDiagnostics("DIAG");
@@ -112,7 +112,7 @@ public class PreferTest {
 	}
 
 	@Test
-	public void testCreatePreferRepresentation() throws Exception {
+	public void create_providerLeavesCreatedFlagUnset_returnsSubmittedBody() throws Exception {
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
