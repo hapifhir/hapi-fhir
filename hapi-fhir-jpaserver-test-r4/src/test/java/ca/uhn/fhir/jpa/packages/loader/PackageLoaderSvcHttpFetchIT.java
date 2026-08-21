@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.packages.loader;
 
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
 import ca.uhn.fhir.util.ClasspathUtil;
@@ -299,7 +300,7 @@ public class PackageLoaderSvcHttpFetchIT {
 		assertThat(allowList.isAllowed(packageUrl)).isTrue();
 
 		assertThatThrownBy(() -> loaderSvc.loadPackageUrlContents(packageUrl))
-				.isInstanceOf(InvalidRequestException.class)
+				.isInstanceOf(InternalErrorException.class)
 				.hasMessageContaining(packageUrl);
 
 		assertThat(myServlet.getAllowedPackageHitCount())
@@ -344,7 +345,7 @@ public class PackageLoaderSvcHttpFetchIT {
 		assertThat(allowList.isAllowed(targetUrl)).isTrue();
 
 		assertThatThrownBy(() -> loaderSvc.loadPackageUrlContents(redirectingUrl))
-				.isInstanceOf(InvalidRequestException.class)
+				.isInstanceOf(InternalErrorException.class)
 				.hasMessageContaining(targetUrl);
 
 		assertThat(myServlet.getAllowedTargetHitCount())
@@ -379,7 +380,7 @@ public class PackageLoaderSvcHttpFetchIT {
 		assertThat(allowList.isPrivateNetworkAllowedForHost(theBlockedAddress)).isTrue();
 
 		assertThatThrownBy(() -> loaderSvc.loadPackageUrlContents(packageUrl))
-				.isInstanceOf(InvalidRequestException.class)
+				.isInstanceOf(InternalErrorException.class)
 				.hasMessageContaining(theBlockedAddress);
 	}
 
@@ -400,7 +401,7 @@ public class PackageLoaderSvcHttpFetchIT {
 		assertThat(allowList.isAllowed(packageUrl)).isTrue();
 
 		assertThatThrownBy(() -> loaderSvc.loadPackageUrlContents(packageUrl))
-				.isInstanceOf(InvalidRequestException.class)
+				.isInstanceOf(InternalErrorException.class)
 				.hasMessageContaining(theBlockedAddress);
 	}
 
@@ -426,7 +427,7 @@ public class PackageLoaderSvcHttpFetchIT {
 		assertThat(allowList.isAllowed(blockedTargetUrl)).isTrue();
 
 		assertThatThrownBy(() -> loaderSvc.loadPackageUrlContents(redirectingUrl))
-				.isInstanceOf(InvalidRequestException.class)
+				.isInstanceOf(InternalErrorException.class)
 				.hasMessageContaining(CLOUD_METADATA_ADDRESS);
 	}
 
