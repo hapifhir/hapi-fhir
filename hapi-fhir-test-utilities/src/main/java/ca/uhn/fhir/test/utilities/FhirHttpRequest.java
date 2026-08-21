@@ -121,11 +121,6 @@ public class FhirHttpRequest {
 		return this;
 	}
 
-	public FhirHttpRequest withHeader(Header theHeader) {
-		myHeaders.add(theHeader);
-		return this;
-	}
-
 	/**
 	 * Adds a {@literal Basic} {@literal Authorization} header for the given credentials.
 	 */
@@ -164,8 +159,14 @@ public class FhirHttpRequest {
 		return executeWithEntity(new HttpPost(myUrl), resourceEntity(theBody));
 	}
 
-	public FhirHttpResponse post(String theBody, ContentType theContentType) {
-		return executeWithEntity(new HttpPost(myUrl), new StringEntity(theBody, theContentType));
+	/**
+	 * Issues a POST with the given body, sent as the given MIME type with a UTF-8 charset.
+	 *
+	 * @param theContentType the MIME type, e.g. {@literal "text/plain"}
+	 */
+	// Created by claude-sonnet-5
+	public FhirHttpResponse post(String theBody, String theContentType) {
+		return executeWithEntity(new HttpPost(myUrl), new StringEntity(theBody, contentType(theContentType)));
 	}
 
 	/**
@@ -175,19 +176,36 @@ public class FhirHttpRequest {
 		return executeWithEntity(new HttpPut(myUrl), resourceEntity(theBody));
 	}
 
-	public FhirHttpResponse put(String theBody, ContentType theContentType) {
-		return executeWithEntity(new HttpPut(myUrl), new StringEntity(theBody, theContentType));
+	/**
+	 * Issues a PUT with the given body, sent as the given MIME type with a UTF-8 charset.
+	 *
+	 * @param theContentType the MIME type, e.g. {@literal "text/plain"}
+	 */
+	// Created by claude-sonnet-5
+	public FhirHttpResponse put(String theBody, String theContentType) {
+		return executeWithEntity(new HttpPut(myUrl), new StringEntity(theBody, contentType(theContentType)));
 	}
 
 	/**
 	 * Issues a PATCH with the given body as {@literal application/json-patch+json}.
 	 */
 	public FhirHttpResponse patch(String theJsonPatchBody) {
-		return patch(theJsonPatchBody, ContentType.create(Constants.CT_JSON_PATCH, StandardCharsets.UTF_8));
+		return patch(theJsonPatchBody, Constants.CT_JSON_PATCH);
 	}
 
-	public FhirHttpResponse patch(String theBody, ContentType theContentType) {
-		return executeWithEntity(new HttpPatch(myUrl), new StringEntity(theBody, theContentType));
+	/**
+	 * Issues a PATCH with the given body, sent as the given MIME type with a UTF-8 charset.
+	 *
+	 * @param theContentType the MIME type, e.g. {@literal "application/json-patch+json"}
+	 */
+	// Created by claude-sonnet-5
+	public FhirHttpResponse patch(String theBody, String theContentType) {
+		return executeWithEntity(new HttpPatch(myUrl), new StringEntity(theBody, contentType(theContentType)));
+	}
+
+	// Created by claude-sonnet-5
+	private static ContentType contentType(String theMimeType) {
+		return ContentType.create(theMimeType, StandardCharsets.UTF_8);
 	}
 
 	/**

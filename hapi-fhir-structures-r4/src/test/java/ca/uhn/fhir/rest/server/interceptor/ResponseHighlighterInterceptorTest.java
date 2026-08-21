@@ -25,7 +25,7 @@ import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.FhirHttpResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
@@ -34,9 +34,6 @@ import com.helger.collection.iterate.ArrayEnumeration;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -59,7 +56,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.web.cors.CorsConfiguration;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
@@ -78,7 +74,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class ResponseHighlighterInterceptorTest {
+class ResponseHighlighterInterceptorTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResponseHighlighterInterceptorTest.class);
 	private static final ResponseHighlighterInterceptor ourInterceptor = new ResponseHighlighterInterceptor();
@@ -95,11 +91,8 @@ public class ResponseHighlighterInterceptorTest {
 		 .setDefaultPrettyPrint(false)
 		 .withServer(s->s.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE));
 
-	@RegisterExtension
-	private HttpClientExtension ourClient = new HttpClientExtension();
-
 	@BeforeEach
-	public void before() {
+	void before() {
 		/*
 		 * Enable CORS
 		 */
@@ -130,96 +123,83 @@ public class ResponseHighlighterInterceptorTest {
 	 * Return a Binary response type - Client accepts text/html but is not a browser
 	 */
 	@Test
-	public void testBinaryOperationHtmlResponseFromProvider() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/html/$binaryOp");
-		httpGet.addHeader("Accept", "text/html");
+	void testBinaryOperationHtmlResponseFromProvider() {
+		FhirHttpResponse status = ourServer.fhirRequest("/Patient/html/$binaryOp")
+			.withHeader("Accept", "text/html")
+			.get();
 
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-		status.close();
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("text/html", status.getFirstHeader("content-type").getValue());
-		assertEquals("<html>DATA</html>", responseContent);
-		assertEquals("Attachment;", status.getFirstHeader("Content-Disposition").getValue());
+		status.assertStatus(200);
+		assertEquals("text/html", status.getHeader("content-type"));
+		assertEquals("<html>DATA</html>", status.getBody());
+		assertEquals("Attachment;", status.getHeader("Content-Disposition"));
 	}
 
 	@Test
-	public void testInvalidRequest() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/html?_elements=Patient:foo");
-		httpGet.addHeader("Accept", "text/html");
+	void testInvalidRequest() {
+		FhirHttpResponse status = ourServer.fhirRequest("/Patient/html?_elements=Patient:foo")
+			.withHeader("Accept", "text/html")
+			.get();
 
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-		status.close();
-		assertEquals(400, status.getStatusLine().getStatusCode());
-		assertThat(status.getFirstHeader("content-type").getValue()).contains("text/html");
-		assertThat(responseContent).contains("Invalid _elements value");
+		status.assertStatus(400);
+		assertThat(status.getHeader("content-type")).contains("text/html");
+		assertThat(status.getBody()).contains("Invalid _elements value");
 	}
 
 	@Test
-	public void testBinaryReadAcceptBrowser() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Binary/foo");
-		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
-		httpGet.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+	void testBinaryReadAcceptBrowser() {
+		FhirHttpResponse status = ourServer.fhirRequest("/Binary/foo")
+			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
+			.withHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+			.get();
 
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		byte[] responseContent = IOUtils.toByteArray(status.getEntity().getContent());
-		status.close();
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("foo", status.getFirstHeader("content-type").getValue());
-		assertEquals("Attachment;", status.getFirstHeader("Content-Disposition").getValue());
-		assertThat(responseContent).containsExactly(new byte[]{1, 2, 3, 4});
+		status.assertStatus(200);
+		assertEquals("foo", status.getHeader("content-type"));
+		assertEquals("Attachment;", status.getHeader("Content-Disposition"));
+		assertThat(status.getBody().getBytes(StandardCharsets.UTF_8)).containsExactly(new byte[]{1, 2, 3, 4});
 	}
 
 	/**
 	 * Return a Binary response type - Client accepts text/html but is not a browser
 	 */
 	@Test
-	public void testBinaryReadHtmlResponseFromProvider() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Binary/html");
-		httpGet.addHeader("Accept", "text/html");
+	void testBinaryReadHtmlResponseFromProvider() {
+		FhirHttpResponse status = ourServer.fhirRequest("/Binary/html")
+			.withHeader("Accept", "text/html")
+			.get();
 
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-		status.close();
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("text/html", status.getFirstHeader("content-type").getValue());
-		assertEquals("<html>DATA</html>", responseContent);
-		assertEquals("Attachment;", status.getFirstHeader("Content-Disposition").getValue());
+		status.assertStatus(200);
+		assertEquals("text/html", status.getHeader("content-type"));
+		assertEquals("<html>DATA</html>", status.getBody());
+		assertEquals("Attachment;", status.getHeader("Content-Disposition"));
 	}
 
 	@Test
-	public void testBinaryReadAcceptFhirJson() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Binary/foo");
-		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
-		httpGet.addHeader("Accept", Constants.CT_FHIR_JSON);
+	void testBinaryReadAcceptFhirJson() {
+		FhirHttpResponse status = ourServer.fhirRequest("/Binary/foo")
+			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
+			.withHeader("Accept", Constants.CT_FHIR_JSON)
+			.get();
 
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		status.close();
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
-		assertNull(status.getFirstHeader("Content-Disposition"));
-		assertEquals("{\"resourceType\":\"Binary\",\"id\":\"foo\",\"contentType\":\"foo\",\"data\":\"AQIDBA==\"}", responseContent);
+		status.assertStatus(200);
+		assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", status.getHeader("content-type").replace(" ", "").toLowerCase());
+		assertNull(status.getHeader("Content-Disposition"));
+		assertEquals("{\"resourceType\":\"Binary\",\"id\":\"foo\",\"contentType\":\"foo\",\"data\":\"AQIDBA==\"}", status.getBody());
 
 	}
 
 	@Test
-	public void testBinaryReadAcceptMissing() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Binary/foo");
+	void testBinaryReadAcceptMissing() {
+		FhirHttpResponse status = ourServer.fhirRequest("/Binary/foo").get();
 
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		byte[] responseContent = IOUtils.toByteArray(status.getEntity().getContent());
-		status.close();
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("foo", status.getFirstHeader("content-type").getValue());
-		assertEquals("Attachment;", status.getFirstHeader("Content-Disposition").getValue());
-		assertThat(responseContent).containsExactly(new byte[]{1, 2, 3, 4});
+		status.assertStatus(200);
+		assertEquals("foo", status.getHeader("content-type"));
+		assertEquals("Attachment;", status.getHeader("Content-Disposition"));
+		assertThat(status.getBody().getBytes(StandardCharsets.UTF_8)).containsExactly(new byte[]{1, 2, 3, 4});
 
 	}
 
 	@Test
-	public void testDontHighlightWhenOriginHeaderPresent() throws Exception {
+	void testDontHighlightWhenOriginHeaderPresent() throws Exception {
 		HttpServletRequest req = mock(HttpServletRequest.class);
 		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("text/html,application/xhtml+xml,application/xml;q=0.9"));
 		when(req.getHeader(Constants.HEADER_CORS_ORIGIN)).thenAnswer(theInvocation -> "http://example.com");
@@ -244,7 +224,7 @@ public class ResponseHighlighterInterceptorTest {
 	}
 
 	@Test
-	public void testExtractNarrativeHtml_DomainResource() {
+	void testExtractNarrativeHtml_DomainResource() {
 		Patient patient = new Patient();
 		patient.addName().setFamily("Simpson");
 		patient.getText().setDivAsString("<div>HELLO</div>");
@@ -254,7 +234,7 @@ public class ResponseHighlighterInterceptorTest {
 	}
 
 	@Test
-	public void testExtractNarrativeHtml_NonDomainResource() {
+	void testExtractNarrativeHtml_NonDomainResource() {
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.TRANSACTION);
 
@@ -263,7 +243,7 @@ public class ResponseHighlighterInterceptorTest {
 	}
 
 	@Test
-	public void testExtractNarrativeHtml_DocumentWithCompositionNarrative() {
+	void testExtractNarrativeHtml_DocumentWithCompositionNarrative() {
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.DOCUMENT);
 		Composition composition = new Composition();
@@ -284,7 +264,7 @@ public class ResponseHighlighterInterceptorTest {
 	}
 
 	@Test
-	public void testExtractNarrativeHtml_ParametersWithNarrativeAsFirstParameter() {
+	void testExtractNarrativeHtml_ParametersWithNarrativeAsFirstParameter() {
 		Parameters parameters = new Parameters();
 		parameters.addParameter("Narrative", new StringType("<div>HELLO</div>"));
 
@@ -293,7 +273,7 @@ public class ResponseHighlighterInterceptorTest {
 	}
 
 	@Test
-	public void testExtractNarrativeHtml_Parameters() {
+	void testExtractNarrativeHtml_Parameters() {
 		Parameters parameters = new Parameters();
 		parameters.addParameter("Foo", new StringType("<div>HELLO</div>"));
 
@@ -302,7 +282,7 @@ public class ResponseHighlighterInterceptorTest {
 	}
 
 	@Test
-	public void testExtractNarrativeHtml_ParametersWithNonNarrativeFirstParameter_1() {
+	void testExtractNarrativeHtml_ParametersWithNonNarrativeFirstParameter_1() {
 		Parameters parameters = new Parameters();
 		parameters.addParameter("Narrative", new Quantity(123L));
 
@@ -311,7 +291,7 @@ public class ResponseHighlighterInterceptorTest {
 	}
 
 	@Test
-	public void testExtractNarrativeHtml_ParametersWithNonNarrativeFirstParameter_2() {
+	void testExtractNarrativeHtml_ParametersWithNonNarrativeFirstParameter_2() {
 		Parameters parameters = new Parameters();
 		parameters.addParameter("Narrative", (Type)null);
 
@@ -320,7 +300,7 @@ public class ResponseHighlighterInterceptorTest {
 	}
 
 	@Test
-	public void testExtractNarrativeHtml_ParametersWithNonNarrativeFirstParameter_3() {
+	void testExtractNarrativeHtml_ParametersWithNonNarrativeFirstParameter_3() {
 		Parameters parameters = new Parameters();
 		parameters.addParameter("Narrative", new StringType("hello"));
 
@@ -329,256 +309,216 @@ public class ResponseHighlighterInterceptorTest {
 	}
 
 	@Test
-	public void testForceApplicationJson() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_format=application/json");
-		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
+	void testForceApplicationJson() {
+		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_format=application/json")
+			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
+			.get();
 
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		status.close();
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_FHIR_JSON_NEW + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
-		assertThat(responseContent).doesNotContain("<html");
+		status.assertStatus(200);
+		assertEquals(Constants.CT_FHIR_JSON_NEW + ";charset=utf-8", status.getHeader("content-type").replace(" ", "").toLowerCase());
+		assertThat(status.getBody()).doesNotContain("<html");
 	}
 
 	@Test
-	public void testForceApplicationJsonFhir() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_format=application/json+fhir");
-		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
+	void testForceApplicationJsonFhir() {
+		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_format=application/json+fhir")
+			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
+			.get();
 
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		status.close();
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
-		assertThat(responseContent).doesNotContain("<html");
+		status.assertStatus(200);
+		assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", status.getHeader("content-type").replace(" ", "").toLowerCase());
+		assertThat(status.getBody()).doesNotContain("<html");
 	}
 
 	@Test
-	public void testForceApplicationJsonPlusFhir() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_format=" + UrlUtil.escapeUrlParam("application/json+fhir"));
-		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
+	void testForceApplicationJsonPlusFhir() {
+		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_format=" + UrlUtil.escapeUrlParam("application/json+fhir"))
+			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
+			.get();
 
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		status.close();
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
-		assertThat(responseContent).doesNotContain("<html");
+		status.assertStatus(200);
+		assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", status.getHeader("content-type").replace(" ", "").toLowerCase());
+		assertThat(status.getBody()).doesNotContain("<html");
 	}
 
 	@Test
-	public void testForceApplicationXml() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_format=application/xml");
-		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
+	void testForceApplicationXml() {
+		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_format=application/xml")
+			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
+			.get();
 
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-		status.close();
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_FHIR_XML_NEW + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
-		assertThat(responseContent).doesNotContain("<html");
+		status.assertStatus(200);
+		assertEquals(Constants.CT_FHIR_XML_NEW + ";charset=utf-8", status.getHeader("content-type").replace(" ", "").toLowerCase());
+		assertThat(status.getBody()).doesNotContain("<html");
 	}
 
 	@Test
-	public void testForceApplicationXmlFhir() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_format=application/xml+fhir");
-		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
+	void testForceApplicationXmlFhir() {
+		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_format=application/xml+fhir")
+			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
+			.get();
 
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-		status.close();
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_FHIR_XML + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
-		assertThat(responseContent).doesNotContain("<html");
+		status.assertStatus(200);
+		assertEquals(Constants.CT_FHIR_XML + ";charset=utf-8", status.getHeader("content-type").replace(" ", "").toLowerCase());
+		assertThat(status.getBody()).doesNotContain("<html");
 	}
 
 	@Test
-	public void testForceApplicationXmlPlusFhir() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_format=" + UrlUtil.escapeUrlParam("application/xml+fhir"));
-		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
+	void testForceApplicationXmlPlusFhir() {
+		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_format=" + UrlUtil.escapeUrlParam("application/xml+fhir"))
+			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
+			.get();
 
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-		status.close();
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_FHIR_XML + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
-		assertThat(responseContent).doesNotContain("<html");
+		status.assertStatus(200);
+		assertEquals(Constants.CT_FHIR_XML + ";charset=utf-8", status.getHeader("content-type").replace(" ", "").toLowerCase());
+		assertThat(status.getBody()).doesNotContain("<html");
 	}
 
 	@Test
-	public void testForceHtmlJson() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_format=html/json");
-		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
+	void testForceHtmlJson() {
+		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_format=html/json")
+			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
+			.get();
+		ourLog.info(status.getBody());
 
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		status.close();
-		ourLog.info(responseContent);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
-		assertThat(responseContent).contains("<html");
-		assertThat(responseContent).contains(">{<");
-		assertThat(responseContent).contains(Constants.HEADER_REQUEST_ID);
+		status.assertStatus(200);
+		assertEquals("text/html;charset=utf-8", status.getHeader("content-type").replace(" ", "").toLowerCase());
+		assertThat(status.getBody()).contains("<html");
+		assertThat(status.getBody()).contains(">{<");
+		assertThat(status.getBody()).contains(Constants.HEADER_REQUEST_ID);
 
 	}
 
 	@Test
-	public void testForceHtmlTurtle() throws Exception {
-		String url = ourServer.getBaseUrl() + "/Patient/1?_format=html/turtle";
-		HttpGet httpGet = new HttpGet(url);
-		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
+	void testForceHtmlTurtle() {
+		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_format=html/turtle")
+			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
+			.get();
+		ourLog.info(status.getBody());
 
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		status.close();
-		ourLog.info(responseContent);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
-		assertThat(responseContent).contains("<html");
-		assertThat(responseContent).contains("<span class='hlQuot'>&quot;urn:hapitest:mrns&quot;</span>");
-		assertThat(responseContent).contains(Constants.HEADER_REQUEST_ID);
+		status.assertStatus(200);
+		assertEquals("text/html;charset=utf-8", status.getHeader("content-type").replace(" ", "").toLowerCase());
+		assertThat(status.getBody()).contains("<html");
+		assertThat(status.getBody()).contains("<span class='hlQuot'>&quot;urn:hapitest:mrns&quot;</span>");
+		assertThat(status.getBody()).contains(Constants.HEADER_REQUEST_ID);
 
 	}
 
 	@Test
-	public void testForceHtmlJsonWithAdditionalParts() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_format=" + UrlUtil.escapeUrlParam("html/json; fhirVersion=1.0"));
-		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
+	void testForceHtmlJsonWithAdditionalParts() {
+		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_format=" + UrlUtil.escapeUrlParam("html/json; fhirVersion=1.0"))
+			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
+			.get();
 
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		status.close();
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
-		assertThat(responseContent).contains("<html");
-		assertThat(responseContent).contains(">{<");
+		status.assertStatus(200);
+		assertEquals("text/html;charset=utf-8", status.getHeader("content-type").replace(" ", "").toLowerCase());
+		assertThat(status.getBody()).contains("<html");
+		assertThat(status.getBody()).contains(">{<");
 
-		ourLog.info(responseContent);
+		ourLog.info(status.getBody());
 	}
 
 	@Test
-	public void testForceHtmlXml() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_format=html/xml");
-		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
+	void testForceHtmlXml() {
+		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_format=html/xml")
+			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
+			.get();
 
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-		status.close();
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
-		assertThat(responseContent).contains("<html");
-		assertThat(responseContent).doesNotContain(">{<");
-		assertThat(responseContent).contains("&lt;");
+		status.assertStatus(200);
+		assertEquals("text/html;charset=utf-8", status.getHeader("content-type").replace(" ", "").toLowerCase());
+		assertThat(status.getBody()).contains("<html");
+		assertThat(status.getBody()).doesNotContain(">{<");
+		assertThat(status.getBody()).contains("&lt;");
 	}
 
 	@Test
-	public void testForceJson() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_format=json");
-		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
+	void testForceJson() {
+		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_format=json")
+			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
+			.get();
 
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		status.close();
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_FHIR_JSON_NEW + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
-		assertThat(responseContent).doesNotContain("<html");
+		status.assertStatus(200);
+		assertEquals(Constants.CT_FHIR_JSON_NEW + ";charset=utf-8", status.getHeader("content-type").replace(" ", "").toLowerCase());
+		assertThat(status.getBody()).doesNotContain("<html");
 	}
 
 	@Test
-	public void testForceResponseTime() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_format=html/json");
-
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		status.close();
-		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
-		assertThat(responseContent.replace('\n', ' ').replace('\r', ' ')).matches(".*Response generated in [0-9]+ms.*");
+	void testForceResponseTime() {
+		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_format=html/json").get();
+		ourLog.info(status.getBody());
+		status.assertStatus(200);
+		assertEquals("text/html;charset=utf-8", status.getHeader("content-type").replace(" ", "").toLowerCase());
+		assertThat(status.getBody().replace('\n', ' ').replace('\r', ' ')).matches(".*Response generated in [0-9]+ms.*");
 
 	}
 
 	@Test
-	public void testGetInvalidResource() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Foobar/123");
-		httpGet.addHeader("Accept", "text/html");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		status.close();
+	void testGetInvalidResource() {
+		FhirHttpResponse status = ourServer.fhirRequest("/Foobar/123")
+			.withHeader("Accept", "text/html")
+			.get();
 
-		ourLog.info("Resp: {}", responseContent);
-		assertEquals(404, status.getStatusLine().getStatusCode());
+		ourLog.info("Resp: {}", status.getBody());
+		status.assertStatus(404);
 
-		assertThat(responseContent).containsSubsequence("<span class='hlTagName'>OperationOutcome</span>", "Unknown resource type 'Foobar' - Server knows how to handle");
+		assertThat(status.getBody()).containsSubsequence("<span class='hlTagName'>OperationOutcome</span>", "Unknown resource type 'Foobar' - Server knows how to handle");
 
 	}
 
 	@Test
-	public void testGetInvalidResourceNoAcceptHeader() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Foobar/123");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		status.close();
+	void testGetInvalidResourceNoAcceptHeader() {
+		FhirHttpResponse status = ourServer.fhirRequest("/Foobar/123").get();
 
-		ourLog.info("Resp: {}", responseContent);
-		assertEquals(404, status.getStatusLine().getStatusCode());
+		ourLog.info("Resp: {}", status.getBody());
+		status.assertStatus(404);
 
-		assertThat(responseContent).doesNotContainPattern("(?s)<span class='hlTagName'>OperationOutcome</span>.*Unknown resource type 'Foobar' - Server knows how to handle");
-		assertThat(responseContent).contains("Unknown resource type 'Foobar'");
-		assertEquals(Constants.CT_FHIR_XML_NEW + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
+		assertThat(status.getBody()).doesNotContainPattern("(?s)<span class='hlTagName'>OperationOutcome</span>.*Unknown resource type 'Foobar' - Server knows how to handle");
+		assertThat(status.getBody()).contains("Unknown resource type 'Foobar'");
+		assertEquals(Constants.CT_FHIR_XML_NEW + ";charset=utf-8", status.getHeader("content-type").replace(" ", "").toLowerCase());
 
 	}
 
 	@Test
-	public void testGetRoot() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/");
-		httpGet.addHeader("Accept", "text/html");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-		status.close();
+	void testGetRoot() {
+		FhirHttpResponse status = ourServer.fhirRequest("/")
+			.withHeader("Accept", "text/html")
+			.get();
 
-		ourLog.info("Resp: {}", responseContent);
-		assertEquals(400, status.getStatusLine().getStatusCode());
+		ourLog.info("Resp: {}", status.getBody());
+		status.assertStatus(400);
 
-		assertThat(responseContent).containsSubsequence("<span class='hlTagName'>OperationOutcome</span>", "This is the base URL of FHIR server. Unable to handle this request, as it does not contain a resource type or operation name.");
+		assertThat(status.getBody()).containsSubsequence("<span class='hlTagName'>OperationOutcome</span>", "This is the base URL of FHIR server. Unable to handle this request, as it does not contain a resource type or operation name.");
 
 	}
 
 	@Test
-	public void testHighlightGraphQLResponse() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/A/$graphql?query=" + UrlUtil.escapeUrlParam("{name}"));
-		httpGet.addHeader("Accept", "text/html");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-		status.close();
+	void testHighlightGraphQLResponse() {
+		FhirHttpResponse status = ourServer.fhirRequest("/Patient/A/$graphql?query=" + UrlUtil.escapeUrlParam("{name}"))
+			.withHeader("Accept", "text/html")
+			.get();
 
-		ourLog.info("Resp: {}", responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		ourLog.info("Resp: {}", status.getBody());
+		status.assertStatus(200);
 
-		assertThat(responseContent).containsSubsequence("&quot;foo&quot;");
+		assertThat(status.getBody()).containsSubsequence("&quot;foo&quot;");
 
 	}
 
 	@Test
-	public void testHighlightGraphQLResponseNonHighlighted() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/A/$graphql?query=" + UrlUtil.escapeUrlParam("{name}"));
-		httpGet.addHeader("Accept", "application/jon");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-		status.close();
+	void testHighlightGraphQLResponseNonHighlighted() {
+		FhirHttpResponse status = ourServer.fhirRequest("/Patient/A/$graphql?query=" + UrlUtil.escapeUrlParam("{name}"))
+			.withHeader("Accept", "application/jon")
+			.get();
 
-		ourLog.info("Resp: {}", responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		ourLog.info("Resp: {}", status.getBody());
+		status.assertStatus(200);
 
-		assertThat(responseContent).containsSubsequence("{\"foo\":\"bar\"}");
+		assertThat(status.getBody()).containsSubsequence("{\"foo\":\"bar\"}");
 
 	}
 
 	@Test
-	public void testHighlightException() throws Exception {
+	void testHighlightException() throws Exception {
 		HttpServletRequest req = mock(HttpServletRequest.class);
 		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("text/html,application/xhtml+xml,application/xml;q=0.9"));
 
@@ -596,9 +536,6 @@ public class ResponseHighlighterInterceptorTest {
 		reqDetails.setServer(server);
 		reqDetails.setServletRequest(req);
 
-		// This can be null depending on the exception type
-		// reqDetails.setParameters(null);
-
 		ResourceNotFoundException exception = new ResourceNotFoundException("Not found");
 		exception.setOperationOutcome(new OperationOutcome().addIssue(new OperationOutcome.OperationOutcomeIssueComponent().setDiagnostics("Hello")));
 
@@ -610,7 +547,7 @@ public class ResponseHighlighterInterceptorTest {
 	}
 
 	@Test
-	public void testHighlightExceptionInvokesOutgoingFailureOperationOutcome() throws Exception {
+	void testHighlightExceptionInvokesOutgoingFailureOperationOutcome() {
 		IAnonymousInterceptor outgoingResponseInterceptor = (thePointcut, theArgs) -> {
 			OperationOutcome oo = (OperationOutcome) theArgs.get(IBaseOperationOutcome.class);
 			oo.addIssue().setDiagnostics("HELP IM A BUG");
@@ -618,15 +555,13 @@ public class ResponseHighlighterInterceptorTest {
 		ourServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME, outgoingResponseInterceptor);
 		try {
 
-			HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Foobar/123");
-			httpGet.addHeader("Accept", "text/html");
-			CloseableHttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			status.close();
+			FhirHttpResponse status = ourServer.fhirRequest("/Foobar/123")
+				.withHeader("Accept", "text/html")
+				.get();
 
-			ourLog.info("Resp: {}", responseContent);
-			assertEquals(404, status.getStatusLine().getStatusCode());
-			assertThat(responseContent).containsSubsequence("HELP IM A BUG");
+			ourLog.info("Resp: {}", status.getBody());
+			status.assertStatus(404);
+			assertThat(status.getBody()).containsSubsequence("HELP IM A BUG");
 
 		} finally {
 
@@ -640,7 +575,7 @@ public class ResponseHighlighterInterceptorTest {
 	 * See #346
 	 */
 	@Test
-	public void testHighlightForceHtmlCt() throws Exception {
+	void testHighlightForceHtmlCt() throws Exception {
 		HttpServletRequest req = mock(HttpServletRequest.class);
 		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("application/xml+fhir"));
 
@@ -667,7 +602,7 @@ public class ResponseHighlighterInterceptorTest {
 	 * See #346
 	 */
 	@Test
-	public void testHighlightForceHtmlFormat() throws Exception {
+	void testHighlightForceHtmlFormat() throws Exception {
 
 		HttpServletRequest req = mock(HttpServletRequest.class);
 		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("application/xml+fhir"));
@@ -692,7 +627,7 @@ public class ResponseHighlighterInterceptorTest {
 	}
 
 	@Test
-	public void testHighlightForceRaw() throws Exception {
+	void testHighlightForceRaw() throws Exception {
 		HttpServletRequest req = mock(HttpServletRequest.class);
 		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("text/html,application/xhtml+xml,application/xml;q=0.9"));
 
@@ -719,7 +654,7 @@ public class ResponseHighlighterInterceptorTest {
 	}
 
 	@Test
-	public void testHighlightNormalResponse() throws Exception {
+	void testHighlightNormalResponse() throws Exception {
 
 		HttpServletRequest req = mock(HttpServletRequest.class);
 		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("text/html,application/xhtml+xml,application/xml;q=0.9"));
@@ -743,13 +678,13 @@ public class ResponseHighlighterInterceptorTest {
 
 		String output = sw.getBuffer().toString();
 		ourLog.info(output);
-		assertThat(output).contains("<span class='hlTagName'>Patient</span>");
-		assertThat(output).containsSubsequence("<body>", "<pre>", "<div", "</pre>");
-		assertThat(output).contains("<a href=\"?_format=json\">");
+		assertThat(output).contains("<span class='hlTagName'>Patient</span>")
+			.containsSubsequence("<body>", "<pre>", "<div", "</pre>")
+			.contains("<a href=\"?_format=json\">");
 	}
 
 	@Test
-	public void testHighlightNormalResponseForcePrettyPrint() throws Exception {
+	void testHighlightNormalResponseForcePrettyPrint() throws Exception {
 		HttpServletRequest req = mock(HttpServletRequest.class);
 		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("text/html,application/xhtml+xml,application/xml;q=0.9"));
 
@@ -774,15 +709,15 @@ public class ResponseHighlighterInterceptorTest {
 
 		String output = sw.getBuffer().toString();
 		ourLog.info(output);
-		assertThat(output).contains("<span class='hlTagName'>Patient</span>");
-		assertThat(output).containsSubsequence("<body>", "<pre>", "<div", "</pre>");
+		assertThat(output).contains("<span class='hlTagName'>Patient</span>")
+			 .containsSubsequence("<body>", "<pre>", "<div", "</pre>");
 	}
 
 	/**
 	 * Browsers declare XML but not JSON in their accept header, we should still respond using JSON if that's the default
 	 */
 	@Test
-	public void testHighlightProducesDefaultJsonWithBrowserRequest() throws Exception {
+	void testHighlightProducesDefaultJsonWithBrowserRequest() throws Exception {
 		HttpServletRequest req = mock(HttpServletRequest.class);
 
 		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("text/html,application/xhtml+xml,application/xml;q=0.9"));
@@ -810,7 +745,7 @@ public class ResponseHighlighterInterceptorTest {
 	}
 
 	@Test
-	public void testHighlightProducesDefaultJsonWithBrowserRequest2() throws Exception {
+	void testHighlightProducesDefaultJsonWithBrowserRequest2() throws Exception {
 		HttpServletRequest req = mock(HttpServletRequest.class);
 
 		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("text/html;q=0.8,application/xhtml+xml,application/xml;q=0.9"));
@@ -838,156 +773,132 @@ public class ResponseHighlighterInterceptorTest {
 	 * See #464
 	 */
 	@Test
-	public void testPrettyPrintDefaultsToTrue() throws Exception {
+	void testPrettyPrintDefaultsToTrue() {
 		ourServer.setDefaultPrettyPrint(false);
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
-		httpGet.addHeader("Accept", "text/html");
+		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1")
+			.withHeader("Accept", "text/html")
+			.get();
 
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		status.close();
-		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent).containsSubsequence("<body>", "<pre>", "<div", "</pre>");
+		ourLog.info(status.getBody());
+		status.assertStatus(200);
+		assertThat(status.getBody()).containsSubsequence("<body>", "<pre>", "<div", "</pre>");
 	}
 
 	/**
 	 * See #464
 	 */
 	@Test
-	public void testPrettyPrintDefaultsToTrueWithExplicitFalse() throws Exception {
+	void testPrettyPrintDefaultsToTrueWithExplicitFalse() {
 		ourServer.setDefaultPrettyPrint(false);
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_pretty=false");
-		httpGet.addHeader("Accept", "text/html");
+		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_pretty=false")
+			.withHeader("Accept", "text/html")
+			.get();
 
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		status.close();
-		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent).doesNotContainPattern("(?s)<body>.*<pre>.*\n.*</pre>");
+		ourLog.info(status.getBody());
+		status.assertStatus(200);
+		assertThat(status.getBody()).doesNotContainPattern("(?s)<body>.*<pre>.*\n.*</pre>");
 	}
 
 	/**
 	 * See #464
 	 */
 	@Test
-	public void testPrettyPrintDefaultsToTrueWithExplicitTrue() throws Exception {
+	void testPrettyPrintDefaultsToTrueWithExplicitTrue() {
 		ourServer.setDefaultPrettyPrint(false);
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_pretty=true");
-		httpGet.addHeader("Accept", "text/html");
+		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_pretty=true")
+			.withHeader("Accept", "text/html")
+			.get();
 
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		status.close();
-		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent).containsSubsequence("<body>", "<pre>", "<div", "</pre>");
+		ourLog.info(status.getBody());
+		status.assertStatus(200);
+		assertThat(status.getBody()).containsSubsequence("<body>", "<pre>", "<div", "</pre>");
 	}
 
 	@Test
-	public void testSearchWithSummaryParam() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchWithWildcardRetVal&_summary=count");
-		httpGet.addHeader("Accept", "html");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		status.close();
+	void testSearchWithSummaryParam() {
+		FhirHttpResponse status = ourServer.fhirRequest("/Patient?_query=searchWithWildcardRetVal&_summary=count")
+			.withHeader("Accept", "html")
+			.get();
 
-		ourLog.info("Resp: {}", responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent).doesNotContain("entry");
+		ourLog.info("Resp: {}", status.getBody());
+		status.assertStatus(200);
+		assertThat(status.getBody()).doesNotContain("entry");
 	}
 
 	@Test
-	public void testShowNeither() throws Exception {
+	void testShowNeither() {
 		ourInterceptor.setShowRequestHeaders(false);
 		ourInterceptor.setShowResponseHeaders(false);
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_format=html/json");
+		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_format=html/json").get();
 
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		status.close();
-		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
-		assertThat(responseContent).doesNotContainIgnoringCase("Accept");
-		assertThat(responseContent).doesNotContainIgnoringCase("Content-Type");
+		ourLog.info(status.getBody());
+		status.assertStatus(200);
+		assertEquals("text/html;charset=utf-8", status.getHeader("content-type").replace(" ", "").toLowerCase());
+		assertThat(status.getBody()).doesNotContainIgnoringCase("Accept");
+		assertThat(status.getBody()).doesNotContainIgnoringCase("Content-Type");
 	}
 
 	@Test
-	public void testShowRequest() throws Exception {
+	void testShowRequest() {
 		ourInterceptor.setShowRequestHeaders(true);
 		ourInterceptor.setShowResponseHeaders(false);
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_format=html/json");
+		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_format=html/json").get();
 
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		status.close();
-		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
-		assertThat(responseContent).containsIgnoringCase("Accept");
-		assertThat(responseContent).doesNotContainIgnoringCase("Content-Type");
+		ourLog.info(status.getBody());
+		status.assertStatus(200);
+		assertEquals("text/html;charset=utf-8", status.getHeader("content-type").replace(" ", "").toLowerCase());
+		assertThat(status.getBody()).containsIgnoringCase("Accept");
+		assertThat(status.getBody()).doesNotContainIgnoringCase("Content-Type");
 	}
 
 	@Test
-	public void testShowRequestAndResponse() throws Exception {
+	void testShowRequestAndResponse() {
 		ourInterceptor.setShowRequestHeaders(true);
 		ourInterceptor.setShowResponseHeaders(true);
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_format=html/json");
+		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_format=html/json").get();
 
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		status.close();
-		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
-		assertThat(responseContent).containsIgnoringCase("Accept");
-		assertThat(responseContent).containsIgnoringCase("Content-Type");
+		ourLog.info(status.getBody());
+		status.assertStatus(200);
+		assertEquals("text/html;charset=utf-8", status.getHeader("content-type").replace(" ", "").toLowerCase());
+		assertThat(status.getBody()).containsIgnoringCase("Accept");
+		assertThat(status.getBody()).containsIgnoringCase("Content-Type");
 	}
 
 	@Test
-	public void testShowResponse() throws Exception {
+	void testShowResponse() {
 		ourInterceptor.setShowResponseHeaders(true);
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_format=html/json");
+		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_format=html/json").get();
 
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		status.close();
-		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
-		assertThat(responseContent).doesNotContainIgnoringCase("Accept");
-		assertThat(responseContent).containsIgnoringCase("Content-Type");
+		ourLog.info(status.getBody());
+		status.assertStatus(200);
+		assertEquals("text/html;charset=utf-8", status.getHeader("content-type").replace(" ", "").toLowerCase());
+		assertThat(status.getBody()).doesNotContainIgnoringCase("Accept");
+		assertThat(status.getBody()).containsIgnoringCase("Content-Type");
 	}
 
 	@Test
-	public void testNarrative() throws IOException {
+	void testNarrative() {
 		Patient patient = new Patient();
 		patient.addName().setFamily("Simpson");
 		patient.getText().setDivAsString("<div><table><thead><tr><th>Header1</th><th>Header2</th></tr></thead><tr><td>A cell</td><td>A cell</td></tr><tr><td>A cell 2</td><td>A cell 2</td></tr></table></div>");
 		ourPatientProvider.myNextPatientOpResponse = patient;
 
-		String url = ourServer.getBaseUrl() + "/Patient/1/$patientOp?_format=html/json";
-		HttpGet httpGet = new HttpGet(url);
-		try (CloseableHttpResponse response = ourClient.execute(httpGet)) {
-			String resp = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			assertThat(resp).contains("<h1>Narrative</h1>");
-			assertThat(resp).contains("<thead><tr><th>Header1</th><th>Header2</th></tr></thead>");
-		}
+		FhirHttpResponse response = ourServer.fhirRequest("/Patient/1/$patientOp?_format=html/json").get();
+		assertThat(response.getBody()).contains("<h1>Narrative</h1>");
+		assertThat(response.getBody()).contains("<thead><tr><th>Header1</th><th>Header2</th></tr></thead>");
 
 	}
 
 
 	@Test
-	public void testNarrative_Disabled() throws IOException {
+	void testNarrative_Disabled() {
 		Patient patient = new Patient();
 		patient.addName().setFamily("Simpson");
 		patient.getText().setDivAsString("<div><table><thead><tr><th>Header1</th><th>Header2</th></tr></thead><tr><td>A cell</td><td>A cell</td></tr><tr><td>A cell 2</td><td>A cell 2</td></tr></table></div>");
@@ -995,34 +906,26 @@ public class ResponseHighlighterInterceptorTest {
 
 		ourInterceptor.setShowNarrative(false);
 
-		String url = ourServer.getBaseUrl() + "/Patient/1/$patientOp?_format=html/json";
-		HttpGet httpGet = new HttpGet(url);
-		try (CloseableHttpResponse response = ourClient.execute(httpGet)) {
-			String resp = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			assertThat(resp).doesNotContain("<h1>Narrative</h1>");
-			assertThat(resp).doesNotContain("<thead><tr><th>Header1</th><th>Header2</th></tr></thead>");
-		}
+		FhirHttpResponse response = ourServer.fhirRequest("/Patient/1/$patientOp?_format=html/json").get();
+		assertThat(response.getBody()).doesNotContain("<h1>Narrative</h1>");
+		assertThat(response.getBody()).doesNotContain("<thead><tr><th>Header1</th><th>Header2</th></tr></thead>");
 
 	}
 
 	@Test
-	public void testNarrative_SketchyTagBlocked() throws IOException {
+	void testNarrative_SketchyTagBlocked() {
 		Patient patient = new Patient();
 		patient.addName().setFamily("Simpson");
 		patient.getText().setDivAsString("<div><table onclick=\"foo();\"><thead><tr><th>Header1</th><th>Header2</th></tr></thead><tr><td>A cell</td><td>A cell</td></tr><tr><td>A cell 2</td><td>A cell 2</td></tr></table></div>");
 		ourPatientProvider.myNextPatientOpResponse = patient;
 
-		String url = ourServer.getBaseUrl() + "/Patient/1/$patientOp?_format=html/json";
-		HttpGet httpGet = new HttpGet(url);
-		try (CloseableHttpResponse response = ourClient.execute(httpGet)) {
-			String resp = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			assertThat(resp).contains("<table><thead><tr><th>Header1</th>");
-		}
+		FhirHttpResponse response = ourServer.fhirRequest("/Patient/1/$patientOp?_format=html/json").get();
+		assertThat(response.getBody()).contains("<table><thead><tr><th>Header1</th>");
 
 	}
 
 	@Test
-	public void testNullResponseResource() {
+	void testNullResponseResource() {
 		ourInterceptor.setShowResponseHeaders(true);
 
 		final RequestDetails requestDetails = mock(RequestDetails.class);
@@ -1056,14 +959,14 @@ public class ResponseHighlighterInterceptorTest {
 		}
 	}
 
-	public static class GraphQLProvider {
+	static class GraphQLProvider {
 		@GraphQL
 		public String processGraphQlRequest(ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQueryUrl String theQuery) {
 			return "{\"foo\":\"bar\"}";
 		}
 	}
 
-	public static class DummyBinaryResourceProvider implements IResourceProvider {
+	static class DummyBinaryResourceProvider implements IResourceProvider {
 
 		@Override
 		public Class<Binary> getResourceType() {
@@ -1095,7 +998,7 @@ public class ResponseHighlighterInterceptorTest {
 
 	}
 
-	public static class DummyPatientResourceProvider implements IResourceProvider {
+	static class DummyPatientResourceProvider implements IResourceProvider {
 
 		private Patient myNextPatientOpResponse;
 
@@ -1217,7 +1120,7 @@ public class ResponseHighlighterInterceptorTest {
 	}
 
 	@AfterAll
-	public static void afterClassClearContext() throws Exception {
+	static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
@@ -1230,4 +1133,3 @@ public class ResponseHighlighterInterceptorTest {
 	}
 
 }
-
