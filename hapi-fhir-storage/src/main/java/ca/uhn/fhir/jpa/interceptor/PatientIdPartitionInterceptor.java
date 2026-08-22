@@ -33,9 +33,11 @@ import ca.uhn.fhir.interceptor.auth.CompartmentSearchParameterModifications;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.interceptor.model.TransactionWriteAfterPrefetchDetails;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.BaseRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
@@ -130,6 +132,9 @@ public class PatientIdPartitionInterceptor {
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
+	@Autowired
+	private JpaStorageSettings myStorageSettings;
+
 	private Map<String, ResourceCompartmentStoragePolicy> myResourceTypeToCompartmentPolicy = Map.of();
 
 	/**
@@ -139,11 +144,13 @@ public class PatientIdPartitionInterceptor {
 			FhirContext theFhirContext,
 			ISearchParamExtractor theSearchParamExtractor,
 			PartitionSettings thePartitionSettings,
-			DaoRegistry theDaoRegistry) {
+			DaoRegistry theDaoRegistry,
+			JpaStorageSettings theStorageSettings) {
 		myFhirContext = theFhirContext;
 		mySearchParamExtractor = theSearchParamExtractor;
 		myPartitionSettings = thePartitionSettings;
 		myDaoRegistry = theDaoRegistry;
+		myStorageSettings = theStorageSettings;
 	}
 
 	/**
@@ -957,8 +964,12 @@ public class PatientIdPartitionInterceptor {
 	 * Only a truly id-less body is rewritten. A body that already carries a client-assigned id is already routable and
 	 * handled by the normal conditional-update path.
 	 * <p>
-	 * An unmatched id-less conditional PUT ({@link TransactionDetails#NOT_FOUND} or absent) is left untouched and still
-	 * fails with HAPI-1321.
+	 * If the pre-fetch found no match ({@link TransactionDetails#NOT_FOUND}), the entry is a create. When the server id
+	 * strategy is {@link JpaStorageSettings.IdStrategyEnum#UUID}, a UUID is assigned to the body so the entry can be
+	 * routed, just as {@code BaseHapiFhirResourceDao#doUpdate} does outside a transaction.
+	 * <p>
+	 * Entries with no pre-fetch verdict, or under any other id strategy, are left untouched and still fail with
+	 * HAPI-1321.
 	 */
 	private void rewriteIdlessConditionalPatientUpdatesToDirect(
 			List<IBase> theEntries, TransactionDetails theTransactionDetails) {
@@ -978,6 +989,15 @@ public class PatientIdPartitionInterceptor {
 			}
 			// Skip a body that already has an id — only a truly id-less body needs the rewrite (see method Javadoc).
 			if (resource.getIdElement().getIdPart() != null) {
+				continue;
+			}
+
+			// No match: this is a create. Under the UUID strategy, assign the server id now so the entry can be routed.
+			if (theTransactionDetails.getResolvedMatchUrls().get(url) == TransactionDetails.NOT_FOUND) {
+				if (myStorageSettings.getResourceServerIdStrategy() == JpaStorageSettings.IdStrategyEnum.UUID) {
+					resource.setId(UUID.randomUUID().toString());
+					resource.setUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED, Boolean.TRUE);
+				}
 				continue;
 			}
 

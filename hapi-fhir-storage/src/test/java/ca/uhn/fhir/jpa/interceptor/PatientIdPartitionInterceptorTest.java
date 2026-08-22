@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
@@ -59,6 +60,7 @@ class PatientIdPartitionInterceptorTest {
 
 	private final FhirContext myFhirContext = FhirContext.forR4Cached();
 	private final PartitionSettings myPartitionSettings = new PartitionSettings();
+	private final JpaStorageSettings myStorageSettings = new JpaStorageSettings();
 	private PatientIdPartitionInterceptor mySvc;
 	private MatchUrlService myMatchUrlSvc;
 
@@ -74,7 +76,7 @@ class PatientIdPartitionInterceptorTest {
 		StorageSettings storageSettings = new StorageSettings();
 		ISearchParamExtractor myRealSearchParamExtractor =
 				new SearchParamExtractorR4(storageSettings, myPartitionSettings, myFhirContext, searchParamRegistry);
-		mySvc = new PatientIdPartitionInterceptor(myFhirContext, myRealSearchParamExtractor, myPartitionSettings, myDaoRegistry);
+		mySvc = new PatientIdPartitionInterceptor(myFhirContext, myRealSearchParamExtractor, myPartitionSettings, myDaoRegistry, myStorageSettings);
 
 		myMatchUrlSvc = new MatchUrlService(myFhirContext, new FhirContextSearchParamRegistry(myFhirContext));
 	}
@@ -223,7 +225,7 @@ class PatientIdPartitionInterceptorTest {
 	void testPolicyVerification(String theResourceType, String thePolicy, String theExpectedFailureIfAny) {
 		Map<String, ResourceCompartmentStoragePolicy> policies = Map.of(theResourceType, ResourceCompartmentStoragePolicy.parse(thePolicy));
 
-		PatientIdPartitionInterceptor interceptor = new PatientIdPartitionInterceptor(myFhirContext, mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
+		PatientIdPartitionInterceptor interceptor = new PatientIdPartitionInterceptor(myFhirContext, mySearchParamExtractor, myPartitionSettings, myDaoRegistry, myStorageSettings);
 		if (isNotBlank(theExpectedFailureIfAny)) {
 			assertThatThrownBy(() -> interceptor.setResourceTypePolicies(policies))
 				.isInstanceOf(ConfigurationException.class)

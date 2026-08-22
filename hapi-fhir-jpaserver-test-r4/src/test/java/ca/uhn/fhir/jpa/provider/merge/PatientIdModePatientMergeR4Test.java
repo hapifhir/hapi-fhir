@@ -99,7 +99,7 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 		super.before();
 
 		myPartitionInterceptor = new PatientIdPartitionInterceptor(
-			getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
+			getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry, myStorageSettings);
 		registerInterceptor(myPartitionInterceptor);
 
 		myPartitionSettings.setPartitioningEnabled(true);

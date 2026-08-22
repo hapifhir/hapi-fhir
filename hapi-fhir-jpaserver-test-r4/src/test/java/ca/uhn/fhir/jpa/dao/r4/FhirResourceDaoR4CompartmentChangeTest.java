@@ -5,6 +5,7 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
@@ -679,7 +680,7 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 			myPartitionSettings.setDefaultPartitionId(-1);
 			// PATIENT_ID mode: partition derived from patient ID via default algorithm
 			myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(
-					getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
+					getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry, myStorageSettings);
 			myInterceptorRegistry.registerInterceptor(myPatientIdPartitionInterceptor);
 		}
 
@@ -757,7 +758,7 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 			myPartitionSettings.setDefaultPartitionId(-1);
 			// BUCKETED_PATIENT_ID mode: patients hashed into a small number of buckets
 			myPatientIdPartitionInterceptor = new SmallBucketPatientIdPartitionInterceptor(
-					getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
+					getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry, myStorageSettings);
 			myInterceptorRegistry.registerInterceptor(myPatientIdPartitionInterceptor);
 		}
 
@@ -834,8 +835,9 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 				FhirContext theFhirContext,
 				ISearchParamExtractor theSearchParamExtractor,
 				PartitionSettings thePartitionSettings,
-				DaoRegistry theDaoRegistry) {
-			super(theFhirContext, theSearchParamExtractor, thePartitionSettings, theDaoRegistry);
+				DaoRegistry theDaoRegistry,
+				JpaStorageSettings theStorageSettings) {
+			super(theFhirContext, theSearchParamExtractor, thePartitionSettings, theDaoRegistry, theStorageSettings);
 		}
 
 		@Override
