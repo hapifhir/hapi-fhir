@@ -1,5 +1,6 @@
 ---
 type: fix
+issue: 8279
 jira: SMILE-11705
 title: "In Patient ID partition mode with UUID server ids, a transaction with a conditional Patient update
   (PUT Patient?identifier=system|value) that had no body id and matched nothing failed with HAPI-1321. A Patient

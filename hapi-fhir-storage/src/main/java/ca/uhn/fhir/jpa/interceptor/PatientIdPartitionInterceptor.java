@@ -809,8 +809,7 @@ public class PatientIdPartitionInterceptor {
 					&& myFhirContext.getResourceType(nextEntry.getResource()).equals(PATIENT_STR)) {
 				if (nextEntry.getMethod() == RequestTypeEnum.POST && isBlank(nextEntry.getConditionalUrl())) {
 					if (nextEntry.getFullUrl() != null && nextEntry.getFullUrl().startsWith("urn:uuid:")) {
-						String newId = UUID.randomUUID().toString();
-						nextEntry.getResource().setId(newId);
+						String newId = assignServerAssignedUuid(nextEntry.getResource());
 						idSubstitutions.put(nextEntry.getFullUrl(), "Patient/" + newId);
 
 						IBase entry = rawEntries.get(i);
@@ -966,7 +965,8 @@ public class PatientIdPartitionInterceptor {
 	 * <p>
 	 * If the pre-fetch found no match ({@link TransactionDetails#NOT_FOUND}), the entry is a create. When the server id
 	 * strategy is {@link JpaStorageSettings.IdStrategyEnum#UUID}, a UUID is assigned to the body so the entry can be
-	 * routed, just as {@code BaseHapiFhirResourceDao#doUpdate} does outside a transaction.
+	 * routed. {@code BaseHapiFhirResourceDao#doUpdate} would assign one too, but only after partition identification
+	 * has already rejected the id-less body with HAPI-1321.
 	 * <p>
 	 * Entries with no pre-fetch verdict, or under any other id strategy, are left untouched and still fail with
 	 * HAPI-1321.
@@ -995,8 +995,7 @@ public class PatientIdPartitionInterceptor {
 			// No match: this is a create. Under the UUID strategy, assign the server id now so the entry can be routed.
 			if (theTransactionDetails.getResolvedMatchUrls().get(url) == TransactionDetails.NOT_FOUND) {
 				if (myStorageSettings.getResourceServerIdStrategy() == JpaStorageSettings.IdStrategyEnum.UUID) {
-					resource.setId(UUID.randomUUID().toString());
-					resource.setUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED, Boolean.TRUE);
+					assignServerAssignedUuid(resource);
 				}
 				continue;
 			}
@@ -1012,6 +1011,19 @@ public class PatientIdPartitionInterceptor {
 			String reference = matchedId.get().toUnqualifiedVersionless().getValue();
 			terser.setElement(entry, "request.url", reference);
 		}
+	}
+
+	/**
+	 * Assigns a server-generated UUID as the resource's id and flags it as server-assigned
+	 * ({@link JpaConstants#RESOURCE_ID_SERVER_ASSIGNED}).
+	 *
+	 * @return the assigned id part
+	 */
+	private String assignServerAssignedUuid(IBaseResource theResource) {
+		String newId = UUID.randomUUID().toString();
+		theResource.setId(newId);
+		theResource.setUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED, Boolean.TRUE);
+		return newId;
 	}
 
 	@SuppressWarnings("SameParameterValue")
