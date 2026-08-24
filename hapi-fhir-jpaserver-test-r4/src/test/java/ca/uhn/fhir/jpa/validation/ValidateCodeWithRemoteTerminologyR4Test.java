@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.test.utilities.validation.IValidationProviders;
 import ca.uhn.fhir.test.utilities.validation.IValidationProvidersR4;
@@ -232,6 +233,37 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 		assertFalse(((BooleanType) respParam.getParameterValue("result")).booleanValue());
 		assertThat(respParam.getParameterValue("message").toString()).isEqualTo("Validator is unable to provide validation for P#" + CODE_SYSTEM_V2_0247_URI +
 			" - Unknown or unusable ValueSet[" + UNKNOWN_VALUE_SYSTEM_URI + "]");
+	}
+
+	@Test
+	void validateCodeOperationOnValueSet_byCodeOnlyNoSystem_doesNotLeakR5OnlyInferSystemWordingInMessage() {
+		final String code = "male";
+		final String valueSetUrl = "http://hl7.org/fhir/ValueSet/administrative-gender";
+
+		// Simulates a strict remote R4 terminology server (e.g. tx.fhir.org) rejecting a
+		// code-only lookup with an HTTP 422 whose message references inferSystem -- an R5+
+		// $validate-code parameter this client never sends for R4 (see
+		// RemoteTerminologyServiceValidationSupport#shouldInferSystem).
+		myValueSetProvider.addTerminologyResource(valueSetUrl);
+		myValueSetProvider.addException(
+			OPERATION_VALIDATE_CODE,
+			valueSetUrl,
+			code,
+			new UnprocessableEntityException(
+				"Unable to find code to validate (looked for coding | codeableConcept | code+system | code+inferSystem in parameters"));
+
+		Parameters inputParam = new Parameters()
+			.addParameter("code", code)
+			.addParameter("url", new UriType(valueSetUrl));
+
+		Parameters respParam = myClient.operation()
+			.onType(ValueSet.class)
+			.named(JpaConstants.OPERATION_VALIDATE_CODE)
+			.withParameters(inputParam)
+			.execute();
+
+		assertFalse(((BooleanType) respParam.getParameterValue("result")).booleanValue());
+		assertThat(respParam.getParameterValue("message").toString()).doesNotContain("inferSystem");
 	}
 
 	@Test

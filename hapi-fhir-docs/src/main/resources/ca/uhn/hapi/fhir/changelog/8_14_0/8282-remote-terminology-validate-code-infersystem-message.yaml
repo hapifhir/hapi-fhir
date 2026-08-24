@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 8282
+title: "Fixed an issue where validating a code against an older (R4/DSTU3) terminology server could show an error 
+message meant for a newer FHIR version."

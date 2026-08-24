@@ -16,6 +16,7 @@ import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.ParametersUtil;
@@ -687,9 +688,19 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 					.withParameters(input)
 					.execute();
 			return createCodeValidationResult(output, errorMessageBuilder, theCode, theDisplay);
-		} catch (ResourceNotFoundException | InvalidRequestException ex) {
+		} catch (ResourceNotFoundException | InvalidRequestException | UnprocessableEntityException ex) {
 			ourLog.error(ex.getMessage(), ex);
-			String errorMessage = errorMessageBuilder.buildErrorMessage(ex.getMessage());
+			// A remote server can reference a parameter that doesn't apply to this FHIR version
+			// (e.g. the R5-only code+inferSystem) even when talking to an R4/DSTU3 endpoint that
+			// never received it. In that specific case, describe our own supported parameter
+			// combinations instead of relaying the remote server's message verbatim. Any other
+			// failure (e.g. a genuine "code not found") still surfaces the remote's real message.
+			boolean referencesUnsupportedInferSystem =
+					!shouldInferSystem(getFhirContext()) && containsInferSystemWord(ex.getMessage());
+			String errorMessage = referencesUnsupportedInferSystem
+					? "Unable to find code to validate " + theCode + " (looked for "
+							+ getSupportedValidateCodeParameterCombinations(getFhirContext()) + " in parameters)"
+					: errorMessageBuilder.buildErrorMessage(ex.getMessage());
 			CodeValidationIssueCode issueCode = ex instanceof ResourceNotFoundException
 					? CodeValidationIssueCode.NOT_FOUND
 					: CodeValidationIssueCode.CODE_INVALID;
@@ -989,6 +1000,10 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 		return theText != null && Strings.CI.contains(theText, "display");
 	}
 
+	private static boolean containsInferSystemWord(String theText) {
+		return theText != null && Strings.CI.contains(theText, "inferSystem");
+	}
+
 	/**
 	 * Returns true if any of the supplied extensions matches the per-issue display-mismatch contract:
 	 * URL equals {@link #DISPLAY_MISMATCH_EXTENSION_URL}, or URL equals {@link #MESSAGE_ID_EXTENSION_URL}
@@ -1059,6 +1074,18 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 			return myInferSystemEnabled;
 		}
 		return theFhirContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.R4);
+	}
+
+	/**
+	 * Parameter combinations this client can populate on a {@code $validate-code} request.
+	 * {@code code+inferSystem} is only included when {@link #shouldInferSystem} is true for
+	 * this context, since {@code inferSystem} is never sent otherwise.
+	 */
+	private String getSupportedValidateCodeParameterCombinations(FhirContext theFhirContext) {
+		if (shouldInferSystem(theFhirContext)) {
+			return "coding | codeableConcept | code+system | code+inferSystem";
+		}
+		return "coding | codeableConcept | code+system";
 	}
 
 	@Nullable
