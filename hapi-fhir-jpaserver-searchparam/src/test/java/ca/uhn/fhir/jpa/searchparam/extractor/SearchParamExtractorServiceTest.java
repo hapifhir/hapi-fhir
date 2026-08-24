@@ -4,14 +4,12 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.MockInvoker;
-import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Reference;
@@ -35,7 +33,6 @@ import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -139,7 +136,7 @@ public class SearchParamExtractorServiceTest {
 	 */
 	// Created by Claude Sonnet 5
 	@Test
-	void testFindContainedResource_whenCandidateHasNoId_returnsNullInsteadOfThrowing() throws Exception {
+	void testFindContainedResource_whenCandidateHasNoId_returnsNullInsteadOfThrowing() {
 		// Setup
 		SearchParamExtractorService svc = new SearchParamExtractorService();
 
@@ -147,7 +144,7 @@ public class SearchParamExtractorServiceTest {
 		Reference reference = new Reference("Patient/123");
 
 		// Execute - should not throw NullPointerException
-		IBaseResource result = invokeFindContainedResource(svc, List.of(candidateWithNoId), reference);
+		IBaseResource result = svc.findContainedResource(List.of(candidateWithNoId), reference);
 
 		// Verify - should return null since no match was found
 		assertThat(result).isNull();
@@ -159,7 +156,7 @@ public class SearchParamExtractorServiceTest {
 	 */
 	// Created by Claude Sonnet 5
 	@Test
-	void testFindContainedResource_whenCandidateIdMatchesReference_returnsCandidate() throws Exception {
+	void testFindContainedResource_whenCandidateIdMatchesReference_returnsCandidate() {
 		// Setup
 		SearchParamExtractorService svc = new SearchParamExtractorService();
 
@@ -169,20 +166,9 @@ public class SearchParamExtractorServiceTest {
 		Reference reference = new Reference("#123");
 
 		// Execute
-		IBaseResource result = invokeFindContainedResource(svc, List.of(candidateWithNoId, matchingCandidate), reference);
+		IBaseResource result = svc.findContainedResource(List.of(candidateWithNoId, matchingCandidate), reference);
 
 		// Verify
 		assertThat(result).isSameAs(matchingCandidate);
-	}
-
-	private static IBaseResource invokeFindContainedResource(
-			SearchParamExtractorService theSvc, Collection<IBaseResource> theResources, IBaseReference theReference) throws Exception {
-		Method method = SearchParamExtractorService.class.getDeclaredMethod(
-			"findContainedResource",
-			Collection.class,
-			IBaseReference.class
-		);
-		method.setAccessible(true);
-		return unsafeCast(method.invoke(theSvc, theResources, theReference));
 	}
 }
