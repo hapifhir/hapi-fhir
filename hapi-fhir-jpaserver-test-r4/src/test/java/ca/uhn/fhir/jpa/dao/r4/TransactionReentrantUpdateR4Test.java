@@ -39,12 +39,23 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Reproduces version corruption that occurs when a transaction Bundle updates a Patient at the
- * same time as an interceptor, firing on a different resource in that same transaction, calls
- * {@code dao.update()} on that Patient re-entrantly.
+ * Covers what happens when a transaction Bundle updates a Patient at the same time as an
+ * interceptor, firing on a different resource in that same transaction, calls {@code dao.update()}
+ * on that Patient re-entrantly.
  * <p>
- * Both writes commit, and {@code HFJ_RESOURCE.RES_VER} is left pointing at a version that is
- * not the highest one present in {@code HFJ_RES_VER}.
+ * Before GL-8721 both writes committed and {@code HFJ_RESOURCE.RES_VER} was left pointing at a
+ * version that was not the highest one present in {@code HFJ_RES_VER}. The fix has two halves, and
+ * the cases below are split along that seam:
+ * </p>
+ * <ul>
+ * <li><b>Repair.</b> Where the client sent no {@code If-Match}, the re-entrant write is allowed and
+ *     the version state is kept consistent - the current-version pointer agrees with the history
+ *     table and the history rows stay a gapless {@code 1..N}.</li>
+ * <li><b>Reject.</b> Where the client did send {@code If-Match}, the precondition is re-checked at
+ *     the point of the real write. The interceptor has by then moved the resource past the version
+ *     the client demanded, so the transaction is refused with a 409 rather than silently discarding
+ *     the interceptor's write.</li>
+ * </ul>
  */
 public class TransactionReentrantUpdateR4Test extends BaseJpaR4Test {
 
@@ -91,26 +102,54 @@ public class TransactionReentrantUpdateR4Test extends BaseJpaR4Test {
 		}
 	}
 
+	/**
+	 * The scenario reported in GL-8721 / SMILE-12076: a transaction Bundle carries a versioned
+	 * {@code PUT} of a Patient alongside a conditional {@code PUT} of a Flag that references it, and a
+	 * customer interceptor on {@code STORAGE_PRESTORAGE_RESOURCE_CREATED} calls {@code dao.update()}
+	 * on that same Patient from inside the hook.
+	 * <p>
+	 * <b>This case asserted a repaired, successful write while GL-8721 was being fixed, and now asserts
+	 * a rejection instead. The change is deliberate</b>, made by the ticket owner once it became clear
+	 * that the two behaviours cannot both hold for this input. The Bundle's {@code PUT} carries
+	 * {@code If-Match: W/"1"}, but that precondition is validated during a pass that stores nothing,
+	 * and the interceptor moves the Patient past v1 before the real write happens. Completing the write
+	 * would silently discard the interceptor's version while reporting success, so the precondition is
+	 * re-checked at the write and the whole transaction is refused.
+	 * </p>
+	 * <p>
+	 * The other half of the GL-8721 fix - repairing the version state rather than refusing the write -
+	 * is what keeps storage consistent when no precondition is involved. It is covered by
+	 * {@link #testTransactionUpdate_whenInterceptorUpdatesSameResource_currentVersionMatchesHistory()},
+	 * which drives this very same Bundle shape without the {@code If-Match}.
+	 * </p>
+	 */
 	@Test
-	public void testTransactionUpdate_whenInterceptorUpdatesSameResource_currentVersionMatchesHistory() {
+	void testTransactionUpdateWithIfMatch_whenInterceptorUpdatesSameResource_throwsVersionConflict() {
 		// Setup - Patient v1
-		Patient patient = new Patient();
-		patient.setId(PATIENT_ID);
-		patient.setActive(true);
-		myPatientDao.update(patient, new SystemRequestDetails());
+		createPatientVersionOne();
 
 		ReentrantFlagInterceptor interceptor = new ReentrantFlagInterceptor(myPatientDao);
 		registerInterceptor(interceptor);
 
-		// Execute - the Patient PUT takes v1 to v2, and the Flag create fires the interceptor,
-		// which updates the same Patient again from inside the transaction
-		Bundle response = mySystemDao.transaction(new SystemRequestDetails(), buildTransaction());
+		// Execute + Verify - the Flag create fires the interceptor, which takes the Patient to v2, so
+		// the Bundle's own PUT can no longer honour If-Match: W/"1"
+		assertThatThrownBy(() -> mySystemDao.transaction(new SystemRequestDetails(), buildTransaction()))
+			.as("The interceptor invalidated If-Match W/\"1\" before the Bundle's own PUT was written, "
+				+ "so that PUT must not silently discard the interceptor's version")
+			.isInstanceOf(ResourceVersionConflictException.class)
+			.hasMessageContaining(Msg.code(3021));
 
-		// Verify
-		assertEquals(1, interceptor.getInvocationCount(),
-			"Interceptor never fired, so this test proves nothing");
+		assertThat(interceptor.getInvocationCount())
+			.as("Interceptor never fired, so this test proves nothing")
+			.isEqualTo(1);
 
-		assertPatientVersionsAreConsistent(response);
+		runInTransaction(() -> {
+			ResourceTable currentRow = findPatientRow();
+			assertThat(currentRow.getVersion())
+				.as("The whole transaction, including the interceptor's write, should have rolled back")
+				.isEqualTo(1L);
+			assertThat(historyVersionsOf(currentRow)).containsExactly(1L);
+		});
 	}
 
 	/**
@@ -208,11 +247,10 @@ public class TransactionReentrantUpdateR4Test extends BaseJpaR4Test {
 	// ---------------------------------------------------------------------------------------------
 	// GL-8721 adjacent cases T1-T8.
 	//
-	// Everything above this line is the originally committed reproduction and is deliberately left
-	// in its JUnit-Assertions style: Gate 1 of the test plan requires that repro to go green on the
-	// fix with no edits to its assertions, so neither the two test methods nor
-	// assertPatientVersionsAreConsistent(Bundle) may be touched. Everything below is new and uses
-	// AssertJ, per the repo conventions.
+	// The no-interceptor control above, and the assertPatientVersionsAreConsistent(Bundle) helper it
+	// uses, are the originally committed reproduction and are left in their JUnit-Assertions style.
+	// The reported case beside them was rewritten when the ticket owner ruled that an If-Match must be
+	// enforced at the real write; everything below is newer and uses AssertJ, per the repo conventions.
 	// ---------------------------------------------------------------------------------------------
 
 	private static final String REENTRANT_FAMILY_NAME = "REENTRANT";
@@ -323,6 +361,52 @@ public class TransactionReentrantUpdateR4Test extends BaseJpaR4Test {
 	}
 
 	/**
+	 * The reported GL-8721 scenario with the precondition taken away - the repair half of the fix.
+	 * <p>
+	 * Identical to
+	 * {@link #testTransactionUpdateWithIfMatch_whenInterceptorUpdatesSameResource_throwsVersionConflict()}
+	 * in every respect except that the Patient entry sends no {@code If-Match}, so there is nothing for
+	 * the server to enforce and the re-entrant write is allowed to proceed. This is the case that pins
+	 * the behaviour the customer actually hit: two writes to one resource in one transaction, route (a),
+	 * which used to leave {@code HFJ_RESOURCE.RES_VER=2} against history rows {@code [1, 2, 3]}.
+	 * </p>
+	 * <p>
+	 * This case carries the assertion the reported case used to make. Do not add an {@code If-Match} to
+	 * it - that turns it into a duplicate of the 409 case and silently removes the only route (a)
+	 * coverage of the version repair.
+	 * </p>
+	 */
+	@Test
+	void testTransactionUpdate_whenInterceptorUpdatesSameResource_currentVersionMatchesHistory() {
+		// Setup - Patient v1
+		createPatientVersionOne();
+
+		ConfigurableReentrantFlagInterceptor interceptor = newNameAppendingFlagInterceptor();
+		registerInterceptor(interceptor);
+
+		// Execute - the Patient PUT takes v1 to v2, and the Flag create fires the interceptor, which
+		// updates the same Patient again from inside the transaction
+		Bundle response = mySystemDao.transaction(new SystemRequestDetails(), buildTransactionWithoutIfMatch());
+
+		// Verify
+		assertThat(interceptor.getInvocationCount())
+			.as("Interceptor never fired, so this test proves nothing")
+			.isEqualTo(1);
+
+		assertPatientStorageVersionsAreConsistent();
+
+		runInTransaction(() -> {
+			ResourceTable currentRow = findPatientRow();
+			assertThat(currentRow.getVersion())
+				.as("Two writes to one Patient in one transaction should leave it at v3")
+				.isEqualTo(3L);
+			assertThat(historyVersionsOf(currentRow)).containsExactly(1L, 2L, 3L);
+		});
+
+		assertResponseEntryVersionMatchesDatabase(response, 0);
+	}
+
+	/**
 	 * T1 - update then delete the same Patient inside one transaction.
 	 * <p>
 	 * This has to be a programmatic transaction rather than a Bundle: entries are sorted by verb
@@ -398,43 +482,6 @@ public class TransactionReentrantUpdateR4Test extends BaseJpaR4Test {
 		assertPatientStorageVersionsAreConsistent();
 	}
 
-	/**
-	 * T2b - behaviour-change pin for the proposed If-Match re-check.
-	 * <p>
-	 * Same Bundle and interceptor as the primary reproduction. The client asked to update v1 and only
-	 * v1, but by the time the Bundle's own PUT reaches its real write the interceptor has already
-	 * moved the Patient on, so committing it discards the interceptor's write while still reporting
-	 * success. The precondition is only ever validated in pass 1 against a predicted version, so today
-	 * nothing catches this; the desired behaviour is a version conflict and a full rollback.
-	 * <p>
-	 * This is the case a changelog note has to describe.
-	 */
-	@Test
-	void testTransactionUpdateWithIfMatch_whenInterceptorUpdatesSameResource_throwsVersionConflict() {
-		// Setup - Patient v1
-		createPatientVersionOne();
-
-		ReentrantFlagInterceptor interceptor = new ReentrantFlagInterceptor(myPatientDao);
-		registerInterceptor(interceptor);
-
-		// Execute + Verify
-		assertThatThrownBy(() -> mySystemDao.transaction(new SystemRequestDetails(), buildTransaction()))
-			.as("The interceptor invalidated If-Match W/\"1\" before the Bundle's own PUT was written, "
-				+ "so that PUT must not silently discard the interceptor's version")
-			.isInstanceOf(ResourceVersionConflictException.class);
-
-		assertThat(interceptor.getInvocationCount())
-			.as("Interceptor never fired, so this test proves nothing")
-			.isEqualTo(1);
-
-		runInTransaction(() -> {
-			ResourceTable currentRow = findPatientRow();
-			assertThat(currentRow.getVersion())
-				.as("The whole transaction, including the interceptor's write, should have rolled back")
-				.isEqualTo(1L);
-			assertThat(historyVersionsOf(currentRow)).containsExactly(1L);
-		});
-	}
 
 	/**
 	 * T3 - route (b) of the execution plan with no If-Match: a POST entry fires the interceptor before
@@ -559,7 +606,15 @@ public class TransactionReentrantUpdateR4Test extends BaseJpaR4Test {
 
 	/**
 	 * T6 - three writes to one Patient in one transaction: the Bundle's own PUT plus two interceptor
-	 * writes, one per Flag. Proves the invariant generalises past N=2.
+	 * writes, one per Flag. Proves the version repair generalises past N=2.
+	 * <p>
+	 * The Patient entry deliberately carries <b>no</b> {@code If-Match}. It used to, which meant that
+	 * once GL-8721 started enforcing preconditions at the real write this case stopped exercising what
+	 * it was written for and simply became a second copy of the 409 assertion in
+	 * {@link #testTransactionUpdateWithIfMatch_whenInterceptorUpdatesSameResource_throwsVersionConflict()}.
+	 * Without the precondition the re-entrant writes are allowed to proceed, which is what lets this
+	 * case still prove the thing it exists to prove.
+	 * </p>
 	 */
 	@Test
 	void testTransactionUpdate_whenInterceptorUpdatesSameResourceTwice_currentVersionMatchesHistory() {
@@ -734,6 +789,17 @@ public class TransactionReentrantUpdateR4Test extends BaseJpaR4Test {
 			.toList();
 	}
 
+	/**
+	 * The reported Bundle shape - Patient PUT first, then a conditional Flag PUT that resolves to a
+	 * create - but without the {@code If-Match} that {@link #buildTransaction()} carries.
+	 */
+	private Bundle buildTransactionWithoutIfMatch() {
+		Bundle bundle = newTransactionBundle();
+		addPatientPut(bundle, false);
+		addConditionalFlagPut(bundle, FLAG_IDENTIFIER_VALUE);
+		return bundle;
+	}
+
 	private Bundle buildPatientOnlyTransaction() {
 		Bundle bundle = newTransactionBundle();
 		addPatientPut(bundle, false);
@@ -764,7 +830,7 @@ public class TransactionReentrantUpdateR4Test extends BaseJpaR4Test {
 
 	private Bundle buildTransactionWithTwoFlags() {
 		Bundle bundle = newTransactionBundle();
-		addPatientPut(bundle, true);
+		addPatientPut(bundle, false);
 		addConditionalFlagPut(bundle, FLAG_IDENTIFIER_VALUE);
 		addConditionalFlagPut(bundle, "f2");
 		return bundle;

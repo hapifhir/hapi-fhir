@@ -1603,6 +1603,22 @@ public abstract class BaseTransactionProcessor {
 							res.setId(newIdType(parts.getResourceType(), parts.getResourceId(), version));
 							outcome = resourceDao.update(
 									res, null, false, false, requestDetailsForEntry, theTransactionDetails);
+
+							/*
+							 * Record the version the client demanded, so that the write pass below can check
+							 * the precondition again against the version that is genuinely current at the
+							 * moment of the write. The check made during this pass compares against a version
+							 * nothing has been written to yet, and another entry in this same transaction can
+							 * still move the resource before we get there. See GL-8721.
+							 *
+							 * This is taken from the If-Match header rather than from the version part of the
+							 * resource id, because plenty of things put a version on an id without the client
+							 * having asked for a precondition at all - reading a resource and updating it
+							 * yields a versioned id, as does id substitution within a transaction.
+							 */
+							if (StringUtils.isNumeric(version)) {
+								outcome.setExpectedVersionForUpdate(Long.parseLong(version));
+							}
 						} else {
 							if (!shouldConditionalUpdateMatchId(res.getIdElement())) {
 								res.setId((String) null);
@@ -2359,7 +2375,8 @@ public abstract class BaseTransactionProcessor {
 					theResource.getIdElement(),
 					theDaoMethodOutcome.getPreviousResource(),
 					operationType,
-					theTransactionDetails);
+					theTransactionDetails,
+					theDaoMethodOutcome.getExpectedVersionForUpdate());
 			updateOutcome = daoMethodOutcome.getEntity();
 			theDaoMethodOutcome = daoMethodOutcome;
 		} else if (!theNonUpdatedEntities.contains(theDaoMethodOutcome.getId())) {

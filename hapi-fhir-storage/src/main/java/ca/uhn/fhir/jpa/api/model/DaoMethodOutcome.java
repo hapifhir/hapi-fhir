@@ -33,6 +33,7 @@ public class DaoMethodOutcome extends MethodOutcome {
 	private IResourcePersistentId myResourcePersistentId;
 	private RestOperationTypeEnum myOperationType;
 	private String myMatchUrl;
+	private Long myExpectedVersionForUpdate;
 
 	/**
 	 * Constructor
@@ -55,6 +56,26 @@ public class DaoMethodOutcome extends MethodOutcome {
 
 	public void setMatchUrl(String theMatchUrl) {
 		myMatchUrl = theMatchUrl;
+	}
+
+	/**
+	 * The resource version the client demanded via an {@code If-Match} precondition, if any.
+	 * <p>
+	 * This is only populated when the update was processed with indexing disabled, i.e. from within a
+	 * FHIR transaction, where the precondition is validated during the first pass but the resource is
+	 * not actually written until the second one. Carrying the expected version on the outcome lets the
+	 * second pass re-validate the precondition against the version that is genuinely current at the
+	 * moment of the write. See GL-8721.
+	 * </p>
+	 *
+	 * @return the version demanded by {@code If-Match}, or {@literal null} if the client did not send one
+	 */
+	public Long getExpectedVersionForUpdate() {
+		return myExpectedVersionForUpdate;
+	}
+
+	public void setExpectedVersionForUpdate(Long theExpectedVersionForUpdate) {
+		myExpectedVersionForUpdate = theExpectedVersionForUpdate;
 	}
 
 	/**

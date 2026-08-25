@@ -94,6 +94,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
@@ -1526,6 +1527,33 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			@Nullable IBaseResource theOldResource,
 			RestOperationTypeEnum theOperationType,
 			TransactionDetails theTransactionDetails) {
+		return updateInternal(
+				theRequestDetails,
+				theResource,
+				theMatchUrl,
+				thePerformIndexing,
+				theForceUpdateVersion,
+				theEntity,
+				theResourceId,
+				theOldResource,
+				theOperationType,
+				theTransactionDetails,
+				null);
+	}
+
+	@Override
+	public DaoMethodOutcome updateInternal(
+			RequestDetails theRequestDetails,
+			T theResource,
+			String theMatchUrl,
+			boolean thePerformIndexing,
+			boolean theForceUpdateVersion,
+			IBasePersistedResource theEntity,
+			IIdType theResourceId,
+			@Nullable IBaseResource theOldResource,
+			RestOperationTypeEnum theOperationType,
+			TransactionDetails theTransactionDetails,
+			@Nullable Long theExpectedVersion) {
 
 		ResourceTable entity = (ResourceTable) theEntity;
 
@@ -1537,6 +1565,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		notifyInterceptors(theRequestDetails, theResource, theOldResource, theTransactionDetails, true);
 
 		entity.setUpdatedByMatchUrl(theMatchUrl);
+
+		validateExpectedVersionAtWrite(theExpectedVersion, entity);
 
 		// Perform update
 		ResourceTable savedEntity = updateEntity(
@@ -1615,6 +1645,56 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		populateOperationOutcomeForUpdate(w, outcome, theMatchUrl, outcome.getOperationType(), theTransactionDetails);
 
 		return outcome;
+	}
+
+	/**
+	 * Re-validates an {@code If-Match} precondition immediately before the resource is physically
+	 * written.
+	 * <p>
+	 * This looks like a duplicate of the check in
+	 * {@code BaseStorageResourceDao#doUpdateForUpdateOrPatch}, and it deliberately is one. Inside a
+	 * FHIR transaction that first check runs during a pass that stores nothing: it compares the
+	 * demanded version against the version the resource holds at that moment and then returns a merely
+	 * <em>predicted</em> outcome, leaving the real write to a later pass. Between those two points any
+	 * other entry in the same transaction can move the resource - in particular a storage interceptor
+	 * firing on a different entry can call {@code dao.update()} on this very resource re-entrantly.
+	 * When that happens the first check has already passed against a version that is no longer
+	 * current, so without re-checking here the {@code If-Match} would be silently ignored and the
+	 * client's update would overwrite a version it never saw.
+	 * </p>
+	 * <p>
+	 * The check has to sit here, immediately before the write, rather than once at the top of the
+	 * write pass: {@code STORAGE_PRESTORAGE_RESOURCE_UPDATED} is broadcast from inside this very
+	 * method, so an interceptor can still write the resource after any earlier check has passed.
+	 * </p>
+	 * <p>
+	 * See GL-8721 and {@code TransactionReentrantUpdateR4Test}.
+	 * </p>
+	 *
+	 * @param theExpectedVersion the version demanded by {@code If-Match}, or {@literal null} if the
+	 *                              client sent no precondition
+	 * @param theEntity the entity about to be written
+	 */
+	private void validateExpectedVersionAtWrite(@Nullable Long theExpectedVersion, ResourceTable theEntity) {
+		if (theExpectedVersion == null) {
+			return;
+		}
+
+		/*
+		 * Flush any version bump that an earlier write in this transaction has marked but not yet
+		 * emitted, so that the comparison below is made against the version the database genuinely
+		 * holds rather than one still sitting in the session.
+		 */
+		if (theEntity.isVersionUpdatedInCurrentTransaction()) {
+			flushPendingResourceVersionUpdate(theEntity);
+		}
+
+		long currentVersion = theEntity.getVersion();
+		if (currentVersion != theExpectedVersion) {
+			throw new ResourceVersionConflictException(Msg.code(3021) + "Trying to update "
+					+ theEntity.getIdDt().toUnqualifiedVersionless().getValue() + "/_history/" + theExpectedVersion
+					+ " but this is not the current version");
+		}
 	}
 
 	private void notifyInterceptors(

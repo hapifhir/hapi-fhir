@@ -53,4 +53,37 @@ public interface IJpaDao<T extends IBaseResource> {
 			IBaseResource theOldResource,
 			RestOperationTypeEnum theOperationType,
 			TransactionDetails theTransactionDetails);
+
+	/**
+	 * Variant of {@link #updateInternal} which re-validates an {@code If-Match} precondition at the
+	 * point of the write. Used by the transaction processor, where the precondition was first checked
+	 * during a pass that stored nothing. See GL-8721.
+	 *
+	 * @param theExpectedVersion the version the client demanded via {@code If-Match}, or
+	 *                              {@literal null} to skip the check
+	 */
+	default DaoMethodOutcome updateInternal(
+			RequestDetails theRequestDetails,
+			T theResource,
+			String theMatchUrl,
+			boolean thePerformIndexing,
+			boolean theForceUpdateVersion,
+			IBasePersistedResource theEntity,
+			IIdType theResourceId,
+			IBaseResource theOldResource,
+			RestOperationTypeEnum theOperationType,
+			TransactionDetails theTransactionDetails,
+			Long theExpectedVersion) {
+		return updateInternal(
+				theRequestDetails,
+				theResource,
+				theMatchUrl,
+				thePerformIndexing,
+				theForceUpdateVersion,
+				theEntity,
+				theResourceId,
+				theOldResource,
+				theOperationType,
+				theTransactionDetails);
+	}
 }
