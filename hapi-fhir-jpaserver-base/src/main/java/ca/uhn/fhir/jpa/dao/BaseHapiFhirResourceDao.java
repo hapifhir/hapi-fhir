@@ -3005,7 +3005,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		 * a second time, create multiple history entries, etc.
 		 */
 		if (entity != null && entity.isVersionUpdatedInCurrentTransaction()) {
-			myEntityManager.flush();
+			flushPendingResourceVersionUpdate(entity);
 		}
 
 		if (entity.isSearchUrlPresent()) {

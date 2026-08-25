@@ -39,6 +39,7 @@ import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.cache.IResourceTypeCacheSvc;
+import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
@@ -112,6 +113,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
+import jakarta.persistence.PersistenceException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
@@ -243,6 +245,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	@Autowired(required = false)
 	private IFulltextSearchSvc myFulltextSearchSvc;
+
+	@Autowired(required = false)
+	private HapiFhirHibernateJpaDialect myHapiFhirHibernateJpaDialect;
 
 	@Autowired
 	protected ResourceHistoryCalculator myResourceHistoryCalculator;
@@ -901,6 +906,33 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				theCreateOrUpdate.name().toLowerCase(), url, resourceType);
 	}
 
+	/**
+	 * Flushes the Hibernate session so that a version increment which has been marked on
+	 * {@literal theEntity} but not yet written is emitted as a physical {@code UPDATE} before the
+	 * caller performs a further write to the same resource.
+	 * <p>
+	 * The flush is translated through {@link HapiFhirHibernateJpaDialect} for the same reason
+	 * {@code TransactionProcessor.flushSession} does it: a raw flush surfaces a lost optimistic-lock
+	 * race as a bare {@link PersistenceException}, which
+	 * {@code HapiTransactionService.isRetriable} does not recognise, so a genuine concurrent writer
+	 * would be reported as a non-retriable 500 rather than a retriable 409.
+	 * </p>
+	 *
+	 * @param theEntity the entity whose pending version increment is being flushed
+	 */
+	protected void flushPendingResourceVersionUpdate(ResourceTable theEntity) {
+		try {
+			myEntityManager.flush();
+		} catch (PersistenceException e) {
+			if (myHapiFhirHibernateJpaDialect != null) {
+				String message = "Error flushing pending version update for resource "
+						+ theEntity.getIdDt().toUnqualifiedVersionless().getValue();
+				throw myHapiFhirHibernateJpaDialect.translate(e, message);
+			}
+			throw e;
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public ResourceTable updateEntity(
@@ -924,6 +956,22 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		ourLog.debug("Starting entity update");
 
 		ResourceTable entity = (ResourceTable) theEntity;
+
+		/*
+		 * If the entity is already carrying an unflushed version bump from an earlier write in this
+		 * same database transaction, Hibernate has not yet emitted the UPDATE that advances
+		 * HFJ_RESOURCE.RES_VER. We are about to create a second history row, so we flush now to force
+		 * that statement out and let the write below claim an increment of its own. That keeps the
+		 * invariant this storage layer depends on: one emitted UPDATE per HFJ_RES_VER row.
+		 *
+		 * This lives here rather than in any individual DAO method because updateEntity is the single
+		 * choke point through which every physical resource-version write passes. Paths that do not
+		 * create a history row - reindexing and history rewrites - pass theCreateNewHistoryEntry=false
+		 * and are deliberately excluded, since they neither consume nor produce a version increment.
+		 */
+		if (theCreateNewHistoryEntry && entity.isVersionUpdatedInCurrentTransaction()) {
+			flushPendingResourceVersionUpdate(entity);
+		}
 
 		/*
 		 * This should be the very first thing..

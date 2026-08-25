@@ -48,6 +48,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PostPersist;
+import jakarta.persistence.PostUpdate;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -450,7 +451,7 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 	 * Setting this flag is an indication that we're making changes and the version number will
 	 * be incremented in the current transaction. When this is set, calls to {@link #getVersion()}
 	 * will be incremented by one.
-	 * This flag is cleared in {@link #postPersist()} since at that time the new version number
+	 * This flag is cleared in {@link #postPersistOrUpdate()} since at that time the new version number
 	 * should be reflected.
 	 */
 	public void markVersionUpdatedInCurrentTransaction() {
@@ -474,8 +475,18 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 		}
 	}
 
+	/**
+	 * Clears {@link #myVersionUpdatedInCurrentTransaction} once the pending version bump has actually
+	 * been written to the database. This fires on both callbacks deliberately: {@code @PostPersist}
+	 * covers the initial INSERT, and {@code @PostUpdate} covers every subsequent flush that emits an
+	 * {@code UPDATE} advancing {@code RES_VER}. Without the latter the flag would stay set for the rest
+	 * of the transaction, so a second write to the same resource would find
+	 * {@link #markVersionUpdatedInCurrentTransaction()} a no-op and its history row would take its
+	 * version number from the fallback in {@link #toHistory(boolean)} instead.
+	 */
 	@PostPersist
-	public void postPersist() {
+	@PostUpdate
+	public void postPersistOrUpdate() {
 		myVersionUpdatedInCurrentTransaction = false;
 	}
 
