@@ -4,12 +4,8 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.config.JpaConfig;
-import ca.uhn.fhir.jpa.entity.TermCodeSystem;
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -17,7 +13,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletResponse;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -32,21 +27,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
 import org.mockito.Mock;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
-import static java.util.stream.Collectors.joining;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_ALL_VALUESET_ID;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
@@ -58,9 +48,7 @@ import static org.mockito.Mockito.when;
 /**
  * Tests load and validate CodeSystem and ValueSet so test names as uploadFirstCurrent... mean uploadCodeSystemAndValueSetCurrent...
  */
-public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
-	private static final Logger ourLog = LoggerFactory.getLogger(TerminologySvcImplCurrentVersionR4Test.class);
-
+class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 	private static final String BASE_LOINC_URL = "http://loinc.org";
 	private static final String BASE_LOINC_VS_URL = BASE_LOINC_URL + "/vs/";
 
@@ -78,10 +66,6 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 	private static final String VS_VERSIONED_ON_UPLOAD_FIRST_CODE = "LA13825-7";
 	private static final String VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY = "1 slice or 1 dinner roll";
 
-	private static final Set<String> possibleVersions = Sets.newHashSet("2.67", "2.68", "2.69");
-
-	private static final int ALL_VS_QTY = 81;
-
 	@Mock
 	private HttpServletResponse mockServletResponse;
 
@@ -95,12 +79,6 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 	private TerminologyTestHelper myTerminologyTestHelper;
 
 	@Autowired
-	private ITermReadSvc myITermReadSvc;
-
-	@Autowired @Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT)
-	private IValidationSupport myJpaPersistedResourceValidationSupport;
-
-	@Autowired
 	private Batch2JobHelper myBatchJobHelper;
 
 	private final ServletRequestDetails myRequestDetails = new ServletRequestDetails();
@@ -109,14 +87,14 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 
 	@BeforeEach
-	public void beforeEach() throws Exception {
+	void beforeEach() {
 		myValueSetIFhirResourceDao = myDaoRegistry.getResourceDao(ValueSet.class);
 
 		when(mockRequestDetails.getServer().getDefaultPageSize()).thenReturn(25);
 	}
 
 	@AfterEach
-	public void afterEach() {
+	void afterEach() {
 		myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 	}
 
@@ -216,28 +194,35 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		assertEquals(prefixWithVersion(currentVersion, VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY), vs1.getExpansion().getContains().iterator().next().getDisplay());
 
 
-		validateExpandedTermConceptsForVersion(currentVersion);
+		validateTermConceptForVersion(currentVersion);
 		for (String version : theAllVersions) {
-			validateExpandedTermConceptsForVersion(version);
+			validateTermConceptForVersion(version);
 		}
 
 		// now for each uploaded version
 		theAllVersions.forEach(this::validateValueExpandForVersion);
 	}
 
-	private void validateExpandedTermConceptsForVersion(String theVersion) {
+	/**
+	 * Validates the TermConcepts for both test codes exist for the given version, and their
+	 * displays match that version. Concepts are matched to a version via
+	 * {@code tcsv.myCodeSystemVersionId} rather than by insertion order (e.g. {@code myId.myId}),
+	 * since concept persistence goes through an asynchronous deferred-storage queue and is not
+	 * guaranteed to happen in upload order.
+	 */
+	private void validateTermConceptForVersion(String theVersion) {
 		runInTransaction(()->{
 			TermConcept termConceptNoVer = (TermConcept) myEntityManager.createQuery(
 				"select tc from TermConcept tc join fetch tc.myCodeSystem tcsv where tc.myCode = '" +
 					VS_NO_VERSIONED_ON_UPLOAD_FIRST_CODE + "' and tcsv.myCodeSystemVersionId = '" + theVersion + "'").getSingleResult();
-			assertNotNull(termConceptNoVer);
-			assertEquals(prefixWithVersion(theVersion, VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY), termConceptNoVer.getDisplay());
+			assertEquals(prefixWithVersion(theVersion, VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY),
+				termConceptNoVer.getDisplay(), "TermCode for code system version: " + theVersion);
 
 			TermConcept termConceptVer = (TermConcept) myEntityManager.createQuery(
 				"select tc from TermConcept tc join fetch tc.myCodeSystem tcsv where tc.myCode = '" +
 					VS_VERSIONED_ON_UPLOAD_FIRST_CODE + "' and tcsv.myCodeSystemVersionId = '" + theVersion + "'").getSingleResult();
-			assertNotNull(termConceptVer);
-			assertEquals(prefixWithVersion(theVersion, VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY), termConceptVer.getDisplay());
+			assertEquals(prefixWithVersion(theVersion, VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY),
+				termConceptVer.getDisplay(), "TermCode for code system version: " + theVersion);
 		});
 	}
 
@@ -345,8 +330,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		expectedNoVersionUnqualifiedIds.add(VS_NO_VERSIONED_ON_UPLOAD_ID);
 
 		List<String> resultUnqualifiedIds = theValueSets.stream()
-			.map(r -> r.getIdElement().getIdPart())
-			.collect(Collectors.toList());
+			.map(r -> r.getIdElement().getIdPart()).toList();
 
 		assertThat(resultUnqualifiedIds).containsExactlyInAnyOrderElementsOf(resultUnqualifiedIds);
 
@@ -374,6 +358,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 			// Fetch from validation context
 			codeSystem = (CodeSystem) myValidationSupport.fetchCodeSystem(BASE_LOINC_URL + "|" + version);
+			assertNotNull(codeSystem);
 			assertEquals(version, codeSystem.getVersion());
 
 			// for ValueSet resource
@@ -386,7 +371,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 	}
 
 	@Test()
-	public void uploadWithVersion() throws Exception {
+	void uploadWithVersion() throws Exception {
 		String ver = "2.67";
 		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion(ver, true);
 
@@ -401,7 +386,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 
 	@Test
-	public void uploadWithVersionThenNoCurrent() throws Exception {
+	void uploadWithVersionThenNoCurrent() throws Exception {
 		logAllCodeSystemsAndVersionsCodeSystemsAndVersions();
 
 		String currentVer = "2.67";
@@ -508,34 +493,16 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 	}
 
 	/**
-	 * Validates TermConcepts were created in the sequence indicated by the parameters,
-	 * and their displays match the expected versions
+	 * Validates a TermConcept exists for each expected version, and its display matches
+	 * that version. See {@link #validateTermConceptForVersion(String)}.
 	 */
 	private void validateTermConcepts(ArrayList<String> theExpectedVersions) {
-		runInTransaction(() -> {
-		@SuppressWarnings("unchecked")
-			List<TermConcept> termConceptNoVerList = (List<TermConcept>) myEntityManager.createQuery(
-				"from TermConcept where myCode = '" + VS_NO_VERSIONED_ON_UPLOAD_FIRST_CODE + "' order by myId.myId").getResultList();
-			assertEquals(theExpectedVersions.size(), termConceptNoVerList.size());
-			for (int i = 0; i < theExpectedVersions.size(); i++) {
-				assertEquals( prefixWithVersion(theExpectedVersions.get(i), VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY),
-					termConceptNoVerList.get(i).getDisplay(), "TermCode with id: " + i + " display");
-			}
-
-			@SuppressWarnings("unchecked")
-			List<TermConcept> termConceptWithVerList = (List<TermConcept>) myEntityManager.createQuery(
-				"from TermConcept where myCode = '" + VS_VERSIONED_ON_UPLOAD_FIRST_CODE + "' order by myId.myId").getResultList();
-			assertEquals(theExpectedVersions.size(), termConceptWithVerList.size());
-			for (int i = 0; i < theExpectedVersions.size(); i++) {
-				assertEquals( prefixWithVersion(theExpectedVersions.get(i), VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY),
-					termConceptWithVerList.get(i).getDisplay(), "TermCode with id: " + i + " display");
-			}
-		});
+		theExpectedVersions.forEach(this::validateTermConceptForVersion);
 	}
 
 
 	@Test
-	public void uploadWithVersionThenNoCurrentThenCurrent() throws Exception {
+	void uploadWithVersionThenNoCurrentThenCurrent() throws Exception {
 		String firstCurrentVer = "2.67";
 		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion(firstCurrentVer, true);
 
@@ -554,33 +521,4 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		//	tests conditions which were failing after VS expansion (before fix for issue-2995)
 		validateTermConcepts(Lists.newArrayList(firstCurrentVer, noCurrentVer, lastCurrentVer));
 	}
-
-
-
-	private TermCodeSystemVersion fetchCurrentCodeSystemVersion() {
-		runInTransaction(() -> {
-			@SuppressWarnings("unchecked")
-			List<TermCodeSystem> tcsList = myEntityManager.createQuery("from TermCodeSystem").getResultList();
-			@SuppressWarnings("unchecked")
-			List<TermCodeSystemVersion> tcsvList = myEntityManager.createQuery("from TermCodeSystemVersion").getResultList();
-			ourLog.error("tcslist: {}", tcsList.stream().map(TermCodeSystem::toString).collect(joining("\n", "\n", "")));
-			ourLog.error("tcsvlist: {}", tcsvList.stream().map(TermCodeSystemVersion::toString).collect(joining("\n", "\n", "")));
-
-			if (tcsList.size() != 1) {
-				throw new IllegalStateException("More than one TCS: " +
-					tcsList.stream().map(tcs -> String.valueOf(tcs.getPid())).collect(joining()));
-			}
-			if (tcsList.get(0).getCurrentVersion() == null) {
-				throw new IllegalStateException("Current version is null in TCS: " + tcsList.get(0).getPid());
-			}
-		});
-
-		return runInTransaction(() -> (TermCodeSystemVersion) myEntityManager.createQuery(
-				"select tcsv from TermCodeSystemVersion tcsv join fetch tcsv.myCodeSystem tcs " +
-					"where tcs.myCurrentVersion = tcsv").getSingleResult());
-	}
-
-
-
-
 }
