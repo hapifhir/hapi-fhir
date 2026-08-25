@@ -2,6 +2,6 @@
 type: fix
 issue: 8279
 jira: SMILE-11705
-title: "In Patient ID partition mode with UUID server ids, a transaction with a conditional Patient update
-  (PUT Patient?identifier=system|value) that had no body id and matched nothing failed with HAPI-1321. A Patient
-  with a server-assigned UUID is now created if one does not exist."
+title: "Previously, when Patient ID partition mode with UUID server ids was configured, a transaction with 
+a conditional Patient update (PUT Patient?identifier=system|value) that had no body id and matched nothing 
+in the repository, failed with HAPI-1321. A Patient with a server-assigned UUID is now created if one does not exist."
