@@ -20,7 +20,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
-import ca.uhn.fhir.test.utilities.FhirHttpResponse;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.ResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
@@ -104,7 +104,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 		patient.setManagingOrganization(new Reference("Organization/123"));
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(patient);
 
-		FhirHttpResponse status = ourServlet.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_JSON);
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_JSON);
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -122,7 +122,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 		patient.addContact().addRelationship().setText("FOO");
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(patient);
 
-		FhirHttpResponse status = ourServlet.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_JSON);
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_JSON);
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -133,7 +133,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 
 	@Test
 	void testGraphQlRequestResponse_GET() {
-		FhirHttpResponse status = ourServlet.fhirRequest("/Patient/123/$graphql?query=" + UrlUtil.escapeUrlParam("{name}")).get();
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient/123/$graphql?query=" + UrlUtil.escapeUrlParam("{name}")).get();
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -144,7 +144,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 
 	@Test
 	void testGraphQlRequestResponse_POST() {
-		FhirHttpResponse status = ourServlet.fhirRequest("/Patient/123/$graphql").post("{\"query\": \"{name}\"}", Constants.CT_JSON);
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient/123/$graphql").post("{\"query\": \"{name}\"}", Constants.CT_JSON);
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -163,7 +163,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 		patient.addContact().addRelationship().setText("FOO");
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(patient);
 
-		FhirHttpResponse status = ourServlet.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_JSON);
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_JSON);
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -180,7 +180,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 		patient.setGender(AdministrativeGender.MALE);
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(patient);
 
-		FhirHttpResponse status = ourServlet.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_JSON);
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_JSON);
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -199,7 +199,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 		patient.setGender(AdministrativeGender.MALE);
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(patient);
 
-		FhirHttpResponse status = ourServlet.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_JSON);
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_JSON);
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -227,7 +227,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 				"</address>" +
 				"</Patient>";
 
-		FhirHttpResponse status = ourServlet.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -248,7 +248,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 		patient.addContact().addRelationship().setText("FOO");
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
 
-		FhirHttpResponse status = ourServlet.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -266,7 +266,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 		patient.addContact().addRelationship().setText("FOO");
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
 
-		FhirHttpResponse status = ourServlet.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -286,7 +286,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 		patient.addContact().addRelationship().setText("FOO");
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
 
-		FhirHttpResponse status = ourServlet.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -310,7 +310,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 		patient.addIdentifier().setValue("002");
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
 
-		FhirHttpResponse status = ourServlet.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -334,7 +334,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 		patient.addIdentifier().setValue("002");
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
 
-		FhirHttpResponse status = ourServlet.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -358,7 +358,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 		patient.addIdentifier().setValue("002");
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
 
-		FhirHttpResponse status = ourServlet.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -382,7 +382,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 		patient.addIdentifier().setValue("002");
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
 
-		FhirHttpResponse status = ourServlet.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -398,7 +398,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 		patient.setGender(AdministrativeGender.MALE);
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
 
-		FhirHttpResponse status = ourServlet.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -414,7 +414,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 		myInterceptor.setFailOnSeverity(null);
 		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
 
-		FhirHttpResponse status = ourServlet.fhirRequest("/Patient/123").delete();
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient/123").delete();
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -427,7 +427,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
 
 		// This header caused a crash
-		FhirHttpResponse status = ourServlet.fhirRequest("/metadata")
+		HttpTestResponse status = ourServlet.fhirRequest("/metadata")
 			.withHeader("Content-Type", "application/xml+fhir")
 			.get();
 
@@ -439,7 +439,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 
 	@Test
 	void testSearch() {
-		FhirHttpResponse status = ourServlet.fhirRequest("/Patient?foo=bar").get();
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient?foo=bar").get();
 
 		ourLog.info("Response was:\n{}", status);
 

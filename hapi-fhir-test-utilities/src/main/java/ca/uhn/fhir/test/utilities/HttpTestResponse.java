@@ -19,35 +19,33 @@
  */
 package ca.uhn.fhir.test.utilities;
 
-import org.apache.http.Header;
-
-import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * The fully-consumed result of a request issued by {@link FhirHttpRequest}.
+ * The fully-consumed result of a request issued by {@link HttpTestRequest}.
  * <p>
- * The underlying Apache {@code CloseableHttpResponse} is closed before this object is
+ * The underlying HTTP response is closed by the {@link IHttpTestTransport} before this object is
  * returned, so the body and headers are captured eagerly. This means a test can hold on
  * to the response and make assertions about it without worrying about connection
  * lifecycle or leaking connections from the pool.
  * </p>
  */
-// Created by claude-opus-5
-public class FhirHttpResponse {
+// Created by claude-sonnet-5
+public class HttpTestResponse {
 
 	private final int myStatusCode;
 	private final String myReasonPhrase;
 	private final String myBody;
-	private final List<Header> myHeaders;
+	private final List<HeaderEntry> myHeaders;
 
-	FhirHttpResponse(int theStatusCode, String theReasonPhrase, String theBody, Header[] theHeaders) {
+	public HttpTestResponse(
+			int theStatusCode, String theReasonPhrase, String theBody, List<HeaderEntry> theHeaders) {
 		myStatusCode = theStatusCode;
 		myReasonPhrase = theReasonPhrase;
 		myBody = theBody;
-		myHeaders = List.of(theHeaders);
+		myHeaders = List.copyOf(theHeaders);
 	}
 
 	/**
@@ -58,7 +56,7 @@ public class FhirHttpResponse {
 	 * @param theExpectedStatusCode the HTTP status code the response is expected to have
 	 * @return this object, so that further assertions can be chained
 	 */
-	public FhirHttpResponse assertStatus(int theExpectedStatusCode) {
+	public HttpTestResponse assertStatus(int theExpectedStatusCode) {
 		assertThat(myStatusCode)
 				.as("Expected HTTP %s but was %s %s. Response body: %s", theExpectedStatusCode, myStatusCode,
 						myReasonPhrase, myBody)
@@ -87,8 +85,8 @@ public class FhirHttpResponse {
 	 */
 	public String getHeader(String theName) {
 		return myHeaders.stream()
-				.filter(t -> t.getName().equalsIgnoreCase(theName))
-				.map(Header::getValue)
+				.filter(t -> t.name().equalsIgnoreCase(theName))
+				.map(HeaderEntry::value)
 				.findFirst()
 				.orElse(null);
 	}
@@ -99,8 +97,8 @@ public class FhirHttpResponse {
 	 */
 	public List<String> getHeaders(String theName) {
 		return myHeaders.stream()
-				.filter(t -> t.getName().equalsIgnoreCase(theName))
-				.map(Header::getValue)
+				.filter(t -> t.name().equalsIgnoreCase(theName))
+				.map(HeaderEntry::value)
 				.toList();
 	}
 
@@ -108,13 +106,24 @@ public class FhirHttpResponse {
 	 * @return all response headers, in receipt order, as name/value pairs
 	 */
 	public List<HeaderEntry> getAllHeaders() {
-		return myHeaders.stream().map(t -> new HeaderEntry(t.getName(), t.getValue())).toList();
+		return myHeaders;
 	}
 
+	/**
+	 * Renders like a raw HTTP response: a status line, one {@literal Name: value} line per
+	 * header, then the body. Tests commonly assert on a specific header's value with
+	 * {@code assertThat(response.toString()).contains("X-My-Header: expected-value")}; that
+	 * only works if headers render as HTTP header lines rather than as a {@code List} dump.
+	 */
 	@Override
 	public String toString() {
-		return "HTTP " + myStatusCode + " " + myReasonPhrase + " headers=" + Arrays.toString(myHeaders.toArray())
-				+ " body=" + myBody;
+		StringBuilder builder = new StringBuilder();
+		builder.append("HTTP ").append(myStatusCode).append(' ').append(myReasonPhrase).append('\n');
+		for (HeaderEntry header : myHeaders) {
+			builder.append(header.name()).append(": ").append(header.value()).append('\n');
+		}
+		builder.append('\n').append(myBody);
+		return builder.toString();
 	}
 
 	/**

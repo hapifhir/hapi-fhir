@@ -25,7 +25,7 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.test.utilities.FhirHttpResponse;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * This class is not JPA-backed; it lives alongside {@link ca.uhn.fhir.jpa.provider.r4.AuthorizationInterceptorWriteResponseJpaR4Test},
- * the existing {@code FhirHttpRequest} consumer in this module, because {@code hapi-fhir-test-utilities}
+ * the existing {@code HttpTestRequest} consumer in this module, because {@code hapi-fhir-test-utilities}
  * cannot itself depend on a real FHIR structures JAR without creating a circular module dependency.
  */
 // Created by claude-sonnet-5
@@ -47,7 +47,7 @@ class RestfulServerExtensionTest {
 
 	@Test
 	void fhirRequest_get_targetsServerBaseUrl() {
-		FhirHttpResponse response = ourServer.fhirRequest("/Patient/123").get();
+		HttpTestResponse response = ourServer.fhirRequest("/Patient/123").get();
 
 		response.assertStatus(200);
 		assertThat(response.getBody()).contains("123");
@@ -58,7 +58,7 @@ class RestfulServerExtensionTest {
 		Patient patient = new Patient();
 		patient.setActive(true);
 
-		FhirHttpResponse response = ourServer.fhirRequest("/Patient").post(patient);
+		HttpTestResponse response = ourServer.fhirRequest("/Patient").post(patient);
 
 		response.assertStatus(201);
 	}

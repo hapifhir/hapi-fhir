@@ -7,7 +7,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.ResponseValidatingInterceptor;
-import ca.uhn.fhir.test.utilities.FhirHttpResponse;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.ResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.UrlUtil;
@@ -73,7 +73,7 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 
 		Mockito.doThrow(new NullPointerException("SOME MESSAGE")).when(module).validateResource(Mockito.any(IValidationContext.class));
 
-		FhirHttpResponse status = ourServlet.fhirRequest("/Patient?foo=bar").get();
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient?foo=bar").get();
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -98,7 +98,7 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 
 		Mockito.doThrow(NullPointerException.class).when(module).validateResource(Mockito.any(IValidationContext.class));
 
-		FhirHttpResponse status = ourServlet.fhirRequest("/Patient?foo=bar").get();
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient?foo=bar").get();
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -123,7 +123,7 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 
 		Mockito.doThrow(new InternalErrorException("FOO")).when(module).validateResource(Mockito.any(IValidationContext.class));
 
-		FhirHttpResponse status = ourServlet.fhirRequest("/Patient?foo=bar").get();
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient?foo=bar").get();
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -148,7 +148,7 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 
 		Mockito.doThrow(InternalErrorException.class).when(module).validateResource(Mockito.any(IValidationContext.class));
 
-		FhirHttpResponse status = ourServlet.fhirRequest("/Patient?foo=bar").get();
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient?foo=bar").get();
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -165,7 +165,7 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 		myInterceptor.setFailOnSeverity(null);
 		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
 
-		FhirHttpResponse status = ourServlet.fhirRequest("/Patient/123").delete();
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient/123").delete();
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -175,7 +175,7 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 
 	@Test
 	void testGraphQlRequestResponse_GET() {
-		FhirHttpResponse status = ourServlet.fhirRequest("/Patient/123/$graphql?query=" + UrlUtil.escapeUrlParam("{name}")).get();
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient/123/$graphql?query=" + UrlUtil.escapeUrlParam("{name}")).get();
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -186,7 +186,7 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 
 	@Test
 	void testGraphQlRequestResponse_POST() {
-		FhirHttpResponse status = ourServlet.fhirRequest("/Patient/123/$graphql").post("{\"query\": \"{name}\"}", Constants.CT_JSON);
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient/123/$graphql").post("{\"query\": \"{name}\"}", Constants.CT_JSON);
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -210,7 +210,7 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 		ourProvider.getProvider().setReturnResource(patient);
 
 		{
-			FhirHttpResponse status = ourServlet.fhirRequest("/Patient?foo=bar").get();
+			HttpTestResponse status = ourServlet.fhirRequest("/Patient?foo=bar").get();
 
 			ourLog.info("Response was:\n{}", status);
 
@@ -220,7 +220,7 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 		}
 		{
 			myInterceptor.setMaximumHeaderLength(100);
-			FhirHttpResponse status = ourServlet.fhirRequest("/Patient?foo=bar").get();
+			HttpTestResponse status = ourServlet.fhirRequest("/Patient?foo=bar").get();
 
 			ourLog.info("Response was:\n{}", status);
 
@@ -239,7 +239,7 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 		patient.setGender(AdministrativeGender.MALE);
 		ourProvider.getProvider().setReturnResource(patient);
 
-		FhirHttpResponse status = ourServlet.fhirRequest("/Patient?foo=bar").get();
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient?foo=bar").get();
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -256,7 +256,7 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 		patient.addContact().addRelationship().setText("FOO");
 		ourProvider.getProvider().setReturnResource(patient);
 
-		FhirHttpResponse status = ourServlet.fhirRequest("/Patient?foo=bar").get();
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient?foo=bar").get();
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -272,7 +272,7 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 		patient.setGender(AdministrativeGender.MALE);
 		ourProvider.getProvider().setReturnResource(patient);
 
-		FhirHttpResponse status = ourServlet.fhirRequest("/Patient?foo=bar").get();
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient?foo=bar").get();
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -291,7 +291,7 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 		patient.setGender(AdministrativeGender.MALE);
 		ourProvider.getProvider().setReturnResource(patient);
 
-		FhirHttpResponse status = ourServlet.fhirRequest("/Patient?foo=bar").get();
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient?foo=bar").get();
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -311,7 +311,7 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 		patient.addContact().addRelationship().setText("FOO");
 		ourProvider.getProvider().setReturnResource(patient);
 
-		FhirHttpResponse status = ourServlet.fhirRequest("/Patient?foo=bar").get();
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient?foo=bar").get();
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -330,7 +330,7 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 		patient.addContact().addRelationship().setText("FOO");
 		ourProvider.getProvider().setReturnResource(patient);
 
-		FhirHttpResponse status = ourServlet.fhirRequest("/Patient?foo=bar").get();
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient?foo=bar").get();
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -346,7 +346,7 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 		patient.setGender(AdministrativeGender.MALE);
 		ourProvider.getProvider().setReturnResource(patient);
 
-		FhirHttpResponse status = ourServlet.fhirRequest("/Patient?foo=bar").get();
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient?foo=bar").get();
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -361,7 +361,7 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 		myInterceptor.addExcludeOperationType(RestOperationTypeEnum.METADATA);
 		myInterceptor.setResponseHeaderValueNoIssues("No issues");
 
-		FhirHttpResponse status = ourServlet.fhirRequest("/metadata").get();
+		HttpTestResponse status = ourServlet.fhirRequest("/metadata").get();
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -376,7 +376,7 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 		myInterceptor.setResponseHeaderValueNoIssues("No issues");
 		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
 
-		FhirHttpResponse status = ourServlet.fhirRequest("/metadata?_pretty=true").get();
+		HttpTestResponse status = ourServlet.fhirRequest("/metadata?_pretty=true").get();
 		ourLog.info(status.getBody());
 
 		ourLog.info("Response was:\n{}", status);

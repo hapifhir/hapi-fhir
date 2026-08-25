@@ -25,7 +25,7 @@ import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.test.utilities.FhirHttpResponse;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
@@ -124,7 +124,7 @@ class ResponseHighlighterInterceptorTest {
 	 */
 	@Test
 	void testBinaryOperationHtmlResponseFromProvider() {
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient/html/$binaryOp")
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/html/$binaryOp")
 			.withHeader("Accept", "text/html")
 			.get();
 
@@ -136,7 +136,7 @@ class ResponseHighlighterInterceptorTest {
 
 	@Test
 	void testInvalidRequest() {
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient/html?_elements=Patient:foo")
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/html?_elements=Patient:foo")
 			.withHeader("Accept", "text/html")
 			.get();
 
@@ -147,7 +147,7 @@ class ResponseHighlighterInterceptorTest {
 
 	@Test
 	void testBinaryReadAcceptBrowser() {
-		FhirHttpResponse status = ourServer.fhirRequest("/Binary/foo")
+		HttpTestResponse status = ourServer.fhirRequest("/Binary/foo")
 			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
 			.withHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
 			.get();
@@ -163,7 +163,7 @@ class ResponseHighlighterInterceptorTest {
 	 */
 	@Test
 	void testBinaryReadHtmlResponseFromProvider() {
-		FhirHttpResponse status = ourServer.fhirRequest("/Binary/html")
+		HttpTestResponse status = ourServer.fhirRequest("/Binary/html")
 			.withHeader("Accept", "text/html")
 			.get();
 
@@ -175,7 +175,7 @@ class ResponseHighlighterInterceptorTest {
 
 	@Test
 	void testBinaryReadAcceptFhirJson() {
-		FhirHttpResponse status = ourServer.fhirRequest("/Binary/foo")
+		HttpTestResponse status = ourServer.fhirRequest("/Binary/foo")
 			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
 			.withHeader("Accept", Constants.CT_FHIR_JSON)
 			.get();
@@ -189,7 +189,7 @@ class ResponseHighlighterInterceptorTest {
 
 	@Test
 	void testBinaryReadAcceptMissing() {
-		FhirHttpResponse status = ourServer.fhirRequest("/Binary/foo").get();
+		HttpTestResponse status = ourServer.fhirRequest("/Binary/foo").get();
 
 		status.assertStatus(200);
 		assertEquals("foo", status.getHeader("content-type"));
@@ -310,7 +310,7 @@ class ResponseHighlighterInterceptorTest {
 
 	@Test
 	void testForceApplicationJson() {
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_format=application/json")
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/1?_format=application/json")
 			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
 			.get();
 
@@ -321,7 +321,7 @@ class ResponseHighlighterInterceptorTest {
 
 	@Test
 	void testForceApplicationJsonFhir() {
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_format=application/json+fhir")
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/1?_format=application/json+fhir")
 			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
 			.get();
 
@@ -332,7 +332,7 @@ class ResponseHighlighterInterceptorTest {
 
 	@Test
 	void testForceApplicationJsonPlusFhir() {
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_format=" + UrlUtil.escapeUrlParam("application/json+fhir"))
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/1?_format=" + UrlUtil.escapeUrlParam("application/json+fhir"))
 			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
 			.get();
 
@@ -343,7 +343,7 @@ class ResponseHighlighterInterceptorTest {
 
 	@Test
 	void testForceApplicationXml() {
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_format=application/xml")
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/1?_format=application/xml")
 			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
 			.get();
 
@@ -354,7 +354,7 @@ class ResponseHighlighterInterceptorTest {
 
 	@Test
 	void testForceApplicationXmlFhir() {
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_format=application/xml+fhir")
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/1?_format=application/xml+fhir")
 			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
 			.get();
 
@@ -365,7 +365,7 @@ class ResponseHighlighterInterceptorTest {
 
 	@Test
 	void testForceApplicationXmlPlusFhir() {
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_format=" + UrlUtil.escapeUrlParam("application/xml+fhir"))
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/1?_format=" + UrlUtil.escapeUrlParam("application/xml+fhir"))
 			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
 			.get();
 
@@ -376,7 +376,7 @@ class ResponseHighlighterInterceptorTest {
 
 	@Test
 	void testForceHtmlJson() {
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_format=html/json")
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/1?_format=html/json")
 			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
 			.get();
 		ourLog.info(status.getBody());
@@ -391,7 +391,7 @@ class ResponseHighlighterInterceptorTest {
 
 	@Test
 	void testForceHtmlTurtle() {
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_format=html/turtle")
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/1?_format=html/turtle")
 			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
 			.get();
 		ourLog.info(status.getBody());
@@ -406,7 +406,7 @@ class ResponseHighlighterInterceptorTest {
 
 	@Test
 	void testForceHtmlJsonWithAdditionalParts() {
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_format=" + UrlUtil.escapeUrlParam("html/json; fhirVersion=1.0"))
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/1?_format=" + UrlUtil.escapeUrlParam("html/json; fhirVersion=1.0"))
 			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
 			.get();
 
@@ -420,7 +420,7 @@ class ResponseHighlighterInterceptorTest {
 
 	@Test
 	void testForceHtmlXml() {
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_format=html/xml")
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/1?_format=html/xml")
 			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
 			.get();
 
@@ -433,7 +433,7 @@ class ResponseHighlighterInterceptorTest {
 
 	@Test
 	void testForceJson() {
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_format=json")
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/1?_format=json")
 			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
 			.get();
 
@@ -444,7 +444,7 @@ class ResponseHighlighterInterceptorTest {
 
 	@Test
 	void testForceResponseTime() {
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_format=html/json").get();
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/1?_format=html/json").get();
 		ourLog.info(status.getBody());
 		status.assertStatus(200);
 		assertEquals("text/html;charset=utf-8", status.getHeader("content-type").replace(" ", "").toLowerCase());
@@ -454,7 +454,7 @@ class ResponseHighlighterInterceptorTest {
 
 	@Test
 	void testGetInvalidResource() {
-		FhirHttpResponse status = ourServer.fhirRequest("/Foobar/123")
+		HttpTestResponse status = ourServer.fhirRequest("/Foobar/123")
 			.withHeader("Accept", "text/html")
 			.get();
 
@@ -467,7 +467,7 @@ class ResponseHighlighterInterceptorTest {
 
 	@Test
 	void testGetInvalidResourceNoAcceptHeader() {
-		FhirHttpResponse status = ourServer.fhirRequest("/Foobar/123").get();
+		HttpTestResponse status = ourServer.fhirRequest("/Foobar/123").get();
 
 		ourLog.info("Resp: {}", status.getBody());
 		status.assertStatus(404);
@@ -480,7 +480,7 @@ class ResponseHighlighterInterceptorTest {
 
 	@Test
 	void testGetRoot() {
-		FhirHttpResponse status = ourServer.fhirRequest("/")
+		HttpTestResponse status = ourServer.fhirRequest("/")
 			.withHeader("Accept", "text/html")
 			.get();
 
@@ -493,7 +493,7 @@ class ResponseHighlighterInterceptorTest {
 
 	@Test
 	void testHighlightGraphQLResponse() {
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient/A/$graphql?query=" + UrlUtil.escapeUrlParam("{name}"))
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/A/$graphql?query=" + UrlUtil.escapeUrlParam("{name}"))
 			.withHeader("Accept", "text/html")
 			.get();
 
@@ -506,7 +506,7 @@ class ResponseHighlighterInterceptorTest {
 
 	@Test
 	void testHighlightGraphQLResponseNonHighlighted() {
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient/A/$graphql?query=" + UrlUtil.escapeUrlParam("{name}"))
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/A/$graphql?query=" + UrlUtil.escapeUrlParam("{name}"))
 			.withHeader("Accept", "application/jon")
 			.get();
 
@@ -555,7 +555,7 @@ class ResponseHighlighterInterceptorTest {
 		ourServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME, outgoingResponseInterceptor);
 		try {
 
-			FhirHttpResponse status = ourServer.fhirRequest("/Foobar/123")
+			HttpTestResponse status = ourServer.fhirRequest("/Foobar/123")
 				.withHeader("Accept", "text/html")
 				.get();
 
@@ -776,7 +776,7 @@ class ResponseHighlighterInterceptorTest {
 	void testPrettyPrintDefaultsToTrue() {
 		ourServer.setDefaultPrettyPrint(false);
 
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1")
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/1")
 			.withHeader("Accept", "text/html")
 			.get();
 
@@ -792,7 +792,7 @@ class ResponseHighlighterInterceptorTest {
 	void testPrettyPrintDefaultsToTrueWithExplicitFalse() {
 		ourServer.setDefaultPrettyPrint(false);
 
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_pretty=false")
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/1?_pretty=false")
 			.withHeader("Accept", "text/html")
 			.get();
 
@@ -808,7 +808,7 @@ class ResponseHighlighterInterceptorTest {
 	void testPrettyPrintDefaultsToTrueWithExplicitTrue() {
 		ourServer.setDefaultPrettyPrint(false);
 
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_pretty=true")
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/1?_pretty=true")
 			.withHeader("Accept", "text/html")
 			.get();
 
@@ -819,7 +819,7 @@ class ResponseHighlighterInterceptorTest {
 
 	@Test
 	void testSearchWithSummaryParam() {
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient?_query=searchWithWildcardRetVal&_summary=count")
+		HttpTestResponse status = ourServer.fhirRequest("/Patient?_query=searchWithWildcardRetVal&_summary=count")
 			.withHeader("Accept", "html")
 			.get();
 
@@ -833,7 +833,7 @@ class ResponseHighlighterInterceptorTest {
 		ourInterceptor.setShowRequestHeaders(false);
 		ourInterceptor.setShowResponseHeaders(false);
 
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_format=html/json").get();
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/1?_format=html/json").get();
 
 		ourLog.info(status.getBody());
 		status.assertStatus(200);
@@ -847,7 +847,7 @@ class ResponseHighlighterInterceptorTest {
 		ourInterceptor.setShowRequestHeaders(true);
 		ourInterceptor.setShowResponseHeaders(false);
 
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_format=html/json").get();
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/1?_format=html/json").get();
 
 		ourLog.info(status.getBody());
 		status.assertStatus(200);
@@ -861,7 +861,7 @@ class ResponseHighlighterInterceptorTest {
 		ourInterceptor.setShowRequestHeaders(true);
 		ourInterceptor.setShowResponseHeaders(true);
 
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_format=html/json").get();
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/1?_format=html/json").get();
 
 		ourLog.info(status.getBody());
 		status.assertStatus(200);
@@ -874,7 +874,7 @@ class ResponseHighlighterInterceptorTest {
 	void testShowResponse() {
 		ourInterceptor.setShowResponseHeaders(true);
 
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient/1?_format=html/json").get();
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/1?_format=html/json").get();
 
 		ourLog.info(status.getBody());
 		status.assertStatus(200);
@@ -890,7 +890,7 @@ class ResponseHighlighterInterceptorTest {
 		patient.getText().setDivAsString("<div><table><thead><tr><th>Header1</th><th>Header2</th></tr></thead><tr><td>A cell</td><td>A cell</td></tr><tr><td>A cell 2</td><td>A cell 2</td></tr></table></div>");
 		ourPatientProvider.myNextPatientOpResponse = patient;
 
-		FhirHttpResponse response = ourServer.fhirRequest("/Patient/1/$patientOp?_format=html/json").get();
+		HttpTestResponse response = ourServer.fhirRequest("/Patient/1/$patientOp?_format=html/json").get();
 		assertThat(response.getBody()).contains("<h1>Narrative</h1>");
 		assertThat(response.getBody()).contains("<thead><tr><th>Header1</th><th>Header2</th></tr></thead>");
 
@@ -906,7 +906,7 @@ class ResponseHighlighterInterceptorTest {
 
 		ourInterceptor.setShowNarrative(false);
 
-		FhirHttpResponse response = ourServer.fhirRequest("/Patient/1/$patientOp?_format=html/json").get();
+		HttpTestResponse response = ourServer.fhirRequest("/Patient/1/$patientOp?_format=html/json").get();
 		assertThat(response.getBody()).doesNotContain("<h1>Narrative</h1>");
 		assertThat(response.getBody()).doesNotContain("<thead><tr><th>Header1</th><th>Header2</th></tr></thead>");
 
@@ -919,7 +919,7 @@ class ResponseHighlighterInterceptorTest {
 		patient.getText().setDivAsString("<div><table onclick=\"foo();\"><thead><tr><th>Header1</th><th>Header2</th></tr></thead><tr><td>A cell</td><td>A cell</td></tr><tr><td>A cell 2</td><td>A cell 2</td></tr></table></div>");
 		ourPatientProvider.myNextPatientOpResponse = patient;
 
-		FhirHttpResponse response = ourServer.fhirRequest("/Patient/1/$patientOp?_format=html/json").get();
+		HttpTestResponse response = ourServer.fhirRequest("/Patient/1/$patientOp?_format=html/json").get();
 		assertThat(response.getBody()).contains("<table><thead><tr><th>Header1</th>");
 
 	}
