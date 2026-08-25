@@ -32,9 +32,8 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.Validate;
+import ca.uhn.fhir.test.utilities.TestHttpClientFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.ee10.servlet.FilterHolder;
 import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHolder;
@@ -63,7 +62,6 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
@@ -254,10 +252,7 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 
 		myPort = JettyUtil.getPortForStartedServer(myServer);
 		ourLog.info("Server has started on port {}", myPort);
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		myHttpClient = builder.build();
+		myHttpClient = TestHttpClientFactory.create();
 	}
 
 	private Filter requestCapturingFilter() {

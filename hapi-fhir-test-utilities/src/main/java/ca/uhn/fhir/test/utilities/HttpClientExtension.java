@@ -20,19 +20,14 @@
 package ca.uhn.fhir.test.utilities;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.apache.commons.lang3.time.DateUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.config.SocketConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * A JUnit extension owning a pooled Apache HttpClient 4.x client for the duration of a test.
@@ -64,27 +59,7 @@ public class HttpClientExtension implements BeforeEachCallback, AfterEachCallbac
 	}
 
 	public void initialize() {
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		connectionManager.setMaxTotal(99);
-		connectionManager.setDefaultMaxPerRoute(99);
-
-		SocketConfig socketConfig = SocketConfig
-			.copy(SocketConfig.DEFAULT)
-			.setSoTimeout((int) (30 * DateUtils.MILLIS_PER_SECOND))
-			.build();
-		connectionManager.setDefaultSocketConfig(socketConfig);
-
-		HttpClientBuilder builder = HttpClientBuilder
-			.create()
-			.setConnectionManager(connectionManager)
-			.setMaxConnPerRoute(99);
-
-		if (myDontFollowRedirects) {
-			builder.disableRedirectHandling();
-		}
-
-		myClient = builder
-			.build();
+		myClient = TestHttpClientFactory.create(!myDontFollowRedirects);
 	}
 
 	@Override
