@@ -13,7 +13,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.ResponseValidatingInterceptor;
-import ca.uhn.fhir.test.utilities.FhirHttpResponse;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.IValidationContext;
@@ -77,7 +77,7 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 
 		Mockito.doThrow(new NullPointerException("SOME MESSAGE")).when(module).validateResource(Mockito.any(IValidationContext.class));
 
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient?foo=bar").get();
+		HttpTestResponse status = ourServer.fhirRequest("/Patient?foo=bar").get();
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -102,7 +102,7 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 
 		Mockito.doThrow(NullPointerException.class).when(module).validateResource(Mockito.any(IValidationContext.class));
 
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient?foo=bar").get();
+		HttpTestResponse status = ourServer.fhirRequest("/Patient?foo=bar").get();
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -127,7 +127,7 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 
 		Mockito.doThrow(new InternalErrorException("FOO")).when(module).validateResource(Mockito.any(IValidationContext.class));
 
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient?foo=bar").get();
+		HttpTestResponse status = ourServer.fhirRequest("/Patient?foo=bar").get();
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -152,7 +152,7 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 
 		Mockito.doThrow(InternalErrorException.class).when(module).validateResource(Mockito.any(IValidationContext.class));
 
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient?foo=bar").get();
+		HttpTestResponse status = ourServer.fhirRequest("/Patient?foo=bar").get();
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -169,7 +169,7 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 		myInterceptor.setFailOnSeverity(null);
 		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
 
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient/123").delete();
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/123").delete();
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -193,7 +193,7 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 		myReturnResource = patient;
 
 		{
-			FhirHttpResponse status = ourServer.fhirRequest("/Patient?foo=bar").get();
+			HttpTestResponse status = ourServer.fhirRequest("/Patient?foo=bar").get();
 
 			ourLog.info("Response was:\n{}", status);
 
@@ -203,7 +203,7 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 		}
 		{
 			myInterceptor.setMaximumHeaderLength(100);
-			FhirHttpResponse status = ourServer.fhirRequest("/Patient?foo=bar").get();
+			HttpTestResponse status = ourServer.fhirRequest("/Patient?foo=bar").get();
 
 			ourLog.info("Response was:\n{}", status);
 
@@ -221,7 +221,7 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 		patient.setGender(AdministrativeGender.MALE);
 		myReturnResource = patient;
 
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient?foo=bar").get();
+		HttpTestResponse status = ourServer.fhirRequest("/Patient?foo=bar").get();
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -241,7 +241,7 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 		patient.addContact().addRelationship().setText("FOO");
 		myReturnResource = patient;
 
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient?foo=bar").get();
+		HttpTestResponse status = ourServer.fhirRequest("/Patient?foo=bar").get();
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -256,7 +256,7 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 		patient.setGender(AdministrativeGender.MALE);
 		myReturnResource = patient;
 
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient?foo=bar").get();
+		HttpTestResponse status = ourServer.fhirRequest("/Patient?foo=bar").get();
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -274,7 +274,7 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 		patient.setGender(AdministrativeGender.MALE);
 		myReturnResource = patient;
 
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient?foo=bar").get();
+		HttpTestResponse status = ourServer.fhirRequest("/Patient?foo=bar").get();
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -294,7 +294,7 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 		patient.addContact().addRelationship().setText("FOO");
 		myReturnResource = patient;
 
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient?foo=bar").get();
+		HttpTestResponse status = ourServer.fhirRequest("/Patient?foo=bar").get();
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -313,7 +313,7 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 		patient.addContact().addRelationship().setText("FOO");
 		myReturnResource = patient;
 
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient?foo=bar").get();
+		HttpTestResponse status = ourServer.fhirRequest("/Patient?foo=bar").get();
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -328,7 +328,7 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 		patient.setGender(AdministrativeGender.MALE);
 		myReturnResource = patient;
 
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient?foo=bar").get();
+		HttpTestResponse status = ourServer.fhirRequest("/Patient?foo=bar").get();
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -343,7 +343,7 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 		myInterceptor.addExcludeOperationType(RestOperationTypeEnum.METADATA);
 		myInterceptor.setResponseHeaderValueNoIssues("No issues");
 
-		FhirHttpResponse status = ourServer.fhirRequest("/metadata").get();
+		HttpTestResponse status = ourServer.fhirRequest("/metadata").get();
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -358,7 +358,7 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 		myInterceptor.setResponseHeaderValueNoIssues("No issues");
 		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
 
-		FhirHttpResponse status = ourServer.fhirRequest("/metadata?_pretty=true").get();
+		HttpTestResponse status = ourServer.fhirRequest("/metadata?_pretty=true").get();
 		ourLog.info(status.getBody());
 
 		ourLog.info("Response was:\n{}", status);

@@ -17,7 +17,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
-import ca.uhn.fhir.test.utilities.FhirHttpResponse;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.IValidationContext;
@@ -79,7 +79,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 		patient.addContact().addRelationship().setText("FOO");
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(patient);
 
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_JSON);
+		HttpTestResponse status = ourServer.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_JSON);
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -98,7 +98,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 		patient.addContact().addRelationship().setText("FOO");
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(patient);
 
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_JSON);
+		HttpTestResponse status = ourServer.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_JSON);
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -114,7 +114,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 		patient.setGender(AdministrativeGender.MALE);
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(patient);
 
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_JSON);
+		HttpTestResponse status = ourServer.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_JSON);
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -132,7 +132,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 		patient.setGender(AdministrativeGender.MALE);
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(patient);
 
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_JSON);
+		HttpTestResponse status = ourServer.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_JSON);
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -153,7 +153,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 		patient.addContact().addRelationship().setText("FOO");
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
 
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
+		HttpTestResponse status = ourServer.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -171,7 +171,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 		patient.addContact().addRelationship().setText("FOO");
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
 
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
+		HttpTestResponse status = ourServer.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -191,7 +191,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 		patient.addContact().addRelationship().setText("FOO");
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
 
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
+		HttpTestResponse status = ourServer.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -216,7 +216,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 		patient.addIdentifier().setValue("002");
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
 
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
+		HttpTestResponse status = ourServer.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -240,7 +240,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 		patient.addIdentifier().setValue("002");
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
 
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
+		HttpTestResponse status = ourServer.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -264,7 +264,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 		patient.addIdentifier().setValue("002");
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
 
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
+		HttpTestResponse status = ourServer.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -288,7 +288,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 		patient.addIdentifier().setValue("002");
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
 
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
+		HttpTestResponse status = ourServer.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -303,7 +303,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 		patient.setGender(AdministrativeGender.MALE);
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
 
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
+		HttpTestResponse status = ourServer.fhirRequest("/Patient").post(encoded, Constants.CT_FHIR_XML);
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -319,7 +319,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 		myInterceptor.setFailOnSeverity(null);
 		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
 
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient/123").delete();
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/123").delete();
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -332,7 +332,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 		myInterceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
 
 		// This header caused a crash
-		FhirHttpResponse status = ourServer.fhirRequest("/metadata")
+		HttpTestResponse status = ourServer.fhirRequest("/metadata")
 			.withHeader("Content-Type", "application/xml+fhir")
 			.get();
 
@@ -344,7 +344,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 
 	@Test
 	void testSearch() {
-		FhirHttpResponse status = ourServer.fhirRequest("/Patient?foo=bar").get();
+		HttpTestResponse status = ourServer.fhirRequest("/Patient?foo=bar").get();
 
 		ourLog.info("Response was:\n{}", status);
 
