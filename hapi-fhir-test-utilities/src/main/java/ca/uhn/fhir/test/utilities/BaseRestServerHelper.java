@@ -22,6 +22,8 @@ package ca.uhn.fhir.test.utilities;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
@@ -59,6 +61,7 @@ public abstract class BaseRestServerHelper {
 	protected String myBase;
 	protected String mySecureBase;
 	protected IGenericClient myClient;
+	private CloseableHttpClient myHttpClient;
 
 	@RegisterExtension
 	public TlsAuthenticationTestHelper myTlsAuthenticationTestHelper = new TlsAuthenticationTestHelper();
@@ -73,6 +76,27 @@ public abstract class BaseRestServerHelper {
 
 	public IGenericClient getClient() {
 		return myClient;
+	}
+
+	/**
+	 * Starts building a raw HTTP request against this server's plain-HTTP base URL, using this
+	 * helper's {@link FhirContext} to encode any FHIR resource bodies. This is the counterpart to
+	 * {@link #getClient()} for tests that need to assert on the wire response — status, headers,
+	 * body — rather than on a parsed resource.
+	 * <p>
+	 * The underlying HTTP client is created on first use and closed by {@link #stop()}. Note that
+	 * this targets {@link #getBase()}; there is no transport for {@link #getSecureBase()} yet, so
+	 * TLS tests still build their own client.
+	 * </p>
+	 *
+	 * @param thePath the path below the server base URL, beginning with a slash
+	 */
+	// Created by claude-opus-5
+	public HttpTestRequest fhirRequest(String thePath) {
+		if (myHttpClient == null) {
+			myHttpClient = HttpClientBuilder.create().build();
+		}
+		return HttpTestRequest.to(myHttpClient, myFhirContext, getBase() + thePath);
 	}
 
 	protected void startServer(Servlet theServlet) throws Exception {
@@ -151,6 +175,10 @@ public abstract class BaseRestServerHelper {
 	}
 
 	public void stop() throws Exception {
+		if (myHttpClient != null) {
+			myHttpClient.close();
+			myHttpClient = null;
+		}
 		JettyUtil.closeServer(myListenerServer);
 	}
 

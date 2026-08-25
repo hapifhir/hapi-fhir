@@ -65,7 +65,17 @@ public interface IHttpTestTransport {
 	 * @param body the request body, or {@literal null} for a request with no body
 	 * @param contentType the MIME type of {@code body} (e.g. {@literal "text/plain"}), or
 	 *    {@literal null} when there is no body. A UTF-8 charset is assumed for textual types.
+	 * @param followRedirects whether the transport should follow a 3xx, or {@literal null} to leave
+	 *    the decision to whatever the underlying client is configured with. Clients disagree on the
+	 *    default — hapi's {@link HttpClientExtension} follows redirects, CDR's
+	 *    {@code SmileTestHttpClient} does not — so a test that cares should say so rather than
+	 *    inherit it. See {@link HttpTestRequest#followRedirects(boolean)}.
 	 */
 	record Request(
-			String method, String url, List<HttpTestResponse.HeaderEntry> headers, byte[] body, String contentType) {}
+			String method,
+			String url,
+			List<HttpTestResponse.HeaderEntry> headers,
+			byte[] body,
+			String contentType,
+			Boolean followRedirects) {}
 }

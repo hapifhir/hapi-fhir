@@ -33,6 +33,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 // Created by claude-sonnet-5
 class FhirHttpTransportContractTest {
 
+	private static final byte[] PNG_MAGIC = new byte[] {(byte) 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A};
+
 	private static final String APACHE_4 = "ApacheHttp4";
 	private static final String APACHE_5 = "ApacheHttp5";
 
@@ -160,6 +162,43 @@ class FhirHttpTransportContractTest {
 		assertThat(response.getBody()).isEmpty();
 	}
 
+	@ParameterizedTest
+	@ValueSource(strings = {APACHE_4, APACHE_5})
+	void getBodyBytes_binaryResponse_returnsBytesUnaltered(String theTransport) {
+		HttpTestResponse response = request(theTransport, "/foo?binary=true").get();
+
+		assertThat(response.getBodyBytes()).containsExactly(PNG_MAGIC);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {APACHE_4, APACHE_5})
+	void contentType_responseHasCharsetParameter_stripsIt(String theTransport) {
+		HttpTestResponse response = request(theTransport, "/foo").get();
+
+		assertThat(response.getHeader("Content-Type")).startsWith("text/plain");
+		assertThat(response.contentType()).isEqualTo("text/plain");
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {APACHE_4, APACHE_5})
+	void withoutRedirects_serverRedirects_returnsTheRedirectItself(String theTransport) {
+		HttpTestResponse response =
+				request(theTransport, "/foo?redirect=true").withoutRedirects().get();
+
+		assertThat(response.getStatusCode()).isEqualTo(302);
+		assertThat(response.getHeader("Location")).isNotNull();
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {APACHE_4, APACHE_5})
+	void followRedirects_serverRedirects_followsToTheDestination(String theTransport) {
+		HttpTestResponse response =
+				request(theTransport, "/foo?redirect=true").followRedirects(true).get();
+
+		assertThat(response.getStatusCode()).isEqualTo(200);
+		assertThat(response.getBody()).contains("method=GET");
+	}
+
 	/**
 	 * Resolved per-test rather than up front, so that the 4.x client — which the server extension
 	 * only creates once it has started — is read after {@code beforeAll} has run.
@@ -180,11 +219,23 @@ class FhirHttpTransportContractTest {
 
 		@Override
 		protected void service(HttpServletRequest theRequest, HttpServletResponse theResponse) throws IOException {
+			if (theRequest.getParameter("redirect") != null) {
+				theResponse.setStatus(302);
+				theResponse.addHeader("Location", theRequest.getRequestURL().toString());
+				return;
+			}
+
 			String statusParameter = theRequest.getParameter("status");
 			int status = statusParameter != null ? Integer.parseInt(statusParameter) : 200;
 			theResponse.setStatus(status);
 			theResponse.addHeader("X-Echo-Header", "echo-value");
 			if (status == 204) {
+				return;
+			}
+
+			if (theRequest.getParameter("binary") != null) {
+				theResponse.setContentType("image/png");
+				theResponse.getOutputStream().write(PNG_MAGIC);
 				return;
 			}
 

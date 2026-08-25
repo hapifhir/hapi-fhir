@@ -66,6 +66,7 @@ public class HttpTestRequest {
 	private final FhirContext myFhirContext;
 	private final String myUrl;
 	private final List<HttpTestResponse.HeaderEntry> myHeaders = new ArrayList<>();
+	private Boolean myFollowRedirects;
 
 	private HttpTestRequest(IHttpTestTransport theTransport, FhirContext theFhirContext, String theUrl) {
 		Validate.notNull(theTransport, "theTransport must not be null");
@@ -141,6 +142,30 @@ public class HttpTestRequest {
 	public HttpTestRequest withHeader(String theName, String theValue) {
 		myHeaders.add(new HttpTestResponse.HeaderEntry(theName, theValue));
 		return this;
+	}
+
+	/**
+	 * Says explicitly whether a {@literal 3xx} should be followed, instead of inheriting whatever
+	 * the underlying client happens to be configured with. Clients disagree: hapi's
+	 * {@link HttpClientExtension} follows redirects by default, CDR's {@code SmileTestHttpClient}
+	 * disables them. A test that asserts on a {@literal Location} header, or on the content of the
+	 * page a redirect leads to, should state which it wants.
+	 *
+	 * @param theFollowRedirects {@literal true} to follow, {@literal false} to return the 3xx itself
+	 */
+	// Created by claude-opus-5
+	public HttpTestRequest followRedirects(boolean theFollowRedirects) {
+		myFollowRedirects = theFollowRedirects;
+		return this;
+	}
+
+	/**
+	 * Shorthand for {@code followRedirects(false)} — the common case, where a test wants to assert
+	 * on the redirect response rather than on its destination.
+	 */
+	// Created by claude-opus-5
+	public HttpTestRequest withoutRedirects() {
+		return followRedirects(false);
 	}
 
 	/**
@@ -272,8 +297,8 @@ public class HttpTestRequest {
 	 * @param theContentType the MIME type of {@code theBody}
 	 */
 	public HttpTestResponse method(String theMethod, byte[] theBody, String theContentType) {
-		return myTransport.execute(
-				new IHttpTestTransport.Request(theMethod, myUrl, myHeaders, theBody, theContentType));
+		return myTransport.execute(new IHttpTestTransport.Request(
+				theMethod, myUrl, myHeaders, theBody, theContentType, myFollowRedirects));
 	}
 
 	private byte[] encodeResource(IBaseResource theBody) {

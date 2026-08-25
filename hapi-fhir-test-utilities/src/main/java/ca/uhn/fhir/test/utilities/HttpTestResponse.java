@@ -19,7 +19,9 @@
  */
 package ca.uhn.fhir.test.utilities;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,21 +33,46 @@ import static org.assertj.core.api.Assertions.assertThat;
  * to the response and make assertions about it without worrying about connection
  * lifecycle or leaking connections from the pool.
  * </p>
+ * <p>
+ * The body is held as bytes rather than as a String, so that a response carrying a binary payload
+ * (a {@literal Binary} resource, an image, gzipped NDJSON) survives intact. {@link #getBody()}
+ * decodes those bytes as UTF-8 for the common textual case; {@link #getBodyBytes()} hands back the
+ * bytes themselves.
+ * </p>
  */
 // Created by claude-sonnet-5
 public class HttpTestResponse {
 
 	private final int myStatusCode;
 	private final String myReasonPhrase;
-	private final String myBody;
+	private final byte[] myBody;
 	private final List<HeaderEntry> myHeaders;
 
+	/**
+	 * @param theBody the response body, or {@literal null} for a response with no body
+	 */
+	// Created by claude-opus-5
 	public HttpTestResponse(
-			int theStatusCode, String theReasonPhrase, String theBody, List<HeaderEntry> theHeaders) {
+			int theStatusCode, String theReasonPhrase, byte[] theBody, List<HeaderEntry> theHeaders) {
 		myStatusCode = theStatusCode;
 		myReasonPhrase = theReasonPhrase;
-		myBody = theBody;
+		myBody = theBody == null ? new byte[0] : theBody.clone();
 		myHeaders = List.copyOf(theHeaders);
+	}
+
+	/**
+	 * Convenience for a response whose body is known to be text; the body is stored as its UTF-8
+	 * encoding.
+	 *
+	 * @see #HttpTestResponse(int, String, byte[], List)
+	 */
+	public HttpTestResponse(
+			int theStatusCode, String theReasonPhrase, String theBody, List<HeaderEntry> theHeaders) {
+		this(
+				theStatusCode,
+				theReasonPhrase,
+				theBody == null ? null : theBody.getBytes(StandardCharsets.UTF_8),
+				theHeaders);
 	}
 
 	/**
@@ -59,7 +86,7 @@ public class HttpTestResponse {
 	public HttpTestResponse assertStatus(int theExpectedStatusCode) {
 		assertThat(myStatusCode)
 				.as("Expected HTTP %s but was %s %s. Response body: %s", theExpectedStatusCode, myStatusCode,
-						myReasonPhrase, myBody)
+						myReasonPhrase, getBody())
 				.isEqualTo(theExpectedStatusCode);
 		return this;
 	}
@@ -73,10 +100,41 @@ public class HttpTestResponse {
 	}
 
 	/**
-	 * @return the response body as a string, or an empty string if the response had no body
+	 * @return the response body decoded as UTF-8, or an empty string if the response had no body.
+	 *    Use {@link #getBodyBytes()} for a payload that is not UTF-8 text.
 	 */
 	public String getBody() {
-		return myBody;
+		return new String(myBody, StandardCharsets.UTF_8);
+	}
+
+	/**
+	 * @return the raw response body bytes, or an empty array if the response had no body. Use this
+	 *    rather than {@link #getBody()} whenever the payload is binary — decoding those bytes as
+	 *    UTF-8 and re-encoding them does not round-trip.
+	 */
+	// Created by claude-opus-5
+	public byte[] getBodyBytes() {
+		return myBody.clone();
+	}
+
+	/**
+	 * The response's MIME type with any parameters removed and the result lower-cased, so that
+	 * {@literal "text/html; charset=UTF-8"} and {@literal "text/html"} compare equal. Tests almost
+	 * always want to assert on the type alone rather than on whatever charset the server chose to
+	 * append.
+	 *
+	 * @return the {@literal Content-Type} MIME type, or {@literal null} if the response had no
+	 *    {@literal Content-Type} header
+	 */
+	// Created by claude-opus-5
+	public String contentType() {
+		String header = getHeader("Content-Type");
+		if (header == null) {
+			return null;
+		}
+		int separator = header.indexOf(';');
+		String mimeType = separator == -1 ? header : header.substring(0, separator);
+		return mimeType.trim().toLowerCase(Locale.ROOT);
 	}
 
 	/**
@@ -122,7 +180,7 @@ public class HttpTestResponse {
 		for (HeaderEntry header : myHeaders) {
 			builder.append(header.name()).append(": ").append(header.value()).append('\n');
 		}
-		builder.append('\n').append(myBody);
+		builder.append('\n').append(getBody());
 		return builder.toString();
 	}
 

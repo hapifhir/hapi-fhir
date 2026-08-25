@@ -26,7 +26,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -36,7 +36,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
@@ -64,12 +63,17 @@ class ApacheHttp4TestTransport implements IHttpTestTransport {
 
 	@Override
 	public HttpTestResponse execute(Request theRequest) {
-		HttpUriRequest request = toApacheRequest(theRequest);
+		HttpRequestBase request = toApacheRequest(theRequest);
 		theRequest.headers().forEach(header -> request.addHeader(header.name(), header.value()));
+		if (theRequest.followRedirects() != null) {
+			request.setConfig(RequestConfig.custom()
+					.setRedirectsEnabled(theRequest.followRedirects())
+					.build());
+		}
 
 		try (CloseableHttpResponse response = myClient.execute(request)) {
 			HttpEntity entity = response.getEntity();
-			String body = entity == null ? "" : IOUtils.toString(entity.getContent(), StandardCharsets.UTF_8);
+			byte[] body = entity == null ? new byte[0] : IOUtils.toByteArray(entity.getContent());
 			HttpTestResponse retVal = new HttpTestResponse(
 					response.getStatusLine().getStatusCode(),
 					response.getStatusLine().getReasonPhrase(),
@@ -82,7 +86,7 @@ class ApacheHttp4TestTransport implements IHttpTestTransport {
 		}
 	}
 
-	private HttpUriRequest toApacheRequest(Request theRequest) {
+	private HttpRequestBase toApacheRequest(Request theRequest) {
 		if (theRequest.body() == null) {
 			return new BodylessRequest(theRequest.method(), theRequest.url());
 		}

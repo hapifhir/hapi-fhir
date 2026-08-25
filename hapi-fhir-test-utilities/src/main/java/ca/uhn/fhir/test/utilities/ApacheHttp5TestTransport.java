@@ -22,6 +22,7 @@ package ca.uhn.fhir.test.utilities;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.Header;
@@ -33,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
@@ -69,6 +69,11 @@ class ApacheHttp5TestTransport implements IHttpTestTransport {
 	public HttpTestResponse execute(Request theRequest) {
 		HttpUriRequestBase request = new HttpUriRequestBase(theRequest.method(), URI.create(theRequest.url()));
 		theRequest.headers().forEach(header -> request.addHeader(header.name(), header.value()));
+		if (theRequest.followRedirects() != null) {
+			request.setConfig(RequestConfig.custom()
+					.setRedirectsEnabled(theRequest.followRedirects())
+					.build());
+		}
 		if (theRequest.body() != null) {
 			request.setEntity(new ByteArrayEntity(theRequest.body(), contentType(theRequest.contentType())));
 		}
@@ -77,7 +82,7 @@ class ApacheHttp5TestTransport implements IHttpTestTransport {
 			// The response-handler form guarantees the response is closed before it returns.
 			HttpTestResponse retVal = myClient.execute(request, response -> {
 				HttpEntity entity = response.getEntity();
-				String body = entity == null ? "" : IOUtils.toString(entity.getContent(), StandardCharsets.UTF_8);
+				byte[] body = entity == null ? new byte[0] : IOUtils.toByteArray(entity.getContent());
 				return new HttpTestResponse(
 						response.getCode(),
 						response.getReasonPhrase(),
