@@ -29,6 +29,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * A fluent builder for issuing HTTP requests against a test server and making assertions
@@ -197,7 +198,7 @@ public class HttpTestRequest {
 	 * @param theContentType the MIME type, e.g. {@literal "text/plain"}
 	 */
 	public HttpTestResponse post(String theBody, String theContentType) {
-		return method("POST", theBody.getBytes(StandardCharsets.UTF_8), theContentType);
+		return method("POST", theBody.getBytes(StandardCharsets.UTF_8), withUtf8Charset(theContentType));
 	}
 
 	/**
@@ -224,7 +225,7 @@ public class HttpTestRequest {
 	 * @param theContentType the MIME type, e.g. {@literal "text/plain"}
 	 */
 	public HttpTestResponse put(String theBody, String theContentType) {
-		return method("PUT", theBody.getBytes(StandardCharsets.UTF_8), theContentType);
+		return method("PUT", theBody.getBytes(StandardCharsets.UTF_8), withUtf8Charset(theContentType));
 	}
 
 	/**
@@ -249,7 +250,7 @@ public class HttpTestRequest {
 	 * @param theContentType the MIME type, e.g. {@literal "application/json-patch+json"}
 	 */
 	public HttpTestResponse patch(String theBody, String theContentType) {
-		return method("PATCH", theBody.getBytes(StandardCharsets.UTF_8), theContentType);
+		return method("PATCH", theBody.getBytes(StandardCharsets.UTF_8), withUtf8Charset(theContentType));
 	}
 
 	/**
@@ -278,5 +279,18 @@ public class HttpTestRequest {
 	private byte[] encodeResource(IBaseResource theBody) {
 		Validate.notNull(myFhirContext, "A FhirContext is required in order to send a resource body");
 		return myFhirContext.newJsonParser().encodeResourceToString(theBody).getBytes(StandardCharsets.UTF_8);
+	}
+
+	/**
+	 * The {@code post(String, ...)}/{@code put(String, ...)}/{@code patch(String, ...)} overloads
+	 * encode their body as UTF-8, so the MIME type they send needs a matching charset unless the
+	 * caller already specified one. This is deliberately not applied to the {@code byte[]} overloads,
+	 * where the caller controls encoding (or the payload is binary and has none).
+	 */
+	private static String withUtf8Charset(String theMimeType) {
+		if (theMimeType.toLowerCase(Locale.ROOT).contains("charset")) {
+			return theMimeType;
+		}
+		return theMimeType + "; charset=" + StandardCharsets.UTF_8.name();
 	}
 }

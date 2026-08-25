@@ -93,7 +93,7 @@ class ApacheHttp4TestTransport implements IHttpTestTransport {
 	}
 
 	private static ContentType contentType(String theMimeType) {
-		return theMimeType == null ? null : ContentType.create(theMimeType, StandardCharsets.UTF_8);
+		return theMimeType == null ? null : ContentType.parse(theMimeType);
 	}
 
 	private static List<HttpTestResponse.HeaderEntry> toHeaderEntries(Header[] theHeaders) {
