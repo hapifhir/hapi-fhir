@@ -8,6 +8,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.core5.util.TimeValue;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -28,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * and nothing else.
  * </p>
  */
-// Created by claude-opus-5
+// Created by claude-sonnet-5
 class FhirHttpTransportContractTest {
 
 	private static final String APACHE_4 = "ApacheHttp4";
@@ -37,7 +39,17 @@ class FhirHttpTransportContractTest {
 	@RegisterExtension
 	private static final HttpServletExtension ourServer = new HttpServletExtension().withServlet(new EchoServlet());
 
-	private static final CloseableHttpClient ourHttp5Client = HttpClients.createDefault();
+	/**
+	 * {@code createDefault()}'s pool trusts a pooled connection is still alive without checking,
+	 * which races against the embedded server closing it — HttpClient5 tests reused a dead
+	 * connection often enough to see intermittent {@code NoHttpResponseException} here. Validating
+	 * on every reuse costs a non-blocking poll per request and closes that race.
+	 */
+	private static final CloseableHttpClient ourHttp5Client = HttpClients.custom()
+			.setConnectionManager(PoolingHttpClientConnectionManagerBuilder.create()
+					.setValidateAfterInactivity(TimeValue.ZERO_MILLISECONDS)
+					.build())
+			.build();
 
 	@AfterAll
 	static void closeHttp5Client() throws IOException {
