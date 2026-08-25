@@ -17,10 +17,9 @@ import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.JsonUtil;
-import ca.uhn.test.util.CloseableHttpResponseUtil;
-import ca.uhn.test.util.ParsedHttpResponse;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -147,20 +146,16 @@ public class BulkPatchProviderTest {
 		}
 
 		// Test
-		String url = ourFhirServer.getBaseUrl() + "/" + JpaConstants.OPERATION_BULK_PATCH;
-		HttpPost post = new HttpPost(url);
-		post.setEntity(new ResourceEntity(ourCtx, request));
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
+		HttpTestResponse response = ourFhirServer.fhirRequest("/" + JpaConstants.OPERATION_BULK_PATCH)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.post(request);
 
-			ourLog.info("Response:\n{}", CloseableHttpResponseUtil.parse(response));
+		ourLog.info("Response:\n{}", response);
 
-			// Verify
-			String expectedUrl = ourFhirServer.getBaseUrl() + "/$hapi.fhir.bulk-patch-status?_jobId=MY-INSTANCE-ID";
-			assertEquals(HttpStatus.Code.ACCEPTED.getCode(), response.getStatusLine().getStatusCode());
-			assertEquals(expectedUrl, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
-
-		}
+		// Verify
+		String expectedUrl = ourFhirServer.getBaseUrl() + "/$hapi.fhir.bulk-patch-status?_jobId=MY-INSTANCE-ID";
+		response.assertStatus(HttpStatus.Code.ACCEPTED.getCode());
+		assertEquals(expectedUrl, response.getHeader(Constants.HEADER_CONTENT_LOCATION));
 
 		verify(myJobCoordinator, times(1)).startInstance(any(), myStartRequestCaptor.capture());
 		JobInstanceStartRequest startRequest = myStartRequestCaptor.getValue();
@@ -216,16 +211,12 @@ public class BulkPatchProviderTest {
 		when(myJobCoordinator.getInstance(eq("MY-INSTANCE-ID"))).thenReturn(instance);
 
 		// Test
-		String url = ourFhirServer.getBaseUrl() + "/" + OPERATION_BULK_PATCH_STATUS + "?" + OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID + "=MY-INSTANCE-ID" + "&" + OPERATION_BULK_PATCH_STATUS_PARAM_RETURN + "=" + OPERATION_BULK_PATCH_STATUS_PARAM_RETURN_VALUE_REPORT;
-		HttpGet get = new HttpGet(url);
-		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
+		String path = "/" + OPERATION_BULK_PATCH_STATUS + "?" + OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID + "=MY-INSTANCE-ID" + "&" + OPERATION_BULK_PATCH_STATUS_PARAM_RETURN + "=" + OPERATION_BULK_PATCH_STATUS_PARAM_RETURN_VALUE_REPORT;
+		HttpTestResponse response = ourFhirServer.fhirRequest(path).get();
 
-			ParsedHttpResponse parsedResponse = CloseableHttpResponseUtil.parse(response);
-			ourLog.info("ResponseBundle:\n{}", parsedResponse.body());
-			assertEquals(report.getReport(), parsedResponse.body());
-			assertEquals("text/plain", parsedResponse.contentType());
-
-		}
+		ourLog.info("ResponseBundle:\n{}", response.getBody());
+		assertEquals(report.getReport(), response.getBody());
+		assertEquals("text/plain", response.contentType());
 
 	}
 
@@ -240,13 +231,11 @@ public class BulkPatchProviderTest {
 		when(myJobCoordinator.getInstance(eq("MY-INSTANCE-ID"))).thenReturn(instance);
 
 		// Test
-		String url = ourFhirServer.getBaseUrl() + "/" + OPERATION_BULK_PATCH_STATUS + "?" + OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID + "=MY-INSTANCE-ID" + "&" + OPERATION_BULK_PATCH_STATUS_PARAM_RETURN + "=" + OPERATION_BULK_PATCH_STATUS_PARAM_RETURN_VALUE_DRYRUN_CHANGES;
-		HttpGet get = new HttpGet(url);
-		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
+		String path = "/" + OPERATION_BULK_PATCH_STATUS + "?" + OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID + "=MY-INSTANCE-ID" + "&" + OPERATION_BULK_PATCH_STATUS_PARAM_RETURN + "=" + OPERATION_BULK_PATCH_STATUS_PARAM_RETURN_VALUE_DRYRUN_CHANGES;
+		HttpTestResponse response = ourFhirServer.fhirRequest(path).get();
 
-			ParsedHttpResponse parsedResponse = CloseableHttpResponseUtil.parse(response);
-			ourLog.info("Response body:\n{}", parsedResponse.body());
-			assertThat(parsedResponse.body())
+		ourLog.info("Response body:\n{}", response.getBody());
+		assertThat(response.getBody())
 				.containsSubsequence(
 					"\"method\": \"PUT\"",
 					"\"url\": \"Patient/123\"",
@@ -257,9 +246,7 @@ public class BulkPatchProviderTest {
 					" \"method\": \"DELETE\"",
 					"\"url\": \"Patient/B\""
 				);
-			assertEquals("application/fhir+json", parsedResponse.contentType());
-
-		}
+		assertEquals("application/fhir+json", response.contentType());
 
 	}
 
@@ -275,17 +262,13 @@ public class BulkPatchProviderTest {
 		when(myJobCoordinator.getInstance(eq("MY-INSTANCE-ID"))).thenReturn(instance);
 
 		// Test
-		String url = ourFhirServer.getBaseUrl() + "/" + OPERATION_BULK_PATCH_STATUS + "?" + OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID + "=MY-INSTANCE-ID" + "&" + OPERATION_BULK_PATCH_STATUS_PARAM_RETURN + "=" + OPERATION_BULK_PATCH_STATUS_PARAM_RETURN_VALUE_DRYRUN_CHANGES;
-		HttpGet get = new HttpGet(url);
-		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
+		String path = "/" + OPERATION_BULK_PATCH_STATUS + "?" + OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID + "=MY-INSTANCE-ID" + "&" + OPERATION_BULK_PATCH_STATUS_PARAM_RETURN + "=" + OPERATION_BULK_PATCH_STATUS_PARAM_RETURN_VALUE_DRYRUN_CHANGES;
+		HttpTestResponse response = ourFhirServer.fhirRequest(path).get();
 
-			ParsedHttpResponse parsedResponse = CloseableHttpResponseUtil.parse(response);
-			ourLog.info("Response body:\n{}", parsedResponse.body());
-			assertThat(parsedResponse.body())
+		ourLog.info("Response body:\n{}", response.getBody());
+		assertThat(response.getBody())
 				.contains("HAPI-2815: Changes response can only be provided for dryRun jobs with dryRunMode=collectChanges");
-			assertEquals("application/fhir+json", parsedResponse.contentType());
-
-		}
+		assertEquals("application/fhir+json", response.contentType());
 
 	}
 
