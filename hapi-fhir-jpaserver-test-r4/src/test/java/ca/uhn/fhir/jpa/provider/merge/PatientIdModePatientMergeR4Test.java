@@ -3,8 +3,7 @@ package ca.uhn.fhir.jpa.provider.merge;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.dao.TransactionPrePartitionResponse;
-import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.interceptor.PatientCompartmentEnforcingInterceptor;
 import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
 import ca.uhn.fhir.jpa.merge.MergeOperationTestHelper;
 import ca.uhn.fhir.jpa.merge.MergeTestParameters;
@@ -23,7 +22,6 @@ import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -44,16 +42,13 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Propagation;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -75,9 +70,6 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 
 	private static final Logger ourLog = LoggerFactory.getLogger(PatientIdModePatientMergeR4Test.class);
 
-	private static final String NOT_ROLLED_BACK_MESSAGE_FRAGMENT =
-		"may have been committed and left in their merged state; they should be checked and, if necessary, reverted manually:";
-
 	@Autowired
 	private Batch2JobHelper myBatch2JobHelper;
 	@Autowired
@@ -85,7 +77,7 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 	@Autowired
 	private ResourceLinkServiceFactory myResourceLinkServiceFactory;
 	@Autowired
-	private HapiTransactionService myHapiTransactionService;
+	private PatientCompartmentEnforcingInterceptor myPatientCompartmentEnforcingInterceptor;
 	private PatientIdPartitionInterceptor myPartitionInterceptor;
 	private MergeOperationTestHelper myMergeHelper;
 	private IIdType myPatientIdSrc;
@@ -99,8 +91,9 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 		super.before();
 
 		myPartitionInterceptor = new PatientIdPartitionInterceptor(
-			getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry, myStorageSettings);
+			getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry, myTransactionBundleNormalizer);
 		registerInterceptor(myPartitionInterceptor);
+		registerInterceptor(myPatientCompartmentEnforcingInterceptor);
 
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setUnnamedPartitionMode(true);
@@ -615,6 +608,133 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 				expectedVersionedSourceId, expectedVersionedTargetId,
 				idsExpectedToReferenceTarget, expectedProvenanceTargets,
 				expectedTargetIdentifiers, null);
+		}
+	}
+
+	@Nested
+	class ResourceLimitAcrossPartitions {
+
+		// Obs(subject=PatientSrc) in PatientSrc's partition + Group(member=PatientSrc) in the default partition.
+		// Two resources reference PatientSrc, so a resource-limit of 1 must be exceeded and the merge rejected.
+		@Test
+		void testMerge_directReferrersAcrossPartitionsExceedResourceLimit_mergeRejected() {
+			// Setup
+			createObservation(myPatientIdSrc, null, null, "obs-src");
+			createGroup(myPatientIdSrc);
+
+			// Execute & verify
+			MergeTestParameters mergeParams = new MergeTestParameters()
+				.sourceResource(new Reference(myPatientIdSrc))
+				.targetResource(new Reference(myPatientIdTgt))
+				.resourceLimit(1);
+
+			String diagnosticMessage = myMergeHelper.callMergeAndExtractDiagnosticMessage(
+				"Patient", mergeParams, PreconditionFailedException.class);
+
+			assertThat(diagnosticMessage)
+				.as("both direct referrers count against the limit, even though they live in different partitions")
+				.contains("HAPI-2880")
+				.contains("exceeds the resource-limit");
+		}
+
+		// Enc(subject=PatientSrc) is the only direct referrer of PatientSrc, so it alone does not exceed a limit of 1.
+		// Obs(subject=PatientC, encounter=Enc) does not reference PatientSrc at all, but the merge still updates it
+		// because Enc moves partition and gets a new id. Two resources are therefore updated, and the limit of 1
+		// must be exceeded.
+		@Test
+		void testMerge_indirectReferrerPushesCountOverResourceLimit_mergeRejected() {
+			// Setup
+			IIdType patientIdC = createPatient("Patient/C", List.of(createTestIdentifier("patient-c")))
+				.getIdElement().toUnqualifiedVersionless();
+			IIdType encId = createEncounter(myPatientIdSrc, "enc-src");
+			createObservation(patientIdC, encId, null, "obs-c");
+
+			// Execute & verify
+			MergeTestParameters mergeParams = new MergeTestParameters()
+				.sourceResource(new Reference(myPatientIdSrc))
+				.targetResource(new Reference(myPatientIdTgt))
+				.resourceLimit(1);
+
+			String diagnosticMessage = myMergeHelper.callMergeAndExtractDiagnosticMessage(
+				"Patient", mergeParams, PreconditionFailedException.class);
+
+			assertThat(diagnosticMessage)
+				.as("an indirect referrer, which only references a moved resource, still counts against the limit")
+				.contains("HAPI-3023")
+				.contains("exceeds the resource-limit");
+		}
+	}
+
+	@Nested
+	class SamePartitionMergeWithCompartmentEnforcement {
+
+		// "src-4963" and "tgt-1" both hash to partition 14829 under
+		// PatientIdPartitionInterceptor.defaultPartitionAlgorithm
+		private static final String SAME_PARTITION_SOURCE_ID_PART = "src-4963";
+		private static final String SAME_PARTITION_TARGET_ID_PART = "tgt-1";
+
+		private IIdType mySamePartitionSrc;
+		private IIdType mySamePartitionTgt;
+
+		@BeforeEach
+		void beforeEach() {
+			mySamePartitionSrc = createPatient("Patient/" + SAME_PARTITION_SOURCE_ID_PART, List.of())
+				.getIdElement().toUnqualifiedVersionless();
+			mySamePartitionTgt = createPatient("Patient/" + SAME_PARTITION_TARGET_ID_PART, List.of())
+				.getIdElement().toUnqualifiedVersionless();
+			assertInSamePartition(mySamePartitionSrc, mySamePartitionTgt);
+		}
+
+		// Observation(subject=PatientSrc) where PatientSrc and PatientTgt are in the SAME partition, with
+		// PatientCompartmentEnforcingInterceptor registered. The merge causes the Observation to change to the
+		// target Patient's compartment, so it needs to be moved rather than updated in place. The undo must
+		// then move it back under its original ID.
+		@Test
+		void testMergeThenUndo_compartmentResourceReferencingSource_whenPatientsInSamePartition_resourceIsMovedAndRestored() {
+			// Setup
+			IIdType obsId = createObservation(mySamePartitionSrc, null, null, "obs-same-partition");
+
+			IBaseResource patientSrcBefore = readResource(Patient.class, mySamePartitionSrc);
+			IBaseResource patientTgtBefore = readResource(Patient.class, mySamePartitionTgt);
+			IBaseResource obsBefore = readResource(Observation.class, obsId);
+
+			// Execute
+			MergeTestParameters mergeParams = new MergeTestParameters()
+				.sourceResource(new Reference(mySamePartitionSrc))
+				.targetResource(new Reference(mySamePartitionTgt));
+			Parameters result = callMerge(mergeParams);
+			myMergeHelper.validateSyncMergeOutcome(result, mergeParams.asParametersResource(), mySamePartitionTgt);
+
+			// Verify: Obs moved to the target patient's compartment, old ID deleted
+			Observation movedObs = assertSingleResourceMovedToTarget(
+				Observation.class, Map.of("obs-same-partition", obsId), mySamePartitionTgt, Observation::getIdentifier);
+			IIdType movedObsId = movedObs.getIdElement().toUnqualifiedVersionless();
+
+			// Undo merge
+			Parameters undoParams = new Parameters();
+			undoParams.addParameter().setName("source-resource").setValue(new Reference(mySamePartitionSrc));
+			undoParams.addParameter().setName("target-resource").setValue(new Reference(mySamePartitionTgt));
+			myMergeHelper.callUndoMergeOperation("Patient", undoParams);
+
+			// Verify: Obs restored under its original ID in the source patient's compartment
+			List<Observation> restoredObs = searchBySubject(Observation.class, mySamePartitionSrc.getValue());
+			assertThat(restoredObs).hasSize(1);
+			assertThat(restoredObs.get(0).getIdElement().toUnqualifiedVersionless())
+				.as("undo must restore the Observation under its original ID")
+				.isEqualTo(obsId);
+
+			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
+				patientSrcBefore, readResource(Patient.class, mySamePartitionSrc));
+			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
+				patientTgtBefore, readResource(Patient.class, mySamePartitionTgt));
+			myMergeHelper.assertResourcesAreEqualIgnoringVersionAndLastUpdated(
+				obsBefore, readResource(Observation.class, obsId));
+
+			assertResourceDeleted(movedObsId);
+
+			assertThat(searchBySubject(Observation.class, mySamePartitionTgt.getValue()))
+				.as("no Observation should reference the target after undo")
+				.isEmpty();
 		}
 	}
 
@@ -1146,261 +1266,6 @@ public class PatientIdModePatientMergeR4Test extends BaseResourceProviderR4Test 
 				&& myTargetIdPart.equals(theNewResource.getIdElement().getIdPart())) {
 				throw new InternalErrorException("Simulated failure during target Patient update");
 			}
-		}
-	}
-
-	@Nested
-	class MergeFailureWithIndependentCommits {
-
-		private MergeBundlePerPartitionSplitInterceptor myBundleSplitter;
-
-		private IIdType myGroupId;
-		private IIdType myObsId;
-
-		@BeforeEach
-		void enableIndependentCommitsAndSeedData() {
-			// REQUIRES_NEW is what makes each partition's sub-bundle commit in its own transaction; without it the whole merge would share one transaction and roll back atomically, defeating this group's partial-failure tests
-			myHapiTransactionService.setTransactionPropagationWhenChangingPartitions(Propagation.REQUIRES_NEW);
-
-			myGroupId = createGroup(myPatientIdSrc);
-			myObsId = createObservation(myPatientIdSrc, null, null, "obs-rollback");
-
-			myBundleSplitter = new MergeBundlePerPartitionSplitInterceptor(Map.of(
-				myPatientIdSrc.getIdPart(), MergeBundlePerPartitionSplitInterceptor.PARTITION_SOURCE,
-				myObsId.getIdPart(), MergeBundlePerPartitionSplitInterceptor.PARTITION_SOURCE,
-				myPatientIdTgt.getIdPart(), MergeBundlePerPartitionSplitInterceptor.PARTITION_TARGET,
-				myGroupId.getIdPart(), MergeBundlePerPartitionSplitInterceptor.PARTITION_DEFAULT));
-			myInterceptorRegistry.registerInterceptor(myBundleSplitter);
-		}
-
-		@AfterEach
-		void resetPartitionCommitPropagation() {
-			myInterceptorRegistry.unregisterInterceptor(myBundleSplitter);
-			myHapiTransactionService.setTransactionPropagationWhenChangingPartitions(
-				HapiTransactionService.DEFAULT_TRANSACTION_PROPAGATION_WHEN_CHANGING_PARTITIONS);
-		}
-
-		@ParameterizedTest
-		@ValueSource(booleans = {false, true})
-		void testMerge_failAtTargetPatientUpdate_leavesCommittedStepsAndReportsThem(boolean theDeleteSource) {
-			FailOnTargetPatientUpdateInterceptor failer =
-				new FailOnTargetPatientUpdateInterceptor(myPatientIdTgt.getIdPart());
-			String diagnosticMessage;
-			myInterceptorRegistry.registerInterceptor(failer);
-			try {
-				diagnosticMessage = myMergeHelper.callMergeAndExtractDiagnosticMessage(
-					"Patient", mergeParams(theDeleteSource), InternalErrorException.class);
-			} finally {
-				myInterceptorRegistry.unregisterInterceptor(failer);
-			}
-
-			assertGroupPointsAtTarget();
-			List<Observation> targetObservations = searchBySubject(Observation.class, myPatientIdTgt.getValue());
-			assertThat(targetObservations)
-				.as("the Observation was copied into the target compartment before the failure")
-				.hasSize(1);
-			assertThat(searchBySubject(Observation.class, myPatientIdSrc.getValue()))
-				.as("the source Observation original is untouched: its delete never ran")
-				.hasSize(1);
-
-			assertThat(diagnosticMessage)
-				.as("only the compartment copy and the referrer committed before the target Patient update failed: "
-					+ "the copied Observation and the Group referrer are reported, and neither a Patient update nor "
-					+ "any Provenance had been reached yet")
-				.contains(NOT_ROLLED_BACK_MESSAGE_FRAGMENT)
-				.contains(targetObservations.get(0).getIdElement().getIdPart())
-				.contains(myGroupId.withVersion("2").getValue())
-				.doesNotContain("Provenance/")
-				.doesNotContain("Patient/")
-				.contains(
-					"Merge failure cause: InternalErrorException: Simulated failure during target Patient update");
-		}
-
-		@ParameterizedTest
-		@ValueSource(booleans = {false, true})
-		void testMerge_failAtMainProvenanceCreation_leavesCommittedStepsAndReportsThem(boolean theDeleteSource) {
-			FailOnMainProvenanceCreateInterceptor failer = new FailOnMainProvenanceCreateInterceptor();
-			String diagnosticMessage;
-			myInterceptorRegistry.registerInterceptor(failer);
-			try {
-				diagnosticMessage = myMergeHelper.callMergeAndExtractDiagnosticMessage(
-					"Patient", mergeParams(theDeleteSource), InternalErrorException.class);
-			} finally {
-				myInterceptorRegistry.unregisterInterceptor(failer);
-			}
-
-			assertThat(diagnosticMessage)
-				.contains(NOT_ROLLED_BACK_MESSAGE_FRAGMENT)
-				.contains(myGroupId.withVersion("2").getValue())
-				.contains(myPatientIdTgt.withVersion("2").getValue())
-				.contains(
-					"Merge failure cause: InternalErrorException: Simulated failure during main Provenance creation");
-			if (!theDeleteSource) {
-				assertThat(diagnosticMessage)
-					.as("with delete-source=false the source Patient was updated in place before the failure, so it "
-						+ "is committed and reported")
-					.contains(myPatientIdSrc.withVersion("2").getValue());
-			}
-
-			//not rolled back
-			assertGroupPointsAtTarget();
-
-			List<Observation> targetObservations = searchBySubject(Observation.class, myPatientIdTgt.getValue());
-			assertThat(targetObservations)
-				.as("the Observation was copied into the target compartment before the failure")
-				.hasSize(1);
-			assertThat(diagnosticMessage)
-				.as("the copied Observation committed under a new server-assigned id and must be reported for "
-					+ "manual reverting")
-				.contains(targetObservations.get(0).getIdElement().getIdPart());
-
-			List<Provenance> committedProvenances = myMergeHelper.searchProvenancesByTarget(myPatientIdTgt);
-			// deleting the source folds its Patient delete into the original Observation's DELETE-in-source-partition member Provenance, so one fewer
-			assertThat(committedProvenances)
-				.as("only the member Provenances commit before the main Provenance fails; the main Provenance (the "
-					+ "one carrying contained resources) is never committed")
-				.hasSize(theDeleteSource ? 4 : 5)
-				.allSatisfy(provenance -> assertThat(provenance.getContained())
-					.as("a committed Provenance here must be a member, not the main Provenance")
-					.isEmpty());
-			committedProvenances.forEach(provenance -> assertThat(diagnosticMessage)
-				.as("each committed member Provenance must be reported for manual reverting")
-				.contains(provenance.getIdElement().getIdPart()));
-		}
-
-		@ParameterizedTest
-		@ValueSource(booleans = {false, true})
-		void testMerge_failAtOriginalDelete_leavesEntireMergeAndReportsIt(boolean theDeleteSource) {
-			FailOnObservationDeleteInterceptor failer =
-				new FailOnObservationDeleteInterceptor(myObsId.getIdPart());
-			String diagnosticMessage;
-			myInterceptorRegistry.registerInterceptor(failer);
-			try {
-				diagnosticMessage = myMergeHelper.callMergeAndExtractDiagnosticMessage(
-					"Patient", mergeParams(theDeleteSource), InternalErrorException.class);
-			} finally {
-				myInterceptorRegistry.unregisterInterceptor(failer);
-			}
-
-			assertGroupPointsAtTarget();
-			List<Observation> targetObservations = searchBySubject(Observation.class, myPatientIdTgt.getValue());
-			assertThat(targetObservations)
-				.as("the Observation was copied into the target compartment")
-				.hasSize(1);
-
-			assertThat(diagnosticMessage)
-				.as("the entire merge committed before the final delete failed, so the copied Observation, the Group "
-					+ "referrer, and the target Patient update are all reported")
-				.contains(NOT_ROLLED_BACK_MESSAGE_FRAGMENT)
-				.contains(targetObservations.get(0).getIdElement().getIdPart())
-				.contains(myGroupId.withVersion("2").getValue())
-				.contains(myPatientIdTgt.withVersion("2").getValue())
-				.contains(
-					"Merge failure cause: InternalErrorException: Simulated failure during original Observation delete");
-			if (!theDeleteSource) {
-				assertThat(diagnosticMessage)
-					.as("with delete-source=false the source Patient update committed too")
-					.contains(myPatientIdSrc.withVersion("2").getValue());
-			}
-
-			List<Provenance> committedProvenances = myMergeHelper.searchProvenancesByTarget(myPatientIdTgt);
-			assertThat(committedProvenances)
-				.as("the whole Provenance group committed here (the delete fails only afterwards), so the main "
-					+ "Provenance is present in addition to the members")
-				.hasSize(theDeleteSource ? 5 : 6);
-			assertThat(committedProvenances.stream()
-					.filter(provenance -> !provenance.getContained().isEmpty())
-					.count())
-				.as("exactly one committed Provenance is the main Provenance, carrying contained resources")
-				.isEqualTo(1);
-			committedProvenances.forEach(provenance -> assertThat(diagnosticMessage)
-				.contains(provenance.getIdElement().getIdPart()));
-		}
-
-		private MergeTestParameters mergeParams(boolean theDeleteSource) {
-			return new MergeTestParameters()
-				.sourceResource(new Reference(myPatientIdSrc))
-				.targetResource(new Reference(myPatientIdTgt))
-				.deleteSource(theDeleteSource);
-		}
-
-		private void assertGroupPointsAtTarget() {
-			Group groupAfter = readResource(Group.class, myGroupId);
-			assertThat(groupAfter.getMemberFirstRep().getEntity().getReference())
-				.isEqualTo(myPatientIdTgt.getValue());
-		}
-	}
-
-	@Interceptor
-	static class FailOnMainProvenanceCreateInterceptor {
-
-		@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
-		public void preCreate(IBaseResource theResource) {
-			if (theResource instanceof Provenance provenance && !provenance.getContained().isEmpty()) {
-				throw new InternalErrorException("Simulated failure during main Provenance creation");
-			}
-		}
-	}
-
-	@Interceptor
-	static class FailOnObservationDeleteInterceptor {
-		private final String myObservationIdPart;
-
-		FailOnObservationDeleteInterceptor(String theObservationIdPart) {
-			myObservationIdPart = theObservationIdPart;
-		}
-
-		@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED)
-		public void preDelete(IBaseResource theResource) {
-			if (theResource instanceof Observation
-				&& myObservationIdPart.equals(theResource.getIdElement().getIdPart())) {
-				throw new InternalErrorException("Simulated failure during original Observation delete");
-			}
-		}
-	}
-
-	/**
-	 * Splits the merge's single transaction bundle into per-partition sub-bundles (source, target, default),
-	 * keyed by a resource-id-to-partition map. Combined with REQUIRES_NEW partition-change propagation, each
-	 * sub-bundle commits in its own transaction on a single database, so a mid-merge failure leaves earlier
-	 * sub-bundles committed.
-	 */
-	@Interceptor
-	static class MergeBundlePerPartitionSplitInterceptor {
-
-		static final String PARTITION_SOURCE = "source";
-		static final String PARTITION_TARGET = "target";
-		static final String PARTITION_DEFAULT = "default";
-
-		private final Map<String, String> myIdPartToPartition;
-
-		MergeBundlePerPartitionSplitInterceptor(Map<String, String> theIdPartToPartition) {
-			myIdPartToPartition = theIdPartToPartition;
-		}
-
-		@Hook(Pointcut.STORAGE_TRANSACTION_PRE_PARTITION)
-		public TransactionPrePartitionResponse split(IBaseBundle theInputBundle) {
-			Bundle input = (Bundle) theInputBundle;
-
-			Map<String, Bundle> bundlesByPartition = new LinkedHashMap<>();
-			for (String partition : List.of(PARTITION_SOURCE, PARTITION_TARGET, PARTITION_DEFAULT)) {
-				Bundle bundle = new Bundle();
-				bundle.setType(Bundle.BundleType.TRANSACTION);
-				bundlesByPartition.put(partition, bundle);
-			}
-			for (Bundle.BundleEntryComponent entry : input.getEntry()) {
-				String idPart = entry.getResource().getIdElement().getIdPart();
-				// a null id-part is a copied resource (CREATE entry with its id cleared for a urn:uuid placeholder); it lands in the target's compartment, so route it to the target partition
-				String partition =
-					idPart == null ? PARTITION_TARGET : myIdPartToPartition.getOrDefault(idPart, PARTITION_TARGET);
-				bundlesByPartition.get(partition).addEntry(entry);
-			}
-
-			List<IBaseBundle> splitBundles = new ArrayList<>();
-			splitBundles.add(bundlesByPartition.get(PARTITION_SOURCE));
-			splitBundles.add(bundlesByPartition.get(PARTITION_TARGET));
-			splitBundles.add(bundlesByPartition.get(PARTITION_DEFAULT));
-			return new TransactionPrePartitionResponse().setSplitBundles(splitBundles);
 		}
 	}
 

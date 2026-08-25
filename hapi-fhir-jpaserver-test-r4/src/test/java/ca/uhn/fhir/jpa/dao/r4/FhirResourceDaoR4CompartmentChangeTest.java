@@ -5,13 +5,13 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
+import ca.uhn.fhir.storage.TransactionBundleNormalizer;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
@@ -680,7 +680,7 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 			myPartitionSettings.setDefaultPartitionId(-1);
 			// PATIENT_ID mode: partition derived from patient ID via default algorithm
 			myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(
-					getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry, myStorageSettings);
+					getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry, myTransactionBundleNormalizer);
 			myInterceptorRegistry.registerInterceptor(myPatientIdPartitionInterceptor);
 		}
 
@@ -758,7 +758,7 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 			myPartitionSettings.setDefaultPartitionId(-1);
 			// BUCKETED_PATIENT_ID mode: patients hashed into a small number of buckets
 			myPatientIdPartitionInterceptor = new SmallBucketPatientIdPartitionInterceptor(
-					getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry, myStorageSettings);
+					getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry, myTransactionBundleNormalizer);
 			myInterceptorRegistry.registerInterceptor(myPatientIdPartitionInterceptor);
 		}
 
@@ -836,8 +836,13 @@ class FhirResourceDaoR4CompartmentChangeTest extends BaseJpaR4Test {
 				ISearchParamExtractor theSearchParamExtractor,
 				PartitionSettings thePartitionSettings,
 				DaoRegistry theDaoRegistry,
-				JpaStorageSettings theStorageSettings) {
-			super(theFhirContext, theSearchParamExtractor, thePartitionSettings, theDaoRegistry, theStorageSettings);
+				TransactionBundleNormalizer theTransactionBundleNormalizer) {
+			super(
+					theFhirContext,
+					theSearchParamExtractor,
+					thePartitionSettings,
+					theDaoRegistry,
+					theTransactionBundleNormalizer);
 		}
 
 		@Override

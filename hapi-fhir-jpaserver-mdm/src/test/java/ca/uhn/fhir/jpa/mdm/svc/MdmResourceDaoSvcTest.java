@@ -112,7 +112,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setUnnamedPartitionMode(true);
 		myPartitionSettings.setIncludePartitionInSearchHashes(false);
-		myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry, myStorageSettings);
+		myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry, myTransactionBundleNormalizer);
 		myInterceptorRegistry.registerInterceptor(myPatientIdPartitionInterceptor);
 
 		try {

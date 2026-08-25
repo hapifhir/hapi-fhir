@@ -97,19 +97,24 @@ public interface IHapiTransactionService {
 			@Nonnull ICallable<T> theCallback);
 
 	/**
-	 * Are two RequestPartitionId values compatible within the same transaction?
+	 * Can work scoped to {@code theCandidatePartitionId} execute inside a transaction scoped to
+	 * {@code theTransactionPartitionId}?
 	 * <p>
 	 * This is an experimental API, subject to change in a future release.
 	 * </p>
 	 * <p>
-	 * This method should return the same result regardless of the order of the arguments.
+	 * For two concrete partitions the relation is symmetric. It is directional when all partitions are
+	 * involved: a transaction opened for all partitions with no explicit partition id list is
+	 * partition-unscoped and can host work for any partition, while all-partition work cannot execute
+	 * inside a transaction scoped to a single partition. All-partitions with an explicit id list (e.g.
+	 * all partitions on a given shard) is a bounded scope, not an unscoped host.
 	 * </p>
 	 *
 	 * @since 7.4.0
 	 */
 	@Beta
 	default boolean isCompatiblePartition(
-			RequestPartitionId theRequestPartitionId, RequestPartitionId theOtherRequestPartitionId) {
+			RequestPartitionId theTransactionPartitionId, RequestPartitionId theCandidatePartitionId) {
 		return true;
 	}
 
