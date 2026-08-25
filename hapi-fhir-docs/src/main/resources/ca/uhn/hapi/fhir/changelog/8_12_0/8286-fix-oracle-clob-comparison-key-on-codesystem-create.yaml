@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 8286
+title: "Creating or updating a `CodeSystem` on Oracle was temporarily failing with `ORA-22848: cannot use CLOB type as comparison key`.
+  The query used to find pre-calculated ValueSet expansions drawing on the CodeSystem selected the whole `TermValueSet`
+  entity with `DISTINCT`, which put the CLOB-typed `TRM_VALUESET.EXPANSION_ERROR` column into the comparison key. The
+  query is now expressed as a semi-join, which also avoids de-duplicating one row per matching concept."
