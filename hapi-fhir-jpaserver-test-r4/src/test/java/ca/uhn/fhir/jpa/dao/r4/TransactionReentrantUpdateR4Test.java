@@ -462,6 +462,48 @@ public class TransactionReentrantUpdateR4Test extends BaseJpaR4Test {
 	}
 
 	/**
+	 * T9 - route (b) again, but with the accident removed. This is the corrupting form.
+	 * <p>
+	 * T3 above passes, and it is important to understand that it passes for a reason that has nothing
+	 * to do with this defect being absent. Its Flag entry is a POST and its Patient entry is a PUT, so
+	 * when pass 1 crosses that verb boundary it calls
+	 * {@code TransactionProcessor.handleVerbChangeInTransactionWriteOperations}, which flushes the
+	 * session. That flush happens to land between the interceptor's write and the Bundle's own
+	 * deferred write, which advances Hibernate's loaded version and repairs the invariant by luck.
+	 * <p>
+	 * Here both entries are PUT, so there is no verb boundary and no flush. The Flag entry is first in
+	 * document order and entries with equal verbs keep document order, so the interceptor still fires
+	 * before the Patient's own entry is walked - the same route (b) ordering as T3, with the incidental
+	 * flush taken away.
+	 * <p>
+	 * <b>Do not "simplify" this case into T3.</b> Changing the Flag entry to a POST, or reordering the
+	 * entries so the verbs differ, reintroduces the verb-change flush and turns this test green without
+	 * fixing anything.
+	 */
+	@Test
+	void testTransactionUpdate_whenSameVerbEntryInterceptorUpdatesSameResource_currentVersionMatchesHistory() {
+		// Setup - Patient v1
+		createPatientVersionOne();
+
+		ConfigurableReentrantFlagInterceptor interceptor = newNameAppendingFlagInterceptor();
+		registerInterceptor(interceptor);
+
+		// Execute
+		Bundle response =
+			mySystemDao.transaction(new SystemRequestDetails(), buildFlagFirstPutOnlyTransaction());
+
+		// Verify
+		assertThat(interceptor.getInvocationCount())
+			.as("Interceptor never fired, so this test proves nothing")
+			.isEqualTo(1);
+
+		assertPatientStorageVersionsAreConsistent();
+		// The Patient is the second entry here, because the Flag has to come first in document order
+		// for the interceptor to fire before the Patient's entry is walked.
+		assertResponseEntryVersionMatchesDatabase(response, 1);
+	}
+
+	/**
 	 * T4 - route (b) with If-Match. The interceptor has already moved the Patient past v1 by the time
 	 * the PUT entry is walked, so pass 1's precondition check rejects the Bundle. Here the desired
 	 * behaviour genuinely is an error; the point of the case is to pin that deliberately, and to pin
@@ -706,6 +748,17 @@ public class TransactionReentrantUpdateR4Test extends BaseJpaR4Test {
 			.getRequest()
 			.setMethod(Bundle.HTTPVerb.POST)
 			.setUrl("Flag");
+		return bundle;
+	}
+
+	/**
+	 * Flag first and both entries on the same verb, so that pass 1 never crosses a verb boundary and
+	 * never flushes. See the Javadoc on the T9 case for why that matters.
+	 */
+	private Bundle buildFlagFirstPutOnlyTransaction() {
+		Bundle bundle = newTransactionBundle();
+		addConditionalFlagPut(bundle, FLAG_IDENTIFIER_VALUE);
+		addPatientPut(bundle, false);
 		return bundle;
 	}
 
