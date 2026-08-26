@@ -36,7 +36,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -261,7 +260,7 @@ class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		List<IBaseResource> noUploadVerValueSets = noUploadVerResult.getAllResources();
 		assertThat(noUploadVerValueSets).hasSize(expectedResultQty);
 
-		matchUnqualifiedIds(noUploadVerValueSets, theExpectedIdVersions);
+		matchUnqualifiedIds(noUploadVerValueSets, theExpectedIdVersions, VS_NO_VERSIONED_ON_UPLOAD_ID);
 
 		// now  validate search for CS ver = null VS ver != null
 		for (String version : theExpectedIdVersions) {
@@ -318,24 +317,26 @@ class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 	/**
 	 * Validates that the collection of unqualified IDs of each element of theValueSets matches the expected
-	 * unqualifiedIds corresponding to the uploaded versions plus one with no version
+	 * unqualifiedIds corresponding to the uploaded versions — one per version, each id being
+	 * theUnqualifiedIdPrefix suffixed with its version. Since the loader was converted to a Batch2 job
+	 * there is no longer an extra version-less ValueSet in these results.
 	 *
-	 * @param theValueSets          the ValueSet collection
-	 * @param theExpectedIdVersions the collection of expected versions
+	 * @param theValueSets            the ValueSet collection
+	 * @param theExpectedIdVersions   the collection of expected versions
+	 * @param theUnqualifiedIdPrefix  the id prefix the searched ValueSets are stored under, which differs per
+	 *                                ValueSet URL — hence a parameter rather than a constant
 	 */
-	private void matchUnqualifiedIds(List<IBaseResource> theValueSets, Collection<String> theExpectedIdVersions) {
+	private void matchUnqualifiedIds(
+			List<IBaseResource> theValueSets, Collection<String> theExpectedIdVersions, String theUnqualifiedIdPrefix) {
 		// set should contain one entry per expectedVersion
-		List<String> expectedNoVersionUnqualifiedIds = theExpectedIdVersions.stream()
-			.map(expVer -> VS_NO_VERSIONED_ON_UPLOAD_ID + "-" + expVer)
-			.collect(Collectors.toList());
-
-		// plus one entry for null version
-		expectedNoVersionUnqualifiedIds.add(VS_NO_VERSIONED_ON_UPLOAD_ID);
+		List<String> expectedUnqualifiedIds = theExpectedIdVersions.stream()
+			.map(expVer -> theUnqualifiedIdPrefix + "-" + expVer)
+			.toList();
 
 		List<String> resultUnqualifiedIds = theValueSets.stream()
 			.map(r -> r.getIdElement().getIdPart()).toList();
 
-		assertThat(resultUnqualifiedIds).containsExactlyInAnyOrderElementsOf(expectedNoVersionUnqualifiedIds);
+		assertThat(resultUnqualifiedIds).containsExactlyInAnyOrderElementsOf(expectedUnqualifiedIds);
 
 		List<String> valueSetVersions = theValueSets.stream().map(r -> ((ValueSet) r).getVersion()).toList();
 		assertThat(valueSetVersions).containsExactlyInAnyOrderElementsOf(theExpectedIdVersions);
@@ -439,7 +440,7 @@ class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		List<IBaseResource> valueSets = result.getAllResources();
 		assertThat(valueSets).hasSize(expectedResultQty);
 
-		matchUnqualifiedIds(valueSets, theExpectedIdVersions);
+		matchUnqualifiedIds(valueSets, theExpectedIdVersions, LOINC_ALL_VALUESET_ID);
 
 		// now validate each specific uploaded version
 		theExpectedIdVersions.forEach(this::validateValueSetSearchForVersionLoincAllVS);
@@ -516,9 +517,12 @@ class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		Map<String, String> versionToDisplay = new HashMap<>();
 		for (TermConcept termConcept : termConcepts) {
 			String version = termConcept.getCodeSystemVersion().getCodeSystemVersionId();
-			assertThat(versionToDisplay.put(version, termConcept.getDisplay()))
+			// Asserted on the map rather than on put()'s return value: put() returns null both for a new key
+			// and for a duplicate whose display was null, which would let a real duplicate through.
+			assertThat(versionToDisplay)
 				.as("Duplicate TermConcept for code: " + theCode + ", version: " + version)
-				.isNull();
+				.doesNotContainKey(version);
+			versionToDisplay.put(version, termConcept.getDisplay());
 		}
 
 		for (String version : theExpectedVersions) {
