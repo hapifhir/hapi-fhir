@@ -44,6 +44,7 @@ import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.JsonUtil;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.ByteArrayInputStream;
@@ -51,6 +52,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_LOINC_DISTRIBUTION_FILE;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_SNOMED_CT_DISTRIBUTION_FILE;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_DUPLICATE_FILE_DEFAULT;
@@ -196,6 +198,27 @@ public class TerminologyTestHelper {
 	public String startImportLoincJobAndWaitForCompletion(
 			String versionId, ZipCollectionBuilder theFiles, boolean theDontMakeCurrent) {
 		return startImportLoincJobAndWaitForCompletion(versionId, theFiles, theDontMakeCurrent, null);
+	}
+
+	/**
+	 * @param theAwaitVersionDelete if this upload replaces an existing TermCodeSystemVersion for the same version
+	 *                              string, activation deletes the old row asynchronously (see
+	 *                              {@link ca.uhn.fhir.jpa.term.TermCodeSystemStorageSvcImpl#activateStagingCodeSystemVersion}).
+	 *                              Pass {@code true} to await that deletion job before returning, so callers that
+	 *                              assert exact TermConcept/TermCodeSystemVersion counts don't race a pending
+	 *                              DELETED_ row. Callers asserting on the pre-deletion state (e.g. delete-job tests)
+	 *                              should keep using the three-arg overload instead.
+	 */
+	public String startImportLoincJobAndWaitForCompletion(
+			String versionId,
+			ZipCollectionBuilder theFiles,
+			boolean theDontMakeCurrent,
+			boolean theAwaitVersionDelete) {
+		String jobInstanceId = startImportLoincJobAndWaitForCompletion(versionId, theFiles, theDontMakeCurrent, null);
+		if (theAwaitVersionDelete) {
+			myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+		}
+		return jobInstanceId;
 	}
 
 	public String startImportLoincJobAndWaitForCompletion(
@@ -368,6 +391,16 @@ public class TerminologyTestHelper {
 	}
 
 	public void startImportLoincJobAndWaitForCompletion(String theVersion, boolean theMakeItCurrent) throws Exception {
+		startImportLoincJobAndWaitForCompletion(theVersion, theMakeItCurrent, false);
+	}
+
+	/**
+	 * @param theAwaitVersionDelete see {@link #startImportLoincJobAndWaitForCompletion(String, ZipCollectionBuilder, boolean, boolean)},
+	 *                              which this delegates to. Defaults to {@code false} via the two-arg overload since
+	 *                              some callers (e.g. delete-job tests) intentionally assert on the pre-deletion state.
+	 */
+	public void startImportLoincJobAndWaitForCompletion(
+			@Nullable String theVersion, boolean theMakeItCurrent, boolean theAwaitVersionDelete) throws Exception {
 		ZipCollectionBuilder files = new ZipCollectionBuilder(true);
 
 		assertThat(theVersion == null
@@ -379,7 +412,7 @@ public class TerminologyTestHelper {
 
 		addLoincMandatoryFilesToZip(files, theVersion);
 
-		startImportLoincJobAndWaitForCompletion(theVersion, files, !theMakeItCurrent);
+		startImportLoincJobAndWaitForCompletion(theVersion, files, !theMakeItCurrent, theAwaitVersionDelete);
 	}
 
 	/**

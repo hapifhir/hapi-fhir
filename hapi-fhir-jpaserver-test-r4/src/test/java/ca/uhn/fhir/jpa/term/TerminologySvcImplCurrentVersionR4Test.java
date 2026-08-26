@@ -29,7 +29,6 @@ import org.mockito.Answers;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -399,7 +398,7 @@ class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		logAllCodeSystemsAndVersionsCodeSystemsAndVersions();
 
 		String nonCurrentVer = "2.68";
-		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion(nonCurrentVer, false);
+		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion(nonCurrentVer, false, true);
 
 		logAllCodeSystemsAndVersionsCodeSystemsAndVersions();
 		logAllUriIndexes();
@@ -501,17 +500,18 @@ class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 	 * matching display. This validation also ensures there are no other version (e.g. DELETED_ ones).
 	 * Concepts are matched to a version by FK, not insertion order, since persistence is async and not upload-ordered.
 	 */
-	private void validateTermConcepts(ArrayList<String> theExpectedVersions) {
+	private void validateTermConcepts(Collection<String> theExpectedVersions) {
 		runInTransaction(() -> {
 			assertTermConceptsForCode(VS_NO_VERSIONED_ON_UPLOAD_FIRST_CODE, VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY, theExpectedVersions);
 			assertTermConceptsForCode(VS_VERSIONED_ON_UPLOAD_FIRST_CODE, VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY, theExpectedVersions);
 		});
 	}
 
-	private void assertTermConceptsForCode(String theCode, String theExpectedDisplaySuffix, ArrayList<String> theExpectedVersions) {
-		@SuppressWarnings("unchecked")
-		List<TermConcept> termConcepts = (List<TermConcept>) myEntityManager.createQuery(
-			"select tc from TermConcept tc join fetch tc.myCodeSystem where tc.myCode = '" + theCode + "'").getResultList();
+	private void assertTermConceptsForCode(String theCode, String theExpectedDisplaySuffix, Collection<String> theExpectedVersions) {
+		List<TermConcept> termConcepts = myEntityManager
+			.createQuery("select tc from TermConcept tc join fetch tc.myCodeSystem where tc.myCode = :code", TermConcept.class)
+			.setParameter("code", theCode)
+			.getResultList();
 		assertThat(termConcepts).as("TermConcept count for code: " + theCode).hasSize(theExpectedVersions.size());
 
 		Map<String, String> versionToDisplay = new HashMap<>();
@@ -542,8 +542,7 @@ class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion(noCurrentVer, false);
 
 		String lastCurrentVer = "2.69";
-		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion(lastCurrentVer, true);
-		myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion(lastCurrentVer, true, true);
 
 		runCommonValidations(Lists.newArrayList(firstCurrentVer, noCurrentVer, lastCurrentVer));
 
