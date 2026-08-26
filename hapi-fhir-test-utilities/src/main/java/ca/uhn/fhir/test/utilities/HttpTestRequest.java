@@ -32,13 +32,8 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * A fluent builder for issuing HTTP requests against a test server and making assertions
- * about the response. This exists to collapse the very common test idiom of building an
- * HTTP request object, adding auth and headers, executing it inside a try-with-resources
- * block, reading the entity, and asserting on the status code.
- * <p>
- * For example:
- * </p>
+ * A fluent builder for issuing an HTTP request in a test and asserting on the response. It replaces
+ * the usual build-request, execute-in-try-with-resources, read-entity, check-status boilerplate:
  * <pre>
  * String body = HttpTestRequest.to(myClient, myFhirContext, myBase + "/Observation/123")
  *    .withBasicAuth("myuser", "mypass")
@@ -47,16 +42,14 @@ import java.util.Locale;
  *    .getBody();
  * </pre>
  * <p>
- * The status assertion is deliberately kept separate from reading the body so that tests
- * which need to assert on the body, the headers, or the reason phrase can do so. See
- * {@link HttpTestResponse}.
+ * Asserting the status is separate from reading the body so a test can also check headers or the
+ * reason phrase. See {@link HttpTestResponse}.
  * </p>
  * <p>
- * This class names no HTTP client library: it describes a request and hands it to an
- * {@link IHttpTestTransport} to issue. That keeps it usable with whatever client a given test
- * already has. Apache HttpClient 4.x and 5.x clients are both accepted directly — see the
- * {@code to(...)} overloads — and anything else can be reached by implementing
- * {@link IHttpTestTransport}. It does not manage client lifecycles.
+ * This class names no HTTP client library — it describes a request and hands it to an
+ * {@link IHttpTestTransport}, so it works with whatever client a test already has. Apache
+ * HttpClient 4.x and 5.x are accepted directly via the {@code to(...)} overloads; anything else
+ * needs an {@link IHttpTestTransport}. Client lifecycles are the caller's problem.
  * </p>
  */
 // Created by claude-sonnet-5
@@ -77,12 +70,11 @@ public class HttpTestRequest {
 	}
 
 	/**
-	 * Creates a request for a server that does not need to encode FHIR resource bodies.
-	 * Calling {@link #post(IBaseResource)} or {@link #put(IBaseResource)} on the returned
-	 * object will fail; use {@link #to(IHttpTestTransport, FhirContext, String)} if you
-	 * need to send a resource.
+	 * For a request that never sends a FHIR resource body. {@link #post(IBaseResource)} and
+	 * {@link #put(IBaseResource)} will fail on the result — use
+	 * {@link #to(IHttpTestTransport, FhirContext, String)} if you need those.
 	 *
-	 * @param theTransport the transport to execute against; its lifecycle is not managed here
+	 * @param theTransport the transport to execute against; not closed here
 	 * @param theUrl the full request URL
 	 */
 	public static HttpTestRequest to(IHttpTestTransport theTransport, String theUrl) {
@@ -90,8 +82,8 @@ public class HttpTestRequest {
 	}
 
 	/**
-	 * @param theTransport the transport to execute against; its lifecycle is not managed here
-	 * @param theFhirContext the context used to encode FHIR resource bodies
+	 * @param theTransport the transport to execute against; not closed here
+	 * @param theFhirContext used to encode FHIR resource bodies
 	 * @param theUrl the full request URL
 	 */
 	public static HttpTestRequest to(IHttpTestTransport theTransport, FhirContext theFhirContext, String theUrl) {
@@ -99,7 +91,7 @@ public class HttpTestRequest {
 	}
 
 	/**
-	 * Convenience overload for callers holding an Apache HttpClient 4.x client.
+	 * For a caller holding an Apache HttpClient 4.x client.
 	 *
 	 * @see #to(IHttpTestTransport, String)
 	 */
@@ -108,7 +100,7 @@ public class HttpTestRequest {
 	}
 
 	/**
-	 * Convenience overload for callers holding an Apache HttpClient 4.x client.
+	 * For a caller holding an Apache HttpClient 4.x client.
 	 *
 	 * @see #to(IHttpTestTransport, FhirContext, String)
 	 */
@@ -118,7 +110,7 @@ public class HttpTestRequest {
 	}
 
 	/**
-	 * Convenience overload for callers holding an Apache HttpClient 5.x client.
+	 * For a caller holding an Apache HttpClient 5.x client.
 	 *
 	 * @see #to(IHttpTestTransport, String)
 	 */
@@ -128,7 +120,7 @@ public class HttpTestRequest {
 	}
 
 	/**
-	 * Convenience overload for callers holding an Apache HttpClient 5.x client.
+	 * For a caller holding an Apache HttpClient 5.x client.
 	 *
 	 * @see #to(IHttpTestTransport, FhirContext, String)
 	 */
@@ -145,22 +137,19 @@ public class HttpTestRequest {
 	}
 
 	/**
-	 * Says explicitly whether a {@literal 3xx} should be followed, instead of inheriting whatever
-	 * the underlying client happens to be configured with. Clients disagree: hapi's
-	 * {@link HttpClientExtension} follows redirects by default, CDR's {@code SmileTestHttpClient}
-	 * disables them.
+	 * States whether a {@literal 3xx} should be followed, rather than inheriting whatever the
+	 * client was built with — clients in this codebase disagree on the default.
 	 * <p>
-	 * Apache HttpClient decides whether to follow redirects when the client itself is built, not
-	 * per request, so this cannot make an already-redirect-disabled client follow one: {@literal
-	 * true} against such a client fails fast with an {@link IllegalStateException} rather than
-	 * silently returning the unfollowed {@literal 3xx}.
+	 * Two caveats, both forced by Apache HttpClient:
 	 * </p>
-	 * <p>
-	 * Either value also replaces the request's configuration with HttpClient's stock defaults for
-	 * everything else — timeouts, compression, cookie policy — rather than whatever the client's
-	 * own default configuration specifies, because HttpClient exposes no way to read a client's
-	 * configured defaults back. Avoid this on a request where the client's other defaults matter.
-	 * </p>
+	 * <ul>
+	 * <li>It can only turn following <i>off</i>. Redirect handling is fixed when the client is
+	 * built, so {@literal true} against a client built with redirects disabled cannot work; it
+	 * fails fast with an {@link IllegalStateException} instead of quietly returning the 3xx.</li>
+	 * <li>Calling this at all resets the request's other settings — timeouts, compression, cookie
+	 * policy — to HttpClient's stock defaults, because a client's configured defaults cannot be
+	 * read back. Avoid it where those matter.</li>
+	 * </ul>
 	 *
 	 * @param theFollowRedirects {@literal true} to follow, {@literal false} to return the 3xx itself
 	 */
@@ -171,8 +160,8 @@ public class HttpTestRequest {
 	}
 
 	/**
-	 * Shorthand for {@code followRedirects(false)} — the common case, where a test wants to assert
-	 * on the redirect response rather than on its destination.
+	 * Shorthand for {@code followRedirects(false)} — the common case, where the test asserts on the
+	 * redirect itself rather than its destination.
 	 */
 	// Created by claude-opus-5
 	public HttpTestRequest withoutRedirects() {
@@ -180,7 +169,7 @@ public class HttpTestRequest {
 	}
 
 	/**
-	 * Adds a {@literal Basic} {@literal Authorization} header for the given credentials.
+	 * Adds a Basic {@literal Authorization} header.
 	 */
 	public HttpTestRequest withBasicAuth(String theUsername, String thePassword) {
 		String credentials = theUsername + ":" + thePassword;
@@ -211,7 +200,7 @@ public class HttpTestRequest {
 	}
 
 	/**
-	 * Issues an {@literal OPTIONS} request — most often used to exercise a CORS preflight.
+	 * Issues an {@literal OPTIONS} request, usually to exercise a CORS preflight.
 	 */
 	public HttpTestResponse options() {
 		return method("OPTIONS");
@@ -222,14 +211,14 @@ public class HttpTestRequest {
 	}
 
 	/**
-	 * Issues a POST with the given resource encoded as {@literal application/fhir+json}.
+	 * POSTs the resource as {@literal application/fhir+json}.
 	 */
 	public HttpTestResponse post(IBaseResource theBody) {
 		return method("POST", encodeResource(theBody), Constants.CT_FHIR_JSON_NEW);
 	}
 
 	/**
-	 * Issues a POST with the given body, sent as the given MIME type with a UTF-8 charset.
+	 * POSTs the body as the given MIME type, with a UTF-8 charset.
 	 *
 	 * @param theContentType the MIME type, e.g. {@literal "text/plain"}
 	 */
@@ -238,9 +227,8 @@ public class HttpTestRequest {
 	}
 
 	/**
-	 * Issues a POST with the given raw bytes, sent as the given MIME type. Use this for
-	 * binary payloads such as {@literal image/png}, where a String body would corrupt the
-	 * content.
+	 * POSTs raw bytes. Use this for binary payloads such as {@literal image/png}, where a String
+	 * body would corrupt the content.
 	 *
 	 * @param theContentType the MIME type, e.g. {@literal "image/png"}
 	 */
@@ -249,14 +237,14 @@ public class HttpTestRequest {
 	}
 
 	/**
-	 * Issues a PUT with the given resource encoded as {@literal application/fhir+json}.
+	 * PUTs the resource as {@literal application/fhir+json}.
 	 */
 	public HttpTestResponse put(IBaseResource theBody) {
 		return method("PUT", encodeResource(theBody), Constants.CT_FHIR_JSON_NEW);
 	}
 
 	/**
-	 * Issues a PUT with the given body, sent as the given MIME type with a UTF-8 charset.
+	 * PUTs the body as the given MIME type, with a UTF-8 charset.
 	 *
 	 * @param theContentType the MIME type, e.g. {@literal "text/plain"}
 	 */
@@ -265,7 +253,7 @@ public class HttpTestRequest {
 	}
 
 	/**
-	 * Issues a PUT with the given raw bytes, sent as the given MIME type.
+	 * PUTs raw bytes.
 	 *
 	 * @see #post(byte[], String)
 	 */
@@ -274,14 +262,14 @@ public class HttpTestRequest {
 	}
 
 	/**
-	 * Issues a PATCH with the given body as {@literal application/json-patch+json}.
+	 * PATCHes the body as {@literal application/json-patch+json}.
 	 */
 	public HttpTestResponse patch(String theJsonPatchBody) {
 		return patch(theJsonPatchBody, Constants.CT_JSON_PATCH);
 	}
 
 	/**
-	 * Issues a PATCH with the given body, sent as the given MIME type with a UTF-8 charset.
+	 * PATCHes the body as the given MIME type, with a UTF-8 charset.
 	 *
 	 * @param theContentType the MIME type, e.g. {@literal "application/json-patch+json"}
 	 */
@@ -290,8 +278,7 @@ public class HttpTestRequest {
 	}
 
 	/**
-	 * Issues a request with the given method and no body. Use this for verbs this builder
-	 * does not model directly.
+	 * Issues a bodyless request with any verb this builder does not model directly.
 	 *
 	 * @param theMethod the HTTP method, e.g. {@literal "TRACE"}
 	 */
@@ -300,11 +287,10 @@ public class HttpTestRequest {
 	}
 
 	/**
-	 * Issues a request with the given method and body. Use this for verbs this builder does
-	 * not model directly.
+	 * Issues a request with any verb this builder does not model directly.
 	 *
 	 * @param theMethod the HTTP method
-	 * @param theBody the request body, or {@literal null} for no body
+	 * @param theBody the request body, or {@literal null} for none
 	 * @param theContentType the MIME type of {@code theBody}
 	 */
 	public HttpTestResponse method(String theMethod, byte[] theBody, String theContentType) {
@@ -318,10 +304,9 @@ public class HttpTestRequest {
 	}
 
 	/**
-	 * The {@code post(String, ...)}/{@code put(String, ...)}/{@code patch(String, ...)} overloads
-	 * encode their body as UTF-8, so the MIME type they send needs a matching charset unless the
-	 * caller already specified one. This is deliberately not applied to the {@code byte[]} overloads,
-	 * where the caller controls encoding (or the payload is binary and has none).
+	 * The String-bodied overloads encode as UTF-8, so the MIME type needs a matching charset unless
+	 * the caller supplied one. Not applied to the {@code byte[]} overloads, where the caller owns
+	 * the encoding — or the payload is binary and has none.
 	 */
 	private static String withUtf8Charset(String theMimeType) {
 		if (theMimeType.toLowerCase(Locale.ROOT).contains("charset")) {

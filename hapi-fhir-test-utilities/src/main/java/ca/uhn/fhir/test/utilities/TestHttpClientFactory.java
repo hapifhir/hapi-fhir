@@ -27,15 +27,15 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Builds the Apache HttpClient 4.x client that test infrastructure in this module hands to tests.
+ * Builds the Apache HttpClient 4.x client that this module's test infrastructure hands to tests, so
+ * that there is one recipe rather than several.
  * <p>
- * This exists so there is one such recipe rather than several. The pool is deliberately large: a
- * test making several concurrent calls against its own embedded server should not queue on itself,
- * which is what happens with HttpClient's default of two connections per route. The socket timeout
- * is generous for the same reason a debugging test should not fail on a slow read.
+ * The pool is deliberately large — HttpClient defaults to two connections per route, which makes a
+ * test issuing concurrent calls queue against itself. The socket timeout is generous so a test
+ * paused in a debugger does not fail on a slow read.
  * </p>
  * <p>
- * Callers own the returned client and must close it.
+ * The caller owns the returned client and must close it.
  * </p>
  */
 // Created by claude-opus-5
@@ -57,9 +57,10 @@ public final class TestHttpClientFactory {
 	}
 
 	/**
-	 * @param theFollowRedirects whether the client should follow a {@literal 3xx}. Prefer stating
-	 *    this per-request with {@link HttpTestRequest#followRedirects(boolean)}, which does not
-	 *    require a second client; this parameter exists for callers that hold a client directly.
+	 * @param theFollowRedirects whether this client follows a {@literal 3xx}. Note that only
+	 *    {@literal true} leaves the choice open afterwards:
+	 *    {@link HttpTestRequest#followRedirects(boolean)} can turn following off per request, but
+	 *    cannot turn it back on for a client built with {@literal false}.
 	 */
 	public static CloseableHttpClient create(boolean theFollowRedirects) {
 		PoolingHttpClientConnectionManager connectionManager =

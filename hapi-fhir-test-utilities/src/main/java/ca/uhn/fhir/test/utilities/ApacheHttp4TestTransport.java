@@ -40,12 +40,13 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * An {@link IHttpTestTransport} backed by an Apache HttpClient <b>4.x</b>
- * {@link CloseableHttpClient}. It does not manage the client's lifecycle.
+ * An {@link IHttpTestTransport} over an Apache HttpClient <b>4.x</b> client. Does not close the
+ * client.
  * <p>
- * Package-private on purpose: callers reach it through
- * {@link HttpTestRequest#to(CloseableHttpClient, String)} rather than naming a transport, so which
- * Apache version a test happens to be on stays an implementation detail of this package.
+ * Package-private on purpose: callers reach it via
+ * {@link HttpTestRequest#to(CloseableHttpClient, String)}, so which Apache version a test runs on
+ * stays an implementation detail.
+ * </p>
  *
  * @see ApacheHttp5TestTransport for the 5.x equivalent
  */
@@ -88,12 +89,9 @@ class ApacheHttp4TestTransport implements IHttpTestTransport {
 	}
 
 	/**
-	 * {@code followRedirects(true)} cannot make an already-redirect-disabled client follow a
-	 * redirect: Apache HttpClient decides this when the client is built, not per request, so a
-	 * request-level override that asks for {@literal true} against such a client is silently
-	 * ignored. Rather than hand the caller an unfollowed {@literal 3xx} it never asked for, fail
-	 * loudly so the mismatch is diagnosable at the point of the request rather than downstream in
-	 * an unrelated assertion.
+	 * Redirect handling is fixed when an Apache client is built, so a request asking to follow one
+	 * against a client built with redirects disabled is simply ignored. Rather than return a 3xx the
+	 * caller did not expect, fail here where the mismatch is obvious.
 	 */
 	private static void assertRedirectExpectationHonoured(Request theRequest, HttpTestResponse theResponse) {
 		if (Boolean.TRUE.equals(theRequest.followRedirects()) && isRedirectStatus(theResponse.getStatusCode())) {
@@ -136,8 +134,8 @@ class ApacheHttp4TestTransport implements IHttpTestTransport {
 	}
 
 	/**
-	 * Carries an arbitrary method name so that verbs 4.x has no dedicated class for
-	 * (and any future ones) work without a switch over method names.
+	 * Carries the verb as a string, so verbs 4.x has no dedicated class for still work without a
+	 * switch over method names.
 	 */
 	private static class BodylessRequest extends HttpRequestBase {
 		private final String myMethod;

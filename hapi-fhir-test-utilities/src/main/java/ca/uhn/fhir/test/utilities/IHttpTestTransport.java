@@ -22,54 +22,43 @@ package ca.uhn.fhir.test.utilities;
 import java.util.List;
 
 /**
- * Transport used by {@link HttpTestRequest} to actually issue a request. This exists so that
- * {@link HttpTestRequest} can describe a request without naming any particular HTTP client
- * library: implementations adapt that description onto a concrete client.
+ * Issues the request that {@link HttpTestRequest} describes, adapting it onto a concrete HTTP
+ * client. This is the seam that lets Apache HttpClient 4.x and 5.x coexist: each gets its own small
+ * implementation, reached through the {@link HttpTestRequest} {@code to(...)} overloads rather than
+ * named directly. Supporting another client is additive.
  * <p>
- * This is the seam that lets Apache HttpClient 4.x and 5.x coexist. Rather than
- * {@link HttpTestRequest} carrying two code paths, each client version gets its own small
- * implementation of this interface; those live alongside {@link HttpTestRequest} and are reached
- * through its {@code to(...)} overloads rather than named directly. Adding a version is additive;
- * no existing transport or caller changes.
- * </p>
- * <p>
- * <b>Not</b> to be confused with {@link ca.uhn.fhir.rest.client.api.IHttpClient}, the production
- * SPI beneath {@link ca.uhn.fhir.rest.client.api.IGenericClient}. That one is a factory for FHIR
- * interactions whose URL and verb are fixed when it is constructed, and its responses are streaming
- * and closeable. This one sends an arbitrary request and hands back a fully-buffered response, which
- * is convenient for assertions and wrong for anything that has to stream.
+ * <b>This is test infrastructure.</b> Do not confuse it with the production
+ * {@link ca.uhn.fhir.rest.client.api.IHttpClient} SPI beneath
+ * {@link ca.uhn.fhir.rest.client.api.IGenericClient} — that builds FHIR interactions with a fixed
+ * URL and verb and returns streaming, closeable responses. This sends one arbitrary request and
+ * buffers the whole response, which suits assertions and rules out streaming.
  * </p>
  */
 // Created by claude-opus-5
 public interface IHttpTestTransport {
 
 	/**
-	 * Issues the given request and fully consumes the response, closing any underlying
-	 * connection before returning.
+	 * Issues the request, reads the whole response, and closes the connection before returning.
 	 *
-	 * @param theRequest the request to issue
-	 * @return the fully-consumed response
-	 * @throws java.io.UncheckedIOException if the request fails to execute or the response body
-	 * cannot be read. A test failure from this is almost always an infrastructure problem (e.g.
-	 * the test server), not a case under test, so it is unchecked rather than forcing every
-	 * calling test method to declare {@code throws IOException}.
+	 * @return the fully-read response
+	 * @throws java.io.UncheckedIOException if the request fails or the body cannot be read. This is
+	 *    almost always broken test infrastructure rather than the case under test, so it is
+	 *    unchecked — otherwise every calling test would declare {@code throws IOException}.
 	 */
 	HttpTestResponse execute(Request theRequest);
 
 	/**
-	 * A single HTTP request, described independently of any HTTP client library.
+	 * One HTTP request, described independently of any HTTP client library.
 	 *
 	 * @param method the HTTP method, e.g. {@literal "GET"}
 	 * @param url the full request URL
-	 * @param headers the request headers, in the order they were added
-	 * @param body the request body, or {@literal null} for a request with no body
-	 * @param contentType the MIME type of {@code body} (e.g. {@literal "text/plain"}), or
-	 *    {@literal null} when there is no body. A UTF-8 charset is assumed for textual types.
-	 * @param followRedirects whether the transport should follow a 3xx, or {@literal null} to leave
-	 *    the decision to whatever the underlying client is configured with. Clients disagree on the
-	 *    default — hapi's {@link HttpClientExtension} follows redirects, CDR's
-	 *    {@code SmileTestHttpClient} does not — so a test that cares should say so rather than
-	 *    inherit it. See {@link HttpTestRequest#followRedirects(boolean)}.
+	 * @param headers the request headers, in the order added
+	 * @param body the request body, or {@literal null} for none
+	 * @param contentType the MIME type of {@code body}, or {@literal null} when there is no body.
+	 *    A UTF-8 charset is assumed for textual types.
+	 * @param followRedirects whether to follow a 3xx, or {@literal null} to inherit the client's
+	 *    own setting. Clients in this codebase disagree on the default, so a test that cares should
+	 *    say so — see {@link HttpTestRequest#followRedirects(boolean)} for the caveats.
 	 */
 	record Request(
 			String method,

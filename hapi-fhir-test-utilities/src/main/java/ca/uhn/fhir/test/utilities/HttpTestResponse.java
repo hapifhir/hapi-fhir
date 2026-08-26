@@ -26,18 +26,14 @@ import java.util.Locale;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * The fully-consumed result of a request issued by {@link HttpTestRequest}.
+ * The result of a request issued by {@link HttpTestRequest}, fully read into memory.
  * <p>
- * The underlying HTTP response is closed by the {@link IHttpTestTransport} before this object is
- * returned, so the body and headers are captured eagerly. This means a test can hold on
- * to the response and make assertions about it without worrying about connection
- * lifecycle or leaking connections from the pool.
+ * The connection is already closed by the time you get this, so a test can hold onto the response
+ * and assert against it freely — there is nothing to leak.
  * </p>
  * <p>
- * The body is held as bytes rather than as a String, so that a response carrying a binary payload
- * (a {@literal Binary} resource, an image, gzipped NDJSON) survives intact. {@link #getBody()}
- * decodes those bytes as UTF-8 for the common textual case; {@link #getBodyBytes()} hands back the
- * bytes themselves.
+ * The body is kept as bytes so binary payloads survive intact. Use {@link #getBody()} for text and
+ * {@link #getBodyBytes()} for anything else.
  * </p>
  */
 // Created by claude-sonnet-5
@@ -49,7 +45,7 @@ public class HttpTestResponse {
 	private final List<HeaderEntry> myHeaders;
 
 	/**
-	 * @param theBody the response body, or {@literal null} for a response with no body
+	 * @param theBody the response body, or {@literal null} if there was none
 	 */
 	// Created by claude-opus-5
 	public HttpTestResponse(
@@ -61,8 +57,7 @@ public class HttpTestResponse {
 	}
 
 	/**
-	 * Convenience for a response whose body is known to be text; the body is stored as its UTF-8
-	 * encoding.
+	 * For a response whose body is known to be text. Stored as UTF-8.
 	 *
 	 * @see #HttpTestResponse(int, String, byte[], List)
 	 */
@@ -76,12 +71,10 @@ public class HttpTestResponse {
 	}
 
 	/**
-	 * Asserts that the response had the given HTTP status code. On failure the message
-	 * includes the response body, which is almost always what you need in order to
-	 * understand why the status was not what you expected.
+	 * Asserts the response had this status code. The failure message includes the body, which is
+	 * usually what tells you why the status was not what you expected.
 	 *
-	 * @param theExpectedStatusCode the HTTP status code the response is expected to have
-	 * @return this object, so that further assertions can be chained
+	 * @return this, for chaining
 	 */
 	public HttpTestResponse assertStatus(int theExpectedStatusCode) {
 		assertThat(myStatusCode)
@@ -100,17 +93,16 @@ public class HttpTestResponse {
 	}
 
 	/**
-	 * @return the response body decoded as UTF-8, or an empty string if the response had no body.
-	 *    Use {@link #getBodyBytes()} for a payload that is not UTF-8 text.
+	 * @return the body decoded as UTF-8, or an empty string if there was none. Use
+	 *    {@link #getBodyBytes()} if the payload is not UTF-8 text.
 	 */
 	public String getBody() {
 		return new String(myBody, StandardCharsets.UTF_8);
 	}
 
 	/**
-	 * @return the raw response body bytes, or an empty array if the response had no body. Use this
-	 *    rather than {@link #getBody()} whenever the payload is binary — decoding those bytes as
-	 *    UTF-8 and re-encoding them does not round-trip.
+	 * @return the raw body bytes, or an empty array if there was none. Prefer this over
+	 *    {@link #getBody()} for binary payloads: a UTF-8 decode and re-encode does not round-trip.
 	 */
 	// Created by claude-opus-5
 	public byte[] getBodyBytes() {
@@ -118,13 +110,11 @@ public class HttpTestResponse {
 	}
 
 	/**
-	 * The response's MIME type with any parameters removed and the result lower-cased, so that
-	 * {@literal "text/html; charset=UTF-8"} and {@literal "text/html"} compare equal. Tests almost
-	 * always want to assert on the type alone rather than on whatever charset the server chose to
-	 * append.
+	 * The MIME type alone, lower-cased with any parameters stripped, so
+	 * {@literal "text/html; charset=UTF-8"} and {@literal "text/html"} compare equal. Tests usually
+	 * want the type, not whatever charset the server appended.
 	 *
-	 * @return the {@literal Content-Type} MIME type, or {@literal null} if the response had no
-	 *    {@literal Content-Type} header
+	 * @return the {@literal Content-Type} MIME type, or {@literal null} if the header was absent
 	 */
 	// Created by claude-opus-5
 	public String contentType() {
@@ -139,7 +129,7 @@ public class HttpTestResponse {
 
 	/**
 	 * @param theName the header name, matched case-insensitively
-	 * @return the value of the first response header with the given name, or {@literal null} if there is none
+	 * @return the first value for this header, or {@literal null} if absent
 	 */
 	public String getHeader(String theName) {
 		return myHeaders.stream()
@@ -151,7 +141,7 @@ public class HttpTestResponse {
 
 	/**
 	 * @param theName the header name, matched case-insensitively
-	 * @return the values of all response headers with the given name, never {@literal null}
+	 * @return every value for this header, never {@literal null}
 	 */
 	public List<String> getHeaders(String theName) {
 		return myHeaders.stream()
@@ -161,17 +151,16 @@ public class HttpTestResponse {
 	}
 
 	/**
-	 * @return all response headers, in receipt order, as name/value pairs
+	 * @return all headers, in the order received
 	 */
 	public List<HeaderEntry> getAllHeaders() {
 		return myHeaders;
 	}
 
 	/**
-	 * Renders like a raw HTTP response: a status line, one {@literal Name: value} line per
-	 * header, then the body. Tests commonly assert on a specific header's value with
-	 * {@code assertThat(response.toString()).contains("X-My-Header: expected-value")}; that
-	 * only works if headers render as HTTP header lines rather than as a {@code List} dump.
+	 * Renders as a raw HTTP response — status line, one {@literal Name: value} per header, then the
+	 * body. Deliberately wire-shaped so that
+	 * {@code assertThat(response.toString()).contains("X-My-Header: expected")} works.
 	 */
 	@Override
 	public String toString() {
@@ -185,7 +174,7 @@ public class HttpTestResponse {
 	}
 
 	/**
-	 * A single response header's name and value, independent of any particular HTTP client library.
+	 * One header, independent of any HTTP client library.
 	 */
 	public record HeaderEntry(String name, String value) {}
 }
