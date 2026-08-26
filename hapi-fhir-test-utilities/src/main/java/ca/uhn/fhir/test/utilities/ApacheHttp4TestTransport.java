@@ -66,10 +66,8 @@ class ApacheHttp4TestTransport implements IHttpTestTransport {
 	public HttpTestResponse execute(Request theRequest) {
 		HttpRequestBase request = toApacheRequest(theRequest);
 		theRequest.headers().forEach(header -> request.addHeader(header.name(), header.value()));
-		if (theRequest.followRedirects() != null) {
-			request.setConfig(RequestConfig.custom()
-					.setRedirectsEnabled(theRequest.followRedirects())
-					.build());
+		if (theRequest.disableRedirects()) {
+			request.setConfig(RequestConfig.custom().setRedirectsEnabled(false).build());
 		}
 
 		try (CloseableHttpResponse response = myClient.execute(request)) {
@@ -81,36 +79,10 @@ class ApacheHttp4TestTransport implements IHttpTestTransport {
 					body,
 					toHeaderEntries(response.getAllHeaders()));
 			ourLog.debug("{} {} -> {}", theRequest.method(), theRequest.url(), retVal);
-			assertRedirectExpectationHonoured(theRequest, retVal);
 			return retVal;
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
-	}
-
-	/**
-	 * Redirect handling is fixed when an Apache client is built, so a request asking to follow one
-	 * against a client built with redirects disabled is simply ignored. Rather than return a 3xx the
-	 * caller did not expect, fail here where the mismatch is obvious.
-	 */
-	private static void assertRedirectExpectationHonoured(Request theRequest, HttpTestResponse theResponse) {
-		if (Boolean.TRUE.equals(theRequest.followRedirects()) && isRedirectStatus(theResponse.getStatusCode())) {
-			throw new IllegalStateException("followRedirects(true) was requested for "
-					+ theRequest.method() + " " + theRequest.url() + ", but the response was HTTP "
-					+ theResponse.getStatusCode() + " " + theResponse.getReasonPhrase()
-					+ ". The client this request was issued on most likely has redirects disabled"
-					+ " (e.g. via HttpClientBuilder#disableRedirectHandling()), which a per-request"
-					+ " override cannot re-enable. Build a client with redirects enabled if this test"
-					+ " needs to follow them.");
-		}
-	}
-
-	private static boolean isRedirectStatus(int theStatusCode) {
-		return theStatusCode == 301
-				|| theStatusCode == 302
-				|| theStatusCode == 303
-				|| theStatusCode == 307
-				|| theStatusCode == 308;
 	}
 
 	private HttpRequestBase toApacheRequest(Request theRequest) {

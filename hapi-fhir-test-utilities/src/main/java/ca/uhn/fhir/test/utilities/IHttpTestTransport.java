@@ -56,9 +56,9 @@ public interface IHttpTestTransport {
 	 * @param body the request body, or {@literal null} for none
 	 * @param contentType the MIME type of {@code body}, or {@literal null} when there is no body.
 	 *    A UTF-8 charset is assumed for textual types.
-	 * @param followRedirects whether to follow a 3xx, or {@literal null} to inherit the client's
-	 *    own setting. Clients in this codebase disagree on the default, so a test that cares should
-	 *    say so — see {@link HttpTestRequest#followRedirects(boolean)} for the caveats.
+	 * @param disableRedirects {@literal true} to return a 3xx rather than follow it. When
+	 *    {@literal false} the client's own setting applies — see
+	 *    {@link HttpTestRequest#withoutRedirects()}.
 	 */
 	record Request(
 			String method,
@@ -66,5 +66,5 @@ public interface IHttpTestTransport {
 			List<HttpTestResponse.HeaderEntry> headers,
 			byte[] body,
 			String contentType,
-			Boolean followRedirects) {}
+			boolean disableRedirects) {}
 }

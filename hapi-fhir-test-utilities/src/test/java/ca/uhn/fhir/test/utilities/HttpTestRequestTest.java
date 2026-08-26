@@ -92,6 +92,24 @@ class HttpTestRequestTest {
 		return HttpTestRequest.to(ourServer.getHttpClient(), ourFhirContext, ourServer.getBaseUrl() + thePath);
 	}
 
+	@Test
+	void post_contentTypeAlreadyHasCharset_isNotAppendedTwice() {
+		HttpTestResponse response =
+				HttpTestRequest.to(ourServer.getHttpClient(), ourServer.getBaseUrl() + "/foo")
+						.post("hello", "text/plain; charset=ISO-8859-1");
+
+		assertThat(response.getBody()).contains("rawContentType=text/plain; charset=ISO-8859-1");
+	}
+
+	@Test
+	void post_contentTypeHasNoCharset_utf8IsAppended() {
+		HttpTestResponse response =
+				HttpTestRequest.to(ourServer.getHttpClient(), ourServer.getBaseUrl() + "/foo")
+						.post("hello", "text/plain");
+
+		assertThat(response.getBody()).contains("rawContentType=text/plain; charset=UTF-8");
+	}
+
 	private static class EchoServlet extends HttpServlet {
 
 		@Override
@@ -103,7 +121,8 @@ class HttpTestRequestTest {
 			theResponse
 				.getWriter()
 				.write("method=" + theRequest.getMethod() + "\ncontentType="
-					+ stripCharset(theRequest.getContentType()) + "\nprefer="
+					+ stripCharset(theRequest.getContentType()) + "\nrawContentType="
+					+ theRequest.getContentType() + "\nprefer="
 					+ theRequest.getHeader(Constants.HEADER_PREFER) + "\nbody=" + requestBody);
 		}
 

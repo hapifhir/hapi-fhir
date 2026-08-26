@@ -57,10 +57,10 @@ public final class TestHttpClientFactory {
 	}
 
 	/**
-	 * @param theFollowRedirects whether this client follows a {@literal 3xx}. Note that only
-	 *    {@literal true} leaves the choice open afterwards:
-	 *    {@link HttpTestRequest#followRedirects(boolean)} can turn following off per request, but
-	 *    cannot turn it back on for a client built with {@literal false}.
+	 * @param theFollowRedirects whether this client follows a {@literal 3xx}. A client built with
+	 *    {@literal true} can still suppress following on individual requests via
+	 *    {@link HttpTestRequest#withoutRedirects()}; one built with {@literal false} cannot be made
+	 *    to follow, since Apache HttpClient fixes this when the client is built.
 	 */
 	public static CloseableHttpClient create(boolean theFollowRedirects) {
 		PoolingHttpClientConnectionManager connectionManager =

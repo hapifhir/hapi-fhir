@@ -76,8 +76,8 @@ public class HttpClientExtension implements BeforeEachCallback, AfterEachCallbac
 	 * lifecycle stays with the extension.
 	 * <p>
 	 * Note that this client <b>follows redirects</b> unless {@link #dontFollowRedirects()} was
-	 * called. A test that cares either way should say so per-request with
-	 * {@link HttpTestRequest#followRedirects(boolean)} rather than rely on that default.
+	 * called. A test that needs to assert on a 3xx can suppress following per-request with
+	 * {@link HttpTestRequest#withoutRedirects()}.
 	 * </p>
 	 *
 	 * @param theUrl the full request URL

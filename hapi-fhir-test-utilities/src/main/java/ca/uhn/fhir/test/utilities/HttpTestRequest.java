@@ -59,7 +59,7 @@ public class HttpTestRequest {
 	private final FhirContext myFhirContext;
 	private final String myUrl;
 	private final List<HttpTestResponse.HeaderEntry> myHeaders = new ArrayList<>();
-	private Boolean myFollowRedirects;
+	private boolean myDisableRedirects;
 
 	private HttpTestRequest(IHttpTestTransport theTransport, FhirContext theFhirContext, String theUrl) {
 		Validate.notNull(theTransport, "theTransport must not be null");
@@ -137,35 +137,18 @@ public class HttpTestRequest {
 	}
 
 	/**
-	 * States whether a {@literal 3xx} should be followed, rather than inheriting whatever the
-	 * client was built with — clients in this codebase disagree on the default.
+	 * Returns a {@literal 3xx} as-is instead of following it, so a test can assert on the status
+	 * and the {@literal Location} header.
 	 * <p>
-	 * Two caveats, both forced by Apache HttpClient:
+	 * Note that this resets the request's other settings — timeouts, compression, cookie policy —
+	 * to Apache HttpClient's stock defaults, because a client's configured defaults cannot be read
+	 * back in order to preserve them. Avoid it where those matter.
 	 * </p>
-	 * <ul>
-	 * <li>It can only turn following <i>off</i>. Redirect handling is fixed when the client is
-	 * built, so {@literal true} against a client built with redirects disabled cannot work; it
-	 * fails fast with an {@link IllegalStateException} instead of quietly returning the 3xx.</li>
-	 * <li>Calling this at all resets the request's other settings — timeouts, compression, cookie
-	 * policy — to HttpClient's stock defaults, because a client's configured defaults cannot be
-	 * read back. Avoid it where those matter.</li>
-	 * </ul>
-	 *
-	 * @param theFollowRedirects {@literal true} to follow, {@literal false} to return the 3xx itself
-	 */
-	// Created by claude-opus-5
-	public HttpTestRequest followRedirects(boolean theFollowRedirects) {
-		myFollowRedirects = theFollowRedirects;
-		return this;
-	}
-
-	/**
-	 * Shorthand for {@code followRedirects(false)} — the common case, where the test asserts on the
-	 * redirect itself rather than its destination.
 	 */
 	// Created by claude-opus-5
 	public HttpTestRequest withoutRedirects() {
-		return followRedirects(false);
+		myDisableRedirects = true;
+		return this;
 	}
 
 	/**
@@ -295,7 +278,7 @@ public class HttpTestRequest {
 	 */
 	public HttpTestResponse method(String theMethod, byte[] theBody, String theContentType) {
 		return myTransport.execute(new IHttpTestTransport.Request(
-				theMethod, myUrl, myHeaders, theBody, theContentType, myFollowRedirects));
+				theMethod, myUrl, myHeaders, theBody, theContentType, myDisableRedirects));
 	}
 
 	private byte[] encodeResource(IBaseResource theBody) {

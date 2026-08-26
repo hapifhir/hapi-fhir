@@ -1,5 +1,6 @@
 package ca.uhn.fhir.test.utilities;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
 import jakarta.servlet.http.HttpServlet;
@@ -11,6 +12,7 @@ import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.core5.util.TimeValue;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -19,6 +21,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 /**
  * Verifies that every {@link IHttpTestTransport} implementation is observably interchangeable. The
@@ -191,12 +194,57 @@ class FhirHttpTransportContractTest {
 
 	@ParameterizedTest
 	@ValueSource(strings = {APACHE_4, APACHE_5})
-	void followRedirects_serverRedirects_followsToTheDestination(String theTransport) {
-		HttpTestResponse response =
-				request(theTransport, "/foo?redirect=true").followRedirects(true).get();
+	void withoutRedirects_notCalled_clientDefaultApplies(String theTransport) {
+		// Both transports here run on clients that follow redirects, so saying nothing follows.
+		HttpTestResponse response = request(theTransport, "/foo?redirect=true").get();
 
 		assertThat(response.getStatusCode()).isEqualTo(200);
 		assertThat(response.getBody()).contains("method=GET");
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {APACHE_4, APACHE_5})
+	void head_sendsHeadMethod(String theTransport) {
+		HttpTestResponse response = request(theTransport, "/foo").head();
+
+		assertThat(response.getStatusCode()).isEqualTo(200);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {APACHE_4, APACHE_5})
+	void put_withStringBody_sendsBodyAndContentType(String theTransport) {
+		HttpTestResponse response = request(theTransport, "/foo").put("hello", "text/plain");
+
+		assertThat(response.getBody()).contains("method=PUT").contains("body=hello");
+		assertThat(response.getBody()).contains("contentType=text/plain");
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {APACHE_4, APACHE_5})
+	void put_withByteArrayBody_sendsBytesUnaltered(String theTransport) {
+		HttpTestResponse response = request(theTransport, "/foo").put(PNG_MAGIC, "image/png");
+
+		assertThat(response.getBody()).contains("method=PUT").contains("contentType=image/png");
+	}
+
+	@Test
+	void to_apacheHttp5ClientOverload_resolvesTheHttp5Transport() {
+		HttpTestResponse response =
+				HttpTestRequest.to(ourHttp5Client, ourServer.getBaseUrl() + "/foo").get();
+
+		assertThat(response.getStatusCode()).isEqualTo(200);
+		assertThat(response.getBody()).contains("method=GET");
+	}
+
+	@Test
+	void to_apacheHttp5ClientWithFhirContextOverload_resolvesTheHttp5Transport() {
+		// A mock context suffices — this module has no FHIR structures JAR, and the request sends
+		// no resource body, so the context is only carried through.
+		HttpTestResponse response = HttpTestRequest.to(
+						ourHttp5Client, mock(FhirContext.class), ourServer.getBaseUrl() + "/foo")
+				.get();
+
+		assertThat(response.getStatusCode()).isEqualTo(200);
 	}
 
 	/**
