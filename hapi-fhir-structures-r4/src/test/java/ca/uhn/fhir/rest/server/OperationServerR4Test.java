@@ -42,7 +42,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -263,7 +262,7 @@ class OperationServerR4Test {
 
 		status.assertStatus(200);
 		assertEquals(contentType.getMimeType(), status.getHeader("Content-Type"));
-		assertThat(status.getBody().getBytes(StandardCharsets.UTF_8)).containsExactly(bytes);
+		assertThat(status.getBodyBytes()).containsExactly(bytes);
 
 	}
 
@@ -277,7 +276,7 @@ class OperationServerR4Test {
 
 		status.assertStatus(200);
 		assertEquals(contentType.getMimeType(), status.getHeader("Content-Type"));
-		assertThat(status.getBody().getBytes(StandardCharsets.UTF_8)).containsExactly(bytes);
+		assertThat(status.getBodyBytes()).containsExactly(bytes);
 		assertEquals("value", ourLastParam1.getValue());
 
 	}

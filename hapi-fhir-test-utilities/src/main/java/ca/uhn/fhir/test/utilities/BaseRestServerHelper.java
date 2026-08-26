@@ -23,7 +23,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
@@ -94,7 +93,7 @@ public abstract class BaseRestServerHelper {
 	// Created by claude-opus-5
 	public HttpTestRequest fhirRequest(String thePath) {
 		if (myHttpClient == null) {
-			myHttpClient = HttpClientBuilder.create().build();
+			myHttpClient = TestHttpClientFactory.create();
 		}
 		return HttpTestRequest.to(myHttpClient, myFhirContext, getBase() + thePath);
 	}

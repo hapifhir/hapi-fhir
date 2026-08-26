@@ -148,8 +148,19 @@ public class HttpTestRequest {
 	 * Says explicitly whether a {@literal 3xx} should be followed, instead of inheriting whatever
 	 * the underlying client happens to be configured with. Clients disagree: hapi's
 	 * {@link HttpClientExtension} follows redirects by default, CDR's {@code SmileTestHttpClient}
-	 * disables them. A test that asserts on a {@literal Location} header, or on the content of the
-	 * page a redirect leads to, should state which it wants.
+	 * disables them.
+	 * <p>
+	 * Apache HttpClient decides whether to follow redirects when the client itself is built, not
+	 * per request, so this cannot make an already-redirect-disabled client follow one: {@literal
+	 * true} against such a client fails fast with an {@link IllegalStateException} rather than
+	 * silently returning the unfollowed {@literal 3xx}.
+	 * </p>
+	 * <p>
+	 * Either value also replaces the request's configuration with HttpClient's stock defaults for
+	 * everything else — timeouts, compression, cookie policy — rather than whatever the client's
+	 * own default configuration specifies, because HttpClient exposes no way to read a client's
+	 * configured defaults back. Avoid this on a request where the client's other defaults matter.
+	 * </p>
 	 *
 	 * @param theFollowRedirects {@literal true} to follow, {@literal false} to return the 3xx itself
 	 */

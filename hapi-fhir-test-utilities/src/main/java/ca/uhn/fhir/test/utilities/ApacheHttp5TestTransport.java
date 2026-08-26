@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.test.utilities;
 
+import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
@@ -90,10 +91,39 @@ class ApacheHttp5TestTransport implements IHttpTestTransport {
 						toHeaderEntries(response.getHeaders()));
 			});
 			ourLog.debug("{} {} -> {}", theRequest.method(), theRequest.url(), retVal);
+			assertRedirectExpectationHonoured(theRequest, retVal);
 			return retVal;
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
+	}
+
+	/**
+	 * {@code followRedirects(true)} cannot make an already-redirect-disabled client follow a
+	 * redirect: Apache HttpClient decides this when the client is built, not per request, so a
+	 * request-level override that asks for {@literal true} against such a client is silently
+	 * ignored. Rather than hand the caller an unfollowed {@literal 3xx} it never asked for, fail
+	 * loudly so the mismatch is diagnosable at the point of the request rather than downstream in
+	 * an unrelated assertion.
+	 */
+	private static void assertRedirectExpectationHonoured(Request theRequest, HttpTestResponse theResponse) {
+		if (Boolean.TRUE.equals(theRequest.followRedirects()) && isRedirectStatus(theResponse.getStatusCode())) {
+			throw new IllegalStateException(Msg.code(3044) + "followRedirects(true) was requested for "
+					+ theRequest.method() + " " + theRequest.url() + ", but the response was HTTP "
+					+ theResponse.getStatusCode() + " " + theResponse.getReasonPhrase()
+					+ ". The client this request was issued on most likely has redirects disabled"
+					+ " (e.g. via HttpClientBuilder#disableRedirectHandling()), which a per-request"
+					+ " override cannot re-enable. Build a client with redirects enabled if this test"
+					+ " needs to follow them.");
+		}
+	}
+
+	private static boolean isRedirectStatus(int theStatusCode) {
+		return theStatusCode == 301
+				|| theStatusCode == 302
+				|| theStatusCode == 303
+				|| theStatusCode == 307
+				|| theStatusCode == 308;
 	}
 
 	private static ContentType contentType(String theMimeType) {

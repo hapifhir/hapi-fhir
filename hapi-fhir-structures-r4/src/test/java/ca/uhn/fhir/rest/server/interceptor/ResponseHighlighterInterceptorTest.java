@@ -58,7 +58,6 @@ import org.springframework.web.cors.CorsConfiguration;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -155,7 +154,7 @@ class ResponseHighlighterInterceptorTest {
 		status.assertStatus(200);
 		assertEquals("foo", status.getHeader("content-type"));
 		assertEquals("Attachment;", status.getHeader("Content-Disposition"));
-		assertThat(status.getBody().getBytes(StandardCharsets.UTF_8)).containsExactly(new byte[]{1, 2, 3, 4});
+		assertThat(status.getBodyBytes()).containsExactly(new byte[]{1, 2, 3, 4});
 	}
 
 	/**
@@ -194,7 +193,7 @@ class ResponseHighlighterInterceptorTest {
 		status.assertStatus(200);
 		assertEquals("foo", status.getHeader("content-type"));
 		assertEquals("Attachment;", status.getHeader("Content-Disposition"));
-		assertThat(status.getBody().getBytes(StandardCharsets.UTF_8)).containsExactly(new byte[]{1, 2, 3, 4});
+		assertThat(status.getBodyBytes()).containsExactly(new byte[]{1, 2, 3, 4});
 
 	}
 
