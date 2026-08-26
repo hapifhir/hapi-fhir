@@ -337,7 +337,7 @@ public class BulkPatchProviderTest {
 	}
 
 	@ParameterizedTest
-	@CsvSource(delimiter = '#', textBlock = """
+	@CsvSource(delimiter = '#', commentCharacter = '~', textBlock = """
 		1|2|3       # {"allPartitions":false,"partitionIds":[1,2,3]}
 		1|  2   |3  # {"allPartitions":false,"partitionIds":[1,2,3]}
 		1|2|  | |3  # {"allPartitions":false,"partitionIds":[1,2,3]}

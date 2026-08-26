@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.model.dialect;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import org.hibernate.dialect.CockroachDialect;
 import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
+import org.hibernate.type.SqlTypes;
 
 /**
  * Dialect for CockroachDB database.
@@ -48,5 +49,18 @@ public class HapiFhirCockroachDialect extends CockroachDialect implements IHapiF
 	@Override
 	public DriverTypeEnum getDriverType() {
 		return DriverTypeEnum.COCKROACHDB_21_1;
+	}
+
+	/**
+	 * CockroachDB's {@code string} type carries no length limit. Hibernate 7 renders our character LOB
+	 * columns using it, where Hibernate 6 rendered a length-qualified {@code varchar}. We keep the
+	 * length-qualified form so that a freshly created schema still matches an existing, migrated one.
+	 */
+	@Override
+	protected String columnType(int theSqlTypeCode) {
+		return switch (theSqlTypeCode) {
+			case SqlTypes.CLOB, SqlTypes.NCLOB -> "varchar($l)";
+			default -> super.columnType(theSqlTypeCode);
+		};
 	}
 }

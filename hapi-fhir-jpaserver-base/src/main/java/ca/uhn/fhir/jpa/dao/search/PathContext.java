@@ -68,11 +68,11 @@ import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.NESTED_SEARCH_PARA
  */
 class PathContext implements SearchPredicateFactory {
 	private final String myPathPrefix;
-	private final BooleanPredicateClausesStep<?> myRootClause;
+	private final BooleanPredicateClausesStep<?, ?> myRootClause;
 	private final SearchPredicateFactory myPredicateFactory;
 
 	PathContext(
-			String thePrefix, BooleanPredicateClausesStep<?> theClause, SearchPredicateFactory thePredicateFactory) {
+			String thePrefix, BooleanPredicateClausesStep<?, ?> theClause, SearchPredicateFactory thePredicateFactory) {
 		myRootClause = theClause;
 		myPredicateFactory = thePredicateFactory;
 		myPathPrefix = thePrefix;
@@ -80,7 +80,7 @@ class PathContext implements SearchPredicateFactory {
 
 	@Nonnull
 	static PathContext buildRootContext(
-			BooleanPredicateClausesStep<?> theRootClause, SearchPredicateFactory thePredicateFactory) {
+			BooleanPredicateClausesStep<?, ?> theRootClause, SearchPredicateFactory thePredicateFactory) {
 		return new PathContext("", theRootClause, thePredicateFactory);
 	}
 
@@ -126,7 +126,7 @@ class PathContext implements SearchPredicateFactory {
 		if (theOrList.size() == 1) {
 			finalClause = theOrList.get(0);
 		} else {
-			BooleanPredicateClausesStep<?> orClause = myPredicateFactory.bool();
+			BooleanPredicateClausesStep<?, ?> orClause = myPredicateFactory.bool();
 			orClause.minimumShouldMatchNumber(1);
 			theOrList.forEach(orClause::should);
 			finalClause = orClause;
@@ -137,7 +137,7 @@ class PathContext implements SearchPredicateFactory {
 	// implement SearchPredicateFactory
 
 	@Override
-	public MatchAllPredicateOptionsStep<?> matchAll() {
+	public MatchAllPredicateOptionsStep<?, ?> matchAll() {
 		return myPredicateFactory.matchAll();
 	}
 
@@ -152,17 +152,17 @@ class PathContext implements SearchPredicateFactory {
 	}
 
 	@Override
-	public BooleanPredicateClausesStep<?> bool() {
+	public BooleanPredicateClausesStep<?, ?> bool() {
 		return myPredicateFactory.bool();
 	}
 
 	@Override
-	public PredicateFinalStep bool(Consumer<? super BooleanPredicateClausesStep<?>> clauseContributor) {
+	public PredicateFinalStep bool(Consumer<? super BooleanPredicateClausesStep<?, ?>> clauseContributor) {
 		return myPredicateFactory.bool(clauseContributor);
 	}
 
 	@Override
-	public SimpleBooleanPredicateClausesStep<?> and() {
+	public SimpleBooleanPredicateClausesStep<?, ?> and() {
 		return myPredicateFactory.and();
 	}
 
@@ -179,7 +179,7 @@ class PathContext implements SearchPredicateFactory {
 	}
 
 	@Override
-	public SimpleBooleanPredicateClausesStep<?> or() {
+	public SimpleBooleanPredicateClausesStep<?, ?> or() {
 		return myPredicateFactory.or();
 	}
 
@@ -206,62 +206,62 @@ class PathContext implements SearchPredicateFactory {
 	}
 
 	@Override
-	public MatchPredicateFieldStep<?> match() {
+	public MatchPredicateFieldStep<?, ?> match() {
 		return myPredicateFactory.match();
 	}
 
 	@Override
-	public RangePredicateFieldStep<?> range() {
+	public RangePredicateFieldStep<?, ?> range() {
 		return myPredicateFactory.range();
 	}
 
 	@Override
-	public PhrasePredicateFieldStep<?> phrase() {
+	public PhrasePredicateFieldStep<?, ?> phrase() {
 		return myPredicateFactory.phrase();
 	}
 
 	@Override
-	public WildcardPredicateFieldStep<?> wildcard() {
+	public WildcardPredicateFieldStep<?, ?> wildcard() {
 		return myPredicateFactory.wildcard();
 	}
 
 	@Override
-	public PrefixPredicateFieldStep<?> prefix() {
+	public PrefixPredicateFieldStep<?, ?> prefix() {
 		return myPredicateFactory.prefix();
 	}
 
 	@Override
-	public RegexpPredicateFieldStep<?> regexp() {
+	public RegexpPredicateFieldStep<?, ?> regexp() {
 		return myPredicateFactory.regexp();
 	}
 
 	@Override
-	public TermsPredicateFieldStep<?> terms() {
+	public TermsPredicateFieldStep<?, ?> terms() {
 		return myPredicateFactory.terms();
 	}
 
 	@Override
-	public NestedPredicateFieldStep<?> nested() {
+	public NestedPredicateFieldStep<?, ?> nested() {
 		return myPredicateFactory.nested();
 	}
 
 	@Override
-	public NestedPredicateClausesStep<?> nested(String theObjectFieldPath) {
+	public NestedPredicateClausesStep<?, ?> nested(String theObjectFieldPath) {
 		return myPredicateFactory.nested(theObjectFieldPath);
 	}
 
 	@Override
-	public SimpleQueryStringPredicateFieldStep<?> simpleQueryString() {
+	public SimpleQueryStringPredicateFieldStep<?, ?> simpleQueryString() {
 		return myPredicateFactory.simpleQueryString();
 	}
 
 	@Override
-	public QueryStringPredicateFieldStep<?> queryString() {
+	public QueryStringPredicateFieldStep<?, ?> queryString() {
 		return myPredicateFactory.queryString();
 	}
 
 	@Override
-	public ExistsPredicateFieldStep<?> exists() {
+	public ExistsPredicateFieldStep<?, ?> exists() {
 		return myPredicateFactory.exists();
 	}
 

@@ -5,7 +5,7 @@ import ca.uhn.fhir.util.TestUtil
 import cn.uhn.fhir.jaxrs.server.example.ExtendedOrganizationResource
 import org.apache.commons.lang3.StringUtils
 import org.assertj.core.api.Assertions.assertThat
-import org.eclipse.jetty.ee10.servlet.ServletContextHandler
+import org.eclipse.jetty.ee11.servlet.ServletContextHandler
 import org.eclipse.jetty.server.Server
 import org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher
 import org.junit.jupiter.api.AfterAll

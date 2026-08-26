@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.web.util.ForwardedHeaderUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -88,7 +89,9 @@ public class ApacheProxyAddressStrategy extends IncomingRequestAddressStrategy {
 	public String determineServerBase(ServletContext servletContext, HttpServletRequest request) {
 		String serverBase = super.determineServerBase(servletContext, request);
 		ServletServerHttpRequest requestWrapper = new ServletServerHttpRequest(request);
-		UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpRequest(requestWrapper);
+		// Spring 7 removed UriComponentsBuilder#fromHttpRequest. This is exactly what it delegated to.
+		UriComponentsBuilder uriBuilder =
+				ForwardedHeaderUtils.adaptFromForwardedHeaders(requestWrapper.getURI(), requestWrapper.getHeaders());
 		uriBuilder.replaceQuery(null);
 		HttpHeaders headers = requestWrapper.getHeaders();
 		adjustSchemeWithDefault(uriBuilder, headers);
@@ -120,7 +123,7 @@ public class ApacheProxyAddressStrategy extends IncomingRequestAddressStrategy {
 	}
 
 	private String pathFrom(String serverBase) {
-		UriComponents build = UriComponentsBuilder.fromHttpUrl(serverBase).build();
+		UriComponents build = UriComponentsBuilder.fromUriString(serverBase).build();
 		return StringUtils.defaultIfBlank(build.getPath(), "");
 	}
 

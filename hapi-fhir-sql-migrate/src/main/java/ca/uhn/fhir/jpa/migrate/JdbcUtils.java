@@ -30,6 +30,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.boot.model.naming.Identifier;
 import org.hibernate.boot.model.relational.QualifiedSequenceName;
 import org.hibernate.dialect.Dialect;
+import org.hibernate.engine.jdbc.dialect.internal.DialectResolverSet;
 import org.hibernate.engine.jdbc.dialect.internal.StandardDialectResolver;
 import org.hibernate.engine.jdbc.dialect.spi.DatabaseMetaDataDialectResolutionInfoAdapter;
 import org.hibernate.engine.jdbc.dialect.spi.DialectResolver;
@@ -66,6 +67,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -458,6 +460,33 @@ public class JdbcUtils {
 				.collect(Collectors.toSet());
 	}
 
+	/**
+	 * Resolves the Hibernate {@link Dialect} for the database behind the given connection.
+	 * <p>
+	 * Hibernate 7 moved a number of dialects, Derby among them, out of hibernate-core and into
+	 * hibernate-community-dialects, where they are contributed through a {@link DialectResolver} registered as a
+	 * java.util.ServiceLoader service. {@link StandardDialectResolver} alone therefore returns null for those
+	 * databases, so we consult the discovered resolvers as well.
+	 * </p>
+	 *
+	 * @throws SQLException if the database metadata can not be read
+	 * @throws InternalErrorException if no resolver recognizes the database
+	 */
+	@Nonnull
+	private static Dialect resolveDialect(Connection theConnection) throws SQLException {
+		DialectResolverSet resolvers = new DialectResolverSet();
+		resolvers.addResolver(new StandardDialectResolver());
+		ServiceLoader.load(DialectResolver.class).forEach(resolvers::addResolver);
+
+		Dialect dialect =
+				resolvers.resolveDialect(new DatabaseMetaDataDialectResolutionInfoAdapter(theConnection.getMetaData()));
+		if (dialect == null) {
+			throw new InternalErrorException(Msg.code(3009) + "Unable to determine the Hibernate dialect for database: "
+					+ theConnection.getMetaData().getDatabaseProductName());
+		}
+		return dialect;
+	}
+
 	@Nonnull
 	public static List<SequenceInformation> getSequenceInformation(
 			DriverTypeEnum.ConnectionProperties theConnectionProperties) throws SQLException {
@@ -466,9 +495,7 @@ public class JdbcUtils {
 			return Objects.requireNonNull(
 					theConnectionProperties.getTxTemplate().execute(t -> {
 						try {
-							DialectResolver dialectResolver = new StandardDialectResolver();
-							Dialect dialect = dialectResolver.resolveDialect(
-									new DatabaseMetaDataDialectResolutionInfoAdapter(connection.getMetaData()));
+							Dialect dialect = resolveDialect(connection);
 
 							List<SequenceInformation> sequenceInformation = new ArrayList<>();
 							if (dialect.getSequenceSupport().supportsSequences()) {
@@ -731,7 +758,10 @@ public class JdbcUtils {
 
 				@Override
 				public IdentifierHelper getIdentifierHelper() {
-					return new NormalizingIdentifierHelperImpl(this, null, true, true, true, true, null, null, null);
+					// Hibernate 7 added the autoQuoteDollar flag after autoQuoteInitialUnderscore. We pass
+					// false, which is how identifiers containing a dollar sign were treated before.
+					return new NormalizingIdentifierHelperImpl(
+							this, null, true, true, true, true, false, null, null, null);
 				}
 
 				@Override

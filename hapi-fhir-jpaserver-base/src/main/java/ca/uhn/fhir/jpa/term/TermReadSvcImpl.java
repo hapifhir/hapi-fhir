@@ -1274,7 +1274,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	private void handleFilter(
 			String theCodeSystemIdentifier,
 			SearchPredicateFactory theF,
-			BooleanPredicateClausesStep<?> theB,
+			BooleanPredicateClausesStep<?, ?> theB,
 			ValueSet.ConceptSetFilterComponent theFilter) {
 		if (isBlank(theFilter.getValue()) && theFilter.getOp() == null && isBlank(theFilter.getProperty())) {
 			return;
@@ -1353,7 +1353,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 	private void handleFilterPropertyDefault(
 			SearchPredicateFactory theF,
-			BooleanPredicateClausesStep<?> theB,
+			BooleanPredicateClausesStep<?, ?> theB,
 			ValueSet.ConceptSetFilterComponent theFilter) {
 
 		String value = theFilter.getValue();
@@ -1403,7 +1403,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 	private void handleFilterRegex(
 			SearchPredicateFactory theF,
-			BooleanPredicateClausesStep<?> theB,
+			BooleanPredicateClausesStep<?, ?> theB,
 			ValueSet.ConceptSetFilterComponent theFilter) {
 		/*
 		 * We treat the regex filter as a match on the regex
@@ -1430,7 +1430,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 	private void handleFilterLoincCopyright(
 			SearchPredicateFactory theF,
-			BooleanPredicateClausesStep<?> theB,
+			BooleanPredicateClausesStep<?, ?> theB,
 			ValueSet.ConceptSetFilterComponent theFilter) {
 
 		if (theFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
@@ -1454,11 +1454,11 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		}
 	}
 
-	private void addFilterLoincCopyrightLoinc(SearchPredicateFactory theF, BooleanPredicateClausesStep<?> theB) {
+	private void addFilterLoincCopyrightLoinc(SearchPredicateFactory theF, BooleanPredicateClausesStep<?, ?> theB) {
 		theB.mustNot(theF.exists().field(CONCEPT_PROPERTY_PREFIX_NAME + "EXTERNAL_COPYRIGHT_NOTICE"));
 	}
 
-	private void addFilterLoincCopyright3rdParty(SearchPredicateFactory theF, BooleanPredicateClausesStep<?> theB) {
+	private void addFilterLoincCopyright3rdParty(SearchPredicateFactory theF, BooleanPredicateClausesStep<?, ?> theB) {
 		theB.must(theF.exists().field(CONCEPT_PROPERTY_PREFIX_NAME + "EXTERNAL_COPYRIGHT_NOTICE"));
 	}
 
@@ -1466,7 +1466,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	private void handleFilterLoincAncestor(
 			String theSystem,
 			SearchPredicateFactory f,
-			BooleanPredicateClausesStep<?> b,
+			BooleanPredicateClausesStep<?, ?> b,
 			ValueSet.ConceptSetFilterComponent theFilter) {
 		switch (theFilter.getOp()) {
 			case EQUAL:
@@ -1484,7 +1484,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	private void addLoincFilterAncestorEqual(
 			String theSystem,
 			SearchPredicateFactory f,
-			BooleanPredicateClausesStep<?> b,
+			BooleanPredicateClausesStep<?, ?> b,
 			ValueSet.ConceptSetFilterComponent theFilter) {
 		addLoincFilterAncestorEqual(theSystem, f, b, theFilter.getProperty(), theFilter.getValue());
 	}
@@ -1492,7 +1492,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	private void addLoincFilterAncestorEqual(
 			String theSystem,
 			SearchPredicateFactory f,
-			BooleanPredicateClausesStep<?> b,
+			BooleanPredicateClausesStep<?, ?> b,
 			String theProperty,
 			String theValue) {
 		List<Term> terms = getAncestorTerms(theSystem, theProperty, theValue);
@@ -1503,7 +1503,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	private void addLoincFilterAncestorIn(
 			String theSystem,
 			SearchPredicateFactory f,
-			BooleanPredicateClausesStep<?> b,
+			BooleanPredicateClausesStep<?, ?> b,
 			ValueSet.ConceptSetFilterComponent theFilter) {
 		String[] values = theFilter.getValue().split(",");
 		List<Term> terms = new ArrayList<>();
@@ -1523,7 +1523,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	private void handleFilterHierarchyExists(
 			String theCodeSystemIdentifier,
 			SearchPredicateFactory theF,
-			BooleanPredicateClausesStep<?> theB,
+			BooleanPredicateClausesStep<?, ?> theB,
 			ValueSet.ConceptSetFilterComponent theFilter) {
 
 		// The value is semantically required here and must be a real boolean literal. The generic EXISTS
@@ -1546,7 +1546,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	 * into a huge terms query.
 	 */
 	private void handleFilterHasParentExists(
-			SearchPredicateFactory theF, BooleanPredicateClausesStep<?> theB, boolean theWantConceptsWithParent) {
+			SearchPredicateFactory theF, BooleanPredicateClausesStep<?, ?> theB, boolean theWantConceptsWithParent) {
 		PredicateFinalStep isRoot = theF.match().field("myParentPids").matching("NONE");
 		if (theWantConceptsWithParent) {
 			theB.mustNot(isRoot); // keep the concepts that have a parent (non-roots)
@@ -1563,7 +1563,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	private void handleFilterHasChildrenExists(
 			String theCodeSystemIdentifier,
 			SearchPredicateFactory theF,
-			BooleanPredicateClausesStep<?> theB,
+			BooleanPredicateClausesStep<?, ?> theB,
 			boolean theWantConceptsWithChildren) {
 		Collection<String> codesHavingChildren = findCodesHavingChildren(theCodeSystemIdentifier);
 
@@ -1592,7 +1592,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	 */
 	private void handleFilterPresenceExists(
 			SearchPredicateFactory theF,
-			BooleanPredicateClausesStep<?> theB,
+			BooleanPredicateClausesStep<?, ?> theB,
 			ValueSet.ConceptSetFilterComponent theFilter) {
 		boolean wantExists = parseRequiredBoolean(theFilter);
 		PredicateFinalStep hasProperty = theF.exists().field(CONCEPT_PROPERTY_PREFIX_NAME + theFilter.getProperty());
@@ -1611,7 +1611,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	 */
 	private void handleFilterBooleanPropertyExists(
 			SearchPredicateFactory theF,
-			BooleanPredicateClausesStep<?> theB,
+			BooleanPredicateClausesStep<?, ?> theB,
 			ValueSet.ConceptSetFilterComponent theFilter) {
 		boolean wantFlagged = parseRequiredBoolean(theFilter);
 		Term term = new Term(CONCEPT_PROPERTY_PREFIX_NAME + theFilter.getProperty(), "true");
@@ -1655,7 +1655,9 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	private void handleFilterLoincParentChild(
-			SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, ValueSet.ConceptSetFilterComponent theFilter) {
+			SearchPredicateFactory f,
+			BooleanPredicateClausesStep<?, ?> b,
+			ValueSet.ConceptSetFilterComponent theFilter) {
 		switch (theFilter.getOp()) {
 			case EQUAL:
 				addLoincFilterParentChildEqual(f, b, theFilter.getProperty(), theFilter.getValue());
@@ -1670,7 +1672,9 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	}
 
 	private void addLoincFilterParentChildIn(
-			SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, ValueSet.ConceptSetFilterComponent theFilter) {
+			SearchPredicateFactory f,
+			BooleanPredicateClausesStep<?, ?> b,
+			ValueSet.ConceptSetFilterComponent theFilter) {
 		String[] values = theFilter.getValue().split(",");
 		List<Term> terms = new ArrayList<>();
 		for (String value : values) {
@@ -1683,7 +1687,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	}
 
 	private void addLoincFilterParentChildEqual(
-			SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, String theProperty, String theValue) {
+			SearchPredicateFactory f, BooleanPredicateClausesStep<?, ?> b, String theProperty, String theValue) {
 		logFilteringValueOnProperty(theValue, theProperty);
 		b.must(f.match().field(CONCEPT_PROPERTY_PREFIX_NAME + theProperty).matching(theValue));
 	}
@@ -1691,7 +1695,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	private void handleFilterConceptAndCode(
 			String theSystem,
 			SearchPredicateFactory f,
-			BooleanPredicateClausesStep<?> b,
+			BooleanPredicateClausesStep<?, ?> b,
 			ValueSet.ConceptSetFilterComponent theFilter) {
 		TermConcept code = findCodeForFilterCriteriaCodeOrConcept(theSystem, theFilter);
 
@@ -1752,7 +1756,9 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	}
 
 	private void handleFilterDisplay(
-			SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, ValueSet.ConceptSetFilterComponent theFilter) {
+			SearchPredicateFactory f,
+			BooleanPredicateClausesStep<?, ?> b,
+			ValueSet.ConceptSetFilterComponent theFilter) {
 		if (theFilter.getProperty().equals("display:exact") && theFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
 			addDisplayFilterExact(f, b, theFilter);
 		} else if (theFilter.getProperty().equals("display") && theFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
@@ -1766,14 +1772,14 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 	private void addDisplayFilterExact(
 			SearchPredicateFactory f,
-			BooleanPredicateClausesStep<?> bool,
+			BooleanPredicateClausesStep<?, ?> bool,
 			ValueSet.ConceptSetFilterComponent nextFilter) {
 		bool.must(f.phrase().field("myDisplay").matching(nextFilter.getValue()));
 	}
 
 	private void addDisplayFilterInexact(
 			SearchPredicateFactory f,
-			BooleanPredicateClausesStep<?> bool,
+			BooleanPredicateClausesStep<?, ?> bool,
 			ValueSet.ConceptSetFilterComponent nextFilter) {
 		bool.must(f.phrase()
 				.field("myDisplay")
@@ -1807,7 +1813,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	private void handleFilterLoincDescendant(
 			String theSystem,
 			SearchPredicateFactory f,
-			BooleanPredicateClausesStep<?> b,
+			BooleanPredicateClausesStep<?, ?> b,
 			ValueSet.ConceptSetFilterComponent theFilter) {
 		switch (theFilter.getOp()) {
 			case EQUAL:
@@ -1825,7 +1831,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	private void addLoincFilterDescendantEqual(
 			String theSystem,
 			SearchPredicateFactory f,
-			BooleanPredicateClausesStep<?> b,
+			BooleanPredicateClausesStep<?, ?> b,
 			ValueSet.ConceptSetFilterComponent theFilter) {
 
 		List<TermConcept.TermConceptPk> parentPids =
@@ -1852,7 +1858,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	private void addLoincFilterDescendantIn(
 			String theSystem,
 			SearchPredicateFactory f,
-			BooleanPredicateClausesStep<?> b,
+			BooleanPredicateClausesStep<?, ?> b,
 			ValueSet.ConceptSetFilterComponent theFilter) {
 
 		String[] values = theFilter.getValue().split(",");

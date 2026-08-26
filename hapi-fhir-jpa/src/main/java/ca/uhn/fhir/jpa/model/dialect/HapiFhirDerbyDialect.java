@@ -20,7 +20,7 @@
 package ca.uhn.fhir.jpa.model.dialect;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import org.hibernate.dialect.DerbyDialect;
+import org.hibernate.community.dialect.DerbyDialect;
 import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
 
 /**

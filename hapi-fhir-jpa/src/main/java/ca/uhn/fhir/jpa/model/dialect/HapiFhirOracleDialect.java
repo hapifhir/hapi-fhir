@@ -64,6 +64,16 @@ public class HapiFhirOracleDialect extends OracleDialect implements IHapiFhirDia
 		return DriverTypeEnum.ORACLE_12C;
 	}
 
+	/**
+	 * Hibernate 7 raised the default timestamp precision for Oracle from 6 to 9, which would render every
+	 * timestamp column as {@code timestamp(9)} instead of the {@code timestamp(6)} that HAPI FHIR schemas
+	 * have always used. We keep 6 so that a freshly created schema still matches an existing, migrated one.
+	 */
+	@Override
+	public int getDefaultTimestampPrecision() {
+		return 6;
+	}
+
 	@Override
 	public int getPreferredSqlTypeCodeForBoolean() {
 		// Use Types.BIT instead of native Oracle 23 BOOLEAN type to maintain

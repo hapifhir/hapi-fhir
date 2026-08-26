@@ -1,0 +1,8 @@
+---
+type: change
+issue: 7881
+title: "HAPI FHIR now builds on Spring Boot 4.0, Spring Framework 7.0, Hibernate ORM 7.2, Hibernate
+  Search 8.2 and Jakarta EE 11 (Servlet 6.1, Jakarta Persistence 3.2, Jakarta REST 4.0). The test
+  baseline moves to JUnit 6. This is a breaking change for downstream consumers, who must upgrade to
+  Spring Boot 4 / Spring Framework 7 as well. Jackson remains on the 2.x line for now. The generated
+  database schema is unchanged from the previous release, so no database migration is required."

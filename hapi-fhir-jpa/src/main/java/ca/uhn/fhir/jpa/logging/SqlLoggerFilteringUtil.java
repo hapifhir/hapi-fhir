@@ -30,7 +30,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -48,6 +51,16 @@ public class SqlLoggerFilteringUtil {
 
 	public static final String FILTER_FILE_PATH = "hibernate-sql-log-filters.txt";
 	private static final AtomicInteger ourRefreshCount = new AtomicInteger();
+
+	/**
+	 * All refresh executors ever started, tracked so that tests can deterministically shut every one of them
+	 * down. This exists because each test works against a fresh (often Mockito-spied) instance, and a spied
+	 * {@link UpdateFiltersTask} can keep running against a stubbed {@code refreshFilters}, leaking a scheduled
+	 * executor that keeps incrementing {@link #ourRefreshCount} into subsequent tests. See
+	 * {@link #shutdownRefreshExecutorsForTests()}.
+	 */
+	private static final Set<ScheduledThreadPoolExecutor> ourRefreshExecutorsForTests =
+			Collections.synchronizedSet(Collections.newSetFromMap(new WeakHashMap<>()));
 
 	private final Logger hibernateLogger = LoggerFactory.getLogger("org.hibernate.SQL");
 
@@ -95,6 +108,7 @@ public class SqlLoggerFilteringUtil {
 
 		myRefreshDoneLatch = new CountDownLatch(1);
 		myRefreshExecutor = new ScheduledThreadPoolExecutor(1);
+		ourRefreshExecutorsForTests.add(myRefreshExecutor);
 		myRefreshExecutor.scheduleAtFixedRate(
 				new UpdateFiltersTask(), 0, FILTER_UPDATE_INTERVAL_SECS, TimeUnit.SECONDS);
 		ourLog.info("Starting SQL log filters refresh executor");
@@ -192,6 +206,19 @@ public class SqlLoggerFilteringUtil {
 	@VisibleForTesting
 	public static int getRefreshCountForTests() {
 		return ourRefreshCount.get();
+	}
+
+	/**
+	 * Shuts down every refresh executor that has ever been started and resets the refresh counter. Tests call
+	 * this to isolate themselves from executors leaked by earlier tests (see {@link #ourRefreshExecutorsForTests}).
+	 */
+	@VisibleForTesting
+	public static void shutdownRefreshExecutorsForTests() {
+		synchronized (ourRefreshExecutorsForTests) {
+			ourRefreshExecutorsForTests.forEach(ScheduledThreadPoolExecutor::shutdownNow);
+			ourRefreshExecutorsForTests.clear();
+		}
+		ourRefreshCount.set(0);
 	}
 
 	@VisibleForTesting
