@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.test.utilities;
 
-import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
@@ -108,7 +107,7 @@ class ApacheHttp5TestTransport implements IHttpTestTransport {
 	 */
 	private static void assertRedirectExpectationHonoured(Request theRequest, HttpTestResponse theResponse) {
 		if (Boolean.TRUE.equals(theRequest.followRedirects()) && isRedirectStatus(theResponse.getStatusCode())) {
-			throw new IllegalStateException(Msg.code(3044) + "followRedirects(true) was requested for "
+			throw new IllegalStateException("followRedirects(true) was requested for "
 					+ theRequest.method() + " " + theRequest.url() + ", but the response was HTTP "
 					+ theResponse.getStatusCode() + " " + theResponse.getReasonPhrase()
 					+ ". The client this request was issued on most likely has redirects disabled"
