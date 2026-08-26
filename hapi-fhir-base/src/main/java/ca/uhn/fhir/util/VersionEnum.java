@@ -184,6 +184,7 @@ public enum VersionEnum {
 	V8_4_1,
 	V8_4_2,
 	V8_4_3,
+	V8_4_4,
 	V8_5_0,
 	V8_6_0,
 	V8_6_1,

@@ -58,6 +58,8 @@ import ca.uhn.fhir.jpa.dao.HistoryBuilderFactory;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.IResourceMetadataExtractorSvc;
+import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.jpa.dao.JpaBulkDataExportHistoryHelper;
 import ca.uhn.fhir.jpa.dao.JpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
@@ -123,6 +125,7 @@ import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
 import ca.uhn.fhir.jpa.provider.InstanceReindexProvider;
 import ca.uhn.fhir.jpa.provider.ProcessMessageProvider;
+import ca.uhn.fhir.jpa.provider.ReferencingResourcesQuerySvc;
 import ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
@@ -218,6 +221,7 @@ import ca.uhn.fhir.rest.server.interceptor.auth.IAuthResourceResolver;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.storage.TransactionBundleNormalizer;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import ca.uhn.fhir.util.IMetaTagSorter;
 import ca.uhn.fhir.util.MetaTagSorterAlphabetical;
@@ -417,6 +421,16 @@ public class JpaConfig {
 	@Bean
 	public TransactionProcessor transactionProcessor() {
 		return new TransactionProcessor();
+	}
+
+	@Bean
+	public TransactionBundleNormalizer transactionBundleNormalizer(
+			FhirContext theFhirContext,
+			MatchUrlService theMatchUrlService,
+			@SuppressWarnings("rawtypes") ITransactionProcessorVersionAdapter theVersionAdapter,
+			JpaStorageSettings theStorageSettings) {
+		return new TransactionBundleNormalizer(
+				theFhirContext, theMatchUrlService, theVersionAdapter, theStorageSettings);
 	}
 
 	@Bean(name = "myAttachmentBinaryAccessProvider")
@@ -1071,6 +1085,12 @@ public class JpaConfig {
 	@Bean
 	public Batch2TaskHelper batch2TaskHelper() {
 		return new Batch2TaskHelper();
+	}
+
+	@Bean
+	public ReferencingResourcesQuerySvc referencingResourcesQuerySvc(
+			IResourceLinkDao theResourceLinkDao, HapiTransactionService theHapiTransactionService) {
+		return new ReferencingResourcesQuerySvc(theResourceLinkDao, theHapiTransactionService);
 	}
 
 	@Bean

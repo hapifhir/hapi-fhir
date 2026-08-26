@@ -1,0 +1,5 @@
+---
+type: add
+issue: 8170
+jira: SMILE-11705
+title: "Patient ID partition mode now supports conditional references to Patient resources in transaction Bundles, as well as auto-creating placeholders for these references when there is no matching Patient.  This support requires storage that supports all-partition search."

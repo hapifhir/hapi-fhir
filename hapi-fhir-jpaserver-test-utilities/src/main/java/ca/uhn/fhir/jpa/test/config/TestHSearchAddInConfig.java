@@ -29,7 +29,6 @@ import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
 import ca.uhn.fhir.jpa.test.util.TestHSearchEventDispatcher;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
-import jakarta.annotation.PreDestroy;
 import org.hibernate.search.backend.elasticsearch.index.IndexStatus;
 import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
 import org.hibernate.search.backend.lucene.cfg.LuceneIndexSettings;
@@ -38,12 +37,10 @@ import org.hibernate.search.mapper.orm.cfg.HibernateOrmMapperSettings;
 import org.hibernate.search.mapper.orm.schema.management.SchemaManagementStrategyName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
-import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
 import java.io.IOException;
@@ -96,15 +93,15 @@ public class TestHSearchAddInConfig {
 			luceneProperties.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
 			// for lucene trace logging
 			luceneProperties.put(BackendSettings.backendKey(LuceneIndexSettings.IO_WRITER_INFOSTREAM), "true");
-			luceneProperties.put(HibernateOrmMapperSettings.ENABLED, "true");
+			luceneProperties.put(HibernateOrmMapperSettings.INDEXING_PLAN_SYNCHRONIZATION_STRATEGY, "sync");
 
-			return (theProperties) -> {
+			return theProperties -> {
 				ourLog.debug("Configuring Hibernate Search - {}", luceneProperties);
 				theProperties.putAll(luceneProperties);
 			};
 		}
 
-
+		@Bean
 		public IFulltextSearchSvc fullTextSearchSvc() {
 			ourLog.info("Hibernate Search: FulltextSearchSvcImpl present");
 			return new FulltextSearchSvcImpl();
@@ -136,8 +133,9 @@ public class TestHSearchAddInConfig {
 			luceneHeapProperties.put(HibernateOrmMapperSettings.ENABLED, "true");
 			luceneHeapProperties.put(BackendSettings.backendKey(LuceneIndexSettings.IO_WRITER_INFOSTREAM), "true");
 			luceneHeapProperties.put(Constants.HIBERNATE_INTEGRATION_ENVERS_ENABLED, "true");
+			luceneHeapProperties.put(HibernateOrmMapperSettings.INDEXING_PLAN_SYNCHRONIZATION_STRATEGY, "sync");
 
-			return (theProperties) -> {
+			return theProperties -> {
 				ourLog.info("Configuring Hibernate Search - {}", luceneHeapProperties);
 				theProperties.putAll(luceneHeapProperties);
 			};
@@ -165,7 +163,7 @@ public class TestHSearchAddInConfig {
 		@Bean
 		IHSearchConfigurer hibernateSearchConfigurer() {
 			ourLog.info("Hibernate Search is disabled");
-			return (theProperties) -> theProperties.put("hibernate.search.enabled", "false");
+			return theProperties -> theProperties.put("hibernate.search.enabled", "false");
 		}
 
 		@Primary
@@ -185,13 +183,11 @@ public class TestHSearchAddInConfig {
 	@Configuration
 	@Import(PooledElasticsearchContainerConfig.class)
 	public static class Elasticsearch {
-		@Autowired
-		ElasticsearchContainer myElasticsearchContainer;
 
 		@Bean
 		@Primary // override the default
 		IHSearchConfigurer hibernateSearchConfigurer(ElasticsearchContainer theContainer) {
-			return (theProperties) -> {
+			return theProperties -> {
 				int httpPort = theContainer.getMappedPort(9200);//9200 is the HTTP port
 				String host = theContainer.getHost();
 
@@ -222,16 +218,11 @@ public class TestHSearchAddInConfig {
 			return new PartitionSettings();
 		}
 
-		@Bean()
-		public ElasticsearchSvcImpl myElasticsearchSvc() {
-			int elasticsearchPort = myElasticsearchContainer.getMappedPort(9200);
-			String host = myElasticsearchContainer.getHost();
+		@Bean
+		public ElasticsearchSvcImpl myElasticsearchSvc(ElasticsearchContainer theElasticsearchContainer) {
+			int elasticsearchPort = theElasticsearchContainer.getMappedPort(9200);
+			String host = theElasticsearchContainer.getHost();
 			return new ElasticsearchSvcImpl("http", host + ":" + elasticsearchPort, null, null);
-		}
-
-		@PreDestroy
-		public void stopEsClient() throws IOException {
-			myElasticsearchSvc().close();
 		}
 	}
 
