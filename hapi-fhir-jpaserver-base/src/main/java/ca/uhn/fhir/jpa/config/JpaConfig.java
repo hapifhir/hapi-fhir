@@ -58,7 +58,6 @@ import ca.uhn.fhir.jpa.dao.HistoryBuilderFactory;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.IResourceMetadataExtractorSvc;
-import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.jpa.dao.JpaBulkDataExportHistoryHelper;
 import ca.uhn.fhir.jpa.dao.JpaStorageResourceParser;
