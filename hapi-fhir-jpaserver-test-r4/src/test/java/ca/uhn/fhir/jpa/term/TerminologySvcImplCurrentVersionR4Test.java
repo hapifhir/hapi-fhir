@@ -32,7 +32,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -177,6 +179,9 @@ class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 	}
 
+	/**
+	 * @param theAllVersions must include currentVersion; the TermConcept check below relies on this to also cover currentVersion
+	 */
 	private void validateValueExpand(String currentVersion, Collection<String> theAllVersions) {
 		// for CS ver = null, VS ver = null
 		ValueSet vs = myValueSetDao.expandByIdentifier(VS_NO_VERSIONED_ON_UPLOAD, null);
@@ -194,10 +199,8 @@ class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		assertEquals(prefixWithVersion(currentVersion, VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY), vs1.getExpansion().getContains().iterator().next().getDisplay());
 
 
-		validateTermConceptForVersion(currentVersion);
-		for (String version : theAllVersions) {
-			validateTermConceptForVersion(version);
-		}
+		// currentVersion is always included in theAllVersions at every call site, so this also covers it
+		theAllVersions.forEach(this::validateTermConceptForVersion);
 
 		// now for each uploaded version
 		theAllVersions.forEach(this::validateValueExpandForVersion);
@@ -332,7 +335,7 @@ class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		List<String> resultUnqualifiedIds = theValueSets.stream()
 			.map(r -> r.getIdElement().getIdPart()).toList();
 
-		assertThat(resultUnqualifiedIds).containsExactlyInAnyOrderElementsOf(resultUnqualifiedIds);
+		assertThat(resultUnqualifiedIds).containsExactlyInAnyOrderElementsOf(expectedNoVersionUnqualifiedIds);
 
 		List<String> valueSetVersions = theValueSets.stream().map(r -> ((ValueSet) r).getVersion()).toList();
 		assertThat(valueSetVersions).containsExactlyInAnyOrderElementsOf(theExpectedIdVersions);
@@ -493,11 +496,36 @@ class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 	}
 
 	/**
-	 * Validates a TermConcept exists for each expected version, and its display matches
-	 * that version. See {@link #validateTermConceptForVersion(String)}.
+	 * Validates exactly one TermConcept exists for the expected versions only, per test code, with the
+	 * matching display. This validation also ensures there are no other version (e.g. DELETED_ ones).
+	 * Concepts are matched to a version by FK, not insertion order, since persistence is async and not upload-ordered.
 	 */
 	private void validateTermConcepts(ArrayList<String> theExpectedVersions) {
-		theExpectedVersions.forEach(this::validateTermConceptForVersion);
+		runInTransaction(() -> {
+			assertTermConceptsForCode(VS_NO_VERSIONED_ON_UPLOAD_FIRST_CODE, VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY, theExpectedVersions);
+			assertTermConceptsForCode(VS_VERSIONED_ON_UPLOAD_FIRST_CODE, VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY, theExpectedVersions);
+		});
+	}
+
+	private void assertTermConceptsForCode(String theCode, String theExpectedDisplaySuffix, ArrayList<String> theExpectedVersions) {
+		@SuppressWarnings("unchecked")
+		List<TermConcept> termConcepts = (List<TermConcept>) myEntityManager.createQuery(
+			"select tc from TermConcept tc join fetch tc.myCodeSystem where tc.myCode = '" + theCode + "'").getResultList();
+		assertThat(termConcepts).as("TermConcept count for code: " + theCode).hasSize(theExpectedVersions.size());
+
+		Map<String, String> versionToDisplay = new HashMap<>();
+		for (TermConcept termConcept : termConcepts) {
+			String version = termConcept.getCodeSystemVersion().getCodeSystemVersionId();
+			assertThat(versionToDisplay.put(version, termConcept.getDisplay()))
+				.as("Duplicate TermConcept for code: " + theCode + ", version: " + version)
+				.isNull();
+		}
+
+		for (String version : theExpectedVersions) {
+			assertThat(versionToDisplay.get(version))
+				.as("TermConcept for code: " + theCode + ", version: " + version)
+				.isEqualTo(prefixWithVersion(version, theExpectedDisplaySuffix));
+		}
 	}
 
 
