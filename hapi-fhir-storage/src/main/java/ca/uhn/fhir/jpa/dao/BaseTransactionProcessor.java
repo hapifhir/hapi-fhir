@@ -57,6 +57,7 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
+import ca.uhn.fhir.jpa.update.UpdateParameters;
 import ca.uhn.fhir.jpa.util.TransactionSemanticsHeader;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
@@ -1596,25 +1597,21 @@ public abstract class BaseTransactionProcessor {
 						UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
 						if (isNotBlank(parts.getResourceId())) {
 							String version = null;
-							if (isNotBlank(myVersionAdapter.getEntryRequestIfMatch(nextReqEntry))) {
-								version = ParameterUtil.parseETagValue(
-										myVersionAdapter.getEntryRequestIfMatch(nextReqEntry));
+							String entryRequestIfMatchVersion = myVersionAdapter.getEntryRequestIfMatch(nextReqEntry);
+							if (isNotBlank(entryRequestIfMatchVersion)) {
+								version = ParameterUtil.parseETagValue(entryRequestIfMatchVersion);
 							}
 							res.setId(newIdType(parts.getResourceType(), parts.getResourceId(), version));
 							outcome = resourceDao.update(
 									res, null, false, false, requestDetailsForEntry, theTransactionDetails);
 
 							/*
-							 * Record the version the client demanded, so that the write pass below can check
-							 * the precondition again against the version that is genuinely current at the
-							 * moment of the write. The check made during this pass compares against a version
-							 * nothing has been written to yet, and another entry in this same transaction can
-							 * still move the resource before we get there. See GL-8721.
-							 *
-							 * This is taken from the If-Match header rather than from the version part of the
-							 * resource id, because plenty of things put a version on an id without the client
-							 * having asked for a precondition at all - reading a resource and updating it
-							 * yields a versioned id, as does id substitution within a transaction.
+							 * Record the version the client demanded, so that the precondition can be checked
+							 * again at write time, performed later within this method (resolveReferencesThenSaveAndIndexResources).
+							 * The recording is required since a storage interceptor firing on another entry can update the
+							 * resource 'res' is pointing at effectively bumping the version number. Without the second check,
+							 * a failing If-Match clause
+							 * is silently ignored.
 							 */
 							if (StringUtils.isNumeric(version)) {
 								outcome.setExpectedVersionForUpdate(Long.parseLong(version));
@@ -2365,18 +2362,20 @@ public abstract class BaseTransactionProcessor {
 			boolean forceUpdateVersion = !theReferencesToAutoVersion.isEmpty();
 			String matchUrl = theDaoMethodOutcome.getMatchUrl();
 			RestOperationTypeEnum operationType = theDaoMethodOutcome.getOperationType();
-			DaoMethodOutcome daoMethodOutcome = jpaDao.updateInternal(
-					theRequest,
-					theResource,
-					matchUrl,
-					true,
-					forceUpdateVersion,
-					theDaoMethodOutcome.getEntity(),
-					theResource.getIdElement(),
-					theDaoMethodOutcome.getPreviousResource(),
-					operationType,
-					theTransactionDetails,
-					theDaoMethodOutcome.getExpectedVersionForUpdate());
+			UpdateParameters<IBaseResource> updateParameters = new UpdateParameters<IBaseResource>()
+					.setRequestDetails(theRequest)
+					.setResource(theResource)
+					.setMatchUrl(matchUrl)
+					.setShouldPerformIndexing(true)
+					.setShouldForceUpdateVersion(forceUpdateVersion)
+					.setEntity(theDaoMethodOutcome.getEntity())
+					.setResourceIdToUpdate(theResource.getIdElement())
+					.setOldResource(theDaoMethodOutcome.getPreviousResource())
+					.setOperationType(operationType)
+					.setTransactionDetails(theTransactionDetails)
+					.setExpectedVersion(theDaoMethodOutcome.getExpectedVersionForUpdate());
+
+			DaoMethodOutcome daoMethodOutcome = jpaDao.updateInternal(updateParameters);
 			updateOutcome = daoMethodOutcome.getEntity();
 			theDaoMethodOutcome = daoMethodOutcome;
 		} else if (!theNonUpdatedEntities.contains(theDaoMethodOutcome.getId())) {

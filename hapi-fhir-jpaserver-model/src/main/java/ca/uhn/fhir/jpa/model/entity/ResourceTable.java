@@ -479,10 +479,11 @@ public class ResourceTable extends BaseHasResource<JpaPid> implements Serializab
 	 * Clears {@link #myVersionUpdatedInCurrentTransaction} once the pending version bump has actually
 	 * been written to the database. This fires on both callbacks deliberately: {@code @PostPersist}
 	 * covers the initial INSERT, and {@code @PostUpdate} covers every subsequent flush that emits an
-	 * {@code UPDATE} advancing {@code RES_VER}. Without the latter the flag would stay set for the rest
-	 * of the transaction, so a second write to the same resource would find
-	 * {@link #markVersionUpdatedInCurrentTransaction()} a no-op and its history row would take its
-	 * version number from the fallback in {@link #toHistory(boolean)} instead.
+	 * {@code UPDATE} effectively advancing {@code RES_VER}.
+	 * <p>
+	 * Without the latter, the flag would stay set for the rest of the transaction causing a version drift
+	 * upon subsequent writes.
+	 * </p>
 	 */
 	@PostPersist
 	@PostUpdate

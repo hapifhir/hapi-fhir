@@ -79,6 +79,7 @@ import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
+import ca.uhn.fhir.jpa.update.UpdateParameters;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
 import ca.uhn.fhir.jpa.util.DialectSvc;
 import ca.uhn.fhir.model.api.IResource;
@@ -912,11 +913,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	 * {@literal theEntity} but not yet written is emitted as a physical {@code UPDATE} before the
 	 * caller performs a further write to the same resource.
 	 * <p>
-	 * The flush is translated through {@link HapiFhirHibernateJpaDialect} for the same reason
-	 * {@code TransactionProcessor.flushSession} does it: a raw flush surfaces a lost optimistic-lock
-	 * race as a bare {@link PersistenceException}, which
+	 * If the flush fails, the {@link PersistenceException} it raises is translated through
+	 * {@link HapiFhirHibernateJpaDialect}, for the same reason
+	 * {@code TransactionProcessor.flushSession} translates it: left untranslated, a lost
+	 * optimistic-lock race surfaces as a bare {@link PersistenceException}, which
 	 * {@code HapiTransactionService.isRetriable} does not recognise, so a genuine concurrent writer
-	 * would be reported as a non-retriable 500 rather than a retriable 409.
+	 * conflict would be reported as a non-retriable 500 rather than a retriable 409.
 	 * </p>
 	 *
 	 * @param theEntity the entity whose pending version increment is being flushed
@@ -1515,6 +1517,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		return theRequest != null ? theRequest.getRequestId() : null;
 	}
 
+	/**
+	 * @deprecated Call {@link #updateInternal(UpdateParameters)} instead.
+	 */
+	@Deprecated
 	@Override
 	public DaoMethodOutcome updateInternal(
 			RequestDetails theRequestDetails,
@@ -1527,82 +1533,77 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			@Nullable IBaseResource theOldResource,
 			RestOperationTypeEnum theOperationType,
 			TransactionDetails theTransactionDetails) {
-		return updateInternal(
-				theRequestDetails,
-				theResource,
-				theMatchUrl,
-				thePerformIndexing,
-				theForceUpdateVersion,
-				theEntity,
-				theResourceId,
-				theOldResource,
-				theOperationType,
-				theTransactionDetails,
-				null);
+		return updateInternal(new UpdateParameters<T>()
+				.setRequestDetails(theRequestDetails)
+				.setResource(theResource)
+				.setMatchUrl(theMatchUrl)
+				.setShouldPerformIndexing(thePerformIndexing)
+				.setShouldForceUpdateVersion(theForceUpdateVersion)
+				.setEntity(theEntity)
+				.setResourceIdToUpdate(theResourceId)
+				.setOldResource(theOldResource)
+				.setOperationType(theOperationType)
+				.setTransactionDetails(theTransactionDetails));
 	}
 
 	@Override
-	public DaoMethodOutcome updateInternal(
-			RequestDetails theRequestDetails,
-			T theResource,
-			String theMatchUrl,
-			boolean thePerformIndexing,
-			boolean theForceUpdateVersion,
-			IBasePersistedResource theEntity,
-			IIdType theResourceId,
-			@Nullable IBaseResource theOldResource,
-			RestOperationTypeEnum theOperationType,
-			TransactionDetails theTransactionDetails,
-			@Nullable Long theExpectedVersion) {
+	public DaoMethodOutcome updateInternal(UpdateParameters<T> theParameters) {
+		RequestDetails requestDetails = theParameters.getRequest();
+		T resource = theParameters.getResource();
+		String matchUrl = theParameters.getMatchUrl();
+		boolean performIndexing = theParameters.shouldPerformIndexing();
+		IIdType resourceId = theParameters.getResourceIdToUpdate();
+		IBaseResource oldResource = theParameters.getOldResource();
+		TransactionDetails transactionDetails = theParameters.getTransactionDetails();
 
-		ResourceTable entity = (ResourceTable) theEntity;
+		ResourceTable entity = (ResourceTable) theParameters.getEntity();
 
 		// We'll update the resource ID with the correct version later but for
 		// now at least set it to something useful for the interceptors
-		theResource.setId(entity.getIdDt());
+		resource.setId(entity.getIdDt());
 
 		// Notify IServerOperationInterceptors about pre-action call
-		notifyInterceptors(theRequestDetails, theResource, theOldResource, theTransactionDetails, true);
+		notifyInterceptors(requestDetails, resource, oldResource, transactionDetails, true);
 
-		entity.setUpdatedByMatchUrl(theMatchUrl);
+		entity.setUpdatedByMatchUrl(matchUrl);
 
-		validateExpectedVersionAtWrite(theExpectedVersion, entity);
+		validateExpectedVersionAtWrite(theParameters.getExpectedVersion(), entity);
 
 		// Perform update
 		ResourceTable savedEntity = updateEntity(
-				theRequestDetails,
-				theResource,
+				requestDetails,
+				resource,
 				entity,
 				null,
-				thePerformIndexing,
-				thePerformIndexing,
-				theTransactionDetails,
-				theForceUpdateVersion,
-				thePerformIndexing);
+				performIndexing,
+				performIndexing,
+				transactionDetails,
+				theParameters.shouldForceUpdateVersion(),
+				performIndexing);
 
 		/*
 		 * If we aren't indexing (meaning we're probably executing a sub-operation within a transaction),
 		 * we'll manually increase the version. This is important because we want the updated version number
 		 * to be reflected in the resource shared with interceptors
 		 */
-		if (!thePerformIndexing
+		if (!performIndexing
 				&& !savedEntity.isUnchangedInCurrentOperation()
 				&& !ourDisableIncrementOnUpdateForUnitTest) {
-			if (!theResourceId.hasVersionIdPart()) {
-				theResourceId = theResourceId.withVersion(Long.toString(savedEntity.getVersion()));
+			if (!resourceId.hasVersionIdPart()) {
+				resourceId = resourceId.withVersion(Long.toString(savedEntity.getVersion()));
 			}
-			incrementId(theResource, savedEntity, theResourceId);
+			incrementId(resource, savedEntity, resourceId);
 		}
 
 		// Update version/lastUpdated so that interceptors see the correct version
-		myJpaStorageResourceParser.updateResourceMetadata(savedEntity, theResource);
+		myJpaStorageResourceParser.updateResourceMetadata(savedEntity, resource);
 
 		// Populate the PID in the resource so it is available to hooks
-		addPidToResource(savedEntity, theResource);
+		addPidToResource(savedEntity, resource);
 
 		// Notify interceptors
 		if (!savedEntity.isUnchangedInCurrentOperation()) {
-			notifyInterceptors(theRequestDetails, theResource, theOldResource, theTransactionDetails, false);
+			notifyInterceptors(requestDetails, resource, oldResource, transactionDetails, false);
 		}
 
 		Collection<? extends BaseTag> tagList = Collections.emptyList();
@@ -1610,11 +1611,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			tagList = entity.getTags();
 		}
 		long version = entity.getVersion();
-		myJpaStorageResourceParser.populateResourceMetadata(entity, false, tagList, version, theResource);
+		myJpaStorageResourceParser.populateResourceMetadata(entity, false, tagList, version, resource);
 
 		boolean wasDeleted = false;
-		if (theOldResource != null) {
-			wasDeleted = theOldResource.isDeleted();
+		if (oldResource != null) {
+			wasDeleted = oldResource.isDeleted();
 		}
 
 		if (wasDeleted && !myStorageSettings.isDeleteEnabled()) {
@@ -1623,10 +1624,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		DaoMethodOutcome outcome = toMethodOutcome(
-						theRequestDetails, savedEntity, theResource, theMatchUrl, theOperationType)
+						requestDetails, savedEntity, resource, matchUrl, theParameters.getOperationType())
 				.setCreated(wasDeleted);
 
-		if (!thePerformIndexing) {
+		if (!performIndexing) {
 			IIdType id = getContext().getVersion().newIdType();
 			id.setValue(entity.getIdDt().getValue());
 			outcome.setId(id);
@@ -1636,13 +1637,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		// since individual item times don't actually make much sense in the context
 		// of a transaction
 		StopWatch w = null;
-		if (theRequestDetails != null && !theRequestDetails.isSubRequest()) {
-			if (theTransactionDetails != null && !theTransactionDetails.isFhirTransaction()) {
-				w = new StopWatch(theTransactionDetails.getTransactionDate());
+		if (requestDetails != null && !requestDetails.isSubRequest()) {
+			if (transactionDetails != null && !transactionDetails.isFhirTransaction()) {
+				w = new StopWatch(transactionDetails.getTransactionDate());
 			}
 		}
 
-		populateOperationOutcomeForUpdate(w, outcome, theMatchUrl, outcome.getOperationType(), theTransactionDetails);
+		populateOperationOutcomeForUpdate(w, outcome, matchUrl, outcome.getOperationType(), transactionDetails);
 
 		return outcome;
 	}

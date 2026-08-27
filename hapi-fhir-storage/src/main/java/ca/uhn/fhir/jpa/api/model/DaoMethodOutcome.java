@@ -65,7 +65,7 @@ public class DaoMethodOutcome extends MethodOutcome {
 	 * FHIR transaction, where the precondition is validated during the first pass but the resource is
 	 * not actually written until the second one. Carrying the expected version on the outcome lets the
 	 * second pass re-validate the precondition against the version that is genuinely current at the
-	 * moment of the write. See GL-8721.
+	 * moment of the write.
 	 * </p>
 	 *
 	 * @return the version demanded by {@code If-Match}, or {@literal null} if the client did not send one
