@@ -105,6 +105,7 @@ import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.ThreadUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -1613,8 +1614,9 @@ public abstract class BaseTransactionProcessor {
 							 * a failing If-Match clause
 							 * is silently ignored.
 							 */
-							if (StringUtils.isNumeric(version)) {
-								outcome.setExpectedVersionForUpdate(Long.parseLong(version));
+							long expectedVersion = NumberUtils.toLong(defaultString(version), -1L);
+							if (expectedVersion > 0) {
+								theTransactionDetails.addExpectedVersion(res.getIdElement(), expectedVersion);
 							}
 						} else {
 							if (!shouldConditionalUpdateMatchId(res.getIdElement())) {
@@ -2373,7 +2375,7 @@ public abstract class BaseTransactionProcessor {
 					.setOldResource(theDaoMethodOutcome.getPreviousResource())
 					.setOperationType(operationType)
 					.setTransactionDetails(theTransactionDetails)
-					.setExpectedVersion(theDaoMethodOutcome.getExpectedVersionForUpdate());
+					.setExpectedVersion(theTransactionDetails.getExpectedVersion(theResource.getIdElement()));
 
 			DaoMethodOutcome daoMethodOutcome = jpaDao.updateInternal(updateParameters);
 			updateOutcome = daoMethodOutcome.getEntity();

@@ -44,7 +44,7 @@ public interface IJpaDao<T extends IBaseResource> {
 			boolean theCreateNewHistoryEntry);
 
 	/**
-	 * @deprecated Call {@link #updateInternal(UpdateParameters)} instead. Scheduled for removal in 8.16.0.
+	 * @deprecated Call {@link #updateInternal(UpdateParameters)} instead. Scheduled for removal in 8.20.0.
 	 */
 	@Deprecated(since = "8.14.0", forRemoval = true)
 	DaoMethodOutcome updateInternal(

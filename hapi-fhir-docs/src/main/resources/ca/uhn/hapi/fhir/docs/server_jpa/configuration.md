@@ -188,7 +188,10 @@ on a `STORAGE_PRESTORAGE_RESOURCE_CREATED` or `STORAGE_PRESTORAGE_RESOURCE_UPDAT
 re-entrantly updates that same resource (for example by calling `update()` on its DAO) while
 processing another entry in the same Bundle, the resource's version has moved by the time the `PUT`
 entry is actually written. The second check catches this and the transaction fails with a
-`ResourceVersionConflictException` (**HTTP 409**), rolling back the entire Bundle.
+`ResourceVersionConflictException` (**HTTP 409**), rolling back the entire Bundle. Unlike a conflict
+between concurrent clients, this one cannot be cleared by retrying, since each replay of the Bundle
+fires the interceptor again and moves the version again, so every attempt fails identically until the
+retry budget is exhausted.
 
 To avoid this, either do not send `If-Match` for a resource that a re-entrant interceptor may also
 update within the same transaction, or move the interceptor's write to a `STORAGE_PRECOMMIT_*`
