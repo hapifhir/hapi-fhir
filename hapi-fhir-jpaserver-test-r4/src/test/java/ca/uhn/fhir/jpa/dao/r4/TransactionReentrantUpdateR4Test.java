@@ -714,9 +714,8 @@ public class TransactionReentrantUpdateR4Test extends BaseJpaR4Test {
 	//
 	// The no-interceptor control, and the assertPatientVersionsAreConsistent(Bundle) helper it uses,
 	// are the originally committed reproduction and are left in their JUnit-Assertions style. The
-	// reported case beside them was rewritten when the ticket owner ruled that an If-Match must be
-	// enforced at the real write; every case added since is newer and uses AssertJ, per the repo
-	// conventions.
+	// reported case beside them asserts the version conflict raised when an If-Match is enforced at
+	// the real write; every case added since is newer and uses AssertJ, per the repo conventions.
 	// ---------------------------------------------------------------------------------------------
 
 	private void assertPatientVersionsAreConsistent(Bundle theTransactionResponse) {
@@ -765,8 +764,8 @@ public class TransactionReentrantUpdateR4Test extends BaseJpaR4Test {
 	 * {@link #assertPatientVersionsAreConsistent(Bundle)} asserts: the current-version pointer agrees
 	 * with the history table, and the history rows form a gapless 1..N sequence.
 	 * <p>
-	 * Duplicated rather than extracted from that helper because Gate 1 of the test plan requires the
-	 * committed reproduction's assertions to stay byte-identical.
+	 * Duplicated rather than extracted from that helper so that the original reproduction's
+	 * assertions stay byte-identical, and remain an honest gate on the fix.
 	 * </p>
 	 */
 	private void assertPatientStorageVersionsAreConsistent() {
@@ -931,7 +930,9 @@ public class TransactionReentrantUpdateR4Test extends BaseJpaR4Test {
 
 	/**
 	 * Flag first and both entries on the same verb, so that pass 1 never crosses a verb boundary and
-	 * never flushes. See the Javadoc on the T9 case for why that matters.
+	 * never flushes. Without that incidental flush the corruption is not masked, which is what
+	 * {@link CurrentVersionMatchesHistory#testTransactionUpdate_whenSameVerbEntryInterceptorUpdatesSameResource_currentVersionMatchesHistory()}
+	 * relies on.
 	 */
 	private Bundle buildFlagFirstPutOnlyTransaction() {
 		return buildFlagFirstPutOnlyTransaction(false);
@@ -1070,8 +1071,9 @@ public class TransactionReentrantUpdateR4Test extends BaseJpaR4Test {
 
 	/**
 	 * Variant of {@link ReentrantFlagInterceptor} whose mutation of the Patient is supplied by the
-	 * test, so a case can decide whether the re-entrant write changes the resource at all (T8 needs
-	 * a re-entrant write that leaves the Patient identical to the Bundle's own PUT body).
+	 * test, so a case can decide whether the re-entrant write changes the resource at all - the
+	 * no-op case needs a re-entrant write that leaves the Patient identical to the Bundle's own PUT
+	 * body.
 	 */
 	@Interceptor
 	private static class ConfigurableReentrantFlagInterceptor {
@@ -1105,7 +1107,7 @@ public class TransactionReentrantUpdateR4Test extends BaseJpaR4Test {
 	}
 
 	/**
-	 * Route (c) of the execution plan: the interceptor hooks the pointcut that is broadcast from
+	 * The interceptor hooks the pointcut that is broadcast from
 	 * inside {@code updateInternal} for the resource currently being written, so its write lands in
 	 * the middle of pass 2's own write path. It fires only once, because the nested
 	 * {@code dao.update()} broadcasts the same pointcut again.
