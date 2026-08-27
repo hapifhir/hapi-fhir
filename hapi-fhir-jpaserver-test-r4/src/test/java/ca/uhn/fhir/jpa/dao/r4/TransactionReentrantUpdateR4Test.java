@@ -4,6 +4,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -11,6 +12,7 @@ import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -377,6 +379,74 @@ public class TransactionReentrantUpdateR4Test extends BaseJpaR4Test {
 					.as("Only the interceptor's write should have produced a new version")
 					.containsExactly(1L, 2L);
 			});
+		}
+
+		/**
+		 * Pins the {@code @PostUpdate} half of the version fix: the "a version bump is pending"
+		 * flag on {@link ResourceTable} must be cleared when Hibernate emits the {@code UPDATE} that
+		 * carries it, not only when it emits the initial {@code INSERT}. With that callback removed the
+		 * flag stays set for the rest of the transaction, so the second write's call to
+		 * {@code markVersionUpdatedInCurrentTransaction()} silently does nothing.
+		 * <p>
+		 * <b>Why no other case in this class proves it.</b> At the default settings a stuck flag is
+		 * invisible. {@code ResourceTable.toHistory(boolean)} carries a fallback that bumps the version
+		 * itself whenever {@code getVersion()} still equals the version of the last history row written -
+		 * which is exactly the state a stuck flag leaves behind. The fallback therefore stands in for the
+		 * skipped bump and reproduces identical {@code RES_VER} and {@code HFJ_RES_VER} values. Deleting
+		 * {@code @PostUpdate} leaves every other case in this class green.
+		 * </p>
+		 * <p>
+		 * <b>Why this configuration exposes it.</b> With resource DB history disabled the fallback is not
+		 * on the path at all: {@code createHistoryEntry} reuses the existing row rather than creating one,
+		 * and finds it by looking up {@code getVersion() - 1}. A stuck flag makes that lookup miss by one,
+		 * the row is not found, and the code drops through to {@code toHistory} - which creates a
+		 * <em>second</em> {@code HFJ_RES_VER} row. The version the transaction superseded is then left in
+		 * the database and stays readable by vread, which is precisely what
+		 * {@code setResourceDbHistoryEnabled(false)} undertakes to prevent. Removing the annotation leaves
+		 * history rows {@code [2, 3]} here instead of {@code [3]}.
+		 * </p>
+		 * <p>
+		 * The Bundle and the interceptor are the same ones
+		 * {@link #testTransactionUpdate_whenInterceptorUpdatesSameResource_currentVersionMatchesHistory()}
+		 * drives; only the storage setting differs.
+		 * </p>
+		 */
+		@Test
+		void testTransactionUpdateWithDbHistoryDisabled_whenInterceptorUpdatesSameResource_previousVersionIsExpunged() {
+			// Setup - Patient v1, with resource history storage turned off
+			myStorageSettings.setResourceDbHistoryEnabled(false);
+			try {
+				createPatientVersionOne();
+
+				ConfigurableReentrantFlagInterceptor interceptor = newNameAppendingFlagInterceptor();
+				registerInterceptor(interceptor);
+
+				// Execute - the Patient PUT takes v1 to v2, and the Flag create fires the interceptor, which
+				// updates the same Patient again from inside the transaction
+				mySystemDao.transaction(new SystemRequestDetails(), buildTransactionWithoutIfMatch());
+
+				// Verify
+				assertThat(interceptor.getInvocationCount())
+					.as("Interceptor never fired, so this test proves nothing")
+					.isEqualTo(1);
+
+				long currentVersion = runInTransaction(() -> {
+					ResourceTable currentRow = findPatientRow();
+					assertThat(historyVersionsOf(currentRow))
+						.as("With resource DB history disabled, two writes to one Patient in one transaction "
+							+ "should leave exactly one HFJ_RES_VER row, holding the current version")
+						.containsExactly(currentRow.getVersion());
+					return currentRow.getVersion();
+				});
+
+				assertThatThrownBy(() -> myPatientDao.read(
+						new IdType(PATIENT_ID).withVersion(Long.toString(currentVersion - 1)),
+						new SystemRequestDetails()))
+					.as("The version the second write superseded should have been expunged, not left readable")
+					.isInstanceOf(ResourceNotFoundException.class);
+			} finally {
+				myStorageSettings.setResourceDbHistoryEnabled(new JpaStorageSettings().isResourceDbHistoryEnabled());
+			}
 		}
 	}
 
