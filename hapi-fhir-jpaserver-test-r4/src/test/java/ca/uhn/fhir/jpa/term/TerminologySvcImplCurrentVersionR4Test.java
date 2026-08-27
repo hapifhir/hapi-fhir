@@ -29,10 +29,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_ALL_VALUESET_ID;
@@ -276,7 +276,7 @@ class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 	/**
 	 * Validates that the collection of unqualified IDs of each element of theValueSets matches the expected
-	 * unqualifiedIds corresponding to the uploaded versions — one per version, each id being
+	 * unqualifiedIds corresponding to the uploaded versions - one per version, each id being
 	 * theUnqualifiedIdPrefix suffixed with its version.
 	 *
 	 * @param theValueSets            the ValueSet collection
@@ -358,8 +358,6 @@ class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion(nonCurrentVer, false);
 
 		logAllCodeSystemsAndVersionsCodeSystemsAndVersions();
-		logAllValueSets();
-		logAllValueSetConcepts();
 		logAllUriIndexes();
 		logAllTokenIndexes("version");
 		logAllConcepts();
@@ -455,38 +453,51 @@ class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 	}
 
 	/**
-	 * Validates that, for each test code, exactly one TermConcept exists per expected version and no others,
-	 * with the display matching that version. A TermConcept belonging to a superseded (DELETED_) version
-	 * therefore fails this check.
+	 * Validates that exactly one TermConcept exists per expected CodeSystem version, and that each one's
+	 * display matches its version. A TermConcept belonging to a superseded (DELETED_) version therefore
+	 * fails this check.
+	 * <p>
+	 * Concepts are keyed by CodeSystem version rather than by PID, because the
+	 * {@link ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl} drain persists them in a separate transaction
+	 * from the import job. PID order therefore does not necessarily follow upload order.
 	 */
-	private void validateTermConcepts(Collection<String> theExpectedVersions) {
-		runInTransaction(() -> {
-			assertTermConceptsForCode(VS_NO_VERSIONED_ON_UPLOAD_FIRST_CODE, VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY, theExpectedVersions);
-			assertTermConceptsForCode(VS_VERSIONED_ON_UPLOAD_FIRST_CODE, VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY, theExpectedVersions);
-		});
+	private void validateTermConcepts(List<String> theExpectedVersions) {
+		validateTermConceptDisplaysByVersion(
+			VS_NO_VERSIONED_ON_UPLOAD_FIRST_CODE, VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY, theExpectedVersions);
+
+		validateTermConceptDisplaysByVersion(
+			VS_VERSIONED_ON_UPLOAD_FIRST_CODE, VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY, theExpectedVersions);
 	}
 
-	private void assertTermConceptsForCode(String theCode, String theExpectedDisplaySuffix, Collection<String> theExpectedVersions) {
-		List<TermConcept> termConcepts = myEntityManager
-			.createQuery("select tc from TermConcept tc join fetch tc.myCodeSystem where tc.myCode = :code", TermConcept.class)
-			.setParameter("code", theCode)
-			.getResultList();
-		assertThat(termConcepts).as("TermConcept count for code: " + theCode).hasSize(theExpectedVersions.size());
+	/**
+	 * Asserts that the TermConcepts for theCode are exactly one per expected version, each displaying
+	 * theDisplay prefixed with its own version. Displays are collected into lists per version so that a
+	 * duplicated version surfaces as a readable map difference rather than an exception.
+	 */
+	private void validateTermConceptDisplaysByVersion(
+			String theCode, String theDisplay, List<String> theExpectedVersions) {
 
-		Map<String, String> versionToDisplay = new HashMap<>();
-		for (TermConcept termConcept : termConcepts) {
-			String version = termConcept.getCodeSystemVersion().getCodeSystemVersionId();
-			assertThat(versionToDisplay)
-				.as("Duplicate TermConcept for code: " + theCode + ", version: " + version)
-				.doesNotContainKey(version);
-			versionToDisplay.put(version, termConcept.getDisplay());
-		}
+		Map<String, List<String>> expectedDisplaysByVersion = theExpectedVersions.stream()
+			.collect(Collectors.toMap(
+				version -> version,
+				version -> List.of(prefixWithVersion(version, theDisplay))));
 
-		for (String version : theExpectedVersions) {
-			assertThat(versionToDisplay)
-				.as("TermConcept for code: " + theCode + ", version: " + version)
-				.containsEntry(version, prefixWithVersion(version, theExpectedDisplaySuffix));
-		}
+		Map<String, List<String>> actualDisplaysByVersion = runInTransaction(() -> {
+			List<TermConcept> concepts = myEntityManager.createQuery(
+					"select tc from TermConcept tc join fetch tc.myCodeSystem tcsv where tc.myCode = :code",
+					TermConcept.class)
+				.setParameter("code", theCode)
+				.getResultList();
+
+			return concepts.stream()
+				.collect(Collectors.groupingBy(
+					concept -> concept.getCodeSystemVersion().getCodeSystemVersionId(),
+					Collectors.mapping(TermConcept::getDisplay, Collectors.toList())));
+		});
+
+		assertThat(actualDisplaysByVersion)
+			.as("TermConcept displays by CodeSystem version for code: %s", theCode)
+			.containsExactlyInAnyOrderEntriesOf(expectedDisplaysByVersion);
 	}
 
 

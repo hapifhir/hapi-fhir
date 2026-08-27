@@ -24,6 +24,7 @@ import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
+import ca.uhn.fhir.jpa.term.TermTestUtil;
 import ca.uhn.fhir.jpa.term.TerminologyTestHelper;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -69,7 +70,7 @@ public class TermCodeSystemDeleteJobTest extends BaseJpaR4Test {
 			assertNotNull(termCodeSystem);
 			termCodeSystemPidVect[0] = termCodeSystem.getPid();
 
-			assertEquals(2, myTermCodeSystemVersionDao.count());
+			assertEquals(2, myTermCodeSystemVersionDao.count(), TermTestUtil.MSG_ONE_CODE_SYSTEM_VERSION_PER_UPLOAD);
 			assertEquals(82 * 2, myTermConceptDao.count());
 		});
 

@@ -58,6 +58,14 @@ public final class TermTestUtil {
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
 	public static final String URL_MY_VALUE_SET = "http://example.com/my_value_set";
 
+	/**
+	 * Message for assertions on the surviving {@code TermCodeSystemVersion} count. An upload creates a
+	 * placeholder version and then supersedes it when the real version is activated, so each upload leaves
+	 * exactly one version behind once the batch2 deletion of the superseded one has run.
+	 */
+	public static final String MSG_ONE_CODE_SYSTEM_VERSION_PER_UPLOAD =
+			"each upload leaves exactly one CodeSystem version once the superseded placeholder is deleted";
+
 	private TermTestUtil() {}
 
 	public static void addLoincMandatoryFilesAndSinglePartLinkToZip(ZipCollectionBuilder theFiles) throws IOException {

@@ -57,7 +57,6 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		files = new ZipCollectionBuilder(true);
 		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(files, "v267_loincupload.properties");
 		String instanceId = myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion("2.66", files);
-		myBatch2JobHelper.awaitNoJobsRunning();
 
 		logAllValueSets();
 
@@ -65,8 +64,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 			assertEquals(1, myTermCodeSystemDao.count());
 			assertEquals(82, myTermConceptDao.count());
 			assertEquals(8, myTermConceptParentChildLinkDao.count());
-			assertEquals(1, myTermCodeSystemVersionDao.count(),
-				"the placeholder version superseded during activation must have been deleted");
+			assertEquals(1, myTermCodeSystemVersionDao.count(), TermTestUtil.MSG_ONE_CODE_SYSTEM_VERSION_PER_UPLOAD);
 			assertEquals(10, myTermValueSetDao.count());
 			assertEquals(5, myTermConceptMapDao.count());
 			assertEquals(16, myResourceTableDao.count());
@@ -101,7 +99,6 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		files = new ZipCollectionBuilder(true);
 		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(files, "v267_loincupload.properties");
 		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion("2.67", files);
-		myBatch2JobHelper.awaitNoJobsRunning();
 
 		logAllCodeSystemsAndVersionsCodeSystemsAndVersions();
 
@@ -110,7 +107,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 			assertEquals(1, myTermCodeSystemDao.count());
 			assertEquals(82 * 2, myTermConceptDao.count());
 			assertEquals(8 * 2, myTermConceptParentChildLinkDao.count());
-			assertEquals(2, myTermCodeSystemVersionDao.count());
+			assertEquals(2, myTermCodeSystemVersionDao.count(), TermTestUtil.MSG_ONE_CODE_SYSTEM_VERSION_PER_UPLOAD);
 			assertEquals(10 * 2, myTermValueSetDao.count());
 			assertEquals(5 * 2, myTermConceptMapDao.count());
 			assertEquals(16 * 2, myResourceTableDao.count());
@@ -130,13 +127,12 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		files = new ZipCollectionBuilder(true);
 		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(files, "v268_loincupload.properties");
 		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion("2.68", files);
-		myBatch2JobHelper.awaitNoJobsRunning();
 
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
 			assertEquals(82 * 3, myTermConceptDao.count());
 			assertEquals(8 * 3, myTermConceptParentChildLinkDao.count());
-			assertEquals(3, myTermCodeSystemVersionDao.count());
+			assertEquals(3, myTermCodeSystemVersionDao.count(), TermTestUtil.MSG_ONE_CODE_SYSTEM_VERSION_PER_UPLOAD);
 			assertEquals(10 * 3, myTermValueSetDao.count());
 			assertEquals(5 * 3, myTermConceptMapDao.count());
 			assertEquals(16 * 3, myResourceTableDao.count());
@@ -192,7 +188,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
-			assertEquals(2, myTermCodeSystemVersionDao.count());
+			assertEquals(2, myTermCodeSystemVersionDao.count(), TermTestUtil.MSG_ONE_CODE_SYSTEM_VERSION_PER_UPLOAD);
 			TermCodeSystem myTermCodeSystem = myTermCodeSystemDao.findByCodeSystemUri("http://loinc.org");
 
 			TermCodeSystemVersion myTermCodeSystemVersion_new =
@@ -209,7 +205,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 
 	@Test
 	public void testValueSetExpansion() throws IOException {
-		// Load LOINC marked as version 2.66
+		// Load LOINC marked as version 2.67
 
 		ZipCollectionBuilder files = new ZipCollectionBuilder(true);
 		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(files, "v267_loincupload.properties");
@@ -225,17 +221,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		assertEquals("Never", outcome.getExpansion().getContains().get(0).getDisplay());
 
 		String expansionMessage = outcome.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE);
-		assertThat(expansionMessage).contains("has not yet been pre-expanded");
-
-		// Now run the pre-expansion
-
-		logAllValueSets();
-		myBatch2JobHelper.awaitNoJobsRunning();
-
-		outcome = myValueSetDao.expand(new IdType("ValueSet/LL1001-8-2.67"), options, newSrd());
-		expansionMessage = outcome.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE);
 		assertThat(expansionMessage).contains("using an expansion that was pre-calculated");
-
 	}
 
 	@Test

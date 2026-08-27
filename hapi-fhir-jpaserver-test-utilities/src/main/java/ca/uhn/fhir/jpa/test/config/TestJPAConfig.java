@@ -90,19 +90,14 @@ public class TestJPAConfig {
 
 	@Bean
 	public TerminologyTestHelper terminologyTestHelper(
-			IJobPersistence theJobPersistence,
-			IJobCoordinator theJobCoordinator,
-			Batch2JobHelper theBatch2JobHelper,
-			MemoryCacheService theMemoryCacheSvc,
-			IValidationSupport theValidationSupport,
-			ITermDeferredStorageSvc theTermDeferredStorageSvc) {
-		return new TerminologyTestHelper(
-			theJobPersistence,
-			theJobCoordinator,
-			theBatch2JobHelper,
-			theMemoryCacheSvc,
-			theValidationSupport,
-			theTermDeferredStorageSvc);
+		IJobPersistence theJobPersistence,
+		IJobCoordinator theJobCoordinator,
+		Batch2JobHelper theBatch2JobHelper,
+		MemoryCacheService theMemoryCacheSvc,
+		IValidationSupport theValidationSupport,
+		ITermDeferredStorageSvc theITermDeferredStorageSvc) {
+		return new TerminologyTestHelper(theJobPersistence,
+			theJobCoordinator, theBatch2JobHelper, theMemoryCacheSvc, theValidationSupport, theITermDeferredStorageSvc);
 	}
 
 	@Bean
