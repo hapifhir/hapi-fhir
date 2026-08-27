@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * GL-8721 follow-up: re-entrant interceptor writes against a <b>PATCH</b> entry in a transaction.
+ * Re-entrant interceptor writes against a <b>PATCH</b> entry in a transaction.
  * <p>
  * Sibling of {@code TransactionReentrantUpdateR4Test}, which covers the same family of defects for
  * full-record {@code PUT} updates. PATCH is a separate shape and a separate code path, and the fix

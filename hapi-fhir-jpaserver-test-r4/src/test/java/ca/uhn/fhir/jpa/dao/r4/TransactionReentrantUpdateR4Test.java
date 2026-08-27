@@ -967,12 +967,6 @@ public class TransactionReentrantUpdateR4Test extends BaseJpaR4Test {
 			myPatientDao, thePatient -> thePatient.addName().setFamily(REENTRANT_FAMILY_NAME));
 	}
 
-	/**
-	 * This interceptor is triggered by the creation of a Flag resource. It will:
-	 * extracts flag.subject (Patient) and update the patient with a deceased date
-	 * effectively creating a new entry in table HFJ_RES_VER.
-	 *
-	 */
 	@Interceptor
 	private static class ReentrantFlagInterceptor {
 

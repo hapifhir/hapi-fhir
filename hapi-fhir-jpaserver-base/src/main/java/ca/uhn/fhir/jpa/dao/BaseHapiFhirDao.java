@@ -911,7 +911,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	/**
 	 * Flushes the Hibernate session so that a version increment which has been marked on
 	 * {@literal theEntity} but not yet written is emitted as a physical {@code UPDATE} before the
-	 * caller performs a further write to the same resource.
+	 * caller performs a further write to the same resource. Does nothing if {@literal theEntity}
+	 * carries no such pending increment.
 	 * <p>
 	 * If the flush fails, the {@link PersistenceException} it raises is translated through
 	 * {@link HapiFhirHibernateJpaDialect}, for the same reason
@@ -924,6 +925,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	 * @param theEntity the entity whose pending version increment is being flushed
 	 */
 	protected void flushPendingResourceVersionUpdate(ResourceTable theEntity) {
+		if (!theEntity.isVersionUpdatedInCurrentTransaction()) {
+			return;
+		}
 		try {
 			myEntityManager.flush();
 		} catch (PersistenceException e) {
@@ -972,7 +976,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		 * create a history row - reindexing and history rewrites - pass theCreateNewHistoryEntry=false
 		 * and are deliberately excluded, since they neither consume nor produce a version increment.
 		 */
-		if (theCreateNewHistoryEntry && entity.isVersionUpdatedInCurrentTransaction()) {
+		if (theCreateNewHistoryEntry) {
 			flushPendingResourceVersionUpdate(entity);
 		}
 
@@ -1668,9 +1672,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	 * write pass: {@code STORAGE_PRESTORAGE_RESOURCE_UPDATED} is broadcast from inside this very
 	 * method, so an interceptor can still write the resource after any earlier check has passed.
 	 * </p>
-	 * <p>
-	 * See GL-8721 and {@code TransactionReentrantUpdateR4Test}.
-	 * </p>
 	 *
 	 * @param theExpectedVersion the version demanded by {@code If-Match}, or {@literal null} if the
 	 *                              client sent no precondition
@@ -1686,9 +1687,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		 * emitted, so that the comparison below is made against the version the database genuinely
 		 * holds rather than one still sitting in the session.
 		 */
-		if (theEntity.isVersionUpdatedInCurrentTransaction()) {
-			flushPendingResourceVersionUpdate(theEntity);
-		}
+		flushPendingResourceVersionUpdate(theEntity);
 
 		long currentVersion = theEntity.getVersion();
 		if (currentVersion != theExpectedVersion) {

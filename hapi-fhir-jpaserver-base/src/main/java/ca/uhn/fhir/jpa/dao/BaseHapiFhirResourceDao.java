@@ -3004,7 +3004,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		 * us to flush hibernate now. That way we can increment the version
 		 * a second time, create multiple history entries, etc.
 		 */
-		if (entity != null && entity.isVersionUpdatedInCurrentTransaction()) {
+		if (entity != null) {
 			flushPendingResourceVersionUpdate(entity);
 		}
 
