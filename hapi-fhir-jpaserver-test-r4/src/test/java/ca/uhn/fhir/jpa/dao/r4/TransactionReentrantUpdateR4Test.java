@@ -457,7 +457,7 @@ public class TransactionReentrantUpdateR4Test extends BaseJpaR4Test {
 	 * is rejected when the write version and precondition version have drifted.
 	 * <p>
 	 * The three refusal cases cover routes (a), (b) and (c) - the three places a re-entrant write can
-	 * land relative to the Bundle's own write - and each asserts {@code Msg.code(3021)}.
+	 * land relative to the Bundle's own write - and each asserts {@code Msg.code(3026)}.
 	 * </p>
 	 */
 	@Nested
@@ -502,7 +502,7 @@ public class TransactionReentrantUpdateR4Test extends BaseJpaR4Test {
 				fail("The interceptor invalidated If-Match W/\"1\" before the Bundle's own PUT was written, "
 						+ "so that PUT must not silently discard the interceptor's version");
 			} catch (ResourceVersionConflictException e) {
-				assertThat(e.getMessage()).contains(Msg.code(3021));
+				assertThat(e.getMessage()).contains(Msg.code(3026));
 			}
 
 			assertThat(interceptor.getInvocationCount())
@@ -552,7 +552,7 @@ public class TransactionReentrantUpdateR4Test extends BaseJpaR4Test {
 						+ "with no verb boundary there is no flush for the pass-1 check to see, so the re-check "
 						+ "at the real write is what has to catch it");
 			} catch (ResourceVersionConflictException e) {
-				assertThat(e.getMessage()).contains(Msg.code(3021));
+				assertThat(e.getMessage()).contains(Msg.code(3026));
 			}
 
 			assertThat(interceptor.getInvocationCount())
@@ -599,7 +599,7 @@ public class TransactionReentrantUpdateR4Test extends BaseJpaR4Test {
 				fail("The interceptor writes from inside the Bundle's own write path, so only a check made "
 						+ "immediately before the write can see that If-Match W/\"1\" is no longer satisfiable");
 			} catch (ResourceVersionConflictException e) {
-				assertThat(e.getMessage()).contains(Msg.code(3021));
+				assertThat(e.getMessage()).contains(Msg.code(3026));
 			}
 
 			assertThat(interceptor.getInvocationCount())

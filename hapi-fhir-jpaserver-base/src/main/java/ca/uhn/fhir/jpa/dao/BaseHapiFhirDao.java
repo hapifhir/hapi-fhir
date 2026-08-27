@@ -1691,7 +1691,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		long currentVersion = theEntity.getVersion();
 		if (currentVersion != theExpectedVersion) {
-			throw new ResourceVersionConflictException(Msg.code(3021) + "Trying to update "
+			throw new ResourceVersionConflictException(Msg.code(3026) + "Trying to update "
 					+ theEntity.getIdDt().toUnqualifiedVersionless().getValue() + "/_history/" + theExpectedVersion
 					+ " but this is not the current version");
 		}
