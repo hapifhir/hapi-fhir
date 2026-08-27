@@ -1,6 +1,5 @@
 package ca.uhn.fhir.test.utilities;
 
-import ca.uhn.fhir.test.utilities.HttpTestResponse.HeaderEntry;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -32,7 +31,7 @@ class HttpTestResponseTest {
 
 	@Test
 	void getHeader_headerPresent_matchesNameCaseInsensitively() {
-		HttpTestResponse response = response(200, "OK", "", new HeaderEntry("Content-Location", "Patient/123"));
+		HttpTestResponse response = response(200, "OK", "", new HttpTestHeader("Content-Location", "Patient/123"));
 
 		assertThat(response.getHeader("content-location")).isEqualTo("Patient/123");
 	}
@@ -47,7 +46,7 @@ class HttpTestResponseTest {
 	@Test
 	void getHeader_headerRepeated_returnsFirstValue() {
 		HttpTestResponse response =
-			response(200, "OK", "", new HeaderEntry("X-Repeated", "first"), new HeaderEntry("X-Repeated", "second"));
+			response(200, "OK", "", new HttpTestHeader("X-Repeated", "first"), new HttpTestHeader("X-Repeated", "second"));
 
 		assertThat(response.getHeader("X-Repeated")).isEqualTo("first");
 	}
@@ -55,7 +54,7 @@ class HttpTestResponseTest {
 	@Test
 	void getHeaders_headerRepeated_returnsAllValuesInOrder() {
 		HttpTestResponse response =
-			response(200, "OK", "", new HeaderEntry("X-Repeated", "first"), new HeaderEntry("X-Repeated", "second"));
+			response(200, "OK", "", new HttpTestHeader("X-Repeated", "first"), new HttpTestHeader("X-Repeated", "second"));
 
 		assertThat(response.getHeaders("X-Repeated")).containsExactly("first", "second");
 	}
@@ -70,10 +69,10 @@ class HttpTestResponseTest {
 	@Test
 	void getAllHeaders_returnsHeadersInReceiptOrder() {
 		HttpTestResponse response =
-			response(200, "OK", "", new HeaderEntry("X-First", "1"), new HeaderEntry("X-Second", "2"));
+			response(200, "OK", "", new HttpTestHeader("X-First", "1"), new HttpTestHeader("X-Second", "2"));
 
 		assertThat(response.getAllHeaders())
-			.containsExactly(new HeaderEntry("X-First", "1"), new HeaderEntry("X-Second", "2"));
+			.containsExactly(new HttpTestHeader("X-First", "1"), new HttpTestHeader("X-Second", "2"));
 	}
 
 	@Test
@@ -96,7 +95,7 @@ class HttpTestResponseTest {
 
 	@Test
 	void getBodyBytes_noBody_returnsEmptyArray() {
-		HttpTestResponse response = new HttpTestResponse(204, "No Content", (byte[]) null, List.of());
+		HttpTestResponse response = new HttpTestResponse(204, "No Content", null, List.of());
 
 		assertThat(response.getBodyBytes()).isEmpty();
 		assertThat(response.getBody()).isEmpty();
@@ -113,42 +112,69 @@ class HttpTestResponseTest {
 
 	@Test
 	void getBody_utf8Body_decodesNonAsciiCharacters() {
-		HttpTestResponse response = new HttpTestResponse(200, "OK", "Ünïcodé", List.of());
+		HttpTestResponse response = HttpTestResponse.fromText(200, "OK", "Ünïcodé", List.of());
 
 		assertThat(response.getBody()).isEqualTo("Ünïcodé");
 	}
 
 	@Test
-	void contentType_headerHasCharsetParameter_stripsIt() {
+	void getContentType_headerHasCharsetParameter_stripsIt() {
 		HttpTestResponse response =
-			response(200, "OK", "", new HeaderEntry("Content-Type", "text/html; charset=UTF-8"));
+			response(200, "OK", "", new HttpTestHeader("Content-Type", "text/html; charset=UTF-8"));
 
-		assertThat(response.contentType()).isEqualTo("text/html");
+		assertThat(response.getContentType()).isEqualTo("text/html");
 	}
 
 	@Test
-	void contentType_headerHasNoParameters_returnsMimeTypeUnchanged() {
-		HttpTestResponse response = response(200, "OK", "", new HeaderEntry("Content-Type", "application/fhir+json"));
+	void getContentType_headerHasNoParameters_returnsMimeTypeUnchanged() {
+		HttpTestResponse response = response(200, "OK", "", new HttpTestHeader("Content-Type", "application/fhir+json"));
 
-		assertThat(response.contentType()).isEqualTo("application/fhir+json");
+		assertThat(response.getContentType()).isEqualTo("application/fhir+json");
 	}
 
 	@Test
-	void contentType_headerHasMixedCase_lowerCasesIt() {
-		HttpTestResponse response = response(200, "OK", "", new HeaderEntry("Content-Type", "TEXT/HTML"));
+	void getContentType_headerHasMixedCase_lowerCasesIt() {
+		HttpTestResponse response = response(200, "OK", "", new HttpTestHeader("Content-Type", "TEXT/HTML"));
 
-		assertThat(response.contentType()).isEqualTo("text/html");
+		assertThat(response.getContentType()).isEqualTo("text/html");
 	}
 
 	@Test
-	void contentType_headerAbsent_returnsNull() {
+	void getContentType_headerAbsent_returnsNull() {
 		HttpTestResponse response = response(200, "OK", "");
 
-		assertThat(response.contentType()).isNull();
+		assertThat(response.getContentType()).isNull();
+	}
+
+	@Test
+	void toString_rendersStatusLineHeadersAndBodyInWireFormat() {
+		HttpTestResponse response = response(
+				201,
+				"Created",
+				"{\"resourceType\":\"Patient\"}",
+				new HttpTestHeader("Content-Location", "Patient/123"),
+				new HttpTestHeader("Content-Type", "application/fhir+json"));
+
+		assertThat(response.toString())
+				.isEqualTo(
+						"""
+						HTTP 201 Created
+						Content-Location: Patient/123
+						Content-Type: application/fhir+json
+
+						{"resourceType":"Patient"}""");
+	}
+
+	@Test
+	void toString_headerPresent_isFoundByASubstringAssertion() {
+		// The shape this format exists for: assertThat(response.toString()).contains("Name: value").
+		HttpTestResponse response = response(200, "OK", "", new HttpTestHeader("X-My-Header", "expected"));
+
+		assertThat(response.toString()).contains("X-My-Header: expected");
 	}
 
 	private HttpTestResponse response(
-		int theStatusCode, String theReasonPhrase, String theBody, HeaderEntry... theHeaders) {
-		return new HttpTestResponse(theStatusCode, theReasonPhrase, theBody, List.of(theHeaders));
+		int theStatusCode, String theReasonPhrase, String theBody, HttpTestHeader... theHeaders) {
+		return HttpTestResponse.fromText(theStatusCode, theReasonPhrase, theBody, List.of(theHeaders));
 	}
 }

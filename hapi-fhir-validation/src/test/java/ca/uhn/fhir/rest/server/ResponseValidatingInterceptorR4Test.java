@@ -103,7 +103,7 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(200);
-		assertThat(status.toString()).doesNotContain("X-FHIR-Response-Validation");
+		assertThat(status.getHeader("X-FHIR-Response-Validation")).isNull();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -153,7 +153,7 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(200);
-		assertThat(status.toString()).doesNotContain("X-FHIR-Response-Validation");
+		assertThat(status.getHeader("X-FHIR-Response-Validation")).isNull();
 	}
 
 
@@ -170,7 +170,7 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(204);
-		assertThat(status.toString()).doesNotContain("X-FHIR-Response-Validation");
+		assertThat(status.getHeader("X-FHIR-Response-Validation")).isNull();
 	}
 
 	@Test
@@ -244,8 +244,9 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(200);
-		assertThat(status.toString().contains(
-			"X-FHIR-Response-Validation: {\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"information\",\"code\":\"informational\",\"diagnostics\":\"No issues detected\"}]}"));
+		assertThat(status.getHeader("X-FHIR-Response-Validation"))
+			.isEqualTo(
+				"{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"information\",\"code\":\"informational\",\"diagnostics\":\"No issues detected\"}]}");
 	}
 
 	@Test
@@ -277,7 +278,7 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(200);
-		assertThat(status.toString()).doesNotContain("X-FHIR-Response-Validation");
+		assertThat(status.getHeader("X-FHIR-Response-Validation")).isNull();
 	}
 
 	@Test
@@ -296,7 +297,7 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(200);
-		assertThat(status.toString().contains("X-FHIR-Response-Validation: NO ISSUES"));
+		assertThat(status.getHeader("X-FHIR-Response-Validation")).isEqualTo("NO ISSUES");
 	}
 
 	@Test
@@ -316,7 +317,7 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(422);
-		assertThat(status.toString()).contains("X-FHIR-Response-Validation");
+		assertThat(status.getHeader("X-FHIR-Response-Validation")).isNotNull();
 	}
 
 	/**
@@ -351,7 +352,7 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(200);
-		assertThat(status.toString()).doesNotContain("X-FHIR-Response-Validation");
+		assertThat(status.getHeader("X-FHIR-Response-Validation")).isNull();
 	}
 
 	@Test
@@ -366,7 +367,7 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(200);
-		assertThat(status.toString()).doesNotContain("X-FHIR-Response-Validation");
+		assertThat(status.getHeader("X-FHIR-Response-Validation")).isNull();
 	}
 
 	@Test
@@ -382,7 +383,7 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(200);
-		assertThat(status.toString().contains("X-FHIR-Response-Validation"));
+		assertThat(status.getHeader("X-FHIR-Response-Validation")).isNotNull();
 	}
 
 }

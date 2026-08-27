@@ -107,7 +107,7 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(200);
-		assertThat(status.toString()).doesNotContain("X-FHIR-Response-Validation");
+		assertThat(status.getHeader("X-FHIR-Response-Validation")).isNull();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -157,7 +157,7 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(200);
-		assertThat(status.toString()).doesNotContain("X-FHIR-Response-Validation");
+		assertThat(status.getHeader("X-FHIR-Response-Validation")).isNull();
 	}
 
 
@@ -174,7 +174,7 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(204);
-		assertThat(status.toString()).doesNotContain("X-FHIR-Response-Validation");
+		assertThat(status.getHeader("X-FHIR-Response-Validation")).isNull();
 	}
 
 
@@ -226,8 +226,9 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(200);
-		assertThat(status.toString().contains(
-			"X-FHIR-Response-Validation: {\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"information\",\"code\":\"informational\",\"diagnostics\":\"No issues detected\"}]}"));
+		assertThat(status.getHeader("X-FHIR-Response-Validation"))
+			.isEqualTo(
+				"{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"information\",\"code\":\"informational\",\"diagnostics\":\"No issues detected\"}]}");
 	}
 
 	/**
@@ -261,7 +262,7 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(200);
-		assertThat(status.toString()).doesNotContain("X-FHIR-Response-Validation");
+		assertThat(status.getHeader("X-FHIR-Response-Validation")).isNull();
 	}
 
 	@Test
@@ -279,7 +280,7 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(200);
-		assertThat(status.toString().contains("X-FHIR-Response-Validation: NO ISSUES"));
+		assertThat(status.getHeader("X-FHIR-Response-Validation")).isEqualTo("NO ISSUES");
 	}
 
 	@Test
@@ -299,7 +300,7 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(422);
-		assertThat(status.toString()).contains("X-FHIR-Response-Validation");
+		assertThat(status.getHeader("X-FHIR-Response-Validation")).isNotNull();
 	}
 
 	/**
@@ -333,7 +334,7 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(200);
-		assertThat(status.toString()).doesNotContain("X-FHIR-Response-Validation");
+		assertThat(status.getHeader("X-FHIR-Response-Validation")).isNull();
 	}
 
 	@Test
@@ -348,7 +349,7 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(200);
-		assertThat(status.toString()).doesNotContain("X-FHIR-Response-Validation");
+		assertThat(status.getHeader("X-FHIR-Response-Validation")).isNull();
 	}
 
 	@Test
@@ -364,7 +365,7 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(200);
-		assertThat(status.toString().contains("X-FHIR-Response-Validation"));
+		assertThat(status.getHeader("X-FHIR-Response-Validation")).isNotNull();
 	}
 
 	public static class PatientProvider implements IResourceProvider {

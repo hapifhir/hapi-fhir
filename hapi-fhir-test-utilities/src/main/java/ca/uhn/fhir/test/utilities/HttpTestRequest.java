@@ -52,13 +52,13 @@ import java.util.Locale;
  * needs an {@link IHttpTestTransport}. Client lifecycles are the caller's problem.
  * </p>
  */
-// Created by claude-sonnet-5
+// Created by claude-opus-5
 public class HttpTestRequest {
 
 	private final IHttpTestTransport myTransport;
 	private final FhirContext myFhirContext;
 	private final String myUrl;
-	private final List<HttpTestResponse.HeaderEntry> myHeaders = new ArrayList<>();
+	private final List<HttpTestHeader> myHeaders = new ArrayList<>();
 	private boolean myDisableRedirects;
 
 	private HttpTestRequest(IHttpTestTransport theTransport, FhirContext theFhirContext, String theUrl) {
@@ -132,20 +132,14 @@ public class HttpTestRequest {
 	}
 
 	public HttpTestRequest withHeader(String theName, String theValue) {
-		myHeaders.add(new HttpTestResponse.HeaderEntry(theName, theValue));
+		myHeaders.add(new HttpTestHeader(theName, theValue));
 		return this;
 	}
 
 	/**
 	 * Returns a {@literal 3xx} as-is instead of following it, so a test can assert on the status
-	 * and the {@literal Location} header.
-	 * <p>
-	 * Note that this resets the request's other settings — timeouts, compression, cookie policy —
-	 * to Apache HttpClient's stock defaults, because a client's configured defaults cannot be read
-	 * back in order to preserve them. Avoid it where those matter.
-	 * </p>
+	 * and the {@literal Location} header. The client's other settings are preserved.
 	 */
-	// Created by claude-opus-5
 	public HttpTestRequest withoutRedirects() {
 		myDisableRedirects = true;
 		return this;

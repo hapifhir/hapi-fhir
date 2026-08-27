@@ -63,7 +63,7 @@ public interface IHttpTestTransport {
 	record Request(
 			String method,
 			String url,
-			List<HttpTestResponse.HeaderEntry> headers,
+			List<HttpTestHeader> headers,
 			byte[] body,
 			String contentType,
 			boolean disableRedirects) {}

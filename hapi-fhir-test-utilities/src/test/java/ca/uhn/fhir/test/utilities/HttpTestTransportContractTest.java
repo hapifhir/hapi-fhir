@@ -3,10 +3,7 @@ package ca.uhn.fhir.test.utilities;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.apache.commons.io.IOUtils;
+import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
@@ -29,14 +26,13 @@ import static org.mockito.Mockito.mock;
  * which HTTP client library is underneath, so each case runs against all transports rather than
  * testing any one of them in isolation.
  * <p>
- * A new transport should be added to {@link #transport(String)} and to each {@code @ValueSource},
- * and nothing else.
+ * A new transport should be added to {@link #transport(String)} and to each {@code @ValueSource}.
+ * The only cases outside that pattern are the ones needing a specifically configured client, which
+ * is inherently client-library-specific; those are named per transport instead.
  * </p>
  */
 // Created by claude-sonnet-5
-class FhirHttpTransportContractTest {
-
-	private static final byte[] PNG_MAGIC = new byte[] {(byte) 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A};
+class HttpTestTransportContractTest {
 
 	private static final String APACHE_4 = "ApacheHttp4";
 	private static final String APACHE_5 = "ApacheHttp5";
@@ -170,16 +166,16 @@ class FhirHttpTransportContractTest {
 	void getBodyBytes_binaryResponse_returnsBytesUnaltered(String theTransport) {
 		HttpTestResponse response = request(theTransport, "/foo?binary=true").get();
 
-		assertThat(response.getBodyBytes()).containsExactly(PNG_MAGIC);
+		assertThat(response.getBodyBytes()).containsExactly(EchoServlet.PNG_MAGIC);
 	}
 
 	@ParameterizedTest
 	@ValueSource(strings = {APACHE_4, APACHE_5})
-	void contentType_responseHasCharsetParameter_stripsIt(String theTransport) {
+	void getContentType_responseHasCharsetParameter_stripsIt(String theTransport) {
 		HttpTestResponse response = request(theTransport, "/foo").get();
 
-		assertThat(response.getHeader("Content-Type")).startsWith("text/plain");
-		assertThat(response.contentType()).isEqualTo("text/plain");
+		assertThat(response.getContentType()).startsWith("text/plain");
+		assertThat(response.getContentType()).isEqualTo("text/plain");
 	}
 
 	@ParameterizedTest
@@ -222,7 +218,7 @@ class FhirHttpTransportContractTest {
 	@ParameterizedTest
 	@ValueSource(strings = {APACHE_4, APACHE_5})
 	void put_withByteArrayBody_sendsBytesUnaltered(String theTransport) {
-		HttpTestResponse response = request(theTransport, "/foo").put(PNG_MAGIC, "image/png");
+		HttpTestResponse response = request(theTransport, "/foo").put(EchoServlet.PNG_MAGIC, "image/png");
 
 		assertThat(response.getBody()).contains("method=PUT").contains("contentType=image/png");
 	}
@@ -248,6 +244,67 @@ class FhirHttpTransportContractTest {
 	}
 
 	/**
+	 * Apache does not merge a request-level {@code RequestConfig} with the client's default — it
+	 * replaces it — so setting one in order to suppress redirects must copy the client's default
+	 * first, or every other setting on it is silently dropped.
+	 * <p>
+	 * Content compression is the lever because it is observable on the wire: with it disabled the
+	 * client sends no {@literal Accept-Encoding} at all. A timeout would need a slow server to
+	 * detect, and a cookie policy would need a cookie.
+	 * </p>
+	 */
+	@Test
+	void withoutRedirects_apacheHttp4ClientWithNonDefaultRequestConfig_preservesThatConfig() throws IOException {
+		try (org.apache.http.impl.client.CloseableHttpClient client = http4ClientWithoutCompression()) {
+			assertThat(HttpTestRequest.to(client, ourServer.getBaseUrl() + "/foo").get().getBody())
+					.as("premise: this client sends no Accept-Encoding when no request config is set")
+					.contains("acceptEncoding=null");
+
+			assertThat(HttpTestRequest.to(client, ourServer.getBaseUrl() + "/foo")
+							.withoutRedirects()
+							.get()
+							.getBody())
+					.contains("acceptEncoding=null");
+		}
+	}
+
+	/**
+	 * @see #withoutRedirects_apacheHttp4ClientWithNonDefaultRequestConfig_preservesThatConfig()
+	 */
+	@Test
+	void withoutRedirects_apacheHttp5ClientWithNonDefaultRequestConfig_preservesThatConfig() throws IOException {
+		try (CloseableHttpClient client = http5ClientWithoutCompression()) {
+			assertThat(HttpTestRequest.to(client, ourServer.getBaseUrl() + "/foo").get().getBody())
+					.as("premise: this client sends no Accept-Encoding when no request config is set")
+					.contains("acceptEncoding=null");
+
+			assertThat(HttpTestRequest.to(client, ourServer.getBaseUrl() + "/foo")
+							.withoutRedirects()
+							.get()
+							.getBody())
+					.contains("acceptEncoding=null");
+		}
+	}
+
+	/**
+	 * Fully qualified because this class already imports the 5.x names of both types.
+	 */
+	private static org.apache.http.impl.client.CloseableHttpClient http4ClientWithoutCompression() {
+		return org.apache.http.impl.client.HttpClients.custom()
+				.setDefaultRequestConfig(org.apache.http.client.config.RequestConfig.custom()
+						.setContentCompressionEnabled(false)
+						.build())
+				.build();
+	}
+
+	private static CloseableHttpClient http5ClientWithoutCompression() {
+		return HttpClients.custom()
+				.setDefaultRequestConfig(
+						RequestConfig.custom().setContentCompressionEnabled(false).build())
+				.build();
+	}
+
+	/**
 	 * Resolved per-test rather than up front, so that the 4.x client — which the server extension
 	 * only creates once it has started — is read after {@code beforeAll} has run.
 	 */
@@ -261,44 +318,5 @@ class FhirHttpTransportContractTest {
 
 	private HttpTestRequest request(String theTransport, String thePath) {
 		return HttpTestRequest.to(transport(theTransport), ourServer.getBaseUrl() + thePath);
-	}
-
-	private static class EchoServlet extends HttpServlet {
-
-		@Override
-		protected void service(HttpServletRequest theRequest, HttpServletResponse theResponse) throws IOException {
-			if (theRequest.getParameter("redirect") != null) {
-				theResponse.setStatus(302);
-				theResponse.addHeader("Location", theRequest.getRequestURL().toString());
-				return;
-			}
-
-			String statusParameter = theRequest.getParameter("status");
-			int status = statusParameter != null ? Integer.parseInt(statusParameter) : 200;
-			theResponse.setStatus(status);
-			theResponse.addHeader("X-Echo-Header", "echo-value");
-			if (status == 204) {
-				return;
-			}
-
-			if (theRequest.getParameter("binary") != null) {
-				theResponse.setContentType("image/png");
-				theResponse.getOutputStream().write(PNG_MAGIC);
-				return;
-			}
-
-			String requestBody = IOUtils.toString(theRequest.getInputStream(), StandardCharsets.UTF_8);
-			theResponse.setContentType("text/plain");
-			theResponse
-					.getWriter()
-					.write("method=" + theRequest.getMethod() + "\nauthorization="
-							+ theRequest.getHeader(Constants.HEADER_AUTHORIZATION) + "\ncontentType="
-							+ stripCharset(theRequest.getContentType()) + "\ncustom="
-							+ theRequest.getHeader("X-Custom") + "\nbody=" + requestBody);
-		}
-
-		private String stripCharset(String theContentType) {
-			return theContentType == null ? null : theContentType.replaceAll(";.*", "").trim();
-		}
 	}
 }

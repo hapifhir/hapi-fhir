@@ -164,11 +164,17 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 		if (!isRunning()) {
 			return;
 		}
-		JettyUtil.closeServer(myServer);
-		myServer = null;
-
-		myHttpClient.close();
-		myHttpClient = null;
+		try {
+			JettyUtil.closeServer(myServer);
+		} finally {
+			// Both are released even if closing the server throws. Otherwise the client's 99-connection
+			// pool leaks, and isRunning() — which only looks at myServer — would make a retry a no-op.
+			myServer = null;
+			if (myHttpClient != null) {
+				myHttpClient.close();
+				myHttpClient = null;
+			}
+		}
 	}
 
 	protected void startServer() throws Exception {
@@ -252,7 +258,9 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 
 		myPort = JettyUtil.getPortForStartedServer(myServer);
 		ourLog.info("Server has started on port {}", myPort);
-		myHttpClient = TestHttpClientFactory.create();
+		// No read timeout: before this client moved onto TestHttpClientFactory it inherited Apache's
+		// unbounded default, and tests driving slow endpoints through this extension rely on that.
+		myHttpClient = TestHttpClientFactory.create(true, TestHttpClientFactory.NO_SOCKET_TIMEOUT);
 	}
 
 	private Filter requestCapturingFilter() {

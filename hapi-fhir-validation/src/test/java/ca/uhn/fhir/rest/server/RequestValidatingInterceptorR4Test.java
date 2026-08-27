@@ -127,7 +127,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(201);
-		assertThat(status.toString()).contains("X-FHIR-Request-Validation");
+		assertThat(status.getHeader("X-FHIR-Request-Validation")).isNotNull();
 		assertThat(status.getBody()).doesNotContain("<severity value=\"error\"/>");
 	}
 
@@ -168,7 +168,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(422);
-		assertThat(status.toString()).contains("X-FHIR-Request-Validation");
+		assertThat(status.getHeader("X-FHIR-Request-Validation")).isNotNull();
 		assertThat(status.getBody()).contains("\"severity\": \"error\"");
 	}
 
@@ -185,7 +185,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(201);
-		assertThat(status.toString()).doesNotContain("X-FHIR-Request-Validation");
+		assertThat(status.getHeader("X-FHIR-Request-Validation")).isNull();
 	}
 
 	@Test
@@ -204,7 +204,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(201);
-		assertThat(status.toString().contains("X-FHIR-Request-Validation: NO ISSUES"));
+		assertThat(status.getHeader("X-FHIR-Request-Validation")).isEqualTo("NO ISSUES");
 	}
 
 	@Test
@@ -253,7 +253,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(422);
-		assertThat(status.toString()).contains("X-FHIR-Request-Validation");
+		assertThat(status.getHeader("X-FHIR-Request-Validation")).isNotNull();
 	}
 
 	@Test
@@ -271,7 +271,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(422);
-		assertThat(status.toString()).contains("X-FHIR-Request-Validation");
+		assertThat(status.getHeader("X-FHIR-Request-Validation")).isNotNull();
 	}
 
 	@Test
@@ -291,7 +291,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(201);
-		assertThat(status.toString()).contains("X-FHIR-Request-Validation: {\"resourceType\":\"OperationOutcome");
+		assertThat(status.getHeader("X-FHIR-Request-Validation")).startsWith("{\"resourceType\":\"OperationOutcome");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -339,7 +339,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(201);
-		assertThat(status.toString()).doesNotContain("X-FHIR-Request-Validation");
+		assertThat(status.getHeader("X-FHIR-Request-Validation")).isNull();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -387,7 +387,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(201);
-		assertThat(status.toString()).doesNotContain("X-FHIR-Request-Validation");
+		assertThat(status.getHeader("X-FHIR-Request-Validation")).isNull();
 	}
 
 	@Test
@@ -403,7 +403,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(201);
-		assertThat(status.toString()).doesNotContain("X-FHIR-Request-Validation");
+		assertThat(status.getHeader("X-FHIR-Request-Validation")).isNull();
 	}
 
 	/**
@@ -419,7 +419,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(204);
-		assertThat(status.toString()).doesNotContain("X-FHIR-Request-Validation");
+		assertThat(status.getHeader("X-FHIR-Request-Validation")).isNull();
 	}
 
 	@Test
@@ -444,7 +444,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(200);
-		assertThat(status.toString()).doesNotContain("X-FHIR-Request-Validation");
+		assertThat(status.getHeader("X-FHIR-Request-Validation")).isNull();
 		assertEquals(true, ourLastRequestWasSearch);
 	}
 

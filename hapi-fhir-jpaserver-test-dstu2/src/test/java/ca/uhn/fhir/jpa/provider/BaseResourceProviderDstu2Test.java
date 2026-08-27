@@ -11,7 +11,6 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.HttpTestRequest;
 import ca.uhn.fhir.test.utilities.server.RestfulServerConfigurerExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -35,19 +34,6 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 	@Autowired
 	@RegisterExtension
 	protected RestfulServerExtension myServer;
-
-	/**
-	 * Starts building a request against this test's server, using its {@link
-	 * ca.uhn.fhir.context.FhirContext} to encode any FHIR resource bodies. Prefer this over
-	 * {@code ourHttpClient} plus a hand-built Apache request: it collapses the
-	 * execute/read-entity/assert-status idiom and does not tie the test to an HTTP client version.
-	 *
-	 * @param thePath the path below the server base URL, beginning with a slash
-	 */
-	// Created by claude-opus-5
-	protected HttpTestRequest fhirRequest(String thePath) {
-		return myServer.fhirRequest(thePath);
-	}
 
 	@RegisterExtension
 	protected RestfulServerConfigurerExtension myServerConfigurer = new RestfulServerConfigurerExtension(() -> myServer)

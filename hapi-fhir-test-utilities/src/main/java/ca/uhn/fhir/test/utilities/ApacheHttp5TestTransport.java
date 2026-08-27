@@ -22,6 +22,7 @@ package ca.uhn.fhir.test.utilities;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.client5.http.config.Configurable;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.core5.http.ContentType;
@@ -51,7 +52,7 @@ import java.util.List;
  *
  * @see ApacheHttp4TestTransport for the 4.x equivalent
  */
-// Created by claude-sonnet-5
+// Created by claude-opus-5
 class ApacheHttp5TestTransport implements IHttpTestTransport {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ApacheHttp5TestTransport.class);
@@ -68,7 +69,8 @@ class ApacheHttp5TestTransport implements IHttpTestTransport {
 		HttpUriRequestBase request = new HttpUriRequestBase(theRequest.method(), URI.create(theRequest.url()));
 		theRequest.headers().forEach(header -> request.addHeader(header.name(), header.value()));
 		if (theRequest.disableRedirects()) {
-			request.setConfig(RequestConfig.custom().setRedirectsEnabled(false).build());
+			request.setConfig(
+					RequestConfig.copy(defaultConfig()).setRedirectsEnabled(false).build());
 		}
 		if (theRequest.body() != null) {
 			request.setEntity(new ByteArrayEntity(theRequest.body(), contentType(theRequest.contentType())));
@@ -92,13 +94,29 @@ class ApacheHttp5TestTransport implements IHttpTestTransport {
 		}
 	}
 
+	/**
+	 * A request-level {@link RequestConfig} replaces the client's default rather than merging with
+	 * it, so the default has to be copied before anything is overridden or every other setting on it
+	 * — timeouts, cookie spec, content compression, proxy — is silently dropped for that request.
+	 * <p>
+	 * Every client {@code HttpClients.custom().build()} returns implements {@link Configurable}; the
+	 * fallback covers a decorated or mocked client that does not.
+	 * </p>
+	 */
+	private RequestConfig defaultConfig() {
+		if (myClient instanceof Configurable configurable && configurable.getConfig() != null) {
+			return configurable.getConfig();
+		}
+		return RequestConfig.DEFAULT;
+	}
+
 	private static ContentType contentType(String theMimeType) {
 		return theMimeType == null ? null : ContentType.parse(theMimeType);
 	}
 
-	private static List<HttpTestResponse.HeaderEntry> toHeaderEntries(Header[] theHeaders) {
+	private static List<HttpTestHeader> toHeaderEntries(Header[] theHeaders) {
 		return Arrays.stream(theHeaders)
-				.map(t -> new HttpTestResponse.HeaderEntry(t.getName(), t.getValue()))
+				.map(t -> new HttpTestHeader(t.getName(), t.getValue()))
 				.toList();
 	}
 }

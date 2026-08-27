@@ -67,10 +67,6 @@
 							<artifactId>jscience</artifactId>
 						</dependency>
 						<dependency>
-							<groupId>com.github.docker-java</groupId>
-							<artifactId>docker-java-transport-zerodep</artifactId>
-						</dependency>
-						<dependency>
 							<groupId>org.springframework</groupId>
 							<artifactId>spring-jcl</artifactId>
 						</dependency>
@@ -100,6 +96,7 @@
 						</dependency>
 					</ignoredDependencies>
 					<ignoredResourcePatterns>
+						<ignoredResourcePattern>org/publicsuffix/list/effective_tld_names\.dat$</ignoredResourcePattern>
 						<ignoredResourcePattern>.*\.txt$</ignoredResourcePattern>
 						<ignoredResourcePattern>.*\.html$</ignoredResourcePattern>
 						<ignoredResourcePattern>schemaorg_apache_xmlbeans.*</ignoredResourcePattern>

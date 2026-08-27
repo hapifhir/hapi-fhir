@@ -84,7 +84,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(201);
-		assertThat(status.toString()).contains("X-FHIR-Request-Validation");
+		assertThat(status.getHeader("X-FHIR-Request-Validation")).isNotNull();
 		assertThat(status.getBody()).doesNotContain("<severity value=\"error\"/>");
 	}
 
@@ -103,7 +103,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(422);
-		assertThat(status.toString()).contains("X-FHIR-Request-Validation");
+		assertThat(status.getHeader("X-FHIR-Request-Validation")).isNotNull();
 		assertThat(status.getBody()).contains("\"severity\":\"error\"");
 	}
 
@@ -119,7 +119,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(201);
-		assertThat(status.toString()).doesNotContain("X-FHIR-Request-Validation");
+		assertThat(status.getHeader("X-FHIR-Request-Validation")).isNull();
 	}
 
 	@Test
@@ -137,7 +137,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(201);
-		assertThat(status.toString().contains("X-FHIR-Request-Validation: NO ISSUES"));
+		assertThat(status.getHeader("X-FHIR-Request-Validation")).isEqualTo("NO ISSUES");
 	}
 
 	@Test
@@ -158,7 +158,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(422);
-		assertThat(status.toString()).contains("X-FHIR-Request-Validation");
+		assertThat(status.getHeader("X-FHIR-Request-Validation")).isNotNull();
 	}
 
 	@Test
@@ -176,7 +176,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(422);
-		assertThat(status.toString()).contains("X-FHIR-Request-Validation");
+		assertThat(status.getHeader("X-FHIR-Request-Validation")).isNotNull();
 	}
 
 	@Test
@@ -196,7 +196,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(201);
-		assertThat(status.toString()).contains("X-FHIR-Request-Validation: {\"resourceType\":\"OperationOutcome");
+		assertThat(status.getHeader("X-FHIR-Request-Validation")).startsWith("{\"resourceType\":\"OperationOutcome");
 	}
 
 
@@ -245,7 +245,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(201);
-		assertThat(status.toString()).doesNotContain("X-FHIR-Request-Validation");
+		assertThat(status.getHeader("X-FHIR-Request-Validation")).isNull();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -293,7 +293,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(201);
-		assertThat(status.toString()).doesNotContain("X-FHIR-Request-Validation");
+		assertThat(status.getHeader("X-FHIR-Request-Validation")).isNull();
 	}
 
 	@Test
@@ -308,7 +308,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(201);
-		assertThat(status.toString()).doesNotContain("X-FHIR-Request-Validation");
+		assertThat(status.getHeader("X-FHIR-Request-Validation")).isNull();
 	}
 
 	/**
@@ -324,7 +324,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(204);
-		assertThat(status.toString()).doesNotContain("X-FHIR-Request-Validation");
+		assertThat(status.getHeader("X-FHIR-Request-Validation")).isNull();
 	}
 
 	@Test
@@ -349,7 +349,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(200);
-		assertThat(status.toString()).doesNotContain("X-FHIR-Request-Validation");
+		assertThat(status.getHeader("X-FHIR-Request-Validation")).isNull();
 		assertEquals(true, ourLastRequestWasSearch);
 	}
 

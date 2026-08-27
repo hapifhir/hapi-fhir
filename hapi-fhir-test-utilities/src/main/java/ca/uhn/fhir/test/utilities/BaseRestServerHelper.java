@@ -174,11 +174,16 @@ public abstract class BaseRestServerHelper {
 	}
 
 	public void stop() throws Exception {
-		if (myHttpClient != null) {
-			myHttpClient.close();
-			myHttpClient = null;
+		try {
+			if (myHttpClient != null) {
+				myHttpClient.close();
+				myHttpClient = null;
+			}
+		} finally {
+			// Without this, a client that fails to close would strand the server and its port
+			// for the rest of the JVM, and every later test in the fork would fail for the wrong reason.
+			JettyUtil.closeServer(myListenerServer);
 		}
-		JettyUtil.closeServer(myListenerServer);
 	}
 
 	public abstract void clearDataAndCounts();

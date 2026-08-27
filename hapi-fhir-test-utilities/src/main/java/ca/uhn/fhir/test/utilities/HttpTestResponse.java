@@ -36,20 +36,19 @@ import static org.assertj.core.api.Assertions.assertThat;
  * {@link #getBodyBytes()} for anything else.
  * </p>
  */
-// Created by claude-sonnet-5
+// Created by claude-opus-5
 public class HttpTestResponse {
 
 	private final int myStatusCode;
 	private final String myReasonPhrase;
 	private final byte[] myBody;
-	private final List<HeaderEntry> myHeaders;
+	private final List<HttpTestHeader> myHeaders;
 
 	/**
 	 * @param theBody the response body, or {@literal null} if there was none
 	 */
-	// Created by claude-opus-5
 	public HttpTestResponse(
-			int theStatusCode, String theReasonPhrase, byte[] theBody, List<HeaderEntry> theHeaders) {
+			int theStatusCode, String theReasonPhrase, byte[] theBody, List<HttpTestHeader> theHeaders) {
 		myStatusCode = theStatusCode;
 		myReasonPhrase = theReasonPhrase;
 		myBody = theBody == null ? new byte[0] : theBody.clone();
@@ -58,12 +57,17 @@ public class HttpTestResponse {
 
 	/**
 	 * For a response whose body is known to be text. Stored as UTF-8.
+	 * <p>
+	 * A factory rather than a second constructor: {@code byte[]} and {@link String} are unrelated
+	 * reference types, so overloaded constructors would be ambiguous for a {@literal null} body and
+	 * every such caller would need a cast.
+	 * </p>
 	 *
 	 * @see #HttpTestResponse(int, String, byte[], List)
 	 */
-	public HttpTestResponse(
-			int theStatusCode, String theReasonPhrase, String theBody, List<HeaderEntry> theHeaders) {
-		this(
+	public static HttpTestResponse fromText(
+			int theStatusCode, String theReasonPhrase, String theBody, List<HttpTestHeader> theHeaders) {
+		return new HttpTestResponse(
 				theStatusCode,
 				theReasonPhrase,
 				theBody == null ? null : theBody.getBytes(StandardCharsets.UTF_8),
@@ -104,7 +108,6 @@ public class HttpTestResponse {
 	 * @return the raw body bytes, or an empty array if there was none. Prefer this over
 	 *    {@link #getBody()} for binary payloads: a UTF-8 decode and re-encode does not round-trip.
 	 */
-	// Created by claude-opus-5
 	public byte[] getBodyBytes() {
 		return myBody.clone();
 	}
@@ -116,8 +119,7 @@ public class HttpTestResponse {
 	 *
 	 * @return the {@literal Content-Type} MIME type, or {@literal null} if the header was absent
 	 */
-	// Created by claude-opus-5
-	public String contentType() {
+	public String getContentType() {
 		String header = getHeader("Content-Type");
 		if (header == null) {
 			return null;
@@ -134,7 +136,7 @@ public class HttpTestResponse {
 	public String getHeader(String theName) {
 		return myHeaders.stream()
 				.filter(t -> t.name().equalsIgnoreCase(theName))
-				.map(HeaderEntry::value)
+				.map(HttpTestHeader::value)
 				.findFirst()
 				.orElse(null);
 	}
@@ -146,14 +148,14 @@ public class HttpTestResponse {
 	public List<String> getHeaders(String theName) {
 		return myHeaders.stream()
 				.filter(t -> t.name().equalsIgnoreCase(theName))
-				.map(HeaderEntry::value)
+				.map(HttpTestHeader::value)
 				.toList();
 	}
 
 	/**
 	 * @return all headers, in the order received
 	 */
-	public List<HeaderEntry> getAllHeaders() {
+	public List<HttpTestHeader> getAllHeaders() {
 		return myHeaders;
 	}
 
@@ -166,15 +168,10 @@ public class HttpTestResponse {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("HTTP ").append(myStatusCode).append(' ').append(myReasonPhrase).append('\n');
-		for (HeaderEntry header : myHeaders) {
+		for (HttpTestHeader header : myHeaders) {
 			builder.append(header.name()).append(": ").append(header.value()).append('\n');
 		}
 		builder.append('\n').append(getBody());
 		return builder.toString();
 	}
-
-	/**
-	 * One header, independent of any HTTP client library.
-	 */
-	public record HeaderEntry(String name, String value) {}
 }

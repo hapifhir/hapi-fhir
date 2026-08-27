@@ -1,16 +1,16 @@
 package ca.uhn.fhir.test.utilities;
 
 import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.net.SocketTimeoutException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Covers the redirect choice {@link TestHttpClientFactory} makes when building a client, which is
@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class TestHttpClientFactoryTest {
 
 	@RegisterExtension
-	private static final HttpServletExtension ourServer = new HttpServletExtension().withServlet(new RedirectServlet());
+	private static final HttpServletExtension ourServer = new HttpServletExtension().withServlet(new EchoServlet());
 
 	@Test
 	void create_followsRedirectsByDefault() throws IOException {
@@ -28,7 +28,7 @@ class TestHttpClientFactoryTest {
 			HttpTestResponse response = HttpTestRequest.to(client, redirectUrl()).get();
 
 			assertThat(response.getStatusCode()).isEqualTo(200);
-			assertThat(response.getBody()).isEqualTo("landed");
+			assertThat(response.getBody()).contains("method=GET");
 		}
 	}
 
@@ -52,21 +52,30 @@ class TestHttpClientFactoryTest {
 		}
 	}
 
-	private String redirectUrl() {
-		return ourServer.getBaseUrl() + "/foo?redirect=true";
+	@Test
+	void createWithSocketTimeout_serverSlowerThanTimeout_failsTheRead() throws IOException {
+		try (CloseableHttpClient client = TestHttpClientFactory.create(true, 50)) {
+			assertThatThrownBy(() -> HttpTestRequest.to(client, slowUrl()).get())
+					.isInstanceOf(UncheckedIOException.class)
+					.hasRootCauseInstanceOf(SocketTimeoutException.class);
+		}
 	}
 
-	private static class RedirectServlet extends HttpServlet {
+	@Test
+	void createWithNoSocketTimeout_serverSlow_waitsForTheResponse() throws IOException {
+		try (CloseableHttpClient client =
+				TestHttpClientFactory.create(true, TestHttpClientFactory.NO_SOCKET_TIMEOUT)) {
+			HttpTestResponse response = HttpTestRequest.to(client, slowUrl()).get();
 
-		@Override
-		protected void service(HttpServletRequest theRequest, HttpServletResponse theResponse) throws IOException {
-			if (theRequest.getParameter("redirect") != null) {
-				theResponse.setStatus(302);
-				theResponse.addHeader("Location", theRequest.getRequestURL().toString());
-				return;
-			}
-			theResponse.setStatus(200);
-			theResponse.getWriter().write("landed");
+			assertThat(response.getStatusCode()).isEqualTo(200);
 		}
+	}
+
+	private String slowUrl() {
+		return ourServer.getBaseUrl() + "/foo?delayMillis=500";
+	}
+
+	private String redirectUrl() {
+		return ourServer.getBaseUrl() + "/foo?redirect=true";
 	}
 }
