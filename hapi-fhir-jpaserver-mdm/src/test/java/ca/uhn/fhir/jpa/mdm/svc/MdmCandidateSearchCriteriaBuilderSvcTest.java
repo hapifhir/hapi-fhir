@@ -82,6 +82,17 @@ public class MdmCandidateSearchCriteriaBuilderSvcTest extends BaseMdmR4Test {
 	}
 
 	@Test
+	public void buildResourceQueryString_commaInValue_escapes() {
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("urn:oid:1.2.36.146.595.217.0.1").setValue("abc,def");
+		MdmResourceSearchParamJson searchParamJson = new MdmResourceSearchParamJson();
+		searchParamJson.addSearchParam("identifier");
+		Optional<String> result = myMdmCandidateSearchCriteriaBuilderSvc.buildResourceQueryString("Patient", patient, Collections.emptyList(), searchParamJson);
+		assertThat(result).isPresent();
+		assertThat(result).contains("Patient?identifier=urn%3Aoid%3A1.2.36.146.595.217.0.1%7Cabc%5C%2Cdef");
+	}
+
+	@Test
 	public void testOmittingCandidateSearchParamsIsAllowed() {
 		Patient patient = new Patient();
 		Optional<String> result = myMdmCandidateSearchCriteriaBuilderSvc.buildResourceQueryString("Patient", patient, Collections.emptyList(), null);
