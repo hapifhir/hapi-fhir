@@ -25,11 +25,14 @@ import ca.uhn.fhir.exception.TokenParamFormatInvalidRequestException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
+import ca.uhn.fhir.jpa.dao.data.ITagDefinitionDao;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
+import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.search.builder.models.MissingParameterQueryParams;
@@ -86,6 +89,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
@@ -109,6 +113,7 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Pageable;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
@@ -155,6 +160,15 @@ public class QueryStack {
 	private final JpaStorageSettings myStorageSettings;
 	private final EnumSet<PredicateBuilderTypeEnum> myReusePredicateBuilderTypes;
 	private final RequestDetails myRequestDetails;
+
+	/**
+	 * Used to resolve tag definition ids up front for {@code _tag}/{@code _security}/{@code _profile}
+	 * searches so the generated SQL filters on {@code HFJ_RES_TAG.TAG_ID} directly instead of joining
+	 * {@code HFJ_TAG_DEF}. May be {@code null}, in which case the legacy join behaviour is used.
+	 */
+	@Nullable
+	private final ITagDefinitionDao myTagDefinitionDao;
+
 	private Map<PredicateBuilderCacheKey, BaseJoiningPredicateBuilder> myJoinMap;
 	private Map<String, BaseJoiningPredicateBuilder> myParamNameToPredicateBuilderMap;
 	// used for _offset queries with sort, should be removed once the fix is applied to the async path too.
@@ -171,7 +185,8 @@ public class QueryStack {
 			FhirContext theFhirContext,
 			SearchQueryBuilder theSqlBuilder,
 			ISearchParamRegistry theSearchParamRegistry,
-			PartitionSettings thePartitionSettings) {
+			PartitionSettings thePartitionSettings,
+			@Nullable ITagDefinitionDao theTagDefinitionDao) {
 		this(
 				theRequestDetails,
 				theSearchParameters,
@@ -180,7 +195,8 @@ public class QueryStack {
 				theSqlBuilder,
 				theSearchParamRegistry,
 				thePartitionSettings,
-				EnumSet.of(PredicateBuilderTypeEnum.DATE, PredicateBuilderTypeEnum.REFERENCE));
+				EnumSet.of(PredicateBuilderTypeEnum.DATE, PredicateBuilderTypeEnum.REFERENCE),
+				theTagDefinitionDao);
 	}
 
 	/**
@@ -194,7 +210,8 @@ public class QueryStack {
 			SearchQueryBuilder theSqlBuilder,
 			ISearchParamRegistry theSearchParamRegistry,
 			PartitionSettings thePartitionSettings,
-			EnumSet<PredicateBuilderTypeEnum> theReusePredicateBuilderTypes) {
+			EnumSet<PredicateBuilderTypeEnum> theReusePredicateBuilderTypes,
+			@Nullable ITagDefinitionDao theTagDefinitionDao) {
 		myRequestDetails = theRequestDetails;
 		myPartitionSettings = thePartitionSettings;
 		assert theSearchParameters != null;
@@ -208,6 +225,7 @@ public class QueryStack {
 		mySqlBuilder = theSqlBuilder;
 		mySearchParamRegistry = theSearchParamRegistry;
 		myReusePredicateBuilderTypes = theReusePredicateBuilderTypes;
+		myTagDefinitionDao = theTagDefinitionDao;
 	}
 
 	public void addSortOnCoordsNear(String theParamName, boolean theAscending, SearchParameterMap theParams) {
@@ -2123,6 +2141,13 @@ public class QueryStack {
 				continue;
 			}
 
+			// Resolve the tag definition id(s) up front so the generated SQL can filter on
+			// HFJ_RES_TAG.TAG_ID directly instead of joining HFJ_TAG_DEF. Returns null when
+			// pre-resolution is not possible (no DAO wired, or a :below qualifier forces the legacy join).
+			// An empty (but non-null) list means the tag does not exist: for a positive match this
+			// resolves to an always-false predicate, and for :not it becomes NOT IN (empty) = match all.
+			List<Long> resolvedTagIds = resolveTagIds(tagType, tokens);
+
 			Condition tagPredicate;
 			BaseJoiningPredicateBuilder join;
 			if (paramInverted) {
@@ -2130,8 +2155,10 @@ public class QueryStack {
 				boolean selectPartitionId = myPartitionSettings.isDatabasePartitionMode();
 				SearchQueryBuilder sqlBuilder = mySqlBuilder.newChildSqlBuilder(selectPartitionId);
 				TagPredicateBuilder tagSelector = sqlBuilder.addTagPredicateBuilder(null);
-				sqlBuilder.addPredicate(
-						tagSelector.createPredicateTag(tagType, tokens, theParamName, theRequestPartitionId));
+				Condition subQueryPredicate = resolvedTagIds != null
+						? tagSelector.createPredicateTagIds(resolvedTagIds)
+						: tagSelector.createPredicateTag(tagType, tokens, theParamName, theRequestPartitionId);
+				sqlBuilder.addPredicate(subQueryPredicate);
 
 				join = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 				tagPredicate = mySqlBuilder
@@ -2149,7 +2176,9 @@ public class QueryStack {
 								theParamName,
 								() -> mySqlBuilder.addTagPredicateBuilder(theSourceJoinColumn))
 						.getResult();
-				tagPredicate = tagJoin.createPredicateTag(tagType, tokens, theParamName, theRequestPartitionId);
+				tagPredicate = resolvedTagIds != null
+						? tagJoin.createPredicateTagIds(resolvedTagIds)
+						: tagJoin.createPredicateTag(tagType, tokens, theParamName, theRequestPartitionId);
 				join = tagJoin;
 			}
 
@@ -2157,6 +2186,46 @@ public class QueryStack {
 		}
 
 		return toAndPredicate(andPredicates);
+	}
+
+	/**
+	 * Resolves the {@code HFJ_TAG_DEF.TAG_ID} value(s) matching the given tag tokens so a
+	 * {@code _tag}/{@code _security}/{@code _profile} search can filter on {@code HFJ_RES_TAG.TAG_ID}
+	 * directly, keeping the selective tag id visible to the query planner instead of hiding it behind a join.
+	 *
+	 * @return the matching tag ids (an empty list means none exist), or {@code null} when
+	 *     pre-resolution should not be applied — either no {@link ITagDefinitionDao} is wired, or a
+	 *     token uses the {@code :below} qualifier whose left-match must stay in the legacy join path.
+	 */
+	@Nullable
+	private List<Long> resolveTagIds(TagTypeEnum theTagType, List<Triple<String, String, String>> theTokens) {
+		if (myTagDefinitionDao == null) {
+			return null;
+		}
+
+		List<Long> tagIds = new ArrayList<>();
+		for (Triple<String, String, String> next : theTokens) {
+			String system = next.getLeft();
+			String qualifier = next.getMiddle();
+			String code = next.getRight();
+
+			// A left-match (:below) can expand to an unbounded set of tag ids; keep the legacy join.
+			if (Objects.equals(qualifier, UriParamQualifierEnum.BELOW.getValue())) {
+				return null;
+			}
+
+			if (theTagType == TagTypeEnum.PROFILE) {
+				system = BaseHapiFhirDao.NS_JPA_PROFILE;
+			}
+
+			String scheme = isNotBlank(system) ? system : null;
+			List<TagDefinition> definitions = myTagDefinitionDao.findByTagTypeAndSchemeAndTermAndVersionAndUserSelected(
+					theTagType, scheme, code, null, null, Pageable.unpaged());
+			for (TagDefinition definition : definitions) {
+				tagIds.add(definition.getId());
+			}
+		}
+		return tagIds;
 	}
 
 	private boolean populateTokens(
@@ -2447,7 +2516,8 @@ public class QueryStack {
 				mySqlBuilder,
 				mySearchParamRegistry,
 				myPartitionSettings,
-				EnumSet.allOf(PredicateBuilderTypeEnum.class));
+				EnumSet.allOf(PredicateBuilderTypeEnum.class),
+				myTagDefinitionDao);
 	}
 
 	@Nullable
