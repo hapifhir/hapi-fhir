@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 8252
+title: "Evaluating Search Parameters against a resource containing another resource with no id could throw a NullPointerException. 
+This has been fixed."

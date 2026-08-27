@@ -147,7 +147,8 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		jpaPackageCache.getPackageServers().clear();
 		String url = myServer.getBaseUrl();
 		ourLog.info("Package server is at base: {}", url);
-		jpaPackageCache.addPackageServer(new PackageServer(url));
+		jpaPackageCache.addPackageServer(new PackageServer(url)
+			.withAllowHttp(true).withAllowPrivateNetwork(true));
 
 		myFakeNpmServlet.clear();
 	}

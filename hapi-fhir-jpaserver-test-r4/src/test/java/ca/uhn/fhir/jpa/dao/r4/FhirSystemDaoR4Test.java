@@ -1,8 +1,13 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.TransactionResponseFinalizedDetails;
+import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
@@ -45,6 +50,7 @@ import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.ThreadPoolUtil;
+import ca.uhn.fhir.util.HapiExtensions;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
@@ -52,6 +58,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.persistence.Id;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.persister.entity.AbstractEntityPersister;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
@@ -116,6 +123,7 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -123,12 +131,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static ca.uhn.fhir.test.utilities.UuidUtils.HASH_UUID_PATTERN;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -450,6 +460,57 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertEquals(IssueSeverity.ERROR, oo.getIssue().get(0).getSeverity());
 		assertEquals(Msg.code(2001) + "Resource Patient/BABABABA is not known", oo.getIssue().get(0).getDiagnostics());
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	public void testBatchWithInlineMatchUrlReference_resolvedPerEntry() {
+		// Batch entries execute as isolated single-entry transactions, so the transaction bundle
+		// normalizer must not touch batch bundles: a cross-entry urn reference cannot resolve there.
+		// Inline match URLs in batch entries resolve per-entry at write time instead.
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+
+		String matchUrl = "Patient?identifier=urn:system|batch-inline-match";
+		Bundle request = new Bundle();
+		request.setType(BundleType.BATCH);
+		addObservation(request, "obs-batch-1", matchUrl);
+		addObservation(request, "obs-batch-2", matchUrl);
+
+		// Normalization is requested, but the bundle is a batch: the transaction-only gate keeps it inert
+		BundleNormalizingTestInterceptor normalizationRequest = registerBundleNormalizingInterceptor();
+		Bundle response;
+		try {
+			response = mySystemDao.transaction(mySrd, request);
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(normalizationRequest);
+		}
+
+		// No synthetic entries or placeholder rewrites in the caller's batch bundle (the stock
+		// per-entry resolution substitutes the concrete Patient id in place)
+		assertThat(request.getEntry()).hasSize(2);
+		for (BundleEntryComponent entry : request.getEntry()) {
+			assertNull(entry.getFullUrl());
+			Observation obs = (Observation) entry.getResource();
+			assertThat(obs.getSubject().getReference()).startsWith("Patient/");
+		}
+
+		assertThat(response.getEntry()).hasSize(2);
+		for (BundleEntryComponent entry : response.getEntry()) {
+			assertEquals("201 Created", entry.getResponse().getStatus());
+			assertThat(entry.getResponse().getLocation()).contains("Observation/");
+		}
+
+		// Both entries resolved to the same auto-created placeholder Patient
+		Observation obs1 = readObservation(response.getEntry().get(0));
+		Observation obs2 = readObservation(response.getEntry().get(1));
+		assertThat(obs1.getSubject().getReference()).startsWith("Patient/");
+		assertEquals(obs1.getSubject().getReference(), obs2.getSubject().getReference());
+
+		Patient placeholder = myPatientDao.read(new IdType(obs1.getSubject().getReference()), mySrd);
+		assertThat(placeholder.getExtensionByUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER)).isNotNull();
+		assertEquals("batch-inline-match", placeholder.getIdentifierFirstRep().getValue());
 	}
 
 	@Test
@@ -1514,6 +1575,370 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals(id.toVersionless().getValue(), o.getSubject().getReference());
 		assertEquals("1", o.getIdElement().getVersionIdPart());
 
+	}
+
+	/**
+	 * End-to-end coverage for the {@code TransactionBundleNormalizer} pre-pass and response cleanup.
+	 * Submits a 4-entry transaction bundle whose Observations reference Patients via inline match URLs:
+	 *   A → pre-existing Patient (out-of-bundle resolution)
+	 *   B → new Patient X (triggers a synthetic conditional create)
+	 *   C → new Patient X (same as B; dedup — must hit the same synthetic)
+	 *   D → new Patient Y (different from X; second synthetic)
+	 * The normalizer prepends 2 synthetic Patient entries to the request. After cleanup the response must
+	 * be 4 entries, positionally aligned with the original request (A/B/C/D), and each Observation's
+	 * subject must resolve to the right Patient on read-back.
+	 */
+	// Created by Claude Opus 4.7
+	@Test
+	public void testTransactionInlineMatchUrl_multipleEntries_responseAlignsOneToOneWithOriginalRequest() {
+		// setup
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+
+		String system = "urn:system";
+		String existingValue = "existing-patient";
+		String newValue1 = "new-patient-1";
+		String newValue2 = "new-patient-2";
+
+		// Pre-existing Patient (out-of-bundle)
+		Patient existing = new Patient();
+		existing.addIdentifier().setSystem(system).setValue(existingValue);
+		IIdType existingPatientId = myPatientDao.create(existing, mySrd).getId().toUnqualifiedVersionless();
+
+		Bundle request = new Bundle();
+		request.setType(BundleType.TRANSACTION);
+
+		// A → pre-existing Patient, B → new Patient X, C → new Patient X, D → new Patient Y
+		addObservation(request, "obs-A", "Patient?identifier=" + system + "|" + existingValue);
+		addObservation(request, "obs-B", "Patient?identifier=" + system + "|" + newValue1);
+		addObservation(request, "obs-C", "Patient?identifier=" + system + "|" + newValue1);
+		addObservation(request, "obs-D", "Patient?identifier=" + system + "|" + newValue2);
+
+		// execute
+		BundleNormalizingTestInterceptor normalizationRequest = registerBundleNormalizingInterceptor();
+		Bundle resp;
+		try {
+			resp = mySystemDao.transaction(mySrd, request);
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(normalizationRequest);
+		}
+
+		// response 1:1 with original request
+		assertThat(resp.getEntry()).hasSize(4);
+		for (BundleEntryComponent entry : resp.getEntry()) {
+			assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", entry.getResponse().getStatus());
+			assertThat(entry.getResponse().getLocation()).contains("Observation/");
+		}
+
+		Observation respA = readObservation(resp.getEntry().get(0));
+		Observation respB = readObservation(resp.getEntry().get(1));
+		Observation respC = readObservation(resp.getEntry().get(2));
+		Observation respD = readObservation(resp.getEntry().get(3));
+		assertEquals("obs-A", respA.getCode().getText());
+		assertEquals("obs-B", respB.getCode().getText());
+		assertEquals("obs-C", respC.getCode().getText());
+		assertEquals("obs-D", respD.getCode().getText());
+
+		// inline match URL → pre-existing Patient
+		assertEquals(existingPatientId.getValue(), respA.getSubject().getReference());
+
+		// inline match URL → new auto-created Patient
+		String patientBRef = respB.getSubject().getReference();
+		String patientCRef = respC.getSubject().getReference();
+		assertThat(patientBRef).startsWith("Patient/");
+		assertEquals(patientBRef, patientCRef);
+
+		Patient autoCreated1 = myPatientDao.read(new IdType(patientBRef), mySrd);
+		assertThat(autoCreated1.getExtensionByUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER)).isNotNull();
+		assertEquals(newValue1, autoCreated1.getIdentifierFirstRep().getValue());
+
+		String patientDRef = respD.getSubject().getReference();
+		assertThat(patientDRef).startsWith("Patient/");
+		assertThat(patientDRef).isNotEqualTo(patientBRef);
+		assertThat(patientDRef).isNotEqualTo(existingPatientId.getValue());
+
+		Patient autoCreated2 = myPatientDao.read(new IdType(patientDRef), mySrd);
+		assertThat(autoCreated2.getExtensionByUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER)).isNotNull();
+		assertEquals(newValue2, autoCreated2.getIdentifierFirstRep().getValue());
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	public void testTransactionInlineMatchUrl_notNormalizedWithoutRegisteredInterceptor() {
+		// Without a registered interceptor invoking the normalizer, the bundle is never normalized
+		// regardless of the storage settings: inline match URL references resolve at write
+		// time (extractor auto-creates a placeholder) exactly as before the normalizer existed.
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+
+		Bundle request = new Bundle();
+		request.setType(BundleType.TRANSACTION);
+		addObservation(request, "obs-no-marker", "Patient?identifier=urn:system|no-marker");
+
+		Bundle resp = mySystemDao.transaction(mySrd, request);
+
+		assertThat(resp.getEntry()).hasSize(1);
+		assertThat(request.getEntry()).hasSize(1);
+		assertNull(request.getEntry().get(0).getFullUrl());
+		Observation obs = (Observation) request.getEntry().get(0).getResource();
+		assertThat(obs.getSubject().getReference()).startsWith("Patient/");
+
+		Patient placeholder = myPatientDao.read(new IdType(obs.getSubject().getReference()), mySrd);
+		assertThat(placeholder.getExtensionByUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER)).isNotNull();
+		assertEquals("no-marker", placeholder.getIdentifierFirstRep().getValue());
+	}
+
+	/**
+	 * An inline match URL resolves against the store's pre-transaction state, never against other bundle
+	 * entries: with a matching patient already stored, the observation references it — not the in-bundle
+	 * twin the same transaction POSTs.
+	 */
+	// Created by Claude Fable 5
+	@Test
+	public void testTransactionInlineMatchUrl_inBundleTwinDoesNotShadowExistingPatient() {
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		Patient existing = new Patient();
+		existing.addIdentifier().setSystem("urn:system-a").setValue("twin-1");
+		String existingId = myPatientDao.create(existing, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		Bundle request = new Bundle();
+		request.setType(BundleType.TRANSACTION);
+		Patient twin = new Patient();
+		twin.addIdentifier().setSystem("urn:system-a").setValue("twin-1");
+		request.addEntry().setResource(twin).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
+		addObservation(request, "obs-twin", "Patient?identifier=urn:system-a|twin-1");
+
+		Bundle resp = mySystemDao.transaction(mySrd, request);
+
+		assertThat(resp.getEntry()).hasSize(2);
+		String postedPatientRef = new IdType(resp.getEntry().get(0).getResponse().getLocation())
+			.toUnqualifiedVersionless().getValue();
+		Observation obs = readObservation(resp.getEntry().get(1));
+
+		assertThat(obs.getSubject().getReference()).isEqualTo(existingId).isNotEqualTo(postedPatientRef);
+		SearchParameterMap allPatients = new SearchParameterMap();
+		allPatients.setLoadSynchronous(true);
+		assertEquals(2, myPatientDao.search(allPatients).size().intValue());
+	}
+
+	/**
+	 * Registers a test interceptor wired like {@code PatientIdPartitionInterceptor}: normalize the bundle after
+	 * the other STORAGE_TRANSACTION_PROCESSING hooks (skipping server-constructed batch sub-requests), and strip
+	 * the synthetic response entries once the response is finalized.
+	 */
+	// Created by Claude Fable 5
+	private BundleNormalizingTestInterceptor registerBundleNormalizingInterceptor() {
+		BundleNormalizingTestInterceptor interceptor = new BundleNormalizingTestInterceptor();
+		myInterceptorRegistry.registerInterceptor(interceptor);
+		return interceptor;
+	}
+
+	// Created by Claude Fable 5
+	@Interceptor
+	public class BundleNormalizingTestInterceptor {
+
+		@Hook(
+				value = Pointcut.STORAGE_TRANSACTION_PROCESSING,
+				order = PatientIdPartitionInterceptor.STORAGE_TRANSACTION_PROCESSING_ORDER_NORMALIZE)
+		public void normalize(IBaseBundle theBundle, TransactionDetails theTransactionDetails) {
+			if (!theTransactionDetails.isServerConstructedBatchSubRequest()) {
+				myTransactionBundleNormalizer.normalize(theBundle, theTransactionDetails);
+			}
+		}
+
+		@Hook(Pointcut.STORAGE_TRANSACTION_RESPONSE_FINALIZED)
+		public void strip(
+				TransactionResponseFinalizedDetails theFinalizedDetails, TransactionDetails theTransactionDetails) {
+			myTransactionBundleNormalizer.stripSyntheticResponseEntries(
+					theFinalizedDetails.getResponseBundle(), theTransactionDetails);
+		}
+	}
+
+	// Created by Claude Opus 4.7
+	private static void addObservation(Bundle theBundle, String theCodeText, String theSubjectInlineMatchUrl) {
+		Observation o = new Observation();
+		o.getCode().setText(theCodeText);
+		o.getSubject().setReference(theSubjectInlineMatchUrl);
+		theBundle.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST).setUrl("Observation");
+	}
+
+	// Created by Claude Opus 4.7
+	private Observation readObservation(BundleEntryComponent theResponseEntry) {
+		return myObservationDao.read(new IdType(theResponseEntry.getResponse().getLocationElement()), mySrd);
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	public void testTransactionInlineMatchUrl_processingHooksSeeOriginalBundle() {
+		// The bundle normalizer runs after STORAGE_TRANSACTION_PROCESSING: hooks registered there
+		// act on the client's original bundle, not the normalized one (synthetics, rewritten refs).
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		Bundle request = new Bundle();
+		request.setType(BundleType.TRANSACTION);
+		addObservation(request, "obs-hook", "Patient?identifier=urn:system|hook-sees-original");
+
+		AtomicInteger entryCountAtHook = new AtomicInteger();
+		AtomicReference<String> subjectRefAtHook = new AtomicReference<>();
+		IAnonymousInterceptor interceptor = (thePointcut, theArgs) -> {
+			Bundle bundleAtHook = (Bundle) theArgs.get(IBaseBundle.class);
+			List<BundleEntryComponent> entriesAtHook = bundleAtHook.getEntry();
+			entryCountAtHook.set(entriesAtHook.size());
+			Observation obsAtHook = (Observation)
+					entriesAtHook.get(entriesAtHook.size() - 1).getResource();
+			subjectRefAtHook.set(obsAtHook.getSubject().getReference());
+		};
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_TRANSACTION_PROCESSING, interceptor);
+		BundleNormalizingTestInterceptor normalizationRequest = registerBundleNormalizingInterceptor();
+		try {
+			Bundle resp = mySystemDao.transaction(mySrd, request);
+
+			assertEquals(1, entryCountAtHook.get());
+			assertEquals("Patient?identifier=urn:system|hook-sees-original", subjectRefAtHook.get());
+
+			// end state unchanged: response aligns 1:1 with the request, placeholder patient created
+			assertThat(resp.getEntry()).hasSize(1);
+			Observation respObs = readObservation(resp.getEntry().get(0));
+			assertThat(respObs.getSubject().getReference()).startsWith("Patient/");
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+			myInterceptorRegistry.unregisterInterceptor(normalizationRequest);
+		}
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	public void testTransaction_responseFinalizedPointcutFiresOnceWithFinalResponse() {
+		Bundle request = new Bundle();
+		request.setType(BundleType.TRANSACTION);
+		Patient p = new Patient();
+		p.setActive(true);
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
+
+		AtomicInteger fireCount = new AtomicInteger();
+		AtomicReference<IBaseBundle> finalizedBundle = new AtomicReference<>();
+		IAnonymousInterceptor interceptor = (thePointcut, theArgs) -> {
+			fireCount.incrementAndGet();
+			finalizedBundle.set(
+					theArgs.get(TransactionResponseFinalizedDetails.class).getResponseBundle());
+		};
+		myInterceptorRegistry.registerAnonymousInterceptor(
+				Pointcut.STORAGE_TRANSACTION_RESPONSE_FINALIZED, interceptor);
+		try {
+			Bundle resp = mySystemDao.transaction(mySrd, request);
+
+			assertEquals(1, fireCount.get());
+			assertThat(finalizedBundle.get()).isSameAs(resp);
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+		}
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	public void testTransaction_processingPointcut_notServerConstructedBatchSubRequest() {
+		Bundle request = new Bundle();
+		request.setType(BundleType.TRANSACTION);
+		Patient p = new Patient();
+		p.setActive(true);
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
+
+		AtomicReference<TransactionDetails> details = new AtomicReference<>();
+		IAnonymousInterceptor interceptor =
+				(thePointcut, theArgs) -> details.set(theArgs.get(TransactionDetails.class));
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_TRANSACTION_PROCESSING, interceptor);
+		try {
+			mySystemDao.transaction(mySrd, request);
+
+			assertNotNull(details.get());
+			assertFalse(details.get().isServerConstructedBatchSubRequest());
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+		}
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	public void testBatch_processingPointcut_marksServerConstructedBatchSubRequests() {
+		Bundle request = new Bundle();
+		request.setType(BundleType.BATCH);
+		Patient p1 = new Patient();
+		p1.setActive(true);
+		request.addEntry().setResource(p1).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
+		Patient p2 = new Patient();
+		p2.setActive(false);
+		request.addEntry().setResource(p2).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
+
+		// Batch entries may be processed concurrently on the bundle-batch pool
+		List<TransactionDetails> details = Collections.synchronizedList(new ArrayList<>());
+		IAnonymousInterceptor interceptor =
+				(thePointcut, theArgs) -> details.add(theArgs.get(TransactionDetails.class));
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_TRANSACTION_PROCESSING, interceptor);
+		try {
+			mySystemDao.transaction(mySrd, request);
+
+			// One top-level fire for the client's batch bundle, then one per entry for the
+			// server-constructed single-entry transaction bundles
+			assertThat(details).hasSize(3).doesNotContainNull();
+			assertEquals(1, details.stream().filter(d -> !d.isServerConstructedBatchSubRequest()).count());
+			assertEquals(2, details.stream().filter(TransactionDetails::isServerConstructedBatchSubRequest).count());
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+		}
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	public void testTransactionConditionalWriteOutcomeDiagnostics_nameIdAndMatchUrl() {
+		Patient existing = new Patient();
+		existing.addIdentifier().setSystem("urn:system").setValue("diag-match");
+		IIdType existingId =
+				myPatientDao.create(existing, mySrd).getId().toUnqualified();
+
+		Bundle request = new Bundle();
+		request.setType(BundleType.TRANSACTION);
+		Patient matchCreate = new Patient();
+		matchCreate.addIdentifier().setSystem("urn:system").setValue("diag-match");
+		request.addEntry()
+				.setFullUrl(IdType.newRandomUuid().getValue())
+				.setResource(matchCreate)
+				.getRequest()
+				.setMethod(HTTPVerb.POST)
+				.setUrl("Patient")
+				.setIfNoneExist("Patient?identifier=urn:system|diag-match");
+		Patient noMatchUpdate = new Patient();
+		noMatchUpdate.addIdentifier().setSystem("urn:system").setValue("diag-nomatch");
+		request.addEntry()
+				.setFullUrl(IdType.newRandomUuid().getValue())
+				.setResource(noMatchUpdate)
+				.getRequest()
+				.setMethod(HTTPVerb.PUT)
+				.setUrl("Patient?identifier=urn:system|diag-nomatch");
+
+		Bundle resp = mySystemDao.transaction(mySrd, request);
+
+		// Matched conditional create: diagnostics must name the matched (versioned) id, not the elapsed millis
+		String matchedDiagnostics = ((OperationOutcome)
+						resp.getEntry().get(0).getResponse().getOutcome())
+				.getIssueFirstRep()
+				.getDiagnostics();
+		assertThat(matchedDiagnostics)
+				.contains(existingId.getValue())
+				.contains("Patient?identifier=urn:system|diag-match");
+
+		// Conditional update without match: diagnostics must fill the match-URL slot
+		String noMatchDiagnostics = ((OperationOutcome)
+						resp.getEntry().get(1).getResponse().getOutcome())
+				.getIssueFirstRep()
+				.getDiagnostics();
+		assertThat(noMatchDiagnostics)
+				.contains("Patient?identifier=urn:system|diag-nomatch")
+				.doesNotContain("{1}");
 	}
 
 	@Test
@@ -3733,6 +4158,42 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			assertThat(e.getMessage()).contains("2279");
 		}
 
+	}
+
+	/**
+	 * The mismatched body id points at a resource that the transaction has already resolved (it is the match target
+	 * of another entry). Per the R4 spec the id mismatch must still be rejected — a resolved id gets no leniency.
+	 */
+	// Created by Claude Fable 5
+	@Test
+	public void testTransactionUpdateMatchUrlWithOneMatchWithResolvedIdNoMatch() {
+		String methodName = "testTransactionUpdateMatchUrlWithOneMatchWithResolvedIdNoMatch";
+		Bundle request = new Bundle();
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		IIdType id = myPatientDao.create(p, mySrd).getId();
+		ourLog.info("Created patient, got it: {}", id);
+
+		Patient other = new Patient();
+		other.addIdentifier().setSystem("urn:system").setValue(methodName + "-other");
+		IIdType otherId = myPatientDao.create(other, mySrd).getId();
+		ourLog.info("Created other patient, got it: {}", otherId);
+
+		other = new Patient();
+		other.addIdentifier().setSystem("urn:system").setValue(methodName + "-other");
+		other.addName().setFamily("Updated");
+		request.addEntry().setResource(other).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient?identifier=urn%3Asystem%7C" + methodName + "-other");
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().setFamily("Hello");
+		p.setId(otherId.toUnqualifiedVersionless());
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient?identifier=urn%3Asystem%7C" + methodName);
+
+		assertThatThrownBy(() -> mySystemDao.transaction(mySrd, request))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining("2279");
 	}
 
 	@Test

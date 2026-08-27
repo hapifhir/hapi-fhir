@@ -40,6 +40,7 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.jpa.batch2.jobs.term.snomedct.ImportSnomedCtJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetParameters;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -88,18 +89,21 @@ public class TerminologyTestHelper {
 	private final Batch2JobHelper myBatch2JobHelper;
 	private final MemoryCacheService myMemoryCacheService;
 	private final IValidationSupport myValidationSupport;
+	private final ITermDeferredStorageSvc myITerminologyDeferredSvc;
 
 	public TerminologyTestHelper(
 			IJobPersistence theJobPersistence,
 			IJobCoordinator theJobCoordinator,
 			Batch2JobHelper theBatch2JobHelper,
 			MemoryCacheService theMemoryCacheService,
-			IValidationSupport theValidationSupport) {
+			IValidationSupport theValidationSupport,
+			ITermDeferredStorageSvc theITermDeferredStorageSvc) {
 		myJobPersistence = theJobPersistence;
 		myJobCoordinator = theJobCoordinator;
 		myBatch2JobHelper = theBatch2JobHelper;
 		myMemoryCacheService = theMemoryCacheService;
 		myValidationSupport = theValidationSupport;
+		myITerminologyDeferredSvc = theITermDeferredStorageSvc;
 	}
 
 	public String startImportCustomJobAndWaitForCompletion(
