@@ -87,16 +87,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class TerminologyTestHelper {
 
-	/**
-	 * Bound on the {@link ITermDeferredStorageSvc#saveDeferred()} passes used to drain the deferred queue.
-	 * Each pass itself makes up to 10 internal passes of 1000 concepts.
-	 * <p>
-	 * {@link ITermDeferredStorageSvc#saveAllDeferred()} is the equivalent production API, but it loops until
-	 * {@link ITermDeferredStorageSvc#isStorageQueueEmpty(boolean)} reports empty, and that never reports
-	 * empty while deferred processing is paused - so it would spin forever against a paused service.
-	 */
-	private static final int MAX_SAVE_DEFERRED_PASSES = 10;
-
 	private final IJobPersistence myJobPersistence;
 	private final IJobCoordinator myJobCoordinator;
 	private final Batch2JobHelper myBatch2JobHelper;
@@ -120,26 +110,23 @@ public class TerminologyTestHelper {
 	}
 
 	/**
-	 * Waits for the async work a successful import leaves behind: the deferred storage queue, the deletion of
-	 * the CodeSystem version it supersedes, and the ValueSet pre-expansions. The drain also starts any
-	 * whole-CodeSystem deletion queued earlier in the same context, so that job is awaited as well.
+	 * Drains the deferred storage queue and waits for the batch2 jobs a successful import leaves behind:
+	 * deletion of the CodeSystem version this import supersedes, deletion of any whole CodeSystem queued
+	 * earlier in the test, and the ValueSet pre-expansions. Every instance of those job definitions is
+	 * awaited, not only the ones this import produced.
 	 * <p>
-	 * The queue must be drained before the deletion jobs are awaited: the superseded version is only enqueued
-	 * for batch2 deletion once the drain reaches it, so awaiting first would find no job instance and return
-	 * immediately.
+	 * Order matters: the drain is what enqueues the superseded version for batch2 deletion, so awaiting the
+	 * delete jobs first would find no instances and return immediately. Deferred processing is re-enabled
+	 * before draining because {@link ITermDeferredStorageSvc#isStorageQueueEmpty(boolean)} reports non-empty
+	 * while processing is paused, which would leave {@link ITermDeferredStorageSvc#saveAllDeferred()} looping
+	 * forever.
+	 * <p>
+	 * Only successful imports call this. A failed import leaves whatever it queued behind for the per-test
+	 * terminology cleanup to discard.
 	 */
 	private void awaitDeferredTerminologyWork() {
-		for (int i = 0; i < MAX_SAVE_DEFERRED_PASSES && !myTermDeferredStorageSvc.isStorageQueueEmpty(false); i++) {
-			myTermDeferredStorageSvc.saveDeferred();
-		}
-
-		if (!myTermDeferredStorageSvc.isStorageQueueEmpty(false)) {
-			myTermDeferredStorageSvc.logQueueForUnitTest();
-			fail("Deferred queue was not drained after " + MAX_SAVE_DEFERRED_PASSES
-					+ " saveDeferred() passes. Note that isStorageQueueEmpty() also reports non-empty when "
-					+ "deferred processing is paused, so check setProcessDeferred(false) callers as well as "
-					+ "the queue contents logged above.");
-		}
+		myTermDeferredStorageSvc.setProcessDeferred(true);
+		myTermDeferredStorageSvc.saveAllDeferred();
 
 		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
