@@ -7,7 +7,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
-import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
@@ -22,7 +21,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
@@ -36,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_ALL_VALUESET_ID;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
@@ -78,9 +75,6 @@ class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 	@Autowired
 	private TerminologyTestHelper myTerminologyTestHelper;
 
-	@Autowired
-	private Batch2JobHelper myBatchJobHelper;
-
 	private final ServletRequestDetails myRequestDetails = new ServletRequestDetails();
 
 	private IFhirResourceDao<ValueSet> myValueSetIFhirResourceDao;
@@ -91,11 +85,6 @@ class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		myValueSetIFhirResourceDao = myDaoRegistry.getResourceDao(ValueSet.class);
 
 		when(mockRequestDetails.getServer().getDefaultPageSize()).thenReturn(25);
-	}
-
-	@AfterEach
-	void afterEach() {
-		myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 	}
 
 	/**
@@ -177,9 +166,6 @@ class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 	}
 
-	/**
-	 * @param theAllVersions must include currentVersion; the TermConcept check below relies on this to also cover currentVersion
-	 */
 	private void validateValueExpand(String currentVersion, Collection<String> theAllVersions) {
 		// for CS ver = null, VS ver = null
 		ValueSet vs = myValueSetDao.expandByIdentifier(VS_NO_VERSIONED_ON_UPLOAD, null);
@@ -197,34 +183,8 @@ class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		assertEquals(prefixWithVersion(currentVersion, VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY), vs1.getExpansion().getContains().iterator().next().getDisplay());
 
 
-		// currentVersion is always included in theAllVersions at every call site, so this also covers it
-		theAllVersions.forEach(this::validateTermConceptForVersion);
-
 		// now for each uploaded version
 		theAllVersions.forEach(this::validateValueExpandForVersion);
-	}
-
-	/**
-	 * Validates the TermConcepts for both test codes exist for the given version, and their
-	 * displays match that version. Concepts are matched to a version via
-	 * {@code tcsv.myCodeSystemVersionId} rather than by insertion order (e.g. {@code myId.myId}),
-	 * since concept persistence goes through an asynchronous deferred-storage queue and is not
-	 * guaranteed to happen in upload order.
-	 */
-	private void validateTermConceptForVersion(String theVersion) {
-		runInTransaction(()->{
-			TermConcept termConceptNoVer = (TermConcept) myEntityManager.createQuery(
-				"select tc from TermConcept tc join fetch tc.myCodeSystem tcsv where tc.myCode = '" +
-					VS_NO_VERSIONED_ON_UPLOAD_FIRST_CODE + "' and tcsv.myCodeSystemVersionId = '" + theVersion + "'").getSingleResult();
-			assertEquals(prefixWithVersion(theVersion, VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY),
-				termConceptNoVer.getDisplay(), "TermCode for code system version: " + theVersion);
-
-			TermConcept termConceptVer = (TermConcept) myEntityManager.createQuery(
-				"select tc from TermConcept tc join fetch tc.myCodeSystem tcsv where tc.myCode = '" +
-					VS_VERSIONED_ON_UPLOAD_FIRST_CODE + "' and tcsv.myCodeSystemVersionId = '" + theVersion + "'").getSingleResult();
-			assertEquals(prefixWithVersion(theVersion, VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY),
-				termConceptVer.getDisplay(), "TermCode for code system version: " + theVersion);
-		});
 	}
 
 
@@ -317,17 +277,14 @@ class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 	/**
 	 * Validates that the collection of unqualified IDs of each element of theValueSets matches the expected
 	 * unqualifiedIds corresponding to the uploaded versions — one per version, each id being
-	 * theUnqualifiedIdPrefix suffixed with its version. Since the loader was converted to a Batch2 job
-	 * there is no longer an extra version-less ValueSet in these results.
+	 * theUnqualifiedIdPrefix suffixed with its version.
 	 *
 	 * @param theValueSets            the ValueSet collection
 	 * @param theExpectedIdVersions   the collection of expected versions
-	 * @param theUnqualifiedIdPrefix  the id prefix the searched ValueSets are stored under, which differs per
-	 *                                ValueSet URL — hence a parameter rather than a constant
+	 * @param theUnqualifiedIdPrefix  the id prefix the searched ValueSets are stored under
 	 */
 	private void matchUnqualifiedIds(
 			List<IBaseResource> theValueSets, Collection<String> theExpectedIdVersions, String theUnqualifiedIdPrefix) {
-		// set should contain one entry per expectedVersion
 		List<String> expectedUnqualifiedIds = theExpectedIdVersions.stream()
 			.map(expVer -> theUnqualifiedIdPrefix + "-" + expVer)
 			.toList();
@@ -373,7 +330,7 @@ class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 	}
 
-	@Test()
+	@Test
 	void uploadWithVersion() throws Exception {
 		String ver = "2.67";
 		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion(ver, true);
@@ -398,9 +355,11 @@ class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		logAllCodeSystemsAndVersionsCodeSystemsAndVersions();
 
 		String nonCurrentVer = "2.68";
-		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion(nonCurrentVer, false, true);
+		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion(nonCurrentVer, false);
 
 		logAllCodeSystemsAndVersionsCodeSystemsAndVersions();
+		logAllValueSets();
+		logAllValueSetConcepts();
 		logAllUriIndexes();
 		logAllTokenIndexes("version");
 		logAllConcepts();
@@ -496,9 +455,9 @@ class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 	}
 
 	/**
-	 * Validates exactly one TermConcept exists for the expected versions only, per test code, with the
-	 * matching display. This validation also ensures there are no other version (e.g. DELETED_ ones).
-	 * Concepts are matched to a version by FK, not insertion order, since persistence is async and not upload-ordered.
+	 * Validates that, for each test code, exactly one TermConcept exists per expected version and no others,
+	 * with the display matching that version. A TermConcept belonging to a superseded (DELETED_) version
+	 * therefore fails this check.
 	 */
 	private void validateTermConcepts(Collection<String> theExpectedVersions) {
 		runInTransaction(() -> {
@@ -517,8 +476,6 @@ class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		Map<String, String> versionToDisplay = new HashMap<>();
 		for (TermConcept termConcept : termConcepts) {
 			String version = termConcept.getCodeSystemVersion().getCodeSystemVersionId();
-			// Asserted on the map rather than on put()'s return value: put() returns null both for a new key
-			// and for a duplicate whose display was null, which would let a real duplicate through.
 			assertThat(versionToDisplay)
 				.as("Duplicate TermConcept for code: " + theCode + ", version: " + version)
 				.doesNotContainKey(version);
@@ -526,9 +483,9 @@ class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		}
 
 		for (String version : theExpectedVersions) {
-			assertThat(versionToDisplay.get(version))
+			assertThat(versionToDisplay)
 				.as("TermConcept for code: " + theCode + ", version: " + version)
-				.isEqualTo(prefixWithVersion(version, theExpectedDisplaySuffix));
+				.containsEntry(version, prefixWithVersion(version, theExpectedDisplaySuffix));
 		}
 	}
 
@@ -542,7 +499,7 @@ class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion(noCurrentVer, false);
 
 		String lastCurrentVer = "2.69";
-		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion(lastCurrentVer, true, true);
+		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion(lastCurrentVer, true);
 
 		runCommonValidations(Lists.newArrayList(firstCurrentVer, noCurrentVer, lastCurrentVer));
 

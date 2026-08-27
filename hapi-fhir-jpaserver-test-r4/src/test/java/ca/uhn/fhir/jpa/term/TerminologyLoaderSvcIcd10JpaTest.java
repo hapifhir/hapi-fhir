@@ -38,7 +38,7 @@ class TerminologyLoaderSvcIcd10JpaTest extends BaseJpaR4Test {
 		// Verify
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
-			assertEquals(2, myTermCodeSystemVersionDao.count());
+			assertEquals(1, myTermCodeSystemVersionDao.count());
 			assertEquals(0, myTermValueSetDao.count());
 			assertEquals(0, myTermConceptMapDao.count());
 			assertEquals(1, myResourceTableDao.count(), () -> myResourceTableDao.findAll().stream().map(t -> "\n * " + t.toString()).collect(Collectors.joining("\n * ")));

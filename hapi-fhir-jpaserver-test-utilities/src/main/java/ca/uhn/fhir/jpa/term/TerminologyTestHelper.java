@@ -38,13 +38,13 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.icd.ImportIcdJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.jpa.batch2.jobs.term.snomedct.ImportSnomedCtJobAppCtx;
-import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetParameters;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.JsonUtil;
-import jakarta.annotation.Nullable;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.ByteArrayInputStream;
@@ -52,6 +52,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_LOINC_DISTRIBUTION_FILE;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_SNOMED_CT_DISTRIBUTION_FILE;
@@ -76,6 +77,7 @@ import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.L
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_RSNA_PLAYBOOK_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_XML_FILE;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET;
 import static ca.uhn.fhir.jpa.test.BaseJpaTest.newSrd;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -85,23 +87,56 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class TerminologyTestHelper {
 
+	/**
+	 * Maximum number of {@link ITermDeferredStorageSvc#saveDeferred()} passes made when draining the deferred
+	 * queue. Each pass itself makes up to 10 internal passes of 1000 concepts, so this is far beyond what any
+	 * test fixture needs. The bound exists so that a queue which can never drain - a paused
+	 * {@link ITermDeferredStorageSvc} - fails the assertion in {@link #awaitDeferredTerminologyWork()} rather
+	 * than spinning forever.
+	 */
+	private static final int MAX_SAVE_DEFERRED_PASSES = 10;
+
 	private final IJobPersistence myJobPersistence;
 	private final IJobCoordinator myJobCoordinator;
 	private final Batch2JobHelper myBatch2JobHelper;
 	private final MemoryCacheService myMemoryCacheService;
 	private final IValidationSupport myValidationSupport;
+	private final ITermDeferredStorageSvc myTermDeferredStorageSvc;
 
 	public TerminologyTestHelper(
-			IJobPersistence theJobPersistence,
-			IJobCoordinator theJobCoordinator,
-			Batch2JobHelper theBatch2JobHelper,
-			MemoryCacheService theMemoryCacheService,
-			IValidationSupport theValidationSupport) {
+			@Nonnull IJobPersistence theJobPersistence,
+			@Nonnull IJobCoordinator theJobCoordinator,
+			@Nonnull Batch2JobHelper theBatch2JobHelper,
+			@Nonnull MemoryCacheService theMemoryCacheService,
+			@Nonnull IValidationSupport theValidationSupport,
+			@Nonnull ITermDeferredStorageSvc theTermDeferredStorageSvc) {
 		myJobPersistence = theJobPersistence;
 		myJobCoordinator = theJobCoordinator;
 		myBatch2JobHelper = theBatch2JobHelper;
 		myMemoryCacheService = theMemoryCacheService;
 		myValidationSupport = theValidationSupport;
+		myTermDeferredStorageSvc = theTermDeferredStorageSvc;
+	}
+
+	/**
+	 * Waits for the async work an import leaves behind: the deferred storage queue, the deletion of the
+	 * CodeSystem version it supersedes, and the ValueSet pre-expansions.
+	 */
+	private void awaitDeferredTerminologyWork() {
+		for (int i = 0; i < MAX_SAVE_DEFERRED_PASSES && !myTermDeferredStorageSvc.isStorageQueueEmpty(false); i++) {
+			myTermDeferredStorageSvc.saveDeferred();
+		}
+
+		assertThat(myTermDeferredStorageSvc.isStorageQueueEmpty(false))
+				.as(
+						"Deferred queue must be drained before awaiting the deletion jobs - either deferred "
+								+ "processing is paused, or %s saveDeferred() passes were not enough to reach the deletions",
+						MAX_SAVE_DEFERRED_PASSES)
+				.isTrue();
+
+		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
+		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(JOB_ID_PRE_EXPAND_VALUESET);
 	}
 
 	public String startImportCustomJobAndWaitForCompletion(
@@ -198,27 +233,6 @@ public class TerminologyTestHelper {
 	public String startImportLoincJobAndWaitForCompletion(
 			String versionId, ZipCollectionBuilder theFiles, boolean theDontMakeCurrent) {
 		return startImportLoincJobAndWaitForCompletion(versionId, theFiles, theDontMakeCurrent, null);
-	}
-
-	/**
-	 * @param theAwaitVersionDelete if this upload replaces an existing TermCodeSystemVersion for the same version
-	 *                              string, activation deletes the old row asynchronously (see
-	 *                              {@link ca.uhn.fhir.jpa.term.TermCodeSystemStorageSvcImpl#activateStagingCodeSystemVersion}).
-	 *                              Pass {@code true} to await that deletion job before returning, so callers that
-	 *                              assert exact TermConcept/TermCodeSystemVersion counts don't race a pending
-	 *                              DELETED_ row. Callers asserting on the pre-deletion state (e.g. delete-job tests)
-	 *                              should keep using the three-arg overload instead.
-	 */
-	public String startImportLoincJobAndWaitForCompletion(
-			String versionId,
-			ZipCollectionBuilder theFiles,
-			boolean theDontMakeCurrent,
-			boolean theAwaitVersionDelete) {
-		String jobInstanceId = startImportLoincJobAndWaitForCompletion(versionId, theFiles, theDontMakeCurrent, null);
-		if (theAwaitVersionDelete) {
-			myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
-		}
-		return jobInstanceId;
 	}
 
 	public String startImportLoincJobAndWaitForCompletion(
@@ -349,6 +363,7 @@ public class TerminologyTestHelper {
 		} else {
 			myBatch2JobHelper.awaitJobFailure(instanceId);
 		}
+		awaitDeferredTerminologyWork();
 
 		return instanceId.getInstanceId();
 	}
@@ -391,16 +406,6 @@ public class TerminologyTestHelper {
 	}
 
 	public void startImportLoincJobAndWaitForCompletion(String theVersion, boolean theMakeItCurrent) throws Exception {
-		startImportLoincJobAndWaitForCompletion(theVersion, theMakeItCurrent, false);
-	}
-
-	/**
-	 * @param theAwaitVersionDelete see {@link #startImportLoincJobAndWaitForCompletion(String, ZipCollectionBuilder, boolean, boolean)},
-	 *                              which this delegates to. Defaults to {@code false} via the two-arg overload since
-	 *                              some callers (e.g. delete-job tests) intentionally assert on the pre-deletion state.
-	 */
-	public void startImportLoincJobAndWaitForCompletion(
-			@Nullable String theVersion, boolean theMakeItCurrent, boolean theAwaitVersionDelete) throws Exception {
 		ZipCollectionBuilder files = new ZipCollectionBuilder(true);
 
 		assertThat(theVersion == null
@@ -412,7 +417,7 @@ public class TerminologyTestHelper {
 
 		addLoincMandatoryFilesToZip(files, theVersion);
 
-		startImportLoincJobAndWaitForCompletion(theVersion, files, !theMakeItCurrent, theAwaitVersionDelete);
+		startImportLoincJobAndWaitForCompletion(theVersion, files, !theMakeItCurrent);
 	}
 
 	/**
@@ -505,7 +510,7 @@ public class TerminologyTestHelper {
 		parameters.setVersion(theVersion);
 
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-		startRequest.setJobDefinitionId(PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET);
+		startRequest.setJobDefinitionId(JOB_ID_PRE_EXPAND_VALUESET);
 		startRequest.setParameters(parameters);
 
 		String instanceId =

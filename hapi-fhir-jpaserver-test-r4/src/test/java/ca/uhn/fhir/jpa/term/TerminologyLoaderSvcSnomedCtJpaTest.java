@@ -51,7 +51,7 @@ public class TerminologyLoaderSvcSnomedCtJpaTest extends BaseJpaR4Test {
 
 		runInTransaction(()->{
 			assertEquals(1, myTermCodeSystemDao.count());
-			assertEquals(2, myTermCodeSystemVersionDao.count());
+			assertEquals(1, myTermCodeSystemVersionDao.count());
 			assertEquals(15, myTermConceptDao.count());
 			assertEquals(3, myTermConceptParentChildLinkDao.count());
 		});
@@ -93,7 +93,7 @@ public class TerminologyLoaderSvcSnomedCtJpaTest extends BaseJpaR4Test {
 
 			runInTransaction(()->{
 				assertEquals(1, myTermCodeSystemDao.count());
-				assertEquals(2, myTermCodeSystemVersionDao.count());
+				assertEquals(1, myTermCodeSystemVersionDao.count());
 				assertEquals(16, myTermConceptDao.count());
 				assertEquals(5, myTermConceptParentChildLinkDao.count());
 			});
@@ -149,7 +149,7 @@ public class TerminologyLoaderSvcSnomedCtJpaTest extends BaseJpaR4Test {
 
 		runInTransaction(()->{
 			assertEquals(1, myTermCodeSystemDao.count());
-			assertEquals(2, myTermCodeSystemVersionDao.count());
+			assertEquals(1, myTermCodeSystemVersionDao.count());
 			assertEquals(15, myTermConceptDao.count());
 			assertEquals(3, myTermConceptParentChildLinkDao.count());
 		});
@@ -180,7 +180,7 @@ public class TerminologyLoaderSvcSnomedCtJpaTest extends BaseJpaR4Test {
 
 		runInTransaction(()->{
 			assertEquals(1, myTermCodeSystemDao.count());
-			assertEquals(2, myTermCodeSystemVersionDao.count());
+			assertEquals(1, myTermCodeSystemVersionDao.count());
 			assertEquals(5, myTermConceptDao.count());
 			assertEquals(3, myTermConceptParentChildLinkDao.count());
 		});

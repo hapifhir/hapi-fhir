@@ -40,6 +40,7 @@ import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
 import ca.uhn.fhir.jpa.term.TermCodeSystemDeleteJobSvcWithUniTestFailures;
 import ca.uhn.fhir.jpa.term.TerminologyTestHelper;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookListener;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
@@ -88,8 +89,20 @@ public class TestJPAConfig {
 	}
 
 	@Bean
-	public TerminologyTestHelper terminologyTestHelper(IJobPersistence theJobPersistence, IJobCoordinator theJobCoordinator, Batch2JobHelper theBatch2JobHelper, MemoryCacheService theMemoryCacheSvc, IValidationSupport theValidationSupport) {
-		return new TerminologyTestHelper(theJobPersistence, theJobCoordinator, theBatch2JobHelper, theMemoryCacheSvc, theValidationSupport);
+	public TerminologyTestHelper terminologyTestHelper(
+			IJobPersistence theJobPersistence,
+			IJobCoordinator theJobCoordinator,
+			Batch2JobHelper theBatch2JobHelper,
+			MemoryCacheService theMemoryCacheSvc,
+			IValidationSupport theValidationSupport,
+			ITermDeferredStorageSvc theTermDeferredStorageSvc) {
+		return new TerminologyTestHelper(
+			theJobPersistence,
+			theJobCoordinator,
+			theBatch2JobHelper,
+			theMemoryCacheSvc,
+			theValidationSupport,
+			theTermDeferredStorageSvc);
 	}
 
 	@Bean

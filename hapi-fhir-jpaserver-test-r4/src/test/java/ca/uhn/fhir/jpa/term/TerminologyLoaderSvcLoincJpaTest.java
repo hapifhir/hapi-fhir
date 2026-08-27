@@ -65,7 +65,8 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 			assertEquals(1, myTermCodeSystemDao.count());
 			assertEquals(82, myTermConceptDao.count());
 			assertEquals(8, myTermConceptParentChildLinkDao.count());
-			assertEquals(2, myTermCodeSystemVersionDao.count());
+			assertEquals(1, myTermCodeSystemVersionDao.count(),
+				"the placeholder version superseded during activation must have been deleted");
 			assertEquals(10, myTermValueSetDao.count());
 			assertEquals(5, myTermConceptMapDao.count());
 			assertEquals(16, myResourceTableDao.count());
@@ -109,7 +110,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 			assertEquals(1, myTermCodeSystemDao.count());
 			assertEquals(82 * 2, myTermConceptDao.count());
 			assertEquals(8 * 2, myTermConceptParentChildLinkDao.count());
-			assertEquals(2 * 2, myTermCodeSystemVersionDao.count());
+			assertEquals(2, myTermCodeSystemVersionDao.count());
 			assertEquals(10 * 2, myTermValueSetDao.count());
 			assertEquals(5 * 2, myTermConceptMapDao.count());
 			assertEquals(16 * 2, myResourceTableDao.count());
@@ -135,7 +136,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 			assertEquals(1, myTermCodeSystemDao.count());
 			assertEquals(82 * 3, myTermConceptDao.count());
 			assertEquals(8 * 3, myTermConceptParentChildLinkDao.count());
-			assertEquals(2 * 3, myTermCodeSystemVersionDao.count());
+			assertEquals(3, myTermCodeSystemVersionDao.count());
 			assertEquals(10 * 3, myTermValueSetDao.count());
 			assertEquals(5 * 3, myTermConceptMapDao.count());
 			assertEquals(16 * 3, myResourceTableDao.count());
@@ -191,7 +192,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
-			assertEquals(4, myTermCodeSystemVersionDao.count());
+			assertEquals(2, myTermCodeSystemVersionDao.count());
 			TermCodeSystem myTermCodeSystem = myTermCodeSystemDao.findByCodeSystemUri("http://loinc.org");
 
 			TermCodeSystemVersion myTermCodeSystemVersion_new =

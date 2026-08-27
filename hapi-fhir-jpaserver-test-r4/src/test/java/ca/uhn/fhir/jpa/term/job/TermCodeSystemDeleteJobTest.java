@@ -33,13 +33,8 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.JsonUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
-
-import java.io.InputStream;
-import java.util.Properties;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
-import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -48,8 +43,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 public class TermCodeSystemDeleteJobTest extends BaseJpaR4Test {
-
-	private Properties uploadProperties;
 
 	@Autowired
 	private TerminologyTestHelper myTerminologyTestHelper;
@@ -60,19 +53,13 @@ public class TermCodeSystemDeleteJobTest extends BaseJpaR4Test {
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
 
-	private void initMultipleVersionLoad() throws Exception {
-		InputStream is = new ClassPathResource("loinc-ver/" + LOINC_UPLOAD_PROPERTIES_FILE.getCode()).getInputStream();
-		uploadProperties = new Properties();
-		uploadProperties.load(is);
-	}
-
 	@Test
 	public void runDeleteJobMultipleVersions() throws Exception {
-		initMultipleVersionLoad();
-
-		// loading a loinc CS with version loads two versions (second one with null version)
 		String firstCurrentVer = "2.67";
 		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion(firstCurrentVer, true);
+
+		String secondCurrentVer = "2.68";
+		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion(secondCurrentVer, true);
 
 		long[] termCodeSystemPidVect = new long[1];  //bypass final restriction
 		runInTransaction(() -> {
@@ -83,7 +70,7 @@ public class TermCodeSystemDeleteJobTest extends BaseJpaR4Test {
 			termCodeSystemPidVect[0] = termCodeSystem.getPid();
 
 			assertEquals(2, myTermCodeSystemVersionDao.count());
-			assertEquals(82, myTermConceptDao.count());
+			assertEquals(82 * 2, myTermConceptDao.count());
 		});
 
 		TermCodeSystemDeleteJobParameters parameters = new TermCodeSystemDeleteJobParameters();

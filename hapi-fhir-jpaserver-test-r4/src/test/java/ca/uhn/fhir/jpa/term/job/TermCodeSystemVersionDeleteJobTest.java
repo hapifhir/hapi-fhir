@@ -70,7 +70,7 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 			assertNotNull(termCodeSystemVersion);
 			termCodeSystemVersionPidVect[0] = requireNonNull(termCodeSystemVersion.getPid());
 
-			assertEquals(2 * 2, myTermCodeSystemVersionDao.count());
+			assertEquals(2, myTermCodeSystemVersionDao.count());
 			assertEquals(82 * 2, myTermConceptDao.count());
 		});
 
@@ -89,7 +89,7 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
 			assertNotNull(myTermCodeSystemDao.findByCodeSystemUri("http://loinc.org"));
-			assertEquals(3, myTermCodeSystemVersionDao.count());
+			assertEquals(1, myTermCodeSystemVersionDao.count());
 			assertEquals(82, myTermConceptDao.count());
 		});
 	}
