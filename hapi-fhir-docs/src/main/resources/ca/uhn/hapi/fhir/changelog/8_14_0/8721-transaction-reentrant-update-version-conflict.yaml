@@ -1,0 +1,12 @@
+---
+type: fix
+issue: 8721
+jira: SMILE-12076
+title: "Fixed an issue where, if a transaction Bundle updated a resource and a storage interceptor
+re-entrantly updated that same resource while processing another entry in the Bundle, the resource's
+current version pointer could end up out of sync with its history, and the Bundle response could
+advertise a version that was not actually stored. As part of this fix, a PUT entry with an If-Match
+header is now re-validated at the moment it is written rather than only when it is read, so a Bundle
+combining a re-entrant interceptor write with If-Match on the same resource will now consistently fail
+with an HTTP 409 Version Conflict and roll back, instead of appearing to succeed while silently
+discarding the interceptor's write."
