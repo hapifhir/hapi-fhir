@@ -1,7 +1,7 @@
 package ca.uhn.hapi.fhir.cdshooks.svc.prefetch;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
+import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.r5.model.CodeableReference;
@@ -41,11 +41,11 @@ class PrefetchTemplateUtilR5Test {
 		final BundleBuilder builder = new BundleBuilder(ourFhirContext);
 		builder.addCollectionEntry(new Device().setId(deviceId1));
 		builder.addCollectionEntry(new Device().setId(deviceId2));
-		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
-		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
-		context.put(DRAFT_ORDERS_CONTEXT_KEY, builder.getBundle());
+		final CdsServiceRequestJson request = new CdsServiceRequestJson();
+		request.addContext(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
+		request.addContext(DRAFT_ORDERS_CONTEXT_KEY, builder.getBundle());
 		// execute
-		final String actual = PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext);
+		final String actual = PrefetchTemplateUtil.substituteTemplate(template, request, ourFhirContext);
 		// validate
 		assertThat(actual).isEqualTo("DeviceRequest?device=1");
 	}
@@ -56,11 +56,11 @@ class PrefetchTemplateUtilR5Test {
 		// setup
 		final String encounterId = "Encounter/1";
 		final String template = "Condition?patient={{context.patientId}}&context={{context.encounter.id}}";
-		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
-		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
-		context.put("encounter", new Encounter().setId(encounterId));
+		final CdsServiceRequestJson request = new CdsServiceRequestJson();
+		request.addContext(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
+		request.addContext("encounter", new Encounter().setId(encounterId));
 		// execute
-		final String actual = PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext);
+		final String actual = PrefetchTemplateUtil.substituteTemplate(template, request, ourFhirContext);
 		// validate
 		assertThat(actual).isEqualTo("Condition?patient=" + TEST_PATIENT_ID + "&context=1");
 	}
@@ -75,9 +75,9 @@ class PrefetchTemplateUtilR5Test {
 		final String pracRoleReference3 = "PractitionerRole/PR3";
 		final String template =
 				"PractitionerRole?_id={{context.draftOrders.entry.resource.ofType(Encounter).participant.actor.resolve().ofType(PractitionerRole).id|%observation.performer.reference|context.mandatoryPracRole}}";
-		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
-		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
-		context.put("mandatoryPracRole", "PractitionerRole/PR4");
+		final CdsServiceRequestJson request = new CdsServiceRequestJson();
+		request.addContext(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
+		request.addContext("mandatoryPracRole", "PractitionerRole/PR4");
 		final Encounter encounter = new Encounter();
 		encounter.setId(encounterId);
 		encounter.addParticipant(
@@ -89,10 +89,10 @@ class PrefetchTemplateUtilR5Test {
 		final BundleBuilder builder = new BundleBuilder(ourFhirContext);
 		builder.addCollectionEntry(encounter);
 		builder.addCollectionEntry(new PractitionerRole().setId(pracRoleReference1));
-		context.put("observation", observation);
-		context.put(DRAFT_ORDERS_CONTEXT_KEY, builder.getBundle());
+		request.addContext(DRAFT_ORDERS_CONTEXT_KEY, builder.getBundle());
+		request.addPrefetch("observation", observation);
 		// execute
-		final String actual = PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext);
+		final String actual = PrefetchTemplateUtil.substituteTemplate(template, request, ourFhirContext);
 		// validate
 		assertThat(actual)
 				.isEqualTo("PractitionerRole?_id=PR1,PractitionerRole/PR2,PractitionerRole/PR3,PractitionerRole/PR4");
@@ -109,11 +109,11 @@ class PrefetchTemplateUtilR5Test {
 		final DeviceRequest deviceRequest1 = new DeviceRequest();
 		deviceRequest1.setCode(new CodeableReference().setReference(new Reference(deviceId1)));
 		builder.addCollectionEntry(deviceRequest1);
-		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
-		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
-		context.put(DRAFT_ORDERS_CONTEXT_KEY, builder.getBundle());
+		final CdsServiceRequestJson request = new CdsServiceRequestJson();
+		request.addContext(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
+		request.addContext(DRAFT_ORDERS_CONTEXT_KEY, builder.getBundle());
 		// execute & validate
-		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
+		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, request, ourFhirContext))
 				.isInstanceOf(InvalidRequestException.class)
 				.hasMessageContaining(
 						"Unable to resolve prefetch template : context.draftOrders.entry.resource.ofType(DeviceRequest).code.reference.resolve().as(Device).id. No result was found for the prefetch query.");
@@ -128,10 +128,10 @@ class PrefetchTemplateUtilR5Test {
 		builder.addCollectionEntry(new ServiceRequest().setId(SERVICE_ID1));
 		builder.addCollectionEntry(new ServiceRequest().setId(SERVICE_ID2));
 		builder.addCollectionEntry(new Observation().setId(OBSERVATION_ID));
-		CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
-		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
-		context.put(DRAFT_ORDERS_CONTEXT_KEY, builder.getBundle());
-		String result = PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext);
+		CdsServiceRequestJson request = new CdsServiceRequestJson();
+		request.addContext(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
+		request.addContext(DRAFT_ORDERS_CONTEXT_KEY, builder.getBundle());
+		String result = PrefetchTemplateUtil.substituteTemplate(template, request, ourFhirContext);
 		assertThat(result).isEqualTo(SERVICE_ID1 + "," + SERVICE_ID2 + " a " + OBSERVATION_ID + " a " + TEST_PATIENT_ID);
 	}
 }

@@ -240,5 +240,41 @@ class HapiTransactionServiceTest {
 			assertFalse(myHapiTransactionService.isCompatiblePartition(partition1, partition2));
 		}
 
+		/**
+		 * A transaction opened for all partitions (with no explicit id list) is partition-unscoped and can host
+		 * work for any partition; the reverse does not hold.
+		 */
+		// Created by Claude Fable 5
+		@Test
+		void partitionedRequiresNew_allPartitionsTransactionHostsAnyPartition() {
+			// given
+			myPartitionSettings.setPartitioningEnabled(true);
+			myHapiTransactionService.setTransactionPropagationWhenChangingPartitions(Propagation.REQUIRES_NEW);
+
+			assertTrue(myHapiTransactionService.isCompatiblePartition(RequestPartitionId.allPartitions(), partition1));
+
+			assertFalse(myHapiTransactionService.isCompatiblePartition(partition1, RequestPartitionId.allPartitions()));
+		}
+
+		/**
+		 * All-partitions with an explicit id list (e.g. "all partitions on a given shard") is a bounded scope,
+		 * not an unscoped host: it is only compatible with its identical self.
+		 */
+		// Created by Claude Fable 5
+		@Test
+		void partitionedRequiresNew_allPartitionsWithIdsIsOnlyCompatibleWithSelf() {
+			// given
+			myPartitionSettings.setPartitioningEnabled(true);
+			myHapiTransactionService.setTransactionPropagationWhenChangingPartitions(Propagation.REQUIRES_NEW);
+			RequestPartitionId boundedAllPartitions = RequestPartitionId.allPartitionsWithPartitionIds(1, 2);
+
+			assertTrue(myHapiTransactionService.isCompatiblePartition(
+					boundedAllPartitions, RequestPartitionId.allPartitionsWithPartitionIds(1, 2)));
+
+			assertFalse(myHapiTransactionService.isCompatiblePartition(boundedAllPartitions, partition1));
+			assertFalse(myHapiTransactionService.isCompatiblePartition(boundedAllPartitions, partition2));
+			assertFalse(myHapiTransactionService.isCompatiblePartition(partition1, boundedAllPartitions));
+		}
+
 	}
 }

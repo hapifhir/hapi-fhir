@@ -28,6 +28,8 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.interceptor.model.TransactionResponseAssembledDetails;
+import ca.uhn.fhir.interceptor.model.TransactionResponseFinalizedDetails;
 import ca.uhn.fhir.interceptor.model.TransactionWriteOperationsDetails;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -275,7 +277,24 @@ public abstract class BaseTransactionProcessor {
 					theRequestDetails, transactionDetails, theRequest, actionName, theNestedMode);
 		}
 
+		// Interceptor broadcast: STORAGE_TRANSACTION_RESPONSE_FINALIZED
+		// Fired before the empty response slots of consolidated duplicate conditionals are dropped below, so
+		// hooks tracking entries by request position still see one response slot per request entry.
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_RESPONSE_FINALIZED)) {
+			@SuppressWarnings("unchecked")
+			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> versionAdapter = myVersionAdapter;
+			HookParams params = new HookParams()
+					.add(
+							TransactionResponseFinalizedDetails.class,
+							new TransactionResponseFinalizedDetails(response, versionAdapter))
+					.add(RequestDetails.class, theRequestDetails)
+					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+					.add(TransactionDetails.class, transactionDetails);
+			compositeBroadcaster.callHooks(Pointcut.STORAGE_TRANSACTION_RESPONSE_FINALIZED, params);
+		}
+
 		List<IBase> entries = myVersionAdapter.getEntries(response);
+
 		for (int i = 0; i < entries.size(); i++) {
 			if (ElementUtil.isEmpty(entries.get(i))) {
 				entries.remove(i);
@@ -652,6 +671,7 @@ public abstract class BaseTransactionProcessor {
 		final IBaseBundle response =
 				myVersionAdapter.createBundle(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTIONRESPONSE.toCode());
 		List<IBase> getEntries = new ArrayList<>();
+
 		final IdentityHashMap<IBase, Integer> originalRequestOrder = new IdentityHashMap<>();
 		for (int i = 0; i < requestEntries.size(); i++) {
 			IBase requestEntry = requestEntries.get(i);
@@ -668,14 +688,7 @@ public abstract class BaseTransactionProcessor {
 		 * Basically if the resource has a match URL that references a placeholder,
 		 * we try to handle the resource with the placeholder first.
 		 */
-		Set<String> placeholderIds = new HashSet<>();
-		for (IBase nextEntry : requestEntries) {
-			String fullUrl = myVersionAdapter.getFullUrl(nextEntry);
-			if (isNotBlank(fullUrl) && fullUrl.startsWith(URN_PREFIX)) {
-				placeholderIds.add(fullUrl);
-			}
-		}
-		requestEntries.sort(new TransactionSorter(placeholderIds));
+		sortEntriesIntoProcessingOrder(requestEntries);
 
 		// perform all writes
 		prepareThenExecuteTransactionWriteOperations(
@@ -705,6 +718,20 @@ public abstract class BaseTransactionProcessor {
 					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 					.add(StorageProcessingMessage.class, message);
 			compositeBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_INFO, params);
+		}
+
+		// Interceptor broadcast: STORAGE_TRANSACTION_RESPONSE_ASSEMBLED
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_RESPONSE_ASSEMBLED)) {
+			@SuppressWarnings("unchecked")
+			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> versionAdapter = myVersionAdapter;
+			HookParams params = new HookParams()
+					.add(
+							TransactionResponseAssembledDetails.class,
+							new TransactionResponseAssembledDetails(response, versionAdapter))
+					.add(RequestDetails.class, theRequestDetails)
+					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+					.add(TransactionDetails.class, theTransactionDetails);
+			compositeBroadcaster.callHooks(Pointcut.STORAGE_TRANSACTION_RESPONSE_ASSEMBLED, params);
 		}
 
 		return response;
@@ -1043,7 +1070,7 @@ public abstract class BaseTransactionProcessor {
 					IBaseResource resource = myVersionAdapter.getResource(theEntry);
 					String resourceType = myContext.getResourceType(resource);
 					nextWriteEntryRequestPartitionId = tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
-							requestDetailsForEntry, resource, resourceType, url);
+							requestDetailsForEntry, resource, resourceType);
 					break;
 				}
 				case PUT: {
@@ -1060,7 +1087,7 @@ public abstract class BaseTransactionProcessor {
 						}
 						if (nextWriteEntryRequestPartitionId == null) {
 							nextWriteEntryRequestPartitionId = tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
-									requestDetailsForEntry, resource, resourceType, url);
+									requestDetailsForEntry, resource, resourceType);
 							if (resourceId != null) {
 								theTransactionDetails.addResolvedPartition(
 										resourceId, nextWriteEntryRequestPartitionId);
@@ -1075,45 +1102,43 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
+	 * Sort transaction entries into processing order: resources whose match URL references a placeholder are handled
+	 * first, then entries are grouped by verb. Called both before processing and again after an interceptor has
+	 * mutated entries (e.g. flipped a create to an update), so the create loop stays verb-grouped. Response slot
+	 * placement is unaffected — it is keyed on the entry object, not its position.
+	 */
+	protected void sortEntriesIntoProcessingOrder(List<IBase> theEntries) {
+		Set<String> placeholderIds = new HashSet<>();
+		for (IBase nextEntry : theEntries) {
+			String fullUrl = myVersionAdapter.getFullUrl(nextEntry);
+			if (isNotBlank(fullUrl) && fullUrl.startsWith(URN_PREFIX)) {
+				placeholderIds.add(fullUrl);
+			}
+		}
+		theEntries.sort(new TransactionSorter(placeholderIds));
+	}
+
+	/**
 	 * Determine the create partition for a transaction write entry before pre-fetch, if possible. In patient-ID
-	 * partition mode the Patient compartment sometimes can't be resolved this early — an inline Patient match URL that
-	 * pre-fetch hasn't resolved yet (Msg 1326), or an id-less conditional-update Patient body (Msg 1321). When
-	 * all-partition search is supported ({@link PartitionSettings#isAllPartitionSearchSupported()}) we defer these to
-	 * {@link RequestPartitionId#allPartitions()} and let routing be settled per-entry at write time, once pre-fetch and
-	 * {@code PatientIdPartitionInterceptor}'s after-prefetch rewrite have resolved the match URL to a concrete Patient.
-	 * Where all-partition search is unsupported the partition must be fixed up front, so the rejection bubbles up
-	 * instead. The body comments spell out which codes and body shapes are deferred.
+	 * partition mode, the Patient compartment sometimes can't be resolved this early — an unresolved Patient
+	 * reference (Msg 1326) or an id-less Patient body (Msg 1321). When all-partition search is supported
+	 * ({@link PartitionSettings#isAllPartitionSearchSupported()}) these are deferred to
+	 * {@link RequestPartitionId#allPartitions()} and settled per entry at write time, once pre-fetch and the
+	 * after-prefetch hooks have resolved the entries; create-time partition validation remains the authoritative
+	 * gate. Where all-partition search is unsupported the partition must be fixed up front, so the rejection
+	 * bubbles up instead.
 	 * <p>
-	 * <b>Not a clean solution:</b> deferral is keyed off Msg 1321/1326, error codes raised specifically by
-	 * {@code PatientIdPartitionInterceptor}, so the core transaction processor is coupled to interceptor-specific
-	 * codes. This is a pragmatic interim approach; a cleaner separation should be designed when time allows.
-	 *
-	 * @param theEntryRequestUrl the entry's request URL; a conditional update is written via a match URL (contains
-	 *     {@code '?'})
+	 * Deferral is keyed off {@link PreFetchSkippableMethodNotAllowedException}, which partition interceptors
+	 * throw for rejections that only reflect not-yet-resolved entry content.
 	 */
 	private RequestPartitionId tryDetermineCreatePartitionForWriteEntryBeforePrefetch(
-			RequestDetails theRequestDetails,
-			IBaseResource theResource,
-			String theResourceType,
-			String theEntryRequestUrl) {
+			RequestDetails theRequestDetails, IBaseResource theResource, String theResourceType) {
 		try {
 			return myRequestPartitionHelperService.determineCreatePartitionForRequest(
 					theRequestDetails, theResource, theResourceType);
 		} catch (MethodNotAllowedException e) {
-			if (!myPartitionSettings.isAllPartitionSearchSupported()) {
-				throw e;
-			}
-			// 1326: the entry's Patient compartment reference is not resolved before pre-fetch. Always deferrable.
-			if (messageStartsWith(e, Msg.code(1326))) {
-				return RequestPartitionId.allPartitions();
-			}
-			// 1321: a truly id-less Patient in a conditional update, whose identifier the after-prefetch rewrite might
-			// map to the existing Patient. Intentionally narrow, matching only an id-less body,
-			// and a more general fix is deferred to Tyner's broader fixes on patient id mode.
-			boolean conditionalUpdateOfIdlessPatient = isNotBlank(theEntryRequestUrl)
-					&& theEntryRequestUrl.indexOf('?') != -1
-					&& theResource.getIdElement().getIdPart() == null;
-			if (conditionalUpdateOfIdlessPatient && messageStartsWith(e, Msg.code(1321))) {
+			if (myPartitionSettings.isAllPartitionSearchSupported()
+					&& e instanceof PreFetchSkippableMethodNotAllowedException) {
 				return RequestPartitionId.allPartitions();
 			}
 			throw e;
@@ -2827,6 +2852,7 @@ public abstract class BaseTransactionProcessor {
 					CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, myRequestDetails);
 
 			TransactionDetails transactionDetails = new TransactionDetails(subRequestBundle);
+			transactionDetails.setServerConstructedBatchSubRequest(true);
 
 			// Interceptor call: STORAGE_TRANSACTION_PROCESSING
 			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_PROCESSING)) {
@@ -2990,10 +3016,5 @@ public abstract class BaseTransactionProcessor {
 
 	private static boolean isUrnEscaped(@Nonnull String theId) {
 		return theId.startsWith(URN_PREFIX_ESCAPED);
-	}
-
-	private static boolean messageStartsWith(Throwable theException, String thePrefix) {
-		String message = theException.getMessage();
-		return message != null && message.startsWith(thePrefix);
 	}
 }
