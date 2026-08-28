@@ -1,4 +1,3 @@
-// Created by claude-opus-5
 package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
@@ -14,7 +13,6 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
@@ -61,6 +59,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
  */
 @SuppressWarnings("unused")
 @ExtendWith(MockitoExtension.class)
+// Created by claude-opus-5
 class BaseBulkModifyResourcesStepTest {
 
 	private static final String RESOURCE_TYPE = "Patient";
@@ -69,9 +68,6 @@ class BaseBulkModifyResourcesStepTest {
 
 	@Spy
 	private IHapiTransactionService myTransactionService = new MyMockTxService();
-
-	@Mock
-	private DaoRegistry myDaoRegistry;
 
 	@Mock
 	private IIdHelperService<IResourcePersistentId<?>> myIdHelperService;
@@ -107,7 +103,7 @@ class BaseBulkModifyResourcesStepTest {
 	private Boolean myTransactionActiveInInTransactionHook;
 
 	/**
-	 * P1: A {@link RetryChunkLaterException} raised by the pre-flight hook is a <b>retry signal</b>, not a
+	 * A {@link RetryChunkLaterException} raised by the pre-flight hook is a <b>retry signal</b>, not a
 	 * failure. It must escape <code>run()</code> so that
 	 * <code>StepExecutor</code> can move the work chunk to POLL_WAITING.
 	 */
@@ -129,7 +125,7 @@ class BaseBulkModifyResourcesStepTest {
 	}
 
 	/**
-	 * A1 (control): a {@link JobExecutionFailedException} raised by the pre-flight hook already escapes
+	 * (control): a {@link JobExecutionFailedException} raised by the pre-flight hook already escapes
 	 * <code>run()</code> today, and must continue to.
 	 */
 	@Test
@@ -151,7 +147,7 @@ class BaseBulkModifyResourcesStepTest {
 	}
 
 	/**
-	 * A2: the same retry signal raised from inside the transactional body must also escape <code>run()</code>.
+	 * The same retry signal raised from inside the transactional body must also escape <code>run()</code>.
 	 * Hoisting the pre-flight call out of the try/catch does not cover this position - the rethrow arm itself
 	 * has to recognise {@link RetryChunkLaterException}.
 	 */
@@ -173,7 +169,7 @@ class BaseBulkModifyResourcesStepTest {
 	}
 
 	/**
-	 * A3 (control): a generic failure inside the transaction is a per-resource failure and must stay swallowed
+	 * (control): a generic failure inside the transaction is a per-resource failure and must stay swallowed
 	 * into the emitted outcome. If this ever turns red, the escape hatch has been over-broadened.
 	 */
 	@Test
@@ -197,13 +193,15 @@ class BaseBulkModifyResourcesStepTest {
 		assertThat(outputData.getFailures()).containsOnlyKeys(RESOURCE_ID_VALUE);
 		assertThat(outputData.getFailures().get(RESOURCE_ID_VALUE)).contains("in-transaction boom");
 		assertThat(outputData.getChangedIds()).isEmpty();
+		assertThat(myOutsideTransactionInvocationCount).isEqualTo(3);
+		assertThat(myInTransactionInvocationCount).isEqualTo(3);
+		assertThat(outputData.getChunkRetryCount()).isEqualTo(2);
 	}
 
 	/**
-	 * A4: <b>deliberate behaviour change, not a regression.</b> A generic failure in the pre-flight hook is a
-	 * whole-chunk guard failure, so it must escape <code>run()</code> and let
-	 * <code>StepExecutor</code> mark the chunk retriable ERRORED, rather than being
-	 * mis-attributed to each individual resource. This test asserts the post-fix semantics.
+	 * A generic failure in the pre-flight hook is a whole-chunk guard failure, so it must escape
+	 * <code>run()</code> and let <code>StepExecutor</code> mark the chunk retriable ERRORED, rather than
+	 * being mis-attributed to each individual resource.
 	 */
 	@Test
 	void testRun_preFlightThrowsGenericException_propagatesSoChunkCanBeRetried() {
@@ -225,7 +223,7 @@ class BaseBulkModifyResourcesStepTest {
 	}
 
 	/**
-	 * A5: invariant guard for the hoist - the pre-flight hook must keep running exactly once, outside any
+	 * Invariant guard for the hoist - the pre-flight hook must keep running exactly once, outside any
 	 * transaction, before the transactional body runs inside one.
 	 */
 	@Test
@@ -262,10 +260,10 @@ class BaseBulkModifyResourcesStepTest {
 
 	/**
 	 * A PID that fails before its resource has been fetched has no ID in the {@link BaseBulkModifyResourcesStep.State},
-	 * so <code>BaseBulkModifyResourcesStep#toId</code> falls back to the ID helper. Without this stub the pre-fix
-	 * failure surfaces as a {@link NullPointerException} from
-	 * {@link BulkModifyResourcesChunkOutcomeJson#addFailure} instead of an honest assertion failure. It is
-	 * {@link org.mockito.Mockito#lenient()} because it is consumed only on the (defective) swallow path.
+	 * so <code>BaseBulkModifyResourcesStep#toId</code> falls back to the ID helper. This stub keeps a regression
+	 * here surfacing as an honest assertion failure rather than a {@link NullPointerException} out of
+	 * {@link BulkModifyResourcesChunkOutcomeJson#addFailure}. It is {@link org.mockito.Mockito#lenient()}
+	 * because it is consumed only when that regression is present.
 	 */
 	private void stubIdHelperForUnresolvedPid() {
 		lenient()
