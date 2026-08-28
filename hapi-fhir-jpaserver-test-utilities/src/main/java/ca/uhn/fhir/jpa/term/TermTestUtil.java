@@ -63,8 +63,7 @@ public final class TermTestUtil {
 	 * placeholder version and then supersedes it when the real version is activated, so each upload leaves
 	 * exactly one version behind once the batch2 deletion of the superseded one has run.
 	 */
-	public static final String MSG_ONE_CODE_SYSTEM_VERSION_PER_UPLOAD =
-			"each upload leaves exactly one CodeSystem version once the superseded placeholder is deleted";
+	public static final String MSG_ONE_CODE_SYSTEM_VERSION_PER_UPLOAD = "one CodeSystemVersion per upload";
 
 	private TermTestUtil() {}
 

@@ -115,17 +115,10 @@ public class TerminologyTestHelper {
 	 * earlier in the test, and the ValueSet pre-expansions. Every instance of those job definitions is
 	 * awaited, not only the ones this import produced.
 	 * <p>
-	 * Order matters: the drain is what enqueues the superseded version for batch2 deletion, so awaiting the
-	 * delete jobs first would find no instances and return immediately. Deferred processing is re-enabled
-	 * before draining because {@link ITermDeferredStorageSvc#isStorageQueueEmpty(boolean)} reports non-empty
-	 * while processing is paused, which would leave {@link ITermDeferredStorageSvc#saveAllDeferred()} looping
-	 * forever.
-	 * <p>
 	 * Only successful imports call this. A failed import leaves whatever it queued behind for the per-test
 	 * terminology cleanup to discard.
 	 */
 	private void awaitImportDeferredTerminologyWork() {
-		myTermDeferredStorageSvc.setProcessDeferred(true);
 		myTermDeferredStorageSvc.saveAllDeferred();
 
 		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);

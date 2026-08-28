@@ -6,6 +6,8 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.TermValueSet;
+import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.util.JsonUtil;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
@@ -15,6 +17,7 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 
 import java.io.IOException;
 import java.util.List;
@@ -219,6 +222,15 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		assertEquals("2.67", outcome.getExpansion().getContains().get(0).getVersion());
 		assertEquals("LA6270-8", outcome.getExpansion().getContains().get(0).getCode());
 		assertEquals("Never", outcome.getExpansion().getContains().get(0).getDisplay());
+
+		String valueSetUrl = outcome.getUrl();
+
+		runInTransaction(() -> {
+			List<TermValueSet> valueSets = myTermValueSetDao.findTermValueSetByUrl(PageRequest.of(0, 10), valueSetUrl);
+			assertThat(valueSets).hasSize(1);
+			assertEquals(valueSetUrl, valueSets.get(0).getUrl());
+			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, valueSets.get(0).getExpansionStatus());
+		});
 
 		outcome = myValueSetDao.expand(new IdType("ValueSet/LL1001-8-2.67"), options, newSrd());
 		String expansionMessage = outcome.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE);
