@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 8232
+jira: SMILE-8760
+title: "Previously, invoking an instance-level `$meta-add` or `$meta-delete` operation as an entry within a
+         `transaction` Bundle failed with `HAPI-1742: Invalid FHIR resource URL` when an `AuthorizationInterceptor`
+         was registered. The `AuthorizationInterceptor` now correctly handles these operation URLs, so the operations 
+         are authorized and applied as expected."
