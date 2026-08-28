@@ -33,6 +33,8 @@ public interface IMdmSettings {
 
 	boolean isEnabled();
 
+	boolean getIgnorePlaceholderResources();
+
 	int getConcurrentConsumers();
 
 	MdmRulesJson getMdmRules();

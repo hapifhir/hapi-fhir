@@ -6,7 +6,10 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static ca.uhn.fhir.util.HapiExtensions.EXT_RESOURCE_PLACEHOLDER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MdmResourceFilteringSvcTest extends BaseMdmR4Test {
 
@@ -33,5 +36,19 @@ class MdmResourceFilteringSvcTest extends BaseMdmR4Test {
 		boolean shouldBeProcessed = myMdmResourceFilteringSvc.shouldBeProcessed(patient);
 
 		assertEquals(true, shouldBeProcessed);
+	}
+
+	@Test
+	void shouldBeProcessed_withPlaceholderResource_skipsUnfilledProcessesFilled() {
+		myMdmSettings.setIgnorePlaceholderResources(true);
+
+		Patient placeholder = new Patient();
+		placeholder.addExtension(EXT_RESOURCE_PLACEHOLDER, new BooleanType(true));
+		placeholder.addIdentifier().setValue("123");
+		assertFalse(myMdmResourceFilteringSvc.shouldBeProcessed(placeholder));
+
+		Patient filledIn = new Patient();   // no extension — the update replaces the body
+		filledIn.addIdentifier().setValue("123");
+		assertTrue(myMdmResourceFilteringSvc.shouldBeProcessed(filledIn));
 	}
 }

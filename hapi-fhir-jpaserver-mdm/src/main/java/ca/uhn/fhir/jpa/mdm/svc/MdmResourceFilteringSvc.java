@@ -25,12 +25,15 @@ import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson;
 import ca.uhn.fhir.mdm.svc.MdmSearchParamSvc;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
+import ca.uhn.fhir.util.ExtensionUtil;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
+import static ca.uhn.fhir.util.HapiExtensions.EXT_RESOURCE_PLACEHOLDER;
 
 @Service
 public class MdmResourceFilteringSvc {
@@ -60,6 +63,10 @@ public class MdmResourceFilteringSvc {
 	public boolean shouldBeProcessed(IAnyResource theResource) {
 		if (MdmResourceUtil.isMdmManaged(theResource)) {
 			ourLog.trace("MDM Message handler is dropping [{}] as it is MDM-managed.", theResource.getId());
+			return false;
+		}
+
+		if (myMdmSettings.getIgnorePlaceholderResources() && ExtensionUtil.hasExtension(theResource, EXT_RESOURCE_PLACEHOLDER)) {
 			return false;
 		}
 

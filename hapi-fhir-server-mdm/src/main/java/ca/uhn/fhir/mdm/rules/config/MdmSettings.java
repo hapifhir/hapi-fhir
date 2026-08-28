@@ -46,6 +46,13 @@ public class MdmSettings implements IMdmSettings {
 	private boolean mySearchAllPartitionForMatch = false;
 	private boolean myShouldAutoDeleteGoldenResources = true;
 	private MdmModeEnum myMdmMode = MATCH_AND_LINK;
+	/**
+	 * Whether or not MDM matching should skip placeholder resources
+	 * instead of trying to match them.
+	 * By default, false. But could be set true for
+	 * added efficiency.
+	 */
+	private boolean myIgnorePlaceholderResources = false;
 
 	/**
 	 * If disabled, the underlying MDM system will operate under the following assumptions:
@@ -74,6 +81,15 @@ public class MdmSettings implements IMdmSettings {
 	public MdmSettings setEnabled(boolean theEnabled) {
 		myEnabled = theEnabled;
 		return this;
+	}
+
+	@Override
+	public boolean getIgnorePlaceholderResources() {
+		return myIgnorePlaceholderResources;
+	}
+
+	public void setIgnorePlaceholderResources(boolean theToIgnore) {
+		myIgnorePlaceholderResources = theToIgnore;
 	}
 
 	@Override
