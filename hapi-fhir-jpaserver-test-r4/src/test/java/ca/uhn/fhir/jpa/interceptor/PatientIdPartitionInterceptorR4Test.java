@@ -1158,13 +1158,28 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		Patient stored = myPatientDao.read(patientId, mySrd);
 		assertEquals("A", stored.getIdentifierFirstRep().getValue());
 
-		// The created Patient must live in the partition derived from its own server-assigned id
-		runInTransaction(() -> {
-			ResourceTable pt = myResourceTableDao.findAll().iterator().next();
-			assertEquals(
-					PatientIdPartitionInterceptor.defaultPartitionAlgorithm(patientId.getIdPart()),
-					pt.getPartitionId().getPartitionId());
-		});
+		assertResourceIsInPartition(
+			PatientIdPartitionInterceptor.defaultPartitionAlgorithm(patientId.getIdPart()), patientId);
+	}
+
+	@Test
+	public void testTransaction_IdlessConditionalCreatePatient_noMatch_uuidStrategy_createsPatient() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.NOT_ALLOWED);
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://ids").setValue("A");
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(patient).conditional("Patient?identifier=http://ids|A");
+
+		Bundle response = mySystemDao.transaction(mySrd, bb.getBundleTyped());
+
+		IIdType patientId = new IdType(response.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless();
+		Patient stored = myPatientDao.read(patientId, mySrd);
+		assertEquals("A", stored.getIdentifierFirstRep().getValue());
+
+		assertResourceIsInPartition(
+			PatientIdPartitionInterceptor.defaultPartitionAlgorithm(patientId.getIdPart()), patientId);
 	}
 
 	@Test
