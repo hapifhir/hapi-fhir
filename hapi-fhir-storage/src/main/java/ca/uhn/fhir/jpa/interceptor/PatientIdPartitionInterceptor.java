@@ -42,7 +42,6 @@ import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.jpa.dao.PreFetchSkippableMethodNotAllowedException;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.BaseRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
@@ -840,8 +839,7 @@ public class PatientIdPartitionInterceptor {
 		for (IBase entry : thePrefetchDetails.getEntries()) {
 			String fullUrl = versionAdapter.getFullUrl(entry);
 			if (fullUrl == null || !fullUrl.startsWith("urn:uuid:")) {
-				setIdOnIdlessConditionalPatientUpdate(
-						versionAdapter, theTransactionDetails, entry, thePrefetchDetails.getStorageSettings());
+				setIdOnIdlessMatchedConditionalPatientUpdate(versionAdapter, theTransactionDetails, entry);
 			} else {
 				resolvePlaceholderPatientEntry(
 						thePrefetchDetails,
@@ -1104,19 +1102,13 @@ public class PatientIdPartitionInterceptor {
 	/**
 	 * Without a normalizer-assigned placeholder fullUrl, an id-less conditional Patient update that pre-fetch matched
 	 * to an existing Patient still needs the matched id stamped on the body. The entry stays conditional, so the DAO
-	 * reports the conditional-match outcome natively.
-	 * <p>
-	 * If the pre-fetch explicitly resolved the URL to no match, the entry is a create. When the server id strategy is
-	 * {@link JpaStorageSettings.IdStrategyEnum#UUID}, the server-assigned UUID is minted onto the body here — the DAO
-	 * would assign one too, but only after partition identification has already rejected the id-less body with
-	 * HAPI-1321. Entries with no pre-fetch verdict, or under any other id strategy, are left untouched.
+	 * reports the conditional-match outcome natively. An unmatched id-less conditional update is left untouched.
 	 */
 	// Created by Claude Fable 5
-	private void setIdOnIdlessConditionalPatientUpdate(
+	private void setIdOnIdlessMatchedConditionalPatientUpdate(
 			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
 			TransactionDetails theTransactionDetails,
-			IBase theEntry,
-			JpaStorageSettings theStorageSettings) {
+			IBase theEntry) {
 		String method = theVersionAdapter.getEntryRequestVerb(myFhirContext, theEntry);
 		String url = theVersionAdapter.getEntryRequestUrl(theEntry);
 		if (!"PUT".equals(method) || url == null || !url.contains("?")) {
@@ -1131,13 +1123,6 @@ public class PatientIdPartitionInterceptor {
 		IIdType matchedId = getPreFetchResolution(url, theTransactionDetails).matchedId();
 		if (matchedId != null) {
 			resource.setId(matchedId.toUnqualifiedVersionless().getValue());
-			return;
-		}
-		// Explicit no-match: a create. Under the UUID strategy, mint the server id now so the entry can be routed.
-		if (theTransactionDetails.getResolvedMatchUrls().get(url) == TransactionDetails.NOT_FOUND
-				&& theStorageSettings.getResourceServerIdStrategy() == JpaStorageSettings.IdStrategyEnum.UUID) {
-			resource.setId(mintPatientReference());
-			resource.setUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED, Boolean.TRUE);
 		}
 	}
 
