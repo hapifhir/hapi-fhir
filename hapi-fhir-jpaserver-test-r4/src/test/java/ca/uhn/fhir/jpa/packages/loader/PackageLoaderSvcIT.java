@@ -8,6 +8,7 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.npm.PackageServer;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -30,20 +31,39 @@ public class PackageLoaderSvcIT {
 	@Spy
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
 	private final FakeNpmServlet myFakeNpmServlet = new FakeNpmServlet();
-	private final PackageLoaderSvc myPackageLoaderSvc = new PackageLoaderSvc();
+	private PackageLoaderSvc myPackageLoaderSvc;
 	private final PackageResourceParsingSvc myResourceParsingSvc = new PackageResourceParsingSvc(myFhirContext);
 
 	@RegisterExtension
 	public HttpServletExtension myServer = new HttpServletExtension()
 		.withServlet(myFakeNpmServlet);
 
+	private PackageLoaderSettingsScope myScope;
+
 	@BeforeEach
 	public void before() throws Exception {
+		String baseUrl = myServer.getBaseUrl();
+		if (!baseUrl.startsWith("http")) {
+			baseUrl = "http://" + baseUrl;
+		}
+		PackageLoaderSettings settings = new PackageLoaderSettings(
+			PackageUrlAllowList.of(List.of(new AllowedUrlPrefix(baseUrl, false)), new ArrayList<>())
+		);
+		myScope = PackageLoaderSvc.applySettings(settings);
+		myPackageLoaderSvc = new PackageLoaderSvc(settings);
 
 		myPackageLoaderSvc.getPackageServers().clear();
-		myPackageLoaderSvc.addPackageServer(new PackageServer(myServer.getBaseUrl()));
+		myPackageLoaderSvc.addPackageServer(
+			new PackageServer(myServer.getBaseUrl()).withAllowHttp(true).withAllowPrivateNetwork(true));
 
 		myFakeNpmServlet.getResponses().clear();
+	}
+
+	@AfterEach
+	public void after() {
+		if (myScope != null) {
+			myScope.close();
+		}
 	}
 
 	@Test

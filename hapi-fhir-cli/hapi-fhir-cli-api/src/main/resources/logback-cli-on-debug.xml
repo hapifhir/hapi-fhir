@@ -1,7 +1,6 @@
 <configuration>
 
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-		<useJansi>false</useJansi>
 		<encoder>
 			<pattern>%d{yyyy-MM-dd} %d{HH:mm:ss.SS} [%thread] [%file:%line] %-5level %logger{20} %msg%n</pattern>
 		</encoder>
@@ -12,8 +11,8 @@
 		<append>false</append>
 		<encoder>
 			<pattern>%d{yyyy-MM-dd} %d{HH:mm:ss.SS} [%thread] [%file:%line] %-5level %logger{20} %msg%n</pattern>
+			<charset>UTF-8</charset>
 		</encoder>
-		<Encoding>utf-8</Encoding>
 	</appender>
 
 	<!-- HAPI HL7v2 App Module -->

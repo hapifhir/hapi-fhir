@@ -7,6 +7,8 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.TermValueSet;
+import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -25,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.AopTestUtils;
 
 import java.util.ArrayList;
@@ -748,6 +751,47 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		IValidationSupport.CodeValidationResult resultBAfter = myValidationSupport.validateCode(ctx, options, "http://foo/cs", "codeB", null, "http://foo/vs");
 		assertThat(resultBAfter).isNotNull();
 		assertThat(resultBAfter.isOk()).isTrue();
+	}
+
+	/**
+	 * Covers the contract of invalidation: a ValueSet drawing several of its pre-expanded concepts from
+	 * the updated CodeSystem is reported as invalidated once, and is left in NOT_EXPANDED so that it gets
+	 * re-expanded against the new CodeSystem content.
+	 */
+	@Test
+	void invalidatePreCalculatedExpansion_valueSetWithMultipleCodesFromCodeSystem_invalidatesItOnce() {
+		// Setup: NOTPRESENT CodeSystem + ValueSet including all of its codes
+		createNotPresentCodeSystem();
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://foo/vs");
+		vs.getCompose().addInclude().setSystem("http://foo/cs");
+		myValueSetDao.create(vs, mySrd);
+
+		CodeSystem delta = newDeltaCodeSystem();
+		delta.addConcept().setCode("codeA").setDisplay("displayA");
+		delta.addConcept().setCode("codeB").setDisplay("displayB");
+		delta.addConcept().setCode("codeC").setDisplay("displayC");
+		myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), delta);
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		// Precondition: the ValueSet is pre-expanded and holds one concept row per code
+		runInTransaction(() -> {
+			List<TermValueSet> preExpanded = myTermValueSetDao.findTermValueSetByUrl(Pageable.unpaged(), "http://foo/vs");
+			assertThat(preExpanded).hasSize(1);
+			assertThat(preExpanded.get(0).getExpansionStatus()).isEqualTo(TermValueSetPreExpansionStatusEnum.EXPANDED);
+			assertThat(preExpanded.get(0).getTotalConcepts()).isEqualTo(3L);
+		});
+
+		// Test
+		int invalidated = myTermValueSetStorageSvc.invalidatePreCalculatedExpansionOfValueSetsContainingCodeSystem("http://foo/cs");
+
+		// Verify
+		assertThat(invalidated).isEqualTo(1);
+		runInTransaction(() -> {
+			List<TermValueSet> afterInvalidation = myTermValueSetDao.findTermValueSetByUrl(Pageable.unpaged(), "http://foo/vs");
+			assertThat(afterInvalidation).hasSize(1);
+			assertThat(afterInvalidation.get(0).getExpansionStatus()).isEqualTo(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED);
+		});
 	}
 
 	private void createNotPresentCodeSystem() {

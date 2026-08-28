@@ -49,7 +49,8 @@ public class NpmDstu3Test extends BaseJpaDstu3Test {
 		JpaPackageCache jpaPackageCache = ProxyUtil.getSingletonTarget(myPackageCacheManager, JpaPackageCache.class);
 
 		jpaPackageCache.getPackageServers().clear();
-		jpaPackageCache.addPackageServer(new PackageServer(myServer.getBaseUrl()));
+		jpaPackageCache.addPackageServer(new PackageServer(myServer.getBaseUrl())
+			.withAllowHttp(true).withAllowPrivateNetwork(true));
 
 		myFakeNpmServlet.getResponses().clear();
 	}
