@@ -40,7 +40,7 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@InjectMocks
-	private StatelessSearchSvcImpl mySynchronousSearchSvc;
+	private StatelessJpaSearchSvcImpl mySynchronousSearchSvc;
 
 	@BeforeEach
 	public void before() {

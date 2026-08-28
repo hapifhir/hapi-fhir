@@ -37,8 +37,8 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.builder.StorageInterceptorHooksFacade;
-import ca.uhn.fhir.jpa.search.exec.ICacheAwareSearchSvc;
-import ca.uhn.fhir.jpa.search.exec.IStatelessSearchSvc;
+import ca.uhn.fhir.jpa.search.exec.ICacheAwareJpaSearchSvc;
+import ca.uhn.fhir.jpa.search.exec.IStatelessJpaSearchSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -95,7 +95,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@Autowired
-	private ICacheAwareSearchSvc myCacheAwareSearchSvc;
+	private ICacheAwareJpaSearchSvc myCacheAwareSearchSvc;
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -104,7 +104,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	private SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
 
 	@Autowired
-	private IStatelessSearchSvc myStatelessSearchSvc;
+	private IStatelessJpaSearchSvc myStatelessSearchSvc;
 
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
@@ -135,8 +135,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 			IInterceptorBroadcaster theInterceptorBroadcaster,
 			DaoRegistry theDaoRegistry,
 			SearchBuilderFactory<JpaPid> theSearchBuilderFactory,
-			IStatelessSearchSvc theStatelessSearchSvc,
-			ICacheAwareSearchSvc theCacheAwareSearchSvc,
+			IStatelessJpaSearchSvc theStatelessSearchSvc,
+			ICacheAwareJpaSearchSvc theCacheAwareSearchSvc,
 			SearchStrategyFactory theSearchStrategyFactory,
 			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
 			IPagingProvider thePagingProvider) {

@@ -166,10 +166,7 @@ import ca.uhn.fhir.jpa.search.cache.DatabaseSearchResultCacheSvcImpl;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.elastic.IndexNamePrefixLayoutStrategy;
-import ca.uhn.fhir.jpa.search.exec.CacheAwareSearchSvcImpl;
-import ca.uhn.fhir.jpa.search.exec.ICacheAwareSearchSvc;
-import ca.uhn.fhir.jpa.search.exec.IStatelessSearchSvc;
-import ca.uhn.fhir.jpa.search.exec.StatelessSearchSvcImpl;
+import ca.uhn.fhir.jpa.search.exec.*;
 import ca.uhn.fhir.jpa.search.reindex.IInstanceReindexService;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.reindex.InstanceReindexServiceImpl;
@@ -984,13 +981,13 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public IStatelessSearchSvc statelessSearchSvc() {
-		return new StatelessSearchSvcImpl();
+	public IStatelessJpaSearchSvc statelessSearchSvc() {
+		return new StatelessJpaSearchSvcImpl();
 	}
 
 	@Bean
-	public ICacheAwareSearchSvc cacheAwareSearchSvc() {
-		return new CacheAwareSearchSvcImpl();
+	public ICacheAwareJpaSearchSvc cacheAwareSearchSvc() {
+		return new CacheAwareJpaSearchSvcImpl();
 	}
 
 	@Bean

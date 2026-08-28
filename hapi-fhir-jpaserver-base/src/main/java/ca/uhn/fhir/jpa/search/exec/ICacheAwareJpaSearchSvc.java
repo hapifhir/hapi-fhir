@@ -35,9 +35,9 @@ import ca.uhn.fhir.rest.server.method.ResponsePage;
  * cached searches, and if appropriate will store any results it finds back in the
  * search cache.
  *
- * @see IStatelessSearchSvc The equivalent service for non-cache-aware searches.
+ * @see IStatelessJpaSearchSvc The equivalent service for non-cache-aware searches.
  */
-public interface ICacheAwareSearchSvc {
+public interface ICacheAwareJpaSearchSvc {
 
 	/**
 	 * Perform a new search using a set of search parameters, either by finding an

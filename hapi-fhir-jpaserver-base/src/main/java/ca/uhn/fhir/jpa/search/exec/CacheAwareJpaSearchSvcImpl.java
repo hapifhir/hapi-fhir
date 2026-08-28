@@ -45,7 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * it will check the {@link ISearchCacheSvc} for any existing cached searches, and if appropriate will store any results it finds back in the
  * search cache.
  */
-public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
+public class CacheAwareJpaSearchSvcImpl implements ICacheAwareJpaSearchSvc {
 
 	@Autowired
 	private ExceptionService myExceptionSvc;
@@ -83,14 +83,14 @@ public class CacheAwareSearchSvcImpl implements ICacheAwareSearchSvc {
 	/**
 	 * Constructor
 	 */
-	public CacheAwareSearchSvcImpl() {
+	public CacheAwareJpaSearchSvcImpl() {
 		super();
 	}
 
 	/**
 	 * Unit test constructor
 	 */
-	public CacheAwareSearchSvcImpl(
+	public CacheAwareJpaSearchSvcImpl(
 			FhirContext theFhirContext,
 			IHapiTransactionService theTxService,
 			JpaStorageSettings theStorageSettings,

@@ -91,7 +91,7 @@ import java.util.Set;
  *     <li>{@link CacheAwareJpaSearchBundleProviderSubsequentPage}</li> is used for the following page loads from the query cache
  * </ul>
  *
- * @see IStatelessSearchSvc The Synchronous Search Service is used instead of this class for searches which don't use the search cache
+ * @see IStatelessJpaSearchSvc The Synchronous Search Service is used instead of this class for searches which don't use the search cache
  * @see ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider The search result for <b>FHIR History</b> operations.
  * @since 8.14.0
  */
@@ -105,7 +105,7 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseCacheAwareJpaSearchBundleProvider.class);
 
 	/**
-	 * Adjust this to raise the level of the debuga logs if you are
+	 * Adjust this to raise the level of the debug logs if you are
 	 * troubleshooting something.
 	 */
 	private static final Level DEBUG_LOG_LEVEL = Level.DEBUG;
@@ -276,12 +276,15 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 				retVal, myRequestDetails, myCompositeBroadcaster);
 
 		// we only care about omitted results from this page
+		theResponsePageBuilder.setPageSize(precount);
 		theResponsePageBuilder.setOmittedResourceCount(precount - retVal.size());
 		theResponsePageBuilder.setResources(retVal);
-		theResponsePageBuilder.setIncludedResourceCount(retVal.size());
+		theResponsePageBuilder.setIncludedResourceCount(searchResults.includedResourceCount());
 		theResponsePageBuilder.setTotalRequestedResourcesFetched(mySearchEntity.getNumFound());
-		theResponsePageBuilder.setHasNextPage(
-				theToIndex < mySearchEntity.getNumFound() || mySearchEntity.getStatus() == SearchStatusEnum.PASSCMPLET);
+
+		// TODO: JA2 the "hasNextPage" property should be removed entirely
+//		theResponsePageBuilder.setHasNextPage(
+//				theToIndex < mySearchEntity.getNumFound() || mySearchEntity.getStatus() == SearchStatusEnum.PASSCMPLET);
 
 		ourLog.atLevel(DEBUG_LOG_LEVEL)
 				.setMessage("Returning {} results for range {}-{}")
@@ -385,7 +388,7 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 					int rangeEnd = (theToIndex - theFromIndex) + rangeStart;
 					rangeEnd = Math.min(rangeEnd, myCachedPidsFromMatches.size());
 					List<JpaPid> rangePids = myCachedPidsFromMatches.pids().subList(rangeStart, rangeEnd);
-					myCachedPidsFromMatchesAndIncludes = new CachedPids(theFromIndex, theToIndex, rangePids);
+					myCachedPidsFromMatchesAndIncludes = new CachedPids(theFromIndex, theToIndex, rangePids, 0);
 					return myCachedPidsFromMatchesAndIncludes;
 				}
 			}
@@ -396,7 +399,7 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 		 */
 		if (myParams != null && mySearchEntity != null && SearchParameterMapCalculator.isWantOnlyCount(myParams)) {
 			if (mySearchEntity.getTotalCount() != null) {
-				myCachedPidsFromMatchesAndIncludes = new CachedPids(theFromIndex, theToIndex, List.of());
+				myCachedPidsFromMatchesAndIncludes = new CachedPids(theFromIndex, theToIndex, List.of(), 0);
 				return myCachedPidsFromMatchesAndIncludes;
 			}
 		}
@@ -469,7 +472,7 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 				mySearchEntity.setStatus(SearchStatusEnum.FINISHED);
 				mySearchCacheSvc.save(mySearchEntity, myRequestPartitionId);
 			}
-			myCachedPidsFromMatchesAndIncludes = new CachedPids(theFromIndex, theToIndex, List.of());
+			myCachedPidsFromMatchesAndIncludes = new CachedPids(theFromIndex, theToIndex, List.of(), 0);
 			return;
 		}
 
@@ -791,8 +794,8 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 			}
 		}
 
-		myCachedPidsFromMatches = new CachedPids(theFromIndex, theToIndex, cachedPidsFromMatches);
-		myCachedPidsFromMatchesAndIncludes = new CachedPids(theFromIndex, theToIndex, theMatchPids);
+		myCachedPidsFromMatches = new CachedPids(theFromIndex, theToIndex, cachedPidsFromMatches, 0);
+		myCachedPidsFromMatchesAndIncludes = new CachedPids(theFromIndex, theToIndex, theMatchPids, includedPidList.size());
 	}
 
 	private Integer fetchRevIncludes(
@@ -1005,7 +1008,13 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 		}
 	}
 
-	private record CachedPids(int fromIndex, int toIndex, List<JpaPid> pids) {
+	/**
+	 * @param fromIndex The from index (includes) corresponding to these PIDs
+	 * @param toIndex The to index (exclusive) corresponding to these PIDs
+	 * @param pids The PIDs themselves
+	 * @param includedResourceCount How many of the PIDs are present because they were pulled into the page by {@literal _include} or {@literal _revinclude} parameters
+	 */
+	private record CachedPids(int fromIndex, int toIndex, List<JpaPid> pids, int includedResourceCount) {
 		public int size() {
 			return pids.size();
 		}

@@ -43,7 +43,7 @@ import java.util.Optional;
 /**
  * Search result provider for fetching pages of a previously executed cache-aware search.
  *
- * @see CacheAwareSearchSvcImpl
+ * @see CacheAwareJpaSearchSvcImpl
  * @since 8.14.0
  */
 public class CacheAwareJpaSearchBundleProviderSubsequentPage extends BaseCacheAwareJpaSearchBundleProvider {

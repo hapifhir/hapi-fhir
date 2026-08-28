@@ -436,6 +436,11 @@ public class ResponsePage {
 			return this;
 		}
 
+		/**
+		 * The number of resources in the current page which were added due to
+		 * {@literal _include} or {@literal _revinclude} parameters as opposed to
+		 * being direct search results.
+		 */
 		public ResponsePageBuilder setIncludedResourceCount(int theIncludedResourceCount) {
 			myIncludedResourceCount = theIncludedResourceCount;
 			return this;
@@ -466,6 +471,9 @@ public class ResponsePage {
 			return this;
 		}
 
+		/**
+		 * The total number of resources requested by the client for the given page
+		 */
 		public ResponsePageBuilder setTotalRequestedResourcesFetched(int theTotalRequestedResourcesFetched) {
 			myTotalRequestedResourcesFetched = theTotalRequestedResourcesFetched;
 			return this;
@@ -511,7 +519,8 @@ public class ResponsePage {
 					myOmittedResourceCount, // omitted resources
 					myTotalRequestedResourcesFetched, // total count of requested resources
 					myBundleProvider, // the bundle provider
-					myHasNextPage);
+				// FIXME: remove the hasNextPage
+				myHasNextPage);
 		}
 	}
 

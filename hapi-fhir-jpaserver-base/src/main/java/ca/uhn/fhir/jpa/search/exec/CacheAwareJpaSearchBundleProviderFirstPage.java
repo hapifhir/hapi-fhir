@@ -52,7 +52,7 @@ import java.util.Optional;
 /**
  * Search result provider for the first page of a cache-aware search.
  *
- * @see CacheAwareSearchSvcImpl
+ * @see CacheAwareJpaSearchSvcImpl
  * @since 8.14.0
  */
 public class CacheAwareJpaSearchBundleProviderFirstPage extends BaseCacheAwareJpaSearchBundleProvider {

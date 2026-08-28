@@ -51,6 +51,7 @@ import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.rest.gclient.ICriterion;
+import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.NumberClientParam;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -244,6 +245,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	private ISearchDao mySearchEntityDao;
 	@Autowired
 	private TerminologyTestHelper myTerminologyTestHelper;
+	private IQuery<Bundle> initialSearch;
 
 	@Override
 	@AfterEach
@@ -663,49 +665,96 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	/**
 	 * Totals should *not* include Included resources
 	 */
-	@Test
-	public void search_withIncludes_calculatesTotalsCorrectly() {
+	@ParameterizedTest
+	@CsvSource(useHeadersInDisplayName = true, textBlock = """
+		_count , _offset, noCache
+		true   , true   , false
+		true   , false  , false
+		false  , true   , false
+		false  , false  , false
+		true   , true   , true
+		true   , false  , true
+		false  , true   , true
+		false  , false  , true
+		""")
+	public void search_withIncludes_calculatesTotalsCorrectly(boolean theCount, boolean theOffset, boolean theNoCache) {
 		// setup
-		int total = 4;
 		Organization o = new Organization();
+		o.setId("ORG");
 		o.setName("Hibert's Clinic");
-		IIdType oid = myClient.create().resource(o).execute().getId().toUnqualifiedVersionless();
+		IIdType oid = myClient.update().resource(o).execute().getId().toUnqualifiedVersionless();
 
+		int total = 25;
 		for (int i = 0; i < total; i++) {
 			Patient p = new Patient();
-			p.setId("Simpson" + i);
+			p.setId("P" + leftPad(Integer.toString(i), 3, '0'));
 			p.getManagingOrganization().setReference(oid.getValue());
 			myClient.update().resource(p).execute();
 		}
 
-		// test
-		Bundle output = myClient
+		// Test - Load first page
+
+		initialSearch = myClient
 			.search()
 			.forResource("Patient")
 			.include(IBaseResource.INCLUDE_ALL)
-			.count(2)
 			.totalMode(SearchTotalModeEnum.ACCURATE)
-			.returnBundle(Bundle.class)
-			.execute();
+			.sort(new SortSpec(Constants.PARAM_ID, SortOrderEnum.ASC))
+			.returnBundle(Bundle.class);
+		if (theCount) {
+			initialSearch = initialSearch.count(10);
+		}
+		if (theOffset) {
+			initialSearch = initialSearch.offset(0);
+		}
+		if (theNoCache) {
+			initialSearch = initialSearch.cacheControl(CacheControlDirective.noCache().setNoStore(true));
+		}
+		Bundle output = initialSearch.execute();
 		assertNotNull(output);
-		assertEquals(3, output.getEntry().size());
 		assertEquals(total, output.getTotal());
-		assertEquals(2, (int) output.getEntry()
-			.stream().filter(e -> e.getResource().fhirType().equalsIgnoreCase("Patient")).count());
+		assertThat(toUnqualifiedVersionlessIdValues(output)).containsExactly(
+			"Patient/P000",
+			"Patient/P001",
+			"Patient/P002",
+			"Patient/P003",
+			"Patient/P004",
+			"Patient/P005",
+			"Patient/P006",
+			"Patient/P007",
+			"Patient/P008",
+			"Patient/P009",
+			"Organization/ORG");
+		assertThat(output.getLink(Constants.LINK_NEXT).getUrl()).contains("_count=10");
+		if (theOffset || theNoCache) {
+			assertThat(output.getLink(Constants.LINK_NEXT).getUrl()).contains("_offset=10");
+		} else {
+			assertThat(output.getLink(Constants.LINK_NEXT).getUrl()).doesNotContain("_offset");
+		}
 
-		output = myClient.search()
-			.forResource("Patient")
-			.include(IBaseResource.INCLUDE_ALL)
-			.offset(2)
-			.cacheControl(CacheControlDirective.noCache())
-			.totalMode(SearchTotalModeEnum.ACCURATE)
-			.returnBundle(Bundle.class)
-			.execute();
+		// Load second page
+
+		output = myClient.loadPage().next(output).execute();
 		assertNotNull(output);
-		assertEquals(3, output.getEntry().size());
 		assertEquals(total, output.getTotal());
-		assertEquals(2, (int) output.getEntry()
-			.stream().filter(e -> e.getResource().fhirType().equalsIgnoreCase("Patient")).count());
+		assertThat(toUnqualifiedVersionlessIdValues(output)).containsExactly(
+			"Patient/P010",
+			"Patient/P011",
+			"Patient/P012",
+			"Patient/P013",
+			"Patient/P014",
+			"Patient/P015",
+			"Patient/P016",
+			"Patient/P017",
+			"Patient/P018",
+			"Patient/P019",
+			"Organization/ORG");
+		assertThat(output.getLink(Constants.LINK_NEXT).getUrl()).contains("_count=10");
+		if (theOffset || theNoCache) {
+			assertThat(output.getLink(Constants.LINK_NEXT).getUrl()).contains("_offset=20");
+		} else {
+			assertThat(output.getLink(Constants.LINK_NEXT).getUrl()).doesNotContain("_offset");
+		}
 	}
 
 	@Test

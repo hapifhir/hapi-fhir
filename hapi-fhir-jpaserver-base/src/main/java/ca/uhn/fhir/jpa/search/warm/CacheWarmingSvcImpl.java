@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.time.DateUtils;
@@ -54,11 +55,12 @@ import java.util.Set;
 public class CacheWarmingSvcImpl implements ICacheWarmingSvc, IHasScheduledJobs {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(CacheWarmingSvcImpl.class);
+	private static final int DEFAULT_FIRST_THRESHOLD = 50;
 
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
 
-	private Map<WarmCacheEntry, Long> myCacheEntryToNextRefresh = new LinkedHashMap<>();
+	private final Map<WarmCacheEntry, Long> myCacheEntryToNextRefresh = new LinkedHashMap<>();
 
 	@Autowired
 	private FhirContext myCtx;
@@ -96,10 +98,15 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc, IHasScheduledJobs 
 		String queryPart = parseWarmUrlParamPart(nextUrl);
 		SearchParameterMap responseCriteriaUrl = myMatchUrlService.translateMatchUrl(queryPart, resourceDef);
 
-		IBundleProvider search = callingDao.search(responseCriteriaUrl);
+		IBundleProvider search = callingDao.search(responseCriteriaUrl, new SystemRequestDetails());
+
+		Integer firstThreshold = myStorageSettings.getSearchPreFetchThresholds().get(0);
+		if (firstThreshold == null || firstThreshold < 1) {
+			firstThreshold = DEFAULT_FIRST_THRESHOLD;
+		}
 
 		// Fetch the first 50 resources to get them into the cache.
-		search.getResources(0, 50);
+		search.getResources(0, firstThreshold);
 	}
 
 	private String parseWarmUrlParamPart(String theNextUrl) {

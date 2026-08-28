@@ -32,9 +32,9 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
  * results is always done by re-executing the search using offsets
  * ({@link SearchParameterMap#getOffset()} and {@link SearchParameterMap#getCount()}).
  *
- * @see ICacheAwareSearchSvc The equivalent service for cache-aware searches.
+ * @see ICacheAwareJpaSearchSvc The equivalent service for cache-aware searches.
  */
-public interface IStatelessSearchSvc extends ISearchSvc {
+public interface IStatelessJpaSearchSvc extends ISearchSvc {
 
 	/**
 	 * Executes a search. The returned bundle provider will contain all fetched results matching the

@@ -12,9 +12,9 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
-import ca.uhn.fhir.jpa.search.exec.CacheAwareSearchSvcImpl;
-import ca.uhn.fhir.jpa.search.exec.ICacheAwareSearchSvc;
-import ca.uhn.fhir.jpa.search.exec.IStatelessSearchSvc;
+import ca.uhn.fhir.jpa.search.exec.CacheAwareJpaSearchSvcImpl;
+import ca.uhn.fhir.jpa.search.exec.ICacheAwareJpaSearchSvc;
+import ca.uhn.fhir.jpa.search.exec.IStatelessJpaSearchSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
@@ -81,12 +81,12 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 	@Mock
 	private IRequestPartitionHelperSvc myPartitionHelperSvc;
 	@Mock
-	private IStatelessSearchSvc mySynchronousSearchSvc;
+	private IStatelessJpaSearchSvc mySynchronousSearchSvc;
 	@Spy
 	private ExceptionService myExceptionSvc = new ExceptionService(myContext);
 	@Mock
 	private IPagingProvider myPagingProvider;
-	private ICacheAwareSearchSvc myCacheAwareSearchSvc;
+	private ICacheAwareJpaSearchSvc myCacheAwareSearchSvc;
 
 	private SearchCoordinatorSvcImpl mySvc;
 	@Captor
@@ -108,7 +108,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		myCurrentSearch = null;
 
-		myCacheAwareSearchSvc = new CacheAwareSearchSvcImpl(
+		myCacheAwareSearchSvc = new CacheAwareJpaSearchSvcImpl(
 			myContext, myTransactionService, myStorageSettings, myInterceptorBroadcaster, mySearchCacheSvc, mySearchResultCacheSvc, myEntityManager, mySearchBuilderFactory, myPartitionHelperSvc
 		);
 
