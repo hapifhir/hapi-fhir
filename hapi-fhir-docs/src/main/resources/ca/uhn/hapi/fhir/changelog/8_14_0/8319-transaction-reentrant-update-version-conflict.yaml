@@ -1,6 +1,6 @@
 ---
 type: fix
-issue: 8721
+issue: 8319
 jira: SMILE-12076
 title: "When a transaction Bundle updated a resource and a storage interceptor re-entrantly updated
 that same resource while processing another entry, the resource's current version could fall out of
