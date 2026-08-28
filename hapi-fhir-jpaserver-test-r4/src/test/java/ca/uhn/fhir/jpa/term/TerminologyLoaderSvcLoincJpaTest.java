@@ -209,6 +209,8 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(files, "v267_loincupload.properties");
 		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion("2.67", files);
 
+		logAllValueSets();
+
 		ValueSetExpansionOptions options = new ValueSetExpansionOptions();
 		ValueSet outcome = myValueSetDao.expand(new IdType("ValueSet/LL1001-8-2.67"), options, newSrd());
 		ourLog.info("Expansion outcome: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
@@ -218,6 +220,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		assertEquals("LA6270-8", outcome.getExpansion().getContains().get(0).getCode());
 		assertEquals("Never", outcome.getExpansion().getContains().get(0).getDisplay());
 
+		outcome = myValueSetDao.expand(new IdType("ValueSet/LL1001-8-2.67"), options, newSrd());
 		String expansionMessage = outcome.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE);
 		assertThat(expansionMessage).contains("using an expansion that was pre-calculated");
 	}

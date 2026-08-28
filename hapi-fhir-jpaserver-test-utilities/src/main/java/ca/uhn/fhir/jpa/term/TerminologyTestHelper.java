@@ -130,8 +130,10 @@ public class TerminologyTestHelper {
 
 		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
-		// adding this revealed a Prod bug which will be fixed separately
-		// myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(JOB_ID_PRE_EXPAND_VALUESET);
+
+		// adding a second saveAllDeferred call until https://github.com/hapifhir/hapi-fhir/issues/8321 is fixed
+		myTermDeferredStorageSvc.saveAllDeferred();
+		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(JOB_ID_PRE_EXPAND_VALUESET);
 	}
 
 	public String startImportCustomJobAndWaitForCompletion(
