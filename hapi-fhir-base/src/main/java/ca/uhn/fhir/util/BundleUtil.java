@@ -691,6 +691,16 @@ public class BundleUtil {
 		return retVal;
 	}
 
+	public static void setSearchModeMetadata(FhirContext theContext, IBaseBundle theBundle) {
+		List<SearchBundleEntryParts> searchBundleEntryParts = getSearchBundleEntryParts(theContext, theBundle);
+		searchBundleEntryParts.forEach(searchBundleEntryPart -> {
+			IBaseResource resource = searchBundleEntryPart.getResource();
+			if (resource != null) {
+				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(resource, searchBundleEntryPart.getSearchMode());
+			}
+		});
+	}
+
 	private static SearchBundleEntryParts getSearchBundleEntryParts(
 			BaseRuntimeChildDefinition theFullUrlChildDef,
 			BaseRuntimeChildDefinition theResourceChildDef,
