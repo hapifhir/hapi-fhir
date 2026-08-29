@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
+import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.util.JsonUtil;
@@ -21,6 +22,10 @@ import org.springframework.data.domain.PageRequest;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.LOINC_URI;
 import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
@@ -30,6 +35,9 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
+
+	private static final String LOINC_IMAGING_DOCUMENT_CODES_VS_URL =
+		"http://loinc.org/vs/loinc-imaging-document-codes";
 
 	@Autowired
 	private TerminologyTestHelper myTerminologyTestHelper;
@@ -235,6 +243,98 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		outcome = myValueSetDao.expand(new IdType("ValueSet/LL1001-8-2.67"), options, newSrd());
 		String expansionMessage = outcome.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE);
 		assertThat(expansionMessage).contains("using an expansion that was pre-calculated");
+	}
+
+	/**
+	 * Reproduces https://github.com/hapifhir/hapi-fhir/issues/8321 on the terminology upload path.
+	 * <p>
+	 * An import activates the ValueSets it generated before it activates the CodeSystem version it
+	 * staged ({@code ImportTerminologyStepFinalize.run} patches each ValueSet to ACTIVE, which fires
+	 * a pre-expansion job on commit, and only afterwards calls
+	 * {@code activateStagingCodeSystemVersion}). A pre-expansion that runs inside that window cannot
+	 * resolve the CodeSystem version, so it falls back to an in-memory expansion that adds every
+	 * enumerated {@code compose.include.concept} without checking it against the CodeSystem.
+	 * <p>
+	 * The assertion is deliberately an invariant rather than a code count, so it holds for any
+	 * LOINC test dataset: a pre-expansion may only contain codes the import actually stored.
+	 */
+	@Test
+	public void testLoadLoinc_PreExpansionsContainOnlyCodesStoredByTheImport() throws IOException {
+		// first import - nothing is being replaced, so no CodeSystem version deletion is in flight
+		ZipCollectionBuilder files = new ZipCollectionBuilder(true);
+		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(files, "v267_loincupload.properties");
+		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion("2.66", files);
+
+		assertPreExpansionsContainOnlyStoredCodes();
+		assertImagingDocumentCodesPreExpansionHasOnlyTheStoredCode();
+
+		// second import - this one replaces the version above, so a version deletion runs alongside it
+		files = new ZipCollectionBuilder(true);
+		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(files, "v267_loincupload.properties");
+		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion("2.67", files);
+
+		assertPreExpansionsContainOnlyStoredCodes();
+		assertImagingDocumentCodesPreExpansionHasOnlyTheStoredCode();
+	}
+
+	/**
+	 * The imaging document ValueSet enumerates the nine LOINC codes listed in
+	 * {@code AccessoryFiles/ImagingDocuments/ImagingDocumentCodes.csv}, of which only
+	 * {@code 17787-3} is present in {@code LoincTable/Loinc.csv}. A correct pre-expansion therefore
+	 * holds exactly one concept. The unvalidated in-memory fallback would hold all nine, and a
+	 * pre-expansion resolved against a CodeSystem version that has no concepts yet would hold none,
+	 * so this catches the failure in both directions.
+	 * <p>
+	 * Note that rows are not filtered on intendedVersionId. A pre-expanded ValueSet keeps a
+	 * non-null one: {@code TermValueSetStorageSvcImpl.activateStagingVersion} promotes the staging
+	 * row and deletes the row it replaces, but never clears the staging marker.
+	 */
+	private void assertImagingDocumentCodesPreExpansionHasOnlyTheStoredCode() {
+		runInTransaction(() -> {
+			List<TermValueSet> allValueSets = myTermValueSetDao.findAll();
+			String storedValueSets = allValueSets.stream()
+				.map(valueSet -> valueSet.getUrl() + "|" + valueSet.getVersion() + " concepts="
+					+ valueSet.getTotalConcepts() + " status=" + valueSet.getExpansionStatus())
+				.sorted()
+				.collect(Collectors.joining("\n  "));
+
+			List<TermValueSet> valueSets = allValueSets.stream()
+				.filter(valueSet -> LOINC_IMAGING_DOCUMENT_CODES_VS_URL.equals(valueSet.getUrl()))
+				.toList();
+
+			assertThat(valueSets)
+				.as("Expected the import to have generated %s. Stored ValueSets:\n  %s",
+					LOINC_IMAGING_DOCUMENT_CODES_VS_URL, storedValueSets)
+				.isNotEmpty();
+
+			assertThat(valueSets)
+				.allSatisfy(valueSet -> assertThat(valueSet.getTotalConcepts())
+					.as("Pre-expansion of %s|%s", valueSet.getUrl(), valueSet.getVersion())
+					.isEqualTo(1L));
+		});
+	}
+
+	/**
+	 * Fails with the ValueSets that hold LOINC codes absent from every stored CodeSystem version,
+	 * which is what the unvalidated in-memory expansion fallback produces.
+	 */
+	private void assertPreExpansionsContainOnlyStoredCodes() {
+		runInTransaction(() -> {
+			Set<String> storedCodes =
+				myTermConceptDao.findAll().stream().map(TermConcept::getCode).collect(Collectors.toSet());
+
+			Map<String, List<String>> unknownCodesByValueSet = myTermValueSetConceptDao.findAll().stream()
+				.filter(concept -> LOINC_URI.equals(concept.getSystem()))
+				.filter(concept -> !storedCodes.contains(concept.getCode()))
+				.collect(Collectors.groupingBy(
+					concept -> concept.getValueSet().getUrl(),
+					TreeMap::new,
+					Collectors.mapping(TermValueSetConcept::getCode, Collectors.toList())));
+
+			assertThat(unknownCodesByValueSet)
+				.as("Pre-expanded ValueSets must not contain LOINC codes that the import never stored")
+				.isEmpty();
+		});
 	}
 
 	@Test

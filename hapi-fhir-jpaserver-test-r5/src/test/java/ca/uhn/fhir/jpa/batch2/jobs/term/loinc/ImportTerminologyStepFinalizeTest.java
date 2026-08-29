@@ -21,6 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
@@ -33,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -130,6 +132,41 @@ public class ImportTerminologyStepFinalizeTest extends BaseImportLoincStepTest {
 
 		String expectedPatchBody = "{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"operation\",\"part\":[{\"name\":\"type\",\"valueString\":\"replace\"},{\"name\":\"path\",\"valueString\":\"status\"},{\"name\":\"value\",\"valueCode\":\"active\"}]}]}";
 		assertEquals(expectedPatchBody, myPatchBodyCaptor.getAllValues().get(0));
+	}
+
+	/**
+	 * Patching a ValueSet to ACTIVE starts a pre-expansion job as soon as that patch commits, and the
+	 * pre-expansion resolves its CodeSystem through the current version. The imported CodeSystem
+	 * version therefore has to be activated and made current before any ValueSet is activated,
+	 * otherwise the pre-expansion runs against a CodeSystem that has no current version and falls
+	 * back to an unvalidated in-memory expansion.
+	 *
+	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8321">GH-8321</a>
+	 */
+	@Test
+	void run_valueSetsToActivate_activatesCodeSystemVersionBeforeValueSets() {
+		// Setup
+		when(myJobPersistence.calculateStepStatistics(any())).thenReturn(new BatchInstanceStepStatisticsDTO(Map.of()));
+		mockFetchJobMetadataAttachment();
+		when(myDaoRegistry.getFhirContext()).thenReturn(FhirContext.forR4Cached());
+		when(myDaoRegistry.getResourceDao(eq("ValueSet"))).thenReturn(myValueSetDao);
+
+		ImportTerminologyJobParameters parameters = new ImportTerminologyJobParameters();
+		TerminologyFileSetJson data = newData();
+		data.addResourceToActivate("ValueSet/A");
+		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "instance-id", "chunk-id"));
+
+		JobDefinition<ImportTerminologyJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTransactionService).importLoincJobDefinition();
+		JobInstance instance = new JobInstance();
+		instance.setInstanceId("my-instance-id");
+
+		// Test
+		myStep.run(new StepExecutionDetails<>(parameters, null, instance, new WorkChunk(), myStepExecutionSvc, jobDefinition, null, null), myDataSink);
+
+		// Verify
+		InOrder inOrder = inOrder(myTermCodeSystemStorageSvc, myValueSetDao);
+		inOrder.verify(myTermCodeSystemStorageSvc).activateStagingCodeSystemVersion(any(), eq("my-staging-version-id"), eq(true));
+		inOrder.verify(myValueSetDao).patch(any(), isNull(), eq(PatchTypeEnum.FHIR_PATCH_JSON), any(), any(), any());
 	}
 
 }
