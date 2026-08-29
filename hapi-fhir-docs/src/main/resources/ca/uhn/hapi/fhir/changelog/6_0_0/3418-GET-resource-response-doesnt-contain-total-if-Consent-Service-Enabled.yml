@@ -1,4 +1,4 @@
 ---
-type: fix
+type: security
 issue: 3418
 title: "`GET` resource with `_total=accurate` and `_summary=count` if consent service enabled should throw an InvalidRequestException. This issue has been fixed."
