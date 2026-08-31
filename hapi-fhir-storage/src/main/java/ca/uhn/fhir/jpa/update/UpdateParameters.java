@@ -23,6 +23,7 @@ import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -37,6 +38,24 @@ public class UpdateParameters<T extends IBaseResource> {
 	private IBasePersistedResource myExistingEntity;
 	private RestOperationTypeEnum myOperationType;
 	private TransactionDetails myTransactionDetails;
+
+	/**
+	 * The resource as it was held in storage immediately before this update, or {@literal null} when it
+	 * was not loaded. Storage interceptors are handed this so they can compare the incoming resource
+	 * against the one it replaces.
+	 */
+	private IBaseResource myOldResource;
+
+	/**
+	 * The version the client demanded via an {@code If-Match} precondition, or {@literal null} when the
+	 * client sent no precondition.
+	 * <p>
+	 * When populated, the precondition is re-validated at the point of the write. This matters inside a
+	 * FHIR transaction, where the precondition is first checked during a pass that stores nothing and
+	 * another entry in the same transaction can still move the resource before the write happens.
+	 * </p>
+	 */
+	private Long myExpectedVersion;
 
 	/**
 	 * In the update methods, we have a local variable to keep track of the old resource before performing the update
@@ -125,6 +144,26 @@ public class UpdateParameters<T extends IBaseResource> {
 
 	public UpdateParameters<T> setTransactionDetails(TransactionDetails myTransactionDetails) {
 		this.myTransactionDetails = myTransactionDetails;
+		return this;
+	}
+
+	@Nullable
+	public IBaseResource getOldResource() {
+		return myOldResource;
+	}
+
+	public UpdateParameters<T> setOldResource(@Nullable IBaseResource theOldResource) {
+		this.myOldResource = theOldResource;
+		return this;
+	}
+
+	@Nullable
+	public Long getExpectedVersion() {
+		return myExpectedVersion;
+	}
+
+	public UpdateParameters<T> setExpectedVersion(@Nullable Long theExpectedVersion) {
+		this.myExpectedVersion = theExpectedVersion;
 		return this;
 	}
 

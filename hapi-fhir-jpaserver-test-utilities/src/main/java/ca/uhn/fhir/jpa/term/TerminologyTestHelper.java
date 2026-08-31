@@ -38,13 +38,13 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.icd.ImportIcdJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.jpa.batch2.jobs.term.snomedct.ImportSnomedCtJobAppCtx;
-import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetParameters;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.JsonUtil;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.ByteArrayInputStream;
@@ -52,6 +52,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
+import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_LOINC_DISTRIBUTION_FILE;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_SNOMED_CT_DISTRIBUTION_FILE;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_DUPLICATE_FILE_DEFAULT;
@@ -75,6 +77,7 @@ import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.L
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_RSNA_PLAYBOOK_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.loinc.LoincUploadPropertiesEnum.LOINC_XML_FILE;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET;
 import static ca.uhn.fhir.jpa.test.BaseJpaTest.newSrd;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -89,21 +92,41 @@ public class TerminologyTestHelper {
 	private final Batch2JobHelper myBatch2JobHelper;
 	private final MemoryCacheService myMemoryCacheService;
 	private final IValidationSupport myValidationSupport;
-	private final ITermDeferredStorageSvc myITerminologyDeferredSvc;
+	private final ITermDeferredStorageSvc myTermDeferredStorageSvc;
 
 	public TerminologyTestHelper(
-			IJobPersistence theJobPersistence,
-			IJobCoordinator theJobCoordinator,
-			Batch2JobHelper theBatch2JobHelper,
-			MemoryCacheService theMemoryCacheService,
-			IValidationSupport theValidationSupport,
-			ITermDeferredStorageSvc theITermDeferredStorageSvc) {
+			@Nonnull IJobPersistence theJobPersistence,
+			@Nonnull IJobCoordinator theJobCoordinator,
+			@Nonnull Batch2JobHelper theBatch2JobHelper,
+			@Nonnull MemoryCacheService theMemoryCacheService,
+			@Nonnull IValidationSupport theValidationSupport,
+			@Nonnull ITermDeferredStorageSvc theTermDeferredStorageSvc) {
 		myJobPersistence = theJobPersistence;
 		myJobCoordinator = theJobCoordinator;
 		myBatch2JobHelper = theBatch2JobHelper;
 		myMemoryCacheService = theMemoryCacheService;
 		myValidationSupport = theValidationSupport;
-		myITerminologyDeferredSvc = theITermDeferredStorageSvc;
+		myTermDeferredStorageSvc = theTermDeferredStorageSvc;
+	}
+
+	/**
+	 * Drains the deferred storage queue and waits for the batch2 jobs a successful import leaves behind:
+	 * deletion of the CodeSystem version this import supersedes, deletion of any whole CodeSystem queued
+	 * earlier in the test, and the ValueSet pre-expansions. Every instance of those job definitions is
+	 * awaited, not only the ones this import produced.
+	 * <p>
+	 * Only successful imports call this. A failed import leaves whatever it queued behind for the per-test
+	 * terminology cleanup to discard.
+	 */
+	private void awaitImportDeferredTerminologyWork() {
+		myTermDeferredStorageSvc.saveAllDeferred();
+
+		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
+
+		// adding a second saveAllDeferred call until https://github.com/hapifhir/hapi-fhir/issues/8321 is fixed
+		myTermDeferredStorageSvc.saveAllDeferred();
+		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(JOB_ID_PRE_EXPAND_VALUESET);
 	}
 
 	public String startImportCustomJobAndWaitForCompletion(
@@ -327,6 +350,7 @@ public class TerminologyTestHelper {
 
 		if (expectSuccess) {
 			myBatch2JobHelper.awaitJobCompletion(instanceId);
+			awaitImportDeferredTerminologyWork();
 		} else {
 			myBatch2JobHelper.awaitJobFailure(instanceId);
 		}
@@ -476,7 +500,7 @@ public class TerminologyTestHelper {
 		parameters.setVersion(theVersion);
 
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-		startRequest.setJobDefinitionId(PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET);
+		startRequest.setJobDefinitionId(JOB_ID_PRE_EXPAND_VALUESET);
 		startRequest.setParameters(parameters);
 
 		String instanceId =
