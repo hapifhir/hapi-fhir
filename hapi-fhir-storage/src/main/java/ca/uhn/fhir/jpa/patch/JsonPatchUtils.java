@@ -112,7 +112,7 @@ public class JsonPatchUtils {
 			throw new InvalidRequestException(Msg.code(1272) + theE.getMessage());
 		} catch (JacksonException theE) {
 			// Jackson 3 parsing/serialization errors (unchecked)
-			throw new InvalidRequestException(Msg.code(9971) + theE.getMessage());
+			throw new InvalidRequestException(Msg.code(3043) + theE.getMessage());
 		}
 	}
 
