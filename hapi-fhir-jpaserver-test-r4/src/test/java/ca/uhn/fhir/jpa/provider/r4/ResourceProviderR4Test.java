@@ -63,6 +63,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -1570,6 +1571,102 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		MethodOutcome output2 = myClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute();
 
 		assertEquals(output1.getId().getIdPart(), output2.getId().getIdPart());
+	}
+
+	/**
+	 * A conditional update whose body carries an id that disagrees with the resource its conditional URL matched
+	 * must be rejected with a 400 and an OperationOutcome (http://hl7.org/fhir/http.html#cond-update).
+	 * <p>
+	 * TODO-TG: characterization test of a known-wrong behaviour. It asserts what the spec requires and is
+	 * {@link Disabled} because HAPI diverges: the REST layer discards the conditional-PUT body id in
+	 * {@code UpdateMethodBinding.validateResourceIdAndUrlIdForNonConditionalOperation}, so the mismatch never
+	 * reaches the HAPI-2279 check in {@code BaseHapiFhirResourceDao.doUpdate} and the match is updated with a 200
+	 * instead. Re-enable once the id stripping is fixed.
+	 * <p>
+	 * Raw HTTP is used deliberately — the generic client must not be able to drop the id on our behalf, or the
+	 * test would be measuring the client rather than the server.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	@Disabled("TODO-TG: known divergence - REST discards the conditional PUT body id, so the mismatch is never rejected")
+	public void testConditionalUpdate_OneMatch_DifferentBodyId_shouldRejectWith2279_specDivergence() throws IOException {
+		Patient existing = new Patient();
+		existing.addIdentifier().setSystem("http://acme.org/mrn").setValue("PT1");
+		IIdType existingId = myClient.create().resource(existing).execute().getId().toUnqualifiedVersionless();
+
+		Patient update = new Patient();
+		update.setId("some-other-id");
+		update.addIdentifier().setSystem("http://acme.org/mrn").setValue("PT1");
+		update.setActive(true);
+
+		HttpPut httpPut = new HttpPut(myServerBase + "/Patient?identifier=http://acme.org/mrn%7CPT1");
+		httpPut.setEntity(new StringEntity(
+			myFhirContext.newJsonParser().encodeResourceToString(update),
+			ContentType.parse("application/json+fhir")));
+
+		try (CloseableHttpResponse status = ourHttpClient.execute(httpPut)) {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info("{}\n{}", status.getStatusLine(), responseContent);
+
+			assertThat(status.getStatusLine().getStatusCode())
+				.as("spec case 5 requires 400 Bad Request when the body id does not match the conditional match")
+				.isEqualTo(400);
+			assertThat(responseContent)
+				.as("the OperationOutcome should identify the id mismatch")
+				.contains("HAPI-2279");
+		}
+
+		Patient matched = myClient.read().resource(Patient.class).withId(existingId).execute();
+		assertThat(matched.hasActive())
+			.as("the rejected conditional update must not have modified the matched resource")
+			.isFalse();
+
+		assertThatThrownBy(() -> myClient.read().resource(Patient.class).withId("some-other-id").execute())
+			.as("the rejected conditional update must not have created anything under the body id")
+			.isInstanceOf(ResourceNotFoundException.class);
+	}
+
+	/**
+	 * A conditional update that matches nothing must create the resource using the client-supplied body id and
+	 * return 201 (http://hl7.org/fhir/http.html#cond-update).
+	 * <p>
+	 * TODO-TG: characterization test of a known-wrong behaviour. It asserts what the spec requires and is
+	 * {@link Disabled} because HAPI diverges: the REST layer discards the conditional-PUT body id in
+	 * {@code UpdateMethodBinding.validateResourceIdAndUrlIdForNonConditionalOperation}, so the resource is created
+	 * with a server-assigned id instead. Re-enable once the id stripping is fixed.
+	 * <p>
+	 * Raw HTTP is used deliberately — see the sibling test above.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	@Disabled("TODO-TG: known divergence - REST discards the conditional PUT body id, so the supplied id is not used")
+	public void testConditionalUpdate_NoMatch_ClientAssignedBodyId_shouldCreateWithThatId_specDivergence() throws IOException {
+		Patient create = new Patient();
+		// alphanumeric: the default ClientIdStrategyEnum.ALPHANUMERIC rejects purely-numeric client ids (Msg 960)
+		create.setId("custom-id-1");
+		create.addIdentifier().setSystem("http://acme.org/mrn").setValue("PT-NOMATCH");
+		create.setActive(true);
+
+		HttpPut httpPut = new HttpPut(myServerBase + "/Patient?identifier=http://acme.org/mrn%7CPT-NOMATCH");
+		httpPut.setEntity(new StringEntity(
+			myFhirContext.newJsonParser().encodeResourceToString(create),
+			ContentType.parse("application/json+fhir")));
+
+		try (CloseableHttpResponse status = ourHttpClient.execute(httpPut)) {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info("{}\n{}", status.getStatusLine(), responseContent);
+
+			assertEquals(201, status.getStatusLine().getStatusCode());
+		}
+
+		Bundle found = myClient.search().forResource(Patient.class)
+			.where(Patient.IDENTIFIER.exactly().systemAndCode("http://acme.org/mrn", "PT-NOMATCH"))
+			.returnBundle(Bundle.class).execute();
+
+		assertThat(found.getEntry()).hasSize(1);
+		assertThat(found.getEntryFirstRep().getResource().getIdElement().getIdPart())
+			.as("spec case 2 requires the resource to be created with the client-supplied id")
+			.isEqualTo("custom-id-1");
 	}
 
 	@Test

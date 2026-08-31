@@ -3663,7 +3663,9 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			.collect(Collectors.toList());
 		String resultingQueryNotFormatted = queries.get(0);
 
-		assertThat(countMatches(resultingQueryNotFormatted, "HASH_VALUE")).as(resultingQueryNotFormatted).isEqualTo(2);
+		// the two value-only tokens share the HASH_VALUE column, so they collapse into one IN clause
+		assertThat(countMatches(resultingQueryNotFormatted, "HASH_VALUE")).as(resultingQueryNotFormatted).isEqualTo(1);
+		assertThat(resultingQueryNotFormatted).contains("HASH_VALUE IN (");
 		assertThat(countMatches(resultingQueryNotFormatted, "HASH_SYS")).as(resultingQueryNotFormatted).isEqualTo(1);
 
 		// Ensure that the search actually worked
