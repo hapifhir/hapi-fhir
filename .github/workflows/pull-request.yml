@@ -64,7 +64,10 @@ jobs:
           fi
 
           # Project version from the root pom (the project <version> is the first one in the file).
-          pom_version=$(sed -n 's:.*<version>\(.*\)</version>.*:\1:p' pom.xml | head -1)
+          # sed quits at the first match rather than piping to 'head -1': under 'set -o pipefail' the
+          # pipe form fails intermittently, because head closes the pipe after one line and sed's
+          # final flush then hits EPIPE and exits 4.
+          pom_version=$(sed -n '/<version>.*<\/version>/{s:.*<version>\(.*\)</version>.*:\1:p;q;}' pom.xml)
           echo "pom version: $pom_version"
 
           # Only enforce for -SNAPSHOT versions.
