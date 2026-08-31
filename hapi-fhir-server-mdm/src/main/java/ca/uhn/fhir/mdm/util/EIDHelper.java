@@ -28,8 +28,10 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -61,11 +63,41 @@ public class EIDHelper {
 	 * @return An optional {@link CanonicalEID} representing the external EID. Absent if the EID is not present.
 	 */
 	public List<CanonicalEID> getExternalEid(IBaseResource theResource) {
+		return CanonicalEID.extractFromResource(myFhirContext, getEidSystemsFor(theResource), theResource);
+	}
+
+	/**
+	 * Returns the one EID that best identifies the given resource, chosen by the order in which EID systems
+	 * are configured for its resource type rather than by the order identifiers appear on the resource.
+	 * Callers that need a stable single value for a resource - a subscription message key, for instance -
+	 * must use this rather than picking the first element of {@link #getExternalEid(IBaseResource)}, whose
+	 * order follows the payload.
+	 *
+	 * @param theResource the resource to extract the EID from
+	 * @return the primary external EID, or empty if the resource carries none
+	 */
+	public Optional<CanonicalEID> getPrimaryExternalEid(IBaseResource theResource) {
+		List<CanonicalEID> externalEids = getExternalEid(theResource);
+		if (externalEids.isEmpty()) {
+			return Optional.empty();
+		}
+
+		for (String eidSystem : getEidSystemsFor(theResource)) {
+			Optional<CanonicalEID> eidForSystem = externalEids.stream()
+					.filter(eid -> Objects.equals(eid.getSystem(), eidSystem))
+					.findFirst();
+			if (eidForSystem.isPresent()) {
+				return eidForSystem;
+			}
+		}
+
+		// Defensive only: the EIDs were extracted from these same systems, so one of them always matched.
+		return Optional.of(externalEids.get(0));
+	}
+
+	private List<String> getEidSystemsFor(IBaseResource theResource) {
 		String resourceType = myFhirContext.getResourceType(theResource);
-		return CanonicalEID.extractFromResource(
-				myFhirContext,
-				myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType(resourceType),
-				theResource);
+		return myMdmSettings.getMdmRules().getEnterpriseEIDSystemsForResourceType(resourceType);
 	}
 
 	/**
@@ -84,6 +116,11 @@ public class EIDHelper {
 	/**
 	 * Determines whether two lists of {@link CanonicalEID} have any intersection. Two resources are considered a match if
 	 * a single {@link CanonicalEID} matches between the two collections.
+	 * <p>
+	 * EIDs are compared on system and value, so that the same value issued by two different EID systems - an
+	 * MRN and an NPI that happen to read alike, say - is not mistaken for one identifier.
+	 * {@code Identifier.use} takes no part in the comparison.
+	 * </p>
 	 *
 	 * @param theFirstResourceEids the first EID
 	 * @param theSecondResourceEids the second EID
@@ -91,11 +128,12 @@ public class EIDHelper {
 	 * @return a boolean indicating whether there is a match between these two identifier sets.
 	 */
 	public boolean eidMatchExists(List<CanonicalEID> theFirstResourceEids, List<CanonicalEID> theSecondResourceEids) {
-		List<String> collect =
-				theFirstResourceEids.stream().map(CanonicalEID::getValue).collect(Collectors.toList());
-		List<String> collect1 =
-				theSecondResourceEids.stream().map(CanonicalEID::getValue).collect(Collectors.toList());
-		return !Collections.disjoint(collect, collect1);
+		Set<String> firstKeys = theFirstResourceEids.stream()
+				.map(CanonicalEID::getSystemAndValueKey)
+				.collect(Collectors.toSet());
+		return theSecondResourceEids.stream()
+				.map(CanonicalEID::getSystemAndValueKey)
+				.anyMatch(firstKeys::contains);
 	}
 
 	/**

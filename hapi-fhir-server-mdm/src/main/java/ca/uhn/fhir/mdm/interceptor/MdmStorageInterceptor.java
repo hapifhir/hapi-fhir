@@ -62,6 +62,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -423,12 +424,22 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 		}
 	}
 
+	/**
+	 * Enforces the "prevent multiple EIDs" safeguard. A resource type may be identified by several EID
+	 * systems, so the safeguard is scoped per system: one EID from each configured system is allowed,
+	 * two from the same system is not. Where only one system is configured this is the same rule as
+	 * "at most one EID per resource".
+	 */
 	private void forbidIfHasMultipleEids(IBaseResource theResource) {
 		String resourceType = extractResourceType(theResource);
 		if (myMdmSettings.isSupportedMdmType(resourceType)) {
-			if (myEIDHelper.getExternalEid(theResource).size() > 1) {
-				throwBlockMultipleEids();
-			}
+			Map<String, Long> eidCountsBySystem = myEIDHelper.getExternalEid(theResource).stream()
+					.collect(Collectors.groupingBy(CanonicalEID::getSystem, LinkedHashMap::new, Collectors.counting()));
+			eidCountsBySystem.entrySet().stream()
+					.filter(eidCountForSystem -> eidCountForSystem.getValue() > 1)
+					.findFirst()
+					.ifPresent(eidCountForSystem ->
+							throwBlockMultipleEids(eidCountForSystem.getKey(), eidCountForSystem.getValue()));
 		}
 	}
 
@@ -464,9 +475,10 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 				+ MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS + " or " + MdmConstants.SYSTEM_MDM_MANAGED);
 	}
 
-	private void throwBlockMultipleEids() {
+	private void throwBlockMultipleEids(String theEidSystem, long theEidCount) {
 		throw new ForbiddenOperationException(Msg.code(766)
-				+ "While running with multiple EIDs disabled, source resources may have at most one EID.");
+				+ "While running with multiple EIDs disabled, source resources may have at most one EID per system, but "
+				+ theEidCount + " were found for system " + theEidSystem + ".");
 	}
 
 	private String extractResourceType(IBaseResource theResource) {

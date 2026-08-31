@@ -154,8 +154,7 @@ public class MdmMatchLinkSvc {
 			IAnyResource firstGoldenResource = goldenResources.get(0);
 
 			goldenResources.subList(1, goldenResources.size()).forEach(possibleDuplicateGoldenResource -> {
-				MdmMatchOutcome outcome = MdmMatchOutcome.POSSIBLE_DUPLICATE;
-				outcome.setEidMatch(theCandidateList.isEidMatch());
+				MdmMatchOutcome outcome = MdmMatchOutcome.possibleDuplicate(theCandidateList.isEidMatch());
 				myMdmLinkSvc.updateLink(
 						firstGoldenResource,
 						possibleDuplicateGoldenResource,
@@ -232,10 +231,12 @@ public class MdmMatchLinkSvc {
 					MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH,
 					MdmLinkSourceEnum.AUTO,
 					theMdmTransactionContext);
+			// This branch is reached only because the two resources carry different external EIDs, so the
+			// duplicate is by definition an EID-based determination.
 			myMdmLinkSvc.updateLink(
 					newGoldenResource,
 					goldenResource,
-					MdmMatchOutcome.POSSIBLE_DUPLICATE,
+					MdmMatchOutcome.possibleDuplicate(true),
 					MdmLinkSourceEnum.AUTO,
 					theMdmTransactionContext);
 		} else {

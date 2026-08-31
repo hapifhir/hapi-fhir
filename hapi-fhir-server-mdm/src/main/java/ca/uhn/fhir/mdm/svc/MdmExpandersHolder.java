@@ -159,8 +159,11 @@ public class MdmExpandersHolder {
 		boolean isMatchOnly = myMdmSettings.getMode() == MdmModeEnum.MATCH_ONLY;
 		boolean hasEidSystems = false;
 		if (myMdmSettings.getMdmRules() != null) {
-			hasEidSystems = myMdmSettings.getMdmRules().getEnterpriseEIDSystems() != null
-					&& !myMdmSettings.getMdmRules().getEnterpriseEIDSystems().isEmpty();
+			hasEidSystems = myMdmSettings.getMdmRules().getEidSystemsByResourceType() != null
+					&& !myMdmSettings
+							.getMdmRules()
+							.getEidSystemsByResourceType()
+							.isEmpty();
 		}
 		return isMatchOnly && hasEidSystems;
 	}

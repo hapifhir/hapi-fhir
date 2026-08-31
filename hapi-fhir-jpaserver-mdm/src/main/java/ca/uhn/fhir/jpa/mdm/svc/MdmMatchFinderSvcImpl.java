@@ -118,11 +118,9 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 			RequestPartitionId theRequestPartitionId) {
 		final SearchParameterMap map = SearchParameterMap.newSynchronous();
 		final TokenOrListParam tokenOrListParam = new TokenOrListParam();
-		final String eidSystemForResourceType =
-				myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType(theResourceType);
-		theEids.stream()
-				.map(CanonicalEID::getValue)
-				.forEach(eid -> tokenOrListParam.addOr(new TokenParam(eidSystemForResourceType, eid)));
+		// Each EID is searched against its own system: a resource type may be identified by several EID
+		// systems, and the same value issued by two of them is not the same identifier.
+		theEids.forEach(eid -> tokenOrListParam.addOr(new TokenParam(eid.getSystem(), eid.getValue())));
 
 		map.add(SP_IDENTIFIER, tokenOrListParam);
 

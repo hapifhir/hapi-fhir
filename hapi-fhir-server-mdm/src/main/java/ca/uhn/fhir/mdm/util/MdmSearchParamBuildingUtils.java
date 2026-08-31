@@ -21,9 +21,13 @@ package ca.uhn.fhir.mdm.util;
 
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.MdmConstants;
+import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+
+import java.util.Collection;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TAG;
 import static org.hl7.fhir.dstu2016may.model.Basic.SP_IDENTIFIER;
@@ -49,13 +53,33 @@ public class MdmSearchParamBuildingUtils {
 	/**
 	 * Creates a SearchParameterMap used for searching for golden resources
 	 * by EID specifically.
+	 *
+	 * @deprecated use {@link #buildEidSearchParameterMap(Collection)}, which matches on the EID system as
+	 * well as the value and can search several EIDs at once.
 	 */
+	@Deprecated
 	public static SearchParameterMap buildEidSearchParameterMap(
 			String theEid, String theResourceType, MdmRulesJson theMdmRules) {
-		SearchParameterMap map = buildBasicGoldenResourceSearchParameterMap(theEid);
+		SearchParameterMap map = buildBasicGoldenResourceSearchParameterMap(theResourceType);
 		map.add(
 				SP_IDENTIFIER,
 				new TokenParam(theMdmRules.getEnterpriseEIDSystemForResourceType(theResourceType), theEid));
+		return map;
+	}
+
+	/**
+	 * Creates a SearchParameterMap that finds the golden resources carrying any of the given EIDs, as a
+	 * single OR query. Each EID is matched on its own system as well as its value, so that the same value
+	 * issued by two different EID systems is not conflated.
+	 *
+	 * @param theEids the EIDs to search for
+	 * @return a search parameter map restricted to golden records
+	 */
+	public static SearchParameterMap buildEidSearchParameterMap(Collection<CanonicalEID> theEids) {
+		SearchParameterMap map = buildBasicGoldenResourceSearchParameterMap(null);
+		TokenOrListParam eidsToSearch = new TokenOrListParam();
+		theEids.forEach(eid -> eidsToSearch.addOr(new TokenParam(eid.getSystem(), eid.getValue())));
+		map.add(SP_IDENTIFIER, eidsToSearch);
 		return map;
 	}
 

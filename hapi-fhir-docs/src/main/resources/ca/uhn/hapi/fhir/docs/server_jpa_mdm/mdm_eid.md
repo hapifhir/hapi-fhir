@@ -1,9 +1,18 @@
 # MDM Enterprise Identifiers
 
-An Enterprise Identifier (EID) is a unique identifier that can be attached to source resources.
-Each implementation is expected to use exactly one EID system for incoming resources,
-defined in the MDM Rules file.
+An Enterprise Identifier (EID) is an identifier that can be attached to source resources and that, within
+the system that issued it, names exactly one real-world entity. The EID systems an implementation uses are
+defined per resource type in the MDM Rules file, under
+[eidSystems](/hapi-fhir/docs/server_jpa_mdm/mdm_rules.html#eidsystems).
 If a source resource with a valid EID is submitted, that EID will be copied over to the Golden Resource that was matched.
+
+A resource type may be identified by a single EID system or by several. Where several are configured, a
+resource may carry one EID from each of them - a medical record number and a national provider identifier,
+say. These are not competing identities: each one on its own identifies the entity, so a match on **any**
+of them is enough to link the resource, and every matching EID is copied to the Golden Resource.
+What a resource is not normally allowed to carry is two EIDs issued by the *same* system, since that would
+make its identity within that system ambiguous. That is enforced by the **Prevent multiple EIDs** setting
+described below, which is enabled by default but may be turned off.
 
 ## MDM EID Settings
 
@@ -12,7 +21,21 @@ contains two EID related settings.  Both are enabled by default.
 
 * **Prevent EID Updates** ([JavaDoc](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setPreventEidUpdates(boolean))): If this is enabled, then once an EID is set on a resource, it cannot be changed. If disabled, patients may have their EID updated.
 
-* **Prevent multiple EIDs**: ([JavaDoc](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setPreventMultipleEids(boolean))): If this is enabled, then a resource cannot have more than one EID, and incoming resources that break this rule will be rejected.
+* **Prevent multiple EIDs**: ([JavaDoc](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setPreventMultipleEids(boolean))): If this is enabled, then a resource cannot have more than one EID from any single EID system, and incoming resources that break this rule will be rejected. Where several EID systems are configured for a resource type, a resource may carry one EID from each of them; what it may not carry is two EIDs issued by the same system.
+
+<p class="helpInfoCalloutBox">
+    Note that <b>Prevent EID Updates</b> requires only that an updated resource still carries at least one of the EIDs it had before. Where a resource type is identified by several EID systems, this means an EID belonging to one system may be changed or removed as long as an EID from another system is left in place.
+</p>
+
+## Matching on Several EID Systems
+
+Where a resource type is identified by more than one EID system, an incoming resource may carry EIDs that
+have already been assigned to *different* Golden Resources - typically because the records arrived
+separately, before anything indicated that both identifiers belonged to the same real-world person.
+
+In that case MDM does not guess which Golden Resource is correct. It links the incoming resource to each
+of them as a POSSIBLE_MATCH, and records a POSSIBLE_DUPLICATE link between the Golden Resources
+themselves, so that a data steward can review and, if appropriate, merge them.
 
 ## MDM EID Scenarios
 

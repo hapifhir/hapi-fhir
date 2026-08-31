@@ -193,7 +193,7 @@ public class MdmEidUpdateService {
 		myMdmLinkSvc.updateLink(
 				newGoldenResource,
 				theOldGoldenResource,
-				MdmMatchOutcome.POSSIBLE_DUPLICATE,
+				MdmMatchOutcome.possibleDuplicate(true),
 				MdmLinkSourceEnum.AUTO,
 				theMdmTransactionContext);
 	}
@@ -214,7 +214,7 @@ public class MdmEidUpdateService {
 		myMdmLinkSvc.updateLink(
 				theNewGoldenResource,
 				theOldGoldenResource,
-				MdmMatchOutcome.POSSIBLE_DUPLICATE,
+				MdmMatchOutcome.possibleDuplicate(true),
 				MdmLinkSourceEnum.AUTO,
 				theMdmTransactionContext);
 	}

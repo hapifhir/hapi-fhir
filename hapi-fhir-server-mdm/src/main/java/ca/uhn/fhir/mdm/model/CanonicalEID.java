@@ -26,6 +26,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Identifier;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -57,15 +59,26 @@ public class CanonicalEID {
 	}
 
 	/**
-	 * Get the appropriate FHIRPath expression to extract the EID identifier value, regardless of resource type.
-	 * e.g. if theBaseResource is a patient, and the MDM EID system is test-system, this will return
+	 * Get the appropriate FHIRPath expression to extract the EID identifier values, regardless of resource type.
+	 * e.g. if theBaseResource is a patient, and the MDM EID systems are test-system and other-system, this will
+	 * return
 	 *
-	 * Patient.identifier.where(system='test-system').value
+	 * Patient.identifier.where(system='test-system' or system='other-system')
 	 *
 	 */
 	private static String buildEidFhirPath(
-			FhirContext theFhirContext, String theEidSystem, IBaseResource theBaseResource) {
-		return theFhirContext.getResourceType(theBaseResource) + ".identifier.where(system='" + theEidSystem + "')";
+			FhirContext theFhirContext, Collection<String> theEidSystems, IBaseResource theBaseResource) {
+		String systemPredicate = theEidSystems.stream()
+				.map(eidSystem -> "system='" + escapeFhirPathStringLiteral(eidSystem) + "'")
+				.collect(Collectors.joining(" or "));
+		return theFhirContext.getResourceType(theBaseResource) + ".identifier.where(" + systemPredicate + ")";
+	}
+
+	/**
+	 * Escapes a value for use inside a single-quoted FHIRPath string literal.
+	 */
+	private static String escapeFhirPathStringLiteral(String theValue) {
+		return theValue.replace("\\", "\\\\").replace("'", "\\'");
 	}
 
 	public Identifier toR4() {
@@ -115,6 +128,17 @@ public class CanonicalEID {
 
 	@Override
 	public String toString() {
+		return getSystemAndValueKey();
+	}
+
+	/**
+	 * Returns the identity of this EID for matching purposes: its system and value, but not its use.
+	 * {@code Identifier.use} routinely differs between a source resource and the golden resource cloned
+	 * from it, so it must not take part in deciding whether two EIDs refer to the same thing.
+	 *
+	 * @return a key of the form {@code system|value}
+	 */
+	public String getSystemAndValueKey() {
 		return mySystem + '|' + myValue;
 	}
 
@@ -129,8 +153,30 @@ public class CanonicalEID {
 	 */
 	public static List<CanonicalEID> extractFromResource(
 			FhirContext theFhirContext, String theEidSystem, IBaseResource theBaseResource) {
+		return extractFromResource(
+				theFhirContext,
+				theEidSystem == null ? Collections.emptyList() : Collections.singletonList(theEidSystem),
+				theBaseResource);
+	}
+
+	/**
+	 * A Factory method to generate {@link CanonicalEID} objects from an incoming resource, matching against
+	 * several EID systems at once.
+	 *
+	 * @param theFhirContext the {@link FhirContext} of the application, used to generate a FHIRPath parser.
+	 * @param theEidSystems the enterprise identifier system URIs that identify this resource type.
+	 * @param theBaseResource the {@link IBaseResource} from which you would like to extract EIDs.
+	 *
+	 * @return every resource identifier matching any of the given eidSystems; empty if there are none.
+	 */
+	public static List<CanonicalEID> extractFromResource(
+			FhirContext theFhirContext, Collection<String> theEidSystems, IBaseResource theBaseResource) {
+		if (theEidSystems.isEmpty()) {
+			return Collections.emptyList();
+		}
+
 		IFhirPath fhirPath = theFhirContext.newFhirPath();
-		String eidPath = buildEidFhirPath(theFhirContext, theEidSystem, theBaseResource);
+		String eidPath = buildEidFhirPath(theFhirContext, theEidSystems, theBaseResource);
 		List<IBase> evaluate = fhirPath.evaluate(theBaseResource, eidPath, IBase.class);
 
 		return evaluate.stream().map(ibase -> new CanonicalEID(fhirPath, ibase)).collect(Collectors.toList());
