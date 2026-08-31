@@ -1102,7 +1102,6 @@
 
 		<!-- see : https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.22#annotations  -->
 		<jackson_annotations_version>2.21</jackson_annotations_version>
-		<jackson_datatype_version>2.21.5</jackson_datatype_version>
 
 		<!-- pay attention to LTS versions going foward : https://github.com/FasterXML/jackson/wiki/Jackson-Releases#open-branches
 		     3.1.6 or later is required: it clears CVE-2026-19032, CVE-2026-68497, CVE-2026-59888,
