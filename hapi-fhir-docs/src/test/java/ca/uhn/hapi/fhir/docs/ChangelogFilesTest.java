@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.ConfigurationException;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.base.Charsets;
 import org.apache.commons.collections4.IteratorUtils;
 import org.apache.commons.io.FileUtils;
