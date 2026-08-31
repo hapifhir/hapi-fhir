@@ -7,6 +7,8 @@ import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.util.VersionEnum;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.sql.SQLException;
@@ -132,6 +134,74 @@ public class AddTableByColumnTaskTest extends BaseTest {
 		task.setNullable(theNullable);
 		task.setColumnLength(theColumnLength);
 
+		return task;
+	}
+
+	@ParameterizedTest
+	@CsvSource({"2, true", "1, true", "0, false"})
+	void testAddTable_withOracleIndexOrganizedFlag_appliedToOracle(int theCompressionLevel, boolean theExpectCompression) {
+		// setup
+		AddTableByColumnTask task = new AddTableByColumnTask("1", "1");
+		task.setTableName("TEST_IOT");
+		task.setDriverType(DriverTypeEnum.ORACLE_12C);
+		task.setPkColumns(Collections.singletonList("PID"));
+		task.setOracleIndexOrganizedTable(theCompressionLevel);
+		task.addAddColumnTask(buildLongColumnTask(DriverTypeEnum.ORACLE_12C, "TEST_IOT"));
+
+		// execute
+		String sql = task.generateSQLCreateScript();
+
+		// validate
+		assertThat(sql).contains("ORGANIZATION INDEX");
+		if (theExpectCompression) {
+			assertThat(sql).contains(" COMPRESS " + theCompressionLevel);
+		} else {
+			assertThat(sql).doesNotContain("COMPRESS");
+		}
+	}
+
+	// COCKROACHDB_21_1 excluded: missing type mappings in ColumnTypeToDriverTypeToSqlType
+	@ParameterizedTest
+	@EnumSource(value = DriverTypeEnum.class, names = {"ORACLE_12C", "COCKROACHDB_21_1"}, mode = EnumSource.Mode.EXCLUDE)
+	void testAddTable_withOracleIndexOrganizedFlag_notAppliedToNonOracle(DriverTypeEnum theDriverType) {
+		// setup
+		AddTableByColumnTask task = new AddTableByColumnTask("1", "1");
+		task.setTableName("TEST_TABLE");
+		task.setDriverType(theDriverType);
+		task.setPkColumns(Collections.singletonList("PID"));
+		task.setOracleIndexOrganizedTable(2);
+		task.addAddColumnTask(buildLongColumnTask(theDriverType, "TEST_TABLE"));
+
+		// execute
+		String sql = task.generateSQLCreateScript();
+
+		// validate
+		assertThat(sql).doesNotContain("ORGANIZATION INDEX").doesNotContain("COMPRESS");
+	}
+
+	@Test
+	void testAddTable_withoutOracleIndexOrganizedFlag_indexNotAdded() {
+		// setup
+		AddTableByColumnTask task = new AddTableByColumnTask("1", "1");
+		task.setTableName("TEST_IOT");
+		task.setDriverType(DriverTypeEnum.ORACLE_12C);
+		task.setPkColumns(Collections.singletonList("PID"));
+		task.addAddColumnTask(buildLongColumnTask(DriverTypeEnum.ORACLE_12C, "TEST_IOT"));
+
+		// execute
+		String sql = task.generateSQLCreateScript();
+
+		// validate
+		assertThat(sql).doesNotContain("ORGANIZATION INDEX").doesNotContain("COMPRESS");
+	}
+
+	private static AddColumnTask buildLongColumnTask(DriverTypeEnum theDriverType, String theTableName) {
+		AddColumnTask task = new AddColumnTask("1", "1");
+		task.setTableName(theTableName);
+		task.setColumnName("PID");
+		task.setColumnType(ColumnTypeEnum.LONG);
+		task.setDriverType(theDriverType);
+		task.setNullable(false);
 		return task;
 	}
 

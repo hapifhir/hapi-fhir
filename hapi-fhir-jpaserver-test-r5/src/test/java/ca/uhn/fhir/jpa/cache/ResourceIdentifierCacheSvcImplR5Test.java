@@ -1,12 +1,16 @@
 package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
+import ca.uhn.fhir.jpa.dao.data.IResourceIdentifierSystemEntityDao;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.ThreadPoolUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.ArrayList;
@@ -18,12 +22,14 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class ResourceIdentifierCacheSvcImplR5Test extends BaseJpaR5Test {
+
+	@Autowired
+	private IResourceIdentifierSystemEntityDao myResourceIdentifierSystemEntityDao;
 
 	private RequestPartitionId myDefaultPartition;
 
@@ -99,6 +105,21 @@ class ResourceIdentifierCacheSvcImplR5Test extends BaseJpaR5Test {
 		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 	}
 
+	@Test
+	void testExpungeEverything_retainsResourceSystemDictionary() {
+		myStorageSettings.setExpungeEnabled(true);
+		myStorageSettings.setAllowMultipleDelete(true);
+		String system = "http://expunge-retention-test";
+		long pid = myResourceIdentifierCacheSvc.getOrCreateResourceIdentifierSystem(newSrd(), myDefaultPartition, system);
+		assertEquals(pid, runInTransaction(() -> myResourceIdentifierSystemEntityDao.findBySystemUrl(system)).orElseThrow());
+
+		myMemoryCacheSvc.invalidateAllCaches();
+		mySystemDao.expunge(new ExpungeOptions().setExpungeEverything(true), new SystemRequestDetails());
+
+		assertEquals(pid, runInTransaction(() -> myResourceIdentifierSystemEntityDao.findBySystemUrl(system)).orElseThrow());
+		long pidAfter = myResourceIdentifierCacheSvc.getOrCreateResourceIdentifierSystem(newSrd(), myDefaultPartition, system);
+		assertEquals(pid, pidAfter);
+	}
 
 	@Test
 	void testGetFhirIdAssociatedWithUniquePatientIdentifier_NoCreate() {

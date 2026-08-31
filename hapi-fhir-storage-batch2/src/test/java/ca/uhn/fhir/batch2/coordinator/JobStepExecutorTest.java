@@ -3,6 +3,8 @@ package ca.uhn.fhir.batch2.coordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.batch2.maintenance.WorkChunkHeartbeatService;
+import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.WorkChunk;
@@ -20,17 +22,21 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class JobStepExecutorTest {
 
 	@Mock
 	private IJobPersistence myPersistence;
+	@Mock
+	private JobDefinition<VoidModel> myJobDefinition;
 	@Mock
 	private JobWorkCursor<VoidModel, VoidModel, VoidModel> myJobWorkCursor;
 	@Mock
@@ -43,6 +49,10 @@ public class JobStepExecutorTest {
 	private IInterceptorService myIInterceptorService;
 	@Mock
 	private ISchedulerService myISchedulerService;
+	@Mock
+	private WorkChunkHeartbeatService myWorkChunkHeartbeatService;
+	@Mock
+	private WorkChunkHeartbeatService.HeartbeatHandle myHeartbeatHandle;
 
 	@Test
 	public void processStep_successfulExecution_closesJob() {
@@ -71,6 +81,8 @@ public class JobStepExecutorTest {
 			gate.set(true);
 			return output;
 		}).when(myWorkChunkProcessor).doExecution(myJobWorkCursor, instance, workChunk);
+		when(myWorkChunkHeartbeatService.scheduleHeartbeatJob(anyString(), anyString()))
+			.thenReturn(myHeartbeatHandle);
 
 		// test
 		executor.processStep();
@@ -80,7 +92,7 @@ public class JobStepExecutorTest {
 			.until(gate::get);
 
 		// verify
-		verify(myISchedulerService).unscheduleLocalJobs(notNull());
+		verify(myHeartbeatHandle).close();
 	}
 
 	@Test
@@ -105,6 +117,8 @@ public class JobStepExecutorTest {
 
 		// when
 		doThrow(new RuntimeException("hello world")).when(myWorkChunkProcessor).doExecution(myJobWorkCursor, instance, workChunk);
+		when(myWorkChunkHeartbeatService.scheduleHeartbeatJob(anyString(), anyString()))
+			.thenReturn(myHeartbeatHandle);
 
 		// test
 		try {
@@ -115,10 +129,12 @@ public class JobStepExecutorTest {
 		}
 
 		// verify
-		verify(myISchedulerService).unscheduleLocalJobs(notNull());
+		verify(myHeartbeatHandle).close();
 	}
 
 	private JobStepExecutor<VoidModel, VoidModel, VoidModel> getExecutor(JobInstance theInstance, WorkChunk theWo, Duration theDuration) {
+		when(myJobWorkCursor.getJobDefinition())
+			.thenReturn(myJobDefinition);
 		JobStepExecutor<VoidModel, VoidModel, VoidModel> executor = new JobStepExecutor<>(
 			myPersistence,
 			theInstance,
@@ -128,8 +144,7 @@ public class JobStepExecutorTest {
 			myIJobMaintenanceService,
 			myJobDefinitionRegistry,
 			myIInterceptorService,
-			myISchedulerService,
-			theDuration
+			myWorkChunkHeartbeatService
 		);
 		return executor;
 	}

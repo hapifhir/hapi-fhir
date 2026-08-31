@@ -28,7 +28,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.TransactionUtil;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.util.TransactionSemanticsHeader;
@@ -61,9 +60,6 @@ public class ConsumeFilesStepV2
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
-
-	@Autowired
-	private IFhirSystemDao mySystemDao;
 
 	@Autowired
 	private PartitionSettings myPartitionSettings;
@@ -139,7 +135,8 @@ public class ConsumeFilesStepV2
 		}
 
 		IBaseBundle requestBundle = bb.getBundleTyped();
-		IBaseBundle responseBundle = (IBaseBundle) mySystemDao.transaction(requestDetails, requestBundle);
+		IBaseBundle responseBundle =
+				(IBaseBundle) myDaoRegistry.getSystemDao().transaction(requestDetails, requestBundle);
 
 		return TransactionUtil.parseTransactionResponse(myCtx, requestBundle, responseBundle);
 	}

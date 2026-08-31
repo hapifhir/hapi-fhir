@@ -28,12 +28,15 @@ import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.interceptor.model.TransactionWriteAfterPrefetchDetails;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
+import ca.uhn.fhir.jpa.dao.index.SearchParamIndexProviderRegistry;
+import ca.uhn.fhir.jpa.dao.index.SearchParamIndexRouting;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.JpaResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -49,10 +52,12 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
@@ -153,6 +158,9 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
+	@Autowired(required = false)
+	private SearchParamIndexProviderRegistry mySearchParamIndexProviderRegistry;
+
 	public void setEntityManagerForUnitTest(EntityManager theEntityManager) {
 		myEntityManager = theEntityManager;
 	}
@@ -216,7 +224,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 			if (theRequestPartitionId != null) {
 				preFetch(theRequest, theTransactionDetails, theEntries, versionAdapter, theRequestPartitionId);
-				callTransactionWriteAfterPrefetchHooks(theRequest, theEntries, theTransactionDetails);
+				callTransactionWriteAfterPrefetchHooks(theRequest, theTransactionDetails, theEntries, versionAdapter);
 			}
 
 			return super.doTransactionWriteOperations(
@@ -233,26 +241,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					theTransactionStopWatch);
 		} finally {
 			myEntityManager.setFlushMode(initialFlushMode);
-		}
-	}
-
-	/**
-	 * Fires {@link Pointcut#STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH}. Hooks may resolve references in the entry
-	 * bodies to concrete IDs using the data resolved during the pre-fetch (available on {@code theTransactionDetails}).
-	 */
-	private void callTransactionWriteAfterPrefetchHooks(
-			RequestDetails theRequest, List<IBase> theEntries, TransactionDetails theTransactionDetails) {
-		IInterceptorBroadcaster compositeBroadcaster =
-				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
-		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH)) {
-			HookParams params = new HookParams()
-					.add(
-							TransactionWriteAfterPrefetchDetails.class,
-							new TransactionWriteAfterPrefetchDetails(theEntries))
-					.add(RequestDetails.class, theRequest)
-					.addIfMatchesType(ServletRequestDetails.class, theRequest)
-					.add(TransactionDetails.class, theTransactionDetails);
-			compositeBroadcaster.callHooks(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH, params);
 		}
 	}
 
@@ -296,7 +284,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		 * Pre-Fetch Resource Bodies (this will happen for any resources we are potentially
 		 * going to update)
 		 */
-		IFhirSystemDao<?, ?> systemDao = myApplicationContext.getBean(IFhirSystemDao.class);
+		IFhirSystemDao<?, ?> systemDao =
+				myApplicationContext.getBean(DaoRegistry.class).getSystemDao();
 		systemDao.preFetchResources(List.copyOf(idsToPreFetchBodiesFor), true);
 
 		/*
@@ -307,6 +296,32 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		preFetchResourceVersions(idsToPreFetchVersionsFor);
 
 		preFetchFhirIds(idsToPreFetchFhirIdsFor, theTransactionDetails);
+	}
+
+	private void callTransactionWriteAfterPrefetchHooks(
+			RequestDetails theRequest,
+			TransactionDetails theTransactionDetails,
+			List<IBase> theEntries,
+			ITransactionProcessorVersionAdapter<?, ?> theVersionAdapter) {
+		// Interceptor call: STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest);
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH)) {
+			@SuppressWarnings("unchecked")
+			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> versionAdapter =
+					(ITransactionProcessorVersionAdapter<IBaseBundle, IBase>) theVersionAdapter;
+			HookParams params = new HookParams()
+					.add(
+							TransactionWriteAfterPrefetchDetails.class,
+							new TransactionWriteAfterPrefetchDetails(theEntries, versionAdapter, myStorageSettings))
+					.add(RequestDetails.class, theRequest)
+					.addIfMatchesType(ServletRequestDetails.class, theRequest)
+					.add(TransactionDetails.class, theTransactionDetails);
+			compositeBroadcaster.callHooks(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH, params);
+
+			// The hook may have flipped some creates to updates; re-group by verb for the write loop.
+			sortEntriesIntoProcessingOrder(theEntries);
+		}
 	}
 
 	private void preFetchFhirIds(Set<JpaPid> theIdsToPreFetchFhirIdsFor, TransactionDetails theTransactionDetails) {
@@ -758,12 +773,27 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		for (MatchUrlToResolve next : theMatchUrls) {
 			RequestPartitionId partition = RequestPartitionId.allPartitions();
 			if (myPartitionSettings.isPartitioningEnabled()) {
-				partition = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
-						theRequestDetails,
-						next.myResourceDefinition.getName(),
-						next.myMatchUrlSearchMap,
-						next.getAssociatedResource());
-				if (partition.isAllPartitions()) {
+				try {
+					partition = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+							theRequestDetails,
+							next.myResourceDefinition.getName(),
+							next.myMatchUrlSearchMap,
+							next.getAssociatedResource());
+				} catch (MethodNotAllowedException e) {
+					// A pre-fetch-skippable rejection means the patient reference isn't resolvable yet; leave
+					// the partition as allPartitions and let the block below settle it. The real compartment
+					// is enforced at create time. Demonstrated by
+					// PatientIdPartitionInterceptorR4Test#testTransaction_ConditionallyCreatedPatientAndConditionallyCreatedObservation:
+					// the Observation's conditional URL cannot be partition-determined before its patient
+					// exists, yet the transaction succeeds and both resources land in the patient's compartment.
+					if (!(e instanceof PreFetchSkippableMethodNotAllowedException)) {
+						throw e;
+					}
+				}
+				if (partition.isAllPartitions() && !myPartitionSettings.isAllPartitionSearchSupported()) {
+					// Keep allPartitions when the infrastructure can fan a search out across all partitions, so
+					// the pre-fetch can find the match wherever it lives; otherwise pin to the transaction
+					// partition to preserve the single-partition guarantee.
 					partition = theOuterRequestPartitionId;
 				}
 			}
@@ -1127,6 +1157,12 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			MatchUrlToResolve theMatchUrl,
 			Set<Long> theOutputSysAndValuePredicates,
 			Set<Long> theOutputValuePredicates) {
+		// Skip the HFJ_SPIDX_TOKEN batch optimization if write to HFJ_SPIDX_TOKEN is suppressed
+		if (mySearchParamIndexProviderRegistry != null
+				&& mySearchParamIndexProviderRegistry.isBuiltInIndexWriteSuppressed(
+						SearchParamIndexRouting.forParamType(RestSearchParameterTypeEnum.TOKEN))) {
+			return false;
+		}
 		if (isNotBlank(theTokenParam.getValue()) && isNotBlank(theTokenParam.getSystem())) {
 			theMatchUrl.myHashSystemAndValue = ResourceIndexedSearchParamToken.calculateHashSystemAndValue(
 					myPartitionSettings,

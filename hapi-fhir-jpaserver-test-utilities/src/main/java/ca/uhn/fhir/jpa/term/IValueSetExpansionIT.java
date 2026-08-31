@@ -48,6 +48,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -434,8 +435,14 @@ public interface IValueSetExpansionIT {
 		try {
 			ValueSet expanded = doSuccessfulValueSetExpansionTest(codeSystem, valueSet);
 
-			assertTrue(expanded.getExpansion().getContains().stream()
-					.anyMatch(c -> c.getCode().equals(CODE_SYSTEM_CODE)));
+			assertTrue(
+					expanded.getExpansion().getContains().stream()
+							.anyMatch(c -> c.getCode().equals(CODE_SYSTEM_CODE)),
+					String.join(
+							", ",
+							expanded.getExpansion().getContains().stream()
+									.map(c -> c.getSystem() + "|" + c.getCode())
+									.collect(Collectors.toSet())));
 		} finally {
 			getJpaStorageSettings().setPreExpandValueSets(preExpand);
 		}

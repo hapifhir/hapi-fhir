@@ -24,7 +24,6 @@ import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.dao.ReindexOutcome;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
@@ -119,10 +118,7 @@ public class ReindexTaskV2 implements TransactionCallback<ReindexResults> {
 	}
 
 	private final DaoRegistry myDaoRegistry;
-	private final IFhirSystemDao<?, ?> mySystemDao;
-
 	private final IIdHelperService<IResourcePersistentId<?>> myIdHelperService;
-
 	private final ResourceIdListWorkChunkJson myData;
 	private final RequestDetails myRequestDetails;
 	private final TransactionDetails myTransactionDetails;
@@ -134,10 +130,8 @@ public class ReindexTaskV2 implements TransactionCallback<ReindexResults> {
 	public ReindexTaskV2(
 			JobParameters theJobParameters,
 			DaoRegistry theRegistry,
-			IFhirSystemDao<?, ?> theSystemDao,
 			IIdHelperService<IResourcePersistentId<?>> theIdHelperService) {
 		myDaoRegistry = theRegistry;
-		mySystemDao = theSystemDao;
 		myIdHelperService = theIdHelperService;
 
 		myData = theJobParameters.getData();
@@ -164,7 +158,7 @@ public class ReindexTaskV2 implements TransactionCallback<ReindexResults> {
 		// Prefetch Resources from DB
 		boolean reindexSearchParameters =
 				myJobParameters.getReindexSearchParameters() != ReindexParameters.ReindexSearchParametersEnum.NONE;
-		mySystemDao.preFetchResources(persistentIds, reindexSearchParameters);
+		myDaoRegistry.getSystemDao().preFetchResources(persistentIds, reindexSearchParameters);
 		ourLog.info(
 				"Prefetched {} resources in {} - Instance[{}] Chunk[{}]",
 				persistentIds.size(),

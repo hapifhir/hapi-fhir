@@ -400,7 +400,6 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0), eq(StatusEnum.getEndedStatuses()))).thenReturn(Lists.newArrayList(instance));
 		mySvc.runEndedJobMaintenancePass();
 		verify(myJobPersistence, times(1)).deleteChunksAndMarkInstanceAsChunksPurged(eq(INSTANCE_ID));
-//		verifyNoMoreInteractions(myJobPersistence);
 	}
 
 	private void runEnqueueReadyChunksTest(List<WorkChunk> theChunks, JobDefinition<TestJobParameters> theJobDefinition) {
@@ -423,35 +422,6 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 
 		// test
 		mySvc.runActiveJobMaintenancePass();
-	}
-
-	@Test
-	public void testMaintenancePass_withREADYWorkChunksForReductionSteps_notQueuedButProcessed() {
-		// setup
-		List<WorkChunk> chunks = List.of(
-			createWorkChunkStep3().setStatus(WorkChunkStatusEnum.READY),
-			createWorkChunkStep3().setStatus(WorkChunkStatusEnum.READY)
-		);
-		List<WorkChunk> previousChunks = List.of(
-			createWorkChunkStep2().setStatus(WorkChunkStatusEnum.COMPLETED),
-			createWorkChunkStep2().setStatus(WorkChunkStatusEnum.COMPLETED)
-		);
-
-		String lastStepId = chunks.get(0).getTargetStepId();
-
-		// when
-		when(myJobPersistence.getDistinctWorkChunkStatesForJobAndStep(eq(INSTANCE_ID), eq(lastStepId)))
-			.thenReturn(chunks.stream().map(WorkChunk::getStatus).collect(Collectors.toSet()));
-
-		// test
-		runEnqueueReadyChunksTest(chunks, createJobDefinitionWithReduction());
-
-		// verify never updated (should remain in ready state)
-		verify(myJobPersistence, never()).fetchAllWorkChunkMetadataForJobInStates(any(), anyString(), any());
-		verify(myJobPersistence, never()).enqueueWorkChunkForProcessing(anyString(), any());
-		verify(myWorkChannelProducer, never()).send(any(JobWorkNotificationJsonMessage.class));
-		verify(myReductionStepExecutorService)
-			.triggerReductionStep(anyString(), any());
 	}
 
 	@Test

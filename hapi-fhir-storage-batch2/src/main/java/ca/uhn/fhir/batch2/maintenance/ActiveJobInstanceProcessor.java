@@ -146,9 +146,22 @@ public class ActiveJobInstanceProcessor {
 			JobWorkCursor<?, ?, ?> jobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(
 					jobDefinition, updatedInstance.get().getCurrentGatedStepId());
 			if (jobWorkCursor.isReductionStep()) {
-				// Reduction step work chunks should never be sent to the queue but to its specific service instead.
-				triggerReductionStep(theInstance, jobWorkCursor);
-				return;
+				Set<WorkChunkStatusEnum> workChunkStatuses = myJobPersistence.getDistinctWorkChunkStatesForJobAndStep(
+						theInstance.getInstanceId(), jobWorkCursor.getCurrentStepId());
+				if ((workChunkStatuses.size() == 1 && workChunkStatuses.contains(WorkChunkStatusEnum.REDUCTION_READY))
+						|| workChunkStatuses.isEmpty()) {
+					// we are not using a workchunk on the queue - run inline
+					// we get here in 2 ways:
+					// * previous step has generated a bunch of REDUCTION_READY chunks (the one unique status)
+					// * previous step has generated zero chunks (likely because there's no data to reduce; job is a
+					// no-op)
+					triggerReductionStep(theInstance, jobWorkCursor);
+					return;
+				} // else
+				// workchunkstatuses contains more than REDUCTION_READY.
+				// this is expected if we're processing using a workchunk (in READY state)
+				// on the queue. we'll let it process normally
+				// Ie, let it get flipped to QUEUED, etc
 			}
 		}
 
@@ -286,7 +299,8 @@ public class ActiveJobInstanceProcessor {
 	private void triggerReductionStep(JobInstance theInstance, JobWorkCursor<?, ?, ?> jobWorkCursor) {
 		String instanceId = theInstance.getInstanceId();
 		ourLog.debug("Triggering Reduction step {} of instance {}.", jobWorkCursor.getCurrentStepId(), instanceId);
-		myReductionStepExecutorService.triggerReductionStep(instanceId, jobWorkCursor);
+		// inline reduction: there is no 'driver' work chunk on the queue for this path
+		myReductionStepExecutorService.triggerReductionStep(instanceId, jobWorkCursor, null);
 	}
 
 	/**

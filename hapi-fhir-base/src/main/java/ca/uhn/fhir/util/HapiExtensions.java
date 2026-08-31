@@ -260,6 +260,13 @@ public class HapiExtensions {
 			"http://hapifhir.io/fhir/StructureDefinition/patient-compartment";
 
 	/**
+	 * Extension on a Provenance resource that groups the Provenances a single operation created, so they can be
+	 * found and processed together. First used by the $merge operation, so that $undo-merge can find and revert
+	 * them as a unit. Its <code>string</code> value identifies the group.
+	 */
+	public static final String EXT_PROVENANCE_GROUP = "http://hapifhir.io/fhir/StructureDefinition/provenance-group";
+
+	/**
 	 * Non instantiable
 	 */
 	private HapiExtensions() {}

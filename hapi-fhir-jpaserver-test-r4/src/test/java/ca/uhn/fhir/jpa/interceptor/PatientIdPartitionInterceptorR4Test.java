@@ -2,20 +2,27 @@ package ca.uhn.fhir.jpa.interceptor;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.interceptor.model.TransactionResponseFinalizedDetails;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.cache.IResourceIdentifierCacheSvc;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.dao.TransactionPrePartitionResponse;
+import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionReferenceScenarios.ExpectedEntry;
 import ca.uhn.fhir.jpa.dao.TransactionUtil;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.util.SqlQuery;
@@ -32,6 +39,8 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
@@ -39,6 +48,7 @@ import ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceEnabledByTy
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.FhirPatchBuilder;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.MultimapCollector;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ListMultimap;
@@ -49,7 +59,12 @@ import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coverage;
@@ -60,7 +75,9 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Provenance;
@@ -73,7 +90,9 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -82,17 +101,26 @@ import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Propagation;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.interceptor.PatientIdPartitionReferenceScenarios.inCompartmentOfOwnSubject;
+import static ca.uhn.fhir.jpa.interceptor.PatientIdPartitionReferenceScenarios.inCompartmentOfSelf;
+import static ca.uhn.fhir.jpa.interceptor.PatientIdPartitionReferenceScenarios.inCompartmentOf;
+import static ca.uhn.fhir.jpa.interceptor.PatientIdPartitionReferenceScenarios.inSamePartitionAsEntry;
 import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onAllThreads;
 import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onCurrentThread;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -119,6 +147,11 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	@Autowired
 	TestDaoSearch myTestDaoSearch;
 
+	@Autowired
+	private MatchUrlService myMatchUrlService;
+	@Autowired
+	private IResourceIdentifierCacheSvc myResourceIdentifierCacheSvc;
+
 	private ForceOffsetSearchModeInterceptor myForceOffsetSearchModeInterceptor;
 	private PatientIdPartitionInterceptor mySvc;
 
@@ -127,7 +160,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	public void before() throws Exception {
 		super.before();
 		myForceOffsetSearchModeInterceptor = new ForceOffsetSearchModeInterceptor();
-		mySvc = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
+		mySvc = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry, myTransactionBundleNormalizer);
 
 		myInterceptorRegistry.registerInterceptor(mySvc);
 		myInterceptorRegistry.registerInterceptor(myForceOffsetSearchModeInterceptor);
@@ -154,6 +187,10 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		myPartitionSettings.setAllPartitionSearchSupported(defaultSettings.isAllPartitionSearchSupported());
 
 		myTransactionService.setTransactionPropagationWhenChangingPartitions(HapiTransactionService.DEFAULT_TRANSACTION_PROPAGATION_WHEN_CHANGING_PARTITIONS);
+
+		JpaStorageSettings defaultStorageSettings = new JpaStorageSettings();
+		myStorageSettings.setResourceServerIdStrategy(defaultStorageSettings.getResourceServerIdStrategy());
+		myStorageSettings.setResourceClientIdStrategy(defaultStorageSettings.getResourceClientIdStrategy());
 	}
 
 
@@ -765,6 +802,23 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	}
 
 	@Test
+	void testTransaction_ObservationInMultipleCompartments_throws() {
+		createPatient(withId("A"), withActiveTrue());
+		createPatient(withId("B"), withActiveTrue());
+
+		Observation obs = new Observation();
+		obs.getSubject().setReference("Patient/A");
+		obs.addPerformer().setReference("Patient/B");
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(obs);
+
+		assertThatThrownBy(() -> mySystemDao.transaction(newSrd(), bb.getBundleTyped()))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining(Msg.code(1324));
+	}
+
+	@Test
 	public void testSearchObservation_allowsMdmQualifier() {
 		try {
 			myObservationDao.search(SearchParameterMap.newSynchronous().add("subject", new ReferenceParam("Patient/ABC").setMdmExpand(true)), mySrd);
@@ -1089,7 +1143,244 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	}
 
 	@Test
+	public void testTransaction_IdlessConditionalUpdatePatient_noMatch_uuidStrategy_createsPatient() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.NOT_ALLOWED);
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://ids").setValue("A");
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionUpdateEntry(patient).conditional("Patient?identifier=http://ids|A");
+
+		Bundle response = mySystemDao.transaction(mySrd, bb.getBundleTyped());
+
+		IIdType patientId = new IdType(response.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless();
+		Patient stored = myPatientDao.read(patientId, mySrd);
+		assertEquals("A", stored.getIdentifierFirstRep().getValue());
+
+		assertResourceIsInPartition(
+			PatientIdPartitionInterceptor.defaultPartitionAlgorithm(patientId.getIdPart()), patientId);
+	}
+
+	@Test
+	public void testTransaction_IdlessConditionalCreatePatient_noMatch_uuidStrategy_createsPatient() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.NOT_ALLOWED);
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://ids").setValue("A");
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(patient).conditional("Patient?identifier=http://ids|A");
+
+		Bundle response = mySystemDao.transaction(mySrd, bb.getBundleTyped());
+
+		IIdType patientId = new IdType(response.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless();
+		Patient stored = myPatientDao.read(patientId, mySrd);
+		assertEquals("A", stored.getIdentifierFirstRep().getValue());
+
+		assertResourceIsInPartition(
+			PatientIdPartitionInterceptor.defaultPartitionAlgorithm(patientId.getIdPart()), patientId);
+	}
+
+	@Test
+	public void testTransaction_IdlessConditionalUpdatePatient_noMatch_defaultStrategy_fails() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.SEQUENTIAL_NUMERIC);
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://ids").setValue("A");
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionUpdateEntry(patient).conditional("Patient?identifier=http://ids|A");
+
+		assertThatThrownBy(() -> mySystemDao.transaction(mySrd, bb.getBundleTyped()))
+			.isInstanceOf(MethodNotAllowedException.class)
+			.hasMessage("HAPI-1321: Patient resource IDs must be client-assigned in patient compartment mode, or server id strategy must be UUID");
+	}
+
+	@Test
+	void testTransaction_ConditionalUpdatePatientByIdentifier_differentBodyId_rejectedWith2279_noDuplicate() {
+		myPartitionSettings.setAllPartitionSearchSupported(true);
+
+		createPatient(withId("A"), withIdentifier("http://acme.org/mrn", "PT00062"), withActiveTrue());
+
+		Patient update = new Patient();
+		update.setId("B");
+		update.addIdentifier().setSystem("http://acme.org/mrn").setValue("PT00062");
+		update.setActive(false);
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionUpdateEntry(update).conditional("Patient?identifier=http://acme.org/mrn|PT00062");
+
+		assertThatThrownBy(() -> mySystemDao.transaction(mySrd, bb.getBundleTyped()))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessage(
+				"HAPI-2279: Failed to UPDATE resource with match URL \"Patient?identifier=http://acme.org/mrn|PT00062\" because the matching resource does not match the provided ID");
+
+		// Only the original Patient A carries the MRN — no duplicate was created.
+		assertThat(myTestDaoSearch.searchForIds("Patient?identifier=http://acme.org/mrn|PT00062"))
+			.containsExactly("A");
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void testTransaction_ConditionalUpdatePatientByIdentifier_updatesInPlace(boolean theBodyCarriesMatchingId) {
+		myPartitionSettings.setAllPartitionSearchSupported(true);
+
+		createPatient(withId("A"), withIdentifier("http://acme.org/mrn", "PT00062"), withActiveTrue());
+
+		Patient update = new Patient();
+		if (theBodyCarriesMatchingId) {
+			update.setId("A");
+		}
+		update.addIdentifier().setSystem("http://acme.org/mrn").setValue("PT00062");
+		update.setActive(false);
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionUpdateEntry(update).conditional("Patient?identifier=http://acme.org/mrn|PT00062");
+
+		mySystemDao.transaction(mySrd, bb.getBundleTyped());
+
+		assertThat(myTestDaoSearch.searchForIds("Patient?identifier=http://acme.org/mrn|PT00062"))
+			.containsExactly("A");
+		assertThat(myPatientDao.read(new IdType("Patient/A"), mySrd).getActive()).isFalse();
+	}
+
+	/**
+	 * A conditional update whose body carries no id updates the Patient matched by the conditional URL, in that
+	 * Patient's own compartment. Covered under both server id strategies.
+	 */
+	// Created by Claude Opus 5
+	@ParameterizedTest
+	@EnumSource(JpaStorageSettings.IdStrategyEnum.class)
+	void testConditionalUpdate_patientIdlessBodyOneMatch_updatesInPlace(JpaStorageSettings.IdStrategyEnum theIdStrategy) {
+		// setup
+		myPartitionSettings.setAllPartitionSearchSupported(true);
+		myStorageSettings.setResourceServerIdStrategy(theIdStrategy);
+
+		createPatient(withId("A"), withIdentifier("http://patient", "1"), withActiveTrue());
+
+		Patient patientToUpdate = new Patient();
+		patientToUpdate.addIdentifier().setSystem("http://patient").setValue("1");
+		patientToUpdate.addName().setFamily("Smith").addGiven("John");
+
+		// execute
+		DaoMethodOutcome outcome = myPatientDao.update(patientToUpdate, "Patient?identifier=http://patient|1", mySrd);
+
+		// verify
+		assertThat(outcome.getId().getIdPart()).isEqualTo("A");
+		assertThat(outcome.getCreated()).isFalse();
+		assertPatientCountInDatabase(1);
+		assertResourceIsInPartition(PATIENT_A_COMPARTMENT_ID, outcome.getId().toUnqualifiedVersionless());
+		assertThat(myPatientDao.read(new IdType("Patient/A"), mySrd).getNameFirstRep().getFamily())
+			.isEqualTo("Smith");
+	}
+
+	/**
+	 * The same conditional update over HTTP, so the response status is covered and not just the DAO outcome.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	void testConditionalUpdate_patientIdlessBodyOneMatchOverRest_updatesInPlace() throws IOException {
+		// setup
+		myPartitionSettings.setAllPartitionSearchSupported(true);
+
+		createPatient(withId("A"), withIdentifier("http://patient", "1"), withActiveTrue());
+
+		Patient patientToUpdate = new Patient();
+		patientToUpdate.addIdentifier().setSystem("http://patient").setValue("1");
+		patientToUpdate.addName().setFamily("Smith").addGiven("John");
+
+		HttpPut httpPut = new HttpPut(myServer.getBaseUrl() + "/Patient?identifier=http://patient%7C1");
+		httpPut.setEntity(new StringEntity(
+			myFhirContext.newJsonParser().encodeResourceToString(patientToUpdate),
+			ContentType.parse("application/json+fhir")));
+
+		// execute
+		try (CloseableHttpResponse status = ourHttpClient.execute(httpPut)) {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info("{}\n{}", status.getStatusLine(), responseContent);
+
+			// verify
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		}
+
+		assertThat(myTestDaoSearch.searchForIds("Patient?identifier=http://patient|1")).containsExactly("A");
+		assertThat(myPatientDao.read(new IdType("Patient/A"), mySrd).getNameFirstRep().getFamily())
+			.isEqualTo("Smith");
+	}
+
+	/**
+	 * An id-less Patient that matches nothing has no compartment to be routed to, so it is rejected rather than
+	 * created.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	void testConditionalUpdate_patientIdlessBodyNoMatch_rejectedWith1321() {
+		// setup
+		myPartitionSettings.setAllPartitionSearchSupported(true);
+
+		Patient patientToUpdate = new Patient();
+		patientToUpdate.addIdentifier().setSystem("http://patient").setValue("1");
+		patientToUpdate.addName().setFamily("Smith").addGiven("John");
+
+		// execute & verify
+		assertThatThrownBy(() -> myPatientDao.update(patientToUpdate, "Patient?identifier=http://patient|1", mySrd))
+			.isInstanceOf(MethodNotAllowedException.class)
+			.hasMessageContaining("HAPI-1321");
+
+		assertPatientCountInDatabase(0);
+	}
+
+	/**
+	 * A conditional URL matching more than one Patient is ambiguous, so the update is rejected and nothing is
+	 * written.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	void testConditionalUpdate_patientIdlessBodyMultipleMatches_preconditionFailed() {
+		// setup
+		myPartitionSettings.setAllPartitionSearchSupported(true);
+
+		createPatient(withId("A"), withIdentifier("http://patient", "1"), withActiveTrue());
+		createPatient(withId("B"), withIdentifier("http://patient", "1"), withActiveTrue());
+
+		Patient patientToUpdate = new Patient();
+		patientToUpdate.addIdentifier().setSystem("http://patient").setValue("1");
+		patientToUpdate.addName().setFamily("Smith").addGiven("John");
+
+		// execute & verify
+		assertThatThrownBy(() -> myPatientDao.update(patientToUpdate, "Patient?identifier=http://patient|1", mySrd))
+			.isInstanceOf(PreconditionFailedException.class)
+			.hasMessageContaining("HAPI-0988");
+
+		assertPatientCountInDatabase(2);
+	}
+
+	/**
+	 * A body id that disagrees with the Patient matched by the conditional URL is rejected, so resolving the match
+	 * to fill in an absent id never overrides an id the caller supplied.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	void testConditionalUpdate_patientDifferentBodyId_rejectedWith2279() {
+		// setup
+		myPartitionSettings.setAllPartitionSearchSupported(true);
+
+		createPatient(withId("A"), withIdentifier("http://patient", "1"), withActiveTrue());
+
+		Patient patientToUpdate = new Patient();
+		patientToUpdate.setId("B");
+		patientToUpdate.addIdentifier().setSystem("http://patient").setValue("1");
+		patientToUpdate.addName().setFamily("Smith").addGiven("John");
+
+		// execute & verify
+		assertThatThrownBy(() -> myPatientDao.update(patientToUpdate, "Patient?identifier=http://patient|1", mySrd))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("HAPI-2279");
+
+		assertPatientCountInDatabase(1);
+	}
+
+	@Test
 	public void testTransaction_SplitAncillaryAndPatient_NewTransactionPerPartition() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
 		registerInterceptor(new MyTransactionSplitInterceptor());
 		myTransactionService.setTransactionPropagationWhenChangingPartitions(Propagation.REQUIRES_NEW);
 
@@ -1128,8 +1419,135 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 
 		// Verify
 		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
+		// One commit per sub-bundle: the compartment writes join their sub-bundle's all-partitions
+		// transaction rather than each committing a REQUIRES_NEW transaction of its own.
+		assertEquals(2, myCaptureQueriesListener.countCommits());
+	}
 
+	/**
+	 * A patient-compartment entry may reference a default-partition entry in the same transaction bundle
+	 * even under the default {@code NOT_ALLOWED} cross-partition reference mode: in-bundle targets resolve
+	 * from {@code TransactionDetails} before any partition-scoped lookup.
+	 *
+	 * TODO-TG: Pinning this behaviour for now. In future, may need to change this so that it is rejected in
+	 *  NOT_ALLOWED mode.
+	 */
+	// Created by Claude Fable 5
+	@Test
+	void testTransaction_CompartmentEntryReferencingInBundleDefaultPartitionEntry_worksUnderNotAllowed() {
+		assertThat(myPartitionSettings.getAllowReferencesAcrossPartitions())
+			.isEqualTo(PartitionSettings.CrossPartitionReferenceMode.NOT_ALLOWED);
+		createPatient(withId("A"), withActiveTrue());
+
+		String orgFullUrl = IdType.newRandomUuid().getValue();
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(buildOrganization(withName("Ancillary Org")), orgFullUrl);
+		bb.addTransactionCreateEntry(buildEncounter(withSubject("Patient/A"), withReference("serviceProvider", orgFullUrl)));
+
+		Bundle output = mySystemDao.transaction(newSrd(), bb.getBundleTyped());
+
+		IIdType orgId = new IdType(output.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless();
+		IIdType encounterId = new IdType(output.getEntry().get(1).getResponse().getLocation()).toUnqualifiedVersionless();
+		assertResourceIsInPartition(ALTERNATE_DEFAULT_ID, orgId);
+		assertResourceIsInPartition(PATIENT_A_COMPARTMENT_ID, encounterId);
+
+		Encounter encounter = myEncounterDao.read(encounterId, newSrd());
+		assertThat(encounter.getServiceProvider().getReference()).isEqualTo(orgId.getValue());
+	}
+
+	/**
+	 * A reference to a <i>pre-existing</i> default-partition resource also works in a transaction under
+	 * {@code NOT_ALLOWED}: transaction pre-fetch resolves every direct reference target on its own read
+	 * partition and records it in {@code TransactionDetails}, so the partition-scoped target lookup that
+	 * {@code NOT_ALLOWED} would otherwise force never runs.
+	 *
+	 * TODO-TG: Pinning this behaviour for now. In future, may need to change this so that it is rejected in
+	 * 	NOT_ALLOWED mode.
+	 */
+	// Created by Claude Fable 5
+	@Test
+	void testTransaction_CompartmentEntryReferencingPreexistingDefaultPartitionResource_alsoWorksUnderNotAllowed() {
+		assertThat(myPartitionSettings.getAllowReferencesAcrossPartitions())
+			.isEqualTo(PartitionSettings.CrossPartitionReferenceMode.NOT_ALLOWED);
+		createPatient(withId("A"), withActiveTrue());
+		IIdType orgId = createOrganization(withId("ORG"), withName("Ancillary Org"));
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(buildEncounter(withSubject("Patient/A"), withReference("serviceProvider", orgId)));
+
+		Bundle output = mySystemDao.transaction(newSrd(), bb.getBundleTyped());
+
+		IIdType encounterId = new IdType(output.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless();
+		assertResourceIsInPartition(PATIENT_A_COMPARTMENT_ID, encounterId);
+		Encounter encounter = myEncounterDao.read(encounterId, newSrd());
+		assertThat(encounter.getServiceProvider().getReference()).isEqualTo(orgId.toUnqualifiedVersionless().getValue());
+	}
+
+	/**
+	 * Where {@code NOT_ALLOWED} does bite: a plain (non-transaction) create has no pre-resolved target in
+	 * {@code TransactionDetails}, so the target lookup is scoped to the source's compartment partition and
+	 * the default-partition Organization is not visible from it.
+	 */
+	// Created by Claude Fable 5
+	@Test
+	void testCreate_CompartmentResourceReferencingPreexistingDefaultPartitionResource_rejectedUnderNotAllowed() {
+		assertThat(myPartitionSettings.getAllowReferencesAcrossPartitions())
+			.isEqualTo(PartitionSettings.CrossPartitionReferenceMode.NOT_ALLOWED);
+		createPatient(withId("A"), withActiveTrue());
+		IIdType orgId = createOrganization(withId("ORG"), withName("Ancillary Org"));
+
+		assertThatThrownBy(() -> createEncounter(withSubject("Patient/A"), withReference("serviceProvider", orgId)))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("Organization/ORG");
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	void testTransaction_CompartmentEntryReferencingPreexistingDefaultPartitionResource_worksUnderAllowedUnqualified() {
+		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+		createPatient(withId("A"), withActiveTrue());
+		IIdType orgId = createOrganization(withId("ORG"), withName("Ancillary Org"));
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(buildEncounter(withSubject("Patient/A"), withReference("serviceProvider", orgId)));
+
+		Bundle output = mySystemDao.transaction(newSrd(), bb.getBundleTyped());
+
+		IIdType encounterId = new IdType(output.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless();
+		assertResourceIsInPartition(PATIENT_A_COMPARTMENT_ID, encounterId);
+		Encounter encounter = myEncounterDao.read(encounterId, newSrd());
+		assertThat(encounter.getServiceProvider().getReference()).isEqualTo(orgId.toUnqualifiedVersionless().getValue());
+	}
+
+	/**
+	 * An inline match URL reference to an ancillary type with no match anywhere: the normalizer mints a
+	 * synthetic Organization conditional-create, which routes to the default partition while the referencing
+	 * Observation lands in the patient's compartment — the synthetic and its referencing entry end up in
+	 * different partitions.
+	 */
+	// Created by Claude Fable 5
+	@Test
+	void testTransaction_InlineMatchUrlAncillaryReference_syntheticCreatedInDefaultPartition() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		createPatient(withId("A"), withActiveTrue());
+
+		Observation obs = new Observation();
+		obs.setSubject(new Reference("Patient/A"));
+		obs.addPerformer(new Reference("Organization?identifier=org-sys|org-new"));
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(obs);
+
+		Bundle output = mySystemDao.transaction(newSrd(), bb.getBundleTyped());
+
+		IIdType obsId = new IdType(output.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless();
+		assertResourceIsInPartition(PATIENT_A_COMPARTMENT_ID, obsId);
+
+		Observation actualObs = myObservationDao.read(obsId, newSrd());
+		IIdType orgId = new IdType(actualObs.getPerformerFirstRep().getReference()).toUnqualifiedVersionless();
+		assertThat(orgId.getResourceType()).isEqualTo("Organization");
+		assertResourceIsInPartition(ALTERNATE_DEFAULT_ID, orgId);
 	}
 
 	@Test
@@ -1308,8 +1726,9 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		TransactionUtil.TransactionResponse mainParsedResponse = performTransactionAndParseResponse(loadResourceFromClasspath(Bundle.class, "transaction-bundles/synthea/Sherise735_Zofia65_Swaniawski813_e0f7758e-a749-4357-858c-53e1db808e37.json"));
 
 		// verify
-		// This bundle contains 517 resources.
-		assertEquals(27, myCaptureQueriesListener.countSelectQueries());
+		// This bundle contains 517 resources. The split path pays one extra select: references to
+		// resources committed by an earlier sub-bundle must be identity-checked in the database.
+		assertEquals(theSplitTransaction ? 27 : 26, myCaptureQueriesListener.countSelectQueries());
 		// this is so high because we limit Hibernate to batches of 30 rows.
 		if (theSplitTransaction) {
 			assertEquals(328, myCaptureQueriesListener.getInsertQueries().size());
@@ -1459,6 +1878,1088 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		// This should NOT throw "HAPI-2223: Partition IDs have not been set"
 		IBundleProvider result = myOrganizationDao.search(searchMap, blankTenantRequest);
 		assertThat(result.size()).isEqualTo(1);
+	}
+
+
+	@SafeVarargs
+	static Consumer<Bundle> bundleAssert(int theExpectedSize, Consumer<Bundle> ...theOtherAssertions) {
+		return theBundle -> {
+			assertThat(theBundle.getEntry()).size().isEqualTo(theExpectedSize);
+			for (Consumer<Bundle> theAssertion : theOtherAssertions) {
+				theAssertion.accept(theBundle);
+			}
+		};
+	}
+
+	// -----------------------------------------------------------------------
+	// Per-entry assertion infrastructure for testTransaction_allReferenceScenarios
+	// (the ExpectedEntry model + factories live in PatientIdPartitionReferenceScenarios)
+	// -----------------------------------------------------------------------
+
+	/**
+	 * Drives per-entry assertions for {@code testTransaction_allReferenceScenarios}.
+	 * <ul>
+	 *   <li>Entry count matches {@code theExpectedEntries.size()}</li>
+	 *   <li>For each entry (in input order): resource type, HTTP status, OO code, partition</li>
+	 * </ul>
+	 */
+	private void assertReferenceScenario(Bundle theResultBundle, List<ExpectedEntry> theExpectedEntries) {
+		assertThat(theResultBundle.getEntry())
+				.as("response entry count")
+				.hasSize(theExpectedEntries.size());
+
+		for (int i = 0; i < theExpectedEntries.size(); i++) {
+			ExpectedEntry expected = theExpectedEntries.get(i);
+			Bundle.BundleEntryResponseComponent response = theResultBundle.getEntry().get(i).getResponse();
+
+			// Type: parse location to verify resource type
+			String location = response.getLocation();
+			assertThat(location).as("entry[%d] location must not be blank", i).isNotBlank();
+			IIdType resourceId = new IdType(location).toUnqualifiedVersionless();
+			assertThat(resourceId.getResourceType())
+					.as("entry[%d] resource type (location=%s)", i, location)
+					.isEqualTo(expected.resourceType());
+
+			// HTTP status: created-class codes → 201, everything else → 200
+			String expectedStatusPrefix = isCreatedOutcome(expected.outcome()) ? "201" : "200";
+			assertThat(response.getStatus())
+					.as("entry[%d] HTTP status for %s/%s", i, expected.resourceType(), expected.outcome())
+					.startsWith(expectedStatusPrefix);
+
+			// OperationOutcome: the primary issue must be indistinguishable from a natively produced one
+			OperationOutcome oo = (OperationOutcome) response.getOutcome();
+			assertThat(oo).as("entry[%d] must have an OperationOutcome", i).isNotNull();
+			assertThat(oo.getIssue()).as("entry[%d] OO must have at least one issue", i).isNotEmpty();
+			OperationOutcome.OperationOutcomeIssueComponent issue = oo.getIssueFirstRep();
+			assertThat(issue.getSeverity())
+					.as("entry[%d] issue severity", i)
+					.isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
+			assertThat(issue.getCode())
+					.as("entry[%d] issue code", i)
+					.isEqualTo(OperationOutcome.IssueType.INFORMATIONAL);
+			Coding coding = issue.getDetails().getCodingFirstRep();
+			assertThat(coding.getSystem())
+					.as("entry[%d] StorageResponseCode system", i)
+					.isEqualTo(expected.outcome().getSystem());
+			assertThat(coding.getCode())
+					.as("entry[%d] OperationOutcome StorageResponseCode for %s", i, expected.resourceType())
+					.isEqualTo(expected.outcome().name());
+			assertThat(coding.getDisplay())
+					.as("entry[%d] StorageResponseCode display", i)
+					.isEqualTo(expected.outcome().getDisplay());
+			assertThat(issue.getDiagnostics())
+					.as("entry[%d] diagnostics must name the versioned id, like a native outcome", i)
+					.contains(new IdType(location).toUnqualified().getValue());
+			assertThat(issue.getDiagnostics())
+					.as("entry[%d] diagnostics must not leak unformatted message arguments", i)
+					.doesNotContain("{0}")
+					.doesNotContain("{1}");
+
+			// Auto-created placeholder reporting
+			List<OperationOutcome.OperationOutcomeIssueComponent> placeholderIssues = oo.getIssue().stream()
+					.filter(t -> StorageResponseCodeEnum.AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE
+							.name()
+							.equals(t.getDetails().getCodingFirstRep().getCode()))
+					.toList();
+			if (expected.createdPlaceholderType() == null) {
+				assertThat(placeholderIssues)
+						.as("entry[%d] must not report an auto-created placeholder", i)
+						.isEmpty();
+			} else {
+				assertThat(placeholderIssues)
+						.as("entry[%d] must report exactly one auto-created placeholder", i)
+						.hasSize(1);
+				IdType placeholderId = (IdType) placeholderIssues
+						.get(0)
+						.getExtensionByUrl(HapiExtensions.EXTENSION_PLACEHOLDER_ID)
+						.getValue();
+				assertThat(placeholderId.getResourceType())
+						.as("entry[%d] placeholder type", i)
+						.isEqualTo(expected.createdPlaceholderType());
+				// The created placeholder must co-locate with the entry that referenced it.
+				assertResourceIsInPartition(
+						getResourcePartition(resourceId), placeholderId.toUnqualifiedVersionless());
+				// A Patient placeholder is a compartment owner created under its own minted id, so it
+				// must additionally land in that id's compartment (co-location alone would also pass
+				// with both resources consistently misplaced).
+				if ("Patient".equals(expected.createdPlaceholderType())) {
+					assertResourceIsInPartition(
+							PatientIdPartitionInterceptor.defaultPartitionAlgorithm(placeholderId.getIdPart()),
+							placeholderId.toUnqualifiedVersionless());
+				}
+			}
+
+			// Partition
+			switch (expected.partitionExpectation()) {
+				case EXACT -> assertResourceIsInPartition(expected.expectedPartition(), resourceId);
+				case SAME_AS_ENTRY -> {
+					String otherLocation = theResultBundle
+							.getEntry()
+							.get(expected.samePartitionAsEntryIndex())
+							.getResponse()
+							.getLocation();
+					IIdType otherId = new IdType(otherLocation).toUnqualifiedVersionless();
+					assertResourceIsInPartition(getResourcePartition(otherId), resourceId);
+				}
+				case OWN_ID -> assertResourceIsInPartition(
+						PatientIdPartitionInterceptor.defaultPartitionAlgorithm(resourceId.getIdPart()), resourceId);
+				case OWN_SUBJECT -> {
+					IIdType subjectId = readStoredSubject(resourceId);
+					assertThat(subjectId.getResourceType())
+							.as("entry[%d] (%s) stored subject must reference a Patient", i, resourceId)
+							.isEqualTo("Patient");
+					assertResourceIsInPartition(
+							PatientIdPartitionInterceptor.defaultPartitionAlgorithm(subjectId.getIdPart()), resourceId);
+				}
+			}
+		}
+	}
+
+
+
+
+	@Test
+	void testTransaction_organizationInlineMatchUrlUnmatched_placeholderInDefaultPartition() {
+		setupOrganizationReferenceFixture();
+
+		Observation obs = executeAndReadObservation(
+			organizationBundle("Organization?identifier=org-sys|danglingOrg"));
+
+		IIdType placeholderOrgId = new IdType(obs.getPerformerFirstRep().getReference());
+		assertThat(placeholderOrgId.getResourceType()).isEqualTo("Organization");
+		assertResourceIsInPartition(ALTERNATE_DEFAULT_ID, placeholderOrgId);
+		assertResourceIsInPartition(
+			PatientIdPartitionInterceptor.defaultPartitionAlgorithm("pat1"),
+			obs.getIdElement().toUnqualifiedVersionless());
+		Organization placeholderOrg = myOrganizationDao.read(placeholderOrgId, mySrd);
+		assertThat(placeholderOrg.getExtensionByUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER)).isNotNull();
+	}
+
+	@Test
+	void testTransaction_organizationInlineMatchUrlMatched_referencesExistingOrganization() {
+		setupOrganizationReferenceFixture();
+		Map<String, Integer> countsBeforeTransaction = countResourcesByType();
+
+		Observation obs = executeAndReadObservation(
+			organizationBundle("Organization?identifier=org-sys|existingOrg"));
+
+		assertThat(obs.getPerformerFirstRep().getReference()).isEqualTo("Organization/orgFix");
+		Map<String, Integer> expectedCounts = new HashMap<>(countsBeforeTransaction);
+		expectedCounts.merge("Observation", 1, Integer::sum);
+		assertThat(countResourcesByType()).isEqualTo(expectedCounts);
+	}
+
+	@Test
+	void testTransaction_organizationDirectReferenceUnmatched_placeholderInDefaultPartition() {
+		setupOrganizationReferenceFixture();
+
+		Observation obs = executeAndReadObservation(organizationBundle("Organization/org-dangling"));
+
+		assertThat(obs.getPerformerFirstRep().getReference()).isEqualTo("Organization/org-dangling");
+		assertResourceIsInPartition(ALTERNATE_DEFAULT_ID, new IdType("Organization/org-dangling"));
+		Organization placeholderOrg = myOrganizationDao.read(new IdType("Organization/org-dangling"), mySrd);
+		assertThat(placeholderOrg.getExtensionByUrl(HapiExtensions.EXT_RESOURCE_PLACEHOLDER)).isNotNull();
+	}
+
+	// Created by Claude Fable 5
+	private void setupOrganizationReferenceFixture() {
+		setupReferenceScenarioFixture();
+		myPartitionSettings.setAllPartitionSearchSupported(true);
+		myPartitionSettings.setAllowReferencesAcrossPartitions(
+			PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+		createOrganization(withId("orgFix"), withIdentifier("org-sys", "existingOrg"));
+	}
+
+	// Created by Claude Fable 5
+	private static String organizationBundle(String thePerformerReference) {
+		return """
+			{ "resourceType" : "Bundle", "type" : "transaction",
+				"entry" : [ {
+					"resource" : {
+						"resourceType" : "Observation",
+						"identifier" : [ { "system" : "observation-system", "value" : "obsWithOrgRef" } ],
+						"subject" : { "reference" : "Patient/pat1" },
+						"performer" : [ { "reference" : "%s" } ]
+					},
+					"request" : { "method" : "POST", "url" : "Observation" }
+				} ]
+			}
+			"""
+			.formatted(thePerformerReference);
+	}
+
+	// Created by Claude Fable 5
+	private Observation executeAndReadObservation(String theBundleJson) {
+		Bundle response = mySystemDao.transaction(
+			mySrd, myFhirContext.newJsonParser().parseResource(Bundle.class, theBundleJson));
+		assertThat(response.getEntry()).hasSize(1);
+		return myObservationDao.read(
+			new IdType(response.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless(), mySrd);
+	}
+
+	/** Reads the stored resource and returns its subject reference. */
+	// Created by Claude Fable 5
+	private IIdType readStoredSubject(IIdType theResourceId) {
+		IBaseResource resource =
+				myDaoRegistry.getResourceDao(theResourceId.getResourceType()).read(theResourceId, mySrd);
+		IBaseReference subject =
+				myFhirContext.newTerser().getSingleValueOrNull(resource, "subject", IBaseReference.class);
+		assertThat(subject).as("%s must have a subject", theResourceId).isNotNull();
+		return subject.getReferenceElement();
+	}
+
+	private static boolean isCreatedOutcome(StorageResponseCodeEnum theCode) {
+		return switch (theCode) {
+			case SUCCESSFUL_CREATE,
+				 SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH,
+				 SUCCESSFUL_UPDATE_AS_CREATE,
+				 SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH -> true;
+			default -> false;
+		};
+	}
+
+	@ParameterizedTest
+	@ArgumentsSource(PatientIdPartitionReferenceScenarios.class)
+	void testTransaction_allReferenceScenarios(
+			boolean theSupportsAllPartitionSearch,
+			String theComment,
+			String theBundle,
+			String theExplanation,
+			List<ExpectedEntry> theExpectedEntries) {
+		myPartitionSettings.setAllPartitionSearchSupported(theSupportsAllPartitionSearch);
+		runReferenceScenario(theComment, theBundle, theExplanation, theExpectedEntries);
+	}
+
+	/**
+	 * Without all-partition search support the transaction machinery cannot defer unroutable entries to an
+	 * all-partitions write transaction ({@code BaseTransactionProcessor} gates the Msg-1321/1326 deferral on
+	 * the flag), so scenarios that depend on pre-fetch resolution or hook-minted ids are rejected wholesale.
+	 */
+	// Created by Claude Fable 5
+	@ParameterizedTest
+	@ArgumentsSource(PatientIdPartitionReferenceScenarios.RejectedWithoutAllPartitionSearch.class)
+	void testTransaction_allReferenceScenarios_rejectedWithoutAllPartitionSearch(
+			String theComment, String theBundle, String theExplanation, String theExpectedError) {
+		myPartitionSettings.setAllPartitionSearchSupported(false);
+		setupReferenceScenarioFixture();
+		Map<String, Integer> countsBeforeTransaction = countResourcesByType();
+
+		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, theBundle);
+		ourLog.info("Test case: {}", theComment);
+		ourLog.info("Scenario explanation (with all-partition search): {}", theExplanation);
+
+		assertThatThrownBy(() -> mySystemDao.transaction(mySrd, requestBundle))
+			.isInstanceOf(BaseServerResponseException.class)
+			.hasMessage(theExpectedError);
+		// Nothing from the rejected bundle persisted — only the fixture resources exist.
+		assertThat(countResourcesByType()).isEqualTo(countsBeforeTransaction);
+	}
+
+	// Created by Claude Fable 5
+	@ParameterizedTest
+	@ArgumentsSource(PatientIdPartitionReferenceScenarios.RejectedWithAllPartitionSearch.class)
+	void testTransaction_allReferenceScenarios_rejectedWithAllPartitionSearch(
+			String theComment, String theBundle, String theExplanation, String theExpectedError) {
+		myPartitionSettings.setAllPartitionSearchSupported(true);
+		setupReferenceScenarioFixture();
+		Map<String, Integer> countsBeforeTransaction = countResourcesByType();
+
+		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, theBundle);
+		ourLog.info("Test case: {}", theComment);
+		ourLog.info("Scenario explanation: {}", theExplanation);
+
+		assertThatThrownBy(() -> mySystemDao.transaction(mySrd, requestBundle))
+			.isInstanceOf(BaseServerResponseException.class)
+			.hasMessage(theExpectedError);
+		// Nothing from the rejected bundle persisted — only the fixture resources exist.
+		assertThat(countResourcesByType()).isEqualTo(countsBeforeTransaction);
+	}
+
+	@ParameterizedTest
+	@ArgumentsSource(PatientIdPartitionCrossPartitionScenarios.class)
+	void testTransaction_crossPartitionReferenceScenarios(
+			PartitionSettings.CrossPartitionReferenceMode theMode,
+			String theComment,
+			String theBundle,
+			String theExplanation,
+			List<ExpectedEntry> theExpectedEntries) {
+		myPartitionSettings.setAllowReferencesAcrossPartitions(theMode);
+		runReferenceScenario(theComment, theBundle, theExplanation, theExpectedEntries);
+	}
+
+	@ParameterizedTest
+	@ArgumentsSource(PatientIdPartitionNormalizerOffScenarios.Accepted.class)
+	void testTransaction_normalizerOffScenarios(
+			String theComment, String theBundle, String theExplanation, List<ExpectedEntry> theExpectedEntries) {
+		setupNormalizerOffFixture();
+		Map<String, Integer> countsBeforeTransaction = countResourcesByType();
+
+		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, theBundle);
+		ourLog.info("Test case: {}", theComment);
+		ourLog.info("Scenario explanation: {}", theExplanation);
+
+		Bundle resultBundle = mySystemDao.transaction(mySrd, requestBundle);
+		ourLog.info("Response bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resultBundle));
+
+		assertNotNull(resultBundle);
+		assertReferenceScenario(resultBundle, theExpectedEntries);
+		assertNoStrayResources(countsBeforeTransaction, theExpectedEntries);
+	}
+
+	@ParameterizedTest
+	@ArgumentsSource(PatientIdPartitionNormalizerOffScenarios.Rejected.class)
+	void testTransaction_normalizerOffScenarios_rejected(String theComment, String theBundle, String theExpectedError) {
+		setupNormalizerOffFixture();
+		Map<String, Integer> countsBeforeTransaction = countResourcesByType();
+
+		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, theBundle);
+		ourLog.info("Test case: {}", theComment);
+
+		// Prefix match: the 1094 path suffix depends on which reference search param is extracted first.
+		assertThatThrownBy(() -> mySystemDao.transaction(mySrd, requestBundle))
+			.isInstanceOf(BaseServerResponseException.class)
+			.hasMessageStartingWith(theExpectedError);
+		// Nothing from the failed bundle persisted — only the fixture resources exist.
+		assertThat(countResourcesByType()).isEqualTo(countsBeforeTransaction);
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	public void testTransaction_splitIntoSubTransactions_responseFinalizedFiresOnceWithAggregatedResponse() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		registerInterceptor(new MyTransactionSplitInterceptor());
+
+		String practitionerFullUrl = IdType.newRandomUuid().getValue();
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(
+			buildPractitioner(withIdentifier("http://practitioner", "1")),
+			practitionerFullUrl
+		);
+		bb.addTransactionCreateEntry(buildPatient(
+			withIdentifier("http://patient", "1"),
+			withReference("generalPractitioner", practitionerFullUrl)
+		));
+
+		AtomicInteger finalizedCount = new AtomicInteger();
+		AtomicInteger assembledCount = new AtomicInteger();
+		AtomicReference<IBaseBundle> finalizedBundle = new AtomicReference<>();
+		IAnonymousInterceptor finalized = (thePointcut, theArgs) -> {
+			finalizedCount.incrementAndGet();
+			finalizedBundle.set(theArgs.get(TransactionResponseFinalizedDetails.class).getResponseBundle());
+		};
+		IAnonymousInterceptor assembled = (thePointcut, theArgs) -> assembledCount.incrementAndGet();
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_TRANSACTION_RESPONSE_FINALIZED, finalized);
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_TRANSACTION_RESPONSE_ASSEMBLED, assembled);
+		try {
+			Bundle response = mySystemDao.transaction(mySrd, bb.getBundleTyped());
+
+			// The split interceptor slices the bundle into two sub-transactions (ancillary + patient),
+			// each firing ASSEMBLED; FINALIZED fires once, with the aggregated response the caller receives.
+			assertEquals(2, assembledCount.get());
+			assertEquals(1, finalizedCount.get());
+			assertThat(finalizedBundle.get()).isSameAs(response);
+			assertThat(response.getEntry()).hasSize(2);
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(finalized);
+			myInterceptorRegistry.unregisterInterceptor(assembled);
+		}
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	public void testBatch_entryWithUnresolvableInlineMatchUrl_notNormalized() {
+		// The server processes each batch entry as its own single-entry "transaction" bundle. Those
+		// server-constructed sub-requests must NOT be normalized (master parity): if the normalizer ran,
+		// it would mint a synthetic conditional create for the match URL and the entry would succeed,
+		// creating a patient the client never asked for.
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		Bundle batch = new Bundle();
+		batch.setType(Bundle.BundleType.BATCH);
+		Observation obs = new Observation();
+		obs.getSubject().setReference("Patient?identifier=old-sys|no-such-patient");
+		batch.addEntry().setResource(obs).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Observation");
+
+		Bundle response = mySystemDao.transaction(mySrd, batch);
+
+		assertThat(response.getEntry()).hasSize(1);
+		assertThat(response.getEntry().get(0).getResponse().getStatus()).startsWith("405");
+		assertPatientCountInDatabase(0);
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	void testBatch_createObservationWithDirectReference_routedToCompartment() {
+		createPatient(withId("pat1"), withIdentifier("old-sys", "existingPat1Ident1"));
+
+		Bundle batch = new Bundle();
+		batch.setType(Bundle.BundleType.BATCH);
+		Observation obs = new Observation();
+		obs.getSubject().setReference("Patient/pat1");
+		batch.addEntry().setResource(obs).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Observation");
+
+		Bundle response = mySystemDao.transaction(mySrd, batch);
+
+		// Each batch entry runs as its own server-constructed sub-transaction; compartment routing still applies.
+		assertThat(response.getEntry()).hasSize(1);
+		assertThat(response.getEntry().get(0).getResponse().getStatus()).startsWith("201");
+		IIdType obsId = new IdType(response.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless();
+		assertResourceIsInPartition(getResourcePartition(new IdType("Patient/pat1")), obsId);
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	void testTransaction_conditionalDeletePatient_deletesInCompartment() {
+		createPatient(withId("A"), withIdentifier("http://acme", "A1"), withActiveTrue());
+
+		String bundle = """
+			{ "resourceType" : "Bundle", "type" : "transaction",
+				"entry" : [
+					{ "request" : { "method" : "DELETE", "url" : "Patient?identifier=http://acme|A1" } }
+				]
+			}
+			""";
+		Bundle response = mySystemDao.transaction(mySrd, myFhirContext.newJsonParser().parseResource(Bundle.class, bundle));
+
+		assertThat(response.getEntry().get(0).getResponse().getStatus()).startsWith("204");
+		assertGone("Patient/A");
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	void testTransaction_patchEntryOnCompartmentResource() {
+		createPatient(withId("A"), withActiveTrue());
+		createObservation(withId("O"), withSubject("Patient/A"), withStatus("final"));
+
+		FhirPatchBuilder patchBuilder = new FhirPatchBuilder(myFhirContext);
+		patchBuilder
+			.insert()
+			.path("Observation.identifier")
+			.index(0)
+			.value(new Identifier().setSystem("http://foo").setValue("123"));
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionFhirPatchEntry(new IdType("Observation/O"), patchBuilder.build());
+
+		mySystemDao.transaction(mySrd, bb.getBundleTyped());
+
+		Observation actual = myObservationDao.read(new IdType("Observation/O"), mySrd);
+		assertEquals("123", actual.getIdentifier().get(0).getValue());
+		assertResourceIsInPartition(PATIENT_A_COMPARTMENT_ID, new IdType("Observation/O"));
+	}
+
+	/**
+	 * Synthetic dedup keys on the raw match URL string, not on the patient it may describe: two distinct
+	 * inline match URLs that a human would read as "the same new person" mint two synthetic conditional
+	 * creates, so two patients are created and each observation follows its own.
+	 */
+	// Created by Claude Fable 5
+	@Test
+	void testTransaction_twoDistinctInlineMatchUrlsForSameNewPatient_createsTwoPatients() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		String bundle = """
+			{ "resourceType" : "Bundle", "type" : "transaction",
+				"entry" : [
+					{
+						"resource" : {
+							"resourceType" : "Observation",
+							"identifier" : [ { "system" : "observation-system", "value" : "obsDistinctA"} ],
+							"subject" : { "reference" : "Patient?identifier=sys-a|same-person" }
+						},
+						"request" : { "method" : "POST", "url" : "Observation"}
+					}, {
+						"resource" : {
+							"resourceType" : "Observation",
+							"identifier" : [ { "system" : "observation-system", "value" : "obsDistinctB"} ],
+							"subject" : { "reference" : "Patient?identifier=sys-b|same-person" }
+						},
+						"request" : { "method" : "POST", "url" : "Observation"}
+					}
+				]
+			}
+			""";
+		Bundle response = mySystemDao.transaction(mySrd, myFhirContext.newJsonParser().parseResource(Bundle.class, bundle));
+
+		assertReferenceScenario(response, List.of(
+			inCompartmentOfOwnSubject("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
+					.reportingCreatedPlaceholder("Patient"),
+			inCompartmentOfOwnSubject("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
+					.reportingCreatedPlaceholder("Patient")));
+		assertPatientCountInDatabase(2);
+
+		Observation obsA = myObservationDao.read(
+			new IdType(response.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless(), mySrd);
+		Observation obsB = myObservationDao.read(
+			new IdType(response.getEntry().get(1).getResponse().getLocation()).toUnqualifiedVersionless(), mySrd);
+		assertThat(obsA.getSubject().getReference()).isNotEqualTo(obsB.getSubject().getReference());
+	}
+
+	/**
+	 * An unconditional in-bundle patient never shadows the store: the inline match URL resolves to the
+	 * existing patient (the synthetic conditional create no-ops on it), the POST twin is created as a
+	 * separate duplicate-identifier patient, and the observation follows the existing patient — the same
+	 * linkage this bundle produces outside patient id partition mode.
+	 */
+	// Created by Claude Fable 5
+	@Test
+	void testTransaction_unconditionalTwinWithInlineMatchUrl_existingPatient_referencesExistingNotTwin() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myPartitionSettings.setAllPartitionSearchSupported(true);
+		createPatient(withId("pat1"), withIdentifier("old-sys", "existingPat1Ident1"));
+
+		String bundle = """
+			{ "resourceType" : "Bundle", "type" : "transaction",
+				"entry" : [
+					{
+						"resource" : {
+							"resourceType" : "Patient",
+							"identifier" : [ { "system" : "old-sys", "value" : "existingPat1Ident1"} ]
+						},
+						"request" : { "method" : "POST", "url" : "Patient"}
+					}, {
+						"resource" : {
+							"resourceType" : "Observation",
+							"identifier" : [ { "system" : "observation-system", "value" : "obsShadow"} ],
+							"subject" : { "reference" : "Patient?identifier=old-sys|existingPat1Ident1" }
+						},
+						"request" : { "method" : "POST", "url" : "Observation"}
+					}
+				]
+			}
+			""";
+		Bundle response = mySystemDao.transaction(mySrd, myFhirContext.newJsonParser().parseResource(Bundle.class, bundle));
+
+		assertReferenceScenario(response, List.of(
+			inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE),
+			inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat1")));
+		assertPatientCountInDatabase(2);
+
+		String newPatientId = new IdType(response.getEntry().get(0).getResponse().getLocation())
+			.toUnqualifiedVersionless().getValue();
+		Observation obs = myObservationDao.read(
+			new IdType(response.getEntry().get(1).getResponse().getLocation()).toUnqualifiedVersionless(), mySrd);
+		assertThat(obs.getSubject().getReference()).isEqualTo("Patient/pat1").isNotEqualTo(newPatientId);
+	}
+
+	/**
+	 * A conditional Patient write whose match URL is non-token resolves in pre-fetch as "matched, id unknowable"
+	 * ({@code PatientIdPartitionInterceptor}'s matched-without-reverse-mapped-id branch), so the hook leaves the
+	 * entry untouched. The match URL is instead resolved when the write reaches the DAO, and the matched Patient
+	 * is updated in place, in its own compartment.
+	 */
+	// Created by Claude Fable 5
+	@Test
+	void testTransaction_matchedNonTokenConditionalPatientUrl_updatesInPlace() {
+		// setup
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		createPatient(withId("patSmith"), withFamily("Smith"));
+
+		String alone = """
+			{ "resourceType" : "Bundle", "type" : "transaction",
+				"entry" : [
+					{
+						"resource" : { "resourceType" : "Patient", "name" : [ { "family" : "Smith" } ] },
+						"request" : { "method" : "PUT", "url" : "Patient?family=Smith" }
+					}
+				]
+			}
+			""";
+
+		// execute
+		Bundle aloneResponse = mySystemDao.transaction(
+			mySrd, myFhirContext.newJsonParser().parseResource(Bundle.class, alone));
+
+		// verify
+		IIdType aloneId = new IdType(aloneResponse.getEntry().get(0).getResponse().getLocation())
+			.toUnqualifiedVersionless();
+		assertThat(aloneId.getValue()).isEqualTo("Patient/patSmith");
+		assertPatientCountInDatabase(1);
+		assertResourceIsInPartition(PatientIdPartitionInterceptor.defaultPartitionAlgorithm("patSmith"), aloneId);
+	}
+
+	/**
+	 * Leaving a matched non-token conditional Patient entry untouched means the hook registers no id
+	 * substitution for it. Another entry referencing that Patient by urn therefore keeps its placeholder subject
+	 * and is rejected for having nothing that places it in a Patient compartment — whether the Patient entry is a
+	 * conditional PUT or a conditional POST. Resolving the match at the DAO comes too late to help, since POSTs
+	 * process before PUTs and the resolved id is never published to the bundle's reference substitutions.
+	 */
+	// Created by Claude Fable 5
+	@Test
+	void testTransaction_urnReferencerToNonTokenConditionalPatient_rejected() {
+		// setup
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		createPatient(withId("patSmith"), withFamily("Smith"));
+
+		String withUrnReferencer = """
+			{ "resourceType" : "Bundle", "type" : "transaction",
+				"entry" : [
+					{
+						"fullUrl" : "urn:uuid:aaaa1111-1111-1111-1111-111111111111",
+						"resource" : { "resourceType" : "Patient", "name" : [ { "family" : "Smith" } ] },
+						"request" : { "method" : "PUT", "url" : "Patient?family=Smith" }
+					}, {
+						"resource" : {
+							"resourceType" : "Observation",
+							"identifier" : [ { "system" : "observation-system", "value" : "obsWithUrnRef"} ],
+							"subject" : { "reference" : "urn:uuid:aaaa1111-1111-1111-1111-111111111111" }
+						},
+						"request" : { "method" : "POST", "url" : "Observation"}
+					}
+				]
+			}
+			""";
+		// execute & verify - the referenced Patient entry is a conditional PUT
+		assertThatThrownBy(() -> mySystemDao.transaction(
+				mySrd, myFhirContext.newJsonParser().parseResource(Bundle.class, withUrnReferencer)))
+			.isInstanceOf(MethodNotAllowedException.class)
+			.hasMessage("HAPI-1326: Resource of type Observation has no values placing it in the Patient compartment");
+
+		String ifNoneExistVariant = """
+			{ "resourceType" : "Bundle", "type" : "transaction",
+				"entry" : [
+					{
+						"fullUrl" : "urn:uuid:cccc3333-3333-3333-3333-333333333333",
+						"resource" : { "resourceType" : "Patient", "name" : [ { "family" : "Smith" } ] },
+						"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?family=Smith" }
+					}, {
+						"resource" : {
+							"resourceType" : "Observation",
+							"identifier" : [ { "system" : "observation-system", "value" : "obsWithUrnRef"} ],
+							"subject" : { "reference" : "urn:uuid:cccc3333-3333-3333-3333-333333333333" }
+						},
+						"request" : { "method" : "POST", "url" : "Observation"}
+					}
+				]
+			}
+			""";
+		// execute & verify - the referenced Patient entry is a conditional POST
+		assertThatThrownBy(() -> mySystemDao.transaction(
+				mySrd, myFhirContext.newJsonParser().parseResource(Bundle.class, ifNoneExistVariant)))
+			.isInstanceOf(MethodNotAllowedException.class)
+			.hasMessage("HAPI-1326: Resource of type Observation has no values placing it in the Patient compartment");
+
+		// Rejections roll back cleanly: only the fixture patient exists.
+		assertPatientCountInDatabase(1);
+	}
+
+	/**
+	 * The unmatched counterpart works: pre-fetch reports "no match", so the hook's mint branch assigns a
+	 * UUID, keeps the entry conditional, and substitutes the urn subject — the pair lands co-located.
+	 */
+	// Created by Claude Fable 5
+	@Test
+	void testTransaction_unmatchedNonTokenConditionalPatientUrl_createsViaMintedId() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		String bundle = """
+			{ "resourceType" : "Bundle", "type" : "transaction",
+				"entry" : [
+					{
+						"fullUrl" : "urn:uuid:bbbb2222-2222-2222-2222-222222222222",
+						"resource" : { "resourceType" : "Patient", "name" : [ { "family" : "Nobody" } ] },
+						"request" : { "method" : "PUT", "url" : "Patient?family=Nobody" }
+					}, {
+						"resource" : {
+							"resourceType" : "Observation",
+							"identifier" : [ { "system" : "observation-system", "value" : "obsWithUrnRef"} ],
+							"subject" : { "reference" : "urn:uuid:bbbb2222-2222-2222-2222-222222222222" }
+						},
+						"request" : { "method" : "POST", "url" : "Observation"}
+					}
+				]
+			}
+			""";
+		Bundle response = mySystemDao.transaction(mySrd, myFhirContext.newJsonParser().parseResource(Bundle.class, bundle));
+
+		assertReferenceScenario(response, List.of(
+			inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH),
+			inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0)));
+	}
+
+
+
+
+
+
+	/**
+	 * Same fixture as {@link #runReferenceScenario} except {@code autoCreatePlaceholderReferenceTargets} stays
+	 * {@code false}, which keeps the {@code TransactionBundleNormalizer} disabled. All-partition search is
+	 * enabled because without the normalizer, inline match URLs resolve only through the pre-fetch search.
+	 */
+	// Created by Claude Fable 5
+	private void setupNormalizerOffFixture() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(false);
+		myPartitionSettings.setAllPartitionSearchSupported(true);
+		PatientIdPartitionNormalizerOffScenarios.createTestFixture(this);
+	}
+
+	// Created by Claude Fable 5
+	private void setupReferenceScenarioFixture() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		PatientIdPartitionReferenceScenarios.createTestFixture(this);
+	}
+
+	// Created by Claude Fable 5
+	private void runReferenceScenario(
+			String theComment, String theBundle, String theExplanation, List<ExpectedEntry> theExpectedEntries) {
+		setupReferenceScenarioFixture();
+		Map<String, Integer> countsBeforeTransaction = countResourcesByType();
+
+		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, theBundle);
+		ourLog.info("Test case: {}", theComment);
+		ourLog.info("Scenario explanation: {}", theExplanation);
+		ourLog.info("Request bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(requestBundle));
+
+		Bundle resultBundle = mySystemDao.transaction(mySrd, requestBundle);
+		ourLog.info("Response bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resultBundle));
+
+		assertNotNull(resultBundle);
+		assertReferenceScenario(resultBundle, theExpectedEntries);
+		assertNoStrayResources(countsBeforeTransaction, theExpectedEntries);
+	}
+
+	/**
+	 * Two conditional creates with the same match URL in one bundle: the duplicate is consolidated onto the first
+	 * entry and silently dropped from the response — the canonical semantics of
+	 * {@code BaseTransactionProcessor#consolidateDuplicateConditionals} (cf.
+	 * {@code FhirSystemDaoR4Test#testTransactionWithDuplicateConditionalCreates}). Exactly one patient is created.
+	 */
+	@Test
+	void testTransaction_duplicateConditionalCreateInBundle_dedup() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		String bundle =
+				"""
+				{ "resourceType" : "Bundle", "type" : "transaction",
+					"entry" : [
+						{
+							"resource" : {
+								"resourceType" : "Patient",
+								"identifier" : [ { "system" : "old-sys", "value" : "duplicate"} ]
+							},
+							"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|duplicate"}
+						}, {
+							"resource" : {
+								"resourceType" : "Patient",
+								"identifier" : [ { "system" : "old-sys", "value" : "duplicate"} ]
+							},
+							"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|duplicate"}
+						}
+					]
+				}
+				""";
+
+		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, bundle);
+		Bundle resultBundle = mySystemDao.transaction(mySrd, requestBundle);
+
+		assertReferenceScenario(
+				resultBundle,
+				List.of(inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH)));
+		assertPatientCountInDatabase(1);
+	}
+
+	/**
+	 * Same as {@link #testTransaction_duplicateConditionalCreateInBundle_dedup} but with conditional PUTs: the
+	 * duplicate consolidates onto the first entry, which creates the patient (update-no-conditional-match).
+	 */
+	@Test
+	void testTransaction_duplicateConditionalUpdateInBundle_dedup() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		String bundle =
+				"""
+				{ "resourceType" : "Bundle", "type" : "transaction",
+					"entry" : [
+						{
+							"resource" : {
+								"resourceType" : "Patient",
+								"identifier" : [ { "system" : "old-sys", "value" : "dup-put"} ]
+							},
+							"request" : { "method" : "PUT", "url" : "Patient?identifier=old-sys|dup-put"}
+						}, {
+							"resource" : {
+								"resourceType" : "Patient",
+								"identifier" : [ { "system" : "old-sys", "value" : "dup-put"} ]
+							},
+							"request" : { "method" : "PUT", "url" : "Patient?identifier=old-sys|dup-put"}
+						}
+					]
+				}
+				""";
+
+		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, bundle);
+		Bundle resultBundle = mySystemDao.transaction(mySrd, requestBundle);
+
+		assertReferenceScenario(
+				resultBundle,
+				List.of(inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH)));
+		assertPatientCountInDatabase(1);
+
+		// The restored message fills the match-URL slot the native message leaves as a literal "{1}"
+		OperationOutcome oo =
+				(OperationOutcome) resultBundle.getEntry().get(0).getResponse().getOutcome();
+		assertThat(oo.getIssueFirstRep().getDiagnostics())
+				.contains("Patient?identifier=old-sys|dup-put")
+				.doesNotContain("{1}");
+	}
+
+	/**
+	 * A conditional create and a conditional update sharing one match URL consolidate too (both are rewritten to
+	 * the same conditional PUT), keeping the first entry's outcome. Stock HAPI would not consolidate across verbs;
+	 * in patient-id partition mode both target the same logical patient, so one create is the correct result.
+	 */
+	@Test
+	void testTransaction_mixedDuplicateConditionalWritesInBundle_dedup() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		String bundle =
+				"""
+				{ "resourceType" : "Bundle", "type" : "transaction",
+					"entry" : [
+						{
+							"resource" : {
+								"resourceType" : "Patient",
+								"identifier" : [ { "system" : "old-sys", "value" : "dup-mixed"} ]
+							},
+							"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|dup-mixed"}
+						}, {
+							"resource" : {
+								"resourceType" : "Patient",
+								"identifier" : [ { "system" : "old-sys", "value" : "dup-mixed"} ]
+							},
+							"request" : { "method" : "PUT", "url" : "Patient?identifier=old-sys|dup-mixed"}
+						}
+					]
+				}
+				""";
+
+		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, bundle);
+		Bundle resultBundle = mySystemDao.transaction(mySrd, requestBundle);
+
+		assertReferenceScenario(
+				resultBundle,
+				List.of(inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH)));
+		assertPatientCountInDatabase(1);
+	}
+
+	/**
+	 * A NOT_FOUND-conditional patient create must leave an HFJ_RES_SEARCH_URL row for its match URL — the unique
+	 * constraint on that row is what makes a concurrent transaction creating the same conditional URL collide
+	 * instead of creating a duplicate patient (see {@code ResourceSearchUrlSvc#enforceMatchUrlResourceUniqueness}).
+	 */
+	@Test
+	void testTransaction_conditionalCreatePatient_leavesSearchUrlRowForConcurrencyGuard() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		String bundle =
+				"""
+				{ "resourceType" : "Bundle", "type" : "transaction",
+					"entry" : [
+						{
+							"resource" : {
+								"resourceType" : "Patient",
+								"identifier" : [ { "system" : "old-sys", "value" : "race-guard"} ]
+							},
+							"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|race-guard"}
+						}
+					]
+				}
+				""";
+
+		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, bundle);
+		Bundle resultBundle = mySystemDao.transaction(mySrd, requestBundle);
+
+		assertReferenceScenario(
+				resultBundle,
+				List.of(inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH)));
+		assertPatientCountInDatabase(1);
+
+		List<String> searchUrls = runInTransaction(() -> myResourceSearchUrlDao.findAll().stream()
+				.map(ResourceSearchUrlEntity::getSearchUrl)
+				.toList());
+		assertThat(searchUrls)
+				.as("conditional-create concurrency guard row")
+				.containsExactly("Patient?identifier=old-sys%7Crace-guard");
+	}
+
+	@Test
+	void testTransaction_rewrittenPatientOutcomeKeepsAutoCreatedPlaceholderIssue() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		String bundle =
+				"""
+				{ "resourceType" : "Bundle", "type" : "transaction",
+					"entry" : [
+						{
+							"resource" : {
+								"resourceType" : "Patient",
+								"identifier" : [ { "system" : "old-sys", "value" : "placeholder-keeper"} ],
+								"managingOrganization" : { "reference" : "Organization/auto-created-org" }
+							},
+							"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|placeholder-keeper"}
+						}
+					]
+				}
+				""";
+
+		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, bundle);
+		Bundle output = mySystemDao.transaction(mySrd, requestBundle);
+
+		OperationOutcome oo =
+				(OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
+		assertThat(oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode())
+				.isEqualTo(StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH.name());
+
+		// The native issue reporting the auto-created placeholder Organization must survive the restore
+		assertThat(oo.getIssue()).as("restored outcome must keep the placeholder issue").hasSize(2);
+		OperationOutcome.OperationOutcomeIssueComponent placeholderIssue =
+				oo.getIssue().get(1);
+		assertThat(placeholderIssue.getDetails().getCodingFirstRep().getCode())
+				.isEqualTo(StorageResponseCodeEnum.AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE.name());
+		IdType placeholderId = (IdType) placeholderIssue
+				.getExtensionByUrl(HapiExtensions.EXTENSION_PLACEHOLDER_ID)
+				.getValue();
+		assertThat(placeholderId.getValue()).contains("Organization/auto-created-org");
+	}
+
+	/**
+	 * The normalizer's synthetic conditional create is placeholder auto-creation: when it actually creates
+	 * the target, the client must be told, exactly as {@code DaoResourceLinkResolver} reports the
+	 * placeholders it creates. The synthetic's own response entry is stripped, so the issue must land on
+	 * the first referencing entry.
+	 */
+	// Created by Claude Fable 5
+	@Test
+	void testTransaction_createdSyntheticPlaceholder_reportedOnFirstReferencingEntry() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		String bundle =
+				"""
+				{ "resourceType" : "Bundle", "type" : "transaction",
+					"entry" : [
+						{
+							"resource" : {
+								"resourceType" : "Encounter",
+								"status" : "finished",
+								"subject" : { "reference" : "Patient?identifier=old-sys|syntheticCreatePatient" }
+							},
+							"request" : { "method" : "POST", "url" : "Encounter"}
+						}, {
+							"resource" : {
+								"resourceType" : "Observation",
+								"identifier" : [ { "system" : "observation-system", "value" : "obsWithMatchUrlRef"} ],
+								"subject" : { "reference" : "Patient?identifier=old-sys|syntheticCreatePatient" }
+							},
+							"request" : { "method" : "POST", "url" : "Observation"}
+						}
+					]
+				}
+				""";
+
+		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, bundle);
+		Bundle output = mySystemDao.transaction(mySrd, requestBundle);
+
+		// The shared match URL minted one synthetic that created one patient: the first referencing entry
+		// carries the placeholder issue, and later referencers are not separately notified.
+		OperationOutcome encounterOutcome =
+				(OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
+		assertThat(encounterOutcome.getIssue())
+				.as("first referencer reports the placeholder")
+				.hasSize(2);
+		OperationOutcome.OperationOutcomeIssueComponent placeholderIssue =
+				encounterOutcome.getIssue().get(1);
+		assertThat(placeholderIssue.getDetails().getCodingFirstRep().getCode())
+				.isEqualTo(StorageResponseCodeEnum.AUTOMATICALLY_CREATED_PLACEHOLDER_RESOURCE.name());
+		IdType placeholderId = (IdType) placeholderIssue
+				.getExtensionByUrl(HapiExtensions.EXTENSION_PLACEHOLDER_ID)
+				.getValue();
+		assertThat(placeholderId.getValue()).contains("Patient/");
+
+		OperationOutcome observationOutcome =
+				(OperationOutcome) output.getEntry().get(1).getResponse().getOutcome();
+		assertThat(observationOutcome.getIssue())
+				.as("later referencers are not separately notified")
+				.hasSize(1);
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	void testTransaction_matchedSyntheticPlaceholder_noPlaceholderIssue() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		createPatient(withId("pat1"), withIdentifier("old-sys", "existingPat1Ident1"));
+
+		String bundle =
+				"""
+				{ "resourceType" : "Bundle", "type" : "transaction",
+					"entry" : [
+						{
+							"resource" : {
+								"resourceType" : "Observation",
+								"identifier" : [ { "system" : "observation-system", "value" : "obsWithMatchUrlRef"} ],
+								"subject" : { "reference" : "Patient?identifier=old-sys|existingPat1Ident1" }
+							},
+							"request" : { "method" : "POST", "url" : "Observation"}
+						}
+					]
+				}
+				""";
+
+		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, bundle);
+		Bundle output = mySystemDao.transaction(mySrd, requestBundle);
+
+		// The synthetic matched the existing patient — nothing was created, so nothing is reported.
+		OperationOutcome oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
+		assertThat(oo.getIssue()).hasSize(1);
+	}
+
+	private void assertPatientCountInDatabase(int theExpectedCount) {
+		List<String> patientIds = runInTransaction(() -> myResourceTableDao.findAll().stream()
+				.filter(t -> "Patient".equals(t.getResourceType()))
+				.map(t -> t.getIdDt().toUnqualifiedVersionless().getValue())
+				.toList());
+		assertThat(patientIds).as("patients in database").hasSize(theExpectedCount);
+	}
+
+	// Created by Claude Fable 5
+	private Map<String, Integer> countResourcesByType() {
+		return runInTransaction(() -> myResourceTableDao.findAll().stream()
+				.filter(t -> t.getDeleted() == null)
+				.collect(Collectors.groupingBy(ResourceTable::getResourceType, Collectors.summingInt(t -> 1))));
+	}
+
+	/**
+	 * Every resource in the database must be a fixture resource or a creation the scenario declares: one per
+	 * created-outcome entry, plus one per reported auto-created placeholder.
+	 */
+	// Created by Claude Fable 5
+	private void assertNoStrayResources(
+			Map<String, Integer> theCountsBeforeTransaction, List<ExpectedEntry> theExpectedEntries) {
+		Map<String, Integer> expectedCounts = new HashMap<>(theCountsBeforeTransaction);
+		for (ExpectedEntry entry : theExpectedEntries) {
+			if (isCreatedOutcome(entry.outcome())) {
+				expectedCounts.merge(entry.resourceType(), 1, Integer::sum);
+			}
+			if (entry.createdPlaceholderType() != null) {
+				expectedCounts.merge(entry.createdPlaceholderType(), 1, Integer::sum);
+			}
+		}
+		assertThat(countResourcesByType()).as("resource counts by type").isEqualTo(expectedCounts);
 	}
 
 	@Interceptor

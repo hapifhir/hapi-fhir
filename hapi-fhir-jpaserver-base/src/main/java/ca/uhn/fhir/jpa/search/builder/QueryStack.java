@@ -40,6 +40,7 @@ import ca.uhn.fhir.jpa.search.builder.models.PredicateBuilderTypeEnum;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseQuantityPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseSearchParamPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.BaseTokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
@@ -54,7 +55,6 @@ import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.SearchParamPresentPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.sql.PartitionableJoinColumns;
 import ca.uhn.fhir.jpa.search.builder.sql.PredicateBuilderFactory;
@@ -382,14 +382,9 @@ public class QueryStack {
 				return;
 
 			case TOKEN:
-				TokenPredicateBuilder tokenPredicateBuilder = mySqlBuilder.createTokenPredicateBuilder();
-				addSortCustomJoin(
-						resourceLinkPredicateBuilder.getJoinColumnsForTarget(),
-						tokenPredicateBuilder,
-						tokenPredicateBuilder.createHashIdentityPredicate(targetType, theChain));
-
-				mySqlBuilder.addSortString(tokenPredicateBuilder.getColumnSystem(), theAscending, myUseAggregate);
-				mySqlBuilder.addSortString(tokenPredicateBuilder.getColumnValue(), theAscending, myUseAggregate);
+				DbColumn[] theSourceJoinColumns = resourceLinkPredicateBuilder.getJoinColumnsForTarget();
+				resolveTokenPredicateBuilder(theChain)
+						.addSort(theSourceJoinColumns, targetType, theChain, theAscending, myUseAggregate);
 				return;
 
 			case DATE:
@@ -463,14 +458,16 @@ public class QueryStack {
 	public void addSortOnToken(String theResourceName, String theParamName, boolean theAscending) {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 
-		TokenPredicateBuilder tokenPredicateBuilder = mySqlBuilder.createTokenPredicateBuilder();
-		Condition hashIdentityPredicate =
-				tokenPredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
+		DbColumn[] theSourceJoinColumns = firstPredicateBuilder.getJoinColumns();
+		resolveTokenPredicateBuilder(theParamName)
+				.addSort(theSourceJoinColumns, theResourceName, theParamName, theAscending, myUseAggregate);
+	}
 
-		addSortCustomJoin(firstPredicateBuilder, tokenPredicateBuilder, hashIdentityPredicate);
-
-		mySqlBuilder.addSortString(tokenPredicateBuilder.getColumnSystem(), theAscending, myUseAggregate);
-		mySqlBuilder.addSortString(tokenPredicateBuilder.getColumnValue(), theAscending, myUseAggregate);
+	private BaseTokenPredicateBuilder resolveTokenPredicateBuilder(String theParamName) {
+		return mySqlBuilder
+				.getCustomPredicateBuilder(RestSearchParameterTypeEnum.TOKEN, theParamName)
+				.map(BaseTokenPredicateBuilder.class::cast)
+				.orElseGet(mySqlBuilder::createTokenPredicateBuilder);
 	}
 
 	public void addSortOnUri(String theResourceName, String theParamName, boolean theAscending) {
@@ -726,6 +723,14 @@ public class QueryStack {
 		 * that do not have a missing field (:missing=false) for much the same reason.
 		 */
 		SearchQueryBuilder sqlBuilder = theParams.getSqlBuilder();
+
+		// allow custom index providers to build their own :missing predicate
+		Optional<BaseSearchParamPredicateBuilder> custom =
+				sqlBuilder.getCustomPredicateBuilder(theParams.getParamType(), theParams.getParamName());
+		if (custom.isPresent()) {
+			return createMissingPredicateForCustomIndexProvider(theParams, sqlBuilder, custom.get());
+		}
+
 		if (myStorageSettings.getIndexMissingFields() == JpaStorageSettings.IndexEnabledEnum.DISABLED) {
 			// new search
 			return createMissingPredicateForUnindexedMissingFields(theParams, sqlBuilder);
@@ -733,6 +738,19 @@ public class QueryStack {
 			// old search
 			return createMissingPredicateForIndexedMissingFields(theParams, sqlBuilder);
 		}
+	}
+
+	/**
+	 * Builds the {@code :missing} predicate using the custom index builder
+	 */
+	private Condition createMissingPredicateForCustomIndexProvider(
+			MissingParameterQueryParams theParams,
+			SearchQueryBuilder theSqlBuilder,
+			BaseSearchParamPredicateBuilder theCustomPredicateBuilder) {
+		ResourceTablePredicateBuilder table = theSqlBuilder.getOrCreateResourceTablePredicateBuilder();
+		MissingQueryParameterPredicateParams missingQueryParameterPredicate = new MissingQueryParameterPredicateParams(
+				table, theParams.isMissing(), theParams.getParamName(), theParams.getRequestPartitionId());
+		return theCustomPredicateBuilder.createPredicateParamMissingValue(missingQueryParameterPredicate);
 	}
 
 	/**
@@ -2289,7 +2307,7 @@ public class QueryStack {
 		if (paramInverted) {
 			boolean selectPartitionId = myPartitionSettings.isDatabasePartitionMode();
 			SearchQueryBuilder sqlBuilder = theSqlBuilder.newChildSqlBuilder(selectPartitionId);
-			TokenPredicateBuilder tokenSelector = sqlBuilder.addTokenPredicateBuilder(null);
+			BaseTokenPredicateBuilder tokenSelector = sqlBuilder.addTokenPredicateBuilder(null, theSearchParam);
 			sqlBuilder.addPredicate(tokenSelector.createPredicateToken(
 					tokens, theResourceName, theSpnamePrefix, theSearchParam, theRequestPartitionId));
 
@@ -2312,11 +2330,11 @@ public class QueryStack {
 						theRequestPartitionId));
 			}
 
-			TokenPredicateBuilder tokenJoin = createOrReusePredicateBuilder(
+			BaseTokenPredicateBuilder tokenJoin = createOrReusePredicateBuilder(
 							PredicateBuilderTypeEnum.TOKEN,
 							theSourceJoinColumn,
 							paramName,
-							() -> theSqlBuilder.addTokenPredicateBuilder(theSourceJoinColumn))
+							() -> theSqlBuilder.addTokenPredicateBuilder(theSourceJoinColumn, theSearchParam))
 					.getResult();
 
 			predicate = tokenJoin.createPredicateToken(
@@ -2325,6 +2343,50 @@ public class QueryStack {
 		}
 
 		return join.combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
+	}
+
+	/**
+	 * Builds one token predicate matching a search parameter across several resource types, used by
+	 * unqualified chained searches (e.g. {@code Provenance?target.identifier=sys|val}). One combined
+	 * call collapses the type-qualified token hashes into a single {@code IN (...)} clause, where
+	 * OR'ing per-type predicates could defeat the token table index.
+	 * <p>
+	 * Plain equality only: the caller must ensure every type declares {@code theSearchParam} as a
+	 * token parameter and no value carries a modifier ({@code :not}, {@code :text}, etc.).
+	 * </p>
+	 */
+	@Nullable
+	public Condition createPredicateTokenForMultipleResourceTypes(
+			@Nullable DbColumn[] theSourceJoinColumn,
+			List<String> theResourceNames,
+			RuntimeSearchParam theSearchParam,
+			List<? extends IQueryParameterType> theList,
+			RequestPartitionId theRequestPartitionId) {
+		validateRequestPartition(theRequestPartitionId);
+
+		List<IQueryParameterType> tokens = new ArrayList<>(theList.size());
+		for (IQueryParameterType nextOr : theList) {
+			if (nextOr instanceof TokenParam tokenParam && tokenParam.isEmpty()) {
+				continue;
+			}
+			tokens.add(nextOr);
+		}
+
+		if (tokens.isEmpty()) {
+			return null;
+		}
+
+		BaseTokenPredicateBuilder tokenJoin = createOrReusePredicateBuilder(
+						PredicateBuilderTypeEnum.TOKEN,
+						theSourceJoinColumn,
+						theSearchParam.getName(),
+						() -> mySqlBuilder.addTokenPredicateBuilder(theSourceJoinColumn, theSearchParam))
+				.getResult();
+
+		Condition predicate = tokenJoin.createPredicateToken(
+				tokens, theResourceNames, null, theSearchParam, null, theRequestPartitionId);
+
+		return tokenJoin.combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
 	}
 
 	public Condition createPredicateUri(
@@ -2511,13 +2573,7 @@ public class QueryStack {
 		RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(
 				theResourceName, theParamName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 		if (nextParamDef != null) {
-
-			if (myPartitionSettings.isPartitioningEnabled() && myPartitionSettings.isIncludePartitionInSearchHashes()) {
-				if (theRequestPartitionId.isAllPartitions()) {
-					throw new PreconditionFailedException(
-							Msg.code(1220) + "This server is not configured to support search against all partitions");
-				}
-			}
+			validateRequestPartition(theRequestPartitionId);
 
 			switch (nextParamDef.getParamType()) {
 				case DATE:
@@ -2750,6 +2806,15 @@ public class QueryStack {
 		}
 
 		return toAndPredicate(andPredicates);
+	}
+
+	private void validateRequestPartition(RequestPartitionId theRequestPartitionId) {
+		if (myPartitionSettings.isPartitioningEnabled() && myPartitionSettings.isIncludePartitionInSearchHashes()) {
+			if (theRequestPartitionId.isAllPartitions()) {
+				throw new PreconditionFailedException(
+						Msg.code(1220) + "This server is not configured to support search against all partitions");
+			}
+		}
 	}
 
 	/**

@@ -1,11 +1,9 @@
 package ca.uhn.fhir.jpa.search;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.dao.ISearchResultConsumer;
+import ca.uhn.fhir.jpa.dao.SearchProgressTracker;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
@@ -23,6 +21,9 @@ import java.util.Collection;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -33,6 +34,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 
+	@SuppressWarnings("unused")
 	@Mock
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
@@ -43,18 +45,18 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 	public void before() {
 		mySynchronousSearchSvc.setContext(ourCtx);
 		mySynchronousSearchSvc.mySearchBuilderFactory = mySearchBuilderFactory;
-	}
 
-	@Test
-	public void testSynchronousSearch() {
 		when(mySearchBuilderFactory.newSearchBuilder(any(), any()))
 			.thenReturn(mySearchBuilder);
+	}
 
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testSynchronousSearch() {
 		SearchParameterMap params = new SearchParameterMap();
 
 		List<JpaPid> pids = createPidSequence(800);
-		when(mySearchBuilder.createQuery(any(SearchParameterMap.class), any(), any(), nullable(RequestPartitionId.class)))
-			.thenReturn(new BaseSearchSvc.ResultIterator(pids.iterator()));
+		mockSearch(pids);
 
 		doAnswer(loadPids()).when(mySearchBuilder)
 			.loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
@@ -71,8 +73,6 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 
 	@Test
 	public void testSynchronousSearchWithOffset() {
-		when(mySearchBuilderFactory.newSearchBuilder(any(), any())).thenReturn(mySearchBuilder);
-
 		SearchParameterMap params = new SearchParameterMap();
 		params.setCount(10);
 		params.setOffset(10);
@@ -80,9 +80,9 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 
 		List<JpaPid> pids = createPidSequence(30);
 		when(mySearchBuilder.createCountQuery(any(SearchParameterMap.class), any(String.class),nullable(RequestDetails.class), nullable(RequestPartitionId.class))).thenReturn(20L);
-		when(mySearchBuilder.createQuery(any(SearchParameterMap.class), any(), nullable(RequestDetails.class), nullable(RequestPartitionId.class))).thenReturn(new BaseSearchSvc.ResultIterator(pids.subList(10, 20).iterator()));
+		mockSearch(pids.subList(10, 20));
 
-		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
+		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(), any(), any(), anyBoolean(), any());
 
 		IBundleProvider result = mySynchronousSearchSvc.executeQuery("Patient", params, RequestPartitionId.allPartitions());
 
@@ -93,19 +93,17 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 
 	@Test
 	public void testSynchronousSearchUpTo() {
-		when(mySearchBuilderFactory.newSearchBuilder(any(), any())).thenReturn(mySearchBuilder);
 		when(myStorageSettings.getDefaultTotalMode()).thenReturn(null);
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronousUpTo(100);
 
 		List<JpaPid> pids = createPidSequence(800);
-		when(mySearchBuilder.createQuery(any(SearchParameterMap.class), any(), nullable(RequestDetails.class), nullable(RequestPartitionId.class)))
-			.thenReturn(new BaseSearchSvc.ResultIterator(pids.iterator()));
+		mockSearch(pids);
 
 		pids = createPidSequence(110);
 		List<JpaPid> finalPids = pids;
-		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(argThat(ids -> ids.containsAll(finalPids)), any(Collection.class), any(List.class), anyBoolean(), nullable(RequestDetails.class));
+		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(argThat(ids -> ids.containsAll(finalPids)), any(), any(), anyBoolean(), nullable(RequestDetails.class));
 
 		IBundleProvider result = mySynchronousSearchSvc.executeQuery("Patient", params,   RequestPartitionId.allPartitions());
 
@@ -115,4 +113,23 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 		assertEquals("109", resources.get(99).getIdElement().getValueAsString());
 	}
 
+
+	private void mockSearch(List<JpaPid> pids) {
+		SearchProgressTracker tracker = new SearchProgressTracker(0, 0);
+		mockSearch(pids, tracker);
+	}
+
+	@SuppressWarnings("unchecked")
+	private void mockSearch(List<JpaPid> pids, SearchProgressTracker tracker) {
+		when(mySearchBuilder.performSearchForPids(any(), any(), any(), any(), any())).thenAnswer(t->{
+			ISearchResultConsumer<JpaPid> consumer = t.getArgument(0, ISearchResultConsumer.class);
+			for (JpaPid pid : pids) {
+				ISearchResultConsumer.Outcome outcome = consumer.consume(null, pid);
+				if (!outcome.isContinue()) {
+					break;
+				}
+			}
+			return tracker;
+		});
+	}
 }

@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7954
+title: "Previously, the package installer parameter `versionPolicy` setting was applied to
+  non-conformance resources (e.g. `Patient`, `Organization`) which meant client-assigned ids were being overridden 
+  by server assigned ids by default. This has been fixed and now `versionPolicy` only applies to canonical resources."

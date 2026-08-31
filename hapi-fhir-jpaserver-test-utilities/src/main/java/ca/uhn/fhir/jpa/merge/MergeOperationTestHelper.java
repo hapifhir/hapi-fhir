@@ -23,15 +23,17 @@ package ca.uhn.fhir.jpa.merge;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.replacereferences.ReplaceReferencesTestHelper;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.merge.AbstractMergeOperationInputParameterNames;
 import ca.uhn.fhir.merge.GenericMergeOperationInputParameterNames;
 import ca.uhn.fhir.merge.IResourceLinkService;
+import ca.uhn.fhir.merge.MergeProvenanceGroupValue;
 import ca.uhn.fhir.merge.ResourceLinkServiceFactory;
 import ca.uhn.fhir.model.api.IProvenanceAgent;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.util.FhirTerser;
@@ -43,13 +45,19 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -81,7 +89,6 @@ public class MergeOperationTestHelper {
 	private final Batch2JobHelper myBatch2JobHelper;
 	private final FhirContext myFhirContext;
 	private final ResourceLinkServiceFactory myLinkServiceFactory;
-	private final DaoRegistry myDaoRegistry;
 	private final String myOperationName;
 	private final AbstractMergeOperationInputParameterNames myParameterNames;
 
@@ -93,14 +100,12 @@ public class MergeOperationTestHelper {
 			@Nonnull IGenericClient theClient,
 			@Nonnull Batch2JobHelper theBatch2JobHelper,
 			@Nonnull FhirContext theFhirContext,
-			@Nonnull ResourceLinkServiceFactory theLinkServiceFactory,
-			@Nonnull DaoRegistry theDaoRegistry) {
+			@Nonnull ResourceLinkServiceFactory theLinkServiceFactory) {
 		this(
 				theClient,
 				theBatch2JobHelper,
 				theFhirContext,
 				theLinkServiceFactory,
-				theDaoRegistry,
 				"$hapi.fhir.merge",
 				new GenericMergeOperationInputParameterNames());
 	}
@@ -115,7 +120,6 @@ public class MergeOperationTestHelper {
 			@Nonnull Batch2JobHelper theBatch2JobHelper,
 			@Nonnull FhirContext theFhirContext,
 			@Nonnull ResourceLinkServiceFactory theLinkServiceFactory,
-			@Nonnull DaoRegistry theDaoRegistry,
 			@Nonnull String theOperationName,
 			@Nonnull AbstractMergeOperationInputParameterNames theParameterNames) {
 
@@ -123,7 +127,6 @@ public class MergeOperationTestHelper {
 		myBatch2JobHelper = theBatch2JobHelper;
 		myFhirContext = theFhirContext;
 		myLinkServiceFactory = theLinkServiceFactory;
-		myDaoRegistry = theDaoRegistry;
 		myOperationName = theOperationName;
 		myParameterNames = theParameterNames;
 	}
@@ -228,6 +231,26 @@ public class MergeOperationTestHelper {
 		assertThat(outcome.getIssue()).hasSize(1).element(0).satisfies(issue -> {
 			assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
 			assertThat(issue.getDetails().getText()).isEqualTo("Merge operation completed successfully.");
+		});
+	}
+
+	/**
+	 * Validates the OperationOutcome from an undo-merge operation reports success and restored the
+	 * expected number of resources.
+	 *
+	 * @param theOutParams                    the output parameters from the undo-merge operation
+	 * @param theExpectedRestoredResourceCount the number of resources the undo is expected to restore
+	 */
+	public void validateUndoMergeSuccessOutcome(
+			@Nonnull Parameters theOutParams, int theExpectedRestoredResourceCount) {
+		OperationOutcome outcome = (OperationOutcome)
+				theOutParams.getParameter(OPERATION_MERGE_OUTPUT_PARAM_OUTCOME).getResource();
+		assertThat(outcome.getIssue()).hasSize(1).element(0).satisfies(issue -> {
+			assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
+			assertThat(issue.getDetails().getText())
+					.matches(String.format(
+							"Successfully restored %d resources to their previous versions based on the Provenance resource: Provenance/[^/]+/_history/1",
+							theExpectedRestoredResourceCount));
 		});
 	}
 
@@ -434,24 +457,208 @@ public class MergeOperationTestHelper {
 		}
 	}
 
+	public List<Provenance> searchProvenancesByTarget(@Nonnull IIdType theTargetId) {
+		Bundle bundle = myClient.search()
+				.forResource(Provenance.class)
+				.where(new ReferenceClientParam("target")
+						.hasId(theTargetId.toUnqualifiedVersionless().getValue()))
+				.returnBundle(Bundle.class)
+				.execute();
+		return bundle.getEntry().stream()
+				.map(Bundle.BundleEntryComponent::getResource)
+				.filter(Provenance.class::isInstance)
+				.map(Provenance.class::cast)
+				.toList();
+	}
+
 	/**
-	 * Validates merge provenance record.
-	 * Delegates to {@link ReplaceReferencesTestHelper#assertMergeProvenance}.
+	 * Validates the single (ungrouped) merge Provenance for the merged resource.
 	 */
-	public void assertMergeProvenance(
+	private void assertUngroupedMergeProvenance(
 			@Nonnull Parameters theInputParams,
 			@Nonnull IIdType theExpectedSourceId,
 			@Nonnull IIdType theExpectedTargetId,
 			@Nonnull Set<String> theExpectedProvenanceTargets,
 			@Nullable List<IProvenanceAgent> theExpectedAgents) {
 
-		ReplaceReferencesTestHelper helper = new ReplaceReferencesTestHelper(myFhirContext, myDaoRegistry);
-		helper.assertMergeProvenance(
+		List<Provenance> provenances = searchProvenancesByTarget(theExpectedTargetId);
+		assertThat(provenances).hasSize(1);
+		assertUngroupedMergeProvenance(
+				myFhirContext,
+				provenances.get(0),
 				theInputParams,
 				theExpectedSourceId,
 				theExpectedTargetId,
 				theExpectedProvenanceTargets,
 				theExpectedAgents);
+	}
+
+	public void assertGroupedMergeProvenances(
+			@Nonnull Parameters theInputParams,
+			@Nonnull IIdType theExpectedSourceId,
+			@Nonnull IIdType theExpectedTargetId,
+			@Nonnull Set<String> theExpectedProvenanceTargets,
+			@Nullable List<IProvenanceAgent> theExpectedAgents) {
+
+		List<Provenance> provenances = searchProvenancesByTarget(theExpectedTargetId);
+		assertThat(provenances).isNotEmpty();
+		assertGroupedMergeProvenances(
+				myFhirContext,
+				provenances,
+				theInputParams,
+				theExpectedSourceId,
+				theExpectedTargetId,
+				theExpectedProvenanceTargets,
+				theExpectedAgents);
+	}
+
+	public static void assertUngroupedMergeProvenance(
+			@Nonnull FhirContext theFhirContext,
+			@Nonnull Provenance theProvenance,
+			@Nonnull Parameters theInputParameters,
+			@Nonnull IIdType theSourceIdWithExpectedVersion,
+			@Nonnull IIdType theTargetIdWithExpectedVersion,
+			@Nonnull Set<String> theExpectedProvenanceTargets,
+			@Nullable List<IProvenanceAgent> theExpectedProvenanceAgents) {
+
+		assertThat(theProvenance.getTarget()).hasSize(theExpectedProvenanceTargets.size());
+		assertFirstTwoTargetsAreTargetAndSource(
+				theProvenance, theTargetIdWithExpectedVersion, theSourceIdWithExpectedVersion);
+
+		Set<String> allActualTargets =
+				ReplaceReferencesTestHelper.extractResourceIdsFromProvenanceTarget(theProvenance.getTarget());
+		assertThat(allActualTargets).containsExactlyInAnyOrderElementsOf(theExpectedProvenanceTargets);
+
+		assertCommonMergeProvenanceFields(
+				theFhirContext, theProvenance, theTargetIdWithExpectedVersion, theExpectedProvenanceAgents);
+		assertMainMergeProvenanceContainedResources(theProvenance, theInputParameters, theTargetIdWithExpectedVersion);
+	}
+
+	public static void assertGroupedMergeProvenances(
+			@Nonnull FhirContext theFhirContext,
+			@Nonnull List<Provenance> theProvenances,
+			@Nonnull Parameters theInputParameters,
+			@Nonnull IIdType theSourceIdWithExpectedVersion,
+			@Nonnull IIdType theTargetIdWithExpectedVersion,
+			@Nonnull Set<String> theExpectedProvenanceTargets,
+			@Nullable List<IProvenanceAgent> theExpectedProvenanceAgents) {
+
+		Provenance mainProvenance = null;
+		List<Provenance> memberProvenances = new ArrayList<>();
+
+		for (Provenance provenance : theProvenances) {
+			if (provenance.hasContained()) {
+				assertThat(mainProvenance)
+						.as("Expected exactly one main Provenance with contained resources")
+						.isNull();
+				mainProvenance = provenance;
+			} else {
+				memberProvenances.add(provenance);
+			}
+		}
+		assertThat(mainProvenance)
+				.as("Expected a main Provenance with contained resources")
+				.isNotNull();
+
+		assertFirstTwoTargetsAreTargetAndSource(
+				mainProvenance, theTargetIdWithExpectedVersion, theSourceIdWithExpectedVersion);
+		assertThat(mainProvenance.getTarget()).hasSize(2);
+		assertCommonMergeProvenanceFields(
+				theFhirContext, mainProvenance, theTargetIdWithExpectedVersion, theExpectedProvenanceAgents);
+		assertMainMergeProvenanceContainedResources(mainProvenance, theInputParameters, theTargetIdWithExpectedVersion);
+
+		String mainGroupId = MergeProvenanceGroupValue.fromProvenance(mainProvenance)
+				.map(MergeProvenanceGroupValue::getGroupId)
+				.orElse(null);
+		assertThat(mainGroupId).isNotBlank();
+
+		List<String> allTargetsAcrossProvenances = new ArrayList<>();
+
+		for (Provenance memberProvenance : memberProvenances) {
+			assertThat(memberProvenance.getTarget().size()).isGreaterThan(2);
+			assertFirstTwoTargetsAreTargetAndSource(
+					memberProvenance, theTargetIdWithExpectedVersion, theSourceIdWithExpectedVersion);
+			assertThat(memberProvenance.hasContained()).isFalse();
+			assertCommonMergeProvenanceFields(
+					theFhirContext, memberProvenance, theTargetIdWithExpectedVersion, theExpectedProvenanceAgents);
+
+			MergeProvenanceGroupValue memberGroupValue =
+					MergeProvenanceGroupValue.fromProvenance(memberProvenance).orElseThrow();
+			assertThat(memberGroupValue.getGroupId()).isEqualTo(mainGroupId);
+			assertThat(memberGroupValue.getPartition())
+					.as("member Provenance group value must name the partition it records changes for")
+					.isPresent();
+			assertThat(memberGroupValue.getChangeType())
+					.as("member Provenance group value must name the change type it records changes for")
+					.isPresent();
+
+			for (int i = 2; i < memberProvenance.getTarget().size(); i++) {
+				allTargetsAcrossProvenances.add(
+						new IdDt(memberProvenance.getTarget().get(i).getReference()).toString());
+			}
+		}
+
+		assertThat(allTargetsAcrossProvenances)
+				.as("each changed resource must be recorded in exactly one member Provenance")
+				.doesNotHaveDuplicates()
+				.containsExactlyInAnyOrderElementsOf(theExpectedProvenanceTargets);
+	}
+
+	private static void assertFirstTwoTargetsAreTargetAndSource(
+			Provenance theProvenance, IIdType theTargetId, IIdType theSourceId) {
+		assertThat(theProvenance.getTarget().size()).isGreaterThanOrEqualTo(2);
+		assertThat(theProvenance.getTarget().get(0).getReference()).isEqualTo(theTargetId.toString());
+		assertThat(theProvenance.getTarget().get(1).getReference()).isEqualTo(theSourceId.toString());
+	}
+
+	private static void assertCommonMergeProvenanceFields(
+			FhirContext theFhirContext,
+			Provenance theProvenance,
+			IIdType theTargetIdWithExpectedVersion,
+			@Nullable List<IProvenanceAgent> theExpectedProvenanceAgents) {
+
+		ReplaceReferencesTestHelper.validateAgents(theFhirContext, theExpectedProvenanceAgents, theProvenance);
+
+		Instant now = Instant.now();
+		Instant oneMinuteAgo = now.minus(1, ChronoUnit.MINUTES);
+		assertThat(theProvenance.getRecorded()).isBetween(oneMinuteAgo, now);
+
+		Period period = theProvenance.getOccurredPeriod();
+		assertThat(period.getStart()).isBefore(period.getEnd());
+		assertThat(period.getStart()).isBetween(oneMinuteAgo, now);
+		assertThat(period.getEnd()).isEqualTo(theProvenance.getRecorded());
+
+		String resourceType = theTargetIdWithExpectedVersion.getResourceType();
+		String expectedReasonCode = "Patient".equals(resourceType) ? "PATADMIN" : "RECORDMGT";
+		assertThat(theProvenance.getReason()).hasSize(1);
+		Coding reasonCoding = theProvenance.getReason().get(0).getCodingFirstRep();
+		assertThat(reasonCoding).isNotNull();
+		assertThat(reasonCoding.getSystem()).isEqualTo("http://terminology.hl7.org/CodeSystem/v3-ActReason");
+		assertThat(reasonCoding.getCode()).isEqualTo(expectedReasonCode);
+
+		Coding activityCoding = theProvenance.getActivity().getCodingFirstRep();
+		assertThat(activityCoding).isNotNull();
+		assertThat(activityCoding.getSystem()).isEqualTo("http://terminology.hl7.org/CodeSystem/iso-21089-lifecycle");
+		assertThat(activityCoding.getCode()).isEqualTo("merge");
+	}
+
+	private static void assertMainMergeProvenanceContainedResources(
+			Provenance theProvenance, Parameters theInputParameters, IIdType theTargetIdWithExpectedVersion) {
+
+		assertThat(theProvenance.hasContained()).isTrue();
+		assertThat(theProvenance.getContained()).hasSize(2);
+		Parameters containedParameters =
+				(Parameters) theProvenance.getContained().get(0);
+		// there would be an id added to the in the contained input parameters,
+		// other than that it should be equal to the input parameters that was used for the operation
+		containedParameters.setId((String) null);
+		assertThat(containedParameters.equalsDeep(theInputParameters)).isTrue();
+
+		// the second contained resource is the OperationOutcome of updating the target resource
+		OperationOutcome outcome =
+				(OperationOutcome) theProvenance.getContained().get(1);
+		assertThat(outcome.getIssue()).hasSize(1);
+		assertThat(outcome.getIssueFirstRep().getDiagnostics()).contains(theTargetIdWithExpectedVersion.toString());
 	}
 
 	/**
@@ -460,11 +667,16 @@ public class MergeOperationTestHelper {
 	 */
 	public void assertResourcesAreEqualIgnoringVersionAndLastUpdated(
 			@Nonnull IBaseResource theBefore, @Nonnull IBaseResource theAfter) {
+		assertResourcesAreEqualIgnoringVersionAndLastUpdated(myFhirContext, theBefore, theAfter);
+	}
+
+	public static void assertResourcesAreEqualIgnoringVersionAndLastUpdated(
+			@Nonnull FhirContext theFhirContext, @Nonnull IBaseResource theBefore, @Nonnull IBaseResource theAfter) {
 
 		assertThat(theBefore.getIdElement().toVersionless())
 				.isEqualTo(theAfter.getIdElement().toVersionless());
 
-		FhirTerser terser = myFhirContext.newTerser();
+		FhirTerser terser = theFhirContext.newTerser();
 		// Create a copy of the before resource since we will modify some of its meta data to match the after resource
 		IBaseResource copyOfTheBefore = terser.clone(theBefore);
 
@@ -474,10 +686,10 @@ public class MergeOperationTestHelper {
 
 		// Copy meta.source from after to before
 		MetaUtil.setSource(
-				myFhirContext, copyOfTheBefore, terser.getSinglePrimitiveValueOrNull(theAfter, "meta.source"));
+				theFhirContext, copyOfTheBefore, terser.getSinglePrimitiveValueOrNull(theAfter, "meta.source"));
 
-		String before = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(copyOfTheBefore);
-		String after = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theAfter);
+		String before = theFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(copyOfTheBefore);
+		String after = theFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theAfter);
 		assertThat(after).isEqualTo(before);
 	}
 
@@ -504,6 +716,52 @@ public class MergeOperationTestHelper {
 			@Nonnull List<Identifier> theExpectedTargetIdentifiers,
 			@Nullable List<IProvenanceAgent> theExpectedAgents) {
 
+		assertCommonMergeState(
+				theMergeParams,
+				theExpectedVersionedSourceId,
+				theExpectedVersionedTargetId,
+				theReferencingResourceIds,
+				theExpectedTargetIdentifiers);
+
+		assertUngroupedMergeProvenance(
+				theMergeParams.asParametersResource(myParameterNames),
+				theExpectedVersionedSourceId,
+				theExpectedVersionedTargetId,
+				theExpectedProvenanceTargets,
+				theExpectedAgents);
+	}
+
+	public void validateResourcesAfterCrossPartitionMerge(
+			@Nonnull MergeTestParameters theMergeParams,
+			@Nonnull IIdType theExpectedVersionedSourceId,
+			@Nonnull IIdType theExpectedVersionedTargetId,
+			@Nonnull List<IIdType> theReferencingResourceIds,
+			@Nonnull Set<String> theExpectedProvenanceTargets,
+			@Nonnull List<Identifier> theExpectedTargetIdentifiers,
+			@Nullable List<IProvenanceAgent> theExpectedAgents) {
+
+		assertCommonMergeState(
+				theMergeParams,
+				theExpectedVersionedSourceId,
+				theExpectedVersionedTargetId,
+				theReferencingResourceIds,
+				theExpectedTargetIdentifiers);
+
+		assertGroupedMergeProvenances(
+				theMergeParams.asParametersResource(myParameterNames),
+				theExpectedVersionedSourceId,
+				theExpectedVersionedTargetId,
+				theExpectedProvenanceTargets,
+				theExpectedAgents);
+	}
+
+	private void assertCommonMergeState(
+			@Nonnull MergeTestParameters theMergeParams,
+			@Nonnull IIdType theExpectedVersionedSourceId,
+			@Nonnull IIdType theExpectedVersionedTargetId,
+			@Nonnull List<IIdType> theReferencingResourceIds,
+			@Nonnull List<Identifier> theExpectedTargetIdentifiers) {
+
 		IIdType sourceId = theExpectedVersionedSourceId.toUnqualifiedVersionless();
 		IIdType targetId = theExpectedVersionedTargetId.toUnqualifiedVersionless();
 		boolean deleteSource = Boolean.TRUE.equals(theMergeParams.getDeleteSource());
@@ -514,13 +772,6 @@ public class MergeOperationTestHelper {
 		if (!theReferencingResourceIds.isEmpty()) {
 			assertReferencesUpdated(theReferencingResourceIds, sourceId, targetId);
 		}
-
-		assertMergeProvenance(
-				theMergeParams.asParametersResource(myParameterNames),
-				theExpectedVersionedSourceId,
-				theExpectedVersionedTargetId,
-				theExpectedProvenanceTargets,
-				theExpectedAgents);
 	}
 
 	/**
@@ -563,9 +814,7 @@ public class MergeOperationTestHelper {
 		return expected;
 	}
 
-	// ================================================
 	// PRIVATE HELPERS
-	// ================================================
 
 	/**
 	 * If the resource has an 'active' field, asserts it has the expected value.

@@ -32,7 +32,7 @@ import ca.uhn.fhir.rest.server.IServerConformanceProvider;
 import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
-import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.server.method.IMethodBinding;
 import ca.uhn.fhir.rest.server.method.ReadMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ClasspathUtil;
@@ -458,7 +458,7 @@ public class OpenApiInterceptor {
 	 * @param operation - The Operation that is in the process of being generated.
 	 * @param baseMethodBinding - Object containing metadata about the method that processes this operation.
 	 */
-	protected void customizeOperation(OpenAPI openApi, Operation operation, BaseMethodBinding baseMethodBinding) {
+	protected void customizeOperation(OpenAPI openApi, Operation operation, IMethodBinding baseMethodBinding) {
 		// Here just to be overridden by extending classes.
 	}
 
@@ -486,7 +486,7 @@ public class OpenApiInterceptor {
 			capabilitiesProvider = (IServerConformanceProvider<?>) restfulServer.getServerConformanceProvider();
 		}
 
-		final MultiKeyMap<String, BaseMethodBinding> operationLookup = buildOperationLookup(restfulServer);
+		final MultiKeyMap<String, IMethodBinding> operationLookup = buildOperationLookup(restfulServer);
 
 		OpenAPI openApi = new OpenAPI();
 
@@ -684,7 +684,7 @@ public class OpenApiInterceptor {
 			// Search
 			if (typeRestfulInteractions.contains(CapabilityStatement.TypeRestfulInteraction.SEARCHTYPE)) {
 
-				final BaseMethodBinding baseMethodBinding =
+				final IMethodBinding baseMethodBinding =
 						operationLookup.get(resourceType, RestOperationTypeEnum.SEARCH_TYPE.name());
 
 				addSearchOperation(
@@ -720,14 +720,14 @@ public class OpenApiInterceptor {
 	 * Iterate through the resource bindings on the server to build a lookup of resource + operation name
 	 * to the method binding that will process that operation.
 	 */
-	private MultiKeyMap<String, BaseMethodBinding> buildOperationLookup(RestfulServer restfulServer) {
+	private MultiKeyMap<String, IMethodBinding> buildOperationLookup(RestfulServer restfulServer) {
 
-		final MultiKeyMap<String, BaseMethodBinding> map = new MultiKeyMap<>();
+		final MultiKeyMap<String, IMethodBinding> map = new MultiKeyMap<>();
 		final Collection<ResourceBinding> resourceBindings = restfulServer.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			final String resourceName = resourceBinding.getResourceName();
 
-			for (BaseMethodBinding methodBinding : resourceBinding.getMethodBindings()) {
+			for (IMethodBinding methodBinding : resourceBinding.getMethodBindings()) {
 				final RestOperationTypeEnum restOperationType = methodBinding.getRestOperationType();
 				final MultiKey<String> key = new MultiKey<>(resourceName, restOperationType.name());
 
@@ -736,7 +736,8 @@ public class OpenApiInterceptor {
 				if (RestOperationTypeEnum.VREAD.equals(restOperationType)) {
 					map.put(resourceName, RestOperationTypeEnum.READ.name(), methodBinding);
 				} else if (RestOperationTypeEnum.READ.equals(restOperationType)
-						&& ((ReadMethodBinding) methodBinding).isVread()) {
+						&& methodBinding instanceof ReadMethodBinding theReadMethodBinding
+						&& theReadMethodBinding.isVread()) {
 					map.put(resourceName, RestOperationTypeEnum.VREAD.name(), methodBinding);
 				}
 			}
@@ -780,7 +781,7 @@ public class OpenApiInterceptor {
 			final FhirContext ctx,
 			final String resourceType,
 			final CapabilityStatement.CapabilityStatementRestResourceComponent nextResource,
-			final BaseMethodBinding baseMethodBinding) {
+			final IMethodBinding baseMethodBinding) {
 		operation.addTagsItem(resourceType);
 		operation.setDescription("This is a search type");
 		operation.setSummary("search-type: Search for " + resourceType + " instances");

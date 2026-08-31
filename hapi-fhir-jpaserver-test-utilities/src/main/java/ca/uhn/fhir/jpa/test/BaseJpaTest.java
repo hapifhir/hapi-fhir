@@ -67,7 +67,6 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
-import ca.uhn.fhir.jpa.dao.mdm.MdmLinkDaoJpaImpl;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -201,7 +200,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.when;
 
 @TestPropertySource(properties = {
@@ -721,15 +719,17 @@ public abstract class BaseJpaTest extends BaseTest {
         });
     }
     
-	protected void logAllTokenIndexes(String... theParamNames) {
+	protected String logAllTokenIndexes(String... theParamNames) {
 		String messageSuffix = theParamNames.length > 0 ? " containing " + Arrays.asList(theParamNames) : "";
-		runInTransaction(() -> {
-			String message = getAllTokenIndexes(theParamNames)
+		String message = runInTransaction(() -> {
+			String allIndexes = getAllTokenIndexes(theParamNames)
 				.stream()
 				.map(ResourceIndexedSearchParamToken::toString)
 				.collect(Collectors.joining("\n * "));
-			ourLog.info("Token indexes{}:\n * {}", messageSuffix, message);
+			return "Token indexes" + messageSuffix + ":\n * " + allIndexes;
 		});
+		ourLog.info(message);
+		return message;
 	}
 
 	@Nonnull
@@ -760,15 +760,17 @@ public abstract class BaseJpaTest extends BaseTest {
 		});
 	}
 
-	protected void logAllStringIndexes(String... theParamNames) {
+	protected String logAllStringIndexes(String... theParamNames) {
 		String messageSuffix = theParamNames.length > 0 ? " containing " + Arrays.asList(theParamNames) : "";
-		runInTransaction(() -> {
-			String message = getAllStringIndexes(theParamNames)
+		String message = runInTransaction(() -> {
+			String indexes = getAllStringIndexes(theParamNames)
 				.stream()
 				.map(ResourceIndexedSearchParamString::toString)
 				.collect(Collectors.joining("\n * "));
-			ourLog.info("String indexes{}:\n * {}", messageSuffix, message);
+			return "String indexes" + messageSuffix + ":\n * " + indexes;
 		});
+		ourLog.info(message);
+		return message;
 	}
 
 	@Nonnull

@@ -1,5 +1,6 @@
 ---
 type: perf
 issue: 8020
+backport: 8.10.1
 title: "A second SQL fetch has been optimized for SQL Server (MSSQL), avoiding
    a slow-performing resource fetch when operating in Database Partition Mode."

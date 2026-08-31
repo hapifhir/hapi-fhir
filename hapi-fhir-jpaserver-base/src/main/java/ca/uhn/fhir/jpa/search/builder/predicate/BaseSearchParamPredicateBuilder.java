@@ -50,7 +50,7 @@ public abstract class BaseSearchParamPredicateBuilder extends BaseJoiningPredica
 	private final DbColumn myColumnHashIdentity;
 
 	@Autowired
-	private ISearchParamIdentityCacheSvc mySearchParamIdentityCacheSvc;
+	protected ISearchParamIdentityCacheSvc mySearchParamIdentityCacheSvc;
 
 	@VisibleForTesting
 	public void setSearchParamIdentityCacheSvcForUnitTest(ISearchParamIdentityCacheSvc theSearchParamIdentityCacheSvc) {
@@ -106,10 +106,26 @@ public abstract class BaseSearchParamPredicateBuilder extends BaseJoiningPredica
 
 	public Condition createHashIdentityPredicate(
 			RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName) {
-		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
-				getPartitionSettings(), theRequestPartitionId, theResourceType, theParamName);
-		mySearchParamIdentityCacheSvc.findOrCreateSearchParamIdentity(hashIdentity, theResourceType, theParamName);
-		return BinaryCondition.equalTo(getColumnHashIdentity(), generatePlaceholder(hashIdentity));
+		return createHashIdentityPredicate(theRequestPartitionId, List.of(theResourceType), theParamName);
+	}
+
+	/**
+	 * Builds a {@code HASH_IDENTITY} predicate matching the given search parameter name on any of the
+	 * given resource types. When more than one resource type is supplied this collapses into a single
+	 * {@code IN (...)} clause rather than a chain of OR'ed equality comparisons.
+	 */
+	@Nonnull
+	public Condition createHashIdentityPredicate(
+			RequestPartitionId theRequestPartitionId, List<String> theResourceTypes, String theParamName) {
+		List<Long> hashIdentities = new ArrayList<>(theResourceTypes.size());
+		for (String nextResourceType : theResourceTypes) {
+			long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
+					getPartitionSettings(), theRequestPartitionId, nextResourceType, theParamName);
+			mySearchParamIdentityCacheSvc.findOrCreateSearchParamIdentity(hashIdentity, nextResourceType, theParamName);
+			hashIdentities.add(hashIdentity);
+		}
+		return QueryParameterUtils.toEqualToOrInPredicate(
+				getColumnHashIdentity(), generatePlaceholders(hashIdentities));
 	}
 
 	public Condition createPredicateParamMissingForNonReference(

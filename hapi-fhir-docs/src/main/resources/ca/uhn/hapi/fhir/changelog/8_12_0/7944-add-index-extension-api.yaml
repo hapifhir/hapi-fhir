@@ -1,0 +1,6 @@
+---
+type: add
+issue: 7944
+title: "Added a new experimental interface, `ISearchParamIndexProvider`, for delegating search parameter index 
+storage to a custom implementation. This interface enables alternative token index storage by allowing storage, 
+retrieval, and deletion operations to be implemented externally."

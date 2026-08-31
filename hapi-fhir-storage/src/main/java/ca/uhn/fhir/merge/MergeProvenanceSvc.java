@@ -20,12 +20,9 @@
 package ca.uhn.fhir.merge;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.model.api.IProvenanceAgent;
 import ca.uhn.fhir.replacereferences.ReplaceReferencesProvenanceSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.CanonicalIdentifier;
-import jakarta.annotation.Nullable;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Identifier;
@@ -33,8 +30,8 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Type;
 
-import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 /**
  *  Handles Provenance resources for the $merge operation.
@@ -44,7 +41,7 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 	private static final String ACTIVITY_CODE_MERGE = "merge";
 
 	public MergeProvenanceSvc(DaoRegistry theDaoRegistry) {
-		super(theDaoRegistry);
+		super(theDaoRegistry.getFhirContext(), theDaoRegistry);
 	}
 
 	@Override
@@ -54,27 +51,14 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 		return retVal;
 	}
 
-	@Override
-	public void createProvenance(
-			IIdType theTargetId,
-			IIdType theSourceId,
-			List<IIdType> theChangedResourceIds,
-			Date theStartTime,
-			RequestDetails theRequestDetails,
-			List<IProvenanceAgent> theProvenanceAgents,
-			List<IBaseResource> theContainedResources) {
+	public Optional<MergeProvenanceGroup> findMergeProvenances(
+			IIdType theTargetId, IIdType theSourceId, RequestDetails theRequestDetails) {
 
-		super.createProvenance(
-				theTargetId,
-				theSourceId,
-				theChangedResourceIds,
-				theStartTime,
-				theRequestDetails,
-				theProvenanceAgents,
-				theContainedResources,
-				// we need to create a Provenance resource even when there were no referencing resources,
-				// because src and target resources are always updated in $merge operation
-				true);
+		List<Provenance> provenances =
+				getProvenancesOfTargetsFilteredByActivity(List.of(theTargetId), theRequestDetails);
+
+		return findMainProvenance(provenances, theTargetId, theSourceId)
+				.map(main -> collectGroupedProvenances(main, provenances));
 	}
 
 	/**
@@ -84,11 +68,28 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 	 * @param theTargetId the target resource id
 	 * @param theSourceIdentifiers the source identifiers to match
 	 * @param theRequestDetails the request details
-	 * @return the Provenance resource if matching one is found, or null if not found.
+	 * @return the matching Provenance group, or empty if no match is found.
 	 */
-	@Nullable
-	public Provenance findProvenanceByTargetIdAndSourceIdentifiers(
+	public Optional<MergeProvenanceGroup> findMergeProvenancesBySourceIdentifiers(
 			IIdType theTargetId, List<CanonicalIdentifier> theSourceIdentifiers, RequestDetails theRequestDetails) {
+
+		List<Provenance> provenances =
+				getProvenancesOfTargetsFilteredByActivity(List.of(theTargetId), theRequestDetails);
+
+		return findMainProvenanceBySourceIdentifiers(provenances, theTargetId, theSourceIdentifiers)
+				.map(main -> collectGroupedProvenances(main, provenances));
+	}
+
+	private Optional<Provenance> findMainProvenance(
+			List<Provenance> theProvenances, IIdType theTargetId, IIdType theSourceId) {
+		return theProvenances.stream()
+				.filter(p -> MergeProvenanceGroupValue.isMainProvenance(p)
+						&& isTargetAndSourceInCorrectOrder(p, theTargetId, theSourceId))
+				.findFirst();
+	}
+
+	private Optional<Provenance> findMainProvenanceBySourceIdentifiers(
+			List<Provenance> theProvenances, IIdType theTargetId, List<CanonicalIdentifier> theSourceIdentifiers) {
 
 		String resourceType = theTargetId.getResourceType();
 		// Returns a list because Patient resources can be merged via two endpoints (Patient/$merge or
@@ -97,27 +98,53 @@ public class MergeProvenanceSvc extends ReplaceReferencesProvenanceSvc {
 		List<AbstractMergeOperationInputParameterNames> parameterNamesList =
 				AbstractMergeOperationInputParameterNames.getParameterNamesForResourceType(resourceType);
 
-		List<Provenance> provenances =
-				getProvenancesOfTargetsFilteredByActivity(List.of(theTargetId), theRequestDetails);
+		return theProvenances.stream()
+				.filter(p -> MergeProvenanceGroupValue.isMainProvenance(p)
+						&& !p.getTarget().isEmpty()
+						&& isEqualVersionlessId(theTargetId, p.getTarget().get(0))
+						&& containsSourceIdentifiersInInputParameters(p, parameterNamesList, theSourceIdentifiers))
+				.findFirst();
+	}
 
+	/**
+	 * From the given list, finds the member Provenances that belong to the same merge operation as the main
+	 * Provenance (those sharing its group id) and bundles them with it into the returned {@link MergeProvenanceGroup},
+	 * or an empty member list if the main Provenance carries no group id.
+	 */
+	private MergeProvenanceGroup collectGroupedProvenances(
+			Provenance theMainProvenance, List<Provenance> theAllProvenances) {
+		Optional<MergeProvenanceGroupValue> mainGroupValue =
+				MergeProvenanceGroupValue.fromProvenance(theMainProvenance);
+		if (mainGroupValue.isEmpty()) {
+			return new MergeProvenanceGroup(theMainProvenance, List.of());
+		}
+
+		List<Provenance> memberProvenances = theAllProvenances.stream()
+				.filter(p -> p != theMainProvenance)
+				.filter(mainGroupValue.get()::isInSameGroup)
+				.toList();
+		return new MergeProvenanceGroup(theMainProvenance, memberProvenances);
+	}
+
+	private boolean containsSourceIdentifiersInInputParameters(
+			Provenance theProvenance,
+			List<AbstractMergeOperationInputParameterNames> theParameterNamesList,
+			List<CanonicalIdentifier> theSourceIdentifiers) {
 		// The input parameters must be the first contained resource in Provenance's contained resources.
+		if (!theProvenance.hasContained() || !(theProvenance.getContained().get(0) instanceof Parameters parameters)) {
+			return false;
+		}
 		// Try each set of parameter names (e.g., patient-specific and generic for Patient resources).
-		for (Provenance provenance : provenances) {
-			if (provenance.hasContained() && provenance.getContained().get(0) instanceof Parameters parameters) {
-				for (AbstractMergeOperationInputParameterNames paramNames : parameterNamesList) {
-					String sourceIdentifierParamName = paramNames.getSourceIdentifiersParameterName();
-					if (parameters.hasParameter(sourceIdentifierParamName)) {
-						List<Type> originalInputSrcIdentifiers =
-								parameters.getParameterValues(sourceIdentifierParamName);
-						if (hasIdentifiers(originalInputSrcIdentifiers, theSourceIdentifiers)) {
-							return provenance;
-						}
-					}
+		for (AbstractMergeOperationInputParameterNames paramNames : theParameterNamesList) {
+			String sourceIdentifierParamName = paramNames.getSourceIdentifiersParameterName();
+			if (parameters.hasParameter(sourceIdentifierParamName)) {
+				List<Type> originalInputSrcIdentifiers = parameters.getParameterValues(sourceIdentifierParamName);
+				if (hasIdentifiers(originalInputSrcIdentifiers, theSourceIdentifiers)) {
+					return true;
 				}
 			}
 		}
-
-		return null;
+		return false;
 	}
 
 	private boolean hasIdentifiers(List<Type> theIdentifiers, List<CanonicalIdentifier> theIdentifiersToLookFor) {

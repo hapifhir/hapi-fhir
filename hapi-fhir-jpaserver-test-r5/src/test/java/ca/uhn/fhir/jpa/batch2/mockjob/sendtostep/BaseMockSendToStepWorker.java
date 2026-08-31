@@ -3,15 +3,15 @@ package ca.uhn.fhir.jpa.batch2.mockjob.sendtostep;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
-import ca.uhn.fhir.model.api.IModelJson;
 import jakarta.annotation.Nonnull;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public abstract class BaseMockSendToStepWorker {
 
-	private List<MockSendToStepJobModelJson> myReceivedMessages = new ArrayList<>();
+	private List<MockSendToStepJobModelJson> myReceivedMessages = Collections.synchronizedList(new ArrayList<>());
 
 	public List<MockSendToStepJobModelJson> getReceivedMessages() {
 		return myReceivedMessages;

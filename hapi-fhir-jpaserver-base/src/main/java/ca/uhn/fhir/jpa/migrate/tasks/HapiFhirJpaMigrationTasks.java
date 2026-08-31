@@ -196,6 +196,62 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.addColumn("20260706.10", "EXPANSION_ERROR")
 				.nullable()
 				.type(ColumnTypeEnum.TEXT);
+
+		version.onTable(Search.HFJ_SEARCH)
+				.modifyColumn("20260716.10", Search.SEARCH_UUID)
+				.nonNullable()
+				.withType(ColumnTypeEnum.STRING, 136);
+
+		// addressing potential missing column PARTITION_ID from index IDX_RES_TYPE_FHIR_ID for MSSQL_2012
+		{
+			if (getFlags().contains(FlagEnum.DB_PARTITION_MODE)) {
+
+				final Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
+
+				// Precondition for the rebuild: returns 1 (run) when IDX_RES_TYPE_FHIR_ID does NOT have
+				// PARTITION_ID as a key column, and 0 (skip) when it does. This limits the rebuild to databases
+				// whose index is still missing PARTITION_ID, so already-correct databases are left untouched.
+				@Language(("SQL"))
+				final String onlyIfSql =
+						"""
+				SELECT CASE WHEN EXISTS (
+					SELECT 1
+					FROM sys.indexes i
+					JOIN sys.index_columns ic ON ic.object_id = i.object_id AND ic.index_id = i.index_id
+					JOIN sys.columns      c  ON c.object_id  = ic.object_id AND c.column_id = ic.column_id
+					WHERE i.object_id = OBJECT_ID('HFJ_RESOURCE')
+						AND i.name = 'IDX_RES_TYPE_FHIR_ID'
+						AND ic.is_included_column = 0          -- key columns only, not INCLUDE
+						AND c.name = 'PARTITION_ID'
+				) THEN 0 ELSE 1 END
+				"""
+								.stripLeading();
+
+				final String onlyfIReason =
+						"Skipping IDX_RES_TYPE_FHIR_ID rebuild, column PARTITION_ID already part of the index";
+
+				hfjResource
+						.dropIndex("20260724.10", "IDX_RES_TYPE_FHIR_ID")
+						.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012)
+						.runEvenDuringSchemaInitialization()
+						.onlyIf(onlyIfSql, onlyfIReason);
+
+				// No onlyIf guard needed on the recreate: AddIndexTask is a no-op if the index already exists, so
+				// this creates the index only when the guarded drop above actually removed it. If the drop was
+				// skipped (PARTITION_ID already a key column), the index is still present and this does nothing.
+				hfjResource
+						.addIndex("20260724.20", "IDX_RES_TYPE_FHIR_ID")
+						.unique(true)
+						.online(true)
+						// include res_id and our deleted_at flag so we can satisfy Observation?_sort=_id from the
+						// index on
+						// platforms that support it.
+						.includeColumns("RES_ID, RES_DELETED_AT")
+						.withColumns("PARTITION_ID", "RES_TYPE", "FHIR_ID")
+						.runEvenDuringSchemaInitialization()
+						.onlyAppliesToPlatforms(DriverTypeEnum.MSSQL_2012);
+			}
+		}
 	}
 
 	protected void init8_10_0() {

@@ -97,7 +97,8 @@ public class ReplaceReferencesAppCtx {
 
 	@Primary
 	@Bean
-	public ReplaceReferencesProvenanceSvc replaceReferencesProvenanceSvc(DaoRegistry theDaoRegistry) {
-		return new ReplaceReferencesProvenanceSvc(theDaoRegistry);
+	public ReplaceReferencesProvenanceSvc replaceReferencesProvenanceSvc(
+			FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
+		return new ReplaceReferencesProvenanceSvc(theFhirContext, theDaoRegistry);
 	}
 }

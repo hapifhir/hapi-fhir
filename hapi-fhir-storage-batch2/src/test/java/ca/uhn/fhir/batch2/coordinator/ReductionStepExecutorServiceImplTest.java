@@ -8,6 +8,7 @@ import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.batch2.maintenance.WorkChunkHeartbeatService;
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
@@ -72,6 +73,8 @@ public class ReductionStepExecutorServiceImplTest {
 	@Mock
 	private IInterceptorService myInterceptorService;
 	@Mock
+	private WorkChunkHeartbeatService myWorkChunkHeartbeatService;
+	@Mock
 	private JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor;
 	@Mock
 	private IJobStepWorker<TestJobParameters, VoidModel, StepInputData> myStepWorker;
@@ -81,7 +84,7 @@ public class ReductionStepExecutorServiceImplTest {
 
 	@BeforeEach
 	public void before() {
-		mySvc = new ReductionStepExecutorServiceImpl(myJobPersistence, myTransactionService, myJobDefinitionRegistry, myJobStepExecutionServices , myInterceptorService);
+		mySvc = new ReductionStepExecutorServiceImpl(myJobPersistence, myTransactionService, myJobDefinitionRegistry, myJobStepExecutionServices , myInterceptorService, myWorkChunkHeartbeatService);
 	}
 
 	// QUEUED, IN_PROGRESS are supported because of backwards compatibility

@@ -952,6 +952,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		ResourceIndexedSearchParams newParams = null;
 
+		// Whether this is the first-ever persist of the resource
+		boolean isNewResource = false;
 		EncodedResource changed;
 		if (theDeletedTimestampOrNull != null) {
 			// DELETE
@@ -964,6 +966,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 			// CREATE or UPDATE
 
+			isNewResource = entity.getVersion() == 1L && entity.getCurrentVersionEntity() == null;
 			IdentityHashMap<ResourceTable, ResourceIndexedSearchParams> existingSearchParams =
 					getSearchParamsMapFromTransaction(theTransactionDetails);
 			existingParams = existingSearchParams.get(entity);
@@ -1139,7 +1142,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				// Synchronize search param indexes
 				AddRemoveCount searchParamAddRemoveCount =
 						myDaoSearchParamSynchronizer.synchronizeSearchParamsToDatabase(
-								theRequest, theTransactionDetails, newParams, entity, existingParams);
+								theRequest, theTransactionDetails, newParams, entity, existingParams, isNewResource);
 
 				newParams.populateResourceTableParamCollections(entity);
 

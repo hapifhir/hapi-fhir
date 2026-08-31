@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.model.dao;
 import ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import ca.uhn.hapi.fhir.sql.hibernatesvc.PartitionedIdProperty;
 import jakarta.annotation.Nonnull;
@@ -99,6 +100,13 @@ public class JpaPid extends BaseResourcePersistentId<Long> implements Comparable
 		super(theVersion, null);
 		myPartitionIdValue = thePartitionId;
 		myId = theId;
+	}
+
+	public JpaPid(Integer thePartitionId, Long theId, String theResourceType, String theFhirId) {
+		super(theResourceType);
+		myPartitionIdValue = thePartitionId;
+		myId = theId;
+		setAssociatedResourceId(new IdDt(theResourceType, theFhirId));
 	}
 
 	private JpaPid(Long theId, String theResourceType) {

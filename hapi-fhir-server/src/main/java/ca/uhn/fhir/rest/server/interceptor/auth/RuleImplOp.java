@@ -744,16 +744,25 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 			boolean allComponentsAreGets = true;
 			for (BundleEntryParts nextPart : inputResources) {
 
+				String url = nextPart.getUrl();
 				if (isInvalidNestedBundleRequest(nextPart)) {
 					throw new InvalidRequestException(
-							Msg.code(2504) + "Can not handle nested Bundle request with url: " + nextPart.getUrl());
+							Msg.code(2504) + "Can not handle nested Bundle request with url: " + url);
 				}
 
 				IBaseResource inputResource = nextPart.getResource();
 				IIdType inputResourceId = null;
-				if (isNotBlank(nextPart.getUrl())) {
+				String instanceOperation = null;
+				if (isNotBlank(url)) {
 
-					UrlUtil.UrlParts parts = UrlUtil.parseUrl(nextPart.getUrl());
+					int lastSlashIdx = url.lastIndexOf('/');
+					if (lastSlashIdx != -1) {
+						instanceOperation = url.substring(lastSlashIdx + 1);
+						if (instanceOperation.startsWith("$")) {
+							url = url.substring(0, lastSlashIdx);
+						}
+					}
+					UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
 
 					inputResourceId =
 							theRequestDetails.getFhirContext().getVersion().newIdType();
@@ -795,7 +804,9 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 
 				// This is done because a Bundle can contain a nested PATCH with Parameters,
 				// which is supported but a non-PATCH nested Parameters resource may be problematic.
-				if (isInvalidNestedParametersRequest(ctx, nextPart, operation)) {
+				// The exception being meta operations such as $meta-add and $meta-delete
+				if (!RestOperationTypeEnum.isMetaOperation(instanceOperation)
+						&& isInvalidNestedParametersRequest(ctx, nextPart, operation)) {
 					throw new InvalidRequestException(Msg.code(339)
 							+ String.format("Can not handle nested Parameters with %s operation", operation));
 				}

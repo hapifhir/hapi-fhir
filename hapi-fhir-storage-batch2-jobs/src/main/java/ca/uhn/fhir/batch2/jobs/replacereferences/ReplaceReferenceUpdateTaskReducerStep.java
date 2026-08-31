@@ -85,24 +85,44 @@ public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJ
 			RequestDetails theRequestDetails,
 			List<IBaseResource> theContainedResources) {
 
-		ReplaceReferencesJobParameters params = theStepExecutionDetails.getParameters();
-		if (params.getCreateProvenance()) {
-
-			IdDt targetIdVersioned = params.getTargetId().asIdDt().withVersion(params.getTargetVersionForProvenance());
-
-			IdDt sourceIdVersioned = params.getSourceId().asIdDt().withVersion(params.getSourceVersionForProvenance());
-
-			List<IIdType> changedResourceIds =
-					ReplaceReferencesProvenanceSvc.extractChangedResourceIds(myPatchOutputBundles);
-			myProvenanceSvc.createProvenance(
-					targetIdVersioned,
-					sourceIdVersioned,
-					changedResourceIds,
-					theStepExecutionDetails.getInstance().getStartTime(),
-					theRequestDetails,
-					ProvenanceAgentJson.toIProvenanceAgents(params.getProvenanceAgents(), myFhirContext),
-					theContainedResources);
+		if (!theStepExecutionDetails.getParameters().getCreateProvenance()) {
+			return;
 		}
+
+		List<IIdType> changedResourceIds = extractChangedResourceIds();
+		if (changedResourceIds.isEmpty()) {
+			return;
+		}
+
+		createProvenanceForChangedResources(
+				theStepExecutionDetails, theRequestDetails, theContainedResources, changedResourceIds);
+	}
+
+	protected List<IIdType> extractChangedResourceIds() {
+		return ReplaceReferencesProvenanceSvc.extractChangedResourceIds(myPatchOutputBundles);
+	}
+
+	protected void createProvenanceForChangedResources(
+			StepExecutionDetails<PT, ReplaceReferencePatchOutcomeJson> theStepExecutionDetails,
+			RequestDetails theRequestDetails,
+			List<IBaseResource> theContainedResources,
+			List<IIdType> theChangedResourceIds) {
+
+		ReplaceReferencesJobParameters params = theStepExecutionDetails.getParameters();
+
+		IdDt targetIdVersioned = params.getTargetId().asIdDt().withVersion(params.getTargetVersionForProvenance());
+
+		IdDt sourceIdVersioned = params.getSourceId().asIdDt().withVersion(params.getSourceVersionForProvenance());
+
+		myProvenanceSvc.createProvenance(
+				targetIdVersioned,
+				sourceIdVersioned,
+				theChangedResourceIds,
+				null,
+				theStepExecutionDetails.getInstance().getStartTime(),
+				theRequestDetails,
+				ProvenanceAgentJson.toIProvenanceAgents(params.getProvenanceAgents(), myFhirContext),
+				theContainedResources);
 	}
 
 	/**

@@ -59,6 +59,7 @@ import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.IResourceMetadataExtractorSvc;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.jpa.dao.JpaBulkDataExportHistoryHelper;
 import ca.uhn.fhir.jpa.dao.JpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
@@ -86,7 +87,9 @@ import ca.uhn.fhir.jpa.dao.expunge.JpaResourceExpungeService;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
 import ca.uhn.fhir.jpa.dao.index.DaoResourceLinkResolver;
 import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
+import ca.uhn.fhir.jpa.dao.index.ISearchParamIndexProvider;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.index.SearchParamIndexProviderRegistry;
 import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
@@ -122,6 +125,7 @@ import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.provider.IReplaceReferencesSvc;
 import ca.uhn.fhir.jpa.provider.InstanceReindexProvider;
 import ca.uhn.fhir.jpa.provider.ProcessMessageProvider;
+import ca.uhn.fhir.jpa.provider.ReferencingResourcesQuerySvc;
 import ca.uhn.fhir.jpa.provider.ReplaceReferencesSvcImpl;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
@@ -217,6 +221,7 @@ import ca.uhn.fhir.rest.server.interceptor.auth.IAuthResourceResolver;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.storage.TransactionBundleNormalizer;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import ca.uhn.fhir.util.IMetaTagSorter;
 import ca.uhn.fhir.util.MetaTagSorterAlphabetical;
@@ -228,6 +233,7 @@ import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValid
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.WorkerContextValidationSupportAdapter;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -258,7 +264,6 @@ import java.util.List;
 	ValidationSupportConfig.class,
 	Batch2SupportConfig.class,
 	JpaBulkExportConfig.class,
-	SearchConfig.class,
 	PackageLoaderConfig.class,
 	EnversAuditConfig.class,
 	MdmJpaConfig.class
@@ -279,17 +284,20 @@ public class JpaConfig {
 	private static final String HAPI_DEFAULT_SCHEDULER_GROUP = "HAPI";
 
 	@Autowired
-	public JpaStorageSettings myStorageSettings;
+	protected JpaStorageSettings myStorageSettings;
 
 	@Autowired
-	private PartitionSettings myPartitionSettings;
-
-	@Autowired
-	private FhirContext myFhirContext;
+	protected FhirContext myFhirContext;
 
 	@Bean
 	public ValidationSupportChain.CacheConfiguration validationSupportChainCacheConfiguration() {
 		return ValidationSupportChain.CacheConfiguration.defaultValues();
+	}
+
+	@Bean
+	public SearchParamIndexProviderRegistry searchParamIndexProviderRegistry(
+			ObjectProvider<ISearchParamIndexProvider> theProviders) {
+		return new SearchParamIndexProviderRegistry(theProviders.stream().toList());
 	}
 
 	/**
@@ -320,11 +328,6 @@ public class JpaConfig {
 	public IValidationSupport jpaValidationSupportChain() {
 		return new JpaValidationSupportChain(
 				myFhirContext, validationSupportChainCacheConfiguration(), workerContextValidationSupportAdapter());
-	}
-
-	@Bean("myDaoRegistry")
-	public DaoRegistry daoRegistry() {
-		return new DaoRegistry();
 	}
 
 	@Lazy
@@ -421,6 +424,16 @@ public class JpaConfig {
 	@Bean
 	public TransactionProcessor transactionProcessor() {
 		return new TransactionProcessor();
+	}
+
+	@Bean
+	public TransactionBundleNormalizer transactionBundleNormalizer(
+			FhirContext theFhirContext,
+			MatchUrlService theMatchUrlService,
+			@SuppressWarnings("rawtypes") ITransactionProcessorVersionAdapter theVersionAdapter,
+			JpaStorageSettings theStorageSettings) {
+		return new TransactionBundleNormalizer(
+				theFhirContext, theMatchUrlService, theVersionAdapter, theStorageSettings);
 	}
 
 	@Bean(name = "myAttachmentBinaryAccessProvider")
@@ -896,8 +909,8 @@ public class JpaConfig {
 
 	@Bean
 	@Primary
-	public ISearchParamProvider searchParamProvider() {
-		return new DaoSearchParamProvider();
+	public ISearchParamProvider searchParamProvider(DaoRegistry theDaoRegistry) {
+		return new DaoSearchParamProvider(theDaoRegistry);
 	}
 
 	@Bean
@@ -1090,6 +1103,12 @@ public class JpaConfig {
 	}
 
 	@Bean
+	public ReferencingResourcesQuerySvc referencingResourcesQuerySvc(
+			IResourceLinkDao theResourceLinkDao, HapiTransactionService theHapiTransactionService) {
+		return new ReferencingResourcesQuerySvc(theResourceLinkDao, theHapiTransactionService);
+	}
+
+	@Bean
 	public IReplaceReferencesSvc replaceReferencesSvc(
 			DaoRegistry theDaoRegistry,
 			HapiTransactionService theHapiTransactionService,
@@ -1114,8 +1133,9 @@ public class JpaConfig {
 
 	@Primary
 	@Bean
-	public ReplaceReferencesProvenanceSvc replaceReferencesProvenanceSvc(DaoRegistry theDaoRegistry) {
-		return new ReplaceReferencesProvenanceSvc(theDaoRegistry);
+	public ReplaceReferencesProvenanceSvc replaceReferencesProvenanceSvc(
+			FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
+		return new ReplaceReferencesProvenanceSvc(theFhirContext, theDaoRegistry);
 	}
 
 	@Bean
@@ -1125,8 +1145,10 @@ public class JpaConfig {
 
 	@Bean
 	public PreviousResourceVersionRestorer resourceVersionRestorer(
-			DaoRegistry theDaoRegistry, HapiTransactionService theHapiTransactionService) {
-		return new PreviousResourceVersionRestorer(theDaoRegistry, theHapiTransactionService);
+			DaoRegistry theDaoRegistry,
+			HapiTransactionService theHapiTransactionService,
+			PartitionSettings thePartitionSettings) {
+		return new PreviousResourceVersionRestorer(theDaoRegistry, theHapiTransactionService, thePartitionSettings);
 	}
 
 	@Bean

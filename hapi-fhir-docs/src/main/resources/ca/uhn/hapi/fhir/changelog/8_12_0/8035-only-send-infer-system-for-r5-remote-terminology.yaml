@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 8035
+title: "The `inferSystem` parameter added to remote terminology `$validate-code` requests in 8.10.0 
+was sent for all FHIR versions, breaking strict R4 servers (e.g. VSAC, CMS) that reject it. It is 
+now sent only for R5+ contexts, restoring R4 compatibility. A new `setInferSystemEnabled` toggle on
+`RemoteTerminologyServiceValidationSupport` allows overriding this behavior."

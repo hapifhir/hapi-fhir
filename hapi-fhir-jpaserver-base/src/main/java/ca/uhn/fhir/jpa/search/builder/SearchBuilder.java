@@ -39,6 +39,8 @@ import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.dao.ISearchResultConsumer;
+import ca.uhn.fhir.jpa.dao.SearchProgressTracker;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.search.ResourceNotFoundInIndexException;
@@ -100,6 +102,7 @@ import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -122,6 +125,7 @@ import com.healthmarketscience.sqlbuilder.UnaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
@@ -151,6 +155,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -213,24 +218,52 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private static final String MY_TARGET_RESOURCE_VERSION = "myTargetResourceVersion";
 	public static final JpaPid[] EMPTY_JPA_PID_ARRAY = new JpaPid[0];
 	public static Integer myMaxPageSizeForTests = null;
-	protected final IInterceptorBroadcaster myInterceptorBroadcaster;
-	protected final IResourceTagDao myResourceTagDao;
-	private final PerformanceTracingLogger myPerformanceTracingLogger;
-	private final DialectSvc myDialectSvc;
 	private String myResourceName;
 	private final Class<? extends IBaseResource> myResourceType;
-	private final HapiFhirLocalContainerEntityManagerFactoryBean myEntityManagerFactory;
-	private final SqlObjectFactory mySqlBuilderFactory;
-	private final HibernatePropertiesProvider myDialectProvider;
-	private final ISearchParamRegistry mySearchParamRegistry;
-	private final PartitionSettings myPartitionSettings;
-	private final DaoRegistry myDaoRegistry;
-	private final FhirContext myContext;
-	private final IIdHelperService<JpaPid> myIdHelperService;
-	private final JpaStorageSettings myStorageSettings;
-	private final SearchQueryProperties mySearchProperties;
-	private final IResourceHistoryTableDao myResourceHistoryTableDao;
-	private final BatchResourceLoader myBatchResourceLoader;
+	protected final SearchQueryProperties mySearchProperties;
+	private PerformanceTracingLogger myPerformanceTracingLogger;
+
+	@Autowired
+	protected IInterceptorBroadcaster myInterceptorBroadcaster;
+
+	@Autowired
+	protected IResourceTagDao myResourceTagDao;
+
+	@Autowired
+	private DialectSvc myDialectSvc;
+
+	@Autowired
+	private HapiFhirLocalContainerEntityManagerFactoryBean myEntityManagerFactory;
+
+	@Autowired
+	private SqlObjectFactory mySqlBuilderFactory;
+
+	@Autowired
+	private HibernatePropertiesProvider myDialectProvider;
+
+	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
+
+	@Autowired
+	private PartitionSettings myPartitionSettings;
+
+	@Autowired
+	private DaoRegistry myDaoRegistry;
+
+	@Autowired
+	private FhirContext myContext;
+
+	@Autowired
+	private IIdHelperService<JpaPid> myIdHelperService;
+
+	@Autowired
+	private JpaStorageSettings myStorageSettings;
+
+	@Autowired
+	private IResourceHistoryTableDao myResourceHistoryTableDao;
+
+	@Autowired
+	private BatchResourceLoader myBatchResourceLoader;
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
@@ -266,44 +299,38 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	/**
 	 * Constructor
 	 */
-	@SuppressWarnings({"rawtypes", "unchecked"})
-	public SearchBuilder(
-			String theResourceName,
-			JpaStorageSettings theStorageSettings,
-			HapiFhirLocalContainerEntityManagerFactoryBean theEntityManagerFactory,
-			SqlObjectFactory theSqlBuilderFactory,
-			HibernatePropertiesProvider theDialectProvider,
-			ISearchParamRegistry theSearchParamRegistry,
-			PartitionSettings thePartitionSettings,
-			IInterceptorBroadcaster theInterceptorBroadcaster,
-			IResourceTagDao theResourceTagDao,
-			DaoRegistry theDaoRegistry,
-			FhirContext theContext,
-			IIdHelperService theIdHelperService,
-			IResourceHistoryTableDao theResourceHistoryTagDao,
-			BatchResourceLoader theBatchResourceLoader,
-			Class<? extends IBaseResource> theResourceType,
-			DialectSvc theDialectSvc) {
+	public SearchBuilder(String theResourceName, Class<? extends IBaseResource> theResourceType) {
 		myResourceName = theResourceName;
 		myResourceType = theResourceType;
-		myStorageSettings = theStorageSettings;
-
-		myEntityManagerFactory = theEntityManagerFactory;
-		mySqlBuilderFactory = theSqlBuilderFactory;
-		myDialectProvider = theDialectProvider;
-		mySearchParamRegistry = theSearchParamRegistry;
-		myPartitionSettings = thePartitionSettings;
-		myInterceptorBroadcaster = theInterceptorBroadcaster;
-		myResourceTagDao = theResourceTagDao;
-		myDaoRegistry = theDaoRegistry;
-		myContext = theContext;
-		myIdHelperService = theIdHelperService;
-		myResourceHistoryTableDao = theResourceHistoryTagDao;
-		myBatchResourceLoader = theBatchResourceLoader;
-		myDialectSvc = theDialectSvc;
-
 		mySearchProperties = new SearchQueryProperties();
-		myPerformanceTracingLogger = new PerformanceTracingLogger(theInterceptorBroadcaster);
+	}
+
+	/**
+	 * Unit Test Constructor
+	 */
+	public SearchBuilder(
+			String theResourceName,
+			Class<? extends IBaseResource> theResourceType,
+			FhirContext theFhirContext,
+			PartitionSettings thePartitionSettings,
+			DaoRegistry theDaoRegistry,
+			ISearchParamRegistry theSearchParamRegistry,
+			JpaStorageSettings theStorageSettings,
+			IResourceHistoryTableDao theResourceHistoryTableDao,
+			BatchResourceLoader theBatchResourceLoader) {
+		this(theResourceName, theResourceType);
+		myContext = theFhirContext;
+		myPartitionSettings = thePartitionSettings;
+		myDaoRegistry = theDaoRegistry;
+		mySearchParamRegistry = theSearchParamRegistry;
+		myStorageSettings = theStorageSettings;
+		myResourceHistoryTableDao = theResourceHistoryTableDao;
+		myBatchResourceLoader = theBatchResourceLoader;
+	}
+
+	@PostConstruct
+	void start() {
+		myPerformanceTracingLogger = new PerformanceTracingLogger(myInterceptorBroadcaster);
 	}
 
 	@VisibleForTesting
@@ -464,6 +491,39 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	@Override
 	public void setPreviouslyAddedResourcePids(@Nonnull List<JpaPid> thePidSet) {
 		myPidSet = new HashSet<>(thePidSet);
+	}
+
+	protected Set<JpaPid> getPreviouslyAddedPids() {
+		return myPidSet;
+	}
+
+	@Override
+	public SearchProgressTracker performSearchForPids(
+			ISearchResultConsumer<JpaPid> theConsumer,
+			SearchParameterMap theParams,
+			SearchRuntimeDetails theSearchRuntime,
+			RequestDetails theRequest,
+			@Nonnull RequestPartitionId theRequestPartitionId) {
+		try (IResultIterator<JpaPid> query =
+				createQuery(theParams, theSearchRuntime, theRequest, theRequestPartitionId)) {
+			while (query.hasNext()) {
+				JpaPid nextPid = query.next();
+				SearchProgressTracker progress = newSearchProgressTracker(query);
+				ISearchResultConsumer.Outcome outcome = theConsumer.consume(progress, nextPid);
+				if (!outcome.isContinue()) {
+					break;
+				}
+			}
+			return newSearchProgressTracker(query);
+		} catch (IOException e) {
+			ourLog.error("IO failure during database access", e);
+			throw new InternalErrorException(Msg.code(1164) + e);
+		}
+	}
+
+	@Nonnull
+	private static SearchProgressTracker newSearchProgressTracker(IResultIterator<JpaPid> theResultIterator) {
+		return new SearchProgressTracker(theResultIterator.getSkippedCount(), theResultIterator.getNonSkippedCount());
 	}
 
 	@SuppressWarnings("ConstantConditions")
@@ -3231,7 +3291,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					// if we got here, it means the current JpaPid has already been processed,
 					// and we will decide (here) if we need to fetch related resources recursively
 					if (myFetchIncludesForEverythingOperation) {
-						myIncludesIterator = new IncludesIterator(myPidSet, myRequest);
+						myIncludesIterator = new IncludesIterator(getPreviouslyAddedPids(), myRequest);
 						myFetchIncludesForEverythingOperation = false;
 					}
 					if (myIncludesIterator != null) {
@@ -3378,15 +3438,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		@Override
 		public int getNonSkippedCount() {
 			return myNonSkipCount;
-		}
-
-		@Override
-		public Collection<JpaPid> getNextResultBatch(long theBatchSize) {
-			Collection<JpaPid> batch = new ArrayList<>();
-			while (this.hasNext() && batch.size() < theBatchSize) {
-				batch.add(this.next());
-			}
-			return batch;
 		}
 
 		@Override

@@ -22,6 +22,7 @@ package ca.uhn.fhir.batch2.coordinator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
+import ca.uhn.fhir.batch2.api.IReductionStepExecutorService;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
@@ -59,17 +60,20 @@ public class WorkChunkProcessor {
 	private final StepExecutor myStepExecutor;
 	private final IHapiTransactionService myHapiTransactionService;
 	private final IJobStepExecutionServices myJobStepExecutionServices;
+	private final IReductionStepExecutorService myReductionStepExecutorService;
 
 	public WorkChunkProcessor(
 			IJobPersistence theJobPersistence,
 			BatchJobSender theSender,
 			IHapiTransactionService theHapiTransactionService,
-			IJobStepExecutionServices theJobStepExecutionServices) {
+			IJobStepExecutionServices theJobStepExecutionServices,
+			IReductionStepExecutorService theReductionStepExecutorService) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theSender;
 		myStepExecutor = new StepExecutor(theJobPersistence);
 		myHapiTransactionService = theHapiTransactionService;
 		myJobStepExecutionServices = theJobStepExecutionServices;
+		myReductionStepExecutorService = theReductionStepExecutorService;
 	}
 
 	/**
@@ -92,12 +96,17 @@ public class WorkChunkProcessor {
 		Class<IT> inputType = step.getInputType();
 		PT parameters = theInstance.getParameters(jobDefinition.getParametersType());
 
+		if (step.isReductionStep()) {
+			// reduction step is a long running async process
+			processReductionStep(theInstance, theCursor, theWorkChunk);
+			return null;
+		}
+
+		// all other kinds of steps
+
 		IJobStepWorker<PT, IT, OT> worker = step.getJobStepWorker();
 		BaseDataSink<PT, IT, OT> dataSink = getDataSink(theCursor, theWorkChunk, jobDefinition, instanceId);
 
-		assert !step.isReductionStep();
-
-		// all other kinds of steps
 		Validate.notNull(theWorkChunk, "theWorkChunk must not be null");
 		Optional<StepExecutionDetails<PT, IT>> stepExecutionDetailsOpt = getExecutionDetailsForNonReductionStep(
 				theWorkChunk,
@@ -131,7 +140,6 @@ public class WorkChunkProcessor {
 			String theInstanceId) {
 		BaseDataSink<PT, IT, OT> dataSink;
 
-		assert !theCursor.isReductionStep();
 		if (theCursor.isFinalStep()) {
 			dataSink = (BaseDataSink<PT, IT, OT>) new FinalStepDataSink<>(
 					theJobDefinition.getJobDefinitionId(), theInstanceId, theWorkChunk, theCursor.asFinalCursor());
@@ -183,5 +191,13 @@ public class WorkChunkProcessor {
 				theJobDefinition,
 				theCurrentStepId,
 				theNextStepId));
+	}
+
+	private void processReductionStep(
+			JobInstance theInstance, JobWorkCursor<?, ?, ?> theCursor, @Nullable WorkChunk theWorkChunk) {
+		// theWorkChunk is the 'driver' chunk that was placed on the queue to trigger this reduction; keeping
+		// its heartbeat alive during the reduction prevents the broker from redelivering it as a dead worker.
+		String driverChunkId = theWorkChunk != null ? theWorkChunk.getId() : null;
+		myReductionStepExecutorService.triggerReductionStep(theInstance.getInstanceId(), theCursor, driverChunkId);
 	}
 }

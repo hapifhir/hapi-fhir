@@ -122,7 +122,9 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 
 	@Override
 	public Stream<IdDt> streamSourceIdsThatReferenceTargetId(IIdType theTargetId) {
-		return myResourceLinkDao.streamSourceIdsForTargetFhirId(theTargetId.getResourceType(), theTargetId.getIdPart());
+		return myResourceLinkDao
+				.streamSourceIdsForTargetFhirId(theTargetId.getResourceType(), theTargetId.getIdPart())
+				.map(pid -> new IdDt(pid.getAssociatedResourceId()));
 	}
 
 	private Stream<TypedResourcePid> streamResourceIdsWithUrl(

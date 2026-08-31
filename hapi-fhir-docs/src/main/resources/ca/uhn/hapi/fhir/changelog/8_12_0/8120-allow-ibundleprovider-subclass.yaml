@@ -1,0 +1,6 @@
+---
+type: add
+issue: 8120
+title: "Plain providers implementing the `@Search` operation may now use a method
+  signature returning a subclass of `IBundleProvider` instead of needing to directly
+  return this type. Thanks to Bob van der Linden for the contribution!"

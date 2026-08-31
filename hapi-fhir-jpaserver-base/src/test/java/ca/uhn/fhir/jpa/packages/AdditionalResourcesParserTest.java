@@ -26,6 +26,7 @@ import static ca.uhn.fhir.jpa.packages.AdditionalResourcesParser.getAdditionalRe
 import static org.assertj.core.api.Assertions.assertThat;
 
 // Created by Claude Opus 4.6
+@SuppressWarnings("deprecation")
 class AdditionalResourcesParserTest {
 
 	private static final FhirContext ourFhirContext = FhirContext.forR4Cached();

@@ -24,6 +24,8 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistrationService;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
@@ -48,6 +50,7 @@ import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
@@ -56,8 +59,6 @@ import jakarta.persistence.TypedQuery;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -100,14 +101,25 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	@Autowired
 	private IHapiTransactionService myTransactionService;
 
+	@Autowired
+	private DaoRegistry myDaoRegistry;
+
+	@Autowired
+	private DaoRegistrationService myDaoRegistrationService;
+
+	@PostConstruct
+	void start() {
+		myDaoRegistrationService.registerSystemDao(this);
+	}
+
 	@VisibleForTesting
 	public void setTransactionProcessorForUnitTest(TransactionProcessor theTransactionProcessor) {
 		myTransactionProcessor = theTransactionProcessor;
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.NEVER)
 	public ExpungeOutcome expunge(ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
+		HapiTransactionService.noTransactionAllowed();
 		validateExpungeEnabled(theExpungeOptions);
 		return myExpungeService.expunge(null, null, theExpungeOptions, theRequestDetails);
 	}
@@ -122,19 +134,20 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 		}
 	}
 
-	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
 	public Map<String, Long> getResourceCounts() {
-		Map<String, Long> retVal = new HashMap<>();
+		return myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
+			Map<String, Long> retVal = new HashMap<>();
 
-		List<Map<?, ?>> counts = myResourceTableDao.getResourceCounts();
-		for (Map<?, ?> next : counts) {
-			retVal.put(
-					next.get("type").toString(),
-					Long.parseLong(next.get("count").toString()));
-		}
+			List<Map<?, ?>> counts = myResourceTableDao.getResourceCounts();
+			for (Map<?, ?> next : counts) {
+				retVal.put(
+						next.get("type").toString(),
+						Long.parseLong(next.get("count").toString()));
+			}
 
-		return retVal;
+			return retVal;
+		});
 	}
 
 	@Nullable
