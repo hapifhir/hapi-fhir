@@ -35,20 +35,25 @@ class MdmResourceFilteringSvcTest extends BaseMdmR4Test {
 		//SUT
 		boolean shouldBeProcessed = myMdmResourceFilteringSvc.shouldBeProcessed(patient);
 
-		assertEquals(true, shouldBeProcessed);
+		assertTrue(shouldBeProcessed);
 	}
 
 	@Test
 	void shouldBeProcessed_withPlaceholderResource_skipsUnfilledProcessesFilled() {
-		myMdmSettings.setIgnorePlaceholderResources(true);
+		boolean ignorePlaceholders = myMdmSettings.isIgnorePlaceholderResources();
+		try {
+			myMdmSettings.setIgnorePlaceholderResources(true);
 
-		Patient placeholder = new Patient();
-		placeholder.addExtension(EXT_RESOURCE_PLACEHOLDER, new BooleanType(true));
-		placeholder.addIdentifier().setValue("123");
-		assertFalse(myMdmResourceFilteringSvc.shouldBeProcessed(placeholder));
+			Patient placeholder = new Patient();
+			placeholder.addExtension(EXT_RESOURCE_PLACEHOLDER, new BooleanType(true));
+			placeholder.addIdentifier().setValue("123");
+			assertFalse(myMdmResourceFilteringSvc.shouldBeProcessed(placeholder));
 
-		Patient filledIn = new Patient();   // no extension — the update replaces the body
-		filledIn.addIdentifier().setValue("123");
-		assertTrue(myMdmResourceFilteringSvc.shouldBeProcessed(filledIn));
+			Patient filledIn = new Patient();   // no extension — the update replaces the body
+			filledIn.addIdentifier().setValue("123");
+			assertTrue(myMdmResourceFilteringSvc.shouldBeProcessed(filledIn));
+		} finally {
+			myMdmSettings.setIgnorePlaceholderResources(ignorePlaceholders);
+		}
 	}
 }

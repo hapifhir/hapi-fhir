@@ -84,12 +84,17 @@ public class MdmSettings implements IMdmSettings {
 	}
 
 	@Override
-	public boolean getIgnorePlaceholderResources() {
+	public boolean isIgnorePlaceholderResources() {
 		return myIgnorePlaceholderResources;
 	}
 
-	public void setIgnorePlaceholderResources(boolean theToIgnore) {
-		myIgnorePlaceholderResources = theToIgnore;
+	/**
+	 * Set IgnorePlaceholderResources.
+	 * Placeholder resources (provided they are allowed) are ignored during MDM
+	 * match operations.
+	 */
+	public void setIgnorePlaceholderResources(boolean theIgnorePlaceholderResources) {
+		myIgnorePlaceholderResources = theIgnorePlaceholderResources;
 	}
 
 	@Override

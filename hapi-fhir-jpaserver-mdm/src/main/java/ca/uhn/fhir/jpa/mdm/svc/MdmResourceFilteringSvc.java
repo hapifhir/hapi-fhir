@@ -25,7 +25,6 @@ import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson;
 import ca.uhn.fhir.mdm.svc.MdmSearchParamSvc;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
-import ca.uhn.fhir.util.ExtensionUtil;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +32,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static ca.uhn.fhir.util.HapiExtensions.EXT_RESOURCE_PLACEHOLDER;
+import static ca.uhn.fhir.storage.PlaceholderResourceUtil.isPlaceholderResource;
 
 @Service
 public class MdmResourceFilteringSvc {
@@ -66,7 +65,7 @@ public class MdmResourceFilteringSvc {
 			return false;
 		}
 
-		if (myMdmSettings.getIgnorePlaceholderResources() && ExtensionUtil.hasExtension(theResource, EXT_RESOURCE_PLACEHOLDER)) {
+		if (myMdmSettings.isIgnorePlaceholderResources() && isPlaceholderResource(theResource)) {
 			return false;
 		}
 

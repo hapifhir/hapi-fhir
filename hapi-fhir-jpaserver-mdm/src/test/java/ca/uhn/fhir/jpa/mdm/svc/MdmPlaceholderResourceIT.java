@@ -9,12 +9,10 @@ import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.MatchedTarget;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
-import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.JsonUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Patient;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
@@ -31,6 +29,7 @@ import java.util.Objects;
 
 import static ca.uhn.fhir.util.HapiExtensions.EXT_RESOURCE_PLACEHOLDER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -63,10 +62,10 @@ public class MdmPlaceholderResourceIT extends BaseMdmR4Test {
 		  		}
 			],
 			"matchResultMap": {
+				"medicare-id": "MATCH"
 			},
 			"eidSystem": "http://company.io/fhir/NamingSystem/custom-eid-system"
 		}
-		
 		""";
 
 	private static final String IDENTIFIER_SYSTEM = "http://hl7.org/fhir/sid/us-medicare";
@@ -75,15 +74,11 @@ public class MdmPlaceholderResourceIT extends BaseMdmR4Test {
 	@Autowired
 	public MdmHelperR4 myMdmHelper;
 
-
 	@Autowired
 	private IMdmMatchFinderSvc mySvc;
 
 	@Autowired
 	private IFhirResourceDao<Patient> myPatientDao;
-
-	@Autowired
-	private EIDHelper myEidHelper;
 
 	private MdmRulesJson myExistingRules;
 
@@ -143,6 +138,7 @@ public class MdmPlaceholderResourceIT extends BaseMdmR4Test {
 	})
 	public void getMatchedTargets_realResource_ignoresPlaceholdersInDb(boolean theHasEidIdentifier) throws InterruptedException {
 		// setup
+		IIdType placehodlerId;
 		{
 			Patient placeholder = createPlaceholderPatient();
 			if (theHasEidIdentifier) {
@@ -154,7 +150,14 @@ public class MdmPlaceholderResourceIT extends BaseMdmR4Test {
 			}
 
 			// shouldn't be matched, so we won't wait on a latch
-			myPatientDao.create(placeholder, new SystemRequestDetails());
+			DaoMethodOutcome outcome = myPatientDao.create(placeholder, new SystemRequestDetails());
+			placehodlerId = outcome.getId();
+
+			Patient nonplaceholder = new Patient();
+			nonplaceholder.addIdentifier()
+				.setSystem(IDENTIFIER_SYSTEM)
+				.setValue("123");
+			myMdmHelper.createWithLatch(nonplaceholder);
 		}
 
 		Patient source = new Patient();
@@ -172,7 +175,9 @@ public class MdmPlaceholderResourceIT extends BaseMdmR4Test {
 		List<MatchedTarget> results = mySvc.getMatchedTargets("Patient", source, RequestPartitionId.allPartitions());
 
 		// validate
-		assertTrue(results.isEmpty());
+		assertEquals(1, results.size());
+		assertFalse(results.stream()
+			.anyMatch(target -> target.getTarget().getIdElement().getIdPartAsLong().equals(placehodlerId.getIdPartAsLong())));
 	}
 
 	@ParameterizedTest
@@ -311,9 +316,7 @@ public class MdmPlaceholderResourceIT extends BaseMdmR4Test {
 	@Test
 	public void updateResource_placeholderResource_doNotCreateGoldenResourcesUntilFilledIn() throws InterruptedException {
 		// setup
-		// Create OUTSIDE the latch window — deliberately not createWithLatch()
-		Patient placeholder = new Patient();
-		placeholder.addExtension(EXT_RESOURCE_PLACEHOLDER, new BooleanType(true));
+		Patient placeholder = createPlaceholderPatient();
 		placeholder.addIdentifier().setSystem(IDENTIFIER_SYSTEM).setValue("123");
 		IIdType id = myPatientDao.create(placeholder, new SystemRequestDetails())
 			.getId().toUnqualifiedVersionless();
@@ -325,9 +328,18 @@ public class MdmPlaceholderResourceIT extends BaseMdmR4Test {
 		filledIn.addIdentifier().setSystem(IDENTIFIER_SYSTEM).setValue("123");
 		filledIn.addName().setFamily("simpson").addGiven("homer");
 
-		myMdmHelper.updateWithLatch(filledIn);   // synchronises AND proves MDM fired
+		myMdmHelper.updateWithLatch(filledIn);
 
 		assertLinkCount(1);
+		runInTransaction(() -> {
+			List<MdmLink> allLinks = myMdmLinkDao.findAll();
+			// one of these links should be to the placeholder
+			assertTrue(allLinks
+				.stream()
+				.anyMatch(link -> {
+					return Objects.equals(link.getSource().getId().getId(), id.getIdPartAsLong());
+				}));
+		});
 	}
 
 	private Patient createPlaceholderPatient() {

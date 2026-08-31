@@ -36,7 +36,6 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.util.ExtensionUtil;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -52,7 +51,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateSearcher.idOrType;
-import static ca.uhn.fhir.util.HapiExtensions.EXT_RESOURCE_PLACEHOLDER;
+import static ca.uhn.fhir.storage.PlaceholderResourceUtil.isPlaceholderResource;
 import static org.hl7.fhir.dstu2016may.model.Basic.SP_IDENTIFIER;
 
 @Service
@@ -84,7 +83,7 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 		if (shouldIgnoreResource(theResource)) {
 			// source is a placeholder (set to be ignored)
 			// return nothing
-			return new ArrayList<>();
+			return Collections.emptyList();
 		}
 
 		List<MatchedTarget> retval = matchBasedOnEid(theResourceType, theResource, theRequestPartitionId);
@@ -96,7 +95,7 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 				myMdmCandidateSearchSvc.findCandidates(theResourceType, theResource, theRequestPartitionId);
 
 		List<MatchedTarget> matches = targetCandidates.stream()
-				.filter(r -> !shouldIgnoreResource(r))
+				.filter(candidate -> !shouldIgnoreResource(candidate))
 				.map(candidate ->
 						new MatchedTarget(candidate, myMdmResourceMatcherSvc.getMatchResult(theResource, candidate)))
 				.collect(Collectors.toList());
@@ -146,7 +145,7 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 				// Exclude the incoming resource from the matched results
 				.filter(resource ->
 						!theResourceIdToExclude.equals(resource.getIdElement().toUnqualifiedVersionless()))
-			.filter(r -> !shouldIgnoreResource(r))
+				.filter(resource -> !shouldIgnoreResource(resource))
 				.map(resource -> new MatchedTarget(resource, MdmMatchOutcome.EID_MATCH))
 				.forEach(retval::add);
 		return retval;
@@ -156,14 +155,10 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 	 * Whether or not the resource should be ignored for mdm matching purposes
 	 */
 	private boolean shouldIgnoreResource(IAnyResource theResource) {
-		if (!myMdmSettings.getIgnorePlaceholderResources()) {
+		if (!myMdmSettings.isIgnorePlaceholderResources()) {
 			return false;
 		}
 
-		/*
-		 * we're matching this to what RepositoryValidatingInterceptor.isPlaceholderResource does...
-		 * which is check for extension existence *only*
-		 */
-		return ExtensionUtil.hasExtension(theResource, EXT_RESOURCE_PLACEHOLDER);
+		return isPlaceholderResource(theResource);
 	}
 }
