@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
+import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.SearchParameterMapCalculator;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -40,6 +41,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.interceptor.ServerInterceptorUtil;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -79,6 +81,9 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 
 	@Autowired
 	private EntityManager myEntityManager;
+
+	@Autowired
+	private IPagingProvider myPagingProvider;
 
 	private int mySyncSize = 250;
 
@@ -335,8 +340,19 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 						bundleProvider.setTotalResourcesRequestedReturned(receivedResourceCount);
 					}
 
-					bundleProvider.setCurrentPageOffset(theParams.getOffset() != null ? theParams.getOffset() : 0);
-					bundleProvider.setCurrentPageSize(theParams.getCount());
+					int offset = 0;
+					if (theParams.getOffset() != null) {
+						offset = theParams.getOffset();
+					}
+					bundleProvider.setCurrentPageOffset(offset);
+
+					int pageSize = DatabaseBackedPagingProvider.DEFAULT_DEFAULT_PAGE_SIZE;
+					if (theParams.getCount() != null) {
+						pageSize = theParams.getCount();
+					} else if (myPagingProvider != null) {
+						pageSize = myPagingProvider.getDefaultPageSize();
+					}
+					bundleProvider.setCurrentPageSize(pageSize);
 
 					if (wantCount) {
 						bundleProvider.setSize(count.intValue());

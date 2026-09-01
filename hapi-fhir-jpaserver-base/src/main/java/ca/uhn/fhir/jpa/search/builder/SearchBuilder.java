@@ -1669,19 +1669,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			position.put(next.getId(), index++);
 		}
 
-		// Grow the list
-		if (theResourceListToPopulate instanceof ArrayList<IBaseResource> list) {
-			list.ensureCapacity(thePids.size());
-		}
-		while (theResourceListToPopulate.size() < thePids.size()) {
-			theResourceListToPopulate.add(null);
-		}
-
 		// Can we fast track this loading by checking elastic search?
 		boolean isUsingElasticSearch = isLoadingFromElasticSearchSupported(thePids);
 		if (isUsingElasticSearch) {
 			try {
 				theResourceListToPopulate.addAll(loadResourcesFromElasticSearch(thePids));
+				growResourceListToMatchPidListSize(thePids, theResourceListToPopulate);
 				return;
 
 			} catch (ResourceNotFoundInIndexException theE) {
@@ -1690,6 +1683,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						"Some resources were not found in index. Make sure all resources were indexed. Resorting to database search.");
 			}
 		}
+
+		growResourceListToMatchPidListSize(thePids, theResourceListToPopulate);
 
 		// We only chunk because some jdbc drivers can't handle long param lists.
 		QueryChunker.chunk(
@@ -3499,6 +3494,16 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	public static void setMaxPageSizeForTest(Integer theTestSize) {
 		myMaxPageSizeForTests = theTestSize;
+	}
+
+	private static void growResourceListToMatchPidListSize(
+			Collection<JpaPid> thePids, List<IBaseResource> theResourceListToPopulate) {
+		if (theResourceListToPopulate instanceof ArrayList<IBaseResource> list) {
+			list.ensureCapacity(thePids.size());
+		}
+		while (theResourceListToPopulate.size() < thePids.size()) {
+			theResourceListToPopulate.add(null);
+		}
 	}
 
 	private static ScrollableResults<?> toScrollableResults(Query theQuery) {
