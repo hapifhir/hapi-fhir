@@ -15,7 +15,6 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.HashSet;
 import java.util.List;
@@ -62,9 +61,9 @@ class MdmStorageInterceptorMultipleEidR4Test extends BaseR4Test {
 
 		myEidHelper = new EIDHelper(ourFhirContext, mdmSettings);
 		myInterceptor = new MdmStorageInterceptor();
-		ReflectionTestUtils.setField(myInterceptor, "myFhirContext", ourFhirContext);
-		ReflectionTestUtils.setField(myInterceptor, "myMdmSettings", mdmSettings);
-		ReflectionTestUtils.setField(myInterceptor, "myEIDHelper", myEidHelper);
+		myInterceptor.setFhirContextForUnitTest(ourFhirContext);
+		myInterceptor.setMdmSettingsForUnitTest(mdmSettings);
+		myInterceptor.setEidHelperForUnitTest(myEidHelper);
 	}
 
 	@Test

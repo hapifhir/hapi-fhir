@@ -51,6 +51,7 @@ import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -118,6 +119,21 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 
 	@Autowired
 	private IMdmLinkUpdaterSvc mdmLinkUpdaterSvc;
+
+	@VisibleForTesting
+	public void setFhirContextForUnitTest(FhirContext theFhirContext) {
+		myFhirContext = theFhirContext;
+	}
+
+	@VisibleForTesting
+	public void setEidHelperForUnitTest(EIDHelper theEidHelper) {
+		myEIDHelper = theEidHelper;
+	}
+
+	@VisibleForTesting
+	public void setMdmSettingsForUnitTest(IMdmSettings theMdmSettings) {
+		myMdmSettings = theMdmSettings;
+	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
 	public void blockManualResourceManipulationOnCreate(
