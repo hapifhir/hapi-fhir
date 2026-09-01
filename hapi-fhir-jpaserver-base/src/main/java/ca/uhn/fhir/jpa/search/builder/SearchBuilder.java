@@ -1527,10 +1527,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(next.resource(), BundleEntrySearchModeEnum.MATCH);
 			}
 
-			// ensure there's enough space; "<=" because of 0-indexing
-			while (theResourceListToPopulate.size() <= index) {
-				theResourceListToPopulate.add(null);
-			}
 			theResourceListToPopulate.set(index, next.resource());
 		}
 	}
@@ -1671,6 +1667,14 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		int index = 0;
 		for (JpaPid next : thePids) {
 			position.put(next.getId(), index++);
+		}
+
+		// Grow the list
+		if (theResourceListToPopulate instanceof ArrayList<IBaseResource> list) {
+			list.ensureCapacity(thePids.size());
+		}
+		while (theResourceListToPopulate.size() < thePids.size()) {
+			theResourceListToPopulate.add(null);
 		}
 
 		// Can we fast track this loading by checking elastic search?

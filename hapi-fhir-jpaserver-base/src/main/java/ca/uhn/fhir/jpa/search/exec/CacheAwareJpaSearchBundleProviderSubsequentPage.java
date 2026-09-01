@@ -89,12 +89,6 @@ public class CacheAwareJpaSearchBundleProviderSubsequentPage extends BaseCacheAw
 
 	@Override
 	protected Search provideSearchEntity() {
-		if (myRequestPartitionId == null) {
-			ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forSearchUuid(mySearchUuid);
-			myRequestPartitionId =
-					myRequestPartitionHelperSvc.determineReadPartitionForRequest(myRequestDetails, details);
-		}
-
 		ourLog.debug("Fetching cached search with UUID: {}", mySearchUuid);
 
 		Optional<Search> searchEntityOpt = mySearchCacheSvc.fetchByUuid(mySearchUuid, myRequestPartitionId);

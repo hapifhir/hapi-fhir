@@ -57,6 +57,7 @@ import java.util.Optional;
  */
 public class CacheAwareJpaSearchBundleProviderFirstPage extends BaseCacheAwareJpaSearchBundleProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(CacheAwareJpaSearchBundleProviderFirstPage.class);
+	public static final String HAPI_CACHE_NAME = "HapiSearchCache";
 
 	private final CacheControlDirective myCacheControlDirective;
 	private Search myCandidateSearchEntity;
@@ -128,7 +129,7 @@ public class CacheAwareJpaSearchBundleProviderFirstPage extends BaseCacheAwareJp
 							retVal = cachedQueryOpt.get();
 
 							myCacheStatus = SearchCacheStatus.builder()
-									.withCacheName("HapiQueryCache")
+									.withCacheName(HAPI_CACHE_NAME)
 									.setStatus(SearchCacheStatus.SearchCacheStatusEnum.HIT)
 									.setCacheEntryTimestamp(retVal.getCreated())
 									.build();
@@ -141,7 +142,7 @@ public class CacheAwareJpaSearchBundleProviderFirstPage extends BaseCacheAwareJp
 
 						} else {
 							myCacheStatus = SearchCacheStatus.builder()
-									.withCacheName("HapiQueryCache")
+									.withCacheName(HAPI_CACHE_NAME)
 									.setStatus(SearchCacheStatus.SearchCacheStatusEnum.FWD_MISS)
 									.build();
 						}
@@ -153,10 +154,18 @@ public class CacheAwareJpaSearchBundleProviderFirstPage extends BaseCacheAwareJp
 
 		} else {
 
-			/// If we get here, we're in a second transaction on the same IBundleProvidr instance. This
-			/// generally means that someone has kept it around and are making subsequent calls to
-			/// {@link #getResources(int, int, ResponsePage.ResponsePageBuilder)}. So we reload the
-			/// entity so we have a fresh copy attached to the session for when we go to commit it.
+			/// If we get here, it means that this method has been called twice (since this
+			/// method clears `myCandidateSearchEntity` as soon as it is consumed). This means
+		    /// that someone has kept a reference to this IBundleProvider around and is making
+		    /// repeated calls to it for more search results (i.e. they have called
+			/// {@link ca.uhn.fhir.rest.api.server.IBundleProvider#getResources(int, int)})
+			/// multiple times on the same instance).
+			///
+			/// This won't happen for standard REST calls, since the plain server framework
+			/// will only call {@link ca.uhn.fhir.rest.api.server.IBundleProvider#getResources(int, int)}
+			/// once. But it can happen for services which perform searches internally, like Batch2
+			/// jobs. So we reload the entity, so we have a fresh copy attached to the session for
+			/// when we go to commit it.
 
 			retVal = mySearchCacheSvc
 					.fetchByUuid(provideLoadedSearchEntity().getUuid(), myRequestPartitionId)

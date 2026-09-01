@@ -881,12 +881,17 @@ public abstract class BaseJpaTest extends BaseTest {
 	}
 
 	protected List<String> toUnqualifiedIdValues(IBaseBundle theFound) {
-		List<String> retVal = new ArrayList<>();
 
 		List<IBaseResource> res = BundleUtil.toListOfResources(getFhirContext(), theFound);
 		int size = res.size();
 		ourLog.info("Found {} results", size);
-		for (IBaseResource next : res) {
+		return toUnqualifiedIdValues(res);
+	}
+
+	@Nonnull
+	protected List<String> toUnqualifiedIdValues(List<IBaseResource> theResources) {
+		List<String> retVal = new ArrayList<>();
+		for (IBaseResource next : theResources) {
 			retVal.add(next.getIdElement().toUnqualified().getValue());
 		}
 		return retVal;

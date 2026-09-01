@@ -2,9 +2,9 @@
 type: perf
 issue: 8217
 title: "The 'async' search coordinator (used for cache-aware searching, which is generally
-   the default kind of search) was reworked last year to no longer actually be 
+   the default kind of search) was reworked a few years ago to no longer actually be 
    asynchronous from the invoking HTTP client thread, but a lot of the surrounding
    infrastructure was not touched. This meant that a simple FHIR search had more database
    round trips than necessary (often quite a few for a simple search). 
-   This coordinator has been reworked into into a new 'Cache Aware Search Service' which
+   This coordinator has been reworked into a new 'Cache Aware Search Service' which
    is very deliberate about avoiding unnecessary database round trips."

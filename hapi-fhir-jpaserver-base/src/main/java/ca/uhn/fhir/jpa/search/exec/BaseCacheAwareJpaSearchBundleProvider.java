@@ -360,15 +360,19 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 				}
 
 				/*
-				 * If we've finished the search, and the currently fetched range has the same
-				 * start as the one we want, and the end exceeds the end of the fetched results,
-				 * then the fetched range is fine to return.
+				 * We can reuse the previously fetched matches if the range being
+				 * requested now is the same as the one we already fetched. We can
+				 * also reuse if the end of the requested range (theToIndex) is
+				 * >= the total number of matches for the search, and <= the
+				 * upper end of the range (since this means that no matter how
+				 * high theToIndex is, we already have all the matches we need)
 				 */
 				if (mySearchEntity != null
 						&& mySearchEntity.getStatus() == SearchStatusEnum.FINISHED
 						&& mySearchEntity.getTotalCount() != null
-						&& mySearchEntity.getTotalCount() <= theToIndex
-						&& theToIndex <= myCachedPidsFromMatchesAndIncludes.toIndex()) {
+						&& theFromIndex == myCachedPidsFromMatchesAndIncludes.fromIndex()
+						&& theToIndex <= myCachedPidsFromMatchesAndIncludes.toIndex()
+						&& theToIndex >= mySearchEntity.getTotalCount()) {
 					return myCachedPidsFromMatchesAndIncludes;
 				}
 			}
@@ -405,34 +409,23 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 		}
 
 		/*
-		 * Ok, so we need to actually open a database transaction and perform the search. We do this in a loop to
-		 * defend against the case where multiple client threads are all fetching new pages of search results
-		 * concurrently (since they will all try to write new pages of results to the query cache, and only
-		 * one will succeed while the others fail with a constraint error.
+		 * Ok, so we need to actually open a database transaction and perform the search.
+		 * We will automatically retry if we get a constraint error, since presumably
+		 * some other thread is also performing the search. If the error just keeps happening,
+		 * we must have a deeper problem, so we should bail.
 		 */
-		for (int i = 0; ; i++) {
-			try {
-				myTxService
-						.withRequest(myRequestDetails)
-						.withRequestPartitionId(myRequestPartitionId)
-						.execute(() -> initializeSearchInsideTransaction(theFromIndex, theToIndex));
-				break;
-			} catch (ResourceVersionConflictException e) {
-				// We failed to write to the query cache. We'll retry the search a few times since presumably
-				// some other thread is also performing the search. If the error just keeps happening, we must
-				// have a deeper problem so we should bail.
-				if (i == 5) {
-					throw e;
-				}
-				ourLog.warn("Constraint error while writing search results to query cache: {}", e.toString());
-				new SleepUtil().sleepAtLeast(500, false);
-			} catch (ResourceGoneException e) {
-				ourLog.info("Aborted search: {}", e.getMessage());
-				throw e;
-			} catch (UnexpectedRollbackException e) {
-				validateSearchEntityNotFailed();
-				throw e;
-			}
+		try {
+			myTxService
+					.withRequest(myRequestDetails)
+					.withRequestPartitionId(myRequestPartitionId)
+					.withMaxRetries(3)
+					.execute(() -> initializeSearchInsideTransaction(theFromIndex, theToIndex));
+		} catch (ResourceGoneException e) {
+			ourLog.info("Aborted search: {}", e.getMessage());
+			throw e;
+		} catch (UnexpectedRollbackException e) {
+			validateSearchEntityNotFailed();
+			throw e;
 		}
 
 		validateSearchEntityNotFailed();
@@ -468,7 +461,9 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 				Long countQuery = newSearchBuilder()
 						.createCountQuery(myParams, mySearchEntity.getUuid(), myRequestDetails, myRequestPartitionId);
 				mySearchEntity.setSearchParameterMap(myParams);
-				mySearchEntity.setTotalCount(Math.toIntExact(countQuery));
+				if (countQuery != null) {
+					mySearchEntity.setTotalCount(Math.toIntExact(countQuery));
+				}
 				mySearchEntity.setStatus(SearchStatusEnum.FINISHED);
 				mySearchCacheSvc.save(mySearchEntity, myRequestPartitionId);
 			}
@@ -633,8 +628,8 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 				mySearchEntity, previouslyFoundPids, foundPidsToStore, myRequestDetails, myRequestPartitionId);
 
 		int numberToReturn = theToIndex - theFromIndex;
-		while (pidsToReturn.size() > numberToReturn) {
-			pidsToReturn.remove(pidsToReturn.size() - 1);
+		if (pidsToReturn.size() > numberToReturn) {
+			pidsToReturn.subList(numberToReturn, pidsToReturn.size()).clear();
 		}
 
 		fetchResourcesAndIncludes(searchBuilder, pidsToReturn, theFromIndex, theToIndex);
@@ -660,7 +655,12 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 		 * If we're searching for the first page of results:
 		 *
 		 * - If the requested count is greater than the first threshold, just search
-		 *   for exactly the requested count instead of advancing to the next threshold.
+		 *   for exactly one more than the requested count instead of advancing to
+		 *   the next threshold. We do this because we assume that many searches will
+		 *   request exactly the number they want to consume, and will never fetch
+		 *   subsequent pages, so this way we avoid fetching 500 results when the
+		 *   client just wants one page of 20. We add one so that we know whether
+		 *   a subsequent page exists though.
 		 * - If the requested count is greater than the last threshold, just search
 		 *   for exactly the last threshold, and don't exceed it.
 		 */

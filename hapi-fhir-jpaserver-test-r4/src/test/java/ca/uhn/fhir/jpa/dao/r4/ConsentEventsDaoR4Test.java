@@ -293,6 +293,39 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
+	public void testSearchAndBlockSomeOnIncludes_IncludesAreDeleted() {
+		IIdType pt0 = createPatient(withActiveTrue());
+		IIdType pt1 = createPatient(withActiveTrue());
+
+		IIdType obs0 = createObservation(withSubject(pt0));
+		IIdType obs1 = createObservation(withSubject(pt1));
+		long evenPid = getEvenPid(obs0, obs1);
+
+		myStorageSettings.setEnforceReferentialIntegrityOnDelete(false);
+		myPatientDao.delete(pt0, newSrd());
+		myPatientDao.delete(pt1, newSrd());
+
+		AtomicInteger preAccessInterceptorCallCount = new AtomicInteger(0);
+		List<String> interceptedResourceIds = new ArrayList<>();
+		IAnonymousInterceptor interceptor = new PreAccessInterceptorCountingAndBlockOdd(preAccessInterceptorCallCount, interceptedResourceIds);
+		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
+
+		// Perform a search
+		SearchParameterMap map = new SearchParameterMap();
+		map.addInclude(Observation.INCLUDE_PATIENT);
+		IBundleProvider outcome = myObservationDao.search(map, mySrd);
+
+		// Fetch the first 10 (don't cross a fetch boundary)
+		List<IBaseResource> resources = outcome.getResources(0, 100);
+		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
+		assertThat(returnedIdValues).containsExactly(
+			"Observation/" + evenPid
+		);
+		assertEquals(1, preAccessInterceptorCallCount.get());
+	}
+
+
+	@Test
 	public void testSearchAndBlockNoneOnIncludes() {
 		create50Observations();
 
@@ -367,6 +400,32 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals(1, hitCount.get());
 		assertEquals(sort(myObservationIdsWithoutVersions.subList(90, myObservationIdsWithoutVersions.size())), sort(interceptedResourceIds));
 		returnedIdValues.forEach(t -> assertTrue(new IdType(t).getIdPartAsLong() % 2 == 0));
+	}
+
+	@Test
+	public void testHistoryAndBlockSome_MostRecentVersionIsDeleted() {
+		IIdType pt0 = createPatient(withActiveTrue());
+		IIdType pt1 = createPatient(withActiveTrue());
+		myPatientDao.delete(pt0, newSrd());
+		myPatientDao.delete(pt1, newSrd());
+		long evenPid = getEvenPid(pt0, pt1);
+
+		AtomicInteger hitCount = new AtomicInteger(0);
+		List<String> interceptedResourceIds = new ArrayList<>();
+		IAnonymousInterceptor interceptor = new PreAccessInterceptorCountingAndBlockOdd(hitCount, interceptedResourceIds);
+		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
+
+		// Perform a history
+		IBundleProvider outcome = myPatientDao.history(null, null, null, mySrd);
+		List<IBaseResource> resources = outcome.getResources(0, 10);
+
+		// Verify
+		assertEquals(1, hitCount.get());
+		List<String> returnedIdValues = toUnqualifiedIdValues(resources);
+		assertThat(returnedIdValues).containsExactly(
+			"Patient/" + evenPid + "/_history/2",
+			"Patient/" + evenPid + "/_history/1"
+		);
 	}
 
 	@Test
@@ -498,7 +557,10 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 			List<String> ids = new ArrayList<>();
 			for (int i = 0; i < accessDetails.size(); i++) {
-				ids.add(accessDetails.getResource(i).getIdElement().toUnqualifiedVersionless().getValue());
+				IBaseResource resource = accessDetails.getResource(i);
+				if (resource != null) {
+					ids.add(resource.getIdElement().toUnqualifiedVersionless().getValue());
+				}
 			}
 			ourLog.info("Invoking {} for {} results: {}", thePointcut, count, ids);
 
@@ -542,5 +604,14 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		return retVal;
 	}
 
+	/**
+	 * Given two resource IDs where one has an even numeric ID part, and the other has
+	 * an odd numeric ID part, returns the even ID. Throws an exception if the IDs are
+	 * both odd or even.
+	 */
+	private static long getEvenPid(IIdType theResourceId0, IIdType theResourceId1) {
+		assertTrue(theResourceId0.getIdPartAsLong() % 2 == 0 ^ theResourceId1.getIdPartAsLong() % 2 == 0, ()->"Expected one even and one odd, got " + theResourceId0 + " and " + theResourceId1);
+		return theResourceId0.getIdPartAsLong() % 2 == 0 ? theResourceId0.getIdPartAsLong() : theResourceId1.getIdPartAsLong();
+	}
 
 }

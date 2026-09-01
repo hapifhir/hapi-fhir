@@ -21,12 +21,14 @@ package ca.uhn.fhir.jpa.search.exec;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.ExceptionService;
@@ -41,8 +43,8 @@ import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * This service performs cache-aware searches. In other words, when executing a search
- * it will check the {@link ISearchCacheSvc} for any existing cached searches, and if appropriate will store any results it finds back in the
+ * This service performs cache-aware searches. In other words, when executing a search,
+ * it will check the {@link ISearchCacheSvc} for any existing cached searches, and if appropriate, will store any results it finds back in the
  * search cache.
  */
 public class CacheAwareJpaSearchSvcImpl implements ICacheAwareJpaSearchSvc {
@@ -58,6 +60,9 @@ public class CacheAwareJpaSearchSvcImpl implements ICacheAwareJpaSearchSvc {
 
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
+
+	@Autowired
+	private PartitionSettings myPartitionSettings;
 
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -140,19 +145,27 @@ public class CacheAwareJpaSearchSvcImpl implements ICacheAwareJpaSearchSvc {
 
 	@Override
 	public IBundleProvider continueExistingSearch(String theUuid, RequestDetails theRequestDetails) {
-		return new CacheAwareJpaSearchBundleProviderSubsequentPage(
-				myFhirContext,
-				theRequestDetails,
-				theUuid,
-				myInterceptorBroadcaster,
-				myPagingProvider,
-				myStorageSettings,
-				myEntityManager,
-				myTxService,
-				myRequestPartitionHelperSvc,
-				mySearchCacheSvc,
-				mySearchResultCacheSvc,
-				myExceptionSvc,
-				mySearchBuilderFactory);
+		CacheAwareJpaSearchBundleProviderSubsequentPage retVal = new CacheAwareJpaSearchBundleProviderSubsequentPage(
+			myFhirContext,
+			theRequestDetails,
+			theUuid,
+			myInterceptorBroadcaster,
+			myPagingProvider,
+			myStorageSettings,
+			myEntityManager,
+			myTxService,
+			myRequestPartitionHelperSvc,
+			mySearchCacheSvc,
+			mySearchResultCacheSvc,
+			myExceptionSvc,
+			mySearchBuilderFactory);
+
+		if (myPartitionSettings.isPartitioningEnabled()) {
+			ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forSearchUuid(theUuid);
+			RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, details);
+			retVal.setRequestPartitionId(requestPartitionId);
+		}
+
+		return retVal;
 	}
 }

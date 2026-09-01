@@ -45,6 +45,7 @@ import ca.uhn.fhir.rest.server.interceptor.ServerInterceptorUtil;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import jakarta.persistence.EntityManager;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -189,6 +190,7 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 								.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
 						compositeBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
 
+						Validate.isTrue(pids.size() == loadedResources.size(), "PID collection size %s doesn't match expected resource collection size of %s", pids.size(), loadedResources.size());
 						for (int i = pids.size() - 1; i >= 0; i--) {
 							if (accessDetails.isDontReturnResourceAtIndex(i)) {
 								pids.remove(i);

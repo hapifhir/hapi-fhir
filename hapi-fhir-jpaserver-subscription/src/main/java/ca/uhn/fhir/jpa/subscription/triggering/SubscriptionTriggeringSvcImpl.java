@@ -55,6 +55,7 @@ import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.google.common.collect.Lists;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.ObjectUtils;
@@ -90,6 +91,7 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -162,8 +164,8 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			requestPartitionId = myRequestPartitionHelperSvc.determineGenericPartitionForRequest(theRequestDetails);
 		}
 
-		List<IPrimitiveType<String>> resourceIds = defaultIfNull(theResourceIds, Collections.emptyList());
-		List<IPrimitiveType<String>> searchUrls = defaultIfNull(theSearchUrls, Collections.emptyList());
+		List<IPrimitiveType<String>> resourceIds = getIfNull(theResourceIds, Collections.emptyList());
+		List<IPrimitiveType<String>> searchUrls = getIfNull(theSearchUrls, Collections.emptyList());
 		// Make sure we have at least one resource ID or search URL
 		if (resourceIds.isEmpty() && searchUrls.isEmpty()) {
 			throw new InvalidRequestException(Msg.code(23) + "No resource IDs or search URLs specified for triggering");
@@ -299,11 +301,8 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 			ourLog.info("Triggering job[{}] is starting a search for {}", theJobDetails.getJobId(), nextSearchUrl);
 
-			SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
-			systemRequestDetails.setRequestPartitionId(theJobDetails.getRequestPartitionId());
-
 			search = mySearchCoordinatorSvc.createNewSearch(
-					callingDao, params, resourceType, new CacheControlDirective(), systemRequestDetails);
+					callingDao, params, resourceType, new CacheControlDirective(), newSystemRequestDetails(theJobDetails));
 
 			if (isNull(search.getUuid())) {
 				// we don't have a search uuid i.e. we're setting up for synchronous processing
@@ -341,11 +340,16 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 				sw.getThroughput(totalSubmitted.get(), TimeUnit.SECONDS));
 	}
 
+	@Nonnull
+	private static SystemRequestDetails newSystemRequestDetails(SubscriptionTriggeringJobDetails theJobDetails) {
+		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
+		systemRequestDetails.setRequestPartitionId(theJobDetails.getRequestPartitionId());
+		return systemRequestDetails;
+	}
+
 	private void processAsynchronous(
 			SubscriptionTriggeringJobDetails theJobDetails, AtomicInteger totalSubmitted, List<Future<?>> futures) {
 		int fromIndex = theJobDetails.getCurrentSearchLastUploadedIndex() + 1;
-
-		IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(theJobDetails.getCurrentSearchResourceType());
 
 		int maxQuerySize = myMaxSubmitPerPass - totalSubmitted.get();
 		int toIndex;
@@ -366,7 +370,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		List<IBaseResource> allResources;
 		try {
 			IBundleProvider search = mySearchCoordinatorSvc.continueExistingSearch(
-					theJobDetails.getCurrentSearchUuid(), new SystemRequestDetails());
+					theJobDetails.getCurrentSearchUuid(), newSystemRequestDetails(theJobDetails));
 			allResources = search.getResources(fromIndex, toIndex);
 		} catch (ResourceGoneException e) {
 			ourLog.debug("Search has expired, submission is done with error: {}", e.getMessage());
