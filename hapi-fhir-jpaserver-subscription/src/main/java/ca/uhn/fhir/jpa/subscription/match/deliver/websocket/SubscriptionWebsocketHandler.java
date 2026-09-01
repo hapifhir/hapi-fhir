@@ -146,7 +146,7 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 		private void deliver(String payload) {
 			try {
 				// Log it
-				ourLog.info("Sending WebSocket message: {}", payload);
+				ourLog.debug("Sending WebSocket message: {}", payload);
 
 				// Send message
 				mySession.sendMessage(new TextMessage(payload));
