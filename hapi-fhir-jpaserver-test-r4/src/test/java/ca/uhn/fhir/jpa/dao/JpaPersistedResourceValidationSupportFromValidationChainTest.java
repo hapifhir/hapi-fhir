@@ -31,7 +31,9 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.ClasspathUtil.loadResource;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -93,7 +95,7 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 
 		final ValidationResult validationResult = validator.validateWithResult(bundleWithBadLibrary);
 
-		assertEquals(10, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
+		assertErrorMessageCount(12, validationResult);
 	}
 
 	@Test
@@ -110,7 +112,7 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 
 		final ValidationResult validationResult = validator.validateWithResult(bundleWithMeasureOnly);
 
-		assertEquals(8, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
+		assertErrorMessageCount(10, validationResult);
 	}
 
 	@Test
@@ -124,7 +126,7 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 
 		final ValidationResult validationResult = validator.validateWithResult(bundleWithMeasureOnlyNoLibraryReference);
 
-		assertEquals(7, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
+		assertErrorMessageCount(9, validationResult);
 	}
 
 	@Test
@@ -302,6 +304,16 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 	@Nonnull
 	private static Predicate<SingleValidationMessage> errorMessagePredicate() {
 		return message -> message.getSeverity() == ResultSeverityEnum.ERROR;
+	}
+
+	private static void assertErrorMessageCount(int theExpectedCount, ValidationResult theValidationResult) {
+		List<SingleValidationMessage> errorMessages = theValidationResult.getMessages().stream()
+			.filter(errorMessagePredicate())
+			.collect(Collectors.toList());
+		assertEquals(theExpectedCount, errorMessages.size(), () -> "Expected " + theExpectedCount + " error messages but found " + errorMessages.size() + ":\n" +
+			errorMessages.stream()
+				.map(message -> "line " + message.getLocationLine() + ", col " + message.getLocationCol() + ": " + message.getMessage())
+				.collect(Collectors.joining("\n")));
 	}
 
 	private static SimpleBundleProvider getBundleProviderWithCodeSystem(String theUrl, String theVersion) {

@@ -68,6 +68,7 @@ import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.storage.test.SqlCountTypeEnum;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
@@ -386,7 +387,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(47, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-		assertEquals(80, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(85, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
 		runInTransaction(() -> assertThat(myResourceTableDao.findAll()).isEmpty());
 		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll()).isEmpty());
@@ -2706,13 +2707,15 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		Bundle outcome = mySystemDao.transaction(mySrd, input.get());
 		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
-		myCaptureQueriesListener.logInsertQueries();
-		assertEquals(18, myCaptureQueriesListener.countInsertQueries());
-		myCaptureQueriesListener.logUpdateQueries();
-		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertThat(myCaptureQueriesListener).has(
+			onAllThreads()
+				.selectCount(1)
+				.insertCount(5, SqlCountTypeEnum.STATEMENTS)
+				.insertCount(18, SqlCountTypeEnum.PARAMETER_SETS)
+				.connectionCount(1)
+				.commitCount(1)
+				.noOtherCounts()
+		);
 
 		/*
 		 * Run a second time
@@ -2720,13 +2723,17 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input.get());
-		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(4, myCaptureQueriesListener.countSelectQueries());
-		myCaptureQueriesListener.logInsertQueries();
-		assertEquals(2, myCaptureQueriesListener.countInsertQueries());
-		myCaptureQueriesListener.logUpdateQueries();
-		assertEquals(4, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertThat(myCaptureQueriesListener).has(
+			onAllThreads()
+				.selectCount(4)
+				.insertCount(1, SqlCountTypeEnum.STATEMENTS)
+				.insertCount(2, SqlCountTypeEnum.PARAMETER_SETS)
+				.updateCount(2, SqlCountTypeEnum.STATEMENTS)
+				.updateCount(4, SqlCountTypeEnum.PARAMETER_SETS)
+				.connectionCount(1)
+				.commitCount(1)
+				.noOtherCounts()
+		);
 
 		/*
 		 * Third time with mass ingestion mode enabled
@@ -2735,14 +2742,17 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input.get());
-		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
-		myCaptureQueriesListener.logInsertQueries();
-		assertEquals(2, myCaptureQueriesListener.countInsertQueries());
-		myCaptureQueriesListener.logUpdateQueries();
-		assertEquals(4, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-
+		assertThat(myCaptureQueriesListener).has(
+			onAllThreads()
+				.selectCount(3)
+				.insertCount(1, SqlCountTypeEnum.STATEMENTS)
+				.insertCount(2, SqlCountTypeEnum.PARAMETER_SETS)
+				.updateCount(2, SqlCountTypeEnum.STATEMENTS)
+				.updateCount(4, SqlCountTypeEnum.PARAMETER_SETS)
+				.connectionCount(1)
+				.commitCount(1)
+				.noOtherCounts()
+		);
 	}
 
 	/**
@@ -2900,15 +2910,18 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	 * of selects too, but this is tricky and may not be worth the effort.
 	 */
 	@ParameterizedTest
-	@CsvSource({
-		"SINGLE_TOKEN   , false, 1  4  4",
-		"SINGLE_TOKEN   , true,  1  3  3",
-		"MULTIPLE_TOKEN , false, 10 13 13",
-		"MULTIPLE_TOKEN , true,  10 3  3",
-		"STRING         , false, 10 13 13",
-		"STRING         , true,  10 3  3",
-	})
-	public void testTransactionWithMultipleConditionalUpdateUrls(String theMatchMode, boolean theMatchUrlCacheEnabled, String theExpectedCounts) {
+	@CsvSource(useHeadersInDisplayName = true, textBlock =
+		"""
+		MatchMode      , MatchUrlCacheEnabled, ExpectSelectFirst, ExpectedSelectSubsequent, ExpectedInsertFirst, ExpectedInsertSubsequent
+		SINGLE_TOKEN   , false                , 1                , 4                       , 7                  , 1
+		SINGLE_TOKEN   , true                 , 1                , 3                       , 7                  , 1
+		MULTIPLE_TOKEN , false                , 10               , 13                      , 7                  , 1
+		MULTIPLE_TOKEN , true                 , 10               , 3                       , 7                  , 1
+		STRING         , false                , 10               , 13                      , 7                  , 1
+		STRING         , true                 , 10               , 3                       , 7                  , 1
+		"""
+	)
+	public void testTransactionWithMultipleConditionalUpdateUrls(String theMatchMode, boolean theMatchUrlCacheEnabled, int theExpectSelectFirst, int theExpectSelectSubsequent, int theExpectInsertFirst, int theExpectInsertSubsequent) {
 		myStorageSettings.setMatchUrlCacheEnabled(theMatchUrlCacheEnabled);
 
 		Supplier<Bundle> input = () ->{
@@ -2935,27 +2948,39 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			return bb.getBundleTyped();
 		};
 
-		String selectCounts = "";
-
 		// Run the first time
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input.get());
-		myCaptureQueriesListener.logSelectQueries();
-		selectCounts += myCaptureQueriesListener.countSelectQueries();
+		assertThat(myCaptureQueriesListener).has(
+			onAllThreads()
+				.selectCount(theExpectSelectFirst)
+				.insertCount(theExpectInsertFirst, SqlCountTypeEnum.STATEMENTS)
+				.connectionCount(1)
+				.commitCount(1)
+		);
 
 		// Run the second time
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input.get());
-		myCaptureQueriesListener.logSelectQueries();
-		selectCounts += " " + myCaptureQueriesListener.countSelectQueries();
+		myCaptureQueriesListener.logInsertQueries();
+		assertThat(myCaptureQueriesListener).has(
+			onAllThreads()
+				.selectCount(theExpectSelectSubsequent)
+				.insertCount(theExpectInsertSubsequent, SqlCountTypeEnum.STATEMENTS)
+				.connectionCount(1)
+				.commitCount(1)
+		);
 
 		// Run the third time
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input.get());
-		myCaptureQueriesListener.logSelectQueries();
-		selectCounts += " " + myCaptureQueriesListener.countSelectQueries();
-
-		assertEquals(theExpectedCounts.replaceAll("  +", " ").trim(), selectCounts);
+		assertThat(myCaptureQueriesListener).has(
+			onAllThreads()
+				.selectCount(theExpectSelectSubsequent)
+				.insertCount(theExpectInsertSubsequent, SqlCountTypeEnum.STATEMENTS)
+				.connectionCount(1)
+				.commitCount(1)
+		);
 	}
 
 	/**
