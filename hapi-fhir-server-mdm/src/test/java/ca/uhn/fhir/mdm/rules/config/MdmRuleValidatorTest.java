@@ -295,7 +295,7 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 	void eidSystems_withEmptyArray_throws() {
 		assertThatThrownBy(() -> setMdmRuleJson("bad-rules-empty-eid-system-array.json"))
 			.isInstanceOf(ConfigurationException.class)
-			.hasMessageContaining(Msg.code(3043))
+			.hasMessageContaining(Msg.code(3044))
 			.hasMessageContaining("Organization");
 	}
 
@@ -303,7 +303,7 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 	void eidSystems_withSameSystemListedTwiceForOneResourceType_throws() {
 		assertThatThrownBy(() -> setMdmRuleJson("bad-rules-duplicate-eid-system.json"))
 			.isInstanceOf(ConfigurationException.class)
-			.hasMessageContaining(Msg.code(3044))
+			.hasMessageContaining(Msg.code(3045))
 			.hasMessageContaining("http://example.com/mrn");
 	}
 

@@ -128,7 +128,7 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 			}
 
 			if (uris.isEmpty()) {
-				throw new ConfigurationException(Msg.code(3043)
+				throw new ConfigurationException(Msg.code(3044)
 						+ String.format(
 								"The eidSystems entry for [%s] is empty. Either remove it, or list at least one EID system.",
 								resourceType));
@@ -137,7 +137,7 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 			Set<String> seenUris = new HashSet<>();
 			uris.forEach(uri -> {
 				if (!seenUris.add(uri)) {
-					throw new ConfigurationException(Msg.code(3044)
+					throw new ConfigurationException(Msg.code(3045)
 							+ String.format(
 									"The eidSystem [%s] is listed more than once for [%s] in the eidSystems field.",
 									uri, resourceType));
