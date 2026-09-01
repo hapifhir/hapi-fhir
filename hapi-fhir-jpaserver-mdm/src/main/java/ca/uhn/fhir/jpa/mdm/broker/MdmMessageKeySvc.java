@@ -24,13 +24,15 @@ import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class MdmMessageKeySvc implements ISubscriptionMessageKeySvc {
-	@Autowired
-	private EIDHelper myEIDHelper;
+	private final EIDHelper myEIDHelper;
+
+	public MdmMessageKeySvc(EIDHelper theEidHelper) {
+		myEIDHelper = theEidHelper;
+	}
 
 	/**
 	 * The broker routes messages sharing a key to the same consumer, which is what keeps changes to one

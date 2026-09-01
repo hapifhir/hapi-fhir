@@ -12,7 +12,6 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.HashSet;
 import java.util.List;
@@ -53,8 +52,7 @@ public class MdmMessageKeySvcTest {
 		MdmSettings mdmSettings =
 			new MdmSettings(new MdmRuleValidator(ourFhirContext, searchParamRetriever, null, null)).setMdmRules(rules);
 
-		myMessageKeySvc = new MdmMessageKeySvc();
-		ReflectionTestUtils.setField(myMessageKeySvc, "myEIDHelper", new EIDHelper(ourFhirContext, mdmSettings));
+		myMessageKeySvc = new MdmMessageKeySvc(new EIDHelper(ourFhirContext, mdmSettings));
 	}
 
 	@Test
