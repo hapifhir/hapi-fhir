@@ -9,6 +9,7 @@ import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,14 +43,26 @@ class GoldenResourceHelperR4Test extends BaseR4Test {
 				new HashSet<>(), new HashSet<>(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE,
 				null, null, null));
 
+		// Set preventMultipleEids explicitly rather than relying on the field default: tests below depend
+		// on which branch of updateGoldenResourceExternalEidFromSourceResource is taken, and that must not
+		// change silently if the default ever moves.
+		configure(List.of(MRN_SYSTEM, NPI_SYSTEM), false);
+	}
+
+	/**
+	 * Rebuilds the helpers under test for a given EID-system configuration. Tests that need a different
+	 * configuration call this first; {@link #before()} establishes the default used by the rest.
+	 */
+	private void configure(List<String> theEidSystems, boolean thePreventMultipleEids) {
 		MdmRulesJson rules = new MdmRulesJson();
 		rules.setVersion("test version");
 		rules.setMdmTypes(List.of("Patient"));
-		rules.addEnterpriseEIDSystems("Patient", List.of(MRN_SYSTEM, NPI_SYSTEM));
+		rules.addEnterpriseEIDSystems("Patient", theEidSystems);
 
 		MdmSettings mdmSettings = new MdmSettings(
 				new MdmRuleValidator(ourFhirContext, mySearchParamRetriever, myIMatcherFactory, mySimilarityFactory))
 			.setMdmRules(rules);
+		mdmSettings.setPreventMultipleEids(thePreventMultipleEids);
 		myEidHelper = new EIDHelper(ourFhirContext, mdmSettings);
 		myGoldenResourceHelper = new GoldenResourceHelper(
 			ourFhirContext, mdmSettings, myEidHelper, new MdmPartitionHelper(new MessageHelper(mdmSettings, ourFhirContext), mdmSettings));
@@ -105,6 +118,129 @@ class GoldenResourceHelperR4Test extends BaseR4Test {
 		assertThat(myEidHelper.getExternalEid(golden)).extracting(CanonicalEID::getSystemAndValueKey)
 			.containsExactly(MRN_SYSTEM + "|mrn-2");
 		assertThat(golden.getIdentifier()).extracting(Identifier::getSystem).contains(UNRELATED_SYSTEM);
+	}
+
+	/**
+	 * A source resource that shares one EID with its matched Golden Resource must still contribute
+	 * the EIDs it carries from EID systems that Golden Resource has no EID in at all.
+	 */
+	@Test
+	void updateGoldenResourceExternalEid_preventMultipleEids_incomingCarriesEidFromASystemTheGoldenLacks_addsIt() {
+		configure(List.of(MRN_SYSTEM, NPI_SYSTEM), true);
+
+		Patient golden = new Patient();
+		golden.addIdentifier(new Identifier().setSystem(MRN_SYSTEM).setValue("mrn-1"));
+
+		Patient source = new Patient();
+		source.addIdentifier(new Identifier().setSystem(MRN_SYSTEM).setValue("mrn-1"));
+		source.addIdentifier(new Identifier().setSystem(NPI_SYSTEM).setValue("npi-9"));
+
+		myGoldenResourceHelper.updateGoldenResourceExternalEidFromSourceResource(
+			golden, source, new MdmTransactionContext(MdmTransactionContext.OperationType.UPDATE_RESOURCE));
+
+		assertThat(myEidHelper.getExternalEid(golden))
+			.extracting(CanonicalEID::getSystemAndValueKey)
+			.containsExactlyInAnyOrder(MRN_SYSTEM + "|mrn-1", NPI_SYSTEM + "|npi-9");
+	}
+
+	/**
+	 * The safeguard is per EID system, so an incoming EID that contradicts the Golden Resource within a
+	 * system it already uses must not be applied - the resulting Golden Resource would carry two EIDs of
+	 * one system and be rejected on its next write. The drop is recorded in the transaction log rather
+	 * than discarded silently.
+	 */
+	@Test
+	void updateGoldenResourceExternalEid_preventMultipleEids_incomingConflictsWithinAnOccupiedSystem_addsNothingAndRecordsIt() {
+		configure(List.of(MRN_SYSTEM, NPI_SYSTEM), true);
+
+		Patient golden = new Patient();
+		golden.addIdentifier(new Identifier().setSystem(MRN_SYSTEM).setValue("mrn-1"));
+		golden.addIdentifier(new Identifier().setSystem(NPI_SYSTEM).setValue("npi-7"));
+
+		Patient source = new Patient();
+		source.addIdentifier(new Identifier().setSystem(MRN_SYSTEM).setValue("mrn-1"));
+		source.addIdentifier(new Identifier().setSystem(NPI_SYSTEM).setValue("npi-9"));
+
+		MdmTransactionContext context = new MdmTransactionContext(
+			TransactionLogMessages.createNew(), MdmTransactionContext.OperationType.UPDATE_RESOURCE);
+		myGoldenResourceHelper.updateGoldenResourceExternalEidFromSourceResource(golden, source, context);
+
+		assertThat(myEidHelper.getExternalEid(golden))
+			.extracting(CanonicalEID::getSystemAndValueKey)
+			.containsExactlyInAnyOrder(MRN_SYSTEM + "|mrn-1", NPI_SYSTEM + "|npi-7");
+		assertThat(context.getTransactionLogMessages().getValues())
+			.anySatisfy(message -> assertThat(message).contains("npi-9").contains("npi-7"));
+	}
+
+	/**
+	 * Two EIDs from one absent system must contribute only the first: applying both would leave the
+	 * Golden Resource holding two EIDs of that system.
+	 */
+	@Test
+	void updateGoldenResourceExternalEid_preventMultipleEids_incomingCarriesTwoEidsFromAnAbsentSystem_addsOnlyTheFirst() {
+		configure(List.of(MRN_SYSTEM, NPI_SYSTEM), true);
+
+		Patient golden = new Patient();
+		golden.addIdentifier(new Identifier().setSystem(MRN_SYSTEM).setValue("mrn-1"));
+
+		Patient source = new Patient();
+		source.addIdentifier(new Identifier().setSystem(MRN_SYSTEM).setValue("mrn-1"));
+		source.addIdentifier(new Identifier().setSystem(NPI_SYSTEM).setValue("npi-8"));
+		source.addIdentifier(new Identifier().setSystem(NPI_SYSTEM).setValue("npi-9"));
+
+		myGoldenResourceHelper.updateGoldenResourceExternalEidFromSourceResource(
+			golden, source, new MdmTransactionContext(MdmTransactionContext.OperationType.UPDATE_RESOURCE));
+
+		assertThat(myEidHelper.getExternalEid(golden))
+			.extracting(CanonicalEID::getSystemAndValueKey)
+			.containsExactlyInAnyOrder(MRN_SYSTEM + "|mrn-1", NPI_SYSTEM + "|npi-8");
+	}
+
+	/**
+	 * The single-EID-system no-op, at unit level: the Golden Resource already carries an EID in the only
+	 * configured system, so there is never anything to add.
+	 */
+	@Test
+	void updateGoldenResourceExternalEid_preventMultipleEids_singleEidSystem_addsNothing() {
+		configure(List.of(MRN_SYSTEM), true);
+
+		Patient golden = new Patient();
+		golden.addIdentifier(new Identifier().setSystem(MRN_SYSTEM).setValue("mrn-1"));
+
+		Patient source = new Patient();
+		source.addIdentifier(new Identifier().setSystem(MRN_SYSTEM).setValue("mrn-1"));
+
+		myGoldenResourceHelper.updateGoldenResourceExternalEidFromSourceResource(
+			golden, source, new MdmTransactionContext(MdmTransactionContext.OperationType.UPDATE_RESOURCE));
+
+		assertThat(myEidHelper.getExternalEid(golden))
+			.extracting(CanonicalEID::getSystemAndValueKey)
+			.containsExactly(MRN_SYSTEM + "|mrn-1");
+	}
+
+	/**
+	 * The single-system no-op must not depend on the "prevent multiple EIDs" safeguard ever having held:
+	 * resources written while it was off, or ingested without passing through the storage interceptor, can
+	 * carry several EIDs of one system. Those must still be left exactly as they are.
+	 */
+	@Test
+	void updateGoldenResourceExternalEid_preventMultipleEids_singleEidSystemWithLegacyMultipleEids_addsNothing() {
+		configure(List.of(MRN_SYSTEM), true);
+
+		Patient golden = new Patient();
+		golden.addIdentifier(new Identifier().setSystem(MRN_SYSTEM).setValue("mrn-1"));
+		golden.addIdentifier(new Identifier().setSystem(MRN_SYSTEM).setValue("mrn-2"));
+
+		Patient source = new Patient();
+		source.addIdentifier(new Identifier().setSystem(MRN_SYSTEM).setValue("mrn-1"));
+		source.addIdentifier(new Identifier().setSystem(MRN_SYSTEM).setValue("mrn-3"));
+
+		myGoldenResourceHelper.updateGoldenResourceExternalEidFromSourceResource(
+			golden, source, new MdmTransactionContext(MdmTransactionContext.OperationType.UPDATE_RESOURCE));
+
+		assertThat(myEidHelper.getExternalEid(golden))
+			.extracting(CanonicalEID::getSystemAndValueKey)
+			.containsExactlyInAnyOrder(MRN_SYSTEM + "|mrn-1", MRN_SYSTEM + "|mrn-2");
 	}
 
 	/**

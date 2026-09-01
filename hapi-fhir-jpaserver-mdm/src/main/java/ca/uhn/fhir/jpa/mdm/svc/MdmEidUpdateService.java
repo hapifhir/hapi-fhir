@@ -85,14 +85,18 @@ public class MdmEidUpdateService {
 		if (updateContext.isRemainsMatchedToSameGoldenResource()) {
 			// Copy over any new external EIDs which don't already exist.
 			if (!updateContext.isIncomingResourceHasAnEid() || updateContext.isHasEidsInCommon()) {
-				// update to patient that uses internal EIDs only.
+				// Must run BEFORE updateLink, which is what upserts the Golden Resource on this branch.
+				if (theMatchedGoldenResourceCandidate.isMatch()) {
+					myGoldenResourceHelper.handleExternalEidAddition(
+							updateContext.getMatchedGoldenResource(), theTargetResource, theMdmTransactionContext);
+				}
 				myMdmLinkSvc.updateLink(
 						updateContext.getMatchedGoldenResource(),
 						theTargetResource,
 						theMatchedGoldenResourceCandidate.getMatchResult(),
 						MdmLinkSourceEnum.AUTO,
 						theMdmTransactionContext);
-			} else if (!updateContext.isHasEidsInCommon()) {
+			} else {
 				handleNoEidsInCommon(
 						theTargetResource, theMatchedGoldenResourceCandidate, theMdmTransactionContext, updateContext);
 			}

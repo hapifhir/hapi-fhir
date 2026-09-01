@@ -418,10 +418,12 @@ abstract public class BaseMdmR4Test extends BaseResourceProviderR4Test {
 	}
 
 	/**
-	 * Adds an EID from the first EID system configured for Patient.
+	 * Adds an EID from the first EID system configured for Patient, or with no system at all where the
+	 * rule set configures none - which is what the single-system accessor this replaced used to do.
 	 */
 	protected Patient addExternalEID(Patient thePatient, String theEID) {
-		return addExternalEID(thePatient, patientEidSystems().get(0), theEID);
+		List<String> eidSystems = patientEidSystems();
+		return addExternalEID(thePatient, eidSystems.isEmpty() ? null : eidSystems.get(0), theEID);
 	}
 
 	/**

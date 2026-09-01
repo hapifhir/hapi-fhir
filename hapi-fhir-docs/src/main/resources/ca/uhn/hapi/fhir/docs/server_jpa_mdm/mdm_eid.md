@@ -14,6 +14,18 @@ What a resource is not normally allowed to carry is two EIDs issued by the *same
 make its identity within that system ambiguous. That is enforced by the **Prevent multiple EIDs** setting
 described below, which is enabled by default but may be turned off.
 
+## How a Golden Resource Accumulates EIDs
+
+A Golden Resource holds the EIDs of the source resources linked to it, and gains them as those resources
+arrive. A Golden Resource created from a resource carrying only a medical record number acquires the
+national provider identifier as soon as a resource carrying both is matched to it - and from that point a
+later resource carrying only the national provider identifier resolves to the same Golden Resource. This
+applies on create and on update alike.
+
+<p class="helpInfoCalloutBox">
+    There is one exception. Where the Golden Resource already holds an EID from a given system, an incoming EID from that <i>same</i> system with a different value is not copied while <b>Prevent multiple EIDs</b> is enabled, since the Golden Resource would then be ambiguous within that system. Such an EID is a contradiction between two issuing authorities rather than new information; it is recorded in the MDM transaction log so that it can be found, but no link or duplicate is raised for it.
+</p>
+
 ## MDM EID Settings
 
 The [MdmSettings](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html) bean 

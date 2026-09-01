@@ -45,8 +45,10 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.context.FhirVersionEnum.DSTU3;
@@ -211,10 +213,22 @@ public class GoldenResourceHelper {
 	}
 
 	/**
-	 * Updates EID on Golden Resource, based on the incoming source resource. If the incoming resource has an external EID, it is applied
-	 * to the Golden Resource, unless that golden resource already has an external EID which does not match, in which case throw {@link IllegalArgumentException}
+	 * Updates EIDs on a Golden Resource, based on the incoming source resource.
+	 * <ul>
+	 * <li>Where the Golden Resource has no external EID, or multiple EIDs are permitted, the incoming EIDs
+	 * are added to it.</li>
+	 * <li>Where the two share an EID, they are the same entity, so the incoming EIDs belonging to an EID
+	 * system the Golden Resource has no EID in are added to it. An incoming EID from a system it already
+	 * uses is not, whatever its value - the Golden Resource would then be ambiguous within that system -
+	 * and the drop is recorded in the transaction log.</li>
+	 * <li>Otherwise the incoming EIDs contradict the Golden Resource's, and an
+	 * {@link IllegalArgumentException} is thrown.</li>
+	 * </ul>
 	 * <p>
-	 * If running in multiple EID mode, then incoming EIDs are simply added to the Golden Resource without checking for matches.
+	 * Where a single EID system is configured for the resource type, the second case can never add
+	 * anything: every EID extracted for that resource type carries that one system, so it is already
+	 * represented on the Golden Resource.
+	 * </p>
 	 *
 	 * @param theGoldenResource The golden resource to update the external EID on.
 	 * @param theSourceResource The source we will retrieve the external EID from.
@@ -246,13 +260,31 @@ public class GoldenResourceHelper {
 			}
 		} else if (!goldenResourceOfficialEid.isEmpty()
 				&& myEIDHelper.eidMatchExists(goldenResourceOfficialEid, incomingSourceEid)) {
-			log(
-					theMdmTransactionContext,
-					"Incoming resource:" + theSourceResource.getIdElement().toVersionless() + " with EIDs "
-							+ incomingSourceEid.stream()
-									.map(CanonicalEID::toString)
-									.collect(Collectors.joining(","))
-							+ " does not need to overwrite the EID in the Golden Resource, as this EID is already present in the Golden Resource");
+			// The resources agree on at least one EID, so they are the same entity. Any EID the incoming
+			// resource carries from an EID system the Golden Resource has no EID in is new information and
+			// is applied; an EID from a system the Golden Resource already uses is not, because a Golden
+			// Resource holding two EIDs of one system would be rejected by the "prevent multiple EIDs"
+			// safeguard on the next write.
+			if (addCanonicalEidsForEidSystemsAbsentFromGoldenResource(
+					theGoldenResource, goldenResourceOfficialEid, incomingSourceEid)) {
+				log(
+						theMdmTransactionContext,
+						"Incoming resource:" + theSourceResource.getIdElement().toVersionless() + " with EIDs "
+								+ incomingSourceEid.stream()
+										.map(CanonicalEID::toString)
+										.collect(Collectors.joining(","))
+								+ " is applying to its related Golden Resource the EIDs of the EID systems that Golden Resource does not yet have an EID for");
+			} else {
+				log(
+						theMdmTransactionContext,
+						"Incoming resource:" + theSourceResource.getIdElement().toVersionless() + " with EIDs "
+								+ incomingSourceEid.stream()
+										.map(CanonicalEID::toString)
+										.collect(Collectors.joining(","))
+								+ " does not need to overwrite the EID in the Golden Resource, as this EID is already present in the Golden Resource");
+			}
+			logEidsDroppedForOccupiedEidSystems(
+					theMdmTransactionContext, theSourceResource, goldenResourceOfficialEid, incomingSourceEid);
 		} else {
 			throw new IllegalArgumentException(Msg.code(1490)
 					+ String.format(
@@ -320,12 +352,57 @@ public class GoldenResourceHelper {
 	 */
 	private boolean addCanonicalEidsToGoldenResourceIfAbsent(
 			IBaseResource theGoldenResource, List<CanonicalEID> theIncomingSourceExternalEids) {
-		Set<String> goldenResourceExternalEidKeys = myEIDHelper.getExternalEid(theGoldenResource).stream()
-				.map(CanonicalEID::getSystemAndValueKey)
+		return addCanonicalEidsToGoldenResource(
+				theGoldenResource,
+				myEIDHelper.getExternalEid(theGoldenResource),
+				theIncomingSourceExternalEids,
+				CanonicalEID::getSystemAndValueKey);
+	}
+
+	/**
+	 * Applies the incoming EIDs belonging to an EID system the Golden Resource carries no EID in at all.
+	 * An EID from a system the Golden Resource already uses is left alone whatever its value, and at most
+	 * one EID per absent system is applied - so this can never leave the Golden Resource holding two EIDs
+	 * issued by one system, which the "prevent multiple EIDs" safeguard would reject on the next write.
+	 * <p>
+	 * Where a single EID system is configured for the resource type and the Golden Resource already
+	 * carries an EID, this provably adds nothing: every EID extracted for that resource type carries that
+	 * one system, so the system is already represented.
+	 * </p>
+	 *
+	 * @return true if an EID was added
+	 */
+	private boolean addCanonicalEidsForEidSystemsAbsentFromGoldenResource(
+			IBaseResource theGoldenResource,
+			List<CanonicalEID> theGoldenResourceExternalEids,
+			List<CanonicalEID> theIncomingSourceExternalEids) {
+		return addCanonicalEidsToGoldenResource(
+				theGoldenResource,
+				theGoldenResourceExternalEids,
+				theIncomingSourceExternalEids,
+				CanonicalEID::getSystem);
+	}
+
+	/**
+	 * Applies to the Golden Resource each incoming EID whose key is not already represented on it. The set
+	 * of represented keys is seeded from the Golden Resource and grown as EIDs are applied, so an incoming
+	 * list carrying two EIDs that share a key contributes only the first.
+	 *
+	 * @param theAlreadyRepresentedKey what makes an incoming EID redundant - its system and value, or its
+	 *                                 system alone
+	 * @return true if an EID was added
+	 */
+	private boolean addCanonicalEidsToGoldenResource(
+			IBaseResource theGoldenResource,
+			List<CanonicalEID> theGoldenResourceExternalEids,
+			List<CanonicalEID> theIncomingSourceExternalEids,
+			Function<CanonicalEID, String> theAlreadyRepresentedKey) {
+		Set<String> alreadyRepresented = theGoldenResourceExternalEids.stream()
+				.map(theAlreadyRepresentedKey)
 				.collect(Collectors.toSet());
 		boolean addedEid = false;
 		for (CanonicalEID incomingExternalEid : theIncomingSourceExternalEids) {
-			if (!goldenResourceExternalEidKeys.add(incomingExternalEid.getSystemAndValueKey())) {
+			if (!alreadyRepresented.add(theAlreadyRepresentedKey.apply(incomingExternalEid))) {
 				continue;
 			}
 			cloneEidIntoResource(myFhirContext, theGoldenResource, incomingExternalEid);
@@ -357,6 +434,38 @@ public class GoldenResourceHelper {
 		return !externalEidsGoldenResource.isEmpty()
 				&& !externalEidsResource.isEmpty()
 				&& !myEIDHelper.eidMatchExists(externalEidsResource, externalEidsGoldenResource);
+	}
+
+	/**
+	 * Records, in the MDM transaction log, every incoming EID that was not applied because the Golden
+	 * Resource already carries a different EID from that same EID system. Such an EID is a contradiction
+	 * between two issuing authorities rather than new information, and it cannot be applied without making
+	 * the Golden Resource ambiguous within that system - but discarding it silently would leave no trace
+	 * of an identifier the caller supplied.
+	 */
+	private void logEidsDroppedForOccupiedEidSystems(
+			MdmTransactionContext theMdmTransactionContext,
+			IAnyResource theSourceResource,
+			List<CanonicalEID> theGoldenResourceExternalEids,
+			List<CanonicalEID> theIncomingSourceExternalEids) {
+		Set<String> goldenResourceKeys = theGoldenResourceExternalEids.stream()
+				.map(CanonicalEID::getSystemAndValueKey)
+				.collect(Collectors.toSet());
+		for (CanonicalEID incomingExternalEid : theIncomingSourceExternalEids) {
+			if (goldenResourceKeys.contains(incomingExternalEid.getSystemAndValueKey())) {
+				continue;
+			}
+			theGoldenResourceExternalEids.stream()
+					.filter(goldenEid -> Objects.equals(goldenEid.getSystem(), incomingExternalEid.getSystem()))
+					.findFirst()
+					.ifPresent(conflicting -> log(
+							theMdmTransactionContext,
+							"Incoming resource:"
+									+ theSourceResource.getIdElement().toVersionless() + " carries EID "
+									+ incomingExternalEid
+									+ " which was not applied to its Golden Resource, as that Golden Resource already has the EID "
+									+ conflicting + " for the same EID system."));
+		}
 	}
 
 	private void log(MdmTransactionContext theMdmTransactionContext, String theMessage) {

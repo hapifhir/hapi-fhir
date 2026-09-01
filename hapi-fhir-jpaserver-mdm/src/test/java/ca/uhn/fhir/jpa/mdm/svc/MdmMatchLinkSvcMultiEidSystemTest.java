@@ -125,4 +125,104 @@ public class MdmMatchLinkSvcMultiEidSystemTest extends BaseMdmR4Test {
 		assertThat(goldenEids).extracting(CanonicalEID::getSystemAndValueKey)
 			.containsExactlyInAnyOrder(mrnSystem() + "|mrn-1", npiSystem() + "|npi-9");
 	}
+
+	/**
+	 * A Golden Resource must acquire the EID of a second configured system from a later resource that
+	 * matches it, so that the OR-matching this feature provides keeps working regardless of the order
+	 * records arrive in.
+	 */
+	@Test
+	public void goldenResource_acquiresTheEidOfASecondSystemFromALaterMatchingResource() {
+		Patient first = createPatientAndUpdateLinks(addExternalEID(buildJanePatient(), mrnSystem(), "mrn-1"));
+
+		Patient carriesBoth = addExternalEID(buildJanePatient(), mrnSystem(), "mrn-1");
+		addExternalEID(carriesBoth, npiSystem(), "npi-9");
+		carriesBoth = createPatientAndUpdateLinks(carriesBoth);
+
+		assertLinksMatchResult(MATCH, MATCH);
+		assertThat(myMdmLinkDaoSvc.getPossibleDuplicates()).isEmpty();
+		assertThat(getGoldenResourceFromTargetResource(carriesBoth).getIdElement().toUnqualifiedVersionless())
+			.isEqualTo(getGoldenResourceFromTargetResource(first).getIdElement().toUnqualifiedVersionless());
+		assertThat(myEIDHelper.getExternalEid(getGoldenResourceFromTargetResource(first)))
+			.extracting(CanonicalEID::getSystemAndValueKey)
+			.containsExactlyInAnyOrder(mrnSystem() + "|mrn-1", npiSystem() + "|npi-9");
+	}
+
+	/**
+	 * The acceptance test for the whole feature. Once a resource carrying both identifiers has told MDM
+	 * that this MRN and this NPI name the same person, a later resource carrying only the NPI must join
+	 * that Golden Resource rather than starting a second one.
+	 */
+	@Test
+	public void patientArrivingWithOnlyTheSecondSystemsEid_joinsTheExistingGoldenResource() {
+		Patient mrnOnly = createPatientAndUpdateLinks(addExternalEID(buildJanePatient(), mrnSystem(), "mrn-1"));
+
+		Patient carriesBoth = addExternalEID(buildJanePatient(), mrnSystem(), "mrn-1");
+		addExternalEID(carriesBoth, npiSystem(), "npi-9");
+		createPatientAndUpdateLinks(carriesBoth);
+
+		Patient npiOnly = createPatientAndUpdateLinks(addExternalEID(buildPaulPatient(), npiSystem(), "npi-9"));
+
+		assertLinksMatchResult(MATCH, MATCH, MATCH);
+		assertLinksMatchedByEid(false, true, true);
+		assertThat(myMdmLinkDaoSvc.getPossibleDuplicates()).isEmpty();
+		assertThat(getGoldenResourceFromTargetResource(npiOnly).getIdElement().toUnqualifiedVersionless())
+			.isEqualTo(getGoldenResourceFromTargetResource(mrnOnly).getIdElement().toUnqualifiedVersionless());
+	}
+
+	/**
+	 * An EID added on update, from a system the Golden Resource has no EID in, must reach the Golden
+	 * Resource - the update path has to accumulate EIDs just as the create path does.
+	 */
+	@Test
+	public void eidFromASecondSystemAddedOnUpdate_isMergedIntoTheGoldenResource() {
+		Patient patient = createPatientAndUpdateLinks(addExternalEID(buildJanePatient(), mrnSystem(), "mrn-u"));
+
+		addExternalEID(patient, npiSystem(), "npi-u");
+		patient = updatePatientAndUpdateLinks(patient);
+
+		assertThat(myEIDHelper.getExternalEid(getGoldenResourceFromTargetResource(patient)))
+			.extracting(CanonicalEID::getSystemAndValueKey)
+			.containsExactlyInAnyOrder(mrnSystem() + "|mrn-u", npiSystem() + "|npi-u");
+	}
+	/**
+	 * A resource that agrees on the MRN but disagrees on the NPI must complete as a MATCH without the
+	 * conflicting NPI being applied - a Golden Resource carrying two NPIs would be rejected by the
+	 * "prevent multiple EIDs" safeguard on its next write, turning a data-quality problem into a failed
+	 * message.
+	 */
+	@Test
+	public void matchingResourceWithADifferentValueInAKnownSystem_leavesTheGoldenResourceUnchanged() {
+		Patient first = addExternalEID(buildJanePatient(), mrnSystem(), "mrn-1");
+		addExternalEID(first, npiSystem(), "npi-7");
+		first = createPatientAndUpdateLinks(first);
+
+		Patient conflicting = addExternalEID(buildJanePatient(), mrnSystem(), "mrn-1");
+		addExternalEID(conflicting, npiSystem(), "npi-9");
+		createPatientAndUpdateLinks(conflicting);
+
+		assertLinksMatchResult(MATCH, MATCH);
+		assertThat(myEIDHelper.getExternalEid(getGoldenResourceFromTargetResource(first)))
+			.extracting(CanonicalEID::getSystemAndValueKey)
+			.containsExactlyInAnyOrder(mrnSystem() + "|mrn-1", npiSystem() + "|npi-7");
+	}
+
+	/**
+	 * The same guard on the update path.
+	 */
+	@Test
+	public void eidChangedWithinASystemOnUpdateWhileAnotherIsRetained_doesNotChangeTheGoldenEid() {
+		Patient patient = addExternalEID(buildJanePatient(), mrnSystem(), "mrn-a");
+		addExternalEID(patient, npiSystem(), "npi-7");
+		patient = createPatientAndUpdateLinks(patient);
+
+		patient.getIdentifier().removeIf(id -> npiSystem().equals(id.getSystem()));
+		addExternalEID(patient, npiSystem(), "npi-9");
+		patient = updatePatientAndUpdateLinks(patient);
+
+		assertThat(myEIDHelper.getExternalEid(getGoldenResourceFromTargetResource(patient)))
+			.extracting(CanonicalEID::getSystemAndValueKey)
+			.containsExactlyInAnyOrder(mrnSystem() + "|mrn-a", npiSystem() + "|npi-7");
+	}
+
 }

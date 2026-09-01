@@ -223,4 +223,25 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		assertThat(possibleDuplicates).hasSize(1);
 		mdmAssertThat(patient3).is_POSSIBLE_DUPLICATE_to(patient1);
 	}
+	/**
+	 * With multiple EIDs permitted, an EID added on update while the original is kept reaches the Golden
+	 * Resource, just as it would had the same resource been created carrying both. Previously the update
+	 * path was the one place that did not accumulate, which made a Golden Resource\'s EID set depend on
+	 * whether an EID arrived by create or by update.
+	 */
+	@Test
+	public void eidAddedOnUpdateWhileTheOriginalIsKept_isMergedIntoTheGoldenResource() {
+		Patient patient = buildJanePatient();
+		addExternalEID(patient, "eid-1");
+		patient = createPatientAndUpdateLinks(patient);
+
+		addExternalEID(patient, "eid-2");
+		patient = updatePatientAndUpdateLinks(patient);
+
+		assertThat(myEidHelper.getExternalEid(getGoldenResourceFromTargetResource(patient)))
+			.extracting(CanonicalEID::getSystemAndValueKey)
+			.containsExactlyInAnyOrder(
+				patientEidSystems().get(0) + "|eid-1", patientEidSystems().get(0) + "|eid-2");
+	}
+
 }
