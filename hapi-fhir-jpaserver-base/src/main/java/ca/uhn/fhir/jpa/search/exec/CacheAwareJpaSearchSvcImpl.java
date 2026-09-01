@@ -160,12 +160,10 @@ public class CacheAwareJpaSearchSvcImpl implements ICacheAwareJpaSearchSvc {
 				myExceptionSvc,
 				mySearchBuilderFactory);
 
-		if (myPartitionSettings.isPartitioningEnabled()) {
-			ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forSearchUuid(theUuid);
-			RequestPartitionId requestPartitionId =
-					myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, details);
-			retVal.setRequestPartitionId(requestPartitionId);
-		}
+		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forSearchUuid(theUuid);
+		RequestPartitionId requestPartitionId =
+				myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, details);
+		retVal.setRequestPartitionId(requestPartitionId);
 
 		return retVal;
 	}
