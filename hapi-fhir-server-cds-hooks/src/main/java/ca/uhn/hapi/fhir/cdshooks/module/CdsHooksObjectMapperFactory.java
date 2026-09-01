@@ -26,6 +26,8 @@ import ca.uhn.fhir.serializer.FhirResourceSerializer;
 import ca.uhn.hapi.fhir.cdshooks.serializer.CdsServiceRequestContextDeserializer;
 import ca.uhn.hapi.fhir.cdshooks.serializer.CdsServiceRequestContextSerializer;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.MapperFeature;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.json.JsonMapper;
@@ -57,6 +59,20 @@ import tools.jackson.databind.module.SimpleModule;
 //
 // 4. ObjectMapper.registerModule() is removed from the mutable API in Jackson 3.
 //    Module registration moves to MapperBuilder.addModule() at construction time.
+//
+// 5. FAIL_ON_TRAILING_TOKENS disabled on the temp mapper only.
+//    Off in Jackson 2, on in Jackson 3. CdsServiceRequestContextDeserializer reads the "context"
+//    property through the temp mapper, which treats it as a whole-document read and then checks
+//    that nothing follows. It runs partway through the request, where the next property
+//    legitimately does follow, so with the Jackson 3 default any request whose "context" is not
+//    the last property fails to parse. The final mapper keeps the check, since there it applies
+//    at the top level and correctly rejects anything after the closing brace.
+//
+// 6. SORT_PROPERTIES_ALPHABETICALLY disabled.
+//    Off in Jackson 2, on in Jackson 3. Property order carries no meaning in JSON, so leaving it
+//    on should not matter to any client. It is disabled because some tests compare serialized
+//    output as text and so depend on the order, and because keeping the output identical to what
+//    this endpoint produced before avoids surprising anyone who does the same.
 
 public class CdsHooksObjectMapperFactory {
 
@@ -71,8 +87,11 @@ public class CdsHooksObjectMapperFactory {
 		// constructors that require a mapper reference. These two classes hold onto
 		// this instance, so be aware they will NOT see the custom module registered
 		// in the final mapper below. Refactor those constructors if that matters.
-		JsonMapper tempMapper =
-				JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build();
+		JsonMapper tempMapper = JsonMapper.builder()
+				.enable(SerializationFeature.INDENT_OUTPUT)
+				.disable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
+				.disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
+				.build();
 
 		// Step 2: build the module using the temp mapper where required.
 		SimpleModule module = new SimpleModule();
@@ -87,6 +106,7 @@ public class CdsHooksObjectMapperFactory {
 		// Jackson 3: module registration belongs in the builder, not on the built mapper.
 		return JsonMapper.builder()
 				.enable(SerializationFeature.INDENT_OUTPUT)
+				.disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
 				.addModule(module)
 				.build();
 	}
