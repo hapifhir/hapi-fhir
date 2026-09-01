@@ -36,7 +36,7 @@ contains two EID related settings.  Both are enabled by default.
 * **Prevent multiple EIDs**: ([JavaDoc](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setPreventMultipleEids(boolean))): If this is enabled, then a resource cannot have more than one EID from any single EID system, and incoming resources that break this rule will be rejected. Where several EID systems are configured for a resource type, a resource may carry one EID from each of them; what it may not carry is two EIDs issued by the same system.
 
 <p class="helpInfoCalloutBox">
-    Note that <b>Prevent EID Updates</b> requires only that an updated resource still carries at least one of the EIDs it had before. Where a resource type is identified by several EID systems, this means an EID belonging to one system may be changed or removed as long as an EID from another system is left in place.
+    <b>Prevent EID Updates</b> is applied per EID system: every EID the resource had before must still be present, so an EID belonging to one system may not be changed or removed even where an EID from another system is left in place. Gaining an EID from a system the resource did not previously use is an addition rather than an update, and remains permitted - it is how a record acquires its second identifier.
 </p>
 
 ## Matching on Several EID Systems

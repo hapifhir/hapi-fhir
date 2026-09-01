@@ -5,6 +5,7 @@ jira: SMILE-12697
 title: "MDM rule definitions can now map a resource type to more than one Enterprise Identifier (EID)
   system: each entry in `eidSystems` accepts an array of system URIs as well as a single one, and a
   resource links to a golden resource if any of its EIDs match. Note three changes to existing behaviour:
-  `preventMultipleEids` is now applied per EID system rather than per resource; EIDs are now compared on
-  their system as well as their value; and where `preventMultipleEids` is disabled, a golden resource now
-  also accumulates EIDs added to a source resource by update, as it already did on create."
+  the `preventMultipleEids` and `preventEidUpdates` safeguards are now applied per EID system rather than
+  per resource; EIDs are now compared on their system as well as their value; and where
+  `preventMultipleEids` is disabled, a golden resource now also accumulates EIDs added to a source
+  resource by update, as it already did on create."

@@ -405,7 +405,11 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 			return;
 		}
 
-		if (!myEIDHelper.eidMatchExists(newExternalEids, oldExternalEids)) {
+		// An EID may be added, but not changed or removed.
+		Set<String> newExternalEidKeys =
+				newExternalEids.stream().map(CanonicalEID::getSystemAndValueKey).collect(Collectors.toSet());
+		if (!newExternalEidKeys.containsAll(
+				oldExternalEids.stream().map(CanonicalEID::getSystemAndValueKey).collect(Collectors.toSet()))) {
 			throwBlockEidChange();
 		}
 	}

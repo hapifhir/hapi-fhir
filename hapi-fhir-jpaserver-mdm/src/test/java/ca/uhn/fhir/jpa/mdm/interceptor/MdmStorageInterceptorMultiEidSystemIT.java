@@ -82,24 +82,56 @@ public class MdmStorageInterceptorMultiEidSystemIT extends BaseMdmR4Test {
 	}
 
 	/**
-	 * Pins the known gap in "prevent EID updates" under several EID systems: the check requires only that
-	 * at least one EID survives, so an NPI can be swapped while the MRN holds it open. This is a
-	 * deliberate deferral rather than intended behaviour - see the follow-up ticket. When that is fixed
-	 * this test should turn red, and the assertion inverted.
+	 * "Prevent EID updates" is scoped per EID system: an EID may not be swapped within a system that
+	 * already had one, even when an EID from another system is left in place.
 	 */
 	@Test
-	public void preventEidUpdates_eidOfOneSystemSwappedWhileAnotherIsKept_isCurrentlyAccepted() throws InterruptedException {
+	public void preventEidUpdates_eidOfOneSystemSwappedWhileAnotherIsKept_isRejected() throws InterruptedException {
 		Patient patient = addExternalEID(buildJanePatient(), mrnSystem(), "mrn-1");
 		addExternalEID(patient, npiSystem(), "npi-9");
-		myMdmHelper.createWithLatch(patient);
+		MdmHelperR4.OutcomeAndLogMessageWrapper outcome = myMdmHelper.createWithLatch(patient);
+		patient.setId(outcome.getDaoMethodOutcome().getId());
 
 		patient.getIdentifier().removeIf(identifier -> npiSystem().equals(identifier.getSystem()));
 		addExternalEID(patient, npiSystem(), "npi-7");
 
+		assertThatThrownBy(() -> myMdmHelper.doUpdateResource(patient, true))
+			.isInstanceOf(ForbiddenOperationException.class)
+			.hasMessageContaining("HAPI-0763");
+	}
+
+	/**
+	 * Removing an EID is a modification too: dropping the NPI while keeping the MRN is rejected.
+	 */
+	@Test
+	public void preventEidUpdates_eidOfOneSystemRemovedWhileAnotherIsKept_isRejected() throws InterruptedException {
+		Patient patient = addExternalEID(buildJanePatient(), mrnSystem(), "mrn-1");
+		addExternalEID(patient, npiSystem(), "npi-9");
+		MdmHelperR4.OutcomeAndLogMessageWrapper outcome = myMdmHelper.createWithLatch(patient);
+		patient.setId(outcome.getDaoMethodOutcome().getId());
+
+		patient.getIdentifier().removeIf(identifier -> npiSystem().equals(identifier.getSystem()));
+
+		assertThatThrownBy(() -> myMdmHelper.doUpdateResource(patient, true))
+			.isInstanceOf(ForbiddenOperationException.class)
+			.hasMessageContaining("HAPI-0763");
+	}
+
+	/**
+	 * Gaining an EID from a system the resource did not previously use is an addition, not an update, and
+	 * remains accepted - it is how a record learns its second identifier.
+	 */
+	@Test
+	public void preventEidUpdates_eidOfANewSystemAdded_isAccepted() throws InterruptedException {
+		Patient patient = addExternalEID(buildJanePatient(), mrnSystem(), "mrn-1");
+		MdmHelperR4.OutcomeAndLogMessageWrapper outcome = myMdmHelper.createWithLatch(patient);
+		patient.setId(outcome.getDaoMethodOutcome().getId());
+
+		addExternalEID(patient, npiSystem(), "npi-9");
 		myMdmHelper.updateWithLatch(patient);
 
-		// The MRN was kept and the NPI swapped, and HAPI-0763 let it through on the strength of the MRN.
 		assertThat(myEIDHelper.getExternalEid(patient)).extracting(CanonicalEID::getSystemAndValueKey)
-			.containsExactlyInAnyOrder(mrnSystem() + "|mrn-1", npiSystem() + "|npi-7");
+			.containsExactlyInAnyOrder(mrnSystem() + "|mrn-1", npiSystem() + "|npi-9");
 	}
+
 }
