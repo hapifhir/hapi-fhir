@@ -26,8 +26,10 @@ import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import jakarta.annotation.Nonnull;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TAG;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -69,34 +71,49 @@ public class MdmSearchParamBuildingUtils {
 	}
 
 	/**
-	 * Creates a SearchParameterMap that finds the golden resources carrying any of the given EIDs, as a
-	 * single OR query. Each EID is matched on its own system as well as its value, so that the same value
-	 * issued by two different EID systems is not conflated.
+	 * Translates EIDs into a single token OR query. Each EID is matched on its own system as well as its
+	 * value, so that the same value issued by two different EID systems is not conflated.
 	 * <p>
 	 * EIDs with no value are dropped. Such an identifier is valid FHIR and identifies nobody, but a token
-	 * search with a blank value matches on the system alone - it would return every golden resource in
-	 * that EID system, and every one of them would be offered up as an EID match candidate.
+	 * search with a blank value matches on the system alone
+	 * </p>
+	 * <p>
+	 * This is the EID half of an EID search on its own, with no restriction on which resources are
+	 * searched. Use {@link #buildEidSearchParameterMap(Collection)} to search golden resources; use this
+	 * directly to search source resources.
 	 * </p>
 	 *
 	 * @param theEids the EIDs to search for
-	 * @return a search parameter map restricted to golden records
+	 * @return the token param, or empty if none of the given EIDs can be searched on
 	 */
-	public static SearchParameterMap buildEidSearchParameterMap(Collection<CanonicalEID> theEids) {
-		SearchParameterMap map = buildBasicGoldenResourceSearchParameterMap(null);
+	@Nonnull
+	public static Optional<TokenOrListParam> buildEidTokenParam(@Nonnull Collection<CanonicalEID> theEids) {
 		TokenOrListParam eidsToSearch = new TokenOrListParam();
 		theEids.stream()
 				.filter(eid -> isNotBlank(eid.getValue()))
 				.forEach(eid -> eidsToSearch.addOr(new TokenParam(eid.getSystem(), eid.getValue())));
-		map.add(SP_IDENTIFIER, eidsToSearch);
-		return map;
+
+		if (eidsToSearch.getValuesAsQueryTokens().isEmpty()) {
+			return Optional.empty();
+		}
+		return Optional.of(eidsToSearch);
 	}
 
 	/**
-	 * Whether any of the given EIDs can actually be searched for - see
-	 * {@link #buildEidSearchParameterMap(Collection)} for why a valueless EID cannot.
+	 * Creates a SearchParameterMap that finds the golden resources carrying any of the given EIDs, as a
+	 * single OR query.
+	 *
+	 * @param theEids the EIDs to search for
+	 * @return a search parameter map restricted to golden records and to those EIDs, or empty if none of
+	 * the EIDs can be searched on - see {@link #buildEidTokenParam(Collection)}
 	 */
-	public static boolean hasSearchableEid(Collection<CanonicalEID> theEids) {
-		return theEids.stream().anyMatch(eid -> isNotBlank(eid.getValue()));
+	@Nonnull
+	public static Optional<SearchParameterMap> buildEidSearchParameterMap(@Nonnull Collection<CanonicalEID> theEids) {
+		return buildEidTokenParam(theEids).map(eidsToSearch -> {
+			SearchParameterMap map = buildBasicGoldenResourceSearchParameterMap(null);
+			map.add(SP_IDENTIFIER, eidsToSearch);
+			return map;
+		});
 	}
 
 	/**

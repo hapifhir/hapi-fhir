@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 8343
+title: "An MDM source resource carrying an enterprise identifier that has an EID system but no value
+  was matched against every resource sharing that EID system, each as a full match at the highest
+  score. An enterprise identifier with no value identifies nobody and is now excluded from EID
+  matching."

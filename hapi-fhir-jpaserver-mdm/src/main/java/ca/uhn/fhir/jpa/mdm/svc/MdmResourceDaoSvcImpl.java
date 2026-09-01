@@ -112,16 +112,15 @@ public class MdmResourceDaoSvcImpl implements IMdmResourceDaoSvc {
 	@Override
 	public List<IAnyResource> searchGoldenResourcesByEIDs(
 			Collection<CanonicalEID> theEids, String theResourceType, RequestPartitionId thePartitionId) {
-		if (!MdmSearchParamBuildingUtils.hasSearchableEid(theEids)) {
+		Optional<SearchParameterMap> map = MdmSearchParamBuildingUtils.buildEidSearchParameterMap(theEids);
+		if (map.isEmpty()) {
 			return Collections.emptyList();
 		}
-
-		SearchParameterMap map = MdmSearchParamBuildingUtils.buildEidSearchParameterMap(theEids);
 
 		IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(theResourceType);
 		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
 		systemRequestDetails.setRequestPartitionId(thePartitionId);
-		IBundleProvider search = resourceDao.search(map, systemRequestDetails);
+		IBundleProvider search = resourceDao.search(map.get(), systemRequestDetails);
 		List<IBaseResource> resources = search.getResources(0, MAX_MATCHING_GOLDEN_RESOURCES);
 
 		validateNoEidResolvesToMultipleGoldenResources(theEids, resources);

@@ -32,10 +32,10 @@ import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
 import ca.uhn.fhir.mdm.util.EIDHelper;
+import ca.uhn.fhir.mdm.util.MdmSearchParamBuildingUtils;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
-import ca.uhn.fhir.rest.param.TokenParam;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -48,6 +48,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateSearcher.idOrType;
@@ -116,13 +117,15 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 			List<CanonicalEID> theEids,
 			String theResourceType,
 			RequestPartitionId theRequestPartitionId) {
-		final SearchParameterMap map = SearchParameterMap.newSynchronous();
-		final TokenOrListParam tokenOrListParam = new TokenOrListParam();
 		// Each EID is searched against its own system: a resource type may be identified by several EID
 		// systems, and the same value issued by two of them is not the same identifier.
-		theEids.forEach(eid -> tokenOrListParam.addOr(new TokenParam(eid.getSystem(), eid.getValue())));
+		Optional<TokenOrListParam> eidsToSearch = MdmSearchParamBuildingUtils.buildEidTokenParam(theEids);
+		if (eidsToSearch.isEmpty()) {
+			return Collections.emptyList();
+		}
 
-		map.add(SP_IDENTIFIER, tokenOrListParam);
+		final SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(SP_IDENTIFIER, eidsToSearch.get());
 
 		IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(theResourceType);
 		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
