@@ -156,8 +156,8 @@ public class CacheAwareJpaSearchBundleProviderFirstPage extends BaseCacheAwareJp
 
 			/// If we get here, it means that this method has been called twice (since this
 			/// method clears `myCandidateSearchEntity` as soon as it is consumed). This means
-		    /// that someone has kept a reference to this IBundleProvider around and is making
-		    /// repeated calls to it for more search results (i.e. they have called
+			/// that someone has kept a reference to this IBundleProvider around and is making
+			/// repeated calls to it for more search results (i.e. they have called
 			/// {@link ca.uhn.fhir.rest.api.server.IBundleProvider#getResources(int, int)})
 			/// multiple times on the same instance).
 			///

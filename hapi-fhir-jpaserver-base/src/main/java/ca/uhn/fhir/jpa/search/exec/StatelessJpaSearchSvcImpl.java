@@ -190,7 +190,11 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 								.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
 						compositeBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
 
-						Validate.isTrue(pids.size() == loadedResources.size(), "PID collection size %s doesn't match expected resource collection size of %s", pids.size(), loadedResources.size());
+						Validate.isTrue(
+								pids.size() == loadedResources.size(),
+								"PID collection size %s doesn't match expected resource collection size of %s",
+								pids.size(),
+								loadedResources.size());
 						for (int i = pids.size() - 1; i >= 0; i--) {
 							if (accessDetails.isDontReturnResourceAtIndex(i)) {
 								pids.remove(i);

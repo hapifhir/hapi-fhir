@@ -34,5 +34,3 @@
 /// actually performing the search and writing new results to the cache.
 
 package ca.uhn.fhir.jpa.search.exec;
-
-import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;

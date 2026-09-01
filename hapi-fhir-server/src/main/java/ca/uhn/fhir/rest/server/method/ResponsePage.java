@@ -519,8 +519,8 @@ public class ResponsePage {
 					myOmittedResourceCount, // omitted resources
 					myTotalRequestedResourcesFetched, // total count of requested resources
 					myBundleProvider, // the bundle provider
-				// FIXME: remove the hasNextPage
-				myHasNextPage);
+					// FIXME: remove the hasNextPage
+					myHasNextPage);
 		}
 	}
 

@@ -204,8 +204,7 @@ public interface IHapiTransactionService {
 		 * @since 8.10.0
 		 */
 		void executeWithoutResult(IExecutionCallable<Void> theCallback);
-
-    }
+	}
 
 	interface IExecutionCallable<T> {
 

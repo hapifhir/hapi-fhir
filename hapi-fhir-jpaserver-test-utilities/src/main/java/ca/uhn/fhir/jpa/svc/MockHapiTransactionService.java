@@ -44,11 +44,9 @@ public class MockHapiTransactionService extends HapiTransactionService {
 		myTransactionStatus = theTransactionStatus;
 	}
 
-
 	public void setBeforeExecuteCallback(Callable<Void> theCallback) {
 		myBeforeExecuteCallback = theCallback;
 	}
-
 
 	public int getTransactionCount() {
 		return myTransactionCount.get();

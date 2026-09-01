@@ -55,13 +55,11 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SearchCacheStatus;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.interceptor.ServerInterceptorUtil;
 import ca.uhn.fhir.rest.server.method.ResponsePage;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.IntCounter;
-import ca.uhn.fhir.util.SleepUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
@@ -283,8 +281,8 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 		theResponsePageBuilder.setTotalRequestedResourcesFetched(mySearchEntity.getNumFound());
 
 		// TODO: JA2 the "hasNextPage" property should be removed entirely
-//		theResponsePageBuilder.setHasNextPage(
-//				theToIndex < mySearchEntity.getNumFound() || mySearchEntity.getStatus() == SearchStatusEnum.PASSCMPLET);
+		//		theResponsePageBuilder.setHasNextPage(
+		//				theToIndex < mySearchEntity.getNumFound() || mySearchEntity.getStatus() == SearchStatusEnum.PASSCMPLET);
 
 		ourLog.atLevel(DEBUG_LOG_LEVEL)
 				.setMessage("Returning {} results for range {}-{}")
@@ -795,7 +793,8 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 		}
 
 		myCachedPidsFromMatches = new CachedPids(theFromIndex, theToIndex, cachedPidsFromMatches, 0);
-		myCachedPidsFromMatchesAndIncludes = new CachedPids(theFromIndex, theToIndex, theMatchPids, includedPidList.size());
+		myCachedPidsFromMatchesAndIncludes =
+				new CachedPids(theFromIndex, theToIndex, theMatchPids, includedPidList.size());
 	}
 
 	private Integer fetchRevIncludes(

@@ -3261,10 +3261,14 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 								if (!mySearchProperties.isDeduplicateInDatabase()
 										|| myFetchIncludesForEverythingOperation) {
 									/*
-									 * We only add to the map if we aren't fetching "everything";
-									 * otherwise, we let the de-duplication happen in the database
-									 * (see createChunkedQueryNormalSearch above), because it
-									 * saves memory that way.
+									 * We use a map to deduplicate results we're fetching when we're fetching
+									 * smaller chunks since it's more performant at small scale to handle
+									 * this at the app level. When we get to the unbounded threshold
+									 * (which can potentially return massive amounts of data) we deduplicate
+									 * in the database instead, so we don't need to use the local map.
+									 * We also deduplicate ocally when fetching _include values for
+									 * $everything queries since they can potentially return the
+									 * same resource multiple times.
 									 */
 									myPidSet.add(nextPid);
 								}

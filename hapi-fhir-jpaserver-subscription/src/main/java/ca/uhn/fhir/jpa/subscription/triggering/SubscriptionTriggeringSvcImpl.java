@@ -90,7 +90,6 @@ import static ca.uhn.fhir.rest.server.provider.ProviderConstants.SUBSCRIPTION_TR
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -302,7 +301,11 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			ourLog.info("Triggering job[{}] is starting a search for {}", theJobDetails.getJobId(), nextSearchUrl);
 
 			search = mySearchCoordinatorSvc.createNewSearch(
-					callingDao, params, resourceType, new CacheControlDirective(), newSystemRequestDetails(theJobDetails));
+					callingDao,
+					params,
+					resourceType,
+					new CacheControlDirective(),
+					newSystemRequestDetails(theJobDetails));
 
 			if (isNull(search.getUuid())) {
 				// we don't have a search uuid i.e. we're setting up for synchronous processing

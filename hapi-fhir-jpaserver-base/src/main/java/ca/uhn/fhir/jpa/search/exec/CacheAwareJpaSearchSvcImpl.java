@@ -146,23 +146,24 @@ public class CacheAwareJpaSearchSvcImpl implements ICacheAwareJpaSearchSvc {
 	@Override
 	public IBundleProvider continueExistingSearch(String theUuid, RequestDetails theRequestDetails) {
 		CacheAwareJpaSearchBundleProviderSubsequentPage retVal = new CacheAwareJpaSearchBundleProviderSubsequentPage(
-			myFhirContext,
-			theRequestDetails,
-			theUuid,
-			myInterceptorBroadcaster,
-			myPagingProvider,
-			myStorageSettings,
-			myEntityManager,
-			myTxService,
-			myRequestPartitionHelperSvc,
-			mySearchCacheSvc,
-			mySearchResultCacheSvc,
-			myExceptionSvc,
-			mySearchBuilderFactory);
+				myFhirContext,
+				theRequestDetails,
+				theUuid,
+				myInterceptorBroadcaster,
+				myPagingProvider,
+				myStorageSettings,
+				myEntityManager,
+				myTxService,
+				myRequestPartitionHelperSvc,
+				mySearchCacheSvc,
+				mySearchResultCacheSvc,
+				myExceptionSvc,
+				mySearchBuilderFactory);
 
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forSearchUuid(theUuid);
-			RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, details);
+			RequestPartitionId requestPartitionId =
+					myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, details);
 			retVal.setRequestPartitionId(requestPartitionId);
 		}
 
