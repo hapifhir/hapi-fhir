@@ -5,6 +5,7 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -92,4 +93,35 @@ class CanonicalEIDTest {
 		retVal.addIdentifier(new Identifier().setSystem(theSecondSystem).setValue(theSecondValue));
 		return retVal;
 	}
+	/**
+	 * A null EID system matches nothing, exactly as the single-system overload already guarantees. It
+	 * reaches this overload when a resource type has no configured EID system and a caller pairs a value
+	 * with the resulting null system.
+	 */
+	@Test
+	void extractFromResource_collectionContainingOnlyANullSystem_returnsEmpty() {
+		Patient patient = new Patient();
+		patient.addIdentifier(new Identifier().setSystem("http://example.com/mrn").setValue("mrn-1"));
+
+		List<CanonicalEID> eids = CanonicalEID.extractFromResource(
+			ourFhirContext, Collections.singletonList(null), patient);
+
+		assertThat(eids).isEmpty();
+	}
+
+	/**
+	 * A null alongside a real system does not poison the whole extraction.
+	 */
+	@Test
+	void extractFromResource_collectionContainingANullSystem_ignoresIt() {
+		Patient patient = new Patient();
+		patient.addIdentifier(new Identifier().setSystem("http://example.com/mrn").setValue("mrn-1"));
+
+		List<CanonicalEID> eids = CanonicalEID.extractFromResource(
+			ourFhirContext, Arrays.asList(null, "http://example.com/mrn"), patient);
+
+		assertThat(eids).extracting(CanonicalEID::getSystemAndValueKey)
+			.containsExactly("http://example.com/mrn|mrn-1");
+	}
+
 }

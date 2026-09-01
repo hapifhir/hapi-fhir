@@ -171,12 +171,17 @@ public class CanonicalEID {
 	 */
 	public static List<CanonicalEID> extractFromResource(
 			FhirContext theFhirContext, Collection<String> theEidSystems, IBaseResource theBaseResource) {
-		if (theEidSystems.isEmpty()) {
+		// A null system matches nothing, as the single-system overload above already guarantees. It reaches
+		// here when a resource type has no configured EID system and a caller pairs a value with the
+		// resulting null.
+		List<String> eidSystems =
+				theEidSystems.stream().filter(Objects::nonNull).collect(Collectors.toList());
+		if (eidSystems.isEmpty()) {
 			return Collections.emptyList();
 		}
 
 		IFhirPath fhirPath = theFhirContext.newFhirPath();
-		String eidPath = buildEidFhirPath(theFhirContext, theEidSystems, theBaseResource);
+		String eidPath = buildEidFhirPath(theFhirContext, eidSystems, theBaseResource);
 		List<IBase> evaluate = fhirPath.evaluate(theBaseResource, eidPath, IBase.class);
 
 		return evaluate.stream().map(ibase -> new CanonicalEID(fhirPath, ibase)).collect(Collectors.toList());
