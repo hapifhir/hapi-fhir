@@ -1,0 +1,10 @@
+---
+type: fix
+issue: 1350
+title: "Previously, URN-shaped canonical references (e.g. `urn:oid:...` or `urn:uuid:...`) were not
+  indexed by the JPA server, and searching a canonical reference search parameter (such as
+  `QuestionnaireResponse?questionnaire=urn:uuid:...`) by such a value returned no results. Per the
+  FHIR specification canonical URLs may be URNs, so these values are now indexed and searchable in
+  the same way as http(s) canonical URLs, including versioned canonicals (`urn:oid:...|version`).
+  Note that resources stored before this fix must be reindexed (e.g. using `$reindex`) for such
+  searches to find them."
