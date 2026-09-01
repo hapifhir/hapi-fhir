@@ -107,10 +107,30 @@ class GoldenResourceHelperR4Test extends BaseR4Test {
 	}
 
 	@Test
-	void overwriteExternalEids_clearsEidsFromEveryConfiguredSystem() {
+	void overwriteExternalEids_clearsOnlyTheEidSystemsBeingOverwritten() {
 		Patient golden = new Patient();
 		golden.addIdentifier(new Identifier().setSystem(MRN_SYSTEM).setValue("mrn-1"));
 		golden.addIdentifier(new Identifier().setSystem(NPI_SYSTEM).setValue("npi-9"));
+		golden.addIdentifier(new Identifier().setSystem(UNRELATED_SYSTEM).setValue("other-1"));
+
+		myGoldenResourceHelper.overwriteExternalEids(golden, List.of(new CanonicalEID(MRN_SYSTEM, "mrn-2", null)));
+
+		// The NPI survives: replacing the MRN says nothing about the resource's NPI.
+		assertThat(myEidHelper.getExternalEid(golden)).extracting(CanonicalEID::getSystemAndValueKey)
+			.containsExactlyInAnyOrder(MRN_SYSTEM + "|mrn-2", NPI_SYSTEM + "|npi-9");
+		assertThat(golden.getIdentifier()).extracting(Identifier::getSystem).contains(UNRELATED_SYSTEM);
+	}
+
+	/**
+	 * With a single configured EID system, the system being overwritten is the only one there is, so the
+	 * scoped clear behaves exactly as clearing everything did.
+	 */
+	@Test
+	void overwriteExternalEids_singleEidSystem_replacesTheEid() {
+		configure(List.of(MRN_SYSTEM), true);
+
+		Patient golden = new Patient();
+		golden.addIdentifier(new Identifier().setSystem(MRN_SYSTEM).setValue("mrn-1"));
 		golden.addIdentifier(new Identifier().setSystem(UNRELATED_SYSTEM).setValue("other-1"));
 
 		myGoldenResourceHelper.overwriteExternalEids(golden, List.of(new CanonicalEID(MRN_SYSTEM, "mrn-2", null)));

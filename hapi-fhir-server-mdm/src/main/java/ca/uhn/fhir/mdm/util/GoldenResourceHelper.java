@@ -294,29 +294,43 @@ public class GoldenResourceHelper {
 		return theGoldenResource;
 	}
 
+	/**
+	 * Replaces the Golden Resource's EIDs with the given ones, within the EID systems those EIDs belong to.
+	 * EID systems the incoming EIDs say nothing about are left alone: where a resource type is identified
+	 * by several EID systems, replacing its MRN is not a statement about its NPI, and clearing both would
+	 * silently delete an identifier nothing in the update mentioned.
+	 * <p>
+	 * With a single configured EID system this is exactly the previous behaviour, since the system being
+	 * overwritten is the only one a Golden Resource of that type can carry an EID in.
+	 * </p>
+	 *
+	 * @param theGoldenResource the Golden Resource to overwrite EIDs on
+	 * @param theNewEid the EIDs to write; the EID systems they belong to are the ones cleared first
+	 * @return the same Golden Resource, modified in place
+	 */
 	public IBaseResource overwriteExternalEids(IBaseResource theGoldenResource, List<CanonicalEID> theNewEid) {
-		clearExternalEids(theGoldenResource);
+		Set<String> systemsBeingOverwritten =
+				theNewEid.stream().map(CanonicalEID::getSystem).collect(Collectors.toSet());
+		clearExternalEids(theGoldenResource, systemsBeingOverwritten);
 		addCanonicalEidsToGoldenResourceIfAbsent(theGoldenResource, theNewEid);
 		return theGoldenResource;
 	}
 
 	private void clearExternalEidsFromTheGoldenResource(
-			BaseRuntimeChildDefinition theGoldenResourceIdentifier, IBaseResource theGoldenResource) {
+			BaseRuntimeChildDefinition theGoldenResourceIdentifier,
+			IBaseResource theGoldenResource,
+			Set<String> theEidSystemsToClear) {
 		IFhirPath fhirPath = myFhirContext.newFhirPath();
 		List<IBase> goldenResourceIdentifiers =
 				theGoldenResourceIdentifier.getAccessor().getValues(theGoldenResource);
 		List<IBase> clonedIdentifiers = new ArrayList<>();
 		FhirTerser terser = myFhirContext.newTerser();
 
-		String resourceType = myFhirContext.getResourceType(theGoldenResource);
-		Set<String> mdmSystems =
-				new HashSet<>(myMdmSettings.getMdmRules().getEnterpriseEIDSystemsForResourceType(resourceType));
-
 		for (IBase base : goldenResourceIdentifiers) {
 			Optional<IPrimitiveType> system = fhirPath.evaluateFirst(base, "system", IPrimitiveType.class);
 			if (system.isPresent()) {
 				String baseSystem = system.get().getValueAsString();
-				if (mdmSystems.contains(baseSystem)) {
+				if (theEidSystemsToClear.contains(baseSystem)) {
 					ourLog.debug(
 							"Found EID confirming to MDM rules {}. It does not need to be copied, skipping",
 							baseSystem);
@@ -336,14 +350,14 @@ public class GoldenResourceHelper {
 		goldenResourceIdentifiers.addAll(clonedIdentifiers);
 	}
 
-	private void clearExternalEids(IBaseResource theGoldenResource) {
+	private void clearExternalEids(IBaseResource theGoldenResource, Set<String> theEidSystemsToClear) {
 		// validate the system - if it's set to EID system - then clear it - type and STU version
 		validateContextSupported();
 
 		// get a ref to the actual ID Field
 		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theGoldenResource);
 		BaseRuntimeChildDefinition goldenResourceIdentifier = resourceDefinition.getChildByName(FIELD_NAME_IDENTIFIER);
-		clearExternalEidsFromTheGoldenResource(goldenResourceIdentifier, theGoldenResource);
+		clearExternalEidsFromTheGoldenResource(goldenResourceIdentifier, theGoldenResource, theEidSystemsToClear);
 	}
 
 	/**
