@@ -46,12 +46,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 /**
  * Unit tests for the exception-routing contract of {@link BaseBulkModifyResourcesStep#run(StepExecutionDetails, IJobDataSink)}.
  * <p>
- * <code>ReindexV3ModifyResourcesStep</code> extends
- * {@link BaseBulkModifyResourcesStep} directly and throws {@link RetryChunkLaterException} from its
- * {@link BaseBulkModifyResourcesStep#processPidsOutsideTransaction} override, so the fake step below
- * subclasses the base class directly rather than {@link BaseBulkModifyResourcesIndividuallyStep}.
- * </p>
- * <p>
  * Note: the hooks below never assert - the production code wraps them in a <code>catch (Throwable)</code>
  * which would swallow an {@link AssertionError} and turn a failing test green. Observations are recorded
  * into fields and asserted after <code>run()</code> returns.
@@ -147,9 +141,8 @@ class BaseBulkModifyResourcesStepTest {
 	}
 
 	/**
-	 * The same retry signal raised from inside the transactional body must also escape <code>run()</code>.
-	 * Hoisting the pre-flight call out of the try/catch does not cover this position - the rethrow arm itself
-	 * has to recognise {@link RetryChunkLaterException}.
+	 * The same retry signal raised from inside the transactional body must also escape <code>run()</code>,
+	 * which requires the rethrow arm of the catch block to recognise {@link RetryChunkLaterException}.
 	 */
 	@Test
 	void testRun_inTransactionThrowsRetryChunkLater_propagatesToStepExecutor() {
@@ -170,7 +163,8 @@ class BaseBulkModifyResourcesStepTest {
 
 	/**
 	 * (control): a generic failure inside the transaction is a per-resource failure and must stay swallowed
-	 * into the emitted outcome. If this ever turns red, the escape hatch has been over-broadened.
+	 * into the emitted outcome. If this ever turns red, the set of exceptions rethrown out of
+	 * <code>run()</code> has been over-broadened.
 	 */
 	@Test
 	void testRun_inTransactionThrowsGenericException_recordedAsPerResourceFailure() {
@@ -223,8 +217,8 @@ class BaseBulkModifyResourcesStepTest {
 	}
 
 	/**
-	 * Invariant guard for the hoist - the pre-flight hook must keep running exactly once, outside any
-	 * transaction, before the transactional body runs inside one.
+	 * Invariant guard - the pre-flight hook must run exactly once, outside any transaction, before the
+	 * transactional body runs inside one.
 	 */
 	@Test
 	void testRun_happyPath_preFlightRunsOutsideTransactionAndBodyRunsInside() {
@@ -313,7 +307,9 @@ class BaseBulkModifyResourcesStepTest {
 
 	/**
 	 * Mirrors <code>ReindexV3ModifyResourcesStep</code>, which extends
-	 * {@link BaseBulkModifyResourcesStep} directly and overrides both hooks.
+	 * {@link BaseBulkModifyResourcesStep} directly (rather than {@link BaseBulkModifyResourcesIndividuallyStep}),
+	 * overrides both hooks, and throws {@link RetryChunkLaterException} from
+	 * {@link BaseBulkModifyResourcesStep#processPidsOutsideTransaction}.
 	 */
 	private class MySvc extends BaseBulkModifyResourcesStep<MyParameters, Void> {
 
