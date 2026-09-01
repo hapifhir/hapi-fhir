@@ -158,7 +158,7 @@ public class MdmRulesJson implements IModelJson {
 	 *
 	 * @param theEnterpriseEIDSystems one EID system per resource type
 	 */
-	@Deprecated
+	@Deprecated(since = "8.14.0", forRemoval = true)
 	public void setEnterpriseEIDSystems(Map<String, String> theEnterpriseEIDSystems) {
 		Map<String, List<String>> escalated = new LinkedHashMap<>();
 		theEnterpriseEIDSystems.forEach(
@@ -248,7 +248,7 @@ public class MdmRulesJson implements IModelJson {
 	 * Use {@link #getEidSystemsByResourceType()} instead. Reports only the first EID system configured
 	 * for each resource type.
 	 */
-	@Deprecated
+	@Deprecated(since = "8.14.0", forRemoval = true)
 	public Map<String, String> getEnterpriseEIDSystems() {
 		Map<String, String> retVal = new LinkedHashMap<>();
 		getEidSystemsByResourceType().forEach((resourceType, eidSystems) -> {
@@ -263,7 +263,7 @@ public class MdmRulesJson implements IModelJson {
 	 * Use {@link #getEnterpriseEIDSystemsForResourceType(String)} instead. Reports only the first EID
 	 * system configured for the resource type.
 	 */
-	@Deprecated
+	@Deprecated(since = "8.14.0", forRemoval = true)
 	public String getEnterpriseEIDSystemForResourceType(String theResourceType) {
 		return getEnterpriseEIDSystemsForResourceType(theResourceType).stream()
 				.findFirst()

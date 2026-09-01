@@ -58,7 +58,7 @@ public class MdmSearchParamBuildingUtils {
 	 * @deprecated use {@link #buildEidSearchParameterMap(Collection)}, which matches on the EID system as
 	 * well as the value and can search several EIDs at once.
 	 */
-	@Deprecated
+	@Deprecated(since = "8.14.0", forRemoval = true)
 	public static SearchParameterMap buildEidSearchParameterMap(
 			String theEid, String theResourceType, MdmRulesJson theMdmRules) {
 		SearchParameterMap map = buildBasicGoldenResourceSearchParameterMap(theResourceType);

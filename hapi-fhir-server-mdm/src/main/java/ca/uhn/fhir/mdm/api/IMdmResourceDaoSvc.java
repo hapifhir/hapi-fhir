@@ -47,7 +47,7 @@ public interface IMdmResourceDaoSvc {
 	 * matches on the EID system as well as the value. This overload pairs the value with the first EID
 	 * system configured for the resource type.
 	 */
-	@Deprecated
+	@Deprecated(since = "8.14.0", forRemoval = true)
 	Optional<IAnyResource> searchGoldenResourceByEID(String theEid, String theResourceType);
 
 	/**
@@ -55,7 +55,7 @@ public interface IMdmResourceDaoSvc {
 	 * matches on the EID system as well as the value. This overload pairs the value with the first EID
 	 * system configured for the resource type.
 	 */
-	@Deprecated
+	@Deprecated(since = "8.14.0", forRemoval = true)
 	Optional<IAnyResource> searchGoldenResourceByEID(
 			String theEid, String theResourceType, RequestPartitionId thePartitionId);
 
