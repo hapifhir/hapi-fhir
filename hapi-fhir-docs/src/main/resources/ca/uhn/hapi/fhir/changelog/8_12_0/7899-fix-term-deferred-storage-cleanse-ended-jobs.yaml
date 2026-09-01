@@ -1,0 +1,4 @@
+---
+type: fix
+issue: XXXX
+title: "TermDeferredStorageSvcImpl#cleanseEndedJobs could leave tracked job ids in `myJobExecutions` indefinitely when more ended `termCodeSystem(Version)DeleteJob` instances existed in the DB than were tracked, causing `isStorageQueueEmpty(true)` to return `false` forever. The fail-safe now iterates tracked ids directly via `IJobCoordinator#getInstance`."
