@@ -26,6 +26,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +60,7 @@ public class HttpTestRequest {
 	private final FhirContext myFhirContext;
 	private final String myUrl;
 	private final List<HttpTestHeader> myHeaders = new ArrayList<>();
+	private final List<FormParam> myFormParams = new ArrayList<>();
 	private boolean myDisableRedirects;
 
 	private HttpTestRequest(IHttpTestTransport theTransport, FhirContext theFhirContext, String theUrl) {
@@ -133,6 +135,27 @@ public class HttpTestRequest {
 
 	public HttpTestRequest withHeader(String theName, String theValue) {
 		myHeaders.add(new HttpTestHeader(theName, theValue));
+		return this;
+	}
+
+	/**
+	 * Adds one {@literal application/x-www-form-urlencoded} parameter, sent by {@link #postForm()}.
+	 * Call it once per parameter; repeating a name sends that name more than once, which is how a
+	 * form carries a multi-valued field.
+	 * <p>
+	 * Names and values are percent-encoded here, so pass them exactly as the server should read
+	 * them. A {@literal null} value sends the name with no {@literal =}, matching what Apache's
+	 * {@code UrlEncodedFormEntity} does with a null-valued pair.
+	 * </p>
+	 * <p>
+	 * The encoding is UTF-8, and the {@literal Content-Type} says so. Apache's
+	 * {@code UrlEncodedFormEntity} defaults to ISO-8859-1 instead, so a value outside ASCII is
+	 * encoded differently here — deliberately, since UTF-8 is what a browser form sends.
+	 * </p>
+	 */
+	public HttpTestRequest withFormParam(String theName, String theValue) {
+		Validate.notNull(theName, "theName must not be null");
+		myFormParams.add(new FormParam(theName, theValue));
 		return this;
 	}
 
@@ -214,6 +237,18 @@ public class HttpTestRequest {
 	}
 
 	/**
+	 * POSTs the parameters added with {@link #withFormParam(String, String)} as
+	 * {@literal application/x-www-form-urlencoded}, in the order they were added. This is the shape
+	 * an OAuth token or authorization endpoint expects.
+	 *
+	 * @throws IllegalStateException if no form parameters were added
+	 */
+	public HttpTestResponse postForm() {
+		Validate.validState(!myFormParams.isEmpty(), "No form parameters were added - call withFormParam(...) first");
+		return execute("POST", encodeFormParams(), withUtf8Charset(Constants.CT_X_FORM_URLENCODED));
+	}
+
+	/**
 	 * PUTs the resource as {@literal application/fhir+json}.
 	 */
 	public HttpTestResponse put(IBaseResource theBody) {
@@ -271,8 +306,34 @@ public class HttpTestRequest {
 	 * @param theContentType the MIME type of {@code theBody}
 	 */
 	public HttpTestResponse method(String theMethod, byte[] theBody, String theContentType) {
+		// Every verb reaches the wire through here, so one check covers all of them. Without it,
+		// form parameters added and then sent with the wrong verb would vanish silently.
+		Validate.validState(
+				myFormParams.isEmpty(),
+				"Form parameters were added with withFormParam(...) - send them with postForm()");
+		return execute(theMethod, theBody, theContentType);
+	}
+
+	private HttpTestResponse execute(String theMethod, byte[] theBody, String theContentType) {
 		return myTransport.execute(new IHttpTestTransport.Request(
 				theMethod, myUrl, myHeaders, theBody, theContentType, myDisableRedirects));
+	}
+
+	/**
+	 * {@link URLEncoder} encodes a space as {@literal +}, which is what this MIME type calls for.
+	 */
+	private byte[] encodeFormParams() {
+		StringBuilder encoded = new StringBuilder();
+		for (FormParam next : myFormParams) {
+			if (!encoded.isEmpty()) {
+				encoded.append('&');
+			}
+			encoded.append(URLEncoder.encode(next.name(), StandardCharsets.UTF_8));
+			if (next.value() != null) {
+				encoded.append('=').append(URLEncoder.encode(next.value(), StandardCharsets.UTF_8));
+			}
+		}
+		return encoded.toString().getBytes(StandardCharsets.UTF_8);
 	}
 
 	private byte[] encodeResource(IBaseResource theBody) {
@@ -291,4 +352,10 @@ public class HttpTestRequest {
 		}
 		return theMimeType + "; charset=" + StandardCharsets.UTF_8.name();
 	}
+
+	/**
+	 * Held unencoded until the request is sent, so that {@link #withFormParam(String, String)} can
+	 * be called in any order and a name may repeat.
+	 */
+	private record FormParam(String name, String value) {}
 }

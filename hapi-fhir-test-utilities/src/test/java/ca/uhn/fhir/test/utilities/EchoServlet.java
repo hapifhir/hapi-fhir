@@ -27,6 +27,8 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Writes back a {@literal text/plain} rendering of the request it received, one
@@ -85,6 +87,7 @@ class EchoServlet extends HttpServlet {
 		}
 
 		String requestBody = IOUtils.toString(theRequest.getInputStream(), StandardCharsets.UTF_8);
+		String parameters = renderParameters(theRequest);
 		theResponse.setContentType("text/plain");
 		theResponse
 				.getWriter()
@@ -94,7 +97,24 @@ class EchoServlet extends HttpServlet {
 						+ theRequest.getContentType() + "\ncustom="
 						+ theRequest.getHeader("X-Custom") + "\nprefer="
 						+ theRequest.getHeader(Constants.HEADER_PREFER) + "\nacceptEncoding="
-						+ theRequest.getHeader("Accept-Encoding") + "\nbody=" + requestBody);
+						+ theRequest.getHeader("Accept-Encoding") + "\nparams=" + parameters + "\nbody="
+						+ requestBody);
+	}
+
+	/**
+	 * Renders the parsed parameters as {@literal name=value} joined by {@literal &}, sorted by name
+	 * so an assertion does not depend on map iteration order, with a multi-valued name's values
+	 * joined by a comma.
+	 * <p>
+	 * This is the only view of a {@literal application/x-www-form-urlencoded} body: reading a
+	 * parameter consumes the input stream, so {@code body=} comes back empty for a form POST.
+	 * </p>
+	 */
+	private String renderParameters(HttpServletRequest theRequest) {
+		return theRequest.getParameterMap().entrySet().stream()
+				.sorted(Map.Entry.comparingByKey())
+				.map(param -> param.getKey() + "=" + String.join(",", param.getValue()))
+				.collect(Collectors.joining("&"));
 	}
 
 	private String stripCharset(String theContentType) {

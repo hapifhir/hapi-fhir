@@ -3,6 +3,7 @@ package ca.uhn.fhir.test.utilities;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
+import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -41,14 +43,24 @@ class HttpTestTransportContractTest {
 	private static final HttpServletExtension ourServer = new HttpServletExtension().withServlet(new EchoServlet());
 
 	/**
-	 * {@code createDefault()}'s pool trusts a pooled connection is still alive without checking,
-	 * which races against the embedded server closing it — HttpClient5 tests reused a dead
-	 * connection often enough to see intermittent {@code NoHttpResponseException} here. Validating
-	 * on every reuse costs a non-blocking poll per request and closes that race.
+	 * The Apache HttpClient 5 client every {@link #APACHE_5} case runs on.
+	 * <p>
+	 * By default, the pool only re-checks a connection once it has been idle for two seconds, so a
+	 * connection the embedded server has already closed can still be leased out, failing the
+	 * request with {@code NoHttpResponseException}. These tests reuse connections well inside that
+	 * window, so the pool is told to re-check on every lease instead.
+	 * </p>
+	 * <p>
+	 * Zero is the value that re-checks every time: it sets the required idle time to nothing, and
+	 * only a negative value turns the check off. HttpClient 4.x, which the {@link #APACHE_4} cases
+	 * use, is the reverse — there zero disabled validation and only a positive value enabled it.
+	 * </p>
 	 */
 	private static final CloseableHttpClient ourHttp5Client = HttpClients.custom()
 			.setConnectionManager(PoolingHttpClientConnectionManagerBuilder.create()
-					.setValidateAfterInactivity(TimeValue.ZERO_MILLISECONDS)
+					.setDefaultConnectionConfig(ConnectionConfig.custom()
+							.setValidateAfterInactivity(TimeValue.ZERO_MILLISECONDS)
+							.build())
 					.build())
 			.build();
 
@@ -101,6 +113,62 @@ class HttpTestTransportContractTest {
 				.contains("method=POST")
 				.contains("body=bytes-payload")
 				.contains("contentType=application/octet-stream");
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {APACHE_4, APACHE_5})
+	void postForm_withFormParams_sendsThemFormEncoded(String theTransport) {
+		String body = request(theTransport, "/foo")
+				.withFormParam("grant_type", "authorization_code")
+				.withFormParam("client_id", "my-client")
+				.postForm()
+				.getBody();
+
+		// The echo renders parameters sorted by name, so client_id precedes grant_type.
+		assertThat(body)
+				.contains("method=POST")
+				.contains("contentType=" + Constants.CT_X_FORM_URLENCODED)
+				.contains("params=client_id=my-client&grant_type=authorization_code");
+	}
+
+	/**
+	 * Asserts on what the server decoded rather than on the bytes sent, because the escaping is
+	 * only correct if it round-trips — a test pinning the percent-encoded form would pass just as
+	 * happily on an encoding no server agrees with.
+	 */
+	@ParameterizedTest
+	@ValueSource(strings = {APACHE_4, APACHE_5})
+	void postForm_valueNeedsEscaping_serverReadsBackTheOriginalValue(String theTransport) {
+		String redirectUri = "https://client.example.org/cb?a=b&c=d e";
+
+		String body = request(theTransport, "/foo")
+				.withFormParam("redirect_uri", redirectUri)
+				.postForm()
+				.getBody();
+
+		assertThat(body).contains("params=redirect_uri=" + redirectUri);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {APACHE_4, APACHE_5})
+	void withFormParam_sameNameTwice_sendsBothValues(String theTransport) {
+		String body = request(theTransport, "/foo")
+				.withFormParam("scope", "openid")
+				.withFormParam("scope", "patient/*.read")
+				.postForm()
+				.getBody();
+
+		// The echo joins a multi-valued parameter with a comma.
+		assertThat(body).contains("params=scope=openid,patient/*.read");
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {APACHE_4, APACHE_5})
+	void withFormParam_nullValue_sendsTheNameWithNoValue(String theTransport) {
+		String body =
+				request(theTransport, "/foo").withFormParam("client_id", null).postForm().getBody();
+
+		assertThat(body).contains("params=client_id=");
 	}
 
 	@ParameterizedTest
@@ -221,6 +289,29 @@ class HttpTestTransportContractTest {
 		HttpTestResponse response = request(theTransport, "/foo").put(EchoServlet.PNG_MAGIC, "image/png");
 
 		assertThat(response.getBody()).contains("method=PUT").contains("contentType=image/png");
+	}
+
+	/**
+	 * The two guards below need no transport — they fail before anything is sent — so they are
+	 * plain cases rather than running once per transport.
+	 */
+	@Test
+	void postForm_noFormParams_failsRatherThanSendingAnEmptyBody() {
+		HttpTestRequest request = HttpTestRequest.to(mock(IHttpTestTransport.class), ourServer.getBaseUrl() + "/foo");
+
+		assertThatThrownBy(request::postForm)
+				.isInstanceOf(IllegalStateException.class)
+				.hasMessageContaining("withFormParam");
+	}
+
+	@Test
+	void get_afterWithFormParam_failsRatherThanDroppingTheParams() {
+		HttpTestRequest request = HttpTestRequest.to(mock(IHttpTestTransport.class), ourServer.getBaseUrl() + "/foo")
+				.withFormParam("client_id", "my-client");
+
+		assertThatThrownBy(request::get)
+				.isInstanceOf(IllegalStateException.class)
+				.hasMessageContaining("postForm");
 	}
 
 	@Test
