@@ -30,6 +30,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import java.util.Collection;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TAG;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hl7.fhir.dstu2016may.model.Basic.SP_IDENTIFIER;
 
 public class MdmSearchParamBuildingUtils {
@@ -71,6 +72,11 @@ public class MdmSearchParamBuildingUtils {
 	 * Creates a SearchParameterMap that finds the golden resources carrying any of the given EIDs, as a
 	 * single OR query. Each EID is matched on its own system as well as its value, so that the same value
 	 * issued by two different EID systems is not conflated.
+	 * <p>
+	 * EIDs with no value are dropped. Such an identifier is valid FHIR and identifies nobody, but a token
+	 * search with a blank value matches on the system alone - it would return every golden resource in
+	 * that EID system, and every one of them would be offered up as an EID match candidate.
+	 * </p>
 	 *
 	 * @param theEids the EIDs to search for
 	 * @return a search parameter map restricted to golden records
@@ -78,9 +84,19 @@ public class MdmSearchParamBuildingUtils {
 	public static SearchParameterMap buildEidSearchParameterMap(Collection<CanonicalEID> theEids) {
 		SearchParameterMap map = buildBasicGoldenResourceSearchParameterMap(null);
 		TokenOrListParam eidsToSearch = new TokenOrListParam();
-		theEids.forEach(eid -> eidsToSearch.addOr(new TokenParam(eid.getSystem(), eid.getValue())));
+		theEids.stream()
+				.filter(eid -> isNotBlank(eid.getValue()))
+				.forEach(eid -> eidsToSearch.addOr(new TokenParam(eid.getSystem(), eid.getValue())));
 		map.add(SP_IDENTIFIER, eidsToSearch);
 		return map;
+	}
+
+	/**
+	 * Whether any of the given EIDs can actually be searched for - see
+	 * {@link #buildEidSearchParameterMap(Collection)} for why a valueless EID cannot.
+	 */
+	public static boolean hasSearchableEid(Collection<CanonicalEID> theEids) {
+		return theEids.stream().anyMatch(eid -> isNotBlank(eid.getValue()));
 	}
 
 	/**

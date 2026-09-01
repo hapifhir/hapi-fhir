@@ -112,13 +112,13 @@ public class MdmResourceDaoSvcImpl implements IMdmResourceDaoSvc {
 	@Override
 	public List<IAnyResource> searchGoldenResourcesByEIDs(
 			Collection<CanonicalEID> theEids, String theResourceType, RequestPartitionId thePartitionId) {
-		if (theEids.isEmpty()) {
+		if (!MdmSearchParamBuildingUtils.hasSearchableEid(theEids)) {
 			return Collections.emptyList();
 		}
 
 		SearchParameterMap map = MdmSearchParamBuildingUtils.buildEidSearchParameterMap(theEids);
 
-		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourceType);
+		IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(theResourceType);
 		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
 		systemRequestDetails.setRequestPartitionId(thePartitionId);
 		IBundleProvider search = resourceDao.search(map, systemRequestDetails);

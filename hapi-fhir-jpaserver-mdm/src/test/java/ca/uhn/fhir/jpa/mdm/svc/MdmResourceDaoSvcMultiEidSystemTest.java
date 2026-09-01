@@ -99,4 +99,42 @@ public class MdmResourceDaoSvcMultiEidSystemTest extends BaseMdmR4Test {
 	public void searchGoldenResourcesByEIDs_noEidsGiven_returnsEmpty() {
 		assertThat(myResourceDaoSvc.searchGoldenResourcesByEIDs(List.of(), "Patient", null)).isEmpty();
 	}
+	/**
+	 * An identifier carrying an EID system but no value is valid FHIR and passes the "prevent multiple
+	 * EIDs" guard, but it identifies nobody. It must not be searched on: a token search with a blank value
+	 * falls back to matching the system alone, which would return every Golden Resource in that EID system
+	 * and offer them all up as EID match candidates.
+	 */
+	@Test
+	public void searchGoldenResourcesByEIDs_eidWithNoValue_isNotSearchedOn() {
+		String mrnSystem = patientEidSystems().get(0);
+
+		myPatientDao.update(addExternalEID(createGoldenPatient(), mrnSystem, "mrn-1"), mySrd);
+		myPatientDao.update(addExternalEID(createGoldenPatient(), mrnSystem, "mrn-2"), mySrd);
+
+		assertThat(myResourceDaoSvc.searchGoldenResourcesByEIDs(
+			List.of(new CanonicalEID(mrnSystem, null, null)), "Patient", null)).isEmpty();
+	}
+
+	/**
+	 * A valueless EID alongside a usable one contributes nothing rather than widening the search.
+	 */
+	@Test
+	public void searchGoldenResourcesByEIDs_eidWithNoValueAlongsideARealOne_searchesOnlyTheRealOne() {
+		String mrnSystem = patientEidSystems().get(0);
+		String npiSystem = patientEidSystems().get(1);
+
+		Patient mrnGolden = addExternalEID(createGoldenPatient(), mrnSystem, "mrn-1");
+		myPatientDao.update(mrnGolden, mySrd);
+		myPatientDao.update(addExternalEID(createGoldenPatient(), npiSystem, "npi-9"), mySrd);
+
+		List<IAnyResource> found = myResourceDaoSvc.searchGoldenResourcesByEIDs(
+			List.of(new CanonicalEID(mrnSystem, "mrn-1", null), new CanonicalEID(npiSystem, "", null)),
+			"Patient", null);
+
+		assertThat(found).hasSize(1);
+		assertThat(found.get(0).getIdElement().toUnqualifiedVersionless().getValue())
+			.isEqualTo(mrnGolden.getIdElement().toUnqualifiedVersionless().getValue());
+	}
+
 }
