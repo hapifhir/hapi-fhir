@@ -55,8 +55,23 @@ public class JsonUtil {
 	public static final SimpleFilterProvider SHOW_ALL_DATA_FILTER_PROVIDER = new SimpleFilterProvider()
 			.addFilter(IModelJson.SENSITIVE_DATA_FILTER_NAME, SimpleBeanPropertyFilter.serializeAll());
 
+	/*
+	 * These mappers use Jackson 2 defaults rather than Jackson 3 defaults for now.
+	 *
+	 * JsonUtil is used very widely, including by downstream products that embed HAPI FHIR.
+	 * Jackson 3 ignores JSON properties that the target class does not declare, instead of
+	 * throwing. A document with a misspelled or renamed field now deserializes successfully
+	 * with that value silently missing, and some callers rely on the failure to detect bad
+	 * input. Other defaults differ too, and they may not all be covered by tests.
+	 * See the "Config default changes" sections of
+	 * https://github.com/FasterXML/jackson/wiki/Jackson-Release-3.0 for the full list.
+	 *
+	 * As a precaution for this first stage of the Jackson 2 to Jackson 3 migration we keep the
+	 * previous behaviour here. This can be revisited later, once each use case has been
+	 * analysed in more depth.
+	 */
 	static {
-		ourMapperPrettyPrint = JsonMapper.builder()
+		ourMapperPrettyPrint = JsonMapper.builderWithJackson2Defaults()
 				.changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL)
 						.withContentInclusion(JsonInclude.Include.NON_NULL))
 				.changeDefaultVisibility(vc -> vc.withFieldVisibility(JsonAutoDetect.Visibility.PUBLIC_ONLY))
@@ -66,7 +81,7 @@ public class JsonUtil {
 				.enable(SerializationFeature.INDENT_OUTPUT)
 				.build();
 
-		ourMapperNonPrettyPrint = JsonMapper.builder()
+		ourMapperNonPrettyPrint = JsonMapper.builderWithJackson2Defaults()
 				.changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL)
 						.withContentInclusion(JsonInclude.Include.NON_NULL))
 				.changeDefaultVisibility(vc -> vc.withFieldVisibility(JsonAutoDetect.Visibility.PUBLIC_ONLY))
@@ -76,7 +91,7 @@ public class JsonUtil {
 				.disable(SerializationFeature.INDENT_OUTPUT)
 				.build();
 
-		ourMapperIncludeSensitive = JsonMapper.builder()
+		ourMapperIncludeSensitive = JsonMapper.builderWithJackson2Defaults()
 				.filterProvider(SHOW_ALL_DATA_FILTER_PROVIDER)
 				.changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL)
 						.withContentInclusion(JsonInclude.Include.NON_NULL))
