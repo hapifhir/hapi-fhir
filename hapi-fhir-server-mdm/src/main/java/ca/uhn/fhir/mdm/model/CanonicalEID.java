@@ -171,9 +171,8 @@ public class CanonicalEID {
 	 */
 	public static List<CanonicalEID> extractFromResource(
 			FhirContext theFhirContext, Collection<String> theEidSystems, IBaseResource theBaseResource) {
-		// A null system matches nothing, as the single-system overload above already guarantees. It reaches
-		// here when a resource type has no configured EID system and a caller pairs a value with the
-		// resulting null.
+		// A null system matches nothing. It arrives here when a resource type has no configured EID system
+		// and a caller pairs a value with the resulting null.
 		List<String> eidSystems =
 				theEidSystems.stream().filter(Objects::nonNull).collect(Collectors.toList());
 		if (eidSystems.isEmpty()) {

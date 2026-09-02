@@ -3,15 +3,13 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
-import ca.uhn.fhir.mdm.model.CanonicalEID;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.util.Collection;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -95,7 +93,7 @@ public class FindCandidateByEidSvcMultiEidSystemTest extends BaseMdmR4Test {
 	 * so the EIDs must be resolved with one query rather than one query per EID.
 	 */
 	@Test
-	@SuppressWarnings({"unchecked", "deprecation"})
+	@SuppressWarnings({"unchecked"})
 	public void findCandidates_severalEids_issuesASingleSearch() {
 		String mrnSystem = patientEidSystems().get(0);
 		String npiSystem = patientEidSystems().get(1);
@@ -108,8 +106,8 @@ public class FindCandidateByEidSvcMultiEidSystemTest extends BaseMdmR4Test {
 
 		verify(myMdmResourceDaoSvcSpy, times(1))
 			.searchGoldenResourcesByEIDs(any(Collection.class), anyString(), nullable(RequestPartitionId.class));
-		// Deliberately naming the deprecated overload: it is the one the previous implementation called
-		// once per EID, so this is what proves the per-EID loop is gone rather than merely supplemented.
+		// The deprecated overload resolves one EID per call, so asserting it is never used is what rules
+		// out a per-EID loop running alongside the single search.
 		verify(myMdmResourceDaoSvcSpy, never())
 			.searchGoldenResourceByEID(anyString(), anyString(), nullable(RequestPartitionId.class));
 	}

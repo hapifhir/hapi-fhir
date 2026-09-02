@@ -225,9 +225,8 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 	}
 	/**
 	 * With multiple EIDs permitted, an EID added on update while the original is kept reaches the Golden
-	 * Resource, just as it would had the same resource been created carrying both. Previously the update
-	 * path was the one place that did not accumulate, which made a Golden Resource\'s EID set depend on
-	 * whether an EID arrived by create or by update.
+	 * Resource, just as it would had the same resource been created carrying both. A Golden Resource's
+	 * EID set must not depend on whether an EID arrived by create or by update.
 	 */
 	@Test
 	public void eidAddedOnUpdateWhileTheOriginalIsKept_isMergedIntoTheGoldenResource() {

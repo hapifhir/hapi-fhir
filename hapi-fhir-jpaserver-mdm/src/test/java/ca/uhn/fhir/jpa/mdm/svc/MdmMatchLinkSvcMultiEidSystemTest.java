@@ -20,8 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Linking behaviour when a resource type is identified by more than one EID system. Runs at the default
- * {@code prevent_multiple_eids=true}, since that safeguard is now scoped per EID system and so no longer
- * stands in the way of a Patient carrying one MRN and one NPI.
+ * {@code prevent_multiple_eids=true}, which is scoped per EID system and so permits a Patient carrying
+ * one MRN and one NPI.
  */
 @TestPropertySource(properties = {"module.mdm.config.script.file=classpath:mdm/mdm-rules-multi-eid-systems.json"})
 // Created by claude-opus-5
