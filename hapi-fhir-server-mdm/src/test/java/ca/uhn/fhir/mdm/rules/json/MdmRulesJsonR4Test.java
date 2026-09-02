@@ -102,11 +102,10 @@ public class MdmRulesJsonR4Test extends BaseMdmRulesR4Test {
 	@Test
 	void eidSystems_serializesAsAnArrayEvenWhenOneSystemIsConfigured() {
 		MdmRulesJson rules = buildActiveBirthdateIdRules();
-		rules.addEnterpriseEIDSystems("Patient", List.of("http://example.com/mrn"));
 
 		String json = JsonUtil.serialize(rules).replaceAll("\\s+", "");
 
-		assertThat(json).contains("\"Patient\":[\"http://example.com/mrn\"]");
+		assertThat(json).contains("\"Patient\":[\"" + PATIENT_EID_FOR_TEST + "\"]");
 	}
 
 	@Test
@@ -127,6 +126,46 @@ public class MdmRulesJsonR4Test extends BaseMdmRulesR4Test {
 
 		assertThat(rules.getEnterpriseEIDSystemsForResourceType("Patient"))
 			.containsExactly("http://example.com/mrn");
+	}
+
+	@Test
+	void addEnterpriseEIDSystems_calledTwiceForOneType_appendsRatherThanReplaces() {
+		MdmRulesJson rules = new MdmRulesJson();
+		rules.addEnterpriseEIDSystems("Patient", List.of("http://example.com/mrn"));
+		rules.addEnterpriseEIDSystems("Patient", List.of("http://example.com/npi"));
+
+		assertThat(rules.getEnterpriseEIDSystemsForResourceType("Patient"))
+			.containsExactly("http://example.com/mrn", "http://example.com/npi");
+	}
+
+	@Test
+	void addEnterpriseEIDSystems_withASystemAlreadyConfigured_doesNotDuplicateIt() {
+		MdmRulesJson rules = new MdmRulesJson();
+		rules.addEnterpriseEIDSystems("Patient", List.of("http://example.com/mrn"));
+		rules.addEnterpriseEIDSystems("Patient", List.of("http://example.com/mrn", "http://example.com/npi"));
+
+		assertThat(rules.getEnterpriseEIDSystemsForResourceType("Patient"))
+			.containsExactly("http://example.com/mrn", "http://example.com/npi");
+	}
+
+	/**
+	 * The plural form exists only to save repeated calls, so it must mean exactly what the singular form
+	 * repeated means - including its de-duplication.
+	 */
+	@Test
+	void addEnterpriseEIDSystems_isEquivalentToRepeatedSingularCalls() {
+		MdmRulesJson viaPlural = new MdmRulesJson();
+		viaPlural.addEnterpriseEIDSystems(
+			"Patient", List.of("http://example.com/mrn", "http://example.com/npi", "http://example.com/mrn"));
+
+		MdmRulesJson viaSingular = new MdmRulesJson();
+		viaSingular.addEnterpriseEIDSystem("Patient", "http://example.com/mrn");
+		viaSingular.addEnterpriseEIDSystem("Patient", "http://example.com/npi");
+		viaSingular.addEnterpriseEIDSystem("Patient", "http://example.com/mrn");
+
+		assertThat(viaPlural.getEnterpriseEIDSystemsForResourceType("Patient"))
+			.isEqualTo(viaSingular.getEnterpriseEIDSystemsForResourceType("Patient"))
+			.containsExactly("http://example.com/mrn", "http://example.com/npi");
 	}
 
 	@Test

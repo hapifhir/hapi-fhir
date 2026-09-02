@@ -197,16 +197,18 @@ public class MdmRulesJson implements IModelJson {
 	}
 
 	/**
-	 * Replaces the EID systems configured for a single resource type.
+	 * Appends EID systems to those already configured for a resource type, in the order given. A system
+	 * already configured for that resource type is not added again, so this is exactly
+	 * {@link #addEnterpriseEIDSystem(String, String)} called once per element.
+	 * <p>
+	 * To replace what is configured rather than add to it, use {@link #setEidSystemsByResourceType(Map)}.
+	 * </p>
 	 *
 	 * @param theResourceType the resource type the EID systems identify
-	 * @param theEidSystems the EID system URIs, in the order they should be applied
+	 * @param theEidSystems the EID system URIs to append, in the order they should be applied
 	 */
 	public void addEnterpriseEIDSystems(String theResourceType, List<String> theEidSystems) {
-		if (myEnterpriseEidSystems == null) {
-			myEnterpriseEidSystems = new LinkedHashMap<>();
-		}
-		myEnterpriseEidSystems.put(theResourceType, new ArrayList<>(theEidSystems));
+		theEidSystems.forEach(eidSystem -> addEnterpriseEIDSystem(theResourceType, eidSystem));
 	}
 
 	/**
