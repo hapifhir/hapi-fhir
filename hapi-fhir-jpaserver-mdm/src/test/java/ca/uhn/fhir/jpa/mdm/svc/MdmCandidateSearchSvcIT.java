@@ -19,9 +19,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.util.UriUtils;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -116,7 +114,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 			.setValue(value);
 		myPatientDao.create(jane, new SystemRequestDetails());
 
-		// add a few values that would get caught if we split it
+		// random resources with some value that would match 'anything', but not '.'
 		for (String val : new String[] { "123", "456" }) {
 			Patient patient = new Patient();
 			patient.setActive(true);
