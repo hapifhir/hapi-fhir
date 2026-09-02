@@ -1119,6 +1119,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			IBundleProvider outcome = myProcedureDao.search(map, new SystemRequestDetails());
 			ourLog.info("Search returned {} resources.", outcome.getResources(0, 999).size());
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+			assertEquals(2, myCaptureQueriesListener.logSelectQueries().size());
 
 			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
 			// Check for a particular WHERE CLAUSE in the generated SQL to make sure we are verifying the correct query
@@ -1147,6 +1148,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			IBundleProvider outcome = myProcedureDao.search(map, new SystemRequestDetails());
 			ourLog.info("Search returned {} resources.", outcome.getResources(0, 999).size());
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+			assertEquals(2, myCaptureQueriesListener.logSelectQueries().size());
 
 			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
 			// Check for a particular WHERE CLAUSE in the generated SQL to make sure we are verifying the correct query
@@ -1173,6 +1175,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			IBundleProvider outcome = myProvenanceDao.search(map, new SystemRequestDetails());
 			ourLog.info("Search returned {} resources.", outcome.getResources(0, 999).size());
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+			assertEquals(1, myCaptureQueriesListener.logSelectQueries().size());
 
 			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 			// Ensure that we do NOT see a couple of particular WHERE clauses

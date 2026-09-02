@@ -51,6 +51,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -5204,5 +5205,49 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myInterceptorRegistry.registerInterceptor(myAuthInterceptor);
 		myConsentInterceptor = new ConsentInterceptor(new IConsentService() {});
 		myInterceptorRegistry.registerInterceptor(myConsentInterceptor);
+	}
+
+	@Test
+	public void testSearch_MultipleTagParams_UsesSingleTagResolutionQuery() {
+		Patient p = new Patient();
+		p.getMeta().addTag("http://sys", "code-1", "display-1");
+		p.getMeta().addTag("http://sys", "code-2", "display-2");
+		p.getMeta().addTag("http://sys", "code-3", "display-3");
+		p.setActive(true);
+		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = SearchParameterMap.newSynchronous()
+			.add(Constants.PARAM_TAG, new TokenParam("http://sys", "code-1"))
+			.add(Constants.PARAM_TAG, new TokenParam("http://sys", "code-2"))
+			.add(Constants.PARAM_TAG, new TokenParam("http://sys", "code-3"));
+		IBundleProvider outcome = myPatientDao.search(map, mySrd);
+		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactly(id.getValue());
+
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(4, myCaptureQueriesListener.logSelectQueries().size());
+		assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+	}
+
+	@Test
+	public void testSearch_MultipleSecurityParams_UsesSingleTagResolutionQuery() {
+		Patient p = new Patient();
+		p.getMeta().addSecurity("http://sys", "code-1", "display-1");
+		p.getMeta().addSecurity("http://sys", "code-2", "display-2");
+		p.getMeta().addSecurity("http://sys", "code-3", "display-3");
+		p.setActive(true);
+		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = SearchParameterMap.newSynchronous()
+			.add(Constants.PARAM_SECURITY, new TokenParam("http://sys", "code-1"))
+			.add(Constants.PARAM_SECURITY, new TokenParam("http://sys", "code-2"))
+			.add(Constants.PARAM_SECURITY, new TokenParam("http://sys", "code-3"));
+		IBundleProvider outcome = myPatientDao.search(map, mySrd);
+		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactly(id.getValue());
+
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(4, myCaptureQueriesListener.logSelectQueries().size());
+		assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 	}
 }
