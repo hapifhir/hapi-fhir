@@ -1,5 +1,5 @@
 ---
-type: fix
+type: performance
 issue: 8308
 title: "Previously, searches using the `_tag`, `_security`, or `_profile` parameters resolved the tag
   through a join to `HFJ_TAG_DEF`, hiding the selective tag id from the database query planner. For
