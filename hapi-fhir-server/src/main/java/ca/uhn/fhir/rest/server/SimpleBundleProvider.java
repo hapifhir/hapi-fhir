@@ -91,7 +91,18 @@ public class SimpleBundleProvider implements IBundleProvider {
 		int size = 0;
 
 		List<? extends IBaseResource> list = theList;
-		if (list.contains(null)) {
+
+		// If the list contains nulls, filter them out.
+		// We can't just call list.contains(null) because some collections
+		// such as List.of(..) don't allow nulls and throw an NPE.
+		boolean containsNulls = false;
+		for (IBaseResource resource : list) {
+			if (resource == null) {
+				containsNulls = true;
+				break;
+			}
+		}
+		if (containsNulls) {
 			list = list.stream().filter(Objects::nonNull).toList();
 		}
 
