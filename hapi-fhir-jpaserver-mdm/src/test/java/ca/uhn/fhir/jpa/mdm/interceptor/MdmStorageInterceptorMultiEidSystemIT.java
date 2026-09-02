@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 @ContextConfiguration(classes = {MdmHelperConfig.class})
 @TestPropertySource(properties = {
-	"mdm.rules.file=mdm/mdm-rules-multi-eid-systems.json",
+	"module.mdm.config.script.file=classpath:mdm/mdm-rules-multi-eid-systems.json",
 	"mdm.prevent_multiple_eids=true",
 	"mdm.prevent_eid_updates=true"
 })

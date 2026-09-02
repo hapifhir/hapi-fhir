@@ -25,15 +25,15 @@ public class MdmHelperConfig {
 	@Value("${mdm.prevent_multiple_eids:true}")
 	boolean myPreventMultipleEids;
 
-	/** Defaults to the standard test rules, so tests that do not set it are unaffected. */
-	@Value("${mdm.rules.file:mdm/mdm-rules.json}")
-	String myRulesFile;
+	@Value("${module.mdm.config.script.file}")
+	Resource myRulesFile;
 
 	@Primary
 	@Bean
 	IMdmSettings mdmSettings(MdmRuleValidator theMdmRuleValidator) throws IOException {
 		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
-		Resource resource = resourceLoader.getResource(myRulesFile);
+		Resource resource = (myRulesFile == null || !myRulesFile.exists())
+			? resourceLoader.getResource("mdm/mdm-rules.json") : myRulesFile;
 		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
 
 		// Set Enabled to true, and set strict mode.
