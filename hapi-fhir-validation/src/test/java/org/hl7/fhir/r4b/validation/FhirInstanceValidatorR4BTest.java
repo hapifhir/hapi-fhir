@@ -1484,9 +1484,12 @@ public class FhirInstanceValidatorR4BTest extends BaseTest {
 		final String encoded = loadResource("patient-with-multiple-comm-langs-en_US-and-en-UNDERSCORE.json");
 
 		final ValidationResult output = myFhirValidator.validateWithResult(encoded);
-		final List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+		final List<SingleValidationMessage> errors = logResultsAndReturnErrorOnes(output);
 
-		assertThat(errors).isEmpty();
+		// The concept satisfies the binding through the valid "en" coding, but the invalid
+		// en_US coding still fails against its CodeSystem, matching the reference validator
+		assertThat(errors).hasSize(1);
+		assertThat(errors.get(0).getMessage()).contains("en_US");
 	}
 
 	@Test
