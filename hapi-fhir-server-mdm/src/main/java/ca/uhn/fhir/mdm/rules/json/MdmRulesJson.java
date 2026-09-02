@@ -216,12 +216,16 @@ public class MdmRulesJson implements IModelJson {
 	 * one is present, otherwise falls back to the deprecated {@code eidSystem} property scoped to all
 	 * resource types, otherwise returns an empty map.
 	 *
-	 * @return the configured EID systems keyed by resource type; never {@literal null}
+	 * @return the configured EID systems keyed by resource type, unmodifiable down to the lists themselves;
+	 * never {@literal null}
 	 */
 	public Map<String, List<String>> getEidSystemsByResourceType() {
 		// First try the new property.
 		if (myEnterpriseEidSystems != null && !myEnterpriseEidSystems.isEmpty()) {
-			return Collections.unmodifiableMap(myEnterpriseEidSystems);
+			Map<String, List<String>> retVal = new LinkedHashMap<>();
+			myEnterpriseEidSystems.forEach(
+					(resourceType, eidSystems) -> retVal.put(resourceType, Collections.unmodifiableList(eidSystems)));
+			return Collections.unmodifiableMap(retVal);
 			// If that fails, fall back to our deprecated property.
 		} else if (!StringUtils.isBlank(myEnterpriseEIDSystem)) {
 			return Map.of(ALL_RESOURCE_SEARCH_PARAM_TYPE, List.of(myEnterpriseEIDSystem));

@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -166,6 +167,33 @@ public class MdmRulesJsonR4Test extends BaseMdmRulesR4Test {
 		assertThat(viaPlural.getEnterpriseEIDSystemsForResourceType("Patient"))
 			.isEqualTo(viaSingular.getEnterpriseEIDSystemsForResourceType("Patient"))
 			.containsExactly("http://example.com/mrn", "http://example.com/npi");
+	}
+
+	/**
+	 * The rules are shared configuration, so nothing a caller is handed may write back into them.
+	 */
+	@Test
+	void getEidSystemsByResourceType_returnedListsAreNotWritable() {
+		MdmRulesJson rules = new MdmRulesJson();
+		rules.addEnterpriseEIDSystem("Patient", "http://example.com/mrn");
+
+		assertThatThrownBy(() -> rules.getEidSystemsByResourceType()
+			.get("Patient")
+			.add("http://example.com/npi"))
+			.isInstanceOf(UnsupportedOperationException.class);
+
+		assertThat(rules.getEnterpriseEIDSystemsForResourceType("Patient"))
+			.containsExactly("http://example.com/mrn");
+	}
+
+	@Test
+	void getEidSystemsByResourceType_returnedMapIsNotWritable() {
+		MdmRulesJson rules = new MdmRulesJson();
+		rules.addEnterpriseEIDSystem("Patient", "http://example.com/mrn");
+
+		assertThatThrownBy(() -> rules.getEidSystemsByResourceType()
+			.put("Practitioner", List.of("http://example.com/npi")))
+			.isInstanceOf(UnsupportedOperationException.class);
 	}
 
 	@Test
