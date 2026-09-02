@@ -1,5 +1,6 @@
 package ca.uhn.fhir.mdm.rules.json;
 
+import ca.uhn.fhir.i18n.Msg;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -79,6 +80,7 @@ class EidSystemListDeserializerTest {
 		assertThatThrownBy(() -> deserialize("""
 			{"eidSystems": {"Patient": 42}}"""))
 			.isInstanceOf(JsonMappingException.class)
+			.hasMessageContaining(Msg.code(3046))
 			.hasMessageContaining("eidSystems")
 			.hasMessageContaining("Patient");
 	}
@@ -88,6 +90,7 @@ class EidSystemListDeserializerTest {
 		assertThatThrownBy(() -> deserialize("""
 			{"eidSystems": {"Patient": ["http://example.com/mrn", 42]}}"""))
 			.isInstanceOf(JsonMappingException.class)
+			.hasMessageContaining(Msg.code(3046))
 			.hasMessageContaining("eidSystems")
 			.hasMessageContaining("Patient");
 	}

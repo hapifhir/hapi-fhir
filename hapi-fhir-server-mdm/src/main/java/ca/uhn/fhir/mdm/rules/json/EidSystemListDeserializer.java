@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.mdm.rules.json;
 
+import ca.uhn.fhir.i18n.Msg;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -91,7 +92,7 @@ public class EidSystemListDeserializer extends JsonDeserializer<List<String>> {
 	private JsonMappingException invalidValue(JsonParser theParser) throws IOException {
 		return JsonMappingException.from(
 				theParser,
-				"eidSystems entry for '" + theParser.currentName()
+				Msg.code(3046) + "eidSystems entry for '" + theParser.currentName()
 						+ "' must be an EID system URI or an array of EID system URIs");
 	}
 }
