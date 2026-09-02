@@ -1,7 +1,8 @@
 ---
 type: performance
 issue: 8308
-title: "Previously, searches using the `_tag`, `_security`, or `_profile` parameters resolved the tag
+title: "Faster queries using _tag, and _security.
+Previously, searches using the `_tag`, or `_security` parameters resolved the tag
   through a join to `HFJ_TAG_DEF`, hiding the selective tag id from the database query planner. For
   high-cardinality tags this led to cardinality underestimates and very slow query plans. This has been
   fixed by resolving the matching tag id(s) up front and filtering on the indexed `HFJ_RES_TAG.TAG_ID`
