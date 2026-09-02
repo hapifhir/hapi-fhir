@@ -74,7 +74,7 @@ class PlaceholderResourceUtilTest {
 				.setValue(new BooleanType(true));
 			args.add(patient);
 		}
-		// 4 basic resource with wrong data type
+		// 4 basic resource with extension with wrong data type
 		{
 			Practitioner practitioner = new Practitioner();
 			practitioner.addExtension()

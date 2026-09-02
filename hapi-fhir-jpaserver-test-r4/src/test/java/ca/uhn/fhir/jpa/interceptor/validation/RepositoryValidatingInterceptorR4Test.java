@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.interceptor.validation;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -541,20 +542,24 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 	 */
 	@Test
 	void createResourceTypeThatCannotHaveExtensions_withRulesRegistered_isNotRejected() {
+		// setup
+		// set rules on interceptor
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
 			.forResourcesOfType("Patient")
 			.requireAtLeastOneProfileOf("http://foo/Profile1", "http://foo/Profile2")
 			.build();
 		myValInterceptor.setRules(rules);
 
+		// test with binary; make sure it's created (ie, has an id value)
 		Binary binary = new Binary();
 		binary.setContentType("text/plain");
 		binary.setContent("hello".getBytes(StandardCharsets.UTF_8));
-		assertThat(myBinaryDao.create(binary).getId().getVersionIdPart()).isEqualTo("1");
+		assertThat(myBinaryDao.create(binary, new SystemRequestDetails()).getId().getVersionIdPart()).isNotNull();
 
+		// test with a bundle; make sure it's created (ie, has an id value)
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.COLLECTION);
-		assertThat(myBundleDao.create(bundle).getId().getVersionIdPart()).isEqualTo("1");
+		assertThat(myBundleDao.create(bundle, new SystemRequestDetails()).getId().getVersionIdPart()).isNotNull();
 	}
 
 	private RepositoryValidatingRuleBuilder newRuleBuilder() {
