@@ -14,10 +14,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -31,6 +33,207 @@ public class MdmRulesJsonR4Test extends BaseMdmRulesR4Test {
 		super.before();
 
 		myRules = buildActiveBirthdateIdRules();
+	}
+
+	@Test
+	void eidSystems_withArrayValues_deserializesAllSystemsInDeclaredOrder() throws IOException {
+		MdmRulesJson rules = deserializeRulesWithEidSystems(
+			"""
+			{"Patient": ["http://example.com/mrn", "http://example.com/npi"]}""");
+
+		assertThat(rules.getEnterpriseEIDSystemsForResourceType("Patient"))
+			.containsExactly("http://example.com/mrn", "http://example.com/npi");
+	}
+
+	@Test
+	void eidSystems_withScalarValue_escalatesToSingletonList() throws IOException {
+		MdmRulesJson rules = deserializeRulesWithEidSystems(
+			"""
+			{"Patient": "http://example.com/mrn"}""");
+
+		assertThat(rules.getEnterpriseEIDSystemsForResourceType("Patient"))
+			.containsExactly("http://example.com/mrn");
+	}
+
+	@Test
+	void eidSystems_mixedScalarAndArray_bothFormsDeserialize() throws IOException {
+		MdmRulesJson rules = deserializeRulesWithEidSystems(
+			"""
+			{"Patient": ["http://example.com/mrn", "http://example.com/npi"], "Practitioner": "http://example.com/npi"}""");
+
+		assertThat(rules.getEnterpriseEIDSystemsForResourceType("Patient"))
+			.containsExactly("http://example.com/mrn", "http://example.com/npi");
+		assertThat(rules.getEnterpriseEIDSystemsForResourceType("Practitioner"))
+			.containsExactly("http://example.com/npi");
+	}
+
+	@Test
+	void eidSystems_wildcardWithArray_appliesToEveryResourceType() throws IOException {
+		MdmRulesJson rules = deserializeRulesWithEidSystems(
+			"""
+			{"*": ["http://example.com/mrn", "http://example.com/npi"]}""");
+
+		assertThat(rules.getEnterpriseEIDSystemsForResourceType("Patient"))
+			.containsExactly("http://example.com/mrn", "http://example.com/npi");
+		assertThat(rules.getEnterpriseEIDSystemsForResourceType("Practitioner"))
+			.containsExactly("http://example.com/mrn", "http://example.com/npi");
+	}
+
+	@Test
+	void getEnterpriseEIDSystemsForResourceType_unconfiguredType_returnsEmptyList() throws IOException {
+		MdmRulesJson rules = deserializeRulesWithEidSystems(
+			"""
+			{"Patient": ["http://example.com/mrn"]}""");
+
+		assertThat(rules.getEnterpriseEIDSystemsForResourceType("Practitioner")).isEmpty();
+	}
+
+	@Test
+	void getEnterpriseEIDSystemsForResourceType_noEidSystemsConfigured_returnsEmptyList() {
+		MdmRulesJson rules = new MdmRulesJson();
+
+		assertThat(rules.getEnterpriseEIDSystemsForResourceType("Patient")).isEmpty();
+	}
+
+	/**
+	 * Pins a consumer-visible change of format. A resource type mapped to a single EID system used to be
+	 * written back out as a bare string, and is now always written back as a one-element array. Anything
+	 * that re-serializes a rules document will see the new shape; both shapes still deserialize.
+	 */
+	@Test
+	void eidSystems_serializesAsAnArrayEvenWhenOneSystemIsConfigured() {
+		MdmRulesJson rules = buildActiveBirthdateIdRules();
+
+		String json = JsonUtil.serialize(rules).replaceAll("\\s+", "");
+
+		assertThat(json).contains("\"Patient\":[\"" + PATIENT_EID_FOR_TEST + "\"]");
+	}
+
+	@Test
+	void addEnterpriseEIDSystem_calledTwiceForOneType_appendsRatherThanReplaces() {
+		MdmRulesJson rules = new MdmRulesJson();
+		rules.addEnterpriseEIDSystem("Patient", "http://example.com/mrn");
+		rules.addEnterpriseEIDSystem("Patient", "http://example.com/npi");
+
+		assertThat(rules.getEnterpriseEIDSystemsForResourceType("Patient"))
+			.containsExactly("http://example.com/mrn", "http://example.com/npi");
+	}
+
+	@Test
+	void addEnterpriseEIDSystem_calledTwiceWithSameSystem_doesNotDuplicate() {
+		MdmRulesJson rules = new MdmRulesJson();
+		rules.addEnterpriseEIDSystem("Patient", "http://example.com/mrn");
+		rules.addEnterpriseEIDSystem("Patient", "http://example.com/mrn");
+
+		assertThat(rules.getEnterpriseEIDSystemsForResourceType("Patient"))
+			.containsExactly("http://example.com/mrn");
+	}
+
+	@Test
+	void addEnterpriseEIDSystems_calledTwiceForOneType_appendsRatherThanReplaces() {
+		MdmRulesJson rules = new MdmRulesJson();
+		rules.addEnterpriseEIDSystems("Patient", List.of("http://example.com/mrn"));
+		rules.addEnterpriseEIDSystems("Patient", List.of("http://example.com/npi"));
+
+		assertThat(rules.getEnterpriseEIDSystemsForResourceType("Patient"))
+			.containsExactly("http://example.com/mrn", "http://example.com/npi");
+	}
+
+	@Test
+	void addEnterpriseEIDSystems_withASystemAlreadyConfigured_doesNotDuplicateIt() {
+		MdmRulesJson rules = new MdmRulesJson();
+		rules.addEnterpriseEIDSystems("Patient", List.of("http://example.com/mrn"));
+		rules.addEnterpriseEIDSystems("Patient", List.of("http://example.com/mrn", "http://example.com/npi"));
+
+		assertThat(rules.getEnterpriseEIDSystemsForResourceType("Patient"))
+			.containsExactly("http://example.com/mrn", "http://example.com/npi");
+	}
+
+	/**
+	 * The plural form exists only to save repeated calls, so it must mean exactly what the singular form
+	 * repeated means - including its de-duplication.
+	 */
+	@Test
+	void addEnterpriseEIDSystems_isEquivalentToRepeatedSingularCalls() {
+		MdmRulesJson viaPlural = new MdmRulesJson();
+		viaPlural.addEnterpriseEIDSystems(
+			"Patient", List.of("http://example.com/mrn", "http://example.com/npi", "http://example.com/mrn"));
+
+		MdmRulesJson viaSingular = new MdmRulesJson();
+		viaSingular.addEnterpriseEIDSystem("Patient", "http://example.com/mrn");
+		viaSingular.addEnterpriseEIDSystem("Patient", "http://example.com/npi");
+		viaSingular.addEnterpriseEIDSystem("Patient", "http://example.com/mrn");
+
+		assertThat(viaPlural.getEnterpriseEIDSystemsForResourceType("Patient"))
+			.isEqualTo(viaSingular.getEnterpriseEIDSystemsForResourceType("Patient"))
+			.containsExactly("http://example.com/mrn", "http://example.com/npi");
+	}
+
+	/**
+	 * The rules are shared configuration, so nothing a caller is handed may write back into them.
+	 */
+	@Test
+	void getEidSystemsByResourceType_returnedListsAreNotWritable() {
+		MdmRulesJson rules = new MdmRulesJson();
+		rules.addEnterpriseEIDSystem("Patient", "http://example.com/mrn");
+
+		assertThatThrownBy(() -> rules.getEidSystemsByResourceType()
+			.get("Patient")
+			.add("http://example.com/npi"))
+			.isInstanceOf(UnsupportedOperationException.class);
+
+		assertThat(rules.getEnterpriseEIDSystemsForResourceType("Patient"))
+			.containsExactly("http://example.com/mrn");
+	}
+
+	@Test
+	void getEidSystemsByResourceType_returnedMapIsNotWritable() {
+		MdmRulesJson rules = new MdmRulesJson();
+		rules.addEnterpriseEIDSystem("Patient", "http://example.com/mrn");
+
+		assertThatThrownBy(() -> rules.getEidSystemsByResourceType()
+			.put("Practitioner", List.of("http://example.com/npi")))
+			.isInstanceOf(UnsupportedOperationException.class);
+	}
+
+	@Test
+	void getEnterpriseEIDSystemForResourceType_withMultipleSystems_returnsFirstConfigured() {
+		MdmRulesJson rules = new MdmRulesJson();
+		rules.addEnterpriseEIDSystems("Patient", List.of("http://example.com/mrn", "http://example.com/npi"));
+
+		assertEquals("http://example.com/mrn", rules.getEnterpriseEIDSystemForResourceType("Patient"));
+	}
+
+	@Test
+	void getEnterpriseEIDSystems_withMultipleSystems_returnsFirstSystemPerResourceType() {
+		MdmRulesJson rules = new MdmRulesJson();
+		rules.addEnterpriseEIDSystems("Patient", List.of("http://example.com/mrn", "http://example.com/npi"));
+		rules.addEnterpriseEIDSystems("Practitioner", List.of("http://example.com/npi"));
+
+		assertThat(rules.getEnterpriseEIDSystems())
+			.containsEntry("Patient", "http://example.com/mrn")
+			.containsEntry("Practitioner", "http://example.com/npi");
+	}
+
+	@Test
+	void setEnterpriseEIDSystems_withScalarMap_escalatesEachValueToSingletonList() {
+		MdmRulesJson rules = new MdmRulesJson();
+		rules.setEnterpriseEIDSystems(Map.of("Patient", "http://example.com/mrn"));
+
+		assertThat(rules.getEnterpriseEIDSystemsForResourceType("Patient"))
+			.containsExactly("http://example.com/mrn");
+	}
+
+	/**
+	 * The legacy singular {@code eidSystem} property is scoped to all resource types, so it must escalate
+	 * to a one-element list under the wildcard key.
+	 */
+	@Test
+	void legacyScalarEidSystem_escalatesToSingletonListForEveryResourceType() {
+		MdmRulesJson rules = buildOldStyleEidRules();
+
+		assertThat(rules.getEnterpriseEIDSystemsForResourceType("Patient")).containsExactly(PATIENT_EID_FOR_TEST);
+		assertThat(rules.getEnterpriseEIDSystemsForResourceType("Medication")).containsExactly(PATIENT_EID_FOR_TEST);
 	}
 
 	@Test
@@ -111,6 +314,22 @@ public class MdmRulesJsonR4Test extends BaseMdmRulesR4Test {
 
 		eidSystem = myRules.getEnterpriseEIDSystemForResourceType("Medication");
 		assertEquals(PATIENT_EID_FOR_TEST, eidSystem);
+	}
+
+	private MdmRulesJson deserializeRulesWithEidSystems(String theEidSystemsBlock) {
+		String json =
+			"""
+			{
+				"version": "1",
+				"mdmTypes": ["Patient", "Practitioner"],
+				"candidateSearchParams": [],
+				"candidateFilterSearchParams": [],
+				"matchFields": [],
+				"matchResultMap": {},
+				"eidSystems": %s
+			}"""
+				.formatted(theEidSystemsBlock);
+		return JsonUtil.deserialize(json, MdmRulesJson.class);
 	}
 
 	@Override

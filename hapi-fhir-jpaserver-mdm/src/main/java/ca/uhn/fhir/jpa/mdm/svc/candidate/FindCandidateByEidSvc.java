@@ -35,8 +35,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class FindCandidateByEidSvc extends BaseCandidateFinder {
@@ -60,31 +62,37 @@ public class FindCandidateByEidSvc extends BaseCandidateFinder {
 		List<MatchedGoldenResourceCandidate> retval = new ArrayList<>();
 
 		List<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theIncomingResource);
-		if (!eidFromResource.isEmpty()) {
-			for (CanonicalEID eid : eidFromResource) {
-				Optional<IAnyResource> oFoundGoldenResource = myMdmResourceDaoSvc.searchGoldenResourceByEID(
-						eid.getValue(),
-						theIncomingResource.getIdElement().getResourceType(),
-						myMdmPartitionHelper.getRequestPartitionIdFromResourceForSearch(theIncomingResource));
-				if (oFoundGoldenResource.isPresent()) {
-					IAnyResource foundGoldenResource = oFoundGoldenResource.get();
-					// Exclude manually declared NO_MATCH links from candidates
-					if (isNoMatch(foundGoldenResource, theIncomingResource)) {
-						continue;
-					}
-					IResourcePersistentId<?> pidOrNull =
-							myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), foundGoldenResource);
-					MatchedGoldenResourceCandidate mpc =
-							new MatchedGoldenResourceCandidate(pidOrNull, MdmMatchOutcome.EID_MATCH);
-					ourLog.debug(
-							"Incoming Resource {} matched Golden Resource {} by EID {}",
-							theIncomingResource.getIdElement().toUnqualifiedVersionless(),
-							foundGoldenResource.getIdElement().toUnqualifiedVersionless(),
-							eid);
+		if (eidFromResource.isEmpty()) {
+			return retval;
+		}
 
-					retval.add(mpc);
-				}
+		// A resource type may be identified by several EID systems, so resolve every EID the incoming
+		// resource carries in one search rather than one search apiece.
+		List<IAnyResource> foundGoldenResources = myMdmResourceDaoSvc.searchGoldenResourcesByEIDs(
+				eidFromResource,
+				theIncomingResource.getIdElement().getResourceType(),
+				myMdmPartitionHelper.getRequestPartitionIdFromResourceForSearch(theIncomingResource));
+
+		// Several of the incoming EIDs may resolve to the same golden resource. That is one candidate, not
+		// several - reporting it more than once would send the resource down the multiple-candidate path
+		// and flag a duplicate that does not exist.
+		Set<IResourcePersistentId<?>> seenGoldenResourcePids = new LinkedHashSet<>();
+		for (IAnyResource foundGoldenResource : foundGoldenResources) {
+			// Exclude manually declared NO_MATCH links from candidates
+			if (isNoMatch(foundGoldenResource, theIncomingResource)) {
+				continue;
 			}
+			IResourcePersistentId<?> pidOrNull =
+					myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), foundGoldenResource);
+			if (!seenGoldenResourcePids.add(pidOrNull)) {
+				continue;
+			}
+			ourLog.debug(
+					"Incoming Resource {} matched Golden Resource {} by EID",
+					theIncomingResource.getIdElement().toUnqualifiedVersionless(),
+					foundGoldenResource.getIdElement().toUnqualifiedVersionless());
+
+			retval.add(new MatchedGoldenResourceCandidate(pidOrNull, MdmMatchOutcome.EID_MATCH));
 		}
 		return retval;
 	}

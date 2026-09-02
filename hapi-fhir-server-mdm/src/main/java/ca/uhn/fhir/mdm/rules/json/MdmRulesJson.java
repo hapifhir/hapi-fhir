@@ -32,6 +32,7 @@ import org.apache.commons.lang3.Validate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -64,8 +65,15 @@ public class MdmRulesJson implements IModelJson {
 	@JsonProperty(value = "eidSystem")
 	String myEnterpriseEIDSystem;
 
+	/**
+	 * Maps a resource type to the EID system URIs that identify it. A resource type may be mapped to a
+	 * single system or to several; see {@link EidSystemListDeserializer} for the accepted JSON forms.
+	 * Declaration order is significant - the first system configured for a resource type is treated as
+	 * its primary one.
+	 */
 	@JsonProperty(value = "eidSystems")
-	Map<String, String> myEnterpriseEidSystems = new HashMap<>();
+	@JsonDeserialize(contentUsing = EidSystemListDeserializer.class)
+	Map<String, List<String>> myEnterpriseEidSystems = new LinkedHashMap<>();
 
 	@JsonProperty(value = "mdmTypes")
 	List<String> myMdmTypes;
@@ -130,7 +138,7 @@ public class MdmRulesJson implements IModelJson {
 	}
 
 	/**
-	 * Use {@link #getEnterpriseEIDSystemForResourceType(String)} instead.
+	 * Use {@link #getEnterpriseEIDSystemsForResourceType(String)} instead.
 	 */
 	@Deprecated
 	public String getEnterpriseEIDSystem() {
@@ -138,46 +146,134 @@ public class MdmRulesJson implements IModelJson {
 	}
 
 	/**
-	 * Use {@link #setEnterpriseEIDSystems(Map)} or {@link #addEnterpriseEIDSystem(String, String)} instead.
+	 * Use {@link #setEidSystemsByResourceType(Map)} or {@link #addEnterpriseEIDSystems(String, List)} instead.
 	 */
 	@Deprecated
 	public void setEnterpriseEIDSystem(String theEnterpriseEIDSystem) {
 		myEnterpriseEIDSystem = theEnterpriseEIDSystem;
 	}
 
+	/**
+	 * Use {@link #setEidSystemsByResourceType(Map)} instead. Each system is escalated to a one-element list.
+	 *
+	 * @param theEnterpriseEIDSystems one EID system per resource type
+	 */
+	@Deprecated(since = "8.14.0", forRemoval = true)
 	public void setEnterpriseEIDSystems(Map<String, String> theEnterpriseEIDSystems) {
-		myEnterpriseEidSystems = theEnterpriseEIDSystems;
+		Map<String, List<String>> escalated = new LinkedHashMap<>();
+		theEnterpriseEIDSystems.forEach(
+				(resourceType, eidSystem) -> escalated.put(resourceType, new ArrayList<>(List.of(eidSystem))));
+		myEnterpriseEidSystems = escalated;
 	}
 
+	/**
+	 * Replaces the EID systems configured for every resource type.
+	 *
+	 * @param theEidSystems the EID systems for each resource type, in the order they should be applied
+	 */
+	public void setEidSystemsByResourceType(Map<String, List<String>> theEidSystems) {
+		Map<String, List<String>> copy = new LinkedHashMap<>();
+		theEidSystems.forEach((resourceType, eidSystems) -> copy.put(resourceType, new ArrayList<>(eidSystems)));
+		myEnterpriseEidSystems = copy;
+	}
+
+	/**
+	 * Appends an EID system to those already configured for a resource type. Adding a system that is
+	 * already configured for that resource type is a no-op.
+	 *
+	 * @param theResourceType the resource type the EID system identifies
+	 * @param theEidSystem the EID system URI to append
+	 */
 	public void addEnterpriseEIDSystem(String theResourceType, String theEidSystem) {
 		if (myEnterpriseEidSystems == null) {
-			myEnterpriseEidSystems = new HashMap<>();
+			myEnterpriseEidSystems = new LinkedHashMap<>();
 		}
-		myEnterpriseEidSystems.put(theResourceType, theEidSystem);
+		List<String> eidSystems =
+				new ArrayList<>(myEnterpriseEidSystems.getOrDefault(theResourceType, Collections.emptyList()));
+		if (!eidSystems.contains(theEidSystem)) {
+			eidSystems.add(theEidSystem);
+			myEnterpriseEidSystems.put(theResourceType, eidSystems);
+		}
 	}
 
-	public Map<String, String> getEnterpriseEIDSystems() {
+	/**
+	 * Appends EID systems to those already configured for a resource type, in the order given. A system
+	 * already configured for that resource type is not added again, so this is exactly
+	 * {@link #addEnterpriseEIDSystem(String, String)} called once per element.
+	 * <p>
+	 * To replace what is configured rather than add to it, use {@link #setEidSystemsByResourceType(Map)}.
+	 * </p>
+	 *
+	 * @param theResourceType the resource type the EID systems identify
+	 * @param theEidSystems the EID system URIs to append, in the order they should be applied
+	 */
+	public void addEnterpriseEIDSystems(String theResourceType, List<String> theEidSystems) {
+		theEidSystems.forEach(eidSystem -> addEnterpriseEIDSystem(theResourceType, eidSystem));
+	}
+
+	/**
+	 * Returns the EID systems configured for each resource type. Reads the {@code eidSystems} property if
+	 * one is present, otherwise falls back to the deprecated {@code eidSystem} property scoped to all
+	 * resource types, otherwise returns an empty map.
+	 *
+	 * @return the configured EID systems keyed by resource type, unmodifiable down to the lists themselves;
+	 * never {@literal null}
+	 */
+	public Map<String, List<String>> getEidSystemsByResourceType() {
 		// First try the new property.
 		if (myEnterpriseEidSystems != null && !myEnterpriseEidSystems.isEmpty()) {
-			return myEnterpriseEidSystems;
+			Map<String, List<String>> retVal = new LinkedHashMap<>();
+			myEnterpriseEidSystems.forEach(
+					(resourceType, eidSystems) -> retVal.put(resourceType, Collections.unmodifiableList(eidSystems)));
+			return Collections.unmodifiableMap(retVal);
 			// If that fails, fall back to our deprecated property.
 		} else if (!StringUtils.isBlank(myEnterpriseEIDSystem)) {
-			HashMap<String, String> retVal = new HashMap<>();
-			retVal.put(ALL_RESOURCE_SEARCH_PARAM_TYPE, myEnterpriseEIDSystem);
-			return retVal;
+			return Map.of(ALL_RESOURCE_SEARCH_PARAM_TYPE, List.of(myEnterpriseEIDSystem));
 			// Otherwise, return an empty map.
 		} else {
 			return Collections.emptyMap();
 		}
 	}
 
+	/**
+	 * Returns every EID system that identifies the given resource type, honouring the
+	 * {@link ca.uhn.fhir.mdm.api.MdmConstants#ALL_RESOURCE_SEARCH_PARAM_TYPE} wildcard key.
+	 *
+	 * @param theResourceType the resource type to look up
+	 * @return the configured EID systems in declaration order; empty if none are configured
+	 */
+	public List<String> getEnterpriseEIDSystemsForResourceType(String theResourceType) {
+		Map<String, List<String>> eidSystems = getEidSystemsByResourceType();
+		List<String> retVal = eidSystems.containsKey(ALL_RESOURCE_SEARCH_PARAM_TYPE)
+				? eidSystems.get(ALL_RESOURCE_SEARCH_PARAM_TYPE)
+				: eidSystems.get(theResourceType);
+		return retVal == null ? Collections.emptyList() : Collections.unmodifiableList(retVal);
+	}
+
+	/**
+	 * Use {@link #getEidSystemsByResourceType()} instead. Reports only the first EID system configured
+	 * for each resource type.
+	 */
+	@Deprecated(since = "8.14.0", forRemoval = true)
+	public Map<String, String> getEnterpriseEIDSystems() {
+		Map<String, String> retVal = new LinkedHashMap<>();
+		getEidSystemsByResourceType().forEach((resourceType, eidSystems) -> {
+			if (!eidSystems.isEmpty()) {
+				retVal.put(resourceType, eidSystems.get(0));
+			}
+		});
+		return retVal;
+	}
+
+	/**
+	 * Use {@link #getEnterpriseEIDSystemsForResourceType(String)} instead. Reports only the first EID
+	 * system configured for the resource type.
+	 */
+	@Deprecated(since = "8.14.0", forRemoval = true)
 	public String getEnterpriseEIDSystemForResourceType(String theResourceType) {
-		Map<String, String> enterpriseEIDSystems = getEnterpriseEIDSystems();
-		if (enterpriseEIDSystems.containsKey(ALL_RESOURCE_SEARCH_PARAM_TYPE)) {
-			return enterpriseEIDSystems.get(ALL_RESOURCE_SEARCH_PARAM_TYPE);
-		} else {
-			return enterpriseEIDSystems.get(theResourceType);
-		}
+		return getEnterpriseEIDSystemsForResourceType(theResourceType).stream()
+				.findFirst()
+				.orElse(null);
 	}
 
 	public String getVersion() {
@@ -192,7 +288,7 @@ public class MdmRulesJson implements IModelJson {
 	private void validate() {
 		Validate.notBlank(myVersion, "version may not be blank");
 
-		Map<String, String> enterpriseEIDSystems = getEnterpriseEIDSystems();
+		Map<String, List<String>> enterpriseEIDSystems = getEidSystemsByResourceType();
 
 		// If we have a * eid system, there should only be one.
 		if (enterpriseEIDSystems.containsKey(ALL_RESOURCE_SEARCH_PARAM_TYPE)) {

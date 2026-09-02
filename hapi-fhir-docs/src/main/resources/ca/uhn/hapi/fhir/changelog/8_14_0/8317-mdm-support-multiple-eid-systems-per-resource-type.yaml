@@ -1,0 +1,14 @@
+---
+type: add
+issue: 8317
+jira: SMILE-12697
+title: "MDM rule definitions can now map a resource type to more than one Enterprise Identifier (EID)
+  system: each entry in `eidSystems` accepts an array of system URIs as well as a single one, and a
+  resource links to a golden resource if any of its EIDs match. Note these changes to existing
+  behaviour. The `preventMultipleEids` safeguard is now applied per EID system rather than per resource,
+  so a resource may carry one EID from each configured system but still never two from the same one.
+  Under `preventEidUpdates`, an EID may be added but no longer changed *or removed* - every EID a
+  resource had must still be present; previously an update that dropped one of several EIDs was
+  accepted, which is only reachable where `preventMultipleEids` is disabled. EIDs are now compared on
+  their system as well as their value. And where `preventMultipleEids` is disabled, a golden resource
+  now also accumulates EIDs added to a source resource by update, as it already did on create."

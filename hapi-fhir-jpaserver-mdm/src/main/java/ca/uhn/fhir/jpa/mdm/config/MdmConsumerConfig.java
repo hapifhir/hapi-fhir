@@ -103,8 +103,8 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	MdmMessageKeySvc mdmMessageKeySvc() {
-		return new MdmMessageKeySvc();
+	MdmMessageKeySvc mdmMessageKeySvc(EIDHelper theEidHelper) {
+		return new MdmMessageKeySvc(theEidHelper);
 	}
 
 	@Bean

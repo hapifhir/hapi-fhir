@@ -51,6 +51,7 @@ import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -62,6 +63,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -117,6 +119,21 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 
 	@Autowired
 	private IMdmLinkUpdaterSvc mdmLinkUpdaterSvc;
+
+	@VisibleForTesting
+	public void setFhirContextForUnitTest(FhirContext theFhirContext) {
+		myFhirContext = theFhirContext;
+	}
+
+	@VisibleForTesting
+	public void setEidHelperForUnitTest(EIDHelper theEidHelper) {
+		myEIDHelper = theEidHelper;
+	}
+
+	@VisibleForTesting
+	public void setMdmSettingsForUnitTest(IMdmSettings theMdmSettings) {
+		myMdmSettings = theMdmSettings;
+	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
 	public void blockManualResourceManipulationOnCreate(
@@ -404,7 +421,11 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 			return;
 		}
 
-		if (!myEIDHelper.eidMatchExists(newExternalEids, oldExternalEids)) {
+		// An EID may be added, but not changed or removed.
+		Set<String> newExternalEidKeys =
+				newExternalEids.stream().map(CanonicalEID::getSystemAndValueKey).collect(Collectors.toSet());
+		if (!newExternalEidKeys.containsAll(
+				oldExternalEids.stream().map(CanonicalEID::getSystemAndValueKey).collect(Collectors.toSet()))) {
 			throwBlockEidChange();
 		}
 	}
@@ -423,12 +444,22 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 		}
 	}
 
+	/**
+	 * Enforces the "prevent multiple EIDs" safeguard. A resource type may be identified by several EID
+	 * systems, so the safeguard is scoped per system: one EID from each configured system is allowed,
+	 * two from the same system is not. Where only one system is configured this is the same rule as
+	 * "at most one EID per resource".
+	 */
 	private void forbidIfHasMultipleEids(IBaseResource theResource) {
 		String resourceType = extractResourceType(theResource);
 		if (myMdmSettings.isSupportedMdmType(resourceType)) {
-			if (myEIDHelper.getExternalEid(theResource).size() > 1) {
-				throwBlockMultipleEids();
-			}
+			Map<String, Long> eidCountsBySystem = myEIDHelper.getExternalEid(theResource).stream()
+					.collect(Collectors.groupingBy(CanonicalEID::getSystem, LinkedHashMap::new, Collectors.counting()));
+			eidCountsBySystem.entrySet().stream()
+					.filter(eidCountForSystem -> eidCountForSystem.getValue() > 1)
+					.findFirst()
+					.ifPresent(eidCountForSystem ->
+							throwBlockMultipleEids(eidCountForSystem.getKey(), eidCountForSystem.getValue()));
 		}
 	}
 
@@ -464,9 +495,10 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 				+ MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS + " or " + MdmConstants.SYSTEM_MDM_MANAGED);
 	}
 
-	private void throwBlockMultipleEids() {
+	private void throwBlockMultipleEids(String theEidSystem, long theEidCount) {
 		throw new ForbiddenOperationException(Msg.code(766)
-				+ "While running with multiple EIDs disabled, source resources may have at most one EID.");
+				+ "While running with multiple EIDs disabled, source resources may have at most one EID per system, but "
+				+ theEidCount + " were found for system " + theEidSystem + ".");
 	}
 
 	private String extractResourceType(IBaseResource theResource) {

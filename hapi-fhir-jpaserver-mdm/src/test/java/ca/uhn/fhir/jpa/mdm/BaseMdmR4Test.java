@@ -417,14 +417,32 @@ abstract public class BaseMdmR4Test extends BaseResourceProviderR4Test {
 		return (T) resourceDao.readByPid(theMdmLink.getGoldenResourcePersistenceId());
 	}
 
+	/**
+	 * Adds an EID from the first EID system configured for Patient, or with no system at all where the
+	 * rule set configures none.
+	 */
 	protected Patient addExternalEID(Patient thePatient, String theEID) {
-		thePatient.addIdentifier().setSystem(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient")).setValue(theEID);
+		List<String> eidSystems = patientEidSystems();
+		return addExternalEID(thePatient, eidSystems.isEmpty() ? null : eidSystems.get(0), theEID);
+	}
+
+	/**
+	 * Adds an EID from a specific EID system, for rule sets that configure more than one for Patient.
+	 */
+	protected Patient addExternalEID(Patient thePatient, String theEidSystem, String theEID) {
+		thePatient.addIdentifier().setSystem(theEidSystem).setValue(theEID);
 		return thePatient;
 	}
 
 	protected Patient clearExternalEIDs(Patient thePatient) {
-		thePatient.getIdentifier().removeIf(theIdentifier -> theIdentifier.getSystem().equalsIgnoreCase(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient")));
+		List<String> eidSystems = patientEidSystems();
+		thePatient.getIdentifier().removeIf(theIdentifier -> eidSystems.stream()
+			.anyMatch(eidSystem -> eidSystem.equalsIgnoreCase(theIdentifier.getSystem())));
 		return thePatient;
+	}
+
+	protected List<String> patientEidSystems() {
+		return myMdmSettings.getMdmRules().getEnterpriseEIDSystemsForResourceType("Patient");
 	}
 
 	protected Patient createPatientAndUpdateLinks(Patient thePatient) {

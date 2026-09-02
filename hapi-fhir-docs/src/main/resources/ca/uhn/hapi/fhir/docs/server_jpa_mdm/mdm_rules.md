@@ -698,6 +698,28 @@ The external EID systems that the HAPI MDM system can expect to see on incoming 
 that an EID is valid for all managed resource types. The values must be valid URIs, and the keys must be valid resource types, or `*`.
 See [MDM EID](/hapi-fhir/docs/server_jpa_mdm/mdm_eid.html) for details on how EIDs are managed by HAPI MDM.
 
+A resource type may be identified by more than one EID system. Where that is the case, list the systems
+as an array. A single system may still be given as a bare string.
+
+```json
+{
+   "eidSystems": {
+      "Patient": [
+         "http://example.com/mrn",
+         "http://example.com/npi"
+      ],
+      "Practitioner": "http://example.com/npi"
+   }
+}
+```
+
+An incoming resource is linked to a golden resource if **any** of its EIDs match, so listing several
+systems widens the set of records that can be resolved directly rather than probabilistically.
+
+Order matters. The first system listed for a resource type is treated as its primary one: it is the
+system used when a single EID has to be chosen for the resource, such as for the subscription message
+key.
+
 <p class="helpInfoCalloutBox">
     Note that this field used to be called `eidSystem`. While that field is deprecated, it will continue to work. In the background, it effectively sets the eid for resource type `*`.
 </p>

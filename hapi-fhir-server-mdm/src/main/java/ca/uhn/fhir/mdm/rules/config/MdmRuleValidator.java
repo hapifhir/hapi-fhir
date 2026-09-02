@@ -97,7 +97,7 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 	}
 
 	private void validateEidSystemsMatchMdmTypes(MdmRulesJson theMdmRules) {
-		theMdmRules.getEnterpriseEIDSystems().keySet().forEach(key -> {
+		theMdmRules.getEidSystemsByResourceType().keySet().forEach(key -> {
 			// Ensure each key is either * or a valid resource type.
 			if (!key.equalsIgnoreCase("*") && !theMdmRules.getMdmTypes().contains(key)) {
 				throw new ConfigurationException(Msg.code(1507)
@@ -115,7 +115,7 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 	}
 
 	private void validateSystemsAreUris(MdmRulesJson theMdmRules) {
-		theMdmRules.getEnterpriseEIDSystems().forEach((resourceType, uri) -> {
+		theMdmRules.getEidSystemsByResourceType().forEach((resourceType, uris) -> {
 			if (!resourceType.equals("*")) {
 				try {
 					myFhirContext.getResourceType(resourceType);
@@ -126,7 +126,24 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 									resourceType));
 				}
 			}
-			validateIsUri(uri);
+
+			if (uris.isEmpty()) {
+				throw new ConfigurationException(Msg.code(3044)
+						+ String.format(
+								"The eidSystems entry for [%s] is empty. Either remove it, or list at least one EID system.",
+								resourceType));
+			}
+
+			Set<String> seenUris = new HashSet<>();
+			uris.forEach(uri -> {
+				if (!seenUris.add(uri)) {
+					throw new ConfigurationException(Msg.code(3045)
+							+ String.format(
+									"The eidSystem [%s] is listed more than once for [%s] in the eidSystems field.",
+									uri, resourceType));
+				}
+				validateIsUri(uri);
+			});
 		});
 	}
 

@@ -24,23 +24,28 @@ import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class MdmMessageKeySvc implements ISubscriptionMessageKeySvc {
-	@Autowired
-	private EIDHelper myEIDHelper;
+	private final EIDHelper myEIDHelper;
 
+	public MdmMessageKeySvc(EIDHelper theEidHelper) {
+		myEIDHelper = theEidHelper;
+	}
+
+	/**
+	 * The broker routes messages sharing a key to the same consumer, which is what keeps changes to one
+	 * patient in order when several MDM consumers are running. The key must therefore not depend on the
+	 * order identifiers happen to appear in the payload. Where a resource type is identified by several
+	 * EID systems, the primary one - the first configured for that resource type - decides the key.
+	 */
 	@Nullable
 	@Override
 	public String getMessageKeyOrNull(IBaseResource theTargetResource) {
-		List<CanonicalEID> eidList = myEIDHelper.getExternalEid(theTargetResource);
-		if (eidList.isEmpty()) {
-			return null;
-		}
-		return eidList.get(0).getValue();
+		return myEIDHelper
+				.getPrimaryExternalEid(theTargetResource)
+				.map(CanonicalEID::getValue)
+				.orElse(null);
 	}
 }

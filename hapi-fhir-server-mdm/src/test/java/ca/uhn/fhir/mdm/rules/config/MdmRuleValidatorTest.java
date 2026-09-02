@@ -278,6 +278,35 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 		mdmRuleValidator.validateAlgorithmRegistrations(rules);
 	}
 
+	@Test
+	void eidSystems_withArrayOfValidUris_passesValidation() throws IOException {
+		setMdmRuleJson("good-rules-multiple-eid-systems.json");
+		// No exception = pass
+	}
+
+	@Test
+	void eidSystems_withArrayContainingInvalidUri_throws() {
+		assertThatThrownBy(() -> setMdmRuleJson("bad-rules-bad-url-in-eid-array.json"))
+			.isInstanceOf(ConfigurationException.class)
+			.hasMessageContaining(Msg.code(1519));
+	}
+
+	@Test
+	void eidSystems_withEmptyArray_throws() {
+		assertThatThrownBy(() -> setMdmRuleJson("bad-rules-empty-eid-system-array.json"))
+			.isInstanceOf(ConfigurationException.class)
+			.hasMessageContaining(Msg.code(3044))
+			.hasMessageContaining("Organization");
+	}
+
+	@Test
+	void eidSystems_withSameSystemListedTwiceForOneResourceType_throws() {
+		assertThatThrownBy(() -> setMdmRuleJson("bad-rules-duplicate-eid-system.json"))
+			.isInstanceOf(ConfigurationException.class)
+			.hasMessageContaining(Msg.code(3045))
+			.hasMessageContaining("http://example.com/mrn");
+	}
+
 	private void setMdmRuleJson(String theS) throws IOException {
 		MdmRuleValidator mdmRuleValidator = new MdmRuleValidator(ourFhirContext, mySearchParamRetriever, null, null);
 		MdmSettings mdmSettings = new MdmSettings(mdmRuleValidator);

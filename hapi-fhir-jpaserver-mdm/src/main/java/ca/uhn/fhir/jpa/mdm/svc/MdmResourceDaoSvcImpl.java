@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -29,6 +30,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmConstants;
+import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.util.MdmSearchParamBuildingUtils;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -41,8 +43,12 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class MdmResourceDaoSvcImpl implements IMdmResourceDaoSvc {
@@ -54,6 +60,9 @@ public class MdmResourceDaoSvcImpl implements IMdmResourceDaoSvc {
 
 	@Autowired
 	IMdmSettings myMdmSettings;
+
+	@Autowired
+	FhirContext myFhirContext;
 
 	@Override
 	public DaoMethodOutcome upsertGoldenResource(IAnyResource theGoldenResource, String theResourceType) {
@@ -94,28 +103,64 @@ public class MdmResourceDaoSvcImpl implements IMdmResourceDaoSvc {
 	@Override
 	public Optional<IAnyResource> searchGoldenResourceByEID(
 			String theEid, String theResourceType, RequestPartitionId thePartitionId) {
-		SearchParameterMap map = MdmSearchParamBuildingUtils.buildEidSearchParameterMap(
-				theEid, theResourceType, myMdmSettings.getMdmRules());
+		String eidSystem = myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType(theResourceType);
+		List<IAnyResource> goldenResources = searchGoldenResourcesByEIDs(
+				Collections.singletonList(new CanonicalEID(eidSystem, theEid, null)), theResourceType, thePartitionId);
+		return goldenResources.stream().findFirst();
+	}
 
-		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourceType);
+	@Override
+	public List<IAnyResource> searchGoldenResourcesByEIDs(
+			Collection<CanonicalEID> theEids, String theResourceType, RequestPartitionId thePartitionId) {
+		Optional<SearchParameterMap> map = MdmSearchParamBuildingUtils.buildEidSearchParameterMap(theEids);
+		if (map.isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(theResourceType);
 		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
 		systemRequestDetails.setRequestPartitionId(thePartitionId);
-		IBundleProvider search = resourceDao.search(map, systemRequestDetails);
+		IBundleProvider search = resourceDao.search(map.get(), systemRequestDetails);
 		List<IBaseResource> resources = search.getResources(0, MAX_MATCHING_GOLDEN_RESOURCES);
 
-		if (resources.isEmpty()) {
-			return Optional.empty();
-		} else if (resources.size() > 1) {
-			throw new InternalErrorException(
-					Msg.code(737) + "Found more than one active " + MdmConstants.CODE_HAPI_MDM_MANAGED
-							+ " Golden Resource with EID "
-							+ theEid
-							+ ": "
-							+ resources.get(0).getIdElement().getValue()
-							+ ", "
-							+ resources.get(1).getIdElement().getValue());
-		} else {
-			return Optional.of((IAnyResource) resources.get(0));
+		validateNoEidResolvesToMultipleGoldenResources(theEids, resources);
+
+		return resources.stream().map(IAnyResource.class::cast).collect(Collectors.toList());
+	}
+
+	/**
+	 * Several golden resources may legitimately come back from one search - that is the case an incoming
+	 * resource carrying EIDs previously assigned to separate golden resources produces. What remains an
+	 * error is a single EID resolving to more than one golden resource, which means the golden resources
+	 * themselves are corrupt.
+	 */
+	private void validateNoEidResolvesToMultipleGoldenResources(
+			Collection<CanonicalEID> theEids, List<IBaseResource> theGoldenResources) {
+		if (theGoldenResources.size() < 2) {
+			return;
 		}
+
+		for (CanonicalEID eid : theEids) {
+			List<IBaseResource> matches = theGoldenResources.stream()
+					.filter(goldenResource -> carriesEid(goldenResource, eid))
+					.toList();
+			if (matches.size() > 1) {
+				throw new InternalErrorException(
+						Msg.code(737) + "Found more than one active " + MdmConstants.CODE_HAPI_MDM_MANAGED
+								+ " Golden Resource with EID "
+								+ eid.getValue()
+								+ ": "
+								+ matches.get(0).getIdElement().getValue()
+								+ ", "
+								+ matches.get(1).getIdElement().getValue());
+			}
+		}
+	}
+
+	private boolean carriesEid(IBaseResource theGoldenResource, CanonicalEID theEid) {
+		return CanonicalEID.extractFromResource(
+						myFhirContext, Collections.singletonList(theEid.getSystem()), theGoldenResource)
+				.stream()
+				.anyMatch(candidate -> Objects.equals(candidate.getValue(), theEid.getValue()));
 	}
 }
