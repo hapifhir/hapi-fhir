@@ -119,6 +119,11 @@ public class PersistedJpaHistoryBundleProvider implements IBundleProvider {
 	// Note: Leave as protected, HSPC depends on this
 	@SuppressWarnings("WeakerAccess")
 	protected void setSearchEntity(Search theSearchEntity) {
+		Validate.notNull(theSearchEntity, "theSearchEntity must not be null");
+		Validate.isTrue(
+				theSearchEntity.getSearchType() == SearchTypeEnum.HISTORY,
+				"theSearchEntity must be a history search: %s",
+				theSearchEntity.getSearchType());
 		mySearchEntity = theSearchEntity;
 	}
 

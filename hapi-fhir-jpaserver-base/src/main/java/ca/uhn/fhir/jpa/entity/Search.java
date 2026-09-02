@@ -29,7 +29,7 @@ import ca.uhn.fhir.rest.param.HistorySearchStyleEnum;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.HapiToStringBuilder;
-import graphql.VisibleForTesting;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.Basic;

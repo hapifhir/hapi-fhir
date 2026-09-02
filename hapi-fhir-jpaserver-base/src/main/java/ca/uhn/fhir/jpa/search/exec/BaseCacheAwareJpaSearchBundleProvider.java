@@ -287,10 +287,6 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 		theResponsePageBuilder.setIncludedResourceCount(searchResults.includedResourceCount());
 		theResponsePageBuilder.setTotalRequestedResourcesFetched(mySearchEntity.getNumFound());
 
-		// TODO: JA2 the "hasNextPage" property should be removed entirely
-		//		theResponsePageBuilder.setHasNextPage(
-		//				theToIndex < mySearchEntity.getNumFound() || mySearchEntity.getStatus() == SearchStatusEnum.PASSCMPLET);
-
 		ourLog.atLevel(DEBUG_LOG_LEVEL)
 				.setMessage("Returning {} results for range {}-{}")
 				.addArgument(retVal.size())
