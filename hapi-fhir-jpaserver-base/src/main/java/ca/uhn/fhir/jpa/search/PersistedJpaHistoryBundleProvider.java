@@ -64,9 +64,9 @@ import java.util.function.Function;
 /**
  * Bundle provider that is used for <code>_history</code> calls
  */
-public class PersistedJpaBundleProvider implements IBundleProvider {
+public class PersistedJpaHistoryBundleProvider implements IBundleProvider {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(PersistedJpaBundleProvider.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(PersistedJpaHistoryBundleProvider.class);
 
 	/*
 	 * Autowired fields
@@ -107,7 +107,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	/**
 	 * Constructor
 	 */
-	public PersistedJpaBundleProvider(RequestDetails theRequest, Search theSearch) {
+	public PersistedJpaHistoryBundleProvider(RequestDetails theRequest, Search theSearch) {
 		Validate.isTrue(
 				theSearch.getSearchType() == SearchTypeEnum.HISTORY,
 				"This bundle provider may only be used for _history calls");

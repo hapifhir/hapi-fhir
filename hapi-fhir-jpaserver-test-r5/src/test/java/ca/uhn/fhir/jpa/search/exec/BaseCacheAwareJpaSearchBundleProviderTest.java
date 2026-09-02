@@ -34,10 +34,11 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.method.ResponsePage;
+import ca.uhn.fhir.test.utilities.ITestDataBuilder;
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,27 +46,39 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
+import static ca.uhn.fhir.rest.api.Constants.EMPTY_STRING_ARRAY;
 import static ca.uhn.fhir.test.utilities.SearchTestUtil.toUnqualifiedVersionlessIdValues;
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -76,7 +89,8 @@ import static org.mockito.Mockito.when;
 
 // Created by gemini-3.7-flash
 @ExtendWith(MockitoExtension.class)
-class BaseCacheAwareJpaSearchBundleProviderTest {
+class BaseCacheAwareJpaSearchBundleProviderTest implements ITestDataBuilder {
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseCacheAwareJpaSearchBundleProviderTest.class);
 
 	private final FhirContext myFhirContext = FhirContext.forR4Cached();
 	private final InterceptorService myInterceptorBroadcaster = new InterceptorService();
@@ -104,11 +118,18 @@ class BaseCacheAwareJpaSearchBundleProviderTest {
 	private SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
 	@Mock
 	private ISearchBuilder<JpaPid> mySearchBuilder;
+	@Mock
+	private IAnonymousInterceptor myMockInterceptor;
+
+	@Captor
+	private ArgumentCaptor<List<JpaPid>> myPidListCaptor;
 
 	private SearchParameterMap myParams;
 	private RequestPartitionId myRequestPartitionId;
 	private Search mySearchEntity;
 	private TestCacheAwareJpaSearchBundleProvider myBundleProvider;
+
+
 
 	@BeforeEach
 	void setUp() {
@@ -126,21 +147,21 @@ class BaseCacheAwareJpaSearchBundleProviderTest {
 		lenient().when(mySearchBuilderFactory.newSearchBuilder(anyString(), any())).thenReturn(mySearchBuilder);
 
 		myBundleProvider = new TestCacheAwareJpaSearchBundleProvider(
-				myFhirContext,
-				myRequestDetails,
-				myInterceptorBroadcaster,
-				myPagingProvider,
-				myStorageSettings,
-				myEntityManager,
-				myTxService,
-				myRequestPartitionHelperSvc,
-				mySearchCacheSvc,
-				mySearchResultCacheSvc,
-				myExceptionService,
-				mySearchBuilderFactory,
-				myParams,
-				myRequestPartitionId,
-				mySearchEntity);
+			myFhirContext,
+			myRequestDetails,
+			myInterceptorBroadcaster,
+			myPagingProvider,
+			myStorageSettings,
+			myEntityManager,
+			myTxService,
+			myRequestPartitionHelperSvc,
+			mySearchCacheSvc,
+			mySearchResultCacheSvc,
+			myExceptionService,
+			mySearchBuilderFactory,
+			myParams,
+			myRequestPartitionId,
+			mySearchEntity);
 	}
 
 	@AfterEach
@@ -157,7 +178,9 @@ class BaseCacheAwareJpaSearchBundleProviderTest {
 		assertThat(myBundleProvider.preferredPageSize()).isNull();
 
 		mySearchEntity.setPreferredPageSize(25);
-		mockSearchExecution(List.of(JpaPid.fromId(1L)), List.of(createPatient("1")));
+
+		mockPerformSearchForPids(1);
+		mockLoadResourcesByPid();
 
 		ResponsePage.ResponsePageBuilder responsePageBuilder = new ResponsePage.ResponsePageBuilder();
 		myBundleProvider.getResources(0, 1, responsePageBuilder);
@@ -178,7 +201,7 @@ class BaseCacheAwareJpaSearchBundleProviderTest {
 		myParams.setOffset(5);
 		when(myPagingProvider.getDefaultPageSize()).thenReturn(10);
 
-		mockSearchExecution(List.of(JpaPid.fromId(1L)), List.of(createPatient("1")));
+		mockPerformSearchForPids(1);
 
 		Integer size = myBundleProvider.size();
 
@@ -188,46 +211,39 @@ class BaseCacheAwareJpaSearchBundleProviderTest {
 
 	@Test
 	void testGetAllResources_Success() {
-		List<JpaPid> pids = List.of(JpaPid.fromId(1L), JpaPid.fromId(2L));
-		List<IBaseResource> patients = List.of(createPatient("1"), createPatient("2"));
-		mockSearchExecution(pids, patients);
+		mockPerformSearchForPids(2);
+		mockLoadResourcesByPid();
 
 		List<IBaseResource> allResources = myBundleProvider.getAllResources();
 
 		assertThat(allResources).hasSize(2);
-		assertThat(allResources.get(0).getIdElement().getIdPart()).isEqualTo("1");
-		assertThat(allResources.get(1).getIdElement().getIdPart()).isEqualTo("2");
+		assertThat(allResources.get(0).getIdElement().getIdPart()).isEqualTo("0");
+		assertThat(allResources.get(1).getIdElement().getIdPart()).isEqualTo("1");
 	}
 
 	@Test
 	void testGetAllResources_ExceedsLimit_ThrowsException() {
-		List<JpaPid> pids = new ArrayList<>();
-		List<IBaseResource> patients = new ArrayList<>();
-		for (long i = 0; i < 10000; i++) {
-			pids.add(JpaPid.fromId(i));
-			patients.add(createPatient(String.valueOf(i)));
-		}
-		mockSearchExecution(pids, patients);
+		mockPerformSearchForPids(10_000);
+		mockLoadResourcesByPid();
 
 		assertThatThrownBy(() -> myBundleProvider.getAllResources())
-				.isInstanceOf(IllegalArgumentException.class)
-				.hasMessageContaining("Can not call getAllResources on a collection of more than 10000 resources");
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("Can not call getAllResources on a collection >= 10000 resources");
 	}
 
 	@Test
 	void testGetResources_BasicSearch_Success() {
-		JpaPid pid1 = JpaPid.fromId(1L);
-		JpaPid pid2 = JpaPid.fromId(2L);
-		Patient patient1 = createPatient("1");
-		Patient patient2 = createPatient("2");
+		mockPerformSearchForPids(2);
+		mockLoadResourcesByPid();
 
-		mockSearchExecution(List.of(pid1, pid2), List.of(patient1, patient2));
 		myInterceptorBroadcaster.registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE, myAnonymousInterceptor);
 
 		ResponsePage.ResponsePageBuilder responsePageBuilder = mock(ResponsePage.ResponsePageBuilder.class);
 		List<IBaseResource> resources = myBundleProvider.getResources(0, 10, responsePageBuilder);
 
-		assertThat(resources).containsExactly(patient1, patient2);
+		assertThat(toUnqualifiedVersionlessIdValues(resources)).containsExactly(
+			"Patient/0", "Patient/1"
+		);
 		verify(responsePageBuilder).setPageSize(2);
 		verify(responsePageBuilder).setOmittedResourceCount(0);
 		verify(responsePageBuilder).setIncludedResourceCount(0);
@@ -236,22 +252,22 @@ class BaseCacheAwareJpaSearchBundleProviderTest {
 		assertThat(mySearchEntity.getTotalCount()).isEqualTo(2);
 
 		verify(mySearchCacheSvc, times(1)).save(eq(mySearchEntity), eq(myRequestPartitionId));
-		verify(mySearchResultCacheSvc, times(1))
-				.storeResults(eq(mySearchEntity), eq(List.of()), eq(List.of(pid1, pid2)), eq(myRequestDetails), eq(myRequestPartitionId));
 		verify(myAnonymousInterceptor, times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE), any());
+
+		verify(mySearchResultCacheSvc, times(1))
+			.storeResults(eq(mySearchEntity), eq(List.of()), myPidListCaptor.capture(), eq(myRequestDetails), eq(myRequestPartitionId));
+		assertThat(myPidListCaptor.getValue()).containsExactly(
+			JpaPid.fromId(0L), JpaPid.fromId(1L)
+		);
 	}
 
 	@Test
 	void testGetResources_PassComplete_WhenMoreResultsAvailable() {
-		List<JpaPid> pids = new ArrayList<>();
-		List<IBaseResource> patients = new ArrayList<>();
-		// PreFetch threshold default is [30, 60, 90, -1]
-		for (long i = 1; i <= 31; i++) {
-			pids.add(JpaPid.fromId(i));
-			patients.add(createPatient(String.valueOf(i)));
-		}
+		// Setup
 
-		mockSearchExecution(pids, patients);
+		mockPerformSearchForPids(31);
+		mockLoadResourcesByPid();
+
 		myInterceptorBroadcaster.registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_SEARCH_PASS_COMPLETE, myAnonymousInterceptor);
 		myInterceptorBroadcaster.registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE, myAnonymousInterceptor);
 
@@ -266,41 +282,42 @@ class BaseCacheAwareJpaSearchBundleProviderTest {
 
 	@Test
 	void testGetResources_PassComplete_WithTotalCountQuery() {
+		// Setup
+
 		myParams.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
 
-		List<JpaPid> pids = new ArrayList<>();
-		List<IBaseResource> patients = new ArrayList<>();
-		for (long i = 1; i <= 31; i++) {
-			pids.add(JpaPid.fromId(i));
-			patients.add(createPatient(String.valueOf(i)));
-		}
-		mockSearchExecution(pids, patients);
-		when(mySearchBuilder.createCountQuery(eq(myParams), eq(mySearchEntity.getUuid()), eq(myRequestDetails), eq(myRequestPartitionId)))
-				.thenReturn(150L);
+		mockPerformSearchForPids(31);
+		List<String> loadedResources = mockLoadResourcesByPid();
 
-		ResponsePage.ResponsePageBuilder responsePageBuilder = new ResponsePage.ResponsePageBuilder();
-		myBundleProvider.getResources(0, 10, responsePageBuilder);
+		when(mySearchBuilder.createCountQuery(eq(myParams), eq(mySearchEntity.getUuid()), eq(myRequestDetails), eq(myRequestPartitionId)))
+			.thenReturn(150L);
+
+		// Test
+
+		myBundleProvider.getResources(0, 10);
+
+		// Verify
 
 		assertThat(mySearchEntity.getStatus()).isEqualTo(SearchStatusEnum.PASSCMPLET);
 		assertThat(mySearchEntity.getTotalCount()).isEqualTo(150);
+		assertThat(loadedResources).containsExactly(generateIdRange(0, 10));
 	}
 
 	@Test
 	void testGetResources_CachedRangeReuse_ExactRange() {
-		JpaPid pid1 = JpaPid.fromId(1L);
-		Patient patient1 = createPatient("1");
-		mockSearchExecution(List.of(pid1), List.of(patient1));
+		mockPerformSearchForPids(1);
+		mockLoadResourcesByPid();
 
 		ResponsePage.ResponsePageBuilder builder1 = new ResponsePage.ResponsePageBuilder();
 		List<IBaseResource> firstCall = myBundleProvider.getResources(0, 10, builder1);
 
-		assertThat(firstCall).containsExactly(patient1);
+		assertThat(toUnqualifiedVersionlessIdValues(firstCall)).containsExactly("Patient/0");
 		assertEquals(1, myTxService.getTransactionCount());
 
 		ResponsePage.ResponsePageBuilder builder2 = new ResponsePage.ResponsePageBuilder();
-		List<IBaseResource> secondCall = myBundleProvider.getResources(0, 10, builder2);
+		myBundleProvider.getResources(0, 10, builder2);
 
-		assertThat(secondCall).containsExactly(patient1);
+		assertThat(toUnqualifiedVersionlessIdValues(firstCall)).containsExactly("Patient/0");
 		// Still only 1 transaction execution because cached range was reused
 		assertEquals(1, myTxService.getTransactionCount());
 	}
@@ -309,23 +326,15 @@ class BaseCacheAwareJpaSearchBundleProviderTest {
 	@ValueSource(ints = {1, 4, 5, 6, 8, 10})
 	void testGetResources_CachedRangeReuse_FinishedSearchWithSmallerTotalCount(int theRequestTo) {
 		// Mock search
-		List<JpaPid> pids = new ArrayList<>();
-		List<IBaseResource> patients = new ArrayList<>();
-		List<String> expectedIds = new ArrayList<>();
-		for (int i = 0; i < 5; i++) {
-			pids.add(JpaPid.fromId((long)i));
-			patients.add(createPatient(Integer.toString(i)));
-			expectedIds.add("Patient/" + i);
-		}
-		mockSearchExecution(pids, patients);
+		mockPerformSearchForPids(5);
+		mockLoadResourcesByPid();
 
-		ResponsePage.ResponsePageBuilder builder1 = new ResponsePage.ResponsePageBuilder();
-		assertThat(toUnqualifiedVersionlessIdValues(myBundleProvider.getResources(0, 10, builder1))).containsExactly(expectedIds.toArray(new String[0]));
+		assertThat(toUnqualifiedVersionlessIdValues(myBundleProvider.getResources(0, 10))).containsExactly(generateIdRange(0, 5));
 		assertEquals(1, myTxService.getTransactionCount());
 
 		// Test
 		List<IBaseResource> secondCall = myBundleProvider.getResources(0, theRequestTo);
-		assertThat(toUnqualifiedVersionlessIdValues(secondCall)).containsExactly(expectedIds.subList(0, Math.min(expectedIds.size(), theRequestTo)).toArray(new String[0]));
+		assertThat(toUnqualifiedVersionlessIdValues(secondCall)).containsExactly(generateIdRange(0, Math.min(5, theRequestTo)));
 
 		// No further transactions
 		assertEquals(1, myTxService.getTransactionCount());
@@ -333,12 +342,8 @@ class BaseCacheAwareJpaSearchBundleProviderTest {
 
 	@Test
 	void testGetResources_CachedRangeSubSliceReuse_NoIncludes() {
-		List<JpaPid> pids = List.of(
-				JpaPid.fromId(1L), JpaPid.fromId(2L), JpaPid.fromId(3L), JpaPid.fromId(4L), JpaPid.fromId(5L));
-		List<IBaseResource> patients = List.of(
-				createPatient("1"), createPatient("2"), createPatient("3"), createPatient("4"), createPatient("5"));
-
-		mockSearchExecution(pids, patients);
+		mockPerformSearchForPids(5);
+		mockLoadResourcesByPid();
 
 		ResponsePage.ResponsePageBuilder builder1 = new ResponsePage.ResponsePageBuilder();
 		myBundleProvider.getResources(0, 5, builder1);
@@ -349,8 +354,8 @@ class BaseCacheAwareJpaSearchBundleProviderTest {
 		List<IBaseResource> subSlice = myBundleProvider.getResources(1, 3, builder2);
 
 		assertThat(subSlice).hasSize(2);
-		assertThat(subSlice.get(0).getIdElement().getIdPart()).isEqualTo("2");
-		assertThat(subSlice.get(1).getIdElement().getIdPart()).isEqualTo("3");
+		assertThat(subSlice.get(0).getIdElement().getIdPart()).isEqualTo("1");
+		assertThat(subSlice.get(1).getIdElement().getIdPart()).isEqualTo("2");
 		// No additional transaction execution
 		assertEquals(1, myTxService.getTransactionCount());
 	}
@@ -378,7 +383,7 @@ class BaseCacheAwareJpaSearchBundleProviderTest {
 		mySearchEntity.setTotalCount(null);
 
 		when(mySearchBuilder.createCountQuery(eq(myParams), eq(mySearchEntity.getUuid()), eq(myRequestDetails), eq(myRequestPartitionId)))
-				.thenReturn(88L);
+			.thenReturn(88L);
 
 		ResponsePage.ResponsePageBuilder builder = new ResponsePage.ResponsePageBuilder();
 		List<IBaseResource> resources = myBundleProvider.getResources(0, 10, builder);
@@ -396,11 +401,11 @@ class BaseCacheAwareJpaSearchBundleProviderTest {
 
 		JpaPid pid1 = JpaPid.fromId(1L);
 		JpaPid pid2 = JpaPid.fromId(2L);
-		Patient p1 = createPatient("1");
-		Patient p2 = createPatient("2");
+		Patient p1 = (Patient) buildPatient(withId("1"));
+		Patient p2 = (Patient) buildPatient(withId("2"));
 
 		when(mySearchResultCacheSvc.fetchResultPids(eq(mySearchEntity), eq(0), eq(10), eq(myRequestDetails), eq(myRequestPartitionId)))
-				.thenReturn(new ArrayList<>(List.of(pid1, pid2)));
+			.thenReturn(new ArrayList<>(List.of(pid1, pid2)));
 
 		doAnswer(invocation -> {
 			List<IBaseResource> list = invocation.getArgument(2);
@@ -424,10 +429,10 @@ class BaseCacheAwareJpaSearchBundleProviderTest {
 		JpaPid pid1 = JpaPid.fromId(1L);
 		JpaPid pid2 = JpaPid.fromId(2L);
 		JpaPid pid3 = JpaPid.fromId(3L);
-		Patient p3 = createPatient("3");
+		Patient p3 = (Patient) buildPatient(withId("3"));
 
 		when(mySearchResultCacheSvc.fetchAllResultPids(eq(mySearchEntity), eq(myRequestDetails), eq(myRequestPartitionId)))
-				.thenReturn(List.of(pid1, pid2));
+			.thenReturn(List.of(pid1, pid2));
 
 		doAnswer(invocation -> {
 			ISearchResultConsumer<JpaPid> consumer = invocation.getArgument(0);
@@ -458,21 +463,18 @@ class BaseCacheAwareJpaSearchBundleProviderTest {
 
 		mySearchEntity.getIncludes().addAll(List.of(nonIterateRevInclude, nonIterateInclude, iterateRevInclude, iterateInclude));
 
-		JpaPid matchPid = JpaPid.fromId(1L);
 		JpaPid revIncludePid = JpaPid.fromId(10L);
 		JpaPid includePid = JpaPid.fromId(20L);
 		JpaPid iterRevIncludePid = JpaPid.fromId(30L);
 		JpaPid iterIncludePid = JpaPid.fromId(40L);
 
-		Patient matchPatient = createPatient("1");
-		Observation obs = new Observation();
-		obs.setId("Observation/10");
-		Patient incOrg = createPatient("20");
-		Observation iterObs = new Observation();
-		iterObs.setId("Observation/30");
-		Patient iterOrg = createPatient("40");
-
-		mockSearchExecution(List.of(matchPid), List.of(matchPatient, obs, incOrg, iterObs, iterOrg));
+		mockPerformSearchForPids(1);
+		mockLoadResourcesByPid(Map.of(
+			revIncludePid, buildObservation(withId("10")),
+			includePid, buildOrganization(withId("20")),
+			iterRevIncludePid, buildObservation(withId("30")),
+			iterIncludePid, buildOrganization(withId("40"))
+		));
 
 		when(mySearchBuilder.loadIncludes(any())).thenAnswer(invocation -> {
 			SearchBuilderLoadIncludesParameters<JpaPid> params = invocation.getArgument(0);
@@ -494,33 +496,41 @@ class BaseCacheAwareJpaSearchBundleProviderTest {
 			return Set.of();
 		});
 
-		ResponsePage.ResponsePageBuilder builder = mock(ResponsePage.ResponsePageBuilder.class);
-		List<IBaseResource> resources = myBundleProvider.getResources(0, 10, builder);
+		// Test
+		List<IBaseResource> resources = myBundleProvider.getResources(0, 10);
 
-		assertThat(resources).hasSize(5);
-		verify(builder).setIncludedResourceCount(4);
+		// Verify
+		assertThat(toUnqualifiedVersionlessIdValues(resources)).containsExactlyInAnyOrder(
+			"Patient/0",
+			"Observation/10",
+			"Organization/20",
+			"Observation/30",
+			"Organization/40"
+		);
 	}
 
 	@Test
 	void testGetResources_WithStoragePreAccessResourcesInterceptor_BlocksResource() {
-		JpaPid pid1 = JpaPid.fromId(1L);
-		JpaPid pid2 = JpaPid.fromId(2L);
-		Patient p1 = createPatient("1");
-		Patient p2 = createPatient("2");
+		// Setup
 
-		when(mySearchBuilder.loadResourcesByPid(eq(List.of(pid1, pid2)), any())).thenReturn(new ArrayList<>(List.of(p1, p2)));
+		mockPerformSearchForPids(2);
+		mockLoadResourcesByPid();
 
+		// Add a PREACCESS interceotor that blocks Patient/0
 		IAnonymousInterceptor interceptor = (pointcut, args) -> {
 			IPreResourceAccessDetails accessDetails = args.get(IPreResourceAccessDetails.class);
+			assertEquals("0", accessDetails.getResource(0).getIdElement().getIdPart());
 			accessDetails.setDontReturnResourceAtIndex(0);
 		};
 		myInterceptorBroadcaster.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
 
-		mockSearchExecution(List.of(pid1, pid2), List.of(p2));
+		// Test
 
 		List<IBaseResource> resources = myBundleProvider.getResources(0, 10);
 
-		assertThat(resources).containsExactly(p2);
+		// Verify
+
+		assertThat(toUnqualifiedVersionlessIdValues(resources)).containsExactly("Patient/1");
 		assertThat(mySearchEntity.getNumBlocked()).isEqualTo(1);
 		assertThat(mySearchEntity.getNumFound()).isEqualTo(1);
 	}
@@ -533,7 +543,7 @@ class BaseCacheAwareJpaSearchBundleProviderTest {
 
 		ResponsePage.ResponsePageBuilder builder = new ResponsePage.ResponsePageBuilder();
 		assertThatThrownBy(() -> myBundleProvider.getResources(0, 10, builder))
-				.isInstanceOf(InternalErrorException.class);
+			.isInstanceOf(InternalErrorException.class);
 
 		assertThat(mySearchEntity.getStatus()).isEqualTo(SearchStatusEnum.FAILED);
 		assertThat(mySearchEntity.getFailureMessage()).contains("Search failed in DB");
@@ -548,7 +558,7 @@ class BaseCacheAwareJpaSearchBundleProviderTest {
 
 		ResponsePage.ResponsePageBuilder builder = new ResponsePage.ResponsePageBuilder();
 		assertThatThrownBy(() -> myBundleProvider.getResources(0, 10, builder))
-				.isInstanceOf(ResourceVersionConflictException.class);
+			.isInstanceOf(ResourceVersionConflictException.class);
 	}
 
 	@Test
@@ -559,15 +569,14 @@ class BaseCacheAwareJpaSearchBundleProviderTest {
 
 		ResponsePage.ResponsePageBuilder builder = new ResponsePage.ResponsePageBuilder();
 		assertThatThrownBy(() -> myBundleProvider.getResources(0, 10, builder))
-				.isInstanceOf(ResourceGoneException.class)
-				.hasMessageContaining("Resource is gone");
+			.isInstanceOf(ResourceGoneException.class)
+			.hasMessageContaining("Resource is gone");
 	}
 
 	@Test
 	void testUnexpectedRollbackException_ValidatesSearchEntity() {
-		JpaPid pid1 = JpaPid.fromId(1L);
-		Patient p1 = createPatient("1");
-		mockSearchExecution(List.of(pid1), List.of(p1));
+		mockPerformSearchForPids(1);
+		mockLoadResourcesByPid();
 
 		// First pass loads the search entity
 		ResponsePage.ResponsePageBuilder builder1 = new ResponsePage.ResponsePageBuilder();
@@ -584,8 +593,8 @@ class BaseCacheAwareJpaSearchBundleProviderTest {
 
 		ResponsePage.ResponsePageBuilder builder2 = new ResponsePage.ResponsePageBuilder();
 		assertThatThrownBy(() -> myBundleProvider.getResources(1, 5, builder2))
-				.isInstanceOf(InternalErrorException.class)
-				.hasMessageContaining("Custom Failure");
+			.isInstanceOf(InternalErrorException.class)
+			.hasMessageContaining("Custom Failure");
 	}
 
 	@Test
@@ -596,9 +605,8 @@ class BaseCacheAwareJpaSearchBundleProviderTest {
 		Date created = new Date(System.currentTimeMillis() - (50 * 60 * 1000L));
 		mySearchEntity.setCreated(created);
 
-		JpaPid pid1 = JpaPid.fromId(1L);
-		Patient p1 = createPatient("1");
-		mockSearchExecution(List.of(pid1), List.of(p1));
+		mockPerformSearchForPids(1);
+		mockLoadResourcesByPid();
 
 		ResponsePage.ResponsePageBuilder builder = new ResponsePage.ResponsePageBuilder();
 		myBundleProvider.getResources(0, 10, builder);
@@ -616,9 +624,8 @@ class BaseCacheAwareJpaSearchBundleProviderTest {
 		mySearchEntity.setCreated(created);
 		mySearchEntity.setExpiryOrNull(null);
 
-		JpaPid pid1 = JpaPid.fromId(1L);
-		Patient p1 = createPatient("1");
-		mockSearchExecution(List.of(pid1), List.of(p1));
+		mockPerformSearchForPids(1);
+		mockLoadResourcesByPid();
 
 		ResponsePage.ResponsePageBuilder builder = new ResponsePage.ResponsePageBuilder();
 		myBundleProvider.getResources(0, 10, builder);
@@ -626,71 +633,266 @@ class BaseCacheAwareJpaSearchBundleProviderTest {
 		assertThat(mySearchEntity.getExpiryOrNull()).isNull();
 	}
 
-	private void mockSearchExecution(List<JpaPid> thePids, List<IBaseResource> theResources) {
-		lenient().doAnswer(invocation -> {
-			ISearchResultConsumer<JpaPid> consumer = invocation.getArgument(0);
-			SearchProgressTracker tracker = new SearchProgressTracker(0, 0);
-			if (thePids != null) {
-				for (JpaPid nextPid : thePids) {
-					consumer.consume(tracker, nextPid);
-				}
-			}
-			return tracker;
-		}).when(mySearchBuilder).performSearchForPids(any(), any(), any(), any(), any());
+	/**
+	 * Ensure that even if we load many PIDs, we don't blow out the available
+	 * RAM by holding a large number of hydrated resources in memory at any
+	 * one time.
+	 */
+	@Test
+	void testFetchManyPids_MaintainSmallLocalMemoryCache_NoConsentService() {
+		// Setup
 
-		lenient().doAnswer(invocation -> {
-			List<IBaseResource> list = invocation.getArgument(2);
-			if (theResources != null) {
-				list.addAll(theResources);
-			}
-			return null;
-		}).when(mySearchBuilder).loadResourcesByPid(anyList(), anyList(), anyList(), anyBoolean(), any());
+		myStorageSettings.setSearchPreFetchThresholds(List.of(10, -1));
+
+		mockPerformSearchForPids(10_000);
+		AtomicReference<Search> search = mockSearchCacheStorage();
+		mockSearchResultCacheStorage();
+		List<String> fetchedResourceIds = mockLoadResourcesByPid();
+
+		// Test
+
+		/*
+		 * Fetch the first page to hit the first (bounded) threshold
+		 */
+
+		myBundleProvider.setFetchedResourceLocalCacheMaximumSize(10);
+		List<IBaseResource> resources = myBundleProvider.getResources(0, 10);
+		assertThat(toUnqualifiedVersionlessIdValues(resources)).containsExactly(generateIdRange(0, 10));
+		verify(mySearchBuilder, times(1)).performSearchForPids(any(), any(), any(), any(), any());
+		verify(mySearchBuilder, times(1)).loadResourcesByPid(anyList(), anyList(), anyList(), anyBoolean(), any());
+		assertEquals(11, search.get().getNumFound());
+		assertEquals(SearchStatusEnum.PASSCMPLET, search.get().getStatus());
+
+		// Only the resources actually being returned should be fetched
+		assertEquals(10, myBundleProvider.getFetchedResourceCacheSize());
+		assertThat(fetchedResourceIds).containsExactly(generateIdRange(0, 10));
+		fetchedResourceIds.clear();
+
+		/*
+		 * Fetch the second page to hit the second (unbounded) threshold
+		 */
+
+		myBundleProvider.setFetchedResourceLocalCacheMaximumSize(15);
+		resources = myBundleProvider.getResources(10, 25);
+		assertThat(toUnqualifiedVersionlessIdValues(resources)).containsExactly(generateIdRange(10, 25));
+		verify(mySearchBuilder, times(2)).performSearchForPids(any(), any(), any(), any(), any());
+		verify(mySearchBuilder, times(2)).loadResourcesByPid(anyList(), anyList(), anyList(), anyBoolean(), any());
+		assertEquals(10_000, search.get().getNumFound());
+		assertEquals(SearchStatusEnum.FINISHED, search.get().getStatus());
+
+		// Only the resources actually being returned should be fetched
+		assertEquals(15, myBundleProvider.getFetchedResourceCacheSize());
+		assertThat(fetchedResourceIds).containsExactly(generateIdRange(10, 25));
 	}
 
-	private Patient createPatient(String theId) {
-		Patient patient = new Patient();
-		patient.setId("Patient/" + theId);
-		return patient;
+	/**
+	 * Ensure that even if we load many PIDs, we don't blow out the available
+	 * RAM by holding a large number of hydrated resources in memory at any
+	 * one time.
+	 */
+	@Test
+	void testFetchManyPids_MaintainSmallLocalMemoryCache_WithConsentService() {
+		// Setup
+
+		myStorageSettings.setSearchPreFetchThresholds(List.of(10, -1));
+
+		mockPerformSearchForPids(10_000);
+		AtomicReference<Search> search = mockSearchCacheStorage();
+		mockSearchResultCacheStorage();
+		List<String> fetchedResourceIds = mockLoadResourcesByPid();
+
+		myInterceptorBroadcaster.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, myMockInterceptor);
+		myInterceptorBroadcaster.registerAnonymousInterceptor(Pointcut.STORAGE_PRESHOW_RESOURCES, myMockInterceptor);
+
+		// Test
+
+		/*
+		 * Fetch the first page to hit the first (bounded) threshold
+		 */
+
+		myBundleProvider.setFetchedResourceLocalCacheMaximumSize(10);
+		List<IBaseResource> resources = myBundleProvider.getResources(0, 10);
+		assertThat(toUnqualifiedVersionlessIdValues(resources)).containsExactly(generateIdRange(0, 10));
+		verify(mySearchBuilder, times(1)).performSearchForPids(any(), any(), any(), any(), any());
+		verify(mySearchBuilder, times(1)).loadResourcesByPid(anyList(), anyList(), anyList(), anyBoolean(), any());
+		assertEquals(11, search.get().getNumFound());
+		assertEquals(SearchStatusEnum.PASSCMPLET, search.get().getStatus());
+
+		// Only the resources actually being returned should be fetched
+		assertEquals(10, myBundleProvider.getFetchedResourceCacheSize());
+		assertThat(fetchedResourceIds).containsExactly(generateIdRange(0, 11));
+		fetchedResourceIds.clear();
+
+		/*
+		 * Fetch the second page to hit the second (unbounded) threshold
+		 */
+
+		myBundleProvider.setFetchedResourceLocalCacheMaximumSize(15);
+		resources = myBundleProvider.getResources(10, 25);
+		assertThat(toUnqualifiedVersionlessIdValues(resources)).containsExactly(generateIdRange(10, 25));
+		verify(mySearchBuilder, times(2)).performSearchForPids(any(), any(), any(), any(), any());
+		verify(mySearchBuilder, times(102)).loadResourcesByPid(anyList(), anyList(), anyList(), anyBoolean(), any());
+		assertEquals(10_000, search.get().getNumFound());
+		assertEquals(SearchStatusEnum.FINISHED, search.get().getStatus());
+
+		// Only the resources actually being returned should be fetched
+		assertEquals(15, myBundleProvider.getFetchedResourceCacheSize());
+		assertThat(fetchedResourceIds).containsExactlyInAnyOrder(generateIdRange(10, 10_000));
+
+		// Make sure we fetched resources in small batches
+		verify(mySearchBuilder, atLeastOnce()).loadResourcesByPid(myPidListCaptor.capture(), anyList(), anyList(), anyBoolean(), any());
+		Set<JpaPid> allPids = new HashSet<>();
+		for (Collection<JpaPid> nextPidList : myPidListCaptor.getAllValues()) {
+			assertThat(nextPidList).hasSizeLessThanOrEqualTo(100);
+			allPids.addAll(nextPidList);
+		}
+		assertEquals(10_000, allPids.size());
+
+	}
+
+
+	@Nonnull
+	private List<String> mockLoadResourcesByPid() {
+		return mockLoadResourcesByPid(Map.of());
+	}
+
+	@SuppressWarnings("unchecked")
+	@Nonnull
+	private List<String> mockLoadResourcesByPid(Map<JpaPid, IBaseResource> theDirectMappings) {
+		theDirectMappings.values().forEach(r->{
+			assertTrue(r.getIdElement().hasResourceType());
+			assertTrue(r.getIdElement().hasIdPart());
+		});
+
+		List<String> fetchedResourceIds = new ArrayList<>();
+		doAnswer(invocation -> {
+			List<JpaPid> pids = invocation.getArgument(0, List.class);
+
+			List<IBaseResource> listToPopulate = invocation.getArgument(2, List.class);
+			for (JpaPid nextPid : pids) {
+				String resourceId;
+				IBaseResource resource;
+
+				if (theDirectMappings.containsKey(nextPid)) {
+					resource = theDirectMappings.get(nextPid);
+					resourceId = resource.getIdElement().toUnqualifiedVersionless().getValue();
+				} else {
+					resourceId = "Patient/" + nextPid.getId();
+					resource = new Patient();
+					resource.setId(resourceId);
+				}
+
+				fetchedResourceIds.add(resourceId);
+				listToPopulate.add(resource);
+			}
+			ourLog.info("loadResourcesByPid() fetched PIDs {} - {}", pids.get(0).getId(), pids.get(pids.size() - 1).getId());
+			return null;
+		}).when(mySearchBuilder).loadResourcesByPid(anyList(), anyList(), anyList(), anyBoolean(), any());
+		return fetchedResourceIds;
+	}
+
+	@SuppressWarnings("unchecked")
+	private void mockSearchResultCacheStorage() {
+		AtomicReference<List<JpaPid>> storedResults = new AtomicReference<>();
+		doAnswer(invocation -> {
+			List<JpaPid> results = invocation.getArgument(2, List.class);
+			storedResults.set(results);
+			return null;
+		}).when(mySearchResultCacheSvc).storeResults(any(), anyList(), anyList(), any(), any());
+		when(mySearchResultCacheSvc.fetchAllResultPids(any(), any(), any())).thenAnswer(invocation -> storedResults.get());
+	}
+
+	@Nonnull
+	private AtomicReference<Search> mockSearchCacheStorage() {
+		AtomicReference<Search> search = new AtomicReference<>();
+		doAnswer(invocation -> {
+			Search searchEntity = invocation.getArgument(0, Search.class);
+			search.set(searchEntity);
+			return null;
+		}).when(mySearchCacheSvc).save(any(), any());
+		return search;
+	}
+
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	private void mockPerformSearchForPids(int theTotalPids) {
+		AtomicReference<Set<JpaPid>> previouslyAddedPids = new AtomicReference<>();
+		lenient().doAnswer(invocation -> {
+			previouslyAddedPids.set(new HashSet<>(invocation.getArgument(0, List.class)));
+			return null;
+		}).when(mySearchBuilder).setPreviouslyAddedResourcePids(anyList());
+		doAnswer(invocation -> {
+			ISearchResultConsumer<JpaPid> consumer = invocation.getArgument(0);
+			SearchProgressTracker tracker = new SearchProgressTracker(0, 0);
+			Long firstReturnedPid = null;
+			Long lastReturnedPid = null;
+			for (long i = 0; i < theTotalPids; i++) {
+				JpaPid pid = JpaPid.fromId(i);
+				if (previouslyAddedPids.get() != null && previouslyAddedPids.get().contains(pid)) {
+					continue;
+				}
+				firstReturnedPid = getIfNull(firstReturnedPid, i);
+				lastReturnedPid = i;
+				ISearchResultConsumer.Outcome outcome = consumer.consume(tracker, pid);
+				if (!outcome.isContinue()) {
+					consumer.consumptionComplete();
+					ourLog.info("performSearchForPids() Returned PIDs {} - {}", firstReturnedPid, lastReturnedPid);
+					return tracker;
+				}
+			}
+			consumer.consumptionComplete();
+			ourLog.info("performSearchForPids() Returned PIDs {} - {}", firstReturnedPid, lastReturnedPid);
+			return tracker;
+		}).when(mySearchBuilder).performSearchForPids(any(), any(), any(), any(), any());
+	}
+
+	private String[] generateIdRange(int theStartInclusive, int theEndExclusive) {
+		List<String> retVal = new ArrayList<>();
+		for (int i = theStartInclusive; i < theEndExclusive; i++) {
+			retVal.add("Patient/" + i);
+		}
+		return retVal.toArray(EMPTY_STRING_ARRAY);
+	}
+
+
+	@Override
+	public FhirContext getFhirContext() {
+		return myFhirContext;
 	}
 
 	private static class TestCacheAwareJpaSearchBundleProvider extends BaseCacheAwareJpaSearchBundleProvider {
-		private Search mySearch;
+		private final Search mySearch;
 
 		public TestCacheAwareJpaSearchBundleProvider(
-				FhirContext theFhirContext,
-				RequestDetails theRequestDetails,
-				IInterceptorBroadcaster theInterceptorBroadcaster,
-				IPagingProvider thePagingProvider,
-				JpaStorageSettings theStorageSettings,
-				EntityManager theEntityManager,
-				IHapiTransactionService theTxService,
-				IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
-				ISearchCacheSvc theSearchCacheSvc,
-				ISearchResultCacheSvc theSearchResultCacheSvc,
-				ExceptionService theExceptionService,
-				SearchBuilderFactory<JpaPid> theSearchBuilderFactory,
-				SearchParameterMap theParams,
-				RequestPartitionId theRequestPartitionId,
-				Search theSearch) {
+			FhirContext theFhirContext,
+			RequestDetails theRequestDetails,
+			IInterceptorBroadcaster theInterceptorBroadcaster,
+			IPagingProvider thePagingProvider,
+			JpaStorageSettings theStorageSettings,
+			EntityManager theEntityManager,
+			IHapiTransactionService theTxService,
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
+			ISearchCacheSvc theSearchCacheSvc,
+			ISearchResultCacheSvc theSearchResultCacheSvc,
+			ExceptionService theExceptionService,
+			SearchBuilderFactory<JpaPid> theSearchBuilderFactory,
+			SearchParameterMap theParams,
+			RequestPartitionId theRequestPartitionId,
+			Search theSearch) {
 			super(
-					theFhirContext,
-					theRequestDetails,
-					theInterceptorBroadcaster,
-					thePagingProvider,
-					theStorageSettings,
-					theEntityManager,
-					theTxService,
-					theRequestPartitionHelperSvc,
-					theSearchCacheSvc,
-					theSearchResultCacheSvc,
-					theExceptionService,
-					theSearchBuilderFactory,
-					theParams,
-					theRequestPartitionId);
-			mySearch = theSearch;
-		}
-
-		public void setSearch(Search theSearch) {
+				theFhirContext,
+				theRequestDetails,
+				theInterceptorBroadcaster,
+				thePagingProvider,
+				theStorageSettings,
+				theEntityManager,
+				theTxService,
+				theRequestPartitionHelperSvc,
+				theSearchCacheSvc,
+				theSearchResultCacheSvc,
+				theExceptionService,
+				theSearchBuilderFactory,
+				theParams,
+				theRequestPartitionId);
 			mySearch = theSearch;
 		}
 

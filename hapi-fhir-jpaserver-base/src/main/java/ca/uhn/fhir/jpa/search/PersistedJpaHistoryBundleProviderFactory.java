@@ -40,15 +40,15 @@ import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
-public class PersistedJpaBundleProviderFactory {
+public class PersistedJpaHistoryBundleProviderFactory {
 
 	@Autowired
 	private ApplicationContext myApplicationContext;
 
-	public PersistedJpaBundleProvider newInstance(RequestDetails theRequest, Search theSearch) {
+	public PersistedJpaHistoryBundleProvider newInstance(RequestDetails theRequest, Search theSearch) {
 		Object retVal =
 				myApplicationContext.getBean(JpaConfig.PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH, theRequest, theSearch);
-		return (PersistedJpaBundleProvider) retVal;
+		return (PersistedJpaHistoryBundleProvider) retVal;
 	}
 
 	public IBundleProvider history(
@@ -93,7 +93,7 @@ public class PersistedJpaBundleProviderFactory {
 		search.setStatus(SearchStatusEnum.FINISHED);
 		search.setHistorySearchStyle(searchParameterType);
 
-		PersistedJpaBundleProvider provider = newInstance(theRequest, search);
+		PersistedJpaHistoryBundleProvider provider = newInstance(theRequest, search);
 		provider.setRequestPartitionId(theRequestPartitionId);
 
 		return provider;

@@ -42,6 +42,7 @@ import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.ExceptionService;
+import ca.uhn.fhir.jpa.search.PersistedJpaHistoryBundleProvider;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
@@ -60,6 +61,8 @@ import ca.uhn.fhir.rest.server.method.ResponsePage;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.IntCounter;
+import ca.uhn.fhir.util.TaskChunker;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
@@ -91,7 +94,7 @@ import java.util.Set;
  * </ul>
  *
  * @see IStatelessJpaSearchSvc The Synchronous Search Service is used instead of this class for searches which don't use the search cache
- * @see ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider The search result for <b>FHIR History</b> operations.
+ * @see PersistedJpaHistoryBundleProvider The search result for <b>FHIR History</b> operations.
  * @since 8.14.0
  */
 public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundleProvider {
@@ -152,6 +155,9 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 	 * or <code>_revinclude</code> results.
 	 */
 	private CachedPids myCachedPidsFromMatchesAndIncludes;
+
+	@Nullable
+	private Integer myFetchedResourceLocalCacheMaximumSize;
 
 	/**
 	 * Constructor
@@ -302,8 +308,7 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 	@Override
 	public List<IBaseResource> getAllResources() {
 		List<IBaseResource> resources = getResources(0, 10000);
-		Validate.isTrue(
-				resources.size() < 10000, "Can not call getAllResources on a collection of more than 10000 resources");
+		Validate.isTrue(resources.size() < 10000, "Can not call getAllResources on a collection >= 10000 resources");
 		resources.removeIf(Objects::isNull);
 		return resources;
 	}
@@ -455,7 +460,7 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 			myParams = extractSearchParameterMapFromSearchEntity();
 		}
 
-		/// If we have a `_count=summary` query, just calculate the count and return
+		// If we have a _count=summary query, calculate the count and return
 		if (SearchParameterMapCalculator.isWantOnlyCount(myParams)) {
 			if (mySearchEntity.getTotalCount() == null) {
 				Long countQuery = newSearchBuilder()
@@ -500,6 +505,8 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 			}
 		}
 
+		trimLocalFetchedResourceCache(pidsToReturn);
+
 		int numWanted = theToIndex - mySearchEntity.getNumFound();
 
 		final IntCounter numToSkip = new IntCounter(0);
@@ -531,19 +538,11 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 			 */
 			List<JpaPid> newPidsThisPass = new ArrayList<>();
 			PidConsumer consumer = new PidConsumer(
-					myRequestDetails,
-					newPidsThisPass,
-					numToSkip,
-					pidsToReturn,
-					searchThreshold,
-					searchBuilder,
-					myCompositeBroadcaster,
-					myFetchedResources);
+					numWanted, newPidsThisPass, numToSkip, pidsToReturn, searchThreshold, searchBuilder);
 			SearchProgressTracker outcome;
 			try {
 				outcome = searchBuilder.performSearchForPids(
 						consumer, myParams, searchDetails, myRequestDetails, myRequestPartitionId);
-				consumer.firePreAccessHooksOnNewPids();
 			} catch (Exception e) {
 				SearchCoordinatorSvcImpl.markSearchAsFailedWithExceptionDetails(mySearchEntity, e);
 				mySearchCacheSvc.save(mySearchEntity, myRequestPartitionId);
@@ -635,6 +634,12 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 		fetchResourcesAndIncludes(searchBuilder, pidsToReturn, theFromIndex, theToIndex);
 	}
 
+	private void trimLocalFetchedResourceCache(List<JpaPid> thePidsToRetain) {
+		if (!myFetchedResources.isEmpty()) {
+			myFetchedResources.entrySet().removeIf(entry -> !thePidsToRetain.contains(entry.getKey()));
+		}
+	}
+
 	/**
 	 * Using the {@link JpaStorageSettings#getSearchPreFetchThresholds() pre-fetch thresholds},
 	 * determines the next search threshold to use.
@@ -721,6 +726,7 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 	protected void fetchResourcesAndIncludes(
 			ISearchBuilder<JpaPid> theSearchBuilder, List<JpaPid> theMatchPids, int theFromIndex, int theToIndex) {
 
+		trimLocalFetchedResourceCache(theMatchPids);
 		List<JpaPid> cachedPidsFromMatches = List.copyOf(theMatchPids);
 
 		List<JpaPid> includedPidList = new ArrayList<>();
@@ -790,13 +796,23 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 			for (int i = 0; i < limit; i++) {
 				JpaPid pid = pidsToFetch.get(i);
 				IBaseResource resource = includeResources.get(i);
-				myFetchedResources.put(pid, resource);
+				addResourceToLocalCache(pid, resource);
 			}
 		}
 
 		myCachedPidsFromMatches = new CachedPids(theFromIndex, theToIndex, cachedPidsFromMatches, 0);
 		myCachedPidsFromMatchesAndIncludes =
 				new CachedPids(theFromIndex, theToIndex, theMatchPids, includedPidList.size());
+	}
+
+	private void addResourceToLocalCache(JpaPid thePid, IBaseResource theResource) {
+		if (myFetchedResourceLocalCacheMaximumSize != null) {
+			Validate.isTrue(
+					myFetchedResources.size() < myFetchedResourceLocalCacheMaximumSize,
+					"Local fetched resource cache can't exceed size: %s",
+					myFetchedResourceLocalCacheMaximumSize);
+		}
+		myFetchedResources.put(thePid, theResource);
 	}
 
 	private Integer fetchRevIncludes(
@@ -897,6 +913,16 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 		myRequestPartitionId = theRequestPartitionId;
 	}
 
+	@VisibleForTesting
+	int getFetchedResourceCacheSize() {
+		return myFetchedResources.size();
+	}
+
+	@VisibleForTesting
+	void setFetchedResourceLocalCacheMaximumSize(int theFetchedResourceLocalCacheMaximumSize) {
+		myFetchedResourceLocalCacheMaximumSize = theFetchedResourceLocalCacheMaximumSize;
+	}
+
 	private record SearchThreshold(
 			@Nullable Integer threshold, boolean isLastThreshold, boolean deduplicateInDatabase) {
 		@Nonnull
@@ -909,36 +935,30 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 		}
 	}
 
-	private static class PidConsumer implements ISearchResultConsumer<JpaPid> {
+	private class PidConsumer implements ISearchResultConsumer<JpaPid> {
 		private final List<JpaPid> myNewPidsThisPass;
 		private final IntCounter myNumToSkip;
 		private final List<JpaPid> myPidsToReturn;
 		private final SearchThreshold mySearchThreshold;
 		private final ISearchBuilder<JpaPid> mySearchBuilder;
-		private final IInterceptorBroadcaster myCompositeBroadcaster;
-		private final RequestDetails myRequestDetails;
-		private final Map<JpaPid, IBaseResource> myFetchedResources;
+		private final IntCounter myNumToRetainInLocalCache;
 
 		private int myCountFoundThisPass;
 		private int myCountBlockedThisPass;
 
 		public PidConsumer(
-				RequestDetails theRequestDetails,
+				int theNumWantedThisPass,
 				List<JpaPid> theNewPidsThisPass,
 				IntCounter theNumToSkip,
 				List<JpaPid> thePidsToReturn,
 				SearchThreshold theSearchThreshold,
-				ISearchBuilder<JpaPid> theSearchBuilder,
-				IInterceptorBroadcaster theCompositeBroadcaster,
-				Map<JpaPid, IBaseResource> theFetchedResources) {
-			myRequestDetails = theRequestDetails;
+				ISearchBuilder<JpaPid> theSearchBuilder) {
+			myNumToRetainInLocalCache = new IntCounter(theNumWantedThisPass);
 			myNewPidsThisPass = theNewPidsThisPass;
 			myNumToSkip = theNumToSkip;
 			myPidsToReturn = thePidsToReturn;
 			mySearchThreshold = theSearchThreshold;
 			mySearchBuilder = theSearchBuilder;
-			myCompositeBroadcaster = theCompositeBroadcaster;
-			myFetchedResources = theFetchedResources;
 		}
 
 		@Nonnull
@@ -960,43 +980,48 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 			return ISearchResultConsumer.CONTINUE;
 		}
 
-		public void firePreAccessHooksOnNewPids() {
+		@Override
+		public void consumptionComplete() {
 
 			// Interceptor call: STORAGE_PREACCESS_RESOURCES
+
 			// This can be used to remove results from the search result details before
-			// the user has a chance to know that they were in the results
-			if (myCompositeBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES) && !myNewPidsThisPass.isEmpty()) {
-				Set<JpaPid> blockedPids = new HashSet<>();
+			// the user has a chance to know that they were in the results. We work in
+			// small batches to avoid loading too many resources into memory at once.
+			if (havePreAccessHooks() && !myNewPidsThisPass.isEmpty()) {
+				TaskChunker.chunk(myNewPidsThisPass, 100, chunk -> {
+					Set<JpaPid> blockedPids = new HashSet<>();
 
-				List<IBaseResource> newResources =
-						mySearchBuilder.loadResourcesByPid(myNewPidsThisPass, myRequestDetails);
-				JpaPreResourceAccessDetails accessDetails =
-						new JpaPreResourceAccessDetails(myNewPidsThisPass, newResources);
-				HookParams params = new HookParams()
-						.add(IPreResourceAccessDetails.class, accessDetails)
-						.add(RequestDetails.class, myRequestDetails)
-						.addIfMatchesType(ServletRequestDetails.class, myRequestDetails);
-				myCompositeBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+					ArrayList<IBaseResource> newResources = new ArrayList<>();
+					mySearchBuilder.loadResourcesByPid(chunk, List.of(), newResources, false, myRequestDetails);
+					JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(chunk, newResources);
+					HookParams params = new HookParams()
+							.add(IPreResourceAccessDetails.class, accessDetails)
+							.add(RequestDetails.class, myRequestDetails)
+							.addIfMatchesType(ServletRequestDetails.class, myRequestDetails);
+					myCompositeBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
 
-				for (int i = myNewPidsThisPass.size() - 1; i >= 0; i--) {
-					if (accessDetails.isDontReturnResourceAtIndex(i)) {
-						JpaPid blockedPid = myNewPidsThisPass.remove(i);
-						newResources.remove(i);
-						blockedPids.add(blockedPid);
-						myCountFoundThisPass--;
-						myCountBlockedThisPass++;
+					for (int i = chunk.size() - 1; i >= 0; i--) {
+						if (accessDetails.isDontReturnResourceAtIndex(i)) {
+							JpaPid blockedPid = chunk.remove(i);
+							newResources.remove(i);
+							blockedPids.add(blockedPid);
+							myCountFoundThisPass--;
+							myCountBlockedThisPass++;
+						}
 					}
-				}
 
-				if (!blockedPids.isEmpty()) {
-					myPidsToReturn.removeIf(blockedPids::contains);
-				}
+					if (!blockedPids.isEmpty()) {
+						myPidsToReturn.removeIf(blockedPids::contains);
+					}
 
-				for (int i = 0; i < myNewPidsThisPass.size(); i++) {
-					JpaPid pid = myNewPidsThisPass.get(i);
-					IBaseResource resource = newResources.get(i);
-					myFetchedResources.put(pid, resource);
-				}
+					for (int i = 0; i < chunk.size() && myNumToRetainInLocalCache.get() > 0; i++) {
+						JpaPid pid = chunk.get(i);
+						IBaseResource resource = newResources.get(i);
+						addResourceToLocalCache(pid, resource);
+						myNumToRetainInLocalCache.decrement();
+					}
+				});
 			}
 		}
 
@@ -1007,6 +1032,10 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 		public int getFoundCount() {
 			return myCountFoundThisPass;
 		}
+	}
+
+	private boolean havePreAccessHooks() {
+		return myCompositeBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES);
 	}
 
 	/**

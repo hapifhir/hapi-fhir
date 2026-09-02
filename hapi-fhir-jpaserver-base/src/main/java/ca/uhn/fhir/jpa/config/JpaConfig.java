@@ -132,8 +132,8 @@ import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProviderDstu2;
 import ca.uhn.fhir.jpa.sched.AutowiringSpringBeanJobFactory;
 import ca.uhn.fhir.jpa.sched.HapiSchedulerServiceImpl;
-import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
-import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
+import ca.uhn.fhir.jpa.search.PersistedJpaHistoryBundleProvider;
+import ca.uhn.fhir.jpa.search.PersistedJpaHistoryBundleProviderFactory;
 import ca.uhn.fhir.jpa.search.PersistedJpaIdSearchBundleProvider;
 import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
 import ca.uhn.fhir.jpa.search.SearchStrategyFactory;
@@ -666,8 +666,8 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public PersistedJpaBundleProviderFactory persistedJpaBundleProviderFactory() {
-		return new PersistedJpaBundleProviderFactory();
+	public PersistedJpaHistoryBundleProviderFactory persistedJpaBundleProviderFactory() {
+		return new PersistedJpaHistoryBundleProviderFactory();
 	}
 
 	@Bean
@@ -718,9 +718,9 @@ public class JpaConfig {
 
 	@Bean(name = PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH)
 	@Scope("prototype")
-	public PersistedJpaBundleProvider newPersistedJpaBundleProviderBySearch(
+	public PersistedJpaHistoryBundleProvider newPersistedJpaBundleProviderBySearch(
 			RequestDetails theRequest, Search theSearch) {
-		return new PersistedJpaBundleProvider(theRequest, theSearch);
+		return new PersistedJpaHistoryBundleProvider(theRequest, theSearch);
 	}
 
 	@Bean(name = PERSISTED_JPA_ID_SEARCH_BUNDLE_PROVIDER)

@@ -77,7 +77,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 	@Mock
 	private SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
 	@Mock
-	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
+	private PersistedJpaHistoryBundleProviderFactory myPersistedJpaHistoryBundleProviderFactory;
 	@Mock
 	private IRequestPartitionHelperSvc myPartitionHelperSvc;
 	@Mock

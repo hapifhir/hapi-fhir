@@ -63,7 +63,8 @@ public class DatabaseBackedPagingProvider extends BasePagingProvider {
 	}
 
 	/**
-	 * Subclasses may override and modify or replace the bundle provider being returned
+	 * Subclasses may override and validate, modify or replace the bundle provider being returned.
+	 * The default implementation returns the bundle provider as is.
 	 */
 	@Nullable
 	protected BaseCacheAwareJpaSearchBundleProvider validateAndReturnBundleProvider(

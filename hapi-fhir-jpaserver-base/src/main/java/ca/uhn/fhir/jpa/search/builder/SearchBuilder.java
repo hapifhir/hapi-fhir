@@ -514,6 +514,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					break;
 				}
 			}
+			theConsumer.consumptionComplete();
 			return newSearchProgressTracker(query);
 		} catch (IOException e) {
 			ourLog.error("IO failure during database access", e);

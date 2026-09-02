@@ -67,7 +67,7 @@ import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
-import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
+import ca.uhn.fhir.jpa.search.PersistedJpaHistoryBundleProviderFactory;
 import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.search.builder.StorageInterceptorHooksFacade;
@@ -242,7 +242,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private Class<T> myResourceType;
 
 	@Autowired
-	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
+	private PersistedJpaHistoryBundleProviderFactory myPersistedJpaHistoryBundleProviderFactory;
 
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
@@ -1405,7 +1405,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		IBundleProvider retVal = myTransactionService
 				.withRequest(theRequestDetails)
 				.withRequestPartitionId(requestPartitionId)
-				.execute(() -> myPersistedJpaBundleProviderFactory.history(
+				.execute(() -> myPersistedJpaHistoryBundleProviderFactory.history(
 						theRequestDetails, myResourceName, null, theSince, theUntil, theOffset, requestPartitionId));
 
 		ourLog.debug("Processed history on {} in {}ms", myResourceName, w.getMillisAndRestart());
@@ -1432,7 +1432,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 							getResourceName(),
 							theId.getIdPart(),
 							ResolveIdentityMode.includeDeleted().cacheOk());
-					return myPersistedJpaBundleProviderFactory.history(
+					return myPersistedJpaHistoryBundleProviderFactory.history(
 							theRequest, myResourceName, resourcePid, theSince, theUntil, theOffset, requestPartitionId);
 				});
 
@@ -1458,7 +1458,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 							getResourceName(),
 							theId.getIdPart(),
 							ResolveIdentityMode.includeDeleted().cacheOk());
-					return myPersistedJpaBundleProviderFactory.history(
+					return myPersistedJpaHistoryBundleProviderFactory.history(
 							theRequest,
 							myResourceName,
 							resourcePid,
