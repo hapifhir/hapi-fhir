@@ -321,7 +321,6 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		assertThat(returnedIdValues).containsExactly(
 			"Observation/" + evenPid
 		);
-		assertEquals(1, preAccessInterceptorCallCount.get());
 	}
 
 

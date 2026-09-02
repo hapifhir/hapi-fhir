@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class SimpleBundleProvider implements IBundleProvider {
@@ -86,14 +87,21 @@ public class SimpleBundleProvider implements IBundleProvider {
 	}
 
 	public SimpleBundleProvider(List<? extends IBaseResource> theList, String theUuid) {
-		myList = theList;
 		myUuid = theUuid;
 		int size = 0;
-		for (IBaseResource r : theList) {
-			if (r != null && BundleUtil.isMatchResource(r)) {
+
+		List<? extends IBaseResource> list = theList;
+		if (list.contains(null)) {
+			list = list.stream().filter(Objects::nonNull).toList();
+		}
+
+		for (IBaseResource r : list) {
+			if (BundleUtil.isMatchResource(r)) {
 				size++;
 			}
 		}
+		myList = list;
+
 		myHasAllResources = true;
 		setSize(size);
 	}

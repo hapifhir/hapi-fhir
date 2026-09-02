@@ -34,7 +34,6 @@ import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.time.DateUtils;
@@ -98,7 +97,11 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc, IHasScheduledJobs 
 		String queryPart = parseWarmUrlParamPart(nextUrl);
 		SearchParameterMap responseCriteriaUrl = myMatchUrlService.translateMatchUrl(queryPart, resourceDef);
 
-		IBundleProvider search = callingDao.search(responseCriteriaUrl, new SystemRequestDetails());
+		// This call doesn't use a RequestDetails right now because if we
+		// pass in a SystemRequestDetails, we get a synchronous search. We
+		// need to find a way to pass in a RequestDetails (and probably
+		// optionally a partition) and still get a cached search.
+		IBundleProvider search = callingDao.search(responseCriteriaUrl);
 
 		Integer firstThreshold = myStorageSettings.getSearchPreFetchThresholds().get(0);
 		if (firstThreshold == null || firstThreshold < 1) {

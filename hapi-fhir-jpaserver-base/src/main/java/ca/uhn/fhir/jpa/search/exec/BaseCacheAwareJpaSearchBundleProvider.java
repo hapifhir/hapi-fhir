@@ -80,6 +80,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -303,6 +304,7 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 		List<IBaseResource> resources = getResources(0, 10000);
 		Validate.isTrue(
 				resources.size() < 10000, "Can not call getAllResources on a collection of more than 10000 resources");
+		resources.removeIf(Objects::isNull);
 		return resources;
 	}
 
