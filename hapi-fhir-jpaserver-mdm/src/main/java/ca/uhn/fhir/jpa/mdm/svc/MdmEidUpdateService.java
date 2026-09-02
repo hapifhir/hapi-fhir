@@ -78,18 +78,20 @@ public class MdmEidUpdateService {
 			MatchedGoldenResourceCandidate theMatchedGoldenResourceCandidate,
 			MdmTransactionContext theMdmTransactionContext) {
 		MdmUpdateContext updateContext = new MdmUpdateContext(theMatchedGoldenResourceCandidate, theTargetResource);
+
+		// Merge the incoming EIDs into the Golden Resource before survivorship rules are applied, so that a
+		// survivorship implementation is handed the same Golden Resource state on update as it is on create
+		if (mergesIncomingEidsIntoGoldenResource(updateContext, theMatchedGoldenResourceCandidate)) {
+			myGoldenResourceHelper.handleExternalEidAddition(
+					updateContext.getMatchedGoldenResource(), theTargetResource, theMdmTransactionContext);
+		}
+
 		myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(
 				theTargetResource, updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
 
 		IAnyResource theOldGoldenResource = updateContext.getExistingGoldenResource();
 		if (updateContext.isRemainsMatchedToSameGoldenResource()) {
-			// Copy over any new external EIDs which don't already exist.
 			if (!updateContext.isIncomingResourceHasAnEid() || updateContext.isHasEidsInCommon()) {
-				// Must run BEFORE updateLink, which is what upserts the Golden Resource on this branch.
-				if (theMatchedGoldenResourceCandidate.isMatch()) {
-					myGoldenResourceHelper.handleExternalEidAddition(
-							updateContext.getMatchedGoldenResource(), theTargetResource, theMdmTransactionContext);
-				}
 				myMdmLinkSvc.updateLink(
 						updateContext.getMatchedGoldenResource(),
 						theTargetResource,
@@ -130,6 +132,18 @@ public class MdmEidUpdateService {
 			myMdmResourceDaoSvc.upsertGoldenResource(
 					updateContext.getMatchedGoldenResource(), theMdmTransactionContext.getResourceType());
 		}
+	}
+
+	/**
+	 * Whether this update merges the incoming resource's external EIDs into the Golden Resource it remains
+	 * matched to. That happens when the two already agree on their EIDs, or the incoming resource carries
+	 * none, and the candidate is a match rather than a possible match.
+	 */
+	private boolean mergesIncomingEidsIntoGoldenResource(
+			MdmUpdateContext theUpdateContext, MatchedGoldenResourceCandidate theCandidate) {
+		return theUpdateContext.isRemainsMatchedToSameGoldenResource()
+				&& (!theUpdateContext.isIncomingResourceHasAnEid() || theUpdateContext.isHasEidsInCommon())
+				&& theCandidate.isMatch();
 	}
 
 	private void handleNoEidsInCommon(
