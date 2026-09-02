@@ -1326,38 +1326,36 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		myCaptureQueriesListener.logSelectQueries();
 		assertThat(values).asList().containsExactly("Patient/" + id);
 
+		assertThat(getSelectSql(0)).contains("from HFJ_TAG_DEF td1_0 where");
 		if (theNegate) {
 			if (myIncludePartitionIdsInPks) {
-				assertThat(getSelectSql(0)).contains("NOT (EXISTS (SELECT s0.PARTITION_ID,s0.RES_ID FROM HFJ_RES_TAG s0");
-				assertThat(getSelectSql(0)).contains(" INNER JOIN HFJ_TAG_DEF s1 ON (s0.TAG_ID = s1.TAG_ID) ");
+				assertThat(getSelectSql(1)).contains("NOT (EXISTS (SELECT s0.PARTITION_ID,s0.RES_ID FROM HFJ_RES_TAG s0");
 			} else {
-				assertThat(getSelectSql(0)).contains("(t0.RES_ID) NOT IN (SELECT t0.RES_ID FROM HFJ_RES_TAG t0 ");
-				assertThat(getSelectSql(0)).contains(" INNER JOIN HFJ_TAG_DEF t1 ON (t0.TAG_ID = t1.TAG_ID) ");
+				assertThat(getSelectSql(1)).contains("(t0.RES_ID) NOT IN (SELECT t0.RES_ID FROM HFJ_RES_TAG t0 ");
 			}
 		} else {
 			if (myIncludePartitionIdsInPks) {
-				assertThat(getSelectSql(0)).contains(" INNER JOIN HFJ_RES_TAG t1 ON ((t0.PARTITION_ID = t1.PARTITION_ID) AND (t0.RES_ID = t1.RES_ID)) INNER");
+				assertThat(getSelectSql(1)).contains(" INNER JOIN HFJ_RES_TAG t1 ON ((t0.PARTITION_ID = t1.PARTITION_ID) AND (t0.RES_ID = t1.RES_ID)) WHERE");
 			} else {
-				assertThat(getSelectSql(0)).contains(" INNER JOIN HFJ_RES_TAG t1 ON (t0.RES_ID = t1.RES_ID) INNER");
+				assertThat(getSelectSql(1)).contains(" INNER JOIN HFJ_RES_TAG t1 ON (t0.RES_ID = t1.RES_ID) WHERE");
 			}
-			assertThat(getSelectSql(0)).contains(" INNER JOIN HFJ_TAG_DEF t2 ON (t1.TAG_ID = t2.TAG_ID) ");
 		}
 
 		if (myIncludePartitionIdsInSql) {
-			assertThat(getSelectSql(0)).contains("PARTITION_ID = '1')");
+			assertThat(getSelectSql(1)).contains("PARTITION_ID = '1')");
 		}
 
-		// Query 1 is the HFJ_RES_VER fetch
-		assertThat(getSelectSql(1)).contains(" from HFJ_RES_VER ");
+		// Query 3 is the HFJ_RES_VER fetch
+		assertThat(getSelectSql(2)).contains(" from HFJ_RES_VER ");
 
-		assertThat(getSelectSql(2)).contains(" from HFJ_HISTORY_TAG rht1_0 ");
+		assertThat(getSelectSql(3)).contains(" from HFJ_HISTORY_TAG rht1_0 ");
 		if (myIncludePartitionIdsInPks) {
-			assertThat(getSelectSql(2)).contains(" where (rht1_0.PARTITION_ID,rht1_0.RES_VER_PID) in (('1',");
+			assertThat(getSelectSql(3)).contains(" where (rht1_0.PARTITION_ID,rht1_0.RES_VER_PID) in (('1',");
 		} else {
-			assertThat(getSelectSql(2)).contains(" where (rht1_0.RES_VER_PID) in ('");
+			assertThat(getSelectSql(3)).contains(" where (rht1_0.RES_VER_PID) in ('");
 		}
 
-		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(4, myCaptureQueriesListener.countSelectQueries());
 	}
 
 	@Test
@@ -1379,27 +1377,28 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		myCaptureQueriesListener.logSelectQueries();
 		assertThat(values).asList().containsExactly("Patient/" + id);
 
+		assertThat(getSelectSql(0)).contains("from HFJ_TAG_DEF td1_0 where");
 		if (myIncludePartitionIdsInPks) {
-			assertThat(getSelectSql(0)).contains(" INNER JOIN HFJ_RES_TAG t1 ON ((t0.PARTITION_ID = t1.PARTITION_ID) AND (t0.RES_ID = t1.RES_ID)) INNER");
+			assertThat(getSelectSql(1)).contains(" INNER JOIN HFJ_RES_TAG t1 ON ((t0.PARTITION_ID = t1.PARTITION_ID) AND (t0.RES_ID = t1.RES_ID)) WHERE");
 		} else {
-			assertThat(getSelectSql(0)).contains(" INNER JOIN HFJ_RES_TAG t1 ON (t0.RES_ID = t1.RES_ID) INNER");
+			assertThat(getSelectSql(1)).contains(" INNER JOIN HFJ_RES_TAG t1 ON (t0.RES_ID = t1.RES_ID) WHERE");
 		}
-		assertThat(getSelectSql(0)).contains(" INNER JOIN HFJ_TAG_DEF t2 ON (t1.TAG_ID = t2.TAG_ID) ");
+
 		if (myIncludePartitionIdsInSql) {
-			assertThat(getSelectSql(0)).contains("(t1.PARTITION_ID = '1')");
+			assertThat(getSelectSql(1)).contains("(t1.PARTITION_ID = '1')");
 		}
 
-		// Query 1 is the HFJ_RES_VER fetch
-		assertThat(getSelectSql(1)).contains(" from HFJ_RES_VER ");
+		// Query 3
+		assertThat(getSelectSql(2)).contains(" from HFJ_RES_VER ");
 
-		assertThat(getSelectSql(2)).contains(" from HFJ_RES_TAG rt1_0 ");
+		assertThat(getSelectSql(3)).contains(" from HFJ_RES_TAG rt1_0 ");
 		if (myIncludePartitionIdsInPks) {
-			assertThat(getSelectSql(2)).contains(" where (rt1_0.RES_ID,rt1_0.PARTITION_ID) in (('" + id + "','1'))");
+			assertThat(getSelectSql(3)).contains(" where (rt1_0.RES_ID,rt1_0.PARTITION_ID) in (('" + id + "','1'))");
 		} else {
-			assertThat(getSelectSql(2)).contains(" where (rt1_0.RES_ID) in ('" + id + "')");
+			assertThat(getSelectSql(3)).contains(" where (rt1_0.RES_ID) in ('" + id + "')");
 		}
 
-		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(4, myCaptureQueriesListener.countSelectQueries());
 	}
 
 	@Test

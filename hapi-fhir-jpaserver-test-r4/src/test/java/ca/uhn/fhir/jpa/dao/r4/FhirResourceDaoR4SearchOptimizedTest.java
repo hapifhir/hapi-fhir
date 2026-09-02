@@ -1039,7 +1039,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		searchParameter1.setExpression("Procedure.extension('Procedure#focalAccess')");
 		searchParameter1.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		searchParameter1.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		IIdType sp1Id = mySearchParameterDao.create(searchParameter1).getId().toUnqualifiedVersionless();
+		mySearchParameterDao.create(searchParameter1).getId().toUnqualifiedVersionless();
 		// SearchParam - focalAccess
 		SearchParameter searchParameter2 = new SearchParameter();
 		searchParameter2.addBase("Provenance");
@@ -1048,7 +1048,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		searchParameter2.setExpression("Provenance.extension('Provenance#activity')");
 		searchParameter2.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		searchParameter2.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		IIdType sp2Id = mySearchParameterDao.create(searchParameter2).getId().toUnqualifiedVersionless();
+		mySearchParameterDao.create(searchParameter2).getId().toUnqualifiedVersionless();
 		mySearchParamRegistry.forceRefresh();
 
 		BodyStructure bs = new BodyStructure();
@@ -1080,13 +1080,13 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		procedure.setSubject(new Reference("Patient/P1"));
 		procedure.setStatus(Procedure.ProcedureStatus.COMPLETED);
 		procedure.setCategory(categoryCodeableConcept1);
-		Extension extProcedure = procedure
+		procedure
 			.addExtension()
 			.setUrl("Procedure#focalAccess")
 			.setValue(new UriType("BodyStructure/" + bsId.getIdPartAsLong()));
 		procedure.getMeta()
 			.addTag("acc_procext_fkc", "1STCANN2NDL", "First Successful Cannulation with 2 Needles");
-		IIdType procedureId = myProcedureDao.create(procedure).getId().toUnqualifiedVersionless();
+		myProcedureDao.create(procedure).getId().toUnqualifiedVersionless();
 
 		Device device = new Device();
 		device.setManufacturer("Acme");
@@ -1095,7 +1095,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		Provenance provenance = new Provenance();
 		provenance.setActivity(new CodeableConcept().addCoding(new Coding().setSystem("http://hl7.org/fhir/v3/DocumentCompletion").setCode("PA")));
 		provenance.addAgent().setWho(new Reference(deviceId));
-		IIdType provenanceId = myProvenanceDao.create(provenance).getId().toUnqualifiedVersionless();
+		myProvenanceDao.create(provenance).getId().toUnqualifiedVersionless();
 
 		logAllResources();
 		logAllResourceTags();
@@ -1119,14 +1119,15 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			IBundleProvider outcome = myProcedureDao.search(map, new SystemRequestDetails());
 			ourLog.info("Search returned {} resources.", outcome.getResources(0, 999).size());
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+			assertEquals(2, myCaptureQueriesListener.logSelectQueries().size());
 
-			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
 			// Check for a particular WHERE CLAUSE in the generated SQL to make sure we are verifying the correct query
 			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), " join hfj_res_link ")).as(selectQuery).isEqualTo(2);
 
 			// Ensure that we do NOT see a couple of particular WHERE clauses
-			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), ".res_type = 'procedure'")).as(selectQuery).isEqualTo(0);
-			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), ".res_deleted_at is null")).as(selectQuery).isEqualTo(0);
+			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), ".res_type = 'procedure'")).as(selectQuery).isZero();
+			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), ".res_deleted_at is null")).as(selectQuery).isZero();
 		}
 
 		// Search example 2:
@@ -1147,14 +1148,15 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			IBundleProvider outcome = myProcedureDao.search(map, new SystemRequestDetails());
 			ourLog.info("Search returned {} resources.", outcome.getResources(0, 999).size());
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+			assertEquals(2, myCaptureQueriesListener.logSelectQueries().size());
 
-			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
 			// Check for a particular WHERE CLAUSE in the generated SQL to make sure we are verifying the correct query
 			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), " join hfj_res_link ")).as(selectQuery).isEqualTo(1);
 
 			// Ensure that we do NOT see a couple of particular WHERE clauses
-			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), ".res_type = 'procedure'")).as(selectQuery).isEqualTo(0);
-			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), ".res_deleted_at is null")).as(selectQuery).isEqualTo(0);
+			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), ".res_type = 'procedure'")).as(selectQuery).isZero();
+			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), ".res_deleted_at is null")).as(selectQuery).isZero();
 		}
 
 		// Search example 3:
@@ -1172,13 +1174,13 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			myCaptureQueriesListener.clear();
 			IBundleProvider outcome = myProvenanceDao.search(map, new SystemRequestDetails());
 			ourLog.info("Search returned {} resources.", outcome.getResources(0, 999).size());
-			//assertEquals(1, outcome.getResources(0, 999).size());
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+			assertEquals(1, myCaptureQueriesListener.logSelectQueries().size());
 
 			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 			// Ensure that we do NOT see a couple of particular WHERE clauses
-			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), ".res_type = 'provenance'")).as(selectQuery).isEqualTo(0);
-			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), ".res_deleted_at is null")).as(selectQuery).isEqualTo(0);
+			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), ".res_type = 'provenance'")).as(selectQuery).isZero();
+			assertThat(StringUtils.countMatches(selectQuery.toLowerCase(), ".res_deleted_at is null")).as(selectQuery).isZero();
 		}
 	}
 
