@@ -3254,8 +3254,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 						if (nextPid != null) {
 							if (!myPidSet.contains(nextPid)) {
-								if (!mySearchProperties.isDeduplicateInDatabase()
-										|| myFetchIncludesForEverythingOperation) {
+								if (!mySearchProperties.isDeduplicateInDatabase()) {
 									/*
 									 * We use a map to deduplicate results we're fetching when we're fetching
 									 * smaller chunks since it's more performant at small scale to handle

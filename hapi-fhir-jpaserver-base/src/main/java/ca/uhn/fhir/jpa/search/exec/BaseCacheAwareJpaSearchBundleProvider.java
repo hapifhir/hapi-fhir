@@ -112,6 +112,12 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 	 */
 	private static final Level DEBUG_LOG_LEVEL = Level.DEBUG;
 
+	/**
+	 * How many resources should we fetch at a time when loading resources
+	 * for the {@link Pointcut#STORAGE_PREACCESS_RESOURCES} pointcut.
+	 */
+	private static final int LOAD_RESOURCES_CHUNK_SIZE = 500;
+
 	protected final RequestDetails myRequestDetails;
 	protected final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	protected final ISearchCacheSvc mySearchCacheSvc;
@@ -667,14 +673,13 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 		 */
 		boolean firstSearch = mySearchEntity.getNumFound() == 0 && mySearchEntity.getNumBlocked() == 0;
 		if (firstSearch && theNumWanted > firstThreshold) {
+			deduplicateInDatabase = false;
 			if (lastThreshold > 0 && theNumWanted > lastThreshold) {
 				threshold = lastThreshold;
 				isLastThreshold = true;
-				deduplicateInDatabase = false;
 			} else {
 				threshold = theNumWanted + 1;
 				isLastThreshold = false;
-				deduplicateInDatabase = false;
 			}
 		} else {
 
@@ -985,7 +990,7 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 			// the user has a chance to know that they were in the results. We work in
 			// small batches to avoid loading too many resources into memory at once.
 			if (havePreAccessHooks() && !myNewPidsThisPass.isEmpty()) {
-				TaskChunker.chunk(myNewPidsThisPass, 100, chunk -> {
+				TaskChunker.chunk(myNewPidsThisPass, LOAD_RESOURCES_CHUNK_SIZE, chunk -> {
 					Set<JpaPid> blockedPids = new HashSet<>();
 
 					ArrayList<IBaseResource> newResources = new ArrayList<>();
