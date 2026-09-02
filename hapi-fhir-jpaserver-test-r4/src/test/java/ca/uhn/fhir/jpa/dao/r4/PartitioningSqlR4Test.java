@@ -2459,7 +2459,8 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
-		assertThat(searchSql).containsOnlyOnce("TAG_SYSTEM='http://system'");
+		// The tag ids are resolved up front in a batched HFJ_TAG_DEF lookup (system is matched in Java).
+		assertThat(searchSql).contains("HFJ_TAG_DEF");
 
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
@@ -2482,7 +2483,8 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
-		assertThat(searchSql).containsOnlyOnce("TAG_SYSTEM='http://system'");
+		// The tag ids are resolved up front in a batched HFJ_TAG_DEF lookup (system is matched in Java).
+		assertThat(searchSql).contains("HFJ_TAG_DEF");
 
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
@@ -2509,7 +2511,8 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
-		assertThat(searchSql).containsOnlyOnce("TAG_SYSTEM='http://system'");
+		// The tag ids are resolved up front in a batched HFJ_TAG_DEF lookup (system is matched in Java).
+		assertThat(searchSql).contains("HFJ_TAG_DEF");
 
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
@@ -2543,7 +2546,8 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
-		assertThat(searchSql).containsOnlyOnce("TAG_SYSTEM='http://system'");
+		// The tag ids are resolved up front in a batched HFJ_TAG_DEF lookup (system is matched in Java).
+		assertThat(searchSql).contains("HFJ_TAG_DEF");
 
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
@@ -2571,7 +2575,8 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
-		assertThat(searchSql).containsOnlyOnce("TAG_SYSTEM='http://system'");
+		// The tag ids are resolved up front in a batched HFJ_TAG_DEF lookup (system is matched in Java).
+		assertThat(searchSql).contains("HFJ_TAG_DEF");
 
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
@@ -2601,7 +2606,8 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
-		assertThat(searchSql).containsOnlyOnce("TAG_SYSTEM='http://system'");
+		// The tag ids are resolved up front in a batched HFJ_TAG_DEF lookup (system is matched in Java).
+		assertThat(searchSql).contains("HFJ_TAG_DEF");
 
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
 		assertThat(searchSql)
@@ -2633,7 +2639,8 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
-		assertThat(searchSql).containsOnlyOnce("TAG_SYSTEM='http://system'");
+		// The tag ids are resolved up front in a batched HFJ_TAG_DEF lookup (system is matched in Java).
+		assertThat(searchSql).contains("HFJ_TAG_DEF");
 
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
@@ -2776,7 +2783,8 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
-		assertThat(searchSql).containsOnlyOnce("TAG_SYSTEM='http://system'");
+		// The tag ids are resolved up front in a batched HFJ_TAG_DEF lookup (system is matched in Java).
+		assertThat(searchSql).contains("HFJ_TAG_DEF");
 
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
 		assertThat(searchSql)
