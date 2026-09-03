@@ -851,11 +851,11 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			fail(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 		}
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(7, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(5, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
-		assertEquals(7, myCaptureQueriesListener.countCommits());
+		assertEquals(5, myCaptureQueriesListener.countCommits());
 
 		// Validate again (should rely only on caches)
 		myCaptureQueriesListener.clear();
@@ -4864,17 +4864,17 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		if (theStoredInRepository) {
 			assertThat(myCaptureQueriesListener).has(
 				onAllThreads()
-					.connectionCount(5)
-					.selectCount(5)
-					.commitCount(5)
+					.connectionCount(3)
+					.selectCount(3)
+					.commitCount(3)
 					.noOtherCounts()
 			);
 		} else {
 			assertThat(myCaptureQueriesListener).has(
 				onAllThreads()
-					.connectionCount(6)
-					.selectCount(6)
-					.commitCount(6)
+					.connectionCount(4)
+					.selectCount(4)
+					.commitCount(4)
 					.noOtherCounts()
 			);
 		}
