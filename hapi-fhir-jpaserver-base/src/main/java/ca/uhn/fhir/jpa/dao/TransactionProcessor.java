@@ -648,6 +648,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 						associatedResource = resource;
 					}
 					processConditionalUrlForPreFetching(
+							theTransactionDetails,
 							theRequestPartitionId,
 							resourceType,
 							associatedResource,
@@ -663,6 +664,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					// same canonical form the write path looks match URLs up by.
 					String ifNoneExist = MatchResourceUrlService.massageForStorage(resourceType, requestIfNoneExist);
 					processConditionalUrlForPreFetching(
+							theTransactionDetails,
 							theRequestPartitionId,
 							resourceType,
 							resource,
@@ -684,6 +686,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 						String refResourceType = determineResourceTypeInResourceUrl(myFhirContext, referenceUrl);
 						if (refResourceType != null) {
 							processConditionalUrlForPreFetching(
+									theTransactionDetails,
 									theRequestPartitionId,
 									refResourceType,
 									null,
@@ -1117,6 +1120,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	 * @param theOutputSearchParameterMapsToResolve This will be populated with any {@link SearchParameterMap} instances corresponding to match URLs we need to resolve
 	 */
 	private void processConditionalUrlForPreFetching(
+			TransactionDetails theTransactionDetails,
 			RequestPartitionId thePartitionId,
 			String theResourceType,
 			@Nullable IBaseResource theAssociatedResource,
@@ -1129,6 +1133,10 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		JpaPid cachedId =
 				myMatchResourceUrlService.processMatchUrlUsingCacheOnly(theResourceType, theRequestUrl, thePartitionId);
 		if (cachedId != null) {
+			// Record the resolution the same way the live pre-fetch would: consumers of the transaction
+			// details' resolved match URLs (the write path's lookup, partition-mode interceptors) must not
+			// see a known-matched URL as never-attempted just because it was answered from the cache.
+			myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, theResourceType, theRequestUrl, cachedId);
 			if (theShouldPreFetchResourceBody) {
 				theOutputIdsToPreFetchBodiesFor.add(cachedId);
 			} else {

@@ -2818,6 +2818,72 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	}
 
 	/**
+	 * With the match URL cache enabled, a repeat of a conditional-create bundle must still no-op to the patient
+	 * the first run created: the pre-fetch cache-hit shortcut must record its resolution where the partition
+	 * AFTER_PREFETCH hook's match reads it, which otherwise treats the known-matched URL as unresolved, mints a fresh
+	 * id, and gets rejected at write time.
+	 */
+	// Created by Claude Fable 5
+	@Test
+	void testTransaction_conditionalCreateRepeatedWithMatchUrlCacheEnabled_noOpsToExistingPatient() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setMatchUrlCacheEnabled(true);
+
+		String bundle =
+				"""
+				{ "resourceType" : "Bundle", "type" : "transaction",
+					"entry" : [
+						{
+							"fullUrl" : "urn:uuid:c4c4e0f1-0000-0000-0000-000000000c4c",
+							"resource" : {
+								"resourceType" : "Patient",
+								"identifier" : [ { "system" : "old-sys", "value" : "cachedCondCreate"} ]
+							},
+							"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|cachedCondCreate"}
+						}, {
+							"resource" : {
+								"resourceType" : "Observation",
+								"identifier" : [ { "system" : "observation-system", "value" : "obsWithUrnRef"} ],
+								"subject" : { "reference" : "urn:uuid:c4c4e0f1-0000-0000-0000-000000000c4c" }
+							},
+							"request" : { "method" : "POST", "url" : "Observation"}
+						}
+					]
+				}
+				""";
+
+		Bundle firstResponse = mySystemDao.transaction(
+				mySrd, myFhirContext.newJsonParser().parseResource(Bundle.class, bundle));
+		assertReferenceScenario(
+				firstResponse,
+				List.of(
+						inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
+						inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0)));
+
+		// The commit of the first transaction has populated the match URL cache; the repeat must NOP to the
+		// same patient rather than minting a new id for a URL the cache already knows is matched.
+		Bundle secondResponse = mySystemDao.transaction(
+				mySrd, myFhirContext.newJsonParser().parseResource(Bundle.class, bundle));
+		assertReferenceScenario(
+				secondResponse,
+				List.of(
+						inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH),
+						inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, 0)));
+
+		String firstPatientId = new IdType(
+						firstResponse.getEntry().get(0).getResponse().getLocation())
+				.toUnqualifiedVersionless()
+				.getValue();
+		String secondPatientId = new IdType(
+						secondResponse.getEntry().get(0).getResponse().getLocation())
+				.toUnqualifiedVersionless()
+				.getValue();
+		assertEquals(firstPatientId, secondPatientId);
+		assertPatientCountInDatabase(1);
+	}
+
+	/**
 	 * The concurrency-guard row must also be written for a conditional create whose ifNoneExist embeds another
 	 * entry's placeholder fullUrl: once the placeholder resolves, the substituted URL — not the raw
 	 * urn form — is what the guard row must record, since that is the URL a concurrent transaction would
