@@ -1731,14 +1731,14 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		assertEquals(theSplitTransaction ? 27 : 26, myCaptureQueriesListener.countSelectQueries());
 		// this is so high because we limit Hibernate to batches of 30 rows.
 		if (theSplitTransaction) {
-			assertEquals(328, myCaptureQueriesListener.getInsertQueries().size());
+			assertEquals(326, myCaptureQueriesListener.getInsertQueries().size());
 			assertEquals(9379, myCaptureQueriesListener.countInsertQueries());
 			assertEquals(36, myCaptureQueriesListener.getUpdateQueries().size());
 			assertEquals(1016, myCaptureQueriesListener.countUpdateQueries());
 			assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 			assertEquals(2, myCaptureQueriesListener.countCommits());
 		} else {
-			assertEquals(322, myCaptureQueriesListener.getInsertQueries().size());
+			assertEquals(319, myCaptureQueriesListener.getInsertQueries().size());
 			assertEquals(9379, myCaptureQueriesListener.countInsertQueries());
 			assertEquals(35, myCaptureQueriesListener.getUpdateQueries().size());
 			assertEquals(1016, myCaptureQueriesListener.countUpdateQueries());
@@ -2715,15 +2715,21 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	}
 
 	/**
-	 * A conditional create and a conditional update sharing one match URL consolidate too (both are rewritten to
-	 * the same conditional PUT), keeping the first entry's outcome. Stock HAPI would not consolidate across verbs;
-	 * in patient-id partition mode both target the same logical patient, so one create is the correct result.
+	 * A conditional create and a conditional update sharing one match URL behave exactly as outside patient id
+	 * partition mode (cf. {@code FhirSystemDaoR4Test#testTransactionWithConditionalCreateAndConditionalUpdateOnSameMatchUrl}):
+	 * the create runs first, the update's match URL resolves to the patient the create just made. An identical
+	 * update body no-ops against it and the transaction succeeds; a differing body means two writes match the
+	 * one conditional URL, and the transaction is rejected with nothing persisted.
 	 */
-	@Test
-	void testTransaction_mixedDuplicateConditionalWritesInBundle_dedup() {
+	// Created by Claude Fable 5
+	@ParameterizedTest
+	@ValueSource(booleans = {false, true})
+	void testTransaction_mixedConditionalCreateAndUpdateOnSameMatchUrl_behavesLikeUnpartitionedMode(
+			boolean theUpdateBodyDiffers) {
 		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 
+		String updateBodyExtra = theUpdateBodyDiffers ? "\"active\" : true," : "";
 		String bundle =
 				"""
 				{ "resourceType" : "Bundle", "type" : "transaction",
@@ -2737,21 +2743,37 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 						}, {
 							"resource" : {
 								"resourceType" : "Patient",
+								%s
 								"identifier" : [ { "system" : "old-sys", "value" : "dup-mixed"} ]
 							},
 							"request" : { "method" : "PUT", "url" : "Patient?identifier=old-sys|dup-mixed"}
 						}
 					]
 				}
-				""";
+				"""
+						.formatted(updateBodyExtra);
 
 		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, bundle);
-		Bundle resultBundle = mySystemDao.transaction(mySrd, requestBundle);
 
-		assertReferenceScenario(
-				resultBundle,
-				List.of(inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH)));
-		assertPatientCountInDatabase(1);
+		if (theUpdateBodyDiffers) {
+			assertThatThrownBy(() -> mySystemDao.transaction(mySrd, requestBundle))
+					.isInstanceOf(InvalidRequestException.class)
+					.hasMessage("HAPI-0542: Unable to process Transaction - Request would cause multiple resources to "
+							+ "match URL: \"Patient?identifier=old-sys|dup-mixed\". Does transaction request contain duplicates?");
+			assertPatientCountInDatabase(0);
+		} else {
+			Bundle resultBundle = mySystemDao.transaction(mySrd, requestBundle);
+
+			assertReferenceScenario(
+					resultBundle,
+					List.of(
+							inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
+							inSamePartitionAsEntry(
+									"Patient",
+									StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH_NO_CHANGE,
+									0)));
+			assertPatientCountInDatabase(1);
+		}
 	}
 
 	/**

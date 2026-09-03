@@ -657,12 +657,16 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 							theIdsToPreFetchBodiesFor,
 							theIdsToPreFetchFhirIdsFor,
 							searchParameterMapsToResolve);
-				} else if ("POST".equals(verb) && requestIfNoneExist != null && requestIfNoneExist.contains("?")) {
+				} else if ("POST".equals(verb) && isNotBlank(requestIfNoneExist)) {
+					// If-None-Exist may legally omit the resource type ("identifier=..." or "?identifier=...").
+					// Qualify it so it pre-fetches — and is recorded in the transaction details — under the
+					// same canonical form the write path looks match URLs up by.
+					String ifNoneExist = MatchResourceUrlService.massageForStorage(resourceType, requestIfNoneExist);
 					processConditionalUrlForPreFetching(
 							theRequestPartitionId,
 							resourceType,
 							resource,
-							requestIfNoneExist,
+							ifNoneExist,
 							false,
 							true,
 							theIdsToPreFetchBodiesFor,
