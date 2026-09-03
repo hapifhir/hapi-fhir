@@ -731,7 +731,7 @@ class BaseCacheAwareJpaSearchBundleProviderTest implements ITestDataBuilder {
 		resources = myBundleProvider.getResources(10, 25);
 		assertThat(toUnqualifiedVersionlessIdValues(resources)).containsExactly(generateIdRange(10, 25));
 		verify(mySearchBuilder, times(2)).performSearchForPids(any(), any(), any(), any(), any());
-		verify(mySearchBuilder, times(102)).loadResourcesByPid(anyList(), anyList(), anyList(), anyBoolean(), any());
+		verify(mySearchBuilder, times(22)).loadResourcesByPid(anyList(), anyList(), anyList(), anyBoolean(), any());
 		assertEquals(10_000, search.get().getNumFound());
 		assertEquals(SearchStatusEnum.FINISHED, search.get().getStatus());
 
@@ -743,7 +743,7 @@ class BaseCacheAwareJpaSearchBundleProviderTest implements ITestDataBuilder {
 		verify(mySearchBuilder, atLeastOnce()).loadResourcesByPid(myPidListCaptor.capture(), anyList(), anyList(), anyBoolean(), any());
 		Set<JpaPid> allPids = new HashSet<>();
 		for (Collection<JpaPid> nextPidList : myPidListCaptor.getAllValues()) {
-			assertThat(nextPidList).hasSizeLessThanOrEqualTo(100);
+			assertThat(nextPidList).hasSizeLessThanOrEqualTo(BaseCacheAwareJpaSearchBundleProvider.LOAD_RESOURCES_CHUNK_SIZE);
 			allPids.addAll(nextPidList);
 		}
 		assertEquals(10_000, allPids.size());

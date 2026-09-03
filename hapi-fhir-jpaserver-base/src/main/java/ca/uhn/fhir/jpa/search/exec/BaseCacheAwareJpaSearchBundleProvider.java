@@ -116,7 +116,7 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 	 * How many resources should we fetch at a time when loading resources
 	 * for the {@link Pointcut#STORAGE_PREACCESS_RESOURCES} pointcut.
 	 */
-	private static final int LOAD_RESOURCES_CHUNK_SIZE = 500;
+	static final int LOAD_RESOURCES_CHUNK_SIZE = 500;
 
 	protected final RequestDetails myRequestDetails;
 	protected final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
