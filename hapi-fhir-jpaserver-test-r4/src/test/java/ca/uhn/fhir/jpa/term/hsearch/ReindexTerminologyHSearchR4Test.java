@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -117,6 +118,11 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 		// pre-expand  ValueSets
 		myBatch2JobHelper.awaitNoJobsRunning();
 
+		runInTransaction(()->{
+			List<TermValueSet> valueSets = myTermValueSetDao.findTermValueSetByUrl(Pageable.unpaged(), "http://loinc.org/vs/LG100-4");
+			ourLog.info(valueSets.toString());
+		});
+
 		// pre-expansion uses freetext so check is to make sure all valuesets have the right number of concepts
 		validateValueSetPreexpansion();
 
@@ -168,7 +174,7 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 	private void validateValueSetPreexpansion() {
 		List<TermValueSet> termValueSets = myTermValueSetDao.findAll();
 		for (TermValueSet termValueSet : termValueSets) {
-			ourLog.debug("=================> testing ValueSet: {}", termValueSet.getUrl());
+			ourLog.info("=================> testing ValueSet: {}", termValueSet.getUrl());
 			long conceptCount = conceptCounts.get(termValueSet.getUrl());
 			assertEquals(conceptCount, termValueSet.getTotalConcepts());
 			long conceptDesignationCount = conceptDesignationCounts.get(termValueSet.getUrl());

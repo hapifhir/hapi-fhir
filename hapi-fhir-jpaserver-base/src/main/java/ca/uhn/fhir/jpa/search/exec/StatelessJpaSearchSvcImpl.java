@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.search;
+package ca.uhn.fhir.jpa.search.exec;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -25,45 +25,45 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.ISearchResultConsumer;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
-import ca.uhn.fhir.jpa.dao.SearchProgressTracker;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
-import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.util.SearchParameterMapCalculator;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.interceptor.ServerInterceptorUtil;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import jakarta.persistence.EntityManager;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantCount;
 import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantOnlyCount;
-import static java.util.Objects.nonNull;
 
-public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
+public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SynchronousSearchSvcImpl.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StatelessJpaSearchSvcImpl.class);
 
 	private FhirContext myContext;
 
@@ -71,10 +71,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 	private JpaStorageSettings myStorageSettings;
 
 	@Autowired
-	protected SearchBuilderFactory mySearchBuilderFactory;
-
-	@Autowired
-	private DaoRegistry myDaoRegistry;
+	protected SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
 
 	@Autowired
 	private HapiTransactionService myTxService;
@@ -86,13 +83,13 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 	private EntityManager myEntityManager;
 
 	@Autowired
-	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+	private IPagingProvider myPagingProvider;
 
 	private int mySyncSize = 250;
 
 	@Override
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	public IBundleProvider executeQuery(
+	public IBundleProvider createNewSearch(
 			SearchParameterMap theParams,
 			RequestDetails theRequestDetails,
 			String theSearchUuid,
@@ -103,9 +100,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 		searchRuntimeDetails.setLoadSynchronous(true);
 
 		boolean theParamWantOnlyCount = isWantOnlyCount(theParams);
-		boolean theParamOrConfigWantCount = nonNull(theParams.getSearchTotalMode())
-				? isWantCount(theParams)
-				: isWantCount(myStorageSettings.getDefaultTotalMode());
+		boolean theParamOrConfigWantCount = SearchParameterMapCalculator.isWantCount(theParams, myStorageSettings);
 		boolean wantCount = theParamWantOnlyCount || theParamOrConfigWantCount;
 
 		// Execute the query and make sure we return distinct results
@@ -148,7 +143,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 					Integer requestedCount = clonedParams.getCount();
 					boolean hasACount = requestedCount != null;
 					if (hasACount) {
-						clonedParams.setCount(requestedCount.intValue() + 1);
+						clonedParams.setCount(requestedCount + 1);
 					}
 
 					// Perform the actual search
@@ -165,7 +160,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 						}
 						return ISearchResultConsumer.CONTINUE;
 					};
-					SearchProgressTracker progressTracker = theSb.performSearchForPids(
+					theSb.performSearchForPids(
 							searchResultConsumer,
 							clonedParams,
 							searchRuntimeDetails,
@@ -182,148 +177,182 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 						pids = pids.subList(0, resourcesToReturn);
 					}
 
-					JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(pids, () -> theSb);
 					IInterceptorBroadcaster compositeBroadcaster =
 							CompositeInterceptorBroadcaster.newCompositeBroadcaster(
 									myInterceptorBroadcaster, theRequestDetails);
+
+					List<IBaseResource> loadedResources = null;
 					if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES)) {
+
+						loadedResources = new ArrayList<>();
+						theSb.loadResourcesByPid(pids, Collections.emptySet(), loadedResources, false, null);
+						JpaPreResourceAccessDetails accessDetails =
+								new JpaPreResourceAccessDetails(pids, loadedResources);
+
 						HookParams params = new HookParams()
 								.add(IPreResourceAccessDetails.class, accessDetails)
 								.add(RequestDetails.class, theRequestDetails)
 								.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
 						compositeBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
-					}
 
-					for (int i = pids.size() - 1; i >= 0; i--) {
-						if (accessDetails.isDontReturnResourceAtIndex(i)) {
-							pids.remove(i);
+						Validate.isTrue(
+								pids.size() == loadedResources.size(),
+								"PID collection size %s doesn't match expected resource collection size of %s",
+								pids.size(),
+								loadedResources.size());
+						for (int i = pids.size() - 1; i >= 0; i--) {
+							if (accessDetails.isDontReturnResourceAtIndex(i)) {
+								pids.remove(i);
+								loadedResources.remove(i);
+							}
 						}
 					}
 
 					/*
-					 * For synchronous queries, we load all the includes right away
+					 * For stateless queries, we load all the includes right away
 					 * since we're returning a static bundle with all the results
-					 * pre-loaded. This is ok because synchronous requests are not
+					 * pre-loaded. This is ok because stateless requests are not
 					 * expected to be paged
 					 *
-					 * On the other hand for async queries we load includes/revincludes
+					 * On the other hand for cache-aware queries we load includes/revincludes
 					 * individually for pages as we return them to clients
 					 */
 
-					// Save original PIDs before any include/revinclude expansion
-					Set<JpaPid> originalPids = new HashSet<>(pids);
+					List<JpaPid> allIncludedPidsList = List.of();
+					if (theParams.hasIncludes() || theParams.hasRevIncludes()) {
+						// Save original PIDs before any include/revinclude expansion
+						Set<JpaPid> originalPids = new HashSet<>(pids);
 
-					Integer maxIncludes = myStorageSettings.getMaximumIncludesToLoadPerPage();
-					List<JpaPid> allIncludedPidsList = new ArrayList<>();
+						Integer maxIncludes = myStorageSettings.getMaximumIncludesToLoadPerPage();
+						allIncludedPidsList = new ArrayList<>();
 
-					// Separate non-iterate and iterate includes/revincludes
-					Set<Include> nonIterateRevIncludes = theParams.getRevIncludes().stream()
-							.filter(i -> !i.isRecurse())
-							.collect(Collectors.toSet());
-					Set<Include> iterateRevIncludes = theParams.getRevIncludes().stream()
-							.filter(Include::isRecurse)
-							.collect(Collectors.toSet());
-					Set<Include> nonIterateIncludes = theParams.getIncludes().stream()
-							.filter(i -> !i.isRecurse())
-							.collect(Collectors.toSet());
-					Set<Include> iterateIncludes = theParams.getIncludes().stream()
-							.filter(Include::isRecurse)
-							.collect(Collectors.toSet());
+						// Separate non-iterate and iterate includes/revincludes
+						Set<Include> nonIterateRevIncludes = theParams.getRevIncludes().stream()
+								.filter(i -> !i.isRecurse())
+								.collect(Collectors.toSet());
+						Set<Include> iterateRevIncludes = theParams.getRevIncludes().stream()
+								.filter(Include::isRecurse)
+								.collect(Collectors.toSet());
+						Set<Include> nonIterateIncludes = theParams.getIncludes().stream()
+								.filter(i -> !i.isRecurse())
+								.collect(Collectors.toSet());
+						Set<Include> iterateIncludes = theParams.getIncludes().stream()
+								.filter(Include::isRecurse)
+								.collect(Collectors.toSet());
 
-					// Phase 1: non-iterate `_revinclude` on original search result PIDs
-					if (!nonIterateRevIncludes.isEmpty()) {
-						Set<JpaPid> revIncludedPids = theSb.loadIncludes(
-								myContext,
-								myEntityManager,
-								originalPids,
-								nonIterateRevIncludes,
-								true,
-								theParams.getLastUpdated(),
-								"(synchronous)",
-								theRequestDetails,
-								maxIncludes);
-						if (maxIncludes != null) {
-							maxIncludes -= revIncludedPids.size();
+						// Phase 1: non-iterate `_revinclude` on original search result PIDs
+						if (!nonIterateRevIncludes.isEmpty()) {
+							Set<JpaPid> revIncludedPids = theSb.loadIncludes(
+									myContext,
+									myEntityManager,
+									originalPids,
+									nonIterateRevIncludes,
+									true,
+									theParams.getLastUpdated(),
+									"(synchronous)",
+									theRequestDetails,
+									maxIncludes);
+							if (maxIncludes != null) {
+								maxIncludes -= revIncludedPids.size();
+							}
+							pids.addAll(revIncludedPids);
+							allIncludedPidsList.addAll(revIncludedPids);
 						}
-						pids.addAll(revIncludedPids);
-						allIncludedPidsList.addAll(revIncludedPids);
-					}
 
-					// Phase 2: non-iterate `_include` on original search result PIDs
-					// (use originalPids so `_include` only applies to the initial search results,
-					// not to revincluded resources — per FHIR spec, without `:iterate`)
-					if (theParams.getEverythingMode() == null
-							&& !nonIterateIncludes.isEmpty()
-							&& (maxIncludes == null || maxIncludes > 0)) {
-						Set<JpaPid> forwardIncludedPids = theSb.loadIncludes(
-								myContext,
-								myEntityManager,
-								originalPids,
-								nonIterateIncludes,
-								false,
-								theParams.getLastUpdated(),
-								"(synchronous)",
-								theRequestDetails,
-								maxIncludes);
-						if (maxIncludes != null) {
-							maxIncludes -= forwardIncludedPids.size();
+						// Phase 2: non-iterate `_include` on original search result PIDs
+						// (use originalPids so `_include` only applies to the initial search results,
+						// not to revincluded resources — per FHIR spec, without `:iterate`)
+						if (theParams.getEverythingMode() == null
+								&& !nonIterateIncludes.isEmpty()
+								&& (maxIncludes == null || maxIncludes > 0)) {
+							Set<JpaPid> forwardIncludedPids = theSb.loadIncludes(
+									myContext,
+									myEntityManager,
+									originalPids,
+									nonIterateIncludes,
+									false,
+									theParams.getLastUpdated(),
+									"(synchronous)",
+									theRequestDetails,
+									maxIncludes);
+							if (maxIncludes != null) {
+								maxIncludes -= forwardIncludedPids.size();
+							}
+							pids.addAll(forwardIncludedPids);
+							allIncludedPidsList.addAll(forwardIncludedPids);
 						}
-						pids.addAll(forwardIncludedPids);
-						allIncludedPidsList.addAll(forwardIncludedPids);
-					}
 
-					// Phase 3: `_revinclude:iterate` on expanded PIDs (including non-iterate revinclude results)
-					if (!iterateRevIncludes.isEmpty() && (maxIncludes == null || maxIncludes > 0)) {
-						Set<JpaPid> iterateRevIncludedPids = theSb.loadIncludes(
-								myContext,
-								myEntityManager,
-								pids,
-								iterateRevIncludes,
-								true,
-								theParams.getLastUpdated(),
-								"(synchronous)",
-								theRequestDetails,
-								maxIncludes);
-						if (maxIncludes != null) {
-							maxIncludes -= iterateRevIncludedPids.size();
+						// Phase 3: `_revinclude:iterate` on expanded PIDs (including non-iterate revinclude results)
+						if (!iterateRevIncludes.isEmpty() && (maxIncludes == null || maxIncludes > 0)) {
+							Set<JpaPid> iterateRevIncludedPids = theSb.loadIncludes(
+									myContext,
+									myEntityManager,
+									pids,
+									iterateRevIncludes,
+									true,
+									theParams.getLastUpdated(),
+									"(synchronous)",
+									theRequestDetails,
+									maxIncludes);
+							if (maxIncludes != null) {
+								maxIncludes -= iterateRevIncludedPids.size();
+							}
+							pids.addAll(iterateRevIncludedPids);
+							allIncludedPidsList.addAll(iterateRevIncludedPids);
 						}
-						pids.addAll(iterateRevIncludedPids);
-						allIncludedPidsList.addAll(iterateRevIncludedPids);
+
+						// Phase 4: `_include:iterate` on all expanded PIDs (including revinclude results)
+						if (theParams.getEverythingMode() == null
+								&& !iterateIncludes.isEmpty()
+								&& (maxIncludes == null || maxIncludes > 0)) {
+							Set<JpaPid> iterateForwardIncludedPids = theSb.loadIncludes(
+									myContext,
+									myEntityManager,
+									pids,
+									iterateIncludes,
+									false,
+									theParams.getLastUpdated(),
+									"(synchronous)",
+									theRequestDetails,
+									maxIncludes);
+							pids.addAll(iterateForwardIncludedPids);
+							allIncludedPidsList.addAll(iterateForwardIncludedPids);
+						}
 					}
 
-					// Phase 4: `_include:iterate` on all expanded PIDs (including revinclude results)
-					if (theParams.getEverythingMode() == null
-							&& !iterateIncludes.isEmpty()
-							&& (maxIncludes == null || maxIncludes > 0)) {
-						Set<JpaPid> iterateForwardIncludedPids = theSb.loadIncludes(
-								myContext,
-								myEntityManager,
-								pids,
-								iterateIncludes,
-								false,
-								theParams.getLastUpdated(),
-								"(synchronous)",
-								theRequestDetails,
-								maxIncludes);
-						pids.addAll(iterateForwardIncludedPids);
-						allIncludedPidsList.addAll(iterateForwardIncludedPids);
+					if (loadedResources == null) {
+						loadedResources = new ArrayList<>();
+						theSb.loadResourcesByPid(pids, allIncludedPidsList, loadedResources, false, theRequestDetails);
+					} else if (!allIncludedPidsList.isEmpty()) {
+						List<IBaseResource> includeResources = new ArrayList<>();
+						theSb.loadResourcesByPid(
+								allIncludedPidsList, allIncludedPidsList, includeResources, false, theRequestDetails);
+						loadedResources.addAll(includeResources);
 					}
 
-					List<IBaseResource> resources = new ArrayList<>();
-					theSb.loadResourcesByPid(pids, allIncludedPidsList, resources, false, theRequestDetails);
 					// Hook: STORAGE_PRESHOW_RESOURCES
-					resources = ServerInterceptorUtil.fireStoragePreshowResource(
-							resources, theRequestDetails, myInterceptorBroadcaster);
+					List<IBaseResource> resources = ServerInterceptorUtil.fireStoragePreshowResource(
+							loadedResources, theRequestDetails, myInterceptorBroadcaster);
 
 					SimpleBundleProvider bundleProvider = new SimpleBundleProvider(resources);
 
 					if (hasACount && theSb.requiresTotal()) {
 						bundleProvider.setTotalResourcesRequestedReturned(receivedResourceCount);
 					}
-					if (theParams.isOffsetQuery()) {
-						bundleProvider.setCurrentPageOffset(theParams.getOffset());
-						bundleProvider.setCurrentPageSize(theParams.getCount());
+
+					int offset = 0;
+					if (theParams.getOffset() != null) {
+						offset = theParams.getOffset();
 					}
+					bundleProvider.setCurrentPageOffset(offset);
+
+					int pageSize = DatabaseBackedPagingProvider.DEFAULT_DEFAULT_PAGE_SIZE;
+					if (theParams.getCount() != null) {
+						pageSize = theParams.getCount();
+					} else if (myPagingProvider != null) {
+						pageSize = myPagingProvider.getDefaultPageSize();
+					}
+					bundleProvider.setCurrentPageSize(pageSize);
 
 					if (wantCount) {
 						bundleProvider.setSize(count.intValue());
@@ -339,7 +368,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 						}
 					}
 
-					bundleProvider.setPreferredPageSize(theParams.getCount());
+					bundleProvider.setPreferredPageSize(pids.size() - allIncludedPidsList.size());
 
 					return bundleProvider;
 				});
@@ -354,9 +383,9 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 
 		Class<? extends IBaseResource> resourceTypeClass =
 				myContext.getResourceDefinition(theResourceType).getImplementingClass();
-		final ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(theResourceType, resourceTypeClass);
+		final ISearchBuilder<JpaPid> sb = mySearchBuilderFactory.newSearchBuilder(theResourceType, resourceTypeClass);
 		sb.setFetchSize(mySyncSize);
-		return executeQuery(
+		return createNewSearch(
 				theSearchParameterMap,
 				null,
 				searchUuid,

@@ -104,7 +104,7 @@ public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhir
 
 		adjustCount(theRequest, paramMap);
 
-		return mySearchCoordinatorSvc.registerSearch(
+		return mySearchCoordinatorSvc.createNewSearch(
 				this,
 				paramMap,
 				getResourceName(),

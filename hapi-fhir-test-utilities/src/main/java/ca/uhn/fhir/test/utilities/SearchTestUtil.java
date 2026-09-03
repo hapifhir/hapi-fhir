@@ -22,6 +22,7 @@ package ca.uhn.fhir.test.utilities;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.util.BundleUtil;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -46,10 +47,14 @@ public class SearchTestUtil {
 			theToIndex = 99999;
 		}
 
-		List<String> retVal = new ArrayList<>();
-
 		List<IBaseResource> resources = theFound.getResources(theFromIndex, theToIndex);
-		for (IBaseResource next : resources) {
+		return toUnqualifiedVersionlessIdValues(resources);
+	}
+
+	@Nonnull
+	public static List<String> toUnqualifiedVersionlessIdValues(List<IBaseResource> theResources) {
+		List<String> retVal = new ArrayList<>();
+		for (IBaseResource next : theResources) {
 			retVal.add(next.getIdElement().toUnqualifiedVersionless().getValue());
 		}
 		return retVal;

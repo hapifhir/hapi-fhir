@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
@@ -47,6 +48,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import static ca.uhn.fhir.rest.server.BasePagingProvider.DEFAULT_DEFAULT_PAGE_SIZE;
 import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 
 public class QueryParameterUtils {
@@ -181,13 +183,26 @@ public class QueryParameterUtils {
 			String theSearchUuid,
 			String theQueryString,
 			Search theSearch,
-			RequestPartitionId theRequestPartitionId) {
+			RequestPartitionId theRequestPartitionId,
+			@Nullable IPagingProvider thePagingProvider) {
 		theSearch.setDeleted(false);
 		theSearch.setUuid(theSearchUuid);
 		theSearch.setCreated(new Date());
 		theSearch.setTotalCount(null);
 		theSearch.setNumFound(0);
-		theSearch.setPreferredPageSize(theParams.getCount());
+
+		if (theParams.getCount() != null) {
+			theSearch.setPreferredPageSize(theParams.getCount());
+		} else if (thePagingProvider != null) {
+			theSearch.setPreferredPageSize(thePagingProvider.getDefaultPageSize());
+		}
+		if (theSearch.getPreferredPageSize() == null) {
+			theSearch.setPreferredPageSize(DEFAULT_DEFAULT_PAGE_SIZE);
+		} else if (thePagingProvider != null
+				&& theSearch.getPreferredPageSize() > thePagingProvider.getMaximumPageSize()) {
+			theSearch.setPreferredPageSize(thePagingProvider.getMaximumPageSize());
+		}
+
 		theSearch.setSearchType(
 				theParams.getEverythingMode() != null ? SearchTypeEnum.EVERYTHING : SearchTypeEnum.SEARCH);
 		theSearch.setLastUpdated(theParams.getLastUpdated());

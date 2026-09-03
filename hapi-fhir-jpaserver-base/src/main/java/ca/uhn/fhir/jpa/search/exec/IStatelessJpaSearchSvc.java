@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.search;
+package ca.uhn.fhir.jpa.search.exec;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.ISearchSvc;
@@ -26,9 +26,22 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 
-public interface ISynchronousSearchSvc extends ISearchSvc {
+/**
+ * This service performs stateless searches, which are searches that do not interact with
+ * the {@link ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc Search Cache} at all. Paging across
+ * results is always done by re-executing the search using offsets
+ * ({@link SearchParameterMap#getOffset()} and {@link SearchParameterMap#getCount()}).
+ *
+ * @see ICacheAwareJpaSearchSvc The equivalent service for cache-aware searches.
+ */
+public interface IStatelessJpaSearchSvc extends ISearchSvc {
 
-	IBundleProvider executeQuery(
+	/**
+	 * Executes a search. The returned bundle provider will contain all fetched results matching the
+	 * {@link SearchParameterMap#getOffset()} and {@link SearchParameterMap#getCount()}, and will not
+	 * be able to page beyond that range.
+	 */
+	IBundleProvider createNewSearch(
 			SearchParameterMap theParams,
 			RequestDetails theRequestDetails,
 			String theSearchUuid,

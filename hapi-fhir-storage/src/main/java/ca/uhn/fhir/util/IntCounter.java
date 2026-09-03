@@ -66,4 +66,8 @@ public class IntCounter {
 	public void set(int theValue) {
 		myCount = theValue;
 	}
+
+	public void decrement() {
+		myCount--;
+	}
 }

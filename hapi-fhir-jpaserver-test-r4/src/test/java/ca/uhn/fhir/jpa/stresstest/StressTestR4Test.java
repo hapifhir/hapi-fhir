@@ -101,7 +101,6 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		myPagingProvider.setMaximumPageSize(myPreviousMaxPageSize);
 
 		SearchCoordinatorSvcImpl searchCoordinator = AopTestUtils.getTargetObject(mySearchCoordinatorSvc);
-		searchCoordinator.setLoadingThrottleForUnitTests(null);
 		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 
 	}
@@ -128,7 +127,6 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		myStorageSettings.setSearchPreFetchThresholds(Lists.newArrayList(50, 200, -1));
 
 		SearchCoordinatorSvcImpl searchCoordinator = AopTestUtils.getTargetObject(mySearchCoordinatorSvc);
-		searchCoordinator.setLoadingThrottleForUnitTests(10);
 
 		Bundle bundle = new Bundle();
 

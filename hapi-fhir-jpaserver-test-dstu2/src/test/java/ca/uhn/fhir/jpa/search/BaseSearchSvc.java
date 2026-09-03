@@ -69,6 +69,7 @@ public class BaseSearchSvc {
 			List<IBaseResource> resources = (List<IBaseResource>) theInvocation.getArguments()[2];
 			for (IResourcePersistentId nextPid : pids) {
 				Patient pt = new Patient();
+				pt.setUserData(IFhirResourceDao.RESOURCE_PID_KEY, nextPid);
 				pt.setId(nextPid.toString());
 				resources.add(pt);
 			}
@@ -81,7 +82,7 @@ public class BaseSearchSvc {
 		private final Iterator<JpaPid> myWrap;
 		private int myCount;
 
-		ResultIterator(Iterator<JpaPid> theWrap) {
+		public ResultIterator(Iterator<JpaPid> theWrap) {
 			myWrap = theWrap;
 		}
 

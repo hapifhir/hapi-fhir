@@ -19,12 +19,13 @@
  */
 package ca.uhn.fhir.jpa.search;
 
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
-import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.search.exec.BaseCacheAwareJpaSearchBundleProvider;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.BasePagingProvider;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -34,16 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class DatabaseBackedPagingProvider extends BasePagingProvider {
 
 	@Autowired
-	private DaoRegistry myDaoRegistry;
-
-	@Autowired
-	private SearchBuilderFactory mySearchBuilderFactory;
-
-	@Autowired
-	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
-
-	@Autowired
-	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+	private ISearchCoordinatorSvc<JpaPid> mySearchCoordinatorSvc;
 
 	/**
 	 * Constructor
@@ -63,26 +55,25 @@ public class DatabaseBackedPagingProvider extends BasePagingProvider {
 	}
 
 	@Override
-	public synchronized IBundleProvider retrieveResultList(RequestDetails theRequestDetails, String theId) {
-		PersistedJpaBundleProvider provider = myPersistedJpaBundleProviderFactory.newInstance(theRequestDetails, theId);
-		return validateAndReturnBundleProvider(provider);
+	public IBundleProvider retrieveResultList(RequestDetails theRequestDetails, @Nonnull String theId) {
+		BaseCacheAwareJpaSearchBundleProvider retVal = (BaseCacheAwareJpaSearchBundleProvider)
+				mySearchCoordinatorSvc.continueExistingSearch(theId, theRequestDetails);
+		retVal = validateAndReturnBundleProvider(retVal);
+		return retVal;
 	}
 
 	/**
-	 * Subclasses may override in order to modify the bundle provider being returned
+	 * Subclasses may override and validate, modify or replace the bundle provider being returned.
+	 * The default implementation returns the bundle provider as is.
 	 */
 	@Nullable
-	protected PersistedJpaBundleProvider validateAndReturnBundleProvider(PersistedJpaBundleProvider theBundleProvider) {
-		if (!theBundleProvider.ensureSearchEntityLoaded()) {
-			return null;
-		}
-
+	protected BaseCacheAwareJpaSearchBundleProvider validateAndReturnBundleProvider(
+			BaseCacheAwareJpaSearchBundleProvider theBundleProvider) {
 		return theBundleProvider;
 	}
 
 	@Override
 	public synchronized String storeResultList(RequestDetails theRequestDetails, IBundleProvider theList) {
-		String uuid = theList.getUuid();
-		return uuid;
+		return theList.getUuid();
 	}
 }

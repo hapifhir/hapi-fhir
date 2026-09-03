@@ -121,7 +121,6 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setSort(new SortSpec(Observation.SP_IDENTIFIER, SortOrderEnum.ASC));
 		IBundleProvider outcome = myObservationDao.search(map, mySrd);
-		ourLog.info("Search UUID: {}", outcome.getUuid());
 
 		// Fetch the first 10 (don't cross a fetch boundary)
 		List<IBaseResource> resources = outcome.getResources(0, 10);
@@ -149,6 +148,41 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 
 	@Test
+	public void testSearchAndBlockSome_HitAndCrossThresholdInSinglePass() {
+		myStorageSettings.setSearchPreFetchThresholds(Arrays.asList(5, 10, 100));
+
+		create50Observations();
+
+		AtomicInteger preAccessInterceptorCallCount = new AtomicInteger(0);
+		List<String> interceptedResourceIds = new ArrayList<>();
+		IAnonymousInterceptor interceptor = new PreAccessInterceptorCountingAndBlockOdd(preAccessInterceptorCallCount, interceptedResourceIds);
+		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
+
+		// Perform a search
+		SearchParameterMap map = new SearchParameterMap();
+		map.setSort(new SortSpec(Observation.SP_IDENTIFIER, SortOrderEnum.ASC));
+		map.setCount(4);
+		IBundleProvider outcome = myObservationDao.search(map, mySrd);
+		ourLog.info("Search UUID: {}", outcome.getUuid());
+
+		// Fetch the first 20 (should hit the first search boundary and need to cross it in the same pass)
+		List<IBaseResource> resources = outcome.getResources(0, 4);
+		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
+		assertEquals(myObservationIdsEvenOnly.subList(0, 4), returnedIdValues);
+		// It takes 2 passes because we should have searched for 4 resources in the first pass,
+		// but filtered half of them leaving only 2, so we needed another pass
+		assertEquals(2, preAccessInterceptorCallCount.get());
+
+		runInTransaction(() -> {
+			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(outcome.getUuid()).orElseThrow();
+			assertEquals(7, search.getNumFound());
+			assertEquals(7, search.getNumBlocked());
+		});
+
+		assertThat(interceptedResourceIds).as("Wrong response from " + outcome.getClass()).isEqualTo(myObservationIds.subList(0, 14));
+	}
+
+		@Test
 	public void testSearchAndBlockSome_LoadSynchronous() {
 		// setup
 		create50Observations();
@@ -202,7 +236,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		List<IBaseResource> resources = outcome.getResources(0, 100);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(sort(myPatientIdsEvenOnly, myObservationIdsEvenOnly), sort(returnedIdValues));
-		assertEquals(2, hitCount.get());
+		assertEquals(3, hitCount.get());
 
 	}
 
@@ -257,6 +291,38 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 		assertEquals(4, preAccessInterceptorCallCount.get());
 	}
+
+	@Test
+	public void testSearchAndBlockSomeOnIncludes_IncludesAreDeleted() {
+		IIdType pt0 = createPatient(withActiveTrue());
+		IIdType pt1 = createPatient(withActiveTrue());
+
+		IIdType obs0 = createObservation(withSubject(pt0));
+		IIdType obs1 = createObservation(withSubject(pt1));
+		long evenPid = getEvenPid(obs0, obs1);
+
+		myStorageSettings.setEnforceReferentialIntegrityOnDelete(false);
+		myPatientDao.delete(pt0, newSrd());
+		myPatientDao.delete(pt1, newSrd());
+
+		AtomicInteger preAccessInterceptorCallCount = new AtomicInteger(0);
+		List<String> interceptedResourceIds = new ArrayList<>();
+		IAnonymousInterceptor interceptor = new PreAccessInterceptorCountingAndBlockOdd(preAccessInterceptorCallCount, interceptedResourceIds);
+		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
+
+		// Perform a search
+		SearchParameterMap map = new SearchParameterMap();
+		map.addInclude(Observation.INCLUDE_PATIENT);
+		IBundleProvider outcome = myObservationDao.search(map, mySrd);
+
+		// Fetch the first 10 (don't cross a fetch boundary)
+		List<IBaseResource> resources = outcome.getResources(0, 100);
+		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
+		assertThat(returnedIdValues).containsExactly(
+			"Observation/" + evenPid
+		);
+	}
+
 
 	@Test
 	public void testSearchAndBlockNoneOnIncludes() {
@@ -333,6 +399,32 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals(1, hitCount.get());
 		assertEquals(sort(myObservationIdsWithoutVersions.subList(90, myObservationIdsWithoutVersions.size())), sort(interceptedResourceIds));
 		returnedIdValues.forEach(t -> assertTrue(new IdType(t).getIdPartAsLong() % 2 == 0));
+	}
+
+	@Test
+	public void testHistoryAndBlockSome_MostRecentVersionIsDeleted() {
+		IIdType pt0 = createPatient(withActiveTrue());
+		IIdType pt1 = createPatient(withActiveTrue());
+		myPatientDao.delete(pt0, newSrd());
+		myPatientDao.delete(pt1, newSrd());
+		long evenPid = getEvenPid(pt0, pt1);
+
+		AtomicInteger hitCount = new AtomicInteger(0);
+		List<String> interceptedResourceIds = new ArrayList<>();
+		IAnonymousInterceptor interceptor = new PreAccessInterceptorCountingAndBlockOdd(hitCount, interceptedResourceIds);
+		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
+
+		// Perform a history
+		IBundleProvider outcome = myPatientDao.history(null, null, null, mySrd);
+		List<IBaseResource> resources = outcome.getResources(0, 10);
+
+		// Verify
+		assertEquals(1, hitCount.get());
+		List<String> returnedIdValues = toUnqualifiedIdValues(resources);
+		assertThat(returnedIdValues).containsExactly(
+			"Patient/" + evenPid + "/_history/2",
+			"Patient/" + evenPid + "/_history/1"
+		);
 	}
 
 	@Test
@@ -464,7 +556,10 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 			List<String> ids = new ArrayList<>();
 			for (int i = 0; i < accessDetails.size(); i++) {
-				ids.add(accessDetails.getResource(i).getIdElement().toUnqualifiedVersionless().getValue());
+				IBaseResource resource = accessDetails.getResource(i);
+				if (resource != null) {
+					ids.add(resource.getIdElement().toUnqualifiedVersionless().getValue());
+				}
 			}
 			ourLog.info("Invoking {} for {} results: {}", thePointcut, count, ids);
 
@@ -508,5 +603,14 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		return retVal;
 	}
 
+	/**
+	 * Given two resource IDs where one has an even numeric ID part, and the other has
+	 * an odd numeric ID part, returns the even ID. Throws an exception if the IDs are
+	 * both odd or even.
+	 */
+	private static long getEvenPid(IIdType theResourceId0, IIdType theResourceId1) {
+		assertTrue(theResourceId0.getIdPartAsLong() % 2 == 0 ^ theResourceId1.getIdPartAsLong() % 2 == 0, ()->"Expected one even and one odd, got " + theResourceId0 + " and " + theResourceId1);
+		return theResourceId0.getIdPartAsLong() % 2 == 0 ? theResourceId0.getIdPartAsLong() : theResourceId1.getIdPartAsLong();
+	}
 
 }

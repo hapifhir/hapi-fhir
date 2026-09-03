@@ -104,7 +104,8 @@ class FhirResourceDaoR4SearchParamIdentityTest extends BaseJpaR4Test {
 		map.add(Patient.SP_ACTIVE, new TokenParam("true"));
 
 		// execute
-		myPatientDao.search(map, mySrd);
+		myPatientDao.search(map, newSrd()).getResources(0, 10);
+
 
 		// verify
 		verifySearchParamIdentity(1, "Patient", Patient.SP_ACTIVE);
@@ -118,7 +119,8 @@ class FhirResourceDaoR4SearchParamIdentityTest extends BaseJpaR4Test {
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Constants.PARAM_FILTER, new StringParam("name co smi"));
 
-		myPatientDao.search(map, mySrd);
+		myPatientDao.search(map, newSrd()).getResources(0, 10);
+
 
 		verifySearchParamIdentity(1, "Patient", "name");
 	}
@@ -140,7 +142,7 @@ class FhirResourceDaoR4SearchParamIdentityTest extends BaseJpaR4Test {
 		param.setMissing(false);
 		map.add(Observation.SP_VALUE_QUANTITY, param);
 
-		myObservationDao.search(map, mySrd);
+		myObservationDao.search(map, newSrd()).getResources(0, 10);
 
 		verifySearchParamIdentity(1, "Observation", Observation.SP_VALUE_QUANTITY);
 	}
@@ -154,7 +156,8 @@ class FhirResourceDaoR4SearchParamIdentityTest extends BaseJpaR4Test {
 		param.setValue("http://vs");
 		map.add(ValueSet.SP_URL, param);
 
-		myValueSetDao.search(map, mySrd);
+		myValueSetDao.search(map, newSrd()).getResources(0, 10);
+
 
 		verifySearchParamIdentity(1, "ValueSet", ValueSet.SP_URL);
 	}
@@ -166,7 +169,8 @@ class FhirResourceDaoR4SearchParamIdentityTest extends BaseJpaR4Test {
 		param.setValue("43.7|79.4");
 		map.add(Location.SP_NEAR, param);
 
-		myLocationDao.search(map, mySrd);
+		myLocationDao.search(map, newSrd()).getResources(0, 10);
+
 
 		verifySearchParamIdentity(1, "Location", Location.SP_NEAR);
 	}
@@ -177,7 +181,8 @@ class FhirResourceDaoR4SearchParamIdentityTest extends BaseJpaR4Test {
 		DateParam param = new DateParam("2021-02-22");
 		map.add(Patient.SP_BIRTHDATE, param);
 
-		myPatientDao.search(map, mySrd);
+		myPatientDao.search(map, newSrd()).getResources(0, 10);
+
 
 		verifySearchParamIdentity(1, "Patient", Patient.SP_BIRTHDATE);
 	}
@@ -188,7 +193,8 @@ class FhirResourceDaoR4SearchParamIdentityTest extends BaseJpaR4Test {
 		NumberParam param = new NumberParam(15);
 		map.add(RiskAssessment.SP_PROBABILITY, param);
 
-		myRiskAssessmentDao.search(map, mySrd);
+		myRiskAssessmentDao.search(map, newSrd()).getResources(0, 10);
+
 
 		verifySearchParamIdentity(1, "RiskAssessment", RiskAssessment.SP_PROBABILITY);
 	}
@@ -199,7 +205,8 @@ class FhirResourceDaoR4SearchParamIdentityTest extends BaseJpaR4Test {
 		QuantityParam param = new QuantityParam(123);
 		map.add(Observation.SP_VALUE_QUANTITY, param);
 
-		myObservationDao.search(map, mySrd);
+		myObservationDao.search(map, newSrd()).getResources(0, 10);
+
 
 		verifySearchParamIdentity(1, "Observation", Observation.SP_VALUE_QUANTITY);
 	}
@@ -209,7 +216,8 @@ class FhirResourceDaoR4SearchParamIdentityTest extends BaseJpaR4Test {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setSort(new SortSpec("gender"));
 
-		myPatientDao.search(map, mySrd);
+		myPatientDao.search(map, newSrd()).getResources(0, 10);
+
 
 		verifySearchParamIdentity(1, "Patient", Patient.SP_GENDER);
 	}
