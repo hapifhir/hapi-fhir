@@ -2795,6 +2795,70 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 				.containsExactly("Patient?identifier=old-sys%7Crace-guard");
 	}
 
+	/**
+	 * The concurrency-guard row must also be written for a conditional create whose ifNoneExist embeds another
+	 * entry's placeholder fullUrl: once the placeholder resolves, the substituted URL — not the raw
+	 * urn form — is what the guard row must record, since that is the URL a concurrent transaction would
+	 * collide on.
+	 */
+	// Created by Claude Fable 5
+	@Test
+	void testTransaction_conditionalCreateWithPlaceholderInIfNoneExist_leavesSearchUrlRowForSubstitutedUrl() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		String bundle =
+				"""
+				{ "resourceType" : "Bundle", "type" : "transaction",
+					"entry" : [
+						{
+							"fullUrl" : "urn:uuid:b7c10c0c-0000-0000-0000-000000000c0c",
+							"resource" : {
+								"resourceType" : "Patient",
+								"identifier" : [ { "system" : "old-sys", "value" : "race-guard-urn"} ]
+							},
+							"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|race-guard-urn"}
+						}, {
+							"resource" : {
+								"resourceType" : "Observation",
+								"identifier" : [ { "system" : "observation-system", "value" : "race-guard-obs"} ],
+								"subject" : { "reference" : "urn:uuid:b7c10c0c-0000-0000-0000-000000000c0c" }
+							},
+							"request" : { "method" : "POST", "url" : "Observation", "ifNoneExist" : "Observation?identifier=observation-system|race-guard-obs&subject=urn:uuid:b7c10c0c-0000-0000-0000-000000000c0c"}
+						}
+					]
+				}
+				""";
+
+		Bundle requestBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, bundle);
+		Bundle resultBundle = mySystemDao.transaction(mySrd, requestBundle);
+
+		assertReferenceScenario(
+				resultBundle,
+				List.of(
+						inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
+						inSamePartitionAsEntry(
+								"Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH, 0)));
+
+		String patientIdPart = new IdType(
+						resultBundle.getEntry().get(0).getResponse().getLocation())
+				.getIdPart();
+		List<String> searchUrls = runInTransaction(() -> myResourceSearchUrlDao.findAll().stream()
+				.map(ResourceSearchUrlEntity::getSearchUrl)
+				.toList());
+		assertThat(searchUrls)
+				.as("conditional-create concurrency guard rows")
+				.hasSize(2)
+				.contains("Patient?identifier=old-sys%7Crace-guard-urn");
+		assertThat(searchUrls)
+				.filteredOn(t -> t.startsWith("Observation?"))
+				.singleElement()
+				.asString()
+				.contains("race-guard-obs")
+				.contains(patientIdPart)
+				.doesNotContain("urn:");
+	}
+
 	@Test
 	void testTransaction_rewrittenPatientOutcomeKeepsAutoCreatedPlaceholderIssue() {
 		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
