@@ -1,0 +1,13 @@
+---
+type: fix
+issue: 8270
+title: "In Patient ID partition mode, a transaction entry whose conditional URL (the If-None-Exist
+  of a conditional create, or the URL of a conditional update) referenced another entry's placeholder
+  fullUrl was incorrectly rejected with error HAPI-0539. Placeholder references inside conditional
+  URLs are now resolved before the entries are processed, matching the behaviour outside of Patient
+  ID partition mode. In addition, conditional creates whose If-None-Exist omits the resource type
+  (the form shown by the FHIR specification) are now included in the transaction conditional URL
+  pre-fetch, giving them the same behaviour and query cost as the type-qualified form, and
+  conditional URLs answered from the match URL cache are now recorded in the transaction details so
+  that repeated conditional creates work correctly in Patient ID partition mode when the match URL
+  cache is enabled."
