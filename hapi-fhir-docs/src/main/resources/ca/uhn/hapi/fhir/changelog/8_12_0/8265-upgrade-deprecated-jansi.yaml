@@ -1,0 +1,7 @@
+---
+type: security
+issue: 8265
+title: "The HAPI FHIR CLI's console colour library has been migrated from the deprecated
+  `org.fusesource.jansi:jansi` to its maintained successor, `org.jline:jansi`, which resolves CVE-2026-8484.
+  To maintain compatibility, logback has also been upgraded from 1.5.25 to 1.6.3 which supports the new successor.
+  Console colour handling remains unchanged."

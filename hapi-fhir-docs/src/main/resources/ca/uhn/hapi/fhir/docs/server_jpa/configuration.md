@@ -176,6 +176,28 @@ With this interceptor in place, the following header can be added to individual 
 X-Retry-On-Version-Conflict: retry; max-retries=100
 ```    
 
+<a id="version-conflict-in-transaction"></a>
+
+## Version Conflicts within a Transaction Bundle
+
+A version conflict can also occur entirely within a single transaction Bundle, without any other
+client involved. If a `PUT` entry in a Bundle carries an `If-Match` precondition, that precondition
+is checked both when the entry is read and again immediately before the resource is physically
+written. Ordinarily these two checks see the same version. However, if a storage interceptor hooked
+on a `STORAGE_PRESTORAGE_RESOURCE_CREATED` or `STORAGE_PRESTORAGE_RESOURCE_UPDATED` pointcut
+re-entrantly updates that same resource (for example by calling `update()` on its DAO) while
+processing another entry in the same Bundle, the resource's version has moved by the time the `PUT`
+entry is actually written. The second check catches this and the transaction fails with a
+`ResourceVersionConflictException` (**HTTP 409**), rolling back the entire Bundle. Unlike a conflict
+between concurrent clients, this one cannot be cleared by retrying, since each replay of the Bundle
+fires the interceptor again and moves the version again, so every attempt fails identically until the
+retry budget is exhausted.
+
+To avoid this, either do not send `If-Match` for a resource that a re-entrant interceptor may also
+update within the same transaction, or move the interceptor's write to a `STORAGE_PRECOMMIT_*`
+pointcut. `STORAGE_PRECOMMIT_*` pointcuts fire after the Bundle's own writes are complete, so they
+cannot race with them.
+
 # Controlling Delete with Expunge size
 
 Delete with expunge submits a job to delete and expunge the requested resources. This is done in batches. If the DELETE
