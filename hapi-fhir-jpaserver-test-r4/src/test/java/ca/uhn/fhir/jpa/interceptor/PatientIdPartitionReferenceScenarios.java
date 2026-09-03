@@ -1491,6 +1491,67 @@ class PatientIdPartitionReferenceScenarios implements ArgumentsProvider {
 				allPartitionSearchOffModeRejectNoCompartment("Observation")
 			),
 			Arguments.of(
+				"Conditionally Update Patient + Conditionally Create Observation | placeholder in the observation's ifNoneExist, patient is new",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"fullUrl" : "urn:uuid:b7c1000d-0000-0000-0000-00000000000d",
+								"resource" : {
+									"resourceType" : "Patient",
+									"identifier" : [ { "system" : "old-sys", "value" : "condUpdatePatient"} ]
+								},
+								"request" : { "method" : "PUT", "url" : "Patient?identifier=old-sys|condUpdatePatient"}
+							}, {
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "condCreateObs"} ],
+									"subject" : { "reference" : "urn:uuid:b7c1000d-0000-0000-0000-00000000000d" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation", "ifNoneExist" : "Observation?identifier=observation-system|condCreateObs&subject=urn:uuid:b7c1000d-0000-0000-0000-00000000000d"}
+							}
+						]
+					}
+					""",
+				"The referenced patient is a conditional update, which processes after the observation's conditional create — so the placeholder in the ifNoneExist cannot rely on write-order substitution and must be resolved up front.",
+				List.of(
+					inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH),
+					inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH, 0)
+				),
+				allPartitionSearchOffModeRejectNoCompartment("Observation")
+			),
+			Arguments.of(
+				"Update-as-create Patient + Conditionally Create Observation | placeholder in the observation's ifNoneExist",
+				"""
+					{ "resourceType" : "Bundle", "type" : "transaction",
+						"entry" : [
+							{
+								"fullUrl" : "urn:uuid:b7c1000e-0000-0000-0000-00000000000e",
+								"resource" : {
+									"resourceType" : "Patient",
+									"id" : "patUacCondUrl",
+									"identifier" : [ { "system" : "old-sys", "value" : "newPatient"} ]
+								},
+								"request" : { "method" : "PUT", "url" : "Patient/patUacCondUrl"}
+							}, {
+								"resource" : {
+									"resourceType" : "Observation",
+									"identifier" : [ { "system" : "observation-system", "value" : "condCreateObs"} ],
+									"subject" : { "reference" : "urn:uuid:b7c1000e-0000-0000-0000-00000000000e" }
+								},
+								"request" : { "method" : "POST", "url" : "Observation", "ifNoneExist" : "Observation?identifier=observation-system|condCreateObs&subject=urn:uuid:b7c1000e-0000-0000-0000-00000000000e"}
+							}
+						]
+					}
+					""",
+				"The referenced patient is an explicit-id update-as-create, which also processes after the observation's conditional create; the placeholder in the ifNoneExist must resolve to the client-assigned id up front.",
+				List.of(
+					inCompartmentOf("Patient", StorageResponseCodeEnum.SUCCESSFUL_UPDATE_AS_CREATE, "patUacCondUrl"),
+					inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH, "patUacCondUrl")
+				),
+				allPartitionSearchOffModeRejectNoCompartment("Observation")
+			),
+			Arguments.of(
 				"Conditionally Create Patient ×2 (duplicate conditional URLs, distinct placeholders) + Observation ×2 | consolidated to one create, all co-located",
 				"""
 					{ "resourceType" : "Bundle", "type" : "transaction",
