@@ -1112,6 +1112,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	 * </p>
 	 *
 	 * @param thePartitionId                        The partition ID of the associated resource (can be null)
+	 * @param theTransactionDetails                 The active transaction details, in which cache-answered resolutions are recorded
 	 * @param theResourceType                       The resource type associated with the match URL (ie what resource type should it resolve to)
 	 * @param theRequestUrl                         The actual match URL, which could be as simple as just parameters or could include the resource type too
 	 * @param theShouldPreFetchResourceBody         Should we also fetch the actual resource body, or just figure out the PID associated with it? See the method javadoc above for some context.
