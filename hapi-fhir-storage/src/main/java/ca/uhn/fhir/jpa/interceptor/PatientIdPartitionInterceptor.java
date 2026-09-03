@@ -39,7 +39,9 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
+import ca.uhn.fhir.jpa.dao.BaseTransactionProcessor;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
+import ca.uhn.fhir.jpa.dao.IdSubstitutionMap;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.PreFetchSkippableMethodNotAllowedException;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -822,6 +824,7 @@ public class PatientIdPartitionInterceptor {
 		Map<String, String> idSubstitutions =
 				rewriteResolvedOrAssignPatientEntryIds(thePrefetchDetails, theTransactionDetails);
 		substituteReferences(thePrefetchDetails.getVersionAdapter(), entries, idSubstitutions);
+		substituteConditionalUrlPlaceholders(thePrefetchDetails.getVersionAdapter(), entries, idSubstitutions);
 	}
 
 	/**
@@ -980,6 +983,48 @@ public class PatientIdPartitionInterceptor {
 				String substitution = theIdSubstitutions.get(referenceString);
 				if (substitution != null) {
 					reference.getResourceReference().setReference(substitution);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Replaces placeholder (urn) references inside each entry's conditional URL — POST ifNoneExist and conditional
+	 * PUT request URLs — with the concrete ids resolved above. The write loop performs the same substitution
+	 * natively, but only from substitutions registered as earlier entries complete; an entry whose placeholder
+	 * points at a Patient processed in the PUT phase (a conditional update or an explicit-id update-as-create)
+	 * always runs after the conditional creates referencing it, so its placeholder must be resolved up front.
+	 * DELETE and PATCH URLs are deliberately left to the write loop: DELETEs process before anything a placeholder
+	 * could resolve to exists (native processing sees the unsubstituted URL and matches nothing), and PATCHes
+	 * process last, when the write loop's substitution map is already complete.
+	 */
+	// Created by Claude Fable 5
+	private void substituteConditionalUrlPlaceholders(
+			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
+			List<IBase> theEntries,
+			Map<String, String> theIdSubstitutions) {
+		if (theIdSubstitutions.isEmpty()) {
+			return;
+		}
+		IdSubstitutionMap idSubstitutions = new IdSubstitutionMap();
+		theIdSubstitutions.forEach((source, target) -> idSubstitutions.put(new IdDt(source), new IdDt(target)));
+		for (IBase entry : theEntries) {
+			String verb = theVersionAdapter.getEntryRequestVerb(myFhirContext, entry);
+			if ("POST".equals(verb)) {
+				String ifNoneExist = theVersionAdapter.getEntryRequestIfNoneExist(entry);
+				String substituted =
+						BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(idSubstitutions, ifNoneExist);
+				if (!Strings.CS.equals(ifNoneExist, substituted)) {
+					theVersionAdapter.setRequestIfNoneExist(entry, substituted);
+				}
+			} else if ("PUT".equals(verb)) {
+				String url = theVersionAdapter.getEntryRequestUrl(entry);
+				if (url != null && url.contains("?")) {
+					String substituted =
+							BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(idSubstitutions, url);
+					if (!Strings.CS.equals(url, substituted)) {
+						theVersionAdapter.setRequestUrl(entry, substituted);
+					}
 				}
 			}
 		}
