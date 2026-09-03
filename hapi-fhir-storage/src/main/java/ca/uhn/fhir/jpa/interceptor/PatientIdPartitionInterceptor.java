@@ -932,16 +932,10 @@ public class PatientIdPartitionInterceptor {
 						theMatchUrlToMintedReference.computeIfAbsent(conditionalUrl, k -> mintPatientReference());
 				theIdSubstitutions.put(theFullUrl, newReference);
 				if ("POST".equals(method) && resolution.prefetched()) {
-					// The entry stays a conditional POST with the minted id stamped as server-assigned: the
-					// write loop then consolidates in-bundle duplicates, writes the HFJ_RES_SEARCH_URL row
-					// that makes a concurrent transaction creating the same conditional URL collide instead
-					// of duplicating the patient, and reports the no-match create outcome — all natively.
+					// The entry stays a conditional POST with the minted id stamped as server-assigned.
 					stampServerAssignedId(resource, newReference);
 				} else {
-					// Rewritten to a conditional PUT with the minted body id. Reached by a conditional update,
-					// and by a match URL the pre-fetch never attempted — treating "never looked" as "no match"
-					// is only safe on this path because a write-time match then collides with the minted body
-					// id instead of quietly diverging from the references substituted above.
+					// Rewritten to a conditional PUT with the minted body id.
 					rewriteAsPut(versionAdapter, theEntry, resource, newReference, conditionalUrl);
 					RewriteIntent intent = "POST".equals(method)
 							? RewriteIntent.CONDITIONAL_CREATE_NO_MATCH
@@ -990,13 +984,7 @@ public class PatientIdPartitionInterceptor {
 
 	/**
 	 * Replaces placeholder (urn) references inside each entry's conditional URL — POST ifNoneExist and conditional
-	 * PUT request URLs — with the concrete ids resolved above. The write loop performs the same substitution
-	 * natively, but only from substitutions registered as earlier entries complete; an entry whose placeholder
-	 * points at a Patient processed in the PUT phase (a conditional update or an explicit-id update-as-create)
-	 * always runs after the conditional creates referencing it, so its placeholder must be resolved up front.
-	 * DELETE and PATCH URLs are deliberately left to the write loop: DELETEs process before anything a placeholder
-	 * could resolve to exists (native processing sees the unsubstituted URL and matches nothing), and PATCHes
-	 * process last, when the write loop's substitution map is already complete.
+	 * PUT request URLs — with the concrete ids resolved above.
 	 */
 	// Created by Claude Fable 5
 	private void substituteConditionalUrlPlaceholders(
@@ -1283,8 +1271,7 @@ public class PatientIdPartitionInterceptor {
 	/**
 	 * Consults what the pre-fetch resolved for the given match URL, via
 	 * {@link TransactionDetails#getResolvedMatchUrls()} and the reverse-id map. The lookup key is canonicalized
-	 * the same way the pre-fetch records it, so the type-less If-None-Exist spellings resolve too. No search is
-	 * performed — we act only on what the pre-fetch put in the transaction details.
+	 * the same way the pre-fetch records it, so the type-less If-None-Exist spellings resolve too.
 	 */
 	// Created by Claude Fable 5
 	private PreFetchResolution getPreFetchResolution(String theMatchUrl, TransactionDetails theTransactionDetails) {

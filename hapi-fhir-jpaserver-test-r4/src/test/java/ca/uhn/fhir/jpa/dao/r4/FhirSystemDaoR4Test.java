@@ -2167,11 +2167,13 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	/**
-	 * A conditional create (POST + If-None-Exist) and a conditional update (PUT) sharing one match URL, with
-	 * nothing pre-existing that matches it. The create runs first and the update's match URL then resolves to
-	 * the resource the create just made. With an identical update body the update no-ops and the transaction
-	 * succeeds against the single created resource; with a differing body, two writes both match the one
-	 * conditional URL and the transaction is rejected.
+	 * A conditional create and an update sharing one match URL, with nothing pre-existing that matches it.
+	 * The create runs first and the update's match URL then resolves to the resource the create just made.
+	 * With an identical update body the update no-ops and the transaction succeeds against the single created
+	 * resource; with a differing body, two writes both match the one conditional URL and the transaction is rejected.
+	 * <p>
+	 * Note that this is technically a bad request per the FHIR spec since the entries should not be depended on each
+	 * other. Pinning down the behavior here.
 	 */
 	// Created by Claude Fable 5
 	@ParameterizedTest
