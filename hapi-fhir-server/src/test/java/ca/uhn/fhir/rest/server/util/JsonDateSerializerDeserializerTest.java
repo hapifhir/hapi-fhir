@@ -1,48 +1,15 @@
 package ca.uhn.fhir.rest.server.util;
 
-/*
- * LFJT3 — "Looking Forward to Jackson Tools 3"
- * =============================================
- * Written for Jackson 2 (com.fasterxml.jackson). Structured so that only
- * the two clearly marked sections change during the future LFJT3 uplift:
- *
- *   1. "── LFJT3 JACKSON IMPORT BLOCK ──"
- *   2. "── LFJT3 MAPPER FACTORY ──"
- *
- * All @Test methods are Jackson-version-agnostic and need zero changes.
- *
- * LFJT3 MIGRATION CHECKLIST
- * --------------------------
- * [ ] Imports:
- *       com.fasterxml.jackson.databind.JsonDeserializer  → tools.jackson.databind.ValueDeserializer
- *       com.fasterxml.jackson.databind.JsonSerializer    → tools.jackson.databind.ValueSerializer
- *       com.fasterxml.jackson.databind.ObjectMapper      → tools.jackson.databind.ObjectMapper
- *       com.fasterxml.jackson.databind.module.SimpleModule → tools.jackson.databind.module.SimpleModule
- * [ ] createMapper() factory: new ObjectMapper() → JsonMapper.builder().build()
- * [ ] JsonDateDeserializer.deserialize() loses "throws IOException" in Jackson 3 —
- *     but that change is in the production class, not here.
- * [ ] JsonDateSerializer.serialize() loses "throws IOException" in Jackson 3 —
- *     same — production class change only.
- */
-
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
-
-// ── LFJT3 JACKSON IMPORT BLOCK ───────────────────────────────────────────────
-// Jackson 2 (NOW — do not change yet):
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-// Jackson 3 (LFJT3 — swap the three lines above for):
-//   import com.fasterxml.jackson.annotation.JsonProperty;   // stays — annotations never move
-//   import tools.jackson.databind.ObjectMapper;
-//   import tools.jackson.databind.module.SimpleModule;
-// ── END LFJT3 JACKSON IMPORT BLOCK ───────────────────────────────────────────
-
+import com.fasterxml.jackson.annotation.JsonProperty;   // stays — annotations never move
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleModule;
 
 import java.util.Date;
 
@@ -61,17 +28,12 @@ class JsonDateSerializerDeserializerTest {
 
 	private ObjectMapper myMapper;
 
-	// ── LFJT3 MAPPER FACTORY ─────────────────────────────────────────────────
-	// Jackson 2 (NOW): new ObjectMapper()
-	// Jackson 3 (LFJT3): JsonMapper.builder().build()
 	private ObjectMapper createMapper() {
 		SimpleModule module = new SimpleModule();
 		module.addSerializer(Date.class, new JsonDateSerializer());
 		module.addDeserializer(Date.class, new JsonDateDeserializer());
-		return new ObjectMapper().registerModule(module);
-		// LFJT3: return JsonMapper.builder().addModule(module).build();
+		return JsonMapper.builder().addModule(module).build();
 	}
-	// ── END LFJT3 MAPPER FACTORY ─────────────────────────────────────────────
 
 	@BeforeEach
 	void setUp() {

@@ -21,9 +21,9 @@ package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.ClasspathUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -54,7 +54,7 @@ public class ConfigLoader {
 	}
 
 	public static <T> T loadJson(String theResourcePath, Class<T> theModelClass) {
-		ObjectMapper mapper = new ObjectMapper();
+		JsonMapper mapper = new JsonMapper();
 		try {
 			return mapper.readValue(loadResourceContent(theResourcePath), theModelClass);
 		} catch (Exception e) {

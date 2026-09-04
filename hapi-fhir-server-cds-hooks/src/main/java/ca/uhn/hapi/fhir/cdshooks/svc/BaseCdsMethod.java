@@ -25,8 +25,8 @@ import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsMethod;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -40,11 +40,11 @@ abstract class BaseCdsMethod implements ICdsMethod {
 		myMethod = theMethod;
 	}
 
-	public Object invoke(ObjectMapper theObjectMapper, IModelJson theJson, String theServiceId) {
+	public Object invoke(JsonMapper theJsonMapper, IModelJson theJson, String theServiceId) {
 		try {
 			// If the method takes a String parameter, first serialize the json request before calling the method
 			if (parameterIsString()) {
-				String json = encodeRequest(theObjectMapper, theJson, theServiceId);
+				String json = encodeRequest(theJsonMapper, theJson, theServiceId);
 
 				return myMethod.invoke(myServiceBean, json);
 			} else {
@@ -66,11 +66,10 @@ abstract class BaseCdsMethod implements ICdsMethod {
 		return String.class.isAssignableFrom(myMethod.getParameterTypes()[0]);
 	}
 
-	private String encodeRequest(
-			ObjectMapper theObjectMapper, IModelJson theCdsServiceRequestJson, String theServiceId) {
+	private String encodeRequest(JsonMapper theJsonMapper, IModelJson theCdsServiceRequestJson, String theServiceId) {
 		try {
-			return theObjectMapper.writeValueAsString(theCdsServiceRequestJson);
-		} catch (JsonProcessingException e) {
+			return theJsonMapper.writeValueAsString(theCdsServiceRequestJson);
+		} catch (JacksonException e) {
 			throw new InvalidRequestException(
 					Msg.code(2377)
 							+ "Failed to deserialize CDS Hooks service request json instance when calling CDS Hooks Service "
