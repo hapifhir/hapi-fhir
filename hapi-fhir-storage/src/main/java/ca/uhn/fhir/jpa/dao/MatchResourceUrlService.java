@@ -252,6 +252,7 @@ public class MatchResourceUrlService<T extends IResourcePersistentId<?>> {
 	 * agree with the ones this service stores.
 	 */
 	public static String massageForStorage(String theResourceType, String theMatchUrl) {
+		Validate.notBlank(theResourceType, "theResourceType must not be null or blank");
 		Validate.notBlank(theMatchUrl, "theMatchUrl must not be null or blank");
 		int questionMarkIdx = theMatchUrl.indexOf("?");
 		if (questionMarkIdx > 0) {
