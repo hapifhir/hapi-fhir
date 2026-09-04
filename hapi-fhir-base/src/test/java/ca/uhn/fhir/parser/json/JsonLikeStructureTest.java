@@ -142,6 +142,10 @@ public class JsonLikeStructureTest {
 		assertEquals(value.getAsString(), "true");
 	}
 
+	/**
+	 * Tests the {@code JacksonWriter.setWriter(..)} override, for sequential reuse of the same
+	 * {@link JacksonStructure}, not for concurrency.
+	 */
 	@Test
 	public void testGetJsonLikeWriterUsesCurrentWriter() throws Exception {
 		JacksonStructure structure = new JacksonStructure();
