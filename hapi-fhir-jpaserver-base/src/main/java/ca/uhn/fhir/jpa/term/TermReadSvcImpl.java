@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
@@ -276,9 +277,15 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	@Autowired
 	private MemoryCacheService myMemoryCache;
 
+	private volatile IValidationSupport myBuiltInValidationSupportForProtectionCheck;
+
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
 		if (isBlank(theSystem)) {
+			return false;
+		}
+		if (isProtectedBuiltInCodeSystem(theSystem)) {
+			// Defer to the chain, so the built-in definition is used
 			return false;
 		}
 		TermCodeSystemVersionDetails cs = getCurrentCodeSystemVersion(theSystem);
@@ -886,8 +893,11 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 			ourLog.debug("Starting {} expansion around CodeSystem: {}", (theAdd ? "inclusion" : "exclusion"), system);
 
-			Optional<TermCodeSystemVersion> termCodeSystemVersion =
-					optionalFindTermCodeSystemVersion(theIncludeOrExclude);
+			Optional<TermCodeSystemVersion> termCodeSystemVersion = isProtectedBuiltInCodeSystem(system)
+					// Protected built-in code systems should be expanded by the in-memory path instead, to ensure the
+					// built-in definitions take precedence over any overriding definitions in the database
+					? Optional.empty()
+					: optionalFindTermCodeSystemVersion(theIncludeOrExclude);
 			if (termCodeSystemVersion.isPresent()) {
 
 				expandValueSetHandleIncludeOrExcludeUsingDatabase(
@@ -2237,10 +2247,11 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		}
 
 		if (isNotBlank(theSystem)
-				&& isCodeSystemNotPresentAndHasNoLocalContent(theValidationSupportContext, theSystem)) {
-			// The included CodeSystem is content=not-present with no local concepts, so fall
-			// through to the next validator in the chain rather than short-circuiting with a
-			// non-null "not found".
+				&& (isCodeSystemNotPresentAndHasNoLocalContent(theValidationSupportContext, theSystem)
+						|| isProtectedBuiltInCodeSystem(theSystem))) {
+			// The included CodeSystem is content=not-present with no local concepts,
+			// or the built-in definition is authoritative for it, so fall through
+			// to the next validator in the chain rather than short-circuiting with a non-null "not found".
 			return null;
 		}
 
@@ -2710,6 +2721,12 @@ public class TermReadSvcImpl implements ITermReadSvc {
 					theValidationSupportContext, theOptions, theValueSetUrl, theCodeSystemUrl, theCode, theDisplay);
 		}
 
+		if (isProtectedBuiltInCodeSystem(theCodeSystemUrl)) {
+			// Fall through to the next validator in the chain, so the code is validated against the built-in definition
+			// rather than the database-stored copy
+			return null;
+		}
+
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 		txTemplate.setReadOnly(true);
@@ -2801,6 +2818,47 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			return false;
 		}
 		return myCodeSystemDao.findByCodeSystemUri(theCodeSystemUrl) != null;
+	}
+
+	/**
+	 * Returns <code>true</code> when the given CodeSystem identifier must not be answered from the
+	 * terminology tables because the built-in default profile definitions are authoritative for it.
+	 * <p>
+	 * The check is deliberately narrow:
+	 * <ul>
+	 *     <li>Only the core specification namespace is protected. Content at other URLs - e.g.
+	 *     <code>terminology.hl7.org</code> (THO, v2, v3), LOINC, SNOMED CT - stored in the terminology
+	 *     tables keeps winning even though the built-in definitions carry partial snapshots of some of
+	 *     it.</li>
+	 *     <li>Only built-in definitions from the current FHIR context are protected.
+	 *     Code systems stored in the database that are not part of the current context
+	 *     (e.g.<code>http://hl7.org/fhir/version-algorithm</code> on an R4 server) will not be considered protected.</li>
+	 *     <li>Setting {@link JpaStorageSettings#setAllowDatabaseValidationOverride(boolean)} to
+	 *     <code>true</code> disables the protection entirely.</li>
+	 * </ul>
+	 * </p>
+	 */
+	private boolean isProtectedBuiltInCodeSystem(String theCodeSystemIdentifier) {
+		if (myStorageSettings.isAllowDatabaseValidationOverride()) {
+			return false;
+		}
+		if (isBlank(theCodeSystemIdentifier)) {
+			return false;
+		}
+		String url = getUrlFromIdentifier(theCodeSystemIdentifier);
+		if (!url.startsWith("http://hl7.org/fhir/")) {
+			return false;
+		}
+		return getDefaultProfileValidationSupport().fetchCodeSystem(url) != null;
+	}
+
+	private IValidationSupport getDefaultProfileValidationSupport() {
+		IValidationSupport retVal = myBuiltInValidationSupportForProtectionCheck;
+		if (retVal == null) {
+			retVal = new DefaultProfileValidationSupport(myContext);
+			myBuiltInValidationSupportForProtectionCheck = retVal;
+		}
+		return retVal;
 	}
 
 	IValidationSupport.CodeValidationResult validateCodeInValueSet(
