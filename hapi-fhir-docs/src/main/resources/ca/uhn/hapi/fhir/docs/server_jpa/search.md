@@ -20,7 +20,9 @@ Searching on Location.Position using `near` currently uses a box search, not a r
 
 ### _filter
 
-The special `_filter` is only partially implemented.
+The special `_filter` search parameter is only partially implemented, and is disabled by default. It must be explicitly enabled (via `JpaStorageSettings#setFilterParameterEnabled(true)`) before it can be used.
+
+`_filter` is honored anywhere a [match URL](https://hl7.org/fhir/http.html#cond-update) is parsed &mdash; including the pre-R5 [Subscription](https://hl7.org/fhir/dstu3/subscription.html) `criteria` element (present in DSTU2, DSTU3, and R4; in R5 the equivalent is the topic-based [`Subscription.filterBy`](https://hl7.org/fhir/subscription.html)), conditional create/update/delete, and the bulk export `_typeFilter` parameter. When a Subscription's `criteria` contains `_filter`, matching falls back to the database matching strategy (it cannot be evaluated by the in-memory matcher). If `_filter` is disabled on the server, such a Subscription is rejected at submission time with an `UnprocessableEntityException`, and other match URL contexts likewise return an error rather than silently ignoring the `_filter` clause.
 
 ### _pid
 
