@@ -805,11 +805,8 @@ public class PatientIdPartitionInterceptor {
 	/**
 	 * Once {@code preFetch} has resolved every conditional URL and reference target, resolve each Patient entry to a
 	 * concrete ID and substitute all in-bundle references to it. This makes compartment placement independent of the
-	 * order entries are processed in: a matched conditional Patient reuses the existing resource's ID, while a new
-	 * Patient has a minted UUID stamped as its server-assigned id
-	 * ({@link JpaConstants#RESOURCE_ID_SERVER_ASSIGNED_VALUE}) without changing the entry's verb — so the write
-	 * loop's native entry ordering, duplicate consolidation, conditional-URL id substitution and operation outcomes
-	 * all apply unchanged.
+	 * order entries are processed in: a matched conditional Patient reuses the existing resource's ID; a new Patient
+	 * gets a minted UUID stamped as its server-assigned id ({@link JpaConstants#RESOURCE_ID_SERVER_ASSIGNED_VALUE}).
 	 */
 	// Created by Claude Opus 4.7
 	@Hook(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH)
