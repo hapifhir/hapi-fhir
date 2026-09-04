@@ -22,38 +22,35 @@ package ca.uhn.hapi.fhir.cdshooks.serializer;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.deser.std.StdDeserializer;
+import tools.jackson.databind.json.JsonMapper;
 
-import java.io.IOException;
 import java.util.LinkedHashMap;
 
 public class CdsServiceRequestContextDeserializer extends StdDeserializer<CdsServiceRequestContextJson> {
 	private final IParser myParser;
-	private final ObjectMapper myObjectMapper;
+	private final JsonMapper myJsonMapper;
 
-	public CdsServiceRequestContextDeserializer(FhirContext theFhirContext, ObjectMapper theObjectMapper) {
+	public CdsServiceRequestContextDeserializer(FhirContext theFhirContext, JsonMapper theJsonMapper) {
 		super(CdsServiceRequestContextJson.class);
 		myParser = theFhirContext.newJsonParser().setPrettyPrint(true);
-		myObjectMapper = theObjectMapper;
+		myJsonMapper = theJsonMapper;
 	}
 
 	@Override
-	public CdsServiceRequestContextJson deserialize(JsonParser theJsonParser, DeserializationContext theContext)
-			throws IOException {
+	public CdsServiceRequestContextJson deserialize(JsonParser theJsonParser, DeserializationContext theContext) {
 		// First deserialize the context as a LinkedHashMap
-		LinkedHashMap<String, Object> map = myObjectMapper.readValue(
-				theJsonParser.getCodec().readTree(theJsonParser).toString(), LinkedHashMap.class);
+		LinkedHashMap<String, Object> map = myJsonMapper.readValue(theJsonParser, LinkedHashMap.class);
 		CdsServiceRequestContextJson retval = new CdsServiceRequestContextJson();
 
 		for (String key : map.keySet()) {
 			Object value = map.get(key);
 			// Convert LinkedHashMap entries to Resources
 			if (value instanceof LinkedHashMap) {
-				String json = myObjectMapper.writeValueAsString(value);
+				String json = myJsonMapper.writeValueAsString(value);
 				IBaseResource resource = myParser.parseResource(json);
 				retval.put(key, resource);
 			} else {

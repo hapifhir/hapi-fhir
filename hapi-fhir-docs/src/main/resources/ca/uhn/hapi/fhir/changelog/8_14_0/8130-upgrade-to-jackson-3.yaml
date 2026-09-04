@@ -1,0 +1,5 @@
+---
+type: change
+issue: 8130
+title: "HAPI FHIR now uses Jackson 3 instead of Jackson 2. The `com.fasterxml.jackson` packages are
+  replaced by `tools.jackson`. See the upgrade notes for details."

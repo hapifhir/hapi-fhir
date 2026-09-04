@@ -23,8 +23,8 @@ import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsMethod;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Nonnull;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.function.Function;
 
@@ -36,7 +36,7 @@ abstract class BaseDynamicCdsServiceMethod implements ICdsMethod {
 	}
 
 	@Override
-	public Object invoke(ObjectMapper theObjectMapper, IModelJson theJson, String theServiceId) {
+	public Object invoke(JsonMapper theJsonMapper, IModelJson theJson, String theServiceId) {
 		return myFunction.apply((CdsServiceRequestJson) theJson);
 	}
 

@@ -34,8 +34,8 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import tools.jackson.core.JacksonException;
 
-import java.io.IOException;
 import java.util.concurrent.Callable;
 
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
@@ -76,7 +76,7 @@ public abstract class BaseImportTerminologyStep {
 		try {
 			jobMetadata = JsonUtil.deserialize(
 					jobMetadataAttachment.getInputStream(), ImportTerminologyMetadataAttachmentJson.class);
-		} catch (IOException e) {
+		} catch (JacksonException e) {
 			throw new JobExecutionFailedException(Msg.code(2940) + "Failed to retrieve job metadata attachment: " + e);
 		}
 		return jobMetadata;

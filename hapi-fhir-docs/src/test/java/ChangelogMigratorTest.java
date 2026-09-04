@@ -3,34 +3,8 @@
  *
  * LFJT3 — "Looking Forward to Jackson Tools 3"
  * =============================================
- * This test file is written against Jackson 2 (com.fasterxml.jackson /
- * jackson-dataformat-yaml) and is structured so that migrating to Jackson 3
- * (tools.jackson) requires changes ONLY in the clearly marked
- * "── LFJT3 JACKSON IMPORT BLOCK ──" and "── LFJT3 MAPPER FACTORY ──"
- * sections. All assertions operate on plain String / Map / List values and
- * are Jackson-version-agnostic.
- *
- * LFJT3 MIGRATION CHECKLIST FOR THIS FILE
- * ----------------------------------------
- *  [ ] Swap the import block (see "── LFJT3 JACKSON IMPORT BLOCK ──")
- *  [ ] Swap the createChangesMapper() factory (see "── LFJT3 MAPPER FACTORY ──")
- *  [ ] Swap the createVersionMapper() factory (see "── LFJT3 MAPPER FACTORY ──")
- *  [ ] All @Test methods — NO CHANGES NEEDED
- *
- * DESIGN NOTE — WHY ChangelogMigrator IS HARD TO TEST AS-IS
- * ----------------------------------------------------------
- * ChangelogMigrator.main() hardcodes two filesystem paths:
- *   - Input:  "src/changes/changes.xml"
- *   - Output: "hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/changelog/<version>"
- * There are no public/package-private methods and no dependency injection.
- * To achieve full integration coverage without refactoring, this test:
- *   (a) Tests YAML serialization directly (instantiating the mapper the same
- *       way ChangelogMigrator does)
- *   (b) Tests the item-map building logic with plain Java (no Jackson needed)
- *   (c) Provides an extractable integration test that runs against a temp dir
- *       by replicating the ChangelogMigrator logic with injected paths —
- *       a pattern that mirrors what ChangelogMigrator would look like after
- *       a recommended refactor to accept paths as arguments.
+ * This test file has been migrated to Jackson 3 (tools.jackson).
+ * All assertions operate on plain String / Map / List values and are Jackson-version-agnostic.
  */
 
 // NOTE: ChangelogMigrator is in the DEFAULT PACKAGE (no package declaration).
@@ -43,19 +17,9 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-// ── LFJT3 JACKSON IMPORT BLOCK ───────────────────────────────────────────────
-// ONLY this block changes during the LFJT3 uplift.
-//
-// Jackson 2 (NOW):
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-//
-// Jackson 3 (LFJT3) — replace the three lines above with:
-//   import tools.jackson.databind.ObjectMapper;
-//   import tools.jackson.dataformat.yaml.YAMLMapper;
-//   import tools.jackson.dataformat.yaml.YAMLWriteFeature;
-// ── END LFJT3 JACKSON IMPORT BLOCK ───────────────────────────────────────────
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.yaml.YAMLMapper;
+import tools.jackson.dataformat.yaml.YAMLWriteFeature;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -75,34 +39,26 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ChangelogMigratorTest {
 
-	// ── LFJT3 MAPPER FACTORY ─────────────────────────────────────────────────
-	// These two methods are the ONLY other change points during LFJT3 uplift.
-	//
-	// Jackson 2 (NOW):
-	//   new ObjectMapper(new YAMLFactory().disable(YAMLGenerator.Feature.SPLIT_LINES))
-	//   new ObjectMapper(new YAMLFactory())
-	//
-	// Jackson 3 (LFJT3) — replace with:
-	//   YAMLMapper.builder().disable(YAMLWriteFeature.SPLIT_LINES).build()
-	//   YAMLMapper.builder().build()
+	// ── MAPPER FACTORY ──────────────────────────────────────────────────────
 
 	/**
 	 * Mirrors the mapper construction in ChangelogMigrator for changes.yaml.
-	 * LFJT3: replace body with YAMLMapper.builder().disable(YAMLWriteFeature.SPLIT_LINES).build()
+	 * Jackson 3: YAMLMapper.builder().disable(YAMLWriteFeature.SPLIT_LINES).build()
 	 */
 	private static ObjectMapper createChangesMapper() {
-		YAMLFactory yf = new YAMLFactory().disable(YAMLGenerator.Feature.SPLIT_LINES);
-		return new ObjectMapper(yf);
+		return YAMLMapper.builder()
+				.disable(YAMLWriteFeature.SPLIT_LINES)
+				.build();
 	}
 
 	/**
 	 * Mirrors the mapper construction in ChangelogMigrator for version.yaml.
-	 * LFJT3: replace body with YAMLMapper.builder().build()
+	 * Jackson 3: YAMLMapper.builder().build()
 	 */
 	private static ObjectMapper createVersionMapper() {
-		return new ObjectMapper(new YAMLFactory());
+		return YAMLMapper.builder().build();
 	}
-	// ── END LFJT3 MAPPER FACTORY ─────────────────────────────────────────────
+	// ── END MAPPER FACTORY ──────────────────────────────────────────────────
 
 
 	// ─────────────────────────────────────────────────────────────────────────
