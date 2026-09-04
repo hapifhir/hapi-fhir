@@ -59,6 +59,8 @@ public class MdmResourceFilteringSvc {
 	 * If the resource has no attributes that appear in the candidate search params, processing should be skipped, as there is not
 	 * sufficient information to perform meaningful MDM processing. (For example, how can MDM processing occur on a patient that has _no_ attributes?)
 	 *
+	 * If the resource is a placeholder resource (and not being submitted for EID matching) it will return as false (not to be processed)
+	 *
 	 * @param theResource the resource that you wish to check against MDM rules.
 	 *
 	 * @return whether or not MDM processing should proceed
