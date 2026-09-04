@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.nickname.NicknameInterceptor;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -25,6 +26,7 @@ import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
@@ -98,6 +100,84 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 			Collection<IAnyResource> result = myMdmCandidateSearchSvc.findCandidates("Practitioner", noMatch, RequestPartitionId.allPartitions());
 			assertThat(result).isEmpty();
 		}
+	}
+
+	@Test
+	public void findCandidates_withPeriod_doesntMatchEverything() {
+		// setup
+		String system = "http://hl7.example.com";
+		String value = ",";
+		Patient jane = new Patient();
+		jane.setActive(true);
+		jane.addIdentifier()
+			.setSystem(system)
+			.setValue(value);
+		myPatientDao.create(jane, new SystemRequestDetails());
+
+		// random resources with some value that would match 'anything', but not '.'
+		for (String val : new String[] { "123", "456" }) {
+			Patient patient = new Patient();
+			patient.setActive(true);
+			patient.addIdentifier()
+				.setSystem(system)
+				.setValue(val);
+			myPatientDao.create(patient, new SystemRequestDetails());
+		}
+
+		Patient incoming = new Patient();
+		incoming.setActive(true);
+		incoming.addIdentifier()
+			.setSystem(system)
+			.setValue(".");
+
+		// test
+		Collection<IAnyResource> results = myMdmCandidateSearchSvc.findCandidates("Patient",
+			incoming, RequestPartitionId.allPartitions());
+
+		// validation
+		assertThat(results).hasSize(0);
+	}
+
+	@Test
+	public void findCandidates_commaInSearchCriteria_works() {
+		// setup
+		String system = "http://hl7.example.com";
+		String value = "123,456";
+		Patient jane = new Patient();
+		jane.setActive(true);
+		jane.addIdentifier()
+			.setSystem(system)
+			.setValue(value);
+		myPatientDao.create(jane, new SystemRequestDetails());
+
+		// add a few values that would get caught if we split it
+		for (String val : new String[] { "123", "456" }) {
+			Patient patient = new Patient();
+			patient.setActive(true);
+			patient.addIdentifier()
+				.setSystem(system)
+				.setValue(val);
+			myPatientDao.create(patient, new SystemRequestDetails());
+		}
+
+		Patient incoming = new Patient();
+		incoming.setActive(true);
+		incoming.addIdentifier()
+			.setSystem(system)
+			.setValue(value);
+
+		// test
+		Collection<IAnyResource> results = myMdmCandidateSearchSvc.findCandidates("Patient",
+			incoming, RequestPartitionId.allPartitions());
+
+		// validation
+		assertThat(results).hasSize(1);
+		IAnyResource first = results.stream().findFirst().get();
+		assertThat(first).isInstanceOf(Patient.class);
+		Patient returned = (Patient) first;
+		assertThat(returned.getIdentifier()).isNotEmpty();
+		assertTrue(returned.getIdentifier()
+			.stream().anyMatch(i -> i.getValue().equalsIgnoreCase(value)));
 	}
 
 	@Test
