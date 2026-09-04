@@ -14,8 +14,6 @@ import ca.uhn.hapi.fhir.cdshooks.config.TestCdsHooksConfig;
 import ca.uhn.hapi.fhir.cdshooks.converters.Jackson3JsonHttpMessageConverter;
 import ca.uhn.hapi.fhir.cdshooks.custom.extensions.model.RequestExtension;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchFhirClientSvc;
-// Jackson 3: com.fasterxml.jackson.databind.JsonNode   → tools.jackson.databind.JsonNode
-//            com.fasterxml.jackson.databind.ObjectMapper → tools.jackson.databind.ObjectMapper
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -26,11 +24,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
-// Jackson 3 / Spring 7: MappingJackson2HttpMessageConverter → JacksonJsonHttpMessageConverter
-//   MappingJackson2HttpMessageConverter was deprecated in Spring Framework 7.0 for removal
-//   in favour of JacksonJsonHttpMessageConverter (org.springframework.http.converter.json).
-//   The constructor signature accepting an ObjectMapper is identical, so this is a drop-in rename.
-//import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
