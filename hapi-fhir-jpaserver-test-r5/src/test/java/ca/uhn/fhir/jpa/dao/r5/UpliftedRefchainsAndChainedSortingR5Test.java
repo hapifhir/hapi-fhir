@@ -401,9 +401,9 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		// Verify SQL
 
 		// 1- Resolve resource forced IDs, and 2- Resolve both conditional-create ifNoneExist URLs in a single
-		// batched token pre-fetch. GL-8878 routes bare-form ifNoneExist URLs (e.g. "identifier=http://system|200",
-		// with no "?") through the same pre-fetch/batching path as full-form URLs, so the two conditional searches
-		// are combined into one query instead of being run individually at transaction time.
+		// batched token pre-fetch. Bare-form ifNoneExist URLs (e.g. "identifier=http://system|200", with no "?")
+		// take the same pre-fetch/batching path as full-form URLs, so the two conditional searches are combined
+		// into one query instead of being run individually at transaction time.
 		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 
 		// Verify correct indexes are written
@@ -447,9 +447,9 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 
 		// Verify SQL
 
-		// GL-8878 routes bare-form ifNoneExist URLs (e.g. "identifier=http://system|200", with no "?") through the
-		// same pre-fetch/batching path as full-form URLs, so the two conditional-create searches are combined into a
-		// single batched token query instead of being run individually at transaction time (9 -> 7).
+		// Bare-form ifNoneExist URLs (e.g. "identifier=http://system|200", with no "?") take the same
+		// pre-fetch/batching path as full-form URLs, so the two conditional-create searches are combined into a
+		// single batched token query instead of being run individually at transaction time.
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(7, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 

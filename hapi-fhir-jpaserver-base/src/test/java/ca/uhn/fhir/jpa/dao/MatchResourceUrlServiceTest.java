@@ -26,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -108,6 +109,7 @@ class MatchResourceUrlServiceTest {
 		SearchParameterMap sp = new SearchParameterMap();
 		sp.setLastUpdated(new DateRangeParam().setLowerBound("2024").setUpperBound("2025"));
 
+		when(myCtx.getResourceType(Patient.class)).thenReturn("Patient");
 		when(myDaoRegistry.getResourceDao(Patient.class)).thenReturn(myFhirResourceDao);
 		when(myFhirResourceDao.searchForIds(any(), any(), any())).thenReturn(List.of(cachedPid));
 		when(myMatchUrlSvc.translateMatchUrl(any(), any())).thenReturn(sp);
@@ -118,6 +120,16 @@ class MatchResourceUrlServiceTest {
 		assertNotNull(pid);
 		assertThat(pid.getPartitionId()).isEqualTo(partitionId);
 		assertThat(pid.getId()).isEqualTo(1L);
+	}
+
+	@Test
+	void testMassageForStorage_nullOrBlankResourceType_throws() {
+		assertThatThrownBy(() -> MatchResourceUrlService.massageForStorage(null, "identifier=foo|bar"))
+			.isInstanceOf(NullPointerException.class)
+			.hasMessageContaining("theResourceType");
+		assertThatThrownBy(() -> MatchResourceUrlService.massageForStorage(" ", "identifier=foo|bar"))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("theResourceType");
 	}
 
 	/**
