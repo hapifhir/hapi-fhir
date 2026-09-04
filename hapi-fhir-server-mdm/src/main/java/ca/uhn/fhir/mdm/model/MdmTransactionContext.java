@@ -57,6 +57,8 @@ public class MdmTransactionContext {
 
 	private List<IMdmLink> myMdmLinkEvents = new ArrayList<>();
 
+	private boolean myIsTooManyCandidatesMatched;
+
 	public TransactionLogMessages getTransactionLogMessages() {
 		return myTransactionLogMessages;
 	}
@@ -124,5 +126,13 @@ public class MdmTransactionContext {
 
 	public boolean getIsBlocked() {
 		return myIsBlockedResource;
+	}
+
+	public boolean isTooManyCandidatesMatched() {
+		return myIsTooManyCandidatesMatched;
+	}
+
+	public void setTooManyCandidatesMatched(boolean theTooManyCandidatesMatched) {
+		myIsTooManyCandidatesMatched = theTooManyCandidatesMatched;
 	}
 }

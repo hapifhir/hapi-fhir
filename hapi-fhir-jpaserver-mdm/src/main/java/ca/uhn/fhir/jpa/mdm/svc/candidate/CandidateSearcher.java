@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.svc.MdmSearchParamSvc;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -58,7 +59,11 @@ public class CandidateSearcher {
 	 * return the bundle provider for the search results.
 	 */
 	public Optional<IBundleProvider> search(
-			String theResourceType, String theResourceCriteria, RequestPartitionId partitionId) {
+			String theResourceType,
+			String theResourceCriteria,
+			RequestPartitionId partitionId,
+			MdmTransactionContext theContext
+	) {
 		SearchParameterMap searchParameterMap =
 				myMdmSearchParamSvc.mapFromCriteria(theResourceType, theResourceCriteria);
 
@@ -69,9 +74,18 @@ public class CandidateSearcher {
 		systemRequestDetails.setRequestPartitionId(partitionId);
 		IBundleProvider retval = resourceDao.search(searchParameterMap, systemRequestDetails);
 
-		if (retval.size() != null && retval.size() >= myMdmSettings.getCandidateSearchLimit()) {
-			return Optional.empty();
+		if (retval.size() != null) {
+			if (retval.size() >= myMdmSettings.getCandidateSearchLimit()) {
+				ourLog.warn("Candidate search yielded {}; more than allowed by settings. Resource will be omitted from MDM matching",
+					retval.size());
+				theContext.setTooManyCandidatesMatched(true);
+				return Optional.empty();
+			} else if (retval.size() >= myMdmSettings.getCandidateSearchWarnLimit()) {
+				ourLog.warn("Candidate search yielded {} results; more than the warning level, but not enough to halt MDM matching.",
+					retval.size());
+			}
 		}
+
 		return Optional.of(retval);
 	}
 
@@ -83,8 +97,8 @@ public class CandidateSearcher {
 	 * @return Optional.empty() if >= IMdmSettings.getCandidateSearchLimit() candidates are found, otherwise
 	 * return the bundle provider for the search results.
 	 */
-	public Optional<IBundleProvider> search(String theResourceType, String theResourceCriteria) {
-		return this.search(theResourceType, theResourceCriteria, RequestPartitionId.allPartitions());
+	public Optional<IBundleProvider> search(String theResourceType, String theResourceCriteria, MdmTransactionContext theContext) {
+		return this.search(theResourceType, theResourceCriteria, RequestPartitionId.allPartitions(), theContext);
 	}
 
 	public static String idOrType(IAnyResource theResource, String theResourceType) {

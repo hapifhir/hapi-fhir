@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
+import ca.uhn.fhir.jpa.mdm.models.FindGoldenResourceCandidatesParams;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
@@ -56,20 +57,21 @@ public class FindCandidateByEidSvc extends BaseCandidateFinder {
 	MdmPartitionHelper myMdmPartitionHelper;
 
 	@Override
-	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(IAnyResource theIncomingResource) {
+	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(FindGoldenResourceCandidatesParams theParams) {
 		List<MatchedGoldenResourceCandidate> retval = new ArrayList<>();
+		IAnyResource incomingResource = theParams.getResource();
 
-		List<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theIncomingResource);
+		List<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(incomingResource);
 		if (!eidFromResource.isEmpty()) {
 			for (CanonicalEID eid : eidFromResource) {
 				Optional<IAnyResource> oFoundGoldenResource = myMdmResourceDaoSvc.searchGoldenResourceByEID(
 						eid.getValue(),
-						theIncomingResource.getIdElement().getResourceType(),
-						myMdmPartitionHelper.getRequestPartitionIdFromResourceForSearch(theIncomingResource));
+						incomingResource.getIdElement().getResourceType(),
+						myMdmPartitionHelper.getRequestPartitionIdFromResourceForSearch(incomingResource));
 				if (oFoundGoldenResource.isPresent()) {
 					IAnyResource foundGoldenResource = oFoundGoldenResource.get();
 					// Exclude manually declared NO_MATCH links from candidates
-					if (isNoMatch(foundGoldenResource, theIncomingResource)) {
+					if (isNoMatch(foundGoldenResource, incomingResource)) {
 						continue;
 					}
 					IResourcePersistentId<?> pidOrNull =
@@ -78,7 +80,7 @@ public class FindCandidateByEidSvc extends BaseCandidateFinder {
 							new MatchedGoldenResourceCandidate(pidOrNull, MdmMatchOutcome.EID_MATCH);
 					ourLog.debug(
 							"Incoming Resource {} matched Golden Resource {} by EID {}",
-							theIncomingResource.getIdElement().toUnqualifiedVersionless(),
+							incomingResource.getIdElement().toUnqualifiedVersionless(),
 							foundGoldenResource.getIdElement().toUnqualifiedVersionless(),
 							eid);
 

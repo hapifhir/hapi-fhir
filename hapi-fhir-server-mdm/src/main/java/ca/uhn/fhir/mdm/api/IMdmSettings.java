@@ -53,7 +53,22 @@ public interface IMdmSettings {
 		return getMdmRules().getMdmTypes().stream().collect(Collectors.joining(", "));
 	}
 
+	/**
+	 * The hard limit for candidate search results.
+	 * If MDM matches exceeds this limit, the submitted resource will be
+	 * tagged and no more matching will be done.
+	 *
+	 * Surpassing this limit is often a sign of
+	 * matching criteria being too broad and applying to too many resources
+	 */
 	int getCandidateSearchLimit();
+
+	/**
+	 * The warn limit for candidate search results.
+	 * If MDM matches exceed this limit, matching will still occur,
+	 * but a warning will be logged.
+	 */
+	int getCandidateSearchWarnLimit();
 
 	String getGoldenResourcePartitionName();
 

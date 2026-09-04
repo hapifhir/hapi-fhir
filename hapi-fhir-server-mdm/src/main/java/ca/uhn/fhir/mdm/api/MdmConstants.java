@@ -35,6 +35,38 @@ public class MdmConstants {
 	public static final String ALL_RESOURCE_SEARCH_PARAM_TYPE = "*";
 
 	/**
+	 * The namespace (system) of the tag for MDM resources that were not
+	 * matched to potential candidates.
+	 * The reason will come in the value.
+	 */
+	public static final String MDM_UNMATCHED_TAG_NAMESPACE = "http://hapifhir.io/fhir/StructureDefinition/mdm-unmatched";
+
+	/**
+	 * If set as the value of an extension with the above namespace,
+	 * denotes a resource that was "blocked" because of a configured MdmBlock list
+	 */
+	public static final String BLOCKED_VALUE = "blocked";
+
+	/**
+	 * If set as the value of an extension with the above namespace,
+	 * denotes a resource that wasn't matched because it exceeded
+	 * the {@link IMdmSettings#getCandidateSearchLimit()}.
+	 */
+	public static final String TOO_MANY_CANDIDATES = "too-many-candidates";
+
+	/**
+	 * Display text for MDM resources that are *blocked* from MDM matching because
+	 * of block rule conditions.
+	 */
+	public static final String BLOCKED_DISPLAY = "This resource has been omitted from MDM Matching because of blocklist criteria.";
+
+	/**
+	 * Display text for MDM resources that are omitted (skipped) during MDM
+	 * matching because the current match rules yield too many candidate matches.
+	 */
+	public static final String TOO_MANY_CANDIDATES_DISPLAY = "This resource has been omitted from MDM matching because it matches to too many candidate resources under current match rules.";
+
+	/**
 	 * Blocked resource tag info
 	 */
 	public static final String CODE_BLOCKED = "BLOCKED_RESOURCE";

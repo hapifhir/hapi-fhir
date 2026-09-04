@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.mdm.models.FindGoldenResourceCandidatesParams;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -42,10 +43,11 @@ public class FindCandidateByLinkSvc extends BaseCandidateFinder {
 	 * @return an Optional list of {@link MatchedGoldenResourceCandidate} indicating matches.
 	 */
 	@Override
-	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(IAnyResource theTarget) {
+	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(FindGoldenResourceCandidatesParams theParams) {
 		List<MatchedGoldenResourceCandidate> retval = new ArrayList<>();
+		IAnyResource target = theParams.getResource();
 
-		IResourcePersistentId targetPid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theTarget);
+		IResourcePersistentId targetPid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), target);
 		if (targetPid != null) {
 			Optional<? extends IMdmLink> oLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(targetPid);
 			if (oLink.isPresent()) {

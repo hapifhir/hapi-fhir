@@ -59,7 +59,9 @@ public class MdmSettings implements IMdmSettings {
 	 * When searching for matching candidates, this is the maximum number of candidates that will be retrieved.  If the
 	 * number matched is equal to or higher than this, then an exception will be thrown and candidate matching will be aborted
 	 */
-	private int myCandidateSearchLimit = DEFAULT_CANDIDATE_SEARCH_LIMIT;
+	private int myCandidateSearchHardLimit = DEFAULT_CANDIDATE_SEARCH_LIMIT;
+
+	private int myCandidateSearchWarnLimit = 5; // default
 
 	@Autowired
 	public MdmSettings(IMdmRuleValidator theMdmRuleValidator) {
@@ -137,11 +139,16 @@ public class MdmSettings implements IMdmSettings {
 
 	@Override
 	public int getCandidateSearchLimit() {
-		return myCandidateSearchLimit;
+		return myCandidateSearchHardLimit;
+	}
+
+	@Override
+	public int getCandidateSearchWarnLimit() {
+		return myCandidateSearchWarnLimit;
 	}
 
 	public void setCandidateSearchLimit(int theCandidateSearchLimit) {
-		myCandidateSearchLimit = theCandidateSearchLimit;
+		myCandidateSearchHardLimit = theCandidateSearchLimit;
 	}
 
 	@Override

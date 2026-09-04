@@ -29,15 +29,20 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmConstants;
+import ca.uhn.fhir.mdm.log.Logs;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.mdm.util.MdmSearchParamBuildingUtils;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -46,6 +51,8 @@ import java.util.Optional;
 
 @Service
 public class MdmResourceDaoSvcImpl implements IMdmResourceDaoSvc {
+	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
+
 
 	private static final int MAX_MATCHING_GOLDEN_RESOURCES = 1000;
 
@@ -117,5 +124,39 @@ public class MdmResourceDaoSvcImpl implements IMdmResourceDaoSvc {
 		} else {
 			return Optional.of((IAnyResource) resources.get(0));
 		}
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
+	public void tagResourceAsUnmatched(IBaseResource theResource, MdmTransactionContext theContext) {
+		if (!theResource.getIdElement().hasIdPart()) {
+			ourLog.error("Cannot tag resources that have not first been persisted!");
+			return;
+		}
+
+		if (theContext.getIsBlocked()) {
+			MdmResourceUtil.tagResourceAsBlocked(theResource);
+		} else if (theContext.isTooManyCandidatesMatched()) {
+			MdmResourceUtil.tagResourceAsTooManyMatchCandidates(theResource);
+		} else {
+			ourLog.warn(
+				"Attempt to tag resource, but no criteria for tagging provided"
+			);
+			return;
+		}
+
+		SystemRequestDetails rd = new SystemRequestDetails();
+		RequestPartitionId partitionId = (RequestPartitionId) theResource.getUserData(Constants.RESOURCE_PARTITION_ID);
+		if (partitionId == null) {
+			partitionId = RequestPartitionId.allPartitions();
+		}
+		rd.setRequestPartitionId(partitionId);
+
+		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResource.fhirType());
+
+		resourceDao.metaAddOperation(theResource.getIdElement().toUnqualifiedVersionless(),
+			theResource.getMeta(),
+			rd,
+			new TransactionDetails());
 	}
 }

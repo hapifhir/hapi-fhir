@@ -20,6 +20,7 @@
 package ca.uhn.fhir.mdm.api;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 
@@ -37,5 +38,6 @@ public interface IMdmMatchFinderSvc {
 	 */
 	@Nonnull
 	List<MatchedTarget> getMatchedTargets(
-			String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId);
+		String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId,
+		MdmTransactionContext theContext);
 }

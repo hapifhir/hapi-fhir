@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
@@ -33,6 +32,7 @@ import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
@@ -59,6 +59,7 @@ import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.MATCH;
 import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.NO_MATCH;
 import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.POSSIBLE_DUPLICATE;
 import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.POSSIBLE_MATCH;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -73,6 +74,48 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class MdmMatchLinkSvcTest {
 
 	private static final Logger ourLog = getLogger(MdmMatchLinkSvcTest.class);
+
+	@Nested
+	public class TooManyCandidatesTest extends BaseMdmR4Test {
+
+		@Test
+		public void findCandidates_withLowSearchLimit_tagsResourceAsTooManyMatches() {
+			// setup
+			int maxThreshold = 3;
+			Date today = new Date();
+			int countToMake = maxThreshold * 2;
+			for (int i = 0; i < countToMake; i++) {
+				Patient jane = buildJaneWithBirthday(today);
+				jane.getName()
+					.get(0)
+					.addGiven("_" + i);
+				jane.setActive(true);
+				createPatient(jane);
+			}
+
+			Patient jane = buildJaneWithBirthday(today);
+			jane.setActive(true);
+
+			// test
+			int searchLimit = myMdmSettings.getCandidateSearchLimit();
+			try {
+				myMdmSettings.setCandidateSearchLimit(maxThreshold);
+				Patient saved = createPatientAndUpdateLinks(jane);
+
+				IIdType id = saved.getIdElement();
+
+				Patient returned = myPatientDao.read(id, new SystemRequestDetails());
+
+				// validate
+				assertTrue(MdmResourceUtil.resourceHasTagWithSystem(
+					returned, MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE
+				));
+			} finally {
+				myMdmSettings.setCandidateSearchLimit(searchLimit);
+			}
+		}
+
+	}
 
 	@Nested
 	public class NoBlockLinkTest extends BaseMdmR4Test {
