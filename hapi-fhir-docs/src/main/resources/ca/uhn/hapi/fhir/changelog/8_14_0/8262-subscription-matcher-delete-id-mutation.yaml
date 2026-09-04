@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 8262
+title: "Previously, SubscriptionMatcherInterceptor.resourceDeleted rewrote the id of the
+    shared STORAGE_PRECOMMIT_RESOURCE_DELETED resource, so later hooks and the DELETE
+    response saw the pre-delete version id. Matching now uses a clone, and the shared
+    instance keeps the deletion version."
