@@ -121,6 +121,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 @Interceptor
 public class PatientIdPartitionInterceptor {
+	private static final Logger ourLog = LoggerFactory.getLogger(PatientIdPartitionInterceptor.class);
+
 	public static final String PATIENT_COMPARTMENT_NONE = "NONE";
 
 	/**
@@ -131,7 +133,16 @@ public class PatientIdPartitionInterceptor {
 	// Created by Claude Fable 5
 	public static final int STORAGE_TRANSACTION_PROCESSING_ORDER_NORMALIZE = 1000;
 
-	private static final Logger ourLog = LoggerFactory.getLogger(PatientIdPartitionInterceptor.class);
+	/**
+	 * The live response codes a rewritten entry produces when its match URL indeed had no match at write time —
+	 * the only situation the recorded rewrite intent describes, and therefore the only outcomes
+	 * {@link #restoreRewrittenPatientOutcomes} may replace.
+	 */
+	// Created by Claude Fable 5
+	private static final Set<String> RESTORABLE_LIVE_CODES = Set.of(
+		StorageResponseCodeEnum.SUCCESSFUL_UPDATE_AS_CREATE.name(),
+		StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH.name());
+
 	private static final String PATIENT_STR = "Patient";
 
 	/**
@@ -1011,6 +1022,17 @@ public class PatientIdPartitionInterceptor {
 						theVersionAdapter.setRequestUrl(entry, substituted);
 					}
 				}
+			} else {
+				String url = theVersionAdapter.getEntryRequestUrl(entry);
+				if (url != null
+						&& url.contains("?")
+						&& !Strings.CS.equals(
+								url, BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(idSubstitutions, url))) {
+					ourLog.debug(
+							"Leaving placeholder reference in the conditional URL of a {} entry for the write loop's native substitution: {}",
+							verb,
+							url);
+				}
 			}
 		}
 	}
@@ -1063,16 +1085,6 @@ public class PatientIdPartitionInterceptor {
 			}
 		}
 	}
-
-	/**
-	 * The live response codes a rewritten entry produces when its match URL indeed had no match at write time —
-	 * the only situation the recorded rewrite intent describes, and therefore the only outcomes
-	 * {@link #restoreRewrittenPatientOutcomes} may replace.
-	 */
-	// Created by Claude Fable 5
-	private static final Set<String> RESTORABLE_LIVE_CODES = Set.of(
-			StorageResponseCodeEnum.SUCCESSFUL_UPDATE_AS_CREATE.name(),
-			StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH.name());
 
 	/** The StorageResponseCode carried by the outcome's primary issue, or null if it carries none. */
 	// Created by Claude Fable 5
