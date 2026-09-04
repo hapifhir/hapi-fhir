@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR JPA Server Test Utilities
+ * HAPI FHIR Test Utilities
  * %%
  * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
@@ -17,14 +17,13 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.provider.r4;
+package ca.uhn.fhir.test.utilities;
 
 /**
- * @deprecated This class stood as a near-duplicate of
- *    {@link ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test}, which is now the only
- *    implementation; extend that one instead. This subclass carries no behaviour of its own and
- *    exists so that code already extending this name keeps compiling for one release.
+ * One HTTP header, independent of any HTTP client library and of the direction it travels in.
+ * Headers a test sets on an {@link HttpTestRequest} and headers it reads back off an
+ * {@link HttpTestResponse} are the same shape, so they share one type rather than the request half
+ * of the API borrowing a type from the response half.
  */
-@Deprecated(forRemoval = true)
 // Created by claude-opus-5
-public abstract class BaseResourceProviderR4Test extends ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test {}
+public record HttpTestHeader(String name, String value) {}

@@ -30,6 +30,7 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IServerAddressStrategy;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.test.utilities.HttpTestRequest;
 import jakarta.servlet.http.HttpServlet;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
@@ -137,6 +138,17 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 	public FhirContext getFhirContext() {
 		createContextIfNeeded();
 		return myFhirContext;
+	}
+
+	/**
+	 * Starts building a request against this server's base URL, using this server's
+	 * {@link #getHttpClient()} and {@link #getFhirContext()} to encode any FHIR resource bodies.
+	 *
+	 * @param thePath the path below the server base URL, beginning with a slash
+	 */
+	// Created by claude-sonnet-5
+	public HttpTestRequest fhirRequest(String thePath) {
+		return HttpTestRequest.to(getHttpClient(), getFhirContext(), getBaseUrl() + thePath);
 	}
 
 	public RestfulServer getRestfulServer() {
