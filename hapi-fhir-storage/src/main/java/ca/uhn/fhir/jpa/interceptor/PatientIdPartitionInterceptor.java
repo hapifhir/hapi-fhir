@@ -39,9 +39,13 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
+import ca.uhn.fhir.jpa.dao.BaseTransactionProcessor;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
+import ca.uhn.fhir.jpa.dao.IdSubstitutionMap;
+import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.PreFetchSkippableMethodNotAllowedException;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.BaseRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
@@ -117,6 +121,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 @Interceptor
 public class PatientIdPartitionInterceptor {
+	private static final Logger ourLog = LoggerFactory.getLogger(PatientIdPartitionInterceptor.class);
+
 	public static final String PATIENT_COMPARTMENT_NONE = "NONE";
 
 	/**
@@ -127,7 +133,16 @@ public class PatientIdPartitionInterceptor {
 	// Created by Claude Fable 5
 	public static final int STORAGE_TRANSACTION_PROCESSING_ORDER_NORMALIZE = 1000;
 
-	private static final Logger ourLog = LoggerFactory.getLogger(PatientIdPartitionInterceptor.class);
+	/**
+	 * The live response codes a rewritten entry produces when its match URL indeed had no match at write time —
+	 * the only situation the recorded rewrite intent describes, and therefore the only outcomes
+	 * {@link #restoreRewrittenPatientOutcomes} may replace.
+	 */
+	// Created by Claude Fable 5
+	private static final Set<String> RESTORABLE_LIVE_CODES = Set.of(
+			StorageResponseCodeEnum.SUCCESSFUL_UPDATE_AS_CREATE.name(),
+			StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH.name());
+
 	private static final String PATIENT_STR = "Patient";
 
 	/**
@@ -144,14 +159,12 @@ public class PatientIdPartitionInterceptor {
 	 */
 	// Created by Claude Opus 4.7
 	private enum RewriteIntent {
-		UNCONDITIONAL_CREATE,
 		CONDITIONAL_CREATE_NO_MATCH,
 		CONDITIONAL_UPDATE_NO_MATCH
 	}
 
 	/**
-	 * @param conditionalUrl the original conditional match URL, needed to render the outcome message; null for
-	 *                       {@link RewriteIntent#UNCONDITIONAL_CREATE}.
+	 * @param conditionalUrl the original conditional match URL, needed to render the outcome message.
 	 */
 	// Created by Claude Opus 4.7
 	private record RewrittenOutcome(RewriteIntent intent, String conditionalUrl) {}
@@ -803,10 +816,8 @@ public class PatientIdPartitionInterceptor {
 	/**
 	 * Once {@code preFetch} has resolved every conditional URL and reference target, resolve each Patient entry to a
 	 * concrete ID and substitute all in-bundle references to it. This makes compartment placement independent of the
-	 * order entries are processed in: a matched conditional Patient reuses the existing resource's ID; an
-	 * unconditional Patient is assigned a UUID and its create is rewritten as a direct update so the ID sticks; an
-	 * unmatched conditional Patient is assigned a UUID on the body but stays a conditional update, so in-bundle
-	 * duplicates of the same match URL consolidate.
+	 * order entries are processed in: a matched conditional Patient reuses the existing resource's ID; a new Patient
+	 * gets a minted UUID stamped as its server-assigned id ({@link JpaConstants#RESOURCE_ID_SERVER_ASSIGNED_VALUE}).
 	 */
 	// Created by Claude Opus 4.7
 	@Hook(Pointcut.STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH)
@@ -821,6 +832,7 @@ public class PatientIdPartitionInterceptor {
 		Map<String, String> idSubstitutions =
 				rewriteResolvedOrAssignPatientEntryIds(thePrefetchDetails, theTransactionDetails);
 		substituteReferences(thePrefetchDetails.getVersionAdapter(), entries, idSubstitutions);
+		substituteConditionalUrlPlaceholders(thePrefetchDetails.getVersionAdapter(), entries, idSubstitutions);
 	}
 
 	/**
@@ -855,9 +867,11 @@ public class PatientIdPartitionInterceptor {
 
 	/**
 	 * Resolves one Patient entry carrying a placeholder (urn:uuid) fullUrl: a matched conditional reuses the
-	 * existing resource's ID; when the server assigns UUIDs, an unconditional create is assigned a minted ID and
-	 * rewritten as a direct update, and an unmatched conditional is assigned a minted ID but stays conditional.
-	 * Substitutions and minted references accumulate in the supplied maps.
+	 * existing resource's ID; when the server assigns UUIDs, a new Patient has a minted ID stamped as its
+	 * server-assigned id, leaving the verb untouched so the write loop processes the entry natively. The entry
+	 * is rewritten to a conditional update only where native processing cannot express the intent: an unmatched
+	 * conditional update needs the minted id on its body, and a match URL the pre-fetch never attempted has an
+	 * unknowable match state here. Substitutions and minted references accumulate in the supplied maps.
 	 */
 	// Created by Claude Fable 5
 	private void resolvePlaceholderPatientEntry(
@@ -893,9 +907,9 @@ public class PatientIdPartitionInterceptor {
 		if (isBlank(matchUrl)) {
 			if ("POST".equals(method)) {
 				if (serverAssignsUuids) {
-					String newReference = assignNewIdAndRewriteToPut(
-							versionAdapter, theTransactionDetails, theEntry, resource, theFullUrl, theIdSubstitutions);
-					rewrittenOutcomes.put(newReference, new RewrittenOutcome(RewriteIntent.UNCONDITIONAL_CREATE, null));
+					String newReference = mintPatientReference();
+					theIdSubstitutions.put(theFullUrl, newReference);
+					stampServerAssignedId(resource, newReference);
 				}
 			} else if ("PUT".equals(method) && isNotBlank(url) && !Strings.CS.equals(theFullUrl, url)) {
 				theIdSubstitutions.put(theFullUrl, url);
@@ -917,22 +931,37 @@ public class PatientIdPartitionInterceptor {
 					resource.setId(matchedReference);
 				}
 			} else if (serverAssignsUuids) {
-				// Keep the entry conditional (PUT Patient?<matchUrl>) rather than rewriting it to a direct
-				// update: the framework then consolidates in-bundle duplicates of the same match URL, and the
-				// create path writes the HFJ_RES_SEARCH_URL row that makes a concurrent transaction creating
-				// the same conditional URL collide instead of duplicating the patient. Duplicates share one
-				// minted id so references to any of them resolve to the single created patient.
-				String conditionalUrl = matchUrl.contains("?") ? matchUrl : PATIENT_STR + "?" + matchUrl;
+				// Duplicates of the same match URL share one minted id: same-verb duplicates then consolidate
+				// onto a single write, and references to any of them resolve to the single created patient. A
+				// create and an update sharing a match URL both write the shared id, which the write loop's
+				// post-write duplicate validation rejects exactly as outside partition mode.
+				String conditionalUrl = MatchResourceUrlService.massageForStorage(PATIENT_STR, matchUrl);
 				String newReference =
 						theMatchUrlToMintedReference.computeIfAbsent(conditionalUrl, k -> mintPatientReference());
 				theIdSubstitutions.put(theFullUrl, newReference);
-				rewriteAsPut(versionAdapter, theEntry, resource, newReference, conditionalUrl);
-				RewriteIntent intent = "POST".equals(method)
-						? RewriteIntent.CONDITIONAL_CREATE_NO_MATCH
-						: RewriteIntent.CONDITIONAL_UPDATE_NO_MATCH;
-				rewrittenOutcomes.putIfAbsent(newReference, new RewrittenOutcome(intent, matchUrl));
+				if ("POST".equals(method) && resolution.prefetched()) {
+					// The entry stays a conditional POST with the minted id stamped as server-assigned.
+					stampServerAssignedId(resource, newReference);
+				} else {
+					// Rewritten to a conditional PUT with the minted body id.
+					rewriteAsPut(versionAdapter, theEntry, resource, newReference, conditionalUrl);
+					RewriteIntent intent = "POST".equals(method)
+							? RewriteIntent.CONDITIONAL_CREATE_NO_MATCH
+							: RewriteIntent.CONDITIONAL_UPDATE_NO_MATCH;
+					rewrittenOutcomes.putIfAbsent(newReference, new RewrittenOutcome(intent, matchUrl));
+				}
 			}
 		}
+	}
+
+	/**
+	 * Marks the minted reference's id part as the resource's server-assigned id
+	 * ({@link JpaConstants#RESOURCE_ID_SERVER_ASSIGNED_VALUE}): the create path adopts it as if the server had
+	 * generated it, so the entry's verb — and everything the write loop keys on it — stays untouched.
+	 */
+	// Created by Claude Fable 5
+	private static void stampServerAssignedId(IBaseResource theResource, String theNewReference) {
+		theResource.setUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED_VALUE, new IdDt(theNewReference).getIdPart());
 	}
 
 	/** Replaces every in-bundle reference that matches a substitution key with its concrete reference. */
@@ -962,9 +991,59 @@ public class PatientIdPartitionInterceptor {
 	}
 
 	/**
+	 * Replaces placeholder (urn) references inside each entry's conditional URL — POST ifNoneExist and conditional
+	 * PUT request URLs — with the concrete ids resolved above.
+	 */
+	// Created by Claude Fable 5
+	private void substituteConditionalUrlPlaceholders(
+			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
+			List<IBase> theEntries,
+			Map<String, String> theIdSubstitutions) {
+		if (theIdSubstitutions.isEmpty()) {
+			return;
+		}
+		IdSubstitutionMap idSubstitutions = new IdSubstitutionMap();
+		theIdSubstitutions.forEach((source, target) -> idSubstitutions.put(new IdDt(source), new IdDt(target)));
+		for (IBase entry : theEntries) {
+			String verb = theVersionAdapter.getEntryRequestVerb(myFhirContext, entry);
+			if ("POST".equals(verb)) {
+				String ifNoneExist = theVersionAdapter.getEntryRequestIfNoneExist(entry);
+				String substituted =
+						BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(idSubstitutions, ifNoneExist);
+				if (!Strings.CS.equals(ifNoneExist, substituted)) {
+					theVersionAdapter.setRequestIfNoneExist(entry, substituted);
+				}
+			} else if ("PUT".equals(verb)) {
+				String url = theVersionAdapter.getEntryRequestUrl(entry);
+				if (url != null && url.contains("?")) {
+					String substituted =
+							BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(idSubstitutions, url);
+					if (!Strings.CS.equals(url, substituted)) {
+						theVersionAdapter.setRequestUrl(entry, substituted);
+					}
+				}
+			} else {
+				String url = theVersionAdapter.getEntryRequestUrl(entry);
+				if (url != null
+						&& url.contains("?")
+						&& !Strings.CS.equals(
+								url, BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(idSubstitutions, url))) {
+					ourLog.debug(
+							"Leaving placeholder reference in the conditional URL of a {} entry for the write loop's native substitution: {}",
+							verb,
+							url);
+				}
+			}
+		}
+	}
+
+	/**
 	 * Once the transaction has been processed, restore the operation outcome each rewritten Patient entry would have
 	 * had if {@link #resolvePatientReferencesAfterPreFetch} hadn't rewritten its verb to make compartment placement
-	 * order-independent.
+	 * order-independent. The restoration only applies to an entry whose live outcome shows the write loop indeed
+	 * found no match ({@link #RESTORABLE_LIVE_CODES}) — any other live code means the recorded no-match intent went
+	 * stale (e.g. the match URL resolved to a patient another entry created moments earlier), and the native outcome
+	 * is the truth.
 	 */
 	// Created by Claude Opus 4.7
 	@Hook(Pointcut.STORAGE_TRANSACTION_RESPONSE_ASSEMBLED)
@@ -999,9 +1078,23 @@ public class PatientIdPartitionInterceptor {
 			// reported for the original verb, and a DAO that reports nothing would have reported nothing.
 			IBaseOperationOutcome liveOutcome = versionAdapter.getResponseOutcome(entry);
 			if (liveOutcome != null) {
-				restorePrimaryIssue(liveOutcome, code, message);
+				String liveCode = primaryResponseCode(liveOutcome);
+				if (liveCode != null && RESTORABLE_LIVE_CODES.contains(liveCode)) {
+					restorePrimaryIssue(liveOutcome, code, message);
+				}
 			}
 		}
+	}
+
+	/** The StorageResponseCode carried by the outcome's primary issue, or null if it carries none. */
+	// Created by Claude Fable 5
+	@Nullable
+	private String primaryResponseCode(IBaseOperationOutcome theOutcome) {
+		List<IBase> codes = myFhirContext.newTerser().getValues(theOutcome, "issue.details.coding.code");
+		if (codes.isEmpty()) {
+			return null;
+		}
+		return ((IPrimitiveType<?>) codes.get(0)).getValueAsString();
 	}
 
 	/**
@@ -1033,7 +1126,6 @@ public class PatientIdPartitionInterceptor {
 	// Created by Claude Opus 4.7
 	private StorageResponseCodeEnum restoredOutcomeCode(RewrittenOutcome theRewrite) {
 		return switch (theRewrite.intent()) {
-			case UNCONDITIONAL_CREATE -> StorageResponseCodeEnum.SUCCESSFUL_CREATE;
 			case CONDITIONAL_CREATE_NO_MATCH -> StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH;
 			case CONDITIONAL_UPDATE_NO_MATCH -> StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH;
 		};
@@ -1043,7 +1135,6 @@ public class PatientIdPartitionInterceptor {
 	private String restoredOutcomeMessage(StorageResponseCodeEnum theCode, String theId, String theConditionalUrl) {
 		HapiLocalizer localizer = myFhirContext.getLocalizer();
 		return switch (theCode) {
-			case SUCCESSFUL_CREATE -> localizer.getMessageSanitized(BaseStorageDao.class, "successfulCreate", theId);
 			case SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH -> localizer.getMessageSanitized(
 					BaseStorageDao.class,
 					"successfulCreateConditionalNoMatch",
@@ -1057,23 +1148,6 @@ public class PatientIdPartitionInterceptor {
 					UrlUtil.sanitizeUrlPart(theConditionalUrl));
 			default -> theCode.getDisplay();
 		};
-	}
-
-	// Created by Claude Opus 4.7
-	private String assignNewIdAndRewriteToPut(
-			ITransactionProcessorVersionAdapter<IBaseBundle, IBase> theVersionAdapter,
-			TransactionDetails theTransactionDetails,
-			IBase theEntry,
-			IBaseResource theResource,
-			String theFullUrl,
-			Map<String, String> theIdSubstitutions) {
-		String newReference = mintPatientReference();
-		// A freshly minted id cannot exist yet. Record that the same way preFetch records unresolvable
-		// ids, so the update path skips its existence lookup.
-		theTransactionDetails.addResolvedResourceId(new IdDt(newReference), null);
-		theIdSubstitutions.put(theFullUrl, newReference);
-		rewriteAsPut(theVersionAdapter, theEntry, theResource, newReference, newReference);
-		return newReference;
 	}
 
 	/**
@@ -1193,27 +1267,33 @@ public class PatientIdPartitionInterceptor {
 	}
 
 	/**
-	 * What the pre-fetch resolved for a match URL: {@code matched} is true when the pre-fetch found an existing
-	 * resource. {@code matchedId} carries its FHIR id, or null when the match has no reverse-mapped id (non-token
-	 * match URL) — such an entry is matched yet its id is unknowable this early, so callers that mint ids for
-	 * unmatched URLs must not treat it as unmatched.
+	 * What the pre-fetch resolved for a match URL. {@code prefetched} is false when the pre-fetch never
+	 * attempted the URL at all (nothing recorded, not even NOT_FOUND) — such a URL may still match at write
+	 * time, so callers must not treat it like a confirmed miss. {@code matched} is true when the pre-fetch
+	 * found an existing resource. {@code matchedId} carries its FHIR id, or null when the match has no
+	 * reverse-mapped id (non-token match URL) — such an entry is matched yet its id is unknowable this early,
+	 * so callers that mint ids for unmatched URLs must not treat it as unmatched.
 	 */
 	// Created by Claude Fable 5
-	private record PreFetchResolution(boolean matched, @Nullable IIdType matchedId) {}
+	private record PreFetchResolution(boolean prefetched, boolean matched, @Nullable IIdType matchedId) {}
 
 	/**
 	 * Consults what the pre-fetch resolved for the given match URL, via
-	 * {@link TransactionDetails#getResolvedMatchUrls()} and the reverse-id map. No search is performed — we act
-	 * only on what the pre-fetch put in the transaction details.
+	 * {@link TransactionDetails#getResolvedMatchUrls()} and the reverse-id map. The lookup key is canonicalized
+	 * the same way the pre-fetch records it, so the type-less If-None-Exist spellings resolve too.
 	 */
 	// Created by Claude Fable 5
 	private PreFetchResolution getPreFetchResolution(String theMatchUrl, TransactionDetails theTransactionDetails) {
+		String canonicalUrl = MatchResourceUrlService.massageForStorage(PATIENT_STR, theMatchUrl);
 		IResourcePersistentId<?> resolved =
-				theTransactionDetails.getResolvedMatchUrls().get(theMatchUrl);
-		if (resolved == null || resolved == TransactionDetails.NOT_FOUND) {
-			return new PreFetchResolution(false, null);
+				theTransactionDetails.getResolvedMatchUrls().get(canonicalUrl);
+		if (resolved == null) {
+			return new PreFetchResolution(false, false, null);
 		}
-		return new PreFetchResolution(true, theTransactionDetails.getReverseResolvedId(resolved));
+		if (resolved == TransactionDetails.NOT_FOUND) {
+			return new PreFetchResolution(true, false, null);
+		}
+		return new PreFetchResolution(true, true, theTransactionDetails.getReverseResolvedId(resolved));
 	}
 
 	@SuppressWarnings("SameParameterValue")
