@@ -3,9 +3,12 @@ package ca.uhn.fhir.jpa.interceptor.validation;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.IntegerType;
@@ -24,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -528,6 +532,34 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 			String issueText = oo.getIssueFirstRep().getDiagnostics();
 			assertThat(issueText).contains("Constraint failed");
 		}
+	}
+
+	/**
+	 * The interceptor checks every resource passing through storage for the placeholder marker
+	 * extension. Resource types that are not {@link org.hl7.fhir.instance.model.api.IBaseHasExtensions}
+	 * (in R4 these are the non-DomainResource types, e.g. Binary and Bundle) cannot carry that
+	 * extension at all, and must be treated as non-placeholders rather than rejected.
+	 */
+	@Test
+	void createResourceTypeThatCannotHaveExtensions_withRulesRegistered_isNotRejected() {
+		// setup
+		// set rules on interceptor
+		List<IRepositoryValidatingRule> rules = newRuleBuilder()
+			.forResourcesOfType("Patient")
+			.requireAtLeastOneProfileOf("http://foo/Profile1", "http://foo/Profile2")
+			.build();
+		myValInterceptor.setRules(rules);
+
+		// test with binary; make sure it's created (ie, has an id value)
+		Binary binary = new Binary();
+		binary.setContentType("text/plain");
+		binary.setContent("hello".getBytes(StandardCharsets.UTF_8));
+		assertThat(myBinaryDao.create(binary, new SystemRequestDetails()).getId().getVersionIdPart()).isNotNull();
+
+		// test with a bundle; make sure it's created (ie, has an id value)
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.COLLECTION);
+		assertThat(myBundleDao.create(bundle, new SystemRequestDetails()).getId().getVersionIdPart()).isNotNull();
 	}
 
 	private RepositoryValidatingRuleBuilder newRuleBuilder() {

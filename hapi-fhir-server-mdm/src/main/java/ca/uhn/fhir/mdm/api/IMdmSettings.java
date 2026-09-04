@@ -33,6 +33,12 @@ public interface IMdmSettings {
 
 	boolean isEnabled();
 
+	/**
+	 * Whether or not placeholder resources will be ignored during MDM matching.
+	 * By default this is 'false'.
+	 */
+	boolean isIgnorePlaceholderResources();
+
 	int getConcurrentConsumers();
 
 	MdmRulesJson getMdmRules();

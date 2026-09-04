@@ -24,6 +24,7 @@ import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson;
 import ca.uhn.fhir.mdm.svc.MdmSearchParamSvc;
+import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
@@ -31,6 +32,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
+import static ca.uhn.fhir.storage.PlaceholderResourceUtil.isPlaceholderResource;
 
 @Service
 public class MdmResourceFilteringSvc {
@@ -45,6 +48,9 @@ public class MdmResourceFilteringSvc {
 	@Autowired
 	FhirContext myFhirContext;
 
+	@Autowired
+	private EIDHelper myEIDHelper;
+
 	/**
 	 * Given a resource from the MDM Channel, determine whether or not MDM processing should occur on it.
 	 *
@@ -53,6 +59,8 @@ public class MdmResourceFilteringSvc {
 	 * If the resource has no attributes that appear in the candidate search params, processing should be skipped, as there is not
 	 * sufficient information to perform meaningful MDM processing. (For example, how can MDM processing occur on a patient that has _no_ attributes?)
 	 *
+	 * If the resource is a placeholder resource (and not being submitted for EID matching) it will return as false (not to be processed)
+	 *
 	 * @param theResource the resource that you wish to check against MDM rules.
 	 *
 	 * @return whether or not MDM processing should proceed
@@ -60,6 +68,16 @@ public class MdmResourceFilteringSvc {
 	public boolean shouldBeProcessed(IAnyResource theResource) {
 		if (MdmResourceUtil.isMdmManaged(theResource)) {
 			ourLog.trace("MDM Message handler is dropping [{}] as it is MDM-managed.", theResource.getId());
+			return false;
+		}
+
+		/*
+		 * EID matching is an exception;
+		 * we will always try and match EID even if it's a placeholder.
+		 */
+		if (myMdmSettings.isIgnorePlaceholderResources()
+				&& isPlaceholderResource(theResource)
+				&& myEIDHelper.getExternalEid(theResource).isEmpty()) {
 			return false;
 		}
 
