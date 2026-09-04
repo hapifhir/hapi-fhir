@@ -2716,7 +2716,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 
 	/**
 	 * A conditional create and a conditional update sharing one match URL behave exactly as outside patient id
-	 * partition mode (cf. {@code FhirSystemDaoR4Test#testTransactionWithConditionalCreateAndConditionalUpdateOnSameMatchUrl}):
+	 * partition mode (cf. {@code FhirSystemDaoR4Test#testTransaction_conditionalCreateAndConditionalUpdateOnSameMatchUrl_succeedsOnlyIfUpdateIsNoOp}):
 	 * the create runs first, the update's match URL resolves to the patient the create just made. An identical
 	 * update body no-ops against it and the transaction succeeds; a differing body means two writes match the
 	 * one conditional URL, and the transaction is rejected with nothing persisted.

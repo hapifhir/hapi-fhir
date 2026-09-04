@@ -2178,7 +2178,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	// Created by Claude Fable 5
 	@ParameterizedTest
 	@ValueSource(booleans = {false, true})
-	public void testTransactionWithConditionalCreateAndConditionalUpdateOnSameMatchUrl(boolean theUpdateBodyDiffers) {
+	public void testTransaction_conditionalCreateAndConditionalUpdateOnSameMatchUrl_succeedsOnlyIfUpdateIsNoOp(boolean theUpdateBodyDiffers) {
 		Bundle request = new Bundle();
 		request.setType(BundleType.TRANSACTION);
 
@@ -2209,7 +2209,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		if (theUpdateBodyDiffers) {
 			try {
 				mySystemDao.transaction(mySrd, request);
-				fail();
+				fail("Expected the transaction to be rejected because the created resource and the differing update both match the same conditional URL");
 			} catch (InvalidRequestException e) {
 				assertEquals(
 					Msg.code(542) + "Unable to process Transaction - Request would cause multiple resources to match URL: "
