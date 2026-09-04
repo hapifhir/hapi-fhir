@@ -140,8 +140,8 @@ public class PatientIdPartitionInterceptor {
 	 */
 	// Created by Claude Fable 5
 	private static final Set<String> RESTORABLE_LIVE_CODES = Set.of(
-		StorageResponseCodeEnum.SUCCESSFUL_UPDATE_AS_CREATE.name(),
-		StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH.name());
+			StorageResponseCodeEnum.SUCCESSFUL_UPDATE_AS_CREATE.name(),
+			StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH.name());
 
 	private static final String PATIENT_STR = "Patient";
 
