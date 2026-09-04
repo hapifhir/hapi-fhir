@@ -77,7 +77,6 @@ public class JsonUtil {
 				.changeDefaultVisibility(vc -> vc.withFieldVisibility(JsonAutoDetect.Visibility.PUBLIC_ONLY))
 				.filterProvider(SENSITIVE_DATA_FILTER_PROVIDER)
 				.enable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
-				.enable(SerializationFeature.APPLY_JSON_INCLUDE_FOR_CONTAINERS)
 				.enable(SerializationFeature.INDENT_OUTPUT)
 				.build();
 
@@ -87,7 +86,6 @@ public class JsonUtil {
 				.changeDefaultVisibility(vc -> vc.withFieldVisibility(JsonAutoDetect.Visibility.PUBLIC_ONLY))
 				.filterProvider(SENSITIVE_DATA_FILTER_PROVIDER)
 				.enable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
-				.enable(SerializationFeature.APPLY_JSON_INCLUDE_FOR_CONTAINERS)
 				.disable(SerializationFeature.INDENT_OUTPUT)
 				.build();
 
@@ -97,7 +95,6 @@ public class JsonUtil {
 						.withContentInclusion(JsonInclude.Include.NON_NULL))
 				.changeDefaultVisibility(vc -> vc.withFieldVisibility(JsonAutoDetect.Visibility.PUBLIC_ONLY))
 				.enable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
-				.enable(SerializationFeature.APPLY_JSON_INCLUDE_FOR_CONTAINERS)
 				.disable(SerializationFeature.INDENT_OUTPUT)
 				.build();
 	}
