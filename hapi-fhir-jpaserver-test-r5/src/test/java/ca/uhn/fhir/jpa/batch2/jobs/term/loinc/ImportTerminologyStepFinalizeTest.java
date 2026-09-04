@@ -10,6 +10,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyModeEnum;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyStepFinalize;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
@@ -20,8 +21,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.InOrder;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
@@ -40,7 +41,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class ImportTerminologyStepFinalizeTest extends BaseImportLoincStepTest {
+class ImportTerminologyStepFinalizeTest extends BaseImportLoincStepTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportTerminologyStepFinalizeTest.class);
 	@Mock
@@ -61,7 +62,7 @@ public class ImportTerminologyStepFinalizeTest extends BaseImportLoincStepTest {
 	@Test
 	void testProcess_GenerateReport() {
 		mockFetchJobMetadataAttachment();
-		when(myJobPersistence.calculateStepStatistics(eq("my-instance-id"))).thenReturn(new BatchInstanceStepStatisticsDTO(Map.of(
+		when(myJobPersistence.calculateStepStatistics("my-instance-id")).thenReturn(new BatchInstanceStepStatisticsDTO(Map.of(
 			"import-concepts", new BatchInstanceStepStatisticsDTO.StepStatistics(10, 20),
 			"import-hierarchy", new BatchInstanceStepStatisticsDTO.StepStatistics(20, 30),
 			"import-answer-lists", new BatchInstanceStepStatisticsDTO.StepStatistics(40, 50)
@@ -107,7 +108,7 @@ public class ImportTerminologyStepFinalizeTest extends BaseImportLoincStepTest {
 		when(myJobPersistence.calculateStepStatistics(any())).thenReturn(new BatchInstanceStepStatisticsDTO(Map.of()));
 		mockFetchJobMetadataAttachment();
 		when(myDaoRegistry.getFhirContext()).thenReturn(FhirContext.forR4Cached());
-		when(myDaoRegistry.getResourceDao(eq("ValueSet"))).thenReturn(myValueSetDao);
+		when(myDaoRegistry.getResourceDao("ValueSet")).thenReturn(myValueSetDao);
 
 		// Test
 		ImportTerminologyJobParameters parameters = new ImportTerminologyJobParameters();
@@ -149,7 +150,7 @@ public class ImportTerminologyStepFinalizeTest extends BaseImportLoincStepTest {
 		when(myJobPersistence.calculateStepStatistics(any())).thenReturn(new BatchInstanceStepStatisticsDTO(Map.of()));
 		mockFetchJobMetadataAttachment();
 		when(myDaoRegistry.getFhirContext()).thenReturn(FhirContext.forR4Cached());
-		when(myDaoRegistry.getResourceDao(eq("ValueSet"))).thenReturn(myValueSetDao);
+		when(myDaoRegistry.getResourceDao("ValueSet")).thenReturn(myValueSetDao);
 
 		ImportTerminologyJobParameters parameters = new ImportTerminologyJobParameters();
 		TerminologyFileSetJson data = newData();
@@ -166,6 +167,39 @@ public class ImportTerminologyStepFinalizeTest extends BaseImportLoincStepTest {
 		// Verify
 		InOrder inOrder = inOrder(myTermCodeSystemStorageSvc, myValueSetDao);
 		inOrder.verify(myTermCodeSystemStorageSvc).activateStagingCodeSystemVersion(any(), eq("my-staging-version-id"), eq(true));
+		inOrder.verify(myValueSetDao).patch(any(), isNull(), eq(PatchTypeEnum.FHIR_PATCH_JSON), any(), any(), any());
+	}
+
+	/**
+	 * As above, for a non-SNAPSHOT import, which makes the existing CodeSystem version current
+	 * instead of activating a staged one.
+	 *
+	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8321">GH-8321</a>
+	 */
+	@Test
+	void run_addModeWithValueSetsToActivate_makesCodeSystemCurrentBeforeValueSets() {
+		// Setup
+		when(myJobPersistence.calculateStepStatistics(any())).thenReturn(new BatchInstanceStepStatisticsDTO(Map.of()));
+		mockFetchJobMetadataAttachment();
+		when(myDaoRegistry.getFhirContext()).thenReturn(FhirContext.forR4Cached());
+		when(myDaoRegistry.getResourceDao(eq("ValueSet"))).thenReturn(myValueSetDao);
+
+		ImportTerminologyJobParameters parameters = new ImportTerminologyJobParameters();
+		parameters.setMode(ImportTerminologyModeEnum.ADD);
+		TerminologyFileSetJson data = newData();
+		data.addResourceToActivate("ValueSet/A");
+		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "instance-id", "chunk-id"));
+
+		JobDefinition<ImportTerminologyJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTransactionService).importLoincJobDefinition();
+		JobInstance instance = new JobInstance();
+		instance.setInstanceId("my-instance-id");
+
+		// Test
+		myStep.run(new StepExecutionDetails<>(parameters, null, instance, new WorkChunk(), myStepExecutionSvc, jobDefinition, null, null), myDataSink);
+
+		// Verify
+		InOrder inOrder = inOrder(myTermCodeSystemStorageSvc, myValueSetDao);
+		inOrder.verify(myTermCodeSystemStorageSvc).makeCodeSystemCurrent(any(), eq("1.234"));
 		inOrder.verify(myValueSetDao).patch(any(), isNull(), eq(PatchTypeEnum.FHIR_PATCH_JSON), any(), any(), any());
 	}
 

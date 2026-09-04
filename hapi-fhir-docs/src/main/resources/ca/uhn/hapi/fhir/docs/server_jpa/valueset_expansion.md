@@ -64,8 +64,9 @@ Whichever way it is queued, the job performs the same steps:
 4. On failure, sets the status to `FAILED_TO_EXPAND` and persists the failure reason in the
    `EXPANSION_ERROR` column of `TRM_VALUESET`.
 
-The job is skipped while deferred terminology entities (e.g. a large CodeSystem still being loaded)
-are being processed, so that ValueSets are not expanded against incomplete CodeSystems.
+The job waits while deferred terminology entities (e.g. a large CodeSystem still being loaded) are
+still queued, retrying until they have been processed, so that ValueSets are not expanded against
+incomplete CodeSystems.
 
 The expanded data lives in the database and is reused across server restarts.
 

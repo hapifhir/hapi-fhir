@@ -1223,7 +1223,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 		// Non Pre-Expanded
 		ValueSet outcome = myValueSetDao.expand(vs, new ValueSetExpansionOptions());
-		assertEquals("ValueSet \"ValueSet.url[http://vs]\" has not yet been pre-expanded. Performing in-memory expansion without parameters. Current status: NOT_EXPANDED | The ValueSet is waiting to be picked up and pre-expanded by a scheduled task.", outcome.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE));
+		assertEquals("ValueSet \"ValueSet.url[http://vs]\" has not yet been pre-expanded. Performing in-memory expansion without parameters. Current status: NOT_EXPANDED | The ValueSet is waiting to be picked up and pre-expanded by a batch job.", outcome.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE));
 		assertThat(myValueSetTestUtil.toCodes(outcome)).as(myValueSetTestUtil.toCodes(outcome).toString()).containsExactly("code5", "code4", "code3", "code2", "code1");
 
 		// Perform pre-expansion
@@ -2452,11 +2452,15 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 	}
 
 	/**
-	 * Reproduces https://github.com/hapifhir/hapi-fhir/issues/8321 on the resource storage path,
-	 * which is what a package or IG upload uses. A CodeSystem big enough for its concept storage to
-	 * be deferred, followed by a ValueSet that includes it, pre-expands against a partially stored
-	 * CodeSystem: storing the ValueSet fires the pre-expansion job on transaction commit, and
-	 * nothing gates that on the deferred terminology storage queue being drained first.
+	 * Covers https://github.com/hapifhir/hapi-fhir/issues/8321 on the resource storage path, which is
+	 * what a package or IG upload uses. A CodeSystem big enough for its concept storage to be
+	 * deferred, followed by a ValueSet that includes it, must not pre-expand until those deferred
+	 * concepts have been processed, otherwise the expansion is written against a partially stored
+	 * CodeSystem.
+	 * <p>
+	 * Scheduling is disabled in these tests, so nothing processes the deferred concepts except the
+	 * pre-expansion job itself. Processing them before the await would empty the queue first and the
+	 * test would pass with or without the readiness check.
 	 */
 	@Test
 	void preExpand_CodeSystemConceptStorageDeferred_ExpandsAllConcepts() {
@@ -2486,15 +2490,13 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		myValueSetDao.create(vs, newSrd());
 		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(JOB_ID_PRE_EXPAND_VALUESET);
 
-		// drain the rest of the deferred queue before asserting, so that a failure below can not be
-		// explained away as the assertion running too early - nothing re-expands the ValueSet, so a
-		// pre-expansion built against the half stored CodeSystem stays wrong once the queue drains
+		// the job processes the deferred concepts itself, so this should find nothing left
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 
-		// validate - the CodeSystem is now complete in the database
+		// validate - the CodeSystem is complete in the database
 		assertThat(runInTransaction(() -> myTermConceptDao.count())).isEqualTo(conceptCount);
 
-		TermValueSet termValueSet = runInTransaction(() -> myTermValueSetDao.findByUrl(VS_URL).orElseThrow());
+		TermValueSet termValueSet = runInTransaction(() -> myTermValueSetDao.findTermValueSetByUrlAndNullVersion(VS_URL).orElseThrow());
 		assertThat(termValueSet.getTotalConcepts()).isEqualTo(conceptCount);
 	}
 
