@@ -19,19 +19,12 @@
  */
 package ca.uhn.fhir.parser.json.jackson;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.json.BaseJsonLikeWriter;
-import tools.jackson.core.FormatSchema;
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.core.ObjectWriteContext;
 import tools.jackson.core.PrettyPrinter;
-import tools.jackson.core.SerializableString;
 import tools.jackson.core.TokenStreamFactory;
-import tools.jackson.core.TreeNode;
-import tools.jackson.core.io.CharacterEscapes;
 import tools.jackson.core.json.JsonFactory;
-import tools.jackson.core.tree.ArrayTreeNode;
-import tools.jackson.core.tree.ObjectTreeNode;
 import tools.jackson.core.util.DefaultIndenter;
 import tools.jackson.core.util.DefaultPrettyPrinter;
 import tools.jackson.core.util.Separators;
@@ -69,13 +62,13 @@ public class JacksonWriter extends BaseJsonLikeWriter {
 		// deferred to here (where isPrettyPrint() is known) rather than done in the
 		// constructor.
 		//
-		// ObjectWriteContext has no default methods in this Jackson version, so every
-		// method must be implemented. Since write(...) below has been changed to call
-		// only type-specific JsonGenerator methods (writeString/writeNumber/writeBoolean/
-		// writeNull and their *Property variants) rather than writePOJO(..), this writer
-		// never relies on ObjectWriteContext.writeValue(..)/writeTree(..) for correctness;
-		// they still throw rather than silently no-op, so any future code path that does
-		// reach them fails loudly instead of producing corrupt JSON.
+		// ObjectWriteContext.Base supplies the defaults for everything except the two
+		// methods overridden below. Its writeValue(..)/writeTree(..)/createObjectNode(..)/
+		// createArrayNode(..) throw, which is correct here: write(...) below calls only
+		// type-specific JsonGenerator methods (writeString/writeNumber/writeBoolean/writeNull
+		// and their *Property variants) rather than writePOJO(..), so this writer never
+		// relies on them, and a future code path that does reach them fails loudly instead
+		// of producing corrupt JSON.
 		final PrettyPrinter prettyPrinter;
 		if (isPrettyPrint()) {
 			Separators separators =
@@ -86,70 +79,15 @@ public class JacksonWriter extends BaseJsonLikeWriter {
 			prettyPrinter = null;
 		}
 
-		ObjectWriteContext writeContext = new ObjectWriteContext() {
-			@Override
-			public FormatSchema getSchema() {
-				return null;
-			}
-
-			@Override
-			public CharacterEscapes getCharacterEscapes() {
-				return null;
-			}
-
+		ObjectWriteContext writeContext = new ObjectWriteContext.Base() {
 			@Override
 			public PrettyPrinter getPrettyPrinter() {
 				return prettyPrinter;
 			}
 
 			@Override
-			public boolean hasPrettyPrinter() {
-				return prettyPrinter != null;
-			}
-
-			@Override
-			public SerializableString getRootValueSeparator(SerializableString defaultSeparator) {
-				return defaultSeparator;
-			}
-
-			@Override
-			public int getStreamWriteFeatures(int defaults) {
-				return defaults;
-			}
-
-			@Override
-			public int getFormatWriteFeatures(int defaults) {
-				return defaults;
-			}
-
-			@Override
 			public TokenStreamFactory tokenStreamFactory() {
 				return myJsonFactory;
-			}
-
-			@Override
-			public ArrayTreeNode createArrayNode() {
-				throw new UnsupportedOperationException(Msg.code(2997) + "Tree-node creation is not supported by "
-						+ JacksonWriter.class.getSimpleName());
-			}
-
-			@Override
-			public ObjectTreeNode createObjectNode() {
-				throw new UnsupportedOperationException(Msg.code(2998) + "Tree-node creation is not supported by "
-						+ JacksonWriter.class.getSimpleName());
-			}
-
-			@Override
-			public void writeValue(JsonGenerator gen, Object value) {
-				throw new UnsupportedOperationException(
-						Msg.code(2999) + JacksonWriter.class.getSimpleName()
-								+ " writes values via type-specific JsonGenerator methods and does not support writePOJO(..)/writeValue(..)");
-			}
-
-			@Override
-			public void writeTree(JsonGenerator gen, TreeNode tree) {
-				throw new UnsupportedOperationException(
-						Msg.code(3000) + "Tree writing is not supported by " + JacksonWriter.class.getSimpleName());
 			}
 		};
 
