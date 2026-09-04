@@ -24,6 +24,7 @@ import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson;
 import ca.uhn.fhir.mdm.svc.MdmSearchParamSvc;
+import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
@@ -47,6 +48,9 @@ public class MdmResourceFilteringSvc {
 	@Autowired
 	FhirContext myFhirContext;
 
+	@Autowired
+	private EIDHelper myEIDHelper;
+
 	/**
 	 * Given a resource from the MDM Channel, determine whether or not MDM processing should occur on it.
 	 *
@@ -65,7 +69,13 @@ public class MdmResourceFilteringSvc {
 			return false;
 		}
 
-		if (myMdmSettings.isIgnorePlaceholderResources() && isPlaceholderResource(theResource)) {
+		/*
+		 * EID matching is an exception;
+		 * we will always try and match EID even if it's a placeholder.
+		 */
+		if (myMdmSettings.isIgnorePlaceholderResources()
+				&& isPlaceholderResource(theResource)
+				&& myEIDHelper.getExternalEid(theResource).isEmpty()) {
 			return false;
 		}
 

@@ -80,15 +80,16 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 	public List<MatchedTarget> getMatchedTargets(
 			String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId) {
 
+		// we match on EID even if placeholder resources are set to be ignored
+		List<MatchedTarget> retval = matchBasedOnEid(theResourceType, theResource, theRequestPartitionId);
+		if (!retval.isEmpty()) {
+			return retval;
+		}
+
 		if (shouldIgnoreResource(theResource)) {
 			// source is a placeholder (set to be ignored)
 			// return nothing
 			return Collections.emptyList();
-		}
-
-		List<MatchedTarget> retval = matchBasedOnEid(theResourceType, theResource, theRequestPartitionId);
-		if (!retval.isEmpty()) {
-			return retval;
 		}
 
 		Collection<IAnyResource> targetCandidates =
@@ -145,7 +146,6 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 				// Exclude the incoming resource from the matched results
 				.filter(resource ->
 						!theResourceIdToExclude.equals(resource.getIdElement().toUnqualifiedVersionless()))
-				.filter(resource -> !shouldIgnoreResource(resource))
 				.map(resource -> new MatchedTarget(resource, MdmMatchOutcome.EID_MATCH))
 				.forEach(retval::add);
 		return retval;

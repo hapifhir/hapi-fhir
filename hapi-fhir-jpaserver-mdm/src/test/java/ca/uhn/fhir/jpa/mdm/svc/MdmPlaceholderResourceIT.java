@@ -130,28 +130,47 @@ public class MdmPlaceholderResourceIT extends BaseMdmR4Test {
 		assertTrue(results.isEmpty());
 	}
 
-	// placeholder as candidate
-	@ParameterizedTest
-	@ValueSource(booleans = {
-		true,
-		false
-	})
-	public void getMatchedTargets_realResource_ignoresPlaceholdersInDb(boolean theHasEidIdentifier) throws InterruptedException {
+	@Test
+	public void getMatchedTargets_realResourceEidMatching_doesNotIgnorePlaceholders() throws InterruptedException {
 		// setup
-		IIdType placehodlerId;
+		Patient placeholder = createPlaceholderPatient();
+		addExternalEID(placeholder, "abc");
+
+		myMdmHelper.createWithLatch(placeholder);
+
+		Patient source = new Patient();
+		source.addIdentifier()
+			.setSystem(IDENTIFIER_SYSTEM)
+			.setValue("123");
+		source.addName()
+			.setFamily("simpson")
+			.addGiven("homer");
+		addExternalEID(source, "abc");
+
+		// test
+		List<MatchedTarget> results = mySvc.getMatchedTargets("Patient", source, RequestPartitionId.allPartitions());
+
+		// validate
+		assertEquals(2, results.size());
+		assertTrue(results.stream()
+			.anyMatch(target -> target.getTarget().getIdElement().getIdPartAsLong().equals(placeholder.getIdElement().getIdPartAsLong())));
+	}
+
+	// placeholder as candidate
+	@Test
+	public void getMatchedTargets_realResource_ignoresPlaceholdersInDb() throws InterruptedException {
+		// setup
+		IIdType placeholderId;
 		{
 			Patient placeholder = createPlaceholderPatient();
-			if (theHasEidIdentifier) {
-				addExternalEID(placeholder, "abc");
-			} else {
+
 				placeholder.addIdentifier()
 					.setSystem(IDENTIFIER_SYSTEM)
 					.setValue("123");
-			}
 
 			// shouldn't be matched, so we won't wait on a latch
 			DaoMethodOutcome outcome = myPatientDao.create(placeholder, new SystemRequestDetails());
-			placehodlerId = outcome.getId();
+			placeholderId = outcome.getId();
 
 			Patient nonplaceholder = new Patient();
 			nonplaceholder.addIdentifier()
@@ -167,9 +186,6 @@ public class MdmPlaceholderResourceIT extends BaseMdmR4Test {
 		source.addName()
 			.setFamily("simpson")
 			.addGiven("homer");
-		if (theHasEidIdentifier) {
-			addExternalEID(source, "abc");
-		}
 
 		// test
 		List<MatchedTarget> results = mySvc.getMatchedTargets("Patient", source, RequestPartitionId.allPartitions());
@@ -177,26 +193,63 @@ public class MdmPlaceholderResourceIT extends BaseMdmR4Test {
 		// validate
 		assertEquals(1, results.size());
 		assertFalse(results.stream()
-			.anyMatch(target -> target.getTarget().getIdElement().getIdPartAsLong().equals(placehodlerId.getIdPartAsLong())));
+			.anyMatch(target -> target.getTarget().getIdElement().getIdPartAsLong().equals(placeholderId.getIdPartAsLong())));
 	}
 
-	@ParameterizedTest
-	@ValueSource(booleans = {
-		true,
-		false
-	})
-	public void getMatchedTargets_oneRealOnePlaceholder_matchesRealOnly(boolean theIsEid) throws InterruptedException {
+	@Test
+	public void getMatchedTargets_realEIDPlaceholder_matches() throws InterruptedException {
 		// setup
 		Patient real = new Patient();
 		real.addName().setFamily("Simpson")
 			.addGiven("Homer");
-		if (theIsEid) {
-			addExternalEID(real, "abc");
-		} else {
-			real.addIdentifier()
-				.setSystem(IDENTIFIER_SYSTEM)
-				.setValue("123");
-		}
+		addExternalEID(real, "abc");
+		myMdmHelper.createWithLatch(real);
+		assertLinkCount(1);
+
+		// create the placeholder with eid
+		Patient placeholder = createPlaceholderPatient();
+		addExternalEID(placeholder, "abc");
+
+		MdmHelperR4.OutcomeAndLogMessageWrapper outcome = myMdmHelper.createWithLatch(placeholder);
+		IIdType placeholderId = outcome.getDaoMethodOutcome()
+			.getId();
+
+
+		Patient candidate = new Patient();
+		candidate.addName()
+			.setFamily("Simpson")
+			.addGiven("jay");
+			addExternalEID(candidate, "abc");
+
+
+		// test
+		myMdmHelper.createWithLatch(candidate);
+
+		// verify
+		assertLinkCount(3);
+
+		runInTransaction(() -> {
+			List<MdmLink> allLinks = myMdmLinkDao.findAll();
+			assertEquals(3, allLinks.size());
+			assertTrue(
+				allLinks.stream()
+					.anyMatch(link -> {
+						return Objects.equals(placeholderId.getIdPartAsLong(), link.getSource().getId().getId());
+					})
+			);
+		});
+	}
+
+	@Test
+	public void getMatchedTargets_oneRealOnePlaceholder_matchesRealOnly() throws InterruptedException {
+		// setup
+		Patient real = new Patient();
+		real.addName().setFamily("Simpson")
+			.addGiven("Homer");
+
+		real.addIdentifier()
+			.setSystem(IDENTIFIER_SYSTEM)
+			.setValue("123");
 		myMdmHelper.createWithLatch(real);
 		assertLinkCount(1);
 
@@ -204,13 +257,10 @@ public class MdmPlaceholderResourceIT extends BaseMdmR4Test {
 		IIdType placeholderId;
 		{
 			Patient placeholder = createPlaceholderPatient();
-			if (theIsEid) {
-				addExternalEID(placeholder, "abc");
-			} else {
-				placeholder.addIdentifier()
-					.setSystem(IDENTIFIER_SYSTEM)
-					.setValue("123");
-			}
+
+			placeholder.addIdentifier()
+				.setSystem(IDENTIFIER_SYSTEM)
+				.setValue("123");
 
 			// shouldn't fire the latch since it shouldn't match
 			DaoMethodOutcome outcome = myPatientDao.create(placeholder, new SystemRequestDetails());
@@ -221,13 +271,10 @@ public class MdmPlaceholderResourceIT extends BaseMdmR4Test {
 		candidate.addName()
 			.setFamily("Simpson")
 			.addGiven("jay");
-		if (theIsEid) {
-			addExternalEID(candidate, "abc");
-		} else {
-			candidate.addIdentifier()
-				.setSystem(IDENTIFIER_SYSTEM)
-				.setValue("123");
-		}
+
+		candidate.addIdentifier()
+			.setSystem(IDENTIFIER_SYSTEM)
+			.setValue("123");
 
 		// test
 		myMdmHelper.createWithLatch(candidate);
