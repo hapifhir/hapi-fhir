@@ -75,7 +75,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
-import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET;
 import static ca.uhn.fhir.jpa.term.TerminologySvcDeltaR4Test.newDeltaCodeSystem;
 import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
 import static java.util.Objects.requireNonNull;
@@ -2449,55 +2448,6 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 			myStorageSettings.setDeferIndexingForCodesystemsOfSize(deferredIndexingDefault);
 			ReindexUtils.setRetryDelay(null);
 		}
-	}
-
-	/**
-	 * Covers https://github.com/hapifhir/hapi-fhir/issues/8321 on the resource storage path, which is
-	 * what a package or IG upload uses. A CodeSystem big enough for its concept storage to be
-	 * deferred, followed by a ValueSet that includes it, must not pre-expand until those deferred
-	 * concepts have been processed, otherwise the expansion is written against a partially stored
-	 * CodeSystem.
-	 * <p>
-	 * Scheduling is disabled in these tests, so nothing processes the deferred concepts except the
-	 * pre-expansion job itself. Processing them before the await would empty the queue first and the
-	 * test would pass with or without the readiness check.
-	 */
-	@Test
-	void preExpand_CodeSystemConceptStorageDeferred_ExpandsAllConcepts() {
-		// setup - a hierarchy bigger than the deferred storage threshold, so the child concepts
-		// past the threshold are left on the deferred queue by the create below
-		int conceptCount = myStorageSettings.getDeferIndexingForCodesystemsOfSize() + 50;
-
-		CodeSystem cs = new CodeSystem();
-		cs.setUrl(CS_URL);
-		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		CodeSystem.ConceptDefinitionComponent root = cs.addConcept().setCode("root").setDisplay("Root");
-		for (int i = 1; i < conceptCount; i++) {
-			root.addConcept().setCode("code-" + i).setDisplay("Code " + i);
-		}
-		myCodeSystemDao.create(cs, newSrd());
-
-		assertFalse(myTerminologyDeferredStorageSvc.isStorageQueueEmpty(false),
-			"Test setup expects the CodeSystem to be big enough for its storage to be deferred");
-
-		ValueSet vs = new ValueSet();
-		vs.setUrl(VS_URL);
-		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		vs.getCompose().addInclude().setSystem(CS_URL);
-
-		// execute - creating the ValueSet starts the pre-expansion job on commit
-		myValueSetDao.create(vs, newSrd());
-		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(JOB_ID_PRE_EXPAND_VALUESET);
-
-		// the job processes the deferred concepts itself, so this should find nothing left
-		myTerminologyDeferredStorageSvc.saveAllDeferred();
-
-		// validate - the CodeSystem is complete in the database
-		assertThat(runInTransaction(() -> myTermConceptDao.count())).isEqualTo(conceptCount);
-
-		TermValueSet termValueSet = runInTransaction(() -> myTermValueSetDao.findTermValueSetByUrlAndNullVersion(VS_URL).orElseThrow());
-		assertThat(termValueSet.getTotalConcepts()).isEqualTo(conceptCount);
 	}
 
 	@Test

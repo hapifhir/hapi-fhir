@@ -10,6 +10,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.svc.MockHapiTransactionService;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
@@ -17,6 +18,7 @@ import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.hl7.fhir.r5.model.ValueSet;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -26,9 +28,13 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+
 import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx.STEP_ID_EXPAND_CONCEPTS_EXCLUDE;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx.STEP_ID_EXPAND_CONCEPTS_INCLUDE;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx.STEP_ID_INITIATE_JOB;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -43,6 +49,7 @@ import static org.mockito.Mockito.when;
 class Step1InitiateJobTest {
 
 	private static final String THE_STAGING_VERSION = "the-staging-version";
+	private static final Duration RETRY_DELAY = Duration.of(3, ChronoUnit.SECONDS);
 	static final String THE_VS_URL = "http://foo";
 	static final String THE_VS_VERSION = "1.0";
 
@@ -68,6 +75,11 @@ class Step1InitiateJobTest {
 	private Step1InitiateJob mySvc;
 	@Captor
 	private ArgumentCaptor<IModelJson> myWorkChunkCaptor;
+
+	@AfterEach
+	void afterResetRetryDelay() {
+		Step1InitiateJob.setRetryDelay(null);
+	}
 
 	@Test
 	void testRun() {
@@ -126,6 +138,7 @@ class Step1InitiateJobTest {
 	void run_deferredStorageQueueNotEmpty_retriesChunkLaterWithoutStagingAnything() {
 		// Setup
 		when(myDeferredStorageSvc.isStorageQueueEmpty(false)).thenReturn(false);
+		Step1InitiateJob.setRetryDelay(RETRY_DELAY);
 
 		PreExpandValueSetParameters params = new PreExpandValueSetParameters();
 		params.setUrl(THE_VS_URL);
@@ -135,7 +148,9 @@ class Step1InitiateJobTest {
 		assertThatThrownBy(() -> mySvc.run(
 			new StepExecutionDetails<>(params, new VoidModel(), new JobInstance(), new WorkChunk(), myJobStepExecutionServices, myJobDefinition, STEP_ID_INITIATE_JOB, STEP_ID_EXPAND_CONCEPTS_INCLUDE),
 			myDataSink))
-			.isInstanceOf(RetryChunkLaterException.class);
+			.isInstanceOfSatisfying(RetryChunkLaterException.class, e ->
+				assertThat(e.getNextPollDuration()).isEqualTo(RETRY_DELAY))
+			.hasMessage(Msg.code(3047));
 
 		verify(myDeferredStorageSvc).saveDeferred();
 		verify(myValueSetStorageSvc, never()).startStagingVersion(any(), any());

@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
 import ca.uhn.fhir.util.IntCounter;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -61,6 +62,8 @@ public class Step1InitiateJob
 	 * The delay before the next poll for the deferred terminology storage queue to empty.
 	 */
 	private static final Duration RETRY_DELAY = Duration.of(30, ChronoUnit.SECONDS);
+
+	private static Duration ourRetryDelay;
 
 	@Autowired
 	private ITermValueSetStorageSvc myTermValueSetStorageSvc;
@@ -99,7 +102,7 @@ public class Step1InitiateJob
 						"Deferred terminology storage is still in progress, delaying pre-expansion of ValueSet[url={}, version={}]",
 						url,
 						version);
-				throw new RetryChunkLaterException(Msg.code(3043), RETRY_DELAY);
+				throw new RetryChunkLaterException(Msg.code(3047), getRetryLaterDelay());
 			}
 		}
 
@@ -173,5 +176,23 @@ public class Step1InitiateJob
 		}
 
 		return retVal;
+	}
+
+	private static Duration getRetryLaterDelay() {
+		if (ourRetryDelay != null) {
+			return ourRetryDelay;
+		}
+		return RETRY_DELAY;
+	}
+
+	/**
+	 * Sets the delay before the next poll for the deferred terminology storage queue to empty.
+	 * Do not use this in production code! Only test code.
+	 *
+	 * @param theRetryDelay the delay to use, or {@literal null} to restore the default
+	 */
+	@VisibleForTesting
+	public static void setRetryDelay(Duration theRetryDelay) {
+		ourRetryDelay = theRetryDelay;
 	}
 }

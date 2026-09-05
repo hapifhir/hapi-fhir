@@ -19,24 +19,41 @@
  */
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.batch2.api.RetryChunkLaterException;
+import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
+import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.Step1InitiateJob;
+import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
+import ca.uhn.fhir.jpa.test.Batch2JobHelper;
+import org.awaitility.core.ConditionTimeoutException;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Covers {@link TermValueSet} pre-expansion lifecycle transitions — how {@code expansionStatus},
  * {@code expansionError}, and {@code expansionTimestamp} change across failure/retry, success/breakage,
- * CodeSystem-content invalidation, and ValueSet activate/deactivate. {@link ValueSetExpansionR4Test} covers
- * {@code $expand} content/query behavior instead.
+ * CodeSystem-content invalidation, and ValueSet activate/deactivate, and when a pre-expansion job is
+ * allowed to start at all. {@link ValueSetExpansionR4Test} covers {@code $expand} content/query
+ * behavior instead.
  */
 // Created by claude-sonnet-5
 class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
@@ -296,6 +313,136 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 			assertThat(termValueSet.getExpansionError()).isNull();
 			assertThat(termValueSet.getExpansionTimestamp()).isNotNull();
 		});
+	}
+
+	/**
+	 * Covers https://github.com/hapifhir/hapi-fhir/issues/8321 on the resource storage path, which is
+	 * what a package or IG upload uses. A CodeSystem big enough for its concept storage to be
+	 * deferred, followed by a ValueSet that includes it, must not pre-expand until those deferred
+	 * concepts have been processed, otherwise the expansion is written against a partially stored
+	 * CodeSystem.
+	 * <p>
+	 * Scheduling is disabled in these tests, so nothing processes the deferred concepts except the
+	 * pre-expansion job itself. Processing them before the await would empty the queue first and the
+	 * test would pass with or without the readiness check.
+	 */
+	@Test
+	void preExpansion_onCodeSystemConceptStorageDeferred_expandsAllConcepts() {
+		myStorageSettings.setPreExpandValueSets(true);
+		int conceptCount = myStorageSettings.getDeferIndexingForCodesystemsOfSize() + 50;
+
+		myCodeSystemDao.create(newDeferredCodeSystem(conceptCount), newSrd());
+
+		assertFalse(myTerminologyDeferredStorageSvc.isStorageQueueEmpty(false),
+			"Test setup expects the CodeSystem to be big enough for its storage to be deferred");
+
+		// storing the ValueSet starts the pre-expansion job on commit
+		myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), newSrd());
+		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(JOB_ID_PRE_EXPAND_VALUESET);
+
+		// the job processes the deferred concepts itself, so this should find nothing left
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+
+		assertThat(runInTransaction(() -> myTermConceptDao.count())).isEqualTo(conceptCount);
+
+		TermValueSet termValueSet = runInTransaction(() -> myTermValueSetDao.findTermValueSetByUrlAndNullVersion(VS_URL).orElseThrow());
+		assertThat(termValueSet.getTotalConcepts()).isEqualTo(conceptCount);
+	}
+
+	/**
+	 * As above, but with deferred processing paused, so the pre-expansion job cannot drain the queue
+	 * itself and has to fall through to {@link RetryChunkLaterException}. The work chunk must park in
+	 * {@link WorkChunkStatusEnum#POLL_WAITING} with nothing expanded, and the expansion must only be
+	 * written once processing resumes.
+	 *
+	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8321">GH-8321</a>
+	 */
+	@Test
+	void preExpansion_onDeferredStorageProcessingPaused_waitsForTheQueueThenExpandsAllConcepts() {
+		myStorageSettings.setPreExpandValueSets(true);
+		int conceptCount = myStorageSettings.getDeferIndexingForCodesystemsOfSize() + 50;
+
+		// keep the poll short enough that this test doesn't run long, but long enough that the chunk is
+		// reliably observed parked between the maintenance passes below
+		Step1InitiateJob.setRetryDelay(Duration.of(1, ChronoUnit.SECONDS));
+		try {
+			myCodeSystemDao.create(newDeferredCodeSystem(conceptCount), newSrd());
+
+			assertFalse(myTerminologyDeferredStorageSvc.isStorageQueueEmpty(false),
+				"Test setup expects the CodeSystem to be big enough for its storage to be deferred");
+
+			// pausing makes the job's own saveDeferred() a no-op, so it has no way to drain the queue
+			myTerminologyDeferredStorageSvc.setProcessDeferred(false);
+
+			// storing the ValueSet starts the pre-expansion job on commit
+			myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), newSrd());
+
+			awaitPollWaitingPreExpansionWorkChunk();
+
+			TermValueSet parkedValueSet = runInTransaction(() -> myTermValueSetDao.findTermValueSetByUrlAndNullVersion(VS_URL).orElseThrow());
+			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, parkedValueSet.getExpansionStatus());
+			assertThat(parkedValueSet.getTotalConcepts()).isZero();
+
+			myTerminologyDeferredStorageSvc.setProcessDeferred(true);
+			myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(JOB_ID_PRE_EXPAND_VALUESET);
+
+			assertThat(runInTransaction(() -> myTermConceptDao.count())).isEqualTo(conceptCount);
+
+			TermValueSet termValueSet = runInTransaction(() -> myTermValueSetDao.findTermValueSetByUrlAndNullVersion(VS_URL).orElseThrow());
+			assertThat(termValueSet.getTotalConcepts()).isEqualTo(conceptCount);
+		} finally {
+			Step1InitiateJob.setRetryDelay(null);
+			myTerminologyDeferredStorageSvc.setProcessDeferred(true);
+		}
+	}
+
+	/**
+	 * Scheduling is disabled in these tests, so a job only advances when a maintenance pass is forced.
+	 */
+	private void awaitPollWaitingPreExpansionWorkChunk() {
+		try {
+			await().atMost(Batch2JobHelper.DEFAULT_WAIT_DURATION).until(() -> {
+				myBatch2JobHelper.forceRunActiveJobMaintenancePass();
+				return preExpansionWorkChunkStatuses().contains(WorkChunkStatusEnum.POLL_WAITING);
+			});
+		} catch (ConditionTimeoutException e) {
+			fail("No pre-expansion work chunk reached POLL_WAITING. Chunk statuses: " + preExpansionWorkChunkStatuses());
+		}
+	}
+
+	private List<WorkChunkStatusEnum> preExpansionWorkChunkStatuses() {
+		Set<String> instanceIds = myBatch2JobHelper.findJobsByDefinition(JOB_ID_PRE_EXPAND_VALUESET).stream()
+			.map(JobInstance::getInstanceId)
+			.collect(Collectors.toSet());
+
+		return runInTransaction(() -> myWorkChunkRepository.findAll().stream()
+			.filter(chunk -> instanceIds.contains(chunk.getInstanceId()))
+			.map(Batch2WorkChunkEntity::getStatus)
+			.toList());
+	}
+
+	/**
+	 * A hierarchy bigger than the deferred storage threshold. Top-level concepts are always persisted
+	 * as the resource is stored, so only a hierarchy leaves anything on the deferred queue.
+	 */
+	private CodeSystem newDeferredCodeSystem(int theConceptCount) {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(CS_URL);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		CodeSystem.ConceptDefinitionComponent root = cs.addConcept().setCode("root").setDisplay("Root");
+		for (int i = 1; i < theConceptCount; i++) {
+			root.addConcept().setCode("code-" + i).setDisplay("Code " + i);
+		}
+		return cs;
+	}
+
+	private ValueSet newValueSetIncludingWholeCodeSystem() {
+		ValueSet vs = new ValueSet();
+		vs.setUrl(VS_URL);
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose().addInclude().setSystem(CS_URL);
+		return vs;
 	}
 
 }
