@@ -22,15 +22,19 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
+import ca.uhn.fhir.batch2.api.RetryChunkLaterException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
 import ca.uhn.fhir.util.IntCounter;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -38,6 +42,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 public class Step1InitiateJob
@@ -52,8 +58,18 @@ public class Step1InitiateJob
 	 */
 	private static final int MAX_CONCEPTS_PER_COMPOSE = 1_000_000;
 
+	/**
+	 * The delay before the next poll for the deferred terminology storage queue to empty.
+	 */
+	private static final Duration RETRY_DELAY = Duration.of(30, ChronoUnit.SECONDS);
+
+	private static Duration ourRetryDelay;
+
 	@Autowired
 	private ITermValueSetStorageSvc myTermValueSetStorageSvc;
+
+	@Autowired
+	private ITermDeferredStorageSvc myDeferredStorageSvc;
 
 	@Autowired
 	private VersionCanonicalizer myVersionCanonicalizer;
@@ -71,6 +87,25 @@ public class Step1InitiateJob
 		PreExpandValueSetParameters parameters = theStepExecutionDetails.getParameters();
 		String url = parameters.getUrl();
 		String version = parameters.getVersion();
+
+		/*
+		 * Expanding while concepts are still queued would resolve the compose rules against a
+		 * partially stored CodeSystem. Process the deferred entities here rather than waiting for the
+		 * scheduled task, which may be suppressed on this node. Must precede startStagingVersion(..),
+		 * which creates a new staging TermValueSet row on every call.
+		 */
+		if (!myDeferredStorageSvc.isStorageQueueEmpty(false)) {
+			myDeferredStorageSvc.saveDeferred();
+
+			if (!myDeferredStorageSvc.isStorageQueueEmpty(false)) {
+				ourLog.info(
+						"Deferred terminology storage is still in progress, delaying pre-expansion of ValueSet[url={}, version={}]",
+						url,
+						version);
+				throw new RetryChunkLaterException(Msg.code(3047), getRetryLaterDelay());
+			}
+		}
+
 		String stagingVersion = myTermValueSetStorageSvc.startStagingVersion(url, version);
 
 		UrlUtil.CanonicalUrlParts canonicalUrl = UrlUtil.parseCanonicalUrl(url, version);
@@ -141,5 +176,23 @@ public class Step1InitiateJob
 		}
 
 		return retVal;
+	}
+
+	private static Duration getRetryLaterDelay() {
+		if (ourRetryDelay != null) {
+			return ourRetryDelay;
+		}
+		return RETRY_DELAY;
+	}
+
+	/**
+	 * Sets the delay before the next poll for the deferred terminology storage queue to empty.
+	 * Do not use this in production code! Only test code.
+	 *
+	 * @param theRetryDelay the delay to use, or {@literal null} to restore the default
+	 */
+	@VisibleForTesting
+	public static void setRetryDelay(Duration theRetryDelay) {
+		ourRetryDelay = theRetryDelay;
 	}
 }

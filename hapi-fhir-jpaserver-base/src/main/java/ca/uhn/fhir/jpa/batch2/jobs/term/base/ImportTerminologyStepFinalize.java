@@ -111,17 +111,21 @@ public class ImportTerminologyStepFinalize<PT extends ImportTerminologyJobParame
 		String codeSystemVersion = jobMetadata.getCodeSystem().getVersion();
 		String stagingVersionId = jobMetadata.getCodeSystemStagingVersionId();
 
-		for (String resourceToActivate : myResourcesToActivate) {
-			updateResourceStatusToActive(theStepExecutionDetails, resourceToActivate);
-		}
-
 		boolean makeCurrent =
 				!Boolean.TRUE.equals(theStepExecutionDetails.getParameters().getDontMakeCurrent());
 
+		/*
+		 * Must precede the ValueSet activation below: that patch starts a pre-expansion job on
+		 * commit, and the job resolves its CodeSystem through the current version.
+		 */
 		if (theStepExecutionDetails.getParameters().getMode() == ImportTerminologyModeEnum.SNAPSHOT) {
 			myTermCodeSystemStorageSvc.activateStagingCodeSystemVersion(codeSystemUrl, stagingVersionId, makeCurrent);
 		} else if (makeCurrent) {
 			myTermCodeSystemStorageSvc.makeCodeSystemCurrent(codeSystemUrl, codeSystemVersion);
+		}
+
+		for (String resourceToActivate : myResourcesToActivate) {
+			updateResourceStatusToActive(theStepExecutionDetails, resourceToActivate);
 		}
 
 		ImportTerminologyResultJson resultJson = new ImportTerminologyResultJson();
