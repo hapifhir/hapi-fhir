@@ -1,3 +1,0 @@
----
-type: fix
-title: "When a `PatientCompartmentEnforcingInterceptor` was registered with mass ingestion mode enabled, resource updates could fail with a NullPointerException (`HAPI-2223: theResource must not be null`). This affected registered subclasses of the interceptor and the history rewrite path. This has been fixed."
