@@ -38,6 +38,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.ServiceRequest;
@@ -251,6 +252,46 @@ class SearchParamExtractorR4Test implements ITestDataBuilder {
 		assertEquals("Consent/999", ((Reference) links.iterator().next().getRef()).getReference());
 	}
 
+
+	// Created by Claude Fable 5
+	@Test
+	void testExtractResourceLinks_urnShapedCanonical_isExtractedAsCanonicalLink() {
+		String urnCanonical = "urn:uuid:0b34ba47-88a9-4e26-9e50-5b1a12a5cf3f";
+
+		QuestionnaireResponse qr = new QuestionnaireResponse();
+		qr.setQuestionnaire(urnCanonical);
+
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
+		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(qr, false);
+
+		List<PathAndRef> questionnaireLinks = links.stream()
+			.filter(t -> "questionnaire".equals(t.getSearchParamName()))
+			.collect(Collectors.toList());
+		assertThat(questionnaireLinks).isNotEmpty();
+		assertThat(questionnaireLinks).allMatch(PathAndRef::isCanonical);
+		assertThat(questionnaireLinks)
+			.extracting(t -> t.getRef().getReferenceElement().getValue())
+			.contains(urnCanonical);
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	void testExtractResourceLinks_urnShapedVersionedCanonical_indexesVersionedAndUnversioned() {
+		String urnCanonical = "urn:oid:1.2.3.4";
+		String versionedUrnCanonical = urnCanonical + "|1.0";
+
+		QuestionnaireResponse qr = new QuestionnaireResponse();
+		qr.setQuestionnaire(versionedUrnCanonical);
+
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
+		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(qr, false);
+
+		List<String> questionnaireLinkValues = links.stream()
+			.filter(t -> "questionnaire".equals(t.getSearchParamName()))
+			.map(t -> t.getRef().getReferenceElement().getValue())
+			.collect(Collectors.toList());
+		assertThat(questionnaireLinkValues).contains(versionedUrnCanonical, urnCanonical);
+	}
 
 	@Test
 	void testExtractSearchParamTokenTest() {

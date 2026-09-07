@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import org.apache.commons.io.IOUtils;
@@ -314,6 +315,67 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 		// THEN: The QuestionnaireResponse is found
 		assertThat(results.getEntry()).hasSize(1);
 		assertThat(results.getEntry().get(0).getResource().getIdElement()
+			.toUnqualifiedVersionless().getValue()).isEqualTo(qrId.getValue());
+	}
+
+	// Created by Claude Fable 5
+	/**
+	 * Verify that searching QuestionnaireResponse by a URN-shaped canonical questionnaire
+	 * (e.g. urn:uuid:... or urn:oid:...) works. Canonicals are allowed to be URNs per the
+	 * FHIR spec, but historically only http(s) canonicals were indexed and searchable.
+	 */
+	@Test
+	void testSearch_withUrnCanonicalQuestionnaire_shouldReturnQuestionnaireResponse() {
+		String urnCanonical = "urn:uuid:0b34ba47-88a9-4e26-9e50-5b1a12a5cf3f";
+
+		QuestionnaireResponse qr = new QuestionnaireResponse();
+		qr.setId("my-urn-qr");
+		qr.setQuestionnaire(urnCanonical);
+		qr.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		IIdType qrId = myQuestionnaireResponseDao.update(qr, mySrd).getId().toUnqualifiedVersionless();
+
+		Bundle results = myClient.search()
+			.byUrl("QuestionnaireResponse?questionnaire=" + UrlUtil.escapeUrlParam(urnCanonical))
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertThat(results.getEntry()).hasSize(1);
+		assertThat(results.getEntry().get(0).getResource().getIdElement()
+			.toUnqualifiedVersionless().getValue()).isEqualTo(qrId.getValue());
+	}
+
+	// Created by Claude Fable 5
+	/**
+	 * Verify that a versioned URN-shaped canonical (urn:oid:...|version) is searchable
+	 * both by the versioned and the unversioned form.
+	 */
+	@Test
+	void testSearch_withVersionedUrnCanonicalQuestionnaire_shouldReturnQuestionnaireResponse() {
+		String urnCanonical = "urn:oid:1.2.3.4";
+		String versionedUrnCanonical = urnCanonical + "|1.0";
+
+		QuestionnaireResponse qr = new QuestionnaireResponse();
+		qr.setId("my-versioned-urn-qr");
+		qr.setQuestionnaire(versionedUrnCanonical);
+		qr.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		IIdType qrId = myQuestionnaireResponseDao.update(qr, mySrd).getId().toUnqualifiedVersionless();
+
+		// Search by the versioned canonical
+		Bundle versionedResults = myClient.search()
+			.byUrl("QuestionnaireResponse?questionnaire=" + UrlUtil.escapeUrlParam(versionedUrnCanonical))
+			.returnBundle(Bundle.class)
+			.execute();
+		assertThat(versionedResults.getEntry()).hasSize(1);
+		assertThat(versionedResults.getEntry().get(0).getResource().getIdElement()
+			.toUnqualifiedVersionless().getValue()).isEqualTo(qrId.getValue());
+
+		// Search by the unversioned canonical
+		Bundle unversionedResults = myClient.search()
+			.byUrl("QuestionnaireResponse?questionnaire=" + UrlUtil.escapeUrlParam(urnCanonical))
+			.returnBundle(Bundle.class)
+			.execute();
+		assertThat(unversionedResults.getEntry()).hasSize(1);
+		assertThat(unversionedResults.getEntry().get(0).getResource().getIdElement()
 			.toUnqualifiedVersionless().getValue()).isEqualTo(qrId.getValue());
 	}
 
