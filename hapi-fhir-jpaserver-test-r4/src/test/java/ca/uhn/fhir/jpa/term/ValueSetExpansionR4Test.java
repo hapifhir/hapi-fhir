@@ -204,6 +204,108 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 	}
 
 	@Test
+	public void testExpandInline_IncludeCodeSystemByOidIdentifier() {
+		String identifierSystem = "urn:ietf:rfc:3986";
+		String oid = "urn:oid:1.2.3.4.100";
+		String canonicalUrl = "https://example.org/CodeSystem/oid-code-system";
+		String version = "4.0.0";
+
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(canonicalUrl);
+		codeSystem.setVersion(version);
+		codeSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		codeSystem.addIdentifier()
+				.setSystem(identifierSystem)
+				.setValue(oid);
+		codeSystem.addConcept()
+				.setCode("code-1")
+				.setDisplay("Code One");
+
+		myCodeSystemDao.create(codeSystem, newSrd());
+
+		ValueSet input = new ValueSet();
+		input.getCompose()
+				.addInclude()
+				.setSystem(oid)
+				.setVersion(version);
+
+		ValueSet expanded =
+				myTermSvc.expandValueSet(
+						new ValueSetExpansionOptions(),
+						input);
+
+		assertThat(expanded.getExpansion().getContains())
+				.hasSize(1);
+
+		ValueSet.ValueSetExpansionContainsComponent contains =
+				expanded.getExpansion().getContainsFirstRep();
+
+		assertEquals(oid, contains.getSystem());
+		assertEquals(version, contains.getVersion());
+		assertEquals("code-1", contains.getCode());
+		assertEquals("Code One", contains.getDisplay());
+	}
+
+	@Test
+	public void testExpandInline_IncludeValueSetByOidIdentifier() {
+		String identifierSystem = "urn:ietf:rfc:3986";
+		String valueSetOid = "urn:oid:1.2.3.4.200";
+		String valueSetUrl =
+				"https://example.org/ValueSet/imported-by-oid";
+		String codeSystemUrl =
+				"https://example.org/CodeSystem/imported-by-oid";
+		String version = "4.0.0";
+
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(codeSystemUrl);
+		codeSystem.setVersion(version);
+		codeSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		codeSystem.addConcept()
+				.setCode("imported-code")
+				.setDisplay("Imported Code");
+
+		myCodeSystemDao.create(codeSystem, newSrd());
+
+		ValueSet importedValueSet = new ValueSet();
+		importedValueSet.setUrl(valueSetUrl);
+		importedValueSet.setVersion(version);
+		importedValueSet.setStatus(
+				Enumerations.PublicationStatus.ACTIVE);
+		importedValueSet.addIdentifier()
+				.setSystem(identifierSystem)
+				.setValue(valueSetOid);
+		importedValueSet.getCompose()
+				.addInclude()
+				.setSystem(codeSystemUrl)
+				.setVersion(version);
+
+		myValueSetDao.create(importedValueSet, newSrd());
+
+		ValueSet input = new ValueSet();
+		input.getCompose()
+				.addInclude()
+				.addValueSet(valueSetOid + "|" + version);
+
+		ValueSet expanded =
+				myTermSvc.expandValueSet(
+						new ValueSetExpansionOptions(),
+						input);
+
+		assertThat(expanded.getExpansion().getContains())
+				.hasSize(1);
+
+		ValueSet.ValueSetExpansionContainsComponent contains =
+				expanded.getExpansion().getContainsFirstRep();
+
+		assertEquals(codeSystemUrl, contains.getSystem());
+		assertEquals(version, contains.getVersion());
+		assertEquals("imported-code", contains.getCode());
+		assertEquals("Imported Code", contains.getDisplay());
+	}
+
+	@Test
 	public void testExpandInline_IncludeCodeSystem_FilterOnDisplay_ExactFilter() throws Exception {
 		loadAndPersistCodeSystemWithDesignations(HttpVerb.PUT);
 
