@@ -31,12 +31,42 @@
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-caching-api</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-caching-caffeine</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-caching-guava</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-caching-testing</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
 				<artifactId>hapi-fhir-checkstyle</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
 				<artifactId>hapi-fhir-cli</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-cli-api</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-cli-app</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -66,12 +96,22 @@
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-docs</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
 				<artifactId>hapi-fhir-jaxrsserver-base</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
 				<artifactId>hapi-fhir-jpa</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-jpa-hibernate-services</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -116,6 +156,31 @@
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-jpaserver-test-dstu2</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-jpaserver-test-dstu3</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-jpaserver-test-r4</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-jpaserver-test-r4b</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-jpaserver-test-r5</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
 				<artifactId>hapi-fhir-jpaserver-test-utilities</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -136,7 +201,7 @@
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
-				<artifactId>hapi-fhir-mdm</artifactId>
+				<artifactId>hapi-fhir-server-mdm</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -228,6 +293,18 @@
 				<groupId>${project.groupId}</groupId>
 				<artifactId>hapi-fhir-test-utilities</artifactId>
 				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-testpage-overlay</artifactId>
+				<version>${project.version}</version>
+				<type>war</type>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-testpage-overlay</artifactId>
+				<version>${project.version}</version>
+				<classifier>classes</classifier>
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
