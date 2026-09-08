@@ -1,0 +1,10 @@
+---
+type: fix
+issue: 8319
+jira: SMILE-12076
+title: "When a transaction Bundle updated a resource and a storage interceptor re-entrantly updated
+that same resource while processing another entry, the resource's current version could fall out of
+sync with its history and the response could report a version that was never stored. This has been
+fixed. An If-Match precondition on a PUT entry is now re-checked at write time, so that combination
+now fails with an HTTP 409 Version Conflict instead of silently discarding the interceptor's write.
+To avoid the conflict, omit If-Match or move the interceptor to a STORAGE_PRECOMMIT_* pointcut."

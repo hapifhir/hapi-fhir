@@ -2794,8 +2794,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		};
 		theTransactionDetails.addRollbackUndoAction(onRollback);
 
-		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(
-				theRequest, theResource, getResourceName());
+		RequestPartitionId requestPartitionId = determineCreatePartitionForUpdate(theResource, theMatchUrl, theRequest);
 
 		boolean rewriteHistory = theRequest != null && theRequest.isRewriteHistory();
 		if (rewriteHistory && !myStorageSettings.isUpdateWithHistoryRewriteEnabled()) {
@@ -2825,6 +2824,33 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.withTransactionDetails(theTransactionDetails)
 				.withRequestPartitionId(requestPartitionId)
 				.execute(updateCallback);
+	}
+
+	/**
+	 * Determines the partition to open the write transaction for.
+	 *
+	 * <p>Partition selection is driven by the resource body, but a conditional update sends no id in the body and
+	 * some strategies need one - patient compartment partitioning derives a Patient's partition from its own id.
+	 * Where the body alone cannot be routed, the write is deferred to all partitions and settled once the
+	 * conditional URL has resolved: a matched update writes to the partition its match already lives in, and
+	 * {@link #doCreateForPostOrPut} re-derives and validates the target partition, which remains the authoritative
+	 * gate. This mirrors how the transaction path handles the same situation in
+	 * {@code BaseTransactionProcessor#tryDetermineCreatePartitionForWriteEntryBeforePrefetch}.
+	 *
+	 * @throws PreFetchSkippableMethodNotAllowedException if the body cannot be routed and either the write is not
+	 *     conditional, or storage cannot search across all partitions and so the partition must be fixed up front
+	 */
+	private RequestPartitionId determineCreatePartitionForUpdate(
+			T theResource, String theMatchUrl, RequestDetails theRequest) {
+		try {
+			return myRequestPartitionHelperService.determineCreatePartitionForRequest(
+					theRequest, theResource, getResourceName());
+		} catch (PreFetchSkippableMethodNotAllowedException e) {
+			if (isBlank(theMatchUrl) || !myPartitionSettings.isAllPartitionSearchSupported()) {
+				throw e;
+			}
+			return RequestPartitionId.allPartitions();
+		}
 	}
 
 	private DaoMethodOutcome doUpdate(
@@ -3004,8 +3030,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		 * us to flush hibernate now. That way we can increment the version
 		 * a second time, create multiple history entries, etc.
 		 */
-		if (entity != null && entity.isVersionUpdatedInCurrentTransaction()) {
-			myEntityManager.flush();
+		if (entity != null) {
+			flushPendingResourceVersionUpdate(entity);
 		}
 
 		if (entity.isSearchUrlPresent()) {

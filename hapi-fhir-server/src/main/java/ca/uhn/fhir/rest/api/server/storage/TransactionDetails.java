@@ -74,6 +74,7 @@ public class TransactionDetails {
 
 	private Map<String, IResourcePersistentId> myResolvedMatchUrls = Collections.emptyMap();
 	private Map<String, Supplier<IBaseResource>> myResolvedResources = Collections.emptyMap();
+	private Map<String, Long> myExpectedVersions = Collections.emptyMap();
 	private Set<IResourcePersistentId> myDeletedResourceIds = Collections.emptySet();
 	private Set<IResourcePersistentId> myUpdatedResourceIds = Collections.emptySet();
 	private Map<String, Object> myUserData;
@@ -341,6 +342,49 @@ public class TransactionDetails {
 	 */
 	public void addResolvedResource(IIdType theResourceId, @Nonnull IBaseResource theResource) {
 		addResolvedResource(theResourceId, () -> theResource);
+	}
+
+	/**
+	 * An <b>Expected Version</b> is a mapping between a resource ID (e.g. "<code>Patient/ABC</code>") and the
+	 * version that a client demanded for that resource with an <code>If-Match</code> precondition.
+	 * <p>
+	 * A FHIR transaction validates each entry in one pass and performs the real write in a later pass, and
+	 * both passes share this same object. Recording the expected version here carries the client's
+	 * precondition across that gap, so the later pass can re-check it against the version that is genuinely
+	 * current at the moment of the write. That matters because a storage interceptor firing on another entry
+	 * may itself write to this resource in between, moving the version on; without the re-check, a failing
+	 * <code>If-Match</code> would be silently ignored.
+	 * </p>
+	 *
+	 * @param theResourceId      the resource the precondition applies to
+	 * @param theExpectedVersion the version demanded by <code>If-Match</code>
+	 * @since 8.14.0
+	 */
+	public void addExpectedVersion(IIdType theResourceId, Long theExpectedVersion) {
+		assert theResourceId != null;
+
+		if (myExpectedVersions.isEmpty()) {
+			myExpectedVersions = new HashMap<>();
+		}
+		myExpectedVersions.put(theResourceId.toUnqualifiedVersionless().getValue(), theExpectedVersion);
+	}
+
+	/**
+	 * An <b>Expected Version</b> is a mapping between a resource ID (e.g. "<code>Patient/ABC</code>") and the
+	 * version that a client demanded for that resource with an <code>If-Match</code> precondition.
+	 * <p>
+	 * This is only populated within a FHIR transaction, by the pass that validates the entry but stores
+	 * nothing. The pass that performs the real write reads it back here in order to re-check the
+	 * precondition against the version that is current at that later point.
+	 * </p>
+	 *
+	 * @param theResourceId the resource to look the precondition up for
+	 * @return the version demanded by <code>If-Match</code>, or {@literal null} if the client did not send one
+	 * @since 8.14.0
+	 */
+	@Nullable
+	public Long getExpectedVersion(IIdType theResourceId) {
+		return myExpectedVersions.get(theResourceId.toUnqualifiedVersionless().getValue());
 	}
 
 	public Map<String, IResourcePersistentId> getResolvedMatchUrls() {

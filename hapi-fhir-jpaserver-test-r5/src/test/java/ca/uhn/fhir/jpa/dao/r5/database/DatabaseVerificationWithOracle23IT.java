@@ -1,15 +1,23 @@
 package ca.uhn.fhir.jpa.dao.r5.database;
 
 import ca.uhn.fhir.jpa.annotation.OracleTest;
+import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
+import ca.uhn.fhir.jpa.entity.TermValueSet;
+import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r5.model.CodeSystem;
+import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Patient;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -21,6 +29,9 @@ public class DatabaseVerificationWithOracle23IT extends BaseDatabaseVerification
 
 	@PersistenceContext
 	private EntityManager myEntityManager;
+
+	@Autowired
+	private ITermValueSetDao myTermValueSetDao;
 
 	/**
 	 * Tests boolean field transitions: true → false → null.
@@ -110,5 +121,55 @@ public class DatabaseVerificationWithOracle23IT extends BaseDatabaseVerification
 			assertThat(found.getUserSelected()).isNull();
 			return null;
 		});
+	}
+
+	/**
+	 * Oracle refuses to use a LOB column as a DISTINCT / GROUP BY comparison key (ORA-22848), and
+	 * {@link TermValueSet#getExpansionError()} is mapped as a CLOB. A query which selects the whole
+	 * TermValueSet entity with DISTINCT therefore fails to even parse on Oracle.
+	 * <p>
+	 * Oracle raises ORA-22848 at describe time, so an empty table is enough to reproduce this.
+	 *
+	 * @see <a href="https://gitlab.com/simpatico.ai/cdr/-/work_items/9151">GL-9151</a>
+	 */
+	@Test
+	void testFindExpandedByCodeSystemUrl_onOracle_doesNotUseClobAsComparisonKey() {
+		runInTransaction(() -> {
+			List<TermValueSet> found = myTermValueSetDao.findExpandedByCodeSystemUrl(
+				"http://example.com/cs",
+				List.of(
+					TermValueSetPreExpansionStatusEnum.EXPANDED,
+					TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS));
+
+			assertThat(found).isEmpty();
+		});
+	}
+
+	/**
+	 * Creating a CodeSystem invalidates any pre-calculated ValueSet expansion which draws on it, which
+	 * runs the query exercised by
+	 * {@link #testFindExpandedByCodeSystemUrl_onOracle_doesNotUseClobAsComparisonKey()}. This is the
+	 * end to end reproduction of that failure.
+	 *
+	 * @see <a href="https://gitlab.com/simpatico.ai/cdr/-/work_items/9151">GL-9151</a>
+	 */
+	@Test
+	void testCreateCodeSystem_onOracle_invalidatesValueSetExpansionsWithoutError() {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl("http://example.com/cs");
+		codeSystem.setVersion("0.1.5");
+		codeSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		codeSystem.setContent(Enumerations.CodeSystemContentMode.COMPLETE);
+		codeSystem.addConcept().setCode("00").setDisplay("No proficiency");
+
+		IIdType codeSystemId = myDaoRegistry.getResourceDao(CodeSystem.class)
+			.create(codeSystem, new SystemRequestDetails())
+			.getId();
+
+		assertThat(codeSystemId.getIdPart()).isNotBlank();
+
+		CodeSystem persisted = myDaoRegistry.getResourceDao(CodeSystem.class)
+			.read(codeSystemId, new SystemRequestDetails());
+		assertThat(persisted.getUrl()).isEqualTo("http://example.com/cs");
 	}
 }

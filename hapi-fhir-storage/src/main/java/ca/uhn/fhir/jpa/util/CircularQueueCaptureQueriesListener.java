@@ -43,6 +43,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.apache.commons.lang3.StringUtils.rightPad;
+
 /**
  * This is a query listener designed to be plugged into a {@link ProxyDataSourceBuilder proxy DataSource}.
  * This listener keeps the last 1000 queries across all threads in a {@link CircularFifoQueue}, dropping queries off the
@@ -65,18 +67,24 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 
 	@Override
 	public String toString() {
-		return "          Current Thread | All Threads\n" + "  SELECT         "
+		return "               Current Thread | All Threads\n" + "  SELECT         "
 				+ renderForToString(countSelectQueriesForCurrentThread()) + " | "
 				+ renderForToString(countSelectQueries()) + "\n"
 				+ "  INSERT         "
-				+ renderForToString(countInsertQueriesForCurrentThread()) + " | "
-				+ renderForToString(countInsertQueries()) + "\n"
+				+ renderForToString(
+						countInsertQueriesForCurrentThread(),
+						getInsertQueriesForCurrentThread().size()) + " | "
+				+ renderForToString(countInsertQueries(), getInsertQueries().size()) + "\n"
 				+ "  UPDATE         "
-				+ renderForToString(countUpdateQueriesForCurrentThread()) + " | "
-				+ renderForToString(countUpdateQueries()) + "\n"
+				+ renderForToString(
+						countUpdateQueriesForCurrentThread(),
+						getUpdateQueriesForCurrentThread().size()) + " | "
+				+ renderForToString(countUpdateQueries(), getUpdateQueries().size()) + "\n"
 				+ "  DELETE         "
-				+ renderForToString(countDeleteQueriesForCurrentThread()) + " | "
-				+ renderForToString(countDeleteQueries()) + "\n"
+				+ renderForToString(
+						countDeleteQueriesForCurrentThread(),
+						getDeleteQueriesForCurrentThread().size()) + " | "
+				+ renderForToString(countDeleteQueries(), getDeleteQueries().size()) + "\n"
 				+ "  COMMIT                        | "
 				+ renderForToString(countCommits()) + "\n"
 				+ "  ROLLBACK                      | "
@@ -90,6 +98,13 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 			return String.format("%-14s", '-');
 		}
 		return String.format("%-14d", theCount);
+	}
+
+	private String renderForToString(int theParamSetCount, int theStatementCount) {
+		if (theParamSetCount == 0 || theParamSetCount == theStatementCount) {
+			return renderForToString(theParamSetCount);
+		}
+		return rightPad(theParamSetCount + " (" + theStatementCount + " stmts)", 14, ' ');
 	}
 
 	@Nonnull

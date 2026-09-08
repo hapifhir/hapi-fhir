@@ -117,6 +117,28 @@ public abstract class BaseTokenPredicateBuilder extends BaseSearchParamPredicate
 			RuntimeSearchParam theSearchParam,
 			SearchFilterParser.CompareOperation theOperation,
 			RequestPartitionId theRequestPartitionId) {
+		return createPredicateToken(
+				theParameters,
+				List.of(theResourceName),
+				theSpnamePrefix,
+				theSearchParam,
+				theOperation,
+				theRequestPartitionId);
+	}
+
+	/**
+	 * Builds a SQL predicate for a token search parameter indexed against several resource types, e.g. an
+	 * unqualified chained search ({@code Provenance?target.identifier=sys|val}). Token hashes are resource
+	 * type qualified, so resolving all types in one call collapses them into a single {@code IN (...)}
+	 * clause instead of one OR'ed equality per type.
+	 */
+	public final Condition createPredicateToken(
+			Collection<IQueryParameterType> theParameters,
+			List<String> theResourceNames,
+			String theSpnamePrefix,
+			RuntimeSearchParam theSearchParam,
+			SearchFilterParser.CompareOperation theOperation,
+			RequestPartitionId theRequestPartitionId) {
 
 		final List<FhirVersionIndependentConcept> codes = new ArrayList<>();
 		String paramName = QueryParameterUtils.getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
@@ -222,14 +244,14 @@ public abstract class BaseTokenPredicateBuilder extends BaseSearchParamPredicate
 			 * param name) but not the actual provided token value.
 			 */
 			Condition hashIdentityPredicate =
-					buildNeHashIdentityCondition(theRequestPartitionId, theResourceName, paramName);
-			Condition hashValuePredicate = createPredicateOrList(theResourceName, paramName, sortedCodesList, false);
+					buildNeHashIdentityCondition(theRequestPartitionId, theResourceNames, paramName);
+			Condition hashValuePredicate = createPredicateOrList(theResourceNames, paramName, sortedCodesList, false);
 			return QueryParameterUtils.toAndPredicate(hashIdentityPredicate, hashValuePredicate);
 		}
 
-		Condition predicate = createPredicateOrList(theResourceName, paramName, sortedCodesList, true);
+		Condition predicate = createPredicateOrList(theResourceNames, paramName, sortedCodesList, true);
 		Condition optionalHashIdentity =
-				buildOptionalHashIdentityForEquals(theRequestPartitionId, theResourceName, paramName);
+				buildOptionalHashIdentityForEquals(theRequestPartitionId, theResourceNames, paramName);
 		if (optionalHashIdentity != null) {
 			predicate = QueryParameterUtils.toAndPredicate(optionalHashIdentity, predicate);
 		}
@@ -241,15 +263,15 @@ public abstract class BaseTokenPredicateBuilder extends BaseSearchParamPredicate
 	 * Subclasses targeting tables without a direct {@code HASH_IDENTITY} column should override.
 	 */
 	protected Condition buildNeHashIdentityCondition(
-			RequestPartitionId theRequestPartitionId, String theResourceName, String theParamName) {
-		return createHashIdentityPredicate(theRequestPartitionId, theResourceName, theParamName);
+			RequestPartitionId theRequestPartitionId, List<String> theResourceNames, String theParamName) {
+		return createHashIdentityPredicate(theRequestPartitionId, theResourceNames, theParamName);
 	}
 
 	/**
 	 * Returns an optional hash-identity predicate to combine with the equality condition.
 	 */
 	protected Condition buildOptionalHashIdentityForEquals(
-			RequestPartitionId theRequestPartitionId, String theResourceName, String theParamName) {
+			RequestPartitionId theRequestPartitionId, List<String> theResourceNames, String theParamName) {
 		return null;
 	}
 
@@ -258,7 +280,7 @@ public abstract class BaseTokenPredicateBuilder extends BaseSearchParamPredicate
 	 * Called by {@link #createPredicateToken} for both the equality and ne branches.
 	 */
 	protected abstract Condition createPredicateOrList(
-			String theResourceType,
+			List<String> theResourceTypes,
 			String theSearchParamName,
 			List<FhirVersionIndependentConcept> theCodes,
 			boolean theWantEquals);

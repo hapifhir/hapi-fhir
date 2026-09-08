@@ -2345,6 +2345,50 @@ public class QueryStack {
 		return join.combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
 	}
 
+	/**
+	 * Builds one token predicate matching a search parameter across several resource types, used by
+	 * unqualified chained searches (e.g. {@code Provenance?target.identifier=sys|val}). One combined
+	 * call collapses the type-qualified token hashes into a single {@code IN (...)} clause, where
+	 * OR'ing per-type predicates could defeat the token table index.
+	 * <p>
+	 * Plain equality only: the caller must ensure every type declares {@code theSearchParam} as a
+	 * token parameter and no value carries a modifier ({@code :not}, {@code :text}, etc.).
+	 * </p>
+	 */
+	@Nullable
+	public Condition createPredicateTokenForMultipleResourceTypes(
+			@Nullable DbColumn[] theSourceJoinColumn,
+			List<String> theResourceNames,
+			RuntimeSearchParam theSearchParam,
+			List<? extends IQueryParameterType> theList,
+			RequestPartitionId theRequestPartitionId) {
+		validateRequestPartition(theRequestPartitionId);
+
+		List<IQueryParameterType> tokens = new ArrayList<>(theList.size());
+		for (IQueryParameterType nextOr : theList) {
+			if (nextOr instanceof TokenParam tokenParam && tokenParam.isEmpty()) {
+				continue;
+			}
+			tokens.add(nextOr);
+		}
+
+		if (tokens.isEmpty()) {
+			return null;
+		}
+
+		BaseTokenPredicateBuilder tokenJoin = createOrReusePredicateBuilder(
+						PredicateBuilderTypeEnum.TOKEN,
+						theSourceJoinColumn,
+						theSearchParam.getName(),
+						() -> mySqlBuilder.addTokenPredicateBuilder(theSourceJoinColumn, theSearchParam))
+				.getResult();
+
+		Condition predicate = tokenJoin.createPredicateToken(
+				tokens, theResourceNames, null, theSearchParam, null, theRequestPartitionId);
+
+		return tokenJoin.combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
+	}
+
 	public Condition createPredicateUri(
 			@Nullable DbColumn[] theSourceJoinColumn,
 			String theResourceName,
@@ -2529,13 +2573,7 @@ public class QueryStack {
 		RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(
 				theResourceName, theParamName, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 		if (nextParamDef != null) {
-
-			if (myPartitionSettings.isPartitioningEnabled() && myPartitionSettings.isIncludePartitionInSearchHashes()) {
-				if (theRequestPartitionId.isAllPartitions()) {
-					throw new PreconditionFailedException(
-							Msg.code(1220) + "This server is not configured to support search against all partitions");
-				}
-			}
+			validateRequestPartition(theRequestPartitionId);
 
 			switch (nextParamDef.getParamType()) {
 				case DATE:
@@ -2768,6 +2806,15 @@ public class QueryStack {
 		}
 
 		return toAndPredicate(andPredicates);
+	}
+
+	private void validateRequestPartition(RequestPartitionId theRequestPartitionId) {
+		if (myPartitionSettings.isPartitioningEnabled() && myPartitionSettings.isIncludePartitionInSearchHashes()) {
+			if (theRequestPartitionId.isAllPartitions()) {
+				throw new PreconditionFailedException(
+						Msg.code(1220) + "This server is not configured to support search against all partitions");
+			}
+		}
 	}
 
 	/**

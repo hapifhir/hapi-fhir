@@ -194,6 +194,15 @@ public enum RestOperationTypeEnum {
 		return CODE_TO_ENUM.get(theCode);
 	}
 
+	public static boolean isMetaOperation(String theCode) {
+		if (theCode == null) {
+			return false;
+		}
+
+		return theCode.equals(RestOperationTypeEnum.META_ADD.getCode())
+				|| theCode.equals(RestOperationTypeEnum.META_DELETE.getCode());
+	}
+
 	/**
 	 * Returns the code associated with this enumerated value
 	 */

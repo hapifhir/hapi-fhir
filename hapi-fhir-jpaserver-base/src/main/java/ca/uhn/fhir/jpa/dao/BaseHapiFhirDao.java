@@ -39,6 +39,7 @@ import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.cache.IResourceTypeCacheSvc;
+import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
@@ -78,6 +79,7 @@ import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
+import ca.uhn.fhir.jpa.update.UpdateParameters;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
 import ca.uhn.fhir.jpa.util.DialectSvc;
 import ca.uhn.fhir.model.api.IResource;
@@ -93,6 +95,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
@@ -112,6 +115,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
+import jakarta.persistence.PersistenceException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
@@ -243,6 +247,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	@Autowired(required = false)
 	private IFulltextSearchSvc myFulltextSearchSvc;
+
+	@Autowired(required = false)
+	private HapiFhirHibernateJpaDialect myHapiFhirHibernateJpaDialect;
 
 	@Autowired
 	protected ResourceHistoryCalculator myResourceHistoryCalculator;
@@ -901,6 +908,38 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				theCreateOrUpdate.name().toLowerCase(), url, resourceType);
 	}
 
+	/**
+	 * Flushes the Hibernate session so that a version increment which has been marked on
+	 * {@literal theEntity} but not yet written is emitted as a physical {@code UPDATE} before the
+	 * caller performs a further write to the same resource. Does nothing if {@literal theEntity}
+	 * carries no such pending increment.
+	 * <p>
+	 * If the flush fails, the {@link PersistenceException} it raises is translated through
+	 * {@link HapiFhirHibernateJpaDialect}, for the same reason
+	 * {@code TransactionProcessor.flushSession} translates it: left untranslated, a lost
+	 * optimistic-lock race surfaces as a bare {@link PersistenceException}, which
+	 * {@code HapiTransactionService.isRetriable} does not recognise, so a genuine concurrent writer
+	 * conflict would be reported as a non-retriable 500 rather than a retriable 409.
+	 * </p>
+	 *
+	 * @param theEntity the entity whose pending version increment is being flushed
+	 */
+	protected void flushPendingResourceVersionUpdate(ResourceTable theEntity) {
+		if (!theEntity.isVersionUpdatedInCurrentTransaction()) {
+			return;
+		}
+		try {
+			myEntityManager.flush();
+		} catch (PersistenceException e) {
+			if (myHapiFhirHibernateJpaDialect != null) {
+				String message = "Error flushing pending version update for resource "
+						+ theEntity.getIdDt().toUnqualifiedVersionless().getValue();
+				throw myHapiFhirHibernateJpaDialect.translate(e, message);
+			}
+			throw e;
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public ResourceTable updateEntity(
@@ -924,6 +963,22 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		ourLog.debug("Starting entity update");
 
 		ResourceTable entity = (ResourceTable) theEntity;
+
+		/*
+		 * If the entity is already carrying an unflushed version bump from an earlier write in this
+		 * same database transaction, Hibernate has not yet emitted the UPDATE that advances
+		 * HFJ_RESOURCE.RES_VER. We are about to create a second history row, so we flush now to force
+		 * that statement out and let the write below claim an increment of its own. That keeps the
+		 * invariant this storage layer depends on: one emitted UPDATE per HFJ_RES_VER row.
+		 *
+		 * This lives here rather than in any individual DAO method because updateEntity is the single
+		 * choke point through which every physical resource-version write passes. Paths that do not
+		 * create a history row - reindexing and history rewrites - pass theCreateNewHistoryEntry=false
+		 * and are deliberately excluded, since they neither consume nor produce a version increment.
+		 */
+		if (theCreateNewHistoryEntry) {
+			flushPendingResourceVersionUpdate(entity);
+		}
 
 		/*
 		 * This should be the very first thing..
@@ -1466,6 +1521,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		return theRequest != null ? theRequest.getRequestId() : null;
 	}
 
+	/**
+	 * @deprecated Call {@link #updateInternal(UpdateParameters)} instead.
+	 */
+	@Deprecated(since = "8.14.0", forRemoval = true)
 	@Override
 	public DaoMethodOutcome updateInternal(
 			RequestDetails theRequestDetails,
@@ -1478,53 +1537,77 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			@Nullable IBaseResource theOldResource,
 			RestOperationTypeEnum theOperationType,
 			TransactionDetails theTransactionDetails) {
+		return updateInternal(new UpdateParameters<T>()
+				.setRequestDetails(theRequestDetails)
+				.setResource(theResource)
+				.setMatchUrl(theMatchUrl)
+				.setShouldPerformIndexing(thePerformIndexing)
+				.setShouldForceUpdateVersion(theForceUpdateVersion)
+				.setEntity(theEntity)
+				.setResourceIdToUpdate(theResourceId)
+				.setOldResource(theOldResource)
+				.setOperationType(theOperationType)
+				.setTransactionDetails(theTransactionDetails));
+	}
 
-		ResourceTable entity = (ResourceTable) theEntity;
+	@Override
+	public DaoMethodOutcome updateInternal(UpdateParameters<T> theParameters) {
+		RequestDetails requestDetails = theParameters.getRequest();
+		T resource = theParameters.getResource();
+		String matchUrl = theParameters.getMatchUrl();
+		boolean performIndexing = theParameters.shouldPerformIndexing();
+		IIdType resourceId = theParameters.getResourceIdToUpdate();
+		IBaseResource oldResource = theParameters.getOldResource();
+		TransactionDetails transactionDetails = theParameters.getTransactionDetails();
+
+		ResourceTable entity = (ResourceTable) theParameters.getEntity();
 
 		// We'll update the resource ID with the correct version later but for
 		// now at least set it to something useful for the interceptors
-		theResource.setId(entity.getIdDt());
+		resource.setId(entity.getIdDt());
 
 		// Notify IServerOperationInterceptors about pre-action call
-		notifyInterceptors(theRequestDetails, theResource, theOldResource, theTransactionDetails, true);
+		notifyInterceptors(requestDetails, resource, oldResource, transactionDetails, true);
 
-		entity.setUpdatedByMatchUrl(theMatchUrl);
+		entity.setUpdatedByMatchUrl(matchUrl);
+
+		validateExpectedVersionAtWrite(theParameters.getExpectedVersion(), entity);
 
 		// Perform update
 		ResourceTable savedEntity = updateEntity(
-				theRequestDetails,
-				theResource,
+				requestDetails,
+				resource,
 				entity,
 				null,
-				thePerformIndexing,
-				thePerformIndexing,
-				theTransactionDetails,
-				theForceUpdateVersion,
-				thePerformIndexing);
+				performIndexing,
+				performIndexing,
+				transactionDetails,
+				theParameters.shouldForceUpdateVersion(),
+				performIndexing);
 
 		/*
 		 * If we aren't indexing (meaning we're probably executing a sub-operation within a transaction),
 		 * we'll manually increase the version. This is important because we want the updated version number
 		 * to be reflected in the resource shared with interceptors
 		 */
-		if (!thePerformIndexing
+		if (!performIndexing
 				&& !savedEntity.isUnchangedInCurrentOperation()
 				&& !ourDisableIncrementOnUpdateForUnitTest) {
-			if (!theResourceId.hasVersionIdPart()) {
-				theResourceId = theResourceId.withVersion(Long.toString(savedEntity.getVersion()));
+			if (!resourceId.hasVersionIdPart()) {
+				resourceId = resourceId.withVersion(Long.toString(savedEntity.getVersion()));
 			}
-			incrementId(theResource, savedEntity, theResourceId);
+			incrementId(resource, savedEntity, resourceId);
 		}
 
 		// Update version/lastUpdated so that interceptors see the correct version
-		myJpaStorageResourceParser.updateResourceMetadata(savedEntity, theResource);
+		myJpaStorageResourceParser.updateResourceMetadata(savedEntity, resource);
 
 		// Populate the PID in the resource so it is available to hooks
-		addPidToResource(savedEntity, theResource);
+		addPidToResource(savedEntity, resource);
 
 		// Notify interceptors
 		if (!savedEntity.isUnchangedInCurrentOperation()) {
-			notifyInterceptors(theRequestDetails, theResource, theOldResource, theTransactionDetails, false);
+			notifyInterceptors(requestDetails, resource, oldResource, transactionDetails, false);
 		}
 
 		Collection<? extends BaseTag> tagList = Collections.emptyList();
@@ -1532,11 +1615,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			tagList = entity.getTags();
 		}
 		long version = entity.getVersion();
-		myJpaStorageResourceParser.populateResourceMetadata(entity, false, tagList, version, theResource);
+		myJpaStorageResourceParser.populateResourceMetadata(entity, false, tagList, version, resource);
 
 		boolean wasDeleted = false;
-		if (theOldResource != null) {
-			wasDeleted = theOldResource.isDeleted();
+		if (oldResource != null) {
+			wasDeleted = oldResource.isDeleted();
 		}
 
 		if (wasDeleted && !myStorageSettings.isDeleteEnabled()) {
@@ -1545,10 +1628,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		DaoMethodOutcome outcome = toMethodOutcome(
-						theRequestDetails, savedEntity, theResource, theMatchUrl, theOperationType)
+						requestDetails, savedEntity, resource, matchUrl, theParameters.getOperationType())
 				.setCreated(wasDeleted);
 
-		if (!thePerformIndexing) {
+		if (!performIndexing) {
 			IIdType id = getContext().getVersion().newIdType();
 			id.setValue(entity.getIdDt().getValue());
 			outcome.setId(id);
@@ -1558,15 +1641,60 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		// since individual item times don't actually make much sense in the context
 		// of a transaction
 		StopWatch w = null;
-		if (theRequestDetails != null && !theRequestDetails.isSubRequest()) {
-			if (theTransactionDetails != null && !theTransactionDetails.isFhirTransaction()) {
-				w = new StopWatch(theTransactionDetails.getTransactionDate());
+		if (requestDetails != null && !requestDetails.isSubRequest()) {
+			if (transactionDetails != null && !transactionDetails.isFhirTransaction()) {
+				w = new StopWatch(transactionDetails.getTransactionDate());
 			}
 		}
 
-		populateOperationOutcomeForUpdate(w, outcome, theMatchUrl, outcome.getOperationType(), theTransactionDetails);
+		populateOperationOutcomeForUpdate(w, outcome, matchUrl, outcome.getOperationType(), transactionDetails);
 
 		return outcome;
+	}
+
+	/**
+	 * Re-validates an {@code If-Match} precondition immediately before the resource is physically
+	 * written.
+	 * <p>
+	 * This looks like a duplicate of the check in
+	 * {@code BaseStorageResourceDao#doUpdateForUpdateOrPatch}, and it deliberately is one. Inside a
+	 * FHIR transaction that first check runs during a pass that stores nothing: it compares the
+	 * demanded version against the version the resource holds at that moment and then returns a merely
+	 * <em>predicted</em> outcome, leaving the real write to a later pass. Between those two points any
+	 * other entry in the same transaction can move the resource - in particular a storage interceptor
+	 * firing on a different entry can call {@code dao.update()} on this very resource re-entrantly.
+	 * When that happens the first check has already passed against a version that is no longer
+	 * current, so without re-checking here the {@code If-Match} would be silently ignored and the
+	 * client's update would overwrite a version it never saw.
+	 * </p>
+	 * <p>
+	 * The check has to sit here, immediately before the write, rather than once at the top of the
+	 * write pass: {@code STORAGE_PRESTORAGE_RESOURCE_UPDATED} is broadcast from inside this very
+	 * method, so an interceptor can still write the resource after any earlier check has passed.
+	 * </p>
+	 *
+	 * @param theExpectedVersion the version demanded by {@code If-Match}, or {@literal null} if the
+	 *                              client sent no precondition
+	 * @param theEntity the entity about to be written
+	 */
+	private void validateExpectedVersionAtWrite(@Nullable Long theExpectedVersion, ResourceTable theEntity) {
+		if (theExpectedVersion == null) {
+			return;
+		}
+
+		/*
+		 * Flush any version bump that an earlier write in this transaction has marked but not yet
+		 * emitted, so that the comparison below is made against the version the database genuinely
+		 * holds rather than one still sitting in the session.
+		 */
+		flushPendingResourceVersionUpdate(theEntity);
+
+		long currentVersion = theEntity.getVersion();
+		if (currentVersion != theExpectedVersion) {
+			throw new ResourceVersionConflictException(Msg.code(3026) + "Trying to update "
+					+ theEntity.getIdDt().toUnqualifiedVersionless().getValue() + "/_history/" + theExpectedVersion
+					+ " but this is not the current version");
+		}
 	}
 
 	private void notifyInterceptors(

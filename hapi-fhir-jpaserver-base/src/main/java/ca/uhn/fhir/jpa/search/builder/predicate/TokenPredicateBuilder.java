@@ -26,14 +26,17 @@ import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import com.google.common.annotations.VisibleForTesting;
-import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -105,83 +108,70 @@ public class TokenPredicateBuilder extends BaseTokenPredicateBuilder {
 
 	@Override
 	protected Condition buildOptionalHashIdentityForEquals(
-			RequestPartitionId theRequestPartitionId, String theResourceName, String theParamName) {
+			RequestPartitionId theRequestPartitionId, List<String> theResourceNames, String theParamName) {
 		if (myStorageSettings.isIncludeHashIdentityForTokenSearches()) {
-			return createHashIdentityPredicate(theRequestPartitionId, theResourceName, theParamName);
+			return createHashIdentityPredicate(theRequestPartitionId, theResourceNames, theParamName);
 		}
 		return null;
 	}
 
 	@Override
 	protected Condition createPredicateOrList(
-			String theResourceType,
+			List<String> theResourceTypes,
 			String theSearchParamName,
 			List<FhirVersionIndependentConcept> theCodes,
 			boolean theWantEquals) {
-		Condition[] conditions = new Condition[theCodes.size()];
 
-		Long[] hashes = new Long[theCodes.size()];
-		DbColumn[] columns = new DbColumn[theCodes.size()];
-		boolean haveMultipleColumns = false;
-		for (int i = 0; i < conditions.length; i++) {
-
-			FhirVersionIndependentConcept nextToken = theCodes.get(i);
-			long hash;
-			DbColumn column;
-			if (nextToken.getSystem() == null) {
-				hash = ResourceIndexedSearchParamToken.calculateHashValue(
-						getPartitionSettings(),
-						getRequestPartitionId(),
-						theResourceType,
-						theSearchParamName,
-						nextToken.getCode());
-				column = myColumnHashValue;
-			} else if (isBlank(nextToken.getCode())) {
-				hash = ResourceIndexedSearchParamToken.calculateHashSystem(
-						getPartitionSettings(),
-						getRequestPartitionId(),
-						theResourceType,
-						theSearchParamName,
-						nextToken.getSystem());
-				column = myColumnHashSystem;
-			} else {
-				hash = ResourceIndexedSearchParamToken.calculateHashSystemAndValue(
-						getPartitionSettings(),
-						getRequestPartitionId(),
-						theResourceType,
-						theSearchParamName,
-						nextToken.getSystem(),
-						nextToken.getCode());
-				column = myColumnHashSystemAndValue;
-			}
-			hashes[i] = hash;
-			columns[i] = column;
-			if (i > 0 && columns[0] != columns[i]) {
-				haveMultipleColumns = true;
+		// Group hashes by column so each column gets a single IN (...) clause.
+		Map<DbColumn, Collection<Long>> hashesByColumn = new LinkedHashMap<>();
+		for (String nextResourceType : theResourceTypes) {
+			for (FhirVersionIndependentConcept nextToken : theCodes) {
+				long hash;
+				DbColumn column;
+				if (nextToken.getSystem() == null) {
+					hash = ResourceIndexedSearchParamToken.calculateHashValue(
+							getPartitionSettings(),
+							getRequestPartitionId(),
+							nextResourceType,
+							theSearchParamName,
+							nextToken.getCode());
+					column = myColumnHashValue;
+				} else if (isBlank(nextToken.getCode())) {
+					hash = ResourceIndexedSearchParamToken.calculateHashSystem(
+							getPartitionSettings(),
+							getRequestPartitionId(),
+							nextResourceType,
+							theSearchParamName,
+							nextToken.getSystem());
+					column = myColumnHashSystem;
+				} else {
+					hash = ResourceIndexedSearchParamToken.calculateHashSystemAndValue(
+							getPartitionSettings(),
+							getRequestPartitionId(),
+							nextResourceType,
+							theSearchParamName,
+							nextToken.getSystem(),
+							nextToken.getCode());
+					column = myColumnHashSystemAndValue;
+				}
+				hashesByColumn
+						.computeIfAbsent(column, t -> new LinkedHashSet<>())
+						.add(hash);
 			}
 		}
 
-		if (!haveMultipleColumns && conditions.length > 1) {
-			List<Long> values = Arrays.asList(hashes);
-			return QueryParameterUtils.toEqualToOrInPredicate(columns[0], generatePlaceholders(values), !theWantEquals);
+		List<Condition> conditions = new ArrayList<>(hashesByColumn.size());
+		for (Map.Entry<DbColumn, Collection<Long>> nextEntry : hashesByColumn.entrySet()) {
+			conditions.add(QueryParameterUtils.toEqualToOrInPredicate(
+					nextEntry.getKey(), generatePlaceholders(nextEntry.getValue()), !theWantEquals));
 		}
 
-		for (int i = 0; i < conditions.length; i++) {
-			String valuePlaceholder = generatePlaceholder(hashes[i]);
-			if (theWantEquals) {
-				conditions[i] = BinaryCondition.equalTo(columns[i], valuePlaceholder);
-			} else {
-				conditions[i] = BinaryCondition.notEqualTo(columns[i], valuePlaceholder);
-			}
+		if (conditions.size() == 1) {
+			return conditions.get(0);
 		}
-		if (conditions.length > 1) {
-			if (theWantEquals) {
-				return QueryParameterUtils.toOrPredicate(conditions);
-			} else {
-				return QueryParameterUtils.toAndPredicate(conditions);
-			}
-		} else {
-			return conditions[0];
+		if (theWantEquals) {
+			return QueryParameterUtils.toOrPredicate(conditions);
 		}
+		return QueryParameterUtils.toAndPredicate(conditions);
 	}
 }

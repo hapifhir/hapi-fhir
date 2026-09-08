@@ -30,6 +30,7 @@ import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
@@ -40,6 +41,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.Date;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.countMatches;
@@ -49,6 +51,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class ChainingR4SearchTest extends BaseJpaR4Test {
+
+	private static final String ENCOUNTER_IDENTIFIER_SYSTEM = "http://foo/encounter/identifier";
 
 	@AfterEach
 	public void after() throws Exception {
@@ -267,6 +271,144 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		IBundleProvider results = myAuditEventDao.search(map, newSrd());
 
 		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactly("AuditEvent/AE-MATCH");
+	}
+
+	@Test
+	void testUnqualifiedChainedTokenSearch_MatchesEveryTargetType_WithOneInClause() {
+		// Setup
+		IIdType matchingEncounterId = createEncounterWithIdentifier("123");
+		IIdType otherEncounterId = createEncounterWithIdentifier("456");
+		IIdType matchingProvenanceId = createProvenanceTargeting(matchingEncounterId);
+		createProvenanceTargeting(otherEncounterId);
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Provenance.SP_TARGET, chainedTargetParam(".identifier", ENCOUNTER_IDENTIFIER_SYSTEM + "|123"));
+
+		// Test
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myProvenanceDao.search(map, newSrd());
+
+		// Verify
+		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactly(matchingProvenanceId.getValue());
+
+		String querySql = findChainedTokenQuery();
+		assertThat(querySql).contains("HASH_SYS_AND_VALUE IN (");
+		assertThat(countMatches(querySql, "HASH_SYS_AND_VALUE")).as(querySql).isEqualTo(1);
+		assertThat(countMatches(querySql, " OR ")).as(querySql).isZero();
+		// every candidate target type contributes one resource type qualified hash to the IN list
+		assertThat(countMatches(querySql, ",")).as(querySql).isGreaterThan(50);
+	}
+
+	@Test
+	void testQualifiedChainedToken_MatchesTheOneTargetType_WithAnEqualityComparison() {
+		// Setup
+		IIdType matchingEncounterId = createEncounterWithIdentifier("123");
+		IIdType otherEncounterId = createEncounterWithIdentifier("456");
+		IIdType matchingProvenanceId = createProvenanceTargeting(matchingEncounterId);
+		createProvenanceTargeting(otherEncounterId);
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Provenance.SP_TARGET, chainedTargetParam(":Encounter.identifier", ENCOUNTER_IDENTIFIER_SYSTEM + "|123"));
+
+		// Test
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myProvenanceDao.search(map, newSrd());
+
+		// Verify
+		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactly(matchingProvenanceId.getValue());
+
+		String querySql = findChainedTokenQuery();
+		assertThat(querySql).contains("HASH_SYS_AND_VALUE = ");
+		assertThat(countMatches(querySql, "HASH_SYS_AND_VALUE")).as(querySql).isEqualTo(1);
+	}
+
+	/**
+	 * A value with a system and a value without one are indexed in different hash columns, so each
+	 * column gets its own IN clause.
+	 */
+	@Test
+	void testUnqualifiedChainedTokenSearch_TokensUsingDifferentHashColumns_UseOneInClausePerColumn() {
+		// Setup
+		IIdType encounterMatchedBySystemAndValue = createEncounterWithIdentifier("123");
+		IIdType encounterMatchedByValueOnly = createEncounterWithIdentifier("456");
+		IIdType unmatchedEncounterId = createEncounterWithIdentifier("789");
+		IIdType provenanceA = createProvenanceTargeting(encounterMatchedBySystemAndValue);
+		IIdType provenanceB = createProvenanceTargeting(encounterMatchedByValueOnly);
+		createProvenanceTargeting(unmatchedEncounterId);
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Provenance.SP_TARGET, new ReferenceOrListParam()
+			.addOr(chainedTargetParam(".identifier", ENCOUNTER_IDENTIFIER_SYSTEM + "|123"))
+			.addOr(chainedTargetParam(".identifier", "456")));
+
+		// Test
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myProvenanceDao.search(map, newSrd());
+
+		// Verify
+		assertThat(toUnqualifiedVersionlessIdValues(results))
+			.containsExactlyInAnyOrder(provenanceA.getValue(), provenanceB.getValue());
+
+		String querySql = findChainedTokenQuery();
+		assertThat(querySql).contains("HASH_SYS_AND_VALUE IN (").contains("HASH_VALUE IN (");
+		// the only OR is the one joining the two hash columns
+		assertThat(countMatches(querySql, " OR ")).as(querySql).isEqualTo(1);
+	}
+
+	/**
+	 * A {@code :not} chain inverts the whole multi-type predicate, so it keeps resolving each target
+	 * type on its own rather than collapsing into one IN clause.
+	 */
+	@Test
+	void testUnqualifiedChainedTokenSearch_WithNotModifier_StillExcludesTheMatchingTarget() {
+		// Setup
+		IIdType excludedEncounterId = createEncounterWithIdentifier("123");
+		IIdType retainedEncounterId = createEncounterWithIdentifier("456");
+		createProvenanceTargeting(excludedEncounterId);
+		IIdType retainedProvenanceId = createProvenanceTargeting(retainedEncounterId);
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Provenance.SP_TARGET, chainedTargetParam(".identifier:not", ENCOUNTER_IDENTIFIER_SYSTEM + "|123"));
+
+		// Test
+		IBundleProvider results = myProvenanceDao.search(map, newSrd());
+
+		// Verify
+		assertThat(toUnqualifiedVersionlessIdValues(results)).containsExactly(retainedProvenanceId.getValue());
+	}
+
+	/**
+	 * @param theQualifier the parameter qualifier, e.g. {@code .identifier} or {@code :Encounter.identifier}
+	 */
+	private ReferenceParam chainedTargetParam(String theQualifier, String theValue) {
+		ReferenceParam param = new ReferenceParam();
+		param.setValueAsQueryToken(myFhirContext, Provenance.SP_TARGET, theQualifier, theValue);
+		return param;
+	}
+
+	private IIdType createEncounterWithIdentifier(String theValue) {
+		Encounter encounter = new Encounter();
+		encounter.addIdentifier().setSystem(ENCOUNTER_IDENTIFIER_SYSTEM).setValue(theValue);
+		return myEncounterDao.create(encounter, mySrd).getId().toUnqualifiedVersionless();
+	}
+
+	private IIdType createProvenanceTargeting(IIdType theTargetId) {
+		Provenance provenance = new Provenance();
+		provenance.addTarget(new Reference(theTargetId));
+		provenance.setRecorded(new Date());
+		return myProvenanceDao.create(provenance, mySrd).getId().toUnqualifiedVersionless();
+	}
+
+	/**
+	 * Returns the captured SELECT that joins the resource link table to the token index, which is the
+	 * query a chained token search resolves to.
+	 */
+	private String findChainedTokenQuery() {
+		return myCaptureQueriesListener.getSelectQueriesForCurrentThread().stream()
+			.map(t -> t.getSql(true, false))
+			.filter(t -> t.contains("HFJ_SPIDX_TOKEN"))
+			.findFirst()
+			.orElseThrow(() -> new AssertionError("No query joining HFJ_SPIDX_TOKEN was captured"));
 	}
 
 	@Test
