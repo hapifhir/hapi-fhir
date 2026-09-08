@@ -290,9 +290,15 @@ public class MdmPlaceholderResourceIT extends BaseMdmR4Test {
 		runInTransaction(() -> {
 			List<MdmLink> allLinks = myMdmLinkDao.findAll();
 			assertEquals(2, allLinks.size());
+			Long grId = null;
 			for (MdmLink link : allLinks) {
 				// none of the links should be to the placeholder
 				assertNotEquals(placeholderId.getIdPartAsLong(), link.getSource().getId().getId());
+				if (grId == null) {
+					grId = link.getGoldenResource().getId().getId();
+				} else {
+					assertEquals(grId, link.getGoldenResource().getId().getId());
+				}
 			}
 		});
 	}
@@ -360,14 +366,12 @@ public class MdmPlaceholderResourceIT extends BaseMdmR4Test {
 			boolean hasPlaceholderMatch = false;
 			for (MdmLink link : allLinks) {
 				linkMap.put(link.getGoldenResource().getId().getId(), link);
-				System.out.println("XXXXX " + theIsEid + " xxxx");
-				System.out.println(link.toString());
 				hasPlaceholderMatch |= Objects.equals(link.getSource().getId().getId(), placeholderId.getIdPartAsLong());
 			}
 			// the placeholder has been matched
 			assertTrue(hasPlaceholderMatch);
-			// we create a GR for each match (until merged)
-			assertEquals(3, linkMap.size());
+			// 1 gr for each since they all match to the same thing
+			assertEquals(1, linkMap.size());
 		});
 	}
 
