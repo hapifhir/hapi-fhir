@@ -372,6 +372,13 @@
 			<artifactId>hapi-fhir-caching-caffeine</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<!-- GraalJS - sandboxed JavaScript engine used by the $execute-javascript operation. Optional:
+		only deployments which register the JavaScriptExecutionProvider need it on the classpath. -->
+		<dependency>
+			<groupId>org.graalvm.js</groupId>
+			<artifactId>js</artifactId>
+			<optional>true</optional>
+		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-caching-testing</artifactId>

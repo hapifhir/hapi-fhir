@@ -1,0 +1,2 @@
+// Returns no resources.
+[];

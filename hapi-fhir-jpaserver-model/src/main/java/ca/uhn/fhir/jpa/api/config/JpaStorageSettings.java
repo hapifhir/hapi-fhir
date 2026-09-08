@@ -126,6 +126,14 @@ public class JpaStorageSettings extends StorageSettings {
 	private static final long DEFAULT_REST_DELETE_BY_URL_RESOURCE_ID_THRESHOLD = 10000;
 
 	/**
+	 * The default maximum number of seconds a single <code>$execute-javascript</code>
+	 * invocation may run before it is stopped.
+	 *
+	 * @since 8.14.0
+	 */
+	public static final long DEFAULT_JAVASCRIPT_EXECUTION_TIMEOUT_SECONDS = 30;
+
+	/**
 	 * If we are batching write operations in transactions, what should the maximum number of write operations per
 	 * transaction be?
 	 * @since 8.0.0
@@ -443,6 +451,23 @@ public class JpaStorageSettings extends StorageSettings {
 	 * @since 8.8.0
 	 */
 	private boolean myAllowDatabaseValidationOverride = false;
+
+	/**
+	 * The directory containing the vetted JavaScript files which the
+	 * <code>$execute-javascript</code> operation is allowed to run. If this is
+	 * <code>null</code> (the default), the operation is not available.
+	 *
+	 * @since 8.14.0
+	 */
+	private String myJavaScriptExecutionScriptsDirectory;
+
+	/**
+	 * The maximum number of wall-clock seconds a single <code>$execute-javascript</code>
+	 * invocation may run before it is stopped and the call fails.
+	 *
+	 * @since 8.14.0
+	 */
+	private long myJavaScriptExecutionTimeoutSeconds = DEFAULT_JAVASCRIPT_EXECUTION_TIMEOUT_SECONDS;
 
 	/**
 	 * Constructor
@@ -2797,6 +2822,50 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	public boolean isAllowDatabaseValidationOverride() {
 		return myAllowDatabaseValidationOverride;
+	}
+
+	/**
+	 * The directory containing the vetted JavaScript files which the
+	 * <code>$execute-javascript</code> operation is allowed to run. If this is
+	 * <code>null</code> (the default), the operation is not available.
+	 *
+	 * @since 8.14.0
+	 */
+	public String getJavaScriptExecutionScriptsDirectory() {
+		return myJavaScriptExecutionScriptsDirectory;
+	}
+
+	/**
+	 * The directory containing the vetted JavaScript files which the
+	 * <code>$execute-javascript</code> operation is allowed to run. If this is
+	 * <code>null</code> (the default), the operation is not available.
+	 *
+	 * @since 8.14.0
+	 */
+	public void setJavaScriptExecutionScriptsDirectory(String theJavaScriptExecutionScriptsDirectory) {
+		myJavaScriptExecutionScriptsDirectory = theJavaScriptExecutionScriptsDirectory;
+	}
+
+	/**
+	 * The maximum number of wall-clock seconds a single <code>$execute-javascript</code>
+	 * invocation may run before it is stopped and the call fails. Defaults to
+	 * {@link #DEFAULT_JAVASCRIPT_EXECUTION_TIMEOUT_SECONDS}.
+	 *
+	 * @since 8.14.0
+	 */
+	public long getJavaScriptExecutionTimeoutSeconds() {
+		return myJavaScriptExecutionTimeoutSeconds;
+	}
+
+	/**
+	 * The maximum number of wall-clock seconds a single <code>$execute-javascript</code>
+	 * invocation may run before it is stopped and the call fails. Defaults to
+	 * {@link #DEFAULT_JAVASCRIPT_EXECUTION_TIMEOUT_SECONDS}.
+	 *
+	 * @since 8.14.0
+	 */
+	public void setJavaScriptExecutionTimeoutSeconds(long theJavaScriptExecutionTimeoutSeconds) {
+		myJavaScriptExecutionTimeoutSeconds = theJavaScriptExecutionTimeoutSeconds;
 	}
 
 	public enum StoreMetaSourceInformationEnum {

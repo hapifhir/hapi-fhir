@@ -1073,6 +1073,10 @@
 		<nullaway_version>0.7.9</nullaway_version>
 		<guava_version>33.2.1-jre</guava_version>
 		<gson_version>2.12.0</gson_version>
+		<!-- GraalJS - embeddable JavaScript engine used by the $execute-javascript operation. The
+		23.0.x line is the last that supports JDK 17 (23.1+ requires JDK 21). Runs in interpreter
+		mode on a stock (non-GraalVM) JDK. -->
+		<graalvm_js_version>23.0.8</graalvm_js_version>
 		<jaxb_bundle_version>2.2.11_1</jaxb_bundle_version>
 		<jaxb_api_version>2.3.1</jaxb_api_version>
 		<jaxb_core_version>2.3.0.1</jaxb_core_version>
@@ -1274,6 +1278,11 @@
 				<groupId>com.github.ben-manes.caffeine</groupId>
 				<artifactId>caffeine</artifactId>
 				<version>${caffeine_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.graalvm.js</groupId>
+				<artifactId>js</artifactId>
+				<version>${graalvm_js_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.jsqlparser</groupId>
