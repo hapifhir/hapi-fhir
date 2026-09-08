@@ -12,6 +12,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -127,6 +128,75 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		// The unsupported filter must surface as an expansion error, not a silent (empty) success.
 		assertNotNull(expansion);
 		assertThat(expansion.getError()).contains("severity");
+	}
+
+	/**
+	 * validating a code against a ValueSet whose include carries a custom concept-property filter
+	 * (e.g. LOINC {@code SCALE_TYP = Doc}) against an inline {@code content: complete} CodeSystem. The filter
+	 * must actually be evaluated, and the two failure modes must be told apart:
+	 * <ul>
+	 *   <li>a determined negative (the property resolved and the code is not a member) -> {@code not-in-vs}</li>
+	 *   <li>an undetermined result (the property is unknown to the code system) -> {@code not-found}, which
+	 *       (unlike {@code vs-invalid}) is recalculated by binding strength and never silently dropped.</li>
+	 * </ul>
+	 */
+	@ParameterizedTest(name = "declared={0}, value={1}, ok={2}, coding={3}")
+	@MethodSource("customPropertyFilterScenarios")
+	public void testValidateCodeInValueSet_customPropertyFilter_completeCodeSystem(
+			boolean theDeclareProperty, String theConceptValue, boolean theExpectedOk, String theExpectedIssueCoding) {
+		String conceptValue = "NULL".equals(theConceptValue) ? null : theConceptValue;
+
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://loinc.org");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setCaseSensitive(true);
+		if (theDeclareProperty) {
+			cs.addProperty().setCode("SCALE_TYP")
+				.setUri("http://loinc.org/property/SCALE_TYP")
+				.setType(CodeSystem.PropertyType.STRING);
+		}
+		CodeSystem.ConceptDefinitionComponent concept = cs.addConcept().setCode("29550-1").setDisplay("Glucose");
+		if (conceptValue != null) {
+			concept.addProperty().setCode("SCALE_TYP").setValue(new StringType(conceptValue));
+		}
+		myPrePopulated.addCodeSystem(cs);
+
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://example.com/doc-typecodes");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose().addInclude().setSystem("http://loinc.org")
+			.addFilter().setProperty("SCALE_TYP").setOp(ValueSet.FilterOperator.EQUAL).setValue("Doc");
+		myPrePopulated.addValueSet(vs);
+
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+		ConceptValidationOptions options = new ConceptValidationOptions();
+		IValidationSupport.CodeValidationResult outcome =
+				myChain.validateCodeInValueSet(valCtx, options, "http://loinc.org", "29550-1", null, vs);
+
+		assertNotNull(outcome);
+		if (theExpectedOk) {
+			assertTrue(outcome.isOk(), () -> "expected member but was: " + outcome.getMessage());
+		} else {
+			assertFalse(outcome.isOk());
+			assertThat(outcome.getIssues()).isNotEmpty();
+			IValidationSupport.CodeValidationIssueCoding coding =
+					outcome.getIssues().get(0).getCoding();
+			assertNotNull(coding);
+			assertEquals(theExpectedIssueCoding, coding.getCode());
+		}
+	}
+
+	private static Stream<Arguments> customPropertyFilterScenarios() {
+		return Stream.of(
+			// declareProperty, conceptValue, expectedOk, expectedIssueCoding   (scenario)
+			Arguments.of(true, "Doc", true, null), // B1: member -> validates
+			Arguments.of(true, "wrong", false, "not-in-vs"), // B2: determined negative
+			Arguments.of(true, "NULL", false, "not-in-vs"), // C : declared, no value -> determined negative
+			Arguments.of(false, "Doc", true, null), // D1: member (undeclared property, Req 2)
+			Arguments.of(false, "wrong", false, "not-in-vs"), // D2: determined negative
+			Arguments.of(false, "NULL", false, "not-found") // A : undetermined -> must NOT be vs-invalid / not-in-vs
+		);
 	}
 
 	@Test
