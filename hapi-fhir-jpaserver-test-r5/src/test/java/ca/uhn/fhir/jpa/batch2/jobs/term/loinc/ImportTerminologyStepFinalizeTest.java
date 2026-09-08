@@ -14,7 +14,6 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyModeEnum;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyStepFinalize;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
-import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.Test;
@@ -46,8 +45,6 @@ class ImportTerminologyStepFinalizeTest extends BaseImportLoincStepTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(ImportTerminologyStepFinalizeTest.class);
 	@Mock
 	private IJobStepExecutionServices myStepExecutionSvc;
-	@Mock
-	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 	@Mock
 	private IJobDataSink<ImportTerminologyResultJson> myDataSink;
 	@InjectMocks
