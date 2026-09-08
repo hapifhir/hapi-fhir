@@ -519,7 +519,10 @@ public class ConsentInterceptor {
 							IBase container = theContainingElementPath.get(theContainingElementPath.size() - 2);
 							BaseRuntimeChildDefinition containerChildElement =
 									theChildDefinitionPath.get(theChildDefinitionPath.size() - 1);
-							containerChildElement.getMutator().setValue(container, replacementResource);
+							// Use replace(..) rather than setValue(..): for a repeating field (e.g. contained),
+							// setValue clears the whole list before adding the replacement back, wiping out
+							// every sibling entry. replace(..) swaps only this element, in place.
+							containerChildElement.getMutator().replace(container, resource, replacementResource);
 							resource = replacementResource;
 						}
 					}

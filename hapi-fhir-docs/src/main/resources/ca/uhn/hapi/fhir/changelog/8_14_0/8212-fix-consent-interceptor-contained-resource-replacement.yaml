@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 8212
+title: "Previously, if an `IConsentService`'s `willSeeResource(...)` method returned a resource nested
+  inside a repeating field (such as `contained`) to indicate that it had been inspected, even when
+  unchanged, `ConsentInterceptor` would clear every other entry in that repeating field, keeping only
+  the returned resource. This has now been fixed. Thanks to Jens Villadsen for the contribution!"
