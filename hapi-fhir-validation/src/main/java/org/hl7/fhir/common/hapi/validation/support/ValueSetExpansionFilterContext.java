@@ -695,4 +695,20 @@ public class ValueSetExpansionFilterContext {
 			super(theMessage);
 		}
 	}
+
+	/**
+	 * Thrown when a ValueSet filter references a concept property that cannot be resolved for the concept
+	 * under evaluation, so membership can be neither established nor refuted (an <em>undetermined</em>
+	 * result, as opposed to a determined negative). This is distinct from {@link UnsupportedFilterException}:
+	 * the property/operator combination is one the in-memory expansion could evaluate, but the data needed to
+	 * do so is absent. Callers should surface this as a {@code not-found} issue (recalculated by binding
+	 * strength) rather than a fatal {@code vs-invalid}, so an undetermined check is never silently dropped.
+	 */
+	public static class UndeterminedFilterException extends RuntimeException {
+		private static final long serialVersionUID = 1L;
+
+		public UndeterminedFilterException(String theMessage) {
+			super(theMessage);
+		}
+	}
 }
