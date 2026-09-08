@@ -24,7 +24,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static ca.uhn.fhir.util.HapiExtensions.EXT_RESOURCE_PLACEHOLDER;
@@ -91,6 +93,7 @@ public class MdmPlaceholderResourceIT extends BaseMdmR4Test {
 
 		myMdmSettings.setMdmRules(rules);
 		myMdmSettings.setIgnorePlaceholderResources(true);
+		myMdmResourceMatcherSvc.setMdmRulesJson(rules);
 	}
 
 	@AfterEach
@@ -99,6 +102,7 @@ public class MdmPlaceholderResourceIT extends BaseMdmR4Test {
 
 		myMdmSettings.setMdmRules(myExistingRules);
 		myMdmSettings.setIgnorePlaceholderResources(false);
+		myMdmResourceMatcherSvc.setMdmRulesJson(myExistingRules);
 	}
 
 	// placeholder as source
@@ -154,6 +158,7 @@ public class MdmPlaceholderResourceIT extends BaseMdmR4Test {
 		assertEquals(2, results.size());
 		assertTrue(results.stream()
 			.anyMatch(target -> target.getTarget().getIdElement().getIdPartAsLong().equals(placeholder.getIdElement().getIdPartAsLong())));
+
 	}
 
 	// placeholder as candidate
@@ -326,10 +331,10 @@ public class MdmPlaceholderResourceIT extends BaseMdmR4Test {
 					.setValue("123");
 			}
 
-
 			MdmHelperR4.OutcomeAndLogMessageWrapper outcome = myMdmHelper.createWithLatch(placeholder);
 			placeholderId = outcome.getDaoMethodOutcome().getId();
 		}
+		assertLinkCount(2);
 
 		Patient candidate = new Patient();
 		candidate.addName()
@@ -351,12 +356,18 @@ public class MdmPlaceholderResourceIT extends BaseMdmR4Test {
 
 		runInTransaction(() -> {
 			List<MdmLink> allLinks = myMdmLinkDao.findAll();
-			// one of these links should be to the placeholder
-			assertTrue(allLinks
-				.stream()
-				.anyMatch(link -> {
-					return Objects.equals(link.getSource().getId().getId(), placeholderId.getIdPartAsLong());
-				}));
+			Map<Long, MdmLink> linkMap = new HashMap<>();
+			boolean hasPlaceholderMatch = false;
+			for (MdmLink link : allLinks) {
+				linkMap.put(link.getGoldenResource().getId().getId(), link);
+				System.out.println("XXXXX " + theIsEid + " xxxx");
+				System.out.println(link.toString());
+				hasPlaceholderMatch |= Objects.equals(link.getSource().getId().getId(), placeholderId.getIdPartAsLong());
+			}
+			// the placeholder has been matched
+			assertTrue(hasPlaceholderMatch);
+			// we create a GR for each match (until merged)
+			assertEquals(3, linkMap.size());
 		});
 	}
 
