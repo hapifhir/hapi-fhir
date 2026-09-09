@@ -63,7 +63,7 @@ public class MdmSearchParamBuildingUtils {
 	@Deprecated(since = "8.14.0", forRemoval = true)
 	public static SearchParameterMap buildEidSearchParameterMap(
 			String theEid, String theResourceType, MdmRulesJson theMdmRules) {
-		SearchParameterMap map = buildBasicGoldenResourceSearchParameterMap(theResourceType);
+		SearchParameterMap map = buildBasicGoldenResourceSearchParameterMap();
 		map.add(
 				SP_IDENTIFIER,
 				new TokenParam(theMdmRules.getEnterpriseEIDSystemForResourceType(theResourceType), theEid));
@@ -110,7 +110,7 @@ public class MdmSearchParamBuildingUtils {
 	@Nonnull
 	public static Optional<SearchParameterMap> buildEidSearchParameterMap(@Nonnull Collection<CanonicalEID> theEids) {
 		return buildEidTokenParam(theEids).map(eidsToSearch -> {
-			SearchParameterMap map = buildBasicGoldenResourceSearchParameterMap(null);
+			SearchParameterMap map = buildBasicGoldenResourceSearchParameterMap();
 			map.add(SP_IDENTIFIER, eidsToSearch);
 			return map;
 		});
@@ -119,7 +119,7 @@ public class MdmSearchParamBuildingUtils {
 	/**
 	 * Creates a SearchParameterMap that can be used to find golden resources.
 	 */
-	public static SearchParameterMap buildBasicGoldenResourceSearchParameterMap(String theResourceType) {
+	public static SearchParameterMap buildBasicGoldenResourceSearchParameterMap() {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(PARAM_TAG, new TokenParam(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD));
