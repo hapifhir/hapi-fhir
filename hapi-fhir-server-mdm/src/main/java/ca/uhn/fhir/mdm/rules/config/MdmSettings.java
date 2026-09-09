@@ -19,15 +19,19 @@
  */
 package ca.uhn.fhir.mdm.rules.config;
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.mdm.api.IMdmRuleValidator;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmModeEnum;
+import ca.uhn.fhir.mdm.rules.json.InvalidEidSystemsException;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.util.JsonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import static ca.uhn.fhir.mdm.api.MdmModeEnum.MATCH_AND_LINK;
 
@@ -85,9 +89,21 @@ public class MdmSettings implements IMdmSettings {
 		return myScriptText;
 	}
 
+	/**
+	 * @throws ConfigurationException if the rules document configures {@code eidSystems} incorrectly, that
+	 * being an error in a document the implementer wrote rather than an internal one
+	 */
 	public MdmSettings setScriptText(String theScriptText) throws IOException {
 		myScriptText = theScriptText;
-		setMdmRules(JsonUtil.deserialize(theScriptText, MdmRulesJson.class));
+		// Read through the stream overload rather than JsonUtil.deserialize(String, Class), which reports
+		// every parse failure as an internal error, so that an invalid eidSystems entry can be told apart
+		// from the rest and reported as the configuration error it is.
+		try (ByteArrayInputStream scriptStream =
+				new ByteArrayInputStream(theScriptText.getBytes(StandardCharsets.UTF_8))) {
+			setMdmRules(JsonUtil.deserialize(scriptStream, MdmRulesJson.class));
+		} catch (InvalidEidSystemsException e) {
+			throw new ConfigurationException(e.getOriginalMessage(), e);
+		}
 		return this;
 	}
 

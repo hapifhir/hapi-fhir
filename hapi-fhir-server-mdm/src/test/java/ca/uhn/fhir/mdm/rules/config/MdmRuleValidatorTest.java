@@ -307,6 +307,18 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 			.hasMessageContaining("http://example.com/mrn");
 	}
 
+	/**
+	 * A rules document is written by an implementer, so a malformed eidSystems entry must be reported as a
+	 * configuration error rather than as the internal error every other Jackson failure produces.
+	 */
+	@Test
+	void eidSystems_withNonStringInTheArray_throwsConfigurationException() {
+		assertThatThrownBy(() -> setMdmRuleJson("bad-rules-non-string-eid-system.json"))
+			.isInstanceOf(ConfigurationException.class)
+			.hasMessageContaining(Msg.code(3046)
+				+ "eidSystems entry for 'Organization' must be an EID system URI or an array of EID system URIs");
+	}
+
 	private void setMdmRuleJson(String theS) throws IOException {
 		MdmRuleValidator mdmRuleValidator = new MdmRuleValidator(ourFhirContext, mySearchParamRetriever, null, null);
 		MdmSettings mdmSettings = new MdmSettings(mdmRuleValidator);

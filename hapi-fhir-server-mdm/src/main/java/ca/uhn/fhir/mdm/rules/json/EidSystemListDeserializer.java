@@ -24,7 +24,6 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonMappingException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -56,7 +55,7 @@ public class EidSystemListDeserializer extends JsonDeserializer<List<String>> {
 	 * @param theParser the parser positioned on the value for one resource type
 	 * @param theContext the active deserialization context
 	 * @return the configured EID systems, in declaration order; never {@literal null}
-	 * @throws JsonMappingException if the value is neither a string nor an array of strings
+	 * @throws InvalidEidSystemsException if the value is neither a string nor an array of strings
 	 */
 	@Override
 	public List<String> deserialize(JsonParser theParser, DeserializationContext theContext) throws IOException {
@@ -92,8 +91,8 @@ public class EidSystemListDeserializer extends JsonDeserializer<List<String>> {
 		return Collections.emptyList();
 	}
 
-	private JsonMappingException invalidValue(JsonParser theParser, String theResourceType) {
-		return JsonMappingException.from(
+	private InvalidEidSystemsException invalidValue(JsonParser theParser, String theResourceType) {
+		return new InvalidEidSystemsException(
 				theParser,
 				Msg.code(3046) + "eidSystems entry for '" + theResourceType
 						+ "' must be an EID system URI or an array of EID system URIs");
