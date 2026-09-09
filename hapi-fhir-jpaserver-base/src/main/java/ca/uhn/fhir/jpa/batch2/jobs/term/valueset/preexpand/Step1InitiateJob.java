@@ -99,7 +99,7 @@ public class Step1InitiateJob
 
 			if (!myDeferredStorageSvc.isStorageQueueEmpty(false)) {
 				ourLog.info(
-						"Deferred terminology storage is still in progress, delaying pre-expansion of ValueSet[url={}, version={}]",
+						"Deferred terminology storage is not ready, delaying pre-expansion of ValueSet[url={}, version={}]",
 						url,
 						version);
 				throw new RetryChunkLaterException(Msg.code(3047), getRetryLaterDelay());
