@@ -27,7 +27,6 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -65,7 +64,11 @@ public class EidSystemListDeserializer extends JsonDeserializer<List<String>> {
 		JsonToken token = theParser.currentToken();
 
 		if (token == JsonToken.VALUE_STRING) {
-			return Collections.singletonList(theParser.getText());
+			// A mutable list, as the array branch below returns, so that both forms of the property leave
+			// the same kind of list on MdmRulesJson rather than one that rejects being added to.
+			List<String> retVal = new ArrayList<>();
+			retVal.add(theParser.getText());
+			return retVal;
 		}
 
 		if (token == JsonToken.START_ARRAY) {
@@ -88,7 +91,7 @@ public class EidSystemListDeserializer extends JsonDeserializer<List<String>> {
 	 */
 	@Override
 	public List<String> getNullValue(DeserializationContext theContext) {
-		return Collections.emptyList();
+		return new ArrayList<>();
 	}
 
 	private InvalidEidSystemsException invalidValue(JsonParser theParser, String theResourceType) {
