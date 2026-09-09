@@ -60,6 +60,9 @@ public class EidSystemListDeserializer extends JsonDeserializer<List<String>> {
 	 */
 	@Override
 	public List<String> deserialize(JsonParser theParser, DeserializationContext theContext) throws IOException {
+		// The resource type has to be read before the array is entered: once the parser is positioned on an
+		// array element it reports no name, and the message would name 'null' instead of the resource type.
+		String resourceType = theParser.currentName();
 		JsonToken token = theParser.currentToken();
 
 		if (token == JsonToken.VALUE_STRING) {
@@ -70,14 +73,14 @@ public class EidSystemListDeserializer extends JsonDeserializer<List<String>> {
 			List<String> retVal = new ArrayList<>();
 			while (theParser.nextToken() != JsonToken.END_ARRAY) {
 				if (theParser.currentToken() != JsonToken.VALUE_STRING) {
-					throw invalidValue(theParser);
+					throw invalidValue(theParser, resourceType);
 				}
 				retVal.add(theParser.getText());
 			}
 			return retVal;
 		}
 
-		throw invalidValue(theParser);
+		throw invalidValue(theParser, resourceType);
 	}
 
 	/**
@@ -89,10 +92,10 @@ public class EidSystemListDeserializer extends JsonDeserializer<List<String>> {
 		return Collections.emptyList();
 	}
 
-	private JsonMappingException invalidValue(JsonParser theParser) throws IOException {
+	private JsonMappingException invalidValue(JsonParser theParser, String theResourceType) {
 		return JsonMappingException.from(
 				theParser,
-				Msg.code(3046) + "eidSystems entry for '" + theParser.currentName()
+				Msg.code(3046) + "eidSystems entry for '" + theResourceType
 						+ "' must be an EID system URI or an array of EID system URIs");
 	}
 }

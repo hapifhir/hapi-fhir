@@ -80,9 +80,8 @@ class EidSystemListDeserializerTest {
 		assertThatThrownBy(() -> deserialize("""
 			{"eidSystems": {"Patient": 42}}"""))
 			.isInstanceOf(JsonMappingException.class)
-			.hasMessageContaining(Msg.code(3046))
-			.hasMessageContaining("eidSystems")
-			.hasMessageContaining("Patient");
+			.hasMessageContaining(Msg.code(3046)
+				+ "eidSystems entry for 'Patient' must be an EID system URI or an array of EID system URIs");
 	}
 
 	@Test
@@ -90,9 +89,8 @@ class EidSystemListDeserializerTest {
 		assertThatThrownBy(() -> deserialize("""
 			{"eidSystems": {"Patient": ["http://example.com/mrn", 42]}}"""))
 			.isInstanceOf(JsonMappingException.class)
-			.hasMessageContaining(Msg.code(3046))
-			.hasMessageContaining("eidSystems")
-			.hasMessageContaining("Patient");
+			.hasMessageContaining(Msg.code(3046)
+				+ "eidSystems entry for 'Patient' must be an EID system URI or an array of EID system URIs");
 	}
 
 	private EidSystemsHolder deserialize(String theJson) throws Exception {
