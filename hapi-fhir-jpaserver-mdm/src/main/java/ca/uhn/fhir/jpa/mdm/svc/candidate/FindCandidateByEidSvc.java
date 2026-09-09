@@ -73,9 +73,9 @@ public class FindCandidateByEidSvc extends BaseCandidateFinder {
 				theIncomingResource.getIdElement().getResourceType(),
 				myMdmPartitionHelper.getRequestPartitionIdFromResourceForSearch(theIncomingResource));
 
-		// Several of the incoming EIDs may resolve to the same golden resource. That is one candidate, not
-		// several - reporting it more than once would send the resource down the multiple-candidate path
-		// and flag a duplicate that does not exist.
+		// The single OR'd search already returns each golden resource once, so this is a guard: were
+		// a golden resource ever reported twice, the resource would go down the
+		// multiple-candidate path and flag a duplicate that does not exist.
 		Set<IResourcePersistentId<?>> seenGoldenResourcePids = new LinkedHashSet<>();
 		for (IAnyResource foundGoldenResource : foundGoldenResources) {
 			// Exclude manually declared NO_MATCH links from candidates
