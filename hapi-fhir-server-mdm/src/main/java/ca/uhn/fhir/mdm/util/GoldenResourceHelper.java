@@ -215,19 +215,18 @@ public class GoldenResourceHelper {
 	/**
 	 * Updates EIDs on a Golden Resource, based on the incoming source resource.
 	 * <ul>
-	 * <li>Where the Golden Resource has no external EID, or multiple EIDs are permitted, the incoming EIDs
-	 * are added to it.</li>
-	 * <li>Where the two share an EID, they are the same entity, so the incoming EIDs belonging to an EID
-	 * system the Golden Resource has no EID in are added to it. An incoming EID from a system it already
-	 * uses is not, whatever its value - the Golden Resource would then be ambiguous within that system -
-	 * and the drop is recorded in the transaction log.</li>
-	 * <li>Otherwise the incoming EIDs contradict the Golden Resource's, and an
-	 * {@link IllegalArgumentException} is thrown.</li>
+	 * <li>The Golden Resource has no external EID, or multiple EIDs are permitted: the incoming EIDs are
+	 * added.</li>
+	 * <li>They share an EID, so they are the same entity. Each incoming EID is then merged by EID system:
+	 * a system the Golden Resource has no EID in is filled in (GR has MRN 1, incoming has MRN 1 + NPI 7:
+	 * NPI 7 is added); a system it already has an EID in is left alone and the drop logged (GR has MRN 1 +
+	 * NPI 9, incoming has MRN 1 + NPI 7: NPI 7 is dropped, as two NPIs would make the GR ambiguous).</li>
+	 * <li>They share no EID, so they contradict each other and {@link IllegalArgumentException} is thrown
+	 * (GR has MRN 1, incoming has MRN 2).</li>
 	 * </ul>
 	 * <p>
-	 * Where a single EID system is configured for the resource type, the second case can never add
-	 * anything: every EID extracted for that resource type carries that one system, so it is already
-	 * represented on the Golden Resource.
+	 * With a single EID system configured for the resource type, the fill-in case never applies: a shared
+	 * EID already means the Golden Resource has an EID in that one system.
 	 * </p>
 	 *
 	 * @param theGoldenResource The golden resource to update the external EID on.
@@ -240,37 +239,37 @@ public class GoldenResourceHelper {
 			MdmTransactionContext theMdmTransactionContext) {
 		// This handles overwriting an automatically assigned EID if a patient that links is coming in with an official
 		// EID.
-		List<CanonicalEID> incomingSourceEid = myEIDHelper.getExternalEid(theSourceResource);
-		List<CanonicalEID> goldenResourceOfficialEid = myEIDHelper.getExternalEid(theGoldenResource);
+		List<CanonicalEID> incomingSourceEids = myEIDHelper.getExternalEid(theSourceResource);
+		List<CanonicalEID> goldenResourceOfficialEids = myEIDHelper.getExternalEid(theGoldenResource);
 
-		if (incomingSourceEid.isEmpty()) {
+		if (incomingSourceEids.isEmpty()) {
 			return theGoldenResource;
 		}
 
-		if (goldenResourceOfficialEid.isEmpty() || !myMdmSettings.isPreventMultipleEids()) {
-			if (addCanonicalEidsToGoldenResourceIfAbsent(theGoldenResource, incomingSourceEid)) {
+		if (goldenResourceOfficialEids.isEmpty() || !myMdmSettings.isPreventMultipleEids()) {
+			if (addCanonicalEidsToGoldenResourceIfAbsent(theGoldenResource, incomingSourceEids)) {
 				log(
 						theMdmTransactionContext,
 						"Incoming resource:" + theSourceResource.getIdElement().toUnqualifiedVersionless()
 								+ " + with EID "
-								+ incomingSourceEid.stream()
+								+ incomingSourceEids.stream()
 										.map(CanonicalEID::toString)
 										.collect(Collectors.joining(","))
 								+ " is applying this EID to its related Golden Resource, as this Golden Resource does not yet have an external EID");
 			}
-		} else if (!goldenResourceOfficialEid.isEmpty()
-				&& myEIDHelper.eidMatchExists(goldenResourceOfficialEid, incomingSourceEid)) {
+		} else if (!goldenResourceOfficialEids.isEmpty()
+				&& myEIDHelper.eidMatchExists(goldenResourceOfficialEids, incomingSourceEids)) {
 			// The resources agree on at least one EID, so they are the same entity. Any EID the incoming
 			// resource carries from an EID system the Golden Resource has no EID in is new information and
 			// is applied; an EID from a system the Golden Resource already uses is not, because a Golden
 			// Resource holding two EIDs of one system would be rejected by the "prevent multiple EIDs"
 			// safeguard on the next write.
 			if (addCanonicalEidsForEidSystemsAbsentFromGoldenResource(
-					theGoldenResource, goldenResourceOfficialEid, incomingSourceEid)) {
+					theGoldenResource, goldenResourceOfficialEids, incomingSourceEids)) {
 				log(
 						theMdmTransactionContext,
 						"Incoming resource:" + theSourceResource.getIdElement().toVersionless() + " with EIDs "
-								+ incomingSourceEid.stream()
+								+ incomingSourceEids.stream()
 										.map(CanonicalEID::toString)
 										.collect(Collectors.joining(","))
 								+ " is applying to its related Golden Resource the EIDs of the EID systems that Golden Resource does not yet have an EID for");
@@ -278,18 +277,18 @@ public class GoldenResourceHelper {
 				log(
 						theMdmTransactionContext,
 						"Incoming resource:" + theSourceResource.getIdElement().toVersionless() + " with EIDs "
-								+ incomingSourceEid.stream()
+								+ incomingSourceEids.stream()
 										.map(CanonicalEID::toString)
 										.collect(Collectors.joining(","))
 								+ " does not need to overwrite the EID in the Golden Resource, as this EID is already present in the Golden Resource");
 			}
 			logEidsDroppedForOccupiedEidSystems(
-					theMdmTransactionContext, theSourceResource, goldenResourceOfficialEid, incomingSourceEid);
+					theMdmTransactionContext, theSourceResource, goldenResourceOfficialEids, incomingSourceEids);
 		} else {
 			throw new IllegalArgumentException(Msg.code(1490)
 					+ String.format(
 							"Incoming resource EID %s would create a duplicate Golden Resource, as Golden Resource EID %s already exists!",
-							incomingSourceEid.toString(), goldenResourceOfficialEid.toString()));
+							incomingSourceEids.toString(), goldenResourceOfficialEids.toString()));
 		}
 		return theGoldenResource;
 	}
