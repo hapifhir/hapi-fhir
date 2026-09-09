@@ -82,16 +82,7 @@ public class MdmMatchLinkSvcTest {
 		public void findCandidates_withLowSearchLimit_tagsResourceAsTooManyMatches() {
 			// setup
 			int maxThreshold = 3;
-			Date today = new Date();
-			int countToMake = maxThreshold * 2;
-			for (int i = 0; i < countToMake; i++) {
-				Patient jane = buildJaneWithBirthday(today);
-				jane.getName()
-					.get(0)
-					.addGiven("_" + i);
-				jane.setActive(true);
-				createPatient(jane);
-			}
+			Date today = createJanePatients(maxThreshold * 2);
 
 			Patient jane = buildJaneWithBirthday(today);
 			jane.setActive(true);
@@ -115,6 +106,63 @@ public class MdmMatchLinkSvcTest {
 			}
 		}
 
+		@Test
+		public void searching_withTooManyCandidateResources_yieldsSaidResources() {
+			// setup
+			int maxThreshold = 3;
+
+			int searchLimit = myMdmSettings.getCandidateSearchLimit();
+			try {
+				myMdmSettings.setCandidateSearchLimit(maxThreshold);
+
+				// test
+				// these are candidates only; MDM is not run on them
+				Date today = createJanePatients(maxThreshold);
+
+				// this one is put through MDM, so it is the one that exceeds the threshold and gets tagged
+				Patient jane = buildJaneWithBirthday(today);
+				jane.setActive(true);
+				createPatientAndUpdateLinks(jane);
+
+				// verify
+				for (boolean toUseValue : new boolean[] { true, false }) {
+					SearchParameterMap map = new SearchParameterMap();
+					map.setLoadSynchronous(true);
+					if (toUseValue) {
+						map.add("_tag", new TokenParam(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE, MdmConstants.TOO_MANY_CANDIDATES));
+					} else {
+						map.add("_tag", new TokenParam(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE));
+					}
+					IBundleProvider results = myPatientDao.search(map, new SystemRequestDetails());
+
+					ourLog.info("Searching with system" + (toUseValue ? " and value " : " only"));
+					assertEquals(1, results.size());
+					for (IBaseResource resource : results.getAllResources()) {
+						assertTrue(resource.getMeta()
+							.getTag().stream()
+							.anyMatch(tag -> {
+								return tag.getSystem().equals(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE)
+									&& tag.getCode().equals(MdmConstants.TOO_MANY_CANDIDATES);
+							}));
+					}
+				}
+			} finally {
+				myMdmSettings.setCandidateSearchLimit(searchLimit);
+			}
+		}
+
+		private Date createJanePatients(int theNumToMake) {
+			Date today = new Date();
+			for (int i = 0; i < theNumToMake; i++) {
+				Patient jane = buildJaneWithBirthday(today);
+				jane.getName()
+					.get(0)
+					.addGiven("_" + i);
+				jane.setActive(true);
+				createPatient(jane);
+			}
+			return today;
+		}
 	}
 
 	@Nested
@@ -849,6 +897,56 @@ public class MdmMatchLinkSvcTest {
 
 		@Autowired
 		private IBlockListRuleProvider myBlockListRuleProvider;
+
+		@Test
+		public void search_withBlockedResources_returnsThem() {
+			// setup
+			String blockedFirstName = "Jane";
+			String blockedLastName = "Doe";
+
+			BlockListJson blockListJson = new BlockListJson();
+			BlockListRuleJson rule = new BlockListRuleJson();
+			rule.setResourceType("Patient");
+			rule.addBlockListField()
+				.setFhirPath("name.single().family")
+				.setBlockedValue(blockedLastName);
+			rule.addBlockListField()
+				.setFhirPath("name.single().given.first()")
+				.setBlockedValue(blockedFirstName);
+			blockListJson.addBlockListRule(rule);
+
+			MdmTransactionContext mdmContext = createContextForCreate("Patient");
+
+			// when
+			when(myBlockListRuleProvider.getBlocklistRules())
+				.thenReturn(blockListJson);
+
+			Patient blockedPatient = createPatient(buildJanePatient());
+			myMdmMatchLinkSvc.updateMdmLinksForMdmSource(blockedPatient, mdmContext);
+
+			// test
+			for (boolean toUseValue : new boolean[] { true, false }) {
+				SearchParameterMap map = new SearchParameterMap();
+				map.setLoadSynchronous(true);
+				if (toUseValue) {
+					map.add("_tag", new TokenParam(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE, MdmConstants.BLOCKED_VALUE));
+				} else {
+					map.add("_tag", new TokenParam(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE));
+				}
+				IBundleProvider results = myPatientDao.search(map, new SystemRequestDetails());
+
+				ourLog.info("Searching with system" + (toUseValue ? " and value " : " only"));
+				assertEquals(1, results.size());
+				for (IBaseResource resource : results.getAllResources()) {
+					assertTrue(resource.getMeta()
+						.getTag().stream()
+						.anyMatch(tag -> {
+							return tag.getSystem().equals(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE)
+								&& tag.getCode().equals(MdmConstants.BLOCKED_VALUE);
+						}));
+				}
+			}
+		}
 
 		@Test
 		public void updateMdmLinksForMdmSource_createBlockedResource_alwaysCreatesNewGoldenResource() {
