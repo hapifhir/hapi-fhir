@@ -36,9 +36,13 @@ public class MdmMessageKeySvc implements ISubscriptionMessageKeySvc {
 
 	/**
 	 * The broker routes messages sharing a key to the same consumer, which is what keeps changes to one
-	 * patient in order when several MDM consumers are running. The key must therefore not depend on the
-	 * order identifiers happen to appear in the payload. Where a resource type is identified by several
-	 * EID systems, the primary one - the first configured for that resource type - decides the key.
+	 * patient in order when several MDM consumers are running. Where a resource type is identified by
+	 * several EID systems, the key is therefore taken from the primary system - the first configured for
+	 * that resource type - rather than from whichever EID the payload happens to list first.
+	 * <p>
+	 * Ordering still decides the key in one case: with "prevent multiple EIDs" off, a resource may hold
+	 * several EIDs within that primary system, and the first of them in the payload wins.
+	 * </p>
 	 */
 	@Nullable
 	@Override
