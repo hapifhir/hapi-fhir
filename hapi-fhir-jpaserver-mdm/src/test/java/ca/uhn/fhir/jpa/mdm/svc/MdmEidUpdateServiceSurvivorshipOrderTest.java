@@ -9,12 +9,12 @@ import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
+import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,7 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -91,7 +91,8 @@ public class MdmEidUpdateServiceSurvivorshipOrderTest {
 		// The incoming resource carries an EID that the Golden Resource already has, which is the branch
 		// that merges EIDs into the Golden Resource.
 		when(myEIDHelper.hasEidOverlap(myGoldenResource, myTargetResource)).thenReturn(true);
-		when(myEIDHelper.getExternalEid(myTargetResource)).thenReturn(Collections.emptyList());
+		when(myEIDHelper.getExternalEid(myTargetResource))
+				.thenReturn(List.of(new CanonicalEID("http://mrn-system", "mrn-1", null)));
 
 		// The resource stays matched to the same Golden Resource.
 		IMdmLink existingLink = mock(IMdmLink.class);
