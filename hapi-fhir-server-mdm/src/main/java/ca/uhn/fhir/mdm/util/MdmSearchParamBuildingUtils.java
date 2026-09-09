@@ -78,9 +78,10 @@ public class MdmSearchParamBuildingUtils {
 	 * search with a blank value matches on the system alone
 	 * </p>
 	 * <p>
-	 * This is the EID half of an EID search on its own, with no restriction on which resources are
-	 * searched. Use {@link #buildEidSearchParameterMap(Collection)} to search golden resources; use this
-	 * directly to search source resources.
+	 * This is the identifier criterion only - it carries no golden record tag filter, so a search built
+	 * from it alone returns every resource of the searched type holding one of these EIDs, golden
+	 * resources included. Use {@link #buildEidSearchParameterMap(Collection)} for a map that adds that tag
+	 * filter and so returns golden resources alone.
 	 * </p>
 	 *
 	 * @param theEids the EIDs to search for
