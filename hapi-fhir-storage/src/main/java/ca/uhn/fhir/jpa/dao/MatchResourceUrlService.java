@@ -243,7 +243,16 @@ public class MatchResourceUrlService<T extends IResourcePersistentId<?>> {
 		return dao;
 	}
 
-	private String massageForStorage(String theResourceType, String theMatchUrl) {
+	/**
+	 * Canonicalizes a conditional/match URL to the type-qualified form used as the storage and lookup key:
+	 * {@code Type?params} is returned unchanged, while the type-less spellings a conditional request may
+	 * legally use — {@code ?params} and bare {@code params} (the form the FHIR specification shows for
+	 * If-None-Exist) — are prefixed with the given resource type. Callers that record or look up match URLs
+	 * outside this service (e.g. transaction pre-fetch) must apply the same canonicalization so their keys
+	 * agree with the ones this service stores.
+	 */
+	public static String massageForStorage(String theResourceType, String theMatchUrl) {
+		Validate.notBlank(theResourceType, "theResourceType must not be null or blank");
 		Validate.notBlank(theMatchUrl, "theMatchUrl must not be null or blank");
 		int questionMarkIdx = theMatchUrl.indexOf("?");
 		if (questionMarkIdx > 0) {

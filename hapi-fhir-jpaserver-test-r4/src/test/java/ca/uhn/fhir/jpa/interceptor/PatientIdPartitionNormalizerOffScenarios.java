@@ -158,6 +158,64 @@ class PatientIdPartitionNormalizerOffScenarios {
 					List.of(
 						inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE)
 					)
+				),
+				Arguments.of(
+					"Conditionally Create Patient + Conditionally Create Observation | placeholder inside the observation's ifNoneExist",
+					"""
+						{ "resourceType" : "Bundle", "type" : "transaction",
+							"entry" : [
+								{
+									"fullUrl" : "urn:uuid:1f9e2b44-0000-0000-0000-000000000d01",
+									"resource" : {
+										"resourceType" : "Patient",
+										"identifier" : [ { "system" : "old-sys", "value" : "condCreatePatient"} ]
+									},
+									"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "Patient?identifier=old-sys|condCreatePatient"}
+								}, {
+									"resource" : {
+										"resourceType" : "Observation",
+										"identifier" : [ { "system" : "observation-system", "value" : "condCreateObs"} ],
+										"subject" : { "reference" : "urn:uuid:1f9e2b44-0000-0000-0000-000000000d01" }
+									},
+									"request" : { "method" : "POST", "url" : "Observation", "ifNoneExist" : "Observation?identifier=observation-system|condCreateObs&subject=urn:uuid:1f9e2b44-0000-0000-0000-000000000d01"}
+								}
+							]
+						}
+						""",
+					"A conditional URL embedding a client-supplied urn fullUrl must resolve without the normalizer — the placeholder resolution lives in the post-prefetch hook.",
+					List.of(
+						inCompartmentOfSelf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH),
+						inSamePartitionAsEntry("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH, 0)
+					)
+				),
+				Arguments.of(
+					"Conditionally Create Patient (bare spec-form ifNoneExist) + Observation | placeholder reference, patient matches existing",
+					"""
+						{ "resourceType" : "Bundle", "type" : "transaction",
+							"entry" : [
+								{
+									"fullUrl" : "urn:uuid:1f9e2b44-0000-0000-0000-000000000d02",
+									"resource" : {
+										"resourceType" : "Patient",
+										"identifier" : [ { "system" : "old-sys", "value" : "existingPat1Ident1"} ]
+									},
+									"request" : { "method" : "POST", "url" : "Patient", "ifNoneExist" : "identifier=old-sys|existingPat1Ident1"}
+								}, {
+									"resource" : {
+										"resourceType" : "Observation",
+										"identifier" : [ { "system" : "observation-system", "value" : "obsWithUrnRef"} ],
+										"subject" : { "reference" : "urn:uuid:1f9e2b44-0000-0000-0000-000000000d02" }
+									},
+									"request" : { "method" : "POST", "url" : "Observation"}
+								}
+							]
+						}
+						""",
+					"The spec allows If-None-Exist to omit the type prefix; a bare URL must still resolve to the existing patient without the normalizer's synthetics.",
+					List.of(
+						inCompartmentOf("Patient", StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH, "pat1"),
+						inCompartmentOf("Observation", StorageResponseCodeEnum.SUCCESSFUL_CREATE, "pat1")
+					)
 				)
 			);
 		}
