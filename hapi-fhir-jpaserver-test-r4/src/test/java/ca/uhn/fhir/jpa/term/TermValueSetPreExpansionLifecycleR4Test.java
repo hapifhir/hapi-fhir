@@ -316,15 +316,15 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 	}
 
 	/**
-	 * Covers https://github.com/hapifhir/hapi-fhir/issues/8321 on the resource storage path, which is
-	 * what a package or IG upload uses. A CodeSystem big enough for its concept storage to be
-	 * deferred, followed by a ValueSet that includes it, must not pre-expand until those deferred
-	 * concepts have been processed, otherwise the expansion is written against a partially stored
-	 * CodeSystem.
+	 * A CodeSystem large enough for its concept storage to be deferred, then a ValueSet that includes
+	 * it: the pre-expansion job has to process the deferred concepts itself before it stages the
+	 * expansion, otherwise the expansion is written against a partially stored CodeSystem. Covers the
+	 * resource storage path rather than the terminology import job.
 	 * <p>
-	 * Scheduling is disabled in these tests, so nothing processes the deferred concepts except the
-	 * pre-expansion job itself. Processing them before the await would empty the queue first and the
-	 * test would pass with or without the readiness check.
+	 * Scheduling is disabled in these tests, so the pre-expansion job is the only thing that can drain
+	 * the deferred queue.
+	 *
+	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8321">Issue #8321</a>
 	 */
 	@Test
 	void preExpansion_onCodeSystemConceptStorageDeferred_expandsAllConcepts() {
@@ -340,7 +340,8 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 		myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), newSrd());
 		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(JOB_ID_PRE_EXPAND_VALUESET);
 
-		// the job processes the deferred concepts itself, so this should find nothing left
+		// must stay after the await - draining the queue first would leave this passing whether or not
+		// the job waits for the deferred concepts
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 
 		assertThat(runInTransaction(() -> myTermConceptDao.count())).isEqualTo(conceptCount);
@@ -355,7 +356,7 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 	 * {@link WorkChunkStatusEnum#POLL_WAITING} with nothing expanded, and the expansion must only be
 	 * written once processing resumes.
 	 *
-	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8321">GH-8321</a>
+	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8321">Issue #8321</a>
 	 */
 	@Test
 	void preExpansion_onDeferredStorageProcessingPaused_waitsForTheQueueThenExpandsAllConcepts() {

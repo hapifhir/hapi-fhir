@@ -139,7 +139,7 @@ class ImportTerminologyStepFinalizeTest extends BaseImportLoincStepTest {
 	 * otherwise the pre-expansion runs against a CodeSystem that has no current version and falls
 	 * back to an unvalidated in-memory expansion.
 	 *
-	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8321">GH-8321</a>
+	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8321">Issue #8321</a>
 	 */
 	@Test
 	void run_valueSetsToActivate_activatesCodeSystemVersionBeforeValueSets() {
@@ -171,7 +171,7 @@ class ImportTerminologyStepFinalizeTest extends BaseImportLoincStepTest {
 	 * As above, for a non-SNAPSHOT import, which makes the existing CodeSystem version current
 	 * instead of activating a staged one.
 	 *
-	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8321">GH-8321</a>
+	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8321">Issue #8321</a>
 	 */
 	@Test
 	void run_addModeWithValueSetsToActivate_makesCodeSystemCurrentBeforeValueSets() {
