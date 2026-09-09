@@ -26,8 +26,6 @@ import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -135,7 +133,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 
 		// test
 		Collection<IAnyResource> results = myMdmCandidateSearchSvc.findCandidates("Patient",
-			incoming, RequestPartitionId.allPartitions());
+			incoming, RequestPartitionId.allPartitions(), new MdmTransactionContext());
 
 		// validation
 		assertThat(results).hasSize(0);
@@ -171,7 +169,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 
 		// test
 		Collection<IAnyResource> results = myMdmCandidateSearchSvc.findCandidates("Patient",
-			incoming, RequestPartitionId.allPartitions());
+			incoming, RequestPartitionId.allPartitions(), new MdmTransactionContext());
 
 		// validation
 		assertThat(results).hasSize(1);
