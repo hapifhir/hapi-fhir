@@ -54,7 +54,6 @@ import java.util.Optional;
 public class MdmResourceDaoSvcImpl implements IMdmResourceDaoSvc {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
-
 	private static final int MAX_MATCHING_GOLDEN_RESOURCES = 1000;
 
 	@Autowired
@@ -127,7 +126,7 @@ public class MdmResourceDaoSvcImpl implements IMdmResourceDaoSvc {
 		}
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Override
 	public void tagResourceAsUnmatched(IBaseResource theResource, MdmTransactionContext theContext) {
 		if (!theResource.getIdElement().hasIdPart()) {
@@ -140,9 +139,7 @@ public class MdmResourceDaoSvcImpl implements IMdmResourceDaoSvc {
 		} else if (theContext.isTooManyCandidatesMatched()) {
 			MdmResourceUtil.tagResourceAsTooManyMatchCandidates(theResource);
 		} else {
-			ourLog.warn(
-				"Attempt to tag resource, but no criteria for tagging provided"
-			);
+			ourLog.warn("Attempt to tag resource, but no criteria for tagging provided");
 			return;
 		}
 
@@ -157,9 +154,7 @@ public class MdmResourceDaoSvcImpl implements IMdmResourceDaoSvc {
 
 		IBaseMetaType meta = theResource.getMeta();
 
-		resourceDao.metaAddOperation(theResource.getIdElement().toUnqualifiedVersionless(),
-			meta,
-			rd,
-			new TransactionDetails());
+		resourceDao.metaAddOperation(
+				theResource.getIdElement().toUnqualifiedVersionless(), meta, rd, new TransactionDetails());
 	}
 }

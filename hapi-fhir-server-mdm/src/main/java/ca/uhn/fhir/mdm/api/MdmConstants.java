@@ -39,7 +39,8 @@ public class MdmConstants {
 	 * matched to potential candidates.
 	 * The reason will come in the value.
 	 */
-	public static final String MDM_UNMATCHED_TAG_NAMESPACE = "http://hapifhir.io/fhir/StructureDefinition/mdm-unmatched";
+	public static final String MDM_UNMATCHED_TAG_NAMESPACE =
+			"http://hapifhir.io/fhir/StructureDefinition/mdm-unmatched";
 
 	/**
 	 * If set as the value of an extension with the above namespace,
@@ -58,13 +59,15 @@ public class MdmConstants {
 	 * Display text for MDM resources that are *blocked* from MDM matching because
 	 * of block rule conditions.
 	 */
-	public static final String BLOCKED_DISPLAY = "This resource has been omitted from MDM Matching because of blocklist criteria.";
+	public static final String BLOCKED_DISPLAY =
+			"This resource has been omitted from MDM Matching because of blocklist criteria.";
 
 	/**
 	 * Display text for MDM resources that are omitted (skipped) during MDM
 	 * matching because the current match rules yield too many candidate matches.
 	 */
-	public static final String TOO_MANY_CANDIDATES_DISPLAY = "This resource has been omitted from MDM matching because it matches to too many candidate resources under current match rules.";
+	public static final String TOO_MANY_CANDIDATES_DISPLAY =
+			"This resource has been omitted from MDM matching because it matches to too many candidate resources under current match rules.";
 
 	/**
 	 * Blocked resource tag info

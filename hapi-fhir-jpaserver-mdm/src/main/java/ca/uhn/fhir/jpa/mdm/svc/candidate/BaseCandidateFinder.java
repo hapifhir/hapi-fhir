@@ -39,7 +39,8 @@ public abstract class BaseCandidateFinder {
 		return candidateList;
 	}
 
-	protected abstract List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(FindGoldenResourceCandidatesParams theParams);
+	protected abstract List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(
+			FindGoldenResourceCandidatesParams theParams);
 
 	protected abstract CandidateStrategyEnum getStrategy();
 }

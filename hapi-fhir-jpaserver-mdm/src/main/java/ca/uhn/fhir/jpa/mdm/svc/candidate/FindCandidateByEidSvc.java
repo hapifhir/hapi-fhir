@@ -57,7 +57,8 @@ public class FindCandidateByEidSvc extends BaseCandidateFinder {
 	MdmPartitionHelper myMdmPartitionHelper;
 
 	@Override
-	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(FindGoldenResourceCandidatesParams theParams) {
+	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(
+			FindGoldenResourceCandidatesParams theParams) {
 		List<MatchedGoldenResourceCandidate> retval = new ArrayList<>();
 		IAnyResource incomingResource = theParams.getResource();
 

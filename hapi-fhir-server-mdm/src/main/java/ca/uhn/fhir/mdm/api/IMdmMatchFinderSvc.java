@@ -38,6 +38,8 @@ public interface IMdmMatchFinderSvc {
 	 */
 	@Nonnull
 	List<MatchedTarget> getMatchedTargets(
-		String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId,
-		MdmTransactionContext theContext);
+			String theResourceType,
+			IAnyResource theResource,
+			RequestPartitionId theRequestPartitionId,
+			MdmTransactionContext theContext);
 }

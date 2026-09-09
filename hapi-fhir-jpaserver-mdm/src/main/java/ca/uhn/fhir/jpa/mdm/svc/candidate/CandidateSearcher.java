@@ -62,8 +62,7 @@ public class CandidateSearcher {
 			String theResourceType,
 			String theResourceCriteria,
 			RequestPartitionId partitionId,
-			MdmTransactionContext theContext
-	) {
+			MdmTransactionContext theContext) {
 		SearchParameterMap searchParameterMap =
 				myMdmSearchParamSvc.mapFromCriteria(theResourceType, theResourceCriteria);
 
@@ -76,15 +75,17 @@ public class CandidateSearcher {
 
 		if (retval.size() != null) {
 			if (retval.size() >= myMdmSettings.getCandidateSearchLimit()) {
-				ourLog.warn("At least {} search candidates were returned for search criteria {}; this is the configured maximum candidates to allow. Resource will be omitted from further MDM matching.",
-					retval.size(),
-					theResourceCriteria);
+				ourLog.warn(
+						"At least {} search candidates were returned for search criteria {}; this is the configured maximum candidates to allow. Resource will be omitted from further MDM matching.",
+						retval.size(),
+						theResourceCriteria);
 				theContext.setTooManyCandidatesMatched(true);
 				return Optional.empty();
 			} else if (retval.size() >= myMdmSettings.getCandidateSearchWarnLimit()) {
-				ourLog.warn("Candidate search yielded {} results for search criteria {}; more than the warning level, but not enough to halt MDM matching.",
-					retval.size(),
-					theResourceCriteria);
+				ourLog.warn(
+						"Candidate search yielded {} results for search criteria {}; more than the warning level, but not enough to halt MDM matching.",
+						retval.size(),
+						theResourceCriteria);
 			}
 		}
 
@@ -99,7 +100,8 @@ public class CandidateSearcher {
 	 * @return Optional.empty() if >= IMdmSettings.getCandidateSearchLimit() candidates are found, otherwise
 	 * return the bundle provider for the search results.
 	 */
-	public Optional<IBundleProvider> search(String theResourceType, String theResourceCriteria, MdmTransactionContext theContext) {
+	public Optional<IBundleProvider> search(
+			String theResourceType, String theResourceCriteria, MdmTransactionContext theContext) {
 		return this.search(theResourceType, theResourceCriteria, RequestPartitionId.allPartitions(), theContext);
 	}
 

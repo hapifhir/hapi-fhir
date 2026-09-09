@@ -125,9 +125,13 @@ public class MdmMatchLinkSvc {
 		}
 
 		if (theMdmTransactionContext.isTooManyCandidatesMatched() || isResourceBlocked) {
-			log(theMdmTransactionContext, "Skipping MDM matching for "
-				+ theResource.getId() +
-				(isResourceBlocked ? ": resource is blocked from mdm matching." : ": candidate search limit exceeded."));
+			log(
+					theMdmTransactionContext,
+					"Skipping MDM matching for "
+							+ theResource.getId()
+							+ (isResourceBlocked
+									? ": resource is blocked from mdm matching."
+									: ": candidate search limit exceeded."));
 			myMdmResourceDaoSvc.tagResourceAsUnmatched(theResource, theMdmTransactionContext);
 		}
 

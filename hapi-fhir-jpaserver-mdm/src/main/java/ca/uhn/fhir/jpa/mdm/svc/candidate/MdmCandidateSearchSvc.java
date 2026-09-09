@@ -76,7 +76,9 @@ public class MdmCandidateSearchSvc {
 	 */
 	@Transactional
 	public Collection<IAnyResource> findCandidates(
-			String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId,
+			String theResourceType,
+			IAnyResource theResource,
+			RequestPartitionId theRequestPartitionId,
 			MdmTransactionContext theContext) {
 
 		/*
@@ -98,8 +100,13 @@ public class MdmCandidateSearchSvc {
 		// must perform one search per MdmResourceSearchParamJson.
 		if (candidateSearchParams.isEmpty()) {
 			searchForIdsAndAddToMap(
-					theResourceType, theResource, matchedPidsToResources, filterCriteria, null, theRequestPartitionId,
-				theContext);
+					theResourceType,
+					theResource,
+					matchedPidsToResources,
+					filterCriteria,
+					null,
+					theRequestPartitionId,
+					theContext);
 		} else {
 			for (MdmResourceSearchParamJson resourceSearchParam : candidateSearchParams) {
 
@@ -163,8 +170,7 @@ public class MdmCandidateSearchSvc {
 			List<String> theFilterCriteria,
 			MdmResourceSearchParamJson resourceSearchParam,
 			RequestPartitionId theRequestPartitionId,
-			MdmTransactionContext theContext
-	) {
+			MdmTransactionContext theContext) {
 		// 1.
 		Optional<String> oResourceCriteria = myMdmCandidateSearchCriteriaBuilderSvc.buildResourceQueryString(
 				theResourceType, theResource, theFilterCriteria, resourceSearchParam);

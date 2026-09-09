@@ -72,7 +72,8 @@ public class FindCandidateByExampleSvc<P extends IResourcePersistentId<?>> exten
 	 * @return an Optional list of {@link MatchedGoldenResourceCandidate} indicating matches.
 	 */
 	@Override
-	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(FindGoldenResourceCandidatesParams theParams) {
+	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(
+			FindGoldenResourceCandidatesParams theParams) {
 		IAnyResource target = theParams.getResource();
 		List<MatchedGoldenResourceCandidate> retval = new ArrayList<>();
 
@@ -83,7 +84,7 @@ public class FindCandidateByExampleSvc<P extends IResourcePersistentId<?>> exten
 				myFhirContext.getResourceType(target),
 				target,
 				myMdmPartitionHelper.getRequestPartitionIdFromResourceForSearch(target),
-			theParams.getContext());
+				theParams.getContext());
 
 		// Convert all possible match targets to their equivalent Golden Resources by looking up in the MdmLink table,
 		// while ensuring that the matches aren't in our NO_MATCH list.

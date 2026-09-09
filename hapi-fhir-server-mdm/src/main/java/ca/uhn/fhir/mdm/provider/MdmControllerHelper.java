@@ -155,8 +155,8 @@ public class MdmControllerHelper {
 				myMdmMatchFinderSvc.getMatchedTargets(theResourceType, theResource, requestPartitionId, context);
 		if (context.isTooManyCandidatesMatched()) {
 			throw new TooManyCandidatesException(Msg.code(762)
-				+ "MDM was aborted. At least " + myMdmSettings.getCandidateSearchLimit()
-				+ " (or more) candidate matches were found. Check logs for more details.");
+					+ "MDM was aborted. At least " + myMdmSettings.getCandidateSearchLimit()
+					+ " (or more) candidate matches were found. Check logs for more details.");
 		}
 		matches.sort(
 				Comparator.comparing((MatchedTarget m) -> m.getMatchResult().getNormalizedScore())

@@ -78,8 +78,10 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 	@Nonnull
 	@Transactional
 	public List<MatchedTarget> getMatchedTargets(
-		String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId,
-		MdmTransactionContext theContext) {
+			String theResourceType,
+			IAnyResource theResource,
+			RequestPartitionId theRequestPartitionId,
+			MdmTransactionContext theContext) {
 
 		List<MatchedTarget> retval = matchBasedOnEid(theResourceType, theResource, theRequestPartitionId, theContext);
 		if (!retval.isEmpty()) {
@@ -99,7 +101,9 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 	}
 
 	private List<MatchedTarget> matchBasedOnEid(
-			String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId,
+			String theResourceType,
+			IAnyResource theResource,
+			RequestPartitionId theRequestPartitionId,
 			MdmTransactionContext theContext) {
 
 		List<CanonicalEID> eidsFromResource = myEIDHelper.getExternalEid(theResource);
@@ -120,8 +124,7 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 			List<CanonicalEID> theEids,
 			String theResourceType,
 			RequestPartitionId theRequestPartitionId,
-			MdmTransactionContext theContext
-	) {
+			MdmTransactionContext theContext) {
 		final SearchParameterMap map = SearchParameterMap.newSynchronous();
 		final TokenOrListParam tokenOrListParam = new TokenOrListParam();
 		final String eidSystemForResourceType =

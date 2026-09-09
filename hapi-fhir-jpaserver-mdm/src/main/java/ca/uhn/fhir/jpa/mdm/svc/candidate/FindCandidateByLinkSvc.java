@@ -43,7 +43,8 @@ public class FindCandidateByLinkSvc extends BaseCandidateFinder {
 	 * @return an Optional list of {@link MatchedGoldenResourceCandidate} indicating matches.
 	 */
 	@Override
-	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(FindGoldenResourceCandidatesParams theParams) {
+	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(
+			FindGoldenResourceCandidatesParams theParams) {
 		List<MatchedGoldenResourceCandidate> retval = new ArrayList<>();
 		IAnyResource target = theParams.getResource();
 
