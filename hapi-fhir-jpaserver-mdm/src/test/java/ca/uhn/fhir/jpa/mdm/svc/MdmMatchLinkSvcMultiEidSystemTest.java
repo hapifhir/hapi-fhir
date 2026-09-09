@@ -27,10 +27,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 // Created by claude-opus-5
 public class MdmMatchLinkSvcMultiEidSystemTest extends BaseMdmR4Test {
 
-	private String mrnSystem() {
-		return patientEidSystems().get(0);
-	}
-	private String npiSystem() { return patientEidSystems().get(1); }
 
 	@Test
 	public void patientsSharingAnMrn_areLinkedToTheSameGoldenResource() {

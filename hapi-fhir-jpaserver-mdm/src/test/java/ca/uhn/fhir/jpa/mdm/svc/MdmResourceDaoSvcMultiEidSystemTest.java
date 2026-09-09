@@ -30,16 +30,14 @@ public class MdmResourceDaoSvcMultiEidSystemTest extends BaseMdmR4Test {
 
 	@Test
 	public void searchGoldenResourcesByEIDs_valueCollidesAcrossSystems_returnsOnlyThePairMatch() {
-		String mrnSystem = patientEidSystems().get(0);
-		String npiSystem = patientEidSystems().get(1);
 
-		Patient mrnGolden = addExternalEID(createGoldenPatient(), mrnSystem, "123");
+		Patient mrnGolden = addExternalEID(createGoldenPatient(), mrnSystem(), "123");
 		myPatientDao.update(mrnGolden, mySrd);
-		Patient npiGolden = addExternalEID(createGoldenPatient(), npiSystem, "123");
+		Patient npiGolden = addExternalEID(createGoldenPatient(), npiSystem(), "123");
 		myPatientDao.update(npiGolden, mySrd);
 
 		List<IAnyResource> found = myResourceDaoSvc.searchGoldenResourcesByEIDs(
-			List.of(new CanonicalEID(mrnSystem, "123", null)), "Patient", null);
+			List.of(new CanonicalEID(mrnSystem(), "123", null)), "Patient", null);
 
 		assertThat(found).hasSize(1);
 		assertThat(found.get(0).getIdElement().toUnqualifiedVersionless().getValue())
@@ -48,16 +46,14 @@ public class MdmResourceDaoSvcMultiEidSystemTest extends BaseMdmR4Test {
 
 	@Test
 	public void searchGoldenResourcesByEIDs_twoEidsResolvingToDifferentGoldenResources_returnsBoth() {
-		String mrnSystem = patientEidSystems().get(0);
-		String npiSystem = patientEidSystems().get(1);
 
-		Patient mrnGolden = addExternalEID(createGoldenPatient(), mrnSystem, "mrn-1");
+		Patient mrnGolden = addExternalEID(createGoldenPatient(), mrnSystem(), "mrn-1");
 		myPatientDao.update(mrnGolden, mySrd);
-		Patient npiGolden = addExternalEID(createGoldenPatient(), npiSystem, "npi-9");
+		Patient npiGolden = addExternalEID(createGoldenPatient(), npiSystem(), "npi-9");
 		myPatientDao.update(npiGolden, mySrd);
 
 		List<IAnyResource> found = myResourceDaoSvc.searchGoldenResourcesByEIDs(
-			List.of(new CanonicalEID(mrnSystem, "mrn-1", null), new CanonicalEID(npiSystem, "npi-9", null)),
+			List.of(new CanonicalEID(mrnSystem(), "mrn-1", null), new CanonicalEID(npiSystem(), "npi-9", null)),
 			"Patient", null);
 
 		assertThat(found).hasSize(2);
@@ -65,15 +61,13 @@ public class MdmResourceDaoSvcMultiEidSystemTest extends BaseMdmR4Test {
 
 	@Test
 	public void searchGoldenResourcesByEIDs_bothEidsOnTheSameGoldenResource_returnsItOnce() {
-		String mrnSystem = patientEidSystems().get(0);
-		String npiSystem = patientEidSystems().get(1);
 
-		Patient golden = addExternalEID(createGoldenPatient(), mrnSystem, "mrn-1");
-		addExternalEID(golden, npiSystem, "npi-9");
+		Patient golden = addExternalEID(createGoldenPatient(), mrnSystem(), "mrn-1");
+		addExternalEID(golden, npiSystem(), "npi-9");
 		myPatientDao.update(golden, mySrd);
 
 		List<IAnyResource> found = myResourceDaoSvc.searchGoldenResourcesByEIDs(
-			List.of(new CanonicalEID(mrnSystem, "mrn-1", null), new CanonicalEID(npiSystem, "npi-9", null)),
+			List.of(new CanonicalEID(mrnSystem(), "mrn-1", null), new CanonicalEID(npiSystem(), "npi-9", null)),
 			"Patient", null);
 
 		assertThat(found).hasSize(1);
@@ -84,13 +78,12 @@ public class MdmResourceDaoSvcMultiEidSystemTest extends BaseMdmR4Test {
 	 */
 	@Test
 	public void searchGoldenResourcesByEIDs_onePairResolvingToTwoGoldenResources_throws() {
-		String mrnSystem = patientEidSystems().get(0);
 
-		myPatientDao.update(addExternalEID(createGoldenPatient(), mrnSystem, "mrn-1"), mySrd);
-		myPatientDao.update(addExternalEID(createGoldenPatient(), mrnSystem, "mrn-1"), mySrd);
+		myPatientDao.update(addExternalEID(createGoldenPatient(), mrnSystem(), "mrn-1"), mySrd);
+		myPatientDao.update(addExternalEID(createGoldenPatient(), mrnSystem(), "mrn-1"), mySrd);
 
 		assertThatThrownBy(() -> myResourceDaoSvc.searchGoldenResourcesByEIDs(
-			List.of(new CanonicalEID(mrnSystem, "mrn-1", null)), "Patient", null))
+			List.of(new CanonicalEID(mrnSystem(), "mrn-1", null)), "Patient", null))
 			.isInstanceOf(InternalErrorException.class)
 			.hasMessageContaining(Msg.code(737));
 	}
@@ -107,13 +100,12 @@ public class MdmResourceDaoSvcMultiEidSystemTest extends BaseMdmR4Test {
 	 */
 	@Test
 	public void searchGoldenResourcesByEIDs_eidWithNoValue_isNotSearchedOn() {
-		String mrnSystem = patientEidSystems().get(0);
 
-		myPatientDao.update(addExternalEID(createGoldenPatient(), mrnSystem, "mrn-1"), mySrd);
-		myPatientDao.update(addExternalEID(createGoldenPatient(), mrnSystem, "mrn-2"), mySrd);
+		myPatientDao.update(addExternalEID(createGoldenPatient(), mrnSystem(), "mrn-1"), mySrd);
+		myPatientDao.update(addExternalEID(createGoldenPatient(), mrnSystem(), "mrn-2"), mySrd);
 
 		assertThat(myResourceDaoSvc.searchGoldenResourcesByEIDs(
-			List.of(new CanonicalEID(mrnSystem, null, null)), "Patient", null)).isEmpty();
+			List.of(new CanonicalEID(mrnSystem(), null, null)), "Patient", null)).isEmpty();
 	}
 
 	/**
@@ -121,15 +113,13 @@ public class MdmResourceDaoSvcMultiEidSystemTest extends BaseMdmR4Test {
 	 */
 	@Test
 	public void searchGoldenResourcesByEIDs_eidWithNoValueAlongsideARealOne_searchesOnlyTheRealOne() {
-		String mrnSystem = patientEidSystems().get(0);
-		String npiSystem = patientEidSystems().get(1);
 
-		Patient mrnGolden = addExternalEID(createGoldenPatient(), mrnSystem, "mrn-1");
+		Patient mrnGolden = addExternalEID(createGoldenPatient(), mrnSystem(), "mrn-1");
 		myPatientDao.update(mrnGolden, mySrd);
-		myPatientDao.update(addExternalEID(createGoldenPatient(), npiSystem, "npi-9"), mySrd);
+		myPatientDao.update(addExternalEID(createGoldenPatient(), npiSystem(), "npi-9"), mySrd);
 
 		List<IAnyResource> found = myResourceDaoSvc.searchGoldenResourcesByEIDs(
-			List.of(new CanonicalEID(mrnSystem, "mrn-1", null), new CanonicalEID(npiSystem, "", null)),
+			List.of(new CanonicalEID(mrnSystem(), "mrn-1", null), new CanonicalEID(npiSystem(), "", null)),
 			"Patient", null);
 
 		assertThat(found).hasSize(1);

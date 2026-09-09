@@ -39,15 +39,13 @@ public class FindCandidateByEidSvcMultiEidSystemTest extends BaseMdmR4Test {
 	 */
 	@Test
 	public void findCandidates_bothEidsResolvingToTheSameGoldenResource_returnsOneCandidate() {
-		String mrnSystem = patientEidSystems().get(0);
-		String npiSystem = patientEidSystems().get(1);
 
-		Patient golden = addExternalEID(createGoldenPatient(), mrnSystem, "mrn-1");
-		addExternalEID(golden, npiSystem, "npi-9");
+		Patient golden = addExternalEID(createGoldenPatient(), mrnSystem(), "mrn-1");
+		addExternalEID(golden, npiSystem(), "npi-9");
 		myPatientDao.update(golden, mySrd);
 
-		Patient incoming = addExternalEID(createPatient(new Patient()), mrnSystem, "mrn-1");
-		addExternalEID(incoming, npiSystem, "npi-9");
+		Patient incoming = addExternalEID(createPatient(new Patient()), mrnSystem(), "mrn-1");
+		addExternalEID(incoming, npiSystem(), "npi-9");
 		myPatientDao.update(incoming, mySrd);
 
 		CandidateList candidates = myFindCandidateByEidSvc.findCandidates(incoming);
@@ -58,14 +56,12 @@ public class FindCandidateByEidSvcMultiEidSystemTest extends BaseMdmR4Test {
 
 	@Test
 	public void findCandidates_eidsResolvingToDifferentGoldenResources_returnsBoth() {
-		String mrnSystem = patientEidSystems().get(0);
-		String npiSystem = patientEidSystems().get(1);
 
-		myPatientDao.update(addExternalEID(createGoldenPatient(), mrnSystem, "mrn-1"), mySrd);
-		myPatientDao.update(addExternalEID(createGoldenPatient(), npiSystem, "npi-9"), mySrd);
+		myPatientDao.update(addExternalEID(createGoldenPatient(), mrnSystem(), "mrn-1"), mySrd);
+		myPatientDao.update(addExternalEID(createGoldenPatient(), npiSystem(), "npi-9"), mySrd);
 
-		Patient incoming = addExternalEID(createPatient(new Patient()), mrnSystem, "mrn-1");
-		addExternalEID(incoming, npiSystem, "npi-9");
+		Patient incoming = addExternalEID(createPatient(new Patient()), mrnSystem(), "mrn-1");
+		addExternalEID(incoming, npiSystem(), "npi-9");
 		myPatientDao.update(incoming, mySrd);
 
 		CandidateList candidates = myFindCandidateByEidSvc.findCandidates(incoming);
@@ -75,12 +71,10 @@ public class FindCandidateByEidSvcMultiEidSystemTest extends BaseMdmR4Test {
 
 	@Test
 	public void findCandidates_eidValueCollidesAcrossSystems_doesNotMatch() {
-		String mrnSystem = patientEidSystems().get(0);
-		String npiSystem = patientEidSystems().get(1);
 
-		myPatientDao.update(addExternalEID(createGoldenPatient(), npiSystem, "123"), mySrd);
+		myPatientDao.update(addExternalEID(createGoldenPatient(), npiSystem(), "123"), mySrd);
 
-		Patient incoming = addExternalEID(createPatient(new Patient()), mrnSystem, "123");
+		Patient incoming = addExternalEID(createPatient(new Patient()), mrnSystem(), "123");
 		myPatientDao.update(incoming, mySrd);
 
 		CandidateList candidates = myFindCandidateByEidSvc.findCandidates(incoming);
@@ -95,11 +89,9 @@ public class FindCandidateByEidSvcMultiEidSystemTest extends BaseMdmR4Test {
 	@Test
 	@SuppressWarnings({"unchecked"})
 	public void findCandidates_severalEids_issuesASingleSearch() {
-		String mrnSystem = patientEidSystems().get(0);
-		String npiSystem = patientEidSystems().get(1);
 
-		Patient incoming = addExternalEID(createPatient(new Patient()), mrnSystem, "mrn-1");
-		addExternalEID(incoming, npiSystem, "npi-9");
+		Patient incoming = addExternalEID(createPatient(new Patient()), mrnSystem(), "mrn-1");
+		addExternalEID(incoming, npiSystem(), "npi-9");
 		myPatientDao.update(incoming, mySrd);
 
 		myFindCandidateByEidSvc.findCandidates(incoming);

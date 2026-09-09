@@ -31,13 +31,7 @@ public class MdmStorageInterceptorMultiEidSystemIT extends BaseMdmR4Test {
 	@Autowired
 	public MdmHelperR4 myMdmHelper;
 
-	private String mrnSystem() {
-		return patientEidSystems().get(0);
-	}
 
-	private String npiSystem() {
-		return patientEidSystems().get(1);
-	}
 
 	/**
 	 * The point of the feature: one MRN and one NPI on a single Patient must be accepted at the default

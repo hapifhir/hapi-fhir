@@ -445,6 +445,22 @@ abstract public class BaseMdmR4Test extends BaseResourceProviderR4Test {
 		return myMdmSettings.getMdmRules().getEnterpriseEIDSystemsForResourceType("Patient");
 	}
 
+	/**
+	 * The first EID system configured for Patient. Named for the medical record number the multi-EID rule
+	 * sets put there, and the only system the single-EID rule sets configure.
+	 */
+	protected String mrnSystem() {
+		return patientEidSystems().get(0);
+	}
+
+	/**
+	 * The second EID system configured for Patient, named for the national provider identifier the
+	 * multi-EID rule sets put there. Only rule sets configuring more than one EID system have it.
+	 */
+	protected String npiSystem() {
+		return patientEidSystems().get(1);
+	}
+
 	protected Patient createPatientAndUpdateLinks(Patient thePatient) {
 		thePatient = createPatient(thePatient);
 		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(thePatient, createContextForCreate("Patient"));
