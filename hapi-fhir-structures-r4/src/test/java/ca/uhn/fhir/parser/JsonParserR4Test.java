@@ -2091,9 +2091,139 @@ public class JsonParserR4Test extends BaseTest {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
+
+	/**
+	 * An extension on a <b>repeating</b> primitive that carries no value at all is emitted by some
+	 * tooling as an "_element" array with no corresponding value array, e.g.
+	 * <code>"_line": [ { "extension": [ ... ] } ]</code>. The non-repeating equivalent
+	 * (<code>"_family": { "extension": [ ... ] }</code>) has always parsed, but the array form was
+	 * reported to the error handler as an incorrect JSON type, so the default lenient handler
+	 * silently dropped the extensions. See #8238.
+	 */
+	@Test
+	public void testParseOrphanExtensionOnRepeatingPrimitive_ArrayFormIsPreserved() {
+		@Language("JSON")
+		String input = """
+			{
+			  "resourceType": "Patient",
+			  "name": [ {
+			    "_given": [ {
+			      "extension": [ {
+			        "url": "http://example.org/given",
+			        "valueString": "given-value"
+			      } ]
+			    } ]
+			  } ],
+			  "address": [ {
+			    "_line": [ {
+			      "extension": [ {
+			        "url": "http://example.org/line",
+			        "valueString": "line-value"
+			      } ]
+			    } ]
+			  } ]
+			}""";
+
+		Patient patient = ourCtx.newJsonParser().parseResource(Patient.class, input);
+
+		List<StringType> given = patient.getNameFirstRep().getGiven();
+		assertThat(given).hasSize(1);
+		assertThat(given.get(0).getValue()).isNull();
+		assertThat(given.get(0).getExtension()).hasSize(1);
+		assertEquals("http://example.org/given", given.get(0).getExtension().get(0).getUrl());
+		assertEquals("given-value", given.get(0).getExtension().get(0).getValue().primitiveValue());
+
+		List<StringType> line = patient.getAddressFirstRep().getLine();
+		assertThat(line).hasSize(1);
+		assertThat(line.get(0).getValue()).isNull();
+		assertThat(line.get(0).getExtension()).hasSize(1);
+		assertEquals("http://example.org/line", line.get(0).getExtension().get(0).getUrl());
+		assertEquals("line-value", line.get(0).getExtension().get(0).getValue().primitiveValue());
+	}
+
+	/**
+	 * As above, but the alternate array carries more than one entry, each of which is a separate
+	 * repetition of the primitive. See #8238.
+	 */
+	@Test
+	public void testParseOrphanExtensionOnRepeatingPrimitive_MultipleEntriesArePreserved() {
+		@Language("JSON")
+		String input = """
+			{
+			  "resourceType": "Patient",
+			  "address": [ {
+			    "_line": [ {
+			      "extension": [ { "url": "http://example.org/line", "valueString": "line-0" } ]
+			    }, {
+			      "extension": [ { "url": "http://example.org/line", "valueString": "line-1" } ]
+			    } ]
+			  } ]
+			}""";
+
+		Patient patient = ourCtx.newJsonParser().parseResource(Patient.class, input);
+
+		List<StringType> line = patient.getAddressFirstRep().getLine();
+		assertThat(line).hasSize(2);
+		assertEquals("line-0", line.get(0).getExtension().get(0).getValue().primitiveValue());
+		assertEquals("line-1", line.get(1).getExtension().get(0).getValue().primitiveValue());
+	}
+
+	/**
+	 * The extensions must survive a full parse/encode/parse cycle, which is what a server storing
+	 * and then serving the resource does. See #8238.
+	 */
+	@Test
+	public void testParseOrphanExtensionOnRepeatingPrimitive_RoundTrips() {
+		@Language("JSON")
+		String input = """
+			{
+			  "resourceType": "Patient",
+			  "address": [ {
+			    "_line": [ {
+			      "extension": [ { "url": "http://example.org/line", "valueString": "line-value" } ]
+			    } ]
+			  } ]
+			}""";
+
+		IParser parser = ourCtx.newJsonParser();
+		String encoded = parser.encodeResourceToString(parser.parseResource(Patient.class, input));
+		assertThat(encoded).contains("_line");
+
+		Patient reparsed = parser.parseResource(Patient.class, encoded);
+		List<StringType> line = reparsed.getAddressFirstRep().getLine();
+		assertThat(line).hasSize(1);
+		assertThat(line.get(0).getExtension()).hasSize(1);
+		assertEquals("line-value", line.get(0).getExtension().get(0).getValue().primitiveValue());
+	}
+
+	/**
+	 * Regression guard: the non-repeating (object) form of an orphan alternate must keep working.
+	 */
+	@Test
+	public void testParseOrphanExtensionOnNonRepeatingPrimitive_StillPreserved() {
+		@Language("JSON")
+		String input = """
+			{
+			  "resourceType": "Patient",
+			  "name": [ {
+			    "_family": {
+			      "extension": [ { "url": "http://example.org/family", "valueString": "family-value" } ]
+			    }
+			  } ]
+			}""";
+
+		Patient patient = ourCtx.newJsonParser().parseResource(Patient.class, input);
+
+		StringType family = patient.getNameFirstRep().getFamilyElement();
+		assertThat(family.getValue()).isNull();
+		assertThat(family.getExtension()).hasSize(1);
+		assertEquals("family-value", family.getExtension().get(0).getValue().primitiveValue());
+	}
+
 	@DatatypeDef(
 		 name = "UnknownPrimitiveType"
 	)
+
 	private static class MyUnknownPrimitiveType extends PrimitiveType<Object> {
 		@Override
 		public Object getValue() {
