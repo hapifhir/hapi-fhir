@@ -36,9 +36,8 @@ public class MdmMatchFinderSvcEidR4Test extends BaseMdmR4Test {
 	}
 
 	/**
-	 * An identifier carrying an EID system but no value is legal FHIR and identifies nobody. Searching on
-	 * it would fall back to matching the EID system alone and return every resource in that system, each
-	 * as a full MATCH at score 1.0.
+	 * An identifier carrying an EID system but no value is legal FHIR and identifies nobody, so it must
+	 * match nothing. This test rules out the behaviour that results from searching on it anyway.
 	 */
 	@Test
 	public void getMatchedTargets_incomingEidCarriesNoValue_matchesNothingByEid() {
