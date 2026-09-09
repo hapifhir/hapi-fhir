@@ -76,13 +76,15 @@ public class CandidateSearcher {
 
 		if (retval.size() != null) {
 			if (retval.size() >= myMdmSettings.getCandidateSearchLimit()) {
-				ourLog.warn("Candidate search yielded {}; more than allowed by settings. Resource will be omitted from MDM matching",
-					retval.size());
+				ourLog.warn("At least {} search candidates were returned for search criteria {}; this is the configured maximum candidates to allow. Resource will be omitted from further MDM matching.",
+					retval.size(),
+					theResourceCriteria);
 				theContext.setTooManyCandidatesMatched(true);
 				return Optional.empty();
 			} else if (retval.size() >= myMdmSettings.getCandidateSearchWarnLimit()) {
-				ourLog.warn("Candidate search yielded {} results; more than the warning level, but not enough to halt MDM matching.",
-					retval.size());
+				ourLog.warn("Candidate search yielded {} results for search criteria {}; more than the warning level, but not enough to halt MDM matching.",
+					retval.size(),
+					theResourceCriteria);
 			}
 		}
 

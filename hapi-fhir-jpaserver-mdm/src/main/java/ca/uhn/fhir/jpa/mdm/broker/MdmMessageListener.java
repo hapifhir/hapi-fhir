@@ -29,7 +29,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.mdm.svc.IMdmModelConverterSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmMatchLinkSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmResourceFilteringSvc;
-import ca.uhn.fhir.jpa.mdm.svc.candidate.TooManyCandidatesException;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicUtil;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
@@ -131,15 +130,6 @@ public class MdmMessageListener implements IMessageListener<ResourceModifiedMess
 				default:
 					ourLog.trace("Not processing modified message for {}", theMsg.getOperationType());
 			}
-		} catch (Exception e) {
-			if (e instanceof TooManyCandidatesException) {
-				ourLog.debug(
-						"Failed to handle MDM Matching for resource: {} since candidate matches exceeded the "
-								+ "candidate search limit",
-						theSourceResource.getIdElement());
-			}
-			log(mdmContext, "Failure during MDM processing: " + e.getMessage(), e);
-			mdmContext.addTransactionLogMessage(e.getMessage());
 		} finally {
 			// Interceptor call: MDM_AFTER_PERSISTED_RESOURCE_CHECKED
 			HookParams params = new HookParams()

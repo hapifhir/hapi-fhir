@@ -114,20 +114,20 @@ public class MdmMatchLinkSvc {
 		 * (so that future resources may match to it).
 		 */
 		boolean isResourceBlocked = myBlockRuleEvaluationSvc.isMdmMatchingBlocked(theResource);
-		// we will mark the golden resource special for this
-		theMdmTransactionContext.setIsBlocked(isResourceBlocked);
 
 		if (!isResourceBlocked) {
 			FindGoldenResourceCandidatesParams params =
 					new FindGoldenResourceCandidatesParams(theResource, theMdmTransactionContext);
 			candidateList = myMdmGoldenResourceFindingSvc.findGoldenResourceCandidates(params);
 		} else {
+			// we will mark the golden resource special for this case
 			theMdmTransactionContext.setIsBlocked(true);
 		}
 
 		if (theMdmTransactionContext.isTooManyCandidatesMatched() || isResourceBlocked) {
 			log(theMdmTransactionContext, "Skipping MDM matching for "
-				+ theResource.getId() + ": candidate search limit exceeded.");
+				+ theResource.getId() +
+				(isResourceBlocked ? ": resource is blocked from mdm matching." : ": candidate search limit exceeded."));
 			myMdmResourceDaoSvc.tagResourceAsUnmatched(theResource, theMdmTransactionContext);
 		}
 
@@ -219,11 +219,6 @@ public class MdmMatchLinkSvc {
 				String.format(
 						"There were no matched candidates for MDM, creating a new %s Golden Resource.",
 						theResource.getIdElement().getResourceType()));
-
-		// TODO - if too many candidates, do not create a GR, but tag the source resource instead
-		// otherwise (even if blocked) allow a GR to be created
-		// do this because otherwise, "too many candidates" resources will cascade and trigger
-		// earlier and earlier for every single later resource until possibly no resource is matched at all
 
 		IAnyResource newGoldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(
 				theResource, theMdmTransactionContext, myMdmSurvivorshipService);

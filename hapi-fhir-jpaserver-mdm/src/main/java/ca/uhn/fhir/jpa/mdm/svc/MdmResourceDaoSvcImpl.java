@@ -41,6 +41,7 @@ import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -154,8 +155,10 @@ public class MdmResourceDaoSvcImpl implements IMdmResourceDaoSvc {
 
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResource.fhirType());
 
+		IBaseMetaType meta = theResource.getMeta();
+
 		resourceDao.metaAddOperation(theResource.getIdElement().toUnqualifiedVersionless(),
-			theResource.getMeta(),
+			meta,
 			rd,
 			new TransactionDetails());
 	}

@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
@@ -27,11 +26,9 @@ import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.rules.json.MdmFilterSearchParamJson;
 import ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson;
-import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,11 +106,6 @@ public class MdmCandidateSearchSvc {
 				if (!isSearchParamForResource(theResourceType, resourceSearchParam)) {
 					continue;
 				}
-				if (theContext.isTooManyCandidatesMatched()) {
-					// partial results don't help; return nothing and upstream we'll tag
-					// this candidate as 'too many candidates'
-					return Collections.emptyList();
-				}
 
 				searchForIdsAndAddToMap(
 						theResourceType,
@@ -123,6 +115,12 @@ public class MdmCandidateSearchSvc {
 						resourceSearchParam,
 						theRequestPartitionId,
 						theContext);
+
+				if (theContext.isTooManyCandidatesMatched()) {
+					// partial results don't help; return nothing and upstream we'll tag
+					// this candidate as 'too many candidates'
+					return Collections.emptyList();
+				}
 			}
 		}
 		// Obviously we don't want to consider the incoming resource as a potential candidate.
@@ -181,13 +179,9 @@ public class MdmCandidateSearchSvc {
 				myCandidateSearcher.search(theResourceType, resourceCriteria, theRequestPartitionId, theContext);
 
 		if (!bundleProvider.isPresent()) {
-			// TODO - log? update value?
-			// is the Golden Resource created already? we don't want to
+			// no results (typically) means too many candidates/
+			// we want to exit immediately
 			return;
-
-//			throw new TooManyCandidatesException(Msg.code(762) + "More than " + myMdmSettings.getCandidateSearchLimit()
-//					+ " candidate matches found for " + resourceCriteria + ".  Aborting mdm matching. Updating the "
-//					+ "candidate search parameters is strongly recommended for better performance of MDM.");
 		}
 		List<IBaseResource> resources = bundleProvider.get().getAllResources();
 

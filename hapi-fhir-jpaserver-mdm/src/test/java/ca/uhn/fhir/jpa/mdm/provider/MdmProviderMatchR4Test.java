@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
-import ca.uhn.fhir.jpa.mdm.svc.candidate.TooManyCandidatesException;
+import ca.uhn.fhir.mdm.model.TooManyCandidatesException;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
