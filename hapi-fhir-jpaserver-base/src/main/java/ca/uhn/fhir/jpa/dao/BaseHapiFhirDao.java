@@ -29,6 +29,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -52,6 +53,7 @@ import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceAddress;
 import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceAddressMetadataKey;
 import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceServiceRegistry;
+import ca.uhn.fhir.jpa.interceptor.PatientCompartmentEnforcingInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
@@ -286,6 +288,16 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	@Override
 	protected IInterceptorBroadcaster getInterceptorBroadcaster() {
 		return myInterceptorBroadcaster;
+	}
+
+	/**
+	 * Returns <code>true</code> if a {@link PatientCompartmentEnforcingInterceptor} (or subclass) is
+	 * registered.
+	 */
+	protected boolean isPatientCompartmentEnforcingInterceptorRegistered() {
+		return myInterceptorBroadcaster instanceof IInterceptorService is
+				&& is.getAllRegisteredInterceptors().stream()
+						.anyMatch(PatientCompartmentEnforcingInterceptor.class::isInstance);
 	}
 
 	protected ApplicationContext getApplicationContext() {
@@ -1337,7 +1349,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			ResourceTable entity = (ResourceTable) theEntity;
 
 			IBaseResource oldResource;
-			if (getStorageSettings().isMassIngestionMode()) {
+			if (getStorageSettings().isMassIngestionMode() && !isPatientCompartmentEnforcingInterceptorRegistered()) {
 				oldResource = null;
 			} else {
 				oldResource = myJpaStorageResourceParser.toResource(entity, false);

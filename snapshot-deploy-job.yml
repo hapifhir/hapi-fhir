@@ -39,6 +39,22 @@ jobs:
         displayName: 'Free up host disk space before build'
         target: host
 
+      # This job deploys whatever version the branch currently declares, and Maven decides
+      # release-vs-snapshot from the version string alone. If a release branch has already been
+      # bumped to a non-SNAPSHOT version, a scheduled run here would publish a real, immutable
+      # release to Maven Central rather than a snapshot. Fail fast instead.
+      - bash: |
+          version=$(mvn -q -N help:evaluate -Dexpression=project.version -DforceStdout)
+          echo verifying that project version $version is a SNAPSHOT before deploying...
+          if [[ "$version" == *-SNAPSHOT ]]
+          then
+            echo "version $version is a SNAPSHOT, proceeding..."
+          else
+            echo "version $version is not a SNAPSHOT, refusing to deploy - releases must go through the release pipeline"
+            exit 1
+          fi
+        displayName: 'Verify project version is a SNAPSHOT'
+
       # We need a valid signing key to sign our builds for deployment to sonatype. We have uploaded
       # both our private and public keys to Azure as 'secure files' that we load into individual pipelines.
 

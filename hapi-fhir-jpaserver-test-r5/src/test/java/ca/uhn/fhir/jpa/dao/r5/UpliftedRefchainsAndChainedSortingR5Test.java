@@ -401,7 +401,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		// Verify SQL
 
 		// 1- Resolve resource forced IDs, and 2- Resolve Practitioner/PR1 reference
-		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 
 		// Verify correct indexes are written
 		logAllStringIndexes();
@@ -445,7 +445,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		// Verify SQL
 
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(9, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(7, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 
 		// Verify correct indexes are written
 		logAllStringIndexes();

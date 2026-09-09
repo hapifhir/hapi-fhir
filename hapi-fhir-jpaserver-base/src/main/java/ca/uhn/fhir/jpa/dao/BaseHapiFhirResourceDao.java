@@ -29,7 +29,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistrationService;
@@ -48,7 +47,6 @@ import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
-import ca.uhn.fhir.jpa.interceptor.PatientCompartmentEnforcingInterceptor;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
@@ -3053,10 +3051,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					null);
 		}
 
-		boolean shouldForcePopulateOldResourceForProcessing = myInterceptorBroadcaster instanceof InterceptorService
-				&& ((InterceptorService) myInterceptorBroadcaster)
-						.hasRegisteredInterceptor(PatientCompartmentEnforcingInterceptor.class);
-		theUpdateParameters.setShouldForcePopulateOldResourceForProcessing(shouldForcePopulateOldResourceForProcessing);
+		theUpdateParameters.setShouldForcePopulateOldResourceForProcessing(
+				isPatientCompartmentEnforcingInterceptorRegistered());
 		return super.doUpdateForUpdateOrPatch(theUpdateParameters);
 	}
 
