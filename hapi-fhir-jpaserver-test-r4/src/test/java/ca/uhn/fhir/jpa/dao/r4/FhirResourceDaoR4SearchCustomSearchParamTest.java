@@ -39,6 +39,7 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
@@ -52,6 +53,7 @@ import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
@@ -375,6 +377,66 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		// Ensure that no exceptions are thrown
 		mySearchParameterDao.create(fooSp, mySrd);
 		mySearchParamRegistry.forceRefresh();
+	}
+
+	@Test
+	public void testCompositeParamOnNestedConsentProvisionDoesNotMatchAcrossRepeatedChildren() {
+		String codeSystem = "urn:oid:2.16.840.1.113883.3.1937.777.24.5.3";
+		String codeSearchParamUrl = "http://example.org/SearchParameter/consent-provision-code";
+		String periodSearchParamUrl = "http://example.org/SearchParameter/consent-provision-period";
+
+		SearchParameter codeSp = new SearchParameter();
+		codeSp.setId("consent-provision-code");
+		codeSp.setUrl(codeSearchParamUrl);
+		codeSp.setCode("mii-provision-provision-code");
+		codeSp.addBase("Consent");
+		codeSp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		codeSp.setType(Enumerations.SearchParamType.TOKEN);
+		codeSp.setExpression("Consent.provision.provision.code");
+		mySearchParameterDao.update(codeSp, mySrd);
+
+		SearchParameter periodSp = new SearchParameter();
+		periodSp.setId("consent-provision-period");
+		periodSp.setUrl(periodSearchParamUrl);
+		periodSp.setCode("mii-provision-provision-period");
+		periodSp.addBase("Consent");
+		periodSp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		periodSp.setType(Enumerations.SearchParamType.DATE);
+		periodSp.setExpression("Consent.provision.provision.period");
+		mySearchParameterDao.update(periodSp, mySrd);
+
+		SearchParameter compositeSp = new SearchParameter();
+		compositeSp.setId("consent-provision-code-period");
+		compositeSp.setUrl("http://example.org/SearchParameter/consent-provision-code-period");
+		compositeSp.setCode("mii-provision-provision-code-period");
+		compositeSp.addBase("Consent");
+		compositeSp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		compositeSp.setType(Enumerations.SearchParamType.COMPOSITE);
+		compositeSp.setExpression("Consent.provision.provision");
+		compositeSp.addComponent().setDefinition(codeSearchParamUrl).setExpression("code");
+		compositeSp.addComponent().setDefinition(periodSearchParamUrl).setExpression("period");
+		mySearchParameterDao.update(compositeSp, mySrd);
+		mySearchParamRegistry.forceRefresh();
+
+		Consent consent = new Consent();
+		consent.setId("CONSENT-8126");
+		consent.setStatus(Consent.ConsentState.ACTIVE);
+		consent.getProvision()
+			.addProvision()
+			.addCode(new CodeableConcept(new Coding(codeSystem, "2.16.840.1.113883.3.1937.777.24.5.3.7", null)))
+			.setPeriod(new Period().setEndElement(new DateTimeType("2054-06-01")));
+		consent.getProvision()
+			.addProvision()
+			.addCode(new CodeableConcept(new Coding(codeSystem, "2.16.840.1.113883.3.1937.777.24.5.3.20", null)))
+			.setPeriod(new Period().setEndElement(new DateTimeType("2053-06-01")));
+		myConsentDao.update(consent, mySrd);
+
+		assertThat(myTestDaoSearch.searchForIds("Consent?mii-provision-provision-code-period="
+				+ codeSystem + "|2.16.840.1.113883.3.1937.777.24.5.3.7$ge2054-01-01"))
+			.containsExactly("CONSENT-8126");
+		assertThat(myTestDaoSearch.searchForIds("Consent?mii-provision-provision-code-period="
+				+ codeSystem + "|2.16.840.1.113883.3.1937.777.24.5.3.20$ge2054-01-01"))
+			.isEmpty();
 	}
 
 	@Test

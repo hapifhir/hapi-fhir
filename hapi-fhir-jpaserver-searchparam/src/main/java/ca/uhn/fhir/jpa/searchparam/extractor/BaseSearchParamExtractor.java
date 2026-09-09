@@ -100,6 +100,7 @@ import javax.measure.unit.Unit;
 
 import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.DATE;
 import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.REFERENCE;
+import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.TOKEN;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -370,6 +371,81 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					theRequestDetails, theResourceType, theParams, runtimeParam);
 			retVal.addAll(comboNonUniqueParams);
 		}
+		retVal.addAll(extractSearchParamComboNonUniqueForTokenDateCompositeParams(theResourceType, theParams));
+		return retVal;
+	}
+
+	private SearchParamSet<ResourceIndexedComboTokenNonUnique>
+			extractSearchParamComboNonUniqueForTokenDateCompositeParams(
+					String theResourceType, ResourceIndexedSearchParams theParams) {
+		SearchParamSet<ResourceIndexedComboTokenNonUnique> retVal = new SearchParamSet<>();
+
+		for (ResourceIndexedSearchParamComposite nextComposite : theParams.myCompositeParams) {
+			if (!isTokenDateComposite(nextComposite)) {
+				continue;
+			}
+
+			RuntimeSearchParam runtimeParam = mySearchParamRegistry.getActiveSearchParam(
+					theResourceType,
+					nextComposite.getSearchParamName(),
+					ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
+			if (runtimeParam == null) {
+				continue;
+			}
+
+			ResourceIndexedSearchParamComposite.Component tokenComponent = nextComposite.getComponents().stream()
+					.filter(t -> t.getSearchParameterType() == TOKEN)
+					.findFirst()
+					.orElseThrow();
+			ResourceIndexedSearchParamComposite.Component dateComponent = nextComposite.getComponents().stream()
+					.filter(t -> t.getSearchParameterType() == DATE)
+					.findFirst()
+					.orElseThrow();
+
+			List<List<String>> tokenChoices = new ArrayList<>();
+			tokenChoices.add(extractTokenDateCompositeTokenChoices(tokenComponent));
+			Set<String> indexStrings =
+					ResourceIndexedSearchParams.extractCompositeStringUniquesValueChains(theResourceType, tokenChoices);
+
+			for (BaseResourceIndexedSearchParam nextDateParam : dateComponent.getParamIndexValues()) {
+				if (nextDateParam instanceof ResourceIndexedSearchParamDate dateParam) {
+					retVal.addAll(convertQueryStringsToNonUniqueIndexEntities(runtimeParam, indexStrings, dateParam));
+				}
+			}
+		}
+
+		return retVal;
+	}
+
+	private boolean isTokenDateComposite(ResourceIndexedSearchParamComposite theComposite) {
+		if (theComposite.getComponents().size() != 2) {
+			return false;
+		}
+
+		long tokenCount = theComposite.getComponents().stream()
+				.filter(t -> t.getSearchParameterType() == TOKEN)
+				.count();
+		long dateCount = theComposite.getComponents().stream()
+				.filter(t -> t.getSearchParameterType() == DATE)
+				.count();
+		return tokenCount == 1 && dateCount == 1;
+	}
+
+	private List<String> extractTokenDateCompositeTokenChoices(
+			ResourceIndexedSearchParamComposite.Component theTokenComponent) {
+		List<String> retVal = new ArrayList<>();
+		String paramName = UrlUtil.escapeUrlParam(theTokenComponent.getSearchParamName());
+
+		for (BaseResourceIndexedSearchParam nextParam : theTokenComponent.getParamIndexValues()) {
+			if (!(nextParam instanceof ResourceIndexedSearchParamToken)) {
+				continue;
+			}
+			String paramValue = nextParam.toQueryParameterType().getValueAsQueryToken();
+			if (isNotBlank(paramValue)) {
+				retVal.add(paramName + "=" + UrlUtil.escapeUrlParam(paramValue));
+			}
+		}
+
 		return retVal;
 	}
 
