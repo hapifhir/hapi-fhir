@@ -23,7 +23,7 @@ later resource carrying only the national provider identifier resolves to the sa
 applies on create and on update alike.
 
 <p class="helpInfoCalloutBox">
-    There is one exception. Where the Golden Resource already holds an EID from a given system, an incoming EID from that <i>same</i> system with a different value is not copied while <b>Prevent multiple EIDs</b> is enabled, since the Golden Resource would then be ambiguous within that system. Such an EID is a contradiction between two issuing authorities rather than new information; it is recorded in the MDM transaction log so that it can be found, but no link or duplicate is raised for it.
+    There is one exception: the incoming resource matches the Golden Resource on one EID system but disagrees with it on another. While <b>Prevent multiple EIDs</b> is enabled, the disagreeing EID is not copied, since the Golden Resource would then hold two EIDs from that system and be ambiguous within it. A Golden Resource holding MRN 1 and NPI 9, matched by a resource carrying MRN 1 and NPI 7, therefore keeps NPI 9 and discards NPI 7. Such an EID is a contradiction between two issuing authorities rather than new information; it is recorded in the MDM transaction log so that it can be found, but no link or duplicate is raised for it.
 </p>
 
 ## MDM EID Settings
