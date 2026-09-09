@@ -294,7 +294,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 
 	/**
-	 * Some ValueSets (IE: AnswerLists), can have a specific version, different than the version of the
+	 * Some ValueSets (IE: AnswerLists), can have a specific version, different from the version of the
 	 * CodeSystem with which they were uploaded. That version is what we distinguish in both sets of tests here,
 	 * no the CodeSystem version.
 	 */
