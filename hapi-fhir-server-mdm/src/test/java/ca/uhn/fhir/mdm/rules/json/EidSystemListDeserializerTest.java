@@ -1,6 +1,5 @@
 package ca.uhn.fhir.mdm.rules.json;
 
-import ca.uhn.fhir.i18n.Msg;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -80,8 +79,7 @@ class EidSystemListDeserializerTest {
 		assertThatThrownBy(() -> deserialize("""
 			{"eidSystems": {"Patient": 42}}"""))
 			.isInstanceOf(JsonMappingException.class)
-			.hasMessageContaining(Msg.code(3046)
-				+ "eidSystems entry for 'Patient' must be an EID system URI or an array of EID system URIs");
+			.hasMessageContaining("eidSystems entry for 'Patient' must be an EID system URI or an array of EID system URIs");
 	}
 
 	@Test
@@ -89,8 +87,7 @@ class EidSystemListDeserializerTest {
 		assertThatThrownBy(() -> deserialize("""
 			{"eidSystems": {"Patient": ["http://example.com/mrn", 42]}}"""))
 			.isInstanceOf(JsonMappingException.class)
-			.hasMessageContaining(Msg.code(3046)
-				+ "eidSystems entry for 'Patient' must be an EID system URI or an array of EID system URIs");
+			.hasMessageContaining("eidSystems entry for 'Patient' must be an EID system URI or an array of EID system URIs");
 	}
 
 	private EidSystemsHolder deserialize(String theJson) throws Exception {

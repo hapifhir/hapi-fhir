@@ -20,6 +20,7 @@
 package ca.uhn.fhir.mdm.rules.config;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.IMdmRuleValidator;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmModeEnum;
@@ -102,7 +103,7 @@ public class MdmSettings implements IMdmSettings {
 				new ByteArrayInputStream(theScriptText.getBytes(StandardCharsets.UTF_8))) {
 			setMdmRules(JsonUtil.deserialize(scriptStream, MdmRulesJson.class));
 		} catch (InvalidEidSystemsException e) {
-			throw new ConfigurationException(e.getOriginalMessage(), e);
+			throw new ConfigurationException(Msg.code(3046) + e.getOriginalMessage(), e);
 		}
 		return this;
 	}
