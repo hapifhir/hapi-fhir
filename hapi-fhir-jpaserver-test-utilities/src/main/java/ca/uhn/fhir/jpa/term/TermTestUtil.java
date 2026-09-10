@@ -65,7 +65,6 @@ public final class TermTestUtil {
 	 */
 	public static final String MSG_ONE_CODE_SYSTEM_VERSION_PER_UPLOAD = "one CodeSystemVersion per upload";
 
-
 	private TermTestUtil() {}
 
 	public static void addLoincMandatoryFilesAndSinglePartLinkToZip(ZipCollectionBuilder theFiles) throws IOException {
