@@ -19,11 +19,11 @@
  */
 package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.log.Logs;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.rules.json.MdmFilterSearchParamJson;
 import ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -76,7 +76,10 @@ public class MdmCandidateSearchSvc {
 	 */
 	@Transactional
 	public Collection<IAnyResource> findCandidates(
-			String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId) {
+			String theResourceType,
+			IAnyResource theResource,
+			RequestPartitionId theRequestPartitionId,
+			MdmTransactionContext theContext) {
 
 		/*
 		 * This is a LinkedHashMap only because a number of Smile MDM unit tests depend on
@@ -97,7 +100,13 @@ public class MdmCandidateSearchSvc {
 		// must perform one search per MdmResourceSearchParamJson.
 		if (candidateSearchParams.isEmpty()) {
 			searchForIdsAndAddToMap(
-					theResourceType, theResource, matchedPidsToResources, filterCriteria, null, theRequestPartitionId);
+					theResourceType,
+					theResource,
+					matchedPidsToResources,
+					filterCriteria,
+					null,
+					theRequestPartitionId,
+					theContext);
 		} else {
 			for (MdmResourceSearchParamJson resourceSearchParam : candidateSearchParams) {
 
@@ -111,7 +120,14 @@ public class MdmCandidateSearchSvc {
 						matchedPidsToResources,
 						filterCriteria,
 						resourceSearchParam,
-						theRequestPartitionId);
+						theRequestPartitionId,
+						theContext);
+
+				if (theContext.isTooManyCandidatesMatched()) {
+					// partial results don't help; return nothing and upstream we'll tag
+					// this candidate as 'too many candidates'
+					return Collections.emptyList();
+				}
 			}
 		}
 		// Obviously we don't want to consider the incoming resource as a potential candidate.
@@ -153,7 +169,8 @@ public class MdmCandidateSearchSvc {
 			Map<IResourcePersistentId, IAnyResource> theMatchedPidsToResources,
 			List<String> theFilterCriteria,
 			MdmResourceSearchParamJson resourceSearchParam,
-			RequestPartitionId theRequestPartitionId) {
+			RequestPartitionId theRequestPartitionId,
+			MdmTransactionContext theContext) {
 		// 1.
 		Optional<String> oResourceCriteria = myMdmCandidateSearchCriteriaBuilderSvc.buildResourceQueryString(
 				theResourceType, theResource, theFilterCriteria, resourceSearchParam);
@@ -165,11 +182,12 @@ public class MdmCandidateSearchSvc {
 
 		// 2.
 		Optional<IBundleProvider> bundleProvider =
-				myCandidateSearcher.search(theResourceType, resourceCriteria, theRequestPartitionId);
+				myCandidateSearcher.search(theResourceType, resourceCriteria, theRequestPartitionId, theContext);
+
 		if (!bundleProvider.isPresent()) {
-			throw new TooManyCandidatesException(Msg.code(762) + "More than " + myMdmSettings.getCandidateSearchLimit()
-					+ " candidate matches found for " + resourceCriteria + ".  Aborting mdm matching. Updating the "
-					+ "candidate search parameters is strongly recommended for better performance of MDM.");
+			// no results (typically) means too many candidates/
+			// we want to exit immediately
+			return;
 		}
 		List<IBaseResource> resources = bundleProvider.get().getAllResources();
 

@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateStrategyEnum;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MatchedGoldenResourceCandidate;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
+import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
@@ -77,6 +78,9 @@ public class MdmMatchLinkSvc {
 	@Autowired
 	private IMdmSurvivorshipService myMdmSurvivorshipService;
 
+	@Autowired
+	private IMdmResourceDaoSvc myMdmResourceDaoSvc;
+
 	/**
 	 * Given an MDM source (consisting of any supported MDM type), find a suitable Golden Resource candidate for them,
 	 * or create one if one does not exist. Performs matching based on rules defined in mdm-rules.json.
@@ -110,16 +114,38 @@ public class MdmMatchLinkSvc {
 		 * (so that future resources may match to it).
 		 */
 		boolean isResourceBlocked = myBlockRuleEvaluationSvc.isMdmMatchingBlocked(theResource);
-		// we will mark the golden resource special for this
-		theMdmTransactionContext.setIsBlocked(isResourceBlocked);
 
 		if (!isResourceBlocked) {
 			FindGoldenResourceCandidatesParams params =
 					new FindGoldenResourceCandidatesParams(theResource, theMdmTransactionContext);
 			candidateList = myMdmGoldenResourceFindingSvc.findGoldenResourceCandidates(params);
+		} else {
+			// we will mark the golden resource special for this case
+			theMdmTransactionContext.setIsBlocked(true);
+		}
+
+		if (theMdmTransactionContext.isTooManyCandidatesMatched() || isResourceBlocked) {
+			log(
+					theMdmTransactionContext,
+					"Skipping MDM matching for "
+							+ theResource.getId()
+							+ (isResourceBlocked
+									? ": resource is blocked from mdm matching."
+									: ": candidate search limit exceeded."));
+			myMdmResourceDaoSvc.tagResourceAsUnmatched(theResource, theMdmTransactionContext);
+		}
+
+		if (theMdmTransactionContext.isTooManyCandidatesMatched()) {
+			// resources with too many candidate matches do not get a golden resource.
+			// we do this because otherwise, "too many candidates" resources will cascade and trigger
+			// earlier and earlier for every single later resource until possibly no resource is matched at all
+			return theMdmTransactionContext;
 		}
 
 		if (isResourceBlocked || candidateList.isEmpty()) {
+			// we still allow blocked resources to create a golden resource
+			// this is both historical (maintaining current functionality)
+			// and logical (blocked resources are often 'test' resources)
 			handleMdmWithNoCandidates(theResource, theMdmTransactionContext);
 		} else if (candidateList.exactlyOneMatch()) {
 			handleMdmWithSingleCandidate(theResource, candidateList.getOnlyMatch(), theMdmTransactionContext);
@@ -197,6 +223,7 @@ public class MdmMatchLinkSvc {
 				String.format(
 						"There were no matched candidates for MDM, creating a new %s Golden Resource.",
 						theResource.getIdElement().getResourceType()));
+
 		IAnyResource newGoldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(
 				theResource, theMdmTransactionContext, myMdmSurvivorshipService);
 		// TODO GGG :)

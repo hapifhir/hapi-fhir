@@ -21,8 +21,10 @@ package ca.uhn.fhir.mdm.api;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Optional;
 
@@ -43,4 +45,13 @@ public interface IMdmResourceDaoSvc {
 
 	Optional<IAnyResource> searchGoldenResourceByEID(
 			String theEid, String theResourceType, RequestPartitionId thePartitionId);
+
+	/**
+	 * Tags the provided resource's meta with the reason it was omitted from
+	 * the MDM matching system.
+	 * Note, the reason comes from the MdmTransactionContext.
+	 * @param theResource - the resource to tag
+	 * @param theContext - the mdm context used to determine match results (that returned none)
+	 */
+	void tagResourceAsUnmatched(IBaseResource theResource, MdmTransactionContext theContext);
 }

@@ -30,6 +30,7 @@ import ca.uhn.fhir.mdm.api.MatchedTarget;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -77,15 +78,18 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 	@Nonnull
 	@Transactional
 	public List<MatchedTarget> getMatchedTargets(
-			String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId) {
+			String theResourceType,
+			IAnyResource theResource,
+			RequestPartitionId theRequestPartitionId,
+			MdmTransactionContext theContext) {
 
-		List<MatchedTarget> retval = matchBasedOnEid(theResourceType, theResource, theRequestPartitionId);
+		List<MatchedTarget> retval = matchBasedOnEid(theResourceType, theResource, theRequestPartitionId, theContext);
 		if (!retval.isEmpty()) {
 			return retval;
 		}
 
 		Collection<IAnyResource> targetCandidates =
-				myMdmCandidateSearchSvc.findCandidates(theResourceType, theResource, theRequestPartitionId);
+				myMdmCandidateSearchSvc.findCandidates(theResourceType, theResource, theRequestPartitionId, theContext);
 
 		List<MatchedTarget> matches = targetCandidates.stream()
 				.map(candidate ->
@@ -97,7 +101,10 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 	}
 
 	private List<MatchedTarget> matchBasedOnEid(
-			String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId) {
+			String theResourceType,
+			IAnyResource theResource,
+			RequestPartitionId theRequestPartitionId,
+			MdmTransactionContext theContext) {
 
 		List<CanonicalEID> eidsFromResource = myEIDHelper.getExternalEid(theResource);
 		if (eidsFromResource.isEmpty()) {
@@ -108,14 +115,16 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 				theResource.getIdElement().toUnqualifiedVersionless(),
 				eidsFromResource,
 				theResourceType,
-				theRequestPartitionId);
+				theRequestPartitionId,
+				theContext);
 	}
 
 	private List<MatchedTarget> searchForResourceByEIDs(
 			IIdType theResourceIdToExclude,
 			List<CanonicalEID> theEids,
 			String theResourceType,
-			RequestPartitionId theRequestPartitionId) {
+			RequestPartitionId theRequestPartitionId,
+			MdmTransactionContext theContext) {
 		final SearchParameterMap map = SearchParameterMap.newSynchronous();
 		final TokenOrListParam tokenOrListParam = new TokenOrListParam();
 		final String eidSystemForResourceType =
@@ -131,6 +140,7 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 		systemRequestDetails.setRequestPartitionId(theRequestPartitionId);
 		IBundleProvider search = resourceDao.search(map, systemRequestDetails);
 		List<MatchedTarget> retval = new ArrayList<>();
+		// TODO LS - too many candidates should be handled here?
 		// We can't use toList() here since it returns an unmodifiable list and we will be sorting it later
 		search.getAllResources().stream()
 				.map(IAnyResource.class::cast)
