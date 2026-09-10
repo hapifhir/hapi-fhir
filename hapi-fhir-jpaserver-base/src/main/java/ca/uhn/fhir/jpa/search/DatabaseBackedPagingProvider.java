@@ -56,6 +56,13 @@ public class DatabaseBackedPagingProvider extends BasePagingProvider {
 
 	@Override
 	public IBundleProvider retrieveResultList(RequestDetails theRequestDetails, @Nonnull String theId) {
+
+		// mySearchCoordinatorSvc.continueExistingSearch returns IBundleProvider, but the JPA server
+		// implementation will always return a BaseCacheAwareJpaSearchBundleProvider so this is a
+		// safe cast. Note that mySearchCoordinatorSvc.continueExistingSearch will never return null
+		// since we don't want to actually open a database transaction more than once, so we only actually
+		// check the DB once we try to fetch resources. At that time we'll throw a ResourceGoneException
+		// if the UUID is not known.
 		BaseCacheAwareJpaSearchBundleProvider retVal = (BaseCacheAwareJpaSearchBundleProvider)
 				mySearchCoordinatorSvc.continueExistingSearch(theId, theRequestDetails);
 		retVal = validateAndReturnBundleProvider(retVal);

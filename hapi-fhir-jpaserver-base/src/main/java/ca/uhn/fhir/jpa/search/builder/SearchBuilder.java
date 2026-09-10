@@ -1048,8 +1048,15 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					myDialectProvider,
 					theSearchQueryProperties.isDoCountOnlyFlag(),
 					false);
+
+			// FIXME: remove
+			ourLog.info(
+					"theSearchProperties: {}  -- mySearchProperties: {}",
+					theSearchQueryProperties.getMaxResultsRequested(),
+					mySearchProperties.getMaxResultsRequested());
+
 			GeneratedSql allTargetsSql = fetchPidsSqlBuilder.generate(
-					theSearchQueryProperties.getOffset(), theSearchQueryProperties.getMaxResultsRequested());
+					theSearchQueryProperties.getOffset(), mySearchProperties.getMaxResultsRequested());
 			String sql = allTargetsSql.getSql();
 			Object[] args = allTargetsSql.getBindVariables().toArray(new Object[0]);
 
