@@ -41,7 +41,6 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
 import ca.uhn.fhir.rest.server.util.NarrativeUtil;
 import ca.uhn.fhir.util.ClasspathUtil;
-import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -55,10 +54,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
-import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.utilities.xhtml.NodeType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
@@ -70,7 +67,6 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -474,33 +470,6 @@ public class ResponseHighlighterInterceptor {
 		}
 
 		return false;
-	}
-
-	@Hook(Pointcut.SERVER_CAPABILITY_STATEMENT_GENERATED)
-	public void capabilityStatementGenerated(
-			RequestDetails theRequestDetails, IBaseConformance theCapabilityStatement) {
-		FhirTerser terser = theRequestDetails.getFhirContext().newTerser();
-
-		Set<String> formats = terser.getValues(theCapabilityStatement, "format", IPrimitiveType.class).stream()
-				.map(t -> t.getValueAsString())
-				.collect(Collectors.toSet());
-		addFormatConditionally(
-				theCapabilityStatement, terser, formats, Constants.CT_FHIR_JSON_NEW, Constants.FORMATS_HTML_JSON);
-		addFormatConditionally(
-				theCapabilityStatement, terser, formats, Constants.CT_FHIR_XML_NEW, Constants.FORMATS_HTML_XML);
-		addFormatConditionally(
-				theCapabilityStatement, terser, formats, Constants.CT_RDF_TURTLE, Constants.FORMATS_HTML_TTL);
-	}
-
-	private void addFormatConditionally(
-			IBaseConformance theCapabilityStatement,
-			FhirTerser terser,
-			Set<String> formats,
-			String wanted,
-			String toAdd) {
-		if (formats.contains(wanted)) {
-			terser.addElement(theCapabilityStatement, "format", toAdd);
-		}
 	}
 
 	private boolean handleOutgoingResponse(

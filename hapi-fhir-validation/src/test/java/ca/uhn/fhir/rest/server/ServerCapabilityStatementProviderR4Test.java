@@ -199,7 +199,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 			.stream()
 			.map(t -> t.getCode())
 			.collect(Collectors.toList());
-		assertThat(formats).as(formats.toString()).containsExactlyInAnyOrder("application/fhir+xml", "xml", "application/fhir+json", "json", "application/x-turtle", "ttl");
+		assertThat(formats).as(formats.toString()).containsExactlyInAnyOrder("application/fhir+xml", "xml", "application/fhir+json", "json", "application/fhir+turtle", "ttl");
 	}
 
 	@Test

@@ -159,7 +159,7 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 			.stream()
 			.map(t -> t.getCode())
 			.collect(Collectors.toList());
-		assertThat(formats).as(formats.toString()).contains("application/x-turtle", "ttl", "application/fhir+xml", "application/fhir+json", "json", "xml");
+		assertThat(formats).as(formats.toString()).contains("application/fhir+turtle", "ttl", "application/fhir+xml", "application/fhir+json", "json", "xml");
 	}
 
 	@Test
@@ -176,7 +176,9 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 			.stream()
 			.map(t -> t.getCode())
 			.collect(Collectors.toList());
-		assertThat(formats).as(formats.toString()).contains("application/x-turtle", "ttl", "application/fhir+xml", "application/fhir+json", "json", "xml", "html/xml", "html/json");
+		assertThat(formats).as(formats.toString()).contains("application/fhir+turtle", "ttl", "application/fhir+xml", "application/fhir+json", "json", "xml");
+		// The html/* values are _format parameter shortcuts, not MimeType codes, so they are not advertised
+		assertThat(formats).as(formats.toString()).doesNotContain("html/xml", "html/json", "html/turtle");
 	}
 
 	@Test

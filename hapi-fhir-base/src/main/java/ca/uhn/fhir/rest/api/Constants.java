@@ -129,6 +129,12 @@ public class Constants {
 
 	public static final String CT_FHIR_JSON = "application/json+fhir";
 	public static final String CT_RDF_TURTLE = "application/x-turtle";
+
+	/**
+	 * The FHIR MimeType for RDF/Turtle encoding in FHIR DSTU3+
+	 */
+	public static final String CT_RDF_TURTLE_NEW = "application/fhir+turtle";
+
 	/**
 	 * The FHIR MimeType for JSON encoding in FHIR DSTU3+
 	 */
