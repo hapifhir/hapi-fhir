@@ -649,6 +649,11 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			public void cacheResource(Resource res) throws FHIRException {}
 
 			@Override
+			public boolean canLoadPackages() {
+				return false;
+			}
+
+			@Override
 			public void cacheResourceFromPackage(Resource res, PackageInformation packageInfo) throws FHIRException {}
 
 			@Override
