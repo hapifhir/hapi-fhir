@@ -106,6 +106,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.slf4j.LoggerFactory;
@@ -2163,6 +2164,69 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			.map(t -> new IdType(t.getResponse().getLocation()).getResourceType())
 			.collect(Collectors.toList());
 		assertThat(responseTypes).as(responseTypes.toString()).containsExactly("Practitioner", "Observation", "Observation");
+	}
+
+	/**
+	 * A conditional create and an update sharing one match URL, with nothing pre-existing that matches it.
+	 * The create runs first and the update's match URL then resolves to the resource the create just made.
+	 * With an identical update body the update no-ops and the transaction succeeds against the single created
+	 * resource; with a differing body, two writes both match the one conditional URL and the transaction is rejected.
+	 * <p>
+	 * Note that this is technically a bad request per the FHIR spec since the entries should not be depended on each
+	 * other. Pinning down the behavior here.
+	 */
+	// Created by Claude Fable 5
+	@ParameterizedTest
+	@ValueSource(booleans = {false, true})
+	public void testTransaction_conditionalCreateAndConditionalUpdateOnSameMatchUrl_succeedsOnlyIfUpdateIsNoOp(boolean theUpdateBodyDiffers) {
+		Bundle request = new Bundle();
+		request.setType(BundleType.TRANSACTION);
+
+		Practitioner p = new Practitioner();
+		p.setId(IdType.newRandomUuid());
+		p.addIdentifier().setSystem("http://foo").setValue("mixed");
+		request.addEntry()
+			.setFullUrl(p.getId())
+			.setResource(p)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("Practitioner/")
+			.setIfNoneExist("Practitioner?identifier=http://foo|mixed");
+
+		Practitioner p2 = new Practitioner();
+		p2.setId(IdType.newRandomUuid());
+		p2.addIdentifier().setSystem("http://foo").setValue("mixed");
+		if (theUpdateBodyDiffers) {
+			p2.setActive(true);
+		}
+		request.addEntry()
+			.setFullUrl(p2.getId())
+			.setResource(p2)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Practitioner?identifier=http://foo|mixed");
+
+		if (theUpdateBodyDiffers) {
+			try {
+				mySystemDao.transaction(mySrd, request);
+				fail("Expected the transaction to be rejected because the created resource and the differing update both match the same conditional URL");
+			} catch (InvalidRequestException e) {
+				assertEquals(
+					Msg.code(542) + "Unable to process Transaction - Request would cause multiple resources to match URL: "
+						+ "\"Practitioner?identifier=http://foo|mixed\". Does transaction request contain duplicates?",
+					e.getMessage());
+			}
+		} else {
+			Bundle response = mySystemDao.transaction(mySrd, request);
+			ourLog.debug("Response:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+
+			assertEquals(2, response.getEntry().size());
+			assertThat(response.getEntry().get(0).getResponse().getStatus()).startsWith("201");
+			assertThat(response.getEntry().get(1).getResponse().getStatus()).startsWith("200");
+			IdType createdId = new IdType(response.getEntry().get(0).getResponse().getLocation());
+			IdType updatedId = new IdType(response.getEntry().get(1).getResponse().getLocation());
+			assertEquals(createdId.toUnqualifiedVersionless().getValue(), updatedId.toUnqualifiedVersionless().getValue());
+		}
 	}
 
 

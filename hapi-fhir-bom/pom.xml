@@ -31,12 +31,42 @@
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-caching-api</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-caching-caffeine</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-caching-guava</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-caching-testing</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
 				<artifactId>hapi-fhir-checkstyle</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
 				<artifactId>hapi-fhir-cli</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-cli-api</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-cli-app</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -66,12 +96,22 @@
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-docs</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
 				<artifactId>hapi-fhir-jaxrsserver-base</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
 				<artifactId>hapi-fhir-jpa</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-jpa-hibernate-services</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -116,6 +156,31 @@
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-jpaserver-test-dstu2</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-jpaserver-test-dstu3</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-jpaserver-test-r4</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-jpaserver-test-r4b</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-jpaserver-test-r5</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
 				<artifactId>hapi-fhir-jpaserver-test-utilities</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -136,7 +201,7 @@
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
-				<artifactId>hapi-fhir-mdm</artifactId>
+				<artifactId>hapi-fhir-server-mdm</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -231,6 +296,18 @@
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-testpage-overlay</artifactId>
+				<version>${project.version}</version>
+				<type>war</type>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-testpage-overlay</artifactId>
+				<version>${project.version}</version>
+				<classifier>classes</classifier>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
 				<artifactId>hapi-fhir-validation</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -268,6 +345,120 @@
 				<groupId>${project.groupId}</groupId>
 				<artifactId>hapi-fhir-server-cds-hooks</artifactId>
 				<version>${project.version}</version>
+			</dependency>
+			<!--
+				The org.hl7.fhir.core artifacts ship under our groupId but carry their own release
+				cadence, so these are versioned independently of ${project.version}.
+			-->
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>org.hl7.fhir.convertors</artifactId>
+				<version>${fhir_core_version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>junit</groupId>
+						<artifactId>junit</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>org.hl7.fhir.dstu2</artifactId>
+				<version>${fhir_core_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>org.hl7.fhir.dstu2016may</artifactId>
+				<version>${fhir_core_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>org.hl7.fhir.dstu3</artifactId>
+				<version>${fhir_core_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>org.hl7.fhir.dstu3.support</artifactId>
+				<version>${fhir_core_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>org.hl7.fhir.model</artifactId>
+				<version>${fhir_core_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>org.hl7.fhir.r4</artifactId>
+				<version>${fhir_core_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>org.hl7.fhir.r4b</artifactId>
+				<version>${fhir_core_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>org.hl7.fhir.r5</artifactId>
+				<version>${fhir_core_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>org.hl7.fhir.support</artifactId>
+				<version>${fhir_core_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>org.hl7.fhir.utilities</artifactId>
+				<version>${fhir_core_version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>commons-net</groupId>
+						<artifactId>commons-net</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>org.hl7.fhir.validation</artifactId>
+				<version>${fhir_core_version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>info.cqframework</groupId>
+						<artifactId>elm</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>info.cqframework</groupId>
+						<artifactId>cql-to-elm</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>info.cqframework</groupId>
+						<artifactId>quick</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>info.cqframework</groupId>
+						<artifactId>qdm</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>info.cqframework</groupId>
+						<artifactId>cql</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>info.cqframework</groupId>
+						<artifactId>model</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>io.javalin</groupId>
+						<artifactId>javalin</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>junit</groupId>
+						<artifactId>junit</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.commons</groupId>
+						<artifactId>commons-collections4</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
