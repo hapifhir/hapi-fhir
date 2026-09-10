@@ -27,6 +27,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.BundleLinks;
 import ca.uhn.fhir.rest.api.Constants;
@@ -37,6 +38,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
+import ca.uhn.fhir.rest.api.server.SearchCacheStatus;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -150,6 +152,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		Integer count = RestfulServerUtils.extractCountParameter(theRequest);
 
 		final IBaseResource responseObject;
+		IBundleProvider responseBundleProvider = null;
 
 		switch (getReturnType()) {
 			case BUNDLE: {
@@ -171,9 +174,9 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 					IBaseResource resource;
 					IPrimitiveType<Date> lastUpdated;
 					if (resultObj instanceof IBundleProvider) {
-						IBundleProvider result = (IBundleProvider) resultObj;
-						resource = result.getResources(0, 1).get(0);
-						lastUpdated = result.getPublished();
+						responseBundleProvider = (IBundleProvider) resultObj;
+						resource = responseBundleProvider.getResources(0, 1).get(0);
+						lastUpdated = responseBundleProvider.getPublished();
 					} else {
 						resource = (IBaseResource) resultObj;
 						lastUpdated = theServer.getFhirContext().getVersion().getLastUpdated(resource);
@@ -189,21 +192,17 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 					responseObject = resource;
 				} else {
+					responseBundleProvider = (IBundleProvider) resultObj;
+
 					ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(
-							theServer,
-							theRequest,
-							params,
-							(IBundleProvider) resultObj,
-							count,
-							responseBundleType,
-							linkSelf);
+							theServer, theRequest, params, responseBundleProvider, count, responseBundleType, linkSelf);
 					responseObject = myResponseBundleBuilder.buildResponseBundle(responseBundleRequest);
 				}
 				break;
 			}
 			case RESOURCE: {
-				IBundleProvider result = (IBundleProvider) resultObj;
-				Integer size = result.size();
+				responseBundleProvider = (IBundleProvider) resultObj;
+				Integer size = responseBundleProvider.size();
 				if (size == null || size == 0) {
 					throw new ResourceNotFoundException(
 							Msg.code(436) + "Resource " + theRequest.getId() + " is not known");
@@ -211,12 +210,30 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 					throw new InternalErrorException(Msg.code(437) + "Method returned multiple resources");
 				}
 
-				responseObject = result.getResources(0, 1).get(0);
+				responseObject = responseBundleProvider.getResources(0, 1).get(0);
 				break;
 			}
 			default:
 				throw new IllegalStateException(Msg.code(438)); // should not happen
 		}
+
+		if (responseBundleProvider != null) {
+			if (theRequest instanceof ServletRequestDetails srd) {
+				SearchCacheStatus cacheStatus = responseBundleProvider.getCacheStatus();
+				if (cacheStatus != null) {
+					if (cacheStatus.getStatus() == SearchCacheStatus.SearchCacheStatusEnum.HIT) {
+						HttpServletResponse response = srd.getServletResponse();
+						String value = "HIT from " + theRequest.getFhirServerBase();
+						if (cacheStatus.getCacheEntryTimestamp() != null) {
+							value += " - Cache entry dated "
+									+ new InstantDt(cacheStatus.getCacheEntryTimestamp()).getValueAsString();
+						}
+						response.addHeader(Constants.HEADER_X_CACHE, value);
+					}
+				}
+			}
+		}
+
 		return responseObject;
 	}
 

@@ -24,7 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 
-
 	@Autowired
 	private ISearchDao mySearchDao;
 

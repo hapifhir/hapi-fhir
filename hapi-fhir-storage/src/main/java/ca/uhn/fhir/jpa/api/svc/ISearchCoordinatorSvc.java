@@ -28,26 +28,16 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import jakarta.annotation.Nullable;
 
-import java.util.List;
-import java.util.Optional;
-
 public interface ISearchCoordinatorSvc<T extends IResourcePersistentId> {
 
-	void cancelAllActiveSearches();
-
-	List<T> getResources(
-			String theUuid,
-			int theFrom,
-			int theTo,
-			@Nullable RequestDetails theRequestDetails,
-			RequestPartitionId theRequestPartitionId);
-
 	/**
+	 * Create a new search for the given search parameters
+	 *
 	 * @param theRequestDetails The RequestDetails associated with the request. If you want to supply a fixed
 	 *                          {@link RequestPartitionId} you can use a {@link ca.uhn.fhir.rest.api.server.SystemRequestDetails}
 	 *                          and supply it there.
 	 */
-	IBundleProvider registerSearch(
+	IBundleProvider createNewSearch(
 			IFhirResourceDao<?> theCallingDao,
 			SearchParameterMap theParams,
 			String theResourceType,
@@ -55,9 +45,12 @@ public interface ISearchCoordinatorSvc<T extends IResourcePersistentId> {
 			@Nullable RequestDetails theRequestDetails);
 
 	/**
-	 * Fetch the total number of search results for the given currently executing search, if one is currently executing and
-	 * the total is known. Will return empty otherwise
+	 * Continue an existing search, given the UUID previously returned from a {@link #createNewSearch(IFhirResourceDao, SearchParameterMap, String, CacheControlDirective, RequestDetails)}
+	 * call to {@link IBundleProvider#getUuid()}.
+	 *
+	 * @param theRequestDetails The RequestDetails associated with the request. If you want to supply a fixed
+	 *                          {@link RequestPartitionId} you can use a {@link ca.uhn.fhir.rest.api.server.SystemRequestDetails}
+	 *                          and supply it there.
 	 */
-	Optional<Integer> getSearchTotal(
-			String theUuid, @Nullable RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId);
+	IBundleProvider continueExistingSearch(String theSearchUuid, @Nullable RequestDetails theRequestDetails);
 }

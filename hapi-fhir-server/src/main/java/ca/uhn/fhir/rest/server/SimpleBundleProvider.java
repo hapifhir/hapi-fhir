@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class SimpleBundleProvider implements IBundleProvider {
@@ -86,14 +87,32 @@ public class SimpleBundleProvider implements IBundleProvider {
 	}
 
 	public SimpleBundleProvider(List<? extends IBaseResource> theList, String theUuid) {
-		myList = theList;
 		myUuid = theUuid;
 		int size = 0;
-		for (IBaseResource r : theList) {
-			if (r != null && BundleUtil.isMatchResource(r)) {
+
+		List<? extends IBaseResource> list = theList;
+
+		// If the list contains nulls, filter them out.
+		// We can't just call list.contains(null) because some collections
+		// such as List.of(..) don't allow nulls and throw an NPE.
+		boolean containsNulls = false;
+		for (IBaseResource resource : list) {
+			if (resource == null) {
+				containsNulls = true;
+				break;
+			}
+		}
+		if (containsNulls) {
+			list = list.stream().filter(Objects::nonNull).toList();
+		}
+
+		for (IBaseResource r : list) {
+			if (BundleUtil.isMatchResource(r)) {
 				size++;
 			}
 		}
+		myList = list;
+
 		myHasAllResources = true;
 		setSize(size);
 	}

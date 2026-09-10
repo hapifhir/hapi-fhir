@@ -5,13 +5,14 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
-import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
-import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
+import ca.uhn.fhir.jpa.search.exec.BaseCacheAwareJpaSearchBundleProvider;
+import ca.uhn.fhir.jpa.search.exec.CacheAwareJpaSearchBundleProviderFirstPage;
 import ca.uhn.fhir.jpa.search.warm.CacheWarmingSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SearchCacheStatus;
 import ca.uhn.fhir.rest.param.StringParam;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
@@ -20,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -95,17 +97,21 @@ public class FhirResourceDaoR4CacheWarmingTest extends BaseJpaR4Test {
 		myPatientDao.update(p2);
 
 		myCacheWarmingSvc.performWarmingPass();
+		logAllSearches();
 
 		Thread.sleep(1000);
 
 		ourLog.info("About to perform search");
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("smith"));
+		myCaptureQueriesListener.clear();
 		IBundleProvider result = myPatientDao.search(params);
-		assertEquals(PersistedJpaBundleProvider.class, result.getClass());
+		assertEquals(CacheAwareJpaSearchBundleProviderFirstPage.class, result.getClass());
+		result.getResources(0, 10);
+		myCaptureQueriesListener.logSelectQueries();
 
-		PersistedJpaBundleProvider resultCasted = (PersistedJpaBundleProvider) result;
-		assertEquals(SearchCacheStatusEnum.HIT, resultCasted.getCacheStatus());
+		BaseCacheAwareJpaSearchBundleProvider resultCasted = (BaseCacheAwareJpaSearchBundleProvider) result;
+		assertEquals(SearchCacheStatus.SearchCacheStatusEnum.HIT, Objects.requireNonNull(resultCasted.getCacheStatus()).getStatus());
 	}
 
 }

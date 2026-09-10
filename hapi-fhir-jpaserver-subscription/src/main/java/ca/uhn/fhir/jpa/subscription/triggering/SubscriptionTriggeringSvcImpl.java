@@ -27,7 +27,6 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.api.svc.ISearchSvc;
-import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
@@ -56,6 +55,7 @@ import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.google.common.collect.Lists;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.ObjectUtils;
@@ -90,7 +90,7 @@ import static ca.uhn.fhir.rest.server.provider.ProviderConstants.SUBSCRIPTION_TR
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -163,8 +163,8 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			requestPartitionId = myRequestPartitionHelperSvc.determineGenericPartitionForRequest(theRequestDetails);
 		}
 
-		List<IPrimitiveType<String>> resourceIds = defaultIfNull(theResourceIds, Collections.emptyList());
-		List<IPrimitiveType<String>> searchUrls = defaultIfNull(theSearchUrls, Collections.emptyList());
+		List<IPrimitiveType<String>> resourceIds = getIfNull(theResourceIds, Collections.emptyList());
+		List<IPrimitiveType<String>> searchUrls = getIfNull(theSearchUrls, Collections.emptyList());
 		// Make sure we have at least one resource ID or search URL
 		if (resourceIds.isEmpty() && searchUrls.isEmpty()) {
 			throw new InvalidRequestException(Msg.code(23) + "No resource IDs or search URLs specified for triggering");
@@ -300,18 +300,19 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 			ourLog.info("Triggering job[{}] is starting a search for {}", theJobDetails.getJobId(), nextSearchUrl);
 
-			SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
-			systemRequestDetails.setRequestPartitionId(theJobDetails.getRequestPartitionId());
-
-			search = mySearchCoordinatorSvc.registerSearch(
-					callingDao, params, resourceType, new CacheControlDirective(), systemRequestDetails);
+			search = mySearchCoordinatorSvc.createNewSearch(
+					callingDao,
+					params,
+					resourceType,
+					new CacheControlDirective(),
+					newSystemRequestDetails(theJobDetails));
 
 			if (isNull(search.getUuid())) {
 				// we don't have a search uuid i.e. we're setting up for synchronous processing
 				theJobDetails.setCurrentSearchUrl(nextSearchUrl);
 				theJobDetails.setCurrentOffset(params.getOffset());
 			} else {
-				// populate properties for asynchronous path
+				// This is the asynchronous path
 				theJobDetails.setCurrentSearchUuid(search.getUuid());
 			}
 
@@ -342,11 +343,16 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 				sw.getThroughput(totalSubmitted.get(), TimeUnit.SECONDS));
 	}
 
+	@Nonnull
+	private static SystemRequestDetails newSystemRequestDetails(SubscriptionTriggeringJobDetails theJobDetails) {
+		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
+		systemRequestDetails.setRequestPartitionId(theJobDetails.getRequestPartitionId());
+		return systemRequestDetails;
+	}
+
 	private void processAsynchronous(
 			SubscriptionTriggeringJobDetails theJobDetails, AtomicInteger totalSubmitted, List<Future<?>> futures) {
 		int fromIndex = theJobDetails.getCurrentSearchLastUploadedIndex() + 1;
-
-		IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(theJobDetails.getCurrentSearchResourceType());
 
 		int maxQuerySize = myMaxSubmitPerPass - totalSubmitted.get();
 		int toIndex;
@@ -364,35 +370,23 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 				toIndex,
 				theJobDetails.getRequestPartitionId());
 
-		List<? extends IResourcePersistentId<?>> allResourceIds;
-		RequestPartitionId requestPartitionId = theJobDetails.getRequestPartitionId();
+		List<IBaseResource> allResources;
 		try {
-			allResourceIds = mySearchCoordinatorSvc.getResources(
-					theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex, null, requestPartitionId);
+			IBundleProvider search = mySearchCoordinatorSvc.continueExistingSearch(
+					theJobDetails.getCurrentSearchUuid(), newSystemRequestDetails(theJobDetails));
+			allResources = search.getResources(fromIndex, toIndex);
 		} catch (ResourceGoneException e) {
 			ourLog.debug("Search has expired, submission is done with error: {}", e.getMessage());
-			allResourceIds = new ArrayList<>();
+			allResources = new ArrayList<>();
 		}
 
-		ourLog.info("Triggering job[{}] delivering {} resources", theJobDetails.getJobId(), allResourceIds.size());
+		ourLog.info("Triggering job[{}] delivering {} resources", theJobDetails.getJobId(), allResources.size());
 		AtomicInteger highestIndexSubmitted = new AtomicInteger(theJobDetails.getCurrentSearchLastUploadedIndex());
 
-		List<? extends List<? extends IResourcePersistentId<?>>> partitions = Lists.partition(allResourceIds, 100);
-		for (List<? extends IResourcePersistentId<?>> resourceIds : partitions) {
+		List<List<IBaseResource>> partitions = Lists.partition(allResources, 100);
+		for (List<IBaseResource> resourceIds : partitions) {
 			Runnable job = () -> {
-				String resourceType = myFhirContext.getResourceType(theJobDetails.getCurrentSearchResourceType());
-				RuntimeResourceDefinition resourceDef =
-						myFhirContext.getResourceDefinition(theJobDetails.getCurrentSearchResourceType());
-				ISearchBuilder searchBuilder =
-						mySearchBuilderFactory.newSearchBuilder(resourceType, resourceDef.getImplementingClass());
-				List<IBaseResource> listToPopulate = new ArrayList<>();
-
-				myTransactionService.withRequest(null).execute(() -> {
-					searchBuilder.loadResourcesByPid(
-							resourceIds, Collections.emptyList(), listToPopulate, false, new SystemRequestDetails());
-				});
-
-				for (IBaseResource nextResource : listToPopulate) {
+				for (IBaseResource nextResource : resourceIds) {
 					submitResource(
 							theJobDetails.getSubscriptionId(), theJobDetails.getRequestPartitionId(), nextResource);
 					totalSubmitted.incrementAndGet();
@@ -408,7 +402,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 			theJobDetails.setCurrentSearchLastUploadedIndex(highestIndexSubmitted.get());
 
-			if (allResourceIds.isEmpty()
+			if (allResources.isEmpty()
 					|| (theJobDetails.getCurrentSearchCount() != null
 							&& toIndex >= theJobDetails.getCurrentSearchCount())) {
 				ourLog.info(

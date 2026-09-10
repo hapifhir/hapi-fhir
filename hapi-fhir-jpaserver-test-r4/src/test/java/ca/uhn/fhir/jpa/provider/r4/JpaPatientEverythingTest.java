@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
+import ca.uhn.fhir.jpa.dao.TransactionUtil;
+import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -94,14 +96,19 @@ import org.hl7.fhir.r4.model.SupplyRequest;
 import org.hl7.fhir.r4.model.VisionPrescription;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -123,8 +130,9 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         return referenceToPatient;
     }
 
-    @Test
-    public void testLargeEverythingFetchReturnsAllPossibleResources() throws IOException {
+    @ParameterizedTest
+	@ValueSource(booleans = {true, false})
+    public void testLargeEverythingFetchReturnsAllPossibleResources(boolean thePaged) throws IOException {
         myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
 
         // This bundle has a bunch of resources all in the compartment of the
@@ -132,7 +140,13 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         Bundle input = myFhirContext.newJsonParser().parseResource(Bundle.class, loadCompressedResource("large-bundle-for-everything.json.gz"));
         String patientId = "Patient/9656908";
 
-        mySystemDao.transaction(mySrd, input);
+		Bundle output = mySystemDao.transaction(mySrd, input);
+
+		List<String> allResourceIds = new ArrayList<>();
+		TransactionUtil.TransactionResponse txResponse = TransactionUtil.parseTransactionResponse(myFhirContext, input, output);
+		for (TransactionUtil.StorageOutcome outcome : txResponse.getStorageOutcomes()) {
+			allResourceIds.add(outcome.getTargetId().toUnqualifiedVersionless().getValue());
+		}
 
         int expectedEverythingSize = 652;
         runInTransaction(() -> {
@@ -140,7 +154,7 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         });
 
 		// Try with a direct API call
-        {
+		if (!thePaged) {
 			Set<String> actualResourceIds = new HashSet<>();
 			PatientEverythingParameters params = new PatientEverythingParameters();
 			int pageSize = 10000;
@@ -156,7 +170,7 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 		}
 
         // Try with an HTTP call
-        {
+        if (thePaged) {
             Set<String> actualResourceIds = new HashSet<>();
             Bundle outcome = myClient
                     .operation()
@@ -179,7 +193,18 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
                 }
             }
 
-					assertThat(actualResourceIds).hasSize(expectedEverythingSize);
+			Bundle finalOutcome = outcome;
+	        runInTransaction(()->{
+				Search entity = mySearchEntityDao.findByUuidAndFetchIncludes(finalOutcome.getIdElement().getIdPart()).orElseThrow();
+				assertEquals(expectedEverythingSize, entity.getNumFound());
+				assertEquals(expectedEverythingSize, entity.getTotalCount());
+			});
+
+			List<String> actualResourceIdsList = new ArrayList<>(actualResourceIds);
+			actualResourceIdsList.sort(String::compareTo);
+			allResourceIds.sort(String::compareTo);
+
+			assertEquals(String.join("\n", allResourceIds), String.join("\n", actualResourceIdsList));
         }
     }
 

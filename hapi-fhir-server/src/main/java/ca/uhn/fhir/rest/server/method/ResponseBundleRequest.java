@@ -99,10 +99,11 @@ public class ResponseBundleRequest {
 	private RequestedPage getRequestedPage(Integer theLimit) {
 		// If the BundleProvider has an offset and page size, we use that
 		if (bundleProvider.getCurrentPageOffset() != null) {
+			Integer currentPageSize = bundleProvider.getCurrentPageSize();
 			Validate.notNull(
-					bundleProvider.getCurrentPageSize(),
+					currentPageSize,
 					"IBundleProvider returned a non-null offset, but did not return a non-null page size");
-			return new RequestedPage(bundleProvider.getCurrentPageOffset(), bundleProvider.getCurrentPageSize());
+			return new RequestedPage(bundleProvider.getCurrentPageOffset(), currentPageSize);
 			// Otherwise, we build it from the request
 		} else {
 			Integer parameterOffset =

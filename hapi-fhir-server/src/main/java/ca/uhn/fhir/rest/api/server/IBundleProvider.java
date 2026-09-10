@@ -191,6 +191,7 @@ public interface IBundleProvider {
 	 * This may return more than size() resources.
 	 * But if no implementation is provided, it will return what getAllResources() returns
 	 * (which is limited by size())
+	 *
 	 * @return
 	 */
 	default List<IBaseResource> getResourceListComplete() {
@@ -240,6 +241,7 @@ public interface IBundleProvider {
 	 * Whether or not this bundle provider contains all resources specified in the total.
 	 * This can be the case if a provider has all the resources and passes them back directly
 	 * (as is the case for some plain/hybrid providers that return lists of resources.
+	 *
 	 * @return
 	 */
 	default boolean containsAllResources() {
@@ -274,5 +276,28 @@ public interface IBundleProvider {
 		return getAllResources().stream()
 				.map(resource -> resource.getIdElement().getIdPart())
 				.collect(Collectors.toList());
+	}
+
+	/**
+	 * Returns the cache status for the search, if known. This method may return null.
+	 *
+	 * @since 8.14.0
+	 */
+	@Nullable
+	default SearchCacheStatus getCacheStatus() {
+		return null;
+	}
+
+	/**
+	 * Subclasses may override this method to indicate that no actions should be
+	 * performed against this provider before fetching the resource list. This
+	 * is an optimization for cases where the invocation of {@link #getResources(int, int)}
+	 * or {@link #getResources(int, int, ResponsePage.ResponsePageBuilder)} will
+	 * trigger a database lookup.
+	 *
+	 * @since 8.14.0
+	 */
+	default boolean isShouldFetchResourcesBeforeOtherProperties() {
+		return false;
 	}
 }

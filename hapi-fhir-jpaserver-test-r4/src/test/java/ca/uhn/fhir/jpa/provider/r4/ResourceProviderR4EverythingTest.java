@@ -10,6 +10,7 @@ import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -76,8 +77,6 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 	public void after() throws Exception {
 		super.after();
 		mySearchCoordinatorSvcImpl.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
-		mySearchCoordinatorSvcImpl.setLoadingThrottleForUnitTests(null);
-		mySearchCoordinatorSvcImpl.setNeverUseLocalSearchForUnitTests(false);
 	}
 
 	@Test
@@ -538,7 +537,12 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 			parameters.addParameter("_id", p3Id.getIdPart() + "," + p4Id.getIdPart());
 			parameters.addParameter(new Parameters.ParametersParameterComponent().setName("_count").setValue(new UnsignedIntType(20)));
 
-			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+			Parameters output = myClient
+				.operation()
+				.onType(Patient.class)
+				.named("everything")
+				.withParameters(parameters)
+				.execute();
 			Bundle b = (Bundle) output.getParameter().get(0).getResource();
 
 			assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
@@ -1027,9 +1031,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 			myObservationDao.create(o);
 		}
 
-		mySearchCoordinatorSvcImpl.setLoadingThrottleForUnitTests(50);
 		mySearchCoordinatorSvcImpl.setSyncSizeForUnitTests(10);
-		mySearchCoordinatorSvcImpl.setNeverUseLocalSearchForUnitTests(true);
 
 		Bundle response = myClient
 			.operation()
@@ -1072,35 +1074,54 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 	@Disabled
 	@Test
 	public void testEverythingWithNoPagingProvider() {
+		IPagingProvider previousPagingProvider = myServer.getRestfulServer().getPagingProvider();
 		myServer.getRestfulServer().setPagingProvider(null);
+		try {
+			List<String> allIds = new ArrayList<>();
 
-		Patient p = new Patient();
-		p.setActive(true);
-		String pid = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+			Patient p = new Patient();
+			p.setActive(true);
+			String pid = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+			allIds.add(pid);
 
-		for (int i = 0; i < 20; i++) {
-			Observation o = new Observation();
-			o.getSubject().setReference(pid);
-			o.addIdentifier().setSystem("foo").setValue(Integer.toString(i));
-			myObservationDao.create(o);
+			for (int i = 0; i < 19; i++) {
+				Observation o = new Observation();
+				o.getSubject().setReference(pid);
+				o.addIdentifier().setSystem("foo").setValue(Integer.toString(i));
+				String obsId = myObservationDao.create(o).getId().toUnqualifiedVersionless().getValue();
+				allIds.add(obsId);
+			}
+
+			Bundle response = myClient
+				.operation()
+				.onInstance(new IdType(pid))
+				.named("everything")
+				.withSearchParameter(Parameters.class, "_count", new NumberParam(10))
+				.returnResourceType(Bundle.class)
+				.useHttpGet()
+				.execute();
+
+			assertThat(response.getEntry()).hasSize(10);
+			assertNull(response.getTotalElement().getValue());
+			assertThat(response.getLink("next").getUrl()).contains("_count=10");
+			assertThat(response.getLink("next").getUrl()).contains("_offset=10");
+			List<String> actualIds = toUnqualifiedVersionlessIdValues(response);
+
+			response = myClient
+				.loadPage()
+				.next(response)
+				.execute();
+
+			assertThat(response.getEntry()).hasSize(10);
+			assertNull(response.getTotalElement().getValue());
+			assertNull(response.getLink("next"));
+			actualIds.addAll(toUnqualifiedVersionlessIdValues(response));
+
+			assertThat(actualIds).containsExactlyInAnyOrder(allIds.toArray(new String[0]));
+
+		} finally {
+			myServer.getRestfulServer().setPagingProvider(previousPagingProvider);
 		}
-
-		mySearchCoordinatorSvcImpl.setLoadingThrottleForUnitTests(50);
-		mySearchCoordinatorSvcImpl.setSyncSizeForUnitTests(10);
-		mySearchCoordinatorSvcImpl.setNeverUseLocalSearchForUnitTests(true);
-
-		Bundle response = myClient
-			.operation()
-			.onInstance(new IdType(pid))
-			.named("everything")
-			.withSearchParameter(Parameters.class, "_count", new NumberParam(10))
-			.returnResourceType(Bundle.class)
-			.useHttpGet()
-			.execute();
-
-		assertThat(response.getEntry()).hasSize(10);
-		assertNull(response.getTotalElement().getValue());
-		assertNull(response.getLink("next"));
 	}
 
 	@Test
@@ -1493,8 +1514,9 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 
 	private IIdType createOrganization(String methodName, String theIndex) {
 		Organization o1 = new Organization();
+		o1.setId("O" + theIndex);
 		o1.setName(methodName + theIndex);
-		return myClient.create().resource(o1).execute().getId().toUnqualifiedVersionless();
+		return myClient.update().resource(o1).execute().getId().toUnqualifiedVersionless();
 	}
 
 	private IIdType createEncounter(String methodName, String theIndex) {
