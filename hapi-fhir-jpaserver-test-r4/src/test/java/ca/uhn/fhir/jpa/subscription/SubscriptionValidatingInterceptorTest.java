@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.subscription;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
@@ -66,6 +67,8 @@ public class SubscriptionValidatingInterceptorTest {
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@Mock
 	private SubscriptionSettings mySubscriptionSettings;
+	@Mock
+	private JpaStorageSettings myStorageSettings;
 	@Spy
 	private PartitionSettings myPartitionSettings = new PartitionSettings();
 
@@ -79,6 +82,9 @@ public class SubscriptionValidatingInterceptorTest {
 		mySubscriptionCanonicalizer = 	spy(new SubscriptionCanonicalizer(myCtx, new SubscriptionSettings(), myPartitionSettings));
 		mySvc.setSubscriptionCanonicalizerForUnitTest(mySubscriptionCanonicalizer);
 		mySvc.setDaoRegistryForUnitTest(myDaoRegistry);
+		// setStorageSettingsForUnitTest must run before setSubscriptionStrategyEvaluatorForUnitTest:
+		// the latter rebuilds the SubscriptionQueryValidator, capturing myStorageSettings by value.
+		mySvc.setStorageSettingsForUnitTest(myStorageSettings);
 		mySvc.setSubscriptionStrategyEvaluatorForUnitTest(mySubscriptionStrategyEvaluator);
 		mySvc.setFhirContext(myCtx);
 		mySvc.setSubscriptionSettingsForUnitTest(mySubscriptionSettings);

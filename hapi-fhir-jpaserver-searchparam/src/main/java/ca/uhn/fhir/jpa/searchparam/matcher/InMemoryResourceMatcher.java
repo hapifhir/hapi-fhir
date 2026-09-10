@@ -78,7 +78,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class InMemoryResourceMatcher {
 
-	public static final Set<String> UNSUPPORTED_PARAMETER_NAMES = Sets.newHashSet(Constants.PARAM_HAS);
+	public static final Set<String> UNSUPPORTED_PARAMETER_NAMES =
+			Sets.newHashSet(Constants.PARAM_HAS, Constants.PARAM_FILTER);
 	private static final org.slf4j.Logger ourLog = LoggerFactory.getLogger(InMemoryResourceMatcher.class);
 
 	@Autowired
