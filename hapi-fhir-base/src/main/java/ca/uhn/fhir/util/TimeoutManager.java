@@ -51,7 +51,7 @@ public class TimeoutManager {
 	public boolean checkTimeout() {
 		boolean retval = false;
 		if (myStopWatch.getMillis() > myWarningTimeout.toMillis() && !warned) {
-			ourLog.warn(myServiceName + " has run for {}", myStopWatch);
+			ourLog.warn("{} has run for {}", myServiceName, myStopWatch);
 			warned = true;
 			retval = true;
 		}
@@ -60,7 +60,7 @@ public class TimeoutManager {
 				throw new TimeoutException(
 						Msg.code(2133) + myServiceName + " timed out after running for " + myStopWatch);
 			} else {
-				ourLog.error(myServiceName + " has run for {}", myStopWatch);
+				ourLog.error("{} has run for {}", myServiceName, myStopWatch);
 				errored = true;
 				retval = true;
 			}

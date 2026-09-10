@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.interceptor;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
@@ -68,6 +69,7 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 		myPartitionSettings.setAllowReferencesAcrossPartitions(defaultPartitionSettings.getAllowReferencesAcrossPartitions());
 
 		myStorageSettings.setMassIngestionMode(false);
+		myStorageSettings.setUpdateWithHistoryRewriteEnabled(false);
 	}
 
 	@ParameterizedTest
@@ -252,6 +254,62 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 		}
 
 
+	@Test
+	public void testUpdateResource_withInterceptorSubclassInMassIngestionMode_nonCrossing_succeeds() {
+		registerInterceptor(new SubclassedPatientCompartmentEnforcingInterceptor(getFhirContext(), myRequestPartitionHelperSvc));
+		myStorageSettings.setMassIngestionMode(true);
+
+		createPatientA();
+		createObservationWithSubject("O", "Patient/A");
+
+		Observation sameCompartment = new Observation();
+		sameCompartment.setId("O");
+		sameCompartment.getSubject().setReference("Patient/A");
+		sameCompartment.getNote().add(new Annotation().setText("some text"));
+
+		DaoMethodOutcome outcome = myObservationDao.update(sameCompartment, new SystemRequestDetails());
+		assertEquals("Patient/A", ((Observation) outcome.getResource()).getSubject().getReference());
+	}
+
+	@Test
+	public void testUpdateResource_withInterceptorSubclassInMassIngestionMode_crossing_throws() {
+		registerInterceptor(new SubclassedPatientCompartmentEnforcingInterceptor(getFhirContext(), myRequestPartitionHelperSvc));
+		myStorageSettings.setMassIngestionMode(true);
+
+		createPatientA();
+		createObservationWithSubject("O", "Patient/A");
+
+		String otherId = createPatientInSamePartitionAsA();
+		Observation updatedObs = new Observation();
+		updatedObs.setId("O");
+		updatedObs.getSubject().setReference("Patient/" + otherId);
+
+		assertThatThrownBy(() -> myObservationDao.update(updatedObs, new SystemRequestDetails()))
+			.isInstanceOf(PreconditionFailedException.class)
+			.hasMessageContaining("HAPI-2476: Resource compartment for Observation/O changed. Was a referenced Patient changed?");
+	}
+
+	@Test
+	public void testHistoryRewriteCurrentVersion_withInterceptorInMassIngestionMode_succeeds() {
+		registerInterceptor(mySvc);
+		myStorageSettings.setMassIngestionMode(true);
+		myStorageSettings.setUpdateWithHistoryRewriteEnabled(true);
+
+		createPatientA();
+		createObservationWithSubject("O", "Patient/A");
+
+		Observation rewritten = new Observation();
+		rewritten.setId("Observation/O/_history/1");
+		rewritten.getSubject().setReference("Patient/A");
+		rewritten.getNote().add(new Annotation().setText("rewritten"));
+
+		SystemRequestDetails rewriteRequest = new SystemRequestDetails();
+		rewriteRequest.setRewriteHistory(true);
+		DaoMethodOutcome outcome = myObservationDao.update(rewritten, rewriteRequest);
+
+		assertEquals("Patient/A", ((Observation) outcome.getResource()).getSubject().getReference());
+	}
+
 	private void registerInterceptor(boolean theUseNewInterceptor) {
 		if (theUseNewInterceptor) {
 			registerInterceptor(mySvc);
@@ -266,6 +324,34 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 		patient.setId("Patient/A");
 		patient.setActive(true);
 		myPatientDao.update(patient, new SystemRequestDetails());
+	}
+
+	private void createObservationWithSubject(String theObservationId, String theSubjectReference){
+		Observation obs = new Observation();
+		obs.setId(theObservationId);
+		obs.getSubject().setReference(theSubjectReference);
+		myObservationDao.update(obs, new SystemRequestDetails());
+	}
+
+	private String createPatientInSamePartitionAsA() {
+		int patientAPartition = PatientIdPartitionInterceptor.defaultPartitionAlgorithm("A");
+		int count = 0;
+		String otherId;
+		do {
+			otherId = "A" + ++count;
+		} while (patientAPartition != PatientIdPartitionInterceptor.defaultPartitionAlgorithm(otherId));
+
+		Patient patient = new Patient();
+		patient.setId("Patient/" + otherId);
+		patient.setActive(true);
+		myPatientDao.update(patient, new SystemRequestDetails());
+		return otherId;
+	}
+
+	private static class SubclassedPatientCompartmentEnforcingInterceptor extends PatientCompartmentEnforcingInterceptor {
+		SubclassedPatientCompartmentEnforcingInterceptor(FhirContext theFhirContext, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+			super(theFhirContext, theRequestPartitionHelperSvc);
+		}
 	}
 
 }
