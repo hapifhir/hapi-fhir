@@ -1,6 +1,7 @@
 ---
 type: fix
 issue: 8321
+backport: 8.12.1
 title: "When a `CodeSystem` was loaded alongside the `ValueSet`s that reference it, such as during an
   implementation guide install or a terminology import, a `ValueSet` could be pre-expanded before the
   `CodeSystem` was fully stored and still marked `EXPANDED`, so `$expand` and `$validate-code` omitted
