@@ -716,9 +716,10 @@ as an array. A single system may still be given as a bare string.
 An incoming resource is linked to a golden resource if **any** of its EIDs match, so listing several
 systems widens the set of records that can be resolved directly rather than probabilistically.
 
-Order matters. The first system listed for a resource type is treated as its primary one: it is the
-system used when a single EID has to be chosen for the resource, such as for the subscription message
-key.
+Order matters. The list is a priority order: the first system listed for a resource type is treated as
+its primary one, and it is the system used when a single EID has to be chosen for the resource, such as
+for the subscription message key. If the resource carries no EID for that system, the next listed system
+is tried, and so on until a value is found.
 
 <p class="helpInfoCalloutBox">
     Note that this field used to be called `eidSystem`. While that field is deprecated, it will continue to work. In the background, it effectively sets the eid for resource type `*`.

@@ -69,6 +69,9 @@ public class EIDHelper {
 	/**
 	 * Returns the one EID that best identifies the given resource, chosen by the order in which EID systems
 	 * are configured for its resource type rather than by the order identifiers appear on the resource.
+	 * That configured order is a priority order: the EID belonging to the first system listed for the
+	 * resource type is returned, and where the resource carries no EID for that system, the next listed
+	 * system is tried, and so on until a value is found.
 	 * Callers that need a stable single value for a resource - a subscription message key, for instance -
 	 * must use this rather than picking the first element of {@link #getExternalEid(IBaseResource)}, whose
 	 * order follows the payload.
