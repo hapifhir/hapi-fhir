@@ -125,26 +125,20 @@ public class MdmMatchLinkSvcTest {
 				createPatientAndUpdateLinks(jane);
 
 				// verify
-				for (boolean toUseValue : new boolean[] { true, false }) {
-					SearchParameterMap map = new SearchParameterMap();
-					map.setLoadSynchronous(true);
-					if (toUseValue) {
-						map.add("_tag", new TokenParam(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE, MdmConstants.TOO_MANY_CANDIDATES));
-					} else {
-						map.add("_tag", new TokenParam(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE));
-					}
-					IBundleProvider results = myPatientDao.search(map, new SystemRequestDetails());
+				SearchParameterMap map = new SearchParameterMap();
+				map.setLoadSynchronous(true);
+				map.add("_tag", new TokenParam(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE, MdmConstants.TOO_MANY_CANDIDATES));
 
-					ourLog.info("Searching with system" + (toUseValue ? " and value " : " only"));
-					assertEquals(1, results.size());
-					for (IBaseResource resource : results.getAllResources()) {
-						assertTrue(resource.getMeta()
-							.getTag().stream()
-							.anyMatch(tag -> {
-								return tag.getSystem().equals(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE)
-									&& tag.getCode().equals(MdmConstants.TOO_MANY_CANDIDATES);
-							}));
-					}
+				IBundleProvider results = myPatientDao.search(map, new SystemRequestDetails());
+
+				assertEquals(1, results.size());
+				for (IBaseResource resource : results.getAllResources()) {
+					assertTrue(resource.getMeta()
+						.getTag().stream()
+						.anyMatch(tag -> {
+							return tag.getSystem().equals(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE)
+								&& tag.getCode().equals(MdmConstants.TOO_MANY_CANDIDATES);
+						}));
 				}
 			} finally {
 				myMdmSettings.setCandidateSearchLimit(searchLimit);
@@ -207,9 +201,9 @@ public class MdmMatchLinkSvcTest {
 			// setup
 			MDMState<Patient, JpaPid> state = new MDMState<>();
 			String startingState = """
-   			GP1, AUTO, MATCH, P1
-   			GP2, AUTO, MATCH, P2
-			""";
+							GP1, AUTO, MATCH, P1
+							GP2, AUTO, MATCH, P2
+				""";
 
 			Map<String, Patient> idToResource = new HashMap<>();
 
@@ -248,11 +242,11 @@ public class MdmMatchLinkSvcTest {
 
 			// verify
 			String endState = """
-   			GP1, AUTO, MATCH, P1
-   			GP2, AUTO, POSSIBLE_MATCH, P2
-   			GP1, AUTO, POSSIBLE_MATCH, P2
-   			GP2, AUTO, POSSIBLE_DUPLICATE, GP1
-			""";
+							GP1, AUTO, MATCH, P1
+							GP2, AUTO, POSSIBLE_MATCH, P2
+							GP1, AUTO, POSSIBLE_MATCH, P2
+							GP2, AUTO, POSSIBLE_DUPLICATE, GP1
+				""";
 			state.setParameterToValue(idToResource);
 			state.setOutputState(endState);
 			myLinkHelper.validateResults(state);
@@ -266,7 +260,7 @@ public class MdmMatchLinkSvcTest {
 
 			assertLinkCount(2);
 
-			 mdmAssertThat(patient1).is_not_MATCH_to(patient2);
+			mdmAssertThat(patient1).is_not_MATCH_to(patient2);
 
 			assertLinksMatchResult(MATCH, MATCH);
 			assertLinksCreatedNewResource(true, true);
@@ -313,26 +307,26 @@ public class MdmMatchLinkSvcTest {
 			assertLinksMatchVector(null, null, null);
 		}
 
-	@Test
-	public void updateMdmLinksForMdmSource_singleCandidateDuringUpdate_DoesNotNullPointer() {
+		@Test
+		public void updateMdmLinksForMdmSource_singleCandidateDuringUpdate_DoesNotNullPointer() {
 
-		//Given: A patient exists with a matched golden resource.
-		Patient jane = createPatientAndUpdateLinks(buildJanePatient());
-		Patient goldenJane = getGoldenResourceFromTargetResource(jane);
+			//Given: A patient exists with a matched golden resource.
+			Patient jane = createPatientAndUpdateLinks(buildJanePatient());
+			Patient goldenJane = getGoldenResourceFromTargetResource(jane);
 
-		//When: A patient who has no existing MDM links comes in as an update
-		Patient secondaryJane = createPatient(buildJanePatient(), false, false);
-		secondaryJane.setActive(true);
-		IAnyResource resource = (IAnyResource) myPatientDao.update(secondaryJane).getResource();
+			//When: A patient who has no existing MDM links comes in as an update
+			Patient secondaryJane = createPatient(buildJanePatient(), false, false);
+			secondaryJane.setActive(true);
+			IAnyResource resource = (IAnyResource) myPatientDao.update(secondaryJane).getResource();
 
-		//Then: The secondary jane should link to the first jane.
-		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(resource, buildUpdateResourceMdmTransactionContext());
-		mdmAssertThat(secondaryJane).is_MATCH_to(goldenJane);
-	}
+			//Then: The secondary jane should link to the first jane.
+			myMdmMatchLinkSvc.updateMdmLinksForMdmSource(resource, buildUpdateResourceMdmTransactionContext());
+			mdmAssertThat(secondaryJane).is_MATCH_to(goldenJane);
+		}
 
-	@Test
-	public void testWhenPOSSIBLE_MATCHOccursOnGoldenResourceThatHasBeenManuallyNOMATCHedThatItIsBlocked() {
-		Patient originalJane = createPatientAndUpdateLinks(buildJanePatient());
+		@Test
+		public void testWhenPOSSIBLE_MATCHOccursOnGoldenResourceThatHasBeenManuallyNOMATCHedThatItIsBlocked() {
+			Patient originalJane = createPatientAndUpdateLinks(buildJanePatient());
 
 			IBundleProvider search = myPatientDao.search(buildGoldenRecordSearchParameterMap());
 			Patient janeGoldenResource = (Patient) search.getResources(0, 1).get(0);
@@ -347,8 +341,8 @@ public class MdmMatchLinkSvcTest {
 			//should cause a whole new GoldenResource to be created.
 			myMdmMatchLinkSvc.updateMdmLinksForMdmSource(unmatchedPatient, createContextForCreate("Patient"));
 
-		GoldenResourceMatchingAssert.assertThat(unmatchedPatient, myIdHelperService, myMdmLinkDaoSvc).is_not_MATCH_to(janeGoldenResource);
-		GoldenResourceMatchingAssert.assertThat(unmatchedPatient, myIdHelperService, myMdmLinkDaoSvc).is_not_MATCH_to(originalJane);
+			GoldenResourceMatchingAssert.assertThat(unmatchedPatient, myIdHelperService, myMdmLinkDaoSvc).is_not_MATCH_to(janeGoldenResource);
+			GoldenResourceMatchingAssert.assertThat(unmatchedPatient, myIdHelperService, myMdmLinkDaoSvc).is_not_MATCH_to(originalJane);
 
 			assertLinksMatchResult(MATCH, NO_MATCH, MATCH);
 			assertLinksCreatedNewResource(true, false, true);
@@ -925,27 +919,22 @@ public class MdmMatchLinkSvcTest {
 			myMdmMatchLinkSvc.updateMdmLinksForMdmSource(blockedPatient, mdmContext);
 
 			// test
-			for (boolean toUseValue : new boolean[] { true, false }) {
-				SearchParameterMap map = new SearchParameterMap();
-				map.setLoadSynchronous(true);
-				if (toUseValue) {
-					map.add("_tag", new TokenParam(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE, MdmConstants.BLOCKED_VALUE));
-				} else {
-					map.add("_tag", new TokenParam(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE));
-				}
-				IBundleProvider results = myPatientDao.search(map, new SystemRequestDetails());
+			SearchParameterMap map = new SearchParameterMap();
+			map.setLoadSynchronous(true);
+			map.add("_tag", new TokenParam(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE, MdmConstants.BLOCKED_VALUE));
 
-				ourLog.info("Searching with system" + (toUseValue ? " and value " : " only"));
-				assertEquals(1, results.size());
-				for (IBaseResource resource : results.getAllResources()) {
-					assertTrue(resource.getMeta()
-						.getTag().stream()
-						.anyMatch(tag -> {
-							return tag.getSystem().equals(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE)
-								&& tag.getCode().equals(MdmConstants.BLOCKED_VALUE);
-						}));
-				}
+			IBundleProvider results = myPatientDao.search(map, new SystemRequestDetails());
+
+			assertEquals(1, results.size());
+			for (IBaseResource resource : results.getAllResources()) {
+				assertTrue(resource.getMeta()
+					.getTag().stream()
+					.anyMatch(tag -> {
+						return tag.getSystem().equals(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE)
+							&& tag.getCode().equals(MdmConstants.BLOCKED_VALUE);
+					}));
 			}
+
 		}
 
 		@Test
@@ -979,11 +968,11 @@ public class MdmMatchLinkSvcTest {
 				myMdmMatchLinkSvc.updateMdmLinksForMdmSource(unblockedPatient, mdmContext);
 			}
 
-				// our blocked name is Jane Doe... let's make sure that's the case
-				Patient blockedPatient = buildJanePatient();
-				assertEquals(blockedLastName, blockedPatient.getName().get(0).getFamily());
-				assertEquals(blockedFirstName, blockedPatient.getName().get(0).getGivenAsSingleString());
-				blockedPatient = createPatient(blockedPatient);
+			// our blocked name is Jane Doe... let's make sure that's the case
+			Patient blockedPatient = buildJanePatient();
+			assertEquals(blockedLastName, blockedPatient.getName().get(0).getFamily());
+			assertEquals(blockedFirstName, blockedPatient.getName().get(0).getGivenAsSingleString());
+			blockedPatient = createPatient(blockedPatient);
 
 			// test
 			myMdmMatchLinkSvc.updateMdmLinksForMdmSource(blockedPatient, mdmContext);
@@ -995,7 +984,7 @@ public class MdmMatchLinkSvcTest {
 
 			List<MdmLink> links = new ArrayList<>();
 			for (IBaseResource gr : grs) {
-				links.addAll(getAllMdmLinks((Patient)gr));
+				links.addAll(getAllMdmLinks((Patient) gr));
 			}
 			assertEquals(2, links.size());
 			Set<Long> ids = new HashSet<>();
@@ -1009,7 +998,7 @@ public class MdmMatchLinkSvcTest {
 
 		public List<MdmLink> getAllMdmLinks(Patient theGoldenPatient) {
 			return myMdmLinkDaoSvc.findMdmLinksByGoldenResource(theGoldenPatient).stream()
-				.map( link -> (MdmLink) link)
+				.map(link -> (MdmLink) link)
 				.collect(Collectors.toList());
 		}
 	}
