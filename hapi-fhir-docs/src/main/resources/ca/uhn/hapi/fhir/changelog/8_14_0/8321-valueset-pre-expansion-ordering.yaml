@@ -1,0 +1,9 @@
+---
+type: fix
+issue: 8321
+title: "When a `CodeSystem` was loaded alongside the `ValueSet`s that reference it, such as during an
+  implementation guide install or a terminology import, a `ValueSet` could be pre-expanded before the
+  `CodeSystem` was fully stored and still marked `EXPANDED`, so `$expand` and `$validate-code` omitted
+  valid codes. Introduced when terminology operations moved to batch2 jobs; pre-expansion now waits for
+  deferred terminology entities to be processed, and an import makes the `CodeSystem` version current
+  before activating the `ValueSet`s it generates."
