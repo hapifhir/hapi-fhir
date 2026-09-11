@@ -1,3 +1,9 @@
+# Compiles Smile CDR against this pull request's HAPI branch.
+#
+# By default the CDR branch is master, or the release branch mapped to this HAPI rel_* branch in
+# cdr_check/hapi_cdr_branch_map.json. To compile against a different CDR branch, add a marker like
+# !cdr-branch=my-cdr-branch to the pull request description or to a comment on it, then re-run this
+# job (a comment added after the run is only picked up on the next run).
 name: Compile against CDR
 on:
   pull_request:
