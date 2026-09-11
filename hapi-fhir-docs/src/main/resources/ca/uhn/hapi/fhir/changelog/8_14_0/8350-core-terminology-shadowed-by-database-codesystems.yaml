@@ -1,0 +1,13 @@
+---
+type: fix
+issue: 8350
+title: "Previously, a CodeSystem stored in the JPA server with same canonical URL as a built-in FHIR definition was used for code validation and for
+ValueSet pre-expansion even when JpaStorageSettings#isAllowDatabaseValidationOverride() was false. 
+This meant that if the stored CodeSystem diverges from the built-in (as happens when installing e.g. hl7.fhir.uv.xver-r5.r4 that contains R5 terminology 
+that exist at same core canonical URLs as in R4 (e.g. http://hl7.org/fhir/item-type),
+then instance validation and pre-expanded ValueSets were based on the stored backported R5 CodeSystem rather on the built-in R4 version. 
+This has been fixed such that when allowDatabaseValidationOverride is false (which is the default), the JPA terminology
+service no longer answers for code systems that is part of the core specification namespace (http://hl7.org/fhir/*) of the active FHIR version the server is running (e.g. R4). 
+Terminology stored at other URLs (e.g. LOINC, SNOMED CT, terminology.hl7.org content), 
+or are not defined in the active FHIR context (e.g. the R5 CodeSystem http://hl7.org/fhir/version-algorithmon an R4 server), are unaffected. 
+Fix submitted by Tue Toft Nørgård (@ttnTrifork)"
