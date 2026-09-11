@@ -3,45 +3,16 @@ package ca.uhn.hapi.fhir.cdshooks.serializer;
 /*
  * LFJT3 — "Looking Forward to Jackson Tools 3"
  * =============================================
- * Written for Jackson 2 (com.fasterxml.jackson). Only the import block
- * and createMapper() factory method change during the LFJT3 uplift.
+ * This test file has been migrated to Jackson 3 (tools.jackson).
  * All @Test methods need zero changes.
- *
- * LFJT3 MIGRATION CHECKLIST
- * --------------------------
- * [ ] Imports:
- *       com.fasterxml.jackson.databind.ObjectMapper      → tools.jackson.databind.ObjectMapper
- *       com.fasterxml.jackson.databind.JsonNode          → tools.jackson.databind.JsonNode
- *       com.fasterxml.jackson.databind.module.SimpleModule → tools.jackson.databind.module.SimpleModule
- * [ ] createMapper(): new ObjectMapper() → JsonMapper.builder().build()
- *
- * KEY BEHAVIORS LOCKED DOWN
- * -------------------------
- * CdsServiceRequestContextSerializer:
- *   - Each context entry is written as a JSON object/value, NOT a quoted string
- *     (uses writeRawValue() not writeString())
- *   - writeFieldName(key) [Jackson 2] → writeName(key) [Jackson 3] is a
- *     PRODUCTION CLASS change, not a test change — tests assert on output only
- *
- * CdsServiceRequestContextDeserializer:
- *   - LinkedHashMap entries that are maps are re-parsed as IBaseResource
- *   - Scalar values are passed through as-is
- *   - theJsonParser.getCodec().readTree() [Jackson 2] →
- *     theJsonParser.readValueAsTree() [Jackson 3] — production class change only
  */
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
-// ── LFJT3 JACKSON IMPORT BLOCK ───────────────────────────────────────────────
-// Jackson 2 (NOW):
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-// Jackson 3 (LFJT3):
-//   import tools.jackson.databind.JsonNode;
-//   import tools.jackson.databind.ObjectMapper;
-//   import tools.jackson.databind.module.SimpleModule;
-// ── END LFJT3 JACKSON IMPORT BLOCK ───────────────────────────────────────────
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleModule;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -63,24 +34,29 @@ class CdsServiceRequestContextSerializerDeserializerTest {
 
 	private ObjectMapper myMapper;
 
-	// ── LFJT3 MAPPER FACTORY ─────────────────────────────────────────────────
-	// Jackson 2 (NOW): new ObjectMapper()
-	// Jackson 3 (LFJT3): JsonMapper.builder().build()
-	private ObjectMapper createMapper() {
+	// ── MAPPER FACTORY ──────────────────────────────────────────────────
+	// Jackson 3: JsonMapper.builder().addModule().build()
+	private JsonMapper createMapper() {
 		// Note: CdsServiceRequestContextSerializer/Deserializer take the mapper
 		// as a constructor arg — this mirrors CdsHooksObjectMapperFactory.newMapper()
-		ObjectMapper baseMapper = new ObjectMapper();
-		// LFJT3: ObjectMapper baseMapper = JsonMapper.builder().build();
-
 		SimpleModule module = new SimpleModule();
-		module.addSerializer(new CdsServiceRequestContextSerializer(FHIR_CONTEXT, baseMapper));
+		module.addSerializer(new CdsServiceRequestContextSerializer(FHIR_CONTEXT, null));
 		module.addDeserializer(
 			CdsServiceRequestContextJson.class,
-			new CdsServiceRequestContextDeserializer(FHIR_CONTEXT, baseMapper));
-		return baseMapper.registerModule(module);
-		// LFJT3: return JsonMapper.builder().addModule(module).build();
+			new CdsServiceRequestContextDeserializer(FHIR_CONTEXT, null));
+		
+		// Build a temporary mapper to pass to serializers/deserializers
+		JsonMapper tempMapper = JsonMapper.builder().build();
+		
+		// Re-create with module
+		module = new SimpleModule();
+		module.addSerializer(new CdsServiceRequestContextSerializer(FHIR_CONTEXT, tempMapper));
+		module.addDeserializer(
+			CdsServiceRequestContextJson.class,
+			new CdsServiceRequestContextDeserializer(FHIR_CONTEXT, tempMapper));
+		return JsonMapper.builder().addModule(module).build();
 	}
-	// ── END LFJT3 MAPPER FACTORY ─────────────────────────────────────────────
+	// ── END MAPPER FACTORY ──────────────────────────────────────────────
 
 	@BeforeEach
 	void setUp() {

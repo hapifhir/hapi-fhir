@@ -1097,9 +1097,19 @@
 		<hibernate_validator_version>8.0.0.Final</hibernate_validator_version>
 		<httpcore_version>4.4.16</httpcore_version>
 		<httpclient_version>4.5.14</httpclient_version>
-		<jackson_version>2.21.6</jackson_version>
-		<jackson_databind_version>2.21.6</jackson_databind_version>
+		<jackson_legacy_core_version>2.21.6</jackson_legacy_core_version>
+		<jackson_legacy_databind_version>2.21.6</jackson_legacy_databind_version>
+
+		<!-- see : https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.22#annotations  -->
 		<jackson_annotations_version>2.21</jackson_annotations_version>
+
+		<!-- pay attention to LTS versions going foward : https://github.com/FasterXML/jackson/wiki/Jackson-Releases#open-branches
+		     3.1.6 or later is required: it clears CVE-2026-19032, CVE-2026-68497, CVE-2026-59888,
+		     CVE-2026-29062 and CVE-2026-54512 through CVE-2026-54518. Jackson 3 also arrives
+		     transitively via elasticsearch-java, which these pins cover as well. -->
+		<jackson_tools_version>3.1.6</jackson_tools_version>
+		<jackson_tools_databind_version>3.1.6</jackson_tools_databind_version>
+
 		<httpclient5_version>5.6.4</httpclient5_version>
 		<httpcore5_version>5.4.3</httpcore5_version>
 		<maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
@@ -1140,11 +1150,6 @@
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 		<elastic_apm_version>1.52.0</elastic_apm_version>
 		<elasticsearch_version>8.19.19</elasticsearch_version>
-		<!-- Jackson 3, used only by elasticsearch-java at runtime
-		     Pinned for CVE-2026-19032, CVE-2026-68497, CVE-2026-59888, CVE-2026-29062 and
-		     CVE-2026-54512 through CVE-2026-54518. Transitive via elasticsearch-java, remove
-		     once the 8.x.x version ships a patched Jackson 3 itself. -->
-		<jackson3_version>3.1.6</jackson3_version>
 		<ucum_version>1.0.9</ucum_version>
 		<!-- only required for third party libraries when generating JavaDoc. Not to be used internally. -->
 		<spotbugs_annotations_version>4.9.8</spotbugs_annotations_version>
@@ -1230,35 +1235,45 @@
 				<artifactId>commonmark</artifactId>
 				<version>0.9.0</version>
 			</dependency>
+
+			<!-- start jackson 2.x legacy version consistency -->
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-core</artifactId>
+				<version>${jackson_legacy_core_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>${jackson_legacy_databind_version}</version>
+			</dependency>
+
+			<!-- end jackson 2.x legacy version consistency -->
+
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-annotations</artifactId>
 				<version>${jackson_annotations_version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
+				<groupId>tools.jackson.core</groupId>
 				<artifactId>jackson-core</artifactId>
-				<version>${jackson_version}</version>
+				<version>${jackson_tools_version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
+				<groupId>tools.jackson.core</groupId>
 				<artifactId>jackson-databind</artifactId>
-				<version>${jackson_databind_version}</version>
+				<version>${jackson_tools_databind_version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.fasterxml.jackson.datatype</groupId>
-				<artifactId>jackson-datatype-jsr310</artifactId>
-				<version>${jackson_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.fasterxml.jackson.dataformat</groupId>
+				<groupId>tools.jackson.dataformat</groupId>
 				<artifactId>jackson-dataformat-yaml</artifactId>
-				<version>${jackson_version}</version>
+				<version>${jackson_tools_version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.fasterxml.jackson.module</groupId>
+				<groupId>tools.jackson.module</groupId>
 				<artifactId>jackson-module-jakarta-xmlbind-annotations</artifactId>
-				<version>${jackson_version}</version>
+				<version>${jackson_tools_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.jayway.jsonpath</groupId>
@@ -1339,11 +1354,13 @@
 				<artifactId>xml-patch</artifactId>
 				<version>0.3.1</version>
 			</dependency>
+
 			<dependency>
-				<groupId>io.dogote</groupId>
-				<artifactId>json-patch</artifactId>
-				<version>1.15</version>
+				<groupId>io.github.vishwakarma</groupId>
+				<artifactId>zjsonpatch</artifactId>
+				<version>0.6.2</version>
 			</dependency>
+
 			<dependency>
 				<groupId>com.google.errorprone</groupId>
 				<artifactId>error_prone_core</artifactId>
@@ -1587,16 +1604,6 @@
 				<groupId>org.elasticsearch.client</groupId>
 				<artifactId>elasticsearch-rest-client-sniffer</artifactId>
 				<version>${elasticsearch_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>tools.jackson.core</groupId>
-				<artifactId>jackson-databind</artifactId>
-				<version>${jackson3_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>tools.jackson.core</groupId>
-				<artifactId>jackson-core</artifactId>
-				<version>${jackson3_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.code.gson</groupId>
@@ -2028,7 +2035,7 @@
 			<dependency>
 				<groupId>org.glassfish</groupId>
 				<artifactId>javax.json</artifactId>
-				<version>1.0.4</version>
+				<version>1.1.4</version>
 			</dependency>
 			<dependency>
 				<groupId>org.glassfish.jaxb</groupId>

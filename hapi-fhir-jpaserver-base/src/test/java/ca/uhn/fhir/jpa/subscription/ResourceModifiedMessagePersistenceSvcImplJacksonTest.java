@@ -3,17 +3,11 @@ package ca.uhn.fhir.jpa.subscription;
 /*
  * LFJT3 — "Looking Forward to Jackson Tools 3"
  * =============================================
- * Written for Jackson 2 (com.fasterxml.jackson). Only the import block
- * and createMapper() factory method change during the future LFJT3 uplift.
- *
- * LFJT3 MIGRATION CHECKLIST
- * --------------------------
- * [ ] Imports: com.fasterxml.jackson.* → tools.jackson.*
- * [ ] createMapper(): new ObjectMapper() → JsonMapper.builder().build()
+ * This test file has been migrated to Jackson 3 (tools.jackson).
  *
  * KEY BEHAVIORS LOCKED DOWN
  * -------------------------
- * ResourceModifiedMessagePersistenceSvcImpl uses new ObjectMapper() internally
+ * ResourceModifiedMessagePersistenceSvcImpl uses JsonMapper internally
  * (in the constructor) to:
  *   1. getPayloadLessMessageAsString()  — serializes ResourceModifiedMessage
  *   2. getPayloadLessMessageFromString() — deserializes ResourceModifiedMessage
@@ -22,10 +16,8 @@ package ca.uhn.fhir.jpa.subscription;
  * and createResourceModifiedMessageFromEntityWithoutInflation() methods,
  * which exercise the Jackson round-trip path without needing JPA/DB.
  *
- * In LFJT3:
- *   - new ObjectMapper()        → JsonMapper.builder().build()
- *   - JsonProcessingException   → JacksonException (unchecked, production class change)
- *   - catch block types change in production class, not here
+ * In Jackson 3, the behavior is Jackson-version-agnostic: the output is the
+ * deserialized object, not the wire format.
  */
 
 import ca.uhn.fhir.context.FhirContext;
@@ -35,14 +27,9 @@ import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntity;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceModifiedMessage;
-// ── LFJT3 JACKSON IMPORT BLOCK ───────────────────────────────────────────────
-// Jackson 2 (NOW):
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-// Jackson 3 (LFJT3):
-//   import tools.jackson.databind.JsonNode;
-//   import tools.jackson.databind.ObjectMapper;
-// ── END LFJT3 JACKSON IMPORT BLOCK ───────────────────────────────────────────
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -79,18 +66,16 @@ class ResourceModifiedMessagePersistenceSvcImplJacksonTest {
 
 	private ResourceModifiedMessagePersistenceSvcImpl mySvc;
 
-	// ── LFJT3 MAPPER FACTORY ─────────────────────────────────────────────────
+	// ── MAPPER FACTORY ──────────────────────────────────────────────────
 	// Not used directly here (the service creates its own mapper internally),
 	// but retained to document the LFJT3 change point.
 	// When LFJT3 lands: ResourceModifiedMessagePersistenceSvcImpl constructor
-	//   myObjectMapper = new ObjectMapper()  →  JsonMapper.builder().build()
-	// Jackson 2 (NOW): new ObjectMapper()
-	// Jackson 3 (LFJT3): JsonMapper.builder().build()
-	private ObjectMapper createVerificationMapper() {
-		return new ObjectMapper();
-		// LFJT3: return JsonMapper.builder().build();
+	//   myObjectMapper = JsonMapper.builder().build()
+	// Jackson 3: JsonMapper.builder().build()
+	private JsonMapper createVerificationMapper() {
+		return JsonMapper.builder().build();
 	}
-	// ── END LFJT3 MAPPER FACTORY ─────────────────────────────────────────────
+	// ── END MAPPER FACTORY ──────────────────────────────────────────────
 
 	@BeforeEach
 	void setUp() {

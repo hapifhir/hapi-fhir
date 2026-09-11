@@ -3,22 +3,12 @@ package ca.uhn.hapi.fhir.cdshooks.svc;
 /*
  * LFJT3 — "Looking Forward to Jackson Tools 3"
  * =============================================
- * Contains LFJT3-aware Jackson 2 tests for:
+ * This test file has been migrated to Jackson 3 (tools.jackson).
+ * Contains Jackson 3 tests for:
  *   - BaseCdsMethod (Jackson: encodeRequest → writeValueAsString)
  *   - BaseDynamicCdsServiceMethod (no Jackson in the class itself — documented)
  *   - CdsConfigServiceImpl (no Jackson behavior — documented)
  *   - CdsServiceRegistryImpl (Jackson: buildResponseFromString, buildFeedbackFromString)
- *
- * Only the import block and createMapper() factory method change during LFJT3.
- *
- * LFJT3 MIGRATION CHECKLIST
- * --------------------------
- * [ ] Imports: com.fasterxml.jackson.* → tools.jackson.*
- * [ ] createMapper(): new ObjectMapper() → JsonMapper.builder().build()
- * [ ] BaseCdsMethod.encodeRequest(): catch (JsonProcessingException e)
- *       → catch (JacksonException e)   — production class change only
- * [ ] CdsServiceRegistryImpl.buildResponseFromString(): same catch swap
- * [ ] CdsServiceRegistryImpl.buildFeedbackFromString(): same catch swap
  */
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -28,12 +18,8 @@ import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceFeedbackJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
-// ── LFJT3 JACKSON IMPORT BLOCK ───────────────────────────────────────────────
-// Jackson 2 (NOW):
-import com.fasterxml.jackson.databind.ObjectMapper;
-// Jackson 3 (LFJT3):
-//   import tools.jackson.databind.ObjectMapper;
-// ── END LFJT3 JACKSON IMPORT BLOCK ───────────────────────────────────────────
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -52,14 +38,12 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class CdsSvcJacksonTest {
 
-	// ── LFJT3 MAPPER FACTORY ─────────────────────────────────────────────────
-	// Jackson 2 (NOW): new ObjectMapper()
-	// Jackson 3 (LFJT3): JsonMapper.builder().build()
-	private ObjectMapper createMapper() {
-		return new ObjectMapper();
-		// LFJT3: return JsonMapper.builder().build();
+	// ── MAPPER FACTORY ──────────────────────────────────────────────────
+	// Jackson 3: JsonMapper.builder().build()
+	private JsonMapper createMapper() {
+		return JsonMapper.builder().build();
 	}
-	// ── END LFJT3 MAPPER FACTORY ─────────────────────────────────────────────
+	// ── END MAPPER FACTORY ──────────────────────────────────────────────
 
 	// ═════════════════════════════════════════════════════════════════════════
 	// 1. BaseCdsMethod — Jackson: encodeRequest → writeValueAsString
@@ -95,7 +79,7 @@ class CdsSvcJacksonTest {
 		@Test
 		@DisplayName("When method param is String, IModelJson is serialized to JSON string")
 		void invoke_stringParam_serializesRequestToJson() throws Exception {
-			ObjectMapper mapper = createMapper();
+			JsonMapper mapper = createMapper();
 			StringParamService bean = new StringParamService();
 			Method method = StringParamService.class.getMethod("handle", String.class);
 
@@ -113,7 +97,7 @@ class CdsSvcJacksonTest {
 		@Test
 		@DisplayName("Serialized string is valid JSON")
 		void invoke_stringParam_resultIsValidJson() throws Exception {
-			ObjectMapper mapper = createMapper();
+			JsonMapper mapper = createMapper();
 			StringParamService bean = new StringParamService();
 			Method method = StringParamService.class.getMethod("handle", String.class);
 			BaseCdsMethod svc = new BaseCdsMethod(bean, method) {};
@@ -128,7 +112,7 @@ class CdsSvcJacksonTest {
 		@Test
 		@DisplayName("When method param is typed (not String), IModelJson is passed directly")
 		void invoke_typedParam_passesRequestDirectly() throws Exception {
-			ObjectMapper mapper = createMapper();
+			JsonMapper mapper = createMapper();
 			TypedParamService bean = new TypedParamService();
 			Method method = TypedParamService.class.getMethod("handle", TestRequestJson.class);
 			BaseCdsMethod svc = new BaseCdsMethod(bean, method) {};
@@ -157,7 +141,7 @@ class CdsSvcJacksonTest {
 		@Test
 		@DisplayName("Registered function is invoked and returns response")
 		void invoke_delegatesToFunction() throws Exception {
-			ObjectMapper mapper = createMapper();
+			JsonMapper mapper = createMapper();
 
 			CdsServiceResponseJson expectedResponse = new CdsServiceResponseJson();
 			CdsServiceResponseCardJson card = new CdsServiceResponseCardJson();
@@ -197,13 +181,13 @@ class CdsSvcJacksonTest {
 	class CdsConfigServiceImplTests {
 
 		@Test
-		@DisplayName("getObjectMapper returns the mapper passed to the constructor")
-		void getObjectMapper_returnsConstructorArg() {
-			ObjectMapper mapper = createMapper();
+		@DisplayName("getJsonMapper returns the mapper passed to the constructor")
+		void getJsonMapper_returnsConstructorArg() {
+			JsonMapper mapper = createMapper();
 			CdsConfigServiceImpl svc = new CdsConfigServiceImpl(
 				ca.uhn.fhir.context.FhirContext.forR4(), mapper, null, null);
 
-			assertThat(svc.getObjectMapper()).isSameAs(mapper);
+			assertThat(svc.getJsonMapper()).isSameAs(mapper);
 		}
 
 		@Test
@@ -227,7 +211,7 @@ class CdsSvcJacksonTest {
 	class CdsServiceRegistryImplJacksonTests {
 
 		private CdsServiceRegistryImpl buildRegistryImpl() {
-			ObjectMapper mapper = createMapper();
+			JsonMapper mapper = createMapper();
 			CdsHooksContextBooter booter = mock(CdsHooksContextBooter.class);
 			when(booter.buildCdsServiceCache()).thenReturn(new CdsServiceCache());
 
@@ -247,7 +231,7 @@ class CdsSvcJacksonTest {
 		@DisplayName("encodeServiceResponse: String result is deserialized to CdsServiceResponseJson")
 		void encodeServiceResponse_stringResult_returnsDeserializedObject() throws Exception {
 			CdsServiceRegistryImpl registry = buildRegistryImpl();
-			ObjectMapper mapper = createMapper();
+			JsonMapper mapper = createMapper();
 
 			CdsServiceResponseJson expected = new CdsServiceResponseJson();
 			CdsServiceResponseCardJson card = new CdsServiceResponseCardJson();
@@ -292,7 +276,7 @@ class CdsSvcJacksonTest {
 		@DisplayName("encodeFeedbackResponse: String result is deserialized to CdsServiceFeedbackJson")
 		void encodeFeedbackResponse_stringResult_returnsDeserializedObject() throws Exception {
 			CdsServiceRegistryImpl registry = buildRegistryImpl();
-			ObjectMapper mapper = createMapper();
+			JsonMapper mapper = createMapper();
 
 			CdsServiceFeedbackJson expected = new CdsServiceFeedbackJson();
 			expected.setCard("card-uuid-123");

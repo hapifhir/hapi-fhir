@@ -24,11 +24,6 @@ import ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidationR
 import ca.uhn.fhir.rest.server.interceptor.validation.helpers.AddressHelper;
 import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.TerserUtil;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -40,6 +35,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.math.BigDecimal;
 import java.util.Properties;
@@ -264,8 +264,8 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 		return StringUtils.isEmpty(endpoint) ? DEFAULT_DATA_CLEANSE_ENDPOINT : endpoint;
 	}
 
-	protected String getRequestBody(FhirContext theFhirContext, IBase... theAddresses) throws JsonProcessingException {
-		ObjectMapper mapper = new ObjectMapper();
+	protected String getRequestBody(FhirContext theFhirContext, IBase... theAddresses) throws JacksonException {
+		JsonMapper mapper = new JsonMapper();
 		ObjectNode rootNode = mapper.createObjectNode();
 		if (!StringUtils.isEmpty(getApiKey())) {
 			rootNode.put("Key", getApiKey());
@@ -283,7 +283,7 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 		return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode);
 	}
 
-	protected ObjectNode toJsonNode(IBase theAddress, ObjectMapper mapper, FhirContext theFhirContext) {
+	protected ObjectNode toJsonNode(IBase theAddress, JsonMapper mapper, FhirContext theFhirContext) {
 		AddressHelper helper = new AddressHelper(theFhirContext, theAddress);
 		ObjectNode addressNode = mapper.createObjectNode();
 

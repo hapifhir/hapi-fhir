@@ -1,7 +1,6 @@
 package ca.uhn.fhir.interceptor.model;
 
 import ca.uhn.fhir.rest.api.Constants;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Patient;
@@ -14,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.thymeleaf.util.StringUtils;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -343,7 +343,7 @@ public class RequestPartitionIdTest {
 	}
 
 	@Test
-	public void testSerDeserSer() throws JsonProcessingException {
+	public void testSerDeserSer() throws IOException {
 		{
 			RequestPartitionId start = fromPartitionId(123, LocalDate.of(2020, 1, 1));
 			String json = assertSerDeserSer(start).asJson();
@@ -416,7 +416,7 @@ public class RequestPartitionIdTest {
 		assertThat(defaultPartition.isDefaultPartition()).isTrue();
 	}
 
-	private RequestPartitionId assertSerDeserSer(RequestPartitionId start) throws JsonProcessingException {
+	private RequestPartitionId assertSerDeserSer(RequestPartitionId start) throws IOException {
 		String json = start.asJson();
 		RequestPartitionId end = RequestPartitionId.fromJson(json);
 		assertEquals(start, end);
