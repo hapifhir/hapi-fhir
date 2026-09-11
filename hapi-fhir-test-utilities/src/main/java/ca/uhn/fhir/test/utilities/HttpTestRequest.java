@@ -1,0 +1,361 @@
+/*-
+ * #%L
+ * HAPI FHIR Test Utilities
+ * %%
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+package ca.uhn.fhir.test.utilities;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.PreferHandlingEnum;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
+/**
+ * A fluent builder for issuing an HTTP request in a test and asserting on the response. It replaces
+ * the usual build-request, execute-in-try-with-resources, read-entity, check-status boilerplate:
+ * <pre>
+ * String body = HttpTestRequest.to(myClient, myFhirContext, myBase + "/Observation/123")
+ *    .withBasicAuth("myuser", "mypass")
+ *    .patch(patchBody)
+ *    .assertStatus(403)
+ *    .getBody();
+ * </pre>
+ * <p>
+ * Asserting the status is separate from reading the body so a test can also check headers or the
+ * reason phrase. See {@link HttpTestResponse}.
+ * </p>
+ * <p>
+ * This class names no HTTP client library — it describes a request and hands it to an
+ * {@link IHttpTestTransport}, so it works with whatever client a test already has. Apache
+ * HttpClient 4.x and 5.x are accepted directly via the {@code to(...)} overloads; anything else
+ * needs an {@link IHttpTestTransport}. Client lifecycles are the caller's problem.
+ * </p>
+ */
+// Created by claude-opus-5
+public class HttpTestRequest {
+
+	private final IHttpTestTransport myTransport;
+	private final FhirContext myFhirContext;
+	private final String myUrl;
+	private final List<HttpTestHeader> myHeaders = new ArrayList<>();
+	private final List<FormParam> myFormParams = new ArrayList<>();
+	private boolean myDisableRedirects;
+
+	private HttpTestRequest(IHttpTestTransport theTransport, FhirContext theFhirContext, String theUrl) {
+		Validate.notNull(theTransport, "theTransport must not be null");
+		Validate.notNull(theUrl, "theUrl must not be null");
+		myTransport = theTransport;
+		myFhirContext = theFhirContext;
+		myUrl = theUrl;
+	}
+
+	/**
+	 * For a request that never sends a FHIR resource body. {@link #post(IBaseResource)} and
+	 * {@link #put(IBaseResource)} will fail on the result — use
+	 * {@link #to(IHttpTestTransport, FhirContext, String)} if you need those.
+	 *
+	 * @param theTransport the transport to execute against; not closed here
+	 * @param theUrl the full request URL
+	 */
+	public static HttpTestRequest to(IHttpTestTransport theTransport, String theUrl) {
+		return new HttpTestRequest(theTransport, null, theUrl);
+	}
+
+	/**
+	 * @param theTransport the transport to execute against; not closed here
+	 * @param theFhirContext used to encode FHIR resource bodies
+	 * @param theUrl the full request URL
+	 */
+	public static HttpTestRequest to(IHttpTestTransport theTransport, FhirContext theFhirContext, String theUrl) {
+		return new HttpTestRequest(theTransport, theFhirContext, theUrl);
+	}
+
+	/**
+	 * For a caller holding an Apache HttpClient 4.x client.
+	 *
+	 * @see #to(IHttpTestTransport, String)
+	 */
+	public static HttpTestRequest to(org.apache.http.impl.client.CloseableHttpClient theClient, String theUrl) {
+		return to(new ApacheHttp4TestTransport(theClient), theUrl);
+	}
+
+	/**
+	 * For a caller holding an Apache HttpClient 4.x client.
+	 *
+	 * @see #to(IHttpTestTransport, FhirContext, String)
+	 */
+	public static HttpTestRequest to(
+			org.apache.http.impl.client.CloseableHttpClient theClient, FhirContext theFhirContext, String theUrl) {
+		return to(new ApacheHttp4TestTransport(theClient), theFhirContext, theUrl);
+	}
+
+	/**
+	 * For a caller holding an Apache HttpClient 5.x client.
+	 *
+	 * @see #to(IHttpTestTransport, String)
+	 */
+	public static HttpTestRequest to(
+			org.apache.hc.client5.http.impl.classic.CloseableHttpClient theClient, String theUrl) {
+		return to(new ApacheHttp5TestTransport(theClient), theUrl);
+	}
+
+	/**
+	 * For a caller holding an Apache HttpClient 5.x client.
+	 *
+	 * @see #to(IHttpTestTransport, FhirContext, String)
+	 */
+	public static HttpTestRequest to(
+			org.apache.hc.client5.http.impl.classic.CloseableHttpClient theClient,
+			FhirContext theFhirContext,
+			String theUrl) {
+		return to(new ApacheHttp5TestTransport(theClient), theFhirContext, theUrl);
+	}
+
+	public HttpTestRequest withHeader(String theName, String theValue) {
+		myHeaders.add(new HttpTestHeader(theName, theValue));
+		return this;
+	}
+
+	/**
+	 * Adds one {@literal application/x-www-form-urlencoded} parameter, sent by {@link #postForm()}.
+	 * Call it once per parameter; repeating a name sends that name more than once, which is how a
+	 * form carries a multi-valued field.
+	 * <p>
+	 * Names and values are percent-encoded here, so pass them exactly as the server should read
+	 * them. A {@literal null} value sends the name with no {@literal =}, matching what Apache's
+	 * {@code UrlEncodedFormEntity} does with a null-valued pair.
+	 * </p>
+	 * <p>
+	 * The encoding is UTF-8, and the {@literal Content-Type} says so. Apache's
+	 * {@code UrlEncodedFormEntity} defaults to ISO-8859-1 instead, so a value outside ASCII is
+	 * encoded differently here — deliberately, since UTF-8 is what a browser form sends.
+	 * </p>
+	 */
+	public HttpTestRequest withFormParam(String theName, String theValue) {
+		Validate.notNull(theName, "theName must not be null");
+		myFormParams.add(new FormParam(theName, theValue));
+		return this;
+	}
+
+	/**
+	 * Returns a {@literal 3xx} as-is instead of following it, so a test can assert on the status
+	 * and the {@literal Location} header. The client's other settings are preserved.
+	 */
+	public HttpTestRequest withoutRedirects() {
+		myDisableRedirects = true;
+		return this;
+	}
+
+	/**
+	 * Adds a Basic {@literal Authorization} header.
+	 */
+	public HttpTestRequest withBasicAuth(String theUsername, String thePassword) {
+		String credentials = theUsername + ":" + thePassword;
+		return withHeader(
+				Constants.HEADER_AUTHORIZATION,
+				"Basic " + Base64.encodeBase64String(credentials.getBytes(StandardCharsets.UTF_8)));
+	}
+
+	public HttpTestRequest withLenient() {
+		return withPreferHandling(PreferHandlingEnum.LENIENT);
+	}
+
+	/**
+	 * Adds a {@literal Prefer: handling=...} header.
+	 */
+	public HttpTestRequest withPreferHandling(PreferHandlingEnum theHandling) {
+		return withHeader(
+				Constants.HEADER_PREFER,
+				Constants.HEADER_PREFER_HANDLING + "=" + theHandling.getHeaderValue());
+	}
+
+	public HttpTestResponse get() {
+		return method("GET");
+	}
+
+	public HttpTestResponse delete() {
+		return method("DELETE");
+	}
+
+	/**
+	 * Issues an {@literal OPTIONS} request, usually to exercise a CORS preflight.
+	 */
+	public HttpTestResponse options() {
+		return method("OPTIONS");
+	}
+
+	public HttpTestResponse head() {
+		return method("HEAD");
+	}
+
+	/**
+	 * POSTs the resource as {@literal application/fhir+json}.
+	 */
+	public HttpTestResponse post(IBaseResource theBody) {
+		return method("POST", encodeResource(theBody), Constants.CT_FHIR_JSON_NEW);
+	}
+
+	/**
+	 * POSTs the body as the given MIME type, with a UTF-8 charset.
+	 *
+	 * @param theContentType the MIME type, e.g. {@literal "text/plain"}
+	 */
+	public HttpTestResponse post(String theBody, String theContentType) {
+		return method("POST", theBody.getBytes(StandardCharsets.UTF_8), withUtf8Charset(theContentType));
+	}
+
+	/**
+	 * POSTs raw bytes. Use this for binary payloads such as {@literal image/png}, where a String
+	 * body would corrupt the content.
+	 *
+	 * @param theContentType the MIME type, e.g. {@literal "image/png"}
+	 */
+	public HttpTestResponse post(byte[] theBody, String theContentType) {
+		return method("POST", theBody, theContentType);
+	}
+
+	/**
+	 * POSTs the parameters added with {@link #withFormParam(String, String)} as
+	 * {@literal application/x-www-form-urlencoded}, in the order they were added. This is the shape
+	 * an OAuth token or authorization endpoint expects.
+	 *
+	 * @throws IllegalStateException if no form parameters were added
+	 */
+	public HttpTestResponse postForm() {
+		Validate.validState(!myFormParams.isEmpty(), "No form parameters were added - call withFormParam(...) first");
+		return execute("POST", encodeFormParams(), withUtf8Charset(Constants.CT_X_FORM_URLENCODED));
+	}
+
+	/**
+	 * PUTs the resource as {@literal application/fhir+json}.
+	 */
+	public HttpTestResponse put(IBaseResource theBody) {
+		return method("PUT", encodeResource(theBody), Constants.CT_FHIR_JSON_NEW);
+	}
+
+	/**
+	 * PUTs the body as the given MIME type, with a UTF-8 charset.
+	 *
+	 * @param theContentType the MIME type, e.g. {@literal "text/plain"}
+	 */
+	public HttpTestResponse put(String theBody, String theContentType) {
+		return method("PUT", theBody.getBytes(StandardCharsets.UTF_8), withUtf8Charset(theContentType));
+	}
+
+	/**
+	 * PUTs raw bytes.
+	 *
+	 * @see #post(byte[], String)
+	 */
+	public HttpTestResponse put(byte[] theBody, String theContentType) {
+		return method("PUT", theBody, theContentType);
+	}
+
+	/**
+	 * PATCHes the body as {@literal application/json-patch+json}.
+	 */
+	public HttpTestResponse patch(String theJsonPatchBody) {
+		return patch(theJsonPatchBody, Constants.CT_JSON_PATCH);
+	}
+
+	/**
+	 * PATCHes the body as the given MIME type, with a UTF-8 charset.
+	 *
+	 * @param theContentType the MIME type, e.g. {@literal "application/json-patch+json"}
+	 */
+	public HttpTestResponse patch(String theBody, String theContentType) {
+		return method("PATCH", theBody.getBytes(StandardCharsets.UTF_8), withUtf8Charset(theContentType));
+	}
+
+	/**
+	 * Issues a bodyless request with any verb this builder does not model directly.
+	 *
+	 * @param theMethod the HTTP method, e.g. {@literal "TRACE"}
+	 */
+	public HttpTestResponse method(String theMethod) {
+		return method(theMethod, null, null);
+	}
+
+	/**
+	 * Issues a request with any verb this builder does not model directly.
+	 *
+	 * @param theMethod the HTTP method
+	 * @param theBody the request body, or {@literal null} for none
+	 * @param theContentType the MIME type of {@code theBody}
+	 */
+	public HttpTestResponse method(String theMethod, byte[] theBody, String theContentType) {
+		// Every verb reaches the wire through here, so one check covers all of them. Without it,
+		// form parameters added and then sent with the wrong verb would vanish silently.
+		Validate.validState(
+				myFormParams.isEmpty(),
+				"Form parameters were added with withFormParam(...) - send them with postForm()");
+		return execute(theMethod, theBody, theContentType);
+	}
+
+	private HttpTestResponse execute(String theMethod, byte[] theBody, String theContentType) {
+		return myTransport.execute(new IHttpTestTransport.Request(
+				theMethod, myUrl, myHeaders, theBody, theContentType, myDisableRedirects));
+	}
+
+	/**
+	 * {@link URLEncoder} encodes a space as {@literal +}, which is what this MIME type calls for.
+	 */
+	private byte[] encodeFormParams() {
+		StringBuilder encoded = new StringBuilder();
+		for (FormParam next : myFormParams) {
+			if (!encoded.isEmpty()) {
+				encoded.append('&');
+			}
+			encoded.append(URLEncoder.encode(next.name(), StandardCharsets.UTF_8));
+			if (next.value() != null) {
+				encoded.append('=').append(URLEncoder.encode(next.value(), StandardCharsets.UTF_8));
+			}
+		}
+		return encoded.toString().getBytes(StandardCharsets.UTF_8);
+	}
+
+	private byte[] encodeResource(IBaseResource theBody) {
+		Validate.notNull(myFhirContext, "A FhirContext is required in order to send a resource body");
+		return myFhirContext.newJsonParser().encodeResourceToString(theBody).getBytes(StandardCharsets.UTF_8);
+	}
+
+	/**
+	 * The String-bodied overloads encode as UTF-8, so the MIME type needs a matching charset unless
+	 * the caller supplied one. Not applied to the {@code byte[]} overloads, where the caller owns
+	 * the encoding — or the payload is binary and has none.
+	 */
+	private static String withUtf8Charset(String theMimeType) {
+		if (theMimeType.toLowerCase(Locale.ROOT).contains("charset")) {
+			return theMimeType;
+		}
+		return theMimeType + "; charset=" + StandardCharsets.UTF_8.name();
+	}
+
+	/**
+	 * Held unencoded until the request is sent, so that {@link #withFormParam(String, String)} can
+	 * be called in any order and a name may repeat.
+	 */
+	private record FormParam(String name, String value) {}
+}

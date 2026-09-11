@@ -96,6 +96,7 @@
 						</dependency>
 					</ignoredDependencies>
 					<ignoredResourcePatterns>
+						<ignoredResourcePattern>org/publicsuffix/list/effective_tld_names\.dat$</ignoredResourcePattern>
 						<ignoredResourcePattern>.*\.txt$</ignoredResourcePattern>
 						<ignoredResourcePattern>.*\.html$</ignoredResourcePattern>
 						<ignoredResourcePattern>schemaorg_apache_xmlbeans.*</ignoredResourcePattern>

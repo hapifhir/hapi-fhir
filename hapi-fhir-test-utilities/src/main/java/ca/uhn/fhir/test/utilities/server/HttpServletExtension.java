@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.test.utilities.server;
 
+import ca.uhn.fhir.test.utilities.HttpTestRequest;
 import jakarta.servlet.http.HttpServlet;
 import org.apache.commons.lang3.Validate;
 
@@ -28,6 +29,23 @@ public class HttpServletExtension extends BaseJettyServerExtension<HttpServletEx
 	public HttpServletExtension withServlet(HttpServlet theServlet) {
 		myServlet = theServlet;
 		return this;
+	}
+
+	/**
+	 * Starts building a request against this server's base URL, using this server's
+	 * {@link #getHttpClient()}. This is the non-FHIR counterpart to
+	 * {@link ca.uhn.fhir.test.utilities.server.RestfulServerExtension#fhirRequest(String)}: the
+	 * servlet under test here is an arbitrary one, so there is no {@link
+	 * ca.uhn.fhir.context.FhirContext} and no way to send a resource body. Callers that need one
+	 * can build the request themselves with
+	 * {@link HttpTestRequest#to(org.apache.http.impl.client.CloseableHttpClient,
+	 * ca.uhn.fhir.context.FhirContext, String)}.
+	 *
+	 * @param thePath the path below the server base URL, beginning with a slash
+	 */
+	// Created by claude-opus-5
+	public HttpTestRequest request(String thePath) {
+		return HttpTestRequest.to(getHttpClient(), getBaseUrl() + thePath);
 	}
 
 	@Override
