@@ -417,14 +417,48 @@ abstract public class BaseMdmR4Test extends BaseResourceProviderR4Test {
 		return (T) resourceDao.readByPid(theMdmLink.getGoldenResourcePersistenceId());
 	}
 
+	/**
+	 * Adds an EID from the first EID system configured for Patient, or with no system at all where the
+	 * rule set configures none.
+	 */
 	protected Patient addExternalEID(Patient thePatient, String theEID) {
-		thePatient.addIdentifier().setSystem(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient")).setValue(theEID);
+		List<String> eidSystems = patientEidSystems();
+		return addExternalEID(thePatient, eidSystems.isEmpty() ? null : eidSystems.get(0), theEID);
+	}
+
+	/**
+	 * Adds an EID from a specific EID system, for rule sets that configure more than one for Patient.
+	 */
+	protected Patient addExternalEID(Patient thePatient, String theEidSystem, String theEID) {
+		thePatient.addIdentifier().setSystem(theEidSystem).setValue(theEID);
 		return thePatient;
 	}
 
 	protected Patient clearExternalEIDs(Patient thePatient) {
-		thePatient.getIdentifier().removeIf(theIdentifier -> theIdentifier.getSystem().equalsIgnoreCase(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient")));
+		List<String> eidSystems = patientEidSystems();
+		thePatient.getIdentifier().removeIf(theIdentifier -> eidSystems.stream()
+			.anyMatch(eidSystem -> eidSystem.equalsIgnoreCase(theIdentifier.getSystem())));
 		return thePatient;
+	}
+
+	protected List<String> patientEidSystems() {
+		return myMdmSettings.getMdmRules().getEnterpriseEIDSystemsForResourceType("Patient");
+	}
+
+	/**
+	 * The first EID system configured for Patient. Named for the medical record number the multi-EID rule
+	 * sets put there, and the only system the single-EID rule sets configure.
+	 */
+	protected String mrnSystem() {
+		return patientEidSystems().get(0);
+	}
+
+	/**
+	 * The second EID system configured for Patient, named for the national provider identifier the
+	 * multi-EID rule sets put there. Only rule sets configuring more than one EID system have it.
+	 */
+	protected String npiSystem() {
+		return patientEidSystems().get(1);
 	}
 
 	protected Patient createPatientAndUpdateLinks(Patient thePatient) {

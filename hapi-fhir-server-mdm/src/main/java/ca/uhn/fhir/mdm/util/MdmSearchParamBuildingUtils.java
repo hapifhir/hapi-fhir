@@ -21,11 +21,18 @@ package ca.uhn.fhir.mdm.util;
 
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.MdmConstants;
+import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import jakarta.annotation.Nonnull;
+
+import java.util.Collection;
+import java.util.Optional;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TAG;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hl7.fhir.dstu2016may.model.Basic.SP_IDENTIFIER;
 
 public class MdmSearchParamBuildingUtils {
@@ -49,10 +56,14 @@ public class MdmSearchParamBuildingUtils {
 	/**
 	 * Creates a SearchParameterMap used for searching for golden resources
 	 * by EID specifically.
+	 *
+	 * @deprecated use {@link #buildEidSearchParameterMap(Collection)}, which matches on the EID system as
+	 * well as the value and can search several EIDs at once.
 	 */
+	@Deprecated(since = "8.14.0", forRemoval = true)
 	public static SearchParameterMap buildEidSearchParameterMap(
 			String theEid, String theResourceType, MdmRulesJson theMdmRules) {
-		SearchParameterMap map = buildBasicGoldenResourceSearchParameterMap(theEid);
+		SearchParameterMap map = buildBasicGoldenResourceSearchParameterMap();
 		map.add(
 				SP_IDENTIFIER,
 				new TokenParam(theMdmRules.getEnterpriseEIDSystemForResourceType(theResourceType), theEid));
@@ -60,9 +71,56 @@ public class MdmSearchParamBuildingUtils {
 	}
 
 	/**
+	 * Translates EIDs into a single token OR query. Each EID is matched on its own system as well as its
+	 * value, so that the same value issued by two different EID systems is not conflated.
+	 * <p>
+	 * EIDs with no value are dropped. Such an identifier is valid FHIR and identifies nobody, but a token
+	 * search with a blank value matches on the system alone
+	 * </p>
+	 * <p>
+	 * This is the identifier criterion only - it carries no golden record tag filter, so a search built
+	 * from it alone returns every resource of the searched type holding one of these EIDs, golden
+	 * resources included. Use {@link #buildEidSearchParameterMap(Collection)} for a map that adds that tag
+	 * filter and so returns golden resources alone.
+	 * </p>
+	 *
+	 * @param theEids the EIDs to search for
+	 * @return the token param, or empty if none of the given EIDs can be searched on
+	 */
+	@Nonnull
+	public static Optional<TokenOrListParam> buildEidTokenParam(@Nonnull Collection<CanonicalEID> theEids) {
+		TokenOrListParam eidsToSearch = new TokenOrListParam();
+		theEids.stream()
+				.filter(eid -> isNotBlank(eid.getValue()))
+				.forEach(eid -> eidsToSearch.addOr(new TokenParam(eid.getSystem(), eid.getValue())));
+
+		if (eidsToSearch.getValuesAsQueryTokens().isEmpty()) {
+			return Optional.empty();
+		}
+		return Optional.of(eidsToSearch);
+	}
+
+	/**
+	 * Creates a SearchParameterMap that finds the golden resources carrying any of the given EIDs, as a
+	 * single OR query.
+	 *
+	 * @param theEids the EIDs to search for
+	 * @return a search parameter map restricted to golden records and to those EIDs, or empty if none of
+	 * the EIDs can be searched on - see {@link #buildEidTokenParam(Collection)}
+	 */
+	@Nonnull
+	public static Optional<SearchParameterMap> buildEidSearchParameterMap(@Nonnull Collection<CanonicalEID> theEids) {
+		return buildEidTokenParam(theEids).map(eidsToSearch -> {
+			SearchParameterMap map = buildBasicGoldenResourceSearchParameterMap();
+			map.add(SP_IDENTIFIER, eidsToSearch);
+			return map;
+		});
+	}
+
+	/**
 	 * Creates a SearchParameterMap that can be used to find golden resources.
 	 */
-	public static SearchParameterMap buildBasicGoldenResourceSearchParameterMap(String theResourceType) {
+	public static SearchParameterMap buildBasicGoldenResourceSearchParameterMap() {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(PARAM_TAG, new TokenParam(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD));

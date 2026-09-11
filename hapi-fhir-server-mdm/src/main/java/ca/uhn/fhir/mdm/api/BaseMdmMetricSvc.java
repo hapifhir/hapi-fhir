@@ -85,7 +85,7 @@ public abstract class BaseMdmMetricSvc implements IMdmMetricSvc {
 		metrics.setResourceType(resourceType);
 
 		// find golden resources
-		map = MdmSearchParamBuildingUtils.buildBasicGoldenResourceSearchParameterMap(resourceType);
+		map = MdmSearchParamBuildingUtils.buildBasicGoldenResourceSearchParameterMap();
 		setCountOnly(map);
 		outcome = dao.search(map, SystemRequestDetails.forRequestPartitionId(theParameters.getRequestPartitionId()));
 		metrics.setGoldenResourcesCount(outcome.size());
