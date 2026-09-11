@@ -26,7 +26,6 @@ import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -40,7 +39,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.util.HapiExtensions.EXT_RESOURCE_PLACEHOLDER;
+import static ca.uhn.fhir.storage.PlaceholderResourceUtil.isPlaceholderResource;
 
 /**
  * This interceptor enforces validation rules on any data saved in a HAPI FHIR JPA repository.
@@ -140,15 +139,6 @@ public class RepositoryValidatingInterceptor {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Return true if the given resource is a placeholder resource, as identified by a specific extension
-	 * @param theNewResource the {@link IBaseResource} to check
-	 * @return whether or not this resource is a placeholder.
-	 */
-	private boolean isPlaceholderResource(IBaseResource theNewResource) {
-		return ExtensionUtil.hasExtension(theNewResource, EXT_RESOURCE_PLACEHOLDER);
 	}
 
 	protected void handleFailure(IRepositoryValidatingRule.RuleEvaluation theOutcome) {

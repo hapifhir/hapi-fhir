@@ -1,0 +1,7 @@
+---
+type: add
+issue: 8318
+title: "Added a setting to allow ignoring placeholder-resources during
+        MDM matching. By default this is set to false (to maintain existing
+        functionality).
+"
