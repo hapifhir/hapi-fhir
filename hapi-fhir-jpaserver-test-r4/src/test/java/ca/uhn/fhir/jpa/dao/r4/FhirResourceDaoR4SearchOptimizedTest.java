@@ -101,7 +101,6 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		mySearchCoordinatorSvcImpl = ProxyUtil.getSingletonTarget(mySearchCoordinatorSvc, SearchCoordinatorSvcImpl.class);
 		mySearchCoordinatorSvcImpl.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcImpl.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
-//		myCaptureQueriesListener.setCaptureQueryStackTrace(true);
 		myStorageSettings.setHibernateSearchIndexSearchParams(false);
 		initResourceTypeCacheFromConfig();
 	}
@@ -273,7 +272,6 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		String uuid = results.getUuid();
 		ourLog.info("** Search returned UUID: {}", uuid);
 
-//		assertEquals(200, myDatabaseBackedPagingProvider.retrieveResultList(mySrd, uuid).size().intValue());
 		assertEquals(200, results.size().intValue());
 		ourLog.info("** Asking for results");
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 5, true);
@@ -610,7 +608,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	private List<SqlQuery> findGroupByQueries() {
 		List<SqlQuery> queries = myCaptureQueriesListener.getSelectQueries();
 		queries = queries.stream().filter(q -> q.getSql(true, false).toLowerCase().contains("group by"))
-			.collect(Collectors.toList());
+			.toList();
 		return queries;
 	}
 
@@ -649,7 +647,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
 			assertEquals(51, search.getNumFound());
 			assertEquals(search.getNumFound(), mySearchResultDao.count());
-			assertEquals(null, search.getTotalCount());
+			assertNull(search.getTotalCount());
 			assertEquals(SearchStatusEnum.PASSCMPLET, search.getStatus());
 			assertEquals(1, search.getVersion().intValue());
 		});
@@ -839,8 +837,9 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 
 		String selectQuery = myCaptureQueriesListener.getSelectQueries().get(1).getSql(true, true);
-		assertThat(selectQuery).contains("HASH_VALUE");
-		assertThat(selectQuery).doesNotContain("HASH_SYS");
+		assertThat(selectQuery)
+			.contains("HASH_VALUE")
+			.doesNotContain("HASH_SYS");
 
 	}
 
@@ -879,7 +878,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			.getSelectQueriesForCurrentThread()
 			.stream()
 			.map(t -> t.getSql(true, false))
-			.collect(Collectors.toList());
+			.toList();
 
 		String resultingQueryNotFormatted = queries.get(0);
 		assertThat(StringUtils.countMatches(resultingQueryNotFormatted, "Patient.managingOrganization")).as(resultingQueryNotFormatted).isEqualTo(1);
@@ -1575,7 +1574,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			.getSelectQueriesForCurrentThread()
 			.stream()
 			.map(t -> t.getSql(true, false))
-			.collect(Collectors.toList());
+			.toList();
 
 		// The first query is the forced ID resolution this time
 		assertThat(queries).hasSize(3);
@@ -1593,7 +1592,4 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		// Ensure that the search actually worked
 		assertEquals(5, search.size().intValue());
 	}
-
-
-
 }

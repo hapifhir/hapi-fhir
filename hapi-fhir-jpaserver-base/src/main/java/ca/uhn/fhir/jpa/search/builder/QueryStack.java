@@ -109,7 +109,6 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Triple;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -2140,7 +2139,7 @@ public class QueryStack {
 				continue;
 			}
 
-			List<Triple<String, String, String>> tokens = Lists.newArrayList();
+			List<TagToken> tokens = Lists.newArrayList();
 			boolean paramInverted = populateTokens(tokens, nextAndParams);
 			if (tokens.isEmpty()) {
 				continue;
@@ -2210,12 +2209,12 @@ public class QueryStack {
 
 		Set<String> codes = new HashSet<>();
 		for (List<? extends IQueryParameterType> nextAndParams : theList) {
-			List<Triple<String, String, String>> tokens = Lists.newArrayList();
+			List<TagToken> tokens = Lists.newArrayList();
 			populateTokens(tokens, nextAndParams);
-			for (Triple<String, String, String> next : tokens) {
+			for (TagToken next : tokens) {
 				// :below (left-match) can't be resolved to exact ids; that and-param keeps the legacy join.
-				if (!Objects.equals(next.getMiddle(), UriParamQualifierEnum.BELOW.getValue())) {
-					codes.add(next.getRight());
+				if (!Objects.equals(next.qualifier(), UriParamQualifierEnum.BELOW.getValue())) {
+					codes.add(next.code());
 				}
 			}
 		}
@@ -2239,18 +2238,16 @@ public class QueryStack {
 	 */
 	@Nullable
 	private List<Long> tagIdsForTokens(
-			TagTypeEnum theTagType,
-			List<Triple<String, String, String>> theTokens,
-			@Nullable List<TagDefinition> theDefinitions) {
+			TagTypeEnum theTagType, List<TagToken> theTokens, @Nullable List<TagDefinition> theDefinitions) {
 		if (theDefinitions == null) {
 			return null;
 		}
 
 		List<Long> tagIds = new ArrayList<>();
-		for (Triple<String, String, String> next : theTokens) {
-			String system = next.getLeft();
-			String qualifier = next.getMiddle();
-			String code = next.getRight();
+		for (TagToken next : theTokens) {
+			String system = next.system();
+			String qualifier = next.qualifier();
+			String code = next.code();
 
 			// A left-match (:below) can expand to an unbounded set of tag ids; keep the legacy join.
 			if (Objects.equals(qualifier, UriParamQualifierEnum.BELOW.getValue())) {
@@ -2271,8 +2268,7 @@ public class QueryStack {
 		return tagIds;
 	}
 
-	private boolean populateTokens(
-			List<Triple<String, String, String>> theTokens, List<? extends IQueryParameterType> theAndParams) {
+	private boolean populateTokens(List<TagToken> theTokens, List<? extends IQueryParameterType> theAndParams) {
 		boolean paramInverted = false;
 
 		for (IQueryParameterType nextOrParam : theAndParams) {
@@ -2296,7 +2292,7 @@ public class QueryStack {
 			}
 
 			if (isNotBlank(code)) {
-				theTokens.add(Triple.of(system, nextOrParam.getQueryParameterQualifier(), code));
+				theTokens.add(new TagToken(system, nextOrParam.getQueryParameterQualifier(), code));
 			}
 		}
 		return paramInverted;
