@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
@@ -38,6 +39,8 @@ class ValueSetExpansionFilterOperatorR4Test extends BaseTermR4Test {
 	/** Children 0-4 carry TTY=SBD; children 5-9 carry TTY=SCD. */
 	private static final int SBD_CHILD_COUNT = 5;
 
+	private static final String PROP_PART_OF = "partOf";
+
 	@BeforeEach
 	void createCodeSystemFixture() {
 		myStorageSettings.setPreExpandValueSets(false);
@@ -58,10 +61,26 @@ class ValueSetExpansionFilterOperatorR4Test extends BaseTermR4Test {
 			child.addProperty()
 					.setCode("TTY")
 					.setValue(new StringType(i < SBD_CHILD_COUNT ? "SBD" : "SCD"));
+			child.addProperty().setCode(PROP_PART_OF).setValue(new CodeType(CODE_PARENT));
 		}
 
 		codeSystem.addConcept().setCode(CODE_SIBLING).setDisplay("Display " + CODE_SIBLING);
 		codeSystem.addConcept().setCode(CODE_STANDALONE).setDisplay("Display " + CODE_STANDALONE);
+
+		// A concept-valued property with a hierarchical meaning, of the kind SNOMED CT defines.
+		// CodeSystem.filter declares that is-a is a legitimate operator over it, so a ValueSet
+		// filtering on PROP_PART_OF with is-a is valid FHIR rather than a malformed request.
+		codeSystem
+				.addProperty()
+				.setCode(PROP_PART_OF)
+				.setType(CodeSystem.PropertyType.CODE)
+				.setDescription("The concept this concept forms part of");
+		codeSystem
+				.addFilter()
+				.setCode(PROP_PART_OF)
+				.addOperator(CodeSystem.FilterOperator.ISA)
+				.addOperator(CodeSystem.FilterOperator.EQUAL)
+				.setValue("A code from this code system");
 
 		myCodeSystemDao.create(codeSystem, mySrd);
 	}
@@ -195,18 +214,20 @@ class ValueSetExpansionFilterOperatorR4Test extends BaseTermR4Test {
 	// ---------------------------------------------------------------------
 
 	/**
-	 * A hierarchy operator applied to a non-hierarchy property cannot be evaluated. The Hibernate
-	 * Search path adds a match-none predicate and returns an empty expansion with no error, which
-	 * gives the caller no indication that a filter was dropped.
+	 * The CodeSystem declares {@code partOf} as a concept-valued property, and declares in
+	 * CodeSystem.filter that is-a may be used with it, so this filter is valid FHIR. The server
+	 * cannot evaluate a transitive relationship over an arbitrary property, so it must say so.
+	 * Instead the Hibernate Search path adds a match-none predicate and returns an empty expansion
+	 * with HTTP 200, asserting that nothing matched when the truth is that nothing was checked.
 	 */
 	@Test
-	void expandValueSet_hierarchyOperatorOnConceptProperty_throwsRatherThanReturningEmpty() {
+	void expandValueSet_isAOnDeclaredHierarchicalProperty_throwsRatherThanReturningEmpty() {
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(false);
 
-		ValueSet valueSet = filterValueSet("TTY", ValueSet.FilterOperator.ISA, "SBD");
+		ValueSet valueSet = filterValueSet(PROP_PART_OF, ValueSet.FilterOperator.ISA, CODE_PARENT);
 		assertThatThrownBy(() -> expandToCodes(valueSet))
 				.isInstanceOf(InvalidRequestException.class)
-				.hasMessageContaining("TTY");
+				.hasMessageContaining(PROP_PART_OF);
 	}
 
 	/**
