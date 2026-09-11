@@ -76,6 +76,16 @@ public class ValidationSupportChainTest extends BaseTest {
 	private IValidationSupport myValidationSupport2;
 
 	@Test
+	public void testCodeableConceptValidationSuccessfulIfNotAllCodingsAreValidDefaultsToTrue() {
+		DefaultProfileValidationSupport ctx = new DefaultProfileValidationSupport(FhirContext.forR4Cached());
+		ValidationSupportChain chain = new ValidationSupportChain(ctx);
+
+		assertTrue(chain.isCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid());
+		chain.setCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid(false);
+		assertFalse(chain.isCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid());
+	}
+
+	@Test
 	public void testVersionCheck() {
 		DefaultProfileValidationSupport ctx3 = new DefaultProfileValidationSupport(FhirContext.forDstu3Cached());
 		DefaultProfileValidationSupport ctx4 = new DefaultProfileValidationSupport(FhirContext.forR4Cached());
