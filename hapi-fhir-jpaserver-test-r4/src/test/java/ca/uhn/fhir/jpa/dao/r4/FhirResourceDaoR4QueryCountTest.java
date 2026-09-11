@@ -833,7 +833,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(cs));
 
 		Observation obs = new Observation();
-//		obs.getMeta().addProfile("http://example.com/fhir/StructureDefinition/vitalsigns-2");
 		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>Hello</div>");
 		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
 		obs.setSubject(new Reference("Patient/123"));
@@ -1181,7 +1180,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			.findAll()
 			.stream()
 			.map(t -> new TypedPidJson(t.getResourceType(), t.getResourceId()))
-			.collect(Collectors.toList()));
+			.toList());
 
 		runInTransaction(() -> assertEquals(10, myResourceTableDao.count()));
 

@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.search.builder.TagToken;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
@@ -31,7 +32,6 @@ import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
-import org.apache.commons.lang3.tuple.Triple;
 
 import java.util.Collection;
 import java.util.List;
@@ -66,7 +66,7 @@ public class TagPredicateBuilder extends BaseJoiningPredicateBuilder {
 
 	public Condition createPredicateTag(
 			TagTypeEnum theTagType,
-			List<Triple<String, String, String>> theTokens,
+			List<TagToken> theTokens,
 			String theParamName,
 			RequestPartitionId theRequestPartitionId) {
 		if (!myTagDefinitionTableIsJoined) {
@@ -104,15 +104,15 @@ public class TagPredicateBuilder extends BaseJoiningPredicateBuilder {
 		return QueryParameterUtils.toEqualToOrInPredicate(myColumnTagId, generatePlaceholders(theTagIds));
 	}
 
-	private Condition createPredicateTagList(TagTypeEnum theTagType, List<Triple<String, String, String>> theTokens) {
+	private Condition createPredicateTagList(TagTypeEnum theTagType, List<TagToken> theTokens) {
 		Condition typePredicate =
 				BinaryCondition.equalTo(myTagDefinitionColumnTagType, generatePlaceholder(theTagType.ordinal()));
 
 		List<Condition> orPredicates = Lists.newArrayList();
-		for (Triple<String, String, String> next : theTokens) {
-			String system = next.getLeft();
-			String code = next.getRight();
-			String qualifier = next.getMiddle();
+		for (TagToken next : theTokens) {
+			String system = next.system();
+			String code = next.code();
+			String qualifier = next.qualifier();
 
 			if (theTagType == TagTypeEnum.PROFILE) {
 				system = BaseHapiFhirDao.NS_JPA_PROFILE;
