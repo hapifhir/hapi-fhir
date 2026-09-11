@@ -25,8 +25,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.collections4.CollectionUtils;
@@ -38,7 +36,10 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.text.StringTokenizer;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import tools.jackson.databind.cfg.DateTimeFeature;
+import tools.jackson.databind.json.JsonMapper;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,8 +63,9 @@ import static org.apache.commons.lang3.ObjectUtils.getIfNull;
  */
 public class RequestPartitionId implements Comparable<RequestPartitionId>, IModelJson {
 	private static final RequestPartitionId ALL_PARTITIONS = new RequestPartitionId();
-	private static final ObjectMapper ourObjectMapper =
-			new ObjectMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+	private static final JsonMapper ourJsonMapper = JsonMapper.builder()
+			.enable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
+			.build();
 	public static final String STRINGIFIER_ALL = "(all)";
 	public static final char STRINGIFIER_DELIM = '_';
 	public static final String STRINGIFIER_DELIM_STRING = Character.toString(STRINGIFIER_DELIM);
@@ -206,8 +208,8 @@ public class RequestPartitionId implements Comparable<RequestPartitionId>, IMode
 		}
 	}
 
-	public static RequestPartitionId fromJson(String theJson) throws JsonProcessingException {
-		return ourObjectMapper.readValue(theJson, RequestPartitionId.class);
+	public static RequestPartitionId fromJson(String theJson) throws IOException {
+		return ourJsonMapper.readValue(theJson, RequestPartitionId.class);
 	}
 
 	public boolean isAllPartitions() {
@@ -608,7 +610,7 @@ public class RequestPartitionId implements Comparable<RequestPartitionId>, IMode
 		}
 	}
 
-	public String asJson() throws JsonProcessingException {
-		return ourObjectMapper.writeValueAsString(this);
+	public String asJson() throws IOException {
+		return ourJsonMapper.writeValueAsString(this);
 	}
 }

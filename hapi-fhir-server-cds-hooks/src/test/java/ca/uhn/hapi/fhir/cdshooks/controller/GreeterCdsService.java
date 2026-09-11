@@ -12,8 +12,9 @@ import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardSourceJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
 import ca.uhn.test.concurrency.IPointcutLatch;
 import ca.uhn.test.concurrency.PointcutLatch;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -56,7 +57,7 @@ public class GreeterCdsService implements IPointcutLatch {
 	public TestResponseJson greetWithString(String theJsonRequest) {
 		myPointcutLatch.call(theJsonRequest);
 
-		ObjectMapper mapper = new ObjectMapper();
+		JsonMapper mapper = new JsonMapper();
 		Patient patient;
 		Practitioner user;
 		try {
@@ -66,7 +67,7 @@ public class GreeterCdsService implements IPointcutLatch {
 			IParser parser = myFhirContext.newJsonParser();
 			patient = parser.parseResource(Patient.class, patientJson);
 			user = parser.parseResource(Practitioner.class, practitionerJson);
-		} catch (IOException e) {
+		} catch (JacksonException e) {
 			throw new AssertionError("Failed to parse request: " + theJsonRequest);
 		}
 

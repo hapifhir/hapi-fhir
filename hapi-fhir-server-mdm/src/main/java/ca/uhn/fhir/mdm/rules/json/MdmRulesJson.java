@@ -23,11 +23,11 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.rules.matcher.util.MatchRuleUtil;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.util.StdConverter;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.util.StdConverter;
 
 import java.util.ArrayList;
 import java.util.Collections;

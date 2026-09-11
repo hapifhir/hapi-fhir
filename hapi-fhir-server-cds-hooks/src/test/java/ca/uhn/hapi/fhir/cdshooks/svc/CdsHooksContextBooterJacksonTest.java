@@ -3,13 +3,7 @@ package ca.uhn.hapi.fhir.cdshooks.svc;
 /*
  * LFJT3 — "Looking Forward to Jackson Tools 3"
  * =============================================
- * Written for Jackson 2 (com.fasterxml.jackson). Only the import block
- * and createMapper() factory method change during the future LFJT3 uplift.
- *
- * LFJT3 MIGRATION CHECKLIST
- * --------------------------
- * [ ] Imports: com.fasterxml.jackson.* → tools.jackson.*
- * [ ] createMapper(): new ObjectMapper() → JsonMapper.builder().build()
+ * This test file has been migrated to Jackson 3 (tools.jackson).
  *
  * KEY BEHAVIORS LOCKED DOWN (CdsHooksContextBooter.serializeExtensions)
  * -----------------------------------------------------------------------
@@ -18,21 +12,16 @@ package ca.uhn.hapi.fhir.cdshooks.svc;
  * - Invalid JSON → UnprocessableEntityException
  * - Null extensionClass → handled upstream (not tested here)
  *
- * NOTE: serializeExtensions() uses `new ObjectMapper()` internally.
- * In LFJT3 that becomes `JsonMapper.builder().build()`. The behavior under
- * test is Jackson-version-agnostic: the output is the deserialized object,
- * not the wire format.
+ * NOTE: serializeExtensions() uses `JsonMapper.builder().build()` internally
+ * in Jackson 3. The behavior under test is Jackson-version-agnostic: the output
+ * is the deserialized object, not the wire format.
  */
 
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsHooksExtension;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import com.fasterxml.jackson.annotation.JsonProperty;
-// ── LFJT3 JACKSON IMPORT BLOCK ───────────────────────────────────────────────
-// Jackson 2 (NOW):
-import com.fasterxml.jackson.databind.ObjectMapper;
-// Jackson 3 (LFJT3):
-//   import tools.jackson.databind.ObjectMapper;
-// ── END LFJT3 JACKSON IMPORT BLOCK ───────────────────────────────────────────
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -50,18 +39,16 @@ class CdsHooksContextBooterJacksonTest {
 
 	private CdsHooksContextBooter myBooter;
 
-	// ── LFJT3 MAPPER FACTORY ─────────────────────────────────────────────────
+	// ── MAPPER FACTORY ──────────────────────────────────────────────────
 	// Not used directly in this test (the booter creates its own mapper internally),
 	// but retained here to document the LFJT3 change point clearly.
 	// When LFJT3 uplift lands in CdsHooksContextBooter.serializeExtensions(),
 	// the internal `new ObjectMapper()` becomes `JsonMapper.builder().build()`.
-	// Jackson 2 (NOW): new ObjectMapper()
-	// Jackson 3 (LFJT3): JsonMapper.builder().build()
-	private ObjectMapper createMapper() {
-		return new ObjectMapper();
-		// LFJT3: return JsonMapper.builder().build();
+	// Jackson 3: JsonMapper.builder().build()
+	private JsonMapper createMapper() {
+		return JsonMapper.builder().build();
 	}
-	// ── END LFJT3 MAPPER FACTORY ─────────────────────────────────────────────
+	// ── END MAPPER FACTORY ──────────────────────────────────────────────
 
 	/** Minimal CdsHooksExtension subclass for testing. */
 	static class TestExtension extends CdsHooksExtension {

@@ -20,17 +20,16 @@
 package ca.uhn.fhir.rest.server.util;
 
 import ca.uhn.fhir.model.primitive.InstantDt;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
-import java.io.IOException;
 import java.util.Date;
 
-public class JsonDateSerializer extends JsonSerializer<Date> {
+public class JsonDateSerializer extends ValueSerializer<Date> {
 
 	@Override
-	public void serialize(Date theValue, JsonGenerator theGen, SerializerProvider theSerializers) throws IOException {
+	public void serialize(Date theValue, JsonGenerator theGen, SerializationContext theSerializers) {
 		if (theValue != null) {
 			theGen.writeString(new InstantDt(theValue).getValueAsString());
 		}

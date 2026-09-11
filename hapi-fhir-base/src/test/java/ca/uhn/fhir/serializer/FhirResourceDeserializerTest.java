@@ -2,12 +2,11 @@ package ca.uhn.fhir.serializer;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 
@@ -39,20 +38,17 @@ class FhirResourceDeserializerTest {
 		IParser parser = mock(IParser.class);
 		IBaseResource resource = mock(IBaseResource.class);
 		DeserializationContext deserializationContext = mock(DeserializationContext.class);
+		JsonParser jsonParser = mock(JsonParser.class);
 
 		when(fhirContext.newJsonParser()).thenReturn(parser);
 		when(parser.setPrettyPrint(true)).thenReturn(parser);
 		when(parser.parseResource(EXPECTED_MINIFIED_JSON)).thenReturn(resource);
+		when(deserializationContext.readTree(jsonParser)).thenReturn(new JsonMapper().readTree(RESOURCE_JSON));
 		FhirResourceDeserializer deserializer = new FhirResourceDeserializer(fhirContext);
 
-		JsonFactory jsonFactory = new JsonFactory();
-		try (JsonParser jsonParser = jsonFactory.createParser(RESOURCE_JSON)) {
-			jsonParser.setCodec(new ObjectMapper());
+		IBaseResource actual = deserializer.deserialize(jsonParser, deserializationContext);
 
-			IBaseResource actual = deserializer.deserialize(jsonParser, deserializationContext);
-
-			assertThat(actual).isSameAs(resource);
-		}
+		assertThat(actual).isSameAs(resource);
 
 		verify(parser).setPrettyPrint(true);
 		verify(parser).parseResource(EXPECTED_MINIFIED_JSON);

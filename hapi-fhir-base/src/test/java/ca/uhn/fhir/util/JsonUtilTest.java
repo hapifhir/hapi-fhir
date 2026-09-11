@@ -14,6 +14,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -158,6 +159,51 @@ class JsonUtilTest {
 	@Test
 	void testDeserialize_rejectsBlankInput() {
 		assertThatThrownBy(() -> JsonUtil.deserialize(" ", Map.class)).isInstanceOf(IllegalArgumentException.class);
+	}
+
+	@Test
+	void testSerialize_listContainingNull_keepsTheNullElement() {
+		ListHolder payload = new ListHolder();
+		payload.setTags(Arrays.asList("x", null, "y"));
+
+		assertThat(JsonUtil.serialize(payload, false)).isEqualTo("{\"tags\":[\"x\",null,\"y\"]}");
+	}
+
+	@Test
+	void testSerialize_mapContainingNullValue_dropsTheEntry() {
+		MapHolder payload = new MapHolder();
+		Map<String, String> attrs = new LinkedHashMap<>();
+		attrs.put("k1", "v1");
+		attrs.put("k2", null);
+		payload.setAttrs(attrs);
+
+		assertThat(JsonUtil.serialize(payload, false)).isEqualTo("{\"attrs\":{\"k1\":\"v1\"}}");
+	}
+
+	static class ListHolder {
+		@JsonProperty("tags")
+		private List<String> myTags;
+
+		public List<String> getTags() {
+			return myTags;
+		}
+
+		public void setTags(List<String> theTags) {
+			myTags = theTags;
+		}
+	}
+
+	static class MapHolder {
+		@JsonProperty("attrs")
+		private Map<String, String> myAttrs;
+
+		public Map<String, String> getAttrs() {
+			return myAttrs;
+		}
+
+		public void setAttrs(Map<String, String> theAttrs) {
+			myAttrs = theAttrs;
+		}
 	}
 
 	@JsonFilter(IModelJson.SENSITIVE_DATA_FILTER_NAME)
