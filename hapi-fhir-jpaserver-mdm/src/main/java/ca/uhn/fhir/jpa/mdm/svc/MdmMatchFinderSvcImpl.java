@@ -51,6 +51,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateSearcher.idOrType;
+import static ca.uhn.fhir.storage.PlaceholderResourceUtil.isPlaceholderResource;
 import static org.hl7.fhir.dstu2016may.model.Basic.SP_IDENTIFIER;
 
 @Service
@@ -71,7 +72,7 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 	private EIDHelper myEIDHelper;
 
 	@Autowired
-	IMdmSettings myMdmSettings;
+	private IMdmSettings myMdmSettings;
 
 	@Override
 	@Nonnull
@@ -79,15 +80,23 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 	public List<MatchedTarget> getMatchedTargets(
 			String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId) {
 
+		// we match on EID even if placeholder resources are set to be ignored
 		List<MatchedTarget> retval = matchBasedOnEid(theResourceType, theResource, theRequestPartitionId);
 		if (!retval.isEmpty()) {
 			return retval;
+		}
+
+		if (shouldIgnoreResource(theResource)) {
+			// source is a placeholder (set to be ignored)
+			// return nothing
+			return Collections.emptyList();
 		}
 
 		Collection<IAnyResource> targetCandidates =
 				myMdmCandidateSearchSvc.findCandidates(theResourceType, theResource, theRequestPartitionId);
 
 		List<MatchedTarget> matches = targetCandidates.stream()
+				.filter(candidate -> !shouldIgnoreResource(candidate))
 				.map(candidate ->
 						new MatchedTarget(candidate, myMdmResourceMatcherSvc.getMatchResult(theResource, candidate)))
 				.collect(Collectors.toList());
@@ -140,5 +149,16 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 				.map(resource -> new MatchedTarget(resource, MdmMatchOutcome.EID_MATCH))
 				.forEach(retval::add);
 		return retval;
+	}
+
+	/**
+	 * Whether or not the resource should be ignored for mdm matching purposes
+	 */
+	private boolean shouldIgnoreResource(IAnyResource theResource) {
+		if (!myMdmSettings.isIgnorePlaceholderResources()) {
+			return false;
+		}
+
+		return isPlaceholderResource(theResource);
 	}
 }
