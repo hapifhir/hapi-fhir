@@ -59,8 +59,9 @@ class HttpClientExtensionTest {
 
 	@Test
 	void fhirRequest_carriesTheSuppliedContext() {
-		// A mock context suffices: no resource body is sent here, so it is only carried through.
-		// Encoding through a real context is covered by HttpTestRequestTest.
+		// A mock context, because a real one needs a structures JAR this module cannot depend on
+		// without a reactor cycle (see HttpTestRequestTest). No resource body is sent here, so the
+		// context is only carried through.
 		HttpTestResponse response =
 				myClient.fhirRequest(mock(FhirContext.class), url("/foo")).get();
 

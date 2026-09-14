@@ -27,6 +27,7 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -218,12 +219,16 @@ public class HttpTestRequest {
 	}
 
 	/**
-	 * POSTs the body as the given MIME type, with a UTF-8 charset.
+	 * POSTs the body encoded with the charset {@code theContentType} names, or UTF-8 when it names
+	 * none — in which case {@literal charset=UTF-8} is appended to the header that is sent. Either
+	 * way the bytes on the wire match the label the server reads them by. Use
+	 * {@link #post(byte[], String)} for a payload that has no text encoding.
 	 *
 	 * @param theContentType the MIME type, e.g. {@literal "text/plain"}
+	 * @throws java.nio.charset.UnsupportedCharsetException if it names a charset this JVM does not have
 	 */
 	public HttpTestResponse post(String theBody, String theContentType) {
-		return method("POST", theBody.getBytes(StandardCharsets.UTF_8), withUtf8Charset(theContentType));
+		return methodWithTextBody("POST", theBody, theContentType);
 	}
 
 	/**
@@ -256,12 +261,14 @@ public class HttpTestRequest {
 	}
 
 	/**
-	 * PUTs the body as the given MIME type, with a UTF-8 charset.
+	 * PUTs the body encoded with the charset {@code theContentType} names, or UTF-8 when it names none.
 	 *
 	 * @param theContentType the MIME type, e.g. {@literal "text/plain"}
+	 * @throws java.nio.charset.UnsupportedCharsetException if it names a charset this JVM does not have
+	 * @see #post(String, String)
 	 */
 	public HttpTestResponse put(String theBody, String theContentType) {
-		return method("PUT", theBody.getBytes(StandardCharsets.UTF_8), withUtf8Charset(theContentType));
+		return methodWithTextBody("PUT", theBody, theContentType);
 	}
 
 	/**
@@ -281,12 +288,15 @@ public class HttpTestRequest {
 	}
 
 	/**
-	 * PATCHes the body as the given MIME type, with a UTF-8 charset.
+	 * PATCHes the body encoded with the charset {@code theContentType} names, or UTF-8 when it names
+	 * none.
 	 *
 	 * @param theContentType the MIME type, e.g. {@literal "application/json-patch+json"}
+	 * @throws java.nio.charset.UnsupportedCharsetException if it names a charset this JVM does not have
+	 * @see #post(String, String)
 	 */
 	public HttpTestResponse patch(String theBody, String theContentType) {
-		return method("PATCH", theBody.getBytes(StandardCharsets.UTF_8), withUtf8Charset(theContentType));
+		return methodWithTextBody("PATCH", theBody, theContentType);
 	}
 
 	/**
@@ -312,6 +322,14 @@ public class HttpTestRequest {
 				myFormParams.isEmpty(),
 				"Form parameters were added with withFormParam(...) - send them with postForm()");
 		return execute(theMethod, theBody, theContentType);
+	}
+
+	/**
+	 * The one place a String body becomes bytes, so that the three overloads cannot drift on which
+	 * charset they encode with.
+	 */
+	private HttpTestResponse methodWithTextBody(String theMethod, String theBody, String theContentType) {
+		return method(theMethod, theBody.getBytes(charsetOf(theContentType)), withUtf8Charset(theContentType));
 	}
 
 	private HttpTestResponse execute(String theMethod, byte[] theBody, String theContentType) {
@@ -342,15 +360,45 @@ public class HttpTestRequest {
 	}
 
 	/**
-	 * The String-bodied overloads encode as UTF-8, so the MIME type needs a matching charset unless
-	 * the caller supplied one. Not applied to the {@code byte[]} overloads, where the caller owns
-	 * the encoding — or the payload is binary and has none.
+	 * Names UTF-8 explicitly when the caller named no charset, so that the header says what
+	 * {@link #charsetOf(String)} chose. Not applied to the {@code byte[]} overloads, where the caller
+	 * owns the encoding — or the payload is binary and has none.
 	 */
 	private static String withUtf8Charset(String theMimeType) {
 		if (theMimeType.toLowerCase(Locale.ROOT).contains("charset")) {
 			return theMimeType;
 		}
 		return theMimeType + "; charset=" + StandardCharsets.UTF_8.name();
+	}
+
+	/**
+	 * The charset named by the MIME type's {@literal charset} parameter, or UTF-8 when it names none.
+	 * Parsed here rather than with a client library's {@code ContentType} because this class names no
+	 * HTTP client library. {@link Charset#forName(String)} resolves the name, so {@literal charset=utf-8}
+	 * and {@literal charset=UTF-8} are the same charset.
+	 *
+	 * @throws java.nio.charset.UnsupportedCharsetException if this JVM does not have the named charset
+	 */
+	private static Charset charsetOf(String theMimeType) {
+		String[] parameters = theMimeType.split(";");
+		for (int i = 1; i < parameters.length; i++) {
+			String parameter = parameters[i].trim();
+			int equals = parameter.indexOf('=');
+			if (equals > 0 && "charset".equalsIgnoreCase(parameter.substring(0, equals).trim())) {
+				return Charset.forName(unquote(parameter.substring(equals + 1).trim()));
+			}
+		}
+		return StandardCharsets.UTF_8;
+	}
+
+	/**
+	 * A charset name may be quoted, which {@link Charset#forName(String)} would reject.
+	 */
+	private static String unquote(String theValue) {
+		if (theValue.length() > 1 && theValue.startsWith("\"") && theValue.endsWith("\"")) {
+			return theValue.substring(1, theValue.length() - 1);
+		}
+		return theValue;
 	}
 
 	/**

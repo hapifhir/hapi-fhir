@@ -55,7 +55,8 @@ public interface IHttpTestTransport {
 	 * @param headers the request headers, in the order added
 	 * @param body the request body, or {@literal null} for none
 	 * @param contentType the MIME type of {@code body}, or {@literal null} when there is no body.
-	 *    A UTF-8 charset is assumed for textual types.
+	 *    {@code body} arrives already encoded, so for a textual type this names the charset it was
+	 *    encoded with — a transport passes both through rather than re-encoding.
 	 * @param disableRedirects {@literal true} to return a 3xx rather than follow it. When
 	 *    {@literal false} the client's own setting applies — see
 	 *    {@link HttpTestRequest#withoutRedirects()}.

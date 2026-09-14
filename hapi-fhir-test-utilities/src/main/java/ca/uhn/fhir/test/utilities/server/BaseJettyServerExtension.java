@@ -83,6 +83,7 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 	private Class<? extends WebSocketConfigurer> myEnableSpringWebsocketSupport;
 	private String myEnableSpringWebsocketContextPath;
 	private long myIdleTimeoutMillis = 30000;
+	private int myHttpClientSocketTimeoutMillis = TestHttpClientFactory.DEFAULT_SOCKET_TIMEOUT_MILLIS;
 	public int myMinThreads = 5;
 	public int myMaxThreads = 50;
 	private final List<Consumer<Server>> myBeforeStartServerConsumers = new ArrayList<>();
@@ -98,6 +99,31 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 	public T withIdleTimeout(long theIdleTimeoutMillis) {
 		Validate.isTrue(myServer == null, "Server is already started");
 		myIdleTimeoutMillis = theIdleTimeoutMillis;
+		return (T) this;
+	}
+
+	/**
+	 * Sets how long the client behind {@link #getHttpClient()} — and behind the {@code fhirRequest(...)}
+	 * and {@code request(...)} builders — waits for a response before failing the read. Default is
+	 * {@link TestHttpClientFactory#DEFAULT_SOCKET_TIMEOUT_MILLIS}. Pass
+	 * {@link TestHttpClientFactory#NO_SOCKET_TIMEOUT} for a server that legitimately takes longer, or
+	 * when stepping through the server under a debugger.
+	 * <p>
+	 * Unlike {@link #withIdleTimeout(long)}, which is the server hanging up on the client, this is the
+	 * client giving up on the server. Bounded by default so that a server which stops responding fails
+	 * the test naming itself rather than hanging the surefire fork until the build kills it.
+	 * </p>
+	 * <p>
+	 * Must be called before the server starts — that is, where the extension is constructed. This
+	 * extension starts the server in its {@code beforeEach} callback, which runs before any
+	 * {@code @BeforeEach} method.
+	 * </p>
+	 */
+	// Created by claude-opus-5
+	@SuppressWarnings("unchecked")
+	public T withHttpClientSocketTimeoutMillis(int theSocketTimeoutMillis) {
+		Validate.isTrue(myServer == null, "Server is already started");
+		myHttpClientSocketTimeoutMillis = theSocketTimeoutMillis;
 		return (T) this;
 	}
 
@@ -258,9 +284,7 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 
 		myPort = JettyUtil.getPortForStartedServer(myServer);
 		ourLog.info("Server has started on port {}", myPort);
-		// No read timeout: before this client moved onto TestHttpClientFactory it inherited Apache's
-		// unbounded default, and tests driving slow endpoints through this extension rely on that.
-		myHttpClient = TestHttpClientFactory.create(true, TestHttpClientFactory.NO_SOCKET_TIMEOUT);
+		myHttpClient = TestHttpClientFactory.create(true, myHttpClientSocketTimeoutMillis);
 	}
 
 	private Filter requestCapturingFilter() {

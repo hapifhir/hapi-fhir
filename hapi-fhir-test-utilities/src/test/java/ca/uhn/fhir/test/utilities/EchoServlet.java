@@ -27,13 +27,16 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.HexFormat;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
  * Writes back a {@literal text/plain} rendering of the request it received, one
  * {@literal name=value} per line, so a test can assert on what actually went over the wire with a
- * substring check.
+ * substring check. {@code body=} is the body decoded as UTF-8, and {@code bodyHex=} is the same
+ * bytes unaltered — assert on that one whenever the encoding is what is under test, since
+ * {@code body=} cannot tell a correctly encoded body from a mojibake one.
  * <p>
  * Four query parameters shape the response instead of echoing: {@code ?redirect=true} returns a
  * {@literal 302} back to the same path without the parameter, {@code ?status=NNN} sets the status
@@ -86,7 +89,7 @@ class EchoServlet extends HttpServlet {
 			return;
 		}
 
-		String requestBody = IOUtils.toString(theRequest.getInputStream(), StandardCharsets.UTF_8);
+		byte[] requestBody = IOUtils.toByteArray(theRequest.getInputStream());
 		String parameters = renderParameters(theRequest);
 		theResponse.setContentType("text/plain");
 		theResponse
@@ -97,8 +100,9 @@ class EchoServlet extends HttpServlet {
 						+ theRequest.getContentType() + "\ncustom="
 						+ theRequest.getHeader("X-Custom") + "\nprefer="
 						+ theRequest.getHeader(Constants.HEADER_PREFER) + "\nacceptEncoding="
-						+ theRequest.getHeader("Accept-Encoding") + "\nparams=" + parameters + "\nbody="
-						+ requestBody);
+						+ theRequest.getHeader("Accept-Encoding") + "\nbodyHex=" + toHex(requestBody)
+						+ "\nparams=" + parameters + "\nbody="
+						+ new String(requestBody, StandardCharsets.UTF_8));
 	}
 
 	/**
@@ -107,7 +111,8 @@ class EchoServlet extends HttpServlet {
 	 * joined by a comma.
 	 * <p>
 	 * This is the only view of a {@literal application/x-www-form-urlencoded} body: reading a
-	 * parameter consumes the input stream, so {@code body=} comes back empty for a form POST.
+	 * parameter consumes the input stream, so {@code body=} and {@code bodyHex=} both come back
+	 * empty for a form POST.
 	 * </p>
 	 */
 	private String renderParameters(HttpServletRequest theRequest) {
@@ -115,6 +120,14 @@ class EchoServlet extends HttpServlet {
 				.sorted(Map.Entry.comparingByKey())
 				.map(param -> param.getKey() + "=" + String.join(",", param.getValue()))
 				.collect(Collectors.joining("&"));
+	}
+
+	/**
+	 * Renders bytes the way {@code bodyHex=} does, so a test can compare against what it sent without
+	 * repeating the encoding. Hex rather than base64 so that a failure message can be read by eye.
+	 */
+	static String toHex(byte[] theBytes) {
+		return HexFormat.of().formatHex(theBytes);
 	}
 
 	private String stripCharset(String theContentType) {

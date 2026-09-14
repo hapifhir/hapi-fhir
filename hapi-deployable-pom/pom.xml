@@ -96,6 +96,9 @@
 						</dependency>
 					</ignoredDependencies>
 					<ignoredResourcePatterns>
+						<!-- docker-java-transport-zerodep and httpclient5 each ship a copy of the public suffix
+						     list, and hapi-fhir-test-utilities is on the classpath of both. Remove this once a
+						     module no longer needs both on one classpath. -->
 						<ignoredResourcePattern>org/publicsuffix/list/effective_tld_names\.dat$</ignoredResourcePattern>
 						<ignoredResourcePattern>.*\.txt$</ignoredResourcePattern>
 						<ignoredResourcePattern>.*\.html$</ignoredResourcePattern>

@@ -54,9 +54,17 @@ public final class TestHttpClientFactory {
 	 */
 	public static final int NO_SOCKET_TIMEOUT = 0;
 
+	/**
+	 * How long a read waits before failing, unless the caller names its own. Bounded so that a server
+	 * that stops responding fails the test naming itself, rather than hanging the surefire fork until
+	 * the build kills it.
+	 *
+	 * @see #create(boolean, int)
+	 */
+	public static final int DEFAULT_SOCKET_TIMEOUT_MILLIS = 30 * 1000;
+
 	private static final int MAX_CONNECTIONS = 99;
 	private static final long CONNECTION_TIME_TO_LIVE_MILLIS = 5000;
-	private static final int DEFAULT_SOCKET_TIMEOUT_MILLIS = 30 * 1000;
 
 	private TestHttpClientFactory() {}
 
@@ -96,9 +104,7 @@ public final class TestHttpClientFactory {
 				.setSoTimeout(theSocketTimeoutMillis)
 				.build());
 
-		HttpClientBuilder builder = HttpClientBuilder.create()
-				.setConnectionManager(connectionManager)
-				.setMaxConnPerRoute(MAX_CONNECTIONS);
+		HttpClientBuilder builder = HttpClientBuilder.create().setConnectionManager(connectionManager);
 		if (!theFollowRedirects) {
 			builder.disableRedirectHandling();
 		}

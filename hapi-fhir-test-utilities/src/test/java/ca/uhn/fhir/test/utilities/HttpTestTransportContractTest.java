@@ -39,6 +39,12 @@ class HttpTestTransportContractTest {
 	private static final String APACHE_4 = "ApacheHttp4";
 	private static final String APACHE_5 = "ApacheHttp5";
 
+	/**
+	 * Escaped rather than written literally, so the test does not depend on the source file encoding.
+	 * Every character below differs between UTF-8 and ISO-8859-1.
+	 */
+	private static final String NON_ASCII_BODY = "h\u00e9llo w\u00f6rld";
+
 	@RegisterExtension
 	private static final HttpServletExtension ourServer = new HttpServletExtension().withServlet(new EchoServlet());
 
@@ -105,14 +111,89 @@ class HttpTestTransportContractTest {
 	@ParameterizedTest
 	@ValueSource(strings = {APACHE_4, APACHE_5})
 	void post_withByteArrayBody_sendsBytesUnaltered(String theTransport) {
-		byte[] bytes = "bytes-payload".getBytes(StandardCharsets.UTF_8);
-
-		String body = request(theTransport, "/foo").post(bytes, "application/octet-stream").getBody();
+		// PNG_MAGIC rather than an ASCII payload: ASCII round-trips through any encoding, so it would
+		// pass even if a transport re-encoded the body, which is the whole point of the byte[] overload.
+		String body = request(theTransport, "/foo")
+				.post(EchoServlet.PNG_MAGIC, "application/octet-stream")
+				.getBody();
 
 		assertThat(body)
 				.contains("method=POST")
-				.contains("body=bytes-payload")
+				.contains("bodyHex=" + EchoServlet.toHex(EchoServlet.PNG_MAGIC))
 				.contains("contentType=application/octet-stream");
+	}
+
+	/**
+	 * The body has to be encoded with the charset the header names, or the server decodes mojibake.
+	 * These assert on {@code bodyHex=} rather than {@code body=}: the echo decodes {@code body=} as
+	 * UTF-8, so it cannot tell a correctly encoded body from a mangled one.
+	 */
+	@ParameterizedTest
+	@ValueSource(strings = {APACHE_4, APACHE_5})
+	void post_contentTypeNamesNonUtf8Charset_encodesBodyWithThatCharset(String theTransport) {
+		String body = request(theTransport, "/foo")
+				.post(NON_ASCII_BODY, "text/plain; charset=ISO-8859-1")
+				.getBody();
+
+		assertThat(body)
+				.contains("bodyHex=" + EchoServlet.toHex(NON_ASCII_BODY.getBytes(StandardCharsets.ISO_8859_1)))
+				.contains("rawContentType=text/plain; charset=ISO-8859-1");
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {APACHE_4, APACHE_5})
+	void put_contentTypeNamesNonUtf8Charset_encodesBodyWithThatCharset(String theTransport) {
+		String body = request(theTransport, "/foo")
+				.put(NON_ASCII_BODY, "text/plain; charset=ISO-8859-1")
+				.getBody();
+
+		assertThat(body)
+				.contains("bodyHex=" + EchoServlet.toHex(NON_ASCII_BODY.getBytes(StandardCharsets.ISO_8859_1)));
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {APACHE_4, APACHE_5})
+	void patch_contentTypeNamesNonUtf8Charset_encodesBodyWithThatCharset(String theTransport) {
+		String body = request(theTransport, "/foo")
+				.patch(NON_ASCII_BODY, "text/plain; charset=ISO-8859-1")
+				.getBody();
+
+		assertThat(body)
+				.contains("bodyHex=" + EchoServlet.toHex(NON_ASCII_BODY.getBytes(StandardCharsets.ISO_8859_1)));
+	}
+
+	/**
+	 * Charset names are resolved rather than compared as text, because a caller writing the name in
+	 * lower case means the same charset.
+	 */
+	@ParameterizedTest
+	@ValueSource(strings = {APACHE_4, APACHE_5})
+	void post_contentTypeNamesUtf8CharsetInLowerCase_encodesBodyAsUtf8(String theTransport) {
+		String body = request(theTransport, "/foo")
+				.post(NON_ASCII_BODY, "text/plain; charset=utf-8")
+				.getBody();
+
+		assertThat(body)
+				.contains("bodyHex=" + EchoServlet.toHex(NON_ASCII_BODY.getBytes(StandardCharsets.UTF_8)));
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {APACHE_4, APACHE_5})
+	void post_contentTypeNamesNoCharset_encodesBodyAsUtf8(String theTransport) {
+		String body = request(theTransport, "/foo").post(NON_ASCII_BODY, "text/plain").getBody();
+
+		assertThat(body)
+				.contains("bodyHex=" + EchoServlet.toHex(NON_ASCII_BODY.getBytes(StandardCharsets.UTF_8)))
+				.contains("rawContentType=text/plain; charset=UTF-8");
+	}
+
+	@Test
+	void post_contentTypeNamesUnknownCharset_failsBeforeSendingAnything() {
+		HttpTestRequest request = HttpTestRequest.to(mock(IHttpTestTransport.class), ourServer.getBaseUrl() + "/foo");
+
+		assertThatThrownBy(() -> request.post(NON_ASCII_BODY, "text/plain; charset=not-a-charset"))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessageContaining("not-a-charset");
 	}
 
 	@ParameterizedTest
@@ -168,7 +249,9 @@ class HttpTestTransportContractTest {
 		String body =
 				request(theTransport, "/foo").withFormParam("client_id", null).postForm().getBody();
 
-		assertThat(body).contains("params=client_id=");
+		// The trailing "\nbody=" pins the end of the value: "params=client_id=" on its own is a prefix
+		// of "params=client_id=anything", so it would pass whether or not a value was sent.
+		assertThat(body).contains("\nparams=client_id=\nbody=");
 	}
 
 	@ParameterizedTest
@@ -288,7 +371,10 @@ class HttpTestTransportContractTest {
 	void put_withByteArrayBody_sendsBytesUnaltered(String theTransport) {
 		HttpTestResponse response = request(theTransport, "/foo").put(EchoServlet.PNG_MAGIC, "image/png");
 
-		assertThat(response.getBody()).contains("method=PUT").contains("contentType=image/png");
+		assertThat(response.getBody())
+				.contains("method=PUT")
+				.contains("bodyHex=" + EchoServlet.toHex(EchoServlet.PNG_MAGIC))
+				.contains("contentType=image/png");
 	}
 
 	/**
@@ -325,8 +411,9 @@ class HttpTestTransportContractTest {
 
 	@Test
 	void to_apacheHttp5ClientWithFhirContextOverload_resolvesTheHttp5Transport() {
-		// A mock context suffices — this module has no FHIR structures JAR, and the request sends
-		// no resource body, so the context is only carried through.
+		// A mock context, because a real one needs a structures JAR this module cannot depend on
+		// without a reactor cycle (see HttpTestRequestTest). The request sends no resource body, so
+		// the context is only carried through.
 		HttpTestResponse response = HttpTestRequest.to(
 						ourHttp5Client, mock(FhirContext.class), ourServer.getBaseUrl() + "/foo")
 				.get();
