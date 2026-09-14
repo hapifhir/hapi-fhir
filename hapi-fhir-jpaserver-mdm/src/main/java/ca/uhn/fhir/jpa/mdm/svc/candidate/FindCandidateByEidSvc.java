@@ -73,10 +73,9 @@ public class FindCandidateByEidSvc extends BaseCandidateFinder {
 		// A resource type may be identified by several EID systems, so resolve every EID the incoming
 		// resource carries in one search rather than one search apiece.
 		List<IAnyResource> foundGoldenResources = myMdmResourceDaoSvc.searchGoldenResourcesByEIDs(
-			eidFromResource,
-			incomingResource.getIdElement().getResourceType(),
-			myMdmPartitionHelper.getRequestPartitionIdFromResourceForSearch(incomingResource));
-
+				eidFromResource,
+				incomingResource.getIdElement().getResourceType(),
+				myMdmPartitionHelper.getRequestPartitionIdFromResourceForSearch(incomingResource));
 
 		// The single OR'd search already returns each golden resource once, so this is a guard: were
 		// a golden resource ever reported twice, the resource would go down the
@@ -93,7 +92,7 @@ public class FindCandidateByEidSvc extends BaseCandidateFinder {
 				continue;
 			}
 			MatchedGoldenResourceCandidate mpc =
-				new MatchedGoldenResourceCandidate(pidOrNull, MdmMatchOutcome.EID_MATCH);
+					new MatchedGoldenResourceCandidate(pidOrNull, MdmMatchOutcome.EID_MATCH);
 			ourLog.debug(
 					"Incoming Resource {} matched Golden Resource {} by EID",
 					incomingResource.getIdElement().toUnqualifiedVersionless(),
