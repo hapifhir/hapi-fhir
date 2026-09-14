@@ -33,13 +33,11 @@ public enum TermValueSetPreExpansionStatusEnum {
 	 */
 
 	NOT_ACTIVE("notActive", "The ValueSet is not active and will not be pre-expanded until it is activated."),
-	NOT_EXPANDED("notExpanded", "The ValueSet is waiting to be picked up and pre-expanded by a scheduled task."),
+	NOT_EXPANDED("notExpanded", "The ValueSet is waiting to be picked up and pre-expanded by a batch job."),
 	EXPANSION_IN_PROGRESS(
-			"expansionInProgress",
-			"The ValueSet has been picked up by a scheduled task and pre-expansion is in progress."),
-	EXPANDED("expanded", "The ValueSet has been picked up by a scheduled task and pre-expansion is complete."),
-	FAILED_TO_EXPAND(
-			"failedToExpand", "The ValueSet has been picked up by a scheduled task and pre-expansion has failed.");
+			"expansionInProgress", "The ValueSet has been picked up by a batch job and pre-expansion is in progress."),
+	EXPANDED("expanded", "The ValueSet has been picked up by a batch job and pre-expansion is complete."),
+	FAILED_TO_EXPAND("failedToExpand", "The ValueSet has been picked up by a batch job and pre-expansion has failed.");
 
 	private static Map<String, TermValueSetPreExpansionStatusEnum> ourValues;
 	private String myCode;
