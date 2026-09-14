@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
@@ -68,11 +69,12 @@ public class Step4And5WriteConceptsStep<OT extends IModelJson> extends BaseImpor
 		ValueSet delta = data.getValueSet();
 
 		ourLog.atInfo()
-				.setMessage("Writing {} concepts as {} with starting order {} and offset {}")
+				.setMessage("Writing {} concepts as {} with starting order {} and offset {} for ValueSet {}")
 				.addArgument(delta.getExpansion().getContains().size())
 				.addArgument(myInclude ? "INCLUDE" : "EXCLUDE")
 				.addArgument(startingOrder)
 				.addArgument(startingOrderOffset)
+				.addArgument(UrlUtil.parseCanonicalUrl(delta.getUrl(), delta.getVersion()))
 				.log();
 
 		Callable<UploadStatistics> uploadFunction = () -> {

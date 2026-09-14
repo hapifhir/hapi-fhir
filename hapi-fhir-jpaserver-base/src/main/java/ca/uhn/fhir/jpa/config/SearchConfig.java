@@ -34,9 +34,6 @@ import ca.uhn.fhir.jpa.search.BatchResourceLoader;
 import ca.uhn.fhir.jpa.search.ExceptionService;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
-import ca.uhn.fhir.jpa.search.builder.tasks.SearchContinuationTask;
-import ca.uhn.fhir.jpa.search.builder.tasks.SearchTask;
-import ca.uhn.fhir.jpa.search.builder.tasks.SearchTaskParameters;
 import ca.uhn.fhir.util.IMetaTagSorter;
 import jakarta.annotation.PostConstruct;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -47,8 +44,6 @@ import org.springframework.context.annotation.Scope;
 
 @Configuration
 public class SearchConfig {
-	public static final String SEARCH_TASK = "searchTask";
-	public static final String CONTINUE_TASK = "continueTask";
 
 	@Autowired
 	protected JpaStorageSettings myStorageSettings;
@@ -88,18 +83,6 @@ public class SearchConfig {
 	@Scope("prototype")
 	public ISearchBuilder newSearchBuilder(String theResourceName, Class<? extends IBaseResource> theResourceType) {
 		return new SearchBuilder(theResourceName, theResourceType);
-	}
-
-	@Bean(name = SEARCH_TASK)
-	@Scope("prototype")
-	public SearchTask createSearchTask(SearchTaskParameters theParams) {
-		return new SearchTask(theParams);
-	}
-
-	@Bean(name = CONTINUE_TASK)
-	@Scope("prototype")
-	public SearchContinuationTask createSearchContinuationTask(SearchTaskParameters theParams) {
-		return new SearchContinuationTask(theParams);
 	}
 
 	@PostConstruct

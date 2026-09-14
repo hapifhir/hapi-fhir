@@ -486,14 +486,15 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	}
 
 	/**
-	 * @param thePidSet May be null
+	 * @param thePidSet May not be null
 	 */
 	@Override
-	public void setPreviouslyAddedResourcePids(@Nonnull List<JpaPid> thePidSet) {
+	public void setPreviouslyAddedResourcePids(@Nonnull Collection<JpaPid> thePidSet) {
+		Validate.notNull(thePidSet, "thePidSet must not be null");
 		myPidSet = new HashSet<>(thePidSet);
 	}
 
-	protected Set<JpaPid> getPreviouslyAddedPids() {
+	protected Set<JpaPid> getPreviouslyAddedResourcePids() {
 		return myPidSet;
 	}
 
@@ -514,6 +515,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					break;
 				}
 			}
+			theConsumer.consumptionComplete();
 			return newSearchProgressTracker(query);
 		} catch (IOException e) {
 			ourLog.error("IO failure during database access", e);
@@ -920,9 +922,24 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		 * parameters in one query. So we only do this optimization if there aren't too
 		 * many results.
 		 */
-		if (myHasNextIteratorQuery) {
-			if (myPidSet.size() + sqlBuilder.countBindVariables() < 900) {
-				sqlBuilder.excludeResourceIdsPredicate(myPidSet);
+		if (myPidSet != null && !myPidSet.isEmpty()) {
+			boolean excluded = false;
+			if (myHasNextIteratorQuery) {
+				if (myPidSet.size() + sqlBuilder.countBindVariables() < 900) {
+					sqlBuilder.excludeResourceIdsPredicate(myPidSet);
+					excluded = true;
+				}
+			}
+			/*
+			 * If we haven't explicitly added a "WHERE pid NOT IN (previous_pids)" to the
+			 * generated SQL, then we need to increase the maximum number of rows to fetch
+			 * since we'll presumably see the previous results again this time.
+			 */
+			if (!excluded) {
+				if (theSearchProperties.getMaxResultsRequested() != null) {
+					theSearchProperties.setMaxResultsRequested(
+							theSearchProperties.getMaxResultsRequested() + myPidSet.size());
+				}
 			}
 		}
 
@@ -1032,6 +1049,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					myDialectProvider,
 					theSearchQueryProperties.isDoCountOnlyFlag(),
 					false);
+
 			GeneratedSql allTargetsSql = fetchPidsSqlBuilder.generate(
 					theSearchQueryProperties.getOffset(), mySearchProperties.getMaxResultsRequested());
 			String sql = allTargetsSql.getSql();
@@ -1512,10 +1530,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(next.resource(), BundleEntrySearchModeEnum.MATCH);
 			}
 
-			// ensure there's enough space; "<=" because of 0-indexing
-			while (theResourceListToPopulate.size() <= index) {
-				theResourceListToPopulate.add(null);
-			}
 			theResourceListToPopulate.set(index, next.resource());
 		}
 	}
@@ -1663,6 +1677,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		if (isUsingElasticSearch) {
 			try {
 				theResourceListToPopulate.addAll(loadResourcesFromElasticSearch(thePids));
+				growResourceListToMatchPidListSize(thePids, theResourceListToPopulate);
 				return;
 
 			} catch (ResourceNotFoundInIndexException theE) {
@@ -1671,6 +1686,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						"Some resources were not found in index. Make sure all resources were indexed. Resorting to database search.");
 			}
 		}
+
+		growResourceListToMatchPidListSize(thePids, theResourceListToPopulate);
 
 		// We only chunk because some jdbc drivers can't handle long param lists.
 		QueryChunker.chunk(
@@ -1891,8 +1908,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES)) {
 				List<JpaPid> includedPidList = new ArrayList<>(allAdded);
+
+				List<IBaseResource> resourceList = new ArrayList<>();
+				loadResourcesByPid(includedPidList, Collections.emptySet(), resourceList, false, null);
 				JpaPreResourceAccessDetails accessDetails =
-						new JpaPreResourceAccessDetails(includedPidList, () -> this);
+						new JpaPreResourceAccessDetails(includedPidList, resourceList);
+
 				HookParams params = new HookParams()
 						.add(IPreResourceAccessDetails.class, accessDetails)
 						.add(RequestDetails.class, request)
@@ -3138,6 +3159,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		private final Integer myOffset;
 		private final IInterceptorBroadcaster myCompositeBroadcaster;
 		private boolean myFirst = true;
+		private boolean myHaveFiredSelectComplete;
 		private IncludesIterator myIncludesIterator;
 		/**
 		 * The next JpaPid value of the next result in this query.
@@ -3236,10 +3258,14 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							if (!myPidSet.contains(nextPid)) {
 								if (!mySearchProperties.isDeduplicateInDatabase()) {
 									/*
-									 * We only add to the map if we aren't fetching "everything";
-									 * otherwise, we let the de-duplication happen in the database
-									 * (see createChunkedQueryNormalSearch above), because it
-									 * saves memory that way.
+									 * We use a map to deduplicate results we're fetching when we're fetching
+									 * smaller chunks since it's more performant at small scale to handle
+									 * this at the app level. When we get to the unbounded threshold
+									 * (which can potentially return massive amounts of data) we deduplicate
+									 * in the database instead, so we don't need to use the local map.
+									 * We also deduplicate ocally when fetching _include values for
+									 * $everything queries since they can potentially return the
+									 * same resource multiple times.
 									 */
 									myPidSet.add(nextPid);
 								}
@@ -3291,7 +3317,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					// if we got here, it means the current JpaPid has already been processed,
 					// and we will decide (here) if we need to fetch related resources recursively
 					if (myFetchIncludesForEverythingOperation) {
-						myIncludesIterator = new IncludesIterator(getPreviouslyAddedPids(), myRequest);
+						myIncludesIterator = new IncludesIterator(getPreviouslyAddedResourcePids(), myRequest);
 						myFetchIncludesForEverythingOperation = false;
 					}
 					if (myIncludesIterator != null) {
@@ -3333,6 +3359,13 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			}
 
 			if (NO_MORE.equals(myNext)) {
+				fireSelectCompleteIfNotAlreadyFired();
+			}
+		}
+
+		private void fireSelectCompleteIfNotAlreadyFired() {
+			if (!myHaveFiredSelectComplete) {
+				myHaveFiredSelectComplete = true;
 				HookParams params = new HookParams()
 						.add(RequestDetails.class, myRequest)
 						.addIfMatchesType(ServletRequestDetails.class, myRequest)
@@ -3375,6 +3408,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		private void initializeIteratorQuery(Integer theOffset, Integer theMaxResultsToFetch) {
 			Integer offset = theOffset;
+			Integer maxResultsToFetch = theMaxResultsToFetch;
 			if (myQueryList.isEmpty()) {
 				// Capture times for Lucene/Elasticsearch queries as well
 				mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());
@@ -3383,12 +3417,15 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				// correct output result for everything operation during paging
 				if (myParams.getEverythingMode() != null) {
 					offset = 0;
+					if (maxResultsToFetch != null && !myPidSet.isEmpty()) {
+						maxResultsToFetch += myPidSet.size();
+					}
 				}
 
 				SearchQueryProperties properties = mySearchProperties.clone();
 				properties
 						.setOffset(offset)
-						.setMaxResultsRequested(theMaxResultsToFetch)
+						.setMaxResultsRequested(maxResultsToFetch)
 						.setDoCountOnlyFlag(false)
 						.setDeduplicateInDatabase(properties.isDeduplicateInDatabase() || offset != null);
 				myQueryList = createQuery(myParams, properties, myRequest, mySearchRuntimeDetails);
@@ -3442,6 +3479,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		@Override
 		public void close() {
+			fireSelectCompleteIfNotAlreadyFired();
 			if (myResultsIterator != null) {
 				myResultsIterator.close();
 			}
@@ -3458,6 +3496,16 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	public static void setMaxPageSizeForTest(Integer theTestSize) {
 		myMaxPageSizeForTests = theTestSize;
+	}
+
+	private static void growResourceListToMatchPidListSize(
+			Collection<JpaPid> thePids, List<IBaseResource> theResourceListToPopulate) {
+		if (theResourceListToPopulate instanceof ArrayList<IBaseResource> list) {
+			list.ensureCapacity(thePids.size());
+		}
+		while (theResourceListToPopulate.size() < thePids.size()) {
+			theResourceListToPopulate.add(null);
+		}
 	}
 
 	private static ScrollableResults<?> toScrollableResults(Query theQuery) {

@@ -181,9 +181,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
 		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
 
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
-		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(false);
 	}
 
 	@Test
@@ -2592,9 +2590,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			myObservationDao.create(o);
 		}
 
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(50);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(10);
-		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(true);
 
 		Bundle response = myClient
 			.operation()
@@ -2636,24 +2632,25 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testEverythingWithNoPagingProvider() {
-		IPagingProvider pagingProvider = myRestServer.getPagingProvider();
+				IPagingProvider previousPagingProvider = myServer.getRestfulServer().getPagingProvider();
+		myServer.getRestfulServer().setPagingProvider(null);
 		try {
-			myRestServer.setPagingProvider(null);
+			List<String> allIds = new ArrayList<>();
 
 			Patient p = new Patient();
 			p.setActive(true);
 			String pid = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+			allIds.add(pid);
 
-			for (int i = 0; i < 20; i++) {
+			for (int i = 0; i < 19; i++) {
 				Observation o = new Observation();
 				o.getSubject().setReference(pid);
 				o.addIdentifier().setSystem("foo").setValue(Integer.toString(i));
-				myObservationDao.create(o);
+				String obsId = myObservationDao.create(o).getId().toUnqualifiedVersionless().getValue();
+				allIds.add(obsId);
 			}
 
-			mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(50);
 			mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(10);
-			mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(true);
 
 			Bundle response = myClient
 				.operation()
@@ -2666,9 +2663,24 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 			assertThat(response.getEntry()).hasSize(10);
 			assertNull(response.getTotalElement().getValue());
+			assertThat(response.getLink("next").getUrl()).contains("_count=10");
+			assertThat(response.getLink("next").getUrl()).contains("_offset=10");
+			List<String> actualIds = toUnqualifiedVersionlessIdValues(response);
+
+			response = myClient
+				.loadPage()
+				.next(response)
+				.execute();
+
+			assertThat(response.getEntry()).hasSize(10);
+			assertNull(response.getTotalElement().getValue());
 			assertNull(response.getLink("next"));
+			actualIds.addAll(toUnqualifiedVersionlessIdValues(response));
+
+			assertThat(actualIds).containsExactlyInAnyOrder(allIds.toArray(new String[0]));
+
 		} finally {
-			myRestServer.setPagingProvider(pagingProvider);
+			myServer.getRestfulServer().setPagingProvider(previousPagingProvider);
 		}
 	}
 
