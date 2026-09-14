@@ -648,6 +648,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 						associatedResource = resource;
 					}
 					processConditionalUrlForPreFetching(
+							theTransactionDetails,
 							theRequestPartitionId,
 							resourceType,
 							associatedResource,
@@ -657,12 +658,17 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 							theIdsToPreFetchBodiesFor,
 							theIdsToPreFetchFhirIdsFor,
 							searchParameterMapsToResolve);
-				} else if ("POST".equals(verb) && requestIfNoneExist != null && requestIfNoneExist.contains("?")) {
+				} else if ("POST".equals(verb) && isNotBlank(requestIfNoneExist)) {
+					// If-None-Exist may legally omit the resource type ("identifier=..." or "?identifier=...").
+					// Qualify it so it pre-fetches — and is recorded in the transaction details — under the
+					// same canonical form the write path looks match URLs up by.
+					String ifNoneExist = MatchResourceUrlService.massageForStorage(resourceType, requestIfNoneExist);
 					processConditionalUrlForPreFetching(
+							theTransactionDetails,
 							theRequestPartitionId,
 							resourceType,
 							resource,
-							requestIfNoneExist,
+							ifNoneExist,
 							false,
 							true,
 							theIdsToPreFetchBodiesFor,
@@ -680,6 +686,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 						String refResourceType = determineResourceTypeInResourceUrl(myFhirContext, referenceUrl);
 						if (refResourceType != null) {
 							processConditionalUrlForPreFetching(
+									theTransactionDetails,
 									theRequestPartitionId,
 									refResourceType,
 									null,
@@ -1104,6 +1111,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	 * a reference in it for example) so it's not really possible to doing anything useful with this.
 	 * </p>
 	 *
+	 * @param theTransactionDetails                 The active transaction details, in which cache-answered resolutions are recorded
 	 * @param thePartitionId                        The partition ID of the associated resource (can be null)
 	 * @param theResourceType                       The resource type associated with the match URL (ie what resource type should it resolve to)
 	 * @param theRequestUrl                         The actual match URL, which could be as simple as just parameters or could include the resource type too
@@ -1113,6 +1121,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	 * @param theOutputSearchParameterMapsToResolve This will be populated with any {@link SearchParameterMap} instances corresponding to match URLs we need to resolve
 	 */
 	private void processConditionalUrlForPreFetching(
+			TransactionDetails theTransactionDetails,
 			RequestPartitionId thePartitionId,
 			String theResourceType,
 			@Nullable IBaseResource theAssociatedResource,
@@ -1125,6 +1134,10 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		JpaPid cachedId =
 				myMatchResourceUrlService.processMatchUrlUsingCacheOnly(theResourceType, theRequestUrl, thePartitionId);
 		if (cachedId != null) {
+			// Record the resolution the same way the live pre-fetch would: consumers of the transaction
+			// details' resolved match URLs (the write path's lookup, partition-mode interceptors) must not
+			// see a known-matched URL as never-attempted just because it was answered from the cache.
+			myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, theResourceType, theRequestUrl, cachedId);
 			if (theShouldPreFetchResourceBody) {
 				theOutputIdsToPreFetchBodiesFor.add(cachedId);
 			} else {

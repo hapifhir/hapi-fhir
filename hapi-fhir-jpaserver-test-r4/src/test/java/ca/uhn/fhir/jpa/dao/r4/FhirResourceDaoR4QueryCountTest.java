@@ -2839,15 +2839,22 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	 * for an explanation of why only SINGLE_TOKEN has a small number of SELECTS.
 	 * Others could potentially be optimized in the future so that they have a small number
 	 * of selects too, but this is tricky and may not be worth the effort.
+	 * <p>
+	 * The SINGLE_TOKEN_BARE_URL and SINGLE_TOKEN_LEADING_QMARK modes are the type-less If-None-Exist
+	 * spellings; they must cost exactly the same as the type-qualified SINGLE_TOKEN form.
 	 */
 	@ParameterizedTest
 	@CsvSource({
-		"SINGLE_TOKEN   , false, 1  2  1",
-		"SINGLE_TOKEN   , true,  1  0  0",
-		"MULTIPLE_TOKEN , false, 10 31 30",
-		"MULTIPLE_TOKEN , true,  10 0  0",
-		"STRING         , false, 10 31 30",
-		"STRING         , true,  10 0  0",
+		"SINGLE_TOKEN               , false, 1  2  1",
+		"SINGLE_TOKEN               , true,  1  0  0",
+		"SINGLE_TOKEN_BARE_URL      , false, 1  2  1",
+		"SINGLE_TOKEN_BARE_URL      , true,  1  0  0",
+		"SINGLE_TOKEN_LEADING_QMARK , false, 1  2  1",
+		"SINGLE_TOKEN_LEADING_QMARK , true,  1  0  0",
+		"MULTIPLE_TOKEN             , false, 10 31 30",
+		"MULTIPLE_TOKEN             , true,  10 0  0",
+		"STRING                     , false, 10 31 30",
+		"STRING                     , true,  10 0  0",
 	})
 	public void testTransactionWithMultipleConditionalCreateUrls(String theMatchMode, boolean theMatchUrlCacheEnabled, String theExpectedCounts) {
 		registerNoOpAuthorizationAndConsentInterceptors();
@@ -2870,6 +2877,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 				String conditionalUrl = switch(theMatchMode) {
 					case "SINGLE_TOKEN" -> "Patient?identifier=http://foo|" + identifier;
+					case "SINGLE_TOKEN_BARE_URL" -> "identifier=http://foo|" + identifier;
+					case "SINGLE_TOKEN_LEADING_QMARK" -> "?identifier=http://foo|" + identifier;
 					case "MULTIPLE_TOKEN" -> "Patient?identifier=http://bar|" + identifier + "&active=true";
 					case "STRING" -> "Patient?name=FAM" + identifier;
 					default -> throw new IllegalStateException("Unexpected value: " + theMatchMode);

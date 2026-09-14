@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 8270
+title: "In Patient ID partition mode, a transaction entry whose conditional URL referenced another 
+entry's placeholder fullUrl was incorrectly rejected with error HAPI-0539. This has been fixed."
