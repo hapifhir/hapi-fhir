@@ -25,6 +25,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
@@ -182,7 +185,41 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		assertThat(interceptedResourceIds).as("Wrong response from " + outcome.getClass()).isEqualTo(myObservationIds.subList(0, 14));
 	}
 
-		@Test
+	@ParameterizedTest
+	@ValueSource(ints = {0, 4})
+	public void testSearchAndBlockSome_UseOffsetSearch(int theOffset) {
+		create50Observations();
+
+		AtomicInteger preAccessInterceptorCallCount = new AtomicInteger(0);
+		List<String> interceptedResourceIds = new ArrayList<>();
+		IAnonymousInterceptor interceptor = new PreAccessInterceptorCountingAndBlockOdd(preAccessInterceptorCallCount, interceptedResourceIds);
+		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
+
+		// Perform a search
+		SearchParameterMap map = new SearchParameterMap();
+		map.setSort(new SortSpec(Observation.SP_IDENTIFIER, SortOrderEnum.ASC));
+		map.setCount(4);
+		map.setOffset(theOffset);
+
+		myCaptureQueriesListener.clear();
+		IBundleProvider outcome = myObservationDao.search(map, mySrd);
+		myCaptureQueriesListener.logSelectQueries();
+		ourLog.info("Search UUID: {}", outcome.getUuid());
+
+		// Fetch the first 20 (should hit the first search boundary and need to cross it in the same pass)
+		List<IBaseResource> resources = outcome.getResources(0, 4);
+		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
+		assertEquals(myObservationIdsEvenOnly.subList(theOffset, theOffset + 4), returnedIdValues);
+		// It takes 2 passes because we should have searched for 4 resources in the first pass,
+		// but filtered half of them leaving only 2, so we needed another pass
+		assertEquals(2, preAccessInterceptorCallCount.get());
+
+		runInTransaction(() -> assertEquals(0, mySearchEntityDao.count()));
+
+		assertThat(interceptedResourceIds).isEqualTo(myObservationIds);
+	}
+
+	@Test
 	public void testSearchAndBlockSome_LoadSynchronous() {
 		// setup
 		create50Observations();

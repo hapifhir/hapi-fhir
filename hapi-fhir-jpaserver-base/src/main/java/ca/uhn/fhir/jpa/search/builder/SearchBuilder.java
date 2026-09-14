@@ -486,14 +486,15 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	}
 
 	/**
-	 * @param thePidSet May be null
+	 * @param thePidSet May not be null
 	 */
 	@Override
-	public void setPreviouslyAddedResourcePids(@Nonnull List<JpaPid> thePidSet) {
+	public void setPreviouslyAddedResourcePids(@Nonnull Collection<JpaPid> thePidSet) {
+		Validate.notNull(thePidSet, "thePidSet must not be null");
 		myPidSet = new HashSet<>(thePidSet);
 	}
 
-	protected Set<JpaPid> getPreviouslyAddedPids() {
+	protected Set<JpaPid> getPreviouslyAddedResourcePids() {
 		return myPidSet;
 	}
 
@@ -1048,12 +1049,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					myDialectProvider,
 					theSearchQueryProperties.isDoCountOnlyFlag(),
 					false);
-
-			// FIXME: remove
-			ourLog.info(
-					"theSearchProperties: {}  -- mySearchProperties: {}",
-					theSearchQueryProperties.getMaxResultsRequested(),
-					mySearchProperties.getMaxResultsRequested());
 
 			GeneratedSql allTargetsSql = fetchPidsSqlBuilder.generate(
 					theSearchQueryProperties.getOffset(), mySearchProperties.getMaxResultsRequested());
@@ -3322,7 +3317,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					// if we got here, it means the current JpaPid has already been processed,
 					// and we will decide (here) if we need to fetch related resources recursively
 					if (myFetchIncludesForEverythingOperation) {
-						myIncludesIterator = new IncludesIterator(getPreviouslyAddedPids(), myRequest);
+						myIncludesIterator = new IncludesIterator(getPreviouslyAddedResourcePids(), myRequest);
 						myFetchIncludesForEverythingOperation = false;
 					}
 					if (myIncludesIterator != null) {

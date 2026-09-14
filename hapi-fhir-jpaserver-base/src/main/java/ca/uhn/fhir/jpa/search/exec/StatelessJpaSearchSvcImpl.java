@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.ISearchResultConsumer;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
+import ca.uhn.fhir.jpa.dao.SearchProgressTracker;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -46,6 +47,8 @@ import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.interceptor.ServerInterceptorUtil;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
+import ca.uhn.fhir.util.IntCounter;
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -85,7 +88,7 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 	@Autowired
 	private IPagingProvider myPagingProvider;
 
-	private int mySyncSize = 250;
+	private final int mySyncSize = 250;
 
 	@Override
 	@SuppressWarnings({"rawtypes", "unchecked"})
@@ -93,7 +96,7 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 			SearchParameterMap theParams,
 			RequestDetails theRequestDetails,
 			String theSearchUuid,
-			ISearchBuilder theSb,
+			ISearchBuilder<JpaPid> theSb,
 			Integer theLoadSynchronousUpTo,
 			RequestPartitionId theRequestPartitionId) {
 		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequestDetails, theSearchUuid);
@@ -102,6 +105,10 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 		boolean theParamWantOnlyCount = isWantOnlyCount(theParams);
 		boolean theParamOrConfigWantCount = SearchParameterMapCalculator.isWantCount(theParams, myStorageSettings);
 		boolean wantCount = theParamWantOnlyCount || theParamOrConfigWantCount;
+
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+		boolean havePreAccessHooks = compositeBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES);
 
 		// Execute the query and make sure we return distinct results
 		return myTxService
@@ -137,75 +144,74 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 						return bundleProvider;
 					}
 
-					// if we have a count, we'll want to request
-					// additional resources
-					SearchParameterMap clonedParams = theParams.clone();
-					Integer requestedCount = clonedParams.getCount();
-					boolean hasACount = requestedCount != null;
-					if (hasACount) {
-						clonedParams.setCount(requestedCount + 1);
+					boolean hasACount = theParams.getCount() != null;
+					List<IBaseResource> loadedResources = new ArrayList<>();
+					IntCounter receivedResourceCount = new IntCounter(-1);
+
+					/*
+					 * If we have any STORAGE_PREACCESS_RESOURCES, and we're doing an offset
+					 * search, we need to search right from offset 0 because we don't know
+					 * which resources might have been filtered out from the first page, and
+					 * we need to ensure that we return full sized pages. So we temporarily
+					 * zero out the offset and add it to the count so that we search from the
+					 * start, and then filter out the eventual list of PIDs and resources.
+					 */
+					Integer originalCount = null;
+					Integer originalOffset = null;
+					if (havePreAccessHooks
+							&& theParams.getCount() != null
+							&& theParams.getOffset() != null
+							&& theParams.getOffset() > 0) {
+						originalCount = theParams.getCount();
+						originalOffset = theParams.getOffset();
+						theParams.setOffset(0);
+						theParams.setCount(originalCount + originalOffset);
 					}
 
-					// Perform the actual search
-					// Load the results synchronously
-					final List<JpaPid> consumedPids = new ArrayList<>();
-					ISearchResultConsumer<JpaPid> searchResultConsumer = (progress, pid) -> {
-						consumedPids.add(pid);
-						if (theLoadSynchronousUpTo != null && consumedPids.size() >= theLoadSynchronousUpTo) {
-							return ISearchResultConsumer.STOP;
-						}
-						if (theParams.getLoadSynchronousUpTo() != null
-								&& consumedPids.size() >= theParams.getLoadSynchronousUpTo()) {
-							return ISearchResultConsumer.STOP;
-						}
-						return ISearchResultConsumer.CONTINUE;
-					};
-					theSb.performSearchForPids(
-							searchResultConsumer,
-							clonedParams,
-							searchRuntimeDetails,
-							theRequestDetails,
-							theRequestPartitionId);
-					List<JpaPid> pids = consumedPids;
+					// Perform the search
+					List<JpaPid> pids = new ArrayList<>();
+					{
+						Integer requestedCount = theParams.getCount();
+						while (true) {
+							PerformedSearchResult searchResult = performSearch(
+									theParams,
+									theRequestDetails,
+									theSb,
+									theLoadSynchronousUpTo,
+									theRequestPartitionId,
+									requestedCount,
+									searchRuntimeDetails,
+									receivedResourceCount,
+									loadedResources);
+							pids.addAll(searchResult.receivedPids());
 
-					// truncate the list we retrieved - if needed
-					int receivedResourceCount = -1;
-					if (hasACount) {
-						// we want the accurate received resource count
-						receivedResourceCount = pids.size();
-						int resourcesToReturn = Math.min(theParams.getCount(), pids.size());
-						pids = pids.subList(0, resourcesToReturn);
-					}
-
-					IInterceptorBroadcaster compositeBroadcaster =
-							CompositeInterceptorBroadcaster.newCompositeBroadcaster(
-									myInterceptorBroadcaster, theRequestDetails);
-
-					List<IBaseResource> loadedResources = null;
-					if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES)) {
-
-						loadedResources = new ArrayList<>();
-						theSb.loadResourcesByPid(pids, Collections.emptySet(), loadedResources, false, null);
-						JpaPreResourceAccessDetails accessDetails =
-								new JpaPreResourceAccessDetails(pids, loadedResources);
-
-						HookParams params = new HookParams()
-								.add(IPreResourceAccessDetails.class, accessDetails)
-								.add(RequestDetails.class, theRequestDetails)
-								.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-						compositeBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
-
-						Validate.isTrue(
-								pids.size() == loadedResources.size(),
-								"PID collection size %s doesn't match expected resource collection size of %s",
-								pids.size(),
-								loadedResources.size());
-						for (int i = pids.size() - 1; i >= 0; i--) {
-							if (accessDetails.isDontReturnResourceAtIndex(i)) {
-								pids.remove(i);
-								loadedResources.remove(i);
+							// If we have any STORAGE_PREACCESS_RESOURCES hooks, then we
+							// might receive less than the desired number since the consent service
+							// can filter some out. If this happens, and we know that there
+							// are more potential resources, try again with a higher
+							// maximum count
+							if (requestedCount != null
+									&& havePreAccessHooks
+									&& searchResult.receivedAsManyResourcesAsRequested()
+									&& searchResult.receivedPids().size() < theParams.getCount()) {
+								requestedCount = requestedCount + mySyncSize;
+								theSb.setMaxResultsToFetch(requestedCount);
+							} else {
+								break;
 							}
 						}
+					}
+
+					if (originalCount != null) {
+						pids = pids.subList(originalOffset, Math.min(pids.size(), originalOffset + originalCount));
+						loadedResources = loadedResources.subList(
+								originalOffset, Math.min(loadedResources.size(), originalOffset + originalCount));
+					}
+
+					if (theParams.getCount() != null) {
+						pids = pids.subList(0, Math.min(pids.size(), theParams.getCount()));
+						loadedResources =
+								loadedResources.subList(0, Math.min(loadedResources.size(), theParams.getCount()));
 					}
 
 					/*
@@ -320,8 +326,7 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 						}
 					}
 
-					if (loadedResources == null) {
-						loadedResources = new ArrayList<>();
+					if (loadedResources.isEmpty()) {
 						theSb.loadResourcesByPid(pids, allIncludedPidsList, loadedResources, false, theRequestDetails);
 					} else if (!allIncludedPidsList.isEmpty()) {
 						List<IBaseResource> includeResources = new ArrayList<>();
@@ -337,7 +342,7 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 					SimpleBundleProvider bundleProvider = new SimpleBundleProvider(resources);
 
 					if (hasACount && theSb.requiresTotal()) {
-						bundleProvider.setTotalResourcesRequestedReturned(receivedResourceCount);
+						bundleProvider.setTotalResourcesRequestedReturned(receivedResourceCount.get());
 					}
 
 					int offset = 0;
@@ -372,6 +377,81 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 
 					return bundleProvider;
 				});
+	}
+
+	@Nonnull
+	private PerformedSearchResult performSearch(
+			SearchParameterMap theParams,
+			RequestDetails theRequestDetails,
+			ISearchBuilder<JpaPid> theSb,
+			Integer theLoadSynchronousUpTo,
+			RequestPartitionId theRequestPartitionId,
+			Integer theRequestedCount,
+			SearchRuntimeDetails theSearchRuntimeDetails,
+			IntCounter theReceivedResourceCountToPopulate,
+			List<IBaseResource> theLoadedResourcesToOptionallyPopulate) {
+		SearchParameterMap clonedParams = theParams.clone();
+		boolean hasACount = theRequestedCount != null;
+		if (hasACount) {
+			clonedParams.setCount(theRequestedCount + 1);
+		}
+
+		// Perform the actual search
+		// Load the results synchronously
+		final List<JpaPid> consumedPids = new ArrayList<>();
+		ISearchResultConsumer<JpaPid> searchResultConsumer =
+				new StatelessSearchResultConsumer(consumedPids, theLoadSynchronousUpTo, theParams);
+		theSb.performSearchForPids(
+				searchResultConsumer, clonedParams, theSearchRuntimeDetails, theRequestDetails, theRequestPartitionId);
+
+		boolean receivedAsManyResourcesAsRequested = true;
+		if (hasACount) {
+			receivedAsManyResourcesAsRequested = consumedPids.size() > theRequestedCount;
+		}
+
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES)) {
+
+			List<IBaseResource> loadedResources = new ArrayList<>();
+			theSb.loadResourcesByPid(consumedPids, Collections.emptySet(), loadedResources, false, null);
+			JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(consumedPids, loadedResources);
+
+			HookParams params = new HookParams()
+					.add(IPreResourceAccessDetails.class, accessDetails)
+					.add(RequestDetails.class, theRequestDetails)
+					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+			compositeBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+
+			Validate.isTrue(
+					consumedPids.size() == loadedResources.size(),
+					"PID collection size %s doesn't match expected resource collection size of %s",
+					consumedPids.size(),
+					loadedResources.size());
+			for (int i = consumedPids.size() - 1; i >= 0; i--) {
+				if (accessDetails.isDontReturnResourceAtIndex(i)) {
+					consumedPids.remove(i);
+					loadedResources.remove(i);
+				}
+			}
+
+			theLoadedResourcesToOptionallyPopulate.addAll(loadedResources);
+		}
+
+		// truncate the list we retrieved - if needed
+		if (hasACount) {
+			// we want the accurate received resource count
+			if (theReceivedResourceCountToPopulate.get() == -1) {
+				theReceivedResourceCountToPopulate.set(consumedPids.size());
+			} else {
+				theReceivedResourceCountToPopulate.increment(consumedPids.size());
+			}
+			int resourcesToReturn = Math.min(theRequestedCount, consumedPids.size());
+			consumedPids.subList(resourcesToReturn, consumedPids.size()).clear();
+		}
+
+		return new PerformedSearchResult(consumedPids, receivedAsManyResourcesAsRequested);
 	}
 
 	@Override
@@ -420,5 +500,35 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 			return myStorageSettings.getFetchSizeDefaultMaximum();
 		}
 		return null;
+	}
+
+	private record PerformedSearchResult(List<JpaPid> receivedPids, boolean receivedAsManyResourcesAsRequested) {}
+
+	@SuppressWarnings("ClassCanBeRecord")
+	private static class StatelessSearchResultConsumer implements ISearchResultConsumer<JpaPid> {
+		private final List<JpaPid> myConsumedPids;
+		private final Integer myLoadSynchronousUpTo;
+		private final SearchParameterMap myParams;
+
+		public StatelessSearchResultConsumer(
+				List<JpaPid> theConsumedPids, Integer theLoadSynchronousUpTo, SearchParameterMap theParams) {
+			myConsumedPids = theConsumedPids;
+			myLoadSynchronousUpTo = theLoadSynchronousUpTo;
+			myParams = theParams;
+		}
+
+		@Nonnull
+		@Override
+		public Outcome consume(SearchProgressTracker theProgressTracker, JpaPid theResult) {
+			myConsumedPids.add(theResult);
+			if (myLoadSynchronousUpTo != null && myConsumedPids.size() >= myLoadSynchronousUpTo) {
+				return ISearchResultConsumer.STOP;
+			}
+			if (myParams.getLoadSynchronousUpTo() != null
+					&& myConsumedPids.size() >= myParams.getLoadSynchronousUpTo()) {
+				return ISearchResultConsumer.STOP;
+			}
+			return ISearchResultConsumer.CONTINUE;
+		}
 	}
 }

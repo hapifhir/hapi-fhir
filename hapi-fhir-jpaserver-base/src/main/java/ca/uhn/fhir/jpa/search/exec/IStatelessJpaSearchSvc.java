@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.search.exec;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.ISearchSvc;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -45,7 +46,7 @@ public interface IStatelessJpaSearchSvc extends ISearchSvc {
 			SearchParameterMap theParams,
 			RequestDetails theRequestDetails,
 			String theSearchUuid,
-			ISearchBuilder theSb,
+			ISearchBuilder<JpaPid> theSb,
 			Integer theLoadSynchronousUpTo,
 			RequestPartitionId theRequestPartitionId);
 }
