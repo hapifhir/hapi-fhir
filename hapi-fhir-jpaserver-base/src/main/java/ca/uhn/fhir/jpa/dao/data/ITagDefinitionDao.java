@@ -44,11 +44,12 @@ public interface ITagDefinitionDao extends JpaRepository<TagDefinition, Long>, I
 			Pageable pageable);
 
 	/**
-	 * Fetches all tag definitions of the given type whose code is in the supplied collection. Used to
+	 * Fetches all tag definitions of the given types whose code is in the supplied collection. Used to
 	 * batch-resolve the tag ids for a {@code _tag}/{@code _security}/{@code _profile} search in a single
-	 * lookup; the system is matched by the caller so this deliberately filters on type + code only.
+	 * lookup — including when a search mixes those parameters — so the system/type is matched by the
+	 * caller and this deliberately filters on type + code only.
 	 */
-	@Query("SELECT t FROM TagDefinition t WHERE t.myTagType = :tagType AND t.myCode IN :codes")
-	List<TagDefinition> findByTagTypeAndCodes(
-			@Param("tagType") TagTypeEnum tagType, @Param("codes") Collection<String> codes);
+	@Query("SELECT t FROM TagDefinition t WHERE t.myTagType IN :tagTypes AND t.myCode IN :codes")
+	List<TagDefinition> findByTagTypesAndCodes(
+			@Param("tagTypes") Collection<TagTypeEnum> tagTypes, @Param("codes") Collection<String> codes);
 }

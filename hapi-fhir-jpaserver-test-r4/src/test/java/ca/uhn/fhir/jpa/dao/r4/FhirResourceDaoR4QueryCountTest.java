@@ -5238,6 +5238,28 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 	@Test
+	public void testSearch_MultipleTagTypeParams_UsesSingleTagResolutionQuery() {
+		Patient p = new Patient();
+		p.getMeta().addTag("http://sys", "code-1", "display-1");
+		p.getMeta().addProfile("test");
+		p.getMeta().addSecurity("http://sys", "code-2", "display-2");
+		p.setActive(true);
+		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = SearchParameterMap.newSynchronous()
+			.add(Constants.PARAM_TAG, new TokenParam("http://sys", "code-1"))
+			.add(Constants.PARAM_PROFILE, new TokenParam("test"))
+			.add(Constants.PARAM_SECURITY, new TokenParam("http://sys", "code-2"));
+		IBundleProvider outcome = myPatientDao.search(map, mySrd);
+		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactly(id.getValue());
+
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(4, myCaptureQueriesListener.logSelectQueries().size());
+		assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+	}
+
+	@Test
 	public void testSearch_MultipleSecurityParams_UsesSingleTagResolutionQuery() {
 		Patient p = new Patient();
 		p.getMeta().addSecurity("http://sys", "code-1", "display-1");

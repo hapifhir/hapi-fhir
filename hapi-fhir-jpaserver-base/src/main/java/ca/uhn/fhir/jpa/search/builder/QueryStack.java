@@ -168,6 +168,19 @@ public class QueryStack {
 	@Nullable
 	private final ITagDefinitionDao myTagDefinitionDao;
 
+	/**
+	 * Tag definitions for this search's {@code _tag}/{@code _security}/{@code _profile} parameters,
+	 * resolved once (across all of them) and cached so mixing those parameters issues a single lookup.
+	 */
+	@Nullable
+	private List<TagDefinition> myResolvedTagDefinitions;
+	/**
+	 * The tag codes included in {@link #myResolvedTagDefinitions}, used to detect a code that was not
+	 * part of the batched lookup so it can safely fall back to the legacy join.
+	 */
+	@Nullable
+	private Set<String> myResolvedTagCodes;
+
 	private Map<PredicateBuilderCacheKey, BaseJoiningPredicateBuilder> myJoinMap;
 	private Map<String, BaseJoiningPredicateBuilder> myParamNameToPredicateBuilderMap;
 	// used for _offset queries with sort, should be removed once the fix is applied to the async path too.
@@ -2128,10 +2141,11 @@ public class QueryStack {
 			throw new IllegalArgumentException(Msg.code(1217) + "Param name: " + theParamName); // shouldn't happen
 		}
 
-		// Batch-resolve the tag definitions for every tag token in this parameter with a single
-		// HFJ_TAG_DEF lookup, so we do not issue one lookup per token. Null means pre-resolution is
-		// unavailable (no DAO wired) and the legacy HFJ_TAG_DEF join is used.
-		List<TagDefinition> resolvedDefinitions = batchResolveTagDefinitions(tagType, theList);
+		// Resolve the tag definitions for the whole search (all _tag/_security/_profile params) in a
+		// single HFJ_TAG_DEF lookup, cached on this QueryStack so mixing those parameters still issues
+		// only one lookup. Null means pre-resolution is unavailable (no DAO wired) and the legacy
+		// HFJ_TAG_DEF join is used.
+		List<TagDefinition> resolvedDefinitions = resolveAllTagDefinitions();
 
 		List<Condition> andPredicates = new ArrayList<>();
 		for (List<? extends IQueryParameterType> nextAndParams : theList) {
@@ -2193,36 +2207,57 @@ public class QueryStack {
 	}
 
 	/**
-	 * Fetches, in a single {@code HFJ_TAG_DEF} lookup, every tag definition of the given type whose code
-	 * appears among the tag tokens of any and-param. The system is matched later (per token) in
-	 * {@link #tagIdsForTokens}, so this batches the round-trips that would otherwise be one-per-token.
+	 * Resolves, in a single {@code HFJ_TAG_DEF} lookup, every tag definition referenced by the
+	 * {@code _tag}, {@code _security} and {@code _profile} parameters of this search. The result is
+	 * cached on this {@link QueryStack} so a search that mixes those parameters still issues only one
+	 * lookup. The type and system are matched per token later in {@link #tagIdsForTokens}.
 	 *
 	 * @return the matching tag definitions (possibly empty), or {@code null} when no
 	 *     {@link ITagDefinitionDao} is wired (in which case the legacy {@code HFJ_TAG_DEF} join is used).
 	 */
 	@Nullable
-	private List<TagDefinition> batchResolveTagDefinitions(
-			TagTypeEnum theTagType, List<List<IQueryParameterType>> theList) {
+	private List<TagDefinition> resolveAllTagDefinitions() {
 		if (myTagDefinitionDao == null) {
 			return null;
 		}
 
-		Set<String> codes = new HashSet<>();
-		for (List<? extends IQueryParameterType> nextAndParams : theList) {
+		if (myResolvedTagDefinitions == null) {
+			Set<TagTypeEnum> tagTypes = EnumSet.noneOf(TagTypeEnum.class);
+			myResolvedTagCodes = new HashSet<>();
+			collectTagCodes(Constants.PARAM_TAG, TagTypeEnum.TAG, tagTypes, myResolvedTagCodes);
+			collectTagCodes(Constants.PARAM_PROFILE, TagTypeEnum.PROFILE, tagTypes, myResolvedTagCodes);
+			collectTagCodes(Constants.PARAM_SECURITY, TagTypeEnum.SECURITY_LABEL, tagTypes, myResolvedTagCodes);
+
+			myResolvedTagDefinitions = myResolvedTagCodes.isEmpty()
+					? Collections.emptyList()
+					: myTagDefinitionDao.findByTagTypesAndCodes(tagTypes, myResolvedTagCodes);
+		}
+
+		return myResolvedTagDefinitions;
+	}
+
+	/**
+	 * Adds the codes of every non-{@code :below} token of the given parameter to {@code theCodes} (and
+	 * records its tag type in {@code theTagTypes}), so {@link #resolveAllTagDefinitions()} can batch them
+	 * into one lookup.
+	 */
+	private void collectTagCodes(
+			String theParamName, TagTypeEnum theTagType, Set<TagTypeEnum> theTagTypes, Set<String> theCodes) {
+		List<List<IQueryParameterType>> andOrParams = mySearchParameters.get(theParamName);
+		if (andOrParams == null) {
+			return;
+		}
+		for (List<IQueryParameterType> nextAndParams : andOrParams) {
 			List<TagToken> tokens = Lists.newArrayList();
 			populateTokens(tokens, nextAndParams);
 			for (TagToken next : tokens) {
 				// :below (left-match) can't be resolved to exact ids; that and-param keeps the legacy join.
 				if (!Objects.equals(next.qualifier(), UriParamQualifierEnum.BELOW.getValue())) {
-					codes.add(next.code());
+					theTagTypes.add(theTagType);
+					theCodes.add(next.code());
 				}
 			}
 		}
-
-		if (codes.isEmpty()) {
-			return Collections.emptyList();
-		}
-		return myTagDefinitionDao.findByTagTypeAndCodes(theTagType, codes);
 	}
 
 	/**
@@ -2232,9 +2267,9 @@ public class QueryStack {
 	 * instead of hiding it behind a join.
 	 *
 	 * @return the matching tag ids (an empty list means none exist), or {@code null} when pre-resolution
-	 *     should not be applied — either no {@link ITagDefinitionDao} is wired ({@code theDefinitions} is
-	 *     {@code null}), or a token uses the {@code :below} qualifier whose left-match must stay in the
-	 *     legacy join path.
+	 *     should not be applied — no {@link ITagDefinitionDao} is wired ({@code theDefinitions} is
+	 *     {@code null}), a token uses the {@code :below} qualifier whose left-match must stay in the
+	 *     legacy join path, or a token's code was not part of the batched lookup (e.g. a nested search).
 	 */
 	@Nullable
 	private List<Long> tagIdsForTokens(
@@ -2254,13 +2289,22 @@ public class QueryStack {
 				return null;
 			}
 
+			// If this code was not part of the batched lookup (e.g. a nested search whose parameters are
+			// not in the top-level map), fall back to the legacy join rather than risk a false "no match".
+			if (myResolvedTagCodes == null || !myResolvedTagCodes.contains(code)) {
+				return null;
+			}
+
 			if (theTagType == TagTypeEnum.PROFILE) {
 				system = BaseHapiFhirDao.NS_JPA_PROFILE;
 			}
 
 			for (TagDefinition definition : theDefinitions) {
-				// A blank system matches the code in any system, mirroring the legacy join predicate.
-				if (code.equals(definition.getCode()) && (isBlank(system) || system.equals(definition.getSystem()))) {
+				// Match type + code + system; a blank system matches the code in any system, mirroring the
+				// legacy join predicate.
+				if (theTagType == definition.getTagType()
+						&& code.equals(definition.getCode())
+						&& (isBlank(system) || system.equals(definition.getSystem()))) {
 					tagIds.add(definition.getId());
 				}
 			}
