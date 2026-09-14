@@ -33,10 +33,10 @@ import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
 import ca.uhn.fhir.mdm.util.EIDHelper;
+import ca.uhn.fhir.mdm.util.MdmSearchParamBuildingUtils;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
-import ca.uhn.fhir.rest.param.TokenParam;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -49,9 +49,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateSearcher.idOrType;
+import static ca.uhn.fhir.storage.PlaceholderResourceUtil.isPlaceholderResource;
 import static org.hl7.fhir.dstu2016may.model.Basic.SP_IDENTIFIER;
 
 @Service
@@ -72,7 +74,7 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 	private EIDHelper myEIDHelper;
 
 	@Autowired
-	IMdmSettings myMdmSettings;
+	private IMdmSettings myMdmSettings;
 
 	@Override
 	@Nonnull
@@ -83,15 +85,23 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 			RequestPartitionId theRequestPartitionId,
 			MdmTransactionContext theContext) {
 
+		// we match on EID even if placeholder resources are set to be ignored
 		List<MatchedTarget> retval = matchBasedOnEid(theResourceType, theResource, theRequestPartitionId, theContext);
 		if (!retval.isEmpty()) {
 			return retval;
+		}
+
+		if (shouldIgnoreResource(theResource)) {
+			// source is a placeholder (set to be ignored)
+			// return nothing
+			return Collections.emptyList();
 		}
 
 		Collection<IAnyResource> targetCandidates =
 				myMdmCandidateSearchSvc.findCandidates(theResourceType, theResource, theRequestPartitionId, theContext);
 
 		List<MatchedTarget> matches = targetCandidates.stream()
+				.filter(candidate -> !shouldIgnoreResource(candidate))
 				.map(candidate ->
 						new MatchedTarget(candidate, myMdmResourceMatcherSvc.getMatchResult(theResource, candidate)))
 				.collect(Collectors.toList());
@@ -125,15 +135,15 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 			String theResourceType,
 			RequestPartitionId theRequestPartitionId,
 			MdmTransactionContext theContext) {
-		final SearchParameterMap map = SearchParameterMap.newSynchronous();
-		final TokenOrListParam tokenOrListParam = new TokenOrListParam();
-		final String eidSystemForResourceType =
-				myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType(theResourceType);
-		theEids.stream()
-				.map(CanonicalEID::getValue)
-				.forEach(eid -> tokenOrListParam.addOr(new TokenParam(eidSystemForResourceType, eid)));
+		// Each EID is searched against its own system: a resource type may be identified by several EID
+		// systems, and the same value issued by two of them is not the same identifier.
+		Optional<TokenOrListParam> eidsToSearch = MdmSearchParamBuildingUtils.buildEidTokenParam(theEids);
+		if (eidsToSearch.isEmpty()) {
+			return Collections.emptyList();
+		}
 
-		map.add(SP_IDENTIFIER, tokenOrListParam);
+		final SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(SP_IDENTIFIER, eidsToSearch.get());
 
 		IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(theResourceType);
 		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
@@ -150,5 +160,16 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 				.map(resource -> new MatchedTarget(resource, MdmMatchOutcome.EID_MATCH))
 				.forEach(retval::add);
 		return retval;
+	}
+
+	/**
+	 * Whether or not the resource should be ignored for mdm matching purposes
+	 */
+	private boolean shouldIgnoreResource(IAnyResource theResource) {
+		if (!myMdmSettings.isIgnorePlaceholderResources()) {
+			return false;
+		}
+
+		return isPlaceholderResource(theResource);
 	}
 }

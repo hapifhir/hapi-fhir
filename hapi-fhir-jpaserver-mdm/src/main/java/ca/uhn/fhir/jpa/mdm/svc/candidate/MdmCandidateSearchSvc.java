@@ -130,6 +130,7 @@ public class MdmCandidateSearchSvc {
 				}
 			}
 		}
+
 		// Obviously we don't want to consider the incoming resource as a potential candidate.
 		// Sometimes, we are running this function on a resource that has not yet been persisted,
 		// so it may not have an ID yet, precluding the need to remove it.
