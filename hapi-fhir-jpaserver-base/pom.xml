@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>8.13.5-SNAPSHOT</version>
+		<version>8.13.7-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -493,8 +493,36 @@
 							<baseResourceNames></baseResourceNames>
 						</configuration>
 					</execution>
+					<!-- Generate the DDL schema files -->
+					<execution>
+						<id>generate-ddl-legacy</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>generate-ddl</goal>
+						</goals>
+						<configuration>
+							<databasePartitionMode>false</databasePartitionMode>
+							<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/nonpartitioned</outputDirectory>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generate-ddl-partitioned</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>generate-ddl</goal>
+						</goals>
+						<configuration>
+							<databasePartitionMode>true</databasePartitionMode>
+							<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/partitioned</outputDirectory>
+						</configuration>
+					</execution>
 				</executions>
 				<dependencies>
+					<dependency>
+						<groupId>ca.uhn.hapi.fhir</groupId>
+						<artifactId>hapi-fhir-jpaserver-model</artifactId>
+						<version>${project.version}</version>
+					</dependency>
 					<dependency>
 						<groupId>ca.uhn.hapi.fhir</groupId>
 						<artifactId>hapi-fhir-structures-dstu2</artifactId>
@@ -516,37 +544,6 @@
 						<version>${project.version}</version>
 					</dependency>
 				</dependencies>
-			</plugin>
-
-			<!-- Generate the DDL schema files -->
-			<plugin>
-				<groupId>ca.uhn.hapi.fhir</groupId>
-				<artifactId>hapi-tinder-plugin</artifactId>
-				<version>${project.version}</version>
-				<executions>
-					<execution>
-						<id>generate-ddl-legacy</id>
-						<phase>process-classes</phase>
-						<goals>
-							<goal>generate-ddl</goal>
-						</goals>
-						<configuration>
-							<databasePartitionMode>false</databasePartitionMode>
-							<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/nonpartitioned</outputDirectory>
-						</configuration>
-					</execution>
-				<execution>
-					<id>generate-ddl-partitioned</id>
-					<phase>process-classes</phase>
-				<goals>
-					<goal>generate-ddl</goal>
-				</goals>
-					<configuration>
-						<databasePartitionMode>true</databasePartitionMode>
-						<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/partitioned</outputDirectory>
-					</configuration>
-				</execution>
-				</executions>
 				<configuration>
 					<packageNames>
 						<packageName>ca.uhn.fhir.jpa.entity</packageName>
@@ -588,13 +585,6 @@
 						</dialect>
 					</dialects>
 				</configuration>
-				<dependencies>
-					<dependency>
-						<groupId>ca.uhn.hapi.fhir</groupId>
-						<artifactId>hapi-fhir-jpaserver-model</artifactId>
-						<version>${project.version}</version>
-					</dependency>
-				</dependencies>
 			</plugin>
 
 			<plugin>
