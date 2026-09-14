@@ -80,6 +80,80 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		myStoppableSubscriptionDeliveringRestHookListener.setCountDownLatch(null);
 		myStoppableSubscriptionDeliveringRestHookListener.resume();
 		mySubscriptionSettings.setTriggerSubscriptionsForNonVersioningChanges(new SubscriptionSettings().isTriggerSubscriptionsForNonVersioningChanges());
+		myStorageSettings.setFilterParameterEnabled(new JpaStorageSettings().isFilterParameterEnabled());
+	}
+
+	/**
+	 * A subscription whose criteria uses the _filter search parameter must deliver exactly once for a
+	 * resource that satisfies the filter, and the delivered resource must be the matching one.
+	 */
+	@Test
+	void testRestHookSubscriptionWithFilterCriteria_matchingResourceDeliversExactlyOnce() throws Exception {
+		createFilterOnFamilySmithSubscription();
+
+		createPatientWithFamily("Smith");
+
+		waitForQueueToDrain();
+
+		ourPatientProvider.waitForUpdateCount(1);
+		assertThat(ourPatientProvider.getStoredResources()).hasSize(1);
+		assertThat(ourPatientProvider.getStoredResources().get(0).getName().get(0).getFamily())
+				.isEqualTo("Smith");
+	}
+
+	/**
+	 * A resource that does not satisfy the _filter must produce zero deliveries.
+	 */
+	@Test
+	void testRestHookSubscriptionWithFilterCriteria_nonMatchingResourceDoesNotDeliver() throws Exception {
+		createFilterOnFamilySmithSubscription();
+
+		createPatientWithFamily("Jones");
+
+		waitForQueueToDrain();
+
+		assertThat(ourPatientProvider.getCountUpdate()).isZero();
+		assertThat(ourPatientProvider.getCountCreate()).isZero();
+		assertThat(ourPatientProvider.getStoredResources()).isEmpty();
+	}
+
+	/**
+	 * When several resources are created, only those satisfying the _filter are delivered. Mixing
+	 * matching and non-matching resources confirms the filter discriminates on a populated type
+	 * rather than firing for every resource of that type.
+	 */
+	@Test
+	void testRestHookSubscriptionWithFilterCriteria_onlyMatchingResourcesDeliver() throws Exception {
+		createFilterOnFamilySmithSubscription();
+
+		for (int i = 0; i < 3; i++) {
+			createPatientWithFamily("Jones");
+		}
+
+		for (int i = 0; i < 2; i++) {
+			createPatientWithFamily("Smith");
+		}
+
+		waitForQueueToDrain();
+
+		ourPatientProvider.waitForUpdateCount(2);
+		assertThat(ourPatientProvider.getStoredResources()).hasSize(2);
+		assertThat(ourPatientProvider.getStoredResources())
+				.allSatisfy(patient ->
+						assertThat(patient.getName().get(0).getFamily()).isEqualTo("Smith"));
+	}
+
+	private void createFilterOnFamilySmithSubscription() throws Exception {
+		myStorageSettings.setFilterParameterEnabled(true);
+		createSubscription("Patient?_filter=name%20eq%20Smith", "application/fhir+json");
+		waitForActivatedSubscriptionCount(1);
+	}
+
+	private void createPatientWithFamily(String theFamily) {
+		Patient patient = new Patient();
+		patient.addName().setFamily(theFamily);
+		patient.setActive(true);
+		myClient.create().resource(patient).execute();
 	}
 
 	/**

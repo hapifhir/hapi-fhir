@@ -22,6 +22,12 @@ public class SubscriptionStrategyEvaluatorTest extends BaseSubscriptionDstu3Test
 		assertDatabase("MessageHeader?event:missing=true");
 	}
 
+	// _filter criteria cannot be evaluated in-memory and must fall back to DATABASE
+	@Test
+	void testFilterParam() {
+		assertDatabase("Patient?_filter=name%20eq%20smith");
+	}
+
 	@Test
 	public void testInMemory() {
 		assertInMemory("Observation?");
