@@ -16,26 +16,27 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class TermDeferredStorageSvcImplTest {
+class TermDeferredStorageSvcImplTest {
 
 	@Mock
 	private PlatformTransactionManager myTxManager;
@@ -53,15 +54,44 @@ public class TermDeferredStorageSvcImplTest {
 	private TermDeferredStorageSvcImpl mySvc;
 
 	@Test
-	public void testSaveDeferredWithExecutionSuspended() {
+	void saveDeferred_processingIsPaused_holdsTheQueuedConceptUntilProcessingResumes() {
+		TermConcept concept = new TermConcept();
+		concept.setCode("CODE_A");
+		TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
+		codeSystemVersion.setId(1L);
+		concept.setCodeSystemVersion(codeSystemVersion);
+
 		TermDeferredStorageSvcImpl svc = new TermDeferredStorageSvcImpl();
+		svc.setTransactionManagerForUnitTest(myTxManager);
+		svc.setTermConceptDaoSvc(myTermConceptDaoSvc);
+		svc.setCodeSystemVersionDaoForUnitTest(myTermCodeSystemVersionDao);
+		svc.addConceptToStorageQueue(concept);
+
 		svc.setProcessDeferred(false);
 		svc.saveDeferred();
+		verifyNoInteractions(myTermConceptDaoSvc);
+
+		// the queued concept must survive the pause, not be dropped by it
+		when(myTermCodeSystemVersionDao.findById(any())).thenReturn(Optional.of(codeSystemVersion));
+		svc.setProcessDeferred(true);
+		svc.saveDeferred();
+		verify(myTermConceptDaoSvc).saveConcept(same(concept));
+	}
+
+	@Test
+	void saveAllDeferred_processingIsPaused_returnsInsteadOfLoopingForever() {
+		TermDeferredStorageSvcImpl svc = new TermDeferredStorageSvcImpl();
+		svc.setProcessDeferred(false);
+
+		// a paused queue reports itself as non-empty, so the save loop has no exit condition of its own
+		assertFalse(svc.isStorageQueueEmpty(false));
+
+		assertTimeoutPreemptively(Duration.ofSeconds(5), svc::saveAllDeferred);
 	}
 
 
 	@Test
-	public void testStorageNotEmptyWhileJobsExecuting() {
+	void testStorageNotEmptyWhileJobsExecuting() {
 		String jobId = "jobId";
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId(jobId);
@@ -88,7 +118,7 @@ public class TermDeferredStorageSvcImplTest {
 
 
 	@Test
-	public void testSaveDeferred_Concept() {
+	void testSaveDeferred_Concept() {
 		TermConcept concept = new TermConcept();
 		concept.setCode("CODE_A");
 
@@ -111,7 +141,7 @@ public class TermDeferredStorageSvcImplTest {
 	}
 
 	@Test
-	public void testSaveDeferred_Concept_StaleCodeSystemVersion() {
+	void testSaveDeferred_Concept_StaleCodeSystemVersion() {
 		TermConcept concept = new TermConcept();
 		concept.setCode("CODE_A");
 
@@ -135,7 +165,7 @@ public class TermDeferredStorageSvcImplTest {
 	}
 
 	@Test
-	public void testSaveDeferred_Concept_Exception() {
+	void testSaveDeferred_Concept_Exception() {
 		// There is a small
 		TermConcept concept = new TermConcept();
 		concept.setCode("CODE_A");
@@ -162,7 +192,7 @@ public class TermDeferredStorageSvcImplTest {
 	}
 
 	@Test
-	public void testSaveDeferred_ConceptParentChildLink_ConceptsMissing() {
+	void testSaveDeferred_ConceptParentChildLink_ConceptsMissing() {
 		TermConceptParentChildLink conceptLink = new TermConceptParentChildLink();
 		conceptLink.setChild(new TermConcept().setId(111L));
 		conceptLink.setParent(new TermConcept().setId(222L));

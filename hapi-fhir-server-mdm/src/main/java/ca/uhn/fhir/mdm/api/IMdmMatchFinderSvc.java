@@ -30,7 +30,11 @@ public interface IMdmMatchFinderSvc {
 	/**
 	 * Retrieve a list of possible target candidates for matching, based on the given {@link IAnyResource}
 	 * Internally, performs all MDM matching rules on the type of the resource.
-	 *
+	 * *
+	 * If placeholder resources are permitted, and "ignore Placeholder Resources" is configured,
+	 * placeholder resources in returned search results will be ignored. If a placeholder resource is
+	 * itself submitted to this svc, under these conditions. it will always return an empty list.
+	 * *
 	 * @param theResourceType the type of the resource.
 	 * @param theResource the resource that we are attempting to find matches for.
 	 * @return a List of {@link MatchedTarget} representing POSSIBLE_MATCH and MATCH outcomes.

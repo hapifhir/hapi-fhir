@@ -84,7 +84,6 @@ public class MdmProviderMatchR4Test extends BaseMdmProviderR4Test {
 
 	}
 
-
 	@Test
 	public void testServerLevelMatch() throws Exception {
 		Patient jane = buildJanePatient();
