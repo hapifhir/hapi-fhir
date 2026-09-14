@@ -74,7 +74,7 @@ public class CollectionUtil {
 		if (collection1 == null) {
 			return unmodifiableCollection(collection0);
 		}
-		return CollectionUtils.union(collection0, collection1);
+		return unmodifiableCollection(CollectionUtils.union(collection0, collection1));
 	}
 
 	/**
