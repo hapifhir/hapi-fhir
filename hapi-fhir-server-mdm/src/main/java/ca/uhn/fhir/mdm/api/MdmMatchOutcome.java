@@ -40,6 +40,22 @@ public final class MdmMatchOutcome {
 			new MdmMatchOutcome(null, null).setMatchResultEnum(MdmMatchResultEnum.POSSIBLE_MATCH);
 
 	/**
+	 * Returns a fresh POSSIBLE_DUPLICATE outcome with its eidMatch flag set.
+	 * <p>
+	 * Use this rather than mutating {@link #POSSIBLE_DUPLICATE}: that constant is shared, so setting a
+	 * flag on it changes the outcome every other caller sees, across threads.
+	 * </p>
+	 *
+	 * @param theEidMatch whether the duplicate was determined from the resources' enterprise identifiers
+	 * @return a new outcome instance
+	 */
+	public static MdmMatchOutcome possibleDuplicate(boolean theEidMatch) {
+		return new MdmMatchOutcome(null, null)
+				.setMatchResultEnum(MdmMatchResultEnum.POSSIBLE_DUPLICATE)
+				.setEidMatch(theEidMatch);
+	}
+
+	/**
 	 * A bitmap that indicates which rules matched
 	 */
 	private final Long vector;
