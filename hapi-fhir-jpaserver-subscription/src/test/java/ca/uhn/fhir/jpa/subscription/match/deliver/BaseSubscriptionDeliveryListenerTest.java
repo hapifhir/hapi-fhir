@@ -438,6 +438,19 @@ public class BaseSubscriptionDeliveryListenerTest {
 	}
 
 	@Test
+	// During the Jackson 2 -> Jackson Tools 3 upgrade, the format of the partition date in the JSON changed.
+	// Concerns were raised that this might b a breaking change. This test demonstrates that it is not.
+	// The new code is able to parse the old format.
+	public void testSerializeJacksonUpgradeLegacyDeliveryMessage() throws JacksonException {
+		String legacyDeliveryMessageJson = "{\"headers\":{\"customHeaders\":{},\"retryCount\":0},\"payload\":{\"canonicalSubscription\":{\"crossPartitionEnabled\":false,\"endpointUrl\":\"http://example.com/fhir\",\"id\":\"Subscription/123\",\"isTopicSubscription\":false,\"payload\":\"application/fhir+json\",\"sendDeleteMessages\":false},\"operationType\":\"CREATE\",\"partitionId\":{\"allPartitions\":false,\"partitionDate\":[2020,1,1],\"partitionIds\":[123]},\"payload\":\"{\\\"resourceType\\\":\\\"Patient\\\",\\\"active\\\":true}\"}}";
+
+		ResourceDeliveryJsonMessage jsonMessage = ResourceDeliveryJsonMessage.fromJson(legacyDeliveryMessageJson);
+
+		assertThat(jsonMessage.getPayload().getPartitionId()).isNotNull();
+		assertThat(jsonMessage.getPayload().getPartitionId().getPartitionDate()).isEqualTo("2020-01-01");
+	}
+
+	@Test
 	public void testRestHookDeliveryFails_raisedExceptionShouldNotIncludeSubmittedResource() {
 		when(myInterceptorBroadcaster.callHooks(any(), any())).thenReturn(true);
 

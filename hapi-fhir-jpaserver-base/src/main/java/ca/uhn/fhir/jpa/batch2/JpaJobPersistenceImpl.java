@@ -382,8 +382,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 				return mapper.writeValueAsString(objectNode);
 			}
 		} catch (Exception e) {
-			// JacksonException is now unchecked (extends RuntimeException) in Jackson 3,
-			// but catch(Exception e) still covers it — no change needed here.
 			ourLog.info("Error Truncating Original Request Url", e);
 		}
 		return null;
