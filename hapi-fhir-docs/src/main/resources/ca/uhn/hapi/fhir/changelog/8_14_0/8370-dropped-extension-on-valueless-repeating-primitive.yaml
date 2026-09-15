@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 8370
+title: "Extensions on a repeating primitive that carries no value (for example an `_line` array with no corresponding `line` array) were silently dropped when parsing JSON, because an orphan alternate that is an array was reported as an incorrect JSON type and discarded by the lenient error handler. Such elements were also dropped when encoding RDF, since the primitive encoder only produced output when a value was present. Both have been fixed, and the elements are now re-encoded in the spec-conformant null-padded form."
