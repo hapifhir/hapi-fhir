@@ -24,7 +24,7 @@ import static org.mockito.Mockito.mock;
 
 /**
  * Verifies that every {@link IHttpTestTransport} implementation is observably interchangeable. The
- * whole point of the transport SPI is that {@link HttpTestRequest} behaves identically no matter
+ * whole point of this interface is that {@link HttpTestRequest} behaves identically no matter
  * which HTTP client library is underneath, so each case runs against all transports rather than
  * testing any one of them in isolation.
  * <p>
@@ -124,9 +124,9 @@ class HttpTestTransportContractTest {
 	}
 
 	/**
-	 * The body has to be encoded with the charset the header names, or the server decodes mojibake.
-	 * These assert on {@code bodyHex=} rather than {@code body=}: the echo decodes {@code body=} as
-	 * UTF-8, so it cannot tell a correctly encoded body from a mangled one.
+	 * The body has to be encoded with the charset the header names, or the server decodes the bytes
+	 * as the wrong characters. These assert on {@code bodyHex=} rather than {@code body=}: the echo
+	 * decodes {@code body=} as UTF-8, so it cannot tell a correctly encoded body from a mangled one.
 	 */
 	@ParameterizedTest
 	@ValueSource(strings = {APACHE_4, APACHE_5})

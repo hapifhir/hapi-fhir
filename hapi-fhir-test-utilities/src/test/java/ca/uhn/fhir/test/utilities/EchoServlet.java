@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
  * {@literal name=value} per line, so a test can assert on what actually went over the wire with a
  * substring check. {@code body=} is the body decoded as UTF-8, and {@code bodyHex=} is the same
  * bytes unaltered — assert on that one whenever the encoding is what is under test, since
- * {@code body=} cannot tell a correctly encoded body from a mojibake one.
+ * {@code body=} cannot tell a correctly encoded body from a mangled one.
  * <p>
  * Four query parameters shape the response instead of echoing: {@code ?redirect=true} returns a
  * {@literal 302} back to the same path without the parameter, {@code ?status=NNN} sets the status

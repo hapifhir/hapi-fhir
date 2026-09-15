@@ -28,7 +28,7 @@ import java.util.List;
  * named directly. Supporting another client is additive.
  * <p>
  * <b>This is test infrastructure.</b> Do not confuse it with the production
- * {@link ca.uhn.fhir.rest.client.api.IHttpClient} SPI beneath
+ * {@link ca.uhn.fhir.rest.client.api.IHttpClient} that sits beneath
  * {@link ca.uhn.fhir.rest.client.api.IGenericClient} — that builds FHIR interactions with a fixed
  * URL and verb and returns streaming, closeable responses. This sends one arbitrary request and
  * buffers the whole response, which suits assertions and rules out streaming.
