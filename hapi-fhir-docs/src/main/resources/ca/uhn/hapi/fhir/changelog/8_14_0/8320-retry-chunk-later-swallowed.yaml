@@ -1,0 +1,10 @@
+---
+type: fix
+issue: 8320
+title: "Previously, a `RetryChunkLaterException` thrown by a bulk-modify job step's pre-flight check (for example,
+  the guard in the Reindex v3 `$reindex` job that defers a chunk while a concurrent `ValueSet` pre-expansion holds
+  the relevant rows) was swallowed by `BaseBulkModifyResourcesStep` and converted into a permanent per-resource
+  failure, causing the job to end in a `FAILED` state with `HAPI-2790` instead of retrying the work chunk. This has
+  been fixed so that the work chunk is deferred and polled again later instead of failing permanently.
+  Other exceptions thrown by a step's pre-flight check now fail the whole work chunk as a retriable `ERRORED`
+  chunk, rather than being recorded as a failure against every individual resource in the chunk."
