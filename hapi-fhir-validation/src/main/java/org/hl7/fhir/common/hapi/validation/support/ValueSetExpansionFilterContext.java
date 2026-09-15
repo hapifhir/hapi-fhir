@@ -511,13 +511,13 @@ public class ValueSetExpansionFilterContext {
 		if (myFilters != null) {
 			for (ValueSet.ConceptSetFilterComponent filter : myFilters) {
 				if (filter.hasProperty()) {
-					String filterProperty = filter.getProperty();
-					StandardConceptProperty property = StandardConceptProperty.forFilterProperty(filterProperty.toLowerCase(Locale.ROOT));
+					String filterProperty = filter.getProperty().toLowerCase(Locale.ROOT);
+					StandardConceptProperty property = StandardConceptProperty.forFilterProperty(filterProperty);
 					if (property != null) {
 						valueSetStandardPropertiesUsedInFilters.add(property);
 					} else if (!CODE_AND_DISPLAY_FILTER_PROPERTIES.contains(filterProperty)) {
 						// Keep the code verbatim: custom property codes are case-sensitive.
-						valueSetCustomPropertiesUsedInFilters.add(filterProperty);
+						valueSetCustomPropertiesUsedInFilters.add(filter.getProperty());
 					}
 				}
 			}
