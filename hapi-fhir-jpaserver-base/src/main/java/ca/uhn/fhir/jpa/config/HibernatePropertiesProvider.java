@@ -38,6 +38,7 @@ public class HibernatePropertiesProvider {
 
 	private Dialect myDialect;
 	private String myHibernateSearchBackend;
+	private Boolean mySqlServerJsonSupported;
 
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
@@ -45,6 +46,11 @@ public class HibernatePropertiesProvider {
 	@VisibleForTesting
 	public void setDialectForUnitTest(Dialect theDialect) {
 		myDialect = theDialect;
+	}
+
+	@VisibleForTesting
+	public void setSqlServerJsonSupportedForUnitTest(Boolean theSqlServerJsonSupported) {
+		mySqlServerJsonSupported = theSqlServerJsonSupported;
 	}
 
 	public Dialect getDialect() {
@@ -78,5 +84,18 @@ public class HibernatePropertiesProvider {
 
 	public boolean isOracleDialect() {
 		return getDialect() instanceof org.hibernate.dialect.OracleDialect;
+	}
+
+	/**
+	 * Returns <code>true</code> when the SQL Server database behind this provider supports the
+	 * <code>OPENJSON</code> table-valued function, which requires a database compatibility level of
+	 * 130 (SQL Server 2016) or higher.
+	 */
+	public boolean isSqlServerJsonSupported() {
+		Boolean sqlServerJsonSupported = mySqlServerJsonSupported;
+		if (sqlServerJsonSupported == null) {
+			return false;
+		}
+		return sqlServerJsonSupported;
 	}
 }

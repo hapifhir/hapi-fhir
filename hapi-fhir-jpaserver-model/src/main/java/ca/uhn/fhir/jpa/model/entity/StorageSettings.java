@@ -57,6 +57,17 @@ public class StorageSettings {
 	private static final boolean DEFAULT_PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA = false;
 
 	public static final int DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE = 100; // 1 for single thread
+
+	/**
+	 * Value for {@link #setLargeIdListJsonThreshold(int)} which disables JSON array binding entirely.
+	 */
+	public static final int LARGE_ID_LIST_JSON_DISABLED = -1;
+
+	/**
+	 * Default value for {@link #setLargeIdListJsonThreshold(int)}.
+	 */
+	public static final int DEFAULT_LARGE_ID_LIST_JSON_THRESHOLD = 800;
+
 	/**
 	 * Default {@link #getTreatReferencesAsLogical() logical URL bases}. Includes the following
 	 * values:
@@ -175,6 +186,12 @@ public class StorageSettings {
 	 * @since 7.4.0
 	 */
 	private boolean myIndexStorageOptimized = false;
+
+	/**
+	 * The number of resource IDs above which a search predicate renders its ID list as a single
+	 * JSON array bind variable instead of one bind variable per ID.
+	 */
+	private int myLargeIdListJsonThreshold = DEFAULT_LARGE_ID_LIST_JSON_THRESHOLD;
 
 	/**
 	 * Constructor
@@ -1325,6 +1342,40 @@ public class StorageSettings {
 	 */
 	public void setValidateResourceStatusForPackageUpload(boolean theValidateResourceStatusForPackageUpload) {
 		myValidateResourceStatusForPackageUpload = theValidateResourceStatusForPackageUpload;
+	}
+
+	/**
+	 * When a search predicate needs to constrain a column to a list of resource IDs, any list holding
+	 * more than this many IDs is bound as a single JSON array string which the database unpacks with
+	 * its own JSON function, instead of emitting one bind variable per ID. This avoids exceeding the
+	 * database's limit on the number of bind parameters in a single statement.
+	 * <p>
+	 * A value of {@link #LARGE_ID_LIST_JSON_DISABLED} (<code>-1</code>) disables the behaviour entirely,
+	 * so every list is rendered as an <code>IN (?,?,...)</code> list. A value of <code>0</code> means
+	 * every list is rendered as a JSON array. Values below {@link #LARGE_ID_LIST_JSON_DISABLED} are rejected.
+	 * </p>
+	 *
+	 * @since 8.14.0
+	 */
+	public int getLargeIdListJsonThreshold() {
+		return myLargeIdListJsonThreshold;
+	}
+
+	/**
+	 * When a search predicate needs to constrain a column to a list of resource IDs, any list holding
+	 * more than this many IDs is bound as a single JSON array string which the database unpacks with
+	 * its own JSON function, instead of emitting one bind variable per ID. This avoids exceeding the
+	 * database's limit on the number of bind parameters in a single statement.
+	 * <p>
+	 * A value of {@link #LARGE_ID_LIST_JSON_DISABLED} (<code>-1</code>) disables the behaviour entirely,
+	 * so every list is rendered as an <code>IN (?,?,...)</code> list. A value of <code>0</code> means
+	 * every list is rendered as a JSON array. Values below {@link #LARGE_ID_LIST_JSON_DISABLED} are rejected.
+	 * </p>
+	 *
+	 * @since 8.14.0
+	 */
+	public void setLargeIdListJsonThreshold(int theLargeIdListJsonThreshold) {
+		myLargeIdListJsonThreshold = theLargeIdListJsonThreshold;
 	}
 
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {

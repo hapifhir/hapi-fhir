@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.rest.param.DateParam;
 import com.healthmarketscience.sqlbuilder.Condition;
@@ -56,6 +57,27 @@ public class SearchQueryBuilderDialectPostgresTest extends BaseSearchQueryBuilde
 		assertEquals(20220101, generatedSql.getBindVariables().get(1));
 		assertEquals(20221231, generatedSql.getBindVariables().get(2));
 		assertEquals(500, generatedSql.getBindVariables().get(5));
+	}
+
+	/**
+	 * GL-9268: when the ID list handed to the <code>_id</code> predicate is larger than
+	 * {@link StorageSettings#getLargeIdListJsonThreshold()}, PostgreSQL must bind the IDs as a single
+	 * JSON array string which is unpacked by <code>jsonb_array_elements_text</code>, instead of
+	 * emitting one bind variable per ID (which overruns PostgreSQL's 65,535 parameter ceiling).
+	 */
+	@Test
+	void testResourceIdsOverThreshold_bindsSingleJsonArray() {
+		StorageSettings storageSettings = new StorageSettings();
+		storageSettings.setLargeIdListJsonThreshold(3);
+
+		SearchQueryBuilder searchQueryBuilder = createSearchQueryBuilder(storageSettings);
+		GeneratedSql generatedSql = generateResourceIdsPredicate(searchQueryBuilder, 1L, 2L, 3L, 4L, 5L);
+		logSql(generatedSql);
+
+		String sql = generatedSql.getSql();
+		assertThat(sql).contains("t0.RES_ID IN (SELECT CAST(j.value AS BIGINT) FROM jsonb_array_elements_text(CAST(? AS jsonb)) AS j)");
+		assertThat(StringUtils.countMatches(sql, "?")).as(sql).isEqualTo(2);
+		assertThat(generatedSql.getBindVariables()).containsExactly("Patient", "[1,2,3,4,5]");
 	}
 
 	@Nonnull
