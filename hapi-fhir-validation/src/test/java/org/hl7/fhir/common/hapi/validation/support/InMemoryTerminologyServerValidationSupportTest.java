@@ -15,6 +15,7 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -130,74 +131,6 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		assertThat(expansion.getError()).contains("severity");
 	}
 
-	/**
-	 * validating a code against a ValueSet whose include carries a custom concept-property filter
-	 * (e.g. LOINC {@code SCALE_TYP = Doc}) against an inline {@code content: complete} CodeSystem. The filter
-	 * must actually be evaluated, and the two failure modes must be told apart:
-	 * <ul>
-	 *   <li>a determined negative (the property resolved and the code is not a member) -> {@code not-in-vs}</li>
-	 *   <li>an undetermined result (the property is unknown to the code system) -> {@code not-found}, which
-	 *       (unlike {@code vs-invalid}) is recalculated by binding strength and never silently dropped.</li>
-	 * </ul>
-	 */
-	@ParameterizedTest(name = "declared={0}, value={1}, ok={2}, coding={3}")
-	@MethodSource("customPropertyFilterScenarios")
-	public void testValidateCodeInValueSet_customPropertyFilter_completeCodeSystem(
-			boolean theDeclareProperty, String theConceptValue, boolean theExpectedOk, String theExpectedIssueCoding) {
-		String conceptValue = "NULL".equals(theConceptValue) ? null : theConceptValue;
-
-		CodeSystem cs = new CodeSystem();
-		cs.setUrl("http://loinc.org");
-		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-		cs.setCaseSensitive(true);
-		if (theDeclareProperty) {
-			cs.addProperty().setCode("SCALE_TYP")
-				.setUri("http://loinc.org/property/SCALE_TYP")
-				.setType(CodeSystem.PropertyType.STRING);
-		}
-		CodeSystem.ConceptDefinitionComponent concept = cs.addConcept().setCode("29550-1").setDisplay("Glucose");
-		if (conceptValue != null) {
-			concept.addProperty().setCode("SCALE_TYP").setValue(new StringType(conceptValue));
-		}
-		myPrePopulated.addCodeSystem(cs);
-
-		ValueSet vs = new ValueSet();
-		vs.setUrl("http://example.com/doc-typecodes");
-		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		vs.getCompose().addInclude().setSystem("http://loinc.org")
-			.addFilter().setProperty("SCALE_TYP").setOp(ValueSet.FilterOperator.EQUAL).setValue("Doc");
-		myPrePopulated.addValueSet(vs);
-
-		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
-		ConceptValidationOptions options = new ConceptValidationOptions();
-		IValidationSupport.CodeValidationResult outcome =
-				myChain.validateCodeInValueSet(valCtx, options, "http://loinc.org", "29550-1", null, vs);
-
-		assertNotNull(outcome);
-		if (theExpectedOk) {
-			assertTrue(outcome.isOk(), () -> "expected member but was: " + outcome.getMessage());
-		} else {
-			assertFalse(outcome.isOk());
-			assertThat(outcome.getIssues()).isNotEmpty();
-			IValidationSupport.CodeValidationIssueCoding coding =
-					outcome.getIssues().get(0).getCoding();
-			assertNotNull(coding);
-			assertEquals(theExpectedIssueCoding, coding.getCode());
-		}
-	}
-
-	private static Stream<Arguments> customPropertyFilterScenarios() {
-		return Stream.of(
-			// declareProperty, conceptValue, expectedOk, expectedIssueCoding   (scenario)
-			Arguments.of(true, "Doc", true, null), // B1: member -> validates
-			Arguments.of(true, "wrong", false, "not-in-vs"), // B2: determined negative
-			Arguments.of(true, "NULL", false, "not-in-vs"), // C : declared, no value -> determined negative
-			Arguments.of(false, "Doc", true, null), // D1: member (undeclared property, Req 2)
-			Arguments.of(false, "wrong", false, "not-in-vs"), // D2: determined negative
-			Arguments.of(false, "NULL", false, "not-found") // A : undetermined -> must NOT be vs-invalid / not-in-vs
-		);
-	}
 
 	@Test
 	public void testValidateCode_mimetypeVSRandomCode_returnsOk() {
@@ -810,5 +743,98 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		assertThat(actualCodes)
 			.as("%s on '%s' should yield %s", op, filterValue, expectedCodes)
 			.containsExactlyInAnyOrderElementsOf(expectedCodes);
+	}
+
+	@Nested
+	public class CustomPropertyFilterOnCompleteCodeSystem {
+
+		private CodeSystem.PropertyComponent myScaleTypProperty;
+		private CodeSystem myCodeSystem;
+		private CodeSystem.ConceptDefinitionComponent myConcept;
+		private ValueSet myValueSet;
+		private ValidationSupportContext myValCtx;
+		private ConceptValidationOptions myOptions;
+
+		@BeforeEach
+		public void beforeEach() {
+			myScaleTypProperty = new CodeSystem.PropertyComponent()
+					.setCode("SCALE_TYP")
+					.setUri("http://loinc.org/property/SCALE_TYP")
+					.setType(CodeSystem.PropertyType.STRING);
+
+			myCodeSystem = new CodeSystem();
+			myCodeSystem.setUrl("http://loinc.org");
+			myCodeSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			myCodeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+			myCodeSystem.setCaseSensitive(true);
+			myConcept = myCodeSystem.addConcept().setCode("29550-1").setDisplay("Glucose");
+
+			myValueSet = new ValueSet();
+			myValueSet.setUrl("http://example.com/doc-typecodes");
+			myValueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			myValueSet.getCompose().addInclude().setSystem("http://loinc.org")
+				.addFilter().setProperty("SCALE_TYP").setOp(ValueSet.FilterOperator.EQUAL).setValue("Doc");
+			myPrePopulated.addValueSet(myValueSet);
+
+			myValCtx = new ValidationSupportContext(myChain);
+			myOptions = new ConceptValidationOptions();
+		}
+
+		/**
+		 * validating a code against a ValueSet whose include carries a custom concept-property filter
+		 * (e.g. LOINC {@code SCALE_TYP = Doc}) against an inline {@code content: complete} CodeSystem. The filter
+		 * must actually be evaluated, and the two failure modes must be told apart:
+		 * <ul>
+		 *   <li>a determined negative (the property resolved and the code is not a member) -> {@code not-in-vs}</li>
+		 *   <li>an undetermined result (the property is unknown to the code system) -> {@code not-found}.</li>
+		 * </ul>
+		 */
+		@ParameterizedTest(name = "isDeclareProperty={0}, conceptValue={1}, expectedValidationResult={2}, expectedIssueCoding={3}")
+		@MethodSource("customPropertyFilterScenarios")
+		public void testValidateCodeInValueSet_customPropertyFilter_completeCodeSystem(
+				boolean theIsDeclareProperty, String theConceptValue, boolean theExpectedValidationResult, String theExpectedIssueCoding) {
+			if (theIsDeclareProperty) {
+				// codeSystem.properties[]
+				myCodeSystem.addProperty(myScaleTypProperty);
+			}
+
+			if (theConceptValue != null) {
+				// codeSystem.concept.property.[code|valueString]
+				myConcept.addProperty().setCode("SCALE_TYP").setValue(new StringType(theConceptValue));
+			}
+			// registered only once the parameter-dependent property state is in place
+			myPrePopulated.addCodeSystem(myCodeSystem);
+
+			// the include.filter names system http://loinc.org, which resolves to the myCodeSystem registered above, so
+			// the SCALE_TYP filter is evaluated against that CodeSystem.concept's properties
+			IValidationSupport.CodeValidationResult outcome =
+					myChain.validateCodeInValueSet(
+							myValCtx, myOptions, "http://loinc.org", "29550-1", null, myValueSet);
+
+			assertThat(outcome).isNotNull();
+			assertThat(outcome.isOk())
+					.as("validation result, message was: %s", outcome.getMessage())
+					.isEqualTo(theExpectedValidationResult);
+			assertThat(getIssueCode(outcome)).isEqualTo(theExpectedIssueCoding);
+		}
+
+		private static Stream<Arguments> customPropertyFilterScenarios() {
+			return Stream.of(
+				// isDeclareProperty, conceptValue, expectedValidationResult, expectedIssueCoding
+				Arguments.of(true, "Doc", true, null), // declared, value matches -> member
+				Arguments.of(true, "wrong", false, "not-in-vs"), // declared, value does not match -> not a member
+				Arguments.of(true, null, false, "not-in-vs"), // declared, no value -> not a member
+				Arguments.of(false, "Doc", true, null), // undeclared, value matches -> member, the value is still read
+				Arguments.of(false, "wrong", false, "not-in-vs"), // undeclared, value does not match -> not a member
+				Arguments.of(false, null, false, "not-found") // undeclared, no value -> membership cannot be determined
+			);
+		}
+
+		private String getIssueCode(IValidationSupport.CodeValidationResult theOutcome) {
+			return theOutcome.getIssues().isEmpty()
+				? null
+				: theOutcome.getIssues().get(0).getCoding().getCode();
+		}
+
 	}
 }
