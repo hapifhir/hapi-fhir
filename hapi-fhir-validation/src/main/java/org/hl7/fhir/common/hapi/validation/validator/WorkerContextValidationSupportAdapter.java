@@ -976,7 +976,24 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 				}
 			} else {
 				if (!validationResultsOk.isEmpty()) {
-					return validationResultsOk.get(0);
+					if (issues.isEmpty()) {
+						return validationResultsOk.get(0);
+					}
+					/* The CodeableConcept is valid because at least one coding is in the ValueSet.
+					ValueSet membership issues of the other codings are downgraded to warnings, but
+					all other findings (such as a code that does not exist in its CodeSystem) keep
+					their severity, matching the behavior of the HL7 reference validator. */
+					ValidationResult retVal = new ValidationResult(validationResultsOk.get(0));
+					for (OperationOutcome.OperationOutcomeIssueComponent issue : issues) {
+						OperationOutcome.OperationOutcomeIssueComponent issueCopy = issue.copy();
+						if (isValueSetMembershipIssue(issueCopy)
+								&& (issueCopy.getSeverity() == OperationOutcome.IssueSeverity.ERROR
+										|| issueCopy.getSeverity() == OperationOutcome.IssueSeverity.FATAL)) {
+							issueCopy.setSeverity(OperationOutcome.IssueSeverity.WARNING);
+						}
+						retVal.getIssues().add(issueCopy);
+					}
+					return retVal;
 				}
 			}
 		}
@@ -1147,6 +1164,13 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 
 	private static boolean hasInvalidDisplayDetailCode(IValidationSupport.CodeValidationIssue theIssue) {
 		return theIssue.hasIssueDetailCode(INVALID_DISPLAY.getCode());
+	}
+
+	private static boolean isValueSetMembershipIssue(OperationOutcome.OperationOutcomeIssueComponent theIssue) {
+		return theIssue.getDetails()
+						.hasCoding(IValidationSupport.CodeValidationIssueCoding.TX_ISSUE_SYSTEM, "not-in-vs")
+				|| theIssue.getDetails()
+						.hasCoding(IValidationSupport.CodeValidationIssueCoding.TX_ISSUE_SYSTEM, "this-code-not-in-vs");
 	}
 
 	public static ConceptValidationOptions convertConceptValidationOptions(ValidationOptions theOptions) {

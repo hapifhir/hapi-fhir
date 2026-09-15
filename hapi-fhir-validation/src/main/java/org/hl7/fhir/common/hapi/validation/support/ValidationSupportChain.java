@@ -146,7 +146,7 @@ public class ValidationSupportChain implements IValidationSupport {
 
 	private final ThreadPoolExecutor myBackgroundExecutor;
 	private final CacheConfiguration myCacheConfiguration;
-	private boolean myEnabledValidationForCodingsLogicalAnd;
+	private boolean myEnabledValidationForCodingsLogicalAnd = true;
 	private String myName = getClass().getSimpleName();
 	private ValidationSupportChainMetrics myMetrics;
 	private volatile boolean myHaveFetchedAllStructureDefinitions = false;
@@ -284,23 +284,23 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	/**
-	 * When validating a CodeableConcept containing multiple codings, this method can be used to control whether
-	 * the validator requires all codings in the CodeableConcept to be valid in order to consider the
-	 * CodeableConcept valid.
+	 * When validating a CodeableConcept containing multiple codings against a ValueSet binding,
+	 * this method controls whether the validator requires all codings to be members of the
+	 * ValueSet in order to consider the CodeableConcept valid, or whether a single matching
+	 * coding is sufficient.
 	 * <p>
-	 * See VersionSpecificWorkerContextWrapper#validateCode in hapi-fhir-validation, and the refer to the values below
-	 * for the behaviour associated with each value.
+	 * See WorkerContextValidationSupportAdapter#validateCode in hapi-fhir-validation for the
+	 * behaviour associated with each value:
 	 * </p>
-	 * <p>
-	 *   <ul>
-	 *     <li>If <code>false</code> (default setting) the validation for codings will return a positive result only if
-	 *     ALL codings are valid.</li>
-	 * 	   <li>If <code>true</code> the validation for codings will return a positive result if ANY codings are valid.
-	 * 	   </li>
-	 * 	  </ul>
-	 * </p>
-	 *
-	 * @return true or false depending on the desired coding validation behaviour.
+	 * <ul>
+	 *   <li>If <code>false</code>, the validation returns a positive result only if ALL codings
+	 *   are members of the ValueSet.</li>
+	 *   <li>If <code>true</code> (default setting), the validation returns a positive result if
+	 *   ANY coding is a member of the ValueSet, matching the FHIR specification and the HL7
+	 *   reference validator. Issues about ValueSet membership of the remaining codings are
+	 *   downgraded to warnings, while other findings (such as a code that does not exist in its
+	 *   CodeSystem) keep their severity.</li>
+	 * </ul>
 	 */
 	public ValidationSupportChain setCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid(
 			boolean theEnabledValidationForCodingsLogicalAnd) {
