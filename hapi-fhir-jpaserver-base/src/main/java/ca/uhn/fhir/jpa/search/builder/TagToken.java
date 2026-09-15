@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR - CDS Hooks
+ * HAPI FHIR JPA Server
  * %%
  * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
@@ -17,11 +17,13 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.hapi.fhir.cdshooks.api;
+package ca.uhn.fhir.jpa.search.builder;
 
-import ca.uhn.fhir.model.api.IModelJson;
-import tools.jackson.databind.json.JsonMapper;
-
-public interface ICdsMethod {
-	Object invoke(JsonMapper theJsonMapper, IModelJson theJson, String theServiceId);
-}
+/**
+ * A single parsed token from a {@code _tag}/{@code _security}/{@code _profile} search parameter.
+ *
+ * @param system the tag system (may be {@code null}/blank, meaning "any system")
+ * @param qualifier the parameter qualifier (e.g. {@code :below}), or {@code null} if none
+ * @param code the tag code
+ */
+public record TagToken(String system, String qualifier, String code) {}
