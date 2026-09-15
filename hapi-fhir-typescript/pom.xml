@@ -32,10 +32,8 @@
 		<!-- TODO JM-GGG Temp fix until runner's base image is upgraded -->
 		<ts.node.version>v16.20.2</ts.node.version>
 		<ts.npm.install.args>install --no-audit --no-fund</ts.npm.install.args>
-		<!-- Skips the publish when this version is already on the registry from the same commit, and fails if
-		     it is there from a different one. npm refuses to republish a version, and because this module builds
-		     before the Maven Central upload, that rejection would otherwise fail any redeploy of a release stage.
-		     See src/main/npm/publish-if-new.sh. -->
+		<!-- Checks and skips the npm publish if the version is already present.
+		     Useful for if the sonatype publish fails after the npm publish, and we need to re-run -->
 		<ts.npm.publish.args>run publish-if-new</ts.npm.publish.args>
 		<ts.npm.workdir>${project.build.directory}/npm</ts.npm.workdir>
 	</properties>
