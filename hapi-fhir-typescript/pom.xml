@@ -32,7 +32,9 @@
 		<!-- TODO JM-GGG Temp fix until runner's base image is upgraded -->
 		<ts.node.version>v16.20.2</ts.node.version>
 		<ts.npm.install.args>install --no-audit --no-fund</ts.npm.install.args>
-		<ts.npm.publish.args>publish --access public</ts.npm.publish.args>
+		<!-- Checks and skips the npm publish if the version is already present.
+		     Useful for if the sonatype publish fails after the npm publish, and we need to re-run -->
+		<ts.npm.publish.args>run publish-if-new</ts.npm.publish.args>
 		<ts.npm.workdir>${project.build.directory}/npm</ts.npm.workdir>
 	</properties>
 
