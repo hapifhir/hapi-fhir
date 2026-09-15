@@ -22,22 +22,54 @@ package ca.uhn.fhir.jpa.config;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.util.ReflectionUtil;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.search.engine.cfg.BackendSettings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.sql.DataSource;
 
 public class HibernatePropertiesProvider {
 
+	/**
+	 * The lowest SQL Server database compatibility level which supports the <code>OPENJSON</code>
+	 * table valued function. This is the compatibility level of SQL Server 2016.
+	 */
+	public static final int MINIMUM_SQL_SERVER_JSON_COMPATIBILITY_LEVEL = 130;
+
+	/**
+	 * The number of consecutive probe failures after which {@link #isSqlServerJsonSupported()} gives up
+	 * and caches <code>false</code>, rather than re-probing on every call. Bounds the cost of a
+	 * permanently unreadable <code>sys.databases</code> table to a fixed number of extra connection
+	 * attempts instead of one per over-threshold search forever.
+	 */
+	private static final int MAX_SQL_SERVER_JSON_PROBE_FAILURES = 3;
+
+	private static final String SQL_SERVER_COMPATIBILITY_LEVEL_QUERY =
+			"SELECT compatibility_level FROM sys.databases WHERE name = DB_NAME()";
+
+	private static final Logger ourLog = LoggerFactory.getLogger(HibernatePropertiesProvider.class);
+
 	@Autowired
 	private LocalContainerEntityManagerFactoryBean myEntityManagerFactory;
 
+	private final AtomicBoolean mySqlServerJsonProbeFailureLogged = new AtomicBoolean(false);
+	private final AtomicBoolean mySqlServerJsonFallbackLogged = new AtomicBoolean(false);
+	private final AtomicInteger mySqlServerJsonProbeFailureCount = new AtomicInteger(0);
+
 	private Dialect myDialect;
 	private String myHibernateSearchBackend;
+	private volatile Boolean mySqlServerJsonSupported;
 
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
@@ -45,6 +77,14 @@ public class HibernatePropertiesProvider {
 	@VisibleForTesting
 	public void setDialectForUnitTest(Dialect theDialect) {
 		myDialect = theDialect;
+	}
+
+	@VisibleForTesting
+	public void setSqlServerJsonSupportedForUnitTest(@Nullable Boolean theSqlServerJsonSupported) {
+		mySqlServerJsonSupported = theSqlServerJsonSupported;
+		if (theSqlServerJsonSupported == null) {
+			mySqlServerJsonProbeFailureCount.set(0);
+		}
 	}
 
 	public Dialect getDialect() {
@@ -78,5 +118,110 @@ public class HibernatePropertiesProvider {
 
 	public boolean isOracleDialect() {
 		return getDialect() instanceof org.hibernate.dialect.OracleDialect;
+	}
+
+	/**
+	 * Returns <code>true</code> when the SQL Server database behind this provider supports the
+	 * <code>OPENJSON</code> table-valued function, which requires a database compatibility level of
+	 * {@value #MINIMUM_SQL_SERVER_JSON_COMPATIBILITY_LEVEL} (SQL Server 2016) or higher.
+	 * <p>
+	 * The database is probed the first time this method is called and the answer is cached for the
+	 * lifetime of this provider, so that the probe never runs at startup. The probe runs until it gets a
+	 * definitive answer - at most {@value #MAX_SQL_SERVER_JSON_PROBE_FAILURES} times if it keeps failing -
+	 * after which the failure itself is cached as "not supported", so a database whose compatibility level
+	 * can never be determined costs a bounded number of extra connection attempts rather than one per
+	 * over-threshold search forever. If the probe cannot be performed - for example because the database
+	 * user may not read <code>sys.databases</code> - this method reports the failure once and answers
+	 * <code>false</code>, so that callers fall back to whatever they do on a database without JSON support.
+	 * </p>
+	 *
+	 * @since 8.14.0
+	 */
+	public boolean isSqlServerJsonSupported() {
+		Boolean sqlServerJsonSupported = mySqlServerJsonSupported;
+		if (sqlServerJsonSupported != null) {
+			return sqlServerJsonSupported;
+		}
+
+		Boolean probeResult = probeSqlServerJsonSupport();
+		if (probeResult != null) {
+			mySqlServerJsonSupported = probeResult;
+			return probeResult;
+		}
+
+		// The probe did not produce a definitive answer. Two threads racing here can each increment this
+		// counter and both re-probe on their next call - benign, since the probe is read-only and
+		// idempotent. Once enough consecutive failures have piled up, give up and cache "false" so a
+		// permanently unreadable sys.databases table does not cost one connection attempt per search.
+		if (mySqlServerJsonProbeFailureCount.incrementAndGet() >= MAX_SQL_SERVER_JSON_PROBE_FAILURES) {
+			mySqlServerJsonSupported = Boolean.FALSE;
+		}
+		return false;
+	}
+
+	/**
+	 * Logs, at most once for the lifetime of this provider, that a query had to fall back to a form
+	 * which does not use <code>OPENJSON</code> because this SQL Server database runs at a compatibility
+	 * level below {@value #MINIMUM_SQL_SERVER_JSON_COMPATIBILITY_LEVEL}.
+	 *
+	 * @since 8.14.0
+	 */
+	public void logSqlServerJsonFallbackWarning() {
+		warnOnce(
+				mySqlServerJsonFallbackLogged,
+				"This SQL Server database is running at a compatibility level below {}, so the OPENJSON function is not available. "
+						+ "Large resource ID lists will continue to be sent as one bind parameter per ID, which can exceed the number of "
+						+ "bind parameters the database accepts in a single statement. Raise the database compatibility level to {} "
+						+ "(SQL Server 2016) or higher to avoid this. This message is only logged once.",
+				MINIMUM_SQL_SERVER_JSON_COMPATIBILITY_LEVEL,
+				MINIMUM_SQL_SERVER_JSON_COMPATIBILITY_LEVEL);
+	}
+
+	/**
+	 * Probes the database for a definitive answer to whether it supports the <code>OPENJSON</code>
+	 * table-valued function, or <code>null</code> if the probe failed to produce one - either because the
+	 * query raised an exception, or because it returned no row. A definitive <code>false</code> - this is
+	 * not a SQL Server dialect at all - is not a failure, and is returned directly.
+	 */
+	@Nullable
+	private Boolean probeSqlServerJsonSupport() {
+		if (!(getDialect() instanceof org.hibernate.dialect.SQLServerDialect)) {
+			return false;
+		}
+
+		try (Connection connection = getDataSource().getConnection();
+				Statement statement = connection.createStatement();
+				ResultSet resultSet = statement.executeQuery(SQL_SERVER_COMPATIBILITY_LEVEL_QUERY)) {
+			if (resultSet.next()) {
+				int compatibilityLevel = resultSet.getInt(1);
+				ourLog.debug("SQL Server database compatibility level is {}", compatibilityLevel);
+				return compatibilityLevel >= MINIMUM_SQL_SERVER_JSON_COMPATIBILITY_LEVEL;
+			}
+			logSqlServerJsonProbeFailure(null);
+		} catch (Exception e) {
+			logSqlServerJsonProbeFailure(e);
+		}
+		return null;
+	}
+
+	private void logSqlServerJsonProbeFailure(@Nullable Exception theException) {
+		warnOnce(
+				mySqlServerJsonProbeFailureLogged,
+				"Failed to determine the compatibility level of this SQL Server database, so features which need a "
+						+ "compatibility level of {} (SQL Server 2016) or higher, such as the OPENJSON function, will not be used. "
+						+ "This message is only logged once.",
+				MINIMUM_SQL_SERVER_JSON_COMPATIBILITY_LEVEL,
+				theException);
+	}
+
+	/**
+	 * Logs a WARN message the first time this is called for the given gate, and does nothing on any
+	 * later call for that same gate - so that a condition which can recur on every search, such as a
+	 * SQL Server compatibility level being too low, is only ever reported once per provider.
+	 */
+	private void warnOnce(AtomicBoolean theGate, String theMessage, Object... theArguments) {
+		if (theGate.compareAndSet(false, true)) {
+			ourLog.warn(theMessage, theArguments);
+		}
 	}
 }

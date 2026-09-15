@@ -84,3 +84,11 @@ Setting this property explicitly to true enables the feature: [Index Storage Opt
 * If this setting is enabled along with [Index Missing Fields](/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/entity/StorageSettings.html#getIndexMissingFields()) setting, the following index may need to be added into the `HFJ_SPIDX_xxx` tables to improve the search performance: `(HASH_IDENTITY, SP_MISSING, RES_ID, PARTITION_ID)`.
 
 * This setting should not be enabled in combination with [Include Partition in Search Hashes](/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/config/PartitionSettings.html#setIncludePartitionInSearchHashes(boolean)) flag, as in this case, Partition could not be included in Search Hashes. 
+
+# Large ID List JSON Binding
+
+Some searches constrain a column to a list of resource IDs - a search on `_id` with many values, or a reference parameter such as `subject=` with many values. This occurs in particular when a request is narrowed to the compartments a user is permitted to see, since every permitted compartment contributes one value; a user holding tens of thousands of grants can produce an ID list of the same size, which puts pressure on the number of bind parameters a single database statement accepts.
+
+Above a configurable threshold, HAPI FHIR binds such a list as a single JSON array parameter which the database unpacks with its own JSON function, instead of one bind parameter per ID. This is supported on PostgreSQL, Oracle and SQL Server; see [Large ID Lists](./database_support.html#large-id-lists) for the per-database mechanism and requirements. MySQL, MariaDB and H2 are unaffected and always use one bind parameter per ID.
+
+The threshold defaults to 800 IDs, and can be tuned or the feature disabled entirely (a value of `-1`) using [Large ID List JSON Threshold](/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/entity/StorageSettings.html#setLargeIdListJsonThreshold(int)).

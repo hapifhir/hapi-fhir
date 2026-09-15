@@ -107,8 +107,10 @@ public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 	public Condition createPredicateResourceIds(boolean theInverse, Collection<JpaPid> theResourceIds) {
 		Validate.notNull(theResourceIds, "theResourceIds must not be null");
 
-		Condition inResourceIds = QueryParameterUtils.toEqualToOrInPredicate(
-				getResourceIdColumn(), generatePlaceholders(JpaPid.toLongList(theResourceIds)));
+		// Negation is applied by the outer wrap below, so an inverted _id predicate renders as
+		// NOT (RES_ID IN (...)) rather than RES_ID NOT IN (...).
+		Condition inResourceIds = getSearchQueryBuilder()
+				.createPredicateIdsInList(getResourceIdColumn(), JpaPid.toLongList(theResourceIds), false);
 		if (theInverse) {
 			inResourceIds = new NotCondition(inResourceIds);
 		}
