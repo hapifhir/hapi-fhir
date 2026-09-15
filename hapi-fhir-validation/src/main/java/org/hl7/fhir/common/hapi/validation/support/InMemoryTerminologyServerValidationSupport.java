@@ -1018,6 +1018,17 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 					retVal = true;
 				}
 			}
+		} catch (ValueSetExpansionFilterContext.UndeterminedFilterException e) {
+			// The filter could not be evaluated for this concept, so membership was neither established nor
+			// refuted. Report that as 'not-found' Mirroring the case above (Msg.code(2646)), where a not-present
+			// CodeSystem leaves filters inapplicable.
+			throw new ExpansionCouldNotBeCompletedInternallyException(
+					Msg.code(3049) + e.getMessage(),
+					new CodeValidationIssue(
+							e.getMessage(),
+							IssueSeverity.ERROR,
+							CodeValidationIssueCode.NOT_FOUND,
+							CodeValidationIssueCoding.NOT_FOUND));
 		} catch (ValueSetExpansionFilterContext.UnsupportedFilterException e) {
 			// The in-memory engine cannot evaluate this filter. Surface it as an expansion failure rather
 			// than silently returning an incomplete/empty expansion, so the caller can report an error or
