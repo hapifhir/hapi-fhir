@@ -64,7 +64,7 @@ public abstract class BaseSearchQueryBuilderDialectTest {
 	}
 
 	/**
-	 * GL-9268: builds and applies an <code>_id</code> predicate for the given PIDs on an already-constructed
+	 * Builds and applies an <code>_id</code> predicate for the given PIDs on an already-constructed
 	 * {@link SearchQueryBuilder} and generates the resulting SQL, on a real {@link ResourceTablePredicateBuilder}.
 	 */
 	protected GeneratedSql generateResourceIdsPredicate(SearchQueryBuilder theBuilder, long... thePids) {

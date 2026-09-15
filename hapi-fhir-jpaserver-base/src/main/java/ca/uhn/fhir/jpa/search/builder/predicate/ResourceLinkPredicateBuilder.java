@@ -507,9 +507,8 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 		Condition targetPidCondition = null;
 		if (!theTargetPidList.isEmpty()) {
-			List<String> placeholders = generatePlaceholders(theTargetPidList);
-			targetPidCondition =
-					QueryParameterUtils.toEqualToOrInPredicate(myColumnTargetResourceId, placeholders, theInverse);
+			targetPidCondition = getSearchQueryBuilder()
+					.createPredicateIdsInList(myColumnTargetResourceId, theTargetPidList, theInverse);
 		}
 
 		Condition targetUrlsCondition = null;
