@@ -498,7 +498,8 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		}
 	}
 
-	private Condition createPredicateReference(
+	@VisibleForTesting
+	Condition createPredicateReference(
 			boolean theInverse,
 			List<String> thePathsToMatch,
 			List<Long> theTargetPidList,

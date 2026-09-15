@@ -5,9 +5,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
+import ca.uhn.fhir.jpa.search.builder.sql.SqlObjectFactory;
 import ca.uhn.fhir.jpa.search.builder.sql.TuplePredicateBuilder;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -23,12 +27,16 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +69,9 @@ public class ResourceLinkPredicateBuilderTest {
 
 	@Mock
 	private IIdHelperService<?> myIdHelperService;
+
+	@Mock
+	private SqlObjectFactory mySqlObjectFactory;
 
 	@BeforeEach
 	public void init() {
@@ -190,5 +201,50 @@ public class ResourceLinkPredicateBuilderTest {
 		when(mySearchParamRegistry.getActiveSearchParam(eq("Observation"), eq("subject"), any())).thenReturn(observationSubjectSP);
 		List<String> result = myResourceLinkPredicateBuilder.createResourceLinkPaths(resourceType, paramName, List.of("Group"));
 		assertThat(result).isEmpty();
+	}
+
+	// --- GL-9268: the reference site binds large target ID lists as a single JSON array ---
+
+	/**
+	 * A16: exercises the large-ID-list threshold boundary at the reference site - above the threshold
+	 * TARGET_RESOURCE_ID is constrained by the JSON unpacking subselect rather than by one bind variable
+	 * per target ID, at or under the threshold the reference site keeps rendering today's IN list, and a
+	 * single target ID still collapses to an equality predicate. Threshold is 3 in every row.
+	 */
+	@ParameterizedTest(name = "targetIdCount={0}")
+	@CsvSource({
+		"5, 'TARGET_RESOURCE_ID IN (SELECT', true",
+		"3, 'TARGET_RESOURCE_ID IN (', false",
+		"1, 'TARGET_RESOURCE_ID = ', false"
+	})
+	void createPredicateReference_targetIdCountAcrossThreshold_rendersExpectedPredicate(int theTargetIdCount, String theExpectedFragment, boolean theExpectJson) {
+		ResourceLinkPredicateBuilder builder = createBuilderOnRealSearchQueryBuilder(3);
+
+		Condition condition = builder.createPredicateReference(false, List.of("Observation.subject"), toTargetPids(theTargetIdCount), List.of());
+
+		assertThat(condition.toString()).contains(theExpectedFragment);
+		if (theExpectJson) {
+			assertThat(condition.toString()).contains("jsonb_array_elements_text");
+		} else {
+			assertThat(condition.toString()).doesNotContain("jsonb_array_elements_text");
+		}
+	}
+
+	private ResourceLinkPredicateBuilder createBuilderOnRealSearchQueryBuilder(int theLargeIdListJsonThreshold) {
+		StorageSettings storageSettings = new StorageSettings();
+		storageSettings.setLargeIdListJsonThreshold(theLargeIdListJsonThreshold);
+
+		HibernatePropertiesProvider dialectProvider = new HibernatePropertiesProvider();
+		dialectProvider.setDialectForUnitTest(new HapiFhirPostgresDialect());
+
+		SearchQueryBuilder searchQueryBuilder = new SearchQueryBuilder(
+			FhirContext.forR4Cached(), storageSettings, new PartitionSettings(), RequestPartitionId.allPartitions(),
+			"Observation", mySqlObjectFactory, dialectProvider, false, false);
+
+		return new ResourceLinkPredicateBuilder(null, searchQueryBuilder);
+	}
+
+	private static List<Long> toTargetPids(int theCount) {
+		return LongStream.rangeClosed(1, theCount).boxed().collect(Collectors.toList());
 	}
 }

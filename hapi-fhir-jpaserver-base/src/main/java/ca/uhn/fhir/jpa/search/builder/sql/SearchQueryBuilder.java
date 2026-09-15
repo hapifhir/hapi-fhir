@@ -115,6 +115,7 @@ public class SearchQueryBuilder {
 	private final SqlObjectFactory mySqlBuilderFactory;
 	private final boolean myCountQuery;
 	private final Dialect myDialect;
+	private final HibernatePropertiesProvider myDialectProvider;
 	private final boolean mySelectPartitionId;
 	private boolean mySelectResourceType;
 	private boolean myMatchNothing;
@@ -151,6 +152,7 @@ public class SearchQueryBuilder {
 				theSqlBuilderFactory,
 				UUID.randomUUID() + "-",
 				theDialectProvider.getDialect(),
+				theDialectProvider,
 				theCountQuery,
 				new ArrayList<>(),
 				thePartitionSettings.isPartitioningEnabled(),
@@ -170,6 +172,7 @@ public class SearchQueryBuilder {
 			SqlObjectFactory theSqlBuilderFactory,
 			String theBindVariableSubstitutionBase,
 			Dialect theDialect,
+			HibernatePropertiesProvider theDialectProvider,
 			boolean theCountQuery,
 			ArrayList<Object> theBindVariableValues,
 			boolean theSelectPartitionId,
@@ -183,6 +186,7 @@ public class SearchQueryBuilder {
 		mySqlBuilderFactory = theSqlBuilderFactory;
 		myCountQuery = theCountQuery;
 		myDialect = theDialect;
+		myDialectProvider = theDialectProvider;
 		if (myDialect instanceof org.hibernate.dialect.MySQLDialect) {
 			dialectIsMySql = true;
 		}
@@ -1015,6 +1019,7 @@ public class SearchQueryBuilder {
 				mySqlBuilderFactory,
 				myBindVariableSubstitutionBase,
 				myDialect,
+				myDialectProvider,
 				false,
 				myBindVariableValues,
 				theSelectPartitionId,
