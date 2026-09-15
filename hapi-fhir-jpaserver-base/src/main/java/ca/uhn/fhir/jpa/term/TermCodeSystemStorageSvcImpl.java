@@ -431,7 +431,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				codeSystemVersion = myCodeSystemVersionDao.findByCodeSystemUriAndNullVersion(theSystemUri);
 			} else {
 				codeSystemVersion =
-					myCodeSystemVersionDao.findByCodeSystemUriAndVersion(theSystemUri, theSystemVersionId);
+						myCodeSystemVersionDao.findByCodeSystemUriAndVersion(theSystemUri, theSystemVersionId);
 			}
 
 			TermCodeSystem codeSystem = codeSystemVersion.getCodeSystem();
