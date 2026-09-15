@@ -59,17 +59,17 @@ public class ValueSetExpansionFilterContext {
 	private static final Set<String> CODE_AND_DISPLAY_FILTER_PROPERTIES = Set.of("concept", "code", "display");
 
 	// The CodeSystem.concept's own 'code' and 'display' values: "code" or "display" -> concept code -> value.
-	private final Map<String, Map<String, String>> codeSystemCodeAndDisplayIndex = new HashMap<>();
+	private final Map<String, Map<String, String>> myCodeSystemCodeAndDisplayIndex = new HashMap<>();
 
 	// CodeSystem.concept.property.value for NON-standard (custom) properties. A Set is used since concept.property
 	// cardinality is 0..*; a filter matches when ANY value satisfies it.
-	private final Map<String, Map<String, Set<String>>> codeSystemCustomPropertyIndex = new HashMap<>();
+	private final Map<String, Map<String, Set<String>>> myCodeSystemCustomPropertyIndex = new HashMap<>();
 
 	// Concepts carrying a non-primitive CodeSystem.concept.property.value (e.g. a Coding) for a custom
 	// property: property code -> concept codes. Such a value cannot be compared against the filter's string
 	// value, so the concept is recorded here to avoid treating it as having no value - that would report a
 	// confident "not a member" about data never examined.
-	private final Map<String, Set<String>> codeSystemCustomPropertiesWithUnusableValue = new HashMap<>();
+	private final Map<String, Set<String>> myCodeSystemCustomPropertiesWithUnusableValue = new HashMap<>();
 
 	// The non-standard property codes CodeSystem.property[] declares.
 	// FHIR documents CodeSystem.concept.property.code as a reference to CodeSystem.property.code, but a
@@ -82,50 +82,51 @@ public class ValueSetExpansionFilterContext {
 	//                 it, so the concept is not a member (a determined negative)
 	//   undeclared -> the CodeSystem does not know the property at all, so membership can be neither
 	//                 established nor refuted (undetermined)
-	private final Set<String> codeSystemDeclaredCustomProperties = new HashSet<>();
+	private final Set<String> myCodeSystemDeclaredCustomProperties = new HashSet<>();
 
 	// The non-standard property codes referenced by the ValueSet filters this context was constructed with,
 	// that is the ValueSet.compose.include.filter (or compose.exclude.filter) entries being applied.
 	//
 	// Indexing walks every CodeSystem.concept.property and keeps only those whose code appears in this set,
-	// storing them in codeSystemCustomPropertyIndex; the rest are skipped to avoid indexing properties that
+	// storing them in myCodeSystemCustomPropertyIndex; the rest are skipped to avoid indexing properties that
 	// can never be accessed.
 	//
-	// Mirrors valueSetStandardPropertiesUsedInFilters, but stores codes verbatim: custom property codes are
+	// Mirrors myValueSetStandardPropertiesUsedInFilters, but stores codes verbatim: custom property codes are
 	// case-sensitive
 	// and must not be lowercased the way the standard-property dispatch does.
-	private final Set<String> valueSetCustomPropertiesUsedInFilters = new HashSet<>();
+	private final Set<String> myValueSetCustomPropertiesUsedInFilters = new HashSet<>();
 
-	private final Map<String, Set<String>> conceptCodeTree = new HashMap<>();
+	private final Map<String, Set<String>> myConceptCodeTree = new HashMap<>();
 	// Concepts carrying a boolean/date standard property, for membership 'exists' checks (see kinds below).
-	private final Map<StandardConceptProperty, Set<String>> conceptsByStandardProperty =
+	private final Map<StandardConceptProperty, Set<String>> myConceptsByStandardProperty =
 			new EnumMap<>(StandardConceptProperty.class);
 	// Standard properties the CodeSystem declares with the canonical concept-properties URI (honored as-is).
-	private final Set<StandardConceptProperty> canonicalUriDeclared = EnumSet.noneOf(StandardConceptProperty.class);
+	private final Set<StandardConceptProperty> myCanonicalUriDeclared = EnumSet.noneOf(StandardConceptProperty.class);
 	// A standard property is "conflicting" when the CodeSystem declares it (by its reserved code) but with a
 	// 'uri' that differs from the canonical concept-properties URI — it then means something non-standard, so
 	// we cannot evaluate it. Maps such a property to that declared URI. A missing declaration, or one without
 	// a uri, is NOT conflicting: the property is matched by its reserved code name instead.
-	private final Map<StandardConceptProperty, String> conflictingPropertyUris =
+	private final Map<StandardConceptProperty, String> myConflictingPropertyUris =
 			new EnumMap<>(StandardConceptProperty.class);
 	// Standard properties used by one of the filters (drives the "matched by code name" info log).
-	private final Set<StandardConceptProperty> valueSetStandardPropertiesUsedInFilters =
+	private final Set<StandardConceptProperty> myValueSetStandardPropertiesUsedInFilters =
 			EnumSet.noneOf(StandardConceptProperty.class);
 	// Standard properties for which the "matched by code name (not declared)" info log was already emitted.
-	private final Set<StandardConceptProperty> loggedNameMatch = EnumSet.noneOf(StandardConceptProperty.class);
-	private final Set<String> allCodes = new HashSet<>();
-	private final Set<String> allCodesLower = new HashSet<>();
-	private final Set<String> allChildCodes = new HashSet<>();
-	private final Set<String> allChildCodesLower = new HashSet<>();
-	private final Map<String, Set<String>> inSetsMap = new HashMap<>();
-	private final Map<String, Pattern> regexCache = new HashMap<>();
+	private final Set<StandardConceptProperty> myLoggedNameMatch = EnumSet.noneOf(StandardConceptProperty.class);
+	private final Set<String> myAllCodes = new HashSet<>();
+	private final Set<String> myAllCodesLower = new HashSet<>();
+	private final Set<String> myAllChildCodes = new HashSet<>();
+	private final Set<String> myAllChildCodesLower = new HashSet<>();
+	private final Map<String, Set<String>> myInSetsMap = new HashMap<>();
+	private final Map<String, Pattern> myRegexCache = new HashMap<>();
 	private final CodeSystem myCodeSystem;
 	private final List<ValueSet.ConceptSetFilterComponent> myFilters;
-	private boolean hasIndexRun = false;
+	private boolean myHasIndexRun = false;
 
-	public ValueSetExpansionFilterContext(CodeSystem codeSystem, List<ValueSet.ConceptSetFilterComponent> filters) {
-		myCodeSystem = codeSystem;
-		myFilters = filters;
+	public ValueSetExpansionFilterContext(
+			CodeSystem theCodeSystem, List<ValueSet.ConceptSetFilterComponent> theFilters) {
+		myCodeSystem = theCodeSystem;
+		myFilters = theFilters;
 	}
 
 	/**
@@ -138,14 +139,14 @@ public class ValueSetExpansionFilterContext {
 	 *     concept, leaving membership neither established nor refuted. Callers must keep this apart from a
 	 *     determined negative (see the exception's javadoc).
 	 */
-	public boolean isFiltered(FhirVersionIndependentConcept concept) {
+	public boolean isFiltered(FhirVersionIndependentConcept theConcept) {
 		if (myFilters == null || myFilters.isEmpty()) {
 			return false;
 		}
 
 		// buildChildrenMap() once in ctor or lazily here
 		for (ValueSet.ConceptSetFilterComponent filter : myFilters) {
-			if (!passesFilter(filter, concept)) {
+			if (!passesFilter(filter, theConcept)) {
 				return true;
 			}
 		}
@@ -159,15 +160,16 @@ public class ValueSetExpansionFilterContext {
 	 *     expansion cannot evaluate (see {@link #isFiltered}).
 	 * @throws UndeterminedFilterException if membership could not be determined (see {@link #isFiltered}).
 	 */
-	public boolean passesFilter(ValueSet.ConceptSetFilterComponent filter, FhirVersionIndependentConcept concept) {
-		if (filter.hasOp()) {
+	public boolean passesFilter(
+			ValueSet.ConceptSetFilterComponent theFilter, FhirVersionIndependentConcept theConcept) {
+		if (theFilter.hasOp()) {
 			// Lazy load the index, if there are any filters to process.
 			buildIndexes();
 
 			// The 'property' element is required by the FHIR spec, but we default to "concept" (the code)
 			// when it's missing, for backwards-compatibility with legacy HAPI clients.
 			String theFilterProperty =
-					filter.hasProperty() ? filter.getProperty().toLowerCase(Locale.ROOT) : "concept";
+					theFilter.hasProperty() ? theFilter.getProperty().toLowerCase(Locale.ROOT) : "concept";
 			boolean onCode = theFilterProperty.equals("concept") || theFilterProperty.equals("code");
 			boolean onDisplay = theFilterProperty.equals("display");
 
@@ -181,21 +183,21 @@ public class ValueSetExpansionFilterContext {
 			 */
 			StandardConceptProperty standardProperty = StandardConceptProperty.forFilterProperty(theFilterProperty);
 			if (standardProperty != null) {
-				String conflictingUri = conflictingPropertyUris.get(standardProperty);
+				String conflictingUri = myConflictingPropertyUris.get(standardProperty);
 				if (conflictingUri != null) {
 					throw new UnsupportedFilterException(Msg.code(3005)
 							+ "In-memory ValueSet expansion cannot evaluate filter on property '"
-							+ filter.getProperty() + "': the CodeSystem declares it with URI '" + conflictingUri
+							+ theFilter.getProperty() + "': the CodeSystem declares it with URI '" + conflictingUri
 							+ "' rather than the standard '" + standardProperty.canonicalUri()
 							+ "', so its meaning is unknown");
 				}
-				if (filter.getOp() == FilterOperator.EXISTS) {
-					boolean wantExists = parseRequiredBoolean(filter);
-					return wantExists == conceptHasStandardProperty(standardProperty, concept.getCode());
+				if (theFilter.getOp() == FilterOperator.EXISTS) {
+					boolean wantExists = parseRequiredBoolean(theFilter);
+					return wantExists == conceptHasStandardProperty(standardProperty, theConcept.getCode());
 				}
 
 				// These standard properties only support the 'exists' operator in-memory.
-				throw unsupportedFilter(filter);
+				throw unsupportedFilter(theFilter);
 			}
 
 			/*
@@ -209,18 +211,18 @@ public class ValueSetExpansionFilterContext {
 			 *      FHIR CodeSystem Defined Concept Properties (4.8.12)</a>
 			 */
 			if (!onCode && !onDisplay) {
-				return passesCustomPropertyFilter(filter, concept);
+				return passesCustomPropertyFilter(theFilter, theConcept);
 			}
 
-			String theFilterValue = filter.getValue();
-			String theConceptCode = concept.getCode();
+			String theFilterValue = theFilter.getValue();
+			String theConceptCode = theConcept.getCode();
 			String theConceptPropertyValue = onCode
-					? concept.getCode()
-					: codeSystemCodeAndDisplayIndex
+					? theConcept.getCode()
+					: myCodeSystemCodeAndDisplayIndex
 							.getOrDefault("display", Collections.emptyMap())
 							.get(theConceptCode);
 
-			switch (filter.getOp()) {
+			switch (theFilter.getOp()) {
 				case EQUAL:
 					// if we’re filtering on display but there is none, it’s not a match
 					if (theConceptPropertyValue == null) {
@@ -377,7 +379,7 @@ public class ValueSetExpansionFilterContext {
 			case CHILD:
 				return hasChildren(theConceptCode);
 			default:
-				return conceptsByStandardProperty
+				return myConceptsByStandardProperty
 						.getOrDefault(theProperty, Set.of())
 						.contains(normalizeCode(theConceptCode));
 		}
@@ -388,8 +390,8 @@ public class ValueSetExpansionFilterContext {
 	 *   1) Must be on the code (not display)
 	 *   2) The filter value must actually exist in the CodeSystem
 	 */
-	private boolean failsStructuralFilterGuard(String theFilterValue, boolean onCode) {
-		return !onCode || isFilterPropertyValueNotInCodeSystem(theFilterValue);
+	private boolean failsStructuralFilterGuard(String theFilterValue, boolean theOnCode) {
+		return !theOnCode || isFilterPropertyValueNotInCodeSystem(theFilterValue);
 	}
 
 	private boolean isDescendantOf(String theParentCode, String theCandidatePropertyValue) {
@@ -419,7 +421,7 @@ public class ValueSetExpansionFilterContext {
 	 * CodeSystem is not case-sensitive (so a filter value like "p" resolves the subtree stored under "P").
 	 */
 	private Set<String> getChildren(String theCode) {
-		return conceptCodeTree.getOrDefault(normalizeCode(theCode), Set.of());
+		return myConceptCodeTree.getOrDefault(normalizeCode(theCode), Set.of());
 	}
 
 	/**
@@ -429,10 +431,10 @@ public class ValueSetExpansionFilterContext {
 		return myCodeSystem.getCaseSensitive() ? theCode : theCode.toLowerCase(Locale.ROOT);
 	}
 
-	private boolean isEqualsWithOptionalCaseSensitive(String a, String b) {
+	private boolean isEqualsWithOptionalCaseSensitive(String theFirst, String theSecond) {
 		return myCodeSystem.getCaseSensitive()
-				? a.equals(b) // case-sensitive
-				: a.equalsIgnoreCase(b); // case-insensitive
+				? theFirst.equals(theSecond) // case-sensitive
+				: theFirst.equalsIgnoreCase(theSecond); // case-insensitive
 	}
 
 	/**
@@ -440,7 +442,7 @@ public class ValueSetExpansionFilterContext {
 	 */
 	private boolean csvFilterListContains(String theCsvFilter, String theCandidatePropertyValue) {
 		// lazily parse & cache the comma-list
-		Set<String> values = inSetsMap.computeIfAbsent(
+		Set<String> values = myInSetsMap.computeIfAbsent(
 				theCsvFilter, filter -> new HashSet<>(Arrays.asList(filter.split("\\s*,\\s*"))));
 
 		// Now just test membership, respecting case‐sensitivity
@@ -453,17 +455,17 @@ public class ValueSetExpansionFilterContext {
 
 	private boolean hasParent(String theCode) {
 		if (myCodeSystem.getCaseSensitive()) {
-			return allChildCodes.contains(theCode);
+			return myAllChildCodes.contains(theCode);
 		}
-		return allChildCodesLower.contains(theCode.toLowerCase(Locale.ROOT));
+		return myAllChildCodesLower.contains(theCode.toLowerCase(Locale.ROOT));
 	}
 
 	private boolean isFilterPropertyValueNotInCodeSystem(String theFilterPropertyValue) {
 		// Fast O(1) existence check, respecting case sensitivity
 		if (myCodeSystem.getCaseSensitive()) {
-			return !allCodes.contains(theFilterPropertyValue);
+			return !myAllCodes.contains(theFilterPropertyValue);
 		} else {
-			return !allCodesLower.contains(theFilterPropertyValue.toLowerCase(Locale.ROOT));
+			return !myAllCodesLower.contains(theFilterPropertyValue.toLowerCase(Locale.ROOT));
 		}
 	}
 
@@ -471,11 +473,12 @@ public class ValueSetExpansionFilterContext {
 	 * Match `text` against the regex `expr`, respecting caseSensitivity.
 	 * Returns false if the pattern is invalid.
 	 */
-	private boolean matchesRegex(String expr, String text) {
+	private boolean matchesRegex(String theExpr, String theText) {
 		try {
-			Pattern p = regexCache.computeIfAbsent(
-					expr, key -> Pattern.compile(key, myCodeSystem.getCaseSensitive() ? 0 : Pattern.CASE_INSENSITIVE));
-			return p.matcher(text).matches();
+			Pattern p = myRegexCache.computeIfAbsent(
+					theExpr,
+					key -> Pattern.compile(key, myCodeSystem.getCaseSensitive() ? 0 : Pattern.CASE_INSENSITIVE));
+			return p.matcher(theText).matches();
 		} catch (PatternSyntaxException e) {
 			// Invalid regex → treat as “no match”
 			return false;
@@ -483,10 +486,10 @@ public class ValueSetExpansionFilterContext {
 	}
 
 	private void buildIndexes() {
-		if (!hasIndexRun) {
+		if (!myHasIndexRun) {
 			classifyProperties();
 			buildIndexes(myCodeSystem.getConcept());
-			hasIndexRun = true;
+			myHasIndexRun = true;
 		}
 	}
 
@@ -514,10 +517,10 @@ public class ValueSetExpansionFilterContext {
 					String filterProperty = filter.getProperty().toLowerCase(Locale.ROOT);
 					StandardConceptProperty property = StandardConceptProperty.forFilterProperty(filterProperty);
 					if (property != null) {
-						valueSetStandardPropertiesUsedInFilters.add(property);
+						myValueSetStandardPropertiesUsedInFilters.add(property);
 					} else if (!CODE_AND_DISPLAY_FILTER_PROPERTIES.contains(filterProperty)) {
 						// Keep the code verbatim: custom property codes are case-sensitive.
-						valueSetCustomPropertiesUsedInFilters.add(filter.getProperty());
+						myValueSetCustomPropertiesUsedInFilters.add(filter.getProperty());
 					}
 				}
 			}
@@ -528,14 +531,14 @@ public class ValueSetExpansionFilterContext {
 				continue; // undeclared / no URI → matched by reserved code name (logged when first matched)
 			}
 			if (property.canonicalUri().equals(declaration.getUri())) {
-				canonicalUriDeclared.add(property);
+				myCanonicalUriDeclared.add(property);
 			} else {
-				conflictingPropertyUris.put(property, declaration.getUri());
+				myConflictingPropertyUris.put(property, declaration.getUri());
 			}
 		}
 		for (CodeSystem.PropertyComponent declaration : myCodeSystem.getProperty()) {
-			if (valueSetCustomPropertiesUsedInFilters.contains(declaration.getCode())) {
-				codeSystemDeclaredCustomProperties.add(declaration.getCode());
+			if (myValueSetCustomPropertiesUsedInFilters.contains(declaration.getCode())) {
+				myCodeSystemDeclaredCustomProperties.add(declaration.getCode());
 			}
 		}
 	}
@@ -549,14 +552,14 @@ public class ValueSetExpansionFilterContext {
 		return null;
 	}
 
-	private void buildIndexes(List<CodeSystem.ConceptDefinitionComponent> defs) {
-		for (var def : defs) {
+	private void buildIndexes(List<CodeSystem.ConceptDefinitionComponent> theDefs) {
+		for (var def : theDefs) {
 			String code = def.getCode();
 			String display = def.getDisplay();
 
 			// 1) Index existence
-			allCodes.add(code);
-			allCodesLower.add(code.toLowerCase(Locale.ROOT));
+			myAllCodes.add(code);
+			myAllCodesLower.add(code.toLowerCase(Locale.ROOT));
 
 			// 2) Index immediate children (nested representation)
 			for (var child : def.getConcept()) {
@@ -570,7 +573,7 @@ public class ValueSetExpansionFilterContext {
 					continue;
 				}
 				// Custom properties are indexed before the skips below: for them, "skipped" and "absent" are
-				// different answers, and conflating the two fabricates a determined negative.
+				// different answers, and treating them as the same fabricates a determined negative.
 				if (isCustomPropertyOfInterest(property.getCode())) {
 					indexCustomProperty(property, code);
 					continue;
@@ -586,12 +589,12 @@ public class ValueSetExpansionFilterContext {
 			}
 
 			// 3) Index the "code" property
-			codeSystemCodeAndDisplayIndex
+			myCodeSystemCodeAndDisplayIndex
 					.computeIfAbsent("code", k -> new HashMap<>())
 					.put(code, code);
 
 			// 4) Index the "display" property
-			codeSystemCodeAndDisplayIndex
+			myCodeSystemCodeAndDisplayIndex
 					.computeIfAbsent("display", k -> new HashMap<>())
 					.put(code, display);
 
@@ -604,11 +607,11 @@ public class ValueSetExpansionFilterContext {
 		// Key the tree by the normalized parent code so that case-insensitive systems resolve the subtree
 		// even when a filter value differs in case from the stored code. Child values keep their original
 		// casing because membership comparisons go through isEqualsWithOptionalCaseSensitive().
-		conceptCodeTree
+		myConceptCodeTree
 				.computeIfAbsent(normalizeCode(theParentCode), k -> new HashSet<>())
 				.add(theChildCode);
-		allChildCodes.add(theChildCode);
-		allChildCodesLower.add(theChildCode.toLowerCase(Locale.ROOT));
+		myAllChildCodes.add(theChildCode);
+		myAllChildCodesLower.add(theChildCode.toLowerCase(Locale.ROOT));
 	}
 
 	/**
@@ -622,7 +625,7 @@ public class ValueSetExpansionFilterContext {
 	}
 
 	private boolean isCustomPropertyOfInterest(String thePropertyCode) {
-		return isContentComplete() && valueSetCustomPropertiesUsedInFilters.contains(thePropertyCode);
+		return isContentComplete() && myValueSetCustomPropertiesUsedInFilters.contains(thePropertyCode);
 	}
 
 	/**
@@ -634,14 +637,14 @@ public class ValueSetExpansionFilterContext {
 		String value =
 				theProperty.getValue().isPrimitive() ? theProperty.getValue().primitiveValue() : null;
 		if (value == null) {
-			codeSystemCustomPropertiesWithUnusableValue
+			myCodeSystemCustomPropertiesWithUnusableValue
 					.computeIfAbsent(theProperty.getCode(), k -> new HashSet<>())
 					.add(theConceptCode);
 			return;
 		}
 		// A blank value is still a value: it simply will not equal the filter's, which is a determination we
 		// can make rather than one we must decline.
-		codeSystemCustomPropertyIndex
+		myCodeSystemCustomPropertyIndex
 				.computeIfAbsent(theProperty.getCode(), k -> new HashMap<>())
 				.computeIfAbsent(theConceptCode, k -> new HashSet<>())
 				.add(value);
@@ -655,12 +658,12 @@ public class ValueSetExpansionFilterContext {
 	 */
 	private void indexStandardProperty(String thePropertyCode, String theConceptCode, String theValue) {
 		StandardConceptProperty property = StandardConceptProperty.forConceptPropertyCode(thePropertyCode);
-		if (property == null || conflictingPropertyUris.containsKey(property)) {
+		if (property == null || myConflictingPropertyUris.containsKey(property)) {
 			return;
 		}
-		if (valueSetStandardPropertiesUsedInFilters.contains(property)
-				&& !canonicalUriDeclared.contains(property)
-				&& loggedNameMatch.add(property)) {
+		if (myValueSetStandardPropertiesUsedInFilters.contains(property)
+				&& !myCanonicalUriDeclared.contains(property)
+				&& myLoggedNameMatch.add(property)) {
 			ourLog.info(
 					"Concept property '{}' in CodeSystem '{}' is not declared with its canonical URI '{}'; matching by property code name.",
 					property.code(),
@@ -688,7 +691,7 @@ public class ValueSetExpansionFilterContext {
 	}
 
 	private void addStandardPropertyMembership(StandardConceptProperty theProperty, String theConceptCode) {
-		conceptsByStandardProperty
+		myConceptsByStandardProperty
 				.computeIfAbsent(theProperty, k -> new HashSet<>())
 				.add(normalizeCode(theConceptCode));
 	}
@@ -742,19 +745,19 @@ public class ValueSetExpansionFilterContext {
 		String property = theFilter.getProperty();
 		String conceptCode = theConcept.getCode();
 
-		if (codeSystemCustomPropertiesWithUnusableValue
+		if (myCodeSystemCustomPropertiesWithUnusableValue
 				.getOrDefault(property, Set.of())
 				.contains(conceptCode)) {
 			throw undeterminedFilter(
 					theFilter, "the concept's value for it cannot be compared against the filter value");
 		}
 
-		Set<String> values = codeSystemCustomPropertyIndex
+		Set<String> values = myCodeSystemCustomPropertyIndex
 				.getOrDefault(property, Collections.emptyMap())
 				.getOrDefault(conceptCode, Set.of());
 
 		if (values.isEmpty()) {
-			if (codeSystemDeclaredCustomProperties.contains(property)) {
+			if (myCodeSystemDeclaredCustomProperties.contains(property)) {
 				// 'complete' makes the absence meaningful: the concept has no value, so it is not a member.
 				// This holds for every operator, including the negative ones - a concept with nothing to
 				// compare is not admitted by a filter it was never measured against.
@@ -829,20 +832,20 @@ public class ValueSetExpansionFilterContext {
 			PRESENCE // date-valued: the concept is flagged when the property is present
 		}
 
-		private final String code;
-		private final Kind kind;
+		private final String myCode;
+		private final Kind myKind;
 
 		StandardConceptProperty(String theCode, Kind theKind) {
-			code = theCode;
-			kind = theKind;
+			myCode = theCode;
+			myKind = theKind;
 		}
 
 		private String code() {
-			return code;
+			return myCode;
 		}
 
 		private Kind kind() {
-			return kind;
+			return myKind;
 		}
 
 		/**
@@ -850,7 +853,7 @@ public class ValueSetExpansionFilterContext {
 		 * {@code http://hl7.org/fhir/concept-properties#inactive}).
 		 */
 		private String canonicalUri() {
-			return CONCEPT_PROPERTIES_SYSTEM + code;
+			return CONCEPT_PROPERTIES_SYSTEM + myCode;
 		}
 
 		/**
@@ -859,7 +862,7 @@ public class ValueSetExpansionFilterContext {
 		 */
 		private static StandardConceptProperty forFilterProperty(String theLowerCasedProperty) {
 			for (StandardConceptProperty next : values()) {
-				if (next.code.toLowerCase(Locale.ROOT).equals(theLowerCasedProperty)) {
+				if (next.myCode.toLowerCase(Locale.ROOT).equals(theLowerCasedProperty)) {
 					return next;
 				}
 			}
@@ -872,7 +875,7 @@ public class ValueSetExpansionFilterContext {
 		 */
 		private static StandardConceptProperty forConceptPropertyCode(String theCode) {
 			for (StandardConceptProperty next : values()) {
-				if (next.code.equals(theCode)) {
+				if (next.myCode.equals(theCode)) {
 					return next;
 				}
 			}
