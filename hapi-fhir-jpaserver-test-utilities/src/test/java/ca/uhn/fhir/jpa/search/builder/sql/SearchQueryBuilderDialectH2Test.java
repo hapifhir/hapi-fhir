@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class SearchQueryBuilderDialectH2Test extends BaseSearchQueryBuilderDialectTest {
 
 	/**
-	 * GL-9268: H2 has no supported JSON unpacking function in this design, so a large ID list keeps
+	 * H2 has no supported JSON unpacking function in this design, so a large ID list keeps
 	 * rendering as a plain IN list with one bind variable per ID.
 	 */
 	@Test

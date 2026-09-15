@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 // Created by claude-opus-5
 @ExtendWith(MockitoExtension.class)
@@ -60,34 +61,66 @@ public class HibernatePropertiesProviderTest {
 	}
 
 	/**
-	 * GL-9268: the compatibility level probe runs lazily on the search path, so a failure there must never
-	 * escape into the search. It degrades to "not supported", reports the failure exactly once, and the
-	 * probe result is cached - including when the probe failed - so a failing probe costs one connection
-	 * rather than one per search.
+	 * The compatibility level probe runs lazily on the search path, so a failure there must never escape
+	 * into the search. It degrades to "not supported" and reports the failure exactly once, no matter how
+	 * many times it is retried. A failed probe is not a definitive answer, so it is not cached outright -
+	 * the next call re-probes - but three consecutive failures give up and cache "false", so a permanently
+	 * unreadable <code>sys.databases</code> costs three extra connection attempts rather than one per
+	 * search forever.
 	 */
 	@Test
-	void isSqlServerJsonSupported_whenProbeFails_returnsFalseWarnsOnceAndIsCached() throws SQLException {
+	void isSqlServerJsonSupported_whenProbeFails_retriesUpToLimitThenCachesFalse() throws SQLException {
 		stubConnection();
 		lenient().when(myStatement.executeQuery(anyString())).thenThrow(new SQLException("SELECT permission denied on object 'databases'"));
 
 		assertThat(mySvc.isSqlServerJsonSupported()).isFalse();
-		assertThat(mySvc.isSqlServerJsonSupported()).isFalse();
-
 		verify(myDataSource, times(1)).getConnection();
+
+		assertThat(mySvc.isSqlServerJsonSupported()).isFalse();
+		verify(myDataSource, times(2)).getConnection();
+
+		assertThat(mySvc.isSqlServerJsonSupported()).isFalse();
+		verify(myDataSource, times(3)).getConnection();
+
+		// Three consecutive failures is the limit - the fourth call must not touch the DataSource again.
+		assertThat(mySvc.isSqlServerJsonSupported()).isFalse();
+		verify(myDataSource, times(3)).getConnection();
+
+		assertThat(compatibilityLevelWarnings())
+			.as("The failed probe must be reported exactly once, no matter how many times it is retried")
+			.hasSize(1);
+	}
+
+	/**
+	 * An empty result set - the query ran but <code>sys.databases</code> had no row for this database -
+	 * is just as much a failed probe as an exception, and gets the same treatment: not cached outright, so
+	 * the next call re-probes.
+	 */
+	@Test
+	void isSqlServerJsonSupported_whenResultSetIsEmpty_isTreatedAsFailedProbe() throws SQLException {
+		stubConnection();
+		when(myStatement.executeQuery(anyString())).thenReturn(myResultSet);
+		when(myResultSet.next()).thenReturn(false);
+
+		assertThat(mySvc.isSqlServerJsonSupported()).isFalse();
+		verify(myDataSource, times(1)).getConnection();
+
+		assertThat(mySvc.isSqlServerJsonSupported()).isFalse();
+		verify(myDataSource, times(2)).getConnection();
+
 		assertThat(compatibilityLevelWarnings()).as("The failed probe must be reported exactly once").hasSize(1);
 	}
 
 	/**
-	 * GL-9268: a database at compatibility level 130 or higher supports OPENJSON, and the probe result is
-	 * cached so later searches do not touch the DataSource again.
+	 * A database at compatibility level 130 or higher supports OPENJSON, and the probe result is cached so
+	 * later searches do not touch the DataSource again.
 	 */
 	@Test
 	void isSqlServerJsonSupported_whenProbeSucceeds_returnsTrueAndIsCached() throws SQLException {
 		stubConnection();
-		lenient().when(myStatement.executeQuery(anyString())).thenReturn(myResultSet);
-		lenient().when(myResultSet.next()).thenReturn(true);
-		lenient().when(myResultSet.getInt(1)).thenReturn(150);
-		lenient().when(myResultSet.getInt("compatibility_level")).thenReturn(150);
+		when(myStatement.executeQuery(anyString())).thenReturn(myResultSet);
+		when(myResultSet.next()).thenReturn(true);
+		when(myResultSet.getInt(1)).thenReturn(150);
 
 		assertThat(mySvc.isSqlServerJsonSupported()).isTrue();
 		assertThat(mySvc.isSqlServerJsonSupported()).isTrue();

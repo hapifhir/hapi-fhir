@@ -60,7 +60,7 @@ public class SearchQueryBuilderDialectPostgresTest extends BaseSearchQueryBuilde
 	}
 
 	/**
-	 * GL-9268: when the ID list handed to the <code>_id</code> predicate is larger than
+	 * When the ID list handed to the <code>_id</code> predicate is larger than
 	 * {@link StorageSettings#getLargeIdListJsonThreshold()}, PostgreSQL must bind the IDs as a single
 	 * JSON array string which is unpacked by <code>jsonb_array_elements_text</code>, instead of
 	 * emitting one bind variable per ID (which overruns PostgreSQL's 65,535 parameter ceiling).

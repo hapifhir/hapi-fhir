@@ -6,6 +6,7 @@ import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.query.TypedParameterValue;
+import org.hibernate.type.StandardBasicTypes;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -21,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class SearchQueryBuilderDialectOracleTest extends BaseSearchQueryBuilderDialectTest {
 
 	/**
-	 * GL-9268: Oracle must unpack a large ID list with JSON_TABLE and bind the JSON array as a CLOB.
+	 * Oracle must unpack a large ID list with JSON_TABLE and bind the JSON array as a CLOB.
 	 * A plain String bind is a VARCHAR2 SQL bind, which is capped at 4,000 bytes by default - already
 	 * exceeded by the JSON array at the shipped threshold - and raises ORA-01461.
 	 */
@@ -47,6 +48,10 @@ public class SearchQueryBuilderDialectOracleTest extends BaseSearchQueryBuilderD
 			.as("Oracle must bind the JSON array as a CLOB, not as a plain String: %s", idListBind)
 			.isInstanceOfAny(Clob.class, TypedParameterValue.class);
 		assertThat(extractCharacterContent(idListBind)).isEqualTo("[1,2,3,4,5]");
+
+		// Pinning the wrapper class alone is not enough - a plain STRING type still passes that check
+		// while reintroducing ORA-01461, so the type itself has to be asserted.
+		assertThat(((TypedParameterValue<?>) idListBind).getType()).isEqualTo(StandardBasicTypes.MATERIALIZED_CLOB);
 	}
 
 	@Nonnull

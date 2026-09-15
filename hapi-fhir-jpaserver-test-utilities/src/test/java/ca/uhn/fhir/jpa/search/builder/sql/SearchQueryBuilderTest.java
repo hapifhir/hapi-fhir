@@ -560,8 +560,6 @@ public class SearchQueryBuilderTest {
 		assertThat(generatedSql.getBindVariables()).contains(latitude, longitude);
 	}
 
-	// --- GL-9268: large ID lists are bound as a single JSON array above a threshold ---
-
 	/**
 	 * A6/A7/A8: exercises the large-ID-list threshold boundary - a list exactly at the threshold is
 	 * unchanged (A6, the branch is strictly greater-than), a single ID still collapses to an equality
@@ -689,6 +687,10 @@ public class SearchQueryBuilderTest {
 
 	private SearchQueryBuilder createPostgresBuilder(int theLargeIdListJsonThreshold) {
 		myStorageSettings.setLargeIdListJsonThreshold(theLargeIdListJsonThreshold);
+		return createPostgresBuilder();
+	}
+
+	private SearchQueryBuilder createPostgresBuilder() {
 		HibernatePropertiesProvider dialectProvider = new HibernatePropertiesProvider();
 		dialectProvider.setDialectForUnitTest(new HapiFhirPostgresDialect());
 		return new SearchQueryBuilder(myFhirContext, myStorageSettings, myPartitionSettings, myRequestPartitionId, "Patient", mySqlBuilderFactory, dialectProvider, false, false);

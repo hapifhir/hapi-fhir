@@ -82,7 +82,7 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 	}
 
 	/**
-	 * GL-9268: with database compatibility level 130 or higher, SQL Server unpacks a large ID list
+	 * With database compatibility level 130 or higher, SQL Server unpacks a large ID list
 	 * with OPENJSON against a single JSON array bind.
 	 */
 	@Test
@@ -102,7 +102,7 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 	}
 
 	/**
-	 * GL-9268: OPENJSON requires database compatibility level 130 (SQL Server 2016). Below that the
+	 * OPENJSON requires database compatibility level 130 (SQL Server 2016). Below that the
 	 * predicate must keep rendering today's IN list rather than emitting SQL the database cannot parse -
 	 * and the fallback must not be silent, but it must also not flood the log: the probe result is
 	 * cached on the HibernatePropertiesProvider, so a second SearchQueryBuilder built on the same

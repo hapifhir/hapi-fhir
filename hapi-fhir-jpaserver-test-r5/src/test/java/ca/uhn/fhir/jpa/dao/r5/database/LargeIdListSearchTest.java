@@ -4,6 +4,8 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.SqlQuery;
+import ca.uhn.fhir.rest.api.SearchStyleEnum;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.test.utilities.SearchTestUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
@@ -21,9 +23,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
- * Shared search test cases for GL-9268: above a configured threshold the <code>_id</code> and
- * reference predicates bind their ID list as a single JSON array string which the database unpacks
- * with its own JSON function, instead of emitting one bind variable per ID.
+ * Shared search test cases: above a configured threshold the <code>_id</code> and reference
+ * predicates bind their ID list as a single JSON array string which the database unpacks with its
+ * own JSON function, instead of emitting one bind variable per ID.
  * <p>
  * Implemented by both {@link BaseDatabaseVerificationIT} and {@link BaseDatabasePartitionModeIT} so every
  * case runs against every supported database vendor, in and out of database partition mode.
@@ -32,13 +34,13 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 // Created by claude-opus-5
 interface LargeIdListSearchTest extends ITestDataBuilder {
 
-	int THRESHOLD_BELOW_TEST_LIST_SIZE = 3;
-	int THRESHOLD_ABOVE_TEST_LIST_SIZE = 10;
+	int BELOW_LIST_SIZE_THRESHOLD = 3;
+	int ABOVE_LIST_SIZE_THRESHOLD = 10;
 
 	/**
 	 * Roughly the number of IDs whose JSON array exceeds Oracle's default 4,000 byte VARCHAR2 bind limit.
 	 */
-	int ORACLE_CLOB_PATIENT_COUNT = 800;
+	int LARGE_PAYLOAD_PATIENT_COUNT = 800;
 
 	record Context(
 		JpaStorageSettings storageSettings,
@@ -58,9 +60,7 @@ interface LargeIdListSearchTest extends ITestDataBuilder {
 	@Test
 	default void testIdSearchOverThreshold_unpacksJsonArray() {
 		Context ctx = getLargeIdListSearchTestContext();
-		int previousThreshold = ctx.storageSettings().getLargeIdListJsonThreshold();
-		ctx.storageSettings().setLargeIdListJsonThreshold(THRESHOLD_BELOW_TEST_LIST_SIZE);
-		try {
+		withLargeIdListJsonThreshold(ctx, BELOW_LIST_SIZE_THRESHOLD, () -> {
 			List<String> patientIds = createPatients(5);
 
 			ctx.captureQueriesListener().clear();
@@ -74,9 +74,7 @@ interface LargeIdListSearchTest extends ITestDataBuilder {
 			if (ctx.databasePartitionMode()) {
 				assertThat(sql).as(sql).contains("PARTITION_ID");
 			}
-		} finally {
-			ctx.storageSettings().setLargeIdListJsonThreshold(previousThreshold);
-		}
+		});
 	}
 
 	/**
@@ -86,9 +84,7 @@ interface LargeIdListSearchTest extends ITestDataBuilder {
 	@Test
 	default void testReferenceSearchOverThreshold_unpacksJsonArray() {
 		Context ctx = getLargeIdListSearchTestContext();
-		int previousThreshold = ctx.storageSettings().getLargeIdListJsonThreshold();
-		ctx.storageSettings().setLargeIdListJsonThreshold(THRESHOLD_BELOW_TEST_LIST_SIZE);
-		try {
+		withLargeIdListJsonThreshold(ctx, BELOW_LIST_SIZE_THRESHOLD, () -> {
 			List<String> patientIds = createPatients(5);
 			List<String> observationIds = patientIds.stream()
 				.map(t -> createObservation(withSubject(t)).toUnqualifiedVersionless().getValue())
@@ -117,9 +113,7 @@ interface LargeIdListSearchTest extends ITestDataBuilder {
 					.as(combinedSql)
 					.isEqualTo(2);
 			}
-		} finally {
-			ctx.storageSettings().setLargeIdListJsonThreshold(previousThreshold);
-		}
+		});
 	}
 
 	/**
@@ -128,9 +122,7 @@ interface LargeIdListSearchTest extends ITestDataBuilder {
 	@Test
 	default void testIdSearchUnderThreshold_keepsInList() {
 		Context ctx = getLargeIdListSearchTestContext();
-		int previousThreshold = ctx.storageSettings().getLargeIdListJsonThreshold();
-		ctx.storageSettings().setLargeIdListJsonThreshold(THRESHOLD_ABOVE_TEST_LIST_SIZE);
-		try {
+		withLargeIdListJsonThreshold(ctx, ABOVE_LIST_SIZE_THRESHOLD, () -> {
 			List<String> patientIds = createPatients(5);
 
 			ctx.captureQueriesListener().clear();
@@ -143,38 +135,63 @@ interface LargeIdListSearchTest extends ITestDataBuilder {
 			assertThat(sql).as(sql).doesNotContain("jsonb_array_elements_text");
 			assertThat(sql).as(sql).doesNotContain("JSON_TABLE");
 			assertThat(sql).as(sql).doesNotContain("OPENJSON");
+		});
+	}
+
+	/**
+	 * Exercises Oracle's 4,000-byte VARCHAR2 bind limit - well under the JSON array of a payload this
+	 * size, so the array has to be bound as a CLOB or the statement fails with ORA-01461 - and SQL
+	 * Server's own switch from <code>nvarchar(4000)</code>/<code>varchar(8000)</code> to <code>(max)</code>
+	 * at the same boundary. Runs on every JSON engine; this is the only place either boundary is actually
+	 * exercised rather than asserted.
+	 * <p>
+	 * Sent as a POST because 800 IDs do not fit in a request line, and the maximum page size and offset are
+	 * raised, for the same reason as in production: search narrowing puts the IDs into the parameter map
+	 * server side and never onto a URL at all, so all matches must come back in one page to compare.
+	 * </p>
+	 */
+	@Test
+	default void testIdSearchOverVarcharBindLimit_bindsLargePayload() {
+		Context ctx = getLargeIdListSearchTestContext();
+		assumeTrue(jsonFunctionForDriver(ctx.driverType()) != null, "JSON engines only");
+
+		Integer previousMaximumPageSize = ctx.server().getRestfulServer().getMaximumPageSize();
+		ctx.server().getRestfulServer().setMaximumPageSize(LARGE_PAYLOAD_PATIENT_COUNT);
+		try {
+			withLargeIdListJsonThreshold(ctx, BELOW_LIST_SIZE_THRESHOLD, () -> {
+				List<String> patientIds = createPatients(LARGE_PAYLOAD_PATIENT_COUNT);
+
+				ctx.captureQueriesListener().clear();
+				Bundle results = ctx.server().getFhirClient()
+					.search()
+					.forResource("Patient")
+					.where(new TokenClientParam("_id").exactly().codes(patientIds))
+					.count(LARGE_PAYLOAD_PATIENT_COUNT)
+					.offset(0)
+					.usingStyle(SearchStyleEnum.POST)
+					.returnBundle(Bundle.class)
+					.execute();
+
+				assertThat(SearchTestUtil.toUnqualifiedVersionlessIdValues(results))
+					.containsExactlyInAnyOrderElementsOf(patientIds);
+				assertIdListUnpacking(ctx, findSelectQueryContaining(ctx, "RES_ID"));
+			});
 		} finally {
-			ctx.storageSettings().setLargeIdListJsonThreshold(previousThreshold);
+			ctx.server().getRestfulServer().setMaximumPageSize(previousMaximumPageSize);
 		}
 	}
 
 	/**
-	 * IT-4: Oracle only. A JSON array of 800 IDs is well over Oracle's default 4,000 byte VARCHAR2 SQL bind
-	 * limit, so the array has to be bound as a CLOB or the statement fails with ORA-01461. This is the only
-	 * place that decision is actually executed rather than asserted.
+	 * Runs the given test with {@link JpaStorageSettings#setLargeIdListJsonThreshold(int)} set to the
+	 * given value, and restores the previous value afterwards even if the test throws.
 	 */
-	@Test
-	default void testOracleIdSearchOverVarcharBindLimit_bindsClob() {
-		Context ctx = getLargeIdListSearchTestContext();
-		assumeTrue(ctx.driverType() == DriverTypeEnum.ORACLE_12C, "Oracle only");
-
-		int previousThreshold = ctx.storageSettings().getLargeIdListJsonThreshold();
-		ctx.storageSettings().setLargeIdListJsonThreshold(THRESHOLD_BELOW_TEST_LIST_SIZE);
+	private void withLargeIdListJsonThreshold(Context theContext, int theThreshold, Runnable theTest) {
+		int previousThreshold = theContext.storageSettings().getLargeIdListJsonThreshold();
+		theContext.storageSettings().setLargeIdListJsonThreshold(theThreshold);
 		try {
-			List<String> patientIds = createPatients(ORACLE_CLOB_PATIENT_COUNT);
-
-			ctx.captureQueriesListener().clear();
-			Bundle results = ctx.server().getFhirClient()
-				.search()
-				.byUrl("Patient?_id=" + String.join(",", patientIds) + "&_count=" + ORACLE_CLOB_PATIENT_COUNT)
-				.returnBundle(Bundle.class)
-				.execute();
-
-			assertThat(SearchTestUtil.toUnqualifiedVersionlessIdValues(results))
-				.containsExactlyInAnyOrderElementsOf(patientIds);
-			assertThat(findSelectQueryContaining(ctx, "RES_ID")).contains("JSON_TABLE");
+			theTest.run();
 		} finally {
-			ctx.storageSettings().setLargeIdListJsonThreshold(previousThreshold);
+			theContext.storageSettings().setLargeIdListJsonThreshold(previousThreshold);
 		}
 	}
 
