@@ -15,7 +15,8 @@
     "src"
   ],
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "publish-if-new": "if [ -n \"$(npm view \"$npm_package_name@$npm_package_version\" version 2>/dev/null)\" ]; then echo \"$npm_package_name@$npm_package_version is already published, skipping\"; else npm publish --access public; fi"
   },
   "devDependencies": {
     "typescript": "${ts.typescript.version}"
