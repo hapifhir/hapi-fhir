@@ -904,10 +904,8 @@ public class SearchQueryBuilder {
 		}
 
 		Condition condition = new BinaryCondition(SQL_IN_OPERATOR, theColumn, new CustomSql(jsonIdListSubselect));
-		if (theInverse) {
-			condition = new NotCondition(condition);
-		}
-		return condition;
+
+		return theInverse ? new NotCondition(condition) : condition;
 	}
 
 	/**
