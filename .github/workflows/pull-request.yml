@@ -74,14 +74,32 @@ jobs:
           fi
 
           base_ver="${pom_version%-SNAPSHOT}"
-          major="${base_ver%%.*}"
-          rest="${base_ver#*.}"
-          minor="${rest%%.*}"
+          if [[ ! "$base_ver" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            echo "pom version '$pom_version' is not major.minor.patch — skipping changelog location check."
+            exit 0
+          fi
+          major="${BASH_REMATCH[1]}"
+          minor="${BASH_REMATCH[2]}"
+          patch="${BASH_REMATCH[3]}"
 
           if [[ "$GITHUB_BASE_REF" == "master" ]]; then
+            # master carries the odd-minor development version for the next (even-minor) release, so the
+            # changelog dir is one minor ahead of the pom: 8.13.0-SNAPSHOT -> 8_14_0.
             expected="${changelog_root}/${major}_$((minor + 1))_0"
-          elif [[ "$GITHUB_BASE_REF" =~ ^rel_[0-9]+_[0-9]+$ ]]; then
-            expected="${changelog_root}/${major}_${minor}_0"
+          elif [[ "$GITHUB_BASE_REF" =~ ^rel_([0-9]+)_([0-9]+)$ ]]; then
+            # The branch name is authoritative for major/minor. A freshly cut release branch still carries the
+            # development version it inherited from master (rel_8_12 sits at 8.11.19-SNAPSHOT) until it is
+            # bumped, so the pom minor cannot be trusted here.
+            rel_major="${BASH_REMATCH[1]}"
+            rel_minor="${BASH_REMATCH[2]}"
+            if [[ "$major" == "$rel_major" && "$minor" == "$rel_minor" ]]; then
+              # Already bumped: the pom patch identifies the release in flight, e.g. rel_8_10 at
+              # 8.10.2-SNAPSHOT -> 8_10_2.
+              expected="${changelog_root}/${rel_major}_${rel_minor}_${patch}"
+            else
+              # Not bumped yet, so the release in flight is X.Y.0.
+              expected="${changelog_root}/${rel_major}_${rel_minor}_0"
+            fi
           else
             echo "Target branch '$GITHUB_BASE_REF' is not master or rel_X_Y — skipping changelog location check."
             exit 0
