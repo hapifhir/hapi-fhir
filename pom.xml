@@ -2807,6 +2807,7 @@
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>animal-sniffer-maven-plugin</artifactId>
 					<version>1.24</version>
+					<!--
 					<configuration>
 						<signature>
 							<groupId>com.toasttab.android</groupId>
@@ -2823,6 +2824,7 @@
 							</goals>
 						</execution>
 					</executions>
+					-->
 				</plugin>
 			</plugins>
 		</pluginManagement>
