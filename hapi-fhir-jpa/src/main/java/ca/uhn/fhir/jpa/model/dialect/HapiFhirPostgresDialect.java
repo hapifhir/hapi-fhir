@@ -45,4 +45,10 @@ public class HapiFhirPostgresDialect extends PostgreSQLDialect implements IHapiF
 	public DriverTypeEnum getDriverType() {
 		return DriverTypeEnum.POSTGRES_9_4;
 	}
+
+	@Override
+	public String renderIdListJsonSubselect(String theQuotedPlaceholder) {
+		return "SELECT CAST(j.value AS BIGINT) FROM jsonb_array_elements_text(CAST(" + theQuotedPlaceholder
+				+ " AS jsonb)) AS j";
+	}
 }

@@ -65,6 +65,20 @@ public class HapiFhirOracleDialect extends OracleDialect implements IHapiFhirDia
 	}
 
 	@Override
+	public String renderIdListJsonSubselect(String theQuotedPlaceholder) {
+		return "SELECT jt.id FROM JSON_TABLE(" + theQuotedPlaceholder + ", '$[*]' COLUMNS (id NUMBER PATH '$')) jt";
+	}
+
+	/**
+	 * @see IHapiFhirDialect#bindsIdListJsonAsClob() for an explanation of why Oracle binds the id list JSON
+	 * array as a CLOB
+	 */
+	@Override
+	public boolean bindsIdListJsonAsClob() {
+		return true;
+	}
+
+	@Override
 	public int getPreferredSqlTypeCodeForBoolean() {
 		// Use Types.BIT instead of native Oracle 23 BOOLEAN type to maintain
 		// compatibility with existing NUMERIC(1,0) schema and match behavior

@@ -26,6 +26,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dialect.IHapiFhirDialect;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
@@ -74,8 +75,6 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hibernate.dialect.Dialect;
-import org.hibernate.dialect.OracleDialect;
-import org.hibernate.dialect.PostgreSQLDialect;
 import org.hibernate.dialect.SQLServerDialect;
 import org.hibernate.dialect.pagination.AbstractLimitHandler;
 import org.hibernate.query.TypedParameterValue;
@@ -112,20 +111,6 @@ public class SearchQueryBuilder {
 	 * spaces matter: the SQL builder library appends the operator verbatim.
 	 */
 	private static final String SQL_IN_OPERATOR = " IN ";
-
-	/*
-	 * Subselects which unpack a JSON array of resource IDs into a single ID column, one per database which
-	 * supports it. Each holds a single %s, which is replaced by a quoted bind variable placeholder holding
-	 * the JSON array. See createPredicateIdsInList(DbColumn, List, boolean).
-	 */
-	private static final String POSTGRES_JSON_ID_LIST_SUBSELECT =
-			"(SELECT CAST(j.value AS BIGINT) FROM jsonb_array_elements_text(CAST(%s AS jsonb)) AS j)";
-
-	private static final String ORACLE_JSON_ID_LIST_SUBSELECT =
-			"(SELECT jt.id FROM JSON_TABLE(%s, '$[*]' COLUMNS (id NUMBER PATH '$')) jt)";
-
-	private static final String SQL_SERVER_JSON_ID_LIST_SUBSELECT =
-			"(SELECT CAST([value] AS BIGINT) FROM OPENJSON(%s))";
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchQueryBuilder.class);
 	private final String myBindVariableSubstitutionBase;
@@ -931,7 +916,8 @@ public class SearchQueryBuilder {
 	 * Returns the subselect which unpacks the given IDs from a single JSON array bind variable, or
 	 * <code>null</code> if this list should keep being rendered as an <code>IN (?,?,...)</code> list -
 	 * because it is not large enough, because the feature is disabled, or because this database has no
-	 * JSON function we can use.
+	 * JSON function we can use. The subselect SQL fragment itself comes from
+	 * {@link IHapiFhirDialect#renderIdListJsonSubselect}, so each dialect owns its own JSON syntax.
 	 */
 	@Nullable
 	private String createJsonIdListSubselect(List<Long> theIds) {
@@ -940,25 +926,22 @@ public class SearchQueryBuilder {
 			return null;
 		}
 
-		// The JSON array is only built inside a matching dialect branch below, so that a database with no
-		// JSON function we can use - H2 and the deprecated MySQL/MariaDB dialects - never pays for it.
-		if (myDialect instanceof PostgreSQLDialect) {
-			return String.format(POSTGRES_JSON_ID_LIST_SUBSELECT, quotedPlaceholder(toJsonArray(theIds)));
+		// A dialect with no JSON function we can use - H2 and the deprecated MySQL/MariaDB dialects - has
+		// no rendering to offer, so the JSON array below is only ever built for a matching dialect.
+		if (!(myDialect instanceof IHapiFhirDialect hapiFhirDialect)) {
+			return null;
 		}
-		if (myDialect instanceof OracleDialect) {
-			// Oracle binds a plain String as a VARCHAR2, which is limited to 4000 bytes by default and
-			// raises ORA-01461 beyond that, so the array has to go across as a CLOB.
-			Object clobBindValue = new TypedParameterValue<>(StandardBasicTypes.MATERIALIZED_CLOB, toJsonArray(theIds));
-			return String.format(ORACLE_JSON_ID_LIST_SUBSELECT, quotedPlaceholder(clobBindValue));
+		if (myDialect instanceof SQLServerDialect && !myDialectProvider.isSqlServerJsonSupported()) {
+			myDialectProvider.logSqlServerJsonFallbackWarning();
+			return null;
 		}
-		if (myDialect instanceof SQLServerDialect) {
-			if (!myDialectProvider.isSqlServerJsonSupported()) {
-				myDialectProvider.logSqlServerJsonFallbackWarning();
-				return null;
-			}
-			return String.format(SQL_SERVER_JSON_ID_LIST_SUBSELECT, quotedPlaceholder(toJsonArray(theIds)));
-		}
-		return null;
+
+		String json = toJsonArray(theIds);
+		Object bindValue = hapiFhirDialect.bindsIdListJsonAsClob()
+				? new TypedParameterValue<>(StandardBasicTypes.MATERIALIZED_CLOB, json)
+				: json;
+		String fragment = hapiFhirDialect.renderIdListJsonSubselect(quotedPlaceholder(bindValue));
+		return fragment == null ? null : "(" + fragment + ")";
 	}
 
 	/**
