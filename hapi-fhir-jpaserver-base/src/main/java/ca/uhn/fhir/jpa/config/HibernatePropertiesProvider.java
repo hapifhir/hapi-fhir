@@ -121,6 +121,24 @@ public class HibernatePropertiesProvider {
 	}
 
 	/**
+	 * Returns <code>true</code> if a large ID list may be bound to this database as a single JSON-array
+	 * parameter rather than one bind parameter per ID. Never throws, and never runs at startup.
+	 *
+	 * @since 8.14.0
+	 */
+	public boolean isLargeIdListJsonBindingSupported() {
+		if (!(getDialect() instanceof org.hibernate.dialect.SQLServerDialect)) {
+			return true;
+		}
+
+		boolean sqlServerJsonSupported = isSqlServerJsonSupported();
+		if (!sqlServerJsonSupported) {
+			logSqlServerJsonFallbackWarning();
+		}
+		return sqlServerJsonSupported;
+	}
+
+	/**
 	 * Returns <code>true</code> when the SQL Server database behind this provider supports the
 	 * <code>OPENJSON</code> table-valued function, which requires a database compatibility level of
 	 * {@value #MINIMUM_SQL_SERVER_JSON_COMPATIBILITY_LEVEL} (SQL Server 2016) or higher.
@@ -134,10 +152,8 @@ public class HibernatePropertiesProvider {
 	 * user may not read <code>sys.databases</code> - this method reports the failure once and answers
 	 * <code>false</code>, so that callers fall back to whatever they do on a database without JSON support.
 	 * </p>
-	 *
-	 * @since 8.14.0
 	 */
-	public boolean isSqlServerJsonSupported() {
+	private boolean isSqlServerJsonSupported() {
 		Boolean sqlServerJsonSupported = mySqlServerJsonSupported;
 		if (sqlServerJsonSupported != null) {
 			return sqlServerJsonSupported;
@@ -163,10 +179,8 @@ public class HibernatePropertiesProvider {
 	 * Logs, at most once for the lifetime of this provider, that a query had to fall back to a form
 	 * which does not use <code>OPENJSON</code> because this SQL Server database runs at a compatibility
 	 * level below {@value #MINIMUM_SQL_SERVER_JSON_COMPATIBILITY_LEVEL}.
-	 *
-	 * @since 8.14.0
 	 */
-	public void logSqlServerJsonFallbackWarning() {
+	private void logSqlServerJsonFallbackWarning() {
 		warnOnce(
 				mySqlServerJsonFallbackLogged,
 				"This SQL Server database is running at a compatibility level below {}, so the OPENJSON function is not available. "

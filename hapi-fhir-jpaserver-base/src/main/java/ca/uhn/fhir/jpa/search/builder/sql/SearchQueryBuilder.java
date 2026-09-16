@@ -900,7 +900,7 @@ public class SearchQueryBuilder {
 	@Nonnull
 	public Condition createPredicateIdsInList(
 			@Nonnull DbColumn theColumn, @Nonnull List<Long> theIds, boolean theInverse) {
-		String jsonIdListSubselect = createJsonIdListSubselect(theIds);
+		String jsonIdListSubselect = createJsonIdListSubselectQuery(theIds);
 		if (jsonIdListSubselect == null) {
 			return QueryParameterUtils.toEqualToOrInPredicate(theColumn, generatePlaceholders(theIds), theInverse);
 		}
@@ -915,12 +915,11 @@ public class SearchQueryBuilder {
 	/**
 	 * Returns the subselect which unpacks the given IDs from a single JSON array bind variable, or
 	 * <code>null</code> if this list should keep being rendered as an <code>IN (?,?,...)</code> list -
-	 * because it is not large enough, because the feature is disabled, or because this database has no
-	 * JSON function we can use. The subselect SQL fragment itself comes from
-	 * {@link IHapiFhirDialect#renderIdListJsonSubselect}, so each dialect owns its own JSON syntax.
+	 * because it is below the configured threshold or is disabled, or because the database type has no
+	 * JSON function we can use.
 	 */
 	@Nullable
-	private String createJsonIdListSubselect(List<Long> theIds) {
+	private String createJsonIdListSubselectQuery(List<Long> theIds) {
 		int threshold = myStorageSettings.getLargeIdListJsonThreshold();
 		if (threshold < 0 || theIds.size() <= threshold) {
 			return null;
@@ -931,8 +930,7 @@ public class SearchQueryBuilder {
 		if (!(myDialect instanceof IHapiFhirDialect hapiFhirDialect)) {
 			return null;
 		}
-		if (myDialect instanceof SQLServerDialect && !myDialectProvider.isSqlServerJsonSupported()) {
-			myDialectProvider.logSqlServerJsonFallbackWarning();
+		if (!myDialectProvider.isLargeIdListJsonBindingSupported()) {
 			return null;
 		}
 
