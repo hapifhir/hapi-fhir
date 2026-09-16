@@ -121,12 +121,11 @@ public class HibernatePropertiesProvider {
 	}
 
 	/**
-	 * Returns <code>true</code> if a large ID list may be bound to this database as a single JSON-array
-	 * parameter rather than one bind parameter per ID. Never throws, and never runs at startup.
+	 * Returns true if the database type supports JSON-array unpacking
 	 *
 	 * @since 8.14.0
 	 */
-	public boolean isLargeIdListJsonBindingSupported() {
+	public boolean isJsonUnpackingSupported() {
 		if (!(getDialect() instanceof org.hibernate.dialect.SQLServerDialect)) {
 			return true;
 		}

@@ -930,7 +930,7 @@ public class SearchQueryBuilder {
 		if (!(myDialect instanceof IHapiFhirDialect hapiFhirDialect)) {
 			return null;
 		}
-		if (!myDialectProvider.isLargeIdListJsonBindingSupported()) {
+		if (!myDialectProvider.isJsonUnpackingSupported()) {
 			return null;
 		}
 

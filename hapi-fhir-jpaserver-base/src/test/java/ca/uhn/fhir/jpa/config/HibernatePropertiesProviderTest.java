@@ -68,26 +68,26 @@ public class HibernatePropertiesProviderTest {
 	 * many times it is retried. A failed probe is not a definitive answer, so it is not cached outright -
 	 * the next call re-probes - but three consecutive failures give up and cache "false", so a permanently
 	 * unreadable <code>sys.databases</code> costs three extra connection attempts rather than one per
-	 * search forever. Once the answer settles on "false", {@link HibernatePropertiesProvider#isLargeIdListJsonBindingSupported()}
+	 * search forever. Once the answer settles on "false", {@link HibernatePropertiesProvider#isJsonUnpackingSupported()}
 	 * also reports its own once-per-provider fallback warning, so two distinct warnings accumulate over the
 	 * life of this test - the probe failure, and the JSON-binding fallback - each logged only once.
 	 */
 	@Test
-	void isLargeIdListJsonBindingSupported_whenProbeFails_retriesUpToLimitThenCachesFalse() throws SQLException {
+	void isJsonUnpackingSupported_whenProbeFails_retriesUpToLimitThenCachesFalse() throws SQLException {
 		stubConnection();
 		lenient().when(myStatement.executeQuery(anyString())).thenThrow(new SQLException("SELECT permission denied on object 'databases'"));
 
-		assertThat(mySvc.isLargeIdListJsonBindingSupported()).isFalse();
+		assertThat(mySvc.isJsonUnpackingSupported()).isFalse();
 		verify(myDataSource, times(1)).getConnection();
 
-		assertThat(mySvc.isLargeIdListJsonBindingSupported()).isFalse();
+		assertThat(mySvc.isJsonUnpackingSupported()).isFalse();
 		verify(myDataSource, times(2)).getConnection();
 
-		assertThat(mySvc.isLargeIdListJsonBindingSupported()).isFalse();
+		assertThat(mySvc.isJsonUnpackingSupported()).isFalse();
 		verify(myDataSource, times(3)).getConnection();
 
 		// Three consecutive failures is the limit - the fourth call must not touch the DataSource again.
-		assertThat(mySvc.isLargeIdListJsonBindingSupported()).isFalse();
+		assertThat(mySvc.isJsonUnpackingSupported()).isFalse();
 		verify(myDataSource, times(3)).getConnection();
 
 		assertThat(compatibilityLevelWarnings())
@@ -106,10 +106,10 @@ public class HibernatePropertiesProviderTest {
 		when(myStatement.executeQuery(anyString())).thenReturn(myResultSet);
 		when(myResultSet.next()).thenReturn(false);
 
-		assertThat(mySvc.isLargeIdListJsonBindingSupported()).isFalse();
+		assertThat(mySvc.isJsonUnpackingSupported()).isFalse();
 		verify(myDataSource, times(1)).getConnection();
 
-		assertThat(mySvc.isLargeIdListJsonBindingSupported()).isFalse();
+		assertThat(mySvc.isJsonUnpackingSupported()).isFalse();
 		verify(myDataSource, times(2)).getConnection();
 
 		assertThat(compatibilityLevelWarnings())
@@ -128,8 +128,8 @@ public class HibernatePropertiesProviderTest {
 		when(myResultSet.next()).thenReturn(true);
 		when(myResultSet.getInt(1)).thenReturn(150);
 
-		assertThat(mySvc.isLargeIdListJsonBindingSupported()).isTrue();
-		assertThat(mySvc.isLargeIdListJsonBindingSupported()).isTrue();
+		assertThat(mySvc.isJsonUnpackingSupported()).isTrue();
+		assertThat(mySvc.isJsonUnpackingSupported()).isTrue();
 
 		verify(myDataSource, times(1)).getConnection();
 		assertThat(compatibilityLevelWarnings()).isEmpty();
@@ -140,10 +140,10 @@ public class HibernatePropertiesProviderTest {
 	 * probe, so the DataSource is never touched.
 	 */
 	@Test
-	void isLargeIdListJsonBindingSupported_withNonSqlServerDialect_returnsTrueWithoutTouchingDataSource() {
+	void isJsonUnpackingSupported_withNonSqlServerDialect_returnsTrueWithoutTouchingDataSource() {
 		mySvc.setDialectForUnitTest(new HapiFhirPostgresDialect());
 
-		assertThat(mySvc.isLargeIdListJsonBindingSupported()).isTrue();
+		assertThat(mySvc.isJsonUnpackingSupported()).isTrue();
 
 		verifyNoInteractions(myDataSource);
 		assertThat(compatibilityLevelWarnings()).isEmpty();

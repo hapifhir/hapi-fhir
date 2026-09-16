@@ -46,7 +46,7 @@ public abstract class BaseSearchQueryBuilderDialectTest {
 		// Lenient because subclasses may build a SearchQueryBuilder on a real HibernatePropertiesProvider
 		lenient().when(myHibernatePropertiesProvider.getDialect())
 			.thenReturn(createDialect());
-		lenient().when(myHibernatePropertiesProvider.isLargeIdListJsonBindingSupported())
+		lenient().when(myHibernatePropertiesProvider.isJsonUnpackingSupported())
 			.thenReturn(true);
 	}
 
