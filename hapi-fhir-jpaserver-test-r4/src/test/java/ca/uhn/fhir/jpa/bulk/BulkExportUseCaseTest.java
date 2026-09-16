@@ -8,6 +8,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -501,6 +502,33 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			final JobInstance jobInstance = optJobInstance.get();
 
 			assertEquals(patientCount, jobInstance.getCombinedRecordsProcessed());
+		}
+
+		@Test
+		public void bulkExport_customCSVFormat_works() {
+			// setup
+			BulkExportJobParameters options = new BulkExportJobParameters();
+			options.setResourceTypes(List.of("Patient"));
+			options.setFilters(new ArrayList<>());
+			options.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
+			options.setOutputFormat("text/csv");
+
+			// TODO - set pointcut for
+//			Pointcut.STORAGE_BULK_EXPORT_RESOURCE_CONVERT
+
+			// test
+			JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+			startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
+			startRequest.setParameters(options);
+			Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, startRequest);
+
+			assertNotNull(startResponse);
+			String jobId = startResponse.getInstanceId();
+
+			// Run a scheduled pass to build the export
+			myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId());
+
+
 		}
 
 		@Test

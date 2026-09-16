@@ -36,7 +36,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster.*;
+import static ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster.IInterceptorFilterHook;
 
 /**
  * Value for {@link Hook#value()}
@@ -1270,6 +1270,36 @@ public enum Pointcut implements IPointcut {
 			boolean.class,
 			"ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters",
 			"org.hl7.fhir.instance.model.api.IBaseResource"),
+
+	/**
+	 * <b>Storage hook:</b>
+	 * Invoked during BulkExport to convert a list of
+	 * resources into a mimetype and output byte stream.
+	 * If null is returned (or no hook registered) NDJSON conversion
+	 * will be used by default.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 *     ca.uhn.fhir.rest.api.server.bulk.BulkExportResourceList
+	 *     		an object containing the list of resources to convert
+	 * </li>
+	 * <li>
+	 *     ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters
+	 *     		the parameters used for the bulk export. The outputFormat is a
+	 *     		property on it.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>ca.uhn.fhir.rest.api.server.bulk.ConvertedFiles</code>
+	 * </p>
+	 */
+	STORAGE_BULK_EXPORT_RESOURCE_CONVERT(
+		"ca.uhn.fhir.rest.api.server.bulk.ConvertedFiles",
+		"ca.uhn.fhir.rest.api.server.bulk.BulkExportResourceList",
+		"ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters"
+	),
 
 	/**
 	 * <b>Storage Hook:</b>

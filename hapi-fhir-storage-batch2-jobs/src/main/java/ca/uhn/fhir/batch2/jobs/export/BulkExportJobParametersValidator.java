@@ -20,6 +20,7 @@
 package ca.uhn.fhir.batch2.jobs.export;
 
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
+import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
@@ -51,6 +52,9 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 
 	@Autowired(required = false)
 	private IBinaryStorageSvc myBinaryStorageSvc;
+
+	@Autowired
+	private InterceptorService myInterceptorService;
 
 	@Nullable
 	@Override
@@ -147,8 +151,15 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 	}
 
 	private boolean isSupportedOutputFormat(String theOutputFormat) {
-		return Constants.CT_FHIR_NDJSON.equalsIgnoreCase(theOutputFormat)
+		if (Constants.CT_FHIR_NDJSON.equalsIgnoreCase(theOutputFormat)
 				|| Constants.CT_APP_NDJSON.equalsIgnoreCase(theOutputFormat)
-				|| Constants.CT_NDJSON.equalsIgnoreCase(theOutputFormat);
+				|| Constants.CT_NDJSON.equalsIgnoreCase(theOutputFormat)) {
+			// this is our default format - so it's always supported
+			return true;
+		}
+
+
+
+		return false;
 	}
 }
