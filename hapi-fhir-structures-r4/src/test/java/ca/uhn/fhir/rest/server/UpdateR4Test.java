@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Verifies what the server framework hands to an {@link Update} provider for plain and conditional PUTs, in
  * particular that a client-supplied id in the resource body survives a conditional PUT's trip through
- * {@code UpdateMethodBinding} (https://github.com/hapifhir/hapi-fhir/issues/8389).
+ * {@code UpdateMethodBinding}.
  */
 // Created by Claude Fable 5.1
 public class UpdateR4Test {
