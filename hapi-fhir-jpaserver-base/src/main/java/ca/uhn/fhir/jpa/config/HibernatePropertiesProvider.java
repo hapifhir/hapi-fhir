@@ -42,21 +42,11 @@ import javax.sql.DataSource;
 public class HibernatePropertiesProvider {
 
 	/**
-	 * The lowest SQL Server database compatibility level which supports the <code>OPENJSON</code>
-	 * table valued function. This is the compatibility level of SQL Server 2016.
+	 * The lowest SQL Server database compatibility level which supports the OPENJSON
+	 * table valued function.
 	 */
-	public static final int MINIMUM_SQL_SERVER_JSON_COMPATIBILITY_LEVEL = 130;
-
-	/**
-	 * The number of consecutive probe failures after which {@link #isSqlServerJsonSupported()} gives up
-	 * and caches <code>false</code>, rather than re-probing on every call. Bounds the cost of a
-	 * permanently unreadable <code>sys.databases</code> table to a fixed number of extra connection
-	 * attempts instead of one per over-threshold search forever.
-	 */
+	public static final int MINIMUM_SQL_SERVER_OPENJSON_COMPATIBILITY_LEVEL = 130;
 	private static final int MAX_SQL_SERVER_JSON_PROBE_FAILURES = 3;
-
-	private static final String SQL_SERVER_COMPATIBILITY_LEVEL_QUERY =
-			"SELECT compatibility_level FROM sys.databases WHERE name = DB_NAME()";
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HibernatePropertiesProvider.class);
 
@@ -69,6 +59,7 @@ public class HibernatePropertiesProvider {
 
 	private Dialect myDialect;
 	private String myHibernateSearchBackend;
+	// If the dialect is SQL Server, store whether it supports JSON, since checking requires probing the DB
 	private volatile Boolean mySqlServerJsonSupported;
 
 	@Autowired
@@ -130,6 +121,7 @@ public class HibernatePropertiesProvider {
 			return true;
 		}
 
+		// Need to check SQL Server DB level
 		boolean sqlServerJsonSupported = isSqlServerJsonSupported();
 		if (!sqlServerJsonSupported) {
 			logSqlServerJsonFallbackWarning();
@@ -140,7 +132,7 @@ public class HibernatePropertiesProvider {
 	/**
 	 * Returns <code>true</code> when the SQL Server database behind this provider supports the
 	 * <code>OPENJSON</code> table-valued function, which requires a database compatibility level of
-	 * {@value #MINIMUM_SQL_SERVER_JSON_COMPATIBILITY_LEVEL} (SQL Server 2016) or higher.
+	 * {@value #MINIMUM_SQL_SERVER_OPENJSON_COMPATIBILITY_LEVEL} (SQL Server 2016) or higher.
 	 * <p>
 	 * The database is probed the first time this method is called and the answer is cached for the
 	 * lifetime of this provider, so that the probe never runs at startup. The probe runs until it gets a
@@ -177,7 +169,7 @@ public class HibernatePropertiesProvider {
 	/**
 	 * Logs, at most once for the lifetime of this provider, that a query had to fall back to a form
 	 * which does not use <code>OPENJSON</code> because this SQL Server database runs at a compatibility
-	 * level below {@value #MINIMUM_SQL_SERVER_JSON_COMPATIBILITY_LEVEL}.
+	 * level below {@value #MINIMUM_SQL_SERVER_OPENJSON_COMPATIBILITY_LEVEL}.
 	 */
 	private void logSqlServerJsonFallbackWarning() {
 		warnOnce(
@@ -186,8 +178,8 @@ public class HibernatePropertiesProvider {
 						+ "Large resource ID lists will continue to be sent as one bind parameter per ID, which can exceed the number of "
 						+ "bind parameters the database accepts in a single statement. Raise the database compatibility level to {} "
 						+ "(SQL Server 2016) or higher to avoid this. This message is only logged once.",
-				MINIMUM_SQL_SERVER_JSON_COMPATIBILITY_LEVEL,
-				MINIMUM_SQL_SERVER_JSON_COMPATIBILITY_LEVEL);
+			MINIMUM_SQL_SERVER_OPENJSON_COMPATIBILITY_LEVEL,
+			MINIMUM_SQL_SERVER_OPENJSON_COMPATIBILITY_LEVEL);
 	}
 
 	/**
@@ -204,11 +196,11 @@ public class HibernatePropertiesProvider {
 
 		try (Connection connection = getDataSource().getConnection();
 				Statement statement = connection.createStatement();
-				ResultSet resultSet = statement.executeQuery(SQL_SERVER_COMPATIBILITY_LEVEL_QUERY)) {
+				ResultSet resultSet = statement.executeQuery("SELECT compatibility_level FROM sys.databases WHERE name = DB_NAME()")) {
 			if (resultSet.next()) {
 				int compatibilityLevel = resultSet.getInt(1);
 				ourLog.debug("SQL Server database compatibility level is {}", compatibilityLevel);
-				return compatibilityLevel >= MINIMUM_SQL_SERVER_JSON_COMPATIBILITY_LEVEL;
+				return compatibilityLevel >= MINIMUM_SQL_SERVER_OPENJSON_COMPATIBILITY_LEVEL;
 			}
 			logSqlServerJsonProbeFailure(null);
 		} catch (Exception e) {
@@ -223,7 +215,7 @@ public class HibernatePropertiesProvider {
 				"Failed to determine the compatibility level of this SQL Server database, so features which need a "
 						+ "compatibility level of {} (SQL Server 2016) or higher, such as the OPENJSON function, will not be used. "
 						+ "This message is only logged once.",
-				MINIMUM_SQL_SERVER_JSON_COMPATIBILITY_LEVEL,
+			MINIMUM_SQL_SERVER_OPENJSON_COMPATIBILITY_LEVEL,
 				theException);
 	}
 
