@@ -47,8 +47,7 @@ public class HapiFhirPostgresDialect extends PostgreSQLDialect implements IHapiF
 	}
 
 	@Override
-	public String renderIdListJsonSubselect(String theQuotedPlaceholder) {
-		return "SELECT CAST(j.value AS BIGINT) FROM jsonb_array_elements_text(CAST(" + theQuotedPlaceholder
-				+ " AS jsonb)) AS j";
+	public String getIdListJsonSubselectTemplate() {
+		return "SELECT CAST(j.value AS BIGINT) FROM jsonb_array_elements_text(CAST(%s AS jsonb)) AS j";
 	}
 }

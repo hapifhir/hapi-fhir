@@ -60,7 +60,7 @@ public class HapiFhirSQLServerDialect extends SQLServerDialect implements IHapiF
 	}
 
 	@Override
-	public String renderIdListJsonSubselect(String theQuotedPlaceholder) {
-		return "SELECT CAST([value] AS BIGINT) FROM OPENJSON(" + theQuotedPlaceholder + ")";
+	public String getIdListJsonSubselectTemplate() {
+		return "SELECT CAST([value] AS BIGINT) FROM OPENJSON(%s)";
 	}
 }

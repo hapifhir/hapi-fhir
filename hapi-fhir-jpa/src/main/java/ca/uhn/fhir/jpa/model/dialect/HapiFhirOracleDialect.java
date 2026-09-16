@@ -65,8 +65,8 @@ public class HapiFhirOracleDialect extends OracleDialect implements IHapiFhirDia
 	}
 
 	@Override
-	public String renderIdListJsonSubselect(String theQuotedPlaceholder) {
-		return "SELECT jt.id FROM JSON_TABLE(" + theQuotedPlaceholder + ", '$[*]' COLUMNS (id NUMBER PATH '$')) jt";
+	public String getIdListJsonSubselectTemplate() {
+		return "SELECT jt.id FROM JSON_TABLE(%s, '$[*]' COLUMNS (id NUMBER PATH '$')) jt";
 	}
 
 	/**

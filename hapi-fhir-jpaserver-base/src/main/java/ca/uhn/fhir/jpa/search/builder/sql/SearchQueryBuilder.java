@@ -925,12 +925,12 @@ public class SearchQueryBuilder {
 			return null;
 		}
 
-		// A dialect with no JSON function we can use - H2 and the deprecated MySQL/MariaDB dialects - has
-		// no rendering to offer, so the JSON array below is only ever built for a matching dialect.
 		if (!(myDialect instanceof IHapiFhirDialect hapiFhirDialect)) {
 			return null;
 		}
-		if (!myDialectProvider.isJsonUnpackingSupported()) {
+
+		String template = hapiFhirDialect.getIdListJsonSubselectTemplate();
+		if (template == null || !myDialectProvider.isJsonUnpackingSupported()) {
 			return null;
 		}
 
@@ -938,8 +938,7 @@ public class SearchQueryBuilder {
 		Object bindValue = hapiFhirDialect.bindsIdListJsonAsClob()
 				? new TypedParameterValue<>(StandardBasicTypes.MATERIALIZED_CLOB, json)
 				: json;
-		String fragment = hapiFhirDialect.renderIdListJsonSubselect(quotedPlaceholder(bindValue));
-		return fragment == null ? null : "(" + fragment + ")";
+		return "(" + String.format(template, quotedPlaceholder(bindValue)) + ")";
 	}
 
 	/**
