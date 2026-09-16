@@ -70,8 +70,7 @@ public class HapiFhirOracleDialect extends OracleDialect implements IHapiFhirDia
 	}
 
 	/**
-	 * @see IHapiFhirDialect#bindsIdListJsonAsClob() for an explanation of why Oracle binds the id list JSON
-	 * array as a CLOB
+	 * True for Oracle since a plain String is bound as VARCHAR2 which is limited to only 4,000 bytes
 	 */
 	@Override
 	public boolean bindsIdListJsonAsClob() {

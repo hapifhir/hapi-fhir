@@ -894,7 +894,6 @@ public class SearchQueryBuilder {
 	 * @param theColumn  the column to constrain
 	 * @param theIds     the resource IDs, in the order they should appear in the JSON array
 	 * @param theInverse <code>true</code> to negate the predicate
-	 * @since 8.14.0
 	 */
 	@Nonnull
 	public Condition createPredicateIdsInList(

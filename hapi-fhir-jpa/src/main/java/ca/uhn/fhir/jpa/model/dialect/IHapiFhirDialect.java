@@ -42,6 +42,8 @@ public interface IHapiFhirDialect {
 	 * Returns a String template for a subselect which unpacks a JSON array of resource IDs.
 	 * The placeholder {@code %s} marks where the list of IDs goes.
 	 * Returns null when the database has no usable JSON function and the IN list should be used.
+	 *
+	 * @since 8.14.0
 	 */
 	@Nullable
 	default String getIdListJsonSubselectTemplate() {
@@ -49,11 +51,8 @@ public interface IHapiFhirDialect {
 	}
 
 	/**
-	 * Returns <code>true</code> if the JSON array bound for {@link #getIdListJsonSubselectTemplate()}
-	 * must be wrapped as a CLOB bind value rather than passed as a plain <code>String</code>. Oracle
-	 * overrides this to <code>true</code> because it binds a plain <code>String</code> as a
-	 * <code>VARCHAR2</code>, which is limited to 4,000 bytes by default and raises
-	 * <code>ORA-01461</code> beyond that.
+	 * Returns true if the JSON array bound for {@link #getIdListJsonSubselectTemplate()}
+	 * must be wrapped as a CLOB bind value rather than passed as a plain String.
 	 *
 	 * @since 8.14.0
 	 */

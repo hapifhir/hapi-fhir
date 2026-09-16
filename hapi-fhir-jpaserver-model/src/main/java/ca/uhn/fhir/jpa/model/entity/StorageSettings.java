@@ -1356,27 +1356,17 @@ public class StorageSettings {
 	}
 
 	/**
-	 * When a search predicate constrains a column to a list of resource IDs - a search on <code>_id</code>
-	 * with many values, or a reference parameter such as <code>subject=</code> with many values - any list
-	 * holding more than this many IDs is bound as a single JSON array string which the database unpacks with
-	 * its own JSON function, rather than as one bind variable per ID. This keeps a very large ID list, such
-	 * as the one automatic search narrowing produces for a user holding tens of thousands of compartment
-	 * grants, below the number of bind parameters the database accepts in a single statement (65,535 on
-	 * PostgreSQL, 2,100 on SQL Server, and an <code>IN</code> list of at most 1,000 expressions on Oracle).
-	 * <p>
-	 * This applies to PostgreSQL (<code>jsonb_array_elements_text</code>), Oracle (<code>JSON_TABLE</code>,
-	 * with the array bound as a CLOB) and SQL Server (<code>OPENJSON</code>). On SQL Server the database must
-	 * be running at compatibility level 130 (SQL Server 2016) or higher; below that the ID list keeps being
-	 * sent as one bind variable per ID and a warning is logged once. MySQL, MariaDB and H2 always keep one
-	 * bind variable per ID.
-	 * </p>
-	 * <p>
-	 * A value of {@link #LARGE_ID_LIST_JSON_DISABLED} (<code>-1</code>) disables the behaviour entirely, so
-	 * every list is rendered as <code>IN (?,?,...)</code>. A value of <code>0</code> means every list is
-	 * rendered as a JSON array, including a list holding a single ID. Values below
-	 * {@link #LARGE_ID_LIST_JSON_DISABLED} are rejected. Defaults to
-	 * {@link #DEFAULT_LARGE_ID_LIST_JSON_THRESHOLD}.
-	 * </p>
+	 * A search containing some filter by resource ID (eg. directly with "_id" or by reference such as
+	 * "subject=") uses one database bind variable per ID. When many IDs are included, the database
+	 * bind parameter limits can be exceeded
+	 * (65,535 on PostgreSQL, 2,100 on SQL Server, and 1,000 expressions on Oracle).
+	 * To avoid this, the list of IDs is bound as a single JSON array string which the database unpacks with
+	 * its own JSON function. This setting configures the threshold at which a search will use a single JSON
+	 * array.
+	 * @param theLargeIdListJsonThreshold The threshold of the number of IDs in a search at which the SQl query
+	 *                                    will use a json array rather than a parameter for each ID
+	 *                                    A value of -1 disables the behaviour entirely.
+	 *                                    Defaults to 800.
 	 *
 	 * @since 8.14.0
 	 */
