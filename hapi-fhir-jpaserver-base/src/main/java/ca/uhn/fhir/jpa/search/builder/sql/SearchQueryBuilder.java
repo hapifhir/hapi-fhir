@@ -885,10 +885,9 @@ public class SearchQueryBuilder {
 	 * <p>
 	 * Lists holding more than {@link StorageSettings#getLargeIdListJsonThreshold()} IDs are bound as a
 	 * single JSON array string which the database unpacks with its own JSON function, instead of one bind
-	 * variable per ID. This keeps a very large ID list - such as the one automatic search narrowing
-	 * produces for a user holding tens of thousands of compartment grants - well below the number of bind
-	 * parameters the database accepts in a single statement. It applies to PostgreSQL, Oracle and SQL
-	 * Server; every other database, and every list at or under the threshold, keeps rendering
+	 * variable per ID. Useful for large ID lists (eg. automatic search narrowing adds one ID per grant - and
+	 * there could be tens of thousands). It applies to PostgreSQL, Oracle and SQL Server only; every other
+	 * database, and every list at or under the threshold, keeps rendering
 	 * <code>IN (?,?,...)</code>.
 	 * </p>
 	 *
@@ -900,7 +899,7 @@ public class SearchQueryBuilder {
 	@Nonnull
 	public Condition createPredicateIdsInList(
 			@Nonnull DbColumn theColumn, @Nonnull List<Long> theIds, boolean theInverse) {
-		String jsonIdListSubselect = createJsonIdListSubselectQuery(theIds);
+		String jsonIdListSubselect = createJsonIdListSubselectQueryOrNull(theIds);
 		if (jsonIdListSubselect == null) {
 			return QueryParameterUtils.toEqualToOrInPredicate(theColumn, generatePlaceholders(theIds), theInverse);
 		}
@@ -913,13 +912,14 @@ public class SearchQueryBuilder {
 	}
 
 	/**
-	 * Returns the subselect which unpacks the given IDs from a single JSON array bind variable, or
-	 * <code>null</code> if this list should keep being rendered as an <code>IN (?,?,...)</code> list -
-	 * because it is below the configured threshold or is disabled, or because the database type has no
-	 * JSON function we can use.
+	 * Returns the subselect which unpacks the given IDs from a single JSON array bind variable.
+	 * Returns null if:
+	 * - the number of IDs is below the configured threshold
+	 * - JSON unpacking is disabled or
+	 * - the database type has no JSON unpacking function
 	 */
 	@Nullable
-	private String createJsonIdListSubselectQuery(List<Long> theIds) {
+	private String createJsonIdListSubselectQueryOrNull(List<Long> theIds) {
 		int threshold = myStorageSettings.getLargeIdListJsonThreshold();
 		if (threshold < 0 || theIds.size() <= threshold) {
 			return null;
@@ -957,16 +957,7 @@ public class SearchQueryBuilder {
 	 */
 	@Nonnull
 	private static String toJsonArray(List<Long> theIds) {
-		StringBuilder jsonArray = new StringBuilder(2 + theIds.size() * 8);
-		jsonArray.append('[');
-		for (int i = 0; i < theIds.size(); i++) {
-			if (i > 0) {
-				jsonArray.append(',');
-			}
-			jsonArray.append(theIds.get(i).longValue());
-		}
-		jsonArray.append(']');
-		return jsonArray.toString();
+		return theIds.stream().map(String::valueOf).collect(Collectors.joining(",", "[", "]"));
 	}
 
 	public int countBindVariables() {

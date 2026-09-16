@@ -39,9 +39,9 @@ public interface IHapiFhirDialect {
 	DriverTypeEnum getDriverType();
 
 	/**
-	 * Template for a subselect which unpacks a JSON array of resource IDs, bound as a single
-	 * parameter, into one row per ID. {@code %s} marks where the bind placeholder goes. Returns
-	 * {@code null} when the database has no usable JSON function and the IN list should be used.
+	 * Returns a String template for a subselect which unpacks a JSON array of resource IDs.
+	 * The placeholder {@code %s} marks where the list of IDs goes.
+	 * Returns null when the database has no usable JSON function and the IN list should be used.
 	 */
 	@Nullable
 	default String getIdListJsonSubselectTemplate() {
