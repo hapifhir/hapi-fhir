@@ -26,6 +26,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface ITagDefinitionDao extends JpaRepository<TagDefinition, Long>, IHapiFhirJpaRepository {
@@ -41,4 +42,14 @@ public interface ITagDefinitionDao extends JpaRepository<TagDefinition, Long>, I
 			@Param("version") String version,
 			@Param("userSelected") Boolean userSelected,
 			Pageable pageable);
+
+	/**
+	 * Fetches all tag definitions of the given types whose code is in the supplied collection. Used to
+	 * batch-resolve the tag ids for a {@code _tag}/{@code _security}/{@code _profile} search in a single
+	 * lookup — including when a search mixes those parameters — so the system/type is matched by the
+	 * caller and this deliberately filters on type + code only.
+	 */
+	@Query("SELECT t FROM TagDefinition t WHERE t.myTagType IN :tagTypes AND t.myCode IN :codes")
+	List<TagDefinition> findByTagTypesAndCodes(
+			@Param("tagTypes") Collection<TagTypeEnum> tagTypes, @Param("codes") Collection<String> codes);
 }

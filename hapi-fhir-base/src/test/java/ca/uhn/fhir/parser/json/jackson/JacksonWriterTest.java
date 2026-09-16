@@ -1,8 +1,8 @@
 package ca.uhn.fhir.parser.json.jackson;
 
 import ca.uhn.fhir.parser.json.BaseJsonLikeWriter;
-import com.fasterxml.jackson.core.JsonFactory;
 import org.junit.jupiter.api.Test;
+import tools.jackson.core.json.JsonFactory;
 
 import java.io.IOException;
 import java.io.Writer;

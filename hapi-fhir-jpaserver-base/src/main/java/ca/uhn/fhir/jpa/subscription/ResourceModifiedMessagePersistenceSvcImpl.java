@@ -38,8 +38,6 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections4.ListUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -47,6 +45,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Collection;
 import java.util.Date;
@@ -75,7 +75,7 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 
 	private final DaoRegistry myDaoRegistry;
 
-	private final ObjectMapper myObjectMapper;
+	private final JsonMapper myJsonMapper;
 
 	private final HapiTransactionService myHapiTransactionService;
 
@@ -90,7 +90,7 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 		myResourceModifiedDao = theResourceModifiedDao;
 		myDaoRegistry = theDaoRegistry;
 		myHapiTransactionService = theHapiTransactionService;
-		myObjectMapper = new ObjectMapper();
+		myJsonMapper = new JsonMapper();
 	}
 
 	@Override
@@ -213,8 +213,8 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 
 	private ResourceModifiedMessage getPayloadLessMessageFromString(String thePayloadLessMessage) {
 		try {
-			return myObjectMapper.readValue(thePayloadLessMessage, ResourceModifiedMessage.class);
-		} catch (JsonProcessingException e) {
+			return myJsonMapper.readValue(thePayloadLessMessage, ResourceModifiedMessage.class);
+		} catch (JacksonException e) {
 			throw new ConfigurationException(Msg.code(2334) + "Failed to json deserialize payloadless  message", e);
 		}
 	}
@@ -223,8 +223,8 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 		ResourceModifiedMessage tempMessage = new PayloadLessResourceModifiedMessage(theMsg);
 
 		try {
-			return myObjectMapper.writeValueAsString(tempMessage);
-		} catch (JsonProcessingException e) {
+			return myJsonMapper.writeValueAsString(tempMessage);
+		} catch (JacksonException e) {
 			throw new ConfigurationException(Msg.code(2335) + "Failed to serialize empty ResourceModifiedMessage", e);
 		}
 	}

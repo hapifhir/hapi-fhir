@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>8.13.7-SNAPSHOT</version>
+		<version>8.13.9-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -51,6 +51,13 @@
 			<artifactId>hapi-fhir-storage</artifactId>
 			<version>${project.version}</version>
 			<scope>compile</scope>
+			<!-- Avoid pulling a second JSON-P provider onto the Oracle migration test classpath. -->
+			<exclusions>
+				<exclusion>
+					<groupId>org.glassfish</groupId>
+					<artifactId>javax.json</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
