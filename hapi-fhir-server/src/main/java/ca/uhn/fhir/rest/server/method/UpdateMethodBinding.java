@@ -95,6 +95,12 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 		return Collections.singleton(RequestTypeEnum.PUT);
 	}
 
+	/**
+	 * For a plain update the body id must be present and must agree with the URL id. For a conditional update the
+	 * body id is optional and is passed through untouched: the FHIR specification leaves it to the server to create
+	 * the resource under that id when nothing matches, or to reject the request when it disagrees with the matched
+	 * resource, and both decisions belong to the storage layer rather than to the REST binding.
+	 */
 	@Override
 	protected void validateResourceIdAndUrlIdForNonConditionalOperation(
 			IBaseResource theResource, String theResourceId, String theUrlId, String theMatchUrl) {
@@ -121,8 +127,6 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 								theUrlId);
 				throw new InvalidRequestException(Msg.code(420) + msg);
 			}
-		} else {
-			theResource.setId((IIdType) null);
 		}
 	}
 }

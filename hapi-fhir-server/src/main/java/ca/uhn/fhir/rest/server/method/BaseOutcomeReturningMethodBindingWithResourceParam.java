@@ -104,15 +104,24 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 			if (resource != null) {
 				String resourceId = resource.getIdElement().getIdPart();
 				String urlId = theRequest.getId() != null ? theRequest.getId().getIdPart() : null;
-				if (getContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3) == false) {
-					resource.setId(theRequest.getId());
-				}
 
 				String matchUrl = null;
 				if (myConditionalUrlIndex != -1) {
 					matchUrl = (String) theParams[myConditionalUrlIndex];
 					matchUrl = defaultIfBlank(matchUrl, null);
 				}
+
+				/*
+				 * For a non-conditional operation the id in the request URL is authoritative and replaces whatever the
+				 * body carried. A conditional operation has no id in the URL, so the body id is left in place and it is
+				 * up to the operation-specific hook below (and ultimately the storage layer) to decide what to do with
+				 * it.
+				 */
+				if (matchUrl == null
+						&& getContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3) == false) {
+					resource.setId(theRequest.getId());
+				}
+
 				validateResourceIdAndUrlIdForNonConditionalOperation(resource, resourceId, urlId, matchUrl);
 			}
 		}
