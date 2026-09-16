@@ -27,31 +27,29 @@ import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class CdsServiceRequestJsonDeserializer {
-	private final ObjectMapper myObjectMapper;
+	private final JsonMapper myJsonMapper;
 	private final FhirContext myFhirContext;
 	private final IParser myParser;
 
-	public CdsServiceRequestJsonDeserializer(
-			@Nonnull FhirContext theFhirContext, @Nonnull ObjectMapper theObjectMapper) {
+	public CdsServiceRequestJsonDeserializer(@Nonnull FhirContext theFhirContext, @Nonnull JsonMapper theJsonMapper) {
 		myFhirContext = theFhirContext;
 		myParser = myFhirContext.newJsonParser().setPrettyPrint(true);
-		myObjectMapper = theObjectMapper;
+		myJsonMapper = theJsonMapper;
 	}
 
 	public CdsServiceRequestJson deserialize(
 			@Nonnull CdsServiceJson theCdsServiceJson, @Nonnull Object theCdsServiceRequestJson) {
-		final JsonNode cdsServiceRequestJsonNode =
-				myObjectMapper.convertValue(theCdsServiceRequestJson, JsonNode.class);
+		final JsonNode cdsServiceRequestJsonNode = myJsonMapper.convertValue(theCdsServiceRequestJson, JsonNode.class);
 		final JsonNode contextNode = cdsServiceRequestJsonNode.get("context");
 		validateHookInstance(cdsServiceRequestJsonNode.get("hookInstance"));
 		validateHook(cdsServiceRequestJsonNode.get("hook"));
@@ -59,8 +57,8 @@ public class CdsServiceRequestJsonDeserializer {
 		try {
 			final JsonNode extensionNode = cdsServiceRequestJsonNode.get("extension");
 			final CdsServiceRequestJson cdsServiceRequestJson =
-					myObjectMapper.convertValue(cdsServiceRequestJsonNode, CdsServiceRequestJson.class);
-			LinkedHashMap<String, Object> map = myObjectMapper.readValue(contextNode.toString(), LinkedHashMap.class);
+					myJsonMapper.convertValue(cdsServiceRequestJsonNode, CdsServiceRequestJson.class);
+			LinkedHashMap<String, Object> map = myJsonMapper.readValue(contextNode.toString(), LinkedHashMap.class);
 			cdsServiceRequestJson.setContext(deserializeContext(map));
 			if (extensionNode != null) {
 				CdsHooksExtension myRequestExtension =
@@ -68,20 +66,19 @@ public class CdsServiceRequestJsonDeserializer {
 				cdsServiceRequestJson.setExtension(myRequestExtension);
 			}
 			return cdsServiceRequestJson;
-		} catch (JsonProcessingException | IllegalArgumentException theEx) {
+		} catch (JacksonException | IllegalArgumentException theEx) {
 			throw new InvalidRequestException(Msg.code(2551) + "Invalid CdsServiceRequest received. " + theEx);
 		}
 	}
 
-	CdsServiceRequestContextJson deserializeContext(LinkedHashMap<String, Object> theMap)
-			throws JsonProcessingException {
+	CdsServiceRequestContextJson deserializeContext(LinkedHashMap<String, Object> theMap) throws JacksonException {
 		final CdsServiceRequestContextJson cdsServiceRequestContextJson = new CdsServiceRequestContextJson();
 		for (Map.Entry<String, Object> entry : theMap.entrySet()) {
 			String key = entry.getKey();
 			Object value = entry.getValue();
 			// Convert LinkedHashMap entries to Resources
 			if (value instanceof LinkedHashMap) {
-				String json = myObjectMapper.writeValueAsString(value);
+				String json = myJsonMapper.writeValueAsString(value);
 				IBaseResource resource = myParser.parseResource(json);
 				cdsServiceRequestContextJson.put(key, resource);
 			} else {
@@ -92,12 +89,12 @@ public class CdsServiceRequestJsonDeserializer {
 	}
 
 	private CdsHooksExtension deserializeExtension(
-			@Nonnull CdsServiceJson theCdsServiceJson, @Nonnull String theExtension) throws JsonProcessingException {
+			@Nonnull CdsServiceJson theCdsServiceJson, @Nonnull String theExtension) throws JacksonException {
 		Class<? extends CdsHooksExtension> extensionClass = theCdsServiceJson.getExtensionClass();
 		if (extensionClass == null) {
 			return null;
 		}
-		return myObjectMapper.readValue(theExtension, extensionClass);
+		return myJsonMapper.readValue(theExtension, extensionClass);
 	}
 
 	private void validateHook(JsonNode hookIdNode) {

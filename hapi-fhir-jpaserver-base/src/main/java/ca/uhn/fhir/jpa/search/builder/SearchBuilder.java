@@ -43,6 +43,7 @@ import ca.uhn.fhir.jpa.dao.ISearchResultConsumer;
 import ca.uhn.fhir.jpa.dao.SearchProgressTracker;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
+import ca.uhn.fhir.jpa.dao.data.ITagDefinitionDao;
 import ca.uhn.fhir.jpa.dao.search.ResourceNotFoundInIndexException;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -261,6 +262,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	@Autowired
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
+
+	@Autowired
+	private ITagDefinitionDao myTagDefinitionDao;
 
 	@Autowired
 	private BatchResourceLoader myBatchResourceLoader;
@@ -842,7 +846,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				myContext,
 				sqlBuilder,
 				mySearchParamRegistry,
-				myPartitionSettings);
+				myPartitionSettings,
+				myTagDefinitionDao);
 
 		if (theParams.keySet().size() > 1
 				|| theParams.getSort() != null
@@ -993,7 +998,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				myContext,
 				sqlBuilder,
 				mySearchParamRegistry,
-				myPartitionSettings);
+				myPartitionSettings,
+				myTagDefinitionDao);
 
 		JdbcTemplate jdbcTemplate = initializeJdbcTemplate(theSearchQueryProperties.getMaxResultsRequested());
 

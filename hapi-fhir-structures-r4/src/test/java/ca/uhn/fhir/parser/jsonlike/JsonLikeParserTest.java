@@ -89,7 +89,7 @@ public class JsonLikeParserTest {
 	/**
 	 * Test that json number values with a leading plus sign are parsed without exception.
 	 * Previously, it was possible to save resources with leading plus sign numbers, e.g., "value": +3.0.
-	 * To ensure that we could read such resources back, the ObjectMapper configuration was updated by enabling:
+	 * To ensure that we could read such resources back, the JsonMapper configuration was updated by enabling:
 	 * {@link com.fasterxml.jackson.core.json.JsonReadFeature#ALLOW_LEADING_PLUS_SIGN_FOR_NUMBERS}
 	 * Reproduces: https://github.com/hapifhir/hapi-fhir/issues/5667
 	 */
