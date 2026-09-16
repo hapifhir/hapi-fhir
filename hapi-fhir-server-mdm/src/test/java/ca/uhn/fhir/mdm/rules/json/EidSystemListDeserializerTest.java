@@ -1,10 +1,10 @@
 package ca.uhn.fhir.mdm.rules.json;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.junit.jupiter.api.Test;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.List;
 import java.util.Map;
@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 // Created by claude-opus-5
 class EidSystemListDeserializerTest {
 
-	private static final ObjectMapper ourObjectMapper = new ObjectMapper();
+	private static final JsonMapper ourObjectMapper = JsonMapper.builder().build();
 
 	/**
 	 * Mirrors the annotation shape used by {@link MdmRulesJson#myEnterpriseEidSystems} so that the
@@ -78,7 +78,7 @@ class EidSystemListDeserializerTest {
 	void deserialize_nonStringValue_throwsNamingTheResourceType() {
 		assertThatThrownBy(() -> deserialize("""
 			{"eidSystems": {"Patient": 42}}"""))
-			.isInstanceOf(JsonMappingException.class)
+			.isInstanceOf(JacksonException.class)
 			.hasMessageContaining("eidSystems entry for 'Patient' must be an EID system URI or an array of EID system URIs");
 	}
 
@@ -86,7 +86,7 @@ class EidSystemListDeserializerTest {
 	void deserialize_arrayContainingNonString_throwsNamingTheResourceType() {
 		assertThatThrownBy(() -> deserialize("""
 			{"eidSystems": {"Patient": ["http://example.com/mrn", 42]}}"""))
-			.isInstanceOf(JsonMappingException.class)
+			.isInstanceOf(JacksonException.class)
 			.hasMessageContaining("eidSystems entry for 'Patient' must be an EID system URI or an array of EID system URIs");
 	}
 

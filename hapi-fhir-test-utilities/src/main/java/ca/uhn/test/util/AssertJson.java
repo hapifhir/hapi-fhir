@@ -19,8 +19,9 @@
  */
 package ca.uhn.test.util;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.json.JsonMapper;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.api.AbstractAssert;
@@ -28,7 +29,6 @@ import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
@@ -250,22 +250,22 @@ public class AssertJson extends AbstractAssert<AssertJson, String> {
 	@Nonnull
 	private static Map<String, Object> getMap(String theJsonString) {
 		try {
-			return new ObjectMapper()
+			return new JsonMapper()
 				.readValue(new ByteArrayInputStream(theJsonString.getBytes()), new TypeReference<>() {});
 
-		} catch (IOException theE) {
-			fail("IOException: " + theE);
+		} catch (JacksonException theE) {
+			fail("JacksonException: " + theE);
 		}
 		return Collections.emptyMap();
 	}
 
 	private List<?> getList(String theJsonString) {
 		try {
-			return new ObjectMapper()
+			return new JsonMapper()
 				.readValue(new ByteArrayInputStream(theJsonString.getBytes()), new TypeReference<>() {});
 
-		} catch (IOException theE) {
-			fail("IOException: " + theE);
+		} catch (JacksonException theE) {
+			fail("JacksonException: " + theE);
 		}
 		return Collections.emptyList();
 	}

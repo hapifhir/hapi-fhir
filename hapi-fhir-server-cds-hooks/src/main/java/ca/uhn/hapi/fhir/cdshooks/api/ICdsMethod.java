@@ -20,8 +20,8 @@
 package ca.uhn.hapi.fhir.cdshooks.api;
 
 import ca.uhn.fhir.model.api.IModelJson;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 public interface ICdsMethod {
-	Object invoke(ObjectMapper theObjectMapper, IModelJson theJson, String theServiceId);
+	Object invoke(JsonMapper theJsonMapper, IModelJson theJson, String theServiceId);
 }
