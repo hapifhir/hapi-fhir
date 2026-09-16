@@ -251,6 +251,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	public void after() throws Exception {
 		super.after();
 
+		myStorageSettings.setResourceClientIdStrategy(new JpaStorageSettings().getResourceClientIdStrategy());
 		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
 		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
@@ -1503,9 +1504,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	/**
-	 * Conditional update (http://hl7.org/fhir/http.html#cond-update) with an acceptable body id: with no match the
-	 * resource is created under the client-supplied id, and with one match whose id agrees with the body the match
-	 * is updated in place.
+	 * Conditional update (http://hl7.org/fhir/http.html#cond-update) with a body id the configured
+	 * {@link JpaStorageSettings.ClientIdStrategyEnum} accepts: with no match the resource is created under the
+	 * client-supplied id, and with one match whose id agrees with the body the match is updated in place. The
+	 * pre-existing match is created before the strategy is switched, so that NOT_ALLOWED can be exercised too.
 	 * <p>
 	 * Raw HTTP is used deliberately — the generic client must not be able to drop the id on our behalf, or the
 	 * test would be measuring the client rather than the server.
@@ -1514,17 +1516,27 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@ParameterizedTest(name = "{0}")
 	@CsvSource(
 		textBlock = """
-		# name,                                                       existingMatchId, bodyId,      status, expectedVersion
-		'no match, client-assigned body id: created under that id',   ,                custom-id-1, 201,    1
-		'one match, body id equals the match: updated in place',      match-pt,        match-pt,    200,    2
+		# name,                                                                       strategy,     existingMatchId, bodyId,      status, expectedVersion
+		'ALPHANUMERIC, no match, client-assigned body id: created under that id',     ALPHANUMERIC, ,                custom-id-1, 201,    1
+		'ALPHANUMERIC, one match, body id equals the match: updated in place',        ALPHANUMERIC, match-pt,        match-pt,    200,    2
+		'ANY, no match, client-assigned body id: created under that id',              ANY,          ,                custom-id-1, 201,    1
+		'ANY, no match, numeric body id: created under that id',                      ANY,          ,                987654321,   201,    1
+		'ANY, one match, body id equals the match: updated in place',                 ANY,          match-pt,        match-pt,    200,    2
+		'NOT_ALLOWED, one match, body id equals the match: updated in place',         NOT_ALLOWED,  match-pt,        match-pt,    200,    2
 		""")
 	public void testConditionalUpdate_bodyIdHonoured(
-			String theName, String theExistingMatchId, String theBodyId, int theExpectedStatus, String theExpectedVersion)
+			String theName,
+			JpaStorageSettings.ClientIdStrategyEnum theStrategy,
+			String theExistingMatchId,
+			String theBodyId,
+			int theExpectedStatus,
+			String theExpectedVersion)
 			throws IOException {
 		// setup
 		if (theExistingMatchId != null) {
 			createPatient(withId(theExistingMatchId), withIdentifier(MRN_SYSTEM, CONDITIONAL_UPDATE_MRN));
 		}
+		myStorageSettings.setResourceClientIdStrategy(theStrategy);
 
 		// execute
 		ConditionalUpdateResponse response = conditionalUpdateByMrn(CONDITIONAL_UPDATE_MRN, theBodyId, "Smith");
@@ -1541,10 +1553,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	/**
-	 * Conditional update rejections: the body id reaches storage untouched, so storage's own rules apply. A body id
-	 * that disagrees with the match, a purely numeric id under the default
-	 * {@link JpaStorageSettings.ClientIdStrategyEnum#ALPHANUMERIC} strategy, an id that is not a valid FHIR id, and an
-	 * id that already belongs to a different resource are all rejected, and nothing is created or modified.
+	 * Conditional update rejections: the body id reaches storage untouched, so storage's own rules apply under each
+	 * {@link JpaStorageSettings.ClientIdStrategyEnum}. A body id that disagrees with the match (HAPI-2279) and an id
+	 * that is not a valid FHIR id (HAPI-0521) are rejected regardless of strategy. ALPHANUMERIC rejects a purely
+	 * numeric id (HAPI-0960) and an id that already belongs to another resource (HAPI-0825); NOT_ALLOWED rejects
+	 * every client-assigned id on a no-match create (HAPI-0959). Nothing is created or modified in any case.
 	 * <p>
 	 * A {@code urn:uuid:} id is included because outside a transaction it is not a placeholder, just an invalid id.
 	 */
@@ -1552,14 +1565,23 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@ParameterizedTest(name = "{0}")
 	@CsvSource(
 		textBlock = """
-		# name,                                                                 existingMatchId, existingOtherId, bodyId,                                        status, expectedCode
-		'one match, different body id: HAPI-2279',                              match-pt,        ,                some-other-id,                                 400,    HAPI-2279
-		'no match, numeric body id under ALPHANUMERIC: HAPI-0960',              ,                ,                987654321,                                     400,    HAPI-0960
-		'no match, body id is not a valid FHIR id: HAPI-0521',                  ,                ,                urn:uuid:8b7d3a4e-2c1f-4f5a-9e6b-0d1c2b3a4f5e, 400,    HAPI-0521
-		'no match, body id already belongs to another resource: HAPI-0825',     ,                existing-pt,     existing-pt,                                   409,    HAPI-0825
+		# name,                                                                                 strategy,     existingMatchId, existingOtherId, bodyId,                                        status, expectedCode
+		'ALPHANUMERIC, one match, different body id: HAPI-2279',                                ALPHANUMERIC, match-pt,        ,                some-other-id,                                 400,    HAPI-2279
+		'ALPHANUMERIC, no match, numeric body id: HAPI-0960',                                   ALPHANUMERIC, ,                ,                987654321,                                     400,    HAPI-0960
+		'ALPHANUMERIC, no match, body id is not a valid FHIR id: HAPI-0521',                    ALPHANUMERIC, ,                ,                urn:uuid:8b7d3a4e-2c1f-4f5a-9e6b-0d1c2b3a4f5e, 400,    HAPI-0521
+		'ALPHANUMERIC, no match, body id already belongs to another resource: HAPI-0825',       ALPHANUMERIC, ,                existing-pt,     existing-pt,                                   409,    HAPI-0825
+		'ANY, one match, different body id: HAPI-2279',                                         ANY,          match-pt,        ,                some-other-id,                                 400,    HAPI-2279
+		'ANY, no match, body id is not a valid FHIR id: HAPI-0521',                             ANY,          ,                ,                urn:uuid:8b7d3a4e-2c1f-4f5a-9e6b-0d1c2b3a4f5e, 400,    HAPI-0521
+		'ANY, no match, body id already belongs to another resource: HAPI-0825',                ANY,          ,                existing-pt,     existing-pt,                                   409,    HAPI-0825
+		'NOT_ALLOWED, no match, client-assigned body id: HAPI-0959',                            NOT_ALLOWED,  ,                ,                custom-id-1,                                   404,    HAPI-0959
+		'NOT_ALLOWED, one match, different body id: HAPI-2279',                                 NOT_ALLOWED,  match-pt,        ,                some-other-id,                                 400,    HAPI-2279
+		'NOT_ALLOWED, no match, numeric body id: HAPI-0959',                                    NOT_ALLOWED,  ,                ,                987654321,                                     404,    HAPI-0959
+		'NOT_ALLOWED, no match, body id is not a valid FHIR id: HAPI-0521',                     NOT_ALLOWED,  ,                ,                urn:uuid:8b7d3a4e-2c1f-4f5a-9e6b-0d1c2b3a4f5e, 400,    HAPI-0521
+		'NOT_ALLOWED, no match, body id already belongs to another resource: HAPI-0959',        NOT_ALLOWED,  ,                existing-pt,     existing-pt,                                   404,    HAPI-0959
 		""")
 	public void testConditionalUpdate_bodyIdRejected(
 			String theName,
+			JpaStorageSettings.ClientIdStrategyEnum theStrategy,
 			String theExistingMatchId,
 			String theExistingOtherId,
 			String theBodyId,
@@ -1573,6 +1595,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		if (theExistingOtherId != null) {
 			createPatient(withId(theExistingOtherId), withIdentifier(MRN_SYSTEM, "PT-OTHER"));
 		}
+		myStorageSettings.setResourceClientIdStrategy(theStrategy);
 
 		// execute
 		ConditionalUpdateResponse response = conditionalUpdateByMrn(CONDITIONAL_UPDATE_MRN, theBodyId, "Smith");
