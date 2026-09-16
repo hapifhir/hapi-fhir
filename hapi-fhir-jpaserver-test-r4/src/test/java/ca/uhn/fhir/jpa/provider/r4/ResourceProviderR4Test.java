@@ -69,6 +69,7 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.test.util.LogbackTestExtension;
 import ca.uhn.test.util.LogbackTestExtensionAssert;
@@ -233,6 +234,8 @@ import static org.mockito.Mockito.when;
 
 @SuppressWarnings("Duplicates")
 public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
+	private static final String MRN_SYSTEM = "http://acme.org/mrn";
+	private static final String CONDITIONAL_UPDATE_MRN = "PT-COND";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4Test.class);
 	private final CapturingInterceptor myCapturingInterceptor = new CapturingInterceptor();
 	@RegisterExtension
@@ -1500,227 +1503,135 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	/**
-	 * A conditional update whose body carries an id that disagrees with the resource its conditional URL matched
-	 * must be rejected with a 400 and an OperationOutcome (http://hl7.org/fhir/http.html#cond-update).
+	 * Conditional update (http://hl7.org/fhir/http.html#cond-update) with an acceptable body id: with no match the
+	 * resource is created under the client-supplied id, and with one match whose id agrees with the body the match
+	 * is updated in place.
 	 * <p>
 	 * Raw HTTP is used deliberately — the generic client must not be able to drop the id on our behalf, or the
 	 * test would be measuring the client rather than the server.
 	 */
-	// Created by Claude Opus 5
-	@Test
-	public void testConditionalUpdate_OneMatch_DifferentBodyId_shouldRejectWith2279() throws IOException {
-		Patient existing = new Patient();
-		existing.addIdentifier().setSystem("http://acme.org/mrn").setValue("PT1");
-		IIdType existingId = myClient.create().resource(existing).execute().getId().toUnqualifiedVersionless();
-
-		Patient update = new Patient();
-		update.setId("some-other-id");
-		update.addIdentifier().setSystem("http://acme.org/mrn").setValue("PT1");
-		update.setActive(true);
-
-		HttpPut httpPut = new HttpPut(myServerBase + "/Patient?identifier=http://acme.org/mrn%7CPT1");
-		httpPut.setEntity(new StringEntity(
-			myFhirContext.newJsonParser().encodeResourceToString(update),
-			ContentType.parse("application/json+fhir")));
-
-		try (CloseableHttpResponse status = ourHttpClient.execute(httpPut)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("{}\n{}", status.getStatusLine(), responseContent);
-
-			assertThat(status.getStatusLine().getStatusCode())
-				.as("spec case 5 requires 400 Bad Request when the body id does not match the conditional match")
-				.isEqualTo(400);
-			assertThat(responseContent)
-				.as("the OperationOutcome should identify the id mismatch")
-				.contains("HAPI-2279");
+	// Created by Claude Fable 5.1
+	@ParameterizedTest(name = "{0}")
+	@CsvSource(
+		textBlock = """
+		# name,                                                       existingMatchId, bodyId,      status, expectedVersion
+		'no match, client-assigned body id: created under that id',   ,                custom-id-1, 201,    1
+		'one match, body id equals the match: updated in place',      match-pt,        match-pt,    200,    2
+		""")
+	public void testConditionalUpdate_bodyIdHonoured(
+			String theName, String theExistingMatchId, String theBodyId, int theExpectedStatus, String theExpectedVersion)
+			throws IOException {
+		// setup
+		if (theExistingMatchId != null) {
+			createPatient(withId(theExistingMatchId), withIdentifier(MRN_SYSTEM, CONDITIONAL_UPDATE_MRN));
 		}
 
-		Patient matched = myClient.read().resource(Patient.class).withId(existingId).execute();
-		assertThat(matched.hasActive())
-			.as("the rejected conditional update must not have modified the matched resource")
-			.isFalse();
+		// execute
+		ConditionalUpdateResponse response = conditionalUpdateByMrn(CONDITIONAL_UPDATE_MRN, theBodyId, "Smith");
 
-		assertThatThrownBy(() -> myClient.read().resource(Patient.class).withId("some-other-id").execute())
-			.as("the rejected conditional update must not have created anything under the body id")
-			.isInstanceOf(ResourceNotFoundException.class);
+		// verify
+		assertThat(response.statusCode()).isEqualTo(theExpectedStatus);
+
+		Patient stored = myClient.read().resource(Patient.class).withId(theBodyId).execute();
+		assertThat(stored.getIdElement().getVersionIdPart()).isEqualTo(theExpectedVersion);
+		assertThat(stored.getNameFirstRep().getFamily()).isEqualTo("Smith");
+		assertThat(searchPatientsByMrn(CONDITIONAL_UPDATE_MRN))
+			.extracting(t -> t.getIdElement().getIdPart())
+			.containsExactly(theBodyId);
 	}
 
 	/**
-	 * A conditional update that matches nothing must create the resource using the client-supplied body id and
-	 * return 201 (http://hl7.org/fhir/http.html#cond-update).
+	 * Conditional update rejections: the body id reaches storage untouched, so storage's own rules apply. A body id
+	 * that disagrees with the match, a purely numeric id under the default
+	 * {@link JpaStorageSettings.ClientIdStrategyEnum#ALPHANUMERIC} strategy, an id that is not a valid FHIR id, and an
+	 * id that already belongs to a different resource are all rejected, and nothing is created or modified.
 	 * <p>
-	 * Raw HTTP is used deliberately — see the sibling test above.
-	 */
-	// Created by Claude Opus 5
-	@Test
-	public void testConditionalUpdate_NoMatch_ClientAssignedBodyId_shouldCreateWithThatId() throws IOException {
-		Patient create = new Patient();
-		// alphanumeric: the default ClientIdStrategyEnum.ALPHANUMERIC rejects purely-numeric client ids (Msg 960)
-		create.setId("custom-id-1");
-		create.addIdentifier().setSystem("http://acme.org/mrn").setValue("PT-NOMATCH");
-		create.setActive(true);
-
-		HttpPut httpPut = new HttpPut(myServerBase + "/Patient?identifier=http://acme.org/mrn%7CPT-NOMATCH");
-		httpPut.setEntity(new StringEntity(
-			myFhirContext.newJsonParser().encodeResourceToString(create),
-			ContentType.parse("application/json+fhir")));
-
-		try (CloseableHttpResponse status = ourHttpClient.execute(httpPut)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("{}\n{}", status.getStatusLine(), responseContent);
-
-			assertEquals(201, status.getStatusLine().getStatusCode());
-		}
-
-		Bundle found = myClient.search().forResource(Patient.class)
-			.where(Patient.IDENTIFIER.exactly().systemAndCode("http://acme.org/mrn", "PT-NOMATCH"))
-			.returnBundle(Bundle.class).execute();
-
-		assertThat(found.getEntry()).hasSize(1);
-		assertThat(found.getEntryFirstRep().getResource().getIdElement().getIdPart())
-			.as("spec case 2 requires the resource to be created with the client-supplied id")
-			.isEqualTo("custom-id-1");
-	}
-
-	/**
-	 * A conditional update whose body id agrees with the resource its conditional URL matched is an ordinary update
-	 * of that resource so must not be rejected.
+	 * A {@code urn:uuid:} id is included because outside a transaction it is not a placeholder, just an invalid id.
 	 */
 	// Created by Claude Fable 5.1
-	@Test
-	public void testConditionalUpdate_OneMatch_SameBodyId_shouldUpdateInPlace() throws IOException {
-		Patient existing = new Patient();
-		existing.addIdentifier().setSystem("http://acme.org/mrn").setValue("PT-SAME");
-		IIdType existingId = myClient.create().resource(existing).execute().getId().toUnqualifiedVersionless();
-
-		Patient update = new Patient();
-		update.setId(existingId.getIdPart());
-		update.addIdentifier().setSystem("http://acme.org/mrn").setValue("PT-SAME");
-		update.setActive(true);
-
-		HttpPut httpPut = new HttpPut(myServerBase + "/Patient?identifier=http://acme.org/mrn%7CPT-SAME");
-		httpPut.setEntity(new StringEntity(
-			myFhirContext.newJsonParser().encodeResourceToString(update),
-			ContentType.parse("application/json+fhir")));
-
-		try (CloseableHttpResponse status = ourHttpClient.execute(httpPut)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("{}\n{}", status.getStatusLine(), responseContent);
-
-			assertEquals(200, status.getStatusLine().getStatusCode());
+	@ParameterizedTest(name = "{0}")
+	@CsvSource(
+		textBlock = """
+		# name,                                                                 existingMatchId, existingOtherId, bodyId,                                        status, expectedCode
+		'one match, different body id: HAPI-2279',                              match-pt,        ,                some-other-id,                                 400,    HAPI-2279
+		'no match, numeric body id under ALPHANUMERIC: HAPI-0960',              ,                ,                987654321,                                     400,    HAPI-0960
+		'no match, body id is not a valid FHIR id: HAPI-0521',                  ,                ,                urn:uuid:8b7d3a4e-2c1f-4f5a-9e6b-0d1c2b3a4f5e, 400,    HAPI-0521
+		'no match, body id already belongs to another resource: HAPI-0825',     ,                existing-pt,     existing-pt,                                   409,    HAPI-0825
+		""")
+	public void testConditionalUpdate_bodyIdRejected(
+			String theName,
+			String theExistingMatchId,
+			String theExistingOtherId,
+			String theBodyId,
+			int theExpectedStatus,
+			String theExpectedCode)
+			throws IOException {
+		// setup
+		if (theExistingMatchId != null) {
+			createPatient(withId(theExistingMatchId), withIdentifier(MRN_SYSTEM, CONDITIONAL_UPDATE_MRN));
+		}
+		if (theExistingOtherId != null) {
+			createPatient(withId(theExistingOtherId), withIdentifier(MRN_SYSTEM, "PT-OTHER"));
 		}
 
-		Patient matched = myClient.read().resource(Patient.class).withId(existingId).execute();
-		assertThat(matched.getActive()).isTrue();
-		assertThat(matched.getIdElement().getVersionIdPart()).isEqualTo("2");
+		// execute
+		ConditionalUpdateResponse response = conditionalUpdateByMrn(CONDITIONAL_UPDATE_MRN, theBodyId, "Smith");
 
-		Bundle found = myClient.search().forResource(Patient.class)
-			.where(Patient.IDENTIFIER.exactly().systemAndCode("http://acme.org/mrn", "PT-SAME"))
-			.returnBundle(Bundle.class).execute();
-		assertThat(found.getEntry()).hasSize(1);
-	}
+		// verify
+		assertThat(response.statusCode()).isEqualTo(theExpectedStatus);
+		assertThat(response.body()).contains(theExpectedCode);
 
-	/**
-	 * With the default {@link JpaStorageSettings.ClientIdStrategyEnum#ALPHANUMERIC} strategy a client may not assign
-	 * a purely numeric id. A conditional update that matches nothing and carries a numeric id is rejected with
-	 * HAPI-960 rather than being silently created under a server-assigned id.
-	 */
-	// Created by Claude Fable 5.1
-	@Test
-	public void testConditionalUpdate_NoMatch_NumericBodyId_shouldRejectWith960() throws IOException {
-		Patient create = new Patient();
-		create.setId("987654321");
-		create.addIdentifier().setSystem("http://acme.org/mrn").setValue("PT-NUMERIC");
-
-		HttpPut httpPut = new HttpPut(myServerBase + "/Patient?identifier=http://acme.org/mrn%7CPT-NUMERIC");
-		httpPut.setEntity(new StringEntity(
-			myFhirContext.newJsonParser().encodeResourceToString(create),
-			ContentType.parse("application/json+fhir")));
-
-		try (CloseableHttpResponse status = ourHttpClient.execute(httpPut)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("{}\n{}", status.getStatusLine(), responseContent);
-
-			assertEquals(400, status.getStatusLine().getStatusCode());
-			assertThat(responseContent).contains("HAPI-0960");
-		}
-
-		Bundle found = myClient.search().forResource(Patient.class)
-			.where(Patient.IDENTIFIER.exactly().systemAndCode("http://acme.org/mrn", "PT-NUMERIC"))
-			.returnBundle(Bundle.class).execute();
-		assertThat(found.getEntry())
-			.as("the rejected conditional update must not have created anything")
+		assertThat(searchPatientsByFamily("Smith"))
+			.as("the rejected conditional update must not have created or modified anything")
 			.isEmpty();
+		List<String> expectedMatchIds = theExistingMatchId != null ? List.of(theExistingMatchId) : List.of();
+		assertThat(searchPatientsByMrn(CONDITIONAL_UPDATE_MRN))
+			.extracting(t -> t.getIdElement().getIdPart())
+			.containsExactlyElementsOf(expectedMatchIds);
+		for (String existingId : Arrays.asList(theExistingMatchId, theExistingOtherId)) {
+			if (existingId != null) {
+				Patient existing = myClient.read().resource(Patient.class).withId(existingId).execute();
+				assertThat(existing.getIdElement().getVersionIdPart())
+					.as("pre-existing resource " + existingId + " must be untouched")
+					.isEqualTo("1");
+			}
+		}
 	}
 
-	/**
-	 * Outside a transaction a {@code urn:uuid:} id is not a placeholder, just an id that is not a valid FHIR id, so a
-	 * conditional update carrying one is rejected by storage like any other malformed client id.
-	 * <p>
-	 * The body is hand-written because the JSON encoder deliberately omits an id that starts with {@code urn:}.
-	 */
-	// Created by Claude Fable 5.1
-	@Test
-	public void testConditionalUpdate_NoMatch_InvalidBodyId_shouldRejectWith521() throws IOException {
-		String body = "{\"resourceType\":\"Patient\",\"id\":\"urn:uuid:8b7d3a4e-2c1f-4f5a-9e6b-0d1c2b3a4f5e\","
-			+ "\"identifier\":[{\"system\":\"http://acme.org/mrn\",\"value\":\"PT-INVALID\"}]}";
+	private record ConditionalUpdateResponse(int statusCode, String body) {}
 
-		HttpPut httpPut = new HttpPut(myServerBase + "/Patient?identifier=http://acme.org/mrn%7CPT-INVALID");
+	/**
+	 * Sends {@code PUT Patient?identifier=<mrn>} with a hand-written JSON body so that the id reaches the server
+	 * exactly as given: the JSON encoder omits a {@code urn:} id, and the generic client could drop any id.
+	 */
+	private ConditionalUpdateResponse conditionalUpdateByMrn(String theMrn, String theBodyId, String theFamily)
+			throws IOException {
+		String body = "{\"resourceType\":\"Patient\",\"id\":\"" + theBodyId + "\","
+			+ "\"identifier\":[{\"system\":\"" + MRN_SYSTEM + "\",\"value\":\"" + theMrn + "\"}],"
+			+ "\"name\":[{\"family\":\"" + theFamily + "\"}]}";
+
+		HttpPut httpPut = new HttpPut(myServerBase + "/Patient?identifier=" + UrlUtil.escapeUrlParam(MRN_SYSTEM + "|" + theMrn));
 		httpPut.setEntity(new StringEntity(body, ContentType.parse("application/json+fhir")));
 
 		try (CloseableHttpResponse status = ourHttpClient.execute(httpPut)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("{}\n{}", status.getStatusLine(), responseContent);
-
-			assertEquals(400, status.getStatusLine().getStatusCode());
-			assertThat(responseContent).contains("HAPI-0521");
+			return new ConditionalUpdateResponse(status.getStatusLine().getStatusCode(), responseContent);
 		}
-
-		Bundle found = myClient.search().forResource(Patient.class)
-			.where(Patient.IDENTIFIER.exactly().systemAndCode("http://acme.org/mrn", "PT-INVALID"))
-			.returnBundle(Bundle.class).execute();
-		assertThat(found.getEntry())
-			.as("the rejected conditional update must not have created anything")
-			.isEmpty();
 	}
 
-	/**
-	 * A conditional update that matches nothing but whose body id already belongs to another resource must not
-	 * silently turn into an update of that other resource. Storage reports it as a client-assigned id conflict.
-	 */
-	// Created by Claude Fable 5.1
-	@Test
-	public void testConditionalUpdate_NoMatch_BodyIdBelongsToOtherResource_shouldRejectWith409() throws IOException {
-		Patient other = new Patient();
-		other.setId("existing-pt");
-		other.addIdentifier().setSystem("http://acme.org/mrn").setValue("PT-OTHER");
-		myClient.update().resource(other).execute();
+	private List<Patient> searchPatientsByMrn(String theMrn) {
+		Bundle found = myClient.search().forResource(Patient.class)
+			.where(Patient.IDENTIFIER.exactly().systemAndCode(MRN_SYSTEM, theMrn))
+			.returnBundle(Bundle.class).execute();
+		return BundleUtil.toListOfResourcesOfType(myFhirContext, found, Patient.class);
+	}
 
-		Patient update = new Patient();
-		update.setId("existing-pt");
-		update.addIdentifier().setSystem("http://acme.org/mrn").setValue("PT-NOMATCH-EXISTING");
-		update.setActive(true);
-
-		HttpPut httpPut = new HttpPut(myServerBase + "/Patient?identifier=http://acme.org/mrn%7CPT-NOMATCH-EXISTING");
-		httpPut.setEntity(new StringEntity(
-			myFhirContext.newJsonParser().encodeResourceToString(update),
-			ContentType.parse("application/json+fhir")));
-
-		try (CloseableHttpResponse status = ourHttpClient.execute(httpPut)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("{}\n{}", status.getStatusLine(), responseContent);
-
-			assertThat(status.getStatusLine().getStatusCode())
-				.as("a body id that already exists but is not the conditional match is a conflict")
-				.isEqualTo(409);
-			assertThat(responseContent).contains("HAPI-0825");
-		}
-
-		Patient existing = myClient.read().resource(Patient.class).withId("existing-pt").execute();
-		assertThat(existing.hasActive())
-			.as("the rejected conditional update must not have modified the other resource")
-			.isFalse();
-		assertThat(existing.getIdentifierFirstRep().getValue()).isEqualTo("PT-OTHER");
+	private List<Patient> searchPatientsByFamily(String theFamily) {
+		Bundle found = myClient.search().forResource(Patient.class)
+			.where(Patient.FAMILY.matches().value(theFamily))
+			.returnBundle(Bundle.class).execute();
+		return BundleUtil.toListOfResourcesOfType(myFhirContext, found, Patient.class);
 	}
 
 	@Test
