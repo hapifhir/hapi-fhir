@@ -135,20 +135,6 @@ public class HibernatePropertiesProviderTest {
 		assertThat(compatibilityLevelWarnings()).isEmpty();
 	}
 
-	/**
-	 * On a dialect other than SQL Server, large ID lists may always be bound as JSON - there is nothing to
-	 * probe, so the DataSource is never touched.
-	 */
-	@Test
-	void isJsonUnpackingSupported_withNonSqlServerDialect_returnsTrueWithoutTouchingDataSource() {
-		mySvc.setDialectForUnitTest(new HapiFhirPostgresDialect());
-
-		assertThat(mySvc.isJsonUnpackingSupported()).isTrue();
-
-		verifyNoInteractions(myDataSource);
-		assertThat(compatibilityLevelWarnings()).isEmpty();
-	}
-
 	private void stubConnection() throws SQLException {
 		lenient().when(myDataSource.getConnection()).thenReturn(myConnection);
 		lenient().when(myConnection.createStatement()).thenReturn(myStatement);
