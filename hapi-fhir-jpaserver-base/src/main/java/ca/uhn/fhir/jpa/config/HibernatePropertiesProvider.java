@@ -164,16 +164,10 @@ public class HibernatePropertiesProvider {
 
 	/**
 	 * Probes a SQL Server database to determine if it supports the OPENJSON
-	 * table-valued function, or <code>null</code> if the probe failed to produce one - either because the
-	 * query raised an exception, or because it returned no row. A definitive <code>false</code> - this is
-	 * not a SQL Server dialect at all - is not a failure, and is returned directly.
+	 * table-valued function, or null if the probe failed to produce one.
 	 */
 	@Nullable
 	private Boolean probeSqlServerJsonSupport() {
-		if (!(getDialect() instanceof org.hibernate.dialect.SQLServerDialect)) {
-			return false;
-		}
-
 		try (Connection connection = getDataSource().getConnection();
 				Statement statement = connection.createStatement();
 				ResultSet resultSet = statement.executeQuery(
