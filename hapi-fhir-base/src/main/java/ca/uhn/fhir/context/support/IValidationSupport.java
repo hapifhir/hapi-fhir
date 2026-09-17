@@ -288,6 +288,11 @@ public interface IValidationSupport {
 	 * Validates that the given code exists and if possible returns a display
 	 * name. This method is called to check codes which are found in "example"
 	 * binding fields (e.g. <code>Observation.code</code>) in the default profile.
+	 * <p>
+	 * No code system version is given, so the code is checked against whichever version is current. To check
+	 * against a specific version, use
+	 * {@link #validateCode(ValidationSupportContext, ConceptValidationOptions, String, String, String, String, String)}.
+	 * </p>
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
 	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
@@ -296,9 +301,6 @@ public interface IValidationSupport {
 	 * @param theCode                     The code, e.g. "<code>1234-5</code>"
 	 * @param theDisplay                  The display name, if it should also be validated
 	 * @return Returns a validation result object
-	 * @see #validateCode(ValidationSupportContext, ConceptValidationOptions, String, String, String, String, String)
-	 * for the overload which also names the code system version to validate against. This method receives no
-	 * version, so an implementation answers from whichever version it treats as current.
 	 */
 	@Nullable
 	default CodeValidationResult validateCode(
@@ -312,27 +314,24 @@ public interface IValidationSupport {
 	}
 
 	/**
-	 * Validates that the given code exists in the given version of the code system, and if possible returns
-	 * a display name.
+	 * Validates that the given code exists in a specific version of the code system, and if possible
+	 * returns a display name.
 	 * <p>
-	 * The default implementation delegates to {@link #validateCode(ValidationSupportContext, ConceptValidationOptions, String, String, String, String)},
-	 * discarding the version, so an existing implementation which overrides only that method continues to
-	 * work unchanged. An implementation which can resolve a specific code system version should override
-	 * this method as well; the version matters when a value set specifies a version of a code system which is not
-	 * the current one, because the current version may not contain the code the specified one does.
+	 * Implementations which can resolve a specific code system version should override this method. The
+	 * default implementation ignores the version and calls
+	 * {@link #validateCode(ValidationSupportContext, ConceptValidationOptions, String, String, String, String)}.
 	 * </p>
-	 *
-	 * @since 8.14.0
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
 	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
 	 * @param theOptions                  Provides options controlling the validation
 	 * @param theCodeSystem               The code system, e.g. "<code>http://loinc.org</code>"
-	 * @param theCodeSystemVersion        The code system version to validate against, e.g. "<code>2.78</code>", or <code>null</code> to use whichever version the implementation treats as current
+	 * @param theCodeSystemVersion        The code system version to validate against, e.g. "<code>2.78</code>", or <code>null</code> to use whichever version is current
 	 * @param theCode                     The code, e.g. "<code>1234-5</code>"
 	 * @param theDisplay                  The display name, if it should also be validated
 	 * @param theValueSetUrl              The value set to validate against, or <code>null</code> to validate against the code system alone
 	 * @return Returns a validation result object
+	 * @since 8.14.0
 	 */
 	@Nullable
 	default CodeValidationResult validateCode(

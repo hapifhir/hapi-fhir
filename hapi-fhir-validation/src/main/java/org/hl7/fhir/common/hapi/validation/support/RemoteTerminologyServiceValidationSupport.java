@@ -1042,8 +1042,8 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 
 	/**
 	 * Adds the code system version to the parameters built by
-	 * {@link #buildValidateCodeInputParameters(String, String, String, String, IBaseResource)}, under the name
-	 * the operation being invoked uses for it.
+	 * {@link #buildValidateCodeInputParameters(String, String, String, String, IBaseResource)}. The two
+	 * operations name this parameter differently, so the name is chosen from the operation being invoked.
 	 */
 	protected IBaseParameters buildValidateCodeInputParameters(
 			String theCodeSystem,
