@@ -47,6 +47,8 @@ public interface IValidationProviders {
 		void addException(String theOperation, String theUrl, String theCode, Exception theException);
 		<P extends IBaseParameters> void addTerminologyResponse(String theOperation, String theUrl, String theCode, P theReturnParams);
 		IBaseParameters addTerminologyResponse(String theOperation, String theUrl, String theCode, FhirContext theFhirContext, String theTerminologyResponseFile);
+		<P extends IBaseParameters> void addTerminologyResponse(String theOperation, String theUrl, String theCodeSystemVersion, String theCode, P theReturnParams);
+		IBaseParameters addTerminologyResponse(String theOperation, String theUrl, String theCodeSystemVersion, String theCode, FhirContext theFhirContext, String theTerminologyResponseFile);
 	}
 
 	abstract class MyValidationProvider<T extends IDomainResource> implements IMyValidationProvider {
@@ -56,7 +58,17 @@ public interface IValidationProviders {
 		private final Map<String, T> myTerminologyResourceMap = new HashMap<>();
 
 		static String getInputKey(String theOperation, String theUrl, String theCode) {
-			return theOperation + "-" + theUrl + "#" + theCode;
+			return getInputKey(theOperation, theUrl, null, theCode);
+		}
+
+		/**
+		 * The code system version is part of the key, so a response registered for one version is not returned
+		 * for a request naming another, or naming none. A test states the version it expects the code under
+		 * test to send by registering the response under it.
+		 */
+		static String getInputKey(String theOperation, String theUrl, String theCodeSystemVersion, String theCode) {
+			String url = theCodeSystemVersion == null ? theUrl : theUrl + "|" + theCodeSystemVersion;
+			return theOperation + "-" + url + "#" + theCode;
 		}
 
 		public void setShouldThrowExceptionForResourceNotFound(boolean theShouldThrowExceptionForResourceNotFound) {
@@ -72,12 +84,21 @@ public interface IValidationProviders {
 
 		@Override
 		public <P extends IBaseParameters> void addTerminologyResponse(String theOperation, String theUrl, String theCode, P theReturnParams) {
-			myTerminologyResponseMap.put(getInputKey(theOperation, theUrl, theCode), theReturnParams);
+			addTerminologyResponse(theOperation, theUrl, null, theCode, theReturnParams);
 		}
 
 		public IBaseParameters addTerminologyResponse(String theOperation, String theUrl, String theCode, FhirContext theFhirContext, String theTerminologyResponseFile) {
+			return addTerminologyResponse(theOperation, theUrl, null, theCode, theFhirContext, theTerminologyResponseFile);
+		}
+
+		@Override
+		public <P extends IBaseParameters> void addTerminologyResponse(String theOperation, String theUrl, String theCodeSystemVersion, String theCode, P theReturnParams) {
+			myTerminologyResponseMap.put(getInputKey(theOperation, theUrl, theCodeSystemVersion, theCode), theReturnParams);
+		}
+
+		public IBaseParameters addTerminologyResponse(String theOperation, String theUrl, String theCodeSystemVersion, String theCode, FhirContext theFhirContext, String theTerminologyResponseFile) {
 			IBaseParameters responseParams = ClasspathUtil.loadResource(theFhirContext, getParameterType(), theTerminologyResponseFile);
-			addTerminologyResponse(theOperation, theUrl, theCode, responseParams);
+			addTerminologyResponse(theOperation, theUrl, theCodeSystemVersion, theCode, responseParams);
 			return responseParams;
 		}
 
@@ -92,10 +113,14 @@ public interface IValidationProviders {
 
 		public abstract T addTerminologyResource(String theUrl, String theVersion);
 		protected IBaseParameters getTerminologyResponse(String theOperation, String theUrl, String theCode) throws Exception {
-			String inputKey = getInputKey(theOperation, theUrl, theCode);
-			if (myExceptionMap.containsKey(inputKey)) {
-				throw myExceptionMap.get(inputKey);
+			return getTerminologyResponse(theOperation, theUrl, null, theCode);
+		}
+
+		protected IBaseParameters getTerminologyResponse(String theOperation, String theUrl, String theCodeSystemVersion, String theCode) throws Exception {
+			if (myExceptionMap.containsKey(getInputKey(theOperation, theUrl, theCode))) {
+				throw myExceptionMap.get(getInputKey(theOperation, theUrl, theCode));
 			}
+			String inputKey = getInputKey(theOperation, theUrl, theCodeSystemVersion, theCode);
 			IBaseParameters params = myTerminologyResponseMap.get(inputKey);
 			if (params == null) {
 				throw new IllegalStateException("Test setup incomplete. Missing return params for " + inputKey);

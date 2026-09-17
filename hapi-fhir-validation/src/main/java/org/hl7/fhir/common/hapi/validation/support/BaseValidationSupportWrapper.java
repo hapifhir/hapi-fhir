@@ -86,6 +86,25 @@ public abstract class BaseValidationSupportWrapper extends BaseValidationSupport
 	}
 
 	@Override
+	public CodeValidationResult validateCode(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nonnull ConceptValidationOptions theOptions,
+			String theCodeSystem,
+			String theCodeSystemVersion,
+			String theCode,
+			String theDisplay,
+			String theValueSetUrl) {
+		return myWrap.validateCode(
+				theValidationSupportContext,
+				theOptions,
+				theCodeSystem,
+				theCodeSystemVersion,
+				theCode,
+				theDisplay,
+				theValueSetUrl);
+	}
+
+	@Override
 	public IValidationSupport.CodeValidationResult validateCodeInValueSet(
 			ValidationSupportContext theValidationSupportContext,
 			ConceptValidationOptions theValidationOptions,

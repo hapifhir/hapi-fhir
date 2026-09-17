@@ -829,8 +829,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			result = validateCodeInValueSet(
 					convertedVs, theValidationOptions, theSystem, theVersion, theCode, theDisplay);
 		} else {
-			result = validateCodeInCodeSystem(
-					theValidationOptions, withVersion(theSystem, theVersion), theCode, theDisplay);
+			result = validateCodeInCodeSystem(theValidationOptions, theSystem, theVersion, theCode, theDisplay);
 		}
 		return convertValidationResult(theSystem, result);
 	}
@@ -893,8 +892,8 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			which can reject a code the value set accepted.
 			*/
 			String expectedVersion = isNotBlank(theVersion) ? theVersion : result.getCodeSystemVersion();
-			IValidationSupport.CodeValidationResult codeSystemResult = validateCodeInCodeSystem(
-					theValidationOptions, withVersion(theSystem, expectedVersion), theCode, theDisplay);
+			IValidationSupport.CodeValidationResult codeSystemResult =
+					validateCodeInCodeSystem(theValidationOptions, theSystem, expectedVersion, theCode, theDisplay);
 			final boolean valueSetResultContainsInvalidDisplay = result.getIssues().stream()
 					.anyMatch(WorkerContextValidationSupportAdapter::hasInvalidDisplayDetailCode);
 			if (codeSystemResult != null) {
@@ -910,14 +909,6 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			}
 		}
 		return result;
-	}
-
-	private static String withVersion(String theSystem, String theVersion) {
-		// The system may already include a version, for example when it was taken from the value set's compose
-		if (isBlank(theVersion) || isBlank(theSystem) || theSystem.contains("|")) {
-			return theSystem;
-		}
-		return theSystem + "|" + theVersion;
 	}
 
 	private IValidationSupport.CodeValidationResult copyCodeValidationResult(
@@ -953,9 +944,22 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	}
 
 	private IValidationSupport.CodeValidationResult validateCodeInCodeSystem(
-			ConceptValidationOptions theValidationOptions, String theSystem, String theCode, String theDisplay) {
+			ConceptValidationOptions theValidationOptions,
+			String theSystem,
+			String theVersion,
+			String theCode,
+			String theDisplay) {
+		// the system arrives carrying its version when it was inferred from the value set's compose
+		String system = theSystem;
+		String version = theVersion;
+		int versionSeparator = system == null ? -1 : system.indexOf('|');
+		if (versionSeparator > -1) {
+			version = system.substring(versionSeparator + 1);
+			system = system.substring(0, versionSeparator);
+		}
+
 		return myValidationSupport.validateCode(
-				newValidationSupportContext(), theValidationOptions, theSystem, theCode, theDisplay, null);
+				newValidationSupportContext(), theValidationOptions, system, version, theCode, theDisplay, null);
 	}
 
 	@Override

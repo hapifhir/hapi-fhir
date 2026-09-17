@@ -815,8 +815,22 @@ public class ValidationSupportChain implements IValidationSupport {
 			String theCode,
 			String theDisplay,
 			String theValueSetUrl) {
+		return validateCode(
+				theValidationSupportContext, theOptions, theCodeSystem, null, theCode, theDisplay, theValueSetUrl);
+	}
 
-		ValidateCodeKey key = new ValidateCodeKey(theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl);
+	@Override
+	public CodeValidationResult validateCode(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nonnull ConceptValidationOptions theOptions,
+			String theCodeSystem,
+			String theCodeSystemVersion,
+			String theCode,
+			String theDisplay,
+			String theValueSetUrl) {
+
+		ValidateCodeKey key = new ValidateCodeKey(
+				theOptions, theCodeSystem, theCodeSystemVersion, theCode, theDisplay, theValueSetUrl, null);
 		CacheValue<CodeValidationResult> retVal = getFromCache(key);
 		if (retVal == null) {
 			retVal = CacheValue.empty();
@@ -829,6 +843,7 @@ public class ValidationSupportChain implements IValidationSupport {
 							theValidationSupportContext,
 							theOptions,
 							theCodeSystem,
+							theCodeSystemVersion,
 							theCode,
 							theDisplay,
 							theValueSetUrl);
@@ -869,7 +884,7 @@ public class ValidationSupportChain implements IValidationSupport {
 	 * but it might be overridden after
 	 * - by the core validator, which has its own logic for determining the severity of an issue for an unknown CodeSystem,
 	 *   which is based on the binding strength. See https://github.com/hapifhir/org.hl7.fhir.core/issues/2129
-	 * - and by the {@link ca.uhn.fhir.rest.server.interceptor.validation.ValidationMessageUnknownCodeSystemProcessingInterceptor}
+	 * - and by the {@link ca.uhn.fhir.rest.server.interceptor.validation.ValidationMessageUnknownCodeSystemPostProcessingInterceptor}
 	 *   to a configured severity if it is registered.
 	 * </p>
 	 *
@@ -909,12 +924,19 @@ public class ValidationSupportChain implements IValidationSupport {
 			String theCode,
 			String theDisplay,
 			@Nonnull IBaseResource theValueSet) {
-		String url = CommonCodeSystemsTerminologyService.getValueSetUrl(getFhirContext(), theValueSet);
+		FhirContext fhirContext = getFhirContext();
+		String url = CommonCodeSystemsTerminologyService.getValueSetUrl(fhirContext, theValueSet);
+		/* getValueSetUrl returns ValueSet.url alone, so two versions of the same canonical would otherwise
+		share a cache entry and whichever was validated first would answer for the other. They can include
+		different code system versions, so their answers legitimately differ.
+		*/
+		String valueSetVersion = CommonCodeSystemsTerminologyService.getValueSetVersion(fhirContext, theValueSet);
 
 		ValidateCodeKey key = null;
 		CacheValue<CodeValidationResult> retVal = null;
 		if (isNotBlank(url)) {
-			key = new ValidateCodeKey(theOptions, theCodeSystem, theCode, theDisplay, url);
+			// validateCodeInValueSet names no code system version
+			key = new ValidateCodeKey(theOptions, theCodeSystem, null, theCode, theDisplay, url, valueSetVersion);
 			retVal = getFromCache(key);
 		}
 		if (retVal != null) {
@@ -1385,25 +1407,39 @@ public class ValidationSupportChain implements IValidationSupport {
 
 	static class ValidateCodeKey extends BaseKey<CodeValidationResult> {
 		private final String mySystem;
+		private final String myCodeSystemVersion;
 		private final String myCode;
 		private final String myDisplay;
 		private final String myValueSetUrl;
+		private final String myValueSetVersion;
 		private final int myHashCode;
 		private final ConceptValidationOptions myOptions;
 
 		private ValidateCodeKey(
 				ConceptValidationOptions theOptions,
 				String theSystem,
+				String theCodeSystemVersion,
 				String theCode,
 				String theDisplay,
-				String theValueSetUrl) {
+				String theValueSetUrl,
+				String theValueSetVersion) {
 			// copy ConceptValidationOptions because it is mutable
 			myOptions = ConceptValidationOptions.copy(theOptions);
 			mySystem = theSystem;
+			myCodeSystemVersion = theCodeSystemVersion;
 			myCode = theCode;
 			myDisplay = theDisplay;
 			myValueSetUrl = theValueSetUrl;
-			myHashCode = Objects.hash("ValidateCodeKey", myOptions, mySystem, myCode, myDisplay, myValueSetUrl);
+			myValueSetVersion = theValueSetVersion;
+			myHashCode = Objects.hash(
+					"ValidateCodeKey",
+					myOptions,
+					mySystem,
+					myCodeSystemVersion,
+					myCode,
+					myDisplay,
+					myValueSetUrl,
+					myValueSetVersion);
 		}
 
 		@Override
@@ -1413,9 +1449,11 @@ public class ValidationSupportChain implements IValidationSupport {
 			ValidateCodeKey that = (ValidateCodeKey) theO;
 			return Objects.equals(myOptions, that.myOptions)
 					&& Objects.equals(mySystem, that.mySystem)
+					&& Objects.equals(myCodeSystemVersion, that.myCodeSystemVersion)
 					&& Objects.equals(myCode, that.myCode)
 					&& Objects.equals(myDisplay, that.myDisplay)
-					&& Objects.equals(myValueSetUrl, that.myValueSetUrl);
+					&& Objects.equals(myValueSetUrl, that.myValueSetUrl)
+					&& Objects.equals(myValueSetVersion, that.myValueSetVersion);
 		}
 
 		@Override
@@ -1427,9 +1465,11 @@ public class ValidationSupportChain implements IValidationSupport {
 		public String toString() {
 			return "ValidateCodeKey{"
 					+ "mySystem='" + mySystem + '\''
+					+ ", myCodeSystemVersion='" + myCodeSystemVersion + '\''
 					+ ", myCode='" + myCode + '\''
 					+ ", myDisplay='" + myDisplay + '\''
 					+ ", myValueSetUrl='" + myValueSetUrl + '\''
+					+ ", myValueSetVersion='" + myValueSetVersion + '\''
 					+ ", myHashCode=" + myHashCode + '\''
 					+ ", myOptions=" + myOptions + '}';
 		}

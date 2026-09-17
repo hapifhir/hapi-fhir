@@ -10,6 +10,8 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
+import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.junit.jupiter.api.Test;
@@ -27,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -97,6 +100,7 @@ class TermReadSvcImplTest {
 			ReflectionTestUtils.setField(mySpiedSvc, "myStorageSettings", new JpaStorageSettings());
 			ReflectionTestUtils.setField(mySpiedSvc, "myVersionCanonicalizer", new VersionCanonicalizer(fhirContext));
 			ReflectionTestUtils.setField(mySpiedSvc, "myCodeSystemDao", myCodeSystemDao);
+			ReflectionTestUtils.setField(mySpiedSvc, "myMemoryCache", new MemoryCacheService(new JpaStorageSettings()));
 
 			TransactionStatus status = new SimpleTransactionStatus();
 			lenient().when(myTxManager.getTransaction(any())).thenReturn(status);
@@ -116,6 +120,20 @@ class TermReadSvcImplTest {
 			doReturn(Optional.empty()).when(mySpiedSvc).findCode(any(), any());
 		}
 
+		/**
+		 * Makes the code findable only under the given code system identifier, so the result of validateCode
+		 * says which version was actually looked in.
+		 */
+		void stubCodeFoundOnlyIn(String theCodeSystemIdentifier) {
+			TermConcept concept = new TermConcept().setCode(UCUM_CODE).setDisplay(UCUM_CODE);
+			doAnswer(invocation -> theCodeSystemIdentifier.equals(invocation.getArgument(0))
+									&& UCUM_CODE.equals(invocation.getArgument(1))
+							? Optional.of(concept)
+							: Optional.empty())
+					.when(mySpiedSvc)
+					.findCode(any(), any());
+		}
+
 		void stubCodeSystemContent(CodeSystem.CodeSystemContentMode theContent) {
 			CodeSystem cs = new CodeSystem();
 			cs.setUrl(UCUM_SYSTEM_URL);
@@ -133,6 +151,17 @@ class TermReadSvcImplTest {
 					null);
 		}
 
+		CodeValidationResult callValidateCode(String theCodeSystemVersion) {
+			return mySpiedSvc.validateCode(
+					myValidationSupportContext,
+					new ConceptValidationOptions(),
+					UCUM_SYSTEM_URL,
+					theCodeSystemVersion,
+					UCUM_CODE,
+					null,
+					null);
+		}
+
 		LookupCodeResult callLookupCode() {
 			return mySpiedSvc.lookupCode(
 					myValidationSupportContext, new LookupCodeRequest(UCUM_SYSTEM_URL, UCUM_CODE));
@@ -141,6 +170,65 @@ class TermReadSvcImplTest {
 		void stubCodeSystemResource(org.hl7.fhir.instance.model.api.IBaseResource theResource) {
 			lenient().when(myRootValidationSupport.fetchCodeSystem(UCUM_SYSTEM_URL)).thenReturn(theResource);
 		}
+	}
+
+	@Test
+	void validateCode_withCodeSystemVersion_validatesAgainstThatVersion() {
+		ValidateCodeFixture fixture = new ValidateCodeFixture();
+		fixture.stubCodeSystemContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		// this service identifies a code system version as "url|version", so the code is only findable there
+		fixture.stubCodeFoundOnlyIn(UCUM_SYSTEM_URL + "|1.0.0");
+
+		CodeValidationResult result = fixture.callValidateCode("1.0.0");
+
+		assertThat(result).isNotNull();
+		assertThat(result.isOk()).isTrue();
+		assertThat(result.getCode()).isEqualTo(UCUM_CODE);
+	}
+
+	@Test
+	void validateCode_withACodeSystemVersionWhichDoesNotHaveTheCode_returnsCodeNotFoundError() {
+		ValidateCodeFixture fixture = new ValidateCodeFixture();
+		fixture.stubCodeSystemContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		fixture.stubCodeFoundOnlyIn(UCUM_SYSTEM_URL + "|1.0.0");
+
+		CodeValidationResult result = fixture.callValidateCode("2.0.0");
+
+		assertThat(result).isNotNull();
+		assertThat(result.getSeverityCode()).isEqualToIgnoringCase("error");
+	}
+
+	@Test
+	void validateCode_withoutACodeSystemVersion_validatesAgainstTheCurrentVersion() {
+		ValidateCodeFixture fixture = new ValidateCodeFixture();
+		fixture.stubCodeSystemContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		// findable under the bare url, which is how this service names whichever version is current
+		fixture.stubCodeFoundOnlyIn(UCUM_SYSTEM_URL);
+
+		CodeValidationResult result = fixture.callValidateCode(null);
+
+		assertThat(result).isNotNull();
+		assertThat(result.isOk()).isTrue();
+		assertThat(result.getCode()).isEqualTo(UCUM_CODE);
+	}
+
+	@Test
+	void validateCode_withCodeSystemAlreadyCarryingItsVersion_doesNotAppendTheVersionTwice() {
+		ValidateCodeFixture fixture = new ValidateCodeFixture();
+		fixture.stubCodeSystemContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		fixture.stubCodeFoundOnlyIn(UCUM_SYSTEM_URL + "|1.0.0");
+
+		CodeValidationResult result = fixture.mySpiedSvc.validateCode(
+				fixture.myValidationSupportContext,
+				new ConceptValidationOptions(),
+				UCUM_SYSTEM_URL + "|1.0.0",
+				"2.0.0",
+				UCUM_CODE,
+				null,
+				null);
+
+		assertThat(result).isNotNull();
+		assertThat(result.isOk()).isTrue();
 	}
 
 	@Test

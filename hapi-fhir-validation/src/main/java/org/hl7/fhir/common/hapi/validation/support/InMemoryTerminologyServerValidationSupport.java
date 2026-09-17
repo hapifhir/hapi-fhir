@@ -174,6 +174,29 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			@Nonnull ValidationSupportContext theValidationSupportContext,
 			@Nonnull ConceptValidationOptions theOptions,
 			String theCodeSystem,
+			String theCodeSystemVersion,
+			String theCode,
+			String theDisplay,
+			String theValueSetUrl) {
+		/* The six-argument method below already resolves a "system|version" code system, so the version is
+		named that way and passed to it rather than the logic being duplicated or hoisted out. Delegating to
+		it rather than the other way round also keeps a subclass which overrides only that method reachable,
+		which is the same reason IValidationSupport's default delegates to the older signature. The join and
+		the split immediately after it are the cost of that.
+		*/
+		String codeSystem =
+				isNotBlank(theCodeSystemVersion) && isNotBlank(theCodeSystem) && !theCodeSystem.contains("|")
+						? theCodeSystem + "|" + theCodeSystemVersion
+						: theCodeSystem;
+		return validateCode(theValidationSupportContext, theOptions, codeSystem, theCode, theDisplay, theValueSetUrl);
+	}
+
+	@Override
+	@Nullable
+	public CodeValidationResult validateCode(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nonnull ConceptValidationOptions theOptions,
+			String theCodeSystem,
 			String theCode,
 			String theDisplay,
 			String theValueSetUrl) {

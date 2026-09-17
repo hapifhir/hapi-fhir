@@ -1,0 +1,21 @@
+{
+  "resourceType": "Parameters",
+  "parameter": [
+    {
+      "name": "result",
+      "valueBoolean": true
+    },
+    {
+      "name": "code",
+      "valueCode": "completed"
+    },
+    {
+      "name": "system",
+      "valueUri": "http://hl7.org/fhir/event-status"
+    },
+    {
+      "name": "display",
+      "valueString": "Completed"
+    }
+  ]
+}

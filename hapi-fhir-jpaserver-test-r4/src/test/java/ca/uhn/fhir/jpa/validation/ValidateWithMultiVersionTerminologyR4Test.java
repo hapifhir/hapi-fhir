@@ -65,12 +65,12 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 	@Nested
 	class MultiVersionCodeSystemTest {
 
-		void setUpPinning(String thePinnedVersion) {
-			createCodeSystem(thePinnedVersion, codeIn(thePinnedVersion));
+		void setUpWithSpecifiedVersion(String theSpecifiedVersion) {
+			createCodeSystem(theSpecifiedVersion, codeIn(theSpecifiedVersion));
 			sleepUntilTimeChange();
-			createCodeSystem(otherThan(thePinnedVersion), codeIn(otherThan(thePinnedVersion)));
+			createCodeSystem(otherThan(theSpecifiedVersion), codeIn(otherThan(theSpecifiedVersion)));
 
-			createValueSetIncludingCodeSystemVersion(VERSION_OLDER, thePinnedVersion);
+			createValueSetIncludingCodeSystemVersion(VERSION_OLDER, theSpecifiedVersion);
 			createProfileBoundTo(VS_URL);
 
 			myTerminologyDeferredStorageSvc.saveAllDeferred();
@@ -82,15 +82,15 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		 */
 		@ParameterizedTest
 		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
-		void validateCodeInValueSet_codeFromPinnedCodeSystemVersion_isValid(String thePinnedVersion) {
+		void validateCodeInValueSet_codeFromSpecifiedCodeSystemVersion_isValid(String theSpecifiedVersion) {
 			// Setup
-			setUpPinning(thePinnedVersion);
+			setUpWithSpecifiedVersion(theSpecifiedVersion);
 			ValueSet valueSet = (ValueSet) myValidationSupport.fetchValueSet(VS_URL);
 			assertThat(valueSet).isNotNull();
 
 			// Test
 			IValidationSupport.CodeValidationResult result =
-				validateCodeInValueSet(valueSet, codeIn(thePinnedVersion));
+				validateCodeInValueSet(valueSet, codeIn(theSpecifiedVersion));
 
 			// Verify
 			assertThat(result).isNotNull();
@@ -103,15 +103,15 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		 */
 		@ParameterizedTest
 		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
-		void validateCodeInValueSet_codeOutsidePinnedCodeSystemVersion_isNotValid(String thePinnedVersion) {
+		void validateCodeInValueSet_codeOutsideSpecifiedCodeSystemVersion_isNotValid(String theSpecifiedVersion) {
 			// Setup
-			setUpPinning(thePinnedVersion);
+			setUpWithSpecifiedVersion(theSpecifiedVersion);
 			ValueSet valueSet = (ValueSet) myValidationSupport.fetchValueSet(VS_URL);
 			assertThat(valueSet).isNotNull();
 
 			// Test
 			IValidationSupport.CodeValidationResult result =
-				validateCodeInValueSet(valueSet, codeIn(otherThan(thePinnedVersion)));
+				validateCodeInValueSet(valueSet, codeIn(otherThan(theSpecifiedVersion)));
 
 			// Verify
 			assertThat(result).isNotNull();
@@ -124,12 +124,12 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		 */
 		@ParameterizedTest
 		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
-		void validate_codeFromPinnedCodeSystemVersion_hasNoErrors(String thePinnedVersion) {
+		void validate_codeFromSpecifiedCodeSystemVersion_hasNoErrors(String theSpecifiedVersion) {
 			// Setup
-			setUpPinning(thePinnedVersion);
+			setUpWithSpecifiedVersion(theSpecifiedVersion);
 
 			// Test
-			OperationOutcome oo = validateObservationWithCode(codeIn(thePinnedVersion));
+			OperationOutcome oo = validateObservationWithCode(codeIn(theSpecifiedVersion));
 
 			// Verify
 			assertThat(errorDiagnostics(oo)).isEmpty();
@@ -141,30 +141,30 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		 */
 		@ParameterizedTest
 		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
-		void validate_codeOutsidePinnedCodeSystemVersion_hasErrors(String thePinnedVersion) {
+		void validate_codeOutsideSpecifiedCodeSystemVersion_hasErrors(String theSpecifiedVersion) {
 			// Setup
-			setUpPinning(thePinnedVersion);
-			String unpinnedCode = codeIn(otherThan(thePinnedVersion));
+			setUpWithSpecifiedVersion(theSpecifiedVersion);
+			String codeFromOtherVersion = codeIn(otherThan(theSpecifiedVersion));
 
 			// Test
-			OperationOutcome oo = validateObservationWithCode(unpinnedCode);
+			OperationOutcome oo = validateObservationWithCode(codeFromOtherVersion);
 
 			// Verify
-			assertThat(errorDiagnostics(oo)).anyMatch(t -> t.contains(unpinnedCode));
+			assertThat(errorDiagnostics(oo)).anyMatch(t -> t.contains(codeFromOtherVersion));
 		}
 	}
 
 	@Nested
 	class MultiVersionValueSetTest {
 
-		void setUpPinning(String thePinnedVersion) {
+		void setUpWithSpecifiedVersion(String theSpecifiedVersion) {
 			createCodeSystem(null, CODE_IN_OLDER_VERSION, CODE_IN_NEWER_VERSION);
 
-			createValueSetIncludingCodes(thePinnedVersion, codeIn(thePinnedVersion));
+			createValueSetIncludingCodes(theSpecifiedVersion, codeIn(theSpecifiedVersion));
 			sleepUntilTimeChange();
-			createValueSetIncludingCodes(otherThan(thePinnedVersion), codeIn(otherThan(thePinnedVersion)));
+			createValueSetIncludingCodes(otherThan(theSpecifiedVersion), codeIn(otherThan(theSpecifiedVersion)));
 
-			createProfileBoundTo(VS_URL + "|" + thePinnedVersion);
+			createProfileBoundTo(VS_URL + "|" + theSpecifiedVersion);
 
 			myTerminologyDeferredStorageSvc.saveAllDeferred();
 		}
@@ -175,16 +175,16 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		 */
 		@ParameterizedTest
 		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
-		void fetchValueSet_pinnedVersionWrittenFirst_returnsThatVersion(String thePinnedVersion) {
+		void fetchValueSet_specifiedVersionWrittenFirst_returnsThatVersion(String theSpecifiedVersion) {
 			// Setup
-			setUpPinning(thePinnedVersion);
+			setUpWithSpecifiedVersion(theSpecifiedVersion);
 
 			// Test
-			ValueSet valueSet = (ValueSet) myValidationSupport.fetchValueSet(VS_URL + "|" + thePinnedVersion);
+			ValueSet valueSet = (ValueSet) myValidationSupport.fetchValueSet(VS_URL + "|" + theSpecifiedVersion);
 
 			// Verify
 			assertThat(valueSet).isNotNull();
-			assertThat(valueSet.getVersion()).isEqualTo(thePinnedVersion);
+			assertThat(valueSet.getVersion()).isEqualTo(theSpecifiedVersion);
 		}
 
 		/**
@@ -192,15 +192,15 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		 */
 		@ParameterizedTest
 		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
-		void validateCodeInValueSet_codeFromPinnedValueSetVersion_isValid(String thePinnedVersion) {
+		void validateCodeInValueSet_codeFromSpecifiedValueSetVersion_isValid(String theSpecifiedVersion) {
 			// Setup
-			setUpPinning(thePinnedVersion);
-			ValueSet valueSet = (ValueSet) myValidationSupport.fetchValueSet(VS_URL + "|" + thePinnedVersion);
+			setUpWithSpecifiedVersion(theSpecifiedVersion);
+			ValueSet valueSet = (ValueSet) myValidationSupport.fetchValueSet(VS_URL + "|" + theSpecifiedVersion);
 			assertThat(valueSet).isNotNull();
 
 			// Test
 			IValidationSupport.CodeValidationResult result =
-				validateCodeInValueSet(valueSet, codeIn(thePinnedVersion));
+				validateCodeInValueSet(valueSet, codeIn(theSpecifiedVersion));
 
 			// Verify
 			assertThat(result).isNotNull();
@@ -212,15 +212,15 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		 */
 		@ParameterizedTest
 		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
-		void validateCodeInValueSet_codeOnlyInUnpinnedValueSetVersion_isNotValid(String thePinnedVersion) {
+		void validateCodeInValueSet_codeOnlyInUnspecifiedValueSetVersion_isNotValid(String theSpecifiedVersion) {
 			// Setup
-			setUpPinning(thePinnedVersion);
-			ValueSet valueSet = (ValueSet) myValidationSupport.fetchValueSet(VS_URL + "|" + thePinnedVersion);
+			setUpWithSpecifiedVersion(theSpecifiedVersion);
+			ValueSet valueSet = (ValueSet) myValidationSupport.fetchValueSet(VS_URL + "|" + theSpecifiedVersion);
 			assertThat(valueSet).isNotNull();
 
 			// Test
 			IValidationSupport.CodeValidationResult result =
-				validateCodeInValueSet(valueSet, codeIn(otherThan(thePinnedVersion)));
+				validateCodeInValueSet(valueSet, codeIn(otherThan(theSpecifiedVersion)));
 
 			// Verify
 			assertThat(result).isNotNull();
@@ -233,12 +233,12 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		 */
 		@ParameterizedTest
 		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
-		void validate_codeFromPinnedValueSetVersion_hasNoErrors(String thePinnedVersion) {
+		void validate_codeFromSpecifiedValueSetVersion_hasNoErrors(String theSpecifiedVersion) {
 			// Setup
-			setUpPinning(thePinnedVersion);
+			setUpWithSpecifiedVersion(theSpecifiedVersion);
 
 			// Test
-			OperationOutcome oo = validateObservationWithCode(codeIn(thePinnedVersion));
+			OperationOutcome oo = validateObservationWithCode(codeIn(theSpecifiedVersion));
 
 			// Verify
 			assertThat(errorDiagnostics(oo)).isEmpty();
@@ -250,34 +250,34 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		 */
 		@ParameterizedTest
 		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
-		void validate_codeOnlyInUnpinnedValueSetVersion_hasErrors(String thePinnedVersion) {
+		void validate_codeOnlyInUnspecifiedValueSetVersion_hasErrors(String theSpecifiedVersion) {
 			// Setup
-			setUpPinning(thePinnedVersion);
-			String unpinnedCode = codeIn(otherThan(thePinnedVersion));
+			setUpWithSpecifiedVersion(theSpecifiedVersion);
+			String codeFromOtherVersion = codeIn(otherThan(theSpecifiedVersion));
 
 			// Test
-			OperationOutcome oo = validateObservationWithCode(unpinnedCode);
+			OperationOutcome oo = validateObservationWithCode(codeFromOtherVersion);
 
 			// Verify
-			assertThat(errorDiagnostics(oo)).anyMatch(t -> t.contains(unpinnedCode));
+			assertThat(errorDiagnostics(oo)).anyMatch(t -> t.contains(codeFromOtherVersion));
 		}
 	}
 
 	@Nested
 	class MultiVersionCodeSystemAndValueSetTest {
 
-		void setUpPinning(String thePinnedVersion) {
-			String unpinnedVersion = otherThan(thePinnedVersion);
+		void setUpWithSpecifiedVersion(String theSpecifiedVersion) {
+			String otherVersion = otherThan(theSpecifiedVersion);
 
-			createCodeSystem(thePinnedVersion, codeIn(thePinnedVersion));
+			createCodeSystem(theSpecifiedVersion, codeIn(theSpecifiedVersion));
 			sleepUntilTimeChange();
-			createCodeSystem(unpinnedVersion, codeIn(unpinnedVersion));
+			createCodeSystem(otherVersion, codeIn(otherVersion));
 
-			createValueSetIncludingCodeSystemVersion(thePinnedVersion, thePinnedVersion);
+			createValueSetIncludingCodeSystemVersion(theSpecifiedVersion, theSpecifiedVersion);
 			sleepUntilTimeChange();
-			createValueSetIncludingCodeSystemVersion(unpinnedVersion, unpinnedVersion);
+			createValueSetIncludingCodeSystemVersion(otherVersion, otherVersion);
 
-			createProfileBoundTo(VS_URL + "|" + thePinnedVersion);
+			createProfileBoundTo(VS_URL + "|" + theSpecifiedVersion);
 
 			myTerminologyDeferredStorageSvc.saveAllDeferred();
 		}
@@ -289,18 +289,18 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		 */
 		@ParameterizedTest
 		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
-		void fetchValueSet_pinnedVersionWrittenFirst_returnsThatVersionStillPinningItsCodeSystem(
-				String thePinnedVersion) {
+		void fetchValueSet_specifiedVersionWrittenFirst_returnsThatVersionStillNamingItsCodeSystemVersion(
+				String theSpecifiedVersion) {
 			// Setup
-			setUpPinning(thePinnedVersion);
+			setUpWithSpecifiedVersion(theSpecifiedVersion);
 
 			// Test
-			ValueSet valueSet = (ValueSet) myValidationSupport.fetchValueSet(VS_URL + "|" + thePinnedVersion);
+			ValueSet valueSet = (ValueSet) myValidationSupport.fetchValueSet(VS_URL + "|" + theSpecifiedVersion);
 
 			// Verify
 			assertThat(valueSet).isNotNull();
-			assertThat(valueSet.getVersion()).isEqualTo(thePinnedVersion);
-			assertThat(valueSet.getCompose().getIncludeFirstRep().getVersion()).isEqualTo(thePinnedVersion);
+			assertThat(valueSet.getVersion()).isEqualTo(theSpecifiedVersion);
+			assertThat(valueSet.getCompose().getIncludeFirstRep().getVersion()).isEqualTo(theSpecifiedVersion);
 		}
 
 		/**
@@ -309,12 +309,12 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		 */
 		@ParameterizedTest
 		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
-		void validate_codeInEveryVersionThatWasNamed_hasNoErrors(String thePinnedVersion) {
+		void validate_codeInEveryVersionThatWasNamed_hasNoErrors(String theSpecifiedVersion) {
 			// Setup
-			setUpPinning(thePinnedVersion);
+			setUpWithSpecifiedVersion(theSpecifiedVersion);
 
 			// Test
-			OperationOutcome oo = validateObservationWithCode(codeIn(thePinnedVersion));
+			OperationOutcome oo = validateObservationWithCode(codeIn(theSpecifiedVersion));
 
 			// Verify
 			assertThat(errorDiagnostics(oo)).isEmpty();
@@ -326,16 +326,16 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		 */
 		@ParameterizedTest
 		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
-		void validate_codeOnlyInTheVersionsThatWereNotNamed_hasErrors(String thePinnedVersion) {
+		void validate_codeOnlyInTheVersionsThatWereNotNamed_hasErrors(String theSpecifiedVersion) {
 			// Setup
-			setUpPinning(thePinnedVersion);
-			String unpinnedCode = codeIn(otherThan(thePinnedVersion));
+			setUpWithSpecifiedVersion(theSpecifiedVersion);
+			String codeFromOtherVersion = codeIn(otherThan(theSpecifiedVersion));
 
 			// Test
-			OperationOutcome oo = validateObservationWithCode(unpinnedCode);
+			OperationOutcome oo = validateObservationWithCode(codeFromOtherVersion);
 
 			// Verify
-			assertThat(errorDiagnostics(oo)).anyMatch(t -> t.contains(unpinnedCode));
+			assertThat(errorDiagnostics(oo)).anyMatch(t -> t.contains(codeFromOtherVersion));
 		}
 	}
 
@@ -347,6 +347,90 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 	/** The version the test does not ask for, and therefore the one it saves last. */
 	private static String otherThan(String theVersion) {
 		return VERSION_OLDER.equals(theVersion) ? VERSION_NEWER : VERSION_OLDER;
+	}
+
+	/**
+	 * The code system version named on {@link IValidationSupport#validateCode(ValidationSupportContext,
+	 * ConceptValidationOptions, String, String, String, String, String)} itself, with no ValueSet involved.
+	 * This is the overload the validator uses to re-check a code against its code system after a ValueSet
+	 * accepted it, so dropping the version here rejects codes the ValueSet allowed.
+	 */
+	@Nested
+	class CodeSystemVersionNamedOnValidateCodeTest {
+
+		void setUpWithSpecifiedVersion(String theSpecifiedVersion) {
+			createCodeSystem(theSpecifiedVersion, codeIn(theSpecifiedVersion));
+			sleepUntilTimeChange();
+			createCodeSystem(otherThan(theSpecifiedVersion), codeIn(otherThan(theSpecifiedVersion)));
+
+			myTerminologyDeferredStorageSvc.saveAllDeferred();
+		}
+
+		@ParameterizedTest
+		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
+		void validateCode_codeFromTheSpecifiedCodeSystemVersion_isValid(String theSpecifiedVersion) {
+			// Setup
+			setUpWithSpecifiedVersion(theSpecifiedVersion);
+
+			// Test
+			IValidationSupport.CodeValidationResult result =
+				validateCodeInCodeSystem(theSpecifiedVersion, codeIn(theSpecifiedVersion));
+
+			// Verify
+			assertThat(result).isNotNull();
+			assertThat(result.isOk()).isTrue();
+		}
+
+		/**
+		 * Without this, the test above would also pass against code which accepted every code regardless of
+		 * the version it was asked for.
+		 */
+		@ParameterizedTest
+		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
+		void validateCode_codeOutsideTheSpecifiedCodeSystemVersion_isNotValid(String theSpecifiedVersion) {
+			// Setup
+			setUpWithSpecifiedVersion(theSpecifiedVersion);
+
+			// Test
+			IValidationSupport.CodeValidationResult result =
+				validateCodeInCodeSystem(theSpecifiedVersion, codeIn(otherThan(theSpecifiedVersion)));
+
+			// Verify
+			assertThat(result).isNotNull();
+			assertThat(result.isOk()).isFalse();
+		}
+
+		/**
+		 * Naming no version has to keep resolving to whichever version is current, which setUpWithSpecifiedVersion always
+		 * saves last. A version must not be invented when the caller named none.
+		 */
+		@ParameterizedTest
+		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
+		void validateCode_withoutACodeSystemVersion_usesTheCurrentVersion(String theSpecifiedVersion) {
+			// Setup
+			setUpWithSpecifiedVersion(theSpecifiedVersion);
+			String lastSavedVersion = otherThan(theSpecifiedVersion);
+
+			// Test
+			IValidationSupport.CodeValidationResult result =
+				validateCodeInCodeSystem(null, codeIn(lastSavedVersion));
+
+			// Verify
+			assertThat(result).isNotNull();
+			assertThat(result.isOk()).isTrue();
+		}
+	}
+
+	private IValidationSupport.CodeValidationResult validateCodeInCodeSystem(
+			String theCodeSystemVersion, String theCode) {
+		return myValidationSupport.validateCode(
+			new ValidationSupportContext(myValidationSupport),
+			new ConceptValidationOptions(),
+			CS_URL,
+			theCodeSystemVersion,
+			theCode,
+			null,
+			null);
 	}
 
 	private void createCodeSystem(String theVersion, String... theCodes) {

@@ -133,7 +133,20 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 			String theDisplay,
 			String theValueSetUrl) {
 
-		return invokeRemoteValidateCode(theCodeSystem, theCode, theDisplay, theValueSetUrl, null);
+		return invokeRemoteValidateCode(theCodeSystem, null, theCode, theDisplay, theValueSetUrl, null);
+	}
+
+	@Override
+	public CodeValidationResult validateCode(
+			ValidationSupportContext theValidationSupportContext,
+			ConceptValidationOptions theOptions,
+			String theCodeSystem,
+			String theCodeSystemVersion,
+			String theCode,
+			String theDisplay,
+			String theValueSetUrl) {
+
+		return invokeRemoteValidateCode(theCodeSystem, theCodeSystemVersion, theCode, theDisplay, theValueSetUrl, null);
 	}
 
 	@Override
@@ -651,6 +664,16 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 
 	protected CodeValidationResult invokeRemoteValidateCode(
 			String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl, IBaseResource theValueSet) {
+		return invokeRemoteValidateCode(theCodeSystem, null, theCode, theDisplay, theValueSetUrl, theValueSet);
+	}
+
+	protected CodeValidationResult invokeRemoteValidateCode(
+			String theCodeSystem,
+			String theCodeSystemVersion,
+			String theCode,
+			String theDisplay,
+			String theValueSetUrl,
+			IBaseResource theValueSet) {
 		if (isBlank(theCode)) {
 			return null;
 		}
@@ -672,8 +695,8 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 					theServerMessage);
 		};
 
-		IBaseParameters input =
-				buildValidateCodeInputParameters(theCodeSystem, theCode, theDisplay, theValueSetUrl, theValueSet);
+		IBaseParameters input = buildValidateCodeInputParameters(
+				theCodeSystem, theCodeSystemVersion, theCode, theDisplay, theValueSetUrl, theValueSet);
 
 		String resourceType = "ValueSet";
 		if (theValueSet == null && theValueSetUrl == null) {
@@ -1015,6 +1038,31 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 
 	public interface ValidationErrorMessageBuilder {
 		String buildErrorMessage(String theServerMessage);
+	}
+
+	/**
+	 * Adds the code system version to the parameters built by
+	 * {@link #buildValidateCodeInputParameters(String, String, String, String, IBaseResource)}, under the name
+	 * the operation being invoked uses for it.
+	 */
+	protected IBaseParameters buildValidateCodeInputParameters(
+			String theCodeSystem,
+			String theCodeSystemVersion,
+			String theCode,
+			String theDisplay,
+			String theValueSetUrl,
+			IBaseResource theValueSet) {
+		IBaseParameters params =
+				buildValidateCodeInputParameters(theCodeSystem, theCode, theDisplay, theValueSetUrl, theValueSet);
+		if (isBlank(theCodeSystemVersion)) {
+			return params;
+		}
+
+		// CodeSystem/$validate-code names the code system version "version". On ValueSet/$validate-code that
+		// name belongs to the value set, and the code system version is "systemVersion".
+		String parameterName = theValueSet == null && theValueSetUrl == null ? "version" : "systemVersion";
+		ParametersUtil.addParameterToParametersString(getFhirContext(), params, parameterName, theCodeSystemVersion);
+		return params;
 	}
 
 	protected IBaseParameters buildValidateCodeInputParameters(

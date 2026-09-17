@@ -2697,6 +2697,27 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		return null;
 	}
 
+	@Override
+	public IValidationSupport.CodeValidationResult validateCode(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nonnull ConceptValidationOptions theOptions,
+			String theCodeSystemUrl,
+			String theCodeSystemVersion,
+			String theCode,
+			String theDisplay,
+			String theValueSetUrl) {
+		/* The six-argument method below already resolves a "url|version" code system identifier, so the
+		version is named that way and passed to it rather than the resolution being duplicated. Delegating to
+		it rather than the other way round also keeps a subclass which overrides only that method reachable.
+		*/
+		String codeSystemUrl =
+				isNotBlank(theCodeSystemVersion) && isNotBlank(theCodeSystemUrl) && !theCodeSystemUrl.contains("|")
+						? theCodeSystemUrl + "|" + theCodeSystemVersion
+						: theCodeSystemUrl;
+		return validateCode(
+				theValidationSupportContext, theOptions, codeSystemUrl, theCode, theDisplay, theValueSetUrl);
+	}
+
 	@CoverageIgnore
 	@Override
 	public IValidationSupport.CodeValidationResult validateCode(
