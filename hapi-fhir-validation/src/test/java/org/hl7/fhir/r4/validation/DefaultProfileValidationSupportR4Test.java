@@ -1,4 +1,4 @@
-package org.hl7.fhir.dstu3.hapi.validation;
+package org.hl7.fhir.r4.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
@@ -49,6 +49,24 @@ public class DefaultProfileValidationSupportR4Test extends BaseValidationTestWit
 
 		cs = (CodeSystem) mySvc.fetchCodeSystem("http://terminology.hl7.org/CodeSystem/v2-0291|999");
 		assertNotNull(cs);
+	}
+
+	@Test
+	public void testLoadStructureDefinitionWithVersion() {
+		// Test that versioned HL7 base StructureDefinition URLs fall back to non-versioned URLs
+		// This addresses issues where IG Publisher sets versions on profile references
+		IBaseResource sd = mySvc.fetchStructureDefinition("http://hl7.org/fhir/StructureDefinition/Medication");
+		assertNotNull(sd);
+
+		// Should find the same resource with version appended (fallback behavior for HL7 URLs)
+		IBaseResource sdVersioned = mySvc.fetchStructureDefinition("http://hl7.org/fhir/StructureDefinition/Medication|4.0.1");
+		assertNotNull(sdVersioned);
+		assertEquals(sd, sdVersioned);
+
+		// Should also work with different version numbers for HL7 base URLs
+		IBaseResource sdVersioned2 = mySvc.fetchStructureDefinition("http://hl7.org/fhir/StructureDefinition/Medication|999");
+		assertNotNull(sdVersioned2);
+		assertEquals(sd, sdVersioned2);
 	}
 
 	@Test

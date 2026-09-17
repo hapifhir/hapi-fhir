@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 7564
+title: "Fixed DefaultProfileValidationSupportBundleStrategy to correctly resolve versioned HL7 core StructureDefinition canonical URLs (e.g. ...|4.0.1) during validation."
