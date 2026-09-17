@@ -70,7 +70,7 @@ public class GenericClientExample {
 		ctx.setRestfulClientFactory(new ApacheHttp5RestfulClientFactory(ctx));
 
 		// Now create a client and use it
-		String serverBase = "http://hapi.fhir.org/baseR5";
+		String serverBase = "https://hapi.fhir.org/baseR5";
 		IGenericClient client = ctx.newRestfulGenericClient(serverBase);
 		// END SNIPPET: chooseProvider
 	}
@@ -82,7 +82,7 @@ public class GenericClientExample {
 		ctx.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
 
 		// Now create a client and use it
-		String serverBase = "http://hapi.fhir.org/baseR5";
+		String serverBase = "https://hapi.fhir.org/baseR5";
 		IGenericClient client = ctx.newRestfulGenericClient(serverBase);
 		// END SNIPPET: deferModelScanning
 	}
@@ -96,7 +96,7 @@ public class GenericClientExample {
 		ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 
 		// Now create a client and use it
-		String serverBase = "http://hapi.fhir.org/baseR5";
+		String serverBase = "https://hapi.fhir.org/baseR5";
 		IGenericClient client = ctx.newRestfulGenericClient(serverBase);
 		// END SNIPPET: dontValidate
 	}
@@ -107,7 +107,7 @@ public class GenericClientExample {
 
 		// START SNIPPET: patchFhir
 		// Create a client
-		String serverBase = "http://hapi.fhir.org/baseR4";
+		String serverBase = "https://hapi.fhir.org/baseR4";
 		IGenericClient client = ctx.newRestfulGenericClient(serverBase);
 
 		// Create a patch object
@@ -133,7 +133,7 @@ public class GenericClientExample {
 
 		// START SNIPPET: patchJson
 		// Create a client
-		String serverBase = "http://hapi.fhir.org/baseR4";
+		String serverBase = "https://hapi.fhir.org/baseR4";
 		IGenericClient client = ctx.newRestfulGenericClient(serverBase);
 
 		// Create a JSON patch object
@@ -158,7 +158,7 @@ public class GenericClientExample {
 		// START SNIPPET: simple
 		// We're connecting to a DSTU1 compliant server in this example
 		FhirContext ctx = FhirContext.forR5();
-		String serverBase = "http://hapi.fhir.org/baseR5";
+		String serverBase = "https://hapi.fhir.org/baseR5";
 
 		IGenericClient client = ctx.newRestfulGenericClient(serverBase);
 
