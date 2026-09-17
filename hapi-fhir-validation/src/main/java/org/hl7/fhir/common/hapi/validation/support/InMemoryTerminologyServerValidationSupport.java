@@ -9,6 +9,7 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
+import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
@@ -118,7 +119,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			String theDisplay,
 			@Nonnull IBaseResource theValueSet) {
 		ValueSetAndMessages expansion;
-		String vsUrl = CommonCodeSystemsTerminologyService.getValueSetUrl(getFhirContext(), theValueSet);
+		String vsUrl = ValidationSupportUtils.getValueSetUrl(getFhirContext(), theValueSet);
 		try {
 			expansion = expandValueSetToCanonical(
 					theValidationSupportContext, theValueSet, theCodeSystemUrlAndVersion, theCode);
@@ -178,28 +179,11 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			String theCode,
 			String theDisplay,
 			String theValueSetUrl) {
-		/* The six-argument method below already resolves a "system|version" code system, so the version is
-		named that way and passed to it rather than the logic being duplicated or hoisted out. Delegating to
-		it rather than the other way round also keeps a subclass which overrides only that method reachable,
-		which is the same reason IValidationSupport's default delegates to the older signature. The join and
-		the split immediately after it are the cost of that.
-		*/
-		String codeSystem =
-				isNotBlank(theCodeSystemVersion) && isNotBlank(theCodeSystem) && !theCodeSystem.contains("|")
-						? theCodeSystem + "|" + theCodeSystemVersion
-						: theCodeSystem;
-		return validateCode(theValidationSupportContext, theOptions, codeSystem, theCode, theDisplay, theValueSetUrl);
-	}
+		// expandValueSet and validateCodeInExpandedValueSet identify the code system by its "system|version"
+		// canonical, so it is joined once here rather than at each of those calls.
+		String codeSystemUrlAndVersion =
+				ValidationSupportUtils.getVersionedCodeSystem(theCodeSystem, theCodeSystemVersion);
 
-	@Override
-	@Nullable
-	public CodeValidationResult validateCode(
-			@Nonnull ValidationSupportContext theValidationSupportContext,
-			@Nonnull ConceptValidationOptions theOptions,
-			String theCodeSystem,
-			String theCode,
-			String theDisplay,
-			String theValueSetUrl) {
 		IBaseResource vs;
 		if (isNotBlank(theValueSetUrl)) {
 			vs = theValidationSupportContext.getRootValidationSupport().fetchValueSet(theValueSetUrl);
@@ -207,78 +191,42 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 				return null;
 			}
 		} else {
-			String codeSystemUrl;
-			String codeSystemVersion = null;
-			int codeSystemVersionIndex = theCodeSystem.indexOf("|");
-			if (codeSystemVersionIndex > -1) {
-				codeSystemUrl = theCodeSystem.substring(0, codeSystemVersionIndex);
-				codeSystemVersion = theCodeSystem.substring(codeSystemVersionIndex + 1);
-			} else {
-				codeSystemUrl = theCodeSystem;
-			}
 			switch (myCtx.getVersion().getVersion()) {
 				case DSTU2:
 				case DSTU2_HL7ORG:
+					// A DSTU2 compose include has no version element, so the canonical goes in whole
 					vs = new org.hl7.fhir.dstu2.model.ValueSet()
 							.setCompose(new org.hl7.fhir.dstu2.model.ValueSet.ValueSetComposeComponent()
 									.addInclude(new org.hl7.fhir.dstu2.model.ValueSet.ConceptSetComponent()
-											.setSystem(theCodeSystem)));
+											.setSystem(codeSystemUrlAndVersion)));
 					break;
 				case DSTU3:
-					if (codeSystemVersion != null) {
-						vs = new org.hl7.fhir.dstu3.model.ValueSet()
-								.setCompose(new org.hl7.fhir.dstu3.model.ValueSet.ValueSetComposeComponent()
-										.addInclude(new org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent()
-												.setSystem(codeSystemUrl)
-												.setVersion(codeSystemVersion)));
-					} else {
-						vs = new org.hl7.fhir.dstu3.model.ValueSet()
-								.setCompose(new org.hl7.fhir.dstu3.model.ValueSet.ValueSetComposeComponent()
-										.addInclude(new org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent()
-												.setSystem(theCodeSystem)));
-					}
+					vs = new org.hl7.fhir.dstu3.model.ValueSet()
+							.setCompose(new org.hl7.fhir.dstu3.model.ValueSet.ValueSetComposeComponent()
+									.addInclude(new org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent()
+											.setSystem(theCodeSystem)
+											.setVersion(theCodeSystemVersion)));
 					break;
 				case R4:
-					if (codeSystemVersion != null) {
-						vs = new org.hl7.fhir.r4.model.ValueSet()
-								.setCompose(new org.hl7.fhir.r4.model.ValueSet.ValueSetComposeComponent()
-										.addInclude(new org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent()
-												.setSystem(codeSystemUrl)
-												.setVersion(codeSystemVersion)));
-					} else {
-						vs = new org.hl7.fhir.r4.model.ValueSet()
-								.setCompose(new org.hl7.fhir.r4.model.ValueSet.ValueSetComposeComponent()
-										.addInclude(new org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent()
-												.setSystem(theCodeSystem)));
-					}
+					vs = new org.hl7.fhir.r4.model.ValueSet()
+							.setCompose(new org.hl7.fhir.r4.model.ValueSet.ValueSetComposeComponent()
+									.addInclude(new org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent()
+											.setSystem(theCodeSystem)
+											.setVersion(theCodeSystemVersion)));
 					break;
 				case R4B:
-					if (codeSystemVersion != null) {
-						vs = new org.hl7.fhir.r4b.model.ValueSet()
-								.setCompose(new org.hl7.fhir.r4b.model.ValueSet.ValueSetComposeComponent()
-										.addInclude(new org.hl7.fhir.r4b.model.ValueSet.ConceptSetComponent()
-												.setSystem(codeSystemUrl)
-												.setVersion(codeSystemVersion)));
-					} else {
-						vs = new org.hl7.fhir.r4b.model.ValueSet()
-								.setCompose(new org.hl7.fhir.r4b.model.ValueSet.ValueSetComposeComponent()
-										.addInclude(new org.hl7.fhir.r4b.model.ValueSet.ConceptSetComponent()
-												.setSystem(theCodeSystem)));
-					}
+					vs = new org.hl7.fhir.r4b.model.ValueSet()
+							.setCompose(new org.hl7.fhir.r4b.model.ValueSet.ValueSetComposeComponent()
+									.addInclude(new org.hl7.fhir.r4b.model.ValueSet.ConceptSetComponent()
+											.setSystem(theCodeSystem)
+											.setVersion(theCodeSystemVersion)));
 					break;
 				case R5:
-					if (codeSystemVersion != null) {
-						vs = new org.hl7.fhir.r5.model.ValueSet()
-								.setCompose(new org.hl7.fhir.r5.model.ValueSet.ValueSetComposeComponent()
-										.addInclude(new org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent()
-												.setSystem(codeSystemUrl)
-												.setVersion(codeSystemVersion)));
-					} else {
-						vs = new org.hl7.fhir.r5.model.ValueSet()
-								.setCompose(new org.hl7.fhir.r5.model.ValueSet.ValueSetComposeComponent()
-										.addInclude(new org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent()
-												.setSystem(theCodeSystem)));
-					}
+					vs = new org.hl7.fhir.r5.model.ValueSet()
+							.setCompose(new org.hl7.fhir.r5.model.ValueSet.ValueSetComposeComponent()
+									.addInclude(new org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent()
+											.setSystem(theCodeSystem)
+											.setVersion(theCodeSystemVersion)));
 					break;
 				case DSTU2_1:
 				default:
@@ -288,7 +236,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		}
 
 		ValueSetExpansionOutcome valueSetExpansionOutcome =
-				expandValueSet(theValidationSupportContext, vs, theCodeSystem, theCode);
+				expandValueSet(theValidationSupportContext, vs, codeSystemUrlAndVersion, theCode);
 		if (valueSetExpansionOutcome == null) {
 			return null;
 		}
@@ -301,7 +249,36 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 
 		IBaseResource expansion = valueSetExpansionOutcome.getValueSet();
 		return validateCodeInExpandedValueSet(
-				theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, expansion, theValueSetUrl);
+				theValidationSupportContext,
+				theOptions,
+				codeSystemUrlAndVersion,
+				theCode,
+				theDisplay,
+				expansion,
+				theValueSetUrl);
+	}
+
+	@Override
+	@Nullable
+	public CodeValidationResult validateCode(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nonnull ConceptValidationOptions theOptions,
+			String theCodeSystem,
+			String theCode,
+			String theDisplay,
+			String theValueSetUrl) {
+		/* A code system reaching this signature can only name a version by carrying it packed as
+		"system|version", so it is split out here and the body above works with the two as separate values.
+		*/
+		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(theCodeSystem);
+		return validateCode(
+				theValidationSupportContext,
+				theOptions,
+				codeSystem.url(),
+				codeSystem.versionId().orElse(null),
+				theCode,
+				theDisplay,
+				theValueSetUrl);
 	}
 
 	private CodeValidationResult validateCodeInExpandedValueSet(
