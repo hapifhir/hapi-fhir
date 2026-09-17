@@ -186,6 +186,30 @@ public class WorkerContextValidationSupportAdapterTest extends BaseValidationTes
 	}
 
 	@Test
+	public void validateCode_noValueSetAndVersionGivenSeparately_checksThatVersion() {
+		// setup
+		setupValidation();
+
+		// execute
+		myWorkerContextWrapper.validateCode(new ValidationOptions(), "http://codesystems.com/system", "1.0.0", "code0", "");
+
+		// verify
+		verify(myValidationSupport, times(1)).validateCode(any(), any(), eq("http://codesystems.com/system|1.0.0"), eq("code0"), any(), any());
+	}
+
+	@Test
+	public void validateCode_noValueSetAndNoSystem_doesNotFail() {
+		// setup
+		setupValidation();
+
+		// execute
+		myWorkerContextWrapper.validateCode(new ValidationOptions(), null, "1.0.0", "code0", "");
+
+		// verify
+		verify(myValidationSupport, times(1)).validateCode(any(), any(), isNull(), eq("code0"), any(), any());
+	}
+
+	@Test
 	public void validateCode_codeNotInValueSet_doesNotResolveSystem() {
 		setupValidation();
 

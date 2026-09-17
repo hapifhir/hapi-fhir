@@ -829,7 +829,8 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			result = validateCodeInValueSet(
 					convertedVs, theValidationOptions, theSystem, theVersion, theCode, theDisplay);
 		} else {
-			result = validateCodeInCodeSystem(theValidationOptions, theSystem, theCode, theDisplay);
+			result = validateCodeInCodeSystem(
+					theValidationOptions, withVersion(theSystem, theVersion), theCode, theDisplay);
 		}
 		return convertValidationResult(theSystem, result);
 	}
@@ -913,7 +914,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 
 	private static String withVersion(String theSystem, String theVersion) {
 		// The system may already include a version, for example when it was taken from the value set's compose
-		if (isBlank(theVersion) || theSystem.contains("|")) {
+		if (isBlank(theVersion) || isBlank(theSystem) || theSystem.contains("|")) {
 			return theSystem;
 		}
 		return theSystem + "|" + theVersion;
