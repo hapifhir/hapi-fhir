@@ -26,24 +26,24 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Validation on a server that holds two versions of the same canonical, where a binding names one of them. The
- * nested fixtures put the second version on either side of the binding, then on both sides at once:
+ * Validation on a server that holds two versions of the same CodeSystem or ValueSet, where a profile asks for
+ * one of them. The nested classes cover the three shapes this takes:
  * <ul>
- *     <li>{@link MultiVersionCodeSystemTest} - two CodeSystem versions, one ValueSet naming one of them in
+ *     <li>{@link MultiVersionCodeSystemTest} - two CodeSystem versions, one ValueSet that names one of them in
  *     {@literal compose.include.version}, and a profile bound to that ValueSet</li>
- *     <li>{@link MultiVersionValueSetTest} - one unversioned CodeSystem holding every code, two ValueSet
+ *     <li>{@link MultiVersionValueSetTest} - one CodeSystem with no version holding every code, two ValueSet
  *     versions, and a profile bound to one of them by {@literal url|version}</li>
- *     <li>{@link MultiVersionCodeSystemAndValueSetTest} - both at once: two versions of each, the binding
- *     pinning the ValueSet and the ValueSet pinning the CodeSystem. Neither link is ambiguous on its own, and
- *     the whole chain has to hold for a caller to get the answer they asked for</li>
+ *     <li>{@link MultiVersionCodeSystemAndValueSetTest} - both at once: two versions of each, with the profile
+ *     naming a ValueSet version and that ValueSet naming a CodeSystem version. Every step has to keep the
+ *     version for the caller to get the answer they asked for</li>
  * </ul>
- * Every fixture runs twice, once pinning each version, and <em>always writes the unpinned version last</em>.
- * That ordering is what gives the tests teeth: an unversioned canonical resolves by {@literal meta.lastUpdated},
- * so the version written last is the one a lookup that ignores the pin would land on. Pinning the
- * last-written version instead would let an implementation that ignores pins altogether pass. Running both
- * directions also rules out a fix that merely prefers the highest business version.
+ * Each test runs twice, once for each version, and <em>always saves the version it did not ask for last</em>.
+ * That ordering is what lets these tests fail: a URL with no version resolves by {@literal meta.lastUpdated},
+ * so the version saved last is the one a lookup that drops the version finds. Asking for the last-saved
+ * version instead would pass even against code that ignores versions altogether, and running both directions
+ * rules out a fix that just picks the highest version number.
  * <p/>
- * Every test asserts the <em>correct</em> behaviour, so a failure is a bug reproducing.
+ * Every test asserts the behaviour we want, so a failing test means the bug is present.
  */
 // Created by Claude Opus 5
 public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
@@ -56,10 +56,10 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 	private static final String VERSION_OLDER = "1.0.0";
 	private static final String VERSION_NEWER = "1.0.1";
 
-	/** Reachable only through version 1.0.0. */
+	/** A code that only version 1.0.0 has. */
 	private static final String CODE_IN_OLDER_VERSION = "vermilion";
 
-	/** Reachable only through version 1.0.1. */
+	/** A code that only version 1.0.1 has. */
 	private static final String CODE_IN_NEWER_VERSION = "cerulean";
 
 	@Nested
@@ -77,8 +77,8 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		}
 
 		/**
-		 * The terminology layer on its own gets this right, which is what makes the validation result below a
-		 * contradiction rather than a missing feature.
+		 * The terminology layer gets this right on its own, so the validation failures below are a bug and not
+		 * a missing feature.
 		 */
 		@ParameterizedTest
 		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
@@ -98,8 +98,8 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		}
 
 		/**
-		 * The same layer, asked about the code the pinned CodeSystem version does not carry, says no. Without
-		 * this, the assertion above would also hold against a terminology layer that accepted everything.
+		 * The same call for a code the named CodeSystem version does not have, which must be rejected. Without
+		 * this, the test above would also pass against a terminology layer that accepted every code.
 		 */
 		@ParameterizedTest
 		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
@@ -119,7 +119,8 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		}
 
 		/**
-		 * The code is in the CodeSystem version the ValueSet pins, and therefore in the bound ValueSet.
+		 * The code is in the CodeSystem version the ValueSet names, so it is in the bound ValueSet and
+		 * validation must accept it.
 		 */
 		@ParameterizedTest
 		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
@@ -135,8 +136,8 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		}
 
 		/**
-		 * The other direction, so that resolving to the last-written version is not mistaken for a fix: a code
-		 * that exists only in the unpinned CodeSystem version is outside the ValueSet.
+		 * The other direction, so that resolving to the last-saved version is not mistaken for a fix: a code
+		 * that exists only in the other CodeSystem version is not in the ValueSet.
 		 */
 		@ParameterizedTest
 		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
@@ -169,8 +170,8 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		}
 
 		/**
-		 * Isolates resolution from validation: asking for the pinned ValueSet should hand back that version,
-		 * not the one written after it.
+		 * Checks resolution on its own, before validation: asking for a ValueSet by version must return that
+		 * version, not the one saved after it.
 		 */
 		@ParameterizedTest
 		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
@@ -187,7 +188,7 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		}
 
 		/**
-		 * The terminology layer, handed the pinned ValueSet, accepts the code it enumerates.
+		 * The terminology layer, given that ValueSet version, accepts the code it lists.
 		 */
 		@ParameterizedTest
 		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
@@ -207,7 +208,7 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		}
 
 		/**
-		 * The same layer, asked about the code only the unpinned ValueSet version enumerates, says no.
+		 * The same call for a code that only the other ValueSet version lists, which must be rejected.
 		 */
 		@ParameterizedTest
 		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
@@ -227,8 +228,8 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		}
 
 		/**
-		 * The binding names one version of the ValueSet and the code is in that version, so validation has to
-		 * accept it even though the other version was written afterwards.
+		 * The profile names one version of the ValueSet and the code is in that version, so validation has to
+		 * accept it even though the other version was saved afterwards.
 		 */
 		@ParameterizedTest
 		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
@@ -244,8 +245,8 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		}
 
 		/**
-		 * The other direction: a code only the unpinned ValueSet version carries is outside the binding.
-		 * Passing the case above by quietly validating against the last-written version would fail here.
+		 * The other direction: a code that only the other ValueSet version has must be rejected. Code that
+		 * passes the test above by validating against the last-saved version fails here.
 		 */
 		@ParameterizedTest
 		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
@@ -282,8 +283,8 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		}
 
 		/**
-		 * Isolates storage and resolution from validation: the pinned ValueSet comes back at that version and
-		 * still names its own CodeSystem version, so the chain the validator has to walk is intact before it
+		 * Checks storage and resolution on their own: the ValueSet comes back at the version asked for and
+		 * still names its own CodeSystem version, so what the validator reads is correct before validation
 		 * starts.
 		 */
 		@ParameterizedTest
@@ -303,11 +304,12 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		}
 
 		/**
-		 * The acceptance case: every link named explicitly, and the code reachable through all of them.
+		 * The accepted case: the profile names a ValueSet version, that ValueSet names a CodeSystem version,
+		 * and the code is in it.
 		 */
 		@ParameterizedTest
 		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
-		void validate_codeReachableThroughTheWholePinnedChain_hasNoErrors(String thePinnedVersion) {
+		void validate_codeInEveryVersionThatWasNamed_hasNoErrors(String thePinnedVersion) {
 			// Setup
 			setUpPinning(thePinnedVersion);
 
@@ -319,12 +321,12 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		}
 
 		/**
-		 * The other direction: a code reachable only through the unpinned ValueSet and its unpinned CodeSystem
-		 * is outside the chain at both links.
+		 * The other direction: a code that only the other ValueSet version and its CodeSystem version have
+		 * must be rejected.
 		 */
 		@ParameterizedTest
 		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
-		void validate_codeReachableOnlyThroughTheUnpinnedChain_hasErrors(String thePinnedVersion) {
+		void validate_codeOnlyInTheVersionsThatWereNotNamed_hasErrors(String thePinnedVersion) {
 			// Setup
 			setUpPinning(thePinnedVersion);
 			String unpinnedCode = codeIn(otherThan(thePinnedVersion));
@@ -337,12 +339,12 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		}
 	}
 
-	/** The code that only the given version carries. */
+	/** The code that only the given version has. */
 	private static String codeIn(String theVersion) {
 		return VERSION_OLDER.equals(theVersion) ? CODE_IN_OLDER_VERSION : CODE_IN_NEWER_VERSION;
 	}
 
-	/** The version the fixture does not pin, and therefore the one it writes last. */
+	/** The version the test does not ask for, and therefore the one it saves last. */
 	private static String otherThan(String theVersion) {
 		return VERSION_OLDER.equals(theVersion) ? VERSION_NEWER : VERSION_OLDER;
 	}

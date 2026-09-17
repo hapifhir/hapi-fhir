@@ -888,8 +888,8 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 		if (result != null && isNotBlank(theSystem)) {
 			/* We got a value set result, which could be successful, or could contain errors/warnings. The code
 			might also be invalid in the code system, so we will check that as well and add those issues
-			to our result. Name the version, or that check answers from whichever version is current and can
-			reject a code the value set accepted.
+			to our result. Pass the version as well: without it this check uses whichever version is current,
+			which can reject a code the value set accepted.
 			*/
 			String expectedVersion = isNotBlank(theVersion) ? theVersion : result.getCodeSystemVersion();
 			IValidationSupport.CodeValidationResult codeSystemResult = validateCodeInCodeSystem(
@@ -912,7 +912,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	}
 
 	private static String withVersion(String theSystem, String theVersion) {
-		// The system can already carry a version, e.g. when it was inferred from the value set's compose
+		// The system may already include a version, for example when it was taken from the value set's compose
 		if (isBlank(theVersion) || theSystem.contains("|")) {
 			return theSystem;
 		}

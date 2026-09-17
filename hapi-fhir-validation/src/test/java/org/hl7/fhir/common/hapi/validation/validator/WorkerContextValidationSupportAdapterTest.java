@@ -111,7 +111,7 @@ public class WorkerContextValidationSupportAdapterTest extends BaseValidationTes
 		// setup
 		setupValidation();
 
-		// The system inferred from a versioned include already carries its version
+		// The system taken from an include that names a version already has the version on it
 		ValueSet valueSet = new ValueSet();
 		valueSet.getCompose()
 			.addInclude()
@@ -125,6 +125,61 @@ public class WorkerContextValidationSupportAdapterTest extends BaseValidationTes
 
 		// execute
 		myWorkerContextWrapper.validateCode(new ValidationOptions(), "code0", valueSet);
+
+		// verify
+		verify(myValidationSupport, times(1)).validateCode(any(), any(), eq("http://codesystems.com/system|1.0.0"), eq("code0"), any(), any());
+	}
+
+	@Test
+	public void validateCode_codingNamesACodeSystemVersion_checksThatVersion() {
+		// setup
+		setupValidation();
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
+
+		when(myValidationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenReturn(new CodeValidationResult().setCode("code0"));
+
+		Coding coding = new Coding("http://codesystems.com/system", "code0", "");
+		coding.setVersion("1.0.0");
+
+		// execute
+		myWorkerContextWrapper.validateCode(new ValidationOptions(), coding, valueSet);
+
+		// verify
+		verify(myValidationSupport, times(1)).validateCode(any(), any(), eq("http://codesystems.com/system|1.0.0"), eq("code0"), any(), any());
+	}
+
+	@Test
+	public void validateCode_callerNamesNoVersion_checksTheVersionTheValueSetAnsweredWith() {
+		// setup
+		setupValidation();
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
+
+		CodeValidationResult valueSetResult = new CodeValidationResult().setCode("code0").setCodeSystemVersion("2.0.0");
+		when(myValidationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenReturn(valueSetResult);
+
+		// execute
+		myWorkerContextWrapper.validateCode(new ValidationOptions(), new Coding("http://codesystems.com/system", "code0", ""), valueSet);
+
+		// verify
+		verify(myValidationSupport, times(1)).validateCode(any(), any(), eq("http://codesystems.com/system|2.0.0"), eq("code0"), any(), any());
+	}
+
+	@Test
+	public void validateCode_systemAndVersionGivenSeparately_checksThatVersion() {
+		// setup
+		setupValidation();
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
+
+		when(myValidationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenReturn(new CodeValidationResult().setCode("code0"));
+
+		// execute
+		myWorkerContextWrapper.validateCode(new ValidationOptions(), "http://codesystems.com/system", "1.0.0", "code0", "", valueSet);
 
 		// verify
 		verify(myValidationSupport, times(1)).validateCode(any(), any(), eq("http://codesystems.com/system|1.0.0"), eq("code0"), any(), any());

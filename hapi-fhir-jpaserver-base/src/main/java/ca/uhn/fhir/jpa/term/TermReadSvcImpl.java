@@ -2688,8 +2688,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		}
 		String url = urlPrimitive.getValueAsString();
 		if (isNotBlank(url)) {
-			// An unversioned canonical resolves to whichever version was written last, so keep the one this
-			// value set named
+			// A URL with no version resolves to whichever version was saved last, so keep the version of the ValueSet
 			String version = CommonCodeSystemsTerminologyService.getValueSetVersion(myContext, theValueSet);
 			String canonicalUrl = isNotBlank(version) ? url + "|" + version : url;
 			return validateCode(
