@@ -27,6 +27,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import java.util.HashSet;
 import java.util.List;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_VALIDATE_CODE;
@@ -188,8 +189,10 @@ public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Tes
 
 		// execute
 		List<String> errors = getValidationErrors(procedure);
-		// TODO: there is currently some duplication in the errors returned. This needs to be investigated and fixed.
-		// assertThat(errors).hasSize(1);
+		// TODO: the one problem is still reported twice, because CodeValidationResult carries the same text in
+		// its message and in an issue, and WorkerContextValidationSupportAdapter.convertValidationResult passes
+		// both on. Asserting on the distinct messages until that is fixed.
+		assertThat(new HashSet<>(errors)).hasSize(1);
 
 		// verify
 		// note that we're not selecting an explicit versions (using latest) so the message verification does not include it.

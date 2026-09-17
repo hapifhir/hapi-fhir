@@ -829,8 +829,9 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			result = validateCodeInValueSet(
 					convertedVs, theValidationOptions, theSystem, theVersion, theCode, theDisplay);
 		} else {
-			result = validateCodeInCodeSystem(
-					theValidationOptions, withVersion(theSystem, theVersion), theCode, theDisplay);
+			// IValidationSupport takes no version, so theVersion cannot be honoured here. See
+			// answeredForTheVersionInUse for why packing it into theSystem is not safe.
+			result = validateCodeInCodeSystem(theValidationOptions, theSystem, theCode, theDisplay);
 		}
 		return convertValidationResult(theSystem, result);
 	}
@@ -889,15 +890,13 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 		if (result != null && isNotBlank(theSystem)) {
 			/* We got a value set result, which could be successful, or could contain errors/warnings. The code
 			might also be invalid in the code system, so we will check that as well and add those issues
-			to our result. Pass the version as well: without it this check uses whichever version is current,
-			which can reject a code the value set accepted.
+			to our result.
 			*/
-			String expectedVersion = isNotBlank(theVersion) ? theVersion : result.getCodeSystemVersion();
-			IValidationSupport.CodeValidationResult codeSystemResult = validateCodeInCodeSystem(
-					theValidationOptions, withVersion(theSystem, expectedVersion), theCode, theDisplay);
+			IValidationSupport.CodeValidationResult codeSystemResult =
+					validateCodeInCodeSystem(theValidationOptions, theSystem, theCode, theDisplay);
 			final boolean valueSetResultContainsInvalidDisplay = result.getIssues().stream()
 					.anyMatch(WorkerContextValidationSupportAdapter::hasInvalidDisplayDetailCode);
-			if (codeSystemResult != null) {
+			if (codeSystemResult != null && answeredForTheVersionInUse(result, theVersion, codeSystemResult)) {
 				result = copyCodeValidationResult(result);
 				for (IValidationSupport.CodeValidationIssue codeValidationIssue : codeSystemResult.getIssues()) {
 					/* Value set validation should already have checked the display name. If we get INVALID_DISPLAY
@@ -912,12 +911,25 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 		return result;
 	}
 
-	private static String withVersion(String theSystem, String theVersion) {
-		// The system may already include a version, for example when it was taken from the value set's compose
-		if (isBlank(theVersion) || isBlank(theSystem) || theSystem.contains("|")) {
-			return theSystem;
+	/**
+	 * Whether the code system check looked at the version the value set used.
+	 * <p/>
+	 * {@link IValidationSupport#validateCode} takes no version, so the check runs against whichever version
+	 * the support treats as current. When a version was in use and the check cannot confirm it looked at that
+	 * one, its issues describe a different version of the code system and would reject codes the value set
+	 * accepted, so they are left out. With no version in use there is nothing to reconcile and the issues are
+	 * kept.
+	 */
+	private static boolean answeredForTheVersionInUse(
+			IValidationSupport.CodeValidationResult theValueSetResult,
+			String theRequestedVersion,
+			IValidationSupport.CodeValidationResult theCodeSystemResult) {
+		String versionInUse =
+				isNotBlank(theRequestedVersion) ? theRequestedVersion : theValueSetResult.getCodeSystemVersion();
+		if (isBlank(versionInUse)) {
+			return true;
 		}
-		return theSystem + "|" + theVersion;
+		return versionInUse.equals(theCodeSystemResult.getCodeSystemVersion());
 	}
 
 	private IValidationSupport.CodeValidationResult copyCodeValidationResult(
