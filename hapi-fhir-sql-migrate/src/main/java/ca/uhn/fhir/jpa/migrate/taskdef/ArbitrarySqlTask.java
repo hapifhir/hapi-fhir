@@ -20,12 +20,12 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.VersionEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -38,7 +38,7 @@ import java.util.function.Consumer;
 
 public class ArbitrarySqlTask extends BaseTask {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(ArbitrarySqlTask.class);
+	private static final Logger ourLog = Logs.getDatabaseMigrationLog();
 	private final String myDescription;
 	private final String myTableName;
 	private List<BaseTask> myTask = new ArrayList<>();
