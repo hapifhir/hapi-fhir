@@ -110,8 +110,8 @@ import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.common.EntityReference;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hibernate.search.mapper.pojo.massindexing.impl.PojoMassIndexingLoggingMonitor;
-import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportUtils;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.context.ConversionContext40_50;
 import org.hl7.fhir.convertors.conv40_50.VersionConvertor_40_50;
@@ -2689,7 +2689,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		String url = urlPrimitive.getValueAsString();
 		if (isNotBlank(url)) {
 			// A URL with no version resolves to whichever version was saved last, so keep the version of the ValueSet
-			String version = CommonCodeSystemsTerminologyService.getValueSetVersion(myContext, theValueSet);
+			String version = ValidationSupportUtils.getValueSetVersion(myContext, theValueSet);
 			String canonicalUrl = isNotBlank(version) ? url + "|" + version : url;
 			return validateCode(
 					theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, canonicalUrl);
@@ -2706,14 +2706,9 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			String theCode,
 			String theDisplay,
 			String theValueSetUrl) {
-		/* The six-argument method below already resolves a "url|version" code system identifier, so the
-		version is named that way and passed to it rather than the resolution being duplicated. Delegating to
-		it rather than the other way round also keeps a subclass which overrides only that method reachable.
-		*/
-		String codeSystemUrl =
-				isNotBlank(theCodeSystemVersion) && isNotBlank(theCodeSystemUrl) && !theCodeSystemUrl.contains("|")
-						? theCodeSystemUrl + "|" + theCodeSystemVersion
-						: theCodeSystemUrl;
+		// The lookups below take the code system as a single "url|version" identifier, which
+		// getCurrentCodeSystemVersion also uses as a cache key, so the version is joined rather than passed beside it.
+		String codeSystemUrl = ValidationSupportUtils.getVersionedCodeSystem(theCodeSystemUrl, theCodeSystemVersion);
 		return validateCode(
 				theValidationSupportContext, theOptions, codeSystemUrl, theCode, theDisplay, theValueSetUrl);
 	}

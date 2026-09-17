@@ -35,6 +35,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.base.Strings;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportUtils;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -126,8 +127,9 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 	}
 
 	static void applyVersionToSystem(IPrimitiveType<String> theSystem, IPrimitiveType<String> theVersion) {
-		if (theVersion != null && isNotBlank(theVersion.getValueAsString()) && theSystem != null) {
-			theSystem.setValue(theSystem.getValueAsString() + "|" + theVersion.getValueAsString());
+		if (theVersion != null && theSystem != null) {
+			theSystem.setValue(ValidationSupportUtils.getVersionedCodeSystem(
+					theSystem.getValueAsString(), theVersion.getValueAsString()));
 		}
 	}
 

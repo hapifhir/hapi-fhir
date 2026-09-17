@@ -36,7 +36,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.LogicUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
-import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportUtils;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -49,7 +49,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 
-import static ca.uhn.fhir.jpa.dao.JpaResourceDaoCodeSystem.createVersionedSystemIfVersionIsPresent;
 import static ca.uhn.fhir.jpa.provider.ValueSetOperationProvider.createValueSetExpansionOptions;
 import static ca.uhn.fhir.util.DatatypeUtil.toStringValue;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -219,8 +218,8 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 		if (theValueSetId != null) {
 			IBaseResource valueSet = read(theValueSetId, theRequestDetails);
 			StringBuilder valueSetIdentifierBuilder =
-					new StringBuilder(CommonCodeSystemsTerminologyService.getValueSetUrl(myFhirContext, valueSet));
-			String valueSetVersion = CommonCodeSystemsTerminologyService.getValueSetVersion(myFhirContext, valueSet);
+					new StringBuilder(ValidationSupportUtils.getValueSetUrl(myFhirContext, valueSet));
+			String valueSetVersion = ValidationSupportUtils.getValueSetVersion(myFhirContext, valueSet);
 			if (valueSetVersion != null) {
 				valueSetIdentifierBuilder.append("|").append(valueSetVersion);
 			}
@@ -238,7 +237,7 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 			for (int i = 0; i < codeableConcept.getCoding().size(); i++) {
 				Coding nextCoding = codeableConcept.getCoding().get(i);
 				String system =
-						createVersionedSystemIfVersionIsPresent(nextCoding.getSystem(), nextCoding.getVersion());
+						ValidationSupportUtils.getVersionedCodeSystem(nextCoding.getSystem(), nextCoding.getVersion());
 				String code = nextCoding.getCode();
 				String display = nextCoding.getDisplay();
 
@@ -251,7 +250,7 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 			}
 			return anyValidation;
 		} else if (haveCoding) {
-			String system = createVersionedSystemIfVersionIsPresent(
+			String system = ValidationSupportUtils.getVersionedCodeSystem(
 					canonicalCodingToValidate.getSystem(), canonicalCodingToValidate.getVersion());
 			String code = canonicalCodingToValidate.getCode();
 			String display = canonicalCodingToValidate.getDisplay();

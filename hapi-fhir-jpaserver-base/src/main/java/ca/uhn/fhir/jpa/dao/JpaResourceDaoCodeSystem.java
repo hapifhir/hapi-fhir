@@ -50,6 +50,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportUtils;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -366,7 +367,7 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 		ConceptValidationOptions options = new ConceptValidationOptions();
 		options.setValidateDisplay(isNotBlank(theDisplay));
 
-		String codeSystemUrl = createVersionedSystemIfVersionIsPresent(theCodeSystemUrl, theVersion);
+		String codeSystemUrl = ValidationSupportUtils.getVersionedCodeSystem(theCodeSystemUrl, theVersion);
 
 		CodeValidationResult retVal =
 				myValidationSupport.validateCode(context, options, codeSystemUrl, theCode, theDisplay, null);
@@ -409,9 +410,7 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 			code = extractCodingCode(theCoding);
 			system = extractCodingSystem(theCoding);
 			String version = extractCodingVersion(theFhirContext, theFhirTerser, theCoding);
-			if (isNotBlank(version)) {
-				system = system + "|" + version;
-			}
+			system = ValidationSupportUtils.getVersionedCodeSystem(system, version);
 		} else {
 			code = theCode.getValue();
 			system = theSystem.getValue();
@@ -457,13 +456,5 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 			return null;
 		}
 		return theFhirTerser.getSinglePrimitiveValueOrNull(theCoding, "version");
-	}
-
-	public static String createVersionedSystemIfVersionIsPresent(String theCodeSystemUrl, String theVersion) {
-		String codeSystemUrl = theCodeSystemUrl;
-		if (isNotBlank(theVersion)) {
-			codeSystemUrl = codeSystemUrl + "|" + theVersion;
-		}
-		return codeSystemUrl;
 	}
 }

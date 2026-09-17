@@ -182,4 +182,26 @@ public class ValidationSupportUtilsTest {
 		// validate
 		assertEquals(theExpectedCodeSystem, result, theMessage);
 	}
+
+	private static Stream<Arguments> getVersionedCodeSystemTestCases() {
+		return Stream.of(
+			Arguments.of(SYSTEM_URL, SYSTEM_VERSION, SYSTEM_URL + "|" + SYSTEM_VERSION, "System and version are joined"),
+			Arguments.of(SYSTEM_URL, null, SYSTEM_URL, "No version leaves the system alone"),
+			Arguments.of(SYSTEM_URL, "", SYSTEM_URL, "Blank version leaves the system alone"),
+			Arguments.of(SYSTEM_URL + "|" + SYSTEM_VERSION, SYSTEM_VERSION_2, SYSTEM_URL + "|" + SYSTEM_VERSION,
+				"A system which already names a version does not get a second one"),
+			Arguments.of(null, SYSTEM_VERSION, null, "Null system is returned as-is rather than throwing"),
+			Arguments.of("", SYSTEM_VERSION, "", "Blank system is returned as-is"));
+	}
+
+	@ParameterizedTest
+	@MethodSource("getVersionedCodeSystemTestCases")
+	public void getVersionedCodeSystem_withDifferentSystemsAndVersions_returnsCorrectResult(String theCodeSystem,
+																							String theVersion, String theExpectedCodeSystem, String theMessage) {
+		// execute
+		String result = ValidationSupportUtils.getVersionedCodeSystem(theCodeSystem, theVersion);
+
+		// validate
+		assertEquals(theExpectedCodeSystem, result, theMessage);
+	}
 }

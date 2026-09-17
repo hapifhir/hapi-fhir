@@ -476,9 +476,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			String version,
 			Resource sourceOfReference,
 			boolean checkForImplicits) {
-		if (StringUtils.isNotBlank(version)) {
-			system = system + "|" + version;
-		}
+		system = ValidationSupportUtils.getVersionedCodeSystem(system, version);
 		ourLog.info("Fetching CodeSystem for: {}", system);
 		IBaseResource fetched = myValidationSupport.fetchCodeSystem(system);
 		if (fetched == null) {
