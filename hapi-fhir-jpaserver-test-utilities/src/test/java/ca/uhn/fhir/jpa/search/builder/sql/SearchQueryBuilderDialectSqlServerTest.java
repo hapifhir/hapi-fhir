@@ -5,18 +5,13 @@ import ca.uhn.fhir.jpa.model.dialect.HapiFhirSQLServerDialect;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
 import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
-import ca.uhn.test.util.LogbackTestExtension;
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.spi.ILoggingEvent;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.dialect.Dialect;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
 import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,9 +21,6 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuilderDialectTest {
-
-	@RegisterExtension
-	public LogbackTestExtension myLogCapture = new LogbackTestExtension(Level.WARN);
 
 	@Test
 	public void testAddSort() {
@@ -103,13 +95,10 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 
 	/**
 	 * OPENJSON requires database compatibility level 130 (SQL Server 2016). Below that the
-	 * predicate must keep rendering today's IN list rather than emitting SQL the database cannot parse -
-	 * and the fallback must not be silent, but it must also not flood the log: the probe result is
-	 * cached on the HibernatePropertiesProvider, so a second SearchQueryBuilder built on the same
-	 * provider does not warn again.
+	 * predicate must keep rendering today's IN list rather than emitting SQL the database cannot parse.
 	 */
 	@Test
-	void testResourceIdsOverThreshold_withoutJsonSupport_keepsInListAndWarnsOnce() {
+	void testResourceIdsOverThreshold_withoutJsonSupport_keepsInList() {
 		HibernatePropertiesProvider dialectProvider = createDialectProvider(false);
 		StorageSettings storageSettings = new StorageSettings();
 		storageSettings.setLargeIdListJsonThreshold(3);
@@ -121,26 +110,6 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 		assertThat(sql).contains("t0.RES_ID IN (?,?,?,?,?)");
 		assertThat(sql.toUpperCase(Locale.ROOT)).doesNotContain("OPENJSON");
 		assertThat(generatedSql.getBindVariables()).containsExactly("Patient", 1L, 2L, 3L, 4L, 5L);
-
-		List<ILoggingEvent> compatibilityLevelWarnings = compatibilityLevelWarnings();
-		assertThat(compatibilityLevelWarnings)
-			.as("Exactly one compatibility level warning is expected after the first fallback")
-			.hasSize(1);
-		assertThat(compatibilityLevelWarnings.get(0).getFormattedMessage()).contains("130");
-
-		// A second builder on the same provider - the probe result is cached, so no new warning is logged.
-		generateResourceIdsPredicate(createSearchQueryBuilder(storageSettings, dialectProvider), 1L, 2L, 3L, 4L, 5L);
-		assertThat(compatibilityLevelWarnings())
-			.as("A second builder on the same provider must not warn again")
-			.hasSize(1);
-	}
-
-	@Nonnull
-	private List<ILoggingEvent> compatibilityLevelWarnings() {
-		return myLogCapture.getLogEvents().stream()
-			.filter(t -> t.getLevel() == Level.WARN)
-			.filter(t -> t.getFormattedMessage().toLowerCase(Locale.ROOT).contains("compatibility level"))
-			.toList();
 	}
 
 	@Nonnull

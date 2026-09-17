@@ -63,42 +63,65 @@ public class HibernatePropertiesProviderTest {
 	}
 
 	/**
-	 * The compatibility level probe runs lazily on the search path, so a failure there must never escape
-	 * into the search. It degrades to "not supported" and reports the failure exactly once, no matter how
-	 * many times it is retried. A failed probe is not a definitive answer, so it is not cached outright -
-	 * the next call re-probes - but three consecutive failures give up and cache "false", so a permanently
-	 * unreadable <code>sys.databases</code> costs three extra connection attempts rather than one per
-	 * search forever. Once the answer settles on "false", {@link HibernatePropertiesProvider#isJsonUnpackingSupported()}
-	 * also reports its own once-per-provider fallback warning, so two distinct warnings accumulate over the
-	 * life of this test - the probe failure, and the JSON-binding fallback - each logged only once.
+	 * A database below compatibility level 130 does not support OPENJSON. The result is cached the first
+	 * time it is determined, at which point the fallback WARN is logged exactly once - a second call must
+	 * not touch the DataSource again, and must not log a second WARN.
 	 */
 	@Test
-	void isJsonUnpackingSupported_whenProbeFails_retriesUpToLimitThenCachesFalse() throws SQLException {
+	void isJsonUnpackingSupported_whenCompatibilityLevelBelow130_returnsFalseAndWarnsOnce() throws SQLException {
+		stubConnection();
+		when(myStatement.executeQuery(anyString())).thenReturn(myResultSet);
+		when(myResultSet.next()).thenReturn(true);
+		when(myResultSet.getInt(1)).thenReturn(120);
+
+		assertThat(mySvc.isJsonUnpackingSupported()).isFalse();
+		verify(myDataSource, times(1)).getConnection();
+		assertThat(compatibilityLevelWarnings()).hasSize(1);
+
+		assertThat(mySvc.isJsonUnpackingSupported()).isFalse();
+		verify(myDataSource, times(1)).getConnection();
+		assertThat(compatibilityLevelWarnings()).hasSize(1);
+	}
+
+	/**
+	 * The compatibility level probe runs lazily on the search path, so a failure there must never escape
+	 * into the search. It degrades to "not supported" and, before enough failures pile up, does not warn at
+	 * all. A failed probe is not a definitive answer, so it is not cached outright - the next call re-probes
+	 * - but three consecutive failures give up and cache "false", logging the fallback WARN exactly once at
+	 * that point, so a permanently unreadable <code>sys.databases</code> costs three extra connection
+	 * attempts rather than one per search forever.
+	 */
+	@Test
+	void isJsonUnpackingSupported_whenProbeKeepsFailing_givesUpAfterThreeAttemptsAndWarnsOnce() throws SQLException {
 		stubConnection();
 		lenient().when(myStatement.executeQuery(anyString())).thenThrow(new SQLException("SELECT permission denied on object 'databases'"));
 
 		assertThat(mySvc.isJsonUnpackingSupported()).isFalse();
 		verify(myDataSource, times(1)).getConnection();
+		assertThat(compatibilityLevelWarnings()).isEmpty();
 
 		assertThat(mySvc.isJsonUnpackingSupported()).isFalse();
 		verify(myDataSource, times(2)).getConnection();
+		assertThat(compatibilityLevelWarnings()).isEmpty();
 
 		assertThat(mySvc.isJsonUnpackingSupported()).isFalse();
 		verify(myDataSource, times(3)).getConnection();
+		assertThat(compatibilityLevelWarnings())
+			.as("The third consecutive failure gives up and warns exactly once")
+			.hasSize(1);
 
 		// Three consecutive failures is the limit - the fourth call must not touch the DataSource again.
 		assertThat(mySvc.isJsonUnpackingSupported()).isFalse();
 		verify(myDataSource, times(3)).getConnection();
-
 		assertThat(compatibilityLevelWarnings())
-			.as("The failed probe and the JSON-binding fallback must each be reported exactly once, no matter how many times they are retried")
-			.hasSize(2);
+			.as("A cached outcome must not warn again")
+			.hasSize(1);
 	}
 
 	/**
 	 * An empty result set - the query ran but <code>sys.databases</code> had no row for this database -
 	 * is just as much a failed probe as an exception, and gets the same treatment: not cached outright, so
-	 * the next call re-probes.
+	 * the next call re-probes, and no WARN until the retry limit is reached.
 	 */
 	@Test
 	void isLargeIdListJsonBindingSupported_whenResultSetIsEmpty_isTreatedAsFailedProbe() throws SQLException {
@@ -108,13 +131,17 @@ public class HibernatePropertiesProviderTest {
 
 		assertThat(mySvc.isJsonUnpackingSupported()).isFalse();
 		verify(myDataSource, times(1)).getConnection();
+		assertThat(compatibilityLevelWarnings()).isEmpty();
 
 		assertThat(mySvc.isJsonUnpackingSupported()).isFalse();
 		verify(myDataSource, times(2)).getConnection();
+		assertThat(compatibilityLevelWarnings()).isEmpty();
 
+		assertThat(mySvc.isJsonUnpackingSupported()).isFalse();
+		verify(myDataSource, times(3)).getConnection();
 		assertThat(compatibilityLevelWarnings())
-			.as("The failed probe and the JSON-binding fallback must each be reported exactly once")
-			.hasSize(2);
+			.as("The third consecutive failure gives up and warns exactly once")
+			.hasSize(1);
 	}
 
 	/**

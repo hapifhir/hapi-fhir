@@ -35,7 +35,6 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.sql.DataSource;
 
@@ -46,6 +45,7 @@ public class HibernatePropertiesProvider {
 	 * table valued function.
 	 */
 	public static final int MINIMUM_SQL_SERVER_OPENJSON_COMPATIBILITY_LEVEL = 130;
+
 	private static final int MAX_SQL_SERVER_JSON_PROBE_FAILURES = 3;
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HibernatePropertiesProvider.class);
@@ -53,8 +53,6 @@ public class HibernatePropertiesProvider {
 	@Autowired
 	private LocalContainerEntityManagerFactoryBean myEntityManagerFactory;
 
-	private final AtomicBoolean mySqlServerJsonProbeFailureLogged = new AtomicBoolean(false);
-	private final AtomicBoolean mySqlServerJsonFallbackLogged = new AtomicBoolean(false);
 	private final AtomicInteger mySqlServerJsonProbeFailureCount = new AtomicInteger(0);
 
 	private Dialect myDialect;
@@ -121,12 +119,7 @@ public class HibernatePropertiesProvider {
 			return true;
 		}
 
-		// Need to check SQL Server DB level
-		boolean sqlServerJsonSupported = isSqlServerJsonSupported();
-		if (!sqlServerJsonSupported) {
-			logSqlServerJsonFallbackWarning();
-		}
-		return sqlServerJsonSupported;
+		return isSqlServerJsonSupported();
 	}
 
 	/**
@@ -135,23 +128,33 @@ public class HibernatePropertiesProvider {
 	 * {@value #MINIMUM_SQL_SERVER_OPENJSON_COMPATIBILITY_LEVEL} (SQL Server 2016) or higher.
 	 * <p>
 	 * The database is probed the first time this method is called and the answer is cached for the
-	 * lifetime of this provider, so that the probe never runs at startup. The probe runs until it gets a
-	 * definitive answer - at most {@value #MAX_SQL_SERVER_JSON_PROBE_FAILURES} times if it keeps failing -
-	 * after which the failure itself is cached as "not supported", so a database whose compatibility level
-	 * can never be determined costs a bounded number of extra connection attempts rather than one per
-	 * over-threshold search forever. If the probe cannot be performed - for example because the database
-	 * user may not read <code>sys.databases</code> - this method reports the failure once and answers
-	 * <code>false</code>, so that callers fall back to whatever they do on a database without JSON support.
+	 * lifetime of this provider, so that the probe never runs at startup. Once the answer is cached - whether
+	 * that is "supported", or "not supported" because the compatibility level is too low, or because the
+	 * probe could not get a definitive answer after repeated attempts - a WARN is logged exactly once per
+	 * provider if the outcome is "not supported". Intermediate probe failures, before the cache settles,
+	 * are only logged at debug. The probe runs until it gets a definitive answer - at most
+	 * {@value #MAX_SQL_SERVER_JSON_PROBE_FAILURES} times if it keeps failing - after which the failure
+	 * itself is cached as "not supported", so a database whose compatibility level can never be determined
+	 * costs a bounded number of extra connection attempts rather than one per over-threshold search forever.
 	 * </p>
 	 */
 	private boolean isSqlServerJsonSupported() {
-		Boolean sqlServerJsonSupported = mySqlServerJsonSupported;
-		if (sqlServerJsonSupported != null) {
-			return sqlServerJsonSupported;
+		Boolean cached = mySqlServerJsonSupported;
+		if (cached != null) {
+			return cached;
 		}
 
 		Boolean probeResult = probeSqlServerJsonSupport();
 		if (probeResult != null) {
+			if (!probeResult) {
+				ourLog.warn(
+						"This SQL Server database is running at a compatibility level below {}, so the OPENJSON function is not available. "
+								+ "Large resource ID lists will continue to be sent as one bind parameter per ID, which can exceed the number of "
+								+ "bind parameters the database accepts in a single statement. Raise the database compatibility level to {} "
+								+ "(SQL Server 2016) or higher to avoid this.",
+						MINIMUM_SQL_SERVER_OPENJSON_COMPATIBILITY_LEVEL,
+						MINIMUM_SQL_SERVER_OPENJSON_COMPATIBILITY_LEVEL);
+			}
 			mySqlServerJsonSupported = probeResult;
 			return probeResult;
 		}
@@ -161,25 +164,16 @@ public class HibernatePropertiesProvider {
 		// idempotent. Once enough consecutive failures have piled up, give up and cache "false" so a
 		// permanently unreadable sys.databases table does not cost one connection attempt per search.
 		if (mySqlServerJsonProbeFailureCount.incrementAndGet() >= MAX_SQL_SERVER_JSON_PROBE_FAILURES) {
+			ourLog.warn(
+					"Could not determine the compatibility level of this SQL Server database after {} attempts, so falling back "
+							+ "to sending large resource ID lists as one bind parameter per ID, which can exceed the number of bind "
+							+ "parameters the database accepts in a single statement. Raise the database compatibility level to "
+							+ MINIMUM_SQL_SERVER_OPENJSON_COMPATIBILITY_LEVEL
+							+ " (SQL Server 2016) or higher to enable the OPENJSON function.",
+					MAX_SQL_SERVER_JSON_PROBE_FAILURES);
 			mySqlServerJsonSupported = Boolean.FALSE;
 		}
 		return false;
-	}
-
-	/**
-	 * Logs, at most once for the lifetime of this provider, that a query had to fall back to a form
-	 * which does not use <code>OPENJSON</code> because this SQL Server database runs at a compatibility
-	 * level below {@value #MINIMUM_SQL_SERVER_OPENJSON_COMPATIBILITY_LEVEL}.
-	 */
-	private void logSqlServerJsonFallbackWarning() {
-		warnOnce(
-				mySqlServerJsonFallbackLogged,
-				"This SQL Server database is running at a compatibility level below {}, so the OPENJSON function is not available. "
-						+ "Large resource ID lists will continue to be sent as one bind parameter per ID, which can exceed the number of "
-						+ "bind parameters the database accepts in a single statement. Raise the database compatibility level to {} "
-						+ "(SQL Server 2016) or higher to avoid this. This message is only logged once.",
-			MINIMUM_SQL_SERVER_OPENJSON_COMPATIBILITY_LEVEL,
-			MINIMUM_SQL_SERVER_OPENJSON_COMPATIBILITY_LEVEL);
 	}
 
 	/**
@@ -196,37 +190,17 @@ public class HibernatePropertiesProvider {
 
 		try (Connection connection = getDataSource().getConnection();
 				Statement statement = connection.createStatement();
-				ResultSet resultSet = statement.executeQuery("SELECT compatibility_level FROM sys.databases WHERE name = DB_NAME()")) {
+				ResultSet resultSet = statement.executeQuery(
+						"SELECT compatibility_level FROM sys.databases WHERE name = DB_NAME()")) {
 			if (resultSet.next()) {
 				int compatibilityLevel = resultSet.getInt(1);
 				ourLog.debug("SQL Server database compatibility level is {}", compatibilityLevel);
 				return compatibilityLevel >= MINIMUM_SQL_SERVER_OPENJSON_COMPATIBILITY_LEVEL;
 			}
-			logSqlServerJsonProbeFailure(null);
+			ourLog.debug("SQL Server compatibility level probe returned no row for this database");
 		} catch (Exception e) {
-			logSqlServerJsonProbeFailure(e);
+			ourLog.debug("Failed to probe the compatibility level of this SQL Server database", e);
 		}
 		return null;
-	}
-
-	private void logSqlServerJsonProbeFailure(@Nullable Exception theException) {
-		warnOnce(
-				mySqlServerJsonProbeFailureLogged,
-				"Failed to determine the compatibility level of this SQL Server database, so features which need a "
-						+ "compatibility level of {} (SQL Server 2016) or higher, such as the OPENJSON function, will not be used. "
-						+ "This message is only logged once.",
-			MINIMUM_SQL_SERVER_OPENJSON_COMPATIBILITY_LEVEL,
-				theException);
-	}
-
-	/**
-	 * Logs a WARN message the first time this is called for the given gate, and does nothing on any
-	 * later call for that same gate - so that a condition which can recur on every search, such as a
-	 * SQL Server compatibility level being too low, is only ever reported once per provider.
-	 */
-	private void warnOnce(AtomicBoolean theGate, String theMessage, Object... theArguments) {
-		if (theGate.compareAndSet(false, true)) {
-			ourLog.warn(theMessage, theArguments);
-		}
 	}
 }
