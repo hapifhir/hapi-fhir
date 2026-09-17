@@ -133,7 +133,8 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 			String theDisplay,
 			String theValueSetUrl) {
 
-		return invokeRemoteValidateCode(theCodeSystem, theCode, theDisplay, theValueSetUrl, null);
+		CodeValidationResult remoteResult = ieturn invokeRemoteValidateCode(theCodeSystem, theCode, theDisplay, theValueSetUrl, null);
+		return applyDisplayMismatchPolicy(remoteResult, theDisplay, theValidationSupportContext);
 	}
 
 	@Override
@@ -1093,5 +1094,29 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 	public void addClientInterceptor(@Nonnull Object theClientInterceptor) {
 		Validate.notNull(theClientInterceptor, "theClientInterceptor must not be null");
 		myClientInterceptors.add(theClientInterceptor);
+	}
+
+
+	/**
+	 * Fix #7811: Apply the configured display_mismatch_policy to results
+	 * from remote terminology servers, which otherwise pass severity verbatim.
+	 */
+	private CodeValidationResult applyDisplayMismatchPolicy(
+			CodeValidationResult theResult,
+			String theDisplay,
+			ValidationSupportContext theCtx) {
+		if (theResult == null) return null;
+		if (!theResult.isOk()) return theResult;
+		if (theDisplay == null || theDisplay.isBlank()) return theResult;
+		String resultDisplay = theResult.getDisplay();
+		if (resultDisplay == null || resultDisplay.equalsIgnoreCase(theDisplay)) return theResult;
+		// Display mismatch detected - apply configured policy
+		IssueSeverity severity = myIssueSeverityForCodeDisplayMismatch;
+		if (severity == IssueSeverity.INFORMATION || severity == IssueSeverity.WARNING) {
+			theResult.setSeverityCode(severity.toCode());
+			theResult.setMessage(
+				"Display Name for " + theDisplay + " does not match expected " + resultDisplay);
+		}
+		return theResult;
 	}
 }
