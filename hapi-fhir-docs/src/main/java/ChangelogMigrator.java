@@ -19,6 +19,7 @@
  */
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.hapi.fhir.docs.ChangelogConstants;
 import org.apache.commons.io.FileUtils;
 import org.jdom2.Content;
 import org.jdom2.Element;
@@ -92,17 +93,17 @@ public class ChangelogMigrator {
 
 				String type = nextAction.getAttribute("type").getValue();
 				switch (type) {
-					case "change":
-						itemMap.put("type", "change");
+					case ChangelogConstants.TYPE_CHANGE:
+						itemMap.put("type", ChangelogConstants.TYPE_CHANGE);
 						break;
-					case "fix":
-						itemMap.put("type", "fix");
+					case ChangelogConstants.TYPE_FIX:
+						itemMap.put("type", ChangelogConstants.TYPE_FIX);
 						break;
-					case "remove":
-						itemMap.put("type", "remove");
+					case ChangelogConstants.TYPE_REMOVE:
+						itemMap.put("type", ChangelogConstants.TYPE_REMOVE);
 						break;
-					case "add":
-						itemMap.put("type", "add");
+					case ChangelogConstants.TYPE_ADD:
+						itemMap.put("type", ChangelogConstants.TYPE_ADD);
 						break;
 					default:
 						throw new Error(Msg.code(630) + "Unknown type: " + type);
