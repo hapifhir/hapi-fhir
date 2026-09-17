@@ -20,6 +20,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class InMemoryTerminologyServerValidationSupportTest extends BaseValidationTestWithInlineMocks {
+	private static final String VERSIONED_CS_URL = "http://example.com/fhir/CodeSystem/versioned";
+
 	private InMemoryTerminologyServerValidationSupport mySvc;
 	private final FhirContext myCtx = FhirContext.forR4();
 	private DefaultProfileValidationSupport myDefaultSupport;
@@ -449,6 +452,64 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		assertNull(outcome.getCodeSystemVersion());
 	}
 
+	/**
+	 * A caller naming the version of a code system which is installed only once must not cost a lookup for
+	 * the versioned canonical: fetchCodeSystem takes only a canonical and implementations differ on whether
+	 * they resolve a version packed into one, so for a remote terminology service that lookup is a network
+	 * round trip which matches nothing.
+	 */
+	@Test
+	void validateCode_codeSystemVersionMatchesTheUnversionedCanonical_doesNotFetchTheVersionedCanonical() {
+		// Setup
+		FetchRecordingValidationSupport recorder = addSingleVersionCodeSystem("1.0.0");
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(
+			valCtx, new ConceptValidationOptions(), VERSIONED_CS_URL, "1.0.0", "code0", null, null);
+
+		// Verify
+		assertNotNull(outcome);
+		assertTrue(outcome.isOk());
+		assertThat(recorder.myFetchedCodeSystemUrls).containsOnly(VERSIONED_CS_URL);
+	}
+
+	/**
+	 * The other direction, so that the test above is not passed by code which ignores the version: when the
+	 * unversioned canonical resolves to a different version, the versioned one still has to be asked for.
+	 */
+	@Test
+	void validateCode_codeSystemVersionDiffersFromTheUnversionedCanonical_fetchesTheVersionedCanonical() {
+		// Setup
+		FetchRecordingValidationSupport recorder = addSingleVersionCodeSystem("1.0.0");
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		mySvc.validateCode(valCtx, new ConceptValidationOptions(), VERSIONED_CS_URL, "2.0.0", "code0", null, null);
+
+		// Verify
+		assertThat(recorder.myFetchedCodeSystemUrls)
+			.containsOnly(VERSIONED_CS_URL, VERSIONED_CS_URL + "|2.0.0");
+	}
+
+	/**
+	 * Adds a CodeSystem holding a single code at the given version, and rebuilds {@link #myChain} so that every
+	 * CodeSystem fetch through it is recorded.
+	 */
+	private FetchRecordingValidationSupport addSingleVersionCodeSystem(String theVersion) {
+		CodeSystem cs = new CodeSystem();
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setUrl(VERSIONED_CS_URL);
+		cs.setVersion(theVersion);
+		cs.addConcept().setCode("code0").setDisplay("Code 0");
+		myPrePopulated.addCodeSystem(cs);
+
+		FetchRecordingValidationSupport recorder = new FetchRecordingValidationSupport(myCtx, myPrePopulated);
+		myChain = new ValidationSupportChain(mySvc, recorder, myDefaultSupport, myCommonCodeSystemsTermSvc);
+		return recorder;
+	}
+
 	@Test
 	public void testExpandValueSet_VsUsesVersionedSystem_CsIsFragmentWithoutCode() {
 		CodeSystem cs = new CodeSystem();
@@ -636,6 +697,23 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 			theValueSet);
 
 		assertTrue(codeValidationResult.isOk());
+	}
+
+	/**
+	 * Records the canonical of every CodeSystem fetch which reaches it.
+	 */
+	private static class FetchRecordingValidationSupport extends BaseValidationSupportWrapper {
+		private final List<String> myFetchedCodeSystemUrls = new ArrayList<>();
+
+		FetchRecordingValidationSupport(FhirContext theFhirContext, IValidationSupport theWrap) {
+			super(theFhirContext, theWrap);
+		}
+
+		@Override
+		public IBaseResource fetchCodeSystem(String theSystem) {
+			myFetchedCodeSystemUrls.add(theSystem);
+			return super.fetchCodeSystem(theSystem);
+		}
 	}
 
 	private static class PrePopulatedValidationSupportDstu2 extends PrePopulatedValidationSupport {
