@@ -185,6 +185,7 @@ import static ca.uhn.fhir.rest.param.ParamPrefixEnum.EQUAL;
 import static ca.uhn.fhir.rest.param.ParameterUtil.coerceToDateParam;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.ArrayUtils.EMPTY_OBJECT_ARRAY;
 import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -1057,9 +1058,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					false);
 
 			GeneratedSql allTargetsSql = fetchPidsSqlBuilder.generate(
-					theSearchQueryProperties.getOffset(), mySearchProperties.getMaxResultsRequested());
+					theSearchQueryProperties.getOffset(), theSearchQueryProperties.getMaxResultsRequested());
 			String sql = allTargetsSql.getSql();
-			Object[] args = allTargetsSql.getBindVariables().toArray(new Object[0]);
+			Object[] args = allTargetsSql.getBindVariables().toArray(EMPTY_OBJECT_ARRAY);
 
 			List<JpaPid> output =
 					jdbcTemplate.query(sql, new JpaPidRowMapper(myPartitionSettings.isPartitioningEnabled()), args);

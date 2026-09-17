@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -120,7 +121,7 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 			createPatients(total);
 			Set<String> ids = new HashSet<>();
 
-			String url = myServerBase + "/Patient/$everything?_format=json";
+			String url = myServerBase + "/Patient/$everything?_format=json&_sort=_id";
 			if (theProvideCountBool) {
 				url += "&_count=" + BasePagingProvider.DEFAULT_MAX_PAGE_SIZE;
 			}
@@ -140,8 +141,10 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 
 			// all future pages
 			do {
-
 				myCaptureQueriesListener.clear();
+
+				ourLog.info("About to fetch URL: {}", nextUrl);
+
 				bundle = fetchBundle(nextUrl);
 				myCaptureQueriesListener.logSelectQueries();
 				assertNotNull(bundle);
@@ -179,8 +182,9 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 	private void createPatients(int theCount) {
 		for (int i = 0; i < theCount; i++) {
 			Patient patient = new Patient();
+			patient.setId("Patient/P" + leftPad(Integer.toString(i), 4, '0'));
 			patient.addName().setFamily("lastn").addGiven("name");
-			myPatientDao.create(patient, new SystemRequestDetails()).getId().toUnqualifiedVersionless();
+			myPatientDao.update(patient, newSrd()).getId().toUnqualifiedVersionless();
 		}
 	}
 
