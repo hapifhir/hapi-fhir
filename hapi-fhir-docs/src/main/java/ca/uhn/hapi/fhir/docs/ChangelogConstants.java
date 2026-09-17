@@ -23,5 +23,5 @@ public class ChangelogConstants {
 	/**
 	 * Non-instantiable
 	 */
-	private ChangelogConstants(){}
+	private ChangelogConstants() {}
 }
