@@ -42,7 +42,7 @@ public class HibernatePropertiesProvider {
 
 	/**
 	 * The lowest SQL Server database compatibility level which supports the OPENJSON
-	 * table valued function.
+	 * table valued function. Equates to SQL Server 2016+
 	 */
 	public static final int MINIMUM_SQL_SERVER_OPENJSON_COMPATIBILITY_LEVEL = 130;
 
@@ -123,20 +123,10 @@ public class HibernatePropertiesProvider {
 	}
 
 	/**
-	 * Returns <code>true</code> when the SQL Server database behind this provider supports the
-	 * <code>OPENJSON</code> table-valued function, which requires a database compatibility level of
-	 * {@value #MINIMUM_SQL_SERVER_OPENJSON_COMPATIBILITY_LEVEL} (SQL Server 2016) or higher.
-	 * <p>
-	 * The database is probed the first time this method is called and the answer is cached for the
-	 * lifetime of this provider, so that the probe never runs at startup. Once the answer is cached - whether
-	 * that is "supported", or "not supported" because the compatibility level is too low, or because the
-	 * probe could not get a definitive answer after repeated attempts - a WARN is logged exactly once per
-	 * provider if the outcome is "not supported". Intermediate probe failures, before the cache settles,
-	 * are only logged at debug. The probe runs until it gets a definitive answer - at most
-	 * {@value #MAX_SQL_SERVER_JSON_PROBE_FAILURES} times if it keeps failing - after which the failure
-	 * itself is cached as "not supported", so a database whose compatibility level can never be determined
-	 * costs a bounded number of extra connection attempts rather than one per over-threshold search forever.
-	 * </p>
+	 * Returns true when the SQL Server database behind this provider supports the
+	 * OPENJSON table-valued function, which requires a database compatibility level of
+	 * 130 (SQL Server 2016) or higher.
+	 * Returns false if the DB probe failed, or if OPENJSON is not supported.
 	 */
 	private boolean isSqlServerJsonSupported() {
 		Boolean cached = mySqlServerJsonSupported;
@@ -149,9 +139,9 @@ public class HibernatePropertiesProvider {
 			if (!probeResult) {
 				ourLog.warn(
 						"This SQL Server database is running at a compatibility level below {}, so the OPENJSON function is not available. "
-								+ "Large resource ID lists will continue to be sent as one bind parameter per ID, which can exceed the number of "
-								+ "bind parameters the database accepts in a single statement. Raise the database compatibility level to {} "
-								+ "(SQL Server 2016) or higher to avoid this.",
+								+ "Searches or patient compartment authorization parameters containing large (thousands) of resource IDs "
+								+ "will continue to be sent as one bind parameter per ID, which can exceed DB parameter limits. "
+								+ "Raise the database compatibility level to {} if your perform such searches.",
 						MINIMUM_SQL_SERVER_OPENJSON_COMPATIBILITY_LEVEL,
 						MINIMUM_SQL_SERVER_OPENJSON_COMPATIBILITY_LEVEL);
 			}
@@ -159,17 +149,13 @@ public class HibernatePropertiesProvider {
 			return probeResult;
 		}
 
-		// The probe did not produce a definitive answer. Two threads racing here can each increment this
-		// counter and both re-probe on their next call - benign, since the probe is read-only and
-		// idempotent. Once enough consecutive failures have piled up, give up and cache "false" so a
-		// permanently unreadable sys.databases table does not cost one connection attempt per search.
+		// The probe failed. Two threads could probe at the same time, but the operation is idempotent.
+		// Retry 3 times before giving up and defaulting to unsupported.
 		if (mySqlServerJsonProbeFailureCount.incrementAndGet() >= MAX_SQL_SERVER_JSON_PROBE_FAILURES) {
 			ourLog.warn(
-					"Could not determine the compatibility level of this SQL Server database after {} attempts, so falling back "
-							+ "to sending large resource ID lists as one bind parameter per ID, which can exceed the number of bind "
-							+ "parameters the database accepts in a single statement. Raise the database compatibility level to "
-							+ MINIMUM_SQL_SERVER_OPENJSON_COMPATIBILITY_LEVEL
-							+ " (SQL Server 2016) or higher to enable the OPENJSON function.",
+					"Could not determine the compatibility level of this SQL Server database after {} attempts."
+							+ "Searches or patient compartment authorization parameters containing large (thousands) of resource IDs "
+							+ "will continue to be sent as one bind parameter per ID, which can exceed DB parameter limits. ",
 					MAX_SQL_SERVER_JSON_PROBE_FAILURES);
 			mySqlServerJsonSupported = Boolean.FALSE;
 		}
@@ -177,7 +163,7 @@ public class HibernatePropertiesProvider {
 	}
 
 	/**
-	 * Probes the database for a definitive answer to whether it supports the <code>OPENJSON</code>
+	 * Probes a SQL Server database to determine if it supports the OPENJSON
 	 * table-valued function, or <code>null</code> if the probe failed to produce one - either because the
 	 * query raised an exception, or because it returned no row. A definitive <code>false</code> - this is
 	 * not a SQL Server dialect at all - is not a failure, and is returned directly.
