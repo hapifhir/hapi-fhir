@@ -107,15 +107,38 @@ public class WorkerContextValidationSupportAdapterTest extends BaseValidationTes
 	}
 
 	@Test
-	public void validateCode_versionInUse_passesTheSystemWithoutTheVersion() {
+	public void validateCode_systemInferredFromVersionedInclude_doesNotAppendTheVersionTwice() {
+		// setup
+		setupValidation();
+
+		// The system taken from an include that names a version already has the version on it
+		ValueSet valueSet = new ValueSet();
+		valueSet.getCompose()
+			.addInclude()
+			.setSystem("http://codesystems.com/system")
+			.setVersion("1.0.0")
+			.addConcept()
+			.setCode("code0");
+
+		CodeValidationResult valueSetResult = new CodeValidationResult().setCode("code0").setCodeSystemVersion("1.0.0");
+		when(myValidationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenReturn(valueSetResult);
+
+		// execute
+		myWorkerContextWrapper.validateCode(new ValidationOptions(), "code0", valueSet);
+
+		// verify
+		verify(myValidationSupport, times(1)).validateCode(any(), any(), eq("http://codesystems.com/system|1.0.0"), eq("code0"), any(), any());
+	}
+
+	@Test
+	public void validateCode_codingNamesACodeSystemVersion_checksThatVersion() {
 		// setup
 		setupValidation();
 
 		ValueSet valueSet = new ValueSet();
 		valueSet.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
 
-		when(myValidationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any()))
-			.thenReturn(new CodeValidationResult().setCode("code0").setCodeSystemVersion("1.0.0"));
+		when(myValidationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenReturn(new CodeValidationResult().setCode("code0"));
 
 		Coding coding = new Coding("http://codesystems.com/system", "code0", "");
 		coding.setVersion("1.0.0");
@@ -124,87 +147,54 @@ public class WorkerContextValidationSupportAdapterTest extends BaseValidationTes
 		myWorkerContextWrapper.validateCode(new ValidationOptions(), coding, valueSet);
 
 		// verify
-		// IValidationSupport takes no version. Implementations that use the system as a plain URL, such as
-		// RemoteTerminologyServiceValidationSupport, look up the wrong thing when a version is appended to it.
-		verify(myValidationSupport, times(1)).validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), any());
+		verify(myValidationSupport, times(1)).validateCode(any(), any(), eq("http://codesystems.com/system|1.0.0"), eq("code0"), any(), any());
 	}
 
 	@Test
-	public void validateCode_codeSystemCheckAnsweredForTheVersionInUse_addsItsIssues() {
+	public void validateCode_callerNamesNoVersion_checksTheVersionTheValueSetAnsweredWith() {
 		// setup
 		setupValidation();
 
 		ValueSet valueSet = new ValueSet();
 		valueSet.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
 
-		when(myValidationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any()))
-			.thenReturn(new CodeValidationResult().setCode("code0").setCodeSystemVersion("1.0.0"));
-
-		String issueMessage = "Unknown code in the code system";
-		when(myValidationSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), eq(null)))
-			.thenReturn(new CodeValidationResult()
-				.setCodeSystemVersion("1.0.0")
-				.addIssue(new CodeValidationIssue(issueMessage, IssueSeverity.ERROR, CodeValidationIssueCode.NOT_FOUND, CodeValidationIssueCoding.NOT_FOUND)));
+		CodeValidationResult valueSetResult = new CodeValidationResult().setCode("code0").setCodeSystemVersion("2.0.0");
+		when(myValidationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenReturn(valueSetResult);
 
 		// execute
-		ValidationResult result =
-			myWorkerContextWrapper.validateCode(new ValidationOptions(), new Coding("http://codesystems.com/system", "code0", ""), valueSet);
+		myWorkerContextWrapper.validateCode(new ValidationOptions(), new Coding("http://codesystems.com/system", "code0", ""), valueSet);
 
 		// verify
-		assertThat(result.getIssues()).hasSize(1);
-		assertThat(result.getIssues().get(0).getDiagnostics()).isEqualTo(issueMessage);
+		verify(myValidationSupport, times(1)).validateCode(any(), any(), eq("http://codesystems.com/system|2.0.0"), eq("code0"), any(), any());
 	}
 
 	@Test
-	public void validateCode_codeSystemCheckAnsweredForAnotherVersion_doesNotAddItsIssues() {
+	public void validateCode_systemAndVersionGivenSeparately_checksThatVersion() {
 		// setup
 		setupValidation();
 
 		ValueSet valueSet = new ValueSet();
 		valueSet.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
 
-		// The value set accepted the code, using version 1.0.0 of the code system
-		when(myValidationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any()))
-			.thenReturn(new CodeValidationResult().setCode("code0").setCodeSystemVersion("1.0.0"));
-
-		// The code system check answered from whichever version it treats as current, which is another one
-		when(myValidationSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), eq(null)))
-			.thenReturn(new CodeValidationResult()
-				.setCodeSystemVersion("2.0.0")
-				.addIssue(new CodeValidationIssue("Unknown code", IssueSeverity.ERROR, CodeValidationIssueCode.NOT_FOUND, CodeValidationIssueCoding.NOT_FOUND)));
+		when(myValidationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenReturn(new CodeValidationResult().setCode("code0"));
 
 		// execute
-		ValidationResult result =
-			myWorkerContextWrapper.validateCode(new ValidationOptions(), new Coding("http://codesystems.com/system", "code0", ""), valueSet);
+		myWorkerContextWrapper.validateCode(new ValidationOptions(), "http://codesystems.com/system", "1.0.0", "code0", "", valueSet);
 
 		// verify
-		assertThat(result.getIssues()).isEmpty();
+		verify(myValidationSupport, times(1)).validateCode(any(), any(), eq("http://codesystems.com/system|1.0.0"), eq("code0"), any(), any());
 	}
 
 	@Test
-	public void validateCode_noVersionInUse_addsCodeSystemIssues() {
+	public void validateCode_noValueSetAndVersionGivenSeparately_checksThatVersion() {
 		// setup
 		setupValidation();
 
-		ValueSet valueSet = new ValueSet();
-		valueSet.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
-
-		// Neither the caller nor the value set named a version, so there is nothing to reconcile
-		when(myValidationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any()))
-			.thenReturn(new CodeValidationResult().setCode("code0"));
-
-		String issueMessage = "Unknown code";
-		when(myValidationSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), eq(null)))
-			.thenReturn(new CodeValidationResult()
-				.addIssue(new CodeValidationIssue(issueMessage, IssueSeverity.ERROR, CodeValidationIssueCode.NOT_FOUND, CodeValidationIssueCoding.NOT_FOUND)));
-
 		// execute
-		ValidationResult result =
-			myWorkerContextWrapper.validateCode(new ValidationOptions(), new Coding("http://codesystems.com/system", "code0", ""), valueSet);
+		myWorkerContextWrapper.validateCode(new ValidationOptions(), "http://codesystems.com/system", "1.0.0", "code0", "");
 
 		// verify
-		assertThat(result.getIssues()).hasSize(1);
-		assertThat(result.getIssues().get(0).getDiagnostics()).isEqualTo(issueMessage);
+		verify(myValidationSupport, times(1)).validateCode(any(), any(), eq("http://codesystems.com/system|1.0.0"), eq("code0"), any(), any());
 	}
 
 	@Test
