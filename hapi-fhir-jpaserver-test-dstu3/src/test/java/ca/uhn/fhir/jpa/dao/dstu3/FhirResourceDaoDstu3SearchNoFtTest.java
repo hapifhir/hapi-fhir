@@ -333,7 +333,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		List<String> actual = toUnqualifiedVersionlessIdValues(myDiagnosticReportDao.search(map));
 		assertThat(actual).containsExactlyInAnyOrder("DiagnosticReport/DR");
 
-		// http://hapi.fhir.org/baseR4/DiagnosticReport?subject._has:Group:member:_id=52152
+		// https://hapi.fhir.org/baseR4/DiagnosticReport?subject._has:Group:member:_id=52152
 	}
 
 	@SuppressWarnings("unused")
