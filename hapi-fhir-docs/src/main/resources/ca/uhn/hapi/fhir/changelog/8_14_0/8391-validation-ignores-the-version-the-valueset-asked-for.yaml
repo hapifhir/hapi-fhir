@@ -4,5 +4,7 @@ issue: 8391
 jira: SMILE-12842
 title: "When a server held two versions of the same `CodeSystem` or `ValueSet`, such as after installing
   two versions of an implementation guide, `$validate` validated against whichever version was current
-  instead of the version specified in the canonical URL that referenced it, so codes that were valid in
-  that version were reported as invalid. This has been fixed."
+  instead of the version specified in the canonical URL that referenced it, whether that was a profile
+  named in `meta.profile` as `url|version`, an element binding, or a `compose.include` entry. Codes valid
+  in the specified version were reported as invalid, and codes valid only in the other version were
+  accepted. Which version won depended on the order the guides were installed in. This has been fixed."
