@@ -29,6 +29,7 @@ import java.util.List;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_LOOKUP;
 import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.CODE;
 import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.CODE_SYSTEM;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -109,5 +110,31 @@ public class RemoteTerminologyLookupCodeWithResponseFileR4Test {
 		String expected = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(returnParams);
 
 		assertEquals(expected, actual);
+	}
+
+	@Test
+	void lookupCode_withSimplifiedSnowstormOutput_convertsCorrectly() {
+		String outputFile = "/terminology/CodeSystem-lookup-output-simplified-snowstorm.json";
+		myCodeSystemProvider.addTerminologyResponse(OPERATION_LOOKUP, CODE_SYSTEM, CODE, ourCtx, outputFile);
+
+		LookupCodeRequest request = new LookupCodeRequest(CODE_SYSTEM, CODE, null, null);
+
+		// test
+		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, request);
+		assertNotNull(outcome);
+		assertThat(outcome.getCodeSystemDisplayName()).isEqualTo("International Edition");
+		assertThat(outcome.getProperties()).anySatisfy(property -> {
+			assertThat(property.getPropertyName()).isEqualTo("effectiveTime");
+			assertThat(property.getType()).isEqualTo("string");
+			assertThat(((IValidationSupport.StringConceptProperty)property).getValue()).isEqualTo("20231001");
+		}).anySatisfy(property -> {
+			assertThat(property.getPropertyName()).isEqualTo("moduleId");
+			assertThat(property.getType()).isEqualTo("code");
+			assertThat(((IValidationSupport.CodeConceptProperty)property).getValue()).isEqualTo("900000000000207008");
+		}).anySatisfy(property -> {
+			assertThat(property.getPropertyName()).isEqualTo("parent");
+			assertThat(property.getType()).isEqualTo("code");
+			assertThat(((IValidationSupport.CodeConceptProperty)property).getValue()).isEqualTo("12345");
+		}).hasSize(3);
 	}
 }
