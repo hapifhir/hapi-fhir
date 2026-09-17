@@ -16,7 +16,7 @@ public class UhnFhirTestApp {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UhnFhirTestApp.class);
 
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) {
 
 		org.h2.Driver.load();
 
