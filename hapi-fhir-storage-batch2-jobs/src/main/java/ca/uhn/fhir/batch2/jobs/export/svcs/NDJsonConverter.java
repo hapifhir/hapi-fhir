@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportResourceList;
 import ca.uhn.fhir.rest.api.server.bulk.ConvertedFile;
 import ca.uhn.fhir.rest.api.server.bulk.ConvertedFiles;
+import ca.uhn.fhir.rest.api.server.bulk.IResourceConverter;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -71,7 +72,9 @@ public class NDJsonConverter implements IResourceConverter {
 				} else {
 					// Otherwise, flush the contents now before adding the next file
 					List<String> stringifiedResources = resourceTypeToStringifiedResources.get(type);
-					ConvertedFile convertedFile = writeStringifiedResources(type, stringifiedResources);
+					ConvertedFile convertedFile = writeStringifiedResources(type, stringifiedResources, theJobParameters);
+
+					convertedResources.addFile(convertedFile);
 
 					resourceTypeToStringifiedResources.removeAll(type);
 					newSize = jsonResource.length();
@@ -84,17 +87,20 @@ public class NDJsonConverter implements IResourceConverter {
 
 		for (String nextResourceType : resourceTypeToStringifiedResources.keySet()) {
 			List<String> stringifiedResources = resourceTypeToStringifiedResources.get(nextResourceType);
-			ConvertedFile file = writeStringifiedResources(nextResourceType, stringifiedResources);
+			ConvertedFile file = writeStringifiedResources(nextResourceType, stringifiedResources, theJobParameters);
 
+			convertedResources.addFile(file);
 		}
 
 		return convertedResources;
 	}
 
-	private ConvertedFile writeStringifiedResources(String theResourceType, List<String> theStringifiedResources) {
+	private ConvertedFile writeStringifiedResources(String theResourceType,
+													List<String> theStringifiedResources,
+													BulkExportJobParameters theJobParameters) {
 		ConvertedFile file = new ConvertedFile();
 		file.setResourceType(theResourceType);
-		file.setMimeType(Constants.CT_APP_NDJSON);
+		file.setMimeType(theJobParameters.getOutputFormat());
 
 		try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
 			try (OutputStreamWriter writer = getStreamWriter(os)) {

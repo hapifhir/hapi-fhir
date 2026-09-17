@@ -25,7 +25,6 @@ public class ConvertedFile {
 
 	/**
 	 * Sets the mime type of the file to be written.
-	 *
 	 */
 	public void setMimeType(String theMimeType) {
 		myMimeType = theMimeType;
@@ -37,7 +36,8 @@ public class ConvertedFile {
 
 	/**
 	 * The resource type of the resources contained in this file.
-	 * Can be null.
+	 * Each file should only contain *one* type of resource,
+	 * so this entire file should consist of only these resources.
 	 */
 	public void setResourceType(String theResourceType) {
 		myResourceType = theResourceType;

@@ -1273,18 +1273,13 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Storage hook:</b>
-	 * Invoked during BulkExport to convert a list of
-	 * resources into a mimetype and output byte stream.
-	 * If null is returned (or no hook registered) NDJSON conversion
-	 * will be used by default.
+	 * Invoked during BulkExport.
+	 * Should return an implementation of the conversion interface
+	 * for the provided BulkExport parameters.
 	 * <p>
 	 * Hooks may accept the following parameters:
 	 * </p>
 	 * <ul>
-	 * <li>
-	 *     ca.uhn.fhir.rest.api.server.bulk.BulkExportResourceList
-	 *     		an object containing the list of resources to convert
-	 * </li>
 	 * <li>
 	 *     ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters
 	 *     		the parameters used for the bulk export. The outputFormat is a
@@ -1292,12 +1287,12 @@ public enum Pointcut implements IPointcut {
 	 * </li>
 	 * </ul>
 	 * <p>
-	 * Hooks should return <code>ca.uhn.fhir.rest.api.server.bulk.ConvertedFiles</code>
+	 * Hooks should return an <code>ca.uhn.fhir.rest.api.server.bulk.IResourceConverter</code>
+	 * implementation.
 	 * </p>
 	 */
 	STORAGE_BULK_EXPORT_RESOURCE_CONVERT(
-		"ca.uhn.fhir.rest.api.server.bulk.ConvertedFiles",
-		"ca.uhn.fhir.rest.api.server.bulk.BulkExportResourceList",
+		"ca.uhn.fhir.rest.api.server.bulk.IResourceConverter",
 		"ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters"
 	),
 

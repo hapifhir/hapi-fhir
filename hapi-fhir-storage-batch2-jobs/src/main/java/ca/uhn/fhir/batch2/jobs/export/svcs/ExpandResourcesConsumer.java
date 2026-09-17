@@ -2,6 +2,7 @@ package ca.uhn.fhir.batch2.jobs.export.svcs;
 
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.jobs.export.BulkDataExportUtil;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -17,6 +18,7 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportResourceList;
 import ca.uhn.fhir.rest.api.server.bulk.ConvertedFile;
 import ca.uhn.fhir.rest.api.server.bulk.ConvertedFiles;
+import ca.uhn.fhir.rest.api.server.bulk.IResourceConverter;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import org.apache.commons.lang3.ObjectUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -27,6 +29,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -159,33 +162,27 @@ public class ExpandResourcesConsumer implements Consumer<List<IBaseResource>> {
 		BulkExportResourceList resourceList = new BulkExportResourceList();
 		resourceList.setResources(theResources);
 
-		ConvertedFiles files = null;
-		if (myInterceptorService.hasHooks(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_CONVERT)) {
-			/*
-			 * if there's a pointcut, we'll use this for the conversion first.
-			 * This allows consumers to override even our NDJson Conversion
-			 * (default).
-			 */
-			IResourceConverter converter = new PointcutProvidedConverter(myInterceptorService);
-			files = converter.consume(resourceList, myStepExecutionDetails.getParameters());
+		if (theResources.isEmpty()) {
+			// the hooks have filtered out everything for some reason
+			// there's nothing to convert and no resources to write
+			// so just return
+			return;
 		}
 
-		if (files == null && isNdJson()) {
-			/*
-			 * no converted files created but format is NDJson.
-			 * Either:
-			 * * no pointcut exists (at all)
-			 * * no pointcut exists for this particular mime type (ndjson)
-			 *
-			 * Fall back to our default
-			 */
-			files = new NDJsonConverter(myFhirContext, myStorageSettings)
-				.consume(resourceList, myStepExecutionDetails.getParameters());
+		IResourceConverter converter = getConverter();
+
+		if (converter == null) {
+			// todo - throw - we shouldn't see this because we validate first
+			throw new JobExecutionFailedException(
+				"No conversion utility for mimetype " + myStepExecutionDetails.getParameters().getOutputFormat()
+			);
 		}
 
-		if (files == null) {
-			// TODO error (we shouldn't get here)
-			throw new RuntimeException(
+		ConvertedFiles files = converter.consume(resourceList, myStepExecutionDetails.getParameters());
+
+		if (!isValid(files)) {
+			// TODO error - conversion utility failed (but is registered)
+			throw new JobExecutionFailedException(
 				String.format("Output format %s not supported",
 					myStepExecutionDetails.getParameters().getOutputFormat())
 			);
@@ -195,14 +192,64 @@ public class ExpandResourcesConsumer implements Consumer<List<IBaseResource>> {
 		// (note that the IResourceConverter could produce
 		// potentially many files for 1 set of resources)
 		for (ConvertedFile file : files.getFiles()) {
-			myBinaryCreator.accept(files);
+			myBinaryCreator.accept(file);
 		}
 	}
 
+	private boolean isValid(ConvertedFiles theConvertedFiles) {
+		if (theConvertedFiles == null || theConvertedFiles.getFiles().isEmpty()) {
+			ourLog.error("No files returned from converter");
+			return false;
+		}
+
+		boolean isValid = true;
+		for (ConvertedFile file : theConvertedFiles.getFiles()) {
+			if (isBlank(file.getResourceType())) {
+				ourLog.error("No ResourceType defined for conversion output");
+				isValid = false;
+			}
+			if (isBlank(file.getMimeType())) {
+				ourLog.error("No mimetype defined for conversion output");
+				isValid = false;
+			}
+			if (file.getBytes() == null) {
+				ourLog.error("No data in converted output");
+				isValid = false;
+			}
+
+			if (!isValid) {
+				break;
+			}
+		}
+
+		return isValid;
+	}
+
+	private IResourceConverter getConverter() {
+		IResourceConverter converter = null;
+		if (myInterceptorService.hasHooks(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_CONVERT)) {
+			/*
+			 * if there's a pointcut for these params, we'll use this for the conversion first.
+			 * This allows consumers to override even our NDJson Conversion.
+			 */
+			HookParams params = new HookParams();
+			params.add(BulkExportJobParameters.class, myStepExecutionDetails.getParameters());
+			converter = (IResourceConverter) myInterceptorService.callHooksAndReturnObject(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_CONVERT, params);
+		}
+
+		if (converter == null && isNdJson()) {
+			// no registered pointcut or null returned but is ndjson, so we'll use the default
+			converter = new NDJsonConverter(myFhirContext, myStorageSettings);
+		}
+
+		return converter;
+	}
+
 	private boolean isNdJson() {
-		return ObjectUtils.firstNonNull(myStepExecutionDetails.getParameters()
-				.getOutputFormat(), Constants.CT_APP_NDJSON)
-			.equals(Constants.CT_APP_NDJSON);
+		String providedFormat = ObjectUtils.firstNonNull(myStepExecutionDetails.getParameters()
+				.getOutputFormat(), Constants.CT_FHIR_NDJSON);
+
+		return BulkDataExportUtil.isNdJson(providedFormat);
 	}
 
 	private void applyPostFetchFiltering(

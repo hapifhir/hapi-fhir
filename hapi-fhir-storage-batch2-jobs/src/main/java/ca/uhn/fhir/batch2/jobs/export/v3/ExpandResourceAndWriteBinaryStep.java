@@ -439,13 +439,6 @@ public class ExpandResourceAndWriteBinaryStep
 		return theDao.search(spMap, new SystemRequestDetails().setRequestPartitionId(theRequestPartitionId));
 	}
 
-	/**
-	 * Returns an output stream writer
-	 * (exposed for testing)
-	 */
-	protected OutputStreamWriter getStreamWriter(ByteArrayOutputStream theOutputStream) {
-		return new OutputStreamWriter(theOutputStream, Constants.CHARSET_UTF8);
-	}
 
 	@VisibleForTesting
 	public void setIdHelperServiceForUnitTest(IIdHelperService<?> theIdHelperService) {
@@ -459,6 +452,9 @@ public class ExpandResourceAndWriteBinaryStep
 		return false;
 	}
 
+	/**
+	 * Overridden in V2 step; unused here
+	 */
 	protected RequestDetails newRequestDetails(
 			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails,
 			BulkExportJobParameters jobParameters) {

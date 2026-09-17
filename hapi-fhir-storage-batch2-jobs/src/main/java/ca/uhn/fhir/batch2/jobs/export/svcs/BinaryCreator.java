@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.util.RandomTextUtils;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.api.server.bulk.ConvertedFile;
@@ -58,7 +59,7 @@ public class BinaryCreator implements Consumer<ConvertedFile> {
 	}
 
 	@Override
-	public void accept(ConvertedFile theExpandedResourcesList) throws JobExecutionFailedException {
+	public void accept(ConvertedFile theConvertedFile) throws JobExecutionFailedException {
 //			int batchSize = theExpandedResourcesList.getStringifiedResources().size();
 //			ourLog.info("Writing {} resources to binary file", batchSize);
 
@@ -68,33 +69,35 @@ public class BinaryCreator implements Consumer<ConvertedFile> {
 
 		IBaseBinary binary = BinaryUtil.newBinary(myFhirContext);
 
-		addMetadataExtensionsToBinary(myStepExecutionDetails, theExpandedResourcesList, binary);
+		addMetadataExtensionsToBinary(myStepExecutionDetails, theConvertedFile, binary);
+		binary.setContent(theConvertedFile.getBytes());
 
-		int processedRecordsCount = 0;
-		try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-			try (OutputStreamWriter streamWriter = getStreamWriter(outputStream)) {
-				for (String stringified : theExpandedResourcesList.getStringifiedResources()) {
-					streamWriter.append(stringified);
-					streamWriter.append("\n");
-					processedRecordsCount++;
-				}
-				streamWriter.flush();
-				outputStream.flush();
-			}
-			binary.setContent(outputStream.toByteArray());
-		} catch (IOException ex) {
-			String errorMsg = String.format(
-				"Failure to process resource of type %s : %s",
-				theExpandedResourcesList.getResourceType(), ex.getMessage());
-			ourLog.error(errorMsg);
-
-			throw new JobExecutionFailedException(Msg.code(2431) + errorMsg);
-		}
+//		int processedRecordsCount = 0;
+//		try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+////			try (OutputStreamWriter streamWriter = getStreamWriter(outputStream)) {
+//////				for (String stringified : theConvertedFile.getStringifiedResources()) {
+//////					streamWriter.append(stringified);
+//////					streamWriter.append("\n");
+//////					processedRecordsCount++;
+//////				}
+////				outputStream.append(theConvertedFile.getBytes());
+////				streamWriter.flush();
+////				outputStream.flush();
+////			}
+//			binary.setContent(theConvertedFile.getBytes());
+//		} catch (IOException ex) {
+//			String errorMsg = String.format(
+//				"Failure to process resource of type %s : %s",
+//				theExpandedResourcesList.getResourceType(), ex.getMessage());
+//			ourLog.error(errorMsg);
+//
+//			throw new JobExecutionFailedException(Msg.code(2431) + errorMsg);
+//		}
 
 		BulkExportJobParameters jobParameters = myStepExecutionDetails.getParameters();
 
 		// TODO -
-		binary.setContentType(jobParameters.getOutputFormat());
+		binary.setContentType(theConvertedFile.getMimeType());
 
 		// Pick a unique ID and retry until we get one that isn't already used. This is just to
 		// avoid any possibility of people guessing the IDs of these Binaries and fishing for them.
@@ -144,15 +147,13 @@ public class BinaryCreator implements Consumer<ConvertedFile> {
 
 		BulkExportBinaryFileId bulkExportBinaryFileId = new BulkExportBinaryFileId();
 		bulkExportBinaryFileId.setBinaryId(id.getValueAsString());
-		bulkExportBinaryFileId.setResourceType(theExpandedResourcesList.getResourceType());
+		bulkExportBinaryFileId.setResourceType(theConvertedFile.getResourceType());
 		myDataSink.accept(bulkExportBinaryFileId);
 
 		ourLog.info(
-			"Binary writing complete for {} resources of type {}.",
-			processedRecordsCount,
-			theExpandedResourcesList.getResourceType());
+			"Binary writing complete for resources of type {}.",
+			theConvertedFile.getResourceType());
 	}
-
 
 	/**
 	 * Adds 3 extensions to the `binary.meta` element.
@@ -185,11 +186,16 @@ public class BinaryCreator implements Consumer<ConvertedFile> {
 			// resource type
 			IBaseExtension<?, ?> typeExtension = meta.addExtension();
 			typeExtension.setUrl(JpaConstants.BULK_META_EXTENSION_RESOURCE_TYPE);
-			typeExtension.setValue(myFhirContext.newPrimitiveString(expandedResources.getResourceType()));
+			typeExtension.setValue(myFhirContext.newPrimitiveString(theFile.getResourceType()));
 		} else {
 			ourLog.warn(
 				"Could not attach metadata extensions to binary resource, as this binary metadata does not support extensions");
 		}
 	}
 
+	private RequestDetails newRequestDetails(
+		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails,
+		BulkExportJobParameters jobParameters) {
+		return theStepExecutionDetails.newSystemRequestDetails();
+	}
 }

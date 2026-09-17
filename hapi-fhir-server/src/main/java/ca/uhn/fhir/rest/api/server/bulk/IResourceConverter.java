@@ -1,8 +1,4 @@
-package ca.uhn.fhir.batch2.jobs.export.svcs;
-
-import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
-import ca.uhn.fhir.rest.api.server.bulk.BulkExportResourceList;
-import ca.uhn.fhir.rest.api.server.bulk.ConvertedFiles;
+package ca.uhn.fhir.rest.api.server.bulk;
 
 public interface IResourceConverter {
 	/**
