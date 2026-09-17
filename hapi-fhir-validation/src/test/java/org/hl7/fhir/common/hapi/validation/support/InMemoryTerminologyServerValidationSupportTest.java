@@ -476,7 +476,9 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 
 	/**
 	 * The other direction, so that the test above is not passed by code which ignores the version: when the
-	 * unversioned canonical resolves to a different version, the versioned one still has to be asked for.
+	 * unversioned canonical resolves to a different version, the versioned one still has to be asked for. The
+	 * order is asserted because both canonicals are fetched either way - code which asks for the versioned one
+	 * first and only reaches the unversioned one through the lookupCode fallback ends up with the same two.
 	 */
 	@Test
 	void validateCode_codeSystemVersionDiffersFromTheUnversionedCanonical_fetchesTheVersionedCanonical() {
@@ -489,7 +491,8 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 
 		// Verify
 		assertThat(recorder.myFetchedCodeSystemUrls)
-			.containsOnly(VERSIONED_CS_URL, VERSIONED_CS_URL + "|2.0.0");
+			.containsOnly(VERSIONED_CS_URL, VERSIONED_CS_URL + "|2.0.0")
+			.containsSubsequence(VERSIONED_CS_URL, VERSIONED_CS_URL + "|2.0.0");
 	}
 
 	/**
