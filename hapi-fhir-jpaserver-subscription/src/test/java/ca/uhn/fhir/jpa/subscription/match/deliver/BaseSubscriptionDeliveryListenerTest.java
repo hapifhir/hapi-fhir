@@ -30,7 +30,7 @@ import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import tools.jackson.core.JacksonException;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
@@ -306,7 +306,7 @@ public class BaseSubscriptionDeliveryListenerTest {
 	}
 
 	@Test
-	public void testSerializeDeliveryMessageWithRequestPartition() throws JsonProcessingException {
+	public void testSerializeDeliveryMessageWithRequestPartition() throws JacksonException {
 		CanonicalSubscription subscription = generateSubscription();
 		Patient patient = generatePatient();
 
@@ -323,12 +323,12 @@ public class BaseSubscriptionDeliveryListenerTest {
 
 
 		// Assert that the partitionID is being serialized in JSON
-		assertThat(jsonString).contains("\"partitionDate\":[2020,1,1]");
+		assertThat(jsonString).contains("\"partitionDate\":\"2020-01-01\"");
 		assertThat(jsonString).contains("\"partitionIds\":[123]");
 	}
 
 	@Test
-	public void testSerializeDeliveryMessageWithNoPartition() throws JsonProcessingException {
+	public void testSerializeDeliveryMessageWithNoPartition() throws JacksonException {
 		CanonicalSubscription subscription = generateSubscription();
 		Patient patient = generatePatient();
 
@@ -427,7 +427,7 @@ public class BaseSubscriptionDeliveryListenerTest {
 	}
 
 	@Test
-	public void testSerializeLegacyDeliveryMessage() throws JsonProcessingException {
+	public void testSerializeLegacyDeliveryMessage() throws JacksonException {
 		String legacyDeliveryMessageJson = "{\"headers\":{\"retryCount\":0,\"customHeaders\":{}},\"payload\":{\"operationType\":\"CREATE\",\"canonicalSubscription\":{\"id\":\"Subscription/123\",\"endpointUrl\":\"http://example.com/fhir\",\"payload\":\"application/fhir+json\"},\"payload\":\"{\\\"resourceType\\\":\\\"Patient\\\",\\\"active\\\":true}\"}}";
 
 		ResourceDeliveryJsonMessage jsonMessage = ResourceDeliveryJsonMessage.fromJson(legacyDeliveryMessageJson);
@@ -435,6 +435,19 @@ public class BaseSubscriptionDeliveryListenerTest {
 		// A legacy message serialized without a partitionId field now deserializes to a null partition. Previously the
 		// no-arg constructor pre-populated the deprecated RequestPartitionId.defaultPartition() sentinel (GL-8692).
 		assertThat(jsonMessage.getPayload().getPartitionId()).isNull();
+	}
+
+	@Test
+	// During the Jackson 2 -> Jackson Tools 3 upgrade, the format of the partition date in the JSON changed.
+	// Concerns were raised that this might b a breaking change. This test demonstrates that it is not.
+	// The new code is able to parse the old format.
+	public void testSerializeJacksonUpgradeLegacyDeliveryMessage() throws JacksonException {
+		String legacyDeliveryMessageJson = "{\"headers\":{\"customHeaders\":{},\"retryCount\":0},\"payload\":{\"canonicalSubscription\":{\"crossPartitionEnabled\":false,\"endpointUrl\":\"http://example.com/fhir\",\"id\":\"Subscription/123\",\"isTopicSubscription\":false,\"payload\":\"application/fhir+json\",\"sendDeleteMessages\":false},\"operationType\":\"CREATE\",\"partitionId\":{\"allPartitions\":false,\"partitionDate\":[2020,1,1],\"partitionIds\":[123]},\"payload\":\"{\\\"resourceType\\\":\\\"Patient\\\",\\\"active\\\":true}\"}}";
+
+		ResourceDeliveryJsonMessage jsonMessage = ResourceDeliveryJsonMessage.fromJson(legacyDeliveryMessageJson);
+
+		assertThat(jsonMessage.getPayload().getPartitionId()).isNotNull();
+		assertThat(jsonMessage.getPayload().getPartitionId().getPartitionDate()).isEqualTo("2020-01-01");
 	}
 
 	@Test
