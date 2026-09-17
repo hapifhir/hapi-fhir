@@ -204,4 +204,25 @@ public class ValidationSupportUtilsTest {
 		// validate
 		assertEquals(theExpectedCodeSystem, result, theMessage);
 	}
+
+	private static Stream<Arguments> getVersionedValueSetTestCases() {
+		return Stream.of(
+			Arguments.of(VALUE_SET_URL, SYSTEM_VERSION, VALUE_SET_URL + "|" + SYSTEM_VERSION, "URL and version are joined"),
+			Arguments.of(VALUE_SET_URL, null, VALUE_SET_URL, "No version leaves the URL alone"),
+			Arguments.of(VALUE_SET_URL, "", VALUE_SET_URL, "Blank version leaves the URL alone"),
+			Arguments.of(VALUE_SET_URL + "|" + SYSTEM_VERSION, SYSTEM_VERSION_2, VALUE_SET_URL + "|" + SYSTEM_VERSION,
+				"A URL which already names a version does not get a second one"),
+			Arguments.of(null, SYSTEM_VERSION, null, "Null URL is returned as-is rather than throwing"));
+	}
+
+	@ParameterizedTest
+	@MethodSource("getVersionedValueSetTestCases")
+	public void getVersionedValueSet_withDifferentUrlsAndVersions_returnsCorrectResult(String theValueSetUrl,
+																					   String theVersion, String theExpectedUrl, String theMessage) {
+		// execute
+		String result = ValidationSupportUtils.getVersionedValueSet(theValueSetUrl, theVersion);
+
+		// validate
+		assertEquals(theExpectedUrl, result, theMessage);
+	}
 }

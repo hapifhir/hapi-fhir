@@ -2690,7 +2690,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		if (isNotBlank(url)) {
 			// A URL with no version resolves to whichever version was saved last, so keep the version of the ValueSet
 			String version = ValidationSupportUtils.getValueSetVersion(myContext, theValueSet);
-			String canonicalUrl = isNotBlank(version) ? url + "|" + version : url;
+			String canonicalUrl = ValidationSupportUtils.getVersionedValueSet(url, version);
 			return validateCode(
 					theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, canonicalUrl);
 		}

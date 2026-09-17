@@ -38,7 +38,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.substringAfter;
 import static org.apache.commons.lang3.StringUtils.substringBefore;
-import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService.getFhirVersionEnum;
+import static org.hl7.fhir.common.hapi.validation.support.ValidationSupportUtils.getFhirVersionEnum;
 
 /**
  * This class is a basic in-memory terminology service, designed to expand ValueSets and validate codes

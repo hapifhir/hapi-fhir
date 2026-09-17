@@ -86,14 +86,15 @@ public abstract class BaseValidationSupportWrapper extends BaseValidationSupport
 	}
 
 	@Override
+	@Nullable
 	public CodeValidationResult validateCode(
 			@Nonnull ValidationSupportContext theValidationSupportContext,
 			@Nonnull ConceptValidationOptions theOptions,
-			String theCodeSystem,
-			String theCodeSystemVersion,
-			String theCode,
-			String theDisplay,
-			String theValueSetUrl) {
+			@Nullable String theCodeSystem,
+			@Nullable String theCodeSystemVersion,
+			@Nullable String theCode,
+			@Nullable String theDisplay,
+			@Nullable String theValueSetUrl) {
 		return myWrap.validateCode(
 				theValidationSupportContext,
 				theOptions,

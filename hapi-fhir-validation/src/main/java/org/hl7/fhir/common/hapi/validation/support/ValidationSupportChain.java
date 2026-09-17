@@ -820,14 +820,15 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
+	@Nullable
 	public CodeValidationResult validateCode(
 			@Nonnull ValidationSupportContext theValidationSupportContext,
 			@Nonnull ConceptValidationOptions theOptions,
-			String theCodeSystem,
-			String theCodeSystemVersion,
-			String theCode,
-			String theDisplay,
-			String theValueSetUrl) {
+			@Nullable String theCodeSystem,
+			@Nullable String theCodeSystemVersion,
+			@Nullable String theCode,
+			@Nullable String theDisplay,
+			@Nullable String theValueSetUrl) {
 
 		ValidateCodeKey key = new ValidateCodeKey(
 				theOptions, theCodeSystem, theCodeSystemVersion, theCode, theDisplay, theValueSetUrl, null);

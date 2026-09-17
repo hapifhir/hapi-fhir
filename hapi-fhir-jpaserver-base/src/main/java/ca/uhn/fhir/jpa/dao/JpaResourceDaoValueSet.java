@@ -217,13 +217,9 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 		String valueSetIdentifier;
 		if (theValueSetId != null) {
 			IBaseResource valueSet = read(theValueSetId, theRequestDetails);
-			StringBuilder valueSetIdentifierBuilder =
-					new StringBuilder(ValidationSupportUtils.getValueSetUrl(myFhirContext, valueSet));
-			String valueSetVersion = ValidationSupportUtils.getValueSetVersion(myFhirContext, valueSet);
-			if (valueSetVersion != null) {
-				valueSetIdentifierBuilder.append("|").append(valueSetVersion);
-			}
-			valueSetIdentifier = valueSetIdentifierBuilder.toString();
+			valueSetIdentifier = ValidationSupportUtils.getVersionedValueSet(
+					ValidationSupportUtils.getValueSetUrl(myFhirContext, valueSet),
+					ValidationSupportUtils.getValueSetVersion(myFhirContext, valueSet));
 		} else if (isNotBlank(toStringValue(theValueSetIdentifier))) {
 			valueSetIdentifier = toStringValue(theValueSetIdentifier);
 		} else {
@@ -236,13 +232,13 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 			IValidationSupport.CodeValidationResult anyValidation = null;
 			for (int i = 0; i < codeableConcept.getCoding().size(); i++) {
 				Coding nextCoding = codeableConcept.getCoding().get(i);
-				String system =
-						ValidationSupportUtils.getVersionedCodeSystem(nextCoding.getSystem(), nextCoding.getVersion());
+				String system = nextCoding.getSystem();
+				String systemVersion = nextCoding.getVersion();
 				String code = nextCoding.getCode();
 				String display = nextCoding.getDisplay();
 
 				IValidationSupport.CodeValidationResult nextValidation =
-						validateCode(system, code, display, valueSetIdentifier);
+						validateCode(system, systemVersion, code, display, valueSetIdentifier);
 				anyValidation = nextValidation;
 				if (nextValidation.isOk()) {
 					return nextValidation;
@@ -250,26 +246,30 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 			}
 			return anyValidation;
 		} else if (haveCoding) {
-			String system = ValidationSupportUtils.getVersionedCodeSystem(
-					canonicalCodingToValidate.getSystem(), canonicalCodingToValidate.getVersion());
+			String system = canonicalCodingToValidate.getSystem();
+			String systemVersion = canonicalCodingToValidate.getVersion();
 			String code = canonicalCodingToValidate.getCode();
 			String display = canonicalCodingToValidate.getDisplay();
-			return validateCode(system, code, display, valueSetIdentifier);
+			return validateCode(system, systemVersion, code, display, valueSetIdentifier);
 		} else {
 			String system = toStringValue(theSystem);
 			String code = toStringValue(theCode);
 			String display = toStringValue(theDisplay);
-			return validateCode(system, code, display, valueSetIdentifier);
+			return validateCode(system, null, code, display, valueSetIdentifier);
 		}
 	}
 
 	private IValidationSupport.CodeValidationResult validateCode(
-			String theSystem, String theCode, String theDisplay, String theValueSetIdentifier) {
+			String theSystem,
+			String theSystemVersion,
+			String theCode,
+			String theDisplay,
+			String theValueSetIdentifier) {
 		ValidationSupportContext context = new ValidationSupportContext(myValidationSupport);
 		ConceptValidationOptions options = new ConceptValidationOptions();
 		options.setValidateDisplay(isNotBlank(theDisplay));
 		IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(
-				context, options, theSystem, theCode, theDisplay, theValueSetIdentifier);
+				context, options, theSystem, theSystemVersion, theCode, theDisplay, theValueSetIdentifier);
 
 		if (result == null) {
 			result = new IValidationSupport.CodeValidationResult();

@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.Logs;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
@@ -114,11 +115,9 @@ public final class ValidationSupportUtils {
 	 * @param theVersion    the code system version, or <code>null</code> to return the code system URL unchanged
 	 * @return the code system URL with the version appended, or the code system URL unchanged
 	 */
-	public static String getVersionedCodeSystem(String theCodeSystem, String theVersion) {
-		if (isNotBlank(theCodeSystem) && isNotBlank(theVersion) && !theCodeSystem.contains("|")) {
-			return theCodeSystem + "|" + theVersion;
-		}
-		return theCodeSystem;
+	@Nullable
+	public static String getVersionedCodeSystem(@Nullable String theCodeSystem, @Nullable String theVersion) {
+		return getVersionedCanonical(theCodeSystem, theVersion);
 	}
 
 	/**
@@ -167,10 +166,10 @@ public final class ValidationSupportUtils {
 	 * @throws IllegalArgumentException if the FHIR version is not supported
 	 * @since 8.14.0
 	 */
-	public static String getValueSetUrl(FhirContext theFhirContext, @Nonnull IBaseResource theValueSet) {
+	@Nullable
+	public static String getValueSetUrl(@Nonnull FhirContext theFhirContext, @Nonnull IBaseResource theValueSet) {
 		String url;
-		FhirVersionEnum structureFhirVersionEnum =
-				CommonCodeSystemsTerminologyService.getFhirVersionEnum(theFhirContext, theValueSet);
+		FhirVersionEnum structureFhirVersionEnum = getFhirVersionEnum(theFhirContext, theValueSet);
 		switch (structureFhirVersionEnum) {
 			case DSTU2: {
 				url = ((ca.uhn.fhir.model.dstu2.resource.ValueSet) theValueSet).getUrl();
@@ -212,9 +211,10 @@ public final class ValidationSupportUtils {
 	 * @return the ValueSet's version, or <code>null</code> if the FHIR version has no version element
 	 * @since 8.14.0
 	 */
+	@Nullable
 	public static String getValueSetVersion(@Nonnull FhirContext theFhirContext, @Nonnull IBaseResource theValueSet) {
 		String version;
-		switch (CommonCodeSystemsTerminologyService.getFhirVersionEnum(theFhirContext, theValueSet)) {
+		switch (getFhirVersionEnum(theFhirContext, theValueSet)) {
 			case DSTU3: {
 				version = ((org.hl7.fhir.dstu3.model.ValueSet) theValueSet).getVersion();
 				break;
@@ -238,5 +238,55 @@ public final class ValidationSupportUtils {
 				version = null;
 		}
 		return version;
+	}
+
+	/**
+	 * Returns the FHIR version of the given resource's structures.
+	 * <p>
+	 * A resource built from the R5 structures is reported as R4B when the context is R4B and the resource is
+	 * not itself an R5 model class, which is a shim for the core library upgrade to 5.6.97.
+	 * </p>
+	 *
+	 * @param theFhirContext the FHIR context the resource belongs to
+	 * @param theResource    the resource to read the structure version from
+	 * @return the resource's FHIR version
+	 * @since 8.14.0
+	 */
+	@Nonnull
+	public static FhirVersionEnum getFhirVersionEnum(
+			@Nonnull FhirContext theFhirContext, @Nonnull IBaseResource theResource) {
+		FhirVersionEnum structureFhirVersionEnum = theResource.getStructureFhirVersionEnum();
+		// TODO: Address this when core lib version is bumped
+		if (theResource.getStructureFhirVersionEnum() == FhirVersionEnum.R5
+				&& theFhirContext.getVersion().getVersion() == FhirVersionEnum.R4B) {
+			if (!(theResource instanceof org.hl7.fhir.r5.model.Resource)) {
+				structureFhirVersionEnum = FhirVersionEnum.R4B;
+			}
+		}
+		return structureFhirVersionEnum;
+	}
+
+	/**
+	 * Joins a value set URL and a version into the canonical form <code>url|version</code>.
+	 * <p>
+	 * The value set URL is returned unchanged if it already carries a version, or if no version is given.
+	 * </p>
+	 *
+	 * @param theValueSetUrl the value set URL, which may already be of the form <code>url|version</code>
+	 * @param theVersion     the value set version, or <code>null</code> to return the URL unchanged
+	 * @return the value set URL with the version appended, or the URL unchanged
+	 * @since 8.14.0
+	 */
+	@Nullable
+	public static String getVersionedValueSet(@Nullable String theValueSetUrl, @Nullable String theVersion) {
+		return getVersionedCanonical(theValueSetUrl, theVersion);
+	}
+
+	@Nullable
+	private static String getVersionedCanonical(@Nullable String theUrl, @Nullable String theVersion) {
+		if (isNotBlank(theUrl) && isNotBlank(theVersion) && !theUrl.contains("|")) {
+			return theUrl + "|" + theVersion;
+		}
+		return theUrl;
 	}
 }

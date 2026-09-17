@@ -367,14 +367,12 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 		ConceptValidationOptions options = new ConceptValidationOptions();
 		options.setValidateDisplay(isNotBlank(theDisplay));
 
-		String codeSystemUrl = ValidationSupportUtils.getVersionedCodeSystem(theCodeSystemUrl, theVersion);
-
-		CodeValidationResult retVal =
-				myValidationSupport.validateCode(context, options, codeSystemUrl, theCode, theDisplay, null);
+		CodeValidationResult retVal = myValidationSupport.validateCode(
+				context, options, theCodeSystemUrl, theVersion, theCode, theDisplay, null);
 		if (retVal == null) {
 			retVal = new CodeValidationResult();
-			retVal.setMessage(
-					"Terminology service was unable to provide validation for " + codeSystemUrl + "#" + theCode);
+			retVal.setMessage("Terminology service was unable to provide validation for "
+					+ ValidationSupportUtils.getVersionedCodeSystem(theCodeSystemUrl, theVersion) + "#" + theCode);
 		}
 		return retVal;
 	}

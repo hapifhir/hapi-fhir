@@ -502,7 +502,8 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 
 	public static String getCodeSystemUrl(@Nonnull FhirContext theFhirContext, @Nonnull IBaseResource theCodeSystem) {
 		String url;
-		FhirVersionEnum structureFhirVersionEnum = getFhirVersionEnum(theFhirContext, theCodeSystem);
+		FhirVersionEnum structureFhirVersionEnum =
+				ValidationSupportUtils.getFhirVersionEnum(theFhirContext, theCodeSystem);
 		switch (structureFhirVersionEnum) {
 			case R4: {
 				url = ((org.hl7.fhir.r4.model.CodeSystem) theCodeSystem).getUrl();
@@ -533,19 +534,12 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	}
 
 	/**
-	 * N.B.:  We are keeping this as a shim due to the upgrade we did to core 5.6.97+
+	 * @deprecated Please use {@link ValidationSupportUtils#getFhirVersionEnum(FhirContext, IBaseResource)} instead.
 	 */
+	@Deprecated(since = "8.14.0")
 	public static FhirVersionEnum getFhirVersionEnum(
 			@Nonnull FhirContext theFhirContext, @Nonnull IBaseResource theResource) {
-		FhirVersionEnum structureFhirVersionEnum = theResource.getStructureFhirVersionEnum();
-		// TODO: Address this when core lib version is bumped
-		if (theResource.getStructureFhirVersionEnum() == FhirVersionEnum.R5
-				&& theFhirContext.getVersion().getVersion() == FhirVersionEnum.R4B) {
-			if (!(theResource instanceof org.hl7.fhir.r5.model.Resource)) {
-				structureFhirVersionEnum = FhirVersionEnum.R4B;
-			}
-		}
-		return structureFhirVersionEnum;
+		return ValidationSupportUtils.getFhirVersionEnum(theFhirContext, theResource);
 	}
 
 	private static HashMap<String, String> buildUspsCodes() {

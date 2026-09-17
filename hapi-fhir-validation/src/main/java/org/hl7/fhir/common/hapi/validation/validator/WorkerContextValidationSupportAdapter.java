@@ -12,6 +12,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.Logs;
+import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -822,14 +823,18 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 
 		IBaseResource convertedVs = getOrConvertValueSet(theValueSet);
 
+		// the system arrives carrying its version when it was inferred from the value set's compose
+		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(theSystem);
+		String system = codeSystem.url();
+		String version = codeSystem.versionId().orElse(theVersion);
+
 		IValidationSupport.CodeValidationResult result;
 		if (convertedVs != null) {
-			result = validateCodeInValueSet(
-					convertedVs, theValidationOptions, theSystem, theVersion, theCode, theDisplay);
+			result = validateCodeInValueSet(convertedVs, theValidationOptions, system, version, theCode, theDisplay);
 		} else {
-			result = validateCodeInCodeSystem(theValidationOptions, theSystem, theVersion, theCode, theDisplay);
+			result = validateCodeInCodeSystem(theValidationOptions, system, version, theCode, theDisplay);
 		}
-		return convertValidationResult(theSystem, result);
+		return convertValidationResult(system, result);
 	}
 
 	private IBaseResource getOrConvertValueSet(ValueSet theValueSet) {
@@ -947,17 +952,8 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			String theVersion,
 			String theCode,
 			String theDisplay) {
-		// the system arrives carrying its version when it was inferred from the value set's compose
-		String system = theSystem;
-		String version = theVersion;
-		int versionSeparator = system == null ? -1 : system.indexOf('|');
-		if (versionSeparator > -1) {
-			version = system.substring(versionSeparator + 1);
-			system = system.substring(0, versionSeparator);
-		}
-
 		return myValidationSupport.validateCode(
-				newValidationSupportContext(), theValidationOptions, system, version, theCode, theDisplay, null);
+				newValidationSupportContext(), theValidationOptions, theSystem, theVersion, theCode, theDisplay, null);
 	}
 
 	@Override
