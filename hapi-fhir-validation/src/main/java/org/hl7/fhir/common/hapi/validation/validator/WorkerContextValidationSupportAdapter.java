@@ -766,7 +766,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	public ValidationResult validateCode(
 			ValidationOptions theOptions, String system, String version, String code, String display) {
 		ConceptValidationOptions validationOptions = convertConceptValidationOptions(theOptions);
-		return doValidation(null, validationOptions, system, code, display);
+		return doValidation(null, validationOptions, system, version, code, display);
 	}
 
 	@Override
@@ -779,7 +779,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			ValueSet theValueSet) {
 
 		ConceptValidationOptions validationOptions = convertConceptValidationOptions(theOptions);
-		return doValidation(theValueSet, validationOptions, theSystem, theCode, display);
+		return doValidation(theValueSet, validationOptions, theSystem, version, theCode, display);
 	}
 
 	@Override
@@ -789,17 +789,18 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 		ConceptValidationOptions validationOptions =
 				convertConceptValidationOptions(theOptions).setInferSystem(true);
 
-		return doValidation(theValueSet, validationOptions, system, code, null);
+		return doValidation(theValueSet, validationOptions, system, null, code, null);
 	}
 
 	@Override
 	public ValidationResult validateCode(ValidationOptions theOptions, Coding theCoding, ValueSet theValueSet) {
 		ConceptValidationOptions validationOptions = convertConceptValidationOptions(theOptions);
 		String system = theCoding.getSystem();
+		String version = theCoding.getVersion();
 		String code = theCoding.getCode();
 		String display = theCoding.getDisplay();
 
-		return doValidation(theValueSet, validationOptions, system, code, display);
+		return doValidation(theValueSet, validationOptions, system, version, code, display);
 	}
 
 	@Override
@@ -817,6 +818,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			@Nullable ValueSet theValueSet,
 			ConceptValidationOptions theValidationOptions,
 			String theSystem,
+			String theVersion,
 			String theCode,
 			String theDisplay) {
 
@@ -824,7 +826,8 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 
 		IValidationSupport.CodeValidationResult result;
 		if (convertedVs != null) {
-			result = validateCodeInValueSet(convertedVs, theValidationOptions, theSystem, theCode, theDisplay);
+			result = validateCodeInValueSet(
+					convertedVs, theValidationOptions, theSystem, theVersion, theCode, theDisplay);
 		} else {
 			result = validateCodeInCodeSystem(theValidationOptions, theSystem, theCode, theDisplay);
 		}
@@ -877,6 +880,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			IBaseResource theValueSet,
 			ConceptValidationOptions theValidationOptions,
 			String theSystem,
+			String theVersion,
 			String theCode,
 			String theDisplay) {
 		IValidationSupport.CodeValidationResult result = myValidationSupport.validateCodeInValueSet(
@@ -884,10 +888,12 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 		if (result != null && isNotBlank(theSystem)) {
 			/* We got a value set result, which could be successful, or could contain errors/warnings. The code
 			might also be invalid in the code system, so we will check that as well and add those issues
-			to our result.
+			to our result. Name the version, or that check answers from whichever version is current and can
+			reject a code the value set accepted.
 			*/
-			IValidationSupport.CodeValidationResult codeSystemResult =
-					validateCodeInCodeSystem(theValidationOptions, theSystem, theCode, theDisplay);
+			String expectedVersion = isNotBlank(theVersion) ? theVersion : result.getCodeSystemVersion();
+			IValidationSupport.CodeValidationResult codeSystemResult = validateCodeInCodeSystem(
+					theValidationOptions, withVersion(theSystem, expectedVersion), theCode, theDisplay);
 			final boolean valueSetResultContainsInvalidDisplay = result.getIssues().stream()
 					.anyMatch(WorkerContextValidationSupportAdapter::hasInvalidDisplayDetailCode);
 			if (codeSystemResult != null) {
@@ -903,6 +909,14 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			}
 		}
 		return result;
+	}
+
+	private static String withVersion(String theSystem, String theVersion) {
+		// The system can already carry a version, e.g. when it was inferred from the value set's compose
+		if (isBlank(theVersion) || theSystem.contains("|")) {
+			return theSystem;
+		}
+		return theSystem + "|" + theVersion;
 	}
 
 	private IValidationSupport.CodeValidationResult copyCodeValidationResult(

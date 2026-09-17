@@ -107,6 +107,30 @@ public class WorkerContextValidationSupportAdapterTest extends BaseValidationTes
 	}
 
 	@Test
+	public void validateCode_systemInferredFromVersionedInclude_doesNotAppendTheVersionTwice() {
+		// setup
+		setupValidation();
+
+		// The system inferred from a versioned include already carries its version
+		ValueSet valueSet = new ValueSet();
+		valueSet.getCompose()
+			.addInclude()
+			.setSystem("http://codesystems.com/system")
+			.setVersion("1.0.0")
+			.addConcept()
+			.setCode("code0");
+
+		CodeValidationResult valueSetResult = new CodeValidationResult().setCode("code0").setCodeSystemVersion("1.0.0");
+		when(myValidationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenReturn(valueSetResult);
+
+		// execute
+		myWorkerContextWrapper.validateCode(new ValidationOptions(), "code0", valueSet);
+
+		// verify
+		verify(myValidationSupport, times(1)).validateCode(any(), any(), eq("http://codesystems.com/system|1.0.0"), eq("code0"), any(), any());
+	}
+
+	@Test
 	public void validateCode_codeNotInValueSet_doesNotResolveSystem() {
 		setupValidation();
 
