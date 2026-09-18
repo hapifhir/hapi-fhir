@@ -2688,7 +2688,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		}
 		String url = urlPrimitive.getValueAsString();
 		if (isNotBlank(url)) {
-			// A URL with no version resolves to whichever version was saved last, so keep the version of the ValueSet
+			// A URL with no version resolves to whichever version was saved last
 			String version = ValidationSupportUtils.getValueSetVersion(myContext, theValueSet);
 			String canonicalUrl = ValidationSupportUtils.getVersionedValueSet(url, version);
 			return validateCode(
@@ -2708,7 +2708,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			@Nullable String theDisplay,
 			@Nullable String theValueSetUrl) {
 		// The lookups below take the code system as a single "url|version" identifier, which
-		// getCurrentCodeSystemVersion also uses as a cache key, so the version is joined rather than passed beside it.
+		// getCurrentCodeSystemVersion also uses as a cache key.
 		String codeSystemUrl = ValidationSupportUtils.getVersionedCodeSystem(theCodeSystemUrl, theCodeSystemVersion);
 		return validateCode(
 				theValidationSupportContext, theOptions, codeSystemUrl, theCode, theDisplay, theValueSetUrl);

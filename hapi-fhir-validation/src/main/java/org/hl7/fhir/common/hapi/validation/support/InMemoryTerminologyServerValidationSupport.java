@@ -179,7 +179,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			String theDisplay,
 			String theValueSetUrl) {
 		// expandValueSet and validateCodeInExpandedValueSet identify the code system by its "system|version"
-		// canonical, so it is joined once here rather than at each of those calls.
+		// canonical rather than as a system and a version
 		String codeSystemUrlAndVersion =
 				ValidationSupportUtils.getVersionedCodeSystem(theCodeSystem, theCodeSystemVersion);
 
@@ -193,7 +193,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			switch (myCtx.getVersion().getVersion()) {
 				case DSTU2:
 				case DSTU2_HL7ORG:
-					// A DSTU2 compose include has no version element, so the canonical goes in whole
+					// A DSTU2 compose include has no version element
 					vs = new org.hl7.fhir.dstu2.model.ValueSet()
 							.setCompose(new org.hl7.fhir.dstu2.model.ValueSet.ValueSetComposeComponent()
 									.addInclude(new org.hl7.fhir.dstu2.model.ValueSet.ConceptSetComponent()
@@ -266,9 +266,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			String theCode,
 			String theDisplay,
 			String theValueSetUrl) {
-		/* A code system reaching this signature can only name a version by carrying it packed as
-		"system|version", so it is split out here and the body above works with the two as separate values.
-		*/
+		// On this signature a code system can only name a version by carrying it packed as "system|version"
 		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(theCodeSystem);
 		return validateCode(
 				theValidationSupportContext,

@@ -927,10 +927,8 @@ public class ValidationSupportChain implements IValidationSupport {
 			@Nonnull IBaseResource theValueSet) {
 		FhirContext fhirContext = getFhirContext();
 		String url = ValidationSupportUtils.getValueSetUrl(fhirContext, theValueSet);
-		/* getValueSetUrl returns ValueSet.url alone, so two versions of the same canonical would otherwise
-		share a cache entry and whichever was validated first would answer for the other. They can include
-		different code system versions, so their answers legitimately differ.
-		*/
+		// getValueSetUrl returns ValueSet.url alone, and two versions of one canonical can include different
+		// code system versions, so the version belongs in the cache key as well
 		String valueSetVersion = ValidationSupportUtils.getValueSetVersion(fhirContext, theValueSet);
 
 		ValidateCodeKey key = null;

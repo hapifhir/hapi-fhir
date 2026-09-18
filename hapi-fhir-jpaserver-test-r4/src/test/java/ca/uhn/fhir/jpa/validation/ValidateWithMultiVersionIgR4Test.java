@@ -28,30 +28,27 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * The situation the bug was reported from: two versions of the same implementation guide installed on one
- * server, where the codes change between the two versions, so validating a resource has to use the version
- * that was specified and not the other one. The nested classes cover the two ways a resource ends up bound to
- * one version:
+ * Two versions of the same implementation guide installed on one server, where the codes change between the
+ * two versions, so validating a resource has to use the version that was specified and not the other one. The
+ * nested classes cover the two ways a resource ends up bound to one version:
  * <ul>
  *	   <li>{@link VersionedProfileInEachIgTest} - each IG version ships its own version of the profile,
- *	   and the resource names one of them in {@literal meta.profile} as {@literal url|version}. This is the
- *	   shape the reporting site sends</li>
+ *	   and the resource names one of them in {@literal meta.profile} as {@literal url|version}</li>
  *	   <li>{@link ProfileFromAConsumingIgTest} - the IG versions ship only terminology, and a separate
  *	   IG holds a profile bound to one IG version's ValueSet by {@literal url|version}, named by an
  *	   unversioned {@literal meta.profile}</li>
  * </ul>
  * In both, the ValueSet names its own CodeSystem version, so every step of the chain specifies a version.
  * Installing with {@link PackageInstallationSpec.VersionPolicyEnum#MULTI_VERSION} is what keeps both versions
- * of each resource on the server, which is how the reporting site had it set up.
+ * of each resource on the server.
  * <p/>
  * Each test runs twice, once for each IG version, and <em>always installs the version it did not specify
  * last</em>. A URL with no version resolves by {@literal meta.lastUpdated}, so the IG installed last is the
  * one that code which drops the version finds. Running both directions also rules out a fix that just picks
- * the highest version number, and matches what the reporting site saw: swapping the install order swapped
- * which payload validated.
+ * the highest version number.
  * <p/>
- * {@link ValidateWithMultiVersionTerminologyR4Test} covers the same bug from resources written straight to the
- * DAOs. This one goes through the package installer instead, so the resources are stored the way a real IG
+ * {@link ValidateWithMultiVersionTerminologyR4Test} covers the same ground from resources written straight to
+ * the DAOs. This one goes through the package installer instead, so the resources are stored the way a real IG
  * install stores them.
  */
 // Created by Claude Opus 5
@@ -111,8 +108,8 @@ class ValidateWithMultiVersionIgR4Test extends BaseJpaR4Test {
 		}
 
 		/**
-		 * The reported case: the code is in the IG version the resource names, so validation has to accept
-		 * it even though the other IG version was installed afterwards.
+		 * The code is in the IG version the resource names, so validation has to accept it even though the other
+		 * IG version was installed afterwards.
 		 */
 		@ParameterizedTest
 		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
@@ -129,8 +126,7 @@ class ValidateWithMultiVersionIgR4Test extends BaseJpaR4Test {
 		}
 
 		/**
-		 * The other direction, which the reporting site saw as a payload that should have been rejected and
-		 * was accepted: a code that only the other IG version has must be rejected.
+		 * The other direction: a code that only the other IG version has must be rejected.
 		 */
 		@ParameterizedTest
 		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
