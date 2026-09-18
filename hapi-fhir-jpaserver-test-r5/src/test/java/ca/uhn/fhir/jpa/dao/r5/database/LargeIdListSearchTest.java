@@ -14,10 +14,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -50,11 +51,6 @@ interface LargeIdListSearchTest extends ITestDataBuilder {
 
 	Context getLargeIdListSearchTestContext();
 
-	/**
-	 * An _id list above the threshold returns the same resources as today, and
-	 * the generated SQL unpacks the IDs with the engine's JSON function.
-	 * In database partition mode the partition predicate must still be there beside it.
-	 */
 	@Test
 	default void testIdSearchOverThreshold_unpacksJsonArray() {
 		Context ctx = getLargeIdListSearchTestContext();
@@ -70,16 +66,12 @@ interface LargeIdListSearchTest extends ITestDataBuilder {
 			String sql = findSelectQueryContaining(ctx, "RES_ID");
 			assertIdListUnpacking(ctx, sql);
 			if (ctx.databasePartitionMode()) {
-				assertThat(sql).as(sql).contains("PARTITION_ID");
+				// Ensure partition part of query still exists
+				assertThat(sql).as(sql).containsPattern("PARTITION_ID = [?']");
 			}
 		});
 	}
 
-	/**
-	 * An search with references list (?subject=) above the threshold returns the same resources as today, and
-	 * the generated SQL unpacks the IDs with the engine's JSON function.
-	 * In database partition mode the partition predicate must still be there beside it.
-	 */
 	@Test
 	default void testReferenceSearchOverThreshold_unpacksJsonArray() {
 		Context ctx = getLargeIdListSearchTestContext();
@@ -93,16 +85,17 @@ interface LargeIdListSearchTest extends ITestDataBuilder {
 			assertThat(SearchTestUtil.toUnqualifiedVersionlessIdValues(results))
 				.containsExactlyInAnyOrderElementsOf(observationIds);
 
-			assertIdListUnpacking(ctx, findSelectQueryContaining(ctx, "TARGET_RESOURCE_ID"));
+			String sql = findSelectQueryContaining(ctx, "TARGET_RESOURCE_ID");
+			assertIdListUnpacking(ctx, sql);
+			if (ctx.databasePartitionMode()) {
+				// Ensure partition part of query still exists
+				assertThat(sql).as(sql).containsPattern("PARTITION_ID = [?']");
+			}
 		});
 	}
 
-	/**
-	 * A search with both an _id list and a reference list above the threshold unpacks two separate
-	 * JSON arrays in the one statement.
-	 */
 	@Test
-	default void testIdAndReferenceSearchBothOverThreshold_unpacksTwoJsonArrays() {
+	default void testIdAndReferenceSearchBothOverThreshold_unpacksTwoSeparateJsonArrays() {
 		Context ctx = getLargeIdListSearchTestContext();
 		withLargeIdListJsonThreshold(ctx, 3, () -> {
 			List<String> patientIds = createPatients(5);
@@ -119,18 +112,21 @@ interface LargeIdListSearchTest extends ITestDataBuilder {
 			if (jsonFunction != null) {
 				String sql = findSelectQueryContaining(ctx, "TARGET_RESOURCE_ID");
 				assertThat(StringUtils.countMatches(sql, jsonFunction)).as(sql).isEqualTo(2);
+
+				if (ctx.databasePartitionMode()) {
+					// Ensure partition part of query still exists
+					assertThat(sql).as(sql).containsPattern("PARTITION_ID = [?']");
+				}
 			}
 		});
 	}
 
-	/**
-	 * IT-3: at or under the threshold nothing changes on any engine.
-	 */
-	@Test
-	default void testIdSearchUnderThreshold_keepsInList() {
+	@ParameterizedTest
+	@ValueSource(ints = {5, 10})
+	default void testIdSearchUnderOrAtThreshold_keepsInList(int theNumberOfPatients) {
 		Context ctx = getLargeIdListSearchTestContext();
 		withLargeIdListJsonThreshold(ctx, 10, () -> {
-			List<String> patientIds = createPatients(5);
+			List<String> patientIds = createPatients(theNumberOfPatients);
 
 			ctx.captureQueriesListener().clear();
 			Bundle results = search(ctx, "Patient?_id=" + String.join(",", patientIds));
@@ -146,19 +142,11 @@ interface LargeIdListSearchTest extends ITestDataBuilder {
 	}
 
 	/**
-	 * Exercises Oracle's 4,000-byte VARCHAR2 bind limit - well under the JSON array of a payload this
-	 * size, so the array has to be bound as a CLOB or the statement fails with ORA-01461 - and SQL
-	 * Server's own switch from <code>nvarchar(4000)</code>/<code>varchar(8000)</code> to <code>(max)</code>
-	 * at the same boundary. Runs on every JSON engine; this is the only place either boundary is actually
-	 * exercised rather than asserted.
-	 * <p>
-	 * Sent as a POST because 800 IDs do not fit in a request line, and the maximum page size and offset are
-	 * raised, for the same reason as in production: search narrowing puts the IDs into the parameter map
-	 * server side and never onto a URL at all, so all matches must come back in one page to compare.
-	 * </p>
+	 * Large list of IDs (800) to test against Oracle's 4,000-byte VARCHAR2 bind limit and
+	 * SQL Server's switch from nvarchar(4000) to varchar(8000)
 	 */
 	@Test
-	default void testIdSearchOverVarcharBindLimit_bindsLargePayload() {
+	default void testIdSearchWithLargeJsonPayload_returnsAllMatches() {
 		Context ctx = getLargeIdListSearchTestContext();
 		assumeTrue(jsonFunctionForDriver(ctx.driverType()) != null, "JSON engines only");
 
@@ -214,7 +202,7 @@ interface LargeIdListSearchTest extends ITestDataBuilder {
 	private List<String> createObservationsFor(List<String> thePatientIds) {
 		return thePatientIds.stream()
 			.map(t -> createObservation(withSubject(t)).toUnqualifiedVersionless().getValue())
-			.collect(Collectors.toList());
+			.toList();
 	}
 
 	private static Bundle search(Context theContext, String theSearchUrl) {
