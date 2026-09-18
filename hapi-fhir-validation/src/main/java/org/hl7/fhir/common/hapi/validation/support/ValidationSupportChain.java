@@ -869,7 +869,8 @@ public class ValidationSupportChain implements IValidationSupport {
 			}
 
 			if (retVal.getValue() == null) {
-				CodeValidationResult unknownCodeSystemResult = generateResultForUnknownCodeSystem(codeSystem, code);
+				CodeValidationResult unknownCodeSystemResult =
+						generateResultForUnknownCodeSystem(codeSystem, theRequest.getCodeSystemVersion(), code);
 				if (unknownCodeSystemResult != null) {
 					retVal = new CacheValue<>(unknownCodeSystemResult);
 				}
@@ -895,13 +896,18 @@ public class ValidationSupportChain implements IValidationSupport {
 	 * </p>
 	 *
 	 * This function was originally part of now deprecated UnknownCodeSystemWarningValidationSupport
-	 * @param theCodeSystem The CodeSystem URL to validate
-	 * @param theCode       The code to validate
+	 * @param theCodeSystem        The CodeSystem URL to validate
+	 * @param theCodeSystemVersion The CodeSystem version the caller asked for, named in the message so they can
+	 *                             see which one was not found. Whether the code system is known at all is
+	 *                             decided on the URL alone: a known code system at an unknown version is not an
+	 *                             unknown code system.
+	 * @param theCode              The code to validate
 	 * @return A CodeValidationResult indicating the error, or null if theCodeSystem is null
 	 * or a validation support can fetch the code system.
 	 */
 	@Nullable
-	private CodeValidationResult generateResultForUnknownCodeSystem(String theCodeSystem, String theCode) {
+	private CodeValidationResult generateResultForUnknownCodeSystem(
+			String theCodeSystem, @Nullable String theCodeSystemVersion, String theCode) {
 
 		if (theCodeSystem == null) {
 			return null;
@@ -911,10 +917,11 @@ public class ValidationSupportChain implements IValidationSupport {
 			return null;
 		}
 
+		String codeSystemCanonical = UrlUtil.toCanonicalUrl(theCodeSystem, theCodeSystemVersion);
 		CodeValidationResult result = new CodeValidationResult();
 		result.setSeverity(IssueSeverity.ERROR);
 		String message = "CodeSystem is unknown and can't be validated: %s for '%s#%s'"
-				.formatted(theCodeSystem, theCodeSystem, theCode);
+				.formatted(codeSystemCanonical, codeSystemCanonical, theCode);
 		result.setMessage(message);
 
 		result.addIssue(new CodeValidationIssue(

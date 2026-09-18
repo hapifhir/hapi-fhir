@@ -6,13 +6,14 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
-import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValidateCodeRequest;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -153,10 +155,14 @@ class TermReadSvcImplTest {
 		}
 
 		CodeValidationResult callValidateCode(String theCodeSystemVersion) {
+			return callValidateCode(UCUM_SYSTEM_URL, theCodeSystemVersion);
+		}
+
+		CodeValidationResult callValidateCode(String theCodeSystem, String theCodeSystemVersion) {
 			return mySpiedSvc.validateCode(
 					myValidationSupportContext,
 					new ConceptValidationOptions(),
-					new ValidateCodeRequest(UCUM_SYSTEM_URL, theCodeSystemVersion, UCUM_CODE, null, null));
+					new ValidateCodeRequest(theCodeSystem, theCodeSystemVersion, UCUM_CODE, null, null));
 		}
 
 		LookupCodeResult callLookupCode() {
@@ -210,18 +216,29 @@ class TermReadSvcImplTest {
 	}
 
 	@Test
-	void validateCode_withCodeSystemAlreadyCarryingItsVersion_doesNotAppendTheVersionTwice() {
+	void validateCode_withCodeSystemAlreadyCarryingTheSameVersion_doesNotAppendTheVersionTwice() {
 		ValidateCodeFixture fixture = new ValidateCodeFixture();
 		fixture.stubCodeSystemContent(CodeSystem.CodeSystemContentMode.COMPLETE);
 		fixture.stubCodeFoundOnlyIn(UCUM_SYSTEM_URL + "|1.0.0");
 
-		CodeValidationResult result = fixture.mySpiedSvc.validateCode(
-				fixture.myValidationSupportContext,
-				new ConceptValidationOptions(),
-				new ValidateCodeRequest(UCUM_SYSTEM_URL + "|1.0.0", "2.0.0", UCUM_CODE, null, null));
+		CodeValidationResult result = fixture.callValidateCode(UCUM_SYSTEM_URL + "|1.0.0", "1.0.0");
 
 		assertThat(result).isNotNull();
 		assertThat(result.isOk()).isTrue();
+	}
+
+	/**
+	 * A code system canonical naming one version and a code system version naming another are contradictory.
+	 * Picking either one silently is how a caller ends up validating against a version it did not ask for.
+	 */
+	@Test
+	void validateCode_withCodeSystemCarryingAConflictingVersion_isRejected() {
+		// no lookup is stubbed: the conflict is rejected before the code system is consulted at all
+		ValidateCodeFixture fixture = new ValidateCodeFixture();
+
+		assertThatThrownBy(() -> fixture.callValidateCode(UCUM_SYSTEM_URL + "|1.0.0", "2.0.0"))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining("does not match expected version: 2.0.0");
 	}
 
 	@Test

@@ -2,8 +2,8 @@ package ca.uhn.fhir.jpa.validation;
 
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValidateCodeRequest;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
@@ -17,7 +17,6 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -30,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Validation on a server that holds two versions of the same CodeSystem or ValueSet, where a profile asks for
- * one of them. The nested classes cover the three shapes this takes:
+ * one of them. The nested classes cover the shapes this takes:
  * <ul>
  *     <li>{@link MultiVersionCodeSystemTest} - two CodeSystem versions, one ValueSet that names one of them in
  *     {@literal compose.include.version}, and a profile bound to that ValueSet</li>
@@ -39,6 +38,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  *     <li>{@link MultiVersionCodeSystemAndValueSetTest} - both at once: two versions of each, with the profile
  *     naming a ValueSet version and that ValueSet naming a CodeSystem version. Every step has to keep the
  *     version for the caller to get the answer they asked for</li>
+ *     <li>{@link CodeSystemVersionNamedOnValidateCodeTest} - two CodeSystem versions and no ValueSet at all,
+ *     with the version named on the {@literal validateCode} call itself</li>
  *     <li>{@link ValueSetValidateCodeOperationTest} - the same two versions of each reached through the
  *     {@literal ValueSet/$validate-code} operation rather than through {@literal $validate}</li>
  * </ul>
@@ -595,7 +596,7 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		myStructureDefinitionDao.create(profile, mySrd);
 	}
 
-	private static @NonNull StructureDefinition getStructureDefinition() {
+	private static StructureDefinition getStructureDefinition() {
 		StructureDefinition profile = new StructureDefinition();
 		profile.setUrl(PROFILE_URL);
 		profile.setName("ColourObservation");

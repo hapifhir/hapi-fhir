@@ -478,9 +478,9 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			String version,
 			Resource sourceOfReference,
 			boolean checkForImplicits) {
-		system = UrlUtil.toCanonicalUrl(system, version);
-		ourLog.info("Fetching CodeSystem for: {}", system);
-		IBaseResource fetched = myValidationSupport.fetchCodeSystem(system);
+		String canonicalUrl = UrlUtil.toCanonicalUrl(system, version);
+		ourLog.info("Fetching CodeSystem for: {}", canonicalUrl);
+		IBaseResource fetched = myValidationSupport.fetchCodeSystem(canonicalUrl);
 		if (fetched == null) {
 			return null;
 		}

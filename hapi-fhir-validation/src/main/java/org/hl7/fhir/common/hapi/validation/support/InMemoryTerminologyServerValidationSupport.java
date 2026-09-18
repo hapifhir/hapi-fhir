@@ -17,7 +17,6 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.dstu2.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.Enumerations;
@@ -571,9 +570,10 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		}
 
 		if (cs != null) {
-			IPrimitiveType<?> content =
-					getFhirContext().newTerser().getSingleValueOrNull(cs, "content", IPrimitiveType.class);
-			return !"not-present".equals(content.getValueAsString());
+			// content is 1..1 in the spec but optional in a stored resource, and an absent one is not
+			// "not-present"
+			String content = getFhirContext().newTerser().getSinglePrimitiveValueOrNull(cs, "content");
+			return !"not-present".equals(content);
 		}
 
 		return false;

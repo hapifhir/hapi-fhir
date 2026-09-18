@@ -2679,15 +2679,13 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			@Nonnull IBaseResource theValueSet) {
 		invokeRunnableForUnitTest();
 
-		IPrimitiveType<?> urlPrimitive;
+		// a ValueSet with no url cannot be looked up by one, so there is nothing to validate against
+		String url;
 		if (theValueSet instanceof org.hl7.fhir.dstu2.model.ValueSet) {
-			urlPrimitive = FhirContext.forDstu2Hl7OrgCached()
-					.newTerser()
-					.getSingleValueOrNull(theValueSet, "url", IPrimitiveType.class);
+			url = FhirContext.forDstu2Hl7OrgCached().newTerser().getSinglePrimitiveValueOrNull(theValueSet, "url");
 		} else {
-			urlPrimitive = myContext.newTerser().getSingleValueOrNull(theValueSet, "url", IPrimitiveType.class);
+			url = myContext.newTerser().getSinglePrimitiveValueOrNull(theValueSet, "url");
 		}
-		String url = urlPrimitive.getValueAsString();
 		if (isNotBlank(url)) {
 			// A URL with no version resolves to whichever version was saved last
 			String version = CommonCodeSystemsTerminologyService.getValueSetVersion(myContext, theValueSet);

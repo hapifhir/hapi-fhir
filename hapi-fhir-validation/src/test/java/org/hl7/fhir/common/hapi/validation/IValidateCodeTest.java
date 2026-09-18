@@ -223,6 +223,25 @@ public interface IValidateCodeTest {
 		assertEquals(DISPLAY, outcome.getDisplay());
 	}
 
+	// Created by Claude Opus 5
+	@Test
+	default void validateCode_codeSystemVersionWithoutACodeSystem_namesNoVersionOnTheRequest() {
+		// a systemVersion qualifies a system, so with no system there is nothing for it to name and strict
+		// servers reject it. The response is registered under no version, so it is returned only if none was
+		// sent.
+		createValueSetReturnParameters(true, DISPLAY, null, null);
+
+		CodeValidationResult outcome = getService()
+				.validateCode(
+						null,
+						new ConceptValidationOptions(),
+						new ValidateCodeRequest(null, CODE_SYSTEM_VERSION, CODE, DISPLAY, VALUE_SET_URL));
+
+		assertNotNull(outcome);
+		assertEquals(CODE, outcome.getCode());
+		assertEquals(DISPLAY, outcome.getDisplay());
+	}
+
 	@Test
 	default void validateCode_withCodeSystemSuccess_returnsCorrectly() {
 		createCodeSystemReturnParameters(true, DISPLAY, null, null);

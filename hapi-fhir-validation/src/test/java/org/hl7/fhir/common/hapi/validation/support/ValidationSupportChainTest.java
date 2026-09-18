@@ -8,9 +8,9 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.TranslateConceptResult;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
+import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
-import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.util.TestUtil;
@@ -256,6 +256,30 @@ public class ValidationSupportChainTest extends BaseTest {
 		verify(myValidationSupport0, times(1)).isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0));
 		verify(myValidationSupport0, times(1))
 			.validateCode(any(), any(), eq(new ValidateCodeRequest(CODE_SYSTEM_URL_0, CODE_SYSTEM_VERSION_0, CODE_0, DISPLAY_0, null)));
+	}
+
+	/**
+	 * A caller who named a version needs to see it in the message, or they cannot tell which version was the
+	 * one not found. Whether the code system is known at all is still decided on the URL alone.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	public void validateCode_codeSystemIsUnknown_namesTheRequestedVersionInTheMessage() {
+		// Setup
+		prepareMock(myValidationSupport0);
+		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(true), myValidationSupport0);
+
+		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(false);
+		when(myValidationSupport0.fetchCodeSystem(eq(CODE_SYSTEM_URL_0))).thenReturn(null);
+
+		// Test
+		IValidationSupport.CodeValidationResult result = validateCodeWithVersion(chain, CODE_SYSTEM_VERSION_0);
+
+		// Verify
+		assertNotNull(result);
+		assertThat(result.getMessage()).contains(CODE_SYSTEM_URL_0 + "|" + CODE_SYSTEM_VERSION_0);
+		// the existence probe uses the bare canonical
+		verify(myValidationSupport0, times(1)).fetchCodeSystem(eq(CODE_SYSTEM_URL_0));
 	}
 
 	/**

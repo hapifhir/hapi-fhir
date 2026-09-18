@@ -685,9 +685,13 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 
 		IGenericClient client = provideClient();
 
+		// with no value set to validate in, the code is validated against the code system on its own
+		boolean isCodeSystemOperation = theValueSet == null && theValueSetUrl == null;
+		String resourceType = isCodeSystemOperation ? "CodeSystem" : "ValueSet";
+
 		// this message builder can be removed once we introduce a parameter object like CodeValidationRequest
 		ValidationErrorMessageBuilder errorMessageBuilder = theServerMessage -> {
-			if (theValueSetUrl == null && theValueSet == null) {
+			if (isCodeSystemOperation) {
 				return getErrorMessage(
 						ERROR_CODE_UNKNOWN_CODE_IN_CODE_SYSTEM, theCodeSystem, theCode, getBaseUrl(), theServerMessage);
 			}
@@ -700,13 +704,9 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 					theServerMessage);
 		};
 
-		IBaseParameters input = buildValidateCodeInputParameters(
-				theCodeSystem, theCodeSystemVersion, theCode, theDisplay, theValueSetUrl, theValueSet);
-
-		String resourceType = "ValueSet";
-		if (theValueSet == null && theValueSetUrl == null) {
-			resourceType = "CodeSystem";
-		}
+		IBaseParameters input =
+				buildValidateCodeInputParameters(theCodeSystem, theCode, theDisplay, theValueSetUrl, theValueSet);
+		addCodeSystemVersionParameter(input, theCodeSystem, theCodeSystemVersion, isCodeSystemOperation);
 
 		try {
 			IBaseParameters output = client.operation()
@@ -1047,27 +1047,27 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 
 	/**
 	 * Adds the code system version to the parameters built by
-	 * {@link #buildValidateCodeInputParameters(String, String, String, String, IBaseResource)}. The two
-	 * operations name this parameter differently, so the name is chosen from the operation being invoked.
+	 * {@link #buildValidateCodeInputParameters(String, String, String, String, IBaseResource)}, so that a
+	 * subclass which overrides that method keeps the version without having to add it itself.
+	 * <p>
+	 * <code>CodeSystem/$validate-code</code> names this parameter <code>version</code>. On
+	 * <code>ValueSet/$validate-code</code> that name belongs to the value set, and the code system version is
+	 * <code>systemVersion</code>. A version with no <code>system</code> beside it qualifies nothing, and strict
+	 * servers reject it, so it is not sent at all.
+	 * </p>
 	 */
-	protected IBaseParameters buildValidateCodeInputParameters(
+	// Created by Claude Opus 5
+	private void addCodeSystemVersionParameter(
+			IBaseParameters theParams,
 			String theCodeSystem,
 			String theCodeSystemVersion,
-			String theCode,
-			String theDisplay,
-			String theValueSetUrl,
-			IBaseResource theValueSet) {
-		IBaseParameters params =
-				buildValidateCodeInputParameters(theCodeSystem, theCode, theDisplay, theValueSetUrl, theValueSet);
-		if (isBlank(theCodeSystemVersion)) {
-			return params;
+			boolean theIsCodeSystemOperation) {
+		if (isBlank(theCodeSystem) || isBlank(theCodeSystemVersion)) {
+			return;
 		}
 
-		// CodeSystem/$validate-code names the code system version "version". On ValueSet/$validate-code that
-		// name belongs to the value set, and the code system version is "systemVersion".
-		String parameterName = theValueSet == null && theValueSetUrl == null ? "version" : "systemVersion";
-		ParametersUtil.addParameterToParametersString(getFhirContext(), params, parameterName, theCodeSystemVersion);
-		return params;
+		String parameterName = theIsCodeSystemOperation ? "version" : "systemVersion";
+		ParametersUtil.addParameterToParametersString(getFhirContext(), theParams, parameterName, theCodeSystemVersion);
 	}
 
 	protected IBaseParameters buildValidateCodeInputParameters(

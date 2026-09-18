@@ -30,15 +30,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Two versions of the same implementation guide installed on one server, where the codes change between the
  * two versions, so validating a resource has to use the version that was specified and not the other one. The
- * nested classes cover the two ways a resource ends up bound to one version:
+ * nested classes cover the ways a resource ends up bound to one version:
  * <ul>
  *	   <li>{@link VersionedProfileInEachIgTest} - each IG version ships its own version of the profile,
  *	   and the resource names one of them in {@literal meta.profile} as {@literal url|version}</li>
  *	   <li>{@link ProfileFromAConsumingIgTest} - the IG versions ship only terminology, and a separate
  *	   IG holds a profile bound to one IG version's ValueSet by {@literal url|version}, named by an
  *	   unversioned {@literal meta.profile}</li>
+ *	   <li>{@link MixedVersionsInOneBundleTest} - one transaction Bundle whose entries name different IG
+ *	   versions, so both versions have to be honoured within a single validation</li>
  * </ul>
- * In both, the ValueSet names its own CodeSystem version, so every step of the chain specifies a version.
+ * In each, the ValueSet names its own CodeSystem version, so every step of the chain specifies a version.
  * Installing with {@link PackageInstallationSpec.VersionPolicyEnum#MULTI_VERSION} is what keeps both versions
  * of each resource on the server.
  * <p/>

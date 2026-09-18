@@ -11,6 +11,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -271,6 +272,16 @@ public class UrlUtilTest {
 		assertThatThrownBy(() -> UrlUtil.toCanonicalUrl("http://foo|456", "123"))
 			.isInstanceOf(InvalidRequestException.class)
 			.hasMessageContaining("Version in URL[http://foo|456 does not match expected version: 123");
+	}
+
+	/**
+	 * A version with no URL is not a canonical, so there is nothing to render. The declared @Nonnull has to
+	 * hold for callers which concatenate or log the result.
+	 */
+	@Test
+	void canonicalUrlPartsToString_withNoUrl_returnsEmptyString() {
+		assertEquals("", new UrlUtil.CanonicalUrlParts(null, Optional.empty()).toString());
+		assertEquals("", new UrlUtil.CanonicalUrlParts(null, Optional.of("123")).toString());
 	}
 
 }
