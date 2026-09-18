@@ -9,7 +9,7 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportBinaryFileId;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
-import ca.uhn.fhir.batch2.jobs.export.v3.ExpandResourceAndWriteBinaryStep;
+import ca.uhn.fhir.batch2.jobs.export.v2.ExpandResourceAndWriteBinaryV2Step;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.context.FhirContext;
@@ -21,6 +21,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -55,6 +56,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
@@ -73,6 +75,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
@@ -82,12 +85,21 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+/**
+ * Tests for the V2 bulk export expand-and-write step.
+ * <p>
+ * V2 is a legacy job whose behaviour is frozen, so this test exists to pin that behaviour
+ * independently of the V3 step (which V2 used to subclass). The MDM expansion and
+ * partition-scoped Binary write covered here are V2-only.
+ */
+// Created by Claude Opus 5
 @ExtendWith(MockitoExtension.class)
-public class ExpandResourceAndWriteBinaryStepTest {
-	private static final Logger ourLog = (Logger) LoggerFactory.getLogger(ExpandResourceAndWriteBinaryStep.class);
+public class ExpandResourceAndWriteBinaryV2StepTest {
+	private static final Logger ourLog =
+		(Logger) LoggerFactory.getLogger(ExpandResourceAndWriteBinaryV2Step.class);
 
 	// inner test class
-	private static class TestExpandResourceAndWriteBinaryStep extends ExpandResourceAndWriteBinaryStep {
+	private static class TestExpandResourceAndWriteBinaryV2Step extends ExpandResourceAndWriteBinaryV2Step {
 
 		private OutputStreamWriter myWriter;
 
@@ -95,15 +107,15 @@ public class ExpandResourceAndWriteBinaryStepTest {
 			myWriter = theWriter;
 		}
 
-//		@Override
-//		protected OutputStreamWriter getStreamWriter(ByteArrayOutputStream theOutputStream) {
-//			if (myWriter == null) {
-//				return super.getStreamWriter(theOutputStream);
-//			}
-//			else {
-//				return myWriter;
-//			}
-//		}
+		@Override
+		protected OutputStreamWriter getStreamWriter(ByteArrayOutputStream theOutputStream) {
+			if (myWriter == null) {
+				return super.getStreamWriter(theOutputStream);
+			}
+			else {
+				return myWriter;
+			}
+		}
 	}
 
 	@Mock
@@ -118,10 +130,14 @@ public class ExpandResourceAndWriteBinaryStepTest {
 	@Mock
 	IJobStepExecutionServices myJobStepExecutionServices;
 
+	@Mock
+	private IBulkExportProcessor<JpaPid> myBulkExportProcessor;
+
 	@SuppressWarnings("unused")
 	@Spy
 	private InterceptorService myInterceptorService = new InterceptorService();
 
+	@SuppressWarnings("unused")
 	@Spy
 	private PartitionSettings myPartitionSettings = new PartitionSettings();
 
@@ -137,7 +153,16 @@ public class ExpandResourceAndWriteBinaryStepTest {
 	private IHapiTransactionService myTransactionService = new NonTransactionalHapiTransactionService();
 
 	@InjectMocks
-	private TestExpandResourceAndWriteBinaryStep myFinalStep;
+	private TestExpandResourceAndWriteBinaryV2Step myFinalStep;
+
+	@Mock
+	IFhirResourceDao<IBaseBinary> binaryDao;
+	@Mock
+	IJobDataSink<BulkExportBinaryFileId> sink;
+	@Captor
+	ArgumentCaptor<IBaseBinary> binaryCaptor;
+	@Captor
+	ArgumentCaptor<SystemRequestDetails> binaryDaoCreateRequestDetailsCaptor;
 
 	@BeforeEach
 	public void init() {
@@ -178,22 +203,29 @@ public class ExpandResourceAndWriteBinaryStepTest {
 		return mockDao;
 	}
 
-	private RequestPartitionId getPartitionId(boolean thePartitioned) {
-		if (thePartitioned) {
-			return RequestPartitionId.fromPartitionName("Partition-A");
-		} else {
-			return RequestPartitionId.fromPartitionId(null);
-		}
+	/**
+	 * Every PID translates to an empty forced ID, so the step falls back to the numeric PID.
+	 */
+	private void stubForcedIdTranslation() {
+		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(t->{
+			@SuppressWarnings("unchecked")
+			Set<IResourcePersistentId<JpaPid>> inputSet = t.getArgument(0, Set.class);
+			Map<IResourcePersistentId<?>, Optional<String>> map = new HashMap<>();
+			for (var next : inputSet) {
+				map.put(next, Optional.empty());
+			}
+			return new PersistentIdToForcedIdMap<>(map);
+		});
 	}
 
-	@Mock
-	IFhirResourceDao<IBaseBinary> binaryDao;
-	@Mock
-	IJobDataSink<BulkExportBinaryFileId> sink;
-	@Captor
-	ArgumentCaptor<IBaseBinary> binaryCaptor;
-	@Captor
-	ArgumentCaptor<SystemRequestDetails> binaryDaoCreateRequestDetailsCaptor;
+	private void stubBinaryUpdate(IIdType theBinaryId) {
+		DaoMethodOutcome methodOutcome = new DaoMethodOutcome();
+		methodOutcome.setId(theBinaryId);
+		when(myDaoRegistry.getResourceDao(eq("Binary")))
+			.thenReturn(binaryDao);
+		when(binaryDao.update(any(IBaseBinary.class), any(RequestDetails.class)))
+			.thenReturn(methodOutcome);
+	}
 
 	@Test
 	public void testExpandResources_RespectMaximumFileCapacity() {
@@ -226,15 +258,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 			String fhirId = t.getArgument(1, String.class);
 			return JpaPid.fromId(Long.parseLong(fhirId));
 		});
-		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(t->{
-			@SuppressWarnings("unchecked")
-			Set<IResourcePersistentId<JpaPid>> inputSet = t.getArgument(0, Set.class);
-			Map<IResourcePersistentId<?>, Optional<String>> map = new HashMap<>();
-			for (var next : inputSet) {
-				map.put(next, Optional.empty());
-			}
-			return new PersistentIdToForcedIdMap<>(map);
-		});
+		stubForcedIdTranslation();
 		when(myDaoRegistry.getResourceDao(eq("Binary")))
 			.thenReturn(binaryDao);
 		AtomicInteger binaryIdCounter = new AtomicInteger(1);
@@ -253,14 +277,13 @@ public class ExpandResourceAndWriteBinaryStepTest {
 		// verify
 		assertEquals(new RunOutcome(resources.size()).getRecordsProcessed(), outcome.getRecordsProcessed());
 
-		verify(binaryDao, times(	3))
+		verify(binaryDao, times(3))
 			.update(binaryCaptor.capture(), binaryDaoCreateRequestDetailsCaptor.capture());
 
 		for (int i = 0; i < 3; i++) {
 			String outputString = new String(binaryCaptor.getAllValues().get(i).getContent());
 			assertEquals(1000, StringUtils.countOccurrencesOf(outputString, "\n"));
 		}
-
 	}
 
 	@Test
@@ -294,15 +317,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 			String fhirId = t.getArgument(1, String.class);
 			return JpaPid.fromId(Long.parseLong(fhirId));
 		});
-		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(t->{
-			@SuppressWarnings("unchecked")
-			Set<IResourcePersistentId<JpaPid>> inputSet = t.getArgument(0, Set.class);
-			Map<IResourcePersistentId<?>, Optional<String>> map = new HashMap<>();
-			for (var next : inputSet) {
-				map.put(next, Optional.empty());
-			}
-			return new PersistentIdToForcedIdMap<>(map);
-		});
+		stubForcedIdTranslation();
 		when(myDaoRegistry.getResourceDao(eq("Binary")))
 			.thenReturn(binaryDao);
 		AtomicInteger binaryIdCounter = new AtomicInteger(1);
@@ -344,7 +359,6 @@ public class ExpandResourceAndWriteBinaryStepTest {
 		assertEquals(100, totalRecords);
 	}
 
-
 	@Test
 	public void run_validInputNoErrors_succeeds() {
 		// setup
@@ -362,25 +376,12 @@ public class ExpandResourceAndWriteBinaryStepTest {
 		);
 
 		IIdType binaryId = new IdType("Binary/123");
-		DaoMethodOutcome methodOutcome = new DaoMethodOutcome();
-		methodOutcome.setId(binaryId);
 
 		// when
 		when(patientDao.search(any(), any())).thenReturn(new SimpleBundleProvider(resources));
 		when(myIdHelperService.newPidFromStringIdAndResourceName(any(), anyString(), anyString())).thenReturn(JpaPid.fromId(1L));
-		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(t->{
-			@SuppressWarnings("unchecked")
-			Set<IResourcePersistentId<JpaPid>> inputSet = t.getArgument(0, Set.class);
-			Map<IResourcePersistentId<?>, Optional<String>> map = new HashMap<>();
-			for (var next : inputSet) {
-				map.put(next, Optional.empty());
-			}
-			return new PersistentIdToForcedIdMap<>(map);
-		});
-		when(myDaoRegistry.getResourceDao(eq("Binary")))
-			.thenReturn(binaryDao);
-		when(binaryDao.update(any(IBaseBinary.class), any(RequestDetails.class)))
-			.thenReturn(methodOutcome);
+		stubForcedIdTranslation();
+		stubBinaryUpdate(binaryId);
 		when(myJobStepExecutionServices.newRequestDetails(any())).thenReturn(new SystemRequestDetails());
 
 		// test
@@ -398,6 +399,115 @@ public class ExpandResourceAndWriteBinaryStepTest {
 		verify(sink)
 			.accept(fileIdArgumentCaptor.capture());
 		assertEquals(binaryId.getValueAsString(), fileIdArgumentCaptor.getValue().getBinaryId());
+	}
+
+	/**
+	 * MDM expansion is a V2-only behaviour. The V3 step gated it behind isV2Job(), so it
+	 * was only ever reachable through this job.
+	 */
+	@Test
+	public void run_expandMdmEnabled_expandsMdmResources() {
+		// setup
+		JobInstance instance = new JobInstance();
+		instance.setInstanceId("1");
+		IFhirResourceDao<?> patientDao = mockOutDaoRegistry();
+
+		ResourceIdList idList = new ResourceIdList();
+		ArrayList<IBaseResource> resources = createResourceList(idList);
+
+		BulkExportJobParameters parameters = createParameters();
+		parameters.setExpandMdm(true);
+
+		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> input = createInput(
+			idList,
+			parameters,
+			instance
+		);
+
+		// when
+		when(patientDao.search(any(), any())).thenReturn(new SimpleBundleProvider(resources));
+		when(myIdHelperService.newPidFromStringIdAndResourceName(any(), anyString(), anyString())).thenReturn(JpaPid.fromId(1L));
+		stubForcedIdTranslation();
+		stubBinaryUpdate(new IdType("Binary/123"));
+		when(myJobStepExecutionServices.newRequestDetails(any())).thenReturn(new SystemRequestDetails());
+
+		// test
+		myFinalStep.run(input, sink);
+
+		// verify
+		verify(myBulkExportProcessor).expandMdmResources(anyList());
+	}
+
+	@Test
+	public void run_expandMdmDisabled_doesNotExpandMdmResources() {
+		// setup
+		JobInstance instance = new JobInstance();
+		instance.setInstanceId("1");
+		IFhirResourceDao<?> patientDao = mockOutDaoRegistry();
+
+		ResourceIdList idList = new ResourceIdList();
+		ArrayList<IBaseResource> resources = createResourceList(idList);
+
+		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> input = createInput(
+			idList,
+			createParameters(),
+			instance
+		);
+
+		// when
+		when(patientDao.search(any(), any())).thenReturn(new SimpleBundleProvider(resources));
+		when(myIdHelperService.newPidFromStringIdAndResourceName(any(), anyString(), anyString())).thenReturn(JpaPid.fromId(1L));
+		stubForcedIdTranslation();
+		stubBinaryUpdate(new IdType("Binary/123"));
+		when(myJobStepExecutionServices.newRequestDetails(any())).thenReturn(new SystemRequestDetails());
+
+		// test
+		myFinalStep.run(input, sink);
+
+		// verify
+		verify(myBulkExportProcessor, never()).expandMdmResources(anyList());
+	}
+
+	/**
+	 * V2 writes the Binary against the partition resolved for security at request time,
+	 * rather than the job's default system request details.
+	 */
+	@Test
+	public void run_partitionIdForSecurityProvided_writesBinaryOnThatPartition() {
+		// setup
+		JobInstance instance = new JobInstance();
+		instance.setInstanceId("1");
+		IFhirResourceDao<?> patientDao = mockOutDaoRegistry();
+
+		ResourceIdList idList = new ResourceIdList();
+		ArrayList<IBaseResource> resources = createResourceList(idList);
+
+		RequestPartitionId securityPartitionId = RequestPartitionId.fromPartitionName("Partition-A");
+		BulkExportJobParameters parameters = createParameters();
+		parameters.setPartitionIdForSecurity(securityPartitionId);
+
+		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> input = createInput(
+			idList,
+			parameters,
+			instance
+		);
+
+		// when
+		when(patientDao.search(any(), any())).thenReturn(new SimpleBundleProvider(resources));
+		when(myIdHelperService.newPidFromStringIdAndResourceName(any(), anyString(), anyString())).thenReturn(JpaPid.fromId(1L));
+		stubForcedIdTranslation();
+		stubBinaryUpdate(new IdType("Binary/123"));
+		when(myJobStepExecutionServices.newRequestDetails(any())).thenReturn(new SystemRequestDetails());
+
+		// test
+		myFinalStep.run(input, sink);
+
+		// verify
+		verify(binaryDao)
+			.update(binaryCaptor.capture(), binaryDaoCreateRequestDetailsCaptor.capture());
+		assertEquals(
+			securityPartitionId,
+			binaryDaoCreateRequestDetailsCaptor.getValue().getRequestPartitionId());
 	}
 
 	@Nonnull
@@ -446,15 +556,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 		// when
 		when(patientDao.search(any(), any())).thenReturn(new SimpleBundleProvider(resources));
 		when(myIdHelperService.newPidFromStringIdAndResourceName(any(), anyString(), anyString())).thenReturn(JpaPid.fromId(1L));
-		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(t->{
-			@SuppressWarnings("unchecked")
-			Set<IResourcePersistentId<JpaPid>> inputSet = t.getArgument(0, Set.class);
-			Map<IResourcePersistentId<?>, Optional<String>> map = new HashMap<>();
-			for (var next : inputSet) {
-				map.put(next, Optional.empty());
-			}
-			return new PersistentIdToForcedIdMap<>(map);
-		});
+		stubForcedIdTranslation();
 		when(myDaoRegistry.getResourceDao(eq("Binary")))
 			.thenReturn(binaryDao);
 

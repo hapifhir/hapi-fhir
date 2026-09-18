@@ -1,0 +1,11 @@
+---
+type: add
+issue: 8383
+title: "Added a pointcut (STORAGE_BULK_EXPORT_RESOURCE_CONVERT) to allow custom
+        export formats. It takes the BulkExportJobParameters and can provide
+        an IResourceConverter implementation.
+        The interface itself takes a wrapped list of resources (all the same kind) as well
+        as the BulkExportJobParameters, and returns a ConvertedFiles object.
+        ConvertedFiles consists of a list of ConvertedFile object, each containing
+        a resource type, the exported mimetype, and the bytes to be written to the Binary.
+"

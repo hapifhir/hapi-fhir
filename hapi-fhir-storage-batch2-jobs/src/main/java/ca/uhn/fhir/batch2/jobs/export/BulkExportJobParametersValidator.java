@@ -20,6 +20,9 @@
 package ca.uhn.fhir.batch2.jobs.export;
 
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
@@ -27,6 +30,7 @@ import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
+import ca.uhn.fhir.rest.api.server.bulk.IResourceConverter;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -52,6 +56,9 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 	@Autowired(required = false)
 	private IBinaryStorageSvc myBinaryStorageSvc;
 
+	@Autowired
+	private InterceptorService myInterceptorService;
+
 	@Nullable
 	@Override
 	public List<String> validate(RequestDetails theRequestDetails, @Nonnull BulkExportJobParameters theParameters) {
@@ -70,9 +77,14 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 		}
 
 		// validate the output format
-		if (!isSupportedOutputFormat(theParameters.getOutputFormat())) {
-			errorMsgs.add("The allowed formats for Bulk Export are %s, %s and %s"
-					.formatted(Constants.CT_FHIR_NDJSON, Constants.CT_APP_NDJSON, Constants.CT_NDJSON));
+		if (!isSupportedOutputFormat(theParameters)) {
+			errorMsgs.add(
+					"Unsupported output format; no known converter available for mime-type %s. Default allowed formats are %s, %s and %s"
+							.formatted(
+									theParameters.getOutputFormat(),
+									Constants.CT_FHIR_NDJSON,
+									Constants.CT_APP_NDJSON,
+									Constants.CT_NDJSON));
 		}
 		// validate the exportId
 		if (!StringUtils.isBlank(theParameters.getExportIdentifier())) {
@@ -146,9 +158,27 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 		return errorMsgs;
 	}
 
-	private boolean isSupportedOutputFormat(String theOutputFormat) {
-		return Constants.CT_FHIR_NDJSON.equalsIgnoreCase(theOutputFormat)
-				|| Constants.CT_APP_NDJSON.equalsIgnoreCase(theOutputFormat)
-				|| Constants.CT_NDJSON.equalsIgnoreCase(theOutputFormat);
+	private boolean isSupportedOutputFormat(BulkExportJobParameters theJobParameters) {
+		boolean isNdJson = BulkDataExportUtil.isNdJson(theJobParameters.getOutputFormat());
+
+		if (myInterceptorService.hasHooks(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_CONVERT)) {
+			HookParams params = new HookParams();
+			params.add(BulkExportJobParameters.class, theJobParameters);
+
+			IResourceConverter converter = (IResourceConverter) myInterceptorService.callHooksAndReturnObject(
+					Pointcut.STORAGE_BULK_EXPORT_RESOURCE_CONVERT, params);
+
+			// a converter is provided
+			if (converter != null) {
+				return true;
+			}
+		}
+
+		if (isNdJson) {
+			// this is our default format - so it's always supported
+			return true;
+		}
+
+		return false;
 	}
 }
