@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.mdm.svc.candidate;
+package ca.uhn.fhir.mdm.model;
 
 public class TooManyCandidatesException extends RuntimeException {
 	public TooManyCandidatesException(String theMessage) {

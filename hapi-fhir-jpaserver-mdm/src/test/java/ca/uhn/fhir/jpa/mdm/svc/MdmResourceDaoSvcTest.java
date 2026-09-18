@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
@@ -9,6 +10,8 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
+import ca.uhn.fhir.mdm.api.MdmConstants;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -21,6 +24,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -79,6 +84,102 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 		Optional<IAnyResource> foundSourcePatient = myResourceDaoSvc.searchGoldenResourceByEID(TEST_EID, "Patient");
 		assertThat(foundSourcePatient).isPresent();
 		assertEquals(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue(), foundSourcePatient.get().getIdElement().toUnqualifiedVersionless().getValue());
+	}
+
+	@Test
+	public void tagResourceAsUnmatched_noId_DoesntAddMeta() {
+		// setup
+		Patient patient = buildFrankPatient(); // not saved
+		MdmTransactionContext context = new MdmTransactionContext();
+		context.setIsBlocked(true); // won't matter
+
+		// test
+		myResourceDaoSvc.tagResourceAsUnmatched(patient, context);
+
+		// validate
+		assertTrue(patient.getMeta() == null
+			|| patient.getMeta().getTag()
+			.stream().noneMatch(t -> t.getSystem().equalsIgnoreCase(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE)));
+	}
+
+	@Test
+	public void tagResourceAsUnmatched_notBlockedNotTooMany_nothingSet() {
+		// setup
+		String existingSystem = "http://hapi-fhir.example.com";
+		String value = "abc123";
+		Patient patient = buildFrankPatient();
+		patient.getMeta()
+			.addTag()
+			.setSystem(existingSystem)
+			.setCode(value);
+		MdmTransactionContext context = new MdmTransactionContext();
+
+		DaoMethodOutcome outcome = myPatientDao.create(patient, new SystemRequestDetails());
+
+		Patient saved = myPatientDao.read(outcome.getId(), new SystemRequestDetails());
+
+		// test
+		myResourceDaoSvc.tagResourceAsUnmatched(saved, context);
+
+		// validate
+		assertNotNull(saved.getMeta());
+		assertTrue(saved.getMeta()
+			.getTag()
+			.stream()
+			.anyMatch(t -> t.getSystem().equalsIgnoreCase(existingSystem) && t.getCode().equalsIgnoreCase(value)));
+		assertTrue(saved.getMeta()
+			.getTag()
+			.stream()
+			.noneMatch(t -> t.getSystem().equalsIgnoreCase(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE)));
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = { true, false })
+	public void tagResourceAsUnmatched_withUnmatchedCriteria_works(boolean theIsTooMany) {
+		// setup
+		Patient patient = buildFrankPatient();
+		MdmTransactionContext context = new MdmTransactionContext();
+		if (theIsTooMany) {
+			context.setTooManyCandidatesMatched(true);
+		} else {
+			// blocked
+			context.setIsBlocked(true);
+		}
+		String existingSystem = "http://hapi-fhir.example.com";
+		String value = "abc123";
+		patient.getMeta()
+			.addTag()
+			.setSystem(existingSystem)
+			.setCode(value);
+
+		DaoMethodOutcome outcome = myPatientDao.create(patient, new SystemRequestDetails());
+
+		Patient saved = myPatientDao.read(outcome.getId(), new SystemRequestDetails());
+
+		// test
+		myResourceDaoSvc.tagResourceAsUnmatched(saved, context);
+
+		// validate
+		saved = myPatientDao.read(outcome.getId(), new SystemRequestDetails());
+
+		assertNotNull(saved.getMeta());
+		assertTrue(saved.getMeta()
+			.getTag()
+			.stream()
+			.filter(t -> t.getSystem().equalsIgnoreCase(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE))
+			.anyMatch(t -> {
+				if (theIsTooMany) {
+					return t.getCode().equalsIgnoreCase(MdmConstants.TOO_MANY_CANDIDATES);
+				} else {
+					return t.getCode().equalsIgnoreCase(MdmConstants.BLOCKED_VALUE);
+				}
+			}));
+		assertTrue(
+			saved.getMeta()
+				.getTag()
+				.stream()
+				.anyMatch(t -> t.getSystem().equalsIgnoreCase(existingSystem) && t.getCode().equalsIgnoreCase(value))
+		);
 	}
 
 	@Test
