@@ -103,4 +103,14 @@ public class ValidateCodeRequest {
 	public int hashCode() {
 		return Objects.hash(myCodeSystem, myCodeSystemVersion, myCode, myDisplay, myValueSetUrl);
 	}
+
+	@Override
+	public String toString() {
+		return "ValidateCodeRequest{" + "myCodeSystem='"
+				+ myCodeSystem + '\'' + ", myCodeSystemVersion='"
+				+ myCodeSystemVersion + '\'' + ", myCode='"
+				+ myCode + '\'' + ", myDisplay='"
+				+ myDisplay + '\'' + ", myValueSetUrl='"
+				+ myValueSetUrl + '\'' + '}';
+	}
 }

@@ -3,5 +3,7 @@ type: add
 issue: 8391
 jira: SMILE-12842
 title: "A new `validateCode` method has been added to `IValidationSupport` which takes a `ValidateCodeRequest`,
-  naming the code system version to validate against alongside the code system. Existing implementations are
-  unaffected, as it defaults to delegating to the existing method."
+  naming the code system version to validate against alongside the code system. Implementations which override
+  only the existing `validateCode` continue to work, as the new method delegates to it by default. A class
+  which wraps another `IValidationSupport` should forward the new method as well, or the code system version
+  is dropped before it reaches what it wraps."

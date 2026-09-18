@@ -182,7 +182,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		String valueSetUrl = theRequest.getValueSetUrl();
 		// expandValueSet and validateCodeInExpandedValueSet identify the code system by its "system|version"
 		// canonical rather than as a system and a version
-		String codeSystemUrlAndVersion = ValidationSupportUtils.getVersionedCodeSystem(codeSystem, codeSystemVersion);
+		String codeSystemUrlAndVersion = UrlUtil.toCanonicalUrl(codeSystem, codeSystemVersion);
 
 		IBaseResource vs;
 		if (isNotBlank(valueSetUrl)) {
@@ -783,8 +783,8 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 				return false;
 			}
 
-			String loadedCodeSystemUrl = ValidationSupportUtils.getVersionedCodeSystem(
-					includeOrExcludeConceptSystemUrl, includeOrExcludeConceptSystemVersion);
+			String loadedCodeSystemUrl =
+					UrlUtil.toCanonicalUrl(includeOrExcludeConceptSystemUrl, includeOrExcludeConceptSystemVersion);
 
 			includeOrExcludeSystemResource = codeSystemConverter.apply(fetchCodeSystem(
 					theValidationSupportContext,
@@ -1059,15 +1059,13 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		}
 
 		if (unversioned != null) {
-			String unversionedVersion =
-					getFhirContext().newTerser().getSinglePrimitiveValueOrNull(unversioned, "version");
+			String unversionedVersion = myCtx.newTerser().getSinglePrimitiveValueOrNull(unversioned, "version");
 			if (theCodeSystemVersion.equals(unversionedVersion)) {
 				return unversioned;
 			}
 		}
 
-		return rootValidationSupport.fetchCodeSystem(
-				ValidationSupportUtils.getVersionedCodeSystem(theCodeSystemUrl, theCodeSystemVersion));
+		return rootValidationSupport.fetchCodeSystem(UrlUtil.toCanonicalUrl(theCodeSystemUrl, theCodeSystemVersion));
 	}
 
 	// Created by Claude Opus 5

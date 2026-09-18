@@ -46,13 +46,13 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.LogicUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
-import org.hl7.fhir.common.hapi.validation.support.ValidationSupportUtils;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -374,7 +374,7 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 		if (retVal == null) {
 			retVal = new CodeValidationResult();
 			retVal.setMessage("Terminology service was unable to provide validation for "
-					+ ValidationSupportUtils.getVersionedCodeSystem(theCodeSystemUrl, theVersion) + "#" + theCode);
+					+ UrlUtil.toCanonicalUrl(theCodeSystemUrl, theVersion) + "#" + theCode);
 		}
 		return retVal;
 	}
@@ -410,7 +410,7 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 			code = extractCodingCode(theCoding);
 			system = extractCodingSystem(theCoding);
 			String version = extractCodingVersion(theFhirContext, theFhirTerser, theCoding);
-			system = ValidationSupportUtils.getVersionedCodeSystem(system, version);
+			system = UrlUtil.toCanonicalUrl(system, version);
 		} else {
 			code = theCode.getValue();
 			system = theSystem.getValue();
@@ -459,12 +459,12 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 	}
 
 	/**
-	 * @deprecated Please use {@link ValidationSupportUtils#getVersionedCodeSystem(String, String)} instead.
+	 * @deprecated Please use {@link UrlUtil#toCanonicalUrl(String, String)} instead.
 	 */
 	@Deprecated(since = "8.14.0")
 	@Nullable
 	public static String createVersionedSystemIfVersionIsPresent(
 			@Nullable String theCodeSystemUrl, @Nullable String theVersion) {
-		return ValidationSupportUtils.getVersionedCodeSystem(theCodeSystemUrl, theVersion);
+		return UrlUtil.toCanonicalUrl(theCodeSystemUrl, theVersion);
 	}
 }

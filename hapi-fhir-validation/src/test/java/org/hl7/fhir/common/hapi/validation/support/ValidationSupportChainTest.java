@@ -231,6 +231,34 @@ public class ValidationSupportChainTest extends BaseTest {
 	}
 
 	/**
+	 * The older signature has no version parameter, so a caller naming a version can only pack it into the
+	 * code system as "system|version". The chain has to split that back out when it builds the request, or
+	 * the packed string reaches the downstream support as the code system URL and the version is lost - and
+	 * a link which synthesises a compose include from it, as InMemoryTerminologyServerValidationSupport
+	 * does, ends up with a pipe inside ConceptSetComponent.system and no version at all.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	public void validateCode_codeSystemPackedWithItsVersion_splitsTheVersionOutIntoTheRequest() {
+		// Setup
+		prepareMock(myValidationSupport0);
+		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(true), myValidationSupport0);
+
+		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(true);
+		when(myValidationSupport0.validateCode(any(), any(), any()))
+			.thenAnswer(t -> new IValidationSupport.CodeValidationResult());
+
+		// Test
+		chain.validateCode(newValidationCtx(chain), new ConceptValidationOptions(),
+			CODE_SYSTEM_URL_0 + "|" + CODE_SYSTEM_VERSION_0, CODE_0, DISPLAY_0, null);
+
+		// Verify
+		verify(myValidationSupport0, times(1)).isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0));
+		verify(myValidationSupport0, times(1))
+			.validateCode(any(), any(), eq(new ValidateCodeRequest(CODE_SYSTEM_URL_0, CODE_SYSTEM_VERSION_0, CODE_0, DISPLAY_0, null)));
+	}
+
+	/**
 	 * The cache key has to carry the code system version, or a code validated against one version answers for
 	 * every other version of the same system - which would defeat the version being passed at all.
 	 */

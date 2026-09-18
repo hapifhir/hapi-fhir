@@ -113,7 +113,6 @@ import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hibernate.search.mapper.pojo.massindexing.impl.PojoMassIndexingLoggingMonitor;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.ValidationSupportUtils;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.context.ConversionContext40_50;
 import org.hl7.fhir.convertors.conv40_50.VersionConvertor_40_50;
@@ -2692,7 +2691,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		if (isNotBlank(url)) {
 			// A URL with no version resolves to whichever version was saved last
 			String version = CommonCodeSystemsTerminologyService.getValueSetVersion(myContext, theValueSet);
-			String canonicalUrl = ValidationSupportUtils.getVersionedValueSet(url, version);
+			String canonicalUrl = UrlUtil.toCanonicalUrl(url, version);
 			return validateCode(
 					theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, canonicalUrl);
 		}
@@ -2708,8 +2707,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			@Nonnull ValidateCodeRequest theRequest) {
 		// The lookups below take the code system as a single "url|version" identifier, which
 		// getCurrentCodeSystemVersion also uses as a cache key.
-		String codeSystemUrl = ValidationSupportUtils.getVersionedCodeSystem(
-				theRequest.getCodeSystem(), theRequest.getCodeSystemVersion());
+		String codeSystemUrl = UrlUtil.toCanonicalUrl(theRequest.getCodeSystem(), theRequest.getCodeSystemVersion());
 		return validateCode(
 				theValidationSupportContext,
 				theOptions,

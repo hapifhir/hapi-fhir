@@ -816,10 +816,13 @@ public class ValidationSupportChain implements IValidationSupport {
 			String theCode,
 			String theDisplay,
 			String theValueSetUrl) {
+		// On this signature a code system can only name a version by carrying it packed as "system|version"
+		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(theCodeSystem);
 		return validateCode(
 				theValidationSupportContext,
 				theOptions,
-				new ValidateCodeRequest(theCodeSystem, null, theCode, theDisplay, theValueSetUrl));
+				new ValidateCodeRequest(
+						codeSystem.url(), codeSystem.versionId().orElse(null), theCode, theDisplay, theValueSetUrl));
 	}
 
 	// Created by Claude Opus 5

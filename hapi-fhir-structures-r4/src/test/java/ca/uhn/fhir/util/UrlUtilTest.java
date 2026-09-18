@@ -247,5 +247,30 @@ public class UrlUtilTest {
 		}
 	}
 
+	// Created by Claude Opus 5
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		# Input URL      , Input Version , Expected Canonical
+		http://foo       , 123           , http://foo|123
+		http://foo       ,               , http://foo
+		http://foo       , ''            , http://foo
+		http://foo|123   ,               , http://foo|123
+		http://foo%7C123 ,               , http://foo|123
+		http://foo|123   , 123           , http://foo|123
+		http://foo|      , 123           , http://foo|123
+		                 , 123           ,
+		''               , 123           ,
+		""")
+	void toCanonicalUrl_withVariousUrlsAndVersions_returnsTheJoinedCanonical(String theInputUrl, String theInputVersionId, String theExpectedCanonical) {
+		assertEquals(theExpectedCanonical, UrlUtil.toCanonicalUrl(theInputUrl, theInputVersionId));
+	}
+
+	// Created by Claude Opus 5
+	@Test
+	void toCanonicalUrl_versionDisagreesWithTheOneInTheUrl_throws() {
+		assertThatThrownBy(() -> UrlUtil.toCanonicalUrl("http://foo|456", "123"))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("Version in URL[http://foo|456 does not match expected version: 123");
+	}
 
 }
