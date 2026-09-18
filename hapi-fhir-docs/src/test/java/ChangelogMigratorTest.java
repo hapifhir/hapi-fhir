@@ -10,6 +10,7 @@
 // NOTE: ChangelogMigrator is in the DEFAULT PACKAGE (no package declaration).
 // This test is also in the default package so it can reference the class directly.
 
+import ca.uhn.hapi.fhir.docs.ChangelogConstants;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -80,7 +81,7 @@ class ChangelogMigratorTest {
 				+ "normally be split across multiple lines if SPLIT_LINES were enabled in the YAMLFactory";
 
 			HashMap<String, Object> itemMap = new HashMap<>();
-			itemMap.put("type", "add");
+			itemMap.put("type", ChangelogConstants.TYPE_ADD);
 			itemMap.put("title", longTitle);
 			HashMap<String, Object> itemRoot = new HashMap<>();
 			itemRoot.put("item", itemMap);
@@ -144,7 +145,7 @@ class ChangelogMigratorTest {
 			// Parsing back is quoting-agnostic and safe for both versions.
 			List<Map<String, Object>> parsed = mapper.readValue(yaml, List.class);
 			Map<?, ?> item = (Map<?, ?>) parsed.get(0).get("item");
-			assertThat(item.get("type")).isEqualTo("add");
+			assertThat(item.get("type")).isEqualTo(ChangelogConstants.TYPE_ADD);
 			assertThat(item.get("issue")).isEqualTo("HAPI-123");
 		}
 
@@ -163,7 +164,7 @@ class ChangelogMigratorTest {
 			// Round-trip to verify type value without quoting sensitivity
 			List<Map<String, Object>> parsed = mapper.readValue(yaml, List.class);
 			Map<?, ?> item = (Map<?, ?>) parsed.get(0).get("item");
-			assertThat(item.get("type")).isEqualTo("fix");
+			assertThat(item.get("type")).isEqualTo(ChangelogConstants.TYPE_FIX);
 		}
 
 		@Test
@@ -172,8 +173,8 @@ class ChangelogMigratorTest {
 			ObjectMapper mapper = createChangesMapper();
 
 			List<Object> items = buildItems(
-				buildItem("add", "HAPI-1", "First feature"),
-				buildItem("fix", "HAPI-2", "Second fix"),
+				buildItem(ChangelogConstants.TYPE_ADD, "HAPI-1", "First feature"),
+				buildItem(ChangelogConstants.TYPE_FIX, "HAPI-2", "Second fix"),
 				buildItemNoIssue("change", "Third change"));
 
 			String yaml = serializeToString(mapper, items);
@@ -202,7 +203,7 @@ class ChangelogMigratorTest {
 		void changesYaml_outputIsValidYaml() throws IOException {
 			ObjectMapper mapper = createChangesMapper();
 			List<Object> items = buildItems(
-				buildItem("add", "HAPI-99", "Feature addition"));
+				buildItem(ChangelogConstants.TYPE_ADD, "HAPI-99", "Feature addition"));
 
 			StringWriter sw = new StringWriter();
 			mapper.writeValue(sw, items);
@@ -292,28 +293,28 @@ class ChangelogMigratorTest {
 		@DisplayName("Type 'add' mapped correctly")
 		void buildItem_typeAdd() {
 			HashMap<Object, Object> itemMap = applyTypeMapping("add");
-			assertThat(itemMap.get("type")).isEqualTo("add");
+			assertThat(itemMap.get("type")).isEqualTo(ChangelogConstants.TYPE_ADD);
 		}
 
 		@Test
 		@DisplayName("Type 'fix' mapped correctly")
 		void buildItem_typeFix() {
 			HashMap<Object, Object> itemMap = applyTypeMapping("fix");
-			assertThat(itemMap.get("type")).isEqualTo("fix");
+			assertThat(itemMap.get("type")).isEqualTo(ChangelogConstants.TYPE_FIX);
 		}
 
 		@Test
 		@DisplayName("Type 'change' mapped correctly")
 		void buildItem_typeChange() {
 			HashMap<Object, Object> itemMap = applyTypeMapping("change");
-			assertThat(itemMap.get("type")).isEqualTo("change");
+			assertThat(itemMap.get("type")).isEqualTo(ChangelogConstants.TYPE_CHANGE);
 		}
 
 		@Test
 		@DisplayName("Type 'remove' mapped correctly")
 		void buildItem_typeRemove() {
 			HashMap<Object, Object> itemMap = applyTypeMapping("remove");
-			assertThat(itemMap.get("type")).isEqualTo("remove");
+			assertThat(itemMap.get("type")).isEqualTo(ChangelogConstants.TYPE_REMOVE);
 		}
 
 		@Test
@@ -386,7 +387,7 @@ class ChangelogMigratorTest {
 			assertThat(itemRootMap.get("item")).isInstanceOf(Map.class);
 			@SuppressWarnings("unchecked")
 			Map<Object, Object> inner = (Map<Object, Object>) itemRootMap.get("item");
-			assertThat(inner).containsEntry("type", "add");
+			assertThat(inner).containsEntry("type", ChangelogConstants.TYPE_ADD);
 			assertThat(inner).containsEntry("title", "Some feature");
 		}
 	}
@@ -422,11 +423,11 @@ class ChangelogMigratorTest {
 			assertThat(parsed).hasSize(2);
 
 			Map<?, ?> item0 = (Map<?, ?>) parsed.get(0).get("item");
-			assertThat(item0.get("type")).isEqualTo("add");
+			assertThat(item0.get("type")).isEqualTo(ChangelogConstants.TYPE_ADD);
 			assertThat(item0.get("issue")).isEqualTo("HAPI-1");
 
 			Map<?, ?> item1 = (Map<?, ?>) parsed.get(1).get("item");
-			assertThat(item1.get("type")).isEqualTo("fix");
+			assertThat(item1.get("type")).isEqualTo(ChangelogConstants.TYPE_FIX);
 			assertThat(item1.get("issue")).isEqualTo("HAPI-2");
 		}
 
@@ -491,10 +492,10 @@ class ChangelogMigratorTest {
 	private HashMap<Object, Object> applyTypeMapping(String theType) {
 		HashMap<Object, Object> itemMap = new HashMap<>();
 		switch (theType) {
-			case "change": itemMap.put("type", "change"); break;
-			case "fix":    itemMap.put("type", "fix");    break;
-			case "remove": itemMap.put("type", "remove"); break;
-			case "add":    itemMap.put("type", "add");    break;
+			case ChangelogConstants.TYPE_CHANGE: itemMap.put("type", ChangelogConstants.TYPE_CHANGE); break;
+			case ChangelogConstants.TYPE_FIX:    itemMap.put("type", ChangelogConstants.TYPE_FIX);    break;
+			case ChangelogConstants.TYPE_REMOVE: itemMap.put("type", ChangelogConstants.TYPE_REMOVE); break;
+			case ChangelogConstants.TYPE_ADD:    itemMap.put("type", ChangelogConstants.TYPE_ADD);    break;
 			default: throw new Error("Unknown type: " + theType);
 		}
 		return itemMap;

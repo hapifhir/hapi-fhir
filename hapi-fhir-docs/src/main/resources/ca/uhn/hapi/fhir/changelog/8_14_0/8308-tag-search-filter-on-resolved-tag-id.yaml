@@ -1,5 +1,5 @@
 ---
-type: performance
+type: perf
 issue: 8308
 title: "Faster queries using _tag, and _security.
 Previously, searches using the `_tag`, or `_security` parameters resolved the tag

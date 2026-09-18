@@ -8,8 +8,8 @@ import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
-import ca.uhn.fhir.test.utilities.FhirHttpRequest;
-import ca.uhn.fhir.test.utilities.FhirHttpResponse;
+import ca.uhn.fhir.test.utilities.HttpTestRequest;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -61,20 +61,20 @@ class AuthorizationInterceptorWriteResponseJpaR4Test extends BaseResourceProvide
 		myInterceptorRegistry.unregisterInterceptorsIf(AuthorizationInterceptor.class::isInstance);
 	}
 
-	private FhirHttpRequest request(String thePath) {
-		return FhirHttpRequest.to(ourHttpClient.getClient(), myFhirContext, myServerBase + thePath)
+	private HttpTestRequest request(String thePath) {
+		return myServer.fhirRequest(thePath)
 			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
 	}
 
-	private FhirHttpResponse patchObservation(String thePreferReturn) {
+	private HttpTestResponse patchObservation(String thePreferReturn) {
 		return patchObservation(request("/Observation/" + myObservationId.getIdPart()).withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + thePreferReturn));
 	}
 
-	private FhirHttpResponse patchObservation() {
+	private HttpTestResponse patchObservation() {
 		return patchObservation(request("/Observation/" + myObservationId.getIdPart()));
 	}
 
-	private FhirHttpResponse patchObservation(FhirHttpRequest theRequest) {
+	private HttpTestResponse patchObservation(HttpTestRequest theRequest) {
 		return theRequest.patch("""
 				[ { "op": "replace", "path": "/status", "value": "amended" } ]
 			""");
@@ -117,10 +117,10 @@ class AuthorizationInterceptorWriteResponseJpaR4Test extends BaseResourceProvide
 			void patch_writeOnlyOnStoredBundleResource_returnsSameVerdictAsReadOfSameBundle() {
 				IIdType bundleId = setupBundle();
 
-				FhirHttpResponse patchResponse = request("/Bundle/" + bundleId.getIdPart()).patch("""
+				HttpTestResponse patchResponse = request("/Bundle/" + bundleId.getIdPart()).patch("""
 						[ { "op": "replace", "path": "/entry/0/resource/status", "value": "amended" } ]
 					""");
-				FhirHttpResponse readResponse = request("/Bundle/" + bundleId.getIdPart()).get();
+				HttpTestResponse readResponse = request("/Bundle/" + bundleId.getIdPart()).get();
 
 				assertThat(patchResponse.getStatusCode())
 					.as("a PATCH of a stored Bundle must be authorized exactly as a plain read of it")
@@ -158,10 +158,10 @@ class AuthorizationInterceptorWriteResponseJpaR4Test extends BaseResourceProvide
 			void patch_readAndWriteOnStoredBundleResource_returnsSameVerdictAsReadOfSameBundle() {
 				IIdType bundleId = setupBundle();
 
-				FhirHttpResponse patchResponse = request("/Bundle/" + bundleId.getIdPart()).patch("""
+				HttpTestResponse patchResponse = request("/Bundle/" + bundleId.getIdPart()).patch("""
 						[ { "op": "replace", "path": "/entry/0/resource/status", "value": "amended" } ]
 					""");
-				FhirHttpResponse readResponse = request("/Bundle/" + bundleId.getIdPart()).get();
+				HttpTestResponse readResponse = request("/Bundle/" + bundleId.getIdPart()).get();
 
 				assertThat(patchResponse.getStatusCode())
 					.as("a PATCH of a stored Bundle must be authorized exactly as a plain read of it")
@@ -197,7 +197,7 @@ class AuthorizationInterceptorWriteResponseJpaR4Test extends BaseResourceProvide
 
 		@Test
 		void create_writeOnlyConditionalUrlMatchingExistingResource_returnsNoResourceBody() {
-			FhirHttpResponse response = request("/Observation")
+			HttpTestResponse response = request("/Observation")
 				.withHeader(Constants.HEADER_IF_NONE_EXIST, "Observation?identifier=" + MRN_IDENTIFIER)
 				.post(createObservation())
 				.assertStatus(200);
