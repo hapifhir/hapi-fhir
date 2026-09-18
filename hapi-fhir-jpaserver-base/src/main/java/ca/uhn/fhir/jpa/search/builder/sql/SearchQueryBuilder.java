@@ -49,6 +49,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -58,6 +59,7 @@ import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.ComboExpression;
 import com.healthmarketscience.sqlbuilder.Condition;
+import com.healthmarketscience.sqlbuilder.CustomSql;
 import com.healthmarketscience.sqlbuilder.FunctionCall;
 import com.healthmarketscience.sqlbuilder.InCondition;
 import com.healthmarketscience.sqlbuilder.NotCondition;
@@ -72,11 +74,15 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hibernate.dialect.Dialect;
+import org.hibernate.dialect.OracleDialect;
+import org.hibernate.dialect.PostgreSQLDialect;
 import org.hibernate.dialect.SQLServerDialect;
 import org.hibernate.dialect.pagination.AbstractLimitHandler;
+import org.hibernate.query.TypedParameterValue;
 import org.hibernate.query.internal.QueryOptionsImpl;
 import org.hibernate.query.spi.Limit;
 import org.hibernate.query.spi.QueryOptions;
+import org.hibernate.type.StandardBasicTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,6 +107,26 @@ public class SearchQueryBuilder {
 	private static final String DEFAULT_ALIAS_PREFIX = DbSpec.DEFAULT_ALIAS_PREFIX;
 	private static final String CHILD_ALIAS_PREFIX = "s";
 
+	/**
+	 * Renders as the SQL <code>IN</code> operator between a column and a subselect. The surrounding
+	 * spaces matter: the SQL builder library appends the operator verbatim.
+	 */
+	private static final String SQL_IN_OPERATOR = " IN ";
+
+	/*
+	 * Subselects which unpack a JSON array of resource IDs into a single ID column, one per database which
+	 * supports it. Each holds a single %s, which is replaced by a quoted bind variable placeholder holding
+	 * the JSON array. See createPredicateIdsInList(DbColumn, List, boolean).
+	 */
+	private static final String POSTGRES_JSON_ID_LIST_SUBSELECT =
+			"(SELECT CAST(j.value AS BIGINT) FROM jsonb_array_elements_text(CAST(%s AS jsonb)) AS j)";
+
+	private static final String ORACLE_JSON_ID_LIST_SUBSELECT =
+			"(SELECT jt.id FROM JSON_TABLE(%s, '$[*]' COLUMNS (id NUMBER PATH '$')) jt)";
+
+	private static final String SQL_SERVER_JSON_ID_LIST_SUBSELECT =
+			"(SELECT CAST([value] AS BIGINT) FROM OPENJSON(%s))";
+
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchQueryBuilder.class);
 	private final String myBindVariableSubstitutionBase;
 	private final ArrayList<Object> myBindVariableValues;
@@ -115,6 +141,7 @@ public class SearchQueryBuilder {
 	private final SqlObjectFactory mySqlBuilderFactory;
 	private final boolean myCountQuery;
 	private final Dialect myDialect;
+	private final HibernatePropertiesProvider myDialectProvider;
 	private final boolean mySelectPartitionId;
 	private boolean mySelectResourceType;
 	private boolean myMatchNothing;
@@ -151,6 +178,7 @@ public class SearchQueryBuilder {
 				theSqlBuilderFactory,
 				UUID.randomUUID() + "-",
 				theDialectProvider.getDialect(),
+				theDialectProvider,
 				theCountQuery,
 				new ArrayList<>(),
 				thePartitionSettings.isPartitioningEnabled(),
@@ -170,6 +198,7 @@ public class SearchQueryBuilder {
 			SqlObjectFactory theSqlBuilderFactory,
 			String theBindVariableSubstitutionBase,
 			Dialect theDialect,
+			HibernatePropertiesProvider theDialectProvider,
 			boolean theCountQuery,
 			ArrayList<Object> theBindVariableValues,
 			boolean theSelectPartitionId,
@@ -183,6 +212,7 @@ public class SearchQueryBuilder {
 		mySqlBuilderFactory = theSqlBuilderFactory;
 		myCountQuery = theCountQuery;
 		myDialect = theDialect;
+		myDialectProvider = theDialectProvider;
 		if (myDialect instanceof org.hibernate.dialect.MySQLDialect) {
 			dialectIsMySql = true;
 		}
@@ -865,6 +895,100 @@ public class SearchQueryBuilder {
 		return theValues.stream().map(this::generatePlaceholder).collect(Collectors.toList());
 	}
 
+	/**
+	 * Creates a predicate constraining the given column to the given list of resource IDs.
+	 * <p>
+	 * Lists holding more than {@link StorageSettings#getLargeIdListJsonThreshold()} IDs are bound as a
+	 * single JSON array string which the database unpacks with its own JSON function, instead of one bind
+	 * variable per ID. This keeps a very large ID list - such as the one automatic search narrowing
+	 * produces for a user holding tens of thousands of compartment grants - well below the number of bind
+	 * parameters the database accepts in a single statement. It applies to PostgreSQL, Oracle and SQL
+	 * Server; every other database, and every list at or under the threshold, keeps rendering
+	 * <code>IN (?,?,...)</code>.
+	 * </p>
+	 *
+	 * @param theColumn  the column to constrain
+	 * @param theIds     the resource IDs, in the order they should appear in the JSON array
+	 * @param theInverse <code>true</code> to negate the predicate
+	 * @since 8.14.0
+	 */
+	@Nonnull
+	public Condition createPredicateIdsInList(
+			@Nonnull DbColumn theColumn, @Nonnull List<Long> theIds, boolean theInverse) {
+		String jsonIdListSubselect = createJsonIdListSubselect(theIds);
+		if (jsonIdListSubselect == null) {
+			return QueryParameterUtils.toEqualToOrInPredicate(theColumn, generatePlaceholders(theIds), theInverse);
+		}
+
+		Condition condition = new BinaryCondition(SQL_IN_OPERATOR, theColumn, new CustomSql(jsonIdListSubselect));
+		if (theInverse) {
+			condition = new NotCondition(condition);
+		}
+		return condition;
+	}
+
+	/**
+	 * Returns the subselect which unpacks the given IDs from a single JSON array bind variable, or
+	 * <code>null</code> if this list should keep being rendered as an <code>IN (?,?,...)</code> list -
+	 * because it is not large enough, because the feature is disabled, or because this database has no
+	 * JSON function we can use.
+	 */
+	@Nullable
+	private String createJsonIdListSubselect(List<Long> theIds) {
+		int threshold = myStorageSettings.getLargeIdListJsonThreshold();
+		if (threshold < 0 || theIds.size() <= threshold) {
+			return null;
+		}
+
+		// The JSON array is only built inside a matching dialect branch below, so that a database with no
+		// JSON function we can use - H2 and the deprecated MySQL/MariaDB dialects - never pays for it.
+		if (myDialect instanceof PostgreSQLDialect) {
+			return String.format(POSTGRES_JSON_ID_LIST_SUBSELECT, quotedPlaceholder(toJsonArray(theIds)));
+		}
+		if (myDialect instanceof OracleDialect) {
+			// Oracle binds a plain String as a VARCHAR2, which is limited to 4000 bytes by default and
+			// raises ORA-01461 beyond that, so the array has to go across as a CLOB.
+			Object clobBindValue = new TypedParameterValue<>(StandardBasicTypes.MATERIALIZED_CLOB, toJsonArray(theIds));
+			return String.format(ORACLE_JSON_ID_LIST_SUBSELECT, quotedPlaceholder(clobBindValue));
+		}
+		if (myDialect instanceof SQLServerDialect) {
+			if (!myDialectProvider.isSqlServerJsonSupported()) {
+				myDialectProvider.logSqlServerJsonFallbackWarning();
+				return null;
+			}
+			return String.format(SQL_SERVER_JSON_ID_LIST_SUBSELECT, quotedPlaceholder(toJsonArray(theIds)));
+		}
+		return null;
+	}
+
+	/**
+	 * Returns a bind variable placeholder for the given value, wrapped in the single quotes
+	 * {@link #generate(Integer, Integer)} expects around a placeholder it is to replace with a
+	 * <code>?</code>. Custom SQL fragments have to add those quotes themselves, since the SQL builder
+	 * library only adds them to values it renders itself.
+	 */
+	@Nonnull
+	private String quotedPlaceholder(Object theValue) {
+		return "'" + generatePlaceholder(theValue) + "'";
+	}
+
+	/**
+	 * Renders the given IDs as a JSON array, in iteration order and with no whitespace.
+	 */
+	@Nonnull
+	private static String toJsonArray(List<Long> theIds) {
+		StringBuilder jsonArray = new StringBuilder(2 + theIds.size() * 8);
+		jsonArray.append('[');
+		for (int i = 0; i < theIds.size(); i++) {
+			if (i > 0) {
+				jsonArray.append(',');
+			}
+			jsonArray.append(theIds.get(i).longValue());
+		}
+		jsonArray.append(']');
+		return jsonArray.toString();
+	}
+
 	public int countBindVariables() {
 		return myBindVariableValues.size();
 	}
@@ -1015,6 +1139,7 @@ public class SearchQueryBuilder {
 				mySqlBuilderFactory,
 				myBindVariableSubstitutionBase,
 				myDialect,
+				myDialectProvider,
 				false,
 				myBindVariableValues,
 				theSelectPartitionId,

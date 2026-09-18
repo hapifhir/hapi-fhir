@@ -5,6 +5,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
@@ -20,7 +21,11 @@ import org.mockito.Mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
+import java.util.List;
+
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 public abstract class BaseSearchQueryBuilderDialectTest {
@@ -38,7 +43,8 @@ public abstract class BaseSearchQueryBuilderDialectTest {
 
 	@BeforeEach
 	public void beforeInitMocks() {
-		when(myHibernatePropertiesProvider.getDialect())
+		// Lenient because subclasses may build a SearchQueryBuilder on a real HibernatePropertiesProvider
+		lenient().when(myHibernatePropertiesProvider.getDialect())
 			.thenReturn(createDialect());
 	}
 
@@ -46,7 +52,30 @@ public abstract class BaseSearchQueryBuilderDialectTest {
 	protected abstract Dialect createDialect();
 
 	protected SearchQueryBuilder createSearchQueryBuilder() {
-		return new SearchQueryBuilder(myFhirContext, new StorageSettings(), new PartitionSettings(), RequestPartitionId.allPartitions(), "Patient", mySqlObjectFactory, myHibernatePropertiesProvider, false, false);
+		return createSearchQueryBuilder(new StorageSettings());
+	}
+
+	protected SearchQueryBuilder createSearchQueryBuilder(StorageSettings theStorageSettings) {
+		return createSearchQueryBuilder(theStorageSettings, myHibernatePropertiesProvider);
+	}
+
+	protected SearchQueryBuilder createSearchQueryBuilder(StorageSettings theStorageSettings, HibernatePropertiesProvider theDialectProvider) {
+		return new SearchQueryBuilder(myFhirContext, theStorageSettings, new PartitionSettings(), RequestPartitionId.allPartitions(), "Patient", mySqlObjectFactory, theDialectProvider, false, false);
+	}
+
+	/**
+	 * Builds and applies an <code>_id</code> predicate for the given PIDs on an already-constructed
+	 * {@link SearchQueryBuilder} and generates the resulting SQL, on a real {@link ResourceTablePredicateBuilder}.
+	 */
+	protected GeneratedSql generateResourceIdsPredicate(SearchQueryBuilder theBuilder, long... thePids) {
+		when(mySqlObjectFactory.resourceTable(any(), any()))
+			.thenReturn(new ResourceTablePredicateBuilder(theBuilder, SearchIncludeDeletedEnum.NEVER));
+
+		List<JpaPid> pids = Arrays.stream(thePids).mapToObj(JpaPid::fromId).toList();
+		Condition predicate = theBuilder.getOrCreateResourceTablePredicateBuilder().createPredicateResourceIds(false, pids);
+		theBuilder.addPredicate(predicate);
+
+		return theBuilder.generate(null, null);
 	}
 
 	protected GeneratedSql buildSqlWithNumericSort(Boolean theAscending, OrderObject.NullOrder theNullOrder) {
