@@ -85,9 +85,7 @@ interface LargeIdListSearchTest extends ITestDataBuilder {
 		Context ctx = getLargeIdListSearchTestContext();
 		withLargeIdListJsonThreshold(ctx, 3, () -> {
 			List<String> patientIds = createPatients(5);
-			List<String> observationIds = patientIds.stream()
-				.map(t -> createObservation(withSubject(t)).toUnqualifiedVersionless().getValue())
-				.collect(Collectors.toList());
+			List<String> observationIds = createObservationsFor(patientIds);
 
 			ctx.captureQueriesListener().clear();
 			Bundle results = search(ctx, "Observation?subject=" + String.join(",", patientIds));
@@ -96,21 +94,31 @@ interface LargeIdListSearchTest extends ITestDataBuilder {
 				.containsExactlyInAnyOrderElementsOf(observationIds);
 
 			assertIdListUnpacking(ctx, findSelectQueryContaining(ctx, "TARGET_RESOURCE_ID"));
+		});
+	}
 
-			// Both sites over the threshold in one statement
+	/**
+	 * A search with both an _id list and a reference list above the threshold unpacks two separate
+	 * JSON arrays in the one statement.
+	 */
+	@Test
+	default void testIdAndReferenceSearchBothOverThreshold_unpacksTwoJsonArrays() {
+		Context ctx = getLargeIdListSearchTestContext();
+		withLargeIdListJsonThreshold(ctx, 3, () -> {
+			List<String> patientIds = createPatients(5);
+			List<String> observationIds = createObservationsFor(patientIds);
+
 			ctx.captureQueriesListener().clear();
-			Bundle combinedResults = search(ctx, "Observation?_id=" + String.join(",", observationIds)
+			Bundle results = search(ctx, "Observation?_id=" + String.join(",", observationIds)
 				+ "&subject=" + String.join(",", patientIds));
 
-			assertThat(SearchTestUtil.toUnqualifiedVersionlessIdValues(combinedResults))
+			assertThat(SearchTestUtil.toUnqualifiedVersionlessIdValues(results))
 				.containsExactlyInAnyOrderElementsOf(observationIds);
 
 			String jsonFunction = jsonFunctionForDriver(ctx.driverType());
 			if (jsonFunction != null) {
-				String combinedSql = findSelectQueryContaining(ctx, "TARGET_RESOURCE_ID");
-				assertThat(StringUtils.countMatches(combinedSql, jsonFunction))
-					.as(combinedSql)
-					.isEqualTo(2);
+				String sql = findSelectQueryContaining(ctx, "TARGET_RESOURCE_ID");
+				assertThat(StringUtils.countMatches(sql, jsonFunction)).as(sql).isEqualTo(2);
 			}
 		});
 	}
@@ -201,6 +209,12 @@ interface LargeIdListSearchTest extends ITestDataBuilder {
 			patientIds.add(id.toUnqualifiedVersionless().getValue());
 		}
 		return patientIds;
+	}
+
+	private List<String> createObservationsFor(List<String> thePatientIds) {
+		return thePatientIds.stream()
+			.map(t -> createObservation(withSubject(t)).toUnqualifiedVersionless().getValue())
+			.collect(Collectors.toList());
 	}
 
 	private static Bundle search(Context theContext, String theSearchUrl) {
