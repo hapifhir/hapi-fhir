@@ -10,6 +10,7 @@ import ca.uhn.fhir.context.support.TranslateConceptResult;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.util.TestUtil;
@@ -146,7 +147,7 @@ public class ValidationSupportChainTest extends BaseTest {
 
 		when(myValidationSupport0.isValueSetSupported(any(), eq(VALUE_SET_URL_0))).thenReturn(false);
 		when(myValidationSupport1.isValueSetSupported(any(), eq(VALUE_SET_URL_0))).thenReturn(true);
-		when(myValidationSupport1.validateCode(any(), any(), any(), any(), any(), any(), any())).thenAnswer(t -> new IValidationSupport.CodeValidationResult());
+		when(myValidationSupport1.validateCode(any(), any(), any())).thenAnswer(t -> new IValidationSupport.CodeValidationResult());
 
 		// Test
 		IValidationSupport.CodeValidationResult result = chain.validateCode(newValidationCtx(chain), new ConceptValidationOptions(), CODE_SYSTEM_URL_0, CODE_0, DISPLAY_0, VALUE_SET_URL_0);
@@ -155,15 +156,15 @@ public class ValidationSupportChainTest extends BaseTest {
 		verify(myValidationSupport0, times(1)).isValueSetSupported(any(), eq(VALUE_SET_URL_0));
 		verify(myValidationSupport1, times(1)).isValueSetSupported(any(), eq(VALUE_SET_URL_0));
 		verify(myValidationSupport2, never()).isValueSetSupported(any(), eq(VALUE_SET_URL_0));
-		verify(myValidationSupport0, never()).validateCode(any(), any(), any(), any(), any(), any(), any());
-		verify(myValidationSupport1, times(1)).validateCode(any(), any(), any(), any(), any(), any(), any());
-		verify(myValidationSupport2, never()).validateCode(any(), any(), any(), any(), any(), any(), any());
+		verify(myValidationSupport0, never()).validateCode(any(), any(), any());
+		verify(myValidationSupport1, times(1)).validateCode(any(), any(), any());
+		verify(myValidationSupport2, never()).validateCode(any(), any(), any());
 
 		// Setup for second execution (should use cache this time)
 		prepareMock(myValidationSupport0, myValidationSupport1, myValidationSupport2);
 		when(myValidationSupport0.isValueSetSupported(any(), eq(VALUE_SET_URL_0))).thenReturn(false);
 		when(myValidationSupport1.isValueSetSupported(any(), eq(VALUE_SET_URL_0))).thenReturn(true);
-		when(myValidationSupport1.validateCode(any(), any(), any(), any(), any(), any(), any())).thenAnswer(t -> new IValidationSupport.CodeValidationResult());
+		when(myValidationSupport1.validateCode(any(), any(), any())).thenAnswer(t -> new IValidationSupport.CodeValidationResult());
 
 		// Test again (should use cache)
 		IValidationSupport.CodeValidationResult result2 = chain.validateCode(newValidationCtx(chain), new ConceptValidationOptions(), CODE_SYSTEM_URL_0, CODE_0, DISPLAY_0, VALUE_SET_URL_0);
@@ -177,9 +178,9 @@ public class ValidationSupportChainTest extends BaseTest {
 			verify(myValidationSupport0, times(1)).isValueSetSupported(any(), eq(VALUE_SET_URL_0));
 			verify(myValidationSupport1, times(1)).isValueSetSupported(any(), eq(VALUE_SET_URL_0));
 			verify(myValidationSupport2, never()).isValueSetSupported(any(), eq(VALUE_SET_URL_0));
-			verify(myValidationSupport0, never()).validateCode(any(), any(), any(), any(), any(), any(), any());
-			verify(myValidationSupport1, times(1)).validateCode(any(), any(), any(), any(), any(), any(), any());
-			verify(myValidationSupport2, never()).validateCode(any(), any(), any(), any(), any(), any(), any());
+			verify(myValidationSupport0, never()).validateCode(any(), any(), any());
+			verify(myValidationSupport1, times(1)).validateCode(any(), any(), any());
+			verify(myValidationSupport2, never()).validateCode(any(), any(), any());
 		}
 	}
 
@@ -192,7 +193,7 @@ public class ValidationSupportChainTest extends BaseTest {
 
 		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(false);
 		when(myValidationSupport1.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(true);
-		when(myValidationSupport1.validateCode(any(), any(), any(), any(), any(), any(), any())).thenAnswer(t -> new IValidationSupport.CodeValidationResult());
+		when(myValidationSupport1.validateCode(any(), any(), any())).thenAnswer(t -> new IValidationSupport.CodeValidationResult());
 
 		// Test
 		IValidationSupport.CodeValidationResult result = chain.validateCode(newValidationCtx(chain), new ConceptValidationOptions(), CODE_SYSTEM_URL_0, CODE_0, DISPLAY_0, null);
@@ -201,15 +202,15 @@ public class ValidationSupportChainTest extends BaseTest {
 		verify(myValidationSupport0, times(1)).isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0));
 		verify(myValidationSupport1, times(1)).isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0));
 		verify(myValidationSupport2, never()).isCodeSystemSupported(any(), any());
-		verify(myValidationSupport0, never()).validateCode(any(), any(), any(), any(), any(), any(), any());
-		verify(myValidationSupport1, times(1)).validateCode(any(), any(), any(), any(), any(), any(), any());
-		verify(myValidationSupport2, never()).validateCode(any(), any(), any(), any(), any(), any(), any());
+		verify(myValidationSupport0, never()).validateCode(any(), any(), any());
+		verify(myValidationSupport1, times(1)).validateCode(any(), any(), any());
+		verify(myValidationSupport2, never()).validateCode(any(), any(), any());
 
 		// Setup for second execution (should use cache this time)
 		prepareMock(myValidationSupport0, myValidationSupport1, myValidationSupport2);
 		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(false);
 		when(myValidationSupport1.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(true);
-		when(myValidationSupport1.validateCode(any(), any(), any(), any(), any(), any(), any())).thenAnswer(t -> new IValidationSupport.CodeValidationResult());
+		when(myValidationSupport1.validateCode(any(), any(), any())).thenAnswer(t -> new IValidationSupport.CodeValidationResult());
 
 		// Test again (should use cache)
 		IValidationSupport.CodeValidationResult result2 = chain.validateCode(newValidationCtx(chain), new ConceptValidationOptions(), CODE_SYSTEM_URL_0, CODE_0, DISPLAY_0, null);
@@ -223,9 +224,9 @@ public class ValidationSupportChainTest extends BaseTest {
 			verify(myValidationSupport0, times(1)).isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0));
 			verify(myValidationSupport1, times(1)).isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0));
 			verify(myValidationSupport2, never()).isCodeSystemSupported(any(), any());
-			verify(myValidationSupport0, never()).validateCode(any(), any(), any(), any(), any(), any(), any());
-			verify(myValidationSupport1, times(1)).validateCode(any(), any(), any(), any(), any(), any(), any());
-			verify(myValidationSupport2, never()).validateCode(any(), any(), any(), any(), any(), any(), any());
+			verify(myValidationSupport0, never()).validateCode(any(), any(), any());
+			verify(myValidationSupport1, times(1)).validateCode(any(), any(), any());
+			verify(myValidationSupport2, never()).validateCode(any(), any(), any());
 		}
 	}
 
@@ -241,7 +242,7 @@ public class ValidationSupportChainTest extends BaseTest {
 		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(true), myValidationSupport0);
 
 		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(true);
-		when(myValidationSupport0.validateCode(any(), any(), any(), any(), any(), any(), any()))
+		when(myValidationSupport0.validateCode(any(), any(), any()))
 			.thenAnswer(t -> new IValidationSupport.CodeValidationResult());
 
 		// Test
@@ -253,9 +254,9 @@ public class ValidationSupportChainTest extends BaseTest {
 		assertNotSame(version0, version1);
 		assertSame(version0, version0Again);
 		verify(myValidationSupport0, times(1))
-			.validateCode(any(), any(), eq(CODE_SYSTEM_URL_0), eq(CODE_SYSTEM_VERSION_0), eq(CODE_0), eq(DISPLAY_0), isNull());
+			.validateCode(any(), any(), eq(new ValidateCodeRequest(CODE_SYSTEM_URL_0, CODE_SYSTEM_VERSION_0, CODE_0, DISPLAY_0, null)));
 		verify(myValidationSupport0, times(1))
-			.validateCode(any(), any(), eq(CODE_SYSTEM_URL_0), eq(CODE_SYSTEM_VERSION_1), eq(CODE_0), eq(DISPLAY_0), isNull());
+			.validateCode(any(), any(), eq(new ValidateCodeRequest(CODE_SYSTEM_URL_0, CODE_SYSTEM_VERSION_1, CODE_0, DISPLAY_0, null)));
 	}
 
 	/**
@@ -298,7 +299,7 @@ public class ValidationSupportChainTest extends BaseTest {
 		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(true), myValidationSupport0);
 
 		when(myValidationSupport0.isValueSetSupported(any(), any())).thenReturn(true);
-		when(myValidationSupport0.validateCode(any(), any(), any(), any(), any(), any(), any()))
+		when(myValidationSupport0.validateCode(any(), any(), any()))
 			.thenAnswer(t -> new IValidationSupport.CodeValidationResult());
 
 		String versionedValueSetUrl = VALUE_SET_URL_0 + "|" + VALUE_SET_VERSION_0;
@@ -312,23 +313,25 @@ public class ValidationSupportChainTest extends BaseTest {
 		assertNotSame(unversioned, versioned);
 		assertSame(unversioned, unversionedAgain);
 		verify(myValidationSupport0, times(1))
-			.validateCode(any(), any(), any(), any(), any(), any(), eq(VALUE_SET_URL_0));
+			.validateCode(any(), any(), eq(new ValidateCodeRequest(CODE_SYSTEM_URL_0, null, CODE_0, DISPLAY_0, VALUE_SET_URL_0)));
 		verify(myValidationSupport0, times(1))
-			.validateCode(any(), any(), any(), any(), any(), any(), eq(versionedValueSetUrl));
+			.validateCode(any(), any(), eq(new ValidateCodeRequest(CODE_SYSTEM_URL_0, null, CODE_0, DISPLAY_0, versionedValueSetUrl)));
 	}
 
 	// Created by Claude Opus 5
 	private IValidationSupport.CodeValidationResult validateCodeInValueSetUrl(
 			ValidationSupportChain theChain, String theValueSetUrl) {
 		return theChain.validateCode(
-			newValidationCtx(theChain), new ConceptValidationOptions(), CODE_SYSTEM_URL_0, null, CODE_0, DISPLAY_0, theValueSetUrl);
+			newValidationCtx(theChain), new ConceptValidationOptions(),
+			new ValidateCodeRequest(CODE_SYSTEM_URL_0, null, CODE_0, DISPLAY_0, theValueSetUrl));
 	}
 
 	// Created by Claude Opus 5
 	private IValidationSupport.CodeValidationResult validateCodeWithVersion(
 			ValidationSupportChain theChain, String theCodeSystemVersion) {
 		return theChain.validateCode(
-			newValidationCtx(theChain), new ConceptValidationOptions(), CODE_SYSTEM_URL_0, theCodeSystemVersion, CODE_0, DISPLAY_0, null);
+			newValidationCtx(theChain), new ConceptValidationOptions(),
+			new ValidateCodeRequest(CODE_SYSTEM_URL_0, theCodeSystemVersion, CODE_0, DISPLAY_0, null));
 	}
 
 	// Created by Claude Opus 5
@@ -877,7 +880,7 @@ public class ValidationSupportChainTest extends BaseTest {
 
 		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(false);
 		when(myValidationSupport1.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(true);
-		when(myValidationSupport1.validateCode(any(), any(), any(), any(), any(), any(), any()))
+		when(myValidationSupport1.validateCode(any(), any(), any()))
 			.thenAnswer(t -> new IValidationSupport.CodeValidationResult());
 
 		// First validation call - should use support1 and cache result
@@ -890,7 +893,7 @@ public class ValidationSupportChainTest extends BaseTest {
 			null
 		);
 		assertNotNull(result1);
-		verify(myValidationSupport1, times(1)).validateCode(any(), any(), any(), any(), any(), any(), any());
+		verify(myValidationSupport1, times(1)).validateCode(any(), any(), any());
 
 		// Second validation call - should hit cache
 		prepareMock(myValidationSupport0, myValidationSupport1);
@@ -917,10 +920,10 @@ public class ValidationSupportChainTest extends BaseTest {
 		// since support1 was removed from the chain
 		prepareMock(myValidationSupport0, myValidationSupport1);
 		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(true);
-		when(myValidationSupport0.validateCode(any(), any(), any(), any(), any(), any(), any()))
+		when(myValidationSupport0.validateCode(any(), any(), any()))
 			.thenAnswer(t -> new IValidationSupport.CodeValidationResult());
 		when(myValidationSupport1.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(true);
-		when(myValidationSupport1.validateCode(any(), any(), any(), any(), any(), any(), any()))
+		when(myValidationSupport1.validateCode(any(), any(), any()))
 			.thenAnswer(t -> new IValidationSupport.CodeValidationResult());
 
 		// Third validation call - cache invalidated, should only call support0
@@ -938,11 +941,11 @@ public class ValidationSupportChainTest extends BaseTest {
 
 		// Verify support0 was called (it's still in the chain)
 		verify(myValidationSupport0, times(1)).isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0));
-		verify(myValidationSupport0, times(1)).validateCode(any(), any(), any(), any(), any(), any(), any());
+		verify(myValidationSupport0, times(1)).validateCode(any(), any(), any());
 
 		// Verify support1 was NOT called (it was removed from the chain)
 		verify(myValidationSupport1, never()).isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0));
-		verify(myValidationSupport1, never()).validateCode(any(), any(), any(), any(), any(), any(), any());
+		verify(myValidationSupport1, never()).validateCode(any(), any(), any());
 	}
 
 

@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -84,14 +85,10 @@ public class CachingValidationSupportTest {
 		support.validateCode(
 			new ValidationSupportContext(support),
 			new ConceptValidationOptions(),
-			CODE_SYSTEM,
-			CODE_SYSTEM_VERSION,
-			CODE,
-			DISPLAY,
-			VALUE_SET_URL);
+			new ValidateCodeRequest(CODE_SYSTEM, CODE_SYSTEM_VERSION, CODE, DISPLAY, VALUE_SET_URL));
 
 		verify(myValidationSupport0)
-			.validateCode(any(), any(), eq(CODE_SYSTEM), eq(CODE_SYSTEM_VERSION), eq(CODE), eq(DISPLAY), eq(VALUE_SET_URL));
+			.validateCode(any(), any(), eq(new ValidateCodeRequest(CODE_SYSTEM, CODE_SYSTEM_VERSION, CODE, DISPLAY, VALUE_SET_URL)));
 	}
 
 	/**

@@ -7,6 +7,7 @@ import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
@@ -155,11 +156,7 @@ class TermReadSvcImplTest {
 			return mySpiedSvc.validateCode(
 					myValidationSupportContext,
 					new ConceptValidationOptions(),
-					UCUM_SYSTEM_URL,
-					theCodeSystemVersion,
-					UCUM_CODE,
-					null,
-					null);
+					new ValidateCodeRequest(UCUM_SYSTEM_URL, theCodeSystemVersion, UCUM_CODE, null, null));
 		}
 
 		LookupCodeResult callLookupCode() {
@@ -221,11 +218,7 @@ class TermReadSvcImplTest {
 		CodeValidationResult result = fixture.mySpiedSvc.validateCode(
 				fixture.myValidationSupportContext,
 				new ConceptValidationOptions(),
-				UCUM_SYSTEM_URL + "|1.0.0",
-				"2.0.0",
-				UCUM_CODE,
-				null,
-				null);
+				new ValidateCodeRequest(UCUM_SYSTEM_URL + "|1.0.0", "2.0.0", UCUM_CODE, null, null));
 
 		assertThat(result).isNotNull();
 		assertThat(result.isOk()).isTrue();

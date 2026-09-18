@@ -3,6 +3,7 @@ package org.hl7.fhir.common.hapi.validation;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
+import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.validation.IValidationProviders;
@@ -159,7 +160,10 @@ public interface IValidateCodeTest {
 		getCodeSystemProvider().addTerminologyResponse(OPERATION_VALIDATE_CODE, CODE_SYSTEM, CODE_SYSTEM_VERSION, CODE, createParameters(true, DISPLAY, null, null));
 
 		CodeValidationResult outcome = getService()
-				.validateCode(null, new ConceptValidationOptions(), CODE_SYSTEM, CODE_SYSTEM_VERSION, CODE, DISPLAY, null);
+				.validateCode(
+						null,
+						new ConceptValidationOptions(),
+						new ValidateCodeRequest(CODE_SYSTEM, CODE_SYSTEM_VERSION, CODE, DISPLAY, null));
 
 		assertNotNull(outcome);
 		assertEquals(CODE, outcome.getCode());
@@ -173,7 +177,11 @@ public interface IValidateCodeTest {
 		createCodeSystemReturnParameters(true, DISPLAY, null, null);
 
 		CodeValidationResult outcome =
-				getService().validateCode(null, new ConceptValidationOptions(), CODE_SYSTEM, null, CODE, DISPLAY, null);
+				getService()
+						.validateCode(
+								null,
+								new ConceptValidationOptions(),
+								new ValidateCodeRequest(CODE_SYSTEM, null, CODE, DISPLAY, null));
 
 		assertNotNull(outcome);
 		assertEquals(CODE, outcome.getCode());
@@ -188,7 +196,10 @@ public interface IValidateCodeTest {
 		getValueSetProvider().addTerminologyResponse(OPERATION_VALIDATE_CODE, VALUE_SET_URL, CODE_SYSTEM_VERSION, CODE, createParameters(true, DISPLAY, null, null));
 
 		CodeValidationResult outcome = getService()
-				.validateCode(null, new ConceptValidationOptions(), CODE_SYSTEM, CODE_SYSTEM_VERSION, CODE, DISPLAY, VALUE_SET_URL);
+				.validateCode(
+						null,
+						new ConceptValidationOptions(),
+						new ValidateCodeRequest(CODE_SYSTEM, CODE_SYSTEM_VERSION, CODE, DISPLAY, VALUE_SET_URL));
 
 		assertNotNull(outcome);
 		assertEquals(CODE, outcome.getCode());
@@ -202,7 +213,10 @@ public interface IValidateCodeTest {
 		createValueSetReturnParameters(true, DISPLAY, null, null);
 
 		CodeValidationResult outcome = getService()
-				.validateCode(null, new ConceptValidationOptions(), CODE_SYSTEM, null, CODE, DISPLAY, VALUE_SET_URL);
+				.validateCode(
+						null,
+						new ConceptValidationOptions(),
+						new ValidateCodeRequest(CODE_SYSTEM, null, CODE, DISPLAY, VALUE_SET_URL));
 
 		assertNotNull(outcome);
 		assertEquals(CODE, outcome.getCode());

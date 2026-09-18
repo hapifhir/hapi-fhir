@@ -3,6 +3,7 @@ package org.hl7.fhir.r5.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
@@ -48,10 +49,12 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -114,7 +117,7 @@ public class QuestionnaireResponseValidatorR5Test  {
 		options.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
 		when(myValSupport.fetchValueSet(eq("http://somevalueset"))).thenReturn(options);
 
-		when(myValSupport.validateCode(any(), any(), any(), nullable(String.class), any(), any(), nullable(String.class)))
+		when(myValSupport.validateCode(any(), any(), any()))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setSeverity(IValidationSupport.IssueSeverity.ERROR).setMessage("Unknown code"));
 		when(myValSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), nullable(ValueSet.class)))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
@@ -178,7 +181,7 @@ public class QuestionnaireResponseValidatorR5Test  {
 
 			when(myValSupport.fetchResource(eq(Questionnaire.class),
 				eq(qa.getQuestionnaire()))).thenReturn(q);
-			when(myValSupport.validateCode(any(), any(), any(), nullable(String.class), any(), any(), nullable(String.class)))
+			when(myValSupport.validateCode(any(), any(), any()))
 				.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
 
 			ValidationResult errors = myVal.validateWithResult(qa);
@@ -217,9 +220,9 @@ public class QuestionnaireResponseValidatorR5Test  {
 
 		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system"))).thenReturn(true);
 		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system2"))).thenReturn(true);
-		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), nullable(String.class), eq("code0"), any(), nullable(String.class)))
+		when(myValSupport.validateCode(any(), any(), requestWith("http://codesystems.com/system", "code0")))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
-		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), nullable(String.class), eq("code1"), any(), nullable(String.class)))
+		when(myValSupport.validateCode(any(), any(), requestWith("http://codesystems.com/system", "code1")))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setSeverity(IValidationSupport.IssueSeverity.ERROR).setMessage("Unknown code"));
 		when(myValSupport.validateCodeInValueSet(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), nullable(ValueSet.class)))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
@@ -376,7 +379,7 @@ public class QuestionnaireResponseValidatorR5Test  {
 		options.getCompose().addInclude().setSystem(codeSystemUrl).addConcept().setCode(codeValue);
 		when(myValSupport.fetchValueSet(eq(valueSetRef)))
 			.thenReturn(options);
-		when(myValSupport.validateCode(any(), any(), eq(codeSystemUrl), nullable(String.class), eq(codeValue), any(String.class), anyString()))
+		when(myValSupport.validateCode(any(), any(), requestWith(codeSystemUrl, codeValue)))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setCode(codeValue));
 
 		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
@@ -438,7 +441,7 @@ public class QuestionnaireResponseValidatorR5Test  {
 		when(myValSupport.isValueSetSupported(any(), eq(valueSetRef))).thenReturn(true);
 		when(myValSupport.fetchValueSet(eq(valueSetRef)))
 			.thenReturn(options);
-		when(myValSupport.validateCode(any(), any(), eq(codeSystemUrl), nullable(String.class), eq(codeValue), any(String.class), anyString()))
+		when(myValSupport.validateCode(any(), any(), requestWith(codeSystemUrl, codeValue)))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setCode(codeValue));
 
 		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
@@ -567,9 +570,9 @@ public class QuestionnaireResponseValidatorR5Test  {
 		options.getCompose().addInclude().setSystem("http://codesystems.com/system2").addConcept().setCode("code2");
 		when(myValSupport.fetchValueSet(eq("http://somevalueset"))).thenReturn(options);
 
-		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), nullable(String.class), eq("code0"), any(), nullable(String.class)))
+		when(myValSupport.validateCode(any(), any(), requestWith("http://codesystems.com/system", "code0")))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
-		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), nullable(String.class), eq("code1"), any(), nullable(String.class)))
+		when(myValSupport.validateCode(any(), any(), requestWith("http://codesystems.com/system", "code1")))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setSeverity(IValidationSupport.IssueSeverity.ERROR).setMessage("Unknown code"));
 
 		QuestionnaireResponse qa;
@@ -738,5 +741,14 @@ public class QuestionnaireResponseValidatorR5Test  {
 		myDefaultValidationSupport = null;
 	}
 
+
+
+	// Created by Claude Opus 5
+	private static ValidateCodeRequest requestWith(String theCodeSystem, String theCode) {
+		// argThat matchers are also applied to the stubbing-time invocation, where the argument is null
+		return argThat(request -> request != null
+			&& Objects.equals(theCodeSystem, request.getCodeSystem())
+			&& Objects.equals(theCode, request.getCode()));
+	}
 
 }

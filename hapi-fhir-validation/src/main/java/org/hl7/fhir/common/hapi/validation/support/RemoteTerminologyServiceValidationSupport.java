@@ -7,6 +7,7 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
+import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.SummaryEnum;
@@ -142,13 +143,15 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 	public CodeValidationResult validateCode(
 			@Nonnull ValidationSupportContext theValidationSupportContext,
 			@Nonnull ConceptValidationOptions theOptions,
-			@Nullable String theCodeSystem,
-			@Nullable String theCodeSystemVersion,
-			@Nullable String theCode,
-			@Nullable String theDisplay,
-			@Nullable String theValueSetUrl) {
+			@Nonnull ValidateCodeRequest theRequest) {
 
-		return invokeRemoteValidateCode(theCodeSystem, theCodeSystemVersion, theCode, theDisplay, theValueSetUrl, null);
+		return invokeRemoteValidateCode(
+				theRequest.getCodeSystem(),
+				theRequest.getCodeSystemVersion(),
+				theRequest.getCode(),
+				theRequest.getDisplay(),
+				theRequest.getValueSetUrl(),
+				null);
 	}
 
 	@Override

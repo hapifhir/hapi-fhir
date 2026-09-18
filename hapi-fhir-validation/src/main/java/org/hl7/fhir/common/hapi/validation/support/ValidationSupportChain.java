@@ -8,6 +8,7 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
+import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
@@ -816,7 +817,9 @@ public class ValidationSupportChain implements IValidationSupport {
 			String theDisplay,
 			String theValueSetUrl) {
 		return validateCode(
-				theValidationSupportContext, theOptions, theCodeSystem, null, theCode, theDisplay, theValueSetUrl);
+				theValidationSupportContext,
+				theOptions,
+				new ValidateCodeRequest(theCodeSystem, null, theCode, theDisplay, theValueSetUrl));
 	}
 
 	// Created by Claude Opus 5
@@ -825,37 +828,36 @@ public class ValidationSupportChain implements IValidationSupport {
 	public CodeValidationResult validateCode(
 			@Nonnull ValidationSupportContext theValidationSupportContext,
 			@Nonnull ConceptValidationOptions theOptions,
-			@Nullable String theCodeSystem,
-			@Nullable String theCodeSystemVersion,
-			@Nullable String theCode,
-			@Nullable String theDisplay,
-			@Nullable String theValueSetUrl) {
+			@Nonnull ValidateCodeRequest theRequest) {
+		String codeSystem = theRequest.getCodeSystem();
+		String code = theRequest.getCode();
+		String valueSetUrl = theRequest.getValueSetUrl();
 
 		ValidateCodeKey key = new ValidateCodeKey(
-				theOptions, theCodeSystem, theCodeSystemVersion, theCode, theDisplay, theValueSetUrl, null);
+				theOptions,
+				codeSystem,
+				theRequest.getCodeSystemVersion(),
+				code,
+				theRequest.getDisplay(),
+				valueSetUrl,
+				null);
 		CacheValue<CodeValidationResult> retVal = getFromCache(key);
 		if (retVal == null) {
 			retVal = CacheValue.empty();
 
 			for (IValidationSupport next : myChain) {
-				if ((isBlank(theValueSetUrl) && isCodeSystemSupported(theValidationSupportContext, next, theCodeSystem))
-						|| (isNotBlank(theValueSetUrl)
-								&& isValueSetSupported(theValidationSupportContext, next, theValueSetUrl))) {
-					CodeValidationResult outcome = next.validateCode(
-							theValidationSupportContext,
-							theOptions,
-							theCodeSystem,
-							theCodeSystemVersion,
-							theCode,
-							theDisplay,
-							theValueSetUrl);
+				if ((isBlank(valueSetUrl) && isCodeSystemSupported(theValidationSupportContext, next, codeSystem))
+						|| (isNotBlank(valueSetUrl)
+								&& isValueSetSupported(theValidationSupportContext, next, valueSetUrl))) {
+					CodeValidationResult outcome =
+							next.validateCode(theValidationSupportContext, theOptions, theRequest);
 					if (outcome != null) {
 						ourLog.debug(
 								"Code {}|{} '{}' in ValueSet {} validated by {}",
-								theCodeSystem,
-								theCode,
-								theDisplay,
-								theValueSetUrl,
+								codeSystem,
+								code,
+								theRequest.getDisplay(),
+								valueSetUrl,
 								next.getName());
 						retVal = new CacheValue<>(outcome);
 						break;
@@ -864,8 +866,7 @@ public class ValidationSupportChain implements IValidationSupport {
 			}
 
 			if (retVal.getValue() == null) {
-				CodeValidationResult unknownCodeSystemResult =
-						generateResultForUnknownCodeSystem(theCodeSystem, theCode);
+				CodeValidationResult unknownCodeSystemResult = generateResultForUnknownCodeSystem(codeSystem, code);
 				if (unknownCodeSystemResult != null) {
 					retVal = new CacheValue<>(unknownCodeSystemResult);
 				}

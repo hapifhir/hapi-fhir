@@ -3,6 +3,7 @@ package org.hl7.fhir.dstu3.hapi.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -54,6 +55,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Objects;
 
 import static ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity.ERROR;
 import static ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity.WARNING;
@@ -63,6 +65,7 @@ import static org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.CHOIC
 import static org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.anyString;
@@ -244,9 +247,9 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		options.getCompose().addInclude().setSystem("http://codesystems.com/system2").addConcept().setCode("code2");
 		when(myValSupport.fetchValueSet(eq("http://somevalueset"))).thenReturn(options);
 
-		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), nullable(String.class), eq("code0"), any(), nullable(String.class)))
+		when(myValSupport.validateCode(any(), any(), requestWith("http://codesystems.com/system", "code0")))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setCode(CODE_ICC_SCHOOLTYPE_PT));
-		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), nullable(String.class), eq("code1"), any(), nullable(String.class)))
+		when(myValSupport.validateCode(any(), any(), requestWith("http://codesystems.com/system", "code1")))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setSeverity(WARNING).setMessage("Unknown code: http://codesystems.com/system / code1"));
 
 
@@ -804,7 +807,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		options.getCompose().addInclude().setSystem(codeSystemUrl).addConcept().setCode(codeValue);
 		when(myValSupport.fetchValueSet(eq(valueSetRef)))
 			.thenReturn(options);
-		when(myValSupport.validateCode(any(), any(), eq(codeSystemUrl), nullable(String.class), eq(codeValue), any(String.class), anyString()))
+		when(myValSupport.validateCode(any(), any(), requestWith(codeSystemUrl, codeValue)))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setCode(codeValue));
 
 		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
@@ -860,7 +863,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		options.getCompose().addInclude().setSystem(codeSystemUrl).addConcept().setCode(codeValue);
 		when(myValSupport.fetchValueSet(eq(valueSetRef)))
 			.thenReturn(options);
-		when(myValSupport.validateCode(any(), any(), eq(codeSystemUrl), nullable(String.class), eq(codeValue), any(String.class), anyString()))
+		when(myValSupport.validateCode(any(), any(), requestWith(codeSystemUrl, codeValue)))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setCode(codeValue));
 
 		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
@@ -1032,9 +1035,9 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system"))).thenReturn(true);
 		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system2"))).thenReturn(true);
-		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), nullable(String.class), eq("code0"), any(), nullable(String.class)))
+		when(myValSupport.validateCode(any(), any(), requestWith("http://codesystems.com/system", "code0")))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
-		when(myValSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), nullable(String.class), eq("code1"), any(), nullable(String.class)))
+		when(myValSupport.validateCode(any(), any(), requestWith("http://codesystems.com/system", "code1")))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setSeverity(ERROR).setMessage("Unknown code"));
 
 		CodeSystem codeSystem = new CodeSystem();
@@ -1203,6 +1206,15 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		myDefaultValidationSupport.flush();
 		myDefaultValidationSupport = null;
 		TestUtil.randomizeLocaleAndTimezone();
+	}
+
+
+	// Created by Claude Opus 5
+	private static ValidateCodeRequest requestWith(String theCodeSystem, String theCode) {
+		// argThat matchers are also applied to the stubbing-time invocation, where the argument is null
+		return argThat(request -> request != null
+			&& Objects.equals(theCodeSystem, request.getCodeSystem())
+			&& Objects.equals(theCode, request.getCode()));
 	}
 
 }

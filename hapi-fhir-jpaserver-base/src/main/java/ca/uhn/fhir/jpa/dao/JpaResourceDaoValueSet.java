@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
@@ -272,7 +273,9 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 		ConceptValidationOptions options = new ConceptValidationOptions();
 		options.setValidateDisplay(isNotBlank(theDisplay));
 		IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(
-				context, options, theSystem, theSystemVersion, theCode, theDisplay, theValueSetIdentifier);
+				context,
+				options,
+				new ValidateCodeRequest(theSystem, theSystemVersion, theCode, theDisplay, theValueSetIdentifier));
 
 		if (result == null) {
 			result = new IValidationSupport.CodeValidationResult();

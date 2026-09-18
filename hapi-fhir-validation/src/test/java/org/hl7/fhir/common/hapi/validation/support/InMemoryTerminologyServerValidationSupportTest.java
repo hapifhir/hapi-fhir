@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.i18n.Msg;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -467,7 +468,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 
 		// Test
 		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(
-			valCtx, new ConceptValidationOptions(), VERSIONED_CS_URL, "1.0.0", "code0", null, null);
+			valCtx, new ConceptValidationOptions(), new ValidateCodeRequest(VERSIONED_CS_URL, "1.0.0", "code0", null, null));
 
 		// Verify
 		assertNotNull(outcome);
@@ -489,7 +490,8 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
 
 		// Test
-		mySvc.validateCode(valCtx, new ConceptValidationOptions(), VERSIONED_CS_URL, "2.0.0", "code0", null, null);
+		mySvc.validateCode(
+			valCtx, new ConceptValidationOptions(), new ValidateCodeRequest(VERSIONED_CS_URL, "2.0.0", "code0", null, null));
 
 		// Verify
 		assertThat(recorder.myFetchedCodeSystemUrls)

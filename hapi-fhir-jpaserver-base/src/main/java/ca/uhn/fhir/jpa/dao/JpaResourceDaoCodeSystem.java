@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
+import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -369,7 +370,7 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 		options.setValidateDisplay(isNotBlank(theDisplay));
 
 		CodeValidationResult retVal = myValidationSupport.validateCode(
-				context, options, theCodeSystemUrl, theVersion, theCode, theDisplay, null);
+				context, options, new ValidateCodeRequest(theCodeSystemUrl, theVersion, theCode, theDisplay, null));
 		if (retVal == null) {
 			retVal = new CodeValidationResult();
 			retVal.setMessage("Terminology service was unable to provide validation for "

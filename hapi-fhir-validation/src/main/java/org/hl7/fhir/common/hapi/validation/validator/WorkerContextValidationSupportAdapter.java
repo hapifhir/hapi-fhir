@@ -7,6 +7,7 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.BaseConceptProperty;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationIssue;
+import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -956,7 +957,9 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			String theCode,
 			String theDisplay) {
 		return myValidationSupport.validateCode(
-				newValidationSupportContext(), theValidationOptions, theSystem, theVersion, theCode, theDisplay, null);
+				newValidationSupportContext(),
+				theValidationOptions,
+				new ValidateCodeRequest(theSystem, theVersion, theCode, theDisplay, null));
 	}
 
 	@Override

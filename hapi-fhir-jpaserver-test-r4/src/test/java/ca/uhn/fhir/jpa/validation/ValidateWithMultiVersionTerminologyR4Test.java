@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.validation;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
@@ -428,11 +429,7 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		return myValidationSupport.validateCode(
 			new ValidationSupportContext(myValidationSupport),
 			new ConceptValidationOptions(),
-			CS_URL,
-			theCodeSystemVersion,
-			theCode,
-			null,
-			null);
+			new ValidateCodeRequest(CS_URL, theCodeSystemVersion, theCode, null, null));
 	}
 
 	/**

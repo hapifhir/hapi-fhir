@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
+import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
@@ -2704,16 +2705,18 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	public IValidationSupport.CodeValidationResult validateCode(
 			@Nonnull ValidationSupportContext theValidationSupportContext,
 			@Nonnull ConceptValidationOptions theOptions,
-			@Nullable String theCodeSystemUrl,
-			@Nullable String theCodeSystemVersion,
-			@Nullable String theCode,
-			@Nullable String theDisplay,
-			@Nullable String theValueSetUrl) {
+			@Nonnull ValidateCodeRequest theRequest) {
 		// The lookups below take the code system as a single "url|version" identifier, which
 		// getCurrentCodeSystemVersion also uses as a cache key.
-		String codeSystemUrl = ValidationSupportUtils.getVersionedCodeSystem(theCodeSystemUrl, theCodeSystemVersion);
+		String codeSystemUrl = ValidationSupportUtils.getVersionedCodeSystem(
+				theRequest.getCodeSystem(), theRequest.getCodeSystemVersion());
 		return validateCode(
-				theValidationSupportContext, theOptions, codeSystemUrl, theCode, theDisplay, theValueSetUrl);
+				theValidationSupportContext,
+				theOptions,
+				codeSystemUrl,
+				theRequest.getCode(),
+				theRequest.getDisplay(),
+				theRequest.getValueSetUrl());
 	}
 
 	@CoverageIgnore

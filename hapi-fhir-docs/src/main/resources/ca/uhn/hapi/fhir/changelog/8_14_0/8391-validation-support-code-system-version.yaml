@@ -2,6 +2,6 @@
 type: add
 issue: 8391
 jira: SMILE-12842
-title: "A new `validateCode` method has been added to `IValidationSupport` which also takes the code system
-  version to validate against. Existing implementations are unaffected, as it defaults to delegating to the
-  existing method."
+title: "A new `validateCode` method has been added to `IValidationSupport` which takes a `ValidateCodeRequest`,
+  naming the code system version to validate against alongside the code system. Existing implementations are
+  unaffected, as it defaults to delegating to the existing method."

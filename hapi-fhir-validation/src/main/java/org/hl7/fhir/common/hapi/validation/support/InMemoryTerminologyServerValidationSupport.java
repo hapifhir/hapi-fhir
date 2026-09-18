@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
+import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
@@ -174,19 +175,18 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 	public CodeValidationResult validateCode(
 			@Nonnull ValidationSupportContext theValidationSupportContext,
 			@Nonnull ConceptValidationOptions theOptions,
-			String theCodeSystem,
-			String theCodeSystemVersion,
-			String theCode,
-			String theDisplay,
-			String theValueSetUrl) {
+			@Nonnull ValidateCodeRequest theRequest) {
+		String codeSystem = theRequest.getCodeSystem();
+		String codeSystemVersion = theRequest.getCodeSystemVersion();
+		String code = theRequest.getCode();
+		String valueSetUrl = theRequest.getValueSetUrl();
 		// expandValueSet and validateCodeInExpandedValueSet identify the code system by its "system|version"
 		// canonical rather than as a system and a version
-		String codeSystemUrlAndVersion =
-				ValidationSupportUtils.getVersionedCodeSystem(theCodeSystem, theCodeSystemVersion);
+		String codeSystemUrlAndVersion = ValidationSupportUtils.getVersionedCodeSystem(codeSystem, codeSystemVersion);
 
 		IBaseResource vs;
-		if (isNotBlank(theValueSetUrl)) {
-			vs = theValidationSupportContext.getRootValidationSupport().fetchValueSet(theValueSetUrl);
+		if (isNotBlank(valueSetUrl)) {
+			vs = theValidationSupportContext.getRootValidationSupport().fetchValueSet(valueSetUrl);
 			if (vs == null) {
 				return null;
 			}
@@ -204,29 +204,29 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 					vs = new org.hl7.fhir.dstu3.model.ValueSet()
 							.setCompose(new org.hl7.fhir.dstu3.model.ValueSet.ValueSetComposeComponent()
 									.addInclude(new org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent()
-											.setSystem(theCodeSystem)
-											.setVersion(theCodeSystemVersion)));
+											.setSystem(codeSystem)
+											.setVersion(codeSystemVersion)));
 					break;
 				case R4:
 					vs = new org.hl7.fhir.r4.model.ValueSet()
 							.setCompose(new org.hl7.fhir.r4.model.ValueSet.ValueSetComposeComponent()
 									.addInclude(new org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent()
-											.setSystem(theCodeSystem)
-											.setVersion(theCodeSystemVersion)));
+											.setSystem(codeSystem)
+											.setVersion(codeSystemVersion)));
 					break;
 				case R4B:
 					vs = new org.hl7.fhir.r4b.model.ValueSet()
 							.setCompose(new org.hl7.fhir.r4b.model.ValueSet.ValueSetComposeComponent()
 									.addInclude(new org.hl7.fhir.r4b.model.ValueSet.ConceptSetComponent()
-											.setSystem(theCodeSystem)
-											.setVersion(theCodeSystemVersion)));
+											.setSystem(codeSystem)
+											.setVersion(codeSystemVersion)));
 					break;
 				case R5:
 					vs = new org.hl7.fhir.r5.model.ValueSet()
 							.setCompose(new org.hl7.fhir.r5.model.ValueSet.ValueSetComposeComponent()
 									.addInclude(new org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent()
-											.setSystem(theCodeSystem)
-											.setVersion(theCodeSystemVersion)));
+											.setSystem(codeSystem)
+											.setVersion(codeSystemVersion)));
 					break;
 				case DSTU2_1:
 				default:
@@ -236,7 +236,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		}
 
 		ValueSetExpansionOutcome valueSetExpansionOutcome =
-				expandValueSet(theValidationSupportContext, vs, codeSystemUrlAndVersion, theCode);
+				expandValueSet(theValidationSupportContext, vs, codeSystemUrlAndVersion, code);
 		if (valueSetExpansionOutcome == null) {
 			return null;
 		}
@@ -252,10 +252,10 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 				theValidationSupportContext,
 				theOptions,
 				codeSystemUrlAndVersion,
-				theCode,
-				theDisplay,
+				code,
+				theRequest.getDisplay(),
 				expansion,
-				theValueSetUrl);
+				valueSetUrl);
 	}
 
 	@Override
@@ -272,11 +272,8 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		return validateCode(
 				theValidationSupportContext,
 				theOptions,
-				codeSystem.url(),
-				codeSystem.versionId().orElse(null),
-				theCode,
-				theDisplay,
-				theValueSetUrl);
+				new ValidateCodeRequest(
+						codeSystem.url(), codeSystem.versionId().orElse(null), theCode, theDisplay, theValueSetUrl));
 	}
 
 	private CodeValidationResult validateCodeInExpandedValueSet(
