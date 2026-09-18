@@ -218,7 +218,7 @@ public class ResourceLinkPredicateBuilderTest {
 		"1, 'TARGET_RESOURCE_ID = ', false, false",
 		"5, 'TARGET_RESOURCE_ID IN (SELECT', true, true"
 	})
-	void createPredicateReference_targetIdCountAcrossThreshold_rendersExpectedPredicate(int theTargetIdCount, String theExpectedFragment, boolean theExpectJson, boolean theInverse) {
+	void createPredicateReference_largeIdListJsonThreshold_rendersExpectedPredicate(int theTargetIdCount, String theExpectedFragment, boolean theExpectJson, boolean theInverse) {
 		ResourceLinkPredicateBuilder builder = createBuilderOnRealSearchQueryBuilder(3);
 
 		Condition condition = builder.createPredicateReference(theInverse, List.of("Observation.subject"), toTargetPids(theTargetIdCount), List.of());
@@ -250,6 +250,6 @@ public class ResourceLinkPredicateBuilderTest {
 	}
 
 	private static List<Long> toTargetPids(int theCount) {
-		return LongStream.rangeClosed(1, theCount).boxed().collect(Collectors.toList());
+		return LongStream.rangeClosed(1, theCount).boxed().toList();
 	}
 }
