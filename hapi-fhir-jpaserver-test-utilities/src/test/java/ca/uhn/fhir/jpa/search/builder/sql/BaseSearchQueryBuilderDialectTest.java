@@ -70,6 +70,11 @@ public abstract class BaseSearchQueryBuilderDialectTest {
 	 * {@link SearchQueryBuilder} and generates the resulting SQL, on a real {@link ResourceTablePredicateBuilder}.
 	 */
 	protected GeneratedSql generateResourceIdsPredicate(SearchQueryBuilder theBuilder, long... thePids) {
+		return generateResourceIdsPredicateWithPaging(theBuilder, null, null, thePids);
+	}
+
+	protected GeneratedSql generateResourceIdsPredicateWithPaging(
+			SearchQueryBuilder theBuilder, Integer theOffset, Integer theMaxResultsToFetch, long... thePids) {
 		when(mySqlObjectFactory.resourceTable(any(), any()))
 			.thenReturn(new ResourceTablePredicateBuilder(theBuilder, SearchIncludeDeletedEnum.NEVER));
 
@@ -77,7 +82,7 @@ public abstract class BaseSearchQueryBuilderDialectTest {
 		Condition predicate = theBuilder.getOrCreateResourceTablePredicateBuilder().createPredicateResourceIds(false, pids);
 		theBuilder.addPredicate(predicate);
 
-		return theBuilder.generate(null, null);
+		return theBuilder.generate(theOffset, theMaxResultsToFetch);
 	}
 
 	protected GeneratedSql buildSqlWithNumericSort(Boolean theAscending, OrderObject.NullOrder theNullOrder) {

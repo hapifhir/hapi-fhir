@@ -112,6 +112,25 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 		assertThat(generatedSql.getBindVariables()).containsExactly("Patient", 1L, 2L, 3L, 4L, 5L);
 	}
 
+	/**
+	 * The SQL Server limit handler rewrites the statement text, which now carries a nested SELECT
+	 * inside the WHERE clause. Paging must still render, with its binds after the JSON array bind.
+	 */
+	@Test
+	void testResourceIdsOverThreshold_withOffsetAndLimit_keepsPagingAndBindOrder() {
+		StorageSettings storageSettings = new StorageSettings();
+		storageSettings.setLargeIdListJsonThreshold(3);
+		SearchQueryBuilder searchQueryBuilder = createSearchQueryBuilder(storageSettings, createDialectProvider(true));
+
+		GeneratedSql generatedSql = generateResourceIdsPredicateWithPaging(searchQueryBuilder, 10, 500, 1L, 2L, 3L, 4L, 5L);
+		logSql(generatedSql);
+
+		String sql = massageSql(generatedSql.getSql());
+		assertThat(sql).contains("OPENJSON(?)");
+		assertThat(sql).endsWith("order by RES_ID offset ? rows fetch next ? rows only");
+		assertThat(generatedSql.getBindVariables()).containsExactly("Patient", "[1,2,3,4,5]", 10, 500);
+	}
+
 	@Nonnull
 	private HibernatePropertiesProvider createDialectProvider(boolean theJsonSupported) {
 		HibernatePropertiesProvider dialectProvider = new HibernatePropertiesProvider();

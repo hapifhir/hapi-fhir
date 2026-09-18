@@ -31,7 +31,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,6 +45,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -573,10 +576,11 @@ public class SearchQueryBuilderTest {
 		"3, 1, false",
 		"1, 1, false",
 		"-1, 5, false",
-		"0, 1, true"
+		"0, 1, true",
+		"3, 4, true"
 	})
 	void testResourceIdsThresholdBoundary_rendersExpectedPredicate(int theThreshold, int theIdCount, boolean theExpectJson) {
-		SearchQueryBuilder builder = createPostgresBuilder(theThreshold);
+		SearchQueryBuilder builder = createPostgresQueryBuilder(theThreshold);
 		builder.addPredicate(createResourceIdsPredicate(builder, false, theIdCount));
 
 		GeneratedSql generated = builder.generate(null, null);
@@ -613,7 +617,7 @@ public class SearchQueryBuilderTest {
 	 */
 	@Test
 	void testJsonPayloadHoldsIdsAndSqlTextDoesNot() {
-		SearchQueryBuilder builder = createPostgresBuilder(3);
+		SearchQueryBuilder builder = createPostgresQueryBuilder(3);
 		builder.addPredicate(createResourceIdsPredicate(builder, false, 5));
 
 		GeneratedSql generated = builder.generate(null, null);
@@ -624,27 +628,26 @@ public class SearchQueryBuilderTest {
 		assertThat(generated.getBindVariables()).containsExactly("Patient", "[1,2,3,4,5]");
 	}
 
+	static Stream<Arguments> secondIdListCases() {
+		return Stream.of(
+			Arguments.of(2, List.of("Patient", "[1,2,3,4,5]", 1L, 2L)),
+			Arguments.of(4, List.of("Patient", "[1,2,3,4,5]", "[1,2,3,4]")));
+	}
+
 	/**
-	 * A11: the JSON placeholder keeps its position in the bind list, between the binds that precede it
-	 * in the SQL text and those appended afterwards.
+	 * A11: each ID-list predicate binds independently, in SQL text order. A second list under the
+	 * threshold renders its own IN list; a second list over the threshold renders its own JSON array.
 	 */
-	@Test
-	void testBindOrderAroundJsonPlaceholder() {
-		SearchQueryBuilder withLimit = createPostgresBuilder(3);
-		withLimit.addPredicate(createResourceIdsPredicate(withLimit, false, 5));
+	@ParameterizedTest
+	@MethodSource("secondIdListCases")
+	void testTwoIdListPredicates_bindIndependentlyInTextOrder(int theSecondListSize, List<Object> theExpectedBinds) {
+		SearchQueryBuilder builder = createPostgresQueryBuilder(3);
+		builder.addPredicate(createResourceIdsPredicate(builder, false, 5));
+		builder.addPredicate(createResourceIdsPredicate(builder, false, theSecondListSize));
 
-		GeneratedSql generatedWithLimit = withLimit.generate(10, 5);
-		assertThat(generatedWithLimit.getBindVariables()).containsExactly("Patient", "[1,2,3,4,5]", 10, 5);
+		GeneratedSql generated = builder.generate(null, null);
 
-		// A second predicate whose binds follow the JSON placeholder inside the WHERE clause
-		SearchQueryBuilder withTrailingPredicate = createPostgresBuilder(3);
-		withTrailingPredicate.addPredicate(createResourceIdsPredicate(withTrailingPredicate, false, 5));
-		withTrailingPredicate.addResourceIdsPredicate(Lists.newArrayList(JpaPid.fromId(10L), JpaPid.fromId(11L)));
-
-		GeneratedSql generatedWithTrailingPredicate = withTrailingPredicate.generate(null, null);
-		String sql = generatedWithTrailingPredicate.getSql();
-		assertThat(sql.indexOf("jsonb_array_elements_text")).isLessThan(sql.lastIndexOf("t0.RES_ID IN (?,?)"));
-		assertThat(generatedWithTrailingPredicate.getBindVariables()).containsExactly("Patient", "[1,2,3,4,5]", 10L, 11L);
+		assertThat(generated.getBindVariables()).containsExactlyElementsOf(theExpectedBinds);
 	}
 
 	/**
@@ -653,7 +656,7 @@ public class SearchQueryBuilderTest {
 	 */
 	@Test
 	void testInverseResourceIdsOverThreshold_rendersNegatedJsonArray() {
-		SearchQueryBuilder builder = createPostgresBuilder(3);
+		SearchQueryBuilder builder = createPostgresQueryBuilder(3);
 		builder.addPredicate(createResourceIdsPredicate(builder, true, 5));
 
 		GeneratedSql generated = builder.generate(null, null);
@@ -672,9 +675,9 @@ public class SearchQueryBuilderTest {
 		myPartitionSettings.setDatabasePartitionMode(true);
 		myRequestPartitionId = RequestPartitionId.fromPartitionId(1);
 
-		SearchQueryBuilder builder = createPostgresBuilder(3);
+		SearchQueryBuilder builder = createPostgresQueryBuilder(3);
 		BaseJoiningPredicateBuilder queryRootTable = builder.getOrCreateResourceTablePredicateBuilder();
-		Condition predicate = queryRootTable.createPredicateResourceIds(false, toPids(5));
+		Condition predicate = queryRootTable.createPredicateResourceIds(false, createPids(5));
 		builder.addPredicate(queryRootTable.combineWithRequestPartitionIdPredicate(myRequestPartitionId, predicate));
 
 		GeneratedSql generated = builder.generate(null, null);
@@ -685,22 +688,22 @@ public class SearchQueryBuilderTest {
 		assertThat(generated.getBindVariables()).containsExactly("Patient", 1, "[1,2,3,4,5]");
 	}
 
-	private SearchQueryBuilder createPostgresBuilder(int theLargeIdListJsonThreshold) {
+	private SearchQueryBuilder createPostgresQueryBuilder(int theLargeIdListJsonThreshold) {
 		myStorageSettings.setLargeIdListJsonThreshold(theLargeIdListJsonThreshold);
-		return createPostgresBuilder();
+		return createPostgresQueryBuilder();
 	}
 
-	private SearchQueryBuilder createPostgresBuilder() {
+	private SearchQueryBuilder createPostgresQueryBuilder() {
 		HibernatePropertiesProvider dialectProvider = new HibernatePropertiesProvider();
 		dialectProvider.setDialectForUnitTest(new HapiFhirPostgresDialect());
 		return new SearchQueryBuilder(myFhirContext, myStorageSettings, myPartitionSettings, myRequestPartitionId, "Patient", mySqlBuilderFactory, dialectProvider, false, false);
 	}
 
 	private static Condition createResourceIdsPredicate(SearchQueryBuilder theBuilder, boolean theInverse, int theCount) {
-		return theBuilder.getOrCreateResourceTablePredicateBuilder().createPredicateResourceIds(theInverse, toPids(theCount));
+		return theBuilder.getOrCreateResourceTablePredicateBuilder().createPredicateResourceIds(theInverse, createPids(theCount));
 	}
 
-	private static List<JpaPid> toPids(int theCount) {
+	private static List<JpaPid> createPids(int theCount) {
 		return LongStream.rangeClosed(1, theCount).mapToObj(JpaPid::fromId).collect(Collectors.toList());
 	}
 
