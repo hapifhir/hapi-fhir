@@ -40,11 +40,10 @@ public class BinaryCreator implements Consumer<ConvertedFile> {
 	private final FhirContext myFhirContext;
 
 	public BinaryCreator(
-		FhirContext theContext,
-		DaoRegistry theDaoRegistry,
-		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails,
-		IJobDataSink<BulkExportBinaryFileId> theDataSink
-	) {
+			FhirContext theContext,
+			DaoRegistry theDaoRegistry,
+			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails,
+			IJobDataSink<BulkExportBinaryFileId> theDataSink) {
 		myFhirContext = theContext;
 		myDaoRegistry = theDaoRegistry;
 		this.myStepExecutionDetails = theStepExecutionDetails;
@@ -53,10 +52,10 @@ public class BinaryCreator implements Consumer<ConvertedFile> {
 
 	@Override
 	public void accept(ConvertedFile theConvertedFile) throws JobExecutionFailedException {
-//			int batchSize = theExpandedResourcesList.getStringifiedResources().size();
-//			ourLog.info("Writing {} resources to binary file", batchSize);
+		//			int batchSize = theExpandedResourcesList.getStringifiedResources().size();
+		//			ourLog.info("Writing {} resources to binary file", batchSize);
 
-//			myNumResourcesProcessed += batchSize;
+		//			myNumResourcesProcessed += batchSize;
 
 		IFhirResourceDao<IBaseBinary> binaryDao = myDaoRegistry.getResourceDao("Binary");
 
@@ -65,27 +64,27 @@ public class BinaryCreator implements Consumer<ConvertedFile> {
 		addMetadataExtensionsToBinary(myStepExecutionDetails, theConvertedFile, binary);
 		binary.setContent(theConvertedFile.getBytes());
 
-//		int processedRecordsCount = 0;
-//		try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-////			try (OutputStreamWriter streamWriter = getStreamWriter(outputStream)) {
-//////				for (String stringified : theConvertedFile.getStringifiedResources()) {
-//////					streamWriter.append(stringified);
-//////					streamWriter.append("\n");
-//////					processedRecordsCount++;
-//////				}
-////				outputStream.append(theConvertedFile.getBytes());
-////				streamWriter.flush();
-////				outputStream.flush();
-////			}
-//			binary.setContent(theConvertedFile.getBytes());
-//		} catch (IOException ex) {
-//			String errorMsg = String.format(
-//				"Failure to process resource of type %s : %s",
-//				theExpandedResourcesList.getResourceType(), ex.getMessage());
-//			ourLog.error(errorMsg);
-//
-//			throw new JobExecutionFailedException(Msg.code(2431) + errorMsg);
-//		}
+		//		int processedRecordsCount = 0;
+		//		try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+		////			try (OutputStreamWriter streamWriter = getStreamWriter(outputStream)) {
+		//////				for (String stringified : theConvertedFile.getStringifiedResources()) {
+		//////					streamWriter.append(stringified);
+		//////					streamWriter.append("\n");
+		//////					processedRecordsCount++;
+		//////				}
+		////				outputStream.append(theConvertedFile.getBytes());
+		////				streamWriter.flush();
+		////				outputStream.flush();
+		////			}
+		//			binary.setContent(theConvertedFile.getBytes());
+		//		} catch (IOException ex) {
+		//			String errorMsg = String.format(
+		//				"Failure to process resource of type %s : %s",
+		//				theExpandedResourcesList.getResourceType(), ex.getMessage());
+		//			ourLog.error(errorMsg);
+		//
+		//			throw new JobExecutionFailedException(Msg.code(2431) + errorMsg);
+		//		}
 
 		BulkExportJobParameters jobParameters = myStepExecutionDetails.getParameters();
 
@@ -117,22 +116,22 @@ public class BinaryCreator implements Consumer<ConvertedFile> {
 
 		if (myFhirContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2)) {
 			if (isNotBlank(jobParameters.getBinarySecurityContextIdentifierSystem())
-				|| isNotBlank(jobParameters.getBinarySecurityContextIdentifierValue())) {
+					|| isNotBlank(jobParameters.getBinarySecurityContextIdentifierValue())) {
 				FhirTerser terser = myFhirContext.newTerser();
 				terser.setElement(
-					binary,
-					"securityContext.identifier.system",
-					jobParameters.getBinarySecurityContextIdentifierSystem());
+						binary,
+						"securityContext.identifier.system",
+						jobParameters.getBinarySecurityContextIdentifierSystem());
 				terser.setElement(
-					binary,
-					"securityContext.identifier.value",
-					jobParameters.getBinarySecurityContextIdentifierValue());
+						binary,
+						"securityContext.identifier.value",
+						jobParameters.getBinarySecurityContextIdentifierValue());
 			}
 		}
 
 		ourLog.info(
-			"Writing Bulk Export Binary resource with ID: Binary/{}",
-			binary.getIdElement().getIdPart());
+				"Writing Bulk Export Binary resource with ID: Binary/{}",
+				binary.getIdElement().getIdPart());
 
 		RequestDetails srd = newRequestDetails(myStepExecutionDetails, jobParameters);
 		DaoMethodOutcome outcome = binaryDao.update(binary, srd);
@@ -143,9 +142,7 @@ public class BinaryCreator implements Consumer<ConvertedFile> {
 		bulkExportBinaryFileId.setResourceType(theConvertedFile.getResourceType());
 		myDataSink.accept(bulkExportBinaryFileId);
 
-		ourLog.info(
-			"Binary writing complete for resources of type {}.",
-			theConvertedFile.getResourceType());
+		ourLog.info("Binary writing complete for resources of type {}.", theConvertedFile.getResourceType());
 	}
 
 	/**
@@ -156,9 +153,9 @@ public class BinaryCreator implements Consumer<ConvertedFile> {
 	 * 3. the resource type of the resources contained in the binary
 	 */
 	private void addMetadataExtensionsToBinary(
-		@Nonnull StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails,
-		ConvertedFile theFile,
-		IBaseBinary binary) {
+			@Nonnull StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails,
+			ConvertedFile theFile,
+			IBaseBinary binary) {
 		// Note that this applies only to hl7.org structures, so these extensions will not be added
 		// to DSTU2 structures
 		if (binary.getMeta() instanceof IBaseHasExtensions meta) {
@@ -174,7 +171,7 @@ public class BinaryCreator implements Consumer<ConvertedFile> {
 			IBaseExtension<?, ?> jobExtension = meta.addExtension();
 			jobExtension.setUrl(JpaConstants.BULK_META_EXTENSION_JOB_ID);
 			jobExtension.setValue(myFhirContext.newPrimitiveString(
-				theStepExecutionDetails.getInstance().getInstanceId()));
+					theStepExecutionDetails.getInstance().getInstanceId()));
 
 			// resource type
 			IBaseExtension<?, ?> typeExtension = meta.addExtension();
@@ -182,13 +179,13 @@ public class BinaryCreator implements Consumer<ConvertedFile> {
 			typeExtension.setValue(myFhirContext.newPrimitiveString(theFile.getResourceType()));
 		} else {
 			ourLog.warn(
-				"Could not attach metadata extensions to binary resource, as this binary metadata does not support extensions");
+					"Could not attach metadata extensions to binary resource, as this binary metadata does not support extensions");
 		}
 	}
 
 	private RequestDetails newRequestDetails(
-		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails,
-		BulkExportJobParameters jobParameters) {
+			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails,
+			BulkExportJobParameters jobParameters) {
 		return theStepExecutionDetails.newSystemRequestDetails();
 	}
 }

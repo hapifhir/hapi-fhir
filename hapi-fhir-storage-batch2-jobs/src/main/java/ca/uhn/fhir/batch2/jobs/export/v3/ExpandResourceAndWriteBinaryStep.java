@@ -147,9 +147,7 @@ public class ExpandResourceAndWriteBinaryStep
 		ResourceIdList idList = theStepExecutionDetails.getData();
 		BulkExportJobParameters parameters = theStepExecutionDetails.getParameters();
 
-
-		ExpandResourcesConsumer resourceListConsumer =
-			new ExpandResourcesConsumer(
+		ExpandResourcesConsumer resourceListConsumer = new ExpandResourcesConsumer(
 				myFhirContext,
 				myBulkExportProcessor,
 				myInterceptorService,
@@ -166,19 +164,14 @@ public class ExpandResourceAndWriteBinaryStep
 		// search the resources
 		fetchResourcesByIdAndConsumeThem(idList, parameters, resourceListConsumer, theStepExecutionDetails);
 
-		int resourcesConsumed =  resourceListConsumer.getConsumedResourceCount();
+		int resourcesConsumed = resourceListConsumer.getConsumedResourceCount();
 		return new RunOutcome(resourcesConsumed);
 	}
 
 	private BinaryCreator getBinaryCreator(
-		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails,
-		IJobDataSink<BulkExportBinaryFileId> theDataSink
-	) {
-		return new BinaryCreator(
-			myFhirContext,
-			myDaoRegistry,
-			theStepExecutionDetails,
-			theDataSink);
+			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails,
+			IJobDataSink<BulkExportBinaryFileId> theDataSink) {
+		return new BinaryCreator(myFhirContext, myDaoRegistry, theStepExecutionDetails, theDataSink);
 	}
 
 	private void fetchResourcesByIdAndConsumeThem(
@@ -437,7 +430,6 @@ public class ExpandResourceAndWriteBinaryStep
 		SearchParameterMap spMap = SearchParameterMap.newSynchronous().add(PARAM_ID, idListParam);
 		return theDao.search(spMap, new SystemRequestDetails().setRequestPartitionId(theRequestPartitionId));
 	}
-
 
 	@VisibleForTesting
 	public void setIdHelperServiceForUnitTest(IIdHelperService<?> theIdHelperService) {

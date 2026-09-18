@@ -72,15 +72,14 @@ public class ExpandResourcesConsumer implements Consumer<List<IBaseResource>> {
 	private int myConsumedResources;
 
 	public ExpandResourcesConsumer(
-		FhirContext theContext,
-		IBulkExportProcessor<?> theIBulkExportProcessor,
-		InterceptorService theInterceptorService,
-		JpaStorageSettings theSettings,
-		InMemoryResourceMatcher theInMemoryMatcher,
-		ResponseTerminologyTranslationSvc theResponseTerminologyTranslationSvc,
-		BinaryCreator theBinaryCreator,
-		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails
-	) {
+			FhirContext theContext,
+			IBulkExportProcessor<?> theIBulkExportProcessor,
+			InterceptorService theInterceptorService,
+			JpaStorageSettings theSettings,
+			InMemoryResourceMatcher theInMemoryMatcher,
+			ResponseTerminologyTranslationSvc theResponseTerminologyTranslationSvc,
+			BinaryCreator theBinaryCreator,
+			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails) {
 		myFhirContext = theContext;
 		myBulkExportProcessor = theIBulkExportProcessor;
 		myInterceptorService = theInterceptorService;
@@ -116,16 +115,16 @@ public class ExpandResourcesConsumer implements Consumer<List<IBaseResource>> {
 		BulkExportJobParameters parameters = myStepExecutionDetails.getParameters();
 
 		ourLog.info(
-			"Bulk export instance[{}] chunk[{}] - About to expand {} resource IDs into their full resource bodies.",
-			instanceId,
-			chunkId,
-			idList.getIds().size());
+				"Bulk export instance[{}] chunk[{}] - About to expand {} resource IDs into their full resource bodies.",
+				instanceId,
+				chunkId,
+				idList.getIds().size());
 
 		// Apply post-fetch filtering
 		String resourceType = idList.getResourceType();
 		List<String> postFetchFilterUrls = parameters.getPostFetchFilterUrls().stream()
-			.filter(t -> t.substring(0, t.indexOf('?')).equals(resourceType))
-			.collect(Collectors.toList());
+				.filter(t -> t.substring(0, t.indexOf('?')).equals(resourceType))
+				.collect(Collectors.toList());
 
 		if (!postFetchFilterUrls.isEmpty()) {
 			applyPostFetchFiltering(theResources, postFetchFilterUrls, instanceId, chunkId);
@@ -145,10 +144,10 @@ public class ExpandResourcesConsumer implements Consumer<List<IBaseResource>> {
 		if (myInterceptorService.hasHooks(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_INCLUSION)) {
 			for (Iterator<IBaseResource> iter = theResources.iterator(); iter.hasNext(); ) {
 				HookParams params = new HookParams()
-					.add(BulkExportJobParameters.class, myStepExecutionDetails.getParameters())
-					.add(IBaseResource.class, iter.next());
+						.add(BulkExportJobParameters.class, myStepExecutionDetails.getParameters())
+						.add(IBaseResource.class, iter.next());
 				boolean outcome =
-					myInterceptorService.callHooks(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_INCLUSION, params);
+						myInterceptorService.callHooks(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_INCLUSION, params);
 				if (!outcome) {
 					iter.remove();
 				}
@@ -177,10 +176,8 @@ public class ExpandResourcesConsumer implements Consumer<List<IBaseResource>> {
 			// but it is possible if a job is in progress, but the server
 			// is stopped and restarted without the requisite interceptors
 			// available.
-			throw new JobExecutionFailedException(
-				Msg.code(3048)
-				+ "No conversion utility for mimetype " + myStepExecutionDetails.getParameters().getOutputFormat()
-			);
+			throw new JobExecutionFailedException(Msg.code(3048) + "No conversion utility for mimetype "
+					+ myStepExecutionDetails.getParameters().getOutputFormat());
 		}
 
 		ConvertedFiles files = converter.consume(resourceList, myStepExecutionDetails.getParameters());
@@ -188,11 +185,10 @@ public class ExpandResourcesConsumer implements Consumer<List<IBaseResource>> {
 		if (!isValid(files)) {
 			// conversion utility failed to provide output
 			// expected for bulk export job
-			throw new JobExecutionFailedException(
-				Msg.code(3049)
-				+ String.format("Output format %s not supported",
-					myStepExecutionDetails.getParameters().getOutputFormat())
-			);
+			throw new JobExecutionFailedException(Msg.code(3049)
+					+ String.format(
+							"Output format %s not supported",
+							myStepExecutionDetails.getParameters().getOutputFormat()));
 		}
 
 		// create the binaries
@@ -241,7 +237,8 @@ public class ExpandResourcesConsumer implements Consumer<List<IBaseResource>> {
 			 */
 			HookParams params = new HookParams();
 			params.add(BulkExportJobParameters.class, myStepExecutionDetails.getParameters());
-			converter = (IResourceConverter) myInterceptorService.callHooksAndReturnObject(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_CONVERT, params);
+			converter = (IResourceConverter) myInterceptorService.callHooksAndReturnObject(
+					Pointcut.STORAGE_BULK_EXPORT_RESOURCE_CONVERT, params);
 		}
 
 		if (converter == null && isNdJson()) {
@@ -253,17 +250,17 @@ public class ExpandResourcesConsumer implements Consumer<List<IBaseResource>> {
 	}
 
 	private boolean isNdJson() {
-		String providedFormat = ObjectUtils.firstNonNull(myStepExecutionDetails.getParameters()
-				.getOutputFormat(), Constants.CT_FHIR_NDJSON);
+		String providedFormat = ObjectUtils.firstNonNull(
+				myStepExecutionDetails.getParameters().getOutputFormat(), Constants.CT_FHIR_NDJSON);
 
 		return BulkDataExportUtil.isNdJson(providedFormat);
 	}
 
 	private void applyPostFetchFiltering(
-		List<IBaseResource> theResources,
-		List<String> thePostFetchFilterUrls,
-		String theInstanceId,
-		String theChunkId) {
+			List<IBaseResource> theResources,
+			List<String> thePostFetchFilterUrls,
+			String theInstanceId,
+			String theChunkId) {
 		int numRemoved = 0;
 		for (Iterator<IBaseResource> iter = theResources.iterator(); iter.hasNext(); ) {
 			boolean matched = applyPostFetchFilteringForSingleResource(thePostFetchFilterUrls, iter);
@@ -276,15 +273,15 @@ public class ExpandResourcesConsumer implements Consumer<List<IBaseResource>> {
 
 		if (numRemoved > 0) {
 			ourLog.info(
-				"Bulk export instance[{}] chunk[{}] - {} resources were filtered out because of post-fetch filter URLs",
-				theInstanceId,
-				theChunkId,
-				numRemoved);
+					"Bulk export instance[{}] chunk[{}] - {} resources were filtered out because of post-fetch filter URLs",
+					theInstanceId,
+					theChunkId,
+					numRemoved);
 		}
 	}
 
 	private boolean applyPostFetchFilteringForSingleResource(
-		List<String> thePostFetchFilterUrls, Iterator<IBaseResource> iter) {
+			List<String> thePostFetchFilterUrls, Iterator<IBaseResource> iter) {
 		IBaseResource nextResource = iter.next();
 		String nextResourceType = myFhirContext.getResourceType(nextResource);
 
@@ -293,7 +290,7 @@ public class ExpandResourcesConsumer implements Consumer<List<IBaseResource>> {
 				String resourceType = nextPostFetchFilterUrl.substring(0, nextPostFetchFilterUrl.indexOf('?'));
 				if (nextResourceType.equals(resourceType)) {
 					InMemoryMatchResult matchResult = myInMemoryResourceMatcher.match(
-						nextPostFetchFilterUrl, nextResource, null, new SystemRequestDetails());
+							nextPostFetchFilterUrl, nextResource, null, new SystemRequestDetails());
 					if (matchResult.matched()) {
 						return true;
 					}
@@ -303,4 +300,3 @@ public class ExpandResourcesConsumer implements Consumer<List<IBaseResource>> {
 		return false;
 	}
 }
-

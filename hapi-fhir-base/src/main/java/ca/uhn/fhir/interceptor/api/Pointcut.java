@@ -1292,9 +1292,8 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 */
 	STORAGE_BULK_EXPORT_RESOURCE_CONVERT(
-		"ca.uhn.fhir.rest.api.server.bulk.IResourceConverter",
-		"ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters"
-	),
+			"ca.uhn.fhir.rest.api.server.bulk.IResourceConverter",
+			"ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters"),
 
 	/**
 	 * <b>Storage Hook:</b>

@@ -66,13 +66,14 @@ public class NDJsonConverter implements IResourceConverter {
 					// is bigger than the maximum allowable. We'll allow it in that
 					// case
 					ourLog.warn(
-						"Single resource size {} exceeds allowable maximum of {}, so will ignore maximum",
-						newSize,
-						bulkExportFileMaximumSize);
+							"Single resource size {} exceeds allowable maximum of {}, so will ignore maximum",
+							newSize,
+							bulkExportFileMaximumSize);
 				} else {
 					// Otherwise, flush the contents now before adding the next file
 					List<String> stringifiedResources = resourceTypeToStringifiedResources.get(type);
-					ConvertedFile convertedFile = writeStringifiedResources(type, stringifiedResources, theJobParameters);
+					ConvertedFile convertedFile =
+							writeStringifiedResources(type, stringifiedResources, theJobParameters);
 
 					convertedResources.addFile(convertedFile);
 
@@ -95,9 +96,8 @@ public class NDJsonConverter implements IResourceConverter {
 		return convertedResources;
 	}
 
-	private ConvertedFile writeStringifiedResources(String theResourceType,
-													List<String> theStringifiedResources,
-													BulkExportJobParameters theJobParameters) {
+	private ConvertedFile writeStringifiedResources(
+			String theResourceType, List<String> theStringifiedResources, BulkExportJobParameters theJobParameters) {
 		ConvertedFile file = new ConvertedFile();
 		file.setResourceType(theResourceType);
 		file.setMimeType(theJobParameters.getOutputFormat());
@@ -116,10 +116,7 @@ public class NDJsonConverter implements IResourceConverter {
 			throw new RuntimeException(ex);
 		}
 
-		ourLog.info(
-			"Expanding of {} resources of type {} completed",
-			theStringifiedResources.size(),
-			theResourceType);
+		ourLog.info("Expanding of {} resources of type {} completed", theStringifiedResources.size(), theResourceType);
 
 		return file;
 	}

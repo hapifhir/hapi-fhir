@@ -78,9 +78,13 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 
 		// validate the output format
 		if (!isSupportedOutputFormat(theParameters)) {
-			errorMsgs.add("Unsupported output format; no known converter available for mime-type %s. Default allowed formats are %s, %s and %s"
-					.formatted(theParameters.getOutputFormat(),
-						Constants.CT_FHIR_NDJSON, Constants.CT_APP_NDJSON, Constants.CT_NDJSON));
+			errorMsgs.add(
+					"Unsupported output format; no known converter available for mime-type %s. Default allowed formats are %s, %s and %s"
+							.formatted(
+									theParameters.getOutputFormat(),
+									Constants.CT_FHIR_NDJSON,
+									Constants.CT_APP_NDJSON,
+									Constants.CT_NDJSON));
 		}
 		// validate the exportId
 		if (!StringUtils.isBlank(theParameters.getExportIdentifier())) {
@@ -161,7 +165,8 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 			HookParams params = new HookParams();
 			params.add(BulkExportJobParameters.class, theJobParameters);
 
-			IResourceConverter converter = (IResourceConverter) myInterceptorService.callHooksAndReturnObject(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_CONVERT, params);
+			IResourceConverter converter = (IResourceConverter) myInterceptorService.callHooksAndReturnObject(
+					Pointcut.STORAGE_BULK_EXPORT_RESOURCE_CONVERT, params);
 
 			// a converter is provided
 			if (converter != null) {

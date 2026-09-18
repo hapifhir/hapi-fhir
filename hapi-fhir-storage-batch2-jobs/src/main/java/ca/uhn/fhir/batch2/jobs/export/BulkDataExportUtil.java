@@ -53,7 +53,7 @@ public class BulkDataExportUtil {
 		}
 
 		return Constants.CT_FHIR_NDJSON.equalsIgnoreCase(theOutputFormat)
-			|| Constants.CT_APP_NDJSON.equalsIgnoreCase(theOutputFormat)
-			|| Constants.CT_NDJSON.equalsIgnoreCase(theOutputFormat);
+				|| Constants.CT_APP_NDJSON.equalsIgnoreCase(theOutputFormat)
+				|| Constants.CT_NDJSON.equalsIgnoreCase(theOutputFormat);
 	}
 }
