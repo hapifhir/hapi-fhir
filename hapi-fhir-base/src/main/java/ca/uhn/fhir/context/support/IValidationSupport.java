@@ -183,13 +183,7 @@ public interface IValidationSupport {
 	}
 
 	/**
-	 * Fetch a code system by ID
-	 * <p>
-	 * The system is a canonical URL, so it may name a version as <code>url|version</code>. Implementations
-	 * backed by stored resources resolve both forms; ones which match the string as given, such as a lookup
-	 * in a map or a search on <code>CodeSystem?url=</code>, find nothing for the versioned form unless the
-	 * version happens to be part of the stored URL.
-	 * </p>
+	 * Fetch a code system by canonical URL
 	 *
 	 * @param theSystem The code system, as a canonical URL which may carry a version, e.g. "<code>http://loinc.org</code>" or "<code>http://loinc.org|2.78</code>"
 	 * @return The valueset (must not be null, but can be an empty ValueSet)
@@ -208,7 +202,7 @@ public interface IValidationSupport {
 	 * </p>
 	 *
 	 * @param theClass The type of the resource to load, or <code>null</code> to return any resource with the given canonical URI
-	 * @param theUri   The resource URI
+	 * @param theUri   The resource, as a canonical URL which may carry a version, e.g. "<code>http://example.org/ValueSet/foo|1.0.0</code>"
 	 * @return Returns the resource, or <code>null</code> if no resource with the
 	 * given URI can be found
 	 */
@@ -244,6 +238,11 @@ public interface IValidationSupport {
 		return null;
 	}
 
+	/**
+	 * Fetch the given StructureDefinition by URL, or returns null if one can't be found for the given URL
+	 *
+	 * @param theUrl The structure definition, as a canonical URL which may carry a version, e.g. "<code>http://example.org/StructureDefinition/foo|1.0.0</code>"
+	 */
 	@Nullable
 	default IBaseResource fetchStructureDefinition(String theUrl) {
 		return null;
@@ -274,6 +273,8 @@ public interface IValidationSupport {
 
 	/**
 	 * Fetch the given ValueSet by URL, or returns null if one can't be found for the given URL
+	 *
+	 * @param theValueSetUrl The value set, as a canonical URL which may carry a version, e.g. "<code>http://example.org/ValueSet/foo|1.0.0</code>"
 	 */
 	@Nullable
 	default IBaseResource fetchValueSet(String theValueSetUrl) {
@@ -303,7 +304,7 @@ public interface IValidationSupport {
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
 	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
 	 * @param theOptions                  Provides options controlling the validation
-	 * @param theCodeSystem               The code system. This signature has no version parameter, so a caller which needs to name a version packs it into the canonical as "<code>http://loinc.org|2.78</code>". Not every implementation splits that form, which is why {@link #validateCode(ValidationSupportContext, ConceptValidationOptions, ValidateCodeRequest)} exists.
+	 * @param theCodeSystem               The code system, e.g. "<code>http://loinc.org</code>"
 	 * @param theCode                     The code, e.g. "<code>1234-5</code>"
 	 * @param theDisplay                  The display name, if it should also be validated
 	 * @return Returns a validation result object
