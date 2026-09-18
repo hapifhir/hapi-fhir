@@ -117,8 +117,10 @@ public interface IValidationProviders {
 		}
 
 		protected IBaseParameters getTerminologyResponse(String theOperation, String theUrl, String theCodeSystemVersion, String theCode) throws Exception {
-			if (myExceptionMap.containsKey(getInputKey(theOperation, theUrl, theCode))) {
-				throw myExceptionMap.get(getInputKey(theOperation, theUrl, theCode));
+			// addException registers without a version, so an exception fires whichever version the request names
+			String exceptionKey = getInputKey(theOperation, theUrl, theCode);
+			if (myExceptionMap.containsKey(exceptionKey)) {
+				throw myExceptionMap.get(exceptionKey);
 			}
 			String inputKey = getInputKey(theOperation, theUrl, theCodeSystemVersion, theCode);
 			IBaseParameters params = myTerminologyResponseMap.get(inputKey);

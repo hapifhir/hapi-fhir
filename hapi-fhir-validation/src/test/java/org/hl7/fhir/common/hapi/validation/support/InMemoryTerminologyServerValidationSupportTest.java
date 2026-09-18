@@ -461,7 +461,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 	@Test
 	void validateCode_codeSystemVersionMatchesTheUnversionedCanonical_doesNotFetchTheVersionedCanonical() {
 		// Setup
-		FetchRecordingValidationSupport recorder = addSingleVersionCodeSystem("1.0.0");
+		FetchRecordingValidationSupport recorder = addSingleVersionCodeSystemAndRecordFetches("1.0.0");
 		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
 
 		// Test
@@ -483,7 +483,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 	@Test
 	void validateCode_codeSystemVersionDiffersFromTheUnversionedCanonical_fetchesTheVersionedCanonical() {
 		// Setup
-		FetchRecordingValidationSupport recorder = addSingleVersionCodeSystem("1.0.0");
+		FetchRecordingValidationSupport recorder = addSingleVersionCodeSystemAndRecordFetches("1.0.0");
 		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
 
 		// Test
@@ -499,7 +499,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 	 * Adds a CodeSystem holding a single code at the given version, and rebuilds {@link #myChain} so that every
 	 * CodeSystem fetch through it is recorded.
 	 */
-	private FetchRecordingValidationSupport addSingleVersionCodeSystem(String theVersion) {
+	private FetchRecordingValidationSupport addSingleVersionCodeSystemAndRecordFetches(String theVersion) {
 		CodeSystem cs = new CodeSystem();
 		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);

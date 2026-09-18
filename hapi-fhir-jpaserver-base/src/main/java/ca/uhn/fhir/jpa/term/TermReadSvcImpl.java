@@ -2698,14 +2698,15 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@Override
+	@Nullable
 	public IValidationSupport.CodeValidationResult validateCode(
 			@Nonnull ValidationSupportContext theValidationSupportContext,
 			@Nonnull ConceptValidationOptions theOptions,
-			String theCodeSystemUrl,
-			String theCodeSystemVersion,
-			String theCode,
-			String theDisplay,
-			String theValueSetUrl) {
+			@Nullable String theCodeSystemUrl,
+			@Nullable String theCodeSystemVersion,
+			@Nullable String theCode,
+			@Nullable String theDisplay,
+			@Nullable String theValueSetUrl) {
 		// The lookups below take the code system as a single "url|version" identifier, which
 		// getCurrentCodeSystemVersion also uses as a cache key, so the version is joined rather than passed beside it.
 		String codeSystemUrl = ValidationSupportUtils.getVersionedCodeSystem(theCodeSystemUrl, theCodeSystemVersion);

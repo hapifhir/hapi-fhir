@@ -94,13 +94,18 @@ public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Tes
 		final String classSystem = "http://terminology.hl7.org/CodeSystem/v3-ActCode";
 		final String identifierTypeSystem = "http://terminology.hl7.org/CodeSystem/v2-0203";
 
-		setupValueSetValidateCode("http://hl7.org/fhir/ValueSet/encounter-status",  "4.0.1","http://hl7.org/fhir/encounter-status", statusCode, "validation/encounter/validateCode-ValueSet-encounter-status.json");
-		setupValueSetValidateCode("http://terminology.hl7.org/ValueSet/v3-ActEncounterCode", "http://terminology.hl7.org/CodeSystem/v3-ActCode", classCode, "validation/encounter/validateCode-ValueSet-v3-ActEncounterCode.json");
+		final String valueSetVersion = "4.0.1";
+		final String statusSystemVersion = "5.0.0-ballot";
+		final String classSystemVersion = "2018-08-12";
+		final String identifierTypeSystemVersion = "3.0.0";
+
+		setupValueSetValidateCode("http://hl7.org/fhir/ValueSet/encounter-status", valueSetVersion, statusSystem, statusCode, "validation/encounter/validateCode-ValueSet-encounter-status.json");
+		setupValueSetValidateCode("http://terminology.hl7.org/ValueSet/v3-ActEncounterCode", classSystem, classCode, "validation/encounter/validateCode-ValueSet-v3-ActEncounterCode.json");
 		setupValueSetValidateCode("http://hl7.org/fhir/ValueSet/identifier-type", "http://hl7.org/fhir/identifier-type", identifierTypeCode, "validation/encounter/validateCode-ValueSet-identifier-type.json");
 
-		setupCodeSystemValidateCode(statusSystem, "5.0.0-ballot", statusCode, "validation/encounter/validateCode-CodeSystem-encounter-status.json");
-		setupCodeSystemValidateCode(classSystem, "2018-08-12", classCode, "validation/encounter/validateCode-CodeSystem-v3-ActCode.json");
-		setupCodeSystemValidateCode(identifierTypeSystem, "3.0.0", identifierTypeCode, "validation/encounter/validateCode-CodeSystem-v2-0203.json");
+		setupCodeSystemValidateCode(statusSystem, statusSystemVersion, statusCode, "validation/encounter/validateCode-CodeSystem-encounter-status.json");
+		setupCodeSystemValidateCode(classSystem, classSystemVersion, classCode, "validation/encounter/validateCode-CodeSystem-v3-ActCode.json");
+		setupCodeSystemValidateCode(identifierTypeSystem, identifierTypeSystemVersion, identifierTypeCode, "validation/encounter/validateCode-CodeSystem-v2-0203.json");
 
 		Encounter encounter = new Encounter();
 		encounter.getMeta().addProfile("http://example.ca/fhir/StructureDefinition/profile-encounter");
@@ -138,10 +143,13 @@ public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Tes
 		final String loincSystem = "http://loinc.org";
 		final String system = "http://fhir.infoway-inforoute.ca/io/psca/CodeSystem/ICD9CM";
 
-		setupValueSetValidateCode("http://hl7.org/fhir/ValueSet/observation-status", "4.0.1", statusSystem, statusCode, "validation/observation/validateCode-ValueSet-observation-status.json");
+		final String valueSetVersion = "4.0.1";
+		final String statusSystemVersion = "5.0.0-ballot";
+
+		setupValueSetValidateCode("http://hl7.org/fhir/ValueSet/observation-status", valueSetVersion, statusSystem, statusCode, "validation/observation/validateCode-ValueSet-observation-status.json");
 		setupValueSetValidateCode("http://hl7.org/fhir/ValueSet/observation-codes", loincSystem, statusCode, "validation/observation/validateCode-ValueSet-codes.json");
 
-		setupCodeSystemValidateCode(statusSystem, "5.0.0-ballot", statusCode, "validation/observation/validateCode-CodeSystem-observation-status.json");
+		setupCodeSystemValidateCode(statusSystem, statusSystemVersion, statusCode, "validation/observation/validateCode-CodeSystem-observation-status.json");
 		setupCodeSystemValidateCode(system, code, "validation/observation/validateCode-CodeSystem-ICD9CM.json");
 
 		Observation obs = new Observation();
@@ -171,12 +179,16 @@ public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Tes
 		final String statusSystem = "http://hl7.org/fhir/event-status";
 		final String snomedSystem = "http://snomed.info/sct";
 
-		setupValueSetValidateCode("http://hl7.org/fhir/ValueSet/event-status", "4.0.1", statusSystem, statusCode, "validation/procedure/validateCode-ValueSet-event-status.json");
+		final String valueSetVersion = "4.0.1";
+		final String statusSystemVersion = "5.0.0-ballot";
+		final String snomedSystemVersion = "http://snomed.info/sct/32506021000036107/version/20241031";
+
+		setupValueSetValidateCode("http://hl7.org/fhir/ValueSet/event-status", valueSetVersion, statusSystem, statusCode, "validation/procedure/validateCode-ValueSet-event-status.json");
 		setupValueSetValidateCode("http://hl7.org/fhir/ValueSet/procedure-code", snomedSystem, procedureCode1, "validation/procedure/validateCode-ValueSet-procedure-code-valid.json");
 		setupValueSetValidateCode("http://hl7.org/fhir/ValueSet/procedure-code", snomedSystem, procedureCode2, "validation/procedure/validateCode-ValueSet-procedure-code-invalid.json");
 
-		setupCodeSystemValidateCode(statusSystem, "5.0.0-ballot", statusCode, "validation/procedure/validateCode-CodeSystem-event-status.json");
-		setupCodeSystemValidateCode(snomedSystem, "http://snomed.info/sct/32506021000036107/version/20241031", procedureCode1, "validation/procedure/validateCode-CodeSystem-snomed-valid.json");
+		setupCodeSystemValidateCode(statusSystem, statusSystemVersion, statusCode, "validation/procedure/validateCode-CodeSystem-event-status.json");
+		setupCodeSystemValidateCode(snomedSystem, snomedSystemVersion, procedureCode1, "validation/procedure/validateCode-CodeSystem-snomed-valid.json");
 		setupCodeSystemValidateCode(snomedSystem, procedureCode2, "validation/procedure/validateCode-CodeSystem-snomed-invalid.json");
 
 		Procedure procedure = new Procedure();
@@ -213,15 +225,19 @@ public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Tes
 		final String snomedSystem = "http://snomed.info/sct";
 		final String absentUnknownSystem = "http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips";
 
-		setupValueSetValidateCode("http://hl7.org/fhir/ValueSet/event-status", "4.0.1", statusSystem, statusCode, "validation/procedure/validateCode-ValueSet-event-status.json");
+		final String valueSetVersion = "4.0.1";
+		final String statusSystemVersion = "5.0.0-ballot";
+		final String absentUnknownSystemVersion = "1.1.0";
+
+		setupValueSetValidateCode("http://hl7.org/fhir/ValueSet/event-status", valueSetVersion, statusSystem, statusCode, "validation/procedure/validateCode-ValueSet-event-status.json");
 		setupValueSetValidateCode("http://hl7.org/fhir/ValueSet/procedure-code", snomedSystem, procedureCode, "validation/procedure/validateCode-ValueSet-procedure-code-invalid-slice.json");
 		setupValueSetValidateCode("http://hl7.org/fhir/uv/ips/ValueSet/absent-or-unknown-procedures-uv-ips", absentUnknownSystem, procedureCode, "validation/procedure/validateCode-ValueSet-absent-or-unknown-procedure.json");
 
-		setupCodeSystemValidateCode(statusSystem, "5.0.0-ballot", statusCode, "validation/procedure/validateCode-CodeSystem-event-status.json");
+		setupCodeSystemValidateCode(statusSystem, statusSystemVersion, statusCode, "validation/procedure/validateCode-CodeSystem-event-status.json");
 		// the code is checked against the CodeSystem once per ValueSet: the procedure-code response names no
-		// version, the absent-or-unknown one names 1.1.0
+		// version, the absent-or-unknown one names a version
 		setupCodeSystemValidateCode(absentUnknownSystem, procedureCode, "validation/procedure/validateCode-CodeSystem-absent-or-unknown.json");
-		setupCodeSystemValidateCode(absentUnknownSystem, "1.1.0", procedureCode, "validation/procedure/validateCode-CodeSystem-absent-or-unknown.json");
+		setupCodeSystemValidateCode(absentUnknownSystem, absentUnknownSystemVersion, procedureCode, "validation/procedure/validateCode-CodeSystem-absent-or-unknown.json");
 
 		Procedure procedure = new Procedure();
 		procedure.setSubject(new Reference("Patient/P1"));
@@ -236,13 +252,16 @@ public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Tes
 
 	@Test
 	public void validate_withVersionInTerminologyResponses_returnsNoErrors() {
-		// setup: the CodeSystem response is registered under version 5.0.0-ballot, the version the ValueSet
-		// response reports, so the test only passes if the CodeSystem check names that version
+		// setup: the CodeSystem response is registered under the version the ValueSet response reports, so
+		// the test only passes if the CodeSystem check names that version
 		final String statusCode = "completed";
 		final String statusSystem = "http://hl7.org/fhir/event-status";
 
-		setupValueSetValidateCode("http://hl7.org/fhir/ValueSet/event-status", "4.0.1", statusSystem, statusCode, "validation/procedure/validateCode-ValueSet-event-status.json");
-		setupCodeSystemValidateCode(statusSystem, "5.0.0-ballot", statusCode, "validation/procedure/validateCode-CodeSystem-event-status.json");
+		final String valueSetVersion = "4.0.1";
+		final String statusSystemVersion = "5.0.0-ballot";
+
+		setupValueSetValidateCode("http://hl7.org/fhir/ValueSet/event-status", valueSetVersion, statusSystem, statusCode, "validation/procedure/validateCode-ValueSet-event-status.json");
+		setupCodeSystemValidateCode(statusSystem, statusSystemVersion, statusCode, "validation/procedure/validateCode-CodeSystem-event-status.json");
 
 		Procedure procedure = new Procedure();
 		procedure.setSubject(new Reference("Patient/P1"));
@@ -264,7 +283,9 @@ public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Tes
 		final String statusCode = "completed";
 		final String statusSystem = "http://hl7.org/fhir/event-status";
 
-		setupValueSetValidateCode("http://hl7.org/fhir/ValueSet/event-status", "4.0.1", statusSystem, statusCode, "validation/procedure/validateCode-ValueSet-event-status-no-version.json");
+		final String valueSetVersion = "4.0.1";
+
+		setupValueSetValidateCode("http://hl7.org/fhir/ValueSet/event-status", valueSetVersion, statusSystem, statusCode, "validation/procedure/validateCode-ValueSet-event-status-no-version.json");
 		setupCodeSystemValidateCode(statusSystem, statusCode, "validation/procedure/validateCode-CodeSystem-event-status-no-version.json");
 
 		Procedure procedure = new Procedure();

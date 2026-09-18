@@ -47,6 +47,7 @@ import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.LogicUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
@@ -454,5 +455,15 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 			return null;
 		}
 		return theFhirTerser.getSinglePrimitiveValueOrNull(theCoding, "version");
+	}
+
+	/**
+	 * @deprecated Please use {@link ValidationSupportUtils#getVersionedCodeSystem(String, String)} instead.
+	 */
+	@Deprecated(since = "8.14.0")
+	@Nullable
+	public static String createVersionedSystemIfVersionIsPresent(
+			@Nullable String theCodeSystemUrl, @Nullable String theVersion) {
+		return ValidationSupportUtils.getVersionedCodeSystem(theCodeSystemUrl, theVersion);
 	}
 }

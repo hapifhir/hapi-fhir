@@ -52,6 +52,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -67,6 +68,10 @@ public class ValidationSupportChainTest extends BaseTest {
 	public static final String CODE_0 = "code-0";
 	public static final String DISPLAY_0 = "display-0";
 	public static final String VALUE_SET_URL_0 = "http://value-set-url-0";
+	public static final String CODE_SYSTEM_VERSION_0 = "code-system-version-0";
+	public static final String CODE_SYSTEM_VERSION_1 = "code-system-version-1";
+	public static final String VALUE_SET_VERSION_0 = "value-set-version-0";
+	public static final String VALUE_SET_VERSION_1 = "value-set-version-1";
 	private static final Logger ourLog = LoggerFactory.getLogger(ValidationSupportChainTest.class);
 	@Mock(strictness = Mock.Strictness.LENIENT)
 	private IValidationSupport myValidationSupport0;
@@ -222,6 +227,112 @@ public class ValidationSupportChainTest extends BaseTest {
 			verify(myValidationSupport1, times(1)).validateCode(any(), any(), any(), any(), any(), any(), any());
 			verify(myValidationSupport2, never()).validateCode(any(), any(), any(), any(), any(), any(), any());
 		}
+	}
+
+	/**
+	 * The cache key has to carry the code system version, or a code validated against one version answers for
+	 * every other version of the same system - which would defeat the version being passed at all.
+	 */
+	@Test
+	public void validateCode_differentCodeSystemVersions_areNotAnsweredFromOneCacheEntry() {
+		// Setup
+		prepareMock(myValidationSupport0);
+		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(true), myValidationSupport0);
+
+		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(true);
+		when(myValidationSupport0.validateCode(any(), any(), any(), any(), any(), any(), any()))
+			.thenAnswer(t -> new IValidationSupport.CodeValidationResult());
+
+		// Test
+		IValidationSupport.CodeValidationResult version0 = validateCodeWithVersion(chain, CODE_SYSTEM_VERSION_0);
+		IValidationSupport.CodeValidationResult version1 = validateCodeWithVersion(chain, CODE_SYSTEM_VERSION_1);
+		IValidationSupport.CodeValidationResult version0Again = validateCodeWithVersion(chain, CODE_SYSTEM_VERSION_0);
+
+		// Verify
+		assertNotSame(version0, version1);
+		assertSame(version0, version0Again);
+		verify(myValidationSupport0, times(1))
+			.validateCode(any(), any(), eq(CODE_SYSTEM_URL_0), eq(CODE_SYSTEM_VERSION_0), eq(CODE_0), eq(DISPLAY_0), isNull());
+		verify(myValidationSupport0, times(1))
+			.validateCode(any(), any(), eq(CODE_SYSTEM_URL_0), eq(CODE_SYSTEM_VERSION_1), eq(CODE_0), eq(DISPLAY_0), isNull());
+	}
+
+	/**
+	 * validateCodeInValueSet keys on ValueSet.url, which is the same string for every version of a value set.
+	 * Two versions can include different code system versions, so their answers legitimately differ and the
+	 * version has to be part of the key as well.
+	 */
+	@Test
+	public void validateCodeInValueSet_differentValueSetVersions_areNotAnsweredFromOneCacheEntry() {
+		// Setup
+		prepareMock(myValidationSupport0);
+		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(true), myValidationSupport0);
+
+		when(myValidationSupport0.isValueSetSupported(any(), eq(VALUE_SET_URL_0))).thenReturn(true);
+		when(myValidationSupport0.validateCodeInValueSet(any(), any(), any(), any(), any(), any()))
+			.thenAnswer(t -> new IValidationSupport.CodeValidationResult());
+
+		// Test
+		IValidationSupport.CodeValidationResult version0 = validateCodeInValueSetVersion(chain, VALUE_SET_VERSION_0);
+		IValidationSupport.CodeValidationResult version1 = validateCodeInValueSetVersion(chain, VALUE_SET_VERSION_1);
+		IValidationSupport.CodeValidationResult version0Again = validateCodeInValueSetVersion(chain, VALUE_SET_VERSION_0);
+
+		// Verify
+		assertNotSame(version0, version1);
+		assertSame(version0, version0Again);
+		verify(myValidationSupport0, times(2)).validateCodeInValueSet(any(), any(), any(), any(), any(), any());
+	}
+
+	/**
+	 * validateCode names no value set version of its own - the key is built with null - because any version
+	 * lives inside theValueSetUrl, which JpaResourceDaoValueSet and TermReadSvcImpl both pass as
+	 * "url|version". The two forms therefore have to remain distinct entries.
+	 */
+	@Test
+	public void validateCode_valueSetUrlWithAndWithoutVersion_areNotAnsweredFromOneCacheEntry() {
+		// Setup
+		prepareMock(myValidationSupport0);
+		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(true), myValidationSupport0);
+
+		when(myValidationSupport0.isValueSetSupported(any(), any())).thenReturn(true);
+		when(myValidationSupport0.validateCode(any(), any(), any(), any(), any(), any(), any()))
+			.thenAnswer(t -> new IValidationSupport.CodeValidationResult());
+
+		String versionedValueSetUrl = VALUE_SET_URL_0 + "|" + VALUE_SET_VERSION_0;
+
+		// Test
+		IValidationSupport.CodeValidationResult unversioned = validateCodeInValueSetUrl(chain, VALUE_SET_URL_0);
+		IValidationSupport.CodeValidationResult versioned = validateCodeInValueSetUrl(chain, versionedValueSetUrl);
+		IValidationSupport.CodeValidationResult unversionedAgain = validateCodeInValueSetUrl(chain, VALUE_SET_URL_0);
+
+		// Verify
+		assertNotSame(unversioned, versioned);
+		assertSame(unversioned, unversionedAgain);
+		verify(myValidationSupport0, times(1))
+			.validateCode(any(), any(), any(), any(), any(), any(), eq(VALUE_SET_URL_0));
+		verify(myValidationSupport0, times(1))
+			.validateCode(any(), any(), any(), any(), any(), any(), eq(versionedValueSetUrl));
+	}
+
+	private IValidationSupport.CodeValidationResult validateCodeInValueSetUrl(
+			ValidationSupportChain theChain, String theValueSetUrl) {
+		return theChain.validateCode(
+			newValidationCtx(theChain), new ConceptValidationOptions(), CODE_SYSTEM_URL_0, null, CODE_0, DISPLAY_0, theValueSetUrl);
+	}
+
+	private IValidationSupport.CodeValidationResult validateCodeWithVersion(
+			ValidationSupportChain theChain, String theCodeSystemVersion) {
+		return theChain.validateCode(
+			newValidationCtx(theChain), new ConceptValidationOptions(), CODE_SYSTEM_URL_0, theCodeSystemVersion, CODE_0, DISPLAY_0, null);
+	}
+
+	private IValidationSupport.CodeValidationResult validateCodeInValueSetVersion(
+			ValidationSupportChain theChain, String theValueSetVersion) {
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl(VALUE_SET_URL_0);
+		valueSet.setVersion(theValueSetVersion);
+		return theChain.validateCodeInValueSet(
+			newValidationCtx(theChain), new ConceptValidationOptions(), CODE_SYSTEM_URL_0, CODE_0, DISPLAY_0, valueSet);
 	}
 
 	@ParameterizedTest

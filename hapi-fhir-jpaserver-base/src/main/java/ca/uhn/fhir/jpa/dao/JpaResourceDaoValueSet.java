@@ -35,6 +35,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.LogicUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportUtils;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -252,10 +253,11 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 			String display = canonicalCodingToValidate.getDisplay();
 			return validateCode(system, systemVersion, code, display, valueSetIdentifier);
 		} else {
-			String system = toStringValue(theSystem);
+			// ValueSetOperationProvider packs the systemVersion operation parameter into the system it passes
+			UrlUtil.CanonicalUrlParts system = UrlUtil.parseCanonicalUrl(toStringValue(theSystem));
 			String code = toStringValue(theCode);
 			String display = toStringValue(theDisplay);
-			return validateCode(system, null, code, display, valueSetIdentifier);
+			return validateCode(system.url(), system.versionId().orElse(null), code, display, valueSetIdentifier);
 		}
 	}
 
