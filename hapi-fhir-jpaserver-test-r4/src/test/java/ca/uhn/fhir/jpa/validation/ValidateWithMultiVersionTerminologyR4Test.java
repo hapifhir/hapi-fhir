@@ -8,11 +8,13 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Nested;
@@ -36,14 +38,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  *     <li>{@link MultiVersionCodeSystemAndValueSetTest} - both at once: two versions of each, with the profile
  *     naming a ValueSet version and that ValueSet naming a CodeSystem version. Every step has to keep the
  *     version for the caller to get the answer they asked for</li>
+ *     <li>{@link ValueSetValidateCodeOperationTest} - the same two versions of each reached through the
+ *     {@literal ValueSet/$validate-code} operation rather than through {@literal $validate}</li>
  * </ul>
  * Each test runs twice, once for each version, and <em>always saves the version it did not ask for last</em>.
  * That ordering is what lets these tests fail: a URL with no version resolves by {@literal meta.lastUpdated},
  * so the version saved last is the one a lookup that drops the version finds. Asking for the last-saved
  * version instead would pass even against code that ignores versions altogether, and running both directions
  * rules out a fix that just picks the highest version number.
- * <p/>
- * Every test asserts the behaviour we want, so a failing test means the bug is present.
  */
 // Created by Claude Opus 5
 public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
@@ -77,8 +79,8 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		}
 
 		/**
-		 * The terminology layer gets this right on its own, so the validation failures below are a bug and not
-		 * a missing feature.
+		 * Checks the terminology layer on its own, before validation: given the ValueSet, it accepts the code
+		 * the CodeSystem version that ValueSet names holds.
 		 */
 		@ParameterizedTest
 		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
@@ -431,6 +433,122 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 			theCode,
 			null,
 			null);
+	}
+
+	/**
+	 * {@literal ValueSet/$validate-code} rather than {@literal $validate}. ValueSetOperationProvider joins its
+	 * {@literal url}/{@literal valueSetVersion} and {@literal system}/{@literal systemVersion} parameters into
+	 * {@literal url|version} canonicals before calling the DAO, so this is the shape the DAO receives them in.
+	 */
+	@Nested
+	class ValueSetValidateCodeOperationTest {
+
+		void setUpWithSpecifiedVersion(String theSpecifiedVersion) {
+			String otherVersion = otherThan(theSpecifiedVersion);
+
+			createCodeSystem(theSpecifiedVersion, codeIn(theSpecifiedVersion));
+			sleepUntilTimeChange();
+			createCodeSystem(otherVersion, codeIn(otherVersion));
+
+			createValueSetIncludingCodeSystemVersion(theSpecifiedVersion, theSpecifiedVersion);
+			sleepUntilTimeChange();
+			createValueSetIncludingCodeSystemVersion(otherVersion, otherVersion);
+
+			myTerminologyDeferredStorageSvc.saveAllDeferred();
+		}
+
+		/**
+		 * The code is in the ValueSet version named, and in the CodeSystem version that ValueSet names.
+		 */
+		@ParameterizedTest
+		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
+		void validateCode_codeInTheSpecifiedValueSetVersion_isValid(String theSpecifiedVersion) {
+			// Setup
+			setUpWithSpecifiedVersion(theSpecifiedVersion);
+
+			// Test
+			IValidationSupport.CodeValidationResult result = validateCodeOnValueSet(
+				VS_URL + "|" + theSpecifiedVersion, CS_URL + "|" + theSpecifiedVersion, codeIn(theSpecifiedVersion));
+
+			// Verify
+			assertThat(result).isNotNull();
+			assertThat(result.isOk()).isTrue();
+		}
+
+		/**
+		 * The other direction: a code that only the other version has must be rejected. Without this, the test
+		 * above would also pass against code which resolved both canonicals to whichever version was saved last.
+		 */
+		@ParameterizedTest
+		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
+		void validateCode_codeOnlyInTheOtherValueSetVersion_isNotValid(String theSpecifiedVersion) {
+			// Setup
+			setUpWithSpecifiedVersion(theSpecifiedVersion);
+
+			// Test
+			IValidationSupport.CodeValidationResult result = validateCodeOnValueSet(
+				VS_URL + "|" + theSpecifiedVersion,
+				CS_URL + "|" + theSpecifiedVersion,
+				codeIn(otherThan(theSpecifiedVersion)));
+
+			// Verify
+			assertThat(result).isNotNull();
+			assertThat(result.isOk()).isFalse();
+		}
+
+		/**
+		 * A canonical whose separator arrives percent-encoded, which is what a client sends when it puts the
+		 * whole canonical in a URL parameter. It has to name the same version as the literal pipe does.
+		 */
+		@ParameterizedTest
+		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
+		void validateCode_codeSystemVersionSeparatorPercentEncoded_isValid(String theSpecifiedVersion) {
+			// Setup
+			setUpWithSpecifiedVersion(theSpecifiedVersion);
+
+			// Test
+			IValidationSupport.CodeValidationResult result = validateCodeOnValueSet(
+				VS_URL + "|" + theSpecifiedVersion, CS_URL + "%7C" + theSpecifiedVersion, codeIn(theSpecifiedVersion));
+
+			// Verify
+			assertThat(result).isNotNull();
+			assertThat(result.isOk()).isTrue();
+		}
+
+		/**
+		 * The system parameter is optional on the operation, and omitting it reaches the support with a null
+		 * system, where the in-memory expansion cannot match the code. Pinned rather than endorsed: the DAO
+		 * passes null for an absent system whether it parses the canonical or not, so this is the behaviour
+		 * that was already there, and the assertion is here to catch the canonical parsing changing it.
+		 */
+		@ParameterizedTest
+		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
+		void validateCode_withoutACodeSystem_isNotValid(String theSpecifiedVersion) {
+			// Setup
+			setUpWithSpecifiedVersion(theSpecifiedVersion);
+
+			// Test
+			IValidationSupport.CodeValidationResult result =
+				validateCodeOnValueSet(VS_URL + "|" + theSpecifiedVersion, null, codeIn(theSpecifiedVersion));
+
+			// Verify
+			assertThat(result).isNotNull();
+			assertThat(result.isOk()).isFalse();
+			assertThat(result.getMessage()).contains("for in-memory expansion of ValueSet");
+		}
+	}
+
+	private IValidationSupport.CodeValidationResult validateCodeOnValueSet(
+			String theValueSetIdentifier, String theCodeSystemIdentifier, String theCode) {
+		return myValueSetDao.validateCode(
+			new UriType(theValueSetIdentifier),
+			null,
+			new CodeType(theCode),
+			theCodeSystemIdentifier == null ? null : new UriType(theCodeSystemIdentifier),
+			null,
+			null,
+			null,
+			mySrd);
 	}
 
 	private void createCodeSystem(String theVersion, String... theCodes) {

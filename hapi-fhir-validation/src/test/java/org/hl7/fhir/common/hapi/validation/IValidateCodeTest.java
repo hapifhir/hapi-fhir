@@ -179,6 +179,33 @@ public interface IValidateCodeTest {
 	}
 
 	@Test
+	default void validateCode_withCodeSystemVersionAndValueSet_namesTheVersionOnTheRequest() {
+		// ValueSet/$validate-code names the code system version "systemVersion", not "version". The response is
+		// registered under CODE_SYSTEM_VERSION only, so it is returned only if the request names that version.
+		getValueSetProvider().addTerminologyResponse(OPERATION_VALIDATE_CODE, VALUE_SET_URL, CODE_SYSTEM_VERSION, CODE, createParameters(true, DISPLAY, null, null));
+
+		CodeValidationResult outcome = getService()
+				.validateCode(null, new ConceptValidationOptions(), CODE_SYSTEM, CODE_SYSTEM_VERSION, CODE, DISPLAY, VALUE_SET_URL);
+
+		assertNotNull(outcome);
+		assertEquals(CODE, outcome.getCode());
+		assertEquals(DISPLAY, outcome.getDisplay());
+	}
+
+	@Test
+	default void validateCode_withoutCodeSystemVersionAndValueSet_namesNoVersionOnTheRequest() {
+		// the response is registered under no version, so it is returned only if the request names none
+		createValueSetReturnParameters(true, DISPLAY, null, null);
+
+		CodeValidationResult outcome = getService()
+				.validateCode(null, new ConceptValidationOptions(), CODE_SYSTEM, null, CODE, DISPLAY, VALUE_SET_URL);
+
+		assertNotNull(outcome);
+		assertEquals(CODE, outcome.getCode());
+		assertEquals(DISPLAY, outcome.getDisplay());
+	}
+
+	@Test
 	default void validateCode_withCodeSystemSuccess_returnsCorrectly() {
 		createCodeSystemReturnParameters(true, DISPLAY, null, null);
 
