@@ -73,7 +73,7 @@ public class UpdateR4Test {
 		'conditional PUT, no body id: provider sees no id',                    /Patient?identifier=http://acme.org/mrn%7C001,        ,                        , 201,    ,                       Patient?identifier=http://acme.org/mrn%7C001,
 		'plain PUT with If-Match: URL id and ETag version override body id',   /Patient/abc,                                  W/"3",   Patient/abc/_history/7,  200,    Patient/abc/_history/3, ,                                             Patient/abc/_history/3
 		""")
-	void testUpdate_idsHandedToProvider(
+	void testUpdate_plainOrConditionalPut_providerReceivesExpectedIds(
 			String theName,
 			String thePath,
 			String theIfMatch,
@@ -112,28 +112,6 @@ public class UpdateR4Test {
 		assertThat(ourLastBodyId).as("the provider must not be invoked").isNull();
 	}
 
-	private record PutResponse(int statusCode, String body) {}
-
-	private PutResponse put(String thePath, String theBodyId, String theIfMatch) throws IOException {
-		Patient patient = new Patient();
-		patient.setId(theBodyId);
-		patient.addIdentifier().setSystem("http://acme.org/mrn").setValue("001");
-
-		HttpPut httpPut = new HttpPut(myServer.getBaseUrl() + thePath);
-		httpPut.setEntity(new StringEntity(
-			ourCtx.newJsonParser().encodeResourceToString(patient),
-			ContentType.create(Constants.CT_FHIR_JSON_NEW, StandardCharsets.UTF_8)));
-		if (theIfMatch != null) {
-			httpPut.addHeader(Constants.HEADER_IF_MATCH, theIfMatch);
-		}
-
-		try (CloseableHttpResponse response = myClient.execute(httpPut)) {
-			String responseContent = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("{}\n{}", response.getStatusLine(), responseContent);
-			return new PutResponse(response.getStatusLine().getStatusCode(), responseContent);
-		}
-	}
-
 	public static class PatientProvider implements IResourceProvider {
 
 		@Override
@@ -151,6 +129,28 @@ public class UpdateR4Test {
 			boolean created = theId == null;
 			IdType outcomeId = created ? new IdType("Patient", "server-assigned", "1") : theId.withVersion("1");
 			return new MethodOutcome(outcomeId, created);
+		}
+	}
+
+	private record PutResponse(int statusCode, String body) {}
+
+	private PutResponse put(String thePath, String theBodyId, String theIfMatch) throws IOException {
+		Patient patient = new Patient();
+		patient.setId(theBodyId);
+		patient.addIdentifier().setSystem("http://acme.org/mrn").setValue("001");
+
+		HttpPut httpPut = new HttpPut(myServer.getBaseUrl() + thePath);
+		httpPut.setEntity(new StringEntity(
+			 ourCtx.newJsonParser().encodeResourceToString(patient),
+			 ContentType.create(Constants.CT_FHIR_JSON_NEW, StandardCharsets.UTF_8)));
+		if (theIfMatch != null) {
+			httpPut.addHeader(Constants.HEADER_IF_MATCH, theIfMatch);
+		}
+
+		try (CloseableHttpResponse response = myClient.execute(httpPut)) {
+			String responseContent = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info("{}\n{}", response.getStatusLine(), responseContent);
+			return new PutResponse(response.getStatusLine().getStatusCode(), responseContent);
 		}
 	}
 }

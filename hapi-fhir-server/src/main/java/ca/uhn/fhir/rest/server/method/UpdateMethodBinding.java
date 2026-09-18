@@ -102,7 +102,7 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	 * resource, and both decisions belong to the storage layer rather than to the REST binding.
 	 */
 	@Override
-	protected void validateResourceIdAndUrlIdForNonConditionalOperation(
+	protected void validateResourceIdAndUrlIdForWriteOperation(
 			IBaseResource theResource, String theResourceId, String theUrlId, String theMatchUrl) {
 		if (isBlank(theMatchUrl)) {
 			if (isBlank(theUrlId)) {

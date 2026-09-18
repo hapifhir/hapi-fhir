@@ -60,7 +60,6 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -183,7 +182,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -1504,10 +1502,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	/**
-	 * Conditional update (http://hl7.org/fhir/http.html#cond-update) with a body id the configured
-	 * {@link JpaStorageSettings.ClientIdStrategyEnum} accepts: with no match the resource is created under the
-	 * client-supplied id, and with one match whose id agrees with the body the match is updated in place. The
-	 * pre-existing match is created before the strategy is switched, so that NOT_ALLOWED can be exercised too.
+	 * Scenarios that a conditional update operation with a user provided body id should be ACCEPTED.
+	 *
 	 * <p>
 	 * Raw HTTP is used deliberately — the generic client must not be able to drop the id on our behalf, or the
 	 * test would be measuring the client rather than the server.
@@ -1524,7 +1520,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		'ANY, one match, body id equals the match: updated in place',                 ANY,          match-pt,        match-pt,    200,    2
 		'NOT_ALLOWED, one match, body id equals the match: updated in place',         NOT_ALLOWED,  match-pt,        match-pt,    200,    2
 		""")
-	public void testConditionalUpdate_bodyIdHonoured(
+	public void testConditionalUpdate_userProvidedIdInResourceBody_acceptScenarios(
 			String theName,
 			JpaStorageSettings.ClientIdStrategyEnum theStrategy,
 			String theExistingMatchId,
@@ -1553,13 +1549,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	/**
-	 * Conditional update rejections: the body id reaches storage untouched, so storage's own rules apply under each
-	 * {@link JpaStorageSettings.ClientIdStrategyEnum}. A body id that disagrees with the match (HAPI-2279) and an id
-	 * that is not a valid FHIR id (HAPI-0521) are rejected regardless of strategy. ALPHANUMERIC rejects a purely
-	 * numeric id (HAPI-0960) and an id that already belongs to another resource (HAPI-0825); NOT_ALLOWED rejects
-	 * every client-assigned id on a no-match create (HAPI-0959). Nothing is created or modified in any case.
+	 * Scenarios that a conditional update operation with a user provided body id should be REJECTED.
 	 * <p>
-	 * A {@code urn:uuid:} id is included because outside a transaction it is not a placeholder, just an invalid id.
+	 * Raw HTTP is used deliberately - see the sibling test above.
 	 */
 	// Created by Claude Fable 5.1
 	@ParameterizedTest(name = "{0}")
@@ -1579,7 +1571,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		'NOT_ALLOWED, no match, body id is not a valid FHIR id: HAPI-0521',                     NOT_ALLOWED,  ,                ,                urn:uuid:8b7d3a4e-2c1f-4f5a-9e6b-0d1c2b3a4f5e, 400,    HAPI-0521
 		'NOT_ALLOWED, no match, body id already belongs to another resource: HAPI-0959',        NOT_ALLOWED,  ,                existing-pt,     existing-pt,                                   404,    HAPI-0959
 		""")
-	public void testConditionalUpdate_bodyIdRejected(
+	public void testConditionalUpdate_userProvidedIdInResourceBody_rejectScenarios(
 			String theName,
 			JpaStorageSettings.ClientIdStrategyEnum theStrategy,
 			String theExistingMatchId,

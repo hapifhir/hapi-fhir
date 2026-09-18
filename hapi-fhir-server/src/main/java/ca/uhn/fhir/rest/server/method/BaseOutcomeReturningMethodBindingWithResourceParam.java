@@ -99,7 +99,7 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 	 * Populates the id and resource parameters of the provider method. For a non-conditional operation the id in
 	 * the request URL is authoritative and replaces whatever id the body carried (DSTU3 and newer). A conditional
 	 * operation has no id in the URL, so the body id is left in place for
-	 * {@link #validateResourceIdAndUrlIdForNonConditionalOperation} and ultimately the storage layer to act on.
+	 * {@link #validateResourceIdAndUrlIdForWriteOperation} and ultimately the storage layer to act on.
 	 */
 	@Override
 	protected void addParametersForServerRequest(RequestDetails theRequest, Object[] theParams) {
@@ -123,7 +123,7 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 					resource.setId(theRequest.getId());
 				}
 
-				validateResourceIdAndUrlIdForNonConditionalOperation(resource, resourceId, urlId, matchUrl);
+				validateResourceIdAndUrlIdForWriteOperation(resource, resourceId, urlId, matchUrl);
 			}
 		}
 	}
@@ -162,7 +162,7 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 	 * @param theMatchUrl   the conditional URL when the request is conditional, otherwise {@code null}
 	 * @throws InvalidRequestException if the ids do not satisfy the rules of the operation
 	 */
-	protected void validateResourceIdAndUrlIdForNonConditionalOperation(
+	protected void validateResourceIdAndUrlIdForWriteOperation(
 			IBaseResource theResource, String theResourceId, String theUrlId, String theMatchUrl) {
 		return;
 	}
