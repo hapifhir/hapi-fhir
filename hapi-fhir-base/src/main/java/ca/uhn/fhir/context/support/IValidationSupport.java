@@ -415,17 +415,18 @@ public interface IValidationSupport {
 	/**
 	 * Look up a code using the system, code and other parameters captured in {@link LookupCodeRequest}.
 	 * <p>
-	 * {@link LookupCodeRequest#getSystem()} carries a canonical URL. <code>CodeSystem/$lookup</code> and
-	 * <code>CodeSystem/$subsumes</code> take the version as a parameter of their own and the provider joins
-	 * it onto the system before calling through, so an implementation which resolves a stored CodeSystem
-	 * sees <code>url|version</code>. Implementations which match the system as given, such as the built-in
-	 * code systems keyed by exact URL, or which forward it to a remote server as the <code>system</code>
-	 * parameter, do not handle that form.
+	 * The system in {@link LookupCodeRequest#getSystem()} may carry a version, in the form
+	 * <code>url|version</code>. <code>CodeSystem/$lookup</code> and <code>CodeSystem/$subsumes</code> take the
+	 * version as a separate parameter, and the provider joins the two together before calling this method. An
+	 * implementation which looks up a stored CodeSystem should therefore split the version back out. One which
+	 * compares the system against a fixed URL, as the built-in code systems do, or sends it to a remote server
+	 * unchanged, will not match a system given in that form.
 	 * </p>
 	 *
 	 * @param theValidationSupportContext      The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
 	 *                                         other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
 	 * @param theLookupCodeRequest             The parameters used to perform the lookup, including system and code.
+	 * @since 7.0.0
 	 */
 	@Nullable
 	default LookupCodeResult lookupCode(
