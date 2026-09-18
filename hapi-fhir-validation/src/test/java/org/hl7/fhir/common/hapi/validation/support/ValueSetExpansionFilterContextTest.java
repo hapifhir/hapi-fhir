@@ -5,7 +5,9 @@ import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.DateTimeType;
+import org.hl7.fhir.r5.model.Enumerations.CodeSystemContentMode;
 import org.hl7.fhir.r5.model.Enumerations.FilterOperator;
+import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -1033,5 +1035,139 @@ class ValueSetExpansionFilterContextTest {
 		assertThat(actual)
 			.as("DESCENDENTOF[%s] on '%s' (case-insensitive flat parent property)", filterValue, testCode)
 			.isEqualTo(expectedIsFiltered);
+	}
+
+	// ---------------------------------------------------------------------------------------------------
+	// Custom (non-standard) concept-property filters, e.g. LOINC 'SCALE_TYP = Doc' selecting the members
+	// defined by http://hl7.org/fhir/ValueSet/doc-typecodes.
+	//
+	// These are only evaluated when the CodeSystem declares content=complete, which asserts every concept is
+	// present in the resource, so a missing property value is meaningful ("not a member") rather than merely
+	// unknown. The scenarios covered are:
+	//   A  : property neither declared nor valued -> undetermined  -> UndeterminedFilterException
+	//   B1 : declared,   value "Doc"   -> member                    -> not filtered
+	//   B2 : declared,   value "wrong" -> determined negative       -> filtered
+	//   C  : declared,   no value      -> determined negative       -> filtered
+	//   D1 : undeclared, value "Doc"   -> member                    -> not filtered
+	//   D2 : undeclared, value "wrong" -> determined negative       -> filtered
+	// ---------------------------------------------------------------------------------------------------
+
+	private static final String SCALE_TYP = "SCALE_TYP";
+	private static final String LOINC_CODE = "29550-1";
+
+	/**
+	 * Build a single-concept LOINC-like CodeSystem carrying the custom property {@code SCALE_TYP}.
+	 *
+	 * @param theContent         the declared CodeSystem.content mode
+	 * @param theIsDeclareProperty whether {@code CodeSystem.property[]} declares SCALE_TYP
+	 * @param theConceptValue    the concept's SCALE_TYP value, or {@code null} for no value
+	 */
+	private static CodeSystem buildCustomPropertyCS(CodeSystemContentMode theContent, boolean theIsDeclareProperty, String theConceptValue) {
+		CodeSystem cs = new CodeSystem()
+			.setUrl("http://loinc.org")
+			.setCaseSensitive(true);
+		cs.setContent(theContent);
+
+		if (theIsDeclareProperty) {
+			cs.addProperty().setCode(SCALE_TYP)
+				.setUri("http://loinc.org/property/SCALE_TYP")
+				.setType(CodeSystem.PropertyType.STRING);
+		}
+
+		CodeSystem.ConceptDefinitionComponent concept = cs.addConcept().setCode(LOINC_CODE).setDisplay("Glucose");
+
+		if (theConceptValue != null) {
+			concept.addProperty().setCode(SCALE_TYP).setValue(new StringType(theConceptValue));
+		}
+
+		return cs;
+	}
+
+	@ParameterizedTest(name = "isDeclare={0}, value={1} ⇒ filtered={2}")
+	@CsvSource(nullValues = "NULL", delimiter = '|', value = {
+		// isDeclareProperty | conceptValue | expectedIsFiltered   (scenario)
+		"true             | Doc          | false", // B1: declared + matching value -> member
+		"true             | wrong        | true",  // B2: declared + non-matching value -> not a member
+		"true             | NULL         | true",  // C : declared + no value -> not a member
+		"false            | Doc          | false", // D1: undeclared + matching value -> member (Req 2)
+		"false            | wrong        | true",  // D2: undeclared + non-matching value -> not a member
+	})
+	void customPropertyEqualIsEvaluatedWhenContentComplete(boolean theIsDeclareProperty, String theConceptValue, boolean theExpectedIsFiltered) {
+		CodeSystem cs = buildCustomPropertyCS(CodeSystemContentMode.COMPLETE, theIsDeclareProperty, theConceptValue);
+
+		boolean actual = isFilteredWithProperty(
+			cs,
+			SCALE_TYP,
+			FilterOperator.EQUAL,
+			"Doc",
+			new FhirVersionIndependentConcept(cs.getUrl(), LOINC_CODE));
+
+		assertThat(actual)
+			.as("SCALE_TYP=Doc, declared=%b, value=%s (content=complete)", theIsDeclareProperty, theConceptValue)
+			.isEqualTo(theExpectedIsFiltered);
+	}
+
+	@Test
+	void customPropertyUndeterminedWhenNeitherDeclaredNorValued() {
+		// Scenario A: content=complete, but SCALE_TYP is unknown to the code system entirely, so membership can
+		// be neither established nor refuted. This must be an UndeterminedFilterException (mapped to not-found by
+		// the caller).
+		CodeSystem cs = buildCustomPropertyCS(CodeSystemContentMode.COMPLETE, false, null);
+
+		ValueSet.ConceptSetFilterComponent f = new ValueSet.ConceptSetFilterComponent()
+			.setProperty(SCALE_TYP).setOp(FilterOperator.EQUAL).setValue("Doc");
+
+		ValueSetExpansionFilterContext ctx = new ValueSetExpansionFilterContext(cs, List.of(f));
+
+		FhirVersionIndependentConcept concept = new FhirVersionIndependentConcept(cs.getUrl(), LOINC_CODE);
+
+		assertThatThrownBy(() -> ctx.isFiltered(concept))
+			.isInstanceOf(ValueSetExpansionFilterContext.UndeterminedFilterException.class)
+			.hasMessageContaining(SCALE_TYP);
+	}
+
+	@ParameterizedTest(name = "[custom non-complete] content={0}")
+	@CsvSource(nullValues = "NULL", value = {"FRAGMENT", "EXAMPLE", "NULL"})
+	void customPropertyRemainsUnsupportedWhenContentNotComplete(CodeSystemContentMode theContentMode) {
+		// for any content mode other than 'complete', a custom-property filter cannot be
+		// soundly evaluated in memory (absence of a value is not meaningful).
+		CodeSystem cs = buildCustomPropertyCS(theContentMode, true, "Doc");
+
+		ValueSet.ConceptSetFilterComponent f = new ValueSet.ConceptSetFilterComponent()
+			.setProperty(SCALE_TYP).setOp(FilterOperator.EQUAL).setValue("Doc");
+
+		ValueSetExpansionFilterContext ctx = new ValueSetExpansionFilterContext(cs, List.of(f));
+
+		FhirVersionIndependentConcept concept = new FhirVersionIndependentConcept(cs.getUrl(), LOINC_CODE);
+
+		assertThatThrownBy(() -> ctx.isFiltered(concept))
+			.isInstanceOf(ValueSetExpansionFilterContext.UnsupportedFilterException.class)
+			.hasMessageContaining(SCALE_TYP);
+	}
+
+	@ParameterizedTest(name = "[custom-op complete] op={0}, filter={1}, value={2} ⇒ filtered={3}")
+	@CsvSource(delimiter = '|', value = {
+		// the filter must actually be evaluated per ConceptSetFilterComponent.op, not just for EQUAL.
+		// op     | filterValue | conceptValue | expectedIsFiltered
+		"IN       | Doc,Other   | Doc          | false", // value in list -> member
+		"IN       | Other,More  | Doc          | true",  // value not in list -> not a member
+		"NOTIN    | Ord,Qn      | Doc          | false", // value not in list -> member
+		"NOTIN    | Doc,Qn      | Doc          | true",  // value in list -> not a member
+		"REGEX    | Do.*        | Doc          | false", // value matches regex -> member
+		"REGEX    | X.*         | Doc          | true",  // value does not match -> not a member
+	})
+	void customPropertyOtherOperatorsAreEvaluatedWhenContentComplete(FilterOperator theOp, String theFilterValue, String theConceptValue, boolean theExpectedIsFiltered) {
+		CodeSystem cs = buildCustomPropertyCS(CodeSystemContentMode.COMPLETE, true, theConceptValue);
+
+		boolean actual = isFilteredWithProperty(
+			cs,
+			SCALE_TYP,
+			theOp,
+			theFilterValue,
+			new FhirVersionIndependentConcept(cs.getUrl(), LOINC_CODE));
+
+		assertThat(actual)
+			.as("SCALE_TYP %s %s, value=%s (content=complete)", theOp, theFilterValue, theConceptValue)
+			.isEqualTo(theExpectedIsFiltered);
 	}
 }
