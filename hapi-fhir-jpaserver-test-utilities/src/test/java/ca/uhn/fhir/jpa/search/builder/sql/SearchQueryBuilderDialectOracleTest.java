@@ -11,8 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.sql.Clob;
-import java.sql.SQLException;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,7 +25,7 @@ public class SearchQueryBuilderDialectOracleTest extends BaseSearchQueryBuilderD
 	 * exceeded by the JSON array at the shipped threshold - and raises ORA-01461.
 	 */
 	@Test
-	void testResourceIdsOverThreshold_bindsJsonArrayAsClob() throws SQLException {
+	void testResourceIdsOverThreshold_bindsJsonArrayAsClob() {
 		StorageSettings storageSettings = new StorageSettings();
 		storageSettings.setLargeIdListJsonThreshold(3);
 
@@ -44,25 +42,10 @@ public class SearchQueryBuilderDialectOracleTest extends BaseSearchQueryBuilderD
 		assertThat(bindVariables.get(0)).isEqualTo("Patient");
 
 		Object idListBind = bindVariables.get(1);
-		assertThat(idListBind)
-			.as("Oracle must bind the JSON array as a CLOB, not as a plain String: %s", idListBind)
-			.isInstanceOfAny(Clob.class, TypedParameterValue.class);
-		assertThat(extractCharacterContent(idListBind)).isEqualTo("[1,2,3,4,5]");
-
-		// Pinning the wrapper class alone is not enough - a plain STRING type still passes that check
-		// while reintroducing ORA-01461, so the type itself has to be asserted.
-		assertThat(((TypedParameterValue<?>) idListBind).getType()).isEqualTo(StandardBasicTypes.MATERIALIZED_CLOB);
-	}
-
-	@Nonnull
-	private static String extractCharacterContent(Object theBindVariable) throws SQLException {
-		if (theBindVariable instanceof Clob clob) {
-			return clob.getSubString(1, (int) clob.length());
-		}
-		if (theBindVariable instanceof TypedParameterValue<?> typedParameterValue) {
-			return String.valueOf(typedParameterValue.getValue());
-		}
-		throw new AssertionError("Not a CLOB-carrying bind variable: " + theBindVariable);
+		assertThat(idListBind).isInstanceOf(TypedParameterValue.class);
+		TypedParameterValue<?> typedBind = (TypedParameterValue<?>) idListBind;
+		assertThat(typedBind.getType()).isEqualTo(StandardBasicTypes.MATERIALIZED_CLOB);
+		assertThat(typedBind.getValue()).isEqualTo("[1,2,3,4,5]");
 	}
 
 	@Nonnull
