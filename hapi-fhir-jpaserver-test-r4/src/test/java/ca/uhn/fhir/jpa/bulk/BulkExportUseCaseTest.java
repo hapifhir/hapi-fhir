@@ -7,6 +7,7 @@ import ca.uhn.fhir.batch2.jobs.export.BulkExportJobParametersBuilder;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -22,7 +23,9 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
+import ca.uhn.fhir.jpa.test.BulkExportCSVConverter;
 import ca.uhn.fhir.jpa.test.BulkExportJobHelper;
+import ca.uhn.fhir.jpa.util.CsvUtil;
 import ca.uhn.fhir.mdm.api.MdmModeEnum;
 import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
@@ -35,14 +38,18 @@ import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportResourceList;
+import ca.uhn.fhir.rest.api.server.bulk.ConvertedFile;
+import ca.uhn.fhir.rest.api.server.bulk.ConvertedFiles;
+import ca.uhn.fhir.rest.api.server.bulk.IResourceConverter;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.UrlUtil;
-import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
@@ -60,6 +67,7 @@ import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.InstantType;
@@ -68,6 +76,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
@@ -80,6 +89,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -90,18 +100,20 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.PARAM_EXPORT_INCLUDE_HISTORY;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.stream.Collectors.mapping;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -134,7 +146,6 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		myStorageSettings.setJobFastTrackingEnabled(false);
 		myBulkExportJobHelper = new BulkExportJobHelper(myClient);
 	}
-
 
 	@Nested
 	class SpecConformanceTests {
@@ -505,30 +516,136 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		public void bulkExport_customCSVFormat_works() {
+		public void bulkExport_customCSVFormat_works() throws IOException {
 			// setup
-			BulkExportJobParameters options = new BulkExportJobParameters();
-			options.setResourceTypes(List.of("Patient"));
-			options.setFilters(new ArrayList<>());
-			options.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
-			options.setOutputFormat("text/csv");
+			String csvMimeType = "text/csv";
 
-			// TODO - set pointcut for
-//			Pointcut.STORAGE_BULK_EXPORT_RESOURCE_CONVERT
+			// create a CSV converter
+			Map<String, String[]> resource2headers = new HashMap<>();
+			resource2headers.put("Patient", new String[] { "family", "givem", "practitioner" });
+			resource2headers.put("Practitioner", new String[] { "family", "given" });
+			resource2headers.put("Observation", new String[] { "status", "subject" });
 
-			// test
-			JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-			startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
-			startRequest.setParameters(options);
-			Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, startRequest);
+			BulkExportCSVConverter converterImpl = new BulkExportCSVConverter(
+				resource2headers,
+				(thePrinter, theResource) -> {
+					String rt = theResource.fhirType();
+					switch (rt) {
+						case "Patient" -> {
+							Patient patient = (Patient) theResource;
+							HumanName name = patient.getNameFirstRep();
+							thePrinter.printRecord(
+								name.getFamily(),
+								String.join(", ", name.getGiven().stream().map(PrimitiveType::asStringValue).collect(Collectors.toSet())),
+								patient.getGeneralPractitioner().stream().findFirst().orElse(new Reference("unknown")).getReference()
+							);
+						}
+						case "Practitioner" -> {
+							Practitioner practitioner = (Practitioner) theResource;
+							HumanName name = practitioner.getNameFirstRep();
+							thePrinter.printRecord(
+								name.getFamily(),
+								String.join(", ", name.getGiven().stream().map(PrimitiveType::getValue).collect(Collectors.toSet())),
+								practitioner.getLanguage()
+							);
+						}
+						case "Observation" -> {
+							Observation observation = (Observation) theResource;
+							thePrinter.printRecord(
+								observation.getStatus().getSystem() + "|" + observation.getStatus().toCode(),
+								observation.getSubject().getReference()
+							);
+						}
+						default -> {
+							fail("Unexpected resource encountered " + rt);
+						}
+					}
+				}
+			);
 
-			assertNotNull(startResponse);
-			String jobId = startResponse.getInstanceId();
+			Object interceptor = new Object() {
+				@Hook(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_CONVERT)
+				public IResourceConverter getConverter(BulkExportJobParameters theParams) {
+					if (theParams.getOutputFormat().equalsIgnoreCase(csvMimeType)) {
+						return converterImpl;
+					}
+					return null;
+				}
+			};
+			// register it
+			myInterceptorService.registerInterceptor(interceptor);
 
-			// Run a scheduled pass to build the export
-			myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId());
+			try {
+				// create some resources
+				for (String name : new String[] { "Homer", "Marge", "Bart", "Lisa", "Maggie" }) {
+					IIdType practId = createPractitioner(withFamily("hibbert"),
+						withGiven("Julius"),
+						withLanguage("English"));
+					IIdType id = createPatient(withActiveTrue(),
+						withReference("generalPractitioner", practId),
+						withFamily("Simpson"),
+						withGiven(name),
+						withGiven("Jay")
+					);
+					createObservation(withStatus("final"),
+						withReference("subject", id));
+				}
 
+				// test
+				HttpGet httpGet = new HttpGet(myClient.getServerBase() + "/$export?_outputFormat=text/csv");
+				httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 
+				String pollingLocation;
+				try (CloseableHttpResponse status = ourHttpClient.execute(httpGet)) {
+					pollingLocation = status.getHeaders("Content-Location")[0].getValue();
+				}
+
+				// poll the data
+				String jobId = Batch2JobHelper.getJobIdFromPollingLocation(pollingLocation);
+
+				myBatch2JobHelper.awaitJobCompletion(jobId);
+
+				try (CloseableHttpResponse status = ourHttpClient.execute(new
+					HttpGet(pollingLocation))) {
+					assertEquals(200, status.getStatusLine().getStatusCode());
+					String responseContent = IOUtils.toString(status.getEntity().getContent(), UTF_8);
+					BulkExportResponseJson result = JsonUtil.deserialize(responseContent,
+						BulkExportResponseJson.class);
+					assertNotNull(result);
+					assertTrue(result.getError().isEmpty());
+
+					// verify
+					Map<String, String> resourceTypeToLocation = new HashMap<>();
+					for (BulkExportResponseJson.Output output : result.getOutput()) {
+						resourceTypeToLocation.put(output.getType(), output.getUrl());
+					}
+					assertEquals(3, resourceTypeToLocation.size());
+					assertTrue(resourceTypeToLocation.containsKey("Patient"));
+					assertTrue(resourceTypeToLocation.containsKey("Practitioner"));
+					assertTrue(resourceTypeToLocation.containsKey("Observation"));
+
+					for (String resourceType : new String[] { "Patient", "Practitioner", "Observation" }) {
+						Binary binary = myBinaryDao.read(
+							new IdType(resourceTypeToLocation.get(resourceType)),
+							new SystemRequestDetails()
+						);
+
+						assertNotNull(binary);
+						String contents = new String(binary.getContent(), UTF_8);
+						ourLog.info("Contents for {} ", resourceType);
+						ourLog.info(contents);
+
+						String[] headers = resource2headers.get(resourceType);
+						String[] rows = contents.split("\n");
+						assertThat(rows).isNotEmpty();
+						assertThat(rows[0].split(","))
+							.containsExactly(headers);
+					}
+				}
+			} finally {
+				// remove our interceptor
+				myInterceptorService.unregisterInterceptor(interceptor);
+			}
 		}
 
 		@Test

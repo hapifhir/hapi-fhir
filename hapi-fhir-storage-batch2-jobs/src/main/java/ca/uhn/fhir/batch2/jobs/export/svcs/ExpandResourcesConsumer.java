@@ -5,6 +5,7 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.export.BulkDataExportUtil;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
@@ -172,18 +173,24 @@ public class ExpandResourcesConsumer implements Consumer<List<IBaseResource>> {
 		IResourceConverter converter = getConverter();
 
 		if (converter == null) {
-			// todo - throw - we shouldn't see this because we validate first
+			// we shouldn't see this because we validate the parameters.
+			// but it is possible if a job is in progress, but the server
+			// is stopped and restarted without the requisite interceptors
+			// available.
 			throw new JobExecutionFailedException(
-				"No conversion utility for mimetype " + myStepExecutionDetails.getParameters().getOutputFormat()
+				Msg.code(3048)
+				+ "No conversion utility for mimetype " + myStepExecutionDetails.getParameters().getOutputFormat()
 			);
 		}
 
 		ConvertedFiles files = converter.consume(resourceList, myStepExecutionDetails.getParameters());
 
 		if (!isValid(files)) {
-			// TODO error - conversion utility failed (but is registered)
+			// conversion utility failed to provide output
+			// expected for bulk export job
 			throw new JobExecutionFailedException(
-				String.format("Output format %s not supported",
+				Msg.code(3049)
+				+ String.format("Output format %s not supported",
 					myStepExecutionDetails.getParameters().getOutputFormat())
 			);
 		}

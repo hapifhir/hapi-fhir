@@ -42,9 +42,7 @@ import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.api.server.bulk.IBulkDataExportHistoryHelper;
@@ -60,8 +58,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -162,6 +158,9 @@ public class ExpandResourceAndWriteBinaryStep
 				myResponseTerminologyTranslationSvc,
 				getBinaryCreator(theStepExecutionDetails, theDataSink),
 				theStepExecutionDetails);
+		// TODO LS - this is always false (on purpose)
+		// because V3 does not allow MDM expansion
+		// kept because the parameters still offer it....
 		resourceListConsumer.setDoExpandMDM(isV2Job() && parameters.isExpandMdm());
 
 		// search the resources
@@ -450,14 +449,5 @@ public class ExpandResourceAndWriteBinaryStep
 	 */
 	protected boolean isV2Job() {
 		return false;
-	}
-
-	/**
-	 * Overridden in V2 step; unused here
-	 */
-	protected RequestDetails newRequestDetails(
-			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails,
-			BulkExportJobParameters jobParameters) {
-		return theStepExecutionDetails.newSystemRequestDetails();
 	}
 }
