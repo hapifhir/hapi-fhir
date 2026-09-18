@@ -819,6 +819,7 @@ public class ValidationSupportChain implements IValidationSupport {
 				theValidationSupportContext, theOptions, theCodeSystem, null, theCode, theDisplay, theValueSetUrl);
 	}
 
+	// Created by Claude Opus 5
 	@Override
 	@Nullable
 	public CodeValidationResult validateCode(

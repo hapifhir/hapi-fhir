@@ -2697,6 +2697,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		return null;
 	}
 
+	// Created by Claude Opus 5
 	@Override
 	@Nullable
 	public IValidationSupport.CodeValidationResult validateCode(

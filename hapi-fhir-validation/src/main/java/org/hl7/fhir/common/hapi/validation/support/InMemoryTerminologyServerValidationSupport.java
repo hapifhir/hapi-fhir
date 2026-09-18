@@ -168,6 +168,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 				vsUrl);
 	}
 
+	// Created by Claude Opus 5
 	@Override
 	@Nullable
 	public CodeValidationResult validateCode(
@@ -1048,6 +1049,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 	 *                                    unversioned canonical resolves to
 	 * @return the CodeSystem, or <code>null</code> if neither canonical resolved one
 	 */
+	// Created by Claude Opus 5
 	@Nullable
 	private IBaseResource fetchCodeSystem(
 			ValidationSupportContext theValidationSupportContext,
@@ -1071,6 +1073,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 				ValidationSupportUtils.getVersionedCodeSystem(theCodeSystemUrl, theCodeSystemVersion));
 	}
 
+	// Created by Claude Opus 5
 	private Function<IBaseResource, CodeSystem> newCodeSystemConverter() {
 		FhirVersionEnum version = myCtx.getVersion().getVersion();
 		if (FhirVersionEnum.DSTU2.equals(version) || FhirVersionEnum.DSTU2_HL7ORG.equals(version)) {

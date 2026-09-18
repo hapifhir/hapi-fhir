@@ -457,9 +457,6 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 			myTerminologyDeferredStorageSvc.saveAllDeferred();
 		}
 
-		/**
-		 * The code is in the ValueSet version named, and in the CodeSystem version that ValueSet names.
-		 */
 		@ParameterizedTest
 		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
 		void validateCode_codeInTheSpecifiedValueSetVersion_isValid(String theSpecifiedVersion) {
@@ -476,8 +473,8 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		}
 
 		/**
-		 * The other direction: a code that only the other version has must be rejected. Without this, the test
-		 * above would also pass against code which resolved both canonicals to whichever version was saved last.
+		 * Without this, the test above would also pass against code which resolved both canonicals to whichever
+		 * version was saved last.
 		 */
 		@ParameterizedTest
 		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})

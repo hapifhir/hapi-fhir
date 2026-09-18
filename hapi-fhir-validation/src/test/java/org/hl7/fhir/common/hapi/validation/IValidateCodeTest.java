@@ -151,6 +151,7 @@ public interface IValidateCodeTest {
 		assertTrue(outcome.getIssues().isEmpty());
 	}
 
+	// Created by Claude Opus 5
 	@Test
 	default void validateCode_withCodeSystemVersion_namesTheVersionOnTheRequest() {
 		// the response is registered under CODE_SYSTEM_VERSION only, so it is returned only if the request
@@ -165,6 +166,7 @@ public interface IValidateCodeTest {
 		assertEquals(DISPLAY, outcome.getDisplay());
 	}
 
+	// Created by Claude Opus 5
 	@Test
 	default void validateCode_withoutCodeSystemVersion_namesNoVersionOnTheRequest() {
 		// the response is registered under no version, so it is returned only if the request names none
@@ -178,6 +180,7 @@ public interface IValidateCodeTest {
 		assertEquals(DISPLAY, outcome.getDisplay());
 	}
 
+	// Created by Claude Opus 5
 	@Test
 	default void validateCode_withCodeSystemVersionAndValueSet_namesTheVersionOnTheRequest() {
 		// ValueSet/$validate-code names the code system version "systemVersion", not "version". The response is
@@ -192,6 +195,7 @@ public interface IValidateCodeTest {
 		assertEquals(DISPLAY, outcome.getDisplay());
 	}
 
+	// Created by Claude Opus 5
 	@Test
 	default void validateCode_withoutCodeSystemVersionAndValueSet_namesNoVersionOnTheRequest() {
 		// the response is registered under no version, so it is returned only if the request names none

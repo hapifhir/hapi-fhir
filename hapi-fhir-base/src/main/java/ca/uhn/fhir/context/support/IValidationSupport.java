@@ -333,6 +333,7 @@ public interface IValidationSupport {
 	 * @return Returns a validation result object
 	 * @since 8.14.0
 	 */
+	// Created by Claude Opus 5
 	@Nullable
 	default CodeValidationResult validateCode(
 			@Nonnull ValidationSupportContext theValidationSupportContext,

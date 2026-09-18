@@ -250,6 +250,7 @@ public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Tes
 		assertThat(errors).hasSize(0);
 	}
 
+	// Created by Claude Opus 5
 	@Test
 	public void validate_withVersionInTerminologyResponses_returnsNoErrors() {
 		// setup: the CodeSystem response is registered under the version the ValueSet response reports, so
@@ -274,6 +275,7 @@ public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Tes
 		assertThat(errors).isEmpty();
 	}
 
+	// Created by Claude Opus 5
 	@Test
 	public void validate_withoutVersionInTerminologyResponses_returnsNoErrors() {
 		// setup: same codes as validate_withVersionInTerminologyResponses_returnsNoErrors, but the recorded
@@ -329,6 +331,7 @@ public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Tes
 	 * states that the check is expected to name it; the provider has no response for any other version, so a
 	 * check which names the wrong one, or none, fails the test.
 	 */
+	// Created by Claude Opus 5
 	private void setupCodeSystemValidateCode(String theUrl, String theCodeSystemVersion, String theCode, String theTerminologyResponseFile) {
 		CodeSystem codeSystem = myCodeSystemProvider.addTerminologyResource(theUrl);
 		myCodeSystemProvider.addTerminologyResponse(OPERATION_VALIDATE_CODE, codeSystem.getUrl(), theCodeSystemVersion, theCode, ourCtx, theTerminologyResponseFile);

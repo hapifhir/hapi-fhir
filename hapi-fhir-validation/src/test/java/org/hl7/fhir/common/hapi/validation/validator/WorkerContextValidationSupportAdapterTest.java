@@ -106,6 +106,7 @@ public class WorkerContextValidationSupportAdapterTest extends BaseValidationTes
 		verify(myValidationSupport, times(1)).validateCode(any(), any(), eq("http://codesystems.com/system"), isNull(), eq("code0"), any(), any());
 	}
 
+	// Created by Claude Opus 5
 	@Test
 	public void validateCode_systemInferredFromVersionedInclude_namesTheVersionSeparately() {
 		// setup
@@ -130,6 +131,7 @@ public class WorkerContextValidationSupportAdapterTest extends BaseValidationTes
 		verify(myValidationSupport, times(1)).validateCode(any(), any(), eq("http://codesystems.com/system"), eq("1.0.0"), eq("code0"), any(), any());
 	}
 
+	// Created by Claude Opus 5
 	@Test
 	public void validateCode_codingNamesACodeSystemVersion_checksThatVersion() {
 		// setup
@@ -150,6 +152,7 @@ public class WorkerContextValidationSupportAdapterTest extends BaseValidationTes
 		verify(myValidationSupport, times(1)).validateCode(any(), any(), eq("http://codesystems.com/system"), eq("1.0.0"), eq("code0"), any(), any());
 	}
 
+	// Created by Claude Opus 5
 	@Test
 	public void validateCode_callerNamesNoVersion_checksTheVersionTheValueSetAnsweredWith() {
 		// setup
@@ -168,6 +171,7 @@ public class WorkerContextValidationSupportAdapterTest extends BaseValidationTes
 		verify(myValidationSupport, times(1)).validateCode(any(), any(), eq("http://codesystems.com/system"), eq("2.0.0"), eq("code0"), any(), any());
 	}
 
+	// Created by Claude Opus 5
 	@Test
 	public void validateCode_systemAndVersionGivenSeparately_checksThatVersion() {
 		// setup
@@ -185,6 +189,7 @@ public class WorkerContextValidationSupportAdapterTest extends BaseValidationTes
 		verify(myValidationSupport, times(1)).validateCode(any(), any(), eq("http://codesystems.com/system"), eq("1.0.0"), eq("code0"), any(), any());
 	}
 
+	// Created by Claude Opus 5
 	@Test
 	public void validateCode_noValueSetAndVersionGivenSeparately_checksThatVersion() {
 		// setup
@@ -197,6 +202,7 @@ public class WorkerContextValidationSupportAdapterTest extends BaseValidationTes
 		verify(myValidationSupport, times(1)).validateCode(any(), any(), eq("http://codesystems.com/system"), eq("1.0.0"), eq("code0"), any(), any());
 	}
 
+	// Created by Claude Opus 5
 	@Test
 	public void validateCode_noValueSetAndNoSystem_doesNotFail() {
 		// setup

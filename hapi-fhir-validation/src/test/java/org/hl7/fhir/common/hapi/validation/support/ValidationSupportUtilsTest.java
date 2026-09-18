@@ -185,6 +185,7 @@ public class ValidationSupportUtilsTest {
 		assertEquals(theExpectedCodeSystem, result, theMessage);
 	}
 
+	// Created by Claude Opus 5
 	private static Stream<Arguments> getVersionedCodeSystemTestCases() {
 		return Stream.of(
 			Arguments.of(SYSTEM_URL, SYSTEM_VERSION, SYSTEM_URL + "|" + SYSTEM_VERSION, "System and version are joined"),
@@ -196,6 +197,7 @@ public class ValidationSupportUtilsTest {
 			Arguments.of("", SYSTEM_VERSION, "", "Blank system is returned as-is"));
 	}
 
+	// Created by Claude Opus 5
 	@ParameterizedTest
 	@MethodSource("getVersionedCodeSystemTestCases")
 	public void getVersionedCodeSystem_withDifferentSystemsAndVersions_returnsCorrectResult(String theCodeSystem,
@@ -207,6 +209,7 @@ public class ValidationSupportUtilsTest {
 		assertEquals(theExpectedCodeSystem, result, theMessage);
 	}
 
+	// Created by Claude Opus 5
 	private static Stream<Arguments> getVersionedValueSetTestCases() {
 		return Stream.of(
 			Arguments.of(VALUE_SET_URL, SYSTEM_VERSION, VALUE_SET_URL + "|" + SYSTEM_VERSION, "URL and version are joined"),
@@ -217,6 +220,7 @@ public class ValidationSupportUtilsTest {
 			Arguments.of(null, SYSTEM_VERSION, null, "Null URL is returned as-is rather than throwing"));
 	}
 
+	// Created by Claude Opus 5
 	@ParameterizedTest
 	@MethodSource("getVersionedValueSetTestCases")
 	public void getVersionedValueSet_withDifferentUrlsAndVersions_returnsCorrectResult(String theValueSetUrl,
@@ -228,6 +232,7 @@ public class ValidationSupportUtilsTest {
 		assertEquals(theExpectedUrl, result, theMessage);
 	}
 
+	// Created by Claude Opus 5
 	private static Stream<Arguments> valueSetsOfEveryFhirVersion() {
 		ca.uhn.fhir.model.dstu2.resource.ValueSet dstu2 = new ca.uhn.fhir.model.dstu2.resource.ValueSet();
 		dstu2.setUrl(VALUE_SET_URL);
@@ -261,6 +266,7 @@ public class ValidationSupportUtilsTest {
 			Arguments.of(FhirContext.forR5Cached(), r5, SYSTEM_VERSION, "R5"));
 	}
 
+	// Created by Claude Opus 5
 	@ParameterizedTest(name = "{3}")
 	@MethodSource("valueSetsOfEveryFhirVersion")
 	public void getValueSetUrl_withValueSetOfEachFhirVersion_returnsTheUrl(FhirContext theFhirContext,
@@ -272,6 +278,7 @@ public class ValidationSupportUtilsTest {
 		assertEquals(VALUE_SET_URL, result, theFhirVersion);
 	}
 
+	// Created by Claude Opus 5
 	@ParameterizedTest(name = "{3}")
 	@MethodSource("valueSetsOfEveryFhirVersion")
 	public void getValueSetVersion_withValueSetOfEachFhirVersion_returnsTheVersion(FhirContext theFhirContext,

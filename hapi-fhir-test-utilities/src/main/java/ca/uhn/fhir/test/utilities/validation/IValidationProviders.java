@@ -66,6 +66,7 @@ public interface IValidationProviders {
 		 * for a request naming another, or naming none. A test states the version it expects the code under
 		 * test to send by registering the response under it.
 		 */
+		// Created by Claude Opus 5
 		static String getInputKey(String theOperation, String theUrl, String theCodeSystemVersion, String theCode) {
 			String url = theCodeSystemVersion == null ? theUrl : theUrl + "|" + theCodeSystemVersion;
 			return theOperation + "-" + url + "#" + theCode;
@@ -91,11 +92,13 @@ public interface IValidationProviders {
 			return addTerminologyResponse(theOperation, theUrl, null, theCode, theFhirContext, theTerminologyResponseFile);
 		}
 
+		// Created by Claude Opus 5
 		@Override
 		public <P extends IBaseParameters> void addTerminologyResponse(String theOperation, String theUrl, String theCodeSystemVersion, String theCode, P theReturnParams) {
 			myTerminologyResponseMap.put(getInputKey(theOperation, theUrl, theCodeSystemVersion, theCode), theReturnParams);
 		}
 
+		// Created by Claude Opus 5
 		public IBaseParameters addTerminologyResponse(String theOperation, String theUrl, String theCodeSystemVersion, String theCode, FhirContext theFhirContext, String theTerminologyResponseFile) {
 			IBaseParameters responseParams = ClasspathUtil.loadResource(theFhirContext, getParameterType(), theTerminologyResponseFile);
 			addTerminologyResponse(theOperation, theUrl, theCodeSystemVersion, theCode, responseParams);
@@ -116,6 +119,7 @@ public interface IValidationProviders {
 			return getTerminologyResponse(theOperation, theUrl, null, theCode);
 		}
 
+		// Created by Claude Opus 5
 		protected IBaseParameters getTerminologyResponse(String theOperation, String theUrl, String theCodeSystemVersion, String theCode) throws Exception {
 			// addException registers without a version, so an exception fires whichever version the request names
 			String exceptionKey = getInputKey(theOperation, theUrl, theCode);

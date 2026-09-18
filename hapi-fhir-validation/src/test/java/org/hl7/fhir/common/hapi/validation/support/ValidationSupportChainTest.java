@@ -233,6 +233,7 @@ public class ValidationSupportChainTest extends BaseTest {
 	 * The cache key has to carry the code system version, or a code validated against one version answers for
 	 * every other version of the same system - which would defeat the version being passed at all.
 	 */
+	// Created by Claude Opus 5
 	@Test
 	public void validateCode_differentCodeSystemVersions_areNotAnsweredFromOneCacheEntry() {
 		// Setup
@@ -262,6 +263,7 @@ public class ValidationSupportChainTest extends BaseTest {
 	 * Two versions can include different code system versions, so their answers legitimately differ and the
 	 * version has to be part of the key as well.
 	 */
+	// Created by Claude Opus 5
 	@Test
 	public void validateCodeInValueSet_differentValueSetVersions_areNotAnsweredFromOneCacheEntry() {
 		// Setup
@@ -288,6 +290,7 @@ public class ValidationSupportChainTest extends BaseTest {
 	 * lives inside theValueSetUrl, which JpaResourceDaoValueSet and TermReadSvcImpl both pass as
 	 * "url|version". The two forms therefore have to remain distinct entries.
 	 */
+	// Created by Claude Opus 5
 	@Test
 	public void validateCode_valueSetUrlWithAndWithoutVersion_areNotAnsweredFromOneCacheEntry() {
 		// Setup
@@ -314,18 +317,21 @@ public class ValidationSupportChainTest extends BaseTest {
 			.validateCode(any(), any(), any(), any(), any(), any(), eq(versionedValueSetUrl));
 	}
 
+	// Created by Claude Opus 5
 	private IValidationSupport.CodeValidationResult validateCodeInValueSetUrl(
 			ValidationSupportChain theChain, String theValueSetUrl) {
 		return theChain.validateCode(
 			newValidationCtx(theChain), new ConceptValidationOptions(), CODE_SYSTEM_URL_0, null, CODE_0, DISPLAY_0, theValueSetUrl);
 	}
 
+	// Created by Claude Opus 5
 	private IValidationSupport.CodeValidationResult validateCodeWithVersion(
 			ValidationSupportChain theChain, String theCodeSystemVersion) {
 		return theChain.validateCode(
 			newValidationCtx(theChain), new ConceptValidationOptions(), CODE_SYSTEM_URL_0, theCodeSystemVersion, CODE_0, DISPLAY_0, null);
 	}
 
+	// Created by Claude Opus 5
 	private IValidationSupport.CodeValidationResult validateCodeInValueSetVersion(
 			ValidationSupportChain theChain, String theValueSetVersion) {
 		ValueSet valueSet = new ValueSet();

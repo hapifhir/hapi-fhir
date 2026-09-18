@@ -166,6 +166,7 @@ public final class ValidationSupportUtils {
 	 * @throws IllegalArgumentException if the FHIR version is not supported
 	 * @since 8.14.0
 	 */
+	// Created by Claude Opus 5
 	@Nullable
 	public static String getValueSetUrl(@Nonnull FhirContext theFhirContext, @Nonnull IBaseResource theValueSet) {
 		String url;
@@ -211,6 +212,7 @@ public final class ValidationSupportUtils {
 	 * @return the ValueSet's version, or <code>null</code> if the FHIR version has no version element
 	 * @since 8.14.0
 	 */
+	// Created by Claude Opus 5
 	@Nullable
 	public static String getValueSetVersion(@Nonnull FhirContext theFhirContext, @Nonnull IBaseResource theValueSet) {
 		String version;
@@ -252,6 +254,7 @@ public final class ValidationSupportUtils {
 	 * @return the resource's FHIR version
 	 * @since 8.14.0
 	 */
+	// Created by Claude Opus 5
 	@Nonnull
 	public static FhirVersionEnum getFhirVersionEnum(
 			@Nonnull FhirContext theFhirContext, @Nonnull IBaseResource theResource) {
@@ -277,11 +280,13 @@ public final class ValidationSupportUtils {
 	 * @return the value set URL with the version appended, or the URL unchanged
 	 * @since 8.14.0
 	 */
+	// Created by Claude Opus 5
 	@Nullable
 	public static String getVersionedValueSet(@Nullable String theValueSetUrl, @Nullable String theVersion) {
 		return getVersionedCanonical(theValueSetUrl, theVersion);
 	}
 
+	// Created by Claude Opus 5
 	@Nullable
 	private static String getVersionedCanonical(@Nullable String theUrl, @Nullable String theVersion) {
 		if (isNotBlank(theUrl) && isNotBlank(theVersion) && !theUrl.contains("|")) {

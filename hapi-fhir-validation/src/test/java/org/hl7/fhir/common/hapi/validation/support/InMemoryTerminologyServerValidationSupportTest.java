@@ -458,6 +458,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 	 * they resolve a version packed into one, so for a remote terminology service that lookup is a network
 	 * round trip which matches nothing.
 	 */
+	// Created by Claude Opus 5
 	@Test
 	void validateCode_codeSystemVersionMatchesTheUnversionedCanonical_doesNotFetchTheVersionedCanonical() {
 		// Setup
@@ -480,6 +481,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 	 * order is asserted because both canonicals are fetched either way - code which asks for the versioned one
 	 * first and only reaches the unversioned one through the lookupCode fallback ends up with the same two.
 	 */
+	// Created by Claude Opus 5
 	@Test
 	void validateCode_codeSystemVersionDiffersFromTheUnversionedCanonical_fetchesTheVersionedCanonical() {
 		// Setup
@@ -499,6 +501,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 	 * Adds a CodeSystem holding a single code at the given version, and rebuilds {@link #myChain} so that every
 	 * CodeSystem fetch through it is recorded.
 	 */
+	// Created by Claude Opus 5
 	private FetchRecordingValidationSupport addSingleVersionCodeSystemAndRecordFetches(String theVersion) {
 		CodeSystem cs = new CodeSystem();
 		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -705,6 +708,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 	/**
 	 * Records the canonical of every CodeSystem fetch which reaches it.
 	 */
+	// Created by Claude Opus 5
 	private static class FetchRecordingValidationSupport extends BaseValidationSupportWrapper {
 		private final List<String> myFetchedCodeSystemUrls = new ArrayList<>();
 
