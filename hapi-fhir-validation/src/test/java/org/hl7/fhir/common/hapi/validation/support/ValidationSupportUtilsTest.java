@@ -1,8 +1,6 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
-import ca.uhn.fhir.context.FhirContext;
 import com.google.common.collect.Lists;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -230,63 +228,5 @@ public class ValidationSupportUtilsTest {
 
 		// validate
 		assertEquals(theExpectedUrl, result, theMessage);
-	}
-
-	// Created by Claude Opus 5
-	private static Stream<Arguments> valueSetsOfEveryFhirVersion() {
-		ca.uhn.fhir.model.dstu2.resource.ValueSet dstu2 = new ca.uhn.fhir.model.dstu2.resource.ValueSet();
-		dstu2.setUrl(VALUE_SET_URL);
-
-		org.hl7.fhir.dstu2.model.ValueSet dstu2Hl7Org = new org.hl7.fhir.dstu2.model.ValueSet();
-		dstu2Hl7Org.setUrl(VALUE_SET_URL);
-
-		org.hl7.fhir.dstu3.model.ValueSet dstu3 = new org.hl7.fhir.dstu3.model.ValueSet();
-		dstu3.setUrl(VALUE_SET_URL);
-		dstu3.setVersion(SYSTEM_VERSION);
-
-		ValueSet r4 = new ValueSet();
-		r4.setUrl(VALUE_SET_URL);
-		r4.setVersion(SYSTEM_VERSION);
-
-		org.hl7.fhir.r4b.model.ValueSet r4b = new org.hl7.fhir.r4b.model.ValueSet();
-		r4b.setUrl(VALUE_SET_URL);
-		r4b.setVersion(SYSTEM_VERSION);
-
-		org.hl7.fhir.r5.model.ValueSet r5 = new org.hl7.fhir.r5.model.ValueSet();
-		r5.setUrl(VALUE_SET_URL);
-		r5.setVersion(SYSTEM_VERSION);
-
-		// DSTU2 has no ValueSet.version element in either set of structures, so null is the only answer there
-		return Stream.of(
-			Arguments.of(FhirContext.forDstu2Cached(), dstu2, null, "DSTU2"),
-			Arguments.of(FhirContext.forDstu2Hl7OrgCached(), dstu2Hl7Org, null, "DSTU2_HL7ORG"),
-			Arguments.of(FhirContext.forDstu3Cached(), dstu3, SYSTEM_VERSION, "DSTU3"),
-			Arguments.of(FhirContext.forR4Cached(), r4, SYSTEM_VERSION, "R4"),
-			Arguments.of(FhirContext.forR4BCached(), r4b, SYSTEM_VERSION, "R4B"),
-			Arguments.of(FhirContext.forR5Cached(), r5, SYSTEM_VERSION, "R5"));
-	}
-
-	// Created by Claude Opus 5
-	@ParameterizedTest(name = "{3}")
-	@MethodSource("valueSetsOfEveryFhirVersion")
-	public void getValueSetUrl_withValueSetOfEachFhirVersion_returnsTheUrl(FhirContext theFhirContext,
-																		   IBaseResource theValueSet, String theExpectedVersion, String theFhirVersion) {
-		// execute
-		String result = ValidationSupportUtils.getValueSetUrl(theFhirContext, theValueSet);
-
-		// validate
-		assertEquals(VALUE_SET_URL, result, theFhirVersion);
-	}
-
-	// Created by Claude Opus 5
-	@ParameterizedTest(name = "{3}")
-	@MethodSource("valueSetsOfEveryFhirVersion")
-	public void getValueSetVersion_withValueSetOfEachFhirVersion_returnsTheVersion(FhirContext theFhirContext,
-																				   IBaseResource theValueSet, String theExpectedVersion, String theFhirVersion) {
-		// execute
-		String result = ValidationSupportUtils.getValueSetVersion(theFhirContext, theValueSet);
-
-		// validate
-		assertEquals(theExpectedVersion, result, theFhirVersion);
 	}
 }

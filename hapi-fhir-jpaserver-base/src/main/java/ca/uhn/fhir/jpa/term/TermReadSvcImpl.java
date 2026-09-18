@@ -110,6 +110,7 @@ import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.common.EntityReference;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hibernate.search.mapper.pojo.massindexing.impl.PojoMassIndexingLoggingMonitor;
+import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportUtils;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
@@ -2689,7 +2690,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		String url = urlPrimitive.getValueAsString();
 		if (isNotBlank(url)) {
 			// A URL with no version resolves to whichever version was saved last
-			String version = ValidationSupportUtils.getValueSetVersion(myContext, theValueSet);
+			String version = CommonCodeSystemsTerminologyService.getValueSetVersion(myContext, theValueSet);
 			String canonicalUrl = ValidationSupportUtils.getVersionedValueSet(url, version);
 			return validateCode(
 					theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, canonicalUrl);

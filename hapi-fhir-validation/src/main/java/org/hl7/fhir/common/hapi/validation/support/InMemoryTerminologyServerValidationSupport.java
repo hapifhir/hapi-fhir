@@ -38,7 +38,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.substringAfter;
 import static org.apache.commons.lang3.StringUtils.substringBefore;
-import static org.hl7.fhir.common.hapi.validation.support.ValidationSupportUtils.getFhirVersionEnum;
+import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService.getFhirVersionEnum;
 
 /**
  * This class is a basic in-memory terminology service, designed to expand ValueSets and validate codes
@@ -119,7 +119,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			String theDisplay,
 			@Nonnull IBaseResource theValueSet) {
 		ValueSetAndMessages expansion;
-		String vsUrl = ValidationSupportUtils.getValueSetUrl(getFhirContext(), theValueSet);
+		String vsUrl = CommonCodeSystemsTerminologyService.getValueSetUrl(getFhirContext(), theValueSet);
 		try {
 			expansion = expandValueSetToCanonical(
 					theValidationSupportContext, theValueSet, theCodeSystemUrlAndVersion, theCode);

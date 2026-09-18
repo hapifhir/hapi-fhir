@@ -17,6 +17,7 @@ import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
+import org.hl7.fhir.dstu2.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
@@ -100,7 +101,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 			String theCode,
 			String theDisplay,
 			@Nonnull IBaseResource theValueSet) {
-		String url = ValidationSupportUtils.getValueSetUrl(getFhirContext(), theValueSet);
+		String url = getValueSetUrl(getFhirContext(), theValueSet);
 		return validateCode(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, url);
 	}
 
@@ -492,18 +493,45 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		return myFhirContext;
 	}
 
-	/**
-	 * @deprecated Please use {@link ValidationSupportUtils#getValueSetUrl(FhirContext, IBaseResource)} instead.
-	 */
-	@Deprecated(since = "8.14.0")
 	public static String getValueSetUrl(FhirContext theFhirContext, @Nonnull IBaseResource theValueSet) {
-		return ValidationSupportUtils.getValueSetUrl(theFhirContext, theValueSet);
+		String url;
+		FhirVersionEnum structureFhirVersionEnum = getFhirVersionEnum(theFhirContext, theValueSet);
+		switch (structureFhirVersionEnum) {
+			case DSTU2: {
+				url = ((ca.uhn.fhir.model.dstu2.resource.ValueSet) theValueSet).getUrl();
+				break;
+			}
+			case DSTU2_HL7ORG: {
+				url = ((ValueSet) theValueSet).getUrl();
+				break;
+			}
+			case DSTU3: {
+				url = ((org.hl7.fhir.dstu3.model.ValueSet) theValueSet).getUrl();
+				break;
+			}
+			case R4: {
+				url = ((org.hl7.fhir.r4.model.ValueSet) theValueSet).getUrl();
+				break;
+			}
+			case R4B: {
+				url = ((org.hl7.fhir.r4b.model.ValueSet) theValueSet).getUrl();
+				break;
+			}
+			case R5: {
+				url = ((org.hl7.fhir.r5.model.ValueSet) theValueSet).getUrl();
+				break;
+			}
+			case DSTU2_1:
+			default:
+				throw new IllegalArgumentException(
+						Msg.code(695) + "Can not handle version: " + structureFhirVersionEnum);
+		}
+		return url;
 	}
 
 	public static String getCodeSystemUrl(@Nonnull FhirContext theFhirContext, @Nonnull IBaseResource theCodeSystem) {
 		String url;
-		FhirVersionEnum structureFhirVersionEnum =
-				ValidationSupportUtils.getFhirVersionEnum(theFhirContext, theCodeSystem);
+		FhirVersionEnum structureFhirVersionEnum = getFhirVersionEnum(theFhirContext, theCodeSystem);
 		switch (structureFhirVersionEnum) {
 			case R4: {
 				url = ((org.hl7.fhir.r4.model.CodeSystem) theCodeSystem).getUrl();
@@ -525,21 +553,48 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		return url;
 	}
 
-	/**
-	 * @deprecated Please use {@link ValidationSupportUtils#getValueSetVersion(FhirContext, IBaseResource)} instead.
-	 */
-	@Deprecated(since = "8.14.0")
 	public static String getValueSetVersion(@Nonnull FhirContext theFhirContext, @Nonnull IBaseResource theValueSet) {
-		return ValidationSupportUtils.getValueSetVersion(theFhirContext, theValueSet);
+		String version;
+		switch (getFhirVersionEnum(theFhirContext, theValueSet)) {
+			case DSTU3: {
+				version = ((org.hl7.fhir.dstu3.model.ValueSet) theValueSet).getVersion();
+				break;
+			}
+			case R4: {
+				version = ((org.hl7.fhir.r4.model.ValueSet) theValueSet).getVersion();
+				break;
+			}
+			case R4B: {
+				version = ((org.hl7.fhir.r4b.model.ValueSet) theValueSet).getVersion();
+				break;
+			}
+			case R5: {
+				version = ((org.hl7.fhir.r5.model.ValueSet) theValueSet).getVersion();
+				break;
+			}
+			case DSTU2:
+			case DSTU2_HL7ORG:
+			case DSTU2_1:
+			default:
+				version = null;
+		}
+		return version;
 	}
 
 	/**
-	 * @deprecated Please use {@link ValidationSupportUtils#getFhirVersionEnum(FhirContext, IBaseResource)} instead.
+	 * N.B.:  We are keeping this as a shim due to the upgrade we did to core 5.6.97+
 	 */
-	@Deprecated(since = "8.14.0")
 	public static FhirVersionEnum getFhirVersionEnum(
 			@Nonnull FhirContext theFhirContext, @Nonnull IBaseResource theResource) {
-		return ValidationSupportUtils.getFhirVersionEnum(theFhirContext, theResource);
+		FhirVersionEnum structureFhirVersionEnum = theResource.getStructureFhirVersionEnum();
+		// TODO: Address this when core lib version is bumped
+		if (theResource.getStructureFhirVersionEnum() == FhirVersionEnum.R5
+				&& theFhirContext.getVersion().getVersion() == FhirVersionEnum.R4B) {
+			if (!(theResource instanceof org.hl7.fhir.r5.model.Resource)) {
+				structureFhirVersionEnum = FhirVersionEnum.R4B;
+			}
+		}
+		return structureFhirVersionEnum;
 	}
 
 	private static HashMap<String, String> buildUspsCodes() {

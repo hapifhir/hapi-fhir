@@ -927,10 +927,10 @@ public class ValidationSupportChain implements IValidationSupport {
 			String theDisplay,
 			@Nonnull IBaseResource theValueSet) {
 		FhirContext fhirContext = getFhirContext();
-		String url = ValidationSupportUtils.getValueSetUrl(fhirContext, theValueSet);
+		String url = CommonCodeSystemsTerminologyService.getValueSetUrl(fhirContext, theValueSet);
 		// getValueSetUrl returns ValueSet.url alone, and two versions of one canonical can include different
 		// code system versions, so the version belongs in the cache key as well
-		String valueSetVersion = ValidationSupportUtils.getValueSetVersion(fhirContext, theValueSet);
+		String valueSetVersion = CommonCodeSystemsTerminologyService.getValueSetVersion(fhirContext, theValueSet);
 
 		ValidateCodeKey key = null;
 		CacheValue<CodeValidationResult> retVal = null;

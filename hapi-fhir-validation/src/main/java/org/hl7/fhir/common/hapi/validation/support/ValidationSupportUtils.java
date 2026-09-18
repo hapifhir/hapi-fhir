@@ -1,10 +1,6 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.Logs;
-import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -155,118 +151,6 @@ public final class ValidationSupportUtils {
 
 	private static void logCodeAndValueSet(String theCode, String theValueSet) {
 		ourLog.debug("CodeSystem couldn't be extracted for code: {} for ValueSet: {}", theCode, theValueSet);
-	}
-
-	/**
-	 * Returns the <code>url</code> of the given ValueSet, for any supported FHIR version.
-	 *
-	 * @param theFhirContext the FHIR context the ValueSet belongs to
-	 * @param theValueSet    the ValueSet to read the URL from
-	 * @return the ValueSet's URL
-	 * @throws IllegalArgumentException if the FHIR version is not supported
-	 * @since 8.14.0
-	 */
-	// Created by Claude Opus 5
-	@Nullable
-	public static String getValueSetUrl(@Nonnull FhirContext theFhirContext, @Nonnull IBaseResource theValueSet) {
-		String url;
-		FhirVersionEnum structureFhirVersionEnum = getFhirVersionEnum(theFhirContext, theValueSet);
-		switch (structureFhirVersionEnum) {
-			case DSTU2: {
-				url = ((ca.uhn.fhir.model.dstu2.resource.ValueSet) theValueSet).getUrl();
-				break;
-			}
-			case DSTU2_HL7ORG: {
-				url = ((org.hl7.fhir.dstu2.model.ValueSet) theValueSet).getUrl();
-				break;
-			}
-			case DSTU3: {
-				url = ((org.hl7.fhir.dstu3.model.ValueSet) theValueSet).getUrl();
-				break;
-			}
-			case R4: {
-				url = ((ValueSet) theValueSet).getUrl();
-				break;
-			}
-			case R4B: {
-				url = ((org.hl7.fhir.r4b.model.ValueSet) theValueSet).getUrl();
-				break;
-			}
-			case R5: {
-				url = ((org.hl7.fhir.r5.model.ValueSet) theValueSet).getUrl();
-				break;
-			}
-			case DSTU2_1:
-			default:
-				throw new IllegalArgumentException(
-						Msg.code(695) + "Can not handle version: " + structureFhirVersionEnum);
-		}
-		return url;
-	}
-
-	/**
-	 * Returns the <code>version</code> of the given ValueSet, for any FHIR version which has one.
-	 *
-	 * @param theFhirContext the FHIR context the ValueSet belongs to
-	 * @param theValueSet    the ValueSet to read the version from
-	 * @return the ValueSet's version, or <code>null</code> if the FHIR version has no version element
-	 * @since 8.14.0
-	 */
-	// Created by Claude Opus 5
-	@Nullable
-	public static String getValueSetVersion(@Nonnull FhirContext theFhirContext, @Nonnull IBaseResource theValueSet) {
-		String version;
-		switch (getFhirVersionEnum(theFhirContext, theValueSet)) {
-			case DSTU3: {
-				version = ((org.hl7.fhir.dstu3.model.ValueSet) theValueSet).getVersion();
-				break;
-			}
-			case R4: {
-				version = ((ValueSet) theValueSet).getVersion();
-				break;
-			}
-			case R4B: {
-				version = ((org.hl7.fhir.r4b.model.ValueSet) theValueSet).getVersion();
-				break;
-			}
-			case R5: {
-				version = ((org.hl7.fhir.r5.model.ValueSet) theValueSet).getVersion();
-				break;
-			}
-			case DSTU2:
-			case DSTU2_HL7ORG:
-			case DSTU2_1:
-			default:
-				version = null;
-		}
-		return version;
-	}
-
-	/**
-	 * Returns the FHIR version of the given resource's structures.
-	 * <p>
-	 * A resource built from the R5 structures is reported as R4B when the context is R4B and the resource is
-	 * not itself an R5 model class, which is a shim for the core library upgrade to 5.6.97.
-	 * </p>
-	 *
-	 * @param theFhirContext the FHIR context the resource belongs to
-	 * @param theResource    the resource to read the structure version from
-	 * @return the resource's FHIR version
-	 * @since 8.14.0
-	 */
-	// Created by Claude Opus 5
-	@Nonnull
-	public static FhirVersionEnum getFhirVersionEnum(
-			@Nonnull FhirContext theFhirContext, @Nonnull IBaseResource theResource) {
-		FhirVersionEnum structureFhirVersionEnum = theResource.getStructureFhirVersionEnum();
-		// TODO: Address this when core lib version is bumped
-		if (theResource.getStructureFhirVersionEnum() == FhirVersionEnum.R5
-				&& theFhirContext.getVersion().getVersion() == FhirVersionEnum.R4B) {
-			if (!(theResource instanceof org.hl7.fhir.r5.model.Resource)) {
-				structureFhirVersionEnum = FhirVersionEnum.R4B;
-			}
-		}
-		return structureFhirVersionEnum;
 	}
 
 	/**
