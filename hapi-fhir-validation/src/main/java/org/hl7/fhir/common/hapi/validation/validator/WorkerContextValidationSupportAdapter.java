@@ -888,12 +888,15 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			String theDisplay) {
 		IValidationSupport.CodeValidationResult result = myValidationSupport.validateCodeInValueSet(
 				newValidationSupportContext(), theValidationOptions, theSystem, theCode, theDisplay, theValueSet);
+
+		/* The ValueSet answer only tells us whether the code is in the expansion, not whether the
+		CodeSystem defines it. org.hl7.fhir.core's validator takes the in-the-ValueSet verdict from the
+		result severity rather than from our issues: it raises that failure itself as a validation message,
+		graded by binding strength, and drops our now redundant not-in-vs issue. Everything else it reports
+		from the issues - so this call is what supplies the issue for a code the CodeSystem does not define.
+		*/
 		if (result != null && isNotBlank(theSystem)) {
-			/* We got a value set result, which could be successful, or could contain errors/warnings. The code
-			might also be invalid in the code system, so we will check that as well and add those issues
-			to our result. Pass the version as well: without it this check uses whichever version is current,
-			which can reject a code the value set accepted.
-			*/
+			// Pass the version as well: without it this check uses whichever version is current
 			String expectedVersion = isNotBlank(theVersion) ? theVersion : result.getCodeSystemVersion();
 			IValidationSupport.CodeValidationResult codeSystemResult =
 					validateCodeInCodeSystem(theValidationOptions, theSystem, expectedVersion, theCode, theDisplay);
