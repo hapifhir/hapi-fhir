@@ -564,11 +564,7 @@ public class SearchQueryBuilderTest {
 	}
 
 	/**
-	 * A6/A7/A8: exercises the large-ID-list threshold boundary - a list exactly at the threshold is
-	 * unchanged (A6, the branch is strictly greater-than), a single ID still collapses to an equality
-	 * predicate at or below the threshold (A7), the documented disable value keeps today's SQL for lists
-	 * of any size (A8, disable half), and a threshold of zero means every list is rendered as a JSON
-	 * array, including a single ID (A8, zero half).
+	 * test the large-ID-list threshold boundaries
 	 */
 	@ParameterizedTest(name = "threshold={0}, idCount={1}, expectJson={2}")
 	@CsvSource({
@@ -600,9 +596,6 @@ public class SearchQueryBuilderTest {
 		}
 	}
 
-	/**
-	 * A8 (validation half): values below the disable value are rejected by the setter.
-	 */
 	@Test
 	void testThresholdBelowDisableValue_isRejected() {
 		StorageSettings storageSettings = new StorageSettings();
@@ -612,8 +605,7 @@ public class SearchQueryBuilderTest {
 	}
 
 	/**
-	 * A10: the JSON payload carries the IDs, and the SQL text carries none of them - so there is no
-	 * injection surface and the SQL text stays stable for the query plan cache.
+	 * Ensure IDs are only present in the bound JSON array
 	 */
 	@Test
 	void testJsonPayloadHoldsIdsAndSqlTextDoesNot() {
@@ -635,8 +627,7 @@ public class SearchQueryBuilderTest {
 	}
 
 	/**
-	 * A11: each ID-list predicate binds independently, in SQL text order. A second list under the
-	 * threshold renders its own IN list; a second list over the threshold renders its own JSON array.
+	 * Each call to createResourceIdsPredicate creates a new JSON array bind, when over the threshold
 	 */
 	@ParameterizedTest
 	@MethodSource("secondIdListCases")
@@ -651,8 +642,7 @@ public class SearchQueryBuilderTest {
 	}
 
 	/**
-	 * A12: an inverted predicate (_id:not) takes the same JSON path; the existing NOT wrap is applied
-	 * to the resulting condition.
+	 * json array still constructed with NOT when theInverse=true (corresponds to _id:not)
 	 */
 	@Test
 	void testInverseResourceIdsOverThreshold_rendersNegatedJsonArray() {
@@ -666,8 +656,7 @@ public class SearchQueryBuilderTest {
 	}
 
 	/**
-	 * A13: in Database Partition Mode the top-level _id predicate goes through the very same method, so it
-	 * gets the JSON array binding too, with the partition predicate left untouched beside it.
+	 * Ensure in Database Partition Mode json array still generated with partition SQL untouched
 	 */
 	@Test
 	void testDatabasePartitionModeResourceIdsOverThreshold_rendersPartitionPredicateAndJsonArray() {

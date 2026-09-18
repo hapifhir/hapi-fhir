@@ -25,7 +25,8 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 /**
  * Shared search test cases: above a configured threshold the <code>_id</code> and reference
  * predicates bind their ID list as a single JSON array string which the database unpacks with its
- * own JSON function, instead of emitting one bind variable per ID.
+ * own JSON function, instead of emitting one bind variable per ID. This prevents exceeding DB parameter
+ * limits for large ID lists.
  * <p>
  * Implemented by both {@link BaseDatabaseVerificationIT} and {@link BaseDatabasePartitionModeIT} so every
  * case runs against every supported database vendor, in and out of database partition mode.
@@ -33,9 +34,6 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
  */
 // Created by claude-opus-5
 interface LargeIdListSearchTest extends ITestDataBuilder {
-
-	int BELOW_LIST_SIZE_THRESHOLD = 3;
-	int ABOVE_LIST_SIZE_THRESHOLD = 10;
 
 	/**
 	 * Roughly the number of IDs whose JSON array exceeds Oracle's default 4,000 byte VARCHAR2 bind limit.
@@ -53,14 +51,14 @@ interface LargeIdListSearchTest extends ITestDataBuilder {
 	Context getLargeIdListSearchTestContext();
 
 	/**
-	 * IT-1 / IT-5: an <code>_id</code> list above the threshold returns the same resources as today, and
-	 * the generated SQL unpacks the IDs with the engine's JSON function. In database partition mode the
-	 * partition predicate must still be there beside it.
+	 * An _id list above the threshold returns the same resources as today, and
+	 * the generated SQL unpacks the IDs with the engine's JSON function.
+	 * In database partition mode the partition predicate must still be there beside it.
 	 */
 	@Test
 	default void testIdSearchOverThreshold_unpacksJsonArray() {
 		Context ctx = getLargeIdListSearchTestContext();
-		withLargeIdListJsonThreshold(ctx, BELOW_LIST_SIZE_THRESHOLD, () -> {
+		withLargeIdListJsonThreshold(ctx, 3, () -> {
 			List<String> patientIds = createPatients(5);
 
 			ctx.captureQueriesListener().clear();
@@ -78,13 +76,14 @@ interface LargeIdListSearchTest extends ITestDataBuilder {
 	}
 
 	/**
-	 * IT-2: the reference site (<code>subject=</code>) gets the same treatment, and a search that is over
-	 * the threshold on both <code>_id</code> and <code>subject</code> puts two JSON placeholders in one statement.
+	 * An search with references list (?subject=) above the threshold returns the same resources as today, and
+	 * the generated SQL unpacks the IDs with the engine's JSON function.
+	 * In database partition mode the partition predicate must still be there beside it.
 	 */
 	@Test
 	default void testReferenceSearchOverThreshold_unpacksJsonArray() {
 		Context ctx = getLargeIdListSearchTestContext();
-		withLargeIdListJsonThreshold(ctx, BELOW_LIST_SIZE_THRESHOLD, () -> {
+		withLargeIdListJsonThreshold(ctx, 3, () -> {
 			List<String> patientIds = createPatients(5);
 			List<String> observationIds = patientIds.stream()
 				.map(t -> createObservation(withSubject(t)).toUnqualifiedVersionless().getValue())
@@ -122,7 +121,7 @@ interface LargeIdListSearchTest extends ITestDataBuilder {
 	@Test
 	default void testIdSearchUnderThreshold_keepsInList() {
 		Context ctx = getLargeIdListSearchTestContext();
-		withLargeIdListJsonThreshold(ctx, ABOVE_LIST_SIZE_THRESHOLD, () -> {
+		withLargeIdListJsonThreshold(ctx, 10, () -> {
 			List<String> patientIds = createPatients(5);
 
 			ctx.captureQueriesListener().clear();
@@ -158,7 +157,7 @@ interface LargeIdListSearchTest extends ITestDataBuilder {
 		Integer previousMaximumPageSize = ctx.server().getRestfulServer().getMaximumPageSize();
 		ctx.server().getRestfulServer().setMaximumPageSize(LARGE_PAYLOAD_PATIENT_COUNT);
 		try {
-			withLargeIdListJsonThreshold(ctx, BELOW_LIST_SIZE_THRESHOLD, () -> {
+			withLargeIdListJsonThreshold(ctx, 3, () -> {
 				List<String> patientIds = createPatients(LARGE_PAYLOAD_PATIENT_COUNT);
 
 				ctx.captureQueriesListener().clear();

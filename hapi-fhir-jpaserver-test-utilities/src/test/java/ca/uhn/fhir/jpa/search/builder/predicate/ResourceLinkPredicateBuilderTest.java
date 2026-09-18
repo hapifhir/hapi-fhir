@@ -204,19 +204,16 @@ public class ResourceLinkPredicateBuilderTest {
 	}
 
 	/**
-	 * A16: exercises the large-ID-list threshold boundary at the reference site - above the threshold
-	 * TARGET_RESOURCE_ID is constrained by the JSON unpacking subselect rather than by one bind variable
-	 * per target ID, at or under the threshold the reference site keeps rendering today's IN list, and a
-	 * single target ID still collapses to an equality predicate. Threshold is 3 in every row. The last row
-	 * covers the one call site whose negation shape changes above the threshold - a plain
-	 * <code>NOT IN (?,...)</code> below it, but <code>NOT (IN (SELECT ...))</code> above it.
+	 * Test the large-ID-list threshold around the boundary. Above should use JSON unpacking subselect,
+	 * under should keep using an IN list (one bind per ID)
 	 */
 	@ParameterizedTest(name = "targetIdCount={0}, inverse={3}")
 	@CsvSource({
 		"5, 'TARGET_RESOURCE_ID IN (SELECT', true, false",
 		"3, 'TARGET_RESOURCE_ID IN (', false, false",
 		"1, 'TARGET_RESOURCE_ID = ', false, false",
-		"5, 'TARGET_RESOURCE_ID IN (SELECT', true, true"
+		"5, 'TARGET_RESOURCE_ID IN (SELECT', true, true",
+		"3, 'TARGET_RESOURCE_ID NOT IN ', false, true"
 	})
 	void createPredicateReference_largeIdListJsonThreshold_rendersExpectedPredicate(int theTargetIdCount, String theExpectedFragment, boolean theExpectJson, boolean theInverse) {
 		ResourceLinkPredicateBuilder builder = createBuilderOnRealSearchQueryBuilder(3);
@@ -231,7 +228,7 @@ public class ResourceLinkPredicateBuilderTest {
 			assertThat(rendered).doesNotContain("jsonb_array_elements_text");
 		}
 		if (theInverse) {
-			assertThat(rendered).as(rendered).contains("NOT (");
+			assertThat(rendered).as(rendered).contains("NOT");
 		}
 	}
 

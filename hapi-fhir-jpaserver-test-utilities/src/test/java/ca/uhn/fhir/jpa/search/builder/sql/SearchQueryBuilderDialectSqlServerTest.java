@@ -73,12 +73,8 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 		assertThat(generatedSql.getBindVariables()).hasSize(2);
 	}
 
-	/**
-	 * With database compatibility level 130 or higher, SQL Server unpacks a large ID list
-	 * with OPENJSON against a single JSON array bind.
-	 */
 	@Test
-	void testResourceIdsOverThreshold_withJsonSupport_bindsSingleJsonArray() {
+	void testResourceIdsOverThreshold_withJsonUnpackingSupport_bindsSingleJsonArray() {
 		HibernatePropertiesProvider dialectProvider = createDialectProvider(true);
 		StorageSettings storageSettings = new StorageSettings();
 		storageSettings.setLargeIdListJsonThreshold(3);
@@ -93,12 +89,8 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 		assertThat(generatedSql.getBindVariables()).containsExactly("Patient", "[1,2,3,4,5]");
 	}
 
-	/**
-	 * OPENJSON requires database compatibility level 130 (SQL Server 2016). Below that the
-	 * predicate must keep rendering today's IN list rather than emitting SQL the database cannot parse.
-	 */
 	@Test
-	void testResourceIdsOverThreshold_withoutJsonSupport_keepsInList() {
+	void testResourceIdsOverThreshold_jsonUnpackingNotSupportedByDbLevel_keepsInList() {
 		HibernatePropertiesProvider dialectProvider = createDialectProvider(false);
 		StorageSettings storageSettings = new StorageSettings();
 		storageSettings.setLargeIdListJsonThreshold(3);
