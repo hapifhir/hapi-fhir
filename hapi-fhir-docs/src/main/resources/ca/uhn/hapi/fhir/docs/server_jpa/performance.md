@@ -85,10 +85,10 @@ Setting this property explicitly to true enables the feature: [Index Storage Opt
 
 * This setting should not be enabled in combination with [Include Partition in Search Hashes](/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/config/PartitionSettings.html#setIncludePartitionInSearchHashes(boolean)) flag, as in this case, Partition could not be included in Search Hashes. 
 
-# Large ID List JSON Binding
+# Large ID Lists in Searches
 
-Some searches constrain a column to a list of resource IDs - a search on `_id` with many values, or a reference parameter such as `subject=` with many values. This occurs in particular when a request is narrowed to the compartments a user is permitted to see, since every permitted compartment contributes one value; a user holding tens of thousands of grants can produce an ID list of the same size, which puts pressure on the number of bind parameters a single database statement accepts.
+A search on `_id`, or on a reference parameter such as `subject`, can carry a very large number of values. This happens in particular with the [Search Narrowing Interceptor](/docs/security/search_narrowing_interceptor.html), which adds one value for every authorized compartment or resource. Databases limit how many parameters a single statement may have (65,535 on PostgreSQL, 2,100 on SQL Server, 1,000 values in a list on Oracle), so a large enough list used to fail with a database error.
 
-Above a configurable threshold, HAPI FHIR binds such a list as a single JSON array parameter which the database unpacks with its own JSON function, instead of one bind parameter per ID. This is supported on PostgreSQL, Oracle and SQL Server; see [Large ID Lists](./database_support.html#large-id-lists) for the per-database mechanism and requirements. MySQL, MariaDB and H2 are unaffected and always use one bind parameter per ID.
+When a list holds more than 800 IDs, HAPI FHIR sends it to the database as a single parameter instead of one parameter per ID. Search results are unchanged. This applies to PostgreSQL, Oracle and Microsoft SQL Server; SQL Server additionally requires [database compatibility level 130 or higher](./database_support.html#compatibility-level). MySQL, MariaDB and H2 keep the previous behaviour and the database's own limit.
 
-The threshold defaults to 800 IDs, and can be tuned or the feature disabled entirely (a value of `-1`) using [Large ID List JSON Threshold](/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/entity/StorageSettings.html#setLargeIdListJsonThreshold(int)).
+The threshold can be changed, or the behaviour disabled entirely with a value of `-1`, using [Large ID List JSON Threshold](/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/entity/StorageSettings.html#setLargeIdListJsonThreshold(int)).

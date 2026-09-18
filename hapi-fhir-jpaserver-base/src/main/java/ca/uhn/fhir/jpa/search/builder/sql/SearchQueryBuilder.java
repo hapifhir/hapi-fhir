@@ -885,8 +885,8 @@ public class SearchQueryBuilder {
 	 * <p>
 	 * Lists holding more than {@link StorageSettings#getLargeIdListJsonThreshold()} IDs are bound as a
 	 * single JSON array string which the database unpacks with its own JSON function, instead of one bind
-	 * variable per ID. Useful for large ID lists (eg. automatic search narrowing adds one ID per grant - and
-	 * there could be tens of thousands). It applies to PostgreSQL, Oracle and SQL Server only; every other
+	 * variable per ID. Useful for large ID lists (eg. the Search Narrowing Interceptor adds one ID per
+	 * authorized compartment - and there could be tens of thousands). It applies to PostgreSQL, Oracle and SQL Server only; every other
 	 * database, and every list at or under the threshold, keeps rendering
 	 * <code>IN (?,?,...)</code>.
 	 * </p>
