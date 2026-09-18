@@ -19,8 +19,11 @@
  */
 package ca.uhn.fhir.util;
 
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+
+import java.util.Date;
 
 /**
  * Added functionality to {@link ToStringBuilder}
@@ -34,11 +37,25 @@ public class HapiToStringBuilder extends ToStringBuilder {
 	}
 
 	/**
+	 * Appends a date with FHIR serialization (ISO-8601, e.g. <code>2022-01-01T00:00:00.000Z</code>).
+	 * Appends the string <code>null</code> if the value is <code>null</code>.
+	 */
+	public HapiToStringBuilder append(String theFieldName, @Nullable Date theValue) {
+		if (theValue != null) {
+			append(theFieldName, DateUtils.convertDateToIso8601String(theValue));
+		} else {
+			super.append(theFieldName, (String) null);
+		}
+		return this;
+	}
+
+	/**
 	 * Performs an {@link #append(String, int)} if {@literal theValue != 0}
 	 */
-	public void appendIfNonZero(String theFieldName, int theValue) {
+	public HapiToStringBuilder appendIfNonZero(String theFieldName, int theValue) {
 		if (theValue != 0) {
 			append(theFieldName, theValue);
 		}
+		return this;
 	}
 }

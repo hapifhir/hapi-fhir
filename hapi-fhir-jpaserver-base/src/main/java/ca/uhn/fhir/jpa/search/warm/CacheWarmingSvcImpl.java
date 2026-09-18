@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.time.DateUtils;
@@ -53,11 +54,12 @@ import java.util.Set;
 public class CacheWarmingSvcImpl implements ICacheWarmingSvc, IHasScheduledJobs {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(CacheWarmingSvcImpl.class);
+	private static final int DEFAULT_FIRST_THRESHOLD = 50;
 
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
 
-	private Map<WarmCacheEntry, Long> myCacheEntryToNextRefresh = new LinkedHashMap<>();
+	private final Map<WarmCacheEntry, Long> myCacheEntryToNextRefresh = new LinkedHashMap<>();
 
 	@Autowired
 	private FhirContext myCtx;
@@ -95,7 +97,19 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc, IHasScheduledJobs 
 		String queryPart = parseWarmUrlParamPart(nextUrl);
 		SearchParameterMap responseCriteriaUrl = myMatchUrlService.translateMatchUrl(queryPart, resourceDef);
 
-		callingDao.search(responseCriteriaUrl);
+		// This call doesn't use a RequestDetails right now because if we
+		// pass in a SystemRequestDetails, we get a synchronous search. We
+		// need to find a way to pass in a RequestDetails (and probably
+		// optionally a partition) and still get a cached search.
+		IBundleProvider search = callingDao.search(responseCriteriaUrl);
+
+		Integer firstThreshold = myStorageSettings.getSearchPreFetchThresholds().get(0);
+		if (firstThreshold == null || firstThreshold < 1) {
+			firstThreshold = DEFAULT_FIRST_THRESHOLD;
+		}
+
+		// Fetch the first 50 resources to get them into the cache.
+		search.getResources(0, firstThreshold);
 	}
 
 	private String parseWarmUrlParamPart(String theNextUrl) {

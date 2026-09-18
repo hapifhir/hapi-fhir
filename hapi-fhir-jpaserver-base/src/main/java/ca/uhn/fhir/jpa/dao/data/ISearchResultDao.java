@@ -43,6 +43,11 @@ public interface ISearchResultDao extends JpaRepository<SearchResult, Long>, IHa
 	@Query(value = "SELECT r.myResourcePartitionId,r.myResourcePid FROM SearchResult r WHERE r.mySearchPid = :search")
 	List<Object[]> findWithSearchPidOrderIndependent(@Param("search") Long theSearchPid);
 
+	@Query(
+			value =
+					"SELECT NEW ca.uhn.fhir.jpa.model.dao.JpaPid(r.myResourcePartitionId, r.myResourcePid) FROM SearchResult r WHERE r.mySearchPid = :search ORDER BY r.myOrder ASC")
+	List<JpaPid> findWithSearchPidOrdered(@Param("search") Long theSearchPid);
+
 	@Modifying
 	@Query("DELETE FROM SearchResult s WHERE s.mySearchPid IN :searchIds")
 	@CanIgnoreReturnValue

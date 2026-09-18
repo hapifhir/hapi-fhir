@@ -22,7 +22,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
-import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -632,8 +631,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		await().until(() -> runInTransaction(() -> mySearchEntityDao.count() == 0));
 		await().until(() -> runInTransaction(() -> mySearchResultDao.count() == 0));
 
-		PersistedJpaSearchFirstPageBundleProvider search = (PersistedJpaSearchFirstPageBundleProvider) myPatientDao.search(new SearchParameterMap());
-		assertEquals(PersistedJpaSearchFirstPageBundleProvider.class, search.getClass());
+		IBundleProvider search = myPatientDao.search(new SearchParameterMap());
 		assertEquals(2, search.size().intValue());
 		assertThat(search.getResources(0, 2)).hasSize(2);
 

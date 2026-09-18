@@ -30,9 +30,7 @@ public class PagingMultinodeProviderR4Test extends BaseResourceProviderR4Test {
 		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
 		
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
-		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(false);
 	}
 
 	@BeforeEach
@@ -70,9 +68,7 @@ public class PagingMultinodeProviderR4Test extends BaseResourceProviderR4Test {
 
 		Bundle found;
 
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(50);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(10);
-		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(true);
 
 		String[][] resultsPages = new String[][]{
 			new String[]{"Patient/A000", "Patient/A001", "Patient/A002", "Patient/A003", "Patient/A004", "Patient/A005", "Patient/A006", "Patient/A007", "Patient/A008", "Patient/A009"},

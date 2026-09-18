@@ -153,10 +153,9 @@ public class JpaPid extends BaseResourcePersistentId<Long> implements Comparable
 		if (this == theO) {
 			return true;
 		}
-		if (!(theO instanceof JpaPid)) {
+		if (!(theO instanceof JpaPid jpaPid)) {
 			return false;
 		}
-		JpaPid jpaPid = (JpaPid) theO;
 		return Objects.equals(myId, jpaPid.myId);
 	}
 
