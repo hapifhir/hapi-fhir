@@ -363,6 +363,26 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
 	}
 
+	/**
+	 * A system canonical which already names a version wins over the version parameter, rather than the two
+	 * being appended into "system|1|2", which resolves to no CodeSystem at all.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	public void testLookupOperationByVersionedSystemAndVersionParameter() {
+		Parameters respParam = myClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named("lookup")
+			.withParameter(Parameters.class, "code", new CodeType("8450-9"))
+			.andParameter("system", new UriType("http://acme.org|1"))
+			.andParameter("version", new StringType("2"))
+			.execute();
+
+		assertEquals("version", respParam.getParameter().get(1).getName());
+		assertEquals("1", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+	}
+
 	@Test
 	public void testLookupOperationByCodeAndSystemUserDefinedNonExistentVersion() {
 		try {
