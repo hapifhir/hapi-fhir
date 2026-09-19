@@ -750,9 +750,13 @@ public class RestfulServerUtils {
 			FhirContext theContext, FhirVersionEnum theForVersion, RequestDetails theRequestDetails) {
 		FhirContext context = getContextForVersion(theContext, theForVersion);
 
-		// Determine response encoding
-		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingWithDefault(theRequestDetails)
-				.getEncoding();
+		// Determine response encoding. A negotiated encoding such as NDJSON cannot be produced by a parser, so fall
+		// back to the server's configured default encoding rather than silently defaulting to XML (see #8357).
+		EncodingEnum responseEncoding = determineParserEncoding(
+				RestfulServerUtils.determineResponseEncodingWithDefault(theRequestDetails)
+						.getEncoding(),
+				theRequestDetails.getServer().getDefaultResponseEncoding());
+
 		IParser parser;
 		switch (responseEncoding) {
 			case JSON:
@@ -770,6 +774,22 @@ public class RestfulServerUtils {
 		configureResponseParser(theRequestDetails, parser);
 
 		return parser;
+	}
+
+	/**
+	 * Returns the encoding to use when building a response parser. A negotiated encoding that cannot be produced by a
+	 * parser (e.g. NDJSON) falls back to the server's configured default encoding rather than XML. See #8357.
+	 */
+	static EncodingEnum determineParserEncoding(
+			EncodingEnum theNegotiatedEncoding, EncodingEnum theServerDefaultEncoding) {
+		switch (theNegotiatedEncoding) {
+			case JSON:
+			case RDF:
+			case XML:
+				return theNegotiatedEncoding;
+			default:
+				return theServerDefaultEncoding;
+		}
 	}
 
 	public static Set<String> parseAcceptHeaderAndReturnHighestRankedOptions(HttpServletRequest theRequest) {
