@@ -102,6 +102,11 @@ public class ValidationSupportUtilsTest {
 				SYSTEM_URL, "ValueSet include with one system and code"),
 			Arguments.of(Lists.newArrayList(new ValueSet.ConceptSetComponent().setSystem(SYSTEM_URL).setVersion(SYSTEM_VERSION)),
 				SYSTEM_URL + "|" + SYSTEM_VERSION, "ValueSet include with one versioned system and no code"),
+			// compose.include.system is a plain URI, but guides are authored with the version packed into it
+			Arguments.of(Lists.newArrayList(new ValueSet.ConceptSetComponent().setSystem(SYSTEM_URL + "|" + SYSTEM_VERSION)),
+				SYSTEM_URL + "|" + SYSTEM_VERSION, "ValueSet include with the version packed into the system"),
+			Arguments.of(Lists.newArrayList(new ValueSet.ConceptSetComponent().setSystem(SYSTEM_URL + "|" + SYSTEM_VERSION).setVersion(SYSTEM_VERSION_2)),
+				SYSTEM_URL + "|" + SYSTEM_VERSION_2, "ValueSet include whose packed system and version element disagree"),
 			Arguments.of(Lists.newArrayList(new ValueSet.ConceptSetComponent().setSystem(SYSTEM_URL),
 					new ValueSet.ConceptSetComponent().setSystem(SYSTEM_URL_2)),
 				null, "ValueSet includes with two systems and no code"),

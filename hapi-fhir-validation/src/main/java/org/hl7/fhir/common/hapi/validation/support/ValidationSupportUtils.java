@@ -1,9 +1,12 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.util.Logs;
+import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public final class ValidationSupportUtils {
 
@@ -44,7 +47,7 @@ public final class ValidationSupportUtils {
 		if (theValueSet.getCompose().getInclude().size() == 1) {
 			org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent include =
 					theValueSet.getCompose().getInclude().iterator().next();
-			return include.hasSystem() ? getVersionedCodeSystem(include.getSystem(), include.getVersion()) : null;
+			return include.hasSystem() ? toCodeSystemCanonical(include.getSystem(), include.getVersion()) : null;
 		}
 
 		// when component has more than one include, their codeSystem(s) could be different, so we need to make sure
@@ -54,7 +57,7 @@ public final class ValidationSupportUtils {
 			if (include.hasSystem()) {
 				for (org.hl7.fhir.dstu3.model.ValueSet.ConceptReferenceComponent concept : include.getConcept()) {
 					if (concept.hasCodeElement() && concept.getCode().equals(theCode)) {
-						return getVersionedCodeSystem(include.getSystem(), include.getVersion());
+						return toCodeSystemCanonical(include.getSystem(), include.getVersion());
 					}
 				}
 			}
@@ -77,7 +80,7 @@ public final class ValidationSupportUtils {
 		if (theValueSet.getCompose().getInclude().size() == 1) {
 			ValueSet.ConceptSetComponent include =
 					theValueSet.getCompose().getInclude().iterator().next();
-			return include.hasSystem() ? getVersionedCodeSystem(include.getSystem(), include.getVersion()) : null;
+			return include.hasSystem() ? toCodeSystemCanonical(include.getSystem(), include.getVersion()) : null;
 		}
 
 		// when component has more than one include, their codeSystem(s) could be different, so we need to make sure
@@ -86,7 +89,7 @@ public final class ValidationSupportUtils {
 			if (include.hasSystem()) {
 				for (ValueSet.ConceptReferenceComponent concept : include.getConcept()) {
 					if (concept.hasCodeElement() && concept.getCode().equals(theCode)) {
-						return getVersionedCodeSystem(include.getSystem(), include.getVersion());
+						return toCodeSystemCanonical(include.getSystem(), include.getVersion());
 					}
 				}
 			}
@@ -96,13 +99,6 @@ public final class ValidationSupportUtils {
 		// because the format was not well handled, let's allow to watch the VS by an easy logging change
 		logCodeAndValueSet(theCode, theValueSet.getId());
 		return null;
-	}
-
-	private static String getVersionedCodeSystem(String theCodeSystem, String theVersion) {
-		if (!theCodeSystem.contains("|") && theVersion != null) {
-			return theCodeSystem + "|" + theVersion;
-		}
-		return theCodeSystem;
 	}
 
 	/**
@@ -116,7 +112,7 @@ public final class ValidationSupportUtils {
 		if (theValueSet.getCompose().getInclude().size() == 1) {
 			org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent include =
 					theValueSet.getCompose().getInclude().iterator().next();
-			return include.hasSystem() ? getVersionedCodeSystem(include.getSystem(), include.getVersion()) : null;
+			return include.hasSystem() ? toCodeSystemCanonical(include.getSystem(), include.getVersion()) : null;
 		}
 
 		// when component has more than one include, their codeSystem(s) could be different, so we need to make sure
@@ -126,7 +122,7 @@ public final class ValidationSupportUtils {
 			if (include.hasSystem()) {
 				for (org.hl7.fhir.r5.model.ValueSet.ConceptReferenceComponent concept : include.getConcept()) {
 					if (concept.hasCodeElement() && concept.getCode().equals(theCode)) {
-						return getVersionedCodeSystem(include.getSystem(), include.getVersion());
+						return toCodeSystemCanonical(include.getSystem(), include.getVersion());
 					}
 				}
 			}
@@ -136,6 +132,24 @@ public final class ValidationSupportUtils {
 		// because the format was not well handled, let's allow to watch the VS by an easy logging change
 		logCodeAndValueSet(theCode, theValueSet.getId());
 		return null;
+	}
+
+	/**
+	 * Joins a {@literal compose.include} system and version into the <code>url|version</code> canonical the
+	 * callers of {@link #extractCodeSystemForCode} expect.
+	 * <p>
+	 * A {@literal compose.include.system} is a plain URI, but guides are authored with a version packed into it,
+	 * so the version can arrive in either element or in both. {@literal compose.include.version} wins when both
+	 * carry one, which is how {@literal InMemoryTerminologyServerValidationSupport} resolves the same pair when
+	 * it expands the include.
+	 * </p>
+	 */
+	// Created by Claude Opus 5
+	private static String toCodeSystemCanonical(String theSystem, String theVersion) {
+		UrlUtil.CanonicalUrlParts system = UrlUtil.parseCanonicalUrl(theSystem);
+		String version =
+				isNotBlank(theVersion) ? theVersion : system.versionId().orElse(null);
+		return UrlUtil.toCanonicalUrl(system.url(), version);
 	}
 
 	private static void logCodeAndValueSet(String theCode, String theValueSet) {
