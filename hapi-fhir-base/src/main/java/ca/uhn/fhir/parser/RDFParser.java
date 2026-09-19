@@ -304,6 +304,24 @@ public class RDFParser extends BaseParser {
 	}
 
 	/**
+	 * Utility method to create a blank node for a primitive that carries no value but does carry
+	 * extensions. Such an element is legal in FHIR - the value is simply absent - so it still needs
+	 * a node for the extensions to hang off, just without a fhir:value predicate.
+	 * @param rdfModel Model to create node within
+	 * @param cardinalityIndex if a collection, this value is written as a fhir:index predicate
+	 * @return Blank node resource containing possibly fhir:index, but no fhir:value
+	 */
+	private Resource createFhirValuelessBlankNode(Model rdfModel, Integer cardinalityIndex) {
+		Resource blankNodeResource = rdfModel.createResource();
+		if (cardinalityIndex != null && cardinalityIndex > -1) {
+			blankNodeResource.addProperty(
+					rdfModel.createProperty(FHIR_NS + FHIR_INDEX),
+					rdfModel.createTypedLiteral(cardinalityIndex, XSDDatatype.XSDinteger));
+		}
+		return blankNodeResource;
+	}
+
+	/**
 	 * Builds the predicate name based on field definition
 	 * @param resource Resource being interrogated
 	 * @param definition field definition
@@ -400,41 +418,42 @@ public class RDFParser extends BaseParser {
 					assert pd != null;
 					String value = pd.getValueAsString();
 					if (value != null || !hasNoExtensions(pd)) {
+						String propertyName =
+								constructPredicateName(resource, childDefinition, childName, parentElement);
+						Resource valueResource;
 						if (value != null) {
-							String propertyName =
-									constructPredicateName(resource, childDefinition, childName, parentElement);
 							XSDDatatype dataType = getXSDDataTypeForFhirType(pd.fhirType(), value);
-							Resource valueResource =
-									this.createFhirValueBlankNode(rdfModel, value, dataType, cardinalityIndex);
-							if (!hasNoExtensions(pd)) {
-								IBaseHasExtensions hasExtension = (IBaseHasExtensions) pd;
-								if (hasExtension.getExtension() != null
-										&& hasExtension.getExtension().size() > 0) {
-									int i = 0;
-									for (IBaseExtension extension : hasExtension.getExtension()) {
-										RuntimeResourceDefinition resDef =
-												getContext().getResourceDefinition(resource);
-										Resource extensionResource = rdfModel.createResource();
-										extensionResource.addProperty(
-												rdfModel.createProperty(FHIR_NS + FHIR_INDEX),
-												rdfModel.createTypedLiteral(i, XSDDatatype.XSDinteger));
-										valueResource.addProperty(
-												rdfModel.createProperty(FHIR_NS + ELEMENT_EXTENSION),
-												extensionResource);
-										encodeCompositeElementToStreamWriter(
-												resource,
-												extension,
-												rdfModel,
-												extensionResource,
-												false,
-												new CompositeChildElement(resDef, theEncodeContext),
-												theEncodeContext);
-									}
+							valueResource = this.createFhirValueBlankNode(rdfModel, value, dataType, cardinalityIndex);
+						} else {
+							valueResource = this.createFhirValuelessBlankNode(rdfModel, cardinalityIndex);
+						}
+						if (!hasNoExtensions(pd)) {
+							IBaseHasExtensions hasExtension = (IBaseHasExtensions) pd;
+							if (hasExtension.getExtension() != null
+									&& hasExtension.getExtension().size() > 0) {
+								int i = 0;
+								for (IBaseExtension extension : hasExtension.getExtension()) {
+									RuntimeResourceDefinition resDef =
+											getContext().getResourceDefinition(resource);
+									Resource extensionResource = rdfModel.createResource();
+									extensionResource.addProperty(
+											rdfModel.createProperty(FHIR_NS + FHIR_INDEX),
+											rdfModel.createTypedLiteral(i, XSDDatatype.XSDinteger));
+									valueResource.addProperty(
+											rdfModel.createProperty(FHIR_NS + ELEMENT_EXTENSION), extensionResource);
+									encodeCompositeElementToStreamWriter(
+											resource,
+											extension,
+											rdfModel,
+											extensionResource,
+											false,
+											new CompositeChildElement(resDef, theEncodeContext),
+											theEncodeContext);
 								}
 							}
-
-							rdfResource.addProperty(rdfModel.createProperty(propertyName), valueResource);
 						}
+
+						rdfResource.addProperty(rdfModel.createProperty(propertyName), valueResource);
 					}
 					break;
 				}
