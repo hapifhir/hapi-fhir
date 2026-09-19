@@ -16,6 +16,7 @@ import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -225,6 +226,25 @@ class TermReadSvcImplTest {
 
 		assertThat(result).isNotNull();
 		assertThat(result.isOk()).isTrue();
+	}
+
+	/**
+	 * ValueSet.url is optional, so a caller may pass one by value with no url. There is then no canonical to
+	 * look the value set up by, and nothing to validate against.
+	 */
+	@Test
+	void validateCodeInValueSet_valueSetWithoutAUrl_returnsNull() {
+		ValidateCodeFixture fixture = new ValidateCodeFixture();
+
+		CodeValidationResult result = fixture.mySpiedSvc.validateCodeInValueSet(
+				fixture.myValidationSupportContext,
+				new ConceptValidationOptions(),
+				UCUM_SYSTEM_URL,
+				UCUM_CODE,
+				null,
+				new ValueSet());
+
+		assertThat(result).isNull();
 	}
 
 	/**

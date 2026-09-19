@@ -502,6 +502,23 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 	}
 
 	/**
+	 * CodeSystem.content is required by the specification but is not enforced when the resource is stored, and
+	 * an absent one is not "not-present": the code system is there, so codes in it can be validated.
+	 */
+	@Test
+	void isCodeSystemSupported_codeSystemWithoutContent_isSupported() {
+		// Setup
+		CodeSystem cs = new CodeSystem();
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setUrl(VERSIONED_CS_URL);
+		cs.addConcept().setCode("code0").setDisplay("Code 0");
+		myPrePopulated.addCodeSystem(cs);
+
+		// Test & Verify
+		assertTrue(mySvc.isCodeSystemSupported(new ValidationSupportContext(myChain), VERSIONED_CS_URL));
+	}
+
+	/**
 	 * A code system canonical naming one version and a code system version naming another are contradictory,
 	 * and neither can be silently preferred. This mirrors {@literal TermReadSvcImpl}, which joins the same pair
 	 * the same way.

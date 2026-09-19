@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 8391
+title: "Validating a code could throw a NullPointerException instead of returning a validation result when a
+  `CodeSystem` had no `content` element, or when a `ValueSet` with no `url` was passed by value. This has
+  been fixed."
