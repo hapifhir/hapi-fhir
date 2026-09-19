@@ -13,6 +13,7 @@ import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.PackageInformation;
 import org.hl7.fhir.r5.model.Resource;
@@ -159,6 +160,98 @@ public class WorkerContextValidationSupportAdapterTest extends BaseValidationTes
 		for(ForkJoinTask<?> f : futures) {
 			f.join();
 		}
+	}
+
+	@Test
+	public void validateCode_codeableConceptAnyCodingValid_downgradesNotInVsIssuesToWarnings() {
+		// setup
+		setupValidation();
+		when(myValidationSupport.isCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid()).thenReturn(true);
+
+		String system = "http://codesystems.com/system";
+		ValueSet valueSet = new ValueSet();
+		valueSet.getCompose().addInclude().setSystem(system).addConcept().setCode("code0");
+
+		CodeValidationResult goodResult = new CodeValidationResult().setCode("code0").setCodeSystemName(system);
+		when(myValidationSupport.validateCodeInValueSet(any(), any(), eq(system), eq("code0"), any(), any())).thenReturn(goodResult);
+
+		CodeValidationIssue badIssue = new CodeValidationIssue("Code not in ValueSet", IssueSeverity.ERROR, CodeValidationIssueCode.CODE_INVALID, CodeValidationIssueCoding.NOT_IN_VS);
+		CodeValidationResult badResult = new CodeValidationResult().setMessage("Code not in ValueSet").setSeverity(IssueSeverity.ERROR).addIssue(badIssue);
+		when(myValidationSupport.validateCodeInValueSet(any(), any(), eq(system), eq("otherCode"), any(), any())).thenReturn(badResult);
+
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding(new Coding(system, "code0", null));
+		codeableConcept.addCoding(new Coding(system, "otherCode", null));
+
+		// execute
+		ValidationResult result = myWorkerContextWrapper.validateCode(new ValidationOptions(), codeableConcept, valueSet);
+
+		// verify
+		assertThat(result.isOk()).isTrue();
+		assertThat(result.getIssues()).hasSize(1);
+		assertThat(result.getIssues().get(0).getSeverity()).isEqualTo(org.hl7.fhir.r5.model.OperationOutcome.IssueSeverity.WARNING);
+		assertThat(result.getIssues().get(0).getDiagnostics()).isEqualTo("Code not in ValueSet");
+	}
+
+	@Test
+	public void validateCode_codeableConceptAnyCodingValid_keepsCodeSystemIssuesAsErrors() {
+		// setup
+		setupValidation();
+		when(myValidationSupport.isCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid()).thenReturn(true);
+
+		String system = "http://codesystems.com/system";
+		ValueSet valueSet = new ValueSet();
+		valueSet.getCompose().addInclude().setSystem(system).addConcept().setCode("code0");
+
+		CodeValidationResult goodResult = new CodeValidationResult().setCode("code0").setCodeSystemName(system);
+		when(myValidationSupport.validateCodeInValueSet(any(), any(), eq(system), eq("code0"), any(), any())).thenReturn(goodResult);
+
+		CodeValidationIssue badIssue = new CodeValidationIssue("Unknown code", IssueSeverity.ERROR, CodeValidationIssueCode.CODE_INVALID, CodeValidationIssueCoding.INVALID_CODE);
+		CodeValidationResult badResult = new CodeValidationResult().setMessage("Unknown code").setSeverity(IssueSeverity.ERROR).addIssue(badIssue);
+		when(myValidationSupport.validateCodeInValueSet(any(), any(), eq(system), eq("badCode"), any(), any())).thenReturn(badResult);
+
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding(new Coding(system, "code0", null));
+		codeableConcept.addCoding(new Coding(system, "badCode", null));
+
+		// execute
+		ValidationResult result = myWorkerContextWrapper.validateCode(new ValidationOptions(), codeableConcept, valueSet);
+
+		// verify
+		assertThat(result.isOk()).isTrue();
+		assertThat(result.getIssues()).hasSize(1);
+		assertThat(result.getIssues().get(0).getSeverity()).isEqualTo(org.hl7.fhir.r5.model.OperationOutcome.IssueSeverity.ERROR);
+		assertThat(result.getIssues().get(0).getDiagnostics()).isEqualTo("Unknown code");
+	}
+
+	@Test
+	public void validateCode_codeableConceptAllCodingsMustBeValid_invalidCodingFailsConcept() {
+		// setup
+		setupValidation();
+		when(myValidationSupport.isCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid()).thenReturn(false);
+
+		String system = "http://codesystems.com/system";
+		ValueSet valueSet = new ValueSet();
+		valueSet.getCompose().addInclude().setSystem(system).addConcept().setCode("code0");
+
+		CodeValidationResult goodResult = new CodeValidationResult().setCode("code0").setCodeSystemName(system);
+		when(myValidationSupport.validateCodeInValueSet(any(), any(), eq(system), eq("code0"), any(), any())).thenReturn(goodResult);
+
+		CodeValidationIssue badIssue = new CodeValidationIssue("Unknown code", IssueSeverity.ERROR, CodeValidationIssueCode.NOT_FOUND, CodeValidationIssueCoding.NOT_FOUND);
+		CodeValidationResult badResult = new CodeValidationResult().setMessage("Unknown code").setSeverity(IssueSeverity.ERROR).addIssue(badIssue);
+		when(myValidationSupport.validateCodeInValueSet(any(), any(), eq(system), eq("badCode"), any(), any())).thenReturn(badResult);
+
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding(new Coding(system, "code0", null));
+		codeableConcept.addCoding(new Coding(system, "badCode", null));
+
+		// execute
+		ValidationResult result = myWorkerContextWrapper.validateCode(new ValidationOptions(), codeableConcept, valueSet);
+
+		// verify
+		assertThat(result.isOk()).isFalse();
+		assertThat(result.getIssues()).hasSize(1);
+		assertThat(result.getIssues().get(0).getSeverity()).isEqualTo(org.hl7.fhir.r5.model.OperationOutcome.IssueSeverity.ERROR);
 	}
 
 	@Test
