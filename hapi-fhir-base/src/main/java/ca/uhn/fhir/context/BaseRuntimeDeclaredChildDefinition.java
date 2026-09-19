@@ -192,6 +192,21 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 			}
 			existingList.remove(theIndex);
 		}
+
+		@Override
+		public void replace(IBase theTarget, IBase theOldValue, IBase theNewValue) {
+			@SuppressWarnings("unchecked")
+			List<IBase> existingList = (List<IBase>) getFieldValue(theTarget, myField);
+			if (existingList != null) {
+				for (int i = 0; i < existingList.size(); i++) {
+					if (existingList.get(i) == theOldValue) {
+						existingList.set(i, theNewValue);
+						return;
+					}
+				}
+			}
+			addValue(theTarget, theNewValue);
+		}
 	}
 
 	private final class FieldPlainAccessor implements IAccessor {
