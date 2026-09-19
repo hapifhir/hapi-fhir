@@ -194,6 +194,21 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 				.hasMessageContaining("Can not have more than 2");
 	}
 
+	@Test
+	void testTranslateMatchUrl_retainsFilterParameter() {
+		var map = myMatchUrlService.translateMatchUrl(
+				"Patient?_filter=name%20eq%20smith", ourCtx.getResourceDefinition("Patient"));
+
+		assertThat(map.containsKey(ca.uhn.fhir.rest.api.Constants.PARAM_FILTER)).isTrue();
+		assertThat(map.get(ca.uhn.fhir.rest.api.Constants.PARAM_FILTER).get(0).get(0))
+				.isInstanceOf(StringParam.class);
+		assertThat(((StringParam) map.get(ca.uhn.fhir.rest.api.Constants.PARAM_FILTER)
+						.get(0)
+						.get(0))
+						.getValue())
+				.isEqualTo("name eq smith");
+	}
+
 	@Override
 	protected FhirContext getFhirContext() {
 		return ourCtx;
