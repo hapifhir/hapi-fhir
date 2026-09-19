@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 8017
+title: "Fixed a quadratic (O(N^2)) `ArrayList.contains` loop in
+  `DaoSearchParamSynchronizer.subtract` that caused re-uploads of very large
+  CodeSystem resources (e.g. NDC, with ~10^6 `ResourceIndexedSearchParam*`
+  rows) to spin for hours of CPU. The `theToSubtract` argument is now wrapped
+  in a `HashSet` (when not already a `Set`), restoring O(N) behavior."
