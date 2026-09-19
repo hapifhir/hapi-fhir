@@ -76,6 +76,7 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters.ExportStyle;
 import static ca.uhn.fhir.util.DatatypeUtil.toBooleanValue;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.stripEnd;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class BulkDataExportProvider {
@@ -552,7 +553,7 @@ public class BulkDataExportProvider {
 
 		BulkExportJobResults results = JsonUtil.deserialize(theJob.getReport(), BulkExportJobResults.class);
 		response.setMsg(results.getReportMsg());
-		response.setRequest(results.getOriginalRequestUrl());
+		response.setRequest(buildRequestUrl(theServerBase, results.getOriginalRequestUrl()));
 
 		// an output is required, even if empty, according to HL7 FHIR IG
 		response.getOutput();
@@ -569,6 +570,14 @@ public class BulkDataExportProvider {
 			}
 		}
 		return response;
+	}
+
+	private static String buildRequestUrl(String theServerBase, String theOriginalRequestUrl) {
+		if (isEmpty(theServerBase) || isEmpty(theOriginalRequestUrl)) {
+			return theOriginalRequestUrl;
+		}
+
+		return stripEnd(theServerBase, "/") + theOriginalRequestUrl;
 	}
 
 	private void handleDeleteRequest(
