@@ -27,19 +27,19 @@ For more information, see [Microsoft JDBC driver documentation](https://learn.mi
 
 ## Compatibility Level
 
-Searches with very large ID lists (see [Large ID Lists in Searches](performance.html#large-id-lists-in-searches)) require a database compatibility level of 130 (SQL Server 2016) or higher. A database restored from an older version can still be running at a lower level. Check it first:
+Searches with very large ID lists (~2000 IDs for SQL Server, see [Large ID Lists in Searches](performance.html#large-id-lists-in-searches)) require a database compatibility level of 130 (equivalent to SQL Server 2016) or higher. If you restored your database from an older version, it could still be running at a lower level. Run the following to check:
 
 ```sql
 SELECT compatibility_level FROM sys.databases WHERE name = DB_NAME()
 ```
 
-If, and only if, the reported level is below 130, raise it - to the highest level your SQL Server version supports (150 for SQL Server 2019, 160 for SQL Server 2022/Azure SQL), not to 130 itself:
+If the reported level is below 130 and you require searches with large ID lists, raise it to the highest level your SQL Server version supports (eg. 150 for SQL Server 2019, 160 for SQL Server 2022/Azure SQL).
 
 ```sql
 ALTER DATABASE [hapi] SET COMPATIBILITY_LEVEL = 150
 ```
 
-If the level is below 130, HAPI FHIR keeps the behaviour of earlier versions for these searches, so they remain subject to SQL Server's limit of 2,100 parameters per statement, and a warning is logged. The same happens if HAPI FHIR cannot read the compatibility level, for example because the database user may not read `sys.databases`. The server starts normally either way.
+If the level is below 130, HAPI FHIR keeps the behaviour of earlier versions for these searches, so they remain subject to SQL Server's limit of 2,100 parameters per statement.
 
 # Experimental Support
 
