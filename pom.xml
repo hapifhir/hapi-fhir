@@ -1021,6 +1021,11 @@
 			<id>bobvanderlinden</id>
 			<name>Bob van der Linden</name>
 		</developer>
+		<developer>
+			<id>oliveregger</id>
+			<name>Oliver Egger</name>
+			<organization>ahdis</organization>
+		</developer>
 	</developers>
 
 	<licenses>
