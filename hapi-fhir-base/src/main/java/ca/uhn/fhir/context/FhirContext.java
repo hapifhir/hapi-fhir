@@ -1356,6 +1356,11 @@ public class FhirContext {
 		return new FhirContext(FhirVersionEnum.R5);
 	}
 
+	public static FhirContext forR6() {
+		return new FhirContext(FhirVersionEnum.R6);
+	}
+
+
 	/**
 	 * Returns a statically cached {@literal FhirContext} instance for the given version, creating one if none exists in the
 	 * cache. One FhirContext will be kept in the cache for each FHIR version that is requested (by calling
@@ -1394,4 +1399,5 @@ public class FhirContext {
 		}
 		return retVal;
 	}
+
 }

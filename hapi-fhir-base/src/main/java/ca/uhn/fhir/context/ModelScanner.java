@@ -415,7 +415,8 @@ class ModelScanner {
 				RestSearchParameterTypeEnum paramType =
 						RestSearchParameterTypeEnum.forCode(searchParam.type().toLowerCase());
 				if (paramType == null) {
-					throw new ConfigurationException(Msg.code(1721) + "Search param " + searchParam.name()
+					throw new ConfigurationException(Msg.code(1721) + "Search param " + searchParam.name() +
+						" on type " + theClass.getName()
 							+ " has an invalid type: " + searchParam.type());
 				}
 				Set<String> providesMembershipInCompartments =

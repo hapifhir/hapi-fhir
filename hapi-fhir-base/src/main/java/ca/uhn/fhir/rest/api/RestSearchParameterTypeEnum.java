@@ -93,6 +93,13 @@ public enum RestSearchParameterTypeEnum {
 	 * Search parameter SHALL be a number (a whole number, or a decimal).
 	 */
 	SPECIAL("special", "http://hl7.org/fhir/search-param-type"),
+
+	/**
+	 * Code Value: <b>resource</b>
+	 *
+	 * A resource type parameter is a special case parameter type that is used to enable chaining through elements that are actual resources (e.g., Bundle.entry.resource).
+	 */
+	RESOURCE("resource", "http://hl7.org/fhir/search-param-type"),
 	;
 
 	/**

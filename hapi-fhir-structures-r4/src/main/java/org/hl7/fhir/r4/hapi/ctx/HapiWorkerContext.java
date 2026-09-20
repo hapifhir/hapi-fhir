@@ -35,6 +35,7 @@ import org.hl7.fhir.r4.terminologies.ValueSetExpander;
 import org.hl7.fhir.r4.utils.validation.IResourceValidator;
 import org.hl7.fhir.utilities.TranslationServices;
 import org.hl7.fhir.utilities.i18n.I18nBase;
+import org.hl7.fhir.utilities.logging.ILoggingService;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 

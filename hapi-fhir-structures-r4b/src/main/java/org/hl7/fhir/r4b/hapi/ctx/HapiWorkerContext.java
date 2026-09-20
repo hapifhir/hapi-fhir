@@ -38,6 +38,7 @@ import org.hl7.fhir.r4b.utils.validation.ValidationContextCarrier;
 import org.hl7.fhir.utilities.TimeTracker;
 import org.hl7.fhir.utilities.TranslationServices;
 import org.hl7.fhir.utilities.i18n.I18nBase;
+import org.hl7.fhir.utilities.logging.ILoggingService;
 import org.hl7.fhir.utilities.npm.BasePackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;

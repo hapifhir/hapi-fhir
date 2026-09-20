@@ -30,6 +30,7 @@ import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.utilities.FhirPublication;
 import org.hl7.fhir.utilities.i18n.I18nBase;
+import org.hl7.fhir.utilities.logging.ILoggingService;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.slf4j.Logger;

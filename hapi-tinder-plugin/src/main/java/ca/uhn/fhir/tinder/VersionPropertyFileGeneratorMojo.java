@@ -3,10 +3,9 @@ package ca.uhn.fhir.tinder;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.reflect.ClassPath;
 import org.apache.commons.io.IOUtils;
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoFailureException;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.InstantType;
@@ -21,7 +20,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 // @Mojo(name = "generate-version-propertyfile", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
-public class VersionPropertyFileGeneratorMojo extends AbstractMojo {
+public class VersionPropertyFileGeneratorMojo /*extends AbstractMojo*/ {
 
 	private static final org.slf4j.Logger ourLog =
 			org.slf4j.LoggerFactory.getLogger(VersionPropertyFileGeneratorMojo.class);
@@ -32,8 +31,8 @@ public class VersionPropertyFileGeneratorMojo extends AbstractMojo {
 	// @Parameter(alias = "targetFile", required = true)
 	private File targetFile;
 
-	@Override
-	public void execute() throws MojoFailureException {
+	/*@Override*/
+	public void execute() throws InternalErrorException {
 		TreeMap<String, Class<?>> resourceTypes = new TreeMap<>();
 		TreeMap<String, Class<?>> datatypeTypes = new TreeMap<>();
 
@@ -48,7 +47,7 @@ public class VersionPropertyFileGeneratorMojo extends AbstractMojo {
 							})
 							.collect(Collectors.toList());
 		} catch (IOException e) {
-			throw new MojoFailureException(Msg.code(108) + e.getMessage(), e);
+			throw new InternalErrorException(Msg.code(108) + e.getMessage(), e);
 		}
 
 		Assert.isTrue(components.size() > 50, "Only have " + components.size() + " components");
@@ -87,7 +86,7 @@ public class VersionPropertyFileGeneratorMojo extends AbstractMojo {
 			ourLog.info("Found datatype: {}", annotation.name());
 			datatypeTypes.put(annotation.name(), clazz);
 		} catch (ClassNotFoundException e1) {
-			throw new MojoFailureException(Msg.code(110) + "Unknown", e1);
+			throw new InternalErrorException(Msg.code(110) + "Unknown", e1);
 		}
 
 		ourLog.info("Found {} resources and {} datatypes", resourceTypes.size(), datatypeTypes.size());
@@ -115,13 +114,13 @@ public class VersionPropertyFileGeneratorMojo extends AbstractMojo {
 			}
 			w.flush();
 		} catch (IOException e) {
-			throw new MojoFailureException(Msg.code(111) + "Failed to write property file", e);
+			throw new InternalErrorException(Msg.code(111) + "Failed to write property file", e);
 		} finally {
 			IOUtils.closeQuietly(w);
 		}
 	}
 
-	public static void main(String[] theArgs) throws MojoFailureException {
+	public static void main(String[] theArgs) {
 		VersionPropertyFileGeneratorMojo m;
 
 		//		VersionPropertyFileGeneratorMojo m = new VersionPropertyFileGeneratorMojo();
@@ -136,10 +135,16 @@ public class VersionPropertyFileGeneratorMojo extends AbstractMojo {
 		// File("hapi-fhir-structures-r4b/src/main/resources/org/hl7/fhir/r4b/model/fhirversion.properties");
 		//		m.execute();
 
+//		m = new VersionPropertyFileGeneratorMojo();
+//		m.packageName = "org.hl7.fhir.r5.model";
+//		m.targetFile =
+//				new File("hapi-fhir-structures-r5/src/main/resources/org/hl7/fhir/r5/model/fhirversion.properties");
+//		m.execute();
+
 		m = new VersionPropertyFileGeneratorMojo();
-		m.packageName = "org.hl7.fhir.r5.model";
+		m.packageName = "org.hl7.fhir.model.core";
 		m.targetFile =
-				new File("hapi-fhir-structures-r5/src/main/resources/org/hl7/fhir/r5/model/fhirversion.properties");
+				new File("hapi-fhir-structures-normative/src/main/resources/org/hl7/fhir/model/core/fhirversion.properties");
 		m.execute();
 
 		//		m.packageName = "org.hl7.fhir.dstu3.model";

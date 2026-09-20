@@ -46,7 +46,9 @@ public enum FhirVersionEnum {
 
 	R4B("org.hl7.fhir.r4b.hapi.ctx.FhirR4B", null, true, new R4BVersion()),
 
-	R5("org.hl7.fhir.r5.hapi.ctx.FhirR5", null, true, new R5Version());
+	R5("org.hl7.fhir.r5.hapi.ctx.FhirR5", null, true, new R5Version()),
+
+	R6("org.hl7.fhir.r6.hapi.ctx.FhirR6", null, true, new R6Version());
 
 	// If you add new constants, add to the various methods below too!
 
@@ -264,6 +266,25 @@ public enum FhirVersionEnum {
 				myVersion = (String) c.getDeclaredField("VERSION").get(null);
 			} catch (Exception e) {
 				myVersion = "5.0.0";
+			}
+		}
+
+		@Override
+		public String provideVersion() {
+			return myVersion;
+		}
+	}
+
+	private static class R6Version implements IVersionProvider {
+
+		private String myVersion;
+
+		R6Version() {
+			try {
+				Class<?> c = Class.forName("org.hl7.fhir.model.core.Constants");
+				myVersion = (String) c.getDeclaredField("VERSION").get(null);
+			} catch (Exception e) {
+				myVersion = "6.0.0";
 			}
 		}
 
