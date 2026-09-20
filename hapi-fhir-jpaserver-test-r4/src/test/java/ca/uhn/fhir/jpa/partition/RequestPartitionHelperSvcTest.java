@@ -1,5 +1,10 @@
 package ca.uhn.fhir.jpa.partition;
 
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.data.IPartitionDao;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
@@ -7,6 +12,7 @@ import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -17,10 +23,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -318,6 +327,97 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
 			myPartitionSettings.setUnnamedPartitionMode(false);
+		}
+	}
+
+	/**
+	 * Partition-selecting resolutions that carry no resource type (system-level history, page
+	 * fetches, server-level operations) still run against a caller-chosen partition, so the
+	 * {@link Pointcut#STORAGE_PARTITION_SELECTED} security hook must fire for them too, with a
+	 * null {@link RuntimeResourceDefinition}.
+	 */
+	@ParameterizedTest(name = "{0}")
+	@MethodSource("readDetailsWithoutResourceType")
+	void testDetermineReadPartitionForRequest_noResourceType_invokesPartitionSelectedHook(String theName, ReadPartitionIdRequestDetails theDetails) {
+		createPartition1();
+		MyReadPartitionInterceptor readInterceptor = new MyReadPartitionInterceptor(RequestPartitionId.fromPartitionId(PARTITION_ID_1));
+		MyPartitionSelectedInterceptor selectedInterceptor = new MyPartitionSelectedInterceptor();
+		myInterceptorRegistry.registerInterceptor(readInterceptor);
+		myInterceptorRegistry.registerInterceptor(selectedInterceptor);
+		try {
+			ServletRequestDetails srd = new ServletRequestDetails();
+
+			RequestPartitionId result = mySvc.determineReadPartitionForRequest(srd, theDetails);
+
+			assertThat(result.getPartitionIds()).containsExactly(PARTITION_ID_1);
+			assertThat(result.getPartitionNames()).containsExactly(PARTITION_NAME_1);
+			assertThat(selectedInterceptor.myPartitionIds).hasSize(1);
+			assertThat(selectedInterceptor.myPartitionIds.get(0).getPartitionNames()).containsExactly(PARTITION_NAME_1);
+			assertThat(selectedInterceptor.myRequestDetails).containsExactly(srd);
+			assertThat(selectedInterceptor.myResourceDefinitions).containsExactly((RuntimeResourceDefinition) null);
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(readInterceptor);
+			myInterceptorRegistry.unregisterInterceptor(selectedInterceptor);
+		}
+	}
+
+	static Stream<Arguments> readDetailsWithoutResourceType() {
+		return Stream.of(
+			Arguments.of("system history", ReadPartitionIdRequestDetails.forHistory(null, null)),
+			Arguments.of("server operation", ReadPartitionIdRequestDetails.forServerOperation("$expunge")),
+			Arguments.of("page fetch", ReadPartitionIdRequestDetails.forSearchUuid("some-search-uuid"))
+		);
+	}
+
+	@Test
+	void testDetermineGenericPartitionForRequest_noResourceName_invokesPartitionSelectedHook() {
+		createPartition1();
+		MyReadPartitionInterceptor readInterceptor = new MyReadPartitionInterceptor(RequestPartitionId.fromPartitionId(PARTITION_ID_1));
+		MyPartitionSelectedInterceptor selectedInterceptor = new MyPartitionSelectedInterceptor();
+		myInterceptorRegistry.registerInterceptor(readInterceptor);
+		myInterceptorRegistry.registerInterceptor(selectedInterceptor);
+		try {
+			// A server-level request (e.g. a transaction) has no resource name
+			ServletRequestDetails srd = new ServletRequestDetails();
+			assertThat(srd.getResourceName()).isNull();
+
+			RequestPartitionId result = mySvc.determineGenericPartitionForRequest(srd);
+
+			assertThat(result.getPartitionNames()).containsExactly(PARTITION_NAME_1);
+			assertThat(selectedInterceptor.myPartitionIds).hasSize(1);
+			assertThat(selectedInterceptor.myRequestDetails).containsExactly(srd);
+			assertThat(selectedInterceptor.myResourceDefinitions).containsExactly((RuntimeResourceDefinition) null);
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(readInterceptor);
+			myInterceptorRegistry.unregisterInterceptor(selectedInterceptor);
+		}
+	}
+
+	@Interceptor
+	private static class MyReadPartitionInterceptor {
+		private final RequestPartitionId myPartitionId;
+
+		private MyReadPartitionInterceptor(RequestPartitionId thePartitionId) {
+			myPartitionId = thePartitionId;
+		}
+
+		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
+		public RequestPartitionId identifyForRead(RequestDetails theRequestDetails) {
+			return myPartitionId;
+		}
+	}
+
+	@Interceptor
+	private static class MyPartitionSelectedInterceptor {
+		private final List<RequestPartitionId> myPartitionIds = new ArrayList<>();
+		private final List<RequestDetails> myRequestDetails = new ArrayList<>();
+		private final List<RuntimeResourceDefinition> myResourceDefinitions = new ArrayList<>();
+
+		@Hook(Pointcut.STORAGE_PARTITION_SELECTED)
+		public void partitionSelected(RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId, RuntimeResourceDefinition theRuntimeResourceDefinition) {
+			myRequestDetails.add(theRequestDetails);
+			myPartitionIds.add(theRequestPartitionId);
+			myResourceDefinitions.add(theRuntimeResourceDefinition);
 		}
 	}
 
