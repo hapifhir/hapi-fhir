@@ -2,9 +2,9 @@ package ca.uhn.fhir.rest.server.interceptor.validation;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.exc.ValueInstantiationException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.exc.ValueInstantiationException;
 import org.junit.jupiter.api.Test;
 
 import java.util.regex.Pattern;
@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ValidationPostProcessingRuleJsonTest {
 
-	ObjectMapper myObjectMapper = new ObjectMapper();
+	JsonMapper myJsonMapper = new JsonMapper();
 
 	@Test
 	void requiresOneOfMsgIdAndmsgIdRegex() {
@@ -24,7 +24,7 @@ class ValidationPostProcessingRuleJsonTest {
 		}
 		""";
 
-		assertThatThrownBy(() -> myObjectMapper.readValue(ruleStr, ValidationPostProcessingRuleJson.class))
+		assertThatThrownBy(() -> myJsonMapper.readValue(ruleStr, ValidationPostProcessingRuleJson.class))
 			.isInstanceOf(ValueInstantiationException.class)
 			.hasMessageContaining(Msg.code(2705) + "One of 'msgId' and 'msgIdRegex' must be present");
 	}
@@ -40,7 +40,7 @@ class ValidationPostProcessingRuleJsonTest {
 		}
 		""";
 
-		assertThatThrownBy(() -> myObjectMapper.readValue(ruleStr, ValidationPostProcessingRuleJson.class))
+		assertThatThrownBy(() -> myJsonMapper.readValue(ruleStr, ValidationPostProcessingRuleJson.class))
 			.isInstanceOf(ValueInstantiationException.class)
 			.hasMessageContaining(Msg.code(2706) + "Only one of 'msgId' and 'msgIdRegex' must be present");
 	}
@@ -53,13 +53,13 @@ class ValidationPostProcessingRuleJsonTest {
 		}
 		""";
 
-		assertThatThrownBy(() -> myObjectMapper.readValue(ruleStr, ValidationPostProcessingRuleJson.class))
+		assertThatThrownBy(() -> myJsonMapper.readValue(ruleStr, ValidationPostProcessingRuleJson.class))
 			.isInstanceOf(ValueInstantiationException.class)
 			.hasMessageContaining(Msg.code(2707) + "Parameter 'newSeverity' must be present");
 	}
 
 	@Test
-	void oldSeveritiesSetsCollection() throws JsonProcessingException {
+	void oldSeveritiesSetsCollection() throws JacksonException {
 		String ruleStr = """
 		{
 			"msgIdRegex": "Terminology_TX_Error.*",
@@ -69,13 +69,13 @@ class ValidationPostProcessingRuleJsonTest {
 		""";
 
 		ValidationPostProcessingRuleJson ruleJson =
-			myObjectMapper.readValue(ruleStr, ValidationPostProcessingRuleJson.class);
+			myJsonMapper.readValue(ruleStr, ValidationPostProcessingRuleJson.class);
 
 		assertThat(ruleJson.getOldSeverities()).contains(ResultSeverityEnum.INFORMATION, ResultSeverityEnum.WARNING);
 	}
 
 	@Test
-	void absentOldSeveritiesSetsEmptyCollection() throws JsonProcessingException {
+	void absentOldSeveritiesSetsEmptyCollection() throws JacksonException {
 		String ruleStr = """
 		{
 			"msgIdRegex": "Terminology_TX_Error.*",
@@ -84,13 +84,13 @@ class ValidationPostProcessingRuleJsonTest {
 		""";
 
 		ValidationPostProcessingRuleJson ruleJson =
-			myObjectMapper.readValue(ruleStr, ValidationPostProcessingRuleJson.class);
+			myJsonMapper.readValue(ruleStr, ValidationPostProcessingRuleJson.class);
 
 		assertThat(ruleJson.getOldSeverities()).isNotNull().isEmpty();
 	}
 
 	@Test
-	void messageFragmentsSetsCollection() throws JsonProcessingException {
+	void messageFragmentsSetsCollection() throws JacksonException {
 		String ruleStr = """
 		{
 			"msgIdRegex": "Terminology_TX_Error.*",
@@ -100,13 +100,13 @@ class ValidationPostProcessingRuleJsonTest {
 		""";
 
 		ValidationPostProcessingRuleJson ruleJson =
-			myObjectMapper.readValue(ruleStr, ValidationPostProcessingRuleJson.class);
+			myJsonMapper.readValue(ruleStr, ValidationPostProcessingRuleJson.class);
 
 		assertThat(ruleJson.getMessageFragments()).contains("msg-fragment-1", "msg-fragment-2");
 	}
 
 	@Test
-	void absentMessageFragmentsSetsEmptyCollection() throws JsonProcessingException {
+	void absentMessageFragmentsSetsEmptyCollection() throws JacksonException {
 		String ruleStr = """
 		{
 			"msgIdRegex": "Terminology_TX_Error.*",
@@ -115,13 +115,13 @@ class ValidationPostProcessingRuleJsonTest {
 		""";
 
 		ValidationPostProcessingRuleJson ruleJson =
-			myObjectMapper.readValue(ruleStr, ValidationPostProcessingRuleJson.class);
+			myJsonMapper.readValue(ruleStr, ValidationPostProcessingRuleJson.class);
 
 		assertThat(ruleJson.getMessageFragments()).isNotNull().isEmpty();
 	}
 
 	@Test
-	void msgIdRegexGetsCompiledAsPattern() throws JsonProcessingException {
+	void msgIdRegexGetsCompiledAsPattern() throws JacksonException {
 		String ruleStr = """
 		{
 			"msgIdRegex": "Terminology_TX.*",
@@ -130,7 +130,7 @@ class ValidationPostProcessingRuleJsonTest {
 		""";
 
 		ValidationPostProcessingRuleJson ruleJson =
-			myObjectMapper.readValue(ruleStr, ValidationPostProcessingRuleJson.class);
+			myJsonMapper.readValue(ruleStr, ValidationPostProcessingRuleJson.class);
 
 		assertThat(ruleJson.getMsgIdRegexPattern())
 			.isNotNull()

@@ -297,10 +297,12 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		try {
 			processChunksAndCompleteJob(theJobWorkCursor, step, instance, parameters, reductionStepWorker, response);
 		} catch (Exception ex) {
-			ourLog.error("Job completion failed for Job {}", instance.getInstanceId(), ex);
-
+			String msg = String.format(
+					"Failed to execute reduction step for instance %s: %s", instance.getInstanceId(), ex.getMessage());
+			ourLog.error(msg, ex);
 			executeInTransactionWithSynchronization(() -> {
 				myJobPersistence.updateInstance(instance.getInstanceId(), theInstance -> {
+					theInstance.setErrorMessage(msg);
 					theInstance.setEndTime(new Date());
 					myJobInstanceStatusUpdater.updateInstanceStatus(theInstance, StatusEnum.FAILED);
 					return true;

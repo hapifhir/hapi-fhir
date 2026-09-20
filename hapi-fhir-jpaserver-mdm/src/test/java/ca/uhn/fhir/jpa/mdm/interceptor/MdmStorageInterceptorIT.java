@@ -862,7 +862,10 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doCreateResource(patient, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertEquals("HAPI-0766: While running with multiple EIDs disabled, source resources may have at most one EID.", e.getMessage());
+			// Both EIDs come from the same system, so the per-system safeguard still rejects them.
+			assertThat(e.getMessage())
+				.startsWith("HAPI-0766: While running with multiple EIDs disabled, source resources may have at most one EID per system")
+				.contains(myMdmSettings.getMdmRules().getEnterpriseEIDSystemsForResourceType("Patient").get(0));
 		}
 
 		setPreventMultipleEids(false);
