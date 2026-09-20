@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
+import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -45,8 +46,10 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.LogicUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
@@ -352,14 +355,12 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 		ConceptValidationOptions options = new ConceptValidationOptions();
 		options.setValidateDisplay(isNotBlank(theDisplay));
 
-		String codeSystemUrl = createVersionedSystemIfVersionIsPresent(theCodeSystemUrl, theVersion);
-
-		CodeValidationResult retVal =
-				myValidationSupport.validateCode(context, options, codeSystemUrl, theCode, theDisplay, null);
+		CodeValidationResult retVal = myValidationSupport.validateCode(
+				context, options, new ValidateCodeRequest(theCodeSystemUrl, theVersion, theCode, theDisplay, null));
 		if (retVal == null) {
 			retVal = new CodeValidationResult();
-			retVal.setMessage(
-					"Terminology service was unable to provide validation for " + codeSystemUrl + "#" + theCode);
+			retVal.setMessage("Terminology service was unable to provide validation for "
+					+ UrlUtil.toCanonicalUrl(theCodeSystemUrl, theVersion) + "#" + theCode);
 		}
 		return retVal;
 	}
@@ -395,9 +396,7 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 			code = extractCodingCode(theCoding);
 			system = extractCodingSystem(theCoding);
 			String version = extractCodingVersion(theFhirContext, theFhirTerser, theCoding);
-			if (isNotBlank(version)) {
-				system = system + "|" + version;
-			}
+			system = UrlUtil.toCanonicalUrl(system, version);
 		} else {
 			code = theCode.getValue();
 			system = theSystem.getValue();
@@ -445,11 +444,13 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 		return theFhirTerser.getSinglePrimitiveValueOrNull(theCoding, "version");
 	}
 
-	public static String createVersionedSystemIfVersionIsPresent(String theCodeSystemUrl, String theVersion) {
-		String codeSystemUrl = theCodeSystemUrl;
-		if (isNotBlank(theVersion)) {
-			codeSystemUrl = codeSystemUrl + "|" + theVersion;
-		}
-		return codeSystemUrl;
+	/**
+	 * @deprecated Please use {@link UrlUtil#toCanonicalUrl(String, String)} instead.
+	 */
+	@Deprecated(since = "8.14.0")
+	@Nullable
+	public static String createVersionedSystemIfVersionIsPresent(
+			@Nullable String theCodeSystemUrl, @Nullable String theVersion) {
+		return UrlUtil.toCanonicalUrl(theCodeSystemUrl, theVersion);
 	}
 }

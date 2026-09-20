@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
+import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
@@ -115,6 +116,7 @@ import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.common.EntityReference;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hibernate.search.mapper.pojo.massindexing.impl.PojoMassIndexingLoggingMonitor;
+import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.context.ConversionContext40_50;
@@ -2842,19 +2844,40 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 			@Nonnull IBaseResource theValueSet) {
 		invokeRunnableForUnitTest();
 
-		IPrimitiveType<?> urlPrimitive;
+		// a ValueSet with no url cannot be looked up by one, so there is nothing to validate against
+		String url;
 		if (theValueSet instanceof org.hl7.fhir.dstu2.model.ValueSet) {
-			urlPrimitive = FhirContext.forDstu2Hl7OrgCached()
-					.newTerser()
-					.getSingleValueOrNull(theValueSet, "url", IPrimitiveType.class);
+			url = FhirContext.forDstu2Hl7OrgCached().newTerser().getSinglePrimitiveValueOrNull(theValueSet, "url");
 		} else {
-			urlPrimitive = myContext.newTerser().getSingleValueOrNull(theValueSet, "url", IPrimitiveType.class);
+			url = myContext.newTerser().getSinglePrimitiveValueOrNull(theValueSet, "url");
 		}
-		String url = urlPrimitive.getValueAsString();
 		if (isNotBlank(url)) {
-			return validateCode(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, url);
+			// A URL with no version resolves to whichever version was saved last
+			String version = CommonCodeSystemsTerminologyService.getValueSetVersion(myContext, theValueSet);
+			String canonicalUrl = UrlUtil.toCanonicalUrl(url, version);
+			return validateCode(
+					theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, canonicalUrl);
 		}
 		return null;
+	}
+
+	// Created by Claude Opus 5
+	@Override
+	@Nullable
+	public IValidationSupport.CodeValidationResult validateCode(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nonnull ConceptValidationOptions theOptions,
+			@Nonnull ValidateCodeRequest theRequest) {
+		// The lookups below take the code system as a single "url|version" identifier, which
+		// getCurrentCodeSystemVersion also uses as a cache key.
+		String codeSystemUrl = UrlUtil.toCanonicalUrl(theRequest.getCodeSystem(), theRequest.getCodeSystemVersion());
+		return validateCode(
+				theValidationSupportContext,
+				theOptions,
+				codeSystemUrl,
+				theRequest.getCode(),
+				theRequest.getDisplay(),
+				theRequest.getValueSetUrl());
 	}
 
 	@CoverageIgnore

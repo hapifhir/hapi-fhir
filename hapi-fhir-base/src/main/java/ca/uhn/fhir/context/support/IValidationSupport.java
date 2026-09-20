@@ -182,9 +182,9 @@ public interface IValidationSupport {
 	}
 
 	/**
-	 * Fetch a code system by ID
+	 * Fetch a code system by canonical URL
 	 *
-	 * @param theSystem The code system
+	 * @param theSystem The code system, as a canonical URL which may carry a version, e.g. "<code>http://loinc.org</code>" or "<code>http://loinc.org|2.78</code>"
 	 * @return The valueset (must not be null, but can be an empty ValueSet)
 	 */
 	@Nullable
@@ -201,7 +201,7 @@ public interface IValidationSupport {
 	 * </p>
 	 *
 	 * @param theClass The type of the resource to load, or <code>null</code> to return any resource with the given canonical URI
-	 * @param theUri   The resource URI
+	 * @param theUri   The resource, as a canonical URL which may carry a version, e.g. "<code>http://example.org/ValueSet/foo|1.0.0</code>"
 	 * @return Returns the resource, or <code>null</code> if no resource with the
 	 * given URI can be found
 	 */
@@ -237,6 +237,11 @@ public interface IValidationSupport {
 		return null;
 	}
 
+	/**
+	 * Fetch the given StructureDefinition by URL, or returns null if one can't be found for the given URL
+	 *
+	 * @param theUrl The structure definition, as a canonical URL which may carry a version, e.g. "<code>http://example.org/StructureDefinition/foo|1.0.0</code>"
+	 */
 	@Nullable
 	default IBaseResource fetchStructureDefinition(String theUrl) {
 		return null;
@@ -248,7 +253,7 @@ public interface IValidationSupport {
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
 	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
-	 * @param theSystem                   The URI for the code system, e.g. <code>"http://loinc.org"</code>
+	 * @param theSystem                   The URI for the code system, as a canonical URL which may carry a version, e.g. <code>"http://loinc.org"</code> or <code>"http://loinc.org|2.78"</code>
 	 * @return Returns <code>true</code> if codes in the given code system can be
 	 * validated
 	 */
@@ -267,6 +272,8 @@ public interface IValidationSupport {
 
 	/**
 	 * Fetch the given ValueSet by URL, or returns null if one can't be found for the given URL
+	 *
+	 * @param theValueSetUrl The value set, as a canonical URL which may carry a version, e.g. "<code>http://example.org/ValueSet/foo|1.0.0</code>"
 	 */
 	@Nullable
 	default IBaseResource fetchValueSet(String theValueSetUrl) {
@@ -287,6 +294,11 @@ public interface IValidationSupport {
 	 * Validates that the given code exists and if possible returns a display
 	 * name. This method is called to check codes which are found in "example"
 	 * binding fields (e.g. <code>Observation.code</code>) in the default profile.
+	 * <p>
+	 * No code system version is given, so the code is checked against whichever version is current. To check
+	 * against a specific version, use
+	 * {@link #validateCode(ValidationSupportContext, ConceptValidationOptions, ValidateCodeRequest)}.
+	 * </p>
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
 	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
@@ -305,6 +317,38 @@ public interface IValidationSupport {
 			String theDisplay,
 			String theValueSetUrl) {
 		return null;
+	}
+
+	/**
+	 * Validates that the given code exists in a specific version of the code system, and if possible
+	 * returns a display name.
+	 * <p>
+	 * Implementations which can resolve a specific code system version should override this method. The
+	 * default implementation discards the version and calls
+	 * {@link #validateCode(ValidationSupportContext, ConceptValidationOptions, String, String, String, String)},
+	 * so an implementation which overrides only that method keeps working unchanged.
+	 * </p>
+	 *
+	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
+	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
+	 * @param theOptions                  Provides options controlling the validation
+	 * @param theRequest                  The code to validate, the code system and version to validate it against, and the value set to validate it in
+	 * @return Returns a validation result object
+	 * @since 8.14.0
+	 */
+	// Created by Claude Opus 5
+	@Nullable
+	default CodeValidationResult validateCode(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nonnull ConceptValidationOptions theOptions,
+			@Nonnull ValidateCodeRequest theRequest) {
+		return validateCode(
+				theValidationSupportContext,
+				theOptions,
+				theRequest.getCodeSystem(),
+				theRequest.getCode(),
+				theRequest.getDisplay(),
+				theRequest.getValueSetUrl());
 	}
 
 	/**
@@ -369,11 +413,19 @@ public interface IValidationSupport {
 
 	/**
 	 * Look up a code using the system, code and other parameters captured in {@link LookupCodeRequest}.
-	 * @since 7.0.0
+	 * <p>
+	 * The system in {@link LookupCodeRequest#getSystem()} may carry a version, in the form
+	 * <code>url|version</code>. <code>CodeSystem/$lookup</code> and <code>CodeSystem/$subsumes</code> take the
+	 * version as a separate parameter, and the provider joins the two together before calling this method. An
+	 * implementation which looks up a stored CodeSystem should therefore split the version back out. One which
+	 * compares the system against a fixed URL, as the built-in code systems do, or sends it to a remote server
+	 * unchanged, will not match a system given in that form.
+	 * </p>
 	 *
 	 * @param theValidationSupportContext      The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
 	 *                                         other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
 	 * @param theLookupCodeRequest             The parameters used to perform the lookup, including system and code.
+	 * @since 7.0.0
 	 */
 	@Nullable
 	default LookupCodeResult lookupCode(
