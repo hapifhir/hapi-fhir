@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
+import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import jakarta.annotation.Nonnull;
@@ -83,6 +84,16 @@ public abstract class BaseValidationSupportWrapper extends BaseValidationSupport
 			String theValueSetUrl) {
 		return myWrap.validateCode(
 				theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl);
+	}
+
+	// Created by Claude Opus 5
+	@Override
+	@Nullable
+	public CodeValidationResult validateCode(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nonnull ConceptValidationOptions theOptions,
+			@Nonnull ValidateCodeRequest theRequest) {
+		return myWrap.validateCode(theValidationSupportContext, theOptions, theRequest);
 	}
 
 	@Override
