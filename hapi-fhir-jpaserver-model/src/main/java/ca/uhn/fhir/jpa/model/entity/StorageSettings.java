@@ -59,9 +59,9 @@ public class StorageSettings {
 	public static final int DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE = 100; // 1 for single thread
 
 	/**
-	 * Default value for {@link #setLargeIdListJsonThreshold(int)}.
+	 * Default value for {@link #setBindIdListAsJsonAboveSize(int)}.
 	 */
-	public static final int DEFAULT_LARGE_ID_LIST_JSON_THRESHOLD = 800;
+	public static final int DEFAULT_BIND_ID_LIST_AS_JSON_ABOVE_SIZE = 800;
 
 	/**
 	 * Default {@link #getTreatReferencesAsLogical() logical URL bases}. Includes the following
@@ -186,7 +186,7 @@ public class StorageSettings {
 	 * The number of resource IDs above which a search predicate renders its ID list as a single
 	 * JSON array bind variable instead of one bind variable per ID.
 	 */
-	private int myLargeIdListJsonThreshold = DEFAULT_LARGE_ID_LIST_JSON_THRESHOLD;
+	private int myBindIdListAsJsonAboveSize = DEFAULT_BIND_ID_LIST_AS_JSON_ABOVE_SIZE;
 
 	/**
 	 * Constructor
@@ -1340,14 +1340,14 @@ public class StorageSettings {
 	}
 
 	/**
-	 * The threshold above which a large resource ID list is bound as a single JSON array string instead
+	 * The number of IDs above which a resource ID list is bound as a single JSON array string instead
 	 * of one bind variable per ID.
 	 *
-	 * @see #setLargeIdListJsonThreshold(int)
+	 * @see #setBindIdListAsJsonAboveSize(int)
 	 * @since 8.14.0
 	 */
-	public int getLargeIdListJsonThreshold() {
-		return myLargeIdListJsonThreshold;
+	public int getBindIdListAsJsonAboveSize() {
+		return myBindIdListAsJsonAboveSize;
 	}
 
 	/**
@@ -1358,20 +1358,20 @@ public class StorageSettings {
 	 * To avoid this, the list of IDs is bound as a single JSON array string which the database unpacks with
 	 * its own JSON function. This setting configures the threshold at which a search will use a single JSON
 	 * array.
-	 * @param theLargeIdListJsonThreshold The threshold of the number of IDs in a search at which the SQl query
-	 *                                    will use a json array rather than a parameter for each ID.
-	 *                                    Must not be negative. A value of 0 always uses a json array.
-	 *                                    To keep one parameter per ID, use a value higher than any expected list.
-	 *                                    Defaults to 800.
+	 * @param theBindIdListAsJsonAboveSize The number of IDs in a search above which the SQL query
+	 *                                     will use a json array rather than a parameter for each ID.
+	 *                                     Must not be negative. A value of 0 always uses a json array.
+	 *                                     To keep one parameter per ID, use a value higher than any expected list.
+	 *                                     Defaults to 800.
 	 *
 	 * @since 8.14.0
 	 */
-	public void setLargeIdListJsonThreshold(int theLargeIdListJsonThreshold) {
+	public void setBindIdListAsJsonAboveSize(int theBindIdListAsJsonAboveSize) {
 		Validate.isTrue(
-				theLargeIdListJsonThreshold >= 0,
-				"Large ID list JSON threshold must not be negative but was: %d",
-				theLargeIdListJsonThreshold);
-		myLargeIdListJsonThreshold = theLargeIdListJsonThreshold;
+				theBindIdListAsJsonAboveSize >= 0,
+				"Bind ID list as JSON above size must not be negative but was: %d",
+				theBindIdListAsJsonAboveSize);
+		myBindIdListAsJsonAboveSize = theBindIdListAsJsonAboveSize;
 	}
 
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {

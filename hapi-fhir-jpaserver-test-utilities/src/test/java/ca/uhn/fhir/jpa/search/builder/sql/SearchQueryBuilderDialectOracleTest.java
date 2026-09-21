@@ -27,7 +27,7 @@ public class SearchQueryBuilderDialectOracleTest extends BaseSearchQueryBuilderD
 	@Test
 	void testResourceIdsOverThreshold_bindsJsonArrayAsClob() {
 		StorageSettings storageSettings = new StorageSettings();
-		storageSettings.setLargeIdListJsonThreshold(3);
+		storageSettings.setBindIdListAsJsonAboveSize(3);
 
 		SearchQueryBuilder searchQueryBuilder = createSearchQueryBuilder(storageSettings);
 		GeneratedSql generatedSql = generateResourceIdsPredicate(searchQueryBuilder, 1L, 2L, 3L, 4L, 5L);

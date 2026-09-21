@@ -61,14 +61,14 @@ public class SearchQueryBuilderDialectPostgresTest extends BaseSearchQueryBuilde
 
 	/**
 	 * When the ID list handed to the <code>_id</code> predicate is larger than
-	 * {@link StorageSettings#getLargeIdListJsonThreshold()}, PostgreSQL must bind the IDs as a single
+	 * {@link StorageSettings#getBindIdListAsJsonAboveSize()}, PostgreSQL must bind the IDs as a single
 	 * JSON array string which is unpacked by <code>jsonb_array_elements_text</code>, instead of
 	 * emitting one bind variable per ID (which overruns PostgreSQL's 65,535 parameter ceiling).
 	 */
 	@Test
 	void testResourceIdsOverThreshold_bindsSingleJsonArray() {
 		StorageSettings storageSettings = new StorageSettings();
-		storageSettings.setLargeIdListJsonThreshold(3);
+		storageSettings.setBindIdListAsJsonAboveSize(3);
 
 		SearchQueryBuilder searchQueryBuilder = createSearchQueryBuilder(storageSettings);
 		GeneratedSql generatedSql = generateResourceIdsPredicate(searchQueryBuilder, 1L, 2L, 3L, 4L, 5L);

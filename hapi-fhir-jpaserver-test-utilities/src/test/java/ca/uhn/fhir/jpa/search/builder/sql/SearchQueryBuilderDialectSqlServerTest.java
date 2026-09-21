@@ -77,7 +77,7 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 	void testResourceIdsOverThreshold_withJsonUnpackingSupport_bindsSingleJsonArray() {
 		HibernatePropertiesProvider dialectProvider = createDialectProvider(true);
 		StorageSettings storageSettings = new StorageSettings();
-		storageSettings.setLargeIdListJsonThreshold(3);
+		storageSettings.setBindIdListAsJsonAboveSize(3);
 		SearchQueryBuilder searchQueryBuilder = createSearchQueryBuilder(storageSettings, dialectProvider);
 
 		GeneratedSql generatedSql = generateResourceIdsPredicate(searchQueryBuilder, 1L, 2L, 3L, 4L, 5L);
@@ -93,7 +93,7 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 	void testResourceIdsOverThreshold_jsonUnpackingNotSupportedByDbLevel_keepsInList() {
 		HibernatePropertiesProvider dialectProvider = createDialectProvider(false);
 		StorageSettings storageSettings = new StorageSettings();
-		storageSettings.setLargeIdListJsonThreshold(3);
+		storageSettings.setBindIdListAsJsonAboveSize(3);
 
 		GeneratedSql generatedSql = generateResourceIdsPredicate(createSearchQueryBuilder(storageSettings, dialectProvider), 1L, 2L, 3L, 4L, 5L);
 		logSql(generatedSql);
@@ -111,7 +111,7 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 	@Test
 	void testResourceIdsOverThreshold_withOffsetAndLimit_keepsPagingAndBindOrder() {
 		StorageSettings storageSettings = new StorageSettings();
-		storageSettings.setLargeIdListJsonThreshold(3);
+		storageSettings.setBindIdListAsJsonAboveSize(3);
 		SearchQueryBuilder searchQueryBuilder = createSearchQueryBuilder(storageSettings, createDialectProvider(true));
 
 		GeneratedSql generatedSql = generateResourceIdsPredicateWithPaging(searchQueryBuilder, 10, 500, 1L, 2L, 3L, 4L, 5L);

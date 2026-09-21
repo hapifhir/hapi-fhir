@@ -54,7 +54,7 @@ interface LargeIdListSearchTest extends ITestDataBuilder {
 	@Test
 	default void testIdSearchOverThreshold_unpacksJsonArray() {
 		Context ctx = getLargeIdListSearchTestContext();
-		withLargeIdListJsonThreshold(ctx, 3, () -> {
+		withBindIdListAsJsonAboveSize(ctx, 3, () -> {
 			List<String> patientIds = createPatients(5);
 
 			ctx.captureQueriesListener().clear();
@@ -75,7 +75,7 @@ interface LargeIdListSearchTest extends ITestDataBuilder {
 	@Test
 	default void testReferenceSearchOverThreshold_unpacksJsonArray() {
 		Context ctx = getLargeIdListSearchTestContext();
-		withLargeIdListJsonThreshold(ctx, 3, () -> {
+		withBindIdListAsJsonAboveSize(ctx, 3, () -> {
 			List<String> patientIds = createPatients(5);
 			List<String> observationIds = createObservationsFor(patientIds);
 
@@ -97,7 +97,7 @@ interface LargeIdListSearchTest extends ITestDataBuilder {
 	@Test
 	default void testIdAndReferenceSearchBothOverThreshold_unpacksTwoSeparateJsonArrays() {
 		Context ctx = getLargeIdListSearchTestContext();
-		withLargeIdListJsonThreshold(ctx, 3, () -> {
+		withBindIdListAsJsonAboveSize(ctx, 3, () -> {
 			List<String> patientIds = createPatients(5);
 			List<String> observationIds = createObservationsFor(patientIds);
 
@@ -125,7 +125,7 @@ interface LargeIdListSearchTest extends ITestDataBuilder {
 	@ValueSource(ints = {5, 10})
 	default void testIdSearchUnderOrAtThreshold_keepsInList(int theNumberOfPatients) {
 		Context ctx = getLargeIdListSearchTestContext();
-		withLargeIdListJsonThreshold(ctx, 10, () -> {
+		withBindIdListAsJsonAboveSize(ctx, 10, () -> {
 			List<String> patientIds = createPatients(theNumberOfPatients);
 
 			ctx.captureQueriesListener().clear();
@@ -153,7 +153,7 @@ interface LargeIdListSearchTest extends ITestDataBuilder {
 		Integer previousMaximumPageSize = ctx.server().getRestfulServer().getMaximumPageSize();
 		ctx.server().getRestfulServer().setMaximumPageSize(LARGE_PAYLOAD_PATIENT_COUNT);
 		try {
-			withLargeIdListJsonThreshold(ctx, 3, () -> {
+			withBindIdListAsJsonAboveSize(ctx, 3, () -> {
 				List<String> patientIds = createPatients(LARGE_PAYLOAD_PATIENT_COUNT);
 
 				ctx.captureQueriesListener().clear();
@@ -177,16 +177,16 @@ interface LargeIdListSearchTest extends ITestDataBuilder {
 	}
 
 	/**
-	 * Runs the given test with {@link JpaStorageSettings#setLargeIdListJsonThreshold(int)} set to the
+	 * Runs the given test with {@link JpaStorageSettings#setBindIdListAsJsonAboveSize(int)} set to the
 	 * given value, and restores the previous value afterwards even if the test throws.
 	 */
-	private void withLargeIdListJsonThreshold(Context theContext, int theThreshold, Runnable theTest) {
-		int previousThreshold = theContext.storageSettings().getLargeIdListJsonThreshold();
-		theContext.storageSettings().setLargeIdListJsonThreshold(theThreshold);
+	private void withBindIdListAsJsonAboveSize(Context theContext, int theThreshold, Runnable theTest) {
+		int previousThreshold = theContext.storageSettings().getBindIdListAsJsonAboveSize();
+		theContext.storageSettings().setBindIdListAsJsonAboveSize(theThreshold);
 		try {
 			theTest.run();
 		} finally {
-			theContext.storageSettings().setLargeIdListJsonThreshold(previousThreshold);
+			theContext.storageSettings().setBindIdListAsJsonAboveSize(previousThreshold);
 		}
 	}
 

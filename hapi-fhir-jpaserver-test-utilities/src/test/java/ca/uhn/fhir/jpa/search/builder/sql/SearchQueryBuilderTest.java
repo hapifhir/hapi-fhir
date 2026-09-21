@@ -599,7 +599,7 @@ public class SearchQueryBuilderTest {
 	void testNegativeThreshold_isRejected() {
 		StorageSettings storageSettings = new StorageSettings();
 
-		assertThatThrownBy(() -> storageSettings.setLargeIdListJsonThreshold(-1))
+		assertThatThrownBy(() -> storageSettings.setBindIdListAsJsonAboveSize(-1))
 			.isInstanceOf(IllegalArgumentException.class);
 	}
 
@@ -676,8 +676,8 @@ public class SearchQueryBuilderTest {
 		assertThat(generated.getBindVariables()).containsExactly("Patient", 1, "[1,2,3,4,5]");
 	}
 
-	private SearchQueryBuilder createPostgresQueryBuilder(int theLargeIdListJsonThreshold) {
-		myStorageSettings.setLargeIdListJsonThreshold(theLargeIdListJsonThreshold);
+	private SearchQueryBuilder createPostgresQueryBuilder(int theBindIdListAsJsonAboveSize) {
+		myStorageSettings.setBindIdListAsJsonAboveSize(theBindIdListAsJsonAboveSize);
 		return createPostgresQueryBuilder();
 	}
 

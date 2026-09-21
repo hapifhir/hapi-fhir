@@ -215,7 +215,7 @@ public class ResourceLinkPredicateBuilderTest {
 		"5, 'TARGET_RESOURCE_ID IN (SELECT', true, true",
 		"3, 'TARGET_RESOURCE_ID NOT IN ', false, true"
 	})
-	void createPredicateReference_largeIdListJsonThreshold_rendersExpectedPredicate(int theTargetIdCount, String theExpectedFragment, boolean theExpectJson, boolean theInverse) {
+	void createPredicateReference_bindIdListAsJsonAboveSize_rendersExpectedPredicate(int theTargetIdCount, String theExpectedFragment, boolean theExpectJson, boolean theInverse) {
 		ResourceLinkPredicateBuilder builder = createBuilderOnRealSearchQueryBuilder(3);
 
 		Condition condition = builder.createPredicateReference(theInverse, List.of("Observation.subject"), toTargetPids(theTargetIdCount), List.of());
@@ -232,9 +232,9 @@ public class ResourceLinkPredicateBuilderTest {
 		}
 	}
 
-	private ResourceLinkPredicateBuilder createBuilderOnRealSearchQueryBuilder(int theLargeIdListJsonThreshold) {
+	private ResourceLinkPredicateBuilder createBuilderOnRealSearchQueryBuilder(int theBindIdListAsJsonAboveSize) {
 		StorageSettings storageSettings = new StorageSettings();
-		storageSettings.setLargeIdListJsonThreshold(theLargeIdListJsonThreshold);
+		storageSettings.setBindIdListAsJsonAboveSize(theBindIdListAsJsonAboveSize);
 
 		HibernatePropertiesProvider dialectProvider = new HibernatePropertiesProvider();
 		dialectProvider.setDialectForUnitTest(new HapiFhirPostgresDialect());

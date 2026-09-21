@@ -883,7 +883,7 @@ public class SearchQueryBuilder {
 	/**
 	 * Creates a predicate constraining the given column to the given list of resource IDs.
 	 * <p>
-	 * Lists holding more than {@link StorageSettings#getLargeIdListJsonThreshold()} IDs are bound as a
+	 * Lists holding more than {@link StorageSettings#getBindIdListAsJsonAboveSize()} IDs are bound as a
 	 * single JSON array string which the database unpacks with its own JSON function, instead of one bind
 	 * variable per ID. Useful for large ID lists (eg. the Search Narrowing Interceptor adds one ID per
 	 * authorized compartment - and there could be tens of thousands). It applies to PostgreSQL, Oracle and SQL Server only; every other
@@ -916,7 +916,7 @@ public class SearchQueryBuilder {
 	 */
 	@Nullable
 	private String createJsonIdListSubselectQueryOrNull(List<Long> theIds) {
-		if (theIds.size() <= myStorageSettings.getLargeIdListJsonThreshold()) {
+		if (theIds.size() <= myStorageSettings.getBindIdListAsJsonAboveSize()) {
 			return null;
 		}
 
