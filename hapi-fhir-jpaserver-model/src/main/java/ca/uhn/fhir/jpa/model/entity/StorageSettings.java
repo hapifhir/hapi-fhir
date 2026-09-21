@@ -1358,6 +1358,10 @@ public class StorageSettings {
 	 * To avoid this, the list of IDs is bound as a single JSON array string which the database unpacks with
 	 * its own JSON function. This setting configures the threshold at which a search will use a single JSON
 	 * array.
+	 * <p>
+	 * This applies to PostgreSQL, Oracle and SQL Server (database compatibility level 130 or higher) only.
+	 * Other databases always use one bind variable per ID.
+	 * </p>
 	 * @param theBindIdListAsJsonAboveSize The number of IDs in a search above which the SQL query
 	 *                                     will use a json array rather than a parameter for each ID.
 	 *                                     Must not be negative. A value of 0 always uses a json array.

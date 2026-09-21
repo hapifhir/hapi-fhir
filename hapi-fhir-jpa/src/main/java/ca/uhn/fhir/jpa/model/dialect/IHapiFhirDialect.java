@@ -40,7 +40,8 @@ public interface IHapiFhirDialect {
 
 	/**
 	 * Returns a String template for a subselect which unpacks a JSON array of resource IDs.
-	 * The placeholder {@code %s} marks where the list of IDs goes.
+	 * The template is applied with {@link String#format}: {@code %s} marks where the single bind variable
+	 * holding the JSON array goes, and a literal {@code %} must be written as {@code %%}.
 	 * Returns null when the database has no usable JSON function and the IN list should be used.
 	 *
 	 * @since 8.14.0

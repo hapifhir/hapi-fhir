@@ -105,7 +105,7 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 	}
 
 	/**
-	 * The SQL Server limit handler rewrites the statement text, which now carries a nested SELECT
+	 * The SQL Server limit handler rewrites the statement text, which carries a nested SELECT
 	 * inside the WHERE clause. Paging must still render, with its binds after the JSON array bind.
 	 */
 	@Test

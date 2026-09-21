@@ -106,7 +106,6 @@ public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 	public Condition createPredicateResourceIds(boolean theInverse, Collection<JpaPid> theResourceIds) {
 		Validate.notNull(theResourceIds, "theResourceIds must not be null");
 
-		// Handle the _id parameter by adding it to the tail
 		return getSearchQueryBuilder()
 				.createPredicateIdsInList(getResourceIdColumn(), JpaPid.toLongList(theResourceIds), theInverse);
 	}

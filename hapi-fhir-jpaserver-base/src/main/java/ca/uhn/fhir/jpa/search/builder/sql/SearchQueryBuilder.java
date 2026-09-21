@@ -892,7 +892,7 @@ public class SearchQueryBuilder {
 	 * </p>
 	 *
 	 * @param theColumn  the column to constrain
-	 * @param theIds     the resource IDs, in the order they should appear in the JSON array
+	 * @param theIds     the resource IDs
 	 * @param theInverse <code>true</code> to negate the predicate
 	 */
 	@Nonnull
@@ -948,7 +948,7 @@ public class SearchQueryBuilder {
 	}
 
 	/**
-	 * Renders the given IDs as a JSON array, in iteration order and with no whitespace.
+	 * Renders the given IDs as a JSON array with no whitespace.
 	 */
 	@Nonnull
 	private static String toJsonArray(List<Long> theIds) {
