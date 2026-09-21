@@ -571,7 +571,6 @@ public class SearchQueryBuilderTest {
 		"3, 3, false",
 		"3, 1, false",
 		"1, 1, false",
-		"-1, 5, false",
 		"0, 1, true",
 		"3, 4, true"
 	})
@@ -597,10 +596,10 @@ public class SearchQueryBuilderTest {
 	}
 
 	@Test
-	void testThresholdBelowDisableValue_isRejected() {
+	void testNegativeThreshold_isRejected() {
 		StorageSettings storageSettings = new StorageSettings();
 
-		assertThatThrownBy(() -> storageSettings.setLargeIdListJsonThreshold(-2))
+		assertThatThrownBy(() -> storageSettings.setLargeIdListJsonThreshold(-1))
 			.isInstanceOf(IllegalArgumentException.class);
 	}
 

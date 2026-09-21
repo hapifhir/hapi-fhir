@@ -59,11 +59,6 @@ public class StorageSettings {
 	public static final int DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE = 100; // 1 for single thread
 
 	/**
-	 * Value for {@link #setLargeIdListJsonThreshold(int)} which disables JSON array binding entirely.
-	 */
-	public static final int LARGE_ID_LIST_JSON_DISABLED = -1;
-
-	/**
 	 * Default value for {@link #setLargeIdListJsonThreshold(int)}.
 	 */
 	public static final int DEFAULT_LARGE_ID_LIST_JSON_THRESHOLD = 800;
@@ -1364,17 +1359,17 @@ public class StorageSettings {
 	 * its own JSON function. This setting configures the threshold at which a search will use a single JSON
 	 * array.
 	 * @param theLargeIdListJsonThreshold The threshold of the number of IDs in a search at which the SQl query
-	 *                                    will use a json array rather than a parameter for each ID
-	 *                                    A value of -1 disables the behaviour entirely.
+	 *                                    will use a json array rather than a parameter for each ID.
+	 *                                    Must not be negative. A value of 0 always uses a json array.
+	 *                                    To keep one parameter per ID, use a value higher than any expected list.
 	 *                                    Defaults to 800.
 	 *
 	 * @since 8.14.0
 	 */
 	public void setLargeIdListJsonThreshold(int theLargeIdListJsonThreshold) {
 		Validate.isTrue(
-				theLargeIdListJsonThreshold >= LARGE_ID_LIST_JSON_DISABLED,
-				"Large ID list JSON threshold must not be less than %d but was: %d",
-				LARGE_ID_LIST_JSON_DISABLED,
+				theLargeIdListJsonThreshold >= 0,
+				"Large ID list JSON threshold must not be negative but was: %d",
 				theLargeIdListJsonThreshold);
 		myLargeIdListJsonThreshold = theLargeIdListJsonThreshold;
 	}

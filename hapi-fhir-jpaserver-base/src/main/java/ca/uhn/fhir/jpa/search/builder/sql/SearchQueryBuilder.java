@@ -911,14 +911,12 @@ public class SearchQueryBuilder {
 	/**
 	 * Returns the subselect which unpacks the given IDs from a single JSON array bind variable.
 	 * Returns null if:
-	 * - the number of IDs is below the configured threshold
-	 * - JSON unpacking is disabled or
+	 * - the number of IDs is at or below the configured threshold or
 	 * - the database type has no JSON unpacking function
 	 */
 	@Nullable
 	private String createJsonIdListSubselectQueryOrNull(List<Long> theIds) {
-		int threshold = myStorageSettings.getLargeIdListJsonThreshold();
-		if (threshold < 0 || theIds.size() <= threshold) {
+		if (theIds.size() <= myStorageSettings.getLargeIdListJsonThreshold()) {
 			return null;
 		}
 

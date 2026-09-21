@@ -91,4 +91,4 @@ A search on `_id`, or on a reference parameter such as `subject`, can carry a ve
 
 By default, when a list holds more than 800 IDs, HAPI FHIR sends it to the database as a single parameter instead of one parameter per ID. Search results are unchanged. This applies to PostgreSQL, Oracle, and Microsoft SQL Server. Note that SQL Server additionally requires [database compatibility level 130 or higher](./database_support.html#compatibility-level). MySQL, MariaDB, and H2 keep the previous behaviour and the database's own limit.
 
-The threshold at which an ID list is bound to one parameter can be changed and the behaviour can disabled entirely with a value of `-1`, using [Large ID List JSON Threshold](/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/entity/StorageSettings.html#setLargeIdListJsonThreshold(int)).
+The threshold at which an ID list is bound to one parameter can be changed using [Large ID List JSON Threshold](/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/entity/StorageSettings.html#setLargeIdListJsonThreshold(int)). To keep the previous behaviour, set the threshold higher than any expected list.
