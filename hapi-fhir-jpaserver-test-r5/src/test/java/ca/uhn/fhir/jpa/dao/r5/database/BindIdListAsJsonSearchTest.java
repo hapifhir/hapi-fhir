@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
  * </p>
  */
 // Created by claude-opus-5
-interface LargeIdListSearchTest extends ITestDataBuilder {
+interface BindIdListAsJsonSearchTest extends ITestDataBuilder {
 
 	/**
 	 * Roughly the number of IDs whose JSON array exceeds Oracle's default 4,000 byte VARCHAR2 bind limit.
@@ -49,11 +49,11 @@ interface LargeIdListSearchTest extends ITestDataBuilder {
 		boolean databasePartitionMode
 	) {}
 
-	Context getLargeIdListSearchTestContext();
+	Context getBindIdListAsJsonSearchTestContext();
 
 	@Test
 	default void testIdSearchOverThreshold_unpacksJsonArray() {
-		Context ctx = getLargeIdListSearchTestContext();
+		Context ctx = getBindIdListAsJsonSearchTestContext();
 		withBindIdListAsJsonAboveSize(ctx, 3, () -> {
 			List<String> patientIds = createPatients(5);
 
@@ -74,7 +74,7 @@ interface LargeIdListSearchTest extends ITestDataBuilder {
 
 	@Test
 	default void testReferenceSearchOverThreshold_unpacksJsonArray() {
-		Context ctx = getLargeIdListSearchTestContext();
+		Context ctx = getBindIdListAsJsonSearchTestContext();
 		withBindIdListAsJsonAboveSize(ctx, 3, () -> {
 			List<String> patientIds = createPatients(5);
 			List<String> observationIds = createObservationsFor(patientIds);
@@ -96,7 +96,7 @@ interface LargeIdListSearchTest extends ITestDataBuilder {
 
 	@Test
 	default void testIdAndReferenceSearchBothOverThreshold_unpacksTwoSeparateJsonArrays() {
-		Context ctx = getLargeIdListSearchTestContext();
+		Context ctx = getBindIdListAsJsonSearchTestContext();
 		withBindIdListAsJsonAboveSize(ctx, 3, () -> {
 			List<String> patientIds = createPatients(5);
 			List<String> observationIds = createObservationsFor(patientIds);
@@ -124,7 +124,7 @@ interface LargeIdListSearchTest extends ITestDataBuilder {
 	@ParameterizedTest
 	@ValueSource(ints = {5, 10})
 	default void testIdSearchUnderOrAtThreshold_keepsInList(int theNumberOfPatients) {
-		Context ctx = getLargeIdListSearchTestContext();
+		Context ctx = getBindIdListAsJsonSearchTestContext();
 		withBindIdListAsJsonAboveSize(ctx, 10, () -> {
 			List<String> patientIds = createPatients(theNumberOfPatients);
 
@@ -147,7 +147,7 @@ interface LargeIdListSearchTest extends ITestDataBuilder {
 	 */
 	@Test
 	default void testIdSearchWithLargeJsonPayload_returnsAllMatches() {
-		Context ctx = getLargeIdListSearchTestContext();
+		Context ctx = getBindIdListAsJsonSearchTestContext();
 		assumeTrue(jsonFunctionForDriver(ctx.driverType()) != null, "JSON engines only");
 
 		Integer previousMaximumPageSize = ctx.server().getRestfulServer().getMaximumPageSize();

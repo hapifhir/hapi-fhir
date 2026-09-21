@@ -75,7 +75,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(SpringExtension.class)
 @EnableJpaRepositories(repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
 @ContextConfiguration(classes = {BaseDatabaseVerificationIT.TestConfig.class, TestDaoSearch.Config.class})
-public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements ITestDataBuilder, TuplePredicateSearchTest, LargeIdListSearchTest {
+public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements ITestDataBuilder, TuplePredicateSearchTest, BindIdListAsJsonSearchTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseDatabaseVerificationIT.class);
 	private static final String MIGRATION_TABLENAME = "MIGRATIONS";
 	public static final String INIT_SCHEMA = "init_schema";
@@ -135,8 +135,8 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 	}
 
 	@Override
-	public LargeIdListSearchTest.Context getLargeIdListSearchTestContext() {
-		return new LargeIdListSearchTest.Context(
+	public BindIdListAsJsonSearchTest.Context getBindIdListAsJsonSearchTestContext() {
+		return new BindIdListAsJsonSearchTest.Context(
 			myStorageSettings,
 			myServer,
 			myCaptureQueriesListener,

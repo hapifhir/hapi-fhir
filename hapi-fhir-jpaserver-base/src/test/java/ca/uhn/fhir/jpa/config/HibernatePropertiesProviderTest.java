@@ -106,7 +106,7 @@ public class HibernatePropertiesProviderTest {
 	}
 
 	@Test
-	void isLargeIdListJsonBindingSupported_whenProbeReturnsEmpty_givesUpAfterThreeAttemptsAndWarnsOnce() throws SQLException {
+	void isJsonUnpackingSupported_whenProbeReturnsEmpty_givesUpAfterThreeAttemptsAndWarnsOnce() throws SQLException {
 		stubConnection();
 		when(myStatement.executeQuery(anyString())).thenReturn(myResultSet);
 		when(myResultSet.next()).thenReturn(false);
@@ -126,7 +126,7 @@ public class HibernatePropertiesProviderTest {
 
 
 	@Test
-	void isLargeIdListJsonBindingSupported_whenProbeSucceeds_returnsTrueAndIsCached() throws SQLException {
+	void isJsonUnpackingSupported_whenProbeSucceeds_returnsTrueAndIsCached() throws SQLException {
 		stubConnection();
 		when(myStatement.executeQuery(anyString())).thenReturn(myResultSet);
 		when(myResultSet.next()).thenReturn(true);

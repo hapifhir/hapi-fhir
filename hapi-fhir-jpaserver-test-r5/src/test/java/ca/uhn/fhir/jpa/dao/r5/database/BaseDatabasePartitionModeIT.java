@@ -57,7 +57,7 @@ import static ca.uhn.fhir.jpa.model.util.JpaConstants.HAPI_DATABASE_PARTITION_MO
 @TestPropertySource(properties = {
 	HAPI_DATABASE_PARTITION_MODE + "=true"
 })
-public abstract class BaseDatabasePartitionModeIT extends BaseJpaTest implements ITestDataBuilder, TuplePredicateSearchTest, LargeIdListSearchTest {
+public abstract class BaseDatabasePartitionModeIT extends BaseJpaTest implements ITestDataBuilder, TuplePredicateSearchTest, BindIdListAsJsonSearchTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseDatabasePartitionModeIT.class);
 	private static final String MIGRATION_TABLENAME = "MIGRATIONS";
 	private static final int PARTITION_ID = 1;
@@ -138,8 +138,8 @@ public abstract class BaseDatabasePartitionModeIT extends BaseJpaTest implements
 	}
 
 	@Override
-	public LargeIdListSearchTest.Context getLargeIdListSearchTestContext() {
-		return new LargeIdListSearchTest.Context(
+	public BindIdListAsJsonSearchTest.Context getBindIdListAsJsonSearchTestContext() {
+		return new BindIdListAsJsonSearchTest.Context(
 			myStorageSettings,
 			myServer,
 			myCaptureQueriesListener,
