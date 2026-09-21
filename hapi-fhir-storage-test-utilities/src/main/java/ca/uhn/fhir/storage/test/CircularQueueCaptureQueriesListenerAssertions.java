@@ -57,16 +57,16 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 	}
 
 	public static QueryCondition onCurrentThread() {
-		return new QueryCondition(false);
+		return new QueryCondition(true);
 	}
 
 	public static QueryCondition onAllThreads() {
-		return new QueryCondition(true);
+		return new QueryCondition(false);
 	}
 
 	public static class QueryCondition extends Condition<CircularQueueCaptureQueriesListener> {
 
-		private final boolean myAllThreads;
+		private final boolean myOnCurrentThread;
 		private final List<BaseTest> myTests = new ArrayList<>();
 		private CircularQueueCaptureQueriesListener myListener;
 		private boolean myHaveSelectCounts;
@@ -80,13 +80,13 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 		/**
 		 * Constructor
 		 */
-		public QueryCondition(boolean theAllThreads) {
-			myAllThreads = theAllThreads;
+		public QueryCondition(boolean theOnCurrentThread) {
+			myOnCurrentThread = theOnCurrentThread;
 		}
 
 		public QueryCondition selectCount(int theCount) {
 			myHaveSelectCounts = true;
-			myTests.add(new TestSelect(theCount, myAllThreads));
+			myTests.add(new TestSelect(theCount, myOnCurrentThread));
 			return this;
 		}
 
@@ -94,39 +94,61 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 			return new StatementAtIndexBuilder(theIndex);
 		}
 
-
+		/**
+		 * How many UPDATE statements were executed
+		 * (uses {@link SqlCountTypeEnum#PARAMETER_SETS} counting)
+		 */
 		public QueryCondition updateCount(int theCount) {
+			return updateCount(theCount, BaseSqlStatementTest.DEFAULT_SQL_COUNT_TYPE);
+		}
+
+		public QueryCondition updateCount(int theCount, @Nonnull SqlCountTypeEnum theCountType) {
 			myHaveUpdateCounts = true;
-			myTests.add(new TestUpdate(theCount, myAllThreads));
+			myTests.add(new TestUpdate(theCount, myOnCurrentThread, theCountType));
 			return this;
 		}
 
+		/**
+		 * How many INSERT statements were executed
+		 * (uses {@link SqlCountTypeEnum#PARAMETER_SETS} counting)
+		 */
 		public QueryCondition insertCount(int theCount) {
+			return insertCount(theCount, BaseSqlStatementTest.DEFAULT_SQL_COUNT_TYPE);
+		}
+		public QueryCondition insertCount(int theCount, @Nonnull SqlCountTypeEnum theCountType) {
 			myHaveInsertCounts = true;
-			myTests.add(new TestInsert(theCount, myAllThreads));
+			myTests.add(new TestInsert(theCount, myOnCurrentThread, theCountType));
 			return this;
 		}
 
+		/**
+		 * How many DELETE statements were executed
+		 * (uses {@link SqlCountTypeEnum#PARAMETER_SETS} counting)
+		 */
 		public QueryCondition deleteCount(int theCount) {
+			return deleteCount(theCount, BaseSqlStatementTest.DEFAULT_SQL_COUNT_TYPE);
+		}
+
+		public QueryCondition deleteCount(int theCount, @Nonnull SqlCountTypeEnum theCountType) {
 			myHaveDeleteCounts = true;
-			myTests.add(new TestDelete(theCount, myAllThreads));
+			myTests.add(new TestDelete(theCount, myOnCurrentThread, theCountType));
 			return this;
 		}
 
 		public QueryCondition commitCount(int theCount) {
 			myHaveCommitCounts = true;
-			myTests.add(new TestCommit(theCount, myAllThreads));
+			myTests.add(new TestCommit(theCount, myOnCurrentThread));
 			return this;
 		}
 
 		public QueryCondition rollbackCount(int theCount) {
 			myHaveRollbackCounts = true;
-			myTests.add(new TestRollback(theCount, myAllThreads));
+			myTests.add(new TestRollback(theCount, myOnCurrentThread));
 			return this;
 		}
 
 		public QueryCondition connectionCount(int theConnectionCount) {
-			myTests.add(new TestConnections(theConnectionCount, myAllThreads));
+			myTests.add(new TestConnections(theConnectionCount, myOnCurrentThread));
 			return this;
 		}
 
@@ -202,22 +224,22 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 			}
 
 			public QueryCondition contains(String theExpectedSql) {
-				myTests.add(new TestSelect(myIndex, myAllThreads, myInlineParams, theExpectedSql, SqlMatchModeEnum.CONTAINS));
+				myTests.add(new TestSelect(myIndex, myOnCurrentThread, myInlineParams, theExpectedSql, SqlMatchModeEnum.CONTAINS));
 				return QueryCondition.this;
 			}
 
 			public QueryCondition doesNotContain(String theNotExpectedSql) {
-				myTests.add(new TestSelect(myIndex, myAllThreads, myInlineParams, theNotExpectedSql, SqlMatchModeEnum.DOES_NOT_CONTAIN));
+				myTests.add(new TestSelect(myIndex, myOnCurrentThread, myInlineParams, theNotExpectedSql, SqlMatchModeEnum.DOES_NOT_CONTAIN));
 				return QueryCondition.this;
 			}
 
 			public QueryCondition startsWith(String theExpectedSql) {
-				myTests.add(new TestSelect(myIndex, myAllThreads, myInlineParams, theExpectedSql, SqlMatchModeEnum.STARTS_WITH));
+				myTests.add(new TestSelect(myIndex, myOnCurrentThread, myInlineParams, theExpectedSql, SqlMatchModeEnum.STARTS_WITH));
 				return QueryCondition.this;
 			}
 
 			public QueryCondition endsWith(String theExpectedSql) {
-				myTests.add(new TestSelect(myIndex, myAllThreads, myInlineParams, theExpectedSql, SqlMatchModeEnum.ENDS_WITH));
+				myTests.add(new TestSelect(myIndex, myOnCurrentThread, myInlineParams, theExpectedSql, SqlMatchModeEnum.ENDS_WITH));
 				return QueryCondition.this;
 			}
 
@@ -233,12 +255,12 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 			}
 
 			public QueryCondition countInstances(int theExpectedCount, String theExpectedSql) {
-				myTests.add(new TestSelect(myIndex, myAllThreads, myInlineParams, theExpectedSql, SqlMatchModeEnum.COUNT_INSTANCES, theExpectedCount));
+				myTests.add(new TestSelect(myIndex, myOnCurrentThread, myInlineParams, theExpectedSql, SqlMatchModeEnum.COUNT_INSTANCES, theExpectedCount));
 				return QueryCondition.this;
 			}
 
 			public QueryCondition countInstancesIgnoreCase(int theExpectedCount, String theExpectedSql) {
-				myTests.add(new TestSelect(myIndex, myAllThreads, myInlineParams, theExpectedSql, SqlMatchModeEnum.COUNT_INSTANCES_IGNORE_CASE, theExpectedCount));
+				myTests.add(new TestSelect(myIndex, myOnCurrentThread, myInlineParams, theExpectedSql, SqlMatchModeEnum.COUNT_INSTANCES_IGNORE_CASE, theExpectedCount));
 				return QueryCondition.this;
 			}
 
@@ -246,7 +268,7 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 			 * Does the SQL match exactly?
 			 */
 			public QueryCondition matches(String theExpectedSql) {
-				myTests.add(new TestSelect(myIndex, myAllThreads, myInlineParams, theExpectedSql, SqlMatchModeEnum.MATCHES));
+				myTests.add(new TestSelect(myIndex, myOnCurrentThread, myInlineParams, theExpectedSql, SqlMatchModeEnum.MATCHES));
 				return QueryCondition.this;
 			}
 
@@ -274,7 +296,7 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 
 				if (actualCount != myExpectCount) {
 					String name = getName();
-					String msg = String.format(LS + "  %-10s Expected[%d] Actual[%d]", name, myExpectCount, actualCount);
+					String msg = String.format("%s  %-20s Expected[%d] Actual[%d]", LS, name, myExpectCount, actualCount);
 					return Optional.of(msg);
 				}
 			}
@@ -297,22 +319,26 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 
 	private static abstract class BaseSqlStatementTest extends BaseTest {
 
+		private static final SqlCountTypeEnum DEFAULT_SQL_COUNT_TYPE = SqlCountTypeEnum.PARAMETER_SETS;
+
 		private final Integer myExpectAtIndex;
 		private final String myExpectedSql;
 		private final SqlMatchModeEnum mySqlMatchMode;
 		private final int myExpectedCount;
 		private final boolean myInlineParams;
+		protected final SqlCountTypeEnum myCountType;
 
 		/**
 		 * Constructor for a statement counting assertion
 		 */
-		private BaseSqlStatementTest(int theExpectCount, boolean theForCurrentThread) {
+		private BaseSqlStatementTest(int theExpectCount, boolean theForCurrentThread, SqlCountTypeEnum theCountType) {
 			super(theExpectCount, theForCurrentThread);
 			myInlineParams = false;
 			myExpectAtIndex = null;
 			myExpectedSql = null;
 			mySqlMatchMode = null;
 			myExpectedCount = 0;
+			myCountType = theCountType;
 		}
 
 		/**
@@ -333,12 +359,17 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 			myExpectedSql = theExpectedSql;
 			mySqlMatchMode = theSqlMatchMode;
 			myExpectedCount = theExpectedCount;
+			myCountType = DEFAULT_SQL_COUNT_TYPE;
 		}
 
 		@Override
 		protected int getCount(CircularQueueCaptureQueriesListener theListener) {
 			List<SqlQuery> actualQueries = getActualStatements(theListener);
-			return CircularQueueCaptureQueriesListener.countQueries(actualQueries);
+			Validate.notNull(myCountType, "No count type configured");
+			return switch (myCountType) {
+				case PARAMETER_SETS -> CircularQueueCaptureQueriesListener.countQueries(actualQueries);
+				case STATEMENTS -> actualQueries.size();
+			};
 		}
 
 		@Override
@@ -425,7 +456,7 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 	private static class TestSelect extends BaseSqlStatementTest {
 
 		private TestSelect(int theExpectCount, boolean theForCurrentThread) {
-			super(theExpectCount, theForCurrentThread);
+			super(theExpectCount, theForCurrentThread, SqlCountTypeEnum.PARAMETER_SETS);
 		}
 
 		private TestSelect(int theIndex, boolean theForCurrentThread,boolean theInlineParams,  String theExpectedSql, SqlMatchModeEnum theSqlMatchMode) {
@@ -456,8 +487,8 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 
 	private static class TestInsert extends BaseSqlStatementTest {
 
-		private TestInsert(int theExpectCount, boolean theForCurrentThread) {
-			super(theExpectCount, theForCurrentThread);
+		private TestInsert(int theExpectCount, boolean theForCurrentThread, SqlCountTypeEnum theCountType) {
+			super(theExpectCount, theForCurrentThread, theCountType);
 		}
 
 		@Nonnull
@@ -480,8 +511,8 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 
 	private static class TestDelete extends BaseSqlStatementTest {
 
-		private TestDelete(int theExpectCount, boolean theForCurrentThread) {
-			super(theExpectCount, theForCurrentThread);
+		private TestDelete(int theExpectCount, boolean theForCurrentThread, SqlCountTypeEnum theCountType) {
+			super(theExpectCount, theForCurrentThread, theCountType);
 		}
 
 		@Nonnull
@@ -504,8 +535,8 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 
 	private static class TestUpdate extends BaseSqlStatementTest {
 
-		private TestUpdate(int theExpectCount, boolean theForCurrentThread) {
-			super(theExpectCount, theForCurrentThread);
+		private TestUpdate(int theExpectCount, boolean theForCurrentThread, SqlCountTypeEnum theCountType) {
+			super(theExpectCount, theForCurrentThread, theCountType);
 		}
 
 		@Nonnull

@@ -98,7 +98,7 @@ public class InMemoryFhirRepository implements IRepository {
 		return new InMemoryFhirRepository(theFhirContext, new HashMap<>(bundleContents));
 	}
 
-	InMemoryFhirRepository(
+	protected InMemoryFhirRepository(
 			@Nonnull FhirContext theContext, @Nonnull Map<String, Map<IIdType, IBaseResource>> theContents) {
 		myFhirContext = theContext;
 		myResourceStorage = new ResourceStorage(theContents);

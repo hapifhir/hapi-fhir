@@ -1,0 +1,6 @@
+---
+type: add
+issue: 8195
+title: "Added support for `Patient/$merge` and `$hapi.fhir.undo-merge` when using the
+  Patient ID Partitioning Interceptor with partitions in separate databases, and for
+  resources whose ids are client-assigned or otherwise not server-assigned numeric ids."

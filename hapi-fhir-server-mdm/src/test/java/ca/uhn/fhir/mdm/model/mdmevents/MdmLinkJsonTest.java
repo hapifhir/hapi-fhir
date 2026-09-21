@@ -3,8 +3,8 @@ package ca.uhn.fhir.mdm.model.mdmevents;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.Test;
 
@@ -32,10 +32,10 @@ public class MdmLinkJsonTest {
 		}
 	}
 
-	private final ObjectMapper myObjectMapper = new ObjectMapper();
+	private final JsonMapper myJsonMapper = new JsonMapper();
 
 	@Test
-	public void serializeDeserialize_longId_works() throws JsonProcessingException {
+	public void serializeDeserialize_longId_works() throws JacksonException {
 		// setup
 		MdmLinkJson json = createLinkJson();
 		TestPID<Long> golden = new TestPID<>("Patient", 1L);
@@ -48,10 +48,10 @@ public class MdmLinkJsonTest {
 		json.setSourcePid(source);
 
 		// test
-		String strVal = myObjectMapper.writeValueAsString(json);
+		String strVal = myJsonMapper.writeValueAsString(json);
 		assertFalse(isBlank(strVal));
 
-		MdmLinkJson deserialized = myObjectMapper.readValue(strVal, MdmLinkJson.class);
+		MdmLinkJson deserialized = myJsonMapper.readValue(strVal, MdmLinkJson.class);
 		assertNotNull(deserialized);
 		assertNull(deserialized.getSourcePid());
 		assertNull(deserialized.getGoldenPid());

@@ -1,0 +1,4 @@
+---
+type: change
+issue: 8202
+title: "Make the InMemoryRepository visible for extension while testing"

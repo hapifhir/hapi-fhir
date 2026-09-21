@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.r4.model.Address;
+import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Claim;
 import org.hl7.fhir.r4.model.Condition;
@@ -803,6 +804,30 @@ class TerserUtilTest {
 		assertNotNull(patientContact);
 		assertEquals(Patient.ContactComponent.class, patientContact.getClass());
 		assertTrue(patientContact.isEmpty());
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	void testAddIdentifierToResource() {
+		Patient patient = new Patient();
+
+		TerserUtil.addIdentifierToResource(ourFhirContext, patient, "http://sys", "val1");
+		TerserUtil.addIdentifierToResource(ourFhirContext, patient, "http://sys", "val2");
+
+		assertThat(patient.getIdentifier()).hasSize(2);
+		assertEquals("http://sys", patient.getIdentifierFirstRep().getSystem());
+		assertEquals("val1", patient.getIdentifierFirstRep().getValue());
+		assertEquals("val2", patient.getIdentifier().get(1).getValue());
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	void testAddIdentifierToResource_typeWithoutIdentifierField_doesNothing() {
+		Binary binary = new Binary();
+
+		TerserUtil.addIdentifierToResource(ourFhirContext, binary, "http://sys", "val1");
+
+		assertTrue(binary.isEmpty());
 	}
 
 }

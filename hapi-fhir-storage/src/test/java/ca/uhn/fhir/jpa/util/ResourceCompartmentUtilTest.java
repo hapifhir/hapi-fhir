@@ -65,17 +65,23 @@ class ResourceCompartmentUtilTest {
 
 		List<RuntimeSearchParam> result = ResourceCompartmentUtil.getPatientCompartmentSearchParams(runtimeResourceDefinition);
 
-		assertThat(result.stream().map(RuntimeSearchParam::getName).toList()).containsExactlyInAnyOrder("performer", "subject");
+		assertThat(result.stream().map(RuntimeSearchParam::getName).toList()).containsExactlyInAnyOrder("patient", "performer", "subject");
 	}
 
+	// The "patient" SP appears even with theIncludeSupersets=false because alias/narrowing patient
+	// SPs (e.g. Observation.patient -> Observation.subject.where(resolve() is Patient), or
+	// Coverage.patient -> Coverage.beneficiary) carry Patient compartment membership directly
+	// (see SearchParameterUtil.getMembershipCompartmentsForSearchParameter). Encounter is the only
+	// row where superset mode adds a param: its compartment declares only "patient", so "subject"
+	// is the broader path-overlapping param picked up when theIncludeSupersets=true.
 	@ParameterizedTest
 	@CsvSource(textBlock = """
-		false , Observation , performer subject
-		true  , Observation , performer patient subject
+		false , Observation , patient performer subject
+		true  , Observation , patient performer subject
 		false , Encounter   , patient
 		true  , Encounter   , patient subject
-		false , Coverage    , beneficiary payor policy-holder subscriber
-		true  , Coverage    , beneficiary payor policy-holder subscriber
+		false , Coverage    , beneficiary patient payor policy-holder subscriber
+		true  , Coverage    , beneficiary patient payor policy-holder subscriber
 		""")
 	void getPatientCompartmentSearchParams_IncludeSupersets(boolean theIncludeSupersets, String theResourceType, String theExpectedParamNames) {
 		RuntimeResourceDefinition runtimeResourceDefinition = myFhirContext.getResourceDefinition(theResourceType);

@@ -185,12 +185,6 @@ public class TermCodeSystem extends BasePartitionable implements Serializable {
 		return myCurrentVersion;
 	}
 
-	public TermCodeSystem setCurrentVersion(TermCodeSystemVersion theCurrentVersion) {
-		myCurrentVersion = theCurrentVersion;
-		setCurrentVersionPid(theCurrentVersion);
-		return this;
-	}
-
 	/**
 	 * Sets only the FK column values without touching the {@code @ManyToOne} entity reference.
 	 * Use this on managed entities to avoid Hibernate HHH000502 warnings caused by dirtying

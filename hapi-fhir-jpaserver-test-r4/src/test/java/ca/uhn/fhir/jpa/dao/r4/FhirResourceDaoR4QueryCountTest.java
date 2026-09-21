@@ -51,6 +51,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -68,6 +69,7 @@ import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.storage.test.SqlCountTypeEnum;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
@@ -386,7 +388,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(47, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-		assertEquals(80, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(85, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
 		runInTransaction(() -> assertThat(myResourceTableDao.findAll()).isEmpty());
 		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll()).isEmpty());
@@ -831,7 +833,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(cs));
 
 		Observation obs = new Observation();
-//		obs.getMeta().addProfile("http://example.com/fhir/StructureDefinition/vitalsigns-2");
 		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>Hello</div>");
 		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
 		obs.setSubject(new Reference("Patient/123"));
@@ -1179,7 +1180,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			.findAll()
 			.stream()
 			.map(t -> new TypedPidJson(t.getResourceType(), t.getResourceId()))
-			.collect(Collectors.toList()));
+			.toList());
 
 		runInTransaction(() -> assertEquals(10, myResourceTableDao.count()));
 
@@ -2706,13 +2707,15 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		Bundle outcome = mySystemDao.transaction(mySrd, input.get());
 		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
-		myCaptureQueriesListener.logInsertQueries();
-		assertEquals(18, myCaptureQueriesListener.countInsertQueries());
-		myCaptureQueriesListener.logUpdateQueries();
-		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertThat(myCaptureQueriesListener).has(
+			onAllThreads()
+				.selectCount(1)
+				.insertCount(5, SqlCountTypeEnum.STATEMENTS)
+				.insertCount(18, SqlCountTypeEnum.PARAMETER_SETS)
+				.connectionCount(1)
+				.commitCount(1)
+				.noOtherCounts()
+		);
 
 		/*
 		 * Run a second time
@@ -2720,13 +2723,17 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input.get());
-		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(4, myCaptureQueriesListener.countSelectQueries());
-		myCaptureQueriesListener.logInsertQueries();
-		assertEquals(2, myCaptureQueriesListener.countInsertQueries());
-		myCaptureQueriesListener.logUpdateQueries();
-		assertEquals(4, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertThat(myCaptureQueriesListener).has(
+			onAllThreads()
+				.selectCount(4)
+				.insertCount(1, SqlCountTypeEnum.STATEMENTS)
+				.insertCount(2, SqlCountTypeEnum.PARAMETER_SETS)
+				.updateCount(2, SqlCountTypeEnum.STATEMENTS)
+				.updateCount(4, SqlCountTypeEnum.PARAMETER_SETS)
+				.connectionCount(1)
+				.commitCount(1)
+				.noOtherCounts()
+		);
 
 		/*
 		 * Third time with mass ingestion mode enabled
@@ -2735,14 +2742,17 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input.get());
-		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
-		myCaptureQueriesListener.logInsertQueries();
-		assertEquals(2, myCaptureQueriesListener.countInsertQueries());
-		myCaptureQueriesListener.logUpdateQueries();
-		assertEquals(4, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-
+		assertThat(myCaptureQueriesListener).has(
+			onAllThreads()
+				.selectCount(3)
+				.insertCount(1, SqlCountTypeEnum.STATEMENTS)
+				.insertCount(2, SqlCountTypeEnum.PARAMETER_SETS)
+				.updateCount(2, SqlCountTypeEnum.STATEMENTS)
+				.updateCount(4, SqlCountTypeEnum.PARAMETER_SETS)
+				.connectionCount(1)
+				.commitCount(1)
+				.noOtherCounts()
+		);
 	}
 
 	/**
@@ -2829,15 +2839,22 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	 * for an explanation of why only SINGLE_TOKEN has a small number of SELECTS.
 	 * Others could potentially be optimized in the future so that they have a small number
 	 * of selects too, but this is tricky and may not be worth the effort.
+	 * <p>
+	 * The SINGLE_TOKEN_BARE_URL and SINGLE_TOKEN_LEADING_QMARK modes are the type-less If-None-Exist
+	 * spellings; they must cost exactly the same as the type-qualified SINGLE_TOKEN form.
 	 */
 	@ParameterizedTest
 	@CsvSource({
-		"SINGLE_TOKEN   , false, 1  2  1",
-		"SINGLE_TOKEN   , true,  1  0  0",
-		"MULTIPLE_TOKEN , false, 10 31 30",
-		"MULTIPLE_TOKEN , true,  10 0  0",
-		"STRING         , false, 10 31 30",
-		"STRING         , true,  10 0  0",
+		"SINGLE_TOKEN               , false, 1  2  1",
+		"SINGLE_TOKEN               , true,  1  0  0",
+		"SINGLE_TOKEN_BARE_URL      , false, 1  2  1",
+		"SINGLE_TOKEN_BARE_URL      , true,  1  0  0",
+		"SINGLE_TOKEN_LEADING_QMARK , false, 1  2  1",
+		"SINGLE_TOKEN_LEADING_QMARK , true,  1  0  0",
+		"MULTIPLE_TOKEN             , false, 10 31 30",
+		"MULTIPLE_TOKEN             , true,  10 0  0",
+		"STRING                     , false, 10 31 30",
+		"STRING                     , true,  10 0  0",
 	})
 	public void testTransactionWithMultipleConditionalCreateUrls(String theMatchMode, boolean theMatchUrlCacheEnabled, String theExpectedCounts) {
 		registerNoOpAuthorizationAndConsentInterceptors();
@@ -2860,6 +2877,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 				String conditionalUrl = switch(theMatchMode) {
 					case "SINGLE_TOKEN" -> "Patient?identifier=http://foo|" + identifier;
+					case "SINGLE_TOKEN_BARE_URL" -> "identifier=http://foo|" + identifier;
+					case "SINGLE_TOKEN_LEADING_QMARK" -> "?identifier=http://foo|" + identifier;
 					case "MULTIPLE_TOKEN" -> "Patient?identifier=http://bar|" + identifier + "&active=true";
 					case "STRING" -> "Patient?name=FAM" + identifier;
 					default -> throw new IllegalStateException("Unexpected value: " + theMatchMode);
@@ -2900,15 +2919,18 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	 * of selects too, but this is tricky and may not be worth the effort.
 	 */
 	@ParameterizedTest
-	@CsvSource({
-		"SINGLE_TOKEN   , false, 1  4  4",
-		"SINGLE_TOKEN   , true,  1  3  3",
-		"MULTIPLE_TOKEN , false, 10 13 13",
-		"MULTIPLE_TOKEN , true,  10 3  3",
-		"STRING         , false, 10 13 13",
-		"STRING         , true,  10 3  3",
-	})
-	public void testTransactionWithMultipleConditionalUpdateUrls(String theMatchMode, boolean theMatchUrlCacheEnabled, String theExpectedCounts) {
+	@CsvSource(useHeadersInDisplayName = true, textBlock =
+		"""
+		MatchMode      , MatchUrlCacheEnabled, ExpectSelectFirst, ExpectedSelectSubsequent, ExpectedInsertFirst, ExpectedInsertSubsequent
+		SINGLE_TOKEN   , false                , 1                , 4                       , 7                  , 1
+		SINGLE_TOKEN   , true                 , 1                , 3                       , 7                  , 1
+		MULTIPLE_TOKEN , false                , 10               , 13                      , 7                  , 1
+		MULTIPLE_TOKEN , true                 , 10               , 3                       , 7                  , 1
+		STRING         , false                , 10               , 13                      , 7                  , 1
+		STRING         , true                 , 10               , 3                       , 7                  , 1
+		"""
+	)
+	public void testTransactionWithMultipleConditionalUpdateUrls(String theMatchMode, boolean theMatchUrlCacheEnabled, int theExpectSelectFirst, int theExpectSelectSubsequent, int theExpectInsertFirst, int theExpectInsertSubsequent) {
 		myStorageSettings.setMatchUrlCacheEnabled(theMatchUrlCacheEnabled);
 
 		Supplier<Bundle> input = () ->{
@@ -2935,27 +2957,39 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			return bb.getBundleTyped();
 		};
 
-		String selectCounts = "";
-
 		// Run the first time
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input.get());
-		myCaptureQueriesListener.logSelectQueries();
-		selectCounts += myCaptureQueriesListener.countSelectQueries();
+		assertThat(myCaptureQueriesListener).has(
+			onAllThreads()
+				.selectCount(theExpectSelectFirst)
+				.insertCount(theExpectInsertFirst, SqlCountTypeEnum.STATEMENTS)
+				.connectionCount(1)
+				.commitCount(1)
+		);
 
 		// Run the second time
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input.get());
-		myCaptureQueriesListener.logSelectQueries();
-		selectCounts += " " + myCaptureQueriesListener.countSelectQueries();
+		myCaptureQueriesListener.logInsertQueries();
+		assertThat(myCaptureQueriesListener).has(
+			onAllThreads()
+				.selectCount(theExpectSelectSubsequent)
+				.insertCount(theExpectInsertSubsequent, SqlCountTypeEnum.STATEMENTS)
+				.connectionCount(1)
+				.commitCount(1)
+		);
 
 		// Run the third time
 		myCaptureQueriesListener.clear();
 		mySystemDao.transaction(mySrd, input.get());
-		myCaptureQueriesListener.logSelectQueries();
-		selectCounts += " " + myCaptureQueriesListener.countSelectQueries();
-
-		assertEquals(theExpectedCounts.replaceAll("  +", " ").trim(), selectCounts);
+		assertThat(myCaptureQueriesListener).has(
+			onAllThreads()
+				.selectCount(theExpectSelectSubsequent)
+				.insertCount(theExpectInsertSubsequent, SqlCountTypeEnum.STATEMENTS)
+				.connectionCount(1)
+				.commitCount(1)
+		);
 	}
 
 	/**
@@ -5179,5 +5213,71 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myInterceptorRegistry.registerInterceptor(myAuthInterceptor);
 		myConsentInterceptor = new ConsentInterceptor(new IConsentService() {});
 		myInterceptorRegistry.registerInterceptor(myConsentInterceptor);
+	}
+
+	@Test
+	public void testSearch_MultipleTagParams_UsesSingleTagResolutionQuery() {
+		Patient p = new Patient();
+		p.getMeta().addTag("http://sys", "code-1", "display-1");
+		p.getMeta().addTag("http://sys", "code-2", "display-2");
+		p.getMeta().addTag("http://sys", "code-3", "display-3");
+		p.setActive(true);
+		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = SearchParameterMap.newSynchronous()
+			.add(Constants.PARAM_TAG, new TokenParam("http://sys", "code-1"))
+			.add(Constants.PARAM_TAG, new TokenParam("http://sys", "code-2"))
+			.add(Constants.PARAM_TAG, new TokenParam("http://sys", "code-3"));
+		IBundleProvider outcome = myPatientDao.search(map, mySrd);
+		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactly(id.getValue());
+
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(4, myCaptureQueriesListener.logSelectQueries().size());
+		assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+	}
+
+	@Test
+	public void testSearch_MultipleTagTypeParams_UsesSingleTagResolutionQuery() {
+		Patient p = new Patient();
+		p.getMeta().addTag("http://sys", "code-1", "display-1");
+		p.getMeta().addProfile("test");
+		p.getMeta().addSecurity("http://sys", "code-2", "display-2");
+		p.setActive(true);
+		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = SearchParameterMap.newSynchronous()
+			.add(Constants.PARAM_TAG, new TokenParam("http://sys", "code-1"))
+			.add(Constants.PARAM_PROFILE, new TokenParam("test"))
+			.add(Constants.PARAM_SECURITY, new TokenParam("http://sys", "code-2"));
+		IBundleProvider outcome = myPatientDao.search(map, mySrd);
+		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactly(id.getValue());
+
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(4, myCaptureQueriesListener.logSelectQueries().size());
+		assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+	}
+
+	@Test
+	public void testSearch_MultipleSecurityParams_UsesSingleTagResolutionQuery() {
+		Patient p = new Patient();
+		p.getMeta().addSecurity("http://sys", "code-1", "display-1");
+		p.getMeta().addSecurity("http://sys", "code-2", "display-2");
+		p.getMeta().addSecurity("http://sys", "code-3", "display-3");
+		p.setActive(true);
+		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = SearchParameterMap.newSynchronous()
+			.add(Constants.PARAM_SECURITY, new TokenParam("http://sys", "code-1"))
+			.add(Constants.PARAM_SECURITY, new TokenParam("http://sys", "code-2"))
+			.add(Constants.PARAM_SECURITY, new TokenParam("http://sys", "code-3"));
+		IBundleProvider outcome = myPatientDao.search(map, mySrd);
+		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactly(id.getValue());
+
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(4, myCaptureQueriesListener.logSelectQueries().size());
+		assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 	}
 }

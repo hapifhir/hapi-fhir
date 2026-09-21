@@ -220,6 +220,10 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding {
 					if (theMethodOutcome != null) {
 						outcome = theMethodOutcome.getResource();
 						theMethodOutcome.fireResourceViewCallbacks();
+						if (restOperationType == RestOperationTypeEnum.CREATE
+								&& Boolean.FALSE.equals(theMethodOutcome.getCreated())) {
+							outcome = null;
+						}
 					} else {
 						outcome = null;
 					}

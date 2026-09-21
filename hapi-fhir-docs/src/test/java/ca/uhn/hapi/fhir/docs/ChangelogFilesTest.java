@@ -1,15 +1,15 @@
 package ca.uhn.hapi.fhir.docs;
 
 import ca.uhn.fhir.context.ConfigurationException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 import com.google.common.base.Charsets;
 import org.apache.commons.collections4.IteratorUtils;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,6 +31,14 @@ class ChangelogFilesTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(ChangelogFilesTest.class);
 
 	private static final Pattern SELF_CLOSING_ANCHOR_PATTERN = Pattern.compile("<a\\s[^>]*/\\s*>");
+
+	private static final List<String> VALID_TYPES = List.of(
+		ChangelogConstants.TYPE_ADD,
+		ChangelogConstants.TYPE_CHANGE,
+		ChangelogConstants.TYPE_FIX,
+		ChangelogConstants.TYPE_PERFORMANCE,
+		ChangelogConstants.TYPE_REMOVE,
+		ChangelogConstants.TYPE_SECURITY);
 
 	@Test
 	void testDocAnchors_validFormat() throws Exception {
@@ -92,7 +100,7 @@ class ChangelogFilesTest {
 				fail("Invalid changelog filename: " + next);
 			}
 
-			ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+			ObjectMapper mapper = YAMLMapper.builder().build();
 			ObjectNode tree;
 			try (FileInputStream fis = new FileInputStream(next)) {
 				tree = (ObjectNode) mapper.readTree(new InputStreamReader(fis, Charsets.UTF_8));
@@ -100,12 +108,17 @@ class ChangelogFilesTest {
 				throw new ConfigurationException("Failed to read " + next, e);
 			}
 
-			List<String> fieldNames = IteratorUtils.toList(tree.fieldNames());
+			List<String> fieldNames = IteratorUtils.toList(tree.propertyNames().iterator());
 			boolean title = fieldNames.remove("title");
 			assertThat(title).as("No 'title' element in " + next).isTrue();
 
 			boolean type = fieldNames.remove("type");
 			assertThat(type).as("No 'type' element in " + next).isTrue();
+
+			String typeValue = tree.get("type").asString();
+			assertThat(typeValue)
+				.as("Invalid 'type' value in " + next + ": '" + typeValue + "' (valid values: " + VALID_TYPES + ")")
+				.isIn(VALID_TYPES);
 
 			// this one is optional
 			boolean haveIssue = fieldNames.remove("issue");

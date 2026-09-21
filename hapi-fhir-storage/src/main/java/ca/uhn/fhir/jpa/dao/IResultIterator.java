@@ -22,14 +22,21 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
 import java.io.Closeable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
-public interface IResultIterator<T extends IResourcePersistentId> extends Iterator<T>, Closeable {
+public interface IResultIterator<T extends IResourcePersistentId<?>> extends Iterator<T>, Closeable {
 
 	int getSkippedCount();
 
 	int getNonSkippedCount();
 
-	Collection<T> getNextResultBatch(long theBatchSize);
+	default Collection<T> getNextResultBatch(long theBatchSize) {
+		Collection<T> batch = new ArrayList<>();
+		while (this.hasNext() && batch.size() < theBatchSize) {
+			batch.add(next());
+		}
+		return batch;
+	}
 }

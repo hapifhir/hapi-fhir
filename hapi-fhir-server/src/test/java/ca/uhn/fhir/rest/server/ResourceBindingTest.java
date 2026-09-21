@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.server.method.IMethodBinding;
 import ca.uhn.fhir.rest.server.method.PageMethodBinding;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +34,7 @@ class ResourceBindingTest {
 		myResourceBinding.addMethod(second);
 
 		// verify
-		List<BaseMethodBinding> list = myResourceBinding.getMethodBindings();
+		List<IMethodBinding> list = myResourceBinding.getMethodBindings();
 		assertThat(second).isNotEqualTo(first);
 		assertEquals(second, list.get(0));
 		assertEquals(first, list.get(1));

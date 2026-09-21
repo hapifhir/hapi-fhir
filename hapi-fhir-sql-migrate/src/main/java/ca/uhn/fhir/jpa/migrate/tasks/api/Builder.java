@@ -557,8 +557,19 @@ public class Builder {
 			public class BuilderAddForeignKeyToColumn {
 				private final List<String> myColumnNames;
 
+				private boolean myWithDeleteCascade;
+
 				public BuilderAddForeignKeyToColumn(List<String> theColumnNames) {
 					myColumnNames = theColumnNames;
+				}
+
+				public BuilderAddForeignKeyToColumn withDeleteCascade() {
+					return withDeleteCascade(true);
+				}
+
+				public BuilderAddForeignKeyToColumn withDeleteCascade(boolean theDeleteCascade) {
+					myWithDeleteCascade = theDeleteCascade;
+					return this;
 				}
 
 				public BuilderCompleteTask references(String theForeignTable, String... theForeignColumns) {
@@ -568,6 +579,9 @@ public class Builder {
 					task.setColumnNames(myColumnNames);
 					task.setForeignTableName(theForeignTable);
 					task.setForeignColumnNames(Arrays.asList(theForeignColumns));
+					if (myWithDeleteCascade) {
+						task.withDeleteCascade();
+					}
 					addTask(task);
 					return new BuilderCompleteTask(task);
 				}
@@ -758,6 +772,17 @@ public class Builder {
 
 		public BuilderAddColumnWithName addColumn(String theColumnName) {
 			return new BuilderAddColumnWithName(myRelease, myVersion, theColumnName, null, this);
+		}
+
+		/**
+		 * For Oracle, creates an Index Organized Table (IOT) with prefix compression
+		 * on the first N primary key columns. Ignored on other databases.
+		 *
+		 * @param theCompressionLevel number of leading PK columns to compress (0 for no compression)
+		 */
+		public BuilderAddTableByColumns asOracleIndexOrganizedTable(int theCompressionLevel) {
+			myTask.setOracleIndexOrganizedTable(theCompressionLevel);
+			return this;
 		}
 
 		@Override

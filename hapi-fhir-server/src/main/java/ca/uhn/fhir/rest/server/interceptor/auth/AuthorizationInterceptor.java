@@ -273,7 +273,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			case GET_TAGS:
 				// These are DSTU1 operations and not relevant
 				return OperationExamineDirection.NONE;
-
+			case PATCH:
 			case EXTENDED_OPERATION_INSTANCE:
 			case EXTENDED_OPERATION_SERVER:
 			case EXTENDED_OPERATION_TYPE:
@@ -289,7 +289,6 @@ public class AuthorizationInterceptor implements IRuleApplier {
 
 			case CREATE:
 			case UPDATE:
-			case PATCH:
 				return OperationExamineDirection.IN;
 
 			case META:
@@ -550,7 +549,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 				break;
 			}
 			default: {
-				if (theResponseObject != null) {
+				if (theResponseObject != null && !isStatusOnlyOperationOutcome(theRequestDetails, theResponseObject)) {
 					resources = Collections.singletonList(theResponseObject);
 				}
 				break;
@@ -561,6 +560,12 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			applyRulesAndFailIfDeny(
 					theRequestDetails.getRestOperationType(), theRequestDetails, null, null, nextResponse, thePointcut);
 		}
+	}
+
+	private static boolean isStatusOnlyOperationOutcome(
+			RequestDetails theRequestDetails, IBaseResource theResponseObject) {
+		return theResponseObject instanceof IBaseOperationOutcome
+				&& !"OperationOutcome".equals(theRequestDetails.getResourceName());
 	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)

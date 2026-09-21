@@ -34,6 +34,7 @@ import ca.uhn.hapi.fhir.cdshooks.api.ICdsHooksDaoAuthorizationSvc;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceMethod;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.prefetch.CdsHookPrefetchPointcutContextJson;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -42,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Service
@@ -165,8 +167,7 @@ public class CdsPrefetchSvc {
 				// The service will manage missing prefetch elements
 				continue;
 			}
-			String url = PrefetchTemplateUtil.substituteTemplate(
-					template, theCdsServiceRequestJson.getContext(), myFhirContext);
+			String url = PrefetchTemplateUtil.substituteTemplate(template, theCdsServiceRequestJson, myFhirContext);
 			ourLog.info("missing: {}.  Fetching with {}", theMissingPrefetch, url);
 
 			CdsHookPrefetchPointcutContextJson cdsHookPrefetchPointcutContext =
@@ -245,9 +246,8 @@ public class CdsPrefetchSvc {
 	private IBaseOperationOutcome extractOrCreateOperationOutcomeFromException(Exception e) {
 		IBaseOperationOutcome oo = null;
 		// check first if we can get an OperationOutcome from the exception
-		if (e instanceof BaseServerResponseException) {
-			BaseServerResponseException serverException = (BaseServerResponseException) e;
-			oo = serverException.getOperationOutcome();
+		if (e instanceof BaseServerResponseException serverResponseException) {
+			oo = serverResponseException.getOperationOutcome();
 		}
 
 		if (oo == null) {
@@ -265,11 +265,12 @@ public class CdsPrefetchSvc {
 		return resource;
 	}
 
+	@Nonnull
 	public Set<String> findMissingPrefetch(
-			CdsServiceJson theServiceSpec, CdsServiceRequestJson theCdsServiceRequestJson) {
+			@Nonnull CdsServiceJson theServiceSpec, @Nonnull CdsServiceRequestJson theCdsServiceRequestJson) {
 		Set<String> expectedPrefetchKeys = theServiceSpec.getPrefetch().keySet();
 		Set<String> actualPrefetchKeys = theCdsServiceRequestJson.getPrefetchKeys();
-		Set<String> retval = new HashSet<>(expectedPrefetchKeys);
+		Set<String> retval = new LinkedHashSet<>(expectedPrefetchKeys);
 		retval.removeAll(actualPrefetchKeys);
 		return retval;
 	}

@@ -53,6 +53,7 @@ import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.ConformanceMethodBinding;
+import ca.uhn.fhir.rest.server.method.IMethodBinding;
 import ca.uhn.fhir.rest.server.method.MethodMatchEnum;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.tenant.ITenantIdentificationStrategy;
@@ -268,7 +269,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		return result;
 	}
 
-	private List<BaseMethodBinding> getGlobalBindings() {
+	private List<IMethodBinding> getGlobalBindings() {
 		return myGlobalBinding.getMethodBindings();
 	}
 
@@ -374,11 +375,11 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * Figure out and return whichever method binding is appropriate for
 	 * the given request
 	 */
-	public BaseMethodBinding determineResourceMethod(RequestDetails requestDetails, String requestPath) {
+	public IMethodBinding determineResourceMethod(RequestDetails requestDetails, String requestPath) {
 		RequestTypeEnum requestType = requestDetails.getRequestType();
 
 		ResourceBinding resourceBinding = null;
-		BaseMethodBinding resourceMethod = null;
+		IMethodBinding resourceMethod = null;
 		String resourceName = requestDetails.getResourceName();
 		if (myServerConformanceMethod.incomingServerRequestMatchesMethod(requestDetails) != MethodMatchEnum.NONE) {
 			resourceMethod = myServerConformanceMethod;
@@ -854,10 +855,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		return myResourceNameToBinding.values();
 	}
 
-	public Collection<BaseMethodBinding> getProviderMethodBindings(Object theProvider) {
-		Set<BaseMethodBinding> retVal = new HashSet<>();
+	public Collection<IMethodBinding> getProviderMethodBindings(Object theProvider) {
+		Set<IMethodBinding> retVal = new HashSet<>();
 		for (ResourceBinding resourceBinding : getResourceBindings()) {
-			for (BaseMethodBinding methodBinding : resourceBinding.getMethodBindings()) {
+			for (IMethodBinding methodBinding : resourceBinding.getMethodBindings()) {
 				if (theProvider.equals(methodBinding.getProvider())) {
 					retVal.add(methodBinding);
 				}
@@ -936,7 +937,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * internal to HAPI and developers generally do not need to interact with it. Use
 	 * with caution, as it may change.
 	 */
-	public List<BaseMethodBinding> getServerBindings() {
+	public List<IMethodBinding> getServerBindings() {
 		return myServerBinding.getMethodBindings();
 	}
 
@@ -1174,7 +1175,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 			validateRequest(requestDetails);
 
-			BaseMethodBinding resourceMethod = determineResourceMethod(requestDetails, requestPath);
+			IMethodBinding resourceMethod = determineResourceMethod(requestDetails, requestPath);
 
 			RestOperationTypeEnum operation = resourceMethod.getRestOperationType(requestDetails);
 			requestDetails.setRestOperationType(operation);
@@ -1845,10 +1846,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				continue;
 			}
 
-			for (Iterator<BaseMethodBinding> it =
+			for (Iterator<IMethodBinding> it =
 							resourceBinding.getMethodBindings().iterator();
 					it.hasNext(); ) {
-				BaseMethodBinding binding = it.next();
+				IMethodBinding binding = it.next();
 				if (theProvider.equals(binding.getProvider())) {
 					it.remove();
 					ourLog.info("{} binding of {} was removed", resourceName, binding);

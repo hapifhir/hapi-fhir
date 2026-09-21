@@ -107,15 +107,6 @@ public class BaseSearchSvc {
 		}
 
 		@Override
-		public Collection<JpaPid> getNextResultBatch(long theBatchSize) {
-			Collection<JpaPid> batch = new ArrayList<>();
-			while (this.hasNext() && batch.size() < theBatchSize) {
-				batch.add(this.next());
-			}
-			return batch;
-		}
-
-		@Override
 		public void close() {
 			// nothing
 		}

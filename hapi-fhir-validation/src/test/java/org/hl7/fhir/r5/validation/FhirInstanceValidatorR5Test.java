@@ -23,6 +23,7 @@ import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.DocumentReference;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Extension;
+import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.hl7.fhir.r5.model.Narrative;
 import org.hl7.fhir.r5.model.Observation;
 import org.hl7.fhir.r5.model.Patient;
@@ -37,6 +38,8 @@ import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
+import org.hl7.fhir.utilities.http.ManagedWebAccess;
+import org.hl7.fhir.utilities.http.ManagedWebAccess.WebAccessPolicy;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,6 +50,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
@@ -61,7 +66,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.atMost;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -96,6 +104,72 @@ public class FhirInstanceValidatorR5Test extends BaseTest {
 		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
 		//TODO JA: This is now 3 since we now validate that there is a questionnaire provided.
 		assertThat(nonInfo).hasSize(3);
+	}
+
+	/**
+	 * Characterization test: org.hl7.fhir.core's ImplementationGuideValidator#checkDependency()
+	 * constructs its own org.hl7.fhir.utilities.npm.FilesystemPackageCacheManager and unconditionally
+	 * calls pcm.getPackageId(uri) for every ImplementationGuide.dependsOn element that has both a uri
+	 * and a packageId - regardless of the IValidationSupport chain HAPI has configured. That call
+	 * never consults the local package cache, so validating such a resource is a reliable way to
+	 * prove that HAPI's JVM can reach org.hl7.fhir.utilities.http.ManagedWebAccess purely as a side
+	 * effect of validating request-controlled content.
+	 * <p>
+	 * We set WebAccessPolicy.PROHIBITED first so no real socket is ever opened (PackageClient still
+	 * calls {@code ManagedWebAccess.accessor(...)} to build the accessor - only the subsequent
+	 * {@code .get(...)} call checks the policy and throws). Note that core swallows that resulting
+	 * IOException at several layers (PackageClient#search, BasePackageCacheManager#loadFromPackageServer)
+	 * and reports a generic "package not found"-style message instead of the policy-denial text, so
+	 * asserting on validation message content alone is not a reliable detector here. Instead we spy
+	 * on the static {@code ManagedWebAccess.accessor(...)} factory method with
+	 * {@code Mockito.CALLS_REAL_METHODS} (real behaviour preserved, including the PROHIBITED check)
+	 * and verify it was actually invoked - direct, unambiguous proof that core reached
+	 * ManagedWebAccess.
+	 */
+	@Test
+	public void testValidateImplementationGuideDependsOnReachesManagedWebAccess() {
+		WebAccessPolicy previousPolicy = ManagedWebAccess.getAccessPolicy();
+		ManagedWebAccess.setAccessPolicy(WebAccessPolicy.PROHIBITED);
+		try (MockedStatic<ManagedWebAccess> managedWebAccess = mockStatic(ManagedWebAccess.class, Mockito.CALLS_REAL_METHODS)) {
+			ImplementationGuide ig = new ImplementationGuide();
+			ig.setUrl("http://example.org/fhir/ImplementationGuide/test-ig");
+			ig.setName("TestIg");
+			ig.setStatus(Enumerations.PublicationStatus.DRAFT);
+			ImplementationGuide.ImplementationGuideDependsOnComponent dependsOn = ig.addDependsOn();
+			dependsOn.setUri("http://example.org/fhir/ImplementationGuide/other-ig");
+			dependsOn.setPackageId("example.fhir.otherig");
+			dependsOn.setVersion("1.0.0");
+
+			ValidationResult output = myVal.validateWithResult(ig);
+			logResultsAndReturnAll(output);
+
+			managedWebAccess.verify(() -> ManagedWebAccess.accessor(any(), any()), atLeastOnce());
+		} finally {
+			ManagedWebAccess.setAccessPolicy(previousPolicy);
+		}
+	}
+
+	/**
+	 * Control case for {@link #testValidateImplementationGuideDependsOnReachesManagedWebAccess()}: a
+	 * plain resource with no package dependencies must validate without ever calling
+	 * {@code ManagedWebAccess.accessor(...)}. This proves that verification above is specific to the
+	 * dependsOn path, rather than an artifact of something else in the validator wiring calling it.
+	 */
+	@Test
+	public void testValidatePlainResourceDoesNotReachManagedWebAccess() {
+		WebAccessPolicy previousPolicy = ManagedWebAccess.getAccessPolicy();
+		ManagedWebAccess.setAccessPolicy(WebAccessPolicy.PROHIBITED);
+		try (MockedStatic<ManagedWebAccess> managedWebAccess = mockStatic(ManagedWebAccess.class, Mockito.CALLS_REAL_METHODS)) {
+			Patient patient = new Patient();
+			patient.addName().setFamily("Simpson").addGiven("Homer");
+
+			ValidationResult output = myVal.validateWithResult(patient);
+			logResultsAndReturnAll(output);
+
+			managedWebAccess.verify(() -> ManagedWebAccess.accessor(any(), any()), never());
+		} finally {
+			ManagedWebAccess.setAccessPolicy(previousPolicy);
+		}
 	}
 
 	@SuppressWarnings("unchecked")

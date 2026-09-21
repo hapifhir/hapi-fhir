@@ -320,10 +320,13 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		// Don't include executing jobs here since there's no point in thrashing over and over
 		// in a busy wait while we wait for batch2 job processes to finish
 		while (!isStorageQueueEmpty(false)) {
-			if (myAllowDeferredTasksTimeout) {
-				if (timeoutManager.checkTimeout()) {
-					ourLog.info(toString());
-				}
+			if (isProcessDeferredPaused()) {
+				ourLog.warn("Deferred storage processing is paused - not saving the deferred entities");
+				return;
+			}
+
+			if (myAllowDeferredTasksTimeout && timeoutManager != null) {
+				timeoutManager.checkTimeout();
 			}
 			saveDeferred();
 		}

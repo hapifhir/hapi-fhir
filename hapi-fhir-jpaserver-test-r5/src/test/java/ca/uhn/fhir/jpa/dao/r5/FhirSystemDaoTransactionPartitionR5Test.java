@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r5;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.dao.PartitionedTransactionPartialFailureException;
 import ca.uhn.fhir.jpa.dao.TransactionPrePartitionResponse;
 import ca.uhn.fhir.jpa.dao.TransactionUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -18,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -85,10 +86,13 @@ public class FhirSystemDaoTransactionPartitionR5Test extends BaseJpaR5Test {
 		registerInterceptor(new FailingInterceptor());
 
 		// Test
-		assertThatThrownBy(()->mySystemDao.transaction(newSrd(), request))
-			.isInstanceOf(InternalErrorException.class);
+		Throwable thrown = catchThrowable(() -> mySystemDao.transaction(newSrd(), request));
 
 		// Verify
+		assertThat(thrown)
+			.isInstanceOf(PartitionedTransactionPartialFailureException.class)
+			.hasCauseInstanceOf(InternalErrorException.class)
+			.hasRootCauseMessage("Patient cannot be inactive");
 
 		// ID assignment should be rolled back on the second (failing) patient, but not
 		// on the first (succeeding) patient
@@ -96,6 +100,20 @@ public class FhirSystemDaoTransactionPartitionR5Test extends BaseJpaR5Test {
 		assertThat(p0.getIdElement().getIdPart()).matches("[0-9]+");
 		Patient p1 = (Patient)request.getEntry().get(1).getResource();
 		assertNull(p1.getIdElement().getIdPart());
+
+		PartitionedTransactionPartialFailureException partialFailure =
+			(PartitionedTransactionPartialFailureException) thrown;
+		List<Bundle.BundleEntryComponent> committedEntries =
+			partialFailure.getCommittedResponseEntriesPerSubBundle().stream()
+				.flatMap(List::stream)
+				.map(Bundle.BundleEntryComponent.class::cast)
+				.toList();
+		assertThat(committedEntries)
+			.as("the exception carries only the first, succeeding sub-bundle's committed entry")
+			.hasSize(1);
+		assertThat(committedEntries.get(0).getResponse().getLocation())
+			.as("the reported committed id is the active Patient that succeeded, not the failing one")
+			.startsWith("Patient/" + p0.getIdElement().getIdPart() + "/");
 	}
 
 

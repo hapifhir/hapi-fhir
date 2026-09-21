@@ -39,7 +39,7 @@ import ca.uhn.fhir.rest.server.IServerConformanceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerConfiguration;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.server.method.IMethodBinding;
 import ca.uhn.fhir.rest.server.method.IParameter;
 import ca.uhn.fhir.rest.server.method.OperationMethodBinding;
 import ca.uhn.fhir.rest.server.method.OperationMethodBinding.ReturnType;
@@ -141,7 +141,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 	}
 
 	private void checkBindingForSystemOps(
-			FhirTerser theTerser, IBase theRest, Set<String> theSystemOps, BaseMethodBinding theMethodBinding) {
+			FhirTerser theTerser, IBase theRest, Set<String> theSystemOps, IMethodBinding theMethodBinding) {
 		RestOperationTypeEnum restOperationType = theMethodBinding.getRestOperationType();
 		if (restOperationType.isSystemLevel()) {
 			String sysOp = restOperationType.getCode();
@@ -248,32 +248,32 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 
 		Set<String> systemOps = new HashSet<>();
 
-		Map<String, List<BaseMethodBinding>> resourceToMethods = configuration.collectMethodBindings();
+		Map<String, List<IMethodBinding>> resourceToMethods = configuration.collectMethodBindings();
 		Map<String, Class<? extends IBaseResource>> resourceNameToSharedSupertype =
 				configuration.getNameToSharedSupertype();
-		List<BaseMethodBinding> globalMethodBindings = configuration.getGlobalBindings();
+		List<IMethodBinding> globalMethodBindings = configuration.getGlobalBindings();
 
 		TreeMultimap<String, String> resourceNameToIncludes = TreeMultimap.create();
 		TreeMultimap<String, String> resourceNameToRevIncludes = TreeMultimap.create();
 		Set<String> resourcesWithIncludeParam = new HashSet<>();
 		Set<String> resourcesWithRevIncludeParam = new HashSet<>();
-		for (Entry<String, List<BaseMethodBinding>> nextEntry : resourceToMethods.entrySet()) {
+		for (Entry<String, List<IMethodBinding>> nextEntry : resourceToMethods.entrySet()) {
 			String resourceName = nextEntry.getKey();
-			for (BaseMethodBinding nextMethod : nextEntry.getValue()) {
-				if (nextMethod instanceof SearchMethodBinding) {
-					resourceNameToIncludes.putAll(resourceName, nextMethod.getIncludes());
-					resourceNameToRevIncludes.putAll(resourceName, nextMethod.getRevIncludes());
-					if (nextMethod.hasIncludeParameter(false)) {
+			for (IMethodBinding nextMethod : nextEntry.getValue()) {
+				if (nextMethod instanceof SearchMethodBinding searchBinding) {
+					resourceNameToIncludes.putAll(resourceName, searchBinding.getIncludes());
+					resourceNameToRevIncludes.putAll(resourceName, searchBinding.getRevIncludes());
+					if (searchBinding.hasIncludeParameter(false)) {
 						resourcesWithIncludeParam.add(resourceName);
 					}
-					if (nextMethod.hasIncludeParameter(true)) {
+					if (searchBinding.hasIncludeParameter(true)) {
 						resourcesWithRevIncludeParam.add(resourceName);
 					}
 				}
 			}
 		}
 
-		for (Entry<String, List<BaseMethodBinding>> nextEntry : resourceToMethods.entrySet()) {
+		for (Entry<String, List<IMethodBinding>> nextEntry : resourceToMethods.entrySet()) {
 
 			Set<String> operationNames = new HashSet<>();
 			String resourceName = nextEntry.getKey();
@@ -293,7 +293,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 				terser.addElement(resource, "type", def.getName());
 				terser.addElement(resource, "profile", def.getResourceProfile(serverBase));
 
-				for (BaseMethodBinding nextMethodBinding : nextEntry.getValue()) {
+				for (IMethodBinding nextMethodBinding : nextEntry.getValue()) {
 					RestOperationTypeEnum resOpCode = nextMethodBinding.getRestOperationType();
 					if (resOpCode.isTypeLevel() || resOpCode.isInstanceLevel()) {
 						String resOp;
@@ -380,7 +380,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 				// global flag set to true, meaning they apply to all resource types)
 				if (globalMethodBindings != null) {
 					Set<String> globalOperationNames = new HashSet<>();
-					for (BaseMethodBinding next : globalMethodBindings) {
+					for (IMethodBinding next : globalMethodBindings) {
 						if (next instanceof OperationMethodBinding) {
 							OperationMethodBinding methodBinding = (OperationMethodBinding) next;
 							if (methodBinding.isGlobalMethod()) {
@@ -520,7 +520,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 				}
 
 			} else {
-				for (BaseMethodBinding nextMethodBinding : nextEntry.getValue()) {
+				for (IMethodBinding nextMethodBinding : nextEntry.getValue()) {
 					checkBindingForSystemOps(terser, rest, systemOps, nextMethodBinding);
 					if (nextMethodBinding instanceof OperationMethodBinding) {
 						OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
@@ -545,7 +545,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		// global flag set to true, meaning they apply to all resource types)
 		if (globalMethodBindings != null) {
 			Set<String> globalOperationNames = new HashSet<>();
-			for (BaseMethodBinding next : globalMethodBindings) {
+			for (IMethodBinding next : globalMethodBindings) {
 				if (next instanceof OperationMethodBinding) {
 					OperationMethodBinding methodBinding = (OperationMethodBinding) next;
 					if (methodBinding.isGlobalMethod()) {
@@ -571,7 +571,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 	}
 
 	private void maybeAddBulkDataDeclarationToConformingToIg(
-			FhirTerser theTerser, IBaseConformance theBaseConformance, List<BaseMethodBinding> theServerBindings) {
+			FhirTerser theTerser, IBaseConformance theBaseConformance, List<IMethodBinding> theServerBindings) {
 		boolean bulkExportEnabled = theServerBindings.stream()
 				.filter(OperationMethodBinding.class::isInstance)
 				.map(OperationMethodBinding.class::cast)

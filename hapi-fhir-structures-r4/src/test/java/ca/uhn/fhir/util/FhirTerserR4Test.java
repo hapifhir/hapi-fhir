@@ -4,15 +4,13 @@ import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.auth.CompartmentSearchParameterModifications;
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.parser.JsonParser;
 
 import static ca.uhn.fhir.test.utilities.UuidUtils.UUID_PATTERN;
 
 import com.google.common.collect.Lists;
-import org.apache.jena.base.Sys;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -26,6 +24,7 @@ import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Enumeration;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Library;
@@ -55,8 +54,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -72,7 +69,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.test.utilities.UuidUtils.HASH_UUID_PATTERN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -1597,6 +1593,37 @@ public class FhirTerserR4Test {
 		}finally {
 			executor.shutdown();
 		}
+	}
+
+	/**
+	 * Thread safety of the shared modifications object itself is covered deterministically by
+	 * CompartmentSearchParameterModificationsTest; this asserts the compartment semantics that the
+	 * modifications overload is supposed to apply.
+	 */
+	@Test
+	void testIsSourceInCompartmentForTarget_appliesCompartmentModifications_returnsProperValue() {
+		FhirContext ctx = FhirContext.forR4();
+		FhirTerser terser = ctx.newTerser();
+		IdType patientId = new IdType("Patient/123");
+
+		// Group.member is in the Patient compartment definition, so the Group is in until "member" is omitted
+		Group groupWithMember = new Group();
+		groupWithMember.addMember().setEntity(new Reference("Patient/123"));
+		assertTrue(terser.isSourceInCompartmentForTarget("Patient", groupWithMember, patientId, new CompartmentSearchParameterModifications()));
+
+		CompartmentSearchParameterModifications withOmittedSP = new CompartmentSearchParameterModifications();
+		withOmittedSP.addSPToOmitFromCompartment("Group", "member");
+		assertFalse(terser.isSourceInCompartmentForTarget("Patient", groupWithMember, patientId, withOmittedSP));
+
+		// Group.managingEntity is not in the Patient compartment definition, so the Group is out until it is added
+		Group groupWithManagingEntity = new Group();
+		groupWithManagingEntity.setManagingEntity(new Reference("Patient/123"));
+		assertFalse(terser.isSourceInCompartmentForTarget(
+				"Patient", groupWithManagingEntity, patientId, new CompartmentSearchParameterModifications()));
+
+		CompartmentSearchParameterModifications withAdditionalSP = new CompartmentSearchParameterModifications();
+		withAdditionalSP.addSPToIncludeInCompartment("Group", "managing-entity");
+		assertTrue(terser.isSourceInCompartmentForTarget("Patient", groupWithManagingEntity, patientId, withAdditionalSP));
 	}
 
 	@Test

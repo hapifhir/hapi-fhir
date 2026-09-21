@@ -1,12 +1,15 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.dao.r5.FhirSystemDaoTransactionPartitionR5Test;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.util.BundleBuilder;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Bundle;
@@ -24,7 +27,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 
 import static ca.uhn.fhir.jpa.test.BaseJpaTest.newSrd;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -143,6 +148,77 @@ public class TransactionPartitionProcessorTest implements ITestDataBuilder {
 			.hasMessageContaining("Interceptor for Pointcut STORAGE_TRANSACTION_PRE_PARTITION must not return Bundles containing duplicates or entries which were not present in the original Bundle");
 	}
 
+	@Test
+	void testPartialFailure_secondSubBundleFails_exceptionContainsSucceededPartitionEntries() {
+		Bundle request = createRequest_Obs0_Patient0_Obs1_Patient1();
+
+		Bundle response0 = new Bundle();
+		response0.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
+		addResponseEntry(response0, "201 Created", "Patient/PAT-0", StorageResponseCodeEnum.SUCCESSFUL_CREATE);
+		addResponseEntry(response0, "201 Created", "Patient/PAT-1", StorageResponseCodeEnum.SUCCESSFUL_CREATE);
+		when(myTransactionProcessor.processTransactionAsSubRequest(any(), any(), any(), any(), anyBoolean()))
+				.thenReturn(response0)
+				.thenThrow(new InternalErrorException("Simulated failure on second partition"));
+
+		myInterceptor.setNextRanges(List.of(1, 3), List.of(0, 2));
+
+		PartitionedTransactionPartialFailureException ex =
+				executeAndCatchPartialFailure(request, "Simulated failure on second partition");
+
+		List<List<IBase>> committedPerSubBundle = ex.getCommittedResponseEntriesPerSubBundle();
+		assertThat(committedPerSubBundle).hasSize(1);
+		assertResponseLocations(committedPerSubBundle.get(0), "Patient/PAT-0", "Patient/PAT-1");
+	}
+
+	@Test
+	void testPartialFailure_thirdSubBundleFails_exceptionContainsFirstTwoPartitionEntries() {
+		BundleBuilder requestBuilder = new BundleBuilder(myFhirContext);
+		requestBuilder.addTransactionUpdateEntry(buildObservation(withId("OBS-0"), withSubject("Patient/PAT-0"), withStatus("final")));
+		requestBuilder.addTransactionUpdateEntry(buildPatient(withId("PAT-0")));
+		requestBuilder.addTransactionUpdateEntry(buildObservation(withId("OBS-1"), withSubject("Patient/PAT-1"), withStatus("final")));
+		requestBuilder.addTransactionUpdateEntry(buildPatient(withId("PAT-1")));
+		requestBuilder.addTransactionUpdateEntry(buildEncounter(withId("ENC-0"), withStatus("planned")));
+		Bundle request = requestBuilder.getBundleTyped();
+
+		Bundle response0 = new Bundle();
+		response0.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
+		addResponseEntry(response0, "201 Created", "Patient/PAT-0", StorageResponseCodeEnum.SUCCESSFUL_CREATE);
+		addResponseEntry(response0, "201 Created", "Patient/PAT-1", StorageResponseCodeEnum.SUCCESSFUL_CREATE);
+
+		Bundle response1 = new Bundle();
+		response1.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
+		addResponseEntry(response1, "201 Created", "Observation/OBS-0", StorageResponseCodeEnum.SUCCESSFUL_CREATE);
+		addResponseEntry(response1, "201 Created", "Observation/OBS-1", StorageResponseCodeEnum.SUCCESSFUL_CREATE);
+
+		when(myTransactionProcessor.processTransactionAsSubRequest(any(), any(), any(), any(), anyBoolean()))
+				.thenReturn(response0, response1)
+				.thenThrow(new InternalErrorException("Simulated failure on third partition"));
+
+		myInterceptor.setNextRanges(List.of(1, 3), List.of(0, 2), List.of(4));
+
+		PartitionedTransactionPartialFailureException ex =
+				executeAndCatchPartialFailure(request, "Simulated failure on third partition");
+
+		List<List<IBase>> committedPerSubBundle = ex.getCommittedResponseEntriesPerSubBundle();
+		assertThat(committedPerSubBundle).hasSize(2);
+		assertResponseLocations(committedPerSubBundle.get(0), "Patient/PAT-0", "Patient/PAT-1");
+		assertResponseLocations(committedPerSubBundle.get(1), "Observation/OBS-0", "Observation/OBS-1");
+	}
+
+	@Test
+	void testPartialFailure_firstSubBundleFails_originalExceptionPropagates() {
+		Bundle request = createRequest_Obs0_Patient0_Obs1_Patient1();
+
+		when(myTransactionProcessor.processTransactionAsSubRequest(any(), any(), any(), any(), anyBoolean()))
+				.thenThrow(new InternalErrorException("Simulated failure on first partition"));
+
+		myInterceptor.setNextRanges(List.of(1, 3), List.of(0, 2));
+
+		assertThatThrownBy(() -> mySvc.execute(request))
+				.isInstanceOf(InternalErrorException.class)
+				.isNotInstanceOf(PartitionedTransactionPartialFailureException.class)
+				.hasMessageContaining("Simulated failure on first partition");
+	}
 
 	private Bundle createRequest_Obs0_Patient0_Obs1_Patient1() {
 		BundleBuilder requestBuilder = new BundleBuilder(myFhirContext);
@@ -167,6 +243,23 @@ public class TransactionPartitionProcessorTest implements ITestDataBuilder {
 	@Override
 	public FhirContext getFhirContext() {
 		return myFhirContext;
+	}
+
+	private PartitionedTransactionPartialFailureException executeAndCatchPartialFailure(
+			Bundle theRequest, String theExpectedRootCauseMessage) {
+		Throwable thrown = catchThrowable(() -> mySvc.execute(theRequest));
+		assertThat(thrown)
+				.isInstanceOf(PartitionedTransactionPartialFailureException.class)
+				.hasMessageStartingWith(Msg.code(2974))
+				.hasCauseInstanceOf(InternalErrorException.class)
+				.hasRootCauseMessage(theExpectedRootCauseMessage);
+		return (PartitionedTransactionPartialFailureException) thrown;
+	}
+
+	private static void assertResponseLocations(List<IBase> theResponseEntriesForPartition, String... theExpectedLocations) {
+		assertThat(theResponseEntriesForPartition)
+				.extracting(e -> ((Bundle.BundleEntryComponent) e).getResponse().getLocation())
+				.containsExactly(theExpectedLocations);
 	}
 
 	private static void addResponseEntry(Bundle theResponseBundle, String theStatusLine, String theLocation, StorageResponseCodeEnum theStorageOutcome) {

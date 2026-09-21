@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef.containertests;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddColumnTaskTestSuite;
+import ca.uhn.fhir.jpa.migrate.taskdef.AddForeignKeyTaskITTestSuite;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddIdGeneratorTaskITTestSuite;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddIndexTaskITTestSuite;
 import ca.uhn.fhir.jpa.migrate.taskdef.DropIndexTaskITTestSuite;
@@ -74,6 +75,15 @@ public abstract class BaseCollectedMigrationTaskSuite {
 
 	@Nested
 	class ModifyColumnTaskTests implements ModifyColumnTaskTestSuite {
+		@Override
+		public Support getSupport() {
+			return BaseCollectedMigrationTaskSuite.this.getSupport();
+		}
+	}
+
+	@Nested
+	class AddForeignKeyTests implements AddForeignKeyTaskITTestSuite {
+
 		@Override
 		public Support getSupport() {
 			return BaseCollectedMigrationTaskSuite.this.getSupport();

@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.sp.SearchParamIdentityCacheSvcImpl;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import com.google.common.annotations.VisibleForTesting;
@@ -74,6 +75,15 @@ public class DaoSearchParamSynchronizer {
 	@Autowired
 	private IHapiTransactionService myTransactionService;
 
+	@Autowired(required = false)
+	public void setSearchParamIndexProviderRegistry(SearchParamIndexProviderRegistry theRegistry) {
+		if (theRegistry != null) {
+			myIndexProviderRegistry = theRegistry;
+		}
+	}
+
+	private SearchParamIndexProviderRegistry myIndexProviderRegistry = new SearchParamIndexProviderRegistry(List.of());
+
 	private UniqueIndexPreExistenceChecker myUniqueIndexPreExistenceChecker;
 
 	@PostConstruct
@@ -87,7 +97,8 @@ public class DaoSearchParamSynchronizer {
 			TransactionDetails theTransactionDetails,
 			ResourceIndexedSearchParams theParams,
 			ResourceTable theEntity,
-			ResourceIndexedSearchParams existingParams) {
+			ResourceIndexedSearchParams existingParams,
+			boolean isNewResource) {
 		AddRemoveCount retVal = new AddRemoveCount();
 
 		synchronize(
@@ -98,14 +109,14 @@ public class DaoSearchParamSynchronizer {
 				theParams.myStringParams,
 				existingParams.myStringParams,
 				null);
-		synchronize(
+		synchronizeToken(
 				theRequestDetails,
 				theTransactionDetails,
 				theEntity,
 				retVal,
 				theParams.myTokenParams,
 				existingParams.myTokenParams,
-				null);
+				isNewResource);
 		synchronize(
 				theRequestDetails,
 				theTransactionDetails,
@@ -198,6 +209,36 @@ public class DaoSearchParamSynchronizer {
 	@VisibleForTesting
 	public void setStorageSettings(JpaStorageSettings theStorageSettings) {
 		myStorageSettings = theStorageSettings;
+	}
+
+	/**
+	 * Synchronizes token index params for a resource, writing to the built-in {@code HFJ_SPIDX_TOKEN}
+	 * table (unless suppressed) and to any registered custom token index provider.
+	 */
+	private <T extends BaseResourceIndex> void synchronizeToken(
+			RequestDetails theRequestDetails,
+			TransactionDetails theTransactionDetails,
+			ResourceTable theEntity,
+			AddRemoveCount theAddRemoveCount,
+			Collection<T> theNewParams,
+			Collection<T> theExistingParams,
+			boolean isNewResource) {
+		SearchParamIndexRouting routing = SearchParamIndexRouting.forParamType(RestSearchParameterTypeEnum.TOKEN);
+		if (!myIndexProviderRegistry.isBuiltInIndexWriteSuppressed(routing)) {
+			synchronize(
+					theRequestDetails,
+					theTransactionDetails,
+					theEntity,
+					theAddRemoveCount,
+					theNewParams,
+					theExistingParams,
+					null);
+		}
+		myIndexProviderRegistry.resolveProvider(routing).ifPresent(provider -> {
+			AddRemoveCount delta = provider.synchronize(theRequestDetails, theNewParams, theEntity, isNewResource);
+			theAddRemoveCount.addToAddCount(delta.getAddCount());
+			theAddRemoveCount.addToRemoveCount(delta.getRemoveCount());
+		});
 	}
 
 	private <T extends BaseResourceIndex> void synchronize(

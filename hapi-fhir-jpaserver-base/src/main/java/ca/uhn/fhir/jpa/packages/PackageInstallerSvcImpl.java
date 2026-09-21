@@ -707,10 +707,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			return Optional.empty();
 		}
 		String version = extractStringValueOrEmpty(theResource, "version", () -> null);
-		return myTxService
-				.withRequest(createRequestDetails())
-				.execute(() -> myTermCodeSystemStorageSvc.findExistingCodeSystemResourcePid(url, version))
-				.map(pid -> theDao.readByPid(pid));
+		return myTxService.withRequest(createRequestDetails()).execute(() -> myTermCodeSystemStorageSvc
+				.findExistingCodeSystemResourcePid(url, version)
+				.map(pid -> theDao.readByPid(pid)));
 	}
 
 	private Optional<IBaseResource> readResourceById(IFhirResourceDao dao, IIdType id) {

@@ -1,9 +1,11 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyModeEnum;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.custom.CustomTerminologyCsvBuilder;
+import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -11,24 +13,22 @@ import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
-import net.sourceforge.plantuml.klimt.creole.Sea;
-import org.apache.lucene.util.StringHelper;
 import org.hl7.fhir.common.hapi.validation.util.TermConceptPropertyTypeEnum;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.util.List;
 
-import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.CUSTOM_CONCEPTS_FILE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -36,6 +36,7 @@ public class TerminologyLoaderSvcCustomJpaTest extends BaseJpaR4Test {
 
 	private static final String CODESYSTEM_URL = "http://example.com/labCodes";
 	private static final String VERSION_1_0 = "1.0";
+	private static final String VERSION_2_0 = "2.0";
 
 	@Autowired
 	private TerminologyTestHelper myTerminologyTestHelper;
@@ -73,7 +74,7 @@ public class TerminologyLoaderSvcCustomJpaTest extends BaseJpaR4Test {
 
 			assertThat(chemConcept.getParents()).isEmpty();
 			assertThat(chemConcept.getChildCodes()).hasSize(2);
-			assertThat(chemConcept.getChildCodes().stream().map(t->t.getCode()).toList()).containsExactlyInAnyOrder(
+			assertThat(chemConcept.getChildCodes().stream().map(TermConcept::getCode).toList()).containsExactlyInAnyOrder(
 				"HB", "NEUT"
 			);
 
@@ -96,9 +97,7 @@ public class TerminologyLoaderSvcCustomJpaTest extends BaseJpaR4Test {
 		myTerminologyTestHelper.startImportCustomJobAndWaitForCompletion(CODESYSTEM_URL, VERSION_1_0, files);
 
 		// Verify
-		runInTransaction(()-> {
-			assertEquals(5, myTermConceptDao.count());
-		});
+		runInTransaction(()-> assertEquals(5, myTermConceptDao.count()));
 	}
 
 	@Test
@@ -308,7 +307,6 @@ public class TerminologyLoaderSvcCustomJpaTest extends BaseJpaR4Test {
 				assertThat(report).contains(
 					"Concepts Removed             : 2",
 					"Concepts Links Removed       : 1",
-					"Concept Designations Removed : 1",
 					"Concept Properties Removed   : 1"
 				);
 			}
@@ -326,6 +324,113 @@ public class TerminologyLoaderSvcCustomJpaTest extends BaseJpaR4Test {
 				);
 			}
 		}
+
+		// Make sure we can expand codes form the updated CodeSystem
+		ValueSet vs = new ValueSet();
+		vs.setId("VS");
+		vs.setUrl(VS_URL);
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose().addInclude().setSystem(CODESYSTEM_URL);
+		ValueSet expansion = myValueSetDao.expand(vs, new ValueSetExpansionOptions());
+		assertThat(expansion.getExpansion().getContains()).hasSizeGreaterThan(0);
 	}
+
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+    ADD,      false
+    ADD,      true
+    REMOVE,   false
+    REMOVE,   true
+    """)
+	void testModes_currentVersionHandling(
+		ImportTerminologyModeEnum theMode, boolean theDontMakeCurrent) throws IOException {
+		// Setup: two versions exist, VERSION_2_0 is current, VERSION_1_0 is not
+		CodeSystem v1 = new CodeSystem();
+		v1.setUrl(CODESYSTEM_URL);
+		v1.setVersion(VERSION_1_0);
+		v1.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		v1.addConcept().setCode("INITIAL-1").setDisplay("Initial 1");
+		myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), v1);
+
+		CodeSystem v2 = new CodeSystem();
+		v2.setUrl(CODESYSTEM_URL);
+		v2.setVersion(VERSION_2_0);
+		v2.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		v2.addConcept().setCode("OTHER-1").setDisplay("Other 1");
+		myTermCodeSystemStorageSvc.addCodeSystemConcepts(newSrd(), v2);
+
+		runInTransaction(() -> {
+			TermCodeSystem tcs = myTermCodeSystemDao.findByCodeSystemUri(CODESYSTEM_URL);
+			assertEquals(VERSION_2_0, tcs.getCurrentVersion().getCodeSystemVersionId());
+		});
+
+		// Test: patch VERSION_1_0 (the non-current version) via ADD/REMOVE
+		ZipCollectionBuilder files = new ZipCollectionBuilder(true);
+		CustomTerminologyCsvBuilder deltaBuilder = new CustomTerminologyCsvBuilder();
+		deltaBuilder.addConcept("NEW-1").withDisplay("New 1");
+		files.addCustomTerminology(deltaBuilder);
+		myTerminologyTestHelper.startImportCustomJobAndWaitForCompletion(
+			CODESYSTEM_URL, VERSION_1_0, files, theMode, theDontMakeCurrent);
+
+		// Verify: currentVersionPid only moves to VERSION_1_0 when makeCurrent was requested
+		runInTransaction(() -> {
+			TermCodeSystem tcs = myTermCodeSystemDao.findByCodeSystemUri(CODESYSTEM_URL);
+			String currentVersionId = tcs.getCurrentVersion().getCodeSystemVersionId();
+			if (theDontMakeCurrent) {
+				assertEquals(VERSION_2_0, currentVersionId);
+			} else {
+				assertEquals(VERSION_1_0, currentVersionId);
+			}
+		});
+	}
+
+	/**
+	 * Make sure that
+	 */
+	@ParameterizedTest
+	@CsvSource(textBlock =
+		///```
+		///Make First Version   Make Second Version   Expected Code
+		///Current              Current               in Expansion
+		///```
+		"""
+		   false              , false               , CODE-1.0-1
+		   true               , false               , CODE-1.0-1
+		   false              , true                , CODE-2.0-1
+		   true               , true                , CODE-2.0-1
+		"""
+	)
+	void testAddConcepts_MarkAsCurrent(boolean theMakeFirstVersionCurrent, boolean theMakeSecondVersionCurrent, String theExpectedCode) throws IOException {
+
+		// Setup
+
+		ZipCollectionBuilder files = new ZipCollectionBuilder(false);
+		CustomTerminologyCsvBuilder deltaBuilder = new CustomTerminologyCsvBuilder();
+		deltaBuilder.addConcept("CODE-1.0-1").withDisplay("CODE 1");
+		files.addCustomTerminology(deltaBuilder);
+		myTerminologyTestHelper.startImportCustomJobAndWaitForCompletion(CODESYSTEM_URL, VERSION_1_0, files, ImportTerminologyModeEnum.ADD, !theMakeFirstVersionCurrent);
+
+		// Test
+
+		files = new ZipCollectionBuilder(false);
+		deltaBuilder = new CustomTerminologyCsvBuilder();
+		deltaBuilder.addConcept("CODE-2.0-1").withDisplay("CODE 1");
+		files.addCustomTerminology(deltaBuilder);
+		myTerminologyTestHelper.startImportCustomJobAndWaitForCompletion(CODESYSTEM_URL, VERSION_2_0, files, ImportTerminologyModeEnum.ADD, !theMakeSecondVersionCurrent);
+
+		// Verify
+
+		ValueSet vs = new ValueSet();
+		vs.setId("VS");
+		vs.setUrl(VS_URL);
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose().addInclude().setSystem(CODESYSTEM_URL);
+		ValueSet expansion = myValueSetDao.expand(vs, new ValueSetExpansionOptions());
+		assertThat(expansion.getExpansion().getContains().stream().map(t->t.getCode()).toList()).containsExactly(
+			theExpectedCode
+		);
+
+}
+
 
 }

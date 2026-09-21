@@ -40,6 +40,7 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinColumns;
@@ -181,6 +182,9 @@ public class JpaModelScannerAndVerifier {
 
 		scan(theClazz, theNames, theIsSuperClass, isView);
 
+		// entities using @IdClass declare a composite primary key with multiple @Id fields in the same class
+		boolean hasIdClass = theClazz.getAnnotation(IdClass.class) != null;
+
 		boolean foundId = false;
 		for (Field nextField : theClazz.getDeclaredFields()) {
 			if (Modifier.isStatic(nextField.getModifiers())) {
@@ -193,7 +197,7 @@ public class JpaModelScannerAndVerifier {
 			Id id = nextField.getAnnotation(Id.class);
 			boolean isId = id != null;
 			if (isId) {
-				Validate.isTrue(!foundId, "Multiple fields annotated with @Id");
+				Validate.isTrue(!foundId || hasIdClass, "Multiple fields annotated with @Id");
 				foundId = true;
 
 				if (Long.class.equals(nextField.getType())) {

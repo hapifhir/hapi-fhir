@@ -32,7 +32,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.server.method.IMethodBinding;
 import jakarta.interceptor.Interceptors;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -348,7 +348,7 @@ public abstract class AbstractJaxRsResourceProvider<R extends IBaseResource> ext
 	 */
 	private Response execute(final Builder theRequestBuilder, final String methodKey) throws IOException {
 		final JaxRsRequest theRequest = theRequestBuilder.build();
-		final BaseMethodBinding method = getBinding(theRequest.getRestOperationType(), methodKey);
+		final IMethodBinding method = getBinding(theRequest.getRestOperationType(), methodKey);
 		try {
 			return (Response) method.invokeServer(this, theRequest);
 		} catch (final Throwable theException) {
@@ -373,7 +373,7 @@ public abstract class AbstractJaxRsResourceProvider<R extends IBaseResource> ext
 	 * @param theBindingKey the key determining the method to be executed (needed for e.g. custom operation)
 	 * @return
 	 */
-	protected BaseMethodBinding getBinding(final RestOperationTypeEnum restOperation, final String theBindingKey) {
+	protected IMethodBinding getBinding(final RestOperationTypeEnum restOperation, final String theBindingKey) {
 		return getBindings().getBinding(restOperation, theBindingKey);
 	}
 

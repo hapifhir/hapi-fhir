@@ -1,7 +1,7 @@
 package ca.uhn.hapi.fhir.cdshooks.svc.prefetch;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
+import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.Encounter;
 import org.junit.jupiter.api.Test;
@@ -22,19 +22,19 @@ class PrefetchTemplateUtilCommonTest {
 	@Test
 	void substituteTemplateShouldInterpolatePrefetchTokensWithContextValues() {
 		String template = "{{context.userId}} a {{context.patientId}} b {{context.patientId}}";
-		CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
-		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
-		context.put("userId", TEST_USER_ID);
-		String result = PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext);
+		CdsServiceRequestJson request = new CdsServiceRequestJson();
+		request.addContext(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
+		request.addContext("userId", TEST_USER_ID);
+		String result = PrefetchTemplateUtil.substituteTemplate(template, request, ourFhirContext);
 		assertThat(result).isEqualTo(TEST_USER_ID + " a " + TEST_PATIENT_ID + " b " + TEST_PATIENT_ID);
 	}
 
 	@Test
 	void substituteTemplateShouldThrowForMissingPrefetchTokens() {
 		String template = "{{context.userId}} a {{context.patientId}}";
-		CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
-		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
-		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
+		CdsServiceRequestJson request = new CdsServiceRequestJson();
+		request.addContext(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
+		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, request, ourFhirContext))
 				.isInstanceOf(InvalidRequestException.class)
 				.hasMessage(
 						"HAPI-2372: Request context did not provide a value for key <userId>.  Available keys in context are: [patientId]");
@@ -43,10 +43,9 @@ class PrefetchTemplateUtilCommonTest {
 	@Test
 	void substituteTemplateShouldThrow412ForMissingContext() {
 		String template = "{{context.userId}} a {{context.patientId}}";
-		// Leave the context empty for the test.
-		CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
+		CdsServiceRequestJson request = new CdsServiceRequestJson();
 
-		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
+		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, request, ourFhirContext))
 				.isInstanceOf(InvalidRequestException.class)
 				.hasMessage(
 						"HAPI-2372: Request context did not provide a value for key <userId>.  Available keys in context are: []");
@@ -55,9 +54,9 @@ class PrefetchTemplateUtilCommonTest {
 	@Test
 	void substituteTemplateShouldThrowForMissingNestedPrefetchTokens() {
 		String template = "{{context.draftOrders.ServiceRequest.id}} a {{context.patientId}}";
-		CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
-		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
-		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
+		CdsServiceRequestJson request = new CdsServiceRequestJson();
+		request.addContext(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
+		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, request, ourFhirContext))
 				.isInstanceOf(InvalidRequestException.class)
 				.hasMessage(
 						"HAPI-2372: Request context did not provide a value for key <draftOrders>.  Available keys in context are: [patientId]");
@@ -67,11 +66,11 @@ class PrefetchTemplateUtilCommonTest {
 	void substituteTemplateShouldHandleWhitespaceAroundUnionOperator() {
 		// setup
 		final String template = "{{context.userId | context.patientId}}";
-		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
-		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
-		context.put("userId", TEST_USER_ID);
+		final CdsServiceRequestJson request = new CdsServiceRequestJson();
+		request.addContext(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
+		request.addContext("userId", TEST_USER_ID);
         // execute
-		final String actual = PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext);
+		final String actual = PrefetchTemplateUtil.substituteTemplate(template, request, ourFhirContext);
         // validate
 		assertThat(actual).isEqualTo(TEST_USER_ID + "," + TEST_PATIENT_ID);
 	}
@@ -80,10 +79,10 @@ class PrefetchTemplateUtilCommonTest {
 	void substituteTemplateShouldThrowWhenDefaultPartKeyHoldsNullValue() {
 		// setup
 		final String template = "Condition?patient={{context.patientId}}";
-		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
-		context.put(PATIENT_ID_CONTEXT_KEY, null);
+		final CdsServiceRequestJson request = new CdsServiceRequestJson();
+		request.addContext(PATIENT_ID_CONTEXT_KEY, null);
 		// execute & validate
-		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
+		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, request, ourFhirContext))
 				.isInstanceOf(InvalidRequestException.class)
 				.hasMessage("HAPI-2375: Request context value for key <patientId> is null or not a string.");
 	}
@@ -92,10 +91,10 @@ class PrefetchTemplateUtilCommonTest {
 	void substituteTemplateShouldThrowWhenDefaultPartKeyHoldsResourceInsteadOfString() {
 		// setup
 		final String template = "Condition?encounter={{context.encounter}}";
-		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
-		context.put("encounter", new Encounter().setId("enc1"));
+		final CdsServiceRequestJson request = new CdsServiceRequestJson();
+		request.addContext("encounter", new Encounter().setId("enc1"));
         // setup & execute
-		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
+		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, request, ourFhirContext))
 				.isInstanceOf(InvalidRequestException.class)
 				.hasMessageContaining("encounter");
 	}
@@ -104,10 +103,10 @@ class PrefetchTemplateUtilCommonTest {
 	void substituteTemplateShouldThrowWhenExpressionMatchesNoKnownPattern() {
 		// setup
 		final String template = "Patient?id={{unknownPattern}}";
-		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
-		context.put("patientId", TEST_PATIENT_ID);
+		final CdsServiceRequestJson request = new CdsServiceRequestJson();
+		request.addContext("patientId", TEST_PATIENT_ID);
 		// execute & validate
-		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
+		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, request, ourFhirContext))
 				.isInstanceOf(InvalidRequestException.class)
 				.hasMessageContaining(
 						"Unable to resolve prefetch template : unknownPattern. No result was found for the prefetch query.");
@@ -117,13 +116,13 @@ class PrefetchTemplateUtilCommonTest {
 	void substituteTemplateShouldThrowWhenFhirPathContextKeyHoldsNonResourceValue() {
 		// setup
 		final String template = "Patient?id={{context.encounter.id}}";
-		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
-		context.put("encounter", "not-a-resource");
+		final CdsServiceRequestJson request = new CdsServiceRequestJson();
+		request.addContext("encounter", "not-a-resource");
 		// execute & validate
-		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
+		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, request, ourFhirContext))
 				.isInstanceOf(InvalidRequestException.class)
-				.hasMessageContaining(
-						"Request context did not provide valid R4 Bundle resource for FHIRPath template key <encounter>");
+				.hasMessageContaining("did not provide a valid")
+				.hasMessageContaining("encounter");
 	}
 
 }

@@ -3826,6 +3826,40 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 	}
 
 	@Test
+	void transactionWithPatchOnExistingPatient_writeOnlyPermissions_returnsForbidden() throws IOException {
+		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("transactions").transaction().withAnyOperation().andApplyNormalRules().andThen()
+					.allow("write patient").write().resourcesOfType(Patient.class).withAnyId().andThen()
+					.denyAll("deny all")
+					.build();
+			}
+		});
+		Bundle input = new Bundle();
+		input.setType(Bundle.BundleType.TRANSACTION);
+		input.addEntry().getRequest().setUrl("Patient/1").setMethod(Bundle.HTTPVerb.PATCH);
+
+		Bundle output = new Bundle();
+		output.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
+		Patient echoedPatient = new Patient();
+		echoedPatient.setActive(true);
+		echoedPatient.addIdentifier().setValue("SECRET-MRN");
+		output.addEntry().setResource(echoedPatient).getResponse().setLocation("/Patient/1");
+
+		ourReturn = Collections.singletonList(output);
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/");
+		httpPost.setEntity(createFhirResourceEntity(input));
+		CloseableHttpResponse status = ourClient.execute(httpPost);
+		String resp = extractResponseAndClose(status);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertThat(resp)
+			.as("a transaction response must not disclose an embedded resource the caller cannot read")
+			.doesNotContain("SECRET-MRN");
+	}
+
+		@Test
 	public void testWriteByCompartmentCreate() throws Exception {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -4046,12 +4080,26 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		// Conditional
 		ourHitMethod = false;
 		httpPost = new HttpPut(ourServer.getBaseUrl() + "/Patient?foo=bar");
-		httpPost.setEntity(createFhirResourceEntity(createPatient(1)));
+		httpPost.setEntity(createFhirResourceEntity(createPatient(null)));
 		status = ourClient.execute(httpPost);
 		response = extractResponseAndClose(status);
 		assertEquals(ERR403, response);
 		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertFalse(ourHitMethod);
+
+		// this case simulates the situation where the user provided id matches the rules but the actual resolution of
+		// the conditional url matched to another resource. As a result, the operation is allowed at the
+		// SERVER_INCOMING_REQUEST_PRE_HANDLED pointcut but denied at STORAGE_PRESTORAGE_RESOURCE_CREATED.
+		// Note that in real DAO, this would be caught earlier with HAPI-2279; however, even if it does not, the
+		// AuthorizationInterceptor can still catch it.
+		ourHitMethod = false;
+		httpPost = new HttpPut(ourServer.getBaseUrl() + "/Patient?foo=bar");
+		httpPost.setEntity(createFhirResourceEntity(createPatient(1)));
+		status = ourClient.execute(httpPost);
+		response = extractResponseAndClose(status);
+		assertEquals(ERR403, response);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		httpPost = new HttpPut(ourServer.getBaseUrl() + "/Patient?foo=bar");

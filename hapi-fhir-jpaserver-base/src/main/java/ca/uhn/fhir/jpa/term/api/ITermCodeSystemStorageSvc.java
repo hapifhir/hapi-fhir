@@ -49,6 +49,15 @@ public interface ITermCodeSystemStorageSvc {
 				|| (boolean) theRequestDetails.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);
 	}
 
+	/**
+	 * Marks the given version of the given code system as the current version. This means
+	 * that lookups, valueset inclusions, etc for this code system will use the given
+	 * version if no version is specified.
+	 *
+	 * @since 8.12.0
+	 */
+	void makeCodeSystemCurrent(String theSystemUri, String theSystemVersionId);
+
 	void storeNewCodeSystemVersion(
 			String theSystemUri,
 			String theSystemName,

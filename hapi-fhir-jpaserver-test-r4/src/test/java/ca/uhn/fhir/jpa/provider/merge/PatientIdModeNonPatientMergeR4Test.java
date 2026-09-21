@@ -56,7 +56,7 @@ class PatientIdModeNonPatientMergeR4Test extends BaseResourceProviderR4Test {
 
 		// Registered here, unregistered automatically by BaseJpaTest.@AfterEach
 		PatientIdPartitionInterceptor partitionInterceptor = new PatientIdPartitionInterceptor(
-			getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry);
+			getFhirContext(), mySearchParamExtractor, myPartitionSettings, myDaoRegistry, myTransactionBundleNormalizer);
 		registerInterceptor(partitionInterceptor);
 
 		myPartitionSettings.setPartitioningEnabled(true);
@@ -68,7 +68,7 @@ class PatientIdModeNonPatientMergeR4Test extends BaseResourceProviderR4Test {
 		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths("Provenance.target");
 
 		myMergeHelper = new MergeOperationTestHelper(
-			myClient, myBatch2JobHelper, myFhirContext, myResourceLinkServiceFactory, myDaoRegistry);
+			myClient, myBatch2JobHelper, myFhirContext, myResourceLinkServiceFactory);
 	}
 
 	@Override

@@ -38,17 +38,21 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.collections4.ListUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.model.entity.PersistedResourceModifiedMessageEntityPK.with;
 
@@ -59,13 +63,19 @@ import static ca.uhn.fhir.jpa.model.entity.PersistedResourceModifiedMessageEntit
  */
 public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModifiedMessagePersistenceSvc {
 
+	/**
+	 * The maximum number of primary keys deleted by a single statement.  The primary key is composed of three columns,
+	 * so each key costs three bound parameters and Oracle refuses any statement carrying more than 1000 of them.
+	 */
+	static final int DELETE_BATCH_SIZE = 250;
+
 	private final FhirContext myFhirContext;
 
 	private final IResourceModifiedDao myResourceModifiedDao;
 
 	private final DaoRegistry myDaoRegistry;
 
-	private final ObjectMapper myObjectMapper;
+	private final JsonMapper myJsonMapper;
 
 	private final HapiTransactionService myHapiTransactionService;
 
@@ -80,7 +90,7 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 		myResourceModifiedDao = theResourceModifiedDao;
 		myDaoRegistry = theDaoRegistry;
 		myHapiTransactionService = theHapiTransactionService;
-		myObjectMapper = new ObjectMapper();
+		myJsonMapper = new JsonMapper();
 	}
 
 	@Override
@@ -150,6 +160,23 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 		return removedCount == 1;
 	}
 
+	@Override
+	public int deleteByPKs(Collection<IPersistedResourceModifiedMessagePK> theResourceModifiedPKs) {
+		if (theResourceModifiedPKs.isEmpty()) {
+			return 0;
+		}
+
+		List<PersistedResourceModifiedMessageEntityPK> pks = theResourceModifiedPKs.stream()
+				.map(PersistedResourceModifiedMessageEntityPK.class::cast)
+				.collect(Collectors.toList());
+
+		int retVal = 0;
+		for (List<PersistedResourceModifiedMessageEntityPK> nextChunk : ListUtils.partition(pks, DELETE_BATCH_SIZE)) {
+			retVal += myResourceModifiedDao.removeByPks(nextChunk);
+		}
+		return retVal;
+	}
+
 	protected ResourceModifiedMessage inflateResourceModifiedMessageFromEntity(
 			ResourceModifiedEntity theResourceModifiedEntity) {
 		String resourceType = theResourceModifiedEntity.getResourceType();
@@ -186,8 +213,8 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 
 	private ResourceModifiedMessage getPayloadLessMessageFromString(String thePayloadLessMessage) {
 		try {
-			return myObjectMapper.readValue(thePayloadLessMessage, ResourceModifiedMessage.class);
-		} catch (JsonProcessingException e) {
+			return myJsonMapper.readValue(thePayloadLessMessage, ResourceModifiedMessage.class);
+		} catch (JacksonException e) {
 			throw new ConfigurationException(Msg.code(2334) + "Failed to json deserialize payloadless  message", e);
 		}
 	}
@@ -196,8 +223,8 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 		ResourceModifiedMessage tempMessage = new PayloadLessResourceModifiedMessage(theMsg);
 
 		try {
-			return myObjectMapper.writeValueAsString(tempMessage);
-		} catch (JsonProcessingException e) {
+			return myJsonMapper.writeValueAsString(tempMessage);
+		} catch (JacksonException e) {
 			throw new ConfigurationException(Msg.code(2335) + "Failed to serialize empty ResourceModifiedMessage", e);
 		}
 	}

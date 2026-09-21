@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 8192
+jira: SMILE-12465
+title: "Previously, a collation-fix migration recreated the index `IDX_RES_TYPE_FHIR_ID` without accounting for
+database partition mode. This affected only clients running SQL Server (MSSQL) in database partition mode, where
+the index was rebuilt without the `PARTITION_ID` key column. This has been fixed."

@@ -1,0 +1,11 @@
+---
+type: fix
+issue: 8168
+title: "SearchParameterUtil now correctly recognizes the 'patient' search parameter
+  as a Patient compartment member when they alias or narrow another search parameter on the same
+  resource that provides Patient compartment membership (e.g. `Observation.patient` narrows
+  `Observation.subject` via the `.where(resolve() is Patient)` pattern; R5 `Coverage.patient` exactly
+  aliases `Coverage.beneficiary`). Previously only Device.patient was special-cased, causing
+  compartment-based access checks and operations such as MDM auto-expansion to silently skip searches using the
+  'patient' search parameter on these resources. Patient search parameters whose own field does
+  not provide compartment membership (e.g. R5 `SupplyRequest.deliverFor`) are not added."

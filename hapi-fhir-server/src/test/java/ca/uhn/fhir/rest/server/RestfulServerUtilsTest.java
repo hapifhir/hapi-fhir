@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
 import ca.uhn.fhir.rest.api.PreferHandlingEnum;
 import ca.uhn.fhir.rest.api.PreferHeader;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -67,6 +68,17 @@ public class RestfulServerUtilsTest {
 		PreferHeader header = RestfulServerUtils.parsePreferHeader(null, "respond-async");
 		assertNull(header.getReturn());
 		assertTrue(header.getRespondAsync());
+	}
+
+	/**
+	 * DELETE is deliberately excluded from {@code ourOperationsWhichAllowPreferHeader}, which is why a DELETE
+	 * response body is never suppressed by a client-supplied {@code Prefer: return=minimal}. If DELETE is ever
+	 * added here, the read-authorization design in {@code AuthorizationInterceptor} (which relies on DELETE
+	 * never carrying a Prefer-suppressible resource body) needs to be revisited.
+	 */
+	@Test
+	public void respectPreferHeader_forDelete_returnsFalse() {
+		assertFalse(RestfulServerUtils.respectPreferHeader(RestOperationTypeEnum.DELETE));
 	}
 
 	@Test

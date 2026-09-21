@@ -20,7 +20,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
-import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.server.method.IMethodBinding;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -569,7 +569,7 @@ public class OpenApiInterceptorTest {
 
 	static class CustomOpenApiInterceptor extends OpenApiInterceptor {
 		@Override
-		protected void customizeOperation(OpenAPI openApi, io.swagger.v3.oas.models.Operation operation, BaseMethodBinding baseMethodBinding) {
+		protected void customizeOperation(OpenAPI openApi, io.swagger.v3.oas.models.Operation operation, IMethodBinding baseMethodBinding) {
 			operation.setDeprecated(true);
 			RestOperationTypeEnum type = baseMethodBinding.getRestOperationType();
 			if (RestOperationTypeEnum.VREAD.equals(type) &&

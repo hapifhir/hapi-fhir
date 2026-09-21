@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
@@ -21,11 +22,13 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.test.concurrency.PointcutLatch;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,6 +45,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -209,6 +213,53 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 
 		assertLinkCount(2);
 	}
+	 @Test
+	void testMdmSubmitPartitioning() throws Exception {
+		// setup
+		assertLinkCount(1);
+
+		// create two copies of the Practitioner on each partition, but don't link anything yet
+		RequestPartitionId requestPartitionId1 = RequestPartitionId.fromPartitionId(1);
+		RequestPartitionId requestPartitionId2 = RequestPartitionId.fromPartitionId(2);
+		Practitioner practitioner1a = createPractitionerOnPartition(buildJanePractitioner(), requestPartitionId1);
+		Practitioner practitioner1b = createPractitionerOnPartition(buildJanePractitioner(), requestPartitionId1);
+		Practitioner practitioner2a = createPractitionerOnPartition(buildJanePractitioner(), requestPartitionId2);
+		Practitioner practitioner2b = createPractitionerOnPartition(buildJanePractitioner(), requestPartitionId2);
+
+		 assertLinkCount(1);
+
+		 // create the request
+		 List<String> urls = new ArrayList<>();
+		 urls.add("Practitioner?");
+		 IPrimitiveType<BigDecimal> batchSize = new DecimalType(new BigDecimal(100));
+		 ServletRequestDetails details = new ServletRequestDetails();
+		 details.setTenantId(PARTITION_1);
+
+		 // set up the latch
+		 PointcutLatch afterMdmLatch = new PointcutLatch(Pointcut.MDM_AFTER_PERSISTED_RESOURCE_CHECKED);
+		 myInterceptorService.registerAnonymousInterceptor(Pointcut.MDM_AFTER_PERSISTED_RESOURCE_CHECKED, afterMdmLatch);
+
+		 // execute
+		 afterMdmLatch.runWithExpectedCount(2, () -> {
+			 IBaseParameters submitJob = myMdmControllerSvc.submitMdmSubmitJob(urls, batchSize, details);
+			 String jobId = ((StringType) ((Parameters) submitJob).getParameterValue("jobId")).getValueAsString();
+			 myBatch2JobHelper.awaitJobCompletion(jobId);
+		 });
+
+		 // validate
+
+		 // The Practitioners on partition 1 have been linked
+		 Optional<MdmLink> link1a = myMdmLinkDaoSvc.findMdmLinkBySource(practitioner1a);
+		 assertThat(link1a).isPresent();
+		 Optional<MdmLink> link1b = myMdmLinkDaoSvc.findMdmLinkBySource(practitioner1b);
+		 assertThat(link1b).isPresent();
+
+		 // The Practitioners on partition 2 have not
+		 Optional<MdmLink> link2a = myMdmLinkDaoSvc.findMdmLinkBySource(practitioner2a);
+		 assertThat(link2a).isEmpty();
+		 Optional<MdmLink> link2b = myMdmLinkDaoSvc.findMdmLinkBySource(practitioner2b);
+		 assertThat(link2b).isEmpty();
+	 }
 
 	private class PartitionIdMatcher implements ArgumentMatcher<RequestPartitionId> {
 		private final RequestPartitionId myRequestPartitionId;

@@ -4,10 +4,12 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
@@ -20,6 +22,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +30,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -34,6 +38,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class InMemoryTerminologyServerValidationSupportTest extends BaseValidationTestWithInlineMocks {
+	private static final String VERSIONED_CS_URL = "http://example.com/fhir/CodeSystem/versioned";
+
 	private InMemoryTerminologyServerValidationSupport mySvc;
 	private final FhirContext myCtx = FhirContext.forR4();
 	private DefaultProfileValidationSupport myDefaultSupport;
@@ -449,6 +455,108 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		assertNull(outcome.getCodeSystemVersion());
 	}
 
+	/**
+	 * A caller naming the version of a code system which is installed only once must not cost a lookup for
+	 * the versioned canonical: fetchCodeSystem takes only a canonical and implementations differ on whether
+	 * they resolve a version packed into one, so for a remote terminology service that lookup is a network
+	 * round trip which matches nothing.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	void validateCode_codeSystemVersionMatchesTheUnversionedCanonical_doesNotFetchTheVersionedCanonical() {
+		// Setup
+		FetchRecordingValidationSupport recorder = addSingleVersionCodeSystemAndRecordFetches("1.0.0");
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(
+			valCtx, new ConceptValidationOptions(), new ValidateCodeRequest(VERSIONED_CS_URL, "1.0.0", "code0", null, null));
+
+		// Verify
+		assertNotNull(outcome);
+		assertTrue(outcome.isOk());
+		assertThat(recorder.myFetchedCodeSystemUrls).containsOnly(VERSIONED_CS_URL);
+	}
+
+	/**
+	 * The other direction, so that the test above is not passed by code which ignores the version: when the
+	 * unversioned canonical resolves to a different version, the versioned one still has to be asked for. The
+	 * order is asserted because both canonicals are fetched either way - code which asks for the versioned one
+	 * first and only reaches the unversioned one through the lookupCode fallback ends up with the same two.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	void validateCode_codeSystemVersionDiffersFromTheUnversionedCanonical_fetchesTheVersionedCanonical() {
+		// Setup
+		FetchRecordingValidationSupport recorder = addSingleVersionCodeSystemAndRecordFetches("1.0.0");
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		mySvc.validateCode(
+			valCtx, new ConceptValidationOptions(), new ValidateCodeRequest(VERSIONED_CS_URL, "2.0.0", "code0", null, null));
+
+		// Verify
+		assertThat(recorder.myFetchedCodeSystemUrls)
+			.containsOnly(VERSIONED_CS_URL, VERSIONED_CS_URL + "|2.0.0")
+			.containsSubsequence(VERSIONED_CS_URL, VERSIONED_CS_URL + "|2.0.0");
+	}
+
+	/**
+	 * CodeSystem.content is required by the specification but is not enforced when the resource is stored, and
+	 * an absent one is not "not-present": the code system is there, so codes in it can be validated.
+	 */
+	@Test
+	void isCodeSystemSupported_codeSystemWithoutContent_isSupported() {
+		// Setup
+		CodeSystem cs = new CodeSystem();
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setUrl(VERSIONED_CS_URL);
+		cs.addConcept().setCode("code0").setDisplay("Code 0");
+		myPrePopulated.addCodeSystem(cs);
+
+		// Test & Verify
+		assertTrue(mySvc.isCodeSystemSupported(new ValidationSupportContext(myChain), VERSIONED_CS_URL));
+	}
+
+	/**
+	 * A code system canonical naming one version and a code system version naming another are contradictory,
+	 * and neither can be silently preferred. This mirrors {@literal TermReadSvcImpl}, which joins the same pair
+	 * the same way.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	void validateCode_codeSystemCarriesAConflictingVersion_isRejected() {
+		// Setup
+		addSingleVersionCodeSystemAndRecordFetches("1.0.0");
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+		ValidateCodeRequest request =
+			new ValidateCodeRequest(VERSIONED_CS_URL + "|1.0.0", "2.0.0", "code0", null, null);
+
+		// Test & Verify
+		assertThatThrownBy(() -> mySvc.validateCode(valCtx, new ConceptValidationOptions(), request))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("does not match expected version: 2.0.0");
+	}
+
+	/**
+	 * Adds a CodeSystem holding a single code at the given version, and rebuilds {@link #myChain} so that every
+	 * CodeSystem fetch through it is recorded.
+	 */
+	// Created by Claude Opus 5
+	private FetchRecordingValidationSupport addSingleVersionCodeSystemAndRecordFetches(String theVersion) {
+		CodeSystem cs = new CodeSystem();
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setUrl(VERSIONED_CS_URL);
+		cs.setVersion(theVersion);
+		cs.addConcept().setCode("code0").setDisplay("Code 0");
+		myPrePopulated.addCodeSystem(cs);
+
+		FetchRecordingValidationSupport recorder = new FetchRecordingValidationSupport(myCtx, myPrePopulated);
+		myChain = new ValidationSupportChain(mySvc, recorder, myDefaultSupport, myCommonCodeSystemsTermSvc);
+		return recorder;
+	}
+
 	@Test
 	public void testExpandValueSet_VsUsesVersionedSystem_CsIsFragmentWithoutCode() {
 		CodeSystem cs = new CodeSystem();
@@ -636,6 +744,24 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 			theValueSet);
 
 		assertTrue(codeValidationResult.isOk());
+	}
+
+	/**
+	 * Records the canonical of every CodeSystem fetch which reaches it.
+	 */
+	// Created by Claude Opus 5
+	private static class FetchRecordingValidationSupport extends BaseValidationSupportWrapper {
+		private final List<String> myFetchedCodeSystemUrls = new ArrayList<>();
+
+		FetchRecordingValidationSupport(FhirContext theFhirContext, IValidationSupport theWrap) {
+			super(theFhirContext, theWrap);
+		}
+
+		@Override
+		public IBaseResource fetchCodeSystem(String theSystem) {
+			myFetchedCodeSystemUrls.add(theSystem);
+			return super.fetchCodeSystem(theSystem);
+		}
 	}
 
 	private static class PrePopulatedValidationSupportDstu2 extends PrePopulatedValidationSupport {

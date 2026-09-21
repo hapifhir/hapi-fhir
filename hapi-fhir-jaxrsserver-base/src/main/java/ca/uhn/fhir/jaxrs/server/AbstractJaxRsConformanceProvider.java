@@ -38,6 +38,7 @@ import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServerConfiguration;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.server.method.IMethodBinding;
 import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
 import ca.uhn.fhir.util.ReflectionUtil;
 import jakarta.ws.rs.GET;
@@ -149,7 +150,7 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 		for (Entry<Class<? extends IResourceProvider>, IResourceProvider> provider : providers.entrySet()) {
 			addProvider(provider.getValue(), provider.getKey());
 		}
-		List<BaseMethodBinding> serverBindings = new ArrayList<BaseMethodBinding>();
+		List<IMethodBinding> serverBindings = new ArrayList<IMethodBinding>();
 		for (ResourceBinding baseMethodBinding : myResourceNameToBinding.values()) {
 			serverBindings.addAll(baseMethodBinding.getMethodBindings());
 		}

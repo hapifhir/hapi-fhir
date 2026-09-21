@@ -403,17 +403,8 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 		/*
 		 * Otherwise, we're not in a transaction
 		 */
-		return updateInternal(
-				theUpdateParameters.getRequest(),
-				theUpdateParameters.getResource(),
-				theUpdateParameters.getMatchUrl(),
-				theUpdateParameters.shouldPerformIndexing(),
-				theUpdateParameters.shouldForceUpdateVersion(),
-				theUpdateParameters.getEntity(),
-				theUpdateParameters.getResourceIdToUpdate(),
-				oldResource,
-				theUpdateParameters.getOperationType(),
-				theUpdateParameters.getTransactionDetails());
+		theUpdateParameters.setOldResource(oldResource);
+		return updateInternal(theUpdateParameters);
 	}
 
 	public static void validateResourceType(IBasePersistedResource<?> theEntity, String theResourceName) {

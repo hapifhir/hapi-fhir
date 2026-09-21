@@ -2043,7 +2043,10 @@ public enum Pointcut implements IPointcut {
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
 	 * <li>
-	 * ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object (since 8.10.0)
+	 * ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object (since 8.10.0).
+	 * Note that this pointcut is also invoked for transaction bundles the server constructs internally to process
+	 * a single entry of a client batch; {@code TransactionDetails#isServerConstructedBatchSubRequest()}
+	 * distinguishes those from client-submitted bundles.
 	 * </li>
 	 * </ul>
 	 * <p>
@@ -2069,8 +2072,9 @@ public enum Pointcut implements IPointcut {
 	 * <p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
-	 * <li>ca.uhn.fhir.interceptor.model.TransactionWriteAfterPrefetchDetails - A context object wrapping the list of
-	 * bundle entries being processed, in processing order</li>
+	 * <li>ca.uhn.fhir.interceptor.model.TransactionWriteAfterPrefetchDetails - Carries the list of bundle entries
+	 * being processed, in processing order, along with the version adapter and storage settings for working with
+	 * them in a FHIR-version-agnostic way.</li>
 	 * <li>ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is being
 	 * processed.</li>
 	 * <li>ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - The same details as the RequestDetails parameter, but
@@ -2086,6 +2090,76 @@ public enum Pointcut implements IPointcut {
 	STORAGE_TRANSACTION_WRITE_AFTER_PREFETCH(
 			void.class,
 			"ca.uhn.fhir.interceptor.model.TransactionWriteAfterPrefetchDetails",
+			"ca.uhn.fhir.rest.api.server.RequestDetails",
+			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+			"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"),
+
+	/**
+	 * <b>Storage Hook:</b>
+	 * Invoked during FHIR transaction processing, once every entry has been processed and the response bundle has been
+	 * fully assembled, including each response entry's final location. Hooks may adjust the response entries
+	 * (for example to correct an operation outcome) before the response is returned to the caller, using the data
+	 * resolved during processing, which is available on the supplied
+	 * {@link ca.uhn.fhir.rest.api.server.storage.TransactionDetails}. When transaction processing is split into
+	 * multiple sub-transactions (e.g. by partition), this pointcut is invoked once per sub-transaction, with that
+	 * sub-transaction's response bundle.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>ca.uhn.fhir.interceptor.model.TransactionResponseAssembledDetails - Carries the assembled response bundle,
+	 * along with the version adapter for reading and mutating its entries in a FHIR-version-agnostic way.</li>
+	 * <li>ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is being
+	 * processed.</li>
+	 * <li>ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - The same details as the RequestDetails parameter, but
+	 * only populated when operating in a RestfulServer. Provided as a convenience.</li>
+	 * <li>ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object.</li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 *
+	 * @since 8.11.20
+	 */
+	STORAGE_TRANSACTION_RESPONSE_ASSEMBLED(
+			void.class,
+			"ca.uhn.fhir.interceptor.model.TransactionResponseAssembledDetails",
+			"ca.uhn.fhir.rest.api.server.RequestDetails",
+			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+			"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"),
+
+	/**
+	 * <b>Storage Hook:</b>
+	 * Invoked once processing of a FHIR transaction or batch bundle has fully completed and the final response
+	 * bundle is about to be returned to the caller. Unlike {@link #STORAGE_TRANSACTION_RESPONSE_ASSEMBLED}, which
+	 * is invoked once per sub-transaction with that sub-transaction's response, this pointcut is invoked exactly
+	 * once per top-level operation, with the complete response — after any sub-transaction responses (e.g.
+	 * partition slices) have been aggregated. Hooks may mutate the response bundle, for example to remove response
+	 * entries corresponding to request entries a hook injected at {@link #STORAGE_TRANSACTION_PROCESSING}. The
+	 * response still carries one entry slot per request entry at this point: the empty slots left by consolidated
+	 * duplicate conditional writes are dropped after this pointcut returns, so positional bookkeeping against the
+	 * request remains valid inside hooks. A nested transaction (one submitted while another is being processed)
+	 * completes its own processing and so invokes this pointcut for its own response.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>ca.uhn.fhir.interceptor.model.TransactionResponseFinalizedDetails - Carries the finalized response
+	 * bundle, along with the version adapter for reading and mutating its entries in a FHIR-version-agnostic
+	 * way.</li>
+	 * <li>ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is being
+	 * processed.</li>
+	 * <li>ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - The same details as the RequestDetails parameter, but
+	 * only populated when operating in a RestfulServer. Provided as a convenience.</li>
+	 * <li>ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object.</li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 *
+	 * @since 8.11.20
+	 */
+	STORAGE_TRANSACTION_RESPONSE_FINALIZED(
+			void.class,
+			"ca.uhn.fhir.interceptor.model.TransactionResponseFinalizedDetails",
 			"ca.uhn.fhir.rest.api.server.RequestDetails",
 			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 			"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"),
@@ -3434,6 +3508,34 @@ public enum Pointcut implements IPointcut {
 			String.class,
 			"ca.uhn.fhir.rest.api.server.RequestDetails",
 			"org.hl7.fhir.instance.model.api.IBaseResource"),
+
+	/**
+	 * <b>Storage Hook:</b>
+	 * This pointcut is invoked when a new Batch job instance is being requested. This happens before
+	 * any other processing happens, so it can be used to modify the job parameters or even replace the
+	 * job definition being requested.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.batch2.model.JobInstanceStartRequest - Contains the details of the job instance that is about
+	 * to be started. Hooks may change any aspect of this object, although care should be taken to not provide
+	 * confusing or unexpected behaviour to the client.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that lead to the creation
+	 * of the jobInstance.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	STORAGE_PRECREATE_BATCH_JOB_INSTANCE(
+			void.class,
+			"ca.uhn.fhir.batch2.model.JobInstanceStartRequest",
+			"ca.uhn.fhir.rest.api.server.RequestDetails"),
 
 	/**
 	 * <b>Storage Hook:</b>

@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.model.config;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu2.model.Subscription;
 
 import java.util.Collections;
@@ -35,6 +36,7 @@ public abstract class BaseSubscriptionSettings {
 	public static final String DEFAULT_RESTHOOK_ENDPOINTURL_VALIDATION_REGEX =
 			"https?://[-%()_.!~*';/?:@&=+$,#A-Za-z0-9\\[\\]]+";
 	public static final long DEFAULT_SUBMISSION_INTERVAL_IN_MS = 5000;
+	public static final int DEFAULT_SUBMISSION_BATCH_SIZE = 1000;
 
 	private final Set<Subscription.SubscriptionChannelType> mySupportedSubscriptionTypes = new HashSet<>();
 	private String myEmailFromAddress = DEFAULT_EMAIL_FROM_ADDRESS;
@@ -44,6 +46,7 @@ public abstract class BaseSubscriptionSettings {
 	private boolean myEnableInMemorySubscriptionMatching = true;
 	private boolean myTriggerSubscriptionsForNonVersioningChanges;
 	private long mySubmissionIntervalInMs = DEFAULT_SUBMISSION_INTERVAL_IN_MS;
+	private int mySubscriptionSubmissionBatchSize = DEFAULT_SUBMISSION_BATCH_SIZE;
 
 	/**
 	 * @since 6.8.0
@@ -321,5 +324,41 @@ public abstract class BaseSubscriptionSettings {
 	 */
 	public void setSubscriptionIntervalInMs(long theSubscriptionIntervalInMs) {
 		mySubmissionIntervalInMs = theSubscriptionIntervalInMs;
+	}
+
+	/**
+	 * The number of persisted Resource Changes which are read from the DB and submitted to the subscription matching
+	 * queue as a single batch. Defaults to {@literal 1000}.
+	 * <p>
+	 * The cost of synchronizing with the message broker, and of deleting the rows which were submitted, is paid once
+	 * per batch instead of once per row, so a larger batch yields greater delivery throughput on brokers where a
+	 * durable publish is expensive. The batch is also the unit of retry: when a submission fails, the whole batch is
+	 * left in the database and re-submitted on a later delivery pass.
+	 * </p>
+	 *
+	 * @since 8.12.0
+	 */
+	public int getSubscriptionSubmissionBatchSize() {
+		return mySubscriptionSubmissionBatchSize;
+	}
+
+	/**
+	 * The number of persisted Resource Changes which are read from the DB and submitted to the subscription matching
+	 * queue as a single batch. Defaults to {@literal 1000}.
+	 * <p>
+	 * The cost of synchronizing with the message broker, and of deleting the rows which were submitted, is paid once
+	 * per batch instead of once per row, so a larger batch yields greater delivery throughput on brokers where a
+	 * durable publish is expensive. The batch is also the unit of retry: when a submission fails, the whole batch is
+	 * left in the database and re-submitted on a later delivery pass.
+	 * </p>
+	 *
+	 * @param theSubscriptionSubmissionBatchSize the number of rows to submit per batch, which must be greater than zero
+	 * @throws IllegalArgumentException if <code>theSubscriptionSubmissionBatchSize</code> is not greater than zero
+	 * @since 8.12.0
+	 */
+	public void setSubscriptionSubmissionBatchSize(int theSubscriptionSubmissionBatchSize) {
+		Validate.isTrue(
+				theSubscriptionSubmissionBatchSize > 0, "theSubscriptionSubmissionBatchSize must be greater than 0");
+		mySubscriptionSubmissionBatchSize = theSubscriptionSubmissionBatchSize;
 	}
 }

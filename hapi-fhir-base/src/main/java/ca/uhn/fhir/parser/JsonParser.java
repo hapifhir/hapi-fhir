@@ -231,9 +231,14 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 	protected void doEncodeToWriter(IBase theElement, Writer theWriter, EncodeContext theEncodeContext)
 			throws IOException, DataFormatException {
 		BaseJsonLikeWriter eventWriter = createJsonWriter(theWriter);
+		if (myPrettyPrint) {
+			eventWriter.setPrettyPrint(myPrettyPrint);
+		}
+		eventWriter.init();
 		eventWriter.beginObject();
 		encodeCompositeElementToStreamWriter(null, null, theElement, eventWriter, false, null, theEncodeContext);
 		eventWriter.endObject();
+		eventWriter.flush();
 		eventWriter.close();
 	}
 
@@ -1403,6 +1408,23 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 							if (theObject.get(nextName) == null) {
 								theState.enteringNewElement(null, nextName);
 								parseAlternates(nextValue, theState, alternateName, alternateName);
+								theState.endingElement();
+							}
+						} else if (nextValue.isArray()) {
+							/*
+							 * The same thing, but for a repeating primitive: e.g. an "_line" array
+							 * with no corresponding "line" array at all. Each entry of the alternate
+							 * array is one repetition of the primitive, so an element is entered for
+							 * every index in order to keep the extensions aligned with the
+							 * repetitions they belong to.
+							 */
+							BaseJsonLikeArray array = nextValue.getAsArray();
+							for (int i = 0; i < array.size(); i++) {
+								BaseJsonLikeValue nextEntry = array.get(i);
+								theState.enteringNewElement(null, nextName);
+								if (nextEntry != null && !nextEntry.isNull()) {
+									parseAlternates(nextEntry, theState, alternateName, alternateName);
+								}
 								theState.endingElement();
 							}
 						} else {

@@ -498,12 +498,12 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 		}
 	}
 
-	private IBaseResource findContainedResource(Collection<IBaseResource> resources, IBaseReference reference) {
+	IBaseResource findContainedResource(Collection<IBaseResource> resources, IBaseReference reference) {
 		for (IBaseResource resource : resources) {
 			String referenceString = reference.getReferenceElement().getValue();
 			if (referenceString != null && referenceString.length() > 1) {
 				referenceString = referenceString.substring(1);
-				if (resource.getIdElement().getValue().equals(referenceString)) {
+				if (Strings.CS.equals(referenceString, resource.getIdElement().getValue())) {
 					return resource;
 				}
 			}

@@ -1,7 +1,7 @@
 package ca.uhn.hapi.fhir.cdshooks.svc.prefetch;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
+import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.dstu3.model.Device;
@@ -33,10 +33,10 @@ class PrefetchTemplateUtilDstu3Test {
 		Observation observation = new Observation();
 		observation.setId(OBSERVATION_ID);
 		builder.addCollectionEntry(observation);
-		CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
-		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
-		context.put(DRAFT_ORDERS_CONTEXT_KEY, builder.getBundle());
-		String result = PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext);
+		CdsServiceRequestJson request = new CdsServiceRequestJson();
+		request.addContext(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
+		request.addContext(DRAFT_ORDERS_CONTEXT_KEY, builder.getBundle());
+		String result = PrefetchTemplateUtil.substituteTemplate(template, request, ourFhirContext);
 		assertThat(result).isEqualTo(OBSERVATION_ID + " a " + TEST_PATIENT_ID);
 	}
 
@@ -51,14 +51,14 @@ class PrefetchTemplateUtilDstu3Test {
 		final DeviceRequest deviceRequest1 = new DeviceRequest();
 		deviceRequest1.setCode(new Reference(deviceId1));
 		builder.addCollectionEntry(deviceRequest1);
-		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
-		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
-		context.put(DRAFT_ORDERS_CONTEXT_KEY, builder.getBundle());
+		final CdsServiceRequestJson request = new CdsServiceRequestJson();
+		request.addContext(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
+		request.addContext(DRAFT_ORDERS_CONTEXT_KEY, builder.getBundle());
 		// execute & validate
-		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
+		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, request, ourFhirContext))
 				.isInstanceOf(InvalidRequestException.class)
 				.hasMessageContaining(
-						"Unable to evaluate FHIRPath for prefetch template key <draftOrders> for FHIR version DSTU3");
+						"Unable to evaluate FHIRPath for prefetch key <draftOrders> for FHIR version DSTU3");
 	}
 
 	@Test
@@ -72,11 +72,11 @@ class PrefetchTemplateUtilDstu3Test {
 		final BundleBuilder builder = new BundleBuilder(ourFhirContext);
 		builder.addCollectionEntry(new Device().setId(deviceId1));
 		builder.addCollectionEntry(new Device().setId(deviceId2));
-		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
-		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
-		context.put(DRAFT_ORDERS_CONTEXT_KEY, builder.getBundle());
+		final CdsServiceRequestJson request = new CdsServiceRequestJson();
+		request.addContext(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
+		request.addContext(DRAFT_ORDERS_CONTEXT_KEY, builder.getBundle());
 		// execute
-		final String actual = PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext);
+		final String actual = PrefetchTemplateUtil.substituteTemplate(template, request, ourFhirContext);
 		// validate
 		assertThat(actual).isEqualTo("DeviceRequest?device=" + deviceId1);
 	}
@@ -90,11 +90,11 @@ class PrefetchTemplateUtilDstu3Test {
 				"DeviceRequest?device={{context.draftOrders.entry.resource.where(id = 'Device/2').id}}";
 		final BundleBuilder builder = new BundleBuilder(ourFhirContext);
 		builder.addCollectionEntry(new Device().setId(deviceId1));
-		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
-		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
-		context.put(DRAFT_ORDERS_CONTEXT_KEY, builder.getBundle());
+		final CdsServiceRequestJson request = new CdsServiceRequestJson();
+		request.addContext(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
+		request.addContext(DRAFT_ORDERS_CONTEXT_KEY, builder.getBundle());
 		// execute & validate
-		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
+		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, request, ourFhirContext))
 				.isInstanceOf(InvalidRequestException.class)
 				.hasMessageContaining(
 						"Unable to resolve prefetch template : context.draftOrders.entry.resource.where(id = 'Device/2').id. No result was found for the prefetch query.");
@@ -106,11 +106,11 @@ class PrefetchTemplateUtilDstu3Test {
 		// setup
 		final String encounterId = "Encounter/1";
 		final String template = "Condition?patient={{context.patientId}}&context={{context.encounter.id}}";
-		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
-		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
-		context.put("encounter", new Encounter().setId(encounterId));
+		final CdsServiceRequestJson request = new CdsServiceRequestJson();
+		request.addContext(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
+		request.addContext("encounter", new Encounter().setId(encounterId));
 		// execute
-		final String actual = PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext);
+		final String actual = PrefetchTemplateUtil.substituteTemplate(template, request, ourFhirContext);
 		// validate
 		assertThat(actual).isEqualTo("Condition?patient=" + TEST_PATIENT_ID + "&context=" + encounterId);
 	}
@@ -120,11 +120,11 @@ class PrefetchTemplateUtilDstu3Test {
 	void substituteTemplateWithFhirPathResourceContextWithInvalidPath() {
 		// setup
 		final String template = "Condition?patient={{context.patientId}}&context={{context.encounter.id}}";
-		final CdsServiceRequestContextJson context = new CdsServiceRequestContextJson();
-		context.put(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
-		context.put("encounter", new Encounter());
+		final CdsServiceRequestJson request = new CdsServiceRequestJson();
+		request.addContext(PATIENT_ID_CONTEXT_KEY, TEST_PATIENT_ID);
+		request.addContext("encounter", new Encounter());
 		// execute & validate
-		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, context, ourFhirContext))
+		assertThatThrownBy(() -> PrefetchTemplateUtil.substituteTemplate(template, request, ourFhirContext))
 				.isInstanceOf(InvalidRequestException.class)
 				.hasMessageContaining("Unable to resolve prefetch template : context.encounter.id. No result was found for the prefetch query.");
 	}

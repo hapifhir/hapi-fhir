@@ -1,7 +1,10 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.interceptor.TransactionConcurrencySemaphoreInterceptor;
 import ca.uhn.fhir.jpa.interceptor.UserRequestRetryVersionConflictsInterceptor;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -56,6 +59,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -76,6 +80,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 	private ExecutorService myExecutor;
 	private UserRequestRetryVersionConflictsInterceptor myRetryInterceptor;
 	private TransactionConcurrencySemaphoreInterceptor myConcurrencySemaphoreInterceptor;
+	private IAnonymousInterceptor myRivalWriterInterceptor;
 
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
@@ -97,6 +102,8 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		myExecutor.shutdown();
 		myInterceptorRegistry.unregisterInterceptor(myRetryInterceptor);
 		myInterceptorRegistry.unregisterInterceptor(myConcurrencySemaphoreInterceptor);
+		myInterceptorRegistry.unregisterInterceptor(myRivalWriterInterceptor);
+		myStorageSettings.setResourceServerIdStrategy(new JpaStorageSettings().getResourceServerIdStrategy());
 	}
 
 	@Test
@@ -905,5 +912,97 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 	private void setupRetryBehaviour(ServletRequestDetails theServletRequestDetails) {
 		when(theServletRequestDetails.isRetry()).thenReturn(true);
 		when(theServletRequestDetails.getMaxRetries()).thenReturn(50);
+	}
+
+	@Test
+	public void testConditionalUpdate_idlessBodyNoMatch_retryAfterConflict_updatesRivalInPlace() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
+		registerRivalPatientWriterThenConflict("RIVAL", "http://ids", "A");
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://ids").setValue("A");
+		patient.addName().setFamily("new-name-from-update");
+
+		DaoMethodOutcome outcome = myPatientDao.update(patient, "Patient?identifier=http://ids|A", newRetryRequestDetails());
+
+		assertThat(outcome.getId().toUnqualifiedVersionless().getValue()).isEqualTo("Patient/RIVAL");
+		assertThat(outcome.getCreated()).isNotEqualTo(Boolean.TRUE);
+		runInTransaction(() -> assertEquals(1, myResourceTableDao.count()));
+		Patient stored = myPatientDao.read(new IdType("Patient/RIVAL"), newRetryRequestDetails());
+		assertThat(stored.getNameFirstRep().getFamily()).isEqualTo("new-name-from-update");
+		assertThat(stored.getIdElement().getVersionIdPart()).isEqualTo("2");
+	}
+
+	@Test
+	public void testTransaction_idlessConditionalUpdateNoMatch_retryAfterConflict_updatesRivalInPlace() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
+		registerRivalPatientWriterThenConflict("RIVAL", "http://ids", "A");
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://ids").setValue("A");
+		patient.addName().setFamily("new-name-from-update");
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionUpdateEntry(patient).conditional("Patient?identifier=http://ids|A");
+
+		Bundle response = mySystemDao.transaction(newRetryRequestDetails(), bb.getBundleTyped());
+
+		IIdType patientId = new IdType(response.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless();
+		assertThat(patientId.getValue()).isEqualTo("Patient/RIVAL");
+		runInTransaction(() -> assertEquals(1, myResourceTableDao.count()));
+		Patient stored = myPatientDao.read(new IdType("Patient/RIVAL"), newRetryRequestDetails());
+		assertThat(stored.getNameFirstRep().getFamily()).isEqualTo("new-name-from-update");
+		assertThat(stored.getIdElement().getVersionIdPart()).isEqualTo("2");
+	}
+
+	@Test
+	public void testConditionalCreate_noMatch_retryAfterConflict_returnsRivalWithoutDuplicate() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
+		registerRivalPatientWriterThenConflict("RIVAL", "http://ids", "A");
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://ids").setValue("A");
+		patient.addName().setFamily("name-that-must-not-be-stored");
+
+		DaoMethodOutcome outcome = myPatientDao.create(patient, "Patient?identifier=http://ids|A", newRetryRequestDetails());
+
+		assertThat(outcome.getId().toUnqualifiedVersionless().getValue()).isEqualTo("Patient/RIVAL");
+		assertThat(outcome.getCreated()).isNotEqualTo(Boolean.TRUE);
+		runInTransaction(() -> assertEquals(1, myResourceTableDao.count()));
+
+		// If-None-Exist matched, so the rival is returned untouched
+		Patient stored = myPatientDao.read(new IdType("Patient/RIVAL"), newRetryRequestDetails());
+		assertThat(stored.getName()).isEmpty();
+		assertThat(stored.getIdElement().getVersionIdPart()).isEqualTo("1");
+	}
+
+	private SystemRequestDetails newRetryRequestDetails() {
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		UserRequestRetryVersionConflictsInterceptor.addRetryHeader(requestDetails, 1);
+		return requestDetails;
+	}
+
+	/**
+	 * Registers a {@code STORAGE_PRESTORAGE_RESOURCE_CREATED} hook that, on its first invocation only, commits a
+	 * rival Patient with the given id and identifier from another thread and then aborts the current attempt with
+	 * a retriable conflict. Unregistered in {@link #after()}.
+	 */
+	private void registerRivalPatientWriterThenConflict(
+			String theRivalId, String theIdentifierSystem, String theIdentifierValue) {
+		AtomicBoolean conflictThrown = new AtomicBoolean(false);
+		myRivalWriterInterceptor = (thePointcut, theArgs) -> {
+			if (conflictThrown.compareAndSet(false, true)) {
+				try {
+					myExecutor.submit(() -> createPatient(
+						withId(theRivalId), withIdentifier(theIdentifierSystem, theIdentifierValue))).get();
+				} catch (Exception e) {
+					throw new AssertionError(e);
+				}
+				throw new ResourceVersionConflictException("simulated conflict");
+			}
+		};
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, myRivalWriterInterceptor);
 	}
 }

@@ -21,8 +21,13 @@ package ca.uhn.fhir.jpa.provider.merge;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.merge.AbstractMergeOperationInputParameterNames;
+import ca.uhn.fhir.merge.MergeChangeType;
+import ca.uhn.fhir.merge.MergeProvenanceGroup;
+import ca.uhn.fhir.merge.MergeProvenanceGroupValue;
 import ca.uhn.fhir.merge.MergeProvenanceSvc;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.replacereferences.PreviousResourceVersionRestorer;
@@ -42,16 +47,22 @@ import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static ca.uhn.fhir.merge.MergeResourceHelper.addErrorToOperationOutcome;
 import static ca.uhn.fhir.merge.MergeResourceHelper.addInfoToOperationOutcome;
 import static ca.uhn.fhir.model.api.StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CHANGE;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_200_OK;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_400_BAD_REQUEST;
+import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_422_UNPROCESSABLE_ENTITY;
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_500_INTERNAL_ERROR;
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_UNDO_MERGE;
 import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
 
 /**
  * This service implements the $hapi.fhir.undo-merge operation.
@@ -71,20 +82,25 @@ public class ResourceUndoMergeService {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceUndoMergeService.class);
 
+	private static final String ISSUE_TYPE_EXCEPTION = "exception";
+
 	private final MergeProvenanceSvc myMergeProvenanceSvc;
 	private final PreviousResourceVersionRestorer myResourceVersionRestorer;
 	private final MergeValidationService myMergeValidationService;
+	private final IHapiTransactionService myHapiTransactionService;
 	private final FhirContext myFhirContext;
 
 	public ResourceUndoMergeService(
 			DaoRegistry theDaoRegistry,
 			MergeProvenanceSvc theMergeProvenanceSvc,
 			PreviousResourceVersionRestorer theResourceVersionRestorer,
-			MergeValidationService theMergeValidationService) {
+			MergeValidationService theMergeValidationService,
+			IHapiTransactionService theHapiTransactionService) {
 		myMergeProvenanceSvc = theMergeProvenanceSvc;
 		myResourceVersionRestorer = theResourceVersionRestorer;
 		myFhirContext = theDaoRegistry.getFhirContext();
 		myMergeValidationService = theMergeValidationService;
+		myHapiTransactionService = theHapiTransactionService;
 	}
 
 	public OperationOutcomeWithStatusCode undoMerge(
@@ -104,7 +120,7 @@ public class ResourceUndoMergeService {
 			} else {
 				undoMergeOutcome.setHttpStatusCode(STATUS_HTTP_500_INTERNAL_ERROR);
 			}
-			addErrorToOperationOutcome(myFhirContext, opOutcome, e.getMessage(), "exception");
+			addErrorToOperationOutcome(myFhirContext, opOutcome, e.getMessage(), ISSUE_TYPE_EXCEPTION);
 		}
 		return undoMergeOutcome;
 	}
@@ -125,42 +141,73 @@ public class ResourceUndoMergeService {
 
 		IBaseResource targetResource = myMergeValidationService.resolveTargetResource(
 				inputParameters, theRequestDetails, opOutcome, theInputParamNames);
+		if (targetResource == null) {
+			// resolveTargetResource already added the error issue to opOutcome
+			undoMergeOutcome.setHttpStatusCode(STATUS_HTTP_422_UNPROCESSABLE_ENTITY);
+			return undoMergeOutcome;
+		}
 		IIdType targetId = targetResource.getIdElement();
 
-		Provenance provenance = null;
-
-		if (inputParameters.getSourceResource() != null) {
-			// the client provided a source id, use it to find the provenance together with the target id
-			IIdType sourceId = inputParameters.getSourceResource().getReferenceElement();
-			provenance =
-					myMergeProvenanceSvc.findProvenance(targetId, sourceId, theRequestDetails, OPERATION_UNDO_MERGE);
-		} else {
-			// the client provided source identifiers, find a provenance using those identifiers and the target id
-			provenance = myMergeProvenanceSvc.findProvenanceByTargetIdAndSourceIdentifiers(
-					targetId, inputParameters.getSourceIdentifiers(), theRequestDetails);
-		}
-
-		if (provenance == null) {
-			String msg =
-					"Unable to find a Provenance created by a $merge operation for the provided source and target resources."
-							+ " Ensure that the provided resource references or identifiers were previously used as parameters in a successful $merge operation";
-			throw new ResourceNotFoundException(Msg.code(2747) + msg);
-		}
+		MergeProvenanceGroup provenanceGroup =
+				findMergeProvenancesOrThrow(inputParameters, targetId, theRequestDetails);
+		Provenance mainProvenance = provenanceGroup.mainProvenance();
 
 		ourLog.info(
 				"Found Provenance resource with id: {} to be used for $undo-merge operation",
-				provenance.getIdElement().asStringValue());
+				mainProvenance.getIdElement().asStringValue());
 
-		List<Reference> references = provenance.getTarget();
-		if (references.size() > inputParameters.getResourceLimit()) {
-			String msg = format(
-					"Number of references to update (%d) exceeds the limit (%d)",
-					references.size(), inputParameters.getResourceLimit());
-			throw new InvalidRequestException(Msg.code(2748) + msg);
+		if (MergeProvenanceGroupValue.fromProvenance(mainProvenance).isEmpty()) {
+			// this Provenance carries no group value, so undo it as an ungrouped Provenance
+			undoUngroupedProvenance(mainProvenance, inputParameters, theRequestDetails, undoMergeOutcome);
+		} else {
+			undoGroupedProvenances(
+					mainProvenance,
+					provenanceGroup.memberProvenances(),
+					inputParameters,
+					theRequestDetails,
+					undoMergeOutcome);
 		}
 
+		return undoMergeOutcome;
+	}
+
+	private MergeProvenanceGroup findMergeProvenancesOrThrow(
+			UndoMergeOperationInputParameters inputParameters, IIdType targetId, RequestDetails theRequestDetails) {
+
+		Optional<MergeProvenanceGroup> provenanceGroup;
+		if (inputParameters.getSourceResource() != null) {
+			// the client provided a source id, use it to find the provenance together with the target id
+			IIdType sourceId = inputParameters.getSourceResource().getReferenceElement();
+			provenanceGroup = myMergeProvenanceSvc.findMergeProvenances(targetId, sourceId, theRequestDetails);
+		} else {
+			// the client provided source identifiers, find a provenance using those identifiers and the target id
+			provenanceGroup = myMergeProvenanceSvc.findMergeProvenancesBySourceIdentifiers(
+					targetId, inputParameters.getSourceIdentifiers(), theRequestDetails);
+		}
+
+		return provenanceGroup.orElseThrow(() -> {
+			String msg =
+					"Unable to find a Provenance created by a $merge operation for the provided source and target resources."
+							+ " Ensure that the provided resource references or identifiers were previously used as parameters in a successful $merge operation";
+			return new ResourceNotFoundException(Msg.code(2747) + msg);
+		});
+	}
+
+	private void undoUngroupedProvenance(
+			Provenance theProvenance,
+			UndoMergeOperationInputParameters inputParameters,
+			RequestDetails theRequestDetails,
+			OperationOutcomeWithStatusCode theUndoMergeOutcome) {
+
+		ourLog.info(
+				"Undoing merge from a single Provenance: {}",
+				theProvenance.getIdElement().toUnqualifiedVersionless().getValue());
+
+		List<Reference> references = theProvenance.getTarget();
+		validateResourceLimit(references.size(), inputParameters.getResourceLimit());
+
 		List<Reference> referencesToRestore = references;
-		if (wasTargetUpdateANoop(provenance)) {
+		if (wasTargetUpdateANoop(theProvenance)) {
 			// skip restoring the target resource if it was not updated by the merge operation.
 			// This happens when the merge operation deletes the source resource (so the target doesn't have the
 			// replaces link added) and either the source resource didn't have any identifiers that were copied over to
@@ -170,14 +217,208 @@ public class ResourceUndoMergeService {
 		}
 
 		myResourceVersionRestorer.restoreToPreviousVersionsInTrx(referencesToRestore, theRequestDetails);
+		populateSuccessOutcome(referencesToRestore.size(), theProvenance, theUndoMergeOutcome);
+	}
 
+	private record ProvenanceRestoreInfo(
+			Provenance provenance,
+			RequestPartitionId partition,
+			MergeChangeType changeType,
+			List<Reference> dataRefs) {}
+
+	private void undoGroupedProvenances(
+			Provenance theMainProvenance,
+			List<Provenance> theMemberProvenances,
+			UndoMergeOperationInputParameters inputParameters,
+			RequestDetails theRequestDetails,
+			OperationOutcomeWithStatusCode theUndoMergeOutcome) {
+
+		validateGroupedMergeResourceLimit(theMainProvenance, theMemberProvenances, inputParameters);
+
+		ourLog.info(
+				"Undoing grouped merge from main Provenance: {} with {} member Provenance(s)",
+				theMainProvenance.getIdElement().toUnqualifiedVersionless().getValue(),
+				theMemberProvenances.size());
+
+		List<ProvenanceRestoreInfo> orderedRestores = orderRestores(theMainProvenance, theMemberProvenances);
+		List<ProvenanceRestoreInfo> completedRestores = new ArrayList<>();
+
+		try {
+			int restoredCount = myHapiTransactionService
+					.withRequest(theRequestDetails)
+					.execute(() -> {
+						int totalRestored = 0;
+						for (ProvenanceRestoreInfo restore : orderedRestores) {
+							ourLog.info(
+									"Restoring {} resource(s) the merge did {} to, from member Provenance {} for partition {}",
+									restore.dataRefs().size(),
+									restore.changeType().getCode(),
+									restore.provenance()
+											.getIdElement()
+											.toUnqualifiedVersionless()
+											.getValue(),
+									restore.partition());
+							myResourceVersionRestorer.restoreToPreviousVersionsInTrx(
+									restore.dataRefs(), restore.partition(), theRequestDetails);
+							completedRestores.add(restore);
+							totalRestored += restore.dataRefs().size();
+						}
+						return totalRestored;
+					});
+			populateSuccessOutcome(restoredCount, theMainProvenance, theUndoMergeOutcome);
+		} catch (Exception theException) {
+			// when changing partitions doesn't require a new transaction, the whole undo ran in one transaction
+			// that rolls back atomically on failure, so nothing was restored and we just rethrow
+			if (!myHapiTransactionService.isRequiresNewTransactionWhenChangingPartitions()) {
+				throw theException;
+			}
+			buildNonAtomicUndoFailureOutcome(orderedRestores, completedRestores, theException, theUndoMergeOutcome);
+		}
+	}
+
+	/**
+	 * Orders the restores to preserve referential integrity: resources the merge deleted are undeleted first, so that
+	 * the referrers restored afterwards point at live resources; resources the merge created are deleted last, once
+	 * every referrer has been repointed away from them.
+	 */
+	private List<ProvenanceRestoreInfo> orderRestores(
+			Provenance theMainProvenance, List<Provenance> theMemberProvenances) {
+
+		String versionlessTargetId =
+				versionlessRefValue(theMainProvenance.getTarget().get(0));
+		String versionlessSourceId =
+				versionlessRefValue(theMainProvenance.getTarget().get(1));
+
+		List<ProvenanceRestoreInfo> restores = new ArrayList<>();
+		for (Provenance memberProvenance : theMemberProvenances) {
+			// first two targets are the merge target and source, used to locate this Provenance
+			// the rest are the refs to restore
+			validateFirstTwoTargetsAreTargetAndSource(memberProvenance, versionlessTargetId, versionlessSourceId);
+			List<Reference> dataRefs = memberProvenance
+					.getTarget()
+					.subList(2, memberProvenance.getTarget().size());
+
+			restores.add(new ProvenanceRestoreInfo(
+					memberProvenance,
+					extractRequiredPartition(memberProvenance),
+					extractRequiredChangeType(memberProvenance),
+					dataRefs));
+		}
+
+		restores.sort(Comparator.comparingInt(restore -> restore.changeType().getUndoOrder()));
+		return restores;
+	}
+
+	private void validateFirstTwoTargetsAreTargetAndSource(
+			Provenance theChangeProvenance, String theVersionlessTargetId, String theVersionlessSourceId) {
+
+		List<Reference> targets = theChangeProvenance.getTarget();
+		if (targets.size() < 2
+				|| !versionlessRefValue(targets.get(0)).equals(theVersionlessTargetId)
+				|| !versionlessRefValue(targets.get(1)).equals(theVersionlessSourceId)) {
+			throw new InternalErrorException(Msg.code(3011)
+					+ String.format(
+							"The member Provenance '%s' does not start with the merge target '%s' and source '%s' references.",
+							theChangeProvenance.getIdElement().asStringValue(),
+							theVersionlessTargetId,
+							theVersionlessSourceId));
+		}
+	}
+
+	private RequestPartitionId extractRequiredPartition(Provenance theChangeProvenance) {
+		return MergeProvenanceGroupValue.fromProvenance(theChangeProvenance)
+				.flatMap(MergeProvenanceGroupValue::getPartition)
+				.orElseThrow(() -> new InternalErrorException(Msg.code(3009)
+						+ String.format(
+								"The member Provenance '%s' does not have the partition it records changes for in its group extension.",
+								theChangeProvenance.getIdElement().asStringValue())));
+	}
+
+	private MergeChangeType extractRequiredChangeType(Provenance theChangeProvenance) {
+		return MergeProvenanceGroupValue.fromProvenance(theChangeProvenance)
+				.flatMap(MergeProvenanceGroupValue::getChangeType)
+				.orElseThrow(() -> new InternalErrorException(Msg.code(3013)
+						+ String.format(
+								"The member Provenance '%s' does not have the change type it records changes for in its group extension.",
+								theChangeProvenance.getIdElement().asStringValue())));
+	}
+
+	private static String versionlessRefValue(Reference theReference) {
+		return theReference.getReferenceElement().toUnqualifiedVersionless().getValue();
+	}
+
+	private void populateSuccessOutcome(
+			int theRestoredCount, Provenance theMainProvenance, OperationOutcomeWithStatusCode theUndoMergeOutcome) {
 		String msg = format(
 				"Successfully restored %d resources to their previous versions based on the Provenance resource: %s",
-				referencesToRestore.size(), provenance.getIdElement().getValue());
-		addInfoToOperationOutcome(myFhirContext, opOutcome, null, msg);
-		undoMergeOutcome.setHttpStatusCode(STATUS_HTTP_200_OK);
+				theRestoredCount, theMainProvenance.getIdElement().getValue());
+		addInfoToOperationOutcome(myFhirContext, theUndoMergeOutcome.getOperationOutcome(), null, msg);
+		theUndoMergeOutcome.setHttpStatusCode(STATUS_HTTP_200_OK);
+	}
 
-		return undoMergeOutcome;
+	private void buildNonAtomicUndoFailureOutcome(
+			List<ProvenanceRestoreInfo> theOrderedRestores,
+			List<ProvenanceRestoreInfo> theCompletedRestores,
+			Exception theFailure,
+			OperationOutcomeWithStatusCode theOutcome) {
+
+		IBaseOperationOutcome opOutcome = theOutcome.getOperationOutcome();
+		theOutcome.setHttpStatusCode(STATUS_HTTP_500_INTERNAL_ERROR);
+
+		if (theCompletedRestores.isEmpty()) {
+			String msg = format(
+					"Undo-merge failed. No resources could be restored. Undo failure cause: %s",
+					theFailure.getMessage());
+			addErrorToOperationOutcome(myFhirContext, opOutcome, msg, ISSUE_TYPE_EXCEPTION);
+			return;
+		}
+
+		List<ProvenanceRestoreInfo> remainingRestores = new ArrayList<>(theOrderedRestores);
+		remainingRestores.removeAll(theCompletedRestores);
+
+		String msg = format(
+				"Undo-merge failed partway through and could not be rolled back automatically. The changes recorded "
+						+ "by the following Provenance resources may have been restored, but may also have been left "
+						+ "in their merged state; they should be checked and, if necessary, reconciled manually: %s. "
+						+ "The changes recorded by these Provenance resources were not restored: %s. "
+						+ "Undo failure cause: %s",
+				describeProvenances(theCompletedRestores),
+				describeProvenances(remainingRestores),
+				theFailure.getMessage());
+		ourLog.error("Reporting undo-merge failure to caller: {}", msg);
+		addErrorToOperationOutcome(myFhirContext, opOutcome, msg, ISSUE_TYPE_EXCEPTION);
+	}
+
+	private static String describeProvenances(List<ProvenanceRestoreInfo> theRestores) {
+		return theRestores.stream()
+				.map(restore -> restore.provenance()
+						.getIdElement()
+						.toUnqualifiedVersionless()
+						.getValue())
+				.collect(joining(", "));
+	}
+
+	private void validateGroupedMergeResourceLimit(
+			Provenance theMainProvenance,
+			List<Provenance> theMemberProvenances,
+			UndoMergeOperationInputParameters inputParameters) {
+		Set<String> referencedResources = new HashSet<>();
+		for (Reference ref : theMainProvenance.getTarget()) {
+			referencedResources.add(versionlessRefValue(ref));
+		}
+		for (Provenance memberProvenance : theMemberProvenances) {
+			for (Reference ref : memberProvenance.getTarget()) {
+				referencedResources.add(versionlessRefValue(ref));
+			}
+		}
+		validateResourceLimit(referencedResources.size(), inputParameters.getResourceLimit());
+	}
+
+	private static void validateResourceLimit(int theCount, int theLimit) {
+		if (theCount > theLimit) {
+			String msg = format("Number of references to update (%d) exceeds the limit (%d)", theCount, theLimit);
+			throw new InvalidRequestException(Msg.code(2748) + msg);
+		}
 	}
 
 	private boolean wasTargetUpdateANoop(Provenance provenance) {

@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ResolveIdentityMode;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
@@ -229,13 +230,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 		// We still haven't found IDs, let's look them up in the DB
 		if (!ids.isEmpty()) {
-			myTransactionService
-					.withSystemRequest()
-					.withRequestPartitionId(requestPartitionId)
-					.executeWithoutResult(partition -> {
-						resolveResourceIdentitiesForFhirIdsUsingDatabase(partition, ids, idToLookup);
-						return null;
-					});
+			createTransactionAndResolveResourceIdentitiesForFhirIdsUsingDatabase(requestPartitionId, ids, idToLookup);
 		}
 
 		// Convert the multimap into a simple map
@@ -275,6 +270,19 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		}
 
 		return retVal;
+	}
+
+	protected void createTransactionAndResolveResourceIdentitiesForFhirIdsUsingDatabase(
+			RequestPartitionId theRequestPartitionId,
+			Collection<IIdType> theIdsToResolve,
+			ListMultimap<IIdType, IResourceLookup<JpaPid>> theMapToPopulate) {
+		myTransactionService
+				.withSystemRequest()
+				.withRequestPartitionId(theRequestPartitionId)
+				.executeWithoutResult(partition -> {
+					resolveResourceIdentitiesForFhirIdsUsingDatabase(partition, theIdsToResolve, theMapToPopulate);
+					return null;
+				});
 	}
 
 	/**
@@ -328,6 +336,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			RequestPartitionId theRequestPartitionId,
 			Collection<IIdType> theIdsToResolve,
 			ListMultimap<IIdType, IResourceLookup<JpaPid>> theMapToPopulate) {
+		HapiTransactionService.requireTransaction();
 
 		/*
 		 * If we have more than a threshold of IDs, we need to chunk the execution to

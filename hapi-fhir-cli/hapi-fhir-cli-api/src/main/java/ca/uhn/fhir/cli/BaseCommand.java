@@ -80,7 +80,7 @@ import java.util.zip.GZIPInputStream;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
-import static org.fusesource.jansi.Ansi.ansi;
+import static org.jline.jansi.Ansi.ansi;
 
 public abstract class BaseCommand implements Comparable<BaseCommand> {
 	public static final String PROMPT = "PROMPT";

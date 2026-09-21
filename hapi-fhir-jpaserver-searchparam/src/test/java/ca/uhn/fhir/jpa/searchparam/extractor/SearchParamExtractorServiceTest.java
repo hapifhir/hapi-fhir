@@ -4,13 +4,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.MockInvoker;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,7 +33,6 @@ import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -125,5 +124,51 @@ public class SearchParamExtractorServiceTest {
 	@SuppressWarnings("unchecked")
 	private static <T> T unsafeCast(Object theObject) {
 		return (T) theObject;
+	}
+
+	/**
+	 * Test that findContainedResource skips a candidate resource that has no id instead of
+	 * throwing an NPE. This can happen when a resource is embedded in another resource (e.g.
+	 * as a Bundle entry) without ever being assigned an id of its own - which is valid, since
+	 * such a resource can still have its own identity established another way (e.g. a
+	 * Bundle.entry.fullUrl). The candidate should simply be treated as a non-match instead of
+	 * blowing up the whole lookup.
+	 */
+	// Created by Claude Sonnet 5
+	@Test
+	void testFindContainedResource_whenCandidateHasNoId_returnsNullInsteadOfThrowing() {
+		// Setup
+		SearchParamExtractorService svc = new SearchParamExtractorService();
+
+		Group candidateWithNoId = new Group();
+		Reference reference = new Reference("Patient/123");
+
+		// Execute - should not throw NullPointerException
+		IBaseResource result = svc.findContainedResource(List.of(candidateWithNoId), reference);
+
+		// Verify - should return null since no match was found
+		assertThat(result).isNull();
+	}
+
+	/**
+	 * Sanity check that a genuine match is still found correctly, including when it isn't the
+	 * first candidate and an earlier, id-less candidate had to be skipped along the way.
+	 */
+	// Created by Claude Sonnet 5
+	@Test
+	void testFindContainedResource_whenCandidateIdMatchesReference_returnsCandidate() {
+		// Setup
+		SearchParamExtractorService svc = new SearchParamExtractorService();
+
+		Group candidateWithNoId = new Group();
+		Group matchingCandidate = new Group();
+		matchingCandidate.setId("123");
+		Reference reference = new Reference("#123");
+
+		// Execute
+		IBaseResource result = svc.findContainedResource(List.of(candidateWithNoId, matchingCandidate), reference);
+
+		// Verify
+		assertThat(result).isSameAs(matchingCandidate);
 	}
 }

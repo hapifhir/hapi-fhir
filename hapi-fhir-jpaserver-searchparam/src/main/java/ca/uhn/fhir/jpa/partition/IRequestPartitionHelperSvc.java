@@ -23,6 +23,7 @@ import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import jakarta.annotation.Nonnull;
@@ -154,6 +155,28 @@ public interface IRequestPartitionHelperSvc {
 	@Nonnull
 	RequestPartitionId determineCreatePartitionForRequest(
 			@Nullable RequestDetails theRequest, @Nonnull IBaseResource theResource, @Nonnull String theResourceType);
+
+	/**
+	 * Same as {@link #determineCreatePartitionForRequest(RequestDetails, IBaseResource, String)}, except that the
+	 * partition cached in the resource's {@link Constants#RESOURCE_PARTITION_ID} user data is ignored, so the
+	 * partition is always recomputed from the resource's current content. The cached value is restored afterward.
+	 *
+	 * @param theRequest the request details from the context of the call
+	 * @param theResource the resource whose partition should be recomputed
+	 * @param theResourceType the resource type
+	 * @return the partition computed from the resource's current content
+	 */
+	@Nonnull
+	default RequestPartitionId determineCreatePartitionForRequestIgnoringCachedPartition(
+			@Nullable RequestDetails theRequest, @Nonnull IBaseResource theResource, @Nonnull String theResourceType) {
+		Object cachedPartition = theResource.getUserData(Constants.RESOURCE_PARTITION_ID);
+		try {
+			theResource.setUserData(Constants.RESOURCE_PARTITION_ID, null);
+			return determineCreatePartitionForRequest(theRequest, theResource, theResourceType);
+		} finally {
+			theResource.setUserData(Constants.RESOURCE_PARTITION_ID, cachedPartition);
+		}
+	}
 
 	@Nonnull
 	Set<Integer> toReadPartitions(@Nonnull RequestPartitionId theRequestPartitionId);

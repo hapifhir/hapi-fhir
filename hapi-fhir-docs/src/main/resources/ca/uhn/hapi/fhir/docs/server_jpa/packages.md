@@ -31,6 +31,53 @@ HAPI FHIR also supports installing a package asynchronously using a batch proces
 myPackageInstallerSvc.installAsynchronously(spec);
 ```
 
+# Restricting Package URLs
+
+By default the package loader will fetch from any URL.
+
+To restrict it, supply a bean implementing `IPackageUrlAllowListProvider`. Each allowed prefix is an `AllowedUrlPrefix`:
+
+```java
+@Bean
+public IPackageUrlAllowListProvider packageUrlAllowListProvider() {
+	return new IPackageUrlAllowListProvider() {
+		@Override
+		public List<AllowedUrlPrefix> getRemotePrefixes() {
+			return List.of(new AllowedUrlPrefix("https://packages2.fhir.org", false));
+		}
+
+		@Override
+		public List<AllowedUrlPrefix> getLocalPrefixes() {
+			return List.of(new AllowedUrlPrefix("file:/opt/packages", false));
+		}
+	};
+}
+```
+
+The `AllowedUrlPrefix` constructor takes the prefix followed by `theIsPrivateNetwork` boolean. When `theIsPrivateNetwork` is set to `true`, fetching from an address on a private network is permitted (otherwise SSRF protection blocks this).
+
+`theIsPrivateNetwork` only applies to remote prefixes and is ignored for `file:` and `classpath:` prefixes.
+
+Whether plain HTTP is permitted is derived from the prefix rather than configured: a prefix beginning `https:` refuses plain-HTTP fetches against that host, and one beginning `http:` permits them. Allow list matching requires a candidate URL's scheme to equal the scheme of the prefix it matches, so the two can never disagree.
+
+Remote prefixes are matched by origin and local prefixes by resolved path, so the example above permits any package beneath `/opt/packages` but not one in `/opt/packages-other`.
+
+Write `file:` prefixes as `file:/opt/packages` or `file:///opt/packages`; the two-slash spelling `file://opt/packages` parses `opt` as a hostname and restricts to `/packages` instead.
+
+When the `IPackageUrlAllowListProvider` bean is present, `PackageLoaderSvc` rejects any package URL that does not match a configured prefix with `HAPI-3028`.
+
+Regardless of what is configured, only the `http:`, `https:`, `file:` and `classpath:` schemes are supported; any other scheme is rejected with `HAPI-3029`.
+
+When no such bean is present (or if the provided bean includes in the list `AllowedUrlPrefix.all()`), all URLs are permitted and behaviour is unchanged.
+
+## Redirects
+
+A prefix is matched against the URL that is requested. If the server answers with a redirect, the redirect target is matched against the allow list in turn before it is followed.
+
+Up to `PackageUrlConstants.MAX_REDIRECTS` (5) hops are followed. A redirect is refused if the target does not match a configured prefix, if it would downgrade `https:` to `http:`, if it repeats a URL already visited in the chain, or if the response carries no usable `Location` header.
+
+A registry or mirror that redirects — for example to a CDN — therefore needs both the URL that is requested and the URL it redirects to on the allow list.
+
 # Install Mode
 
 The `installMode` field on `PackageInstallationSpec` controls what is persisted during installation:

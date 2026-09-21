@@ -2,6 +2,7 @@ package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.StringType;
@@ -75,5 +76,27 @@ class ExtensionUtilTest {
 		ExtensionUtil.clearAllExtensions(p);
 
 		assertThat(p.getExtension()).isEmpty();
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	void testAddExtensionIfSupported() {
+		Patient patient = new Patient();
+		ExtensionUtil.addExtensionIfSupported(ourFhirContext, patient, EXT_URL, "boolean", Boolean.TRUE);
+
+		assertTrue(ExtensionUtil.hasExtension(patient, EXT_URL));
+		IBaseDatatype value = ExtensionUtil.getExtensionByUrl(patient, EXT_URL).getValue();
+		assertEquals("boolean", value.fhirType());
+		assertEquals("true", ((PrimitiveType) value).asStringValue());
+	}
+
+	// Created by Claude Fable 5
+	@Test
+	void testAddExtensionIfSupported_typeWithoutExtensions_doesNothing() {
+		Binary binary = new Binary();
+
+		ExtensionUtil.addExtensionIfSupported(ourFhirContext, binary, EXT_URL, "boolean", Boolean.TRUE);
+
+		assertTrue(binary.isEmpty());
 	}
 }

@@ -99,7 +99,7 @@ public class ResourceIdentifierCacheSvcImpl implements IResourceIdentifierCacheS
 											MemoryCacheService.CacheEnum.RESOURCE_IDENTIFIER_SYSTEM_TO_PID,
 											theSystem,
 											newEntity.getPid());
-									ourLog.info(
+									ourLog.debug(
 											"Created identifier System[{}] with PID: {}",
 											theSystem,
 											newEntity.getPid());

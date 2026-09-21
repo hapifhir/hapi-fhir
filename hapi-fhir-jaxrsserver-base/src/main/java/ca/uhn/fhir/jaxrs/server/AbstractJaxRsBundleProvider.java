@@ -32,7 +32,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.server.method.IMethodBinding;
 import jakarta.interceptor.Interceptors;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -129,7 +129,7 @@ public abstract class AbstractJaxRsBundleProvider extends AbstractJaxRsProvider
 	 */
 	private Response execute(final Builder theRequestBuilder, final String methodKey) throws IOException {
 		final JaxRsRequest theRequest = theRequestBuilder.build();
-		final BaseMethodBinding method = getBinding(theRequest.getRestOperationType(), methodKey);
+		final IMethodBinding method = getBinding(theRequest.getRestOperationType(), methodKey);
 		try {
 			return (Response) method.invokeServer(this, theRequest);
 		} catch (final Throwable theException) {
@@ -154,7 +154,7 @@ public abstract class AbstractJaxRsBundleProvider extends AbstractJaxRsProvider
 	 * @param theBindingKey the key determining the method to be executed (needed for e.g. custom operation)
 	 * @return
 	 */
-	protected BaseMethodBinding getBinding(final RestOperationTypeEnum restOperation, final String theBindingKey) {
+	protected IMethodBinding getBinding(final RestOperationTypeEnum restOperation, final String theBindingKey) {
 		return getBindings().getBinding(restOperation, theBindingKey);
 	}
 

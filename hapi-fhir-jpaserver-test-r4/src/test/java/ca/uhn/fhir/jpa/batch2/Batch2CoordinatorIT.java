@@ -229,6 +229,60 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void startInstance_hookOverridesJobDefinitionIdAndParameters_overriddenJobRunsToCompletion() throws InterruptedException {
+		// setup - two registered job definitions: the one the caller requests (which must
+		// never run), and the one the hook swaps in
+		String requestedJobId = getMethodNameForJobId();
+		String overrideJobId = requestedJobId + "-override";
+
+		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> requestedJobFirstStep = (step, sink) -> {
+			fail("The requested job definition must not run when a hook overrides it");
+			return RunOutcome.SUCCESS;
+		};
+		myJobDefinitionRegistry.addJobDefinition(
+			buildGatedJobDefinition(requestedJobId, requestedJobFirstStep, (step, sink) -> fail()));
+
+		AtomicReference<String> param1SeenByWorker = new AtomicReference<>();
+		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> overrideJobFirstStep = (step, sink) -> {
+			param1SeenByWorker.set(step.getParameters().getParam1());
+			return callLatch(myFirstStepLatch, step);
+		};
+		myJobDefinitionRegistry.addJobDefinition(
+			buildGatedJobDefinition(overrideJobId, overrideJobFirstStep, (step, sink) -> fail()));
+
+		// the pointcut fires for every batch2 job start, so a real interceptor must
+		// filter before acting - model that here
+		IAnonymousInterceptor hook = (pointcut, params) -> {
+			JobInstanceStartRequest startRequest = params.get(JobInstanceStartRequest.class);
+			if (!requestedJobId.equals(startRequest.getJobDefinitionId())) {
+				return;
+			}
+			startRequest.setJobDefinitionId(overrideJobId);
+			TestJobParameters parameters = startRequest.getParameters(TestJobParameters.class);
+			parameters.setParam1("set-by-hook");
+			startRequest.setParameters(parameters);
+		};
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRECREATE_BATCH_JOB_INSTANCE, hook);
+		try {
+			// test
+			JobInstanceStartRequest request = buildRequest(requestedJobId);
+			myFirstStepLatch.setExpectedCount(1);
+			Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
+			myBatch2JobHelper.runActiveJobMaintenancePass();
+			myFirstStepLatch.awaitExpected();
+			myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId());
+
+			// verify - the persisted instance belongs to the override definition, and the
+			// parameter rewrite made by the hook reached the running worker
+			JobInstance instance = myJobCoordinator.getInstance(startResponse.getInstanceId());
+			assertEquals(overrideJobId, instance.getJobDefinitionId());
+			assertEquals("set-by-hook", param1SeenByWorker.get());
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(hook);
+		}
+	}
+
+	@Test
 	public void replayingWorkChunkNotificationMessages_forFailedJobs_shouldNotThrowNullPointers() throws Exception {
 		// setup
 		String currentLogger = myLogbackTestExtension.getCurrentLogger();
@@ -1346,7 +1400,19 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	}
 
 	static class TestJobParameters implements IModelJson {
+
+		@JsonProperty("param1")
+		private String myParam1;
+
 		TestJobParameters() {
+		}
+
+		public String getParam1() {
+			return myParam1;
+		}
+
+		public void setParam1(String theParam1) {
+			myParam1 = theParam1;
 		}
 	}
 

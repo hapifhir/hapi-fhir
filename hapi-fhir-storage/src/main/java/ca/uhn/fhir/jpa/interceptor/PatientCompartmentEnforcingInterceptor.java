@@ -28,7 +28,6 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.util.ResourceCompartmentUtil;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -132,19 +131,10 @@ public class PatientCompartmentEnforcingInterceptor {
 	 */
 	private String determinePartition(
 			RequestDetails theRequestDetails, IBaseResource theResource, String resourceType) {
-		Object stashedPartition = theResource.getUserData(Constants.RESOURCE_PARTITION_ID);
-		if (stashedPartition != null) {
-			theResource.setUserData(Constants.RESOURCE_PARTITION_ID, null);
-		}
-		try {
-			assert myRequestPartitionHelperSvc != null;
-			RequestPartitionId requestPartition = myRequestPartitionHelperSvc.determineCreatePartitionForRequest(
-					theRequestDetails, theResource, resourceType);
-			return requestPartition.toJson();
-		} finally {
-			if (stashedPartition != null) {
-				theResource.setUserData(Constants.RESOURCE_PARTITION_ID, stashedPartition);
-			}
-		}
+		assert myRequestPartitionHelperSvc != null;
+		RequestPartitionId requestPartition =
+				myRequestPartitionHelperSvc.determineCreatePartitionForRequestIgnoringCachedPartition(
+						theRequestDetails, theResource, resourceType);
+		return requestPartition.toJson();
 	}
 }
