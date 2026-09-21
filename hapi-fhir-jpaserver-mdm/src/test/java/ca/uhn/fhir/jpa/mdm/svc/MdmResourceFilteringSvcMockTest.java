@@ -9,9 +9,9 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -26,7 +26,7 @@ class MdmResourceFilteringSvcMockTest {
 	MdmSearchParamSvc myMdmSearchParamSvc;
 	@MockitoBean
 	FhirContext myFhirContext;
-	@MockBean
+	@MockitoBean
 	private EIDHelper myEIDHelper;
 	@Autowired
 	private MdmResourceFilteringSvc myMdmResourceFilteringSvc;
