@@ -37,9 +37,10 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 interface BindIdListAsJsonSearchTest extends ITestDataBuilder {
 
 	/**
-	 * Roughly the number of IDs whose JSON array exceeds Oracle's default 4,000 byte VARCHAR2 bind limit.
+	 * A number of IDs whose JSON array exceeds Oracle's default 4,000 byte VARCHAR2 bind limit even with the
+	 * smallest possible IDs (1 to 1,200 renders about 4,900 bytes).
 	 */
-	int LARGE_PAYLOAD_PATIENT_COUNT = 800;
+	int LARGE_PAYLOAD_PATIENT_COUNT = 1200;
 
 	record Context(
 		JpaStorageSettings storageSettings,
@@ -142,7 +143,7 @@ interface BindIdListAsJsonSearchTest extends ITestDataBuilder {
 	}
 
 	/**
-	 * Large list of IDs (800) to test against Oracle's 4,000-byte VARCHAR2 bind limit and
+	 * Large list of IDs to test against Oracle's 4,000-byte VARCHAR2 bind limit and
 	 * SQL Server's switch from nvarchar(4000) to varchar(8000)
 	 */
 	@Test
