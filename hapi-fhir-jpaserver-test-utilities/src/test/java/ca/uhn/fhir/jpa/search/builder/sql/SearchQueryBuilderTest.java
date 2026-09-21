@@ -679,7 +679,7 @@ public class SearchQueryBuilderTest {
 	}
 
 	@Test
-	void testResourceIdsOverThreshold_deprecatedPostgres94Dialect_rendersJsonArray() {
+	void testResourceIdsOverThreshold_postgres94Dialect_rendersJsonArray() {
 		myStorageSettings.setBindIdListAsJsonAboveSize(3);
 		SearchQueryBuilder builder = createQueryBuilder(new HapiFhirPostgres94Dialect());
 		builder.addPredicate(createResourceIdsPredicate(builder, false, 4));
