@@ -42,4 +42,9 @@ public class HapiFhirPostgres94Dialect extends PostgreSQLDialect implements IHap
 	public DriverTypeEnum getDriverType() {
 		return DriverTypeEnum.POSTGRES_9_4;
 	}
+
+	@Override
+	public String getIdListJsonSubselectTemplate() {
+		return "SELECT CAST(j.value AS BIGINT) FROM jsonb_array_elements_text(CAST(%s AS jsonb)) AS j";
+	}
 }

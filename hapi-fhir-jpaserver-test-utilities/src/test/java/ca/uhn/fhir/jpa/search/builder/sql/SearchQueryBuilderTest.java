@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirMariaDBDialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirOracleDialect;
+import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
@@ -23,6 +24,7 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSpec;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.dialect.DerbyDialect;
+import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.MySQL8Dialect;
 import org.hibernate.dialect.PostgreSQLDialect;
 import org.hibernate.dialect.SQLServer2012Dialect;
@@ -676,14 +678,30 @@ public class SearchQueryBuilderTest {
 		assertThat(generated.getBindVariables()).containsExactly("Patient", 1, "[1,2,3,4,5]");
 	}
 
+	@Test
+	void testResourceIdsOverThreshold_deprecatedPostgres94Dialect_rendersJsonArray() {
+		myStorageSettings.setBindIdListAsJsonAboveSize(3);
+		SearchQueryBuilder builder = createQueryBuilder(new HapiFhirPostgres94Dialect());
+		builder.addPredicate(createResourceIdsPredicate(builder, false, 4));
+
+		GeneratedSql generated = builder.generate(null, null);
+
+		assertThat(generated.getSql()).contains("jsonb_array_elements_text");
+		assertThat(generated.getBindVariables()).containsExactly("Patient", "[1,2,3,4]");
+	}
+
 	private SearchQueryBuilder createPostgresQueryBuilder(int theBindIdListAsJsonAboveSize) {
 		myStorageSettings.setBindIdListAsJsonAboveSize(theBindIdListAsJsonAboveSize);
 		return createPostgresQueryBuilder();
 	}
 
 	private SearchQueryBuilder createPostgresQueryBuilder() {
+		return createQueryBuilder(new HapiFhirPostgresDialect());
+	}
+
+	private SearchQueryBuilder createQueryBuilder(Dialect theDialect) {
 		HibernatePropertiesProvider dialectProvider = new HibernatePropertiesProvider();
-		dialectProvider.setDialectForUnitTest(new HapiFhirPostgresDialect());
+		dialectProvider.setDialectForUnitTest(theDialect);
 		return new SearchQueryBuilder(myFhirContext, myStorageSettings, myPartitionSettings, myRequestPartitionId, "Patient", mySqlBuilderFactory, dialectProvider, false, false);
 	}
 
