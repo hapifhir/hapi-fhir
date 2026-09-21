@@ -10,8 +10,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -24,6 +26,7 @@ import java.util.Locale;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -135,6 +138,24 @@ public class HibernatePropertiesProviderTest {
 
 		verify(myDataSource, times(1)).getConnection();
 		assertThat(compatibilityLevelWarnings()).isEmpty();
+	}
+
+	@Test
+	void isJsonUnpackingSupported_insideTransaction_reusesTheTransactionConnection() throws SQLException {
+		when(myConnection.createStatement()).thenReturn(myStatement);
+		when(myStatement.executeQuery(anyString())).thenReturn(myResultSet);
+		when(myResultSet.next()).thenReturn(true);
+		when(myResultSet.getInt(1)).thenReturn(150);
+
+		TransactionSynchronizationManager.bindResource(myDataSource, new ConnectionHolder(myConnection));
+		try {
+			assertThat(mySvc.isJsonUnpackingSupported()).isTrue();
+		} finally {
+			TransactionSynchronizationManager.unbindResource(myDataSource);
+		}
+
+		verify(myDataSource, never()).getConnection();
+		verify(myConnection, never()).close();
 	}
 
 	private void stubConnection() throws SQLException {

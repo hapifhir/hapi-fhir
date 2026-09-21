@@ -30,11 +30,10 @@ import org.hibernate.search.engine.cfg.BackendSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.sql.DataSource;
 
@@ -168,12 +167,13 @@ public class HibernatePropertiesProvider {
 	 */
 	@Nullable
 	private Boolean probeSqlServerJsonSupport() {
-		try (Connection connection = getDataSource().getConnection();
-				Statement statement = connection.createStatement();
-				ResultSet resultSet = statement.executeQuery(
-						"SELECT compatibility_level FROM sys.databases WHERE name = DB_NAME()")) {
-			if (resultSet.next()) {
-				int compatibilityLevel = resultSet.getInt(1);
+		try {
+			// JdbcTemplate uses the connection of the current transaction rather than taking another from the pool
+			Integer compatibilityLevel = new JdbcTemplate(getDataSource())
+					.query(
+							"SELECT compatibility_level FROM sys.databases WHERE name = DB_NAME()",
+							(ResultSetExtractor<Integer>) t -> t.next() ? t.getInt(1) : null);
+			if (compatibilityLevel != null) {
 				ourLog.debug("SQL Server database compatibility level is {}", compatibilityLevel);
 				return compatibilityLevel >= MINIMUM_SQL_SERVER_OPENJSON_COMPATIBILITY_LEVEL;
 			}
