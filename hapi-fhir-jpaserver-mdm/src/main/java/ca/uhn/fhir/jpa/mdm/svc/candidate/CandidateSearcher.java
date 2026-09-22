@@ -24,19 +24,19 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.svc.MdmSearchParamSvc;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
 
 public class CandidateSearcher {
-	private static final Logger ourLog = LoggerFactory.getLogger(CandidateSearcher.class);
+	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 	private final DaoRegistry myDaoRegistry;
 	private final IMdmSettings myMdmSettings;
 	private final MdmSearchParamSvc myMdmSearchParamSvc;
