@@ -7,11 +7,13 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.BaseConceptProperty;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationIssue;
+import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.Logs;
+import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -466,11 +468,10 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 
 	@Override
 	public CodeSystem fetchCodeSystem(String system, String version, Resource sourceOfReference) {
-		if (StringUtils.isNotBlank(version)) {
-			system = system + "|" + version;
-		}
-		ourLog.info("Fetching CodeSystem for: {}", system);
-		IBaseResource fetched = myValidationSupport.fetchCodeSystem(system);
+		String canonicalUrl = UrlUtil.toCanonicalUrl(system, version);
+		ourLog.info("Fetching CodeSystem for: {}", canonicalUrl);
+		IBaseResource fetched = myValidationSupport.fetchCodeSystem(canonicalUrl);
+
 		if (fetched == null) {
 			return null;
 		}
@@ -707,7 +708,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	public ValidationResult validateCode(
 			ValidationOptions theOptions, String system, String version, String code, String display) {
 		ConceptValidationOptions validationOptions = convertConceptValidationOptions(theOptions);
-		return doValidation(null, validationOptions, system, code, display);
+		return doValidation(null, validationOptions, system, version, code, display);
 	}
 
 	@Override
@@ -720,7 +721,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			ValueSet theValueSet) {
 
 		ConceptValidationOptions validationOptions = convertConceptValidationOptions(theOptions);
-		return doValidation(theValueSet, validationOptions, theSystem, theCode, display);
+		return doValidation(theValueSet, validationOptions, theSystem, version, theCode, display);
 	}
 
 	@Override
@@ -730,17 +731,18 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 		ConceptValidationOptions validationOptions =
 				convertConceptValidationOptions(theOptions).setInferSystem(true);
 
-		return doValidation(theValueSet, validationOptions, system, code, null);
+		return doValidation(theValueSet, validationOptions, system, null, code, null);
 	}
 
 	@Override
 	public ValidationResult validateCode(ValidationOptions theOptions, Coding theCoding, ValueSet theValueSet) {
 		ConceptValidationOptions validationOptions = convertConceptValidationOptions(theOptions);
 		String system = theCoding.getSystem();
+		String version = theCoding.getVersion();
 		String code = theCoding.getCode();
 		String display = theCoding.getDisplay();
 
-		return doValidation(theValueSet, validationOptions, system, code, display);
+		return doValidation(theValueSet, validationOptions, system, version, code, display);
 	}
 
 	@Override
@@ -758,18 +760,24 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			@Nullable ValueSet theValueSet,
 			ConceptValidationOptions theValidationOptions,
 			String theSystem,
+			String theVersion,
 			String theCode,
 			String theDisplay) {
 
 		IBaseResource convertedVs = getOrConvertValueSet(theValueSet);
 
+		// the system arrives carrying its version when it was inferred from the value set's compose
+		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(theSystem);
+		String system = codeSystem.url();
+		String version = codeSystem.versionId().orElse(theVersion);
+
 		IValidationSupport.CodeValidationResult result;
 		if (convertedVs != null) {
-			result = validateCodeInValueSet(convertedVs, theValidationOptions, theSystem, theCode, theDisplay);
+			result = validateCodeInValueSet(convertedVs, theValidationOptions, system, version, theCode, theDisplay);
 		} else {
-			result = validateCodeInCodeSystem(theValidationOptions, theSystem, theCode, theDisplay);
+			result = validateCodeInCodeSystem(theValidationOptions, system, version, theCode, theDisplay);
 		}
-		return convertValidationResult(theSystem, result);
+		return convertValidationResult(system, result);
 	}
 
 	private IBaseResource getOrConvertValueSet(ValueSet theValueSet) {
@@ -818,17 +826,23 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			IBaseResource theValueSet,
 			ConceptValidationOptions theValidationOptions,
 			String theSystem,
+			String theVersion,
 			String theCode,
 			String theDisplay) {
 		IValidationSupport.CodeValidationResult result = myValidationSupport.validateCodeInValueSet(
 				newValidationSupportContext(), theValidationOptions, theSystem, theCode, theDisplay, theValueSet);
+
+		/* The ValueSet answer only tells us whether the code is in the expansion, not whether the
+		CodeSystem defines it. org.hl7.fhir.core's validator takes the in-the-ValueSet verdict from the
+		result severity rather than from our issues: it raises that failure itself as a validation message,
+		graded by binding strength, and drops our now redundant not-in-vs issue. Everything else it reports
+		from the issues - so this call is what supplies the issue for a code the CodeSystem does not define.
+		*/
 		if (result != null && isNotBlank(theSystem)) {
-			/* We got a value set result, which could be successful, or could contain errors/warnings. The code
-			might also be invalid in the code system, so we will check that as well and add those issues
-			to our result.
-			*/
+			// Pass the version as well: without it this check uses whichever version is current
+			String expectedVersion = isNotBlank(theVersion) ? theVersion : result.getCodeSystemVersion();
 			IValidationSupport.CodeValidationResult codeSystemResult =
-					validateCodeInCodeSystem(theValidationOptions, theSystem, theCode, theDisplay);
+				validateCodeInCodeSystem(theValidationOptions, theSystem, expectedVersion, theCode, theDisplay);
 			final boolean valueSetResultContainsInvalidDisplay = result.getIssues().stream()
 					.anyMatch(WorkerContextValidationSupportAdapter::hasInvalidDisplayDetailCode);
 			if (codeSystemResult != null) {
@@ -879,9 +893,9 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	}
 
 	private IValidationSupport.CodeValidationResult validateCodeInCodeSystem(
-			ConceptValidationOptions theValidationOptions, String theSystem, String theCode, String theDisplay) {
+			ConceptValidationOptions theValidationOptions, String theSystem, String theVersion, String theCode, String theDisplay) {
 		return myValidationSupport.validateCode(
-				newValidationSupportContext(), theValidationOptions, theSystem, theCode, theDisplay, null);
+				newValidationSupportContext(), theValidationOptions, new ValidateCodeRequest(theSystem, theVersion, theCode, theDisplay, null));
 	}
 
 	@Override
