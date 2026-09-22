@@ -528,7 +528,7 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 							HumanName name = patient.getNameFirstRep();
 							thePrinter.printRecord(
 								name.getFamily(),
-								String.join(", ", name.getGiven().stream().map(PrimitiveType::asStringValue).collect(Collectors.toList())),
+								name.getGiven().stream().map(PrimitiveType::asStringValue).collect(Collectors.joining(", ")),
 								patient.getGeneralPractitioner().stream().findFirst().orElse(new Reference("unknown")).getReference()
 							);
 						}
@@ -650,7 +650,7 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 									String row = nameToRow.get(name);
 									assertNotNull(row);
 									assertThat(row)
-										.contains("Simpson,\"Jay, " + name + "\",Practitioner/");
+										.contains("Simpson,\"" + name + ", Jay\",Practitioner/");
 								}
 							}
 							case "Practitioner" -> {
