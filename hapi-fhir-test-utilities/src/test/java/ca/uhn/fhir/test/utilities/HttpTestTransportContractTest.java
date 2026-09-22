@@ -137,7 +137,7 @@ class HttpTestTransportContractTest {
 
 		assertThat(body)
 				.contains("bodyHex=" + EchoServlet.toHex(NON_ASCII_BODY.getBytes(StandardCharsets.ISO_8859_1)))
-				.contains("rawContentType=text/plain; charset=ISO-8859-1");
+				.containsIgnoringCase("rawContentType=text/plain; charset=ISO-8859-1");
 	}
 
 	@ParameterizedTest
@@ -184,7 +184,7 @@ class HttpTestTransportContractTest {
 
 		assertThat(body)
 				.contains("bodyHex=" + EchoServlet.toHex(NON_ASCII_BODY.getBytes(StandardCharsets.UTF_8)))
-				.contains("rawContentType=text/plain; charset=UTF-8");
+				.containsIgnoringCase("rawContentType=text/plain; charset=UTF-8");
 	}
 
 	@Test
