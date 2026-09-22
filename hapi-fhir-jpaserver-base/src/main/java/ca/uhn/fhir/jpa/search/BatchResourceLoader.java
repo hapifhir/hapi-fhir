@@ -42,6 +42,7 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.IMetaTagSorter;
 import ca.uhn.fhir.util.MetaUtil;
@@ -110,7 +111,9 @@ public class BatchResourceLoader {
 	 * @return List of loaded resources with their database IDs
 	 */
 	public List<ResourceLoadResult> loadResources(
-			List<ResourceHistoryTable> theResourceHistoryEntities, boolean theForHistoryOperation) {
+			RequestDetails theRequestDetails,
+			List<ResourceHistoryTable> theResourceHistoryEntities,
+			boolean theForHistoryOperation) {
 		// 1. Iterate over history entities and split them into ESR and non-ESR lists
 		List<ResourceLoadResult> result = new ArrayList<>(theResourceHistoryEntities.size());
 		Map<String, List<EsrEntityResourceHolder>> esrEntities = new HashMap<>();
@@ -119,7 +122,7 @@ public class BatchResourceLoader {
 				historyEntity -> preProcessEntities(historyEntity, esrEntities, preloadedEntities, result));
 
 		// 2. Process ESR entities in batch per provider
-		List<EntityResourceHolder> esrResources = processEsrEntities(esrEntities);
+		List<EntityResourceHolder> esrResources = processEsrEntities(theRequestDetails, esrEntities);
 
 		// 3. Batch extract tags for all entities
 		Map<JpaPid, Collection<BaseTag>> tagsMap =
@@ -257,7 +260,8 @@ public class BatchResourceLoader {
 		return FhirContext.forCached(theVersion);
 	}
 
-	private List<EntityResourceHolder> processEsrEntities(Map<String, List<EsrEntityResourceHolder>> theEsrEntities) {
+	private List<EntityResourceHolder> processEsrEntities(
+			RequestDetails theRequestDetails, Map<String, List<EsrEntityResourceHolder>> theEsrEntities) {
 		List<EntityResourceHolder> result = new ArrayList<>();
 		for (Map.Entry<String, List<EsrEntityResourceHolder>> entry : theEsrEntities.entrySet()) {
 			String providerId = entry.getKey();
@@ -271,7 +275,7 @@ public class BatchResourceLoader {
 
 			Map<String, IBaseResource> resourceMap;
 			try {
-				resourceMap = provider.fetchResources(addresses);
+				resourceMap = provider.fetchResources(theRequestDetails, addresses);
 			} catch (Exception theException) {
 				String message = String.format(
 						"Failed to load %d externally stored resources from %s provider.",

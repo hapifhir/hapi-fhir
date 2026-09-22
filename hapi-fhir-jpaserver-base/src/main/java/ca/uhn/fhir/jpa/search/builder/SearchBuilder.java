@@ -1512,7 +1512,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		List<ResourceLoadResult> resourceLoadResults =
-				myBatchResourceLoader.loadResources(resourceSearchViewList, theForHistoryOperation);
+				myBatchResourceLoader.loadResources(theRequest, resourceSearchViewList, theForHistoryOperation);
 
 		for (ResourceLoadResult next : resourceLoadResults) {
 			if (next.isDeleted()) {
