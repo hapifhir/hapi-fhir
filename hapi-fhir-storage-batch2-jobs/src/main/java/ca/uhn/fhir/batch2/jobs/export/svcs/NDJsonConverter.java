@@ -1,6 +1,8 @@
 package ca.uhn.fhir.batch2.jobs.export.svcs;
 
+import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
@@ -11,6 +13,7 @@ import ca.uhn.fhir.rest.api.server.bulk.ConvertedFiles;
 import ca.uhn.fhir.rest.api.server.bulk.IResourceConverter;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 
@@ -21,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -41,7 +45,9 @@ public class NDJsonConverter implements IResourceConverter {
 	}
 
 	@Override
-	public ConvertedFiles consume(BulkExportResourceList theResources, BulkExportJobParameters theJobParameters) {
+	@Nonnull
+	public ConvertedFiles consume(
+			@Nonnull BulkExportResourceList theResources, @Nonnull BulkExportJobParameters theJobParameters) {
 		IParser parser = getParser();
 
 		ConvertedFiles convertedResources = new ConvertedFiles();
@@ -100,7 +106,12 @@ public class NDJsonConverter implements IResourceConverter {
 			String theResourceType, List<String> theStringifiedResources, BulkExportJobParameters theJobParameters) {
 		ConvertedFile file = new ConvertedFile();
 		file.setResourceType(theResourceType);
-		file.setMimeType(theJobParameters.getOutputFormat());
+		// shouldn't get here with a null output format
+		// but just in case...
+		file.setMimeType(
+				isBlank(theJobParameters.getOutputFormat())
+						? Constants.CT_FHIR_NDJSON
+						: theJobParameters.getOutputFormat());
 
 		try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
 			try (OutputStreamWriter writer = getStreamWriter(os)) {
@@ -111,9 +122,11 @@ public class NDJsonConverter implements IResourceConverter {
 			}
 			file.setBytes(os.toByteArray());
 		} catch (IOException ex) {
-			// TODO - better error handling
 			// ex can come from either outputstream or streamwriter
-			throw new RuntimeException(ex);
+			String errormsg =
+					String.format("Failure to process resource of type %s : %s", theResourceType, ex.getMessage());
+			ourLog.error(errormsg);
+			throw new JobExecutionFailedException(Msg.code(3050) + errormsg, ex);
 		}
 
 		ourLog.info("Expanding of {} resources of type {} completed", theStringifiedResources.size(), theResourceType);
@@ -129,7 +142,7 @@ public class NDJsonConverter implements IResourceConverter {
 	 * Returns an output stream writer
 	 * (exposed for testing)
 	 */
-	protected OutputStreamWriter getStreamWriter(ByteArrayOutputStream theOutputStream) {
+	OutputStreamWriter getStreamWriter(ByteArrayOutputStream theOutputStream) {
 		return new OutputStreamWriter(theOutputStream, Constants.CHARSET_UTF8);
 	}
 }

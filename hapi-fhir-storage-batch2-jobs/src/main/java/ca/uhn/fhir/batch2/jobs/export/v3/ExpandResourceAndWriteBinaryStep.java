@@ -147,6 +147,20 @@ public class ExpandResourceAndWriteBinaryStep
 		ResourceIdList idList = theStepExecutionDetails.getData();
 		BulkExportJobParameters parameters = theStepExecutionDetails.getParameters();
 
+		ExpandResourcesConsumer resourceListConsumer =
+				getExpandResourcesConsumer(theStepExecutionDetails, theDataSink, parameters);
+
+		// search the resources
+		fetchResourcesByIdAndConsumeThem(idList, parameters, resourceListConsumer, theStepExecutionDetails);
+
+		int resourcesConsumed = resourceListConsumer.getConsumedResourceCount();
+		return new RunOutcome(resourcesConsumed);
+	}
+
+	private ExpandResourcesConsumer getExpandResourcesConsumer(
+			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails,
+			IJobDataSink<BulkExportBinaryFileId> theDataSink,
+			BulkExportJobParameters theParameters) {
 		ExpandResourcesConsumer resourceListConsumer = new ExpandResourcesConsumer(
 				myFhirContext,
 				myBulkExportProcessor,
@@ -156,16 +170,12 @@ public class ExpandResourceAndWriteBinaryStep
 				myResponseTerminologyTranslationSvc,
 				getBinaryCreator(theStepExecutionDetails, theDataSink),
 				theStepExecutionDetails);
-		// TODO LS - this is always false (on purpose)
-		// because V3 does not allow MDM expansion
-		// kept because the parameters still offer it....
-		resourceListConsumer.setDoExpandMDM(isV2Job() && parameters.isExpandMdm());
-
-		// search the resources
-		fetchResourcesByIdAndConsumeThem(idList, parameters, resourceListConsumer, theStepExecutionDetails);
-
-		int resourcesConsumed = resourceListConsumer.getConsumedResourceCount();
-		return new RunOutcome(resourcesConsumed);
+		// V3 does not support MDM expansion — the feature was rolled back to V2 only.
+		// BulkExportJobParameters still carries isExpandMdm() because V2 and V3 share the
+		// parameters shape, so this is pinned false rather than removed, to make the
+		// rollback explicit rather than looking like an oversight.
+		resourceListConsumer.setDoExpandMDM(isV2Job() && theParameters.isExpandMdm());
+		return resourceListConsumer;
 	}
 
 	private BinaryCreator getBinaryCreator(
@@ -438,6 +448,8 @@ public class ExpandResourceAndWriteBinaryStep
 
 	/**
 	 * Overridden in the V2 step
+	 * Always false since the mdmexpansion was rolled back form
+	 * V2 for V3
 	 */
 	protected boolean isV2Job() {
 		return false;

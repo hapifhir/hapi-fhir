@@ -21,8 +21,8 @@ package ca.uhn.fhir.batch2.jobs.export;
 
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
@@ -57,7 +57,7 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 	private IBinaryStorageSvc myBinaryStorageSvc;
 
 	@Autowired
-	private InterceptorService myInterceptorService;
+	private IInterceptorBroadcaster myInterceptorService;
 
 	@Nullable
 	@Override

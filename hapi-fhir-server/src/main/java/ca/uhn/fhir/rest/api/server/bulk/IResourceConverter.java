@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.api.server.bulk;
 
+import jakarta.annotation.Nonnull;
+
 public interface IResourceConverter {
 	/**
 	 * Consumes the list of resources (already expanded)
@@ -9,5 +11,7 @@ public interface IResourceConverter {
 	 * @param theJobParameters - the bulk export parameters
 	 * @return - the ConvertedFiles
 	 */
-	ConvertedFiles consume(BulkExportResourceList theResources, BulkExportJobParameters theJobParameters);
+	@Nonnull
+	ConvertedFiles consume(
+			@Nonnull BulkExportResourceList theResources, @Nonnull BulkExportJobParameters theJobParameters);
 }

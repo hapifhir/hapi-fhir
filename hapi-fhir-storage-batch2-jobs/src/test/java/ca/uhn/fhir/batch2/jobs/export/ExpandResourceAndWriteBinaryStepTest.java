@@ -3,7 +3,6 @@ package ca.uhn.fhir.batch2.jobs.export;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
-import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
@@ -32,17 +31,12 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,11 +46,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -67,47 +58,22 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static ca.uhn.fhir.rest.api.Constants.CT_APP_NDJSON;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ExpandResourceAndWriteBinaryStepTest {
-	private static final Logger ourLog = (Logger) LoggerFactory.getLogger(ExpandResourceAndWriteBinaryStep.class);
-
-	// inner test class
-	private static class TestExpandResourceAndWriteBinaryStep extends ExpandResourceAndWriteBinaryStep {
-
-		private OutputStreamWriter myWriter;
-
-		public void setWriter(OutputStreamWriter theWriter) {
-			myWriter = theWriter;
-		}
-
-//		@Override
-//		protected OutputStreamWriter getStreamWriter(ByteArrayOutputStream theOutputStream) {
-//			if (myWriter == null) {
-//				return super.getStreamWriter(theOutputStream);
-//			}
-//			else {
-//				return myWriter;
-//			}
-//		}
-	}
-
-	@Mock
-	private ListAppender<ILoggingEvent> myAppender;
 
 	@Mock
 	private DaoRegistry myDaoRegistry;
@@ -137,31 +103,25 @@ public class ExpandResourceAndWriteBinaryStepTest {
 	private IHapiTransactionService myTransactionService = new NonTransactionalHapiTransactionService();
 
 	@InjectMocks
-	private TestExpandResourceAndWriteBinaryStep myFinalStep;
+	private ExpandResourceAndWriteBinaryStep myFinalStep;
 
 	@BeforeEach
 	public void init() {
-		ourLog.addAppender(myAppender);
 		myFinalStep.setIdHelperServiceForUnitTest(myIdHelperService);
-	}
-
-	@AfterEach
-	public void after() {
-		ourLog.detachAppender(myAppender);
 	}
 
 	private BulkExportJobParameters createParameters() {
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
 		parameters.setResourceTypes(Arrays.asList("Patient", "Observation"));
 		parameters.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
-		parameters.setOutputFormat("json");
+		parameters.setOutputFormat(CT_APP_NDJSON);
 		parameters.setSince(new Date());
 		return parameters;
 	}
 
 	private StepExecutionDetails<BulkExportJobParameters, ResourceIdList> createInput(ResourceIdList theData,
-																												 BulkExportJobParameters theParameters,
-																												 JobInstance theInstance) {
+																					  BulkExportJobParameters theParameters,
+																					  JobInstance theInstance) {
 		return new StepExecutionDetails<>(
 			theParameters,
 			theData,
@@ -214,7 +174,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 		);
 
 		// when
-		when(patientDao.search(any(), any())).thenAnswer(t->{
+		when(patientDao.search(any(), any())).thenAnswer(t -> {
 			SearchParameterMap map = t.getArgument(0, SearchParameterMap.class);
 			List<List<IQueryParameterType>> idsAnd = map.get(PARAM_ID);
 			assertEquals(1, idsAnd.size());
@@ -222,11 +182,11 @@ public class ExpandResourceAndWriteBinaryStepTest {
 			return new SimpleBundleProvider(resources.subList(0, idsOr.size()));
 		});
 
-		when(myIdHelperService.newPidFromStringIdAndResourceName(any(), anyString(), anyString())).thenAnswer(t->{
+		when(myIdHelperService.newPidFromStringIdAndResourceName(any(), anyString(), anyString())).thenAnswer(t -> {
 			String fhirId = t.getArgument(1, String.class);
 			return JpaPid.fromId(Long.parseLong(fhirId));
 		});
-		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(t->{
+		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(t -> {
 			@SuppressWarnings("unchecked")
 			Set<IResourcePersistentId<JpaPid>> inputSet = t.getArgument(0, Set.class);
 			Map<IResourcePersistentId<?>, Optional<String>> map = new HashMap<>();
@@ -239,7 +199,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 			.thenReturn(binaryDao);
 		AtomicInteger binaryIdCounter = new AtomicInteger(1);
 		when(binaryDao.update(any(IBaseBinary.class), any(RequestDetails.class)))
-			.thenAnswer(t->{
+			.thenAnswer(t -> {
 				IIdType binaryId = new IdType("Binary/" + binaryIdCounter.getAndIncrement());
 				DaoMethodOutcome methodOutcome = new DaoMethodOutcome();
 				methodOutcome.setId(binaryId);
@@ -253,7 +213,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 		// verify
 		assertEquals(new RunOutcome(resources.size()).getRecordsProcessed(), outcome.getRecordsProcessed());
 
-		verify(binaryDao, times(	3))
+		verify(binaryDao, times(3))
 			.update(binaryCaptor.capture(), binaryDaoCreateRequestDetailsCaptor.capture());
 
 		for (int i = 0; i < 3; i++) {
@@ -282,7 +242,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 		);
 
 		// when
-		when(patientDao.search(any(), any())).thenAnswer(t->{
+		when(patientDao.search(any(), any())).thenAnswer(t -> {
 			SearchParameterMap map = t.getArgument(0, SearchParameterMap.class);
 			List<List<IQueryParameterType>> idsAnd = map.get(PARAM_ID);
 			assertEquals(1, idsAnd.size());
@@ -290,11 +250,11 @@ public class ExpandResourceAndWriteBinaryStepTest {
 			return new SimpleBundleProvider(resources.subList(0, idsOr.size()));
 		});
 
-		when(myIdHelperService.newPidFromStringIdAndResourceName(any(), anyString(), anyString())).thenAnswer(t->{
+		when(myIdHelperService.newPidFromStringIdAndResourceName(any(), anyString(), anyString())).thenAnswer(t -> {
 			String fhirId = t.getArgument(1, String.class);
 			return JpaPid.fromId(Long.parseLong(fhirId));
 		});
-		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(t->{
+		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(t -> {
 			@SuppressWarnings("unchecked")
 			Set<IResourcePersistentId<JpaPid>> inputSet = t.getArgument(0, Set.class);
 			Map<IResourcePersistentId<?>, Optional<String>> map = new HashMap<>();
@@ -307,7 +267,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 			.thenReturn(binaryDao);
 		AtomicInteger binaryIdCounter = new AtomicInteger(1);
 		when(binaryDao.update(any(IBaseBinary.class), any(RequestDetails.class)))
-			.thenAnswer(t->{
+			.thenAnswer(t -> {
 				IIdType binaryId = new IdType("Binary/" + binaryIdCounter.getAndIncrement());
 				DaoMethodOutcome methodOutcome = new DaoMethodOutcome();
 				methodOutcome.setId(binaryId);
@@ -368,7 +328,7 @@ public class ExpandResourceAndWriteBinaryStepTest {
 		// when
 		when(patientDao.search(any(), any())).thenReturn(new SimpleBundleProvider(resources));
 		when(myIdHelperService.newPidFromStringIdAndResourceName(any(), anyString(), anyString())).thenReturn(JpaPid.fromId(1L));
-		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(t->{
+		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(t -> {
 			@SuppressWarnings("unchecked")
 			Set<IResourcePersistentId<JpaPid>> inputSet = t.getArgument(0, Set.class);
 			Map<IResourcePersistentId<?>, Optional<String>> map = new HashMap<>();
@@ -425,62 +385,4 @@ public class ExpandResourceAndWriteBinaryStepTest {
 		idList.setIds(batchResourceIds);
 		return resources;
 	}
-
-	@Test
-	public void run_withIOException_throws() throws IOException {
-		// setup
-		String testException = "I am an exceptional exception.";
-		JobInstance instance = new JobInstance();
-		instance.setInstanceId("1");
-		ResourceIdList idList = new ResourceIdList();
-		ArrayList<IBaseResource> resources = createResourceList(idList);
-		IFhirResourceDao<?> patientDao = mockOutDaoRegistry();
-
-		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> input = createInput(
-			idList,
-			createParameters(),
-			instance
-		);
-		ourLog.setLevel(Level.ERROR);
-
-		// when
-		when(patientDao.search(any(), any())).thenReturn(new SimpleBundleProvider(resources));
-		when(myIdHelperService.newPidFromStringIdAndResourceName(any(), anyString(), anyString())).thenReturn(JpaPid.fromId(1L));
-		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(t->{
-			@SuppressWarnings("unchecked")
-			Set<IResourcePersistentId<JpaPid>> inputSet = t.getArgument(0, Set.class);
-			Map<IResourcePersistentId<?>, Optional<String>> map = new HashMap<>();
-			for (var next : inputSet) {
-				map.put(next, Optional.empty());
-			}
-			return new PersistentIdToForcedIdMap<>(map);
-		});
-		when(myDaoRegistry.getResourceDao(eq("Binary")))
-			.thenReturn(binaryDao);
-
-		// we're gong to mock the writer
-		OutputStreamWriter writer = mock(OutputStreamWriter.class);
-		when(writer.append(anyString())).thenThrow(new IOException(testException));
-		myFinalStep.setWriter(writer);
-
-		// test
-		try {
-			myFinalStep.run(input, sink);
-			fail("");
-		} catch (JobExecutionFailedException ex) {
-			assertThat(ex.getMessage()).contains("Failure to process resource of type");
-		}
-
-		// verify
-		ArgumentCaptor<ILoggingEvent> logCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
-		verify(myAppender).doAppend(logCaptor.capture());
-		assertThat(logCaptor.getValue().getFormattedMessage()).contains("Failure to process resource of type "
-			+ idList.getResourceType()
-			+ " : "
-			+ testException);
-
-		verify(sink, never())
-			.accept(any(BulkExportBinaryFileId.class));
-	}
-
 }

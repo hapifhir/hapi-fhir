@@ -25,7 +25,6 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.test.BulkExportCSVConverter;
 import ca.uhn.fhir.jpa.test.BulkExportJobHelper;
-import ca.uhn.fhir.jpa.util.CsvUtil;
 import ca.uhn.fhir.mdm.api.MdmModeEnum;
 import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
@@ -38,9 +37,6 @@ import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
-import ca.uhn.fhir.rest.api.server.bulk.BulkExportResourceList;
-import ca.uhn.fhir.rest.api.server.bulk.ConvertedFile;
-import ca.uhn.fhir.rest.api.server.bulk.ConvertedFiles;
 import ca.uhn.fhir.rest.api.server.bulk.IResourceConverter;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
@@ -49,7 +45,6 @@ import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Sets;
-import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
@@ -89,7 +84,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -100,8 +94,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -113,7 +105,6 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -519,11 +510,12 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		public void bulkExport_customCSVFormat_works() throws IOException {
 			// setup
 			String csvMimeType = "text/csv";
+			String[] firstNames = new String[] { "Homer", "Marge", "Bart", "Lisa", "Maggie" };
 
 			// create a CSV converter
 			Map<String, String[]> resource2headers = new HashMap<>();
-			resource2headers.put("Patient", new String[] { "family", "givem", "practitioner" });
-			resource2headers.put("Practitioner", new String[] { "family", "given" });
+			resource2headers.put("Patient", new String[] { "family", "given", "practitioner" });
+			resource2headers.put("Practitioner", new String[] { "family", "given", "language" });
 			resource2headers.put("Observation", new String[] { "status", "subject" });
 
 			BulkExportCSVConverter converterImpl = new BulkExportCSVConverter(
@@ -536,7 +528,7 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 							HumanName name = patient.getNameFirstRep();
 							thePrinter.printRecord(
 								name.getFamily(),
-								String.join(", ", name.getGiven().stream().map(PrimitiveType::asStringValue).collect(Collectors.toSet())),
+								String.join(", ", name.getGiven().stream().map(PrimitiveType::asStringValue).collect(Collectors.toList())),
 								patient.getGeneralPractitioner().stream().findFirst().orElse(new Reference("unknown")).getReference()
 							);
 						}
@@ -577,7 +569,7 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 			try {
 				// create some resources
-				for (String name : new String[] { "Homer", "Marge", "Bart", "Lisa", "Maggie" }) {
+				for (String name : firstNames) {
 					IIdType practId = createPractitioner(withFamily("hibbert"),
 						withGiven("Julius"),
 						withLanguage("English"));
@@ -635,11 +627,50 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 						ourLog.info("Contents for {} ", resourceType);
 						ourLog.info(contents);
 
+						int resourceCount = firstNames.length;
 						String[] headers = resource2headers.get(resourceType);
 						String[] rows = contents.split("\n");
-						assertThat(rows).isNotEmpty();
+						assertThat(rows).hasSize(resourceCount + 1);
 						assertThat(rows[0].split(","))
 							.containsExactly(headers);
+
+						switch (resourceType) {
+							case "Patient" -> {
+								Map<String, String> nameToRow = new HashMap<>();
+								for (String row : rows) {
+									for (String name : firstNames) {
+										if (row.contains(name)) {
+											nameToRow.put(name, row);
+											break;
+										}
+									}
+								}
+								assertThat(nameToRow).hasSize(resourceCount);
+								for (String name : firstNames) {
+									String row = nameToRow.get(name);
+									assertNotNull(row);
+									assertThat(row)
+										.contains("Simpson,\"Jay, " + name + "\",Practitioner/");
+								}
+							}
+							case "Practitioner" -> {
+								// all the practitioners are the same...
+								for (int i = 1; i < resourceCount + 1; i++) {
+									assertThat(rows[i].split(","))
+										.hasSize(3);
+									assertThat(rows[i])
+										.contains("hibbert,Julius,English");
+								}
+							}
+							case "Observation" -> {
+								for (int i = 1; i < resourceCount + 1; i++) {
+									assertThat(rows[i].split(","))
+										.hasSize(2);
+									assertThat(rows[i])
+										.contains("observation-status|final,Patient/");
+								}
+							}
+						}
 					}
 				}
 			} finally {

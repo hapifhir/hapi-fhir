@@ -52,10 +52,6 @@ public class BinaryCreator implements Consumer<ConvertedFile> {
 
 	@Override
 	public void accept(ConvertedFile theConvertedFile) throws JobExecutionFailedException {
-		//			int batchSize = theExpandedResourcesList.getStringifiedResources().size();
-		//			ourLog.info("Writing {} resources to binary file", batchSize);
-
-		//			myNumResourcesProcessed += batchSize;
 
 		IFhirResourceDao<IBaseBinary> binaryDao = myDaoRegistry.getResourceDao("Binary");
 
@@ -64,31 +60,8 @@ public class BinaryCreator implements Consumer<ConvertedFile> {
 		addMetadataExtensionsToBinary(myStepExecutionDetails, theConvertedFile, binary);
 		binary.setContent(theConvertedFile.getBytes());
 
-		//		int processedRecordsCount = 0;
-		//		try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-		////			try (OutputStreamWriter streamWriter = getStreamWriter(outputStream)) {
-		//////				for (String stringified : theConvertedFile.getStringifiedResources()) {
-		//////					streamWriter.append(stringified);
-		//////					streamWriter.append("\n");
-		//////					processedRecordsCount++;
-		//////				}
-		////				outputStream.append(theConvertedFile.getBytes());
-		////				streamWriter.flush();
-		////				outputStream.flush();
-		////			}
-		//			binary.setContent(theConvertedFile.getBytes());
-		//		} catch (IOException ex) {
-		//			String errorMsg = String.format(
-		//				"Failure to process resource of type %s : %s",
-		//				theExpandedResourcesList.getResourceType(), ex.getMessage());
-		//			ourLog.error(errorMsg);
-		//
-		//			throw new JobExecutionFailedException(Msg.code(2431) + errorMsg);
-		//		}
-
 		BulkExportJobParameters jobParameters = myStepExecutionDetails.getParameters();
 
-		// TODO -
 		binary.setContentType(theConvertedFile.getMimeType());
 
 		// Pick a unique ID and retry until we get one that isn't already used. This is just to
@@ -133,7 +106,7 @@ public class BinaryCreator implements Consumer<ConvertedFile> {
 				"Writing Bulk Export Binary resource with ID: Binary/{}",
 				binary.getIdElement().getIdPart());
 
-		RequestDetails srd = newRequestDetails(myStepExecutionDetails, jobParameters);
+		RequestDetails srd = newRequestDetails(myStepExecutionDetails);
 		DaoMethodOutcome outcome = binaryDao.update(binary, srd);
 		IIdType id = outcome.getId();
 
@@ -184,8 +157,7 @@ public class BinaryCreator implements Consumer<ConvertedFile> {
 	}
 
 	private RequestDetails newRequestDetails(
-			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails,
-			BulkExportJobParameters jobParameters) {
+			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails) {
 		return theStepExecutionDetails.newSystemRequestDetails();
 	}
 }
