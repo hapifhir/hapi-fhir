@@ -117,33 +117,7 @@ public interface ISearchBuilder<T extends IResourcePersistentId<?>> {
 		return result;
 	}
 
-	/**
-	 * Use the loadIncludes that takes a parameters object instead.
-	 */
-	@Deprecated
-	Set<T> loadIncludes(
-			FhirContext theContext,
-			EntityManager theEntityManager,
-			Collection<T> theMatches,
-			Collection<Include> theRevIncludes,
-			boolean theReverseMode,
-			DateRangeParam theLastUpdated,
-			String theSearchIdOrDescription,
-			RequestDetails theRequest,
-			Integer theMaxCount);
-
-	default Set<T> loadIncludes(SearchBuilderLoadIncludesParameters<T> theParameters) {
-		return this.loadIncludes(
-				theParameters.getFhirContext(),
-				theParameters.getEntityManager(),
-				theParameters.getMatches(),
-				theParameters.getIncludeFilters(),
-				theParameters.isReverseMode(),
-				theParameters.getLastUpdated(),
-				theParameters.getSearchIdOrDescription(),
-				theParameters.getRequestDetails(),
-				theParameters.getMaxCount());
-	}
+	Set<T> loadIncludes(SearchBuilderLoadIncludesParameters<T> theParameters);
 
 	/**
 	 * How many results may be fetched at once

@@ -1910,6 +1910,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		Bundle outcome = performSearchForPatients(theUseQueryCache, theUseIncludes);
 
 		// Verify
+		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(expectedResultsPerPage, outcome.getEntry().size());
 		assertThat(myCaptureQueriesListener).has(
 			onAllThreads()
