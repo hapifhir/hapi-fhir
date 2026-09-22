@@ -1,11 +1,13 @@
 ---
 type: add
 issue: 8383
-title: "Added a pointcut (STORAGE_BULK_EXPORT_RESOURCE_CONVERT) to allow custom
-        export formats. It takes the BulkExportJobParameters and can provide
-        an IResourceConverter implementation.
-        The interface itself takes a wrapped list of resources (all the same kind) as well
-        as the BulkExportJobParameters, and returns a ConvertedFiles object.
-        ConvertedFiles consists of a list of ConvertedFile object, each containing
-        a resource type, the exported mimetype, and the bytes to be written to the Binary.
+title: "Bulk export can now emit formats other than NDJSON.
+        A hook on the new `STORAGE_BULK_EXPORT_RESOURCE_CONVERT` pointcut receives the 
+        `BulkExportJobParameters` and returns an `IResourceConverter`, which takes
+        the expanded resources and returns the bytes and content type to store in each Binary.
+        Returning a converter for an `_outputFormat` makes
+        that format valid; returning null leaves the default behaviour in place,
+        where NDJSON content types are written by the built-in writer and any other format is 
+        rejected when the job starts.
+        NDJSON remains the default, so behaviour is unchanged when no hook is registered.
 "
