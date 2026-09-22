@@ -758,7 +758,9 @@ public class ValueSetExpansionFilterContext {
 
 		if (values.isEmpty()) {
 			if (myCodeSystemDeclaredCustomProperties.contains(property)) {
-				// 'complete' makes the absence meaningful: the concept has no value, so it is not a member.
+				// The CodeSystem declares this custom property and 'complete' says it carries every concept
+				// it defines, so this CodeSystem.concept genuinely has no value for that property - a
+				// determined negative, so it is not a member.
 				// This holds for every operator, including the negative ones - a concept with nothing to
 				// compare is not admitted by a filter it was never measured against.
 				return false;
