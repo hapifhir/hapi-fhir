@@ -842,7 +842,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			// Pass the version as well: without it this check uses whichever version is current
 			String expectedVersion = isNotBlank(theVersion) ? theVersion : result.getCodeSystemVersion();
 			IValidationSupport.CodeValidationResult codeSystemResult =
-				validateCodeInCodeSystem(theValidationOptions, theSystem, expectedVersion, theCode, theDisplay);
+					validateCodeInCodeSystem(theValidationOptions, theSystem, expectedVersion, theCode, theDisplay);
 			final boolean valueSetResultContainsInvalidDisplay = result.getIssues().stream()
 					.anyMatch(WorkerContextValidationSupportAdapter::hasInvalidDisplayDetailCode);
 			if (codeSystemResult != null) {
@@ -893,9 +893,15 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	}
 
 	private IValidationSupport.CodeValidationResult validateCodeInCodeSystem(
-			ConceptValidationOptions theValidationOptions, String theSystem, String theVersion, String theCode, String theDisplay) {
+			ConceptValidationOptions theValidationOptions,
+			String theSystem,
+			String theVersion,
+			String theCode,
+			String theDisplay) {
 		return myValidationSupport.validateCode(
-				newValidationSupportContext(), theValidationOptions, new ValidateCodeRequest(theSystem, theVersion, theCode, theDisplay, null));
+				newValidationSupportContext(),
+				theValidationOptions,
+				new ValidateCodeRequest(theSystem, theVersion, theCode, theDisplay, null));
 	}
 
 	@Override
