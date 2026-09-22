@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.DateAndListParam;
@@ -48,6 +49,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -104,6 +106,7 @@ import static ca.uhn.fhir.util.IoUtil.runTimes;
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -3506,6 +3509,62 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		ourLog.info("SQL:{}", sql);
 		assertThat(countMatches(sql, "RHT1_0.PARTITION_ID IN ('1')")).as(sql).isEqualTo(1);
 
+	}
+
+	/**
+	 * System-level history has no resource type, but the partition it runs against is still chosen
+	 * by the caller, so the {@link Pointcut#STORAGE_PARTITION_SELECTED} security hook must fire.
+	 */
+	@Test
+	void testHistory_Server_InvokesPartitionSelectedHookWithNullResourceDefinition() {
+		createPatient(withCreatePartition(1), withBirthdate("2020-01-01"));
+
+		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PARTITION_SELECTED, interceptor);
+		try {
+			addNextTargetPartitionsForRead(1);
+			IBundleProvider results = mySystemDao.history(null, null, null, mySrd);
+			assertEquals(1, results.sizeOrThrowNpe());
+
+			ArgumentCaptor<HookParams> captor = ArgumentCaptor.forClass(HookParams.class);
+			verify(interceptor, times(1)).invoke(eq(Pointcut.STORAGE_PARTITION_SELECTED), captor.capture());
+
+			HookParams params = captor.getValue();
+			RequestPartitionId partitionId = params.get(RequestPartitionId.class);
+			assertThat(partitionId.getPartitionIds()).containsExactly(1);
+			assertThat(partitionId.getPartitionNames()).containsExactly("PART-1");
+			assertThat(params.get(RequestDetails.class)).isSameAs(mySrd);
+			assertThat(params.get(RuntimeResourceDefinition.class)).isNull();
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+		}
+	}
+
+	@Test
+	void testHistory_Server_PartitionSelectedHookCanDenyAccess() {
+		createPatient(withCreatePartition(1), withBirthdate("2020-01-01"));
+
+		IAnonymousInterceptor interceptor = (thePointcut, theArgs) -> {
+			throw new ForbiddenOperationException("Denied by test");
+		};
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PARTITION_SELECTED, interceptor);
+		try {
+			addNextTargetPartitionsForRead(1);
+			myCaptureQueriesListener.clear();
+
+			assertThatThrownBy(() -> mySystemDao.history(null, null, null, mySrd))
+				.isInstanceOf(ForbiddenOperationException.class)
+				.hasMessage("Denied by test");
+
+			// The history query must not have been executed
+			List<String> historyQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread().stream()
+				.map(t -> t.getSql(false, false).toUpperCase())
+				.filter(t -> t.contains("HFJ_RES_VER"))
+				.toList();
+			assertThat(historyQueries).isEmpty();
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+		}
 	}
 
 	@Test
