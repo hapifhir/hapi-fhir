@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Strings;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
@@ -126,8 +127,8 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 	}
 
 	static void applyVersionToSystem(IPrimitiveType<String> theSystem, IPrimitiveType<String> theVersion) {
-		if (theVersion != null && isNotBlank(theVersion.getValueAsString()) && theSystem != null) {
-			theSystem.setValue(theSystem.getValueAsString() + "|" + theVersion.getValueAsString());
+		if (theSystem != null && theVersion != null && isNotBlank(theVersion.getValueAsString())) {
+			theSystem.setValue(UrlUtil.toCanonicalUrl(theSystem.getValueAsString(), theVersion.getValueAsString()));
 		}
 	}
 

@@ -51,11 +51,13 @@ public interface IValidationProvidersDstu3 {
 				@IdParam(optional = true) IdType theId,
 				@OperationParam(name = "url", min = 0, max = 1) UriType theCodeSystemUrl,
 				@OperationParam(name = "code", min = 0, max = 1) CodeType theCode,
+				@OperationParam(name = "version", min = 0, max = 1) StringType theVersion,
 				@OperationParam(name = "display", min = 0, max = 1) StringType theDisplay
 		) throws Exception {
 			String url = theCodeSystemUrl != null ? theCodeSystemUrl.getValue() : null;
 			String code = theCode != null ? theCode.getValue() : null;
-			return getTerminologyResponse("$validate-code", url, code);
+			String version = theVersion != null ? theVersion.getValue() : null;
+			return getTerminologyResponse("$validate-code", url, version, code);
 		}
 
 		@Operation(name = "$lookup", idempotent = true, returnParameters= {
@@ -114,12 +116,14 @@ public interface IValidationProvidersDstu3 {
 				@OperationParam(name = "url", min = 0, max = 1) UriType theValueSetUrl,
 				@OperationParam(name = "code", min = 0, max = 1) CodeType theCode,
 				@OperationParam(name = "system", min = 0, max = 1) UriType theSystem,
+				@OperationParam(name = "systemVersion", min = 0, max = 1) StringType theSystemVersion,
 				@OperationParam(name = "display", min = 0, max = 1) StringType theDisplay,
 				@OperationParam(name = "valueSet") ValueSet theValueSet
 		) throws Exception {
 			String url = theValueSetUrl != null ? theValueSetUrl.getValue() : null;
 			String code = theCode != null ? theCode.getValue() : null;
-			return getTerminologyResponse("$validate-code", url, code);
+			String systemVersion = theSystemVersion != null ? theSystemVersion.getValue() : null;
+			return getTerminologyResponse("$validate-code", url, systemVersion, code);
 		}
 		@Override
 		public Class<? extends IBaseResource> getResourceType() {
