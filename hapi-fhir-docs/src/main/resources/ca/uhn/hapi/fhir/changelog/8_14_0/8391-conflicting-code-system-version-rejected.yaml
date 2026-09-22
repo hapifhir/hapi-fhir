@@ -1,6 +1,7 @@
 ---
 type: fix
 issue: 8391
+backport: 8.8.2
 title: "`CodeSystem/$lookup`, `CodeSystem/$subsumes` and `CodeSystem/$validate-code` joined the `version`
   parameter onto `system` without checking whether `system` already carried a version, so a request naming a
   version in both built a canonical such as `http://acme.org|1|2`, which matches no `CodeSystem` and failed as
