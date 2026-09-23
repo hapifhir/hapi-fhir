@@ -641,7 +641,9 @@ class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 			assertNotNull(result);
 			assertNotNull(result.getValueLow());
-			assertNull(result.getValueHigh(), "Open-ended period must not populate sp_value_high");
+			assertThat(result.getValueHigh())
+					.as("Period with no end must index the end-of-time sentinel as sp_value_high")
+					.isEqualTo(DateUtils.getEndOfDay(myStorageSettings.getPeriodIndexEndOfTime().getValue()));
 		}
 
 		@Test
