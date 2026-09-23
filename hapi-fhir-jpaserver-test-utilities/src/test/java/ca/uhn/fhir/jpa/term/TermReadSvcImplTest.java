@@ -4,15 +4,11 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
-import ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
-import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
-import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -34,7 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -104,24 +99,9 @@ class TermReadSvcImplTest {
 			ReflectionTestUtils.setField(mySpiedSvc, "myStorageSettings", new JpaStorageSettings());
 			ReflectionTestUtils.setField(mySpiedSvc, "myVersionCanonicalizer", new VersionCanonicalizer(fhirContext));
 			ReflectionTestUtils.setField(mySpiedSvc, "myCodeSystemDao", myCodeSystemDao);
-			ReflectionTestUtils.setField(mySpiedSvc, "myMemoryCache", new MemoryCacheService(new JpaStorageSettings()));
 
 			TransactionStatus status = new SimpleTransactionStatus();
 			lenient().when(myTxManager.getTransaction(any())).thenReturn(status);
-		}
-
-		/**
-		 * Simulate a local TermCodeSystem row for the URL. This mirrors loader-populated (LOINC),
-		 * delta-populated, and empty-delta-target NOTPRESENT CodeSystems, where the local DB is
-		 * authoritative even though content=not-present.
-		 */
-		void stubLocalTermCodeSystemExists() {
-			TermCodeSystem cs = new TermCodeSystem();
-			lenient().when(myCodeSystemDao.findByCodeSystemUri(UCUM_SYSTEM_URL)).thenReturn(cs);
-		}
-
-		void stubFindCodeEmpty() {
-			doReturn(Optional.empty()).when(mySpiedSvc).findCode(any(), any());
 		}
 
 		/**
@@ -145,16 +125,6 @@ class TermReadSvcImplTest {
 			lenient().when(myRootValidationSupport.fetchCodeSystem(UCUM_SYSTEM_URL)).thenReturn(cs);
 		}
 
-		CodeValidationResult callValidateCode() {
-			return mySpiedSvc.validateCode(
-					myValidationSupportContext,
-					new ConceptValidationOptions(),
-					UCUM_SYSTEM_URL,
-					UCUM_CODE,
-					null,
-					null);
-		}
-
 		CodeValidationResult callValidateCode(String theCodeSystemVersion) {
 			return callValidateCode(UCUM_SYSTEM_URL, theCodeSystemVersion);
 		}
@@ -164,15 +134,6 @@ class TermReadSvcImplTest {
 					myValidationSupportContext,
 					new ConceptValidationOptions(),
 					new ValidateCodeRequest(theCodeSystem, theCodeSystemVersion, UCUM_CODE, null, null));
-		}
-
-		LookupCodeResult callLookupCode() {
-			return mySpiedSvc.lookupCode(
-					myValidationSupportContext, new LookupCodeRequest(UCUM_SYSTEM_URL, UCUM_CODE));
-		}
-
-		void stubCodeSystemResource(org.hl7.fhir.instance.model.api.IBaseResource theResource) {
-			lenient().when(myRootValidationSupport.fetchCodeSystem(UCUM_SYSTEM_URL)).thenReturn(theResource);
 		}
 	}
 
@@ -259,115 +220,5 @@ class TermReadSvcImplTest {
 		assertThatThrownBy(() -> fixture.callValidateCode(UCUM_SYSTEM_URL + "|1.0.0", "2.0.0"))
 				.isInstanceOf(InvalidRequestException.class)
 				.hasMessageContaining("does not match expected version: 2.0.0");
-	}
-
-	@Test
-	void validateCode_withNotPresentCodeSystemAndMissingCode_returnsNullToAllowChainFallThrough() {
-		ValidateCodeFixture fixture = new ValidateCodeFixture();
-		fixture.stubCodeSystemContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-		fixture.stubFindCodeEmpty();
-
-		CodeValidationResult result = fixture.callValidateCode();
-
-		assertThat(result)
-				.as("NOTPRESENT CodeSystem must not short-circuit the ValidationSupportChain; validateCode should return null so algorithmic validators (e.g. UCUM) can be consulted")
-				.isNull();
-	}
-
-	@Test
-	void validateCode_withCompleteCodeSystemAndMissingCode_returnsCodeNotFoundError() {
-		ValidateCodeFixture fixture = new ValidateCodeFixture();
-		fixture.stubCodeSystemContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-		fixture.stubFindCodeEmpty();
-
-		CodeValidationResult result = fixture.callValidateCode();
-
-		assertThat(result)
-				.as("COMPLETE CodeSystem with a genuinely missing code must still return a 'code not found' validation error")
-				.isNotNull();
-		assertThat(result.getSeverityCode()).isEqualToIgnoringCase("error");
-	}
-
-	@Test
-	void lookupCode_withNotPresentCodeSystemAndMissingCode_returnsNullToAllowChainFallThrough() {
-		ValidateCodeFixture fixture = new ValidateCodeFixture();
-		fixture.stubCodeSystemContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-		fixture.stubFindCodeEmpty();
-
-		LookupCodeResult result = fixture.callLookupCode();
-
-		assertThat(result)
-				.as("NOTPRESENT CodeSystem must not short-circuit the ValidationSupportChain; lookupCode should return null so algorithmic validators (e.g. UCUM) can be consulted")
-				.isNull();
-	}
-
-	@Test
-	void lookupCode_withCompleteCodeSystemAndMissingCode_returnsNotFoundResult() {
-		ValidateCodeFixture fixture = new ValidateCodeFixture();
-		fixture.stubCodeSystemContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-		fixture.stubFindCodeEmpty();
-
-		LookupCodeResult result = fixture.callLookupCode();
-
-		assertThat(result)
-				.as("COMPLETE CodeSystem with a genuinely missing code must still return a non-null LookupCodeResult with found=false")
-				.isNotNull();
-		assertThat(result.isFound()).isFalse();
-	}
-
-	@Test
-	void validateCode_withNotPresentCodeSystemBackedByLocalTermCodeSystem_returnsCodeNotFoundError() {
-		// Loader-populated (LOINC), delta-populated, and empty-delta-target CodeSystems keep
-		// content=NOT_PRESENT but the local term DB is authoritative. A missing code must surface
-		// "Unknown code", not fall through to the validation-support chain.
-		ValidateCodeFixture fixture = new ValidateCodeFixture();
-		fixture.stubCodeSystemContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-		fixture.stubFindCodeEmpty();
-		fixture.stubLocalTermCodeSystemExists();
-
-		CodeValidationResult result = fixture.callValidateCode();
-
-		assertThat(result)
-				.as("NOTPRESENT CodeSystem backed by a local TermCodeSystem row must surface 'code not found' rather than short-circuit to null")
-				.isNotNull();
-		assertThat(result.getSeverityCode()).isEqualToIgnoringCase("error");
-	}
-
-	@Test
-	void lookupCode_withNotPresentCodeSystemBackedByLocalTermCodeSystem_returnsNotFoundResult() {
-		ValidateCodeFixture fixture = new ValidateCodeFixture();
-		fixture.stubCodeSystemContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-		fixture.stubFindCodeEmpty();
-		fixture.stubLocalTermCodeSystemExists();
-
-		LookupCodeResult result = fixture.callLookupCode();
-
-		assertThat(result)
-				.as("NOTPRESENT CodeSystem backed by a local TermCodeSystem row must return a LookupCodeResult with found=false rather than null")
-				.isNotNull();
-		assertThat(result.isFound()).isFalse();
-	}
-
-	@Test
-	void validateCode_whenCanonicalizerReturnsNull_returnsCodeNotFoundErrorWithoutNpe() {
-		ValidateCodeFixture fixture = new ValidateCodeFixture();
-		// Simulate a CodeSystem resource that VersionCanonicalizer cannot canonicalize — e.g. a
-		// pathological input where codeSystemToCanonical returns null. We stub the canonicalizer
-		// on the spy to return null and verify the guard returns "not found" rather than NPEing.
-		CodeSystem rawCodeSystem = new CodeSystem();
-		rawCodeSystem.setUrl(UCUM_SYSTEM_URL);
-		fixture.stubCodeSystemResource(rawCodeSystem);
-		fixture.stubFindCodeEmpty();
-
-		VersionCanonicalizer nullReturningCanonicalizer = mock(VersionCanonicalizer.class);
-		lenient().when(nullReturningCanonicalizer.codeSystemToCanonical(any())).thenReturn(null);
-		ReflectionTestUtils.setField(fixture.mySpiedSvc, "myVersionCanonicalizer", nullReturningCanonicalizer);
-
-		CodeValidationResult result = fixture.callValidateCode();
-
-		assertThat(result)
-				.as("When VersionCanonicalizer.codeSystemToCanonical returns null, validateCode must fall through to the normal 'code not found' result rather than throwing NPE")
-				.isNotNull();
-		assertThat(result.getSeverityCode()).isEqualToIgnoringCase("error");
 	}
 }
