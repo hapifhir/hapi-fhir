@@ -43,7 +43,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.interceptor.ServerInterceptorUtil;
@@ -58,8 +57,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -227,6 +229,7 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 					 */
 
 					List<JpaPid> allIncludedPidsList = List.of();
+					Map<JpaPid, IBaseResource> fetchedIncludedResources = new HashMap<>();
 					if (theParams.hasIncludes() || theParams.hasRevIncludes()) {
 						// Save original PIDs before any include/revinclude expansion
 						Set<JpaPid> originalPids = new HashSet<>(pids);
@@ -250,23 +253,26 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 
 						// Phase 1: non-iterate `_revinclude` on original search result PIDs
 						if (!nonIterateRevIncludes.isEmpty()) {
-							DateRangeParam lastUpdated = theParams.getLastUpdated();
 							SearchBuilderLoadIncludesParameters<JpaPid> p = new SearchBuilderLoadIncludesParameters<>();
 							p.setFhirContext(myContext);
 							p.setEntityManager(myEntityManager);
 							p.setMatches(originalPids);
 							p.setIncludeFilters(nonIterateRevIncludes);
 							p.setReverseMode(true);
-							p.setLastUpdated(lastUpdated);
+							p.setLastUpdated(theParams.getLastUpdated());
 							p.setSearchIdOrDescription("(synchronous)");
 							p.setRequestDetails(theRequestDetails);
 							p.setMaxCount(maxIncludes);
-							Set<JpaPid> revIncludedPids = theSb.loadIncludes(p);
+							ISearchBuilder.FetchedIncludes<JpaPid> revIncludedPids = theSb.loadIncludes(p);
 							if (maxIncludes != null) {
-								maxIncludes -= revIncludedPids.size();
+								maxIncludes -= revIncludedPids.pids().size();
 							}
-							pids.addAll(revIncludedPids);
-							allIncludedPidsList.addAll(revIncludedPids);
+							pids.addAll(revIncludedPids.pids());
+							allIncludedPidsList.addAll(revIncludedPids.pids());
+							if (revIncludedPids.resourcesIfFetched().isPresent()) {
+								fetchedIncludedResources.putAll(
+										revIncludedPids.resourcesIfFetched().get());
+							}
 						}
 
 						// Phase 2: non-iterate `_include` on original search result PIDs
@@ -275,64 +281,75 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 						if (theParams.getEverythingMode() == null
 								&& !nonIterateIncludes.isEmpty()
 								&& (maxIncludes == null || maxIncludes > 0)) {
-							DateRangeParam lastUpdated = theParams.getLastUpdated();
 							SearchBuilderLoadIncludesParameters<JpaPid> p = new SearchBuilderLoadIncludesParameters<>();
 							p.setFhirContext(myContext);
 							p.setEntityManager(myEntityManager);
 							p.setMatches(originalPids);
 							p.setIncludeFilters(nonIterateIncludes);
 							p.setReverseMode(false);
-							p.setLastUpdated(lastUpdated);
+							p.setLastUpdated(theParams.getLastUpdated());
 							p.setSearchIdOrDescription("(synchronous)");
 							p.setRequestDetails(theRequestDetails);
 							p.setMaxCount(maxIncludes);
-							Set<JpaPid> forwardIncludedPids = theSb.loadIncludes(p);
+							ISearchBuilder.FetchedIncludes<JpaPid> forwardIncludedPids = theSb.loadIncludes(p);
 							if (maxIncludes != null) {
-								maxIncludes -= forwardIncludedPids.size();
+								maxIncludes -= forwardIncludedPids.pids().size();
 							}
-							pids.addAll(forwardIncludedPids);
-							allIncludedPidsList.addAll(forwardIncludedPids);
+							pids.addAll(forwardIncludedPids.pids());
+							allIncludedPidsList.addAll(forwardIncludedPids.pids());
+							if (forwardIncludedPids.resourcesIfFetched().isPresent()) {
+								fetchedIncludedResources.putAll(
+										forwardIncludedPids.resourcesIfFetched().get());
+							}
 						}
 
 						// Phase 3: `_revinclude:iterate` on expanded PIDs (including non-iterate revinclude results)
 						if (!iterateRevIncludes.isEmpty() && (maxIncludes == null || maxIncludes > 0)) {
-							DateRangeParam lastUpdated = theParams.getLastUpdated();
 							SearchBuilderLoadIncludesParameters<JpaPid> p = new SearchBuilderLoadIncludesParameters<>();
 							p.setFhirContext(myContext);
 							p.setEntityManager(myEntityManager);
 							p.setMatches(pids);
 							p.setIncludeFilters(iterateRevIncludes);
 							p.setReverseMode(true);
-							p.setLastUpdated(lastUpdated);
+							p.setLastUpdated(theParams.getLastUpdated());
 							p.setSearchIdOrDescription("(synchronous)");
 							p.setRequestDetails(theRequestDetails);
 							p.setMaxCount(maxIncludes);
-							Set<JpaPid> iterateRevIncludedPids = theSb.loadIncludes(p);
+							ISearchBuilder.FetchedIncludes<JpaPid> iterateRevIncludedPids = theSb.loadIncludes(p);
 							if (maxIncludes != null) {
-								maxIncludes -= iterateRevIncludedPids.size();
+								maxIncludes -= iterateRevIncludedPids.pids().size();
 							}
-							pids.addAll(iterateRevIncludedPids);
-							allIncludedPidsList.addAll(iterateRevIncludedPids);
+							pids.addAll(iterateRevIncludedPids.pids());
+							allIncludedPidsList.addAll(iterateRevIncludedPids.pids());
+							if (iterateRevIncludedPids.resourcesIfFetched().isPresent()) {
+								fetchedIncludedResources.putAll(iterateRevIncludedPids
+										.resourcesIfFetched()
+										.get());
+							}
 						}
 
 						// Phase 4: `_include:iterate` on all expanded PIDs (including revinclude results)
 						if (theParams.getEverythingMode() == null
 								&& !iterateIncludes.isEmpty()
 								&& (maxIncludes == null || maxIncludes > 0)) {
-							DateRangeParam lastUpdated = theParams.getLastUpdated();
 							SearchBuilderLoadIncludesParameters<JpaPid> p = new SearchBuilderLoadIncludesParameters<>();
 							p.setFhirContext(myContext);
 							p.setEntityManager(myEntityManager);
 							p.setMatches(pids);
 							p.setIncludeFilters(iterateIncludes);
 							p.setReverseMode(false);
-							p.setLastUpdated(lastUpdated);
+							p.setLastUpdated(theParams.getLastUpdated());
 							p.setSearchIdOrDescription("(synchronous)");
 							p.setRequestDetails(theRequestDetails);
 							p.setMaxCount(maxIncludes);
-							Set<JpaPid> iterateForwardIncludedPids = theSb.loadIncludes(p);
-							pids.addAll(iterateForwardIncludedPids);
-							allIncludedPidsList.addAll(iterateForwardIncludedPids);
+							ISearchBuilder.FetchedIncludes<JpaPid> iterateForwardIncludedPids = theSb.loadIncludes(p);
+							pids.addAll(iterateForwardIncludedPids.pids());
+							allIncludedPidsList.addAll(iterateForwardIncludedPids.pids());
+							if (iterateForwardIncludedPids.resourcesIfFetched().isPresent()) {
+								fetchedIncludedResources.putAll(iterateForwardIncludedPids
+										.resourcesIfFetched()
+										.get());
+							}
 						}
 					}
 
@@ -340,8 +357,21 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 						theSb.loadResourcesByPid(pids, allIncludedPidsList, loadedResources, false, theRequestDetails);
 					} else if (!allIncludedPidsList.isEmpty()) {
 						List<IBaseResource> includeResources = new ArrayList<>();
-						theSb.loadResourcesByPid(
-								allIncludedPidsList, allIncludedPidsList, includeResources, false, theRequestDetails);
+						for (Iterator<JpaPid> iter = allIncludedPidsList.iterator(); iter.hasNext(); ) {
+							JpaPid nextPid = iter.next();
+							if (fetchedIncludedResources.containsKey(nextPid)) {
+								includeResources.add(fetchedIncludedResources.get(nextPid));
+								iter.remove();
+							}
+						}
+						if (!allIncludedPidsList.isEmpty()) {
+							theSb.loadResourcesByPid(
+									allIncludedPidsList,
+									allIncludedPidsList,
+									includeResources,
+									false,
+									theRequestDetails);
+						}
 						loadedResources.addAll(includeResources);
 					}
 

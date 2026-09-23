@@ -1886,9 +1886,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		HIT           , false                , true       , 6           , 0
 		MISS          , false                , true       , 5           , 17
 		SKIP          , false                , true       , 4           , 0
-		HIT           , true                 , true       , 7           , 17
-		MISS          , true                 , true       , 7           , 17
-		SKIP          , true                 , true       , 7           , 0
+		HIT           , true                 , true       , 6           , 17
+		MISS          , true                 , true       , 6           , 17
+		SKIP          , true                 , true       , 6           , 0
 		""")
 	void testSearch_FirstPage(QueryCacheMode theUseQueryCache, boolean theUseConsentInterceptor, boolean theUseIncludes, int theExpectSelect, int theExpectInsert) {
 		// Setup
@@ -1936,7 +1936,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		SKIP          , false                , true        , 4           , 0           , 0
 		HIT           , true                 , true        , 9           , 136         , 1
 		MISS          , true                 , true        , 9           , 136         , 1
-		SKIP          , true                 , true        , 7           , 0           , 0
+		SKIP          , true                 , true        , 6           , 0           , 0
 		""")
 	void testSearch_SecondPage(QueryCacheMode theUseQueryCache, boolean theUseConsentInterceptor, boolean theUseIncludes, int theExpectSelect, int theExpectInsert, int theExpectUpdate) {
 		// Setup
@@ -1971,6 +1971,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			.execute();
 
 		// Verify
+		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(expectedResultsPerPage, outcome.getEntry().size());
 		assertThat(myCaptureQueriesListener).has(
 			onAllThreads()

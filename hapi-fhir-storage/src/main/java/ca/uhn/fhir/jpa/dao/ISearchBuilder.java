@@ -19,18 +19,14 @@
  */
 package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-import ca.uhn.fhir.rest.param.DateRangeParam;
 import com.google.common.collect.Streams;
 import jakarta.annotation.Nonnull;
-import jakarta.persistence.EntityManager;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -38,7 +34,10 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -117,7 +116,7 @@ public interface ISearchBuilder<T extends IResourcePersistentId<?>> {
 		return result;
 	}
 
-	Set<T> loadIncludes(SearchBuilderLoadIncludesParameters<T> theParameters);
+	FetchedIncludes<T> loadIncludes(SearchBuilderLoadIncludesParameters<T> theParameters);
 
 	/**
 	 * How many results may be fetched at once
@@ -125,4 +124,26 @@ public interface ISearchBuilder<T extends IResourcePersistentId<?>> {
 	void setFetchSize(int theFetchSize);
 
 	void setPreviouslyAddedResourcePids(Collection<T> thePreviouslyAddedResourcePids);
+
+	/**
+	 * @param pids A writeable set of PIDs
+	 * @param resourcesIfFetched If the PIDs had to be hydrated (i.e. in order to verify consent), the fetched PIDs are returned
+	 *                           in case they are needed later, in order to avoid double fetching.
+	 */
+	record FetchedIncludes<T>(Set<T> pids, Optional<Map<T, IBaseResource>> resourcesIfFetched) {
+
+		/**
+		 * Constructor
+		 */
+		public FetchedIncludes() {
+			this(new HashSet<>());
+		}
+
+		/**
+		 * Constructor
+		 */
+		public FetchedIncludes(Set<T> theObjects) {
+			this(theObjects, Optional.empty());
+		}
+	}
 }

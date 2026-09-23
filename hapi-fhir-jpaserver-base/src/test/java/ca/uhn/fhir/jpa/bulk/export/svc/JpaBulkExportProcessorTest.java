@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -339,7 +340,7 @@ public class JpaBulkExportProcessorTest {
 		when(observationSearchBuilder.loadIncludes(
 			any(SearchBuilderLoadIncludesParameters.class)
 		))
-			.thenReturn(new HashSet<>());
+			.thenReturn(new ISearchBuilder.FetchedIncludes<>(new HashSet<>()));
 
 		// ret
 		when(observationSearchBuilder.createQuery(
