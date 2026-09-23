@@ -83,8 +83,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import java.math.BigDecimal;
-import java.util.*;
 import java.util.stream.Collectors;
+import java.util.*;
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.NonSI;
 import javax.measure.unit.Unit;
@@ -2318,17 +2318,13 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					periodAsDates.end.getDateValueAsString(),
 					periodAsDates.start.getDateValueAsString());
 			theParams.add(myIndexedSearchParamDate);
-
 		}
 
 		/**
 		 * Sets default start/end values for Periods
 		 */
 		private @Nullable PeriodAsDates normalizePeriodDates(
-				Date start,
-				String startAsString,
-				Date end,
-				String endAsString) {
+				Date start, String startAsString, Date end, String endAsString) {
 
 			if (start == null && end == null) {
 				return null;
@@ -2343,14 +2339,10 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				endAsString = myStorageSettings.getPeriodIndexEndOfTime().getValueAsString();
 			}
 			return new PeriodAsDates(
-					new DateStringWrapper(start, startAsString),
-					new DateStringWrapper(end, endAsString));
+					new DateStringWrapper(start, startAsString), new DateStringWrapper(end, endAsString));
 		}
 
-		private record PeriodAsDates(
-				@Nonnull DateStringWrapper start,
-				@Nonnull DateStringWrapper end
-		) {}
+		private record PeriodAsDates(@Nonnull DateStringWrapper start, @Nonnull DateStringWrapper end) {}
 
 		/**
 		 * For Timings, we consider all the dates in the structure (eg. Timing.event, Timing.repeat.bounds.boundsPeriod)
@@ -2385,18 +2377,20 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 			Optional<IBase> repeat = myTimingRepeatValueChild.getAccessor().getFirstValueOrNull(theValue);
 			if (repeat.isPresent()) {
-				Optional<IBase> bounds = myTimingRepeatBoundsValueChild.getAccessor().getFirstValueOrNull(repeat.get());
+				Optional<IBase> bounds =
+						myTimingRepeatBoundsValueChild.getAccessor().getFirstValueOrNull(repeat.get());
 				if (bounds.isPresent()) {
 					String boundsType = toRootTypeName(bounds.get());
 					if ("Period".equals(boundsType)) {
-						DateStringWrapper start = extractValuesAsFhirDates(myPeriodStartValueChild, bounds.get()).stream()
-								.map(it -> new DateStringWrapper(it.getValue(), it.getValueAsString()))
+						DateStringWrapper start =
+								extractValuesAsFhirDates(myPeriodStartValueChild, bounds.get()).stream()
+										.map(it -> new DateStringWrapper(it.getValue(), it.getValueAsString()))
 										.findFirst()
 										.orElse(null);
 						DateStringWrapper end = extractValuesAsFhirDates(myPeriodEndValueChild, bounds.get()).stream()
 								.map(it -> new DateStringWrapper(it.getValue(), it.getValueAsString()))
-										.findFirst()
-										.orElse(null);
+								.findFirst()
+								.orElse(null);
 
 						PeriodAsDates periodAsDates = normalizePeriodDates(
 								start,
