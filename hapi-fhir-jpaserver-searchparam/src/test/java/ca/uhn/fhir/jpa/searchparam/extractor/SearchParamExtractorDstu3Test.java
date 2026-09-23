@@ -24,6 +24,7 @@ import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
+import ca.uhn.fhir.util.DateUtils;
 import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Lists;
@@ -233,25 +234,49 @@ public class SearchParamExtractorDstu3Test {
 	@Test
 	void testBoundsPeriodEndOnlyIndexesStartOfTimeAsLowValue() {
 		// FHIR spec: a missing period.start is "less than" any actual date, so sp_value_low must be the
-		// start-of-time sentinel that addDate_Period() uses, not a copy of period.end
+		// start-of-time sentinel that addDate_Period()
 		StorageSettings storageSettings = new StorageSettings();
 		ProcedureRequest procedureRequest = new ProcedureRequest();
 		procedureRequest.setOccurrence(new Timing()
-			.setRepeat(new Timing.TimingRepeatComponent()
-				.setBounds(new Period().setEndElement(new DateTimeType("2024-09-16T16:00:00.000-06:00")))));
+				.setRepeat(new Timing.TimingRepeatComponent()
+						.setBounds(new Period().setEndElement(new DateTimeType("2024-09-16T16:00:00.000-06:00")))));
 
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(storageSettings, new PartitionSettings(), ourCtx, new FhirContextSearchParamRegistry(ourCtx));
 		extractor.start();
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> dates = extractor.extractSearchParamDates(procedureRequest);
 
 		ResourceIndexedSearchParamDate occurrence = dates.stream()
-			.filter(p -> "occurrence".equals(p.getParamName()))
-			.findFirst()
-			.orElse(null);
+				.filter(p -> "occurrence".equals(p.getParamName()))
+				.findFirst()
+				.orElse(null);
 
 		assertThat(occurrence).isNotNull();
-		assertThat(occurrence.getValueHigh()).isNotNull();
 		assertThat(occurrence.getValueLow()).isEqualTo(storageSettings.getPeriodIndexStartOfTime().getValue());
+		assertThat(occurrence.getValueHigh()).isNotNull();
+	}
+
+	@Test
+	void testBoundsPeriodStartOnlyIndexesEndOfTimeAsHighValue() {
+		// FHIR spec: a missing period.end is "greater than" any actual date, so sp_value_high must be the
+		// end-of-time sentinel that addDate_Period() uses
+		StorageSettings storageSettings = new StorageSettings();
+		ProcedureRequest procedureRequest = new ProcedureRequest();
+		procedureRequest.setOccurrence(new Timing()
+				.setRepeat(new Timing.TimingRepeatComponent()
+						.setBounds(new Period().setStartElement(new DateTimeType("2024-09-16T16:00:00.000-06:00")))));
+
+		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(storageSettings, new PartitionSettings(), ourCtx, new FhirContextSearchParamRegistry(ourCtx));
+		extractor.start();
+		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> dates = extractor.extractSearchParamDates(procedureRequest);
+
+		ResourceIndexedSearchParamDate occurrence = dates.stream()
+				.filter(p -> "occurrence".equals(p.getParamName()))
+				.findFirst()
+				.orElse(null);
+
+		assertThat(occurrence).isNotNull();
+		assertThat(occurrence.getValueLow()).isNotNull();
+		assertThat(occurrence.getValueHigh()).isEqualTo(DateUtils.getEndOfDay(storageSettings.getPeriodIndexEndOfTime().getValue()));
 	}
 
 	@Test
