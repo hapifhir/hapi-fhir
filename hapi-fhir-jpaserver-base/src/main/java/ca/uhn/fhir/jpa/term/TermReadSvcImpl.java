@@ -2903,9 +2903,9 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 		txTemplate.setReadOnly(true);
 		Optional<FhirVersionIndependentConcept> codeOpt =
 				txTemplate.execute(tx -> findCode(theCodeSystemUrl, theCode).map(c -> {
-					String codeSystemVersionId = getCurrentCodeSystemVersion(
-									theValidationSupportContext, theCodeSystemUrl)
-							.myCodeSystemVersionId;
+					TermCodeSystemVersionDetails csv =
+							getCurrentCodeSystemVersion(theValidationSupportContext, theCodeSystemUrl);
+					String codeSystemVersionId = csv != null ? csv.myCodeSystemVersionId : null;
 					return new FhirVersionIndependentConcept(
 							theCodeSystemUrl, c.getCode(), c.getDisplay(), codeSystemVersionId);
 				}));
