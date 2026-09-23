@@ -9,7 +9,10 @@ public class ConvertedFiles {
 
 	/**
 	 * Retrieves the current list of converted files
-	 * (never null)
+	 * (never null).
+	 * We might want to consider making this a stream instead of a list
+	 * if customers decide to convert our list of resources into an
+	 * even larger list of "contents".
 	 */
 	public List<ConvertedFile> getFiles() {
 		if (myFiles == null) {
