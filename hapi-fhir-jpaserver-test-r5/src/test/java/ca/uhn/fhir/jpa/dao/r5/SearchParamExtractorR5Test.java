@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR5;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
+import ca.uhn.fhir.util.DateUtils;
 import org.hl7.fhir.r5.model.Appointment;
 import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.Period;
@@ -26,6 +27,7 @@ public class SearchParamExtractorR5Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamExtractorR5Test.class);
 	private static final FhirContext ourCtx = FhirContext.forR5Cached();
+	private static final StorageSettings ourStorageSettings = new StorageSettings();
 	private FhirContextSearchParamRegistry mySearchParamRegistry;
 
 	@BeforeEach
@@ -46,7 +48,7 @@ public class SearchParamExtractorR5Test {
 
 
 		//When we extract the Date SPs
-		SearchParamExtractorR5 extractor = new SearchParamExtractorR5(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
+		SearchParamExtractorR5 extractor = new SearchParamExtractorR5(ourStorageSettings, new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> dates = extractor.extractSearchParamDates(appointment);
 
 		//We find one, and the lexer doesn't explode.
@@ -57,22 +59,45 @@ public class SearchParamExtractorR5Test {
 	void testBoundsPeriodEndOnlyIndexesStartOfTimeAsLowValue() {
 		// FHIR spec: a missing period.start is "less than" any actual date, so sp_value_low must be the
 		// start-of-time sentinel that addDate_Period() uses, not a copy of period.end
-		StorageSettings storageSettings = new StorageSettings();
 		ServiceRequest serviceRequest = new ServiceRequest();
 		serviceRequest.setOccurrence(new Timing()
 			.setRepeat(new Timing.TimingRepeatComponent()
 				.setBounds(new Period().setEndElement(new DateTimeType("2024-09-16T16:00:00.000-06:00")))));
 
-		SearchParamExtractorR5 extractor = new SearchParamExtractorR5(storageSettings, new PartitionSettings(), ourCtx, mySearchParamRegistry);
+		SearchParamExtractorR5 extractor = new SearchParamExtractorR5(ourStorageSettings, new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> dates = extractor.extractSearchParamDates(serviceRequest);
 
 		ResourceIndexedSearchParamDate occurrence = dates.stream()
-			.filter(p -> "occurrence".equals(p.getParamName()))
-			.findFirst()
-			.orElse(null);
+				.filter(p -> "occurrence".equals(p.getParamName()))
+				.findFirst()
+				.orElse(null);
 
 		assertThat(occurrence).isNotNull();
-		assertThat(occurrence.getValueHigh()).isNotNull();
-		assertThat(occurrence.getValueLow()).isEqualTo(storageSettings.getPeriodIndexStartOfTime().getValue());
+		assertThat(occurrence.getValueHigh()).isEqualTo("2024-09-16T16:00:00.000-06:00");
+		assertThat(occurrence.getValueLow()).isEqualTo(ourStorageSettings.getPeriodIndexStartOfTime().getValue());
+	}
+
+	@Test
+	void testBoundsPeriodStartOnlyIndexesEndOfTimeAsHighValue() {
+		// FHIR spec: a missing period.end is "greater than" any actual date, so sp_value_high must be the
+		// end-of-time sentinel that addDate_Period() uses
+		StorageSettings storageSettings = new StorageSettings();
+		ServiceRequest serviceRequest = new ServiceRequest();
+		serviceRequest.setOccurrence(new Timing()
+				.setRepeat(new Timing.TimingRepeatComponent()
+						.setBounds(new Period().setStartElement(new DateTimeType("2024-09-16T16:00:00.000-06:00")))));
+
+		SearchParamExtractorR5 extractor = new SearchParamExtractorR5(storageSettings, new PartitionSettings(), ourCtx, new FhirContextSearchParamRegistry(ourCtx));
+		extractor.start();
+		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> dates = extractor.extractSearchParamDates(serviceRequest);
+
+		ResourceIndexedSearchParamDate occurrence = dates.stream()
+				.filter(p -> "occurrence".equals(p.getParamName()))
+				.findFirst()
+				.orElse(null);
+
+		assertThat(occurrence).isNotNull();
+		assertThat(occurrence.getValueLow()).isEqualTo("2024-09-16T16:00:00.000-06:00");
+		assertThat(occurrence.getValueHigh()).isEqualTo(DateUtils.getEndOfDay(storageSettings.getPeriodIndexEndOfTime().getValue()));
 	}
 }
