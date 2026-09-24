@@ -53,7 +53,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -468,9 +467,9 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 	 * understand the code systems (e.g. it has the wrong version, or incomplete definitions) then it
 	 * SHALL return an error."</i> Because the sections here enumerate their concepts, the expansion
 	 * instead succeeds, stores the codes, and serves them to every later {@code validateCode} - see
-	 * <a href="https://github.com/hapifhir/hapi-fhir/issues/8415">#8415</a>. They are written as
-	 * assertions on today's behaviour so the suite stays green, with each docstring naming what the
-	 * assertion becomes once the expansion is made to fail. The fix itself needs a version-aware
+	 * <a href="https://github.com/hapifhir/hapi-fhir/issues/8415">#8415</a>. They assert the outcome the
+	 * specification requires, so the ones covering an unresolvable version are red until that issue is
+	 * fixed, and each docstring says which. The fix itself needs a version-aware
 	 * {@code isCodeSystemSupported}, which is
 	 * <a href="https://github.com/hapifhir/hapi-fhir/issues/8402">#8402</a>.
 	 * <p>
@@ -490,11 +489,11 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 		 * to a version that was never read. On this path nothing self-heals: re-expanding produces the same
 		 * rows, because 2.0.0 is still absent.
 		 * <p>
-		 * The {@code $expand} SHALL requires an error instead. Once #8415 is fixed this asserts
-		 * {@code FAILED_TO_EXPAND}, no stored codes, and a failed {@code validateCode}.
+		 * R5 {@code ValueSet/$expand}, Out Parameters, requires an error instead, and that is what this
+		 * asserts. Red until #8415 is fixed.
 		 */
 		@Test
-		void preExpansion_includeNamesUninstalledCodeSystemVersion_storesAndValidatesCodesNoCodeSystemContains() {
+		void preExpansion_includeNamesUninstalledCodeSystemVersion_failsAndStoresNothingToValidateAgainst() {
 			myStorageSettings.setPreExpandValueSets(true);
 
 			// Given a CodeSystem installed at version 1.0.0, holding "A" and not "NOT-STORED"
@@ -504,21 +503,19 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 			givenValueSetEnumeratingCodes("2.0.0", "A", "NOT-STORED");
 			myBatch2JobHelper.awaitNoJobsRunning();
 
-			// Then the expansion reports success and stores both codes, attributed to the version the
-			// include asked for, though nothing ever read it
+			// Then the expansion fails and stores nothing, because no installed version backs the codes
 			runInTransaction(() -> {
 				TermValueSet termValueSet = myTermValueSetDao
 					.findTermValueSetByUrlAndNullVersion(VS_URL)
 					.orElseThrow(IllegalStateException::new);
-				assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
-				assertThat(preExpandedCodes()).containsExactly("A", "NOT-STORED");
-				assertThat(preExpandedSystemVersions()).containsExactly("2.0.0");
+				assertEquals(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND, termValueSet.getExpansionStatus());
+				assertThat(preExpandedCodes()).isEmpty();
 			});
 
-			// And the stored rows make the code valid, though no installed CodeSystem version contains it
+			// And there is nothing to validate the code against
 			IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(
 				new CodeType(VS_URL), null, new CodeType("NOT-STORED"), new CodeType(CS_URL), null, null, null, mySrd);
-			assertTrue(outcome.isOk());
+			assertFalse(outcome.isOk());
 		}
 
 		/**
@@ -652,10 +649,12 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 		/**
 		 * Not confined to not-present CodeSystems: the same thing happens for one whose content the
 		 * server holds in full, so this is not the documented compromise for a CodeSystem that cannot
-		 * be supplied.
+		 * be supplied. Asserts the same outcome as
+		 * {@link #preExpansion_includeNamesUninstalledCodeSystemVersion_failsAndStoresNothingToValidateAgainst},
+		 * and is red for the same reason.
 		 */
 		@Test
-		void preExpansion_completeCodeSystemAndIncludeNamesUninstalledVersion_storesCodesWithoutClaimingTheVersion() {
+		void preExpansion_completeCodeSystemAndIncludeNamesUninstalledVersion_failsAndStoresNothingToValidateAgainst() {
 			myStorageSettings.setPreExpandValueSets(true);
 
 			// Given the CodeSystem stored as COMPLETE rather than NOTPRESENT
@@ -663,20 +662,20 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 			givenValueSetEnumeratingCodes("2.0.0", "A", "NOT-STORED");
 			myBatch2JobHelper.awaitNoJobsRunning();
 
-			// Then the version is withheld here too, so this is not the allowance made for a CodeSystem
+			// Then the expansion fails here too, so this is not the allowance made for a CodeSystem
 			// whose content cannot be supplied
 			runInTransaction(() -> {
 				TermValueSet termValueSet = myTermValueSetDao
 					.findTermValueSetByUrlAndNullVersion(VS_URL)
 					.orElseThrow(IllegalStateException::new);
-				assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
-				assertThat(preExpandedSystemVersions()).containsOnlyNulls();
+				assertEquals(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND, termValueSet.getExpansionStatus());
+				assertThat(preExpandedCodes()).isEmpty();
 			});
 
-			// And nothing served from it claims the version either
+			// And there is nothing to validate the code against
 			IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(
 				new CodeType(VS_URL), null, new CodeType("NOT-STORED"), new CodeType(CS_URL), null, null, null, mySrd);
-			assertNull(outcome.getCodeSystemVersion());
+			assertFalse(outcome.isOk());
 		}
 
 		private void givenCodeSystemVersionHoldingConceptA() {
