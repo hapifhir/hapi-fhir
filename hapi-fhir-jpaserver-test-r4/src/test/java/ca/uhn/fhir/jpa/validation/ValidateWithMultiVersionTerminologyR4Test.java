@@ -533,6 +533,109 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		}
 	}
 
+	/**
+	 * The customer-reported shape (GL-9389): one include which both names {@literal compose.include.version}
+	 * and enumerates the concepts it allows. Neither of the other builders does both - one names a version and
+	 * takes the whole system, the other enumerates codes and names no version - and this is the combination
+	 * that is said to fail in both directions at once.
+	 */
+	@Nested
+	class EnumeratedCodesFromANamedCodeSystemVersionTest {
+
+		void setUpWithSpecifiedVersion(String theSpecifiedVersion) {
+			String otherVersion = otherThan(theSpecifiedVersion);
+
+			createCodeSystem(theSpecifiedVersion, codeIn(theSpecifiedVersion));
+			sleepUntilTimeChange();
+			createCodeSystem(otherVersion, codeIn(otherVersion));
+
+			createValueSetIncludingCodesFromCodeSystemVersion(
+				null, theSpecifiedVersion, codeIn(theSpecifiedVersion));
+
+			myTerminologyDeferredStorageSvc.saveAllDeferred();
+		}
+
+		@ParameterizedTest
+		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
+		void validateCode_codeEnumeratedFromTheNamedVersion_isValid(String theSpecifiedVersion) {
+			// Setup
+			setUpWithSpecifiedVersion(theSpecifiedVersion);
+
+			// Test
+			IValidationSupport.CodeValidationResult result =
+				validateCodeOnValueSet(VS_URL, CS_URL, codeIn(theSpecifiedVersion));
+
+			// Verify
+			assertThat(result).isNotNull();
+			assertThat(result.isOk()).isTrue();
+		}
+
+		@ParameterizedTest
+		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
+		void validateCode_codeFromTheOtherVersionWhichIsNotEnumerated_isNotValid(String theSpecifiedVersion) {
+			// Setup
+			setUpWithSpecifiedVersion(theSpecifiedVersion);
+
+			// Test
+			IValidationSupport.CodeValidationResult result =
+				validateCodeOnValueSet(VS_URL, CS_URL, codeIn(otherThan(theSpecifiedVersion)));
+
+			// Verify
+			assertThat(result).isNotNull();
+			assertThat(result.isOk()).isFalse();
+		}
+
+		/**
+		 * The same question with the code system version named explicitly, as
+		 * {@literal ValueSet/$validate-code?systemVersion=} sends it.
+		 */
+		@ParameterizedTest
+		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
+		void validateCode_codeEnumeratedFromTheNamedVersionWithSystemVersionGiven_isValid(
+				String theSpecifiedVersion) {
+			// Setup
+			setUpWithSpecifiedVersion(theSpecifiedVersion);
+
+			// Test
+			IValidationSupport.CodeValidationResult result = validateCodeOnValueSet(
+				VS_URL, CS_URL + "|" + theSpecifiedVersion, codeIn(theSpecifiedVersion));
+
+			// Verify
+			assertThat(result).isNotNull();
+			assertThat(result.isOk()).isTrue();
+		}
+
+		/**
+		 * The resource-validation path reaches terminology through validateCodeInValueSet with the ValueSet
+		 * as a resource, which is a different route to the same question - #8392 fixed that one. Running both
+		 * here is what shows whether the two still disagree.
+		 */
+		@ParameterizedTest
+		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
+		void validate_codeEnumeratedFromTheNamedVersion_hasNoErrors(String theSpecifiedVersion) {
+			// Setup
+			setUpWithSpecifiedVersion(theSpecifiedVersion);
+			createProfileBoundTo(VS_URL);
+
+			// Test
+			OperationOutcome outcome = validateObservationWithCode(codeIn(theSpecifiedVersion));
+
+			// Verify
+			assertThat(errorDiagnostics(outcome)).isEmpty();
+		}
+	}
+
+	private void createValueSetIncludingCodesFromCodeSystemVersion(
+			String theValueSetVersion, String theCodeSystemVersion, String... theCodes) {
+		ValueSet valueSet = newValueSet(theValueSetVersion);
+		ValueSet.ConceptSetComponent include =
+			valueSet.getCompose().addInclude().setSystem(CS_URL).setVersion(theCodeSystemVersion);
+		for (String code : theCodes) {
+			include.addConcept().setCode(code);
+		}
+		myValueSetDao.create(valueSet, mySrd);
+	}
+
 	private IValidationSupport.CodeValidationResult validateCodeOnValueSet(
 			String theValueSetIdentifier, String theCodeSystemIdentifier, String theCode) {
 		return myValueSetDao.validateCode(
