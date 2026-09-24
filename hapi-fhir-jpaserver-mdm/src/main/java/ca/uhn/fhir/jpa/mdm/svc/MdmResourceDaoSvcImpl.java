@@ -190,7 +190,7 @@ public class MdmResourceDaoSvcImpl implements IMdmResourceDaoSvc {
 
 		SystemRequestDetails rd = new SystemRequestDetails();
 		RequestPartitionId partitionId = RequestPartitionId.getPartitionFromUserDataIfPresent(theResource)
-			.orElse(RequestPartitionId.allPartitions());
+				.orElse(RequestPartitionId.allPartitions());
 		rd.setRequestPartitionId(partitionId);
 
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResource.fhirType());

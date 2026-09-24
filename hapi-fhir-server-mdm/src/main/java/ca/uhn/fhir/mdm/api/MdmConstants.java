@@ -39,8 +39,7 @@ public class MdmConstants {
 	 * matched to potential candidates.
 	 * The reason will come in the value.
 	 */
-	public static final String MDM_UNMATCHED_TAG_NAMESPACE =
-			"http://hapifhir.io/fhir/NamingSystem/mdm-unmatched";
+	public static final String MDM_UNMATCHED_TAG_NAMESPACE = "http://hapifhir.io/fhir/NamingSystem/mdm-unmatched";
 
 	/**
 	 * If set as the value of an extension with the above namespace,
