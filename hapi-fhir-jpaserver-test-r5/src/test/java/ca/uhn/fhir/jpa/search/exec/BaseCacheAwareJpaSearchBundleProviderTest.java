@@ -181,6 +181,7 @@ class BaseCacheAwareJpaSearchBundleProviderTest implements ITestDataBuilder {
 
 		mockPerformSearchForPids(1);
 		mockLoadResourcesByPid();
+		mockFetchNoIncludes();
 
 		ResponsePage.ResponsePageBuilder responsePageBuilder = new ResponsePage.ResponsePageBuilder();
 		myBundleProvider.getResources(0, 1, responsePageBuilder);
@@ -202,6 +203,7 @@ class BaseCacheAwareJpaSearchBundleProviderTest implements ITestDataBuilder {
 		when(myPagingProvider.getDefaultPageSize()).thenReturn(10);
 
 		mockPerformSearchForPids(1);
+		mockFetchNoIncludes();
 
 		Integer size = myBundleProvider.size();
 
@@ -213,6 +215,7 @@ class BaseCacheAwareJpaSearchBundleProviderTest implements ITestDataBuilder {
 	void testGetAllResources_Success() {
 		mockPerformSearchForPids(2);
 		mockLoadResourcesByPid();
+		mockFetchNoIncludes();
 
 		List<IBaseResource> allResources = myBundleProvider.getAllResources();
 
@@ -225,6 +228,7 @@ class BaseCacheAwareJpaSearchBundleProviderTest implements ITestDataBuilder {
 	void testGetAllResources_ExceedsLimit_ThrowsException() {
 		mockPerformSearchForPids(10_000);
 		mockLoadResourcesByPid();
+		mockFetchNoIncludes();
 
 		assertThatThrownBy(() -> myBundleProvider.getAllResources())
 			.isInstanceOf(IllegalArgumentException.class)
@@ -235,6 +239,7 @@ class BaseCacheAwareJpaSearchBundleProviderTest implements ITestDataBuilder {
 	void testGetResources_BasicSearch_Success() {
 		mockPerformSearchForPids(2);
 		mockLoadResourcesByPid();
+		mockFetchNoIncludes();
 
 		myInterceptorBroadcaster.registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE, myAnonymousInterceptor);
 
@@ -267,6 +272,7 @@ class BaseCacheAwareJpaSearchBundleProviderTest implements ITestDataBuilder {
 
 		mockPerformSearchForPids(31);
 		mockLoadResourcesByPid();
+		mockFetchNoIncludes();
 
 		myInterceptorBroadcaster.registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_SEARCH_PASS_COMPLETE, myAnonymousInterceptor);
 		myInterceptorBroadcaster.registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE, myAnonymousInterceptor);
@@ -287,6 +293,7 @@ class BaseCacheAwareJpaSearchBundleProviderTest implements ITestDataBuilder {
 		myParams.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
 
 		mockPerformSearchForPids(31);
+		mockFetchNoIncludes();
 		List<String> loadedResources = mockLoadResourcesByPid();
 
 		when(mySearchBuilder.createCountQuery(eq(myParams), eq(mySearchEntity.getUuid()), eq(myRequestDetails), eq(myRequestPartitionId)))
@@ -307,6 +314,7 @@ class BaseCacheAwareJpaSearchBundleProviderTest implements ITestDataBuilder {
 	void testGetResources_CachedRangeReuse_ExactRange() {
 		mockPerformSearchForPids(1);
 		mockLoadResourcesByPid();
+		mockFetchNoIncludes();
 
 		ResponsePage.ResponsePageBuilder builder1 = new ResponsePage.ResponsePageBuilder();
 		List<IBaseResource> firstCall = myBundleProvider.getResources(0, 10, builder1);
@@ -328,6 +336,7 @@ class BaseCacheAwareJpaSearchBundleProviderTest implements ITestDataBuilder {
 		// Mock search
 		mockPerformSearchForPids(5);
 		mockLoadResourcesByPid();
+		mockFetchNoIncludes();
 
 		assertThat(toUnqualifiedVersionlessIdValues(myBundleProvider.getResources(0, 10))).containsExactly(generateIdRange(0, 5));
 		assertEquals(1, myTxService.getTransactionCount());
@@ -344,6 +353,7 @@ class BaseCacheAwareJpaSearchBundleProviderTest implements ITestDataBuilder {
 	void testGetResources_CachedRangeSubSliceReuse_NoIncludes() {
 		mockPerformSearchForPids(5);
 		mockLoadResourcesByPid();
+		mockFetchNoIncludes();
 
 		ResponsePage.ResponsePageBuilder builder1 = new ResponsePage.ResponsePageBuilder();
 		myBundleProvider.getResources(0, 5, builder1);
@@ -396,6 +406,8 @@ class BaseCacheAwareJpaSearchBundleProviderTest implements ITestDataBuilder {
 
 	@Test
 	void testGetResources_ExistingSearchInDbCache_ReturnsExistingPids() {
+		mockFetchNoIncludes();
+
 		mySearchEntity.setStatus(SearchStatusEnum.FINISHED);
 		mySearchEntity.setNumFound(2);
 
@@ -423,6 +435,8 @@ class BaseCacheAwareJpaSearchBundleProviderTest implements ITestDataBuilder {
 
 	@Test
 	void testGetResources_IncrementalContinuation_WhenNumFoundGreaterThanZero() {
+		mockFetchNoIncludes();
+
 		mySearchEntity.setStatus(SearchStatusEnum.PASSCMPLET);
 		mySearchEntity.setNumFound(2);
 
@@ -481,19 +495,19 @@ class BaseCacheAwareJpaSearchBundleProviderTest implements ITestDataBuilder {
 			if (params.isReverseMode() && !params.getIncludeFilters().isEmpty()) {
 				Include inc = params.getIncludeFilters().iterator().next();
 				if ("Observation:subject".equals(inc.getValue())) {
-					return Set.of(revIncludePid);
+					return new ISearchBuilder.FetchedIncludes<>(Set.of(revIncludePid));
 				} else if ("DiagnosticReport:result".equals(inc.getValue())) {
-					return Set.of(iterRevIncludePid);
+					return new ISearchBuilder.FetchedIncludes<>(Set.of(iterRevIncludePid));
 				}
 			} else if (!params.isReverseMode() && !params.getIncludeFilters().isEmpty()) {
 				Include inc = params.getIncludeFilters().iterator().next();
 				if ("Patient:organization".equals(inc.getValue())) {
-					return Set.of(includePid);
+					return new ISearchBuilder.FetchedIncludes<>(Set.of(includePid));
 				} else if ("Organization:partof".equals(inc.getValue())) {
-					return Set.of(iterIncludePid);
+					return new ISearchBuilder.FetchedIncludes<>(Set.of(iterIncludePid));
 				}
 			}
-			return Set.of();
+			return new ISearchBuilder.FetchedIncludes<>(Set.of());
 		});
 
 		// Test
@@ -515,6 +529,7 @@ class BaseCacheAwareJpaSearchBundleProviderTest implements ITestDataBuilder {
 
 		mockPerformSearchForPids(2);
 		mockLoadResourcesByPid();
+		mockFetchNoIncludes();
 
 		// Add a PREACCESS interceotor that blocks Patient/0
 		IAnonymousInterceptor interceptor = (pointcut, args) -> {
@@ -577,6 +592,7 @@ class BaseCacheAwareJpaSearchBundleProviderTest implements ITestDataBuilder {
 	void testUnexpectedRollbackException_ValidatesSearchEntity() {
 		mockPerformSearchForPids(1);
 		mockLoadResourcesByPid();
+		mockFetchNoIncludes();
 
 		// First pass loads the search entity
 		ResponsePage.ResponsePageBuilder builder1 = new ResponsePage.ResponsePageBuilder();
@@ -607,6 +623,7 @@ class BaseCacheAwareJpaSearchBundleProviderTest implements ITestDataBuilder {
 
 		mockPerformSearchForPids(1);
 		mockLoadResourcesByPid();
+		mockFetchNoIncludes();
 
 		ResponsePage.ResponsePageBuilder builder = new ResponsePage.ResponsePageBuilder();
 		myBundleProvider.getResources(0, 10, builder);
@@ -626,6 +643,7 @@ class BaseCacheAwareJpaSearchBundleProviderTest implements ITestDataBuilder {
 
 		mockPerformSearchForPids(1);
 		mockLoadResourcesByPid();
+		mockFetchNoIncludes();
 
 		ResponsePage.ResponsePageBuilder builder = new ResponsePage.ResponsePageBuilder();
 		myBundleProvider.getResources(0, 10, builder);
@@ -641,6 +659,7 @@ class BaseCacheAwareJpaSearchBundleProviderTest implements ITestDataBuilder {
 	@Test
 	void testFetchManyPids_MaintainSmallLocalMemoryCache_NoConsentService() {
 		// Setup
+		mockFetchNoIncludes();
 
 		myStorageSettings.setSearchPreFetchThresholds(List.of(10, -1));
 
@@ -697,6 +716,7 @@ class BaseCacheAwareJpaSearchBundleProviderTest implements ITestDataBuilder {
 		myStorageSettings.setSearchPreFetchThresholds(List.of(10, -1));
 
 		mockPerformSearchForPids(10_000);
+		mockFetchNoIncludes();
 		AtomicReference<Search> search = mockSearchCacheStorage();
 		mockSearchResultCacheStorage();
 		List<String> fetchedResourceIds = mockLoadResourcesByPid();
@@ -851,6 +871,10 @@ class BaseCacheAwareJpaSearchBundleProviderTest implements ITestDataBuilder {
 			retVal.add("Patient/" + i);
 		}
 		return retVal.toArray(EMPTY_STRING_ARRAY);
+	}
+
+	private void mockFetchNoIncludes() {
+		when(mySearchBuilder.loadIncludes(any())).thenReturn(new ISearchBuilder.FetchedIncludes<>());
 	}
 
 
