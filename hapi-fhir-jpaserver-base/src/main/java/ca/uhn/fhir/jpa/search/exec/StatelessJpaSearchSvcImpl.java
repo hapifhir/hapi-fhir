@@ -95,7 +95,6 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 	private final int mySyncSize = 250;
 
 	@Override
-	@SuppressWarnings({"rawtypes", "unchecked"})
 	public IBundleProvider createNewSearch(
 			SearchParameterMap theParams,
 			RequestDetails theRequestDetails,
@@ -269,10 +268,7 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 							}
 							pids.addAll(revIncludedPids.pids());
 							allIncludedPidsList.addAll(revIncludedPids.pids());
-							if (revIncludedPids.resourcesIfFetched().isPresent()) {
-								fetchedIncludedResources.putAll(
-										revIncludedPids.resourcesIfFetched().get());
-							}
+							fetchedIncludedResources.putAll(revIncludedPids.resourcesIfFetched());
 						}
 
 						// Phase 2: non-iterate `_include` on original search result PIDs
@@ -297,10 +293,7 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 							}
 							pids.addAll(forwardIncludedPids.pids());
 							allIncludedPidsList.addAll(forwardIncludedPids.pids());
-							if (forwardIncludedPids.resourcesIfFetched().isPresent()) {
-								fetchedIncludedResources.putAll(
-										forwardIncludedPids.resourcesIfFetched().get());
-							}
+							fetchedIncludedResources.putAll(forwardIncludedPids.resourcesIfFetched());
 						}
 
 						// Phase 3: `_revinclude:iterate` on expanded PIDs (including non-iterate revinclude results)
@@ -321,11 +314,7 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 							}
 							pids.addAll(iterateRevIncludedPids.pids());
 							allIncludedPidsList.addAll(iterateRevIncludedPids.pids());
-							if (iterateRevIncludedPids.resourcesIfFetched().isPresent()) {
-								fetchedIncludedResources.putAll(iterateRevIncludedPids
-										.resourcesIfFetched()
-										.get());
-							}
+							fetchedIncludedResources.putAll(iterateRevIncludedPids.resourcesIfFetched());
 						}
 
 						// Phase 4: `_include:iterate` on all expanded PIDs (including revinclude results)
@@ -345,11 +334,7 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 							ISearchBuilder.FetchedIncludes<JpaPid> iterateForwardIncludedPids = theSb.loadIncludes(p);
 							pids.addAll(iterateForwardIncludedPids.pids());
 							allIncludedPidsList.addAll(iterateForwardIncludedPids.pids());
-							if (iterateForwardIncludedPids.resourcesIfFetched().isPresent()) {
-								fetchedIncludedResources.putAll(iterateForwardIncludedPids
-										.resourcesIfFetched()
-										.get());
-							}
+							fetchedIncludedResources.putAll(iterateForwardIncludedPids.resourcesIfFetched());
 						}
 					}
 

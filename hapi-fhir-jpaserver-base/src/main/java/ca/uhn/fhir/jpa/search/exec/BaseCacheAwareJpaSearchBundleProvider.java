@@ -758,10 +758,7 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 				}
 				theMatchPids.addAll(nonIterateIncludedPids.pids());
 				includedPidList.addAll(nonIterateIncludedPids.pids());
-				if (nonIterateIncludedPids.resourcesIfFetched().isPresent()) {
-					myFetchedResources.putAll(
-							nonIterateIncludedPids.resourcesIfFetched().get());
-				}
+				myFetchedResources.putAll(nonIterateIncludedPids.resourcesIfFetched());
 			}
 
 			// Load `_revinclude:iterate`
@@ -779,10 +776,7 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 				ISearchBuilder.FetchedIncludes<JpaPid> iterateIncludedPids = theSearchBuilder.loadIncludes(parameters);
 				theMatchPids.addAll(iterateIncludedPids.pids());
 				includedPidList.addAll(iterateIncludedPids.pids());
-				if (iterateIncludedPids.resourcesIfFetched().isPresent()) {
-					myFetchedResources.putAll(
-							iterateIncludedPids.resourcesIfFetched().get());
-				}
+				myFetchedResources.putAll(iterateIncludedPids.resourcesIfFetched());
 			}
 		}
 
@@ -839,10 +833,7 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 		}
 		thePids.addAll(nonIterateRevIncludedPids.pids());
 		theIncludedPidList.addAll(nonIterateRevIncludedPids.pids());
-		if (nonIterateRevIncludedPids.resourcesIfFetched().isPresent()) {
-			myFetchedResources.putAll(
-					nonIterateRevIncludedPids.resourcesIfFetched().get());
-		}
+		myFetchedResources.putAll(nonIterateRevIncludedPids.resourcesIfFetched());
 		return theMaxIncludes;
 	}
 

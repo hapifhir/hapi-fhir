@@ -1922,7 +1922,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			}
 		}
 
-		return new FetchedIncludes<>(allAdded, Optional.ofNullable(fetchedResourceMap));
+		return new FetchedIncludes<>(allAdded, fetchedResourceMap);
 	}
 
 	private void loadIncludesMatchSpecific(

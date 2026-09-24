@@ -27,6 +27,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import com.google.common.collect.Streams;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -40,6 +41,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
+
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 
 public interface ISearchBuilder<T extends IResourcePersistentId<?>> {
 	Logger ourLog = LoggerFactory.getLogger(ISearchBuilder.class);
@@ -127,10 +130,12 @@ public interface ISearchBuilder<T extends IResourcePersistentId<?>> {
 
 	/**
 	 * @param pids A writeable set of PIDs
-	 * @param resourcesIfFetched If the PIDs had to be hydrated (i.e. in order to verify consent), the fetched PIDs are returned
-	 *                           in case they are needed later, in order to avoid double fetching.
+	 * @param resourcesIfFetched If the PIDs had to be hydrated (i.e. in order to verify consent), the fetched PIDs are returned.
+	 *                           This means that consumers of this API can avoid a second lookup. There is no guarantee
+	 *                           that any of the PIDs returned by {@link #pids()} will be found in the map, but only PIDs
+	 *                           returned by {@link #pids()} will be present as keys in the map, if any.
 	 */
-	record FetchedIncludes<T>(Set<T> pids, Optional<Map<T, IBaseResource>> resourcesIfFetched) {
+	record FetchedIncludes<T>(@Nonnull Set<T> pids, @Nonnull Map<T, IBaseResource> resourcesIfFetched) {
 
 		/**
 		 * Constructor
@@ -142,8 +147,17 @@ public interface ISearchBuilder<T extends IResourcePersistentId<?>> {
 		/**
 		 * Constructor
 		 */
-		public FetchedIncludes(Set<T> theObjects) {
-			this(theObjects, Optional.empty());
+		public FetchedIncludes(Set<T> thePids) {
+			this(thePids, Map.of());
 		}
+
+		/**
+		 * Constructor
+		 */
+		public FetchedIncludes(@Nonnull Set<T> pids, @Nullable Map<T, IBaseResource> resourcesIfFetched) {
+			this.pids = pids;
+			this.resourcesIfFetched = getIfNull(resourcesIfFetched, Map.of());
+		}
+
 	}
 }
