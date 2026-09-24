@@ -129,11 +129,14 @@ public interface ISearchBuilder<T extends IResourcePersistentId<?>> {
 	void setPreviouslyAddedResourcePids(Collection<T> thePreviouslyAddedResourcePids);
 
 	/**
-	 * @param pids A writeable set of PIDs
-	 * @param resourcesIfFetched If the PIDs had to be hydrated (i.e. in order to verify consent), the fetched PIDs are returned.
+	 * This class is the return type for {@link #loadIncludes(SearchBuilderLoadIncludesParameters)}
+	 *
+	 * @param pids A set of PIDs (guaranteed to be a writeable set which can safely be modified)
+	 * @param resourcesIfFetched If the PIDs had to be hydrated (i.e. to verify consent), the fetched PIDs are returned.
 	 *                           This means that consumers of this API can avoid a second lookup. There is no guarantee
 	 *                           that any of the PIDs returned by {@link #pids()} will be found in the map, but only PIDs
-	 *                           returned by {@link #pids()} will be present as keys in the map, if any.
+	 *                           returned by {@link #pids()} will be present as keys in the map. In other words, check for
+	 *                           the existence of PIDs in the map before fetching them, but don't assume they will be there.
 	 */
 	record FetchedIncludes<T>(@Nonnull Set<T> pids, @Nonnull Map<T, IBaseResource> resourcesIfFetched) {
 
@@ -157,6 +160,13 @@ public interface ISearchBuilder<T extends IResourcePersistentId<?>> {
 		public FetchedIncludes(@Nonnull Set<T> pids, @Nullable Map<T, IBaseResource> resourcesIfFetched) {
 			this.pids = pids;
 			this.resourcesIfFetched = getIfNull(resourcesIfFetched, Map.of());
+		}
+
+		/**
+		 * @return Returns the size of the {@link #pids()} set
+		 */
+		public int size() {
+			return pids.size();
 		}
 
 	}

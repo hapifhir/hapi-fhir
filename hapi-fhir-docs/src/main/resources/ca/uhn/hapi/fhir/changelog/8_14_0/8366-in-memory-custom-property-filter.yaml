@@ -1,0 +1,9 @@
+---
+type: fix
+issue: 8366
+title: "Previously, validating a code against a ValueSet whose `filter` selects on a custom
+      `CodeSystem.concept.property` (such as LOINC `SCALE_TYP`) failed, even when the CodeSystem was
+      supplied with `content: complete` and carried the property value. Such filters are now evaluated in
+      memory for the `=`, `in`, `not-in` and `regex` operators. Where the CodeSystem declares
+      `content: complete` but does not declare the property at all, membership can be neither established
+      nor ruled out, and this is now reported as `not-found` rather than as a `vs-invalid` error."
