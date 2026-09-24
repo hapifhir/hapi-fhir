@@ -750,14 +750,34 @@ public class ValidationSupportChain implements IValidationSupport {
 
 	@Override
 	public IBaseResource fetchValueSet(String theUrl) {
-		Function<IValidationSupport, IBaseResource> invoker = v -> v.fetchValueSet(theUrl);
-		ResourceByUrlKey<IBaseResource> key = new ResourceByUrlKey<>(ResourceByUrlKey.TypeEnum.VALUESET, theUrl);
-		return fetchValue(key, invoker, theUrl);
+		// On this signature a value set can only name a version by carrying it packed as "url|version"
+		UrlUtil.CanonicalUrlParts valueSet = UrlUtil.parseCanonicalUrl(theUrl);
+		String valueSetVersion = valueSet.versionId().orElse(null);
+		return fetchValueSet(valueSet.url(), valueSetVersion);
 	}
 
-	@SuppressWarnings("unchecked")
+	// Created by Claude Opus 5
+	@Override
+	public IBaseResource fetchValueSet(String theUrl, @Nullable String theVersion) {
+		Function<IValidationSupport, IBaseResource> invoker = v -> v.fetchValueSet(theUrl, theVersion);
+		// Two versions of one value set are different resources, so the version belongs in the cache key
+		String canonicalUrl = UrlUtil.toCanonicalUrl(theUrl, theVersion);
+		ResourceByUrlKey<IBaseResource> key = new ResourceByUrlKey<>(ResourceByUrlKey.TypeEnum.VALUESET, canonicalUrl);
+		return fetchValue(key, invoker, canonicalUrl);
+	}
+
 	@Override
 	public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri) {
+		// On this signature a resource can only name a version by carrying it packed as "url|version"
+		UrlUtil.CanonicalUrlParts resource = UrlUtil.parseCanonicalUrl(theUri);
+		String resourceVersion = resource.versionId().orElse(null);
+		return fetchResource(theClass, resource.url(), resourceVersion);
+	}
+
+	// Created by Claude Opus 5
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri, @Nullable String theVersion) {
 
 		/*
 		 * If we're looking for a common type with a dedicated fetch method, use that
@@ -770,18 +790,20 @@ public class ValidationSupportChain implements IValidationSupport {
 			if (elementDefinition != null) {
 				switch (elementDefinition.getName()) {
 					case "ValueSet":
-						return (T) fetchValueSet(theUri);
+						return (T) fetchValueSet(theUri, theVersion);
 					case "CodeSystem":
-						return (T) fetchCodeSystem(theUri);
+						return (T) fetchCodeSystem(theUri, theVersion);
 					case "StructureDefinition":
-						return (T) fetchStructureDefinition(theUri);
+						return (T) fetchStructureDefinition(theUri, theVersion);
 				}
 			}
 		}
 
-		Function<IValidationSupport, T> invoker = v -> v.fetchResource(theClass, theUri);
-		TypedResourceByUrlKey<T> key = new TypedResourceByUrlKey<>(theClass, theUri);
-		return fetchValue(key, invoker, theUri);
+		Function<IValidationSupport, T> invoker = v -> v.fetchResource(theClass, theUri, theVersion);
+		// Two versions of one resource are different resources, so the version belongs in the cache key
+		String canonicalUrl = UrlUtil.toCanonicalUrl(theUri, theVersion);
+		TypedResourceByUrlKey<T> key = new TypedResourceByUrlKey<>(theClass, canonicalUrl);
+		return fetchValue(key, invoker, canonicalUrl);
 	}
 
 	@Override
@@ -793,16 +815,28 @@ public class ValidationSupportChain implements IValidationSupport {
 
 	@Override
 	public IBaseResource fetchStructureDefinition(String theUrl) {
+		// On this signature a structure definition can only name a version by carrying it packed as "url|version"
+		UrlUtil.CanonicalUrlParts structureDefinition = UrlUtil.parseCanonicalUrl(theUrl);
+		String structureDefinitionVersion = structureDefinition.versionId().orElse(null);
+		return fetchStructureDefinition(structureDefinition.url(), structureDefinitionVersion);
+	}
+
+	// Created by Claude Opus 5
+	@Override
+	public IBaseResource fetchStructureDefinition(String theUrl, @Nullable String theVersion) {
+		// Two versions of one structure definition are different resources, so the version belongs in the key
+		String canonicalUrl = UrlUtil.toCanonicalUrl(theUrl, theVersion);
 		synchronized (myStructureDefinitionsByUrl) {
-			IBaseResource candidate = myStructureDefinitionsByUrl.get(theUrl);
+			IBaseResource candidate = myStructureDefinitionsByUrl.get(canonicalUrl);
 			if (candidate == null) {
-				Function<IValidationSupport, IBaseResource> invoker = v -> v.fetchStructureDefinition(theUrl);
+				Function<IValidationSupport, IBaseResource> invoker =
+						v -> v.fetchStructureDefinition(theUrl, theVersion);
 				ResourceByUrlKey<IBaseResource> key =
-						new ResourceByUrlKey<>(ResourceByUrlKey.TypeEnum.STRUCTUREDEFINITION, theUrl);
-				candidate = fetchValue(key, invoker, theUrl);
+						new ResourceByUrlKey<>(ResourceByUrlKey.TypeEnum.STRUCTUREDEFINITION, canonicalUrl);
+				candidate = fetchValue(key, invoker, canonicalUrl);
 				if (myExpiringCache != null) {
 					if (candidate != null) {
-						if (myStructureDefinitionsByUrl.putIfAbsent(theUrl, candidate) == null) {
+						if (myStructureDefinitionsByUrl.putIfAbsent(canonicalUrl, candidate) == null) {
 							myStructureDefinitionsAsList.add(candidate);
 						}
 					}

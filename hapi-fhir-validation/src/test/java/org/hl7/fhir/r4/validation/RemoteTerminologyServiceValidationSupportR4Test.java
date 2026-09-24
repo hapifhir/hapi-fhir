@@ -65,6 +65,7 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 	private static final String CODE_SYSTEM = "CODE_SYS";
 	private static final String CODE = "CODE";
 	private static final String CODE_SYSTEM_VERSION = "2.78";
+	private static final String VALUE_SET_VERSION = "1.0.0";
 	private static final String VALUE_SET_URL = "http://value.set/url";
 	private static final String TARGET_SYSTEM = "http://target.system/url";
 	private static final String CONCEPT_MAP_URL = "http://concept.map/url";
@@ -182,6 +183,62 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 		assertEquals(CODE_SYSTEM, myCodeSystemProvider.myLastUrlParam.getValue());
 		assertNotNull(myCodeSystemProvider.myLastVersionParam);
 		assertEquals(CODE_SYSTEM_VERSION, myCodeSystemProvider.myLastVersionParam.getValue());
+	}
+
+	/**
+	 * A ValueSet resource's {@code url} element never contains a pipe either, so the version has to be
+	 * sent as its own search parameter here too. This module already split the canonical by hand; it
+	 * now takes the version as a parameter and leaves the parsing to UrlUtil.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	void fetchValueSet_packedVersionedCanonical_searchesUrlAndVersionSeparately() {
+		myValueSetProvider.myNextReturnValueSets = List.of(newValueSet(VALUE_SET_VERSION));
+
+		IBaseResource valueSet = mySvc.fetchValueSet(VALUE_SET_URL + "|" + VALUE_SET_VERSION);
+
+		assertNotNull(valueSet);
+		assertEquals(VALUE_SET_URL, myValueSetProvider.myLastUrlParam.getValue());
+		assertNotNull(myValueSetProvider.myLastVersionParam);
+		assertEquals(VALUE_SET_VERSION, myValueSetProvider.myLastVersionParam.getValue());
+	}
+
+	// Created by Claude Opus 5
+	@Test
+	void fetchValueSet_versionAsItsOwnParameter_searchesUrlAndVersionSeparately() {
+		myValueSetProvider.myNextReturnValueSets = List.of(newValueSet(VALUE_SET_VERSION));
+
+		IBaseResource valueSet = mySvc.fetchValueSet(VALUE_SET_URL, VALUE_SET_VERSION);
+
+		assertNotNull(valueSet);
+		assertEquals(VALUE_SET_URL, myValueSetProvider.myLastUrlParam.getValue());
+		assertNotNull(myValueSetProvider.myLastVersionParam);
+		assertEquals(VALUE_SET_VERSION, myValueSetProvider.myLastVersionParam.getValue());
+	}
+
+	// Created by Claude Opus 5
+	@Test
+	void fetchValueSet_noVersion_searchesUrlOnly() {
+		myValueSetProvider.myNextReturnValueSets = List.of(newValueSet(null));
+
+		IBaseResource valueSet = mySvc.fetchValueSet(VALUE_SET_URL);
+
+		assertNotNull(valueSet);
+		assertEquals(VALUE_SET_URL, myValueSetProvider.myLastUrlParam.getValue());
+		assertNull(myValueSetProvider.myLastVersionParam);
+	}
+
+	// Created by Claude Opus 5
+	@Test
+	void isValueSetSupported_versionAsItsOwnParameter_searchesUrlAndVersionSeparately() {
+		myValueSetProvider.myNextReturnValueSets = List.of(newValueSet(VALUE_SET_VERSION));
+
+		boolean supported = mySvc.isValueSetSupported(null, VALUE_SET_URL, VALUE_SET_VERSION);
+
+		assertTrue(supported);
+		assertEquals(VALUE_SET_URL, myValueSetProvider.myLastUrlParam.getValue());
+		assertNotNull(myValueSetProvider.myLastVersionParam);
+		assertEquals(VALUE_SET_VERSION, myValueSetProvider.myLastVersionParam.getValue());
 	}
 
 	@Test
@@ -326,6 +383,15 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 	 * A CodeSystem a test provider can return: the server rejects a resource with no ID.
 	 */
 	// Created by Claude Opus 5
+	private static ValueSet newValueSet(@Nullable String theVersion) {
+		ValueSet valueSet = new ValueSet();
+		valueSet.setId("ValueSet/123");
+		valueSet.setUrl(VALUE_SET_URL);
+		valueSet.setVersion(theVersion);
+		return valueSet;
+	}
+
+	// Created by Claude Opus 5
 	private static CodeSystem newCodeSystem(@Nullable String theVersion) {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setId("CodeSystem/123");
@@ -362,6 +428,8 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 	private static class MyValueSetProvider implements IResourceProvider {
 		private List<ValueSet> myNextReturnValueSets;
 		private UriParam myLastUrlParam;
+		// Created by Claude Opus 5
+		private StringParam myLastVersionParam;
 		private SummaryEnum myLastSummaryParam;
 		private Parameters myValidateCodeResult;
 		private BooleanType myLastValidateCodeInferSystem;
@@ -382,8 +450,12 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 		}
 
 		@Search
-		public List<ValueSet> find(@RequiredParam(name = "url") UriParam theUrlParam, SummaryEnum theSummaryParam) {
+		public List<ValueSet> find(
+			@RequiredParam(name = "url") UriParam theUrlParam,
+			@OptionalParam(name = "version") StringParam theVersionParam,
+			SummaryEnum theSummaryParam) {
 			myLastUrlParam = theUrlParam;
+			myLastVersionParam = theVersionParam;
 			myLastSummaryParam = theSummaryParam;
 			assert myNextReturnValueSets != null;
 			return myNextReturnValueSets;

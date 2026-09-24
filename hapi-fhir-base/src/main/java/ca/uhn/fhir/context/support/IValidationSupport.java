@@ -261,6 +261,29 @@ public interface IValidationSupport {
 	}
 
 	/**
+	 * Loads a resource needed by the validation, by URL and version.
+	 * <p>
+	 * This is the form callers should use: the version travels as its own parameter, so no layer has to
+	 * remember to split a packed <code>url|version</code> canonical, and none can silently drop the version
+	 * by forgetting to. The default implementation packs the version back into the URL and calls
+	 * {@link #fetchResource(Class, String)}, so an implementation which overrides only that method keeps
+	 * working unchanged.
+	 * </p>
+	 *
+	 * @param theClass   The type of the resource to load, or <code>null</code> to return any resource with the given canonical URI
+	 * @param theUri     The resource URL, without a version, e.g. "<code>http://example.org/ValueSet/foo</code>"
+	 * @param theVersion The resource version, e.g. "<code>1.0.0</code>", or <code>null</code> for whichever version is current
+	 * @return Returns the resource, or <code>null</code> if no resource with the given URI can be found
+	 * @since 8.14.0
+	 */
+	// Created by Claude Opus 5
+	@Nullable
+	default <T extends IBaseResource> T fetchResource(
+			@Nullable Class<T> theClass, String theUri, @Nullable String theVersion) {
+		return fetchResource(theClass, UrlUtil.toCanonicalUrl(theUri, theVersion));
+	}
+
+	/**
 	 * Fetch the given StructureDefinition by URL, or returns null if one can't be found for the given URL
 	 *
 	 * @param theUrl The structure definition, as a canonical URL which may carry a version, e.g. "<code>http://example.org/StructureDefinition/foo|1.0.0</code>"
@@ -268,6 +291,25 @@ public interface IValidationSupport {
 	@Nullable
 	default IBaseResource fetchStructureDefinition(String theUrl) {
 		return null;
+	}
+
+	/**
+	 * Fetch the given StructureDefinition by URL and version, or returns null if one can't be found.
+	 * <p>
+	 * This is the form callers should use, for the reason given on {@link #fetchResource(Class, String, String)}.
+	 * The default implementation packs the version back into the URL and calls
+	 * {@link #fetchStructureDefinition(String)}.
+	 * </p>
+	 *
+	 * @param theUrl     The structure definition URL, without a version, e.g. "<code>http://example.org/StructureDefinition/foo</code>"
+	 * @param theVersion The structure definition version, e.g. "<code>1.0.0</code>", or <code>null</code> for whichever version is current
+	 * @return The StructureDefinition, or <code>null</code> if this module cannot supply it
+	 * @since 8.14.0
+	 */
+	// Created by Claude Opus 5
+	@Nullable
+	default IBaseResource fetchStructureDefinition(String theUrl, @Nullable String theVersion) {
+		return fetchStructureDefinition(UrlUtil.toCanonicalUrl(theUrl, theVersion));
 	}
 
 	/**
@@ -325,6 +367,25 @@ public interface IValidationSupport {
 	@Nullable
 	default IBaseResource fetchValueSet(String theValueSetUrl) {
 		return null;
+	}
+
+	/**
+	 * Fetch the given ValueSet by URL and version, or returns null if one can't be found.
+	 * <p>
+	 * This is the form callers should use, for the reason given on {@link #fetchResource(Class, String, String)}.
+	 * The default implementation packs the version back into the URL and calls
+	 * {@link #fetchValueSet(String)}.
+	 * </p>
+	 *
+	 * @param theValueSetUrl The value set URL, without a version, e.g. "<code>http://example.org/ValueSet/foo</code>"
+	 * @param theVersion     The value set version, e.g. "<code>1.0.0</code>", or <code>null</code> for whichever version is current
+	 * @return The ValueSet, or <code>null</code> if this module cannot supply it
+	 * @since 8.14.0
+	 */
+	// Created by Claude Opus 5
+	@Nullable
+	default IBaseResource fetchValueSet(String theValueSetUrl, @Nullable String theVersion) {
+		return fetchValueSet(UrlUtil.toCanonicalUrl(theValueSetUrl, theVersion));
 	}
 
 	/**

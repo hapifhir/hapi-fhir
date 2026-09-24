@@ -73,6 +73,8 @@ public class ValidationSupportChainTest extends BaseTest {
 	public static final String CODE_SYSTEM_VERSION_1 = "code-system-version-1";
 	public static final String VALUE_SET_VERSION_0 = "value-set-version-0";
 	public static final String VALUE_SET_VERSION_1 = "value-set-version-1";
+	public static final String STRUCTURE_DEFINITION_URL_0 = "http://structure-definition-url-0";
+	public static final String RESOURCE_VERSION_0 = "resource-version-0";
 	private static final Logger ourLog = LoggerFactory.getLogger(ValidationSupportChainTest.class);
 	@Mock(strictness = Mock.Strictness.LENIENT)
 	private IValidationSupport myValidationSupport0;
@@ -406,6 +408,98 @@ public class ValidationSupportChainTest extends BaseTest {
 			.validateCode(any(), any(), eq(new ValidateCodeRequest(CODE_SYSTEM_URL_0, null, CODE_0, DISPLAY_0, versionedValueSetUrl)));
 	}
 
+	/**
+	 * A version packed into the canonical has to reach the module as its own argument, or a module which can
+	 * resolve a specific version never gets told which one was asked for.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	public void fetchValueSet_versionedCanonical_asksTheModuleForUrlAndVersion() {
+		// Setup
+		prepareMock(myValidationSupport0);
+		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(true), myValidationSupport0);
+		ValueSet valueSet = new ValueSet();
+		when(myValidationSupport0.fetchValueSet(eq(VALUE_SET_URL_0), eq(VALUE_SET_VERSION_0))).thenReturn(valueSet);
+
+		// Test
+		IBaseResource result = chain.fetchValueSet(VALUE_SET_URL_0 + "|" + VALUE_SET_VERSION_0);
+
+		// Verify
+		assertSame(valueSet, result);
+		verify(myValidationSupport0, times(1)).fetchValueSet(eq(VALUE_SET_URL_0), eq(VALUE_SET_VERSION_0));
+	}
+
+	/**
+	 * Two versions of one canonical are two different resources, so they cannot share a cache entry.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	public void fetchValueSet_differentVersions_areNotAnsweredFromOneCacheEntry() {
+		// Setup
+		prepareMock(myValidationSupport0);
+		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(true), myValidationSupport0);
+		when(myValidationSupport0.fetchValueSet(eq(VALUE_SET_URL_0), any())).thenAnswer(t -> new ValueSet());
+
+		// Test
+		IBaseResource version0 = chain.fetchValueSet(VALUE_SET_URL_0 + "|" + VALUE_SET_VERSION_0);
+		IBaseResource version1 = chain.fetchValueSet(VALUE_SET_URL_0 + "|" + VALUE_SET_VERSION_1);
+		IBaseResource unversioned = chain.fetchValueSet(VALUE_SET_URL_0);
+		IBaseResource version0Again = chain.fetchValueSet(VALUE_SET_URL_0 + "|" + VALUE_SET_VERSION_0);
+
+		// Verify
+		assertNotSame(version0, version1);
+		assertNotSame(version0, unversioned);
+		assertSame(version0, version0Again);
+		verify(myValidationSupport0, times(3)).fetchValueSet(eq(VALUE_SET_URL_0), any());
+	}
+
+	// Created by Claude Opus 5
+	@Test
+	public void fetchStructureDefinition_versionedCanonical_asksTheModuleForUrlAndVersion() {
+		// Setup
+		prepareMock(myValidationSupport0);
+		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(true), myValidationSupport0);
+		StructureDefinition structureDefinition = new StructureDefinition();
+		when(myValidationSupport0.fetchStructureDefinition(eq(STRUCTURE_DEFINITION_URL_0), eq(RESOURCE_VERSION_0)))
+			.thenReturn(structureDefinition);
+
+		// Test
+		IBaseResource result = chain.fetchStructureDefinition(STRUCTURE_DEFINITION_URL_0 + "|" + RESOURCE_VERSION_0);
+
+		// Verify
+		assertSame(structureDefinition, result);
+		verify(myValidationSupport0, times(1))
+			.fetchStructureDefinition(eq(STRUCTURE_DEFINITION_URL_0), eq(RESOURCE_VERSION_0));
+	}
+
+	/**
+	 * fetchResource routes the types with a dedicated fetch method to it, so that both entry points share one
+	 * cache entry. The version has to survive that routing.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	public void fetchResource_versionedCanonical_asksTheModuleForUrlAndVersion() {
+		// Setup
+		prepareMock(myValidationSupport0);
+		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(true), myValidationSupport0);
+		ValueSet valueSet = new ValueSet();
+		ListResource list = new ListResource();
+		when(myValidationSupport0.fetchValueSet(eq(VALUE_SET_URL_0), eq(VALUE_SET_VERSION_0))).thenReturn(valueSet);
+		when(myValidationSupport0.fetchResource(eq(ListResource.class), eq("http://foo"), eq(RESOURCE_VERSION_0)))
+			.thenReturn(list);
+
+		// Test
+		IBaseResource routedToValueSet = chain.fetchResource(ValueSet.class, VALUE_SET_URL_0 + "|" + VALUE_SET_VERSION_0);
+		IBaseResource fetchedByType = chain.fetchResource(ListResource.class, "http://foo|" + RESOURCE_VERSION_0);
+
+		// Verify
+		assertSame(valueSet, routedToValueSet);
+		assertSame(list, fetchedByType);
+		verify(myValidationSupport0, times(1)).fetchValueSet(eq(VALUE_SET_URL_0), eq(VALUE_SET_VERSION_0));
+		verify(myValidationSupport0, times(1))
+			.fetchResource(eq(ListResource.class), eq("http://foo"), eq(RESOURCE_VERSION_0));
+	}
+
 	// Created by Claude Opus 5
 	private IValidationSupport.CodeValidationResult validateCodeInValueSetUrl(
 			ValidationSupportChain theChain, String theValueSetUrl) {
@@ -722,16 +816,16 @@ public class ValidationSupportChainTest extends BaseTest {
 		prepareMock(myValidationSupport0, myValidationSupport1, myValidationSupport2);
 		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(theUseCache), myValidationSupport0, myValidationSupport1, myValidationSupport2);
 
-		when(myValidationSupport0.fetchValueSet(any())).thenReturn(null);
-		when(myValidationSupport1.fetchValueSet(any())).thenAnswer(t -> new ValueSet());
+		when(myValidationSupport0.fetchValueSet(any(), any())).thenReturn(null);
+		when(myValidationSupport1.fetchValueSet(any(), any())).thenAnswer(t -> new ValueSet());
 
 		// Test
 		IBaseResource result = chain.fetchValueSet(VALUE_SET_URL_0);
 
 		// Verify
-		verify(myValidationSupport0, times(1)).fetchValueSet(any());
-		verify(myValidationSupport1, times(1)).fetchValueSet(any());
-		verify(myValidationSupport2, times(0)).fetchValueSet(any());
+		verify(myValidationSupport0, times(1)).fetchValueSet(any(), any());
+		verify(myValidationSupport1, times(1)).fetchValueSet(any(), any());
+		verify(myValidationSupport2, times(0)).fetchValueSet(any(), any());
 
 		// Test again (should use cache)
 		IBaseResource result2 = chain.fetchValueSet(VALUE_SET_URL_0);
@@ -739,13 +833,13 @@ public class ValidationSupportChainTest extends BaseTest {
 		// Verify
 		if (theUseCache) {
 			assertSame(result, result2);
-			verify(myValidationSupport0, times(1)).fetchValueSet(any());
-			verify(myValidationSupport1, times(1)).fetchValueSet(any());
-			verify(myValidationSupport2, times(0)).fetchValueSet(any());
+			verify(myValidationSupport0, times(1)).fetchValueSet(any(), any());
+			verify(myValidationSupport1, times(1)).fetchValueSet(any(), any());
+			verify(myValidationSupport2, times(0)).fetchValueSet(any(), any());
 		} else {
-			verify(myValidationSupport0, times(2)).fetchValueSet(any());
-			verify(myValidationSupport1, times(2)).fetchValueSet(any());
-			verify(myValidationSupport2, times(0)).fetchValueSet(any());
+			verify(myValidationSupport0, times(2)).fetchValueSet(any(), any());
+			verify(myValidationSupport1, times(2)).fetchValueSet(any(), any());
+			verify(myValidationSupport2, times(0)).fetchValueSet(any(), any());
 		}
 	}
 
@@ -756,16 +850,16 @@ public class ValidationSupportChainTest extends BaseTest {
 		prepareMock(myValidationSupport0, myValidationSupport1, myValidationSupport2);
 		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(theUseCache), myValidationSupport0, myValidationSupport1, myValidationSupport2);
 
-		when(myValidationSupport0.fetchValueSet(any())).thenReturn(null);
-		when(myValidationSupport1.fetchValueSet(any())).thenAnswer(t -> new ValueSet());
+		when(myValidationSupport0.fetchValueSet(any(), any())).thenReturn(null);
+		when(myValidationSupport1.fetchValueSet(any(), any())).thenAnswer(t -> new ValueSet());
 
 		// Test
 		IBaseResource result = chain.fetchResource(ValueSet.class, VALUE_SET_URL_0);
 
 		// Verify
-		verify(myValidationSupport0, times(1)).fetchValueSet( any());
-		verify(myValidationSupport1, times(1)).fetchValueSet( any());
-		verify(myValidationSupport2, times(0)).fetchValueSet(any());
+		verify(myValidationSupport0, times(1)).fetchValueSet(any(), any());
+		verify(myValidationSupport1, times(1)).fetchValueSet(any(), any());
+		verify(myValidationSupport2, times(0)).fetchValueSet(any(), any());
 
 		// Test again (should use cache)
 		IBaseResource result2 = chain.fetchResource(ValueSet.class, VALUE_SET_URL_0);
@@ -773,13 +867,13 @@ public class ValidationSupportChainTest extends BaseTest {
 		// Verify
 		if (theUseCache) {
 			assertSame(result, result2);
-			verify(myValidationSupport0, times(1)).fetchValueSet( any());
-			verify(myValidationSupport1, times(1)).fetchValueSet( any());
-			verify(myValidationSupport2, times(0)).fetchValueSet( any());
+			verify(myValidationSupport0, times(1)).fetchValueSet(any(), any());
+			verify(myValidationSupport1, times(1)).fetchValueSet(any(), any());
+			verify(myValidationSupport2, times(0)).fetchValueSet(any(), any());
 		} else {
-			verify(myValidationSupport0, times(2)).fetchValueSet( any());
-			verify(myValidationSupport1, times(2)).fetchValueSet( any());
-			verify(myValidationSupport2, times(0)).fetchValueSet(any());
+			verify(myValidationSupport0, times(2)).fetchValueSet(any(), any());
+			verify(myValidationSupport1, times(2)).fetchValueSet(any(), any());
+			verify(myValidationSupport2, times(0)).fetchValueSet(any(), any());
 		}
 	}
 
@@ -790,16 +884,16 @@ public class ValidationSupportChainTest extends BaseTest {
 		prepareMock(myValidationSupport0, myValidationSupport1, myValidationSupport2);
 		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(theUseCache), myValidationSupport0, myValidationSupport1, myValidationSupport2);
 
-		when(myValidationSupport0.fetchResource(any(), any())).thenReturn(null);
-		when(myValidationSupport1.fetchResource(any(), any())).thenAnswer(t -> new ListResource());
+		when(myValidationSupport0.fetchResource(any(), any(), any())).thenReturn(null);
+		when(myValidationSupport1.fetchResource(any(), any(), any())).thenAnswer(t -> new ListResource());
 
 		// Test
 		IBaseResource result = chain.fetchResource(ListResource.class, "http://foo");
 
 		// Verify
-		verify(myValidationSupport0, times(1)).fetchResource(any(), any());
-		verify(myValidationSupport1, times(1)).fetchResource(any(), any());
-		verify(myValidationSupport2, times(0)).fetchResource(any(), any());
+		verify(myValidationSupport0, times(1)).fetchResource(any(), any(), any());
+		verify(myValidationSupport1, times(1)).fetchResource(any(), any(), any());
+		verify(myValidationSupport2, times(0)).fetchResource(any(), any(), any());
 
 		// Test again (should use cache)
 		IBaseResource result2 = chain.fetchResource(ListResource.class, "http://foo");
@@ -807,13 +901,13 @@ public class ValidationSupportChainTest extends BaseTest {
 		// Verify
 		if (theUseCache) {
 			assertSame(result, result2);
-			verify(myValidationSupport0, times(1)).fetchResource(any(), any());
-			verify(myValidationSupport1, times(1)).fetchResource(any(), any());
-			verify(myValidationSupport2, times(0)).fetchResource(any(), any());
+			verify(myValidationSupport0, times(1)).fetchResource(any(), any(), any());
+			verify(myValidationSupport1, times(1)).fetchResource(any(), any(), any());
+			verify(myValidationSupport2, times(0)).fetchResource(any(), any(), any());
 		} else {
-			verify(myValidationSupport0, times(2)).fetchResource(any(), any());
-			verify(myValidationSupport1, times(2)).fetchResource(any(), any());
-			verify(myValidationSupport2, times(0)).fetchResource(any(), any());
+			verify(myValidationSupport0, times(2)).fetchResource(any(), any(), any());
+			verify(myValidationSupport1, times(2)).fetchResource(any(), any(), any());
+			verify(myValidationSupport2, times(0)).fetchResource(any(), any(), any());
 		}
 	}
 
@@ -900,7 +994,7 @@ public class ValidationSupportChainTest extends BaseTest {
 		libraryTestRunner.clearAllExportedData();
 
 		prepareMock(myValidationSupport0, myValidationSupport1, myValidationSupport2);
-		when(myValidationSupport0.fetchStructureDefinition("http://foo")).thenReturn(new StructureDefinition().setUrl("http://foo"));
+		when(myValidationSupport0.fetchStructureDefinition(eq("http://foo"), isNull())).thenReturn(new StructureDefinition().setUrl("http://foo"));
 		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(theUseCache), myValidationSupport0, myValidationSupport1, myValidationSupport2);
 		chain.setName("FOO_NAME");
 

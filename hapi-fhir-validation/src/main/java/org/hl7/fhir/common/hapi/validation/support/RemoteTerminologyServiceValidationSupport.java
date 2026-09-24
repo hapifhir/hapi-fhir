@@ -594,33 +594,44 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 
 	@Override
 	public IBaseResource fetchValueSet(String theValueSetUrl) {
+		UrlUtil.CanonicalUrlParts valueSet = UrlUtil.parseCanonicalUrl(theValueSetUrl);
+		String valueSetVersion = valueSet.versionId().orElse(null);
+		return fetchValueSet(valueSet.url(), valueSetVersion);
+	}
+
+	// Created by Claude Opus 5
+	@Override
+	public IBaseResource fetchValueSet(String theValueSetUrl, @Nullable String theVersion) {
 		// force the remote server to send the whole resource.
 		SummaryEnum summaryParam = SummaryEnum.FALSE;
-		return fetchValueSet(theValueSetUrl, summaryParam);
+		return searchForValueSet(theValueSetUrl, theVersion, summaryParam);
 	}
 
 	/**
-	 * Search for a ValueSet by canonical url via IGenericClient.
+	 * Search for a ValueSet by url and version via IGenericClient.
+	 * <p>
+	 * The version is sent as its own search parameter: a ValueSet resource's <code>url</code> element
+	 * never contains a pipe, so a packed <code>url|version</code> canonical matches nothing.
+	 * </p>
 	 *
-	 * @param theValueSetUrl the canonical url of the ValueSet
+	 * @param theValueSetUrl the value set url, without a version
+	 * @param theVersion the value set version, or null for whichever version the server considers current
 	 * @param theSummaryParam force a summary mode - null allows server default
 	 * @return the ValueSet or null if none match the url
 	 */
 	@Nullable
-	private IBaseResource fetchValueSet(String theValueSetUrl, SummaryEnum theSummaryParam) {
+	private IBaseResource searchForValueSet(
+			String theValueSetUrl, @Nullable String theVersion, @Nullable SummaryEnum theSummaryParam) {
 		IGenericClient client = provideClient();
 		Class<? extends IBaseBundle> bundleType =
 				myCtx.getResourceDefinition("Bundle").getImplementingClass(IBaseBundle.class);
 
-		IQuery<IBaseBundle> valueSetQuery = client.search().forResource("ValueSet");
+		IQuery<IBaseBundle> valueSetQuery = client.search()
+				.forResource("ValueSet")
+				.where(CodeSystem.URL.matches().value(theValueSetUrl));
 
-		int pipeIdx = theValueSetUrl.indexOf("|");
-		if (pipeIdx < 0) {
-			valueSetQuery.where(CodeSystem.URL.matches().value(theValueSetUrl));
-		} else {
-			valueSetQuery.where(CodeSystem.URL.matches().value(theValueSetUrl.substring(0, pipeIdx)));
-			valueSetQuery.where(
-					new StringClientParam("version").matches().value(theValueSetUrl.substring(pipeIdx + 1)));
+		if (isNotBlank(theVersion)) {
+			valueSetQuery.where(new StringClientParam("version").matches().value(theVersion));
 		}
 
 		if (theSummaryParam != null) {
@@ -656,17 +667,19 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 
 	@Override
 	public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
-		// a summary is ok if we are just checking the presence.
-		SummaryEnum summaryParam = null;
-
-		return fetchValueSet(theValueSetUrl, summaryParam) != null;
+		UrlUtil.CanonicalUrlParts valueSet = UrlUtil.parseCanonicalUrl(theValueSetUrl);
+		String valueSetVersion = valueSet.versionId().orElse(null);
+		return isValueSetSupported(theValidationSupportContext, valueSet.url(), valueSetVersion);
 	}
 
 	// Created by Claude Opus 5
 	@Override
 	public boolean isValueSetSupported(
 			ValidationSupportContext theValidationSupportContext, String theValueSetUrl, @Nullable String theVersion) {
-		return isValueSetSupported(theValidationSupportContext, UrlUtil.toCanonicalUrl(theValueSetUrl, theVersion));
+		// a summary is ok if we are just checking the presence.
+		SummaryEnum summaryParam = null;
+
+		return searchForValueSet(theValueSetUrl, theVersion, summaryParam) != null;
 	}
 
 	@Override
