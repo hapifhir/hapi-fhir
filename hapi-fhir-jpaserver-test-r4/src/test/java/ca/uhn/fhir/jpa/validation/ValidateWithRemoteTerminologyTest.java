@@ -201,7 +201,7 @@ public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Tes
 		// execute
 		List<String> errors = getValidationErrors(procedure);
 		// One error, not several. The duplication this assertion was disabled for came from the
-		// version-pinned CodeSystem reading as unknown, which added an issue of its own alongside the
+		// version-specific CodeSystem reading as unknown, which added an issue of its own alongside the
 		// real one; the version now reaches the terminology service as its own search parameter.
 		// Created by Claude Opus 5
 		assertThat(errors).hasSize(1);

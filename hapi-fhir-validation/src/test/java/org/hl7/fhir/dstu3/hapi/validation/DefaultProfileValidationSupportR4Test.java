@@ -84,7 +84,7 @@ public class DefaultProfileValidationSupportR4Test extends BaseValidationTestWit
 	/**
 	 * The spec ships exactly one definition of each StructureDefinition, so naming a version cannot select
 	 * between them and must not make the lookup fail. Unlike the CodeSystem and ValueSet path, this one had
-	 * no canonical handling at all, so every version-pinned StructureDefinition read as absent.
+	 * no canonical handling at all, so every version-specific StructureDefinition read as absent.
 	 */
 	// Created by Claude Opus 5
 	@Test
@@ -102,8 +102,8 @@ public class DefaultProfileValidationSupportR4Test extends BaseValidationTestWit
 
 	/**
 	 * This module ignores the version for hl7.org and terminology.hl7.org URLs - the spec ships one
-	 * definition of each - so an unknown version still resolves. testLoadCodeSystemWithVersion pins that
-	 * for the packed canonical; this pins that the parameterized form and the chain agree with it, rather
+	 * definition of each - so an unknown version still resolves. testLoadCodeSystemWithVersion names that
+	 * for the packed canonical; this names that the parameterized form and the chain agree with it, rather
 	 * than quietly becoming stricter.
 	 */
 	// Created by Claude Opus 5

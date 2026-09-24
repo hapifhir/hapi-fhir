@@ -512,7 +512,7 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 
 		/**
 		 * The system parameter is optional on the operation, and omitting it reaches the support with a null
-		 * system, where the in-memory expansion cannot match the code. Pinned rather than endorsed: the DAO
+		 * system, where the in-memory expansion cannot match the code. Recorded rather than endorsed: the DAO
 		 * passes null for an absent system whether it parses the canonical or not, so this is the behaviour
 		 * that was already there, and the assertion is here to catch the canonical parsing changing it.
 		 */

@@ -166,7 +166,7 @@ public interface IValidationProviders {
 		}
 
 		/**
-		 * A version-pinned canonical arrives as a url plus a version search parameter, as it does on a real
+		 * A version-specific canonical arrives as a url plus a version search parameter, as it does on a real
 		 * server: a conformance resource's url element never contains a pipe.
 		 */
 		// Created by Claude Opus 5

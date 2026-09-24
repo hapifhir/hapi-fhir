@@ -112,9 +112,9 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 	}
 
 	/**
-	 * A CodeSystem resource's {@code url} element never contains a pipe, so a version-pinned canonical
+	 * A CodeSystem resource's {@code url} element never contains a pipe, so a version-specific canonical
 	 * can only match when the version is sent as its own search parameter. Packing it into {@code url}
-	 * makes every version-pinned system read as unknown.
+	 * makes every version-specific system read as unknown.
 	 */
 	// Created by Claude Opus 5
 	@Test
@@ -155,7 +155,7 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 	}
 
 	/**
-	 * {@code isCodeSystemSupported} answers from the same search, so a version-pinned system read as
+	 * {@code isCodeSystemSupported} answers from the same search, so a version-specific system read as
 	 * unknown also reads as unsupported - which is what makes the whole ValueSet fail rather than
 	 * just one code.
 	 */

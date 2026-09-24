@@ -318,7 +318,7 @@ public class RemoteTerminologyServiceJpaR4Test extends BaseJpaR4Test {
 			"http://hl7.org/fhir/ValueSet/identifier-type",
 			"http://hl7.org/fhir/ValueSet/identifier-type"
 		);
-		// The version-pinned question is now asked as well as the unversioned one. It used to go out as
+		// The version-specific question is now asked as well as the unversioned one. It used to go out as
 		// url=...|2.9, which no CodeSystem.url can match, so it was answered wrongly for free; a search which
 		// can actually match costs a round trip, once per version per cache window.
 		// Created by Claude Opus 5
@@ -431,7 +431,7 @@ public class RemoteTerminologyServiceJpaR4Test extends BaseJpaR4Test {
 		}
 
 		/**
-		 * A version-pinned canonical arrives as a url plus a version, as it does on a real server: a
+		 * A version-specific canonical arrives as a url plus a version, as it does on a real server: a
 		 * CodeSystem resource's url element never contains a pipe. The search is recorded in canonical
 		 * form so a test can see which version was asked for.
 		 */
