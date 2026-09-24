@@ -10,8 +10,7 @@ The supported databases are regularly tested for ongoing compliance and performa
 | [PostgreSQL](https://www.postgresql.org/)                                   | **Supported** | `ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect`  |                                                                                                                                   |
 | [Oracle](https://www.oracle.com/ca-en/database/12c-database/)               | **Supported** | `ca.uhn.fhir.jpa.model.dialect.HapiFhirOracleDialect`    |                                                                                                                                   |
 | [Cockroach DB](https://www.cockroachlabs.com/)                              | Experimental  | `ca.uhn.fhir.jpa.model.dialect.HapiFhirCockroachDialect` | A CockroachDB dialect was contributed by a HAPI FHIR community member. This dialect is not regularly tested, use with caution.    |
-| MySQL                                                                       | Deprecated    | `ca.uhn.fhir.jpa.model.dialect.HapiFhirMySQLDialect`     | MySQL and MariaDB exhibit poor performance with HAPI FHIR and have therefore been deprecated. These databases should not be used. |
-| MariaDB                                                                     | Deprecated    | `ca.uhn.fhir.jpa.model.dialect.HapiFhirMariaDBDialect`   | MySQL and MariaDB exhibit poor performance with HAPI FHIR and have therefore been deprecated. These databases should not be used. |
+| MariaDB                                                                     | Deprecated    | `ca.uhn.fhir.jpa.model.dialect.HapiFhirMariaDBDialect`   | MariaDB exhibits poor performance with HAPI FHIR and has therefore been deprecated. This database should not be used.            |
 
 # Microsoft SQL Server
 
