@@ -7,10 +7,15 @@ import ca.uhn.fhir.jpa.nickname.INicknameSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.nickname.NicknameInterceptor;
+import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -23,11 +28,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 
@@ -53,6 +61,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 	@AfterEach
 	public void resetMdmSettings() {
 		myMdmSettings.setCandidateSearchLimit(MdmSettings.DEFAULT_CANDIDATE_SEARCH_LIMIT);
+		myMdmSettings.setCandidateSearchWarnLimit(MdmSettings.DEFAULT_WARN_LIMIT);
 		myInterceptorRegistry.unregisterInterceptor(myNicknameInterceptor);
 	}
 
@@ -214,7 +223,49 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 	}
 
 	@Test
-	public void testTooManyMatches() {
+	public void findCandidates_overWarnLimit_logs() {
+		// setup
+		int warnLimit = 3;
+		ListAppender<ILoggingEvent> appender = new ListAppender<>();
+		Logger logger = (Logger) Logs.getMdmTroubleshootingLog();
+
+		try {
+			for (int i = 0; i < warnLimit; i++) {
+				createActivePatient();
+			}
+			logger.addAppender(appender);
+			appender.start();
+			myMdmSettings.setCandidateSearchWarnLimit(warnLimit);
+
+			// test
+			Patient jane = buildJanePatient();
+			MdmTransactionContext context = new MdmTransactionContext();
+			Collection<IAnyResource> results = myMdmCandidateSearchSvc.findCandidates(
+				"Patient", jane, RequestPartitionId.allPartitions(), context);
+
+			// verify
+			assertFalse(context.isTooManyCandidatesMatched());
+			assertEquals(warnLimit, results.size());
+
+			List<ILoggingEvent> events = appender.list
+				.stream()
+				.filter(log -> log.getLevel() == Level.WARN)
+				.toList();
+			assertThat(events.stream()
+				.filter(e -> e.getMessage().contains("Candidate search yielded"))
+				.toList())
+				.hasSize(1);
+		} finally {
+			appender.stop();
+
+			// revert
+			myMdmSettings.setCandidateSearchWarnLimit(MdmSettings.DEFAULT_WARN_LIMIT);
+			logger.detachAppender(appender);
+		}
+	}
+
+	@Test
+	public void findCandidates_moreThanConfigureDLimit_haltsMatching() {
 		// setup
 		int searchLimit = myMdmSettings.getCandidateSearchLimit();
 		try {

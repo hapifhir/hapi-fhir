@@ -150,7 +150,6 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 		systemRequestDetails.setRequestPartitionId(theRequestPartitionId);
 		IBundleProvider search = resourceDao.search(map, systemRequestDetails);
 		List<MatchedTarget> retval = new ArrayList<>();
-		// TODO LS - too many candidates should be handled here?
 		// We can't use toList() here since it returns an unmodifiable list and we will be sorting it later
 		search.getAllResources().stream()
 				.map(IAnyResource.class::cast)

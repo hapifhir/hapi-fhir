@@ -39,6 +39,7 @@ import static ca.uhn.fhir.mdm.api.MdmModeEnum.MATCH_AND_LINK;
 @Component
 public class MdmSettings implements IMdmSettings {
 	public static final int DEFAULT_CANDIDATE_SEARCH_LIMIT = 10000;
+	public static final int DEFAULT_WARN_LIMIT = 50;
 	private final IMdmRuleValidator myMdmRuleValidator;
 
 	private boolean myEnabled;
@@ -73,7 +74,7 @@ public class MdmSettings implements IMdmSettings {
 	 */
 	private int myCandidateSearchHardLimit = DEFAULT_CANDIDATE_SEARCH_LIMIT;
 
-	private int myCandidateSearchWarnLimit = 5; // default
+	private int myCandidateSearchWarnLimit = DEFAULT_WARN_LIMIT;
 
 	@Autowired
 	public MdmSettings(IMdmRuleValidator theMdmRuleValidator) {
@@ -183,6 +184,10 @@ public class MdmSettings implements IMdmSettings {
 	@Override
 	public int getCandidateSearchWarnLimit() {
 		return myCandidateSearchWarnLimit;
+	}
+
+	public void setCandidateSearchWarnLimit(int theWarnLimit) {
+		myCandidateSearchWarnLimit = theWarnLimit;
 	}
 
 	public void setCandidateSearchLimit(int theCandidateSearchLimit) {

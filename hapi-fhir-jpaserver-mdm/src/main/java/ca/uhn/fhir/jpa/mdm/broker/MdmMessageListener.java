@@ -130,6 +130,9 @@ public class MdmMessageListener implements IMessageListener<ResourceModifiedMess
 				default:
 					ourLog.trace("Not processing modified message for {}", theMsg.getOperationType());
 			}
+		} catch (Exception e) {
+			log(mdmContext, "Failure during MDM processing: " + e.getMessage(), e);
+			mdmContext.addTransactionLogMessage(e.getMessage());
 		} finally {
 			// Interceptor call: MDM_AFTER_PERSISTED_RESOURCE_CHECKED
 			HookParams params = new HookParams()
