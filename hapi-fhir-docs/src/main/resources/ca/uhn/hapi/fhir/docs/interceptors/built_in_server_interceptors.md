@@ -41,7 +41,7 @@ The ResponseHighlighterInterceptor detects when a request is coming from a brows
 * [ResponseHighlighterInterceptor JavaDoc](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/ResponseHighlighterInterceptor.html)
 * [ResponseHighlighterInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/ResponseHighlighterInterceptor.java)
 
-To see an example of how the output of this interceptor looks, see our demo server using the following example query: [http://hapi.fhir.org/baseR4/Patient](http://hapi.fhir.org/baseR4/Patient). The HTML view you see in that page with colour and indenting is provided by ResponseHighlighterInterceptor. Without this interceptor the response will simply be raw JSON/XML (as it will also be with this interceptor if the request is not coming from a browser, or is invoked by JavaScript).
+To see an example of how the output of this interceptor looks, see our demo server using the following example query: [https://hapi.fhir.org/baseR4/Patient](https://hapi.fhir.org/baseR4/Patient). The HTML view you see in that page with colour and indenting is provided by ResponseHighlighterInterceptor. Without this interceptor the response will simply be raw JSON/XML (as it will also be with this interceptor if the request is not coming from a browser, or is invoked by JavaScript).
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/ServletExamples.java|responseHighlighterInterceptor}}

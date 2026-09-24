@@ -19,11 +19,13 @@
  */
 package ca.uhn.fhir.jpa.util;
 
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 
 import static ca.uhn.fhir.jpa.searchparam.SearchParameterMap.INTEGER_0;
+import static java.util.Objects.nonNull;
 
 public class SearchParameterMapCalculator {
 
@@ -35,7 +37,29 @@ public class SearchParameterMapCalculator {
 		return SearchTotalModeEnum.ACCURATE.equals(theSearchTotalModeEnum);
 	}
 
+	/**
+	 * Returns true if either:
+	 * <ul>
+	 *     <li>{@link SearchParameterMap#getSummaryMode()} is {@link SummaryEnum#COUNT}</ul>
+	 *     <li>{@link SearchParameterMap#getCount()} is {@literal 0}
+	 * </ul>
+	 */
 	public static boolean isWantOnlyCount(SearchParameterMap myParams) {
 		return SummaryEnum.COUNT.equals(myParams.getSummaryMode()) | INTEGER_0.equals(myParams.getCount());
+	}
+
+	/**
+	 * Returns true if either:
+	 * <ul>
+	 *     <li>{@link SearchParameterMap#getSearchTotalMode()} is {@link SearchTotalModeEnum#ACCURATE}</ul>
+	 *     <li>{@link SearchParameterMap#getSearchTotalMode()} is {@literal null} and {@link JpaStorageSettings#getDefaultTotalMode()} is {@link SearchTotalModeEnum#ACCURATE}</ul>
+	 * </ul>
+	 *
+	 * @since 8.14.0
+	 */
+	public static boolean isWantCount(SearchParameterMap theParams, JpaStorageSettings theStorageSettings) {
+		return nonNull(theParams.getSearchTotalMode())
+				? isWantCount(theParams)
+				: isWantCount(theStorageSettings.getDefaultTotalMode());
 	}
 }

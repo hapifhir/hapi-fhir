@@ -49,6 +49,7 @@ import java.util.function.Consumer;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * This is an experiment to see if we can make test data creation for storage unit tests a bit more readable.
@@ -201,15 +202,19 @@ public interface ITestDataBuilder {
 	}
 
 	default ICreationArgument withId(@Nonnull String theId) {
-		return t -> {
-			assertThat(theId).matches("[a-zA-Z0-9-]+");
-			((IBaseResource)t).setId(theId);
-		};
+		assertNotNull(theId);
+		return withIdOrNull(theId);
 	}
 
 	default ICreationArgument withIdOrNull(@Nullable String theId) {
 		return t -> {
-			((IBaseResource)t).setId(theId);
+			IBaseResource resource = (IBaseResource) t;
+			if (theId != null) {
+				assertThat(theId).matches("[a-zA-Z0-9-]+");
+				resource.setId(getFhirContext().getResourceType(resource) + "/" + theId);
+			} else {
+				resource.setId((String)null);
+			}
 		};
 	}
 

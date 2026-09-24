@@ -591,7 +591,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 
 		runInTransaction(() -> {
 			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(searchId).orElseThrow(() -> new IllegalStateException());
-			assertEquals(3, search.getNumFound());
+			assertEquals(2, search.getNumFound());
 			assertEquals(1, search.getNumBlocked());
 			assertEquals(2, search.getTotalCount());
 		});

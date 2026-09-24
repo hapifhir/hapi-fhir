@@ -193,7 +193,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 		Class<R> resourceType = ResourceParserUtil.determineTypeToParse(myFhirContext, theResourceType, tagList);
 
 		// 4. parse the text to FHIR
-		R retVal = parseResource(theEntity, resourceEncoding, decodedResourceText, resourceType);
+		R retVal = parseResource(theRequestDetails, theEntity, resourceEncoding, decodedResourceText, resourceType);
 
 		// 5. fill MetaData
 		retVal = populateResourceMetadata(theEntity, theForHistoryOperation, tagList, version, retVal);
@@ -226,6 +226,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 
 	@SuppressWarnings("unchecked")
 	private <R extends IBaseResource> R parseResource(
+			RequestDetails theRequestDetails,
 			IBaseResourceEntity<?> theEntity,
 			ResourceEncodingEnum theResourceEncoding,
 			String theDecodedResourceText,
@@ -236,7 +237,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			EsrResourceDetails resourceDetails = ResourceParserUtil.getEsrResourceDetails(theDecodedResourceText);
 			IExternallyStoredResourceService provider =
 					myExternallyStoredResourceServiceRegistry.getProvider(resourceDetails.providerId());
-			retVal = (R) provider.fetchResource(resourceDetails.address());
+			retVal = (R) provider.fetchResource(theRequestDetails, resourceDetails.address());
 
 		} else if (theResourceEncoding != ResourceEncodingEnum.DEL) {
 
