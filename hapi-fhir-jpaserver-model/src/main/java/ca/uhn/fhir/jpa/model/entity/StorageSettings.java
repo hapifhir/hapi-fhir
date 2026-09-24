@@ -59,6 +59,11 @@ public class StorageSettings {
 	public static final int DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE = 100; // 1 for single thread
 
 	/**
+	 * Value for {@link #setBindIdListAsJsonAboveSize(int)} which always binds one parameter per ID.
+	 */
+	public static final int BIND_ID_LIST_AS_JSON_DISABLED = -1;
+
+	/**
 	 * Default value for {@link #setBindIdListAsJsonAboveSize(int)}.
 	 */
 	public static final int DEFAULT_BIND_ID_LIST_AS_JSON_ABOVE_SIZE = 800;
@@ -1364,16 +1369,17 @@ public class StorageSettings {
 	 * </p>
 	 * @param theBindIdListAsJsonAboveSize The number of IDs in a search above which the SQL query
 	 *                                     will use a json array rather than a parameter for each ID.
-	 *                                     Must not be negative. A value of 0 always uses a json array.
-	 *                                     To keep one parameter per ID, use a value higher than any expected list.
+	 *                                     A value of 0 always uses a json array; {@link #BIND_ID_LIST_AS_JSON_DISABLED}
+	 *                                     (-1) always uses one parameter per ID.
 	 *                                     Defaults to 800.
 	 *
 	 * @since 8.14.0
 	 */
 	public void setBindIdListAsJsonAboveSize(int theBindIdListAsJsonAboveSize) {
 		Validate.isTrue(
-				theBindIdListAsJsonAboveSize >= 0,
-				"Bind ID list as JSON above size must not be negative but was: %d",
+				theBindIdListAsJsonAboveSize >= BIND_ID_LIST_AS_JSON_DISABLED,
+				"Bind ID list as JSON above size must not be less than %d but was: %d",
+				BIND_ID_LIST_AS_JSON_DISABLED,
 				theBindIdListAsJsonAboveSize);
 		myBindIdListAsJsonAboveSize = theBindIdListAsJsonAboveSize;
 	}

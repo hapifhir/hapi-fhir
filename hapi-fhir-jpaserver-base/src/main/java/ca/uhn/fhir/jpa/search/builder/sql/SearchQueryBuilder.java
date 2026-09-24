@@ -916,7 +916,8 @@ public class SearchQueryBuilder {
 	 */
 	@Nullable
 	private String createJsonIdListSubselectQueryOrNull(List<Long> theIds) {
-		if (theIds.size() <= myStorageSettings.getBindIdListAsJsonAboveSize()) {
+		int threshold = myStorageSettings.getBindIdListAsJsonAboveSize();
+		if (threshold == StorageSettings.BIND_ID_LIST_AS_JSON_DISABLED || theIds.size() <= threshold) {
 			return null;
 		}
 
