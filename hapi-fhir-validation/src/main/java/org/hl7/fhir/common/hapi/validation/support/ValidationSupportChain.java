@@ -395,10 +395,8 @@ public class ValidationSupportChain implements IValidationSupport {
 	public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
 		// On this signature a ValueSet can only name a version by carrying it packed as "url|version"
 		UrlUtil.CanonicalUrlParts valueSet = UrlUtil.parseCanonicalUrl(theValueSetUrl);
-		return isValueSetSupported(
-				theValidationSupportContext,
-				valueSet.url(),
-				valueSet.versionId().orElse(null));
+		String valueSetVersion = valueSet.versionId().orElse(null);
+		return isValueSetSupported(theValidationSupportContext, valueSet.url(), valueSetVersion);
 	}
 
 	// Created by Claude Opus 5
@@ -555,12 +553,9 @@ public class ValidationSupportChain implements IValidationSupport {
 		if (retVal == null) {
 			retVal = CacheValue.empty();
 			UrlUtil.CanonicalUrlParts valueSetToExpand = UrlUtil.parseCanonicalUrl(theValueSetUrlToExpand);
+			String valueSetVersion = valueSetToExpand.versionId().orElse(null);
 			for (IValidationSupport next : myChain) {
-				if (isValueSetSupported(
-						theValidationSupportContext,
-						next,
-						valueSetToExpand.url(),
-						valueSetToExpand.versionId().orElse(null))) {
+				if (isValueSetSupported(theValidationSupportContext, next, valueSetToExpand.url(), valueSetVersion)) {
 					ValueSetExpansionOutcome expanded =
 							next.expandValueSet(theValidationSupportContext, expansionOptions, theValueSetUrlToExpand);
 					if (expanded != null) {
@@ -821,10 +816,8 @@ public class ValidationSupportChain implements IValidationSupport {
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
 		// On this signature a code system can only name a version by carrying it packed as "system|version"
 		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(theSystem);
-		return isCodeSystemSupported(
-				theValidationSupportContext,
-				codeSystem.url(),
-				codeSystem.versionId().orElse(null));
+		String codeSystemVersion = codeSystem.versionId().orElse(null);
+		return isCodeSystemSupported(theValidationSupportContext, codeSystem.url(), codeSystemVersion);
 	}
 
 	// Created by Claude Opus 5
@@ -891,35 +884,24 @@ public class ValidationSupportChain implements IValidationSupport {
 			@Nonnull ConceptValidationOptions theOptions,
 			@Nonnull ValidateCodeRequest theRequest) {
 		String codeSystem = theRequest.getCodeSystem();
+		String codeSystemVersion = theRequest.getCodeSystemVersion();
 		String code = theRequest.getCode();
 		String valueSetUrl = theRequest.getValueSetUrl();
 
 		ValidateCodeKey key = new ValidateCodeKey(
-				theOptions,
-				codeSystem,
-				theRequest.getCodeSystemVersion(),
-				code,
-				theRequest.getDisplay(),
-				valueSetUrl,
-				null);
+				theOptions, codeSystem, codeSystemVersion, code, theRequest.getDisplay(), valueSetUrl, null);
 		CacheValue<CodeValidationResult> retVal = getFromCache(key);
 		if (retVal == null) {
 			retVal = CacheValue.empty();
 
 			UrlUtil.CanonicalUrlParts valueSet = UrlUtil.parseCanonicalUrl(valueSetUrl);
+			String valueSetVersion = valueSet.versionId().orElse(null);
 			for (IValidationSupport next : myChain) {
-				if ((isBlank(valueSetUrl)
-								&& isCodeSystemSupported(
-										theValidationSupportContext,
-										next,
-										codeSystem,
-										theRequest.getCodeSystemVersion()))
-						|| (isNotBlank(valueSetUrl)
-								&& isValueSetSupported(
-										theValidationSupportContext,
-										next,
-										valueSet.url(),
-										valueSet.versionId().orElse(null)))) {
+				// A named ValueSet decides which module answers; without one, the code system does
+				boolean moduleCanAnswer = isBlank(valueSetUrl)
+						? isCodeSystemSupported(theValidationSupportContext, next, codeSystem, codeSystemVersion)
+						: isValueSetSupported(theValidationSupportContext, next, valueSet.url(), valueSetVersion);
+				if (moduleCanAnswer) {
 					CodeValidationResult outcome =
 							next.validateCode(theValidationSupportContext, theOptions, theRequest);
 					if (outcome != null) {
@@ -938,7 +920,7 @@ public class ValidationSupportChain implements IValidationSupport {
 
 			if (retVal.getValue() == null) {
 				CodeValidationResult unknownCodeSystemResult =
-						generateResultForUnknownCodeSystem(codeSystem, theRequest.getCodeSystemVersion(), code);
+						generateResultForUnknownCodeSystem(codeSystem, codeSystemVersion, code);
 				if (unknownCodeSystemResult != null) {
 					retVal = new CacheValue<>(unknownCodeSystemResult);
 				}
@@ -1065,11 +1047,9 @@ public class ValidationSupportChain implements IValidationSupport {
 				final String displayLanguage = theLookupCodeRequest.getDisplayLanguage();
 				// LookupCodeRequest has no version field, so a version can only arrive packed into the system
 				UrlUtil.CanonicalUrlParts codeSystemToLookUp = UrlUtil.parseCanonicalUrl(system);
+				String codeSystemVersion = codeSystemToLookUp.versionId().orElse(null);
 				if (isCodeSystemSupported(
-						theValidationSupportContext,
-						next,
-						codeSystemToLookUp.url(),
-						codeSystemToLookUp.versionId().orElse(null))) {
+						theValidationSupportContext, next, codeSystemToLookUp.url(), codeSystemVersion)) {
 					LookupCodeResult lookupCodeResult =
 							next.lookupCode(theValidationSupportContext, theLookupCodeRequest);
 					if (lookupCodeResult == null) {

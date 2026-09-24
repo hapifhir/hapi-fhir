@@ -640,10 +640,8 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
 		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(theSystem);
-		return isCodeSystemSupported(
-				theValidationSupportContext,
-				codeSystem.url(),
-				codeSystem.versionId().orElse(null));
+		String codeSystemVersion = codeSystem.versionId().orElse(null);
+		return isCodeSystemSupported(theValidationSupportContext, codeSystem.url(), codeSystemVersion);
 	}
 
 	// Created by Claude Opus 5
