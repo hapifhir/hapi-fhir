@@ -21,17 +21,22 @@ package ca.uhn.fhir.test.utilities.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.util.ClasspathUtil;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public interface IValidationProviders {
 	String CODE_SYSTEM = "http://code.system/url";
@@ -135,19 +140,41 @@ public interface IValidationProviders {
 		}
 
 		protected T getTerminologyResource(UriParam theUrlParam) {
+			return getTerminologyResource(theUrlParam, null);
+		}
+
+		/**
+		 * The resource registered for the given url, preferring one registered for that version. Versioned
+		 * resources are registered under the canonical key, so a version is looked up there first; a fixture
+		 * which registered the resource by url alone still answers, as it did while the version could only
+		 * reach this provider packed into the url.
+		 */
+		// Created by Claude Opus 5
+		protected T getTerminologyResource(UriParam theUrlParam, @Nullable StringParam theVersionParam) {
 			if (theUrlParam.isEmpty()) {
 				throw new IllegalStateException("CodeSystem url should not be null.");
 			}
 			String urlValue = theUrlParam.getValue();
+			String version = theVersionParam != null ? theVersionParam.getValue() : null;
+			if (isNotBlank(version) && myTerminologyResourceMap.containsKey(urlValue + "|" + version)) {
+				return myTerminologyResourceMap.get(urlValue + "|" + version);
+			}
 			if (!myTerminologyResourceMap.containsKey(urlValue) && myShouldThrowExceptionForResourceNotFound) {
 				throw new IllegalStateException("Test setup incomplete. CodeSystem not found " + urlValue);
 			}
 			return myTerminologyResourceMap.get(urlValue);
 		}
 
+		/**
+		 * A version-pinned canonical arrives as a url plus a version search parameter, as it does on a real
+		 * server: a conformance resource's url element never contains a pipe.
+		 */
+		// Created by Claude Opus 5
 		@Search
-		public List<T> find(@RequiredParam(name = "url") UriParam theUrlParam) {
-			T resource = getTerminologyResource(theUrlParam);
+		public List<T> find(
+				@RequiredParam(name = "url") UriParam theUrlParam,
+				@OptionalParam(name = "version") StringParam theVersionParam) {
+			T resource = getTerminologyResource(theUrlParam, theVersionParam);
 			return resource != null ? List.of(resource) : List.of();
 		}
 	}

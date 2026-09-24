@@ -1,0 +1,13 @@
+---
+type: fix
+issue: 8402
+title: "`fetchCodeSystem`, `isCodeSystemSupported` and `isValueSetSupported` on `IValidationSupport` can now
+  take the version as its own parameter instead of packed into the URL as `url|version`. Two defects are fixed
+  by this. A `RemoteTerminologyServiceValidationSupport` sent the whole packed canonical as one `url` search
+  value, so a version-pinned code system was reported unknown by `$expand` and `$validate-code` even when the
+  terminology service held it - a `CodeSystem` resource's `url` element never contains a pipe. And a
+  `ValidationSupportChain` chose which module answered by asking whether it supported the code system without
+  naming a version, so the first module holding the system answered every request whatever version was asked
+  for, which made chain order decide validation outcomes. Existing implementations keep working: the
+  version-aware methods pack the version back into the URL by default. The six-argument `validateCode` is
+  deprecated in favour of the `ValidateCodeRequest` form added in #8391."

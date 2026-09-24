@@ -11,8 +11,10 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import com.google.common.collect.ListMultimap;
@@ -306,14 +308,25 @@ public class RemoteTerminologyServiceJpaR4Test extends BaseJpaR4Test {
 			"None of the codings provided are in the value set 'IdentifierType'");
 
 		// Verify 1
-		Assertions.assertEquals(2, myCaptureQueriesListener.countGetConnections());
+		// Three connections, not two: the chain asks each module whether it supports the code system at the
+		// version the validator named as well as at no version, and those are separate cache entries, while
+		// TermReadSvcImpl answers both by looking up the bare URI - so the same TRM_CODESYSTEM query runs twice.
+		// Making that module version-aware is #8402's remaining half.
+		// Created by Claude Opus 5
+		Assertions.assertEquals(3, myCaptureQueriesListener.countGetConnections());
 		assertThat(ourValueSetProvider.mySearchParams).asList().containsExactlyInAnyOrder(
 			"http://hl7.org/fhir/ValueSet/identifier-type",
 			"http://hl7.org/fhir/ValueSet/identifier-type"
 		);
+		// The version-pinned question is now asked as well as the unversioned one. It used to go out as
+		// url=...|2.9, which no CodeSystem.url can match, so it was answered wrongly for free; a search which
+		// can actually match costs a round trip, once per version per cache window.
+		// Created by Claude Opus 5
 		assertThat(ourCodeSystemProvider.mySearchUrls).asList().containsExactlyInAnyOrder(
 			"http://terminology.hl7.org/CodeSystem/v2-0203",
-			"http://terminology.hl7.org/CodeSystem/v2-0203"
+			"http://terminology.hl7.org/CodeSystem/v2-0203",
+			"http://terminology.hl7.org/CodeSystem/v2-0203|2.9",
+			"http://terminology.hl7.org/CodeSystem/v2-0203|2.9"
 		);
 		assertEquals(0, ourValueSetProvider.myValidatedCodes.size());
 		assertEquals(0, ourCodeSystemProvider.myValidatedCodes.size());
@@ -417,11 +430,27 @@ public class RemoteTerminologyServiceJpaR4Test extends BaseJpaR4Test {
 			return retVal;
 		}
 
+		/**
+		 * A version-pinned canonical arrives as a url plus a version, as it does on a real server: a
+		 * CodeSystem resource's url element never contains a pipe. The search is recorded in canonical
+		 * form so a test can see which version was asked for.
+		 */
+		// Created by Claude Opus 5
 		@Search
-		public List<CodeSystem> find(@RequiredParam(name = "url") UriParam theUrlParam) {
+		public List<CodeSystem> find(
+			@RequiredParam(name = "url") UriParam theUrlParam,
+			@OptionalParam(name = "version") StringParam theVersionParam) {
 			String url = theUrlParam != null ? theUrlParam.getValue() : null;
-			mySearchUrls.add(url);
-			return myUrlToCodeSystems.get(defaultString(url));
+			String version = theVersionParam != null ? theVersionParam.getValue() : null;
+			mySearchUrls.add(UrlUtil.toCanonicalUrl(url, version));
+
+			List<CodeSystem> matches = myUrlToCodeSystems.get(defaultString(url));
+			if (isNotBlank(version)) {
+				return matches.stream()
+					.filter(codeSystem -> version.equals(codeSystem.getVersion()))
+					.toList();
+			}
+			return matches;
 		}
 
 		@Override

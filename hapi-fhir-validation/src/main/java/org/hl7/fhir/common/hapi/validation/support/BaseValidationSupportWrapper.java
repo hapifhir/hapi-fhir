@@ -127,6 +127,13 @@ public abstract class BaseValidationSupportWrapper extends BaseValidationSupport
 		return myWrap.expandValueSet(theValidationSupportContext, theExpansionOptions, theValueSetToExpand);
 	}
 
+	/*
+	 * The version-aware fetchCodeSystem, isCodeSystemSupported and isValueSetSupported are deliberately left
+	 * to their interface defaults, which pack the version into the URL and route through the methods below.
+	 * Forwarding them straight to the wrapped support would skip whatever a subclass does in those methods -
+	 * HapiToHl7OrgDstu2ValidatingSupportWrapper converts the resource it returns, for one.
+	 */
+	// Created by Claude Opus 5
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
 		return myWrap.fetchCodeSystem(theSystem);

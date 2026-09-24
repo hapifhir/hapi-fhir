@@ -20,6 +20,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.ParametersUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
@@ -183,24 +184,42 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
+		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(theSystem);
+		return fetchCodeSystem(codeSystem.url(), codeSystem.versionId().orElse(null));
+	}
+
+	// Created by Claude Opus 5
+	@Override
+	public IBaseResource fetchCodeSystem(String theSystem, @Nullable String theVersion) {
 		// callers of this want the whole resource.
-		return fetchCodeSystem(theSystem, SummaryEnum.FALSE);
+		return searchForCodeSystem(theSystem, theVersion, SummaryEnum.FALSE);
 	}
 
 	/**
-	 * Fetch the code system, possibly a summary.
-	 * @param theSystem the canonical url
+	 * Search for a CodeSystem by url and version via IGenericClient.
+	 * <p>
+	 * The version is sent as its own search parameter: a CodeSystem resource's <code>url</code> element
+	 * never contains a pipe, so a packed <code>url|version</code> canonical matches nothing.
+	 * </p>
+	 *
+	 * @param theSystem the code system url, without a version
+	 * @param theVersion the code system version, or null for whichever version the server considers current
 	 * @param theSummaryParam to force a summary mode - or null to allow server default.
-	 * @return the CodeSystem
+	 * @return the CodeSystem, or null if none match
 	 */
 	@Nullable
-	private IBaseResource fetchCodeSystem(String theSystem, @Nullable SummaryEnum theSummaryParam) {
+	private IBaseResource searchForCodeSystem(
+			String theSystem, @Nullable String theVersion, @Nullable SummaryEnum theSummaryParam) {
 		IGenericClient client = provideClient();
 		Class<? extends IBaseBundle> bundleType =
 				myCtx.getResourceDefinition("Bundle").getImplementingClass(IBaseBundle.class);
 		IQuery<IBaseBundle> codeSystemQuery = client.search()
 				.forResource("CodeSystem")
 				.where(CodeSystem.URL.matches().value(theSystem));
+
+		if (isNotBlank(theVersion)) {
+			codeSystemQuery.where(new StringClientParam("version").matches().value(theVersion));
+		}
 
 		if (theSummaryParam != null) {
 			codeSystemQuery.summaryMode(theSummaryParam);
@@ -620,10 +639,21 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
+		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(theSystem);
+		return isCodeSystemSupported(
+				theValidationSupportContext,
+				codeSystem.url(),
+				codeSystem.versionId().orElse(null));
+	}
+
+	// Created by Claude Opus 5
+	@Override
+	public boolean isCodeSystemSupported(
+			ValidationSupportContext theValidationSupportContext, String theSystem, @Nullable String theVersion) {
 		// a summary is ok if we are just checking the presence.
 		SummaryEnum summaryParam = null;
 
-		return fetchCodeSystem(theSystem, summaryParam) != null;
+		return searchForCodeSystem(theSystem, theVersion, summaryParam) != null;
 	}
 
 	@Override
@@ -632,6 +662,13 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 		SummaryEnum summaryParam = null;
 
 		return fetchValueSet(theValueSetUrl, summaryParam) != null;
+	}
+
+	// Created by Claude Opus 5
+	@Override
+	public boolean isValueSetSupported(
+			ValidationSupportContext theValidationSupportContext, String theValueSetUrl, @Nullable String theVersion) {
+		return isValueSetSupported(theValidationSupportContext, UrlUtil.toCanonicalUrl(theValueSetUrl, theVersion));
 	}
 
 	@Override

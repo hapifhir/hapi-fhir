@@ -23,9 +23,10 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
@@ -140,11 +141,18 @@ public interface IValidationProvidersR4 {
 			return getTerminologyResponse("$validate-code", url, systemVersion, code);
 		}
 
+		/**
+		 * Overrides the inherited search rather than adding a second one, so that a url-only search has just
+		 * one method to match. A fixture registers its ValueSet unversioned, so the version the caller asked
+		 * for is stamped onto what is returned.
+		 */
+		// Created by Claude Opus 5
+		@Override
 		@Search
-		public List<ValueSet> find(@OptionalParam(name = "url") UriParam theUrlParam,
-								   @OptionalParam(name = "version") TokenParam theVersionParam) {
-			ValueSet valueSet = getTerminologyResource(theUrlParam);
-			String version = theVersionParam.getValue();
+		public List<ValueSet> find(@RequiredParam(name = "url") UriParam theUrlParam,
+								   @OptionalParam(name = "version") StringParam theVersionParam) {
+			ValueSet valueSet = getTerminologyResource(theUrlParam, theVersionParam);
+			String version = theVersionParam != null ? theVersionParam.getValue() : null;
 			if (valueSet != null && StringUtils.isNotEmpty(version)) {
 				valueSet.setVersion(version);
 			}

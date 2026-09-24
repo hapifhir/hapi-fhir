@@ -171,7 +171,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 			Questionnaire q = new Questionnaire();
 			when(myValSupport.fetchResource(eq(Questionnaire.class),
 				eq(QUESTIONNAIRE_URL))).thenReturn(q);
-			when(myValSupport.fetchCodeSystem(eq("http://codesystems.com/system"))).thenReturn(codeSystem);
+			when(myValSupport.fetchCodeSystem(eq("http://codesystems.com/system"), any())).thenReturn(codeSystem);
 			when(myValSupport.fetchValueSet(eq("http://somevalueset"))).thenReturn(options);
 			when(myValSupport.validateCodeInValueSet(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), nullable(ValueSet.class)))
 				.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
@@ -223,8 +223,8 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.CHOICE).setOptions(new Reference("http://somevalueset"));
 		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(QUESTIONNAIRE_URL))).thenReturn(q);
 
-		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system"))).thenReturn(true);
-		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system2"))).thenReturn(true);
+		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system"), any())).thenReturn(true);
+		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system2"), any())).thenReturn(true);
 		when(myValSupport.validateCodeInValueSet(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), nullable(ValueSet.class)))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
 		when(myValSupport.validateCodeInValueSet(any(), any(), eq("http://codesystems.com/system"), eq("code1"), any(), nullable(ValueSet.class)))
@@ -234,13 +234,13 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
 		codeSystem.setUrl("http://codesystems.com/system");
 		codeSystem.addConcept().setCode("code0");
-		when(myValSupport.fetchCodeSystem(eq("http://codesystems.com/system"))).thenReturn(codeSystem);
+		when(myValSupport.fetchCodeSystem(eq("http://codesystems.com/system"), any())).thenReturn(codeSystem);
 
 		CodeSystem codeSystem2 = new CodeSystem();
 		codeSystem2.setContent(CodeSystemContentMode.COMPLETE);
 		codeSystem2.setUrl("http://codesystems.com/system2");
 		codeSystem2.addConcept().setCode("code2");
-		when(myValSupport.fetchCodeSystem(eq("http://codesystems.com/system2"))).thenReturn(codeSystem2);
+		when(myValSupport.fetchCodeSystem(eq("http://codesystems.com/system2"), any())).thenReturn(codeSystem2);
 
 		ValueSet options = new ValueSet();
 		options.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
@@ -801,7 +801,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
 		codeSystem.setUrl(codeSystemUrl);
 		codeSystem.addConcept().setCode(codeValue);
-		when(myValSupport.fetchCodeSystem(eq(codeSystemUrl))).thenReturn(codeSystem);
+		when(myValSupport.fetchCodeSystem(eq(codeSystemUrl), any())).thenReturn(codeSystem);
 
 		ValueSet options = new ValueSet();
 		options.getCompose().addInclude().setSystem(codeSystemUrl).addConcept().setCode(codeValue);
@@ -856,7 +856,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
 		codeSystem.setUrl(codeSystemUrl);
 		codeSystem.addConcept().setCode(codeValue);
-		when(myValSupport.fetchCodeSystem(eq(codeSystemUrl)))
+		when(myValSupport.fetchCodeSystem(eq(codeSystemUrl), any()))
 			.thenReturn(codeSystem);
 
 		ValueSet options = new ValueSet();
@@ -987,7 +987,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		when(myValSupport.fetchValueSet(eq(ID_VS_SCHOOLTYPE.getValue()))).thenReturn(iccSchoolTypeVs);
 		when(myValSupport.validateCodeInValueSet(any(), any(), eq(SYSTEMURI_ICC_SCHOOLTYPE), eq(CODE_ICC_SCHOOLTYPE_PT), any(), nullable(ValueSet.class)))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setCode(CODE_ICC_SCHOOLTYPE_PT));
-		when(myValSupport.fetchCodeSystem(eq(SYSTEMURI_ICC_SCHOOLTYPE))).thenReturn(codeSystem);
+		when(myValSupport.fetchCodeSystem(eq(SYSTEMURI_ICC_SCHOOLTYPE), any())).thenReturn(codeSystem);
 
 		ValidationResult errors = myVal.validateWithResult(questionnaireResponse);
 
@@ -1033,8 +1033,8 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		item.setLinkId("link0").setRequired(true).setType(QuestionnaireItemType.OPENCHOICE).setOptions(new Reference("http://somevalueset"));
 		when(myValSupport.fetchResource(eq(Questionnaire.class), eq(questionnaireRef))).thenReturn(q);
 
-		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system"))).thenReturn(true);
-		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system2"))).thenReturn(true);
+		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system"), any())).thenReturn(true);
+		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system2"), any())).thenReturn(true);
 		when(myValSupport.validateCode(any(), any(), requestWith("http://codesystems.com/system", "code0")))
 			.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
 		when(myValSupport.validateCode(any(), any(), requestWith("http://codesystems.com/system", "code1")))
@@ -1044,13 +1044,13 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
 		codeSystem.setUrl("http://codesystems.com/system");
 		codeSystem.addConcept().setCode("code0");
-		when(myValSupport.fetchCodeSystem(eq("http://codesystems.com/system"))).thenReturn(codeSystem);
+		when(myValSupport.fetchCodeSystem(eq("http://codesystems.com/system"), any())).thenReturn(codeSystem);
 
 		CodeSystem codeSystem2 = new CodeSystem();
 		codeSystem2.setContent(CodeSystemContentMode.COMPLETE);
 		codeSystem2.setUrl("http://codesystems.com/system2");
 		codeSystem2.addConcept().setCode("code2");
-		when(myValSupport.fetchCodeSystem(eq("http://codesystems.com/system2"))).thenReturn(codeSystem2);
+		when(myValSupport.fetchCodeSystem(eq("http://codesystems.com/system2"), any())).thenReturn(codeSystem2);
 
 		ValueSet options = new ValueSet();
 		options.setUrl("http://somevalueset");
@@ -1058,7 +1058,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		options.getCompose().addInclude().setSystem("http://codesystems.com/system2").addConcept().setCode("code2");
 		when(myValSupport.fetchValueSet(eq("http://somevalueset"))).thenReturn(options);
 
-		when(myValSupport.isValueSetSupported(any(), eq("http://somevalueset"))).thenReturn(true);
+		when(myValSupport.isValueSetSupported(any(), eq("http://somevalueset"), any())).thenReturn(true);
 
 		when(myValSupport.validateCodeInValueSet(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), any(IBaseResource.class))).thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
 

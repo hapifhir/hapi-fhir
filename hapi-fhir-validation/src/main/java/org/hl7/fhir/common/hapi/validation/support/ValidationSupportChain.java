@@ -393,25 +393,45 @@ public class ValidationSupportChain implements IValidationSupport {
 
 	@Override
 	public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
+		// On this signature a ValueSet can only name a version by carrying it packed as "url|version"
+		UrlUtil.CanonicalUrlParts valueSet = UrlUtil.parseCanonicalUrl(theValueSetUrl);
+		return isValueSetSupported(
+				theValidationSupportContext,
+				valueSet.url(),
+				valueSet.versionId().orElse(null));
+	}
+
+	// Created by Claude Opus 5
+	@Override
+	public boolean isValueSetSupported(
+			ValidationSupportContext theValidationSupportContext, String theValueSetUrl, @Nullable String theVersion) {
 		for (IValidationSupport next : myChain) {
-			boolean retVal = isValueSetSupported(theValidationSupportContext, next, theValueSetUrl);
+			boolean retVal = isValueSetSupported(theValidationSupportContext, next, theValueSetUrl, theVersion);
 			if (retVal) {
-				ourLog.debug("ValueSet {} found in {}", theValueSetUrl, next.getName());
+				ourLog.debug(
+						"ValueSet {} found in {}", UrlUtil.toCanonicalUrl(theValueSetUrl, theVersion), next.getName());
 				return true;
 			}
 		}
 		return false;
 	}
 
+	/**
+	 * Whether one module in the chain supports the given ValueSet version. A module holding the ValueSet
+	 * at a different version does not support it, for the same reason as
+	 * {@link #isCodeSystemSupported(ValidationSupportContext, IValidationSupport, String, String)}.
+	 */
 	private boolean isValueSetSupported(
 			ValidationSupportContext theValidationSupportContext,
 			IValidationSupport theValidationSupport,
-			String theValueSetUrl) {
-		IsValueSetSupportedKey key = new IsValueSetSupportedKey(theValidationSupport, theValueSetUrl);
+			String theValueSetUrl,
+			@Nullable String theValueSetVersion) {
+		IsValueSetSupportedKey key = new IsValueSetSupportedKey(
+				theValidationSupport, UrlUtil.toCanonicalUrl(theValueSetUrl, theValueSetVersion));
 		CacheValue<Boolean> value = getFromCache(key);
 		if (value == null) {
-			value = new CacheValue<>(
-					theValidationSupport.isValueSetSupported(theValidationSupportContext, theValueSetUrl));
+			value = new CacheValue<>(theValidationSupport.isValueSetSupported(
+					theValidationSupportContext, theValueSetUrl, theValueSetVersion));
 			putInCache(key, value);
 		}
 		return value.getValue();
@@ -534,8 +554,13 @@ public class ValidationSupportChain implements IValidationSupport {
 
 		if (retVal == null) {
 			retVal = CacheValue.empty();
+			UrlUtil.CanonicalUrlParts valueSetToExpand = UrlUtil.parseCanonicalUrl(theValueSetUrlToExpand);
 			for (IValidationSupport next : myChain) {
-				if (isValueSetSupported(theValidationSupportContext, next, theValueSetUrlToExpand)) {
+				if (isValueSetSupported(
+						theValidationSupportContext,
+						next,
+						valueSetToExpand.url(),
+						valueSetToExpand.versionId().orElse(null))) {
 					ValueSetExpansionOutcome expanded =
 							next.expandValueSet(theValidationSupportContext, expansionOptions, theValueSetUrlToExpand);
 					if (expanded != null) {
@@ -693,9 +718,20 @@ public class ValidationSupportChain implements IValidationSupport {
 
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
-		Function<IValidationSupport, IBaseResource> invoker = v -> v.fetchCodeSystem(theSystem);
-		ResourceByUrlKey<IBaseResource> key = new ResourceByUrlKey<>(ResourceByUrlKey.TypeEnum.CODESYSTEM, theSystem);
-		return fetchValue(key, invoker, theSystem);
+		// On this signature a code system can only name a version by carrying it packed as "system|version"
+		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(theSystem);
+		return fetchCodeSystem(codeSystem.url(), codeSystem.versionId().orElse(null));
+	}
+
+	// Created by Claude Opus 5
+	@Override
+	public IBaseResource fetchCodeSystem(String theSystem, @Nullable String theVersion) {
+		Function<IValidationSupport, IBaseResource> invoker = v -> v.fetchCodeSystem(theSystem, theVersion);
+		// Two versions of one code system are different resources, so the version belongs in the cache key
+		String canonicalUrl = UrlUtil.toCanonicalUrl(theSystem, theVersion);
+		ResourceByUrlKey<IBaseResource> key =
+				new ResourceByUrlKey<>(ResourceByUrlKey.TypeEnum.CODESYSTEM, canonicalUrl);
+		return fetchValue(key, invoker, canonicalUrl);
 	}
 
 	private <T> T fetchValue(ResourceByUrlKey<T> theKey, Function<IValidationSupport, T> theInvoker, String theUrl) {
@@ -783,10 +819,25 @@ public class ValidationSupportChain implements IValidationSupport {
 
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
+		// On this signature a code system can only name a version by carrying it packed as "system|version"
+		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(theSystem);
+		return isCodeSystemSupported(
+				theValidationSupportContext,
+				codeSystem.url(),
+				codeSystem.versionId().orElse(null));
+	}
+
+	// Created by Claude Opus 5
+	@Override
+	public boolean isCodeSystemSupported(
+			ValidationSupportContext theValidationSupportContext, String theSystem, @Nullable String theVersion) {
 		for (IValidationSupport next : myChain) {
-			if (isCodeSystemSupported(theValidationSupportContext, next, theSystem)) {
+			if (isCodeSystemSupported(theValidationSupportContext, next, theSystem, theVersion)) {
 				if (ourLog.isDebugEnabled()) {
-					ourLog.debug("CodeSystem with System {} is supported by {}", theSystem, next.getName());
+					ourLog.debug(
+							"CodeSystem with System {} is supported by {}",
+							UrlUtil.toCanonicalUrl(theSystem, theVersion),
+							next.getName());
 				}
 				return true;
 			}
@@ -794,15 +845,22 @@ public class ValidationSupportChain implements IValidationSupport {
 		return false;
 	}
 
+	/**
+	 * Whether one module in the chain supports the given code system version. A module holding the system
+	 * at a different version does not support it: that is what lets the chain pick the module holding the
+	 * version the caller asked for, rather than whichever module comes first.
+	 */
 	private boolean isCodeSystemSupported(
 			ValidationSupportContext theValidationSupportContext,
 			IValidationSupport theValidationSupport,
-			String theCodeSystemUrl) {
-		IsCodeSystemSupportedKey key = new IsCodeSystemSupportedKey(theValidationSupport, theCodeSystemUrl);
+			String theCodeSystemUrl,
+			@Nullable String theCodeSystemVersion) {
+		IsCodeSystemSupportedKey key = new IsCodeSystemSupportedKey(
+				theValidationSupport, UrlUtil.toCanonicalUrl(theCodeSystemUrl, theCodeSystemVersion));
 		CacheValue<Boolean> value = getFromCache(key);
 		if (value == null) {
-			value = new CacheValue<>(
-					theValidationSupport.isCodeSystemSupported(theValidationSupportContext, theCodeSystemUrl));
+			value = new CacheValue<>(theValidationSupport.isCodeSystemSupported(
+					theValidationSupportContext, theCodeSystemUrl, theCodeSystemVersion));
 			putInCache(key, value);
 		}
 		return value.getValue();
@@ -848,10 +906,20 @@ public class ValidationSupportChain implements IValidationSupport {
 		if (retVal == null) {
 			retVal = CacheValue.empty();
 
+			UrlUtil.CanonicalUrlParts valueSet = UrlUtil.parseCanonicalUrl(valueSetUrl);
 			for (IValidationSupport next : myChain) {
-				if ((isBlank(valueSetUrl) && isCodeSystemSupported(theValidationSupportContext, next, codeSystem))
+				if ((isBlank(valueSetUrl)
+								&& isCodeSystemSupported(
+										theValidationSupportContext,
+										next,
+										codeSystem,
+										theRequest.getCodeSystemVersion()))
 						|| (isNotBlank(valueSetUrl)
-								&& isValueSetSupported(theValidationSupportContext, next, valueSetUrl))) {
+								&& isValueSetSupported(
+										theValidationSupportContext,
+										next,
+										valueSet.url(),
+										valueSet.versionId().orElse(null)))) {
 					CodeValidationResult outcome =
 							next.validateCode(theValidationSupportContext, theOptions, theRequest);
 					if (outcome != null) {
@@ -956,7 +1024,9 @@ public class ValidationSupportChain implements IValidationSupport {
 
 		retVal = CacheValue.empty();
 		for (IValidationSupport next : myChain) {
-			if (isBlank(url) || isValueSetSupported(theValidationSupportContext, next, url)) {
+			// The ValueSet itself is supplied, so this only gates which module is asked. Narrowing it by the
+			// resource's version would skip a module holding that same ValueSet unversioned.
+			if (isBlank(url) || isValueSetSupported(theValidationSupportContext, next, url, null)) {
 				CodeValidationResult outcome = next.validateCodeInValueSet(
 						theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, theValueSet);
 				if (outcome != null) {
@@ -993,7 +1063,13 @@ public class ValidationSupportChain implements IValidationSupport {
 				final String system = theLookupCodeRequest.getSystem();
 				final String code = theLookupCodeRequest.getCode();
 				final String displayLanguage = theLookupCodeRequest.getDisplayLanguage();
-				if (isCodeSystemSupported(theValidationSupportContext, next, system)) {
+				// LookupCodeRequest has no version field, so a version can only arrive packed into the system
+				UrlUtil.CanonicalUrlParts codeSystemToLookUp = UrlUtil.parseCanonicalUrl(system);
+				if (isCodeSystemSupported(
+						theValidationSupportContext,
+						next,
+						codeSystemToLookUp.url(),
+						codeSystemToLookUp.versionId().orElse(null))) {
 					LookupCodeResult lookupCodeResult =
 							next.lookupCode(theValidationSupportContext, theLookupCodeRequest);
 					if (lookupCodeResult == null) {

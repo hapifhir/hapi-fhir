@@ -10,14 +10,17 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -61,6 +64,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidationTestWithInlineMocks {
 	private static final String CODE_SYSTEM = "CODE_SYS";
 	private static final String CODE = "CODE";
+	private static final String CODE_SYSTEM_VERSION = "2.78";
 	private static final String VALUE_SET_URL = "http://value.set/url";
 	private static final String TARGET_SYSTEM = "http://target.system/url";
 	private static final String CONCEPT_MAP_URL = "http://concept.map/url";
@@ -104,6 +108,80 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 
 		// then
 		assertEquals(SummaryEnum.FALSE, myValueSetProvider.myLastSummaryParam);
+	}
+
+	/**
+	 * A CodeSystem resource's {@code url} element never contains a pipe, so a version-pinned canonical
+	 * can only match when the version is sent as its own search parameter. Packing it into {@code url}
+	 * makes every version-pinned system read as unknown.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	void fetchCodeSystem_packedVersionedCanonical_searchesUrlAndVersionSeparately() {
+		myCodeSystemProvider.myNextReturnCodeSystems = List.of(newCodeSystem(CODE_SYSTEM_VERSION));
+
+		IBaseResource codeSystem = mySvc.fetchCodeSystem(CODE_SYSTEM + "|" + CODE_SYSTEM_VERSION);
+
+		assertNotNull(codeSystem);
+		assertEquals(CODE_SYSTEM, myCodeSystemProvider.myLastUrlParam.getValue());
+		assertNotNull(myCodeSystemProvider.myLastVersionParam);
+		assertEquals(CODE_SYSTEM_VERSION, myCodeSystemProvider.myLastVersionParam.getValue());
+	}
+
+	// Created by Claude Opus 5
+	@Test
+	void fetchCodeSystem_versionAsItsOwnParameter_searchesUrlAndVersionSeparately() {
+		myCodeSystemProvider.myNextReturnCodeSystems = List.of(newCodeSystem(CODE_SYSTEM_VERSION));
+
+		IBaseResource codeSystem = mySvc.fetchCodeSystem(CODE_SYSTEM, CODE_SYSTEM_VERSION);
+
+		assertNotNull(codeSystem);
+		assertEquals(CODE_SYSTEM, myCodeSystemProvider.myLastUrlParam.getValue());
+		assertNotNull(myCodeSystemProvider.myLastVersionParam);
+		assertEquals(CODE_SYSTEM_VERSION, myCodeSystemProvider.myLastVersionParam.getValue());
+	}
+
+	// Created by Claude Opus 5
+	@Test
+	void fetchCodeSystem_noVersion_searchesUrlOnly() {
+		myCodeSystemProvider.myNextReturnCodeSystems = List.of(newCodeSystem(null));
+
+		IBaseResource codeSystem = mySvc.fetchCodeSystem(CODE_SYSTEM);
+
+		assertNotNull(codeSystem);
+		assertEquals(CODE_SYSTEM, myCodeSystemProvider.myLastUrlParam.getValue());
+		assertNull(myCodeSystemProvider.myLastVersionParam);
+	}
+
+	/**
+	 * {@code isCodeSystemSupported} answers from the same search, so a version-pinned system read as
+	 * unknown also reads as unsupported - which is what makes the whole ValueSet fail rather than
+	 * just one code.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	void isCodeSystemSupported_packedVersionedCanonical_searchesUrlAndVersionSeparately() {
+		myCodeSystemProvider.myNextReturnCodeSystems = List.of(newCodeSystem(CODE_SYSTEM_VERSION));
+
+		boolean supported = mySvc.isCodeSystemSupported(null, CODE_SYSTEM + "|" + CODE_SYSTEM_VERSION);
+
+		assertTrue(supported);
+		assertEquals(CODE_SYSTEM, myCodeSystemProvider.myLastUrlParam.getValue());
+		assertNotNull(myCodeSystemProvider.myLastVersionParam);
+		assertEquals(CODE_SYSTEM_VERSION, myCodeSystemProvider.myLastVersionParam.getValue());
+	}
+
+	// Created by Claude Opus 5
+	@Test
+	void isCodeSystemSupported_versionAsItsOwnParameter_searchesUrlAndVersionSeparately() {
+		myCodeSystemProvider.myNextReturnCodeSystems = List.of(newCodeSystem(CODE_SYSTEM_VERSION));
+
+		boolean supported = mySvc.isCodeSystemSupported(null, CODE_SYSTEM, CODE_SYSTEM_VERSION);
+
+		assertTrue(supported);
+		assertEquals(CODE_SYSTEM, myCodeSystemProvider.myLastUrlParam.getValue());
+		assertNotNull(myCodeSystemProvider.myLastVersionParam);
+		assertEquals(CODE_SYSTEM_VERSION, myCodeSystemProvider.myLastVersionParam.getValue());
 	}
 
 	@Test
@@ -244,9 +322,22 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 	}
 
 	@SuppressWarnings("unused")
+	/**
+	 * A CodeSystem a test provider can return: the server rejects a resource with no ID.
+	 */
+	// Created by Claude Opus 5
+	private static CodeSystem newCodeSystem(@Nullable String theVersion) {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setId("CodeSystem/123");
+		codeSystem.setUrl(CODE_SYSTEM);
+		codeSystem.setVersion(theVersion);
+		return codeSystem;
+	}
+
 	private static class MyCodeSystemProvider implements IResourceProvider {
 		private SummaryEnum myLastSummaryParam;
 		private UriParam myLastUrlParam;
+		private StringParam myLastVersionParam;
 		private List<CodeSystem> myNextReturnCodeSystems;
 
 		@Override
@@ -255,8 +346,12 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 		}
 
 		@Search
-		public List<CodeSystem> find(@RequiredParam(name = "url") UriParam theUrlParam, SummaryEnum theSummaryParam) {
+		public List<CodeSystem> find(
+				@RequiredParam(name = "url") UriParam theUrlParam,
+				@OptionalParam(name = "version") StringParam theVersionParam,
+				SummaryEnum theSummaryParam) {
 			myLastUrlParam = theUrlParam;
+			myLastVersionParam = theVersionParam;
 			myLastSummaryParam = theSummaryParam;
 			assert myNextReturnCodeSystems != null;
 			return myNextReturnCodeSystems;
