@@ -43,7 +43,7 @@ public enum DriverTypeEnum {
 	DERBY_EMBEDDED("org.apache.derby.jdbc.EmbeddedDriver", true),
 	MARIADB_10_1("org.mariadb.jdbc.Driver", false),
 
-	// Formerly com.mysql.jdbc.Driver
+	// Note: This remains only vestigially. This driver is no longer supported.
 	MYSQL_5_7("com.mysql.cj.jdbc.Driver", false),
 
 	POSTGRES_9_4("org.postgresql.Driver", false),
