@@ -754,7 +754,7 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 				ISearchBuilder.FetchedIncludes<JpaPid> nonIterateIncludedPids =
 						theSearchBuilder.loadIncludes(parameters);
 				if (remainingIncludesUntilMax != null) {
-					remainingIncludesUntilMax -= nonIterateIncludedPids.pids().size();
+					remainingIncludesUntilMax -= nonIterateIncludedPids.size();
 				}
 				theMatchPids.addAll(nonIterateIncludedPids.pids());
 				includedPidList.addAll(nonIterateIncludedPids.pids());
@@ -829,7 +829,7 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 				createLoadIncludeParameters(thePids, theIncludes, true, theMaxIncludes);
 		ISearchBuilder.FetchedIncludes<JpaPid> nonIterateRevIncludedPids = theSearchBuilder.loadIncludes(parameters);
 		if (theMaxIncludes != null) {
-			theMaxIncludes -= nonIterateRevIncludedPids.pids().size();
+			theMaxIncludes -= nonIterateRevIncludedPids.size();
 		}
 		thePids.addAll(nonIterateRevIncludedPids.pids());
 		theIncludedPidList.addAll(nonIterateRevIncludedPids.pids());

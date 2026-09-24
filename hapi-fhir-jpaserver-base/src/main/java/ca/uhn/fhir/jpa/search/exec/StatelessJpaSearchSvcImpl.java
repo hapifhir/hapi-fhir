@@ -264,7 +264,7 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 							p.setMaxCount(maxIncludes);
 							ISearchBuilder.FetchedIncludes<JpaPid> revIncludedPids = theSb.loadIncludes(p);
 							if (maxIncludes != null) {
-								maxIncludes -= revIncludedPids.pids().size();
+								maxIncludes -= revIncludedPids.size();
 							}
 							pids.addAll(revIncludedPids.pids());
 							allIncludedPidsList.addAll(revIncludedPids.pids());
@@ -289,7 +289,7 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 							p.setMaxCount(maxIncludes);
 							ISearchBuilder.FetchedIncludes<JpaPid> forwardIncludedPids = theSb.loadIncludes(p);
 							if (maxIncludes != null) {
-								maxIncludes -= forwardIncludedPids.pids().size();
+								maxIncludes -= forwardIncludedPids.size();
 							}
 							pids.addAll(forwardIncludedPids.pids());
 							allIncludedPidsList.addAll(forwardIncludedPids.pids());
@@ -310,7 +310,7 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 							p.setMaxCount(maxIncludes);
 							ISearchBuilder.FetchedIncludes<JpaPid> iterateRevIncludedPids = theSb.loadIncludes(p);
 							if (maxIncludes != null) {
-								maxIncludes -= iterateRevIncludedPids.pids().size();
+								maxIncludes -= iterateRevIncludedPids.size();
 							}
 							pids.addAll(iterateRevIncludedPids.pids());
 							allIncludedPidsList.addAll(iterateRevIncludedPids.pids());

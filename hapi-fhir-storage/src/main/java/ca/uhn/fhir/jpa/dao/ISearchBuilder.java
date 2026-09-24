@@ -38,7 +38,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -119,6 +118,17 @@ public interface ISearchBuilder<T extends IResourcePersistentId<?>> {
 		return result;
 	}
 
+	/**
+	 * Resolves the <code>_include</code> and <code>_revinclude</code> resources associated with
+	 * a set of PID search results.
+	 * <p>
+	 * If present, any {@link ca.uhn.fhir.interceptor.api.Pointcut#STORAGE_PREACCESS_RESOURCES} pointcuts
+	 * will be invoked (i.e. for consent services), and only results which are <b>included</b> in the
+	 * search results will be returned. Because this pointcut can require actually resolving the resources
+	 * the fetched resources <b>MAY</b> also be returned in {@link FetchedIncludes#resourcesIfFetched()}.
+	 * If they are present, you can use them rather than re-fetching them for better efficiency.
+	 * </p>
+	 */
 	FetchedIncludes<T> loadIncludes(SearchBuilderLoadIncludesParameters<T> theParameters);
 
 	/**
@@ -168,6 +178,5 @@ public interface ISearchBuilder<T extends IResourcePersistentId<?>> {
 		public int size() {
 			return pids.size();
 		}
-
 	}
 }
