@@ -55,14 +55,8 @@ public enum DriverTypeEnum {
 
 	COCKROACHDB_21_1("org.postgresql.Driver", false),
 	;
-	private static final Set<DriverTypeEnum> ourSupportedDrivers = Set.of(
-		H2_EMBEDDED,
-		DERBY_EMBEDDED,
-		MARIADB_10_1,
-		POSTGRES_9_4,
-		ORACLE_12C,
-		MSSQL_2012,
-		COCKROACHDB_21_1);
+	private static final Set<DriverTypeEnum> ourSupportedDrivers =
+			Set.of(H2_EMBEDDED, DERBY_EMBEDDED, MARIADB_10_1, POSTGRES_9_4, ORACLE_12C, MSSQL_2012, COCKROACHDB_21_1);
 
 	/**
 	 * @return {@literal true} if this driver type is currently supported by HAPI FHIR
