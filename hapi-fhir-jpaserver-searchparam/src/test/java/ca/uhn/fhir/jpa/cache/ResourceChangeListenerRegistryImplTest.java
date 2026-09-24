@@ -17,7 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -47,13 +47,13 @@ class ResourceChangeListenerRegistryImplTest {
 	ResourceChangeListenerRegistryImpl myResourceChangeListenerRegistry;
 	@Autowired
 	ResourceChangeListenerCacheFactory myResourceChangeListenerCacheFactory;
-	@MockBean
+	@MockitoBean
 	private IResourceVersionSvc myResourceVersionSvc;
-	@MockBean
+	@MockitoBean
 	private ResourceChangeListenerCacheRefresherImpl myResourceChangeListenerCacheRefresher;
-	@MockBean
+	@MockitoBean
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
-	@MockBean
+	@MockitoBean
 	private SearchParamMatcher mySearchParamMatcher;
 
 	private final IResourceChangeListener myTestListener = mock(IResourceChangeListener.class);

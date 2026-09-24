@@ -35,6 +35,14 @@
 			<groupId>org.hibernate.orm</groupId>
 			<artifactId>hibernate-core</artifactId>
 		</dependency>
+		<!--
+		Hibernate 7 moved several dialects, including Derby, out of hibernate-core. We need them here so that
+		JdbcUtils can still resolve a dialect for those databases.
+		-->
+		<dependency>
+			<groupId>org.hibernate.orm</groupId>
+			<artifactId>hibernate-community-dialects</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>jakarta.annotation</groupId>
 			<artifactId>jakarta.annotation-api</artifactId>

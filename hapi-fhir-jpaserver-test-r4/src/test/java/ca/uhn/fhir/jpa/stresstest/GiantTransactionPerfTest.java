@@ -58,17 +58,26 @@ import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityGraph;
+import jakarta.persistence.CacheRetrieveMode;
+import jakarta.persistence.CacheStoreMode;
+import jakarta.persistence.ConnectionConsumer;
+import jakarta.persistence.ConnectionFunction;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.FindOption;
 import jakarta.persistence.FlushModeType;
 import jakarta.persistence.LockModeType;
+import jakarta.persistence.LockOption;
 import jakarta.persistence.Query;
+import jakarta.persistence.RefreshOption;
 import jakarta.persistence.StoredProcedureQuery;
 import jakarta.persistence.TypedQuery;
+import jakarta.persistence.TypedQueryReference;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaDelete;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.CriteriaSelect;
 import jakarta.persistence.criteria.CriteriaUpdate;
 import jakarta.persistence.metamodel.Metamodel;
 import org.hibernate.internal.SessionImpl;
@@ -847,6 +856,84 @@ public class GiantTransactionPerfTest {
 
 		@Override
 		public boolean isOpen() {
+			throw new UnsupportedOperationException();
+		}
+
+		// Added in Jakarta Persistence 3.2
+		@Override
+		public <C> void runWithConnection(ConnectionConsumer<C> action) {
+			throw new UnsupportedOperationException();
+		}
+
+		// Added in Jakarta Persistence 3.2
+		@Override
+		public <C, T> T callWithConnection(ConnectionFunction<C, T> function) {
+			throw new UnsupportedOperationException();
+		}
+
+		// Added in Jakarta Persistence 3.2
+		@Override
+		public <T> T find(Class<T> entityClass, Object primaryKey, FindOption... options) {
+			throw new UnsupportedOperationException();
+		}
+
+		// Added in Jakarta Persistence 3.2
+		@Override
+		public <T> T find(EntityGraph<T> entityGraph, Object primaryKey, FindOption... options) {
+			throw new UnsupportedOperationException();
+		}
+
+		// Added in Jakarta Persistence 3.2
+		@Override
+		public <T> T getReference(T entity) {
+			throw new UnsupportedOperationException();
+		}
+
+		// Added in Jakarta Persistence 3.2
+		@Override
+		public void lock(Object entity, LockModeType lockMode, LockOption... options) {
+			throw new UnsupportedOperationException();
+		}
+
+		// Added in Jakarta Persistence 3.2
+		@Override
+		public void refresh(Object entity, RefreshOption... options) {
+			throw new UnsupportedOperationException();
+		}
+
+		// Added in Jakarta Persistence 3.2
+		@Override
+		public <T> TypedQuery<T> createQuery(CriteriaSelect<T> selectQuery) {
+			throw new UnsupportedOperationException();
+		}
+
+		// Added in Jakarta Persistence 3.2
+		@Override
+		public <T> TypedQuery<T> createQuery(TypedQueryReference<T> reference) {
+			throw new UnsupportedOperationException();
+		}
+
+		// Added in Jakarta Persistence 3.2
+		@Override
+		public CacheRetrieveMode getCacheRetrieveMode() {
+			throw new UnsupportedOperationException();
+		}
+
+		// Added in Jakarta Persistence 3.2
+		@Override
+		public void setCacheRetrieveMode(CacheRetrieveMode cacheRetrieveMode) {
+			throw new UnsupportedOperationException();
+		}
+
+		// Added in Jakarta Persistence 3.2
+		@Override
+		public CacheStoreMode getCacheStoreMode() {
+			throw new UnsupportedOperationException();
+		}
+
+		// Added in Jakarta Persistence 3.2
+		@Override
+		public void setCacheStoreMode(CacheStoreMode cacheStoreMode) {
 			throw new UnsupportedOperationException();
 		}
 

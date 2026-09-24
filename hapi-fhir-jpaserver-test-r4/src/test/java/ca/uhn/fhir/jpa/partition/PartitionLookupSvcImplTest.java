@@ -9,7 +9,7 @@ import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -26,17 +26,17 @@ class PartitionLookupSvcImplTest {
 
 	@Autowired
 	private PartitionLookupSvcImpl myPartitionLookupSvc;
-	@MockBean
+	@MockitoBean
 	PartitionSettings myPartitionSettings;
-	@MockBean
+	@MockitoBean
 	IInterceptorService myInterceptorBroadcaster;
-	@MockBean
+	@MockitoBean
 	IPartitionDao myPartitionDao;
-	@MockBean
+	@MockitoBean
 	private FhirContext myFhirCtx;
-	@MockBean
+	@MockitoBean
 	private PlatformTransactionManager myTxManager;
-	@MockBean
+	@MockitoBean
 	private MemoryCacheService myMemoryCacheService;
 
 	@Configuration

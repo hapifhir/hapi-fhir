@@ -305,6 +305,13 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 			updateComponentWithNewPropertyList(identifierMapper, finalPropertyList);
 		}
 
+		// NOTE: we deliberately do NOT rebuild the identifier's own cached CompositeType here. Doing so leaves
+		// it without a mapping model part, which makes SessionFactory startup fail when it registers
+		// embeddable mapping types. At runtime the stale type is harmless, because the mapping model is
+		// derived from the (already filtered) columns of the identifier Value. Only an explicit
+		// Metadata#validate() notices the discrepancy, so the DDL generator repairs it just for that check -
+		// see alignFilteredIdentifierTypes().
+
 		PrimaryKey pk = table.getPrimaryKey();
 		List<Column> pkColumns = pk.getColumns();
 		removeColumns(pkColumns, idRemovedColumns::contains);
@@ -538,6 +545,29 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 			throw new InternalErrorException(Msg.code(2603) + "Failed to access field " + theFieldName, e);
 		}
 		return selectables;
+	}
+
+	/**
+	 * Rebuilds the cached {@link CompositeType} of any composite identifier whose type still describes more
+	 * properties than the identifier actually has, which is the case for the identifiers we filtered a
+	 * partition id column out of.
+	 * <p>
+	 * This exists purely so that an explicit {@link org.hibernate.boot.Metadata#validate()} passes; it is
+	 * called by the DDL generator, which never builds a {@link org.hibernate.SessionFactory}. Do not call it
+	 * on metadata that is about to be used at runtime: the rebuilt type has no mapping model part, and
+	 * SessionFactory startup dereferences that when registering embeddable mapping types.
+	 * </p>
+	 */
+	public static void alignFilteredIdentifierTypes(org.hibernate.boot.Metadata theMetadata) {
+		for (PersistentClass persistentClass : theMetadata.getEntityBindings()) {
+			KeyValue identifier = persistentClass.getIdentifier();
+			if (identifier instanceof Component component
+					&& component.getType() instanceof ComponentType componentType
+					&& componentType.getPropertyNames().length
+							!= component.getProperties().size()) {
+				updateComponentWithNewPropertyList(component, component.getProperties());
+			}
+		}
 	}
 
 	private static void updateComponentWithNewPropertyList(

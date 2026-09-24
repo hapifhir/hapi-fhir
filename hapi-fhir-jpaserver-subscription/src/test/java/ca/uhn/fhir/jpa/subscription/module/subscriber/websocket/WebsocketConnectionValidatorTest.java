@@ -28,7 +28,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -48,29 +48,29 @@ public class WebsocketConnectionValidatorTest {
 	public static String WEBSOCKET_SUBSCRIPTION_ID = "2";
 	public static String NON_EXISTENT_SUBSCRIPTION_ID = "3";
 
-	@MockBean
+	@MockitoBean
 	MatchUrlService myMatchUrlService;
-	@MockBean
+	@MockitoBean
 	DaoRegistry myDaoRegistry;
-	@MockBean
+	@MockitoBean
 	PlatformTransactionManager myPlatformTransactionManager;
-	@MockBean
+	@MockitoBean
 	SearchParamMatcher mySearchParamMatcher;
-	@MockBean
+	@MockitoBean
 	SubscriptionChannelConfig mySubscriptionChannelConfig;
-	@MockBean
+	@MockitoBean
 	SubscriptionChannelFactory mySubscriptionChannelFactory;
-	@MockBean
+	@MockitoBean
 	IInterceptorBroadcaster myInterceptorBroadcaster;
-	@MockBean
+	@MockitoBean
 	InMemoryResourceMatcher myInMemoryResourceMatcher;
-	@MockBean
+	@MockitoBean
 	SubscriptionRegistry mySubscriptionRegistry;
-	@MockBean
+	@MockitoBean
 	IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
-	@MockBean
+	@MockitoBean
 	ISearchParamRegistry mySearchParamRegistry;
-	@MockBean
+	@MockitoBean
 	SubscriptionSettings mySubscriptionSettings;
 
 	@Autowired

@@ -21,7 +21,7 @@ import org.hl7.fhir.dstu2.model.Subscription;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
@@ -43,8 +43,33 @@ public class SubscriptionSubmitInterceptorLoaderTest {
 	@Autowired
 	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
 
-	@MockBean
+	@MockitoBean
 	private IInterceptorService myInterceptorService;
+
+	// These beans are only needed to satisfy the dependencies of the configurations under test. They can not be
+	// declared on MyConfig, since @MockitoBean is not supported on @Configuration classes.
+	@MockitoBean
+	private IIdHelperService<JpaPid> myIdHelperService;
+	@MockitoBean
+	private StorageSettings myStorageSettings;
+	@MockitoBean
+	private ISearchParamProvider mySearchParamProvider;
+	@MockitoBean
+	private IValidationSupport myValidationSupport;
+	@MockitoBean
+	private SubscriptionChannelFactory mySubscriptionChannelFactory;
+	@MockitoBean
+	private DaoRegistry myDaoRegistry;
+	@MockitoBean
+	private IResourceVersionSvc myResourceVersionSvc;
+	@MockitoBean
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+	@MockitoBean
+	private PlatformTransactionManager myPlatformTransactionManager;
+	@MockitoBean
+	private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
+	@MockitoBean
+	private IHapiTransactionService myHapiTransactionService;
 
 	/**
 	 * It should be possible to run only the {@link SubscriptionSubmitterConfig} without the
@@ -74,30 +99,6 @@ public class SubscriptionSubmitInterceptorLoaderTest {
 			subscriptionSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
 			return subscriptionSettings;
 		}
-
-		@MockBean
-		public IIdHelperService<JpaPid> myIdHelperService;
-		@MockBean
-		public StorageSettings myStorageSettings;
-		@MockBean
-		private ISearchParamProvider mySearchParamProvider;
-		@MockBean
-		private IValidationSupport myValidationSupport;
-		@MockBean
-		private SubscriptionChannelFactory mySubscriptionChannelFactory;
-		@MockBean
-		private DaoRegistry myDaoRegistry;
-		@MockBean
-		private IResourceVersionSvc myResourceVersionSvc;
-		@MockBean
-		private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
-		@MockBean
-		private PlatformTransactionManager myPlatformTransactionManager;
-		@MockBean
-		private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
-		@MockBean
-		private IHapiTransactionService myHapiTransactionService;
-
 	}
 
 
