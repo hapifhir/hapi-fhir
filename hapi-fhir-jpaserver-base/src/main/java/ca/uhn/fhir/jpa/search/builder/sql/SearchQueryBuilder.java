@@ -909,32 +909,39 @@ public class SearchQueryBuilder {
 	}
 
 	/**
-	 * Returns the subselect which unpacks the given IDs from a single JSON array bind variable.
-	 * Returns null if:
-	 * - the number of IDs is at or below the configured threshold or
-	 * - the database type has no JSON unpacking function
+	 * Returns the subselect which unpacks the given IDs from a single JSON array bind variable, or
+	 * null when {@link #shouldBindIdListAsJson(List)} is false.
 	 */
 	@Nullable
 	private String createJsonIdListSubselectQueryOrNull(List<Long> theIds) {
-		int threshold = myStorageSettings.getBindIdListAsJsonAboveSize();
-		if (threshold == StorageSettings.BIND_ID_LIST_AS_JSON_DISABLED || theIds.size() <= threshold) {
+		if (!shouldBindIdListAsJson(theIds)) {
 			return null;
 		}
 
-		if (!(myDialect instanceof IHapiFhirDialect hapiFhirDialect)) {
-			return null;
-		}
-
-		String template = hapiFhirDialect.getIdListJsonSubselectTemplate();
-		if (template == null || !myDialectProvider.isJsonUnpackingSupported()) {
-			return null;
-		}
-
+		IHapiFhirDialect hapiFhirDialect = (IHapiFhirDialect) myDialect;
 		String json = toJsonArray(theIds);
 		Object bindValue = hapiFhirDialect.bindsIdListJsonAsClob()
 				? new TypedParameterValue<>(StandardBasicTypes.MATERIALIZED_CLOB, json)
 				: json;
-		return "(" + String.format(template, quotedPlaceholder(bindValue)) + ")";
+		return "(" + String.format(hapiFhirDialect.getIdListJsonSubselectTemplate(), quotedPlaceholder(bindValue))
+				+ ")";
+	}
+
+	/**
+	 * Returns false if:
+	 * - the number of IDs is at or below the configured threshold, or the threshold is
+	 *   {@link StorageSettings#BIND_ID_LIST_AS_JSON_DISABLED}
+	 * - the database type has no JSON unpacking function
+	 */
+	private boolean shouldBindIdListAsJson(List<Long> theIds) {
+		int threshold = myStorageSettings.getBindIdListAsJsonAboveSize();
+		if (threshold == StorageSettings.BIND_ID_LIST_AS_JSON_DISABLED || theIds.size() <= threshold) {
+			return false;
+		}
+
+		return myDialect instanceof IHapiFhirDialect hapiFhirDialect
+				&& hapiFhirDialect.getIdListJsonSubselectTemplate() != null
+				&& myDialectProvider.isJsonUnpackingSupported();
 	}
 
 	/**
