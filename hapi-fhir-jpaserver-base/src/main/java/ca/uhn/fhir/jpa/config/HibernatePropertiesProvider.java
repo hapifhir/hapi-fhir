@@ -133,32 +133,38 @@ public class HibernatePropertiesProvider {
 			return cached;
 		}
 
-		Boolean probeResult = probeSqlServerJsonSupport();
-		if (probeResult != null) {
-			if (!probeResult) {
-				ourLog.warn(
-						"This SQL Server database is running at a compatibility level below {}, so the OPENJSON function is not available. "
-								+ "Searches or patient compartment authorization parameters containing large numbers (thousands) of resource IDs "
-								+ "will continue to be sent as one bind parameter per ID, which can exceed DB parameter limits. "
-								+ "Raise the database compatibility level to {} if you perform such searches.",
-						MINIMUM_SQL_SERVER_OPENJSON_COMPATIBILITY_LEVEL,
-						MINIMUM_SQL_SERVER_OPENJSON_COMPATIBILITY_LEVEL);
+		synchronized (this) {
+			cached = mySqlServerJsonSupported;
+			if (cached != null) {
+				return cached;
 			}
-			mySqlServerJsonSupported = probeResult;
-			return probeResult;
-		}
 
-		// The probe failed. Two threads could probe at the same time, but the operation is idempotent.
-		// Retry 3 times before giving up and defaulting to unsupported.
-		if (mySqlServerJsonProbeFailureCount.incrementAndGet() >= MAX_SQL_SERVER_JSON_PROBE_FAILURES) {
-			ourLog.warn(
-					"Could not determine the compatibility level of this SQL Server database after {} attempts. "
-							+ "Searches or patient compartment authorization parameters containing large numbers (thousands) of resource IDs "
-							+ "will continue to be sent as one bind parameter per ID, which can exceed DB parameter limits.",
-					MAX_SQL_SERVER_JSON_PROBE_FAILURES);
-			mySqlServerJsonSupported = Boolean.FALSE;
+			Boolean probeResult = probeSqlServerJsonSupport();
+			if (probeResult != null) {
+				if (!probeResult) {
+					ourLog.warn(
+							"This SQL Server database is running at a compatibility level below {}, so the OPENJSON function is not available. "
+									+ "Searches or patient compartment authorization parameters containing large numbers (thousands) of resource IDs "
+									+ "will continue to be sent as one bind parameter per ID, which can exceed DB parameter limits. "
+									+ "Raise the database compatibility level to {} if you perform such searches.",
+							MINIMUM_SQL_SERVER_OPENJSON_COMPATIBILITY_LEVEL,
+							MINIMUM_SQL_SERVER_OPENJSON_COMPATIBILITY_LEVEL);
+				}
+				mySqlServerJsonSupported = probeResult;
+				return probeResult;
+			}
+
+			// The probe failed. Retry 3 times before giving up and defaulting to unsupported.
+			if (mySqlServerJsonProbeFailureCount.incrementAndGet() >= MAX_SQL_SERVER_JSON_PROBE_FAILURES) {
+				ourLog.warn(
+						"Could not determine the compatibility level of this SQL Server database after {} attempts. "
+								+ "Searches or patient compartment authorization parameters containing large numbers (thousands) of resource IDs "
+								+ "will continue to be sent as one bind parameter per ID, which can exceed DB parameter limits.",
+						MAX_SQL_SERVER_JSON_PROBE_FAILURES);
+				mySqlServerJsonSupported = Boolean.FALSE;
+			}
+			return false;
 		}
-		return false;
 	}
 
 	/**
