@@ -2322,8 +2322,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		/**
 		 * Sets default start/end values for Periods
 		 */
-		private PeriodAsDates normalizePeriodDates(
-				Date start, String startAsString, Date end, String endAsString) {
+		private PeriodAsDates normalizePeriodDates(Date start, String startAsString, Date end, String endAsString) {
 
 			if (start == null && end == null) {
 				return null;
