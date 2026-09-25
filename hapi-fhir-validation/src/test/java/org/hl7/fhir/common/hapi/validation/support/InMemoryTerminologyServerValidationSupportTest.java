@@ -543,6 +543,25 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 	}
 
 	/**
+	 * The same contradiction reaching the chain is rejected there, before any module is asked, rather than
+	 * being resolved in favour of either version.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	void validateCode_throughTheChainWithAConflictingVersion_isRejected() {
+		// Setup
+		addSingleVersionCodeSystemAndRecordFetches("1.0.0");
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+		ValidateCodeRequest request =
+			new ValidateCodeRequest(VERSIONED_CS_URL + "|1.0.0", "2.0.0", "code0", null, null);
+
+		// Test & Verify
+		assertThatThrownBy(() -> myChain.validateCode(valCtx, new ConceptValidationOptions(), request))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining(Msg.code(2952));
+	}
+
+	/**
 	 * The version the include names is not installed - only another version of that code system is. The code
 	 * exists in the version that <em>is</em> installed, so accepting it means answering a question nobody
 	 * asked: the caller asked about 2.0.0 and got an answer from 1.0.0, with nothing said about the
@@ -643,7 +662,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 
 	/**
 	 * A module written before the version-aware isCodeSystemSupported existed, and which recognises only the
-	 * exact code system URL, has to keep being asked when a coding names a version, as it was before.
+	 * exact code system URL, has to keep being asked when a coding names a version.
 	 */
 	// Created by Claude Opus 5
 	@Test

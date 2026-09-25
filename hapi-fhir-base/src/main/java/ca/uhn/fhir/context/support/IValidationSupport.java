@@ -207,6 +207,8 @@ public interface IValidationSupport {
 	 * @param theSystem  The code system URL, without a version, e.g. "<code>http://loinc.org</code>"
 	 * @param theVersion The code system version, e.g. "<code>2.78</code>", or <code>null</code> for whichever version is current
 	 * @return The CodeSystem, or <code>null</code> if this module cannot supply it
+	 * @throws ca.uhn.fhir.rest.server.exceptions.InvalidRequestException If the URL already carries a version
+	 *                                                                 which differs from the version given
 	 * @since 8.14.0
 	 */
 	// Created by Claude Opus 5
@@ -274,6 +276,8 @@ public interface IValidationSupport {
 	 * @param theUri     The resource URL, without a version, e.g. "<code>http://example.org/ValueSet/foo</code>"
 	 * @param theVersion The resource version, e.g. "<code>1.0.0</code>", or <code>null</code> for whichever version is current
 	 * @return Returns the resource, or <code>null</code> if no resource with the given URI can be found
+	 * @throws ca.uhn.fhir.rest.server.exceptions.InvalidRequestException If the URL already carries a version
+	 *                                                                 which differs from the version given
 	 * @since 8.14.0
 	 */
 	// Created by Claude Opus 5
@@ -304,6 +308,8 @@ public interface IValidationSupport {
 	 * @param theUrl     The structure definition URL, without a version, e.g. "<code>http://example.org/StructureDefinition/foo</code>"
 	 * @param theVersion The structure definition version, e.g. "<code>1.0.0</code>", or <code>null</code> for whichever version is current
 	 * @return The StructureDefinition, or <code>null</code> if this module cannot supply it
+	 * @throws ca.uhn.fhir.rest.server.exceptions.InvalidRequestException If the URL already carries a version
+	 *                                                                 which differs from the version given
 	 * @since 8.14.0
 	 */
 	// Created by Claude Opus 5
@@ -344,6 +350,8 @@ public interface IValidationSupport {
 	 * @param theSystem                   The code system URL, without a version, e.g. "<code>http://loinc.org</code>"
 	 * @param theVersion                  The code system version, e.g. "<code>2.78</code>", or <code>null</code> for whichever version is current
 	 * @return Returns <code>true</code> if codes in the given code system version can be validated
+	 * @throws ca.uhn.fhir.rest.server.exceptions.InvalidRequestException If the URL already carries a version
+	 *                                                                 which differs from the version given
 	 * @since 8.14.0
 	 */
 	// Created by Claude Opus 5
@@ -391,6 +399,8 @@ public interface IValidationSupport {
 	 * @param theValueSetUrl The value set URL, without a version, e.g. "<code>http://example.org/ValueSet/foo</code>"
 	 * @param theVersion     The value set version, e.g. "<code>1.0.0</code>", or <code>null</code> for whichever version is current
 	 * @return The ValueSet, or <code>null</code> if this module cannot supply it
+	 * @throws ca.uhn.fhir.rest.server.exceptions.InvalidRequestException If the URL already carries a version
+	 *                                                                 which differs from the version given
 	 * @since 8.14.0
 	 */
 	// Created by Claude Opus 5
@@ -590,6 +600,8 @@ public interface IValidationSupport {
 	 * @param theValueSetUrl              The ValueSet URL, without a version
 	 * @param theVersion                  The ValueSet version, or <code>null</code> for whichever version is current
 	 * @return Returns <code>true</code> if the given ValueSet version can be validated
+	 * @throws ca.uhn.fhir.rest.server.exceptions.InvalidRequestException If the URL already carries a version
+	 *                                                                 which differs from the version given
 	 * @since 8.14.0
 	 */
 	// Created by Claude Opus 5
