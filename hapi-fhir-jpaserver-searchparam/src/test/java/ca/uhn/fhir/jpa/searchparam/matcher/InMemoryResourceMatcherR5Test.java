@@ -188,6 +188,13 @@ public class InMemoryResourceMatcherR5Test {
 	}
 
 	@Test
+	public void testUnsupportedFilter() {
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match("Observation?_filter=code%20eq%20" + OBSERVATION_CODE, myObservation, mySearchParams, newRequest());
+		assertFalse(result.supported());
+		assertEquals("Parameter: <_filter> Reason: Parameter not supported", result.getUnsupportedReason());
+	}
+
+	@Test
 	public void testSupportedNot() {
 		String criteria = "code" + TokenParamModifier.NOT.getValue() + "=" + OBSERVATION_CODE + ",a_different_code";
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match(criteria, myObservation, mySearchParams, newRequest());
