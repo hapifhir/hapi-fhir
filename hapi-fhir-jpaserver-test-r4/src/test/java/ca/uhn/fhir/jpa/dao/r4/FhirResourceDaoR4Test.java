@@ -4211,9 +4211,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 	@ParameterizedTest
 	@MethodSource("timingDateRangeSearchParams")
-	public void testTimingDateRangeSearch_ordinalAndDatetimeSearchesMatch(
-			List<Date> theEventDates, Period thePeriod, List<DateRangeParam> searchRanges, List<Date> theExpectedDates) {
-
+	public void testTimingDateRangeSearch_ordinalAndDatetimeSearchesMatch(List<Date> theEventDates, Period thePeriod, List<Date> theExpectedDates) {
 		// Given
 		ServiceRequest sr = new ServiceRequest();
 		sr.setStatus(ServiceRequest.ServiceRequestStatus.ACTIVE);
@@ -4231,17 +4229,27 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 			myServiceRequestDao.create(sr, mySrd);
 		}
 
-		for (DateRangeParam searchRange : searchRanges) {
-			// When
-			SearchParameterMap params = new SearchParameterMap();
-			params.add(ServiceRequest.SP_OCCURRENCE, searchRange);
-			IBundleProvider datetimeSearchResponse = myServiceRequestDao.search(params);
+		SearchParameterMap params;
 
-			// Then
-			List<Date> eventDatesFromDatetimeSearch = getEventDatesFromServiceRequestsInSearchResponse(datetimeSearchResponse);
-			assertThat(toUnqualifiedVersionlessIdValues(datetimeSearchResponse)).hasSize(theExpectedDates.size());
-			assertThat(eventDatesFromDatetimeSearch).containsExactlyElementsOf(theExpectedDates);
-		}
+		// When
+		params = new SearchParameterMap();
+		params.add(ServiceRequest.SP_OCCURRENCE, new DateRangeParam("2025-02-08T14:00:00Z", "2025-02-09T14:00:00Z"));
+		IBundleProvider datetimeSearchResponse =  myServiceRequestDao.search(params);
+
+		// Then
+		assertThat(toUnqualifiedVersionlessIdValues(datetimeSearchResponse)).hasSize(theExpectedDates.size());
+		List<Date> eventDatesFromDatetimeSearch = getEventDatesFromServiceRequestsInSearchResponse(datetimeSearchResponse);
+		assertThat(eventDatesFromDatetimeSearch).containsExactlyElementsOf(theExpectedDates);
+
+		// When
+		params = new SearchParameterMap();
+		params.add(ServiceRequest.SP_OCCURRENCE, new DateRangeParam("2025-02-08", "2025-02-09"));
+		IBundleProvider ordinalDateSearchResponse = myServiceRequestDao.search(params);
+
+		// Then
+		assertThat(toUnqualifiedVersionlessIdValues(ordinalDateSearchResponse)).hasSize(theExpectedDates.size());
+		List<Date> eventDatesFromOrdinalSearch = getEventDatesFromServiceRequestsInSearchResponse(ordinalDateSearchResponse);
+		assertThat(eventDatesFromOrdinalSearch).containsExactlyElementsOf(theExpectedDates);
 	}
 
 	private static List<Date> getEventDatesFromServiceRequestsInSearchResponse(IBundleProvider theDateSearchResponse) {
@@ -4256,10 +4264,6 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 	}
 
 	private static Stream<Arguments> timingDateRangeSearchParams() {
-		List<DateRangeParam> searchRanges = List.of(
-				new DateRangeParam("2025-02-08T14:00:00Z", "2025-02-09T14:00:00Z"),
-				new DateRangeParam("2025-02-08", "2025-02-09")
-		);
 		Date feb6 = new DateTimeType("2025-02-06T14:00:00Z").setTimeZoneZulu(true).getValue();
 		Date feb7 = new DateTimeType("2025-02-07T14:00:00Z").setTimeZoneZulu(true).getValue();
 		Date feb8 = new DateTimeType("2025-02-08T14:00:00Z").setTimeZoneZulu(true).getValue();
@@ -4267,32 +4271,27 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		Date feb10 = new DateTimeType("2025-02-10T14:00:00Z").setTimeZoneZulu(true).getValue();
 		Date feb11 = new DateTimeType("2025-02-11T14:00:00Z").setTimeZoneZulu(true).getValue();
 
-		List<Date> datesFeb6to11 = List.of(feb6, feb7, feb8, feb9, feb10, feb11);
+		Period periodNoStart = new Period();
+		periodNoStart.setEnd(feb11);
 
-		Period periodNoStartToFeb10 = new Period();
-		periodNoStartToFeb10.setEnd(feb9);
+		Period periodNoEnd = new Period();
+		periodNoEnd.setStart(feb7);
 
-		Period periodFeb7ToNoEnd = new Period();
-		periodFeb7ToNoEnd.setStart(feb7);
+		Period periodStartEnd = new Period();
+		periodStartEnd.setStart(feb7);
+		periodStartEnd.setEnd(feb10);
 
-		Period periodFeb7To10 = new Period();
-		periodFeb7To10.setStart(feb7);
-		periodFeb7To10.setEnd(feb10);
-
-		Period periodFeb10To11 = new Period();
-		periodFeb10To11.setStart(feb10);
-		periodFeb10To11.setEnd(feb11);
-
-		// search period is Feb 8-9
 		return Stream.of(
-				// Timing period with no start - should overlap with the search range
-				Arguments.of(datesFeb6to11, periodNoStartToFeb10, searchRanges, datesFeb6to11),
-				// Timing period with no end - should overlap with the search range
-				Arguments.of(datesFeb6to11, periodFeb7ToNoEnd, searchRanges, datesFeb6to11),
-				// Timing period with start and end within the search range
-				Arguments.of(datesFeb6to11, periodFeb7To10, searchRanges, datesFeb6to11),
-				// Timing period with start and end outside the search range
-				Arguments.of(datesFeb6to11, periodFeb10To11, searchRanges, List.of(feb8, feb9))
+			// Timing period with no start
+			Arguments.of(List.of(feb7, feb8, feb9, feb10), periodNoStart, List.of(feb7, feb8, feb9)),
+			// Timing period with no end
+			Arguments.of(List.of(feb8, feb9, feb10, feb11), periodNoEnd, List.of()),
+			// Timing period with start and end, event falls within date range
+			Arguments.of(List.of(feb7, feb8, feb9, feb10), periodStartEnd, List.of(feb7, feb8, feb9, feb10)),
+			// Timing period with start and end, event falls before date range
+			Arguments.of(List.of(feb6, feb7, feb8, feb9, feb10), periodStartEnd, List.of(feb6, feb7, feb8, feb9, feb10)),
+			// Timing period with start and end, event falls after date range
+			Arguments.of(List.of(feb7, feb8, feb9, feb10, feb11), periodStartEnd, List.of(feb7, feb8, feb9, feb10, feb11))
 		);
 	}
 
