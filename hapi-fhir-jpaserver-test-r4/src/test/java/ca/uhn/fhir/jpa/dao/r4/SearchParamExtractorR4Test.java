@@ -22,6 +22,7 @@ import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
+import ca.uhn.fhir.util.DateUtils;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Sets;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -537,6 +538,79 @@ class SearchParamExtractorR4Test implements ITestDataBuilder {
 	}
 
 	@Nested
+	class PeriodDateExtraction {
+
+		private SearchParamExtractorR4 myExtractor;
+
+		@BeforeEach
+		void setUp() {
+			myExtractor = new SearchParamExtractorR4(myStorageSettings, myPartitionSettings, ourCtx, mySearchParamRegistry);
+		}
+
+		private ResourceIndexedSearchParamDate extractDateParam(Encounter theEncounter) {
+			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> dates = myExtractor.extractSearchParamDates(theEncounter);
+			return dates.stream()
+					.filter(p -> "date".equals(p.getParamName()))
+					.findFirst()
+					.orElse(null);
+		}
+
+		@Test
+		void testPeriodEndOnlyIndexesStartOfTimeAsLowValue() {
+			// FHIR spec: a missing period.start is "less than" any actual date, so the low bound is the
+			// start-of-time sentinel and date=le searches below period.end still match
+			Encounter encounter = new Encounter();
+			encounter.setPeriod(new Period().setEndElement(new DateTimeType("2026-01-01T00:00:00Z")));
+
+			ResourceIndexedSearchParamDate result = extractDateParam(encounter);
+
+			assertThat(result).isNotNull();
+			assertThat(result.getValueLow()).isEqualTo(myStorageSettings.getPeriodIndexStartOfTime().getValue());
+			assertThat(result.getValueLowDateOrdinal()).isEqualTo(10010101);
+			assertThat(result.getValueHigh()).isEqualTo(new DateTimeType("2026-01-01T00:00:00Z").getValue());
+		}
+
+		@Test
+		void testPeriodStartOnlyIndexesEndOfTimeAsHighValue() {
+			// FHIR spec: a missing period.end is "greater than" any actual date, so the high bound is the
+			// end-of-time sentinel and date=ge searches above period.start still match
+			Encounter encounter = new Encounter();
+			encounter.setPeriod(new Period().setStartElement(new DateTimeType("2026-01-01T00:00:00Z")));
+
+			ResourceIndexedSearchParamDate result = extractDateParam(encounter);
+
+			assertThat(result).isNotNull();
+			assertThat(result.getValueLow()).isEqualTo(new DateTimeType("2026-01-01T00:00:00Z").getValue());
+			// the sentinel carries DAY precision, so the high bound is normalised to the end of that day
+			assertThat(result.getValueHigh())
+					.isEqualTo(DateUtils.getEndOfDay(myStorageSettings.getPeriodIndexEndOfTime().getValue()));
+			assertThat(result.getValueHighDateOrdinal()).isEqualTo(90000101);
+		}
+
+		@Test
+		void testPeriodWithStartAndEndIndexesBothValues() {
+			Encounter encounter = new Encounter();
+			encounter.setPeriod(new Period()
+					.setStartElement(new DateTimeType("2026-01-01T00:00:00Z"))
+					.setEndElement(new DateTimeType("2026-01-31T00:00:00Z")));
+
+			ResourceIndexedSearchParamDate result = extractDateParam(encounter);
+
+			assertThat(result).isNotNull();
+			assertThat(result.getValueLow()).isEqualTo(new DateTimeType("2026-01-01T00:00:00Z").getValue());
+			assertThat(result.getValueHigh()).isEqualTo(new DateTimeType("2026-01-31T00:00:00Z").getValue());
+		}
+
+		@Test
+		void testPeriodWithNeitherStartNorEndIsNotIndexed() {
+			Encounter encounter = new Encounter();
+			encounter.setPeriod(new Period());
+
+			assertThat(extractDateParam(encounter)).isNull();
+		}
+	}
+
+	@Nested
 	class TimingOccurrenceDateExtraction {
 
 		private SearchParamExtractorR4 myExtractor;
@@ -567,7 +641,27 @@ class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 			assertNotNull(result);
 			assertNotNull(result.getValueLow());
-			assertNull(result.getValueHigh(), "Open-ended period must not populate sp_value_high");
+			assertThat(result.getValueHigh())
+					.as("Period with no end must index the end-of-time sentinel as sp_value_high")
+					.isEqualTo(DateUtils.getEndOfDay(myStorageSettings.getPeriodIndexEndOfTime().getValue()));
+		}
+
+		@Test
+		void testBoundsPeriodEndOnlyIndexesStartOfTimeAsLowValue() {
+			// FHIR spec: a missing period.start is "less than" any actual date, so sp_value_low must be the
+			// start-of-time sentinel that addDate_Period() uses, not a copy of period.end
+			ServiceRequest serviceRequest = new ServiceRequest();
+			serviceRequest.setOccurrence(new Timing()
+					.setRepeat(new Timing.TimingRepeatComponent()
+							.setBounds(new Period().setEndElement(new DateTimeType("2024-09-16T16:00:00.000-06:00")))));
+
+			ResourceIndexedSearchParamDate result = extractOccurrenceParam(serviceRequest);
+
+			assertThat(result).isNotNull();
+			assertThat(result.getValueHigh()).isNotNull();
+			assertThat(result.getValueLow())
+					.as("Period with no start must index the start-of-time sentinel as sp_value_low")
+					.isEqualTo(myStorageSettings.getPeriodIndexStartOfTime().getValue());
 		}
 
 		@Test

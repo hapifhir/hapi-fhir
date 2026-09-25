@@ -82,18 +82,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.*;
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.NonSI;
 import javax.measure.unit.Unit;
@@ -2310,60 +2300,80 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				Set<ResourceIndexedSearchParamDate> theParams,
 				RuntimeSearchParam theSearchParam,
 				IBase theValue) {
-			Date start = extractValueAsDate(myPeriodStartValueChild, theValue);
-			String startAsString = extractValueAsString(myPeriodStartValueChild, theValue);
-			Date end = extractValueAsDate(myPeriodEndValueChild, theValue);
-			String endAsString = extractValueAsString(myPeriodEndValueChild, theValue);
+			PeriodAsDates periodAsDates = normalizePeriodDates(
+					extractValueAsDate(myPeriodStartValueChild, theValue),
+					extractValueAsString(myPeriodStartValueChild, theValue),
+					extractValueAsDate(myPeriodEndValueChild, theValue),
+					extractValueAsString(myPeriodEndValueChild, theValue));
+			if (periodAsDates == null) return;
 
-			if (start != null || end != null) {
-
-				if (start == null) {
-					start = myStorageSettings.getPeriodIndexStartOfTime().getValue();
-					startAsString =
-							myStorageSettings.getPeriodIndexStartOfTime().getValueAsString();
-				}
-				if (end == null) {
-					end = myStorageSettings.getPeriodIndexEndOfTime().getValue();
-					endAsString = myStorageSettings.getPeriodIndexEndOfTime().getValueAsString();
-				}
-
-				myIndexedSearchParamDate = new ResourceIndexedSearchParamDate(
-						myPartitionSettings,
-						theResourceType,
-						theSearchParam.getName(),
-						start,
-						startAsString,
-						end,
-						endAsString,
-						startAsString);
-				theParams.add(myIndexedSearchParamDate);
-			}
+			myIndexedSearchParamDate = new ResourceIndexedSearchParamDate(
+					myPartitionSettings,
+					theResourceType,
+					theSearchParam.getName(),
+					periodAsDates.start,
+					periodAsDates.start.getDateValueAsString(),
+					periodAsDates.end,
+					periodAsDates.end.getDateValueAsString(),
+					periodAsDates.start.getDateValueAsString());
+			theParams.add(myIndexedSearchParamDate);
 		}
+
+		/**
+		 * Sets default start/end values for Periods
+		 */
+		private PeriodAsDates normalizePeriodDates(Date start, String startAsString, Date end, String endAsString) {
+
+			if (start == null && end == null) {
+				return null;
+			}
+
+			if (start == null) {
+				start = myStorageSettings.getPeriodIndexStartOfTime().getValue();
+				startAsString = myStorageSettings.getPeriodIndexStartOfTime().getValueAsString();
+			}
+			if (end == null) {
+				end = myStorageSettings.getPeriodIndexEndOfTime().getValue();
+				endAsString = myStorageSettings.getPeriodIndexEndOfTime().getValueAsString();
+			}
+			return new PeriodAsDates(
+					new DateStringWrapper(start, startAsString), new DateStringWrapper(end, endAsString));
+		}
+
+		private record PeriodAsDates(@Nonnull DateStringWrapper start, @Nonnull DateStringWrapper end) {}
 
 		/**
 		 * For Timings, we consider all the dates in the structure (eg. Timing.event, Timing.repeat.bounds.boundsPeriod)
 		 * to create an upper and lower bound Indexed Search Param.
+		 * If `event` is present, we don't normalize the start/end date of the period.
 		 */
 		private void addDate_Timing(
 				String theResourceType,
 				Set<ResourceIndexedSearchParamDate> theParams,
 				RuntimeSearchParam theSearchParam,
 				IBase theValue) {
-			List<IPrimitiveType<Date>> values = extractValuesAsFhirDates(myTimingEventValueChild, theValue);
+			List<IPrimitiveType<Date>> eventDateValues = extractValuesAsFhirDates(myTimingEventValueChild, theValue);
 
-			TreeSet<DateStringWrapper> dates = new TreeSet<>();
-			String firstValue = null;
-			for (IPrimitiveType<Date> nextEvent : values) {
+			SortedSet<DateStringWrapper> eventDatesSorted = new TreeSet<>();
+			String firstSeenValue = null;
+
+			for (IPrimitiveType<Date> nextEvent : eventDateValues) {
 				if (nextEvent.getValue() != null) {
-					dates.add(new DateStringWrapper(nextEvent.getValue(), nextEvent.getValueAsString()));
-					if (firstValue == null) {
-						firstValue = nextEvent.getValueAsString();
+					eventDatesSorted.add(new DateStringWrapper(nextEvent.getValue(), nextEvent.getValueAsString()));
+					if (firstSeenValue == null) {
+						firstSeenValue = nextEvent.getValueAsString();
 					}
 				}
 			}
 
-			DateStringWrapper periodEnd = null;
-			boolean isPeriod = false;
+			// In order to properly set upper and lower bounds, we need to compute each of the separately
+			SortedSet<DateStringWrapper> startDates = new TreeSet<>();
+			SortedSet<DateStringWrapper> endDates = new TreeSet<>();
+			if (!eventDatesSorted.isEmpty()) {
+				startDates.add(eventDatesSorted.first());
+				endDates.add(eventDatesSorted.last());
+			}
+
 			Optional<IBase> repeat = myTimingRepeatValueChild.getAccessor().getFirstValueOrNull(theValue);
 			if (repeat.isPresent()) {
 				Optional<IBase> bounds =
@@ -2371,40 +2381,56 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				if (bounds.isPresent()) {
 					String boundsType = toRootTypeName(bounds.get());
 					if ("Period".equals(boundsType)) {
-						isPeriod = true;
-						IPrimitiveType<Date> start =
+						DateStringWrapper periodStart =
 								extractValuesAsFhirDates(myPeriodStartValueChild, bounds.get()).stream()
+										.filter(Objects::nonNull)
+										.filter(it -> it.getValue() != null)
+										.map(it -> new DateStringWrapper(it.getValue(), it.getValueAsString()))
 										.findFirst()
 										.orElse(null);
-						IPrimitiveType<Date> end =
+						DateStringWrapper periodEnd =
 								extractValuesAsFhirDates(myPeriodEndValueChild, bounds.get()).stream()
+										.filter(Objects::nonNull)
+										.filter(it -> it.getValue() != null)
+										.map(it -> new DateStringWrapper(it.getValue(), it.getValueAsString()))
 										.findFirst()
 										.orElse(null);
 
-						if (start != null && start.getValue() != null) {
-							dates.add(new DateStringWrapper(start.getValue(), start.getValueAsString()));
-						}
-						if (end != null && end.getValue() != null) {
-							periodEnd = new DateStringWrapper(end.getValue(), end.getValueAsString());
-							dates.add(periodEnd);
+						// ONLY If we have no event dates, normalize the Period for indexing.
+						// This is to prevent unbounded Periods turning into a catch-all and returning
+						// search results with events outside a searched Period.
+						if (eventDatesSorted.isEmpty()) {
+							PeriodAsDates periodAsDates = normalizePeriodDates(
+									periodStart,
+									periodStart != null ? periodStart.getDateValueAsString() : null,
+									periodEnd,
+									periodEnd != null ? periodEnd.getDateValueAsString() : null);
+							if (periodAsDates != null) {
+								startDates.add(periodAsDates.start);
+								endDates.add(periodAsDates.end);
+							}
+						} else {
+							if (periodStart != null) {
+								startDates.add(periodStart);
+							}
+							if (periodEnd != null) {
+								endDates.add(periodEnd);
+							}
 						}
 					}
 				}
 			}
 
-			if (!dates.isEmpty()) {
-				DateStringWrapper high = isPeriod ? periodEnd : dates.last();
-				String highString = high != null ? high.getDateValueAsString() : null;
-
+			if (!startDates.isEmpty() || !endDates.isEmpty()) {
 				myIndexedSearchParamDate = new ResourceIndexedSearchParamDate(
 						myPartitionSettings,
 						theResourceType,
 						theSearchParam.getName(),
-						dates.first(),
-						dates.first().getDateValueAsString(),
-						high,
-						highString,
-						firstValue);
+						startDates.first(),
+						startDates.first().getDateValueAsString(),
+						endDates.last(),
+						endDates.last().getDateValueAsString(),
+						firstSeenValue);
 				theParams.add(myIndexedSearchParamDate);
 			}
 		}

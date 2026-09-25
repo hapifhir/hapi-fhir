@@ -21,20 +21,26 @@ import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.searchparam.registry.ReadOnlySearchParamCache;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
+import ca.uhn.fhir.util.DateUtils;
 import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.Duration;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.Location;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Period;
+import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.dstu3.model.Questionnaire;
+import org.hl7.fhir.dstu3.model.Timing;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
@@ -223,6 +229,54 @@ public class SearchParamExtractorDstu3Test {
 			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamUri> outcome = extractor.extractSearchParamUri(resource);
 			assertThat(outcome.getWarnings()).containsExactly("Search param [Patient]#foo is unable to index value of type Patient as a URI at path: Patient");
 		}
+	}
+
+	@Test
+	void testBoundsPeriodEndOnlyIndexesStartOfTimeAsLowValue() {
+		// FHIR spec: a missing period.start is "less than" any actual date, so sp_value_low must be the
+		// start-of-time sentinel that addDate_Period()
+		StorageSettings storageSettings = new StorageSettings();
+		ProcedureRequest procedureRequest = new ProcedureRequest();
+		procedureRequest.setOccurrence(new Timing()
+				.setRepeat(new Timing.TimingRepeatComponent()
+						.setBounds(new Period().setEndElement(new DateTimeType("2024-09-16T16:00:00.000-06:00")))));
+
+		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(storageSettings, new PartitionSettings(), ourCtx, new FhirContextSearchParamRegistry(ourCtx));
+		extractor.start();
+		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> dates = extractor.extractSearchParamDates(procedureRequest);
+
+		ResourceIndexedSearchParamDate occurrence = dates.stream()
+				.filter(p -> "occurrence".equals(p.getParamName()))
+				.findFirst()
+				.orElse(null);
+
+		assertThat(occurrence).isNotNull();
+		assertThat(occurrence.getValueLow()).isEqualTo(storageSettings.getPeriodIndexStartOfTime().getValue());
+		assertThat(occurrence.getValueHigh()).isNotNull();
+	}
+
+	@Test
+	void testBoundsPeriodStartOnlyIndexesEndOfTimeAsHighValue() {
+		// FHIR spec: a missing period.end is "greater than" any actual date, so sp_value_high must be the
+		// end-of-time sentinel that addDate_Period() uses
+		StorageSettings storageSettings = new StorageSettings();
+		ProcedureRequest procedureRequest = new ProcedureRequest();
+		procedureRequest.setOccurrence(new Timing()
+				.setRepeat(new Timing.TimingRepeatComponent()
+						.setBounds(new Period().setStartElement(new DateTimeType("2024-09-16T16:00:00.000-06:00")))));
+
+		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(storageSettings, new PartitionSettings(), ourCtx, new FhirContextSearchParamRegistry(ourCtx));
+		extractor.start();
+		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> dates = extractor.extractSearchParamDates(procedureRequest);
+
+		ResourceIndexedSearchParamDate occurrence = dates.stream()
+				.filter(p -> "occurrence".equals(p.getParamName()))
+				.findFirst()
+				.orElse(null);
+
+		assertThat(occurrence).isNotNull();
+		assertThat(occurrence.getValueLow()).isNotNull();
+		assertThat(occurrence.getValueHigh()).isEqualTo(DateUtils.getEndOfDay(storageSettings.getPeriodIndexEndOfTime().getValue()));
 	}
 
 	@Test
