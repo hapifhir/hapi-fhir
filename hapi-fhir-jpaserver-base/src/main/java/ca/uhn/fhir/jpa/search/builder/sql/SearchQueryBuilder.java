@@ -910,38 +910,40 @@ public class SearchQueryBuilder {
 
 	/**
 	 * Returns the subselect which unpacks the given IDs from a single JSON array bind variable, or
-	 * null when {@link #shouldBindIdListAsJson(List)} is false.
+	 * null when {@link #getIdListJsonSubselectTemplateOrNull(List)} returns null.
 	 */
 	@Nullable
 	private String createJsonIdListSubselectQueryOrNull(List<Long> theIds) {
-		if (!shouldBindIdListAsJson(theIds)) {
+		String template = getIdListJsonSubselectTemplateOrNull(theIds);
+		if (template == null) {
 			return null;
 		}
 
-		IHapiFhirDialect hapiFhirDialect = (IHapiFhirDialect) myDialect;
 		String json = toJsonArray(theIds);
-		Object bindValue = hapiFhirDialect.bindsIdListJsonAsClob()
+		Object bindValue = ((IHapiFhirDialect) myDialect).bindsIdListJsonAsClob()
 				? new TypedParameterValue<>(StandardBasicTypes.MATERIALIZED_CLOB, json)
 				: json;
-		return "(" + String.format(hapiFhirDialect.getIdListJsonSubselectTemplate(), quotedPlaceholder(bindValue))
-				+ ")";
+		return "(" + String.format(template, quotedPlaceholder(bindValue)) + ")";
 	}
 
 	/**
-	 * Returns false if:
+	 * Returns the dialect's JSON subselect template, or null if:
 	 * - the number of IDs is at or below the configured threshold, or the threshold is
 	 *   {@link StorageSettings#BIND_ID_LIST_AS_JSON_DISABLED}
 	 * - the database type has no JSON unpacking function
 	 */
-	private boolean shouldBindIdListAsJson(List<Long> theIds) {
+	@Nullable
+	private String getIdListJsonSubselectTemplateOrNull(List<Long> theIds) {
 		int threshold = myStorageSettings.getBindIdListAsJsonAboveSize();
 		if (threshold == StorageSettings.BIND_ID_LIST_AS_JSON_DISABLED || theIds.size() <= threshold) {
-			return false;
+			return null;
 		}
 
-		return myDialect instanceof IHapiFhirDialect hapiFhirDialect
-				&& hapiFhirDialect.getIdListJsonSubselectTemplate() != null
-				&& myDialectProvider.isJsonUnpackingSupported();
+		if (!(myDialect instanceof IHapiFhirDialect hapiFhirDialect) || !myDialectProvider.isJsonUnpackingSupported()) {
+			return null;
+		}
+
+		return hapiFhirDialect.getIdListJsonSubselectTemplate();
 	}
 
 	/**
