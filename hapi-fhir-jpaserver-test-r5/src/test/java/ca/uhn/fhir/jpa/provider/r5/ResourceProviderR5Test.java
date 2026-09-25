@@ -25,13 +25,6 @@ import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.UrlUtil;
-import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Bundle.BundleEntryComponent;
@@ -63,7 +56,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.comparator.Comparators;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -410,31 +402,18 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 	}
 
 	@Test
-	public void testValidateGeneratedCapabilityStatement() throws IOException {
+	public void testValidateGeneratedCapabilityStatement() {
 
-		String input;
-		HttpGet get = new HttpGet(myServerBase + "/metadata?_format=json");
-		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
-			assertEquals(200, resp.getStatusLine().getStatusCode());
-			input = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(input);
-		}
+		String input = myServer.fhirRequest("/metadata?_format=json").get().assertStatus(200).getBody();
+		ourLog.info(input);
 
+		String respString = myServer.fhirRequest("/CapabilityStatement/$validate?_pretty=true").post(input, Constants.CT_JSON).assertStatus(200).getBody();
+		ourLog.debug(respString);
 
-		HttpPost post = new HttpPost(myServerBase + "/CapabilityStatement/$validate?_pretty=true");
-		post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
-
-		try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
-			String respString = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.debug(respString);
-			assertEquals(200, resp.getStatusLine().getStatusCode());
-
-			// As of 2023-01-26, the above line was restored.
-			// As of 2021-12-28, the R5 structures return a version string that isn't
-			// actually in the fhirVersion ValueSet. If this stops being the case this
-			// test will fail and the line above should be restored
-
-		}
+		// As of 2023-01-26, the assertStatus(200) above was restored.
+		// As of 2021-12-28, the R5 structures return a version string that isn't
+		// actually in the fhirVersion ValueSet. If this stops being the case this
+		// test will fail and the assertStatus(200) above should be restored
 	}
 
 	@Test
@@ -477,7 +456,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 	}
 
 	@Test
-	public void testSearchWithCompositeSort() throws IOException {
+	public void testSearchWithCompositeSort() {
 
 		IIdType pid0;
 		IIdType oid1;
@@ -553,14 +532,8 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			ourLog.debug("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
-		String uri = myServerBase + "/Observation?_sort=combo-code-value-quantity";
-		Bundle found;
-
-		HttpGet get = new HttpGet(uri);
-		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
-			String output = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-			found = myFhirCtx.newXmlParser().parseResource(Bundle.class, output);
-		}
+		String output = myServer.fhirRequest("/Observation?_sort=combo-code-value-quantity").get().getBody();
+		Bundle found = myFhirCtx.newXmlParser().parseResource(Bundle.class, output);
 
 		ourLog.debug("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
 

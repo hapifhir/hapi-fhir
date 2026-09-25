@@ -7,15 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.parser.StrictErrorHandler;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.BasePagingProvider;
+import ca.uhn.fhir.test.utilities.HttpTestRequest;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.util.BundleUtil;
-import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
@@ -25,7 +21,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -75,7 +70,7 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 	 * Notice that the issue is not gateway related. Is a plain server issue.
 	 */
 	@Test
-	public void testEverythingPaginatesThroughAllPatients_whenCountIsEqualToMaxPageSize() throws IOException {
+	public void testEverythingPaginatesThroughAllPatients_whenCountIsEqualToMaxPageSize() {
 		// setup
 		int totalPatients = 54;
 		createPatients(totalPatients);
@@ -102,7 +97,7 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
-	public void testEverythingTypeOperationPagination_withDifferentPrefetchThresholds_coverageTest(boolean theProvideCountBool) throws IOException {
+	public void testEverythingTypeOperationPagination_withDifferentPrefetchThresholds_coverageTest(boolean theProvideCountBool) {
 		// setup
 		List<Integer> previousPrefetchThreshold = myStorageSettings.getSearchPreFetchThresholds();
 		// other tests may be resetting this
@@ -188,18 +183,13 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 		}
 	}
 
-	private Bundle fetchBundle(String theUrl) throws IOException {
-		Bundle bundle;
-		HttpGet get = new HttpGet(theUrl);
-		CloseableHttpResponse resp = ourHttpClient.execute(get);
-		try {
-			assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy(), resp.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue().replaceAll(";.*", ""));
-			bundle = EncodingEnum.JSON.newParser(myFhirContext).parseResource(Bundle.class, IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8));
-		} finally {
-			IOUtils.closeQuietly(resp);
-		}
-
-		return bundle;
+	/**
+	 * @param theUrl a fully-qualified URL, since paging links come back absolute
+	 */
+	private Bundle fetchBundle(String theUrl) {
+		HttpTestResponse resp = HttpTestRequest.to(myServer.getHttpClient(), theUrl).get();
+		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy(), resp.getContentType());
+		return EncodingEnum.JSON.newParser(myFhirContext).parseResource(Bundle.class, resp.getBody());
 	}
 
 }

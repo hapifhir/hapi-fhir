@@ -22,12 +22,8 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import com.google.common.collect.Lists;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -50,7 +46,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import jakarta.servlet.ServletException;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -189,15 +184,11 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
 		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);
 
-		HttpPost post = new HttpPost(myServerBase + "/Patient");
-		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("Response was: {}", resp);
-			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
-		}
+		HttpTestResponse response = myServer.fhirRequest("/Patient").post(resource, Constants.CT_FHIR_XML);
+		ourLog.info("Response was: {}", response.getBody());
+		response.assertStatus(201);
+		String newIdString = response.getHeader(Constants.HEADER_LOCATION_LC);
+		assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 
 		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED), myParamsCaptor.capture());
 		assertEquals(RestOperationTypeEnum.CREATE, myParamsCaptor.getValue().get(RestOperationTypeEnum.class));
@@ -289,15 +280,11 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
 		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);
 
-		HttpPost post = new HttpPost(myServerBase + "/Patient");
-		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("Response was: {}", resp);
-			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
-		}
+		HttpTestResponse response = myServer.fhirRequest("/Patient").post(resource, Constants.CT_FHIR_XML);
+		ourLog.info("Response was: {}", response.getBody());
+		response.assertStatus(201);
+		String newIdString = response.getHeader(Constants.HEADER_LOCATION_LC);
+		assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 
 		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED), myParamsCaptor.capture());
 		assertEquals(RestOperationTypeEnum.CREATE, myParamsCaptor.getValue().get(RestOperationTypeEnum.class));
@@ -345,11 +332,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 	private void transaction(Bundle theBundle) throws IOException {
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(theBundle);
-		HttpPost post = new HttpPost(myServerBase + "/");
-		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
-			assertEquals(200, response.getStatusLine().getStatusCode());
-		}
+		myServer.fhirRequest("/").post(resource, Constants.CT_FHIR_XML).assertStatus(200);
 	}
 
 	@Test

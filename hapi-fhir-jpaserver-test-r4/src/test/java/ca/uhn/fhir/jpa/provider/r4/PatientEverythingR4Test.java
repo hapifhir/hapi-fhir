@@ -9,11 +9,9 @@ import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.test.utilities.HttpTestRequest;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.util.BundleUtil;
-import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Encounter;
@@ -145,12 +143,9 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		assertThat(actual).containsExactlyInAnyOrder(patientId, observationId);
 
 		// Synchronous call
-		HttpGet get = new HttpGet(myServerBase + "/" + patientId + "/$everything?_format=json&_count=100");
-		get.addHeader(Constants.HEADER_CACHE_CONTROL, Constants.CACHE_CONTROL_NO_CACHE);
-		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
-			assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy(), resp.getFirstHeader(ca.uhn.fhir.rest.api.Constants.HEADER_CONTENT_TYPE).getValue().replaceAll(";.*", ""));
-			bundle = EncodingEnum.JSON.newParser(myFhirContext).parseResource(Bundle.class, IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8));
-		}
+		HttpTestResponse resp = myServer.fhirRequest("/" + patientId + "/$everything?_format=json&_count=100").withHeader(Constants.HEADER_CACHE_CONTROL, Constants.CACHE_CONTROL_NO_CACHE).get();
+		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy(), resp.getContentType());
+		bundle = EncodingEnum.JSON.newParser(myFhirContext).parseResource(Bundle.class, resp.getBody());
 		assertNull(bundle.getLink("next"));
 		actual = new TreeSet<>();
 		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
@@ -301,17 +296,9 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 	}
 
 	private Bundle fetchBundle(String theUrl, EncodingEnum theEncoding) throws IOException {
-		Bundle bundle;
-		HttpGet get = new HttpGet(theUrl);
-		CloseableHttpResponse resp = ourHttpClient.execute(get);
-		try {
-			assertEquals(theEncoding.getResourceContentTypeNonLegacy(), resp.getFirstHeader(ca.uhn.fhir.rest.api.Constants.HEADER_CONTENT_TYPE).getValue().replaceAll(";.*", ""));
-			bundle = theEncoding.newParser(myFhirContext).parseResource(Bundle.class, IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8));
-		} finally {
-			IOUtils.closeQuietly(resp);
-		}
-
-		return bundle;
+		HttpTestResponse resp = HttpTestRequest.to(myServer.getHttpClient(), theUrl).get();
+		assertEquals(theEncoding.getResourceContentTypeNonLegacy(), resp.getContentType());
+		return theEncoding.newParser(myFhirContext).parseResource(Bundle.class, resp.getBody());
 	}
 
 }

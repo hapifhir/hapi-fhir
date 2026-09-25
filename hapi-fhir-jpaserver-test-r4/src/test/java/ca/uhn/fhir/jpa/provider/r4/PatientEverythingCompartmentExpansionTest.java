@@ -3,12 +3,8 @@ package ca.uhn.fhir.jpa.provider.r4;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Device;
@@ -20,7 +16,6 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -47,7 +42,7 @@ public class PatientEverythingCompartmentExpansionTest extends BaseResourceProvi
 		medicationAdministration.setMedication(referenceToMedication);
 		String medicationAdministrationId = myClient.create().resource(medicationAdministration).execute().getId().toUnqualifiedVersionless().getValue();
 
-		Bundle bundle = fetchBundle(myServerBase + "/" + patientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
+		Bundle bundle = fetchBundle("/" + patientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
 
 		assertNull(bundle.getLink("next"));
 
@@ -73,7 +68,7 @@ public class PatientEverythingCompartmentExpansionTest extends BaseResourceProvi
 		patient.setManagingOrganization(referenceToOrganization);
 		String patientId = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless().getValue();
 
-		Bundle bundle = fetchBundle(myClient.getServerBase() + "/" + patientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
+		Bundle bundle = fetchBundle("/" + patientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
 
 		assertNull(bundle.getLink("next"));
 
@@ -98,7 +93,7 @@ public class PatientEverythingCompartmentExpansionTest extends BaseResourceProvi
 		patient.setGeneralPractitioner(List.of(referenceToOrganization));
 		String patientId = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless().getValue();
 
-		Bundle bundle = fetchBundle(myClient.getServerBase() + "/" + patientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
+		Bundle bundle = fetchBundle("/" + patientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
 
 		assertNull(bundle.getLink("next"));
 
@@ -123,7 +118,7 @@ public class PatientEverythingCompartmentExpansionTest extends BaseResourceProvi
 		patient.setGeneralPractitioner(List.of(referenceToPractitioner));
 		String patientId = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless().getValue();
 
-		Bundle bundle = fetchBundle(myClient.getServerBase() + "/" + patientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
+		Bundle bundle = fetchBundle("/" + patientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
 
 		assertNull(bundle.getLink("next"));
 
@@ -149,7 +144,7 @@ public class PatientEverythingCompartmentExpansionTest extends BaseResourceProvi
 		String deviceId = myClient.create().resource(device).execute().getId().toUnqualifiedVersionless().getValue();
 
 
-		Bundle bundle = fetchBundle(myClient.getServerBase() + "/" + patientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
+		Bundle bundle = fetchBundle("/" + patientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
 
 		assertNull(bundle.getLink("next"));
 
@@ -163,18 +158,13 @@ public class PatientEverythingCompartmentExpansionTest extends BaseResourceProvi
 	}
 
 
-	private Bundle fetchBundle(String theUrl, EncodingEnum theEncoding) throws IOException {
-		Bundle bundle;
-		HttpGet get = new HttpGet(theUrl);
-		CloseableHttpResponse resp = ourHttpClient.execute(get);
-		try {
-			assertEquals(theEncoding.getResourceContentTypeNonLegacy(), resp.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue().replaceAll(";.*", ""));
-			bundle = theEncoding.newParser(myFhirContext).parseResource(Bundle.class, IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8));
-		} finally {
-			IOUtils.closeQuietly(resp);
-		}
-
-		return bundle;
+	/**
+	 * @param thePath the path below the server base, e.g. {@literal "/Patient/123/$everything"}
+	 */
+	private Bundle fetchBundle(String thePath, EncodingEnum theEncoding) {
+		HttpTestResponse resp = myServer.fhirRequest(thePath).get();
+		assertEquals(theEncoding.getResourceContentTypeNonLegacy(), resp.getContentType());
+		return theEncoding.newParser(myFhirContext).parseResource(Bundle.class, resp.getBody());
 	}
 
 }

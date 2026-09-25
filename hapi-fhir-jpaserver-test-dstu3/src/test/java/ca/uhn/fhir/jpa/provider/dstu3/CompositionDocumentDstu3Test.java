@@ -5,11 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Composition;
@@ -25,7 +20,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -109,10 +103,10 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 	}
 
 	@Test
-	public void testDocumentBundleReturnedCorrect() throws IOException {
+	public void testDocumentBundleReturnedCorrect() {
 
-		String theUrl = myServerBase + "/" + compId + "/$document?_format=json";
-		Bundle bundle = fetchBundle(theUrl, EncodingEnum.JSON);
+		String path = "/" + compId + "/$document?_format=json";
+		Bundle bundle = fetchBundle(path, EncodingEnum.JSON);
 		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		bundle.getEntry().stream()
@@ -136,15 +130,9 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 		assertThat(actual).contains(myObsIds.toArray(new String[0]));
 	}
 
-	private Bundle fetchBundle(String theUrl, EncodingEnum theEncoding) throws IOException, ClientProtocolException {
-		Bundle bundle;
-		HttpGet get = new HttpGet(theUrl);
-
-		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
-			String resourceString = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-			bundle = theEncoding.newParser(myFhirContext).parseResource(Bundle.class, resourceString);
-		} 
-		return bundle;
+	private Bundle fetchBundle(String thePath, EncodingEnum theEncoding) {
+		String resourceString = myServer.fhirRequest(thePath).get().getBody();
+		return theEncoding.newParser(myFhirContext).parseResource(Bundle.class, resourceString);
 	}
 
 }

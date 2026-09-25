@@ -19,13 +19,10 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.test.utilities.HttpTestRequest;
 import ca.uhn.fhir.util.StopWatch;
-import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -628,9 +625,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		}
 		myClient.transaction().withBundle(input).execute();
 
-		try (CloseableHttpResponse getMeta = ourHttpClient.execute(new HttpGet(myServerBase + "/metadata"))) {
-			assertEquals(200, getMeta.getStatusLine().getStatusCode());
-		}
+		myServer.fhirRequest("/metadata").get().assertStatus(200);
 
 		List<BaseTask> tasks = Lists.newArrayList();
 		try {
@@ -760,34 +755,17 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 		@Override
 		public void run() {
-			CloseableHttpResponse getResp;
 			for (int i = 0; i < 10; i++) {
 				try {
-					Bundle respBundle;
-
 					// Load search
-					HttpGet get = new HttpGet(myServerBase + "/Patient?identifier=http%3A%2F%2Ftest%7CBAR," + UUID.randomUUID());
-					get.addHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
-					getResp = ourHttpClient.execute(get);
-					try {
-						String respBundleString = IOUtils.toString(getResp.getEntity().getContent(), Charsets.UTF_8);
-						assertThat(getResp.getStatusLine().getStatusCode()).as(respBundleString).isEqualTo(200);
-						respBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, respBundleString);
-						myTaskCount++;
-					} finally {
-						IOUtils.closeQuietly(getResp);
-					}
+					String path = "/Patient?identifier=http%3A%2F%2Ftest%7CBAR," + UUID.randomUUID();
+					String respBundleString = myServer.fhirRequest(path).withHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW).get().assertStatus(200).getBody();
+					Bundle respBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, respBundleString);
+					myTaskCount++;
 
 					// Load page 2
-					get = new HttpGet(respBundle.getLink("next").getUrl());
-					get.addHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
-					getResp = ourHttpClient.execute(get);
-					try {
-						assertEquals(200, getResp.getStatusLine().getStatusCode());
-						myTaskCount++;
-					} finally {
-						IOUtils.closeQuietly(getResp);
-					}
+					HttpTestRequest.to(myServer.getHttpClient(), respBundle.getLink("next").getUrl()).withHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW).get().assertStatus(200);
+					myTaskCount++;
 
 				} catch (Throwable e) {
 					ourLog.error("Failure during search", e);

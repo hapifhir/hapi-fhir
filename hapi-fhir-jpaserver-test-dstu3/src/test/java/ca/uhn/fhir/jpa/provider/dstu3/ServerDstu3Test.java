@@ -1,18 +1,13 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.rest.openapi.OpenApiInterceptor;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -35,48 +30,40 @@ public class ServerDstu3Test extends BaseResourceProviderDstu3Test {
 	 * See #519
 	 */
 	@Test
-	public void saveIdParamOnlyAppearsOnce() throws IOException {
-		HttpGet get = new HttpGet(myServerBase + "/metadata?_pretty=true&_format=xml");
-		CloseableHttpResponse resp = ourHttpClient.execute(get);
-		try {
-			ourLog.info(resp.toString());
-			assertEquals(200, resp.getStatusLine().getStatusCode());
+	public void saveIdParamOnlyAppearsOnce() {
+		HttpTestResponse resp = myServer.fhirRequest("/metadata?_pretty=true&_format=xml").get();
+		ourLog.info(resp.toString());
+		resp.assertStatus(200);
 
-			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.debug(respString);
+		String respString = resp.getBody();
+		ourLog.debug(respString);
 
-			CapabilityStatement cs = myFhirContext.newXmlParser().parseResource(CapabilityStatement.class, respString);
+		CapabilityStatement cs = myFhirContext.newXmlParser().parseResource(CapabilityStatement.class, respString);
 
-			for (CapabilityStatementRestResourceComponent nextResource : cs.getRest().get(0).getResource()) {
-				ourLog.info("Testing resource: " + nextResource.getType());
-				Set<String> sps = new HashSet<String>();
-				for (CapabilityStatementRestResourceSearchParamComponent nextSp : nextResource.getSearchParam()) {
-					if (sps.add(nextSp.getName()) == false) {
-						fail("Duplicate search parameter " + nextSp.getName() + " for resource " + nextResource.getType());
-					}
-				}
-
-				if (!sps.contains("_id")) {
-					fail("No search parameter _id for resource " + nextResource.getType());
+		for (CapabilityStatementRestResourceComponent nextResource : cs.getRest().get(0).getResource()) {
+			ourLog.info("Testing resource: " + nextResource.getType());
+			Set<String> sps = new HashSet<String>();
+			for (CapabilityStatementRestResourceSearchParamComponent nextSp : nextResource.getSearchParam()) {
+				if (sps.add(nextSp.getName()) == false) {
+					fail("Duplicate search parameter " + nextSp.getName() + " for resource " + nextResource.getType());
 				}
 			}
-		} finally {
-			IOUtils.closeQuietly(resp.getEntity().getContent());
+
+			if (!sps.contains("_id")) {
+				fail("No search parameter _id for resource " + nextResource.getType());
+			}
 		}
 	}
 
 
 	@Test
-	public void testFetchOpenApi() throws IOException {
+	public void testFetchOpenApi() {
 		myRestServer.registerInterceptor(new OpenApiInterceptor());
 
-		HttpGet get = new HttpGet(myServerBase + "/api-docs");
-		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
-			String string = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(string);
+		HttpTestResponse response = myServer.fhirRequest("/api-docs").get();
+		ourLog.info(response.getBody());
 
-			assertEquals(200, response.getStatusLine().getStatusCode());
-		}
+		response.assertStatus(200);
 	}
 
 

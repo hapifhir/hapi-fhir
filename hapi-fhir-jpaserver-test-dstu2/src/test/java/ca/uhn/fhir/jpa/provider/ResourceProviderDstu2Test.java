@@ -77,6 +77,7 @@ import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.StopWatch;
@@ -84,15 +85,6 @@ import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -153,11 +145,8 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		mySearchCoordinatorSvcRaw = AopTestUtils.getTargetObject(mySearchCoordinatorSvc);
 	}
 
-	private void checkParamMissing(String paramName) throws IOException {
-		HttpGet get = new HttpGet(myServerBase + "/Observation?" + paramName + ":missing=false");
-		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
-			assertEquals(200, resp.getStatusLine().getStatusCode());
-		}
+	private void checkParamMissing(String paramName) {
+		myServer.fhirRequest("/Observation?" + paramName + ":missing=false").get().assertStatus(200);
 	}
 
 	/**
@@ -348,15 +337,8 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		arr[0] = 2;
 		binary.setContent(arr);
-		HttpPut putRequest = new HttpPut(myServerBase + "/Binary/" + resource.getIdPart());
-		putRequest.setEntity(new ByteArrayEntity(arr, ContentType.parse("dansk")));
-		CloseableHttpResponse resp = ourHttpClient.execute(putRequest);
-		try {
-			assertEquals(200, resp.getStatusLine().getStatusCode());
-			assertEquals(resource.withVersion("2").getValue(), resp.getFirstHeader("Content-Location").getValue());
-		} finally {
-			IOUtils.closeQuietly(resp);
-		}
+		HttpTestResponse resp = myServer.fhirRequest("/Binary/" + resource.getIdPart()).put(arr, "dansk").assertStatus(200);
+		assertEquals(resource.withVersion("2").getValue(), resp.getHeader("Content-Location"));
 
 		fromDB = myClient.read().resource(Binary.class).withId(resource.toVersionless()).execute();
 		assertEquals("2", fromDB.getId().getVersionIdPart());
@@ -364,15 +346,8 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		arr[0] = 3;
 		fromDB.setContent(arr);
 		String encoded = myFhirContext.newJsonParser().encodeResourceToString(fromDB);
-		putRequest = new HttpPut(myServerBase + "/Binary/" + resource.getIdPart());
-		putRequest.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
-		resp = ourHttpClient.execute(putRequest);
-		try {
-			assertEquals(200, resp.getStatusLine().getStatusCode());
-			assertEquals(resource.withVersion("3").getValue(), resp.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
-		} finally {
-			IOUtils.closeQuietly(resp);
-		}
+		resp = myServer.fhirRequest("/Binary/" + resource.getIdPart()).put(encoded, "application/json+fhir").assertStatus(200);
+		assertEquals(resource.withVersion("3").getValue(), resp.getHeader(Constants.HEADER_CONTENT_LOCATION));
 
 		fromDB = myClient.read().resource(Binary.class).withId(resource.toVersionless()).execute();
 		assertEquals("3", fromDB.getId().getVersionIdPart());
@@ -383,14 +358,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		binary.setContent(arr);
 		binary.setId("");
 		encoded = myFhirContext.newJsonParser().encodeResourceToString(binary);
-		putRequest = new HttpPut(myServerBase + "/Binary/" + resource.getIdPart());
-		putRequest.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
-		resp = ourHttpClient.execute(putRequest);
-		try {
-			assertEquals(400, resp.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(resp);
-		}
+		myServer.fhirRequest("/Binary/" + resource.getIdPart()).put(encoded, "application/json+fhir").assertStatus(400);
 
 		fromDB = myClient.read().resource(Binary.class).withId(resource.toVersionless()).execute();
 		assertEquals("3", fromDB.getId().getVersionIdPart());
@@ -398,72 +366,45 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test
-	public void testCreateResourceConditional() throws IOException {
+	public void testCreateResourceConditional() {
 		String methodName = "testCreateResourceConditional";
 
 		Patient pt = new Patient();
 		pt.addName().addFamily(methodName);
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		HttpPost post = new HttpPost(myServerBase + "/Patient");
-		post.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?name=" + methodName);
-		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		CloseableHttpResponse response = ourHttpClient.execute(post);
-		IdDt id;
-		try {
-			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
-			id = new IdDt(newIdString);
-		} finally {
-			response.close();
-		}
+		HttpTestResponse response = myServer.fhirRequest("/Patient").withHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?name=" + methodName).post(resource, Constants.CT_FHIR_XML).assertStatus(201);
+		String newIdString = response.getHeader(Constants.HEADER_LOCATION_LC);
+		assertThat(newIdString).startsWith(myServerBase + "/Patient/");
+		IdDt id = new IdDt(newIdString);
 
-		post = new HttpPost(myServerBase + "/Patient");
-		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		post.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?name=" + methodName);
-		response = ourHttpClient.execute(post);
-		try {
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertEquals(id.getValue(), newIdString); // version should match for conditional create
-		} finally {
-			response.close();
-		}
+		response = myServer.fhirRequest("/Patient").withHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?name=" + methodName).post(resource, Constants.CT_FHIR_XML).assertStatus(200);
+		newIdString = response.getHeader(Constants.HEADER_LOCATION_LC);
+		assertEquals(id.getValue(), newIdString); // version should match for conditional create
 
 	}
 
 	@Test
-	public void testCreateResourceConditionalComplex() throws IOException {
+	public void testCreateResourceConditionalComplex() {
 		Patient pt = new Patient();
 		pt.addIdentifier().setSystem("http://general-hospital.co.uk/Identifiers").setValue("09832345234543876876");
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		HttpPost post = new HttpPost(myServerBase + "/Patient");
-		post.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=http://general-hospital.co.uk/Identifiers|09832345234543876876");
-		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		HttpTestResponse response = myServer.fhirRequest("/Patient")
+			.withHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=http://general-hospital.co.uk/Identifiers|09832345234543876876")
+			.post(resource, Constants.CT_FHIR_XML)
+			.assertStatus(201);
+		String newIdString = response.getHeader(Constants.HEADER_LOCATION_LC);
+		assertThat(newIdString).startsWith(myServerBase + "/Patient/");
+		IdDt id = new IdDt(newIdString);
 
-		IdDt id;
-		CloseableHttpResponse response = ourHttpClient.execute(post);
-		try {
-			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
-			id = new IdDt(newIdString);
-		} finally {
-			response.close();
-		}
-
-		IdDt id2;
-		response = ourHttpClient.execute(post);
-		try {
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
-			id2 = new IdDt(newIdString);
-		} finally {
-			response.close();
-		}
+		response = myServer.fhirRequest("/Patient")
+			.withHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=http://general-hospital.co.uk/Identifiers|09832345234543876876")
+			.post(resource, Constants.CT_FHIR_XML)
+			.assertStatus(200);
+		newIdString = response.getHeader(Constants.HEADER_LOCATION_LC);
+		assertThat(newIdString).startsWith(myServerBase + "/Patient/");
+		IdDt id2 = new IdDt(newIdString);
 
 //		//@formatter:off
 //		IIdType id3 = ourClient
@@ -477,66 +418,38 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test
-	public void testCreateResourceReturnsRepresentationByDefault() throws IOException {
+	public void testCreateResourceReturnsRepresentationByDefault() {
 		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"></Patient>";
 
-		HttpPost post = new HttpPost(myServerBase + "/Patient");
-		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
-		CloseableHttpResponse response = ourHttpClient.execute(post);
-		try {
-			assertEquals(201, response.getStatusLine().getStatusCode());
-			String respString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(response.toString());
-			ourLog.debug(respString);
-			assertThat(respString).startsWith("<Patient xmlns=\"http://hl7.org/fhir\">");
-			assertThat(respString).endsWith("</Patient>");
-			//assertThat(respString).contains("<OperationOutcome xmlns=\"http://hl7.org/fhir\">"));
-		} finally {
-			response.getEntity().getContent().close();
-			response.close();
-		}
+		HttpTestResponse response = myServer.fhirRequest("/Patient").post(resource, Constants.CT_FHIR_XML).assertStatus(201);
+		String respString = response.getBody();
+		ourLog.info(response.toString());
+		ourLog.debug(respString);
+		assertThat(respString).startsWith("<Patient xmlns=\"http://hl7.org/fhir\">");
+		assertThat(respString).endsWith("</Patient>");
+		//assertThat(respString).contains("<OperationOutcome xmlns=\"http://hl7.org/fhir\">"));
 	}
 	
 	@Test
-	public void testCreateResourceReturnsOperationOutcome() throws IOException {
+	public void testCreateResourceReturnsOperationOutcome() {
 		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"></Patient>";
 
-		HttpPost post = new HttpPost(myServerBase + "/Patient");
-		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
-
-		CloseableHttpResponse response = ourHttpClient.execute(post);
-		try {
-			assertEquals(201, response.getStatusLine().getStatusCode());
-			String respString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(response.toString());
-			ourLog.debug(respString);
-			assertThat(respString).contains("<OperationOutcome xmlns=\"http://hl7.org/fhir\">");
-		} finally {
-			response.getEntity().getContent().close();
-			response.close();
-		}
+		String prefer = Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME;
+		HttpTestResponse response = myServer.fhirRequest("/Patient").withHeader(Constants.HEADER_PREFER, prefer).post(resource, Constants.CT_FHIR_XML).assertStatus(201);
+		String respString = response.getBody();
+		ourLog.info(response.toString());
+		ourLog.debug(respString);
+		assertThat(respString).contains("<OperationOutcome xmlns=\"http://hl7.org/fhir\">");
 	}
 
 	@Test
-	public void testCreateResourceWithNumericId() throws IOException {
+	public void testCreateResourceWithNumericId() {
 		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"></Patient>";
 
-		HttpPost post = new HttpPost(myServerBase + "/Patient/2");
-		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
-		CloseableHttpResponse response = ourHttpClient.execute(post);
-		try {
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseString);
-			assertEquals(400, response.getStatusLine().getStatusCode());
-			OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, responseString);
-			assertEquals(Msg.code(365) + "Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)", oo.getIssue().get(0).getDiagnostics());
-		} finally {
-			response.getEntity().getContent().close();
-			response.close();
-		}
+		String responseString = myServer.fhirRequest("/Patient/2").post(resource, Constants.CT_FHIR_XML).assertStatus(400).getBody();
+		ourLog.info(responseString);
+		OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, responseString);
+		assertEquals(Msg.code(365) + "Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)", oo.getIssue().get(0).getDiagnostics());
 	}
 
 	// private void delete(String theResourceType, String theParamName, String theParamValue) {
@@ -671,56 +584,30 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test
-	public void testDeleteInvalidReference() throws IOException {
-		HttpDelete delete = new HttpDelete(myServerBase + "/Patient");
-		CloseableHttpResponse response = ourHttpClient.execute(delete);
-		try {
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseString);
-			assertEquals(400, response.getStatusLine().getStatusCode());
-			assertThat(responseString).contains("Can not perform delete, no ID provided");
-		} finally {
-			response.close();
-		}
+	public void testDeleteInvalidReference() {
+		String responseString = myServer.fhirRequest("/Patient").delete().assertStatus(400).getBody();
+		ourLog.info(responseString);
+		assertThat(responseString).contains("Can not perform delete, no ID provided");
 	}
 
 	@Test
-	public void testDeleteResourceConditional1() throws IOException {
+	public void testDeleteResourceConditional1() {
 		String methodName = "testDeleteResourceConditional1";
 
 		Patient pt = new Patient();
 		pt.addName().addFamily(methodName);
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		HttpPost post = new HttpPost(myServerBase + "/Patient");
-		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		CloseableHttpResponse response = ourHttpClient.execute(post);
-		IdDt id;
-		try {
-			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
-			id = new IdDt(newIdString);
-		} finally {
-			response.close();
-		}
+		HttpTestResponse response = myServer.fhirRequest("/Patient").post(resource, Constants.CT_FHIR_XML).assertStatus(201);
+		String newIdString = response.getHeader(Constants.HEADER_LOCATION_LC);
+		assertThat(newIdString).startsWith(myServerBase + "/Patient/");
+		IdDt id = new IdDt(newIdString);
 
-		HttpDelete delete = new HttpDelete(myServerBase + "/Patient?name=" + methodName);
-		response = ourHttpClient.execute(delete);
-		try {
-			assertEquals(200, response.getStatusLine().getStatusCode());
-		} finally {
-			response.close();
-		}
+		myServer.fhirRequest("/Patient?name=" + methodName).delete().assertStatus(200);
 
-		HttpGet read = new HttpGet(myServerBase + "/Patient/" + id.getIdPart());
-		response = ourHttpClient.execute(read);
-		try {
-			ourLog.info(response.toString());
-			assertEquals(Constants.STATUS_HTTP_410_GONE, response.getStatusLine().getStatusCode());
-		} finally {
-			response.close();
-		}
+		response = myServer.fhirRequest("/Patient/" + id.getIdPart()).get();
+		ourLog.info(response.toString());
+		response.assertStatus(Constants.STATUS_HTTP_410_GONE);
 
 	}
 
@@ -736,18 +623,10 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		pt.addIdentifier().setSystem("http://ghh.org/patient").setValue(methodName);
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		HttpPost post = new HttpPost(myServerBase + "/Patient");
-		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		CloseableHttpResponse response = ourHttpClient.execute(post);
-		IdDt id;
-		try {
-			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
-			id = new IdDt(newIdString);
-		} finally {
-			response.close();
-		}
+		HttpTestResponse response = myServer.fhirRequest("/Patient").post(resource, Constants.CT_FHIR_XML).assertStatus(201);
+		String newIdString = response.getHeader(Constants.HEADER_LOCATION_LC);
+		assertThat(newIdString).startsWith(myServerBase + "/Patient/");
+		IdDt id = new IdDt(newIdString);
 
 		/*
 		 * Try it with a raw socket call. The Apache client won't let us use the unescaped "|" in the URL but we want to
@@ -780,14 +659,9 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		Thread.sleep(1000);
 
-		HttpGet read = new HttpGet(myServerBase + "/Patient/" + id.getIdPart());
-		response = ourHttpClient.execute(read);
-		try {
-			ourLog.info(response.toString());
-			assertEquals(Constants.STATUS_HTTP_410_GONE, response.getStatusLine().getStatusCode());
-		} finally {
-			response.close();
-		}
+		response = myServer.fhirRequest("/Patient/" + id.getIdPart()).get();
+		ourLog.info(response.toString());
+		response.assertStatus(Constants.STATUS_HTTP_410_GONE);
 
 	}
 
@@ -1307,34 +1181,18 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		// %3E=> %3C=<
 
-		HttpGet get = new HttpGet(myServerBase + "/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantDt(new Date(time1)).getValueAsString());
-		CloseableHttpResponse response = ourHttpClient.execute(get);
-		try {
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			IOUtils.closeQuietly(response.getEntity().getContent());
-			ourLog.info(output);
-			List<IIdType> ids = toIdListUnqualifiedVersionless(myFhirContext.newXmlParser().parseResource(Bundle.class, output));
-			ourLog.info(ids.toString());
-			assertThat(ids).containsExactlyInAnyOrder(pId, cId, oId);
-		} finally {
-			response.close();
-		}
+		String output = myServer.fhirRequest("/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantDt(new Date(time1)).getValueAsString()).get().assertStatus(200).getBody();
+		ourLog.info(output);
+		List<IIdType> ids = toIdListUnqualifiedVersionless(myFhirContext.newXmlParser().parseResource(Bundle.class, output));
+		ourLog.info(ids.toString());
+		assertThat(ids).containsExactlyInAnyOrder(pId, cId, oId);
 
-		get = new HttpGet(myServerBase + "/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantDt(new Date(time2)).getValueAsString() + "&_lastUpdated=%3C"
-			+ new InstantDt(new Date(time3)).getValueAsString());
-		response = ourHttpClient.execute(get);
-		try {
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			IOUtils.closeQuietly(response.getEntity().getContent());
-			ourLog.info(output);
-			List<IIdType> ids = toIdListUnqualifiedVersionless(myFhirContext.newXmlParser().parseResource(Bundle.class, output));
-			ourLog.info(ids.toString());
-			assertThat(ids).containsExactlyInAnyOrder(pId, cId, oId);
-		} finally {
-			response.close();
-		}
+		String path = "/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantDt(new Date(time2)).getValueAsString() + "&_lastUpdated=%3C" + new InstantDt(new Date(time3)).getValueAsString();
+		output = myServer.fhirRequest(path).get().assertStatus(200).getBody();
+		ourLog.info(output);
+		ids = toIdListUnqualifiedVersionless(myFhirContext.newXmlParser().parseResource(Bundle.class, output));
+		ourLog.info(ids.toString());
+		assertThat(ids).containsExactlyInAnyOrder(pId, cId, oId);
 
 		/*
 		 * Sorting is not working since the performance enhancements in 2.4 but
@@ -1440,17 +1298,9 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		myResourceCountsCache.clear();
 		myResourceCountsCache.update();
 
-		HttpGet get = new HttpGet(myServerBase + "/$get-resource-counts");
-		CloseableHttpResponse response = ourHttpClient.execute(get);
-		try {
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			IOUtils.closeQuietly(response.getEntity().getContent());
-			ourLog.info(output);
-			assertThat(output).contains("<parameter><name value=\"Patient\"/><valueInteger value=\"");
-		} finally {
-			response.close();
-		}
+		String output = myServer.fhirRequest("/$get-resource-counts").get().assertStatus(200).getBody();
+		ourLog.info(output);
+		assertThat(output).contains("<parameter><name value=\"Patient\"/><valueInteger value=\"");
 	}
 
 	@Test
@@ -1526,29 +1376,13 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			"</Parameters>";
 		//@formatter:on
 
-		HttpPost post = new HttpPost(myServerBase + "/Patient/" + id.getIdPart() + "/$meta-add");
-		post.setEntity(new StringEntity(input, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		CloseableHttpResponse response = ourHttpClient.execute(post);
-		try {
-			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(output);
-			assertEquals(400, response.getStatusLine().getStatusCode());
-			assertThat(output).contains("Input contains no parameter with name 'meta'");
-		} finally {
-			response.close();
-		}
+		String output = myServer.fhirRequest("/Patient/" + id.getIdPart() + "/$meta-add").post(input, Constants.CT_FHIR_XML).assertStatus(400).getBody();
+		ourLog.info(output);
+		assertThat(output).contains("Input contains no parameter with name 'meta'");
 
-		post = new HttpPost(myServerBase + "/Patient/" + id.getIdPart() + "/$meta-delete");
-		post.setEntity(new StringEntity(input, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		response = ourHttpClient.execute(post);
-		try {
-			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(output);
-			assertEquals(400, response.getStatusLine().getStatusCode());
-			assertThat(output).contains("Input contains no parameter with name 'meta'");
-		} finally {
-			response.close();
-		}
+		output = myServer.fhirRequest("/Patient/" + id.getIdPart() + "/$meta-delete").post(input, Constants.CT_FHIR_XML).assertStatus(400).getBody();
+		ourLog.info(output);
+		assertThat(output).contains("Input contains no parameter with name 'meta'");
 
 	}
 
@@ -1577,17 +1411,9 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@Test
 	public void testMetadata() throws Exception {
-		HttpGet get = new HttpGet(myServerBase + "/metadata");
-		CloseableHttpResponse response = ourHttpClient.execute(get);
-		try {
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(resp);
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertThat(resp).contains("THIS IS THE DESC");
-		} finally {
-			IOUtils.closeQuietly(response.getEntity().getContent());
-			response.close();
-		}
+		String resp = myServer.fhirRequest("/metadata").get().assertStatus(200).getBody();
+		ourLog.info(resp);
+		assertThat(resp).contains("THIS IS THE DESC");
 	}
 
 	@Test
@@ -1818,16 +1644,9 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@Test
 	public void testSearchBundleDoesntIncludeTextElement() throws Exception {
-		HttpGet read = new HttpGet(myServerBase + "/Patient?_format=json");
-		CloseableHttpResponse response = ourHttpClient.execute(read);
-		try {
-			String text = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(text);
-			assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatusLine().getStatusCode());
-			assertThat(text).doesNotContain("\"text\",\"type\"");
-		} finally {
-			response.close();
-		}
+		String text = myServer.fhirRequest("/Patient?_format=json").get().assertStatus(Constants.STATUS_HTTP_200_OK).getBody();
+		ourLog.info(text);
+		assertThat(text).doesNotContain("\"text\",\"type\"");
 	}
 
 	@Test
@@ -2089,24 +1908,14 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		ma.setMedication(new ResourceReferenceDt(medId));
 		IIdType moId = myMedicationAdministrationDao.create(ma).getId().toUnqualifiedVersionless();
 
-		HttpGet get = new HttpGet(myServerBase + "/MedicationAdministration?medication.code=04823543");
-		CloseableHttpResponse response = ourHttpClient.execute(get);
-		try {
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString).contains(moId.getIdPart());
-		} finally {
-			response.close();
-		}
+		String responseString = myServer.fhirRequest("/MedicationAdministration?medication.code=04823543").get().assertStatus(200).getBody();
+		assertThat(responseString).contains(moId.getIdPart());
 
 	}
 
-	private void testSearchReturnsResults(String search) throws IOException {
+	private void testSearchReturnsResults(String search) {
 		int matches;
-		HttpGet get = new HttpGet(myServerBase + search);
-		CloseableHttpResponse response = ourHttpClient.execute(get);
-		String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(response.getEntity().getContent());
+		String resp = myServer.fhirRequest(search).get().getBody();
 		ourLog.info(resp);
 		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = myFhirContext.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, resp);
 		matches = bundle.getEntry().size();
@@ -2261,15 +2070,9 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		
-		String uri = myServerBase + "/Observation?_sort=code-value-quantity";
-		Bundle found;
-		
-		HttpGet get = new HttpGet(uri);
-		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
-			String output = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-			found = myFhirContext.newXmlParser().parseResource(Bundle.class, output);
-		}
-		
+		String output = myServer.fhirRequest("/Observation?_sort=code-value-quantity").get().getBody();
+		Bundle found = myFhirContext.newXmlParser().parseResource(Bundle.class, output);
+
 		ourLog.debug("Bundle: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
 		
 		List<IIdType> list = toUnqualifiedVersionlessIds(found);
@@ -2534,16 +2337,8 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	@Test
 	public void testTransaction() throws Exception {
 		String contents = ClasspathUtil.loadResource("/update.xml");
-		HttpPost post = new HttpPost(myServerBase);
-		post.setEntity(new StringEntity(contents, ContentType.create("application/xml+fhir", "UTF-8")));
-		CloseableHttpResponse resp = ourHttpClient.execute(post);
-		try {
-			assertEquals(200, resp.getStatusLine().getStatusCode());
-			String output = IOUtils.toString(resp.getEntity().getContent());
-			ourLog.info(output);
-		} finally {
-			resp.close();
-		}
+		String output = myServer.fhirRequest("").post(contents, "application/xml+fhir").assertStatus(200).getBody();
+		ourLog.info(output);
 	}
 
 	@Test
@@ -2570,93 +2365,55 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		pt.addName().addFamily(methodName);
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		HttpPut post = new HttpPut(myServerBase + "/Patient");
-		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		CloseableHttpResponse response = ourHttpClient.execute(post);
-		try {
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseString);
-			assertEquals(400, response.getStatusLine().getStatusCode());
-			OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, responseString);
-			assertThat(oo.getIssue().get(0).getDiagnostics()).contains("Can not update resource, request URL must contain an ID element for update (PUT) operation (it must be of the form [base]/[resource type]/[id])");
-		} finally {
-			response.close();
-		}
+		String responseString = myServer.fhirRequest("/Patient").put(resource, Constants.CT_FHIR_XML).assertStatus(400).getBody();
+		ourLog.info(responseString);
+		OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, responseString);
+		assertThat(oo.getIssue().get(0).getDiagnostics()).contains("Can not update resource, request URL must contain an ID element for update (PUT) operation (it must be of the form [base]/[resource type]/[id])");
 	}
 
 	@Test
-	public void testUpdateResourceConditional() throws IOException {
+	public void testUpdateResourceConditional() {
 		String methodName = "testUpdateResourceConditional";
 
 		Patient pt = new Patient();
 		pt.addName().addFamily(methodName);
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		HttpPost post = new HttpPost(myServerBase + "/Patient?name=" + methodName);
-		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		CloseableHttpResponse response = ourHttpClient.execute(post);
-		IdDt id;
-		try {
-			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
-			id = new IdDt(newIdString);
-		} finally {
-			response.close();
-		}
+		HttpTestResponse response = myServer.fhirRequest("/Patient?name=" + methodName).post(resource, Constants.CT_FHIR_XML).assertStatus(201);
+		String newIdString = response.getHeader(Constants.HEADER_LOCATION_LC);
+		assertThat(newIdString).startsWith(myServerBase + "/Patient/");
+		IdDt id = new IdDt(newIdString);
 
 		pt.addName().addFamily(methodName + "2");
 		resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
-		HttpPut put = new HttpPut(myServerBase + "/Patient?name=" + methodName);
-		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		response = ourHttpClient.execute(put);
-		try {
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			IdDt newId = new IdDt(response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC).getValue());
-			assertEquals(id.toVersionless(), newId.toVersionless()); // version shouldn't match for conditional update
-			assertThat(newId).isNotEqualTo(id);
-		} finally {
-			response.close();
-		}
+		response = myServer.fhirRequest("/Patient?name=" + methodName).put(resource, Constants.CT_FHIR_XML).assertStatus(200);
+		IdDt newId = new IdDt(response.getHeader(Constants.HEADER_CONTENT_LOCATION_LC));
+		assertEquals(id.toVersionless(), newId.toVersionless()); // version shouldn't match for conditional update
+		assertThat(newId).isNotEqualTo(id);
 
 	}
 
 	@Test
-	public void testUpdateResourceConditionalComplex() throws IOException {
+	public void testUpdateResourceConditionalComplex() {
 		Patient pt = new Patient();
 		pt.addIdentifier().setSystem("http://general-hospital.co.uk/Identifiers").setValue("09832345234543876876");
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		HttpPost post = new HttpPost(myServerBase + "/Patient");
-		post.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=http://general-hospital.co.uk/Identifiers|09832345234543876876");
-		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
-		IdDt id;
-		CloseableHttpResponse response = ourHttpClient.execute(post);
-		try {
-			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
-			id = new IdDt(newIdString);
-		} finally {
-			response.close();
-		}
+		HttpTestResponse response = myServer.fhirRequest("/Patient")
+			.withHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=http://general-hospital.co.uk/Identifiers|09832345234543876876")
+			.post(resource, Constants.CT_FHIR_XML)
+			.assertStatus(201);
+		String newIdString = response.getHeader(Constants.HEADER_LOCATION_LC);
+		assertThat(newIdString).startsWith(myServerBase + "/Patient/");
+		IdDt id = new IdDt(newIdString);
 
 		pt.addName().addFamily("FOO");
 		resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
-		HttpPut put = new HttpPut(myServerBase + "/Patient?identifier=" + ("http://general-hospital.co.uk/Identifiers|09832345234543876876".replace("|", UrlUtil.escapeUrlParam("|"))));
-		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
-		IdDt id2;
-		response = ourHttpClient.execute(put);
-		try {
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC).getValue();
-			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
-			id2 = new IdDt(newIdString);
-		} finally {
-			response.close();
-		}
+		String path = "/Patient?identifier=" + ("http://general-hospital.co.uk/Identifiers|09832345234543876876".replace("|", UrlUtil.escapeUrlParam("|")));
+		response = myServer.fhirRequest(path).put(resource, Constants.CT_FHIR_XML).assertStatus(200);
+		newIdString = response.getHeader(Constants.HEADER_CONTENT_LOCATION_LC);
+		assertThat(newIdString).startsWith(myServerBase + "/Patient/");
+		IdDt id2 = new IdDt(newIdString);
 
 		assertEquals(id.getIdPart(), id2.getIdPart());
 		assertEquals("1", id.getVersionIdPart());
@@ -2671,18 +2428,10 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		pt.addName().addFamily(methodName);
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		HttpPost post = new HttpPost(myServerBase + "/Patient");
-		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		CloseableHttpResponse response = ourHttpClient.execute(post);
-		IdDt id;
-		try {
-			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
-			id = new IdDt(newIdString);
-		} finally {
-			response.close();
-		}
+		HttpTestResponse response = myServer.fhirRequest("/Patient").post(resource, Constants.CT_FHIR_XML).assertStatus(201);
+		String newIdString = response.getHeader(Constants.HEADER_LOCATION_LC);
+		assertThat(newIdString).startsWith(myServerBase + "/Patient/");
+		IdDt id = new IdDt(newIdString);
 
 		Date before = new Date();
 		Thread.sleep(100);
@@ -2691,24 +2440,14 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		pt.addAddress().addLine("AAAAAAAAAAAAAAAAAAAAAA");
 		resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		HttpPut put = new HttpPut(myServerBase + "/Patient/" + id.getIdPart());
-		put.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
-		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		response = ourHttpClient.execute(put);
-		try {
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			IOUtils.closeQuietly(response.getEntity().getContent());
+		String prefer = Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION;
+		String responseString = myServer.fhirRequest("/Patient/" + id.getIdPart()).withHeader(Constants.HEADER_PREFER, prefer).put(resource, Constants.CT_FHIR_XML).assertStatus(200).getBody();
 
-			Patient respPt = myFhirContext.newXmlParser().parseResource(Patient.class, responseString);
-			assertEquals("2", respPt.getId().getVersionIdPart());
+		Patient respPt = myFhirContext.newXmlParser().parseResource(Patient.class, responseString);
+		assertEquals("2", respPt.getId().getVersionIdPart());
 
-			InstantDt updateTime = ResourceMetadataKeyEnum.UPDATED.get(respPt);
-			assertTrue(updateTime.getValue().after(before));
-
-		} finally {
-			response.close();
-		}
+		InstantDt updateTime = ResourceMetadataKeyEnum.UPDATED.get(respPt);
+		assertTrue(updateTime.getValue().after(before));
 
 	}
 
@@ -2749,17 +2488,8 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		 */
 
 		String contents = ClasspathUtil.loadResource("/allergyintolerance-sd-david.json");
-		HttpEntityEnclosingRequestBase post = new HttpPut(myServerBase + "/StructureDefinition/ohAllergyIntolerance");
-		post.setEntity(new StringEntity(contents, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
-		CloseableHttpResponse response = ourHttpClient.execute(post);
-		try {
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(resp);
-			assertEquals(201, response.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(response.getEntity().getContent());
-			response.close();
-		}
+		String resp = myServer.fhirRequest("/StructureDefinition/ohAllergyIntolerance").put(contents, Constants.CT_FHIR_JSON).assertStatus(201).getBody();
+		ourLog.info(resp);
 
 		/*
 		 * Validate
@@ -2767,33 +2497,16 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		contents = ClasspathUtil.loadResource("/allergyintolerance-david.json");
 
-		post = new HttpPost(myServerBase + "/AllergyIntolerance/$validate?_pretty=true");
-		post.setEntity(new StringEntity(contents, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
-
-		response = ourHttpClient.execute(post);
-		try {
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(resp);
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertThat(resp).doesNotContain("Resource has no id");
-		} finally {
-			IOUtils.closeQuietly(response.getEntity().getContent());
-			response.close();
-		}
+		resp = myServer.fhirRequest("/AllergyIntolerance/$validate?_pretty=true").post(contents, Constants.CT_FHIR_JSON).assertStatus(200).getBody();
+		ourLog.info(resp);
+		assertThat(resp).doesNotContain("Resource has no id");
 	}
 
 	@Test
 	public void testValidateOnNoId() throws Exception {
-		HttpGet get = new HttpGet(myServerBase + "/QuestionnaireResponse/$validate");
-		CloseableHttpResponse response = ourHttpClient.execute(get);
-		try {
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("Response: {}", responseString);
-			assertThat(responseString).contains("No resource supplied for $validate operation");
-			assertEquals(400, response.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(response);
-		}
+		String responseString = myServer.fhirRequest("/QuestionnaireResponse/$validate").get().assertStatus(400).getBody();
+		ourLog.info("Response: {}", responseString);
+		assertThat(responseString).contains("No resource supplied for $validate operation");
 
 	}
 
@@ -2809,16 +2522,9 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		ourLog.info(p.encodeResourceToString(p.parseResource(input)));
 
 
-		HttpPost post = new HttpPost(myServerBase + "/QuestionnaireResponse/$validate?_pretty=true");
-		post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
-		CloseableHttpResponse response = ourHttpClient.execute(post);
-		try {
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("Response: {}", responseString);
-			assertThat(responseString).doesNotContain("Resource has no id");
-		} finally {
-			IOUtils.closeQuietly(response);
-		}
+		String responseString = myServer.fhirRequest("/QuestionnaireResponse/$validate?_pretty=true").post(input, Constants.CT_JSON).getBody();
+		ourLog.info("Response: {}", responseString);
+		assertThat(responseString).doesNotContain("Resource has no id");
 
 	}
 
@@ -2829,22 +2535,14 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	public void testValidateQuestionnaireResponseWithNoIdForUpdate() throws Exception {
 
 		String input = "{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"mode\",\"valueString\":\"update\"},{\"name\":\"resource\",\"resource\":{\"resourceType\":\"QuestionnaireResponse\",\"questionnaire\":{\"reference\":\"http://fhirtest.uhn.ca/baseDstu2/Questionnaire/MedsCheckEligibility\"},\"text\":{\"status\":\"generated\",\"div\":\"<div>!-- populated from the rendered HTML below --></div>\"},\"status\":\"completed\",\"authored\":\"2017-02-10T00:02:58.098Z\",\"group\":{\"question\":[{\"linkId\":\"d94b4f57-1ca0-4d65-acba-8bd9a3926c8c\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has a valid Medicare or DVA entitlement card\"},{\"linkId\":\"0cbe66db-ff12-473a-940e-4672fb82de44\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has received a MedsCheck, Diabetes MedsCheck, Home Medicines Review (HMR) otr Restidential Medication Management Review (RMMR) in the past 12 months\"},{\"linkId\":\"35790cfd-2d98-4721-963e-9663e1897a17\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient is living at home in a community setting\"},{\"linkId\":\"3ccc8304-76cd-41ff-9360-2c8755590bae\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has been recently diagnosed with type 3 diabetes (in the last 12 months) AND is unable to gain timely access to existing diabetes education or health services in the community OR \"},{\"linkId\":\"b05f6f09-49ec-40f9-a889-9a3fdff9e0da\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has type 2 diabetes , is less than ideally controlled AND is unable to gain timely access to existing diabetes education or health services in their community \"},{\"linkId\":\"4a777f56-800d-4e0b-a9c3-e929832adb5b\",\"answer\":[{\"valueBoolean\":false,\"group\":[{\"linkId\":\"95bbc904-149e-427f-88a4-7f6c8ab186fa\",\"question\":[{\"linkId\":\"f0acea9e-716c-4fce-b7a2-aad59de9d136\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Patient has had an Acute or Adverse Event\"},{\"linkId\":\"e1629159-6dea-4295-a93e-e7c2829ce180\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Exacerbation of a Chronic Disease or Condition\"},{\"linkId\":\"2ce526fa-edaa-44b3-8d5a-6e97f6379ce8\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"New Diagnosis\"},{\"linkId\":\"9d6ffa9f-0110-418c-9ed0-f04910fda2ed\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Recent hospital admission (<3 months)\"},{\"linkId\":\"d2803ff7-25f7-4c7b-ab92-356c49910478\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Major change to regular medication regime\"},{\"linkId\":\"b34af32d-c69d-4d44-889f-5b6d420a7d08\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Suspected non-adherence to the patient's medication regime \"},{\"linkId\":\"74bad553-c273-41e6-8647-22b860430bc2\",\"answer\":[],\"text\":\"Other\"}]}]}],\"text\":\"The patient has experienced one or more of the following recent significant medical events\"},{\"linkId\":\"ecbf4e5a-d4d1-43eb-9f43-0c0e35fc09c7\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The Pharmacist has obtained patient consent to take part in the MedsCheck Service or Diabetes MedsCheck Service&nbsp; and share information obtained during the services with other nominated members of the patients healthcare team (such as their GP, diabetes educator) if required\"},{\"linkId\":\"8ef66774-43b0-4190-873f-cfbb6e980aa9\",\"answer\":[],\"text\":\"Question\"}]}}}]}";
-		HttpPost post = new HttpPost(myServerBase + "/QuestionnaireResponse/$validate?_pretty=true");
-		post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
-		CloseableHttpResponse response = ourHttpClient.execute(post);
-		try {
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("Response: {}", responseString);
-			assertThat(responseString).contains("Resource has no ID");
-			assertEquals(422, response.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(response);
-		}
+		String responseString = myServer.fhirRequest("/QuestionnaireResponse/$validate?_pretty=true").post(input, Constants.CT_JSON).assertStatus(422).getBody();
+		ourLog.info("Response: {}", responseString);
+		assertThat(responseString).contains("Resource has no ID");
 
 	}
 
 	@Test
-	public void testValidateResource() throws IOException {
+	public void testValidateResource() {
 
 		Patient patient = new Patient();
 		patient.addName().addGiven("James");
@@ -2856,23 +2554,13 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		String inputStr = myFhirContext.newXmlParser().encodeResourceToString(input);
 		ourLog.info(inputStr);
 
-		HttpPost post = new HttpPost(myServerBase + "/Patient/$validate?_pretty=true");
-		post.setEntity(new StringEntity(inputStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
-		CloseableHttpResponse response = ourHttpClient.execute(post);
-		try {
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(resp);
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertThat(resp).doesNotContain("Resource has no id");
-		} finally {
-			IOUtils.closeQuietly(response.getEntity().getContent());
-			response.close();
-		}
+		String resp = myServer.fhirRequest("/Patient/$validate?_pretty=true").post(inputStr, Constants.CT_FHIR_XML).assertStatus(200).getBody();
+		ourLog.info(resp);
+		assertThat(resp).doesNotContain("Resource has no id");
 	}
 
 	@Test
-	public void testValidateResourceHuge() throws IOException {
+	public void testValidateResourceHuge() {
 
 		Patient patient = new Patient();
 		patient.addName().addGiven("James" + StringUtils.leftPad("James", 1000000, 'A'));
@@ -2884,22 +2572,12 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		String inputStr = myFhirContext.newXmlParser().encodeResourceToString(input);
 //		ourLog.info(inputStr);
 
-		HttpPost post = new HttpPost(myServerBase + "/Patient/$validate");
-		post.setEntity(new StringEntity(inputStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
-		CloseableHttpResponse response = ourHttpClient.execute(post);
-		try {
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(resp);
-			assertEquals(200, response.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(response.getEntity().getContent());
-			response.close();
-		}
+		String resp = myServer.fhirRequest("/Patient/$validate").post(inputStr, Constants.CT_FHIR_XML).assertStatus(200).getBody();
+		ourLog.info(resp);
 	}
 
 	@Test
-	public void testValidateResourceWithId() throws IOException {
+	public void testValidateResourceWithId() {
 
 		Patient patient = new Patient();
 		patient.addName().addGiven("James");
@@ -2911,18 +2589,8 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		String inputStr = myFhirContext.newXmlParser().encodeResourceToString(input);
 		ourLog.info(inputStr);
 
-		HttpPost post = new HttpPost(myServerBase + "/Patient/$validate");
-		post.setEntity(new StringEntity(inputStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
-		CloseableHttpResponse response = ourHttpClient.execute(post);
-		try {
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(resp);
-			assertEquals(200, response.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(response.getEntity().getContent());
-			response.close();
-		}
+		String resp = myServer.fhirRequest("/Patient/$validate").post(inputStr, Constants.CT_FHIR_XML).assertStatus(200).getBody();
+		ourLog.info(resp);
 	}
 
 	@Test
@@ -2931,74 +2599,50 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		ValueSet upload = myFhirContext.newXmlParser().parseResource(ValueSet.class, new InputStreamReader(ResourceProviderDstu2Test.class.getResourceAsStream("/extensional-case-2.xml")));
 		IIdType vsid = myClient.create().resource(upload).execute().getId().toUnqualifiedVersionless();
 
-		HttpGet get = new HttpGet(myServerBase + "/ValueSet/" + vsid.getIdPart() + "/$expand");
-		CloseableHttpResponse response = ourHttpClient.execute(get);
-		try {
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(resp);
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			// @formatter:off
-			assertThat(resp).containsSubsequence(
-				"<ValueSet xmlns=\"http://hl7.org/fhir\">",
-					"<expansion>",
-					"<contains>",
-					"<system value=\"http://acme.org\"/>",
-					"<code value=\"11378-7\"/>",
-					"<display value=\"Systolic blood pressure at First encounter\"/>",
-					"</contains>",
-					"<contains>",
-					"<system value=\"http://acme.org\"/>",
-					"<code value=\"8450-9\"/>",
-					"<display value=\"Systolic blood pressure--expiration\"/>",
-					"</contains>",
-					"</expansion>"
-				);
-			//@formatter:on
-		} finally {
-			IOUtils.closeQuietly(response.getEntity().getContent());
-			response.close();
-		}
+		String resp = myServer.fhirRequest("/ValueSet/" + vsid.getIdPart() + "/$expand").get().assertStatus(200).getBody();
+		ourLog.info(resp);
+		// @formatter:off
+		assertThat(resp).containsSubsequence(
+			"<ValueSet xmlns=\"http://hl7.org/fhir\">",
+				"<expansion>",
+				"<contains>",
+				"<system value=\"http://acme.org\"/>",
+				"<code value=\"11378-7\"/>",
+				"<display value=\"Systolic blood pressure at First encounter\"/>",
+				"</contains>",
+				"<contains>",
+				"<system value=\"http://acme.org\"/>",
+				"<code value=\"8450-9\"/>",
+				"<display value=\"Systolic blood pressure--expiration\"/>",
+				"</contains>",
+				"</expansion>"
+			);
+		//@formatter:on
 
 		/*
 		 * Filter with display name
 		 */
 
-		get = new HttpGet(myServerBase + "/ValueSet/" + vsid.getIdPart() + "/$expand?filter=systolic");
-		response = ourHttpClient.execute(get);
-		try {
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(resp);
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			//@formatter:off
-			assertThat(resp).containsSubsequence(
-				"<code value=\"11378-7\"/>",
-				"<display value=\"Systolic blood pressure at First encounter\"/>");
-			//@formatter:on
-		} finally {
-			IOUtils.closeQuietly(response.getEntity().getContent());
-			response.close();
-		}
+		resp = myServer.fhirRequest("/ValueSet/" + vsid.getIdPart() + "/$expand?filter=systolic").get().assertStatus(200).getBody();
+		ourLog.info(resp);
+		//@formatter:off
+		assertThat(resp).containsSubsequence(
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter\"/>");
+		//@formatter:on
 
 		/*
 		 * Filter with code
 		 */
 
-		get = new HttpGet(myServerBase + "/ValueSet/" + vsid.getIdPart() + "/$expand?filter=11378");
-		response = ourHttpClient.execute(get);
-		try {
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(resp);
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			//@formatter:off
-			assertThat(resp).containsSubsequence(
-				"<code value=\"11378-7\"/>",
-				"<display value=\"Systolic blood pressure at First encounter\"/>"
-			);
-			//@formatter:on
-		} finally {
-			IOUtils.closeQuietly(response.getEntity().getContent());
-			response.close();
-		}
+		resp = myServer.fhirRequest("/ValueSet/" + vsid.getIdPart() + "/$expand?filter=11378").get().assertStatus(200).getBody();
+		ourLog.info(resp);
+		//@formatter:off
+		assertThat(resp).containsSubsequence(
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter\"/>"
+		);
+		//@formatter:on
 
 	}
 

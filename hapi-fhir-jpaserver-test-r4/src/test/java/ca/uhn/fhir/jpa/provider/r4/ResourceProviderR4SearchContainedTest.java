@@ -9,11 +9,7 @@ import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.UrlUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CarePlan;
 import org.hl7.fhir.r4.model.CarePlan.CarePlanIntent;
 import org.hl7.fhir.r4.model.CarePlan.CarePlanStatus;
@@ -43,7 +39,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -90,27 +85,19 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 	}
 
 	@Test
-	public void testContainedDisabled() throws Exception {
+	public void testContainedDisabled() {
 		myStorageSettings.setIndexOnContainedResources(false);
 
-		String uri = myServerBase + "/Observation?subject.name=Smith&_contained=true";
-		try (CloseableHttpResponse response = ourHttpClient.execute(new HttpGet(uri))) {
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(resp);
-			assertEquals(MethodNotAllowedException.STATUS_CODE, response.getStatusLine().getStatusCode());
-			assertThat(resp).contains(">" + Msg.code(984) + "Searching with _contained mode enabled is not enabled on this server");
-		}
+		String resp = myServer.fhirRequest("/Observation?subject.name=Smith&_contained=true").get().assertStatus(MethodNotAllowedException.STATUS_CODE).getBody();
+		ourLog.info(resp);
+		assertThat(resp).contains(">" + Msg.code(984) + "Searching with _contained mode enabled is not enabled on this server");
 	}
 
 	@Test
-	public void testContainedBoth() throws Exception {
-		String uri = myServerBase + "/Observation?subject.name=Smith&_contained=both";
-		try (CloseableHttpResponse response = ourHttpClient.execute(new HttpGet(uri))) {
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(resp);
-			assertEquals(MethodNotAllowedException.STATUS_CODE, response.getStatusLine().getStatusCode());
-			assertThat(resp).contains("Contained mode 'both' is not currently supported");
-		}
+	public void testContainedBoth() {
+		String resp = myServer.fhirRequest("/Observation?subject.name=Smith&_contained=both").get().assertStatus(MethodNotAllowedException.STATUS_CODE).getBody();
+		ourLog.info(resp);
+		assertThat(resp).contains("Contained mode 'both' is not currently supported");
 	}
 
 	@Test
@@ -165,28 +152,28 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 
 
 		//-- Simple name match
-		String uri = myServerBase + "/Observation?subject.name=Smith&_contained=true";
+		String uri = "/Observation?subject.name=Smith&_contained=true";
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
 		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getValue());
 
 		//-- Simple name match with or
-		uri = myServerBase + "/Observation?subject.name=Smith,Jane&_contained=true";
+		uri = "/Observation?subject.name=Smith,Jane&_contained=true";
 		oids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
 		assertThat(oids).hasSize(2);
 		//assertEquals(oids.toString(), "[Observation/1, Observation/2]");
 
 		//-- Simple name match with qualifier
-		uri = myServerBase + "/Observation?subject.name:exact=Smith&_contained=true";
+		uri = "/Observation?subject.name:exact=Smith&_contained=true";
 		oids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
 		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getValue());
 
 		//-- Simple name match with and
-		uri = myServerBase + "/Observation?subject.family=Smith&subject.given=John&_contained=true";
+		uri = "/Observation?subject.family=Smith&subject.given=John&_contained=true";
 		oids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
 		assertThat(oids).hasSize(1);
@@ -249,42 +236,42 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 		}
 
 		//-- Search by date default op
-		String uri = myServerBase + "/Observation?subject.birthdate=2000-01-01&_contained=true";
+		String uri = "/Observation?subject.birthdate=2000-01-01&_contained=true";
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
 		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getValue());
 
 		//-- Search by date op=eq
-		uri = myServerBase + "/Observation?subject.birthdate=eq2000-01-01&_contained=true";
+		uri = "/Observation?subject.birthdate=eq2000-01-01&_contained=true";
 		oids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
 		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getValue());
 
 		//-- Search by date op=eq, with or
-		uri = myServerBase + "/Observation?subject.birthdate=2000-01-01,2000-02-01&_contained=true";
+		uri = "/Observation?subject.birthdate=2000-01-01,2000-02-01&_contained=true";
 		oids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
 		assertThat(oids).hasSize(2);
 		//assertEquals(oids.toString(), "[Observation/1, Observation/2]");
 
 		//-- Simple name match with op = gt
-		uri = myServerBase + "/Observation?subject.birthdate=gt2000-02-10&_contained=true";
+		uri = "/Observation?subject.birthdate=gt2000-02-10&_contained=true";
 		oids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
 		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid3.getValue());
 
 		//-- Simple name match with AND
-		uri = myServerBase + "/Observation?subject.family=Smith&subject.birthdate=eq2000-01-01&_contained=true";
+		uri = "/Observation?subject.family=Smith&subject.birthdate=eq2000-01-01&_contained=true";
 		oids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
 		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getValue());
 
 		//-- Simple name match with AND - not found
-		uri = myServerBase + "/Observation?subject.family=Smith&subject.birthdate=eq2000-02-01&_contained=true";
+		uri = "/Observation?subject.family=Smith&subject.birthdate=eq2000-02-01&_contained=true";
 		oids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
 		assertThat(oids).hasSize(0);
@@ -389,7 +376,7 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 		}
 
 		//-- Search by number
-		String uri = myServerBase + "/ClinicalImpression?investigation.probability=2&_contained=true";
+		String uri = "/ClinicalImpression?investigation.probability=2&_contained=true";
 		List<String> cids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
 		assertThat(cids).hasSize(1);
@@ -397,7 +384,7 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 
 
 		//-- Search by number with op = eq
-		uri = myServerBase + "/ClinicalImpression?investigation.probability=eq2&_contained=true";
+		uri = "/ClinicalImpression?investigation.probability=eq2&_contained=true";
 		cids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
 		assertThat(cids).hasSize(1);
@@ -405,12 +392,12 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 
 
 		//-- Search by number with op = eq and or
-		uri = myServerBase + "/ClinicalImpression?investigation.probability=eq2,10&_contained=true";
+		uri = "/ClinicalImpression?investigation.probability=eq2,10&_contained=true";
 		cids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		assertThat(cids).hasSize(2);
 
 		//-- Search by number with op = lt 
-		uri = myServerBase + "/ClinicalImpression?investigation.probability=lt4&_contained=true";
+		uri = "/ClinicalImpression?investigation.probability=lt4&_contained=true";
 		cids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
 		assertThat(cids).hasSize(1);
@@ -513,7 +500,7 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 		}
 
 		//-- Search by quantity
-		String uri = myServerBase + "/Encounter?reason-reference.combo-value-quantity=200&_contained=true";
+		String uri = "/Encounter?reason-reference.combo-value-quantity=200&_contained=true";
 		List<String> eids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
 		assertThat(eids).hasSize(1);
@@ -521,7 +508,7 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 
 
 		//-- Search by quantity
-		uri = myServerBase + "/Encounter?reason-reference.combo-value-quantity=le400&_contained=true";
+		uri = "/Encounter?reason-reference.combo-value-quantity=le400&_contained=true";
 		eids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
 		assertThat(eids).hasSize(3);
@@ -624,7 +611,7 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 		}
 
 		//-- Search by code
-		String uri = myServerBase + "/Encounter?reason-reference.code=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7") + "&_contained=true";
+		String uri = "/Encounter?reason-reference.code=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7") + "&_contained=true";
 		List<String> eids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
 		assertThat(eids).hasSize(1);
@@ -728,14 +715,14 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 		}
 
 		//-- Search by composite
-		String uri = myServerBase + "/Encounter?reason-reference.combo-code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-8$300") + "&_contained=true";
+		String uri = "/Encounter?reason-reference.combo-code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-8$300") + "&_contained=true";
 		List<String> eids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
 		assertThat(eids).hasSize(1);
 		assertThat(eids).containsExactly(eid2.getValue());
 
 		//-- Search by composite - not found
-		uri = myServerBase + "/Encounter?reason-reference.combo-code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$300") + "&_contained=true";
+		uri = "/Encounter?reason-reference.combo-code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$300") + "&_contained=true";
 		eids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
 		assertThat(eids).hasSize(0);
@@ -829,20 +816,20 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 		}
 
 		//-- Search by uri
-		String uri = myServerBase + "/Observation?based-on.instantiates-uri=http://www.hl7.com";
+		String uri = "/Observation?based-on.instantiates-uri=http://www.hl7.com";
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
 		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getValue());
 
 		//-- Search by uri more than 1 results
-		uri = myServerBase + "/Observation?based-on.instantiates-uri=http://www2.hl7.com";
+		uri = "/Observation?based-on.instantiates-uri=http://www2.hl7.com";
 		oids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
 		assertThat(oids).hasSize(2);
 
 		//-- Search by uri with 'or'
-		uri = myServerBase + "/Observation?based-on.instantiates-uri=http://www.hl7.com,http://www2.hl7.com";
+		uri = "/Observation?based-on.instantiates-uri=http://www.hl7.com,http://www2.hl7.com";
 		oids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
 		assertThat(oids).hasSize(3);
@@ -923,13 +910,13 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 
 
 		//-- No Obs with Patient Smith
-		String uri = myServerBase + "/Observation?subject.family=Smith&_contained=true";
+		String uri = "/Observation?subject.family=Smith&_contained=true";
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
 		assertThat(oids).hasSize(0);
 
 		//-- Two Obs with Patient Doe
-		uri = myServerBase + "/Observation?subject.family=Doe&_contained=true";
+		uri = "/Observation?subject.family=Doe&_contained=true";
 		oids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
 		assertThat(oids).hasSize(2);
@@ -978,13 +965,13 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 		}
 
 		//-- No Obs with Patient Smith
-		String uri = myServerBase + "/Observation?subject.family=Smith&_contained=true";
+		String uri = "/Observation?subject.family=Smith&_contained=true";
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
 		assertThat(oids).hasSize(0);
 
 		//-- 1 Obs with Patient Doe
-		uri = myServerBase + "/Observation?subject.family=Doe&_contained=true";
+		uri = "/Observation?subject.family=Doe&_contained=true";
 		oids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
 		assertThat(oids).hasSize(1);
@@ -1034,24 +1021,11 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 			ourLog.debug("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(medReqCreated));
 		}
 
-		String uri = myServerBase + "/MedicationRequest?medication.code=http://" + UrlUtil.escapeUrlParam("snomed.info/sct|324689003");
+		String uri = "/MedicationRequest?medication.code=http://" + UrlUtil.escapeUrlParam("snomed.info/sct|324689003");
 		List<String> mids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
 		assertThat(mids).hasSize(1);
 		assertThat(mids).containsExactly(mid1.getValue());
-	}
-
-	public List<String> searchAndReturnUnqualifiedVersionlessIdValues(String uri) throws IOException {
-		List<String> ids;
-		HttpGet get = new HttpGet(uri);
-
-		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(resp);
-			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, resp);
-			ids = toUnqualifiedVersionlessIdValues(bundle);
-		}
-		return ids;
 	}
 
 }

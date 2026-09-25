@@ -10,11 +10,6 @@ import ca.uhn.fhir.jpa.term.TermTestUtil;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -485,20 +480,13 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 	}
 
 	@Test
-	public void testUpdateCodeSystemById() throws IOException {
+	public void testUpdateCodeSystemById() {
 
 		CodeSystem initialCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCsId.getId()).execute();
 		assertEquals("Parent Child CodeSystem", initialCodeSystem.getName());
 		initialCodeSystem.setName("Updated Parent Child CodeSystem");
 		String encoded = myFhirContext.newJsonParser().encodeResourceToString(initialCodeSystem);
-		HttpPut putRequest = new HttpPut(myServerBase + "/CodeSystem/" + parentChildCsId);
-		putRequest.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
-		CloseableHttpResponse resp = ourHttpClient.execute(putRequest);
-		try {
-			assertEquals(200, resp.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(resp);
-		}
+		myServer.fhirRequest("/CodeSystem/" + parentChildCsId).put(encoded, "application/json+fhir").assertStatus(200);
 
 		CodeSystem updatedCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCsId.getId()).execute();
 		assertEquals("Updated Parent Child CodeSystem", updatedCodeSystem.getName());

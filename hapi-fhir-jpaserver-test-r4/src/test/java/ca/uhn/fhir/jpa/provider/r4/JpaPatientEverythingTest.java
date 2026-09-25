@@ -14,10 +14,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Account;
@@ -105,10 +102,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -2082,16 +2077,10 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 			.hasMessageContaining("patient2");
 	}
 
-    private Set<String> getActualEverythingResultIds(String patientId) throws IOException {
-        Bundle bundle;
-        HttpGet get = new HttpGet(myClient.getServerBase() + "/" + patientId + "/$everything?_format=json");
-        CloseableHttpResponse resp = ourHttpClient.execute(get);
-        try {
-			assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy(), resp.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue().replaceAll(";.*", ""));
-            bundle = EncodingEnum.JSON.newParser(myFhirContext).parseResource(Bundle.class, IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8));
-        } finally {
-            IOUtils.closeQuietly(resp);
-        }
+    private Set<String> getActualEverythingResultIds(String patientId) {
+        HttpTestResponse resp = myServer.fhirRequest("/" + patientId + "/$everything?_format=json").get();
+		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy(), resp.getContentType());
+        Bundle bundle = EncodingEnum.JSON.newParser(myFhirContext).parseResource(Bundle.class, resp.getBody());
 
 		assertNull(bundle.getLink("next"));
 

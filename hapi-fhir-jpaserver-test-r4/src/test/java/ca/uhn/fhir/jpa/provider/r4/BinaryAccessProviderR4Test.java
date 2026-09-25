@@ -21,14 +21,9 @@ import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.test.concurrency.PointcutLatch;
-import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -111,8 +106,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 			// Read it back using the operation
 
-			String path = myServerBase +
-				"/DocumentReference/" + id.getIdPart() + "/" +
+			String path = "/DocumentReference/" + id.getIdPart() + "/" +
 				JpaConstants.OPERATION_BINARY_ACCESS_READ +
 				"?path=DocumentReference.content.attachment";
 			executeBinaryReadAndValidate(path, SOME_BYTES, "image/png");
@@ -132,8 +126,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESHOW_RESOURCES, interceptor);
 		try {
 			// Read it back using the operation
-			String path = myServerBase +
-				"/DocumentReference/" + id.getIdPart() + "/" +
+			String path = "/DocumentReference/" + id.getIdPart() + "/" +
 				JpaConstants.OPERATION_BINARY_ACCESS_READ +
 				"?path=DocumentReference.content[1].attachment";
 			executeBinaryReadAndValidate(path, SOME_BYTES_2, "image/gif");
@@ -148,17 +141,10 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	public void testReadNoPath() throws IOException {
 		IIdType id = createDocumentReference(true);
 
-		String path = myServerBase +
-			"/DocumentReference/" + id.getIdPart() + "/" +
+		String path = "/DocumentReference/" + id.getIdPart() + "/" +
 			JpaConstants.OPERATION_BINARY_ACCESS_READ;
-		HttpGet get = new HttpGet(path);
-		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
-
-			assertEquals(400, resp.getStatusLine().getStatusCode());
-			String response = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-			assertThat(response).contains("No path specified");
-
-		}
+		String response = myServer.fhirRequest(path).get().assertStatus(400).getBody();
+		assertThat(response).contains("No path specified");
 
 	}
 
@@ -166,19 +152,12 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	public void testReadNoData() throws IOException {
 		IIdType id = createDocumentReference(false);
 
-		String path = myServerBase +
-			"/DocumentReference/" + id.getIdPart() + "/" +
+		String path = "/DocumentReference/" + id.getIdPart() + "/" +
 			JpaConstants.OPERATION_BINARY_ACCESS_READ +
 			"?path=DocumentReference.content.attachment";
 
-		HttpGet get = new HttpGet(path);
-		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
-
-			assertEquals(400, resp.getStatusLine().getStatusCode());
-			String response = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-			assertThat(response).matches(".*The resource with ID DocumentReference/[0-9]+ has no data at path.*");
-
-		}
+		String response = myServer.fhirRequest(path).get().assertStatus(400).getBody();
+		assertThat(response).matches(".*The resource with ID DocumentReference/[0-9]+ has no data at path.*");
 	}
 
 
@@ -190,25 +169,21 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_OUTGOING_RESPONSE, latch);
 
 
-		String path = myServerBase +
-			"/DocumentReference/" + id.getIdPart() + "/" +
+		String path = "/DocumentReference/" + id.getIdPart() + "/" +
 			JpaConstants.OPERATION_BINARY_ACCESS_READ +
 			"?path=DocumentReference.content.attachment";
-		HttpGet get = new HttpGet(path);
 
 		latch.setExpectedCount(1);
-		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
-			assertEquals(200, resp.getStatusLine().getStatusCode());
-			List<HookParams> hookParams = latch.awaitExpected();
+		myServer.fhirRequest(path).get().assertStatus(200);
+		List<HookParams> hookParams = latch.awaitExpected();
 
-			RequestDetails requestDetails = PointcutLatch.getInvocationParameterOfType(hookParams, RequestDetails.class);
-			ResponseDetails responseDetails = PointcutLatch.getInvocationParameterOfType(hookParams, ResponseDetails.class);
+		RequestDetails requestDetails = PointcutLatch.getInvocationParameterOfType(hookParams, RequestDetails.class);
+		ResponseDetails responseDetails = PointcutLatch.getInvocationParameterOfType(hookParams, ResponseDetails.class);
 
-			assertNotNull(responseDetails);
-			assertNotNull(requestDetails);
+		assertNotNull(responseDetails);
+		assertNotNull(requestDetails);
 
-			assertEquals(id.toString(), requestDetails.getId().toString());
-		}
+		assertEquals(id.toString(), requestDetails.getId().toString());
 	}
 
 	@Test
@@ -216,8 +191,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		IIdType id = createDocumentReference(false);
 
 		// Write a binary using the operation
-		String path = myServerBase +
-			"/DocumentReference/" + id.getIdPart() + "/" +
+		String path = "/DocumentReference/" + id.getIdPart() + "/" +
 			JpaConstants.OPERATION_BINARY_ACCESS_WRITE +
 			"?path=DocumentReference.content.attachment";
 		String attachmentId = executeBinaryWriteAndValidateDocumentReference(path, SOME_BYTES);
@@ -225,18 +199,11 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 		myBinaryStorageSvc.expungeBinaryContent(id, attachmentId);
 
-		path = myServerBase +
-			"/DocumentReference/" + id.getIdPart() + "/" +
+		path = "/DocumentReference/" + id.getIdPart() + "/" +
 			JpaConstants.OPERATION_BINARY_ACCESS_READ +
 			"?path=DocumentReference.content.attachment";
-		HttpGet get = new HttpGet(path);
-		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
-
-			assertEquals(400, resp.getStatusLine().getStatusCode());
-			String response = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-			assertThat(response).matches(".*Can not find the requested binary content. It may have been deleted.*");
-
-		}
+		String response = myServer.fhirRequest(path).get().assertStatus(400).getBody();
+		assertThat(response).matches(".*Can not find the requested binary content. It may have been deleted.*");
 
 	}
 
@@ -252,8 +219,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		try {
 
 			// Write the binary using the operation
-			String path = myServerBase +
-				"/DocumentReference/" + id.getIdPart() + "/" +
+			String path = "/DocumentReference/" + id.getIdPart() + "/" +
 				JpaConstants.OPERATION_BINARY_ACCESS_WRITE +
 				"?path=DocumentReference.content.attachment";
 			String attachmentId = executeBinaryWriteAndValidateDocumentReference(path, SOME_BYTES);
@@ -261,7 +227,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			validateInterceptorInvoked(interceptor, 1);
 
 			// Read it back using the operation
-			path = myServerBase + "/DocumentReference/" + id.getIdPart() + "/" +
+			path = "/DocumentReference/" + id.getIdPart() + "/" +
 				JpaConstants.OPERATION_BINARY_ACCESS_READ + "?path=DocumentReference.content.attachment";
 			executeBinaryReadAndValidate(path, SOME_BYTES, "image/jpeg");
 		} finally {
@@ -282,7 +248,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		registerInterceptor(interceptor);
 		try {
 			// Write the binary using the operation
-			String path = myServerBase + "/DocumentReference/" + id.getIdPart() + "/" +
+			String path = "/DocumentReference/" + id.getIdPart() + "/" +
 				JpaConstants.OPERATION_BINARY_ACCESS_WRITE + "?path=DocumentReference.content.attachment";
 			String attachmentId = executeBinaryWriteAndValidateDocumentReference(path, SOME_BYTES);
 			assertThat(attachmentId).matches("[a-zA-Z0-9]{100}");
@@ -295,7 +261,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			assertEquals(attachmentId, attachmentIdNoOp);
 
 			// Read it back using the operation
-			path = myServerBase + "/DocumentReference/" + id.getIdPart() + "/" + JpaConstants.OPERATION_BINARY_ACCESS_READ +
+			path = "/DocumentReference/" + id.getIdPart() + "/" + JpaConstants.OPERATION_BINARY_ACCESS_READ +
 				"?path=DocumentReference.content.attachment";
 			executeBinaryReadAndValidate(path, SOME_BYTES, "image/jpeg");
 		} finally {
@@ -332,32 +298,24 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		try {
 
 			// Write the binary using the operation
-			String path = myServerBase +
-				"/DocumentReference/" + id.getIdPart() + "/" +
+			String path = "/DocumentReference/" + id.getIdPart() + "/" +
 				JpaConstants.OPERATION_BINARY_ACCESS_WRITE +
 				"?path=DocumentReference.content.attachment";
-			HttpPost post = new HttpPost(path);
-			post.setEntity(new ByteArrayEntity(SOME_BYTES_2, ContentType.IMAGE_JPEG));
-			post.addHeader("Accept", "application/fhir+json; _pretty=true");
-			String attachmentId;
-			try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
+			String accept = "application/fhir+json; _pretty=true";
+			HttpTestResponse resp = myServer.fhirRequest(path).withHeader(Constants.HEADER_ACCEPT, accept).post(SOME_BYTES_2, ContentType.IMAGE_JPEG.getMimeType()).assertStatus(200);
+			assertThat(resp.getContentType()).contains("application/fhir+json");
+			String response = resp.getBody();
+			ourLog.info("Response: {}", response);
 
-				assertEquals(200, resp.getStatusLine().getStatusCode());
-				assertThat(resp.getEntity().getContentType().getValue()).contains("application/fhir+json");
-				String response = IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8);
-				ourLog.info("Response: {}", response);
+			DocumentReference ref = myFhirContext.newJsonParser().parseResource(DocumentReference.class, response);
 
-				DocumentReference ref = myFhirContext.newJsonParser().parseResource(DocumentReference.class, response);
-
-				Attachment attachment = ref.getContentFirstRep().getAttachment();
-				assertEquals(ContentType.IMAGE_JPEG.getMimeType(), attachment.getContentType());
-				assertEquals(4, attachment.getSize());
-				assertThat(attachment.getData()).containsExactly(SOME_BYTES_2);
-				assertEquals("2", ref.getMeta().getVersionId());
-				attachmentId = attachment.getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
-				assertNull(attachmentId);
-
-			}
+			Attachment attachment = ref.getContentFirstRep().getAttachment();
+			assertEquals(ContentType.IMAGE_JPEG.getMimeType(), attachment.getContentType());
+			assertEquals(4, attachment.getSize());
+			assertThat(attachment.getData()).containsExactly(SOME_BYTES_2);
+			assertEquals("2", ref.getMeta().getVersionId());
+			String attachmentId = attachment.getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
+			assertNull(attachmentId);
 
 			validateInterceptorInvoked(interceptor, 1);
 		} finally {
@@ -381,14 +339,14 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		registerInterceptor(interceptor);
 		try {
 			// Write using the operation
-			String path = myServerBase + "/Binary/" + id.getIdPart() + "/" +
+			String path = "/Binary/" + id.getIdPart() + "/" +
 				JpaConstants.OPERATION_BINARY_ACCESS_WRITE + "?path=Binary";
 			String attachmentId = executeBinaryWriteAndValidateBinary(path);
 			assertThat(attachmentId).matches("[a-zA-Z0-9]{100}");
 			validateInterceptorInvoked(interceptor, 1);
 
 			// Read it back using the operation
-			path = myServerBase + "/Binary/" + id.getIdPart() + "/" +
+			path = "/Binary/" + id.getIdPart() + "/" +
 				JpaConstants.OPERATION_BINARY_ACCESS_READ + "?path=Binary";
 			executeBinaryReadAndValidate(path, SOME_BYTES, "image/jpeg");
 		} finally {
@@ -414,8 +372,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		registerInterceptor(interceptor);
 		try {
 			// Write the binary using the operation
-			String path = myServerBase +
-				"/Binary/" + id.getIdPart() + "/" +
+			String path = "/Binary/" + id.getIdPart() + "/" +
 				JpaConstants.OPERATION_BINARY_ACCESS_WRITE +
 				"?path=Binary";
 			String attachmentId = executeBinaryWriteAndValidateBinary(path);
@@ -429,8 +386,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			assertEquals(attachmentId, attachmentIdNoOp);
 
 			// Read it back using the operation
-			path = myServerBase +
-				"/Binary/" + id.getIdPart() + "/" +
+			path = "/Binary/" + id.getIdPart() + "/" +
 				JpaConstants.OPERATION_BINARY_ACCESS_READ +
 				"?path=Binary";
 			executeBinaryReadAndValidate(path, SOME_BYTES, "image/jpeg");
@@ -454,15 +410,13 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 		// Write using the operation
 
-		String path = myServerBase +
-			"/Binary/" + id.getIdPart() + "/" +
+		String path = "/Binary/" + id.getIdPart() + "/" +
 			JpaConstants.OPERATION_BINARY_ACCESS_WRITE;
 		String attachmentId = executeBinaryWriteAndValidateBinary(path);
 		assertThat(attachmentId).matches("[a-zA-Z0-9]{100}");
 
 		// Read it back using the operation
-		path = myServerBase +
-			"/Binary/" + id.getIdPart() + "/" +
+		path = "/Binary/" + id.getIdPart() + "/" +
 			JpaConstants.OPERATION_BINARY_ACCESS_READ;
 		executeBinaryReadAndValidate(path, SOME_BYTES, "image/jpeg");
 
@@ -498,8 +452,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		try {
 			// Write using the operation
 
-			String path = myServerBase +
-				"/DocumentReference/" + id.getIdPart() + "/" +
+			String path = "/DocumentReference/" + id.getIdPart() + "/" +
 				JpaConstants.OPERATION_BINARY_ACCESS_WRITE +
 				"?path=DocumentReference.content.attachment";
 			String attachmentId = executeBinaryWriteAndValidateDocumentReference(path, bytes);
@@ -533,8 +486,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		try {
 			// Write using the operation
 
-			String path = myServerBase +
-				"/DocumentReference/" + id.getIdPart() + "/" +
+			String path = "/DocumentReference/" + id.getIdPart() + "/" +
 				JpaConstants.OPERATION_BINARY_ACCESS_WRITE +
 				"?path=DocumentReference.content.attachment";
 			String attachmentId = executeBinaryWriteAndValidateDocumentReference(path, bytes);
@@ -544,8 +496,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			validateInterceptorInvoked(interceptor, 1);
 
 			// Read it back using the operation
-			path = myServerBase +
-				"/DocumentReference/" + id.getIdPart() + "/" +
+			path = "/DocumentReference/" + id.getIdPart() + "/" +
 				JpaConstants.OPERATION_BINARY_ACCESS_READ +
 				"?path=DocumentReference.content.attachment";
 			executeBinaryReadAndValidate(path, bytes, "image/jpeg");
@@ -555,31 +506,21 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	private void executeBinaryReadAndValidate(String thePath, byte[] theExpectedContent, String theExpectedContentType) throws IOException {
-		HttpGet get = new HttpGet(thePath);
-		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
+		HttpTestResponse resp = myServer.fhirRequest(thePath).get().assertStatus(200);
+		assertEquals(theExpectedContentType, resp.getHeader(Constants.HEADER_CONTENT_TYPE));
+		byte[] actualBytes = resp.getBodyBytes();
+		assertEquals(String.valueOf(theExpectedContent.length), resp.getHeader("Content-Length"));
+		ourLog.info("Response: {}", resp);
 
-			assertEquals(200, resp.getStatusLine().getStatusCode());
-			assertEquals(theExpectedContentType, resp.getEntity().getContentType().getValue());
-			assertEquals(theExpectedContent.length, resp.getEntity().getContentLength());
-			ourLog.info("Response: {}", resp);
-
-			byte[] actualBytes = IOUtils.toByteArray(resp.getEntity().getContent());
-			assertThat(actualBytes).containsExactly(theExpectedContent);
-		}
+		assertThat(actualBytes).containsExactly(theExpectedContent);
 	}
 
 	private String executeBinaryWrite(String thePath, byte[] theContent) throws IOException {
-		HttpPost post = new HttpPost(thePath);
-		post.setEntity(new ByteArrayEntity(theContent, ContentType.IMAGE_JPEG));
-		post.addHeader("Accept", "application/fhir+json; _pretty=true");
-		String response;
-		try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
-
-			assertEquals(200, resp.getStatusLine().getStatusCode());
-			assertThat(resp.getEntity().getContentType().getValue()).contains("application/fhir+json");
-			response = IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8);
-			ourLog.info("Response: {}", response);
-		}
+		String accept = "application/fhir+json; _pretty=true";
+		HttpTestResponse resp = myServer.fhirRequest(thePath).withHeader(Constants.HEADER_ACCEPT, accept).post(theContent, ContentType.IMAGE_JPEG.getMimeType()).assertStatus(200);
+		assertThat(resp.getContentType()).contains("application/fhir+json");
+		String response = resp.getBody();
+		ourLog.info("Response: {}", response);
 		return response;
 	}
 
@@ -645,8 +586,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	public void testResourceExpungeAlsoExpungesBinaryData() throws IOException {
 		IIdType id = createDocumentReference(false);
 
-		String path = myServerBase +
-			"/DocumentReference/" + id.getIdPart() + "/" +
+		String path = "/DocumentReference/" + id.getIdPart() + "/" +
 			JpaConstants.OPERATION_BINARY_ACCESS_WRITE +
 			"?path=DocumentReference.content.attachment";
 		String attachmentId = executeBinaryWriteAndValidateDocumentReference(path, SOME_BYTES);
@@ -693,8 +633,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 			IIdType id = createDocumentReference(false);
 
-			String path = myServerBase +
-				"/DocumentReference/" + id.getIdPart() + "/" +
+			String path = "/DocumentReference/" + id.getIdPart() + "/" +
 				JpaConstants.OPERATION_BINARY_ACCESS_WRITE +
 				"?path=DocumentReference.content.attachment";
 			String attachmentId = executeBinaryWriteAndValidateDocumentReference(path, SOME_BYTES);
