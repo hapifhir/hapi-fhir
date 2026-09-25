@@ -2,7 +2,7 @@
 type: add
 issue: 8342
 title: "Added warning and absolute thresholds for MDM matching when searching for candidates.
-        When warning threshold (defaulted to 5) is reached or exceeded, additional logging will result.
+        When warning threshold (defaulted to 50) is reached or exceeded, additional logging will result.
         When max threshold (defaulted to 10000) is reached or exceeded, the resource is tagged
         and omitted from MDM matching (so as not to halt the system entirely). No Golden Resource
         is created for such a resource.
