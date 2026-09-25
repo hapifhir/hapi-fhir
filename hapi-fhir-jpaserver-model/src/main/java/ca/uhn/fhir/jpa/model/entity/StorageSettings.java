@@ -57,6 +57,17 @@ public class StorageSettings {
 	private static final boolean DEFAULT_PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA = false;
 
 	public static final int DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE = 100; // 1 for single thread
+
+	/**
+	 * Value for {@link #setBindIdListAsJsonAboveSize(int)} which always binds one parameter per ID.
+	 */
+	public static final int BIND_ID_LIST_AS_JSON_DISABLED = -1;
+
+	/**
+	 * Default value for {@link #setBindIdListAsJsonAboveSize(int)}.
+	 */
+	public static final int DEFAULT_BIND_ID_LIST_AS_JSON_ABOVE_SIZE = 800;
+
 	/**
 	 * Default {@link #getTreatReferencesAsLogical() logical URL bases}. Includes the following
 	 * values:
@@ -175,6 +186,12 @@ public class StorageSettings {
 	 * @since 7.4.0
 	 */
 	private boolean myIndexStorageOptimized = false;
+
+	/**
+	 * The number of resource IDs above which a search predicate renders its ID list as a single
+	 * JSON array bind variable instead of one bind variable per ID.
+	 */
+	private int myBindIdListAsJsonAboveSize = DEFAULT_BIND_ID_LIST_AS_JSON_ABOVE_SIZE;
 
 	/**
 	 * Constructor
@@ -1325,6 +1342,46 @@ public class StorageSettings {
 	 */
 	public void setValidateResourceStatusForPackageUpload(boolean theValidateResourceStatusForPackageUpload) {
 		myValidateResourceStatusForPackageUpload = theValidateResourceStatusForPackageUpload;
+	}
+
+	/**
+	 * The number of IDs above which a resource ID list is bound as a single JSON array string instead
+	 * of one bind variable per ID.
+	 *
+	 * @see #setBindIdListAsJsonAboveSize(int)
+	 * @since 8.14.0
+	 */
+	public int getBindIdListAsJsonAboveSize() {
+		return myBindIdListAsJsonAboveSize;
+	}
+
+	/**
+	 * A search containing some filter by resource ID (eg. directly with "_id" or by reference such as
+	 * "subject=") uses one database bind variable per ID. When many IDs are included, the database
+	 * bind parameter limits can be exceeded
+	 * (65,535 on PostgreSQL, 2,100 on SQL Server, and 1,000 expressions on Oracle).
+	 * To avoid this, the list of IDs is bound as a single JSON array string which the database unpacks with
+	 * its own JSON function. This setting configures the threshold at which a search will use a single JSON
+	 * array.
+	 * <p>
+	 * This applies to PostgreSQL, Oracle and SQL Server (database compatibility level 130 or higher) only.
+	 * Other databases always use one bind variable per ID.
+	 * </p>
+	 * @param theBindIdListAsJsonAboveSize The number of IDs in a search above which the SQL query
+	 *                                     will use a json array rather than a parameter for each ID.
+	 *                                     A value of 0 always uses a json array; {@link #BIND_ID_LIST_AS_JSON_DISABLED}
+	 *                                     (-1) always uses one parameter per ID.
+	 *                                     Defaults to 800.
+	 *
+	 * @since 8.14.0
+	 */
+	public void setBindIdListAsJsonAboveSize(int theBindIdListAsJsonAboveSize) {
+		Validate.isTrue(
+				theBindIdListAsJsonAboveSize >= BIND_ID_LIST_AS_JSON_DISABLED,
+				"Bind ID list as JSON above size must not be less than %d but was: %d",
+				BIND_ID_LIST_AS_JSON_DISABLED,
+				theBindIdListAsJsonAboveSize);
+		myBindIdListAsJsonAboveSize = theBindIdListAsJsonAboveSize;
 	}
 
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
