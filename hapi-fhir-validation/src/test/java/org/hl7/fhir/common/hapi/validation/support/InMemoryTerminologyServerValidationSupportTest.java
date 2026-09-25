@@ -604,13 +604,14 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 	}
 
 	/**
-	 * A CodeSystem stored without a version element is the only definition of that system there is, so it
-	 * answers whatever version a coding names. Asserting the rejection as well as the acceptance is what shows
-	 * the code was actually checked against the CodeSystem, rather than let through with no module asked.
+	 * The named version is not stored, and neither a copy stored without a version nor one at another version
+	 * stands in for it: as in the HL7 validator, the version is reported as not found. Both stored copies hold
+	 * the code, so a fallback to either would accept it.
 	 */
 	// Created by Claude Opus 5
-	@Test
-	void validateCode_codeSystemStoredWithoutAVersion_answersForANamedVersion() {
+	@ParameterizedTest
+	@ValueSource(booleans = {false, true})
+	void validateCode_namedVersionNotStored_isReportedNotFound(boolean theAlsoStoreAnotherVersion) {
 		// Setup
 		CodeSystem cs = new CodeSystem();
 		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -618,19 +619,26 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		cs.setUrl(VERSIONED_CS_URL);
 		cs.addConcept().setCode("code0").setDisplay("Code 0");
 		myPrePopulated.addCodeSystem(cs);
+		if (theAlsoStoreAnotherVersion) {
+			myPrePopulated.addCodeSystem(cs.copy().setVersion("1.0.0"));
+		}
 		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
 
 		// Test
-		IValidationSupport.CodeValidationResult codeInTheSystem = myChain.validateCode(
-			valCtx, new ConceptValidationOptions(), new ValidateCodeRequest(VERSIONED_CS_URL, "1.0.0", "code0", null, null));
-		IValidationSupport.CodeValidationResult codeNotInTheSystem = myChain.validateCode(
-			valCtx, new ConceptValidationOptions(), new ValidateCodeRequest(VERSIONED_CS_URL, "1.0.0", "code9", null, null));
+		IValidationSupport.CodeValidationResult namedVersion = myChain.validateCode(
+			valCtx, new ConceptValidationOptions(), new ValidateCodeRequest(VERSIONED_CS_URL, "2.0.0", "code0", null, null));
+		IValidationSupport.CodeValidationResult noVersionNamed = myChain.validateCode(
+			valCtx, new ConceptValidationOptions(), new ValidateCodeRequest(VERSIONED_CS_URL, null, "code0", null, null));
 
 		// Verify
-		assertNotNull(codeInTheSystem);
-		assertTrue(codeInTheSystem.isOk(), codeInTheSystem.getMessage());
-		assertNotNull(codeNotInTheSystem);
-		assertFalse(codeNotInTheSystem.isOk());
+		assertNotNull(namedVersion);
+		assertFalse(namedVersion.isOk());
+		assertEquals(
+			"A definition for CodeSystem '" + VERSIONED_CS_URL
+				+ "' version '2.0.0' could not be found, so the code cannot be validated",
+			namedVersion.getMessage());
+		assertNotNull(noVersionNamed);
+		assertTrue(noVersionNamed.isOk(), noVersionNamed.getMessage());
 	}
 
 	/**

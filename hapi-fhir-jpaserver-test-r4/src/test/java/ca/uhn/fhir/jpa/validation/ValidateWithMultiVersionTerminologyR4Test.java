@@ -688,56 +688,66 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 	}
 
 	/**
-	 * The CodeSystem is stored without a version element, and the coding names one. With no version stored
-	 * there is only one definition of the system, so it answers whatever version is named. Each test also
-	 * checks a code the CodeSystem does not have, which shows the code was checked rather than let through
-	 * with no module asked. No profile binds the coding to a ValueSet: a binding reaches terminology through
-	 * validateCodeInValueSet, which never asks about the version, so it would pass either way.
+	 * The coding names a CodeSystem version which is not stored. Neither a copy stored without a version nor a
+	 * copy at another version stands in for it: as in the HL7 validator, the named version is reported as not
+	 * found. Every stored copy holds the code, so a fallback to any of them would show up as the code being
+	 * accepted. No profile binds the coding to a ValueSet: a binding reaches terminology through
+	 * validateCodeInValueSet, which never asks about the version.
 	 */
 	@Nested
-	class CodeSystemStoredWithoutAVersionTest {
+	class CodeSystemVersionNotStoredTest {
 
-		void setUpWithUnversionedCodeSystem() {
+		/**
+		 * Stores the CodeSystem without a version, and - when asked - a second copy at {@link #VERSION_NEWER},
+		 * so that {@link #VERSION_OLDER} is the version which is not stored.
+		 */
+		void setUpWithoutTheNamedVersion(boolean theAlsoStoreAnotherVersion) {
 			createCodeSystem(null, CODE_IN_OLDER_VERSION);
+			if (theAlsoStoreAnotherVersion) {
+				sleepUntilTimeChange();
+				createCodeSystem(VERSION_NEWER, CODE_IN_OLDER_VERSION);
+			}
 
 			myTerminologyDeferredStorageSvc.saveAllDeferred();
 		}
 
 		@ParameterizedTest
-		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
-		void validateCode_namedVersionOfAnUnversionedCodeSystem_answersFromIt(String theNamedVersion) {
+		@ValueSource(booleans = {false, true})
+		void validateCode_namedVersionNotStored_isReportedNotFound(boolean theAlsoStoreAnotherVersion) {
 			// Setup
-			setUpWithUnversionedCodeSystem();
+			setUpWithoutTheNamedVersion(theAlsoStoreAnotherVersion);
 
 			// Test
-			IValidationSupport.CodeValidationResult codeInTheSystem =
-				validateCodeInCodeSystem(theNamedVersion, CODE_IN_OLDER_VERSION);
-			IValidationSupport.CodeValidationResult codeNotInTheSystem =
-				validateCodeInCodeSystem(theNamedVersion, CODE_IN_NEWER_VERSION);
+			IValidationSupport.CodeValidationResult namedVersion =
+				validateCodeInCodeSystem(VERSION_OLDER, CODE_IN_OLDER_VERSION);
+			IValidationSupport.CodeValidationResult noVersionNamed = validateCodeInCodeSystem(null, CODE_IN_OLDER_VERSION);
 
 			// Verify
-			assertThat(codeInTheSystem).isNotNull();
-			assertThat(codeInTheSystem.isOk()).as(codeInTheSystem.getMessage()).isTrue();
-			assertThat(codeNotInTheSystem).isNotNull();
-			assertThat(codeNotInTheSystem.isOk()).isFalse();
+			assertThat(namedVersion).isNotNull();
+			assertThat(namedVersion.isOk()).isFalse();
+			assertThat(namedVersion.getMessage())
+				.isEqualTo("A definition for CodeSystem '" + CS_URL + "' version '" + VERSION_OLDER
+					+ "' could not be found, so the code cannot be validated");
+			assertThat(noVersionNamed).isNotNull();
+			assertThat(noVersionNamed.isOk()).as(noVersionNamed.getMessage()).isTrue();
 		}
 
 		@ParameterizedTest
-		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
-		void validate_codingNamesAVersionOfAnUnversionedCodeSystem_validatesAgainstIt(String theNamedVersion) {
+		@ValueSource(booleans = {false, true})
+		void validate_codingNamesAVersionNotStored_reportsItNotFound(boolean theAlsoStoreAnotherVersion) {
 			// Setup
-			setUpWithUnversionedCodeSystem();
+			setUpWithoutTheNamedVersion(theAlsoStoreAnotherVersion);
 
 			// Test
-			OperationOutcome codeInTheSystem = validateObservationWithoutProfile(CODE_IN_OLDER_VERSION, theNamedVersion);
-			OperationOutcome codeNotInTheSystem =
-				validateObservationWithoutProfile(CODE_IN_NEWER_VERSION, theNamedVersion);
+			OperationOutcome namedVersion = validateObservationWithoutProfile(CODE_IN_OLDER_VERSION, VERSION_OLDER);
+			OperationOutcome noVersionNamed = validateObservationWithoutProfile(CODE_IN_OLDER_VERSION, null);
 
-			// Verify - with no profile the coding's binding is the base example one, so a code missing from the
-			// CodeSystem is reported as a warning rather than an error
-			assertThat(allDiagnostics(codeInTheSystem)).noneMatch(t -> t.contains(CODE_IN_OLDER_VERSION));
-			assertThat(allDiagnostics(codeNotInTheSystem))
-				.anyMatch(t -> t.contains("Code is not found in CodeSystem") && t.contains(CODE_IN_NEWER_VERSION));
+			// Verify - the chain reports the version as an error, and the validator scales that to the binding
+			// strength: with no profile the coding's binding is the base example one, so it arrives as a warning
+			assertThat(namedVersion.getIssue())
+				.anyMatch(t -> t.getSeverity() == OperationOutcome.IssueSeverity.WARNING
+					&& t.getDiagnostics().contains("version '" + VERSION_OLDER + "' could not be found"));
+			assertThat(allDiagnostics(noVersionNamed)).noneMatch(t -> t.contains(CODE_IN_OLDER_VERSION));
 		}
 	}
 

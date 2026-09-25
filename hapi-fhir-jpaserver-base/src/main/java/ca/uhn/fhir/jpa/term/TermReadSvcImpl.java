@@ -2355,9 +2355,6 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			if (cs != null) {
 				if (version != null) {
 					csv = myCodeSystemVersionDao.findByCodeSystemPidAndVersion(cs.getPid(), version);
-					if (csv == null) {
-						csv = findTheOnlyVersionIfUnversioned(cs);
-					}
 				} else if (cs.getCurrentVersion() != null) {
 					csv = cs.getCurrentVersion();
 				}
@@ -2368,25 +2365,6 @@ public class TermReadSvcImpl implements ITermReadSvc {
 				return null;
 			}
 		});
-	}
-
-	/**
-	 * A code system stored without a version is the only definition of it there is, so it answers for any
-	 * version named. Once any version is stored, only an exact match answers.
-	 */
-	// Created by Claude Opus 5
-	@Nullable
-	private TermCodeSystemVersion findTheOnlyVersionIfUnversioned(TermCodeSystem theCodeSystem) {
-		TermCodeSystemVersion unversioned =
-				myCodeSystemVersionDao.findByCodeSystemPidVersionIsNull(theCodeSystem.getPid());
-		if (unversioned == null) {
-			return null;
-		}
-		boolean onlyVersionStored = myCodeSystemVersionDao
-						.findSortedPidsByCodeSystemPid(theCodeSystem.getPid())
-						.size()
-				== 1;
-		return onlyVersionStored ? unversioned : null;
 	}
 
 	private String getVersionFromIdentifier(String theUri) {

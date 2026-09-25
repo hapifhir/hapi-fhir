@@ -979,15 +979,20 @@ public class ValidationSupportChain implements IValidationSupport {
 	 *   to a configured severity if it is registered.
 	 * </p>
 	 *
+	 * <p>
+	 * A code system which is known, but not at the version the caller named, is not an unknown code system: it
+	 * gets an error of its own, worded as the HL7 validator words it. A stored copy without a version does not
+	 * stand in for the named version, as it does not in the HL7 validator either.
+	 * </p>
+	 *
 	 * This function was originally part of now deprecated UnknownCodeSystemWarningValidationSupport
 	 * @param theCodeSystem        The CodeSystem URL to validate
 	 * @param theCodeSystemVersion The CodeSystem version the caller asked for, named in the message so they can
 	 *                             see which one was not found. Whether the code system is known at all is
-	 *                             decided on the URL alone: a known code system at an unknown version is not an
-	 *                             unknown code system.
+	 *                             decided on the URL alone.
 	 * @param theCode              The code to validate
 	 * @return A CodeValidationResult indicating the error, or null if theCodeSystem is null
-	 * or a validation support can fetch the code system.
+	 * or a validation support can fetch the code system at the version asked for.
 	 */
 	@Nullable
 	private CodeValidationResult generateResultForUnknownCodeSystem(
@@ -996,18 +1001,38 @@ public class ValidationSupportChain implements IValidationSupport {
 		if (theCodeSystem == null) {
 			return null;
 		}
-		IBaseResource codeSystem = fetchCodeSystem(theCodeSystem);
+		UrlUtil.CanonicalUrlParts codeSystemParts = UrlUtil.parseCanonicalUrl(theCodeSystem, theCodeSystemVersion);
+		String codeSystemUrl = codeSystemParts.url();
+		String codeSystemVersion = codeSystemParts.versionId().orElse(null);
+		IBaseResource codeSystem = fetchCodeSystem(codeSystemUrl, null);
 		if (codeSystem != null) {
-			return null;
+			if (codeSystemVersion == null || fetchCodeSystem(codeSystemUrl, codeSystemVersion) != null) {
+				return null;
+			}
+			return generateResultForUnknownCodeSystemVersion(codeSystemUrl, codeSystemVersion);
 		}
 
-		String codeSystemCanonical = UrlUtil.toCanonicalUrl(theCodeSystem, theCodeSystemVersion);
+		String codeSystemCanonical = UrlUtil.toCanonicalUrl(codeSystemUrl, codeSystemVersion);
 		CodeValidationResult result = new CodeValidationResult();
 		result.setSeverity(IssueSeverity.ERROR);
 		String message = "CodeSystem is unknown and can't be validated: %s for '%s#%s'"
 				.formatted(codeSystemCanonical, codeSystemCanonical, theCode);
 		result.setMessage(message);
 
+		result.addIssue(new CodeValidationIssue(
+				message, IssueSeverity.ERROR, CodeValidationIssueCode.NOT_FOUND, CodeValidationIssueCoding.NOT_FOUND));
+		return result;
+	}
+
+	// Created by Claude Opus 5
+	private CodeValidationResult generateResultForUnknownCodeSystemVersion(
+			String theCodeSystemUrl, String theCodeSystemVersion) {
+		String message =
+				"A definition for CodeSystem '%s' version '%s' could not be found, so the code cannot be validated"
+						.formatted(theCodeSystemUrl, theCodeSystemVersion);
+		CodeValidationResult result = new CodeValidationResult();
+		result.setSeverity(IssueSeverity.ERROR);
+		result.setMessage(message);
 		result.addIssue(new CodeValidationIssue(
 				message, IssueSeverity.ERROR, CodeValidationIssueCode.NOT_FOUND, CodeValidationIssueCoding.NOT_FOUND));
 		return result;

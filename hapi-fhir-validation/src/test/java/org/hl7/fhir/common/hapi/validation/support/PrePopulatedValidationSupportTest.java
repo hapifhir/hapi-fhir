@@ -53,13 +53,12 @@ public class PrePopulatedValidationSupportTest extends BaseValidationTestWithInl
 	}
 
 	/**
-	 * A CodeSystem stored without a version answers for a named version only while it is the sole definition
-	 * of that system. Once a versioned copy is stored too, a version nobody stored must not fall back to the
-	 * unversioned one - which is stored last here, so it is the one a bare-URL lookup finds.
+	 * A named version which is not stored is not answered by another copy of the system - neither one stored
+	 * without a version nor one at another version - as in the HL7 validator.
 	 */
 	// Created by Claude Opus 5
 	@Test
-	public void fetchCodeSystem_namedVersionNotStored_fallsBackToTheUnversionedCopyOnlyWhenNoVersionIsStored() {
+	public void fetchCodeSystem_namedVersionNotStored_isNotAnsweredByAnotherCopy() {
 		// Setup
 		CodeSystem unversioned = new CodeSystem();
 		unversioned.setUrl("http://cs");
@@ -73,8 +72,9 @@ public class PrePopulatedValidationSupportTest extends BaseValidationTestWithInl
 		mySvc.addCodeSystem(unversioned);
 
 		// Test & Verify
-		assertThat(onlyUnversioned.fetchCodeSystem("http://cs", "2.0.0")).isSameAs(unversioned);
-		assertThat(onlyUnversioned.isCodeSystemSupported(null, "http://cs", "2.0.0")).isTrue();
+		assertThat(onlyUnversioned.fetchCodeSystem("http://cs", "2.0.0")).isNull();
+		assertThat(onlyUnversioned.isCodeSystemSupported(null, "http://cs", "2.0.0")).isFalse();
+		assertThat(onlyUnversioned.fetchCodeSystem("http://cs", null)).isSameAs(unversioned);
 		assertThat(mySvc.fetchCodeSystem("http://cs", "1.0.0")).isSameAs(versioned);
 		assertThat(mySvc.fetchCodeSystem("http://cs", "2.0.0")).isNull();
 		assertThat(mySvc.isCodeSystemSupported(null, "http://cs", "2.0.0")).isFalse();
