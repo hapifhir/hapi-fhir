@@ -1752,31 +1752,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	 * The JpaPid returned will have resource type populated.
 	 */
 	@Override
-	public Set<JpaPid> loadIncludes(
-			FhirContext theContext,
-			EntityManager theEntityManager,
-			Collection<JpaPid> theMatches,
-			Collection<Include> theIncludes,
-			boolean theReverseMode,
-			DateRangeParam theLastUpdated,
-			String theSearchIdOrDescription,
-			RequestDetails theRequest,
-			Integer theMaxCount) {
-		SearchBuilderLoadIncludesParameters<JpaPid> parameters = new SearchBuilderLoadIncludesParameters<>();
-		parameters.setFhirContext(theContext);
-		parameters.setEntityManager(theEntityManager);
-		parameters.setMatches(theMatches);
-		parameters.setIncludeFilters(theIncludes);
-		parameters.setReverseMode(theReverseMode);
-		parameters.setLastUpdated(theLastUpdated);
-		parameters.setSearchIdOrDescription(theSearchIdOrDescription);
-		parameters.setRequestDetails(theRequest);
-		parameters.setMaxCount(theMaxCount);
-		return loadIncludes(parameters);
-	}
-
-	@Override
-	public Set<JpaPid> loadIncludes(SearchBuilderLoadIncludesParameters<JpaPid> theParameters) {
+	public FetchedIncludes<JpaPid> loadIncludes(SearchBuilderLoadIncludesParameters<JpaPid> theParameters) {
 		Collection<JpaPid> matches = theParameters.getMatches();
 		Collection<Include> currentIncludes = theParameters.getIncludeFilters();
 		boolean reverseMode = theParameters.isReverseMode();
@@ -1794,10 +1770,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			CurrentThreadCaptureQueriesListener.startCapturing();
 		}
 		if (matches.isEmpty()) {
-			return new HashSet<>();
+			return new FetchedIncludes<>();
 		}
 		if (currentIncludes == null || currentIncludes.isEmpty()) {
-			return new HashSet<>();
+			return new FetchedIncludes<>();
 		}
 		String searchPidFieldName = reverseMode ? MY_TARGET_RESOURCE_PID : MY_SOURCE_RESOURCE_PID;
 		String searchPartitionIdFieldName =
@@ -1911,15 +1887,17 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// Interceptor call: STORAGE_PREACCESS_RESOURCES
 		// This can be used to remove results from the search result details before
 		// the user has a chance to know that they were in the results
+		Map<JpaPid, IBaseResource> fetchedResourceMap = null;
 		if (!allAdded.isEmpty()) {
 
 			if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PREACCESS_RESOURCES)) {
 				List<JpaPid> includedPidList = new ArrayList<>(allAdded);
+				List<IBaseResource> fetchedResourceList = new ArrayList<>();
+				fetchedResourceMap = new HashMap<>();
 
-				List<IBaseResource> resourceList = new ArrayList<>();
-				loadResourcesByPid(includedPidList, Collections.emptySet(), resourceList, false, null);
+				loadResourcesByPid(includedPidList, Collections.emptySet(), fetchedResourceList, false, null);
 				JpaPreResourceAccessDetails accessDetails =
-						new JpaPreResourceAccessDetails(includedPidList, resourceList);
+						new JpaPreResourceAccessDetails(includedPidList, fetchedResourceList);
 
 				HookParams params = new HookParams()
 						.add(IPreResourceAccessDetails.class, accessDetails)
@@ -1929,16 +1907,24 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 				for (int i = includedPidList.size() - 1; i >= 0; i--) {
 					if (accessDetails.isDontReturnResourceAtIndex(i)) {
-						JpaPid value = includedPidList.remove(i);
+						JpaPid value = includedPidList.get(i);
 						if (value != null) {
 							allAdded.remove(value);
+							fetchedResourceList.remove(i);
+						}
+					} else {
+						JpaPid pid = includedPidList.get(i);
+						IBaseResource resource = fetchedResourceList.get(i);
+						if (resource != null) {
+							ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(resource, BundleEntrySearchModeEnum.INCLUDE);
+							fetchedResourceMap.put(pid, resource);
 						}
 					}
 				}
 			}
 		}
 
-		return allAdded;
+		return new FetchedIncludes<>(allAdded, fetchedResourceMap);
 	}
 
 	private void loadIncludesMatchSpecific(
@@ -3127,7 +3113,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					if (!typeNames.isEmpty()) {
 						loadParams.setDesiredResourceTypes(typeNames);
 					}
-					Set<JpaPid> newPids = loadIncludes(loadParams);
+					Set<JpaPid> newPids = loadIncludes(loadParams).pids();
 					myCurrentIterator = newPids.iterator();
 				}
 

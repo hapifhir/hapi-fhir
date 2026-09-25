@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.dao.SearchProgressTracker;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -55,9 +56,13 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -91,7 +96,6 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 	private final int mySyncSize = 250;
 
 	@Override
-	@SuppressWarnings({"rawtypes", "unchecked"})
 	public IBundleProvider createNewSearch(
 			SearchParameterMap theParams,
 			RequestDetails theRequestDetails,
@@ -225,6 +229,7 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 					 */
 
 					List<JpaPid> allIncludedPidsList = List.of();
+					Map<JpaPid, IBaseResource> fetchedIncludedResources = new HashMap<>();
 					if (theParams.hasIncludes() || theParams.hasRevIncludes()) {
 						// Save original PIDs before any include/revinclude expansion
 						Set<JpaPid> originalPids = new HashSet<>(pids);
@@ -248,21 +253,20 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 
 						// Phase 1: non-iterate `_revinclude` on original search result PIDs
 						if (!nonIterateRevIncludes.isEmpty()) {
-							Set<JpaPid> revIncludedPids = theSb.loadIncludes(
-									myContext,
-									myEntityManager,
+							ISearchBuilder.FetchedIncludes<JpaPid> revIncludedPids = loadIncludesOrRevIncludes(
+									theParams,
+									theRequestDetails,
+									theSb,
 									originalPids,
 									nonIterateRevIncludes,
 									true,
-									theParams.getLastUpdated(),
-									"(synchronous)",
-									theRequestDetails,
 									maxIncludes);
 							if (maxIncludes != null) {
 								maxIncludes -= revIncludedPids.size();
 							}
-							pids.addAll(revIncludedPids);
-							allIncludedPidsList.addAll(revIncludedPids);
+							pids.addAll(revIncludedPids.pids());
+							allIncludedPidsList.addAll(revIncludedPids.pids());
+							fetchedIncludedResources.putAll(revIncludedPids.resourcesIfFetched());
 						}
 
 						// Phase 2: non-iterate `_include` on original search result PIDs
@@ -271,58 +275,50 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 						if (theParams.getEverythingMode() == null
 								&& !nonIterateIncludes.isEmpty()
 								&& (maxIncludes == null || maxIncludes > 0)) {
-							Set<JpaPid> forwardIncludedPids = theSb.loadIncludes(
-									myContext,
-									myEntityManager,
+							ISearchBuilder.FetchedIncludes<JpaPid> forwardIncludedPids = loadIncludesOrRevIncludes(
+									theParams,
+									theRequestDetails,
+									theSb,
 									originalPids,
 									nonIterateIncludes,
 									false,
-									theParams.getLastUpdated(),
-									"(synchronous)",
-									theRequestDetails,
 									maxIncludes);
 							if (maxIncludes != null) {
 								maxIncludes -= forwardIncludedPids.size();
 							}
-							pids.addAll(forwardIncludedPids);
-							allIncludedPidsList.addAll(forwardIncludedPids);
+							pids.addAll(forwardIncludedPids.pids());
+							allIncludedPidsList.addAll(forwardIncludedPids.pids());
+							fetchedIncludedResources.putAll(forwardIncludedPids.resourcesIfFetched());
 						}
 
 						// Phase 3: `_revinclude:iterate` on expanded PIDs (including non-iterate revinclude results)
 						if (!iterateRevIncludes.isEmpty() && (maxIncludes == null || maxIncludes > 0)) {
-							Set<JpaPid> iterateRevIncludedPids = theSb.loadIncludes(
-									myContext,
-									myEntityManager,
-									pids,
-									iterateRevIncludes,
-									true,
-									theParams.getLastUpdated(),
-									"(synchronous)",
-									theRequestDetails,
-									maxIncludes);
+							ISearchBuilder.FetchedIncludes<JpaPid> iterateRevIncludedPids = loadIncludesOrRevIncludes(
+									theParams, theRequestDetails, theSb, pids, iterateRevIncludes, true, maxIncludes);
 							if (maxIncludes != null) {
 								maxIncludes -= iterateRevIncludedPids.size();
 							}
-							pids.addAll(iterateRevIncludedPids);
-							allIncludedPidsList.addAll(iterateRevIncludedPids);
+							pids.addAll(iterateRevIncludedPids.pids());
+							allIncludedPidsList.addAll(iterateRevIncludedPids.pids());
+							fetchedIncludedResources.putAll(iterateRevIncludedPids.resourcesIfFetched());
 						}
 
 						// Phase 4: `_include:iterate` on all expanded PIDs (including revinclude results)
 						if (theParams.getEverythingMode() == null
 								&& !iterateIncludes.isEmpty()
 								&& (maxIncludes == null || maxIncludes > 0)) {
-							Set<JpaPid> iterateForwardIncludedPids = theSb.loadIncludes(
-									myContext,
-									myEntityManager,
-									pids,
-									iterateIncludes,
-									false,
-									theParams.getLastUpdated(),
-									"(synchronous)",
-									theRequestDetails,
-									maxIncludes);
-							pids.addAll(iterateForwardIncludedPids);
-							allIncludedPidsList.addAll(iterateForwardIncludedPids);
+							ISearchBuilder.FetchedIncludes<JpaPid> iterateForwardIncludedPids =
+									loadIncludesOrRevIncludes(
+											theParams,
+											theRequestDetails,
+											theSb,
+											pids,
+											iterateIncludes,
+											false,
+											maxIncludes);
+							pids.addAll(iterateForwardIncludedPids.pids());
+							allIncludedPidsList.addAll(iterateForwardIncludedPids.pids());
+							fetchedIncludedResources.putAll(iterateForwardIncludedPids.resourcesIfFetched());
 						}
 					}
 
@@ -330,8 +326,21 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 						theSb.loadResourcesByPid(pids, allIncludedPidsList, loadedResources, false, theRequestDetails);
 					} else if (!allIncludedPidsList.isEmpty()) {
 						List<IBaseResource> includeResources = new ArrayList<>();
-						theSb.loadResourcesByPid(
-								allIncludedPidsList, allIncludedPidsList, includeResources, false, theRequestDetails);
+						for (Iterator<JpaPid> iter = allIncludedPidsList.iterator(); iter.hasNext(); ) {
+							JpaPid nextPid = iter.next();
+							if (fetchedIncludedResources.containsKey(nextPid)) {
+								includeResources.add(fetchedIncludedResources.get(nextPid));
+								iter.remove();
+							}
+						}
+						if (!allIncludedPidsList.isEmpty()) {
+							theSb.loadResourcesByPid(
+									allIncludedPidsList,
+									allIncludedPidsList,
+									includeResources,
+									false,
+									theRequestDetails);
+						}
 						loadedResources.addAll(includeResources);
 					}
 
@@ -377,6 +386,28 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 
 					return bundleProvider;
 				});
+	}
+
+	private ISearchBuilder.FetchedIncludes<JpaPid> loadIncludesOrRevIncludes(
+			SearchParameterMap theParams,
+			RequestDetails theRequestDetails,
+			ISearchBuilder<JpaPid> theSb,
+			Collection<JpaPid> thePids,
+			Set<Include> theIncludes,
+			boolean theReverseMode,
+			Integer theMaxIncludes) {
+		SearchBuilderLoadIncludesParameters<JpaPid> p = new SearchBuilderLoadIncludesParameters<>();
+		p.setFhirContext(myContext);
+		p.setEntityManager(myEntityManager);
+		p.setLastUpdated(theParams.getLastUpdated());
+		p.setRequestDetails(theRequestDetails);
+		p.setMatches(thePids);
+		p.setIncludeFilters(theIncludes);
+		p.setReverseMode(theReverseMode);
+		p.setSearchIdOrDescription("(synchronous)");
+		p.setMaxCount(theMaxIncludes);
+		ISearchBuilder.FetchedIncludes<JpaPid> iterateRevIncludedPids = theSb.loadIncludes(p);
+		return iterateRevIncludedPids;
 	}
 
 	@Nonnull
