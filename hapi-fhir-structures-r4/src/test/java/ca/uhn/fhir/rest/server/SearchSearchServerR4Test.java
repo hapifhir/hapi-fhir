@@ -232,11 +232,7 @@ public class SearchSearchServerR4Test {
   @Test
   public void testSearchByPost() throws Exception {
     // add parameters to the post method
-    String responseContent = ourServer.fhirRequest("/Patient/_search")
-        .withFormParam("_id", "aaa")
-        .postForm()
-        .assertStatus(200)
-        .getBody();
+    String responseContent = ourServer.fhirRequest("/Patient/_search").withFormParam("_id", "aaa").postForm().assertStatus(200).getBody();
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(1);
 
@@ -251,11 +247,7 @@ public class SearchSearchServerR4Test {
   public void testSearchByPostWithInvalidPostUrl() throws Exception {
     // should end with _search
     // add parameters to the post method
-    String responseContent = ourServer.fhirRequest("/Patient?name=Central")
-        .withFormParam("_id", "aaa")
-        .postForm()
-        .assertStatus(400)
-        .getBody();
+    String responseContent = ourServer.fhirRequest("/Patient?name=Central").withFormParam("_id", "aaa").postForm().assertStatus(400).getBody();
     ourLog.info(responseContent);
 		assertThat(responseContent).contains("<diagnostics value=\"" + Msg.code(446) + "Incorrect Content-Type header value of &quot;application/x-www-form-urlencoded; charset=UTF-8&quot; was provided in the request. A FHIR Content-Type is required for &quot;CREATE&quot; operation\"/>");
   }
@@ -266,10 +258,7 @@ public class SearchSearchServerR4Test {
   @Test
   public void testSearchByPostWithMissingContentType() throws Exception {
     // should end with _search
-    String responseContent = ourServer.fhirRequest("/Patient?name=Central")
-        .method("POST", new byte[] { 1, 2, 3, 4 }, null)
-        .assertStatus(400)
-        .getBody();
+    String responseContent = ourServer.fhirRequest("/Patient?name=Central").method("POST", new byte[] { 1, 2, 3, 4 }, null).assertStatus(400).getBody();
     ourLog.info(responseContent);
 		assertThat(responseContent).contains("<diagnostics value=\"" + Msg.code(448) + "No Content-Type header was provided in the request. This is required for &quot;CREATE&quot; operation\"/>");
   }
@@ -280,11 +269,7 @@ public class SearchSearchServerR4Test {
   @Test
   public void testSearchByPostWithParamsInBodyAndUrl() throws Exception {
     // add parameters to the post method
-    String responseContent = ourServer.fhirRequest("/Patient/_search?name=Central")
-        .withFormParam("_id", "aaa")
-        .postForm()
-        .assertStatus(200)
-        .getBody();
+    String responseContent = ourServer.fhirRequest("/Patient/_search?name=Central").withFormParam("_id", "aaa").postForm().assertStatus(200).getBody();
     ourLog.info(responseContent);
 
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);

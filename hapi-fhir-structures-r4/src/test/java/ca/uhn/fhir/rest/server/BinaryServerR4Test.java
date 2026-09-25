@@ -61,10 +61,7 @@ public class 	BinaryServerR4Test {
 		ourNextBinary.setSecurityContext(new Reference("Patient/1"));
 		ourNextBinary.setContentType("application/foo");
 
-		HttpTestResponse status = ourServer.fhirRequest("/Binary/A")
-			.withHeader("Content-Type", "application/foo")
-			.get()
-			.assertStatus(200);
+		HttpTestResponse status = ourServer.fhirRequest("/Binary/A").withHeader("Content-Type", "application/foo").get().assertStatus(200);
 		assertEquals("application/foo", status.getHeader(Constants.HEADER_CONTENT_TYPE));
 		assertEquals("Patient/1", status.getHeader(Constants.HEADER_X_SECURITY_CONTEXT));
 		assertEquals("W/\"222\"", status.getHeader(Constants.HEADER_ETAG));
@@ -85,11 +82,7 @@ public class 	BinaryServerR4Test {
 		ourNextBinary.setSecurityContext(new Reference("Patient/1"));
 		ourNextBinary.setContentType("application/foo");
 
-		HttpTestResponse status = ourServer.fhirRequest("/Binary/A")
-			.withHeader("Content-Type", "application/foo")
-			.withHeader("Accept", Constants.CT_FHIR_JSON)
-			.get()
-			.assertStatus(200);
+		HttpTestResponse status = ourServer.fhirRequest("/Binary/A").withHeader("Content-Type", "application/foo").withHeader("Accept", Constants.CT_FHIR_JSON).get().assertStatus(200);
 		assertEquals("application/json+fhir;charset=utf-8", status.getHeader(Constants.HEADER_CONTENT_TYPE));
 		assertEquals("Patient/1", status.getHeader(Constants.HEADER_X_SECURITY_CONTEXT));
 		assertEquals("W/\"222\"", status.getHeader(Constants.HEADER_ETAG));
@@ -102,9 +95,7 @@ public class 	BinaryServerR4Test {
 
 	@Test
 	public void testPostBinaryWithSecurityContext() throws Exception {
-		ourServer.fhirRequest("/Binary")
-			.withHeader(Constants.HEADER_X_SECURITY_CONTEXT, "Encounter/2")
-			.post(new byte[]{0, 1, 2, 3, 4}, "application/foo");
+		ourServer.fhirRequest("/Binary").withHeader(Constants.HEADER_X_SECURITY_CONTEXT, "Encounter/2").post(new byte[]{0, 1, 2, 3, 4}, "application/foo");
 		assertNull(ourLastId);
 		assertEquals("application/foo", ourLastBinary.getContentType());
 		assertEquals("Encounter/2", ourLastBinary.getSecurityContext().getReference());
@@ -164,9 +155,7 @@ public class 	BinaryServerR4Test {
 
 	@Test
 	public void testPutBinaryWithSecurityContext() throws Exception {
-		ourServer.fhirRequest("/Binary/A")
-			.withHeader(Constants.HEADER_X_SECURITY_CONTEXT, "Encounter/2")
-			.put(new byte[]{0, 1, 2, 3, 4}, "application/foo");
+		ourServer.fhirRequest("/Binary/A").withHeader(Constants.HEADER_X_SECURITY_CONTEXT, "Encounter/2").put(new byte[]{0, 1, 2, 3, 4}, "application/foo");
 		assertEquals("Binary/A", ourLastId.getValue());
 		assertEquals("Binary/A", ourLastBinary.getId());
 		assertEquals("application/foo", ourLastBinary.getContentType());

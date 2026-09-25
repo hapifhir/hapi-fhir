@@ -78,9 +78,7 @@ public class ExceptionHandlingInterceptorTest {
 		ourServer.registerInterceptor(interceptor);
 
 		//When: We make a request to the server, triggering this exception to be thrown on an otherwise successful request
-		HttpTestResponse response = ourServer.fhirRequest("/Patient?succeed=true")
-			.withHeader("Accept-encoding", "gzip")
-			.get();
+		HttpTestResponse response = ourServer.fhirRequest("/Patient?succeed=true").withHeader("Accept-encoding", "gzip").get();
 		ourServer.unregisterInterceptor(interceptor);
 
 		//Then: This should still return an OperationOutcome, and not explode with an HTML IllegalState response.
@@ -101,9 +99,7 @@ public class ExceptionHandlingInterceptorTest {
 		AlterHttpResponseCodeInterceptorToValid404Value alterHttpResponseCodeInterceptorToValid404Value =
 			 new AlterHttpResponseCodeInterceptorToValid404Value();
 		//When: We make a request to the server, triggering this exception to be thrown on an otherwise successful request
-		HttpTestResponse response = ourServer.fhirRequest("/Patient?succeed=true")
-			.withHeader("Accept-encoding", "gzip")
-			.get();
+		HttpTestResponse response = ourServer.fhirRequest("/Patient?succeed=true").withHeader("Accept-encoding", "gzip").get();
 
 		//Then: This should still return an OperationOutcome, and not explode with an HTML IllegalState response.
 		String responseContent = response.assertStatus(500).getBody();
@@ -114,9 +110,7 @@ public class ExceptionHandlingInterceptorTest {
 
 		//When: We add an Interceptor which will return an alternate Http Response Code, it gets returned to the caller
 		ourServer.registerInterceptor(alterHttpResponseCodeInterceptorToValid404Value);
-		response = ourServer.fhirRequest("/Patient?succeed=true")
-			.withHeader("Accept-encoding", "gzip")
-			.get();
+		response = ourServer.fhirRequest("/Patient?succeed=true").withHeader("Accept-encoding", "gzip").get();
 		ourServer.unregisterInterceptor(alterHttpResponseCodeInterceptorToValid404Value);
 
 		//Then: This should still return an OperationOutcome, and not explode with an HTML IllegalState response.

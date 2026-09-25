@@ -127,11 +127,8 @@ public class CorsInterceptorDstu3Test {
 	@Test
 	public void testRequestWithNullOrigin() throws ClientProtocolException, IOException {
 		{
-			HttpTestResponse status = fhirRequest("/Organization/b27ed191-f62d-4128-d99d-40b5e84f2bf2")
-				.withHeader(Constants.HEADER_CORS_REQUEST_METHOD, "GET")
-				.withHeader(Constants.HEADER_CORS_ORIGIN, "null")
-				.withHeader(Constants.HEADER_CORS_REQUEST_HEADERS, "accept, x-fhir-starter, content-type")
-				.options();
+			HttpTestResponse status = fhirRequest("/Organization/b27ed191-f62d-4128-d99d-40b5e84f2bf2").withHeader(Constants.HEADER_CORS_REQUEST_METHOD, "GET")
+				.withHeader(Constants.HEADER_CORS_ORIGIN, "null").withHeader(Constants.HEADER_CORS_REQUEST_HEADERS, "accept, x-fhir-starter, content-type").options();
 			String responseContent = status.getBody();
 			ourLog.info("Response was:\n{}", responseContent);
 			assertEquals("GET,POST,PUT,DELETE,OPTIONS", status.getHeader(Constants.HEADER_CORS_ALLOW_METHODS));

@@ -413,19 +413,14 @@ public class SearchR4Test {
 
 	@Test
 	public void testRequestIdSuppliedAndReturned() throws Exception {
-		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/Patient?identifier=foo%7Cbar&_pretty=true")
-			.withHeader(Constants.HEADER_REQUEST_ID, "help im a bug")
-			.get()
-			.assertStatus(200);
+		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/Patient?identifier=foo%7Cbar&_pretty=true").withHeader(Constants.HEADER_REQUEST_ID, "help im a bug").get().assertStatus(200);
 		String requestId = response.getHeader(Constants.HEADER_REQUEST_ID);
 		assertThat(requestId).matches("help im a bug");
 	}
 
 	@Test
 	public void testRequestIdSuppliedAndReturned_Invalid() throws Exception {
-		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/Patient?identifier=foo%7Cbar&_pretty=true")
-			.withHeader(Constants.HEADER_REQUEST_ID, "help i'm a bug")
-			.get()
+		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/Patient?identifier=foo%7Cbar&_pretty=true").withHeader(Constants.HEADER_REQUEST_ID, "help i'm a bug").get()
 			.assertStatus(200);
 		String requestId = response.getHeader(Constants.HEADER_REQUEST_ID);
 		assertThat(requestId).matches("[a-zA-Z0-9]{16}");

@@ -69,8 +69,7 @@ public class ServerMimetypeR4Test {
 		String enc = ourCtx.newJsonParser().encodeResourceToString(p);
 		String expectedResponseContent = "{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\"},\"name\":[{\"family\":\"FAMILY\"}]}";
 
-		HttpTestResponse response = ourServer.fhirRequest("/Patient")
-			.post(enc, Constants.CT_FHIR_JSON + "; charset=utf-8");
+		HttpTestResponse response = ourServer.fhirRequest("/Patient").post(enc, Constants.CT_FHIR_JSON + "; charset=utf-8");
 		String responseContent = response.getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
@@ -87,8 +86,7 @@ public class ServerMimetypeR4Test {
 		String enc = ourCtx.newJsonParser().encodeResourceToString(p);
 		String expectedResponseContent = "{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"diagnostics\":\"FAMILY\"}]}";
 
-		HttpTestResponse response = ourServer.fhirRequest("/Patient")
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
+		HttpTestResponse response = ourServer.fhirRequest("/Patient").withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
 			.post(enc, Constants.CT_FHIR_JSON_NEW + "; charset=utf-8");
 		String responseContent = response.getBody();
 
@@ -106,9 +104,7 @@ public class ServerMimetypeR4Test {
 		String enc = ourCtx.newJsonParser().encodeResourceToString(p);
 		String expectedResponseContent = "{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\"},\"name\":[{\"family\":\"FAMILY\"}]}";
 
-		HttpTestResponse response = ourServer.fhirRequest("/Patient")
-			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
-			.post(enc, Constants.CT_FHIR_JSON + "; charset=utf-8");
+		HttpTestResponse response = ourServer.fhirRequest("/Patient").withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW).post(enc, Constants.CT_FHIR_JSON + "; charset=utf-8");
 		String responseContent = response.getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
@@ -125,8 +121,7 @@ public class ServerMimetypeR4Test {
 		String enc = ourCtx.newXmlParser().encodeResourceToString(p);
 		String expectedResponseContent = "<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><diagnostics value=\"FAMILY\"/></issue></OperationOutcome>";
 
-		HttpTestResponse response = ourServer.fhirRequest("/Patient")
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
+		HttpTestResponse response = ourServer.fhirRequest("/Patient").withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
 			.post(enc, Constants.CT_FHIR_XML + "; charset=utf-8");
 		String responseContent = response.getBody();
 
@@ -144,8 +139,7 @@ public class ServerMimetypeR4Test {
 		String enc = ourCtx.newXmlParser().encodeResourceToString(p);
 		String expectedResponseContent = "<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"1\"/><meta><versionId value=\"1\"/></meta><name><family value=\"FAMILY\"/></name></Patient>";
 
-		HttpTestResponse response = ourServer.fhirRequest("/Patient")
-			.post(enc, Constants.CT_FHIR_XML_NEW + "; charset=utf-8");
+		HttpTestResponse response = ourServer.fhirRequest("/Patient").post(enc, Constants.CT_FHIR_XML_NEW + "; charset=utf-8");
 		String responseContent = response.getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
@@ -162,9 +156,7 @@ public class ServerMimetypeR4Test {
 		String enc = ourCtx.newXmlParser().encodeResourceToString(p);
 		String expectedResponseContent = "<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"1\"/><meta><versionId value=\"1\"/></meta><name><family value=\"FAMILY\"/></name></Patient>";
 
-		HttpTestResponse response = ourServer.fhirRequest("/Patient")
-			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML_NEW)
-			.post(enc, Constants.CT_FHIR_XML + "; charset=utf-8");
+		HttpTestResponse response = ourServer.fhirRequest("/Patient").withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML_NEW).post(enc, Constants.CT_FHIR_XML + "; charset=utf-8");
 		String responseContent = response.getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);

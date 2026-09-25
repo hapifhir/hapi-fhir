@@ -84,10 +84,7 @@ public class PagingTest {
 			checkParam(nextLink, Constants.PARAM_COUNT, "10");
 		}
 		{
-			responseContent = HttpTestRequest.to(myServerExtension.getHttpClient(), myServerExtension.getFhirContext(), nextLink)
-				.get()
-				.assertStatus(200)
-				.getBody();
+			responseContent = HttpTestRequest.to(myServerExtension.getHttpClient(), myServerExtension.getFhirContext(), nextLink).get().assertStatus(200).getBody();
 
 			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
 			assertThat(bundle.getEntry()).hasSize(10);
@@ -108,10 +105,7 @@ public class PagingTest {
 			checkParam(nextLink, Constants.PARAM_COUNT, "10");
 		}
 		{
-			responseContent = HttpTestRequest.to(myServerExtension.getHttpClient(), myServerExtension.getFhirContext(), nextLink)
-				.get()
-				.assertStatus(200)
-				.getBody();
+			responseContent = HttpTestRequest.to(myServerExtension.getHttpClient(), myServerExtension.getFhirContext(), nextLink).get().assertStatus(200).getBody();
 
 			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
 			assertThat(bundle.getEntry()).hasSize(1);
@@ -156,10 +150,7 @@ public class PagingTest {
 			checkParam(nextLink, Constants.PARAM_COUNT, "10");
 		}
 		{
-			responseContent = HttpTestRequest.to(myServerExtension.getHttpClient(), myServerExtension.getFhirContext(), nextLink)
-				.get()
-				.assertStatus(200)
-				.getBody();
+			responseContent = HttpTestRequest.to(myServerExtension.getHttpClient(), myServerExtension.getFhirContext(), nextLink).get().assertStatus(200).getBody();
 
 			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
 			assertThat(bundle.getEntry()).hasSize(10);
@@ -180,10 +171,7 @@ public class PagingTest {
 			checkParam(nextLink, Constants.PARAM_COUNT, "10");
 		}
 		{
-			responseContent = HttpTestRequest.to(myServerExtension.getHttpClient(), myServerExtension.getFhirContext(), nextLink)
-				.get()
-				.assertStatus(200)
-				.getBody();
+			responseContent = HttpTestRequest.to(myServerExtension.getHttpClient(), myServerExtension.getFhirContext(), nextLink).get().assertStatus(200).getBody();
 
 			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
 			assertThat(bundle.getEntry()).hasSize(10);

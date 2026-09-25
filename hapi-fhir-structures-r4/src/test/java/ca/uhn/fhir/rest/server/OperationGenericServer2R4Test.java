@@ -102,10 +102,7 @@ public class OperationGenericServer2R4Test {
 		p.addParameter().setName("PARAM2").setValue(new Coding("sys", "val", "dis"));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		String response = ourServer.fhirRequest("/Patient/123/$OP_INSTANCE")
-			.post(inParamsStr, Constants.CT_FHIR_XML)
-			.assertStatus(200)
-			.getBody();
+		String response = ourServer.fhirRequest("/Patient/123/$OP_INSTANCE").post(inParamsStr, Constants.CT_FHIR_XML).assertStatus(200).getBody();
 		ourLog.info(response);
 
 		CodeType param1 = (CodeType) ourLastParam1;
@@ -155,10 +152,7 @@ public class OperationGenericServer2R4Test {
 		p.addParameter().setName("PARAM1").setValue(new CodeType("PARAM1val2"));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		String response = ourServer.fhirRequest("/Patient/123/$OP_INSTANCE")
-			.post(inParamsStr, Constants.CT_FHIR_XML)
-			.assertStatus(200)
-			.getBody();
+		String response = ourServer.fhirRequest("/Patient/123/$OP_INSTANCE").post(inParamsStr, Constants.CT_FHIR_XML).assertStatus(200).getBody();
 		ourLog.info(response);
 
 		List<IPrimitiveType<String>> param1 = (List<IPrimitiveType<String>>) ourLastParam1;
@@ -211,10 +205,7 @@ public class OperationGenericServer2R4Test {
 		p.addParameter().setName("PARAM2").setValue(new StringType("PARAM2val"));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		String response = ourServer.fhirRequest("/Patient/123/$OP_INSTANCE")
-			.post(inParamsStr, Constants.CT_FHIR_XML)
-			.assertStatus(200)
-			.getBody();
+		String response = ourServer.fhirRequest("/Patient/123/$OP_INSTANCE").post(inParamsStr, Constants.CT_FHIR_XML).assertStatus(200).getBody();
 		ourLog.info(response);
 
 		UriType param1 = (UriType) ourLastParam1;

@@ -54,8 +54,7 @@ public class CreateWithPreferReturnR4Test {
 		oo.addIssue().setDiagnostics("DIAG");
 		ourReturnOperationOutcome = oo;
 
-		HttpTestResponse response = ourServer.fhirRequest("/Patient")
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_MINIMAL)
+		HttpTestResponse response = ourServer.fhirRequest("/Patient").withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_MINIMAL)
 			.post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML);
 
 		String responseContent = response.getBody();
@@ -81,8 +80,7 @@ public class CreateWithPreferReturnR4Test {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		HttpTestResponse response = ourServer.fhirRequest("/Patient")
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
+		HttpTestResponse response = ourServer.fhirRequest("/Patient").withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
 			.post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML);
 
 		String responseContent = response.getBody();
@@ -103,8 +101,7 @@ public class CreateWithPreferReturnR4Test {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		HttpTestResponse response = ourServer.fhirRequest("/Patient")
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION)
+		HttpTestResponse response = ourServer.fhirRequest("/Patient").withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION)
 			.post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML);
 
 		String responseContent = response.getBody();
@@ -125,8 +122,7 @@ public class CreateWithPreferReturnR4Test {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		HttpTestResponse response = ourServer.fhirRequest("/Patient")
-			.post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML);
+		HttpTestResponse response = ourServer.fhirRequest("/Patient").post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML);
 
 		String responseContent = response.getBody();
 

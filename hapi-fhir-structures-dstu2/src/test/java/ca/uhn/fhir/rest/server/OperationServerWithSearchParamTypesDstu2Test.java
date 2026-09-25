@@ -108,8 +108,8 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 
 	@Test
 	public void testAndListWithUrl() throws Exception {
-		String response = ourServer.fhirRequest("/Patient/$andlist?valstr=VALSTR1A,VALSTR1B&valstr=VALSTR2A,VALSTR2B&valtok=" + UrlUtil.escapeUrlParam("VALTOK1A|VALTOK1B") + "&valtok="
-				+ UrlUtil.escapeUrlParam("VALTOK2A|VALTOK2B")).get().assertStatus(200).getBody();
+		String path = "/Patient/$andlist?valstr=VALSTR1A,VALSTR1B&valstr=VALSTR2A,VALSTR2B&valtok=" + UrlUtil.escapeUrlParam("VALTOK1A|VALTOK1B") + "&valtok=" + UrlUtil.escapeUrlParam("VALTOK2A|VALTOK2B");
+		String response = ourServer.fhirRequest(path).get().assertStatus(200).getBody();
 		ourLog.info(response);
 
 		assertThat(ourLastParamValStr).hasSize(2);
@@ -260,8 +260,8 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 
 	@Test
 	public void testOrListWithUrl() throws Exception {
-		String response = ourServer.fhirRequest("/Patient/$orlist?valstr=VALSTR1A,VALSTR1B&valstr=VALSTR2A,VALSTR2B&valtok=" + UrlUtil.escapeUrlParam("VALTOK1A|VALTOK1B") + "&valtok="
-				+ UrlUtil.escapeUrlParam("VALTOK2A|VALTOK2B")).get().assertStatus(200).getBody();
+		String path = "/Patient/$orlist?valstr=VALSTR1A,VALSTR1B&valstr=VALSTR2A,VALSTR2B&valtok=" + UrlUtil.escapeUrlParam("VALTOK1A|VALTOK1B") + "&valtok=" + UrlUtil.escapeUrlParam("VALTOK2A|VALTOK2B");
+		String response = ourServer.fhirRequest(path).get().assertStatus(200).getBody();
 		ourLog.info(response);
 
 		assertThat(ourLastParamValStr).hasSize(2);

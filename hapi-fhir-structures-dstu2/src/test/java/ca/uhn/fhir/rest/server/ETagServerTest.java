@@ -52,10 +52,7 @@ public class ETagServerTest {
 	public void testAutomaticNotModified() throws Exception {
 		ourLastModifiedDate = new InstantDt("2012-11-25T02:34:45.2222Z").getValue();
 
-		ourServer.fhirRequest("/Patient/2")
-			.withHeader(Constants.HEADER_IF_NONE_MATCH, "\"222\"")
-			.get()
-			.assertStatus(Constants.STATUS_HTTP_304_NOT_MODIFIED);
+		ourServer.fhirRequest("/Patient/2").withHeader(Constants.HEADER_IF_NONE_MATCH, "\"222\"").get().assertStatus(Constants.STATUS_HTTP_304_NOT_MODIFIED);
 
 	}
 
@@ -98,10 +95,7 @@ public class ETagServerTest {
 		p.addIdentifier().setSystem("urn:system").setValue("001");
 		String resBody = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		ourServer.fhirRequest("/Patient/2")
-			.withHeader(Constants.HEADER_IF_MATCH, "\"221\"")
-			.put(resBody, Constants.CT_FHIR_XML)
-			.assertStatus(200);
+		ourServer.fhirRequest("/Patient/2").withHeader(Constants.HEADER_IF_MATCH, "\"221\"").put(resBody, Constants.CT_FHIR_XML).assertStatus(200);
 		assertEquals("Patient/2/_history/221", ourLastId.toUnqualified().getValue());
 	}
 
@@ -112,10 +106,7 @@ public class ETagServerTest {
 		p.addIdentifier().setSystem("urn:system").setValue("001");
 		String resBody = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		ourServer.fhirRequest("/Patient/2")
-			.withHeader(Constants.HEADER_IF_MATCH, "\"222\"")
-			.put(resBody, Constants.CT_FHIR_XML)
-			.assertStatus(Constants.STATUS_HTTP_412_PRECONDITION_FAILED);
+		ourServer.fhirRequest("/Patient/2").withHeader(Constants.HEADER_IF_MATCH, "\"222\"").put(resBody, Constants.CT_FHIR_XML).assertStatus(Constants.STATUS_HTTP_412_PRECONDITION_FAILED);
 		assertEquals("Patient/2/_history/222", ourLastId.toUnqualified().getValue());
 	}
 

@@ -111,8 +111,7 @@ public class BinaryDstu2Test {
 
 	@Test
 	public void testBinaryReadAcceptBrowser() throws Exception {
-		HttpTestRequest http = ourServer.fhirRequest("/Binary/foo")
-			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
+		HttpTestRequest http = ourServer.fhirRequest("/Binary/foo").withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
 			.withHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
 
 		binaryRead(http);
@@ -128,11 +127,8 @@ public class BinaryDstu2Test {
 
 	@Test
 	public void testBinaryReadAcceptFhirJson() throws Exception {
-		HttpTestResponse status = ourServer.fhirRequest("/Binary/foo")
-			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
-			.withHeader("Accept", Constants.CT_FHIR_JSON)
-			.get()
-			.assertStatus(200);
+		HttpTestResponse status = ourServer.fhirRequest("/Binary/foo").withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
+			.withHeader("Accept", Constants.CT_FHIR_JSON).get().assertStatus(200);
 		String responseContent = status.getBody();
 		assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", status.getHeader("content-type").replace(" ", "").toLowerCase());
 		assertNull(status.getHeader("Content-Disposition"));

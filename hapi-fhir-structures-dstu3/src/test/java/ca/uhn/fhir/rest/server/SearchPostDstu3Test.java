@@ -69,10 +69,7 @@ public class SearchPostDstu3Test {
 	 */
 	@Test
 	public void testSearchWithMixedParamsNoInterceptorsYesParams() throws Exception {
-		HttpTestResponse response = ourServer.fhirRequest("/Patient/_search?_format=application/fhir+json")
-			.withHeader("Cache-Control","no-cache")
-			.withFormParam("name", "Smith")
-			.postForm();
+		HttpTestResponse response = ourServer.fhirRequest("/Patient/_search?_format=application/fhir+json").withHeader("Cache-Control","no-cache").withFormParam("name", "Smith").postForm();
 		String responseContent = response.assertStatus(200).getBody();
 		ourLog.info(responseContent);
 
@@ -90,10 +87,7 @@ public class SearchPostDstu3Test {
 	 */
 	@Test
 	public void testSearchWithMixedParamsNoInterceptorsNoParams() throws Exception {
-		HttpTestResponse response = ourServer.fhirRequest("/Patient/_search")
-			.withHeader("Cache-Control","no-cache")
-			.withFormParam("name", "Smith")
-			.postForm();
+		HttpTestResponse response = ourServer.fhirRequest("/Patient/_search").withHeader("Cache-Control","no-cache").withFormParam("name", "Smith").postForm();
 		String responseContent = response.assertStatus(200).getBody();
 		ourLog.info(responseContent);
 
@@ -113,10 +107,7 @@ public class SearchPostDstu3Test {
 	public void testSearchWithMixedParamsYesInterceptorsYesParams() throws Exception {
 		ourServer.registerInterceptor(new ParamLoggingInterceptor());
 		
-		HttpTestResponse response = ourServer.fhirRequest("/Patient/_search?_format=application/fhir+json")
-			.withHeader("Cache-Control","no-cache")
-			.withFormParam("name", "Smith")
-			.postForm();
+		HttpTestResponse response = ourServer.fhirRequest("/Patient/_search?_format=application/fhir+json").withHeader("Cache-Control","no-cache").withFormParam("name", "Smith").postForm();
 		String responseContent = response.assertStatus(200).getBody();
 		ourLog.info(responseContent);
 
@@ -136,10 +127,7 @@ public class SearchPostDstu3Test {
 	public void testSearchWithMixedParamsYesInterceptorsNoParams() throws Exception {
 		ourServer.registerInterceptor(new ParamLoggingInterceptor());
 		
-		HttpTestResponse response = ourServer.fhirRequest("/Patient/_search")
-			.withHeader("Cache-Control","no-cache")
-			.withFormParam("name", "Smith")
-			.postForm();
+		HttpTestResponse response = ourServer.fhirRequest("/Patient/_search").withHeader("Cache-Control","no-cache").withFormParam("name", "Smith").postForm();
 		String responseContent = response.assertStatus(200).getBody();
 		ourLog.info(responseContent);
 

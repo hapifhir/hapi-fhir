@@ -54,26 +54,17 @@ public class ReadDstu2Test {
 		// Fixture was last modified at 2012-01-01T12:12:12Z
 		// thus it has changed before the later time of 2012-01-01T13:00:00Z
 		// so we expect a 304
-		ourServer.fhirRequest("/Patient/2")
-			.withHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T13:00:00Z").getValue()))
-			.get()
-			.assertStatus(304);
+		ourServer.fhirRequest("/Patient/2").withHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T13:00:00Z").getValue())).get().assertStatus(304);
 
 		// Fixture was last modified at 2012-01-01T12:12:12Z
 		// thus it has changed at the same time of 2012-01-01T12:12:12Z
 		// so we expect a 304
-		ourServer.fhirRequest("/Patient/2")
-			.withHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T12:12:12Z").getValue()))
-			.get()
-			.assertStatus(304);
+		ourServer.fhirRequest("/Patient/2").withHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T12:12:12Z").getValue())).get().assertStatus(304);
 
 		// Fixture was last modified at 2012-01-01T12:12:12Z
 		// thus it has changed after the earlier time of 2012-01-01T10:00:00Z
 		// so we expect a 200
-		ourServer.fhirRequest("/Patient/2")
-			.withHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T10:00:00Z").getValue()))
-			.get()
-			.assertStatus(200);
+		ourServer.fhirRequest("/Patient/2").withHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T10:00:00Z").getValue())).get().assertStatus(200);
 
 	}
 

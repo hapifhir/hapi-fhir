@@ -138,11 +138,7 @@ public class TransactionWithBundleResourceParamTest {
 		String bundleString = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(bundleString);
 
-		String responseContent = fhirRequest("/")
-			.withHeader("Accept", Constants.CT_FHIR_XML + "; pretty=true")
-			.post(bundleString, Constants.CT_FHIR_XML)
-			.assertStatus(200)
-			.getBody();
+		String responseContent = fhirRequest("/").withHeader("Accept", Constants.CT_FHIR_XML + "; pretty=true").post(bundleString, Constants.CT_FHIR_XML).assertStatus(200).getBody();
 
 		ourLog.info(responseContent);
 

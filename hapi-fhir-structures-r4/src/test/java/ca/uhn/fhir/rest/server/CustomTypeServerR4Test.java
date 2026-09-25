@@ -43,10 +43,7 @@ public class CustomTypeServerR4Test {
 		patient.setId("2");
 		patient.addIdentifier().setValue("002");
 
-		String responseContent = ourServer.fhirRequest("/Patient")
-			.post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
-			.assertStatus(201)
-			.getBody();
+		String responseContent = ourServer.fhirRequest("/Patient").post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML).assertStatus(201).getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
 	}
@@ -57,10 +54,7 @@ public class CustomTypeServerR4Test {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		String responseContent = ourServer.fhirRequest("/Patient/2")
-			.post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
-			.assertStatus(400)
-			.getBody();
+		String responseContent = ourServer.fhirRequest("/Patient/2").post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML).assertStatus(400).getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
 
@@ -74,11 +68,8 @@ public class CustomTypeServerR4Test {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		String responseContent = ourServer.fhirRequest("/Patient/2")
-			.withHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=system%7C001")
-			.post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
-			.assertStatus(400)
-			.getBody();
+		String responseContent = ourServer.fhirRequest("/Patient/2").withHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=system%7C001")
+			.post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML).assertStatus(400).getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
 

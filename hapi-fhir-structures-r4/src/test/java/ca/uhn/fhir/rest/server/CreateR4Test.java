@@ -103,11 +103,8 @@ public class CreateR4Test {
 	public void testCreateReturnsOperationOutcome() throws Exception {
 		ourReturnOo = new OperationOutcome().addIssue(new OperationOutcomeIssueComponent().setDiagnostics("DIAG"));
 
-		String responseContent = ourServer.fhirRequest("/Patient")
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
-			.post("{\"resourceType\":\"Patient\", \"status\":\"active\"}", "application/fhir+json; charset=utf-8")
-			.assertStatus(201)
-			.getBody();
+		String responseContent = ourServer.fhirRequest("/Patient").withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
+			.post("{\"resourceType\":\"Patient\", \"status\":\"active\"}", "application/fhir+json; charset=utf-8").assertStatus(201).getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
 

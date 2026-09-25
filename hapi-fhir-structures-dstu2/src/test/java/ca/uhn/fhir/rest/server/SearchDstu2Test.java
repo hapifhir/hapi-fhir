@@ -72,11 +72,7 @@ public class SearchDstu2Test {
 	public void testSearchWithInvalidPostUrl() throws Exception {
 		// should end with _search
 		// add parameters to the post method
-		String responseContent = ourServer.fhirRequest("/Patient?name=Central")
-			.withFormParam("_id", "aaa")
-			.postForm()
-			.assertStatus(400)
-			.getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?name=Central").withFormParam("_id", "aaa").postForm().assertStatus(400).getBody();
 		ourLog.info(responseContent);
 		assertThat(responseContent).contains("<diagnostics value=\"" + Msg.code(446) + "Incorrect Content-Type header value of &quot;application/x-www-form-urlencoded; charset=UTF-8&quot; was provided in the request. A FHIR Content-Type is required for &quot;CREATE&quot; operation\"/>");
 

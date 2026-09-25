@@ -65,9 +65,7 @@ public class PagingUsingNamedPagesR4Test {
 	}
 
 	private Bundle executeAndReturnBundle(String theUrl, EncodingEnum theExpectEncoding) {
-		HttpTestResponse response = HttpTestRequest.to(ourServer.getHttpClient(), ourServer.getFhirContext(), theUrl)
-			.get()
-			.assertStatus(200);
+		HttpTestResponse response = HttpTestRequest.to(ourServer.getHttpClient(), ourServer.getFhirContext(), theUrl).get().assertStatus(200);
 		String responseContent = response.getBody();
 		ourLog.info(responseContent);
 		EncodingEnum ct = EncodingEnum.forContentType(response.getContentType());
@@ -137,18 +135,12 @@ public class PagingUsingNamedPagesR4Test {
 		when(myPagingProvider.retrieveResultList(any(), nullable(String.class), nullable(String.class))).thenReturn(null);
 
 		// With ID
-		String responseContent = ourServer.fhirRequest("?_getpages=SEARCHID0&_pageId=PAGEID0&_format=xml&_bundletype=FOO" + UrlUtil.escapeUrlParam("\""))
-			.get()
-			.assertStatus(410)
-			.getBody();
+		String responseContent = ourServer.fhirRequest("?_getpages=SEARCHID0&_pageId=PAGEID0&_format=xml&_bundletype=FOO" + UrlUtil.escapeUrlParam("\"")).get().assertStatus(410).getBody();
 		ourLog.info(responseContent);
 		assertThat(responseContent).doesNotContain("FOO\"");
 
 		// Without ID
-		responseContent = ourServer.fhirRequest("?_getpages=SEARCHID0&_format=xml&_bundletype=FOO" + UrlUtil.escapeUrlParam("\""))
-			.get()
-			.assertStatus(410)
-			.getBody();
+		responseContent = ourServer.fhirRequest("?_getpages=SEARCHID0&_format=xml&_bundletype=FOO" + UrlUtil.escapeUrlParam("\"")).get().assertStatus(410).getBody();
 		ourLog.info(responseContent);
 		assertThat(responseContent).doesNotContain("FOO\"");
 
@@ -163,9 +155,7 @@ public class PagingUsingNamedPagesR4Test {
 		when(myPagingProvider.retrieveResultList(any(), eq("SEARCHID0"), eq("PAGEID0"))).thenReturn(provider0);
 
 		// Initial search
-		HttpTestResponse response = ourServer.fhirRequest("?_getpages=SEARCHID0&_pageId=PAGEID0&_format=xml&_bundletype=FOO" + UrlUtil.escapeUrlParam("\""))
-			.get()
-			.assertStatus(200);
+		HttpTestResponse response = ourServer.fhirRequest("?_getpages=SEARCHID0&_pageId=PAGEID0&_format=xml&_bundletype=FOO" + UrlUtil.escapeUrlParam("\"")).get().assertStatus(200);
 		String responseContent = response.getBody();
 		ourLog.info(responseContent);
 		assertThat(responseContent).doesNotContain("FOO\"");

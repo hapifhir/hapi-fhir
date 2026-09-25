@@ -50,31 +50,19 @@ public class SearchWithServerAddressStrategyDstu3Test {
 		assertThat(responseContent).contains("<fullUrl value=\"" + ourServer.getBaseUrl() + "/Patient/1\"/>");
 		
 		ourServer.setServerAddressStrategy(new ApacheProxyAddressStrategy(false));
-		responseContent = ourServer.fhirRequest("/Patient")
-			.withHeader(Constants.HEADER_X_FORWARDED_HOST, "foo.com")
-			.get()
-			.assertStatus(200)
-			.getBody();
+		responseContent = ourServer.fhirRequest("/Patient").withHeader(Constants.HEADER_X_FORWARDED_HOST, "foo.com").get().assertStatus(200).getBody();
 		ourLog.info(responseContent);
 		assertThat(responseContent).contains("<given value=\"FAMILY\"");
 		assertThat(responseContent).contains("<fullUrl value=\"http://foo.com/Patient/1\"/>");
 
 		ourServer.setServerAddressStrategy(ApacheProxyAddressStrategy.forHttps());
-		responseContent = ourServer.fhirRequest("/Patient")
-			.withHeader(Constants.HEADER_X_FORWARDED_HOST, "foo.com")
-			.get()
-			.assertStatus(200)
-			.getBody();
+		responseContent = ourServer.fhirRequest("/Patient").withHeader(Constants.HEADER_X_FORWARDED_HOST, "foo.com").get().assertStatus(200).getBody();
 		ourLog.info(responseContent);
 		assertThat(responseContent).contains("<given value=\"FAMILY\"");
 		assertThat(responseContent).contains("<fullUrl value=\"https://foo.com/Patient/1\"/>");
 
 		ourServer.setServerAddressStrategy(new ApacheProxyAddressStrategy(false));
-		responseContent = ourServer.fhirRequest("/Patient")
-			.withHeader(Constants.HEADER_X_FORWARDED_HOST, "foo.com")
-			.withHeader(Constants.HEADER_X_FORWARDED_PROTO, "https")
-			.get()
-			.assertStatus(200)
+		responseContent = ourServer.fhirRequest("/Patient").withHeader(Constants.HEADER_X_FORWARDED_HOST, "foo.com").withHeader(Constants.HEADER_X_FORWARDED_PROTO, "https").get().assertStatus(200)
 			.getBody();
 		ourLog.info(responseContent);
 		assertThat(responseContent).contains("<given value=\"FAMILY\"");
