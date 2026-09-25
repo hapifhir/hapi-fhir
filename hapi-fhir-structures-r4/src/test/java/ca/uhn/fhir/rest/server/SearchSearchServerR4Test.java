@@ -108,7 +108,7 @@ public class SearchSearchServerR4Test {
    */
   @Test
   void testSearchByPostWithParamsOnlyInQueryString() throws Exception {
-    HttpTestResponse response = ourServer.fhirRequest("/Patient/_search?_id=aaa").method("POST");
+    HttpTestResponse response = ourServer.fhirRequest("/Patient/_search?_id=aaa").method("POST", new byte[0], null);
     String responseContent = response.getBody();
     ourLog.info(responseContent);
 

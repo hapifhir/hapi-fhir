@@ -44,7 +44,6 @@ public class UnclassifiedServerExceptionDstu3Test {
 		ourLog.info("HTTP {} {}", response.getStatusCode(), response.getReasonPhrase());
 		ourLog.info(responseContent);
 		response.assertStatus(477);
-		//assertEquals("SOME MESSAGE", status.getStatusLine().getReasonPhrase());
 		assertThat(responseContent).contains("business-rule");
 
 	}

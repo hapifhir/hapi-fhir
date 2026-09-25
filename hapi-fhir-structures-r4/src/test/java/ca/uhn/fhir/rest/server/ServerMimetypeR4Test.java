@@ -170,14 +170,14 @@ public class ServerMimetypeR4Test {
 	public void testHttpTraceNotEnabled() throws Exception {
 		HttpTestResponse status = ourServer.fhirRequest("/Patient").method("TRACE");
 		ourLog.info(status.toString());
-		assertEquals(400, status.getStatusCode());
+		status.assertStatus(400);
 	}
 
 	@Test
 	public void testHttpTrackNotEnabled() throws Exception {
 		HttpTestResponse status = ourServer.fhirRequest("/Patient").method("TRACK");
 		ourLog.info(status.toString());
-		assertEquals(400, status.getStatusCode());
+		status.assertStatus(400);
 	}
 
 	/**
