@@ -27,7 +27,6 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -40,19 +39,14 @@ import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizedList;
 import ca.uhn.fhir.rest.server.interceptor.auth.SearchNarrowingInterceptor;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.test.utilities.HttpTestRequest;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.Header;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -201,6 +195,16 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		ourRestServer.setPagingProvider(myPagingProvider);
 	}
 
+	/**
+	 * This test starts its own server rather than using {@code RestfulServerExtension}, so it
+	 * supplies the client and base URL that {@code myServer.fhirRequest(...)} would otherwise.
+	 *
+	 * @param thePath the path below the server base, beginning with a slash
+	 */
+	private HttpTestRequest fhirRequest(String thePath) {
+		return HttpTestRequest.to(ourHttpClient, myFhirContext, ourServerBase + thePath);
+	}
+
 	@Test
 	public void testEverythingReturnsCorrectBundleType() throws Exception {
 		ourRestServer.setDefaultResponseEncoding(EncodingEnum.JSON);
@@ -214,21 +218,16 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			myClient.create().resource(p).execute();
 		}
 
-		HttpGet get = new HttpGet(ourServerBase + "/Patient/$everything");
-		get.addHeader("Accept", "application/xml+fhir");
-		CloseableHttpResponse http = ourHttpClient.execute(get);
-		try {
-			String response = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(response);
-			assertThat(response).doesNotContain("_format");
-			assertEquals(200, http.getStatusLine().getStatusCode());
+		String response = fhirRequest("/Patient/$everything")
+			.withHeader("Accept", "application/xml+fhir")
+			.get()
+			.assertStatus(200)
+			.getBody();
+		ourLog.info(response);
+		assertThat(response).doesNotContain("_format");
 
-			Bundle responseBundle = ourCtx.newXmlParser().parseResource(Bundle.class, response);
-			assertEquals(BundleType.SEARCHSET, responseBundle.getTypeElement().getValue());
-
-		} finally {
-			http.close();
-		}
+		Bundle responseBundle = ourCtx.newXmlParser().parseResource(Bundle.class, response);
+		assertEquals(BundleType.SEARCHSET, responseBundle.getTypeElement().getValue());
 
 		ourRestServer.unregisterInterceptor(interceptor);
 	}
@@ -246,31 +245,20 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			myClient.create().resource(p).execute();
 		}
 
-		HttpGet get = new HttpGet(ourServerBase + "/Patient/$everything");
-		get.addHeader("Accept", "application/xml, text/html");
-		CloseableHttpResponse http = ourHttpClient.execute(get);
-
-		try {
-			String response = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(response);
-			assertThat(response).contains("_format=json");
-			assertEquals(200, http.getStatusLine().getStatusCode());
-		} finally {
-			http.close();
-		}
+		String response = fhirRequest("/Patient/$everything")
+			.withHeader("Accept", "application/xml, text/html")
+			.get()
+			.assertStatus(200)
+			.getBody();
+		ourLog.info(response);
+		assertThat(response).contains("_format=json");
 
 		ourRestServer.unregisterInterceptor(interceptor);
 	}
 
 	@Test
 	public void testEverythingType() throws Exception {
-		HttpGet get = new HttpGet(ourServerBase + "/Patient/$everything");
-		CloseableHttpResponse http = ourHttpClient.execute(get);
-		try {
-			assertEquals(200, http.getStatusLine().getStatusCode());
-		} finally {
-			http.close();
-		}
+		fhirRequest("/Patient/$everything").get().assertStatus(200);
 	}
 
 	@Test
@@ -281,52 +269,34 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testMarkResourcesForReindexing() throws Exception {
-		HttpRequestBase post = new HttpPost(ourServerBase + "/$mark-all-resources-for-reindexing");
-		CloseableHttpResponse http = ourHttpClient.execute(post);
-		try {
-			String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(output);
-			assertEquals(200, http.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(http);
-		}
+		String output = fhirRequest("/$mark-all-resources-for-reindexing")
+			.method("POST")
+			.assertStatus(200)
+			.getBody();
+		ourLog.info(output);
 
-		post = new HttpPost(ourServerBase + "/$perform-reindexing-pass");
-		http = ourHttpClient.execute(post);
-		try {
-			String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(output);
-			assertEquals(200, http.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(http);
-		}
+		output = fhirRequest("/$perform-reindexing-pass")
+			.method("POST")
+			.assertStatus(200)
+			.getBody();
+		ourLog.info(output);
 
 	}
 
 	@Test
 	public void testMarkResourcesForReindexingTyped() throws Exception {
 
-		HttpPost post = new HttpPost(ourServerBase + "/$mark-all-resources-for-reindexing?type=Patient");
-		post.setEntity(new ResourceEntity(myFhirContext, new Parameters().addParameter("type", new CodeType("Patient"))));
-		CloseableHttpResponse http = ourHttpClient.execute(post);
-		try {
-			String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(output);
-			assertEquals(200, http.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(http);
-		}
+		String output = fhirRequest("/$mark-all-resources-for-reindexing?type=Patient")
+			.post(new Parameters().addParameter("type", new CodeType("Patient")))
+			.assertStatus(200)
+			.getBody();
+		ourLog.info(output);
 
-		post = new HttpPost(ourServerBase + "/$mark-all-resources-for-reindexing?type=FOO");
-		post.setEntity(new ResourceEntity(myFhirContext, new Parameters().addParameter("type", new CodeType("FOO"))));
-		http = ourHttpClient.execute(post);
-		try {
-			String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(output);
-			assertEquals(400, http.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(http);
-		}
+		output = fhirRequest("/$mark-all-resources-for-reindexing?type=FOO")
+			.post(new Parameters().addParameter("type", new CodeType("FOO")))
+			.assertStatus(400)
+			.getBody();
+		ourLog.info(output);
 
 	}
 
@@ -335,10 +305,8 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	public void testResponseUsesCorrectContentType() throws Exception {
 		ourRestServer.setDefaultResponseEncoding(EncodingEnum.JSON);
 
-		HttpGet get = new HttpGet(ourServerBase);
-//		get.addHeader("Accept", "application/xml, text/html");
-		CloseableHttpResponse http = ourHttpClient.execute(get);
-		assertThat(http.getFirstHeader("Content-Type").getValue()).contains("application/fhir+json");
+		HttpTestResponse http = fhirRequest("").get();
+		assertThat(http.getHeader("Content-Type")).contains("application/fhir+json");
 	}
 
 	@Test
@@ -478,22 +446,15 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		inputBundle.addEntry().getRequest().setMethod(HTTPVerb.DELETE).setUrl("Patient?name=Pietercx85ioqWJbI");
 		String input = myFhirContext.newXmlParser().encodeResourceToString(inputBundle);
 
-		HttpPost req = new HttpPost(ourServerBase + "?_pretty=true");
-		req.setEntity(new StringEntity(input, ContentType.parse(Constants.CT_FHIR_XML + "; charset=utf-8")));
+		String encoded = fhirRequest("?_pretty=true")
+			.post(input, Constants.CT_FHIR_XML)
+			.getBody();
+		ourLog.info(encoded);
 
-		CloseableHttpResponse resp = ourHttpClient.execute(req);
-		try {
-			String encoded = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(encoded);
+		assertThat(encoded).contains("transaction-response");
 
-			assertThat(encoded).contains("transaction-response");
-
-			Bundle response = myFhirContext.newXmlParser().parseResource(Bundle.class, encoded);
-			assertThat(response.getEntry()).hasSize(3);
-
-		} finally {
-			IOUtils.closeQuietly(resp.getEntity().getContent());
-		}
+		Bundle response = myFhirContext.newXmlParser().parseResource(Bundle.class, encoded);
+		assertThat(response.getEntry()).hasSize(3);
 
 		try {
 			myClient.read().resource(Patient.class).withId(id).execute();
@@ -815,18 +776,12 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			"</Bundle>";
 		//@formatter:off
 
-		HttpPost req = new HttpPost(ourServerBase);
-		req.setEntity(new StringEntity(input, ContentType.parse(Constants.CT_FHIR_XML + "; charset=utf-8")));
+		String encoded = fhirRequest("")
+			.post(input, Constants.CT_FHIR_XML)
+			.getBody();
+		ourLog.info(encoded);
 
-		CloseableHttpResponse resp = ourHttpClient.execute(req);
-		try {
-			String encoded = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(encoded);
-
-			assertThat(encoded).contains("transaction-response");
-		} finally {
-			IOUtils.closeQuietly(resp.getEntity().getContent());
-		}
+		assertThat(encoded).contains("transaction-response");
 
 	}
 
@@ -847,23 +802,16 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			InputStream bundleRes = SystemProviderR4Test.class.getResourceAsStream("/questionnaire-sdc-profile-example-ussg-fht.xml");
 			String bundleStr = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
 
-			HttpPost req = new HttpPost(ourServerBase);
-			req.setEntity(new StringEntity(bundleStr, ContentType.parse(Constants.CT_FHIR_XML + "; charset=utf-8")));
+			HttpTestResponse resp = fhirRequest("").post(bundleStr, Constants.CT_FHIR_XML);
+			String encoded = resp.getBody();
+			ourLog.info(encoded);
 
-			CloseableHttpResponse resp = ourHttpClient.execute(req);
-			try {
-				String encoded = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
-				ourLog.info(encoded);
+			//@formatter:off
+			assertThat(encoded).contains("Questionnaire/54127-6/_history/");
+			//@formatter:on
 
-				//@formatter:off
-				assertThat(encoded).contains("Questionnaire/54127-6/_history/");
-				//@formatter:on
-
-				for (Header next : resp.getHeaders(RequestValidatingInterceptor.DEFAULT_RESPONSE_HEADER_NAME)) {
-					ourLog.info(next.toString());
-				}
-			} finally {
-				IOUtils.closeQuietly(resp.getEntity().getContent());
+			for (String next : resp.getHeaders(RequestValidatingInterceptor.DEFAULT_RESPONSE_HEADER_NAME)) {
+				ourLog.info(next);
 			}
 		} finally {
 			ourRestServer.unregisterInterceptor(interceptor);

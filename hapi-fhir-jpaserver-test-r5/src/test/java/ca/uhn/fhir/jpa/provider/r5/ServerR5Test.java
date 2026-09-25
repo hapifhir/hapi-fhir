@@ -8,10 +8,8 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.util.ExtensionConstants;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CapabilityStatement;
 import org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
@@ -29,8 +27,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -52,22 +48,21 @@ public class ServerR5Test extends BaseResourceProviderR5Test {
 
 	@Test
 	@Disabled
-	public void testCapabilityStatementValidates() throws IOException {
-		HttpGet get = new HttpGet(myServerBase + "/metadata?_pretty=true&_format=json");
-		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
-			assertEquals(200, resp.getStatusLine().getStatusCode());
-			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
+	public void testCapabilityStatementValidates() {
+		String respString = myServer.fhirRequest("/metadata?_pretty=true&_format=json")
+			.get()
+			.assertStatus(200)
+			.getBody();
 
-			ourLog.debug(respString);
+		ourLog.debug(respString);
 
-			CapabilityStatement cs = myFhirCtx.newJsonParser().parseResource(CapabilityStatement.class, respString);
+		CapabilityStatement cs = myFhirCtx.newJsonParser().parseResource(CapabilityStatement.class, respString);
 
-			try {
-				myCapabilityStatementDao.validate(cs, null, respString, EncodingEnum.JSON, null, null, null);
-			} catch (PreconditionFailedException e) {
-				ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
-				fail();
-			}
+		try {
+			myCapabilityStatementDao.validate(cs, null, respString, EncodingEnum.JSON, null, null, null);
+		} catch (PreconditionFailedException e) {
+			ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			fail();
 		}
 	}
 
@@ -76,33 +71,28 @@ public class ServerR5Test extends BaseResourceProviderR5Test {
 	 * See #519
 	 */
 	@Test
-	public void saveIdParamOnlyAppearsOnce() throws IOException {
-		HttpGet get = new HttpGet(myServerBase + "/metadata?_pretty=true&_format=xml");
-		CloseableHttpResponse resp = ourHttpClient.execute(get);
-		try {
-			ourLog.info(resp.toString());
-			assertEquals(200, resp.getStatusLine().getStatusCode());
+	public void saveIdParamOnlyAppearsOnce() {
+		HttpTestResponse resp = myServer.fhirRequest("/metadata?_pretty=true&_format=xml").get();
+		ourLog.info(resp.toString());
+		resp.assertStatus(200);
 
-			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.debug(respString);
+		String respString = resp.getBody();
+		ourLog.debug(respString);
 
-			CapabilityStatement cs = myFhirCtx.newXmlParser().parseResource(CapabilityStatement.class, respString);
+		CapabilityStatement cs = myFhirCtx.newXmlParser().parseResource(CapabilityStatement.class, respString);
 
-			for (CapabilityStatementRestResourceComponent nextResource : cs.getRest().get(0).getResource()) {
-				ourLog.info("Testing resource: " + nextResource.getType());
-				Set<String> sps = new HashSet<String>();
-				for (CapabilityStatementRestResourceSearchParamComponent nextSp : nextResource.getSearchParam()) {
-					if (sps.add(nextSp.getName()) == false) {
-						fail("Duplicate search parameter " + nextSp.getName() + " for resource " + nextResource.getType());
-					}
-				}
-
-				if (!sps.contains("_id")) {
-					fail("No search parameter _id for resource " + nextResource.getType());
+		for (CapabilityStatementRestResourceComponent nextResource : cs.getRest().get(0).getResource()) {
+			ourLog.info("Testing resource: " + nextResource.getType());
+			Set<String> sps = new HashSet<String>();
+			for (CapabilityStatementRestResourceSearchParamComponent nextSp : nextResource.getSearchParam()) {
+				if (sps.add(nextSp.getName()) == false) {
+					fail("Duplicate search parameter " + nextSp.getName() + " for resource " + nextResource.getType());
 				}
 			}
-		} finally {
-			IOUtils.closeQuietly(resp.getEntity().getContent());
+
+			if (!sps.contains("_id")) {
+				fail("No search parameter _id for resource " + nextResource.getType());
+			}
 		}
 	}
 

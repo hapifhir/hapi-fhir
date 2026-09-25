@@ -28,13 +28,11 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
+import ca.uhn.fhir.test.utilities.HttpTestRequest;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.BundleUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -134,8 +132,18 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		}
 	}
 
+	/**
+	 * This test starts its own server rather than using {@code RestfulServerExtension}, so it builds
+	 * requests against that server's base URL here.
+	 *
+	 * @param thePath the path below the server base URL, beginning with a slash
+	 */
+	private static HttpTestRequest fhirRequest(String thePath) {
+		return HttpTestRequest.to(ourHttpClient, ourCtx, ourServerBase + thePath);
+	}
+
 	@Test
-	public void testEverythingReturnsCorrectFormatInPagingLink() throws Exception {
+	public void testEverythingReturnsCorrectFormatInPagingLink() {
 		myRestServer.setDefaultResponseEncoding(EncodingEnum.JSON);
 		myRestServer.setPagingProvider(new FifoMemoryPagingProvider(1).setDefaultPageSize(10));
 		ResponseHighlighterInterceptor interceptor = new ResponseHighlighterInterceptor();
@@ -147,17 +155,13 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 			ourClient.create().resource(p).execute();
 		}
 
-		HttpGet get = new HttpGet(ourServerBase + "/Patient/$everything");
-		get.addHeader("Accept", "application/xml, text/html");
-		CloseableHttpResponse http = ourHttpClient.execute(get);
-		try {
-			String response = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(response);
-			assertThat(response).contains("_format=json");
-			assertEquals(200, http.getStatusLine().getStatusCode());
-		} finally {
-			http.close();
-		}
+		String response = fhirRequest("/Patient/$everything")
+			.withHeader("Accept", "application/xml, text/html")
+			.get()
+			.assertStatus(200)
+			.getBody();
+		ourLog.info(response);
+		assertThat(response).contains("_format=json");
 
 		myRestServer.unregisterInterceptor(interceptor);
 	}
@@ -170,7 +174,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 
 
 	@Test
-	public void testEverythingReturnsCorrectBundleType() throws Exception {
+	public void testEverythingReturnsCorrectBundleType() {
 		myRestServer.setDefaultResponseEncoding(EncodingEnum.JSON);
 		myRestServer.setPagingProvider(new FifoMemoryPagingProvider(1).setDefaultPageSize(10));
 		ResponseHighlighterInterceptor interceptor = new ResponseHighlighterInterceptor();
@@ -182,34 +186,23 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 			ourClient.create().resource(p).execute();
 		}
 
-		HttpGet get = new HttpGet(ourServerBase + "/Patient/$everything");
-		get.addHeader("Accept", "application/xml+fhir");
-		CloseableHttpResponse http = ourHttpClient.execute(get);
-		try {
-			String response = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(response);
-			assertThat(response).doesNotContain("_format");
-			assertEquals(200, http.getStatusLine().getStatusCode());
+		String response = fhirRequest("/Patient/$everything")
+			.withHeader("Accept", "application/xml+fhir")
+			.get()
+			.assertStatus(200)
+			.getBody();
+		ourLog.info(response);
+		assertThat(response).doesNotContain("_format");
 
-			Bundle responseBundle = ourCtx.newXmlParser().parseResource(Bundle.class, response);
-			assertEquals(BundleTypeEnum.SEARCH_RESULTS, responseBundle.getTypeElement().getValueAsEnum());
-
-		} finally {
-			http.close();
-		}
+		Bundle responseBundle = ourCtx.newXmlParser().parseResource(Bundle.class, response);
+		assertEquals(BundleTypeEnum.SEARCH_RESULTS, responseBundle.getTypeElement().getValueAsEnum());
 
 		myRestServer.unregisterInterceptor(interceptor);
 	}
 
 	@Test
-	public void testEverythingType() throws Exception {
-		HttpGet get = new HttpGet(ourServerBase + "/Patient/$everything");
-		CloseableHttpResponse http = ourHttpClient.execute(get);
-		try {
-			assertEquals(200, http.getStatusLine().getStatusCode());
-		} finally {
-			http.close();
-		}
+	public void testEverythingType() {
+		fhirRequest("/Patient/$everything").get().assertStatus(200);
 	}
 
 
@@ -403,16 +396,12 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	@Test
-	public void testMarkResourcesForReindexing() throws Exception {
-		HttpPost post = new HttpPost(ourServerBase + "/$mark-all-resources-for-reindexing");
-		CloseableHttpResponse http = ourHttpClient.execute(post);
-		try {
-			String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(output);
-			assertEquals(200, http.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(http);
-		}
+	public void testMarkResourcesForReindexing() {
+		String output = fhirRequest("/$mark-all-resources-for-reindexing")
+			.method("POST")
+			.assertStatus(200)
+			.getBody();
+		ourLog.info(output);
 	}
 
 	@AfterAll

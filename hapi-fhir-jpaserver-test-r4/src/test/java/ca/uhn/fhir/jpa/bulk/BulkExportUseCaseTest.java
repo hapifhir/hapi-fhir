@@ -35,6 +35,8 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.test.utilities.HttpTestRequest;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
@@ -42,11 +44,7 @@ import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.Header;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -78,7 +76,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -93,7 +90,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.PARAM_EXPORT_INCLUDE_HISTORY;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.mapping;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -139,7 +135,7 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	class SpecConformanceTests {
 
 		@Test
-		void testBulkExportJobsAreMetaTaggedWithJobIdAndExportId() throws IOException {
+		void testBulkExportJobsAreMetaTaggedWithJobIdAndExportId() {
 			//Given a patient exists
 			Patient p = new Patient();
 			p.setId("Pat-1");
@@ -151,37 +147,33 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			myBatch2JobHelper.awaitJobCompletion(jobId);
 
 			//Then: When the poll shows as complete, all attributes should be filled.
-			HttpGet statusGet = new HttpGet(pollingLocation);
 			String expectedOriginalUrl = myClient.getServerBase() + "/$export?_type=Patient&_exportId=im-an-export-identifier";
-			try (CloseableHttpResponse status = ourHttpClient.execute(statusGet)) {
-				assertEquals(200, status.getStatusLine().getStatusCode());
-				String responseContent = IOUtils.toString(status.getEntity().getContent(), UTF_8);
-				assertThat(isNotBlank(responseContent)).as(responseContent).isTrue();
+			String responseContent = pollingRequest(pollingLocation).get().assertStatus(200).getBody();
+			assertThat(isNotBlank(responseContent)).as(responseContent).isTrue();
 
-				ourLog.info(responseContent);
+			ourLog.info(responseContent);
 
-				BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
-				assertEquals(expectedOriginalUrl, result.getRequest());
-				assertThat(result.getOutput()).isNotEmpty();
-				String binaryUrl = result.getOutput().get(0).getUrl();
-				Binary binaryResource = myClient.read().resource(Binary.class).withUrl(binaryUrl).execute();
+			BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
+			assertEquals(expectedOriginalUrl, result.getRequest());
+			assertThat(result.getOutput()).isNotEmpty();
+			String binaryUrl = result.getOutput().get(0).getUrl();
+			Binary binaryResource = myClient.read().resource(Binary.class).withUrl(binaryUrl).execute();
 
-				List<Extension> extension = binaryResource.getMeta().getExtension();
-				assertThat(extension).hasSize(3);
+			List<Extension> extension = binaryResource.getMeta().getExtension();
+			assertThat(extension).hasSize(3);
 
-				assertEquals(JpaConstants.BULK_META_EXTENSION_EXPORT_IDENTIFIER, extension.get(0).getUrl());
-				assertEquals("im-an-export-identifier", extension.get(0).getValue().toString());
+			assertEquals(JpaConstants.BULK_META_EXTENSION_EXPORT_IDENTIFIER, extension.get(0).getUrl());
+			assertEquals("im-an-export-identifier", extension.get(0).getValue().toString());
 
-				assertEquals(JpaConstants.BULK_META_EXTENSION_JOB_ID, extension.get(1).getUrl());
-				assertEquals(jobId, extension.get(1).getValue().toString());
+			assertEquals(JpaConstants.BULK_META_EXTENSION_JOB_ID, extension.get(1).getUrl());
+			assertEquals(jobId, extension.get(1).getValue().toString());
 
-				assertEquals(JpaConstants.BULK_META_EXTENSION_RESOURCE_TYPE, extension.get(2).getUrl());
-				assertEquals("Patient", extension.get(2).getValue().toString());
-			}
+			assertEquals(JpaConstants.BULK_META_EXTENSION_RESOURCE_TYPE, extension.get(2).getUrl());
+			assertEquals("Patient", extension.get(2).getValue().toString());
 		}
 
 		@Test
-		void testBatchJobsAreOnlyReusedIfInProgress() throws IOException {
+		void testBatchJobsAreOnlyReusedIfInProgress() {
 			//Given a patient exists
 			Patient p = new Patient();
 			p.setId("Pat-1");
@@ -204,7 +196,7 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		void testPollingLocationContainsAllRequiredAttributesUponCompletion() throws IOException {
+		void testPollingLocationContainsAllRequiredAttributesUponCompletion() {
 
 			//Given a patient exists
 			Patient p = new Patient();
@@ -217,26 +209,23 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			myBatch2JobHelper.awaitJobCompletion(jobId);
 
 			//Then: When the poll shows as complete, all attributes should be filled.
-			HttpGet statusGet = new HttpGet(pollingLocation);
 			String expectedOriginalUrl = myClient.getServerBase() + "/$export?_type=Patient";
-			try (CloseableHttpResponse status = ourHttpClient.execute(statusGet)) {
-				String responseContent = IOUtils.toString(status.getEntity().getContent(), UTF_8);
+			String responseContent = pollingRequest(pollingLocation).get().getBody();
 
-				ourLog.info(responseContent);
+			ourLog.info(responseContent);
 
-				BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
-				assertEquals(expectedOriginalUrl, result.getRequest());
-				assertEquals(true, result.getRequiresAccessToken());
-				assertNotNull(result.getTransactionTime());
-				assertThat(result.getOutput()).isNotEmpty();
+			BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
+			assertEquals(expectedOriginalUrl, result.getRequest());
+			assertEquals(true, result.getRequiresAccessToken());
+			assertNotNull(result.getTransactionTime());
+			assertThat(result.getOutput()).isNotEmpty();
 
-				//We assert specifically on content as the deserialized version will "helpfully" fill in missing fields.
-				assertThat(responseContent).contains("\"error\" : [ ]");
-			}
+			//We assert specifically on content as the deserialized version will "helpfully" fill in missing fields.
+			assertThat(responseContent).contains("\"error\" : [ ]");
 		}
 
 		@Test
-		void export_shouldExportPatientResource_whenTypeParameterOmitted() throws IOException {
+		void export_shouldExportPatientResource_whenTypeParameterOmitted() {
 
 			//Given a patient exists
 			Patient p = new Patient();
@@ -244,39 +233,32 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			myClient.update().resource(p).execute();
 
 			//And Given we start a bulk export job
-			HttpGet httpGet = new HttpGet(myClient.getServerBase() + "/$export");
-			httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-			String pollingLocation;
-			try (CloseableHttpResponse status = ourHttpClient.execute(httpGet)) {
-				Header[] headers = status.getHeaders("Content-Location");
-				pollingLocation = headers[0].getValue();
-			}
+			String pollingLocation = myServer.fhirRequest("/$export")
+				.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+				.get()
+				.getHeader("Content-Location");
 			String jobId = Batch2JobHelper.getJobIdFromPollingLocation(pollingLocation);
 			myBatch2JobHelper.awaitJobCompletion(jobId);
 
 			//Then: When the poll shows as complete, all attributes should be filled.
-			HttpGet statusGet = new HttpGet(pollingLocation);
 			String expectedOriginalUrl = myClient.getServerBase() + "/$export";
-			try (CloseableHttpResponse status = ourHttpClient.execute(statusGet)) {
-				assertEquals(200, status.getStatusLine().getStatusCode());
-				String responseContent = IOUtils.toString(status.getEntity().getContent(), UTF_8);
-				assertThat(isNotBlank(responseContent)).as(responseContent).isTrue();
+			String responseContent = pollingRequest(pollingLocation).get().assertStatus(200).getBody();
+			assertThat(isNotBlank(responseContent)).as(responseContent).isTrue();
 
-				ourLog.info(responseContent);
+			ourLog.info(responseContent);
 
-				BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
-				assertEquals(expectedOriginalUrl, result.getRequest());
-				assertEquals(true, result.getRequiresAccessToken());
-				assertNotNull(result.getTransactionTime());
-				assertThat(result.getOutput()).isNotEmpty();
+			BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
+			assertEquals(expectedOriginalUrl, result.getRequest());
+			assertEquals(true, result.getRequiresAccessToken());
+			assertNotNull(result.getTransactionTime());
+			assertThat(result.getOutput()).isNotEmpty();
 
-				//We assert specifically on content as the deserialized version will "helpfully" fill in missing fields.
-				assertThat(responseContent).contains("\"error\" : [ ]");
-			}
+			//We assert specifically on content as the deserialized version will "helpfully" fill in missing fields.
+			assertThat(responseContent).contains("\"error\" : [ ]");
 		}
 
 		@Test
-		void export_shouldExportPatientAndObservationAndEncounterResources_whenTypeParameterOmitted() throws IOException {
+		void export_shouldExportPatientAndObservationAndEncounterResources_whenTypeParameterOmitted() {
 
 			Patient patient = new Patient();
 			patient.setId("Pat-1");
@@ -290,36 +272,30 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			encounter.setId("Enc-1");
 			myClient.update().resource(encounter).execute();
 
-			HttpGet httpGet = new HttpGet(myClient.getServerBase() + "/$export");
-			httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-			String pollingLocation;
-			try (CloseableHttpResponse status = ourHttpClient.execute(httpGet)) {
-				Header[] headers = status.getHeaders("Content-Location");
-				pollingLocation = headers[0].getValue();
-			}
+			String pollingLocation = myServer.fhirRequest("/$export")
+				.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+				.get()
+				.getHeader("Content-Location");
 			String jobId = Batch2JobHelper.getJobIdFromPollingLocation(pollingLocation);
 			myBatch2JobHelper.awaitJobCompletion(jobId);
 
-			HttpGet statusGet = new HttpGet(pollingLocation);
 			String expectedOriginalUrl = myClient.getServerBase() + "/$export";
-			try (CloseableHttpResponse status = ourHttpClient.execute(statusGet)) {
-				String responseContent = IOUtils.toString(status.getEntity().getContent(), UTF_8);
-				BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
-				assertEquals(expectedOriginalUrl, result.getRequest());
-				assertEquals(true, result.getRequiresAccessToken());
-				assertNotNull(result.getTransactionTime());
-				assertEquals(3, result.getOutput().size());
-				assertThat(result.getOutput().stream().filter(o -> o.getType().equals("Patient")).collect(Collectors.toList())).hasSize(1);
-				assertThat(result.getOutput().stream().filter(o -> o.getType().equals("Observation")).collect(Collectors.toList())).hasSize(1);
-				assertThat(result.getOutput().stream().filter(o -> o.getType().equals("Encounter")).collect(Collectors.toList())).hasSize(1);
+			String responseContent = pollingRequest(pollingLocation).get().getBody();
+			BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
+			assertEquals(expectedOriginalUrl, result.getRequest());
+			assertEquals(true, result.getRequiresAccessToken());
+			assertNotNull(result.getTransactionTime());
+			assertEquals(3, result.getOutput().size());
+			assertThat(result.getOutput().stream().filter(o -> o.getType().equals("Patient")).collect(Collectors.toList())).hasSize(1);
+			assertThat(result.getOutput().stream().filter(o -> o.getType().equals("Observation")).collect(Collectors.toList())).hasSize(1);
+			assertThat(result.getOutput().stream().filter(o -> o.getType().equals("Encounter")).collect(Collectors.toList())).hasSize(1);
 
-				//We assert specifically on content as the deserialized version will "helpfully" fill in missing fields.
-				assertThat(responseContent).contains("\"error\" : [ ]");
-			}
+			//We assert specifically on content as the deserialized version will "helpfully" fill in missing fields.
+			assertThat(responseContent).contains("\"error\" : [ ]");
 		}
 
 		@Test
-		void export_shouldNotExportBinaryResource_whenTypeParameterOmitted() throws IOException {
+		void export_shouldNotExportBinaryResource_whenTypeParameterOmitted() {
 
 			Patient patient = new Patient();
 			patient.setId("Pat-1");
@@ -329,61 +305,59 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			binary.setId("Bin-1");
 			myClient.update().resource(binary).execute();
 
-			HttpGet httpGet = new HttpGet(myClient.getServerBase() + "/$export");
-			httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-			String pollingLocation;
-			try (CloseableHttpResponse status = ourHttpClient.execute(httpGet)) {
-				Header[] headers = status.getHeaders("Content-Location");
-				pollingLocation = headers[0].getValue();
-			}
+			String pollingLocation = myServer.fhirRequest("/$export")
+				.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+				.get()
+				.getHeader("Content-Location");
 			String jobId = Batch2JobHelper.getJobIdFromPollingLocation(pollingLocation);
 			myBatch2JobHelper.awaitJobCompletion(jobId);
 
-			HttpGet statusGet = new HttpGet(pollingLocation);
 			String expectedOriginalUrl = myClient.getServerBase() + "/$export";
-			try (CloseableHttpResponse status = ourHttpClient.execute(statusGet)) {
-				String responseContent = IOUtils.toString(status.getEntity().getContent(), UTF_8);
-				BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
-				assertEquals(expectedOriginalUrl, result.getRequest());
-				assertEquals(true, result.getRequiresAccessToken());
-				assertNotNull(result.getTransactionTime());
-				assertEquals(1, result.getOutput().size());
-				assertThat(result.getOutput().stream().filter(o -> o.getType().equals("Patient")).collect(Collectors.toList())).hasSize(1);
-				assertThat(result.getOutput().stream().filter(o -> o.getType().equals("Binary")).collect(Collectors.toList())).isEmpty();
+			String responseContent = pollingRequest(pollingLocation).get().getBody();
+			BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
+			assertEquals(expectedOriginalUrl, result.getRequest());
+			assertEquals(true, result.getRequiresAccessToken());
+			assertNotNull(result.getTransactionTime());
+			assertEquals(1, result.getOutput().size());
+			assertThat(result.getOutput().stream().filter(o -> o.getType().equals("Patient")).collect(Collectors.toList())).hasSize(1);
+			assertThat(result.getOutput().stream().filter(o -> o.getType().equals("Binary")).collect(Collectors.toList())).isEmpty();
 
-				//We assert specifically on content as the deserialized version will "helpfully" fill in missing fields.
-				assertThat(responseContent).contains("\"error\" : [ ]");
-			}
+			//We assert specifically on content as the deserialized version will "helpfully" fill in missing fields.
+			assertThat(responseContent).contains("\"error\" : [ ]");
 		}
 
 	}
 
-	private String submitBulkExportForTypes(String... theTypes) throws IOException {
+	private String submitBulkExportForTypes(String... theTypes) {
 		return submitBulkExportForTypesWithExportId(null, theTypes);
 	}
 
-	private String submitBulkExportForTypesWithExportId(String theExportId, String... theTypes) throws IOException {
+	private String submitBulkExportForTypesWithExportId(String theExportId, String... theTypes) {
 		String typeString = String.join(",", theTypes);
-		String uri = myClient.getServerBase() + "/$export?_type=" + typeString;
+		String path = "/$export?_type=" + typeString;
 		if (!StringUtils.isBlank(theExportId)) {
-			uri += "&_exportId=" + theExportId;
+			path += "&_exportId=" + theExportId;
 		}
 
-		HttpGet httpGet = new HttpGet(uri);
-		httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		String pollingLocation;
-		try (CloseableHttpResponse status = ourHttpClient.execute(httpGet)) {
-			Header[] headers = status.getHeaders("Content-Location");
-			pollingLocation = headers[0].getValue();
-		}
-		return pollingLocation;
+		return myServer.fhirRequest(path)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.get()
+			.getHeader("Content-Location");
+	}
+
+	/**
+	 * The server returns the polling location as an absolute URL, but {@code fhirRequest} takes a
+	 * path below the server base.
+	 */
+	private HttpTestRequest pollingRequest(String thePollingLocation) {
+		return myServer.fhirRequest(thePollingLocation.substring(myServerBase.length()));
 	}
 
 	@Nested
 	class SystemBulkExportTests {
 
 		@Test
-		void testBinariesAreStreamedWithRespectToAcceptHeader() throws IOException {
+		void testBinariesAreStreamedWithRespectToAcceptHeader() {
 			int patientCount = 5;
 			for (int i = 0; i < patientCount; i++) {
 				Patient patient = new Patient();
@@ -399,51 +373,38 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			String replace = patientBinaryId.replace("_history/1", "");
 
 			{ // Test with the Accept Header omitted should stream out the results.
-				HttpGet expandGet = new HttpGet(myServerBase + "/" + replace);
-				try (CloseableHttpResponse status = ourHttpClient.execute(expandGet)) {
-					Header[] headers = status.getHeaders("Content-Type");
-					String response = IOUtils.toString(status.getEntity().getContent(), UTF_8);
-					logContentTypeAndResponse(headers, response);
-					validateNdJsonResponse(headers, response, patientCount);
-				}
+				HttpTestResponse status = myServer.fhirRequest("/" + replace).get();
+				logContentTypeAndResponse(status);
+				validateNdJsonResponse(status, patientCount);
 			}
 
 			{ //Test with the Accept Header set to application/fhir+ndjson should stream out the results.
-				HttpGet expandGet = new HttpGet(myServerBase + "/" + replace);
-				expandGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_NDJSON);
-				try (CloseableHttpResponse status = ourHttpClient.execute(expandGet)) {
-					Header[] headers = status.getHeaders("Content-Type");
-					String response = IOUtils.toString(status.getEntity().getContent(), UTF_8);
-					logContentTypeAndResponse(headers, response);
-					validateNdJsonResponse(headers, response, patientCount);
-				}
+				HttpTestResponse status = myServer.fhirRequest("/" + replace)
+					.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_NDJSON)
+					.get();
+				logContentTypeAndResponse(status);
+				validateNdJsonResponse(status, patientCount);
 			}
 
 			{ //Test that demanding octet-stream will force it to whatever the Binary's content-type is set to.
-				HttpGet expandGet = new HttpGet(myServerBase + "/" + replace);
-				expandGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_OCTET_STREAM);
-				try (CloseableHttpResponse status = ourHttpClient.execute(expandGet)) {
-					Header[] headers = status.getHeaders("Content-Type");
-					String response = IOUtils.toString(status.getEntity().getContent(), UTF_8);
-					logContentTypeAndResponse(headers, response);
-					validateNdJsonResponse(headers, response, patientCount);
-				}
+				HttpTestResponse status = myServer.fhirRequest("/" + replace)
+					.withHeader(Constants.HEADER_ACCEPT, Constants.CT_OCTET_STREAM)
+					.get();
+				logContentTypeAndResponse(status);
+				validateNdJsonResponse(status, patientCount);
 			}
 
 			{ //Test with the Accept Header set to application/fhir+json should simply return the Binary resource.
-				HttpGet expandGet = new HttpGet(myServerBase + "/" + replace);
-				expandGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON);
+				HttpTestResponse status = myServer.fhirRequest("/" + replace)
+					.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON)
+					.get();
+				logContentTypeAndResponse(status);
 
-				try (CloseableHttpResponse status = ourHttpClient.execute(expandGet)) {
-					Header[] headers = status.getHeaders("Content-Type");
-					String response = IOUtils.toString(status.getEntity().getContent(), UTF_8);
-					logContentTypeAndResponse(headers, response);
-
-					assertThat(headers[0].getValue()).contains(Constants.CT_FHIR_JSON);
-					assertThat(response).doesNotContain("\n");
-					Binary binary = myFhirContext.newJsonParser().parseResource(Binary.class, response);
-					assertEquals(patientBinaryId, binary.getIdElement().getValue());
-				}
+				String response = status.getBody();
+				assertThat(status.getHeader("Content-Type")).contains(Constants.CT_FHIR_JSON);
+				assertThat(response).doesNotContain("\n");
+				Binary binary = myFhirContext.newJsonParser().parseResource(Binary.class, response);
+				assertEquals(patientBinaryId, binary.getIdElement().getValue());
 			}
 		}
 
@@ -538,15 +499,16 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				contains("Export complete, but no data to generate report for job instance:");
 		}
 
-		private void logContentTypeAndResponse(Header[] headers, String response) {
+		private void logContentTypeAndResponse(HttpTestResponse theResponse) {
 			ourLog.info("**************************");
-			ourLog.info("Content-Type is: {}", headers[0]);
-			ourLog.info("Response is: {}", response);
+			ourLog.info("Content-Type is: {}", theResponse.getHeader("Content-Type"));
+			ourLog.info("Response is: {}", theResponse.getBody());
 			ourLog.info("**************************");
 		}
 
-		private void validateNdJsonResponse(Header[] headers, String response, int theExpectedCount) {
-			assertThat(headers[0].getValue()).contains(Constants.CT_FHIR_NDJSON);
+		private void validateNdJsonResponse(HttpTestResponse theResponse, int theExpectedCount) {
+			String response = theResponse.getBody();
+			assertThat(theResponse.getHeader("Content-Type")).contains(Constants.CT_FHIR_NDJSON);
 			assertThat(response).contains("\n");
 			Bundle bundle = myFhirContext.newNDJsonParser().parseResource(Bundle.class, response);
 			assertThat(bundle.getEntry()).hasSize(theExpectedCount);

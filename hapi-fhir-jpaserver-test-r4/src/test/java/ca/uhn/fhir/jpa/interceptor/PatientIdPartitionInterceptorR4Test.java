@@ -44,6 +44,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceEnabledByTypeInterceptor;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.FhirPatchBuilder;
@@ -59,9 +60,6 @@ import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -101,7 +99,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Propagation;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -1287,19 +1284,13 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		patientToUpdate.addIdentifier().setSystem("http://patient").setValue("1");
 		patientToUpdate.addName().setFamily("Smith").addGiven("John");
 
-		HttpPut httpPut = new HttpPut(myServer.getBaseUrl() + "/Patient?identifier=http://patient%7C1");
-		httpPut.setEntity(new StringEntity(
-			myFhirContext.newJsonParser().encodeResourceToString(patientToUpdate),
-			ContentType.parse("application/json+fhir")));
-
 		// execute
-		try (CloseableHttpResponse status = ourHttpClient.execute(httpPut)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("{}\n{}", status.getStatusLine(), responseContent);
+		HttpTestResponse response = myServer.fhirRequest("/Patient?identifier=http://patient%7C1")
+			.put(myFhirContext.newJsonParser().encodeResourceToString(patientToUpdate), "application/json+fhir");
+		ourLog.info("{}", response);
 
-			// verify
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		}
+		// verify
+		response.assertStatus(200);
 
 		assertThat(myTestDaoSearch.searchForIds("Patient?identifier=http://patient|1")).containsExactly("A");
 		assertThat(myPatientDao.read(new IdType("Patient/A"), mySrd).getNameFirstRep().getFamily())

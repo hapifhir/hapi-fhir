@@ -6,9 +6,6 @@ import ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.AbstractIterableAssert;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -29,8 +26,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Date;
@@ -72,7 +67,7 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 	 * Test new contextDirection extension for NIH.
 	 */
 	@Test
-	public void testAutocompleteDirectionExisting() throws IOException {
+	public void testAutocompleteDirectionExisting() {
 		// given
 		Coding mean_blood_pressure = new Coding("http://loinc.org", "8478-0", "Mean blood pressure");
 		Coding blood_count = new Coding("http://loinc.org", "789-8", "Erythrocytes [#/volume] in Blood by Automated count");
@@ -83,20 +78,18 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 		createObservationWithCode(mean_blood_pressure);
 
 		// when
-		HttpGet expandQuery = new HttpGet(myServerBase + "/ValueSet/$expand?contextDirection=existing&context=Observation.code:text&filter=pressure");
-		try (CloseableHttpResponse response = BaseResourceProviderR4Test.ourHttpClient.execute(expandQuery)) {
+		String text = myServer.fhirRequest("/ValueSet/$expand?contextDirection=existing&context=Observation.code:text&filter=pressure")
+			.get()
+			.assertStatus(Constants.STATUS_HTTP_200_OK)
+			.getBody();
 
-			// then
-			assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatusLine().getStatusCode());
-			String text = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ValueSet valueSet = myFhirContext.newXmlParser().parseResource(ValueSet.class, text);
-			ourLog.info("testAutocompleteDirectionExisting {}", text);
-			assertNotNull(valueSet);
-			List<ValueSet.ValueSetExpansionContainsComponent> expansions = valueSet.getExpansion().getContains();
-			ValueSetExpansionIterableAssert.assertThat(expansions).hasExpansionWithCoding(mean_blood_pressure);
-			ValueSetExpansionIterableAssert.assertThat(expansions).doesNotHaveExpansionWithCoding(blood_count);
-		}
-
+		// then
+		ValueSet valueSet = myFhirContext.newXmlParser().parseResource(ValueSet.class, text);
+		ourLog.info("testAutocompleteDirectionExisting {}", text);
+		assertNotNull(valueSet);
+		List<ValueSet.ValueSetExpansionContainsComponent> expansions = valueSet.getExpansion().getContains();
+		ValueSetExpansionIterableAssert.assertThat(expansions).hasExpansionWithCoding(mean_blood_pressure);
+		ValueSetExpansionIterableAssert.assertThat(expansions).doesNotHaveExpansionWithCoding(blood_count);
 	}
 
 	private void createObservationWithCode(Coding c) {
@@ -187,45 +180,45 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testCountReturnsExpectedSizeOfResources() throws IOException {
+	public void testCountReturnsExpectedSizeOfResources() {
 		IntStream.range(0, 10).forEach(index -> {
 			Coding blood_count = new Coding("http://loinc.org", "789-8", "Erythrocytes in Blood by Automated count for code: " + (index + 1));
 			createObservationWithCode(blood_count);
 		});
-		HttpGet countQuery = new HttpGet(myServerBase + "/Observation?code=789-8&_count=5&_total=accurate");
 		myCaptureQueriesListener.clear();
-		try (CloseableHttpResponse response = BaseResourceProviderR4Test.ourHttpClient.execute(countQuery)) {
-			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-			// then
-			assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatusLine().getStatusCode());
-			String text = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, text);
-			assertThat(bundle.getTotal()).as("Expected total 10 observations matching query").isEqualTo(10);
-			assertThat(bundle.getEntry().size()).as("Expected 5 observation entries to match page size").isEqualTo(5);
-			assertTrue(bundle.getLink("next").hasRelation());
-			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
-		}
+		String text = myServer.fhirRequest("/Observation?code=789-8&_count=5&_total=accurate")
+			.get()
+			.assertStatus(Constants.STATUS_HTTP_200_OK)
+			.getBody();
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+		// then
+		Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, text);
+		assertThat(bundle.getTotal()).as("Expected total 10 observations matching query").isEqualTo(10);
+		assertThat(bundle.getEntry().size()).as("Expected 5 observation entries to match page size").isEqualTo(5);
+		assertTrue(bundle.getLink("next").hasRelation());
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 	}
 
 	@Test
-	public void testCountZeroReturnsNoResourceEntries() throws IOException {
+	public void testCountZeroReturnsNoResourceEntries() {
 		IntStream.range(0, 10).forEach(index -> {
 			Coding blood_count = new Coding("http://loinc.org", "789-8", "Erythrocytes in Blood by Automated count for code: " + (index + 1));
 			createObservationWithCode(blood_count);
 		});
-		HttpGet countQuery = new HttpGet(myServerBase + "/Observation?code=789-8&_count=0");
 		myCaptureQueriesListener.clear();
-		try (CloseableHttpResponse response = BaseResourceProviderR4Test.ourHttpClient.execute(countQuery)) {
-			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-			assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatusLine().getStatusCode());
-			String text = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, text);
-			assertThat(bundle.getTotal()).as("Expected total 10 observations matching query").isEqualTo(10);
-			assertThat(bundle.getEntry().size()).as("Expected no entries in bundle").isEqualTo(0);
-			assertThat(bundle.getLink("next")).as("Expected no 'next' link").isNull();
-			assertThat(bundle.getLink("prev")).as("Expected no 'prev' link").isNull();
-			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
-		}
+		String text = myServer.fhirRequest("/Observation?code=789-8&_count=0")
+			.get()
+			.assertStatus(Constants.STATUS_HTTP_200_OK)
+			.getBody();
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+		Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, text);
+		assertThat(bundle.getTotal()).as("Expected total 10 observations matching query").isEqualTo(10);
+		assertThat(bundle.getEntry().size()).as("Expected no entries in bundle").isEqualTo(0);
+		assertThat(bundle.getLink("next")).as("Expected no 'next' link").isNull();
+		assertThat(bundle.getLink("prev")).as("Expected no 'prev' link").isNull();
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 
 	}
 

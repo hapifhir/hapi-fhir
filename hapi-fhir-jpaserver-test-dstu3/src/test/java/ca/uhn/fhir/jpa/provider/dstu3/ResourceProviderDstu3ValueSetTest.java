@@ -15,15 +15,10 @@ import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.util.UrlUtil;
-import com.google.common.base.Charsets;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
@@ -682,20 +677,17 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	@Test
 	public void testInvalidFilter() throws Exception {
 		String string = IOUtils.toString(getClass().getResourceAsStream("/bug_516_invalid_expansion.json"), StandardCharsets.UTF_8);
-		HttpPost post = new HttpPost(myServerBase + "/ValueSet/%24expand");
-		post.setEntity(new StringEntity(string, ContentType.parse(ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW)));
 
-		try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
+		HttpTestResponse resp = myServer.fhirRequest("/ValueSet/%24expand")
+			.post(string, ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW);
 
-			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.debug(respString);
+		String respString = resp.getBody();
+		ourLog.debug(respString);
 
-			ourLog.info(resp.toString());
+		ourLog.info(resp.toString());
 
-			assertEquals(400, resp.getStatusLine().getStatusCode());
-			assertThat(respString).contains("Unknown FilterOperator code 'n'");
-
-		}
+		resp.assertStatus(400);
+		assertThat(respString).contains("Unknown FilterOperator code 'n'");
 	}
 
 	@Test
@@ -723,22 +715,20 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		createLocalCs();
 		createLocalVsWithIncludeConcept();
 
-		String url = myServerBase +
-			"/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code?system=" +
+		String path = "/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code?system=" +
 			UrlUtil.escapeUrlParam(URL_MY_CODE_SYSTEM) +
 			"&code=AA";
 
-		ourLog.info("* Requesting: {}", url);
+		ourLog.info("* Requesting: {}", myServerBase + path);
 
-		HttpGet request = new HttpGet(url);
-		request.addHeader("Accept", "application/fhir+json");
-		try (CloseableHttpResponse response = ourHttpClient.execute(request)) {
-			String respString = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.debug(respString);
+		String respString = myServer.fhirRequest(path)
+			.withHeader("Accept", "application/fhir+json")
+			.get()
+			.getBody();
+		ourLog.debug(respString);
 
-			Parameters respParam = myFhirContext.newJsonParser().parseResource(Parameters.class, respString);
-			assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
-		}
+		Parameters respParam = myFhirContext.newJsonParser().parseResource(Parameters.class, respString);
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 	}
 
 	@Test

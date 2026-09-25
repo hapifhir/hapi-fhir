@@ -8,10 +8,6 @@ import ca.uhn.fhir.rest.openapi.OpenApiInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.util.UrlUtil;
-import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4b.model.Bundle;
 import org.hl7.fhir.r4b.model.Bundle.BundleEntryComponent;
@@ -32,7 +28,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -238,7 +233,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 	}
 
 	@Test
-	public void testSearchWithCompositeSort() throws IOException {
+	public void testSearchWithCompositeSort() {
 
 		IIdType pid0;
 		IIdType oid1;
@@ -314,14 +309,10 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 			ourLog.debug("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
-		String uri = myServerBase + "/Observation?_sort=combo-code-value-quantity";
-		Bundle found;
-
-		HttpGet get = new HttpGet(uri);
-		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
-			String output = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-			found = myFhirCtx.newXmlParser().parseResource(Bundle.class, output);
-		}
+		String output = myServer.fhirRequest("/Observation?_sort=combo-code-value-quantity")
+			.get()
+			.getBody();
+		Bundle found = myFhirCtx.newXmlParser().parseResource(Bundle.class, output);
 
 		ourLog.debug("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
 
@@ -398,17 +389,11 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 	}
 
 	@Test
-	public void testOpenApiFetchSwaggerUi() throws IOException {
+	public void testOpenApiFetchSwaggerUi() {
 		myServer.getInterceptorService().registerInterceptor(new OpenApiInterceptor());
 
-		String uri = myServerBase + "/swagger-ui/";
-
-		HttpGet get = new HttpGet(uri);
-		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
-			String output = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Fetch output: {}", output);
-			assertEquals(200, resp.getStatusLine().getStatusCode());
-		}
+		String output = myServer.fhirRequest("/swagger-ui/").get().assertStatus(200).getBody();
+		ourLog.info("Fetch output: {}", output);
 	}
 
 

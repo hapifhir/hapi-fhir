@@ -7,14 +7,9 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
@@ -33,7 +28,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -212,47 +206,30 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 			"    </item>\n" +
 			"</QuestionnaireResponse>";
 
-		HttpPost post = new HttpPost(myServerBase + "/QuestionnaireResponse");
-		post.setEntity(new StringEntity(input, ContentType.create(ca.uhn.fhir.rest.api.Constants.CT_FHIR_XML, "UTF-8")));
-		CloseableHttpResponse response = ourHttpClient.execute(post);
-		final IdType id2;
-		try {
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("Response: {}", responseString);
-			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(ca.uhn.fhir.rest.api.Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString).startsWith(myServerBase + "/QuestionnaireResponse/");
-			id2 = new IdType(newIdString);
-		} finally {
-			IOUtils.closeQuietly(response);
-		}
+		HttpTestResponse response = myServer.fhirRequest("/QuestionnaireResponse")
+			.post(input, ca.uhn.fhir.rest.api.Constants.CT_FHIR_XML);
+		String responseString = response.getBody();
+		ourLog.info("Response: {}", responseString);
+		response.assertStatus(201);
+		String newIdString = response.getHeader(ca.uhn.fhir.rest.api.Constants.HEADER_LOCATION_LC);
+		assertThat(newIdString).startsWith(myServerBase + "/QuestionnaireResponse/");
+		final IdType id2 = new IdType(newIdString);
 
-		HttpGet get = new HttpGet(myServerBase + "/QuestionnaireResponse/" + id2.getIdPart() + "?_format=xml&_pretty=true");
-		response = ourHttpClient.execute(get);
-		try {
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("Response: {}", responseString);
-			assertThat(responseString).contains("Exclusion Criteria");
-		} finally {
-			IOUtils.closeQuietly(response);
-		}
-
-
+		responseString = myServer.fhirRequest("/QuestionnaireResponse/" + id2.getIdPart() + "?_format=xml&_pretty=true")
+			.get()
+			.getBody();
+		ourLog.info("Response: {}", responseString);
+		assertThat(responseString).contains("Exclusion Criteria");
 	}
 
 	@Test
 	public void testValidateOnNoId() throws Exception {
-		HttpGet get = new HttpGet(myServerBase + "/QuestionnaireResponse/$validate");
-		CloseableHttpResponse response = ourHttpClient.execute(get);
-		try {
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("Response: {}", responseString);
-			assertThat(responseString).contains("No resource supplied for $validate operation");
-			assertEquals(400, response.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(response);
-		}
-
+		String responseString = myServer.fhirRequest("/QuestionnaireResponse/$validate")
+			.get()
+			.assertStatus(400)
+			.getBody();
+		ourLog.info("Response: {}", responseString);
+		assertThat(responseString).contains("No resource supplied for $validate operation");
 	}
 
 
@@ -263,17 +240,11 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 	public void testValidateQuestionnaireResponseWithNoIdForCreate() throws Exception {
 
 		String input = "{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"mode\",\"valueString\":\"create\"},{\"name\":\"resource\",\"resource\":{\"resourceType\":\"QuestionnaireResponse\",\"questionnaire\":\"http://fhirtest.uhn.ca/baseDstu2/Questionnaire/MedsCheckEligibility\",\"text\":{\"status\":\"generated\",\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">!-- populated from the rendered HTML below --></div>\"},\"status\":\"completed\",\"authored\":\"2017-02-10T00:02:58.098Z\"}}]}";
-		HttpPost post = new HttpPost(myServerBase + "/QuestionnaireResponse/$validate?_pretty=true");
-		post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
-		CloseableHttpResponse response = ourHttpClient.execute(post);
-		try {
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("Response: {}", responseString);
-			assertEquals(200, response.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(response);
-		}
-
+		String responseString = myServer.fhirRequest("/QuestionnaireResponse/$validate?_pretty=true")
+			.post(input, ca.uhn.fhir.rest.api.Constants.CT_JSON)
+			.assertStatus(200)
+			.getBody();
+		ourLog.info("Response: {}", responseString);
 	}
 
 	// Created by Claude Sonnet 4.6
@@ -324,18 +295,12 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 	public void testValidateQuestionnaireResponseWithNoIdForUpdate() throws Exception {
 
 		String input = "{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"mode\",\"valueString\":\"update\"},{\"name\":\"resource\",\"resource\":{\"resourceType\":\"QuestionnaireResponse\",\"questionnaire\":\"http://fhirtest.uhn.ca/baseDstu2/Questionnaire/MedsCheckEligibility\",\"text\":{\"status\":\"generated\",\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">!-- populated from the rendered HTML below --></div>\"},\"status\":\"completed\",\"authored\":\"2017-02-10T00:02:58.098Z\"}}]}";
-		HttpPost post = new HttpPost(myServerBase + "/QuestionnaireResponse/$validate?_pretty=true");
-		post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
-		CloseableHttpResponse response = ourHttpClient.execute(post);
-		try {
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("Response: {}", responseString);
-			assertThat(responseString).contains("Resource has no ID");
-			assertEquals(422, response.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(response);
-		}
-
+		String responseString = myServer.fhirRequest("/QuestionnaireResponse/$validate?_pretty=true")
+			.post(input, ca.uhn.fhir.rest.api.Constants.CT_JSON)
+			.assertStatus(422)
+			.getBody();
+		ourLog.info("Response: {}", responseString);
+		assertThat(responseString).contains("Resource has no ID");
 	}
 
 

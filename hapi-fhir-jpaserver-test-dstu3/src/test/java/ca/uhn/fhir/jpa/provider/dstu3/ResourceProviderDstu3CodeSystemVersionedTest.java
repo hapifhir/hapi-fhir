@@ -8,11 +8,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeType;
@@ -764,20 +759,15 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 	}
 
 	@Test
-	public void testUpdateCodeSystemById() throws IOException {
+	public void testUpdateCodeSystemById() {
 
 		CodeSystem initialCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs1Id.getId()).execute();
 		assertEquals("Parent Child CodeSystem 1", initialCodeSystem.getName());
 		initialCodeSystem.setName("Updated Parent Child CodeSystem 1");
 		String encoded = myFhirContext.newJsonParser().encodeResourceToString(initialCodeSystem);
-		HttpPut putRequest = new HttpPut(myServerBase + "/CodeSystem/" + parentChildCs1Id);
-		putRequest.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
-		CloseableHttpResponse resp = ourHttpClient.execute(putRequest);
-		try {
-			assertEquals(200, resp.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(resp);
-		}
+		myServer.fhirRequest("/CodeSystem/" + parentChildCs1Id)
+			.put(encoded, "application/json+fhir")
+			.assertStatus(200);
 
 		CodeSystem updatedCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs1Id.getId()).execute();
 		assertEquals("Updated Parent Child CodeSystem 1", updatedCodeSystem.getName());
@@ -786,14 +776,9 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		assertEquals("Parent Child CodeSystem 2", initialCodeSystem.getName());
 		initialCodeSystem.setName("Updated Parent Child CodeSystem 2");
 		encoded = myFhirContext.newJsonParser().encodeResourceToString(initialCodeSystem);
-		putRequest = new HttpPut(myServerBase + "/CodeSystem/" + parentChildCs2Id);
-		putRequest.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
-		resp = ourHttpClient.execute(putRequest);
-		try {
-			assertEquals(200, resp.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(resp);
-		}
+		myServer.fhirRequest("/CodeSystem/" + parentChildCs2Id)
+			.put(encoded, "application/json+fhir")
+			.assertStatus(200);
 
 		updatedCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs2Id.getId()).execute();
 		assertEquals("Updated Parent Child CodeSystem 2", updatedCodeSystem.getName());

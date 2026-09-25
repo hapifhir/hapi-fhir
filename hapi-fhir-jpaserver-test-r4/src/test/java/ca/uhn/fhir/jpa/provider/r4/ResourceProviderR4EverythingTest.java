@@ -14,8 +14,6 @@ import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
@@ -766,35 +764,25 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		// %3E=> %3C=<
 
 		myCaptureQueriesListener.clear();
-		HttpGet get = new HttpGet(myServerBase + "/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantType(new Date(time1)).getValueAsString());
-		CloseableHttpResponse response = ourHttpClient.execute(get);
+		String output = myServer.fhirRequest("/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantType(new Date(time1)).getValueAsString())
+			.get()
+			.assertStatus(200)
+			.getBody();
 		myCaptureQueriesListener.logSelectQueries();
-		try {
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			response.getEntity().getContent().close();
-			ourLog.info(output);
-			List<IIdType> ids = toUnqualifiedVersionlessIds(myFhirContext.newXmlParser().parseResource(Bundle.class, output));
-			ourLog.info(ids.toString());
-			assertThat(ids).containsExactlyInAnyOrder(pId, cId, oId);
-		} finally {
-			response.close();
-		}
+		ourLog.info(output);
+		List<IIdType> ids = toUnqualifiedVersionlessIds(myFhirContext.newXmlParser().parseResource(Bundle.class, output));
+		ourLog.info(ids.toString());
+		assertThat(ids).containsExactlyInAnyOrder(pId, cId, oId);
 
-		get = new HttpGet(myServerBase + "/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantType(new Date(time2)).getValueAsString() + "&_lastUpdated=%3C"
-			+ new InstantType(new Date(time3)).getValueAsString());
-		response = ourHttpClient.execute(get);
-		try {
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			response.getEntity().getContent().close();
-			ourLog.info(output);
-			List<IIdType> ids = toUnqualifiedVersionlessIds(myFhirContext.newXmlParser().parseResource(Bundle.class, output));
-			ourLog.info(ids.toString());
-			assertThat(ids).containsExactlyInAnyOrder(pId, cId, oId);
-		} finally {
-			response.close();
-		}
+		output = myServer.fhirRequest("/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantType(new Date(time2)).getValueAsString() + "&_lastUpdated=%3C"
+				+ new InstantType(new Date(time3)).getValueAsString())
+			.get()
+			.assertStatus(200)
+			.getBody();
+		ourLog.info(output);
+		ids = toUnqualifiedVersionlessIds(myFhirContext.newXmlParser().parseResource(Bundle.class, output));
+		ourLog.info(ids.toString());
+		assertThat(ids).containsExactlyInAnyOrder(pId, cId, oId);
 
 		/*
 		 * Sorting is not working since the performance enhancements in 2.4 but
