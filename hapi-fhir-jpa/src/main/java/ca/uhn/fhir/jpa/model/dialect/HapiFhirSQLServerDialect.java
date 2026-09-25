@@ -58,4 +58,9 @@ public class HapiFhirSQLServerDialect extends SQLServerDialect implements IHapiF
 	public DriverTypeEnum getDriverType() {
 		return DriverTypeEnum.MSSQL_2012;
 	}
+
+	@Override
+	public String getIdListJsonSubselectTemplate() {
+		return "SELECT CAST([value] AS BIGINT) FROM OPENJSON(%s)";
+	}
 }
