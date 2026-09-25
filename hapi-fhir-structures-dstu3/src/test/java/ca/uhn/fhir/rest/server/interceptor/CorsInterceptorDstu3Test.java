@@ -13,16 +13,11 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.test.utilities.HttpTestRequest;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpOptions;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -43,7 +38,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.web.cors.CorsConfiguration;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,48 +57,43 @@ public class CorsInterceptorDstu3Test {
 	@Test
 	public void testContextWithSpace() throws Exception {
 		{
-			HttpOptions httpOpt = new HttpOptions(ourBaseUri + "/Organization/b27ed191-f62d-4128-d99d-40b5e84f2bf2");
-			httpOpt.addHeader(Constants.HEADER_CORS_REQUEST_METHOD, "POST");
-			httpOpt.addHeader(Constants.HEADER_CORS_ORIGIN, "http://www.fhir-starter.com");
-			httpOpt.addHeader(Constants.HEADER_CORS_REQUEST_HEADERS, "accept, x-fhir-starter, content-type");
-			HttpResponse status = ourClient.execute(httpOpt);
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			IOUtils.closeQuietly(status.getEntity().getContent());
+			HttpTestResponse status = fhirRequest("/Organization/b27ed191-f62d-4128-d99d-40b5e84f2bf2")
+				.withHeader(Constants.HEADER_CORS_REQUEST_METHOD, "POST")
+				.withHeader(Constants.HEADER_CORS_ORIGIN, "http://www.fhir-starter.com")
+				.withHeader(Constants.HEADER_CORS_REQUEST_HEADERS, "accept, x-fhir-starter, content-type")
+				.options();
+			String responseContent = status.getBody();
 			ourLog.info("Response was:\n{}", responseContent);
-			assertEquals("GET,POST,PUT,DELETE,OPTIONS", status.getFirstHeader(Constants.HEADER_CORS_ALLOW_METHODS).getValue());
-			assertEquals("http://www.fhir-starter.com", status.getFirstHeader(Constants.HEADER_CORS_ALLOW_ORIGIN).getValue());
+			assertEquals("GET,POST,PUT,DELETE,OPTIONS", status.getHeader(Constants.HEADER_CORS_ALLOW_METHODS));
+			assertEquals("http://www.fhir-starter.com", status.getHeader(Constants.HEADER_CORS_ALLOW_ORIGIN));
 		}
 		{
-			String uri = ourBaseUri + "/Patient?identifier=urn:hapitest:mrns%7C00001";
-			HttpGet httpGet = new HttpGet(uri);
-			httpGet.addHeader(Constants.HEADER_X_FHIR_STARTER, "urn:fhir.starter");
-			httpGet.addHeader(Constants.HEADER_CORS_ORIGIN, "http://www.fhir-starter.com");
-			HttpResponse status = ourClient.execute(httpGet);
+			HttpTestResponse status = fhirRequest("/Patient?identifier=urn:hapitest:mrns%7C00001")
+				.withHeader(Constants.HEADER_X_FHIR_STARTER, "urn:fhir.starter")
+				.withHeader(Constants.HEADER_CORS_ORIGIN, "http://www.fhir-starter.com")
+				.get();
 
-			Header origin = status.getFirstHeader(Constants.HEADER_CORS_ALLOW_ORIGIN);
-			assertEquals("http://www.fhir-starter.com", origin.getValue());
+			String origin = status.getHeader(Constants.HEADER_CORS_ALLOW_ORIGIN);
+			assertEquals("http://www.fhir-starter.com", origin);
 
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			IOUtils.closeQuietly(status.getEntity().getContent());
+			String responseContent = status.getBody();
 			ourLog.info("Response was:\n{}", responseContent);
 
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			status.assertStatus(200);
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 
 			assertThat(bundle.getEntry()).hasSize(1);
 		}
 		{
-			HttpPost httpOpt = new HttpPost(ourBaseUri + "/Patient");
-			httpOpt.addHeader(Constants.HEADER_CORS_REQUEST_METHOD, "POST");
-			httpOpt.addHeader(Constants.HEADER_CORS_ORIGIN, "http://www.fhir-starter.com");
-			httpOpt.addHeader(Constants.HEADER_CORS_REQUEST_HEADERS, "accept, x-fhir-starter, content-type");
-			httpOpt.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(new Patient())));
-			HttpResponse status = ourClient.execute(httpOpt);
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			IOUtils.closeQuietly(status.getEntity().getContent());
+			HttpTestResponse status = fhirRequest("/Patient")
+				.withHeader(Constants.HEADER_CORS_REQUEST_METHOD, "POST")
+				.withHeader(Constants.HEADER_CORS_ORIGIN, "http://www.fhir-starter.com")
+				.withHeader(Constants.HEADER_CORS_REQUEST_HEADERS, "accept, x-fhir-starter, content-type")
+				.post(ourCtx.newXmlParser().encodeResourceToString(new Patient()), "text/plain; charset=ISO-8859-1");
+			String responseContent = status.getBody();
 			ourLog.info("Response: {}", status);
 			ourLog.info("Response was:\n{}", responseContent);
-			assertEquals("http://www.fhir-starter.com", status.getFirstHeader(Constants.HEADER_CORS_ALLOW_ORIGIN).getValue());
+			assertEquals("http://www.fhir-starter.com", status.getHeader(Constants.HEADER_CORS_ALLOW_ORIGIN));
 		}
 	}
 	
@@ -124,34 +113,33 @@ public class CorsInterceptorDstu3Test {
 	@Test
 	public void testRequestWithInvalidOrigin() throws ClientProtocolException, IOException {
 		{
-			HttpOptions httpOpt = new HttpOptions(ourBaseUri + "/Organization/b27ed191-f62d-4128-d99d-40b5e84f2bf2");
-			httpOpt.addHeader(Constants.HEADER_CORS_REQUEST_METHOD, "GET");
-			httpOpt.addHeader(Constants.HEADER_CORS_ORIGIN, "http://yahoo.com");
-			httpOpt.addHeader(Constants.HEADER_CORS_REQUEST_HEADERS, "accept, x-fhir-starter, content-type");
-			HttpResponse status = ourClient.execute(httpOpt);
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			IOUtils.closeQuietly(status.getEntity().getContent());
+			HttpTestResponse status = fhirRequest("/Organization/b27ed191-f62d-4128-d99d-40b5e84f2bf2")
+				.withHeader(Constants.HEADER_CORS_REQUEST_METHOD, "GET")
+				.withHeader(Constants.HEADER_CORS_ORIGIN, "http://yahoo.com")
+				.withHeader(Constants.HEADER_CORS_REQUEST_HEADERS, "accept, x-fhir-starter, content-type")
+				.options();
+			String responseContent = status.getBody();
 			ourLog.info("Response was:\n{}", responseContent);
-			assertEquals(403, status.getStatusLine().getStatusCode());
+			status.assertStatus(403);
 		}
 	}
 
 	@Test
 	public void testRequestWithNullOrigin() throws ClientProtocolException, IOException {
 		{
-			HttpOptions httpOpt = new HttpOptions(ourBaseUri + "/Organization/b27ed191-f62d-4128-d99d-40b5e84f2bf2");
-			httpOpt.addHeader(Constants.HEADER_CORS_REQUEST_METHOD, "GET");
-			httpOpt.addHeader(Constants.HEADER_CORS_ORIGIN, "null");
-			httpOpt.addHeader(Constants.HEADER_CORS_REQUEST_HEADERS, "accept, x-fhir-starter, content-type");
-			HttpResponse status = ourClient.execute(httpOpt);
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			IOUtils.closeQuietly(status.getEntity().getContent());
+			HttpTestResponse status = fhirRequest("/Organization/b27ed191-f62d-4128-d99d-40b5e84f2bf2").withHeader(Constants.HEADER_CORS_REQUEST_METHOD, "GET")
+				.withHeader(Constants.HEADER_CORS_ORIGIN, "null").withHeader(Constants.HEADER_CORS_REQUEST_HEADERS, "accept, x-fhir-starter, content-type").options();
+			String responseContent = status.getBody();
 			ourLog.info("Response was:\n{}", responseContent);
-			assertEquals("GET,POST,PUT,DELETE,OPTIONS", status.getFirstHeader(Constants.HEADER_CORS_ALLOW_METHODS).getValue());
-			assertEquals("null", status.getFirstHeader(Constants.HEADER_CORS_ALLOW_ORIGIN).getValue());
+			assertEquals("GET,POST,PUT,DELETE,OPTIONS", status.getHeader(Constants.HEADER_CORS_ALLOW_METHODS));
+			assertEquals("null", status.getHeader(Constants.HEADER_CORS_ALLOW_ORIGIN));
 		}
 	}
 	
+	private HttpTestRequest fhirRequest(String thePath) {
+		return HttpTestRequest.to(ourClient, ourCtx, ourBaseUri + thePath);
+	}
+
 	public static void afterClass() throws Exception {
 		JettyUtil.closeServer(ourServer);
 		ourClient.close();

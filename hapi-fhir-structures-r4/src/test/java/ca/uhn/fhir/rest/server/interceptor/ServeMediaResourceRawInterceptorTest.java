@@ -7,13 +7,9 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Media;
@@ -41,8 +37,6 @@ public class ServeMediaResourceRawInterceptorTest {
 		 .withPagingProvider(new FifoMemoryPagingProvider(100))
 		 .setDefaultResponseEncoding(EncodingEnum.JSON);
 
-	@RegisterExtension
-	private HttpClientExtension ourClient = new HttpClientExtension();
 	private String myReadUrl;
 
 	@BeforeEach
@@ -50,7 +44,7 @@ public class ServeMediaResourceRawInterceptorTest {
 		myInterceptor = new ServeMediaResourceRawInterceptor();
 		ourServer.getInterceptorService().registerInterceptor(myInterceptor);
 
-		myReadUrl = ourServer.getBaseUrl() + "/Media/123";
+		myReadUrl = "/Media/123";
 	}
 
 	@AfterEach
@@ -65,12 +59,10 @@ public class ServeMediaResourceRawInterceptorTest {
 		ourNextResponse.getContent().setContentType("image/png");
 		ourNextResponse.getContent().setData(new byte[]{2, 3, 4, 5, 6, 7, 8});
 
-		HttpGet get = new HttpGet(myReadUrl);
-		try (CloseableHttpResponse response = ourClient.execute(get)) {
-			assertEquals("application/fhir+json;charset=utf-8", response.getEntity().getContentType().getValue());
-			String contents = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			assertThat(contents).contains("\"resourceType\"");
-		}
+		HttpTestResponse response = ourServer.fhirRequest(myReadUrl).get();
+		assertEquals("application/fhir+json;charset=utf-8", response.getHeader(Constants.HEADER_CONTENT_TYPE));
+		String contents = response.getBody();
+		assertThat(contents).contains("\"resourceType\"");
 	}
 
 	@Test
@@ -79,13 +71,10 @@ public class ServeMediaResourceRawInterceptorTest {
 		ourNextResponse.getContent().setContentType("image/png");
 		ourNextResponse.getContent().setData(new byte[]{2, 3, 4, 5, 6, 7, 8});
 
-		HttpGet get = new HttpGet(myReadUrl);
-		get.addHeader(Constants.HEADER_ACCEPT, "image/png");
-		try (CloseableHttpResponse response = ourClient.execute(get)) {
-			assertEquals("image/png", response.getEntity().getContentType().getValue());
-			byte[] contents = IOUtils.toByteArray(response.getEntity().getContent());
-			assertThat(contents).containsExactly(new byte[]{2, 3, 4, 5, 6, 7, 8});
-		}
+		HttpTestResponse response = ourServer.fhirRequest(myReadUrl).withHeader(Constants.HEADER_ACCEPT, "image/png").get();
+		assertEquals("image/png", response.getHeader(Constants.HEADER_CONTENT_TYPE));
+		byte[] contents = response.getBodyBytes();
+		assertThat(contents).containsExactly(new byte[]{2, 3, 4, 5, 6, 7, 8});
 	}
 
 	@Test
@@ -93,11 +82,8 @@ public class ServeMediaResourceRawInterceptorTest {
 		ourNextResponse = new Media();
 		ourNextResponse.getContent().setData(new byte[]{2, 3, 4, 5, 6, 7, 8});
 
-		HttpGet get = new HttpGet(myReadUrl);
-		get.addHeader(Constants.HEADER_ACCEPT, "image/png");
-		try (CloseableHttpResponse response = ourClient.execute(get)) {
-			assertEquals("application/fhir+json;charset=utf-8", response.getEntity().getContentType().getValue());
-		}
+		HttpTestResponse response = ourServer.fhirRequest(myReadUrl).withHeader(Constants.HEADER_ACCEPT, "image/png").get();
+		assertEquals("application/fhir+json;charset=utf-8", response.getHeader(Constants.HEADER_CONTENT_TYPE));
 	}
 
 	@Test
@@ -106,12 +92,10 @@ public class ServeMediaResourceRawInterceptorTest {
 		ourNextResponse.getContent().setContentType("image/png");
 		ourNextResponse.getContent().setData(new byte[]{2, 3, 4, 5, 6, 7, 8});
 
-		HttpGet get = new HttpGet(myReadUrl + "?_output=data");
-		try (CloseableHttpResponse response = ourClient.execute(get)) {
-			assertEquals("image/png", response.getEntity().getContentType().getValue());
-			byte[] contents = IOUtils.toByteArray(response.getEntity().getContent());
-			assertThat(contents).containsExactly(new byte[]{2, 3, 4, 5, 6, 7, 8});
-		}
+		HttpTestResponse response = ourServer.fhirRequest(myReadUrl + "?_output=data").get();
+		assertEquals("image/png", response.getHeader(Constants.HEADER_CONTENT_TYPE));
+		byte[] contents = response.getBodyBytes();
+		assertThat(contents).containsExactly(new byte[]{2, 3, 4, 5, 6, 7, 8});
 	}
 
 	private static class MyMediaResourceProvider implements IResourceProvider {

@@ -7,29 +7,17 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.MyPatientWithExtensions;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.DateUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -37,7 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class ReadR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReadR4Test.class);
-	private static CloseableHttpClient ourClient;
 	private final FhirContext myCtx = FhirContext.forR4Cached();
 	@RegisterExtension
 	public RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(myCtx);
@@ -52,209 +39,149 @@ public class ReadR4Test {
 	public void testRead() throws Exception {
 		myRestfulServerExtension.getRestfulServer().registerProvider(new PatientProvider());
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2?_format=xml&_pretty=true");
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/Patient/2?_format=xml&_pretty=true").get();
+		String responseContent = response.getBody();
+		ourLog.info("Response was:\n{}", responseContent);
 
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("Response was:\n{}", responseContent);
+		response.assertStatus(200);
+		assertNull(response.getHeader(Constants.HEADER_LOCATION));
+		assertEquals("http://localhost:" + myPort + "/Patient/2/_history/2", response.getHeader(Constants.HEADER_CONTENT_LOCATION));
 
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertNull(status.getFirstHeader(Constants.HEADER_LOCATION));
-			assertEquals("http://localhost:" + myPort + "/Patient/2/_history/2", status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
-
-			assertThat(responseContent).containsSubsequence(
-				"<Patient xmlns=\"http://hl7.org/fhir\">",
-				" <id value=\"2\"/>",
-				" <modifierExtension url=\"http://example.com/ext/date\">",
-				"  <valueDate value=\"2011-01-01\"/>",
-				" </modifierExtension>",
-				"</Patient>");
-		}
+		assertThat(responseContent).containsSubsequence(
+			"<Patient xmlns=\"http://hl7.org/fhir\">",
+			" <id value=\"2\"/>",
+			" <modifierExtension url=\"http://example.com/ext/date\">",
+			"  <valueDate value=\"2011-01-01\"/>",
+			" </modifierExtension>",
+			"</Patient>");
 	}
 
 	@Test
 	public void testReadUsingPlainProvider() throws Exception {
 		myRestfulServerExtension.getRestfulServer().registerProvider(new PlainGenericPatientProvider());
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2?_format=xml&_pretty=true");
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/Patient/2?_format=xml&_pretty=true").get();
+		String responseContent = response.getBody();
+		ourLog.info("Response was:\n{}", responseContent);
 
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("Response was:\n{}", responseContent);
+		response.assertStatus(200);
+		assertNull(response.getHeader(Constants.HEADER_LOCATION));
+		assertEquals("http://localhost:" + myPort + "/Patient/2/_history/2", response.getHeader(Constants.HEADER_CONTENT_LOCATION));
 
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertNull(status.getFirstHeader(Constants.HEADER_LOCATION));
-			assertEquals("http://localhost:" + myPort + "/Patient/2/_history/2", status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
-
-			assertThat(responseContent).containsSubsequence(
-				"<Patient xmlns=\"http://hl7.org/fhir\">",
-				" <id value=\"2\"/>",
-				" <modifierExtension url=\"http://example.com/ext/date\">",
-				"  <valueDate value=\"2011-01-01\"/>",
-				" </modifierExtension>",
-				"</Patient>");
-		}
+		assertThat(responseContent).containsSubsequence(
+			"<Patient xmlns=\"http://hl7.org/fhir\">",
+			" <id value=\"2\"/>",
+			" <modifierExtension url=\"http://example.com/ext/date\">",
+			"  <valueDate value=\"2011-01-01\"/>",
+			" </modifierExtension>",
+			"</Patient>");
 	}
 
 	@Test
 	public void testInvalidQueryParamsInRead() throws Exception {
 		myRestfulServerExtension.getRestfulServer().registerProvider(new PatientProvider());
 
-		CloseableHttpResponse status;
-		HttpGet httpGet;
+		String responseContent;
 
-		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2?_contained=both&_format=xml&_pretty=true");
-		status = ourClient.execute(httpGet);
-		try (InputStream inputStream = status.getEntity().getContent()) {
-			assertEquals(400, status.getStatusLine().getStatusCode());
+		responseContent = myRestfulServerExtension.fhirRequest("/Patient/2?_contained=both&_format=xml&_pretty=true").get().assertStatus(400).getBody();
+		assertThat(responseContent).containsSubsequence(
+			"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
+			" <issue>",
+			"  <severity value=\"error\"/>",
+			"  <code value=\"processing\"/>",
+			"  <diagnostics value=\""+ Msg.code(384) + "Invalid query parameter(s) for this request: &quot;[_contained]&quot;\"/>",
+			" </issue>",
+			"</OperationOutcome>"
+		);
 
-			String responseContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-			assertThat(responseContent).containsSubsequence(
-				"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
-				" <issue>",
-				"  <severity value=\"error\"/>",
-				"  <code value=\"processing\"/>",
-				"  <diagnostics value=\""+ Msg.code(384) + "Invalid query parameter(s) for this request: &quot;[_contained]&quot;\"/>",
-				" </issue>",
-				"</OperationOutcome>"
-			);
-		}
+		responseContent = myRestfulServerExtension.fhirRequest("/Patient/2?_containedType=contained&_format=xml&_pretty=true").get().assertStatus(400).getBody();
+		assertThat(responseContent).containsSubsequence(
+			"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
+			" <issue>",
+			"  <severity value=\"error\"/>",
+			"  <code value=\"processing\"/>",
+			"  <diagnostics value=\""+ Msg.code(384) + "Invalid query parameter(s) for this request: &quot;[_containedType]&quot;\"/>",
+			" </issue>",
+			"</OperationOutcome>"
+		);
 
-		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2?_containedType=contained&_format=xml&_pretty=true");
-		status = ourClient.execute(httpGet);
-		try (InputStream inputStream = status.getEntity().getContent()) {
-			assertEquals(400, status.getStatusLine().getStatusCode());
+		responseContent = myRestfulServerExtension.fhirRequest("/Patient/2?_count=10&_format=xml&_pretty=true").get().assertStatus(400).getBody();
+		assertThat(responseContent).containsSubsequence(
+			"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
+			" <issue>",
+			"  <severity value=\"error\"/>",
+			"  <code value=\"processing\"/>",
+			"  <diagnostics value=\"" + Msg.code(384) + "Invalid query parameter(s) for this request: &quot;[_count]&quot;\"/>",
+			" </issue>",
+			"</OperationOutcome>"
+		);
 
-			String responseContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-			assertThat(responseContent).containsSubsequence(
-				"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
-				" <issue>",
-				"  <severity value=\"error\"/>",
-				"  <code value=\"processing\"/>",
-				"  <diagnostics value=\""+ Msg.code(384) + "Invalid query parameter(s) for this request: &quot;[_containedType]&quot;\"/>",
-				" </issue>",
-				"</OperationOutcome>"
-			);
-		}
+		responseContent = myRestfulServerExtension.fhirRequest("/Patient/2?_include=Patient:organization&_format=xml&_pretty=true").get().assertStatus(400).getBody();
+		assertThat(responseContent).containsSubsequence(
+			"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
+			" <issue>",
+			"  <severity value=\"error\"/>",
+			"  <code value=\"processing\"/>",
+			"  <diagnostics value=\""+ Msg.code(384)+ "Invalid query parameter(s) for this request: &quot;[_include]&quot;\"/>",
+			" </issue>",
+			"</OperationOutcome>"
+		);
 
-		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2?_count=10&_format=xml&_pretty=true");
-		status = ourClient.execute(httpGet);
-		try (InputStream inputStream = status.getEntity().getContent()) {
-			assertEquals(400, status.getStatusLine().getStatusCode());
+		responseContent = myRestfulServerExtension.fhirRequest("/Patient/2?_revinclude=Provenance:target&_format=xml&_pretty=true").get().assertStatus(400).getBody();
+		assertThat(responseContent).containsSubsequence(
+			"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
+			" <issue>",
+			"  <severity value=\"error\"/>",
+			"  <code value=\"processing\"/>",
+			"  <diagnostics value=\""+ Msg.code(384) + "Invalid query parameter(s) for this request: &quot;[_revinclude]&quot;\"/>",
+			" </issue>",
+			"</OperationOutcome>"
+		);
 
-			String responseContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-			assertThat(responseContent).containsSubsequence(
-				"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
-				" <issue>",
-				"  <severity value=\"error\"/>",
-				"  <code value=\"processing\"/>",
-				"  <diagnostics value=\"" + Msg.code(384) + "Invalid query parameter(s) for this request: &quot;[_count]&quot;\"/>",
-				" </issue>",
-				"</OperationOutcome>"
-			);
-		}
+		responseContent = myRestfulServerExtension.fhirRequest("/Patient/2?_sort=family&_format=xml&_pretty=true").get().assertStatus(400).getBody();
+		assertThat(responseContent).containsSubsequence(
+			"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
+			" <issue>",
+			"  <severity value=\"error\"/>",
+			"  <code value=\"processing\"/>",
+			"  <diagnostics value=\""+ Msg.code(384) + "Invalid query parameter(s) for this request: &quot;[_sort]&quot;\"/>",
+			" </issue>",
+			"</OperationOutcome>"
+		);
 
-		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2?_include=Patient:organization&_format=xml&_pretty=true");
-		status = ourClient.execute(httpGet);
-		try (InputStream inputStream = status.getEntity().getContent()) {
-			assertEquals(400, status.getStatusLine().getStatusCode());
-
-			String responseContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-			assertThat(responseContent).containsSubsequence(
-				"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
-				" <issue>",
-				"  <severity value=\"error\"/>",
-				"  <code value=\"processing\"/>",
-				"  <diagnostics value=\""+ Msg.code(384)+ "Invalid query parameter(s) for this request: &quot;[_include]&quot;\"/>",
-				" </issue>",
-				"</OperationOutcome>"
-			);
-		}
-
-		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2?_revinclude=Provenance:target&_format=xml&_pretty=true");
-		status = ourClient.execute(httpGet);
-		try (InputStream inputStream = status.getEntity().getContent()) {
-			assertEquals(400, status.getStatusLine().getStatusCode());
-
-			String responseContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-			assertThat(responseContent).containsSubsequence(
-				"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
-				" <issue>",
-				"  <severity value=\"error\"/>",
-				"  <code value=\"processing\"/>",
-				"  <diagnostics value=\""+ Msg.code(384) + "Invalid query parameter(s) for this request: &quot;[_revinclude]&quot;\"/>",
-				" </issue>",
-				"</OperationOutcome>"
-			);
-		}
-
-		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2?_sort=family&_format=xml&_pretty=true");
-		status = ourClient.execute(httpGet);
-		try (InputStream inputStream = status.getEntity().getContent()) {
-			assertEquals(400, status.getStatusLine().getStatusCode());
-
-			String responseContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-			assertThat(responseContent).containsSubsequence(
-				"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
-				" <issue>",
-				"  <severity value=\"error\"/>",
-				"  <code value=\"processing\"/>",
-				"  <diagnostics value=\""+ Msg.code(384) + "Invalid query parameter(s) for this request: &quot;[_sort]&quot;\"/>",
-				" </issue>",
-				"</OperationOutcome>"
-			);
-		}
-
-		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2?_total=accurate&_format=xml&_pretty=true");
-		status = ourClient.execute(httpGet);
-		try (InputStream inputStream = status.getEntity().getContent()) {
-			assertEquals(400, status.getStatusLine().getStatusCode());
-
-			String responseContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-			assertThat(responseContent).containsSubsequence(
-				"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
-				" <issue>",
-				"  <severity value=\"error\"/>",
-				"  <code value=\"processing\"/>",
-				"  <diagnostics value=\"" + Msg.code(384) + "Invalid query parameter(s) for this request: &quot;[_total]&quot;\"/>",
-				" </issue>",
-				"</OperationOutcome>"
-			);
-		}
+		responseContent = myRestfulServerExtension.fhirRequest("/Patient/2?_total=accurate&_format=xml&_pretty=true").get().assertStatus(400).getBody();
+		assertThat(responseContent).containsSubsequence(
+			"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
+			" <issue>",
+			"  <severity value=\"error\"/>",
+			"  <code value=\"processing\"/>",
+			"  <diagnostics value=\"" + Msg.code(384) + "Invalid query parameter(s) for this request: &quot;[_total]&quot;\"/>",
+			" </issue>",
+			"</OperationOutcome>"
+		);
 	}
 
 	@Test
 	public void testIfModifiedSince() throws Exception {
 		myRestfulServerExtension.getRestfulServer().registerProvider(new PatientProvider());
 
-		HttpGet httpGet;
-
 		// Fixture was last modified at 2012-01-01T12:12:12Z
 		// thus it hasn't changed after the later time of 2012-01-01T13:00:00Z
 		// so we expect a 304 (Not Modified)
-		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2");
-		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T13:00:00Z").getValue()));
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			assertEquals(304, status.getStatusLine().getStatusCode());
-		}
+		myRestfulServerExtension.fhirRequest("/Patient/2").withHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T13:00:00Z").getValue())).get()
+			.assertStatus(304);
 
 		// Fixture was last modified at 2012-01-01T12:12:12Z
 		// thus it hasn't changed after the same time of 2012-01-01T12:12:12Z
 		// so we expect a 304 (Not Modified)
-		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2");
-		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T12:12:12Z").getValue()));
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			assertEquals(304, status.getStatusLine().getStatusCode());
-		}
+		myRestfulServerExtension.fhirRequest("/Patient/2").withHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T12:12:12Z").getValue())).get()
+			.assertStatus(304);
 
 		// Fixture was last modified at 2012-01-01T12:12:12Z
 		// thus it has changed after the earlier time of 2012-01-01T10:00:00Z
 		// so we expect a 200
-		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2");
-		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T10:00:00Z").getValue()));
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			assertEquals(200, status.getStatusLine().getStatusCode());
-		}
+		myRestfulServerExtension.fhirRequest("/Patient/2").withHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T10:00:00Z").getValue())).get()
+			.assertStatus(200);
 
 	}
 
@@ -295,17 +222,4 @@ public class ReadR4Test {
 
 	}
 
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-	}
-
-	@AfterAll
-	public static void afterClass() throws IOException {
-		ourClient.close();
-	}
 }

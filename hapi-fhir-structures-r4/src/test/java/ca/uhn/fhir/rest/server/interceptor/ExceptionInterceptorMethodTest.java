@@ -8,15 +8,10 @@ import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import com.google.common.base.Charsets;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -46,9 +41,6 @@ public class ExceptionInterceptorMethodTest {
 		 .withPagingProvider(new FifoMemoryPagingProvider(100))
 		 .setDefaultResponseEncoding(EncodingEnum.XML);
 	
-	@RegisterExtension
-	private HttpClientExtension ourClient = new HttpClientExtension();
-	
 	@BeforeEach
 	public void before() {
 		myInterceptor = mock(IServerInterceptor.class);
@@ -67,11 +59,7 @@ public class ExceptionInterceptorMethodTest {
 		when(myInterceptor.incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 		when(myInterceptor.handleException(any(RequestDetails.class), any(BaseServerResponseException.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=throwUnprocessableEntityException");
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			ourLog.info(IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8));
-			assertEquals(422, status.getStatusLine().getStatusCode());
-		}
+		ourLog.info(ourServer.fhirRequest("/Patient?_query=throwUnprocessableEntityException").get().assertStatus(422).getBody());
 
 		ArgumentCaptor<BaseServerResponseException> captor = ArgumentCaptor.forClass(BaseServerResponseException.class);
 		verify(myInterceptor, times(1)).handleException(any(RequestDetails.class), captor.capture(), any(HttpServletRequest.class), any(HttpServletResponse.class));
@@ -94,13 +82,9 @@ public class ExceptionInterceptorMethodTest {
 			return false;
 		});
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=throwUnprocessableEntityException");
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(responseContent);
-			assertEquals(405, status.getStatusLine().getStatusCode());
-			assertEquals("HELP IM A BUG", responseContent);
-		}
+		String responseContent = ourServer.fhirRequest("/Patient?_query=throwUnprocessableEntityException").get().assertStatus(405).getBody();
+		ourLog.info(responseContent);
+		assertEquals("HELP IM A BUG", responseContent);
 
 	}
 

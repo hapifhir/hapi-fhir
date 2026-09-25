@@ -24,15 +24,8 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -66,8 +59,6 @@ public class LoggingInterceptorDstu2Test {
 		.withPagingProvider(new FifoMemoryPagingProvider(100))
 		.setDefaultPrettyPrint(false);
 
-	@RegisterExtension
-	public static final HttpClientExtension ourClient = new HttpClientExtension();
 
 	@BeforeEach
 	public void before() {
@@ -90,9 +81,7 @@ public class LoggingInterceptorDstu2Test {
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/EX");
-		HttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourServer.fhirRequest("/Patient/EX").get();
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
@@ -108,9 +97,7 @@ public class LoggingInterceptorDstu2Test {
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/metadata");
-		HttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourServer.fhirRequest("/metadata").get();
 		
 		
 
@@ -129,9 +116,7 @@ public class LoggingInterceptorDstu2Test {
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123/$everything");
-		HttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourServer.fhirRequest("/Patient/123/$everything").get();
 
 		
 
@@ -151,10 +136,7 @@ public class LoggingInterceptorDstu2Test {
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
-
-		HttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourServer.fhirRequest("/Patient/1").get();
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
@@ -171,10 +153,7 @@ public class LoggingInterceptorDstu2Test {
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
-
-		HttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourServer.fhirRequest("/Patient/1").get();
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
@@ -191,10 +170,7 @@ public class LoggingInterceptorDstu2Test {
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
-
-		HttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourServer.fhirRequest("/Patient/1").get();
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
@@ -213,10 +189,7 @@ public class LoggingInterceptorDstu2Test {
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
-
-		HttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourServer.fhirRequest("/Patient/1").get();
 
 		
 
@@ -235,11 +208,7 @@ public class LoggingInterceptorDstu2Test {
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
-		httpGet.addHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_XML);
-
-		HttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourServer.fhirRequest("/Patient/1").withHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_XML).get();
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
@@ -260,11 +229,7 @@ public class LoggingInterceptorDstu2Test {
 		p.addIdentifier().setValue("VAL");
 		String input = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
-		httpPost.setEntity(new StringEntity(input, ContentType.parse(Constants.CT_FHIR_XML + ";charset=utf-8")));
-
-		HttpResponse status = ourClient.execute(httpPost);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourServer.fhirRequest("/Patient").post(input, Constants.CT_FHIR_XML + ";charset=utf-8");
 
 
 		
@@ -290,11 +255,7 @@ public class LoggingInterceptorDstu2Test {
 
 		ourThrowException = new NullPointerException("FOO");
 
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
-		httpPost.setEntity(new StringEntity(input, ContentType.parse(Constants.CT_FHIR_XML + ";charset=utf-8")));
-
-		HttpResponse status = ourClient.execute(httpPost);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourServer.fhirRequest("/Patient").post(input, Constants.CT_FHIR_XML + ";charset=utf-8");
 
 		
 
@@ -313,9 +274,7 @@ public class LoggingInterceptorDstu2Test {
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/$everything");
-		HttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourServer.fhirRequest("/$everything").get();
 
 		
 
@@ -334,9 +293,7 @@ public class LoggingInterceptorDstu2Test {
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/$everything");
-		HttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourServer.fhirRequest("/Patient/$everything").get();
 		
 		
 		
@@ -354,9 +311,7 @@ public class LoggingInterceptorDstu2Test {
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
-		HttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourServer.fhirRequest("/Patient/1").get();
 
 		
 
@@ -375,9 +330,7 @@ public class LoggingInterceptorDstu2Test {
 		Logger logger = mock(Logger.class);
 		interceptor.setLogger(logger);
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id=1");
-		HttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourServer.fhirRequest("/Patient?_id=1").get();
 
 		
 		

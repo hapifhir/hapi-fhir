@@ -15,13 +15,9 @@ import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.test.utilities.HttpTestRequest;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -53,6 +49,10 @@ public class TransactionWithBundleResourceParamTest {
 	@BeforeEach
 	public void before() {
 		ourReturnOperationOutcome = false;
+	}
+
+	private HttpTestRequest fhirRequest(String thePath) {
+		return HttpTestRequest.to(ourClient, ourCtx, "http://localhost:" + ourPort + thePath);
 	}
 
 	@Test
@@ -94,14 +94,8 @@ public class TransactionWithBundleResourceParamTest {
 		String bundleString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(bundleString);
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/");
 //		httpPost.addHeader("Accept", Constants.CT_ATOM_XML + "; pretty=true");
-		httpPost.setEntity(new StringEntity(bundleString, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
-		HttpResponse status = ourClient.execute(httpPost);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		String responseContent = fhirRequest("/").post(bundleString, Constants.CT_FHIR_JSON).assertStatus(200).getBody();
 
 		ourLog.info(responseContent);
 
@@ -144,15 +138,7 @@ public class TransactionWithBundleResourceParamTest {
 		String bundleString = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(bundleString);
 
-		String base = "http://localhost:" + ourPort + "/";
-		HttpPost httpPost = new HttpPost(base);
-		httpPost.addHeader("Accept", Constants.CT_FHIR_XML + "; pretty=true");
-		httpPost.setEntity(new StringEntity(bundleString, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		HttpResponse status = ourClient.execute(httpPost);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		String responseContent = fhirRequest("/").withHeader("Accept", Constants.CT_FHIR_XML + "; pretty=true").post(bundleString, Constants.CT_FHIR_XML).assertStatus(200).getBody();
 
 		ourLog.info(responseContent);
 
@@ -195,13 +181,7 @@ public class TransactionWithBundleResourceParamTest {
 		String bundleString = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(bundleString);
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/");
-		httpPost.setEntity(new StringEntity(bundleString, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		HttpResponse status = ourClient.execute(httpPost);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		String responseContent = fhirRequest("/").post(bundleString, Constants.CT_FHIR_XML).assertStatus(200).getBody();
 
 		ourLog.info(responseContent);
 

@@ -10,28 +10,19 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.VersionUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.client.methods.HttpOptions;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpRequestBase;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class MetadataConformanceDstu3Test {
 
@@ -45,102 +36,68 @@ public class MetadataConformanceDstu3Test {
 		 .withPagingProvider(new FifoMemoryPagingProvider(100))
 		 .setDefaultPrettyPrint(false);
 
-	@RegisterExtension
-	private HttpClientExtension ourClient = new HttpClientExtension();
-
 	@Test
 	public void testSummary() throws Exception {
 		String output;
 
 		// With
-		HttpRequestBase httpPost = new HttpGet(ourServer.getBaseUrl() + "/metadata?_summary=true&_pretty=true");
-		CloseableHttpResponse status = ourClient.execute(httpPost);
-		try {
-			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			ourLog.info(output);
-			assertThat(output).contains("<CapabilityStatement");
-			assertThat(output).contains("<meta>", "SUBSETTED", "</meta>");
-			assertThat(output).doesNotContain("searchParam");
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
-		}
+		output = ourServer.fhirRequest("/metadata?_summary=true&_pretty=true").get().assertStatus(200).getBody();
+		ourLog.info(output);
+		assertThat(output).contains("<CapabilityStatement");
+		assertThat(output).contains("<meta>", "SUBSETTED", "</meta>");
+		assertThat(output).doesNotContain("searchParam");
 
 		// Without
-		httpPost = new HttpGet(ourServer.getBaseUrl() + "/metadata?_pretty=true");
-		status = ourClient.execute(httpPost);
-		try {
-			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			ourLog.info(output);
-			assertThat(output).contains("<CapabilityStatement");
-			assertThat(output).doesNotContain("<meta>", "SUBSETTED", "</meta>");
-			assertThat(output).contains("searchParam");
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
-		}
+		output = ourServer.fhirRequest("/metadata?_pretty=true").get().assertStatus(200).getBody();
+		ourLog.info(output);
+		assertThat(output).contains("<CapabilityStatement");
+		assertThat(output).doesNotContain("<meta>", "SUBSETTED", "</meta>");
+		assertThat(output).contains("searchParam");
 	}
 
 	@Test
 	public void testElements() throws Exception {
 		String output;
 
-		HttpRequestBase httpPost = new HttpGet(ourServer.getBaseUrl() + "/metadata?_elements=fhirVersion&_pretty=true");
-		CloseableHttpResponse status = ourClient.execute(httpPost);
-		try {
-			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			ourLog.info(output);
-			assertThat(output).contains("<CapabilityStatement");
-			assertThat(output).contains("<meta>", "SUBSETTED", "</meta>");
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
-		}
+		output = ourServer.fhirRequest("/metadata?_elements=fhirVersion&_pretty=true").get().assertStatus(200).getBody();
+		ourLog.info(output);
+		assertThat(output).contains("<CapabilityStatement");
+		assertThat(output).contains("<meta>", "SUBSETTED", "</meta>");
 	}
 
 	@Test
 	public void testHttpMethods() throws Exception {
 		String output;
 
-		HttpRequestBase httpOperation = new HttpGet(ourServer.getBaseUrl() + "/metadata");
-		try (CloseableHttpResponse status = ourClient.execute(httpOperation)) {
-			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertThat(output).contains("<CapabilityStatement");
-			assertThat(status.getFirstHeader(Constants.HEADER_POWERED_BY).getValue()).contains("HAPI FHIR " + VersionUtil.getVersion());
-			assertThat(status.getFirstHeader(Constants.HEADER_POWERED_BY).getValue()).contains("REST Server (FHIR Server; FHIR " + ourCtx.getVersion().getVersion().getFhirVersionString() + "/" + ourCtx.getVersion().getVersion().name() + ")");
-		}
+		HttpTestResponse status = ourServer.fhirRequest("/metadata").get();
+		output = status.getBody();
+		status.assertStatus(200);
+		assertThat(output).contains("<CapabilityStatement");
+		assertThat(status.getHeader(Constants.HEADER_POWERED_BY)).contains("HAPI FHIR " + VersionUtil.getVersion());
+		assertThat(status.getHeader(Constants.HEADER_POWERED_BY)).contains("REST Server (FHIR Server; FHIR " + ourCtx.getVersion().getVersion().getFhirVersionString() + "/" + ourCtx.getVersion().getVersion().name() + ")");
 
-		httpOperation = new HttpOptions(ourServer.getBaseUrl());
-		try (CloseableHttpResponse status = ourClient.execute(httpOperation)) {
-			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertThat(output).contains("<CapabilityStatement");
-			assertThat(status.getFirstHeader(Constants.HEADER_POWERED_BY).getValue()).contains("HAPI FHIR " + VersionUtil.getVersion());
-			assertThat(status.getFirstHeader(Constants.HEADER_POWERED_BY).getValue()).contains("REST Server (FHIR Server; FHIR " + ourCtx.getVersion().getVersion().getFhirVersionString() + "/" + ourCtx.getVersion().getVersion().name() + ")");
-		}
+		status = ourServer.fhirRequest("").options();
+		output = status.getBody();
+		status.assertStatus(200);
+		assertThat(output).contains("<CapabilityStatement");
+		assertThat(status.getHeader(Constants.HEADER_POWERED_BY)).contains("HAPI FHIR " + VersionUtil.getVersion());
+		assertThat(status.getHeader(Constants.HEADER_POWERED_BY)).contains("REST Server (FHIR Server; FHIR " + ourCtx.getVersion().getVersion().getFhirVersionString() + "/" + ourCtx.getVersion().getVersion().name() + ")");
 
-		httpOperation = new HttpPost(ourServer.getBaseUrl() + "/metadata");
-		try (CloseableHttpResponse status = ourClient.execute(httpOperation)) {
-			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertEquals(405, status.getStatusLine().getStatusCode());
-			assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"" + Msg.code(388) + "/metadata request must use HTTP GET or HTTP HEAD\"/></issue></OperationOutcome>", output);
-		}
+		status = ourServer.fhirRequest("/metadata").method("POST", new byte[0], null);
+		output = status.getBody();
+		status.assertStatus(405);
+		assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"" + Msg.code(388) + "/metadata request must use HTTP GET or HTTP HEAD\"/></issue></OperationOutcome>", output);
 
-		httpOperation = new HttpHead(ourServer.getBaseUrl() + "/metadata");
-		try (CloseableHttpResponse status = ourClient.execute(httpOperation)) {
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertNull(status.getEntity());
-		}
+		status = ourServer.fhirRequest("/metadata").head();
+		status.assertStatus(200);
+		assertThat(status.getBodyBytes()).isEmpty();
 
 		/*
 		 * There is no @read on the RP below, so this should fail. Otherwise it
 		 * would be interpreted as a read on ID "metadata"
 		 */
-		httpOperation = new HttpGet(ourServer.getBaseUrl() + "/Patient/metadata");
-		try (CloseableHttpResponse status = ourClient.execute(httpOperation)) {
-			assertEquals(400, status.getStatusLine().getStatusCode());
-		}
+		status = ourServer.fhirRequest("/Patient/metadata").get();
+		assertEquals(400, status.getStatusCode());
 	}
 
 	@SuppressWarnings("unused")

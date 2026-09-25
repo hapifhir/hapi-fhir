@@ -12,14 +12,9 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.DateUtils;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,9 +41,6 @@ public class ReadDstu2Test {
 		.withPagingProvider(new FifoMemoryPagingProvider(100))
 		.setDefaultPrettyPrint(false);
 
-	@RegisterExtension
-	public static final HttpClientExtension ourClient = new HttpClientExtension();
-
 	@BeforeEach
 	public void before() {
 		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.NEVER);
@@ -59,44 +51,20 @@ public class ReadDstu2Test {
 	@Test
 	public void testIfModifiedSince() throws Exception {
 
-		CloseableHttpResponse status;
-		HttpGet httpGet;
-
 		// Fixture was last modified at 2012-01-01T12:12:12Z
 		// thus it has changed before the later time of 2012-01-01T13:00:00Z
 		// so we expect a 304
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/2");
-		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T13:00:00Z").getValue()));
-		status = ourClient.execute(httpGet);
-		try {
-			assertEquals(304, status.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(status);
-		}
+		ourServer.fhirRequest("/Patient/2").withHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T13:00:00Z").getValue())).get().assertStatus(304);
 
 		// Fixture was last modified at 2012-01-01T12:12:12Z
 		// thus it has changed at the same time of 2012-01-01T12:12:12Z
 		// so we expect a 304
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/2");
-		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T12:12:12Z").getValue()));
-		status = ourClient.execute(httpGet);
-		try {
-			assertEquals(304, status.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(status);
-		}
+		ourServer.fhirRequest("/Patient/2").withHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T12:12:12Z").getValue())).get().assertStatus(304);
 
 		// Fixture was last modified at 2012-01-01T12:12:12Z
 		// thus it has changed after the earlier time of 2012-01-01T10:00:00Z
 		// so we expect a 200
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/2");
-		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T10:00:00Z").getValue()));
-		status = ourClient.execute(httpGet);
-		try {
-			assertEquals(200, status.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(status);
-		}
+		ourServer.fhirRequest("/Patient/2").withHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T10:00:00Z").getValue())).get().assertStatus(200);
 
 	}
 
@@ -107,12 +75,7 @@ public class ReadDstu2Test {
 	public void testAddProfile() throws Exception {
 		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.ONLY_FOR_CUSTOM);
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123?_format=xml");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), Constants.CHARSET_UTF8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		String responseContent = ourServer.fhirRequest("/Patient/123?_format=xml").get().assertStatus(200).getBody();
 		assertThat(responseContent).contains("p1ReadValue");
 		assertThat(responseContent).contains("p1ReadId");
 		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><lastUpdated value=\"2012-01-01T12:12:12Z\"/><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>", responseContent);
@@ -130,14 +93,9 @@ public class ReadDstu2Test {
 		ourInitializeProfileList = true;
 		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.ONLY_FOR_CUSTOM);
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123&_format=xml");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), Constants.CHARSET_UTF8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
+		String responseContent = ourServer.fhirRequest("/Patient/123&_format=xml").get().assertStatus(200).getBody();
 		ourLog.info(responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("p1ReadValue");
 		assertThat(responseContent).contains("p1ReadId");
 		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><lastUpdated value=\"2012-01-01T12:12:12Z\"/><profile value=\"http://foo\"/><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>", responseContent);
@@ -150,13 +108,8 @@ public class ReadDstu2Test {
 	public void testReadJson() throws Exception {
 		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.ONLY_FOR_CUSTOM);
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123?_format=json");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), Constants.CHARSET_UTF8);
+		String responseContent = ourServer.fhirRequest("/Patient/123?_format=json").get().assertStatus(200).getBody();
 		ourLog.info(responseContent);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("p1ReadValue");
 		assertThat(responseContent).contains("p1ReadId");
 		assertThat(responseContent).contains("\"meta\":{\"lastUpdated\":\"2012-01-01T12:12:12Z\",\"profile\":[\"http://foo_profile\"]}");
@@ -167,12 +120,7 @@ public class ReadDstu2Test {
 	 */
 	@Test
 	public void testReadXml() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123&_format=xml");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), Constants.CHARSET_UTF8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		String responseContent = ourServer.fhirRequest("/Patient/123&_format=xml").get().assertStatus(200).getBody();
 		assertThat(responseContent).contains("p1ReadValue");
 		assertThat(responseContent).contains("p1ReadId");
 
@@ -183,12 +131,7 @@ public class ReadDstu2Test {
 	public void testVread() throws Exception {
 		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.ONLY_FOR_CUSTOM);
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123/_history/1");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), Constants.CHARSET_UTF8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		String responseContent = ourServer.fhirRequest("/Patient/123/_history/1").get().assertStatus(200).getBody();
 		assertThat(responseContent).contains("p1ReadValue");
 		assertThat(responseContent).contains("p1ReadId");
 		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><lastUpdated value=\"2012-01-01T12:12:12Z\"/><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>", responseContent);

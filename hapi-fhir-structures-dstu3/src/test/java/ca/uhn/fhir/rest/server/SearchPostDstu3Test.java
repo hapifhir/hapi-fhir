@@ -11,16 +11,9 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import com.google.common.collect.Lists;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.message.BasicNameValuePair;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -32,7 +25,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,9 +56,6 @@ public class SearchPostDstu3Test {
 		 .withPagingProvider(new FifoMemoryPagingProvider(100))
 		 .setDefaultPrettyPrint(false);
 
-	@RegisterExtension
-	private HttpClientExtension ourClient = new HttpClientExtension();
-
 	@BeforeEach
 	public void before() {
 		ourLastMethod = null;
@@ -80,29 +69,16 @@ public class SearchPostDstu3Test {
 	 */
 	@Test
 	public void testSearchWithMixedParamsNoInterceptorsYesParams() throws Exception {
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/_search?_format=application/fhir+json");
-		httpPost.addHeader("Cache-Control","no-cache");
-		List<NameValuePair> parameters = Lists.newArrayList();
-		parameters.add(new BasicNameValuePair("name", "Smith"));
-		httpPost.setEntity(new UrlEncodedFormEntity(parameters));
+		HttpTestResponse response = ourServer.fhirRequest("/Patient/_search?_format=application/fhir+json").withHeader("Cache-Control","no-cache").withFormParam("name", "Smith").postForm();
+		String responseContent = response.assertStatus(200).getBody();
+		ourLog.info(responseContent);
 
-		ourLog.info("Outgoing post: {}", httpPost);
-		
-		CloseableHttpResponse status = ourClient.execute(httpPost);
-		try {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-
-			assertEquals("search", ourLastMethod);
-			assertNull(ourLastSortSpec);
-			assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
-			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
-			assertEquals("Smith", ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
-			assertEquals(Constants.CT_FHIR_JSON_NEW, status.getEntity().getContentType().getValue().replaceAll(";.*", ""));
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
-		}
+		assertEquals("search", ourLastMethod);
+		assertNull(ourLastSortSpec);
+		assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
+		assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
+		assertEquals("Smith", ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals(Constants.CT_FHIR_JSON_NEW, response.getContentType());
 
 	}
 
@@ -111,29 +87,16 @@ public class SearchPostDstu3Test {
 	 */
 	@Test
 	public void testSearchWithMixedParamsNoInterceptorsNoParams() throws Exception {
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/_search");
-		httpPost.addHeader("Cache-Control","no-cache");
-		List<NameValuePair> parameters = Lists.newArrayList();
-		parameters.add(new BasicNameValuePair("name", "Smith"));
-		httpPost.setEntity(new UrlEncodedFormEntity(parameters));
+		HttpTestResponse response = ourServer.fhirRequest("/Patient/_search").withHeader("Cache-Control","no-cache").withFormParam("name", "Smith").postForm();
+		String responseContent = response.assertStatus(200).getBody();
+		ourLog.info(responseContent);
 
-		ourLog.info("Outgoing post: {}", httpPost);
-		
-		CloseableHttpResponse status = ourClient.execute(httpPost);
-		try {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-
-			assertEquals("search", ourLastMethod);
-			assertNull(ourLastSortSpec);
-			assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
-			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
-			assertEquals("Smith", ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
-			assertEquals(Constants.CT_FHIR_XML_NEW, status.getEntity().getContentType().getValue().replaceAll(";.*", ""));
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
-		}
+		assertEquals("search", ourLastMethod);
+		assertNull(ourLastSortSpec);
+		assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
+		assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
+		assertEquals("Smith", ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals(Constants.CT_FHIR_XML_NEW, response.getContentType());
 
 	}
 
@@ -144,29 +107,16 @@ public class SearchPostDstu3Test {
 	public void testSearchWithMixedParamsYesInterceptorsYesParams() throws Exception {
 		ourServer.registerInterceptor(new ParamLoggingInterceptor());
 		
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/_search?_format=application/fhir+json");
-		httpPost.addHeader("Cache-Control","no-cache");
-		List<NameValuePair> parameters = Lists.newArrayList();
-		parameters.add(new BasicNameValuePair("name", "Smith"));
-		httpPost.setEntity(new UrlEncodedFormEntity(parameters));
+		HttpTestResponse response = ourServer.fhirRequest("/Patient/_search?_format=application/fhir+json").withHeader("Cache-Control","no-cache").withFormParam("name", "Smith").postForm();
+		String responseContent = response.assertStatus(200).getBody();
+		ourLog.info(responseContent);
 
-		ourLog.info("Outgoing post: {}", httpPost);
-		
-		CloseableHttpResponse status = ourClient.execute(httpPost);
-		try {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-
-			assertEquals("search", ourLastMethod);
-			assertNull(ourLastSortSpec);
-			assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
-			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
-			assertEquals("Smith", ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
-			assertEquals(Constants.CT_FHIR_JSON_NEW, status.getEntity().getContentType().getValue().replaceAll(";.*", ""));
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
-		}
+		assertEquals("search", ourLastMethod);
+		assertNull(ourLastSortSpec);
+		assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
+		assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
+		assertEquals("Smith", ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals(Constants.CT_FHIR_JSON_NEW, response.getContentType());
 
 	}
 
@@ -177,29 +127,16 @@ public class SearchPostDstu3Test {
 	public void testSearchWithMixedParamsYesInterceptorsNoParams() throws Exception {
 		ourServer.registerInterceptor(new ParamLoggingInterceptor());
 		
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/_search");
-		httpPost.addHeader("Cache-Control","no-cache");
-		List<NameValuePair> parameters = Lists.newArrayList();
-		parameters.add(new BasicNameValuePair("name", "Smith"));
-		httpPost.setEntity(new UrlEncodedFormEntity(parameters));
+		HttpTestResponse response = ourServer.fhirRequest("/Patient/_search").withHeader("Cache-Control","no-cache").withFormParam("name", "Smith").postForm();
+		String responseContent = response.assertStatus(200).getBody();
+		ourLog.info(responseContent);
 
-		ourLog.info("Outgoing post: {}", httpPost);
-		
-		CloseableHttpResponse status = ourClient.execute(httpPost);
-		try {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-
-			assertEquals("search", ourLastMethod);
-			assertNull(ourLastSortSpec);
-			assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
-			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
-			assertEquals("Smith", ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
-			assertEquals(Constants.CT_FHIR_XML_NEW, status.getEntity().getContentType().getValue().replaceAll(";.*", ""));
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
-		}
+		assertEquals("search", ourLastMethod);
+		assertNull(ourLastSortSpec);
+		assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
+		assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
+		assertEquals("Smith", ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals(Constants.CT_FHIR_XML_NEW, response.getContentType());
 
 	}
 	

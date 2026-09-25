@@ -8,13 +8,9 @@ import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.HttpTestRequest;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -27,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -49,9 +44,6 @@ public class UpdateR4Test {
 	private final RestfulServerExtension myServer = new RestfulServerExtension(ourCtx)
 		.registerProvider(new PatientProvider())
 		.setDefaultResponseEncoding(EncodingEnum.JSON);
-
-	@RegisterExtension
-	private final HttpClientExtension myClient = new HttpClientExtension();
 
 	@BeforeEach
 	void beforeEach() {
@@ -84,10 +76,10 @@ public class UpdateR4Test {
 			String theExpectedBodyId)
 			throws IOException {
 		// execute
-		PutResponse response = put(thePath, theBodyId, theIfMatch);
+		HttpTestResponse response = put(thePath, theBodyId, theIfMatch);
 
 		// verify
-		assertThat(response.statusCode()).isEqualTo(theExpectedStatus);
+		response.assertStatus(theExpectedStatus);
 		assertThat(ourLastConditionalUrl).isEqualTo(theExpectedConditionalUrl);
 		if (theExpectedIdParam == null) {
 			assertThat(ourLastIdParam).isNull();
@@ -104,11 +96,11 @@ public class UpdateR4Test {
 	@Test
 	void testUpdate_mismatchedBodyId_rejectedWith420() throws IOException {
 		// execute
-		PutResponse response = put("/Patient/abc", "Patient/other", null);
+		HttpTestResponse response = put("/Patient/abc", "Patient/other", null);
 
 		// verify
-		assertThat(response.statusCode()).isEqualTo(400);
-		assertThat(response.body()).contains("HAPI-0420");
+		response.assertStatus(400);
+		assertThat(response.getBody()).contains("HAPI-0420");
 		assertThat(ourLastBodyId).as("the provider must not be invoked").isNull();
 	}
 
@@ -132,25 +124,18 @@ public class UpdateR4Test {
 		}
 	}
 
-	private record PutResponse(int statusCode, String body) {}
-
-	private PutResponse put(String thePath, String theBodyId, String theIfMatch) throws IOException {
+	private HttpTestResponse put(String thePath, String theBodyId, String theIfMatch) throws IOException {
 		Patient patient = new Patient();
 		patient.setId(theBodyId);
 		patient.addIdentifier().setSystem("http://acme.org/mrn").setValue("001");
 
-		HttpPut httpPut = new HttpPut(myServer.getBaseUrl() + thePath);
-		httpPut.setEntity(new StringEntity(
-			 ourCtx.newJsonParser().encodeResourceToString(patient),
-			 ContentType.create(Constants.CT_FHIR_JSON_NEW, StandardCharsets.UTF_8)));
+		HttpTestRequest request = myServer.fhirRequest(thePath);
 		if (theIfMatch != null) {
-			httpPut.addHeader(Constants.HEADER_IF_MATCH, theIfMatch);
+			request.withHeader(Constants.HEADER_IF_MATCH, theIfMatch);
 		}
 
-		try (CloseableHttpResponse response = myClient.execute(httpPut)) {
-			String responseContent = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("{}\n{}", response.getStatusLine(), responseContent);
-			return new PutResponse(response.getStatusLine().getStatusCode(), responseContent);
-		}
+		HttpTestResponse response = request.put(ourCtx.newJsonParser().encodeResourceToString(patient), Constants.CT_FHIR_JSON_NEW);
+		ourLog.info("{}", response);
+		return response;
 	}
 }

@@ -6,12 +6,8 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.dstu2016may.model.HumanName;
 import org.hl7.fhir.dstu2016may.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -36,8 +32,6 @@ public class SearchWithGenericListDstu2_1Test {
 		.registerProvider(new DummyPatientResourceProvider())
 		.setDefaultResponseEncoding(EncodingEnum.XML);
 
-	@RegisterExtension
-	public static final HttpClientExtension ourClient = new HttpClientExtension();
 
 	@BeforeEach
 	public void before() {
@@ -49,12 +43,8 @@ public class SearchWithGenericListDstu2_1Test {
 	 */
 	@Test
 	public void testSearch() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?identifier=foo&_pretty=true");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient?identifier=foo&_pretty=true").get().assertStatus(200).getBody();
 		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("searchByIdentifier", ourLastMethod);
 		assertThat(responseContent).contains("<family value=\"FAMILY\"");
 		assertThat(responseContent).contains("<fullUrl value=\"" + ourServer.getBaseUrl() + "/Patient/1\"/>");

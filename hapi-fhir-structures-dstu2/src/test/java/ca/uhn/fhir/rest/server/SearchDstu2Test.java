@@ -22,29 +22,17 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.HttpTestRequest;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import com.google.common.base.Charsets;
 import jakarta.annotation.Nonnull;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.message.BasicNameValuePair;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -71,9 +59,6 @@ public class SearchDstu2Test {
 		.withPagingProvider(new FifoMemoryPagingProvider(100))
 		.setDefaultPrettyPrint(false);
 
-	@RegisterExtension
-	public static final HttpClientExtension ourClient = new HttpClientExtension();
-
 	@BeforeEach
 	public void before() {
 		ourLastMethod = null;
@@ -86,66 +71,48 @@ public class SearchDstu2Test {
 	@Test
 	public void testSearchWithInvalidPostUrl() throws Exception {
 		// should end with _search
-		HttpPost filePost = new HttpPost(ourServer.getBaseUrl() + "/Patient?name=Central"); 
-
 		// add parameters to the post method
-		List<NameValuePair> parameters = new ArrayList<NameValuePair>();
-		parameters.add(new BasicNameValuePair("_id", "aaa"));
-
-		UrlEncodedFormEntity sendentity = new UrlEncodedFormEntity(parameters, "UTF-8");
-		filePost.setEntity(sendentity);
-
-		HttpResponse status = ourClient.execute(filePost);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient?name=Central").withFormParam("_id", "aaa").postForm().assertStatus(400).getBody();
 		ourLog.info(responseContent);
-		assertEquals(400, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("<diagnostics value=\"" + Msg.code(446) + "Incorrect Content-Type header value of &quot;application/x-www-form-urlencoded; charset=UTF-8&quot; was provided in the request. A FHIR Content-Type is required for &quot;CREATE&quot; operation\"/>");
 
 	}
 
 	@Test
 	public void testEncodeConvertsReferencesToRelative() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchWithRef");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		HttpTestResponse response = ourServer.fhirRequest("/Patient?_query=searchWithRef").get();
+		String responseContent = response.getBody();
 		ourLog.info(responseContent);
 
 		assertThat(responseContent).doesNotContain("text");
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(200, response.getStatusCode());
 		Patient patient = (Patient) ourCtx.newXmlParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
 		String ref = patient.getManagingOrganization().getReference().getValue();
 		assertEquals("Organization/555", ref);
-		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION));
+		assertNull(response.getHeader(Constants.HEADER_CONTENT_LOCATION));
 	}
 
 	@Test
 	public void testEncodeConvertsReferencesToRelativeJson() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchWithRef&_format=json");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		HttpTestResponse response = ourServer.fhirRequest("/Patient?_query=searchWithRef&_format=json").get();
+		String responseContent = response.getBody();
 		ourLog.info(responseContent);
 
 		assertThat(responseContent).doesNotContain("text");
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(200, response.getStatusCode());
 		Patient patient = (Patient) ourCtx.newJsonParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
 		String ref = patient.getManagingOrganization().getReference().getValue();
 		assertEquals("Organization/555", ref);
-		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION));
+		assertNull(response.getHeader(Constants.HEADER_CONTENT_LOCATION));
 	}
 
 	@Test
 	public void testResultBundleHasUpdateTime() throws Exception {
 		ourReturnPublished = new InstantDt("2011-02-03T11:22:33Z");
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchWithBundleProvider&_pretty=true");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient?_query=searchWithBundleProvider&_pretty=true").get().getBody();
 		ourLog.info(responseContent);
 
 		assertThat(responseContent).containsSubsequence("<lastUpdated value=\"2011-02-03T11:22:33Z\"/>");
@@ -153,46 +120,28 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testResultBundleHasUuid() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchWithRef");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient?_query=searchWithRef").get().assertStatus(200).getBody();
 		ourLog.info(responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).matches(".*id value..[0-9a-f-]+\\\".*");
 	}
 
 	@Test
 	public void testSearchBlacklist01Failing() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchBlacklist01&ref.black1=value");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient?_query=searchBlacklist01&ref.black1=value").get().assertStatus(400).getBody();
 		ourLog.info(responseContent);
-		assertEquals(400, status.getStatusLine().getStatusCode());
 	}
 
 	@Test
 	public void testSearchBlacklist01Passing() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchBlacklist01&ref.white1=value");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient?_query=searchBlacklist01&ref.white1=value").get().assertStatus(200).getBody();
 		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("searchBlacklist01", ourLastMethod);
 	}
 
 	@Test
 	public void testSearchByPost() throws Exception {
-		HttpPost httpGet = new HttpPost(ourServer.getBaseUrl() + "/Patient/_search");
-		StringEntity entity = new StringEntity("searchDateAndList=2001,2002&searchDateAndList=2003,2004", ContentType.APPLICATION_FORM_URLENCODED);
-		httpGet.setEntity(entity);
-
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient/_search").post("searchDateAndList=2001,2002&searchDateAndList=2003,2004", Constants.CT_X_FORM_URLENCODED).getBody();
 		ourLog.info(responseContent);
 		assertEquals("searchDateAndList", ourLastMethod);
 		assertThat(ourLastDateAndList.getValuesAsQueryTokens()).hasSize(2);
@@ -205,11 +154,7 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchMethodReturnsNull() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchReturnNull");
-
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient?_query=searchReturnNull").get().getBody();
 		ourLog.info(responseContent);
 		assertEquals("searchReturnNull", ourLastMethod);
 		assertThat(responseContent).contains("<total value=\"0\"/>");
@@ -217,13 +162,7 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchByPostWithBodyAndUrlParams() throws Exception {
-		HttpPost httpGet = new HttpPost(ourServer.getBaseUrl() + "/Patient/_search?_format=json");
-		StringEntity entity = new StringEntity("searchDateAndList=2001,2002&searchDateAndList=2003,2004", ContentType.APPLICATION_FORM_URLENCODED);
-		httpGet.setEntity(entity);
-
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient/_search?_format=json").post("searchDateAndList=2001,2002&searchDateAndList=2003,2004", Constants.CT_X_FORM_URLENCODED).getBody();
 		ourLog.info(responseContent);
 		assertEquals("searchDateAndList", ourLastMethod);
 		assertThat(ourLastDateAndList.getValuesAsQueryTokens()).hasSize(2);
@@ -239,13 +178,7 @@ public class SearchDstu2Test {
 	public void testSearchByPostWithBodyAndUrlParamsNoManual() throws Exception {
 		ourServer.getRestfulServer().setIgnoreServerParsedRequestParameters(false);
 
-		HttpPost httpGet = new HttpPost(ourServer.getBaseUrl() + "/Patient/_search?_format=json");
-		StringEntity entity = new StringEntity("searchDateAndList=2001,2002&searchDateAndList=2003,2004", ContentType.APPLICATION_FORM_URLENCODED);
-		httpGet.setEntity(entity);
-
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient/_search?_format=json").post("searchDateAndList=2001,2002&searchDateAndList=2003,2004", Constants.CT_X_FORM_URLENCODED).getBody();
 		ourLog.info(responseContent);
 		assertEquals("searchDateAndList", ourLastMethod);
 		assertThat(ourLastDateAndList.getValuesAsQueryTokens()).hasSize(2);
@@ -259,23 +192,13 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchByPut() throws Exception {
-		HttpPut httpGet = new HttpPut(ourServer.getBaseUrl() + "/Patient/_search");
-		StringEntity entity = new StringEntity("searchDateAndList=2001,2002&searchDateAndList=2003,2004", ContentType.APPLICATION_FORM_URLENCODED);
-		httpGet.setEntity(entity);
-
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient/_search").put("searchDateAndList=2001,2002&searchDateAndList=2003,2004", Constants.CT_X_FORM_URLENCODED).assertStatus(400).getBody();
 		ourLog.info(responseContent);
-		assertEquals(400, status.getStatusLine().getStatusCode());
 	}
 
 	@Test
 	public void testSearchDateAndList() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?searchDateAndList=2001,2002&searchDateAndList=2003,2004");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient?searchDateAndList=2001,2002&searchDateAndList=2003,2004").get().getBody();
 		ourLog.info(responseContent);
 		assertEquals("searchDateAndList", ourLastMethod);
 		assertThat(ourLastDateAndList.getValuesAsQueryTokens()).hasSize(2);
@@ -292,10 +215,7 @@ public class SearchDstu2Test {
 	public void testSearchPagesAllHaveCorrectBundleType() throws Exception {
 		Bundle resp;
 		{
-			HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?searchHugeResults=yes&_count=10&_pretty=true");
-			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			IOUtils.closeQuietly(status.getEntity().getContent());
+			String responseContent = ourServer.fhirRequest("/Patient?searchHugeResults=yes&_count=10&_pretty=true").get().getBody();
 			ourLog.info(responseContent);
 			resp = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 			assertEquals("searchset", resp.getType());
@@ -306,10 +226,7 @@ public class SearchDstu2Test {
 
 		// Now try the next page
 		{
-			HttpGet httpGet = new HttpGet(nextLink.getUrl());
-			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			IOUtils.closeQuietly(status.getEntity().getContent());
+			String responseContent = HttpTestRequest.to(ourServer.getHttpClient(), ourServer.getFhirContext(), nextLink.getUrl()).get().getBody();
 			ourLog.info(responseContent);
 			resp = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 			assertEquals("searchset", resp.getType());
@@ -321,10 +238,7 @@ public class SearchDstu2Test {
 
 		// Now try a third page
 		{
-			HttpGet httpGet = new HttpGet(nextLink.getUrl());
-			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			IOUtils.closeQuietly(status.getEntity().getContent());
+			String responseContent = HttpTestRequest.to(ourServer.getHttpClient(), ourServer.getFhirContext(), nextLink.getUrl()).get().getBody();
 			ourLog.info(responseContent);
 			resp = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 			assertEquals("searchset", resp.getType());
@@ -337,12 +251,8 @@ public class SearchDstu2Test {
 	 */
 	@Test
 	public void testSearchQuantityMissingTrue() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?quantity:missing=true");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient?quantity:missing=true").get().assertStatus(200).getBody();
 		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals(Boolean.TRUE, ourLastQuantity.getMissing());
 	}
 
@@ -351,12 +261,8 @@ public class SearchDstu2Test {
 	 */
 	@Test
 	public void testSearchQuantityValue() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?quantity=gt100");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient?quantity=gt100").get().assertStatus(200).getBody();
 		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		assertEquals(ParamPrefixEnum.GREATERTHAN, ourLastQuantity.getPrefix());
 		assertEquals(100, ourLastQuantity.getValue().intValue());
@@ -364,12 +270,8 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchReferenceParams01() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchNoList&ref=123");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient?_query=searchNoList&ref=123").get().assertStatus(200).getBody();
 		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		assertEquals("123", ourLastRef.getIdPart());
 		assertNull(ourLastRef.getResourceType());
@@ -377,12 +279,8 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchReferenceParams02() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchNoList&ref=Patient/123");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient?_query=searchNoList&ref=Patient/123").get().assertStatus(200).getBody();
 		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		assertEquals("123", ourLastRef.getIdPart());
 		assertEquals("Patient", ourLastRef.getResourceType());
@@ -390,12 +288,8 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchReferenceParams03() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchNoList&ref:Patient=Patient/123");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient?_query=searchNoList&ref:Patient=Patient/123").get().assertStatus(200).getBody();
 		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		assertEquals("123", ourLastRef.getIdPart());
 		assertEquals("Patient", ourLastRef.getResourceType());
@@ -403,12 +297,8 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchReferenceParams04() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchNoList&ref:Patient=123");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient?_query=searchNoList&ref:Patient=123").get().assertStatus(200).getBody();
 		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		assertEquals("123", ourLastRef.getIdPart());
 		assertEquals("Patient", ourLastRef.getResourceType());
@@ -419,60 +309,40 @@ public class SearchDstu2Test {
 	 */
 	@Test
 	public void testSearchByIdExact() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id:exact=aaa&reference=value");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient?_id:exact=aaa&reference=value").get().assertStatus(200).getBody();
 		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		assertEquals("idProvider", ourLastMethod);
 	}
 
 	@Test
 	public void testSearchByQualifiedIdQualifiedString() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id:exact=aaa&stringParam:exact=value");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient?_id:exact=aaa&stringParam:exact=value").get().assertStatus(200).getBody();
 		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		assertEquals("stringParam:true:true", ourLastMethod);
 	}
 
 	@Test
 	public void testSearchByQualifiedString() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id=aaa&stringParam:exact=value");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient?_id=aaa&stringParam:exact=value").get().assertStatus(200).getBody();
 		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		assertEquals("stringParam:false:true", ourLastMethod);
 	}
 
 	@Test
 	public void testSearchByQualifiedIdString() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id:exact=aaa&stringParam=value");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient?_id:exact=aaa&stringParam=value").get().assertStatus(200).getBody();
 		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		assertEquals("stringParam:true:false", ourLastMethod);
 	}
 
 	@Test
 	public void testSearchByIdString() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id=aaa&stringParam=value");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient?_id=aaa&stringParam=value").get().assertStatus(200).getBody();
 		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		assertEquals("stringParam:false:false", ourLastMethod);
 	}
@@ -480,22 +350,14 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchWhitelist01Failing() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchWhitelist01&ref=value");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient?_query=searchWhitelist01&ref=value").get().assertStatus(400).getBody();
 		ourLog.info(responseContent);
-		assertEquals(400, status.getStatusLine().getStatusCode());
 	}
 
 	@Test
 	public void testSearchWhitelist01Passing() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchWhitelist01&ref.white1=value");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient?_query=searchWhitelist01&ref.white1=value").get().assertStatus(200).getBody();
 		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("searchWhitelist01", ourLastMethod);
 	}
 

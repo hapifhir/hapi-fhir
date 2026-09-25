@@ -13,11 +13,6 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.interceptor.SearchPreferHandlingInterceptor;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.HumanName;
@@ -27,7 +22,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,13 +68,8 @@ public class SearchPreferHandlingInterceptorTest {
 
 	@Test
 	public void testSearchWithUnknownResourceType() throws IOException {
-		try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
-			try (CloseableHttpResponse result = client.execute(new HttpGet("http://localhost:" + myPort + "/BadResource?foo=bar"))) {
-				assertEquals(404, result.getStatusLine().getStatusCode());
-				String response = IOUtils.toString(result.getEntity().getContent(), StandardCharsets.UTF_8);
-				assertThat(response).contains("Unknown resource type 'BadResource' - Server knows how to handle: [Patient]");
-			}
-		}
+		String response = myRestfulServerExtension.fhirRequest("/BadResource?foo=bar").get().assertStatus(404).getBody();
+		assertThat(response).contains("Unknown resource type 'BadResource' - Server knows how to handle: [Patient]");
 	}
 
 	@Test

@@ -13,13 +13,8 @@ import ca.uhn.fhir.rest.annotation.Since;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.HumanName;
@@ -37,7 +32,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -61,13 +55,9 @@ public class PlainProviderR4Test {
 		 .setDefaultResponseEncoding(EncodingEnum.XML)
 		 .withServletPath("/fhir/context/*");
 
-	@RegisterExtension
-	private HttpClientExtension ourClient = new HttpClientExtension();
-
 	@Test
 	public void providersThatReturnListOfResources_willNotHaveNonMATCH() throws IOException {
 		// setup
-		HttpResponse response;
 		List<Patient> patients = new ArrayList<>();
 		IResourceProvider testProvider = new IResourceProvider() {
 
@@ -102,15 +92,10 @@ public class PlainProviderR4Test {
 		extraPatient.setId("Patient/extra");
 		patients.add(extraPatient);
 
-		String baseUri = ourServer.getBaseUrl();
-
 		// test
-		HttpGet get = new HttpGet(baseUri + "/Patient");
-		response = ourClient.execute(get);
+		String responseContent = ourServer.fhirRequest("/Patient").get().getBody();
 
 		// validate
-		String responseContent = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(response.getEntity().getContent());
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertNotNull(bundle);
 
@@ -124,32 +109,21 @@ public class PlainProviderR4Test {
 		GlobalHistoryProvider provider = new GlobalHistoryProvider();
 		ourServer.registerProvider(provider);
 
-		String baseUri = ourServer.getBaseUrl();
-		HttpResponse status = ourClient.execute(new HttpGet(baseUri + "/_history?_since=2012-01-02T00%3A01%3A02&_count=12"));
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/_history?_since=2012-01-02T00%3A01%3A02&_count=12").get().assertStatus(200).getBody();
 		ourLog.info("Response was:\n{}", responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(3);
 		
 		assertThat(provider.myLastSince.getValueAsString()).startsWith("2012-01-02T00:01:02");
 		assertEquals("12", provider.myLastCount.getValueAsString());
 
-		status = ourClient.execute(new HttpGet(baseUri + "/_history?&_count=12"));
-		responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		responseContent = ourServer.fhirRequest("/_history?&_count=12").get().assertStatus(200).getBody();
 		bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(3);
 		assertNull(provider.myLastSince);
 		assertEquals("12", provider.myLastCount.getValueAsString());
 		
-		status =ourClient.execute(new HttpGet(baseUri + "/_history?_since=2012-01-02T00%3A01%3A02"));
-		responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		responseContent = ourServer.fhirRequest("/_history?_since=2012-01-02T00%3A01%3A02").get().assertStatus(200).getBody();
 		bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(3);
 		assertThat(provider.myLastSince.getValueAsString()).startsWith("2012-01-02T00:01:02");
@@ -161,11 +135,7 @@ public class PlainProviderR4Test {
 		GlobalHistoryProvider provider = new GlobalHistoryProvider();
 		ourServer.registerProvider(provider);
 
-		String baseUri = ourServer.getBaseUrl();
-		CloseableHttpResponse status = ourClient.execute(new HttpGet(baseUri + "/_history"));
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		String responseContent = ourServer.fhirRequest("/_history").get().assertStatus(200).getBody();
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(3);
 		assertNull(provider.myLastSince);
@@ -177,24 +147,19 @@ public class PlainProviderR4Test {
 		ourServer.registerProvider(new SearchProvider());
 
 		String baseUri = ourServer.getBaseUrl();
-		String uri = baseUri + "/Patient?identifier=urn:hapitest:mrns%7C00001";
-		HttpGet httpGet = new HttpGet(uri);
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+		String path = "/Patient?identifier=urn:hapitest:mrns%7C00001";
+		String uri = baseUri + path;
+		String responseContent = ourServer.fhirRequest(path).get().assertStatus(200).getBody();
+		ourLog.info("Response was:\n{}", responseContent);
 
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			IOUtils.closeQuietly(status.getEntity().getContent());
-			ourLog.info("Response was:\n{}", responseContent);
+		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+		assertThat(bundle.getEntry()).hasSize(1);
 
-			assertThat(bundle.getEntry()).hasSize(1);
+		Patient patient = (Patient) bundle.getEntry().get(0).getResource();
+		assertEquals("PatientOne", patient.getName().get(0).getGiven().get(0).getValue());
 
-			Patient patient = (Patient) bundle.getEntry().get(0).getResource();
-			assertEquals("PatientOne", patient.getName().get(0).getGiven().get(0).getValue());
-
-			assertEquals(uri.replace(":hapitest:", "%3Ahapitest%3A"), bundle.getLink("self").getUrl());
-		}
+		assertEquals(uri.replace(":hapitest:", "%3Ahapitest%3A"), bundle.getLink("self").getUrl());
 
 	}
 	

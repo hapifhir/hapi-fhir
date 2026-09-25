@@ -4,12 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -21,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchWithServerAddressStrategyDstu3Test {
 
@@ -35,19 +30,12 @@ public class SearchWithServerAddressStrategyDstu3Test {
 		 .withPagingProvider(new FifoMemoryPagingProvider(100))
 		 .setDefaultPrettyPrint(false);
 
-	@RegisterExtension
-	private HttpClientExtension ourClient = new HttpClientExtension();
-
 	@Test
 	public void testIncomingRequestAddressStrategy() throws Exception {
 		ourServer.setServerAddressStrategy(new IncomingRequestAddressStrategy());
 		
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient").get().assertStatus(200).getBody();
 		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("<given value=\"FAMILY\"");
 		assertThat(responseContent).contains("<fullUrl value=\"" + ourServer.getBaseUrl() + "/Patient/1\"/>");
 	}
@@ -56,46 +44,27 @@ public class SearchWithServerAddressStrategyDstu3Test {
 	public void testApacheProxyAddressStrategy() throws Exception {
 		
 		ourServer.setServerAddressStrategy(ApacheProxyAddressStrategy.forHttp());
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient").get().assertStatus(200).getBody();
 		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("<given value=\"FAMILY\"");
 		assertThat(responseContent).contains("<fullUrl value=\"" + ourServer.getBaseUrl() + "/Patient/1\"/>");
 		
 		ourServer.setServerAddressStrategy(new ApacheProxyAddressStrategy(false));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient");
-		httpGet.addHeader(Constants.HEADER_X_FORWARDED_HOST, "foo.com");
-		status = ourClient.execute(httpGet);
-		responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		responseContent = ourServer.fhirRequest("/Patient").withHeader(Constants.HEADER_X_FORWARDED_HOST, "foo.com").get().assertStatus(200).getBody();
 		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("<given value=\"FAMILY\"");
 		assertThat(responseContent).contains("<fullUrl value=\"http://foo.com/Patient/1\"/>");
 
 		ourServer.setServerAddressStrategy(ApacheProxyAddressStrategy.forHttps());
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient");
-		httpGet.addHeader(Constants.HEADER_X_FORWARDED_HOST, "foo.com");
-		status = ourClient.execute(httpGet);
-		responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		responseContent = ourServer.fhirRequest("/Patient").withHeader(Constants.HEADER_X_FORWARDED_HOST, "foo.com").get().assertStatus(200).getBody();
 		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("<given value=\"FAMILY\"");
 		assertThat(responseContent).contains("<fullUrl value=\"https://foo.com/Patient/1\"/>");
 
 		ourServer.setServerAddressStrategy(new ApacheProxyAddressStrategy(false));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient");
-		httpGet.addHeader(Constants.HEADER_X_FORWARDED_HOST, "foo.com");
-		httpGet.addHeader(Constants.HEADER_X_FORWARDED_PROTO, "https");
-		status = ourClient.execute(httpGet);
-		responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		responseContent = ourServer.fhirRequest("/Patient").withHeader(Constants.HEADER_X_FORWARDED_HOST, "foo.com").withHeader(Constants.HEADER_X_FORWARDED_PROTO, "https").get().assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("<given value=\"FAMILY\"");
 		assertThat(responseContent).contains("<fullUrl value=\"https://foo.com/Patient/1\"/>");
 
@@ -105,12 +74,8 @@ public class SearchWithServerAddressStrategyDstu3Test {
 	public void testHardcodedAddressStrategy() throws Exception {
 		ourServer.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://example.com/fhir/base"));
 		
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient").get().assertStatus(200).getBody();
 		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("<given value=\"FAMILY\"");
 		assertThat(responseContent).contains("<fullUrl value=\"http://example.com/fhir/base/Patient/1\"/>");
 	}

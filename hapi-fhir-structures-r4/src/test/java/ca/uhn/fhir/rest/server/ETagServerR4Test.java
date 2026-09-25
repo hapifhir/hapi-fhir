@@ -10,18 +10,9 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
@@ -49,9 +40,6 @@ public class ETagServerR4Test {
 		 .withPagingProvider(new FifoMemoryPagingProvider(100))
 		 .setDefaultResponseEncoding(EncodingEnum.XML);
 
-	@RegisterExtension
-	private HttpClientExtension ourClient = new HttpClientExtension();
-
 	@BeforeEach
   public void before() {
     ourLastId = null;
@@ -74,29 +62,23 @@ public class ETagServerR4Test {
   private void doTestAutomaticNotModified() throws Exception {
 	  ourLastModifiedDate = new InstantDt("2012-11-25T02:34:45.2222Z").getValue();
 
-	  HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/2");
-	  httpGet.addHeader(Constants.HEADER_IF_NONE_MATCH, "\"222\"");
-	  HttpResponse status = ourClient.execute(httpGet);
-		assertEquals(Constants.STATUS_HTTP_304_NOT_MODIFIED, status.getStatusLine().getStatusCode());
+	  ourServer.fhirRequest("/Patient/2").withHeader(Constants.HEADER_IF_NONE_MATCH, "\"222\"").get().assertStatus(Constants.STATUS_HTTP_304_NOT_MODIFIED);
   }
 
   @Test
   public void testETagHeader() throws Exception {
     ourLastModifiedDate = new InstantDt("2012-11-25T02:34:45.2222Z").getValue();
 
-    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/2/_history/3");
-    HttpResponse status = ourClient.execute(httpGet);
-    String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-    IOUtils.closeQuietly(status.getEntity().getContent());
+    HttpTestResponse response = ourServer.fhirRequest("/Patient/2/_history/3").get().assertStatus(200);
+    String responseContent = response.getBody();
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
     Identifier dt = ourCtx.newXmlParser().parseResource(Patient.class, responseContent).getIdentifier().get(0);
 		assertEquals("2", dt.getSystemElement().getValueAsString());
 		assertEquals("3", dt.getValue());
 
-    Header cl = status.getFirstHeader(Constants.HEADER_ETAG_LC);
+    String cl = response.getHeader(Constants.HEADER_ETAG_LC);
 		assertNotNull(cl);
-		assertEquals("W/\"222\"", cl.getValue());
+		assertEquals("W/\"222\"", cl);
   }
 
   @Test
@@ -105,34 +87,27 @@ public class ETagServerR4Test {
     ourPutVersionInPatientId = false;
     ourLastModifiedDate = null;
 
-    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/2/_history/3");
-    HttpResponse status = ourClient.execute(httpGet);
-    IOUtils.closeQuietly(status.getEntity().getContent());
+    HttpTestResponse response = ourServer.fhirRequest("/Patient/2/_history/3").get().assertStatus(200);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
-
-    Header cl = status.getFirstHeader(Constants.HEADER_ETAG_LC);
+    String cl = response.getHeader(Constants.HEADER_ETAG_LC);
 		assertNotNull(cl);
-		assertEquals("W/\"222\"", cl.getValue());
+		assertEquals("W/\"222\"", cl);
   }
 
   @Test
   public void testLastModifiedHeader() throws Exception {
     ourLastModifiedDate = new InstantDt("2012-11-25T02:34:45.2222Z").getValue();
 
-    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/2/_history/3");
-    HttpResponse status = ourClient.execute(httpGet);
-    String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-    IOUtils.closeQuietly(status.getEntity().getContent());
+    HttpTestResponse response = ourServer.fhirRequest("/Patient/2/_history/3").get().assertStatus(200);
+    String responseContent = response.getBody();
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
     Identifier dt = ourCtx.newXmlParser().parseResource(Patient.class, responseContent).getIdentifier().get(0);
 		assertEquals("2", dt.getSystemElement().getValueAsString());
 		assertEquals("3", dt.getValue());
 
-    Header cl = status.getFirstHeader(Constants.HEADER_LAST_MODIFIED_LOWERCASE);
+    String cl = response.getHeader(Constants.HEADER_LAST_MODIFIED_LOWERCASE);
 		assertNotNull(cl);
-		assertEquals("Sun, 25 Nov 2012 02:34:45 GMT", cl.getValue());
+		assertEquals("Sun, 25 Nov 2012 02:34:45 GMT", cl);
   }
 
   @Test
@@ -142,13 +117,7 @@ public class ETagServerR4Test {
     p.addIdentifier().setSystem("urn:system").setValue("001");
     String resBody = ourCtx.newXmlParser().encodeResourceToString(p);
 
-    HttpPut http;
-    http = new HttpPut(ourServer.getBaseUrl() + "/Patient/2");
-    http.setEntity(new StringEntity(resBody, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-    http.addHeader(Constants.HEADER_IF_MATCH, "\"221\"");
-    CloseableHttpResponse status = ourClient.execute(http);
-    IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
+    ourServer.fhirRequest("/Patient/2").withHeader(Constants.HEADER_IF_MATCH, "\"221\"").put(resBody, Constants.CT_FHIR_XML).assertStatus(200);
 		assertEquals("Patient/2/_history/221", ourLastId.toUnqualified().getValue());
 
   }
@@ -160,13 +129,7 @@ public class ETagServerR4Test {
     p.addIdentifier().setSystem("urn:system").setValue("001");
     String resBody = ourCtx.newXmlParser().encodeResourceToString(p);
 
-    HttpPut http;
-    http = new HttpPut(ourServer.getBaseUrl() + "/Patient/2");
-    http.setEntity(new StringEntity(resBody, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-    http.addHeader(Constants.HEADER_IF_MATCH, "\"222\"");
-    CloseableHttpResponse status = ourClient.execute(http);
-    IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(Constants.STATUS_HTTP_412_PRECONDITION_FAILED, status.getStatusLine().getStatusCode());
+    ourServer.fhirRequest("/Patient/2").withHeader(Constants.HEADER_IF_MATCH, "\"222\"").put(resBody, Constants.CT_FHIR_XML).assertStatus(Constants.STATUS_HTTP_412_PRECONDITION_FAILED);
 		assertEquals("Patient/2/_history/222", ourLastId.toUnqualified().getValue());
   }
 
@@ -177,12 +140,7 @@ public class ETagServerR4Test {
     p.addIdentifier().setSystem("urn:system").setValue("001");
     String resBody = ourCtx.newXmlParser().encodeResourceToString(p);
 
-    HttpPut http;
-    http = new HttpPut(ourServer.getBaseUrl() + "/Patient/2");
-    http.setEntity(new StringEntity(resBody, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-    HttpResponse status = ourClient.execute(http);
-    IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
+    ourServer.fhirRequest("/Patient/2").put(resBody, Constants.CT_FHIR_XML).assertStatus(200);
 
   }
 

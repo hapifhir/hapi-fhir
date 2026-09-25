@@ -23,15 +23,9 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
 import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.IntegerType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -49,7 +43,6 @@ import org.mockito.InOrder;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -74,9 +67,6 @@ public class InterceptorDstu3Test {
 		 .registerProvider(new DummyPatientResourceProvider())
 		 .withPagingProvider(new FifoMemoryPagingProvider(100))
 		 .setDefaultPrettyPrint(false);
-
-	@RegisterExtension
-	private HttpClientExtension ourClient = new HttpClientExtension();
 
 	@AfterEach
 	public void after() {
@@ -117,12 +107,7 @@ public class InterceptorDstu3Test {
 			p.addParameter().setName("limit").setValue(new IntegerType(123));
 			String input = ourCtx.newJsonParser().encodeResourceToString(p);
 
-			HttpPost post = new HttpPost(ourServer.getBaseUrl() + "/Patient/$postOperation");
-			post.setEntity(new StringEntity(input, ContentType.create("application/fhir+json", Constants.CHARSET_UTF8)));
-			try (CloseableHttpResponse status = ourClient.execute(post)) {
-				assertEquals(200, status.getStatusLine().getStatusCode());
-				IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			}
+			ourServer.fhirRequest("/Patient/$postOperation").post(input, "application/fhir+json").assertStatus(200);
 		} finally {
 			ourServer.unregisterInterceptor(interceptor);
 		}
@@ -147,13 +132,10 @@ public class InterceptorDstu3Test {
 		ourServer.registerInterceptor(interceptor);
 		try {
 
-			HttpGet get = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
-			try (CloseableHttpResponse status = ourClient.execute(get)) {
-				String response = IOUtils.toString(status.getEntity().getContent(), Constants.CHARSET_UTF8);
-				assertThat(response).contains("NAME1");
-				assertEquals(202, status.getStatusLine().getStatusCode());
-				assertEquals("Accepted", status.getStatusLine().getReasonPhrase());
-			}
+			HttpTestResponse httpResponse = ourServer.fhirRequest("/Patient/1").get().assertStatus(202);
+			String response = httpResponse.getBody();
+			assertThat(response).contains("NAME1");
+			assertEquals("Accepted", httpResponse.getReasonPhrase());
 
 		} finally {
 			ourServer.unregisterInterceptor(interceptor);
@@ -188,11 +170,7 @@ public class InterceptorDstu3Test {
 
 		String input = createInput();
 
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/$validate");
-		httpPost.setEntity(new StringEntity(input, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
-		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
-			IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		}
+		ourServer.fhirRequest("/Patient/$validate").post(input, Constants.CT_FHIR_JSON);
 
 		InOrder order = inOrder(myInterceptor1, myInterceptor2);
 		order.verify(myInterceptor1, times(1)).incomingRequestPreProcessed(nullable(HttpServletRequest.class), nullable(HttpServletResponse.class));
@@ -222,12 +200,8 @@ public class InterceptorDstu3Test {
 
 		String input = createInput();
 
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
-		httpPost.setEntity(new StringEntity(input, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
-		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
-			IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(status.getStatusLine().getStatusCode()).isBetween(200, 201);
-		}
+		HttpTestResponse response = ourServer.fhirRequest("/Patient").post(input, Constants.CT_FHIR_JSON);
+		assertThat(response.getStatusCode()).isBetween(200, 201);
 	}
 
 	@Test
@@ -244,12 +218,7 @@ public class InterceptorDstu3Test {
 
 		String input = createInput();
 
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
-		httpPost.setEntity(new StringEntity(input, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
-		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
-			assertEquals(201, status.getStatusLine().getStatusCode());
-			IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		}
+		ourServer.fhirRequest("/Patient").post(input, Constants.CT_FHIR_JSON).assertStatus(201);
 
 		InOrder order = inOrder(myInterceptor1);
 		verify(myInterceptor1, times(1)).incomingRequestPreProcessed(nullable(HttpServletRequest.class), nullable(HttpServletResponse.class));
@@ -280,11 +249,7 @@ public class InterceptorDstu3Test {
 
 		String input = createInput();
 
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/$validate");
-		httpPost.setEntity(new StringEntity(input, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
-		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
-			IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		}
+		ourServer.fhirRequest("/Patient/$validate").post(input, Constants.CT_FHIR_JSON);
 
 		InOrder order = inOrder(myInterceptor1);
 		order.verify(myInterceptor1, times(1)).incomingRequestPreProcessed(nullable(HttpServletRequest.class), nullable(HttpServletResponse.class));
