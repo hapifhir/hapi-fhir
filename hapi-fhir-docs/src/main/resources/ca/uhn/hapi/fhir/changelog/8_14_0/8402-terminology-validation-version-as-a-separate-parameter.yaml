@@ -1,0 +1,12 @@
+---
+type: fix
+issue: 8402
+title: "Validating or looking up a code against a specific code system version did not always use that version.
+  Validation could use whichever version the first matching validation support module held, so changing the
+  order of the modules could change the result. A remote terminology service reported a code system version as
+  unknown even when it held that version. A ValueSet that includes all codes from a code system version which
+  is not installed accepted codes from another installed version. A code lookup naming a version answered from the current
+  version instead. All of these now use the version that was named. When that version is not stored, validation
+  now fails with the error 'A definition for CodeSystem ... version ... could not be found, so the code cannot
+  be validated', as the HL7 validator reports it, instead of using a copy of the code system stored without a
+  version or at another version."
