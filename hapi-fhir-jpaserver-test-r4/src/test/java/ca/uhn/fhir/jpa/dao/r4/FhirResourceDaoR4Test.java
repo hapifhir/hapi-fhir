@@ -4237,9 +4237,9 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		IBundleProvider datetimeSearchResponse =  myServiceRequestDao.search(params);
 
 		// Then
-		assertThat(toUnqualifiedVersionlessIdValues(datetimeSearchResponse)).hasSize(theExpectedDates.size());
 		List<Date> eventDatesFromDatetimeSearch = getEventDatesFromServiceRequestsInSearchResponse(datetimeSearchResponse);
 		assertThat(eventDatesFromDatetimeSearch).containsExactlyElementsOf(theExpectedDates);
+		assertThat(toUnqualifiedVersionlessIdValues(datetimeSearchResponse)).hasSize(theExpectedDates.size());
 
 		// When
 		params = new SearchParameterMap();
@@ -4247,9 +4247,9 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		IBundleProvider ordinalDateSearchResponse = myServiceRequestDao.search(params);
 
 		// Then
-		assertThat(toUnqualifiedVersionlessIdValues(ordinalDateSearchResponse)).hasSize(theExpectedDates.size());
 		List<Date> eventDatesFromOrdinalSearch = getEventDatesFromServiceRequestsInSearchResponse(ordinalDateSearchResponse);
 		assertThat(eventDatesFromOrdinalSearch).containsExactlyElementsOf(theExpectedDates);
+		assertThat(toUnqualifiedVersionlessIdValues(ordinalDateSearchResponse)).hasSize(theExpectedDates.size());
 	}
 
 	private static List<Date> getEventDatesFromServiceRequestsInSearchResponse(IBundleProvider theDateSearchResponse) {
@@ -4285,7 +4285,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 			// Timing period with no start
 			Arguments.of(List.of(feb7, feb8, feb9, feb10), periodNoStart, List.of(feb7, feb8, feb9)),
 			// Timing period with no end
-			Arguments.of(List.of(feb8, feb9, feb10, feb11), periodNoEnd, List.of()),
+			Arguments.of(List.of(feb7, feb8, feb9, feb10, feb11), periodNoEnd, List.of(feb8, feb9, feb10, feb11)),
 			// Timing period with start and end, event falls within date range
 			Arguments.of(List.of(feb7, feb8, feb9, feb10), periodStartEnd, List.of(feb7, feb8, feb9, feb10)),
 			// Timing period with start and end, event falls before date range

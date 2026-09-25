@@ -78,7 +78,6 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
@@ -2323,7 +2322,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		/**
 		 * Sets default start/end values for Periods
 		 */
-		private @Nullable PeriodAsDates normalizePeriodDates(
+		private PeriodAsDates normalizePeriodDates(
 				Date start, String startAsString, Date end, String endAsString) {
 
 			if (start == null && end == null) {
@@ -2347,6 +2346,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		/**
 		 * For Timings, we consider all the dates in the structure (eg. Timing.event, Timing.repeat.bounds.boundsPeriod)
 		 * to create an upper and lower bound Indexed Search Param.
+		 * If `event` is present, we don't normalize the start/end date of the period.
 		 */
 		private void addDate_Timing(
 				String theResourceType,
@@ -2392,14 +2392,26 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 								.findFirst()
 								.orElse(null);
 
-						PeriodAsDates periodAsDates = normalizePeriodDates(
-								start,
-								start != null ? start.getDateValueAsString() : null,
-								end,
-								end != null ? end.getDateValueAsString() : null);
-						if (periodAsDates != null) {
-							startDates.add(periodAsDates.start);
-							endDates.add(periodAsDates.end);
+						// ONLY If we have no event dates, normalize the Period for indexing.
+						// This is to prevent unbounded Periods turning into a catch-all and returning
+						// search results with events outside a searched Period.
+						if (eventDatesSorted.isEmpty()) {
+							PeriodAsDates periodAsDates = normalizePeriodDates(
+									start,
+									start != null ? start.getDateValueAsString() : null,
+									end,
+									end != null ? end.getDateValueAsString() : null);
+							if (periodAsDates != null) {
+								startDates.add(periodAsDates.start);
+								endDates.add(periodAsDates.end);
+							}
+						} else {
+							if (start != null) {
+								startDates.add(start);
+							}
+							if (end != null) {
+								endDates.add(end);
+							}
 						}
 					}
 				}
