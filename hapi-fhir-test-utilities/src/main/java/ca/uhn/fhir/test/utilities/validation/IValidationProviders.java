@@ -144,10 +144,20 @@ public interface IValidationProviders {
 		}
 
 		/**
-		 * The resource registered for the given url, preferring one registered for that version. Versioned
-		 * resources are registered under the canonical key, so a version is looked up there first; a fixture
-		 * which registered the resource by url alone still answers, as it did while the version could only
-		 * reach this provider packed into the url.
+		 * Kept so that code written against the earlier signature still compiles.
+		 *
+		 * @deprecated Use {@link #find(UriParam, StringParam)}
+		 */
+		// Created by Claude Opus 5
+		@Deprecated(since = "8.14.0")
+		public List<T> find(UriParam theUrlParam) {
+			return find(theUrlParam, null);
+		}
+
+		/**
+		 * The resource registered for the given url and version. As on a real server, a search naming a version
+		 * matches only a resource registered for that version, never one registered by url alone, so a test
+		 * cannot pass by being handed another version than the one it asked for.
 		 */
 		// Created by Claude Opus 5
 		protected T getTerminologyResource(UriParam theUrlParam, @Nullable StringParam theVersionParam) {
@@ -156,7 +166,7 @@ public interface IValidationProviders {
 			}
 			String urlValue = theUrlParam.getValue();
 			String version = theVersionParam != null ? theVersionParam.getValue() : null;
-			if (isNotBlank(version) && myTerminologyResourceMap.containsKey(urlValue + "|" + version)) {
+			if (isNotBlank(version)) {
 				return myTerminologyResourceMap.get(urlValue + "|" + version);
 			}
 			if (!myTerminologyResourceMap.containsKey(urlValue) && myShouldThrowExceptionForResourceNotFound) {

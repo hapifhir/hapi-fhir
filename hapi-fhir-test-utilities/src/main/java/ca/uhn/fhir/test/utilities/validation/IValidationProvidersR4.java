@@ -22,14 +22,11 @@ package ca.uhn.fhir.test.utilities.validation;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
-import ca.uhn.fhir.rest.annotation.OptionalParam;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
-import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import jakarta.servlet.http.HttpServletRequest;
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -142,22 +139,14 @@ public interface IValidationProvidersR4 {
 		}
 
 		/**
-		 * Overrides the inherited search rather than adding a second one, so that a url-only search has just
-		 * one method to match. A fixture registers its ValueSet unversioned, so the version the caller asked
-		 * for is stamped onto what is returned.
+		 * Kept so that code written against the earlier signature still compiles.
+		 *
+		 * @deprecated Use {@link #find(UriParam, StringParam)}
 		 */
 		// Created by Claude Opus 5
-		@Override
-		@Search
-		public List<ValueSet> find(@RequiredParam(name = "url") UriParam theUrlParam,
-								   @OptionalParam(name = "version") StringParam theVersionParam) {
-			ValueSet valueSet = getTerminologyResource(theUrlParam, theVersionParam);
-			String version = theVersionParam != null ? theVersionParam.getValue() : null;
-			if (valueSet != null && StringUtils.isNotEmpty(version)) {
-				valueSet.setVersion(version);
-			}
-
-			return valueSet != null ? List.of(valueSet) : List.of();
+		@Deprecated(since = "8.14.0")
+		public List<ValueSet> find(UriParam theUrlParam, TokenParam theVersionParam) {
+			return find(theUrlParam, theVersionParam != null ? new StringParam(theVersionParam.getValue()) : null);
 		}
 
 		@Override
@@ -182,6 +171,7 @@ public interface IValidationProvidersR4 {
 		@Override
 		public ValueSet addTerminologyResource(String theUrl, String theVersion) {
 			ValueSet valueSet = addTerminologyResource(theUrl);
+			valueSet.setVersion(theVersion);
 			addVersionedTerminologyResource(theUrl, theVersion, valueSet);
 			return valueSet;
 		}
