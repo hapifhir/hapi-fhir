@@ -465,7 +465,8 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	 */
 	// Created by Claude Opus 5
 	@Override
-	public IBaseResource fetchCodeSystem(String theSystem, @Nullable String theVersion) {
+	@Nullable
+	public IBaseResource fetchCodeSystem(@Nonnull String theSystem, @Nullable String theVersion) {
 		return fetchCodeSystem(theSystem);
 	}
 
@@ -495,7 +496,9 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	// Created by Claude Opus 5
 	@Override
 	public boolean isCodeSystemSupported(
-			ValidationSupportContext theValidationSupportContext, String theSystem, @Nullable String theVersion) {
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theSystem,
+			@Nullable String theVersion) {
 		return isCodeSystemSupported(theValidationSupportContext, theSystem);
 	}
 
@@ -524,7 +527,9 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	// Created by Claude Opus 5
 	@Override
 	public boolean isValueSetSupported(
-			ValidationSupportContext theValidationSupportContext, String theValueSetUrl, @Nullable String theVersion) {
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theValueSetUrl,
+			@Nullable String theVersion) {
 		return isValueSetSupported(theValidationSupportContext, theValueSetUrl);
 	}
 

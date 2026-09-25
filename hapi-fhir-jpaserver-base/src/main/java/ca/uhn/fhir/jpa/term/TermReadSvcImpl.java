@@ -297,7 +297,9 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	// Created by Claude Opus 5
 	@Override
 	public boolean isCodeSystemSupported(
-			ValidationSupportContext theValidationSupportContext, String theSystem, @Nullable String theVersion) {
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theSystem,
+			@Nullable String theVersion) {
 		return isCodeSystemSupported(theValidationSupportContext, UrlUtil.toCanonicalUrl(theSystem, theVersion));
 	}
 

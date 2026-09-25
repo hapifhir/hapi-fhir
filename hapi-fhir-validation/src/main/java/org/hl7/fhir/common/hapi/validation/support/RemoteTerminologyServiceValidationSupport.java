@@ -190,7 +190,8 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 
 	// Created by Claude Opus 5
 	@Override
-	public IBaseResource fetchCodeSystem(String theSystem, @Nullable String theVersion) {
+	@Nullable
+	public IBaseResource fetchCodeSystem(@Nonnull String theSystem, @Nullable String theVersion) {
 		// callers of this want the whole resource.
 		return searchForCodeSystem(theSystem, theVersion, SummaryEnum.FALSE);
 	}
@@ -608,7 +609,8 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 
 	// Created by Claude Opus 5
 	@Override
-	public IBaseResource fetchValueSet(String theValueSetUrl, @Nullable String theVersion) {
+	@Nullable
+	public IBaseResource fetchValueSet(@Nonnull String theValueSetUrl, @Nullable String theVersion) {
 		// force the remote server to send the whole resource.
 		SummaryEnum summaryParam = SummaryEnum.FALSE;
 		return searchForValueSet(theValueSetUrl, theVersion, summaryParam);
@@ -665,7 +667,9 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 	// Created by Claude Opus 5
 	@Override
 	public boolean isCodeSystemSupported(
-			ValidationSupportContext theValidationSupportContext, String theSystem, @Nullable String theVersion) {
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theSystem,
+			@Nullable String theVersion) {
 		// a summary is ok if we are just checking the presence.
 		SummaryEnum summaryParam = null;
 
@@ -682,7 +686,9 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 	// Created by Claude Opus 5
 	@Override
 	public boolean isValueSetSupported(
-			ValidationSupportContext theValidationSupportContext, String theValueSetUrl, @Nullable String theVersion) {
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theValueSetUrl,
+			@Nullable String theVersion) {
 		// a summary is ok if we are just checking the presence.
 		SummaryEnum summaryParam = null;
 

@@ -85,7 +85,9 @@ public abstract class BaseValidationSupportWrapper extends BaseValidationSupport
 	// Created by Claude Opus 5
 	@Override
 	public boolean isCodeSystemSupported(
-			ValidationSupportContext theValidationSupportContext, String theSystem, @Nullable String theVersion) {
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theSystem,
+			@Nullable String theVersion) {
 		return myWrap.isCodeSystemSupported(theValidationSupportContext, theSystem, theVersion);
 	}
 

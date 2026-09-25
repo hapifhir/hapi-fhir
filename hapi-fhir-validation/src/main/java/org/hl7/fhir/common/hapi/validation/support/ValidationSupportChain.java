@@ -37,6 +37,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -144,6 +145,14 @@ public class ValidationSupportChain implements IValidationSupport {
 	 */
 	@Nonnull
 	private final List<IBaseResource> myStructureDefinitionsAsList = new ArrayList<>();
+	/**
+	 * The instances in {@link #myStructureDefinitionsAsList}. One instance can be cached under several URLs -
+	 * a base definition is the same resource with or without its version - and is listed once. Guarded as
+	 * the fields above.
+	 */
+	// Created by Claude Opus 5
+	@Nonnull
+	private final Set<IBaseResource> myStructureDefinitionsListed = Collections.newSetFromMap(new IdentityHashMap<>());
 
 	private final ThreadPoolExecutor myBackgroundExecutor;
 	private final CacheConfiguration myCacheConfiguration;
@@ -377,6 +386,7 @@ public class ValidationSupportChain implements IValidationSupport {
 		synchronized (myStructureDefinitionsByUrl) {
 			myStructureDefinitionsByUrl.clear();
 			myStructureDefinitionsAsList.clear();
+			myStructureDefinitionsListed.clear();
 		}
 	}
 
@@ -402,7 +412,9 @@ public class ValidationSupportChain implements IValidationSupport {
 	// Created by Claude Opus 5
 	@Override
 	public boolean isValueSetSupported(
-			ValidationSupportContext theValidationSupportContext, String theValueSetUrl, @Nullable String theVersion) {
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theValueSetUrl,
+			@Nullable String theVersion) {
 		for (IValidationSupport next : myChain) {
 			boolean retVal = isValueSetSupported(theValidationSupportContext, next, theValueSetUrl, theVersion);
 			if (retVal) {
@@ -660,7 +672,9 @@ public class ValidationSupportChain implements IValidationSupport {
 
 						url = defaultIfBlank(url, UUID.randomUUID().toString());
 						if (myStructureDefinitionsByUrl.putIfAbsent(url, structureDefinition) == null) {
-							myStructureDefinitionsAsList.add(structureDefinition);
+							if (myStructureDefinitionsListed.add(structureDefinition)) {
+								myStructureDefinitionsAsList.add(structureDefinition);
+							}
 						}
 					}
 				}
@@ -720,7 +734,8 @@ public class ValidationSupportChain implements IValidationSupport {
 
 	// Created by Claude Opus 5
 	@Override
-	public IBaseResource fetchCodeSystem(String theSystem, @Nullable String theVersion) {
+	@Nullable
+	public IBaseResource fetchCodeSystem(@Nonnull String theSystem, @Nullable String theVersion) {
 		Function<IValidationSupport, IBaseResource> invoker = v -> v.fetchCodeSystem(theSystem, theVersion);
 		// Two versions of one code system are different resources, so the version belongs in the cache key
 		String canonicalUrl = UrlUtil.toCanonicalUrl(theSystem, theVersion);
@@ -758,7 +773,8 @@ public class ValidationSupportChain implements IValidationSupport {
 
 	// Created by Claude Opus 5
 	@Override
-	public IBaseResource fetchValueSet(String theUrl, @Nullable String theVersion) {
+	@Nullable
+	public IBaseResource fetchValueSet(@Nonnull String theUrl, @Nullable String theVersion) {
 		Function<IValidationSupport, IBaseResource> invoker = v -> v.fetchValueSet(theUrl, theVersion);
 		// Two versions of one value set are different resources, so the version belongs in the cache key
 		String canonicalUrl = UrlUtil.toCanonicalUrl(theUrl, theVersion);
@@ -777,7 +793,9 @@ public class ValidationSupportChain implements IValidationSupport {
 	// Created by Claude Opus 5
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri, @Nullable String theVersion) {
+	@Nullable
+	public <T extends IBaseResource> T fetchResource(
+			@Nullable Class<T> theClass, @Nonnull String theUri, @Nullable String theVersion) {
 
 		/*
 		 * If we're looking for a common type with a dedicated fetch method, use that
@@ -823,7 +841,8 @@ public class ValidationSupportChain implements IValidationSupport {
 
 	// Created by Claude Opus 5
 	@Override
-	public IBaseResource fetchStructureDefinition(String theUrl, @Nullable String theVersion) {
+	@Nullable
+	public IBaseResource fetchStructureDefinition(@Nonnull String theUrl, @Nullable String theVersion) {
 		// Two versions of one structure definition are different resources, so the version belongs in the key
 		String canonicalUrl = UrlUtil.toCanonicalUrl(theUrl, theVersion);
 		synchronized (myStructureDefinitionsByUrl) {
@@ -837,7 +856,9 @@ public class ValidationSupportChain implements IValidationSupport {
 				if (myExpiringCache != null) {
 					if (candidate != null) {
 						if (myStructureDefinitionsByUrl.putIfAbsent(canonicalUrl, candidate) == null) {
-							myStructureDefinitionsAsList.add(candidate);
+							if (myStructureDefinitionsListed.add(candidate)) {
+								myStructureDefinitionsAsList.add(candidate);
+							}
 						}
 					}
 				}
@@ -857,7 +878,9 @@ public class ValidationSupportChain implements IValidationSupport {
 	// Created by Claude Opus 5
 	@Override
 	public boolean isCodeSystemSupported(
-			ValidationSupportContext theValidationSupportContext, String theSystem, @Nullable String theVersion) {
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theSystem,
+			@Nullable String theVersion) {
 		for (IValidationSupport next : myChain) {
 			if (isCodeSystemSupported(theValidationSupportContext, next, theSystem, theVersion)) {
 				if (ourLog.isDebugEnabled()) {

@@ -116,6 +116,24 @@ public class DefaultProfileValidationSupportR4Test extends BaseValidationTestWit
 		assertNotNull(chain.fetchCodeSystem(url, "999"));
 	}
 
+	/**
+	 * A StructureDefinition from the base specification is the same resource whether it is asked for with or
+	 * without its version, so fetching it both ways must not list it twice.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	public void testFetchAllStructureDefinitions_baseDefinitionFetchedWithAndWithoutVersion_isListedOnce() {
+		ValidationSupportChain chain = new ValidationSupportChain(mySvc);
+		String url = "http://hl7.org/fhir/StructureDefinition/Patient";
+		chain.fetchAllStructureDefinitions();
+		IBaseResource patient = chain.fetchStructureDefinition(url);
+		assertNotNull(chain.fetchStructureDefinition(url, "4.0.1"));
+
+		List<IBaseResource> all = chain.fetchAllStructureDefinitions();
+
+		assertEquals(1, all.stream().filter(t -> t == patient).count());
+	}
+
 	@Test
 	public void testValidateBuiltInProfile() {
 		IBaseResource address = mySvc.fetchStructureDefinition("http://hl7.org/fhir/StructureDefinition/Address");

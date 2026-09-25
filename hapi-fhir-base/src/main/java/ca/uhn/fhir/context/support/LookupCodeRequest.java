@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.context.support;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 import java.util.Collection;
@@ -87,6 +88,7 @@ public class LookupCodeRequest {
 	 * @since 8.14.0
 	 */
 	// Created by Claude Opus 5
+	@Nonnull
 	public LookupCodeRequest setVersion(@Nullable String theVersion) {
 		myVersion = theVersion;
 		return this;

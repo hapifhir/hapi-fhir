@@ -211,7 +211,7 @@ public interface IValidationSupport {
 	 */
 	// Created by Claude Opus 5
 	@Nullable
-	default IBaseResource fetchCodeSystem(String theSystem, @Nullable String theVersion) {
+	default IBaseResource fetchCodeSystem(@Nonnull String theSystem, @Nullable String theVersion) {
 		return fetchCodeSystem(UrlUtil.toCanonicalUrl(theSystem, theVersion));
 	}
 
@@ -279,7 +279,7 @@ public interface IValidationSupport {
 	// Created by Claude Opus 5
 	@Nullable
 	default <T extends IBaseResource> T fetchResource(
-			@Nullable Class<T> theClass, String theUri, @Nullable String theVersion) {
+			@Nullable Class<T> theClass, @Nonnull String theUri, @Nullable String theVersion) {
 		return fetchResource(theClass, UrlUtil.toCanonicalUrl(theUri, theVersion));
 	}
 
@@ -308,7 +308,7 @@ public interface IValidationSupport {
 	 */
 	// Created by Claude Opus 5
 	@Nullable
-	default IBaseResource fetchStructureDefinition(String theUrl, @Nullable String theVersion) {
+	default IBaseResource fetchStructureDefinition(@Nonnull String theUrl, @Nullable String theVersion) {
 		return fetchStructureDefinition(UrlUtil.toCanonicalUrl(theUrl, theVersion));
 	}
 
@@ -348,7 +348,9 @@ public interface IValidationSupport {
 	 */
 	// Created by Claude Opus 5
 	default boolean isCodeSystemSupported(
-			ValidationSupportContext theValidationSupportContext, String theSystem, @Nullable String theVersion) {
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theSystem,
+			@Nullable String theVersion) {
 		String canonicalUrl = UrlUtil.toCanonicalUrl(theSystem, theVersion);
 		if (isCodeSystemSupported(theValidationSupportContext, canonicalUrl)) {
 			return true;
@@ -393,7 +395,7 @@ public interface IValidationSupport {
 	 */
 	// Created by Claude Opus 5
 	@Nullable
-	default IBaseResource fetchValueSet(String theValueSetUrl, @Nullable String theVersion) {
+	default IBaseResource fetchValueSet(@Nonnull String theValueSetUrl, @Nullable String theVersion) {
 		return fetchValueSet(UrlUtil.toCanonicalUrl(theValueSetUrl, theVersion));
 	}
 
@@ -592,7 +594,9 @@ public interface IValidationSupport {
 	 */
 	// Created by Claude Opus 5
 	default boolean isValueSetSupported(
-			ValidationSupportContext theValidationSupportContext, String theValueSetUrl, @Nullable String theVersion) {
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theValueSetUrl,
+			@Nullable String theVersion) {
 		return isValueSetSupported(theValidationSupportContext, UrlUtil.toCanonicalUrl(theValueSetUrl, theVersion));
 	}
 
