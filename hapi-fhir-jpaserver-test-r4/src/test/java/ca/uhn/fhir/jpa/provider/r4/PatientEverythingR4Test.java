@@ -143,9 +143,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		assertThat(actual).containsExactlyInAnyOrder(patientId, observationId);
 
 		// Synchronous call
-		HttpTestResponse resp = myServer.fhirRequest("/" + patientId + "/$everything?_format=json&_count=100")
-			.withHeader(Constants.HEADER_CACHE_CONTROL, Constants.CACHE_CONTROL_NO_CACHE)
-			.get();
+		HttpTestResponse resp = myServer.fhirRequest("/" + patientId + "/$everything?_format=json&_count=100").withHeader(Constants.HEADER_CACHE_CONTROL, Constants.CACHE_CONTROL_NO_CACHE).get();
 		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy(), resp.getContentType());
 		bundle = EncodingEnum.JSON.newParser(myFhirContext).parseResource(Bundle.class, resp.getBody());
 		assertNull(bundle.getLink("next"));

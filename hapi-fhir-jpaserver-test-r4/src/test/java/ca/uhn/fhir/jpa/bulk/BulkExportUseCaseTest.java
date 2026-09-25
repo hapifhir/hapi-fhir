@@ -233,10 +233,7 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			myClient.update().resource(p).execute();
 
 			//And Given we start a bulk export job
-			String pollingLocation = myServer.fhirRequest("/$export")
-				.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
-				.get()
-				.getHeader("Content-Location");
+			String pollingLocation = myServer.fhirRequest("/$export").withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC).get().getHeader("Content-Location");
 			String jobId = Batch2JobHelper.getJobIdFromPollingLocation(pollingLocation);
 			myBatch2JobHelper.awaitJobCompletion(jobId);
 
@@ -272,10 +269,7 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			encounter.setId("Enc-1");
 			myClient.update().resource(encounter).execute();
 
-			String pollingLocation = myServer.fhirRequest("/$export")
-				.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
-				.get()
-				.getHeader("Content-Location");
+			String pollingLocation = myServer.fhirRequest("/$export").withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC).get().getHeader("Content-Location");
 			String jobId = Batch2JobHelper.getJobIdFromPollingLocation(pollingLocation);
 			myBatch2JobHelper.awaitJobCompletion(jobId);
 
@@ -305,10 +299,7 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			binary.setId("Bin-1");
 			myClient.update().resource(binary).execute();
 
-			String pollingLocation = myServer.fhirRequest("/$export")
-				.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
-				.get()
-				.getHeader("Content-Location");
+			String pollingLocation = myServer.fhirRequest("/$export").withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC).get().getHeader("Content-Location");
 			String jobId = Batch2JobHelper.getJobIdFromPollingLocation(pollingLocation);
 			myBatch2JobHelper.awaitJobCompletion(jobId);
 
@@ -339,10 +330,7 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			path += "&_exportId=" + theExportId;
 		}
 
-		return myServer.fhirRequest(path)
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
-			.get()
-			.getHeader("Content-Location");
+		return myServer.fhirRequest(path).withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC).get().getHeader("Content-Location");
 	}
 
 	/**
@@ -379,25 +367,19 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			}
 
 			{ //Test with the Accept Header set to application/fhir+ndjson should stream out the results.
-				HttpTestResponse status = myServer.fhirRequest("/" + replace)
-					.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_NDJSON)
-					.get();
+				HttpTestResponse status = myServer.fhirRequest("/" + replace).withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_NDJSON).get();
 				logContentTypeAndResponse(status);
 				validateNdJsonResponse(status, patientCount);
 			}
 
 			{ //Test that demanding octet-stream will force it to whatever the Binary's content-type is set to.
-				HttpTestResponse status = myServer.fhirRequest("/" + replace)
-					.withHeader(Constants.HEADER_ACCEPT, Constants.CT_OCTET_STREAM)
-					.get();
+				HttpTestResponse status = myServer.fhirRequest("/" + replace).withHeader(Constants.HEADER_ACCEPT, Constants.CT_OCTET_STREAM).get();
 				logContentTypeAndResponse(status);
 				validateNdJsonResponse(status, patientCount);
 			}
 
 			{ //Test with the Accept Header set to application/fhir+json should simply return the Binary resource.
-				HttpTestResponse status = myServer.fhirRequest("/" + replace)
-					.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON)
-					.get();
+				HttpTestResponse status = myServer.fhirRequest("/" + replace).withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON).get();
 				logContentTypeAndResponse(status);
 
 				String response = status.getBody();

@@ -30,10 +30,7 @@ public class ResourceProviderR5FqlTest extends BaseResourceProviderR5Test {
 		request.addParameter(HfqlConstants.PARAM_FETCH_SIZE, new IntegerType(5));
 
 		// Test
-		String outcome = myServer.fhirRequest("/" + HfqlConstants.HFQL_EXECUTE)
-			.post(request)
-			.assertStatus(200)
-			.getBody();
+		String outcome = myServer.fhirRequest("/" + HfqlConstants.HFQL_EXECUTE).post(request).assertStatus(200).getBody();
 
 		// Verify
 		assertThat(outcome).contains("0,Simpson0,Homer");

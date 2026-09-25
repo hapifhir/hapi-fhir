@@ -78,10 +78,7 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 		createObservationWithCode(mean_blood_pressure);
 
 		// when
-		String text = myServer.fhirRequest("/ValueSet/$expand?contextDirection=existing&context=Observation.code:text&filter=pressure")
-			.get()
-			.assertStatus(Constants.STATUS_HTTP_200_OK)
-			.getBody();
+		String text = myServer.fhirRequest("/ValueSet/$expand?contextDirection=existing&context=Observation.code:text&filter=pressure").get().assertStatus(Constants.STATUS_HTTP_200_OK).getBody();
 
 		// then
 		ValueSet valueSet = myFhirContext.newXmlParser().parseResource(ValueSet.class, text);
@@ -186,10 +183,7 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 			createObservationWithCode(blood_count);
 		});
 		myCaptureQueriesListener.clear();
-		String text = myServer.fhirRequest("/Observation?code=789-8&_count=5&_total=accurate")
-			.get()
-			.assertStatus(Constants.STATUS_HTTP_200_OK)
-			.getBody();
+		String text = myServer.fhirRequest("/Observation?code=789-8&_count=5&_total=accurate").get().assertStatus(Constants.STATUS_HTTP_200_OK).getBody();
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 		// then
@@ -207,10 +201,7 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 			createObservationWithCode(blood_count);
 		});
 		myCaptureQueriesListener.clear();
-		String text = myServer.fhirRequest("/Observation?code=789-8&_count=0")
-			.get()
-			.assertStatus(Constants.STATUS_HTTP_200_OK)
-			.getBody();
+		String text = myServer.fhirRequest("/Observation?code=789-8&_count=0").get().assertStatus(Constants.STATUS_HTTP_200_OK).getBody();
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 		Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, text);

@@ -37,10 +37,7 @@ public class ResourceProviderInvalidDataR4Test extends BaseResourceProviderR4Tes
 			myResourceHistoryTableDao.save(resVer);
 		});
 
-		String responseContent = myServer.fhirRequest("/Observation/" + id)
-			.withHeader("Accept", "application/fhir+json")
-			.get()
-			.getBody();
+		String responseContent = myServer.fhirRequest("/Observation/" + id).withHeader("Accept", "application/fhir+json").get().getBody();
 		ourLog.info("Response content: " + responseContent);
 		assertThat(responseContent).contains("\"value\":-0.100");
 	}

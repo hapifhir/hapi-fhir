@@ -966,8 +966,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	public void testInvalidFilter() {
 		String string = ClasspathUtil.loadResource("/bug_516_invalid_expansion.json");
 
-		HttpTestResponse resp = myServer.fhirRequest("/ValueSet/%24expand")
-			.post(string, ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW);
+		HttpTestResponse resp = myServer.fhirRequest("/ValueSet/%24expand").post(string, ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW);
 
 		String respString = resp.getBody();
 		ourLog.debug(respString);
@@ -1118,10 +1117,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 			UrlUtil.escapeUrlParam(URL_MY_CODE_SYSTEM) +
 			"&code=AA";
 
-		String respString = myServer.fhirRequest(url)
-			.withHeader("Accept", "application/fhir+json")
-			.get()
-			.getBody();
+		String respString = myServer.fhirRequest(url).withHeader("Accept", "application/fhir+json").get().getBody();
 		ourLog.debug(respString);
 
 		Parameters respParam = myFhirCtx.newJsonParser().parseResource(Parameters.class, respString);
@@ -1139,10 +1135,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 		ourLog.info("* Requesting: {}", url);
 
-		String respString = myServer.fhirRequest(url)
-			.withHeader("Accept", "application/fhir+json")
-			.get()
-			.getBody();
+		String respString = myServer.fhirRequest(url).withHeader("Accept", "application/fhir+json").get().getBody();
 		ourLog.debug(respString);
 
 		Parameters respParam = myFhirCtx.newJsonParser().parseResource(Parameters.class, respString);

@@ -184,8 +184,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
 		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);
 
-		HttpTestResponse response = myServer.fhirRequest("/Patient")
-			.post(resource, Constants.CT_FHIR_XML);
+		HttpTestResponse response = myServer.fhirRequest("/Patient").post(resource, Constants.CT_FHIR_XML);
 		ourLog.info("Response was: {}", response.getBody());
 		response.assertStatus(201);
 		String newIdString = response.getHeader(Constants.HEADER_LOCATION_LC);
@@ -281,8 +280,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
 		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);
 
-		HttpTestResponse response = myServer.fhirRequest("/Patient")
-			.post(resource, Constants.CT_FHIR_XML);
+		HttpTestResponse response = myServer.fhirRequest("/Patient").post(resource, Constants.CT_FHIR_XML);
 		ourLog.info("Response was: {}", response.getBody());
 		response.assertStatus(201);
 		String newIdString = response.getHeader(Constants.HEADER_LOCATION_LC);
@@ -334,9 +332,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 	private void transaction(Bundle theBundle) throws IOException {
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(theBundle);
-		myServer.fhirRequest("/")
-			.post(resource, Constants.CT_FHIR_XML)
-			.assertStatus(200);
+		myServer.fhirRequest("/").post(resource, Constants.CT_FHIR_XML).assertStatus(200);
 	}
 
 	@Test

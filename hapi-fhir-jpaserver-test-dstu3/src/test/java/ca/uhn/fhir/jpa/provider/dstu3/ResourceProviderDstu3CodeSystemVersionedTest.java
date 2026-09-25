@@ -765,9 +765,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		assertEquals("Parent Child CodeSystem 1", initialCodeSystem.getName());
 		initialCodeSystem.setName("Updated Parent Child CodeSystem 1");
 		String encoded = myFhirContext.newJsonParser().encodeResourceToString(initialCodeSystem);
-		myServer.fhirRequest("/CodeSystem/" + parentChildCs1Id)
-			.put(encoded, "application/json+fhir")
-			.assertStatus(200);
+		myServer.fhirRequest("/CodeSystem/" + parentChildCs1Id).put(encoded, "application/json+fhir").assertStatus(200);
 
 		CodeSystem updatedCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs1Id.getId()).execute();
 		assertEquals("Updated Parent Child CodeSystem 1", updatedCodeSystem.getName());
@@ -776,9 +774,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		assertEquals("Parent Child CodeSystem 2", initialCodeSystem.getName());
 		initialCodeSystem.setName("Updated Parent Child CodeSystem 2");
 		encoded = myFhirContext.newJsonParser().encodeResourceToString(initialCodeSystem);
-		myServer.fhirRequest("/CodeSystem/" + parentChildCs2Id)
-			.put(encoded, "application/json+fhir")
-			.assertStatus(200);
+		myServer.fhirRequest("/CodeSystem/" + parentChildCs2Id).put(encoded, "application/json+fhir").assertStatus(200);
 
 		updatedCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs2Id.getId()).execute();
 		assertEquals("Updated Parent Child CodeSystem 2", updatedCodeSystem.getName());

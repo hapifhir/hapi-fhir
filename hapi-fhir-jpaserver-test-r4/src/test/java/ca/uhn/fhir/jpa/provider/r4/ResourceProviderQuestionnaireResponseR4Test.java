@@ -206,8 +206,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 			"    </item>\n" +
 			"</QuestionnaireResponse>";
 
-		HttpTestResponse response = myServer.fhirRequest("/QuestionnaireResponse")
-			.post(input, ca.uhn.fhir.rest.api.Constants.CT_FHIR_XML);
+		HttpTestResponse response = myServer.fhirRequest("/QuestionnaireResponse").post(input, ca.uhn.fhir.rest.api.Constants.CT_FHIR_XML);
 		String responseString = response.getBody();
 		ourLog.info("Response: {}", responseString);
 		response.assertStatus(201);
@@ -215,19 +214,14 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 		assertThat(newIdString).startsWith(myServerBase + "/QuestionnaireResponse/");
 		final IdType id2 = new IdType(newIdString);
 
-		responseString = myServer.fhirRequest("/QuestionnaireResponse/" + id2.getIdPart() + "?_format=xml&_pretty=true")
-			.get()
-			.getBody();
+		responseString = myServer.fhirRequest("/QuestionnaireResponse/" + id2.getIdPart() + "?_format=xml&_pretty=true").get().getBody();
 		ourLog.info("Response: {}", responseString);
 		assertThat(responseString).contains("Exclusion Criteria");
 	}
 
 	@Test
 	public void testValidateOnNoId() throws Exception {
-		String responseString = myServer.fhirRequest("/QuestionnaireResponse/$validate")
-			.get()
-			.assertStatus(400)
-			.getBody();
+		String responseString = myServer.fhirRequest("/QuestionnaireResponse/$validate").get().assertStatus(400).getBody();
 		ourLog.info("Response: {}", responseString);
 		assertThat(responseString).contains("No resource supplied for $validate operation");
 	}
@@ -240,10 +234,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 	public void testValidateQuestionnaireResponseWithNoIdForCreate() throws Exception {
 
 		String input = "{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"mode\",\"valueString\":\"create\"},{\"name\":\"resource\",\"resource\":{\"resourceType\":\"QuestionnaireResponse\",\"questionnaire\":\"http://fhirtest.uhn.ca/baseDstu2/Questionnaire/MedsCheckEligibility\",\"text\":{\"status\":\"generated\",\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">!-- populated from the rendered HTML below --></div>\"},\"status\":\"completed\",\"authored\":\"2017-02-10T00:02:58.098Z\"}}]}";
-		String responseString = myServer.fhirRequest("/QuestionnaireResponse/$validate?_pretty=true")
-			.post(input, ca.uhn.fhir.rest.api.Constants.CT_JSON)
-			.assertStatus(200)
-			.getBody();
+		String responseString = myServer.fhirRequest("/QuestionnaireResponse/$validate?_pretty=true").post(input, ca.uhn.fhir.rest.api.Constants.CT_JSON).assertStatus(200).getBody();
 		ourLog.info("Response: {}", responseString);
 	}
 
@@ -295,10 +286,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 	public void testValidateQuestionnaireResponseWithNoIdForUpdate() throws Exception {
 
 		String input = "{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"mode\",\"valueString\":\"update\"},{\"name\":\"resource\",\"resource\":{\"resourceType\":\"QuestionnaireResponse\",\"questionnaire\":\"http://fhirtest.uhn.ca/baseDstu2/Questionnaire/MedsCheckEligibility\",\"text\":{\"status\":\"generated\",\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">!-- populated from the rendered HTML below --></div>\"},\"status\":\"completed\",\"authored\":\"2017-02-10T00:02:58.098Z\"}}]}";
-		String responseString = myServer.fhirRequest("/QuestionnaireResponse/$validate?_pretty=true")
-			.post(input, ca.uhn.fhir.rest.api.Constants.CT_JSON)
-			.assertStatus(422)
-			.getBody();
+		String responseString = myServer.fhirRequest("/QuestionnaireResponse/$validate?_pretty=true").post(input, ca.uhn.fhir.rest.api.Constants.CT_JSON).assertStatus(422).getBody();
 		ourLog.info("Response: {}", responseString);
 		assertThat(responseString).contains("Resource has no ID");
 	}

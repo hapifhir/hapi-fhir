@@ -939,21 +939,15 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 			.setValue("ParentA");
 		IIdType vsId = myValueSetDao.create(vs).getId().toUnqualifiedVersionless();
 
-		String expandResponse = myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$expand?_pretty=true")
-			.get()
-			.getBody();
+		String expandResponse = myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$expand?_pretty=true").get().getBody();
 		ourLog.info("Response: {}", expandResponse);
 
-		String validateCodeResponse = myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=ChildAA&_pretty=true")
-			.get()
-			.getBody();
+		String validateCodeResponse = myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=ChildAA&_pretty=true").get().getBody();
 		ourLog.info("Response: {}", validateCodeResponse);
 		Parameters output = myFhirContext.newXmlParser().parseResource(Parameters.class, validateCodeResponse);
 		assertEquals(true, output.getParameterBool("result"));
 
-		String validateCodeResponse2 = myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=FOO&_pretty=true")
-			.get()
-			.getBody();
+		String validateCodeResponse2 = myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=FOO&_pretty=true").get().getBody();
 		ourLog.info("Response: {}", validateCodeResponse2);
 		Parameters output2 = myFhirContext.newXmlParser().parseResource(Parameters.class, validateCodeResponse2);
 		assertEquals(false, output2.getParameterBool("result"));

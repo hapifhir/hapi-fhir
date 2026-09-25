@@ -764,21 +764,15 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		// %3E=> %3C=<
 
 		myCaptureQueriesListener.clear();
-		String output = myServer.fhirRequest("/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantType(new Date(time1)).getValueAsString())
-			.get()
-			.assertStatus(200)
-			.getBody();
+		String output = myServer.fhirRequest("/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantType(new Date(time1)).getValueAsString()).get().assertStatus(200).getBody();
 		myCaptureQueriesListener.logSelectQueries();
 		ourLog.info(output);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(myFhirContext.newXmlParser().parseResource(Bundle.class, output));
 		ourLog.info(ids.toString());
 		assertThat(ids).containsExactlyInAnyOrder(pId, cId, oId);
 
-		output = myServer.fhirRequest("/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantType(new Date(time2)).getValueAsString() + "&_lastUpdated=%3C"
-				+ new InstantType(new Date(time3)).getValueAsString())
-			.get()
-			.assertStatus(200)
-			.getBody();
+		String path = "/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantType(new Date(time2)).getValueAsString() + "&_lastUpdated=%3C" + new InstantType(new Date(time3)).getValueAsString();
+		output = myServer.fhirRequest(path).get().assertStatus(200).getBody();
 		ourLog.info(output);
 		ids = toUnqualifiedVersionlessIds(myFhirContext.newXmlParser().parseResource(Bundle.class, output));
 		ourLog.info(ids.toString());

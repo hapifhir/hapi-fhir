@@ -404,16 +404,10 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 	@Test
 	public void testValidateGeneratedCapabilityStatement() {
 
-		String input = myServer.fhirRequest("/metadata?_format=json")
-			.get()
-			.assertStatus(200)
-			.getBody();
+		String input = myServer.fhirRequest("/metadata?_format=json").get().assertStatus(200).getBody();
 		ourLog.info(input);
 
-		String respString = myServer.fhirRequest("/CapabilityStatement/$validate?_pretty=true")
-			.post(input, Constants.CT_JSON)
-			.assertStatus(200)
-			.getBody();
+		String respString = myServer.fhirRequest("/CapabilityStatement/$validate?_pretty=true").post(input, Constants.CT_JSON).assertStatus(200).getBody();
 		ourLog.debug(respString);
 
 		// As of 2023-01-26, the above line was restored.
@@ -538,9 +532,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			ourLog.debug("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
-		String output = myServer.fhirRequest("/Observation?_sort=combo-code-value-quantity")
-			.get()
-			.getBody();
+		String output = myServer.fhirRequest("/Observation?_sort=combo-code-value-quantity").get().getBody();
 		Bundle found = myFhirCtx.newXmlParser().parseResource(Bundle.class, output);
 
 		ourLog.debug("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));

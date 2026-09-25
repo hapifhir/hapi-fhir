@@ -852,8 +852,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		initialCodeSystem.setName("Updated Parent Child CodeSystem 1");
 		String encoded = myFhirContext.newJsonParser().encodeResourceToString(initialCodeSystem);
 		myCaptureQueriesListener.clear();
-		HttpTestResponse resp = myServer.fhirRequest("/CodeSystem/" + parentChildCs1Id)
-			.put(encoded, "application/json+fhir");
+		HttpTestResponse resp = myServer.fhirRequest("/CodeSystem/" + parentChildCs1Id).put(encoded, "application/json+fhir");
 		myCaptureQueriesListener.logAllQueries();
 		resp.assertStatus(200);
 
@@ -864,9 +863,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		assertEquals("Parent Child CodeSystem 2", initialCodeSystem.getName());
 		initialCodeSystem.setName("Updated Parent Child CodeSystem 2");
 		encoded = myFhirContext.newJsonParser().encodeResourceToString(initialCodeSystem);
-		myServer.fhirRequest("/CodeSystem/" + parentChildCs2Id)
-			.put(encoded, "application/json+fhir")
-			.assertStatus(200);
+		myServer.fhirRequest("/CodeSystem/" + parentChildCs2Id).put(encoded, "application/json+fhir").assertStatus(200);
 
 		updatedCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs2Id.getId()).execute();
 		assertEquals("Updated Parent Child CodeSystem 2", updatedCodeSystem.getName());

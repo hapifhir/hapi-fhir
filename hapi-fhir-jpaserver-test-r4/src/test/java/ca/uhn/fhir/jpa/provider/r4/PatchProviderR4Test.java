@@ -189,10 +189,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
 		String encodedRequest = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
 		ourLog.info("Request:\n{}", encodedRequest);
-		String responseString = myServer.fhirRequest("")
-			.post(encodedRequest, Constants.CT_FHIR_JSON_NEW)
-			.assertStatus(200)
-			.getBody();
+		String responseString = myServer.fhirRequest("").post(encodedRequest, Constants.CT_FHIR_JSON_NEW).assertStatus(200).getBody();
 		assertThat(responseString).contains("\"resourceType\":\"Bundle\"");
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
@@ -384,11 +381,8 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			"]";
 
 		String responseString = myServer.fhirRequest("/Observation/" + id.getIdPart())
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION)
-			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON)
-			.patch(patchText)
-			.assertStatus(200)
-			.getBody();
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION).withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON)
+			.patch(patchText).assertStatus(200).getBody();
 		ourLog.info("Response:\n{}", responseString);
 		assertThat(responseString).contains("\"derivedFrom\":[{\"reference\":\"Media/465eb73a-bce3-423a-b86e-5d0d267638f4\"}]");
 
@@ -410,9 +404,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
 		String responseString = myServer.fhirRequest("/Patient/" + pid1.getIdPart())
 			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
-			.patch("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]")
-			.assertStatus(200)
-			.getBody();
+			.patch("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]").assertStatus(200).getBody();
 		assertThat(responseString).contains("<OperationOutcome");
 		assertThat(responseString).contains("INFORMATION");
 
@@ -480,12 +472,8 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		patient.addName().setFamily(patchedFamilyName).addGiven("Joe");
 		IIdType pid1 = myPatientDao.create(patient, mySrd).getId();
 
-		String responseString = myServer.fhirRequest("/" + pid1.getValue())
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
-			.withHeader(Constants.HEADER_REWRITE_HISTORY, "true")
-			.patch("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]")
-			.assertStatus(200)
-			.getBody();
+		String responseString = myServer.fhirRequest("/" + pid1.getValue()).withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
+			.withHeader(Constants.HEADER_REWRITE_HISTORY, "true").patch("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]").assertStatus(200).getBody();
 		assertThat(responseString).contains("<OperationOutcome");
 		assertThat(responseString).contains("INFORMATION");
 
@@ -522,10 +510,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
 		String encodedRequest = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
 		ourLog.info("Request:\n{}", encodedRequest);
-		String responseString = myServer.fhirRequest("")
-			.post(encodedRequest, Constants.CT_FHIR_JSON_NEW)
-			.assertStatus(200)
-			.getBody();
+		String responseString = myServer.fhirRequest("").post(encodedRequest, Constants.CT_FHIR_JSON_NEW).assertStatus(200).getBody();
 		assertThat(responseString).contains("\"resourceType\":\"Bundle\"");
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
@@ -548,9 +533,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
 		String responseString = myServer.fhirRequest("/Patient?_id=" + pid1.getIdPart())
 			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
-			.patch("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]")
-			.assertStatus(200)
-			.getBody();
+			.patch("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]").assertStatus(200).getBody();
 		assertThat(responseString).contains("<OperationOutcome");
 		assertThat(responseString).contains("INFORMATION");
 
@@ -573,9 +556,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
 		String responseString = myServer.fhirRequest("/Patient?_id=" + pid1.getIdPart() + "FOO")
 			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
-			.patch("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]")
-			.assertStatus(404)
-			.getBody();
+			.patch("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]").assertStatus(404).getBody();
 		assertThat(responseString).contains("<OperationOutcome");
 		assertThat(responseString).contains("Invalid match URL &quot;Patient?_id=" + pid1.getIdPart() + "FOO&quot; - No resources match this search");
 
@@ -603,9 +584,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
 		String responseString = myServer.fhirRequest("/Patient?active=true")
 			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
-			.patch("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]")
-			.assertStatus(412)
-			.getBody();
+			.patch("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]").assertStatus(412).getBody();
 		assertThat(responseString).contains("<OperationOutcome");
 		assertThat(responseString).contains("Failed to PATCH Patient with match URL &quot;Patient?active=true&quot; because this search matched 2 resources");
 
@@ -636,10 +615,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
 
 		String responseString = myServer.fhirRequest("/Observation/" + id.getIdPart())
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
-			.patch(patchText)
-			.assertStatus(400)
-			.getBody();
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME).patch(patchText).assertStatus(400).getBody();
 		assertThat(responseString).contains("<OperationOutcome");
 		assertThat(responseString).contains("was expecting double-quote to start");
 
@@ -657,11 +633,8 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		String responseString = myServer.fhirRequest("/Patient/" + pid1.getIdPart())
-			.withHeader("If-Match", "W/\"9\"")
-			.patch("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]")
-			.assertStatus(409)
-			.getBody();
+		String path = "/Patient/" + pid1.getIdPart();
+		String responseString = myServer.fhirRequest(path).withHeader("If-Match", "W/\"9\"").patch("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]").assertStatus(409).getBody();
 		assertThat(responseString).contains("<OperationOutcome");
 		assertThat(responseString).contains("<diagnostics value=\"" + Msg.code(550) + Msg.code(974) + "Version 9 is not the most recent version of this resource, unable to apply patch\"/>");
 
@@ -682,12 +655,9 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		String responseString = myServer.fhirRequest("/Patient/" + pid1.getIdPart())
-			.withHeader("If-Match", "W/\"1\"")
+		String responseString = myServer.fhirRequest("/Patient/" + pid1.getIdPart()).withHeader("If-Match", "W/\"1\"")
 			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
-			.patch("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]")
-			.assertStatus(200)
-			.getBody();
+			.patch("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]").assertStatus(200).getBody();
 		assertThat(responseString).contains("<OperationOutcome");
 		assertThat(responseString).contains("INFORMATION");
 
@@ -710,9 +680,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
 		String patchString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><diff xmlns:fhir=\"http://hl7.org/fhir\"><replace sel=\"fhir:Patient/fhir:active/@value\">false</replace></diff>";
 		String responseString = myServer.fhirRequest("/Patient/" + pid1.getIdPart())
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
-			.patch(patchString, Constants.CT_XML_PATCH)
-			.assertStatus(200)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME).patch(patchString, Constants.CT_XML_PATCH).assertStatus(200)
 			.getBody();
 		assertThat(responseString).contains("<OperationOutcome");
 		assertThat(responseString).contains("INFORMATION");
@@ -751,10 +719,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
 		ourLog.info("Encoded output: {}", encoded);
 
-		String responseString = myServer.fhirRequest("")
-			.post(encoded, Constants.CT_FHIR_JSON_NEW)
-			.assertStatus(200)
-			.getBody();
+		String responseString = myServer.fhirRequest("").post(encoded, Constants.CT_FHIR_JSON_NEW).assertStatus(200).getBody();
 		assertThat(responseString).contains("\"resourceType\":\"Bundle\"");
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
@@ -788,10 +753,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.getRequest().setUrl(pid1.getValue())
 			.setMethod(Bundle.HTTPVerb.PATCH);
 
-		String responseString = myServer.fhirRequest("")
-			.post(myFhirContext.newJsonParser().encodeResourceToString(input), Constants.CT_FHIR_JSON_NEW)
-			.assertStatus(400)
-			.getBody();
+		String responseString = myServer.fhirRequest("").post(myFhirContext.newJsonParser().encodeResourceToString(input), Constants.CT_FHIR_JSON_NEW).assertStatus(400).getBody();
 		assertThat(responseString).contains("Missing or invalid content type for PATCH operation");
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
@@ -824,10 +786,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.getRequest().setUrl(pid1.getValue())
 			.setMethod(Bundle.HTTPVerb.PATCH);
 
-		String responseString = myServer.fhirRequest("")
-			.post(myFhirContext.newJsonParser().encodeResourceToString(input), Constants.CT_FHIR_JSON_NEW)
-			.assertStatus(400)
-			.getBody();
+		String responseString = myServer.fhirRequest("").post(myFhirContext.newJsonParser().encodeResourceToString(input), Constants.CT_FHIR_JSON_NEW).assertStatus(400).getBody();
 		assertThat(responseString).contains("Unable to determine PATCH body from request");
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
@@ -861,10 +820,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.getRequest().setUrl(pid1.getValue())
 			.setMethod(Bundle.HTTPVerb.PATCH);
 
-		String responseString = myServer.fhirRequest("")
-			.post(myFhirContext.newJsonParser().encodeResourceToString(input), Constants.CT_FHIR_JSON_NEW)
-			.assertStatus(400)
-			.getBody();
+		String responseString = myServer.fhirRequest("").post(myFhirContext.newJsonParser().encodeResourceToString(input), Constants.CT_FHIR_JSON_NEW).assertStatus(400).getBody();
 		assertThat(responseString).contains("Invalid Content-Type for PATCH operation: application/octet-stream");
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
@@ -897,10 +853,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.getRequest().setUrl(pid1.getValue())
 			.setMethod(Bundle.HTTPVerb.PATCH);
 
-		String responseString = myServer.fhirRequest("")
-			.post(myFhirContext.newJsonParser().encodeResourceToString(input), Constants.CT_FHIR_JSON_NEW)
-			.assertStatus(400)
-			.getBody();
+		String responseString = myServer.fhirRequest("").post(myFhirContext.newJsonParser().encodeResourceToString(input), Constants.CT_FHIR_JSON_NEW).assertStatus(400).getBody();
 		assertThat(responseString).contains("Binary PATCH detected with FHIR content type. FHIR Patch should use Parameters resource.");
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
@@ -932,11 +885,8 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		String patchText = "[{\"op\":\"add\",\"path\":\"/member/0\",\"value\":{\"entity\":{\"reference\":\"" + patientId.getValue() + "\"},\"inactive\":false}}]";
 
 		String responseString = myServer.fhirRequest("/Group/" + groupId.getIdPart())
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION)
-			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON)
-			.patch(patchText)
-			.assertStatus(200)
-			.getBody();
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION).withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON)
+			.patch(patchText).assertStatus(200).getBody();
 		ourLog.info("Response:\n{}", responseString);
 		assertThat(responseString).contains("\"reference\":\"" + patientId.getValue() + "\"");
 
@@ -982,10 +932,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
 		String encodedRequest = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
 		ourLog.info("Request:\n{}", encodedRequest);
-		String responseString = myServer.fhirRequest("")
-			.post(encodedRequest, Constants.CT_FHIR_JSON_NEW)
-			.assertStatus(200)
-			.getBody();
+		String responseString = myServer.fhirRequest("").post(encodedRequest, Constants.CT_FHIR_JSON_NEW).assertStatus(200).getBody();
 		ourLog.info("Response:\n{}", responseString);
 		assertThat(responseString).contains("\"resourceType\":\"Bundle\"");
 

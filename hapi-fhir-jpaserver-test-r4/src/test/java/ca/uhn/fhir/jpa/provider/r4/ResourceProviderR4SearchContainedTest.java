@@ -88,20 +88,14 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 	public void testContainedDisabled() {
 		myStorageSettings.setIndexOnContainedResources(false);
 
-		String resp = myServer.fhirRequest("/Observation?subject.name=Smith&_contained=true")
-			.get()
-			.assertStatus(MethodNotAllowedException.STATUS_CODE)
-			.getBody();
+		String resp = myServer.fhirRequest("/Observation?subject.name=Smith&_contained=true").get().assertStatus(MethodNotAllowedException.STATUS_CODE).getBody();
 		ourLog.info(resp);
 		assertThat(resp).contains(">" + Msg.code(984) + "Searching with _contained mode enabled is not enabled on this server");
 	}
 
 	@Test
 	public void testContainedBoth() {
-		String resp = myServer.fhirRequest("/Observation?subject.name=Smith&_contained=both")
-			.get()
-			.assertStatus(MethodNotAllowedException.STATUS_CODE)
-			.getBody();
+		String resp = myServer.fhirRequest("/Observation?subject.name=Smith&_contained=both").get().assertStatus(MethodNotAllowedException.STATUS_CODE).getBody();
 		ourLog.info(resp);
 		assertThat(resp).contains("Contained mode 'both' is not currently supported");
 	}

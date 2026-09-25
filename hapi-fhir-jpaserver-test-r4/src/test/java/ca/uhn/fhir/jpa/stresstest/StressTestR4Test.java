@@ -758,19 +758,13 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 			for (int i = 0; i < 10; i++) {
 				try {
 					// Load search
-					String respBundleString = myServer.fhirRequest("/Patient?identifier=http%3A%2F%2Ftest%7CBAR," + UUID.randomUUID())
-						.withHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW)
-						.get()
-						.assertStatus(200)
-						.getBody();
+					String path = "/Patient?identifier=http%3A%2F%2Ftest%7CBAR," + UUID.randomUUID();
+					String respBundleString = myServer.fhirRequest(path).withHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW).get().assertStatus(200).getBody();
 					Bundle respBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, respBundleString);
 					myTaskCount++;
 
 					// Load page 2
-					HttpTestRequest.to(myServer.getHttpClient(), respBundle.getLink("next").getUrl())
-						.withHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW)
-						.get()
-						.assertStatus(200);
+					HttpTestRequest.to(myServer.getHttpClient(), respBundle.getLink("next").getUrl()).withHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW).get().assertStatus(200);
 					myTaskCount++;
 
 				} catch (Throwable e) {

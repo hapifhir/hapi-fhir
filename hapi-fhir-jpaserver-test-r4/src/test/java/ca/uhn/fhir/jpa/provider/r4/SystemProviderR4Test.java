@@ -218,11 +218,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			myClient.create().resource(p).execute();
 		}
 
-		String response = fhirRequest("/Patient/$everything")
-			.withHeader("Accept", "application/xml+fhir")
-			.get()
-			.assertStatus(200)
-			.getBody();
+		String response = fhirRequest("/Patient/$everything").withHeader("Accept", "application/xml+fhir").get().assertStatus(200).getBody();
 		ourLog.info(response);
 		assertThat(response).doesNotContain("_format");
 
@@ -245,11 +241,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			myClient.create().resource(p).execute();
 		}
 
-		String response = fhirRequest("/Patient/$everything")
-			.withHeader("Accept", "application/xml, text/html")
-			.get()
-			.assertStatus(200)
-			.getBody();
+		String response = fhirRequest("/Patient/$everything").withHeader("Accept", "application/xml, text/html").get().assertStatus(200).getBody();
 		ourLog.info(response);
 		assertThat(response).contains("_format=json");
 
@@ -269,16 +261,10 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testMarkResourcesForReindexing() throws Exception {
-		String output = fhirRequest("/$mark-all-resources-for-reindexing")
-			.method("POST")
-			.assertStatus(200)
-			.getBody();
+		String output = fhirRequest("/$mark-all-resources-for-reindexing").method("POST").assertStatus(200).getBody();
 		ourLog.info(output);
 
-		output = fhirRequest("/$perform-reindexing-pass")
-			.method("POST")
-			.assertStatus(200)
-			.getBody();
+		output = fhirRequest("/$perform-reindexing-pass").method("POST").assertStatus(200).getBody();
 		ourLog.info(output);
 
 	}
@@ -286,16 +272,10 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	@Test
 	public void testMarkResourcesForReindexingTyped() throws Exception {
 
-		String output = fhirRequest("/$mark-all-resources-for-reindexing?type=Patient")
-			.post(new Parameters().addParameter("type", new CodeType("Patient")))
-			.assertStatus(200)
-			.getBody();
+		String output = fhirRequest("/$mark-all-resources-for-reindexing?type=Patient").post(new Parameters().addParameter("type", new CodeType("Patient"))).assertStatus(200).getBody();
 		ourLog.info(output);
 
-		output = fhirRequest("/$mark-all-resources-for-reindexing?type=FOO")
-			.post(new Parameters().addParameter("type", new CodeType("FOO")))
-			.assertStatus(400)
-			.getBody();
+		output = fhirRequest("/$mark-all-resources-for-reindexing?type=FOO").post(new Parameters().addParameter("type", new CodeType("FOO"))).assertStatus(400).getBody();
 		ourLog.info(output);
 
 	}
@@ -446,9 +426,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		inputBundle.addEntry().getRequest().setMethod(HTTPVerb.DELETE).setUrl("Patient?name=Pietercx85ioqWJbI");
 		String input = myFhirContext.newXmlParser().encodeResourceToString(inputBundle);
 
-		String encoded = fhirRequest("?_pretty=true")
-			.post(input, Constants.CT_FHIR_XML)
-			.getBody();
+		String encoded = fhirRequest("?_pretty=true").post(input, Constants.CT_FHIR_XML).getBody();
 		ourLog.info(encoded);
 
 		assertThat(encoded).contains("transaction-response");
@@ -776,9 +754,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			"</Bundle>";
 		//@formatter:off
 
-		String encoded = fhirRequest("")
-			.post(input, Constants.CT_FHIR_XML)
-			.getBody();
+		String encoded = fhirRequest("").post(input, Constants.CT_FHIR_XML).getBody();
 		ourLog.info(encoded);
 
 		assertThat(encoded).contains("transaction-response");

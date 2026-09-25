@@ -35,12 +35,8 @@ public class ResourceProviderR5ValidationTest extends BaseResourceProviderR5Test
 
 		// Test
 		String response = switch (theLevel) {
-			case TYPE -> myServer.fhirRequest("/Patient/$validate?profile=http://profile-noname-patient")
-				.post(patient)
-				.getBody();
-			case INSTANCE -> myServer.fhirRequest("/Patient/P/$validate?profile=http://profile-noname-patient")
-				.get()
-				.getBody();
+			case TYPE -> myServer.fhirRequest("/Patient/$validate?profile=http://profile-noname-patient").post(patient).getBody();
+			case INSTANCE -> myServer.fhirRequest("/Patient/P/$validate?profile=http://profile-noname-patient").get().getBody();
 		};
 
 		ourLog.info(response);

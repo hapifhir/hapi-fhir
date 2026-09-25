@@ -155,11 +155,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 			ourClient.create().resource(p).execute();
 		}
 
-		String response = fhirRequest("/Patient/$everything")
-			.withHeader("Accept", "application/xml, text/html")
-			.get()
-			.assertStatus(200)
-			.getBody();
+		String response = fhirRequest("/Patient/$everything").withHeader("Accept", "application/xml, text/html").get().assertStatus(200).getBody();
 		ourLog.info(response);
 		assertThat(response).contains("_format=json");
 
@@ -186,11 +182,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 			ourClient.create().resource(p).execute();
 		}
 
-		String response = fhirRequest("/Patient/$everything")
-			.withHeader("Accept", "application/xml+fhir")
-			.get()
-			.assertStatus(200)
-			.getBody();
+		String response = fhirRequest("/Patient/$everything").withHeader("Accept", "application/xml+fhir").get().assertStatus(200).getBody();
 		ourLog.info(response);
 		assertThat(response).doesNotContain("_format");
 
@@ -397,10 +389,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testMarkResourcesForReindexing() {
-		String output = fhirRequest("/$mark-all-resources-for-reindexing")
-			.method("POST")
-			.assertStatus(200)
-			.getBody();
+		String output = fhirRequest("/$mark-all-resources-for-reindexing").method("POST").assertStatus(200).getBody();
 		ourLog.info(output);
 	}
 
