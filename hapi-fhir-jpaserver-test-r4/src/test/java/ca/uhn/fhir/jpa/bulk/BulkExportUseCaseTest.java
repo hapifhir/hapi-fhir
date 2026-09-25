@@ -7,7 +7,9 @@ import ca.uhn.fhir.batch2.jobs.export.BulkExportJobParametersBuilder;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -21,6 +23,7 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
+import ca.uhn.fhir.jpa.test.BulkExportCSVConverter;
 import ca.uhn.fhir.jpa.test.BulkExportJobHelper;
 import ca.uhn.fhir.mdm.api.MdmModeEnum;
 import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
@@ -34,13 +37,13 @@ import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
+import ca.uhn.fhir.rest.api.server.bulk.IResourceConverter;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.UrlUtil;
-import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -59,6 +62,7 @@ import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.InstantType;
@@ -67,6 +71,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
@@ -94,7 +99,6 @@ import java.util.stream.IntStream;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.PARAM_EXPORT_INCLUDE_HISTORY;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.stream.Collectors.mapping;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -133,7 +137,6 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		myStorageSettings.setJobFastTrackingEnabled(false);
 		myBulkExportJobHelper = new BulkExportJobHelper(myClient);
 	}
-
 
 	@Nested
 	class SpecConformanceTests {
@@ -501,6 +504,179 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			final JobInstance jobInstance = optJobInstance.get();
 
 			assertEquals(patientCount, jobInstance.getCombinedRecordsProcessed());
+		}
+
+		@Test
+		public void bulkExport_customCSVFormat_works() throws IOException {
+			// setup
+			String csvMimeType = "text/csv";
+			String[] firstNames = new String[] { "Homer", "Marge", "Bart", "Lisa", "Maggie" };
+
+			// create a CSV converter
+			Map<String, String[]> resource2headers = new HashMap<>();
+			resource2headers.put("Patient", new String[] { "family", "given", "practitioner" });
+			resource2headers.put("Practitioner", new String[] { "family", "given", "language" });
+			resource2headers.put("Observation", new String[] { "status", "subject" });
+
+			BulkExportCSVConverter converterImpl = new BulkExportCSVConverter(
+				resource2headers,
+				(thePrinter, theResource) -> {
+					String rt = theResource.fhirType();
+					switch (rt) {
+						case "Patient" -> {
+							Patient patient = (Patient) theResource;
+							HumanName name = patient.getNameFirstRep();
+							thePrinter.printRecord(
+								name.getFamily(),
+								name.getGiven().stream().map(PrimitiveType::asStringValue).collect(Collectors.joining(", ")),
+								patient.getGeneralPractitioner().stream().findFirst().orElse(new Reference("unknown")).getReference()
+							);
+						}
+						case "Practitioner" -> {
+							Practitioner practitioner = (Practitioner) theResource;
+							HumanName name = practitioner.getNameFirstRep();
+							thePrinter.printRecord(
+								name.getFamily(),
+								String.join(", ", name.getGiven().stream().map(PrimitiveType::getValue).collect(Collectors.toSet())),
+								practitioner.getLanguage()
+							);
+						}
+						case "Observation" -> {
+							Observation observation = (Observation) theResource;
+							thePrinter.printRecord(
+								observation.getStatus().getSystem() + "|" + observation.getStatus().toCode(),
+								observation.getSubject().getReference()
+							);
+						}
+						default -> {
+							fail("Unexpected resource encountered " + rt);
+						}
+					}
+				}
+			);
+
+			Object interceptor = new Object() {
+				@Hook(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_CONVERT)
+				public IResourceConverter getConverter(BulkExportJobParameters theParams) {
+					if (theParams.getOutputFormat().equalsIgnoreCase(csvMimeType)) {
+						return converterImpl;
+					}
+					return null;
+				}
+			};
+			// register it
+			myInterceptorService.registerInterceptor(interceptor);
+
+			try {
+				// create some resources
+				for (String name : firstNames) {
+					IIdType practId = createPractitioner(withFamily("hibbert"),
+						withGiven("Julius"),
+						withLanguage("English"));
+					IIdType id = createPatient(withActiveTrue(),
+						withReference("generalPractitioner", practId),
+						withFamily("Simpson"),
+						withGiven(name),
+						withGiven("Jay")
+					);
+					createObservation(withStatus("final"),
+						withReference("subject", id));
+				}
+
+				// test
+				HttpGet httpGet = new HttpGet(myClient.getServerBase() + "/$export?_outputFormat=text/csv");
+				httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+
+				String pollingLocation;
+				try (CloseableHttpResponse status = ourHttpClient.execute(httpGet)) {
+					pollingLocation = status.getHeaders("Content-Location")[0].getValue();
+				}
+
+				// poll the data
+				String jobId = Batch2JobHelper.getJobIdFromPollingLocation(pollingLocation);
+
+				myBatch2JobHelper.awaitJobCompletion(jobId);
+
+				try (CloseableHttpResponse status = ourHttpClient.execute(new
+					HttpGet(pollingLocation))) {
+					assertEquals(200, status.getStatusLine().getStatusCode());
+					String responseContent = IOUtils.toString(status.getEntity().getContent(), UTF_8);
+					BulkExportResponseJson result = JsonUtil.deserialize(responseContent,
+						BulkExportResponseJson.class);
+					assertNotNull(result);
+					assertTrue(result.getError().isEmpty());
+
+					// verify
+					Map<String, String> resourceTypeToLocation = new HashMap<>();
+					for (BulkExportResponseJson.Output output : result.getOutput()) {
+						resourceTypeToLocation.put(output.getType(), output.getUrl());
+					}
+					assertEquals(3, resourceTypeToLocation.size());
+					assertTrue(resourceTypeToLocation.containsKey("Patient"));
+					assertTrue(resourceTypeToLocation.containsKey("Practitioner"));
+					assertTrue(resourceTypeToLocation.containsKey("Observation"));
+
+					for (String resourceType : new String[] { "Patient", "Practitioner", "Observation" }) {
+						Binary binary = myBinaryDao.read(
+							new IdType(resourceTypeToLocation.get(resourceType)),
+							new SystemRequestDetails()
+						);
+
+						assertNotNull(binary);
+						String contents = new String(binary.getContent(), UTF_8);
+						ourLog.info("Contents for {} ", resourceType);
+						ourLog.info(contents);
+
+						int resourceCount = firstNames.length;
+						String[] headers = resource2headers.get(resourceType);
+						String[] rows = contents.split("\n");
+						assertThat(rows).hasSize(resourceCount + 1);
+						assertThat(rows[0].split(","))
+							.containsExactly(headers);
+
+						switch (resourceType) {
+							case "Patient" -> {
+								Map<String, String> nameToRow = new HashMap<>();
+								for (String row : rows) {
+									for (String name : firstNames) {
+										if (row.contains(name)) {
+											nameToRow.put(name, row);
+											break;
+										}
+									}
+								}
+								assertThat(nameToRow).hasSize(resourceCount);
+								for (String name : firstNames) {
+									String row = nameToRow.get(name);
+									assertNotNull(row);
+									assertThat(row)
+										.contains("Simpson,\"" + name + ", Jay\",Practitioner/");
+								}
+							}
+							case "Practitioner" -> {
+								// all the practitioners are the same...
+								for (int i = 1; i < resourceCount + 1; i++) {
+									assertThat(rows[i].split(","))
+										.hasSize(3);
+									assertThat(rows[i])
+										.contains("hibbert,Julius,English");
+								}
+							}
+							case "Observation" -> {
+								for (int i = 1; i < resourceCount + 1; i++) {
+									assertThat(rows[i].split(","))
+										.hasSize(2);
+									assertThat(rows[i])
+										.contains("observation-status|final,Patient/");
+								}
+							}
+						}
+					}
+				}
+			} finally {
+				// remove our interceptor
+				myInterceptorService.unregisterInterceptor(interceptor);
+			}
 		}
 
 		@Test
