@@ -301,8 +301,8 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			String path = "/DocumentReference/" + id.getIdPart() + "/" +
 				JpaConstants.OPERATION_BINARY_ACCESS_WRITE +
 				"?path=DocumentReference.content.attachment";
-			HttpTestResponse resp = myServer.fhirRequest(path).withHeader(Constants.HEADER_ACCEPT, "application/fhir+json; _pretty=true").post(SOME_BYTES_2, ContentType.IMAGE_JPEG.getMimeType())
-				.assertStatus(200);
+			String accept = "application/fhir+json; _pretty=true";
+			HttpTestResponse resp = myServer.fhirRequest(path).withHeader(Constants.HEADER_ACCEPT, accept).post(SOME_BYTES_2, ContentType.IMAGE_JPEG.getMimeType()).assertStatus(200);
 			assertThat(resp.getContentType()).contains("application/fhir+json");
 			String response = resp.getBody();
 			ourLog.info("Response: {}", response);
@@ -509,15 +509,15 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		HttpTestResponse resp = myServer.fhirRequest(thePath).get().assertStatus(200);
 		assertEquals(theExpectedContentType, resp.getHeader(Constants.HEADER_CONTENT_TYPE));
 		byte[] actualBytes = resp.getBodyBytes();
-		assertEquals(theExpectedContent.length, actualBytes.length);
+		assertEquals(String.valueOf(theExpectedContent.length), resp.getHeader("Content-Length"));
 		ourLog.info("Response: {}", resp);
 
 		assertThat(actualBytes).containsExactly(theExpectedContent);
 	}
 
 	private String executeBinaryWrite(String thePath, byte[] theContent) throws IOException {
-		HttpTestResponse resp = myServer.fhirRequest(thePath).withHeader(Constants.HEADER_ACCEPT, "application/fhir+json; _pretty=true").post(theContent, ContentType.IMAGE_JPEG.getMimeType())
-			.assertStatus(200);
+		String accept = "application/fhir+json; _pretty=true";
+		HttpTestResponse resp = myServer.fhirRequest(thePath).withHeader(Constants.HEADER_ACCEPT, accept).post(theContent, ContentType.IMAGE_JPEG.getMimeType()).assertStatus(200);
 		assertThat(resp.getContentType()).contains("application/fhir+json");
 		String response = resp.getBody();
 		ourLog.info("Response: {}", response);

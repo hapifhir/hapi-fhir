@@ -43,6 +43,7 @@ import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerConfigurerExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Parameters;
@@ -64,6 +65,11 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @ContextConfiguration(classes = ServerConfiguration.class)
 public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
+	/**
+	 * @deprecated Use {@code myServer.fhirRequest(path)}, or {@code myServer.getHttpClient()} for an
+	 * absolute URL. This field will be removed in a future release.
+	 */
+	@Deprecated
 	@RegisterExtension
 	protected static HttpClientExtension ourHttpClient = new HttpClientExtension();
 
@@ -241,9 +247,11 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	}
 
 	/**
-	 * @param thePath the path below the server base, e.g. {@literal "/Patient?_id=FOO"}
+	 * @param thePath the path below the server base, starting with {@literal "/"}, e.g. {@literal "/Patient?_id=FOO"}
+	 * @return the unqualified versionless ids of the resources in the returned Bundle
 	 */
 	protected List<String> searchAndReturnUnqualifiedVersionlessIdValues(String thePath) {
+		Validate.isTrue(thePath.startsWith("/"), "Path must start with '/': %s", thePath);
 		String resp = myServer.fhirRequest(thePath).get().getBody();
 		ourLog.info(resp);
 		Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, resp);

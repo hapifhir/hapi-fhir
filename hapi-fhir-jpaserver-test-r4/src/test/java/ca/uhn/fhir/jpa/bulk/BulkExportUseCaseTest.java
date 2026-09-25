@@ -338,7 +338,7 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	 * path below the server base.
 	 */
 	private HttpTestRequest pollingRequest(String thePollingLocation) {
-		return myServer.fhirRequest(thePollingLocation.substring(myServerBase.length()));
+		return HttpTestRequest.to(myServer.getHttpClient(), thePollingLocation);
 	}
 
 	@Nested

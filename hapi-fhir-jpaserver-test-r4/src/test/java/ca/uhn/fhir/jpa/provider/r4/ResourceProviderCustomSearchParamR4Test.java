@@ -270,8 +270,8 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		IBundleProvider results;
 		List<String> foundResources;
 
-		String resp = myServer.fhirRequest("/Appointment?_include:recurse=Appointment:patient&_include:recurse=Appointment:location&_include:recurse=Patient:attending&_pretty=true").get()
-			.assertStatus(200).getBody();
+		String path = "/Appointment?_include:recurse=Appointment:patient&_include:recurse=Appointment:location&_include:recurse=Patient:attending&_pretty=true";
+		String resp = myServer.fhirRequest(path).get().assertStatus(200).getBody();
 		ourLog.info(resp);
 
 		assertThat(resp).contains("<fullUrl value=\"http://localhost:" + myPort + "/fhir/context/Practitioner/");

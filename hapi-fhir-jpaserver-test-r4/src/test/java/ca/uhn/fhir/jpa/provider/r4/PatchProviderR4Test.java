@@ -49,6 +49,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
 
 	private static final Logger ourLog = LoggerFactory.getLogger(PatchProviderR4Test.class);
+	private static final String PREFER_RETURN_OPERATION_OUTCOME = Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME;
 
 	@Mock
 	private IAnonymousInterceptor myAnonymousInterceptor;
@@ -380,9 +381,9 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			"      } " +
 			"]";
 
-		String responseString = myServer.fhirRequest("/Observation/" + id.getIdPart())
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION).withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON)
-			.patch(patchText).assertStatus(200).getBody();
+		String prefer = Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION;
+		String path = "/Observation/" + id.getIdPart();
+		String responseString = myServer.fhirRequest(path).withHeader(Constants.HEADER_PREFER, prefer).withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON).patch(patchText).assertStatus(200).getBody();
 		ourLog.info("Response:\n{}", responseString);
 		assertThat(responseString).contains("\"derivedFrom\":[{\"reference\":\"Media/465eb73a-bce3-423a-b86e-5d0d267638f4\"}]");
 
@@ -402,9 +403,8 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_PREPATCH, myAnonymousInterceptor);
 
-		String responseString = myServer.fhirRequest("/Patient/" + pid1.getIdPart())
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
-			.patch("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]").assertStatus(200).getBody();
+		String patchText = "[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]";
+		String responseString = myServer.fhirRequest("/Patient/" + pid1.getIdPart()).withHeader(Constants.HEADER_PREFER, PREFER_RETURN_OPERATION_OUTCOME).patch(patchText).assertStatus(200).getBody();
 		assertThat(responseString).contains("<OperationOutcome");
 		assertThat(responseString).contains("INFORMATION");
 
@@ -472,8 +472,9 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		patient.addName().setFamily(patchedFamilyName).addGiven("Joe");
 		IIdType pid1 = myPatientDao.create(patient, mySrd).getId();
 
-		String responseString = myServer.fhirRequest("/" + pid1.getValue()).withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
-			.withHeader(Constants.HEADER_REWRITE_HISTORY, "true").patch("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]").assertStatus(200).getBody();
+		String path = "/" + pid1.getValue();
+		String patchText = "[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]";
+		String responseString = myServer.fhirRequest(path).withHeader(Constants.HEADER_PREFER, PREFER_RETURN_OPERATION_OUTCOME).withHeader(Constants.HEADER_REWRITE_HISTORY, "true").patch(patchText).assertStatus(200).getBody();
 		assertThat(responseString).contains("<OperationOutcome");
 		assertThat(responseString).contains("INFORMATION");
 
@@ -531,9 +532,9 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		String responseString = myServer.fhirRequest("/Patient?_id=" + pid1.getIdPart())
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
-			.patch("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]").assertStatus(200).getBody();
+		String path = "/Patient?_id=" + pid1.getIdPart();
+		String patchText = "[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]";
+		String responseString = myServer.fhirRequest(path).withHeader(Constants.HEADER_PREFER, PREFER_RETURN_OPERATION_OUTCOME).patch(patchText).assertStatus(200).getBody();
 		assertThat(responseString).contains("<OperationOutcome");
 		assertThat(responseString).contains("INFORMATION");
 
@@ -554,9 +555,9 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		String responseString = myServer.fhirRequest("/Patient?_id=" + pid1.getIdPart() + "FOO")
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
-			.patch("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]").assertStatus(404).getBody();
+		String path = "/Patient?_id=" + pid1.getIdPart() + "FOO";
+		String patchText = "[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]";
+		String responseString = myServer.fhirRequest(path).withHeader(Constants.HEADER_PREFER, PREFER_RETURN_OPERATION_OUTCOME).patch(patchText).assertStatus(404).getBody();
 		assertThat(responseString).contains("<OperationOutcome");
 		assertThat(responseString).contains("Invalid match URL &quot;Patient?_id=" + pid1.getIdPart() + "FOO&quot; - No resources match this search");
 
@@ -582,9 +583,8 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		String responseString = myServer.fhirRequest("/Patient?active=true")
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
-			.patch("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]").assertStatus(412).getBody();
+		String patchText = "[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]";
+		String responseString = myServer.fhirRequest("/Patient?active=true").withHeader(Constants.HEADER_PREFER, PREFER_RETURN_OPERATION_OUTCOME).patch(patchText).assertStatus(412).getBody();
 		assertThat(responseString).contains("<OperationOutcome");
 		assertThat(responseString).contains("Failed to PATCH Patient with match URL &quot;Patient?active=true&quot; because this search matched 2 resources");
 
@@ -614,8 +614,8 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			"    } ]";
 
 
-		String responseString = myServer.fhirRequest("/Observation/" + id.getIdPart())
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME).patch(patchText).assertStatus(400).getBody();
+		String path = "/Observation/" + id.getIdPart();
+		String responseString = myServer.fhirRequest(path).withHeader(Constants.HEADER_PREFER, PREFER_RETURN_OPERATION_OUTCOME).patch(patchText).assertStatus(400).getBody();
 		assertThat(responseString).contains("<OperationOutcome");
 		assertThat(responseString).contains("was expecting double-quote to start");
 
@@ -655,9 +655,9 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		String responseString = myServer.fhirRequest("/Patient/" + pid1.getIdPart()).withHeader("If-Match", "W/\"1\"")
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
-			.patch("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]").assertStatus(200).getBody();
+		String path = "/Patient/" + pid1.getIdPart();
+		String patchText = "[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]";
+		String responseString = myServer.fhirRequest(path).withHeader("If-Match", "W/\"1\"").withHeader(Constants.HEADER_PREFER, PREFER_RETURN_OPERATION_OUTCOME).patch(patchText).assertStatus(200).getBody();
 		assertThat(responseString).contains("<OperationOutcome");
 		assertThat(responseString).contains("INFORMATION");
 
@@ -679,9 +679,8 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		}
 
 		String patchString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><diff xmlns:fhir=\"http://hl7.org/fhir\"><replace sel=\"fhir:Patient/fhir:active/@value\">false</replace></diff>";
-		String responseString = myServer.fhirRequest("/Patient/" + pid1.getIdPart())
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME).patch(patchString, Constants.CT_XML_PATCH).assertStatus(200)
-			.getBody();
+		String path = "/Patient/" + pid1.getIdPart();
+		String responseString = myServer.fhirRequest(path).withHeader(Constants.HEADER_PREFER, PREFER_RETURN_OPERATION_OUTCOME).patch(patchString, Constants.CT_XML_PATCH).assertStatus(200).getBody();
 		assertThat(responseString).contains("<OperationOutcome");
 		assertThat(responseString).contains("INFORMATION");
 
@@ -884,9 +883,9 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		// JSON Patch: add a member at /member/0
 		String patchText = "[{\"op\":\"add\",\"path\":\"/member/0\",\"value\":{\"entity\":{\"reference\":\"" + patientId.getValue() + "\"},\"inactive\":false}}]";
 
-		String responseString = myServer.fhirRequest("/Group/" + groupId.getIdPart())
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION).withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON)
-			.patch(patchText).assertStatus(200).getBody();
+		String prefer = Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION;
+		String path = "/Group/" + groupId.getIdPart();
+		String responseString = myServer.fhirRequest(path).withHeader(Constants.HEADER_PREFER, prefer).withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON).patch(patchText).assertStatus(200).getBody();
 		ourLog.info("Response:\n{}", responseString);
 		assertThat(responseString).contains("\"reference\":\"" + patientId.getValue() + "\"");
 

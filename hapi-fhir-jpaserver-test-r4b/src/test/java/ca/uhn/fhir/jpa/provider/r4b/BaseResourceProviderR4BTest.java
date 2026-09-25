@@ -17,7 +17,6 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerConfigurerExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.junit.jupiter.api.AfterEach;
@@ -33,9 +32,6 @@ public abstract class BaseResourceProviderR4BTest extends BaseJpaR4BTest {
 	protected int myPort;
 	protected String myServerBase;
 	protected IGenericClient myClient;
-
-	@RegisterExtension
-	protected static HttpClientExtension ourHttpClient = new HttpClientExtension();
 
 	@Autowired
 	@RegisterExtension

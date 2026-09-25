@@ -1175,6 +1175,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		return ids;
 	}
 
+	private List<String> searchOkAndReturnUnqualifiedVersionlessIdValues(String thePath) {
+		String resp = myServer.fhirRequest(thePath).get().assertStatus(200).getBody();
+		return toUnqualifiedVersionlessIdValues(myFhirContext.newXmlParser().parseResource(Bundle.class, resp));
+	}
+
 	@Test
 	@Disabled
 	public void testMakingQuery() {
@@ -1823,13 +1828,12 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		pt.addName().setFamily(methodName);
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		String newIdString = myServer.fhirRequest("/Patient").withHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?name=" + methodName).post(resource, Constants.CT_FHIR_XML).assertStatus(201)
-			.getHeader(Constants.HEADER_LOCATION_LC);
+		String ifNoneExist = "Patient?name=" + methodName;
+		String newIdString = myServer.fhirRequest("/Patient").withHeader(Constants.HEADER_IF_NONE_EXIST, ifNoneExist).post(resource, Constants.CT_FHIR_XML).assertStatus(201).getHeader(Constants.HEADER_LOCATION_LC);
 		assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 		IdType id = new IdType(newIdString);
 
-		newIdString = myServer.fhirRequest("/Patient").withHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?name=" + methodName).post(resource, Constants.CT_FHIR_XML).assertStatus(200)
-			.getHeader(Constants.HEADER_LOCATION_LC);
+		newIdString = myServer.fhirRequest("/Patient").withHeader(Constants.HEADER_IF_NONE_EXIST, ifNoneExist).post(resource, Constants.CT_FHIR_XML).assertStatus(200).getHeader(Constants.HEADER_LOCATION_LC);
 		assertEquals(id.getValue(), newIdString); // version should match for conditional create
 	}
 
@@ -1859,8 +1863,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	/**
-	 * Sends the same conditional create twice in {@link #testCreateResourceConditionalComplex()}, where the
-	 * second call must match the first rather than create again.
+	 * POSTs a Patient with an If-None-Exist on the general-hospital identifier.
 	 */
 	private HttpTestResponse conditionalCreatePatient(String theResource) {
 		return myServer.fhirRequest("/Patient")
@@ -1884,8 +1887,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	public void testCreateResourceReturnsOperationOutcome() {
 		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"></Patient>";
 
-		HttpTestResponse response = myServer.fhirRequest("/Patient").withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
-			.post(resource, Constants.CT_FHIR_XML).assertStatus(201);
+		String prefer = Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME;
+		HttpTestResponse response = myServer.fhirRequest("/Patient").withHeader(Constants.HEADER_PREFER, prefer).post(resource, Constants.CT_FHIR_XML).assertStatus(201);
 		ourLog.info(response.toString());
 		String respString = response.getBody();
 		ourLog.debug(respString);
@@ -2243,8 +2246,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		dr.getCode().setText("CODE TEXT");
 		myClient.create().resource(dr).execute();
 
-		String output = myServer.fhirRequest("/DiagnosticReport?_include=DiagnosticReport:result&_elements:exclude=DiagnosticReport&_elements=DiagnosticReport.status,Observation.value,Observation.code,Observation.subject&_pretty=true")
-			.get().assertStatus(200).getBody();
+		String path = "/DiagnosticReport?_include=DiagnosticReport:result&_elements:exclude=DiagnosticReport&_elements=DiagnosticReport.status,Observation.value,Observation.code,Observation.subject&_pretty=true";
+		String output = myServer.fhirRequest(path).get().assertStatus(200).getBody();
 		assertThat(output).doesNotContain("<Diagn");
 		ourLog.info(output);
 	}
@@ -3381,9 +3384,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		String responseString = myServer.fhirRequest("/Patient/" + pid1.getIdPart())
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
-			.patch("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]").assertStatus(200).getBody();
+		String prefer = Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME;
+		String patchText = "[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]";
+		String responseString = myServer.fhirRequest("/Patient/" + pid1.getIdPart()).withHeader(Constants.HEADER_PREFER, prefer).patch(patchText).assertStatus(200).getBody();
 		assertThat(responseString).contains("<OperationOutcome");
 		assertThat(responseString).contains("INFORMATION");
 
@@ -3426,9 +3429,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		String responseString = myServer.fhirRequest("/Patient/" + pid1.getIdPart())
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME).withHeader("If-Match", "W/\"1\"")
-			.patch("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]").assertStatus(200).getBody();
+		String path = "/Patient/" + pid1.getIdPart();
+		String prefer = Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME;
+		String patchText = "[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]";
+		String responseString = myServer.fhirRequest(path).withHeader(Constants.HEADER_PREFER, prefer).withHeader("If-Match", "W/\"1\"").patch(patchText).assertStatus(200).getBody();
 		ourLog.info("Response: {}", responseString);
 		assertThat(responseString).contains("<OperationOutcome");
 		assertThat(responseString).contains("INFORMATION");
@@ -3451,9 +3455,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 
 		String patchString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><diff xmlns:fhir=\"http://hl7.org/fhir\"><replace sel=\"fhir:Patient/fhir:active/@value\">false</replace></diff>";
-		String responseString = myServer.fhirRequest("/Patient/" + pid1.getIdPart())
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME).patch(patchString, Constants.CT_XML_PATCH).assertStatus(200)
-			.getBody();
+		String prefer = Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME;
+		String responseString = myServer.fhirRequest("/Patient/" + pid1.getIdPart()).withHeader(Constants.HEADER_PREFER, prefer).patch(patchString, Constants.CT_XML_PATCH).assertStatus(200).getBody();
 		assertThat(responseString).contains("<OperationOutcome");
 		assertThat(responseString).contains("INFORMATION");
 
@@ -4118,10 +4121,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		enc.addParticipant().getIndividual().setReference("Practitioner/PRAC");
 		myClient.update().resource(enc).execute().getId().toUnqualifiedVersionless();
 
-		assertThat(searchAndReturnUnqualifiedVersionlessIdValues("/Encounter?patient=P2&date=ge2017-01-01&_include:recurse=Encounter:practitioner&_lastUpdated=ge2017-11-10"))
+		assertThat(searchOkAndReturnUnqualifiedVersionlessIdValues("/Encounter?patient=P2&date=ge2017-01-01&_include:recurse=Encounter:practitioner&_lastUpdated=ge2017-11-10"))
 			.containsExactlyInAnyOrder("Practitioner/PRAC", "Encounter/E2");
 
-		assertThat(searchAndReturnUnqualifiedVersionlessIdValues("/Encounter?patient=P2&date=ge2017-01-01&_include:recurse=Encounter:practitioner&_lastUpdated=ge2099-11-10"))
+		assertThat(searchOkAndReturnUnqualifiedVersionlessIdValues("/Encounter?patient=P2&date=ge2017-01-01&_include:recurse=Encounter:practitioner&_lastUpdated=ge2099-11-10"))
 			.isEmpty();
 	}
 
@@ -4330,7 +4333,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		o2.setValue(new Quantity().setValue(new BigDecimal("-20")));
 		String oid2 = myObservationDao.create(o2, mySrd).getId().toUnqualifiedVersionless().getValue();
 
-		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues("/Observation?value-quantity=gt-15");
+		List<String> ids = searchOkAndReturnUnqualifiedVersionlessIdValues("/Observation?value-quantity=gt-15");
 		assertThat(ids).containsExactly(oid1);
 		assertThat(ids).doesNotContain(oid2);
 	}
@@ -5384,7 +5387,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		mr2.addCategory().addCoding().setSystem("urn:medicationroute").setCode("oral");
 		IIdType id2 = myMedicationRequestDao.create(mr2, mySrd).getId().toUnqualifiedVersionless();
 
-		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues("/MedicationRequest?date:missing=false");
+		List<String> ids = searchOkAndReturnUnqualifiedVersionlessIdValues("/MedicationRequest?date:missing=false");
 		assertThat(ids).containsExactly(id1.getValue());
 		assertThat(ids).doesNotContain(id2.getValue());
 	}
@@ -5401,8 +5404,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		patient.addName().setFamily("testSearchWithMixedParams").addGiven("Joe");
 		myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
-		String responseContent = myServer.fhirRequest("/Patient/_search?_format=application/xml").withHeader("Cache-Control", "no-cache").withFormParam("name", "Smith").postForm().assertStatus(200)
-			.getBody();
+		String path = "/Patient/_search?_format=application/xml";
+		String responseContent = myServer.fhirRequest(path).withHeader("Cache-Control", "no-cache").withFormParam("name", "Smith").postForm().assertStatus(200).getBody();
 		ourLog.info(responseContent);
 	}
 
@@ -5913,8 +5916,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		pt.setId(id.getIdPart());
 		resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		String responseString = myServer.fhirRequest("/Patient/" + id.getIdPart())
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION).put(resource, Constants.CT_FHIR_XML).assertStatus(200).getBody();
+		String prefer = Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION;
+		String responseString = myServer.fhirRequest("/Patient/" + id.getIdPart()).withHeader(Constants.HEADER_PREFER, prefer).put(resource, Constants.CT_FHIR_XML).assertStatus(200).getBody();
 
 		Patient respPt = myFhirContext.newXmlParser().parseResource(Patient.class, responseString);
 		assertEquals("2", respPt.getIdElement().getVersionIdPart());

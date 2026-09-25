@@ -291,8 +291,8 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 
 		myServer.registerInterceptor(myDeleteInterceptor);
 
-		String deleteResponse = myServer.fhirRequest("/" + myPatientId.getValue() + "?_pretty=true").withHeader(Constants.HEADER_CASCADE, Constants.CASCADE_DELETE)
-			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW).delete().assertStatus(200).getBody();
+		String path = "/" + myPatientId.getValue() + "?_pretty=true";
+		String deleteResponse = myServer.fhirRequest(path).withHeader(Constants.HEADER_CASCADE, Constants.CASCADE_DELETE).withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW).delete().assertStatus(200).getBody();
 		ourLog.info("Response: {}", deleteResponse);
 		assertThat(deleteResponse).contains("Cascaded delete to ");
 

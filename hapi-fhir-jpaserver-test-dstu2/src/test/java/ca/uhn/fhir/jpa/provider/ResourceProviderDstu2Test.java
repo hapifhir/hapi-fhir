@@ -434,8 +434,8 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	public void testCreateResourceReturnsOperationOutcome() {
 		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"></Patient>";
 
-		HttpTestResponse response = myServer.fhirRequest("/Patient").withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
-			.post(resource, Constants.CT_FHIR_XML).assertStatus(201);
+		String prefer = Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME;
+		HttpTestResponse response = myServer.fhirRequest("/Patient").withHeader(Constants.HEADER_PREFER, prefer).post(resource, Constants.CT_FHIR_XML).assertStatus(201);
 		String respString = response.getBody();
 		ourLog.info(response.toString());
 		ourLog.debug(respString);
@@ -2440,8 +2440,8 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		pt.addAddress().addLine("AAAAAAAAAAAAAAAAAAAAAA");
 		resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		String responseString = myServer.fhirRequest("/Patient/" + id.getIdPart())
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION).put(resource, Constants.CT_FHIR_XML).assertStatus(200).getBody();
+		String prefer = Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION;
+		String responseString = myServer.fhirRequest("/Patient/" + id.getIdPart()).withHeader(Constants.HEADER_PREFER, prefer).put(resource, Constants.CT_FHIR_XML).assertStatus(200).getBody();
 
 		Patient respPt = myFhirContext.newXmlParser().parseResource(Patient.class, responseString);
 		assertEquals("2", respPt.getId().getVersionIdPart());

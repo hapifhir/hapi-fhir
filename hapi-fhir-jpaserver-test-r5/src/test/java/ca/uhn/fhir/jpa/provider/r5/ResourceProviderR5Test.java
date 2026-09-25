@@ -410,10 +410,10 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		String respString = myServer.fhirRequest("/CapabilityStatement/$validate?_pretty=true").post(input, Constants.CT_JSON).assertStatus(200).getBody();
 		ourLog.debug(respString);
 
-		// As of 2023-01-26, the above line was restored.
+		// As of 2023-01-26, the assertStatus(200) above was restored.
 		// As of 2021-12-28, the R5 structures return a version string that isn't
 		// actually in the fhirVersion ValueSet. If this stops being the case this
-		// test will fail and the line above should be restored
+		// test will fail and the assertStatus(200) above should be restored
 	}
 
 	@Test

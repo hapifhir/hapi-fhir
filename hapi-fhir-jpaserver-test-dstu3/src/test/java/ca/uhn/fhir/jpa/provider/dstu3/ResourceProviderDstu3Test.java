@@ -876,8 +876,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testCreateResourceReturnsOperationOutcome() throws IOException {
 		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"></Patient>";
 
-		HttpTestResponse response = myServer.fhirRequest("/Patient").withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
-			.post(resource, Constants.CT_FHIR_XML).assertStatus(201);
+		String prefer = Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME;
+		HttpTestResponse response = myServer.fhirRequest("/Patient").withHeader(Constants.HEADER_PREFER, prefer).post(resource, Constants.CT_FHIR_XML).assertStatus(201);
 		String respString = response.getBody();
 		ourLog.info(response.toString());
 		ourLog.debug(respString);
@@ -3631,8 +3631,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		patient.addName().setFamily("testSearchWithMixedParams").addGiven("Joe");
 		myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
-		String responseContent = myServer.fhirRequest("/Patient/_search?_format=application/xml").withHeader("Cache-Control", "no-cache").withFormParam("name", "Smith").postForm().assertStatus(200)
-			.getBody();
+		String path = "/Patient/_search?_format=application/xml";
+		String responseContent = myServer.fhirRequest(path).withHeader("Cache-Control", "no-cache").withFormParam("name", "Smith").postForm().assertStatus(200).getBody();
 		ourLog.info(responseContent);
 
 
@@ -3985,8 +3985,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		pt.setId(id.getIdPart());
 		resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		String responseString = myServer.fhirRequest("/Patient/" + id.getIdPart())
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION).put(resource, Constants.CT_FHIR_XML).assertStatus(200).getBody();
+		String prefer = Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION;
+		String responseString = myServer.fhirRequest("/Patient/" + id.getIdPart()).withHeader(Constants.HEADER_PREFER, prefer).put(resource, Constants.CT_FHIR_XML).assertStatus(200).getBody();
 
 		Patient respPt = myFhirContext.newXmlParser().parseResource(Patient.class, responseString);
 		assertEquals("2", respPt.getIdElement().getVersionIdPart());
