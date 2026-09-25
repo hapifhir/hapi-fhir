@@ -43,9 +43,6 @@ import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerConfigurerExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Parameters;
@@ -58,7 +55,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.cors.CorsConfiguration;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -244,20 +240,16 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		return false;
 	}
 
-	protected List<String> searchAndReturnUnqualifiedVersionlessIdValues(String uri) throws IOException {
-		List<String> ids;
-		HttpGet get = new HttpGet(uri);
-
-		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(resp);
-			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, resp);
-			ids = toUnqualifiedVersionlessIdValues(bundle);
-			ourLog.debug("Observation: \n"
-					+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
-		}
-
-		return ids;
+	/**
+	 * @param thePath the path below the server base, e.g. {@literal "/Patient?_id=FOO"}
+	 */
+	protected List<String> searchAndReturnUnqualifiedVersionlessIdValues(String thePath) {
+		String resp = myServer.fhirRequest(thePath).get().getBody();
+		ourLog.info(resp);
+		Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, resp);
+		ourLog.debug("Observation: \n"
+				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		return toUnqualifiedVersionlessIdValues(bundle);
 	}
 
 	private class MyHttpCodeClientIntercepter implements IClientInterceptor {

@@ -1008,13 +1008,13 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		o.getCode().setText("GOODBYE");
 		myClient.update().resource(o).execute();
 
-		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(myServerBase + "/Patient/FOO/$everything?_content=White");
+		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues("/Patient/FOO/$everything?_content=White");
 		assertThat(ids).containsExactly("Patient/FOO");
 
-		ids = searchAndReturnUnqualifiedVersionlessIdValues(myServerBase + "/Patient/FOO/$everything?_content=HELLO");
+		ids = searchAndReturnUnqualifiedVersionlessIdValues("/Patient/FOO/$everything?_content=HELLO");
 		assertThat(ids).containsExactly("Patient/FOO");
 
-		ids = searchAndReturnUnqualifiedVersionlessIdValues(myServerBase + "/Patient/FOO/$everything?_content=GOODBYE");
+		ids = searchAndReturnUnqualifiedVersionlessIdValues("/Patient/FOO/$everything?_content=GOODBYE");
 		assertThat(ids).containsExactlyInAnyOrder("Patient/FOO", "Observation/BAZ");
 	}
 

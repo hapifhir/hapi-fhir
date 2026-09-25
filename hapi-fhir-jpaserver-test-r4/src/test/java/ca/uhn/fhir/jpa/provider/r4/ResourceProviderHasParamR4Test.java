@@ -5,11 +5,7 @@ import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.util.UrlUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Device;
@@ -26,8 +22,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -109,7 +103,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 		}
 
 		
-		String uri = myServerBase + "/Patient?_has:Observation:subject:identifier=" + UrlUtil.escapeUrlParam("urn:system|FOO");
+		String uri = "/Patient?_has:Observation:subject:identifier=" + UrlUtil.escapeUrlParam("urn:system|FOO");
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		assertThat(ids).containsExactly(pid0.getValue());
 	}
@@ -160,7 +154,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			ourLog.debug("Encounter: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
 		}
 		
-		String uri = myServerBase + "/Patient?_has:Encounter:subject:class=" + UrlUtil.escapeUrlParam("urn:system|IMP") + "&_has:Encounter:subject:date=gt1950";
+		String uri = "/Patient?_has:Encounter:subject:class=" + UrlUtil.escapeUrlParam("urn:system|IMP") + "&_has:Encounter:subject:date=gt1950";
 		
 		ourLog.info("uri = " + uri);
 		
@@ -217,7 +211,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			ourLog.debug("Encounter: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
 		}
 		
-		String uri = myServerBase + "/Patient?_has:Observation:patient:code=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7") + "&_has:Encounter:subject:date=gt1950";
+		String uri = "/Patient?_has:Observation:patient:code=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7") + "&_has:Encounter:subject:date=gt1950";
 		
 		ourLog.info("uri = " + uri);
 		
@@ -266,7 +260,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			myObservationDao.create(obs, mySrd);
 		}
 
-		String uri = myServerBase + "/Patient?_has:Observation:subject:code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt180");
+		String uri = "/Patient?_has:Observation:subject:code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt180");
 		ourLog.info("uri = " + uri);
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		assertThat(ids).containsExactly(pid0.getValue());
@@ -314,7 +308,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			myObservationDao.create(obs, mySrd);
 		}
 
-		String uri = myServerBase + "/Patient?_has:Observation:subject:code-value-date=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt2019");
+		String uri = "/Patient?_has:Observation:subject:code-value-date=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt2019");
 		ourLog.info("uri = " + uri);
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		assertThat(ids).containsExactly(pid0.getValue());
@@ -370,7 +364,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			myObservationDao.create(obs, mySrd);
 		}
 
-		String uri = myServerBase + "/Patient?_has:Observation:subject:combo-code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-8$200");
+		String uri = "/Patient?_has:Observation:subject:combo-code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-8$200");
 		ourLog.info("uri = " + uri);
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		assertThat(ids).containsExactly(pid0.getValue());
@@ -430,7 +424,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			myObservationDao.create(obs, mySrd);
 		}
 
-		String uri = myServerBase + "/Patient?_has:Observation:subject:code-value-string=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$100,http://loinc.org|2345-7$200");
+		String uri = "/Patient?_has:Observation:subject:code-value-string=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$100,http://loinc.org|2345-7$200");
 		ourLog.info("uri = " + uri);
 		
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
@@ -478,7 +472,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			myObservationDao.create(obs, mySrd);
 		}
 
-		String uri = myServerBase + "/Patient?_has:Observation:subject:code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$lt180");
+		String uri = "/Patient?_has:Observation:subject:code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$lt180");
 		ourLog.info("uri = " + uri);
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		assertThat(ids).isEmpty();
@@ -525,7 +519,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			myObservationDao.create(obs, mySrd);
 		}
 
-		String uri = myServerBase + "/Patient?_has:Observation:subject:code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt180") + "&_has:Observation:subject:identifier=" + UrlUtil.escapeUrlParam("urn:system|FOO");
+		String uri = "/Patient?_has:Observation:subject:code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt180") + "&_has:Observation:subject:identifier=" + UrlUtil.escapeUrlParam("urn:system|FOO");
 		
 		ourLog.info("uri = " + uri);
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
@@ -586,7 +580,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			ourLog.debug("Encounter: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
 		}
 		
-		String uri = myServerBase + "/Patient?_has:Observation:subject:code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt180") + "&_has:Encounter:subject:date=gt1950" + "&_has:Encounter:subject:class=" + UrlUtil.escapeUrlParam("urn:system|IMP");
+		String uri = "/Patient?_has:Observation:subject:code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt180") + "&_has:Encounter:subject:date=gt1950" + "&_has:Encounter:subject:class=" + UrlUtil.escapeUrlParam("urn:system|IMP");
 		
 		ourLog.info("uri = " + uri);
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
@@ -602,8 +596,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			expectedPatientIds.add(createPatientWithObs(10).toUnqualifiedVersionless().getValue());
 		}
 
-		String uri = myServerBase +
-			"/Patient?_has:Observation:subject:code-value-quantity=http://" +
+		String uri = "/Patient?_has:Observation:subject:code-value-quantity=http://" +
 			UrlUtil.escapeUrlParam("loinc.org|2345-7$gt180") +
 			"&_has:Observation:subject:date=gt1950" +
 			"&_has:Observation:subject:status=final" +
@@ -629,19 +622,6 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 		}
 
 		assertThat(notInListQueries.size()).isNotEqualTo(0);
-	}
-
-	public List<String> searchAndReturnUnqualifiedVersionlessIdValues(String uri) throws IOException {
-		List<String> ids;
-		HttpGet get = new HttpGet(uri);
-
-		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("Response was: {}", resp);
-			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, resp);
-			ids = toUnqualifiedVersionlessIdValues(bundle);
-		}
-		return ids;
 	}
 
 	private IIdType createPatientWithObs(int obsNum) {
