@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.util.ILockable;
+import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.compress.utils.Sets;
@@ -182,16 +183,22 @@ public class PrePopulatedValidationSupport extends BaseValidationSupport impleme
 
 		HashSet<String> retVal = Sets.newHashSet(url, urlWithoutVersion);
 
-		Optional<IBase> versionValue =
-				resourceDef.getChildByName("version").getAccessor().getFirstValueOrNull(theResource);
-		String version = versionValue
-				.map(t -> (((IPrimitiveType<?>) t).getValueAsString()))
-				.orElse(null);
+		String version = getVersion(theResource);
 		if (isNotBlank(version)) {
 			retVal.add(urlWithoutVersion + "|" + version);
 		}
 
 		return retVal;
+	}
+
+	@Nullable
+	private String getVersion(IBaseResource theResource) {
+		RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition(theResource);
+		Optional<IBase> versionValue =
+				resourceDef.getChildByName("version").getAccessor().getFirstValueOrNull(theResource);
+		return versionValue
+				.map(t -> (((IPrimitiveType<?>) t).getValueAsString()))
+				.orElse(null);
 	}
 
 	/**
@@ -311,6 +318,35 @@ public class PrePopulatedValidationSupport extends BaseValidationSupport impleme
 		return myUrlToCodeSystems.get(theSystem);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * A CodeSystem stored without a version element answers for any version, as long as no version of that
+	 * system is stored: it is then the only definition there is, so it cannot be answering in place of the
+	 * version that was named. Once any version is stored, only an exact match answers.
+	 * </p>
+	 */
+	// Created by Claude Opus 5
+	@Override
+	public IBaseResource fetchCodeSystem(String theSystem, @Nullable String theVersion) {
+		IBaseResource retVal = myUrlToCodeSystems.get(UrlUtil.toCanonicalUrl(theSystem, theVersion));
+		if (retVal == null && isNotBlank(theVersion)) {
+			retVal = fetchCodeSystemStoredOnlyWithoutAVersion(theSystem);
+		}
+		return retVal;
+	}
+
+	@Nullable
+	private IBaseResource fetchCodeSystemStoredOnlyWithoutAVersion(String theSystem) {
+		IBaseResource candidate = myUrlToCodeSystems.get(theSystem);
+		if (candidate == null || isNotBlank(getVersion(candidate))) {
+			return null;
+		}
+		String versionedKeyPrefix = theSystem + "|";
+		boolean anyVersionStored = myUrlToCodeSystems.keySet().stream().anyMatch(t -> t.startsWith(versionedKeyPrefix));
+		return anyVersionStored ? null : candidate;
+	}
+
 	@Override
 	public IBaseResource fetchValueSet(String theUri) {
 		return myUrlToValueSets.get(theUri);
@@ -329,6 +365,19 @@ public class PrePopulatedValidationSupport extends BaseValidationSupport impleme
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
 		return myUrlToCodeSystems.containsKey(theSystem);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Answers as {@link #fetchCodeSystem(String, String)} does.
+	 * </p>
+	 */
+	// Created by Claude Opus 5
+	@Override
+	public boolean isCodeSystemSupported(
+			ValidationSupportContext theValidationSupportContext, String theSystem, @Nullable String theVersion) {
+		return fetchCodeSystem(theSystem, theVersion) != null;
 	}
 
 	@Override

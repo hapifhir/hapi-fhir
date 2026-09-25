@@ -176,6 +176,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -2354,6 +2355,9 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			if (cs != null) {
 				if (version != null) {
 					csv = myCodeSystemVersionDao.findByCodeSystemPidAndVersion(cs.getPid(), version);
+					if (csv == null) {
+						csv = findTheOnlyVersionIfUnversioned(cs);
+					}
 				} else if (cs.getCurrentVersion() != null) {
 					csv = cs.getCurrentVersion();
 				}
@@ -2364,6 +2368,25 @@ public class TermReadSvcImpl implements ITermReadSvc {
 				return null;
 			}
 		});
+	}
+
+	/**
+	 * A code system stored without a version is the only definition of it there is, so it answers for any
+	 * version named. Once any version is stored, only an exact match answers.
+	 */
+	// Created by Claude Opus 5
+	@Nullable
+	private TermCodeSystemVersion findTheOnlyVersionIfUnversioned(TermCodeSystem theCodeSystem) {
+		TermCodeSystemVersion unversioned =
+				myCodeSystemVersionDao.findByCodeSystemPidVersionIsNull(theCodeSystem.getPid());
+		if (unversioned == null) {
+			return null;
+		}
+		boolean onlyVersionStored = myCodeSystemVersionDao
+						.findSortedPidsByCodeSystemPid(theCodeSystem.getPid())
+						.size()
+				== 1;
+		return onlyVersionStored ? unversioned : null;
 	}
 
 	private String getVersionFromIdentifier(String theUri) {
@@ -2557,7 +2580,17 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		return myTxTemplate.execute(t -> {
 			final String theSystem = theLookupCodeRequest.getSystem();
 			final String theCode = theLookupCodeRequest.getCode();
-			Optional<TermConcept> codeOpt = findCode(theSystem, theCode);
+			// The version is named on the request where the caller could name it, and otherwise can only have
+			// arrived packed into the system as "url|version"
+			String codeSystemIdentifier = theSystem;
+			if (isNotBlank(theSystem)) {
+				UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(theSystem);
+				String codeSystemVersion = defaultIfBlank(
+						theLookupCodeRequest.getVersion(),
+						codeSystem.versionId().orElse(null));
+				codeSystemIdentifier = UrlUtil.toCanonicalUrl(codeSystem.url(), codeSystemVersion);
+			}
+			Optional<TermConcept> codeOpt = findCode(codeSystemIdentifier, theCode);
 			if (codeOpt.isPresent()) {
 				TermConcept code = codeOpt.get();
 

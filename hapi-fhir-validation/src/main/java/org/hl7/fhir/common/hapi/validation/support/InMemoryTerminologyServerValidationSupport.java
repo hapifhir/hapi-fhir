@@ -33,6 +33,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.contains;
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -543,13 +544,16 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			ValidationSupportContext theValidationSupportContext, @Nonnull LookupCodeRequest theLookupCodeRequest) {
 		final String code = theLookupCodeRequest.getCode();
 		final String system = theLookupCodeRequest.getSystem();
+		// The version is named on the request where the caller could name it, and otherwise can only have
+		// arrived packed into the system as "url|version"
+		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(system);
+		String codeSystemVersion = defaultIfBlank(
+				theLookupCodeRequest.getVersion(), codeSystem.versionId().orElse(null));
 		CodeValidationResult codeValidationResult = validateCode(
 				theValidationSupportContext,
 				new ConceptValidationOptions(),
-				system,
-				code,
-				theLookupCodeRequest.getDisplayLanguage(),
-				null);
+				new ValidateCodeRequest(
+						codeSystem.url(), codeSystemVersion, code, theLookupCodeRequest.getDisplayLanguage(), null));
 		if (codeValidationResult == null) {
 			return null;
 		}

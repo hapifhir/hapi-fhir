@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.validation;
 
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -423,6 +424,36 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 			assertThat(result).isNotNull();
 			assertThat(result.isOk()).isTrue();
 		}
+
+		/**
+		 * A lookup naming the version has to answer from it: the version saved last holds a code the named one
+		 * does not, so a lookup which drops the version finds that code and misses the named version's.
+		 */
+		@ParameterizedTest
+		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
+		void lookupCode_withACodeSystemVersion_answersFromThatVersion(String theSpecifiedVersion) {
+			// Setup
+			setUpWithSpecifiedVersion(theSpecifiedVersion);
+
+			// Test
+			IValidationSupport.LookupCodeResult codeInTheSpecifiedVersion =
+				lookupCodeInCodeSystem(theSpecifiedVersion, codeIn(theSpecifiedVersion));
+			IValidationSupport.LookupCodeResult codeOnlyInTheOtherVersion =
+				lookupCodeInCodeSystem(theSpecifiedVersion, codeIn(otherThan(theSpecifiedVersion)));
+
+			// Verify
+			assertThat(codeInTheSpecifiedVersion).isNotNull();
+			assertThat(codeInTheSpecifiedVersion.isFound()).isTrue();
+			assertThat(codeInTheSpecifiedVersion.getCodeSystemVersion()).isEqualTo(theSpecifiedVersion);
+			assertThat(codeOnlyInTheOtherVersion).isNotNull();
+			assertThat(codeOnlyInTheOtherVersion.isFound()).isFalse();
+		}
+	}
+
+	private IValidationSupport.LookupCodeResult lookupCodeInCodeSystem(String theCodeSystemVersion, String theCode) {
+		return myValidationSupport.lookupCode(
+			new ValidationSupportContext(myValidationSupport),
+			new LookupCodeRequest(CS_URL, theCode).setVersion(theCodeSystemVersion));
 	}
 
 	private IValidationSupport.CodeValidationResult validateCodeInCodeSystem(
@@ -656,6 +687,60 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		}
 	}
 
+	/**
+	 * The CodeSystem is stored without a version element, and the coding names one. With no version stored
+	 * there is only one definition of the system, so it answers whatever version is named. Each test also
+	 * checks a code the CodeSystem does not have, which shows the code was checked rather than let through
+	 * with no module asked. No profile binds the coding to a ValueSet: a binding reaches terminology through
+	 * validateCodeInValueSet, which never asks about the version, so it would pass either way.
+	 */
+	@Nested
+	class CodeSystemStoredWithoutAVersionTest {
+
+		void setUpWithUnversionedCodeSystem() {
+			createCodeSystem(null, CODE_IN_OLDER_VERSION);
+
+			myTerminologyDeferredStorageSvc.saveAllDeferred();
+		}
+
+		@ParameterizedTest
+		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
+		void validateCode_namedVersionOfAnUnversionedCodeSystem_answersFromIt(String theNamedVersion) {
+			// Setup
+			setUpWithUnversionedCodeSystem();
+
+			// Test
+			IValidationSupport.CodeValidationResult codeInTheSystem =
+				validateCodeInCodeSystem(theNamedVersion, CODE_IN_OLDER_VERSION);
+			IValidationSupport.CodeValidationResult codeNotInTheSystem =
+				validateCodeInCodeSystem(theNamedVersion, CODE_IN_NEWER_VERSION);
+
+			// Verify
+			assertThat(codeInTheSystem).isNotNull();
+			assertThat(codeInTheSystem.isOk()).as(codeInTheSystem.getMessage()).isTrue();
+			assertThat(codeNotInTheSystem).isNotNull();
+			assertThat(codeNotInTheSystem.isOk()).isFalse();
+		}
+
+		@ParameterizedTest
+		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
+		void validate_codingNamesAVersionOfAnUnversionedCodeSystem_validatesAgainstIt(String theNamedVersion) {
+			// Setup
+			setUpWithUnversionedCodeSystem();
+
+			// Test
+			OperationOutcome codeInTheSystem = validateObservationWithoutProfile(CODE_IN_OLDER_VERSION, theNamedVersion);
+			OperationOutcome codeNotInTheSystem =
+				validateObservationWithoutProfile(CODE_IN_NEWER_VERSION, theNamedVersion);
+
+			// Verify - with no profile the coding's binding is the base example one, so a code missing from the
+			// CodeSystem is reported as a warning rather than an error
+			assertThat(allDiagnostics(codeInTheSystem)).noneMatch(t -> t.contains(CODE_IN_OLDER_VERSION));
+			assertThat(allDiagnostics(codeNotInTheSystem))
+				.anyMatch(t -> t.contains("Code is not found in CodeSystem") && t.contains(CODE_IN_NEWER_VERSION));
+		}
+	}
+
 	private void createValueSetIncludingCodesFromCodeSystemVersion(
 			String theValueSetVersion, String theCodeSystemVersion, String... theCodes) {
 		ValueSet valueSet = newValueSet(theValueSetVersion);
@@ -759,17 +844,33 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		observation.getMeta().addProfile(PROFILE_URL);
 		observation.setStatus(Observation.ObservationStatus.FINAL);
 		observation.getCode().addCoding().setSystem(CS_URL).setCode(theCode).setDisplay(theCode);
+		return validate(observation);
+	}
 
+	private OperationOutcome validateObservationWithoutProfile(String theCode, String theCodingVersion) {
+		Observation observation = new Observation();
+		observation.setStatus(Observation.ObservationStatus.FINAL);
+		observation.getCode().addCoding().setSystem(CS_URL).setVersion(theCodingVersion).setCode(theCode).setDisplay(theCode);
+		return validate(observation);
+	}
+
+	private OperationOutcome validate(Observation theObservation) {
 		OperationOutcome oo;
 		try {
 			MethodOutcome outcome =
-				myObservationDao.validate(observation, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
+				myObservationDao.validate(theObservation, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
 			oo = (OperationOutcome) outcome.getOperationOutcome();
 		} catch (PreconditionFailedException e) {
 			oo = (OperationOutcome) e.getOperationOutcome();
 		}
 		ourLog.info("Validation errors: {}", errorDiagnostics(oo));
 		return oo;
+	}
+
+	private List<String> allDiagnostics(OperationOutcome theOutcome) {
+		return theOutcome.getIssue().stream()
+			.map(OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
+			.toList();
 	}
 
 	private List<String> errorDiagnostics(OperationOutcome theOutcome) {

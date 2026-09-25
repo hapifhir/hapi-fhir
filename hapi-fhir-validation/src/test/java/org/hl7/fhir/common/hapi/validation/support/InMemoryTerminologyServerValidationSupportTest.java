@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
@@ -600,6 +601,69 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		// Verify
 		assertNotNull(outcome);
 		assertTrue(outcome.isOk(), "UCUM ships one definition, so it answers for any version");
+	}
+
+	/**
+	 * A CodeSystem stored without a version element is the only definition of that system there is, so it
+	 * answers whatever version a coding names. Asserting the rejection as well as the acceptance is what shows
+	 * the code was actually checked against the CodeSystem, rather than let through with no module asked.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	void validateCode_codeSystemStoredWithoutAVersion_answersForANamedVersion() {
+		// Setup
+		CodeSystem cs = new CodeSystem();
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setUrl(VERSIONED_CS_URL);
+		cs.addConcept().setCode("code0").setDisplay("Code 0");
+		myPrePopulated.addCodeSystem(cs);
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.CodeValidationResult codeInTheSystem = myChain.validateCode(
+			valCtx, new ConceptValidationOptions(), new ValidateCodeRequest(VERSIONED_CS_URL, "1.0.0", "code0", null, null));
+		IValidationSupport.CodeValidationResult codeNotInTheSystem = myChain.validateCode(
+			valCtx, new ConceptValidationOptions(), new ValidateCodeRequest(VERSIONED_CS_URL, "1.0.0", "code9", null, null));
+
+		// Verify
+		assertNotNull(codeInTheSystem);
+		assertTrue(codeInTheSystem.isOk(), codeInTheSystem.getMessage());
+		assertNotNull(codeNotInTheSystem);
+		assertFalse(codeNotInTheSystem.isOk());
+	}
+
+	/**
+	 * The chain picks the module holding the version a lookup names, and that module has to answer from the
+	 * same version. Each version holds a code the other does not, and 2.0.0 is stored last, so a lookup which
+	 * drops the version answers from 2.0.0 - finding codeB and missing codeA.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	void lookupCode_twoVersionsStoredAndOneNamed_answersFromTheNamedVersion() {
+		// Setup
+		for (String version : List.of("1.0.0", "2.0.0")) {
+			CodeSystem cs = new CodeSystem();
+			cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+			cs.setUrl(VERSIONED_CS_URL);
+			cs.setVersion(version);
+			cs.addConcept().setCode(version.equals("1.0.0") ? "codeA" : "codeB");
+			myPrePopulated.addCodeSystem(cs);
+		}
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.LookupCodeResult codeInTheNamedVersion =
+			myChain.lookupCode(valCtx, new LookupCodeRequest(VERSIONED_CS_URL, "codeA").setVersion("1.0.0"));
+		IValidationSupport.LookupCodeResult codeOnlyInTheOtherVersion =
+			myChain.lookupCode(valCtx, new LookupCodeRequest(VERSIONED_CS_URL, "codeB").setVersion("1.0.0"));
+
+		// Verify
+		assertNotNull(codeInTheNamedVersion);
+		assertTrue(codeInTheNamedVersion.isFound());
+		assertNotNull(codeOnlyInTheOtherVersion);
+		assertFalse(codeOnlyInTheOtherVersion.isFound());
 	}
 
 	/**
