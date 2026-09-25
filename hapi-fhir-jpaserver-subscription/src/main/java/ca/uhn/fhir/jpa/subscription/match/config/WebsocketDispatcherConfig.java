@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.subscription.match.deliver.websocket.WebsocketConnectionV
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
@@ -41,6 +42,7 @@ public class WebsocketDispatcherConfig implements WebSocketConfigurer {
 	SubscriptionSettings mySubscriptionSettings;
 
 	@Bean
+	@Lazy
 	public WebsocketConnectionValidator websocketConnectionValidator() {
 		return new WebsocketConnectionValidator();
 	}

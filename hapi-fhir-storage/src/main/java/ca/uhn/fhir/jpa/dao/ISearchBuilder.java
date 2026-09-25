@@ -150,5 +150,5 @@ public interface ISearchBuilder<T extends IResourcePersistentId<?>> {
 	 */
 	void setFetchSize(int theFetchSize);
 
-	void setPreviouslyAddedResourcePids(List<T> thePreviouslyAddedResourcePids);
+	void setPreviouslyAddedResourcePids(Collection<T> thePreviouslyAddedResourcePids);
 }

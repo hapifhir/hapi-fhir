@@ -122,7 +122,7 @@ public class ValidatorExamples {
 		ctx.setParserErrorHandler(new StrictErrorHandler());
 
 		// This client will have strict parser validation enabled
-		IGenericClient client = ctx.newRestfulGenericClient("http://hapi.fhir.org/baseR4");
+		IGenericClient client = ctx.newRestfulGenericClient("https://hapi.fhir.org/baseR4");
 		// END SNIPPET: clientValidation
 
 	}
@@ -401,7 +401,7 @@ public class ValidatorExamples {
 
 		// Create a module that uses a remote terminology service
 		RemoteTerminologyServiceValidationSupport remoteTermSvc = new RemoteTerminologyServiceValidationSupport(ctx);
-		remoteTermSvc.setBaseUrl("http://hapi.fhir.org/baseR4");
+		remoteTermSvc.setBaseUrl("https://hapi.fhir.org/baseR4");
 		supportChain.addValidationSupport(remoteTermSvc);
 
 		// Create a validator using the FhirInstanceValidator module. We can use this

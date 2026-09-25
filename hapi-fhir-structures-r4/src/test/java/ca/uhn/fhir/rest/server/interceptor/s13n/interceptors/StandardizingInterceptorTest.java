@@ -3,7 +3,7 @@ package ca.uhn.fhir.rest.server.interceptor.s13n.interceptors;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.s13n.StandardizingInterceptor;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Person;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,7 +45,7 @@ class StandardizingInterceptorTest {
 
 	@BeforeEach
 	public void init() throws Exception {
-		myInterceptor = new StandardizingInterceptor(new ObjectMapper().readValue(CONFIG, Map.class));
+		myInterceptor = new StandardizingInterceptor(new JsonMapper().readValue(CONFIG, Map.class));
 
 		myRequestDetails = mock(RequestDetails.class);
 		when(myRequestDetails.getFhirContext()).thenReturn(ourCtx);
@@ -73,7 +73,7 @@ class StandardizingInterceptorTest {
 
 	@Test
 	public void testBadConfig() throws Exception {
-		myInterceptor = new StandardizingInterceptor(new ObjectMapper().readValue(BAD_CONFIG, Map.class));
+		myInterceptor = new StandardizingInterceptor(new JsonMapper().readValue(BAD_CONFIG, Map.class));
 
 		try {
 			myInterceptor.resourcePreCreate(myRequestDetails, new Person());

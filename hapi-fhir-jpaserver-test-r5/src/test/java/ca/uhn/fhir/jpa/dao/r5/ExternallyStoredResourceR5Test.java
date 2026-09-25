@@ -68,7 +68,7 @@ public class ExternallyStoredResourceR5Test extends BaseJpaR5Test {
 		IIdType id = storePatientWithExternalAddress();
 		Patient patient = new Patient();
 		patient.setActive(true);
-		when(myProvider.fetchResource(any())).thenReturn(patient);
+		when(myProvider.fetchResource(any(), any())).thenReturn(patient);
 
 		// Test
 		Patient fetchedPatient = myPatientDao.read(id, mySrd);

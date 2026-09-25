@@ -68,7 +68,7 @@ public class JpaResourceDaoObservation<T extends IBaseResource> extends BaseHapi
 			HttpServletResponse theServletResponse) {
 		updateSearchParamsForLastn(theSearchParameterMap, theRequestDetails);
 
-		return mySearchCoordinatorSvc.registerSearch(
+		return mySearchCoordinatorSvc.createNewSearch(
 				this,
 				theSearchParameterMap,
 				getResourceName(),

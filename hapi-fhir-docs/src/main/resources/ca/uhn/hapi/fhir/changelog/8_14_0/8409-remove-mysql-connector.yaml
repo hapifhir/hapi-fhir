@@ -1,0 +1,4 @@
+---
+type: remove
+title: "MySQL is no longer a supported database platform, and the MySQL JDBC driver is no longer bundled with the
+  HAPI FHIR CLI. MySQL users should migrate to a supported database platform such as PostgreSQL before upgrading."

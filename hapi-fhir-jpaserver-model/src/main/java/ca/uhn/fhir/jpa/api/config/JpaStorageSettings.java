@@ -1804,14 +1804,19 @@ public class JpaStorageSettings extends StorageSettings {
 	 * </p>
 	 */
 	public void setSearchPreFetchThresholds(List<Integer> thePreFetchThresholds) {
-		Validate.isTrue(thePreFetchThresholds.size() > 0, "thePreFetchThresholds must not be empty");
-		int last = 0;
-		for (Integer nextInt : thePreFetchThresholds) {
-			Validate.isTrue(nextInt > 0 || nextInt == -1, nextInt + " is not a valid prefetch threshold");
-			Validate.isTrue(nextInt != last, "Prefetch thresholds must be sequential");
-			Validate.isTrue(nextInt > last || nextInt == -1, "Prefetch thresholds must be sequential");
-			Validate.isTrue(last != -1, "Prefetch thresholds must be sequential");
-			last = nextInt;
+		Validate.isTrue(!thePreFetchThresholds.isEmpty(), "thePreFetchThresholds must not be empty");
+		int previousThreshold = 0;
+		for (Integer nextThreshold : thePreFetchThresholds) {
+			Validate.isTrue(nextThreshold != null, "null is not a valid prefetch threshold");
+			Validate.isTrue(
+					nextThreshold > 0 || nextThreshold == -1, nextThreshold + " is not a valid prefetch threshold");
+			Validate.isTrue(nextThreshold != previousThreshold, "Prefetch thresholds must be sequential");
+			Validate.isTrue(
+					nextThreshold > previousThreshold || nextThreshold == -1, "Prefetch thresholds must be sequential");
+			Validate.isTrue(
+					previousThreshold != -1,
+					"Prefetch thresholds must be sequential, and -1 can only be used as the final entry");
+			previousThreshold = nextThreshold;
 		}
 		mySearchPreFetchThresholds = thePreFetchThresholds;
 	}

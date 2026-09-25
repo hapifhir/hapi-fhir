@@ -147,7 +147,7 @@ class SearchBuilderTest {
 			when(myResourceHistoryTableDao.findCurrentVersionsByResourcePidsAndFetchResourceTable(any()))
 				.thenReturn(List.of(ht));
 			ResourceLoadResult result = new ResourceLoadResult(ht.getPersistentId(), patient, false);
-			when(myBatchResourceLoader.loadResources(any(List.class), anyBoolean())).thenReturn(List.of(result));
+			when(myBatchResourceLoader.loadResources(any(), any(List.class), anyBoolean())).thenReturn(List.of(result));
 		} else {
 			when(myFulltextSearchSvc.getResources(any(List.class)))
 				.thenReturn(List.of(patient));
