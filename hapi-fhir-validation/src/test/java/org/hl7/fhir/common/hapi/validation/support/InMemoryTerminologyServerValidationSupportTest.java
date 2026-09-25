@@ -642,6 +642,72 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 	}
 
 	/**
+	 * A module written before the version-aware isCodeSystemSupported existed, and which recognises only the
+	 * exact code system URL, has to keep being asked when a coding names a version, as it was before.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	void validateCode_moduleRecognisingOnlyTheExactUrl_isStillAskedWhenAVersionIsNamed() {
+		// Setup
+		String exactUrl = "http://example.com/fhir/CodeSystem/exact-url-only";
+		IValidationSupport exactUrlModule = new IValidationSupport() {
+			@Override
+			public FhirContext getFhirContext() {
+				return myCtx;
+			}
+
+			@Override
+			public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
+				return exactUrl.equals(theSystem);
+			}
+
+			@Override
+			public CodeValidationResult validateCode(
+					ValidationSupportContext theValidationSupportContext,
+					ConceptValidationOptions theOptions,
+					String theCodeSystem,
+					String theCode,
+					String theDisplay,
+					String theValueSetUrl) {
+				return new CodeValidationResult().setCode(theCode);
+			}
+		};
+		ValidationSupportChain chain = new ValidationSupportChain(exactUrlModule, myDefaultSupport);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = chain.validateCode(
+			new ValidationSupportContext(chain),
+			new ConceptValidationOptions(),
+			new ValidateCodeRequest(exactUrl, "2.0.0", "code0", null, null));
+
+		// Verify
+		assertNotNull(outcome);
+		assertTrue(outcome.isOk(), outcome.getMessage());
+		assertEquals("code0", outcome.getCode());
+	}
+
+	/**
+	 * When a ValueSet is named and no module holds it, the question was about the ValueSet, so the result must
+	 * not claim that the code system version could not be found.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	void validateCode_valueSetNoModuleHolds_doesNotReportTheCodeSystemVersion() {
+		// Setup
+		addSingleVersionCodeSystemAndRecordFetches("1.0.0");
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = myChain.validateCode(
+			valCtx,
+			new ConceptValidationOptions(),
+			new ValidateCodeRequest(VERSIONED_CS_URL, "2.0.0", "code0", null, "http://example.com/fhir/ValueSet/unknown"));
+
+		// Verify
+		assertNull(outcome);
+	}
+
+	/**
 	 * The chain picks the module holding the version a lookup names, and that module has to answer from the
 	 * same version. Each version holds a code the other does not, and 2.0.0 is stored last, so a lookup which
 	 * drops the version answers from 2.0.0 - finding codeB and missing codeA.

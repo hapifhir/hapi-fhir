@@ -953,8 +953,8 @@ public class ValidationSupportChain implements IValidationSupport {
 			}
 
 			if (retVal.getValue() == null) {
-				CodeValidationResult unknownCodeSystemResult =
-						generateResultForUnknownCodeSystem(codeSystem, codeSystemVersion, code);
+				CodeValidationResult unknownCodeSystemResult = generateResultForUnknownCodeSystem(
+						codeSystem, codeSystemVersion, code, isNotBlank(valueSetUrl));
 				if (unknownCodeSystemResult != null) {
 					retVal = new CacheValue<>(unknownCodeSystemResult);
 				}
@@ -991,12 +991,14 @@ public class ValidationSupportChain implements IValidationSupport {
 	 *                             see which one was not found. Whether the code system is known at all is
 	 *                             decided on the URL alone.
 	 * @param theCode              The code to validate
+	 * @param theValueSetNamed     Whether the caller asked about a ValueSet. The code system version is then not
+	 *                             reported, since the question was membership of the ValueSet.
 	 * @return A CodeValidationResult indicating the error, or null if theCodeSystem is null
 	 * or a validation support can fetch the code system at the version asked for.
 	 */
 	@Nullable
 	private CodeValidationResult generateResultForUnknownCodeSystem(
-			String theCodeSystem, @Nullable String theCodeSystemVersion, String theCode) {
+			String theCodeSystem, @Nullable String theCodeSystemVersion, String theCode, boolean theValueSetNamed) {
 
 		if (theCodeSystem == null) {
 			return null;
@@ -1006,7 +1008,9 @@ public class ValidationSupportChain implements IValidationSupport {
 		String codeSystemVersion = codeSystemParts.versionId().orElse(null);
 		IBaseResource codeSystem = fetchCodeSystem(codeSystemUrl, null);
 		if (codeSystem != null) {
-			if (codeSystemVersion == null || fetchCodeSystem(codeSystemUrl, codeSystemVersion) != null) {
+			if (theValueSetNamed
+					|| codeSystemVersion == null
+					|| fetchCodeSystem(codeSystemUrl, codeSystemVersion) != null) {
 				return null;
 			}
 			return generateResultForUnknownCodeSystemVersion(codeSystemUrl, codeSystemVersion);

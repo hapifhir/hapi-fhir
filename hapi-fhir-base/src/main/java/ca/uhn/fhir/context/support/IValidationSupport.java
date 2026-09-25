@@ -332,9 +332,11 @@ public interface IValidationSupport {
 	 * <p>
 	 * This is the form callers should use, and the one a validation support chain needs in order to
 	 * pick the module holding the version that was asked for rather than the first module holding the
-	 * system. The default implementation packs the version into the URL and calls
-	 * {@link #isCodeSystemSupported(ValidationSupportContext, String)}, so an implementation which
-	 * overrides only that method keeps working unchanged.
+	 * system. The default implementation calls {@link #isCodeSystemSupported(ValidationSupportContext, String)}
+	 * with the version packed into the URL, and if that answers <code>false</code>, again with the URL on its
+	 * own, so an implementation which overrides only that method and recognises only the plain URL keeps
+	 * working unchanged. An implementation which holds specific versions of a code system should override
+	 * this method and answer <code>false</code> for a version it does not hold.
 	 * </p>
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
@@ -347,7 +349,14 @@ public interface IValidationSupport {
 	// Created by Claude Opus 5
 	default boolean isCodeSystemSupported(
 			ValidationSupportContext theValidationSupportContext, String theSystem, @Nullable String theVersion) {
-		return isCodeSystemSupported(theValidationSupportContext, UrlUtil.toCanonicalUrl(theSystem, theVersion));
+		String canonicalUrl = UrlUtil.toCanonicalUrl(theSystem, theVersion);
+		if (isCodeSystemSupported(theValidationSupportContext, canonicalUrl)) {
+			return true;
+		}
+		String url = UrlUtil.parseCanonicalUrl(theSystem).url();
+		return canonicalUrl != null
+				&& !canonicalUrl.equals(url)
+				&& isCodeSystemSupported(theValidationSupportContext, url);
 	}
 
 	/**

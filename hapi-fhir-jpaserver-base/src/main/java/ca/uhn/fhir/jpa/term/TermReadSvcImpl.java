@@ -288,6 +288,19 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		return cs != null;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Answers only for the version named, since several versions of one code system can be stored.
+	 * </p>
+	 */
+	// Created by Claude Opus 5
+	@Override
+	public boolean isCodeSystemSupported(
+			ValidationSupportContext theValidationSupportContext, String theSystem, @Nullable String theVersion) {
+		return isCodeSystemSupported(theValidationSupportContext, UrlUtil.toCanonicalUrl(theSystem, theVersion));
+	}
+
 	@Override
 	public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
 		return fetchValueSet(theValueSetUrl) != null;
