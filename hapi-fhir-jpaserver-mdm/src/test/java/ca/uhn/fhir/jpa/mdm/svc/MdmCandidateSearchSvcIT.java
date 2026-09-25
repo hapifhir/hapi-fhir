@@ -3,14 +3,19 @@ package ca.uhn.fhir.jpa.mdm.svc;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchSvc;
-import ca.uhn.fhir.jpa.mdm.svc.candidate.TooManyCandidatesException;
 import ca.uhn.fhir.jpa.nickname.INicknameSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.nickname.NicknameInterceptor;
+import ca.uhn.fhir.mdm.log.Logs;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -23,11 +28,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
 
 public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 
@@ -53,6 +61,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 	@AfterEach
 	public void resetMdmSettings() {
 		myMdmSettings.setCandidateSearchLimit(MdmSettings.DEFAULT_CANDIDATE_SEARCH_LIMIT);
+		myMdmSettings.setCandidateSearchWarnLimit(MdmSettings.DEFAULT_WARN_LIMIT);
 		myInterceptorRegistry.unregisterInterceptor(myNicknameInterceptor);
 	}
 
@@ -61,7 +70,8 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 		createActivePatient();
 		Patient newJane = buildJanePatient();
 
-		Collection<IAnyResource> result = myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions());
+		Collection<IAnyResource> result = myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions(),
+			new MdmTransactionContext());
 		assertThat(result).hasSize(1);
 	}
 
@@ -88,7 +98,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 			Practitioner nick = new Practitioner();
 			nick.getNameFirstRep().addGiven("Bill");
 			nick.getNameFirstRep().setFamily("Shatner");
-			Collection<IAnyResource> result = myMdmCandidateSearchSvc.findCandidates("Practitioner", nick, RequestPartitionId.allPartitions());
+			Collection<IAnyResource> result = myMdmCandidateSearchSvc.findCandidates("Practitioner", nick, RequestPartitionId.allPartitions(), new MdmTransactionContext());
 			assertThat(result).hasSize(1);
 		}
 
@@ -97,7 +107,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 			Practitioner noMatch = new Practitioner();
 			noMatch.getNameFirstRep().addGiven("Bob");
 			noMatch.getNameFirstRep().setFamily("Shatner");
-			Collection<IAnyResource> result = myMdmCandidateSearchSvc.findCandidates("Practitioner", noMatch, RequestPartitionId.allPartitions());
+			Collection<IAnyResource> result = myMdmCandidateSearchSvc.findCandidates("Practitioner", noMatch, RequestPartitionId.allPartitions(), new MdmTransactionContext());
 			assertThat(result).isEmpty();
 		}
 	}
@@ -132,7 +142,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 
 		// test
 		Collection<IAnyResource> results = myMdmCandidateSearchSvc.findCandidates("Patient",
-			incoming, RequestPartitionId.allPartitions());
+			incoming, RequestPartitionId.allPartitions(), new MdmTransactionContext());
 
 		// validation
 		assertThat(results).hasSize(0);
@@ -168,7 +178,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 
 		// test
 		Collection<IAnyResource> results = myMdmCandidateSearchSvc.findCandidates("Patient",
-			incoming, RequestPartitionId.allPartitions());
+			incoming, RequestPartitionId.allPartitions(), new MdmTransactionContext());
 
 		// validation
 		assertThat(results).hasSize(1);
@@ -190,7 +200,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 
 		Patient newJane = buildJaneWithBirthday(today);
 
-		Collection<IAnyResource> result = myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions());
+		Collection<IAnyResource> result = myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions(), new MdmTransactionContext());
 		assertThat(result).hasSize(1);
 	}
 
@@ -208,27 +218,87 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 		incomingPatient.setActive(true);
 		incomingPatient.setGeneralPractitioner(Collections.singletonList(new Reference(practitionerAndUpdateLinks.getId())));
 
-		Collection<IAnyResource> patient = myMdmCandidateSearchSvc.findCandidates("Patient", incomingPatient, RequestPartitionId.allPartitions());
+		Collection<IAnyResource> patient = myMdmCandidateSearchSvc.findCandidates("Patient", incomingPatient, RequestPartitionId.allPartitions(), new MdmTransactionContext());
 		assertThat(patient).hasSize(1);
 	}
 
 	@Test
-	public void testTooManyMatches() {
-		myMdmSettings.setCandidateSearchLimit(3);
-
-		Patient newJane = buildJanePatient();
-
-		createActivePatient();
-		assertEquals(1, runInTransaction(() -> myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions()).size()));
-		createActivePatient();
-		assertEquals(2, runInTransaction(() -> myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions()).size()));
+	public void findCandidates_overWarnLimit_logs() {
+		// setup
+		int warnLimit = 3;
+		ListAppender<ILoggingEvent> appender = new ListAppender<>();
+		Logger logger = (Logger) Logs.getMdmTroubleshootingLog();
 
 		try {
+			for (int i = 0; i < warnLimit; i++) {
+				createActivePatient();
+			}
+			logger.addAppender(appender);
+			appender.start();
+			myMdmSettings.setCandidateSearchWarnLimit(warnLimit);
+
+			// test
+			Patient jane = buildJanePatient();
+			MdmTransactionContext context = new MdmTransactionContext();
+			Collection<IAnyResource> results = myMdmCandidateSearchSvc.findCandidates(
+				"Patient", jane, RequestPartitionId.allPartitions(), context);
+
+			// verify
+			assertFalse(context.isTooManyCandidatesMatched());
+			assertEquals(warnLimit, results.size());
+
+			List<ILoggingEvent> events = appender.list
+				.stream()
+				.filter(log -> log.getLevel() == Level.WARN)
+				.toList();
+			assertThat(events.stream()
+				.filter(e -> e.getMessage().contains("Candidate search yielded"))
+				.toList())
+				.hasSize(1);
+		} finally {
+			appender.stop();
+
+			// revert
+			myMdmSettings.setCandidateSearchWarnLimit(MdmSettings.DEFAULT_WARN_LIMIT);
+			logger.detachAppender(appender);
+		}
+	}
+
+	@Test
+	public void findCandidates_moreThanConfigureDLimit_haltsMatching() {
+		// setup
+		int searchLimit = myMdmSettings.getCandidateSearchLimit();
+		try {
+			myMdmSettings.setCandidateSearchLimit(3);
+
+			Patient newJane = buildJanePatient();
+
 			createActivePatient();
-			myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions());
-			fail();
-		} catch (TooManyCandidatesException e) {
-			assertEquals("HAPI-0762: More than 3 candidate matches found for Patient?identifier=http%3A%2F%2Fa.tv%2F%7CID.JANE.123&active=true.  Aborting mdm matching. Updating the candidate search parameters is strongly recommended for better performance of MDM.", e.getMessage());
+
+			{
+				MdmTransactionContext context = new MdmTransactionContext();
+				assertEquals(1, runInTransaction(() -> {
+					return myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions(), context).size();
+				}));
+				assertFalse(context.isTooManyCandidatesMatched());
+			}
+			{
+				MdmTransactionContext context = new MdmTransactionContext();
+				createActivePatient();
+				assertEquals(2, runInTransaction(() -> myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions(), context).size()));
+				assertFalse(context.isTooManyCandidatesMatched());
+			}
+
+			// test
+			createActivePatient();
+			MdmTransactionContext context = new MdmTransactionContext();
+			Collection<IAnyResource> results = myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions(), context);
+
+			// verify
+			assertTrue(results.isEmpty());
+			assertTrue(context.isTooManyCandidatesMatched());
+		} finally {
+			myMdmSettings.setCandidateSearchLimit(searchLimit);
 		}
 	}
 

@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
-import org.hl7.fhir.instance.model.api.IAnyResource;
+import ca.uhn.fhir.jpa.mdm.models.FindGoldenResourceCandidatesParams;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -33,13 +33,14 @@ public abstract class BaseCandidateFinder {
 	@Autowired
 	MdmLinkDaoSvc myMdmLinkDaoSvc;
 
-	CandidateList findCandidates(IAnyResource theTarget) {
+	CandidateList findCandidates(FindGoldenResourceCandidatesParams theParams) {
 		CandidateList candidateList = new CandidateList(getStrategy());
-		candidateList.addAll(getStrategy(), findMatchGoldenResourceCandidates(theTarget));
+		candidateList.addAll(getStrategy(), findMatchGoldenResourceCandidates(theParams));
 		return candidateList;
 	}
 
-	protected abstract List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(IAnyResource theTarget);
+	protected abstract List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(
+			FindGoldenResourceCandidatesParams theParams);
 
 	protected abstract CandidateStrategyEnum getStrategy();
 }

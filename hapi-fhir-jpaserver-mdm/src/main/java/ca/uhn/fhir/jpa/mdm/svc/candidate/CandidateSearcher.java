@@ -24,18 +24,19 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.log.Logs;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.svc.MdmSearchParamSvc;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
 
 public class CandidateSearcher {
-	private static final Logger ourLog = LoggerFactory.getLogger(CandidateSearcher.class);
+	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 	private final DaoRegistry myDaoRegistry;
 	private final IMdmSettings myMdmSettings;
 	private final MdmSearchParamSvc myMdmSearchParamSvc;
@@ -58,7 +59,10 @@ public class CandidateSearcher {
 	 * return the bundle provider for the search results.
 	 */
 	public Optional<IBundleProvider> search(
-			String theResourceType, String theResourceCriteria, RequestPartitionId partitionId) {
+			String theResourceType,
+			String theResourceCriteria,
+			RequestPartitionId partitionId,
+			MdmTransactionContext theContext) {
 		SearchParameterMap searchParameterMap =
 				myMdmSearchParamSvc.mapFromCriteria(theResourceType, theResourceCriteria);
 
@@ -69,9 +73,38 @@ public class CandidateSearcher {
 		systemRequestDetails.setRequestPartitionId(partitionId);
 		IBundleProvider retval = resourceDao.search(searchParameterMap, systemRequestDetails);
 
-		if (retval.size() != null && retval.size() >= myMdmSettings.getCandidateSearchLimit()) {
-			return Optional.empty();
+		if (retval.size() != null) {
+			/*
+			 * NB: we log as warnings the fact that thresholds have been breached so as to alert
+			 * users to the issues.
+			 *
+			 * We additionally log (at debug) level search criteria (which may include PHI, so cannot
+			 * be logged at a 'higher' level) in case users are confused as to what the criteria that
+			 * resulted in this case was.
+			 */
+			if (retval.size() >= myMdmSettings.getCandidateSearchLimit()) {
+				ourLog.warn(
+						"At least {} search candidates were returned for search criteria; this is the configured maximum candidates to allow. Resource will be omitted from further MDM matching. Turn on debug logging for additional information",
+						retval.size());
+				ourLog.debug(
+						"MDM Match candidate search limit exceeded: Candidate search returned {} resources of type {} for the search criteria {}.",
+						retval.size(),
+						theResourceType,
+						theResourceCriteria);
+				theContext.setTooManyCandidatesMatched(true);
+				return Optional.empty();
+			} else if (retval.size() >= myMdmSettings.getCandidateSearchWarnLimit()) {
+				ourLog.warn(
+						"Candidate search yielded {} results for the search criteria; more than the warning level, but not enough to halt MDM matching. For additional details, turn on debug logging.",
+						retval.size());
+				ourLog.debug(
+						"MDM Match warning threshold exceeded: Candidate search yielded {} resources of type {} for the search criteria {}.",
+						retval.size(),
+						theResourceType,
+						theResourceCriteria);
+			}
 		}
+
 		return Optional.of(retval);
 	}
 
@@ -83,8 +116,9 @@ public class CandidateSearcher {
 	 * @return Optional.empty() if >= IMdmSettings.getCandidateSearchLimit() candidates are found, otherwise
 	 * return the bundle provider for the search results.
 	 */
-	public Optional<IBundleProvider> search(String theResourceType, String theResourceCriteria) {
-		return this.search(theResourceType, theResourceCriteria, RequestPartitionId.allPartitions());
+	public Optional<IBundleProvider> search(
+			String theResourceType, String theResourceCriteria, MdmTransactionContext theContext) {
+		return this.search(theResourceType, theResourceCriteria, RequestPartitionId.allPartitions(), theContext);
 	}
 
 	public static String idOrType(IAnyResource theResource, String theResourceType) {

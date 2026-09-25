@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR JPA Server - Master Data Management
+ * HAPI FHIR - Master Data Management
  * %%
  * Copyright (C) 2014 - 2026 Smile CDR, Inc.
  * %%
@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.mdm.svc.candidate;
+package ca.uhn.fhir.mdm.model;
 
 public class TooManyCandidatesException extends RuntimeException {
 	public TooManyCandidatesException(String theMessage) {

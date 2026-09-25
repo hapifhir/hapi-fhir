@@ -26,9 +26,30 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Optional;
 
+import static ca.uhn.fhir.mdm.api.MdmConstants.BLOCKED_DISPLAY;
+import static ca.uhn.fhir.mdm.api.MdmConstants.BLOCKED_VALUE;
+import static ca.uhn.fhir.mdm.api.MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE;
+import static ca.uhn.fhir.mdm.api.MdmConstants.TOO_MANY_CANDIDATES;
+import static ca.uhn.fhir.mdm.api.MdmConstants.TOO_MANY_CANDIDATES_DISPLAY;
+
 public final class MdmResourceUtil {
 
 	private MdmResourceUtil() {}
+
+	/**
+	 * Tag the given resource as blocked by mdm rules
+	 */
+	public static void tagResourceAsBlocked(IBaseResource theResource) {
+		setTagOnResource(theResource, MDM_UNMATCHED_TAG_NAMESPACE, BLOCKED_VALUE, BLOCKED_DISPLAY);
+	}
+
+	/**
+	 * Tags the given resource as not-matched due to exceeding
+	 * the match limit
+	 */
+	public static void tagResourceAsTooManyMatchCandidates(IBaseResource theResource) {
+		setTagOnResource(theResource, MDM_UNMATCHED_TAG_NAMESPACE, TOO_MANY_CANDIDATES, TOO_MANY_CANDIDATES_DISPLAY);
+	}
 
 	/**
 	 * If the resource is tagged as not managed by MDM, return false. Otherwise true.
@@ -77,7 +98,7 @@ public final class MdmResourceUtil {
 		return theBaseResource.getMeta().getTag(theSystem, theCode) != null;
 	}
 
-	private static boolean resourceHasTagWithSystem(IBaseResource theBaseResource, @Nonnull String theSystem) {
+	public static boolean resourceHasTagWithSystem(IBaseResource theBaseResource, @Nonnull String theSystem) {
 		if (theBaseResource == null) {
 			return false;
 		}
