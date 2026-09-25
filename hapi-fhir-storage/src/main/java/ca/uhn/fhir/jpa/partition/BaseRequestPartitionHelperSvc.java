@@ -39,7 +39,6 @@ import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.Logs;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -390,9 +389,8 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 
 		// Note: It's still possible that the partition only has a date but no name/id
 
-		if (StringUtils.isNotBlank(theResourceType)) {
-			validateHasPartitionPermissions(theRequest, theResourceType, retVal);
-		}
+		// Fire STORAGE_PARTITION_SELECTED even with no resource type, so system-level ops are checked too.
+		validateHasPartitionPermissions(theRequest, theResourceType, retVal);
 
 		// Replace null partition ID with non-null default partition ID if one is being used
 		if (myPartitionSettings.getDefaultPartitionId() != null

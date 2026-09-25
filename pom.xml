@@ -7,7 +7,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>8.13.9-SNAPSHOT</version>
+	<version>8.13.10-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -1653,11 +1653,6 @@
 				<groupId>io.swagger.core.v3</groupId>
 				<artifactId>swagger-core-jakarta</artifactId>
 				<version>${swagger_jakarta_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.mysql</groupId>
-				<artifactId>mysql-connector-j</artifactId>
-				<version>9.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springdoc</groupId>

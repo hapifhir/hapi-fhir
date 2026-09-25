@@ -383,7 +383,11 @@ public class HapiTransactionService implements IHapiTransactionService {
 					int maxRetries = 0;
 					boolean exceptionIsRetriable = isRetriable(e);
 					if (exceptionIsRetriable) {
-						maxRetries = calculateMaxRetries(theExecutionBuilder.myRequestDetails, e);
+						if (theExecutionBuilder.myMaxRetries != null) {
+							maxRetries = theExecutionBuilder.myMaxRetries;
+						} else {
+							maxRetries = calculateMaxRetries(theExecutionBuilder.myRequestDetails, e);
+						}
 						retriesRemaining = maxRetries - i;
 					}
 
@@ -527,6 +531,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 		private TransactionDetails myTransactionDetails;
 		private Runnable myOnRollback;
 		protected RequestPartitionId myRequestPartitionId;
+		private Integer myMaxRetries;
 
 		protected ExecutionBuilder(RequestDetails theRequestDetails) {
 			myRequestDetails = theRequestDetails;
@@ -557,6 +562,12 @@ public class HapiTransactionService implements IHapiTransactionService {
 		public ExecutionBuilder withRequestPartitionId(RequestPartitionId theRequestPartitionId) {
 			assert myRequestPartitionId == null;
 			myRequestPartitionId = theRequestPartitionId;
+			return this;
+		}
+
+		@Override
+		public IExecutionBuilder withMaxRetries(int theMaxRetries) {
+			myMaxRetries = theMaxRetries;
 			return this;
 		}
 

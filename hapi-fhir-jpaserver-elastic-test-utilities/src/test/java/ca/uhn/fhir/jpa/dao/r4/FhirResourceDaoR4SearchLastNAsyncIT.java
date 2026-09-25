@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onAllThreads;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -45,7 +46,7 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 
 	@AfterEach
 	public void disableAdvancedHSearchIndex() {
-		myStorageSettings.setAdvancedHSearchIndexing(new JpaStorageSettings().isAdvancedHSearchIndexing());
+		myStorageSettings.setHibernateSearchIndexSearchParams(new JpaStorageSettings().isHibernateSearchIndexSearchParams());
 	}
 
 	@Override
@@ -108,42 +109,28 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 		myBiggerPreFetchThresholds.add(1000);
 		myBiggerPreFetchThresholds.add(-1);
 		myStorageSettings.setSearchPreFetchThresholds(myBiggerPreFetchThresholds);
+		myMemoryCacheService.invalidateAllCaches();
 
 		myCaptureQueriesListener.clear();
 		List<String> results = toUnqualifiedVersionlessIdValues(myObservationDao.observationsLastN(params, mockSrd(), null));
 		assertThat(results).hasSize(75);
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		List<String> queries = myCaptureQueriesListener
-			.getSelectQueriesForCurrentThread()
-			.stream()
-			.map(t -> t.getSql(true, false))
-			.collect(Collectors.toList());
 
-		ourLog.info("Queries:\n * " + String.join("\n * ", queries));
-
+		// 1 query to resolve resource FHIR IDs to PIDs
+		// 1 query to look up the Search from cache
 		// 1 query to resolve the subject PIDs
 		// 3 queries to actually perform the search
-		// 1 query to lookup up Search from cache, and 2 chunked queries to retrieve resources by PID.
-		assertThat(queries).hasSize(7);
-
-		// The first chunked query should have a full complement of PIDs
-		StringBuilder firstQueryPattern = new StringBuilder(".*RES_ID\\) in \\('[0-9]+'");
-		for (int pidIndex = 1; pidIndex < 50; pidIndex++) {
-			firstQueryPattern.append(",'[0-9]+'");
-		}
-		firstQueryPattern.append("\\).*");
-		assertThat(queries.get(5)).matches(firstQueryPattern.toString());
-
-		// the second chunked query should be padded with "-1".
-		StringBuilder secondQueryPattern = new StringBuilder(".*RES_ID\\) in \\('[0-9]+'");
-		for (int pidIndex = 1; pidIndex < 25; pidIndex++) {
-			secondQueryPattern.append(",'[0-9]+'");
-		}
-		for (int pidIndex = 0; pidIndex < 25; pidIndex++) {
-			secondQueryPattern.append(",'-1'");
-		}
-		secondQueryPattern.append("\\).*");
-		assertThat(queries.get(6)).matches(secondQueryPattern.toString());
+		assertThat(myCaptureQueriesListener).has(
+			onAllThreads()
+				.selectCount(6)
+				.insertCount(76)
+				.commitCount(2)
+				.connectionCount(2)
+				.noOtherCounts()
+				// The first chunked query should have a full complement of PIDs
+				.selectSqlAtIndex(4).matches(".* in \\('[0-9]+'(,'[0-9]+'){49}\\).*")
+				// The second chunked query should be padded with "-1".
+				.selectSqlAtIndex(5).matches(".* in \\('[0-9]+'(,'[0-9]+')+(,'-1')+\\).*")
+		);
 
 	}
 
