@@ -1915,8 +1915,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					} else {
 						JpaPid pid = includedPidList.get(i);
 						IBaseResource resource = fetchedResourceList.get(i);
-						ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(resource, BundleEntrySearchModeEnum.INCLUDE);
-						fetchedResourceMap.put(pid, resource);
+						if (resource != null) {
+							ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(resource, BundleEntrySearchModeEnum.INCLUDE);
+							fetchedResourceMap.put(pid, resource);
+						}
 					}
 				}
 			}
