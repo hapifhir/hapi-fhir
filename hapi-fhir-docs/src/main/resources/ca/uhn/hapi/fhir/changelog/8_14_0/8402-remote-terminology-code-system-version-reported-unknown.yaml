@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 8402
+title: "With `RemoteTerminologyServiceValidationSupport`, validating a code against a specific version of a code
+  system could report that version as unknown even though the remote terminology server held it. This has been
+  fixed."

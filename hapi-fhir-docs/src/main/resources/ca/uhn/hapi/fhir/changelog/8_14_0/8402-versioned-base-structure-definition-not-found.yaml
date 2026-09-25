@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 8402
+title: "A StructureDefinition from the base FHIR specification could not be found when it was requested with its
+  version, such as `http://hl7.org/fhir/StructureDefinition/Patient|4.0.1`. This has been fixed."
