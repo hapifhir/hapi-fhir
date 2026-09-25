@@ -23,6 +23,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -264,8 +265,8 @@ public class BulkExportJobParametersValidatorTest {
 		assertNotNull(errors);
 		assertThat(errors)
 			.isNotEmpty();
-		assertThat(errors)
-			.anySatisfy(msg -> msg.contains("Unsupported output format; no known converter available for mime-type json"));
+		assertTrue(errors.stream()
+			.anyMatch(msg -> msg.contains("Unsupported output format; no known converter available for mime-type json")));
 	}
 
 	@ParameterizedTest
