@@ -1,10 +1,8 @@
 ---
 type: add
 issue: 8402
-title: "IValidationSupport has new forms of fetchCodeSystem, fetchValueSet, fetchStructureDefinition,
-  fetchResource, isCodeSystemSupported and isValueSetSupported that take the version as a separate parameter,
-  instead of it being appended to the URL as url|version. LookupCodeRequest can now name a code system version
-  too. Existing implementations keep working without changes, because the new methods append the version to the
-  URL and call the existing methods by default. An implementation that can resolve specific versions should
-  override the new methods. The validateCode method that takes six arguments is deprecated in favour of the one
-  that takes a ValidateCodeRequest."
+title: "The `IValidationSupport` methods that fetch a code system, value set or other conformance resource, or
+  that check whether a code system or value set is supported, now have forms that take the version as a separate
+  argument. `LookupCodeRequest` can now include a code system version as well. Existing `IValidationSupport`
+  implementations do not need to change. The six-argument `validateCode` method is deprecated; use the one that
+  takes a `ValidateCodeRequest` instead."
