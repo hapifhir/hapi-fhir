@@ -143,16 +143,6 @@ public interface IValidationProviders {
 			return getTerminologyResource(theUrlParam, null);
 		}
 
-		/**
-		 * Kept so that code written against the earlier signature still compiles.
-		 *
-		 * @deprecated Use {@link #find(UriParam, StringParam)}
-		 */
-		// Created by Claude Opus 5
-		@Deprecated(since = "8.14.0")
-		public List<T> find(UriParam theUrlParam) {
-			return find(theUrlParam, null);
-		}
 
 		/**
 		 * The resource registered for the given url and version. As on a real server, a search naming a version

@@ -23,9 +23,6 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.param.UriParam;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -136,17 +133,6 @@ public interface IValidationProvidersR4 {
 			String code = theCode != null ? theCode.getValue() : null;
 			String systemVersion = theSystemVersion != null ? theSystemVersion.getValue() : null;
 			return getTerminologyResponse("$validate-code", url, systemVersion, code);
-		}
-
-		/**
-		 * Kept so that code written against the earlier signature still compiles.
-		 *
-		 * @deprecated Use {@link #find(UriParam, StringParam)}
-		 */
-		// Created by Claude Opus 5
-		@Deprecated(since = "8.14.0")
-		public List<ValueSet> find(UriParam theUrlParam, TokenParam theVersionParam) {
-			return find(theUrlParam, theVersionParam != null ? new StringParam(theVersionParam.getValue()) : null);
 		}
 
 		@Override
