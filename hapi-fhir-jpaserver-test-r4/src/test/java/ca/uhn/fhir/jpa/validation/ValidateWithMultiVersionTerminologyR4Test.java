@@ -625,6 +625,37 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		}
 	}
 
+	/**
+	 * The version the ValueSet names is not installed at all - only another version of that code system is.
+	 * The code exists in the version which is installed, so accepting it means answering from a version
+	 * nobody asked for, and saying nothing about the substitution.
+	 */
+	@Nested
+	class CodeSystemVersionNotInstalledTest {
+
+		void setUpWithOnlyOneVersionInstalled(String theInstalledVersion) {
+			createCodeSystem(theInstalledVersion, codeIn(theInstalledVersion));
+			createValueSetIncludingCodeSystemVersion(null, otherThan(theInstalledVersion));
+
+			myTerminologyDeferredStorageSvc.saveAllDeferred();
+		}
+
+		@ParameterizedTest
+		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})
+		void validateCode_valueSetNamesAnUninstalledCodeSystemVersion_isNotValid(String theInstalledVersion) {
+			// Setup
+			setUpWithOnlyOneVersionInstalled(theInstalledVersion);
+
+			// Test
+			IValidationSupport.CodeValidationResult result =
+				validateCodeOnValueSet(VS_URL, CS_URL, codeIn(theInstalledVersion));
+
+			// Verify
+			assertThat(result).isNotNull();
+			assertThat(result.isOk()).isFalse();
+		}
+	}
+
 	private void createValueSetIncludingCodesFromCodeSystemVersion(
 			String theValueSetVersion, String theCodeSystemVersion, String... theCodes) {
 		ValueSet valueSet = newValueSet(theValueSetVersion);

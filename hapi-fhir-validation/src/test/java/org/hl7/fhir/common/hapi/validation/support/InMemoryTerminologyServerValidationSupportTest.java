@@ -542,6 +542,67 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 	}
 
 	/**
+	 * The version the include names is not installed - only another version of that code system is. The code
+	 * exists in the version that <em>is</em> installed, so accepting it means answering a question nobody
+	 * asked: the caller asked about 2.0.0 and got an answer from 1.0.0, with nothing said about the
+	 * substitution.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	void validateCodeInValueSet_includeNamesAnUninstalledCodeSystemVersion_doesNotAcceptACodeFromAnotherVersion() {
+		// Setup
+		addSingleVersionCodeSystemAndRecordFetches("1.0.0");
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem(VERSIONED_CS_URL).setVersion("2.0.0");
+		myPrePopulated.addValueSet(vs);
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+			valCtx, new ConceptValidationOptions(), VERSIONED_CS_URL, "code0", null, vs);
+
+		// Verify
+		assertNotNull(outcome);
+		assertFalse(outcome.isOk(), "code0 exists only in 1.0.0, and the include named 2.0.0");
+		assertThat(outcome.getMessage())
+			.as("the caller has to be told which version could not be found, not just that something failed")
+			.contains(VERSIONED_CS_URL + "|2.0.0");
+	}
+
+	/**
+	 * The same branch serves code systems this server does not store at all - a not-present CodeSystem, or one
+	 * owned by another module such as UCUM. Naming a version must not shut that path down: a module holding
+	 * exactly one definition of a system answers for whatever version is asked for.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	void validateCodeInValueSet_includeNamesAVersionOfACodeSystemAnotherModuleOwns_isStillValidated() {
+		// Setup
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose()
+			.addInclude()
+			.setSystem(CommonCodeSystemsTerminologyService.UCUM_CODESYSTEM_URL)
+			.setVersion("2.1");
+		myPrePopulated.addValueSet(vs);
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+			valCtx,
+			new ConceptValidationOptions(),
+			CommonCodeSystemsTerminologyService.UCUM_CODESYSTEM_URL,
+			"mg",
+			null,
+			vs);
+
+		// Verify
+		assertNotNull(outcome);
+		assertTrue(outcome.isOk(), "UCUM ships one definition, so it answers for any version");
+	}
+
+	/**
 	 * Adds a CodeSystem holding a single code at the given version, and rebuilds {@link #myChain} so that every
 	 * CodeSystem fetch through it is recorded.
 	 */

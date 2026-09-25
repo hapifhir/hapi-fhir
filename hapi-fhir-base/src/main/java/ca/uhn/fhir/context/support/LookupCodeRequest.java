@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.context.support;
 
+import jakarta.annotation.Nullable;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
@@ -30,6 +32,7 @@ import java.util.Objects;
 public class LookupCodeRequest {
 	private final String mySystem;
 	private final String myCode;
+	private String myVersion;
 	private String myDisplayLanguage;
 	private Collection<String> myPropertyNames;
 
@@ -59,6 +62,36 @@ public class LookupCodeRequest {
 		return mySystem;
 	}
 
+	/**
+	 * The code system version to look the code up in, or <code>null</code> for whichever version the
+	 * implementation treats as current.
+	 * <p>
+	 * Naming the version here rather than packing it into {@link #getSystem()} as a
+	 * <code>url|version</code> canonical is what lets an implementation which cannot resolve a specific
+	 * version tell that a version was asked for at all, instead of silently answering from another one.
+	 * </p>
+	 *
+	 * @since 8.14.0
+	 */
+	// Created by Claude Opus 5
+	@Nullable
+	public String getVersion() {
+		return myVersion;
+	}
+
+	/**
+	 * Names the code system version to look the code up in.
+	 *
+	 * @param theVersion The code system version, e.g. "<code>2.78</code>", or <code>null</code> for whichever version is current
+	 * @return this, for chaining
+	 * @since 8.14.0
+	 */
+	// Created by Claude Opus 5
+	public LookupCodeRequest setVersion(@Nullable String theVersion) {
+		myVersion = theVersion;
+		return this;
+	}
+
 	public String getCode() {
 		return myCode;
 	}
@@ -81,12 +114,13 @@ public class LookupCodeRequest {
 		LookupCodeRequest that = (LookupCodeRequest) theO;
 		return Objects.equals(mySystem, that.mySystem)
 				&& Objects.equals(myCode, that.myCode)
+				&& Objects.equals(myVersion, that.myVersion)
 				&& Objects.equals(myDisplayLanguage, that.myDisplayLanguage)
 				&& Objects.equals(myPropertyNames, that.myPropertyNames);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(mySystem, myCode, myDisplayLanguage, myPropertyNames);
+		return Objects.hash(mySystem, myCode, myVersion, myDisplayLanguage, myPropertyNames);
 	}
 }

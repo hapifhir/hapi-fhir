@@ -239,6 +239,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 			ValidationSupportContext theValidationSupportContext, @Nonnull LookupCodeRequest theLookupCodeRequest) {
 		final String code = theLookupCodeRequest.getCode();
 		final String system = theLookupCodeRequest.getSystem();
+		final String version = theLookupCodeRequest.getVersion();
 		final String displayLanguage = theLookupCodeRequest.getDisplayLanguage();
 		Validate.notBlank(code, "theCode must be provided");
 
@@ -255,6 +256,12 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 		ParametersUtil.addParameterToParametersString(fhirContext, params, "code", code);
 		if (!StringUtils.isEmpty(system)) {
 			ParametersUtil.addParameterToParametersString(fhirContext, params, "system", system);
+		}
+		// Without this the server answers from whichever version it treats as current, and the caller who
+		// named a version is told nothing about the substitution.
+		// Created by Claude Opus 5
+		if (!StringUtils.isEmpty(version)) {
+			ParametersUtil.addParameterToParametersString(fhirContext, params, "version", version);
 		}
 		if (!StringUtils.isEmpty(displayLanguage)) {
 			ParametersUtil.addParameterToParametersString(fhirContext, params, "language", displayLanguage);

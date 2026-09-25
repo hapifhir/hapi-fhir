@@ -831,14 +831,26 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			if (includeOrExcludeSystemResource == null || isIncludeCodeSystemIgnored) {
 
 				if (theWantCode != null) {
+					/*
+					 * Both the support check and the lookup name the version the include asked for. Dropping it
+					 * here is what let a code be accepted out of whichever version happened to be installed: the
+					 * caller asks about 2.0.0, the server holds 1.0.0 only, and the answer comes back valid with
+					 * nothing said about the substitution. A module which cannot resolve a specific version still
+					 * behaves as before, because the version-aware methods default to the old ones.
+					 */
+					// Created by Claude Opus 5
 					if (theValidationSupportContext
 							.getRootValidationSupport()
-							.isCodeSystemSupported(theValidationSupportContext, includeOrExcludeConceptSystemUrl)) {
+							.isCodeSystemSupported(
+									theValidationSupportContext,
+									includeOrExcludeConceptSystemUrl,
+									includeOrExcludeConceptSystemVersion)) {
 						LookupCodeResult lookup = theValidationSupportContext
 								.getRootValidationSupport()
 								.lookupCode(
 										theValidationSupportContext,
-										new LookupCodeRequest(includeOrExcludeConceptSystemUrl, theWantCode));
+										new LookupCodeRequest(includeOrExcludeConceptSystemUrl, theWantCode)
+												.setVersion(includeOrExcludeConceptSystemVersion));
 						if (lookup != null) {
 							ableToHandleCode = true;
 							if (lookup.isFound()) {
