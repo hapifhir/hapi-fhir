@@ -12,15 +12,9 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.dstu2.model.IdType;
 import org.hl7.fhir.dstu2.model.Patient;
 import org.junit.jupiter.api.AfterAll;
@@ -53,9 +47,6 @@ public class CreateConditionalHl7OrgTest {
       .setDefaultResponseEncoding(EncodingEnum.JSON)
       .setDefaultPrettyPrint(false);
 
-  @RegisterExtension
-  public static HttpClientExtension ourClient = new HttpClientExtension();
-
 	
 	@BeforeEach
 	public void before() {
@@ -71,20 +62,13 @@ public class CreateConditionalHl7OrgTest {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
-		httpPost.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=system%7C001");
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
-		HttpResponse status = ourClient.execute(httpPost);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		HttpTestResponse status = ourServer.fhirRequest("/Patient").withHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=system%7C001").post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML).assertStatus(201);
+		String responseContent = status.getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
+		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getHeader("location"));
+		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getHeader("content-location"));
 
 		assertNull(ourLastId.getValue());
 		assertNull(ourLastIdParam);
@@ -98,19 +82,13 @@ public class CreateConditionalHl7OrgTest {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient?_format=true&_pretty=true");
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
-		HttpResponse status = ourClient.execute(httpPost);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		HttpTestResponse status = ourServer.fhirRequest("/Patient?_format=true&_pretty=true").post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML).assertStatus(201);
+		String responseContent = status.getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
+		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getHeader("location"));
+		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getHeader("content-location"));
 
 		assertNull(ourLastId.getValue());
 		assertNull(ourLastIdParam);
@@ -124,12 +102,7 @@ public class CreateConditionalHl7OrgTest {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_pretty=true");
-
-		HttpResponse status = ourClient.execute(httpGet);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient?_pretty=true").get().getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
 

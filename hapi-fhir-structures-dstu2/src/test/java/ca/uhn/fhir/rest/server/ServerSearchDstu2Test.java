@@ -7,13 +7,9 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,9 +37,6 @@ public class ServerSearchDstu2Test {
 		.withPagingProvider(new FifoMemoryPagingProvider(100))
 		.setDefaultPrettyPrint(false);
 
-	@RegisterExtension
-	public static final HttpClientExtension ourClient = new HttpClientExtension();
-
 	@BeforeEach
 	public void before() {
 		ourLastMethod = null;
@@ -53,10 +46,7 @@ public class ServerSearchDstu2Test {
 
 	@Test
 	public void testReferenceParamMissingFalse() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/?param3:missing=false");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/?param3:missing=false").get().getBody();
 		ourLog.info(responseContent);
 		assertEquals("searchParam3", ourLastMethod);
 		assertEquals(Boolean.FALSE, ourLastRef2.getMissing());
@@ -64,10 +54,7 @@ public class ServerSearchDstu2Test {
 
 	@Test
 	public void testReferenceParamMissingTrue() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/?param3:missing=true");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/?param3:missing=true").get().getBody();
 		ourLog.info(responseContent);
 		assertEquals("searchParam3", ourLastMethod);
 		assertEquals(Boolean.TRUE, ourLastRef2.getMissing());
@@ -75,10 +62,7 @@ public class ServerSearchDstu2Test {
 
 	@Test
 	public void testSearchParam1() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/?param1=param1value");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/?param1=param1value").get().getBody();
 		ourLog.info(responseContent);
 		assertEquals("searchParam1", ourLastMethod);
 		assertEquals("param1value", ourLastRef.getValue());
@@ -86,10 +70,7 @@ public class ServerSearchDstu2Test {
 
 	@Test
 	public void testSearchParam2() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/?param2=param2value&foo=bar");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/?param2=param2value&foo=bar").get().getBody();
 		ourLog.info(responseContent);
 		assertEquals("searchParam2", ourLastMethod);
 		assertEquals("param2value", ourLastRef.getValue());
@@ -97,10 +78,7 @@ public class ServerSearchDstu2Test {
 
 	@Test
 	public void testSearchParamWithSpace() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/?param2=param+value&foo=bar");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/?param2=param+value&foo=bar").get().getBody();
 		ourLog.info(responseContent);
 		assertEquals("searchParam2", ourLastMethod);
 		assertEquals("param value", ourLastRef.getValue());
@@ -108,10 +86,7 @@ public class ServerSearchDstu2Test {
 
 	@Test
 	public void testSearchWithEncodedValue() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/?param1=" + UrlUtil.escapeUrlParam("Jernelöv"));
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/?param1=" + UrlUtil.escapeUrlParam("Jernelöv")).get().getBody();
 		ourLog.info(responseContent);
 		assertEquals("searchParam1", ourLastMethod);
 		assertEquals("Jernelöv", ourLastRef.getValue());
@@ -119,10 +94,7 @@ public class ServerSearchDstu2Test {
 
 	@Test
 	public void testUnknownSearchParam() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/?foo=bar");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/?foo=bar").get().getBody();
 		ourLog.info(responseContent);
 		assertNull(ourLastMethod);
 	}

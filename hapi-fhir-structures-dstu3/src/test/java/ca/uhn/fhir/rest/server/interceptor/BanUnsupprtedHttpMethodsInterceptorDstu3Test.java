@@ -8,29 +8,20 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.methods.HttpTrace;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 
@@ -44,89 +35,51 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 		 .withPagingProvider(new FifoMemoryPagingProvider(100))
 		 .setDefaultPrettyPrint(false);
 
-	@RegisterExtension
-	private HttpClientExtension ourClient = new HttpClientExtension();
-
 	@Test
 	public void testHttpTraceNotEnabled() throws Exception {
-		HttpTrace req = new HttpTrace(ourServer.getBaseUrl() + "/Patient");
-		CloseableHttpResponse status = ourClient.execute(req);
-		try {
-			ourLog.info(status.toString());
-			assertEquals(405, status.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
-		}
+		HttpTestResponse status = ourServer.fhirRequest("/Patient").method("TRACE");
+		ourLog.info(status.toString());
+		assertEquals(405, status.getStatusCode());
 	}
 	
 	@Test	
 	public void testHeadJsonWithInvalidPatient() throws Exception {	
-		HttpHead httpGet = new HttpHead(ourServer.getBaseUrl() + "/Patient/123");	
-		HttpResponse status = ourClient.execute(httpGet);
-		assertNull(status.getEntity());	
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/123").head();
+		assertThat(status.getBodyBytes()).isEmpty();	
  		ourLog.info(status.toString());
 
-		assertEquals(404, status.getStatusLine().getStatusCode());
-		assertThat(status.getFirstHeader(Constants.HEADER_POWERED_BY).getValue()).contains("HAPI");
+		assertEquals(404, status.getStatusCode());
+		assertThat(status.getHeader(Constants.HEADER_POWERED_BY)).contains("HAPI");
 	}
 	
 	@Test	
 	public void testHeadJsonWithValidPatient() throws Exception {	
-		HttpHead httpGet = new HttpHead(ourServer.getBaseUrl() + "/Patient/1");	
-		HttpResponse status = ourClient.execute(httpGet);
-		assertNull(status.getEntity());	
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/1").head();
+		assertThat(status.getBodyBytes()).isEmpty();	
  		ourLog.info(status.toString());
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(status.getFirstHeader(Constants.HEADER_POWERED_BY).getValue()).contains("HAPI");
+		assertEquals(200, status.getStatusCode());
+		assertThat(status.getHeader(Constants.HEADER_POWERED_BY)).contains("HAPI");
 	}
 	
 	@Test
 	public void testHttpTrackNotEnabled() throws Exception {
-		HttpRequestBase req = new HttpRequestBase() {
-			@Override
-			public String getMethod() {
-				return "TRACK";
-			}
-		};
-		req.setURI(new URI(ourServer.getBaseUrl() + "/Patient"));
-
-		CloseableHttpResponse status = ourClient.execute(req);
-		try {
-			ourLog.info(status.toString());
-			assertEquals(405, status.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
-		}
+		HttpTestResponse status = ourServer.fhirRequest("/Patient").method("TRACK");
+		ourLog.info(status.toString());
+		assertEquals(405, status.getStatusCode());
 	}
 
 	@Test
 	public void testHttpFooNotEnabled() throws Exception {
-		HttpRequestBase req = new HttpRequestBase() {
-			@Override
-			public String getMethod() {
-				return "FOO";
-			}
-		};
-		req.setURI(new URI(ourServer.getBaseUrl() + "/Patient"));
-
-		CloseableHttpResponse status = ourClient.execute(req);
-		try {
-			ourLog.info(status.toString());
-			assertEquals(501, status.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
-		}
+		HttpTestResponse status = ourServer.fhirRequest("/Patient").method("FOO");
+		ourLog.info(status.toString());
+		assertEquals(501, status.getStatusCode());
 	}
 
 	@Test
 	public void testRead() throws Exception {
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
-		HttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		ourServer.fhirRequest("/Patient/1").get().assertStatus(200);
 	}
 	
 	@AfterAll

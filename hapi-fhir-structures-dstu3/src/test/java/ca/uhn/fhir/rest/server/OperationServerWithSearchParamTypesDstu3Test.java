@@ -16,16 +16,9 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -65,9 +58,6 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		 .withPagingProvider(new FifoMemoryPagingProvider(10).setDefaultPageSize(2))
 		 .setDefaultPrettyPrint(false);
 
-	@RegisterExtension
-	private HttpClientExtension ourClient = new HttpClientExtension();
-
 	@BeforeEach
 	public void before() {
 		ourLastMethod = "";
@@ -99,14 +89,8 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		p.addParameter().setName("valtok").setValue(new StringType("VALTOK2A|VALTOK2B"));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/$andlist");
-		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		HttpResponse status = ourClient.execute(httpPost);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		String response = IOUtils.toString(status.getEntity().getContent());
+		String response = ourServer.fhirRequest("/Patient/$andlist").post(inParamsStr, Constants.CT_FHIR_XML).assertStatus(200).getBody();
 		ourLog.info(response);
-		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(ourLastParamValStr).hasSize(2);
 		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(2);
@@ -125,26 +109,16 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 
 	@Test
 	public void testEscapedOperationName() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/%24andlist?valstr=VALSTR1A,VALSTR1B&valstr=VALSTR2A,VALSTR2B&valtok=" + UrlUtil.escapeUrlParam("VALTOK1A|VALTOK1B") + "&valtok=" + UrlUtil.escapeUrlParam("VALTOK2A|VALTOK2B"));
-		HttpResponse status = ourClient.execute(httpGet);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		String response = IOUtils.toString(status.getEntity().getContent());
+		String response = ourServer.fhirRequest("/Patient/%24andlist?valstr=VALSTR1A,VALSTR1B&valstr=VALSTR2A,VALSTR2B&valtok=" + UrlUtil.escapeUrlParam("VALTOK1A|VALTOK1B") + "&valtok=" + UrlUtil.escapeUrlParam("VALTOK2A|VALTOK2B")).get().assertStatus(200).getBody();
 		ourLog.info(response);
-		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(ourLastParamValStr).hasSize(2);
 	}
 	
 	@Test
 	public void testAndListWithUrl() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/$andlist?valstr=VALSTR1A,VALSTR1B&valstr=VALSTR2A,VALSTR2B&valtok=" + UrlUtil.escapeUrlParam("VALTOK1A|VALTOK1B") + "&valtok=" + UrlUtil.escapeUrlParam("VALTOK2A|VALTOK2B"));
-		HttpResponse status = ourClient.execute(httpGet);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		String response = IOUtils.toString(status.getEntity().getContent());
+		String response = ourServer.fhirRequest("/Patient/$andlist?valstr=VALSTR1A,VALSTR1B&valstr=VALSTR2A,VALSTR2B&valtok=" + UrlUtil.escapeUrlParam("VALTOK1A|VALTOK1B") + "&valtok=" + UrlUtil.escapeUrlParam("VALTOK2A|VALTOK2B")).get().assertStatus(200).getBody();
 		ourLog.info(response);
-		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(ourLastParamValStr).hasSize(2);
 		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(2);
@@ -270,14 +244,8 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		p.addParameter().setName("valtok").setValue(new StringType("VALTOKA|VALTOKB"));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/$nonrepeating");
-		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		HttpResponse status = ourClient.execute(httpPost);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		String response = IOUtils.toString(status.getEntity().getContent());
+		String response = ourServer.fhirRequest("/Patient/$nonrepeating").post(inParamsStr, Constants.CT_FHIR_XML).assertStatus(200).getBody();
 		ourLog.info(response);
-		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(ourLastParamValStr).hasSize(1);
 		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(1);
@@ -290,13 +258,8 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 	}
 	@Test
 	public void testNonRepeatingWithUrl() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/$nonrepeating?valstr=VALSTR&valtok=" + UrlUtil.escapeUrlParam("VALTOKA|VALTOKB"));
-		HttpResponse status = ourClient.execute(httpGet);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		String response = IOUtils.toString(status.getEntity().getContent());
+		String response = ourServer.fhirRequest("/Patient/$nonrepeating?valstr=VALSTR&valtok=" + UrlUtil.escapeUrlParam("VALTOKA|VALTOKB")).get().assertStatus(200).getBody();
 		ourLog.info(response);
-		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(ourLastParamValStr).hasSize(1);
 		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(1);
@@ -310,13 +273,8 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 
 	@Test
 	public void testNonRepeatingWithUrlQualified() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/$nonrepeating?valstr:exact=VALSTR&valtok:not=" + UrlUtil.escapeUrlParam("VALTOKA|VALTOKB"));
-		HttpResponse status = ourClient.execute(httpGet);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		String response = IOUtils.toString(status.getEntity().getContent());
+		String response = ourServer.fhirRequest("/Patient/$nonrepeating?valstr:exact=VALSTR&valtok:not=" + UrlUtil.escapeUrlParam("VALTOKA|VALTOKB")).get().assertStatus(200).getBody();
 		ourLog.info(response);
-		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(ourLastParamValStr).hasSize(1);
 		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(1);
@@ -339,14 +297,8 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		p.addParameter().setName("valtok").setValue(new StringType("VALTOK2A|VALTOK2B"));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/$orlist");
-		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		HttpResponse status = ourClient.execute(httpPost);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		String response = IOUtils.toString(status.getEntity().getContent());
+		String response = ourServer.fhirRequest("/Patient/$orlist").post(inParamsStr, Constants.CT_FHIR_XML).assertStatus(200).getBody();
 		ourLog.info(response);
-		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(ourLastParamValStr).hasSize(2);
 		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(2);
@@ -365,13 +317,8 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 
 	@Test
 	public void testOrListWithUrl() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/$orlist?valstr=VALSTR1A,VALSTR1B&valstr=VALSTR2A,VALSTR2B&valtok=" + UrlUtil.escapeUrlParam("VALTOK1A|VALTOK1B") + "&valtok=" + UrlUtil.escapeUrlParam("VALTOK2A|VALTOK2B"));
-		HttpResponse status = ourClient.execute(httpGet);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		String response = IOUtils.toString(status.getEntity().getContent());
+		String response = ourServer.fhirRequest("/Patient/$orlist?valstr=VALSTR1A,VALSTR1B&valstr=VALSTR2A,VALSTR2B&valtok=" + UrlUtil.escapeUrlParam("VALTOK1A|VALTOK1B") + "&valtok=" + UrlUtil.escapeUrlParam("VALTOK2A|VALTOK2B")).get().assertStatus(200).getBody();
 		ourLog.info(response);
-		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(ourLastParamValStr).hasSize(2);
 		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(2);

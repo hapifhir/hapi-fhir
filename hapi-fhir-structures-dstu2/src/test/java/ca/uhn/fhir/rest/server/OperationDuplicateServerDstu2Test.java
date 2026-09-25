@@ -10,12 +10,8 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
@@ -37,19 +33,11 @@ public class OperationDuplicateServerDstu2Test {
 		.withPagingProvider(new FifoMemoryPagingProvider(10).setDefaultPageSize(2))
 		.setDefaultPrettyPrint(false);
 
-	@RegisterExtension
-	public static final HttpClientExtension ourClient = new HttpClientExtension();
-
 	@Test
 	public void testOperationsAreCollapsed() throws Exception {
 		// Metadata
 		{
-			HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/metadata?_pretty=true");
-			HttpResponse status = ourClient.execute(httpGet);
-
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			String response = IOUtils.toString(status.getEntity().getContent());
-			IOUtils.closeQuietly(status.getEntity().getContent());
+			String response = ourServer.fhirRequest("/metadata?_pretty=true").get().assertStatus(200).getBody();
 			ourLog.info(response);
 
 			Conformance resp = ourCtx.newXmlParser().parseResource(Conformance.class, response);
@@ -60,12 +48,7 @@ public class OperationDuplicateServerDstu2Test {
 
 		// OperationDefinition
 		{
-			HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/OperationDefinition/OrganizationPatient-ts-myoperation?_pretty=true");
-			HttpResponse status = ourClient.execute(httpGet);
-
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			String response = IOUtils.toString(status.getEntity().getContent());
-			IOUtils.closeQuietly(status.getEntity().getContent());
+			String response = ourServer.fhirRequest("/OperationDefinition/OrganizationPatient-ts-myoperation?_pretty=true").get().assertStatus(200).getBody();
 			ourLog.info(response);
 
 			OperationDefinition resp = ourCtx.newXmlParser().parseResource(OperationDefinition.class, response);

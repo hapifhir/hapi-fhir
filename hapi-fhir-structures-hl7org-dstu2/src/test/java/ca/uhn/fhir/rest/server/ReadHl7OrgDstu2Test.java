@@ -4,19 +4,14 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.dstu2.model.Patient;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ReadHl7OrgDstu2Test {
 
@@ -29,20 +24,13 @@ public class ReadHl7OrgDstu2Test {
       .setDefaultResponseEncoding(EncodingEnum.JSON)
       .setDefaultPrettyPrint(false);
 
-  @RegisterExtension
-  public static HttpClientExtension ourClient = new HttpClientExtension();
-
   /**
 	 * In DSTU2+ the resource ID appears in the resource body
 	 */
 	@Test
 	public void testReadXml() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123&_format=xml");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient/123&_format=xml").get().assertStatus(200).getBody();
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("p1ReadValue");
 		assertThat(responseContent).contains("p1ReadId");
 	}
@@ -52,12 +40,8 @@ public class ReadHl7OrgDstu2Test {
 	 */
 	@Test
 	public void testReadJson() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123&_format=json");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient/123&_format=json").get().assertStatus(200).getBody();
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("p1ReadValue");
 		assertThat(responseContent).contains("p1ReadId");
 	}

@@ -15,15 +15,11 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.OperationOutcome.IssueType;
@@ -35,7 +31,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
@@ -56,9 +51,6 @@ public class ServerExceptionDstu3Test {
 		 .withPagingProvider(new FifoMemoryPagingProvider(100))
 		 .setDefaultPrettyPrint(false);
 
-	@RegisterExtension
-	private HttpClientExtension ourClient = new HttpClientExtension();
-
 	@AfterEach
 	public void after() {
 		ourException = null;
@@ -74,19 +66,14 @@ public class ServerExceptionDstu3Test {
 			.addResponseHeader("X-Foo", "BAR BAR");
 
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		try {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(status.getStatusLine().toString());
-			ourLog.info(responseContent);
+		HttpTestResponse response = ourServer.fhirRequest("/Patient").get();
+		String responseContent = response.getBody();
+		ourLog.info("HTTP {} {}", response.getStatusCode(), response.getReasonPhrase());
+		ourLog.info(responseContent);
 
-			assertEquals(404, status.getStatusLine().getStatusCode());
-			assertEquals("BAR BAR", status.getFirstHeader("X-Foo").getValue());
-			assertThat(status.getFirstHeader(Constants.HEADER_POWERED_BY).getValue()).contains("HAPI FHIR");
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
-		}
+		response.assertStatus(404);
+		assertEquals("BAR BAR", response.getHeader("X-Foo"));
+		assertThat(response.getHeader(Constants.HEADER_POWERED_BY)).contains("HAPI FHIR");
 
 	}
 
@@ -102,14 +89,12 @@ public class ServerExceptionDstu3Test {
 
 		ourException = new InternalErrorException("Error", operationOutcome);
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_format=json");
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			byte[] responseContentBytes = IOUtils.toByteArray(status.getEntity().getContent());
-			String responseContent = new String(responseContentBytes, Charsets.UTF_8);
-			ourLog.info(status.getStatusLine().toString());
-			ourLog.info(responseContent);
-			assertThat(responseContent).contains("El nombre está vacío");
-		}
+		HttpTestResponse response = ourServer.fhirRequest("/Patient?_format=json").get();
+		byte[] responseContentBytes = response.getBodyBytes();
+		String responseContent = new String(responseContentBytes, Charsets.UTF_8);
+		ourLog.info("HTTP {} {}", response.getStatusCode(), response.getReasonPhrase());
+		ourLog.info(responseContent);
+		assertThat(responseContent).contains("El nombre está vacío");
 
 	}
 
@@ -118,15 +103,13 @@ public class ServerExceptionDstu3Test {
 
 		ourException = new NullPointerException("Hello");
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_format=json");
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			assertEquals(500, status.getStatusLine().getStatusCode());
-			byte[] responseContentBytes = IOUtils.toByteArray(status.getEntity().getContent());
-			String responseContent = new String(responseContentBytes, Charsets.UTF_8);
-			ourLog.info(status.getStatusLine().toString());
-			ourLog.info(responseContent);
-			assertThat(responseContent).contains("\"diagnostics\":\"" + Msg.code(389) + "Failed to call access method: java.lang.NullPointerException: Hello\"");
-		}
+		HttpTestResponse response = ourServer.fhirRequest("/Patient?_format=json").get();
+		response.assertStatus(500);
+		byte[] responseContentBytes = response.getBodyBytes();
+		String responseContent = new String(responseContentBytes, Charsets.UTF_8);
+		ourLog.info("HTTP {} {}", response.getStatusCode(), response.getReasonPhrase());
+		ourLog.info(responseContent);
+		assertThat(responseContent).contains("\"diagnostics\":\"" + Msg.code(389) + "Failed to call access method: java.lang.NullPointerException: Hello\"");
 
 	}
 
@@ -135,15 +118,13 @@ public class ServerExceptionDstu3Test {
 
 		ourException = new IOException("Hello");
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_format=json");
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			assertEquals(500, status.getStatusLine().getStatusCode());
-			byte[] responseContentBytes = IOUtils.toByteArray(status.getEntity().getContent());
-			String responseContent = new String(responseContentBytes, Charsets.UTF_8);
-			ourLog.info(status.getStatusLine().toString());
-			ourLog.info(responseContent);
-			assertThat(responseContent).contains("\"diagnostics\":\"" + Msg.code(389) + "Failed to call access method: java.io.IOException: Hello\"");
-		}
+		HttpTestResponse response = ourServer.fhirRequest("/Patient?_format=json").get();
+		response.assertStatus(500);
+		byte[] responseContentBytes = response.getBodyBytes();
+		String responseContent = new String(responseContentBytes, Charsets.UTF_8);
+		ourLog.info("HTTP {} {}", response.getStatusCode(), response.getReasonPhrase());
+		ourLog.info(responseContent);
+		assertThat(responseContent).contains("\"diagnostics\":\"" + Msg.code(389) + "Failed to call access method: java.io.IOException: Hello\"");
 
 	}
 
@@ -157,15 +138,13 @@ public class ServerExceptionDstu3Test {
 			}
 		});
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_format=json");
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			assertEquals(500, status.getStatusLine().getStatusCode());
-			byte[] responseContentBytes = IOUtils.toByteArray(status.getEntity().getContent());
-			String responseContent = new String(responseContentBytes, Charsets.UTF_8);
-			ourLog.info(status.getStatusLine().toString());
-			ourLog.info(responseContent);
-			assertThat(responseContent).contains("\"diagnostics\":\"Hello\"");
-		}
+		HttpTestResponse response = ourServer.fhirRequest("/Patient?_format=json").get();
+		response.assertStatus(500);
+		byte[] responseContentBytes = response.getBodyBytes();
+		String responseContent = new String(responseContentBytes, Charsets.UTF_8);
+		ourLog.info("HTTP {} {}", response.getStatusCode(), response.getReasonPhrase());
+		ourLog.info(responseContent);
+		assertThat(responseContent).contains("\"diagnostics\":\"Hello\"");
 
 		ourServer.getInterceptorService().unregisterAllInterceptors();
 
@@ -175,15 +154,13 @@ public class ServerExceptionDstu3Test {
 	@Test
 	public void testPostWithNoBody() throws IOException {
 
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
-		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(status.getStatusLine().toString());
-			ourLog.info(responseContent);
+		HttpTestResponse response = ourServer.fhirRequest("/Patient").method("POST", new byte[0], null);
+		String responseContent = response.getBody();
+		ourLog.info("HTTP {} {}", response.getStatusCode(), response.getReasonPhrase());
+		ourLog.info(responseContent);
 
-			assertEquals(201, status.getStatusLine().getStatusCode());
-			assertThat(status.getFirstHeader("Location").getValue()).contains("Patient/123");
-		}
+		response.assertStatus(201);
+		assertThat(response.getHeader("Location")).contains("Patient/123");
 
 	}
 
@@ -209,23 +186,21 @@ public class ServerExceptionDstu3Test {
 		ourException = new AuthenticationException().addAuthenticateHeaderForRealm("REALM");
 
 		// execute
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient");
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(status.getStatusLine().toString());
-			ourLog.info(responseContent);
+		HttpTestResponse response = ourServer.fhirRequest("/Patient").get();
+		String responseContent = response.getBody();
+		ourLog.info("HTTP {} {}", response.getStatusCode(), response.getReasonPhrase());
+		ourLog.info(responseContent);
 
-			// validate
-			assertEquals(401, status.getStatusLine().getStatusCode());
-			assertEquals("Basic realm=\"REALM\"", status.getFirstHeader("WWW-Authenticate").getValue());
-			OperationOutcome outcome = assertDoesNotThrow(() ->
-				 ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent));
-			assertThat(outcome.getIssue()).hasSize(1);
-			OperationOutcome.OperationOutcomeIssueComponent issue = outcome.getIssueFirstRep();
-			assertEquals(OperationOutcome.IssueSeverity.ERROR, issue.getSeverity());
-			assertEquals(OperationOutcome.IssueType.PROCESSING, issue.getCode());
-			assertEquals("Client unauthorized", issue.getDiagnostics());
-		}
+		// validate
+		response.assertStatus(401);
+		assertEquals("Basic realm=\"REALM\"", response.getHeader("WWW-Authenticate"));
+		OperationOutcome outcome = assertDoesNotThrow(() ->
+			 ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent));
+		assertThat(outcome.getIssue()).hasSize(1);
+		OperationOutcome.OperationOutcomeIssueComponent issue = outcome.getIssueFirstRep();
+		assertEquals(OperationOutcome.IssueSeverity.ERROR, issue.getSeverity());
+		assertEquals(OperationOutcome.IssueType.PROCESSING, issue.getCode());
+		assertEquals("Client unauthorized", issue.getDiagnostics());
 
 	}
 

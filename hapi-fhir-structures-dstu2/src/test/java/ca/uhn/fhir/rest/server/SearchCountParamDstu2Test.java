@@ -8,12 +8,8 @@ import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,9 +37,6 @@ public class SearchCountParamDstu2Test {
 		.withPagingProvider(new FifoMemoryPagingProvider(100))
 		.setDefaultPrettyPrint(false);
 
-	@RegisterExtension
-	public static final HttpClientExtension ourClient = new HttpClientExtension();
-
 	@BeforeEach
 	public void before() {
 		ourLastMethod = null;
@@ -52,29 +45,20 @@ public class SearchCountParamDstu2Test {
 
 	@Test
 	public void testSearch() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_count=2");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		try {
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals("search", ourLastMethod);
-			assertEquals(Integer.valueOf(2), ourLastParam);
-			
-			assertThat(responseContent).containsSubsequence(
-				"<link>", 
-				"<relation value=\"self\"/>", 
-				"<url value=\"" + ourServer.getBaseUrl() + "/Patient?_count=2\"/>",
-				"</link>", 
-				"<link>",
-				"<relation value=\"next\"/>", 
-				"<url value=\"" + ourServer.getBaseUrl() + "?_getpages=", "&amp;_getpagesoffset=2&amp;_count=2&amp;_bundletype=searchset\"/>",
-				"</link>");
-
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
-		}
-
+		String responseContent = ourServer.fhirRequest("/Patient?_count=2").get().assertStatus(200).getBody();
+		ourLog.info(responseContent);
+		assertEquals("search", ourLastMethod);
+		assertEquals(Integer.valueOf(2), ourLastParam);
+		
+		assertThat(responseContent).containsSubsequence(
+			"<link>", 
+			"<relation value=\"self\"/>", 
+			"<url value=\"" + ourServer.getBaseUrl() + "/Patient?_count=2\"/>",
+			"</link>", 
+			"<link>",
+			"<relation value=\"next\"/>", 
+			"<url value=\"" + ourServer.getBaseUrl() + "?_getpages=", "&amp;_getpagesoffset=2&amp;_count=2&amp;_bundletype=searchset\"/>",
+			"</link>");
 	}
 
 	/**
@@ -82,31 +66,22 @@ public class SearchCountParamDstu2Test {
 	 */
 	@Test
 	public void testSearchWithNoCountParam() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchWithNoCountParam&_count=2");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		try {
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals("searchWithNoCountParam", ourLastMethod);
-			assertNull(ourLastParam);
-			
-			//@formatter:off
-			assertThat(responseContent).containsSubsequence(
-				"<link>", 
-				"<relation value=\"self\"/>", 
-				"<url value=\"" + ourServer.getBaseUrl() + "/Patient?_count=2&amp;_query=searchWithNoCountParam\"/>",
-				"</link>", 
-				"<link>",
-				"<relation value=\"next\"/>", 
-				"<url value=\"" + ourServer.getBaseUrl() + "?_getpages=", "&amp;_getpagesoffset=2&amp;_count=2&amp;_bundletype=searchset\"/>",
-				"</link>");
-			//@formatter:on
-			
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
-		}
-
+		String responseContent = ourServer.fhirRequest("/Patient?_query=searchWithNoCountParam&_count=2").get().assertStatus(200).getBody();
+		ourLog.info(responseContent);
+		assertEquals("searchWithNoCountParam", ourLastMethod);
+		assertNull(ourLastParam);
+		
+		//@formatter:off
+		assertThat(responseContent).containsSubsequence(
+			"<link>", 
+			"<relation value=\"self\"/>", 
+			"<url value=\"" + ourServer.getBaseUrl() + "/Patient?_count=2&amp;_query=searchWithNoCountParam\"/>",
+			"</link>", 
+			"<link>",
+			"<relation value=\"next\"/>", 
+			"<url value=\"" + ourServer.getBaseUrl() + "?_getpages=", "&amp;_getpagesoffset=2&amp;_count=2&amp;_bundletype=searchset\"/>",
+			"</link>");
+		//@formatter:on
 	}
 
 	@AfterAll

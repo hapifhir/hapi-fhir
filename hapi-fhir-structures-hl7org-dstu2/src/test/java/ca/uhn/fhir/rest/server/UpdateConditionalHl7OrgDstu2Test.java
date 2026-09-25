@@ -12,15 +12,9 @@ import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.dstu2.model.IdType;
 import org.hl7.fhir.dstu2.model.Patient;
 import org.junit.jupiter.api.AfterAll;
@@ -51,9 +45,6 @@ public class UpdateConditionalHl7OrgDstu2Test {
       .setDefaultResponseEncoding(EncodingEnum.JSON)
       .setDefaultPrettyPrint(false);
 
-  @RegisterExtension
-  public static HttpClientExtension ourClient = new HttpClientExtension();
-
 
   @BeforeEach
 	public void before() {
@@ -69,19 +60,13 @@ public class UpdateConditionalHl7OrgDstu2Test {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		HttpPut httpPost = new HttpPut(ourServer.getBaseUrl() + "/Patient?identifier=system%7C001");
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
-		HttpResponse status = ourClient.execute(httpPost);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		HttpTestResponse status = ourServer.fhirRequest("/Patient?identifier=system%7C001").put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML).assertStatus(200);
+		String responseContent = status.getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertNull(status.getFirstHeader("location"));
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
+		assertNull(status.getHeader("location"));
+		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getHeader("content-location"));
 
 		assertNull(ourLastId);
 		assertNull(ourLastIdParam);
@@ -96,19 +81,13 @@ public class UpdateConditionalHl7OrgDstu2Test {
 		patient.setId("2");
 		patient.addIdentifier().setValue("002");
 
-		HttpPut httpPost = new HttpPut(ourServer.getBaseUrl() + "/Patient/2");
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
-		HttpResponse status = ourClient.execute(httpPost);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/2").put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML).assertStatus(200);
+		String responseContent = status.getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertNull(status.getFirstHeader("location"));
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
+		assertNull(status.getHeader("location"));
+		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getHeader("content-location"));
 
 		assertEquals("Patient/2", new IdType(ourLastId).toUnqualified().getValue());
 		assertEquals("Patient/2", ourLastIdParam.toUnqualified().getValue());
@@ -122,12 +101,7 @@ public class UpdateConditionalHl7OrgDstu2Test {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_pretty=true");
-
-		HttpResponse status = ourClient.execute(httpGet);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient?_pretty=true").get().getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
 

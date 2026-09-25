@@ -6,12 +6,8 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.AfterAll;
@@ -33,9 +29,6 @@ public class FormatParameterDstu3Test {
 		 .withPagingProvider(new FifoMemoryPagingProvider(100))
 		 .setDefaultPrettyPrint(false);
 
-	@RegisterExtension
-	private HttpClientExtension ourClient = new HttpClientExtension();
-
 	/**
 	 * See #346
 	 */
@@ -43,17 +36,10 @@ public class FormatParameterDstu3Test {
 	public void testFormatXml() throws Exception {
 		ourServer.setDefaultResponseEncoding(EncodingEnum.JSON);
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123?_format=xml");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		try {
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			ourLog.info(responseContent);
+		String responseContent = ourServer.fhirRequest("/Patient/123?_format=xml").get().assertStatus(200).getBody();
+		ourLog.info(responseContent);
 
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals(VALUE_XML, responseContent);
-		} finally {
-			IOUtils.closeQuietly(status);
-		}
+		assertEquals(VALUE_XML, responseContent);
 	}
 
 	/**
@@ -63,17 +49,10 @@ public class FormatParameterDstu3Test {
 	public void testFormatApplicationXml() throws Exception {
 		ourServer.setDefaultResponseEncoding(EncodingEnum.JSON);
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123?_format=application/xml");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		try {
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			ourLog.info(responseContent);
+		String responseContent = ourServer.fhirRequest("/Patient/123?_format=application/xml").get().assertStatus(200).getBody();
+		ourLog.info(responseContent);
 
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals(VALUE_XML, responseContent);
-		} finally {
-			IOUtils.closeQuietly(status);
-		}
+		assertEquals(VALUE_XML, responseContent);
 	}
 
 	/**
@@ -83,17 +62,10 @@ public class FormatParameterDstu3Test {
 	public void testFormatApplicationXmlFhir() throws Exception {
 		ourServer.setDefaultResponseEncoding(EncodingEnum.JSON);
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123?_format=application/xml%2Bfhir");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		try {
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			ourLog.info(responseContent);
+		String responseContent = ourServer.fhirRequest("/Patient/123?_format=application/xml%2Bfhir").get().assertStatus(200).getBody();
+		ourLog.info(responseContent);
 
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals(VALUE_XML, responseContent);
-		} finally {
-			IOUtils.closeQuietly(status);
-		}
+		assertEquals(VALUE_XML, responseContent);
 	}
 
 	/**
@@ -104,17 +76,10 @@ public class FormatParameterDstu3Test {
 		ourServer.setDefaultResponseEncoding(EncodingEnum.JSON);
 
 		// The plus isn't escaped here, and it should be.. but we'll be lenient
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123?_format=application/xml+fhir");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		try {
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			ourLog.info(responseContent);
+		String responseContent = ourServer.fhirRequest("/Patient/123?_format=application/xml+fhir").get().assertStatus(200).getBody();
+		ourLog.info(responseContent);
 
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals(VALUE_XML, responseContent);
-		} finally {
-			IOUtils.closeQuietly(status);
-		}
+		assertEquals(VALUE_XML, responseContent);
 	}
 
 	/**
@@ -124,17 +89,10 @@ public class FormatParameterDstu3Test {
 	public void testFormatJson() throws Exception {
 		ourServer.setDefaultResponseEncoding(EncodingEnum.XML);
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123?_format=json");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		try {
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			ourLog.info(responseContent);
+		String responseContent = ourServer.fhirRequest("/Patient/123?_format=json").get().assertStatus(200).getBody();
+		ourLog.info(responseContent);
 
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals(VALUE_JSON, responseContent);
-		} finally {
-			IOUtils.closeQuietly(status);
-		}
+		assertEquals(VALUE_JSON, responseContent);
 	}
 
 	/**
@@ -144,17 +102,10 @@ public class FormatParameterDstu3Test {
 	public void testFormatApplicationJson() throws Exception {
 		ourServer.setDefaultResponseEncoding(EncodingEnum.XML);
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123?_format=application/json");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		try {
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			ourLog.info(responseContent);
+		String responseContent = ourServer.fhirRequest("/Patient/123?_format=application/json").get().assertStatus(200).getBody();
+		ourLog.info(responseContent);
 
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals(VALUE_JSON, responseContent);
-		} finally {
-			IOUtils.closeQuietly(status);
-		}
+		assertEquals(VALUE_JSON, responseContent);
 	}
 
 	/**
@@ -164,17 +115,10 @@ public class FormatParameterDstu3Test {
 	public void testFormatApplicationJsonFhir() throws Exception {
 		ourServer.setDefaultResponseEncoding(EncodingEnum.XML);
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123?_format=application/json%2Bfhir");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		try {
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			ourLog.info(responseContent);
+		String responseContent = ourServer.fhirRequest("/Patient/123?_format=application/json%2Bfhir").get().assertStatus(200).getBody();
+		ourLog.info(responseContent);
 
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals(VALUE_JSON, responseContent);
-		} finally {
-			IOUtils.closeQuietly(status);
-		}
+		assertEquals(VALUE_JSON, responseContent);
 	}
 
 	/**
@@ -185,17 +129,10 @@ public class FormatParameterDstu3Test {
 		ourServer.setDefaultResponseEncoding(EncodingEnum.XML);
 
 		// The plus isn't escaped here, and it should be.. but we'll be lenient
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123?_format=application/json+fhir");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		try {
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			ourLog.info(responseContent);
+		String responseContent = ourServer.fhirRequest("/Patient/123?_format=application/json+fhir").get().assertStatus(200).getBody();
+		ourLog.info(responseContent);
 
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals(VALUE_JSON, responseContent);
-		} finally {
-			IOUtils.closeQuietly(status);
-		}
+		assertEquals(VALUE_JSON, responseContent);
 	}
 
 	@AfterAll

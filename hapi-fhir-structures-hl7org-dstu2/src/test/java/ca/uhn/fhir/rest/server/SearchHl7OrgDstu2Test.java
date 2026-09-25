@@ -6,13 +6,10 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import jakarta.annotation.Nonnull;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.dstu2.model.Bundle;
 import org.hl7.fhir.dstu2.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -39,52 +36,39 @@ public class SearchHl7OrgDstu2Test {
       .setDefaultResponseEncoding(EncodingEnum.XML)
       .setDefaultPrettyPrint(false);
 
-  @RegisterExtension
-  public static HttpClientExtension ourClient = new HttpClientExtension();
-
   @Test
   public void testEncodeConvertsReferencesToRelative() throws Exception {
-    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchWithRef");
-    HttpResponse status = ourClient.execute(httpGet);
-    String responseContent = IOUtils.toString(status.getEntity().getContent());
-    IOUtils.closeQuietly(status.getEntity().getContent());
+    HttpTestResponse status = ourServer.fhirRequest("/Patient?_query=searchWithRef").get().assertStatus(200);
+    String responseContent = status.getBody();
     ourLog.info(responseContent);
 
 		assertThat(responseContent).doesNotContain("text");
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
     Patient patient = (Patient) ourCtx.newXmlParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
     String ref = patient.getManagingOrganization().getReference();
 		assertEquals("Organization/555", ref);
-		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION));
+		assertNull(status.getHeader(Constants.HEADER_CONTENT_LOCATION));
   }
 
   @Test
   public void testEncodeConvertsReferencesToRelativeJson() throws Exception {
-    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchWithRef&_format=json");
-    HttpResponse status = ourClient.execute(httpGet);
-    String responseContent = IOUtils.toString(status.getEntity().getContent());
-    IOUtils.closeQuietly(status.getEntity().getContent());
+    HttpTestResponse status = ourServer.fhirRequest("/Patient?_query=searchWithRef&_format=json").get().assertStatus(200);
+    String responseContent = status.getBody();
     ourLog.info(responseContent);
 
 		assertThat(responseContent).doesNotContain("text");
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
     Patient patient = (Patient) ourCtx.newJsonParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
     String ref = patient.getManagingOrganization().getReference();
 		assertEquals("Organization/555", ref);
-		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION));
+		assertNull(status.getHeader(Constants.HEADER_CONTENT_LOCATION));
   }
 
   @Test
   public void testResultBundleHasUuid() throws Exception {
-    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchWithRef");
-    HttpResponse status = ourClient.execute(httpGet);
-    String responseContent = IOUtils.toString(status.getEntity().getContent());
-    IOUtils.closeQuietly(status.getEntity().getContent());
+    String responseContent = ourServer.fhirRequest("/Patient?_query=searchWithRef").get().assertStatus(200).getBody();
     ourLog.info(responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).matches(".*id value..[0-9a-f-]+\\\".*");
   }
 
@@ -93,10 +77,7 @@ public class SearchHl7OrgDstu2Test {
     ourReturnPublished = new InstantDt("2011-02-03T11:22:33Z");
 		assertEquals(ourReturnPublished.getValueAsString(), "2011-02-03T11:22:33Z");
 
-    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchWithBundleProvider&_pretty=true");
-    HttpResponse status = ourClient.execute(httpGet);
-    String responseContent = IOUtils.toString(status.getEntity().getContent());
-    IOUtils.closeQuietly(status.getEntity().getContent());
+    String responseContent = ourServer.fhirRequest("/Patient?_query=searchWithBundleProvider&_pretty=true").get().getBody();
     ourLog.info(responseContent);
 
     assertThat(responseContent).containsSubsequence("<lastUpdated value=\"2011-02-03T11:22:33Z\"/>");

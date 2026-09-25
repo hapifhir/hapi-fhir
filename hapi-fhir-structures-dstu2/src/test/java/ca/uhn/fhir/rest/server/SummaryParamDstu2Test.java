@@ -13,12 +13,9 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,9 +43,6 @@ public class SummaryParamDstu2Test {
 		.withPagingProvider(new FifoMemoryPagingProvider(100))
 		.setDefaultPrettyPrint(false);
 
-	@RegisterExtension
-	public static final HttpClientExtension ourClient = new HttpClientExtension();
-
 	@BeforeEach
 	public void before() {
 		ourLastSummary = null;
@@ -57,14 +51,11 @@ public class SummaryParamDstu2Test {
 
 	@Test
 	public void testReadSummaryData() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_summary=" + SummaryEnum.DATA.getCode());
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		HttpTestResponse response = ourServer.fhirRequest("/Patient/1?_summary=" + SummaryEnum.DATA.getCode()).get().assertStatus(200);
+		String responseContent = response.getBody();
 		ourLog.info(responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase(), status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf"));
+		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase(), response.getHeader(Constants.HEADER_CONTENT_TYPE).replace(" ", "").replace("UTF", "utf"));
 		assertThat(responseContent).doesNotContain("<Bundle");
 		assertThat(responseContent).contains("<Patien");
 		assertThat(responseContent).doesNotContain("<div>THE DIV</div>");
@@ -76,14 +67,11 @@ public class SummaryParamDstu2Test {
 
 	@Test
 	public void testReadSummaryText() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_summary=" + SummaryEnum.TEXT.getCode());
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		HttpTestResponse response = ourServer.fhirRequest("/Patient/1?_summary=" + SummaryEnum.TEXT.getCode()).get().assertStatus(200);
+		String responseContent = response.getBody();
 		ourLog.info(responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_HTML_WITH_UTF8.replace(" ", "").toLowerCase(), status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf"));
+		assertEquals(Constants.CT_HTML_WITH_UTF8.replace(" ", "").toLowerCase(), response.getHeader(Constants.HEADER_CONTENT_TYPE).replace(" ", "").replace("UTF", "utf"));
 		assertThat(responseContent).doesNotContain("<Bundle");
 		assertThat(responseContent).doesNotContain("<Medic");
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">THE DIV</div>", responseContent);
@@ -93,14 +81,11 @@ public class SummaryParamDstu2Test {
 
 	@Test
 	public void testReadSummaryTextWithMandatory() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/MedicationOrder/1?_summary=" + SummaryEnum.TEXT.getCode());
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		HttpTestResponse response = ourServer.fhirRequest("/MedicationOrder/1?_summary=" + SummaryEnum.TEXT.getCode()).get().assertStatus(200);
+		String responseContent = response.getBody();
 		ourLog.info(responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_HTML_WITH_UTF8.replace(" ", "").toLowerCase(), status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf"));
+		assertEquals(Constants.CT_HTML_WITH_UTF8.replace(" ", "").toLowerCase(), response.getHeader(Constants.HEADER_CONTENT_TYPE).replace(" ", "").replace("UTF", "utf"));
 		assertThat(responseContent).doesNotContain("<Bundle");
 		assertThat(responseContent).doesNotContain("<Patien");
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">TEXT</div>", responseContent);
@@ -110,14 +95,11 @@ public class SummaryParamDstu2Test {
 
 	@Test
 	public void testReadSummaryTrue() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_summary=" + SummaryEnum.TRUE.getCode());
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		HttpTestResponse response = ourServer.fhirRequest("/Patient/1?_summary=" + SummaryEnum.TRUE.getCode()).get().assertStatus(200);
+		String responseContent = response.getBody();
 		ourLog.info(responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase(), status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf"));
+		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase(), response.getHeader(Constants.HEADER_CONTENT_TYPE).replace(" ", "").replace("UTF", "utf"));
 		assertThat(responseContent).doesNotContain("<Bundle");
 		assertThat(responseContent).contains("<Patien");
 		assertThat(responseContent).doesNotContain("<div>THE DIV</div>");
@@ -128,13 +110,9 @@ public class SummaryParamDstu2Test {
 
 	@Test
 	public void testSearchSummaryCount() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_pretty=true&_summary=" + SummaryEnum.COUNT.getCode());
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient?_pretty=true&_summary=" + SummaryEnum.COUNT.getCode()).get().assertStatus(200).getBody();
 		ourLog.info(responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("<total value=\"1\"/>");
 		assertThat(responseContent).doesNotContain("entry");
 		assertThat(responseContent).doesNotContain("THE DIV");
@@ -145,13 +123,9 @@ public class SummaryParamDstu2Test {
 
 	@Test
 	public void testSearchSummaryData() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_summary=" + SummaryEnum.DATA.getCode());
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient?_summary=" + SummaryEnum.DATA.getCode()).get().assertStatus(200).getBody();
 		ourLog.info(responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("<Patient");
 		assertThat(responseContent).doesNotContain("THE DIV");
 		assertThat(responseContent).contains("family");
@@ -161,13 +135,9 @@ public class SummaryParamDstu2Test {
 
 	@Test
 	public void testSearchSummaryFalse() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_summary=false");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient?_summary=false").get().assertStatus(200).getBody();
 		ourLog.info(responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("<Patient");
 		assertThat(responseContent).contains("THE DIV");
 		assertThat(responseContent).contains("family");
@@ -177,13 +147,9 @@ public class SummaryParamDstu2Test {
 
 	@Test
 	public void testSearchSummaryText() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_summary=" + SummaryEnum.TEXT.getCode());
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient?_summary=" + SummaryEnum.TEXT.getCode()).get().assertStatus(200).getBody();
 		ourLog.info(responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("<total value=\"1\"/>");
 		assertThat(responseContent).contains("entry");
 		assertThat(responseContent).contains("THE DIV");
@@ -194,13 +160,9 @@ public class SummaryParamDstu2Test {
 
 	@Test
 	public void testSearchSummaryTextWithMandatory() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/MedicationOrder?_summary=" + SummaryEnum.TEXT.getCode() + "&_pretty=true");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/MedicationOrder?_summary=" + SummaryEnum.TEXT.getCode() + "&_pretty=true").get().assertStatus(200).getBody();
 		ourLog.info(responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("<total value=\"1\"/>");
 		assertThat(responseContent).contains("entry");
 		assertThat(responseContent).contains(">TEXT<");
@@ -210,13 +172,9 @@ public class SummaryParamDstu2Test {
 
 	@Test
 	public void testSearchSummaryTextMulti() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=multi&_summary=" + SummaryEnum.TEXT.getCode());
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient?_query=multi&_summary=" + SummaryEnum.TEXT.getCode()).get().assertStatus(200).getBody();
 		ourLog.info(responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("<total value=\"1\"/>");
 		assertThat(responseContent).contains("entry");
 		assertThat(responseContent).contains("THE DIV");
@@ -227,13 +185,9 @@ public class SummaryParamDstu2Test {
 
 	@Test
 	public void testSearchSummaryTrue() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_summary=" + SummaryEnum.TRUE.getCode());
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient?_summary=" + SummaryEnum.TRUE.getCode()).get().assertStatus(200).getBody();
 		ourLog.info(responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("<Patient");
 		assertThat(responseContent).doesNotContain("THE DIV");
 		assertThat(responseContent).contains("family");
@@ -243,13 +197,9 @@ public class SummaryParamDstu2Test {
 
 	@Test
 	public void testSearchSummaryWithTextAndOthers() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_summary=text&_summary=data");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient?_summary=text&_summary=data").get().assertStatus(400).getBody();
 		ourLog.info(responseContent);
 
-		assertEquals(400, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("Can not combine _summary=text with other values for _summary");
 	}
 

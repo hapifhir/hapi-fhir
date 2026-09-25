@@ -7,12 +7,8 @@ import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +19,6 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -42,9 +37,6 @@ public class IncludeAndRevincludeParameterTest {
 		.withPagingProvider(new FifoMemoryPagingProvider(100))
 		.setDefaultPrettyPrint(false);
 
-	@RegisterExtension
-	public static final HttpClientExtension ourClient = new HttpClientExtension();
-
 	@BeforeEach
 	public void before() {
 		ourIncludes = null;
@@ -54,11 +46,7 @@ public class IncludeAndRevincludeParameterTest {
 
 	@Test
 	public void testNoIncludes() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=normalInclude");
-		HttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		ourServer.fhirRequest("/Patient?_query=normalInclude").get().assertStatus(200);
 
 		assertThat(ourIncludes).hasSize(0);
 		assertThat(ourReverseIncludes).hasSize(0);
@@ -66,11 +54,7 @@ public class IncludeAndRevincludeParameterTest {
 	
 	@Test
 	public void testWithBoth() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=normalInclude&_include=A.a&_include=B.b&_revinclude=C.c&_revinclude=D.d");
-		HttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		ourServer.fhirRequest("/Patient?_query=normalInclude&_include=A.a&_include=B.b&_revinclude=C.c&_revinclude=D.d").get().assertStatus(200);
 
 		assertThat(ourIncludes).hasSize(2);
 		assertThat(ourReverseIncludes).hasSize(2);

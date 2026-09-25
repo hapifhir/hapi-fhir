@@ -6,12 +6,8 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -38,9 +34,6 @@ public class SearchSortDstu3Test {
 		 .withPagingProvider(new FifoMemoryPagingProvider(100))
 		 .setDefaultPrettyPrint(false);
 
-	@RegisterExtension
-	private HttpClientExtension ourClient = new HttpClientExtension();
-
 	@BeforeEach
 	public void before() {
 		ourLastMethod = null;
@@ -49,29 +42,21 @@ public class SearchSortDstu3Test {
 
 	@Test
 	public void testSearch() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_sort=param1,-param2,param3,-param4");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		try {
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals("search", ourLastMethod);
+		String responseContent = ourServer.fhirRequest("/Patient?_sort=param1,-param2,param3,-param4").get().assertStatus(200).getBody();
+		ourLog.info(responseContent);
+		assertEquals("search", ourLastMethod);
 
-			assertEquals("param1", ourLastSortSpec.getParamName());
-			assertEquals(SortOrderEnum.ASC, ourLastSortSpec.getOrder());
+		assertEquals("param1", ourLastSortSpec.getParamName());
+		assertEquals(SortOrderEnum.ASC, ourLastSortSpec.getOrder());
 
-			assertEquals("param2", ourLastSortSpec.getChain().getParamName());
-			assertEquals(SortOrderEnum.DESC, ourLastSortSpec.getChain().getOrder());
+		assertEquals("param2", ourLastSortSpec.getChain().getParamName());
+		assertEquals(SortOrderEnum.DESC, ourLastSortSpec.getChain().getOrder());
 
-			assertEquals("param3", ourLastSortSpec.getChain().getChain().getParamName());
-			assertEquals(SortOrderEnum.ASC, ourLastSortSpec.getChain().getChain().getOrder());
+		assertEquals("param3", ourLastSortSpec.getChain().getChain().getParamName());
+		assertEquals(SortOrderEnum.ASC, ourLastSortSpec.getChain().getChain().getOrder());
 
-			assertEquals("param4", ourLastSortSpec.getChain().getChain().getChain().getParamName());
-			assertEquals(SortOrderEnum.DESC, ourLastSortSpec.getChain().getChain().getChain().getOrder());
-
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
-		}
+		assertEquals("param4", ourLastSortSpec.getChain().getChain().getChain().getParamName());
+		assertEquals(SortOrderEnum.DESC, ourLastSortSpec.getChain().getChain().getChain().getOrder());
 
 	}
 
