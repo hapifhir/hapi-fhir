@@ -308,19 +308,17 @@ public class RemoteTerminologyServiceJpaR4Test extends BaseJpaR4Test {
 			"None of the codings provided are in the value set 'IdentifierType'");
 
 		// Verify 1
-		// Three connections, not two: the chain asks each module whether it supports the code system at the
-		// version the validator named as well as at no version, and those are separate cache entries, while
-		// TermReadSvcImpl answers both by looking up the bare URI - so the same TRM_CODESYSTEM query runs twice.
-		// Making that module version-aware is #8402's remaining half.
+		// Three connections: the chain asks each module about the code system both at the version the validator
+		// named and at no version, which are separate cache entries, and TermReadSvcImpl looks the code system up
+		// by its URL for each.
 		// Created by Claude Opus 5
 		Assertions.assertEquals(3, myCaptureQueriesListener.countGetConnections());
 		assertThat(ourValueSetProvider.mySearchParams).asList().containsExactlyInAnyOrder(
 			"http://hl7.org/fhir/ValueSet/identifier-type",
 			"http://hl7.org/fhir/ValueSet/identifier-type"
 		);
-		// The version-specific question is now asked as well as the unversioned one. It used to go out as
-		// url=...|2.9, which no CodeSystem.url can match, so it was answered wrongly for free; a search which
-		// can actually match costs a round trip, once per version per cache window.
+		// The versioned and the unversioned search both reach the terminology service, the version as a search
+		// parameter of its own, recorded here in canonical form. Each costs a round trip once per cache window.
 		// Created by Claude Opus 5
 		assertThat(ourCodeSystemProvider.mySearchUrls).asList().containsExactlyInAnyOrder(
 			"http://terminology.hl7.org/CodeSystem/v2-0203",

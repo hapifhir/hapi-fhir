@@ -896,9 +896,10 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	/**
-	 * Whether one module in the chain supports the given code system version. A module holding the system
-	 * at a different version does not support it: that is what lets the chain pick the module holding the
-	 * version the caller asked for, rather than whichever module comes first.
+	 * Whether one module in the chain supports the given code system version. A module which implements the
+	 * version-aware isCodeSystemSupported and holds the system at a different version does not support it:
+	 * that is what lets the chain pick the module holding the version the caller asked for, rather than
+	 * whichever module comes first.
 	 */
 	private boolean isCodeSystemSupported(
 			ValidationSupportContext theValidationSupportContext,

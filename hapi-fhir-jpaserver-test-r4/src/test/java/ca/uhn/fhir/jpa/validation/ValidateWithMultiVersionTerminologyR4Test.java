@@ -638,8 +638,8 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 
 		/**
 		 * The resource-validation path reaches terminology through validateCodeInValueSet with the ValueSet
-		 * as a resource, which is a different route to the same question - #8392 fixed that one. Running both
-		 * here is what shows whether the two still disagree.
+		 * as a resource, which is a different route to the same question. Running both here shows whether the
+		 * two disagree.
 		 */
 		@ParameterizedTest
 		@ValueSource(strings = {VERSION_OLDER, VERSION_NEWER})

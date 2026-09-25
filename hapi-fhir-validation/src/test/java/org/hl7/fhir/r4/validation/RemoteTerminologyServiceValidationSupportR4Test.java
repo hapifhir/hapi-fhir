@@ -187,8 +187,7 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 
 	/**
 	 * A ValueSet resource's {@code url} element never contains a pipe either, so the version has to be
-	 * sent as its own search parameter here too. This module already split the canonical by hand; it
-	 * now takes the version as a parameter and leaves the parsing to UrlUtil.
+	 * sent as its own search parameter here too.
 	 */
 	// Created by Claude Opus 5
 	@Test
