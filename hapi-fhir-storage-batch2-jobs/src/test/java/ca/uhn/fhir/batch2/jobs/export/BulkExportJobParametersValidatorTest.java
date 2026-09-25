@@ -264,8 +264,7 @@ public class BulkExportJobParametersValidatorTest {
 		assertNotNull(errors);
 		assertThat(errors)
 			.isNotEmpty()
-			.contains("The allowed formats for Bulk Export are %s, %s and %s"
-				.formatted(Constants.CT_FHIR_NDJSON, Constants.CT_APP_NDJSON, Constants.CT_NDJSON));
+			.contains("Unsupported output format; no known converter available for mime-type json");
 	}
 
 	@ParameterizedTest
