@@ -74,16 +74,34 @@ public class CandidateSearcher {
 		IBundleProvider retval = resourceDao.search(searchParameterMap, systemRequestDetails);
 
 		if (retval.size() != null) {
+			/*
+			 * NB: we log as warnings the fact that thresholds have been breached so as to alert
+			 * users to the issues.
+			 *
+			 * We additionally log (at debug) level search criteria (which may include PHI, so cannot
+			 * be logged at a 'higher' level) in case users are confused as to what the criteria that
+			 * resulted in this case was.
+			 */
 			if (retval.size() >= myMdmSettings.getCandidateSearchLimit()) {
 				ourLog.warn(
-						"At least {} search candidates were returned for search criteria; this is the configured maximum candidates to allow. Resource will be omitted from further MDM matching.",
+						"At least {} search candidates were returned for search criteria; this is the configured maximum candidates to allow. Resource will be omitted from further MDM matching. Turn on debug logging for additional information",
 						retval.size());
+				ourLog.debug(
+						"MDM Match candidate search limit exceeded: Candidate search returned {} resources of type {} for the search criteria {}.",
+						retval.size(),
+						theResourceType,
+						theResourceCriteria);
 				theContext.setTooManyCandidatesMatched(true);
 				return Optional.empty();
 			} else if (retval.size() >= myMdmSettings.getCandidateSearchWarnLimit()) {
 				ourLog.warn(
-						"Candidate search yielded {} results for the search criteria; more than the warning level, but not enough to halt MDM matching.",
+						"Candidate search yielded {} results for the search criteria; more than the warning level, but not enough to halt MDM matching. For additional details, turn on debug logging.",
 						retval.size());
+				ourLog.debug(
+						"MDM Match warning threshold exceeded: Candidate search yielded {} resources of type {} for the search criteria {}.",
+						retval.size(),
+						theResourceType,
+						theResourceCriteria);
 			}
 		}
 
