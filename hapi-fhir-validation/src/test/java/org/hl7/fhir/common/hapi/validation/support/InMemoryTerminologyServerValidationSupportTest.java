@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
@@ -539,6 +540,223 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		assertThatThrownBy(() -> mySvc.validateCode(valCtx, new ConceptValidationOptions(), request))
 			.isInstanceOf(InvalidRequestException.class)
 			.hasMessageContaining("does not match expected version: 2.0.0");
+	}
+
+	/**
+	 * The same contradiction reaching the chain is rejected there, before any module is asked, rather than
+	 * being resolved in favour of either version.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	void validateCode_throughTheChainWithAConflictingVersion_isRejected() {
+		// Setup
+		addSingleVersionCodeSystemAndRecordFetches("1.0.0");
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+		ValidateCodeRequest request =
+			new ValidateCodeRequest(VERSIONED_CS_URL + "|1.0.0", "2.0.0", "code0", null, null);
+
+		// Test & Verify
+		assertThatThrownBy(() -> myChain.validateCode(valCtx, new ConceptValidationOptions(), request))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining(Msg.code(2952));
+	}
+
+	/**
+	 * The version the include names is not installed - only another version of that code system is. The code
+	 * exists in the version that <em>is</em> installed, so accepting it means answering a question nobody
+	 * asked: the caller asked about 2.0.0 and got an answer from 1.0.0, with nothing said about the
+	 * substitution.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	void validateCodeInValueSet_includeNamesAnUninstalledCodeSystemVersion_doesNotAcceptACodeFromAnotherVersion() {
+		// Setup
+		addSingleVersionCodeSystemAndRecordFetches("1.0.0");
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem(VERSIONED_CS_URL).setVersion("2.0.0");
+		myPrePopulated.addValueSet(vs);
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+			valCtx, new ConceptValidationOptions(), VERSIONED_CS_URL, "code0", null, vs);
+
+		// Verify
+		assertNotNull(outcome);
+		assertFalse(outcome.isOk(), "code0 exists only in 1.0.0, and the include named 2.0.0");
+		assertThat(outcome.getMessage())
+			.as("the caller has to be told which version could not be found, not just that something failed")
+			.contains(VERSIONED_CS_URL + "|2.0.0");
+	}
+
+	/**
+	 * The same branch serves code systems this server does not store at all - a not-present CodeSystem, or one
+	 * owned by another module such as UCUM. Naming a version must not shut that path down: a module holding
+	 * exactly one definition of a system answers for whatever version is asked for.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	void validateCodeInValueSet_includeNamesAVersionOfACodeSystemAnotherModuleOwns_isStillValidated() {
+		// Setup
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose()
+			.addInclude()
+			.setSystem(CommonCodeSystemsTerminologyService.UCUM_CODESYSTEM_URL)
+			.setVersion("2.1");
+		myPrePopulated.addValueSet(vs);
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+			valCtx,
+			new ConceptValidationOptions(),
+			CommonCodeSystemsTerminologyService.UCUM_CODESYSTEM_URL,
+			"mg",
+			null,
+			vs);
+
+		// Verify
+		assertNotNull(outcome);
+		assertTrue(outcome.isOk(), "UCUM ships one definition, so it answers for any version");
+	}
+
+	/**
+	 * The named version is not stored, and neither a copy stored without a version nor one at another version
+	 * stands in for it: as in the HL7 validator, the version is reported as not found. Both stored copies hold
+	 * the code, so a fallback to either would accept it.
+	 */
+	// Created by Claude Opus 5
+	@ParameterizedTest
+	@ValueSource(booleans = {false, true})
+	void validateCode_namedVersionNotStored_isReportedNotFound(boolean theAlsoStoreAnotherVersion) {
+		// Setup
+		CodeSystem cs = new CodeSystem();
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setUrl(VERSIONED_CS_URL);
+		cs.addConcept().setCode("code0").setDisplay("Code 0");
+		myPrePopulated.addCodeSystem(cs);
+		if (theAlsoStoreAnotherVersion) {
+			myPrePopulated.addCodeSystem(cs.copy().setVersion("1.0.0"));
+		}
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.CodeValidationResult namedVersion = myChain.validateCode(
+			valCtx, new ConceptValidationOptions(), new ValidateCodeRequest(VERSIONED_CS_URL, "2.0.0", "code0", null, null));
+		IValidationSupport.CodeValidationResult noVersionNamed = myChain.validateCode(
+			valCtx, new ConceptValidationOptions(), new ValidateCodeRequest(VERSIONED_CS_URL, null, "code0", null, null));
+
+		// Verify
+		assertNotNull(namedVersion);
+		assertFalse(namedVersion.isOk());
+		assertEquals(
+			"A definition for CodeSystem '" + VERSIONED_CS_URL
+				+ "' version '2.0.0' could not be found, so the code cannot be validated",
+			namedVersion.getMessage());
+		assertNotNull(noVersionNamed);
+		assertTrue(noVersionNamed.isOk(), noVersionNamed.getMessage());
+	}
+
+	/**
+	 * A module written before the version-aware isCodeSystemSupported existed, and which recognises only the
+	 * exact code system URL, has to keep being asked when a coding names a version.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	void validateCode_moduleRecognisingOnlyTheExactUrl_isStillAskedWhenAVersionIsNamed() {
+		// Setup
+		String exactUrl = "http://example.com/fhir/CodeSystem/exact-url-only";
+		IValidationSupport exactUrlModule = new IValidationSupport() {
+			@Override
+			public FhirContext getFhirContext() {
+				return myCtx;
+			}
+
+			@Override
+			public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
+				return exactUrl.equals(theSystem);
+			}
+
+			@Override
+			public CodeValidationResult validateCode(
+					ValidationSupportContext theValidationSupportContext,
+					ConceptValidationOptions theOptions,
+					String theCodeSystem,
+					String theCode,
+					String theDisplay,
+					String theValueSetUrl) {
+				return new CodeValidationResult().setCode(theCode);
+			}
+		};
+		ValidationSupportChain chain = new ValidationSupportChain(exactUrlModule, myDefaultSupport);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = chain.validateCode(
+			new ValidationSupportContext(chain),
+			new ConceptValidationOptions(),
+			new ValidateCodeRequest(exactUrl, "2.0.0", "code0", null, null));
+
+		// Verify
+		assertNotNull(outcome);
+		assertTrue(outcome.isOk(), outcome.getMessage());
+		assertEquals("code0", outcome.getCode());
+	}
+
+	/**
+	 * When a ValueSet is named and no module holds it, the question was about the ValueSet, so the result must
+	 * not claim that the code system version could not be found.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	void validateCode_valueSetNoModuleHolds_doesNotReportTheCodeSystemVersion() {
+		// Setup
+		addSingleVersionCodeSystemAndRecordFetches("1.0.0");
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = myChain.validateCode(
+			valCtx,
+			new ConceptValidationOptions(),
+			new ValidateCodeRequest(VERSIONED_CS_URL, "2.0.0", "code0", null, "http://example.com/fhir/ValueSet/unknown"));
+
+		// Verify
+		assertNull(outcome);
+	}
+
+	/**
+	 * The chain picks the module holding the version a lookup names, and that module has to answer from the
+	 * same version. Each version holds a code the other does not, and 2.0.0 is stored last, so a lookup which
+	 * drops the version answers from 2.0.0 - finding codeB and missing codeA.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	void lookupCode_twoVersionsStoredAndOneNamed_answersFromTheNamedVersion() {
+		// Setup
+		for (String version : List.of("1.0.0", "2.0.0")) {
+			CodeSystem cs = new CodeSystem();
+			cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+			cs.setUrl(VERSIONED_CS_URL);
+			cs.setVersion(version);
+			cs.addConcept().setCode(version.equals("1.0.0") ? "codeA" : "codeB");
+			myPrePopulated.addCodeSystem(cs);
+		}
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.LookupCodeResult codeInTheNamedVersion =
+			myChain.lookupCode(valCtx, new LookupCodeRequest(VERSIONED_CS_URL, "codeA").setVersion("1.0.0"));
+		IValidationSupport.LookupCodeResult codeOnlyInTheOtherVersion =
+			myChain.lookupCode(valCtx, new LookupCodeRequest(VERSIONED_CS_URL, "codeB").setVersion("1.0.0"));
+
+		// Verify
+		assertNotNull(codeInTheNamedVersion);
+		assertTrue(codeInTheNamedVersion.isFound());
+		assertNotNull(codeOnlyInTheOtherVersion);
+		assertFalse(codeOnlyInTheOtherVersion.isFound());
 	}
 
 	/**

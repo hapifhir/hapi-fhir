@@ -194,6 +194,30 @@ public interface IValidationSupport {
 	}
 
 	/**
+	 * Fetch a code system by URL and version.
+	 * <p>
+	 * This is the form callers should use: the version travels as its own parameter, so no layer has to
+	 * remember to split a packed <code>url|version</code> canonical, and none can silently drop the
+	 * version by forgetting to. The default implementation packs the version back into the URL and calls
+	 * {@link #fetchCodeSystem(String)}, so an implementation which overrides only that method keeps
+	 * working unchanged. An implementation which can resolve a specific version should override this
+	 * method, and have {@link #fetchCodeSystem(String)} delegate to it.
+	 * </p>
+	 *
+	 * @param theSystem  The code system URL, without a version, e.g. "<code>http://loinc.org</code>"
+	 * @param theVersion The code system version, e.g. "<code>2.78</code>", or <code>null</code> for whichever version is current
+	 * @return The CodeSystem, or <code>null</code> if this module cannot supply it
+	 * @throws ca.uhn.fhir.rest.server.exceptions.InvalidRequestException If the URL already carries a version
+	 *                                                                 which differs from the version given
+	 * @since 8.14.0
+	 */
+	// Created by Claude Opus 5
+	@Nullable
+	default IBaseResource fetchCodeSystem(@Nonnull String theSystem, @Nullable String theVersion) {
+		return fetchCodeSystem(UrlUtil.toCanonicalUrl(theSystem, theVersion));
+	}
+
+	/**
 	 * Loads a resource needed by the validation (a StructureDefinition, or a
 	 * ValueSet)
 	 *
@@ -239,6 +263,31 @@ public interface IValidationSupport {
 	}
 
 	/**
+	 * Loads a resource needed by the validation, by URL and version.
+	 * <p>
+	 * This is the form callers should use: the version travels as its own parameter, so no layer has to
+	 * remember to split a packed <code>url|version</code> canonical, and none can silently drop the version
+	 * by forgetting to. The default implementation packs the version back into the URL and calls
+	 * {@link #fetchResource(Class, String)}, so an implementation which overrides only that method keeps
+	 * working unchanged.
+	 * </p>
+	 *
+	 * @param theClass   The type of the resource to load, or <code>null</code> to return any resource with the given canonical URI
+	 * @param theUri     The resource URL, without a version, e.g. "<code>http://example.org/ValueSet/foo</code>"
+	 * @param theVersion The resource version, e.g. "<code>1.0.0</code>", or <code>null</code> for whichever version is current
+	 * @return Returns the resource, or <code>null</code> if no resource with the given URI can be found
+	 * @throws ca.uhn.fhir.rest.server.exceptions.InvalidRequestException If the URL already carries a version
+	 *                                                                 which differs from the version given
+	 * @since 8.14.0
+	 */
+	// Created by Claude Opus 5
+	@Nullable
+	default <T extends IBaseResource> T fetchResource(
+			@Nullable Class<T> theClass, @Nonnull String theUri, @Nullable String theVersion) {
+		return fetchResource(theClass, UrlUtil.toCanonicalUrl(theUri, theVersion));
+	}
+
+	/**
 	 * Fetch the given StructureDefinition by URL, or returns null if one can't be found for the given URL
 	 *
 	 * @param theUrl The structure definition, as a canonical URL which may carry a version, e.g. "<code>http://example.org/StructureDefinition/foo|1.0.0</code>"
@@ -246,6 +295,27 @@ public interface IValidationSupport {
 	@Nullable
 	default IBaseResource fetchStructureDefinition(String theUrl) {
 		return null;
+	}
+
+	/**
+	 * Fetch the given StructureDefinition by URL and version, or returns null if one can't be found.
+	 * <p>
+	 * This is the form callers should use, for the reason given on {@link #fetchResource(Class, String, String)}.
+	 * The default implementation packs the version back into the URL and calls
+	 * {@link #fetchStructureDefinition(String)}.
+	 * </p>
+	 *
+	 * @param theUrl     The structure definition URL, without a version, e.g. "<code>http://example.org/StructureDefinition/foo</code>"
+	 * @param theVersion The structure definition version, e.g. "<code>1.0.0</code>", or <code>null</code> for whichever version is current
+	 * @return The StructureDefinition, or <code>null</code> if this module cannot supply it
+	 * @throws ca.uhn.fhir.rest.server.exceptions.InvalidRequestException If the URL already carries a version
+	 *                                                                 which differs from the version given
+	 * @since 8.14.0
+	 */
+	// Created by Claude Opus 5
+	@Nullable
+	default IBaseResource fetchStructureDefinition(@Nonnull String theUrl, @Nullable String theVersion) {
+		return fetchStructureDefinition(UrlUtil.toCanonicalUrl(theUrl, theVersion));
 	}
 
 	/**
@@ -260,6 +330,43 @@ public interface IValidationSupport {
 	 */
 	default boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
 		return false;
+	}
+
+	/**
+	 * Returns <code>true</code> if codes in the given code system version can be validated by this
+	 * validation support module.
+	 * <p>
+	 * This is the form callers should use, and the one a validation support chain needs in order to
+	 * pick the module holding the version that was asked for rather than the first module holding the
+	 * system. The default implementation calls {@link #isCodeSystemSupported(ValidationSupportContext, String)}
+	 * with the version packed into the URL, and if that answers <code>false</code>, again with the URL on its
+	 * own, so an implementation which overrides only that method and recognises only the plain URL keeps
+	 * working unchanged. An implementation which holds specific versions of a code system should override
+	 * this method and answer <code>false</code> for a version it does not hold.
+	 * </p>
+	 *
+	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
+	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
+	 * @param theSystem                   The code system URL, without a version, e.g. "<code>http://loinc.org</code>"
+	 * @param theVersion                  The code system version, e.g. "<code>2.78</code>", or <code>null</code> for whichever version is current
+	 * @return Returns <code>true</code> if codes in the given code system version can be validated
+	 * @throws ca.uhn.fhir.rest.server.exceptions.InvalidRequestException If the URL already carries a version
+	 *                                                                 which differs from the version given
+	 * @since 8.14.0
+	 */
+	// Created by Claude Opus 5
+	default boolean isCodeSystemSupported(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theSystem,
+			@Nullable String theVersion) {
+		String canonicalUrl = UrlUtil.toCanonicalUrl(theSystem, theVersion);
+		if (isCodeSystemSupported(theValidationSupportContext, canonicalUrl)) {
+			return true;
+		}
+		String url = UrlUtil.parseCanonicalUrl(theSystem).url();
+		return canonicalUrl != null
+				&& !canonicalUrl.equals(url)
+				&& isCodeSystemSupported(theValidationSupportContext, url);
 	}
 
 	/**
@@ -279,6 +386,27 @@ public interface IValidationSupport {
 	@Nullable
 	default IBaseResource fetchValueSet(String theValueSetUrl) {
 		return null;
+	}
+
+	/**
+	 * Fetch the given ValueSet by URL and version, or returns null if one can't be found.
+	 * <p>
+	 * This is the form callers should use, for the reason given on {@link #fetchResource(Class, String, String)}.
+	 * The default implementation packs the version back into the URL and calls
+	 * {@link #fetchValueSet(String)}.
+	 * </p>
+	 *
+	 * @param theValueSetUrl The value set URL, without a version, e.g. "<code>http://example.org/ValueSet/foo</code>"
+	 * @param theVersion     The value set version, e.g. "<code>1.0.0</code>", or <code>null</code> for whichever version is current
+	 * @return The ValueSet, or <code>null</code> if this module cannot supply it
+	 * @throws ca.uhn.fhir.rest.server.exceptions.InvalidRequestException If the URL already carries a version
+	 *                                                                 which differs from the version given
+	 * @since 8.14.0
+	 */
+	// Created by Claude Opus 5
+	@Nullable
+	default IBaseResource fetchValueSet(@Nonnull String theValueSetUrl, @Nullable String theVersion) {
+		return fetchValueSet(UrlUtil.toCanonicalUrl(theValueSetUrl, theVersion));
 	}
 
 	/**
@@ -308,7 +436,12 @@ public interface IValidationSupport {
 	 * @param theCode                     The code, e.g. "<code>1234-5</code>"
 	 * @param theDisplay                  The display name, if it should also be validated
 	 * @return Returns a validation result object
+	 * @deprecated Use {@link #validateCode(ValidationSupportContext, ConceptValidationOptions, ValidateCodeRequest)},
+	 * which names the code system version as its own parameter instead of leaving it packed into
+	 * {@literal theCodeSystem}. Implementations may still override this form: the version-aware one
+	 * delegates to it by default.
 	 */
+	@Deprecated(since = "8.14.0")
 	@Nullable
 	default CodeValidationResult validateCode(
 			ValidationSupportContext theValidationSupportContext,
@@ -449,6 +582,34 @@ public interface IValidationSupport {
 	 */
 	default boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
 		return false;
+	}
+
+	/**
+	 * Returns <code>true</code> if the given ValueSet version can be validated by this validation support
+	 * module.
+	 * <p>
+	 * This is the form callers should use, and the one a validation support chain needs in order to
+	 * pick the module holding the version that was asked for rather than the first module holding the
+	 * ValueSet. The default implementation packs the version into the URL and calls
+	 * {@link #isValueSetSupported(ValidationSupportContext, String)}, so an implementation which
+	 * overrides only that method keeps working unchanged.
+	 * </p>
+	 *
+	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
+	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
+	 * @param theValueSetUrl              The ValueSet URL, without a version
+	 * @param theVersion                  The ValueSet version, or <code>null</code> for whichever version is current
+	 * @return Returns <code>true</code> if the given ValueSet version can be validated
+	 * @throws ca.uhn.fhir.rest.server.exceptions.InvalidRequestException If the URL already carries a version
+	 *                                                                 which differs from the version given
+	 * @since 8.14.0
+	 */
+	// Created by Claude Opus 5
+	default boolean isValueSetSupported(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theValueSetUrl,
+			@Nullable String theVersion) {
+		return isValueSetSupported(theValidationSupportContext, UrlUtil.toCanonicalUrl(theValueSetUrl, theVersion));
 	}
 
 	/**

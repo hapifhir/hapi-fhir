@@ -200,8 +200,7 @@ public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Tes
 
 		// execute
 		List<String> errors = getValidationErrors(procedure);
-		// TODO: there is currently some duplication in the errors returned. This needs to be investigated and fixed.
-		// assertThat(errors).hasSize(1);
+		assertThat(errors).hasSize(1);
 
 		// verify
 		// note that we're not selecting an explicit versions (using latest) so the message verification does not include it.
@@ -328,12 +327,15 @@ public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Tes
 
 	/**
 	 * Registers the response the CodeSystem $validate-code is expected to be answered with. Passing a version
-	 * states that the check is expected to name it; the provider has no response for any other version, so a
-	 * check which names the wrong one, or none, fails the test.
+	 * states that the check is expected to name it, and the terminology server then holds the CodeSystem at
+	 * that version; the provider has no response for any other version, so a check which names the wrong one,
+	 * or none, fails the test.
 	 */
 	// Created by Claude Opus 5
 	private void setupCodeSystemValidateCode(String theUrl, String theCodeSystemVersion, String theCode, String theTerminologyResponseFile) {
-		CodeSystem codeSystem = myCodeSystemProvider.addTerminologyResource(theUrl);
+		CodeSystem codeSystem = theCodeSystemVersion != null
+			? myCodeSystemProvider.addTerminologyResource(theUrl, theCodeSystemVersion)
+			: myCodeSystemProvider.addTerminologyResource(theUrl);
 		myCodeSystemProvider.addTerminologyResponse(OPERATION_VALIDATE_CODE, codeSystem.getUrl(), theCodeSystemVersion, theCode, ourCtx, theTerminologyResponseFile);
 	}
 

@@ -30,6 +30,7 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -262,7 +263,11 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 
 	@Override
 	public IBaseResource fetchStructureDefinition(String theUrl) {
-		String url = theUrl;
+		// The spec ships exactly one definition of each StructureDefinition, so a named version cannot
+		// select between them and must not make the lookup fail. fetchCodeSystemOrValueSet ignores the
+		// version for hl7.org URLs for the same reason, and every StructureDefinition here is one.
+		// Created by Claude Opus 5
+		String url = UrlUtil.parseCanonicalUrl(theUrl).url();
 		if (!url.startsWith(IValidationSupport.URL_PREFIX_STRUCTURE_DEFINITION)) {
 			if (url.indexOf('/') == -1) {
 				url = IValidationSupport.URL_PREFIX_STRUCTURE_DEFINITION + url;

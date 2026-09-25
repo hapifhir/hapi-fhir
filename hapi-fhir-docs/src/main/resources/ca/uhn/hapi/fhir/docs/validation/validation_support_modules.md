@@ -14,13 +14,14 @@ There are a several implementations of the [IValidationSupport](/hapi-fhir/apido
 
 [JavaDoc](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/support/ValidationSupportChain.html) / [Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-validation/src/main/java/org/hl7/fhir/common/hapi/validation/support/ValidationSupportChain.java)
 
-This module can be used to combine multiple implementations together so that for every request, each support class instance in the chain is tried in sequence. Note that nearly all methods in the [IValidationSupport](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/context/support/IValidationSupport.html) interface are permitted to return `null` if they are not able to service a particular method call. So for example, if a call to the [`validateCode`](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/context/support/IValidationSupport.html#validateCode(ca.uhn.fhir.context.support.ValidationSupportContext,ca.uhn.fhir.context.support.ConceptValidationOptions,java.lang.String,java.lang.String,java.lang.String,java.lang.String)) method is made, the validator will try each module in the chain until one of them returns a non-null response.
+This module can be used to combine multiple implementations together so that for every request, each support class instance in the chain is tried in sequence. Note that nearly all methods in the [IValidationSupport](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/context/support/IValidationSupport.html) interface are permitted to return `null` if they are not able to service a particular method call. So for example, if a call to the [`validateCode`](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/context/support/IValidationSupport.html#validateCode(ca.uhn.fhir.context.support.ValidationSupportContext,ca.uhn.fhir.context.support.ConceptValidationOptions,ca.uhn.fhir.context.support.ValidateCodeRequest)) method is made, the validator will try each module in the chain until one of them returns a non-null response.
 
 The following chaining logic is used:
 
 * Calls to `fetchAll...` methods such as `fetchAllConformanceResources()` and `fetchAllStructureDefinitions()` will call every method in the chain in order, and aggregate the results into a single list to return.
-* Calls to fetch or validate codes, such as `validateCode(...)` and `lookupCode(...)` will first test each module in the chain using the`isCodeSystemSupported(...)` or `isValueSetSupported(...)` methods (depending on whether a ValueSet URL is present in the method parameters) and will invoke any methods in the chain which return that they can handle the given CodeSystem/ValueSet URL. The first non-null value returned by a method in the chain that can support the URL will be returned to the caller.
-* A call to validate a code may name a code system version. Support is still tested using the code system URL on its own, without the version, so a module which handles the URL takes part in the chain either way. A module which does not override the `validateCode(...)` method that takes a `ValidateCodeRequest` answers from whichever version it treats as current, because the default implementation of that method drops the version and calls the older signature.
+* Calls to fetch or validate codes, such as `validateCode(...)` and `lookupCode(...)`, will first test each module in the chain using the `isCodeSystemSupported(...)` or `isValueSetSupported(...)` methods (depending on whether a ValueSet URL is present in the method parameters), and will invoke any methods in the chain which return that they can handle the given CodeSystem/ValueSet. The first non-null value returned by a method in the chain that can support it will be returned to the caller.
+* When a call names a code system version, the chain passes it to `isCodeSystemSupported(...)` as its own argument, so only a module that can answer for that version is used. `PrePopulatedValidationSupport`, `InMemoryTerminologyServerValidationSupport`, `RemoteTerminologyServiceValidationSupport` and the JPA server's terminology service answer only for a version they hold. A CodeSystem stored without a version does not answer for a named version. `CommonCodeSystemsTerminologyService` ships a single definition of each code system it knows, so it answers for any version. If the code system is known but no module holds the named version, the result is the error `A definition for CodeSystem '[url]' version '[version]' could not be found, so the code cannot be validated`, as the HL7 validator reports it.
+* A custom module which holds specific versions of a code system should override `isCodeSystemSupported(...)` and `validateCode(...)` in the forms that take the version. A module which overrides only the older forms keeps working: it is asked with `url|version` and then with the plain URL, and it answers from whichever version it treats as current.
 * All other methods will invoke the method in the chain in order, and will return immediately as soon as a non-null value is returned.
 
 The following caching logic is used if caching is enabled using `CacheConfiguration`. You can use `CacheConfiguration.disabled()` if you want to disable caching.
@@ -158,10 +159,12 @@ This module validates codes using a remote FHIR-based terminology server.
 
 This module will invoke the following operations on the remote terminology server:
 
-* **GET [base]/CodeSystem?url=[url]** &ndash; Tests whether a given CodeSystem is supported on the server 
-* **GET [base]/ValueSet?url=[url]** &ndash; Tests whether a given ValueSet is supported on the server 
+* **GET [base]/CodeSystem?url=[url]&version=[version]** &ndash; Tests whether a given CodeSystem is supported on the server 
+* **GET [base]/ValueSet?url=[url]&version=[version]** &ndash; Tests whether a given ValueSet is supported on the server 
 * **POST [base]/CodeSystem/$validate-code** &ndash; Validate codes in fields where no specific ValueSet is bound 
 * **POST [base]/ValueSet/$validate-code** &ndash; Validate codes in fields where a specific ValueSet is bound 
+
+The `version` search parameter is sent only when the caller names a version.
 
 ## Inferring the Code System
 

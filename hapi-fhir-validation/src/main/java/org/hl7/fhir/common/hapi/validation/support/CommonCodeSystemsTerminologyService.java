@@ -455,6 +455,21 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		return normalized;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This module ships exactly one definition of each code system it knows, so it answers for whatever
+	 * version is asked for. That is only safe because it stores no versioned content: a module which does
+	 * must answer truthfully, or chain order decides which version a code is validated against.
+	 * </p>
+	 */
+	// Created by Claude Opus 5
+	@Override
+	@Nullable
+	public IBaseResource fetchCodeSystem(@Nonnull String theSystem, @Nullable String theVersion) {
+		return fetchCodeSystem(theSystem);
+	}
+
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
 		if (theSystem == null) {
@@ -472,6 +487,21 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		return false;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Version-insensitive, for the reason given on {@link #fetchCodeSystem(String, String)}.
+	 * </p>
+	 */
+	// Created by Claude Opus 5
+	@Override
+	public boolean isCodeSystemSupported(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theSystem,
+			@Nullable String theVersion) {
+		return isCodeSystemSupported(theValidationSupportContext, theSystem);
+	}
+
 	@Override
 	public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
 
@@ -486,6 +516,21 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		}
 
 		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Version-insensitive, for the reason given on {@link #fetchCodeSystem(String, String)}.
+	 * </p>
+	 */
+	// Created by Claude Opus 5
+	@Override
+	public boolean isValueSetSupported(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theValueSetUrl,
+			@Nullable String theVersion) {
+		return isValueSetSupported(theValidationSupportContext, theValueSetUrl);
 	}
 
 	@Override

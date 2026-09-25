@@ -51,4 +51,32 @@ public class PrePopulatedValidationSupportTest extends BaseValidationTestWithInl
 			assertThat(mySvc.fetchBinary(entry.getKey())).containsExactly(entry.getValue());
 		}
 	}
+
+	/**
+	 * A named version which is not stored is not answered by another copy of the system - neither one stored
+	 * without a version nor one at another version - as in the HL7 validator.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	public void fetchCodeSystem_namedVersionNotStored_isNotAnsweredByAnotherCopy() {
+		// Setup
+		CodeSystem unversioned = new CodeSystem();
+		unversioned.setUrl("http://cs");
+		PrePopulatedValidationSupport onlyUnversioned = new PrePopulatedValidationSupport(FhirContext.forR4Cached());
+		onlyUnversioned.addCodeSystem(unversioned);
+
+		CodeSystem versioned = new CodeSystem();
+		versioned.setUrl("http://cs");
+		versioned.setVersion("1.0.0");
+		mySvc.addCodeSystem(versioned);
+		mySvc.addCodeSystem(unversioned);
+
+		// Test & Verify
+		assertThat(onlyUnversioned.fetchCodeSystem("http://cs", "2.0.0")).isNull();
+		assertThat(onlyUnversioned.isCodeSystemSupported(null, "http://cs", "2.0.0")).isFalse();
+		assertThat(onlyUnversioned.fetchCodeSystem("http://cs", null)).isSameAs(unversioned);
+		assertThat(mySvc.fetchCodeSystem("http://cs", "1.0.0")).isSameAs(versioned);
+		assertThat(mySvc.fetchCodeSystem("http://cs", "2.0.0")).isNull();
+		assertThat(mySvc.isCodeSystemSupported(null, "http://cs", "2.0.0")).isFalse();
+	}
 }

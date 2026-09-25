@@ -33,6 +33,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.contains;
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -543,13 +544,16 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			ValidationSupportContext theValidationSupportContext, @Nonnull LookupCodeRequest theLookupCodeRequest) {
 		final String code = theLookupCodeRequest.getCode();
 		final String system = theLookupCodeRequest.getSystem();
+		// The version is named on the request where the caller could name it, and otherwise can only have
+		// arrived packed into the system as "url|version"
+		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(system);
+		String codeSystemVersion = defaultIfBlank(
+				theLookupCodeRequest.getVersion(), codeSystem.versionId().orElse(null));
 		CodeValidationResult codeValidationResult = validateCode(
 				theValidationSupportContext,
 				new ConceptValidationOptions(),
-				system,
-				code,
-				theLookupCodeRequest.getDisplayLanguage(),
-				null);
+				new ValidateCodeRequest(
+						codeSystem.url(), codeSystemVersion, code, theLookupCodeRequest.getDisplayLanguage(), null));
 		if (codeValidationResult == null) {
 			return null;
 		}
@@ -577,6 +581,21 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		}
 
 		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Answers only for the version named: the code system is fetched through the chain at that version.
+	 * </p>
+	 */
+	// Created by Claude Opus 5
+	@Override
+	public boolean isCodeSystemSupported(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theSystem,
+			@Nullable String theVersion) {
+		return isCodeSystemSupported(theValidationSupportContext, UrlUtil.toCanonicalUrl(theSystem, theVersion));
 	}
 
 	@Override
@@ -831,14 +850,21 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			if (includeOrExcludeSystemResource == null || isIncludeCodeSystemIgnored) {
 
 				if (theWantCode != null) {
+					// The support check and the lookup both name the version the include asks for, so a code is not
+					// accepted from another installed version of the code system
+					// Created by Claude Opus 5
 					if (theValidationSupportContext
 							.getRootValidationSupport()
-							.isCodeSystemSupported(theValidationSupportContext, includeOrExcludeConceptSystemUrl)) {
+							.isCodeSystemSupported(
+									theValidationSupportContext,
+									includeOrExcludeConceptSystemUrl,
+									includeOrExcludeConceptSystemVersion)) {
 						LookupCodeResult lookup = theValidationSupportContext
 								.getRootValidationSupport()
 								.lookupCode(
 										theValidationSupportContext,
-										new LookupCodeRequest(includeOrExcludeConceptSystemUrl, theWantCode));
+										new LookupCodeRequest(includeOrExcludeConceptSystemUrl, theWantCode)
+												.setVersion(includeOrExcludeConceptSystemVersion));
 						if (lookup != null) {
 							ableToHandleCode = true;
 							if (lookup.isFound()) {

@@ -176,6 +176,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -285,6 +286,21 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		}
 		TermCodeSystemVersionDetails cs = getCurrentCodeSystemVersion(theSystem);
 		return cs != null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Answers only for the version named, since several versions of one code system can be stored.
+	 * </p>
+	 */
+	// Created by Claude Opus 5
+	@Override
+	public boolean isCodeSystemSupported(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theSystem,
+			@Nullable String theVersion) {
+		return isCodeSystemSupported(theValidationSupportContext, UrlUtil.toCanonicalUrl(theSystem, theVersion));
 	}
 
 	@Override
@@ -2557,7 +2573,17 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		return myTxTemplate.execute(t -> {
 			final String theSystem = theLookupCodeRequest.getSystem();
 			final String theCode = theLookupCodeRequest.getCode();
-			Optional<TermConcept> codeOpt = findCode(theSystem, theCode);
+			// The version is named on the request where the caller could name it, and otherwise can only have
+			// arrived packed into the system as "url|version"
+			String codeSystemIdentifier = theSystem;
+			if (isNotBlank(theSystem)) {
+				UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(theSystem);
+				String codeSystemVersion = defaultIfBlank(
+						theLookupCodeRequest.getVersion(),
+						codeSystem.versionId().orElse(null));
+				codeSystemIdentifier = UrlUtil.toCanonicalUrl(codeSystem.url(), codeSystemVersion);
+			}
+			Optional<TermConcept> codeOpt = findCode(codeSystemIdentifier, theCode);
 			if (codeOpt.isPresent()) {
 				TermConcept code = codeOpt.get();
 
