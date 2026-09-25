@@ -263,8 +263,9 @@ public class BulkExportJobParametersValidatorTest {
 		// validate
 		assertNotNull(errors);
 		assertThat(errors)
-			.isNotEmpty()
-			.contains("Unsupported output format; no known converter available for mime-type json");
+			.isNotEmpty();
+		assertThat(errors)
+			.anySatisfy(msg -> msg.contains("Unsupported output format; no known converter available for mime-type json"));
 	}
 
 	@ParameterizedTest
