@@ -2381,35 +2381,40 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				if (bounds.isPresent()) {
 					String boundsType = toRootTypeName(bounds.get());
 					if ("Period".equals(boundsType)) {
-						DateStringWrapper start =
+						DateStringWrapper periodStart =
 								extractValuesAsFhirDates(myPeriodStartValueChild, bounds.get()).stream()
+										.filter(Objects::nonNull)
+										.filter(it -> it.getValue() != null)
 										.map(it -> new DateStringWrapper(it.getValue(), it.getValueAsString()))
 										.findFirst()
 										.orElse(null);
-						DateStringWrapper end = extractValuesAsFhirDates(myPeriodEndValueChild, bounds.get()).stream()
-								.map(it -> new DateStringWrapper(it.getValue(), it.getValueAsString()))
-								.findFirst()
-								.orElse(null);
+						DateStringWrapper periodEnd =
+								extractValuesAsFhirDates(myPeriodEndValueChild, bounds.get()).stream()
+										.filter(Objects::nonNull)
+										.filter(it -> it.getValue() != null)
+										.map(it -> new DateStringWrapper(it.getValue(), it.getValueAsString()))
+										.findFirst()
+										.orElse(null);
 
 						// ONLY If we have no event dates, normalize the Period for indexing.
 						// This is to prevent unbounded Periods turning into a catch-all and returning
 						// search results with events outside a searched Period.
 						if (eventDatesSorted.isEmpty()) {
 							PeriodAsDates periodAsDates = normalizePeriodDates(
-									start,
-									start != null ? start.getDateValueAsString() : null,
-									end,
-									end != null ? end.getDateValueAsString() : null);
+									periodStart,
+									periodStart != null ? periodStart.getDateValueAsString() : null,
+									periodEnd,
+									periodEnd != null ? periodEnd.getDateValueAsString() : null);
 							if (periodAsDates != null) {
 								startDates.add(periodAsDates.start);
 								endDates.add(periodAsDates.end);
 							}
 						} else {
-							if (start != null) {
-								startDates.add(start);
+							if (periodStart != null) {
+								startDates.add(periodStart);
 							}
-							if (end != null) {
-								endDates.add(end);
+							if (periodEnd != null) {
+								endDates.add(periodEnd);
 							}
 						}
 					}
