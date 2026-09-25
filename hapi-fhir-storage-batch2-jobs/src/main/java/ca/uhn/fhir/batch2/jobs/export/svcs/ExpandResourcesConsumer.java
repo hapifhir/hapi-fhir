@@ -176,7 +176,7 @@ public class ExpandResourcesConsumer implements Consumer<List<IBaseResource>> {
 			// but it is possible if a job is in progress, but the server
 			// is stopped and restarted without the requisite interceptors
 			// available.
-			throw new JobExecutionFailedException(Msg.code(3048) + "No conversion utility for mimetype "
+			throw new JobExecutionFailedException(Msg.code(3051) + "No conversion utility for mimetype "
 					+ myStepExecutionDetails.getParameters().getOutputFormat());
 		}
 
@@ -185,7 +185,7 @@ public class ExpandResourcesConsumer implements Consumer<List<IBaseResource>> {
 		if (!isValid(files)) {
 			// conversion utility failed to provide output
 			// expected for bulk export job
-			throw new JobExecutionFailedException(Msg.code(3049)
+			throw new JobExecutionFailedException(Msg.code(3052)
 					+ String.format(
 							"Output format %s not supported",
 							myStepExecutionDetails.getParameters().getOutputFormat()));
