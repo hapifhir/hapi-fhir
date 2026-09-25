@@ -6,13 +6,10 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.method.ResponsePage;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.HttpTestRequest;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Lists;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleLinkComponent;
@@ -24,7 +21,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,9 +45,6 @@ public class SearchBundleProviderWithNoSizeR4Test {
 		 .registerProvider(new DummyPatientResourceProvider())
 		 .withPagingProvider(new FifoMemoryPagingProvider(100))
 		 .setDefaultResponseEncoding(EncodingEnum.XML);
-
-	@RegisterExtension
-	private HttpClientExtension ourClient = new HttpClientExtension();
 
 	@BeforeEach
 	public void before() {
@@ -82,66 +75,41 @@ public class SearchBundleProviderWithNoSizeR4Test {
 				}
 			});
 
-		HttpGet httpGet;
-		CloseableHttpResponse status = null;
+		String responseContent;
 		BundleLinkComponent linkNext;
 
-		try {
-			httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_format=json");
-			status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals("searchAll", ourLastMethod);
-			respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
+		responseContent = ourServer.fhirRequest("/Patient?_format=json").get().assertStatus(200).getBody();
+		ourLog.info(responseContent);
+		assertEquals("searchAll", ourLastMethod);
+		respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 
-			assertThat(respBundle.getEntry()).hasSize(10);
-			assertEquals("Patient/0", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
-			linkNext = respBundle.getLink("next");
-			assertNotNull(linkNext);
-
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
-		}
+		assertThat(respBundle.getEntry()).hasSize(10);
+		assertEquals("Patient/0", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		linkNext = respBundle.getLink("next");
+		assertNotNull(linkNext);
 
 
 		when(ourLastBundleProvider.size()).thenReturn(25);
 
-		try {
-			httpGet = new HttpGet(linkNext.getUrl());
-			status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals("searchAll", ourLastMethod);
-			respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
+		responseContent = HttpTestRequest.to(ourServer.getHttpClient(), ourServer.getFhirContext(), linkNext.getUrl()).get().assertStatus(200).getBody();
+		ourLog.info(responseContent);
+		assertEquals("searchAll", ourLastMethod);
+		respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 
-			assertThat(respBundle.getEntry()).hasSize(10);
-			assertEquals("Patient/10", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
-			linkNext = respBundle.getLink("next");
-			assertNotNull(linkNext);
+		assertThat(respBundle.getEntry()).hasSize(10);
+		assertEquals("Patient/10", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		linkNext = respBundle.getLink("next");
+		assertNotNull(linkNext);
 
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
-		}
+		responseContent = HttpTestRequest.to(ourServer.getHttpClient(), ourServer.getFhirContext(), linkNext.getUrl()).get().assertStatus(200).getBody();
+		ourLog.info(responseContent);
+		assertEquals("searchAll", ourLastMethod);
+		respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 
-		try {
-			httpGet = new HttpGet(linkNext.getUrl());
-			status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals("searchAll", ourLastMethod);
-			respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
-
-			assertThat(respBundle.getEntry()).hasSize(5);
-			assertEquals("Patient/20", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
-			linkNext = respBundle.getLink("next");
-			assertNull(linkNext);
-
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
-		}
+		assertThat(respBundle.getEntry()).hasSize(5);
+		assertEquals("Patient/20", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		linkNext = respBundle.getLink("next");
+		assertNull(linkNext);
 
 	}
 

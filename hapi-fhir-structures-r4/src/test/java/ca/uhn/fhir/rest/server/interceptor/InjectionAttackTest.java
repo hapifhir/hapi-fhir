@@ -10,14 +10,10 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
-import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterAll;
@@ -41,151 +37,138 @@ public class InjectionAttackTest {
 		 .registerInterceptor(new ResponseHighlighterInterceptor())
 		 .setDefaultResponseEncoding(EncodingEnum.JSON);
 
-	@RegisterExtension
-	private HttpClientExtension ourClient = new HttpClientExtension();
-
 	@Test
 	public void testPreventHtmlInjectionViaInvalidContentType() throws Exception {
-		String requestUrl = ourServer.getBaseUrl() + "/Patient/123";
+		String requestPath = "/Patient/123";
 
 		// XML HTML
-		HttpGet httpGet = new HttpGet(requestUrl);
-		httpGet.addHeader(Constants.HEADER_ACCEPT, "application/<script>");
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(responseContent);
+		String responseContent = ourServer.fhirRequest(requestPath)
+			.withHeader(Constants.HEADER_ACCEPT, "application/<script>")
+			.get()
+			.assertStatus(200)
+			.getBody();
+		ourLog.info(responseContent);
 
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertThat(responseContent).doesNotContain("<script>");
-		}
+		assertThat(responseContent).doesNotContain("<script>");
 	}
 
 	@Test
 	public void testPreventHtmlInjectionViaInvalidParameterName() throws Exception {
-		String requestUrl = ourServer.getBaseUrl() +
+		String requestPath =
 			"/Patient?a" +
 			UrlUtil.escapeUrlParam("<script>") +
 			"=123";
 
 		// XML HTML
-		HttpGet httpGet = new HttpGet(requestUrl);
-		httpGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML + ", " + Constants.CT_FHIR_XML_NEW);
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(responseContent);
+		HttpTestResponse response = ourServer.fhirRequest(requestPath)
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML + ", " + Constants.CT_FHIR_XML_NEW)
+			.get()
+			.assertStatus(400);
+		String responseContent = response.getBody();
+		ourLog.info(responseContent);
 
-			assertEquals(400, status.getStatusLine().getStatusCode());
-			assertThat(responseContent).doesNotContain("<script>");
-			assertEquals("text/html", status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim());
-		}
+		assertThat(responseContent).doesNotContain("<script>");
+		assertEquals("text/html", response.getContentType());
 
 		// JSON HTML
-		httpGet = new HttpGet(requestUrl);
-		httpGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML + ", " + Constants.CT_FHIR_JSON_NEW);
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(responseContent);
+		response = ourServer.fhirRequest(requestPath)
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML + ", " + Constants.CT_FHIR_JSON_NEW)
+			.get()
+			.assertStatus(400);
+		responseContent = response.getBody();
+		ourLog.info(responseContent);
 
-			assertEquals(400, status.getStatusLine().getStatusCode());
-			assertThat(responseContent).doesNotContain("<script>");
-			assertEquals("text/html", status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim());
-		}
+		assertThat(responseContent).doesNotContain("<script>");
+		assertEquals("text/html", response.getContentType());
 
 		// XML HTML
-		httpGet = new HttpGet(requestUrl);
-		httpGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML_NEW);
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(responseContent);
+		response = ourServer.fhirRequest(requestPath)
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML_NEW)
+			.get()
+			.assertStatus(400);
+		responseContent = response.getBody();
+		ourLog.info(responseContent);
 
-			assertEquals(400, status.getStatusLine().getStatusCode());
-			assertThat(responseContent).doesNotContain("<script>");
-			assertEquals(Constants.CT_FHIR_XML_NEW, status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim());
-		}
+		assertThat(responseContent).doesNotContain("<script>");
+		assertEquals(Constants.CT_FHIR_XML_NEW, response.getContentType());
 
 		// JSON Plain
-		httpGet = new HttpGet(requestUrl);
-		httpGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(responseContent);
+		response = ourServer.fhirRequest(requestPath)
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
+			.get()
+			.assertStatus(400);
+		responseContent = response.getBody();
+		ourLog.info(responseContent);
 
-			assertEquals(400, status.getStatusLine().getStatusCode());
-			assertThat(responseContent).doesNotContain("<script>");
-			assertEquals(Constants.CT_FHIR_JSON_NEW, status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim());
-		}
+		assertThat(responseContent).doesNotContain("<script>");
+		assertEquals(Constants.CT_FHIR_JSON_NEW, response.getContentType());
 	}
 
 	@Test
 	public void testPreventHtmlInjectionViaInvalidResourceType() throws Exception {
-		String requestUrl = ourServer.getBaseUrl() +
+		String requestPath =
 			"/AA" +
 			UrlUtil.escapeUrlParam("<script>");
 
 		// XML HTML
-		HttpGet httpGet = new HttpGet(requestUrl);
-		httpGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML + ", " + Constants.CT_FHIR_XML_NEW);
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(responseContent);
+		HttpTestResponse response = ourServer.fhirRequest(requestPath)
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML + ", " + Constants.CT_FHIR_XML_NEW)
+			.get()
+			.assertStatus(404);
+		String responseContent = response.getBody();
+		ourLog.info(responseContent);
 
-			assertEquals(404, status.getStatusLine().getStatusCode());
-			assertThat(responseContent).doesNotContain("<script>");
-			assertEquals("text/html", status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim());
-		}
+		assertThat(responseContent).doesNotContain("<script>");
+		assertEquals("text/html", response.getContentType());
 
 		// JSON HTML
-		httpGet = new HttpGet(requestUrl);
-		httpGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML + ", " + Constants.CT_FHIR_JSON_NEW);
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(responseContent);
+		response = ourServer.fhirRequest(requestPath)
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML + ", " + Constants.CT_FHIR_JSON_NEW)
+			.get()
+			.assertStatus(404);
+		responseContent = response.getBody();
+		ourLog.info(responseContent);
 
-			assertEquals(404, status.getStatusLine().getStatusCode());
-			assertThat(responseContent).doesNotContain("<script>");
-			assertEquals("text/html", status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim());
-		}
+		assertThat(responseContent).doesNotContain("<script>");
+		assertEquals("text/html", response.getContentType());
 
 		// XML HTML
-		httpGet = new HttpGet(requestUrl);
-		httpGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML_NEW);
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(responseContent);
+		response = ourServer.fhirRequest(requestPath)
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML_NEW)
+			.get()
+			.assertStatus(404);
+		responseContent = response.getBody();
+		ourLog.info(responseContent);
 
-			assertEquals(404, status.getStatusLine().getStatusCode());
-			assertThat(responseContent).doesNotContain("<script>");
-			assertEquals(Constants.CT_FHIR_XML_NEW, status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim());
-		}
+		assertThat(responseContent).doesNotContain("<script>");
+		assertEquals(Constants.CT_FHIR_XML_NEW, response.getContentType());
 
 		// JSON Plain
-		httpGet = new HttpGet(requestUrl);
-		httpGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(responseContent);
+		response = ourServer.fhirRequest(requestPath)
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
+			.get()
+			.assertStatus(404);
+		responseContent = response.getBody();
+		ourLog.info(responseContent);
 
-			assertEquals(404, status.getStatusLine().getStatusCode());
-			assertThat(responseContent).doesNotContain("<script>");
-			assertEquals(Constants.CT_FHIR_JSON_NEW, status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim());
-		}
+		assertThat(responseContent).doesNotContain("<script>");
+		assertEquals(Constants.CT_FHIR_JSON_NEW, response.getContentType());
 	}
 
 	@Test
 	public void testPreventHtmlInjectionViaInvalidTokenParamModifier() throws Exception {
-		String requestUrl = ourServer.getBaseUrl() +
+		String requestPath =
 			"/Patient?identifier:" +
 			UrlUtil.escapeUrlParam("<script>") +
 			"=123";
-		HttpGet httpGet = new HttpGet(requestUrl);
-		httpGet.addHeader(Constants.HEADER_ACCEPT, "application/<script>");
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(responseContent);
+		String responseContent = ourServer.fhirRequest(requestPath)
+			.withHeader(Constants.HEADER_ACCEPT, "application/<script>")
+			.get()
+			.assertStatus(200)
+			.getBody();
+		ourLog.info(responseContent);
 
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertThat(responseContent).doesNotContain("<script>");
-		}
+		assertThat(responseContent).doesNotContain("<script>");
 
 	}
 

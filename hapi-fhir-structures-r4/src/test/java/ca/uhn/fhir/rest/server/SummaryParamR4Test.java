@@ -7,13 +7,9 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
@@ -47,9 +43,6 @@ public class SummaryParamR4Test {
 		 .withPagingProvider(new FifoMemoryPagingProvider(100))
 		 .setDefaultResponseEncoding(EncodingEnum.XML);
 
-	@RegisterExtension
-	private HttpClientExtension ourClient = new HttpClientExtension();
-
 	@BeforeEach
 	public void before() {
 		ourLastSummary = null;
@@ -59,7 +52,7 @@ public class SummaryParamR4Test {
 	@Test
 	public void testReadSummaryData() throws Exception {
 		verifyXmlAndJson(
-			ourServer.getBaseUrl() + "/Patient/1?_summary=" + SummaryEnum.DATA.getCode(),
+			"/Patient/1?_summary=" + SummaryEnum.DATA.getCode(),
 			Patient.class,
 			patient -> {
 				String responseContent = ourCtx.newXmlParser().encodeResourceToString(patient);
@@ -76,41 +69,35 @@ public class SummaryParamR4Test {
 
 	@Test
 	public void testReadSummaryText() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_summary=" + SummaryEnum.TEXT.getCode());
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(responseContent);
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/1?_summary=" + SummaryEnum.TEXT.getCode()).get().assertStatus(200);
+		String responseContent = status.getBody();
+		ourLog.info(responseContent);
 
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals(Constants.CT_HTML_WITH_UTF8.replace(" ", "").toLowerCase(), status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf"));
-			assertThat(responseContent).doesNotContain("<Bundle");
-			assertThat(responseContent).doesNotContain("<Medic");
-			assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">THE DIV</div>", responseContent);
-			assertThat(responseContent).doesNotContain("efer");
-			assertEquals(SummaryEnum.TEXT, ourLastSummary);
-		}
+		assertEquals(Constants.CT_HTML_WITH_UTF8.replace(" ", "").toLowerCase(), status.getHeader(Constants.HEADER_CONTENT_TYPE).replace(" ", "").replace("UTF", "utf"));
+		assertThat(responseContent).doesNotContain("<Bundle");
+		assertThat(responseContent).doesNotContain("<Medic");
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">THE DIV</div>", responseContent);
+		assertThat(responseContent).doesNotContain("efer");
+		assertEquals(SummaryEnum.TEXT, ourLastSummary);
 	}
 
 	@Test
 	public void testReadSummaryTextWithMandatory() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/MedicationRequest/1?_summary=" + SummaryEnum.TEXT.getCode());
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(responseContent);
+		HttpTestResponse status = ourServer.fhirRequest("/MedicationRequest/1?_summary=" + SummaryEnum.TEXT.getCode()).get().assertStatus(200);
+		String responseContent = status.getBody();
+		ourLog.info(responseContent);
 
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals(Constants.CT_HTML_WITH_UTF8.replace(" ", "").toLowerCase(), status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf"));
-			assertThat(responseContent).doesNotContain("<Bundle");
-			assertThat(responseContent).doesNotContain("<Patien");
-			assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">TEXT</div>", responseContent);
-			assertThat(responseContent).doesNotContain("family");
-			assertThat(responseContent).doesNotContain("maritalStatus");
-		}
+		assertEquals(Constants.CT_HTML_WITH_UTF8.replace(" ", "").toLowerCase(), status.getHeader(Constants.HEADER_CONTENT_TYPE).replace(" ", "").replace("UTF", "utf"));
+		assertThat(responseContent).doesNotContain("<Bundle");
+		assertThat(responseContent).doesNotContain("<Patien");
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">TEXT</div>", responseContent);
+		assertThat(responseContent).doesNotContain("family");
+		assertThat(responseContent).doesNotContain("maritalStatus");
 	}
 
 	@Test
 	public void testReadSummaryTrue() throws Exception {
-		String url = ourServer.getBaseUrl() + "/Patient/1?_summary=" + SummaryEnum.TRUE.getCode();
+		String url = "/Patient/1?_summary=" + SummaryEnum.TRUE.getCode();
 		verifyXmlAndJson(
 			url,
 			Patient.class,
@@ -129,7 +116,7 @@ public class SummaryParamR4Test {
 
 	@Test
 	public void testSearchSummaryCount() throws Exception {
-		String url = ourServer.getBaseUrl() + "/Patient?_pretty=true&_summary=" + SummaryEnum.COUNT.getCode();
+		String url = "/Patient?_pretty=true&_summary=" + SummaryEnum.COUNT.getCode();
 		verifyXmlAndJson(
 			url,
 			bundle -> {
@@ -146,7 +133,7 @@ public class SummaryParamR4Test {
 
 	@Test
 	public void testSearchSummaryCountAndData() throws Exception {
-		String url = ourServer.getBaseUrl() + "/Patient?_pretty=true&_summary=" + SummaryEnum.COUNT.getCode() + "," + SummaryEnum.DATA.getCode();
+		String url = "/Patient?_pretty=true&_summary=" + SummaryEnum.COUNT.getCode() + "," + SummaryEnum.DATA.getCode();
 		verifyXmlAndJson(
 			url,
 			bundle -> {
@@ -162,7 +149,7 @@ public class SummaryParamR4Test {
 
 	@Test
 	public void testSearchSummaryData() throws Exception {
-		String url = ourServer.getBaseUrl() + "/Patient?_summary=" + SummaryEnum.DATA.getCode();
+		String url = "/Patient?_summary=" + SummaryEnum.DATA.getCode();
 		verifyXmlAndJson(
 			url,
 			bundle -> {
@@ -179,7 +166,7 @@ public class SummaryParamR4Test {
 
 	@Test
 	public void testSearchSummaryFalse() throws Exception {
-		String url = ourServer.getBaseUrl() + "/Patient?_summary=false";
+		String url = "/Patient?_summary=false";
 		verifyXmlAndJson(
 			url,
 			bundle -> {
@@ -195,7 +182,7 @@ public class SummaryParamR4Test {
 
 	@Test
 	public void testSearchSummaryText() throws Exception {
-		String url = ourServer.getBaseUrl() + "/Patient?_summary=" + SummaryEnum.TEXT.getCode();
+		String url = "/Patient?_summary=" + SummaryEnum.TEXT.getCode();
 		verifyXmlAndJson(
 			url,
 			bundle -> {
@@ -212,7 +199,7 @@ public class SummaryParamR4Test {
 
 	@Test
 	public void testSearchSummaryTextWithMandatory() throws Exception {
-		String url = ourServer.getBaseUrl() + "/MedicationRequest?_summary=" + SummaryEnum.TEXT.getCode() + "&_pretty=true";
+		String url = "/MedicationRequest?_summary=" + SummaryEnum.TEXT.getCode() + "&_pretty=true";
 		verifyXmlAndJson(
 			url,
 			bundle -> {
@@ -230,7 +217,7 @@ public class SummaryParamR4Test {
 
 	@Test
 	public void testSearchSummaryTextMulti() throws Exception {
-		String url = ourServer.getBaseUrl() + "/Patient?_query=multi&_summary=" + SummaryEnum.TEXT.getCode();
+		String url = "/Patient?_query=multi&_summary=" + SummaryEnum.TEXT.getCode();
 		verifyXmlAndJson(
 			url,
 			bundle -> {
@@ -247,7 +234,7 @@ public class SummaryParamR4Test {
 
 	@Test
 	public void testSearchSummaryTrue() throws Exception {
-		String url = ourServer.getBaseUrl() + "/Patient?_summary=" + SummaryEnum.TRUE.getCode();
+		String url = "/Patient?_summary=" + SummaryEnum.TRUE.getCode();
 		verifyXmlAndJson(
 			url,
 			bundle -> {
@@ -264,41 +251,31 @@ public class SummaryParamR4Test {
 
 	@Test
 	public void testSearchSummaryWithTextAndOthers() throws Exception {
-		String url = ourServer.getBaseUrl() + "/Patient?_summary=text&_summary=data";
-		try (CloseableHttpResponse status = ourClient.execute(new HttpGet(url))) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(responseContent);
+		String url = "/Patient?_summary=text&_summary=data";
+		String responseContent = ourServer.fhirRequest(url).get().assertStatus(400).getBody();
+		ourLog.info(responseContent);
 
-			assertEquals(400, status.getStatusLine().getStatusCode());
-			assertThat(responseContent).contains("Can not combine _summary=text with other values for _summary");
-		}
+		assertThat(responseContent).contains("Can not combine _summary=text with other values for _summary");
 	}
 
-	private void verifyXmlAndJson(String theUri, Consumer<Bundle> theVerifier) throws IOException {
-		verifyXmlAndJson(theUri, Bundle.class, theVerifier);
+	private void verifyXmlAndJson(String thePath, Consumer<Bundle> theVerifier) throws IOException {
+		verifyXmlAndJson(thePath, Bundle.class, theVerifier);
 	}
 
-	private <T extends IBaseResource> void verifyXmlAndJson(String theUri, Class<T> theType, Consumer<T> theVerifier) throws IOException {
+	private <T extends IBaseResource> void verifyXmlAndJson(String thePath, Class<T> theType, Consumer<T> theVerifier) throws IOException {
 		EncodingEnum encodingEnum;
-		HttpGet httpGet;
 
 		encodingEnum = EncodingEnum.JSON;
-		httpGet = new HttpGet(theUri + "&_pretty=true&_format=" + encodingEnum.getFormatContentType());
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(responseContent);
-			T response = encodingEnum.newParser(ourCtx).parseResource(theType, responseContent);
-			theVerifier.accept(response);
-		}
+		String responseContent = ourServer.fhirRequest(thePath + "&_pretty=true&_format=" + encodingEnum.getFormatContentType()).get().getBody();
+		ourLog.info(responseContent);
+		T response = encodingEnum.newParser(ourCtx).parseResource(theType, responseContent);
+		theVerifier.accept(response);
 
 		encodingEnum = EncodingEnum.XML;
-		httpGet = new HttpGet(theUri + "&_pretty=true&_format=" + encodingEnum.getFormatContentType());
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(responseContent);
-			T response = encodingEnum.newParser(ourCtx).parseResource(theType, responseContent);
-			theVerifier.accept(response);
-		}
+		responseContent = ourServer.fhirRequest(thePath + "&_pretty=true&_format=" + encodingEnum.getFormatContentType()).get().getBody();
+		ourLog.info(responseContent);
+		response = encodingEnum.newParser(ourCtx).parseResource(theType, responseContent);
+		theVerifier.accept(response);
 	}
 
 	public static class DummyMedicationRequestProvider implements IResourceProvider {

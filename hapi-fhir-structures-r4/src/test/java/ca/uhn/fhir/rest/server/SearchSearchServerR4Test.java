@@ -20,21 +20,11 @@ import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.message.BasicNameValuePair;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
@@ -46,9 +36,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -76,9 +64,6 @@ public class SearchSearchServerR4Test {
 		 .withPagingProvider(new FifoMemoryPagingProvider(10).setDefaultPageSize(10))
 		 .setDefaultResponseEncoding(EncodingEnum.XML);
 
-	@RegisterExtension
-	public static HttpClientExtension ourClient = new HttpClientExtension();
-
 	@BeforeEach
   public void before() {
 		ourServer.setServerAddressStrategy(new IncomingRequestAddressStrategy());
@@ -94,13 +79,9 @@ public class SearchSearchServerR4Test {
 
   @Test
   public void testEncodeConvertsReferencesToRelative() throws Exception {
-    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchWithRef");
-    HttpResponse status = ourClient.execute(httpGet);
-    String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
-    IOUtils.closeQuietly(status.getEntity().getContent());
+    String responseContent = ourServer.fhirRequest("/Patient?_query=searchWithRef").get().assertStatus(200).getBody();
     ourLog.info(responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
     Patient patient = (Patient) ourCtx.newXmlParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
     String ref = patient.getManagingOrganization().getReference();
 		assertEquals("Organization/555", ref);
@@ -112,15 +93,10 @@ public class SearchSearchServerR4Test {
   @Test
   public void testGetPagesWithPost() throws Exception {
 
-    HttpPost httpPost = new HttpPost(ourServer.getBaseUrl());
-    List<? extends NameValuePair> parameters = Collections.singletonList(new BasicNameValuePair("_getpages", "AAA"));
-    httpPost.setEntity(new UrlEncodedFormEntity(parameters));
-
-    CloseableHttpResponse status = ourClient.execute(httpPost);
-    String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
-    IOUtils.closeQuietly(status.getEntity().getContent());
+    HttpTestResponse response = ourServer.fhirRequest("").withFormParam("_getpages", "AAA").postForm();
+    String responseContent = response.getBody();
     ourLog.info(responseContent);
-		assertThat(status.getStatusLine().getStatusCode()).isNotEqualTo(400);
+		assertThat(response.getStatusCode()).isNotEqualTo(400);
 		assertThat(responseContent).contains("Search ID &quot;AAA&quot; does not exist and may have expired");
   }
 
@@ -132,14 +108,11 @@ public class SearchSearchServerR4Test {
    */
   @Test
   void testSearchByPostWithParamsOnlyInQueryString() throws Exception {
-    HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/_search?_id=aaa");
-
-    CloseableHttpResponse status = ourClient.execute(httpPost);
-    String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
-    IOUtils.closeQuietly(status.getEntity().getContent());
+    HttpTestResponse response = ourServer.fhirRequest("/Patient/_search?_id=aaa").method("POST");
+    String responseContent = response.getBody();
     ourLog.info(responseContent);
 
-    assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+    assertThat(response.getStatusCode()).isEqualTo(200);
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
     assertThat(bundle.getEntry()).hasSize(1);
 
@@ -149,11 +122,7 @@ public class SearchSearchServerR4Test {
 
   @Test
   public void testOmitEmptyOptionalParam() throws Exception {
-    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id=");
-    HttpResponse status = ourClient.execute(httpGet);
-    String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
-    IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
+    String responseContent = ourServer.fhirRequest("/Patient?_id=").get().assertStatus(200).getBody();
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(1);
 
@@ -164,21 +133,14 @@ public class SearchSearchServerR4Test {
   @Test
   public void testParseEscapedValues() throws Exception {
 
-	  String b = ourServer.getBaseUrl() +
-		  "/Patient?" +
+	  String b = "/Patient?" +
 		  escapeUrlParam("findPatientWithAndList") + '=' + escapeUrlParam("NE\\,NE,NE\\,NE") + '&' +
 		  escapeUrlParam("findPatientWithAndList") + '=' + escapeUrlParam("NE\\\\NE") + '&' +
 		  escapeUrlParam("findPatientWithAndList:exact") + '=' + escapeUrlParam("E\\$E") + '&' +
 		  escapeUrlParam("findPatientWithAndList:exact") + '=' + escapeUrlParam("E\\|E") + '&';
 
-    HttpGet httpGet = new HttpGet(b);
-
-    HttpResponse status = ourClient.execute(httpGet);
-    String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
-    IOUtils.closeQuietly(status.getEntity().getContent());
+    String responseContent = ourServer.fhirRequest(b).get().assertStatus(200).getBody();
     ourLog.info(responseContent);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		assertThat(ourLastAndList.getValuesAsQueryTokens()).hasSize(4);
 		assertThat(ourLastAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(2);
@@ -193,12 +155,7 @@ public class SearchSearchServerR4Test {
 
   @Test
   public void testReturnLinks() throws Exception {
-    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=findWithLinks");
-
-    CloseableHttpResponse status = ourClient.execute(httpGet);
-    String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
-    IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
+    String responseContent = ourServer.fhirRequest("/Patient?_query=findWithLinks").get().assertStatus(200).getBody();
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(10);
 
@@ -214,12 +171,7 @@ public class SearchSearchServerR4Test {
   public void testReturnLinksWithAddressStrategy() throws Exception {
     ourServer.setServerAddressStrategy(new HardcodedServerAddressStrategy("https://blah.com/base"));
 
-    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=findWithLinks");
-
-    CloseableHttpResponse status = ourClient.execute(httpGet);
-    String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
-    IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
+    String responseContent = ourServer.fhirRequest("/Patient?_query=findWithLinks").get().assertStatus(200).getBody();
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 
     ourLog.info(responseContent);
@@ -238,13 +190,7 @@ public class SearchSearchServerR4Test {
      * Load the second page
      */
     String urlPart = linkNext.substring(linkNext.indexOf('?'));
-    String link = ourServer.getBaseUrl() + urlPart;
-    httpGet = new HttpGet(link);
-
-    status = ourClient.execute(httpGet);
-    responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
-    IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
+    responseContent = ourServer.fhirRequest(urlPart).get().assertStatus(200).getBody();
     bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 
     ourLog.info(responseContent);
@@ -259,11 +205,7 @@ public class SearchSearchServerR4Test {
 
   @Test
   public void testSearchById() throws Exception {
-    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id=aaa");
-    HttpResponse status = ourClient.execute(httpGet);
-    String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
-    IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
+    String responseContent = ourServer.fhirRequest("/Patient?_id=aaa").get().assertStatus(200).getBody();
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(1);
 
@@ -289,19 +231,12 @@ public class SearchSearchServerR4Test {
 
   @Test
   public void testSearchByPost() throws Exception {
-    HttpPost filePost = new HttpPost(ourServer.getBaseUrl() + "/Patient/_search");
-
     // add parameters to the post method
-    List<NameValuePair> parameters = new ArrayList<>();
-    parameters.add(new BasicNameValuePair("_id", "aaa"));
-
-    UrlEncodedFormEntity sendentity = new UrlEncodedFormEntity(parameters, "UTF-8");
-    filePost.setEntity(sendentity);
-
-    HttpResponse status = ourClient.execute(filePost);
-    String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
-    IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
+    String responseContent = ourServer.fhirRequest("/Patient/_search")
+        .withFormParam("_id", "aaa")
+        .postForm()
+        .assertStatus(200)
+        .getBody();
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(1);
 
@@ -314,21 +249,14 @@ public class SearchSearchServerR4Test {
    */
   @Test
   public void testSearchByPostWithInvalidPostUrl() throws Exception {
-    HttpPost filePost = new HttpPost(ourServer.getBaseUrl() + "/Patient?name=Central"); // should end with
-                                                                                               // _search
-
+    // should end with _search
     // add parameters to the post method
-    List<NameValuePair> parameters = new ArrayList<NameValuePair>();
-    parameters.add(new BasicNameValuePair("_id", "aaa"));
-
-    UrlEncodedFormEntity sendentity = new UrlEncodedFormEntity(parameters, "UTF-8");
-    filePost.setEntity(sendentity);
-
-    HttpResponse status = ourClient.execute(filePost);
-    String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
-    IOUtils.closeQuietly(status.getEntity().getContent());
+    String responseContent = ourServer.fhirRequest("/Patient?name=Central")
+        .withFormParam("_id", "aaa")
+        .postForm()
+        .assertStatus(400)
+        .getBody();
     ourLog.info(responseContent);
-		assertEquals(400, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("<diagnostics value=\"" + Msg.code(446) + "Incorrect Content-Type header value of &quot;application/x-www-form-urlencoded; charset=UTF-8&quot; was provided in the request. A FHIR Content-Type is required for &quot;CREATE&quot; operation\"/>");
   }
 
@@ -337,17 +265,12 @@ public class SearchSearchServerR4Test {
    */
   @Test
   public void testSearchByPostWithMissingContentType() throws Exception {
-    HttpPost filePost = new HttpPost(ourServer.getBaseUrl() + "/Patient?name=Central"); // should end with
-                                                                                               // _search
-
-    HttpEntity sendentity = new ByteArrayEntity(new byte[] { 1, 2, 3, 4 });
-    filePost.setEntity(sendentity);
-
-    HttpResponse status = ourClient.execute(filePost);
-    String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
-    IOUtils.closeQuietly(status.getEntity().getContent());
+    // should end with _search
+    String responseContent = ourServer.fhirRequest("/Patient?name=Central")
+        .method("POST", new byte[] { 1, 2, 3, 4 }, null)
+        .assertStatus(400)
+        .getBody();
     ourLog.info(responseContent);
-		assertEquals(400, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("<diagnostics value=\"" + Msg.code(448) + "No Content-Type header was provided in the request. This is required for &quot;CREATE&quot; operation\"/>");
   }
 
@@ -356,20 +279,13 @@ public class SearchSearchServerR4Test {
    */
   @Test
   public void testSearchByPostWithParamsInBodyAndUrl() throws Exception {
-    HttpPost filePost = new HttpPost(ourServer.getBaseUrl() + "/Patient/_search?name=Central");
-
     // add parameters to the post method
-    List<NameValuePair> parameters = new ArrayList<>();
-    parameters.add(new BasicNameValuePair("_id", "aaa"));
-
-    UrlEncodedFormEntity sendentity = new UrlEncodedFormEntity(parameters, "UTF-8");
-    filePost.setEntity(sendentity);
-
-    HttpResponse status = ourClient.execute(filePost);
-    String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
-    IOUtils.closeQuietly(status.getEntity().getContent());
+    String responseContent = ourServer.fhirRequest("/Patient/_search?name=Central")
+        .withFormParam("_id", "aaa")
+        .postForm()
+        .assertStatus(200)
+        .getBody();
     ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
 
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(1);
@@ -382,12 +298,8 @@ public class SearchSearchServerR4Test {
 
   @Test
   public void testSearchCompartment() throws Exception {
-    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123/fooCompartment");
-    HttpResponse status = ourClient.execute(httpGet);
-    String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
+    String responseContent = ourServer.fhirRequest("/Patient/123/fooCompartment").get().assertStatus(200).getBody();
     ourLog.info(responseContent);
-    IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(1);
 
@@ -398,13 +310,8 @@ public class SearchSearchServerR4Test {
 
   @Test
   public void testSearchGetWithUnderscoreSearch() throws Exception {
-    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/_search?subject%3APatient=100&name=3141-9%2C8302-2%2C8287-5%2C39156-5");
+    String responseContent = ourServer.fhirRequest("/Observation/_search?subject%3APatient=100&name=3141-9%2C8302-2%2C8287-5%2C39156-5").get().assertStatus(200).getBody();
 
-    HttpResponse status = ourClient.execute(httpGet);
-    String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
-    IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(1);
 
@@ -418,12 +325,7 @@ public class SearchSearchServerR4Test {
 
   @Test
   public void testSearchIncludesParametersIncludes() throws Exception {
-    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchIncludes&_include=foo&_include:recurse=bar");
-
-    CloseableHttpResponse status = ourClient.execute(httpGet);
-    IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
-    IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
+    ourServer.fhirRequest("/Patient?_query=searchIncludes&_include=foo&_include:recurse=bar").get().assertStatus(200);
 
 		assertThat(ourLastIncludes).hasSize(2);
 		assertThat(ourLastIncludes).containsExactlyInAnyOrder(new Include("foo", false), new Include("bar", true));
@@ -431,12 +333,7 @@ public class SearchSearchServerR4Test {
 
   @Test
   public void testSearchIncludesParametersIncludesList() throws Exception {
-    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchIncludesList&_include=foo&_include:recurse=bar");
-
-    CloseableHttpResponse status = ourClient.execute(httpGet);
-    IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
-    IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
+    ourServer.fhirRequest("/Patient?_query=searchIncludesList&_include=foo&_include:recurse=bar").get().assertStatus(200);
 
 		assertThat(ourLastIncludes).hasSize(2);
 		assertThat(ourLastIncludes).containsExactlyInAnyOrder(new Include("foo", false), new Include("bar", true));
@@ -444,23 +341,14 @@ public class SearchSearchServerR4Test {
 
   @Test
   public void testSearchIncludesParametersNone() throws Exception {
-    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchIncludes");
-
-    CloseableHttpResponse status = ourClient.execute(httpGet);
-    IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
-    IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
+    ourServer.fhirRequest("/Patient?_query=searchIncludes").get().assertStatus(200);
 
 		assertThat(ourLastIncludes).isEmpty();
   }
 
   @Test
   public void testSearchWithOrList() throws Exception {
-    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?findPatientWithOrList=aaa,bbb");
-    HttpResponse status = ourClient.execute(httpGet);
-    String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
-    IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
+    String responseContent = ourServer.fhirRequest("/Patient?findPatientWithOrList=aaa,bbb").get().assertStatus(200).getBody();
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(1);
 
@@ -472,11 +360,7 @@ public class SearchSearchServerR4Test {
   @Test
   public void testSearchWithTokenParameter() throws Exception {
     String token = UrlUtil.escapeUrlParam("http://www.dmix.gov/vista/2957|301");
-    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?tokenParam=" + token);
-    HttpResponse status = ourClient.execute(httpGet);
-    String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
-    IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
+    String responseContent = ourServer.fhirRequest("/Patient?tokenParam=" + token).get().assertStatus(200).getBody();
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(1);
 
@@ -487,12 +371,7 @@ public class SearchSearchServerR4Test {
 
   @Test
   public void testSpecificallyNamedQueryGetsPrecedence() throws Exception {
-    HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?AAA=123");
-
-    HttpResponse status = ourClient.execute(httpGet);
-    String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
-    IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
+    String responseContent = ourServer.fhirRequest("/Patient?AAA=123").get().assertStatus(200).getBody();
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(1);
 
@@ -501,12 +380,7 @@ public class SearchSearchServerR4Test {
 
     // Now the named query
 
-    httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=findPatientByAAA&AAA=123");
-
-    status = ourClient.execute(httpGet);
-    responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
-    IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
+    responseContent = ourServer.fhirRequest("/Patient?_query=findPatientByAAA&AAA=123").get().assertStatus(200).getBody();
     bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(1);
 

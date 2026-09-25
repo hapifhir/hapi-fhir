@@ -5,14 +5,12 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.HttpTestRequest;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
@@ -21,8 +19,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,9 +45,6 @@ public class PagingUsingNamedPagesR4Test {
 		 .setDefaultResponseEncoding(EncodingEnum.JSON)
 		 .setDefaultPrettyPrint(false);
 
-	@RegisterExtension
-	private HttpClientExtension ourClient = new HttpClientExtension();
-
 	@BeforeEach
 	public void before() {
 		myPagingProvider = mock(IPagingProvider.class);
@@ -71,18 +64,17 @@ public class PagingUsingNamedPagesR4Test {
 		return patients;
 	}
 
-	private Bundle executeAndReturnBundle(HttpGet httpGet, EncodingEnum theExpectEncoding) throws IOException {
-		Bundle bundle;
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			EncodingEnum ct = EncodingEnum.forContentType(status.getEntity().getContentType().getValue().replaceAll(";.*", "").trim());
-			assertEquals(theExpectEncoding, ct);
-			assert ct != null;
-			bundle = ct.newParser(ourCtx).parseResource(Bundle.class, responseContent);
-			assertThat(bundle.getEntry()).hasSize(10);
-		}
+	private Bundle executeAndReturnBundle(String theUrl, EncodingEnum theExpectEncoding) {
+		HttpTestResponse response = HttpTestRequest.to(ourServer.getHttpClient(), ourServer.getFhirContext(), theUrl)
+			.get()
+			.assertStatus(200);
+		String responseContent = response.getBody();
+		ourLog.info(responseContent);
+		EncodingEnum ct = EncodingEnum.forContentType(response.getContentType());
+		assertEquals(theExpectEncoding, ct);
+		assert ct != null;
+		Bundle bundle = ct.newParser(ourCtx).parseResource(Bundle.class, responseContent);
+		assertThat(bundle.getEntry()).hasSize(10);
 		return bundle;
 	}
 
@@ -107,15 +99,13 @@ public class PagingUsingNamedPagesR4Test {
 
 		ourNextBundleProvider = provider0;
 
-		HttpGet httpGet;
 		String linkSelf;
 		String linkNext;
 		String linkPrev;
 		Bundle bundle;
 
 		// Initial search
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_format=xml");
-		bundle = executeAndReturnBundle(httpGet, EncodingEnum.XML);
+		bundle = executeAndReturnBundle(ourServer.getBaseUrl() + "/Patient?_format=xml", EncodingEnum.XML);
 		linkSelf = bundle.getLink(Constants.LINK_SELF).getUrl();
 		assertEquals(ourServer.getBaseUrl() + "/Patient?_format=xml", linkSelf);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
@@ -123,8 +113,7 @@ public class PagingUsingNamedPagesR4Test {
 		assertNull(bundle.getLink(Constants.LINK_PREVIOUS));
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		bundle = executeAndReturnBundle(httpGet, EncodingEnum.XML);
+		bundle = executeAndReturnBundle(linkNext, EncodingEnum.XML);
 		linkSelf = bundle.getLink(Constants.LINK_SELF).getUrl();
 		assertEquals(ourServer.getBaseUrl() + "?_getpages=SEARCHID0&_pageId=PAGEID1&_format=xml&_bundletype=searchset", linkSelf);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
@@ -133,8 +122,7 @@ public class PagingUsingNamedPagesR4Test {
 		assertEquals(ourServer.getBaseUrl() + "?_getpages=SEARCHID0&_pageId=PAGEID0&_format=xml&_bundletype=searchset", linkPrev);
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		bundle = executeAndReturnBundle(httpGet, EncodingEnum.XML);
+		bundle = executeAndReturnBundle(linkNext, EncodingEnum.XML);
 		linkSelf = bundle.getLink(Constants.LINK_SELF).getUrl();
 		assertEquals(ourServer.getBaseUrl() + "?_getpages=SEARCHID0&_pageId=PAGEID2&_format=xml&_bundletype=searchset", linkSelf);
 		assertNull(bundle.getLink(Constants.LINK_NEXT));
@@ -149,22 +137,20 @@ public class PagingUsingNamedPagesR4Test {
 		when(myPagingProvider.retrieveResultList(any(), nullable(String.class), nullable(String.class))).thenReturn(null);
 
 		// With ID
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "?_getpages=SEARCHID0&_pageId=PAGEID0&_format=xml&_bundletype=FOO" + UrlUtil.escapeUrlParam("\""));
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseContent);
-			assertThat(responseContent).doesNotContain("FOO\"");
-			assertEquals(410, status.getStatusLine().getStatusCode());
-		}
+		String responseContent = ourServer.fhirRequest("?_getpages=SEARCHID0&_pageId=PAGEID0&_format=xml&_bundletype=FOO" + UrlUtil.escapeUrlParam("\""))
+			.get()
+			.assertStatus(410)
+			.getBody();
+		ourLog.info(responseContent);
+		assertThat(responseContent).doesNotContain("FOO\"");
 
 		// Without ID
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "?_getpages=SEARCHID0&_format=xml&_bundletype=FOO" + UrlUtil.escapeUrlParam("\""));
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseContent);
-			assertThat(responseContent).doesNotContain("FOO\"");
-			assertEquals(410, status.getStatusLine().getStatusCode());
-		}
+		responseContent = ourServer.fhirRequest("?_getpages=SEARCHID0&_format=xml&_bundletype=FOO" + UrlUtil.escapeUrlParam("\""))
+			.get()
+			.assertStatus(410)
+			.getBody();
+		ourLog.info(responseContent);
+		assertThat(responseContent).doesNotContain("FOO\"");
 
 	}
 
@@ -177,17 +163,16 @@ public class PagingUsingNamedPagesR4Test {
 		when(myPagingProvider.retrieveResultList(any(), eq("SEARCHID0"), eq("PAGEID0"))).thenReturn(provider0);
 
 		// Initial search
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "?_getpages=SEARCHID0&_pageId=PAGEID0&_format=xml&_bundletype=FOO" + UrlUtil.escapeUrlParam("\""));
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseContent);
-			assertThat(responseContent).doesNotContain("FOO\"");
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			EncodingEnum ct = EncodingEnum.forContentType(status.getEntity().getContentType().getValue().replaceAll(";.*", "").trim());
-			assert ct != null;
-			Bundle bundle = EncodingEnum.XML.newParser(ourCtx).parseResource(Bundle.class, responseContent);
-			assertThat(bundle.getEntry()).hasSize(10);
-		}
+		HttpTestResponse response = ourServer.fhirRequest("?_getpages=SEARCHID0&_pageId=PAGEID0&_format=xml&_bundletype=FOO" + UrlUtil.escapeUrlParam("\""))
+			.get()
+			.assertStatus(200);
+		String responseContent = response.getBody();
+		ourLog.info(responseContent);
+		assertThat(responseContent).doesNotContain("FOO\"");
+		EncodingEnum ct = EncodingEnum.forContentType(response.getContentType());
+		assert ct != null;
+		Bundle bundle = EncodingEnum.XML.newParser(ourCtx).parseResource(Bundle.class, responseContent);
+		assertThat(bundle.getEntry()).hasSize(10);
 
 	}
 

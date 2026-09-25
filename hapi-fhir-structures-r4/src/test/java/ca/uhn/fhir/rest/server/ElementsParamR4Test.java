@@ -8,13 +8,8 @@ import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DiagnosticReport;
@@ -55,9 +50,6 @@ public class ElementsParamR4Test {
 		 .withPagingProvider(new FifoMemoryPagingProvider(100))
 		 .setDefaultResponseEncoding(EncodingEnum.XML);
 
-	@RegisterExtension
-	private HttpClientExtension ourClient = new HttpClientExtension();
-
 	@BeforeEach
 	public void before() {
 		ourLastElements = null;
@@ -69,7 +61,7 @@ public class ElementsParamR4Test {
 	public void testElementsOnChoiceWithGenericName() throws IOException {
 		createObservationWithQuantity();
 		verifyXmlAndJson(
-			ourServer.getBaseUrl() + "/Observation?_elements=value,status",
+			"/Observation?_elements=value,status",
 			bundle -> {
 				Observation obs = (Observation) bundle.getEntry().get(0).getResource();
 				assertEquals("SUBSETTED", obs.getMeta().getTag().get(0).getCode());
@@ -83,7 +75,7 @@ public class ElementsParamR4Test {
 	public void testElementsOnChoiceWithSpecificName() throws IOException {
 		createObservationWithQuantity();
 		verifyXmlAndJson(
-			ourServer.getBaseUrl() + "/Observation?_elements=valueQuantity,status",
+			"/Observation?_elements=valueQuantity,status",
 			bundle -> {
 				Observation obs = (Observation) bundle.getEntry().get(0).getResource();
 				assertEquals("SUBSETTED", obs.getMeta().getTag().get(0).getCode());
@@ -98,7 +90,7 @@ public class ElementsParamR4Test {
 	public void testElementsOnChoiceWithSpecificNameNotMatching() throws IOException {
 		createObservationWithQuantity();
 		verifyXmlAndJson(
-			ourServer.getBaseUrl() + "/Observation?_elements=valueString,status",
+			"/Observation?_elements=valueString,status",
 			bundle -> {
 				Observation obs = (Observation) bundle.getEntry().get(0).getResource();
 				assertEquals("SUBSETTED", obs.getMeta().getTag().get(0).getCode());
@@ -111,7 +103,7 @@ public class ElementsParamR4Test {
 	public void testExcludeResources() throws IOException {
 		createProcedureWithLongChain();
 		verifyXmlAndJson(
-			ourServer.getBaseUrl() + "/Procedure?_include=*&_elements:exclude=Procedure,DiagnosticReport,*.meta",
+			"/Procedure?_include=*&_elements:exclude=Procedure,DiagnosticReport,*.meta",
 			bundle -> {
 				assertEquals(null, bundle.getEntry().get(0).getResource());
 				assertEquals(null, bundle.getEntry().get(1).getResource());
@@ -128,15 +120,10 @@ public class ElementsParamR4Test {
 	public void testInvalidInclude() throws IOException {
 		createProcedureWithLongChain();
 		EncodingEnum encodingEnum;
-		HttpGet httpGet;
 
 		encodingEnum = EncodingEnum.JSON;
-		httpGet = new HttpGet((ourServer.getBaseUrl() + "/Procedure?_include=*&_elements=DiagnosticReport:foo") + "&_pretty=true&_format=" + encodingEnum.getFormatContentType());
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(responseContent);
-			assertEquals(400, status.getStatusLine().getStatusCode());
-		}
+		String responseContent = ourServer.fhirRequest("/Procedure?_include=*&_elements=DiagnosticReport:foo" + "&_pretty=true&_format=" + encodingEnum.getFormatContentType()).get().assertStatus(400).getBody();
+		ourLog.info(responseContent);
 
 	}
 
@@ -154,7 +141,7 @@ public class ElementsParamR4Test {
 	@Test
 	public void testReadSummaryData() throws Exception {
 		verifyXmlAndJson(
-			ourServer.getBaseUrl() + "/Patient/1?_elements=name,maritalStatus",
+			"/Patient/1?_elements=name,maritalStatus",
 			Patient.class,
 			patient -> {
 				String responseContent = ourCtx.newXmlParser().encodeResourceToString(patient);
@@ -171,7 +158,7 @@ public class ElementsParamR4Test {
 	@Test
 	public void testReadSummaryTrue() throws Exception {
 		verifyXmlAndJson(
-			ourServer.getBaseUrl() + "/Patient/1?_elements=name",
+			"/Patient/1?_elements=name",
 			Patient.class,
 			patient -> {
 				String responseContent = ourCtx.newXmlParser().encodeResourceToString(patient);
@@ -186,7 +173,7 @@ public class ElementsParamR4Test {
 	@Test
 	public void testSearchSummaryData() throws Exception {
 		verifyXmlAndJson(
-			ourServer.getBaseUrl() + "/Patient?_elements=name,maritalStatus",
+			"/Patient?_elements=name,maritalStatus",
 			bundle -> {
 				assertEquals("1", bundle.getTotalElement().getValueAsString());
 				String responseContent = ourCtx.newXmlParser().encodeResourceToString(bundle.getEntry().get(0).getResource());
@@ -202,7 +189,7 @@ public class ElementsParamR4Test {
 	@Test
 	public void testSearchSummaryText() throws Exception {
 		verifyXmlAndJson(
-			ourServer.getBaseUrl() + "/Patient?_elements=text&_pretty=true",
+			"/Patient?_elements=text&_pretty=true",
 			bundle -> {
 				assertEquals("1", bundle.getTotalElement().getValueAsString());
 				String responseContent = ourCtx.newXmlParser().encodeResourceToString(bundle.getEntry().get(0).getResource());
@@ -222,7 +209,7 @@ public class ElementsParamR4Test {
 	public void testStandardElementsFilter() throws IOException {
 		createProcedureWithLongChain();
 		verifyXmlAndJson(
-			ourServer.getBaseUrl() + "/Procedure?_include=*&_elements=reasonCode,status",
+			"/Procedure?_include=*&_elements=reasonCode,status",
 			bundle -> {
 				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
 				assertEquals("SUBSETTED", procedure.getMeta().getTag().get(0).getCode());
@@ -244,7 +231,7 @@ public class ElementsParamR4Test {
 	public void testMultiResourceElementsFilter() throws IOException {
 		createProcedureWithLongChain();
 		verifyXmlAndJson(
-			ourServer.getBaseUrl() + "/Procedure?_include=*&_elements=Procedure.reasonCode,Observation.status,Observation.subject,Observation.value",
+			"/Procedure?_include=*&_elements=Procedure.reasonCode,Observation.status,Observation.subject,Observation.value",
 			bundle -> {
 				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
 				assertEquals("SUBSETTED", procedure.getMeta().getTag().get(0).getCode());
@@ -270,7 +257,7 @@ public class ElementsParamR4Test {
 			.setUrl("http://quantity")
 			.setValue(Quantity.fromUcum("1.1", "mg"));
 		verifyXmlAndJson(
-			ourServer.getBaseUrl() + "/Procedure?_elements=Procedure.extension",
+			"/Procedure?_elements=Procedure.extension",
 			bundle -> {
 				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
 				assertEquals("SUBSETTED", procedure.getMeta().getTag().get(0).getCode());
@@ -280,7 +267,7 @@ public class ElementsParamR4Test {
 			});
 
 		verifyXmlAndJson(
-			ourServer.getBaseUrl() + "/Procedure?_elements=Procedure.extension.value",
+			"/Procedure?_elements=Procedure.extension.value",
 			bundle -> {
 				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
 				assertEquals("SUBSETTED", procedure.getMeta().getTag().get(0).getCode());
@@ -290,7 +277,7 @@ public class ElementsParamR4Test {
 			});
 
 		verifyXmlAndJson(
-			ourServer.getBaseUrl() + "/Procedure?_elements=Procedure.extension.value.value",
+			"/Procedure?_elements=Procedure.extension.value.value",
 			bundle -> {
 				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
 				assertEquals("SUBSETTED", procedure.getMeta().getTag().get(0).getCode());
@@ -300,7 +287,7 @@ public class ElementsParamR4Test {
 			});
 
 		verifyXmlAndJson(
-			ourServer.getBaseUrl() + "/Procedure?_elements=Procedure.reason",
+			"/Procedure?_elements=Procedure.reason",
 			bundle -> {
 				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
 				assertEquals("SUBSETTED", procedure.getMeta().getTag().get(0).getCode());
@@ -312,7 +299,7 @@ public class ElementsParamR4Test {
 	public void testMultiResourceElementsFilterWithMetadataExcluded() throws IOException {
 		createProcedureWithLongChain();
 		verifyXmlAndJson(
-			ourServer.getBaseUrl() + "/Procedure?_include=*&_elements=Procedure.reasonCode,Observation.status,Observation.subject,Observation.value&_elements:exclude=*.meta",
+			"/Procedure?_include=*&_elements=Procedure.reasonCode,Observation.status,Observation.subject,Observation.value&_elements:exclude=*.meta",
 			bundle -> {
 				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
 				assertEquals(true, procedure.getMeta().isEmpty());
@@ -338,7 +325,7 @@ public class ElementsParamR4Test {
 	public void testMultiResourceElementsFilterDoesntAffectFocalResource() throws IOException {
 		createProcedureWithLongChain();
 		verifyXmlAndJson(
-			ourServer.getBaseUrl() + "/Procedure?_include=*&_elements=Observation.subject",
+			"/Procedure?_include=*&_elements=Observation.subject",
 			bundle -> {
 				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
 				assertEquals(true, procedure.getMeta().isEmpty());
@@ -363,7 +350,7 @@ public class ElementsParamR4Test {
 		ourServer.getRestfulServer().setElementsSupport(ElementsSupportEnum.STANDARD);
 		createProcedureWithLongChain();
 		verifyXmlAndJson(
-			ourServer.getBaseUrl() + "/Procedure?_include=*&_elements=Procedure.reasonCode,Observation.status,Observation.subject,Observation.value&_elements:exclude=*.meta",
+			"/Procedure?_include=*&_elements=Procedure.reasonCode,Observation.status,Observation.subject,Observation.value&_elements:exclude=*.meta",
 			bundle -> {
 				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
 				assertEquals(true, procedure.getMeta().isEmpty());
@@ -386,7 +373,7 @@ public class ElementsParamR4Test {
 	public void testElementsFilterWithComplexPath() throws IOException {
 		createProcedureWithLongChain();
 		verifyXmlAndJson(
-			ourServer.getBaseUrl() + "/Procedure?_elements=Procedure.reasonCode.coding.code",
+			"/Procedure?_elements=Procedure.reasonCode.coding.code",
 			bundle -> {
 				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
 				assertEquals("SUBSETTED", procedure.getMeta().getTag().get(0).getCode());
@@ -416,31 +403,24 @@ public class ElementsParamR4Test {
 		dr.addResult().setResource(obs);
 	}
 
-	private void verifyXmlAndJson(String theUri, Consumer<Bundle> theVerifier) throws IOException {
-		verifyXmlAndJson(theUri, Bundle.class, theVerifier);
+	private void verifyXmlAndJson(String thePath, Consumer<Bundle> theVerifier) throws IOException {
+		verifyXmlAndJson(thePath, Bundle.class, theVerifier);
 	}
 
-	private <T extends IBaseResource> void verifyXmlAndJson(String theUri, Class<T> theType, Consumer<T> theVerifier) throws IOException {
+	private <T extends IBaseResource> void verifyXmlAndJson(String thePath, Class<T> theType, Consumer<T> theVerifier) throws IOException {
 		EncodingEnum encodingEnum;
-		HttpGet httpGet;
 
 		encodingEnum = EncodingEnum.JSON;
-		httpGet = new HttpGet(theUri + "&_pretty=true&_format=" + encodingEnum.getFormatContentType());
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(responseContent);
-			T response = encodingEnum.newParser(ourCtx).parseResource(theType, responseContent);
-			theVerifier.accept(response);
-		}
+		String responseContent = ourServer.fhirRequest(thePath + "&_pretty=true&_format=" + encodingEnum.getFormatContentType()).get().getBody();
+		ourLog.info(responseContent);
+		T response = encodingEnum.newParser(ourCtx).parseResource(theType, responseContent);
+		theVerifier.accept(response);
 
 		encodingEnum = EncodingEnum.XML;
-		httpGet = new HttpGet(theUri + "&_pretty=true&_format=" + encodingEnum.getFormatContentType());
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(responseContent);
-			T response = encodingEnum.newParser(ourCtx).parseResource(theType, responseContent);
-			theVerifier.accept(response);
-		}
+		responseContent = ourServer.fhirRequest(thePath + "&_pretty=true&_format=" + encodingEnum.getFormatContentType()).get().getBody();
+		ourLog.info(responseContent);
+		response = encodingEnum.newParser(ourCtx).parseResource(theType, responseContent);
+		theVerifier.accept(response);
 	}
 
 	public static class DummyObservationResourceProvider implements IResourceProvider {
