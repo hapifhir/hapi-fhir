@@ -8,22 +8,15 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
-import ca.uhn.fhir.rest.client.apache.ResourceEntity;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.OperationOutcome;
 import org.hl7.fhir.r5.model.Organization;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Patient;
+import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.StringType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,7 +25,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -50,8 +42,6 @@ public class ValidateR5Test {
 		.withPagingProvider(new FifoMemoryPagingProvider(100))
 		.setDefaultPrettyPrint(false);
 
-	@RegisterExtension
-	private static final HttpClientExtension ourClient = new HttpClientExtension();
 
 	public static Patient ourLastPatient;
 	private static EncodingEnum ourLastEncoding;
@@ -85,17 +75,9 @@ public class ValidateR5Test {
 		Parameters params = new Parameters();
 		params.addParameter().setName("resource").setResource(patient);
 
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/$validate");
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		String resp = ourServer.fhirRequest("/Patient/$validate").post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML).assertStatus(200).getBody();
 
-		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
-			String resp = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			IOUtils.closeQuietly(status.getEntity().getContent());
-
-			assertEquals(200, status.getStatusLine().getStatusCode());
-
-			assertThat(resp).contains("<OperationOutcome");
-		}
+		assertThat(resp).contains("<OperationOutcome");
 	}
 
 	@Test
@@ -109,14 +91,7 @@ public class ValidateR5Test {
 		params.addParameter().setName("resource").setResource(patient);
 		params.addParameter().setName("mode").setValue(new CodeType(" "));
 
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/$validate");
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
-		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
-			IOUtils.closeQuietly(status.getEntity().getContent());
-
-			assertEquals(200, status.getStatusLine().getStatusCode());
-		}
+		ourServer.fhirRequest("/Patient/$validate").post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML).assertStatus(200);
 	}
 
 	@Test
@@ -130,17 +105,9 @@ public class ValidateR5Test {
 		params.addParameter().setName("resource").setResource(patient);
 		params.addParameter().setName("mode").setValue(new CodeType("AAA"));
 
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/$validate");
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		String resp = ourServer.fhirRequest("/Patient/$validate").post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML).assertStatus(400).getBody();
 
-		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
-			String resp = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			IOUtils.closeQuietly(status.getEntity().getContent());
-
-			assertEquals(400, status.getStatusLine().getStatusCode());
-
-			assertThat(resp).contains("Invalid mode value: &quot;AAA&quot;");
-		}
+		assertThat(resp).contains("Invalid mode value: &quot;AAA&quot;");
 	}
 
 	@Test
@@ -153,15 +120,9 @@ public class ValidateR5Test {
 		Parameters params = new Parameters();
 		params.addParameter().setName("mode").setValue(new CodeType("create"));
 
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/$validate");
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		ourServer.fhirRequest("/Patient/$validate").post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML).assertStatus(200);
 
-		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
-			IOUtils.closeQuietly(status.getEntity().getContent());
-
-			assertNull(ourLastPatient);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-		}
+		assertNull(ourLastPatient);
 	}
 
 	@Test
@@ -169,19 +130,12 @@ public class ValidateR5Test {
 		ourOutcomeToReturn = new OperationOutcome();
 		ourOutcomeToReturn.addIssue().setDiagnostics("FOOBAR");
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123/$validate");
+		String resp = ourServer.fhirRequest("/Patient/123/$validate").get().assertStatus(200).getBody();
 
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String resp = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			IOUtils.closeQuietly(status.getEntity().getContent());
-
-			assertEquals(200, status.getStatusLine().getStatusCode());
-
-			assertThat(resp).contains("<OperationOutcome", "FOOBAR");
-			assertNull(ourLastPatient);
-			assertEquals("Patient", ourLastId.getResourceType());
-			assertEquals("123", ourLastId.getIdPart());
-		}
+		assertThat(resp).contains("<OperationOutcome", "FOOBAR");
+		assertNull(ourLastPatient);
+		assertEquals("Patient", ourLastId.getResourceType());
+		assertEquals("123", ourLastId.getIdPart());
 	}
 
 	@Test
@@ -194,15 +148,10 @@ public class ValidateR5Test {
 		Parameters params = new Parameters();
 		params.addParameter().setName("resource").setResource(org);
 
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Organization/$validate");
-		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
+		ourServer.fhirRequest("/Organization/$validate").post(ourCtx.newJsonParser().encodeResourceToString(params), Constants.CT_FHIR_JSON).assertStatus(200);
 
-		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
-			assertEquals(200, status.getStatusLine().getStatusCode());
-
-			assertThat(ourLastResourceBody).contains("\"resourceType\":\"Organization\"", "\"identifier\"", "\"value\":\"001");
-			assertEquals(EncodingEnum.JSON, ourLastEncoding);
-		}
+		assertThat(ourLastResourceBody).contains("\"resourceType\":\"Organization\"", "\"identifier\"", "\"value\":\"001");
+		assertEquals(EncodingEnum.JSON, ourLastEncoding);
 	}
 
 	@ParameterizedTest
@@ -213,32 +162,25 @@ public class ValidateR5Test {
 		patient.addIdentifier().setValue("001");
 		patient.addIdentifier().setValue("002");
 
-		HttpPost httpPost;
-		String url = ourServer.getBaseUrl() + "/Patient/$validate";
+		String path = "/Patient/$validate";
+		Resource body = patient;
 		if (theUseParametersRequest) {
 			Parameters params = new Parameters();
 			params.addParameter().setName("resource").setResource(patient);
 			params.addParameter().setName("profile").setValue(new StringType("http://foo"));
 			params.addParameter().setName("mode").setValue(new StringType(ValidationModeEnum.CREATE.getCode()));
-			httpPost = new HttpPost(url);
-			httpPost.setEntity(new ResourceEntity(ourCtx, params));
+			body = params;
 		} else {
-			httpPost = new HttpPost(url + "?profile=http://foo&mode=create");
-			httpPost.setEntity(new ResourceEntity(ourCtx, patient));
+			path += "?profile=http://foo&mode=create";
 		}
 
-		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
-			String resp = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(resp);
-			IOUtils.closeQuietly(status.getEntity().getContent());
+		String resp = ourServer.fhirRequest(path).post(body).assertStatus(200).getBody();
+		ourLog.info(resp);
 
-			assertEquals(200, status.getStatusLine().getStatusCode());
-
-			assertThat(resp).contains("\"resourceType\":\"OperationOutcome\"");
-			assertEquals("001", ourLastPatient.getIdentifier().get(0).getValue());
-			assertEquals("http://foo", ourLastProfile);
-			assertEquals(ValidationModeEnum.CREATE, ourLastMode);
-		}
+		assertThat(resp).contains("\"resourceType\":\"OperationOutcome\"");
+		assertEquals("001", ourLastPatient.getIdentifier().get(0).getValue());
+		assertEquals("http://foo", ourLastProfile);
+		assertEquals(ValidationModeEnum.CREATE, ourLastMode);
 	}
 
 	@Test
@@ -254,17 +196,9 @@ public class ValidateR5Test {
 		Parameters params = new Parameters();
 		params.addParameter().setName("resource").setResource(patient);
 
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/$validate");
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		String resp = ourServer.fhirRequest("/Patient/$validate").post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML).assertStatus(200).getBody();
 
-		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
-			String resp = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			IOUtils.closeQuietly(status.getEntity().getContent());
-
-			assertEquals(200, status.getStatusLine().getStatusCode());
-
-			assertThat(resp).contains("<OperationOutcome", "FOOBAR");
-		}
+		assertThat(resp).contains("<OperationOutcome", "FOOBAR");
 	}
 
 	public static class OrganizationProvider implements IResourceProvider {
