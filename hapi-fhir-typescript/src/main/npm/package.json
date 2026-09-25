@@ -15,7 +15,8 @@
     "src"
   ],
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "publish-if-new": "bash publish-if-new.sh"
   },
   "devDependencies": {
     "typescript": "${ts.typescript.version}"
