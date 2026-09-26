@@ -1,0 +1,9 @@
+---
+type: fix
+issue: 7731
+title: "Previously, when an R4/R4B/R5 server installed an Implementation Guide with fetchDependencies=true,
+  a transitive dependency that declared an incompatible FHIR version (for example hl7.fhir.uv.extensions
+  which declares FHIR 5.0.0) would immediately fail with HAPI-1288 even when a version-specific counterpart
+  (for example hl7.fhir.uv.extensions.r4) was available on the package registry. The package installer now
+  attempts to load the version-specific variant (.r4, .r4b, .r5, .r3) before raising a compatibility error,
+  allowing packages such as U.S. Core 8.0.1 to load on R4 servers without manual dependency exclusion."
