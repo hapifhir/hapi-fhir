@@ -105,6 +105,19 @@ public class RuntimeChildExt extends BaseRuntimeChildDefinition {
 					extensions.add(value);
 				}
 			}
+
+			@Override
+			@SuppressWarnings({"unchecked", "rawtypes"})
+			public void replace(IBase theTarget, IBase theOldValue, IBase theNewValue) {
+				List extensions = ((IBaseHasExtensions) theTarget).getExtension();
+				for (int i = 0; i < extensions.size(); i++) {
+					if (extensions.get(i) == theOldValue) {
+						extensions.set(i, theNewValue);
+						return;
+					}
+				}
+				addValue(theTarget, theNewValue);
+			}
 		};
 	}
 
