@@ -341,11 +341,6 @@ public class JpaConstants {
 	public static final String HEADER_UPSERT_EXISTENCE_CHECK = "X-Upsert-Extistence-Check";
 	public static final String HEADER_UPSERT_EXISTENCE_CHECK_DISABLED = "disabled";
 
-	/**
-	 * Parameters for the rewrite history operation
-	 */
-	public static final String HEADER_REWRITE_HISTORY = "X-Rewrite-History";
-
 	public static final String SKIP_REINDEX_ON_UPDATE = "SKIP-REINDEX-ON-UPDATE";
 	/**
 	 * IPS Generation operation name
