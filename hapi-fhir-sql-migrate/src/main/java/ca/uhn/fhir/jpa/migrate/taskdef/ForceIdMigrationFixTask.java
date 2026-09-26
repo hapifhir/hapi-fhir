@@ -19,11 +19,11 @@
  */
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import ca.uhn.fhir.util.Logs;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.sql.SQLException;
@@ -34,7 +34,7 @@ import java.sql.SQLException;
  * This migration includes the copy action, but also adds a trim() call to fixup the bad server-assigned ids.
  */
 public class ForceIdMigrationFixTask extends BaseTask {
-	private static final Logger ourLog = LoggerFactory.getLogger(ForceIdMigrationFixTask.class);
+	private static final Logger ourLog = Logs.getDatabaseMigrationLog();
 
 	public ForceIdMigrationFixTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
