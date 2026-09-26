@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.rest.client.apache;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.client.api.BaseHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
@@ -33,6 +34,7 @@ import org.apache.hc.core5.http.HttpEntity;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashMap;
@@ -116,7 +118,11 @@ public class ApacheHttp5Request extends BaseHttpRequest implements IHttpRequest 
 
 	@Override
 	public String getUri() {
-		return myRequest.getRequestUri().toString();
+		try {
+			return myRequest.getUri().toString();
+		} catch (URISyntaxException e) {
+			throw new IllegalStateException(Msg.code(2875) + "Invalid URI in request", e);
+		}
 	}
 
 	@Override
