@@ -91,6 +91,14 @@ public class AddIndexTask extends BaseTableTask {
 		Set<String> indexNames = JdbcUtils.getIndexNames(getConnectionProperties(), getTableName());
 		if (indexNames.contains(myIndexName)) {
 			logInfo(ourLog, "Index {} already exists on table {} - No action performed", myIndexName, getTableName());
+
+			if (isDryRun()) {
+				captureExecutedStatement(
+					getTableName(),
+					"-- Skipped: index " + myIndexName + " already existed when the database was checked\n"
+						+ "-- before the migration ran. If a statement above drops this index, run the following SQL:\n"
+						+ "-- " + generateSql());
+			}
 			return;
 		}
 
