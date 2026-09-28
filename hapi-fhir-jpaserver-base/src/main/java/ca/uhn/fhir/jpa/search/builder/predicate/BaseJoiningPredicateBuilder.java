@@ -25,7 +25,6 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import com.healthmarketscience.sqlbuilder.Condition;
-import com.healthmarketscience.sqlbuilder.NotCondition;
 import com.healthmarketscience.sqlbuilder.UnaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
@@ -107,14 +106,8 @@ public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 	public Condition createPredicateResourceIds(boolean theInverse, Collection<JpaPid> theResourceIds) {
 		Validate.notNull(theResourceIds, "theResourceIds must not be null");
 
-		Condition inResourceIds = QueryParameterUtils.toEqualToOrInPredicate(
-				getResourceIdColumn(), generatePlaceholders(JpaPid.toLongList(theResourceIds)));
-		if (theInverse) {
-			inResourceIds = new NotCondition(inResourceIds);
-		}
-
-		// Handle the _id parameter by adding it to the tail
-		return inResourceIds;
+		return getSearchQueryBuilder()
+				.createPredicateIdsInList(getResourceIdColumn(), JpaPid.toLongList(theResourceIds), theInverse);
 	}
 
 	public static List<Integer> replaceDefaultPartitionIdIfNonNull(

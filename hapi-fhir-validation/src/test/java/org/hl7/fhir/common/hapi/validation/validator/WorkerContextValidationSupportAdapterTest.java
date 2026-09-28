@@ -8,6 +8,7 @@ import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationIssueCode;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationIssueCoding;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity;
+import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -23,12 +24,14 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -103,7 +106,116 @@ public class WorkerContextValidationSupportAdapterTest extends BaseValidationTes
 
 		// verify
 		verify(myValidationSupport, times(1)).validateCodeInValueSet(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), any());
-		verify(myValidationSupport, times(1)).validateCode(any(), any(), eq("http://codesystems.com/system"), eq("code0"), any(), any());
+		verify(myValidationSupport, times(1)).validateCode(any(), any(), requestWith("http://codesystems.com/system", null, "code0"));
+	}
+
+	// Created by Claude Opus 5
+	@Test
+	public void validateCode_systemInferredFromVersionedInclude_namesTheVersionSeparately() {
+		// setup
+		setupValidation();
+
+		// The system taken from an include that names a version already has the version on it
+		ValueSet valueSet = new ValueSet();
+		valueSet.getCompose()
+			.addInclude()
+			.setSystem("http://codesystems.com/system")
+			.setVersion("1.0.0")
+			.addConcept()
+			.setCode("code0");
+
+		CodeValidationResult valueSetResult = new CodeValidationResult().setCode("code0").setCodeSystemVersion("1.0.0");
+		when(myValidationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenReturn(valueSetResult);
+
+		// execute
+		myWorkerContextWrapper.validateCode(new ValidationOptions(), "code0", valueSet);
+
+		// verify
+		verify(myValidationSupport, times(1)).validateCode(any(), any(), requestWith("http://codesystems.com/system", "1.0.0", "code0"));
+	}
+
+	// Created by Claude Opus 5
+	@Test
+	public void validateCode_codingNamesACodeSystemVersion_checksThatVersion() {
+		// setup
+		setupValidation();
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
+
+		when(myValidationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenReturn(new CodeValidationResult().setCode("code0"));
+
+		Coding coding = new Coding("http://codesystems.com/system", "code0", "");
+		coding.setVersion("1.0.0");
+
+		// execute
+		myWorkerContextWrapper.validateCode(new ValidationOptions(), coding, valueSet);
+
+		// verify
+		verify(myValidationSupport, times(1)).validateCode(any(), any(), requestWith("http://codesystems.com/system", "1.0.0", "code0"));
+	}
+
+	// Created by Claude Opus 5
+	@Test
+	public void validateCode_callerNamesNoVersion_checksTheVersionTheValueSetAnsweredWith() {
+		// setup
+		setupValidation();
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
+
+		CodeValidationResult valueSetResult = new CodeValidationResult().setCode("code0").setCodeSystemVersion("2.0.0");
+		when(myValidationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenReturn(valueSetResult);
+
+		// execute
+		myWorkerContextWrapper.validateCode(new ValidationOptions(), new Coding("http://codesystems.com/system", "code0", ""), valueSet);
+
+		// verify
+		verify(myValidationSupport, times(1)).validateCode(any(), any(), requestWith("http://codesystems.com/system", "2.0.0", "code0"));
+	}
+
+	// Created by Claude Opus 5
+	@Test
+	public void validateCode_systemAndVersionGivenSeparately_checksThatVersion() {
+		// setup
+		setupValidation();
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
+
+		when(myValidationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenReturn(new CodeValidationResult().setCode("code0"));
+
+		// execute
+		myWorkerContextWrapper.validateCode(new ValidationOptions(), "http://codesystems.com/system", "1.0.0", "code0", "", valueSet);
+
+		// verify
+		verify(myValidationSupport, times(1)).validateCode(any(), any(), requestWith("http://codesystems.com/system", "1.0.0", "code0"));
+	}
+
+	// Created by Claude Opus 5
+	@Test
+	public void validateCode_noValueSetAndVersionGivenSeparately_checksThatVersion() {
+		// setup
+		setupValidation();
+
+		// execute
+		myWorkerContextWrapper.validateCode(new ValidationOptions(), "http://codesystems.com/system", "1.0.0", "code0", "");
+
+		// verify
+		verify(myValidationSupport, times(1)).validateCode(any(), any(), requestWith("http://codesystems.com/system", "1.0.0", "code0"));
+	}
+
+	// Created by Claude Opus 5
+	@Test
+	public void validateCode_noValueSetAndNoSystem_doesNotFail() {
+		// setup
+		setupValidation();
+
+		// execute
+		myWorkerContextWrapper.validateCode(new ValidationOptions(), null, "1.0.0", "code0", "");
+
+		// verify
+		verify(myValidationSupport, times(1)).validateCode(any(), any(), requestWith(null, "1.0.0", "code0"));
 	}
 
 	@Test
@@ -119,7 +231,7 @@ public class WorkerContextValidationSupportAdapterTest extends BaseValidationTes
 
 		// verify
 		verify(myValidationSupport, times(1)).validateCodeInValueSet(any(), any(), eq(null), eq("code1"), any(), any());
-		verify(myValidationSupport, never()).validateCode(any(), any(), any(), any(), any(), any());
+		verify(myValidationSupport, never()).validateCode(any(), any(), any());
 	}
 
 	@Test
@@ -137,7 +249,7 @@ public class WorkerContextValidationSupportAdapterTest extends BaseValidationTes
 		String issueMessage = "Code not in here!";
 		CodeValidationIssue codeValidationIssue = new CodeValidationIssue(issueMessage, IssueSeverity.ERROR, CodeValidationIssueCode.NOT_FOUND, CodeValidationIssueCoding.NOT_FOUND);
 		CodeValidationResult codeValResult = new CodeValidationResult().setMessage("Bad code in CS").setCode(badCode).setCodeSystemName(system).setSeverity(IssueSeverity.ERROR).addIssue(codeValidationIssue);
-		when(myValidationSupport.validateCode(any(), any(), eq("http://codesystems.com/system"), eq(badCode) , any(), eq(null))).thenReturn(codeValResult);
+		when(myValidationSupport.validateCode(any(), any(), requestWith("http://codesystems.com/system", null, badCode))).thenReturn(codeValResult);
 
 		ForkJoinPool pool = ForkJoinPool.commonPool();
 		List<ForkJoinTask<?>> futures = new ArrayList<>();
@@ -308,4 +420,14 @@ public class WorkerContextValidationSupportAdapterTest extends BaseValidationTes
 		when(mockValidationSupport.getFhirContext()).thenReturn(ourCtx);
 		return mockValidationSupport;
 	}
+
+	// Created by Claude Opus 5
+	private static ValidateCodeRequest requestWith(String theCodeSystem, String theCodeSystemVersion, String theCode) {
+		// argThat matchers are also applied to the stubbing-time invocation, where the argument is null
+		return argThat(request -> request != null
+			&& Objects.equals(theCodeSystem, request.getCodeSystem())
+			&& Objects.equals(theCodeSystemVersion, request.getCodeSystemVersion())
+			&& Objects.equals(theCode, request.getCode()));
+	}
+
 }

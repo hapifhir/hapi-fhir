@@ -38,7 +38,7 @@ public class CreateCompositionAndGenerateDocument {
 
 		// START SNIPPET: CreateCompositionAndGenerateDocument
 		FhirContext ctx = FhirContext.forR4();
-		IGenericClient client = ctx.newRestfulGenericClient("http://hapi.fhir.org/baseR4");
+		IGenericClient client = ctx.newRestfulGenericClient("https://hapi.fhir.org/baseR4");
 
 		Patient patient = new Patient();
 		patient.setId("PATIENT-ABC");

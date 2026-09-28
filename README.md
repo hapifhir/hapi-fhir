@@ -18,10 +18,10 @@ HAPI FHIR - Java API for HL7 FHIR Clients and Servers
 ## Documentation and wiki
 
 Complete project documentation is available here:
-http://hapifhir.io
+https://hapifhir.io
 
 A demonstration of this project is available here:
-http://hapi.fhir.org/
+https://hapi.fhir.org/
 
 This project is Open Source, licensed under the Apache Software License 2.0.
 

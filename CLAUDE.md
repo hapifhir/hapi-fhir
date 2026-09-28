@@ -200,7 +200,7 @@ Before writing production code, write a failing test first. All code changes mus
 ## Documentation
 
 - Complete documentation: http://hapifhir.io
-- Live demo server: http://hapi.fhir.org
+- Live demo server: https://hapi.fhir.org
 - Javadocs: https://hapifhir.io/hapi-fhir/apidocs/
 - Issue tracker: https://github.com/hapifhir/hapi-fhir/issues
 - Commercial support: https://smilecdr.com

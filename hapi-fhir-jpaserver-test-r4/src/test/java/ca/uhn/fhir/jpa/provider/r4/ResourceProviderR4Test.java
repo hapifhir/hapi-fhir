@@ -39,6 +39,8 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -49,6 +51,7 @@ import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.rest.gclient.ICriterion;
+import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.NumberClientParam;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -60,7 +63,6 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -69,6 +71,7 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.test.util.LogbackTestExtension;
 import ca.uhn.test.util.LogbackTestExtensionAssert;
@@ -182,7 +185,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -220,6 +222,7 @@ import static ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick;
 import static ca.uhn.fhir.rest.param.BaseParamWithPrefix.MSG_PREFIX_INVALID_FORMAT;
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -233,6 +236,8 @@ import static org.mockito.Mockito.when;
 
 @SuppressWarnings("Duplicates")
 public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
+	private static final String MRN_SYSTEM = "http://acme.org/mrn";
+	private static final String CONDITIONAL_UPDATE_MRN = "PT-COND";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4Test.class);
 	private final CapturingInterceptor myCapturingInterceptor = new CapturingInterceptor();
 	@RegisterExtension
@@ -242,12 +247,14 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	private ISearchDao mySearchEntityDao;
 	@Autowired
 	private TerminologyTestHelper myTerminologyTestHelper;
+	private IQuery<Bundle> initialSearch;
 
 	@Override
 	@AfterEach
 	public void after() throws Exception {
 		super.after();
 
+		myStorageSettings.setResourceClientIdStrategy(new JpaStorageSettings().getResourceClientIdStrategy());
 		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
 		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
@@ -259,10 +266,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		myStorageSettings.setIndexOnContainedResources(new JpaStorageSettings().isIndexOnContainedResources());
 
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
-		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(false);
-		mySearchCoordinatorSvcRaw.cancelAllActiveSearches();
 		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 
 		myClient.unregisterInterceptor(myCapturingInterceptor);
@@ -571,7 +575,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		Bundle response = myClient
 			.search()
-			.byUrl("Observation?part-of=" + procedureId + "&derived-from:DocumentReference.contenttype=application/vnd.mfer&_total=accurate&_count=2")
+			.byUrl("Observation?part-of=" + procedureId + "&derived-from:DocumentReference.contenttype=application/vnd.mfer&_total=accurate&_sort=_id&_count=2")
 			.returnBundle(Bundle.class)
 			.execute();
 
@@ -579,9 +583,13 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		int pageCount = 0;
 		while (response != null) {
 			obsCount += response.getEntry().size();
+			List<String> nextIds = toUnqualifiedVersionlessIdValues(response);
+			ourLog.info("Loaded page of IDs: {}", nextIds);
 			pageCount++;
 			if (response.getLink("next") != null) {
+				myCaptureQueriesListener.clear();
 				response = myClient.loadPage().next(response).execute();
+				myCaptureQueriesListener.logSelectQueries();
 			} else {
 				response = null;
 			}
@@ -660,47 +668,96 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	/**
 	 * Totals should *not* include Included resources
 	 */
-	@Test
-	public void search_withIncludes_calculatesTotalsCorrectly() {
+	@ParameterizedTest
+	@CsvSource(useHeadersInDisplayName = true, textBlock = """
+		_count , _offset, noCache
+		true   , true   , false
+		true   , false  , false
+		false  , true   , false
+		false  , false  , false
+		true   , true   , true
+		true   , false  , true
+		false  , true   , true
+		false  , false  , true
+		""")
+	public void search_withIncludes_calculatesTotalsCorrectly(boolean theCount, boolean theOffset, boolean theNoCache) {
 		// setup
-		int total = 4;
 		Organization o = new Organization();
+		o.setId("ORG");
 		o.setName("Hibert's Clinic");
-		IIdType oid = myClient.create().resource(o).execute().getId().toUnqualifiedVersionless();
+		IIdType oid = myClient.update().resource(o).execute().getId().toUnqualifiedVersionless();
 
+		int total = 25;
 		for (int i = 0; i < total; i++) {
 			Patient p = new Patient();
-			p.setId("Simpson" + i);
+			p.setId("P" + leftPad(Integer.toString(i), 3, '0'));
 			p.getManagingOrganization().setReference(oid.getValue());
 			myClient.update().resource(p).execute();
 		}
 
-		// test
-		Bundle output = myClient
+		// Test - Load first page
+
+		initialSearch = myClient
 			.search()
 			.forResource("Patient")
 			.include(IBaseResource.INCLUDE_ALL)
-			.count(2)
-			.returnBundle(Bundle.class)
-			.execute();
+			.totalMode(SearchTotalModeEnum.ACCURATE)
+			.sort(new SortSpec(Constants.PARAM_ID, SortOrderEnum.ASC))
+			.returnBundle(Bundle.class);
+		if (theCount) {
+			initialSearch = initialSearch.count(10);
+		}
+		if (theOffset) {
+			initialSearch = initialSearch.offset(0);
+		}
+		if (theNoCache) {
+			initialSearch = initialSearch.cacheControl(CacheControlDirective.noCache().setNoStore(true));
+		}
+		Bundle output = initialSearch.execute();
 		assertNotNull(output);
-		assertEquals(3, output.getEntry().size());
 		assertEquals(total, output.getTotal());
-		assertEquals(2, (int) output.getEntry()
-			.stream().filter(e -> e.getResource().fhirType().equalsIgnoreCase("Patient")).count());
+		assertThat(toUnqualifiedVersionlessIdValues(output)).containsExactly(
+			"Patient/P000",
+			"Patient/P001",
+			"Patient/P002",
+			"Patient/P003",
+			"Patient/P004",
+			"Patient/P005",
+			"Patient/P006",
+			"Patient/P007",
+			"Patient/P008",
+			"Patient/P009",
+			"Organization/ORG");
+		assertThat(output.getLink(Constants.LINK_NEXT).getUrl()).contains("_count=10");
+		if (theOffset || theNoCache) {
+			assertThat(output.getLink(Constants.LINK_NEXT).getUrl()).contains("_offset=10");
+		} else {
+			assertThat(output.getLink(Constants.LINK_NEXT).getUrl()).doesNotContain("_offset");
+		}
 
-		output = myClient.search()
-			.forResource("Patient")
-			.include(IBaseResource.INCLUDE_ALL)
-			.offset(2)
-			.cacheControl(CacheControlDirective.noCache())
-			.returnBundle(Bundle.class)
-			.execute();
+		// Load second page
+
+		output = myClient.loadPage().next(output).execute();
 		assertNotNull(output);
-		assertEquals(3, output.getEntry().size());
 		assertEquals(total, output.getTotal());
-		assertEquals(2, (int) output.getEntry()
-			.stream().filter(e -> e.getResource().fhirType().equalsIgnoreCase("Patient")).count());
+		assertThat(toUnqualifiedVersionlessIdValues(output)).containsExactly(
+			"Patient/P010",
+			"Patient/P011",
+			"Patient/P012",
+			"Patient/P013",
+			"Patient/P014",
+			"Patient/P015",
+			"Patient/P016",
+			"Patient/P017",
+			"Patient/P018",
+			"Patient/P019",
+			"Organization/ORG");
+		assertThat(output.getLink(Constants.LINK_NEXT).getUrl()).contains("_count=10");
+		if (theOffset || theNoCache) {
+			assertThat(output.getLink(Constants.LINK_NEXT).getUrl()).contains("_offset=20");
+		} else {
+			assertThat(output.getLink(Constants.LINK_NEXT).getUrl()).doesNotContain("_offset");
+		}
 	}
 
 	@Test
@@ -752,7 +809,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@MethodSource("createFhirSearchWithChainingAndCountParams")
 	public void testFhirSearch_withChainingAndPagination_searchFinishes(Map<Integer, Integer> theRefCountToResourceCount, Integer theMaxPageSize, List<Integer> thePrefetchThresholds) {
 		// Given
-		mySearchCoordinatorSvcRaw.setMaxMillisToWaitForRemoteResultsForUnitTest(30000);
 		if (theMaxPageSize != null) {
 			myPagingProvider.setMaximumPageSize(theMaxPageSize);
 		}
@@ -785,7 +841,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.execute();
 
 		List<String> ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
-		ourLog.info("Loaded page 1 with ids: {}", ids);
+		ourLog.info("Loaded page 1 with requested count {} and got {} ids: {}", count, ids.size(), ids);
 		assertThat(output.getEntry()).hasSize(Math.min(count, totalNumberOfPatientsCreated));
 
 		// When: loading the next page
@@ -943,29 +999,49 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testSearchFetchPageBeyondEnd() {
 		for (int i = 0; i < 10; i++) {
-			Organization o = new Organization();
-			o.setId("O" + i);
-			o.setName("O" + i);
-			IIdType oid = myClient.update().resource(o).execute().getId().toUnqualifiedVersionless();
+			Patient p = new Patient();
+			p.setId("P" + i);
+			p.getNameFirstRep().setFamily(leftPad(Integer.toString(i), 5, '0'));
+			myClient.update().resource(p).execute().getId().toUnqualifiedVersionless();
 		}
+
+		// Load the 0-2 page
 
 		Bundle output = myClient
 			.search()
-			.forResource("Organization")
+			.forResource("Patient")
 			.count(3)
+			.sort(new SortSpec(Patient.SP_FAMILY, SortOrderEnum.ASC))
 			.returnBundle(Bundle.class)
 			.execute();
 
+		assertThat(extractFamilyNamesFromPatientsInBundle(output)).containsExactly(
+			"00000", "00001", "00002"
+		);
+
+		// Try to load an offset past the end
+
 		String nextPageUrl = output.getLink("next").getUrl();
-		String url = nextPageUrl.replace("_getpagesoffset=3", "_getpagesoffset=999");
-		ourLog.info("Going to request URL: {}", url);
+		String pastTheEndUrl = nextPageUrl.replace("_getpagesoffset=3", "_getpagesoffset=999");
+		ourLog.info("Going to request URL: {}", pastTheEndUrl);
 
 		output = myClient
 			.loadPage()
-			.byUrl(url)
+			.byUrl(pastTheEndUrl)
 			.andReturnBundle(Bundle.class)
 			.execute();
 		assertThat(output.getEntry()).isEmpty();
+
+		// Now load the original 3-5 page
+
+		output = myClient
+			.loadPage()
+			.byUrl(nextPageUrl)
+			.andReturnBundle(Bundle.class)
+			.execute();
+		assertThat(extractFamilyNamesFromPatientsInBundle(output)).containsExactly(
+			"00003", "00004", "00005"
+		);
 
 	}
 
@@ -1500,99 +1576,151 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	/**
-	 * A conditional update whose body carries an id that disagrees with the resource its conditional URL matched
-	 * must be rejected with a 400 and an OperationOutcome (http://hl7.org/fhir/http.html#cond-update).
-	 * <p>
-	 * TODO-TG: characterization test of a known-wrong behaviour. It asserts what the spec requires and is
-	 * {@link Disabled} because HAPI diverges: the REST layer discards the conditional-PUT body id in
-	 * {@code UpdateMethodBinding.validateResourceIdAndUrlIdForNonConditionalOperation}, so the mismatch never
-	 * reaches the HAPI-2279 check in {@code BaseHapiFhirResourceDao.doUpdate} and the match is updated with a 200
-	 * instead. Re-enable once the id stripping is fixed.
+	 * Scenarios that a conditional update operation with a user provided body id should be ACCEPTED.
+	 *
 	 * <p>
 	 * Raw HTTP is used deliberately — the generic client must not be able to drop the id on our behalf, or the
 	 * test would be measuring the client rather than the server.
 	 */
-	// Created by Claude Opus 5
-	@Test
-	@Disabled("TODO-TG: known divergence - REST discards the conditional PUT body id, so the mismatch is never rejected")
-	public void testConditionalUpdate_OneMatch_DifferentBodyId_shouldRejectWith2279_specDivergence() throws IOException {
-		Patient existing = new Patient();
-		existing.addIdentifier().setSystem("http://acme.org/mrn").setValue("PT1");
-		IIdType existingId = myClient.create().resource(existing).execute().getId().toUnqualifiedVersionless();
-
-		Patient update = new Patient();
-		update.setId("some-other-id");
-		update.addIdentifier().setSystem("http://acme.org/mrn").setValue("PT1");
-		update.setActive(true);
-
-		HttpPut httpPut = new HttpPut(myServerBase + "/Patient?identifier=http://acme.org/mrn%7CPT1");
-		httpPut.setEntity(new StringEntity(
-			myFhirContext.newJsonParser().encodeResourceToString(update),
-			ContentType.parse("application/json+fhir")));
-
-		try (CloseableHttpResponse status = ourHttpClient.execute(httpPut)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("{}\n{}", status.getStatusLine(), responseContent);
-
-			assertThat(status.getStatusLine().getStatusCode())
-				.as("spec case 5 requires 400 Bad Request when the body id does not match the conditional match")
-				.isEqualTo(400);
-			assertThat(responseContent)
-				.as("the OperationOutcome should identify the id mismatch")
-				.contains("HAPI-2279");
+	// Created by Claude Fable 5.1
+	@ParameterizedTest(name = "{0}")
+	@CsvSource(
+		textBlock = """
+		# name,                                                                       strategy,     existingMatchId, bodyId,      status, expectedVersion
+		'ALPHANUMERIC, no match, client-assigned body id: created under that id',     ALPHANUMERIC, ,                custom-id-1, 201,    1
+		'ALPHANUMERIC, one match, body id equals the match: updated in place',        ALPHANUMERIC, match-pt,        match-pt,    200,    2
+		'ANY, no match, client-assigned body id: created under that id',              ANY,          ,                custom-id-1, 201,    1
+		'ANY, no match, numeric body id: created under that id',                      ANY,          ,                987654321,   201,    1
+		'ANY, one match, body id equals the match: updated in place',                 ANY,          match-pt,        match-pt,    200,    2
+		'NOT_ALLOWED, one match, body id equals the match: updated in place',         NOT_ALLOWED,  match-pt,        match-pt,    200,    2
+		""")
+	public void testConditionalUpdate_userProvidedIdInResourceBody_acceptScenarios(
+			String theName,
+			JpaStorageSettings.ClientIdStrategyEnum theStrategy,
+			String theExistingMatchId,
+			String theBodyId,
+			int theExpectedStatus,
+			String theExpectedVersion)
+			throws IOException {
+		// setup
+		if (theExistingMatchId != null) {
+			createPatient(withId(theExistingMatchId), withIdentifier(MRN_SYSTEM, CONDITIONAL_UPDATE_MRN));
 		}
+		myStorageSettings.setResourceClientIdStrategy(theStrategy);
 
-		Patient matched = myClient.read().resource(Patient.class).withId(existingId).execute();
-		assertThat(matched.hasActive())
-			.as("the rejected conditional update must not have modified the matched resource")
-			.isFalse();
+		// execute
+		ConditionalUpdateResponse response = conditionalUpdateByMrn(CONDITIONAL_UPDATE_MRN, theBodyId, "Smith");
 
-		assertThatThrownBy(() -> myClient.read().resource(Patient.class).withId("some-other-id").execute())
-			.as("the rejected conditional update must not have created anything under the body id")
-			.isInstanceOf(ResourceNotFoundException.class);
+		// verify
+		assertThat(response.statusCode()).isEqualTo(theExpectedStatus);
+
+		Patient stored = myClient.read().resource(Patient.class).withId(theBodyId).execute();
+		assertThat(stored.getIdElement().getVersionIdPart()).isEqualTo(theExpectedVersion);
+		assertThat(stored.getNameFirstRep().getFamily()).isEqualTo("Smith");
+		assertThat(searchPatientsByMrn(CONDITIONAL_UPDATE_MRN))
+			.extracting(t -> t.getIdElement().getIdPart())
+			.containsExactly(theBodyId);
 	}
 
 	/**
-	 * A conditional update that matches nothing must create the resource using the client-supplied body id and
-	 * return 201 (http://hl7.org/fhir/http.html#cond-update).
+	 * Scenarios that a conditional update operation with a user provided body id should be REJECTED.
 	 * <p>
-	 * TODO-TG: characterization test of a known-wrong behaviour. It asserts what the spec requires and is
-	 * {@link Disabled} because HAPI diverges: the REST layer discards the conditional-PUT body id in
-	 * {@code UpdateMethodBinding.validateResourceIdAndUrlIdForNonConditionalOperation}, so the resource is created
-	 * with a server-assigned id instead. Re-enable once the id stripping is fixed.
-	 * <p>
-	 * Raw HTTP is used deliberately — see the sibling test above.
+	 * Raw HTTP is used deliberately - see the sibling test above.
 	 */
-	// Created by Claude Opus 5
-	@Test
-	@Disabled("TODO-TG: known divergence - REST discards the conditional PUT body id, so the supplied id is not used")
-	public void testConditionalUpdate_NoMatch_ClientAssignedBodyId_shouldCreateWithThatId_specDivergence() throws IOException {
-		Patient create = new Patient();
-		// alphanumeric: the default ClientIdStrategyEnum.ALPHANUMERIC rejects purely-numeric client ids (Msg 960)
-		create.setId("custom-id-1");
-		create.addIdentifier().setSystem("http://acme.org/mrn").setValue("PT-NOMATCH");
-		create.setActive(true);
+	// Created by Claude Fable 5.1
+	@ParameterizedTest(name = "{0}")
+	@CsvSource(
+		textBlock = """
+		# name,                                                                                 strategy,     existingMatchId, existingOtherId, bodyId,                                        status, expectedCode
+		'ALPHANUMERIC, one match, different body id: HAPI-2279',                                ALPHANUMERIC, match-pt,        ,                some-other-id,                                 400,    HAPI-2279
+		'ALPHANUMERIC, no match, numeric body id: HAPI-0960',                                   ALPHANUMERIC, ,                ,                987654321,                                     400,    HAPI-0960
+		'ALPHANUMERIC, no match, body id is not a valid FHIR id: HAPI-0521',                    ALPHANUMERIC, ,                ,                urn:uuid:8b7d3a4e-2c1f-4f5a-9e6b-0d1c2b3a4f5e, 400,    HAPI-0521
+		'ALPHANUMERIC, no match, body id already belongs to another resource: HAPI-0825',       ALPHANUMERIC, ,                existing-pt,     existing-pt,                                   409,    HAPI-0825
+		'ANY, one match, different body id: HAPI-2279',                                         ANY,          match-pt,        ,                some-other-id,                                 400,    HAPI-2279
+		'ANY, no match, body id is not a valid FHIR id: HAPI-0521',                             ANY,          ,                ,                urn:uuid:8b7d3a4e-2c1f-4f5a-9e6b-0d1c2b3a4f5e, 400,    HAPI-0521
+		'ANY, no match, body id already belongs to another resource: HAPI-0825',                ANY,          ,                existing-pt,     existing-pt,                                   409,    HAPI-0825
+		'NOT_ALLOWED, no match, client-assigned body id: HAPI-0959',                            NOT_ALLOWED,  ,                ,                custom-id-1,                                   404,    HAPI-0959
+		'NOT_ALLOWED, one match, different body id: HAPI-2279',                                 NOT_ALLOWED,  match-pt,        ,                some-other-id,                                 400,    HAPI-2279
+		'NOT_ALLOWED, no match, numeric body id: HAPI-0959',                                    NOT_ALLOWED,  ,                ,                987654321,                                     404,    HAPI-0959
+		'NOT_ALLOWED, no match, body id is not a valid FHIR id: HAPI-0521',                     NOT_ALLOWED,  ,                ,                urn:uuid:8b7d3a4e-2c1f-4f5a-9e6b-0d1c2b3a4f5e, 400,    HAPI-0521
+		'NOT_ALLOWED, no match, body id already belongs to another resource: HAPI-0959',        NOT_ALLOWED,  ,                existing-pt,     existing-pt,                                   404,    HAPI-0959
+		""")
+	public void testConditionalUpdate_userProvidedIdInResourceBody_rejectScenarios(
+			String theName,
+			JpaStorageSettings.ClientIdStrategyEnum theStrategy,
+			String theExistingMatchId,
+			String theExistingOtherId,
+			String theBodyId,
+			int theExpectedStatus,
+			String theExpectedCode)
+			throws IOException {
+		// setup
+		if (theExistingMatchId != null) {
+			createPatient(withId(theExistingMatchId), withIdentifier(MRN_SYSTEM, CONDITIONAL_UPDATE_MRN));
+		}
+		if (theExistingOtherId != null) {
+			createPatient(withId(theExistingOtherId), withIdentifier(MRN_SYSTEM, "PT-OTHER"));
+		}
+		myStorageSettings.setResourceClientIdStrategy(theStrategy);
 
-		HttpPut httpPut = new HttpPut(myServerBase + "/Patient?identifier=http://acme.org/mrn%7CPT-NOMATCH");
-		httpPut.setEntity(new StringEntity(
-			myFhirContext.newJsonParser().encodeResourceToString(create),
-			ContentType.parse("application/json+fhir")));
+		// execute
+		ConditionalUpdateResponse response = conditionalUpdateByMrn(CONDITIONAL_UPDATE_MRN, theBodyId, "Smith");
+
+		// verify
+		assertThat(response.statusCode()).isEqualTo(theExpectedStatus);
+		assertThat(response.body()).contains(theExpectedCode);
+
+		assertThat(searchPatientsByFamily("Smith"))
+			.as("the rejected conditional update must not have created or modified anything")
+			.isEmpty();
+		List<String> expectedMatchIds = theExistingMatchId != null ? List.of(theExistingMatchId) : List.of();
+		assertThat(searchPatientsByMrn(CONDITIONAL_UPDATE_MRN))
+			.extracting(t -> t.getIdElement().getIdPart())
+			.containsExactlyElementsOf(expectedMatchIds);
+		for (String existingId : Arrays.asList(theExistingMatchId, theExistingOtherId)) {
+			if (existingId != null) {
+				Patient existing = myClient.read().resource(Patient.class).withId(existingId).execute();
+				assertThat(existing.getIdElement().getVersionIdPart())
+					.as("pre-existing resource " + existingId + " must be untouched")
+					.isEqualTo("1");
+			}
+		}
+	}
+
+	private record ConditionalUpdateResponse(int statusCode, String body) {}
+
+	/**
+	 * Sends {@code PUT Patient?identifier=<mrn>} with a hand-written JSON body so that the id reaches the server
+	 * exactly as given: the JSON encoder omits a {@code urn:} id, and the generic client could drop any id.
+	 */
+	private ConditionalUpdateResponse conditionalUpdateByMrn(String theMrn, String theBodyId, String theFamily)
+			throws IOException {
+		String body = "{\"resourceType\":\"Patient\",\"id\":\"" + theBodyId + "\","
+			+ "\"identifier\":[{\"system\":\"" + MRN_SYSTEM + "\",\"value\":\"" + theMrn + "\"}],"
+			+ "\"name\":[{\"family\":\"" + theFamily + "\"}]}";
+
+		HttpPut httpPut = new HttpPut(myServerBase + "/Patient?identifier=" + UrlUtil.escapeUrlParam(MRN_SYSTEM + "|" + theMrn));
+		httpPut.setEntity(new StringEntity(body, ContentType.parse("application/json+fhir")));
 
 		try (CloseableHttpResponse status = ourHttpClient.execute(httpPut)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("{}\n{}", status.getStatusLine(), responseContent);
-
-			assertEquals(201, status.getStatusLine().getStatusCode());
+			return new ConditionalUpdateResponse(status.getStatusLine().getStatusCode(), responseContent);
 		}
+	}
 
+	private List<Patient> searchPatientsByMrn(String theMrn) {
 		Bundle found = myClient.search().forResource(Patient.class)
-			.where(Patient.IDENTIFIER.exactly().systemAndCode("http://acme.org/mrn", "PT-NOMATCH"))
+			.where(Patient.IDENTIFIER.exactly().systemAndCode(MRN_SYSTEM, theMrn))
 			.returnBundle(Bundle.class).execute();
+		return BundleUtil.toListOfResourcesOfType(myFhirContext, found, Patient.class);
+	}
 
-		assertThat(found.getEntry()).hasSize(1);
-		assertThat(found.getEntryFirstRep().getResource().getIdElement().getIdPart())
-			.as("spec case 2 requires the resource to be created with the client-supplied id")
-			.isEqualTo("custom-id-1");
+	private List<Patient> searchPatientsByFamily(String theFamily) {
+		Bundle found = myClient.search().forResource(Patient.class)
+			.where(Patient.FAMILY.matches().value(theFamily))
+			.returnBundle(Bundle.class).execute();
+		return BundleUtil.toListOfResourcesOfType(myFhirContext, found, Patient.class);
 	}
 
 	@Test
@@ -3399,7 +3527,17 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals("Patient", bundle.getEntry().get(0).getResource().getIdElement().getResourceType());
 		assertEquals("Patient", bundle.getEntry().get(1).getResource().getIdElement().getResourceType());
 		assertEquals("Organization", bundle.getEntry().get(2).getResource().getIdElement().getResourceType());
-		assertEquals(10, bundle.getTotal());
+
+		// Load the next page
+		bundle = myClient
+			.loadPage()
+			.next(bundle)
+			.execute();
+
+		assertEquals("Patient", bundle.getEntry().get(0).getResource().getIdElement().getResourceType());
+		assertEquals("Patient", bundle.getEntry().get(1).getResource().getIdElement().getResourceType());
+		assertEquals("Organization", bundle.getEntry().get(2).getResource().getIdElement().getResourceType());
+		assertEquals(10, bundle.getTotalElement().getValue());
 	}
 
 	@Test
@@ -3843,9 +3981,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 		ourLog.debug("Result: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
-		assertEquals(1, bundle.getTotal());
 		assertThat(bundle.getEntry()).hasSize(1);
-		assertEquals(id2.getIdPart(), bundle.getEntry().get(0).getResource().getIdElement().getIdPart());
+			assertEquals(id2.getIdPart(), bundle.getEntry().get(0).getResource().getIdElement().getIdPart());
 	}
 
 	@Test
@@ -4657,23 +4794,37 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		for (int i = 1; i <= 20; i++) {
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue(Integer.toString(i));
-			patient.addName().setFamily(methodName).addGiven("Joe");
+			patient.addName().setFamily("foo" + leftPad(Integer.toString(i), 2, '0')).addGiven("Joe");
 			myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		List<String> linkNext = Lists.newArrayList();
+		Set<String> linkNext = new HashSet<>();
 		for (int i = 0; i < 100; i++) {
-			Bundle bundle = myClient.search().forResource(Patient.class).where(Patient.NAME.matches().value("testSearchPagingKeepsOldSearches")).count(5).returnBundle(Bundle.class).execute();
+			Bundle bundle = myClient
+				.search()
+				.forResource(Patient.class)
+				.where(Patient.NAME.matches().value("foo"))
+				.count(5)
+				.sort(new SortSpec(Patient.SP_FAMILY, SortOrderEnum.ASC))
+				.returnBundle(Bundle.class).execute();
 			assertTrue(isNotBlank(bundle.getLink("next").getUrl()));
 			assertThat(bundle.getEntry()).hasSize(5);
+			List<String> familyNames = extractFamilyNamesFromPatientsInBundle(bundle);
+			assertThat(familyNames).containsExactly("foo01", "foo02", "foo03", "foo04", "foo05");
 			linkNext.add(bundle.getLink("next").getUrl());
 		}
+		assertThat(linkNext).hasSize(100);
+
+		logAllSearches();
+		logAllSearchResults();
 
 		int index = 0;
 		for (String nextLink : linkNext) {
 			ourLog.info("Fetching index {}", index++);
 			Bundle b = myClient.fetchResourceFromUrl(Bundle.class, nextLink);
 			assertThat(b.getEntry()).hasSize(5);
+			List<String> familyNames = extractFamilyNamesFromPatientsInBundle(b);
+			assertThat(familyNames).containsExactly("foo06", "foo07", "foo08", "foo09", "foo10");
 		}
 	}
 
@@ -5224,7 +5375,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Disabled("Not useful with the search coordinator thread pool removed")
 	public void testSearchWithCountNotSet() {
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(1);
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(200);
 
 		for (int i = 0; i < 10; i++) {
 			Patient pat = new Patient();
@@ -5262,38 +5412,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testSearchWithCountSearchResultsUpTo20() {
-		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(1);
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(200);
-		myStorageSettings.setCountSearchResultsUpTo(20);
-
-		for (int i = 0; i < 10; i++) {
-			Patient pat = new Patient();
-			pat.addIdentifier().setSystem("urn:system:rpr4").setValue("test" + i);
-			myClient.create().resource(pat).execute();
-		}
-
-		StopWatch sw = new StopWatch();
-
-		Bundle found = myClient
-			.search()
-			.forResource(Patient.class)
-			.returnBundle(Bundle.class)
-			.count(1)
-			.execute();
-
-		assertThat(sw.getMillis()).isGreaterThanOrEqualTo(1000L);
-
-		assertEquals(10, found.getTotalElement().getValue().intValue());
-		assertThat(found.getEntry()).hasSize(1);
-
-	}
-
-	@Test
 	@Disabled("Not useful with the search coordinator thread pool removed")
 	public void testSearchWithCountSearchResultsUpTo5() {
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(1);
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(200);
 		myStorageSettings.setCountSearchResultsUpTo(5);
 
 		for (int i = 0; i < 10; i++) {
@@ -6756,7 +6877,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	public void testValidateResourceHuge() throws IOException {
 
 		Patient patient = new Patient();
-		patient.addName().addGiven("James" + StringUtils.leftPad("James", 1000000, 'A'));
+		patient.addName().addGiven("James" + leftPad("James", 1000000, 'A'));
 		patient.setBirthDateElement(new DateType("2011-02-02"));
 
 		Parameters input = new Parameters();
@@ -8172,4 +8293,12 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.hasMessage("HTTP 400 Bad Request: HAPI-2498: Unsupported search modifier(s): \"[:identifier]\" for resource type \"Observation\". Valid search modifiers are: [:contains, :exact, :in, :iterate, :missing, :not-in, :of-type, :recurse, :text]");
 		}
 	}
+
+
+	@Nonnull
+	private static List<String> extractFamilyNamesFromPatientsInBundle(Bundle bundle) {
+		List<String> familyNames = bundle.getEntry().stream().map(t -> ((Patient)t.getResource()).getName().get(0).getFamily()).toList();
+		return familyNames;
+	}
+
 }

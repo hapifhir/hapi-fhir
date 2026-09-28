@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
@@ -412,7 +413,8 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 							}
 						}
 						case MATCHES -> {
-							if (!renderedSql.equals(myExpectedSql)) {
+							Pattern pattern = Pattern.compile(myExpectedSql);
+							if (!pattern.matcher(renderedSql).matches()) {
 								yield Optional.of(LS + "Expected SQL  : " + renderedSql + LS +
 									"to match      : " + myExpectedSql);
 							} else {

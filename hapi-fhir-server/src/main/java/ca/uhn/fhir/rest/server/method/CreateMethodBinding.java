@@ -59,7 +59,7 @@ public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	}
 
 	@Override
-	protected void validateResourceIdAndUrlIdForNonConditionalOperation(
+	protected void validateResourceIdAndUrlIdForWriteOperation(
 			IBaseResource theResource, String theResourceId, String theUrlId, String theMatchUrl) {
 		if (isNotBlank(theUrlId)) {
 			String msg = getContext()

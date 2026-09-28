@@ -1,12 +1,13 @@
 package org.hl7.fhir.common.hapi.validation;
 
+import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
+import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.validation.IValidationProviders;
 import ca.uhn.fhir.util.ClasspathUtil;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -149,6 +150,96 @@ public interface IValidateCodeTest {
 		assertNull(outcome.getSeverity());
 		assertNull(outcome.getMessage());
 		assertTrue(outcome.getIssues().isEmpty());
+	}
+
+	// Created by Claude Opus 5
+	@Test
+	default void validateCode_withCodeSystemVersion_namesTheVersionOnTheRequest() {
+		// the response is registered under CODE_SYSTEM_VERSION only, so it is returned only if the request
+		// names that version
+		getCodeSystemProvider().addTerminologyResponse(OPERATION_VALIDATE_CODE, CODE_SYSTEM, CODE_SYSTEM_VERSION, CODE, createParameters(true, DISPLAY, null, null));
+
+		CodeValidationResult outcome = getService()
+				.validateCode(
+						null,
+						new ConceptValidationOptions(),
+						new ValidateCodeRequest(CODE_SYSTEM, CODE_SYSTEM_VERSION, CODE, DISPLAY, null));
+
+		assertNotNull(outcome);
+		assertEquals(CODE, outcome.getCode());
+		assertEquals(DISPLAY, outcome.getDisplay());
+	}
+
+	// Created by Claude Opus 5
+	@Test
+	default void validateCode_withoutCodeSystemVersion_namesNoVersionOnTheRequest() {
+		// the response is registered under no version, so it is returned only if the request names none
+		createCodeSystemReturnParameters(true, DISPLAY, null, null);
+
+		CodeValidationResult outcome =
+				getService()
+						.validateCode(
+								null,
+								new ConceptValidationOptions(),
+								new ValidateCodeRequest(CODE_SYSTEM, null, CODE, DISPLAY, null));
+
+		assertNotNull(outcome);
+		assertEquals(CODE, outcome.getCode());
+		assertEquals(DISPLAY, outcome.getDisplay());
+	}
+
+	// Created by Claude Opus 5
+	@Test
+	default void validateCode_withCodeSystemVersionAndValueSet_namesTheVersionOnTheRequest() {
+		// ValueSet/$validate-code names the code system version "systemVersion", not "version". The response is
+		// registered under CODE_SYSTEM_VERSION only, so it is returned only if the request names that version.
+		getValueSetProvider().addTerminologyResponse(OPERATION_VALIDATE_CODE, VALUE_SET_URL, CODE_SYSTEM_VERSION, CODE, createParameters(true, DISPLAY, null, null));
+
+		CodeValidationResult outcome = getService()
+				.validateCode(
+						null,
+						new ConceptValidationOptions(),
+						new ValidateCodeRequest(CODE_SYSTEM, CODE_SYSTEM_VERSION, CODE, DISPLAY, VALUE_SET_URL));
+
+		assertNotNull(outcome);
+		assertEquals(CODE, outcome.getCode());
+		assertEquals(DISPLAY, outcome.getDisplay());
+	}
+
+	// Created by Claude Opus 5
+	@Test
+	default void validateCode_withoutCodeSystemVersionAndValueSet_namesNoVersionOnTheRequest() {
+		// the response is registered under no version, so it is returned only if the request names none
+		createValueSetReturnParameters(true, DISPLAY, null, null);
+
+		CodeValidationResult outcome = getService()
+				.validateCode(
+						null,
+						new ConceptValidationOptions(),
+						new ValidateCodeRequest(CODE_SYSTEM, null, CODE, DISPLAY, VALUE_SET_URL));
+
+		assertNotNull(outcome);
+		assertEquals(CODE, outcome.getCode());
+		assertEquals(DISPLAY, outcome.getDisplay());
+	}
+
+	// Created by Claude Opus 5
+	@Test
+	default void validateCode_codeSystemVersionWithoutACodeSystem_namesNoVersionOnTheRequest() {
+		// a systemVersion qualifies a system, so with no system there is nothing for it to name and strict
+		// servers reject it. The response is registered under no version, so it is returned only if none was
+		// sent.
+		createValueSetReturnParameters(true, DISPLAY, null, null);
+
+		CodeValidationResult outcome = getService()
+				.validateCode(
+						null,
+						new ConceptValidationOptions(),
+						new ValidateCodeRequest(null, CODE_SYSTEM_VERSION, CODE, DISPLAY, VALUE_SET_URL));
+
+		assertNotNull(outcome);
+		assertEquals(CODE, outcome.getCode());
+		assertEquals(DISPLAY, outcome.getDisplay());
 	}
 
 	@Test

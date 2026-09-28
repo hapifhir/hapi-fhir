@@ -1,0 +1,8 @@
+---
+type: perf
+issue: 8426
+title: "A duplicate database query has been optimized away when performing a search where:
+* `_include` or `_revinclude` parameters are used on the query URL
+* Consent services are enabled (or any other PREACCESS pointcut hooks are registered)
+
+While resolving the include/revincludes for a search (in both stateful and stateless modes), the resources are loaded from the database. These loaded resources are now retained in memory in order to avoid needing to load them again to return them to the client."

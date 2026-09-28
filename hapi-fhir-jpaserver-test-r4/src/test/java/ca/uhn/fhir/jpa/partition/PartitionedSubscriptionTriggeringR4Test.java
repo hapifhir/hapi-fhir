@@ -16,6 +16,7 @@ import ca.uhn.fhir.jpa.subscription.resthook.RestHookTestR4Test;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookListener;
+import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -208,8 +209,14 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		ArrayList<IPrimitiveType<String>> searchUrlList = new ArrayList<>();
 		searchUrlList.add(new StringDt("Observation?"));
 
+		myCaptureQueriesListener.clear();
 		Parameters resultParameters = (Parameters) mySubscriptionTriggeringSvc.triggerSubscription(null, searchUrlList, subscriptionId, mySrd);
 		mySubscriptionTriggeringSvc.runDeliveryPass();
+
+		// Verify
+		for (SqlQuery selectQuery : myCaptureQueriesListener.getSelectQueries()) {
+			assertThat(selectQuery.getRequestPartitionId().getPartitionIds()).containsExactly(1);
+		}
 
 		waitForQueueToDrain();
 		List<Observation> resourceUpdates = BaseSubscriptionsR4Test.ourObservationProvider.getResourceUpdates();
