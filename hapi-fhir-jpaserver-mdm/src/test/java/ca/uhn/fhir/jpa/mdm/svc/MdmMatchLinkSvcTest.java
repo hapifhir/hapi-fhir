@@ -106,6 +106,79 @@ public class MdmMatchLinkSvcTest {
 			}
 		}
 
+		/**
+		 * The tag says the resource is currently omitted from matching, so a later pass that matches it has to clear
+		 * the tag. Storage will not do it on an update - tags are merged, not replaced - so MDM deletes it explicitly.
+		 */
+		@Test
+		public void updateLinks_whenResourceNoLongerExceedsTheLimit_clearsTheUnmatchedTag() {
+			// setup: tag jane by putting her over a limit she exceeds
+			int maxThreshold = 3;
+			Date today = createJanePatients(maxThreshold * 2);
+
+			Patient jane = buildJaneWithBirthday(today);
+			jane.setActive(true);
+
+			int searchLimit = myMdmSettings.getCandidateSearchLimit();
+			IIdType id;
+			try {
+				myMdmSettings.setCandidateSearchLimit(maxThreshold);
+				id = createPatientAndUpdateLinks(jane).getIdElement();
+			} finally {
+				myMdmSettings.setCandidateSearchLimit(searchLimit);
+			}
+			assertTrue(MdmResourceUtil.resourceHasTagWithSystem(
+				myPatientDao.read(id, new SystemRequestDetails()), MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE
+			));
+
+			// test: resubmit with the limit restored, so matching runs to completion this time
+			updatePatientAndUpdateLinks(myPatientDao.read(id, new SystemRequestDetails()));
+
+			// validate
+			Patient returned = myPatientDao.read(id, new SystemRequestDetails());
+			assertFalse(MdmResourceUtil.resourceHasTagWithSystem(
+				returned, MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE
+			));
+		}
+
+		/**
+		 * The candidate count is a property of the repository, not of the resource, so a resource that matched
+		 * cleanly can cross the limit later purely because similar resources arrived after it.
+		 */
+		@Test
+		public void updateLinks_whenLaterArrivalsCrossTheLimit_tagsAPreviouslyCleanResource() {
+			int maxThreshold = 3;
+
+			int searchLimit = myMdmSettings.getCandidateSearchLimit();
+			try {
+				myMdmSettings.setCandidateSearchLimit(maxThreshold);
+
+				// setup: jane is well under the limit on her first pass, so she is not tagged
+				Date today = createJanePatients(1);
+				Patient jane = buildJaneWithBirthday(today);
+				jane.setActive(true);
+				IIdType id = createPatientAndUpdateLinks(jane).getIdElement().toUnqualifiedVersionless();
+				assertFalse(MdmResourceUtil.resourceHasTagWithSystem(
+					myPatientDao.read(id, new SystemRequestDetails()), MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE
+				));
+
+				// more janes arrive, pushing the candidate count for that name over the limit
+				createJanePatients(maxThreshold, today);
+
+				// test: resubmitting jane unchanged is now enough to have her omitted from matching
+				updatePatientAndUpdateLinks(myPatientDao.read(id, new SystemRequestDetails()));
+
+				// verify
+				Patient returned = myPatientDao.read(id, new SystemRequestDetails());
+				assertTrue(returned.getMeta()
+					.getTag().stream()
+					.anyMatch(tag -> tag.getSystem().equals(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE)
+						&& tag.getCode().equals(MdmConstants.TOO_MANY_CANDIDATES)));
+			} finally {
+				myMdmSettings.setCandidateSearchLimit(searchLimit);
+			}
+		}
+
 		@Test
 		public void searching_withTooManyCandidateResources_yieldsSaidResources() {
 			// setup
@@ -146,16 +219,19 @@ public class MdmMatchLinkSvcTest {
 		}
 
 		private Date createJanePatients(int theNumToMake) {
-			Date today = new Date();
+			return createJanePatients(theNumToMake, new Date());
+		}
+
+		private Date createJanePatients(int theNumToMake, Date theBirthday) {
 			for (int i = 0; i < theNumToMake; i++) {
-				Patient jane = buildJaneWithBirthday(today);
+				Patient jane = buildJaneWithBirthday(theBirthday);
 				jane.getName()
 					.get(0)
 					.addGiven("_" + i);
 				jane.setActive(true);
 				createPatient(jane);
 			}
-			return today;
+			return theBirthday;
 		}
 	}
 
@@ -935,6 +1011,114 @@ public class MdmMatchLinkSvcTest {
 					}));
 			}
 
+		}
+
+		/**
+		 * Untagging runs on passes that then re-tag for the same reason. A resource that is still blocked has to come
+		 * out of a repeat pass with exactly one tag - not zero, and not two.
+		 */
+		/**
+		 * The reason a resource is omitted from matching can change between passes. Because the persisted tag is
+		 * added rather than replaced, both codes would accumulate under the one system unless the earlier tag is
+		 * cleared first.
+		 */
+		@Test
+		public void updateMdmLinksForMdmSource_blockedThenOverCandidateLimit_keepsOnlyTheCurrentTag() {
+			// setup - block Jane Doe, and pick a limit that any candidate search will reach
+			BlockListJson blockListJson = new BlockListJson();
+			BlockListRuleJson rule = new BlockListRuleJson();
+			rule.setResourceType("Patient");
+			rule.addBlockListField()
+				.setFhirPath("name.single().family")
+				.setBlockedValue("Doe");
+			rule.addBlockListField()
+				.setFhirPath("name.single().given.first()")
+				.setBlockedValue("Jane");
+			blockListJson.addBlockListRule(rule);
+
+			when(myBlockListRuleProvider.getBlocklistRules())
+				.thenReturn(blockListJson);
+
+			int searchLimit = myMdmSettings.getCandidateSearchLimit();
+			try {
+				myMdmSettings.setCandidateSearchLimit(1);
+
+				Patient jane = buildJanePatient();
+				jane.setActive(true);
+				IIdType id = createPatient(jane).getIdElement().toUnqualifiedVersionless();
+				myMdmMatchLinkSvc.updateMdmLinksForMdmSource(
+					myPatientDao.read(id, new SystemRequestDetails()), createContextForCreate("Patient"));
+				assertEquals(MdmConstants.BLOCKED_VALUE, onlyUnmatchedTagCode(id));
+
+				// the block list no longer covers her, but there are now more candidates than the limit allows
+				when(myBlockListRuleProvider.getBlocklistRules())
+					.thenReturn(new BlockListJson());
+				for (int i = 0; i < 2; i++) {
+					Patient candidate = buildJanePatient();
+					candidate.setActive(true);
+					createPatient(candidate);
+				}
+
+				// test
+				myMdmMatchLinkSvc.updateMdmLinksForMdmSource(
+					myPatientDao.read(id, new SystemRequestDetails()), createContextForUpdate("Patient"));
+
+				// verify - the blocked code is replaced by the current one, not joined by it
+				assertEquals(MdmConstants.TOO_MANY_CANDIDATES, onlyUnmatchedTagCode(id));
+			} finally {
+				myMdmSettings.setCandidateSearchLimit(searchLimit);
+			}
+		}
+
+		/**
+		 * Reads the resource back and returns the code of its one mdm-unmatched tag, failing if there is not
+		 * exactly one.
+		 */
+		private String onlyUnmatchedTagCode(IIdType theId) {
+			Patient persisted = myPatientDao.read(theId, new SystemRequestDetails());
+			List<String> codes = persisted.getMeta().getTag().stream()
+				.filter(tag -> tag.getSystem().equals(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE))
+				.map(tag -> tag.getCode())
+				.toList();
+			assertEquals(1, codes.size());
+			return codes.get(0);
+		}
+
+		@Test
+		public void updateMdmLinksForMdmSource_resourceStaysBlocked_keepsExactlyOneTag() {
+			// setup
+			BlockListJson blockListJson = new BlockListJson();
+			BlockListRuleJson rule = new BlockListRuleJson();
+			rule.setResourceType("Patient");
+			rule.addBlockListField()
+				.setFhirPath("name.single().family")
+				.setBlockedValue("Doe");
+			rule.addBlockListField()
+				.setFhirPath("name.single().given.first()")
+				.setBlockedValue("Jane");
+			blockListJson.addBlockListRule(rule);
+
+			when(myBlockListRuleProvider.getBlocklistRules())
+				.thenReturn(blockListJson);
+
+			Patient blockedPatient = createPatient(buildJanePatient());
+			IIdType id = blockedPatient.getIdElement().toUnqualifiedVersionless();
+			myMdmMatchLinkSvc.updateMdmLinksForMdmSource(blockedPatient, createContextForCreate("Patient"));
+
+			// test - resubmit it; the block list still matches, so it stays blocked
+			Patient resubmitted = myPatientDao.read(id, new SystemRequestDetails());
+			myMdmMatchLinkSvc.updateMdmLinksForMdmSource(resubmitted, createContextForUpdate("Patient"));
+
+			// verify
+			Patient returned = myPatientDao.read(id, new SystemRequestDetails());
+			assertEquals(1, returned.getMeta()
+				.getTag().stream()
+				.filter(tag -> tag.getSystem().equals(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE))
+				.count());
+			assertTrue(returned.getMeta()
+				.getTag().stream()
+				.anyMatch(tag -> tag.getSystem().equals(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE)
+					&& tag.getCode().equals(MdmConstants.BLOCKED_VALUE)));
 		}
 
 		@Test

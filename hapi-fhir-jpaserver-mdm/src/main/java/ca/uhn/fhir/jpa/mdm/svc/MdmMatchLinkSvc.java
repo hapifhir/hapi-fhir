@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
+import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -102,6 +103,12 @@ public class MdmMatchLinkSvc {
 
 	private MdmTransactionContext doMdmUpdate(
 			IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {
+		// if previously tagged unmatched, remove tag before resubmission
+		// we don't want multiple unmatced tag reasons (there shouldn't be multiple)
+		if (MdmResourceUtil.resourceHasTagWithSystem(theResource, MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE)) {
+			myMdmResourceDaoSvc.untagResourceAsUnmatched(theResource);
+		}
+
 		// we initialize to an empty list
 		// we require a candidatestrategy, but it doesn't matter
 		// because empty lists are effectively no matches

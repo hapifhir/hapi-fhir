@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.mdm.api;
 
+import java.util.List;
+
 public class MdmConstants {
 
 	/**
@@ -53,6 +55,12 @@ public class MdmConstants {
 	 * the {@link IMdmSettings#getCandidateSearchLimit()}.
 	 */
 	public static final String TOO_MANY_CANDIDATES = "too-many-candidates";
+
+	/**
+	 * List of all the various 'unmatched' tag types.
+	 * If a new one is added above, be sure to add it here too
+	 */
+	public static final List<String> MDM_UNMATCHED_CODES = List.of(BLOCKED_VALUE, TOO_MANY_CANDIDATES);
 
 	/**
 	 * Display text for MDM resources that are *blocked* from MDM matching because

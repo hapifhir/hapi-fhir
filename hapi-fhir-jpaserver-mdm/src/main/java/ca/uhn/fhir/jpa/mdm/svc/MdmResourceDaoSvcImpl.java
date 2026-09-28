@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -173,6 +174,32 @@ public class MdmResourceDaoSvcImpl implements IMdmResourceDaoSvc {
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Override
+	public void untagResourceAsUnmatched(IBaseResource theResource) {
+		if (!theResource.getIdElement().hasIdPart()) {
+			ourLog.error("Cannot untag resources that have not been persisted.");
+			return;
+		}
+
+		SystemRequestDetails rd = getSystemRequestDetailsForResource(theResource);
+
+		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResource.fhirType());
+
+		// this should never be null anyways
+		BaseRuntimeElementDefinition<?> metabase = Objects.requireNonNull(myFhirContext.getElementDefinition("Meta"));
+		IBaseMetaType meta = (IBaseMetaType) metabase.newInstance();
+		for (String code : MdmConstants.MDM_UNMATCHED_CODES) {
+			meta.addTag().setSystem(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE).setCode(code);
+		}
+
+		resourceDao.metaDeleteOperation(
+				theResource.getIdElement().toUnqualifiedVersionless(), meta, rd, new TransactionDetails());
+
+		// strip from memory
+		MdmResourceUtil.removeTagWithSystem(theResource, MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE);
+	}
+
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	@Override
 	public void tagResourceAsUnmatched(IBaseResource theResource, MdmTransactionContext theContext) {
 		if (!theResource.getIdElement().hasIdPart()) {
 			ourLog.error("Cannot tag resources that have not first been persisted!");
@@ -188,10 +215,7 @@ public class MdmResourceDaoSvcImpl implements IMdmResourceDaoSvc {
 			return;
 		}
 
-		SystemRequestDetails rd = new SystemRequestDetails();
-		RequestPartitionId partitionId = RequestPartitionId.getPartitionFromUserDataIfPresent(theResource)
-				.orElse(RequestPartitionId.allPartitions());
-		rd.setRequestPartitionId(partitionId);
+		SystemRequestDetails rd = getSystemRequestDetailsForResource(theResource);
 
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResource.fhirType());
 
@@ -199,5 +223,13 @@ public class MdmResourceDaoSvcImpl implements IMdmResourceDaoSvc {
 
 		resourceDao.metaAddOperation(
 				theResource.getIdElement().toUnqualifiedVersionless(), meta, rd, new TransactionDetails());
+	}
+
+	private SystemRequestDetails getSystemRequestDetailsForResource(IBaseResource theResource) {
+		SystemRequestDetails rd = new SystemRequestDetails();
+		RequestPartitionId partitionId = RequestPartitionId.getPartitionFromUserDataIfPresent(theResource)
+				.orElse(RequestPartitionId.allPartitions());
+		rd.setRequestPartitionId(partitionId);
+		return rd;
 	}
 }

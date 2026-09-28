@@ -183,6 +183,103 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 	}
 
 	@Test
+	public void untagResourceAsUnmatched_noId_doesNothing() {
+		// setup
+		Patient patient = buildFrankPatient(); // not saved
+		MdmResourceUtil.tagResourceAsBlocked(patient);
+
+		// test
+		myResourceDaoSvc.untagResourceAsUnmatched(patient);
+
+		// validate - the in-memory tag is left alone, because there is nothing to reconcile it against
+		assertTrue(patient.getMeta()
+			.getTag()
+			.stream()
+			.anyMatch(t -> t.getSystem().equalsIgnoreCase(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE)));
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = { true, false })
+	public void untagResourceAsUnmatched_withUnmatchedTag_removesOnlyThatTag(boolean theIsTooMany) {
+		// setup
+		String existingSystem = "http://hapi-fhir.example.com";
+		String value = "abc123";
+		Patient patient = buildFrankPatient();
+		patient.getMeta()
+			.addTag()
+			.setSystem(existingSystem)
+			.setCode(value);
+
+		DaoMethodOutcome outcome = myPatientDao.create(patient, new SystemRequestDetails());
+
+		MdmTransactionContext context = new MdmTransactionContext();
+		if (theIsTooMany) {
+			context.setTooManyCandidatesMatched(true);
+		} else {
+			context.setIsBlocked(true);
+		}
+		Patient saved = myPatientDao.read(outcome.getId(), new SystemRequestDetails());
+		myResourceDaoSvc.tagResourceAsUnmatched(saved, context);
+
+		// test
+		saved = myPatientDao.read(outcome.getId(), new SystemRequestDetails());
+		myResourceDaoSvc.untagResourceAsUnmatched(saved);
+
+		// validate
+		Patient reread = myPatientDao.read(outcome.getId(), new SystemRequestDetails());
+		assertTrue(reread.getMeta()
+			.getTag()
+			.stream()
+			.noneMatch(t -> t.getSystem().equalsIgnoreCase(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE)));
+		// unrelated tags are not collateral damage
+		assertTrue(reread.getMeta()
+			.getTag()
+			.stream()
+			.anyMatch(t -> t.getSystem().equalsIgnoreCase(existingSystem) && t.getCode().equalsIgnoreCase(value)));
+		// and the in-memory copy agrees with what was persisted
+		assertTrue(saved.getMeta()
+			.getTag()
+			.stream()
+			.noneMatch(t -> t.getSystem().equalsIgnoreCase(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE)));
+	}
+
+	/**
+	 * Tags are added rather than replaced, so a resource can accumulate both codes under the unmatched system.
+	 * Untagging has to clear the system, not one known code, or the next pass leaves two tags behind.
+	 */
+	@Test
+	public void untagResourceAsUnmatched_bothCodesPresent_removesBoth() {
+		// setup
+		Patient patient = buildFrankPatient();
+		patient.getMeta()
+			.addTag()
+			.setSystem(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE)
+			.setCode(MdmConstants.BLOCKED_VALUE);
+		patient.getMeta()
+			.addTag()
+			.setSystem(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE)
+			.setCode(MdmConstants.TOO_MANY_CANDIDATES);
+
+		DaoMethodOutcome outcome = myPatientDao.create(patient, new SystemRequestDetails());
+		Patient saved = myPatientDao.read(outcome.getId(), new SystemRequestDetails());
+		assertEquals(2, saved.getMeta()
+			.getTag()
+			.stream()
+			.filter(t -> t.getSystem().equalsIgnoreCase(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE))
+			.count());
+
+		// test
+		myResourceDaoSvc.untagResourceAsUnmatched(saved);
+
+		// validate
+		Patient reread = myPatientDao.read(outcome.getId(), new SystemRequestDetails());
+		assertTrue(reread.getMeta()
+			.getTag()
+			.stream()
+			.noneMatch(t -> t.getSystem().equalsIgnoreCase(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE)));
+	}
+
+	@Test
 	public void testSearchGoldenResourceOnSamePartition() {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
