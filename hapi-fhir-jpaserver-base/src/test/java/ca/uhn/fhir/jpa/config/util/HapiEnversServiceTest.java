@@ -21,6 +21,7 @@ import org.hibernate.cfg.ValidationSettings;
 import org.hibernate.dialect.H2Dialect;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.boot.internal.EnversService;
+import org.hibernate.envers.boot.internal.EnversServiceImpl;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
@@ -34,6 +35,43 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 // Created by Claude Opus 5.5
 class HapiEnversServiceTest {
+
+	/**
+	 * The Hibernate and Envers version {@link HapiEnversService} was verified against. Update it only after doing
+	 * the checks in {@link #hibernateVersion_isTheOneHapiEnversServiceWasVerifiedAgainst()}.
+	 */
+	private static final String VERIFIED_HIBERNATE_VERSION = "7.2.19.Final";
+
+	private static final String RECHECK_HAPI_ENVERS_SERVICE =
+			"""
+			Hibernate is %s and Envers is %s, but HapiEnversService was verified against %s. Before updating \
+			VERIFIED_HIBERNATE_VERSION in this test, check in this order (the HapiEnversService javadoc explains why \
+			it exists):
+			1. Does Envers still resolve entity id types while it initializes (AbstractCompositeIdMapper calling \
+			Component#getType())? If not, HapiEnversService is no longer needed: remove it, its registration in \
+			HapiEntityManagerFactoryUtil and this test class, and stop here.
+			2. Did AdditionalMappingContributor gain a way to order contributors (like FunctionContributor\
+			#ordinal())? If so, make DatabasePartitionModeIdFilteringMappingContributor run first with it, remove \
+			HapiEnversService and its registration, keep the SessionFactory test below without its \
+			HapiEnversService line, and stop here.
+			3. Otherwise HapiEnversService stays. EnversServiceImpl is internal to Envers: confirm isEnabled() and \
+			initialize(MetadataImplementor, MappingCollector, EffectiveMappingDefaults) still exist with those \
+			signatures, and that configure(Map) still sets what isEnabled() returns.
+			4. Confirm Hibernate still does not configure a service supplied through StandardServiceRegistryBuilder\
+			#addService (HapiEnversService configures itself for that reason), and that a supplied service still \
+			replaces the EnversServiceInitiator that Envers registers.
+			Then run HapiEnversServiceTest and MdmLinkDaoSvcTest (hapi-fhir-jpaserver-mdm).""";
+
+	@Test
+	void hibernateVersion_isTheOneHapiEnversServiceWasVerifiedAgainst() {
+		String hibernateVersion = org.hibernate.Version.getVersionString();
+		String enversVersion = EnversServiceImpl.class.getPackage().getImplementationVersion();
+		assertThat(List.of(hibernateVersion, enversVersion))
+				.withFailMessage(
+						RECHECK_HAPI_ENVERS_SERVICE.formatted(
+								hibernateVersion, enversVersion, VERIFIED_HIBERNATE_VERSION))
+				.containsOnly(VERIFIED_HIBERNATE_VERSION);
+	}
 
 	/**
 	 * Hibernate runs mapping contributors in classpath order. When Envers runs before the partition id filter,
