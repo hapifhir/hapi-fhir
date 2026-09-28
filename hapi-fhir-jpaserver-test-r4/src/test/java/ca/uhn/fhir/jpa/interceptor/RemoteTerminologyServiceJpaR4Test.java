@@ -122,7 +122,7 @@ public class RemoteTerminologyServiceJpaR4Test extends BaseJpaR4Test {
 		assertSuccess(outcome);
 
 		// Verify 1
-		Assertions.assertEquals(2, myCaptureQueriesListener.countGetConnections());
+		Assertions.assertEquals(1, myCaptureQueriesListener.countGetConnections());
 		assertThat(ourValueSetProvider.mySearchParams).asList().containsExactlyInAnyOrder(
 			"http://hl7.org/fhir/ValueSet/administrative-gender", "4.0.1",
 			"http://hl7.org/fhir/ValueSet/administrative-gender","http://hl7.org/fhir/ValueSet/administrative-gender"
