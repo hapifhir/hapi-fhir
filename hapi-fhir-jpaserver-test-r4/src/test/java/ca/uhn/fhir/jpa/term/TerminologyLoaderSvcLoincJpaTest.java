@@ -1,8 +1,10 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyResultJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetParameters;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -21,13 +23,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.LOINC_URI;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx.STEP_ID_INITIATE_JOB;
 import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -266,6 +272,47 @@ class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 
 		assertPreExpansionsContainOnlyStoredCodes();
 		assertImagingDocumentCodesPreExpansionHasOnlyTheStoredCode();
+	}
+
+	/**
+	 * Every import queues the deletion of the CodeSystem version row its staging version replaces. A
+	 * pre-expansion reads the stored terminology in its initiate step, so that step must not complete
+	 * until the deletion has.
+	 */
+	@Test
+	void importLoinc_twoVersions_PreExpansionInitiatesAfterVersionDeletion() throws IOException {
+		ZipCollectionBuilder files = new ZipCollectionBuilder(true);
+		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(files, "v267_loincupload.properties");
+		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion("2.66", files);
+
+		files = new ZipCollectionBuilder(true);
+		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(files, "v267_loincupload.properties");
+		myTerminologyTestHelper.startImportLoincJobAndWaitForCompletion("2.67", files);
+
+		Date versionDeleted = myBatch2JobHelper.findJobsByDefinition(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME).stream()
+			.map(JobInstance::getEndTime)
+			.max(Date::compareTo)
+			.orElseThrow();
+
+		Map<String, Date> initiatedBeforeDeletion = new TreeMap<>();
+		for (JobInstance preExpansion : myBatch2JobHelper.findJobsByDefinition(JOB_ID_PRE_EXPAND_VALUESET)) {
+			PreExpandValueSetParameters parameters = preExpansion.getParameters(PreExpandValueSetParameters.class);
+			if (!"2.67".equals(parameters.getVersion())) {
+				continue;
+			}
+			Date initiated = runInTransaction(() -> myJobPersistence
+				.fetchAllWorkChunksForStepStream(preExpansion.getInstanceId(), STEP_ID_INITIATE_JOB)
+				.map(WorkChunk::getEndTime)
+				.findFirst()
+				.orElseThrow());
+			if (initiated.before(versionDeleted)) {
+				initiatedBeforeDeletion.put(parameters.getUrl(), initiated);
+			}
+		}
+
+		assertThat(initiatedBeforeDeletion)
+			.as("Pre-expansions initiated before the CodeSystem version deletion ended at %s", versionDeleted)
+			.isEmpty();
 	}
 
 	/**
