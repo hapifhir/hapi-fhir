@@ -263,6 +263,16 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 	@Override
 	public IBaseResource fetchStructureDefinition(String theUrl) {
 		String url = theUrl;
+
+		// Handle versioned URLs like "http://hl7.org/fhir/StructureDefinition/Medication|4.0.1"
+		// Extract version if present
+		String version = null;
+		int pipeIdx = url.indexOf('|');
+		if (pipeIdx > 0) {
+			version = url.substring(pipeIdx + 1);
+			url = url.substring(0, pipeIdx);
+		}
+
 		if (!url.startsWith(IValidationSupport.URL_PREFIX_STRUCTURE_DEFINITION)) {
 			if (url.indexOf('/') == -1) {
 				url = IValidationSupport.URL_PREFIX_STRUCTURE_DEFINITION + url;
@@ -272,6 +282,18 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 		}
 		Map<String, IBaseResource> structureDefinitionMap = provideStructureDefinitionMap();
 		IBaseResource retVal = structureDefinitionMap.get(url);
+
+		// If version was specified and we found a candidate, verify it matches (except for HL7 base URLs)
+		if (retVal != null
+				&& isNotBlank(version)
+				&& !url.startsWith("http://hl7.org")
+				&& !url.startsWith("http://terminology.hl7.org")) {
+			String candidateVersion = myCtx.newTerser().getSinglePrimitiveValueOrNull(retVal, "version");
+			if (!StringUtils.equals(version, candidateVersion)) {
+				retVal = null;
+			}
+		}
+
 		if (retVal == null) {
 
 			if (url.startsWith(IValidationSupport.URL_PREFIX_STRUCTURE_DEFINITION)) {
