@@ -58,6 +58,7 @@ import org.hibernate.type.Type;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -66,6 +67,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.WeakHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -131,6 +133,9 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class DatabasePartitionModeIdFilteringMappingContributor
 		implements org.hibernate.boot.spi.AdditionalMappingContributor {
 
+	private static final Set<InFlightMetadataCollector> ourFilteredMetadata =
+			Collections.synchronizedSet(Collections.newSetFromMap(new WeakHashMap<>()));
+
 	private final Set<TableAndColumnName> myQualifiedIdRemovedColumnNames = new HashSet<>();
 
 	/**
@@ -160,6 +165,20 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 			InFlightMetadataCollector theMetadata,
 			ResourceStreamLocator theResourceStreamLocator,
 			MetadataBuildingContext theBuildingContext) {
+		filterPartitionIds(theMetadata);
+	}
+
+	/**
+	 * Removes the partition id from entity ids, unless database partition mode is enabled. Runs at most once per
+	 * metadata build, so it can also be called before other contributors that read entity ids: Envers captures
+	 * their types while it initializes, and contributors run in classpath order.
+	 *
+	 * @param theMetadata The metadata being built
+	 */
+	public void filterPartitionIds(InFlightMetadataCollector theMetadata) {
+		if (!ourFilteredMetadata.add(theMetadata)) {
+			return;
+		}
 
 		StandardServiceRegistry serviceRegistry =
 				theMetadata.getBootstrapContext().getServiceRegistry();
