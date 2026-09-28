@@ -69,4 +69,9 @@ public class HapiFhirSQLServerDialect extends SQLServerDialect implements IHapiF
 	public int getDefaultTimestampPrecision() {
 		return 6;
 	}
+
+	@Override
+	public String getIdListJsonSubselectTemplate() {
+		return "SELECT CAST([value] AS BIGINT) FROM OPENJSON(%s)";
+	}
 }

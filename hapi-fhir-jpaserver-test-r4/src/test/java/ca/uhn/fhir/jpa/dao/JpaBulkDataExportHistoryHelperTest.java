@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
+import ca.uhn.fhir.jpa.search.PersistedJpaHistoryBundleProviderFactory;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,7 +21,7 @@ import static org.mockito.Mockito.verify;
 class JpaBulkDataExportHistoryHelperTest {
 
 	@Mock
-	private PersistedJpaBundleProviderFactory myBundleProviderFactory;
+	private PersistedJpaHistoryBundleProviderFactory myBundleProviderFactory;
 
 	@InjectMocks
 	private JpaBulkDataExportHistoryHelper myHistoryHelper;
