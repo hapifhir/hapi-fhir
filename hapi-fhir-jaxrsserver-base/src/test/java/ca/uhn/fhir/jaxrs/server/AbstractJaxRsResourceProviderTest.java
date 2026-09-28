@@ -343,7 +343,7 @@ public class AbstractJaxRsResourceProviderTest {
 		when(mock.update(idCaptor.capture(), patientCaptor.capture(), conditionalCaptor.capture())).thenReturn(new MethodOutcome());
 		client.update().resource(createPatient(1)).conditional().where(Patient.IDENTIFIER.exactly().identifier("2")).execute();
 
-		assertNull(patientCaptor.getValue().getId().getIdPart());
+		assertEquals("1", patientCaptor.getValue().getId().getIdPart());
 		assertEquals("Patient?identifier=2&_format=json", conditionalCaptor.getValue());
 	}
 

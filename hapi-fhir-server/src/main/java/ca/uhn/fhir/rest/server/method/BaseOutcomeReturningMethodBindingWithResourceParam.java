@@ -27,6 +27,7 @@ import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -94,6 +95,12 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 		}
 	}
 
+	/**
+	 * Populates the id and resource parameters of the provider method. For a non-conditional operation the id in
+	 * the request URL is authoritative and replaces whatever id the body carried (DSTU3 and newer). A conditional
+	 * operation has no id in the URL, so the body id is left in place for
+	 * {@link #validateResourceIdAndUrlIdForWriteOperation} and ultimately the storage layer to act on.
+	 */
 	@Override
 	protected void addParametersForServerRequest(RequestDetails theRequest, Object[] theParams) {
 		if (myIdParamIndex != null) {
@@ -104,16 +111,19 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 			if (resource != null) {
 				String resourceId = resource.getIdElement().getIdPart();
 				String urlId = theRequest.getId() != null ? theRequest.getId().getIdPart() : null;
-				if (getContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3) == false) {
-					resource.setId(theRequest.getId());
-				}
 
 				String matchUrl = null;
 				if (myConditionalUrlIndex != -1) {
 					matchUrl = (String) theParams[myConditionalUrlIndex];
 					matchUrl = defaultIfBlank(matchUrl, null);
 				}
-				validateResourceIdAndUrlIdForNonConditionalOperation(resource, resourceId, urlId, matchUrl);
+
+				if (matchUrl == null
+						&& getContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3) == false) {
+					resource.setId(theRequest.getId());
+				}
+
+				validateResourceIdAndUrlIdForWriteOperation(resource, resourceId, urlId, matchUrl);
 			}
 		}
 	}
@@ -141,9 +151,18 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 	}
 
 	/**
-	 * Subclasses may override
+	 * Hook for operation-specific rules about the ids on an incoming resource. It is invoked after the resource has
+	 * been parsed and, for a non-conditional operation, after its id has been replaced by the id from the request
+	 * URL. For a conditional operation the id supplied in the body is left untouched, and it is up to the subclass
+	 * to decide whether to keep, discard or reject it. The default implementation accepts everything.
+	 *
+	 * @param theResource   the parsed resource that will be handed to the provider method
+	 * @param theResourceId the id part the body carried before any replacement, or {@code null} if it had none
+	 * @param theUrlId      the id part from the request URL, or {@code null} for a request without one
+	 * @param theMatchUrl   the conditional URL when the request is conditional, otherwise {@code null}
+	 * @throws InvalidRequestException if the ids do not satisfy the rules of the operation
 	 */
-	protected void validateResourceIdAndUrlIdForNonConditionalOperation(
+	protected void validateResourceIdAndUrlIdForWriteOperation(
 			IBaseResource theResource, String theResourceId, String theUrlId, String theMatchUrl) {
 		return;
 	}

@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
@@ -35,6 +36,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.LogicUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -49,7 +51,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 
-import static ca.uhn.fhir.jpa.dao.JpaResourceDaoCodeSystem.createVersionedSystemIfVersionIsPresent;
 import static ca.uhn.fhir.jpa.provider.ValueSetOperationProvider.createValueSetExpansionOptions;
 import static ca.uhn.fhir.util.DatatypeUtil.toStringValue;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -218,13 +219,9 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 		String valueSetIdentifier;
 		if (theValueSetId != null) {
 			IBaseResource valueSet = read(theValueSetId, theRequestDetails);
-			StringBuilder valueSetIdentifierBuilder =
-					new StringBuilder(CommonCodeSystemsTerminologyService.getValueSetUrl(myFhirContext, valueSet));
-			String valueSetVersion = CommonCodeSystemsTerminologyService.getValueSetVersion(myFhirContext, valueSet);
-			if (valueSetVersion != null) {
-				valueSetIdentifierBuilder.append("|").append(valueSetVersion);
-			}
-			valueSetIdentifier = valueSetIdentifierBuilder.toString();
+			valueSetIdentifier = UrlUtil.toCanonicalUrl(
+					CommonCodeSystemsTerminologyService.getValueSetUrl(myFhirContext, valueSet),
+					CommonCodeSystemsTerminologyService.getValueSetVersion(myFhirContext, valueSet));
 		} else if (isNotBlank(toStringValue(theValueSetIdentifier))) {
 			valueSetIdentifier = toStringValue(theValueSetIdentifier);
 		} else {
@@ -237,13 +234,13 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 			IValidationSupport.CodeValidationResult anyValidation = null;
 			for (int i = 0; i < codeableConcept.getCoding().size(); i++) {
 				Coding nextCoding = codeableConcept.getCoding().get(i);
-				String system =
-						createVersionedSystemIfVersionIsPresent(nextCoding.getSystem(), nextCoding.getVersion());
+				String system = nextCoding.getSystem();
+				String systemVersion = nextCoding.getVersion();
 				String code = nextCoding.getCode();
 				String display = nextCoding.getDisplay();
 
 				IValidationSupport.CodeValidationResult nextValidation =
-						validateCode(system, code, display, valueSetIdentifier);
+						validateCode(system, systemVersion, code, display, valueSetIdentifier);
 				anyValidation = nextValidation;
 				if (nextValidation.isOk()) {
 					return nextValidation;
@@ -251,26 +248,33 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 			}
 			return anyValidation;
 		} else if (haveCoding) {
-			String system = createVersionedSystemIfVersionIsPresent(
-					canonicalCodingToValidate.getSystem(), canonicalCodingToValidate.getVersion());
+			String system = canonicalCodingToValidate.getSystem();
+			String systemVersion = canonicalCodingToValidate.getVersion();
 			String code = canonicalCodingToValidate.getCode();
 			String display = canonicalCodingToValidate.getDisplay();
-			return validateCode(system, code, display, valueSetIdentifier);
+			return validateCode(system, systemVersion, code, display, valueSetIdentifier);
 		} else {
-			String system = toStringValue(theSystem);
+			// ValueSetOperationProvider packs the systemVersion operation parameter into the system it passes
+			UrlUtil.CanonicalUrlParts system = UrlUtil.parseCanonicalUrl(toStringValue(theSystem));
 			String code = toStringValue(theCode);
 			String display = toStringValue(theDisplay);
-			return validateCode(system, code, display, valueSetIdentifier);
+			return validateCode(system.url(), system.versionId().orElse(null), code, display, valueSetIdentifier);
 		}
 	}
 
 	private IValidationSupport.CodeValidationResult validateCode(
-			String theSystem, String theCode, String theDisplay, String theValueSetIdentifier) {
+			String theSystem,
+			String theSystemVersion,
+			String theCode,
+			String theDisplay,
+			String theValueSetIdentifier) {
 		ValidationSupportContext context = new ValidationSupportContext(myValidationSupport);
 		ConceptValidationOptions options = new ConceptValidationOptions();
 		options.setValidateDisplay(isNotBlank(theDisplay));
 		IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(
-				context, options, theSystem, theCode, theDisplay, theValueSetIdentifier);
+				context,
+				options,
+				new ValidateCodeRequest(theSystem, theSystemVersion, theCode, theDisplay, theValueSetIdentifier));
 
 		if (result == null) {
 			result = new IValidationSupport.CodeValidationResult();

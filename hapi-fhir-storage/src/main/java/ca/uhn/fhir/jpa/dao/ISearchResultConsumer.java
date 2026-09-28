@@ -47,6 +47,12 @@ public interface ISearchResultConsumer<T> {
 	Outcome consume(SearchProgressTracker theProgressTracker, T theResult);
 
 	/**
+	 * This method is invoked once after the last call to {@link #consume(SearchProgressTracker, T)}
+	 */
+	default void consumptionComplete() {}
+	;
+
+	/**
 	 * Response type for {@link #consume(SearchProgressTracker, Object)}
 	 */
 	class Outcome {

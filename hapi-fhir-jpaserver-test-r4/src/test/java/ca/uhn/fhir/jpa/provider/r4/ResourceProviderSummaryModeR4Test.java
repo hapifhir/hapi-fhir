@@ -31,7 +31,6 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 	public void after() throws Exception {
 		super.after();
 		myStorageSettings.setCountSearchResultsUpTo(null);
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
 		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 		myStorageSettings.setDefaultTotalMode(null);
@@ -44,7 +43,6 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 		myStorageSettings.setCountSearchResultsUpTo(5);
 
 		mySearchCoordinatorSvcRaw = AopTestUtils.getTargetObject(mySearchCoordinatorSvc);
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(50);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(5);
 
 		myStorageSettings.setSearchPreFetchThresholds(Lists.newArrayList(20, 50, -1));
