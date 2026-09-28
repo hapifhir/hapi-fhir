@@ -27,6 +27,7 @@ import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.VersionEnum;
 import org.apache.commons.lang3.StringUtils;
+import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Bundle;
@@ -74,7 +75,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(SpringExtension.class)
 @EnableJpaRepositories(repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
 @ContextConfiguration(classes = {BaseDatabaseVerificationIT.TestConfig.class, TestDaoSearch.Config.class})
-public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements ITestDataBuilder, TuplePredicateSearchTest {
+public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements ITestDataBuilder, TuplePredicateSearchTest, BindIdListAsJsonSearchTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseDatabaseVerificationIT.class);
 	private static final String MIGRATION_TABLENAME = "MIGRATIONS";
 	public static final String INIT_SCHEMA = "init_schema";
@@ -103,6 +104,9 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 	@Autowired
 	private ExpungeEverythingService myExpungeEverythingService;
 
+	@Autowired
+	private JpaEmbeddedDatabase myJpaEmbeddedDatabase;
+
 	SystemRequestDetails myRequestDetails = new SystemRequestDetails();
 
 	@RegisterExtension
@@ -127,6 +131,17 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 		return new TuplePredicateSearchTest.Context(
 			myStorageSettings,
 			myServer
+		);
+	}
+
+	@Override
+	public BindIdListAsJsonSearchTest.Context getBindIdListAsJsonSearchTestContext() {
+		return new BindIdListAsJsonSearchTest.Context(
+			myStorageSettings,
+			myServer,
+			myCaptureQueriesListener,
+			myJpaEmbeddedDatabase.getDriverType(),
+			false
 		);
 	}
 
@@ -298,8 +313,12 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 			schemaMigrator.migrate();
 			ourLog.info("Migration complete");
 
-
-			return dataSource;
+			// Wrap so that myCaptureQueriesListener sees the queries these tests assert on. The parent
+			// TestR5Config does this too, but this class overrides dataSource() wholesale.
+			return ProxyDataSourceBuilder.create(dataSource)
+				.afterQuery(captureQueriesListener())
+				.afterMethod(captureQueriesListener())
+				.build();
 		}
 
 		@Bean

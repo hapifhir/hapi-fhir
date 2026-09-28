@@ -10,8 +10,7 @@ The supported databases are regularly tested for ongoing compliance and performa
 | [PostgreSQL](https://www.postgresql.org/)                                   | **Supported** | `ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect`  |                                                                                                                                   |
 | [Oracle](https://www.oracle.com/ca-en/database/12c-database/)               | **Supported** | `ca.uhn.fhir.jpa.model.dialect.HapiFhirOracleDialect`    |                                                                                                                                   |
 | [Cockroach DB](https://www.cockroachlabs.com/)                              | Experimental  | `ca.uhn.fhir.jpa.model.dialect.HapiFhirCockroachDialect` | A CockroachDB dialect was contributed by a HAPI FHIR community member. This dialect is not regularly tested, use with caution.    |
-| MySQL                                                                       | Deprecated    | `ca.uhn.fhir.jpa.model.dialect.HapiFhirMySQLDialect`     | MySQL and MariaDB exhibit poor performance with HAPI FHIR and have therefore been deprecated. These databases should not be used. |
-| MariaDB                                                                     | Deprecated    | `ca.uhn.fhir.jpa.model.dialect.HapiFhirMariaDBDialect`   | MySQL and MariaDB exhibit poor performance with HAPI FHIR and have therefore been deprecated. These databases should not be used. |
+| MariaDB                                                                     | Deprecated    | `ca.uhn.fhir.jpa.model.dialect.HapiFhirMariaDBDialect`   | MariaDB exhibits poor performance with HAPI FHIR and has therefore been deprecated. This database should not be used.            |
 
 # Microsoft SQL Server
 
@@ -24,6 +23,22 @@ jdbc:sqlserver://localhost:1433;databaseName=hapi;sendStringParametersAsUnicode=
 ```
 
 For more information, see [Microsoft JDBC driver documentation](https://learn.microsoft.com/en-us/sql/connect/jdbc/setting-the-connection-properties).
+
+## Compatibility Level
+
+Searches with very large ID lists (~2000 IDs for SQL Server, see [Large ID Lists in Searches](performance.html#large-id-lists-in-searches)) require a database compatibility level of 130 (equivalent to SQL Server 2016) or higher. If you restored your database from an older version, it could still be running at a lower level. Run the following to check:
+
+```sql
+SELECT compatibility_level FROM sys.databases WHERE name = DB_NAME()
+```
+
+If the reported level is below 130 and you require searches with large ID lists, raise it to the highest level your SQL Server version supports (eg. 150 for SQL Server 2019, 160 for SQL Server 2022/Azure SQL).
+
+```sql
+ALTER DATABASE [hapi] SET COMPATIBILITY_LEVEL = 150
+```
+
+If the level is below 130, HAPI FHIR keeps the behaviour of earlier versions for these searches, so they remain subject to SQL Server's limit of 2,100 parameters per statement.
 
 # Experimental Support
 

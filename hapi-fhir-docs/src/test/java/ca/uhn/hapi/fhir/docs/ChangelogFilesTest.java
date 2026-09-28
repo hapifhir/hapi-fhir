@@ -2,7 +2,6 @@ package ca.uhn.hapi.fhir.docs;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.ObjectNode;
 import com.google.common.base.Charsets;
 import org.apache.commons.collections4.IteratorUtils;
@@ -32,6 +31,14 @@ class ChangelogFilesTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(ChangelogFilesTest.class);
 
 	private static final Pattern SELF_CLOSING_ANCHOR_PATTERN = Pattern.compile("<a\\s[^>]*/\\s*>");
+
+	private static final List<String> VALID_TYPES = List.of(
+		ChangelogConstants.TYPE_ADD,
+		ChangelogConstants.TYPE_CHANGE,
+		ChangelogConstants.TYPE_FIX,
+		ChangelogConstants.TYPE_PERFORMANCE,
+		ChangelogConstants.TYPE_REMOVE,
+		ChangelogConstants.TYPE_SECURITY);
 
 	@Test
 	void testDocAnchors_validFormat() throws Exception {
@@ -107,6 +114,11 @@ class ChangelogFilesTest {
 
 			boolean type = fieldNames.remove("type");
 			assertThat(type).as("No 'type' element in " + next).isTrue();
+
+			String typeValue = tree.get("type").asString();
+			assertThat(typeValue)
+				.as("Invalid 'type' value in " + next + ": '" + typeValue + "' (valid values: " + VALID_TYPES + ")")
+				.isIn(VALID_TYPES);
 
 			// this one is optional
 			boolean haveIssue = fieldNames.remove("issue");

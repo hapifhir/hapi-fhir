@@ -1,6 +1,6 @@
 # Web Testpage Overlay
 
-HAPI FHIR includes a web UI that can be used to test your server implementation. This UI is the same UI used on the [http://hapi.fhir.org](http://hapi.fhir.org) public HAPI FHIR test server.
+HAPI FHIR includes a web UI that can be used to test your server implementation. This UI is the same UI used on the [https://hapi.fhir.org](https://hapi.fhir.org) public HAPI FHIR test server.
 
 The Web Testpage Overlay is a [Maven WAR Overlay](http://maven.apache.org/plugins/maven-war-plugin/overlays.html) project,
 meaning that you create your own WAR project (which you would likely be doing anyway

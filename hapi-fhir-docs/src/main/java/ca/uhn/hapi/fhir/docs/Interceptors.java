@@ -51,7 +51,7 @@ public class Interceptors {
 		FhirContext ctx = FhirContext.forR4();
 
 		// Create a new client instance
-		IGenericClient client = ctx.newRestfulGenericClient("http://hapi.fhir.org/baseR4");
+		IGenericClient client = ctx.newRestfulGenericClient("https://hapi.fhir.org/baseR4");
 
 		// Register an interceptor against the client
 		client.registerInterceptor(new LoggingInterceptor());

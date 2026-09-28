@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -17,6 +18,7 @@ import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
@@ -33,6 +35,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import jakarta.annotation.Nullable;
 import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl.SEARCH_CLEANUP_JOB_INTERVAL_MILLIS;
@@ -44,7 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("Duplicates")
-public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
+public class FhirResourceDaoR4SearchPageExpiryTest extends BaseResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4SearchPageExpiryTest.class);
 
 	@Autowired
@@ -69,6 +73,49 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 		myStorageSettings.setCountSearchResultsUpTo(10000);
 	}
+
+	@Test
+	void testSearchExpiryIsUpdatedWhenSearchIsReused() {
+		// Setup
+
+		myStorageSettings.setReuseCachedSearchResultsForMillis(DateUtils.MILLIS_PER_DAY);
+		myStorageSettings.setSearchPreFetchThresholds(List.of(6, -1));
+
+		for (int i = 0; i < 10; i++) {
+			createPatient(withActiveTrue());
+		}
+
+		Bundle search = myClient
+			.search()
+			.forResource(Patient.class)
+			.returnBundle(Bundle.class)
+			.count(5)
+			.execute();
+		String searchUuid = search.getIdElement().getIdPart();
+
+		long currentExpiry = System.currentTimeMillis() - DateUtils.MILLIS_PER_MINUTE;
+		runInTransaction(()->{
+			myEntityManager.createQuery("UPDATE Search s SET s.myCreated = :created")
+				.setParameter("created", new Date(System.currentTimeMillis() - DateUtils.MILLIS_PER_DAY))
+				.executeUpdate();
+		});
+
+		// Test
+		myClient
+			.loadPage()
+			.next(search)
+			.execute();
+
+		// Verify
+		runInTransaction(()->{
+			Search searchEntity = mySearchEntityDao.findByUuidAndFetchIncludes(searchUuid).orElseThrow();
+			Date expiry = searchEntity.getExpiryOrNull();
+			assertNotNull(expiry);
+			assertThat(expiry.getTime()).isGreaterThan(currentExpiry);
+		});
+
+	}
+
 
 	@Test
 	public void testExpirePagesAfterReuse() throws Exception {
@@ -394,8 +441,6 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 				assertNotNull(search);
 			}
 		});
-
-		mySearchCoordinatorSvc.cancelAllActiveSearches();
 
 		myStorageSettings.setExpireSearchResults(true);
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();

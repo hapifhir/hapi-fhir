@@ -4382,7 +4382,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 		runInTransaction(() -> {
 			ca.uhn.fhir.jpa.entity.Search search = new ca.uhn.fhir.jpa.entity.Search();
-			QueryParameterUtils.populateSearchEntity(map, "Encounter", uuid, normalized, search, RequestPartitionId.allPartitions());
+			QueryParameterUtils.populateSearchEntity(map, "Encounter", uuid, normalized, search, RequestPartitionId.allPartitions(), myPagingProvider);
 			search.setStatus(SearchStatusEnum.FAILED);
 			search.setFailureCode(500);
 			search.setFailureMessage("FOO");
