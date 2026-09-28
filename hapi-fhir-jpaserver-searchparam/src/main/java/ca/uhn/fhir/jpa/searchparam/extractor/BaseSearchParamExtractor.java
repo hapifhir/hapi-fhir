@@ -2171,7 +2171,13 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 							break;
 						}
 
-						if (parsed.isAbsolute()) {
+						/*
+						 * Canonical URLs are usually absolute http(s) URLs, but the FHIR spec
+						 * also allows URN-shaped canonicals (e.g. urn:oid:..., urn:uuid:...) so
+						 * we index those the same way.
+						 */
+						boolean isUrn = StringUtils.startsWith(parsed.getValue(), "urn:");
+						if (parsed.isAbsolute() || isUrn) {
 							String refValue =
 									fakeReference.getReferenceElement().getValue();
 
