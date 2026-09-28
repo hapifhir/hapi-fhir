@@ -23,6 +23,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.util.HapiToStringBuilder;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.AttributeOverride;
@@ -45,7 +46,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.Length;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -202,7 +202,7 @@ public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk
 	@Override
 	public String toString() {
 		JpaPid resourceId = getResourceId();
-		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+		return new HapiToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 				.append("resourceId", resourceId.getId())
 				.append("partitionId", resourceId.getPartitionId())
 				.append("resourceType", myResourceType)
@@ -210,6 +210,7 @@ public class ResourceHistoryTable extends BaseHasResource<ResourceHistoryTablePk
 				.append("resourceVersion", myResourceVersion)
 				.append("pid", myId)
 				.append("updated", getPublished())
+				.append("deleted", getDeleted())
 				.toString();
 	}
 

@@ -20,7 +20,7 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
+import ca.uhn.fhir.jpa.search.PersistedJpaHistoryBundleProviderFactory;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.bulk.IBulkDataExportHistoryHelper;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -34,7 +34,7 @@ import java.util.List;
 public class JpaBulkDataExportHistoryHelper implements IBulkDataExportHistoryHelper {
 
 	@Autowired
-	private PersistedJpaBundleProviderFactory myBundleProviderFactory;
+	private PersistedJpaHistoryBundleProviderFactory myBundleProviderFactory;
 
 	@Override
 	public IBundleProvider fetchHistoryForResourceIds(

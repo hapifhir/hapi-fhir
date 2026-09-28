@@ -639,10 +639,11 @@ public class UrlUtil {
 	/**
 	 * Parses a versioned or unversioned canonical URL (e.g. <code>http://foo</code> or <code>http://foo|123</code>)
 	 * into its constituent parts. An optional version ID can also be provided, for scenarios where the version can be
-	 * provided either in the URL or in a separate parameter. If both are provided, the version from the parameter
-	 * takes precedence.
+	 * provided either in the URL or in a separate parameter. If both are provided and they agree, that version is
+	 * returned; if they disagree, neither is chosen and the call fails.
 	 *
 	 * @param theUrl The URL to parse (may be null, in which case an empty {@link CanonicalUrlParts} is returned and any value in {@literal theVersion} is ignored)
+	 * @throws InvalidRequestException If the URL carries a version which does not match {@literal theVersion}
 	 *
 	 * @since 8.12.0
 	 */
@@ -667,12 +668,12 @@ public class UrlUtil {
 		}
 
 		if (separatorStart == -1) {
-			return new CanonicalUrlParts(inputUrl, Optional.ofNullable(theVersion));
+			return new CanonicalUrlParts(inputUrl, theVersion);
 		} else {
 			String url = inputUrl.substring(0, separatorStart);
 			String versionId = inputUrl.substring(separatorEnd + 1);
 			if (isBlank(versionId)) {
-				return new CanonicalUrlParts(url, Optional.ofNullable(theVersion));
+				return new CanonicalUrlParts(url, theVersion);
 			} else if (isNotBlank(theVersion) && !versionId.equals(theVersion)) {
 				throw new InvalidRequestException(Msg.code(2952) + "Version in URL[" + sanitizeUrlPart(inputUrl)
 						+ " does not match expected version: " + theVersion);
@@ -680,6 +681,31 @@ public class UrlUtil {
 
 			return new CanonicalUrlParts(url, Optional.of(versionId));
 		}
+	}
+
+	/**
+	 * Joins a canonical URL and a version into the canonical form <code>url|version</code>, the inverse of
+	 * {@link #parseCanonicalUrl(String, String)}.
+	 * <p>
+	 * The URL is returned unchanged if no version is given, and a version already carried by the URL is kept
+	 * rather than appended a second time. A version given both in the URL and in {@literal theVersion} which
+	 * does not agree is an error, and throws as {@link #parseCanonicalUrl(String, String)} does.
+	 * </p>
+	 *
+	 * @param theUrl     The canonical URL, which may already be of the form <code>url|version</code>
+	 * @param theVersion The version, or <code>null</code> to return the URL unchanged
+	 * @return The versioned canonical URL, or <code>null</code> if {@literal theUrl} is blank
+	 * @throws ca.uhn.fhir.rest.server.exceptions.InvalidRequestException If the URL carries a version which does not match {@literal theVersion}
+	 * @since 8.14.0
+	 */
+	// Created by Claude Opus 5
+	@Nullable
+	public static String toCanonicalUrl(@Nullable String theUrl, @Nullable String theVersion) {
+		CanonicalUrlParts parts = parseCanonicalUrl(theUrl, theVersion);
+		if (parts.url() == null) {
+			return null;
+		}
+		return parts.toString();
 	}
 
 	private static void throwInvalidRequestExceptionForNotValidUri(String theUri, Exception theCause) {
@@ -726,7 +752,7 @@ public class UrlUtil {
 		}
 	}
 
-	public record CanonicalUrlParts(String url, Optional<String> versionId) {
+	public record CanonicalUrlParts(@Nullable String url, Optional<String> versionId) {
 
 		/**
 		 * Constructor
@@ -738,13 +764,17 @@ public class UrlUtil {
 		/**
 		 * If a version is present, returns the complete versioned canonical URL (e.g.
 		 * <code>http://loinc.org|2.69</code>). Otherwise, returns {@link #url()} (e.g.
-		 * <code>http://loinc.org</code>).
+		 * <code>http://loinc.org</code>). With no URL there is no canonical to return, and a version alone is
+		 * not one, so the empty string is returned.
 		 *
 		 * @since 8.12.0
 		 */
 		@Nonnull
 		@Override
 		public String toString() {
+			if (url() == null) {
+				return "";
+			}
 			if (versionId().isPresent()) {
 				return url() + "|" + versionId().get();
 			}

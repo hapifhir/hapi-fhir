@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -956,23 +957,26 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 		pat.setGender(AdministrativeGenderEnum.FEMALE);
 		IIdType patId2 = myPatientDao.create(pat2, mySrd).getId().toUnqualifiedVersionless();
 
-		SearchParameterMap map;
 		IBundleProvider results;
 		List<String> foundResources;
 
 		// Try with custom gender SP
-		map = new SearchParameterMap();
-		map.add("foo", new TokenParam(null, "male"));
-		results = myPatientDao.search(map);
-		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources).containsExactly(patId.getValue());
+		{
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("foo", new TokenParam(null, "male"));
+			results = myPatientDao.search(map);
+			foundResources = toUnqualifiedVersionlessIdValues(results);
+			assertThat(foundResources).containsExactly(patId.getValue());
+		}
 
 		// Try with normal gender SP
-		map = new SearchParameterMap();
-		map.add("gender", new TokenParam(null, "male"));
-		results = myPatientDao.search(map);
-		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources).containsExactly(patId.getValue());
+		{
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("gender", new TokenParam(null, "male"));
+			results = myPatientDao.search(map);
+			foundResources = toUnqualifiedVersionlessIdValues(results);
+			assertThat(foundResources).containsExactly(patId.getValue());
+		}
 
 		// Delete the param
 		mySearchParameterDao.delete(spId, mySrd);
@@ -983,13 +987,12 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 		myResourceReindexingSvc.forceReindexingPass();
 
 		// Try with custom gender SP
-		map = new SearchParameterMap();
-		map.add("foo", new TokenParam(null, "male"));
-		try {
-			myPatientDao.search(map).size();
-			fail("");
-		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1223) + "Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: " + getValidPatientSearchParams(), e.getMessage());
+		{
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("foo", new TokenParam(null, "male"));
+			assertThatThrownBy(() -> myPatientDao.search(map, newSrd()).getResources(0, 10))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining(Msg.code(1223) + "Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: " + getValidPatientSearchParams());
 		}
 	}
 
@@ -1015,27 +1018,24 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 		pat.setGender(AdministrativeGenderEnum.FEMALE);
 		IIdType patId2 = myPatientDao.create(pat2, mySrd).getId().toUnqualifiedVersionless();
 
-		SearchParameterMap map;
-		IBundleProvider results;
-		List<String> foundResources;
 
 		// Try with custom gender SP (should find nothing)
-		map = new SearchParameterMap();
-		map.add("foo", new TokenParam(null, "male"));
-		try {
-			myPatientDao.search(map).size();
-			fail("");
-		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1223) + "Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: " + getValidPatientSearchParams(), e.getMessage());
+		{
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("foo", new TokenParam(null, "male"));
+			assertThatThrownBy(() -> myPatientDao.search(map, newSrd()).getResources(0, 10))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining(Msg.code(1223) + "Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: " + getValidPatientSearchParams());
 		}
 
 		// Try with normal gender SP
-		map = new SearchParameterMap();
-		map.add("gender", new TokenParam(null, "male"));
-		results = myPatientDao.search(map);
-		foundResources = toUnqualifiedVersionlessIdValues(results);
-		assertThat(foundResources).containsExactly(patId.getValue());
-
+		{
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("gender", new TokenParam(null, "male"));
+			IBundleProvider results = myPatientDao.search(map);
+			List<String> foundResources = toUnqualifiedVersionlessIdValues(results);
+			assertThat(foundResources).containsExactly(patId.getValue());
+		}
 	}
 
 

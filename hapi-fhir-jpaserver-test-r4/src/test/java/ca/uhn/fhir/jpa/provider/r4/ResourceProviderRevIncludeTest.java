@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onAllThreads;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -90,9 +91,7 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 			ourLog.info("Created detected issue: {}", diid.getValue()); // 4...103
 			dids.add(diid);
 		}
-		SqlCapturingInterceptor sqlCapturingInterceptor = new SqlCapturingInterceptor();
 		myCaptureQueriesListener.clear();
-		myInterceptorRegistry.registerInterceptor(sqlCapturingInterceptor);
 		Bundle bundle = myClient.search()
 			.forResource(Patient.class)
 			.count(200)
@@ -152,8 +151,11 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 
 		//Ensure that the revincludes are included in the query list of the sql trace.
 		//TODO GGG/KHS reduce this to something less than 5 by smarter iterating and getting the resource types earlier when needed.
-		assertThat(sqlCapturingInterceptor.getQueryList()).hasSize(5);
-		myInterceptorRegistry.unregisterInterceptor(sqlCapturingInterceptor);
+		assertThat(myCaptureQueriesListener).has(
+			onAllThreads()
+				.selectCount(7)
+		);
+
 	}
 
 	@Test

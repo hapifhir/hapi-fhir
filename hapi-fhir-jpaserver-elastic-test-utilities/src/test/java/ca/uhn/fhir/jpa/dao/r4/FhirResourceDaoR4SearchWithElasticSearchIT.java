@@ -1614,11 +1614,13 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			myCaptureQueriesListener.clear();
 			myHSearchEventDispatcher.register(mySearchEventListener);
 
-			myTestDaoSearch.searchForBundleProvider("Observation?code=code-1,code-2,code-3", false);
+			IBundleProvider provider = myTestDaoSearch.searchForBundleProvider("Observation?code=code-1,code-2,code-3", false);
+			provider.getResources(0, 10);
 
-			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-
-			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(2);
+			assertThat(myCaptureQueriesListener).has(
+				onAllThreads()
+					.selectCount(1)
+			);
 
 			// index only queried once for count
 			Mockito.verify(mySearchEventListener, Mockito.times(1)).hsearchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
