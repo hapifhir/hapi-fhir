@@ -39,8 +39,6 @@ import org.hl7.fhir.dstu3.model.ValueSet.FilterOperator;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
@@ -76,11 +74,8 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	}
 
 	private void persistCodeSystem(CodeSystem theCodeSystem) {
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-				@Override
-				protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-					myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
-				}
+		new TransactionTemplate(myTxManager).executeWithoutResult(theStatus -> {
+				myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
 			});
 	}
 
@@ -91,11 +86,8 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	}
 
 	private void persistValueSet(ValueSet theValueSet) {
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-				@Override
-				protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-					myExtensionalVsId = myValueSetDao.create(theValueSet, mySrd).getId().toUnqualifiedVersionless();
-				}
+		new TransactionTemplate(myTxManager).executeWithoutResult(theStatus -> {
+				myExtensionalVsId = myValueSetDao.create(theValueSet, mySrd).getId().toUnqualifiedVersionless();
 			});
 	}
 

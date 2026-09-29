@@ -194,8 +194,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.BufferedReader;
@@ -3940,12 +3938,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		p2.setActive(false);
 		IIdType id2 = myClient.create().resource(p2).execute().getId();
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersion(JpaPidFk.fromId(id1.getIdPartAsLong(), null), 1);
-				myResourceHistoryTableDao.delete(version);
-			}
+		new TransactionTemplate(myTxManager).executeWithoutResult(status -> {
+			ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersion(JpaPidFk.fromId(id1.getIdPartAsLong(), null), 1);
+			myResourceHistoryTableDao.delete(version);
 		});
 
 		Bundle bundle = myClient.history().onServer().returnBundle(Bundle.class).execute();
@@ -3965,12 +3960,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IIdType id2 = myClient.create().resource(p2).execute().getId();
 
 		myCaptureQueriesListener.clear();
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersion(JpaPidFk.fromId(id1.getIdPartAsLong(), null), 1);
-				myResourceHistoryTableDao.delete(version);
-			}
+		new TransactionTemplate(myTxManager).executeWithoutResult(status -> {
+			ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersion(JpaPidFk.fromId(id1.getIdPartAsLong(), null), 1);
+			myResourceHistoryTableDao.delete(version);
 		});
 
 		myCaptureQueriesListener.logAllQueriesForCurrentThread();

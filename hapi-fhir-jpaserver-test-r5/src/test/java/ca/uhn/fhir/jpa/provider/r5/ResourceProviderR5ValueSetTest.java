@@ -45,8 +45,6 @@ import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
@@ -100,11 +98,8 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	private void persistCodeSystem(CodeSystem theCodeSystem) {
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				myExtensionalCsId = myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
-			}
+		new TransactionTemplate(myTxManager).executeWithoutResult(theStatus -> {
+			myExtensionalCsId = myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
 		});
 	}
 
@@ -118,19 +113,13 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	private void persistValueSet(ValueSet theValueSet, HTTPVerb theVerb) {
 		switch (theVerb) {
 			case POST:
-				new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-					@Override
-					protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-						myExtensionalVsId = myValueSetDao.create(theValueSet, mySrd).getId().toUnqualifiedVersionless();
-					}
+				new TransactionTemplate(myTxManager).executeWithoutResult(theStatus -> {
+					myExtensionalVsId = myValueSetDao.create(theValueSet, mySrd).getId().toUnqualifiedVersionless();
 				});
 				break;
 			case PUT:
-				new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-					@Override
-					protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-						myExtensionalVsId = myValueSetDao.update(theValueSet, mySrd).getId().toUnqualifiedVersionless();
-					}
+				new TransactionTemplate(myTxManager).executeWithoutResult(theStatus -> {
+					myExtensionalVsId = myValueSetDao.update(theValueSet, mySrd).getId().toUnqualifiedVersionless();
 				});
 				break;
 			default:

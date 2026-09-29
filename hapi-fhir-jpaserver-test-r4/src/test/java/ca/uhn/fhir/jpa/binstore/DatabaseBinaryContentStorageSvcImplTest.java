@@ -8,8 +8,6 @@ import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import jakarta.persistence.EntityManager;
-import org.hibernate.LobHelper;
-import org.hibernate.Session;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -34,7 +32,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -300,11 +297,6 @@ public class DatabaseBinaryContentStorageSvcImplTest extends BaseJpaR4Test {
 	public void testStoreBinaryContent_whenSupportingLegacyBlobServer_willStoreToBlobAndBinaryArray() throws IOException {
 		ArgumentCaptor<BinaryStorageEntity> captor = ArgumentCaptor.forClass(BinaryStorageEntity.class);
 		EntityManager mockedEntityManager = mock(EntityManager.class);
-		Session mockedSession = mock(Session.class);
-		LobHelper mockedLobHelper = mock(LobHelper.class);
-		when(mockedEntityManager.getDelegate()).thenReturn(mockedSession);
-		when(mockedSession.getLobHelper()).thenReturn(mockedLobHelper);
-		when(mockedLobHelper.createBlob(any())).thenReturn(mock(Blob.class));
 
 		// given
 		DatabaseBinaryContentStorageSvcImpl svc = new DatabaseBinaryContentStorageSvcImpl();

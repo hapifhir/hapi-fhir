@@ -28,11 +28,8 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -1858,99 +1855,96 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		CodeSystem codeSystemResource = myCodeSystemDao.read(codeSystemId);
 		ourLog.debug("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystemResource));
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				ResourceTable resourceTable = (ResourceTable) myCodeSystemDao.readEntity(codeSystemResource.getIdElement().toVersionless(), null);
-				JpaPid codeSystemResourcePid = resourceTable.getId();
-				TermCodeSystem codeSystem = myTermCodeSystemDao.findByResourcePid(codeSystemResourcePid);
-				assertEquals(CS_URL, codeSystem.getCodeSystemUri());
-				assertEquals("SYSTEM NAME", codeSystem.getName());
+		new TransactionTemplate(myTxManager).executeWithoutResult(theStatus -> {
+			ResourceTable resourceTable = (ResourceTable) myCodeSystemDao.readEntity(codeSystemResource.getIdElement().toVersionless(), null);
+			JpaPid codeSystemResourcePid = resourceTable.getId();
+			TermCodeSystem codeSystem = myTermCodeSystemDao.findByResourcePid(codeSystemResourcePid);
+			assertEquals(CS_URL, codeSystem.getCodeSystemUri());
+			assertEquals("SYSTEM NAME", codeSystem.getName());
 
-				TermCodeSystemVersion codeSystemVersion = codeSystem.getCurrentVersion();
-				assertEquals(9, codeSystemVersion.getConcepts().size());
+			TermCodeSystemVersion codeSystemVersion = codeSystem.getCurrentVersion();
+			assertEquals(9, codeSystemVersion.getConcepts().size());
 
-				List<TermConcept> concepts = myTermConceptDao.findByCodeSystemVersion(codeSystemVersion);
-				concepts.sort(Comparator.comparing(TermConcept::getCode));
-				assertEquals(9, concepts.size());
+			List<TermConcept> concepts = myTermConceptDao.findByCodeSystemVersion(codeSystemVersion);
+			concepts.sort(Comparator.comparing(TermConcept::getCode));
+			assertEquals(9, concepts.size());
 
-				int index = 0;
-				TermConcept parentA = concepts.get(index++);
-				assertEquals("ParentA", parentA.getCode());
-				assertNull(parentA.getDisplay());
-				assertEquals(2, parentA.getChildren().size());
-				assertEquals(0, parentA.getParents().size());
-				assertEquals(0, parentA.getDesignations().size());
-				assertEquals(0, parentA.getProperties().size());
+			int index = 0;
+			TermConcept parentA = concepts.get(index++);
+			assertEquals("ParentA", parentA.getCode());
+			assertNull(parentA.getDisplay());
+			assertEquals(2, parentA.getChildren().size());
+			assertEquals(0, parentA.getParents().size());
+			assertEquals(0, parentA.getDesignations().size());
+			assertEquals(0, parentA.getProperties().size());
 
-				TermConcept parentB = concepts.get(index++);
-				assertEquals("ParentB", parentB.getCode());
-				assertNull(parentB.getDisplay());
-				assertEquals(0, parentB.getChildren().size());
-				assertEquals(0, parentB.getParents().size());
-				assertEquals(0, parentB.getDesignations().size());
-				assertEquals(0, parentB.getProperties().size());
+			TermConcept parentB = concepts.get(index++);
+			assertEquals("ParentB", parentB.getCode());
+			assertNull(parentB.getDisplay());
+			assertEquals(0, parentB.getChildren().size());
+			assertEquals(0, parentB.getParents().size());
+			assertEquals(0, parentB.getDesignations().size());
+			assertEquals(0, parentB.getProperties().size());
 
-				TermConcept parentWithNoChildrenA = concepts.get(index++);
-				assertEquals("ParentWithNoChildrenA", parentWithNoChildrenA.getCode());
-				assertNull(parentWithNoChildrenA.getDisplay());
-				assertEquals(0, parentWithNoChildrenA.getChildren().size());
-				assertEquals(0, parentWithNoChildrenA.getParents().size());
-				assertEquals(0, parentWithNoChildrenA.getDesignations().size());
-				assertEquals(0, parentWithNoChildrenA.getProperties().size());
+			TermConcept parentWithNoChildrenA = concepts.get(index++);
+			assertEquals("ParentWithNoChildrenA", parentWithNoChildrenA.getCode());
+			assertNull(parentWithNoChildrenA.getDisplay());
+			assertEquals(0, parentWithNoChildrenA.getChildren().size());
+			assertEquals(0, parentWithNoChildrenA.getParents().size());
+			assertEquals(0, parentWithNoChildrenA.getDesignations().size());
+			assertEquals(0, parentWithNoChildrenA.getProperties().size());
 
-				TermConcept parentWithNoChildrenB = concepts.get(index++);
-				assertEquals("ParentWithNoChildrenB", parentWithNoChildrenB.getCode());
-				assertNull(parentWithNoChildrenB.getDisplay());
-				assertEquals(0, parentWithNoChildrenB.getChildren().size());
-				assertEquals(0, parentWithNoChildrenB.getParents().size());
-				assertEquals(0, parentWithNoChildrenB.getDesignations().size());
-				assertEquals(0, parentWithNoChildrenB.getProperties().size());
+			TermConcept parentWithNoChildrenB = concepts.get(index++);
+			assertEquals("ParentWithNoChildrenB", parentWithNoChildrenB.getCode());
+			assertNull(parentWithNoChildrenB.getDisplay());
+			assertEquals(0, parentWithNoChildrenB.getChildren().size());
+			assertEquals(0, parentWithNoChildrenB.getParents().size());
+			assertEquals(0, parentWithNoChildrenB.getDesignations().size());
+			assertEquals(0, parentWithNoChildrenB.getProperties().size());
 
-				TermConcept parentWithNoChildrenC = concepts.get(index++);
-				assertEquals("ParentWithNoChildrenC", parentWithNoChildrenC.getCode());
-				assertNull(parentWithNoChildrenC.getDisplay());
-				assertEquals(0, parentWithNoChildrenC.getChildren().size());
-				assertEquals(0, parentWithNoChildrenC.getParents().size());
-				assertEquals(0, parentWithNoChildrenC.getDesignations().size());
-				assertEquals(0, parentWithNoChildrenC.getProperties().size());
+			TermConcept parentWithNoChildrenC = concepts.get(index++);
+			assertEquals("ParentWithNoChildrenC", parentWithNoChildrenC.getCode());
+			assertNull(parentWithNoChildrenC.getDisplay());
+			assertEquals(0, parentWithNoChildrenC.getChildren().size());
+			assertEquals(0, parentWithNoChildrenC.getParents().size());
+			assertEquals(0, parentWithNoChildrenC.getDesignations().size());
+			assertEquals(0, parentWithNoChildrenC.getProperties().size());
 
-				TermConcept childAA = concepts.get(index++);
-				assertEquals("childAA", childAA.getCode());
-				assertNull(childAA.getDisplay());
-				assertEquals(2, childAA.getChildren().size());
-				assertEquals(1, childAA.getParents().size());
-				assertSame(parentA, childAA.getParents().iterator().next().getParent());
-				assertEquals(0, childAA.getDesignations().size());
-				assertEquals(0, childAA.getProperties().size());
+			TermConcept childAA = concepts.get(index++);
+			assertEquals("childAA", childAA.getCode());
+			assertNull(childAA.getDisplay());
+			assertEquals(2, childAA.getChildren().size());
+			assertEquals(1, childAA.getParents().size());
+			assertSame(parentA, childAA.getParents().iterator().next().getParent());
+			assertEquals(0, childAA.getDesignations().size());
+			assertEquals(0, childAA.getProperties().size());
 
-				TermConcept childAAA = concepts.get(index++);
-				assertEquals("childAAA", childAAA.getCode());
-				assertNull(childAAA.getDisplay());
-				assertEquals(0, childAAA.getChildren().size());
-				assertEquals(1, childAAA.getParents().size());
-				assertSame(childAA, childAAA.getParents().iterator().next().getParent());
-				assertEquals(0, childAAA.getDesignations().size());
-				assertEquals(2, childAAA.getProperties().size());
+			TermConcept childAAA = concepts.get(index++);
+			assertEquals("childAAA", childAAA.getCode());
+			assertNull(childAAA.getDisplay());
+			assertEquals(0, childAAA.getChildren().size());
+			assertEquals(1, childAAA.getParents().size());
+			assertSame(childAA, childAAA.getParents().iterator().next().getParent());
+			assertEquals(0, childAAA.getDesignations().size());
+			assertEquals(2, childAAA.getProperties().size());
 
-				TermConcept childAAB = concepts.get(index++);
-				assertEquals("childAAB", childAAB.getCode());
-				assertNull(childAAB.getDisplay());
-				assertEquals(0, childAAB.getChildren().size());
-				assertEquals(1, childAAB.getParents().size());
-				assertSame(childAA, childAAB.getParents().iterator().next().getParent());
-				assertEquals(1, childAAB.getDesignations().size());
-				assertEquals(2, childAAB.getProperties().size());
+			TermConcept childAAB = concepts.get(index++);
+			assertEquals("childAAB", childAAB.getCode());
+			assertNull(childAAB.getDisplay());
+			assertEquals(0, childAAB.getChildren().size());
+			assertEquals(1, childAAB.getParents().size());
+			assertSame(childAA, childAAB.getParents().iterator().next().getParent());
+			assertEquals(1, childAAB.getDesignations().size());
+			assertEquals(2, childAAB.getProperties().size());
 
-				TermConcept childAB = concepts.get(index++);
-				assertEquals("childAB", childAB.getCode());
-				assertNull(childAB.getDisplay());
-				assertEquals(0, childAB.getChildren().size());
-				assertEquals(1, childAB.getParents().size());
-				assertSame(parentA, childAB.getParents().iterator().next().getParent());
-				assertEquals(0, childAB.getDesignations().size());
-				assertEquals(0, childAB.getProperties().size());
-			}
+			TermConcept childAB = concepts.get(index++);
+			assertEquals("childAB", childAB.getCode());
+			assertNull(childAB.getDisplay());
+			assertEquals(0, childAB.getChildren().size());
+			assertEquals(1, childAB.getParents().size());
+			assertSame(parentA, childAB.getParents().iterator().next().getParent());
+			assertEquals(0, childAB.getDesignations().size());
+			assertEquals(0, childAB.getProperties().size());
 		});
 	}
 

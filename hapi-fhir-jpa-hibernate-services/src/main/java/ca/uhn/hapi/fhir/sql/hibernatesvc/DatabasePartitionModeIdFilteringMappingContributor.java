@@ -229,7 +229,7 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 			PersistentClass entityPersistentClass =
 					theMetadata.getEntityBindingMap().get(nextEntityName);
 			Table table = entityPersistentClass.getTable();
-			for (ForeignKey foreignKey : table.getForeignKeys().values()) {
+			for (ForeignKey foreignKey : table.getForeignKeyCollection()) {
 				// Adjust relations with local filtered columns (e.g. ManyToOne)
 				filterPartitionedIdsFromLocalFks(theClassLoaderService, theMetadata, foreignKey, table, nextEntityName);
 			}

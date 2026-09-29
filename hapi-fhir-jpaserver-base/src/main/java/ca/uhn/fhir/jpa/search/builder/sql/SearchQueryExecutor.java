@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.search.builder.sql;
 
+import org.hibernate.query.QueryFlushMode;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -27,7 +28,6 @@ import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.IoUtil;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.FlushModeType;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
 import jakarta.persistence.Query;
@@ -137,7 +137,7 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 					// java.util.concurrent.ExecutionException:
 					// org.springframework.transaction.UnexpectedRollbackException: Transaction silently rolled back
 					// because it has been marked as rollback-only
-					hibernateQuery.setFlushMode(FlushModeType.COMMIT);
+					hibernateQuery.setQueryFlushMode(QueryFlushMode.NO_FLUSH);
 					ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
 					myResultSet = new ScrollableResultsIterator<>(scrollableResults);
 					myQueryInitialized = true;

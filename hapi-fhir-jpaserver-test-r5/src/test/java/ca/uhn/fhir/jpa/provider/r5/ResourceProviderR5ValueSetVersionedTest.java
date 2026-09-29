@@ -15,7 +15,6 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
 import org.hl7.fhir.r5.model.BooleanType;
@@ -37,8 +36,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
@@ -94,11 +91,8 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 	private void persistCodeSystem(CodeSystem theCodeSystem) {
 		theCodeSystem.setId("CodeSystem/cs1");
 		theCodeSystem.setVersion("1");
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				myExtensionalCsId_v1 = myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
-			}
+		new TransactionTemplate(myTxManager).executeWithoutResult(theStatus -> {
+			myExtensionalCsId_v1 = myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
 		});
 		myCodeSystemDao.readEntity(myExtensionalCsId_v1, null);
 
@@ -107,11 +101,8 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 		for(ConceptDefinitionComponent conceptDefinitionComponent : theCodeSystem.getConcept()) {
 			conceptDefinitionComponent.setDisplay(conceptDefinitionComponent.getDisplay() + " v2");
 		}
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				myExtensionalCsId_v2 = myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
-			}
+		new TransactionTemplate(myTxManager).executeWithoutResult(theStatus -> {
+			myExtensionalCsId_v2 = myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
 		});
 		myCodeSystemDao.readEntity(myExtensionalCsId_v2, null);
 
@@ -140,19 +131,13 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 			case HEAD:
 				break;
 			case POST:
-				new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-					@Override
-					protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-						vsId[0] = myValueSetDao.create(theValueSet, mySrd).getId().toUnqualifiedVersionless();
-					}
+				new TransactionTemplate(myTxManager).executeWithoutResult(theStatus -> {
+					vsId[0] = myValueSetDao.create(theValueSet, mySrd).getId().toUnqualifiedVersionless();
 				});
 				break;
 			case PUT:
-				new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-					@Override
-					protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-						vsId[0] = myValueSetDao.update(theValueSet, mySrd).getId().toUnqualifiedVersionless();
-					}
+				new TransactionTemplate(myTxManager).executeWithoutResult(theStatus -> {
+					vsId[0] = myValueSetDao.update(theValueSet, mySrd).getId().toUnqualifiedVersionless();
 				});
 				break;
 			case DELETE:
