@@ -360,15 +360,15 @@ public interface IValidationSupport {
 			@Nonnull ValidationSupportContext theValidationSupportContext,
 			@Nullable String theSystem,
 			@Nullable String theVersion) {
-		String canonicalUrl = UrlUtil.toCanonicalUrl(theSystem, theVersion);
-		if (canonicalUrl == null) {
+		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(theSystem, theVersion);
+		if (codeSystem.url() == null) {
 			return false;
 		}
-		if (isCodeSystemSupported(theValidationSupportContext, canonicalUrl)) {
+		if (isCodeSystemSupported(theValidationSupportContext, codeSystem.toString())) {
 			return true;
 		}
-		String url = UrlUtil.parseCanonicalUrl(canonicalUrl).url();
-		return !canonicalUrl.equals(url) && isCodeSystemSupported(theValidationSupportContext, url);
+		return codeSystem.versionId().isPresent()
+				&& isCodeSystemSupported(theValidationSupportContext, codeSystem.url());
 	}
 
 	/**
