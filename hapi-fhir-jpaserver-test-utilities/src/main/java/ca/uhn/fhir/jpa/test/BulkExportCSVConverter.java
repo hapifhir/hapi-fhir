@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkExportResourceList;
 import ca.uhn.fhir.rest.api.server.bulk.ConvertedFile;
 import ca.uhn.fhir.rest.api.server.bulk.ConvertedFiles;
 import ca.uhn.fhir.rest.api.server.bulk.IResourceConverter;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.csv.CSVPrinter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -46,7 +47,8 @@ public class BulkExportCSVConverter implements IResourceConverter {
 	}
 
 	@Override
-	public ConvertedFiles consume(BulkExportResourceList theResources, BulkExportJobParameters theJobParameters) {
+	@Nonnull
+	public ConvertedFiles consume(@Nonnull BulkExportResourceList theResources, @Nonnull BulkExportJobParameters theJobParameters) {
 		ConvertedFiles files = new ConvertedFiles();
 
 		ConvertedFile file = new ConvertedFile();

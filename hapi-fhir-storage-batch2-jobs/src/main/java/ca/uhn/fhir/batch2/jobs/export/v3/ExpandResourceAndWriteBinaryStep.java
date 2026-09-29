@@ -110,7 +110,7 @@ public class ExpandResourceAndWriteBinaryStep
 	@Autowired
 	private IBulkDataExportHistoryHelper myExportHelper;
 
-	@Autowired
+	@Autowired(required = false)
 	private ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
 
 	/**
@@ -170,11 +170,9 @@ public class ExpandResourceAndWriteBinaryStep
 				myResponseTerminologyTranslationSvc,
 				getBinaryCreator(theStepExecutionDetails, theDataSink),
 				theStepExecutionDetails);
-		// V3 does not support MDM expansion — the feature was rolled back to V2 only.
-		// BulkExportJobParameters still carries isExpandMdm() because V2 and V3 share the
-		// parameters shape, so this is pinned false rather than removed, to make the
-		// rollback explicit rather than looking like an oversight.
-		resourceListConsumer.setDoExpandMDM(isV2Job() && theParameters.isExpandMdm());
+		// V3 does not support MDM expansion - even though the method parameters have it
+		// DO NOT SET THEM HERE!
+		// Adding (back) MDM expansion requires a new job version.
 		return resourceListConsumer;
 	}
 
@@ -444,14 +442,5 @@ public class ExpandResourceAndWriteBinaryStep
 	@VisibleForTesting
 	public void setIdHelperServiceForUnitTest(IIdHelperService<?> theIdHelperService) {
 		myIdHelperService = theIdHelperService;
-	}
-
-	/**
-	 * Overridden in the V2 step
-	 * Always false since the mdmexpansion was rolled back form
-	 * V2 for V3
-	 */
-	protected boolean isV2Job() {
-		return false;
 	}
 }

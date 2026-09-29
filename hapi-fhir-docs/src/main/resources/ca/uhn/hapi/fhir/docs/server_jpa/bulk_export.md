@@ -8,7 +8,7 @@ Export runs as a [Batch2 job](/hapi-fhir/docs/server_jpa_batch/introduction.html
 
 Each output file is written to a `Binary` resource, and the manifest points at those `Binary` resources.
 
-A given file contains only a single resource type, and large results are split across several files so that no one file exceeds `JpaStorageSettings#getBulkExportFileMaximumSize()` (100 MB by default).
+A given file contains only a single resource type, and large results are split across several files so that no file exceeds `JpaStorageSettings#setBulkExportFileMaximumCapacity()` (100 MB by default).
 
 # Output Formats
 
@@ -33,7 +33,7 @@ The first non-null implementation returned by the hook will be used by the job.
 
 An implementer can even choose to override the default NDJSON if they so choose.
 
-The following example registers a custom converter for `text/csv` and leaves every other format alone:
+The following example registers a custom converter for `text/csv` and ignores every other `_outputFormat`:
 
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/interceptor/BulkExportCsvConverterInterceptor.java|interceptor}}
 

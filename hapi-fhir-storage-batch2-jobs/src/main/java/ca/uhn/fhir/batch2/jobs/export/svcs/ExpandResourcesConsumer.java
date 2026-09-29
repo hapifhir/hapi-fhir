@@ -21,6 +21,7 @@ import ca.uhn.fhir.rest.api.server.bulk.ConvertedFile;
 import ca.uhn.fhir.rest.api.server.bulk.ConvertedFiles;
 import ca.uhn.fhir.rest.api.server.bulk.IResourceConverter;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.ObjectUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -77,7 +78,7 @@ public class ExpandResourcesConsumer implements Consumer<List<IBaseResource>> {
 			InterceptorService theInterceptorService,
 			JpaStorageSettings theSettings,
 			InMemoryResourceMatcher theInMemoryMatcher,
-			ResponseTerminologyTranslationSvc theResponseTerminologyTranslationSvc,
+			@Nullable ResponseTerminologyTranslationSvc theResponseTerminologyTranslationSvc,
 			BinaryCreator theBinaryCreator,
 			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails) {
 		myFhirContext = theContext;
@@ -137,7 +138,13 @@ public class ExpandResourcesConsumer implements Consumer<List<IBaseResource>> {
 
 		// Normalize terminology
 		if (myStorageSettings.isNormalizeTerminologyForBulkExportJobs()) {
-			myResponseTerminologyTranslationSvc.processResourcesForTerminologyTranslation(theResources);
+			if (myResponseTerminologyTranslationSvc != null) {
+				myResponseTerminologyTranslationSvc.processResourcesForTerminologyTranslation(theResources);
+			} else {
+				throw new JobExecutionFailedException(
+						Msg.code(3053)
+								+ "Terminology normalization is enabled for bulk export jobs, but no ResponseTerminologyTranslationSvc bean is available");
+			}
 		}
 
 		// Interceptor call - remove omitted resources
@@ -187,7 +194,7 @@ public class ExpandResourcesConsumer implements Consumer<List<IBaseResource>> {
 			// expected for bulk export job
 			throw new JobExecutionFailedException(Msg.code(3052)
 					+ String.format(
-							"Output format %s not supported",
+							"Output converter for format %s produced invalid results. See logs for more details",
 							myStepExecutionDetails.getParameters().getOutputFormat()));
 		}
 

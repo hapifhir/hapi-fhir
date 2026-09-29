@@ -58,7 +58,7 @@ public class NDJsonConverterTest {
 		}
 	}
 
-	private FhirContext myFhirContext = FhirContext.forR4Cached();
+	private final FhirContext myFhirContext = FhirContext.forR4Cached();
 
 	private JpaStorageSettings myJpaStorageSettings;
 
@@ -71,7 +71,7 @@ public class NDJsonConverterTest {
 	}
 
 	@Test
-	public void consume_blankOutput_fillsInAsNDJSON() {
+	void consume_blankOutput_fillsInAsNDJSON() {
 		// setup
 		BulkExportJobParameters parameters = createParameters();
 		// normally this would be blocked by validators; but we'll test it for defensiveness
@@ -94,7 +94,7 @@ public class NDJsonConverterTest {
 	}
 
 	@Test
-	public void consume_moreThanBulkMaxFileSize_splitsOutput() {
+	void consume_moreThanBulkMaxFileSize_splitsOutput() {
 		// setup
 		int resourceCount = 5;
 		BulkExportJobParameters parameters = createParameters();
@@ -133,7 +133,7 @@ public class NDJsonConverterTest {
 	}
 
 	@Test
-	public void consume_withIOException_throws() throws IOException {
+	void consume_withIOException_throws() throws IOException {
 		// setup
 		BulkExportJobParameters parameters = createParameters();
 		String testException = "I am an exceptional exception.";
