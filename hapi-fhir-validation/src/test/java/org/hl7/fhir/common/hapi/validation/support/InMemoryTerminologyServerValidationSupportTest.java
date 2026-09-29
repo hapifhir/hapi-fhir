@@ -39,6 +39,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class InMemoryTerminologyServerValidationSupportTest extends BaseValidationTestWithInlineMocks {
 	private static final String VERSIONED_CS_URL = "http://example.com/fhir/CodeSystem/versioned";
@@ -580,6 +584,31 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		assertThatThrownBy(() -> myChain.lookupCode(valCtx, request))
 			.isInstanceOf(InvalidRequestException.class)
 			.hasMessageContaining(Msg.code(2952));
+	}
+
+	/**
+	 * The support checks ask the root support for the code system or ValueSet with the version as its own
+	 * argument, whether it was named separately or arrived packed into the URL.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void isCodeSystemAndValueSetSupported_withAVersion_fetchWithTheVersionAsItsOwnArgument() {
+		// Setup
+		String valueSetUrl = "http://example.com/fhir/ValueSet/versioned";
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		IValidationSupport root = mock(IValidationSupport.class);
+		when(root.fetchCodeSystem(VERSIONED_CS_URL, "1.0.0")).thenReturn(codeSystem);
+		when(root.fetchValueSet(valueSetUrl, "1.0.0")).thenReturn(new ValueSet());
+		ValidationSupportContext valCtx = new ValidationSupportContext(root);
+
+		// Test & Verify
+		assertTrue(mySvc.isCodeSystemSupported(valCtx, VERSIONED_CS_URL, "1.0.0"));
+		assertTrue(mySvc.isCodeSystemSupported(valCtx, VERSIONED_CS_URL + "|1.0.0"));
+		assertTrue(mySvc.isValueSetSupported(valCtx, valueSetUrl, "1.0.0"));
+		assertTrue(mySvc.isValueSetSupported(valCtx, valueSetUrl + "|1.0.0"));
+		verify(root, never()).fetchCodeSystem(VERSIONED_CS_URL + "|1.0.0");
+		verify(root, never()).fetchValueSet(valueSetUrl + "|1.0.0");
 	}
 
 	/**

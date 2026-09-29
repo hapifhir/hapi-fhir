@@ -280,11 +280,12 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
-		if (isBlank(theSystem)) {
-			return false;
-		}
-		TermCodeSystemVersionDetails cs = getCurrentCodeSystemVersion(theSystem);
-		return cs != null;
+		// On this signature a code system can only name a version by carrying it packed as "system|version"
+		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(theSystem);
+		return isCodeSystemSupported(
+				theValidationSupportContext,
+				codeSystem.url(),
+				codeSystem.versionId().orElse(null));
 	}
 
 	/**
@@ -299,12 +300,36 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			@Nonnull ValidationSupportContext theValidationSupportContext,
 			@Nullable String theSystem,
 			@Nullable String theVersion) {
-		return isCodeSystemSupported(theValidationSupportContext, UrlUtil.toCanonicalUrl(theSystem, theVersion));
+		// The current version details are looked up and cached by the "url|version" identifier
+		String codeSystemIdentifier = UrlUtil.toCanonicalUrl(theSystem, theVersion);
+		return codeSystemIdentifier != null && getCurrentCodeSystemVersion(codeSystemIdentifier) != null;
 	}
 
 	@Override
 	public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
-		return fetchValueSet(theValueSetUrl) != null;
+		// On this signature a ValueSet can only name a version by carrying it packed as "url|version"
+		UrlUtil.CanonicalUrlParts valueSet = UrlUtil.parseCanonicalUrl(theValueSetUrl);
+		return isValueSetSupported(
+				theValidationSupportContext,
+				valueSet.url(),
+				valueSet.versionId().orElse(null));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Answers only for the version named, since several versions of one ValueSet can be stored.
+	 * </p>
+	 */
+	// Created by Claude Opus 5.5
+	@Override
+	public boolean isValueSetSupported(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theValueSetUrl,
+			@Nullable String theVersion) {
+		UrlUtil.CanonicalUrlParts valueSet = UrlUtil.parseCanonicalUrl(theValueSetUrl, theVersion);
+		return valueSet.url() != null
+				&& fetchValueSet(valueSet.url(), valueSet.versionId().orElse(null)) != null;
 	}
 
 	private void addCodeIfNotAlreadyAdded(

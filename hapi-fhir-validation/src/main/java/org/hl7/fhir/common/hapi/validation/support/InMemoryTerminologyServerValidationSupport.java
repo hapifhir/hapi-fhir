@@ -560,12 +560,34 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
-		if (isBlank(theSystem)) {
+		// On this signature a code system can only name a version by carrying it packed as "system|version"
+		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(theSystem);
+		return isCodeSystemSupported(
+				theValidationSupportContext,
+				codeSystem.url(),
+				codeSystem.versionId().orElse(null));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Answers only for the version named: the code system is fetched through the chain at that version.
+	 * </p>
+	 */
+	// Created by Claude Opus 5
+	@Override
+	public boolean isCodeSystemSupported(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theSystem,
+			@Nullable String theVersion) {
+		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(theSystem, theVersion);
+		if (codeSystem.url() == null) {
 			return false;
 		}
 
-		IBaseResource cs =
-				theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(theSystem);
+		IBaseResource cs = theValidationSupportContext
+				.getRootValidationSupport()
+				.fetchCodeSystem(codeSystem.url(), codeSystem.versionId().orElse(null));
 
 		if (!myCtx.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU2_1)) {
 			return cs != null;
@@ -581,25 +603,37 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		return false;
 	}
 
+	@Override
+	public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
+		// On this signature a ValueSet can only name a version by carrying it packed as "url|version"
+		UrlUtil.CanonicalUrlParts valueSet = UrlUtil.parseCanonicalUrl(theValueSetUrl);
+		return isValueSetSupported(
+				theValidationSupportContext,
+				valueSet.url(),
+				valueSet.versionId().orElse(null));
+	}
+
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * Answers only for the version named: the code system is fetched through the chain at that version.
+	 * Answers only for the version named: the ValueSet is fetched through the chain at that version.
 	 * </p>
 	 */
-	// Created by Claude Opus 5
+	// Created by Claude Opus 5.5
 	@Override
-	public boolean isCodeSystemSupported(
+	public boolean isValueSetSupported(
 			@Nonnull ValidationSupportContext theValidationSupportContext,
-			@Nullable String theSystem,
+			@Nullable String theValueSetUrl,
 			@Nullable String theVersion) {
-		return isCodeSystemSupported(theValidationSupportContext, UrlUtil.toCanonicalUrl(theSystem, theVersion));
-	}
+		UrlUtil.CanonicalUrlParts valueSet = UrlUtil.parseCanonicalUrl(theValueSetUrl, theVersion);
+		if (valueSet.url() == null) {
+			return false;
+		}
 
-	@Override
-	public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
-		return isNotBlank(theValueSetUrl)
-				&& theValidationSupportContext.getRootValidationSupport().fetchValueSet(theValueSetUrl) != null;
+		IBaseResource vs = theValidationSupportContext
+				.getRootValidationSupport()
+				.fetchValueSet(valueSet.url(), valueSet.versionId().orElse(null));
+		return vs != null;
 	}
 
 	private void addCodesDstu2Hl7Org(

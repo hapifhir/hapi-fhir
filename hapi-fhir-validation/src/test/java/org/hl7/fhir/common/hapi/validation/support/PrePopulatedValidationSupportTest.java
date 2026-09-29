@@ -79,4 +79,25 @@ public class PrePopulatedValidationSupportTest extends BaseValidationTestWithInl
 		assertThat(mySvc.fetchCodeSystem("http://cs", "2.0.0")).isNull();
 		assertThat(mySvc.isCodeSystemSupported(null, "http://cs", "2.0.0")).isFalse();
 	}
+
+	/**
+	 * A ValueSet is supported at the version stored, and with no version named, but not at another version -
+	 * whether the version is named separately or packed into the URL.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	public void isValueSetSupported_oneVersionStored_supportsOnlyThatVersion() {
+		// Setup
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl("http://vs");
+		valueSet.setVersion("1.0.0");
+		mySvc.addValueSet(valueSet);
+
+		// Test & Verify
+		assertThat(mySvc.isValueSetSupported(null, "http://vs", "1.0.0")).isTrue();
+		assertThat(mySvc.isValueSetSupported(null, "http://vs", null)).isTrue();
+		assertThat(mySvc.isValueSetSupported(null, "http://vs", "2.0.0")).isFalse();
+		assertThat(mySvc.isValueSetSupported(null, "http://vs|1.0.0")).isTrue();
+		assertThat(mySvc.isValueSetSupported(null, "http://vs|2.0.0")).isFalse();
+	}
 }
