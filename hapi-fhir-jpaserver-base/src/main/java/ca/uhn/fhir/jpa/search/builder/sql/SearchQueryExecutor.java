@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.search.builder.sql;
 
-import org.hibernate.query.QueryFlushMode;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -35,6 +34,7 @@ import org.apache.commons.lang3.Validate;
 import org.hibernate.CacheMode;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
+import org.hibernate.query.QueryFlushMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

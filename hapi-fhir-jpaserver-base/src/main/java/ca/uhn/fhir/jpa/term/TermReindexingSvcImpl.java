@@ -79,8 +79,7 @@ public class TermReindexingSvcImpl implements ITermReindexingSvc, IHasScheduledJ
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		tt.executeWithoutResult(theArg0 -> {
 			int maxResult = 1000;
-			Page<TermConcept> concepts =
-					myConceptDao.findResourcesRequiringReindexing(PageRequest.of(0, maxResult));
+			Page<TermConcept> concepts = myConceptDao.findResourcesRequiringReindexing(PageRequest.of(0, maxResult));
 			if (!concepts.hasContent()) {
 				if (myChildToParentPidCache != null) {
 					ourLog.info("Clearing parent concept cache");
@@ -138,8 +137,7 @@ public class TermReindexingSvcImpl implements ITermReindexingSvc, IHasScheduledJ
 				for (Long next : parentLinks) {
 					myChildToParentPidCache.put(theConceptPid, next);
 				}
-				int parentCount =
-						myChildToParentPidCache.get(theConceptPid).size();
+				int parentCount = myChildToParentPidCache.get(theConceptPid).size();
 				ourLog.info(
 						"Found {} parent concepts of concept {} (cache has {})",
 						parentCount,
