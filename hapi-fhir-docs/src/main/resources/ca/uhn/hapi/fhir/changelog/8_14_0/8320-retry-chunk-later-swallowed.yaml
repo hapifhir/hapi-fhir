@@ -7,4 +7,10 @@ title: "Previously, a `RetryChunkLaterException` thrown by a bulk-modify job ste
   failure, causing the job to end in a `FAILED` state with `HAPI-2790` instead of retrying the work chunk. This has
   been fixed so that the work chunk is deferred and polled again later instead of failing permanently.
   Other exceptions thrown by a step's pre-flight check now fail the whole work chunk as a retriable `ERRORED`
-  chunk, rather than being recorded as a failure against every individual resource in the chunk."
+  chunk, rather than being recorded as a failure against every individual resource in the chunk.
+  Similarly, a `ReductionStepFailureException` thrown while modifying resources in a bulk-modify transaction
+  now propagates to the batch2 framework instead of being recorded as a failure against each resource.
+  To make this safe for custom job steps, the batch2 exceptions that control how a work chunk or job is handled
+  (`RetryChunkLaterException`, `JobExecutionFailedException` and `ReductionStepFailureException`) now implement
+  the new marker interface `IBatch2FrameworkException`. Step code that catches broad exception types such as
+  `Exception` or `Throwable` must rethrow any exception implementing this interface unchanged."
