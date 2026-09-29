@@ -62,7 +62,10 @@ public class CreateConditionalHl7OrgTest {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		HttpTestResponse status = ourServer.fhirRequest("/Patient").withHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=system%7C001").post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML).assertStatus(201);
+		HttpTestResponse status = ourServer.fhirRequest("/Patient")
+			.withHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=system%7C001")
+			.post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
+			.assertStatus(201);
 		String responseContent = status.getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
@@ -82,7 +85,9 @@ public class CreateConditionalHl7OrgTest {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		HttpTestResponse status = ourServer.fhirRequest("/Patient?_format=true&_pretty=true").post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML).assertStatus(201);
+		HttpTestResponse status = ourServer.fhirRequest("/Patient?_format=true&_pretty=true")
+			.post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
+			.assertStatus(201);
 		String responseContent = status.getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);

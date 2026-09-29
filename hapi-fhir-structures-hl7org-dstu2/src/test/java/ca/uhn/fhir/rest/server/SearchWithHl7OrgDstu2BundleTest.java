@@ -27,7 +27,10 @@ public class SearchWithHl7OrgDstu2BundleTest {
 
   @Test
 	public void testSearch() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?_format=xml&_pretty=true").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?_format=xml&_pretty=true")
+			.get()
+			.assertStatus(200)
+			.getBody();
 
 		responseContent = responseContent.replace("_pretty=true&amp;_format=xml", "_format=xml&amp;_pretty=true");
 		

@@ -41,7 +41,9 @@ public class PreferHl7OrgDstu2Test {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		HttpTestResponse status = ourServer.fhirRequest("/Patient").post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML).assertStatus(201);
+		HttpTestResponse status = ourServer.fhirRequest("/Patient")
+			.post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
+			.assertStatus(201);
 		String responseContent = status.getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);

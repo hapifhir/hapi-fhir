@@ -35,7 +35,10 @@ public class SearchWithIncludesDstu3Test {
 
 	@Test
 	public void testSearchIncludesReferences() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?_pretty=true&_include=Patient:organization&_include=Organization:" + Organization.SP_PARTOF).get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?_pretty=true&_include=Patient:organization&_include=Organization:" + Organization.SP_PARTOF)
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 
 		// Response should include both the patient, and the organization that was referred to

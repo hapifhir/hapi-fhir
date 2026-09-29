@@ -57,7 +57,10 @@ public class SearchDstu3Test {
 
 	@Test
 	public void testSearchNormal() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?identifier=foo%7Cbar").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?identifier=foo%7Cbar")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 
 		assertEquals("search", ourLastMethod);
@@ -69,7 +72,10 @@ public class SearchDstu3Test {
 
 	@Test
 	public void testSearchWithInvalidChain() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?identifier.chain=foo%7Cbar").get().assertStatus(400).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?identifier.chain=foo%7Cbar")
+			.get()
+			.assertStatus(400)
+			.getBody();
 		ourLog.info(responseContent);
 
 		OperationOutcome oo = (OperationOutcome) ourCtx.newJsonParser().parseResource(responseContent);
@@ -192,22 +198,26 @@ public class SearchDstu3Test {
 		Bundle bundle;
 
 		// Initial search
-		bundle = executeAndReturnLinkNext(ourServer.fhirRequest("/Patient?identifier=foo%7Cbar").withHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"), EncodingEnum.XML);
+		bundle = executeAndReturnLinkNext(ourServer.fhirRequest("/Patient?identifier=foo%7Cbar")
+			.withHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"), EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).doesNotContain("_format");
 
 		// Fetch the next page
-		bundle = executeAndReturnLinkNext(HttpTestRequest.to(ourServer.getHttpClient(), ourCtx, linkNext).withHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"), EncodingEnum.XML);
+		bundle = executeAndReturnLinkNext(HttpTestRequest.to(ourServer.getHttpClient(), ourCtx, linkNext)
+			.withHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"), EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).doesNotContain("_format");
 
 		// Fetch the next page
-		bundle = executeAndReturnLinkNext(HttpTestRequest.to(ourServer.getHttpClient(), ourCtx, linkNext).withHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"), EncodingEnum.XML);
+		bundle = executeAndReturnLinkNext(HttpTestRequest.to(ourServer.getHttpClient(), ourCtx, linkNext)
+			.withHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"), EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).doesNotContain("_format");
 
 		// Fetch the next page
-		bundle = executeAndReturnLinkNext(HttpTestRequest.to(ourServer.getHttpClient(), ourCtx, linkNext).withHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"), EncodingEnum.XML);
+		bundle = executeAndReturnLinkNext(HttpTestRequest.to(ourServer.getHttpClient(), ourCtx, linkNext)
+			.withHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"), EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).doesNotContain("_format");
 

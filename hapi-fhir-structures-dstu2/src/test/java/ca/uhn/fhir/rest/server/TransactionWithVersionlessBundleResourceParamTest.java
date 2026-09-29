@@ -65,7 +65,10 @@ public class TransactionWithVersionlessBundleResourceParamTest {
 		String bundleString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(bundleString);
 
-		String responseContent = fhirRequest("/").post(bundleString, Constants.CT_FHIR_JSON).assertStatus(200).getBody();
+		String responseContent = fhirRequest("/")
+			.post(bundleString, Constants.CT_FHIR_JSON)
+			.assertStatus(200)
+			.getBody();
 
 		ourLog.info(responseContent);
 

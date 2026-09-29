@@ -52,7 +52,9 @@ public class SearchHl7OrgDstu2Test {
 
   @Test
   public void testEncodeConvertsReferencesToRelativeJson() throws Exception {
-    HttpTestResponse status = ourServer.fhirRequest("/Patient?_query=searchWithRef&_format=json").get().assertStatus(200);
+    HttpTestResponse status = ourServer.fhirRequest("/Patient?_query=searchWithRef&_format=json")
+	.get()
+	.assertStatus(200);
     String responseContent = status.getBody();
     ourLog.info(responseContent);
 
@@ -77,7 +79,9 @@ public class SearchHl7OrgDstu2Test {
     ourReturnPublished = new InstantDt("2011-02-03T11:22:33Z");
 		assertEquals(ourReturnPublished.getValueAsString(), "2011-02-03T11:22:33Z");
 
-    String responseContent = ourServer.fhirRequest("/Patient?_query=searchWithBundleProvider&_pretty=true").get().getBody();
+    String responseContent = ourServer.fhirRequest("/Patient?_query=searchWithBundleProvider&_pretty=true")
+	.get()
+	.getBody();
     ourLog.info(responseContent);
 
     assertThat(responseContent).containsSubsequence("<lastUpdated value=\"2011-02-03T11:22:33Z\"/>");

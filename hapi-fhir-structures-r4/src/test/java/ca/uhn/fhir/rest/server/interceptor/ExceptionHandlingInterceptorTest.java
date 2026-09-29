@@ -62,7 +62,10 @@ public class ExceptionHandlingInterceptorTest {
 	public void testInternalError() throws Exception {
 		myInterceptor.setReturnStackTracesForExceptionTypes(Throwable.class);
 		{
-			String responseContent = ourServer.fhirRequest("/Patient?throwInternalError=aaa").get().assertStatus(500).getBody();
+			String responseContent = ourServer.fhirRequest("/Patient?throwInternalError=aaa")
+				.get()
+				.assertStatus(500)
+				.getBody();
 			ourLog.info(responseContent);
 			OperationOutcome oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
 			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("Exception Text");
@@ -78,7 +81,9 @@ public class ExceptionHandlingInterceptorTest {
 		ourServer.registerInterceptor(interceptor);
 
 		//When: We make a request to the server, triggering this exception to be thrown on an otherwise successful request
-		HttpTestResponse response = ourServer.fhirRequest("/Patient?succeed=true").withHeader("Accept-encoding", "gzip").get();
+		HttpTestResponse response = ourServer.fhirRequest("/Patient?succeed=true")
+			.withHeader("Accept-encoding", "gzip")
+			.get();
 		ourServer.unregisterInterceptor(interceptor);
 
 		//Then: This should still return an OperationOutcome, and not explode with an HTML IllegalState response.
@@ -99,7 +104,9 @@ public class ExceptionHandlingInterceptorTest {
 		AlterHttpResponseCodeInterceptorToValid404Value alterHttpResponseCodeInterceptorToValid404Value =
 			 new AlterHttpResponseCodeInterceptorToValid404Value();
 		//When: We make a request to the server, triggering this exception to be thrown on an otherwise successful request
-		HttpTestResponse response = ourServer.fhirRequest("/Patient?succeed=true").withHeader("Accept-encoding", "gzip").get();
+		HttpTestResponse response = ourServer.fhirRequest("/Patient?succeed=true")
+			.withHeader("Accept-encoding", "gzip")
+			.get();
 
 		//Then: This should still return an OperationOutcome, and not explode with an HTML IllegalState response.
 		String responseContent = response.assertStatus(500).getBody();
@@ -125,7 +132,10 @@ public class ExceptionHandlingInterceptorTest {
 	@Test
 	public void testInternalErrorFormatted() throws Exception {
 		{
-			String responseContent = ourServer.fhirRequest("/Patient?throwInternalError=aaa&_format=true").get().assertStatus(500).getBody();
+			String responseContent = ourServer.fhirRequest("/Patient?throwInternalError=aaa&_format=true")
+				.get()
+				.assertStatus(500)
+				.getBody();
 			ourLog.info(responseContent);
 			OperationOutcome oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
 			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("Exception Text");

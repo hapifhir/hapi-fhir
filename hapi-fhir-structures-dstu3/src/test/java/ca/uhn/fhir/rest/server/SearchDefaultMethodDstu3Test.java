@@ -76,7 +76,10 @@ public class SearchDefaultMethodDstu3Test {
 
 	@Test
 	public void testSearchTwoOptionalParams() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?param1=val1&param2=val2").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?param1=val1&param2=val2")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 
 		assertThat(ourLastParam1.getValuesAsQueryTokens()).hasSize(1);
@@ -93,7 +96,10 @@ public class SearchDefaultMethodDstu3Test {
 
 	@Test
 	public void testSearchTwoOptionalParamsAndExtraParam() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?param1=val1&param2=val2&param3=val3&_pretty=true").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?param1=val1&param2=val2&param3=val3&_pretty=true")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 
 		assertEquals("search03", ourLastMethod);
@@ -114,7 +120,10 @@ public class SearchDefaultMethodDstu3Test {
 
 	@Test
 	public void testSearchTwoOptionalParamsWithQualifierAndExtraParam() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?param1=val1&param2=val2&param2:exact=val2e&param3=val3&_pretty=true").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?param1=val1&param2=val2&param2:exact=val2e&param3=val3&_pretty=true")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 
 		assertEquals("search03", ourLastMethod);

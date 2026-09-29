@@ -69,7 +69,9 @@ public class SummaryParamR4Test {
 
 	@Test
 	public void testReadSummaryText() throws Exception {
-		HttpTestResponse status = ourServer.fhirRequest("/Patient/1?_summary=" + SummaryEnum.TEXT.getCode()).get().assertStatus(200);
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/1?_summary=" + SummaryEnum.TEXT.getCode())
+			.get()
+			.assertStatus(200);
 		String responseContent = status.getBody();
 		ourLog.info(responseContent);
 
@@ -83,7 +85,9 @@ public class SummaryParamR4Test {
 
 	@Test
 	public void testReadSummaryTextWithMandatory() throws Exception {
-		HttpTestResponse status = ourServer.fhirRequest("/MedicationRequest/1?_summary=" + SummaryEnum.TEXT.getCode()).get().assertStatus(200);
+		HttpTestResponse status = ourServer.fhirRequest("/MedicationRequest/1?_summary=" + SummaryEnum.TEXT.getCode())
+			.get()
+			.assertStatus(200);
 		String responseContent = status.getBody();
 		ourLog.info(responseContent);
 
@@ -266,13 +270,17 @@ public class SummaryParamR4Test {
 		EncodingEnum encodingEnum;
 
 		encodingEnum = EncodingEnum.JSON;
-		String responseContent = ourServer.fhirRequest(thePath + "&_pretty=true&_format=" + encodingEnum.getFormatContentType()).get().getBody();
+		String responseContent = ourServer.fhirRequest(thePath + "&_pretty=true&_format=" + encodingEnum.getFormatContentType())
+			.get()
+			.getBody();
 		ourLog.info(responseContent);
 		T response = encodingEnum.newParser(ourCtx).parseResource(theType, responseContent);
 		theVerifier.accept(response);
 
 		encodingEnum = EncodingEnum.XML;
-		responseContent = ourServer.fhirRequest(thePath + "&_pretty=true&_format=" + encodingEnum.getFormatContentType()).get().getBody();
+		responseContent = ourServer.fhirRequest(thePath + "&_pretty=true&_format=" + encodingEnum.getFormatContentType())
+			.get()
+			.getBody();
 		ourLog.info(responseContent);
 		response = encodingEnum.newParser(ourCtx).parseResource(theType, responseContent);
 		theVerifier.accept(response);

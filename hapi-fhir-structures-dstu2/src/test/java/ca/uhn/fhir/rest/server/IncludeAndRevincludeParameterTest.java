@@ -54,7 +54,9 @@ public class IncludeAndRevincludeParameterTest {
 	
 	@Test
 	public void testWithBoth() throws Exception {
-		ourServer.fhirRequest("/Patient?_query=normalInclude&_include=A.a&_include=B.b&_revinclude=C.c&_revinclude=D.d").get().assertStatus(200);
+		ourServer.fhirRequest("/Patient?_query=normalInclude&_include=A.a&_include=B.b&_revinclude=C.c&_revinclude=D.d")
+			.get()
+			.assertStatus(200);
 
 		assertThat(ourIncludes).hasSize(2);
 		assertThat(ourReverseIncludes).hasSize(2);

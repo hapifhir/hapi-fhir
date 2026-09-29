@@ -51,7 +51,10 @@ public class MultitenancyR4Test {
 	@Test
 	public void testUrlBaseStrategy() throws Exception {
 
-		String responseContent = ourServer.fhirRequest("/TENANT2/Patient?identifier=foo%7Cbar").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/TENANT2/Patient?identifier=foo%7Cbar")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		assertEquals("search", ourLastMethod);
 		assertEquals("TENANT2", ourLastTenantId);
 		assertEquals("foo", ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem());

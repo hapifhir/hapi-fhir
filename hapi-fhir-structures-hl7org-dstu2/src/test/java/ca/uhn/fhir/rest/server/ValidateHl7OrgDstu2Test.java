@@ -64,7 +64,10 @@ public class ValidateHl7OrgDstu2Test {
 		params.addParameter().setName("profile").setValue(new StringType("http://foo"));
 		params.addParameter().setName("mode").setValue(new StringType(ValidationModeEnum.CREATE.getCode()));
 
-		String resp = ourServer.fhirRequest("/Patient/$validate").post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML).assertStatus(200).getBody();
+		String resp = ourServer.fhirRequest("/Patient/$validate")
+			.post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getBody();
 
 		assertThat(resp).containsSubsequence("<OperationOutcome");
 		assertEquals("http://foo", ourLastProfile);
@@ -81,7 +84,10 @@ public class ValidateHl7OrgDstu2Test {
 		Parameters params = new Parameters();
 		params.addParameter().setName("resource").setResource(patient);
 
-		String resp = ourServer.fhirRequest("/Patient/$validate").post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML).assertStatus(200).getBody();
+		String resp = ourServer.fhirRequest("/Patient/$validate")
+			.post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getBody();
 
 		assertThat(resp).containsSubsequence("<OperationOutcome");
 	}
@@ -99,7 +105,10 @@ public class ValidateHl7OrgDstu2Test {
 		Parameters params = new Parameters();
 		params.addParameter().setName("resource").setResource(patient);
 
-		String resp = ourServer.fhirRequest("/Patient/$validate").post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML).assertStatus(200).getBody();
+		String resp = ourServer.fhirRequest("/Patient/$validate")
+			.post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getBody();
 
 		assertThat(resp).containsSubsequence("<OperationOutcome", "FOOBAR");
 	}
@@ -114,7 +123,9 @@ public class ValidateHl7OrgDstu2Test {
 		Parameters params = new Parameters();
 		params.addParameter().setName("resource").setResource(org);
 
-		ourServer.fhirRequest("/Organization/$validate").post(ourCtx.newJsonParser().encodeResourceToString(params), Constants.CT_FHIR_JSON).assertStatus(200);
+		ourServer.fhirRequest("/Organization/$validate")
+			.post(ourCtx.newJsonParser().encodeResourceToString(params), Constants.CT_FHIR_JSON)
+			.assertStatus(200);
 
 		assertThat(ourLastResourceBody).containsSubsequence("\"resourceType\":\"Organization\"", "\"identifier\"", "\"value\":\"001");
 		assertEquals(EncodingEnum.JSON, ourLastEncoding);

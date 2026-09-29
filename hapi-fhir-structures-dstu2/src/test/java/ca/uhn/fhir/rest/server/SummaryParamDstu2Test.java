@@ -51,7 +51,9 @@ public class SummaryParamDstu2Test {
 
 	@Test
 	public void testReadSummaryData() throws Exception {
-		HttpTestResponse response = ourServer.fhirRequest("/Patient/1?_summary=" + SummaryEnum.DATA.getCode()).get().assertStatus(200);
+		HttpTestResponse response = ourServer.fhirRequest("/Patient/1?_summary=" + SummaryEnum.DATA.getCode())
+			.get()
+			.assertStatus(200);
 		String responseContent = response.getBody();
 		ourLog.info(responseContent);
 
@@ -67,7 +69,9 @@ public class SummaryParamDstu2Test {
 
 	@Test
 	public void testReadSummaryText() throws Exception {
-		HttpTestResponse response = ourServer.fhirRequest("/Patient/1?_summary=" + SummaryEnum.TEXT.getCode()).get().assertStatus(200);
+		HttpTestResponse response = ourServer.fhirRequest("/Patient/1?_summary=" + SummaryEnum.TEXT.getCode())
+			.get()
+			.assertStatus(200);
 		String responseContent = response.getBody();
 		ourLog.info(responseContent);
 
@@ -81,7 +85,9 @@ public class SummaryParamDstu2Test {
 
 	@Test
 	public void testReadSummaryTextWithMandatory() throws Exception {
-		HttpTestResponse response = ourServer.fhirRequest("/MedicationOrder/1?_summary=" + SummaryEnum.TEXT.getCode()).get().assertStatus(200);
+		HttpTestResponse response = ourServer.fhirRequest("/MedicationOrder/1?_summary=" + SummaryEnum.TEXT.getCode())
+			.get()
+			.assertStatus(200);
 		String responseContent = response.getBody();
 		ourLog.info(responseContent);
 
@@ -95,7 +101,9 @@ public class SummaryParamDstu2Test {
 
 	@Test
 	public void testReadSummaryTrue() throws Exception {
-		HttpTestResponse response = ourServer.fhirRequest("/Patient/1?_summary=" + SummaryEnum.TRUE.getCode()).get().assertStatus(200);
+		HttpTestResponse response = ourServer.fhirRequest("/Patient/1?_summary=" + SummaryEnum.TRUE.getCode())
+			.get()
+			.assertStatus(200);
 		String responseContent = response.getBody();
 		ourLog.info(responseContent);
 
@@ -110,7 +118,10 @@ public class SummaryParamDstu2Test {
 
 	@Test
 	public void testSearchSummaryCount() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?_pretty=true&_summary=" + SummaryEnum.COUNT.getCode()).get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?_pretty=true&_summary=" + SummaryEnum.COUNT.getCode())
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 
 		assertThat(responseContent).contains("<total value=\"1\"/>");
@@ -123,7 +134,10 @@ public class SummaryParamDstu2Test {
 
 	@Test
 	public void testSearchSummaryData() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?_summary=" + SummaryEnum.DATA.getCode()).get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?_summary=" + SummaryEnum.DATA.getCode())
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 
 		assertThat(responseContent).contains("<Patient");
@@ -147,7 +161,10 @@ public class SummaryParamDstu2Test {
 
 	@Test
 	public void testSearchSummaryText() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?_summary=" + SummaryEnum.TEXT.getCode()).get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?_summary=" + SummaryEnum.TEXT.getCode())
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 
 		assertThat(responseContent).contains("<total value=\"1\"/>");
@@ -160,7 +177,10 @@ public class SummaryParamDstu2Test {
 
 	@Test
 	public void testSearchSummaryTextWithMandatory() throws Exception {
-		String responseContent = ourServer.fhirRequest("/MedicationOrder?_summary=" + SummaryEnum.TEXT.getCode() + "&_pretty=true").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/MedicationOrder?_summary=" + SummaryEnum.TEXT.getCode() + "&_pretty=true")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 
 		assertThat(responseContent).contains("<total value=\"1\"/>");
@@ -172,7 +192,10 @@ public class SummaryParamDstu2Test {
 
 	@Test
 	public void testSearchSummaryTextMulti() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?_query=multi&_summary=" + SummaryEnum.TEXT.getCode()).get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?_query=multi&_summary=" + SummaryEnum.TEXT.getCode())
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 
 		assertThat(responseContent).contains("<total value=\"1\"/>");
@@ -185,7 +208,10 @@ public class SummaryParamDstu2Test {
 
 	@Test
 	public void testSearchSummaryTrue() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?_summary=" + SummaryEnum.TRUE.getCode()).get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?_summary=" + SummaryEnum.TRUE.getCode())
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 
 		assertThat(responseContent).contains("<Patient");
@@ -197,7 +223,10 @@ public class SummaryParamDstu2Test {
 
 	@Test
 	public void testSearchSummaryWithTextAndOthers() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?_summary=text&_summary=data").get().assertStatus(400).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?_summary=text&_summary=data")
+			.get()
+			.assertStatus(400)
+			.getBody();
 		ourLog.info(responseContent);
 
 		assertThat(responseContent).contains("Can not combine _summary=text with other values for _summary");

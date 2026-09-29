@@ -72,7 +72,11 @@ public class SearchDstu2Test {
 	public void testSearchWithInvalidPostUrl() throws Exception {
 		// should end with _search
 		// add parameters to the post method
-		String responseContent = ourServer.fhirRequest("/Patient?name=Central").withFormParam("_id", "aaa").postForm().assertStatus(400).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?name=Central")
+			.withFormParam("_id", "aaa")
+			.postForm()
+			.assertStatus(400)
+			.getBody();
 		ourLog.info(responseContent);
 		assertThat(responseContent).contains("<diagnostics value=\"" + Msg.code(446) + "Incorrect Content-Type header value of &quot;application/x-www-form-urlencoded; charset=UTF-8&quot; was provided in the request. A FHIR Content-Type is required for &quot;CREATE&quot; operation\"/>");
 
@@ -112,7 +116,9 @@ public class SearchDstu2Test {
 	public void testResultBundleHasUpdateTime() throws Exception {
 		ourReturnPublished = new InstantDt("2011-02-03T11:22:33Z");
 
-		String responseContent = ourServer.fhirRequest("/Patient?_query=searchWithBundleProvider&_pretty=true").get().getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?_query=searchWithBundleProvider&_pretty=true")
+			.get()
+			.getBody();
 		ourLog.info(responseContent);
 
 		assertThat(responseContent).containsSubsequence("<lastUpdated value=\"2011-02-03T11:22:33Z\"/>");
@@ -120,7 +126,10 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testResultBundleHasUuid() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?_query=searchWithRef").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?_query=searchWithRef")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 
 		assertThat(responseContent).matches(".*id value..[0-9a-f-]+\\\".*");
@@ -128,20 +137,28 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchBlacklist01Failing() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?_query=searchBlacklist01&ref.black1=value").get().assertStatus(400).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?_query=searchBlacklist01&ref.black1=value")
+			.get()
+			.assertStatus(400)
+			.getBody();
 		ourLog.info(responseContent);
 	}
 
 	@Test
 	public void testSearchBlacklist01Passing() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?_query=searchBlacklist01&ref.white1=value").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?_query=searchBlacklist01&ref.white1=value")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 		assertEquals("searchBlacklist01", ourLastMethod);
 	}
 
 	@Test
 	public void testSearchByPost() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient/_search").post("searchDateAndList=2001,2002&searchDateAndList=2003,2004", Constants.CT_X_FORM_URLENCODED).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient/_search")
+			.post("searchDateAndList=2001,2002&searchDateAndList=2003,2004", Constants.CT_X_FORM_URLENCODED)
+			.getBody();
 		ourLog.info(responseContent);
 		assertEquals("searchDateAndList", ourLastMethod);
 		assertThat(ourLastDateAndList.getValuesAsQueryTokens()).hasSize(2);
@@ -162,7 +179,9 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchByPostWithBodyAndUrlParams() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient/_search?_format=json").post("searchDateAndList=2001,2002&searchDateAndList=2003,2004", Constants.CT_X_FORM_URLENCODED).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient/_search?_format=json")
+			.post("searchDateAndList=2001,2002&searchDateAndList=2003,2004", Constants.CT_X_FORM_URLENCODED)
+			.getBody();
 		ourLog.info(responseContent);
 		assertEquals("searchDateAndList", ourLastMethod);
 		assertThat(ourLastDateAndList.getValuesAsQueryTokens()).hasSize(2);
@@ -178,7 +197,9 @@ public class SearchDstu2Test {
 	public void testSearchByPostWithBodyAndUrlParamsNoManual() throws Exception {
 		ourServer.getRestfulServer().setIgnoreServerParsedRequestParameters(false);
 
-		String responseContent = ourServer.fhirRequest("/Patient/_search?_format=json").post("searchDateAndList=2001,2002&searchDateAndList=2003,2004", Constants.CT_X_FORM_URLENCODED).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient/_search?_format=json")
+			.post("searchDateAndList=2001,2002&searchDateAndList=2003,2004", Constants.CT_X_FORM_URLENCODED)
+			.getBody();
 		ourLog.info(responseContent);
 		assertEquals("searchDateAndList", ourLastMethod);
 		assertThat(ourLastDateAndList.getValuesAsQueryTokens()).hasSize(2);
@@ -192,13 +213,18 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchByPut() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient/_search").put("searchDateAndList=2001,2002&searchDateAndList=2003,2004", Constants.CT_X_FORM_URLENCODED).assertStatus(400).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient/_search")
+			.put("searchDateAndList=2001,2002&searchDateAndList=2003,2004", Constants.CT_X_FORM_URLENCODED)
+			.assertStatus(400)
+			.getBody();
 		ourLog.info(responseContent);
 	}
 
 	@Test
 	public void testSearchDateAndList() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?searchDateAndList=2001,2002&searchDateAndList=2003,2004").get().getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?searchDateAndList=2001,2002&searchDateAndList=2003,2004")
+			.get()
+			.getBody();
 		ourLog.info(responseContent);
 		assertEquals("searchDateAndList", ourLastMethod);
 		assertThat(ourLastDateAndList.getValuesAsQueryTokens()).hasSize(2);
@@ -215,7 +241,9 @@ public class SearchDstu2Test {
 	public void testSearchPagesAllHaveCorrectBundleType() throws Exception {
 		Bundle resp;
 		{
-			String responseContent = ourServer.fhirRequest("/Patient?searchHugeResults=yes&_count=10&_pretty=true").get().getBody();
+			String responseContent = ourServer.fhirRequest("/Patient?searchHugeResults=yes&_count=10&_pretty=true")
+				.get()
+				.getBody();
 			ourLog.info(responseContent);
 			resp = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 			assertEquals("searchset", resp.getType());
@@ -226,7 +254,9 @@ public class SearchDstu2Test {
 
 		// Now try the next page
 		{
-			String responseContent = HttpTestRequest.to(ourServer.getHttpClient(), ourServer.getFhirContext(), nextLink.getUrl()).get().getBody();
+			String responseContent = HttpTestRequest.to(ourServer.getHttpClient(), ourServer.getFhirContext(), nextLink.getUrl())
+				.get()
+				.getBody();
 			ourLog.info(responseContent);
 			resp = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 			assertEquals("searchset", resp.getType());
@@ -238,7 +268,9 @@ public class SearchDstu2Test {
 
 		// Now try a third page
 		{
-			String responseContent = HttpTestRequest.to(ourServer.getHttpClient(), ourServer.getFhirContext(), nextLink.getUrl()).get().getBody();
+			String responseContent = HttpTestRequest.to(ourServer.getHttpClient(), ourServer.getFhirContext(), nextLink.getUrl())
+				.get()
+				.getBody();
 			ourLog.info(responseContent);
 			resp = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 			assertEquals("searchset", resp.getType());
@@ -251,7 +283,10 @@ public class SearchDstu2Test {
 	 */
 	@Test
 	public void testSearchQuantityMissingTrue() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?quantity:missing=true").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?quantity:missing=true")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 		assertEquals(Boolean.TRUE, ourLastQuantity.getMissing());
 	}
@@ -270,7 +305,10 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchReferenceParams01() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?_query=searchNoList&ref=123").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?_query=searchNoList&ref=123")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 
 		assertEquals("123", ourLastRef.getIdPart());
@@ -279,7 +317,10 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchReferenceParams02() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?_query=searchNoList&ref=Patient/123").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?_query=searchNoList&ref=Patient/123")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 
 		assertEquals("123", ourLastRef.getIdPart());
@@ -288,7 +329,10 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchReferenceParams03() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?_query=searchNoList&ref:Patient=Patient/123").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?_query=searchNoList&ref:Patient=Patient/123")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 
 		assertEquals("123", ourLastRef.getIdPart());
@@ -297,7 +341,10 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchReferenceParams04() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?_query=searchNoList&ref:Patient=123").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?_query=searchNoList&ref:Patient=123")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 
 		assertEquals("123", ourLastRef.getIdPart());
@@ -309,7 +356,10 @@ public class SearchDstu2Test {
 	 */
 	@Test
 	public void testSearchByIdExact() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?_id:exact=aaa&reference=value").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?_id:exact=aaa&reference=value")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 
 		assertEquals("idProvider", ourLastMethod);
@@ -317,7 +367,10 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchByQualifiedIdQualifiedString() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?_id:exact=aaa&stringParam:exact=value").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?_id:exact=aaa&stringParam:exact=value")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 
 		assertEquals("stringParam:true:true", ourLastMethod);
@@ -325,7 +378,10 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchByQualifiedString() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?_id=aaa&stringParam:exact=value").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?_id=aaa&stringParam:exact=value")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 
 		assertEquals("stringParam:false:true", ourLastMethod);
@@ -333,7 +389,10 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchByQualifiedIdString() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?_id:exact=aaa&stringParam=value").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?_id:exact=aaa&stringParam=value")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 
 		assertEquals("stringParam:true:false", ourLastMethod);
@@ -341,7 +400,10 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchByIdString() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?_id=aaa&stringParam=value").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?_id=aaa&stringParam=value")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 
 		assertEquals("stringParam:false:false", ourLastMethod);
@@ -350,13 +412,19 @@ public class SearchDstu2Test {
 
 	@Test
 	public void testSearchWhitelist01Failing() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?_query=searchWhitelist01&ref=value").get().assertStatus(400).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?_query=searchWhitelist01&ref=value")
+			.get()
+			.assertStatus(400)
+			.getBody();
 		ourLog.info(responseContent);
 	}
 
 	@Test
 	public void testSearchWhitelist01Passing() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?_query=searchWhitelist01&ref.white1=value").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?_query=searchWhitelist01&ref.white1=value")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 		assertEquals("searchWhitelist01", ourLastMethod);
 	}

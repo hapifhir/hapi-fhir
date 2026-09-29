@@ -64,7 +64,10 @@ public class IncludeHl7OrgDstu2Test {
 
   @Test
   public void testOneIncludeXml() throws Exception {
-    String responseContent = ourServer.fhirRequest("/Patient?name=Hello&_include=foo").get().assertStatus(200).getBody();
+    String responseContent = ourServer.fhirRequest("/Patient?name=Hello&_include=foo")
+	.get()
+	.assertStatus(200)
+	.getBody();
 
     ourLog.info(responseContent);
 
@@ -79,7 +82,10 @@ public class IncludeHl7OrgDstu2Test {
 
   @Test
   public void testOneIncludeJson() throws Exception {
-    String responseContent = ourServer.fhirRequest("/Patient?name=Hello&_include=foo&_format=json").get().assertStatus(200).getBody();
+    String responseContent = ourServer.fhirRequest("/Patient?name=Hello&_include=foo&_format=json")
+	.get()
+	.assertStatus(200)
+	.getBody();
 
     ourLog.info(responseContent);
 
@@ -94,7 +100,10 @@ public class IncludeHl7OrgDstu2Test {
 
   @Test
   public void testIIncludedResourcesNonContained() throws Exception {
-    String responseContent = ourServer.fhirRequest("/Patient?_query=normalInclude&_pretty=true").get().assertStatus(200).getBody();
+    String responseContent = ourServer.fhirRequest("/Patient?_query=normalInclude&_pretty=true")
+	.get()
+	.assertStatus(200)
+	.getBody();
 
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 
@@ -116,7 +125,10 @@ public class IncludeHl7OrgDstu2Test {
 
   @Test
   public void testIIncludedResourcesNonContainedInExtension() throws Exception {
-    String responseContent = ourServer.fhirRequest("/Patient?_query=extInclude&_pretty=true").get().assertStatus(200).getBody();
+    String responseContent = ourServer.fhirRequest("/Patient?_query=extInclude&_pretty=true")
+	.get()
+	.assertStatus(200)
+	.getBody();
 
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 
@@ -138,7 +150,10 @@ public class IncludeHl7OrgDstu2Test {
 
   @Test
   public void testIIncludedResourcesNonContainedInExtensionJson() throws Exception {
-    String responseContent = ourServer.fhirRequest("/Patient?_query=extInclude&_pretty=true&_format=json").get().assertStatus(200).getBody();
+    String responseContent = ourServer.fhirRequest("/Patient?_query=extInclude&_pretty=true&_format=json")
+	.get()
+	.assertStatus(200)
+	.getBody();
 
     Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 
@@ -160,7 +175,10 @@ public class IncludeHl7OrgDstu2Test {
 
   @Test
   public void testIIncludedResourcesNonContainedInDeclaredExtension() throws Exception {
-    String responseContent = ourServer.fhirRequest("/Patient?_query=declaredExtInclude&_pretty=true").get().assertStatus(200).getBody();
+    String responseContent = ourServer.fhirRequest("/Patient?_query=declaredExtInclude&_pretty=true")
+	.get()
+	.assertStatus(200)
+	.getBody();
 
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 
@@ -184,7 +202,10 @@ public class IncludeHl7OrgDstu2Test {
 
   @Test
   public void testTwoInclude() throws Exception {
-    String responseContent = ourServer.fhirRequest("/Patient?name=Hello&_include=foo&_include=bar&_pretty=true").get().assertStatus(200).getBody();
+    String responseContent = ourServer.fhirRequest("/Patient?name=Hello&_include=foo&_include=bar&_pretty=true")
+	.get()
+	.assertStatus(200)
+	.getBody();
 
     ourLog.info(responseContent);
 

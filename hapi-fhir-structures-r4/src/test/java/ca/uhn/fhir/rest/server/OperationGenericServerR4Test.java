@@ -59,7 +59,10 @@ public class OperationGenericServerR4Test {
 		p.addParameter().setName("PARAM2").setResource(new Patient().setActive(true));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		String response = ourServer.fhirRequest("/Patient/123/$OP_INSTANCE").post(inParamsStr, Constants.CT_FHIR_XML).assertStatus(200).getBody();
+		String response = ourServer.fhirRequest("/Patient/123/$OP_INSTANCE")
+			.post(inParamsStr, Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getBody();
 
 		assertEquals("PARAM1val", ourLastParam1.getValue());
 		assertEquals(true, ourLastParam2.getActive());
@@ -80,7 +83,10 @@ public class OperationGenericServerR4Test {
 		p.addParameter().setName("PARAM2").setResource(new Patient().setActive(true));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		String response = ourServer.fhirRequest("/$OP_SERVER").post(inParamsStr, Constants.CT_FHIR_XML).assertStatus(200).getBody();
+		String response = ourServer.fhirRequest("/$OP_SERVER")
+			.post(inParamsStr, Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getBody();
 
 		assertEquals("PARAM1", ourLastResourceParam.getParameterFirstRep().getName());
 		assertEquals("PARAM1val", ourLastParam1.getValue());
@@ -99,7 +105,10 @@ public class OperationGenericServerR4Test {
 		p.addParameter().setName("PARAM2").setResource(new Patient().setActive(true));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		String response = ourServer.fhirRequest("/Patient/$OP_TYPE").post(inParamsStr, Constants.CT_FHIR_XML).assertStatus(200).getBody();
+		String response = ourServer.fhirRequest("/Patient/$OP_TYPE")
+			.post(inParamsStr, Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(response);
 
 		assertEquals("PARAM1", ourLastResourceParam.getParameterFirstRep().getName());

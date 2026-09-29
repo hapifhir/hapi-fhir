@@ -49,7 +49,10 @@ public class FormatParameterDstu3Test {
 	public void testFormatApplicationXml() throws Exception {
 		ourServer.setDefaultResponseEncoding(EncodingEnum.JSON);
 
-		String responseContent = ourServer.fhirRequest("/Patient/123?_format=application/xml").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient/123?_format=application/xml")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 
 		assertEquals(VALUE_XML, responseContent);
@@ -62,7 +65,10 @@ public class FormatParameterDstu3Test {
 	public void testFormatApplicationXmlFhir() throws Exception {
 		ourServer.setDefaultResponseEncoding(EncodingEnum.JSON);
 
-		String responseContent = ourServer.fhirRequest("/Patient/123?_format=application/xml%2Bfhir").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient/123?_format=application/xml%2Bfhir")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 
 		assertEquals(VALUE_XML, responseContent);
@@ -76,7 +82,10 @@ public class FormatParameterDstu3Test {
 		ourServer.setDefaultResponseEncoding(EncodingEnum.JSON);
 
 		// The plus isn't escaped here, and it should be.. but we'll be lenient
-		String responseContent = ourServer.fhirRequest("/Patient/123?_format=application/xml+fhir").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient/123?_format=application/xml+fhir")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 
 		assertEquals(VALUE_XML, responseContent);
@@ -102,7 +111,10 @@ public class FormatParameterDstu3Test {
 	public void testFormatApplicationJson() throws Exception {
 		ourServer.setDefaultResponseEncoding(EncodingEnum.XML);
 
-		String responseContent = ourServer.fhirRequest("/Patient/123?_format=application/json").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient/123?_format=application/json")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 
 		assertEquals(VALUE_JSON, responseContent);
@@ -115,7 +127,10 @@ public class FormatParameterDstu3Test {
 	public void testFormatApplicationJsonFhir() throws Exception {
 		ourServer.setDefaultResponseEncoding(EncodingEnum.XML);
 
-		String responseContent = ourServer.fhirRequest("/Patient/123?_format=application/json%2Bfhir").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient/123?_format=application/json%2Bfhir")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 
 		assertEquals(VALUE_JSON, responseContent);
@@ -129,7 +144,10 @@ public class FormatParameterDstu3Test {
 		ourServer.setDefaultResponseEncoding(EncodingEnum.XML);
 
 		// The plus isn't escaped here, and it should be.. but we'll be lenient
-		String responseContent = ourServer.fhirRequest("/Patient/123?_format=application/json+fhir").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient/123?_format=application/json+fhir")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 
 		assertEquals(VALUE_JSON, responseContent);

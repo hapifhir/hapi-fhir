@@ -46,7 +46,10 @@ public class SearchR5Test {
 
 	@Test
 	public void testSearch() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?identifier=foo%7Cbar&_pretty=true").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?identifier=foo%7Cbar&_pretty=true")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 
 		assertEquals("search", ourLastMethod);

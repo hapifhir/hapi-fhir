@@ -55,7 +55,8 @@ public class CreateDstu3Test {
 	@Test
 	public void testCreateReturnsLocationHeader() throws Exception {
 
-		HttpTestResponse response = ourServer.fhirRequest("/Patient").post("{\"resourceType\":\"Patient\", \"status\":\"active\"}", "application/fhir+json; charset=utf-8");
+		HttpTestResponse response = ourServer.fhirRequest("/Patient")
+			.post("{\"resourceType\":\"Patient\", \"status\":\"active\"}", "application/fhir+json; charset=utf-8");
 		String responseContent = response.assertStatus(201).getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
@@ -71,7 +72,10 @@ public class CreateDstu3Test {
 		ourReturnOo = new OperationOutcome().addIssue(new OperationOutcomeIssueComponent().setDiagnostics("DIAG"));
 		String expectedResponseContent = "{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\"},\"gender\":\"male\"}";
 		
-		String responseContent = ourServer.fhirRequest("/Patient").post("{\"resourceType\":\"Patient\", \"gender\":\"male\"}", "application/fhir+json; charset=utf-8").assertStatus(201).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient")
+			.post("{\"resourceType\":\"Patient\", \"gender\":\"male\"}", "application/fhir+json; charset=utf-8")
+			.assertStatus(201)
+			.getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
 		assertEquals(expectedResponseContent, responseContent);
@@ -84,7 +88,10 @@ public class CreateDstu3Test {
 	@Test
 	public void testCreateWithInvalidContent() throws Exception {
 
-		String responseContent = ourServer.fhirRequest("/Patient").post("FOO", "application/xml+fhir; charset=utf-8").assertStatus(400).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient")
+			.post("FOO", "application/xml+fhir; charset=utf-8")
+			.assertStatus(400)
+			.getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
 
@@ -97,7 +104,10 @@ public class CreateDstu3Test {
 	@Test
 	public void testCreateWithIncorrectContent1() throws Exception {
 
-		String responseContent = ourServer.fhirRequest("/Patient").post("{\"foo\":\"bar\"}", "application/xml+fhir; charset=utf-8").assertStatus(400).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient")
+			.post("{\"foo\":\"bar\"}", "application/xml+fhir; charset=utf-8")
+			.assertStatus(400)
+			.getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
 
@@ -109,7 +119,10 @@ public class CreateDstu3Test {
 	@Test
 	public void testCreateWithIncorrectContent2() throws Exception {
 
-		String responseContent = ourServer.fhirRequest("/Patient").post("{\"foo\":\"bar\"}", "application/fhir+xml; charset=utf-8").assertStatus(400).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient")
+			.post("{\"foo\":\"bar\"}", "application/fhir+xml; charset=utf-8")
+			.assertStatus(400)
+			.getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
 
@@ -121,7 +134,10 @@ public class CreateDstu3Test {
 	@Test
 	public void testCreateWithIncorrectContent3() throws Exception {
 
-		String responseContent = ourServer.fhirRequest("/Patient").post("{\"foo\":\"bar\"}", "application/fhir+json; charset=utf-8").assertStatus(400).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient")
+			.post("{\"foo\":\"bar\"}", "application/fhir+json; charset=utf-8")
+			.assertStatus(400)
+			.getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
 
@@ -132,7 +148,10 @@ public class CreateDstu3Test {
 	@Test
 	public void testSearch() throws Exception {
 
-		String responseContent = ourServer.fhirRequest("/Patient?_format=xml&_pretty=true").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?_format=xml&_pretty=true")
+			.get()
+			.assertStatus(200)
+			.getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
 

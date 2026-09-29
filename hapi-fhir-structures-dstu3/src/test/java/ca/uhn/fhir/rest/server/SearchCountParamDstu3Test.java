@@ -65,7 +65,10 @@ public class SearchCountParamDstu3Test {
 
 	@Test
 	public void testSearchCount0() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?_count=0&_pretty=true").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?_count=0&_pretty=true")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 		assertEquals("search", ourLastMethod);
 		assertEquals(Integer.valueOf(0), ourLastParam);
@@ -83,7 +86,10 @@ public class SearchCountParamDstu3Test {
 	 */
 	@Test
 	public void testSearchWithNoCountParam() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?_query=searchWithNoCountParam&_count=2").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?_query=searchWithNoCountParam&_count=2")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 		assertEquals("searchWithNoCountParam", ourLastMethod);
 		assertNull(ourLastParam);

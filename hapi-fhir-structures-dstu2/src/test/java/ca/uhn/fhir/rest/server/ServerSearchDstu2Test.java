@@ -86,7 +86,9 @@ public class ServerSearchDstu2Test {
 
 	@Test
 	public void testSearchWithEncodedValue() throws Exception {
-		String responseContent = ourServer.fhirRequest("/?param1=" + UrlUtil.escapeUrlParam("Jernelöv")).get().getBody();
+		String responseContent = ourServer.fhirRequest("/?param1=" + UrlUtil.escapeUrlParam("Jernelöv"))
+			.get()
+			.getBody();
 		ourLog.info(responseContent);
 		assertEquals("searchParam1", ourLastMethod);
 		assertEquals("Jernelöv", ourLastRef.getValue());

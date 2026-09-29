@@ -63,7 +63,10 @@ public class HistoryR4Test {
 	@Test
 	public void testAt() throws Exception {
 		{
-			String responseContent = ourServer.fhirRequest("/_history?_at=gt2001&_at=lt2005").get().assertStatus(200).getBody();
+			String responseContent = ourServer.fhirRequest("/_history?_at=gt2001&_at=lt2005")
+				.get()
+				.assertStatus(200)
+				.getBody();
 			ourLog.info(responseContent);
 
 			assertEquals(ParamPrefixEnum.GREATERTHAN, ourLastAt.getLowerBound().getPrefix());
@@ -76,7 +79,10 @@ public class HistoryR4Test {
 	@Test
 	public void testInstanceHistory() throws Exception {
 		{
-			String responseContent = ourServer.fhirRequest("/Patient/123/_history?_pretty=true").get().assertStatus(200).getBody();
+			String responseContent = ourServer.fhirRequest("/Patient/123/_history?_pretty=true")
+				.get()
+				.assertStatus(200)
+				.getBody();
 			ourLog.info(responseContent);
 
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
@@ -140,7 +146,10 @@ public class HistoryR4Test {
 	@Test
 	public void testVread() throws Exception {
 		{
-			String responseContent = ourServer.fhirRequest("/Patient/123/_history/456").get().assertStatus(200).getBody();
+			String responseContent = ourServer.fhirRequest("/Patient/123/_history/456")
+				.get()
+				.assertStatus(200)
+				.getBody();
 			ourLog.info(responseContent);
 
 			Patient bundle = ourCtx.newXmlParser().parseResource(Patient.class, responseContent);

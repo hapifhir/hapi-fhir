@@ -54,7 +54,8 @@ public class PatchServerDstu3Test {
 	@Test
 	public void testPatchValidJson() throws Exception {
 		String requestContents = "[ { \"op\": \"add\", \"path\": \"/a/b/c\", \"value\": [ \"foo\", \"bar\" ] } ]";
-		String responseContent = ourServer.fhirRequest("/Patient/123").withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
+		String responseContent = ourServer.fhirRequest("/Patient/123")
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
 			.method("PATCH", requestContents.getBytes(StandardCharsets.UTF_8), Constants.CT_JSON_PATCH).assertStatus(200).getBody();
 		ourLog.info(responseContent);
 		assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">OK</div></text></OperationOutcome>", responseContent);
@@ -68,7 +69,8 @@ public class PatchServerDstu3Test {
 	@Test
 	public void testPatchUsingConditional() throws Exception {
 		String requestContents = "[ { \"op\": \"add\", \"path\": \"/a/b/c\", \"value\": [ \"foo\", \"bar\" ] } ]";
-		String responseContent = ourServer.fhirRequest("/Patient?_id=123").withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
+		String responseContent = ourServer.fhirRequest("/Patient?_id=123")
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
 			.method("PATCH", requestContents.getBytes(StandardCharsets.UTF_8), Constants.CT_JSON_PATCH).assertStatus(200).getBody();
 		ourLog.info(responseContent);
 		assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">OK</div></text></OperationOutcome>", responseContent);
@@ -83,7 +85,8 @@ public class PatchServerDstu3Test {
 	@Test
 	public void testPatchValidXml() throws Exception {
 		String requestContents = "<root/>";
-		String responseContent = ourServer.fhirRequest("/Patient/123").withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
+		String responseContent = ourServer.fhirRequest("/Patient/123")
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
 			.method("PATCH", requestContents.getBytes(StandardCharsets.UTF_8), Constants.CT_XML_PATCH).assertStatus(200).getBody();
 		ourLog.info(responseContent);
 		assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">OK</div></text></OperationOutcome>", responseContent);
@@ -97,7 +100,10 @@ public class PatchServerDstu3Test {
 	@Test
 	public void testPatchValidJsonWithCharset() throws Exception {
 		String requestContents = "[ { \"op\": \"add\", \"path\": \"/a/b/c\", \"value\": [ \"foo\", \"bar\" ] } ]";
-		String responseContent = ourServer.fhirRequest("/Patient/123").patch(requestContents, Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX).assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient/123")
+			.patch(requestContents, Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 
 		assertEquals("patientPatch", ourLastMethod);
@@ -108,7 +114,10 @@ public class PatchServerDstu3Test {
 	@Test
 	public void testPatchInvalidMimeType() throws Exception {
 		String requestContents = "[ { \"op\": \"add\", \"path\": \"/a/b/c\", \"value\": [ \"foo\", \"bar\" ] } ]";
-		String responseContent = ourServer.fhirRequest("/Patient/123").patch(requestContents, "text/plain; charset=UTF-8").assertStatus(400).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient/123")
+			.patch(requestContents, "text/plain; charset=UTF-8")
+			.assertStatus(400)
+			.getBody();
 		ourLog.info(responseContent);
 		assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"" + Msg.code(1965) + "Invalid Content-Type for PATCH operation: text/plain\"/></issue></OperationOutcome>", responseContent);
 

@@ -80,7 +80,8 @@ public class UpdateDstu2Test {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		HttpTestResponse status = ourServer.fhirRequest("/Patient?identifier=system%7C001").put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML);
+		HttpTestResponse status = ourServer.fhirRequest("/Patient?identifier=system%7C001")
+			.put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML);
 
 		String responseContent = status.getBody();
 
@@ -104,7 +105,8 @@ public class UpdateDstu2Test {
 		patient.setId("2");
 		patient.addIdentifier().setValue("002");
 
-		HttpTestResponse status = ourServer.fhirRequest("/Patient/2").put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML);
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/2")
+			.put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML);
 
 		String responseContent = status.getBody();
 

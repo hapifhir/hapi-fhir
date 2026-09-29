@@ -83,7 +83,10 @@ public class ReadR4Test {
 
 		String responseContent;
 
-		responseContent = myRestfulServerExtension.fhirRequest("/Patient/2?_contained=both&_format=xml&_pretty=true").get().assertStatus(400).getBody();
+		responseContent = myRestfulServerExtension.fhirRequest("/Patient/2?_contained=both&_format=xml&_pretty=true")
+			.get()
+			.assertStatus(400)
+			.getBody();
 		assertThat(responseContent).containsSubsequence(
 			"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
 			" <issue>",
@@ -94,7 +97,10 @@ public class ReadR4Test {
 			"</OperationOutcome>"
 		);
 
-		responseContent = myRestfulServerExtension.fhirRequest("/Patient/2?_containedType=contained&_format=xml&_pretty=true").get().assertStatus(400).getBody();
+		responseContent = myRestfulServerExtension.fhirRequest("/Patient/2?_containedType=contained&_format=xml&_pretty=true")
+			.get()
+			.assertStatus(400)
+			.getBody();
 		assertThat(responseContent).containsSubsequence(
 			"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
 			" <issue>",
@@ -105,7 +111,10 @@ public class ReadR4Test {
 			"</OperationOutcome>"
 		);
 
-		responseContent = myRestfulServerExtension.fhirRequest("/Patient/2?_count=10&_format=xml&_pretty=true").get().assertStatus(400).getBody();
+		responseContent = myRestfulServerExtension.fhirRequest("/Patient/2?_count=10&_format=xml&_pretty=true")
+			.get()
+			.assertStatus(400)
+			.getBody();
 		assertThat(responseContent).containsSubsequence(
 			"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
 			" <issue>",
@@ -116,7 +125,10 @@ public class ReadR4Test {
 			"</OperationOutcome>"
 		);
 
-		responseContent = myRestfulServerExtension.fhirRequest("/Patient/2?_include=Patient:organization&_format=xml&_pretty=true").get().assertStatus(400).getBody();
+		responseContent = myRestfulServerExtension.fhirRequest("/Patient/2?_include=Patient:organization&_format=xml&_pretty=true")
+			.get()
+			.assertStatus(400)
+			.getBody();
 		assertThat(responseContent).containsSubsequence(
 			"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
 			" <issue>",
@@ -127,7 +139,10 @@ public class ReadR4Test {
 			"</OperationOutcome>"
 		);
 
-		responseContent = myRestfulServerExtension.fhirRequest("/Patient/2?_revinclude=Provenance:target&_format=xml&_pretty=true").get().assertStatus(400).getBody();
+		responseContent = myRestfulServerExtension.fhirRequest("/Patient/2?_revinclude=Provenance:target&_format=xml&_pretty=true")
+			.get()
+			.assertStatus(400)
+			.getBody();
 		assertThat(responseContent).containsSubsequence(
 			"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
 			" <issue>",
@@ -138,7 +153,10 @@ public class ReadR4Test {
 			"</OperationOutcome>"
 		);
 
-		responseContent = myRestfulServerExtension.fhirRequest("/Patient/2?_sort=family&_format=xml&_pretty=true").get().assertStatus(400).getBody();
+		responseContent = myRestfulServerExtension.fhirRequest("/Patient/2?_sort=family&_format=xml&_pretty=true")
+			.get()
+			.assertStatus(400)
+			.getBody();
 		assertThat(responseContent).containsSubsequence(
 			"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
 			" <issue>",
@@ -149,7 +167,10 @@ public class ReadR4Test {
 			"</OperationOutcome>"
 		);
 
-		responseContent = myRestfulServerExtension.fhirRequest("/Patient/2?_total=accurate&_format=xml&_pretty=true").get().assertStatus(400).getBody();
+		responseContent = myRestfulServerExtension.fhirRequest("/Patient/2?_total=accurate&_format=xml&_pretty=true")
+			.get()
+			.assertStatus(400)
+			.getBody();
 		assertThat(responseContent).containsSubsequence(
 			"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
 			" <issue>",
@@ -168,19 +189,25 @@ public class ReadR4Test {
 		// Fixture was last modified at 2012-01-01T12:12:12Z
 		// thus it hasn't changed after the later time of 2012-01-01T13:00:00Z
 		// so we expect a 304 (Not Modified)
-		myRestfulServerExtension.fhirRequest("/Patient/2").withHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T13:00:00Z").getValue())).get()
+		myRestfulServerExtension.fhirRequest("/Patient/2")
+			.withHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T13:00:00Z").getValue()))
+			.get()
 			.assertStatus(304);
 
 		// Fixture was last modified at 2012-01-01T12:12:12Z
 		// thus it hasn't changed after the same time of 2012-01-01T12:12:12Z
 		// so we expect a 304 (Not Modified)
-		myRestfulServerExtension.fhirRequest("/Patient/2").withHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T12:12:12Z").getValue())).get()
+		myRestfulServerExtension.fhirRequest("/Patient/2")
+			.withHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T12:12:12Z").getValue()))
+			.get()
 			.assertStatus(304);
 
 		// Fixture was last modified at 2012-01-01T12:12:12Z
 		// thus it has changed after the earlier time of 2012-01-01T10:00:00Z
 		// so we expect a 200
-		myRestfulServerExtension.fhirRequest("/Patient/2").withHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T10:00:00Z").getValue())).get()
+		myRestfulServerExtension.fhirRequest("/Patient/2")
+			.withHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T10:00:00Z").getValue()))
+			.get()
 			.assertStatus(200);
 
 	}

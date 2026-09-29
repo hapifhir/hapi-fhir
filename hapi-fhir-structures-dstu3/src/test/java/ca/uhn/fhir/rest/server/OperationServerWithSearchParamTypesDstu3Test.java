@@ -89,7 +89,10 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		p.addParameter().setName("valtok").setValue(new StringType("VALTOK2A|VALTOK2B"));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		String response = ourServer.fhirRequest("/Patient/$andlist").post(inParamsStr, Constants.CT_FHIR_XML).assertStatus(200).getBody();
+		String response = ourServer.fhirRequest("/Patient/$andlist")
+			.post(inParamsStr, Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(response);
 
 		assertThat(ourLastParamValStr).hasSize(2);
@@ -109,7 +112,10 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 
 	@Test
 	public void testEscapedOperationName() throws Exception {
-		String response = ourServer.fhirRequest("/Patient/%24andlist?valstr=VALSTR1A,VALSTR1B&valstr=VALSTR2A,VALSTR2B&valtok=" + UrlUtil.escapeUrlParam("VALTOK1A|VALTOK1B") + "&valtok=" + UrlUtil.escapeUrlParam("VALTOK2A|VALTOK2B")).get().assertStatus(200).getBody();
+		String response = ourServer.fhirRequest("/Patient/%24andlist?valstr=VALSTR1A,VALSTR1B&valstr=VALSTR2A,VALSTR2B&valtok=" + UrlUtil.escapeUrlParam("VALTOK1A|VALTOK1B") + "&valtok=" + UrlUtil.escapeUrlParam("VALTOK2A|VALTOK2B"))
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(response);
 
 		assertThat(ourLastParamValStr).hasSize(2);
@@ -117,7 +123,10 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 	
 	@Test
 	public void testAndListWithUrl() throws Exception {
-		String response = ourServer.fhirRequest("/Patient/$andlist?valstr=VALSTR1A,VALSTR1B&valstr=VALSTR2A,VALSTR2B&valtok=" + UrlUtil.escapeUrlParam("VALTOK1A|VALTOK1B") + "&valtok=" + UrlUtil.escapeUrlParam("VALTOK2A|VALTOK2B")).get().assertStatus(200).getBody();
+		String response = ourServer.fhirRequest("/Patient/$andlist?valstr=VALSTR1A,VALSTR1B&valstr=VALSTR2A,VALSTR2B&valtok=" + UrlUtil.escapeUrlParam("VALTOK1A|VALTOK1B") + "&valtok=" + UrlUtil.escapeUrlParam("VALTOK2A|VALTOK2B"))
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(response);
 
 		assertThat(ourLastParamValStr).hasSize(2);
@@ -244,7 +253,10 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		p.addParameter().setName("valtok").setValue(new StringType("VALTOKA|VALTOKB"));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		String response = ourServer.fhirRequest("/Patient/$nonrepeating").post(inParamsStr, Constants.CT_FHIR_XML).assertStatus(200).getBody();
+		String response = ourServer.fhirRequest("/Patient/$nonrepeating")
+			.post(inParamsStr, Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(response);
 
 		assertThat(ourLastParamValStr).hasSize(1);
@@ -258,7 +270,10 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 	}
 	@Test
 	public void testNonRepeatingWithUrl() throws Exception {
-		String response = ourServer.fhirRequest("/Patient/$nonrepeating?valstr=VALSTR&valtok=" + UrlUtil.escapeUrlParam("VALTOKA|VALTOKB")).get().assertStatus(200).getBody();
+		String response = ourServer.fhirRequest("/Patient/$nonrepeating?valstr=VALSTR&valtok=" + UrlUtil.escapeUrlParam("VALTOKA|VALTOKB"))
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(response);
 
 		assertThat(ourLastParamValStr).hasSize(1);
@@ -273,7 +288,10 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 
 	@Test
 	public void testNonRepeatingWithUrlQualified() throws Exception {
-		String response = ourServer.fhirRequest("/Patient/$nonrepeating?valstr:exact=VALSTR&valtok:not=" + UrlUtil.escapeUrlParam("VALTOKA|VALTOKB")).get().assertStatus(200).getBody();
+		String response = ourServer.fhirRequest("/Patient/$nonrepeating?valstr:exact=VALSTR&valtok:not=" + UrlUtil.escapeUrlParam("VALTOKA|VALTOKB"))
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(response);
 
 		assertThat(ourLastParamValStr).hasSize(1);
@@ -297,7 +315,10 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		p.addParameter().setName("valtok").setValue(new StringType("VALTOK2A|VALTOK2B"));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		String response = ourServer.fhirRequest("/Patient/$orlist").post(inParamsStr, Constants.CT_FHIR_XML).assertStatus(200).getBody();
+		String response = ourServer.fhirRequest("/Patient/$orlist")
+			.post(inParamsStr, Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(response);
 
 		assertThat(ourLastParamValStr).hasSize(2);
@@ -317,7 +338,10 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 
 	@Test
 	public void testOrListWithUrl() throws Exception {
-		String response = ourServer.fhirRequest("/Patient/$orlist?valstr=VALSTR1A,VALSTR1B&valstr=VALSTR2A,VALSTR2B&valtok=" + UrlUtil.escapeUrlParam("VALTOK1A|VALTOK1B") + "&valtok=" + UrlUtil.escapeUrlParam("VALTOK2A|VALTOK2B")).get().assertStatus(200).getBody();
+		String response = ourServer.fhirRequest("/Patient/$orlist?valstr=VALSTR1A,VALSTR1B&valstr=VALSTR2A,VALSTR2B&valtok=" + UrlUtil.escapeUrlParam("VALTOK1A|VALTOK1B") + "&valtok=" + UrlUtil.escapeUrlParam("VALTOK2A|VALTOK2B"))
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(response);
 
 		assertThat(ourLastParamValStr).hasSize(2);

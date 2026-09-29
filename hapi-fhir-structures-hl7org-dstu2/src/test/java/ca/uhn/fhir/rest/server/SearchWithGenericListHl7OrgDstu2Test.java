@@ -44,7 +44,10 @@ public class SearchWithGenericListHl7OrgDstu2Test {
    */
   @Test
   public void testSearch() throws Exception {
-    String responseContent = ourServer.fhirRequest("/Patient?identifier=foo&_pretty=true").get().assertStatus(200).getBody();
+    String responseContent = ourServer.fhirRequest("/Patient?identifier=foo&_pretty=true")
+	.get()
+	.assertStatus(200)
+	.getBody();
     ourLog.info(responseContent);
 		assertEquals("searchByIdentifier", ourLastMethod);
 		assertThat(responseContent).contains("<family value=\"FAMILY\"");

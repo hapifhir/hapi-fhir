@@ -232,7 +232,11 @@ public class SearchSearchServerR4Test {
   @Test
   public void testSearchByPost() throws Exception {
     // add parameters to the post method
-    String responseContent = ourServer.fhirRequest("/Patient/_search").withFormParam("_id", "aaa").postForm().assertStatus(200).getBody();
+    String responseContent = ourServer.fhirRequest("/Patient/_search")
+	.withFormParam("_id", "aaa")
+	.postForm()
+	.assertStatus(200)
+	.getBody();
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(1);
 
@@ -247,7 +251,11 @@ public class SearchSearchServerR4Test {
   public void testSearchByPostWithInvalidPostUrl() throws Exception {
     // should end with _search
     // add parameters to the post method
-    String responseContent = ourServer.fhirRequest("/Patient?name=Central").withFormParam("_id", "aaa").postForm().assertStatus(400).getBody();
+    String responseContent = ourServer.fhirRequest("/Patient?name=Central")
+	.withFormParam("_id", "aaa")
+	.postForm()
+	.assertStatus(400)
+	.getBody();
     ourLog.info(responseContent);
 		assertThat(responseContent).contains("<diagnostics value=\"" + Msg.code(446) + "Incorrect Content-Type header value of &quot;application/x-www-form-urlencoded; charset=UTF-8&quot; was provided in the request. A FHIR Content-Type is required for &quot;CREATE&quot; operation\"/>");
   }
@@ -258,7 +266,10 @@ public class SearchSearchServerR4Test {
   @Test
   public void testSearchByPostWithMissingContentType() throws Exception {
     // should end with _search
-    String responseContent = ourServer.fhirRequest("/Patient?name=Central").method("POST", new byte[] { 1, 2, 3, 4 }, null).assertStatus(400).getBody();
+    String responseContent = ourServer.fhirRequest("/Patient?name=Central")
+	.method("POST", new byte[] { 1, 2, 3, 4 }, null)
+	.assertStatus(400)
+	.getBody();
     ourLog.info(responseContent);
 		assertThat(responseContent).contains("<diagnostics value=\"" + Msg.code(448) + "No Content-Type header was provided in the request. This is required for &quot;CREATE&quot; operation\"/>");
   }
@@ -269,7 +280,11 @@ public class SearchSearchServerR4Test {
   @Test
   public void testSearchByPostWithParamsInBodyAndUrl() throws Exception {
     // add parameters to the post method
-    String responseContent = ourServer.fhirRequest("/Patient/_search?name=Central").withFormParam("_id", "aaa").postForm().assertStatus(200).getBody();
+    String responseContent = ourServer.fhirRequest("/Patient/_search?name=Central")
+	.withFormParam("_id", "aaa")
+	.postForm()
+	.assertStatus(200)
+	.getBody();
     ourLog.info(responseContent);
 
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
@@ -295,7 +310,10 @@ public class SearchSearchServerR4Test {
 
   @Test
   public void testSearchGetWithUnderscoreSearch() throws Exception {
-    String responseContent = ourServer.fhirRequest("/Observation/_search?subject%3APatient=100&name=3141-9%2C8302-2%2C8287-5%2C39156-5").get().assertStatus(200).getBody();
+    String responseContent = ourServer.fhirRequest("/Observation/_search?subject%3APatient=100&name=3141-9%2C8302-2%2C8287-5%2C39156-5")
+	.get()
+	.assertStatus(200)
+	.getBody();
 
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(1);
@@ -318,7 +336,9 @@ public class SearchSearchServerR4Test {
 
   @Test
   public void testSearchIncludesParametersIncludesList() throws Exception {
-    ourServer.fhirRequest("/Patient?_query=searchIncludesList&_include=foo&_include:recurse=bar").get().assertStatus(200);
+    ourServer.fhirRequest("/Patient?_query=searchIncludesList&_include=foo&_include:recurse=bar")
+	.get()
+	.assertStatus(200);
 
 		assertThat(ourLastIncludes).hasSize(2);
 		assertThat(ourLastIncludes).containsExactlyInAnyOrder(new Include("foo", false), new Include("bar", true));
@@ -333,7 +353,10 @@ public class SearchSearchServerR4Test {
 
   @Test
   public void testSearchWithOrList() throws Exception {
-    String responseContent = ourServer.fhirRequest("/Patient?findPatientWithOrList=aaa,bbb").get().assertStatus(200).getBody();
+    String responseContent = ourServer.fhirRequest("/Patient?findPatientWithOrList=aaa,bbb")
+	.get()
+	.assertStatus(200)
+	.getBody();
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(1);
 
@@ -365,7 +388,10 @@ public class SearchSearchServerR4Test {
 
     // Now the named query
 
-    responseContent = ourServer.fhirRequest("/Patient?_query=findPatientByAAA&AAA=123").get().assertStatus(200).getBody();
+    responseContent = ourServer.fhirRequest("/Patient?_query=findPatientByAAA&AAA=123")
+	.get()
+	.assertStatus(200)
+	.getBody();
     bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(1);
 

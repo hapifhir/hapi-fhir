@@ -57,7 +57,10 @@ public class OperationDuplicateServerHl7OrgDstu2Test {
 
     // OperationDefinition
     {
-      String response = ourServer.fhirRequest("/OperationDefinition/OrganizationPatient-ts-myoperation?_pretty=true").get().assertStatus(200).getBody();
+      String response = ourServer.fhirRequest("/OperationDefinition/OrganizationPatient-ts-myoperation?_pretty=true")
+	.get()
+	.assertStatus(200)
+	.getBody();
 
       ourLog.info(response);
 

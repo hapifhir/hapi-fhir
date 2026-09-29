@@ -197,7 +197,10 @@ public class ConsentInterceptorTest {
 
 		switch (theConsentSvcResponse) {
 			case "NONE"->{
-				String responseContent = ourServer.fhirRequest("/Patient?_summary=count").get().assertStatus(400).getBody();
+				String responseContent = ourServer.fhirRequest("/Patient?_summary=count")
+					.get()
+					.assertStatus(400)
+					.getBody();
 				ourLog.info("Response: {}", responseContent);
 				assertThat(responseContent).contains(Msg.code(2038) + "_summary=count is not permitted on this server");
 			}
@@ -205,13 +208,19 @@ public class ConsentInterceptorTest {
 				when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 				when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
 				when(myConsentSvc.willSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
-				String responseContent = ourServer.fhirRequest("/Patient?_summary=data").get().assertStatus(200).getBody();
+				String responseContent = ourServer.fhirRequest("/Patient?_summary=data")
+					.get()
+					.assertStatus(200)
+					.getBody();
 				ourLog.info("Response: {}", responseContent);
 				assertThat(responseContent).doesNotContain("\"total\"");
 			}
 			case "AUTHORIZED" -> {
 				when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.AUTHORIZED);
-				String responseContent = ourServer.fhirRequest("/Patient?_summary=data").get().assertStatus(200).getBody();
+				String responseContent = ourServer.fhirRequest("/Patient?_summary=data")
+					.get()
+					.assertStatus(200)
+					.getBody();
 				ourLog.info("Response: {}", responseContent);
 				assertThat(responseContent).contains("\"total\"");
 			}
@@ -558,7 +567,10 @@ public class ConsentInterceptorTest {
 		nextPageLink = response.getLink(Constants.LINK_NEXT).getUrl();
 
 		// Now perform a page request
-		responseContent = HttpTestRequest.to(ourServer.getHttpClient(), ourServer.getFhirContext(), nextPageLink).get().assertStatus(200).getBody();
+		responseContent = HttpTestRequest.to(ourServer.getHttpClient(), ourServer.getFhirContext(), nextPageLink)
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info("Response: {}", responseContent);
 
 		verify(myConsentSvc, times(2)).startOperation(any(), any());
@@ -861,7 +873,10 @@ public class ConsentInterceptorTest {
 	public void testOutcomeException() throws IOException {
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 
-		String responseContent = ourServer.fhirRequest("/Patient?searchThrowNullPointerException=1").get().assertStatus(500).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?searchThrowNullPointerException=1")
+			.get()
+			.assertStatus(500)
+			.getBody();
 		ourLog.info("Response: {}", responseContent);
 
 		verify(myConsentSvc, timeout(2000).times(0)).completeOperationSuccess(any(), any());

@@ -49,7 +49,8 @@ public class UpdateDstu3Test {
 		patient.addIdentifier().setValue("002");
 		ourSetLastUpdated = new InstantType("2002-04-22T11:22:33.022Z");
 
-		HttpTestResponse response = ourServer.fhirRequest("/Patient/123").put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML);
+		HttpTestResponse response = ourServer.fhirRequest("/Patient/123")
+			.put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML);
 		String responseContent = response.assertStatus(200).getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
@@ -75,7 +76,10 @@ public class UpdateDstu3Test {
 		patient.setId("001");
 		patient.addIdentifier().setValue("002");
 
-		String responseContent = ourServer.fhirRequest("/Patient?_id=001").put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML).assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?_id=001")
+			.put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getBody();
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals("Patient?_id=001", ourConditionalUrl);
@@ -89,7 +93,10 @@ public class UpdateDstu3Test {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		String responseContent = ourServer.fhirRequest("/Patient/001").put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML).assertStatus(400).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient/001")
+			.put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
+			.assertStatus(400)
+			.getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
 
@@ -104,7 +111,10 @@ public class UpdateDstu3Test {
 		patient.setId("001");
 		patient.addIdentifier().setValue("002");
 
-		String responseContent = ourServer.fhirRequest("/Patient/001").put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML).assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient/001")
+			.put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getBody();
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertNull(ourConditionalUrl);
@@ -119,7 +129,10 @@ public class UpdateDstu3Test {
 		patient.setId("Patient/3/_history/4");
 		patient.addIdentifier().setValue("002");
 
-		String responseContent = ourServer.fhirRequest("/Patient/1/_history/2").put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML).assertStatus(400).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient/1/_history/2")
+			.put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
+			.assertStatus(400)
+			.getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
 

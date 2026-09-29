@@ -59,7 +59,10 @@ public class ExceptionInterceptorMethodTest {
 		when(myInterceptor.incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 		when(myInterceptor.handleException(any(RequestDetails.class), any(BaseServerResponseException.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 
-		ourLog.info(ourServer.fhirRequest("/Patient?_query=throwUnprocessableEntityException").get().assertStatus(422).getBody());
+		ourLog.info(ourServer.fhirRequest("/Patient?_query=throwUnprocessableEntityException")
+			.get()
+			.assertStatus(422)
+			.getBody());
 
 		ArgumentCaptor<BaseServerResponseException> captor = ArgumentCaptor.forClass(BaseServerResponseException.class);
 		verify(myInterceptor, times(1)).handleException(any(RequestDetails.class), captor.capture(), any(HttpServletRequest.class), any(HttpServletResponse.class));
@@ -82,7 +85,10 @@ public class ExceptionInterceptorMethodTest {
 			return false;
 		});
 
-		String responseContent = ourServer.fhirRequest("/Patient?_query=throwUnprocessableEntityException").get().assertStatus(405).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?_query=throwUnprocessableEntityException")
+			.get()
+			.assertStatus(405)
+			.getBody();
 		ourLog.info(responseContent);
 		assertEquals("HELP IM A BUG", responseContent);
 

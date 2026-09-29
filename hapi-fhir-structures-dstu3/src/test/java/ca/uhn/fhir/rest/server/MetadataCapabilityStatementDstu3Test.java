@@ -54,7 +54,10 @@ public class MetadataCapabilityStatementDstu3Test {
 	public void testElements() throws Exception {
 		String output;
 
-		output = ourServer.fhirRequest("/metadata?_elements=fhirVersion&_pretty=true").get().assertStatus(200).getBody();
+		output = ourServer.fhirRequest("/metadata?_elements=fhirVersion&_pretty=true")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(output);
 		assertThat(output).contains("<CapabilityStatement");
 		assertThat(output).contains("<meta>", "SUBSETTED", "</meta>");

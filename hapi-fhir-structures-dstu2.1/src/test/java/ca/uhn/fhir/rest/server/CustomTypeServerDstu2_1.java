@@ -58,7 +58,10 @@ public class CustomTypeServerDstu2_1 {
 		patient.addIdentifier().setValue("002");
 
 		String body = ourCtx.newXmlParser().encodeResourceToString(patient);
-		String responseContent = ourServer.fhirRequest("/Patient").post(body, Constants.CT_FHIR_XML).assertStatus(400).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient")
+			.post(body, Constants.CT_FHIR_XML)
+			.assertStatus(400)
+			.getBody();
 		ourLog.info("Response was:\n{}", responseContent);
 	}
 
@@ -69,7 +72,10 @@ public class CustomTypeServerDstu2_1 {
 		patient.addIdentifier().setValue("002");
 
 		String body = ourCtx.newXmlParser().encodeResourceToString(patient);
-		String responseContent = ourServer.fhirRequest("/Patient/2").post(body, Constants.CT_FHIR_XML).assertStatus(400).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient/2")
+			.post(body, Constants.CT_FHIR_XML)
+			.assertStatus(400)
+			.getBody();
 		ourLog.info("Response was:\n{}", responseContent);
 		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
 		assertEquals(Msg.code(365) + "Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)", oo.getIssue().get(0).getDiagnostics());
@@ -82,7 +88,11 @@ public class CustomTypeServerDstu2_1 {
 		patient.addIdentifier().setValue("002");
 
 		String body = ourCtx.newXmlParser().encodeResourceToString(patient);
-		String responseContent = ourServer.fhirRequest("/Patient/2").withHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=system%7C001").post(body, Constants.CT_FHIR_XML).assertStatus(400).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient/2")
+			.withHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=system%7C001")
+			.post(body, Constants.CT_FHIR_XML)
+			.assertStatus(400)
+			.getBody();
 		ourLog.info("Response was:\n{}", responseContent);
 		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
 		assertEquals(Msg.code(365) + "Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)", oo.getIssue().get(0).getDiagnostics());

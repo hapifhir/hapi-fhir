@@ -75,7 +75,10 @@ public class ValidateR5Test {
 		Parameters params = new Parameters();
 		params.addParameter().setName("resource").setResource(patient);
 
-		String resp = ourServer.fhirRequest("/Patient/$validate").post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML).assertStatus(200).getBody();
+		String resp = ourServer.fhirRequest("/Patient/$validate")
+			.post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getBody();
 
 		assertThat(resp).contains("<OperationOutcome");
 	}
@@ -91,7 +94,9 @@ public class ValidateR5Test {
 		params.addParameter().setName("resource").setResource(patient);
 		params.addParameter().setName("mode").setValue(new CodeType(" "));
 
-		ourServer.fhirRequest("/Patient/$validate").post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML).assertStatus(200);
+		ourServer.fhirRequest("/Patient/$validate")
+			.post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML)
+			.assertStatus(200);
 	}
 
 	@Test
@@ -105,7 +110,10 @@ public class ValidateR5Test {
 		params.addParameter().setName("resource").setResource(patient);
 		params.addParameter().setName("mode").setValue(new CodeType("AAA"));
 
-		String resp = ourServer.fhirRequest("/Patient/$validate").post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML).assertStatus(400).getBody();
+		String resp = ourServer.fhirRequest("/Patient/$validate")
+			.post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML)
+			.assertStatus(400)
+			.getBody();
 
 		assertThat(resp).contains("Invalid mode value: &quot;AAA&quot;");
 	}
@@ -120,7 +128,9 @@ public class ValidateR5Test {
 		Parameters params = new Parameters();
 		params.addParameter().setName("mode").setValue(new CodeType("create"));
 
-		ourServer.fhirRequest("/Patient/$validate").post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML).assertStatus(200);
+		ourServer.fhirRequest("/Patient/$validate")
+			.post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML)
+			.assertStatus(200);
 
 		assertNull(ourLastPatient);
 	}
@@ -148,7 +158,9 @@ public class ValidateR5Test {
 		Parameters params = new Parameters();
 		params.addParameter().setName("resource").setResource(org);
 
-		ourServer.fhirRequest("/Organization/$validate").post(ourCtx.newJsonParser().encodeResourceToString(params), Constants.CT_FHIR_JSON).assertStatus(200);
+		ourServer.fhirRequest("/Organization/$validate")
+			.post(ourCtx.newJsonParser().encodeResourceToString(params), Constants.CT_FHIR_JSON)
+			.assertStatus(200);
 
 		assertThat(ourLastResourceBody).contains("\"resourceType\":\"Organization\"", "\"identifier\"", "\"value\":\"001");
 		assertEquals(EncodingEnum.JSON, ourLastEncoding);
@@ -196,7 +208,10 @@ public class ValidateR5Test {
 		Parameters params = new Parameters();
 		params.addParameter().setName("resource").setResource(patient);
 
-		String resp = ourServer.fhirRequest("/Patient/$validate").post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML).assertStatus(200).getBody();
+		String resp = ourServer.fhirRequest("/Patient/$validate")
+			.post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getBody();
 
 		assertThat(resp).contains("<OperationOutcome", "FOOBAR");
 	}

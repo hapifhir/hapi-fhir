@@ -57,7 +57,8 @@ public class CreateR4Test {
 	@Test
 	public void testCreateIgnoresIdInResourceBody() throws Exception {
 
-		HttpTestResponse response = ourServer.fhirRequest("/Patient").post("{\"resourceType\":\"Patient\", \"id\":\"999\", \"status\":\"active\"}", "application/fhir+json; charset=utf-8");
+		HttpTestResponse response = ourServer.fhirRequest("/Patient")
+			.post("{\"resourceType\":\"Patient\", \"id\":\"999\", \"status\":\"active\"}", "application/fhir+json; charset=utf-8");
 		String responseContent = response.getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
@@ -73,7 +74,10 @@ public class CreateR4Test {
 	@Test
 	public void testCreateFailsIfNoContentTypeProvided() throws Exception {
 
-		String responseContent = ourServer.fhirRequest("/Patient").method("POST", "{\"resourceType\":\"Patient\", \"id\":\"999\", \"status\":\"active\"}".getBytes(StandardCharsets.UTF_8), null).assertStatus(400).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient")
+			.method("POST", "{\"resourceType\":\"Patient\", \"id\":\"999\", \"status\":\"active\"}".getBytes(StandardCharsets.UTF_8), null)
+			.assertStatus(400)
+			.getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
 
@@ -86,7 +90,8 @@ public class CreateR4Test {
 	@Test
 	public void testCreateReturnsLocationHeader() throws Exception {
 
-		HttpTestResponse response = ourServer.fhirRequest("/Patient").post("{\"resourceType\":\"Patient\", \"status\":\"active\"}", "application/fhir+json; charset=utf-8");
+		HttpTestResponse response = ourServer.fhirRequest("/Patient")
+			.post("{\"resourceType\":\"Patient\", \"status\":\"active\"}", "application/fhir+json; charset=utf-8");
 		String responseContent = response.getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
@@ -103,7 +108,8 @@ public class CreateR4Test {
 	public void testCreateReturnsOperationOutcome() throws Exception {
 		ourReturnOo = new OperationOutcome().addIssue(new OperationOutcomeIssueComponent().setDiagnostics("DIAG"));
 
-		String responseContent = ourServer.fhirRequest("/Patient").withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
+		String responseContent = ourServer.fhirRequest("/Patient")
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
 			.post("{\"resourceType\":\"Patient\", \"status\":\"active\"}", "application/fhir+json; charset=utf-8").assertStatus(201).getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
@@ -116,7 +122,10 @@ public class CreateR4Test {
 		ourReturnOo = new OperationOutcome().addIssue(new OperationOutcomeIssueComponent().setDiagnostics("DIAG"));
 		String expectedResponseContent = "{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\"},\"gender\":\"male\"}";
 
-		String responseContent = ourServer.fhirRequest("/Patient").post("{\"resourceType\":\"Patient\", \"gender\":\"male\"}", "application/fhir+json; charset=utf-8").assertStatus(201).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient")
+			.post("{\"resourceType\":\"Patient\", \"gender\":\"male\"}", "application/fhir+json; charset=utf-8")
+			.assertStatus(201)
+			.getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
 
@@ -126,7 +135,10 @@ public class CreateR4Test {
 	@Test
 	public void testCreateWithIncorrectContent1() throws Exception {
 
-		String responseContent = ourServer.fhirRequest("/Patient").post("{\"foo\":\"bar\"}", "application/xml+fhir; charset=utf-8").assertStatus(400).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient")
+			.post("{\"foo\":\"bar\"}", "application/xml+fhir; charset=utf-8")
+			.assertStatus(400)
+			.getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
 
@@ -138,7 +150,10 @@ public class CreateR4Test {
 	@Test
 	public void testCreateWithIncorrectContent2() throws Exception {
 
-		String responseContent = ourServer.fhirRequest("/Patient").post("{\"foo\":\"bar\"}", "application/fhir+xml; charset=utf-8").assertStatus(400).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient")
+			.post("{\"foo\":\"bar\"}", "application/fhir+xml; charset=utf-8")
+			.assertStatus(400)
+			.getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
 
@@ -150,7 +165,10 @@ public class CreateR4Test {
 	@Test
 	public void testCreateWithIncorrectContent3() throws Exception {
 
-		String responseContent = ourServer.fhirRequest("/Patient").post("{\"foo\":\"bar\"}", "application/fhir+json; charset=utf-8").assertStatus(400).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient")
+			.post("{\"foo\":\"bar\"}", "application/fhir+json; charset=utf-8")
+			.assertStatus(400)
+			.getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
 
@@ -164,7 +182,10 @@ public class CreateR4Test {
 	@Test
 	public void testCreateWithInvalidContent() throws Exception {
 
-		String responseContent = ourServer.fhirRequest("/Patient").post("FOO", "application/xml+fhir; charset=utf-8").assertStatus(400).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient")
+			.post("FOO", "application/xml+fhir; charset=utf-8")
+			.assertStatus(400)
+			.getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
 
@@ -183,7 +204,9 @@ public class CreateR4Test {
 		p.setActive(true);
 		String body = ourCtx.newJsonParser().encodeResourceToString(p);
 
-		HttpTestResponse response = ourServer.fhirRequest("/Patient").post(body, "application/fhir+json; charset=utf-8").assertStatus(201);
+		HttpTestResponse response = ourServer.fhirRequest("/Patient")
+			.post(body, "application/fhir+json; charset=utf-8")
+			.assertStatus(201);
 		assertEquals("application/fhir+json;charset=utf-8", response.getHeader(Constants.HEADER_CONTENT_TYPE));
 
 		String responseContent = response.getBody();
@@ -202,7 +225,9 @@ public class CreateR4Test {
 		String body = ourCtx.newJsonParser().encodeResourceToString(p);
 
 		ourServer.getRestfulServer().setDefaultPreferReturn(PreferReturnEnum.OPERATION_OUTCOME);
-		HttpTestResponse response = ourServer.fhirRequest("/Patient").post(body, "application/fhir+json; charset=utf-8").assertStatus(201);
+		HttpTestResponse response = ourServer.fhirRequest("/Patient")
+			.post(body, "application/fhir+json; charset=utf-8")
+			.assertStatus(201);
 		assertEquals("application/fhir+json;charset=utf-8", response.getHeader(Constants.HEADER_CONTENT_TYPE));
 
 		String responseContent = response.getBody();
@@ -222,7 +247,9 @@ public class CreateR4Test {
 		String body = ourCtx.newJsonParser().encodeResourceToString(p);
 
 		ourServer.getRestfulServer().setDefaultPreferReturn(PreferReturnEnum.MINIMAL);
-		HttpTestResponse response = ourServer.fhirRequest("/Patient").post(body, "application/fhir+json; charset=utf-8").assertStatus(201);
+		HttpTestResponse response = ourServer.fhirRequest("/Patient")
+			.post(body, "application/fhir+json; charset=utf-8")
+			.assertStatus(201);
 		assertNull(response.getHeader(Constants.HEADER_CONTENT_TYPE));
 
 		String responseContent = response.getBody();
@@ -233,7 +260,10 @@ public class CreateR4Test {
 	@Test
 	public void testSearch() throws Exception {
 
-		String responseContent = ourServer.fhirRequest("/Patient?_format=xml&_pretty=true").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?_format=xml&_pretty=true")
+			.get()
+			.assertStatus(200)
+			.getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
 

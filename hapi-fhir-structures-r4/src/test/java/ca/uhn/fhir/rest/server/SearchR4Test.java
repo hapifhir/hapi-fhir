@@ -107,7 +107,10 @@ public class SearchR4Test {
 	 */
 	@Test
 	public void testPageRequestCantTriggerSearchAccidentally() throws Exception {
-		String responseContent = myRestfulServerExtension.fhirRequest("/Patient?" + Constants.PARAM_PAGINGACTION + "=12345").get().assertStatus(400).getBody();
+		String responseContent = myRestfulServerExtension.fhirRequest("/Patient?" + Constants.PARAM_PAGINGACTION + "=12345")
+			.get()
+			.assertStatus(400)
+			.getBody();
 		ourLog.info(responseContent);
 		assertThat(responseContent).contains("not know how to handle GET operation[Patient] with parameters [[_getpages]]");
 	}
@@ -393,7 +396,10 @@ public class SearchR4Test {
 
 	@Test
 	public void testSearchNormal() throws Exception {
-		String responseContent = myRestfulServerExtension.fhirRequest("/Patient?identifier=foo%7Cbar&_pretty=true").get().assertStatus(200).getBody();
+		String responseContent = myRestfulServerExtension.fhirRequest("/Patient?identifier=foo%7Cbar&_pretty=true")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 		validate(myCtx.newJsonParser().parseResource(responseContent));
 
@@ -406,21 +412,28 @@ public class SearchR4Test {
 
 	@Test
 	public void testRequestIdGeneratedAndReturned() throws Exception {
-		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/Patient?identifier=foo%7Cbar&_pretty=true").get().assertStatus(200);
+		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/Patient?identifier=foo%7Cbar&_pretty=true")
+			.get()
+			.assertStatus(200);
 		String requestId = response.getHeader(Constants.HEADER_REQUEST_ID);
 		assertThat(requestId).matches("[a-zA-Z0-9]{16}");
 	}
 
 	@Test
 	public void testRequestIdSuppliedAndReturned() throws Exception {
-		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/Patient?identifier=foo%7Cbar&_pretty=true").withHeader(Constants.HEADER_REQUEST_ID, "help im a bug").get().assertStatus(200);
+		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/Patient?identifier=foo%7Cbar&_pretty=true")
+			.withHeader(Constants.HEADER_REQUEST_ID, "help im a bug")
+			.get()
+			.assertStatus(200);
 		String requestId = response.getHeader(Constants.HEADER_REQUEST_ID);
 		assertThat(requestId).matches("help im a bug");
 	}
 
 	@Test
 	public void testRequestIdSuppliedAndReturned_Invalid() throws Exception {
-		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/Patient?identifier=foo%7Cbar&_pretty=true").withHeader(Constants.HEADER_REQUEST_ID, "help i'm a bug").get()
+		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/Patient?identifier=foo%7Cbar&_pretty=true")
+			.withHeader(Constants.HEADER_REQUEST_ID, "help i'm a bug")
+			.get()
 			.assertStatus(200);
 		String requestId = response.getHeader(Constants.HEADER_REQUEST_ID);
 		assertThat(requestId).matches("[a-zA-Z0-9]{16}");
@@ -428,7 +441,10 @@ public class SearchR4Test {
 
 	@Test
 	public void testSearchWithInvalidChain() throws Exception {
-		String responseContent = myRestfulServerExtension.fhirRequest("/Patient?identifier.chain=foo%7Cbar").get().assertStatus(400).getBody();
+		String responseContent = myRestfulServerExtension.fhirRequest("/Patient?identifier.chain=foo%7Cbar")
+			.get()
+			.assertStatus(400)
+			.getBody();
 		ourLog.info(responseContent);
 
 		OperationOutcome oo = (OperationOutcome) myCtx.newJsonParser().parseResource(responseContent);

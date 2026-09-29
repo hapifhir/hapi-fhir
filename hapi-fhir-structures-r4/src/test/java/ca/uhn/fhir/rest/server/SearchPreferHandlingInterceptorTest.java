@@ -68,7 +68,10 @@ public class SearchPreferHandlingInterceptorTest {
 
 	@Test
 	public void testSearchWithUnknownResourceType() throws IOException {
-		String response = myRestfulServerExtension.fhirRequest("/BadResource?foo=bar").get().assertStatus(404).getBody();
+		String response = myRestfulServerExtension.fhirRequest("/BadResource?foo=bar")
+			.get()
+			.assertStatus(404)
+			.getBody();
 		assertThat(response).contains("Unknown resource type 'BadResource' - Server knows how to handle: [Patient]");
 	}
 

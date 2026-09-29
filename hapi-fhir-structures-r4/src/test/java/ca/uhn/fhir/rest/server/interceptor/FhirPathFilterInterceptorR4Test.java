@@ -80,7 +80,9 @@ public class FhirPathFilterInterceptorR4Test {
 		myServerExtension.getRestfulServer().registerInterceptor(new ResponseHighlighterInterceptor());
 		final IIdType patientId = createPatient();
 
-		String responseText = myServerExtension.fhirRequest("/" + patientId.toUnqualified().getValue() + "?_format=" + Constants.FORMATS_HTML_JSON).get().getBody();
+		String responseText = myServerExtension.fhirRequest("/" + patientId.toUnqualified().getValue() + "?_format=" + Constants.FORMATS_HTML_JSON)
+			.get()
+			.getBody();
 		ourLog.info("Response:\n{}", responseText);
 		assertThat(responseText).contains("<span class='hlTagName'>&quot;system&quot;</span>: <span class='hlQuot'>&quot;http://identifiers/1&quot;");
 		assertThat(responseText).contains("<span class='hlTagName'>&quot;given&quot;</span>: <span class='hlControl'>[</span> <span class='hlTagName'>&quot;Homer&quot;</span><span class='hlControl'>,</span> <span class='hlTagName'>&quot;Jay&quot;</span> ]</div>");
@@ -90,7 +92,9 @@ public class FhirPathFilterInterceptorR4Test {
 	public void testFilteredResponse() throws IOException {
 		final IIdType patientId = createPatient();
 
-		String responseText = myServerExtension.fhirRequest("/" + patientId.toUnqualified().getValue() + "?_fhirpath=Patient.identifier&_pretty=true").get().getBody();
+		String responseText = myServerExtension.fhirRequest("/" + patientId.toUnqualified().getValue() + "?_fhirpath=Patient.identifier&_pretty=true")
+			.get()
+			.getBody();
 		ourLog.info("Response:\n{}", responseText);
 		assertThat(responseText).contains("\"system\": \"http://identifiers/1\"");
 		assertThat(responseText).doesNotContain("\"given\": [ \"Homer\", \"Jay\" ]");
@@ -101,7 +105,9 @@ public class FhirPathFilterInterceptorR4Test {
 	public void testFilteredResponse_ExpressionReturnsExtension() throws IOException {
 		final IIdType patientId = createPatient();
 
-		String responseText = myServerExtension.fhirRequest("/" + patientId.toUnqualified().getValue() + "?_fhirpath=Patient.extension('http://hl7.org/fhir/us/core/StructureDefinition/us-core-race')&_pretty=true").get().getBody();
+		String responseText = myServerExtension.fhirRequest("/" + patientId.toUnqualified().getValue() + "?_fhirpath=Patient.extension('http://hl7.org/fhir/us/core/StructureDefinition/us-core-race')&_pretty=true")
+			.get()
+			.getBody();
 		ourLog.info("Response:\n{}", responseText);
 		assertThat(responseText).contains("\"url\": \"http://hl7.org/fhir/us/core/StructureDefinition/us-core-race\"");
 
@@ -111,7 +117,9 @@ public class FhirPathFilterInterceptorR4Test {
 	public void testFilteredResponse_ExpressionReturnsResource() throws IOException {
 		final IIdType patientId = createPatient();
 
-		String responseText = myServerExtension.fhirRequest("/" + patientId.toUnqualified().getValue() + "?_fhirpath=Patient&_pretty=true").get().getBody();
+		String responseText = myServerExtension.fhirRequest("/" + patientId.toUnqualified().getValue() + "?_fhirpath=Patient&_pretty=true")
+			.get()
+			.getBody();
 		ourLog.info("Response:\n{}", responseText);
 		assertThat(responseText).contains("\"resource\": {");
 		assertThat(responseText).contains("\"system\": \"http://identifiers/1\"");
@@ -123,7 +131,10 @@ public class FhirPathFilterInterceptorR4Test {
 	public void testFilteredResponse_ExpressionIsInvalid() throws IOException {
 		final IIdType patientId = createPatient();
 
-		String responseText = myServerExtension.fhirRequest("/" + patientId.toUnqualified().getValue() + "?_fhirpath=" + UrlUtil.escapeUrlParam("***")).get().assertStatus(400).getBody();
+		String responseText = myServerExtension.fhirRequest("/" + patientId.toUnqualified().getValue() + "?_fhirpath=" + UrlUtil.escapeUrlParam("***"))
+			.get()
+			.assertStatus(400)
+			.getBody();
 		ourLog.info("Response:\n{}", responseText);
 		assertThat(responseText).contains("left operand to * can only have 1 value, but has 8 values");
 
@@ -133,7 +144,9 @@ public class FhirPathFilterInterceptorR4Test {
 	public void testFilteredResponseBundle() throws IOException {
 		createPatient();
 
-		String responseText = myServerExtension.fhirRequest("/Patient?_fhirpath=Bundle.entry.resource.as(Patient).name&_pretty=true").get().getBody();
+		String responseText = myServerExtension.fhirRequest("/Patient?_fhirpath=Bundle.entry.resource.as(Patient).name&_pretty=true")
+			.get()
+			.getBody();
 		ourLog.info("Response:\n{}", responseText);
 		assertThat(responseText).contains("      \"valueHumanName\": {\n" +
 			"        \"family\": \"Simpson\",\n" +
@@ -147,7 +160,9 @@ public class FhirPathFilterInterceptorR4Test {
 		myServerExtension.getRestfulServer().registerInterceptor(new ResponseHighlighterInterceptor());
 		final IIdType patientId = createPatient();
 
-		String responseText = myServerExtension.fhirRequest("/" + patientId.toUnqualified().getValue() + "?_fhirpath=Patient.identifier&_format=" + Constants.FORMATS_HTML_JSON).get().getBody();
+		String responseText = myServerExtension.fhirRequest("/" + patientId.toUnqualified().getValue() + "?_fhirpath=Patient.identifier&_format=" + Constants.FORMATS_HTML_JSON)
+			.get()
+			.getBody();
 		ourLog.info("Response:\n{}", responseText);
 		assertThat(responseText).contains("<span class='hlTagName'>&quot;system&quot;</span>: <span class='hlQuot'>&quot;http://identifiers/1&quot;");
 		assertThat(responseText).doesNotContain("<span class='hlTagName'>&quot;given&quot;</span>: <span class='hlControl'>[</span> <span class='hlTagName'>&quot;Homer&quot;</span><span class='hlControl'>,</span> <span class='hlTagName'>&quot;Jay&quot;</span> ]</div>");
@@ -170,7 +185,9 @@ public class FhirPathFilterInterceptorR4Test {
 	public void testFilteredResponse_withBundleComposition_returnsResult(final String theFhirPathExpression, final String expectedResult) throws IOException {
 		IIdType bundle = createBundleDocument();
 
-		String responseText = myServerExtension.fhirRequest("/" + bundle.toUnqualified().getValue() + "?_fhirpath=" + theFhirPathExpression).get().getBody();
+		String responseText = myServerExtension.fhirRequest("/" + bundle.toUnqualified().getValue() + "?_fhirpath=" + theFhirPathExpression)
+			.get()
+			.getBody();
 		ourLog.info("Response:\n{}", responseText);
 		IBaseResource resource = ourCtx.newJsonParser().parseResource(responseText);
 		assertTrue(resource instanceof Parameters);

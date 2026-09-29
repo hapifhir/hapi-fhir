@@ -109,7 +109,10 @@ public class PlainProviderR4Test {
 		GlobalHistoryProvider provider = new GlobalHistoryProvider();
 		ourServer.registerProvider(provider);
 
-		String responseContent = ourServer.fhirRequest("/_history?_since=2012-01-02T00%3A01%3A02&_count=12").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/_history?_since=2012-01-02T00%3A01%3A02&_count=12")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info("Response was:\n{}", responseContent);
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(3);
@@ -123,7 +126,10 @@ public class PlainProviderR4Test {
 		assertNull(provider.myLastSince);
 		assertEquals("12", provider.myLastCount.getValueAsString());
 		
-		responseContent = ourServer.fhirRequest("/_history?_since=2012-01-02T00%3A01%3A02").get().assertStatus(200).getBody();
+		responseContent = ourServer.fhirRequest("/_history?_since=2012-01-02T00%3A01%3A02")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(3);
 		assertThat(provider.myLastSince.getValueAsString()).startsWith("2012-01-02T00:01:02");

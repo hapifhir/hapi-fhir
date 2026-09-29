@@ -122,7 +122,10 @@ public class ElementsParamR4Test {
 		EncodingEnum encodingEnum;
 
 		encodingEnum = EncodingEnum.JSON;
-		String responseContent = ourServer.fhirRequest("/Procedure?_include=*&_elements=DiagnosticReport:foo" + "&_pretty=true&_format=" + encodingEnum.getFormatContentType()).get().assertStatus(400).getBody();
+		String responseContent = ourServer.fhirRequest("/Procedure?_include=*&_elements=DiagnosticReport:foo" + "&_pretty=true&_format=" + encodingEnum.getFormatContentType())
+			.get()
+			.assertStatus(400)
+			.getBody();
 		ourLog.info(responseContent);
 
 	}
@@ -411,13 +414,17 @@ public class ElementsParamR4Test {
 		EncodingEnum encodingEnum;
 
 		encodingEnum = EncodingEnum.JSON;
-		String responseContent = ourServer.fhirRequest(thePath + "&_pretty=true&_format=" + encodingEnum.getFormatContentType()).get().getBody();
+		String responseContent = ourServer.fhirRequest(thePath + "&_pretty=true&_format=" + encodingEnum.getFormatContentType())
+			.get()
+			.getBody();
 		ourLog.info(responseContent);
 		T response = encodingEnum.newParser(ourCtx).parseResource(theType, responseContent);
 		theVerifier.accept(response);
 
 		encodingEnum = EncodingEnum.XML;
-		responseContent = ourServer.fhirRequest(thePath + "&_pretty=true&_format=" + encodingEnum.getFormatContentType()).get().getBody();
+		responseContent = ourServer.fhirRequest(thePath + "&_pretty=true&_format=" + encodingEnum.getFormatContentType())
+			.get()
+			.getBody();
 		ourLog.info(responseContent);
 		response = encodingEnum.newParser(ourCtx).parseResource(theType, responseContent);
 		theVerifier.accept(response);

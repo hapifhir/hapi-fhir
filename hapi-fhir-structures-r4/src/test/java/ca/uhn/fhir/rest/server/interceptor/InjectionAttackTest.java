@@ -42,7 +42,11 @@ public class InjectionAttackTest {
 		String requestPath = "/Patient/123";
 
 		// XML HTML
-		String responseContent = ourServer.fhirRequest(requestPath).withHeader(Constants.HEADER_ACCEPT, "application/<script>").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest(requestPath)
+			.withHeader(Constants.HEADER_ACCEPT, "application/<script>")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 
 		assertThat(responseContent).doesNotContain("<script>");
@@ -56,7 +60,10 @@ public class InjectionAttackTest {
 			"=123";
 
 		// XML HTML
-		HttpTestResponse response = ourServer.fhirRequest(requestPath).withHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML + ", " + Constants.CT_FHIR_XML_NEW).get().assertStatus(400);
+		HttpTestResponse response = ourServer.fhirRequest(requestPath)
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML + ", " + Constants.CT_FHIR_XML_NEW)
+			.get()
+			.assertStatus(400);
 		String responseContent = response.getBody();
 		ourLog.info(responseContent);
 
@@ -64,7 +71,10 @@ public class InjectionAttackTest {
 		assertEquals("text/html", response.getContentType());
 
 		// JSON HTML
-		response = ourServer.fhirRequest(requestPath).withHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML + ", " + Constants.CT_FHIR_JSON_NEW).get().assertStatus(400);
+		response = ourServer.fhirRequest(requestPath)
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML + ", " + Constants.CT_FHIR_JSON_NEW)
+			.get()
+			.assertStatus(400);
 		responseContent = response.getBody();
 		ourLog.info(responseContent);
 
@@ -72,7 +82,10 @@ public class InjectionAttackTest {
 		assertEquals("text/html", response.getContentType());
 
 		// XML HTML
-		response = ourServer.fhirRequest(requestPath).withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML_NEW).get().assertStatus(400);
+		response = ourServer.fhirRequest(requestPath)
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML_NEW)
+			.get()
+			.assertStatus(400);
 		responseContent = response.getBody();
 		ourLog.info(responseContent);
 
@@ -80,7 +93,10 @@ public class InjectionAttackTest {
 		assertEquals(Constants.CT_FHIR_XML_NEW, response.getContentType());
 
 		// JSON Plain
-		response = ourServer.fhirRequest(requestPath).withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW).get().assertStatus(400);
+		response = ourServer.fhirRequest(requestPath)
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
+			.get()
+			.assertStatus(400);
 		responseContent = response.getBody();
 		ourLog.info(responseContent);
 
@@ -95,7 +111,10 @@ public class InjectionAttackTest {
 			UrlUtil.escapeUrlParam("<script>");
 
 		// XML HTML
-		HttpTestResponse response = ourServer.fhirRequest(requestPath).withHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML + ", " + Constants.CT_FHIR_XML_NEW).get().assertStatus(404);
+		HttpTestResponse response = ourServer.fhirRequest(requestPath)
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML + ", " + Constants.CT_FHIR_XML_NEW)
+			.get()
+			.assertStatus(404);
 		String responseContent = response.getBody();
 		ourLog.info(responseContent);
 
@@ -103,7 +122,10 @@ public class InjectionAttackTest {
 		assertEquals("text/html", response.getContentType());
 
 		// JSON HTML
-		response = ourServer.fhirRequest(requestPath).withHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML + ", " + Constants.CT_FHIR_JSON_NEW).get().assertStatus(404);
+		response = ourServer.fhirRequest(requestPath)
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML + ", " + Constants.CT_FHIR_JSON_NEW)
+			.get()
+			.assertStatus(404);
 		responseContent = response.getBody();
 		ourLog.info(responseContent);
 
@@ -111,7 +133,10 @@ public class InjectionAttackTest {
 		assertEquals("text/html", response.getContentType());
 
 		// XML HTML
-		response = ourServer.fhirRequest(requestPath).withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML_NEW).get().assertStatus(404);
+		response = ourServer.fhirRequest(requestPath)
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML_NEW)
+			.get()
+			.assertStatus(404);
 		responseContent = response.getBody();
 		ourLog.info(responseContent);
 
@@ -119,7 +144,10 @@ public class InjectionAttackTest {
 		assertEquals(Constants.CT_FHIR_XML_NEW, response.getContentType());
 
 		// JSON Plain
-		response = ourServer.fhirRequest(requestPath).withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW).get().assertStatus(404);
+		response = ourServer.fhirRequest(requestPath)
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
+			.get()
+			.assertStatus(404);
 		responseContent = response.getBody();
 		ourLog.info(responseContent);
 
@@ -133,7 +161,11 @@ public class InjectionAttackTest {
 			"/Patient?identifier:" +
 			UrlUtil.escapeUrlParam("<script>") +
 			"=123";
-		String responseContent = ourServer.fhirRequest(requestPath).withHeader(Constants.HEADER_ACCEPT, "application/<script>").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest(requestPath)
+			.withHeader(Constants.HEADER_ACCEPT, "application/<script>")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 
 		assertThat(responseContent).doesNotContain("<script>");

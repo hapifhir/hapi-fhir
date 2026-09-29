@@ -88,7 +88,10 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 		p.addParameter().setName("valtok").setValue(new StringDt("VALTOK2A|VALTOK2B"));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		String response = ourServer.fhirRequest("/Patient/$andlist").post(inParamsStr, Constants.CT_FHIR_XML).assertStatus(200).getBody();
+		String response = ourServer.fhirRequest("/Patient/$andlist")
+			.post(inParamsStr, Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(response);
 
 		assertThat(ourLastParamValStr).hasSize(2);
@@ -186,7 +189,10 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 		p.addParameter().setName("valtok").setValue(new StringDt("VALTOKA|VALTOKB"));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		String response = ourServer.fhirRequest("/Patient/$nonrepeating").post(inParamsStr, Constants.CT_FHIR_XML).assertStatus(200).getBody();
+		String response = ourServer.fhirRequest("/Patient/$nonrepeating")
+			.post(inParamsStr, Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(response);
 
 		assertThat(ourLastParamValStr).hasSize(1);
@@ -201,7 +207,10 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 
 	@Test
 	public void testNonRepeatingWithUrl() throws Exception {
-		String response = ourServer.fhirRequest("/Patient/$nonrepeating?valstr=VALSTR&valtok=" + UrlUtil.escapeUrlParam("VALTOKA|VALTOKB")).get().assertStatus(200).getBody();
+		String response = ourServer.fhirRequest("/Patient/$nonrepeating?valstr=VALSTR&valtok=" + UrlUtil.escapeUrlParam("VALTOKA|VALTOKB"))
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(response);
 
 		assertThat(ourLastParamValStr).hasSize(1);
@@ -216,7 +225,10 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 
 	@Test
 	public void testNonRepeatingWithUrlQualified() throws Exception {
-		String response = ourServer.fhirRequest("/Patient/$nonrepeating?valstr:exact=VALSTR&valtok:not=" + UrlUtil.escapeUrlParam("VALTOKA|VALTOKB")).get().assertStatus(200).getBody();
+		String response = ourServer.fhirRequest("/Patient/$nonrepeating?valstr:exact=VALSTR&valtok:not=" + UrlUtil.escapeUrlParam("VALTOKA|VALTOKB"))
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(response);
 
 		assertThat(ourLastParamValStr).hasSize(1);
@@ -240,7 +252,10 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 		p.addParameter().setName("valtok").setValue(new StringDt("VALTOK2A|VALTOK2B"));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		String response = ourServer.fhirRequest("/Patient/$orlist").post(inParamsStr, Constants.CT_FHIR_XML).assertStatus(200).getBody();
+		String response = ourServer.fhirRequest("/Patient/$orlist")
+			.post(inParamsStr, Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(response);
 
 		assertThat(ourLastParamValStr).hasSize(2);

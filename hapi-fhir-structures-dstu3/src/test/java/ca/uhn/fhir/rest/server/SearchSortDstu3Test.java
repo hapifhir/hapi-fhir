@@ -42,7 +42,10 @@ public class SearchSortDstu3Test {
 
 	@Test
 	public void testSearch() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?_sort=param1,-param2,param3,-param4").get().assertStatus(200).getBody();
+		String responseContent = ourServer.fhirRequest("/Patient?_sort=param1,-param2,param3,-param4")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 		assertEquals("search", ourLastMethod);
 

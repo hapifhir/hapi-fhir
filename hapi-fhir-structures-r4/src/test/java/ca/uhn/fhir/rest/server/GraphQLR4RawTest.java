@@ -59,7 +59,9 @@ public class GraphQLR4RawTest {
 		ourNextRetVal = "{\"foo\"}";
 
 
-		HttpTestResponse status = myRestfulServerExtension.fhirRequest("/Patient/123/$graphql?query=" + UrlUtil.escapeUrlParam("{name{family,given}}")).get().assertStatus(200);
+		HttpTestResponse status = myRestfulServerExtension.fhirRequest("/Patient/123/$graphql?query=" + UrlUtil.escapeUrlParam("{name{family,given}}"))
+			.get()
+			.assertStatus(200);
 		String responseContent = status.getBody();
 		ourLog.info(responseContent);
 
@@ -75,7 +77,9 @@ public class GraphQLR4RawTest {
 		ourNextRetVal = "{\"foo\"}";
 
 
-		HttpTestResponse status = myRestfulServerExtension.fhirRequest("/Condition/123/$graphql?query=" + UrlUtil.escapeUrlParam("{name{family,given}}")).get().assertStatus(404);
+		HttpTestResponse status = myRestfulServerExtension.fhirRequest("/Condition/123/$graphql?query=" + UrlUtil.escapeUrlParam("{name{family,given}}"))
+			.get()
+			.assertStatus(404);
 		String responseContent = status.getBody();
 		ourLog.info(responseContent);
 		assertThat(responseContent).contains("Unknown resource type");
@@ -86,7 +90,8 @@ public class GraphQLR4RawTest {
 	public void testGraphInstance_Post_ContentTypeJson() throws Exception {
 		ourNextRetVal = "{\"foo\"}";
 
-		HttpTestResponse status = myRestfulServerExtension.fhirRequest("/Patient/123/$graphql").withHeader("Accept", "application/json")
+		HttpTestResponse status = myRestfulServerExtension.fhirRequest("/Patient/123/$graphql")
+			.withHeader("Accept", "application/json")
 			.post("{\"query\": \"{name{family,given}}\"}".getBytes(StandardCharsets.UTF_8), "application/json").assertStatus(200);
 		String responseContent = status.getBody();
 		ourLog.info(responseContent);
@@ -102,7 +107,8 @@ public class GraphQLR4RawTest {
 	public void testGraphInstance_Post_ContentTypeGraphql() throws Exception {
 		ourNextRetVal = "{\"foo\"}";
 
-		HttpTestResponse status = myRestfulServerExtension.fhirRequest("/Patient/123/$graphql").withHeader("Accept", "application/json")
+		HttpTestResponse status = myRestfulServerExtension.fhirRequest("/Patient/123/$graphql")
+			.withHeader("Accept", "application/json")
 			.post("{name{family,given}}".getBytes(StandardCharsets.UTF_8), "application/graphql").assertStatus(200);
 		String responseContent = status.getBody();
 		ourLog.info(responseContent);
@@ -119,7 +125,8 @@ public class GraphQLR4RawTest {
 	public void testGraphBase_Post_ListQuery() throws Exception {
 		ourNextRetVal = "{\"foo\"}";
 
-		HttpTestResponse status = myRestfulServerExtension.fhirRequest("/$graphql").withHeader("Accept", "application/json")
+		HttpTestResponse status = myRestfulServerExtension.fhirRequest("/$graphql")
+			.withHeader("Accept", "application/json")
 			.post("{\"query\": \"{PatientList(date: \\\"2022\\\") {name{family,given}}}\"}".getBytes(StandardCharsets.UTF_8), "application/json").assertStatus(200);
 		String responseContent = status.getBody();
 		ourLog.info(responseContent);
@@ -138,7 +145,9 @@ public class GraphQLR4RawTest {
 		ourNextRetVal = "{\"foo\"}";
 
 
-		HttpTestResponse status = myRestfulServerExtension.fhirRequest("/$graphql?query=" + UrlUtil.escapeUrlParam("{name{family,given}}")).get().assertStatus(200);
+		HttpTestResponse status = myRestfulServerExtension.fhirRequest("/$graphql?query=" + UrlUtil.escapeUrlParam("{name{family,given}}"))
+			.get()
+			.assertStatus(200);
 		String responseContent = status.getBody();
 		ourLog.info(responseContent);
 

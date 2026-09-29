@@ -91,7 +91,10 @@ public class SearchBundleProviderWithNoSizeR4Test {
 
 		when(ourLastBundleProvider.size()).thenReturn(25);
 
-		responseContent = HttpTestRequest.to(ourServer.getHttpClient(), ourServer.getFhirContext(), linkNext.getUrl()).get().assertStatus(200).getBody();
+		responseContent = HttpTestRequest.to(ourServer.getHttpClient(), ourServer.getFhirContext(), linkNext.getUrl())
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 		assertEquals("searchAll", ourLastMethod);
 		respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
@@ -101,7 +104,10 @@ public class SearchBundleProviderWithNoSizeR4Test {
 		linkNext = respBundle.getLink("next");
 		assertNotNull(linkNext);
 
-		responseContent = HttpTestRequest.to(ourServer.getHttpClient(), ourServer.getFhirContext(), linkNext.getUrl()).get().assertStatus(200).getBody();
+		responseContent = HttpTestRequest.to(ourServer.getHttpClient(), ourServer.getFhirContext(), linkNext.getUrl())
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 		assertEquals("searchAll", ourLastMethod);
 		respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
