@@ -133,7 +133,10 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 		myEncounterId = myClient.create().resource(e).execute().getId().toUnqualifiedVersionless();
 
 		String path = "/" + myPatientId.getValue() + "?" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE + "&_pretty=true";
-		String deleteResponse = myServer.fhirRequest(path).withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW).delete().getBody();
+		String deleteResponse = myServer.fhirRequest(path)
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
+			.delete()
+			.getBody();
 		ourLog.info("Response: {}", deleteResponse);
 
 		verify(mockResourceDao).read(any(IIdType.class), theRequestDetailsCaptor.capture());
@@ -199,7 +202,11 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 		myServer.registerInterceptor(myDeleteInterceptor);
 
 		String path = "/" + myPatientId.getValue() + "?" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE + "&_pretty=true";
-		String deleteResponse = myServer.fhirRequest(path).withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW).delete().assertStatus(200).getBody();
+		String deleteResponse = myServer.fhirRequest(path)
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
+			.delete()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info("Response: {}", deleteResponse);
 		assertThat(deleteResponse).contains("Cascaded delete to ");
 
@@ -226,7 +233,11 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 			myServer.registerInterceptor(myDeleteInterceptor);
 
 			String path = "/" + myPatientId.getValue() + "?" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE + "&_pretty=true";
-			String deleteResponse = myServer.fhirRequest(path).withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW).delete().assertStatus(200).getBody();
+			String deleteResponse = myServer.fhirRequest(path)
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
+				.delete()
+				.assertStatus(200)
+				.getBody();
 			ourLog.info("Response: {}", deleteResponse);
 			assertThat(deleteResponse).contains("Cascaded delete to ");
 
@@ -261,7 +272,11 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 		myServer.registerInterceptor(myDeleteInterceptor);
 
 		String path = "/Organization/" + o0id.getIdPart() + "?" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE + "&_pretty=true";
-		String deleteResponse = myServer.fhirRequest(path).withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW).delete().assertStatus(200).getBody();
+		String deleteResponse = myServer.fhirRequest(path)
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
+			.delete()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info("Response: {}", deleteResponse);
 		assertThat(deleteResponse).contains("Cascaded delete to ");
 
@@ -292,7 +307,12 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 		myServer.registerInterceptor(myDeleteInterceptor);
 
 		String path = "/" + myPatientId.getValue() + "?_pretty=true";
-		String deleteResponse = myServer.fhirRequest(path).withHeader(Constants.HEADER_CASCADE, Constants.CASCADE_DELETE).withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW).delete().assertStatus(200).getBody();
+		String deleteResponse = myServer.fhirRequest(path)
+			.withHeader(Constants.HEADER_CASCADE, Constants.CASCADE_DELETE)
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
+			.delete()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info("Response: {}", deleteResponse);
 		assertThat(deleteResponse).contains("Cascaded delete to ");
 

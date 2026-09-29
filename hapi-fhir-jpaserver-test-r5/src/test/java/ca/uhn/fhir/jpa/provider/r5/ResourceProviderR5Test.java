@@ -407,7 +407,10 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		String input = myServer.fhirRequest("/metadata?_format=json").get().assertStatus(200).getBody();
 		ourLog.info(input);
 
-		String respString = myServer.fhirRequest("/CapabilityStatement/$validate?_pretty=true").post(input, Constants.CT_JSON).assertStatus(200).getBody();
+		String respString = myServer.fhirRequest("/CapabilityStatement/$validate?_pretty=true")
+			.post(input, Constants.CT_JSON)
+			.assertStatus(200)
+			.getBody();
 		ourLog.debug(respString);
 
 		// As of 2023-01-26, the assertStatus(200) above was restored.

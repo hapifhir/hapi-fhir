@@ -302,7 +302,10 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 				JpaConstants.OPERATION_BINARY_ACCESS_WRITE +
 				"?path=DocumentReference.content.attachment";
 			String accept = "application/fhir+json; _pretty=true";
-			HttpTestResponse resp = myServer.fhirRequest(path).withHeader(Constants.HEADER_ACCEPT, accept).post(SOME_BYTES_2, ContentType.IMAGE_JPEG.getMimeType()).assertStatus(200);
+			HttpTestResponse resp = myServer.fhirRequest(path)
+				.withHeader(Constants.HEADER_ACCEPT, accept)
+				.post(SOME_BYTES_2, ContentType.IMAGE_JPEG.getMimeType())
+				.assertStatus(200);
 			assertThat(resp.getContentType()).contains("application/fhir+json");
 			String response = resp.getBody();
 			ourLog.info("Response: {}", response);
@@ -517,7 +520,10 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 	private String executeBinaryWrite(String thePath, byte[] theContent) throws IOException {
 		String accept = "application/fhir+json; _pretty=true";
-		HttpTestResponse resp = myServer.fhirRequest(thePath).withHeader(Constants.HEADER_ACCEPT, accept).post(theContent, ContentType.IMAGE_JPEG.getMimeType()).assertStatus(200);
+		HttpTestResponse resp = myServer.fhirRequest(thePath)
+			.withHeader(Constants.HEADER_ACCEPT, accept)
+			.post(theContent, ContentType.IMAGE_JPEG.getMimeType())
+			.assertStatus(200);
 		assertThat(resp.getContentType()).contains("application/fhir+json");
 		String response = resp.getBody();
 		ourLog.info("Response: {}", response);

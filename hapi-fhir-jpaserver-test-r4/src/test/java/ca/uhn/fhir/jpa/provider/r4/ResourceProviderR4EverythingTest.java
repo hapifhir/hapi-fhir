@@ -764,7 +764,10 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		// %3E=> %3C=<
 
 		myCaptureQueriesListener.clear();
-		String output = myServer.fhirRequest("/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantType(new Date(time1)).getValueAsString()).get().assertStatus(200).getBody();
+		String output = myServer.fhirRequest("/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantType(new Date(time1)).getValueAsString())
+			.get()
+			.assertStatus(200)
+			.getBody();
 		myCaptureQueriesListener.logSelectQueries();
 		ourLog.info(output);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(myFhirContext.newXmlParser().parseResource(Bundle.class, output));

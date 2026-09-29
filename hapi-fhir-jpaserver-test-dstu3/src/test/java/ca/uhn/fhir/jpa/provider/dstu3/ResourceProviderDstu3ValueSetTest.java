@@ -678,7 +678,8 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	public void testInvalidFilter() throws Exception {
 		String string = IOUtils.toString(getClass().getResourceAsStream("/bug_516_invalid_expansion.json"), StandardCharsets.UTF_8);
 
-		HttpTestResponse resp = myServer.fhirRequest("/ValueSet/%24expand").post(string, ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW);
+		HttpTestResponse resp = myServer.fhirRequest("/ValueSet/%24expand")
+			.post(string, ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW);
 
 		String respString = resp.getBody();
 		ourLog.debug(respString);

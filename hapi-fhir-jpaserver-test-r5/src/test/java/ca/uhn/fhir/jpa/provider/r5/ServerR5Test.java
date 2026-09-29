@@ -49,7 +49,10 @@ public class ServerR5Test extends BaseResourceProviderR5Test {
 	@Test
 	@Disabled
 	public void testCapabilityStatementValidates() {
-		String respString = myServer.fhirRequest("/metadata?_pretty=true&_format=json").get().assertStatus(200).getBody();
+		String respString = myServer.fhirRequest("/metadata?_pretty=true&_format=json")
+			.get()
+			.assertStatus(200)
+			.getBody();
 
 		ourLog.debug(respString);
 

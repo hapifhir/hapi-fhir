@@ -34,7 +34,9 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 
 		String query = "{name{family,given}}";
 
-		String resp = myServer.fhirRequest("/Patient/" + myPatientId0.getIdPart() + "/$graphql?query=" + UrlUtil.escapeUrlParam(query)).get().getBody();
+		String resp = myServer.fhirRequest("/Patient/" + myPatientId0.getIdPart() + "/$graphql?query=" + UrlUtil.escapeUrlParam(query))
+			.get()
+			.getBody();
 		ourLog.info(resp);
 		@Language("json")
 		String expected = """
@@ -56,7 +58,9 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 
 		String query = "{birthDate}";
 
-		String resp = myServer.fhirRequest("/Patient/" + myPatientId0.getIdPart() + "/$graphql?query=" + UrlUtil.escapeUrlParam(query)).get().getBody();
+		String resp = myServer.fhirRequest("/Patient/" + myPatientId0.getIdPart() + "/$graphql?query=" + UrlUtil.escapeUrlParam(query))
+			.get()
+			.getBody();
 		ourLog.info(resp);
 		@Language("json")
 		String expected = """
@@ -74,7 +78,10 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 		// Repeat a couple of times to make sure it doesn't fail after the first one. At one point
 		// the generator polluted the structure userdata and failed the second time
 		for (int i = 0; i < 3; i++) {
-			String resp = myServer.fhirRequest("/Patient/$graphql").post(INTROSPECTION_QUERY, Constants.CT_JSON).assertStatus(200).getBody();
+			String resp = myServer.fhirRequest("/Patient/$graphql")
+				.post(INTROSPECTION_QUERY, Constants.CT_JSON)
+				.assertStatus(200)
+				.getBody();
 			ourLog.info(resp);
 			assertThat(resp).contains("{\"kind\":\"OBJECT\",\"name\":\"Patient\",");
 			assertThat(resp).doesNotContain("{\"kind\":\"OBJECT\",\"name\":\"Observation\",");
@@ -93,7 +100,10 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 		// Repeat a couple of times to make sure it doesn't fail after the first one. At one point
 		// the generator polluted the structure userdata and failed the second time
 		for (int i = 0; i < 3; i++) {
-			String resp = myServer.fhirRequest("/Observation/$graphql").post(INTROSPECTION_QUERY, Constants.CT_JSON).assertStatus(200).getBody();
+			String resp = myServer.fhirRequest("/Observation/$graphql")
+				.post(INTROSPECTION_QUERY, Constants.CT_JSON)
+				.assertStatus(200)
+				.getBody();
 			ourLog.info(resp);
 			assertThat(resp).doesNotContain("{\"kind\":\"OBJECT\",\"name\":\"Patient\",");
 			assertThat(resp).contains("{\"kind\":\"OBJECT\",\"name\":\"Observation\",");
@@ -113,7 +123,10 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 		// Repeat a couple of times to make sure it doesn't fail after the first one. At one point
 		// the generator polluted the structure userdata and failed the second time
 		for (int i = 0; i < 3; i++) {
-			String resp = myServer.fhirRequest("/$graphql").post(INTROSPECTION_QUERY, Constants.CT_JSON).assertStatus(200).getBody();
+			String resp = myServer.fhirRequest("/$graphql")
+				.post(INTROSPECTION_QUERY, Constants.CT_JSON)
+				.assertStatus(200)
+				.getBody();
 			ourLog.info("Response has size: {}", FileUtil.formatFileSize(resp.length()));
 			assertThat(resp).contains("{\"kind\":\"OBJECT\",\"name\":\"Patient\",");
 			assertThat(resp).contains("{\"kind\":\"OBJECT\",\"name\":\"Observation\",");

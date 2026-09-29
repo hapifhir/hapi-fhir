@@ -513,7 +513,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		output = myServer.fhirRequest("/Condition?onset-date=ge").get().assertStatus(400).getBody();
 		assertThat(output).contains(MSG_PREFIX_INVALID_FORMAT + "&quot;ge&quot;");
 
-		output = myServer.fhirRequest("/Condition?onset-date=" + UrlUtil.escapeUrlParam(">")).get().assertStatus(400).getBody();
+		output = myServer.fhirRequest("/Condition?onset-date=" + UrlUtil.escapeUrlParam(">"))
+			.get()
+			.assertStatus(400)
+			.getBody();
 		assertThat(output).contains(MSG_PREFIX_INVALID_FORMAT + "&quot;&gt;&quot;");
 	}
 
@@ -1107,7 +1110,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		p.setActive(true);
 		p.setId("AAA");
 		String encoded = myFhirContext.newJsonParser().encodeResourceToString(p);
-		String responseContent = myServer.fhirRequest("/Patient/AAA").put(encoded, "application/json+fhir").assertStatus(201).getBody();
+		String responseContent = myServer.fhirRequest("/Patient/AAA")
+			.put(encoded, "application/json+fhir")
+			.assertStatus(201)
+			.getBody();
 		ourLog.info(responseContent);
 		assertThat(responseContent).contains("true");
 
@@ -1119,7 +1125,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		p.setActive(true);
 		p.setId("AAA");
 		encoded = myFhirContext.newJsonParser().encodeResourceToString(p);
-		responseContent = myServer.fhirRequest("/Patient/AAA").put(encoded, "application/json+fhir").assertStatus(201).getBody();
+		responseContent = myServer.fhirRequest("/Patient/AAA")
+			.put(encoded, "application/json+fhir")
+			.assertStatus(201)
+			.getBody();
 		ourLog.info(responseContent);
 		assertThat(responseContent).contains("true");
 	}
@@ -1184,7 +1193,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Disabled
 	public void testMakingQuery() {
 		ourLog.info("*** MAKING QUERY");
-		myServer.fhirRequest("/QuestionnaireResponse?_count=50&status=completed&questionnaire=ARIncenterAbsRecord&_lastUpdated=%3E" + UrlUtil.escapeUrlParam("=2018-01-01") + "&context.organization=O3435").get();
+		myServer.fhirRequest("/QuestionnaireResponse?_count=50&status=completed&questionnaire=ARIncenterAbsRecord&_lastUpdated=%3E" + UrlUtil.escapeUrlParam("=2018-01-01") + "&context.organization=O3435")
+			.get();
 		System.exit(0);
 	}
 
@@ -1610,7 +1620,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			+ "\"name\":[{\"family\":\"" + theFamily + "\"}]}";
 
 		HttpTestResponse response = myServer
-			.fhirRequest("/Patient?identifier=" + UrlUtil.escapeUrlParam(MRN_SYSTEM + "|" + theMrn)).put(body, "application/json+fhir");
+			.fhirRequest("/Patient?identifier=" + UrlUtil.escapeUrlParam(MRN_SYSTEM + "|" + theMrn))
+				.put(body, "application/json+fhir");
 		ourLog.info("{}", response);
 		return new ConditionalUpdateResponse(response.getStatusCode(), response.getBody());
 	}
@@ -1779,7 +1790,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		procedure.setExtension(List.of(extension));
 		String procedureString = myFhirContext.newXmlParser().encodeResourceToString(procedure);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(procedure));
-		String newIdString = myServer.fhirRequest("/Procedure").post(procedureString, Constants.CT_FHIR_XML).assertStatus(201).getHeader(Constants.HEADER_LOCATION_LC);
+		String newIdString = myServer.fhirRequest("/Procedure")
+			.post(procedureString, Constants.CT_FHIR_XML)
+			.assertStatus(201)
+			.getHeader(Constants.HEADER_LOCATION_LC);
 		assertThat(newIdString).startsWith(myServerBase + "/Procedure/");
 		IdType id = new IdType(newIdString);
 
@@ -1813,7 +1827,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		bundle.setEntry(List.of(entry));
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		String parameterResource = myFhirContext.newXmlParser().encodeResourceToString(bundle);
-		String responseString = myServer.fhirRequest("").post(parameterResource, Constants.CT_FHIR_XML).assertStatus(400).getBody();
+		String responseString = myServer.fhirRequest("")
+			.post(parameterResource, Constants.CT_FHIR_XML)
+			.assertStatus(400)
+			.getBody();
 		assertThat(responseString).contains("Extension contains both a value and nested extensions");
 
 		// Get procedures
@@ -1829,11 +1846,19 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
 		String ifNoneExist = "Patient?name=" + methodName;
-		String newIdString = myServer.fhirRequest("/Patient").withHeader(Constants.HEADER_IF_NONE_EXIST, ifNoneExist).post(resource, Constants.CT_FHIR_XML).assertStatus(201).getHeader(Constants.HEADER_LOCATION_LC);
+		String newIdString = myServer.fhirRequest("/Patient")
+			.withHeader(Constants.HEADER_IF_NONE_EXIST, ifNoneExist)
+			.post(resource, Constants.CT_FHIR_XML)
+			.assertStatus(201)
+			.getHeader(Constants.HEADER_LOCATION_LC);
 		assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 		IdType id = new IdType(newIdString);
 
-		newIdString = myServer.fhirRequest("/Patient").withHeader(Constants.HEADER_IF_NONE_EXIST, ifNoneExist).post(resource, Constants.CT_FHIR_XML).assertStatus(200).getHeader(Constants.HEADER_LOCATION_LC);
+		newIdString = myServer.fhirRequest("/Patient")
+			.withHeader(Constants.HEADER_IF_NONE_EXIST, ifNoneExist)
+			.post(resource, Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getHeader(Constants.HEADER_LOCATION_LC);
 		assertEquals(id.getValue(), newIdString); // version should match for conditional create
 	}
 
@@ -1875,7 +1900,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	public void testCreateResourceReturnsRepresentationByDefault() {
 		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"></Patient>";
 
-		HttpTestResponse response = myServer.fhirRequest("/Patient").post(resource, Constants.CT_FHIR_XML).assertStatus(201);
+		HttpTestResponse response = myServer.fhirRequest("/Patient")
+			.post(resource, Constants.CT_FHIR_XML)
+			.assertStatus(201);
 		ourLog.info(response.toString());
 		String respString = response.getBody();
 		ourLog.debug(respString);
@@ -1888,7 +1915,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"></Patient>";
 
 		String prefer = Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME;
-		HttpTestResponse response = myServer.fhirRequest("/Patient").withHeader(Constants.HEADER_PREFER, prefer).post(resource, Constants.CT_FHIR_XML).assertStatus(201);
+		HttpTestResponse response = myServer.fhirRequest("/Patient")
+			.withHeader(Constants.HEADER_PREFER, prefer)
+			.post(resource, Constants.CT_FHIR_XML)
+			.assertStatus(201);
 		ourLog.info(response.toString());
 		String respString = response.getBody();
 		ourLog.debug(respString);
@@ -1899,7 +1929,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	public void testCreateResourceWithNumericId() {
 		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"2\"/></Patient>";
 
-		String responseString = myServer.fhirRequest("/Patient/2").post(resource, Constants.CT_FHIR_XML).assertStatus(400).getBody();
+		String responseString = myServer.fhirRequest("/Patient/2")
+			.post(resource, Constants.CT_FHIR_XML)
+			.assertStatus(400)
+			.getBody();
 		ourLog.info(responseString);
 		OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, responseString);
 		assertEquals(Msg.code(365) + "Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)", oo.getIssue().get(0).getDiagnostics());
@@ -2054,7 +2087,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	public void testDeleteConditionalNoMatches() {
 		String methodName = "testDeleteConditionalNoMatches";
 
-		String response = myServer.fhirRequest("/Patient?identifier=" + methodName).delete().assertStatus(200).getBody();
+		String response = myServer.fhirRequest("/Patient?identifier=" + methodName)
+			.delete()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(response);
 		assertThat(response).contains("<diagnostics value=\"Unable to find resource matching URL &quot;Patient?identifier=testDeleteConditionalNoMatches&quot;. Nothing has been deleted.\"/>");
 	}
@@ -2091,7 +2127,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Disabled("Scratchpad for ad-hoc testing")
 	public void testQuery() {
 		ourLog.info("** Performing Search");
-		HttpTestResponse response = myServer.fhirRequest("/MedicationRequest?category=community&identifier=urn:oid:2.16.840.1.113883.3.7418.12.3%7C&intent=order&medication.code:text=calcitriol,hectorol,Zemplar,rocaltrol,vectical,vitamin%20D,doxercalciferol,paricalcitol&status=active,completed").get();
+		HttpTestResponse response = myServer.fhirRequest("/MedicationRequest?category=community&identifier=urn:oid:2.16.840.1.113883.3.7418.12.3%7C&intent=order&medication.code:text=calcitriol,hectorol,Zemplar,rocaltrol,vectical,vitamin%20D,doxercalciferol,paricalcitol&status=active,completed")
+			.get();
 		ourLog.info(response.toString());
 		ourLog.info("** DONE Performing Search");
 	}
@@ -2104,7 +2141,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		pt.addName().setFamily(methodName);
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		String newIdString = myServer.fhirRequest("/Patient").post(resource, Constants.CT_FHIR_XML).assertStatus(201).getHeader(Constants.HEADER_LOCATION_LC);
+		String newIdString = myServer.fhirRequest("/Patient")
+			.post(resource, Constants.CT_FHIR_XML)
+			.assertStatus(201)
+			.getHeader(Constants.HEADER_LOCATION_LC);
 		assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 		IdType id = new IdType(newIdString);
 
@@ -2113,7 +2153,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, resp);
 		assertThat(oo.getIssueFirstRep().getDiagnostics()).startsWith("Successfully deleted 1 resource(s). Took");
 
-		HttpTestResponse readResponse = myServer.fhirRequest("/Patient/" + id.getIdPart()).get().assertStatus(Constants.STATUS_HTTP_410_GONE);
+		HttpTestResponse readResponse = myServer.fhirRequest("/Patient/" + id.getIdPart())
+			.get()
+			.assertStatus(Constants.STATUS_HTTP_410_GONE);
 		ourLog.info(readResponse.toString());
 		resp = readResponse.getBody();
 		oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, resp);
@@ -2139,7 +2181,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		pt.addIdentifier().setSystem("http://ghh.org/patient").setValue(methodName);
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		String newIdString = myServer.fhirRequest("/Patient").post(resource, Constants.CT_FHIR_XML).assertStatus(201).getHeader(Constants.HEADER_LOCATION_LC);
+		String newIdString = myServer.fhirRequest("/Patient")
+			.post(resource, Constants.CT_FHIR_XML)
+			.assertStatus(201)
+			.getHeader(Constants.HEADER_LOCATION_LC);
 		assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 		IdType id = new IdType(newIdString);
 
@@ -2170,7 +2215,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		Thread.sleep(1000);
 
-		HttpTestResponse response = myServer.fhirRequest("/Patient/" + id.getIdPart()).get().assertStatus(Constants.STATUS_HTTP_410_GONE);
+		HttpTestResponse response = myServer.fhirRequest("/Patient/" + id.getIdPart())
+			.get()
+			.assertStatus(Constants.STATUS_HTTP_410_GONE);
 		ourLog.info(response.toString());
 	}
 
@@ -2298,7 +2345,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	public void testExtensionUrlWithHl7Url() throws IOException {
 		String input = IOUtils.toString(ResourceProviderR4Test.class.getResourceAsStream("/bug872-ext-with-hl7-url.json"), Charsets.UTF_8);
 
-		String respString = myServer.fhirRequest("/Patient/" + JpaConstants.OPERATION_VALIDATE).post(input, Constants.CT_JSON).assertStatus(200).getBody();
+		String respString = myServer.fhirRequest("/Patient/" + JpaConstants.OPERATION_VALIDATE)
+			.post(input, Constants.CT_JSON)
+			.assertStatus(200)
+			.getBody();
 		ourLog.debug(respString);
 	}
 
@@ -2315,7 +2365,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		try {
 			String input = IOUtils.toString(ResourceProviderR4Test.class.getResourceAsStream("/bug872-ext-with-hl7-url.json"), Charsets.UTF_8);
 
-			String respString = myServer.fhirRequest("/Patient/$validate").post(input, Constants.CT_JSON).assertStatus(200).getBody();
+			String respString = myServer.fhirRequest("/Patient/$validate")
+				.post(input, Constants.CT_JSON)
+				.assertStatus(200)
+				.getBody();
 			ourLog.debug(respString);
 			assertThat(respString).contains("Unknown extension http://hl7.org/fhir/ValueSet/v3-ActInvoiceGroupCode");
 		} finally {
@@ -2329,7 +2382,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String input = myServer.fhirRequest("/metadata?_format=json").get().assertStatus(200).getBody();
 		ourLog.info(input);
 
-		String respString = myServer.fhirRequest("/CapabilityStatement/$validate?_pretty=true").post(input, Constants.CT_JSON).assertStatus(200).getBody();
+		String respString = myServer.fhirRequest("/CapabilityStatement/$validate?_pretty=true")
+			.post(input, Constants.CT_JSON)
+			.assertStatus(200)
+			.getBody();
 		ourLog.debug(respString);
 	}
 
@@ -2342,7 +2398,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		input.getCode().setText("Hello");
 		input.setStatus(ObservationStatus.FINAL);
 
-		String respString = myServer.fhirRequest("/Observation/$validate?_pretty=true").post(input).assertStatus(200).getBody();
+		String respString = myServer.fhirRequest("/Observation/$validate?_pretty=true")
+			.post(input)
+			.assertStatus(200)
+			.getBody();
 		ourLog.debug(respString);
 		assertThat(respString).contains("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it could not be found");
 	}
@@ -2371,7 +2430,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myStorageSettings.setHibernateSearchIndexSearchParams(true);
 		mySearchParamRegistry.forceRefresh();
 
-		String responseString = myServer.fhirRequest("/Observation?_content=systolic&_pretty=true").withHeader("Content-Type", "application/json").get().assertStatus(200).getBody();
+		String responseString = myServer.fhirRequest("/Observation?_content=systolic&_pretty=true")
+			.withHeader("Content-Type", "application/json")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseString);
 		Bundle bundle = parser.parseResource(Bundle.class, responseString);
 		assertEquals(1, bundle.getTotal());
@@ -2950,7 +3013,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals("1", id.getVersionIdPart());
 		assertThat(id.getIdPart()).isNotEqualTo("AAA");
 
-		String respString = myServer.fhirRequest("/Patient/" + id.getIdPart() + "/_history/1").put(resource, Constants.CT_FHIR_XML).assertStatus(400).getBody();
+		String respString = myServer.fhirRequest("/Patient/" + id.getIdPart() + "/_history/1")
+			.put(resource, Constants.CT_FHIR_XML)
+			.assertStatus(400)
+			.getBody();
 		ourLog.info("Response: {}", respString);
 		OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, respString);
 		assertThat(oo.getIssue().get(0).getDiagnostics()).isEqualTo(Msg.code(420) + "Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"AAA\" does not match URL ID of \""
@@ -3288,7 +3354,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		//@formatter:on
 
 		for (String operation : List.of("$meta-add", "$meta-delete")) {
-			String output = myServer.fhirRequest("/Patient/" + id.getIdPart() + "/" + operation).post(input, Constants.CT_FHIR_XML).assertStatus(400).getBody();
+			String output = myServer.fhirRequest("/Patient/" + id.getIdPart() + "/" + operation)
+				.post(input, Constants.CT_FHIR_XML)
+				.assertStatus(400)
+				.getBody();
 			ourLog.info(output);
 			assertThat(output).contains("Input contains no parameter with name 'meta'");
 		}
@@ -3363,11 +3432,17 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			"    <gender value=\"female\"/>\n" +
 			"</Patient>";
 
-		String newIdString = myServer.fhirRequest("/Patient").post(input, Constants.CT_FHIR_XML).assertStatus(201).getHeader(Constants.HEADER_LOCATION_LC);
+		String newIdString = myServer.fhirRequest("/Patient")
+			.post(input, Constants.CT_FHIR_XML)
+			.assertStatus(201)
+			.getHeader(Constants.HEADER_LOCATION_LC);
 		assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 		IdType id = new IdType(newIdString);
 
-		String resp = myServer.fhirRequest("/Patient/" + id.getIdPart() + "?_pretty=true").get().assertStatus(200).getBody();
+		String resp = myServer.fhirRequest("/Patient/" + id.getIdPart() + "?_pretty=true")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(resp);
 		assertThat(resp).contains("Underweight");
 	}
@@ -3386,7 +3461,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		String prefer = Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME;
 		String patchText = "[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]";
-		String responseString = myServer.fhirRequest("/Patient/" + pid1.getIdPart()).withHeader(Constants.HEADER_PREFER, prefer).patch(patchText).assertStatus(200).getBody();
+		String responseString = myServer.fhirRequest("/Patient/" + pid1.getIdPart())
+			.withHeader(Constants.HEADER_PREFER, prefer)
+			.patch(patchText)
+			.assertStatus(200)
+			.getBody();
 		assertThat(responseString).contains("<OperationOutcome");
 		assertThat(responseString).contains("INFORMATION");
 
@@ -3408,7 +3487,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 
 		String path = "/Patient/" + pid1.getIdPart();
-		String responseString = myServer.fhirRequest(path).withHeader("If-Match", "W/\"9\"").patch("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]").assertStatus(409).getBody();
+		String responseString = myServer.fhirRequest(path)
+			.withHeader("If-Match", "W/\"9\"")
+			.patch("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]")
+			.assertStatus(409)
+			.getBody();
 		assertThat(responseString).contains("<OperationOutcome");
 		assertThat(responseString).contains("<diagnostics value=\"" + Msg.code(550) + Msg.code(974) + "Version 9 is not the most recent version of this resource, unable to apply patch\"/>");
 
@@ -3432,7 +3515,12 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String path = "/Patient/" + pid1.getIdPart();
 		String prefer = Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME;
 		String patchText = "[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]";
-		String responseString = myServer.fhirRequest(path).withHeader(Constants.HEADER_PREFER, prefer).withHeader("If-Match", "W/\"1\"").patch(patchText).assertStatus(200).getBody();
+		String responseString = myServer.fhirRequest(path)
+			.withHeader(Constants.HEADER_PREFER, prefer)
+			.withHeader("If-Match", "W/\"1\"")
+			.patch(patchText)
+			.assertStatus(200)
+			.getBody();
 		ourLog.info("Response: {}", responseString);
 		assertThat(responseString).contains("<OperationOutcome");
 		assertThat(responseString).contains("INFORMATION");
@@ -3456,7 +3544,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		String patchString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><diff xmlns:fhir=\"http://hl7.org/fhir\"><replace sel=\"fhir:Patient/fhir:active/@value\">false</replace></diff>";
 		String prefer = Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME;
-		String responseString = myServer.fhirRequest("/Patient/" + pid1.getIdPart()).withHeader(Constants.HEADER_PREFER, prefer).patch(patchString, Constants.CT_XML_PATCH).assertStatus(200).getBody();
+		String responseString = myServer.fhirRequest("/Patient/" + pid1.getIdPart())
+			.withHeader(Constants.HEADER_PREFER, prefer)
+			.patch(patchString, Constants.CT_XML_PATCH)
+			.assertStatus(200)
+			.getBody();
 		assertThat(responseString).contains("<OperationOutcome");
 		assertThat(responseString).contains("INFORMATION");
 
@@ -3723,7 +3815,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.setValue("A");
 		IIdType vsid = myClient.create().resource(vs).execute().getId().toUnqualifiedVersionless();
 
-		String text = myServer.fhirRequest("/" + vsid.getValue() + "/$expand").get().assertStatus(Constants.STATUS_HTTP_200_OK).getBody();
+		String text = myServer.fhirRequest("/" + vsid.getValue() + "/$expand")
+			.get()
+			.assertStatus(Constants.STATUS_HTTP_200_OK)
+			.getBody();
 		ourLog.info(text);
 		assertThat(text).contains("\"A\"");
 		assertThat(text).contains("\"A1\"");
@@ -3782,7 +3877,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		obs2.setValue(new StringType("OBS2"));
 		myClient.create().resource(obs2).execute();
 
-		String text = myServer.fhirRequest("/Observation?code:in=http://vs").get().assertStatus(Constants.STATUS_HTTP_200_OK).getBody();
+		String text = myServer.fhirRequest("/Observation?code:in=http://vs")
+			.get()
+			.assertStatus(Constants.STATUS_HTTP_200_OK)
+			.getBody();
 		ourLog.info(text);
 		assertThat(text).contains("\"OBS1\"");
 		assertThat(text).doesNotContain("\"OBS2\"");
@@ -3831,7 +3929,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testSearchBundleDoesntIncludeTextElement() {
-		String text = myServer.fhirRequest("/Patient?_format=json").get().assertStatus(Constants.STATUS_HTTP_200_OK).getBody();
+		String text = myServer.fhirRequest("/Patient?_format=json")
+			.get()
+			.assertStatus(Constants.STATUS_HTTP_200_OK)
+			.getBody();
 		ourLog.info(text);
 		assertThat(text).doesNotContain("\"text\",\"type\"");
 	}
@@ -4318,7 +4419,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		ma.setMedication(new Reference(medId));
 		IIdType moId = myMedicationAdministrationDao.create(ma, mySrd).getId().toUnqualifiedVersionless();
 
-		String responseString = myServer.fhirRequest("/MedicationAdministration?medication.code=04823543").get().assertStatus(200).getBody();
+		String responseString = myServer.fhirRequest("/MedicationAdministration?medication.code=04823543")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseString);
 		assertThat(responseString).contains(moId.getIdPart());
 	}
@@ -5405,7 +5509,12 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		String path = "/Patient/_search?_format=application/xml";
-		String responseContent = myServer.fhirRequest(path).withHeader("Cache-Control", "no-cache").withFormParam("name", "Smith").postForm().assertStatus(200).getBody();
+		String responseContent = myServer.fhirRequest(path)
+			.withHeader("Cache-Control", "no-cache")
+			.withFormParam("name", "Smith")
+			.postForm()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(responseContent);
 	}
 
@@ -5761,7 +5870,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		pt.addName().setFamily(methodName);
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		String responseString = myServer.fhirRequest("/Patient").put(resource, Constants.CT_FHIR_XML).assertStatus(400).getBody();
+		String responseString = myServer.fhirRequest("/Patient")
+			.put(resource, Constants.CT_FHIR_XML)
+			.assertStatus(400)
+			.getBody();
 		ourLog.info(responseString);
 		OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, responseString);
 		assertThat(oo.getIssue().get(0).getDiagnostics()).contains("Can not update resource, request URL must contain an ID element for update (PUT) operation (it must be of the form [base]/[resource type]/[id])");
@@ -5776,7 +5888,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		pt.addName().setFamily(methodName);
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		String responseString = myServer.fhirRequest("/Patient").put(resource, Constants.CT_FHIR_XML).assertStatus(400).getBody();
+		String responseString = myServer.fhirRequest("/Patient")
+			.put(resource, Constants.CT_FHIR_XML)
+			.assertStatus(400)
+			.getBody();
 		ourLog.info(responseString);
 		assertThat(responseString).contains("Can not update resource, request URL must contain an ID element for update (PUT) operation (it must be of the form [base]/[resource type]/[id])");
 		assertThat(responseString).contains("<OperationOutcome");
@@ -5790,7 +5905,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		pt.addName().setFamily(methodName);
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		String responseString = myServer.fhirRequest("/Patient/FOO").put(resource, Constants.CT_FHIR_XML).assertStatus(400).getBody();
+		String responseString = myServer.fhirRequest("/Patient/FOO")
+			.put(resource, Constants.CT_FHIR_XML)
+			.assertStatus(400)
+			.getBody();
 		ourLog.info(responseString);
 		assertThat(responseString).contains("Can not update resource, resource body must contain an ID element for update (PUT) operation");
 		assertThat(responseString).contains("<OperationOutcome");
@@ -5812,7 +5930,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String encoded = myFhirContext.newJsonParser().encodeResourceToString(p1);
 		ourLog.info(encoded);
 
-		String responseString = myServer.fhirRequest(path).withHeader("Accept", Constants.CT_FHIR_JSON).put(encoded, Constants.CT_FHIR_JSON).assertStatus(400).getBody();
+		String responseString = myServer.fhirRequest(path)
+			.withHeader("Accept", Constants.CT_FHIR_JSON)
+			.put(encoded, Constants.CT_FHIR_JSON)
+			.assertStatus(400)
+			.getBody();
 		OperationOutcome oo = myFhirContext.newJsonParser().parseResource(OperationOutcome.class, responseString);
 		assertThat(oo.getIssue().get(0).getDiagnostics()).isEqualTo(Msg.code(420) + "Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"FOO\" does not match URL ID of \""
 			+ p1id.getIdPart() + "\"");
@@ -5821,7 +5943,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		p1.setId((String) null);
 
 		encoded = myFhirContext.newJsonParser().encodeResourceToString(p1);
-		responseString = myServer.fhirRequest(path).withHeader("Accept", Constants.CT_FHIR_JSON).put(encoded, Constants.CT_FHIR_JSON).assertStatus(400).getBody();
+		responseString = myServer.fhirRequest(path)
+			.withHeader("Accept", Constants.CT_FHIR_JSON)
+			.put(encoded, Constants.CT_FHIR_JSON)
+			.assertStatus(400)
+			.getBody();
 		oo = myFhirContext.newJsonParser().parseResource(OperationOutcome.class, responseString);
 		assertEquals(Msg.code(419) + "Can not update resource, resource body must contain an ID element for update (PUT) operation", oo.getIssue().get(0).getDiagnostics());
 
@@ -5867,13 +5993,19 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		pt.addName().setFamily(methodName);
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		String newIdString = myServer.fhirRequest("/Patient?name=" + methodName).post(resource, Constants.CT_FHIR_XML).assertStatus(201).getHeader(Constants.HEADER_LOCATION_LC);
+		String newIdString = myServer.fhirRequest("/Patient?name=" + methodName)
+			.post(resource, Constants.CT_FHIR_XML)
+			.assertStatus(201)
+			.getHeader(Constants.HEADER_LOCATION_LC);
 		assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 		IdType id = new IdType(newIdString);
 
 		pt.addAddress().addLine("AAAAAAAAAAAAAAAAAAA");
 		resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
-		IdType newId = new IdType(myServer.fhirRequest("/Patient?name=" + methodName).put(resource, Constants.CT_FHIR_XML).assertStatus(200).getHeader(Constants.HEADER_CONTENT_LOCATION_LC));
+		IdType newId = new IdType(myServer.fhirRequest("/Patient?name=" + methodName)
+			.put(resource, Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getHeader(Constants.HEADER_CONTENT_LOCATION_LC));
 		assertEquals(id.toVersionless(), newId.toVersionless()); // version shouldn't match for conditional update
 		assertThat(newId).isNotEqualTo(id);
 	}
@@ -5891,7 +6023,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		pt.addName().setFamily("FOO");
 		resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 		String path = "/Patient?identifier=" + ("http://general-hospital.co.uk/Identifiers|09832345234543876876".replace("|", UrlUtil.escapeUrlParam("|")));
-		newIdString = myServer.fhirRequest(path).put(resource, Constants.CT_FHIR_XML).assertStatus(200).getHeader(Constants.HEADER_CONTENT_LOCATION_LC);
+		newIdString = myServer.fhirRequest(path)
+			.put(resource, Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getHeader(Constants.HEADER_CONTENT_LOCATION_LC);
 		assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 		IdType id2 = new IdType(newIdString);
 
@@ -5917,7 +6052,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
 		String prefer = Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION;
-		String responseString = myServer.fhirRequest("/Patient/" + id.getIdPart()).withHeader(Constants.HEADER_PREFER, prefer).put(resource, Constants.CT_FHIR_XML).assertStatus(200).getBody();
+		String responseString = myServer.fhirRequest("/Patient/" + id.getIdPart())
+			.withHeader(Constants.HEADER_PREFER, prefer)
+			.put(resource, Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getBody();
 
 		Patient respPt = myFhirContext.newXmlParser().parseResource(Patient.class, responseString);
 		assertEquals("2", respPt.getIdElement().getVersionIdPart());
@@ -6044,7 +6183,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	 * PUTs the resource with an {@literal If-Match} ETag, for the version-conflict tests.
 	 */
 	private HttpTestResponse updateWithIfMatch(IIdType theId, String theResource, String theETag) {
-		return myServer.fhirRequest("/Patient/" + theId.getIdPart()).withHeader(Constants.HEADER_IF_MATCH, theETag).put(theResource, Constants.CT_FHIR_XML);
+		return myServer.fhirRequest("/Patient/" + theId.getIdPart())
+			.withHeader(Constants.HEADER_IF_MATCH, theETag)
+			.put(theResource, Constants.CT_FHIR_XML);
 	}
 
 	/**
@@ -6122,7 +6263,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		pt.addName().setFamily(methodName);
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		String responseString = myServer.fhirRequest("/Patient/A2").put(resource, Constants.CT_FHIR_XML).assertStatus(400).getBody();
+		String responseString = myServer.fhirRequest("/Patient/A2")
+			.put(resource, Constants.CT_FHIR_XML)
+			.assertStatus(400)
+			.getBody();
 		ourLog.info(responseString);
 		OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, responseString);
 		assertEquals(Msg.code(420) + "Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"333\" does not match URL ID of \"A2\"", oo.getIssue().get(0).getDiagnostics());
@@ -6159,7 +6303,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String inputStr = myFhirContext.newXmlParser().encodeResourceToString(input);
 		ourLog.info(inputStr);
 
-		String resp = myServer.fhirRequest("/Patient/$validate").post(inputStr, Constants.CT_FHIR_XML).assertStatus(400).getBody();
+		String resp = myServer.fhirRequest("/Patient/$validate")
+			.post(inputStr, Constants.CT_FHIR_XML)
+			.assertStatus(400)
+			.getBody();
 		ourLog.info(resp);
 		assertThat(resp).contains("No resource supplied for $validate operation (resource is required unless mode is &quot;delete&quot;)");
 	}
@@ -6172,7 +6319,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		patient.setBirthDateElement(new DateType("2011-02-02"));
 
 		String inputStr = myFhirContext.newXmlParser().encodeResourceToString(patient);
-		String resp = myServer.fhirRequest("/Patient/$validate").post(inputStr, Constants.CT_FHIR_XML).assertStatus(200).getBody();
+		String resp = myServer.fhirRequest("/Patient/$validate")
+			.post(inputStr, Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(resp);
 		assertThat(resp).doesNotContain("Resource has no id");
 	}
@@ -6184,7 +6334,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	public void testValidateJsonWithDuplicateKey() throws IOException {
 
 		String inputStr = "{\"resourceType\":\"Patient\", \"name\":[{\"text\":\"foo\"}], \"name\":[{\"text\":\"foo\"}] }";
-		String resp = myServer.fhirRequest("/Patient/$validate").post(inputStr, Constants.CT_FHIR_JSON_NEW).assertStatus(200).getBody();
+		String resp = myServer.fhirRequest("/Patient/$validate")
+			.post(inputStr, Constants.CT_FHIR_JSON_NEW)
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(resp);
 		assertThat(resp).contains("The JSON property 'name' is a duplicate and will be ignored");
 	}
@@ -6203,7 +6356,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String inputStr = myFhirContext.newXmlParser().encodeResourceToString(input);
 		ourLog.debug(inputStr);
 
-		String resp = myServer.fhirRequest("/Patient/$validate").post(inputStr, Constants.CT_FHIR_XML).assertStatus(200).getBody();
+		String resp = myServer.fhirRequest("/Patient/$validate")
+			.post(inputStr, Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(resp);
 	}
 
@@ -6218,7 +6374,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		IIdType id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
-		String resp = myServer.fhirRequest("/Patient/" + id.getIdPart() + "/$validate").get().assertStatus(200).getBody();
+		String resp = myServer.fhirRequest("/Patient/" + id.getIdPart() + "/$validate")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(resp);
 		assertThat(resp).contains("SHALL at least contain a contact's details or a reference to an organization");
 	}
@@ -6238,7 +6397,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String inputStr = myFhirContext.newXmlParser().encodeResourceToString(input);
 		ourLog.info(inputStr);
 
-		String resp = myServer.fhirRequest("/Patient/A123/$validate").post(inputStr, Constants.CT_FHIR_XML).assertStatus(200).getBody();
+		String resp = myServer.fhirRequest("/Patient/A123/$validate")
+			.post(inputStr, Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(resp);
 	}
 
@@ -6253,7 +6415,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		input.addParameter().setName("resource").setResource(patient);
 
 		String inputStr = myFhirContext.newXmlParser().encodeResourceToString(input);
-		String resp = myServer.fhirRequest("/Patient/$validate?_pretty=true").post(inputStr, Constants.CT_FHIR_XML).assertStatus(200).getBody();
+		String resp = myServer.fhirRequest("/Patient/$validate?_pretty=true")
+			.post(inputStr, Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(resp);
 		assertThat(resp).doesNotContain("Resource has no id");
 		assertThat(resp).doesNotContain("warn");
@@ -6268,7 +6433,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		patient.setBirthDateElement(new DateType("2011-02-02"));
 
 		String inputStr = myFhirContext.newXmlParser().encodeResourceToString(patient);
-		String resp = myServer.fhirRequest("/Patient/$validate").post(inputStr, Constants.CT_FHIR_XML).assertStatus(200).getBody();
+		String resp = myServer.fhirRequest("/Patient/$validate")
+			.post(inputStr, Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(resp);
 		assertThat(resp).doesNotContain("Resource has no id");
 		assertThat(resp).contains("<td>No issues detected during validation</td>");
@@ -6287,7 +6455,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		ValueSet upload = myFhirContext.newXmlParser().parseResource(ValueSet.class, new InputStreamReader(ResourceProviderR4Test.class.getResourceAsStream("/extensional-case-3-vs.xml")));
 		IIdType vsid = myClient.create().resource(upload).execute().getId().toUnqualifiedVersionless();
 
-		String resp = myServer.fhirRequest("/ValueSet/" + vsid.getIdPart() + "/$expand").get().assertStatus(200).getBody();
+		String resp = myServer.fhirRequest("/ValueSet/" + vsid.getIdPart() + "/$expand")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(resp);
 		assertThat(resp).contains("<ValueSet xmlns=\"http://hl7.org/fhir\">");
 		assertThat(resp).contains("<expansion>");
@@ -6307,7 +6478,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		 * Filter with display name
 		 */
 
-		resp = myServer.fhirRequest("/ValueSet/" + vsid.getIdPart() + "/$expand?filter=systolic").get().assertStatus(200).getBody();
+		resp = myServer.fhirRequest("/ValueSet/" + vsid.getIdPart() + "/$expand?filter=systolic")
+			.get()
+			.assertStatus(200)
+			.getBody();
 		ourLog.info(resp);
 		assertThat(resp).contains(
 			"<code value=\"11378-7\"/>",

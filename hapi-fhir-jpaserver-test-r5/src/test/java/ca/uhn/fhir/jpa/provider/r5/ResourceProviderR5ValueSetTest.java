@@ -966,7 +966,8 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	public void testInvalidFilter() {
 		String string = ClasspathUtil.loadResource("/bug_516_invalid_expansion.json");
 
-		HttpTestResponse resp = myServer.fhirRequest("/ValueSet/%24expand").post(string, ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW);
+		HttpTestResponse resp = myServer.fhirRequest("/ValueSet/%24expand")
+			.post(string, ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW);
 
 		String respString = resp.getBody();
 		ourLog.debug(respString);

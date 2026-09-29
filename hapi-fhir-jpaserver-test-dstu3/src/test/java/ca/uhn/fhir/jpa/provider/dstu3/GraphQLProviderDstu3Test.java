@@ -20,7 +20,9 @@ public class GraphQLProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		initTestPatients();
 
 		String query = "{name{family,given}}";
-		String resp = myServer.fhirRequest("/Patient/" + myPatientId0.getIdPart() + "/$graphql?query=" + UrlUtil.escapeUrlParam(query)).get().getBody();
+		String resp = myServer.fhirRequest("/Patient/" + myPatientId0.getIdPart() + "/$graphql?query=" + UrlUtil.escapeUrlParam(query))
+			.get()
+			.getBody();
 		ourLog.info(resp);
 		assertThat(TestUtil.stripWhitespace(resp)).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
 			"  \"name\":[{\n" +
