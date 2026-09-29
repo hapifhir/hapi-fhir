@@ -23,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -86,6 +87,29 @@ class PreExpandValueSetParametersValidatorTest {
 		assertThat(errors).containsExactly(
 			"ValueSet does not exist: ValueSet/1"
 		);
+
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void testValidate_ValueSetUrlAndVersionNotFound() {
+
+		// Setup
+
+		PreExpandValueSetParameters parameters = new PreExpandValueSetParameters();
+		parameters.setUrl("http://foo");
+		parameters.setVersion("1.0");
+
+		// Test
+
+		List<String> errors = mySvc.validate(new SystemRequestDetails(), parameters);
+
+		// Validate
+
+		assertThat(errors).containsExactly(
+			"ValueSet not found: http://foo|1.0"
+		);
+		verify(myValidationSupport).fetchValueSet("http://foo", "1.0");
 
 	}
 

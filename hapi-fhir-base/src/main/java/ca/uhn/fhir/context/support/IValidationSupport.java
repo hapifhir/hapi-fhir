@@ -364,7 +364,7 @@ public interface IValidationSupport {
 		if (codeSystem.url() == null) {
 			return false;
 		}
-		if (isCodeSystemSupported(theValidationSupportContext, codeSystem.toString())) {
+		if (isCodeSystemSupported(theValidationSupportContext, codeSystem.toCanonicalUrl())) {
 			return true;
 		}
 		return codeSystem.versionId().isPresent()
