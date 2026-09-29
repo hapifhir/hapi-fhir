@@ -94,7 +94,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 		context.setIsBlocked(true); // won't matter
 
 		// test
-		myResourceDaoSvc.tagResourceAsUnmatched(patient, context);
+		myResourceDaoSvc.updateUnmatchedTags(patient, context);
 
 		// validate
 		assertTrue(patient.getMeta() == null
@@ -119,7 +119,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 		Patient saved = myPatientDao.read(outcome.getId(), new SystemRequestDetails());
 
 		// test
-		myResourceDaoSvc.tagResourceAsUnmatched(saved, context);
+		myResourceDaoSvc.updateUnmatchedTags(saved, context);
 
 		// validate
 		assertNotNull(saved.getMeta());
@@ -157,7 +157,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 		Patient saved = myPatientDao.read(outcome.getId(), new SystemRequestDetails());
 
 		// test
-		myResourceDaoSvc.tagResourceAsUnmatched(saved, context);
+		myResourceDaoSvc.updateUnmatchedTags(saved, context);
 
 		// validate
 		saved = myPatientDao.read(outcome.getId(), new SystemRequestDetails());
@@ -182,25 +182,62 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 		);
 	}
 
-	@Test
-	public void untagResourceAsUnmatched_noId_doesNothing() {
+	@ParameterizedTest
+	@ValueSource(booleans = { true, false })
+	public void updateMatchedTags_withOppositeTagSet_flipsThem(boolean theIsTooMany) {
 		// setup
-		Patient patient = buildFrankPatient(); // not saved
-		MdmResourceUtil.tagResourceAsBlocked(patient);
+		Patient patient = buildFrankPatient();
+
+		// set the opposite value onto it
+		if (theIsTooMany) {
+			patient.getMeta()
+				.addTag()
+				.setSystem(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE)
+				.setCode(MdmConstants.BLOCKED_VALUE);
+		} else {
+			patient.getMeta()
+				.addTag()
+				.setSystem(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE)
+				.setCode(MdmConstants.TOO_MANY_CANDIDATES);
+		}
+		DaoMethodOutcome outcome = myPatientDao.create(patient, new SystemRequestDetails());
 
 		// test
-		myResourceDaoSvc.untagResourceAsUnmatched(patient);
+		MdmTransactionContext context = new MdmTransactionContext();
+		if (theIsTooMany) {
+			context.setTooManyCandidatesMatched(true);
+		} else {
+			context.setIsBlocked(true);
+		}
+		Patient saved = myPatientDao.read(outcome.getId(), new SystemRequestDetails());
+		myResourceDaoSvc.updateUnmatchedTags(saved, context);
 
-		// validate - the in-memory tag is left alone, because there is nothing to reconcile it against
-		assertTrue(patient.getMeta()
-			.getTag()
-			.stream()
-			.anyMatch(t -> t.getSystem().equalsIgnoreCase(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE)));
+		// validate
+		String expectedCode = theIsTooMany ? MdmConstants.TOO_MANY_CANDIDATES : MdmConstants.BLOCKED_VALUE;
+		String unexpectedCode = theIsTooMany ? MdmConstants.BLOCKED_VALUE : MdmConstants.TOO_MANY_CANDIDATES;
+		Patient reread = myPatientDao.read(outcome.getId(), new SystemRequestDetails());
+
+		for (Patient tocheck : new Patient[] { saved, reread }) {
+			assertTrue(tocheck.getMeta()
+				.getTag()
+				.stream()
+				.anyMatch(t -> {
+					return t.getSystem().equalsIgnoreCase(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE)
+						&& t.getCode().equalsIgnoreCase(expectedCode);
+				}));
+			assertTrue(tocheck.getMeta()
+				.getTag()
+				.stream()
+				.noneMatch(t -> {
+					return t.getSystem().equalsIgnoreCase(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE)
+						&& t.getCode().equalsIgnoreCase(unexpectedCode);
+				}));
+		}
 	}
 
 	@ParameterizedTest
 	@ValueSource(booleans = { true, false })
-	public void untagResourceAsUnmatched_withUnmatchedTag_removesOnlyThatTag(boolean theIsTooMany) {
+	public void updateUnmatchedTags_withUnmatchedTag_removesOnlyThatTag(boolean theIsTooMany) {
 		// setup
 		String existingSystem = "http://hapi-fhir.example.com";
 		String value = "abc123";
@@ -210,20 +247,23 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 			.setSystem(existingSystem)
 			.setCode(value);
 
+		if (theIsTooMany) {
+			patient.getMeta()
+				.addTag()
+				.setSystem(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE)
+				.setCode(MdmConstants.TOO_MANY_CANDIDATES);
+		} else {
+			patient.getMeta()
+				.addTag()
+				.setSystem(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE)
+				.setCode(MdmConstants.BLOCKED_VALUE);
+		}
 		DaoMethodOutcome outcome = myPatientDao.create(patient, new SystemRequestDetails());
 
-		MdmTransactionContext context = new MdmTransactionContext();
-		if (theIsTooMany) {
-			context.setTooManyCandidatesMatched(true);
-		} else {
-			context.setIsBlocked(true);
-		}
-		Patient saved = myPatientDao.read(outcome.getId(), new SystemRequestDetails());
-		myResourceDaoSvc.tagResourceAsUnmatched(saved, context);
-
 		// test
-		saved = myPatientDao.read(outcome.getId(), new SystemRequestDetails());
-		myResourceDaoSvc.untagResourceAsUnmatched(saved);
+		MdmTransactionContext context = new MdmTransactionContext();
+		Patient saved = myPatientDao.read(outcome.getId(), new SystemRequestDetails());
+		myResourceDaoSvc.updateUnmatchedTags(saved, context);
 
 		// validate
 		Patient reread = myPatientDao.read(outcome.getId(), new SystemRequestDetails());
@@ -248,7 +288,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 	 * Untagging has to clear the system, not one known code, or the next pass leaves two tags behind.
 	 */
 	@Test
-	public void untagResourceAsUnmatched_bothCodesPresent_removesBoth() {
+	public void updateUnmatchedTags_bothCodesPresent_removesBoth() {
 		// setup
 		Patient patient = buildFrankPatient();
 		patient.getMeta()
@@ -269,7 +309,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 			.count());
 
 		// test
-		myResourceDaoSvc.untagResourceAsUnmatched(saved);
+		myResourceDaoSvc.updateUnmatchedTags(saved, new MdmTransactionContext());
 
 		// validate
 		Patient reread = myPatientDao.read(outcome.getId(), new SystemRequestDetails());

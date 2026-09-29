@@ -86,11 +86,5 @@ public interface IMdmResourceDaoSvc {
 	 * @param theResource - the resource to tag
 	 * @param theContext - the mdm context used to determine match results (that returned none)
 	 */
-	void tagResourceAsUnmatched(IBaseResource theResource, MdmTransactionContext theContext);
-
-	/**
-	 * Removes any mdm-unmatched tags.
-	 * @param theResource = the resource to untag
-	 */
-	void untagResourceAsUnmatched(IBaseResource theResource);
+	void updateUnmatchedTags(IBaseResource theResource, MdmTransactionContext theContext);
 }

@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.mdm.svc;
 
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -44,8 +43,10 @@ import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,7 +56,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Service
 public class MdmResourceDaoSvcImpl implements IMdmResourceDaoSvc {
@@ -174,55 +178,60 @@ public class MdmResourceDaoSvcImpl implements IMdmResourceDaoSvc {
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Override
-	public void untagResourceAsUnmatched(IBaseResource theResource) {
-		if (!theResource.getIdElement().hasIdPart()) {
-			ourLog.error("Cannot untag resources that have not been persisted.");
-			return;
-		}
-
-		SystemRequestDetails rd = getSystemRequestDetailsForResource(theResource);
-
-		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResource.fhirType());
-
-		// this should never be null anyways
-		BaseRuntimeElementDefinition<?> metabase = Objects.requireNonNull(myFhirContext.getElementDefinition("Meta"));
-		IBaseMetaType meta = (IBaseMetaType) metabase.newInstance();
-		for (String code : MdmConstants.MDM_UNMATCHED_CODES) {
-			meta.addTag().setSystem(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE).setCode(code);
-		}
-
-		resourceDao.metaDeleteOperation(
-				theResource.getIdElement().toUnqualifiedVersionless(), meta, rd, new TransactionDetails());
-
-		// strip from memory
-		MdmResourceUtil.removeTagWithSystem(theResource, MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE);
-	}
-
-	@SuppressWarnings({"rawtypes", "unchecked"})
-	@Override
-	public void tagResourceAsUnmatched(IBaseResource theResource, MdmTransactionContext theContext) {
+	public void updateUnmatchedTags(IBaseResource theResource, MdmTransactionContext theContext) {
 		if (!theResource.getIdElement().hasIdPart()) {
 			ourLog.error("Cannot tag resources that have not first been persisted!");
 			return;
 		}
 
-		if (theContext.getIsBlocked()) {
-			MdmResourceUtil.tagResourceAsBlocked(theResource);
-		} else if (theContext.isTooManyCandidatesMatched()) {
-			MdmResourceUtil.tagResourceAsTooManyMatchCandidates(theResource);
-		} else {
-			ourLog.warn("Attempt to tag resource, but no criteria for tagging provided");
+		String desiredCode = getDesiredCodeToAdd(theContext);
+
+		Set<String> codesToRemove = theResource.getMeta().getTag()
+			.stream().filter(tag -> MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE.equalsIgnoreCase(tag.getSystem()))
+			.map(IBaseCoding::getCode)
+			.filter(code -> !Objects.equals(desiredCode, code))
+			.collect(Collectors.toSet());
+
+		boolean needsTag = isNotBlank(desiredCode) && theResource.getMeta().getTag(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE, desiredCode) == null;
+
+		if (!needsTag && codesToRemove.isEmpty()) {
+			// already correct
 			return;
 		}
 
-		SystemRequestDetails rd = getSystemRequestDetailsForResource(theResource);
-
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResource.fhirType());
 
+		IIdType id = theResource.getIdElement().toUnqualifiedVersionless();
+		SystemRequestDetails rd = getSystemRequestDetailsForResource(theResource);
 		IBaseMetaType meta = theResource.getMeta();
 
-		resourceDao.metaAddOperation(
-				theResource.getIdElement().toUnqualifiedVersionless(), meta, rd, new TransactionDetails());
+		for (String code : codesToRemove) {
+			resourceDao.removeTag(id, TagTypeEnum.TAG, MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE, code, rd);
+		}
+
+		// remove the in-memory tags
+		MdmResourceUtil.removeTagWithSystem(theResource, MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE);
+
+		if (needsTag) {
+			if (theContext.getIsBlocked()) {
+				MdmResourceUtil.tagResourceAsBlocked(theResource);
+			} else if (theContext.isTooManyCandidatesMatched()) {
+				MdmResourceUtil.tagResourceAsTooManyMatchCandidates(theResource);
+			}
+			resourceDao.metaAddOperation(theResource.getIdElement().toUnqualifiedVersionless(), meta, rd, new TransactionDetails());
+		}
+	}
+
+	private String getDesiredCodeToAdd(MdmTransactionContext theContext) {
+		String desiredCode = null;
+		if (theContext.getIsBlocked()) {
+			desiredCode = MdmConstants.BLOCKED_VALUE;
+		} else if (theContext.isTooManyCandidatesMatched()) {
+			desiredCode = MdmConstants.TOO_MANY_CANDIDATES;
+		} else {
+			// should have no tags
+		}
+		return desiredCode;
 	}
 
 	private SystemRequestDetails getSystemRequestDetailsForResource(IBaseResource theResource) {
