@@ -24,6 +24,22 @@ jdbc:sqlserver://localhost:1433;databaseName=hapi;sendStringParametersAsUnicode=
 
 For more information, see [Microsoft JDBC driver documentation](https://learn.microsoft.com/en-us/sql/connect/jdbc/setting-the-connection-properties).
 
+## Compatibility Level
+
+Searches with very large ID lists (~2000 IDs for SQL Server, see [Large ID Lists in Searches](performance.html#large-id-lists-in-searches)) require a database compatibility level of 130 (equivalent to SQL Server 2016) or higher. If you restored your database from an older version, it could still be running at a lower level. Run the following to check:
+
+```sql
+SELECT compatibility_level FROM sys.databases WHERE name = DB_NAME()
+```
+
+If the reported level is below 130 and you require searches with large ID lists, raise it to the highest level your SQL Server version supports (eg. 150 for SQL Server 2019, 160 for SQL Server 2022/Azure SQL).
+
+```sql
+ALTER DATABASE [hapi] SET COMPATIBILITY_LEVEL = 150
+```
+
+If the level is below 130, HAPI FHIR keeps the behaviour of earlier versions for these searches, so they remain subject to SQL Server's limit of 2,100 parameters per statement.
+
 # Experimental Support
 
 HAPI FHIR uses the Hibernate ORM to provide database abstraction. This means that HAPI FHIR could theoretically also work on other databases supported by Hibernate.

@@ -65,6 +65,19 @@ public class HapiFhirOracleDialect extends OracleDialect implements IHapiFhirDia
 	}
 
 	@Override
+	public String getIdListJsonSubselectTemplate() {
+		return "SELECT jt.id FROM JSON_TABLE(%s, '$[*]' COLUMNS (id NUMBER PATH '$')) jt";
+	}
+
+	/**
+	 * True for Oracle since a plain String is bound as VARCHAR2 which is limited to only 4,000 bytes
+	 */
+	@Override
+	public boolean bindsIdListJsonAsClob() {
+		return true;
+	}
+
+	@Override
 	public int getPreferredSqlTypeCodeForBoolean() {
 		// Use Types.BIT instead of native Oracle 23 BOOLEAN type to maintain
 		// compatibility with existing NUMERIC(1,0) schema and match behavior
