@@ -41,7 +41,8 @@ public class PreviousVersionReader<T extends IBaseResource> {
 	}
 
 	public Optional<T> readPreviousVersion(T theResource, boolean theDeletedOk) {
-		return readPreviousVersion(theResource, theDeletedOk, null);
+		Optional<RequestPartitionId> partitionId = RequestPartitionId.getPartitionFromUserDataIfPresent(theResource);
+		return readPreviousVersion(theResource, theDeletedOk, partitionId.orElse(null));
 	}
 
 	/**

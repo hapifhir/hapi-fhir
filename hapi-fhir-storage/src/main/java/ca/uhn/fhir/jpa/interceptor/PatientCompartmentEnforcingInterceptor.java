@@ -98,8 +98,13 @@ public class PatientCompartmentEnforcingInterceptor {
 		String patientCompartmentCurrent;
 		if (myRequestPartitionHelperSvc != null) {
 			String resourceType = myFhirContext.getResourceType(theOldResource);
-			patientCompartmentOld = determinePartition(theRequestDetails, theOldResource, resourceType);
-			patientCompartmentCurrent = determinePartition(theRequestDetails, theResource, resourceType);
+
+			RequestPartitionId requestPartition = myRequestPartitionHelperSvc.determineCreatePartitionForRequest(
+					theRequestDetails, theOldResource, resourceType);
+			patientCompartmentOld = requestPartition.toJson();
+
+			patientCompartmentCurrent =
+					determinePartitionWithoutUsingCache(theRequestDetails, theResource, resourceType);
 		} else {
 			patientCompartmentOld = ResourceCompartmentUtil.getPatientCompartmentIdentity(
 							theOldResource, myFhirContext, mySearchParamExtractor)
@@ -129,7 +134,7 @@ public class PatientCompartmentEnforcingInterceptor {
 	 * instead of returning the cached one, just in case the resource is being updated in a way that
 	 * causes it to use a different partition.
 	 */
-	private String determinePartition(
+	private String determinePartitionWithoutUsingCache(
 			RequestDetails theRequestDetails, IBaseResource theResource, String resourceType) {
 		assert myRequestPartitionHelperSvc != null;
 		RequestPartitionId requestPartition =
