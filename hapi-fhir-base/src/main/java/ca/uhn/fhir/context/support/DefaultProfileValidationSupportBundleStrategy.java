@@ -268,6 +268,9 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 		// version for hl7.org URLs for the same reason, and every StructureDefinition here is one.
 		// Created by Claude Opus 5
 		String url = UrlUtil.parseCanonicalUrl(theUrl).url();
+		if (url == null) {
+			return null;
+		}
 		if (!url.startsWith(IValidationSupport.URL_PREFIX_STRUCTURE_DEFINITION)) {
 			if (url.indexOf('/') == -1) {
 				url = IValidationSupport.URL_PREFIX_STRUCTURE_DEFINITION + url;

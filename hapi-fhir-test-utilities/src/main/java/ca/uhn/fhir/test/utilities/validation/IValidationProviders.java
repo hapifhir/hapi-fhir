@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.util.ClasspathUtil;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IDomainResource;
@@ -171,9 +172,10 @@ public interface IValidationProviders {
 		 */
 		// Created by Claude Opus 5
 		@Search
+		@Nonnull
 		public List<T> find(
-				@RequiredParam(name = "url") UriParam theUrlParam,
-				@OptionalParam(name = "version") StringParam theVersionParam) {
+				@Nonnull @RequiredParam(name = "url") UriParam theUrlParam,
+				@Nullable @OptionalParam(name = "version") StringParam theVersionParam) {
 			T resource = getTerminologyResource(theUrlParam, theVersionParam);
 			return resource != null ? List.of(resource) : List.of();
 		}

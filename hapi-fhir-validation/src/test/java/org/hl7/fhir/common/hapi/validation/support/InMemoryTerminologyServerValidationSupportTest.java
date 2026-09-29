@@ -562,6 +562,27 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 	}
 
 	/**
+	 * A lookup whose system names one version and whose request names another is contradictory in the same
+	 * way, and is rejected by this module and by the chain rather than answered from either version.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void lookupCode_codeSystemCarriesAConflictingVersion_isRejected() {
+		// Setup
+		addSingleVersionCodeSystemAndRecordFetches("1.0.0");
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+		LookupCodeRequest request = new LookupCodeRequest(VERSIONED_CS_URL + "|1.0.0", "code0").setVersion("2.0.0");
+
+		// Test & Verify
+		assertThatThrownBy(() -> mySvc.lookupCode(valCtx, request))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining(Msg.code(2952));
+		assertThatThrownBy(() -> myChain.lookupCode(valCtx, request))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining(Msg.code(2952));
+	}
+
+	/**
 	 * The version the include names is not installed - only another version of that code system is. The code
 	 * exists in the version that <em>is</em> installed, so accepting it means answering a question nobody
 	 * asked: the caller asked about 2.0.0 and got an answer from 1.0.0, with nothing said about the

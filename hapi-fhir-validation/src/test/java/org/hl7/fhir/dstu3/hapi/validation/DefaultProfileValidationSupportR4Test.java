@@ -82,6 +82,18 @@ public class DefaultProfileValidationSupportR4Test extends BaseValidationTestWit
 	}
 
 	/**
+	 * A blank URL names no StructureDefinition, directly or through a chain, and is answered with nothing.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	public void testFetchStructureDefinition_blankUrl_returnsNull() {
+		ValidationSupportChain chain = new ValidationSupportChain(mySvc);
+
+		assertNull(mySvc.fetchStructureDefinition(""), "directly");
+		assertNull(chain.fetchStructureDefinition(""), "through a chain");
+	}
+
+	/**
 	 * The spec ships exactly one definition of each StructureDefinition, so naming a version cannot select
 	 * between them and must not make the lookup fail. Unlike the CodeSystem and ValueSet path, this one had
 	 * no canonical handling at all, so every version-specific StructureDefinition read as absent.

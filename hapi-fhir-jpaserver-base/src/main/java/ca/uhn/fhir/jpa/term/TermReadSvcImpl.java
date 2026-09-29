@@ -176,7 +176,6 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -2577,11 +2576,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			// arrived packed into the system as "url|version"
 			String codeSystemIdentifier = theSystem;
 			if (isNotBlank(theSystem)) {
-				UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(theSystem);
-				String codeSystemVersion = defaultIfBlank(
-						theLookupCodeRequest.getVersion(),
-						codeSystem.versionId().orElse(null));
-				codeSystemIdentifier = UrlUtil.toCanonicalUrl(codeSystem.url(), codeSystemVersion);
+				codeSystemIdentifier = UrlUtil.toCanonicalUrl(theSystem, theLookupCodeRequest.getVersion());
 			}
 			Optional<TermConcept> codeOpt = findCode(codeSystemIdentifier, theCode);
 			if (codeOpt.isPresent()) {

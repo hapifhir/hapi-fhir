@@ -1121,16 +1121,15 @@ public class ValidationSupportChain implements IValidationSupport {
 		if (retVal == null) {
 
 			retVal = CacheValue.empty();
+			final String system = theLookupCodeRequest.getSystem();
+			// The version is named on the request where the caller could name it, and otherwise can only
+			// have arrived packed into the system as "url|version"
+			UrlUtil.CanonicalUrlParts codeSystemToLookUp =
+					UrlUtil.parseCanonicalUrl(system, theLookupCodeRequest.getVersion());
+			String codeSystemVersion = codeSystemToLookUp.versionId().orElse(null);
 			for (IValidationSupport next : myChain) {
-				final String system = theLookupCodeRequest.getSystem();
 				final String code = theLookupCodeRequest.getCode();
 				final String displayLanguage = theLookupCodeRequest.getDisplayLanguage();
-				// The version is named on the request where the caller could name it, and otherwise can only
-				// have arrived packed into the system as "url|version"
-				UrlUtil.CanonicalUrlParts codeSystemToLookUp = UrlUtil.parseCanonicalUrl(system);
-				String codeSystemVersion = defaultIfBlank(
-						theLookupCodeRequest.getVersion(),
-						codeSystemToLookUp.versionId().orElse(null));
 				if (isCodeSystemSupported(
 						theValidationSupportContext, next, codeSystemToLookUp.url(), codeSystemVersion)) {
 					LookupCodeResult lookupCodeResult =
