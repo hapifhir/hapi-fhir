@@ -186,13 +186,14 @@ public class MdmResourceDaoSvcImpl implements IMdmResourceDaoSvc {
 
 		String desiredCode = getDesiredCodeToAdd(theContext);
 
-		Set<String> codesToRemove = theResource.getMeta().getTag()
-			.stream().filter(tag -> MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE.equalsIgnoreCase(tag.getSystem()))
-			.map(IBaseCoding::getCode)
-			.filter(code -> !Objects.equals(desiredCode, code))
-			.collect(Collectors.toSet());
+		Set<String> codesToRemove = theResource.getMeta().getTag().stream()
+				.filter(tag -> MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE.equalsIgnoreCase(tag.getSystem()))
+				.map(IBaseCoding::getCode)
+				.filter(code -> !Objects.equals(desiredCode, code))
+				.collect(Collectors.toSet());
 
-		boolean needsTag = isNotBlank(desiredCode) && theResource.getMeta().getTag(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE, desiredCode) == null;
+		boolean needsTag = isNotBlank(desiredCode)
+				&& theResource.getMeta().getTag(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE, desiredCode) == null;
 
 		if (!needsTag && codesToRemove.isEmpty()) {
 			// already correct
@@ -218,7 +219,8 @@ public class MdmResourceDaoSvcImpl implements IMdmResourceDaoSvc {
 			} else if (theContext.isTooManyCandidatesMatched()) {
 				MdmResourceUtil.tagResourceAsTooManyMatchCandidates(theResource);
 			}
-			resourceDao.metaAddOperation(theResource.getIdElement().toUnqualifiedVersionless(), meta, rd, new TransactionDetails());
+			resourceDao.metaAddOperation(
+					theResource.getIdElement().toUnqualifiedVersionless(), meta, rd, new TransactionDetails());
 		}
 	}
 
