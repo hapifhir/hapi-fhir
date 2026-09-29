@@ -10,6 +10,8 @@ title: "Previously, a `RetryChunkLaterException` thrown by a bulk-modify job ste
   chunk, rather than being recorded as a failure against every individual resource in the chunk.
   Similarly, a `ReductionStepFailureException` thrown while modifying resources in a bulk-modify transaction
   now propagates to the batch2 framework instead of being recorded as a failure against each resource.
+  The batch2 framework now fails the work chunk immediately, without retrying it, when any work chunk step throws
+  a `ReductionStepFailureException`; previously the chunk was marked as a retriable `ERRORED` chunk.
   To make this safe for custom job steps, the batch2 exceptions that control how a work chunk or job is handled
   (`RetryChunkLaterException`, `JobExecutionFailedException` and `ReductionStepFailureException`) now implement
   the new marker interface `IBatch2FrameworkException`. Step code that catches broad exception types such as
