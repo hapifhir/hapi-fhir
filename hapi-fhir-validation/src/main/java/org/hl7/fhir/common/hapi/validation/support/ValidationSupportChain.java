@@ -38,6 +38,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -88,8 +89,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * You can use {@link CacheConfiguration#disabled()} if you want to disable caching.
  * <ul>
  * <li>
- *     Calls to fetch StructureDefinitions including {@link #fetchAllStructureDefinitions()}
- *     and {@link #fetchStructureDefinition(String)} are cached in a non-expiring cache.
+ *     Calls to fetch StructureDefinitions including {@link #fetchAllStructureDefinitions()},
+ *     {@link #fetchStructureDefinition(String)} and {@link #fetchStructureDefinition(String, String)}
+ *     are cached in a non-expiring cache.
  *     This is because the {@link org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator}
  *     module makes assumptions that these objects will not change for the lifetime
  *     of the validator for performance reasons.
@@ -132,27 +134,14 @@ public class ValidationSupportChain implements IValidationSupport {
 	 * and non-expiring. Note that this field is non-synchronized. If you
 	 * access it, you should first wrap the call in
 	 * <code>synchronized(myStructureDefinitionsByUrl)</code>.
+	 * <p>
+	 * One instance can be cached under several URLs - a base definition is the same resource with or
+	 * without its version - so the map is kept in insertion order and
+	 * {@link #getDistinctStructureDefinitions()} lists each instance once.
+	 * </p>
 	 */
 	@Nonnull
-	private final Map<String, IBaseResource> myStructureDefinitionsByUrl = new HashMap<>();
-	/**
-	 * See class documentation for an explanation of why this is separate
-	 * and non-expiring. Note that this field is non-synchronized. If you
-	 * access it, you should first wrap the call in
-	 * <code>synchronized(myStructureDefinitionsByUrl)</code> (synchronize on
-	 * the other field because both collections are expected to be modified
-	 * at the same time).
-	 */
-	@Nonnull
-	private final List<IBaseResource> myStructureDefinitionsAsList = new ArrayList<>();
-	/**
-	 * The instances in {@link #myStructureDefinitionsAsList}. One instance can be cached under several URLs -
-	 * a base definition is the same resource with or without its version - and is listed once. Guarded as
-	 * the fields above.
-	 */
-	// Created by Claude Opus 5
-	@Nonnull
-	private final Set<IBaseResource> myStructureDefinitionsListed = Collections.newSetFromMap(new IdentityHashMap<>());
+	private final Map<String, IBaseResource> myStructureDefinitionsByUrl = new LinkedHashMap<>();
 
 	private final ThreadPoolExecutor myBackgroundExecutor;
 	private final CacheConfiguration myCacheConfiguration;
@@ -385,8 +374,6 @@ public class ValidationSupportChain implements IValidationSupport {
 		}
 		synchronized (myStructureDefinitionsByUrl) {
 			myStructureDefinitionsByUrl.clear();
-			myStructureDefinitionsAsList.clear();
-			myStructureDefinitionsListed.clear();
 		}
 	}
 
@@ -671,17 +658,27 @@ public class ValidationSupportChain implements IValidationSupport {
 						}
 
 						url = defaultIfBlank(url, UUID.randomUUID().toString());
-						if (myStructureDefinitionsByUrl.putIfAbsent(url, structureDefinition) == null) {
-							if (myStructureDefinitionsListed.add(structureDefinition)) {
-								myStructureDefinitionsAsList.add(structureDefinition);
-							}
-						}
+						myStructureDefinitionsByUrl.putIfAbsent(url, structureDefinition);
 					}
 				}
 			}
 			myHaveFetchedAllStructureDefinitions = true;
 		}
-		return Collections.unmodifiableList(new ArrayList<>(myStructureDefinitionsAsList));
+		synchronized (myStructureDefinitionsByUrl) {
+			return getDistinctStructureDefinitions();
+		}
+	}
+
+	/**
+	 * The cached structure definitions, each instance once, in the order first cached. The caller must hold
+	 * the lock on {@link #myStructureDefinitionsByUrl}.
+	 */
+	// Created by Claude Opus 5.5
+	private List<IBaseResource> getDistinctStructureDefinitions() {
+		Set<IBaseResource> distinct = Collections.newSetFromMap(new IdentityHashMap<>());
+		return myStructureDefinitionsByUrl.values().stream()
+				.filter(distinct::add)
+				.toList();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -855,11 +852,7 @@ public class ValidationSupportChain implements IValidationSupport {
 				candidate = fetchValue(key, invoker, canonicalUrl);
 				if (myExpiringCache != null) {
 					if (candidate != null) {
-						if (myStructureDefinitionsByUrl.putIfAbsent(canonicalUrl, candidate) == null) {
-							if (myStructureDefinitionsListed.add(candidate)) {
-								myStructureDefinitionsAsList.add(candidate);
-							}
-						}
+						myStructureDefinitionsByUrl.putIfAbsent(canonicalUrl, candidate);
 					}
 				}
 			}
@@ -1257,7 +1250,7 @@ public class ValidationSupportChain implements IValidationSupport {
 	int getMetricNonExpiringCacheEntries() {
 		synchronized (myStructureDefinitionsByUrl) {
 			int size = myNonExpiringCache != null ? myNonExpiringCache.size() : 0;
-			return size + myStructureDefinitionsAsList.size();
+			return size + getDistinctStructureDefinitions().size();
 		}
 	}
 

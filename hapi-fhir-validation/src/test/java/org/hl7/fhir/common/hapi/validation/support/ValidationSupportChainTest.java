@@ -40,6 +40,10 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -103,6 +107,164 @@ public class ValidationSupportChainTest extends BaseTest {
 
 		assertNotNull(chain.fetchStructureDefinition("http://hl7.org/fhir/StructureDefinition/Patient"));
 		assertEquals(649, chain.fetchAllStructureDefinitions().size());
+	}
+
+	/**
+	 * One instance is cached under its plain and its versioned URL. It is listed and counted once, the list
+	 * keeps the order the definitions were first cached, and invalidating the caches forgets them.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	public void fetchAllStructureDefinitions_instanceCachedUnderTwoUrls_listedAndCountedOnceInFirstCachedOrder() {
+		// Setup
+		prepareMock(myValidationSupport0);
+		StructureDefinition first = new StructureDefinition().setUrl(STRUCTURE_DEFINITION_URL_0);
+		StructureDefinition versioned = new StructureDefinition().setUrl("http://structure-definition-url-1");
+		versioned.setVersion(RESOURCE_VERSION_0);
+		when(myValidationSupport0.fetchStructureDefinition(eq(versioned.getUrl()), isNull())).thenReturn(versioned);
+		when(myValidationSupport0.fetchStructureDefinition(eq(versioned.getUrl()), eq(RESOURCE_VERSION_0)))
+			.thenReturn(versioned);
+		when(myValidationSupport0.fetchAllStructureDefinitions()).thenReturn(List.of(first, versioned));
+		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(true), myValidationSupport0);
+
+		// Test
+		chain.fetchStructureDefinition(versioned.getUrl());
+		chain.fetchStructureDefinition(versioned.getUrl(), RESOURCE_VERSION_0);
+		List<IBaseResource> all = chain.fetchAllStructureDefinitions();
+
+		// Verify
+		assertThat(all).containsExactly(versioned, first);
+		assertEquals(2, chain.getMetricNonExpiringCacheEntries());
+
+		chain.invalidateCaches();
+		assertEquals(0, chain.getMetricNonExpiringCacheEntries());
+	}
+
+	/**
+	 * FhirInstanceValidator assumes structure definitions do not change for the lifetime of the validator, so
+	 * the chain keeps them after the expiring cache has timed out, and forgets them only when all caches are
+	 * invalidated.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	public void fetchStructureDefinition_expiringCacheTimedOut_stillAnswersFromTheNonExpiringCache() {
+		// Setup
+		prepareMock(myValidationSupport0);
+		String listedUrl = "http://structure-definition-url-1";
+		StructureDefinition fetched = new StructureDefinition().setUrl(STRUCTURE_DEFINITION_URL_0);
+		StructureDefinition listed = new StructureDefinition().setUrl(listedUrl);
+		when(myValidationSupport0.fetchStructureDefinition(eq(STRUCTURE_DEFINITION_URL_0), isNull()))
+			.thenReturn(fetched);
+		when(myValidationSupport0.fetchAllStructureDefinitions()).thenReturn(List.of(listed));
+		ValidationSupportChain.CacheConfiguration cacheTimeouts = ValidationSupportChain.CacheConfiguration
+			.defaultValues()
+			.setCacheTimeout(Duration.ofMillis(500));
+		ValidationSupportChain chain = new ValidationSupportChain(cacheTimeouts, myValidationSupport0);
+		assertSame(fetched, chain.fetchStructureDefinition(STRUCTURE_DEFINITION_URL_0));
+		assertThat(chain.fetchAllStructureDefinitions()).containsExactly(fetched, listed);
+
+		// Test
+		StructureDefinition fetchedReplacement = new StructureDefinition().setUrl(STRUCTURE_DEFINITION_URL_0);
+		StructureDefinition listedReplacement = new StructureDefinition().setUrl(listedUrl);
+		when(myValidationSupport0.fetchStructureDefinition(eq(STRUCTURE_DEFINITION_URL_0), isNull()))
+			.thenReturn(fetchedReplacement);
+		when(myValidationSupport0.fetchAllStructureDefinitions()).thenReturn(List.of(listedReplacement));
+		TestUtil.sleepAtLeast(750);
+
+		// Verify
+		assertSame(fetched, chain.fetchStructureDefinition(STRUCTURE_DEFINITION_URL_0));
+		assertThat(chain.fetchAllStructureDefinitions()).containsExactly(fetched, listed);
+		verify(myValidationSupport0, times(1)).fetchStructureDefinition(eq(STRUCTURE_DEFINITION_URL_0), isNull());
+		verify(myValidationSupport0, times(1)).fetchAllStructureDefinitions();
+
+		chain.invalidateCaches();
+		assertSame(fetchedReplacement, chain.fetchStructureDefinition(STRUCTURE_DEFINITION_URL_0));
+		assertThat(chain.fetchAllStructureDefinitions()).containsExactly(fetchedReplacement, listedReplacement);
+	}
+
+	/**
+	 * A structure definition asked for with and without a version can be two different resources, so each is
+	 * cached under its own key: neither answers for the other, a repeat is answered from the cache, and both
+	 * are listed.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	public void fetchStructureDefinition_sameUrlVersionedAndUnversioned_cachedAsSeparateResources() {
+		// Setup
+		prepareMock(myValidationSupport0);
+		StructureDefinition unversioned = new StructureDefinition().setUrl(STRUCTURE_DEFINITION_URL_0);
+		StructureDefinition versioned = new StructureDefinition().setUrl(STRUCTURE_DEFINITION_URL_0);
+		versioned.setVersion(RESOURCE_VERSION_0);
+		when(myValidationSupport0.fetchStructureDefinition(eq(STRUCTURE_DEFINITION_URL_0), isNull()))
+			.thenReturn(unversioned);
+		when(myValidationSupport0.fetchStructureDefinition(eq(STRUCTURE_DEFINITION_URL_0), eq(RESOURCE_VERSION_0)))
+			.thenReturn(versioned);
+		when(myValidationSupport0.fetchAllStructureDefinitions()).thenReturn(List.of());
+		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(true), myValidationSupport0);
+
+		// Test
+		IBaseResource firstUnversioned = chain.fetchStructureDefinition(STRUCTURE_DEFINITION_URL_0);
+		IBaseResource firstVersioned = chain.fetchStructureDefinition(STRUCTURE_DEFINITION_URL_0, RESOURCE_VERSION_0);
+		IBaseResource secondUnversioned = chain.fetchStructureDefinition(STRUCTURE_DEFINITION_URL_0);
+		IBaseResource secondVersioned =
+			chain.fetchStructureDefinition(STRUCTURE_DEFINITION_URL_0 + "|" + RESOURCE_VERSION_0);
+
+		// Verify
+		assertSame(unversioned, firstUnversioned);
+		assertSame(versioned, firstVersioned);
+		assertSame(unversioned, secondUnversioned);
+		assertSame(versioned, secondVersioned);
+		verify(myValidationSupport0, times(1)).fetchStructureDefinition(eq(STRUCTURE_DEFINITION_URL_0), isNull());
+		verify(myValidationSupport0, times(1))
+			.fetchStructureDefinition(eq(STRUCTURE_DEFINITION_URL_0), eq(RESOURCE_VERSION_0));
+		assertThat(chain.fetchAllStructureDefinitions()).containsExactly(unversioned, versioned);
+	}
+
+	/**
+	 * Listing the cached structure definitions walks the cache, so it must not run while another thread adds
+	 * to it.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	public void fetchAllStructureDefinitions_whileOtherThreadsCacheDefinitions_neverFails() throws Exception {
+		// Setup
+		prepareMock(myValidationSupport0);
+		when(myValidationSupport0.fetchAllStructureDefinitions()).thenReturn(List.of());
+		when(myValidationSupport0.fetchStructureDefinition(any(), isNull()))
+			.thenAnswer(t -> new StructureDefinition().setUrl(t.getArgument(0)));
+		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(true), myValidationSupport0);
+		chain.fetchAllStructureDefinitions();
+		int writerCount = 4;
+		int urlsPerWriter = 500;
+		ExecutorService executor = Executors.newFixedThreadPool(writerCount + 1);
+
+		// Test
+		try {
+			List<Future<?>> writers = new ArrayList<>();
+			for (int writer = 0; writer < writerCount; writer++) {
+				String prefix = "http://writer-" + writer + "/";
+				writers.add(executor.submit(() -> {
+					for (int i = 0; i < urlsPerWriter; i++) {
+						chain.fetchStructureDefinition(prefix + i);
+					}
+				}));
+			}
+			Future<?> reader = executor.submit(() -> {
+				while (writers.stream().anyMatch(t -> !t.isDone())) {
+					chain.fetchAllStructureDefinitions();
+					chain.getMetricNonExpiringCacheEntries();
+				}
+			});
+
+			// Verify
+			for (Future<?> writer : writers) {
+				writer.get(1, TimeUnit.MINUTES);
+			}
+			reader.get(1, TimeUnit.MINUTES);
+		} finally {
+			executor.shutdownNow();
+		}
+		assertThat(chain.fetchAllStructureDefinitions()).hasSize(writerCount * urlsPerWriter);
 	}
 
 
