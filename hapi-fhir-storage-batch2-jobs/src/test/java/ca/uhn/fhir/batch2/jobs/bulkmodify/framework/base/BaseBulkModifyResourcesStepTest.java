@@ -124,8 +124,8 @@ class BaseBulkModifyResourcesStepTest {
 	}
 
 	/**
-	 * (control): a {@link JobExecutionFailedException} raised by the pre-flight hook already escapes
-	 * <code>run()</code> today, and must continue to.
+	 * A {@link JobExecutionFailedException} raised by the pre-flight hook is an unrecoverable failure and
+	 * must escape <code>run()</code> unchanged.
 	 */
 	@Test
 	void testRun_preFlightThrowsJobExecutionFailed_stillPropagates() {
@@ -175,8 +175,8 @@ class BaseBulkModifyResourcesStepTest {
 	}
 
 	/**
-	 * (control): a generic failure inside the transaction is a per-resource failure and must stay swallowed
-	 * into the emitted outcome. If this ever turns red, the set of exceptions rethrown out of
+	 * A generic failure inside the transaction is a per-resource failure and must be recorded in the emitted
+	 * outcome rather than thrown. If this ever turns red, the set of exceptions rethrown out of
 	 * <code>run()</code> has been over-broadened.
 	 */
 	@Test
@@ -267,10 +267,11 @@ class BaseBulkModifyResourcesStepTest {
 
 	/**
 	 * A PID that fails before its resource has been fetched has no ID in the {@link BaseBulkModifyResourcesStep.State},
-	 * so <code>BaseBulkModifyResourcesStep#toId</code> falls back to the ID helper. This stub keeps a regression
-	 * here surfacing as an honest assertion failure rather than a {@link NullPointerException} out of
-	 * {@link BulkModifyResourcesChunkOutcomeJson#addFailure}. It is {@link org.mockito.Mockito#lenient()}
-	 * because it is consumed only when that regression is present.
+	 * so <code>BaseBulkModifyResourcesStep#toId</code> falls back to the ID helper. An unstubbed mock returns
+	 * null there, which would surface as a {@link NullPointerException} out of
+	 * {@link BulkModifyResourcesChunkOutcomeJson#addFailure} rather than as an assertion failure. The stub is
+	 * {@link org.mockito.Mockito#lenient()} because it is only consumed when a hook failure is recorded in the
+	 * outcome instead of propagating.
 	 */
 	private void stubIdHelperForUnresolvedPid() {
 		lenient()
@@ -319,10 +320,9 @@ class BaseBulkModifyResourcesStepTest {
 	}
 
 	/**
-	 * Mirrors <code>ReindexV3ModifyResourcesStep</code>, which extends
-	 * {@link BaseBulkModifyResourcesStep} directly (rather than {@link BaseBulkModifyResourcesIndividuallyStep}),
-	 * overrides both hooks, and throws {@link RetryChunkLaterException} from
-	 * {@link BaseBulkModifyResourcesStep#processPidsOutsideTransaction}.
+	 * Extends {@link BaseBulkModifyResourcesStep} directly, rather than
+	 * {@link BaseBulkModifyResourcesIndividuallyStep}, so that both hooks can be overridden, as steps such as
+	 * <code>ReindexV3ModifyResourcesStep</code> do.
 	 */
 	private class MySvc extends BaseBulkModifyResourcesStep<MyParameters, Void> {
 

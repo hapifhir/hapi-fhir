@@ -95,6 +95,22 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 		super();
 	}
 
+	/**
+	 * Modifies the resources in the work chunk, first in a single transaction and then, for any that failed,
+	 * one resource at a time in separate transactions, so that a failure on one resource doesn't block the
+	 * others. Failures of individual resources are recorded in the emitted outcome rather than thrown.
+	 * <p>
+	 * The following are not recorded as per-resource failures. They propagate out of this method so that the
+	 * batch2 framework can act on them, for example by deferring the work chunk in response to a
+	 * {@link RetryChunkLaterException}:
+	 * </p>
+	 * <ul>
+	 *    <li>Any exception thrown by {@link #processPidsOutsideTransaction}</li>
+	 *    <li>Any {@link IBatch2FrameworkException} thrown by {@link #processPidsInTransaction}</li>
+	 * </ul>
+	 *
+	 * @throws RetryChunkLaterException If a subclass hook asked for the work chunk to be polled again later
+	 */
 	@Nonnull
 	@Override
 	public RunOutcome run(
@@ -191,7 +207,6 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 				theStepExecutionDetails, theJobParameters, theState, thePids, transactionDetails, theDataSink);
 
 		try {
-
 			myTransactionService
 					.withSystemRequestOnPartition(theRequestPartitionId)
 					.withTransactionDetails(transactionDetails)
@@ -263,10 +278,9 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 	 * A generic exception thrown here is converted into a per-resource failure for the PIDs in
 	 * {@literal thePids}. Exceptions implementing {@link IBatch2FrameworkException} are instead propagated
 	 * unchanged to the batch2 framework; for example, an implementation may throw {@link RetryChunkLaterException}
-	 * to defer the entire work chunk and have it polled again later. The re-run-from-the-beginning hazard described on
-	 * {@link #processPidsOutsideTransaction} is worse here: by the time the single-pid retry loop reaches PID
-	 * <i>n</i>, PIDs 1..<i>n-1</i> have each already been committed in their own transaction, so deferring at
-	 * this point causes all of them to be processed again.
+	 * to defer the entire work chunk and have it polled again later. As described on
+	 * {@link #processPidsOutsideTransaction}, a deferred chunk is re-run <b>from the beginning</b>, so any PIDs
+	 * already committed earlier in the chunk are processed a second time.
 	 * </p>
 	 *
 	 * @param theStepExecutionDetails The step execution details for this work chunk
