@@ -19,18 +19,15 @@
  */
 package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-import ca.uhn.fhir.rest.param.DateRangeParam;
 import com.google.common.collect.Streams;
 import jakarta.annotation.Nonnull;
-import jakarta.persistence.EntityManager;
+import jakarta.annotation.Nullable;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -38,9 +35,13 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
+
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 
 public interface ISearchBuilder<T extends IResourcePersistentId<?>> {
 	Logger ourLog = LoggerFactory.getLogger(ISearchBuilder.class);
@@ -118,32 +119,17 @@ public interface ISearchBuilder<T extends IResourcePersistentId<?>> {
 	}
 
 	/**
-	 * Use the loadIncludes that takes a parameters object instead.
+	 * Resolves the <code>_include</code> and <code>_revinclude</code> resources associated with
+	 * a set of PID search results.
+	 * <p>
+	 * If present, any {@link ca.uhn.fhir.interceptor.api.Pointcut#STORAGE_PREACCESS_RESOURCES} pointcuts
+	 * will be invoked (i.e. for consent services), and only results which are <b>included</b> in the
+	 * search results will be returned. Because this pointcut can require actually resolving the resources
+	 * the fetched resources <b>MAY</b> also be returned in {@link FetchedIncludes#resourcesIfFetched()}.
+	 * If they are present, you can use them rather than re-fetching them for better efficiency.
+	 * </p>
 	 */
-	@Deprecated
-	Set<T> loadIncludes(
-			FhirContext theContext,
-			EntityManager theEntityManager,
-			Collection<T> theMatches,
-			Collection<Include> theRevIncludes,
-			boolean theReverseMode,
-			DateRangeParam theLastUpdated,
-			String theSearchIdOrDescription,
-			RequestDetails theRequest,
-			Integer theMaxCount);
-
-	default Set<T> loadIncludes(SearchBuilderLoadIncludesParameters<T> theParameters) {
-		return this.loadIncludes(
-				theParameters.getFhirContext(),
-				theParameters.getEntityManager(),
-				theParameters.getMatches(),
-				theParameters.getIncludeFilters(),
-				theParameters.isReverseMode(),
-				theParameters.getLastUpdated(),
-				theParameters.getSearchIdOrDescription(),
-				theParameters.getRequestDetails(),
-				theParameters.getMaxCount());
-	}
+	FetchedIncludes<T> loadIncludes(SearchBuilderLoadIncludesParameters<T> theParameters);
 
 	/**
 	 * How many results may be fetched at once
@@ -151,4 +137,46 @@ public interface ISearchBuilder<T extends IResourcePersistentId<?>> {
 	void setFetchSize(int theFetchSize);
 
 	void setPreviouslyAddedResourcePids(Collection<T> thePreviouslyAddedResourcePids);
+
+	/**
+	 * This class is the return type for {@link #loadIncludes(SearchBuilderLoadIncludesParameters)}
+	 *
+	 * @param pids A set of PIDs (guaranteed to be a writeable set which can safely be modified)
+	 * @param resourcesIfFetched If the PIDs had to be hydrated (i.e. to verify consent), the fetched PIDs are returned.
+	 *                           This means that consumers of this API can avoid a second lookup. There is no guarantee
+	 *                           that any of the PIDs returned by {@link #pids()} will be found in the map, but only PIDs
+	 *                           returned by {@link #pids()} will be present as keys in the map. In other words, check for
+	 *                           the existence of PIDs in the map before fetching them, but don't assume they will be there.
+	 */
+	record FetchedIncludes<T>(@Nonnull Set<T> pids, @Nonnull Map<T, IBaseResource> resourcesIfFetched) {
+
+		/**
+		 * Constructor
+		 */
+		public FetchedIncludes() {
+			this(new HashSet<>());
+		}
+
+		/**
+		 * Constructor
+		 */
+		public FetchedIncludes(Set<T> thePids) {
+			this(thePids, Map.of());
+		}
+
+		/**
+		 * Constructor
+		 */
+		public FetchedIncludes(@Nonnull Set<T> pids, @Nullable Map<T, IBaseResource> resourcesIfFetched) {
+			this.pids = pids;
+			this.resourcesIfFetched = getIfNull(resourcesIfFetched, Map.of());
+		}
+
+		/**
+		 * @return Returns the size of the {@link #pids()} set
+		 */
+		public int size() {
+			return pids.size();
+		}
+	}
 }
