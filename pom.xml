@@ -1138,7 +1138,7 @@
 		<reflections_version>0.9.11</reflections_version>
 		<servicemix_saxon_version>9.8.0-15</servicemix_saxon_version>
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
-		<swagger_jakarta_version>2.2.30</swagger_jakarta_version>
+		<swagger_jakarta_version>2.2.47</swagger_jakarta_version>
 		<slf4j_version>2.0.16</slf4j_version>
 		<log4j_to_slf4j_version>2.24.1</log4j_to_slf4j_version>
 		<spring_version>7.0.8</spring_version>
@@ -1658,14 +1658,58 @@
 			<dependency>
 				<groupId>org.springdoc</groupId>
 				<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-				<version>2.8.17</version>
+				<version>3.0.3</version>
 			</dependency>
-		   <!-- Pinned for CVE-2026-40977, CVE-2026-40972, CVE-2026-40975, CVE-2026-40973
-		   transitive via springdoc-openapi-starter-webmvc-ui -->
+			<!-- springdoc brings these Spring Boot modules at the Boot version it was built with; keep them all on ours -->
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-starter-validation</artifactId>
-				<version>3.5.14</version>
+				<artifactId>spring-boot</artifactId>
+				<version>${spring_boot_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-autoconfigure</artifactId>
+				<version>${spring_boot_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-http-converter</artifactId>
+				<version>${spring_boot_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-jackson</artifactId>
+				<version>${spring_boot_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-servlet</artifactId>
+				<version>${spring_boot_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter</artifactId>
+				<version>${spring_boot_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-logging</artifactId>
+				<version>${spring_boot_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-validation</artifactId>
+				<version>${spring_boot_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-web-server</artifactId>
+				<version>${spring_boot_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-webmvc</artifactId>
+				<version>${spring_boot_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.sf.json-lib</groupId>
