@@ -1083,7 +1083,6 @@
 		<jaxb_core_version>2.3.0.1</jaxb_core_version>
 		<jaxb_runtime_version>4.0.4</jaxb_runtime_version>
 		<jena_version>5.5.0</jena_version>
-		<!-- fixme jm: comment still applies? -->
 		<!-- Single bump point for the org.jline artifacts: org.jline:jansi (managed below) and any downstream
 		     pin of org.jline:jline must stay at the same version - see the comment at the jansi entry. -->
 		<jline_version>3.30.16</jline_version>
@@ -1104,7 +1103,6 @@
 		<httpcore_version>4.4.16</httpcore_version>
 		<httpclient_version>4.5.14</httpclient_version>
 
-		<!-- fixme jm: not sure about these -->
 		<jackson_legacy_core_version>2.21.6</jackson_legacy_core_version>
 		<jackson_legacy_databind_version>2.21.6</jackson_legacy_databind_version>
 		<!-- see : https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.22#annotations  -->
@@ -1243,8 +1241,8 @@
 				<version>0.9.0</version>
 			</dependency>
 
-			<!-- fixme jm: still needed? -->
-			<!-- start jackson 2.x legacy version consistency -->
+			<!-- start jackson 2.x legacy version consistency
+			 	still needed by swagger-core and flyway -->
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-core</artifactId>
@@ -2046,12 +2044,6 @@
 				<scope>test</scope>
 			</dependency>
 
-			<!-- fixme jm: double check! -->
-<!--			<dependency>-->
-<!--				<groupId>org.fusesource.jansi</groupId>-->
-<!--				<artifactId>jansi</artifactId>-->
-<!--				<version>2.4.1</version>-->
-<!--			</dependency>-->
 			<!--
 				org.jline:jansi and org.jline:jline ship overlapping copies of org.jline.* classes. Downstream
 				builds that also resolve org.jline:jline must keep the two artifacts at the same version - bump
