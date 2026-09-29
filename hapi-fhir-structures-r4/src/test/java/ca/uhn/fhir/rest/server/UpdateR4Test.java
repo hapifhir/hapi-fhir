@@ -19,8 +19,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -34,7 +32,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 // Created by Claude Fable 5.1
 public class UpdateR4Test {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(UpdateR4Test.class);
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static IdType ourLastIdParam;
 	private static String ourLastConditionalUrl;
@@ -135,7 +132,6 @@ public class UpdateR4Test {
 		}
 
 		HttpTestResponse response = request.put(ourCtx.newJsonParser().encodeResourceToString(patient), Constants.CT_FHIR_JSON_NEW);
-		ourLog.info("{}", response);
 		return response;
 	}
 }

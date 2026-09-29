@@ -22,7 +22,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ServeMediaResourceRawInterceptorTest {
 
@@ -60,7 +59,7 @@ public class ServeMediaResourceRawInterceptorTest {
 		ourNextResponse.getContent().setData(new byte[]{2, 3, 4, 5, 6, 7, 8});
 
 		HttpTestResponse response = ourServer.fhirRequest(myReadUrl).get();
-		assertEquals("application/fhir+json;charset=utf-8", response.getHeader(Constants.HEADER_CONTENT_TYPE));
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE)).isEqualTo("application/fhir+json;charset=utf-8");
 		String contents = response.getBody();
 		assertThat(contents).contains("\"resourceType\"");
 	}
@@ -74,7 +73,7 @@ public class ServeMediaResourceRawInterceptorTest {
 		HttpTestResponse response = ourServer.fhirRequest(myReadUrl)
 			.withHeader(Constants.HEADER_ACCEPT, "image/png")
 			.get();
-		assertEquals("image/png", response.getHeader(Constants.HEADER_CONTENT_TYPE));
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE)).isEqualTo("image/png");
 		byte[] contents = response.getBodyBytes();
 		assertThat(contents).containsExactly(new byte[]{2, 3, 4, 5, 6, 7, 8});
 	}
@@ -87,7 +86,7 @@ public class ServeMediaResourceRawInterceptorTest {
 		HttpTestResponse response = ourServer.fhirRequest(myReadUrl)
 			.withHeader(Constants.HEADER_ACCEPT, "image/png")
 			.get();
-		assertEquals("application/fhir+json;charset=utf-8", response.getHeader(Constants.HEADER_CONTENT_TYPE));
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE)).isEqualTo("application/fhir+json;charset=utf-8");
 	}
 
 	@Test
@@ -97,7 +96,7 @@ public class ServeMediaResourceRawInterceptorTest {
 		ourNextResponse.getContent().setData(new byte[]{2, 3, 4, 5, 6, 7, 8});
 
 		HttpTestResponse response = ourServer.fhirRequest(myReadUrl + "?_output=data").get();
-		assertEquals("image/png", response.getHeader(Constants.HEADER_CONTENT_TYPE));
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE)).isEqualTo("image/png");
 		byte[] contents = response.getBodyBytes();
 		assertThat(contents).containsExactly(new byte[]{2, 3, 4, 5, 6, 7, 8});
 	}

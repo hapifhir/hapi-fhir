@@ -24,7 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchR4BTest {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchR4BTest.class);
 	private static final FhirContext ourCtx = FhirContext.forR4BCached();
 	private static TokenAndListParam ourIdentifiers;
 	private static String ourLastMethod;
@@ -50,7 +49,6 @@ public class SearchR4BTest {
 			.get()
 			.assertStatus(200)
 			.getBody();
-		ourLog.info(responseContent);
 
 		assertEquals("search", ourLastMethod);
 

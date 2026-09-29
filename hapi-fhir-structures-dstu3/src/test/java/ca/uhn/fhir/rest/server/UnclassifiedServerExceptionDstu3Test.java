@@ -42,7 +42,6 @@ public class UnclassifiedServerExceptionDstu3Test {
 		HttpTestResponse response = ourServer.fhirRequest("/Patient").get();
 		String responseContent = response.getBody();
 		ourLog.info("HTTP {} {}", response.getStatusCode(), response.getReasonPhrase());
-		ourLog.info(responseContent);
 		response.assertStatus(477);
 		assertThat(responseContent).contains("business-rule");
 

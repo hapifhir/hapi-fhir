@@ -44,7 +44,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class CorsInterceptorDstu3Test {
@@ -64,8 +63,8 @@ public class CorsInterceptorDstu3Test {
 				.options();
 			String responseContent = status.getBody();
 			ourLog.info("Response was:\n{}", responseContent);
-			assertEquals("GET,POST,PUT,DELETE,OPTIONS", status.getHeader(Constants.HEADER_CORS_ALLOW_METHODS));
-			assertEquals("http://www.fhir-starter.com", status.getHeader(Constants.HEADER_CORS_ALLOW_ORIGIN));
+			assertThat(status.getHeader(Constants.HEADER_CORS_ALLOW_METHODS)).isEqualTo("GET,POST,PUT,DELETE,OPTIONS");
+			assertThat(status.getHeader(Constants.HEADER_CORS_ALLOW_ORIGIN)).isEqualTo("http://www.fhir-starter.com");
 		}
 		{
 			HttpTestResponse status = fhirRequest("/Patient?identifier=urn:hapitest:mrns%7C00001")
@@ -74,7 +73,7 @@ public class CorsInterceptorDstu3Test {
 				.get();
 
 			String origin = status.getHeader(Constants.HEADER_CORS_ALLOW_ORIGIN);
-			assertEquals("http://www.fhir-starter.com", origin);
+			assertThat(origin).isEqualTo("http://www.fhir-starter.com");
 
 			String responseContent = status.getBody();
 			ourLog.info("Response was:\n{}", responseContent);
@@ -93,7 +92,7 @@ public class CorsInterceptorDstu3Test {
 			String responseContent = status.getBody();
 			ourLog.info("Response: {}", status);
 			ourLog.info("Response was:\n{}", responseContent);
-			assertEquals("http://www.fhir-starter.com", status.getHeader(Constants.HEADER_CORS_ALLOW_ORIGIN));
+			assertThat(status.getHeader(Constants.HEADER_CORS_ALLOW_ORIGIN)).isEqualTo("http://www.fhir-starter.com");
 		}
 	}
 	
@@ -132,8 +131,8 @@ public class CorsInterceptorDstu3Test {
 				.withHeader(Constants.HEADER_CORS_ORIGIN, "null").withHeader(Constants.HEADER_CORS_REQUEST_HEADERS, "accept, x-fhir-starter, content-type").options();
 			String responseContent = status.getBody();
 			ourLog.info("Response was:\n{}", responseContent);
-			assertEquals("GET,POST,PUT,DELETE,OPTIONS", status.getHeader(Constants.HEADER_CORS_ALLOW_METHODS));
-			assertEquals("null", status.getHeader(Constants.HEADER_CORS_ALLOW_ORIGIN));
+			assertThat(status.getHeader(Constants.HEADER_CORS_ALLOW_METHODS)).isEqualTo("GET,POST,PUT,DELETE,OPTIONS");
+			assertThat(status.getHeader(Constants.HEADER_CORS_ALLOW_ORIGIN)).isEqualTo("null");
 		}
 	}
 	

@@ -37,7 +37,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class OperationGenericServer2R4Test {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationGenericServer2R4Test.class);
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static IdType ourLastId;
 	private static Object ourLastParam1;
@@ -106,15 +105,14 @@ public class OperationGenericServer2R4Test {
 			.post(inParamsStr, Constants.CT_FHIR_XML)
 			.assertStatus(200)
 			.getBody();
-		ourLog.info(response);
 
 		CodeType param1 = (CodeType) ourLastParam1;
-		assertEquals("PARAM1val", param1.getValue());
+		assertThat(param1.getValue()).isEqualTo("PARAM1val");
 
 		Coding param2 = (Coding) ourLastParam2;
-		assertEquals("sys", param2.getSystem());
-		assertEquals("val", param2.getCode());
-		assertEquals("dis", param2.getDisplay());
+		assertThat(param2.getSystem()).isEqualTo("sys");
+		assertThat(param2.getCode()).isEqualTo("val");
+		assertThat(param2.getDisplay()).isEqualTo("dis");
 
 	}
 
@@ -159,13 +157,12 @@ public class OperationGenericServer2R4Test {
 			.post(inParamsStr, Constants.CT_FHIR_XML)
 			.assertStatus(200)
 			.getBody();
-		ourLog.info(response);
 
 		List<IPrimitiveType<String>> param1 = (List<IPrimitiveType<String>>) ourLastParam1;
 		assertThat(param1).hasSize(2);
-		assertEquals(CodeType.class, param1.get(0).getClass());
-		assertEquals("PARAM1val", param1.get(0).getValue());
-		assertEquals("PARAM1val2", param1.get(1).getValue());
+		assertThat(param1.get(0).getClass()).isEqualTo(CodeType.class);
+		assertThat(param1.get(0).getValue()).isEqualTo("PARAM1val");
+		assertThat(param1.get(1).getValue()).isEqualTo("PARAM1val2");
 
 	}
 
@@ -215,13 +212,12 @@ public class OperationGenericServer2R4Test {
 			.post(inParamsStr, Constants.CT_FHIR_XML)
 			.assertStatus(200)
 			.getBody();
-		ourLog.info(response);
 
 		UriType param1 = (UriType) ourLastParam1;
-		assertEquals("PARAM1val", param1.getValue());
+		assertThat(param1.getValue()).isEqualTo("PARAM1val");
 
 		List<StringType> param2 = (List<StringType>) ourLastParam2;
-		assertEquals("PARAM2val", param2.get(0).getValue());
+		assertThat(param2.get(0).getValue()).isEqualTo("PARAM2val");
 
 	}
 
@@ -280,9 +276,8 @@ public class OperationGenericServer2R4Test {
 		ourServer.registerProvider(provider);
 
 		String response = ourServer.fhirRequest("/Patient/123/$OP_INSTANCE").get().assertStatus(200).getBody();
-		ourLog.info(response);
 
-		assertEquals("123", ourLastId.getIdPart());
+		assertThat(ourLastId.getIdPart()).isEqualTo("123");
 
 	}
 

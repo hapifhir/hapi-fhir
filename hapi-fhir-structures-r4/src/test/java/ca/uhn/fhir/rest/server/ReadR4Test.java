@@ -20,11 +20,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class ReadR4Test {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReadR4Test.class);
 	private final FhirContext myCtx = FhirContext.forR4Cached();
 	@RegisterExtension
 	public RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(myCtx);
@@ -41,11 +38,10 @@ public class ReadR4Test {
 
 		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/Patient/2?_format=xml&_pretty=true").get();
 		String responseContent = response.getBody();
-		ourLog.info("Response was:\n{}", responseContent);
 
 		response.assertStatus(200);
-		assertNull(response.getHeader(Constants.HEADER_LOCATION));
-		assertEquals("http://localhost:" + myPort + "/Patient/2/_history/2", response.getHeader(Constants.HEADER_CONTENT_LOCATION));
+		assertThat(response.getHeader(Constants.HEADER_LOCATION)).isNull();
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_LOCATION)).isEqualTo("http://localhost:" + myPort + "/Patient/2/_history/2");
 
 		assertThat(responseContent).containsSubsequence(
 			"<Patient xmlns=\"http://hl7.org/fhir\">",
@@ -62,11 +58,10 @@ public class ReadR4Test {
 
 		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/Patient/2?_format=xml&_pretty=true").get();
 		String responseContent = response.getBody();
-		ourLog.info("Response was:\n{}", responseContent);
 
 		response.assertStatus(200);
-		assertNull(response.getHeader(Constants.HEADER_LOCATION));
-		assertEquals("http://localhost:" + myPort + "/Patient/2/_history/2", response.getHeader(Constants.HEADER_CONTENT_LOCATION));
+		assertThat(response.getHeader(Constants.HEADER_LOCATION)).isNull();
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_LOCATION)).isEqualTo("http://localhost:" + myPort + "/Patient/2/_history/2");
 
 		assertThat(responseContent).containsSubsequence(
 			"<Patient xmlns=\"http://hl7.org/fhir\">",

@@ -1,7 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
@@ -41,7 +40,6 @@ public class SearchDstu3Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
 	private static TokenAndListParam ourIdentifiers;
 	private static String ourLastMethod;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchDstu3Test.class);
 
 	@RegisterExtension
 	private RestfulServerExtension ourServer  = new RestfulServerExtension(ourCtx)
@@ -61,12 +59,11 @@ public class SearchDstu3Test {
 			.get()
 			.assertStatus(200)
 			.getBody();
-		ourLog.info(responseContent);
 
-		assertEquals("search", ourLastMethod);
+		assertThat(ourLastMethod).isEqualTo("search");
 
-		assertEquals("foo", ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem());
-		assertEquals("bar", ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+		assertThat(ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem()).isEqualTo("foo");
+		assertThat(ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("bar");
 
 	}
 
@@ -76,10 +73,9 @@ public class SearchDstu3Test {
 			.get()
 			.assertStatus(400)
 			.getBody();
-		ourLog.info(responseContent);
 
 		OperationOutcome oo = (OperationOutcome) ourCtx.newJsonParser().parseResource(responseContent);
-		assertEquals(Msg.code(1935) + "Invalid search parameter \"identifier.chain\". Parameter contains a chain (.chain) and chains are not supported for this parameter (chaining is only allowed on reference parameters)", oo.getIssueFirstRep().getDiagnostics());
+		assertThat(oo.getIssueFirstRep().getDiagnostics()).isEqualTo(Msg.code(1935) + "Invalid search parameter \"identifier.chain\". Parameter contains a chain (.chain) and chains are not supported for this parameter (chaining is only allowed on reference parameters)");
 
 	}
 
@@ -226,13 +222,12 @@ public class SearchDstu3Test {
 	private Bundle executeAndReturnLinkNext(HttpTestRequest theRequest, EncodingEnum theExpectEncoding) {
 		HttpTestResponse response = theRequest.get();
 		String responseContent = response.assertStatus(200).getBody();
-		ourLog.info(responseContent);
 		EncodingEnum ct = EncodingEnum.forContentType(response.getContentType());
-		assertEquals(theExpectEncoding, ct);
+		assertThat(ct).isEqualTo(theExpectEncoding);
 		Bundle bundle = ct.newParser(ourCtx).parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(10);
 		String linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertNotNull(linkNext);
+		assertThat(linkNext).isNotNull();
 		return bundle;
 	}
 

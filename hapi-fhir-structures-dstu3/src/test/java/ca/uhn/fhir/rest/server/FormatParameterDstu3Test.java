@@ -1,6 +1,5 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -21,7 +20,6 @@ public class FormatParameterDstu3Test {
 	private static final String VALUE_XML = "<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>";
 	private static final String VALUE_JSON = "{\"resourceType\":\"Patient\",\"id\":\"p1ReadId\",\"meta\":{\"profile\":[\"http://foo_profile\"]},\"identifier\":[{\"value\":\"p1ReadValue\"}]}";
 	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FormatParameterDstu3Test.class);
 
 	@RegisterExtension
 	private RestfulServerExtension ourServer  = new RestfulServerExtension(ourCtx)
@@ -37,9 +35,8 @@ public class FormatParameterDstu3Test {
 		ourServer.setDefaultResponseEncoding(EncodingEnum.JSON);
 
 		String responseContent = ourServer.fhirRequest("/Patient/123?_format=xml").get().assertStatus(200).getBody();
-		ourLog.info(responseContent);
 
-		assertEquals(VALUE_XML, responseContent);
+		assertThat(responseContent).isEqualTo(VALUE_XML);
 	}
 
 	/**
@@ -53,9 +50,8 @@ public class FormatParameterDstu3Test {
 			.get()
 			.assertStatus(200)
 			.getBody();
-		ourLog.info(responseContent);
 
-		assertEquals(VALUE_XML, responseContent);
+		assertThat(responseContent).isEqualTo(VALUE_XML);
 	}
 
 	/**
@@ -69,9 +65,8 @@ public class FormatParameterDstu3Test {
 			.get()
 			.assertStatus(200)
 			.getBody();
-		ourLog.info(responseContent);
 
-		assertEquals(VALUE_XML, responseContent);
+		assertThat(responseContent).isEqualTo(VALUE_XML);
 	}
 
 	/**
@@ -86,9 +81,8 @@ public class FormatParameterDstu3Test {
 			.get()
 			.assertStatus(200)
 			.getBody();
-		ourLog.info(responseContent);
 
-		assertEquals(VALUE_XML, responseContent);
+		assertThat(responseContent).isEqualTo(VALUE_XML);
 	}
 
 	/**
@@ -99,9 +93,8 @@ public class FormatParameterDstu3Test {
 		ourServer.setDefaultResponseEncoding(EncodingEnum.XML);
 
 		String responseContent = ourServer.fhirRequest("/Patient/123?_format=json").get().assertStatus(200).getBody();
-		ourLog.info(responseContent);
 
-		assertEquals(VALUE_JSON, responseContent);
+		assertThat(responseContent).isEqualTo(VALUE_JSON);
 	}
 
 	/**
@@ -115,9 +108,8 @@ public class FormatParameterDstu3Test {
 			.get()
 			.assertStatus(200)
 			.getBody();
-		ourLog.info(responseContent);
 
-		assertEquals(VALUE_JSON, responseContent);
+		assertThat(responseContent).isEqualTo(VALUE_JSON);
 	}
 
 	/**
@@ -131,9 +123,8 @@ public class FormatParameterDstu3Test {
 			.get()
 			.assertStatus(200)
 			.getBody();
-		ourLog.info(responseContent);
 
-		assertEquals(VALUE_JSON, responseContent);
+		assertThat(responseContent).isEqualTo(VALUE_JSON);
 	}
 
 	/**
@@ -148,9 +139,8 @@ public class FormatParameterDstu3Test {
 			.get()
 			.assertStatus(200)
 			.getBody();
-		ourLog.info(responseContent);
 
-		assertEquals(VALUE_JSON, responseContent);
+		assertThat(responseContent).isEqualTo(VALUE_JSON);
 	}
 
 	@AfterAll

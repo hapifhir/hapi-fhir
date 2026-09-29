@@ -26,11 +26,9 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MetadataCapabilityStatementDstu3Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(MetadataCapabilityStatementDstu3Test.class);
 	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
 
 	@RegisterExtension
@@ -58,7 +56,6 @@ public class MetadataCapabilityStatementDstu3Test {
 			.get()
 			.assertStatus(200)
 			.getBody();
-		ourLog.info(output);
 		assertThat(output).contains("<CapabilityStatement");
 		assertThat(output).contains("<meta>", "SUBSETTED", "</meta>");
 	}
@@ -77,7 +74,7 @@ public class MetadataCapabilityStatementDstu3Test {
 		status = ourServer.fhirRequest("/metadata").method("POST", new byte[0], null);
 		output = status.getBody();
 		status.assertStatus(405);
-		assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"" + Msg.code(388) + "/metadata request must use HTTP GET or HTTP HEAD\"/></issue></OperationOutcome>", output);
+		assertThat(output).isEqualTo("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"" + Msg.code(388) + "/metadata request must use HTTP GET or HTTP HEAD\"/></issue></OperationOutcome>");
 
 		/*
 		 * There is no @read on the RP below, so this should fail. Otherwise it
@@ -93,10 +90,9 @@ public class MetadataCapabilityStatementDstu3Test {
 		String output;
 
 		output = ourServer.fhirRequest("/metadata?_format=json").get().assertStatus(200).getBody();
-		ourLog.info(output);
 		CapabilityStatement cs = ourCtx.newJsonParser().parseResource(CapabilityStatement.class, output);
 
-		assertEquals(ourServer.getBaseUrl() + "/", cs.getImplementation().getUrl());
+		assertThat(cs.getImplementation().getUrl()).isEqualTo(ourServer.getBaseUrl() + "/");
 	}
 
 	@Test
@@ -104,7 +100,7 @@ public class MetadataCapabilityStatementDstu3Test {
 
 		HttpTestResponse status = ourServer.fhirRequest("/metadata?_elements=fhirVersion&_pretty=true").head();
 		status.getAllHeaders();
-		assertEquals(200, status.getStatusCode());
+		assertThat(status.getStatusCode()).isEqualTo(200);
 	}
 
 	@Test
@@ -114,10 +110,9 @@ public class MetadataCapabilityStatementDstu3Test {
 		String output;
 
 		output = ourServer.fhirRequest("/metadata?_format=json").get().assertStatus(200).getBody();
-		ourLog.info(output);
 		CapabilityStatement cs = ourCtx.newJsonParser().parseResource(CapabilityStatement.class, output);
 
-		assertEquals("http://foo/bar", cs.getImplementation().getUrl());
+		assertThat(cs.getImplementation().getUrl()).isEqualTo("http://foo/bar");
 	}
 
 	@Test
@@ -126,14 +121,12 @@ public class MetadataCapabilityStatementDstu3Test {
 
 		// With
 		output = ourServer.fhirRequest("/metadata?_summary=true&_pretty=true").get().assertStatus(200).getBody();
-		ourLog.info(output);
 		assertThat(output).contains("<CapabilityStatement");
 		assertThat(output).contains("<meta>", "SUBSETTED", "</meta>");
 		assertThat(output).doesNotContain("searchParam");
 
 		// Without
 		output = ourServer.fhirRequest("/metadata?_pretty=true").get().assertStatus(200).getBody();
-		ourLog.info(output);
 		assertThat(output).contains("<CapabilityStatement");
 		assertThat(output).doesNotContain("<meta>", "SUBSETTED", "</meta>");
 		assertThat(output).contains("searchParam");

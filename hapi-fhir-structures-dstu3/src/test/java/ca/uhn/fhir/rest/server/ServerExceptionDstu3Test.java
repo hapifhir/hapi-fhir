@@ -36,7 +36,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ServerExceptionDstu3Test {
 
@@ -69,10 +68,9 @@ public class ServerExceptionDstu3Test {
 		HttpTestResponse response = ourServer.fhirRequest("/Patient").get();
 		String responseContent = response.getBody();
 		ourLog.info("HTTP {} {}", response.getStatusCode(), response.getReasonPhrase());
-		ourLog.info(responseContent);
 
 		response.assertStatus(404);
-		assertEquals("BAR BAR", response.getHeader("X-Foo"));
+		assertThat(response.getHeader("X-Foo")).isEqualTo("BAR BAR");
 		assertThat(response.getHeader(Constants.HEADER_POWERED_BY)).contains("HAPI FHIR");
 
 	}
@@ -93,7 +91,6 @@ public class ServerExceptionDstu3Test {
 		byte[] responseContentBytes = response.getBodyBytes();
 		String responseContent = new String(responseContentBytes, Charsets.UTF_8);
 		ourLog.info("HTTP {} {}", response.getStatusCode(), response.getReasonPhrase());
-		ourLog.info(responseContent);
 		assertThat(responseContent).contains("El nombre está vacío");
 
 	}
@@ -108,7 +105,6 @@ public class ServerExceptionDstu3Test {
 		byte[] responseContentBytes = response.getBodyBytes();
 		String responseContent = new String(responseContentBytes, Charsets.UTF_8);
 		ourLog.info("HTTP {} {}", response.getStatusCode(), response.getReasonPhrase());
-		ourLog.info(responseContent);
 		assertThat(responseContent).contains("\"diagnostics\":\"" + Msg.code(389) + "Failed to call access method: java.lang.NullPointerException: Hello\"");
 
 	}
@@ -123,7 +119,6 @@ public class ServerExceptionDstu3Test {
 		byte[] responseContentBytes = response.getBodyBytes();
 		String responseContent = new String(responseContentBytes, Charsets.UTF_8);
 		ourLog.info("HTTP {} {}", response.getStatusCode(), response.getReasonPhrase());
-		ourLog.info(responseContent);
 		assertThat(responseContent).contains("\"diagnostics\":\"" + Msg.code(389) + "Failed to call access method: java.io.IOException: Hello\"");
 
 	}
@@ -143,7 +138,6 @@ public class ServerExceptionDstu3Test {
 		byte[] responseContentBytes = response.getBodyBytes();
 		String responseContent = new String(responseContentBytes, Charsets.UTF_8);
 		ourLog.info("HTTP {} {}", response.getStatusCode(), response.getReasonPhrase());
-		ourLog.info(responseContent);
 		assertThat(responseContent).contains("\"diagnostics\":\"Hello\"");
 
 		ourServer.getInterceptorService().unregisterAllInterceptors();
@@ -157,7 +151,6 @@ public class ServerExceptionDstu3Test {
 		HttpTestResponse response = ourServer.fhirRequest("/Patient").method("POST", new byte[0], null);
 		String responseContent = response.getBody();
 		ourLog.info("HTTP {} {}", response.getStatusCode(), response.getReasonPhrase());
-		ourLog.info(responseContent);
 
 		response.assertStatus(201);
 		assertThat(response.getHeader("Location")).contains("Patient/123");
@@ -189,18 +182,17 @@ public class ServerExceptionDstu3Test {
 		HttpTestResponse response = ourServer.fhirRequest("/Patient").get();
 		String responseContent = response.getBody();
 		ourLog.info("HTTP {} {}", response.getStatusCode(), response.getReasonPhrase());
-		ourLog.info(responseContent);
 
 		// validate
 		response.assertStatus(401);
-		assertEquals("Basic realm=\"REALM\"", response.getHeader("WWW-Authenticate"));
+		assertThat(response.getHeader("WWW-Authenticate")).isEqualTo("Basic realm=\"REALM\"");
 		OperationOutcome outcome = assertDoesNotThrow(() ->
 			 ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent));
 		assertThat(outcome.getIssue()).hasSize(1);
 		OperationOutcome.OperationOutcomeIssueComponent issue = outcome.getIssueFirstRep();
-		assertEquals(OperationOutcome.IssueSeverity.ERROR, issue.getSeverity());
-		assertEquals(OperationOutcome.IssueType.PROCESSING, issue.getCode());
-		assertEquals("Client unauthorized", issue.getDiagnostics());
+		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
+		assertThat(issue.getCode()).isEqualTo(OperationOutcome.IssueType.PROCESSING);
+		assertThat(issue.getDiagnostics()).isEqualTo("Client unauthorized");
 
 	}
 

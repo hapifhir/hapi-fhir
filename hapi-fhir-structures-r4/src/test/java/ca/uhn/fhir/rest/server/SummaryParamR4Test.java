@@ -31,7 +31,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SummaryParamR4Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SummaryParamR4Test.class);
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static SummaryEnum ourLastSummary;
 	private static List<SummaryEnum> ourLastSummaryList;
@@ -73,14 +72,13 @@ public class SummaryParamR4Test {
 			.get()
 			.assertStatus(200);
 		String responseContent = status.getBody();
-		ourLog.info(responseContent);
 
-		assertEquals(Constants.CT_HTML_WITH_UTF8.replace(" ", "").toLowerCase(), status.getHeader(Constants.HEADER_CONTENT_TYPE).replace(" ", "").replace("UTF", "utf"));
+		assertThat(status.getHeader(Constants.HEADER_CONTENT_TYPE).replace(" ", "").replace("UTF", "utf")).isEqualTo(Constants.CT_HTML_WITH_UTF8.replace(" ", "").toLowerCase());
 		assertThat(responseContent).doesNotContain("<Bundle");
 		assertThat(responseContent).doesNotContain("<Medic");
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">THE DIV</div>", responseContent);
+		assertThat(responseContent).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">THE DIV</div>");
 		assertThat(responseContent).doesNotContain("efer");
-		assertEquals(SummaryEnum.TEXT, ourLastSummary);
+		assertThat(ourLastSummary).isEqualTo(SummaryEnum.TEXT);
 	}
 
 	@Test
@@ -89,12 +87,11 @@ public class SummaryParamR4Test {
 			.get()
 			.assertStatus(200);
 		String responseContent = status.getBody();
-		ourLog.info(responseContent);
 
-		assertEquals(Constants.CT_HTML_WITH_UTF8.replace(" ", "").toLowerCase(), status.getHeader(Constants.HEADER_CONTENT_TYPE).replace(" ", "").replace("UTF", "utf"));
+		assertThat(status.getHeader(Constants.HEADER_CONTENT_TYPE).replace(" ", "").replace("UTF", "utf")).isEqualTo(Constants.CT_HTML_WITH_UTF8.replace(" ", "").toLowerCase());
 		assertThat(responseContent).doesNotContain("<Bundle");
 		assertThat(responseContent).doesNotContain("<Patien");
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">TEXT</div>", responseContent);
+		assertThat(responseContent).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">TEXT</div>");
 		assertThat(responseContent).doesNotContain("family");
 		assertThat(responseContent).doesNotContain("maritalStatus");
 	}
@@ -257,7 +254,6 @@ public class SummaryParamR4Test {
 	public void testSearchSummaryWithTextAndOthers() throws Exception {
 		String url = "/Patient?_summary=text&_summary=data";
 		String responseContent = ourServer.fhirRequest(url).get().assertStatus(400).getBody();
-		ourLog.info(responseContent);
 
 		assertThat(responseContent).contains("Can not combine _summary=text with other values for _summary");
 	}
@@ -273,7 +269,6 @@ public class SummaryParamR4Test {
 		String responseContent = ourServer.fhirRequest(thePath + "&_pretty=true&_format=" + encodingEnum.getFormatContentType())
 			.get()
 			.getBody();
-		ourLog.info(responseContent);
 		T response = encodingEnum.newParser(ourCtx).parseResource(theType, responseContent);
 		theVerifier.accept(response);
 
@@ -281,7 +276,6 @@ public class SummaryParamR4Test {
 		responseContent = ourServer.fhirRequest(thePath + "&_pretty=true&_format=" + encodingEnum.getFormatContentType())
 			.get()
 			.getBody();
-		ourLog.info(responseContent);
 		response = encodingEnum.newParser(ourCtx).parseResource(theType, responseContent);
 		theVerifier.accept(response);
 	}

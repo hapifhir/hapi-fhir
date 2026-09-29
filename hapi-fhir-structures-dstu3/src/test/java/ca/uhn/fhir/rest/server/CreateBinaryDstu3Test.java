@@ -1,7 +1,5 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -46,7 +44,7 @@ public class CreateBinaryDstu3Test {
 	@Test
 	public void testRawBytesBinaryContentType() throws Exception {
 		ourServer.fhirRequest("/Binary").post(new byte[] { 0, 1, 2, 3, 4 }, "application/foo");
-		assertEquals("application/foo", ourLastBinary.getContentType());
+		assertThat(ourLastBinary.getContentType()).isEqualTo("application/foo");
 		assertThat(ourLastBinary.getContent()).containsExactly(new byte[]{0, 1, 2, 3, 4});
 		assertThat(ourLastBinaryBytes).containsExactly(new byte[]{0, 1, 2, 3, 4});
 	}
@@ -63,7 +61,7 @@ public class CreateBinaryDstu3Test {
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(b);
 
 		ourServer.fhirRequest("/Binary").post(encoded.getBytes(StandardCharsets.UTF_8), Constants.CT_FHIR_JSON);
-		assertEquals("application/foo", ourLastBinary.getContentType());
+		assertThat(ourLastBinary.getContentType()).isEqualTo("application/foo");
 		assertThat(ourLastBinary.getContent()).containsExactly(new byte[]{0, 1, 2, 3, 4});
 	}
 
@@ -79,16 +77,16 @@ public class CreateBinaryDstu3Test {
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(b);
 
 		ourServer.fhirRequest("/Binary").post(encoded.getBytes(StandardCharsets.UTF_8), Constants.CT_FHIR_JSON);
-		assertEquals("application/xml+fhir", ourLastBinary.getContentType());
+		assertThat(ourLastBinary.getContentType()).isEqualTo(Constants.CT_FHIR_XML);
 		assertThat(ourLastBinary.getContent()).containsExactly(b.getContent());
-		assertEquals(encoded, ourLastBinaryString);
+		assertThat(ourLastBinaryString).isEqualTo(encoded);
 		assertThat(ourLastBinaryBytes).containsExactly(encoded.getBytes("UTF-8"));
 	}
 
 	@Test
 	public void testRawBytesNoContentType() throws Exception {
 		ourServer.fhirRequest("/Binary").method("POST", new byte[] { 0, 1, 2, 3, 4 }, null);
-		assertNull(ourLastBinary.getContentType());
+		assertThat(ourLastBinary.getContentType()).isNull();
 		assertThat(ourLastBinary.getContent()).containsExactly(new byte[]{0, 1, 2, 3, 4});
 	}
 

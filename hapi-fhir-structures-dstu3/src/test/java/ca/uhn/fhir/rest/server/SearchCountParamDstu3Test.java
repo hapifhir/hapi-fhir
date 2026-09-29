@@ -1,7 +1,5 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -25,7 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class SearchCountParamDstu3Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchCountParamDstu3Test.class);
 	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
 	private static String ourLastMethod;
 	private static Integer ourLastParam;
@@ -46,9 +43,8 @@ public class SearchCountParamDstu3Test {
 	@Test
 	public void testSearch() throws Exception {
 		String responseContent = ourServer.fhirRequest("/Patient?_count=2").get().assertStatus(200).getBody();
-		ourLog.info(responseContent);
-		assertEquals("search", ourLastMethod);
-		assertEquals(Integer.valueOf(2), ourLastParam);
+		assertThat(ourLastMethod).isEqualTo("search");
+		assertThat(ourLastParam).isEqualTo(Integer.valueOf(2));
 
 		assertThat(responseContent).contains(
 			 "<link>",
@@ -69,9 +65,8 @@ public class SearchCountParamDstu3Test {
 			.get()
 			.assertStatus(200)
 			.getBody();
-		ourLog.info(responseContent);
-		assertEquals("search", ourLastMethod);
-		assertEquals(Integer.valueOf(0), ourLastParam);
+		assertThat(ourLastMethod).isEqualTo("search");
+		assertThat(ourLastParam).isEqualTo(Integer.valueOf(0));
 
 		assertThat(responseContent).contains(
 			 "<Bundle",
@@ -90,9 +85,8 @@ public class SearchCountParamDstu3Test {
 			.get()
 			.assertStatus(200)
 			.getBody();
-		ourLog.info(responseContent);
-		assertEquals("searchWithNoCountParam", ourLastMethod);
-		assertNull(ourLastParam);
+		assertThat(ourLastMethod).isEqualTo("searchWithNoCountParam");
+		assertThat(ourLastParam).isNull();
 
 		assertThat(responseContent).contains(
 			 "<link>",

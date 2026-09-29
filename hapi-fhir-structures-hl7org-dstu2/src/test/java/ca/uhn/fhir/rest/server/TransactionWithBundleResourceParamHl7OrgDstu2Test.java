@@ -180,7 +180,7 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 		ourLog.info(bundleString);
 
 		String responseContent = fhirRequest("/")
-			.withHeader("Accept", Constants.CT_FHIR_XML + "; pretty=true")
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML + "; pretty=true")
 			.post(bundleString, Constants.CT_FHIR_XML)
 			.assertStatus(200)
 			.getBody();

@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.MyPatientWithExtensions;
@@ -61,9 +62,9 @@ public class CreateDstu3Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(1, response.getHeaders("Location").size());
-		assertEquals(1, response.getHeaders("Content-Location").size());
-		assertEquals(ourServer.getBaseUrl() + "/Patient/1", response.getHeader("Location"));
+		assertThat(response.getHeaders("Location").size()).isEqualTo(1);
+		assertThat(response.getHeaders(Constants.HEADER_CONTENT_LOCATION).size()).isEqualTo(1);
+		assertThat(response.getHeader("Location")).isEqualTo(ourServer.getBaseUrl() + "/Patient/1");
 
 	}
 

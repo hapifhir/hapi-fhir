@@ -1,7 +1,5 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
@@ -70,18 +68,17 @@ public class SearchPostDstu3Test {
 	@Test
 	public void testSearchWithMixedParamsNoInterceptorsYesParams() throws Exception {
 		HttpTestResponse response = ourServer.fhirRequest("/Patient/_search?_format=application/fhir+json")
-			.withHeader("Cache-Control","no-cache")
+			.withHeader(Constants.HEADER_CACHE_CONTROL,Constants.CACHE_CONTROL_NO_CACHE)
 			.withFormParam("name", "Smith")
 			.postForm();
 		String responseContent = response.assertStatus(200).getBody();
-		ourLog.info(responseContent);
 
-		assertEquals("search", ourLastMethod);
-		assertNull(ourLastSortSpec);
+		assertThat(ourLastMethod).isEqualTo("search");
+		assertThat(ourLastSortSpec).isNull();
 		assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
 		assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
-		assertEquals("Smith", ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
-		assertEquals(Constants.CT_FHIR_JSON_NEW, response.getContentType());
+		assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("Smith");
+		assertThat(response.getContentType()).isEqualTo(Constants.CT_FHIR_JSON_NEW);
 
 	}
 
@@ -91,18 +88,17 @@ public class SearchPostDstu3Test {
 	@Test
 	public void testSearchWithMixedParamsNoInterceptorsNoParams() throws Exception {
 		HttpTestResponse response = ourServer.fhirRequest("/Patient/_search")
-			.withHeader("Cache-Control","no-cache")
+			.withHeader(Constants.HEADER_CACHE_CONTROL,Constants.CACHE_CONTROL_NO_CACHE)
 			.withFormParam("name", "Smith")
 			.postForm();
 		String responseContent = response.assertStatus(200).getBody();
-		ourLog.info(responseContent);
 
-		assertEquals("search", ourLastMethod);
-		assertNull(ourLastSortSpec);
+		assertThat(ourLastMethod).isEqualTo("search");
+		assertThat(ourLastSortSpec).isNull();
 		assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
 		assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
-		assertEquals("Smith", ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
-		assertEquals(Constants.CT_FHIR_XML_NEW, response.getContentType());
+		assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("Smith");
+		assertThat(response.getContentType()).isEqualTo(Constants.CT_FHIR_XML_NEW);
 
 	}
 
@@ -114,18 +110,17 @@ public class SearchPostDstu3Test {
 		ourServer.registerInterceptor(new ParamLoggingInterceptor());
 		
 		HttpTestResponse response = ourServer.fhirRequest("/Patient/_search?_format=application/fhir+json")
-			.withHeader("Cache-Control","no-cache")
+			.withHeader(Constants.HEADER_CACHE_CONTROL,Constants.CACHE_CONTROL_NO_CACHE)
 			.withFormParam("name", "Smith")
 			.postForm();
 		String responseContent = response.assertStatus(200).getBody();
-		ourLog.info(responseContent);
 
-		assertEquals("search", ourLastMethod);
-		assertNull(ourLastSortSpec);
+		assertThat(ourLastMethod).isEqualTo("search");
+		assertThat(ourLastSortSpec).isNull();
 		assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
 		assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
-		assertEquals("Smith", ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
-		assertEquals(Constants.CT_FHIR_JSON_NEW, response.getContentType());
+		assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("Smith");
+		assertThat(response.getContentType()).isEqualTo(Constants.CT_FHIR_JSON_NEW);
 
 	}
 
@@ -137,18 +132,17 @@ public class SearchPostDstu3Test {
 		ourServer.registerInterceptor(new ParamLoggingInterceptor());
 		
 		HttpTestResponse response = ourServer.fhirRequest("/Patient/_search")
-			.withHeader("Cache-Control","no-cache")
+			.withHeader(Constants.HEADER_CACHE_CONTROL,Constants.CACHE_CONTROL_NO_CACHE)
 			.withFormParam("name", "Smith")
 			.postForm();
 		String responseContent = response.assertStatus(200).getBody();
-		ourLog.info(responseContent);
 
-		assertEquals("search", ourLastMethod);
-		assertNull(ourLastSortSpec);
+		assertThat(ourLastMethod).isEqualTo("search");
+		assertThat(ourLastSortSpec).isNull();
 		assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
 		assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
-		assertEquals("Smith", ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
-		assertEquals(Constants.CT_FHIR_XML_NEW, response.getContentType());
+		assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("Smith");
+		assertThat(response.getContentType()).isEqualTo(Constants.CT_FHIR_XML_NEW);
 
 	}
 	

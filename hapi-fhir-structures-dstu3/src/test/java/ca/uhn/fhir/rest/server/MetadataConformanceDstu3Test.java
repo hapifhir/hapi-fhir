@@ -22,11 +22,9 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MetadataConformanceDstu3Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(MetadataConformanceDstu3Test.class);
 	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
 
 	@RegisterExtension
@@ -42,14 +40,12 @@ public class MetadataConformanceDstu3Test {
 
 		// With
 		output = ourServer.fhirRequest("/metadata?_summary=true&_pretty=true").get().assertStatus(200).getBody();
-		ourLog.info(output);
 		assertThat(output).contains("<CapabilityStatement");
 		assertThat(output).contains("<meta>", "SUBSETTED", "</meta>");
 		assertThat(output).doesNotContain("searchParam");
 
 		// Without
 		output = ourServer.fhirRequest("/metadata?_pretty=true").get().assertStatus(200).getBody();
-		ourLog.info(output);
 		assertThat(output).contains("<CapabilityStatement");
 		assertThat(output).doesNotContain("<meta>", "SUBSETTED", "</meta>");
 		assertThat(output).contains("searchParam");
@@ -63,7 +59,6 @@ public class MetadataConformanceDstu3Test {
 			.get()
 			.assertStatus(200)
 			.getBody();
-		ourLog.info(output);
 		assertThat(output).contains("<CapabilityStatement");
 		assertThat(output).contains("<meta>", "SUBSETTED", "</meta>");
 	}
@@ -89,7 +84,7 @@ public class MetadataConformanceDstu3Test {
 		status = ourServer.fhirRequest("/metadata").method("POST", new byte[0], null);
 		output = status.getBody();
 		status.assertStatus(405);
-		assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"" + Msg.code(388) + "/metadata request must use HTTP GET or HTTP HEAD\"/></issue></OperationOutcome>", output);
+		assertThat(output).isEqualTo("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"" + Msg.code(388) + "/metadata request must use HTTP GET or HTTP HEAD\"/></issue></OperationOutcome>");
 
 		status = ourServer.fhirRequest("/metadata").head();
 		status.assertStatus(200);
@@ -100,7 +95,7 @@ public class MetadataConformanceDstu3Test {
 		 * would be interpreted as a read on ID "metadata"
 		 */
 		status = ourServer.fhirRequest("/Patient/metadata").get();
-		assertEquals(400, status.getStatusCode());
+		assertThat(status.getStatusCode()).isEqualTo(400);
 	}
 
 	@SuppressWarnings("unused")

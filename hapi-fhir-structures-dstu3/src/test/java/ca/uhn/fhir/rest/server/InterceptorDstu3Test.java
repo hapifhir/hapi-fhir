@@ -107,7 +107,7 @@ public class InterceptorDstu3Test {
 			p.addParameter().setName("limit").setValue(new IntegerType(123));
 			String input = ourCtx.newJsonParser().encodeResourceToString(p);
 
-			ourServer.fhirRequest("/Patient/$postOperation").post(input, "application/fhir+json").assertStatus(200);
+			ourServer.fhirRequest("/Patient/$postOperation").post(input, Constants.CT_FHIR_JSON_NEW).assertStatus(200);
 		} finally {
 			ourServer.unregisterInterceptor(interceptor);
 		}
@@ -135,7 +135,7 @@ public class InterceptorDstu3Test {
 			HttpTestResponse httpResponse = ourServer.fhirRequest("/Patient/1").get().assertStatus(202);
 			String response = httpResponse.getBody();
 			assertThat(response).contains("NAME1");
-			assertEquals("Accepted", httpResponse.getReasonPhrase());
+			assertThat(httpResponse.getReasonPhrase()).isEqualTo("Accepted");
 
 		} finally {
 			ourServer.unregisterInterceptor(interceptor);

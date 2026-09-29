@@ -1,6 +1,5 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
@@ -24,7 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class SearchSortDstu3Test {
 
 	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchSortDstu3Test.class);
 	private static String ourLastMethod;
 	private static SortSpec ourLastSortSpec;
 
@@ -46,20 +44,19 @@ public class SearchSortDstu3Test {
 			.get()
 			.assertStatus(200)
 			.getBody();
-		ourLog.info(responseContent);
-		assertEquals("search", ourLastMethod);
+		assertThat(ourLastMethod).isEqualTo("search");
 
-		assertEquals("param1", ourLastSortSpec.getParamName());
-		assertEquals(SortOrderEnum.ASC, ourLastSortSpec.getOrder());
+		assertThat(ourLastSortSpec.getParamName()).isEqualTo("param1");
+		assertThat(ourLastSortSpec.getOrder()).isEqualTo(SortOrderEnum.ASC);
 
-		assertEquals("param2", ourLastSortSpec.getChain().getParamName());
-		assertEquals(SortOrderEnum.DESC, ourLastSortSpec.getChain().getOrder());
+		assertThat(ourLastSortSpec.getChain().getParamName()).isEqualTo("param2");
+		assertThat(ourLastSortSpec.getChain().getOrder()).isEqualTo(SortOrderEnum.DESC);
 
-		assertEquals("param3", ourLastSortSpec.getChain().getChain().getParamName());
-		assertEquals(SortOrderEnum.ASC, ourLastSortSpec.getChain().getChain().getOrder());
+		assertThat(ourLastSortSpec.getChain().getChain().getParamName()).isEqualTo("param3");
+		assertThat(ourLastSortSpec.getChain().getChain().getOrder()).isEqualTo(SortOrderEnum.ASC);
 
-		assertEquals("param4", ourLastSortSpec.getChain().getChain().getChain().getParamName());
-		assertEquals(SortOrderEnum.DESC, ourLastSortSpec.getChain().getChain().getChain().getOrder());
+		assertThat(ourLastSortSpec.getChain().getChain().getChain().getParamName()).isEqualTo("param4");
+		assertThat(ourLastSortSpec.getChain().getChain().getChain().getOrder()).isEqualTo(SortOrderEnum.DESC);
 
 	}
 

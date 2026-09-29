@@ -27,7 +27,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class OperationGenericServerR4Test {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationGenericServerR4Test.class);
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static IdType ourLastId;
 	private static String ourLastMethod;
@@ -109,7 +108,6 @@ public class OperationGenericServerR4Test {
 			.post(inParamsStr, Constants.CT_FHIR_XML)
 			.assertStatus(200)
 			.getBody();
-		ourLog.info(response);
 
 		assertEquals("PARAM1", ourLastResourceParam.getParameterFirstRep().getName());
 		assertEquals("PARAM1val", ourLastParam1.getValue());
@@ -124,7 +122,6 @@ public class OperationGenericServerR4Test {
 	@Test
 	public void testOperationWithGetUsingParams() throws Exception {
 		String response = ourServer.fhirRequest("/Patient/$OP_TYPE?PARAM1=PARAM1val").get().assertStatus(200).getBody();
-		ourLog.info(response);
 
 		assertNull(ourLastResourceParam);
 		assertEquals("PARAM1val", ourLastParam1.getValue());

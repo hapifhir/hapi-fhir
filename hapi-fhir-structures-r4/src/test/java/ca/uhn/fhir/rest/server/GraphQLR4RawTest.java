@@ -29,12 +29,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class GraphQLR4RawTest {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(GraphQLR4RawTest.class);
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static String ourNextRetVal;
 	private static IdType ourLastId;
@@ -63,12 +60,11 @@ public class GraphQLR4RawTest {
 			.get()
 			.assertStatus(200);
 		String responseContent = status.getBody();
-		ourLog.info(responseContent);
 
-		assertEquals("{\"foo\"}", responseContent);
-		assertThat(status.getHeader(Constants.HEADER_CONTENT_TYPE)).startsWith("application/json");
-		assertEquals("Patient/123", ourLastId.getValue());
-		assertEquals("{name{family,given}}", ourLastQuery);
+		assertThat(responseContent).isEqualTo("{\"foo\"}");
+		assertThat(status.getHeader(Constants.HEADER_CONTENT_TYPE)).startsWith(Constants.CT_JSON);
+		assertThat(ourLastId.getValue()).isEqualTo("Patient/123");
+		assertThat(ourLastQuery).isEqualTo("{name{family,given}}");
 
 	}
 
@@ -81,7 +77,6 @@ public class GraphQLR4RawTest {
 			.get()
 			.assertStatus(404);
 		String responseContent = status.getBody();
-		ourLog.info(responseContent);
 		assertThat(responseContent).contains("Unknown resource type");
 
 	}
@@ -91,15 +86,14 @@ public class GraphQLR4RawTest {
 		ourNextRetVal = "{\"foo\"}";
 
 		HttpTestResponse status = myRestfulServerExtension.fhirRequest("/Patient/123/$graphql")
-			.withHeader("Accept", "application/json")
-			.post("{\"query\": \"{name{family,given}}\"}".getBytes(StandardCharsets.UTF_8), "application/json").assertStatus(200);
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON)
+			.post("{\"query\": \"{name{family,given}}\"}".getBytes(StandardCharsets.UTF_8), Constants.CT_JSON).assertStatus(200);
 		String responseContent = status.getBody();
-		ourLog.info(responseContent);
 
-		assertEquals("{\"foo\"}", responseContent);
-		assertThat(status.getHeader(Constants.HEADER_CONTENT_TYPE)).startsWith("application/json");
-		assertEquals("Patient/123", ourLastId.getValue());
-		assertEquals("{name{family,given}}", ourLastQuery);
+		assertThat(responseContent).isEqualTo("{\"foo\"}");
+		assertThat(status.getHeader(Constants.HEADER_CONTENT_TYPE)).startsWith(Constants.CT_JSON);
+		assertThat(ourLastId.getValue()).isEqualTo("Patient/123");
+		assertThat(ourLastQuery).isEqualTo("{name{family,given}}");
 
 	}
 
@@ -108,16 +102,15 @@ public class GraphQLR4RawTest {
 		ourNextRetVal = "{\"foo\"}";
 
 		HttpTestResponse status = myRestfulServerExtension.fhirRequest("/Patient/123/$graphql")
-			.withHeader("Accept", "application/json")
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON)
 			.post("{name{family,given}}".getBytes(StandardCharsets.UTF_8), "application/graphql").assertStatus(200);
 		String responseContent = status.getBody();
-		ourLog.info(responseContent);
 
-		assertEquals("{\"foo\"}", responseContent);
-		assertThat(status.getHeader(Constants.HEADER_CONTENT_TYPE)).startsWith("application/json");
-		assertEquals("Patient/123", ourLastId.getValue());
-		assertEquals("{name{family,given}}", ourLastQuery);
-		assertEquals("Patient", ourLastResourceType);
+		assertThat(responseContent).isEqualTo("{\"foo\"}");
+		assertThat(status.getHeader(Constants.HEADER_CONTENT_TYPE)).startsWith(Constants.CT_JSON);
+		assertThat(ourLastId.getValue()).isEqualTo("Patient/123");
+		assertThat(ourLastQuery).isEqualTo("{name{family,given}}");
+		assertThat(ourLastResourceType).isEqualTo("Patient");
 
 	}
 
@@ -126,16 +119,15 @@ public class GraphQLR4RawTest {
 		ourNextRetVal = "{\"foo\"}";
 
 		HttpTestResponse status = myRestfulServerExtension.fhirRequest("/$graphql")
-			.withHeader("Accept", "application/json")
-			.post("{\"query\": \"{PatientList(date: \\\"2022\\\") {name{family,given}}}\"}".getBytes(StandardCharsets.UTF_8), "application/json").assertStatus(200);
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON)
+			.post("{\"query\": \"{PatientList(date: \\\"2022\\\") {name{family,given}}}\"}".getBytes(StandardCharsets.UTF_8), Constants.CT_JSON).assertStatus(200);
 		String responseContent = status.getBody();
-		ourLog.info(responseContent);
 
-		assertEquals("{\"foo\"}", responseContent);
-		assertThat(status.getHeader(Constants.HEADER_CONTENT_TYPE)).startsWith("application/json");
-		assertNull(ourLastId);
-		assertNull(ourLastResourceType);
-		assertEquals("{PatientList(date: \"2022\") {name{family,given}}}", ourLastQuery);
+		assertThat(responseContent).isEqualTo("{\"foo\"}");
+		assertThat(status.getHeader(Constants.HEADER_CONTENT_TYPE)).startsWith(Constants.CT_JSON);
+		assertThat(ourLastId).isNull();
+		assertThat(ourLastResourceType).isNull();
+		assertThat(ourLastQuery).isEqualTo("{PatientList(date: \"2022\") {name{family,given}}}");
 
 	}
 
@@ -149,12 +141,11 @@ public class GraphQLR4RawTest {
 			.get()
 			.assertStatus(200);
 		String responseContent = status.getBody();
-		ourLog.info(responseContent);
 
-		assertEquals("{\"foo\"}", responseContent);
-		assertThat(status.getHeader(Constants.HEADER_CONTENT_TYPE)).startsWith("application/json");
-		assertNull(ourLastId);
-		assertEquals("{name{family,given}}", ourLastQuery);
+		assertThat(responseContent).isEqualTo("{\"foo\"}");
+		assertThat(status.getHeader(Constants.HEADER_CONTENT_TYPE)).startsWith(Constants.CT_JSON);
+		assertThat(ourLastId).isNull();
+		assertThat(ourLastQuery).isEqualTo("{name{family,given}}");
 
 	}
 

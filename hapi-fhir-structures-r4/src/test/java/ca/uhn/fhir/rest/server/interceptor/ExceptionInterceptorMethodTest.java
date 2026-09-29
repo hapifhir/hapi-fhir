@@ -89,7 +89,6 @@ public class ExceptionInterceptorMethodTest {
 			.get()
 			.assertStatus(405)
 			.getBody();
-		ourLog.info(responseContent);
 		assertEquals("HELP IM A BUG", responseContent);
 
 	}

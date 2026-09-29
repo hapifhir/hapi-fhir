@@ -65,7 +65,7 @@ public class ETagServerR4Test {
 	  ourServer.fhirRequest("/Patient/2")
 		.withHeader(Constants.HEADER_IF_NONE_MATCH, "\"222\"")
 		.get()
-		.assertStatus(Constants.STATUS_HTTP_304_NOT_MODIFIED);
+		.assertStatus(304);
   }
 
   @Test
@@ -138,7 +138,7 @@ public class ETagServerR4Test {
     ourServer.fhirRequest("/Patient/2")
 	.withHeader(Constants.HEADER_IF_MATCH, "\"222\"")
 	.put(resBody, Constants.CT_FHIR_XML)
-	.assertStatus(Constants.STATUS_HTTP_412_PRECONDITION_FAILED);
+	.assertStatus(412);
 		assertEquals("Patient/2/_history/222", ourLastId.toUnqualified().getValue());
   }
 

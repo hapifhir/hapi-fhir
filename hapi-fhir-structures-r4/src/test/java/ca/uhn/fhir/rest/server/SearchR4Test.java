@@ -94,9 +94,8 @@ public class SearchR4Test {
 	private Bundle executeSearch(HttpTestRequest theRequest, EncodingEnum theExpectEncoding) throws IOException {
 		HttpTestResponse response = theRequest.get().assertStatus(200);
 		String responseContent = response.getBody();
-		ourLog.info(responseContent);
 		EncodingEnum ct = EncodingEnum.forContentType(response.getContentType());
-		assertEquals(theExpectEncoding, ct);
+		assertThat(ct).isEqualTo(theExpectEncoding);
 		Bundle bundle = ct.newParser(myCtx).parseResource(Bundle.class, responseContent);
 		validate(bundle);
 		return bundle;
@@ -111,7 +110,6 @@ public class SearchR4Test {
 			.get()
 			.assertStatus(400)
 			.getBody();
-		ourLog.info(responseContent);
 		assertThat(responseContent).contains("not know how to handle GET operation[Patient] with parameters [[_getpages]]");
 	}
 
@@ -400,13 +398,12 @@ public class SearchR4Test {
 			.get()
 			.assertStatus(200)
 			.getBody();
-		ourLog.info(responseContent);
 		validate(myCtx.newJsonParser().parseResource(responseContent));
 
-		assertEquals("search", ourLastMethod);
+		assertThat(ourLastMethod).isEqualTo("search");
 
-		assertEquals("foo", ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem());
-		assertEquals("bar", ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+		assertThat(ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem()).isEqualTo("foo");
+		assertThat(ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("bar");
 
 	}
 
@@ -445,10 +442,9 @@ public class SearchR4Test {
 			.get()
 			.assertStatus(400)
 			.getBody();
-		ourLog.info(responseContent);
 
 		OperationOutcome oo = (OperationOutcome) myCtx.newJsonParser().parseResource(responseContent);
-		assertEquals(Msg.code(1935) + "Invalid search parameter \"identifier.chain\". Parameter contains a chain (.chain) and chains are not supported for this parameter (chaining is only allowed on reference parameters)", oo.getIssueFirstRep().getDiagnostics());
+		assertThat(oo.getIssueFirstRep().getDiagnostics()).isEqualTo(Msg.code(1935) + "Invalid search parameter \"identifier.chain\". Parameter contains a chain (.chain) and chains are not supported for this parameter (chaining is only allowed on reference parameters)");
 
 	}
 

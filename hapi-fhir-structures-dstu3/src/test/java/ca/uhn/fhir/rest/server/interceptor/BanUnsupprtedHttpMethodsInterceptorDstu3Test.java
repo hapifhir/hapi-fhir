@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 
@@ -38,8 +37,7 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 	@Test
 	public void testHttpTraceNotEnabled() throws Exception {
 		HttpTestResponse status = ourServer.fhirRequest("/Patient").method("TRACE");
-		ourLog.info(status.toString());
-		assertEquals(405, status.getStatusCode());
+		assertThat(status.getStatusCode()).isEqualTo(405);
 	}
 	
 	@Test	
@@ -48,7 +46,7 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 		assertThat(status.getBodyBytes()).isEmpty();	
  		ourLog.info(status.toString());
 
-		assertEquals(404, status.getStatusCode());
+		assertThat(status.getStatusCode()).isEqualTo(404);
 		assertThat(status.getHeader(Constants.HEADER_POWERED_BY)).contains("HAPI");
 	}
 	
@@ -58,22 +56,20 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 		assertThat(status.getBodyBytes()).isEmpty();	
  		ourLog.info(status.toString());
 
-		assertEquals(200, status.getStatusCode());
+		assertThat(status.getStatusCode()).isEqualTo(200);
 		assertThat(status.getHeader(Constants.HEADER_POWERED_BY)).contains("HAPI");
 	}
 	
 	@Test
 	public void testHttpTrackNotEnabled() throws Exception {
 		HttpTestResponse status = ourServer.fhirRequest("/Patient").method("TRACK");
-		ourLog.info(status.toString());
-		assertEquals(405, status.getStatusCode());
+		assertThat(status.getStatusCode()).isEqualTo(405);
 	}
 
 	@Test
 	public void testHttpFooNotEnabled() throws Exception {
 		HttpTestResponse status = ourServer.fhirRequest("/Patient").method("FOO");
-		ourLog.info(status.toString());
-		assertEquals(501, status.getStatusCode());
+		assertThat(status.getStatusCode()).isEqualTo(501);
 	}
 
 	@Test

@@ -33,7 +33,6 @@ import static org.mockito.Mockito.when;
 
 public class PagingUsingNamedPagesR4Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PagingUsingNamedPagesR4Test.class);
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static IBundleProvider ourNextBundleProvider;
 	private IPagingProvider myPagingProvider;
@@ -69,9 +68,8 @@ public class PagingUsingNamedPagesR4Test {
 			.get()
 			.assertStatus(200);
 		String responseContent = response.getBody();
-		ourLog.info(responseContent);
 		EncodingEnum ct = EncodingEnum.forContentType(response.getContentType());
-		assertEquals(theExpectEncoding, ct);
+		assertThat(ct).isEqualTo(theExpectEncoding);
 		assert ct != null;
 		Bundle bundle = ct.newParser(ourCtx).parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(10);
@@ -141,7 +139,6 @@ public class PagingUsingNamedPagesR4Test {
 			.get()
 			.assertStatus(410)
 			.getBody();
-		ourLog.info(responseContent);
 		assertThat(responseContent).doesNotContain("FOO\"");
 
 		// Without ID
@@ -149,7 +146,6 @@ public class PagingUsingNamedPagesR4Test {
 			.get()
 			.assertStatus(410)
 			.getBody();
-		ourLog.info(responseContent);
 		assertThat(responseContent).doesNotContain("FOO\"");
 
 	}
@@ -167,7 +163,6 @@ public class PagingUsingNamedPagesR4Test {
 			.get()
 			.assertStatus(200);
 		String responseContent = response.getBody();
-		ourLog.info(responseContent);
 		assertThat(responseContent).doesNotContain("FOO\"");
 		EncodingEnum ct = EncodingEnum.forContentType(response.getContentType());
 		assert ct != null;

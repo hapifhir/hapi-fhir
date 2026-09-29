@@ -21,7 +21,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class SearchHl7OrgDstu2Test {
 
@@ -47,7 +46,7 @@ public class SearchHl7OrgDstu2Test {
     Patient patient = (Patient) ourCtx.newXmlParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
     String ref = patient.getManagingOrganization().getReference();
 		assertEquals("Organization/555", ref);
-		assertNull(status.getHeader(Constants.HEADER_CONTENT_LOCATION));
+		assertThat(status.getHeader(Constants.HEADER_CONTENT_LOCATION)).isNull();
   }
 
   @Test
@@ -63,7 +62,7 @@ public class SearchHl7OrgDstu2Test {
     Patient patient = (Patient) ourCtx.newJsonParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
     String ref = patient.getManagingOrganization().getReference();
 		assertEquals("Organization/555", ref);
-		assertNull(status.getHeader(Constants.HEADER_CONTENT_LOCATION));
+		assertThat(status.getHeader(Constants.HEADER_CONTENT_LOCATION)).isNull();
   }
 
   @Test

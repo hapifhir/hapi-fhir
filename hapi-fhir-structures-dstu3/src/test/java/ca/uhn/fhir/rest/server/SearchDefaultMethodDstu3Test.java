@@ -1,7 +1,5 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.RawParam;
@@ -52,25 +50,23 @@ public class SearchDefaultMethodDstu3Test {
 	@Test
 	public void testSearchNoParams() throws Exception {
 		String responseContent = ourServer.fhirRequest("/Patient").get().assertStatus(200).getBody();
-		ourLog.info(responseContent);
 
 		assertThat(ourLastMethod).isIn("search01", "search02", "search03");
-		assertNull(ourLastParam1);
-		assertNull(ourLastParam2);
-		assertNull(ourLastAdditionalParams);
+		assertThat(ourLastParam1).isNull();
+		assertThat(ourLastParam2).isNull();
+		assertThat(ourLastAdditionalParams).isNull();
 
 	}
 
 	@Test
 	public void testSearchOneOptionalParam() throws Exception {
 		String responseContent = ourServer.fhirRequest("/Patient?param1=val1").get().assertStatus(200).getBody();
-		ourLog.info(responseContent);
 
 		assertThat(ourLastParam1.getValuesAsQueryTokens()).hasSize(1);
 		assertThat(ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
-		assertEquals("val1", ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
-		assertNull(ourLastParam2);
-		assertNull(ourLastAdditionalParams);
+		assertThat(ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("val1");
+		assertThat(ourLastParam2).isNull();
+		assertThat(ourLastAdditionalParams).isNull();
 
 	}
 
@@ -80,17 +76,16 @@ public class SearchDefaultMethodDstu3Test {
 			.get()
 			.assertStatus(200)
 			.getBody();
-		ourLog.info(responseContent);
 
 		assertThat(ourLastParam1.getValuesAsQueryTokens()).hasSize(1);
 		assertThat(ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
-		assertEquals("val1", ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+		assertThat(ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("val1");
 
 		assertThat(ourLastParam2.getValuesAsQueryTokens()).hasSize(1);
 		assertThat(ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
-		assertEquals("val2", ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+		assertThat(ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("val2");
 
-		assertNull(ourLastAdditionalParams);
+		assertThat(ourLastAdditionalParams).isNull();
 
 	}
 
@@ -100,21 +95,20 @@ public class SearchDefaultMethodDstu3Test {
 			.get()
 			.assertStatus(200)
 			.getBody();
-		ourLog.info(responseContent);
 
-		assertEquals("search03", ourLastMethod);
+		assertThat(ourLastMethod).isEqualTo("search03");
 
 		assertThat(ourLastParam1.getValuesAsQueryTokens()).hasSize(1);
 		assertThat(ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
-		assertEquals("val1", ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+		assertThat(ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("val1");
 
 		assertThat(ourLastParam2.getValuesAsQueryTokens()).hasSize(1);
 		assertThat(ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
-		assertEquals("val2", ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+		assertThat(ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("val2");
 
 		ourLog.info(ourLastAdditionalParams.toString());
 		assertThat(ourLastAdditionalParams).hasSize(1);
-		assertEquals("val3", ourLastAdditionalParams.get("param3").get(0));
+		assertThat(ourLastAdditionalParams.get("param3").get(0)).isEqualTo("val3");
 
 	}
 
@@ -124,22 +118,21 @@ public class SearchDefaultMethodDstu3Test {
 			.get()
 			.assertStatus(200)
 			.getBody();
-		ourLog.info(responseContent);
 
-		assertEquals("search03", ourLastMethod);
+		assertThat(ourLastMethod).isEqualTo("search03");
 
 		assertThat(ourLastParam1.getValuesAsQueryTokens()).hasSize(1);
 		assertThat(ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
-		assertEquals("val1", ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+		assertThat(ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("val1");
 
 		assertThat(ourLastParam2.getValuesAsQueryTokens()).as(ourLastParam2.toString()).hasSize(2);
 		assertThat(ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
-		assertEquals("val2", ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
-		assertEquals("val2e", ourLastParam2.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().get(0).getValue());
+		assertThat(ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("val2");
+		assertThat(ourLastParam2.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("val2e");
 
 		ourLog.info(ourLastAdditionalParams.toString());
 		assertThat(ourLastAdditionalParams).hasSize(1);
-		assertEquals("val3", ourLastAdditionalParams.get("param3").get(0));
+		assertThat(ourLastAdditionalParams.get("param3").get(0)).isEqualTo("val3");
 
 	}
 

@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MultitenancyR4Test {
 
@@ -55,17 +54,17 @@ public class MultitenancyR4Test {
 			.get()
 			.assertStatus(200)
 			.getBody();
-		assertEquals("search", ourLastMethod);
-		assertEquals("TENANT2", ourLastTenantId);
-		assertEquals("foo", ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem());
-		assertEquals("bar", ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+		assertThat(ourLastMethod).isEqualTo("search");
+		assertThat(ourLastTenantId).isEqualTo("TENANT2");
+		assertThat(ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem()).isEqualTo("foo");
+		assertThat(ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("bar");
 
 		Bundle resp = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
-		assertEquals(ourServer.getBaseUrl() + "/TENANT2/Patient?identifier=foo%7Cbar", resp.getLink("self").getUrl());
-		assertEquals(ourServer.getBaseUrl() + "/TENANT2/Patient/0", resp.getEntry().get(0).getFullUrl());
-		assertEquals(ourServer.getBaseUrl() + "/TENANT2/Patient/0", resp.getEntry().get(0).getResource().getId());
+		assertThat(resp.getLink("self").getUrl()).isEqualTo(ourServer.getBaseUrl() + "/TENANT2/Patient?identifier=foo%7Cbar");
+		assertThat(resp.getEntry().get(0).getFullUrl()).isEqualTo(ourServer.getBaseUrl() + "/TENANT2/Patient/0");
+		assertThat(resp.getEntry().get(0).getResource().getId()).isEqualTo(ourServer.getBaseUrl() + "/TENANT2/Patient/0");
 		assertThat(resp.getLink("next").getUrl()).startsWith(ourServer.getBaseUrl() + "/TENANT2?_getpages=");
 
 		// GET the root

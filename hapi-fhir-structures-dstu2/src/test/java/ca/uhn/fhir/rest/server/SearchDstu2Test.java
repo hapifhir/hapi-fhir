@@ -90,11 +90,11 @@ public class SearchDstu2Test {
 
 		assertThat(responseContent).doesNotContain("text");
 
-		assertEquals(200, response.getStatusCode());
+		assertThat(response.getStatusCode()).isEqualTo(200);
 		Patient patient = (Patient) ourCtx.newXmlParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
 		String ref = patient.getManagingOrganization().getReference().getValue();
 		assertEquals("Organization/555", ref);
-		assertNull(response.getHeader(Constants.HEADER_CONTENT_LOCATION));
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_LOCATION)).isNull();
 	}
 
 	@Test
@@ -105,11 +105,11 @@ public class SearchDstu2Test {
 
 		assertThat(responseContent).doesNotContain("text");
 
-		assertEquals(200, response.getStatusCode());
+		assertThat(response.getStatusCode()).isEqualTo(200);
 		Patient patient = (Patient) ourCtx.newJsonParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
 		String ref = patient.getManagingOrganization().getReference().getValue();
 		assertEquals("Organization/555", ref);
-		assertNull(response.getHeader(Constants.HEADER_CONTENT_LOCATION));
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_LOCATION)).isNull();
 	}
 
 	@Test

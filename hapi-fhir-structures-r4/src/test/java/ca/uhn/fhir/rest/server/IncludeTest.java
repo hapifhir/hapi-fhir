@@ -44,7 +44,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class IncludeTest {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(IncludeTest.class);
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 
 	@RegisterExtension
@@ -61,7 +60,6 @@ public class IncludeTest {
 			.get()
 			.assertStatus(400)
 			.getBody();
-		ourLog.info(responseContent);
 		assertThat(responseContent).contains("Invalid _include parameter value");
 	}
 
@@ -73,13 +71,11 @@ public class IncludeTest {
 			.getBody();
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 
-		ourLog.info(responseContent);
-
 		assertThat(bundle.getEntry()).hasSize(3);
 
-		assertEquals(("Patient/p1"), bundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
-		assertEquals(("Patient/p2"), bundle.getEntry().get(1).getResource().getIdElement().toUnqualifiedVersionless().getValue());
-		assertEquals(("Organization/o1"), bundle.getEntry().get(2).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		assertThat(bundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(("Patient/p1"));
+		assertThat(bundle.getEntry().get(1).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(("Patient/p2"));
+		assertThat(bundle.getEntry().get(2).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(("Organization/o1"));
 
 		Patient p1 = (Patient) bundle.getEntry().get(0).getResource();
 		assertThat(p1.getContained()).isEmpty();
@@ -96,13 +92,11 @@ public class IncludeTest {
 			.getBody();
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 
-		ourLog.info(responseContent);
-
 		assertThat(bundle.getEntry()).hasSize(4);
-		assertEquals(("Patient/p1"), bundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
-		assertEquals(("Patient/p2"), bundle.getEntry().get(1).getResource().getIdElement().toUnqualifiedVersionless().getValue());
-		assertEquals(("Organization/o1"), bundle.getEntry().get(2).getResource().getIdElement().toUnqualifiedVersionless().getValue());
-		assertEquals(("Organization/o2"), bundle.getEntry().get(3).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		assertThat(bundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(("Patient/p1"));
+		assertThat(bundle.getEntry().get(1).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(("Patient/p2"));
+		assertThat(bundle.getEntry().get(2).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(("Organization/o1"));
+		assertThat(bundle.getEntry().get(3).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(("Organization/o2"));
 
 		Patient p1 = (Patient) bundle.getEntry().get(0).getResource();
 		assertThat(p1.getContained()).isEmpty();
@@ -119,12 +113,10 @@ public class IncludeTest {
 			.getBody();
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 
-		ourLog.info(responseContent);
-
 		assertThat(bundle.getEntry()).hasSize(3);
-		assertEquals(("Patient/p1"), bundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
-		assertEquals(("Patient/p2"), bundle.getEntry().get(1).getResource().getIdElement().toUnqualifiedVersionless().getValue());
-		assertEquals(("Organization/o1"), bundle.getEntry().get(2).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		assertThat(bundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(("Patient/p1"));
+		assertThat(bundle.getEntry().get(1).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(("Patient/p2"));
+		assertThat(bundle.getEntry().get(2).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(("Organization/o1"));
 
 		Patient p1 = (Patient) bundle.getEntry().get(0).getResource();
 		assertThat(p1.getContained()).isEmpty();
@@ -141,12 +133,10 @@ public class IncludeTest {
 			.getBody();
 		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 
-		ourLog.info(responseContent);
-
 		assertThat(bundle.getEntry()).hasSize(3);
-		assertEquals("Patient/p1", bundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
-		assertEquals("Patient/p2", bundle.getEntry().get(1).getResource().getIdElement().toUnqualifiedVersionless().getValue());
-		assertEquals("Organization/o1", bundle.getEntry().get(2).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		assertThat(bundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("Patient/p1");
+		assertThat(bundle.getEntry().get(1).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("Patient/p2");
+		assertThat(bundle.getEntry().get(2).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("Organization/o1");
 
 		Patient p1 = (Patient) bundle.getEntry().get(0).getResource();
 		assertThat(p1.getContained()).isEmpty();
@@ -191,7 +181,7 @@ public class IncludeTest {
 
 		Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
 		assertThat(p.getName()).isEmpty();
-		assertEquals("Hello", p.getIdElement().getIdPart());
+		assertThat(p.getIdElement().getIdPart()).isEqualTo("Hello");
 	}
 
 	@Test
@@ -205,8 +195,8 @@ public class IncludeTest {
 
 		Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
 		assertThat(p.getName()).hasSize(1);
-		assertEquals("Hello", p.getIdElement().getIdPart());
-		assertEquals("foo-false", p.getName().get(0).getFamily());
+		assertThat(p.getIdElement().getIdPart()).isEqualTo("Hello");
+		assertThat(p.getName().get(0).getFamily()).isEqualTo("foo-false");
 	}
 
 	@Test
@@ -220,8 +210,8 @@ public class IncludeTest {
 
 		Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
 		assertThat(p.getName()).hasSize(1);
-		assertEquals("Hello", p.getIdElement().getIdPart());
-		assertEquals("foo-true", p.getName().get(0).getFamily());
+		assertThat(p.getIdElement().getIdPart()).isEqualTo("Hello");
+		assertThat(p.getName().get(0).getFamily()).isEqualTo("foo-true");
 	}
 
 	@Test
@@ -235,7 +225,7 @@ public class IncludeTest {
 
 		Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
 		assertThat(p.getName()).hasSize(2);
-		assertEquals("Hello", p.getIdElement().getIdPart());
+		assertThat(p.getIdElement().getIdPart()).isEqualTo("Hello");
 
 		Set<String> values = new HashSet<String>();
 		values.add(p.getName().get(0).getFamily());
@@ -253,7 +243,7 @@ public class IncludeTest {
 		assertThat(bundle.getEntry()).hasSize(1);
 
 		Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
-		assertEquals("foo", p.getIdentifierFirstRep().getValue());
+		assertThat(p.getIdentifierFirstRep().getValue()).isEqualTo("foo");
 	}
 
 	public static class DummyDiagnosticReportResourceProvider implements IResourceProvider {

@@ -24,7 +24,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class CreateWithPreferReturnR4Test {
 
@@ -62,12 +61,12 @@ public class CreateWithPreferReturnR4Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		response.assertStatus(Constants.STATUS_HTTP_201_CREATED);
+		response.assertStatus(201);
 		assertThat(responseContent).isNullOrEmpty();
 		// assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).doesNotContain("fhir");
-		assertNull(response.getHeader(Constants.HEADER_CONTENT_TYPE));
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", response.getHeader("location"));
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", response.getHeader("content-location"));
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE)).isNull();
+		assertThat(response.getHeader("location")).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
+		assertThat(response.getHeader("content-location")).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
 
 	}
 
@@ -89,11 +88,11 @@ public class CreateWithPreferReturnR4Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		response.assertStatus(Constants.STATUS_HTTP_201_CREATED);
+		response.assertStatus(201);
 		assertThat(responseContent).contains("DIAG");
-		assertEquals("application/xml+fhir;charset=utf-8", response.getHeader(Constants.HEADER_CONTENT_TYPE).toLowerCase().replace(" ", ""));
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", response.getHeader("location"));
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", response.getHeader("content-location"));
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE).toLowerCase().replace(" ", "")).isEqualTo("application/xml+fhir;charset=utf-8");
+		assertThat(response.getHeader("location")).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
+		assertThat(response.getHeader("content-location")).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
 
 	}
 
@@ -111,11 +110,11 @@ public class CreateWithPreferReturnR4Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		response.assertStatus(Constants.STATUS_HTTP_201_CREATED);
+		response.assertStatus(201);
 		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE)).contains(Constants.CT_FHIR_XML);
 		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"001\"/><meta><versionId value=\"002\"/></meta><identifier><value value=\"002\"/></identifier></Patient>", responseContent);
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", response.getHeader("location"));
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", response.getHeader("content-location"));
+		assertThat(response.getHeader("location")).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
+		assertThat(response.getHeader("content-location")).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
 
 	}
 
@@ -133,8 +132,8 @@ public class CreateWithPreferReturnR4Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		response.assertStatus(201);
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", response.getHeader("location"));
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", response.getHeader("content-location"));
+		assertThat(response.getHeader("location")).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
+		assertThat(response.getHeader("content-location")).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
 
 	}
 

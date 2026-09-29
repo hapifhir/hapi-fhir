@@ -1,7 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
@@ -54,7 +53,6 @@ public class UpdateDstu3Test {
 		String responseContent = response.assertStatus(200).getBody();
 
 		ourLog.info("Response was:\n{}", responseContent);
-		ourLog.info("Response was:\n{}", response);
 
 		assertThat(responseContent).isNotEmpty();
 
@@ -62,10 +60,10 @@ public class UpdateDstu3Test {
 		assertEquals(patient.getIdElement().getIdPart(), actualPatient.getIdElement().getIdPart());
 		assertEquals(patient.getIdentifier().get(0).getValue(), actualPatient.getIdentifier().get(0).getValue());
 
-		assertNull(response.getHeader("location"));
-		assertEquals(ourServer.getBaseUrl() + "/Patient/123/_history/002", response.getHeader("content-location"));
-		assertEquals("W/\"002\"", response.getHeader(Constants.HEADER_ETAG_LC));
-		assertEquals("Mon, 22 Apr 2002 11:22:33 GMT", response.getHeader(Constants.HEADER_LAST_MODIFIED_LOWERCASE));
+		assertThat(response.getHeader("location")).isNull();
+		assertThat(response.getHeader("content-location")).isEqualTo(ourServer.getBaseUrl() + "/Patient/123/_history/002");
+		assertThat(response.getHeader(Constants.HEADER_ETAG_LC)).isEqualTo("W/\"002\"");
+		assertThat(response.getHeader(Constants.HEADER_LAST_MODIFIED_LOWERCASE)).isEqualTo("Mon, 22 Apr 2002 11:22:33 GMT");
 
 	}
 
@@ -80,10 +78,9 @@ public class UpdateDstu3Test {
 			.put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
 			.assertStatus(200)
 			.getBody();
-		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals("Patient?_id=001", ourConditionalUrl);
-		assertNull(ourId);
+		assertThat(ourConditionalUrl).isEqualTo("Patient?_id=001");
+		assertThat(ourId).isNull();
 
 	}
 
@@ -115,10 +112,9 @@ public class UpdateDstu3Test {
 			.put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
 			.assertStatus(200)
 			.getBody();
-		ourLog.info("Response was:\n{}", responseContent);
 
-		assertNull(ourConditionalUrl);
-		assertEquals("Patient/001", ourId.getValue());
+		assertThat(ourConditionalUrl).isNull();
+		assertThat(ourId.getValue()).isEqualTo("Patient/001");
 
 	}
 

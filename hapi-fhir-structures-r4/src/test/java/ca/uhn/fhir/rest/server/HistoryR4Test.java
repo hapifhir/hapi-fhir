@@ -22,8 +22,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -36,7 +34,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class HistoryR4Test {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(HistoryR4Test.class);
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static DateRangeParam ourLastAt;
 	private static InstantType ourLastSince;
@@ -67,7 +64,6 @@ public class HistoryR4Test {
 				.get()
 				.assertStatus(200)
 				.getBody();
-			ourLog.info(responseContent);
 
 			assertEquals(ParamPrefixEnum.GREATERTHAN, ourLastAt.getLowerBound().getPrefix());
 			assertEquals("2001", ourLastAt.getLowerBound().getValueAsString());
@@ -83,7 +79,6 @@ public class HistoryR4Test {
 				.get()
 				.assertStatus(200)
 				.getBody();
-			ourLog.info(responseContent);
 
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 			assertThat(bundle.getEntry()).hasSize(2);
@@ -97,7 +92,6 @@ public class HistoryR4Test {
 	public void testServerHistory() throws Exception {
 		{
 			String responseContent = ourServer.fhirRequest("/_history").get().assertStatus(200).getBody();
-			ourLog.info(responseContent);
 
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 			assertThat(bundle.getEntry()).hasSize(2);
@@ -111,7 +105,6 @@ public class HistoryR4Test {
 	public void testSince() throws Exception {
 		{
 			String responseContent = ourServer.fhirRequest("/_history?_since=2005").get().assertStatus(200).getBody();
-			ourLog.info(responseContent);
 
 			assertNull(ourLastAt);
 			assertEquals("2005", ourLastSince.getValueAsString());
@@ -128,7 +121,6 @@ public class HistoryR4Test {
 	public void testTypeHistory() throws Exception {
 		{
 			String responseContent = ourServer.fhirRequest("/Patient/_history").get().assertStatus(200).getBody();
-			ourLog.info(responseContent);
 
 			assertNull(ourLastAt);
 
@@ -150,7 +142,6 @@ public class HistoryR4Test {
 				.get()
 				.assertStatus(200)
 				.getBody();
-			ourLog.info(responseContent);
 
 			Patient bundle = ourCtx.newXmlParser().parseResource(Patient.class, responseContent);
 			assertEquals("vread", bundle.getNameFirstRep().getFamily());

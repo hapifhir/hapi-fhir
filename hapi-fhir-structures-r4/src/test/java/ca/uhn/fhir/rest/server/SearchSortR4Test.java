@@ -24,7 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SearchSortR4Test {
 
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchSortR4Test.class);
 	private static String ourLastMethod;
 	private static SortSpec ourLastSortSpec;
 
@@ -47,7 +46,6 @@ public class SearchSortR4Test {
 			.get()
 			.assertStatus(200)
 			.getBody();
-		ourLog.info(responseContent);
 		assertEquals("search", ourLastMethod);
 
 		assertEquals("param1", ourLastSortSpec.getParamName());

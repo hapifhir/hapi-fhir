@@ -25,20 +25,14 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FhirPathFilterInterceptorR4Test {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(FhirPathFilterInterceptorR4Test.class);
 	private static FhirContext ourCtx = FhirContext.forR4();
 	@Order(0)
 	@RegisterExtension
@@ -69,7 +63,6 @@ public class FhirPathFilterInterceptorR4Test {
 		IIdType patientId = createPatient();
 
 		String responseText = myServerExtension.fhirRequest("/" + patientId.toUnqualified().getValue()).get().getBody();
-		ourLog.info("Response:\n{}", responseText);
 		assertThat(responseText).contains("\"system\": \"http://identifiers/1\"");
 		assertThat(responseText).contains("\"given\": [ \"Homer\", \"Jay\" ]");
 	}
@@ -83,7 +76,6 @@ public class FhirPathFilterInterceptorR4Test {
 		String responseText = myServerExtension.fhirRequest("/" + patientId.toUnqualified().getValue() + "?_format=" + Constants.FORMATS_HTML_JSON)
 			.get()
 			.getBody();
-		ourLog.info("Response:\n{}", responseText);
 		assertThat(responseText).contains("<span class='hlTagName'>&quot;system&quot;</span>: <span class='hlQuot'>&quot;http://identifiers/1&quot;");
 		assertThat(responseText).contains("<span class='hlTagName'>&quot;given&quot;</span>: <span class='hlControl'>[</span> <span class='hlTagName'>&quot;Homer&quot;</span><span class='hlControl'>,</span> <span class='hlTagName'>&quot;Jay&quot;</span> ]</div>");
 	}
@@ -95,7 +87,6 @@ public class FhirPathFilterInterceptorR4Test {
 		String responseText = myServerExtension.fhirRequest("/" + patientId.toUnqualified().getValue() + "?_fhirpath=Patient.identifier&_pretty=true")
 			.get()
 			.getBody();
-		ourLog.info("Response:\n{}", responseText);
 		assertThat(responseText).contains("\"system\": \"http://identifiers/1\"");
 		assertThat(responseText).doesNotContain("\"given\": [ \"Homer\", \"Jay\" ]");
 
@@ -108,7 +99,6 @@ public class FhirPathFilterInterceptorR4Test {
 		String responseText = myServerExtension.fhirRequest("/" + patientId.toUnqualified().getValue() + "?_fhirpath=Patient.extension('http://hl7.org/fhir/us/core/StructureDefinition/us-core-race')&_pretty=true")
 			.get()
 			.getBody();
-		ourLog.info("Response:\n{}", responseText);
 		assertThat(responseText).contains("\"url\": \"http://hl7.org/fhir/us/core/StructureDefinition/us-core-race\"");
 
 	}
@@ -120,7 +110,6 @@ public class FhirPathFilterInterceptorR4Test {
 		String responseText = myServerExtension.fhirRequest("/" + patientId.toUnqualified().getValue() + "?_fhirpath=Patient&_pretty=true")
 			.get()
 			.getBody();
-		ourLog.info("Response:\n{}", responseText);
 		assertThat(responseText).contains("\"resource\": {");
 		assertThat(responseText).contains("\"system\": \"http://identifiers/1\"");
 		assertThat(responseText).contains("\"given\": [ \"Homer\", \"Jay\" ]");
@@ -135,7 +124,6 @@ public class FhirPathFilterInterceptorR4Test {
 			.get()
 			.assertStatus(400)
 			.getBody();
-		ourLog.info("Response:\n{}", responseText);
 		assertThat(responseText).contains("left operand to * can only have 1 value, but has 8 values");
 
 	}
@@ -147,7 +135,6 @@ public class FhirPathFilterInterceptorR4Test {
 		String responseText = myServerExtension.fhirRequest("/Patient?_fhirpath=Bundle.entry.resource.as(Patient).name&_pretty=true")
 			.get()
 			.getBody();
-		ourLog.info("Response:\n{}", responseText);
 		assertThat(responseText).contains("      \"valueHumanName\": {\n" +
 			"        \"family\": \"Simpson\",\n" +
 			"        \"given\": [ \"Homer\", \"Jay\" ]\n" +
@@ -163,7 +150,6 @@ public class FhirPathFilterInterceptorR4Test {
 		String responseText = myServerExtension.fhirRequest("/" + patientId.toUnqualified().getValue() + "?_fhirpath=Patient.identifier&_format=" + Constants.FORMATS_HTML_JSON)
 			.get()
 			.getBody();
-		ourLog.info("Response:\n{}", responseText);
 		assertThat(responseText).contains("<span class='hlTagName'>&quot;system&quot;</span>: <span class='hlQuot'>&quot;http://identifiers/1&quot;");
 		assertThat(responseText).doesNotContain("<span class='hlTagName'>&quot;given&quot;</span>: <span class='hlControl'>[</span> <span class='hlTagName'>&quot;Homer&quot;</span><span class='hlControl'>,</span> <span class='hlTagName'>&quot;Jay&quot;</span> ]</div>");
 
@@ -188,15 +174,14 @@ public class FhirPathFilterInterceptorR4Test {
 		String responseText = myServerExtension.fhirRequest("/" + bundle.toUnqualified().getValue() + "?_fhirpath=" + theFhirPathExpression)
 			.get()
 			.getBody();
-		ourLog.info("Response:\n{}", responseText);
 		IBaseResource resource = ourCtx.newJsonParser().parseResource(responseText);
-		assertTrue(resource instanceof Parameters);
+		assertThat(resource instanceof Parameters).isTrue();
 		Parameters parameters = (Parameters)resource;
 		Parameters.ParametersParameterComponent parameterComponent = parameters.getParameter("result");
-		assertNotNull(parameterComponent);
+		assertThat(parameterComponent).isNotNull();
 		assertThat(parameterComponent.getPart()).hasSize(2);
 		Parameters.ParametersParameterComponent resultComponent = parameterComponent.getPart().get(1);
-		assertEquals("result", resultComponent.getName());
+		assertThat(resultComponent.getName()).isEqualTo("result");
 		assertThat(responseText).contains(expectedResult);
 
 	}

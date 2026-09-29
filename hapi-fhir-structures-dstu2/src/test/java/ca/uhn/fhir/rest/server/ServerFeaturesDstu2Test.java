@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -89,9 +88,7 @@ public class ServerFeaturesDstu2Test {
 		HttpTestResponse response = ourServer.fhirRequest("/Patient/123").head();
 		assertThat(response.getBodyBytes()).isEmpty();
 
-		ourLog.info(response.toString());
-
-		assertEquals(200, response.getStatusCode());
+		assertThat(response.getStatusCode()).isEqualTo(200);
 		assertThat(response.getHeader(Constants.HEADER_POWERED_BY)).contains("HAPI");
 	}
 

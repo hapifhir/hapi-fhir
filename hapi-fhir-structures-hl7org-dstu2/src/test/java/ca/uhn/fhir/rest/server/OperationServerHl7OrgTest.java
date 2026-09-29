@@ -96,7 +96,7 @@ public class OperationServerHl7OrgTest {
 	.assertStatus(405);
     String response = status.getBody();
 
-		assertEquals("POST", status.getHeader(Constants.HEADER_ALLOW));
+		assertThat(status.getHeader(Constants.HEADER_ALLOW)).isEqualTo("POST");
 		assertThat(response).contains("Can not invoke operation $OP_TYPE using HTTP GET because parameter PARAM2 is not a primitive datatype");
   }
 
@@ -201,10 +201,10 @@ public class OperationServerHl7OrgTest {
   public void testOperationCantUseGetIfItIsntIdempotent() throws Exception {
     HttpTestResponse status = ourServer.fhirRequest("/Patient/123/$OP_INSTANCE")
 	.get()
-	.assertStatus(Constants.STATUS_HTTP_405_METHOD_NOT_ALLOWED);
+	.assertStatus(405);
     String response = status.getBody();
 
-		assertEquals("POST", status.getHeader(Constants.HEADER_ALLOW));
+		assertThat(status.getHeader(Constants.HEADER_ALLOW)).isEqualTo("POST");
 		assertThat(response).contains("HTTP Method GET is not allowed");
   }
 
@@ -220,7 +220,6 @@ public class OperationServerHl7OrgTest {
 	.assertStatus(400);
     String response = status.getBody();
 
-    ourLog.info(status.toString());
     ourLog.info(response);
 
 		assertThat(response).contains("Request has parameter PARAM1 of type IntegerType but method expects type StringType");

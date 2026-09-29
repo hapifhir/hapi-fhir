@@ -24,10 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class InjectionAttackTest {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(InjectionAttackTest.class);
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 
 	@RegisterExtension
@@ -47,7 +45,6 @@ public class InjectionAttackTest {
 			.get()
 			.assertStatus(200)
 			.getBody();
-		ourLog.info(responseContent);
 
 		assertThat(responseContent).doesNotContain("<script>");
 	}
@@ -65,10 +62,9 @@ public class InjectionAttackTest {
 			.get()
 			.assertStatus(400);
 		String responseContent = response.getBody();
-		ourLog.info(responseContent);
 
 		assertThat(responseContent).doesNotContain("<script>");
-		assertEquals("text/html", response.getContentType());
+		assertThat(response.getContentType()).isEqualTo("text/html");
 
 		// JSON HTML
 		response = ourServer.fhirRequest(requestPath)
@@ -76,10 +72,9 @@ public class InjectionAttackTest {
 			.get()
 			.assertStatus(400);
 		responseContent = response.getBody();
-		ourLog.info(responseContent);
 
 		assertThat(responseContent).doesNotContain("<script>");
-		assertEquals("text/html", response.getContentType());
+		assertThat(response.getContentType()).isEqualTo("text/html");
 
 		// XML HTML
 		response = ourServer.fhirRequest(requestPath)
@@ -87,10 +82,9 @@ public class InjectionAttackTest {
 			.get()
 			.assertStatus(400);
 		responseContent = response.getBody();
-		ourLog.info(responseContent);
 
 		assertThat(responseContent).doesNotContain("<script>");
-		assertEquals(Constants.CT_FHIR_XML_NEW, response.getContentType());
+		assertThat(response.getContentType()).isEqualTo(Constants.CT_FHIR_XML_NEW);
 
 		// JSON Plain
 		response = ourServer.fhirRequest(requestPath)
@@ -98,10 +92,9 @@ public class InjectionAttackTest {
 			.get()
 			.assertStatus(400);
 		responseContent = response.getBody();
-		ourLog.info(responseContent);
 
 		assertThat(responseContent).doesNotContain("<script>");
-		assertEquals(Constants.CT_FHIR_JSON_NEW, response.getContentType());
+		assertThat(response.getContentType()).isEqualTo(Constants.CT_FHIR_JSON_NEW);
 	}
 
 	@Test
@@ -116,10 +109,9 @@ public class InjectionAttackTest {
 			.get()
 			.assertStatus(404);
 		String responseContent = response.getBody();
-		ourLog.info(responseContent);
 
 		assertThat(responseContent).doesNotContain("<script>");
-		assertEquals("text/html", response.getContentType());
+		assertThat(response.getContentType()).isEqualTo("text/html");
 
 		// JSON HTML
 		response = ourServer.fhirRequest(requestPath)
@@ -127,10 +119,9 @@ public class InjectionAttackTest {
 			.get()
 			.assertStatus(404);
 		responseContent = response.getBody();
-		ourLog.info(responseContent);
 
 		assertThat(responseContent).doesNotContain("<script>");
-		assertEquals("text/html", response.getContentType());
+		assertThat(response.getContentType()).isEqualTo("text/html");
 
 		// XML HTML
 		response = ourServer.fhirRequest(requestPath)
@@ -138,10 +129,9 @@ public class InjectionAttackTest {
 			.get()
 			.assertStatus(404);
 		responseContent = response.getBody();
-		ourLog.info(responseContent);
 
 		assertThat(responseContent).doesNotContain("<script>");
-		assertEquals(Constants.CT_FHIR_XML_NEW, response.getContentType());
+		assertThat(response.getContentType()).isEqualTo(Constants.CT_FHIR_XML_NEW);
 
 		// JSON Plain
 		response = ourServer.fhirRequest(requestPath)
@@ -149,10 +139,9 @@ public class InjectionAttackTest {
 			.get()
 			.assertStatus(404);
 		responseContent = response.getBody();
-		ourLog.info(responseContent);
 
 		assertThat(responseContent).doesNotContain("<script>");
-		assertEquals(Constants.CT_FHIR_JSON_NEW, response.getContentType());
+		assertThat(response.getContentType()).isEqualTo(Constants.CT_FHIR_JSON_NEW);
 	}
 
 	@Test
@@ -166,7 +155,6 @@ public class InjectionAttackTest {
 			.get()
 			.assertStatus(200)
 			.getBody();
-		ourLog.info(responseContent);
 
 		assertThat(responseContent).doesNotContain("<script>");
 

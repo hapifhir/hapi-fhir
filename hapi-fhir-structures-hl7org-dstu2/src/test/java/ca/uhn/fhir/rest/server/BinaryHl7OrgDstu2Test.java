@@ -89,7 +89,7 @@ public class BinaryHl7OrgDstu2Test {
   public void testRead() throws Exception {
     HttpTestResponse status = ourServer.fhirRequest("/Binary/foo").get().assertStatus(200);
     byte[] responseContent = status.getBodyBytes();
-		assertEquals("foo", status.getHeader("content-type"));
+		assertThat(status.getHeader("content-type")).isEqualTo("foo");
 		assertThat(responseContent).containsExactly(new byte[]{1, 2, 3, 4});
 
   }
@@ -98,7 +98,7 @@ public class BinaryHl7OrgDstu2Test {
   public void testSearchJson() throws Exception {
     HttpTestResponse status = ourServer.fhirRequest("/Binary?_pretty=true&_format=json").get().assertStatus(200);
     String responseContent = status.getBody();
-		assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", status.getHeader("content-type").replace(" ", "").replace("UTF", "utf"));
+		assertThat(status.getHeader("content-type").replace(" ", "").replace("UTF", "utf")).isEqualTo(Constants.CT_FHIR_JSON + ";charset=utf-8");
 
     ourLog.info(responseContent);
 
@@ -113,7 +113,7 @@ public class BinaryHl7OrgDstu2Test {
   public void testSearchXml() throws Exception {
     HttpTestResponse status = ourServer.fhirRequest("/Binary?_pretty=true").get().assertStatus(200);
     String responseContent = status.getBody();
-		assertEquals(Constants.CT_FHIR_XML + ";charset=utf-8", status.getHeader("content-type").replace(" ", "").replace("UTF", "utf"));
+		assertThat(status.getHeader("content-type").replace(" ", "").replace("UTF", "utf")).isEqualTo(Constants.CT_FHIR_XML + ";charset=utf-8");
 
     ourLog.info(responseContent);
 

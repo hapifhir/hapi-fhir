@@ -28,7 +28,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class PatchServerDstu3Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PatchServerDstu3Test.class);
 	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
 	private static String ourLastMethod;
 	private static PatchTypeEnum ourLastPatchType;
@@ -57,8 +56,7 @@ public class PatchServerDstu3Test {
 		String responseContent = ourServer.fhirRequest("/Patient/123")
 			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
 			.method("PATCH", requestContents.getBytes(StandardCharsets.UTF_8), Constants.CT_JSON_PATCH).assertStatus(200).getBody();
-		ourLog.info(responseContent);
-		assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">OK</div></text></OperationOutcome>", responseContent);
+		assertThat(responseContent).isEqualTo("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">OK</div></text></OperationOutcome>");
 
 		assertEquals("patientPatch", ourLastMethod);
 		assertEquals("Patient/123", ourLastId.getValue());
@@ -72,8 +70,7 @@ public class PatchServerDstu3Test {
 		String responseContent = ourServer.fhirRequest("/Patient?_id=123")
 			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
 			.method("PATCH", requestContents.getBytes(StandardCharsets.UTF_8), Constants.CT_JSON_PATCH).assertStatus(200).getBody();
-		ourLog.info(responseContent);
-		assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">OK</div></text></OperationOutcome>", responseContent);
+		assertThat(responseContent).isEqualTo("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">OK</div></text></OperationOutcome>");
 
 		assertEquals("patientPatch", ourLastMethod);
 		assertEquals("Patient?_id=123", ourLastConditional);
@@ -88,8 +85,7 @@ public class PatchServerDstu3Test {
 		String responseContent = ourServer.fhirRequest("/Patient/123")
 			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
 			.method("PATCH", requestContents.getBytes(StandardCharsets.UTF_8), Constants.CT_XML_PATCH).assertStatus(200).getBody();
-		ourLog.info(responseContent);
-		assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">OK</div></text></OperationOutcome>", responseContent);
+		assertThat(responseContent).isEqualTo("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">OK</div></text></OperationOutcome>");
 
 		assertEquals("patientPatch", ourLastMethod);
 		assertEquals("Patient/123", ourLastId.getValue());
@@ -104,7 +100,6 @@ public class PatchServerDstu3Test {
 			.patch(requestContents, Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)
 			.assertStatus(200)
 			.getBody();
-		ourLog.info(responseContent);
 
 		assertEquals("patientPatch", ourLastMethod);
 		assertEquals("Patient/123", ourLastId.getValue());
@@ -118,8 +113,7 @@ public class PatchServerDstu3Test {
 			.patch(requestContents, "text/plain; charset=UTF-8")
 			.assertStatus(400)
 			.getBody();
-		ourLog.info(responseContent);
-		assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"" + Msg.code(1965) + "Invalid Content-Type for PATCH operation: text/plain\"/></issue></OperationOutcome>", responseContent);
+		assertThat(responseContent).isEqualTo("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"" + Msg.code(1965) + "Invalid Content-Type for PATCH operation: text/plain\"/></issue></OperationOutcome>");
 
 	}
 

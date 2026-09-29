@@ -65,9 +65,9 @@ public class CreateR4Test {
 
 		response.assertStatus(201);
 
-		assertEquals(1, response.getHeaders("Location").size());
-		assertEquals(1, response.getHeaders("Content-Location").size());
-		assertEquals(ourServer.getBaseUrl() + "/Patient/1", response.getHeader("Location"));
+		assertThat(response.getHeaders("Location").size()).isEqualTo(1);
+		assertThat(response.getHeaders(Constants.HEADER_CONTENT_LOCATION).size()).isEqualTo(1);
+		assertThat(response.getHeader("Location")).isEqualTo(ourServer.getBaseUrl() + "/Patient/1");
 
 	}
 
@@ -78,8 +78,6 @@ public class CreateR4Test {
 			.method("POST", "{\"resourceType\":\"Patient\", \"id\":\"999\", \"status\":\"active\"}".getBytes(StandardCharsets.UTF_8), null)
 			.assertStatus(400)
 			.getBody();
-
-		ourLog.info("Response was:\n{}", responseContent);
 
 		assertThat(responseContent).contains("No Content-Type header was provided in the request. This is required for \\\"CREATE\\\" operation");
 	}
@@ -98,9 +96,9 @@ public class CreateR4Test {
 
 		response.assertStatus(201);
 
-		assertEquals(1, response.getHeaders("Location").size());
-		assertEquals(1, response.getHeaders("Content-Location").size());
-		assertEquals(ourServer.getBaseUrl() + "/Patient/1", response.getHeader("Location"));
+		assertThat(response.getHeaders("Location").size()).isEqualTo(1);
+		assertThat(response.getHeaders(Constants.HEADER_CONTENT_LOCATION).size()).isEqualTo(1);
+		assertThat(response.getHeader("Location")).isEqualTo(ourServer.getBaseUrl() + "/Patient/1");
 
 	}
 
@@ -207,10 +205,9 @@ public class CreateR4Test {
 		HttpTestResponse response = ourServer.fhirRequest("/Patient")
 			.post(body, "application/fhir+json; charset=utf-8")
 			.assertStatus(201);
-		assertEquals("application/fhir+json;charset=utf-8", response.getHeader(Constants.HEADER_CONTENT_TYPE));
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE)).isEqualTo("application/fhir+json;charset=utf-8");
 
 		String responseContent = response.getBody();
-		ourLog.info("Response was:\n{}", responseContent);
 		assertThat(responseContent).contains("\"resourceType\":\"Patient\"");
 
 	}
@@ -228,10 +225,9 @@ public class CreateR4Test {
 		HttpTestResponse response = ourServer.fhirRequest("/Patient")
 			.post(body, "application/fhir+json; charset=utf-8")
 			.assertStatus(201);
-		assertEquals("application/fhir+json;charset=utf-8", response.getHeader(Constants.HEADER_CONTENT_TYPE));
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE)).isEqualTo("application/fhir+json;charset=utf-8");
 
 		String responseContent = response.getBody();
-		ourLog.info("Response was:\n{}", responseContent);
 		assertThat(responseContent).contains("\"resourceType\":\"OperationOutcome\"");
 
 
@@ -250,7 +246,7 @@ public class CreateR4Test {
 		HttpTestResponse response = ourServer.fhirRequest("/Patient")
 			.post(body, "application/fhir+json; charset=utf-8")
 			.assertStatus(201);
-		assertNull(response.getHeader(Constants.HEADER_CONTENT_TYPE));
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE)).isNull();
 
 		String responseContent = response.getBody();
 		assertThat(responseContent).isNullOrEmpty();

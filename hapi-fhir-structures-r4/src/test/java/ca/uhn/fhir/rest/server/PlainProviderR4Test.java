@@ -156,16 +156,15 @@ public class PlainProviderR4Test {
 		String path = "/Patient?identifier=urn:hapitest:mrns%7C00001";
 		String uri = baseUri + path;
 		String responseContent = ourServer.fhirRequest(path).get().assertStatus(200).getBody();
-		ourLog.info("Response was:\n{}", responseContent);
 
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 
 		assertThat(bundle.getEntry()).hasSize(1);
 
 		Patient patient = (Patient) bundle.getEntry().get(0).getResource();
-		assertEquals("PatientOne", patient.getName().get(0).getGiven().get(0).getValue());
+		assertThat(patient.getName().get(0).getGiven().get(0).getValue()).isEqualTo("PatientOne");
 
-		assertEquals(uri.replace(":hapitest:", "%3Ahapitest%3A"), bundle.getLink("self").getUrl());
+		assertThat(bundle.getLink("self").getUrl()).isEqualTo(uri.replace(":hapitest:", "%3Ahapitest%3A"));
 
 	}
 	

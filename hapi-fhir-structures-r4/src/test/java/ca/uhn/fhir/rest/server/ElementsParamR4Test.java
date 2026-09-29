@@ -36,7 +36,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ElementsParamR4Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ElementsParamR4Test.class);
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static Set<String> ourLastElements;
 	private static Procedure ourNextProcedure;
@@ -126,7 +125,6 @@ public class ElementsParamR4Test {
 			.get()
 			.assertStatus(400)
 			.getBody();
-		ourLog.info(responseContent);
 
 	}
 
@@ -417,7 +415,6 @@ public class ElementsParamR4Test {
 		String responseContent = ourServer.fhirRequest(thePath + "&_pretty=true&_format=" + encodingEnum.getFormatContentType())
 			.get()
 			.getBody();
-		ourLog.info(responseContent);
 		T response = encodingEnum.newParser(ourCtx).parseResource(theType, responseContent);
 		theVerifier.accept(response);
 
@@ -425,7 +422,6 @@ public class ElementsParamR4Test {
 		responseContent = ourServer.fhirRequest(thePath + "&_pretty=true&_format=" + encodingEnum.getFormatContentType())
 			.get()
 			.getBody();
-		ourLog.info(responseContent);
 		response = encodingEnum.newParser(ourCtx).parseResource(theType, responseContent);
 		theVerifier.accept(response);
 	}

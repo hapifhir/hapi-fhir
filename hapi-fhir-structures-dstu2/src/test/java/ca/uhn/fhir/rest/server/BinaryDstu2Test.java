@@ -26,15 +26,12 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * Created by dsotnikov on 2/25/2014.
  */
 public class BinaryDstu2Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BinaryDstu2Test.class);
 	private static final FhirContext ourCtx = FhirContext.forDstu2Cached();
 	private static Binary ourLast;
 
@@ -55,13 +52,11 @@ public class BinaryDstu2Test {
 		HttpTestResponse response = ourServer.fhirRequest("/Binary/foo?_format=xml").get();
 		String responseContent = response.getBody();
 
-		ourLog.info(responseContent);
-
 		response.assertStatus(200);
 		assertThat(response.getHeader("content-type")).startsWith(Constants.CT_FHIR_XML + ";");
 
 		Binary bin = ourCtx.newXmlParser().parseResource(Binary.class, responseContent);
-		assertEquals("foo", bin.getContentType());
+		assertThat(bin.getContentType()).isEqualTo("foo");
 		assertThat(bin.getContent()).containsExactly(new byte[]{1, 2, 3, 4});
 	}
 
@@ -70,13 +65,11 @@ public class BinaryDstu2Test {
 		HttpTestResponse response = ourServer.fhirRequest("/Binary/foo?_format=json").get();
 		String responseContent = response.getBody();
 
-		ourLog.info(responseContent);
-
 		response.assertStatus(200);
 		assertThat(response.getHeader("content-type")).startsWith(Constants.CT_FHIR_JSON + ";");
 
 		Binary bin = ourCtx.newJsonParser().parseResource(Binary.class, responseContent);
-		assertEquals("foo", bin.getContentType());
+		assertThat(bin.getContentType()).isEqualTo("foo");
 		assertThat(bin.getContent()).containsExactly(new byte[]{1, 2, 3, 4});
 	}
 
@@ -85,7 +78,7 @@ public class BinaryDstu2Test {
 	public void testPostBinary() throws Exception {
 		ourServer.fhirRequest("/Binary").post(new byte[]{1, 2, 3, 4}, "foo/bar; charset=UTF-8").assertStatus(201);
 
-		assertEquals("foo/bar; charset=UTF-8", ourLast.getContentType());
+		assertThat(ourLast.getContentType()).isEqualTo("foo/bar; charset=UTF-8");
 		assertThat(ourLast.getContent()).containsExactly(new byte[]{1, 2, 3, 4});
 	}
 
@@ -99,7 +92,7 @@ public class BinaryDstu2Test {
 
 		ourServer.fhirRequest("/Binary").post(stringContent, Constants.CT_FHIR_JSON).assertStatus(201);
 
-		assertEquals("text/plain", ourLast.getContentType().replace(" ", "").toLowerCase());
+		assertThat(ourLast.getContentType().replace(" ", "").toLowerCase()).isEqualTo("text/plain");
 	}
 
 	@Test
@@ -113,7 +106,7 @@ public class BinaryDstu2Test {
 	public void testBinaryReadAcceptBrowser() throws Exception {
 		HttpTestRequest http = ourServer.fhirRequest("/Binary/foo")
 			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
-			.withHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+			.withHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
 
 		binaryRead(http);
 	}
@@ -121,8 +114,8 @@ public class BinaryDstu2Test {
 	private void binaryRead(HttpTestRequest http) {
 		HttpTestResponse status = http.get().assertStatus(200);
 		byte[] responseContent = status.getBodyBytes();
-		assertEquals("foo", status.getHeader("content-type"));
-		assertEquals("Attachment;", status.getHeader("Content-Disposition")); // This is a security requirement!
+		assertThat(status.getHeader("content-type")).isEqualTo("foo");
+		assertThat(status.getHeader("Content-Disposition")).isEqualTo("Attachment;"); // This is a security requirement!
 		assertThat(responseContent).containsExactly(new byte[]{1, 2, 3, 4});
 	}
 
@@ -130,25 +123,23 @@ public class BinaryDstu2Test {
 	public void testBinaryReadAcceptFhirJson() throws Exception {
 		HttpTestResponse status = ourServer.fhirRequest("/Binary/foo")
 			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
-			.withHeader("Accept", Constants.CT_FHIR_JSON).get().assertStatus(200);
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON).get().assertStatus(200);
 		String responseContent = status.getBody();
-		assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", status.getHeader("content-type").replace(" ", "").toLowerCase());
-		assertNull(status.getHeader("Content-Disposition"));
-		assertEquals("{\"resourceType\":\"Binary\",\"id\":\"1\",\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}", responseContent);
+		assertThat(status.getHeader("content-type").replace(" ", "").toLowerCase()).isEqualTo(Constants.CT_FHIR_JSON + ";charset=utf-8");
+		assertThat(status.getHeader("Content-Disposition")).isNull();
+		assertThat(responseContent).isEqualTo("{\"resourceType\":\"Binary\",\"id\":\"1\",\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}");
 	}
 
 	@Test
 	public void testSearchJson() throws Exception {
 		HttpTestResponse response = ourServer.fhirRequest("/Binary?_pretty=true&_format=json").get().assertStatus(200);
 		String responseContent = response.getBody();
-		assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", response.getHeader("content-type").replace(" ", "").replace("UTF", "utf"));
-
-		ourLog.info(responseContent);
+		assertThat(response.getHeader("content-type").replace(" ", "").replace("UTF", "utf")).isEqualTo(Constants.CT_FHIR_JSON + ";charset=utf-8");
 
 		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 		Binary bin = (Binary) bundle.getEntry().get(0).getResource();
 
-		assertEquals("text/plain", bin.getContentType());
+		assertThat(bin.getContentType()).isEqualTo("text/plain");
 		assertThat(bin.getContent()).containsExactly(new byte[]{1, 2, 3, 4});
 	}
 
@@ -156,14 +147,12 @@ public class BinaryDstu2Test {
 	public void testSearchXml() throws Exception {
 		HttpTestResponse response = ourServer.fhirRequest("/Binary?_pretty=true").get().assertStatus(200);
 		String responseContent = response.getBody();
-		assertEquals(Constants.CT_FHIR_XML + ";charset=utf-8", response.getHeader("content-type").replace(" ", "").replace("UTF", "utf"));
-
-		ourLog.info(responseContent);
+		assertThat(response.getHeader("content-type").replace(" ", "").replace("UTF", "utf")).isEqualTo(Constants.CT_FHIR_XML + ";charset=utf-8");
 
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		Binary bin = (Binary) bundle.getEntry().get(0).getResource();
 
-		assertEquals("text/plain", bin.getContentType());
+		assertThat(bin.getContentType()).isEqualTo("text/plain");
 		assertThat(bin.getContent()).containsExactly(new byte[]{1, 2, 3, 4});
 	}
 

@@ -20,13 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class SearchCountParamDstu2Test {
 
 	private static final FhirContext ourCtx = FhirContext.forDstu2Cached();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchCountParamDstu2Test.class);
 	private static String ourLastMethod;
 	private static Integer ourLastParam;
 
@@ -46,9 +43,8 @@ public class SearchCountParamDstu2Test {
 	@Test
 	public void testSearch() throws Exception {
 		String responseContent = ourServer.fhirRequest("/Patient?_count=2").get().assertStatus(200).getBody();
-		ourLog.info(responseContent);
-		assertEquals("search", ourLastMethod);
-		assertEquals(Integer.valueOf(2), ourLastParam);
+		assertThat(ourLastMethod).isEqualTo("search");
+		assertThat(ourLastParam).isEqualTo(Integer.valueOf(2));
 		
 		assertThat(responseContent).containsSubsequence(
 			"<link>", 
@@ -70,9 +66,8 @@ public class SearchCountParamDstu2Test {
 			.get()
 			.assertStatus(200)
 			.getBody();
-		ourLog.info(responseContent);
-		assertEquals("searchWithNoCountParam", ourLastMethod);
-		assertNull(ourLastParam);
+		assertThat(ourLastMethod).isEqualTo("searchWithNoCountParam");
+		assertThat(ourLastParam).isNull();
 		
 		//@formatter:off
 		assertThat(responseContent).containsSubsequence(

@@ -57,7 +57,7 @@ public class SummaryParamDstu2Test {
 		String responseContent = response.getBody();
 		ourLog.info(responseContent);
 
-		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase(), response.getHeader(Constants.HEADER_CONTENT_TYPE).replace(" ", "").replace("UTF", "utf"));
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE).replace(" ", "").replace("UTF", "utf")).isEqualTo(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase());
 		assertThat(responseContent).doesNotContain("<Bundle");
 		assertThat(responseContent).contains("<Patien");
 		assertThat(responseContent).doesNotContain("<div>THE DIV</div>");
@@ -75,7 +75,7 @@ public class SummaryParamDstu2Test {
 		String responseContent = response.getBody();
 		ourLog.info(responseContent);
 
-		assertEquals(Constants.CT_HTML_WITH_UTF8.replace(" ", "").toLowerCase(), response.getHeader(Constants.HEADER_CONTENT_TYPE).replace(" ", "").replace("UTF", "utf"));
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE).replace(" ", "").replace("UTF", "utf")).isEqualTo(Constants.CT_HTML_WITH_UTF8.replace(" ", "").toLowerCase());
 		assertThat(responseContent).doesNotContain("<Bundle");
 		assertThat(responseContent).doesNotContain("<Medic");
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">THE DIV</div>", responseContent);
@@ -91,7 +91,7 @@ public class SummaryParamDstu2Test {
 		String responseContent = response.getBody();
 		ourLog.info(responseContent);
 
-		assertEquals(Constants.CT_HTML_WITH_UTF8.replace(" ", "").toLowerCase(), response.getHeader(Constants.HEADER_CONTENT_TYPE).replace(" ", "").replace("UTF", "utf"));
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE).replace(" ", "").replace("UTF", "utf")).isEqualTo(Constants.CT_HTML_WITH_UTF8.replace(" ", "").toLowerCase());
 		assertThat(responseContent).doesNotContain("<Bundle");
 		assertThat(responseContent).doesNotContain("<Patien");
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">TEXT</div>", responseContent);
@@ -107,7 +107,7 @@ public class SummaryParamDstu2Test {
 		String responseContent = response.getBody();
 		ourLog.info(responseContent);
 
-		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase(), response.getHeader(Constants.HEADER_CONTENT_TYPE).replace(" ", "").replace("UTF", "utf"));
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE).replace(" ", "").replace("UTF", "utf")).isEqualTo(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase());
 		assertThat(responseContent).doesNotContain("<Bundle");
 		assertThat(responseContent).contains("<Patien");
 		assertThat(responseContent).doesNotContain("<div>THE DIV</div>");

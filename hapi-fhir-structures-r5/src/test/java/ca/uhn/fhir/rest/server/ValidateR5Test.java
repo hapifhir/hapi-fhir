@@ -27,12 +27,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class ValidateR5Test {
 	private static final FhirContext ourCtx = FhirContext.forR5Cached();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValidateR5Test.class);
 
 	@RegisterExtension
 	private static final RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
@@ -132,7 +129,7 @@ public class ValidateR5Test {
 			.post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML)
 			.assertStatus(200);
 
-		assertNull(ourLastPatient);
+		assertThat(ourLastPatient).isNull();
 	}
 
 	@Test
@@ -143,9 +140,9 @@ public class ValidateR5Test {
 		String resp = ourServer.fhirRequest("/Patient/123/$validate").get().assertStatus(200).getBody();
 
 		assertThat(resp).contains("<OperationOutcome", "FOOBAR");
-		assertNull(ourLastPatient);
-		assertEquals("Patient", ourLastId.getResourceType());
-		assertEquals("123", ourLastId.getIdPart());
+		assertThat(ourLastPatient).isNull();
+		assertThat(ourLastId.getResourceType()).isEqualTo("Patient");
+		assertThat(ourLastId.getIdPart()).isEqualTo("123");
 	}
 
 	@Test
@@ -163,7 +160,7 @@ public class ValidateR5Test {
 			.assertStatus(200);
 
 		assertThat(ourLastResourceBody).contains("\"resourceType\":\"Organization\"", "\"identifier\"", "\"value\":\"001");
-		assertEquals(EncodingEnum.JSON, ourLastEncoding);
+		assertThat(ourLastEncoding).isEqualTo(EncodingEnum.JSON);
 	}
 
 	@ParameterizedTest
@@ -187,12 +184,11 @@ public class ValidateR5Test {
 		}
 
 		String resp = ourServer.fhirRequest(path).post(body).assertStatus(200).getBody();
-		ourLog.info(resp);
 
 		assertThat(resp).contains("\"resourceType\":\"OperationOutcome\"");
-		assertEquals("001", ourLastPatient.getIdentifier().get(0).getValue());
-		assertEquals("http://foo", ourLastProfile);
-		assertEquals(ValidationModeEnum.CREATE, ourLastMode);
+		assertThat(ourLastPatient.getIdentifier().get(0).getValue()).isEqualTo("001");
+		assertThat(ourLastProfile).isEqualTo("http://foo");
+		assertThat(ourLastMode).isEqualTo(ValidationModeEnum.CREATE);
 	}
 
 	@Test

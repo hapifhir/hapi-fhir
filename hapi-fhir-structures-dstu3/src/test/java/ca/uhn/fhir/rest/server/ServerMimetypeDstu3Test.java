@@ -75,22 +75,20 @@ public class ServerMimetypeDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		response.assertStatus(201);
-		assertEquals(Constants.CT_FHIR_XML, response.getHeader("content-type").replaceAll(";.*", ""));
+		assertThat(response.getHeader("content-type").replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_XML);
 		assertEquals(expectedResponseContent, responseContent);
 	}
 
 	@Test
 	public void testHttpTraceNotEnabled() throws Exception {
 		HttpTestResponse status = ourServer.fhirRequest("/Patient").method("TRACE");
-		ourLog.info(status.toString());
-		assertEquals(400, status.getStatusCode());
+		assertThat(status.getStatusCode()).isEqualTo(400);
 	}
 
 	@Test
 	public void testHttpTrackNotEnabled() throws Exception {
 		HttpTestResponse status = ourServer.fhirRequest("/Patient").method("TRACK");
-		ourLog.info(status.toString());
-		assertEquals(400, status.getStatusCode());
+		assertThat(status.getStatusCode()).isEqualTo(400);
 	}
 
 	@Test
@@ -108,7 +106,7 @@ public class ServerMimetypeDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		response.assertStatus(201);
-		assertEquals(Constants.CT_FHIR_XML_NEW, response.getHeader("content-type").replaceAll(";.*", ""));
+		assertThat(response.getHeader("content-type").replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_XML_NEW);
 		assertEquals(expectedResponseContent, responseContent);
 	}
 
@@ -127,7 +125,7 @@ public class ServerMimetypeDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		response.assertStatus(201);
-		assertEquals(Constants.CT_FHIR_XML_NEW, response.getHeader("content-type").replaceAll(";.*", ""));
+		assertThat(response.getHeader("content-type").replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_XML_NEW);
 		assertEquals(expectedResponseContent, responseContent);
 	}
 
@@ -145,7 +143,7 @@ public class ServerMimetypeDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		response.assertStatus(201);
-		assertEquals(Constants.CT_FHIR_JSON, response.getHeader("content-type").replaceAll(";.*", ""));
+		assertThat(response.getHeader("content-type").replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_JSON);
 		assertEquals(expectedResponseContent, responseContent);
 	}
 
@@ -163,7 +161,7 @@ public class ServerMimetypeDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		response.assertStatus(201);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, response.getHeader("content-type").replaceAll(";.*", ""));
+		assertThat(response.getHeader("content-type").replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_JSON_NEW);
 		assertEquals(expectedResponseContent, responseContent);
 	}
 
@@ -182,7 +180,7 @@ public class ServerMimetypeDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		response.assertStatus(201);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, response.getHeader("content-type").replaceAll(";.*", ""));
+		assertThat(response.getHeader("content-type").replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_JSON_NEW);
 		assertEquals(expectedResponseContent, responseContent);
 	}
 	
@@ -197,7 +195,7 @@ public class ServerMimetypeDstu3Test {
 		response.assertStatus(200);
 		assertThat(responseContent).contains("<Patient xmlns=\"http://hl7.org/fhir\">");
 		assertThat(responseContent).doesNotContain("http://hl7.org/fhir/");
-		assertEquals(Constants.CT_FHIR_XML_NEW, response.getHeader("content-type").replaceAll(";.*", ""));
+		assertThat(response.getHeader("content-type").replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_XML_NEW);
 	}
 
 	@Test
@@ -211,7 +209,7 @@ public class ServerMimetypeDstu3Test {
 		response.assertStatus(200);
 		assertThat(responseContent).contains("<Patient xmlns=\"http://hl7.org/fhir\">");
 		assertThat(responseContent).doesNotContain("http://hl7.org/fhir/");
-		assertEquals(Constants.CT_FHIR_XML, response.getHeader("content-type").replaceAll(";.*", ""));
+		assertThat(response.getHeader("content-type").replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_XML);
 	}
 
 	@Test
@@ -225,7 +223,7 @@ public class ServerMimetypeDstu3Test {
 		response.assertStatus(200);
 		assertThat(responseContent).contains("<Patient xmlns=\"http://hl7.org/fhir\">");
 		assertThat(responseContent).doesNotContain("http://hl7.org/fhir/");
-		assertEquals(Constants.CT_FHIR_XML_NEW, response.getHeader("content-type").replaceAll(";.*", ""));
+		assertThat(response.getHeader("content-type").replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_XML_NEW);
 	}
 
 
@@ -240,7 +238,7 @@ public class ServerMimetypeDstu3Test {
 
 		response.assertStatus(200);
 		assertThat(responseContent).contains("\"resourceType\"");
-		assertEquals(Constants.CT_FHIR_JSON_NEW, response.getHeader("content-type").replaceAll(";.*", ""));
+		assertThat(response.getHeader("content-type").replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_JSON_NEW);
 	}
 
 	@Test
@@ -253,7 +251,7 @@ public class ServerMimetypeDstu3Test {
 
 		response.assertStatus(200);
 		assertThat(responseContent).contains("\"resourceType\"");
-		assertEquals(Constants.CT_FHIR_JSON, response.getHeader("content-type").replaceAll(";.*", ""));
+		assertThat(response.getHeader("content-type").replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_JSON);
 	}
 
 	@Test
@@ -266,7 +264,7 @@ public class ServerMimetypeDstu3Test {
 
 		response.assertStatus(200);
 		assertThat(responseContent).contains("\"resourceType\"");
-		assertEquals(Constants.CT_FHIR_JSON_NEW, response.getHeader("content-type").replaceAll(";.*", ""));
+		assertThat(response.getHeader("content-type").replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_JSON_NEW);
 	}
 
 	@AfterAll

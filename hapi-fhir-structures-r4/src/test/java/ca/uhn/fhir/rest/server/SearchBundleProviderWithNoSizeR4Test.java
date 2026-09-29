@@ -25,9 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -38,7 +35,6 @@ public class SearchBundleProviderWithNoSizeR4Test {
 	private static TokenAndListParam ourIdentifiers;
 	private static IBundleProvider ourLastBundleProvider;
 	private static String ourLastMethod;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchBundleProviderWithNoSizeR4Test.class);
 
 	@RegisterExtension
 	public RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
@@ -79,14 +75,13 @@ public class SearchBundleProviderWithNoSizeR4Test {
 		BundleLinkComponent linkNext;
 
 		responseContent = ourServer.fhirRequest("/Patient?_format=json").get().assertStatus(200).getBody();
-		ourLog.info(responseContent);
-		assertEquals("searchAll", ourLastMethod);
+		assertThat(ourLastMethod).isEqualTo("searchAll");
 		respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 
 		assertThat(respBundle.getEntry()).hasSize(10);
-		assertEquals("Patient/0", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		assertThat(respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("Patient/0");
 		linkNext = respBundle.getLink("next");
-		assertNotNull(linkNext);
+		assertThat(linkNext).isNotNull();
 
 
 		when(ourLastBundleProvider.size()).thenReturn(25);
@@ -95,27 +90,25 @@ public class SearchBundleProviderWithNoSizeR4Test {
 			.get()
 			.assertStatus(200)
 			.getBody();
-		ourLog.info(responseContent);
-		assertEquals("searchAll", ourLastMethod);
+		assertThat(ourLastMethod).isEqualTo("searchAll");
 		respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 
 		assertThat(respBundle.getEntry()).hasSize(10);
-		assertEquals("Patient/10", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		assertThat(respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("Patient/10");
 		linkNext = respBundle.getLink("next");
-		assertNotNull(linkNext);
+		assertThat(linkNext).isNotNull();
 
 		responseContent = HttpTestRequest.to(ourServer.getHttpClient(), ourServer.getFhirContext(), linkNext.getUrl())
 			.get()
 			.assertStatus(200)
 			.getBody();
-		ourLog.info(responseContent);
-		assertEquals("searchAll", ourLastMethod);
+		assertThat(ourLastMethod).isEqualTo("searchAll");
 		respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 
 		assertThat(respBundle.getEntry()).hasSize(5);
-		assertEquals("Patient/20", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		assertThat(respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("Patient/20");
 		linkNext = respBundle.getLink("next");
-		assertNull(linkNext);
+		assertThat(linkNext).isNull();
 
 	}
 
