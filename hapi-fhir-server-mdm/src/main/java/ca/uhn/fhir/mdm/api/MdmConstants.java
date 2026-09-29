@@ -45,7 +45,8 @@ public class MdmConstants {
 
 	/**
 	 * As the code of a tag with the above system,
-	 * denotes a resource that was "blocked" because of a configured MdmBlock list
+	 * denotes a source resource that is currently blocked by a configured MdmBlock list.
+	 * The golden resource equivalent is {@link #CODE_BLOCKED}.
 	 */
 	public static final String BLOCKED_VALUE = "blocked";
 
@@ -77,7 +78,9 @@ public class MdmConstants {
 			"This resource has been omitted from MDM matching because it matches to too many candidate resources under current match rules.";
 
 	/**
-	 * Blocked resource tag info
+	 * As the code of a tag with the system {@link #SYSTEM_GOLDEN_RECORD_STATUS},
+	 * denotes a golden resource created for a blocked source resource. Set only at creation.
+	 * The source resource equivalent is {@link #BLOCKED_VALUE}.
 	 */
 	public static final String CODE_BLOCKED = "BLOCKED_RESOURCE";
 

@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -15,6 +17,7 @@ import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -384,6 +387,86 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 				.filteredOn(t -> MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE.equalsIgnoreCase(t.getSystem()))
 				.extracting(Coding::getCode)
 				.containsExactly(MdmConstants.BLOCKED_VALUE);
+		}
+	}
+
+	@Test
+	public void updateUnmatchedTags_partitionedResource_storesTagInResourcePartition() {
+		// setup
+		myPartitionSettings.setPartitioningEnabled(true);
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
+		RequestPartitionId partitionId = RequestPartitionId.fromPartitionId(1);
+		SystemRequestDetails partitionRequest = new SystemRequestDetails().setRequestPartitionId(partitionId);
+		DaoMethodOutcome outcome = myPatientDao.create(buildFrankPatient(), partitionRequest);
+		Patient saved = myPatientDao.read(outcome.getId().toUnqualifiedVersionless(), partitionRequest);
+
+		MdmTransactionContext context = new MdmTransactionContext();
+		context.setIsBlocked(true);
+
+		// test
+		myResourceDaoSvc.updateUnmatchedTags(saved, context);
+
+		// validate
+		Patient reread = myPatientDao.read(outcome.getId().toUnqualifiedVersionless(), partitionRequest);
+		assertThat(reread.getMeta().getTag())
+			.filteredOn(t -> MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE.equalsIgnoreCase(t.getSystem()))
+			.extracting(Coding::getCode)
+			.containsExactly(MdmConstants.BLOCKED_VALUE);
+	}
+
+	/**
+	 * A resource that doesn't carry its partition is tagged in the partition the partition interceptors choose, as
+	 * the rest of the MDM flow does, rather than across all partitions.
+	 */
+	@Test
+	public void updateUnmatchedTags_noResourcePartition_usesPartitionFromInterceptors() {
+		// setup
+		myPartitionSettings.setPartitioningEnabled(true);
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
+		RequestPartitionId partitionId = RequestPartitionId.fromPartitionId(1);
+		SystemRequestDetails partitionRequest = new SystemRequestDetails().setRequestPartitionId(partitionId);
+		DaoMethodOutcome outcome = myPatientDao.create(buildFrankPatient(), partitionRequest);
+		Patient saved = myPatientDao.read(outcome.getId().toUnqualifiedVersionless(), partitionRequest);
+		saved.setUserData(Constants.RESOURCE_PARTITION_ID, null);
+
+		MdmTransactionContext context = new MdmTransactionContext();
+		context.setIsBlocked(true);
+
+		FixedPartitionInterceptor partitionInterceptor = new FixedPartitionInterceptor(partitionId);
+		myInterceptorRegistry.registerInterceptor(partitionInterceptor);
+		try {
+			// test
+			myResourceDaoSvc.updateUnmatchedTags(saved, context);
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(partitionInterceptor);
+		}
+
+		// validate
+		assertThat(partitionInterceptor.getCallCount()).isPositive();
+		Patient reread = myPatientDao.read(outcome.getId().toUnqualifiedVersionless(), partitionRequest);
+		assertThat(reread.getMeta().getTag())
+			.filteredOn(t -> MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE.equalsIgnoreCase(t.getSystem()))
+			.extracting(Coding::getCode)
+			.containsExactly(MdmConstants.BLOCKED_VALUE);
+	}
+
+	@Interceptor
+	public static class FixedPartitionInterceptor {
+		private final RequestPartitionId myPartitionId;
+		private final AtomicInteger myCallCount = new AtomicInteger();
+
+		FixedPartitionInterceptor(RequestPartitionId thePartitionId) {
+			myPartitionId = thePartitionId;
+		}
+
+		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY)
+		public RequestPartitionId identifyPartition() {
+			myCallCount.incrementAndGet();
+			return myPartitionId;
+		}
+
+		int getCallCount() {
+			return myCallCount.get();
 		}
 	}
 

@@ -210,7 +210,8 @@ public class MdmResourceDaoSvcImpl implements IMdmResourceDaoSvc {
 
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResource.fhirType());
 		IIdType id = theResource.getIdElement().toUnqualifiedVersionless();
-		SystemRequestDetails requestDetails = getSystemRequestDetailsForResource(theResource);
+		RequestDetails requestDetails = new SystemRequestDetails()
+				.setRequestPartitionId((RequestPartitionId) theResource.getUserData(Constants.RESOURCE_PARTITION_ID));
 		for (String code : removedCodes) {
 			resourceDao.removeTag(id, TagTypeEnum.TAG, theSystem, code, requestDetails);
 		}
@@ -224,13 +225,5 @@ public class MdmResourceDaoSvcImpl implements IMdmResourceDaoSvc {
 				.filter(tag -> theSystem.equalsIgnoreCase(tag.getSystem()))
 				.map(IBaseCoding::getCode)
 				.collect(Collectors.toSet());
-	}
-
-	private SystemRequestDetails getSystemRequestDetailsForResource(IBaseResource theResource) {
-		SystemRequestDetails rd = new SystemRequestDetails();
-		RequestPartitionId partitionId = RequestPartitionId.getPartitionFromUserDataIfPresent(theResource)
-				.orElse(RequestPartitionId.allPartitions());
-		rd.setRequestPartitionId(partitionId);
-		return rd;
 	}
 }
