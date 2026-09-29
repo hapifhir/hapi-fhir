@@ -10,6 +10,7 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.Logs;
+import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
@@ -472,19 +473,12 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
-		if (theSystem == null) {
-			return false;
-		}
-		switch (theSystem) {
-			case COUNTRIES_CODESYSTEM_URL:
-			case UCUM_CODESYSTEM_URL:
-			case MIMETYPES_CODESYSTEM_URL:
-			case USPS_CODESYSTEM_URL:
-			case LANGUAGES_CODESYSTEM_URL:
-				return true;
-		}
-
-		return false;
+		// On this signature a code system can only name a version by carrying it packed as "system|version"
+		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(theSystem);
+		return isCodeSystemSupported(
+				theValidationSupportContext,
+				codeSystem.url(),
+				codeSystem.versionId().orElse(null));
 	}
 
 	/**
@@ -499,7 +493,19 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 			@Nonnull ValidationSupportContext theValidationSupportContext,
 			@Nullable String theSystem,
 			@Nullable String theVersion) {
-		return isCodeSystemSupported(theValidationSupportContext, theSystem);
+		if (theSystem == null) {
+			return false;
+		}
+		switch (theSystem) {
+			case COUNTRIES_CODESYSTEM_URL:
+			case UCUM_CODESYSTEM_URL:
+			case MIMETYPES_CODESYSTEM_URL:
+			case USPS_CODESYSTEM_URL:
+			case LANGUAGES_CODESYSTEM_URL:
+				return true;
+		}
+
+		return false;
 	}
 
 	@Override
