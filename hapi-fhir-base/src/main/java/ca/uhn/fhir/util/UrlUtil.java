@@ -701,11 +701,7 @@ public class UrlUtil {
 	// Created by Claude Opus 5
 	@Nullable
 	public static String toCanonicalUrl(@Nullable String theUrl, @Nullable String theVersion) {
-		CanonicalUrlParts parts = parseCanonicalUrl(theUrl, theVersion);
-		if (parts.url() == null) {
-			return null;
-		}
-		return parts.toString();
+		return parseCanonicalUrl(theUrl, theVersion).toCanonicalUrl();
 	}
 
 	private static void throwInvalidRequestExceptionForNotValidUri(String theUri, Exception theCause) {
@@ -772,13 +768,23 @@ public class UrlUtil {
 		@Nonnull
 		@Override
 		public String toString() {
+			return defaultString(toCanonicalUrl());
+		}
+
+		/**
+		 * Joins the parts into the canonical form <code>url|version</code>, or the URL on its own if there is
+		 * no version.
+		 *
+		 * @return The canonical URL, or <code>null</code> if there is no URL
+		 * @since 8.14.0
+		 */
+		// Created by Claude Opus 5.5
+		@Nullable
+		public String toCanonicalUrl() {
 			if (url() == null) {
-				return "";
+				return null;
 			}
-			if (versionId().isPresent()) {
-				return url() + "|" + versionId().get();
-			}
-			return url();
+			return versionId().map(version -> url() + "|" + version).orElse(url());
 		}
 
 		/**
