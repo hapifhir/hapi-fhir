@@ -5,6 +5,5 @@ title: "When a code was validated or looked up against a specific version of a c
   `CodeSystem/$validate-code`, `ValueSet/$validate-code` or `CodeSystem/$lookup`, a different version of that
   code system could be used instead, without any warning, so a code could be accepted or rejected on the
   strength of the wrong version. The version that was asked for is now used. If that version is not stored,
-  `CodeSystem/$validate-code` reports the error 'A definition for CodeSystem ... version ... could not be found,
-  so the code cannot be validated', as the HL7 validator does, and `$validate` reports the same message at a
+  `CodeSystem/$validate-code` reports an error, as the HL7 validator does, and `$validate` reports an issue at a
   severity that depends on the binding strength."
