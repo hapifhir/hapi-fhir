@@ -2,18 +2,27 @@ package ca.uhn.fhir.jpa.test;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
+import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.coordinator.ReductionStepExecutorServiceImpl;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.broker.jms.SpringMessagingReceiverAdapter;
+import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import java.time.Duration;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -32,6 +41,16 @@ class Batch2JobHelperTest {
 	IJobMaintenanceService myJobMaintenanceService;
 	@Mock
 	IJobCoordinator myJobCoordinator;
+	@Mock
+	IJobPersistence myJobPersistence;
+	@Mock
+	SpringMessagingReceiverAdapter<JobWorkNotification> myWorkChannelConsumer;
+	@Mock
+	LinkedBlockingChannel myWorkChannel;
+	@Mock
+	ThreadPoolTaskExecutor myWorkChannelExecutor;
+	@Mock
+	ReductionStepExecutorServiceImpl myReductionStepExecutorService;
 
 	@InjectMocks
 	Batch2JobHelper myBatch2JobHelper;
@@ -147,6 +166,63 @@ class Batch2JobHelperTest {
 
 		// verify - no getInstance calls since all jobs were filtered out
 		verify(myJobCoordinator).getJobInstancesByJobDefinitionId(JOB_DEFINITION_ID, 100, 0);
+	}
+
+	@Test
+	void cancelAllJobsAndAwaitCancellation_workStillRunning_returnsOnceWorkersAndReducerAreIdle() {
+		// setup
+		JobInstance activeJob = createInstance("active-1", StatusEnum.IN_PROGRESS);
+		when(myJobPersistence.fetchInstances(1000, 0)).thenReturn(List.of(activeJob));
+		setUpWorkChannel();
+		when(myWorkChannelExecutor.getActiveCount()).thenReturn(1, 1, 0);
+		when(myWorkChannelExecutor.getQueueSize()).thenReturn(2, 0);
+		when(myReductionStepExecutorService.isIdleForUnitTest()).thenReturn(false, true);
+
+		// execute
+		myBatch2JobHelper.cancelAllJobsAndAwaitCancellation();
+
+		// verify
+		verify(myJobPersistence).cancelInstance("active-1");
+		verify(myJobMaintenanceService).forceActiveJobMaintenancePass();
+		verify(myWorkChannelExecutor, atLeast(3)).getActiveCount();
+		verify(myReductionStepExecutorService, atLeast(2)).isIdleForUnitTest();
+	}
+
+	@Test
+	void cancelAllJobsAndAwaitCancellation_workNeverStops_failsNamingTheRunningWork() {
+		// setup
+		when(myJobPersistence.fetchInstances(1000, 0)).thenReturn(List.of());
+		setUpWorkChannel();
+		when(myWorkChannelExecutor.getActiveCount()).thenReturn(1);
+		when(myWorkChannelExecutor.getQueueSize()).thenReturn(3);
+		when(myReductionStepExecutorService.isIdleForUnitTest()).thenReturn(false);
+
+		// execute & verify
+		assertThatThrownBy(() -> myBatch2JobHelper.cancelAllJobsAndAwaitCancellation(Duration.ofMillis(500)))
+			.hasMessageContaining("1 running, 3 queued")
+			.hasMessageContaining("reducer busy");
+		verify(myJobMaintenanceService).forceActiveJobMaintenancePass();
+	}
+
+	@Test
+	void cancelAllJobsAndAwaitCancellation_noWorkChannelOrReducer_cancelsAndRunsMaintenance() {
+		// setup
+		JobInstance activeJob = createInstance("active-1", StatusEnum.IN_PROGRESS);
+		when(myJobPersistence.fetchInstances(1000, 0)).thenReturn(List.of(activeJob));
+
+		// execute
+		myBatch2JobHelper.cancelAllJobsAndAwaitCancellation();
+
+		// verify
+		verify(myJobPersistence).cancelInstance("active-1");
+		verify(myJobMaintenanceService).forceActiveJobMaintenancePass();
+	}
+
+	private void setUpWorkChannel() {
+		when(myWorkChannelConsumer.getSpringMessagingChannelReceiver()).thenReturn(myWorkChannel);
+		when(myWorkChannel.getExecutor()).thenReturn(myWorkChannelExecutor);
+		myBatch2JobHelper.setWorkChannelConsumer(myWorkChannelConsumer);
+		myBatch2JobHelper.setReductionStepExecutorService(myReductionStepExecutorService);
 	}
 
 	private static JobInstance createInstance(String theId, StatusEnum theStatus) {
