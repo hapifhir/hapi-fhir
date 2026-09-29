@@ -51,9 +51,9 @@ import static org.mockito.Mockito.verifyNoInteractions;
 /**
  * Unit tests for the exception-routing contract of {@link BaseBulkModifyResourcesStep#run(StepExecutionDetails, IJobDataSink)}.
  * <p>
- * Note: the hooks below never assert - the production code wraps them in a <code>catch (Throwable)</code>
- * which would swallow an {@link AssertionError} and turn a failing test green. Observations are recorded
- * into fields and asserted after <code>run()</code> returns.
+ * Note: the hooks below never assert - the production code wraps the in-transaction hook in a
+ * <code>catch (Throwable)</code> which would swallow an {@link AssertionError} and turn a failing test green.
+ * Observations are recorded into fields and asserted after <code>run()</code> returns.
  * </p>
  */
 @SuppressWarnings("unused")
@@ -102,7 +102,7 @@ class BaseBulkModifyResourcesStepTest {
 	private Boolean myTransactionActiveInInTransactionHook;
 
 	/**
-	 * A {@link RetryChunkLaterException} raised by the pre-flight hook is a <b>retry signal</b>, not a
+	 * A {@link RetryChunkLaterException} raised by the outside-transaction hook is a <b>retry signal</b>, not a
 	 * failure. It must escape <code>run()</code> so that
 	 * <code>StepExecutor</code> can move the work chunk to POLL_WAITING.
 	 */
@@ -124,7 +124,7 @@ class BaseBulkModifyResourcesStepTest {
 	}
 
 	/**
-	 * A {@link JobExecutionFailedException} raised by the pre-flight hook is an unrecoverable failure and
+	 * A {@link JobExecutionFailedException} raised by the outside-transaction hook is an unrecoverable failure and
 	 * must escape <code>run()</code> unchanged.
 	 */
 	@Test
@@ -206,7 +206,7 @@ class BaseBulkModifyResourcesStepTest {
 	}
 
 	/**
-	 * A generic failure in the pre-flight hook is a whole-chunk guard failure, so it must escape
+	 * A generic failure in the outside-transaction hook is a whole-chunk guard failure, so it must escape
 	 * <code>run()</code> and let <code>StepExecutor</code> mark the chunk retriable ERRORED, rather than
 	 * being mis-attributed to each individual resource.
 	 */
@@ -230,7 +230,7 @@ class BaseBulkModifyResourcesStepTest {
 	}
 
 	/**
-	 * Invariant guard - the pre-flight hook must run exactly once, outside any transaction, before the
+	 * Invariant guard - the outside-transaction hook must run exactly once, outside any transaction, before the
 	 * transactional body runs inside one.
 	 */
 	@Test

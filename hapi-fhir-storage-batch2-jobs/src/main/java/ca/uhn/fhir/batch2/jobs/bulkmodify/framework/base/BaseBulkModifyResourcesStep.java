@@ -276,11 +276,9 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 	 * </p>
 	 * <p>
 	 * A generic exception thrown here is converted into a per-resource failure for the PIDs in
-	 * {@literal thePids}. Exceptions implementing {@link IBatch2FrameworkException} are instead propagated
-	 * unchanged to the batch2 framework; for example, an implementation may throw {@link RetryChunkLaterException}
-	 * to defer the entire work chunk and have it polled again later. As described on
-	 * {@link #processPidsOutsideTransaction}, a deferred chunk is re-run <b>from the beginning</b>, so any PIDs
-	 * already committed earlier in the chunk are processed a second time.
+	 * {@literal thePids}. An {@link IBatch2FrameworkException} is instead propagated unchanged to the batch2
+	 * framework; throwing {@link RetryChunkLaterException} defers the whole work chunk, with the re-run caveat
+	 * described on {@link #processPidsOutsideTransaction}.
 	 * </p>
 	 *
 	 * @param theStepExecutionDetails The step execution details for this work chunk

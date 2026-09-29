@@ -4,5 +4,5 @@ issue: 8320
 title: "Previously, when a bulk-modify batch job such as `$reindex` needed to defer a work chunk (for example,
   because terminology storage for a `CodeSystem` was still pending), the chunk failed instead and the job could
   end in a `FAILED` state with `HAPI-2790`. The chunk is now deferred and retried later. Custom batch2 job steps
-  can use the new `IBatch2FrameworkException` marker interface to recognize the framework's control exceptions,
+  can use the new `IBatch2FrameworkException` marker interface to recognize the exceptions the framework acts on,
   which must be rethrown rather than caught and handled."
