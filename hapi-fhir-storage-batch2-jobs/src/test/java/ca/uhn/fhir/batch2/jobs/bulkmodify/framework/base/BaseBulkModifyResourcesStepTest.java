@@ -1,8 +1,10 @@
 package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base;
 
+import ca.uhn.fhir.batch2.api.IBatch2FrameworkException;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
+import ca.uhn.fhir.batch2.api.ReductionStepFailureException;
 import ca.uhn.fhir.batch2.api.RetryChunkLaterException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
@@ -22,6 +24,8 @@ import jakarta.annotation.Nullable;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -34,6 +38,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import java.time.Duration;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -141,24 +146,32 @@ class BaseBulkModifyResourcesStepTest {
 	}
 
 	/**
-	 * The same retry signal raised from inside the transactional body must also escape <code>run()</code>,
-	 * which requires the rethrow arm of the catch block to recognise {@link RetryChunkLaterException}.
+	 * A framework signal ({@link IBatch2FrameworkException}) raised from inside the transactional body must
+	 * escape <code>run()</code> unchanged - the same instance, not wrapped or recorded as a per-resource
+	 * failure - so that <code>StepExecutor</code> / <code>ReductionStepExecutorServiceImpl</code> can act on it.
 	 */
-	@Test
-	void testRun_inTransactionThrowsRetryChunkLater_propagatesToStepExecutor() {
+	@ParameterizedTest
+	@MethodSource("frameworkExceptions")
+	void testRun_inTransactionThrowsFrameworkException_propagatesUnchanged(RuntimeException theFrameworkException) {
 		// Setup
 		stubIdHelperForUnresolvedPid();
-		myInTransactionAction =
-				(theState, thePids) -> {
-					throw new RetryChunkLaterException(Msg.code(2830), Duration.ofSeconds(10));
-				};
+		myInTransactionAction = (theState, thePids) -> {
+			throw theFrameworkException;
+		};
 		StepExecutionDetails<MyParameters, TypedPidAndVersionListWorkChunkJson> details = createDetails();
 
 		// Test & Verify
-		assertThatThrownBy(() -> mySvc.run(details, mySink)).isInstanceOf(RetryChunkLaterException.class);
+		assertThatThrownBy(() -> mySvc.run(details, mySink)).isSameAs(theFrameworkException);
 
 		verifyNoInteractions(mySink);
 		assertThat(myInTransactionInvocationCount).isEqualTo(1);
+	}
+
+	static Stream<RuntimeException> frameworkExceptions() {
+		return Stream.of(
+				new RetryChunkLaterException(Msg.code(2830), Duration.ofSeconds(10)),
+				new JobExecutionFailedException("unrecoverable-marker"),
+				new ReductionStepFailureException("reduction-marker", new BulkModifyResourcesChunkOutcomeJson()));
 	}
 
 	/**

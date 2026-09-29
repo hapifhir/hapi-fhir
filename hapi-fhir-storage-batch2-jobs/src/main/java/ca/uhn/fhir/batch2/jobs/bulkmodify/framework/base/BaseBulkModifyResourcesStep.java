@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base;
 
+import ca.uhn.fhir.batch2.api.IBatch2FrameworkException;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
@@ -201,9 +202,10 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 			// Storage transaction succeeded
 			theState.movePendingToSaved();
 
-		} catch (JobExecutionFailedException | RetryChunkLaterException e) {
-			throw e;
 		} catch (Throwable e) {
+			if (e instanceof IBatch2FrameworkException) {
+				throw e;
+			}
 			String failureMessage = e.toString();
 			ourLog.warn("Failure occurred during bulk modification. Failure: {}", failureMessage);
 			for (TypedPidAndVersionJson pid : thePids) {
@@ -259,8 +261,9 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 	 * </p>
 	 * <p>
 	 * A generic exception thrown here is converted into a per-resource failure for the PIDs in
-	 * {@literal thePids}, but an implementation may instead throw {@link RetryChunkLaterException} to defer
-	 * the entire work chunk and have it polled again later. The re-run-from-the-beginning hazard described on
+	 * {@literal thePids}. Exceptions implementing {@link IBatch2FrameworkException} are instead propagated
+	 * unchanged to the batch2 framework; for example, an implementation may throw {@link RetryChunkLaterException}
+	 * to defer the entire work chunk and have it polled again later. The re-run-from-the-beginning hazard described on
 	 * {@link #processPidsOutsideTransaction} is worse here: by the time the single-pid retry loop reaches PID
 	 * <i>n</i>, PIDs 1..<i>n-1</i> have each already been committed in their own transaction, so deferring at
 	 * this point causes all of them to be processed again.
