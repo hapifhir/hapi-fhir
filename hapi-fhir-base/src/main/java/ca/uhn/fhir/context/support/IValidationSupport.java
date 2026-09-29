@@ -349,7 +349,8 @@ public interface IValidationSupport {
 	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
 	 * @param theSystem                   The code system URL, without a version, e.g. "<code>http://loinc.org</code>"
 	 * @param theVersion                  The code system version, e.g. "<code>2.78</code>", or <code>null</code> for whichever version is current
-	 * @return Returns <code>true</code> if codes in the given code system version can be validated
+	 * @return Returns <code>true</code> if codes in the given code system version can be validated, and
+	 *         <code>false</code> if no system is given
 	 * @throws ca.uhn.fhir.rest.server.exceptions.InvalidRequestException If the URL already carries a version
 	 *                                                                 which differs from the version given
 	 * @since 8.14.0
@@ -360,13 +361,14 @@ public interface IValidationSupport {
 			@Nullable String theSystem,
 			@Nullable String theVersion) {
 		String canonicalUrl = UrlUtil.toCanonicalUrl(theSystem, theVersion);
+		if (canonicalUrl == null) {
+			return false;
+		}
 		if (isCodeSystemSupported(theValidationSupportContext, canonicalUrl)) {
 			return true;
 		}
-		String url = UrlUtil.parseCanonicalUrl(theSystem).url();
-		return canonicalUrl != null
-				&& !canonicalUrl.equals(url)
-				&& isCodeSystemSupported(theValidationSupportContext, url);
+		String url = UrlUtil.parseCanonicalUrl(canonicalUrl).url();
+		return !canonicalUrl.equals(url) && isCodeSystemSupported(theValidationSupportContext, url);
 	}
 
 	/**
