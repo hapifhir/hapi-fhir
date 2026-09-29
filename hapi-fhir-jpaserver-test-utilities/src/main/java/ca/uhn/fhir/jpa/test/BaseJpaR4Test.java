@@ -664,41 +664,47 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		 */
 		ourLog.info("Pausing Schedulers");
 		mySchedulerService.pause();
-
-		myTerminologyDeferredStorageSvc.logQueueForUnitTest();
-		if (!myTermDeferredStorageSvc.isStorageQueueEmpty(true)) {
-			ourLog.warn("There is deferred terminology storage stuff still in the queue. Please verify your tests clean up ok.");
-			if (myTermDeferredStorageSvc instanceof TermDeferredStorageSvcImpl t) {
-				t.clearDeferred();
-			}
-		}
-
-		boolean registeredStorageInterceptor = false;
-		if (myMdmStorageInterceptor != null && !myInterceptorService.getAllRegisteredInterceptors().contains(myMdmStorageInterceptor)) {
-			myInterceptorService.registerInterceptor(myMdmStorageInterceptor);
-			registeredStorageInterceptor = true;
-		}
 		try {
-			runInTransaction(() -> {
-				myMdmLinkHistoryDao.deleteAll();
-				myMdmLinkDao.deleteAll();
-			});
-			purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
-
+			/*
+			 * Stop batch2 work before the purge. A step that is still executing would write into the
+			 * database and the caches after they are cleaned, and into the next test.
+			 */
 			myBatch2JobHelper.cancelAllJobsAndAwaitCancellation();
-			runInTransaction(() -> {
-				myWorkChunkRepository.deleteAll();
-				myJobInstanceRepository.deleteAll();
-			});
-		} finally {
-			if (registeredStorageInterceptor) {
-				myInterceptorService.unregisterInterceptor(myMdmStorageInterceptor);
-			}
-		}
 
-		// restart the jobs
-		ourLog.info("Restarting the schedulers");
-		mySchedulerService.unpause();
+			myTerminologyDeferredStorageSvc.logQueueForUnitTest();
+			if (!myTermDeferredStorageSvc.isStorageQueueEmpty(true)) {
+				ourLog.warn("There is deferred terminology storage stuff still in the queue. Please verify your tests clean up ok.");
+				if (myTermDeferredStorageSvc instanceof TermDeferredStorageSvcImpl t) {
+					t.clearDeferred();
+				}
+			}
+
+			boolean registeredStorageInterceptor = false;
+			if (myMdmStorageInterceptor != null && !myInterceptorService.getAllRegisteredInterceptors().contains(myMdmStorageInterceptor)) {
+				myInterceptorService.registerInterceptor(myMdmStorageInterceptor);
+				registeredStorageInterceptor = true;
+			}
+			try {
+				runInTransaction(() -> {
+					myMdmLinkHistoryDao.deleteAll();
+					myMdmLinkDao.deleteAll();
+				});
+				purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
+
+				runInTransaction(() -> {
+					myWorkChunkRepository.deleteAll();
+					myJobInstanceRepository.deleteAll();
+				});
+			} finally {
+				if (registeredStorageInterceptor) {
+					myInterceptorService.unregisterInterceptor(myMdmStorageInterceptor);
+				}
+			}
+		} finally {
+			// restart the jobs
+			ourLog.info("Restarting the schedulers");
+			mySchedulerService.unpause();
+		}
 		ourLog.info("5 - " + getClass().getSimpleName() + ".afterPurgeDatabases");
 	}
 
