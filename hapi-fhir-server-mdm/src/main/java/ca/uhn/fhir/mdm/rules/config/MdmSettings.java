@@ -70,7 +70,8 @@ public class MdmSettings implements IMdmSettings {
 
 	/**
 	 * When searching for matching candidates, this is the maximum number of candidates that will be retrieved.  If the
-	 * number matched is equal to or higher than this, then an exception will be thrown and candidate matching will be aborted
+	 * number matched is equal to or higher than this, the resource is omitted from MDM matching and tagged
+	 * as having too many candidates
 	 */
 	private int myCandidateSearchHardLimit = DEFAULT_CANDIDATE_SEARCH_LIMIT;
 

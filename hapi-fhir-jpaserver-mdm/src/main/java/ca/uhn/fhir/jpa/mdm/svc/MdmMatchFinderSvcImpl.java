@@ -83,7 +83,7 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 			String theResourceType,
 			IAnyResource theResource,
 			RequestPartitionId theRequestPartitionId,
-			MdmTransactionContext theContext) {
+			@Nonnull MdmTransactionContext theContext) {
 
 		// we match on EID even if placeholder resources are set to be ignored
 		List<MatchedTarget> retval = matchBasedOnEid(theResourceType, theResource, theRequestPartitionId, theContext);

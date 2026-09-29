@@ -44,13 +44,13 @@ public class MdmConstants {
 	public static final String MDM_UNMATCHED_TAG_NAMESPACE = "http://hapifhir.io/fhir/NamingSystem/mdm-unmatched";
 
 	/**
-	 * If set as the value of an extension with the above namespace,
+	 * As the code of a tag with the above system,
 	 * denotes a resource that was "blocked" because of a configured MdmBlock list
 	 */
 	public static final String BLOCKED_VALUE = "blocked";
 
 	/**
-	 * If set as the value of an extension with the above namespace,
+	 * As the code of a tag with the above system,
 	 * denotes a resource that wasn't matched because it exceeded
 	 * the {@link IMdmSettings#getCandidateSearchLimit()}.
 	 */

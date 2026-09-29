@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -21,6 +23,7 @@ import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -32,6 +35,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -317,6 +321,70 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 			.getTag()
 			.stream()
 			.noneMatch(t -> t.getSystem().equalsIgnoreCase(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE)));
+	}
+
+	/**
+	 * A resource that is still omitted for the same reason is already correct. Writing to it anyway fires a resource
+	 * update, which can send the resource back through MDM.
+	 */
+	@Test
+	public void updateUnmatchedTags_desiredTagAlreadyStored_writesNothing() {
+		// setup
+		Patient patient = buildFrankPatient();
+		MdmResourceUtil.tagResourceAsBlocked(patient);
+		DaoMethodOutcome outcome = myPatientDao.create(patient, new SystemRequestDetails());
+		Patient saved = myPatientDao.read(outcome.getId(), new SystemRequestDetails());
+
+		MdmTransactionContext context = new MdmTransactionContext();
+		context.setIsBlocked(true);
+
+		AtomicInteger updateCount = new AtomicInteger();
+		IAnonymousInterceptor updateCounter = (thePointcut, theArgs) -> updateCount.incrementAndGet();
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, updateCounter);
+		try {
+			// test
+			myResourceDaoSvc.updateUnmatchedTags(saved, context);
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(updateCounter);
+		}
+
+		// validate
+		assertThat(updateCount.get()).isZero();
+	}
+
+	/**
+	 * When the current code is stored beside a stale one, only the stale one goes; the resource handed in must still
+	 * carry the current code, since MDM keeps working with it after this call.
+	 */
+	@Test
+	public void updateUnmatchedTags_desiredAndStaleTagsStored_keepsDesiredTagInMemory() {
+		// setup
+		Patient patient = buildFrankPatient();
+		patient.getMeta().addTag().setSystem(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE).setCode(MdmConstants.BLOCKED_VALUE);
+		patient.getMeta()
+			.addTag()
+			.setSystem(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE)
+			.setCode(MdmConstants.TOO_MANY_CANDIDATES);
+		DaoMethodOutcome outcome = myPatientDao.create(patient, new SystemRequestDetails());
+		Patient saved = myPatientDao.read(outcome.getId(), new SystemRequestDetails());
+		assertThat(saved.getMeta().getTag())
+			.filteredOn(t -> MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE.equalsIgnoreCase(t.getSystem()))
+			.hasSize(2);
+
+		MdmTransactionContext context = new MdmTransactionContext();
+		context.setIsBlocked(true);
+
+		// test
+		myResourceDaoSvc.updateUnmatchedTags(saved, context);
+
+		// validate
+		Patient reread = myPatientDao.read(outcome.getId(), new SystemRequestDetails());
+		for (Patient toCheck : new Patient[] {saved, reread}) {
+			assertThat(toCheck.getMeta().getTag())
+				.filteredOn(t -> MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE.equalsIgnoreCase(t.getSystem()))
+				.extracting(Coding::getCode)
+				.containsExactly(MdmConstants.BLOCKED_VALUE);
+		}
 	}
 
 	@Test

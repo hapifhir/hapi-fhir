@@ -1121,6 +1121,41 @@ public class MdmMatchLinkSvcTest {
 					&& tag.getCode().equals(MdmConstants.BLOCKED_VALUE)));
 		}
 
+		/**
+		 * A blocked resource that goes through MDM a second time must keep the golden resource it already has. A second
+		 * pass is not only a user resubmission: the unmatched tag written on the first pass is itself a resource update.
+		 */
+		@Test
+		public void updateMdmLinksForMdmSource_blockedResourceProcessedTwice_keepsOneGoldenResource() {
+			// setup
+			BlockListJson blockListJson = new BlockListJson();
+			BlockListRuleJson rule = new BlockListRuleJson();
+			rule.setResourceType("Patient");
+			rule.addBlockListField()
+				.setFhirPath("name.single().family")
+				.setBlockedValue("Doe");
+			rule.addBlockListField()
+				.setFhirPath("name.single().given.first()")
+				.setBlockedValue("Jane");
+			blockListJson.addBlockListRule(rule);
+
+			when(myBlockListRuleProvider.getBlocklistRules())
+				.thenReturn(blockListJson);
+
+			Patient blockedPatient = createPatient(buildJanePatient());
+			IIdType id = blockedPatient.getIdElement().toUnqualifiedVersionless();
+			myMdmMatchLinkSvc.updateMdmLinksForMdmSource(blockedPatient, createContextForCreate("Patient"));
+			assertEquals(1, getAllGoldenPatients().size());
+
+			// test
+			Patient resubmitted = myPatientDao.read(id, new SystemRequestDetails());
+			myMdmMatchLinkSvc.updateMdmLinksForMdmSource(resubmitted, createContextForUpdate("Patient"));
+
+			// verify
+			assertEquals(1, getAllGoldenPatients().size());
+			assertEquals(1, myMdmLinkDaoSvc.findMdmLinksBySourceResource(resubmitted).size());
+		}
+
 		@Test
 		public void updateMdmLinksForMdmSource_createBlockedResource_alwaysCreatesNewGoldenResource() {
 			// setup

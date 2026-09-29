@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.models.FindGoldenResourceCandidatesParams;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateList;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateStrategyEnum;
@@ -81,6 +82,9 @@ public class MdmMatchLinkSvc {
 	@Autowired
 	private IMdmResourceDaoSvc myMdmResourceDaoSvc;
 
+	@Autowired
+	private MdmLinkDaoSvc<?, ?> myMdmLinkDaoSvc;
+
 	/**
 	 * Given an MDM source (consisting of any supported MDM type), find a suitable Golden Resource candidate for them,
 	 * or create one if one does not exist. Performs matching based on rules defined in mdm-rules.json.
@@ -140,6 +144,16 @@ public class MdmMatchLinkSvc {
 			// resources with too many candidate matches do not get a golden resource.
 			// we do this because otherwise, "too many candidates" resources will cascade and trigger
 			// earlier and earlier for every single later resource until possibly no resource is matched at all
+			return theMdmTransactionContext;
+		}
+
+		if (isResourceBlocked
+				&& myMdmLinkDaoSvc.getMatchedLinkForSource(theResource).isPresent()) {
+			// a blocked resource that went through MDM before keeps the golden resource it already has
+			log(
+					theMdmTransactionContext,
+					"Resource " + theResource.getId()
+							+ " is blocked and already linked to a golden resource; keeping that link.");
 			return theMdmTransactionContext;
 		}
 
