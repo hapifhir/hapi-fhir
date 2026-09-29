@@ -304,7 +304,7 @@ public class Batch2JobHelper {
 
 	public boolean hasRunningJobs() {
 		HashMap<String, String> map = new HashMap<>();
-		List<JobInstance> jobs = myJobCoordinator.getInstances(1000, 1);
+		List<JobInstance> jobs = myJobCoordinator.getInstances(1000, 0);
 		// "All Jobs" assumes at least one job exists
 		if (jobs.isEmpty()) {
 			return false;

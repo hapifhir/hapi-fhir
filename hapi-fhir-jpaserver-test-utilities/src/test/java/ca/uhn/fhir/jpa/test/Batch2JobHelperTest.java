@@ -67,7 +67,7 @@ class Batch2JobHelperTest {
 		JobInstance failedJob = createInstance("failed-1", StatusEnum.FAILED);
 		JobInstance cancelledJob = createInstance("cancelled-1", StatusEnum.CANCELLED);
 		JobInstance completedJob = createInstance("completed-1", StatusEnum.COMPLETED);
-		when(myJobCoordinator.getInstances(1000, 1))
+		when(myJobCoordinator.getInstances(1000, 0))
 			.thenReturn(List.of(failedJob, cancelledJob, completedJob));
 
 		// execute
@@ -75,7 +75,7 @@ class Batch2JobHelperTest {
 
 		// verify
 		assertThat(result).isFalse();
-		verify(myJobCoordinator).getInstances(1000, 1);
+		verify(myJobCoordinator).getInstances(1000, 0);
 	}
 
 	@Test
@@ -84,7 +84,7 @@ class Batch2JobHelperTest {
 		JobInstance failedJob = createInstance("failed-1", StatusEnum.FAILED);
 		JobInstance activeJob = createInstance("active-1", StatusEnum.IN_PROGRESS);
 		activeJob.setJobDefinitionId(JOB_DEFINITION_ID);
-		when(myJobCoordinator.getInstances(1000, 1))
+		when(myJobCoordinator.getInstances(1000, 0))
 			.thenReturn(List.of(failedJob, activeJob));
 
 		// execute
@@ -92,7 +92,7 @@ class Batch2JobHelperTest {
 
 		// verify
 		assertThat(result).isTrue();
-		verify(myJobCoordinator).getInstances(1000, 1);
+		verify(myJobCoordinator).getInstances(1000, 0);
 	}
 
 	@Test
