@@ -751,12 +751,14 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 				Collection<Include> includes = mySearchEntity.toIncludesList(false);
 				SearchBuilderLoadIncludesParameters<JpaPid> parameters =
 						createLoadIncludeParameters(originalPids, includes, false, remainingIncludesUntilMax);
-				Set<JpaPid> nonIterateIncludedPids = theSearchBuilder.loadIncludes(parameters);
+				ISearchBuilder.FetchedIncludes<JpaPid> nonIterateIncludedPids =
+						theSearchBuilder.loadIncludes(parameters);
 				if (remainingIncludesUntilMax != null) {
 					remainingIncludesUntilMax -= nonIterateIncludedPids.size();
 				}
-				theMatchPids.addAll(nonIterateIncludedPids);
-				includedPidList.addAll(nonIterateIncludedPids);
+				theMatchPids.addAll(nonIterateIncludedPids.pids());
+				includedPidList.addAll(nonIterateIncludedPids.pids());
+				myFetchedResources.putAll(nonIterateIncludedPids.resourcesIfFetched());
 			}
 
 			// Load `_revinclude:iterate`
@@ -771,9 +773,10 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 				Collection<Include> includes = mySearchEntity.toIncludesList(true);
 				SearchBuilderLoadIncludesParameters<JpaPid> parameters =
 						createLoadIncludeParameters(theMatchPids, includes, false, remainingIncludesUntilMax);
-				Set<JpaPid> iterateIncludedPids = theSearchBuilder.loadIncludes(parameters);
-				theMatchPids.addAll(iterateIncludedPids);
-				includedPidList.addAll(iterateIncludedPids);
+				ISearchBuilder.FetchedIncludes<JpaPid> iterateIncludedPids = theSearchBuilder.loadIncludes(parameters);
+				theMatchPids.addAll(iterateIncludedPids.pids());
+				includedPidList.addAll(iterateIncludedPids.pids());
+				myFetchedResources.putAll(iterateIncludedPids.resourcesIfFetched());
 			}
 		}
 
@@ -824,12 +827,13 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 			Collection<Include> theIncludes) {
 		SearchBuilderLoadIncludesParameters<JpaPid> parameters =
 				createLoadIncludeParameters(thePids, theIncludes, true, theMaxIncludes);
-		Set<JpaPid> nonIterateRevIncludedPids = theSearchBuilder.loadIncludes(parameters);
+		ISearchBuilder.FetchedIncludes<JpaPid> nonIterateRevIncludedPids = theSearchBuilder.loadIncludes(parameters);
 		if (theMaxIncludes != null) {
 			theMaxIncludes -= nonIterateRevIncludedPids.size();
 		}
-		thePids.addAll(nonIterateRevIncludedPids);
-		theIncludedPidList.addAll(nonIterateRevIncludedPids);
+		thePids.addAll(nonIterateRevIncludedPids.pids());
+		theIncludedPidList.addAll(nonIterateRevIncludedPids.pids());
+		myFetchedResources.putAll(nonIterateRevIncludedPids.resourcesIfFetched());
 		return theMaxIncludes;
 	}
 
