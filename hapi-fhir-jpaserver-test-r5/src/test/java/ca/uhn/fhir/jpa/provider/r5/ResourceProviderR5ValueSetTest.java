@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -970,9 +971,6 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 			.post(string, ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW);
 
 		String respString = resp.getBody();
-		ourLog.debug(respString);
-
-		ourLog.info(resp.toString());
 
 		resp.assertStatus(400);
 		assertThat(respString).contains("Unknown FilterOperator code 'n'");
@@ -1118,11 +1116,10 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 			UrlUtil.escapeUrlParam(URL_MY_CODE_SYSTEM) +
 			"&code=AA";
 
-		String respString = myServer.fhirRequest(url).withHeader("Accept", "application/fhir+json").get().getBody();
-		ourLog.debug(respString);
+		String respString = myServer.fhirRequest(url).withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW).get().getBody();
 
 		Parameters respParam = myFhirCtx.newJsonParser().parseResource(Parameters.class, respString);
-		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
 	}
 
 	@Test
@@ -1136,11 +1133,10 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 		ourLog.info("* Requesting: {}", url);
 
-		String respString = myServer.fhirRequest(url).withHeader("Accept", "application/fhir+json").get().getBody();
-		ourLog.debug(respString);
+		String respString = myServer.fhirRequest(url).withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW).get().getBody();
 
 		Parameters respParam = myFhirCtx.newJsonParser().parseResource(Parameters.class, respString);
-		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
 	}
 
 	@Test
@@ -1239,34 +1235,28 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		String validateCodeUrl2 = "/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=FOO&_pretty=true";
 
 		String response = myServer.fhirRequest(expandUrl).get().getBody();
-		ourLog.info("Response: {}", response);
 		assertThat(response).contains("<display value=\"Child AA\"/>");
 
 		response = myServer.fhirRequest(validateCodeUrl).get().getBody();
-		ourLog.info("Response: {}", response);
 		Parameters output = myFhirCtx.newXmlParser().parseResource(Parameters.class, response);
-		assertTrue(output.getParameterBool("result"));
+		assertThat(output.getParameterBool("result")).isTrue();
 
 		response = myServer.fhirRequest(validateCodeUrl2).get().getBody();
-		ourLog.info("Response: {}", response);
 		output = myFhirCtx.newXmlParser().parseResource(Parameters.class, response);
-		assertFalse(output.getParameterBool("result"));
+		assertThat(output.getParameterBool("result")).isFalse();
 
 		// Now do a pre-expansion
 		myBatch2JobHelper.awaitNoJobsRunning();
 
 		response = myServer.fhirRequest(expandUrl).get().getBody();
-		ourLog.info("Response: {}", response);
 
 		response = myServer.fhirRequest(validateCodeUrl).get().getBody();
-		ourLog.info("Response: {}", response);
 		output = myFhirCtx.newXmlParser().parseResource(Parameters.class, response);
-		assertTrue(output.getParameterBool("result"));
+		assertThat(output.getParameterBool("result")).isTrue();
 
 		response = myServer.fhirRequest(validateCodeUrl2).get().getBody();
-		ourLog.info("Response: {}", response);
 		output = myFhirCtx.newXmlParser().parseResource(Parameters.class, response);
-		assertFalse(output.getParameterBool("result"));
+		assertThat(output.getParameterBool("result")).isFalse();
 
 	}
 

@@ -390,8 +390,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 	public void testOpenApiFetchSwaggerUi() {
 		myServer.getInterceptorService().registerInterceptor(new OpenApiInterceptor());
 
-		String output = myServer.fhirRequest("/swagger-ui/").get().assertStatus(200).getBody();
-		ourLog.info("Fetch output: {}", output);
+		myServer.fhirRequest("/swagger-ui/").get().assertStatus(200);
 	}
 
 

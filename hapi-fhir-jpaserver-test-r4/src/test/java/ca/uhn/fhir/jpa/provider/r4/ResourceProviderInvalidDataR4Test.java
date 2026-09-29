@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.jpa.model.dao.JpaPidFk;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.rest.api.Constants;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Quantity;
 import org.junit.jupiter.api.AfterEach;
@@ -38,7 +39,7 @@ public class ResourceProviderInvalidDataR4Test extends BaseResourceProviderR4Tes
 		});
 
 		String responseContent = myServer.fhirRequest("/Observation/" + id)
-			.withHeader("Accept", "application/fhir+json")
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
 			.get()
 			.getBody();
 		ourLog.info("Response content: " + responseContent);

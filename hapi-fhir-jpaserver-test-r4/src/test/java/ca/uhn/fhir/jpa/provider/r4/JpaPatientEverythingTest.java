@@ -2079,7 +2079,7 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
     private Set<String> getActualEverythingResultIds(String patientId) {
         HttpTestResponse resp = myServer.fhirRequest("/" + patientId + "/$everything?_format=json").get();
-		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy(), resp.getContentType());
+		assertThat(resp.getContentType()).isEqualTo(EncodingEnum.JSON.getResourceContentTypeNonLegacy());
         Bundle bundle = EncodingEnum.JSON.newParser(myFhirContext).parseResource(Bundle.class, resp.getBody());
 
 		assertNull(bundle.getLink("next"));

@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -146,7 +145,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		HttpTestResponse resp = myServer.fhirRequest("/" + patientId + "/$everything?_format=json&_count=100")
 			.withHeader(Constants.HEADER_CACHE_CONTROL, Constants.CACHE_CONTROL_NO_CACHE)
 			.get();
-		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy(), resp.getContentType());
+		assertThat(resp.getContentType()).isEqualTo(EncodingEnum.JSON.getResourceContentTypeNonLegacy());
 		bundle = EncodingEnum.JSON.newParser(myFhirContext).parseResource(Bundle.class, resp.getBody());
 		assertNull(bundle.getLink("next"));
 		actual = new TreeSet<>();
@@ -299,7 +298,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 
 	private Bundle fetchBundle(String theUrl, EncodingEnum theEncoding) throws IOException {
 		HttpTestResponse resp = HttpTestRequest.to(myServer.getHttpClient(), theUrl).get();
-		assertEquals(theEncoding.getResourceContentTypeNonLegacy(), resp.getContentType());
+		assertThat(resp.getContentType()).isEqualTo(theEncoding.getResourceContentTypeNonLegacy());
 		return theEncoding.newParser(myFhirContext).parseResource(Bundle.class, resp.getBody());
 	}
 

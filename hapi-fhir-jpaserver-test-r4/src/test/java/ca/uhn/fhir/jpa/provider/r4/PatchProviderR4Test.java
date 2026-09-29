@@ -392,7 +392,6 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.patch(patchText)
 			.assertStatus(200)
 			.getBody();
-		ourLog.info("Response:\n{}", responseString);
 		assertThat(responseString).contains("\"derivedFrom\":[{\"reference\":\"Media/465eb73a-bce3-423a-b86e-5d0d267638f4\"}]");
 
 	}
@@ -671,7 +670,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
 		String path = "/Patient/" + pid1.getIdPart();
 		String responseString = myServer.fhirRequest(path)
-			.withHeader("If-Match", "W/\"9\"")
+			.withHeader(Constants.HEADER_IF_MATCH, "W/\"9\"")
 			.patch("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]")
 			.assertStatus(409)
 			.getBody();
@@ -698,7 +697,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		String path = "/Patient/" + pid1.getIdPart();
 		String patchText = "[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]";
 		String responseString = myServer.fhirRequest(path)
-			.withHeader("If-Match", "W/\"1\"")
+			.withHeader(Constants.HEADER_IF_MATCH, "W/\"1\"")
 			.withHeader(Constants.HEADER_PREFER, PREFER_RETURN_OPERATION_OUTCOME)
 			.patch(patchText)
 			.assertStatus(200)
@@ -955,7 +954,6 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.patch(patchText)
 			.assertStatus(200)
 			.getBody();
-		ourLog.info("Response:\n{}", responseString);
 		assertThat(responseString).contains("\"reference\":\"" + patientId.getValue() + "\"");
 
 		// Verify via a read
@@ -1004,7 +1002,6 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.post(encodedRequest, Constants.CT_FHIR_JSON_NEW)
 			.assertStatus(200)
 			.getBody();
-		ourLog.info("Response:\n{}", responseString);
 		assertThat(responseString).contains("\"resourceType\":\"Bundle\"");
 
 		// Verify via a read

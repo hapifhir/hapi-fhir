@@ -405,13 +405,10 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 	public void testValidateGeneratedCapabilityStatement() {
 
 		String input = myServer.fhirRequest("/metadata?_format=json").get().assertStatus(200).getBody();
-		ourLog.info(input);
 
-		String respString = myServer.fhirRequest("/CapabilityStatement/$validate?_pretty=true")
+		myServer.fhirRequest("/CapabilityStatement/$validate?_pretty=true")
 			.post(input, Constants.CT_JSON)
-			.assertStatus(200)
-			.getBody();
-		ourLog.debug(respString);
+			.assertStatus(200);
 
 		// As of 2023-01-26, the assertStatus(200) above was restored.
 		// As of 2021-12-28, the R5 structures return a version string that isn't

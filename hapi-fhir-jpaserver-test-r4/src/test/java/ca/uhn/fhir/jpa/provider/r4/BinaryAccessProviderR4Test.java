@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -180,10 +179,10 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		RequestDetails requestDetails = PointcutLatch.getInvocationParameterOfType(hookParams, RequestDetails.class);
 		ResponseDetails responseDetails = PointcutLatch.getInvocationParameterOfType(hookParams, ResponseDetails.class);
 
-		assertNotNull(responseDetails);
-		assertNotNull(requestDetails);
+		assertThat(responseDetails).isNotNull();
+		assertThat(requestDetails).isNotNull();
 
-		assertEquals(id.toString(), requestDetails.getId().toString());
+		assertThat(requestDetails.getId().toString()).isEqualTo(id.toString());
 	}
 
 	@Test
@@ -306,19 +305,18 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 				.withHeader(Constants.HEADER_ACCEPT, accept)
 				.post(SOME_BYTES_2, ContentType.IMAGE_JPEG.getMimeType())
 				.assertStatus(200);
-			assertThat(resp.getContentType()).contains("application/fhir+json");
+			assertThat(resp.getContentType()).contains(Constants.CT_FHIR_JSON_NEW);
 			String response = resp.getBody();
-			ourLog.info("Response: {}", response);
 
 			DocumentReference ref = myFhirContext.newJsonParser().parseResource(DocumentReference.class, response);
 
 			Attachment attachment = ref.getContentFirstRep().getAttachment();
-			assertEquals(ContentType.IMAGE_JPEG.getMimeType(), attachment.getContentType());
-			assertEquals(4, attachment.getSize());
+			assertThat(attachment.getContentType()).isEqualTo(ContentType.IMAGE_JPEG.getMimeType());
+			assertThat(attachment.getSize()).isEqualTo(4);
 			assertThat(attachment.getData()).containsExactly(SOME_BYTES_2);
-			assertEquals("2", ref.getMeta().getVersionId());
+			assertThat(ref.getMeta().getVersionId()).isEqualTo("2");
 			String attachmentId = attachment.getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
-			assertNull(attachmentId);
+			assertThat(attachmentId).isNull();
 
 			validateInterceptorInvoked(interceptor, 1);
 		} finally {
@@ -510,10 +508,9 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 	private void executeBinaryReadAndValidate(String thePath, byte[] theExpectedContent, String theExpectedContentType) throws IOException {
 		HttpTestResponse resp = myServer.fhirRequest(thePath).get().assertStatus(200);
-		assertEquals(theExpectedContentType, resp.getHeader(Constants.HEADER_CONTENT_TYPE));
+		assertThat(resp.getHeader(Constants.HEADER_CONTENT_TYPE)).isEqualTo(theExpectedContentType);
 		byte[] actualBytes = resp.getBodyBytes();
-		assertEquals(String.valueOf(theExpectedContent.length), resp.getHeader("Content-Length"));
-		ourLog.info("Response: {}", resp);
+		assertThat(resp.getHeader("Content-Length")).isEqualTo(String.valueOf(theExpectedContent.length));
 
 		assertThat(actualBytes).containsExactly(theExpectedContent);
 	}
@@ -524,9 +521,8 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			.withHeader(Constants.HEADER_ACCEPT, accept)
 			.post(theContent, ContentType.IMAGE_JPEG.getMimeType())
 			.assertStatus(200);
-		assertThat(resp.getContentType()).contains("application/fhir+json");
+		assertThat(resp.getContentType()).contains(Constants.CT_FHIR_JSON_NEW);
 		String response = resp.getBody();
-		ourLog.info("Response: {}", response);
 		return response;
 	}
 

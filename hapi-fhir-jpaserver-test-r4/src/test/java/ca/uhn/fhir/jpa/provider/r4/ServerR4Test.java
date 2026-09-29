@@ -14,7 +14,6 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.test.utilities.HttpTestHeader;
 import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.util.ExtensionConstants;
-import org.apache.http.HttpStatus;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent;
@@ -58,8 +57,6 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 			.get()
 			.assertStatus(200)
 			.getBody();
-
-		ourLog.debug(respString);
 
 		CapabilityStatement cs = myFhirContext.newJsonParser().parseResource(CapabilityStatement.class, respString);
 
@@ -388,13 +385,13 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 			OperationOutcome validationOutcome = getOutcome(
 				myServer.fhirRequest("/Patient/$validate")
 					.post(thePatientStr, Constants.CT_FHIR_JSON_NEW)
-					.assertStatus(HttpStatus.SC_OK),
+					.assertStatus(200),
 				parser);
 
 			OperationOutcome createOutcome = getOutcome(
 				myServer.fhirRequest("/Patient/" + theId)
 					.put(thePatientStr, Constants.CT_FHIR_JSON_NEW)
-					.assertStatus(HttpStatus.SC_PRECONDITION_FAILED),
+					.assertStatus(412),
 				parser);
 
 			assertNotNull(validationOutcome);
@@ -426,11 +423,9 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void saveIdParamOnlyAppearsOnce() throws IOException {
 		HttpTestResponse resp = myServer.fhirRequest("/metadata?_pretty=true&_format=xml").get();
-		ourLog.info(resp.toString());
 		resp.assertStatus(200);
 
 		String respString = resp.getBody();
-		ourLog.debug(respString);
 
 		CapabilityStatement cs = myFhirContext.newXmlParser().parseResource(CapabilityStatement.class, respString);
 
@@ -512,8 +507,6 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 			.withHeader(theXRequestIdHeaderKey, xRequestIdHeaderValue)
 			.get()
 			.assertStatus(200);
-
-		ourLog.debug(response.getBody());
 
 		List<HttpTestHeader> xRequestIdHeaders = response.getAllHeaders().stream()
 			.filter(header -> theXRequestIdHeaderKey.equals(header.name()))

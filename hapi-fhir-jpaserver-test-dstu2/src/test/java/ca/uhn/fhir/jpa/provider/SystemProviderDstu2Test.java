@@ -21,6 +21,7 @@ import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
@@ -156,11 +157,10 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		}
 
 		String response = fhirRequest("/Patient/$everything")
-			.withHeader("Accept", "application/xml, text/html")
+			.withHeader(Constants.HEADER_ACCEPT, "application/xml, text/html")
 			.get()
 			.assertStatus(200)
 			.getBody();
-		ourLog.info(response);
 		assertThat(response).contains("_format=json");
 
 		myRestServer.unregisterInterceptor(interceptor);
@@ -187,15 +187,14 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		}
 
 		String response = fhirRequest("/Patient/$everything")
-			.withHeader("Accept", "application/xml+fhir")
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML)
 			.get()
 			.assertStatus(200)
 			.getBody();
-		ourLog.info(response);
 		assertThat(response).doesNotContain("_format");
 
 		Bundle responseBundle = ourCtx.newXmlParser().parseResource(Bundle.class, response);
-		assertEquals(BundleTypeEnum.SEARCH_RESULTS, responseBundle.getTypeElement().getValueAsEnum());
+		assertThat(responseBundle.getTypeElement().getValueAsEnum()).isEqualTo(BundleTypeEnum.SEARCH_RESULTS);
 
 		myRestServer.unregisterInterceptor(interceptor);
 	}
@@ -397,8 +396,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testMarkResourcesForReindexing() {
-		String output = fhirRequest("/$mark-all-resources-for-reindexing").method("POST").assertStatus(200).getBody();
-		ourLog.info(output);
+		fhirRequest("/$mark-all-resources-for-reindexing").method("POST").assertStatus(200);
 	}
 
 	@AfterAll

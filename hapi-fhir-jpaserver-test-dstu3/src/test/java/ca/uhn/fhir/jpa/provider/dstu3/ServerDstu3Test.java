@@ -32,11 +32,9 @@ public class ServerDstu3Test extends BaseResourceProviderDstu3Test {
 	@Test
 	public void saveIdParamOnlyAppearsOnce() {
 		HttpTestResponse resp = myServer.fhirRequest("/metadata?_pretty=true&_format=xml").get();
-		ourLog.info(resp.toString());
 		resp.assertStatus(200);
 
 		String respString = resp.getBody();
-		ourLog.debug(respString);
 
 		CapabilityStatement cs = myFhirContext.newXmlParser().parseResource(CapabilityStatement.class, respString);
 
@@ -61,7 +59,6 @@ public class ServerDstu3Test extends BaseResourceProviderDstu3Test {
 		myRestServer.registerInterceptor(new OpenApiInterceptor());
 
 		HttpTestResponse response = myServer.fhirRequest("/api-docs").get();
-		ourLog.info(response.getBody());
 
 		response.assertStatus(200);
 	}

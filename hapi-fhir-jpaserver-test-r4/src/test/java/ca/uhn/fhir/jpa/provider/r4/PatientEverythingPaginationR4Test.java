@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import static org.apache.commons.lang3.StringUtils.leftPad;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -188,7 +187,7 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 	 */
 	private Bundle fetchBundle(String theUrl) {
 		HttpTestResponse resp = HttpTestRequest.to(myServer.getHttpClient(), theUrl).get();
-		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy(), resp.getContentType());
+		assertThat(resp.getContentType()).isEqualTo(EncodingEnum.JSON.getResourceContentTypeNonLegacy());
 		return EncodingEnum.JSON.newParser(myFhirContext).parseResource(Bundle.class, resp.getBody());
 	}
 

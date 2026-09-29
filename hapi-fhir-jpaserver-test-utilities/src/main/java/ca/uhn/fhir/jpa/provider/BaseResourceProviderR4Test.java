@@ -253,7 +253,6 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	protected List<String> searchAndReturnUnqualifiedVersionlessIdValues(String thePath) {
 		Validate.isTrue(thePath.startsWith("/"), "Path must start with '/': %s", thePath);
 		String resp = myServer.fhirRequest(thePath).get().getBody();
-		ourLog.info(resp);
 		Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, resp);
 		ourLog.debug("Observation: \n"
 				+ myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));

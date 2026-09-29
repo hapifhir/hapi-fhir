@@ -151,10 +151,8 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			String responseContent = pollingRequest(pollingLocation).get().assertStatus(200).getBody();
 			assertThat(isNotBlank(responseContent)).as(responseContent).isTrue();
 
-			ourLog.info(responseContent);
-
 			BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
-			assertEquals(expectedOriginalUrl, result.getRequest());
+			assertThat(result.getRequest()).isEqualTo(expectedOriginalUrl);
 			assertThat(result.getOutput()).isNotEmpty();
 			String binaryUrl = result.getOutput().get(0).getUrl();
 			Binary binaryResource = myClient.read().resource(Binary.class).withUrl(binaryUrl).execute();
@@ -162,14 +160,14 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			List<Extension> extension = binaryResource.getMeta().getExtension();
 			assertThat(extension).hasSize(3);
 
-			assertEquals(JpaConstants.BULK_META_EXTENSION_EXPORT_IDENTIFIER, extension.get(0).getUrl());
-			assertEquals("im-an-export-identifier", extension.get(0).getValue().toString());
+			assertThat(extension.get(0).getUrl()).isEqualTo(JpaConstants.BULK_META_EXTENSION_EXPORT_IDENTIFIER);
+			assertThat(extension.get(0).getValue().toString()).isEqualTo("im-an-export-identifier");
 
-			assertEquals(JpaConstants.BULK_META_EXTENSION_JOB_ID, extension.get(1).getUrl());
-			assertEquals(jobId, extension.get(1).getValue().toString());
+			assertThat(extension.get(1).getUrl()).isEqualTo(JpaConstants.BULK_META_EXTENSION_JOB_ID);
+			assertThat(extension.get(1).getValue().toString()).isEqualTo(jobId);
 
-			assertEquals(JpaConstants.BULK_META_EXTENSION_RESOURCE_TYPE, extension.get(2).getUrl());
-			assertEquals("Patient", extension.get(2).getValue().toString());
+			assertThat(extension.get(2).getUrl()).isEqualTo(JpaConstants.BULK_META_EXTENSION_RESOURCE_TYPE);
+			assertThat(extension.get(2).getValue().toString()).isEqualTo("Patient");
 		}
 
 		@Test
@@ -212,12 +210,10 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			String expectedOriginalUrl = myClient.getServerBase() + "/$export?_type=Patient";
 			String responseContent = pollingRequest(pollingLocation).get().getBody();
 
-			ourLog.info(responseContent);
-
 			BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
-			assertEquals(expectedOriginalUrl, result.getRequest());
-			assertEquals(true, result.getRequiresAccessToken());
-			assertNotNull(result.getTransactionTime());
+			assertThat(result.getRequest()).isEqualTo(expectedOriginalUrl);
+			assertThat(result.getRequiresAccessToken()).isTrue();
+			assertThat(result.getTransactionTime()).isNotNull();
 			assertThat(result.getOutput()).isNotEmpty();
 
 			//We assert specifically on content as the deserialized version will "helpfully" fill in missing fields.
@@ -236,7 +232,7 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			String pollingLocation = myServer.fhirRequest("/$export")
 				.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
 				.get()
-				.getHeader("Content-Location");
+				.getHeader(Constants.HEADER_CONTENT_LOCATION);
 			String jobId = Batch2JobHelper.getJobIdFromPollingLocation(pollingLocation);
 			myBatch2JobHelper.awaitJobCompletion(jobId);
 
@@ -245,12 +241,10 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			String responseContent = pollingRequest(pollingLocation).get().assertStatus(200).getBody();
 			assertThat(isNotBlank(responseContent)).as(responseContent).isTrue();
 
-			ourLog.info(responseContent);
-
 			BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
-			assertEquals(expectedOriginalUrl, result.getRequest());
-			assertEquals(true, result.getRequiresAccessToken());
-			assertNotNull(result.getTransactionTime());
+			assertThat(result.getRequest()).isEqualTo(expectedOriginalUrl);
+			assertThat(result.getRequiresAccessToken()).isTrue();
+			assertThat(result.getTransactionTime()).isNotNull();
 			assertThat(result.getOutput()).isNotEmpty();
 
 			//We assert specifically on content as the deserialized version will "helpfully" fill in missing fields.
@@ -275,17 +269,17 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			String pollingLocation = myServer.fhirRequest("/$export")
 				.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
 				.get()
-				.getHeader("Content-Location");
+				.getHeader(Constants.HEADER_CONTENT_LOCATION);
 			String jobId = Batch2JobHelper.getJobIdFromPollingLocation(pollingLocation);
 			myBatch2JobHelper.awaitJobCompletion(jobId);
 
 			String expectedOriginalUrl = myClient.getServerBase() + "/$export";
 			String responseContent = pollingRequest(pollingLocation).get().getBody();
 			BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
-			assertEquals(expectedOriginalUrl, result.getRequest());
-			assertEquals(true, result.getRequiresAccessToken());
-			assertNotNull(result.getTransactionTime());
-			assertEquals(3, result.getOutput().size());
+			assertThat(result.getRequest()).isEqualTo(expectedOriginalUrl);
+			assertThat(result.getRequiresAccessToken()).isTrue();
+			assertThat(result.getTransactionTime()).isNotNull();
+			assertThat(result.getOutput().size()).isEqualTo(3);
 			assertThat(result.getOutput().stream().filter(o -> o.getType().equals("Patient")).collect(Collectors.toList())).hasSize(1);
 			assertThat(result.getOutput().stream().filter(o -> o.getType().equals("Observation")).collect(Collectors.toList())).hasSize(1);
 			assertThat(result.getOutput().stream().filter(o -> o.getType().equals("Encounter")).collect(Collectors.toList())).hasSize(1);
@@ -308,17 +302,17 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			String pollingLocation = myServer.fhirRequest("/$export")
 				.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
 				.get()
-				.getHeader("Content-Location");
+				.getHeader(Constants.HEADER_CONTENT_LOCATION);
 			String jobId = Batch2JobHelper.getJobIdFromPollingLocation(pollingLocation);
 			myBatch2JobHelper.awaitJobCompletion(jobId);
 
 			String expectedOriginalUrl = myClient.getServerBase() + "/$export";
 			String responseContent = pollingRequest(pollingLocation).get().getBody();
 			BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
-			assertEquals(expectedOriginalUrl, result.getRequest());
-			assertEquals(true, result.getRequiresAccessToken());
-			assertNotNull(result.getTransactionTime());
-			assertEquals(1, result.getOutput().size());
+			assertThat(result.getRequest()).isEqualTo(expectedOriginalUrl);
+			assertThat(result.getRequiresAccessToken()).isTrue();
+			assertThat(result.getTransactionTime()).isNotNull();
+			assertThat(result.getOutput().size()).isEqualTo(1);
 			assertThat(result.getOutput().stream().filter(o -> o.getType().equals("Patient")).collect(Collectors.toList())).hasSize(1);
 			assertThat(result.getOutput().stream().filter(o -> o.getType().equals("Binary")).collect(Collectors.toList())).isEmpty();
 
@@ -342,7 +336,7 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		return myServer.fhirRequest(path)
 			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
 			.get()
-			.getHeader("Content-Location");
+			.getHeader(Constants.HEADER_CONTENT_LOCATION);
 	}
 
 	/**
@@ -401,10 +395,10 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				logContentTypeAndResponse(status);
 
 				String response = status.getBody();
-				assertThat(status.getHeader("Content-Type")).contains(Constants.CT_FHIR_JSON);
+				assertThat(status.getHeader(Constants.HEADER_CONTENT_TYPE)).contains(Constants.CT_FHIR_JSON);
 				assertThat(response).doesNotContain("\n");
 				Binary binary = myFhirContext.newJsonParser().parseResource(Binary.class, response);
-				assertEquals(patientBinaryId, binary.getIdElement().getValue());
+				assertThat(binary.getIdElement().getValue()).isEqualTo(patientBinaryId);
 			}
 		}
 
@@ -501,14 +495,13 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 		private void logContentTypeAndResponse(HttpTestResponse theResponse) {
 			ourLog.info("**************************");
-			ourLog.info("Content-Type is: {}", theResponse.getHeader("Content-Type"));
-			ourLog.info("Response is: {}", theResponse.getBody());
+			ourLog.info("Content-Type is: {}", theResponse.getHeader(Constants.HEADER_CONTENT_TYPE));
 			ourLog.info("**************************");
 		}
 
 		private void validateNdJsonResponse(HttpTestResponse theResponse, int theExpectedCount) {
 			String response = theResponse.getBody();
-			assertThat(theResponse.getHeader("Content-Type")).contains(Constants.CT_FHIR_NDJSON);
+			assertThat(theResponse.getHeader(Constants.HEADER_CONTENT_TYPE)).contains(Constants.CT_FHIR_NDJSON);
 			assertThat(response).contains("\n");
 			Bundle bundle = myFhirContext.newNDJsonParser().parseResource(Bundle.class, response);
 			assertThat(bundle.getEntry()).hasSize(theExpectedCount);

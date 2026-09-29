@@ -7,7 +7,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
-import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CarePlan;
@@ -90,9 +89,8 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 
 		String resp = myServer.fhirRequest("/Observation?subject.name=Smith&_contained=true")
 			.get()
-			.assertStatus(MethodNotAllowedException.STATUS_CODE)
+			.assertStatus(405)
 			.getBody();
-		ourLog.info(resp);
 		assertThat(resp).contains(">" + Msg.code(984) + "Searching with _contained mode enabled is not enabled on this server");
 	}
 
@@ -100,9 +98,8 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 	public void testContainedBoth() {
 		String resp = myServer.fhirRequest("/Observation?subject.name=Smith&_contained=both")
 			.get()
-			.assertStatus(MethodNotAllowedException.STATUS_CODE)
+			.assertStatus(405)
 			.getBody();
-		ourLog.info(resp);
 		assertThat(resp).contains("Contained mode 'both' is not currently supported");
 	}
 

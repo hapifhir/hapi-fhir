@@ -6,13 +6,10 @@ import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class GraphQLProviderDstu3Test extends BaseResourceProviderDstu3Test {
-	private Logger ourLog = LoggerFactory.getLogger(GraphQLProviderDstu3Test.class);
 	private IIdType myPatientId0;
 
 	@Test
@@ -23,7 +20,6 @@ public class GraphQLProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		String resp = myServer.fhirRequest("/Patient/" + myPatientId0.getIdPart() + "/$graphql?query=" + UrlUtil.escapeUrlParam(query))
 			.get()
 			.getBody();
-		ourLog.info(resp);
 		assertThat(TestUtil.stripWhitespace(resp)).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
 			"  \"name\":[{\n" +
 			"    \"family\":\"FAM\",\n" +
@@ -40,7 +36,6 @@ public class GraphQLProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		String query = "{PatientList(given:\"given\"){name{family,given}}}";
 		String resp = myServer.fhirRequest("/$graphql?query=" + UrlUtil.escapeUrlParam(query)).get().getBody();
-		ourLog.info(resp);
 		assertThat(TestUtil.stripWhitespace(resp)).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
 			"  \"PatientList\":[{\n" +
 			"    \"name\":[{\n" +

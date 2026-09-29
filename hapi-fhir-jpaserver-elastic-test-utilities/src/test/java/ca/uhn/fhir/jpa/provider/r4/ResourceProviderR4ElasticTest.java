@@ -21,8 +21,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -35,15 +33,11 @@ import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
 @ContextConfiguration(classes = TestR4ConfigWithElasticHSearch.class)
 public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
-	private static final Logger ourLog = LoggerFactory.getLogger(ResourceProviderR4ElasticTest.class);
-
 	private BaseJpaResourceProvider<Observation> myObservationResourceProvider;
 
 	@BeforeEach
@@ -80,13 +74,12 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 		// when
 		String text = myServer.fhirRequest("/ValueSet/$expand?contextDirection=existing&context=Observation.code:text&filter=pressure")
 			.get()
-			.assertStatus(Constants.STATUS_HTTP_200_OK)
+			.assertStatus(200)
 			.getBody();
 
 		// then
 		ValueSet valueSet = myFhirContext.newXmlParser().parseResource(ValueSet.class, text);
-		ourLog.info("testAutocompleteDirectionExisting {}", text);
-		assertNotNull(valueSet);
+		assertThat(valueSet).isNotNull();
 		List<ValueSet.ValueSetExpansionContainsComponent> expansions = valueSet.getExpansion().getContains();
 		ValueSetExpansionIterableAssert.assertThat(expansions).hasExpansionWithCoding(mean_blood_pressure);
 		ValueSetExpansionIterableAssert.assertThat(expansions).doesNotHaveExpansionWithCoding(blood_count);
@@ -188,7 +181,7 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 		myCaptureQueriesListener.clear();
 		String text = myServer.fhirRequest("/Observation?code=789-8&_count=5&_total=accurate")
 			.get()
-			.assertStatus(Constants.STATUS_HTTP_200_OK)
+			.assertStatus(200)
 			.getBody();
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
@@ -196,7 +189,7 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 		Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, text);
 		assertThat(bundle.getTotal()).as("Expected total 10 observations matching query").isEqualTo(10);
 		assertThat(bundle.getEntry().size()).as("Expected 5 observation entries to match page size").isEqualTo(5);
-		assertTrue(bundle.getLink("next").hasRelation());
+		assertThat(bundle.getLink("next").hasRelation()).isTrue();
 		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 	}
 
@@ -209,7 +202,7 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 		myCaptureQueriesListener.clear();
 		String text = myServer.fhirRequest("/Observation?code=789-8&_count=0")
 			.get()
-			.assertStatus(Constants.STATUS_HTTP_200_OK)
+			.assertStatus(200)
 			.getBody();
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 

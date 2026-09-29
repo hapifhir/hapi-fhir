@@ -55,8 +55,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -74,7 +72,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(ExpungeR4Test.class);
 	private IIdType myOneVersionPatientId;
 	private IIdType myTwoVersionPatientId;
 	private IIdType myDeletedPatientId;
@@ -293,8 +290,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 			+ "&" +
 			JpaConstants.PARAM_DELETE_EXPUNGE + "=true"
 			;
-		String responseString = myServer.fhirRequest(path).delete().assertStatus(200).getBody();
-		ourLog.info("Response:\n{}", responseString);
+		myServer.fhirRequest(path).delete().assertStatus(200);
 
 		runInTransaction(() -> {
 			ResourceTable res;

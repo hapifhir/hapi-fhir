@@ -185,7 +185,6 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);
 
 		HttpTestResponse response = myServer.fhirRequest("/Patient").post(resource, Constants.CT_FHIR_XML);
-		ourLog.info("Response was: {}", response.getBody());
 		response.assertStatus(201);
 		String newIdString = response.getHeader(Constants.HEADER_LOCATION_LC);
 		assertThat(newIdString).startsWith(myServerBase + "/Patient/");
@@ -281,7 +280,6 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);
 
 		HttpTestResponse response = myServer.fhirRequest("/Patient").post(resource, Constants.CT_FHIR_XML);
-		ourLog.info("Response was: {}", response.getBody());
 		response.assertStatus(201);
 		String newIdString = response.getHeader(Constants.HEADER_LOCATION_LC);
 		assertThat(newIdString).startsWith(myServerBase + "/Patient/");

@@ -133,11 +133,9 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 		myEncounterId = myClient.create().resource(e).execute().getId().toUnqualifiedVersionless();
 
 		String path = "/" + myPatientId.getValue() + "?" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE + "&_pretty=true";
-		String deleteResponse = myServer.fhirRequest(path)
+		myServer.fhirRequest(path)
 			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
-			.delete()
-			.getBody();
-		ourLog.info("Response: {}", deleteResponse);
+			.delete();
 
 		verify(mockResourceDao).read(any(IIdType.class), theRequestDetailsCaptor.capture());
 		List<RequestDetails> capturedRequestDetailsParam = theRequestDetailsCaptor.getAllValues();
@@ -207,7 +205,6 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 			.delete()
 			.assertStatus(200)
 			.getBody();
-		ourLog.info("Response: {}", deleteResponse);
 		assertThat(deleteResponse).contains("Cascaded delete to ");
 
 		try {
@@ -238,7 +235,6 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 				.delete()
 				.assertStatus(200)
 				.getBody();
-			ourLog.info("Response: {}", deleteResponse);
 			assertThat(deleteResponse).contains("Cascaded delete to ");
 
 			try {
@@ -277,7 +273,6 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 			.delete()
 			.assertStatus(200)
 			.getBody();
-		ourLog.info("Response: {}", deleteResponse);
 		assertThat(deleteResponse).contains("Cascaded delete to ");
 
 		try {
@@ -313,7 +308,6 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 			.delete()
 			.assertStatus(200)
 			.getBody();
-		ourLog.info("Response: {}", deleteResponse);
 		assertThat(deleteResponse).contains("Cascaded delete to ");
 
 		try {

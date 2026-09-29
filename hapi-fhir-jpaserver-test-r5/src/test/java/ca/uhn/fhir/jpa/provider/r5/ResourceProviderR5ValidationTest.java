@@ -4,12 +4,8 @@ import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ResourceProviderR5ValidationTest extends BaseResourceProviderR5Test {
-
-	private static final Logger ourLog = LoggerFactory.getLogger(ResourceProviderR5ValidationTest.class);
 
 	@ParameterizedTest
 	@EnumSource(LevelEnum.class)
@@ -34,16 +30,12 @@ public class ResourceProviderR5ValidationTest extends BaseResourceProviderR5Test
 		}
 
 		// Test
-		String response = switch (theLevel) {
+		switch (theLevel) {
 			case TYPE -> myServer.fhirRequest("/Patient/$validate?profile=http://profile-noname-patient")
-				.post(patient)
-				.getBody();
+				.post(patient);
 			case INSTANCE -> myServer.fhirRequest("/Patient/P/$validate?profile=http://profile-noname-patient")
-				.get()
-				.getBody();
-		};
-
-		ourLog.info(response);
+				.get();
+		}
 	}
 
 	enum LevelEnum {

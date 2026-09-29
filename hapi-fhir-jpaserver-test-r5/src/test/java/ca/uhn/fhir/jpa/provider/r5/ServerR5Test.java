@@ -54,8 +54,6 @@ public class ServerR5Test extends BaseResourceProviderR5Test {
 			.assertStatus(200)
 			.getBody();
 
-		ourLog.debug(respString);
-
 		CapabilityStatement cs = myFhirCtx.newJsonParser().parseResource(CapabilityStatement.class, respString);
 
 		try {
@@ -73,11 +71,9 @@ public class ServerR5Test extends BaseResourceProviderR5Test {
 	@Test
 	public void saveIdParamOnlyAppearsOnce() {
 		HttpTestResponse resp = myServer.fhirRequest("/metadata?_pretty=true&_format=xml").get();
-		ourLog.info(resp.toString());
 		resp.assertStatus(200);
 
 		String respString = resp.getBody();
-		ourLog.debug(respString);
 
 		CapabilityStatement cs = myFhirCtx.newXmlParser().parseResource(CapabilityStatement.class, respString);
 

@@ -24,7 +24,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResourceProviderDstu3Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderQuestionnaireResponseDstu3Test.class);
 	private static RequestValidatingInterceptor ourValidatingInterceptor;
 
 	@Override
@@ -124,7 +123,6 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 		HttpTestResponse response = myServer.fhirRequest("/QuestionnaireResponse")
 			.post(input, ca.uhn.fhir.rest.api.Constants.CT_FHIR_XML);
 		String responseString = response.getBody();
-		ourLog.info("Response: {}", responseString);
 		response.assertStatus(201);
 		String newIdString = response.getHeader(ca.uhn.fhir.rest.api.Constants.HEADER_LOCATION_LC);
 		assertThat(newIdString).startsWith(myServerBase + "/QuestionnaireResponse/");
@@ -133,7 +131,6 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 		responseString = myServer.fhirRequest("/QuestionnaireResponse/" + id2.getIdPart() + "?_format=xml&_pretty=true")
 			.get()
 			.getBody();
-		ourLog.info("Response: {}", responseString);
 		assertThat(responseString).contains("Exclusion Criteria");
 	}
 
@@ -143,7 +140,6 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 			.get()
 			.assertStatus(400)
 			.getBody();
-		ourLog.info("Response: {}", responseString);
 		assertThat(responseString).contains("No resource supplied for $validate operation");
 	}
 	
@@ -155,11 +151,9 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 	public void testValidateQuestionnaireResponseWithNoIdForCreate() throws Exception {
 		
 		String input = "{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"mode\",\"valueString\":\"create\"},{\"name\":\"resource\",\"resource\":{\"resourceType\":\"QuestionnaireResponse\",\"questionnaire\":{\"reference\":\"http://fhirtest.uhn.ca/baseDstu2/Questionnaire/MedsCheckEligibility\"},\"text\":{\"status\":\"generated\",\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">!-- populated from the rendered HTML below --></div>\"},\"status\":\"completed\",\"authored\":\"2017-02-10T00:02:58.098Z\"}}]}";
-		String responseString = myServer.fhirRequest("/QuestionnaireResponse/$validate?_pretty=true")
+		myServer.fhirRequest("/QuestionnaireResponse/$validate?_pretty=true")
 			.post(input, ca.uhn.fhir.rest.api.Constants.CT_JSON)
-			.assertStatus(200)
-			.getBody();
-		ourLog.info("Response: {}", responseString);
+			.assertStatus(200);
 	}
 	
 	/**
@@ -173,7 +167,6 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 			.post(input, ca.uhn.fhir.rest.api.Constants.CT_JSON)
 			.assertStatus(422)
 			.getBody();
-		ourLog.info("Response: {}", responseString);
 		assertThat(responseString).contains("Resource has no ID");
 	}
 

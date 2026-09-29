@@ -1286,8 +1286,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 
 		// execute
 		HttpTestResponse response = myServer.fhirRequest("/Patient?identifier=http://patient%7C1")
-			.put(myFhirContext.newJsonParser().encodeResourceToString(patientToUpdate), "application/json+fhir");
-		ourLog.info("{}", response);
+			.put(myFhirContext.newJsonParser().encodeResourceToString(patientToUpdate), Constants.CT_FHIR_JSON);
 
 		// verify
 		response.assertStatus(200);

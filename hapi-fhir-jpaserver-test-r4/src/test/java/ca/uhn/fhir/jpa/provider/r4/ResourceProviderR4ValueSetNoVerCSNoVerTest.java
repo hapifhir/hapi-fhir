@@ -16,6 +16,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
@@ -791,9 +792,6 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 			.post(string, ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW);
 
 		String respString = resp.getBody();
-		ourLog.debug(respString);
-
-		ourLog.info(resp.toString());
 
 		resp.assertStatus(400);
 		assertThat(respString).contains("Unknown FilterOperator code 'n'");
@@ -999,11 +997,10 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 			UrlUtil.escapeUrlParam(URL_MY_CODE_SYSTEM) +
 			"&code=AA";
 
-		String respString = myServer.fhirRequest(path).withHeader("Accept", "application/fhir+json").get().getBody();
-		ourLog.debug(respString);
+		String respString = myServer.fhirRequest(path).withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW).get().getBody();
 
 		Parameters respParam = myFhirContext.newJsonParser().parseResource(Parameters.class, respString);
-		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
 	}
 
 	@Test
@@ -1194,13 +1191,10 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 			UrlUtil.escapeUrlParam(URL_MY_CODE_SYSTEM) +
 			"&code=AA";
 
-		ourLog.info("* Requesting: {}", path);
-
-		String respString = myServer.fhirRequest(path).withHeader("Accept", "application/fhir+json").get().getBody();
-		ourLog.debug(respString);
+		String respString = myServer.fhirRequest(path).withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW).get().getBody();
 
 		Parameters respParam = myFhirContext.newJsonParser().parseResource(Parameters.class, respString);
-		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
 	}
 
 	@Test
@@ -1296,24 +1290,20 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 			.setValue("ParentA");
 		IIdType vsId = myValueSetDao.create(vs, newSrd()).getId().toUnqualifiedVersionless();
 
-		String expandResponse = myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$expand?_pretty=true")
-			.get()
-			.getBody();
-		ourLog.info("Response: {}", expandResponse);
+		myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$expand?_pretty=true")
+			.get();
 
 		String validateCodeResponse = myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=ChildAA&_pretty=true")
 			.get()
 			.getBody();
-		ourLog.info("Response: {}", validateCodeResponse);
 		Parameters output = myFhirContext.newXmlParser().parseResource(Parameters.class, validateCodeResponse);
-		assertTrue(output.getParameterBool("result"));
+		assertThat(output.getParameterBool("result")).isTrue();
 
 		String validateCodeResponse2 = myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=FOO&_pretty=true")
 			.get()
 			.getBody();
-		ourLog.info("Response: {}", validateCodeResponse2);
 		Parameters output2 = myFhirContext.newXmlParser().parseResource(Parameters.class, validateCodeResponse2);
-		assertFalse(output2.getParameterBool("result"));
+		assertThat(output2.getParameterBool("result")).isFalse();
 	}
 
 	@Test

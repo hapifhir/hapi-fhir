@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.FileUtil;
@@ -37,7 +36,6 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 		String resp = myServer.fhirRequest("/Patient/" + myPatientId0.getIdPart() + "/$graphql?query=" + UrlUtil.escapeUrlParam(query))
 			.get()
 			.getBody();
-		ourLog.info(resp);
 		@Language("json")
 		String expected = """
 			{
@@ -48,7 +46,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 			    "given":["GivenOnly1","GivenOnly2"]
 			  }]
 			}""";
-		assertEquals(TestUtil.stripWhitespace(DATA_PREFIX + expected + DATA_SUFFIX), TestUtil.stripWhitespace(resp));
+		assertThat(TestUtil.stripWhitespace(resp)).isEqualTo(TestUtil.stripWhitespace(DATA_PREFIX + expected + DATA_SUFFIX));
 
 	}
 
@@ -61,13 +59,12 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 		String resp = myServer.fhirRequest("/Patient/" + myPatientId0.getIdPart() + "/$graphql?query=" + UrlUtil.escapeUrlParam(query))
 			.get()
 			.getBody();
-		ourLog.info(resp);
 		@Language("json")
 		String expected = """
             {
 		    "birthDate": "1965-08-09"
 			}""";
-		assertEquals(TestUtil.stripWhitespace(DATA_PREFIX + expected + DATA_SUFFIX), TestUtil.stripWhitespace(resp));
+		assertThat(TestUtil.stripWhitespace(resp)).isEqualTo(TestUtil.stripWhitespace(DATA_PREFIX + expected + DATA_SUFFIX));
 
 	}
 
@@ -82,7 +79,6 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 				.post(INTROSPECTION_QUERY, Constants.CT_JSON)
 				.assertStatus(200)
 				.getBody();
-			ourLog.info(resp);
 			assertThat(resp).contains("{\"kind\":\"OBJECT\",\"name\":\"Patient\",");
 			assertThat(resp).doesNotContain("{\"kind\":\"OBJECT\",\"name\":\"Observation\",");
 			assertThat(resp).doesNotContain("\"name\":\"Observation\",\"args\":[{\"name\":\"id\"");
@@ -104,7 +100,6 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 				.post(INTROSPECTION_QUERY, Constants.CT_JSON)
 				.assertStatus(200)
 				.getBody();
-			ourLog.info(resp);
 			assertThat(resp).doesNotContain("{\"kind\":\"OBJECT\",\"name\":\"Patient\",");
 			assertThat(resp).contains("{\"kind\":\"OBJECT\",\"name\":\"Observation\",");
 			assertThat(resp).doesNotContain("{\"kind\":\"OBJECT\",\"name\":\"Query\",\"fields\":[{\"name\":\"PatientList\"");
@@ -145,7 +140,6 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 		String query = "{Patient(id:\"" + myPatientId0.getIdPart() + "\"){name{family,given}}}";
 
 		String resp = myServer.fhirRequest("/$graphql?query=" + UrlUtil.escapeUrlParam(query)).get().getBody();
-		ourLog.info(resp);
 
 		@Language("json")
 		String expected = """
@@ -173,7 +167,6 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 		String query = "{PatientList(given:\"given\"){name{family,given}}}";
 
 		String resp = myServer.fhirRequest("/$graphql?query=" + UrlUtil.escapeUrlParam(query)).get().getBody();
-		ourLog.info(resp);
 		@Language("json")
 		String expected = """
 			{
@@ -190,7 +183,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 			    }]
 			  }]
 			}""";
-		assertEquals(TestUtil.stripWhitespace(DATA_PREFIX + expected + DATA_SUFFIX), TestUtil.stripWhitespace(resp));
+		assertThat(TestUtil.stripWhitespace(resp)).isEqualTo(TestUtil.stripWhitespace(DATA_PREFIX + expected + DATA_SUFFIX));
 
 	}
 
@@ -201,8 +194,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 		String query = "{ObservationList(date: \"2022\") {id}}";
 
 		myCaptureQueriesListener.clear();
-		String resp = myServer.fhirRequest("/$graphql?query=" + UrlUtil.escapeUrlParam(query)).get().getBody();
-		ourLog.info(resp);
+		myServer.fhirRequest("/$graphql?query=" + UrlUtil.escapeUrlParam(query)).get();
 		myCaptureQueriesListener.logSelectQueries();
 	}
 
@@ -213,7 +205,6 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 		String query = "{PatientList(_id: " + myPatientId0.getIdPart() + ") {id}}";
 
 		String resp = myServer.fhirRequest("/$graphql?query=" + UrlUtil.escapeUrlParam(query)).get().getBody();
-		ourLog.info(resp);
 
 		@Language("json")
 		String expected = """

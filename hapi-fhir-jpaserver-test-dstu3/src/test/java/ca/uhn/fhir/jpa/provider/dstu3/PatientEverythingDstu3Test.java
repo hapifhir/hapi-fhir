@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -238,7 +237,7 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 	 */
 	private Bundle fetchBundle(String theUrl, EncodingEnum theEncoding) {
 		HttpTestResponse resp = HttpTestRequest.to(myServer.getHttpClient(), theUrl).get();
-		assertEquals(theEncoding.getResourceContentTypeNonLegacy(), resp.getContentType());
+		assertThat(resp.getContentType()).isEqualTo(theEncoding.getResourceContentTypeNonLegacy());
 		return theEncoding.newParser(myFhirContext).parseResource(Bundle.class, resp.getBody());
 	}
 

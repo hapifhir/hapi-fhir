@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -163,7 +162,7 @@ public class PatientEverythingCompartmentExpansionTest extends BaseResourceProvi
 	 */
 	private Bundle fetchBundle(String thePath, EncodingEnum theEncoding) {
 		HttpTestResponse resp = myServer.fhirRequest(thePath).get();
-		assertEquals(theEncoding.getResourceContentTypeNonLegacy(), resp.getContentType());
+		assertThat(resp.getContentType()).isEqualTo(theEncoding.getResourceContentTypeNonLegacy());
 		return theEncoding.newParser(myFhirContext).parseResource(Bundle.class, resp.getBody());
 	}
 

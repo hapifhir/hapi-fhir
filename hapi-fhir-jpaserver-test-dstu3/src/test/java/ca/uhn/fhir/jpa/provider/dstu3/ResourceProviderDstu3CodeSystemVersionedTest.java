@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3TerminologyTest;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.dstu3.model.BooleanType;
@@ -765,7 +766,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		assertEquals("Parent Child CodeSystem 1", initialCodeSystem.getName());
 		initialCodeSystem.setName("Updated Parent Child CodeSystem 1");
 		String encoded = myFhirContext.newJsonParser().encodeResourceToString(initialCodeSystem);
-		myServer.fhirRequest("/CodeSystem/" + parentChildCs1Id).put(encoded, "application/json+fhir").assertStatus(200);
+		myServer.fhirRequest("/CodeSystem/" + parentChildCs1Id).put(encoded, Constants.CT_FHIR_JSON).assertStatus(200);
 
 		CodeSystem updatedCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs1Id.getId()).execute();
 		assertEquals("Updated Parent Child CodeSystem 1", updatedCodeSystem.getName());
@@ -774,7 +775,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		assertEquals("Parent Child CodeSystem 2", initialCodeSystem.getName());
 		initialCodeSystem.setName("Updated Parent Child CodeSystem 2");
 		encoded = myFhirContext.newJsonParser().encodeResourceToString(initialCodeSystem);
-		myServer.fhirRequest("/CodeSystem/" + parentChildCs2Id).put(encoded, "application/json+fhir").assertStatus(200);
+		myServer.fhirRequest("/CodeSystem/" + parentChildCs2Id).put(encoded, Constants.CT_FHIR_JSON).assertStatus(200);
 
 		updatedCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs2Id.getId()).execute();
 		assertEquals("Updated Parent Child CodeSystem 2", updatedCodeSystem.getName());
