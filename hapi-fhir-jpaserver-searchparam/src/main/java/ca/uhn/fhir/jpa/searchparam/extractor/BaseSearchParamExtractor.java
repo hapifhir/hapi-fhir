@@ -2419,7 +2419,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 			if (!eventDatesSorted.isEmpty()) {
 				/*
-				 * In order to preserve existing search behavior, if there was no end dates, discard all events
+				 * In order to preserve existing search behavior, if there were no end dates, discard all events
 				 * and start dates as well
 				 * @see ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4Test
 				 * 		testTimingDateRangeSearch_ordinalAndDatetimeSearchesMatch
