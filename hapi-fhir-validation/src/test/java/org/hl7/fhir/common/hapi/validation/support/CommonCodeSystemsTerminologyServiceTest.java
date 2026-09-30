@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity;
 import ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
+import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.i18n.Msg;
@@ -21,8 +22,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService.ALL_LANGUAGES_VALUESET_URL;
+import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService.COUNTRIES_CODESYSTEM_URL;
 import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService.CURRENCIES_CODESYSTEM_URL;
 import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService.CURRENCIES_VALUESET_URL;
 import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService.LANGUAGES_CODESYSTEM_URL;
@@ -110,6 +114,42 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 		final ValueSet vs = new ValueSet().setUrl(UCUM_VALUESET_URL);
 		CodeValidationResult result = mySvc.validateCodeInValueSet(newSupport(), newOptions(), UCUM_CODESYSTEM_URL, code, null, vs);
 		validateCodeResultError(result, "Error processing unit '" + code +"': The unit '" + code + "' is unknown' at position 0 (for 'http://unitsofmeasure.org#"+code+"')");
+	}
+
+	@Test
+	public void testValidateCode_withVersionedUnitsOfMeasureThroughChain_returnsValid() {
+		final String code = "mg";
+		ValidationSupportChain chain = new ValidationSupportChain(mySvc);
+
+		CodeValidationResult result = chain.validateCode(new ValidationSupportContext(chain), newOptions(), new ValidateCodeRequest(UCUM_CODESYSTEM_URL, "2.1", code, null, null));
+
+		validateCodeResultOk(result, code, "(milligram)");
+	}
+
+	@Test
+	public void testIsCodeSystemSupported_withAnyVersion_answersForTheDefinitionItHolds() {
+		for (String system : List.of(COUNTRIES_CODESYSTEM_URL, UCUM_CODESYSTEM_URL, MIMETYPES_CODESYSTEM_URL, USPS_CODESYSTEM_URL, LANGUAGES_CODESYSTEM_URL)) {
+			assertTrue(mySvc.isCodeSystemSupported(newSupport(), system, "2.1"), system);
+		}
+		assertFalse(mySvc.isCodeSystemSupported(newSupport(), "http://foo", "2.1"));
+	}
+
+	@Test
+	public void testIsValueSetSupported_withAnyVersion_answersForTheDefinitionItHolds() {
+		for (String valueSet : List.of(CURRENCIES_VALUESET_URL, LANGUAGES_VALUESET_URL, ALL_LANGUAGES_VALUESET_URL, MIMETYPES_VALUESET_URL, UCUM_VALUESET_URL, USPS_VALUESET_URL)) {
+			assertTrue(mySvc.isValueSetSupported(newSupport(), valueSet, "2.1"), valueSet);
+		}
+		assertFalse(mySvc.isValueSetSupported(newSupport(), "http://foo", "2.1"));
+	}
+
+	@Test
+	public void testFetchCodeSystem_withAnyVersion_returnsTheDefinitionItHolds() {
+		CodeSystem cs = (CodeSystem) mySvc.fetchCodeSystem(CURRENCIES_CODESYSTEM_URL, "2.1");
+
+		assertNotNull(cs);
+		assertEquals(CURRENCIES_CODESYSTEM_URL, cs.getUrl());
+		assertThat(cs.getConcept()).hasSize(182);
+		assertNull(mySvc.fetchCodeSystem("http://foo", "2.1"));
 	}
 
 	@ParameterizedTest
