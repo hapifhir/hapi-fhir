@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 8408
+jira: SMILE-12320
+title: "`Period` parsing in `BaseSearchParamExtractor` was standardized so that date searches against resources with 
+  Periods behave in a consistent manner. This fixes an issue with ServiceRequest searches not returning results when
+  their `occurrenceTiming.boundsPeriod` had no `start`."
