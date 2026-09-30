@@ -4,7 +4,9 @@ import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import jakarta.persistence.OptimisticLockException;
 import jakarta.persistence.PersistenceException;
+import jakarta.persistence.PessimisticLockException;
 import org.hibernate.HibernateException;
 import org.hibernate.PersistentObjectException;
 import org.hibernate.StaleStateException;
@@ -17,6 +19,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import java.sql.SQLException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -58,6 +61,31 @@ public class HapiFhirHibernateJpaDialectTest {
 		outcome = mySvc.convertHibernateAccessException(new HibernateException("this is a message"));
 		assertThat(outcome.getMessage()).contains("this is a message");
 
+	}
+
+	@Test
+	void testTranslateExceptionIfPossible_staleStateWrappedInOptimisticLockException() {
+		OptimisticLockException exception = new OptimisticLockException(new StaleStateException("this is a message"));
+
+		assertThatThrownBy(() -> mySvc.translateExceptionIfPossible(exception))
+				.isInstanceOf(ResourceVersionConflictException.class)
+				.hasMessageContaining("The operation has failed with a version constraint failure");
+	}
+
+	@Test
+	void testTranslateExceptionIfPossible_pessimisticLockWrappedInPersistenceException() {
+		PessimisticLockException exception = new PessimisticLockException(new org.hibernate.PessimisticLockException(
+				"this is a message", new SQLException("reason"), "update HFJ_RES_VER set RES_VER=?"));
+
+		assertThatThrownBy(() -> mySvc.translateExceptionIfPossible(exception))
+				.isInstanceOf(ResourceVersionConflictException.class)
+				.hasMessageContaining("The operation has failed with a version constraint failure");
+	}
+
+	@Test
+	void testTranslateExceptionIfPossible_unwrappedHibernateException() {
+		assertThatThrownBy(() -> mySvc.translateExceptionIfPossible(new StaleStateException("this is a message")))
+				.isInstanceOf(ResourceVersionConflictException.class);
 	}
 
 	@Test

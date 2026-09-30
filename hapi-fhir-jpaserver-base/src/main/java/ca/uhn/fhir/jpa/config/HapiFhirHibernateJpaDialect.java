@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.PersistenceException;
 import org.hibernate.HibernateException;
 import org.hibernate.PessimisticLockException;
@@ -73,10 +74,19 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 	 * {@link HibernateExceptionTranslator}, and {@link HibernateJpaDialect#translateExceptionIfPossible} now
 	 * delegates to a translator it holds internally. We therefore hook in here instead of overriding the
 	 * conversion method, which would no longer be called.
+	 * <p>
+	 * Like Spring's translator, this also unwraps a {@link HibernateException} that Hibernate wrapped in a
+	 * {@link PersistenceException}, which is how optimistic and pessimistic lock failures reach us.
+	 * </p>
 	 */
+	@Nullable
 	@Override
 	public DataAccessException translateExceptionIfPossible(@Nonnull RuntimeException theException) {
 		if (theException instanceof HibernateException hibernateException) {
+			return convertHibernateAccessException(hibernateException, null);
+		}
+		if (theException instanceof PersistenceException
+				&& theException.getCause() instanceof HibernateException hibernateException) {
 			return convertHibernateAccessException(hibernateException, null);
 		}
 		return super.translateExceptionIfPossible(theException);
@@ -85,7 +95,8 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 	/**
 	 * Applies HAPI FHIR's translation of Hibernate exceptions, falling back to Spring's standard conversion.
 	 */
-	DataAccessException convertHibernateAccessException(@Nonnull HibernateException theException) {
+	@Nonnull
+	protected DataAccessException convertHibernateAccessException(@Nonnull HibernateException theException) {
 		return convertHibernateAccessException(theException, null);
 	}
 
