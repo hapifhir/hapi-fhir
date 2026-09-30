@@ -86,7 +86,7 @@ class Batch2JobHelperTest {
 		JobInstance failedJob = createInstance("failed-1", StatusEnum.FAILED);
 		JobInstance cancelledJob = createInstance("cancelled-1", StatusEnum.CANCELLED);
 		JobInstance completedJob = createInstance("completed-1", StatusEnum.COMPLETED);
-		when(myJobCoordinator.getInstances(1000, 0))
+		when(myJobPersistence.fetchInstances(1000, 0))
 			.thenReturn(List.of(failedJob, cancelledJob, completedJob));
 
 		// execute
@@ -94,7 +94,7 @@ class Batch2JobHelperTest {
 
 		// verify
 		assertThat(result).isFalse();
-		verify(myJobCoordinator).getInstances(1000, 0);
+		verify(myJobPersistence).fetchInstances(1000, 0);
 	}
 
 	@Test
@@ -103,7 +103,7 @@ class Batch2JobHelperTest {
 		JobInstance failedJob = createInstance("failed-1", StatusEnum.FAILED);
 		JobInstance activeJob = createInstance("active-1", StatusEnum.IN_PROGRESS);
 		activeJob.setJobDefinitionId(JOB_DEFINITION_ID);
-		when(myJobCoordinator.getInstances(1000, 0))
+		when(myJobPersistence.fetchInstances(1000, 0))
 			.thenReturn(List.of(failedJob, activeJob));
 
 		// execute
@@ -111,7 +111,7 @@ class Batch2JobHelperTest {
 
 		// verify
 		assertThat(result).isTrue();
-		verify(myJobCoordinator).getInstances(1000, 0);
+		verify(myJobPersistence).fetchInstances(1000, 0);
 	}
 
 	@Test
@@ -183,7 +183,7 @@ class Batch2JobHelperTest {
 
 		// verify
 		verify(myJobPersistence).cancelInstance("active-1");
-		verify(myJobMaintenanceService).forceActiveJobMaintenancePass();
+		verifyNoInteractions(myJobMaintenanceService);
 		verify(myWorkChannelExecutor, atLeast(3)).getActiveCount();
 		verify(myReductionStepExecutorService, atLeast(2)).isIdleForUnitTest();
 	}
@@ -201,11 +201,11 @@ class Batch2JobHelperTest {
 		assertThatThrownBy(() -> myBatch2JobHelper.cancelAllJobsAndAwaitCancellation(Duration.ofMillis(500)))
 			.hasMessageContaining("1 running, 3 queued")
 			.hasMessageContaining("reducer busy");
-		verify(myJobMaintenanceService).forceActiveJobMaintenancePass();
+		verifyNoInteractions(myJobMaintenanceService);
 	}
 
 	@Test
-	void cancelAllJobsAndAwaitCancellation_noWorkChannelOrReducer_cancelsAndRunsMaintenance() {
+	void cancelAllJobsAndAwaitCancellation_noWorkChannelOrReducer_onlyCancels() {
 		// setup
 		JobInstance activeJob = createInstance("active-1", StatusEnum.IN_PROGRESS);
 		when(myJobPersistence.fetchInstances(1000, 0)).thenReturn(List.of(activeJob));
@@ -215,7 +215,7 @@ class Batch2JobHelperTest {
 
 		// verify
 		verify(myJobPersistence).cancelInstance("active-1");
-		verify(myJobMaintenanceService).forceActiveJobMaintenancePass();
+		verifyNoInteractions(myJobMaintenanceService);
 	}
 
 	private void setUpWorkChannel() {

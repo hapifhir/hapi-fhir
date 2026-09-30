@@ -335,7 +335,9 @@ public class Batch2JobHelper {
 
 	public boolean hasRunningJobs() {
 		HashMap<String, String> map = new HashMap<>();
-		List<JobInstance> jobs = myJobCoordinator.getInstances(1000, 0);
+		// Read through the persistence layer: the coordinator throws for instances whose job definition is not
+		// registered, which tests that store instances directly create
+		List<JobInstance> jobs = myJobPersistence.fetchInstances(1000, 0);
 		// "All Jobs" assumes at least one job exists
 		if (jobs.isEmpty()) {
 			return false;
@@ -429,9 +431,10 @@ public class Batch2JobHelper {
 	 * Cancels every job instance and waits until no batch2 work is still executing, so that nothing writes
 	 * to the database or the caches after the caller cleans them up.
 	 * <p>
-	 * Cancelling only sets a flag; a maintenance pass turns it into the {@link StatusEnum#CANCELLED} status
-	 * that workers check before they pick up a chunk. A step that is already executing runs to completion,
-	 * which is what this method waits for.
+	 * Cancelling only sets a flag, which takes effect at the next maintenance pass. This method does not run
+	 * one: a pass enqueues the READY chunks of every instance, including ones the caller is about to delete.
+	 * Callers pause the schedulers first, so no new work is enqueued, and the chunks already queued or
+	 * executing run to completion, which is what this method waits for.
 	 */
 	public void cancelAllJobsAndAwaitCancellation() {
 		cancelAllJobsAndAwaitCancellation(DEFAULT_WAIT_DURATION);
@@ -443,7 +446,6 @@ public class Batch2JobHelper {
 		for (JobInstance next : instances) {
 			myJobPersistence.cancelInstance(next.getInstanceId());
 		}
-		myJobMaintenanceService.forceActiveJobMaintenancePass();
 
 		await().atMost(theTimeout)
 			.untilAsserted(() -> assertThat(describeRunningBatch2Work())
