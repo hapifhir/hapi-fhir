@@ -30,10 +30,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.WeakHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -51,12 +48,6 @@ public class SqlLoggerFilteringUtil {
 
 	public static final String FILTER_FILE_PATH = "hibernate-sql-log-filters.txt";
 	private static final AtomicInteger ourRefreshCount = new AtomicInteger();
-
-	/**
-	 * Every refresh executor started, so that {@link #shutdownRefreshExecutorsForTests()} can stop them all.
-	 */
-	private static final Set<ScheduledThreadPoolExecutor> ourRefreshExecutorsForTests =
-			Collections.synchronizedSet(Collections.newSetFromMap(new WeakHashMap<>()));
 
 	private final Logger hibernateLogger = LoggerFactory.getLogger("org.hibernate.SQL");
 
@@ -104,7 +95,6 @@ public class SqlLoggerFilteringUtil {
 
 		myRefreshDoneLatch = new CountDownLatch(1);
 		myRefreshExecutor = new ScheduledThreadPoolExecutor(1);
-		ourRefreshExecutorsForTests.add(myRefreshExecutor);
 		myRefreshExecutor.scheduleAtFixedRate(
 				new UpdateFiltersTask(), 0, FILTER_UPDATE_INTERVAL_SECS, TimeUnit.SECONDS);
 		ourLog.info("Starting SQL log filters refresh executor");
@@ -119,7 +109,8 @@ public class SqlLoggerFilteringUtil {
 		}
 	}
 
-	private synchronized void stopFilterRefreshExecutor() {
+	@VisibleForTesting
+	synchronized void stopFilterRefreshExecutor() {
 		if (myRefreshExecutor == null || myRefreshExecutor.isShutdown()) {
 			return;
 		}
@@ -202,19 +193,6 @@ public class SqlLoggerFilteringUtil {
 	@VisibleForTesting
 	public static int getRefreshCountForTests() {
 		return ourRefreshCount.get();
-	}
-
-	/**
-	 * Shuts down every refresh executor started so far and resets the refresh counter, isolating a test from
-	 * executors leaked by earlier ones.
-	 */
-	@VisibleForTesting
-	public static void shutdownRefreshExecutorsForTests() {
-		synchronized (ourRefreshExecutorsForTests) {
-			ourRefreshExecutorsForTests.forEach(ScheduledThreadPoolExecutor::shutdownNow);
-			ourRefreshExecutorsForTests.clear();
-		}
-		ourRefreshCount.set(0);
 	}
 
 	@VisibleForTesting

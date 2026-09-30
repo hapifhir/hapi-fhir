@@ -53,12 +53,6 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 public class SqlLoggerFilteringAndUtilTest {
 
-	@AfterEach
-	void shutdownLeakedRefreshExecutors() {
-		// Spied util instances can leave refresh executors running, which inflates the shared refresh counter.
-		SqlLoggerFilteringUtil.shutdownRefreshExecutorsForTests();
-	}
-
 	@Nested
 	public class SqlStatementFilteringLoggerTests {
 		@Spy
@@ -75,6 +69,11 @@ public class SqlLoggerFilteringAndUtilTest {
 
 			ch.qos.logback.classic.Logger myTestedclassLogger = loggerContext.getLogger("ca.cdr.api.logging.SqlLoggerFilteringUtil");
 			myTestedclassLogger.setLevel(Level.toLevel("trace"));
+		}
+
+		@AfterEach
+		void stopRefreshExecutor() {
+			myFilteringUtil.stopFilterRefreshExecutor();
 		}
 
 		@Nested
@@ -218,6 +217,12 @@ public class SqlLoggerFilteringAndUtilTest {
 			LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 			myHibernateLogger = loggerContext.getLogger(SqlLoggerFilteringUtil.class);
 			myHibernateLogger = loggerContext.getLogger("org.hibernate.SQL");
+		}
+
+		@AfterEach
+		void stopRefreshExecutor() {
+			// A stubbed refreshFilters never runs the executor's own stop check
+			mySpiedUtil.stopFilterRefreshExecutor();
 		}
 
 		@Nested
