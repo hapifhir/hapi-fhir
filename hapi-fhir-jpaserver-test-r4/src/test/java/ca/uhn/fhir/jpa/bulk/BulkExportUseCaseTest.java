@@ -47,7 +47,10 @@ import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Sets;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -81,6 +84,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -96,7 +100,6 @@ import java.util.stream.IntStream;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.PARAM_EXPORT_INCLUDE_HISTORY;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.stream.Collectors.mapping;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
