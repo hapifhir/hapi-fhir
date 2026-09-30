@@ -2424,7 +2424,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				 * @see ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4Test
 				 * 		testTimingDateRangeSearch_ordinalAndDatetimeSearchesMatch
 				 */
-				if (endDates.isEmpty()) {
+				if (endDates.isEmpty() && !startDates.isEmpty()) {
 					startDates.clear();
 				} else {
 					startDates.add(eventDatesSorted.first());
