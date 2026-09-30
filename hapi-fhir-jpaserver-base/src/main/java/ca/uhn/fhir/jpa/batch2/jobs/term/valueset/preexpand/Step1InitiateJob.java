@@ -109,7 +109,8 @@ public class Step1InitiateJob
 		String stagingVersion = myTermValueSetStorageSvc.startStagingVersion(url, version);
 
 		UrlUtil.CanonicalUrlParts canonicalUrl = UrlUtil.parseCanonicalUrl(url, version);
-		IBaseResource inputVs = myValidationSupport.fetchValueSet(canonicalUrl.toString());
+		IBaseResource inputVs = myValidationSupport.fetchValueSet(
+				canonicalUrl.url(), canonicalUrl.versionId().orElse(null));
 		ValueSet valueSetCanonical = myVersionCanonicalizer.valueSetToCanonical(inputVs);
 
 		ValueSet.ValueSetComposeComponent compose = valueSetCanonical.getCompose();
