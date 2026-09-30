@@ -481,7 +481,7 @@ public class JdbcUtils {
 		Dialect dialect =
 				resolvers.resolveDialect(new DatabaseMetaDataDialectResolutionInfoAdapter(theConnection.getMetaData()));
 		if (dialect == null) {
-			throw new InternalErrorException(Msg.code(3009) + "Unable to determine the Hibernate dialect for database: "
+			throw new InternalErrorException(Msg.code(3055) + "Unable to determine the Hibernate dialect for database: "
 					+ theConnection.getMetaData().getDatabaseProductName());
 		}
 		return dialect;
