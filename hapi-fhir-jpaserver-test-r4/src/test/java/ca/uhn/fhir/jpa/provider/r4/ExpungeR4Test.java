@@ -34,9 +34,6 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.HapiExtensions;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -58,12 +55,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -79,7 +72,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(ExpungeR4Test.class);
 	private IIdType myOneVersionPatientId;
 	private IIdType myTwoVersionPatientId;
 	private IIdType myDeletedPatientId;
@@ -275,7 +267,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testDeleteCascade() throws IOException {
+	public void testDeleteCascade() {
 		myServer.getRestfulServer().registerInterceptor(new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorRegistry, myThreadSafeResourceDeleterSvc));
 
 		// setup
@@ -293,17 +285,12 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		IIdType patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		// execute
-		String url = myServerBase + "/Organization/" + organizationId.getIdPart() + "?" +
+		String path = "/Organization/" + organizationId.getIdPart() + "?" +
 			Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE
 			+ "&" +
 			JpaConstants.PARAM_DELETE_EXPUNGE + "=true"
 			;
-		HttpDelete delete = new HttpDelete(url);
-		try (CloseableHttpResponse response = ourHttpClient.execute(delete)) {
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("Response:\n{}", responseString);
-			assertEquals(200, response.getStatusLine().getStatusCode());
-		}
+		myServer.fhirRequest(path).delete().assertStatus(200);
 
 		runInTransaction(() -> {
 			ResourceTable res;
