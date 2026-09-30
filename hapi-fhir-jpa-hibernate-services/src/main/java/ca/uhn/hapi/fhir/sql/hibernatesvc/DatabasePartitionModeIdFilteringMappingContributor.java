@@ -170,8 +170,7 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 
 	/**
 	 * Removes the partition id from entity ids, unless database partition mode is enabled. Runs at most once per
-	 * metadata build, so it can also be called before other contributors that read entity ids: Envers captures
-	 * their types while it initializes, and contributors run in classpath order.
+	 * metadata build, so contributors that read entity ids (such as Envers) can call it before they do.
 	 *
 	 * @param theMetadata The metadata being built
 	 */
@@ -324,12 +323,8 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 			updateComponentWithNewPropertyList(identifierMapper, finalPropertyList);
 		}
 
-		// NOTE: we deliberately do NOT rebuild the identifier's own cached CompositeType here. Doing so leaves
-		// it without a mapping model part, which makes SessionFactory startup fail when it registers
-		// embeddable mapping types. At runtime the stale type is harmless, because the mapping model is
-		// derived from the (already filtered) columns of the identifier Value. Only an explicit
-		// Metadata#validate() notices the discrepancy, so the DDL generator repairs it just for that check -
-		// see alignFilteredIdentifierTypes().
+		// The identifier's cached CompositeType is deliberately left stale: rebuilding it drops its mapping
+		// model part and breaks SessionFactory startup. See alignFilteredIdentifierTypes().
 
 		PrimaryKey pk = table.getPrimaryKey();
 		List<Column> pkColumns = pk.getColumns();
@@ -567,14 +562,11 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 	}
 
 	/**
-	 * Rebuilds the cached {@link CompositeType} of any composite identifier whose type still describes more
-	 * properties than the identifier actually has, which is the case for the identifiers we filtered a
-	 * partition id column out of.
+	 * Rebuilds the cached {@link CompositeType} of composite identifiers that a partition id column was filtered
+	 * out of, so that {@link org.hibernate.boot.Metadata#validate()} passes.
 	 * <p>
-	 * This exists purely so that an explicit {@link org.hibernate.boot.Metadata#validate()} passes; it is
-	 * called by the DDL generator, which never builds a {@link org.hibernate.SessionFactory}. Do not call it
-	 * on metadata that is about to be used at runtime: the rebuilt type has no mapping model part, and
-	 * SessionFactory startup dereferences that when registering embeddable mapping types.
+	 * For DDL generation only: the rebuilt type has no mapping model part, so a
+	 * {@link org.hibernate.SessionFactory} can not be built from metadata passed through this method.
 	 * </p>
 	 */
 	public static void alignFilteredIdentifierTypes(org.hibernate.boot.Metadata theMetadata) {

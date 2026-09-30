@@ -89,7 +89,6 @@ public class ApacheProxyAddressStrategy extends IncomingRequestAddressStrategy {
 	public String determineServerBase(ServletContext servletContext, HttpServletRequest request) {
 		String serverBase = super.determineServerBase(servletContext, request);
 		ServletServerHttpRequest requestWrapper = new ServletServerHttpRequest(request);
-		// Spring 7 removed UriComponentsBuilder#fromHttpRequest. This is exactly what it delegated to.
 		UriComponentsBuilder uriBuilder =
 				ForwardedHeaderUtils.adaptFromForwardedHeaders(requestWrapper.getURI(), requestWrapper.getHeaders());
 		uriBuilder.replaceQuery(null);

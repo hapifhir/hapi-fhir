@@ -52,9 +52,8 @@ public class HapiFhirCockroachDialect extends CockroachDialect implements IHapiF
 	}
 
 	/**
-	 * CockroachDB's {@code string} type carries no length limit. Hibernate 7 renders our character LOB
-	 * columns using it, where Hibernate 6 rendered a length-qualified {@code varchar}. We keep the
-	 * length-qualified form so that a freshly created schema still matches an existing, migrated one.
+	 * Renders character LOB columns as a length-qualified {@code varchar}, matching existing HAPI FHIR schemas,
+	 * rather than CockroachDB's unbounded {@code string}.
 	 */
 	@Override
 	protected String columnType(int theSqlTypeCode) {

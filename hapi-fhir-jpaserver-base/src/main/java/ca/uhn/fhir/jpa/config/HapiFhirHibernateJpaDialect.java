@@ -70,14 +70,10 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 	}
 
 	/**
-	 * Spring 7 moved the Hibernate exception conversion out of {@link HibernateJpaDialect} and into
-	 * {@link HibernateExceptionTranslator}, and {@link HibernateJpaDialect#translateExceptionIfPossible} now
-	 * delegates to a translator it holds internally. We therefore hook in here instead of overriding the
-	 * conversion method, which would no longer be called.
-	 * <p>
-	 * Like Spring's translator, this also unwraps a {@link HibernateException} that Hibernate wrapped in a
-	 * {@link PersistenceException}, which is how optimistic and pessimistic lock failures reach us.
-	 * </p>
+	 * Applies HAPI FHIR's translation to Hibernate exceptions, including those Hibernate wrapped in a
+	 * {@link PersistenceException}, which is how optimistic and pessimistic lock failures arrive.
+	 * {@link HibernateJpaDialect} delegates to an internal {@link HibernateExceptionTranslator}, so this is the
+	 * only place to hook in.
 	 */
 	@Nullable
 	@Override
@@ -185,8 +181,7 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 	}
 
 	/**
-	 * Exposes Spring's protected Hibernate exception conversion, which is the behaviour
-	 * {@literal super.convertHibernateAccessException()} provided before Spring 7.
+	 * Exposes Spring's default (protected) Hibernate exception conversion.
 	 */
 	private static class DefaultExceptionTranslator extends HibernateExceptionTranslator {
 		DataAccessException convert(HibernateException theException) {

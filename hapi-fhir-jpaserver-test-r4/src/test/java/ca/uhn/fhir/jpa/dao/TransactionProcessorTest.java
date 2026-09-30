@@ -179,8 +179,8 @@ public class TransactionProcessorTest {
 
 	@BeforeEach
 	void before() {
-		// Spring Boot 4 removed the MockitoTestExecutionListener that used to initialize plain @Mock/@Captor
-		// fields, so we initialize them explicitly here and release them in tearDown.
+		// Spring's test framework does not initialize plain @Mock/@Captor fields; open them here, close them in
+		// tearDown.
 		myMocks = MockitoAnnotations.openMocks(this);
 
 		myDaoRegistry.unregisterAll();

@@ -60,10 +60,7 @@ public class HapiFhirSQLServerDialect extends SQLServerDialect implements IHapiF
 	}
 
 	/**
-	 * Hibernate 7 raised the default timestamp precision for SQL Server from 6 to 7, which would render
-	 * every timestamp column as {@code datetime2(7)} instead of the {@code datetime2(6)} that HAPI FHIR
-	 * schemas have always used. We keep 6 so that a freshly created schema still matches an existing,
-	 * migrated one.
+	 * HAPI FHIR schemas use {@code datetime2(6)}; Hibernate's SQL Server default is 7.
 	 */
 	@Override
 	public int getDefaultTimestampPrecision() {

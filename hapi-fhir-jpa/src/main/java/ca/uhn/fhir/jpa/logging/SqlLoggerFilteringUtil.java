@@ -53,11 +53,7 @@ public class SqlLoggerFilteringUtil {
 	private static final AtomicInteger ourRefreshCount = new AtomicInteger();
 
 	/**
-	 * All refresh executors ever started, tracked so that tests can deterministically shut every one of them
-	 * down. This exists because each test works against a fresh (often Mockito-spied) instance, and a spied
-	 * {@link UpdateFiltersTask} can keep running against a stubbed {@code refreshFilters}, leaking a scheduled
-	 * executor that keeps incrementing {@link #ourRefreshCount} into subsequent tests. See
-	 * {@link #shutdownRefreshExecutorsForTests()}.
+	 * Every refresh executor started, so that {@link #shutdownRefreshExecutorsForTests()} can stop them all.
 	 */
 	private static final Set<ScheduledThreadPoolExecutor> ourRefreshExecutorsForTests =
 			Collections.synchronizedSet(Collections.newSetFromMap(new WeakHashMap<>()));
@@ -209,8 +205,8 @@ public class SqlLoggerFilteringUtil {
 	}
 
 	/**
-	 * Shuts down every refresh executor that has ever been started and resets the refresh counter. Tests call
-	 * this to isolate themselves from executors leaked by earlier tests (see {@link #ourRefreshExecutorsForTests}).
+	 * Shuts down every refresh executor started so far and resets the refresh counter, isolating a test from
+	 * executors leaked by earlier ones.
 	 */
 	@VisibleForTesting
 	public static void shutdownRefreshExecutorsForTests() {

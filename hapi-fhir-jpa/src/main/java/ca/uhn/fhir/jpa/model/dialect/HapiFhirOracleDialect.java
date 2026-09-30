@@ -65,9 +65,7 @@ public class HapiFhirOracleDialect extends OracleDialect implements IHapiFhirDia
 	}
 
 	/**
-	 * Hibernate 7 raised the default timestamp precision for Oracle from 6 to 9, which would render every
-	 * timestamp column as {@code timestamp(9)} instead of the {@code timestamp(6)} that HAPI FHIR schemas
-	 * have always used. We keep 6 so that a freshly created schema still matches an existing, migrated one.
+	 * HAPI FHIR schemas use {@code timestamp(6)}; Hibernate's Oracle default is 9.
 	 */
 	@Override
 	public int getDefaultTimestampPrecision() {

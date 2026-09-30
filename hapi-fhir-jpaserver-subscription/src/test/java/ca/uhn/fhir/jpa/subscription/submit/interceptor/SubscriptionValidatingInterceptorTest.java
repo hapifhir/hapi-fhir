@@ -93,8 +93,7 @@ public class SubscriptionValidatingInterceptorTest {
 
 	@BeforeEach
 	public void before() {
-		// Spring Boot 4 removed the MockitoTestExecutionListener that used to initialize plain @Mock fields,
-		// so we initialize them explicitly here and release them in tearDown.
+		// Spring's test framework does not initialize plain @Mock fields; open them here, close them in tearDown.
 		myMocks = MockitoAnnotations.openMocks(this);
 		setFhirContext(FhirVersionEnum.R4B);
 		when(myDaoRegistry.isResourceTypeSupported(any())).thenReturn(true);

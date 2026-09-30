@@ -32,11 +32,10 @@ import java.util.function.Supplier;
 /**
  * Envers' service, made to remove the partition id from entity ids before Envers reads them.
  * <p>
- * Envers and {@link DatabasePartitionModeIdFilteringMappingContributor} are both Hibernate mapping contributors,
- * which Hibernate runs in classpath order. Since Hibernate 7, Envers captures the type of every entity id while it
- * initializes, so if it runs first it keeps the ids with the partition id, and SessionFactory startup fails with
- * "identifier mapping has wrong number of columns". This service runs the filter at the start of Envers'
- * initialization, whichever contributor Hibernate runs first.
+ * Envers captures the type of every entity id while it initializes, and Hibernate runs mapping contributors,
+ * including {@link DatabasePartitionModeIdFilteringMappingContributor}, in classpath order. Running the filter
+ * here makes that order irrelevant; otherwise SessionFactory startup can fail with "identifier mapping has
+ * wrong number of columns".
  * </p>
  * <p>
  * It is registered as a provided service, which Hibernate does not configure, so it configures itself from the

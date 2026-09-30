@@ -859,79 +859,66 @@ public class GiantTransactionPerfTest {
 			throw new UnsupportedOperationException();
 		}
 
-		// Added in Jakarta Persistence 3.2
 		@Override
 		public <C> void runWithConnection(ConnectionConsumer<C> action) {
 			throw new UnsupportedOperationException();
 		}
 
-		// Added in Jakarta Persistence 3.2
 		@Override
 		public <C, T> T callWithConnection(ConnectionFunction<C, T> function) {
 			throw new UnsupportedOperationException();
 		}
 
-		// Added in Jakarta Persistence 3.2
 		@Override
 		public <T> T find(Class<T> entityClass, Object primaryKey, FindOption... options) {
 			throw new UnsupportedOperationException();
 		}
 
-		// Added in Jakarta Persistence 3.2
 		@Override
 		public <T> T find(EntityGraph<T> entityGraph, Object primaryKey, FindOption... options) {
 			throw new UnsupportedOperationException();
 		}
 
-		// Added in Jakarta Persistence 3.2
 		@Override
 		public <T> T getReference(T entity) {
 			throw new UnsupportedOperationException();
 		}
 
-		// Added in Jakarta Persistence 3.2
 		@Override
 		public void lock(Object entity, LockModeType lockMode, LockOption... options) {
 			throw new UnsupportedOperationException();
 		}
 
-		// Added in Jakarta Persistence 3.2
 		@Override
 		public void refresh(Object entity, RefreshOption... options) {
 			throw new UnsupportedOperationException();
 		}
 
-		// Added in Jakarta Persistence 3.2
 		@Override
 		public <T> TypedQuery<T> createQuery(CriteriaSelect<T> selectQuery) {
 			throw new UnsupportedOperationException();
 		}
 
-		// Added in Jakarta Persistence 3.2
 		@Override
 		public <T> TypedQuery<T> createQuery(TypedQueryReference<T> reference) {
 			throw new UnsupportedOperationException();
 		}
 
-		// Added in Jakarta Persistence 3.2
 		@Override
 		public CacheRetrieveMode getCacheRetrieveMode() {
 			throw new UnsupportedOperationException();
 		}
 
-		// Added in Jakarta Persistence 3.2
 		@Override
 		public void setCacheRetrieveMode(CacheRetrieveMode cacheRetrieveMode) {
 			throw new UnsupportedOperationException();
 		}
 
-		// Added in Jakarta Persistence 3.2
 		@Override
 		public CacheStoreMode getCacheStoreMode() {
 			throw new UnsupportedOperationException();
 		}
 
-		// Added in Jakarta Persistence 3.2
 		@Override
 		public void setCacheStoreMode(CacheStoreMode cacheStoreMode) {
 			throw new UnsupportedOperationException();
