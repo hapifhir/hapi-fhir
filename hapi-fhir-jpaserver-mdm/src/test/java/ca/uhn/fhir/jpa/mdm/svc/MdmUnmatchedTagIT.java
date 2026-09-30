@@ -15,6 +15,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -43,6 +44,12 @@ public class MdmUnmatchedTagIT extends BaseMdmR4Test {
 
 	private int myOriginalCandidateSearchLimit;
 
+	// JUnit also runs these for the nested class's tests, so the limit is saved here rather than in a test
+	@BeforeEach
+	public void saveCandidateSearchLimit() {
+		myOriginalCandidateSearchLimit = myMdmSettings.getCandidateSearchLimit();
+	}
+
 	@AfterEach
 	public void restoreCandidateSearchLimit() {
 		myMdmSettings.setCandidateSearchLimit(myOriginalCandidateSearchLimit);
@@ -50,7 +57,6 @@ public class MdmUnmatchedTagIT extends BaseMdmR4Test {
 
 	@Test
 	public void asyncResubmission_ofAResourceThatNowMatches_clearsTheUnmatchedTag() throws InterruptedException {
-		myOriginalCandidateSearchLimit = myMdmSettings.getCandidateSearchLimit();
 
 		// setup - one jane already in the repository to act as a candidate, then a limit low enough that the
 		// next one cannot be narrowed down
