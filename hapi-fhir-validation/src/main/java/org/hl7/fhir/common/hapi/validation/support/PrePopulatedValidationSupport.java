@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.util.ILockable;
+import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.compress.utils.Sets;
@@ -328,12 +329,56 @@ public class PrePopulatedValidationSupport extends BaseValidationSupport impleme
 
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
-		return myUrlToCodeSystems.containsKey(theSystem);
+		// On this signature a code system can only name a version by carrying it packed as "system|version"
+		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(theSystem);
+		return isCodeSystemSupported(
+				theValidationSupportContext,
+				codeSystem.url(),
+				codeSystem.versionId().orElse(null));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Answers only for the version named, since this module can hold several versions of one code system.
+	 * </p>
+	 */
+	// Created by Claude Opus 5
+	@Override
+	public boolean isCodeSystemSupported(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theSystem,
+			@Nullable String theVersion) {
+		// Each version is stored under its own "url|version" key
+		String canonicalUrl = UrlUtil.toCanonicalUrl(theSystem, theVersion);
+		return canonicalUrl != null && myUrlToCodeSystems.containsKey(canonicalUrl);
 	}
 
 	@Override
 	public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
-		return myUrlToValueSets.containsKey(theValueSetUrl);
+		// On this signature a ValueSet can only name a version by carrying it packed as "url|version"
+		UrlUtil.CanonicalUrlParts valueSet = UrlUtil.parseCanonicalUrl(theValueSetUrl);
+		return isValueSetSupported(
+				theValidationSupportContext,
+				valueSet.url(),
+				valueSet.versionId().orElse(null));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Answers only for the version named, since this module can hold several versions of one ValueSet.
+	 * </p>
+	 */
+	// Created by Claude Opus 5.5
+	@Override
+	public boolean isValueSetSupported(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theValueSetUrl,
+			@Nullable String theVersion) {
+		// Each version is stored under its own "url|version" key
+		String canonicalUrl = UrlUtil.toCanonicalUrl(theValueSetUrl, theVersion);
+		return canonicalUrl != null && myUrlToValueSets.containsKey(canonicalUrl);
 	}
 
 	/**

@@ -3,6 +3,7 @@ package org.hl7.fhir.r4.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -32,6 +33,7 @@ import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -43,6 +45,8 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.context.support.IValidationSupport.ConceptDesignation;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Version specific tests for CodeSystem $lookup against RemoteTerminologyValidationSupport.
@@ -166,8 +170,34 @@ public class RemoteTerminologyLookupCodeR4Test implements IRemoteTerminologyLook
 	}
 
 	@SuppressWarnings("unused")
+	/**
+	 * A remote terminology service answers from whichever version it treats as current unless the request
+	 * names one, so a caller who asked about a specific version would be told nothing about the substitution.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	void lookupCode_withACodeSystemVersion_sendsItAsItsOwnParameter() {
+		// Setup
+		LookupCodeResult result = new LookupCodeResult();
+		result.setFound(true);
+		result.setSearchedForCode("code0");
+		result.setSearchedForSystem("http://cs");
+		result.setCodeDisplay("Code 0");
+		myLookupCodeProviderR4.setLookupCodeResult(result);
+
+		// Test
+		mySvc.lookupCode(
+			null, new LookupCodeRequest("http://cs", "code0").setVersion("2.0.0"));
+
+		// Verify
+		assertNotNull(myLookupCodeProviderR4.myLastVersion);
+		assertEquals("2.0.0", myLookupCodeProviderR4.myLastVersion.getValue());
+	}
+
 	static class MyLookupCodeProviderR4 implements IValidationProviders.IMyLookupCodeProvider {
 		private LookupCodeResult myLookupCodeResult;
+		// Created by Claude Opus 5
+		private StringType myLastVersion;
 
 		@Override
 		public void setLookupCodeResult(LookupCodeResult theLookupCodeResult) {
@@ -191,6 +221,7 @@ public class RemoteTerminologyLookupCodeR4Test implements IRemoteTerminologyLook
 			@OperationParam(name = "property", max = OperationParam.MAX_UNLIMITED) List<CodeType> thePropertyNames,
 			RequestDetails theRequestDetails
 		) {
+			myLastVersion = theVersion;
 			if (theSystem == null) {
 				throw new InvalidRequestException(MessageFormat.format(MESSAGE_RESPONSE_INVALID, theCode));
 			}
