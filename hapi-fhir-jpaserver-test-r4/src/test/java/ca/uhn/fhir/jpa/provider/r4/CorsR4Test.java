@@ -2,29 +2,22 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.Constants;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CorsR4Test extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CorsR4Test.class);
 
 	@Test
-	public void saveLocalOrigin() throws IOException {
-		HttpGet get = new HttpGet(myServerBase + "/Patient?name=test");
-		get.addHeader(Constants.HEADER_CORS_ORIGIN, "file://");
-		CloseableHttpResponse resp = ourHttpClient.execute(get);
-		
+	public void saveLocalOrigin() {
+		HttpTestResponse resp = myServer.fhirRequest("/Patient?name=test")
+			.withHeader(Constants.HEADER_CORS_ORIGIN, "file://")
+			.get();
+
 		ourLog.info(resp.toString());
-		
-		IOUtils.closeQuietly(resp.getEntity().getContent());
-		assertEquals(200, resp.getStatusLine().getStatusCode());
+
+		resp.assertStatus(200);
 	}
 
 

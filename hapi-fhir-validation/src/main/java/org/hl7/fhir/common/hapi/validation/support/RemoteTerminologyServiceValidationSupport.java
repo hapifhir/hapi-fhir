@@ -20,6 +20,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.ParametersUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
@@ -183,24 +184,43 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
+		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(theSystem);
+		return fetchCodeSystem(codeSystem.url(), codeSystem.versionId().orElse(null));
+	}
+
+	// Created by Claude Opus 5
+	@Override
+	@Nullable
+	public IBaseResource fetchCodeSystem(@Nonnull String theSystem, @Nullable String theVersion) {
 		// callers of this want the whole resource.
-		return fetchCodeSystem(theSystem, SummaryEnum.FALSE);
+		return searchForCodeSystem(theSystem, theVersion, SummaryEnum.FALSE);
 	}
 
 	/**
-	 * Fetch the code system, possibly a summary.
-	 * @param theSystem the canonical url
+	 * Search for a CodeSystem by url and version via IGenericClient.
+	 * <p>
+	 * The version is sent as its own search parameter: a CodeSystem resource's <code>url</code> element
+	 * never contains a pipe, so a packed <code>url|version</code> canonical matches nothing.
+	 * </p>
+	 *
+	 * @param theSystem the code system url, without a version
+	 * @param theVersion the code system version, or null for whichever version the server considers current
 	 * @param theSummaryParam to force a summary mode - or null to allow server default.
-	 * @return the CodeSystem
+	 * @return the CodeSystem, or null if none match
 	 */
 	@Nullable
-	private IBaseResource fetchCodeSystem(String theSystem, @Nullable SummaryEnum theSummaryParam) {
+	private IBaseResource searchForCodeSystem(
+			String theSystem, @Nullable String theVersion, @Nullable SummaryEnum theSummaryParam) {
 		IGenericClient client = provideClient();
 		Class<? extends IBaseBundle> bundleType =
 				myCtx.getResourceDefinition("Bundle").getImplementingClass(IBaseBundle.class);
 		IQuery<IBaseBundle> codeSystemQuery = client.search()
 				.forResource("CodeSystem")
 				.where(CodeSystem.URL.matches().value(theSystem));
+
+		if (isNotBlank(theVersion)) {
+			codeSystemQuery.where(new StringClientParam("version").matches().value(theVersion));
+		}
 
 		if (theSummaryParam != null) {
 			codeSystemQuery.summaryMode(theSummaryParam);
@@ -220,6 +240,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 			ValidationSupportContext theValidationSupportContext, @Nonnull LookupCodeRequest theLookupCodeRequest) {
 		final String code = theLookupCodeRequest.getCode();
 		final String system = theLookupCodeRequest.getSystem();
+		final String version = theLookupCodeRequest.getVersion();
 		final String displayLanguage = theLookupCodeRequest.getDisplayLanguage();
 		Validate.notBlank(code, "theCode must be provided");
 
@@ -236,6 +257,12 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 		ParametersUtil.addParameterToParametersString(fhirContext, params, "code", code);
 		if (!StringUtils.isEmpty(system)) {
 			ParametersUtil.addParameterToParametersString(fhirContext, params, "system", system);
+		}
+		// Without this the server answers from whichever version it treats as current, and the caller who
+		// named a version is told nothing about the substitution.
+		// Created by Claude Opus 5
+		if (!StringUtils.isEmpty(version)) {
+			ParametersUtil.addParameterToParametersString(fhirContext, params, "version", version);
 		}
 		if (!StringUtils.isEmpty(displayLanguage)) {
 			ParametersUtil.addParameterToParametersString(fhirContext, params, "language", displayLanguage);
@@ -575,33 +602,45 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 
 	@Override
 	public IBaseResource fetchValueSet(String theValueSetUrl) {
+		UrlUtil.CanonicalUrlParts valueSet = UrlUtil.parseCanonicalUrl(theValueSetUrl);
+		String valueSetVersion = valueSet.versionId().orElse(null);
+		return fetchValueSet(valueSet.url(), valueSetVersion);
+	}
+
+	// Created by Claude Opus 5
+	@Override
+	@Nullable
+	public IBaseResource fetchValueSet(@Nonnull String theValueSetUrl, @Nullable String theVersion) {
 		// force the remote server to send the whole resource.
 		SummaryEnum summaryParam = SummaryEnum.FALSE;
-		return fetchValueSet(theValueSetUrl, summaryParam);
+		return searchForValueSet(theValueSetUrl, theVersion, summaryParam);
 	}
 
 	/**
-	 * Search for a ValueSet by canonical url via IGenericClient.
+	 * Search for a ValueSet by url and version via IGenericClient.
+	 * <p>
+	 * The version is sent as its own search parameter: a ValueSet resource's <code>url</code> element
+	 * never contains a pipe, so a packed <code>url|version</code> canonical matches nothing.
+	 * </p>
 	 *
-	 * @param theValueSetUrl the canonical url of the ValueSet
+	 * @param theValueSetUrl the value set url, without a version
+	 * @param theVersion the value set version, or null for whichever version the server considers current
 	 * @param theSummaryParam force a summary mode - null allows server default
 	 * @return the ValueSet or null if none match the url
 	 */
 	@Nullable
-	private IBaseResource fetchValueSet(String theValueSetUrl, SummaryEnum theSummaryParam) {
+	private IBaseResource searchForValueSet(
+			String theValueSetUrl, @Nullable String theVersion, @Nullable SummaryEnum theSummaryParam) {
 		IGenericClient client = provideClient();
 		Class<? extends IBaseBundle> bundleType =
 				myCtx.getResourceDefinition("Bundle").getImplementingClass(IBaseBundle.class);
 
-		IQuery<IBaseBundle> valueSetQuery = client.search().forResource("ValueSet");
+		IQuery<IBaseBundle> valueSetQuery = client.search()
+				.forResource("ValueSet")
+				.where(CodeSystem.URL.matches().value(theValueSetUrl));
 
-		int pipeIdx = theValueSetUrl.indexOf("|");
-		if (pipeIdx < 0) {
-			valueSetQuery.where(CodeSystem.URL.matches().value(theValueSetUrl));
-		} else {
-			valueSetQuery.where(CodeSystem.URL.matches().value(theValueSetUrl.substring(0, pipeIdx)));
-			valueSetQuery.where(
-					new StringClientParam("version").matches().value(theValueSetUrl.substring(pipeIdx + 1)));
+		if (isNotBlank(theVersion)) {
+			valueSetQuery.where(new StringClientParam("version").matches().value(theVersion));
 		}
 
 		if (theSummaryParam != null) {
@@ -620,18 +659,40 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
+		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(theSystem);
+		String codeSystemVersion = codeSystem.versionId().orElse(null);
+		return isCodeSystemSupported(theValidationSupportContext, codeSystem.url(), codeSystemVersion);
+	}
+
+	// Created by Claude Opus 5
+	@Override
+	public boolean isCodeSystemSupported(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theSystem,
+			@Nullable String theVersion) {
 		// a summary is ok if we are just checking the presence.
 		SummaryEnum summaryParam = null;
 
-		return fetchCodeSystem(theSystem, summaryParam) != null;
+		return searchForCodeSystem(theSystem, theVersion, summaryParam) != null;
 	}
 
 	@Override
 	public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
+		UrlUtil.CanonicalUrlParts valueSet = UrlUtil.parseCanonicalUrl(theValueSetUrl);
+		String valueSetVersion = valueSet.versionId().orElse(null);
+		return isValueSetSupported(theValidationSupportContext, valueSet.url(), valueSetVersion);
+	}
+
+	// Created by Claude Opus 5
+	@Override
+	public boolean isValueSetSupported(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theValueSetUrl,
+			@Nullable String theVersion) {
 		// a summary is ok if we are just checking the presence.
 		SummaryEnum summaryParam = null;
 
-		return fetchValueSet(theValueSetUrl, summaryParam) != null;
+		return searchForValueSet(theValueSetUrl, theVersion, summaryParam) != null;
 	}
 
 	@Override

@@ -280,16 +280,56 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
-		if (isBlank(theSystem)) {
-			return false;
-		}
-		TermCodeSystemVersionDetails cs = getCurrentCodeSystemVersion(theSystem);
-		return cs != null;
+		// On this signature a code system can only name a version by carrying it packed as "system|version"
+		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(theSystem);
+		return isCodeSystemSupported(
+				theValidationSupportContext,
+				codeSystem.url(),
+				codeSystem.versionId().orElse(null));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Answers only for the version named, since several versions of one code system can be stored.
+	 * </p>
+	 */
+	// Created by Claude Opus 5
+	@Override
+	public boolean isCodeSystemSupported(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theSystem,
+			@Nullable String theVersion) {
+		// The current version details are looked up and cached by the "url|version" identifier
+		String codeSystemIdentifier = UrlUtil.toCanonicalUrl(theSystem, theVersion);
+		return codeSystemIdentifier != null && getCurrentCodeSystemVersion(codeSystemIdentifier) != null;
 	}
 
 	@Override
 	public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
-		return fetchValueSet(theValueSetUrl) != null;
+		// On this signature a ValueSet can only name a version by carrying it packed as "url|version"
+		UrlUtil.CanonicalUrlParts valueSet = UrlUtil.parseCanonicalUrl(theValueSetUrl);
+		return isValueSetSupported(
+				theValidationSupportContext,
+				valueSet.url(),
+				valueSet.versionId().orElse(null));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Answers only for the version named, since several versions of one ValueSet can be stored.
+	 * </p>
+	 */
+	// Created by Claude Opus 5.5
+	@Override
+	public boolean isValueSetSupported(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theValueSetUrl,
+			@Nullable String theVersion) {
+		UrlUtil.CanonicalUrlParts valueSet = UrlUtil.parseCanonicalUrl(theValueSetUrl, theVersion);
+		return valueSet.url() != null
+				&& fetchValueSet(valueSet.url(), valueSet.versionId().orElse(null)) != null;
 	}
 
 	private void addCodeIfNotAlreadyAdded(
@@ -2563,7 +2603,13 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		return myTxTemplate.execute(t -> {
 			final String theSystem = theLookupCodeRequest.getSystem();
 			final String theCode = theLookupCodeRequest.getCode();
-			Optional<TermConcept> codeOpt = findCode(theSystem, theCode);
+			// The version is named on the request where the caller could name it, and otherwise can only have
+			// arrived packed into the system as "url|version"
+			String codeSystemIdentifier = theSystem;
+			if (isNotBlank(theSystem)) {
+				codeSystemIdentifier = UrlUtil.toCanonicalUrl(theSystem, theLookupCodeRequest.getVersion());
+			}
+			Optional<TermConcept> codeOpt = findCode(codeSystemIdentifier, theCode);
 			if (codeOpt.isPresent()) {
 				TermConcept code = codeOpt.get();
 
@@ -2712,13 +2758,57 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		// The lookups below take the code system as a single "url|version" identifier, which
 		// getCurrentCodeSystemVersion also uses as a cache key.
 		String codeSystemUrl = UrlUtil.toCanonicalUrl(theRequest.getCodeSystem(), theRequest.getCodeSystemVersion());
-		return validateCode(
-				theValidationSupportContext,
-				theOptions,
-				codeSystemUrl,
-				theRequest.getCode(),
-				theRequest.getDisplay(),
-				theRequest.getValueSetUrl());
+		String codeToValidate = theRequest.getCode();
+		String display = theRequest.getDisplay();
+		String valueSetUrl = theRequest.getValueSetUrl();
+
+		// TODO GGG TRY TO JUST AUTO_PASS HERE AND SEE WHAT HAPPENS.
+		invokeRunnableForUnitTest();
+		theOptions.setValidateDisplay(isNotBlank(display));
+
+		if (isNotBlank(valueSetUrl)) {
+			return validateCodeInValueSet(
+					theValidationSupportContext, theOptions, valueSetUrl, codeSystemUrl, codeToValidate, display);
+		}
+
+		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+		txTemplate.setReadOnly(true);
+		Optional<FhirVersionIndependentConcept> codeOpt =
+				txTemplate.execute(tx -> findCode(codeSystemUrl, codeToValidate).map(c -> {
+					TermCodeSystemVersionDetails csv = getCurrentCodeSystemVersion(codeSystemUrl);
+					String codeSystemVersionId = csv != null ? csv.codeSystemVersionId() : null;
+					return new FhirVersionIndependentConcept(
+							codeSystemUrl, c.getCode(), c.getDisplay(), codeSystemVersionId);
+				}));
+
+		if (codeOpt != null && codeOpt.isPresent()) {
+			FhirVersionIndependentConcept code = codeOpt.get();
+			if (!theOptions.isValidateDisplay()
+					|| isBlank(code.getDisplay())
+					|| isBlank(display)
+					|| code.getDisplay().equals(display)) {
+				return new CodeValidationResult().setCode(code.getCode()).setDisplay(code.getDisplay());
+			} else {
+				return InMemoryTerminologyServerValidationSupport.createResultForDisplayMismatch(
+						myContext,
+						codeToValidate,
+						display,
+						code.getDisplay(),
+						code.getSystem(),
+						code.getSystemVersion(),
+						myStorageSettings.getIssueSeverityForCodeDisplayMismatch());
+			}
+		}
+
+		if (isNotBlank(codeSystemUrl)
+				&& Boolean.TRUE.equals(txTemplate.execute(tx ->
+						isCodeSystemNotPresentAndHasNoLocalContent(theValidationSupportContext, codeSystemUrl)))) {
+			return null;
+		}
+
+		return createCodeNotFoundErrorForValidationResult(
+				codeSystemUrl, codeToValidate, null, createMessageAppendForCodeNotFoundInCodeSystem(codeSystemUrl));
 	}
 
 	@CoverageIgnore
@@ -2730,53 +2820,13 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			String theCode,
 			String theDisplay,
 			String theValueSetUrl) {
-		// TODO GGG TRY TO JUST AUTO_PASS HERE AND SEE WHAT HAPPENS.
-		invokeRunnableForUnitTest();
-		theOptions.setValidateDisplay(isNotBlank(theDisplay));
-
-		if (isNotBlank(theValueSetUrl)) {
-			return validateCodeInValueSet(
-					theValidationSupportContext, theOptions, theValueSetUrl, theCodeSystemUrl, theCode, theDisplay);
-		}
-
-		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
-		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-		txTemplate.setReadOnly(true);
-		Optional<FhirVersionIndependentConcept> codeOpt =
-				txTemplate.execute(tx -> findCode(theCodeSystemUrl, theCode).map(c -> {
-					TermCodeSystemVersionDetails csv = getCurrentCodeSystemVersion(theCodeSystemUrl);
-					String codeSystemVersionId = csv != null ? csv.codeSystemVersionId() : null;
-					return new FhirVersionIndependentConcept(
-							theCodeSystemUrl, c.getCode(), c.getDisplay(), codeSystemVersionId);
-				}));
-
-		if (codeOpt != null && codeOpt.isPresent()) {
-			FhirVersionIndependentConcept code = codeOpt.get();
-			if (!theOptions.isValidateDisplay()
-					|| isBlank(code.getDisplay())
-					|| isBlank(theDisplay)
-					|| code.getDisplay().equals(theDisplay)) {
-				return new CodeValidationResult().setCode(code.getCode()).setDisplay(code.getDisplay());
-			} else {
-				return InMemoryTerminologyServerValidationSupport.createResultForDisplayMismatch(
-						myContext,
-						theCode,
-						theDisplay,
-						code.getDisplay(),
-						code.getSystem(),
-						code.getSystemVersion(),
-						myStorageSettings.getIssueSeverityForCodeDisplayMismatch());
-			}
-		}
-
-		if (isNotBlank(theCodeSystemUrl)
-				&& Boolean.TRUE.equals(txTemplate.execute(tx ->
-						isCodeSystemNotPresentAndHasNoLocalContent(theValidationSupportContext, theCodeSystemUrl)))) {
-			return null;
-		}
-
-		return createCodeNotFoundErrorForValidationResult(
-				theCodeSystemUrl, theCode, null, createMessageAppendForCodeNotFoundInCodeSystem(theCodeSystemUrl));
+		// On this signature a code system can only name a version by carrying it packed as "system|version"
+		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(theCodeSystemUrl);
+		return validateCode(
+				theValidationSupportContext,
+				theOptions,
+				new ValidateCodeRequest(
+						codeSystem.url(), codeSystem.versionId().orElse(null), theCode, theDisplay, theValueSetUrl));
 	}
 
 	/**

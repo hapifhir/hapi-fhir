@@ -10,6 +10,7 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.Logs;
+import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
@@ -455,8 +456,43 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		return normalized;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This module ships exactly one definition of each code system it knows, so it answers for whatever
+	 * version is asked for. That is only safe because it stores no versioned content: a module which does
+	 * must answer truthfully, or chain order decides which version a code is validated against.
+	 * </p>
+	 */
+	// Created by Claude Opus 5
+	@Override
+	@Nullable
+	public IBaseResource fetchCodeSystem(@Nonnull String theSystem, @Nullable String theVersion) {
+		return fetchCodeSystem(theSystem);
+	}
+
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
+		// On this signature a code system can only name a version by carrying it packed as "system|version"
+		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(theSystem);
+		return isCodeSystemSupported(
+				theValidationSupportContext,
+				codeSystem.url(),
+				codeSystem.versionId().orElse(null));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Version-insensitive, for the reason given on {@link #fetchCodeSystem(String, String)}.
+	 * </p>
+	 */
+	// Created by Claude Opus 5
+	@Override
+	public boolean isCodeSystemSupported(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theSystem,
+			@Nullable String theVersion) {
 		if (theSystem == null) {
 			return false;
 		}
@@ -486,6 +522,21 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		}
 
 		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Version-insensitive, for the reason given on {@link #fetchCodeSystem(String, String)}.
+	 * </p>
+	 */
+	// Created by Claude Opus 5
+	@Override
+	public boolean isValueSetSupported(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theValueSetUrl,
+			@Nullable String theVersion) {
+		return isValueSetSupported(theValidationSupportContext, theValueSetUrl);
 	}
 
 	@Override
