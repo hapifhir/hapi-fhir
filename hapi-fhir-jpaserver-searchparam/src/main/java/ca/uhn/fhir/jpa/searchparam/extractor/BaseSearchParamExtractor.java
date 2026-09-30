@@ -2369,10 +2369,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			// In order to properly set upper and lower bounds, we need to compute each of the separately
 			SortedSet<DateStringWrapper> startDates = new TreeSet<>();
 			SortedSet<DateStringWrapper> endDates = new TreeSet<>();
-			if (!eventDatesSorted.isEmpty()) {
-				startDates.add(eventDatesSorted.first());
-				endDates.add(eventDatesSorted.last());
-			}
 
 			Optional<IBase> repeat = myTimingRepeatValueChild.getAccessor().getFirstValueOrNull(theValue);
 			if (repeat.isPresent()) {
@@ -2418,6 +2414,16 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 							}
 						}
 					}
+				}
+			}
+
+			if (!eventDatesSorted.isEmpty()) {
+				// In order to preserve existing search behavior, if there was no end dates, discard all events and start dates as well
+				if (endDates.isEmpty()) {
+					startDates.clear();
+				} else {
+					startDates.add(eventDatesSorted.first());
+					endDates.add(eventDatesSorted.last());
 				}
 			}
 
