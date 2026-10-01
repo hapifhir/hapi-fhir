@@ -80,7 +80,7 @@ public class Batch2JobHelper {
 	private final IReductionStepExecutorService myReductionStepExecutorService;
 
 	/**
-	 * A helper that cannot {@link #awaitNoInFlightWork()}.
+	 * Creates a helper that cannot use {@link #awaitNoInFlightWork()}.
 	 */
 	public Batch2JobHelper(IJobMaintenanceService theJobMaintenanceService, IJobCoordinator theJobCoordinator, IJobPersistence theJobPersistence) {
 		myJobMaintenanceService = theJobMaintenanceService;
@@ -91,7 +91,7 @@ public class Batch2JobHelper {
 	}
 
 	/**
-	 * A helper that can also {@link #awaitNoInFlightWork()}, which watches the batch2 worker threads and the reducer.
+	 * Creates a helper that can also wait for running batch2 work with {@link #awaitNoInFlightWork()}.
 	 */
 	public Batch2JobHelper(
 			IJobMaintenanceService theJobMaintenanceService,
@@ -343,8 +343,8 @@ public class Batch2JobHelper {
 
 	public boolean hasRunningJobs() {
 		HashMap<String, String> map = new HashMap<>();
-		// Read through the persistence layer: the coordinator throws for instances whose job definition is not
-		// registered, which tests that store instances directly create
+		// Use IJobPersistence: IJobCoordinator throws for jobs whose definition is not registered,
+		// which some tests create
 		List<JobInstance> jobs = fetchAllNotEndedInstances();
 		// "All Jobs" assumes at least one job exists
 		if (jobs.isEmpty()) {
@@ -436,9 +436,8 @@ public class Batch2JobHelper {
 	}
 
 	/**
-	 * Cancels every job instance that has not ended. Despite its name, it does not wait: cancelling only sets a
-	 * flag, which takes effect at the next maintenance pass, and work already queued or executing runs to
-	 * completion. Use {@link #awaitNoInFlightWork()} to wait for that work.
+	 * Cancels every job that has not finished. Despite the name, it does not wait: a cancelled job only stops
+	 * later, and work it has already started keeps running. Call {@link #awaitNoInFlightWork()} to wait for that.
 	 */
 	public void cancelAllJobsAndAwaitCancellation() {
 		for (JobInstance next : fetchAllNotEndedInstances()) {
@@ -447,28 +446,29 @@ public class Batch2JobHelper {
 	}
 
 	/**
-	 * Waits until no batch2 work chunk is queued or executing and no reduction step is running or waiting, so that
-	 * nothing writes to the database or the caches after the caller cleans them up.
+	 * Waits until batch2 has no work queued or running and the reducer is idle, so that nothing writes to the
+	 * database while a test cleans it up.
 	 * <p>
-	 * It does not stop new work from starting: callers pause the schedulers first, so that no maintenance pass
-	 * enqueues more. A scheduled job that was already running when the scheduler paused, which
-	 * {@code ISchedulerService#pause()} gives up waiting for after a short time, is not waited for.
+	 * It does not stop new work from starting, so pause the schedulers first. A scheduled job that was already
+	 * running when they paused is not waited for.
 	 * </p>
 	 * <p>
-	 * The idle state has to hold for 50 ms: a chunk moving from the executor queue to a worker thread is briefly
-	 * counted in neither place.
+	 * Batch2 has to stay idle for 50 ms in a row, because work passing from the queue to a worker thread is
+	 * briefly invisible.
 	 * </p>
 	 *
-	 * @throws IllegalStateException if this helper was built without the work channel consumer and reduction step
-	 * executor, or they are not the in-memory implementations whose threads it can see
-	 * @throws ConditionTimeoutException if the work is still running after {@link #DEFAULT_WAIT_DURATION}
+	 * @throws IllegalStateException if this helper was created without the work channel and reducer, or cannot
+	 * inspect them
+	 * @throws ConditionTimeoutException if work is still running after {@link #DEFAULT_WAIT_DURATION}
 	 */
 	public void awaitNoInFlightWork() {
 		awaitNoInFlightWork(DEFAULT_WAIT_DURATION);
 	}
 
-	@VisibleForTesting
-	void awaitNoInFlightWork(Duration theTimeout) {
+	/**
+	 * Same as {@link #awaitNoInFlightWork()}, with a custom timeout.
+	 */
+	public void awaitNoInFlightWork(Duration theTimeout) {
 		Validate.validState(
 				myWorkChannelConsumer != null && myReductionStepExecutorService != null,
 				"This Batch2JobHelper was built without the work channel consumer and reduction step executor");
@@ -485,8 +485,8 @@ public class Batch2JobHelper {
 	}
 
 	/**
-	 * Every page, so that a test that leaves more instances than fit on one is still fully covered. Cancelling
-	 * sets a flag and leaves the status alone, so the instances do not move between pages while they are read.
+	 * Reads every page, not just the first. Cancelling does not change a job's status, so jobs do not move between
+	 * pages while this reads them.
 	 */
 	private List<JobInstance> fetchAllNotEndedInstances() {
 		List<JobInstance> retVal = new ArrayList<>();

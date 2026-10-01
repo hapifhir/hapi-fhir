@@ -594,8 +594,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@AfterEach()
 	@Order(0)
 	public void afterCleanupDao() {
-		// A job the test did not wait for is cancelled and awaited in afterPurgeDatabase, so it cannot
-		// affect the next test. Report it rather than fail: many tests start jobs they never wait for.
+		// Warn rather than fail: many tests start jobs and never wait for them.
+		// afterPurgeDatabase cancels those jobs and waits for them before purging, so they can't affect the next test.
 		if (myBatch2JobHelper.hasRunningJobs()) {
 			ourLog.warn("{} ended with batch2 jobs still running; they are cancelled before the database is purged", getClass().getSimpleName());
 		}

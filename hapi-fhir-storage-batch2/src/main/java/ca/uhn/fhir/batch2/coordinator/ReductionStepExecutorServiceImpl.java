@@ -221,8 +221,8 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 	}
 
 	/**
-	 * Returns {@literal true} when no reduction is running and none is waiting to run. Tests use this
-	 * to make sure no reducer is still writing when they clean up the database.
+	 * Returns {@literal true} when no reduction step is running or waiting to run. Tests use this to check that
+	 * the reducer has stopped writing before they clean up the database.
 	 */
 	@VisibleForTesting
 	public boolean isIdleForUnitTest() {

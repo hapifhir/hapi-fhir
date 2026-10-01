@@ -409,15 +409,16 @@ public abstract class BaseJpaTest extends BaseTest {
 	}
 
 	/**
-	 * Pauses the schedulers, cancels every batch2 job and waits for the work already running to finish, then
-	 * runs {@code theCleanup}. Batch2 work that is still executing would otherwise write into the database and
-	 * the caches after they are cleaned, and into the next test.
+	 * Runs {@code theCleanup} while no batch2 work is running. It pauses the schedulers, cancels all batch2 jobs
+	 * and waits for any work already running to finish, so that nothing writes to the database while it is being
+	 * cleaned. The schedulers are restarted afterwards.
 	 * <p>
-	 * If the batch2 work does not stop, {@code theCleanup} runs anyway so that the next test starts clean, and
-	 * the timeout is rethrown afterwards, or attached as suppressed to whatever {@code theCleanup} throws.
+	 * If the work does not finish in time, {@code theCleanup} still runs so the next test starts clean, and the
+	 * timeout is thrown afterwards. If {@code theCleanup} fails as well, its exception is thrown and the timeout is
+	 * attached to it.
 	 * </p>
 	 * <p>
-	 * Requires a {@link Batch2JobHelper} bean in the test context, which {@code TestJPAConfig} provides.
+	 * Needs the {@link Batch2JobHelper} bean from {@code TestJPAConfig}.
 	 * </p>
 	 */
 	protected void runWithSchedulersPausedAndBatch2Stopped(Runnable theCleanup) {
