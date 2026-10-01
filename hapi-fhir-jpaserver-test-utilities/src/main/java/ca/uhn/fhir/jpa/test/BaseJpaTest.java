@@ -135,6 +135,7 @@ import ca.uhn.fhir.util.TestUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
+import org.awaitility.core.ConditionTimeoutException;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -404,6 +405,35 @@ public abstract class BaseJpaTest extends BaseTest {
 	@BeforeAll
 	public static void beforeClassRandomizeLocale() {
 		doRandomizeLocaleAndTimezone();
+	}
+
+	/**
+	 * Pauses the schedulers, cancels every batch2 job and waits for the work already running to finish, then
+	 * runs {@code theCleanup}. Batch2 work that is still executing would otherwise write into the database and
+	 * the caches after they are cleaned, and into the next test.
+	 * <p>
+	 * If the batch2 work does not stop, {@code theCleanup} runs anyway so that the next test starts clean, and
+	 * the timeout is rethrown afterwards.
+	 * </p>
+	 */
+	protected void runWithSchedulersPausedAndBatch2Stopped(Runnable theCleanup) {
+		ourLog.info("Pausing Schedulers");
+		mySchedulerService.pause();
+		ConditionTimeoutException batch2StillRunning = null;
+		try {
+			try {
+				myBatch2JobHelper.cancelAllJobsAndAwaitCancellation();
+			} catch (ConditionTimeoutException e) {
+				batch2StillRunning = e;
+			}
+			theCleanup.run();
+		} finally {
+			ourLog.info("Restarting the schedulers");
+			mySchedulerService.unpause();
+		}
+		if (batch2StillRunning != null) {
+			throw batch2StillRunning;
+		}
 	}
 
 	@SuppressWarnings("BusyWait")

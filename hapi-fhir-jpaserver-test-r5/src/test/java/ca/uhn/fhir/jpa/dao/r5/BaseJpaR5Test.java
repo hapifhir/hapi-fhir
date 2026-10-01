@@ -141,7 +141,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -496,9 +495,9 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	}
 
 	@BeforeEach
-	@Transactional()
 	public void beforePurgeDatabase() {
-		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataSchedulerHelper);
+		// Not in a transaction: the batch2 workers awaited here need to commit
+		runWithSchedulersPausedAndBatch2Stopped(() -> purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataSchedulerHelper));
 	}
 
 	@BeforeEach

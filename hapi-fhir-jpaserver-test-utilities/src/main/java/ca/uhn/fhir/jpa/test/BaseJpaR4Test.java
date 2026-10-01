@@ -127,7 +127,6 @@ import jakarta.persistence.EntityManager;
 
 import java.util.Objects;
 
-import org.awaitility.core.ConditionTimeoutException;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -665,21 +664,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		 * We have to stop all scheduled jobs or they will
 		 * interfere with the database cleanup!
 		 */
-		ourLog.info("Pausing Schedulers");
-		mySchedulerService.pause();
-		ConditionTimeoutException batch2StillRunning = null;
-		try {
-			/*
-			 * Stop batch2 work before the purge. A step that is still executing would write into the
-			 * database and the caches after they are cleaned, and into the next test. If it does not stop,
-			 * purge anyway so that the next test starts clean, and fail this one afterwards.
-			 */
-			try {
-				myBatch2JobHelper.cancelAllJobsAndAwaitCancellation();
-			} catch (ConditionTimeoutException e) {
-				batch2StillRunning = e;
-			}
-
+		runWithSchedulersPausedAndBatch2Stopped(() -> {
 			myTerminologyDeferredStorageSvc.logQueueForUnitTest();
 			if (!myTermDeferredStorageSvc.isStorageQueueEmpty(true)) {
 				ourLog.warn("There is deferred terminology storage stuff still in the queue. Please verify your tests clean up ok.");
@@ -709,14 +694,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 					myInterceptorService.unregisterInterceptor(myMdmStorageInterceptor);
 				}
 			}
-		} finally {
-			// restart the jobs
-			ourLog.info("Restarting the schedulers");
-			mySchedulerService.unpause();
-		}
-		if (batch2StillRunning != null) {
-			throw batch2StillRunning;
-		}
+		});
 		ourLog.info("5 - " + getClass().getSimpleName() + ".afterPurgeDatabases");
 	}
 
