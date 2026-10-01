@@ -58,7 +58,7 @@ public class SearchParamExtractorR5Test {
 	@Test
 	void testBoundsPeriodEndOnlyIndexesStartOfTimeAsLowValue() {
 		// FHIR spec: a missing period.start is "less than" any actual date, so sp_value_low must be the
-		// start-of-time sentinel that addDate_Period() uses, not a copy of period.end
+		// start-of-time sentinel that addDate_Period() uses
 		ServiceRequest serviceRequest = new ServiceRequest();
 		serviceRequest.setOccurrence(new Timing()
 			.setRepeat(new Timing.TimingRepeatComponent()

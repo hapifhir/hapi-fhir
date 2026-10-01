@@ -630,7 +630,7 @@ class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 		@Test
 		void testBoundsPeriodStartOnlyProducesNullHighValue() {
-			// FHIR spec: absent period.end means open-ended — sp_value_high must be null, not a copy of start
+			// FHIR spec: absent period.end means open-ended, so sp_value_high is the end-of-time sentinel
 			ServiceRequest serviceRequest = new ServiceRequest();
 			serviceRequest.setOccurrence(new Timing()
 					.addEvent(null)
@@ -649,7 +649,7 @@ class SearchParamExtractorR4Test implements ITestDataBuilder {
 		@Test
 		void testBoundsPeriodEndOnlyIndexesStartOfTimeAsLowValue() {
 			// FHIR spec: a missing period.start is "less than" any actual date, so sp_value_low must be the
-			// start-of-time sentinel that addDate_Period() uses, not a copy of period.end
+			// start-of-time sentinel that addDate_Period() uses
 			ServiceRequest serviceRequest = new ServiceRequest();
 			serviceRequest.setOccurrence(new Timing()
 					.setRepeat(new Timing.TimingRepeatComponent()
@@ -712,6 +712,27 @@ class SearchParamExtractorR4Test implements ITestDataBuilder {
 			assertNotNull(result.getValueLow());
 			assertNotNull(result.getValueHigh());
 			assertEquals(result.getValueLow(), result.getValueHigh());
+		}
+
+		// Created by claude-opus-5-5
+		// Expected to fail on both master and the GH-8408 branch: master indexes a null high value,
+		// the branch produces no index row
+		@Test
+		void testTimingEventsWithBoundsPeriodStartOnlyIsIndexed() {
+			// A Timing with concrete events must stay searchable even when its boundsPeriod is open-ended
+			ServiceRequest serviceRequest = new ServiceRequest();
+			serviceRequest.setOccurrence(new Timing()
+					.addEvent(new DateTimeType("2025-02-08T14:00:00Z").getValue())
+					.setRepeat(new Timing.TimingRepeatComponent()
+							.setBounds(new Period().setStartElement(new DateTimeType("2025-02-07T14:00:00Z")))));
+
+			ResourceIndexedSearchParamDate result = extractOccurrenceParam(serviceRequest);
+
+			assertThat(result)
+					.as("Timing with events and a start-only boundsPeriod must produce an occurrence index row")
+					.isNotNull();
+			assertThat(result.getValueLow()).isEqualTo(new DateTimeType("2025-02-07T14:00:00Z").getValue());
+			assertThat(result.getValueHigh()).isNotNull();
 		}
 	}
 
