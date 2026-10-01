@@ -22,8 +22,6 @@ package ca.uhn.fhir.rest.server;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.method.IMethodBinding;
 import ca.uhn.fhir.rest.server.method.MethodMatchEnum;
-import org.apache.commons.lang3.Validate;
-import org.checkerframework.checker.nullness.qual.RequiresNonNull;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -102,7 +100,7 @@ public class ResourceBinding {
 	}
 
 	private static String describeProvider(Object theProvider) {
-        return theProvider == null ? "null" : theProvider.getClass().getName();
+		return theProvider == null ? "null" : theProvider.getClass().getName();
 	}
 
 	@Override
