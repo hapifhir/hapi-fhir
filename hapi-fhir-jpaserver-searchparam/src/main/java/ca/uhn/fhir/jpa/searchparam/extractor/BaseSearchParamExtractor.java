@@ -2322,6 +2322,17 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		/**
 		 * Sets default start/end values for Periods
 		 */
+		private PeriodAsDates normalizePeriodDates(DateStringWrapper periodStart, DateStringWrapper periodEnd) {
+			return normalizePeriodDates(
+					periodStart,
+					periodStart != null ? periodStart.getDateValueAsString() : null,
+					periodEnd,
+					periodEnd != null ? periodEnd.getDateValueAsString() : null);
+		}
+
+		/**
+		 * Sets default start/end values for Periods
+		 */
 		private PeriodAsDates normalizePeriodDates(Date start, String startAsString, Date end, String endAsString) {
 
 			if (start == null && end == null) {
@@ -2396,11 +2407,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 						// This is to prevent unbounded Periods turning into a catch-all and returning
 						// search results with events outside a searched Period.
 						if (eventDatesSorted.isEmpty()) {
-							PeriodAsDates periodAsDates = normalizePeriodDates(
-									periodStart,
-									periodStart != null ? periodStart.getDateValueAsString() : null,
-									periodEnd,
-									periodEnd != null ? periodEnd.getDateValueAsString() : null);
+							PeriodAsDates periodAsDates = normalizePeriodDates(periodStart, periodEnd);
 							if (periodAsDates != null) {
 								startDates.add(periodAsDates.start);
 								endDates.add(periodAsDates.end);
