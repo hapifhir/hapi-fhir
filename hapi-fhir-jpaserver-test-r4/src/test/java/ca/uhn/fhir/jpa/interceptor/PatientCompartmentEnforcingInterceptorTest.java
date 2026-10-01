@@ -102,6 +102,8 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 		obs.getSubject().setReference("Patient/A");
 		myObservationDao.update(obs, new SystemRequestDetails()).getId().getIdPart();
 
+		logAllResources();
+
 		// try updating observation's patient, which would cross partition boundaries
 		Observation updatedObs = new Observation();
 		updatedObs.setId("O");
@@ -196,6 +198,7 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 	@Test
 	public void testDeleteAndRecreateResource_InPatientCompartmentSucceeds() {
 		// Setup
+		registerInterceptor(true);
 		createPatient(withId("A"), withActiveTrue());
 		createObservation(withId("O"), withSubject("Patient/A"));
 

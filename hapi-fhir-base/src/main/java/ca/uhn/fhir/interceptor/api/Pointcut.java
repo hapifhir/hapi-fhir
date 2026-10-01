@@ -36,7 +36,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster.*;
+import static ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster.IInterceptorFilterHook;
 
 /**
  * Value for {@link Hook#value()}
@@ -1270,6 +1270,30 @@ public enum Pointcut implements IPointcut {
 			boolean.class,
 			"ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters",
 			"org.hl7.fhir.instance.model.api.IBaseResource"),
+
+	/**
+	 * <b>Storage hook:</b>
+	 * Invoked during BulkExport.
+	 * Should return an implementation of the conversion interface
+	 * for the provided BulkExport parameters.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 *     ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters
+	 *     		the parameters used for the bulk export. The outputFormat is a
+	 *     		property on it.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return an <code>ca.uhn.fhir.rest.api.server.bulk.IResourceConverter</code>
+	 * implementation.
+	 * </p>
+	 */
+	STORAGE_BULK_EXPORT_RESOURCE_CONVERT(
+			"ca.uhn.fhir.rest.api.server.bulk.IResourceConverter",
+			"ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters"),
 
 	/**
 	 * <b>Storage Hook:</b>
