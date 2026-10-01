@@ -117,34 +117,18 @@ class Batch2JobHelperTest {
 	}
 
 	@Test
-	void hasRunningJobs_countedJobOnSecondPage_returnsTrue() {
+	void hasRunningJobs_runningJobOnSecondPage_returnsTrue() {
 		// setup
-		JobInstance ignoredJob = createInstance("ignored-1", StatusEnum.IN_PROGRESS);
-		ignoredJob.setJobDefinitionId(JOB_DEFINITION_ID);
-		JobInstance countedJob = createInstance("active-1", StatusEnum.IN_PROGRESS);
-		countedJob.setJobDefinitionId("other-job-def");
-		when(myJobPersistence.fetchInstances(1000, 0, NOT_ENDED)).thenReturn(List.of(ignoredJob));
-		when(myJobPersistence.fetchInstances(1000, 1, NOT_ENDED)).thenReturn(List.of(countedJob));
+		when(myJobPersistence.fetchInstances(1000, 0, NOT_ENDED))
+			.thenReturn(List.of(createInstance("completed-1", StatusEnum.COMPLETED)));
+		when(myJobPersistence.fetchInstances(1000, 1, NOT_ENDED))
+			.thenReturn(List.of(createInstance("active-1", StatusEnum.IN_PROGRESS)));
 
 		// execute
-		boolean result = myBatch2JobHelper.hasRunningJobs(Set.of(JOB_DEFINITION_ID));
+		boolean result = myBatch2JobHelper.hasRunningJobs();
 
 		// verify
 		assertThat(result).isTrue();
-	}
-
-	@Test
-	void hasRunningJobs_onlyIgnoredDefinitionRunning_returnsFalse() {
-		// setup
-		JobInstance ignoredJob = createInstance("ignored-1", StatusEnum.IN_PROGRESS);
-		ignoredJob.setJobDefinitionId(JOB_DEFINITION_ID);
-		when(myJobPersistence.fetchInstances(1000, 0, NOT_ENDED)).thenReturn(List.of(ignoredJob));
-
-		// execute
-		boolean result = myBatch2JobHelper.hasRunningJobs(Set.of(JOB_DEFINITION_ID));
-
-		// verify
-		assertThat(result).isFalse();
 	}
 
 	@Test

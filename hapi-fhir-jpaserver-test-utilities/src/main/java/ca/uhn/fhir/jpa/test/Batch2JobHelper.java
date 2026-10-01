@@ -337,14 +337,6 @@ public class Batch2JobHelper {
 	}
 
 	public boolean hasRunningJobs() {
-		return hasRunningJobs(List.of());
-	}
-
-	/**
-	 * Returns {@literal true} if a job instance that has not ended belongs to a job definition other than
-	 * {@code theIgnoredJobDefinitionIds}.
-	 */
-	public boolean hasRunningJobs(@Nonnull Collection<String> theIgnoredJobDefinitionIds) {
 		HashMap<String, String> map = new HashMap<>();
 		// Read through the persistence layer: the coordinator throws for instances whose job definition is not
 		// registered, which tests that store instances directly create
@@ -355,7 +347,7 @@ public class Batch2JobHelper {
 		}
 
 		for (JobInstance job : jobs) {
-			if (!job.getStatus().isEnded() && !theIgnoredJobDefinitionIds.contains(job.getJobDefinitionId())) {
+			if (!job.getStatus().isEnded()) {
 				map.put(job.getInstanceId(), job.getJobDefinitionId() + " : " + job.getStatus().name());
 			}
 		}
