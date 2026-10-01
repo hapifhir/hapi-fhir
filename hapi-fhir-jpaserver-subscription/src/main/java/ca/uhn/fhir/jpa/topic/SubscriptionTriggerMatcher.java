@@ -49,10 +49,8 @@ public class SubscriptionTriggerMatcher {
 	private final SubscriptionTopicSupport mySubscriptionTopicSupport;
 	private final BaseResourceMessage.OperationTypeEnum myOperation;
 	private final SubscriptionTopic.SubscriptionTopicResourceTriggerComponent myTrigger;
-	private final String myResourceName;
 	private final IBaseResource myResource;
-	private final IFhirResourceDao myDao;
-	private final PreviousVersionReader myPreviousVersionReader;
+	private final PreviousVersionReader<IBaseResource> myPreviousVersionReader;
 	private final SystemRequestDetails mySrd;
 	private final MemoryCacheService myMemoryCacheService;
 
@@ -64,10 +62,11 @@ public class SubscriptionTriggerMatcher {
 		mySubscriptionTopicSupport = theSubscriptionTopicSupport;
 		myOperation = theMsg.getOperationType();
 		myResource = theMsg.getResource(theSubscriptionTopicSupport.getFhirContext());
-		myResourceName = myResource.fhirType();
-		myDao = mySubscriptionTopicSupport.getDaoRegistry().getResourceDao(myResourceName);
+		String resourceName = myResource.fhirType();
+		IFhirResourceDao<IBaseResource> dao =
+				mySubscriptionTopicSupport.getDaoRegistry().getResourceDao(resourceName);
 		myTrigger = theTrigger;
-		myPreviousVersionReader = new PreviousVersionReader(myDao);
+		myPreviousVersionReader = new PreviousVersionReader<>(dao);
 		mySrd = SystemRequestDetails.forRequestPartitionId(theMsg.getPartitionId());
 		myMemoryCacheService = theMemoryCacheService;
 	}
@@ -107,7 +106,7 @@ public class SubscriptionTriggerMatcher {
 					|| myOperation == ResourceModifiedMessage.OperationTypeEnum.DELETE) {
 
 				Optional<IBaseResource> oPreviousVersion =
-						myPreviousVersionReader.readPreviousVersion(myResource, false, mySrd.getRequestPartitionId());
+						myPreviousVersionReader.readPreviousVersion(myResource, false, mySrd);
 				if (oPreviousVersion.isPresent()) {
 					previousMatches = matchResource(oPreviousVersion.get(), previousCriteria);
 				} else {
@@ -141,9 +140,9 @@ public class SubscriptionTriggerMatcher {
 					if ("current".equalsIgnoreCase(theName)) return List.of(myResource);
 
 					if ("previous".equalsIgnoreCase(theName)) {
-						Optional previousResource = myPreviousVersionReader.readPreviousVersion(
-								myResource, false, mySrd.getRequestPartitionId());
-						if (previousResource.isPresent()) return List.of((IBase) previousResource.get());
+						Optional<IBaseResource> previousResource =
+								myPreviousVersionReader.readPreviousVersion(myResource, false, mySrd);
+						if (previousResource.isPresent()) return List.of(previousResource.get());
 					}
 
 					return null;
