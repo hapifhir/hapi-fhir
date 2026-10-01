@@ -68,6 +68,7 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.test.utilities.HttpTestResponse;
+import ca.uhn.fhir.test.utilities.server.BaseJettyServerExtension;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
@@ -207,6 +208,7 @@ import java.util.stream.Stream;
 
 import static ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick;
 import static ca.uhn.fhir.rest.param.BaseParamWithPrefix.MSG_PREFIX_INVALID_FORMAT;
+import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onThreadsWithNameMatching;
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.leftPad;
@@ -453,7 +455,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		pt3.addName().setFamily("zzzzz");
 		myPatientDao.create(pt3, mySrd).getId().toUnqualifiedVersionless().getValue();
 
-
+		myCaptureQueriesListener.clear();
 		Bundle output = myClient
 			.search()
 			.forResource("Patient")
@@ -462,6 +464,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.execute();
 		List<String> ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
 		assertThat(ids).containsExactlyInAnyOrder(pt1id);
+		assertThat(myCaptureQueriesListener).has(
+			onThreadsWithNameMatching(BaseJettyServerExtension.THREAD_NAME_PREFIX_PATTERN)
+				.selectCount(2)
+		);
 
 		output = myClient
 			.search()
