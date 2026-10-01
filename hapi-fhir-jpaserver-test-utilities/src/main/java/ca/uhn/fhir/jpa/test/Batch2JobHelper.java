@@ -35,11 +35,11 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.Validate;
 import org.awaitility.Awaitility;
 import org.awaitility.core.ConditionTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.test.util.AopTestUtils;
@@ -74,32 +74,37 @@ public class Batch2JobHelper {
 	private final IJobMaintenanceService myJobMaintenanceService;
 	private final IJobCoordinator myJobCoordinator;
 	private final IJobPersistence myJobPersistence;
-	private IChannelConsumer<JobWorkNotification> myWorkChannelConsumer;
-	private IReductionStepExecutorService myReductionStepExecutorService;
+	@Nullable
+	private final IChannelConsumer<JobWorkNotification> myWorkChannelConsumer;
+	@Nullable
+	private final IReductionStepExecutorService myReductionStepExecutorService;
 
+	/**
+	 * A helper that cannot {@link #awaitNoInFlightWork()}.
+	 */
 	public Batch2JobHelper(IJobMaintenanceService theJobMaintenanceService, IJobCoordinator theJobCoordinator, IJobPersistence theJobPersistence) {
 		myJobMaintenanceService = theJobMaintenanceService;
 		myJobCoordinator = theJobCoordinator;
 		myJobPersistence = theJobPersistence;
+		myWorkChannelConsumer = null;
+		myReductionStepExecutorService = null;
 	}
 
 	/**
-	 * Lets {@link #cancelAllJobsAndAwaitCancellation()} wait for the batch2 worker threads. Without it, only
-	 * the reducer (if set) is awaited.
+	 * A helper that can also {@link #awaitNoInFlightWork()}, which watches the batch2 worker threads and the reducer.
 	 */
-	@Autowired(required = false)
-	public void setWorkChannelConsumer(@Nullable IChannelConsumer<JobWorkNotification> theWorkChannelConsumer) {
-		myWorkChannelConsumer = theWorkChannelConsumer;
-	}
-
-	/**
-	 * Lets {@link #cancelAllJobsAndAwaitCancellation()} wait for a running reduction step. Without it, only
-	 * the worker threads (if set) are awaited.
-	 */
-	@Autowired(required = false)
-	public void setReductionStepExecutorService(
-			@Nullable IReductionStepExecutorService theReductionStepExecutorService) {
-		myReductionStepExecutorService = theReductionStepExecutorService;
+	public Batch2JobHelper(
+			IJobMaintenanceService theJobMaintenanceService,
+			IJobCoordinator theJobCoordinator,
+			IJobPersistence theJobPersistence,
+			@Nonnull IChannelConsumer<JobWorkNotification> theWorkChannelConsumer,
+			@Nonnull IReductionStepExecutorService theReductionStepExecutorService) {
+		myJobMaintenanceService = theJobMaintenanceService;
+		myJobCoordinator = theJobCoordinator;
+		myJobPersistence = theJobPersistence;
+		myWorkChannelConsumer = Validate.notNull(theWorkChannelConsumer, "theWorkChannelConsumer must not be null");
+		myReductionStepExecutorService =
+				Validate.notNull(theReductionStepExecutorService, "theReductionStepExecutorService must not be null");
 	}
 
 	public JobInstance awaitJobCompletion(Batch2JobStartResponse theStartResponse) {
@@ -431,40 +436,51 @@ public class Batch2JobHelper {
 	}
 
 	/**
-	 * Cancels every job instance and waits until no batch2 work is still executing, so that nothing writes
-	 * to the database or the caches after the caller cleans them up. It does not wait for the instances to
-	 * reach {@link StatusEnum#CANCELLED}, and it waits for nothing when this helper was built without the
-	 * work channel and reducer wired in (by Spring, or the setters).
-	 * <p>
-	 * Cancelling only sets a flag, which takes effect at the next maintenance pass. This method does not run
-	 * one: a pass enqueues the READY chunks of every instance, including ones the caller is about to delete.
-	 * Callers pause the schedulers first so that no pass starts, and the chunks already queued or executing
-	 * run to completion, which is what this method waits for. A scheduled job that was already running when
-	 * the scheduler paused, which {@code ISchedulerService#pause()} gives up waiting for after a short time,
-	 * is not waited for.
-	 * </p>
-	 * <p>
-	 * The idle state has to hold for 50 ms: a chunk moving from the executor queue to
-	 * a worker thread is briefly counted in neither place.
-	 * </p>
+	 * Cancels every job instance that has not ended. Despite its name, it does not wait: cancelling only sets a
+	 * flag, which takes effect at the next maintenance pass, and work already queued or executing runs to
+	 * completion. Use {@link #awaitNoInFlightWork()} to wait for that work.
 	 */
 	public void cancelAllJobsAndAwaitCancellation() {
-		cancelAllJobsAndAwaitCancellation(DEFAULT_WAIT_DURATION);
+		for (JobInstance next : fetchAllNotEndedInstances()) {
+			myJobPersistence.cancelInstance(next.getInstanceId());
+		}
+	}
+
+	/**
+	 * Waits until no batch2 work chunk is queued or executing and no reduction step is running or waiting, so that
+	 * nothing writes to the database or the caches after the caller cleans them up.
+	 * <p>
+	 * It does not stop new work from starting: callers pause the schedulers first, so that no maintenance pass
+	 * enqueues more. A scheduled job that was already running when the scheduler paused, which
+	 * {@code ISchedulerService#pause()} gives up waiting for after a short time, is not waited for.
+	 * </p>
+	 * <p>
+	 * The idle state has to hold for 50 ms: a chunk moving from the executor queue to a worker thread is briefly
+	 * counted in neither place.
+	 * </p>
+	 *
+	 * @throws IllegalStateException if this helper was built without the work channel consumer and reduction step
+	 * executor, or they are not the in-memory implementations whose threads it can see
+	 * @throws ConditionTimeoutException if the work is still running after {@link #DEFAULT_WAIT_DURATION}
+	 */
+	public void awaitNoInFlightWork() {
+		awaitNoInFlightWork(DEFAULT_WAIT_DURATION);
 	}
 
 	@VisibleForTesting
-	void cancelAllJobsAndAwaitCancellation(Duration theTimeout) {
-		List<JobInstance> instances = fetchAllNotEndedInstances();
-		for (JobInstance next : instances) {
-			myJobPersistence.cancelInstance(next.getInstanceId());
-		}
+	void awaitNoInFlightWork(Duration theTimeout) {
+		Validate.validState(
+				myWorkChannelConsumer != null && myReductionStepExecutorService != null,
+				"This Batch2JobHelper was built without the work channel consumer and reduction step executor");
+		ThreadPoolTaskExecutor workChannelExecutor = getWorkChannelExecutor(myWorkChannelConsumer);
+		ReductionStepExecutorServiceImpl reducer = getReducer(myReductionStepExecutorService);
 
 		await().pollDelay(Duration.ZERO)
 			.pollInterval(Duration.ofMillis(10))
 			.during(BATCH2_IDLE_DURATION)
 			.atMost(theTimeout)
-			.untilAsserted(() -> assertThat(describeRunningBatch2Work())
-				.as("batch2 work still running after cancelling all jobs")
+			.untilAsserted(() -> assertThat(describeInFlightWork(workChannelExecutor, reducer))
+				.as("batch2 work still in flight")
 				.isEmpty());
 	}
 
@@ -483,31 +499,39 @@ public class Batch2JobHelper {
 		}
 	}
 
-	private List<String> describeRunningBatch2Work() {
+	private static List<String> describeInFlightWork(
+			ThreadPoolTaskExecutor theWorkChannelExecutor, ReductionStepExecutorServiceImpl theReducer) {
 		List<String> retVal = new ArrayList<>();
-		ThreadPoolTaskExecutor workChannelExecutor = getWorkChannelExecutor();
-		if (workChannelExecutor != null) {
-			int running = workChannelExecutor.getActiveCount();
-			int queued = workChannelExecutor.getQueueSize();
-			if (running > 0 || queued > 0) {
-				retVal.add("work channel: " + running + " running, " + queued + " queued");
-			}
+		int running = theWorkChannelExecutor.getActiveCount();
+		int queued = theWorkChannelExecutor.getQueueSize();
+		if (running > 0 || queued > 0) {
+			retVal.add("work channel: " + running + " running, " + queued + " queued");
 		}
-		if (myReductionStepExecutorService != null
-				&& AopTestUtils.getUltimateTargetObject(myReductionStepExecutorService) instanceof ReductionStepExecutorServiceImpl reducer
-				&& !reducer.isIdleForUnitTest()) {
+		if (!theReducer.isIdleForUnitTest()) {
 			retVal.add("reducer busy");
 		}
 		return retVal;
 	}
 
-	private ThreadPoolTaskExecutor getWorkChannelExecutor() {
-		if (myWorkChannelConsumer instanceof SpringMessagingReceiverAdapter<?> adapter
+	private static ThreadPoolTaskExecutor getWorkChannelExecutor(
+			IChannelConsumer<JobWorkNotification> theWorkChannelConsumer) {
+		if (theWorkChannelConsumer instanceof SpringMessagingReceiverAdapter<?> adapter
 				&& adapter.getSpringMessagingChannelReceiver() instanceof ExecutorSubscribableChannel channel
 				&& channel.getExecutor() instanceof ThreadPoolTaskExecutor executor) {
 			return executor;
 		}
-		return null;
+		throw new IllegalStateException(
+				"Cannot see the worker threads of batch2 work channel consumer " + theWorkChannelConsumer);
+	}
+
+	private static ReductionStepExecutorServiceImpl getReducer(
+			IReductionStepExecutorService theReductionStepExecutorService) {
+		if (AopTestUtils.getUltimateTargetObject(theReductionStepExecutorService)
+				instanceof ReductionStepExecutorServiceImpl reducer) {
+			return reducer;
+		}
+		throw new IllegalStateException(
+				"Cannot see the state of reduction step executor " + theReductionStepExecutorService);
 	}
 
 	/**

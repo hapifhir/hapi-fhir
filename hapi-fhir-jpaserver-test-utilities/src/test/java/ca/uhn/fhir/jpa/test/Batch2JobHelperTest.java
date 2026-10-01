@@ -10,9 +10,9 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.broker.jms.SpringMessagingReceiverAdapter;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -54,10 +54,19 @@ class Batch2JobHelperTest {
 	@Mock
 	ReductionStepExecutorServiceImpl myReductionStepExecutorService;
 
-	@InjectMocks
 	Batch2JobHelper myBatch2JobHelper;
 	static JobInstance ourIncompleteInstance = new JobInstance().setStatus(StatusEnum.IN_PROGRESS);
 	static JobInstance ourCompleteInstance = new JobInstance().setStatus(StatusEnum.COMPLETED);
+
+	@BeforeEach
+	void before() {
+		myBatch2JobHelper = new Batch2JobHelper(
+			myJobMaintenanceService,
+			myJobCoordinator,
+			myJobPersistence,
+			myWorkChannelConsumer,
+			myReductionStepExecutorService);
+	}
 
 	@AfterEach
 	void after() {
@@ -186,27 +195,7 @@ class Batch2JobHelperTest {
 	}
 
 	@Test
-	void cancelAllJobsAndAwaitCancellation_workStillRunning_returnsOnceWorkersAndReducerAreIdle() {
-		// setup
-		JobInstance activeJob = createInstance("active-1", StatusEnum.IN_PROGRESS);
-		when(myJobPersistence.fetchInstances(1000, 0, NOT_ENDED)).thenReturn(List.of(activeJob));
-		setUpWorkChannel();
-		when(myWorkChannelExecutor.getActiveCount()).thenReturn(1, 1, 0);
-		when(myWorkChannelExecutor.getQueueSize()).thenReturn(2, 0);
-		when(myReductionStepExecutorService.isIdleForUnitTest()).thenReturn(false, true);
-
-		// execute
-		myBatch2JobHelper.cancelAllJobsAndAwaitCancellation();
-
-		// verify
-		verify(myJobPersistence).cancelInstance("active-1");
-		verifyNoInteractions(myJobMaintenanceService);
-		verify(myWorkChannelExecutor, atLeast(3)).getActiveCount();
-		verify(myReductionStepExecutorService, atLeast(2)).isIdleForUnitTest();
-	}
-
-	@Test
-	void cancelAllJobsAndAwaitCancellation_instancesOnTwoPages_cancelsAll() {
+	void cancelAllJobsAndAwaitCancellation_instancesOnTwoPages_cancelsAllWithoutWaiting() {
 		// setup
 		when(myJobPersistence.fetchInstances(1000, 0, NOT_ENDED))
 			.thenReturn(List.of(createInstance("active-1", StatusEnum.IN_PROGRESS)));
@@ -219,58 +208,68 @@ class Batch2JobHelperTest {
 		// verify
 		verify(myJobPersistence).cancelInstance("active-1");
 		verify(myJobPersistence).cancelInstance("active-2");
+		verifyNoInteractions(myWorkChannelConsumer, myReductionStepExecutorService, myJobMaintenanceService);
 	}
 
 	@Test
-	void cancelAllJobsAndAwaitCancellation_idleForOnePollOnly_waitsUntilIdleHolds() {
+	void awaitNoInFlightWork_workStillRunning_returnsOnceWorkersAndReducerAreIdle() {
 		// setup
-		when(myJobPersistence.fetchInstances(1000, 0, NOT_ENDED)).thenReturn(List.of());
+		setUpWorkChannel();
+		when(myWorkChannelExecutor.getActiveCount()).thenReturn(1, 1, 0);
+		when(myWorkChannelExecutor.getQueueSize()).thenReturn(2, 0);
+		when(myReductionStepExecutorService.isIdleForUnitTest()).thenReturn(false, true);
+
+		// execute
+		myBatch2JobHelper.awaitNoInFlightWork();
+
+		// verify
+		verify(myWorkChannelExecutor, atLeast(3)).getActiveCount();
+		verify(myReductionStepExecutorService, atLeast(2)).isIdleForUnitTest();
+		verifyNoInteractions(myJobMaintenanceService);
+	}
+
+	@Test
+	void awaitNoInFlightWork_idleForOnePollOnly_waitsUntilIdleHolds() {
+		// setup
 		setUpWorkChannel();
 		when(myWorkChannelExecutor.getActiveCount()).thenReturn(0, 1, 0);
 		when(myReductionStepExecutorService.isIdleForUnitTest()).thenReturn(true);
 
 		// execute
-		myBatch2JobHelper.cancelAllJobsAndAwaitCancellation();
+		myBatch2JobHelper.awaitNoInFlightWork();
 
 		// verify
 		verify(myWorkChannelExecutor, atLeast(3)).getActiveCount();
 	}
 
 	@Test
-	void cancelAllJobsAndAwaitCancellation_workNeverStops_failsNamingTheRunningWork() {
+	void awaitNoInFlightWork_workNeverStops_failsNamingTheRunningWork() {
 		// setup
-		when(myJobPersistence.fetchInstances(1000, 0, NOT_ENDED)).thenReturn(List.of());
 		setUpWorkChannel();
 		when(myWorkChannelExecutor.getActiveCount()).thenReturn(1);
 		when(myWorkChannelExecutor.getQueueSize()).thenReturn(3);
 		when(myReductionStepExecutorService.isIdleForUnitTest()).thenReturn(false);
 
 		// execute & verify
-		assertThatThrownBy(() -> myBatch2JobHelper.cancelAllJobsAndAwaitCancellation(Duration.ofMillis(500)))
+		assertThatThrownBy(() -> myBatch2JobHelper.awaitNoInFlightWork(Duration.ofMillis(500)))
 			.hasMessageContaining("1 running, 3 queued")
 			.hasMessageContaining("reducer busy");
-		verifyNoInteractions(myJobMaintenanceService);
 	}
 
 	@Test
-	void cancelAllJobsAndAwaitCancellation_noWorkChannelOrReducer_onlyCancels() {
+	void awaitNoInFlightWork_builtWithoutWorkChannelAndReducer_fails() {
 		// setup
-		JobInstance activeJob = createInstance("active-1", StatusEnum.IN_PROGRESS);
-		when(myJobPersistence.fetchInstances(1000, 0, NOT_ENDED)).thenReturn(List.of(activeJob));
+		Batch2JobHelper helper = new Batch2JobHelper(myJobMaintenanceService, myJobCoordinator, myJobPersistence);
 
-		// execute
-		myBatch2JobHelper.cancelAllJobsAndAwaitCancellation();
-
-		// verify
-		verify(myJobPersistence).cancelInstance("active-1");
-		verifyNoInteractions(myJobMaintenanceService);
+		// execute & verify
+		assertThatThrownBy(helper::awaitNoInFlightWork)
+			.isInstanceOf(IllegalStateException.class)
+			.hasMessageContaining("work channel consumer and reduction step executor");
 	}
 
 	private void setUpWorkChannel() {
 		when(myWorkChannelConsumer.getSpringMessagingChannelReceiver()).thenReturn(myWorkChannel);
 		when(myWorkChannel.getExecutor()).thenReturn(myWorkChannelExecutor);
-		myBatch2JobHelper.setWorkChannelConsumer(myWorkChannelConsumer);
-		myBatch2JobHelper.setReductionStepExecutorService(myReductionStepExecutorService);
 	}
 
 	private static JobInstance createInstance(String theId, StatusEnum theStatus) {

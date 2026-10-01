@@ -428,6 +428,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		try {
 			try {
 				myBatch2JobHelper.cancelAllJobsAndAwaitCancellation();
+				myBatch2JobHelper.awaitNoInFlightWork();
 			} catch (ConditionTimeoutException e) {
 				batch2StillRunning = e;
 			}
