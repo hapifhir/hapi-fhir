@@ -19,6 +19,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -115,6 +116,20 @@ class Batch2JobHelperTest {
 	}
 
 	@Test
+	void hasRunningJobs_onlyIgnoredDefinitionRunning_returnsFalse() {
+		// setup
+		JobInstance ignoredJob = createInstance("ignored-1", StatusEnum.IN_PROGRESS);
+		ignoredJob.setJobDefinitionId(JOB_DEFINITION_ID);
+		when(myJobPersistence.fetchInstances(1000, 0)).thenReturn(List.of(ignoredJob));
+
+		// execute
+		boolean result = myBatch2JobHelper.hasRunningJobs(Set.of(JOB_DEFINITION_ID));
+
+		// verify
+		assertThat(result).isFalse();
+	}
+
+	@Test
 	void awaitNoJobsRunning_succeeds_whenOnlyTerminalJobsExist() {
 		// setup
 		JobInstance failedJob = createInstance("failed-1", StatusEnum.FAILED);
@@ -186,6 +201,21 @@ class Batch2JobHelperTest {
 		verifyNoInteractions(myJobMaintenanceService);
 		verify(myWorkChannelExecutor, atLeast(3)).getActiveCount();
 		verify(myReductionStepExecutorService, atLeast(2)).isIdleForUnitTest();
+	}
+
+	@Test
+	void cancelAllJobsAndAwaitCancellation_idleForOnePollOnly_waitsUntilIdleHolds() {
+		// setup
+		when(myJobPersistence.fetchInstances(1000, 0)).thenReturn(List.of());
+		setUpWorkChannel();
+		when(myWorkChannelExecutor.getActiveCount()).thenReturn(0, 1, 0);
+		when(myReductionStepExecutorService.isIdleForUnitTest()).thenReturn(true);
+
+		// execute
+		myBatch2JobHelper.cancelAllJobsAndAwaitCancellation();
+
+		// verify
+		verify(myWorkChannelExecutor, atLeast(3)).getActiveCount();
 	}
 
 	@Test

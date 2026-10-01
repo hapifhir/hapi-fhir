@@ -43,6 +43,7 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx;
 import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
@@ -126,6 +127,7 @@ import jakarta.persistence.EntityManager;
 
 import java.util.Objects;
 
+import org.awaitility.core.ConditionTimeoutException;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -594,11 +596,10 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@AfterEach()
 	@Order(0)
 	public void afterCleanupDao() {
-		// A job the test did not wait for is cancelled and awaited in afterPurgeDatabase, so it cannot
-		// affect the next test. Report it rather than fail: most are pre-expansions the test never uses.
-		if (myBatch2JobHelper.hasRunningJobs()) {
-			ourLog.warn("{} ended with batch2 jobs still running; they are cancelled before the database is purged", getClass().getSimpleName());
-		}
+		// Storing an active ValueSet starts a pre-expansion that few tests wait for; afterPurgeDatabase cancels it
+		assertThat(myBatch2JobHelper.hasRunningJobs(Set.of(PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET)))
+			.as("batch2 jobs still running at the end of the test")
+			.isFalse();
 
 		myStorageSettings.setExpireSearchResults(new JpaStorageSettings().isExpireSearchResults());
 		myStorageSettings.setEnforceReferentialIntegrityOnDelete(new JpaStorageSettings().isEnforceReferentialIntegrityOnDelete());
@@ -666,12 +667,18 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		 */
 		ourLog.info("Pausing Schedulers");
 		mySchedulerService.pause();
+		ConditionTimeoutException batch2StillRunning = null;
 		try {
 			/*
 			 * Stop batch2 work before the purge. A step that is still executing would write into the
-			 * database and the caches after they are cleaned, and into the next test.
+			 * database and the caches after they are cleaned, and into the next test. If it does not stop,
+			 * purge anyway so that the next test starts clean, and fail this one afterwards.
 			 */
-			myBatch2JobHelper.cancelAllJobsAndAwaitCancellation();
+			try {
+				myBatch2JobHelper.cancelAllJobsAndAwaitCancellation();
+			} catch (ConditionTimeoutException e) {
+				batch2StillRunning = e;
+			}
 
 			myTerminologyDeferredStorageSvc.logQueueForUnitTest();
 			if (!myTermDeferredStorageSvc.isStorageQueueEmpty(true)) {
@@ -706,6 +713,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 			// restart the jobs
 			ourLog.info("Restarting the schedulers");
 			mySchedulerService.unpause();
+		}
+		if (batch2StillRunning != null) {
+			throw batch2StillRunning;
 		}
 		ourLog.info("5 - " + getClass().getSimpleName() + ".afterPurgeDatabases");
 	}

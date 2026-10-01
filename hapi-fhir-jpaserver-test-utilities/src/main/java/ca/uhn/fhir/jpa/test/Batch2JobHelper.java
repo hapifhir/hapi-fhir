@@ -34,6 +34,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.awaitility.Awaitility;
 import org.awaitility.core.ConditionTimeoutException;
 import org.slf4j.Logger;
@@ -68,6 +69,7 @@ public class Batch2JobHelper {
 	private static final int BATCH_SIZE = 100;
 	public static final int DEFAULT_WAIT_DEADLINE = 30;
 	public static final Duration DEFAULT_WAIT_DURATION = Duration.of(DEFAULT_WAIT_DEADLINE, ChronoUnit.SECONDS);
+	private static final Duration BATCH2_IDLE_DURATION = Duration.ofMillis(50);
 
 	private final IJobMaintenanceService myJobMaintenanceService;
 	private final IJobCoordinator myJobCoordinator;
@@ -86,7 +88,7 @@ public class Batch2JobHelper {
 	 * the reducer (if set) is awaited.
 	 */
 	@Autowired(required = false)
-	public void setWorkChannelConsumer(IChannelConsumer<JobWorkNotification> theWorkChannelConsumer) {
+	public void setWorkChannelConsumer(@Nullable IChannelConsumer<JobWorkNotification> theWorkChannelConsumer) {
 		myWorkChannelConsumer = theWorkChannelConsumer;
 	}
 
@@ -95,7 +97,8 @@ public class Batch2JobHelper {
 	 * the worker threads (if set) are awaited.
 	 */
 	@Autowired(required = false)
-	public void setReductionStepExecutorService(IReductionStepExecutorService theReductionStepExecutorService) {
+	public void setReductionStepExecutorService(
+			@Nullable IReductionStepExecutorService theReductionStepExecutorService) {
 		myReductionStepExecutorService = theReductionStepExecutorService;
 	}
 
@@ -334,6 +337,14 @@ public class Batch2JobHelper {
 	}
 
 	public boolean hasRunningJobs() {
+		return hasRunningJobs(List.of());
+	}
+
+	/**
+	 * Returns {@literal true} if a job instance that has not ended belongs to a job definition other than
+	 * {@code theIgnoredJobDefinitionIds}.
+	 */
+	public boolean hasRunningJobs(@Nonnull Collection<String> theIgnoredJobDefinitionIds) {
 		HashMap<String, String> map = new HashMap<>();
 		// Read through the persistence layer: the coordinator throws for instances whose job definition is not
 		// registered, which tests that store instances directly create
@@ -344,7 +355,7 @@ public class Batch2JobHelper {
 		}
 
 		for (JobInstance job : jobs) {
-			if (!job.getStatus().isEnded()) {
+			if (!job.getStatus().isEnded() && !theIgnoredJobDefinitionIds.contains(job.getJobDefinitionId())) {
 				map.put(job.getInstanceId(), job.getJobDefinitionId() + " : " + job.getStatus().name());
 			}
 		}
@@ -429,12 +440,21 @@ public class Batch2JobHelper {
 
 	/**
 	 * Cancels every job instance and waits until no batch2 work is still executing, so that nothing writes
-	 * to the database or the caches after the caller cleans them up.
+	 * to the database or the caches after the caller cleans them up. It does not wait for the instances to
+	 * reach {@link StatusEnum#CANCELLED}, and it waits for nothing when this helper was built without the
+	 * work channel and reducer wired in (by Spring, or the setters).
 	 * <p>
 	 * Cancelling only sets a flag, which takes effect at the next maintenance pass. This method does not run
 	 * one: a pass enqueues the READY chunks of every instance, including ones the caller is about to delete.
-	 * Callers pause the schedulers first, so no new work is enqueued, and the chunks already queued or
-	 * executing run to completion, which is what this method waits for.
+	 * Callers pause the schedulers first so that no pass starts, and the chunks already queued or executing
+	 * run to completion, which is what this method waits for. A scheduled job that was already running when
+	 * the scheduler paused, which {@code ISchedulerService#pause()} gives up waiting for after a short time,
+	 * is not waited for.
+	 * </p>
+	 * <p>
+	 * The idle state has to hold for 50 ms: a chunk moving from the executor queue to
+	 * a worker thread is briefly counted in neither place.
+	 * </p>
 	 */
 	public void cancelAllJobsAndAwaitCancellation() {
 		cancelAllJobsAndAwaitCancellation(DEFAULT_WAIT_DURATION);
@@ -447,7 +467,10 @@ public class Batch2JobHelper {
 			myJobPersistence.cancelInstance(next.getInstanceId());
 		}
 
-		await().atMost(theTimeout)
+		await().pollDelay(Duration.ZERO)
+			.pollInterval(Duration.ofMillis(10))
+			.during(BATCH2_IDLE_DURATION)
+			.atMost(theTimeout)
 			.untilAsserted(() -> assertThat(describeRunningBatch2Work())
 				.as("batch2 work still running after cancelling all jobs")
 				.isEmpty());
