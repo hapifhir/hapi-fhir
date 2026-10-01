@@ -83,9 +83,8 @@ class ResourceBindingTest {
 				.extracting(ILoggingEvent::getFormattedMessage)
 				.asString()
 				.contains("public void Foo.bar()")
-				.contains(describe(existingProvider))
-				.contains(describe(newProvider))
-				.contains("most recently registered provider (" + describe(newProvider) + ") will be used");
+				.contains(existingProvider.getClass().getName())
+				.contains(newProvider.getClass().getName());
 	}
 
 	// Created by claude-opus-5-5
@@ -111,11 +110,6 @@ class ResourceBindingTest {
 		when(binding.getBindingKey()).thenReturn(theBindingKey);
 		when(binding.getProvider()).thenReturn(theProvider);
 		return binding;
-	}
-
-	// Created by claude-opus-5-5
-	private static String describe(Object theProvider) {
-		return theProvider.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(theProvider));
 	}
 
 	// Created by claude-opus-5-5

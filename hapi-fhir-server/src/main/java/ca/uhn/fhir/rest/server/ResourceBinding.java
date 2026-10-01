@@ -22,6 +22,8 @@ package ca.uhn.fhir.rest.server;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.method.IMethodBinding;
 import ca.uhn.fhir.rest.server.method.MethodMatchEnum;
+import org.apache.commons.lang3.Validate;
+import org.checkerframework.checker.nullness.qual.RequiresNonNull;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -92,20 +94,15 @@ public class ResourceBinding {
 				.findFirst()
 				.ifPresent(existing -> ourLog.warn(
 						"The following method has been registered twice against this RestfulServer: {} "
-								+ "(existing provider: {}, new provider: {}). "
-								+ "The most recently registered provider ({}) will be used",
+								+ "(existing provider: {}, new provider: {}).",
 						method.getBindingKey(),
 						describeProvider(existing.getProvider()),
-						describeProvider(method.getProvider()),
 						describeProvider(method.getProvider())));
 		this.myMethodBindings.push(method);
 	}
 
 	private static String describeProvider(Object theProvider) {
-		if (theProvider == null) {
-			return "null";
-		}
-		return theProvider.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(theProvider));
+        return theProvider == null ? "null" : theProvider.getClass().getName();
 	}
 
 	@Override
