@@ -261,6 +261,23 @@ class TermReadSvcImplTest {
 				.hasMessageContaining("does not match expected version: 2.0.0");
 	}
 
+	/**
+	 * The same contradiction on a lookup is rejected as it is on validateCode, rather than answered from the
+	 * version named on the request.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void lookupCode_withCodeSystemCarryingAConflictingVersion_isRejected() {
+		// no lookup is stubbed: the conflict is rejected before the code system is consulted at all
+		ValidateCodeFixture fixture = new ValidateCodeFixture();
+		LookupCodeRequest request =
+				new LookupCodeRequest(UCUM_SYSTEM_URL + "|1.0.0", UCUM_CODE).setVersion("2.0.0");
+
+		assertThatThrownBy(() -> fixture.mySpiedSvc.lookupCode(fixture.myValidationSupportContext, request))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining("does not match expected version: 2.0.0");
+	}
+
 	@Test
 	void validateCode_withNotPresentCodeSystemAndMissingCode_returnsNullToAllowChainFallThrough() {
 		ValidateCodeFixture fixture = new ValidateCodeFixture();

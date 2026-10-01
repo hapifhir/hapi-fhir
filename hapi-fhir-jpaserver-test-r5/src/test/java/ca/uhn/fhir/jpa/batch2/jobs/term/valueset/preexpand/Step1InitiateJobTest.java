@@ -95,7 +95,7 @@ class Step1InitiateJobTest {
 			.addExclude()
 			.setSystem("http://system-2");
 		when(myDeferredStorageSvc.isStorageQueueEmpty(false)).thenReturn(true);
-		when(myValidationSupport.fetchValueSet(eq("http://foo|1.0"))).thenReturn(inputVs);
+		when(myValidationSupport.fetchValueSet(eq("http://foo"), eq("1.0"))).thenReturn(inputVs);
 		when(myValueSetStorageSvc.startStagingVersion(eq(THE_VS_URL), eq(THE_VS_VERSION))).thenReturn(THE_STAGING_VERSION);
 
 		// Test
@@ -166,7 +166,7 @@ class Step1InitiateJobTest {
 		inputVs.getCompose()
 			.addInclude()
 			.setSystem("http://system-0");
-		when(myValidationSupport.fetchValueSet(eq("http://foo|1.0"))).thenReturn(inputVs);
+		when(myValidationSupport.fetchValueSet(eq("http://foo"), eq("1.0"))).thenReturn(inputVs);
 		when(myValueSetStorageSvc.startStagingVersion(eq(THE_VS_URL), eq(THE_VS_VERSION))).thenReturn(THE_STAGING_VERSION);
 
 		PreExpandValueSetParameters params = new PreExpandValueSetParameters();
