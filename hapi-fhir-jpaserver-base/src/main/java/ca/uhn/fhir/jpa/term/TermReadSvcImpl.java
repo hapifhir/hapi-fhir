@@ -176,6 +176,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -942,6 +943,12 @@ public class TermReadSvcImpl implements ITermReadSvc {
 						termCodeSystemVersion.get());
 
 			} else {
+
+				ourLog.warn(
+						"CodeSystem {} version {} is not in the terminology tables; expanding the {} in memory",
+						system,
+						defaultIfBlank(theIncludeOrExclude.getVersion(), "(current)"),
+						theAdd ? "inclusion" : "exclusion");
 
 				if (!theIncludeOrExclude.getConcept().isEmpty() && theExpansionFilter.hasCode()) {
 					if (defaultString(theIncludeOrExclude.getSystem()).equals(theExpansionFilter.getSystem())) {
