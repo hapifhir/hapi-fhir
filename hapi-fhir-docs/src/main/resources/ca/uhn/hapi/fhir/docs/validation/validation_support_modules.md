@@ -45,6 +45,22 @@ This module supplies the built-in FHIR core structure definitions, including bot
 
 This module acts as a simple terminology service that can validate codes against ValueSet and CodeSystem resources purely in-memory (i.e. with no database). This is sufficient in many basic cases, although it is not able to validate CodeSystems with external content (i.e CodeSystems where the `CodeSystem.content` field is `external`, such as the LOINC and SNOMED CT CodeSystems).
 
+## ValueSets That Use an Unknown CodeSystem
+
+A ValueSet cannot be expanded if it uses a CodeSystem the server does not have, or a CodeSystem version it does not have. This is true even when the ValueSet lists its codes (`ValueSet.compose.include.concept`): the listed codes are not accepted without the CodeSystem to check them against. The FHIR specification requires `$expand` to return an error in this case, and the HL7 validator behaves the same way.
+
+What happens:
+
+* `ValueSet/$expand` returns an error.
+* `ValueSet/$validate-code` rejects the code, and returns an `x-caused-by-unknown-system` output parameter naming the CodeSystem (as `url|version` when a version was not found).
+* Resource validation (`$validate`) reports the unknown CodeSystem once. Its severity depends on the binding strength; to change it, use the [ValidationMessageUnknownCodeSystemPostProcessingInterceptor](./instance_validator.html#modifying-validation-message-severity-via-interceptor).
+* On a JPA server, pre-expansion of the ValueSet ends with status `FAILED_TO_EXPAND`, and a search using `:in` or `:not-in` on the ValueSet returns an error.
+
+Listed codes are still accepted when:
+
+* Another module in the chain supports the CodeSystem without a CodeSystem resource, for example the BCP-47 language codes in [CommonCodeSystemsTerminologyService](#commoncodesystemsterminologyservice).
+* The caller expands with `ValueSetExpansionOptions#setFailOnMissingCodeSystem(false)`.
+
 # PrePopulatedValidationSupport
 
 [JavaDoc](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/support/PrePopulatedValidationSupport.html) / [Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-validation/src/main/java/org/hl7/fhir/common/hapi/validation/support/PrePopulatedValidationSupport.java)

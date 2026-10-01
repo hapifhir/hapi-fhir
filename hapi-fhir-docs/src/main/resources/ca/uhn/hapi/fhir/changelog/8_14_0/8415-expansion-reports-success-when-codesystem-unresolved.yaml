@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 8415
+title: "Previously, codes listed in a `ValueSet` were accepted even when the server did not have their
+  `CodeSystem`, or the `CodeSystem` version named. Now, as the FHIR specification requires, `$expand` of such a
+  `ValueSet` fails, `$validate-code` rejects the code and returns an `x-caused-by-unknown-system` parameter,
+  pre-expansion ends as `FAILED_TO_EXPAND`, and `:in` and `:not-in` searches return an error."
