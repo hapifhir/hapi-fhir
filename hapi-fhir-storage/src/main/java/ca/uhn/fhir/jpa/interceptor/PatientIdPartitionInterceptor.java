@@ -322,7 +322,7 @@ public class PatientIdPartitionInterceptor {
 			// when a resource is deleted, the current version of the deleted resource is empty
 			// and will definitely not have references to a patient.  in order to determine the
 			// patient compartment of a deleted resource, we need to get its previous version.
-			resource = getPreviousVersion(theResource);
+			resource = getPreviousVersion(theResource, theRequestDetails);
 		}
 
 		Collection<String> oCompartmentIdentity = ResourceCompartmentUtil.getResourceCompartments(
@@ -606,11 +606,11 @@ public class PatientIdPartitionInterceptor {
 		return Optional.of(provideSingleCompartmentPartition(theRequestDetails, idPart));
 	}
 
-	private IBaseResource getPreviousVersion(IBaseResource theResource) {
+	private IBaseResource getPreviousVersion(IBaseResource theResource, RequestDetails theRequestDetails) {
 		IFhirResourceDao<IBaseResource> resourceDao = myDaoRegistry.getResourceDao(theResource);
 		PreviousVersionReader<IBaseResource> reader = new PreviousVersionReader<>(resourceDao);
 
-		Optional<IBaseResource> oPreviousVersion = reader.readPreviousVersion(theResource);
+		Optional<IBaseResource> oPreviousVersion = reader.readPreviousVersion(theResource, theRequestDetails);
 
 		return oPreviousVersion.orElse(theResource);
 	}
