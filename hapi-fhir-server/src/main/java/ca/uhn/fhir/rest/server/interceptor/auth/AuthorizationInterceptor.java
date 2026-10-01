@@ -26,6 +26,7 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -52,6 +53,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -155,12 +157,8 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			IBaseResource theOutputResource,
 			Pointcut thePointcut) {
 		@SuppressWarnings("unchecked")
-		List<IAuthRule> rules =
-				(List<IAuthRule>) theRequestDetails.getUserData().get(myRequestRuleListKey);
-		if (rules == null) {
-			rules = buildRuleList(theRequestDetails);
-			theRequestDetails.getUserData().put(myRequestRuleListKey, rules);
-		}
+		List<IAuthRule> rules = getRulesForRequest(theRequestDetails);
+
 		Set<AuthorizationFlagsEnum> flags = getFlags();
 
 		ourLog.trace(
@@ -479,6 +477,44 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		applyRulesAndFailIfDeny(restOperationType, theRequestDetails, null, null, null, thePointcut);
 	}
 
+	@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
+	public void hookPreSearchRegistered(RequestDetails theRequestDetails) {
+		if (theRequestDetails == null) {
+			return;
+		}
+		Set<ReverseChainLink> links =
+				extractReverseChainLinks(theRequestDetails.getParameters().keySet());
+		if (links.isEmpty()) {
+			return;
+		}
+		List<IAuthRule> rules = getRulesForRequest(theRequestDetails);
+		for (ReverseChainLink nextLink : links) {
+			Verdict verdict = evaluateAccessToReachableResources(rules, nextLink, theRequestDetails);
+			if (verdict.getDecision() != PolicyEnum.ALLOW) {
+				handleDeny(theRequestDetails, verdict);
+			}
+		}
+	}
+
+	private Verdict evaluateAccessToReachableResources(
+			List<IAuthRule> theRules, ReverseChainLink theLink, RequestDetails theRequestDetails) {
+		for (IAuthRule nextRule : theRules) {
+			if (nextRule instanceof RuleImplOp rule
+					&& rule.isReadRuleFor(theLink.resourceType(), theRequestDetails.getTenantId())) {
+				if (rule.getMode() == PolicyEnum.DENY) {
+					return new Verdict(PolicyEnum.DENY, rule);
+				}
+				if (rule.isUnrestrictedWithinType()
+						|| (theLink.linkedToSearchedType()
+								&& rule.isUnrestrictedWithinSearchedCompartment(
+										theLink.resourceType(), theLink.linkParameter(), theRequestDetails))) {
+					return new Verdict(PolicyEnum.ALLOW, rule);
+				}
+			}
+		}
+		return new Verdict(getDefaultPolicy(), null);
+	}
+
 	/**
 	 * TODO GGG This method should eventually be used when invoking the rules applier.....however we currently rely on the incorrect
 	 * behaviour of passing down `EXTENDED_OPERATION_SERVER`.
@@ -743,5 +779,38 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			theRequestDetails.getUserData().put(myRequestSeenResourcesKey, alreadySeenResources);
 		}
 		return alreadySeenResources;
+	}
+
+	private List<IAuthRule> getRulesForRequest(RequestDetails theRequestDetails) {
+		List<IAuthRule> rules =
+				(List<IAuthRule>) theRequestDetails.getUserData().get(myRequestRuleListKey);
+		if (rules == null) {
+			rules = buildRuleList(theRequestDetails);
+			theRequestDetails.getUserData().put(myRequestRuleListKey, rules);
+		}
+		return rules;
+	}
+
+	/**
+	 * One level of a <code>_has</code> parameter: the type it joins, the reference parameter on that type
+	 * used for the join, and whether that reference points at the searched resource (the outermost level).
+	 */
+	record ReverseChainLink(String resourceType, String linkParameter, boolean linkedToSearchedType) {}
+
+	static Set<ReverseChainLink> extractReverseChainLinks(Collection<String> theParameterNames) {
+		Set<ReverseChainLink> retVal = new LinkedHashSet<>();
+		for (String nextName : theParameterNames) {
+			if (nextName.startsWith(Constants.PARAM_HAS + ":")) {
+				String[] parts = nextName.split(":");
+				boolean linkedToSearchedType = true;
+				for (int i = 0; i + 2 < parts.length; i++) {
+					if (Constants.PARAM_HAS.equals(parts[i])) {
+						retVal.add(new ReverseChainLink(parts[i + 1], parts[i + 2], linkedToSearchedType));
+						linkedToSearchedType = false;
+					}
+				}
+			}
+		}
+		return retVal;
 	}
 }
