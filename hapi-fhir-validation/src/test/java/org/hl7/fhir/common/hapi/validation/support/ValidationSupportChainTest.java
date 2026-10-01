@@ -40,6 +40,10 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -73,6 +77,8 @@ public class ValidationSupportChainTest extends BaseTest {
 	public static final String CODE_SYSTEM_VERSION_1 = "code-system-version-1";
 	public static final String VALUE_SET_VERSION_0 = "value-set-version-0";
 	public static final String VALUE_SET_VERSION_1 = "value-set-version-1";
+	public static final String STRUCTURE_DEFINITION_URL_0 = "http://structure-definition-url-0";
+	public static final String RESOURCE_VERSION_0 = "resource-version-0";
 	private static final Logger ourLog = LoggerFactory.getLogger(ValidationSupportChainTest.class);
 	@Mock(strictness = Mock.Strictness.LENIENT)
 	private IValidationSupport myValidationSupport0;
@@ -101,6 +107,164 @@ public class ValidationSupportChainTest extends BaseTest {
 
 		assertNotNull(chain.fetchStructureDefinition("http://hl7.org/fhir/StructureDefinition/Patient"));
 		assertEquals(649, chain.fetchAllStructureDefinitions().size());
+	}
+
+	/**
+	 * One instance is cached under its plain and its versioned URL. It is listed and counted once, the list
+	 * keeps the order the definitions were first cached, and invalidating the caches forgets them.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	public void fetchAllStructureDefinitions_instanceCachedUnderTwoUrls_listedAndCountedOnceInFirstCachedOrder() {
+		// Setup
+		prepareMock(myValidationSupport0);
+		StructureDefinition first = new StructureDefinition().setUrl(STRUCTURE_DEFINITION_URL_0);
+		StructureDefinition versioned = new StructureDefinition().setUrl("http://structure-definition-url-1");
+		versioned.setVersion(RESOURCE_VERSION_0);
+		when(myValidationSupport0.fetchStructureDefinition(eq(versioned.getUrl()), isNull())).thenReturn(versioned);
+		when(myValidationSupport0.fetchStructureDefinition(eq(versioned.getUrl()), eq(RESOURCE_VERSION_0)))
+			.thenReturn(versioned);
+		when(myValidationSupport0.fetchAllStructureDefinitions()).thenReturn(List.of(first, versioned));
+		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(true), myValidationSupport0);
+
+		// Test
+		chain.fetchStructureDefinition(versioned.getUrl());
+		chain.fetchStructureDefinition(versioned.getUrl(), RESOURCE_VERSION_0);
+		List<IBaseResource> all = chain.fetchAllStructureDefinitions();
+
+		// Verify
+		assertThat(all).containsExactly(versioned, first);
+		assertEquals(2, chain.getMetricNonExpiringCacheEntries());
+
+		chain.invalidateCaches();
+		assertEquals(0, chain.getMetricNonExpiringCacheEntries());
+	}
+
+	/**
+	 * FhirInstanceValidator assumes structure definitions do not change for the lifetime of the validator, so
+	 * the chain keeps them after the expiring cache has timed out, and forgets them only when all caches are
+	 * invalidated.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	public void fetchStructureDefinition_expiringCacheTimedOut_stillAnswersFromTheNonExpiringCache() {
+		// Setup
+		prepareMock(myValidationSupport0);
+		String listedUrl = "http://structure-definition-url-1";
+		StructureDefinition fetched = new StructureDefinition().setUrl(STRUCTURE_DEFINITION_URL_0);
+		StructureDefinition listed = new StructureDefinition().setUrl(listedUrl);
+		when(myValidationSupport0.fetchStructureDefinition(eq(STRUCTURE_DEFINITION_URL_0), isNull()))
+			.thenReturn(fetched);
+		when(myValidationSupport0.fetchAllStructureDefinitions()).thenReturn(List.of(listed));
+		ValidationSupportChain.CacheConfiguration cacheTimeouts = ValidationSupportChain.CacheConfiguration
+			.defaultValues()
+			.setCacheTimeout(Duration.ofMillis(500));
+		ValidationSupportChain chain = new ValidationSupportChain(cacheTimeouts, myValidationSupport0);
+		assertSame(fetched, chain.fetchStructureDefinition(STRUCTURE_DEFINITION_URL_0));
+		assertThat(chain.fetchAllStructureDefinitions()).containsExactly(fetched, listed);
+
+		// Test
+		StructureDefinition fetchedReplacement = new StructureDefinition().setUrl(STRUCTURE_DEFINITION_URL_0);
+		StructureDefinition listedReplacement = new StructureDefinition().setUrl(listedUrl);
+		when(myValidationSupport0.fetchStructureDefinition(eq(STRUCTURE_DEFINITION_URL_0), isNull()))
+			.thenReturn(fetchedReplacement);
+		when(myValidationSupport0.fetchAllStructureDefinitions()).thenReturn(List.of(listedReplacement));
+		TestUtil.sleepAtLeast(750);
+
+		// Verify
+		assertSame(fetched, chain.fetchStructureDefinition(STRUCTURE_DEFINITION_URL_0));
+		assertThat(chain.fetchAllStructureDefinitions()).containsExactly(fetched, listed);
+		verify(myValidationSupport0, times(1)).fetchStructureDefinition(eq(STRUCTURE_DEFINITION_URL_0), isNull());
+		verify(myValidationSupport0, times(1)).fetchAllStructureDefinitions();
+
+		chain.invalidateCaches();
+		assertSame(fetchedReplacement, chain.fetchStructureDefinition(STRUCTURE_DEFINITION_URL_0));
+		assertThat(chain.fetchAllStructureDefinitions()).containsExactly(fetchedReplacement, listedReplacement);
+	}
+
+	/**
+	 * A structure definition asked for with and without a version can be two different resources, so each is
+	 * cached under its own key: neither answers for the other, a repeat is answered from the cache, and both
+	 * are listed.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	public void fetchStructureDefinition_sameUrlVersionedAndUnversioned_cachedAsSeparateResources() {
+		// Setup
+		prepareMock(myValidationSupport0);
+		StructureDefinition unversioned = new StructureDefinition().setUrl(STRUCTURE_DEFINITION_URL_0);
+		StructureDefinition versioned = new StructureDefinition().setUrl(STRUCTURE_DEFINITION_URL_0);
+		versioned.setVersion(RESOURCE_VERSION_0);
+		when(myValidationSupport0.fetchStructureDefinition(eq(STRUCTURE_DEFINITION_URL_0), isNull()))
+			.thenReturn(unversioned);
+		when(myValidationSupport0.fetchStructureDefinition(eq(STRUCTURE_DEFINITION_URL_0), eq(RESOURCE_VERSION_0)))
+			.thenReturn(versioned);
+		when(myValidationSupport0.fetchAllStructureDefinitions()).thenReturn(List.of());
+		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(true), myValidationSupport0);
+
+		// Test
+		IBaseResource firstUnversioned = chain.fetchStructureDefinition(STRUCTURE_DEFINITION_URL_0);
+		IBaseResource firstVersioned = chain.fetchStructureDefinition(STRUCTURE_DEFINITION_URL_0, RESOURCE_VERSION_0);
+		IBaseResource secondUnversioned = chain.fetchStructureDefinition(STRUCTURE_DEFINITION_URL_0);
+		IBaseResource secondVersioned =
+			chain.fetchStructureDefinition(STRUCTURE_DEFINITION_URL_0 + "|" + RESOURCE_VERSION_0);
+
+		// Verify
+		assertSame(unversioned, firstUnversioned);
+		assertSame(versioned, firstVersioned);
+		assertSame(unversioned, secondUnversioned);
+		assertSame(versioned, secondVersioned);
+		verify(myValidationSupport0, times(1)).fetchStructureDefinition(eq(STRUCTURE_DEFINITION_URL_0), isNull());
+		verify(myValidationSupport0, times(1))
+			.fetchStructureDefinition(eq(STRUCTURE_DEFINITION_URL_0), eq(RESOURCE_VERSION_0));
+		assertThat(chain.fetchAllStructureDefinitions()).containsExactly(unversioned, versioned);
+	}
+
+	/**
+	 * Listing the cached structure definitions walks the cache, so it must not run while another thread adds
+	 * to it.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	public void fetchAllStructureDefinitions_whileOtherThreadsCacheDefinitions_neverFails() throws Exception {
+		// Setup
+		prepareMock(myValidationSupport0);
+		when(myValidationSupport0.fetchAllStructureDefinitions()).thenReturn(List.of());
+		when(myValidationSupport0.fetchStructureDefinition(any(), isNull()))
+			.thenAnswer(t -> new StructureDefinition().setUrl(t.getArgument(0)));
+		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(true), myValidationSupport0);
+		chain.fetchAllStructureDefinitions();
+		int writerCount = 4;
+		int urlsPerWriter = 500;
+		ExecutorService executor = Executors.newFixedThreadPool(writerCount + 1);
+
+		// Test
+		try {
+			List<Future<?>> writers = new ArrayList<>();
+			for (int writer = 0; writer < writerCount; writer++) {
+				String prefix = "http://writer-" + writer + "/";
+				writers.add(executor.submit(() -> {
+					for (int i = 0; i < urlsPerWriter; i++) {
+						chain.fetchStructureDefinition(prefix + i);
+					}
+				}));
+			}
+			Future<?> reader = executor.submit(() -> {
+				while (writers.stream().anyMatch(t -> !t.isDone())) {
+					chain.fetchAllStructureDefinitions();
+					chain.getMetricNonExpiringCacheEntries();
+				}
+			});
+
+			// Verify
+			for (Future<?> writer : writers) {
+				writer.get(1, TimeUnit.MINUTES);
+			}
+			reader.get(1, TimeUnit.MINUTES);
+		} finally {
+			executor.shutdownNow();
+		}
+		assertThat(chain.fetchAllStructureDefinitions()).hasSize(writerCount * urlsPerWriter);
 	}
 
 
@@ -145,25 +309,25 @@ public class ValidationSupportChainTest extends BaseTest {
 		prepareMock(myValidationSupport0, myValidationSupport1, myValidationSupport2);
 		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(theUseCache), myValidationSupport0, myValidationSupport1, myValidationSupport2);
 
-		when(myValidationSupport0.isValueSetSupported(any(), eq(VALUE_SET_URL_0))).thenReturn(false);
-		when(myValidationSupport1.isValueSetSupported(any(), eq(VALUE_SET_URL_0))).thenReturn(true);
+		when(myValidationSupport0.isValueSetSupported(any(), eq(VALUE_SET_URL_0), any())).thenReturn(false);
+		when(myValidationSupport1.isValueSetSupported(any(), eq(VALUE_SET_URL_0), any())).thenReturn(true);
 		when(myValidationSupport1.validateCode(any(), any(), any())).thenAnswer(t -> new IValidationSupport.CodeValidationResult());
 
 		// Test
 		IValidationSupport.CodeValidationResult result = chain.validateCode(newValidationCtx(chain), new ConceptValidationOptions(), CODE_SYSTEM_URL_0, CODE_0, DISPLAY_0, VALUE_SET_URL_0);
 
 		// Verify
-		verify(myValidationSupport0, times(1)).isValueSetSupported(any(), eq(VALUE_SET_URL_0));
-		verify(myValidationSupport1, times(1)).isValueSetSupported(any(), eq(VALUE_SET_URL_0));
-		verify(myValidationSupport2, never()).isValueSetSupported(any(), eq(VALUE_SET_URL_0));
+		verify(myValidationSupport0, times(1)).isValueSetSupported(any(), eq(VALUE_SET_URL_0), any());
+		verify(myValidationSupport1, times(1)).isValueSetSupported(any(), eq(VALUE_SET_URL_0), any());
+		verify(myValidationSupport2, never()).isValueSetSupported(any(), eq(VALUE_SET_URL_0), any());
 		verify(myValidationSupport0, never()).validateCode(any(), any(), any());
 		verify(myValidationSupport1, times(1)).validateCode(any(), any(), any());
 		verify(myValidationSupport2, never()).validateCode(any(), any(), any());
 
 		// Setup for second execution (should use cache this time)
 		prepareMock(myValidationSupport0, myValidationSupport1, myValidationSupport2);
-		when(myValidationSupport0.isValueSetSupported(any(), eq(VALUE_SET_URL_0))).thenReturn(false);
-		when(myValidationSupport1.isValueSetSupported(any(), eq(VALUE_SET_URL_0))).thenReturn(true);
+		when(myValidationSupport0.isValueSetSupported(any(), eq(VALUE_SET_URL_0), any())).thenReturn(false);
+		when(myValidationSupport1.isValueSetSupported(any(), eq(VALUE_SET_URL_0), any())).thenReturn(true);
 		when(myValidationSupport1.validateCode(any(), any(), any())).thenAnswer(t -> new IValidationSupport.CodeValidationResult());
 
 		// Test again (should use cache)
@@ -175,9 +339,9 @@ public class ValidationSupportChainTest extends BaseTest {
 			verifyNoInteractions(myValidationSupport0, myValidationSupport1, myValidationSupport2);
 		} else {
 			assertNotSame(result, result2);
-			verify(myValidationSupport0, times(1)).isValueSetSupported(any(), eq(VALUE_SET_URL_0));
-			verify(myValidationSupport1, times(1)).isValueSetSupported(any(), eq(VALUE_SET_URL_0));
-			verify(myValidationSupport2, never()).isValueSetSupported(any(), eq(VALUE_SET_URL_0));
+			verify(myValidationSupport0, times(1)).isValueSetSupported(any(), eq(VALUE_SET_URL_0), any());
+			verify(myValidationSupport1, times(1)).isValueSetSupported(any(), eq(VALUE_SET_URL_0), any());
+			verify(myValidationSupport2, never()).isValueSetSupported(any(), eq(VALUE_SET_URL_0), any());
 			verify(myValidationSupport0, never()).validateCode(any(), any(), any());
 			verify(myValidationSupport1, times(1)).validateCode(any(), any(), any());
 			verify(myValidationSupport2, never()).validateCode(any(), any(), any());
@@ -191,25 +355,25 @@ public class ValidationSupportChainTest extends BaseTest {
 		prepareMock(myValidationSupport0, myValidationSupport1, myValidationSupport2);
 		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(theUseCache), myValidationSupport0, myValidationSupport1, myValidationSupport2);
 
-		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(false);
-		when(myValidationSupport1.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(true);
+		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0), any())).thenReturn(false);
+		when(myValidationSupport1.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0), any())).thenReturn(true);
 		when(myValidationSupport1.validateCode(any(), any(), any())).thenAnswer(t -> new IValidationSupport.CodeValidationResult());
 
 		// Test
 		IValidationSupport.CodeValidationResult result = chain.validateCode(newValidationCtx(chain), new ConceptValidationOptions(), CODE_SYSTEM_URL_0, CODE_0, DISPLAY_0, null);
 
 		// Verify
-		verify(myValidationSupport0, times(1)).isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0));
-		verify(myValidationSupport1, times(1)).isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0));
-		verify(myValidationSupport2, never()).isCodeSystemSupported(any(), any());
+		verify(myValidationSupport0, times(1)).isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0), any());
+		verify(myValidationSupport1, times(1)).isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0), any());
+		verify(myValidationSupport2, never()).isCodeSystemSupported(any(), any(), any());
 		verify(myValidationSupport0, never()).validateCode(any(), any(), any());
 		verify(myValidationSupport1, times(1)).validateCode(any(), any(), any());
 		verify(myValidationSupport2, never()).validateCode(any(), any(), any());
 
 		// Setup for second execution (should use cache this time)
 		prepareMock(myValidationSupport0, myValidationSupport1, myValidationSupport2);
-		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(false);
-		when(myValidationSupport1.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(true);
+		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0), any())).thenReturn(false);
+		when(myValidationSupport1.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0), any())).thenReturn(true);
 		when(myValidationSupport1.validateCode(any(), any(), any())).thenAnswer(t -> new IValidationSupport.CodeValidationResult());
 
 		// Test again (should use cache)
@@ -221,9 +385,9 @@ public class ValidationSupportChainTest extends BaseTest {
 			verifyNoInteractions(myValidationSupport0, myValidationSupport1, myValidationSupport2);
 		} else {
 			assertNotSame(result, result2);
-			verify(myValidationSupport0, times(1)).isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0));
-			verify(myValidationSupport1, times(1)).isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0));
-			verify(myValidationSupport2, never()).isCodeSystemSupported(any(), any());
+			verify(myValidationSupport0, times(1)).isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0), any());
+			verify(myValidationSupport1, times(1)).isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0), any());
+			verify(myValidationSupport2, never()).isCodeSystemSupported(any(), any(), any());
 			verify(myValidationSupport0, never()).validateCode(any(), any(), any());
 			verify(myValidationSupport1, times(1)).validateCode(any(), any(), any());
 			verify(myValidationSupport2, never()).validateCode(any(), any(), any());
@@ -244,7 +408,7 @@ public class ValidationSupportChainTest extends BaseTest {
 		prepareMock(myValidationSupport0);
 		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(true), myValidationSupport0);
 
-		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(true);
+		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0), any())).thenReturn(true);
 		when(myValidationSupport0.validateCode(any(), any(), any()))
 			.thenAnswer(t -> new IValidationSupport.CodeValidationResult());
 
@@ -253,7 +417,7 @@ public class ValidationSupportChainTest extends BaseTest {
 			CODE_SYSTEM_URL_0 + "|" + CODE_SYSTEM_VERSION_0, CODE_0, DISPLAY_0, null);
 
 		// Verify
-		verify(myValidationSupport0, times(1)).isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0));
+		verify(myValidationSupport0, times(1)).isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0), any());
 		verify(myValidationSupport0, times(1))
 			.validateCode(any(), any(), eq(new ValidateCodeRequest(CODE_SYSTEM_URL_0, CODE_SYSTEM_VERSION_0, CODE_0, DISPLAY_0, null)));
 	}
@@ -269,8 +433,8 @@ public class ValidationSupportChainTest extends BaseTest {
 		prepareMock(myValidationSupport0);
 		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(true), myValidationSupport0);
 
-		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(false);
-		when(myValidationSupport0.fetchCodeSystem(eq(CODE_SYSTEM_URL_0))).thenReturn(null);
+		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0), any())).thenReturn(false);
+		when(myValidationSupport0.fetchCodeSystem(eq(CODE_SYSTEM_URL_0), isNull())).thenReturn(null);
 
 		// Test
 		IValidationSupport.CodeValidationResult result = validateCodeWithVersion(chain, CODE_SYSTEM_VERSION_0);
@@ -278,8 +442,8 @@ public class ValidationSupportChainTest extends BaseTest {
 		// Verify
 		assertNotNull(result);
 		assertThat(result.getMessage()).contains(CODE_SYSTEM_URL_0 + "|" + CODE_SYSTEM_VERSION_0);
-		// the existence probe uses the bare canonical
-		verify(myValidationSupport0, times(1)).fetchCodeSystem(eq(CODE_SYSTEM_URL_0));
+		// the existence probe asks for the URL with no version
+		verify(myValidationSupport0, times(1)).fetchCodeSystem(eq(CODE_SYSTEM_URL_0), isNull());
 	}
 
 	/**
@@ -293,7 +457,7 @@ public class ValidationSupportChainTest extends BaseTest {
 		prepareMock(myValidationSupport0);
 		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(true), myValidationSupport0);
 
-		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(true);
+		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0), any())).thenReturn(true);
 		when(myValidationSupport0.validateCode(any(), any(), any()))
 			.thenAnswer(t -> new IValidationSupport.CodeValidationResult());
 
@@ -312,6 +476,42 @@ public class ValidationSupportChainTest extends BaseTest {
 	}
 
 	/**
+	 * Two validation support modules hold the same code system at different versions - a PrePopulated module
+	 * with one version and a remote terminology module with another, say. The chain picks which module
+	 * answers by asking each whether it supports the system, so while that question named no version, the
+	 * first module holding the system answered every request whatever version was asked for, and re-ordering
+	 * the chain silently changed validation outcomes.
+	 */
+	// Created by Claude Opus 5
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void validateCode_twoModulesHoldDifferentVersionsOfOneCodeSystem_answersFromTheModuleHoldingTheRequestedVersion(
+			boolean theModuleHoldingTheRequestedVersionComesFirst) {
+		// Setup
+		prepareMock(myValidationSupport0, myValidationSupport1);
+		IValidationSupport.CodeValidationResult resultFromRequestedVersion = new IValidationSupport.CodeValidationResult();
+
+		// support0 holds only version 0, support1 only version 1
+		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0), eq(CODE_SYSTEM_VERSION_0))).thenReturn(true);
+		when(myValidationSupport1.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0), eq(CODE_SYSTEM_VERSION_1))).thenReturn(true);
+		when(myValidationSupport1.validateCode(any(), any(), any(ValidateCodeRequest.class)))
+			.thenReturn(resultFromRequestedVersion);
+
+		ValidationSupportChain chain = theModuleHoldingTheRequestedVersionComesFirst
+			? new ValidationSupportChain(newCacheConfiguration(true), myValidationSupport1, myValidationSupport0)
+			: new ValidationSupportChain(newCacheConfiguration(true), myValidationSupport0, myValidationSupport1);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = validateCodeWithVersion(chain, CODE_SYSTEM_VERSION_1);
+
+		// Verify
+		assertSame(resultFromRequestedVersion, outcome);
+		verify(myValidationSupport0, never()).validateCode(any(), any(), any(ValidateCodeRequest.class));
+		verify(myValidationSupport1, times(1))
+			.validateCode(any(), any(), eq(new ValidateCodeRequest(CODE_SYSTEM_URL_0, CODE_SYSTEM_VERSION_1, CODE_0, DISPLAY_0, null)));
+	}
+
+	/**
 	 * validateCodeInValueSet keys on ValueSet.url, which is the same string for every version of a value set.
 	 * Two versions can include different code system versions, so their answers legitimately differ and the
 	 * version has to be part of the key as well.
@@ -323,7 +523,7 @@ public class ValidationSupportChainTest extends BaseTest {
 		prepareMock(myValidationSupport0);
 		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(true), myValidationSupport0);
 
-		when(myValidationSupport0.isValueSetSupported(any(), eq(VALUE_SET_URL_0))).thenReturn(true);
+		when(myValidationSupport0.isValueSetSupported(any(), eq(VALUE_SET_URL_0), any())).thenReturn(true);
 		when(myValidationSupport0.validateCodeInValueSet(any(), any(), any(), any(), any(), any()))
 			.thenAnswer(t -> new IValidationSupport.CodeValidationResult());
 
@@ -350,7 +550,7 @@ public class ValidationSupportChainTest extends BaseTest {
 		prepareMock(myValidationSupport0);
 		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(true), myValidationSupport0);
 
-		when(myValidationSupport0.isValueSetSupported(any(), any())).thenReturn(true);
+		when(myValidationSupport0.isValueSetSupported(any(), any(), any())).thenReturn(true);
 		when(myValidationSupport0.validateCode(any(), any(), any()))
 			.thenAnswer(t -> new IValidationSupport.CodeValidationResult());
 
@@ -368,6 +568,98 @@ public class ValidationSupportChainTest extends BaseTest {
 			.validateCode(any(), any(), eq(new ValidateCodeRequest(CODE_SYSTEM_URL_0, null, CODE_0, DISPLAY_0, VALUE_SET_URL_0)));
 		verify(myValidationSupport0, times(1))
 			.validateCode(any(), any(), eq(new ValidateCodeRequest(CODE_SYSTEM_URL_0, null, CODE_0, DISPLAY_0, versionedValueSetUrl)));
+	}
+
+	/**
+	 * A version packed into the canonical has to reach the module as its own argument, or a module which can
+	 * resolve a specific version never gets told which one was asked for.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	public void fetchValueSet_versionedCanonical_asksTheModuleForUrlAndVersion() {
+		// Setup
+		prepareMock(myValidationSupport0);
+		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(true), myValidationSupport0);
+		ValueSet valueSet = new ValueSet();
+		when(myValidationSupport0.fetchValueSet(eq(VALUE_SET_URL_0), eq(VALUE_SET_VERSION_0))).thenReturn(valueSet);
+
+		// Test
+		IBaseResource result = chain.fetchValueSet(VALUE_SET_URL_0 + "|" + VALUE_SET_VERSION_0);
+
+		// Verify
+		assertSame(valueSet, result);
+		verify(myValidationSupport0, times(1)).fetchValueSet(eq(VALUE_SET_URL_0), eq(VALUE_SET_VERSION_0));
+	}
+
+	/**
+	 * Two versions of one canonical are two different resources, so they cannot share a cache entry.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	public void fetchValueSet_differentVersions_areNotAnsweredFromOneCacheEntry() {
+		// Setup
+		prepareMock(myValidationSupport0);
+		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(true), myValidationSupport0);
+		when(myValidationSupport0.fetchValueSet(eq(VALUE_SET_URL_0), any())).thenAnswer(t -> new ValueSet());
+
+		// Test
+		IBaseResource version0 = chain.fetchValueSet(VALUE_SET_URL_0 + "|" + VALUE_SET_VERSION_0);
+		IBaseResource version1 = chain.fetchValueSet(VALUE_SET_URL_0 + "|" + VALUE_SET_VERSION_1);
+		IBaseResource unversioned = chain.fetchValueSet(VALUE_SET_URL_0);
+		IBaseResource version0Again = chain.fetchValueSet(VALUE_SET_URL_0 + "|" + VALUE_SET_VERSION_0);
+
+		// Verify
+		assertNotSame(version0, version1);
+		assertNotSame(version0, unversioned);
+		assertSame(version0, version0Again);
+		verify(myValidationSupport0, times(3)).fetchValueSet(eq(VALUE_SET_URL_0), any());
+	}
+
+	// Created by Claude Opus 5
+	@Test
+	public void fetchStructureDefinition_versionedCanonical_asksTheModuleForUrlAndVersion() {
+		// Setup
+		prepareMock(myValidationSupport0);
+		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(true), myValidationSupport0);
+		StructureDefinition structureDefinition = new StructureDefinition();
+		when(myValidationSupport0.fetchStructureDefinition(eq(STRUCTURE_DEFINITION_URL_0), eq(RESOURCE_VERSION_0)))
+			.thenReturn(structureDefinition);
+
+		// Test
+		IBaseResource result = chain.fetchStructureDefinition(STRUCTURE_DEFINITION_URL_0 + "|" + RESOURCE_VERSION_0);
+
+		// Verify
+		assertSame(structureDefinition, result);
+		verify(myValidationSupport0, times(1))
+			.fetchStructureDefinition(eq(STRUCTURE_DEFINITION_URL_0), eq(RESOURCE_VERSION_0));
+	}
+
+	/**
+	 * fetchResource routes the types with a dedicated fetch method to it, so that both entry points share one
+	 * cache entry. The version has to survive that routing.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	public void fetchResource_versionedCanonical_asksTheModuleForUrlAndVersion() {
+		// Setup
+		prepareMock(myValidationSupport0);
+		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(true), myValidationSupport0);
+		ValueSet valueSet = new ValueSet();
+		ListResource list = new ListResource();
+		when(myValidationSupport0.fetchValueSet(eq(VALUE_SET_URL_0), eq(VALUE_SET_VERSION_0))).thenReturn(valueSet);
+		when(myValidationSupport0.fetchResource(eq(ListResource.class), eq("http://foo"), eq(RESOURCE_VERSION_0)))
+			.thenReturn(list);
+
+		// Test
+		IBaseResource routedToValueSet = chain.fetchResource(ValueSet.class, VALUE_SET_URL_0 + "|" + VALUE_SET_VERSION_0);
+		IBaseResource fetchedByType = chain.fetchResource(ListResource.class, "http://foo|" + RESOURCE_VERSION_0);
+
+		// Verify
+		assertSame(valueSet, routedToValueSet);
+		assertSame(list, fetchedByType);
+		verify(myValidationSupport0, times(1)).fetchValueSet(eq(VALUE_SET_URL_0), eq(VALUE_SET_VERSION_0));
+		verify(myValidationSupport0, times(1))
+			.fetchResource(eq(ListResource.class), eq("http://foo"), eq(RESOURCE_VERSION_0));
 	}
 
 	// Created by Claude Opus 5
@@ -408,8 +700,8 @@ public class ValidationSupportChainTest extends BaseTest {
 		prepareMock(myValidationSupport0, myValidationSupport1, myValidationSupport2);
 		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(theUseCache), myValidationSupport0, myValidationSupport1, myValidationSupport2);
 
-		when(myValidationSupport0.isValueSetSupported(any(), eq(VALUE_SET_URL_0))).thenReturn(false);
-		when(myValidationSupport1.isValueSetSupported(any(), eq(VALUE_SET_URL_0))).thenReturn(true);
+		when(myValidationSupport0.isValueSetSupported(any(), eq(VALUE_SET_URL_0), any())).thenReturn(false);
+		when(myValidationSupport1.isValueSetSupported(any(), eq(VALUE_SET_URL_0), any())).thenReturn(true);
 		when(myValidationSupport1.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenAnswer(t -> new IValidationSupport.CodeValidationResult());
 
 		ValueSet inputValueSet = new ValueSet();
@@ -422,16 +714,16 @@ public class ValidationSupportChainTest extends BaseTest {
 
 		// Verify
 		if (theValueSetHasUrl) {
-			verify(myValidationSupport0, times(1)).isValueSetSupported(any(), eq(VALUE_SET_URL_0));
-			verify(myValidationSupport1, times(1)).isValueSetSupported(any(), eq(VALUE_SET_URL_0));
-			verify(myValidationSupport2, never()).isValueSetSupported(any(), eq(VALUE_SET_URL_0));
+			verify(myValidationSupport0, times(1)).isValueSetSupported(any(), eq(VALUE_SET_URL_0), any());
+			verify(myValidationSupport1, times(1)).isValueSetSupported(any(), eq(VALUE_SET_URL_0), any());
+			verify(myValidationSupport2, never()).isValueSetSupported(any(), eq(VALUE_SET_URL_0), any());
 			verify(myValidationSupport0, never()).validateCodeInValueSet(any(), any(), any(), any(), any(), any());
 			verify(myValidationSupport1, times(1)).validateCodeInValueSet(any(), any(), any(), any(), any(), any());
 			verify(myValidationSupport2, never()).validateCodeInValueSet(any(), any(), any(), any(), any(), any());
 		} else {
-			verify(myValidationSupport0, never()).isValueSetSupported(any(), eq(VALUE_SET_URL_0));
-			verify(myValidationSupport1, never()).isValueSetSupported(any(), eq(VALUE_SET_URL_0));
-			verify(myValidationSupport2, never()).isValueSetSupported(any(), eq(VALUE_SET_URL_0));
+			verify(myValidationSupport0, never()).isValueSetSupported(any(), eq(VALUE_SET_URL_0), any());
+			verify(myValidationSupport1, never()).isValueSetSupported(any(), eq(VALUE_SET_URL_0), any());
+			verify(myValidationSupport2, never()).isValueSetSupported(any(), eq(VALUE_SET_URL_0), any());
 			verify(myValidationSupport0, times(1)).validateCodeInValueSet(any(), any(), any(), any(), any(), any());
 			verify(myValidationSupport1, times(1)).validateCodeInValueSet(any(), any(), any(), any(), any(), any());
 			verify(myValidationSupport2, never()).validateCodeInValueSet(any(), any(), any(), any(), any(), any());
@@ -439,8 +731,8 @@ public class ValidationSupportChainTest extends BaseTest {
 
 		// Setup for second execution (should use cache this time)
 		prepareMock(myValidationSupport0, myValidationSupport1, myValidationSupport2);
-		when(myValidationSupport0.isValueSetSupported(any(), eq(VALUE_SET_URL_0))).thenReturn(false);
-		when(myValidationSupport1.isValueSetSupported(any(), eq(VALUE_SET_URL_0))).thenReturn(true);
+		when(myValidationSupport0.isValueSetSupported(any(), eq(VALUE_SET_URL_0), any())).thenReturn(false);
+		when(myValidationSupport1.isValueSetSupported(any(), eq(VALUE_SET_URL_0), any())).thenReturn(true);
 		when(myValidationSupport1.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenAnswer(t -> new IValidationSupport.CodeValidationResult());
 
 		// Test again (should use cache)
@@ -456,14 +748,14 @@ public class ValidationSupportChainTest extends BaseTest {
 		} else {
 			assertNotSame(result, result2);
 			if (theValueSetHasUrl) {
-				verify(myValidationSupport0, times(1)).isValueSetSupported(any(), eq(VALUE_SET_URL_0));
-				verify(myValidationSupport1, times(1)).isValueSetSupported(any(), eq(VALUE_SET_URL_0));
-				verify(myValidationSupport2, never()).isValueSetSupported(any(), eq(VALUE_SET_URL_0));
+				verify(myValidationSupport0, times(1)).isValueSetSupported(any(), eq(VALUE_SET_URL_0), any());
+				verify(myValidationSupport1, times(1)).isValueSetSupported(any(), eq(VALUE_SET_URL_0), any());
+				verify(myValidationSupport2, never()).isValueSetSupported(any(), eq(VALUE_SET_URL_0), any());
 				verify(myValidationSupport0, never()).validateCodeInValueSet(any(), any(), any(), any(), any(), any());
 			} else {
-				verify(myValidationSupport0, never()).isValueSetSupported(any(), eq(VALUE_SET_URL_0));
-				verify(myValidationSupport1, never()).isValueSetSupported(any(), eq(VALUE_SET_URL_0));
-				verify(myValidationSupport2, never()).isValueSetSupported(any(), eq(VALUE_SET_URL_0));
+				verify(myValidationSupport0, never()).isValueSetSupported(any(), eq(VALUE_SET_URL_0), any());
+				verify(myValidationSupport1, never()).isValueSetSupported(any(), eq(VALUE_SET_URL_0), any());
+				verify(myValidationSupport2, never()).isValueSetSupported(any(), eq(VALUE_SET_URL_0), any());
 				verify(myValidationSupport0, times(1)).validateCodeInValueSet(any(), any(), any(), any(), any(), any());
 			}
 
@@ -484,9 +776,9 @@ public class ValidationSupportChainTest extends BaseTest {
 		prepareMock(myValidationSupport0, myValidationSupport1, myValidationSupport2);
 		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(theUseCache), myValidationSupport0, myValidationSupport1, myValidationSupport2);
 
-		when(myValidationSupport0.isValueSetSupported(any(), eq(VALUE_SET_URL_0))).thenReturn(true);
+		when(myValidationSupport0.isValueSetSupported(any(), eq(VALUE_SET_URL_0), any())).thenReturn(true);
 		when(myValidationSupport0.expandValueSet(any(), any(), any(IBaseResource.class))).thenReturn(null);
-		when(myValidationSupport1.isValueSetSupported(any(), eq(VALUE_SET_URL_0))).thenReturn(true);
+		when(myValidationSupport1.isValueSetSupported(any(), eq(VALUE_SET_URL_0), any())).thenReturn(true);
 		when(myValidationSupport1.expandValueSet(any(), any(), any(IBaseResource.class))).thenAnswer(t -> new IValidationSupport.ValueSetExpansionOutcome(new ValueSet()));
 
 		ValueSet valueSetToExpand = new ValueSet();
@@ -526,9 +818,9 @@ public class ValidationSupportChainTest extends BaseTest {
 		prepareMock(myValidationSupport0, myValidationSupport1, myValidationSupport2);
 		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(theUseCache), myValidationSupport0, myValidationSupport1, myValidationSupport2);
 
-		when(myValidationSupport0.isValueSetSupported(any(), eq(VALUE_SET_URL_0))).thenReturn(true);
+		when(myValidationSupport0.isValueSetSupported(any(), eq(VALUE_SET_URL_0), any())).thenReturn(true);
 		when(myValidationSupport0.expandValueSet(any(), any(), any(String.class))).thenReturn(null);
-		when(myValidationSupport1.isValueSetSupported(any(), eq(VALUE_SET_URL_0))).thenReturn(true);
+		when(myValidationSupport1.isValueSetSupported(any(), eq(VALUE_SET_URL_0), any())).thenReturn(true);
 		when(myValidationSupport1.expandValueSet(any(), any(), any(String.class))).thenAnswer(t -> new IValidationSupport.ValueSetExpansionOutcome(new ValueSet()));
 
 		// Test
@@ -650,8 +942,8 @@ public class ValidationSupportChainTest extends BaseTest {
 		prepareMock(myValidationSupport0, myValidationSupport1, myValidationSupport2);
 		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(theUseCache), myValidationSupport0, myValidationSupport1, myValidationSupport2);
 
-		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(true);
-		when(myValidationSupport1.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(true);
+		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0), any())).thenReturn(true);
+		when(myValidationSupport1.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0), any())).thenReturn(true);
 		when(myValidationSupport0.lookupCode(any(), any(LookupCodeRequest.class))).thenReturn(null);
 		when(myValidationSupport1.lookupCode(any(), any(LookupCodeRequest.class))).thenAnswer(t -> new IValidationSupport.LookupCodeResult());
 
@@ -686,16 +978,16 @@ public class ValidationSupportChainTest extends BaseTest {
 		prepareMock(myValidationSupport0, myValidationSupport1, myValidationSupport2);
 		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(theUseCache), myValidationSupport0, myValidationSupport1, myValidationSupport2);
 
-		when(myValidationSupport0.fetchValueSet(any())).thenReturn(null);
-		when(myValidationSupport1.fetchValueSet(any())).thenAnswer(t -> new ValueSet());
+		when(myValidationSupport0.fetchValueSet(any(), any())).thenReturn(null);
+		when(myValidationSupport1.fetchValueSet(any(), any())).thenAnswer(t -> new ValueSet());
 
 		// Test
 		IBaseResource result = chain.fetchValueSet(VALUE_SET_URL_0);
 
 		// Verify
-		verify(myValidationSupport0, times(1)).fetchValueSet(any());
-		verify(myValidationSupport1, times(1)).fetchValueSet(any());
-		verify(myValidationSupport2, times(0)).fetchValueSet(any());
+		verify(myValidationSupport0, times(1)).fetchValueSet(any(), any());
+		verify(myValidationSupport1, times(1)).fetchValueSet(any(), any());
+		verify(myValidationSupport2, times(0)).fetchValueSet(any(), any());
 
 		// Test again (should use cache)
 		IBaseResource result2 = chain.fetchValueSet(VALUE_SET_URL_0);
@@ -703,13 +995,13 @@ public class ValidationSupportChainTest extends BaseTest {
 		// Verify
 		if (theUseCache) {
 			assertSame(result, result2);
-			verify(myValidationSupport0, times(1)).fetchValueSet(any());
-			verify(myValidationSupport1, times(1)).fetchValueSet(any());
-			verify(myValidationSupport2, times(0)).fetchValueSet(any());
+			verify(myValidationSupport0, times(1)).fetchValueSet(any(), any());
+			verify(myValidationSupport1, times(1)).fetchValueSet(any(), any());
+			verify(myValidationSupport2, times(0)).fetchValueSet(any(), any());
 		} else {
-			verify(myValidationSupport0, times(2)).fetchValueSet(any());
-			verify(myValidationSupport1, times(2)).fetchValueSet(any());
-			verify(myValidationSupport2, times(0)).fetchValueSet(any());
+			verify(myValidationSupport0, times(2)).fetchValueSet(any(), any());
+			verify(myValidationSupport1, times(2)).fetchValueSet(any(), any());
+			verify(myValidationSupport2, times(0)).fetchValueSet(any(), any());
 		}
 	}
 
@@ -720,16 +1012,16 @@ public class ValidationSupportChainTest extends BaseTest {
 		prepareMock(myValidationSupport0, myValidationSupport1, myValidationSupport2);
 		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(theUseCache), myValidationSupport0, myValidationSupport1, myValidationSupport2);
 
-		when(myValidationSupport0.fetchValueSet(any())).thenReturn(null);
-		when(myValidationSupport1.fetchValueSet(any())).thenAnswer(t -> new ValueSet());
+		when(myValidationSupport0.fetchValueSet(any(), any())).thenReturn(null);
+		when(myValidationSupport1.fetchValueSet(any(), any())).thenAnswer(t -> new ValueSet());
 
 		// Test
 		IBaseResource result = chain.fetchResource(ValueSet.class, VALUE_SET_URL_0);
 
 		// Verify
-		verify(myValidationSupport0, times(1)).fetchValueSet( any());
-		verify(myValidationSupport1, times(1)).fetchValueSet( any());
-		verify(myValidationSupport2, times(0)).fetchValueSet(any());
+		verify(myValidationSupport0, times(1)).fetchValueSet(any(), any());
+		verify(myValidationSupport1, times(1)).fetchValueSet(any(), any());
+		verify(myValidationSupport2, times(0)).fetchValueSet(any(), any());
 
 		// Test again (should use cache)
 		IBaseResource result2 = chain.fetchResource(ValueSet.class, VALUE_SET_URL_0);
@@ -737,13 +1029,13 @@ public class ValidationSupportChainTest extends BaseTest {
 		// Verify
 		if (theUseCache) {
 			assertSame(result, result2);
-			verify(myValidationSupport0, times(1)).fetchValueSet( any());
-			verify(myValidationSupport1, times(1)).fetchValueSet( any());
-			verify(myValidationSupport2, times(0)).fetchValueSet( any());
+			verify(myValidationSupport0, times(1)).fetchValueSet(any(), any());
+			verify(myValidationSupport1, times(1)).fetchValueSet(any(), any());
+			verify(myValidationSupport2, times(0)).fetchValueSet(any(), any());
 		} else {
-			verify(myValidationSupport0, times(2)).fetchValueSet( any());
-			verify(myValidationSupport1, times(2)).fetchValueSet( any());
-			verify(myValidationSupport2, times(0)).fetchValueSet(any());
+			verify(myValidationSupport0, times(2)).fetchValueSet(any(), any());
+			verify(myValidationSupport1, times(2)).fetchValueSet(any(), any());
+			verify(myValidationSupport2, times(0)).fetchValueSet(any(), any());
 		}
 	}
 
@@ -754,16 +1046,16 @@ public class ValidationSupportChainTest extends BaseTest {
 		prepareMock(myValidationSupport0, myValidationSupport1, myValidationSupport2);
 		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(theUseCache), myValidationSupport0, myValidationSupport1, myValidationSupport2);
 
-		when(myValidationSupport0.fetchResource(any(), any())).thenReturn(null);
-		when(myValidationSupport1.fetchResource(any(), any())).thenAnswer(t -> new ListResource());
+		when(myValidationSupport0.fetchResource(any(), any(), any())).thenReturn(null);
+		when(myValidationSupport1.fetchResource(any(), any(), any())).thenAnswer(t -> new ListResource());
 
 		// Test
 		IBaseResource result = chain.fetchResource(ListResource.class, "http://foo");
 
 		// Verify
-		verify(myValidationSupport0, times(1)).fetchResource(any(), any());
-		verify(myValidationSupport1, times(1)).fetchResource(any(), any());
-		verify(myValidationSupport2, times(0)).fetchResource(any(), any());
+		verify(myValidationSupport0, times(1)).fetchResource(any(), any(), any());
+		verify(myValidationSupport1, times(1)).fetchResource(any(), any(), any());
+		verify(myValidationSupport2, times(0)).fetchResource(any(), any(), any());
 
 		// Test again (should use cache)
 		IBaseResource result2 = chain.fetchResource(ListResource.class, "http://foo");
@@ -771,13 +1063,13 @@ public class ValidationSupportChainTest extends BaseTest {
 		// Verify
 		if (theUseCache) {
 			assertSame(result, result2);
-			verify(myValidationSupport0, times(1)).fetchResource(any(), any());
-			verify(myValidationSupport1, times(1)).fetchResource(any(), any());
-			verify(myValidationSupport2, times(0)).fetchResource(any(), any());
+			verify(myValidationSupport0, times(1)).fetchResource(any(), any(), any());
+			verify(myValidationSupport1, times(1)).fetchResource(any(), any(), any());
+			verify(myValidationSupport2, times(0)).fetchResource(any(), any(), any());
 		} else {
-			verify(myValidationSupport0, times(2)).fetchResource(any(), any());
-			verify(myValidationSupport1, times(2)).fetchResource(any(), any());
-			verify(myValidationSupport2, times(0)).fetchResource(any(), any());
+			verify(myValidationSupport0, times(2)).fetchResource(any(), any(), any());
+			verify(myValidationSupport1, times(2)).fetchResource(any(), any(), any());
+			verify(myValidationSupport2, times(0)).fetchResource(any(), any(), any());
 		}
 	}
 
@@ -864,7 +1156,7 @@ public class ValidationSupportChainTest extends BaseTest {
 		libraryTestRunner.clearAllExportedData();
 
 		prepareMock(myValidationSupport0, myValidationSupport1, myValidationSupport2);
-		when(myValidationSupport0.fetchStructureDefinition("http://foo")).thenReturn(new StructureDefinition().setUrl("http://foo"));
+		when(myValidationSupport0.fetchStructureDefinition(eq("http://foo"), isNull())).thenReturn(new StructureDefinition().setUrl("http://foo"));
 		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(theUseCache), myValidationSupport0, myValidationSupport1, myValidationSupport2);
 		chain.setName("FOO_NAME");
 
@@ -903,17 +1195,17 @@ public class ValidationSupportChainTest extends BaseTest {
 	public void testModifyingServiceInvalidatesCache() {
 		// Setup
 		prepareMock(myValidationSupport0, myValidationSupport1, myValidationSupport2);
-		when(myValidationSupport0.isCodeSystemSupported(any(), eq("http://foo"))).thenReturn(true);
-		when(myValidationSupport1.isCodeSystemSupported(any(), eq("http://foo"))).thenReturn(true);
+		when(myValidationSupport0.isCodeSystemSupported(any(), eq("http://foo"), any())).thenReturn(true);
+		when(myValidationSupport1.isCodeSystemSupported(any(), eq("http://foo"), any())).thenReturn(true);
 
 		ValidationSupportChain svc = new ValidationSupportChain(myValidationSupport0, myValidationSupport1);
 		assertTrue(svc.isCodeSystemSupported(newValidationCtx(svc), "http://foo"));
 
 		// Test
 		svc.addValidationSupport(myValidationSupport2);
-		when(myValidationSupport0.isCodeSystemSupported(any(), eq("http://foo"))).thenReturn(false);
-		when(myValidationSupport1.isCodeSystemSupported(any(), eq("http://foo"))).thenReturn(false);
-		when(myValidationSupport2.isCodeSystemSupported(any(), eq("http://foo"))).thenReturn(false);
+		when(myValidationSupport0.isCodeSystemSupported(any(), eq("http://foo"), any())).thenReturn(false);
+		when(myValidationSupport1.isCodeSystemSupported(any(), eq("http://foo"), any())).thenReturn(false);
+		when(myValidationSupport2.isCodeSystemSupported(any(), eq("http://foo"), any())).thenReturn(false);
 		boolean actual = svc.isCodeSystemSupported(newValidationCtx(svc), "http://foo");
 
 		// Verify
@@ -930,8 +1222,8 @@ public class ValidationSupportChainTest extends BaseTest {
 			myValidationSupport1
 		);
 
-		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(false);
-		when(myValidationSupport1.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(true);
+		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0), any())).thenReturn(false);
+		when(myValidationSupport1.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0), any())).thenReturn(true);
 		when(myValidationSupport1.validateCode(any(), any(), any()))
 			.thenAnswer(t -> new IValidationSupport.CodeValidationResult());
 
@@ -949,8 +1241,8 @@ public class ValidationSupportChainTest extends BaseTest {
 
 		// Second validation call - should hit cache
 		prepareMock(myValidationSupport0, myValidationSupport1);
-		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(false);
-		when(myValidationSupport1.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(true);
+		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0), any())).thenReturn(false);
+		when(myValidationSupport1.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0), any())).thenReturn(true);
 
 		IValidationSupport.CodeValidationResult result2 = chain.validateCode(
 			newValidationCtx(chain),
@@ -971,10 +1263,10 @@ public class ValidationSupportChainTest extends BaseTest {
 		// Setup BOTH validators to support the code system - only support0 should be called
 		// since support1 was removed from the chain
 		prepareMock(myValidationSupport0, myValidationSupport1);
-		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(true);
+		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0), any())).thenReturn(true);
 		when(myValidationSupport0.validateCode(any(), any(), any()))
 			.thenAnswer(t -> new IValidationSupport.CodeValidationResult());
-		when(myValidationSupport1.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0))).thenReturn(true);
+		when(myValidationSupport1.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0), any())).thenReturn(true);
 		when(myValidationSupport1.validateCode(any(), any(), any()))
 			.thenAnswer(t -> new IValidationSupport.CodeValidationResult());
 
@@ -992,11 +1284,11 @@ public class ValidationSupportChainTest extends BaseTest {
 		assertNotSame(result1, result3);
 
 		// Verify support0 was called (it's still in the chain)
-		verify(myValidationSupport0, times(1)).isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0));
+		verify(myValidationSupport0, times(1)).isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0), any());
 		verify(myValidationSupport0, times(1)).validateCode(any(), any(), any());
 
 		// Verify support1 was NOT called (it was removed from the chain)
-		verify(myValidationSupport1, never()).isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0));
+		verify(myValidationSupport1, never()).isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0), any());
 		verify(myValidationSupport1, never()).validateCode(any(), any(), any());
 	}
 

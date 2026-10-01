@@ -20,10 +20,6 @@ import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -943,28 +939,20 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 			.setValue("ParentA");
 		IIdType vsId = myValueSetDao.create(vs).getId().toUnqualifiedVersionless();
 
-		HttpGet expandGet = new HttpGet(myServerBase + "/ValueSet/" + vsId.getIdPart() + "/$expand?_pretty=true");
-		try (CloseableHttpResponse status = ourHttpClient.execute(expandGet)) {
-			String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response: {}", response);
-		}
+		myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$expand?_pretty=true")
+			.get();
 
-		HttpGet validateCodeGet = new HttpGet(myServerBase + "/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=ChildAA&_pretty=true");
-		try (CloseableHttpResponse status = ourHttpClient.execute(validateCodeGet)) {
-			String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response: {}", response);
-			Parameters output = myFhirContext.newXmlParser().parseResource(Parameters.class, response);
-			assertEquals(true, output.getParameterBool("result"));
-		}
+		String validateCodeResponse = myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=ChildAA&_pretty=true")
+			.get()
+			.getBody();
+		Parameters output = myFhirContext.newXmlParser().parseResource(Parameters.class, validateCodeResponse);
+		assertThat(output.getParameterBool("result")).isTrue();
 
-		HttpGet validateCodeGet2 = new HttpGet(myServerBase + "/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=FOO&_pretty=true");
-		try (CloseableHttpResponse status = ourHttpClient.execute(validateCodeGet2)) {
-			String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response: {}", response);
-			Parameters output = myFhirContext.newXmlParser().parseResource(Parameters.class, response);
-			assertEquals(false, output.getParameterBool("result"));
-		}
-
+		String validateCodeResponse2 = myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=FOO&_pretty=true")
+			.get()
+			.getBody();
+		Parameters output2 = myFhirContext.newXmlParser().parseResource(Parameters.class, validateCodeResponse2);
+		assertThat(output2.getParameterBool("result")).isFalse();
 	}
 
 	@Test
