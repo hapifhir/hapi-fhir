@@ -11,6 +11,7 @@ import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
@@ -211,7 +212,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 	@ValueSource(strings = {
 			CommonCodeSystemsTerminologyService.MIMETYPES_CODESYSTEM_URL,
 			CommonCodeSystemsTerminologyService.COUNTRIES_CODESYSTEM_URL,
-			CommonCodeSystemsTerminologyService.CURRENCIES_VALUESET_URL,
+			CommonCodeSystemsTerminologyService.CURRENCIES_CODESYSTEM_URL,
 			CommonCodeSystemsTerminologyService.LANGUAGES_CODESYSTEM_URL,
 			CommonCodeSystemsTerminologyService.UCUM_CODESYSTEM_URL
 	})
@@ -754,6 +755,57 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		assertNotNull(outcome);
 		assertNull(outcome.getValueSet());
 		assertThat(outcome.getError()).contains("http://cs");
+	}
+
+	/**
+	 * A $validate-code server SHALL return an {@code x-caused-by-unknown-system} parameter for each code system it
+	 * did not support (HL7 terminology ecosystem IG), so a client can tell "the code is wrong" from "the server
+	 * lacks the terminology".
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCodeInValueSet_enumeratedIncludeOfAnUnknownCodeSystem_reportsTheSystemAsCausedByUnknownSystem() {
+		// Setup
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem("http://cs").addConcept().setCode("code1");
+		myPrePopulated.addValueSet(vs);
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+			valCtx, new ConceptValidationOptions(), "http://cs", "code1", null, vs);
+
+		// Verify
+		assertNotNull(outcome);
+		assertThat(outcome.getUnknownSystems()).containsExactly("http://cs");
+		assertThat(ParametersUtil.getNamedParameterValuesAsString(
+				myCtx, outcome.toParameters(myCtx), IValidationSupport.CodeValidationResult.CAUSED_BY_UNKNOWN_SYSTEM))
+			.containsExactly("http://cs");
+	}
+
+	/**
+	 * As {@link #validateCodeInValueSet_enumeratedIncludeOfAnUnknownCodeSystem_reportsTheSystemAsCausedByUnknownSystem},
+	 * for a code system known only at another version: the canonical names the version that was not found.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCodeInValueSet_enumeratedIncludeNamesAnUninstalledCodeSystemVersion_reportsTheVersionAsCausedByUnknownSystem() {
+		// Setup
+		addSingleVersionCodeSystemAndRecordFetches("1.0.0");
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem(VERSIONED_CS_URL).setVersion("2.0.0").addConcept().setCode("code0");
+		myPrePopulated.addValueSet(vs);
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+			valCtx, new ConceptValidationOptions(), VERSIONED_CS_URL, "code0", null, vs);
+
+		// Verify
+		assertNotNull(outcome);
+		assertThat(outcome.getUnknownSystems()).containsExactly(VERSIONED_CS_URL + "|2.0.0");
 	}
 
 	/**

@@ -1039,6 +1039,7 @@ public class ValidationSupportChain implements IValidationSupport {
 		String message = "CodeSystem is unknown and can't be validated: %s for '%s#%s'"
 				.formatted(codeSystemCanonical, codeSystemCanonical, theCode);
 		result.setMessage(message);
+		result.addUnknownSystem(codeSystemCanonical);
 
 		result.addIssue(new CodeValidationIssue(
 				message, IssueSeverity.ERROR, CodeValidationIssueCode.NOT_FOUND, CodeValidationIssueCoding.NOT_FOUND));
@@ -1054,6 +1055,7 @@ public class ValidationSupportChain implements IValidationSupport {
 		CodeValidationResult result = new CodeValidationResult();
 		result.setSeverity(IssueSeverity.ERROR);
 		result.setMessage(message);
+		result.addUnknownSystem(UrlUtil.toCanonicalUrl(theCodeSystemUrl, theCodeSystemVersion));
 		result.addIssue(new CodeValidationIssue(
 				message, IssueSeverity.ERROR, CodeValidationIssueCode.NOT_FOUND, CodeValidationIssueCoding.NOT_FOUND));
 		return result;
