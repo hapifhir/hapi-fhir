@@ -135,6 +135,7 @@ import ca.uhn.fhir.util.TestUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
+import org.apache.commons.lang3.Validate;
 import org.awaitility.core.ConditionTimeoutException;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -413,10 +414,14 @@ public abstract class BaseJpaTest extends BaseTest {
 	 * the caches after they are cleaned, and into the next test.
 	 * <p>
 	 * If the batch2 work does not stop, {@code theCleanup} runs anyway so that the next test starts clean, and
-	 * the timeout is rethrown afterwards.
+	 * the timeout is rethrown afterwards, or attached as suppressed to whatever {@code theCleanup} throws.
+	 * </p>
+	 * <p>
+	 * Requires a {@link Batch2JobHelper} bean in the test context, which {@code TestJPAConfig} provides.
 	 * </p>
 	 */
 	protected void runWithSchedulersPausedAndBatch2Stopped(Runnable theCleanup) {
+		Validate.notNull(myBatch2JobHelper, "No Batch2JobHelper in the test context - import TestJPAConfig");
 		ourLog.info("Pausing Schedulers");
 		mySchedulerService.pause();
 		ConditionTimeoutException batch2StillRunning = null;
@@ -427,6 +432,11 @@ public abstract class BaseJpaTest extends BaseTest {
 				batch2StillRunning = e;
 			}
 			theCleanup.run();
+		} catch (RuntimeException | Error e) {
+			if (batch2StillRunning != null) {
+				e.addSuppressed(batch2StillRunning);
+			}
+			throw e;
 		} finally {
 			ourLog.info("Restarting the schedulers");
 			mySchedulerService.unpause();

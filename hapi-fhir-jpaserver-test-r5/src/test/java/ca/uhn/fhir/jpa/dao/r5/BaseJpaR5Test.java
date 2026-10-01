@@ -496,7 +496,8 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 
 	@BeforeEach
 	public void beforePurgeDatabase() {
-		// Not in a transaction: the batch2 workers awaited here need to commit
+		// Not in a transaction: the batch2 workers awaited here need to commit. Because this runs before each
+		// test, batch2 work that does not stop fails this test, but was left running by the previous one.
 		runWithSchedulersPausedAndBatch2Stopped(() -> purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataSchedulerHelper));
 	}
 

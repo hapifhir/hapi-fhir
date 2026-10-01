@@ -353,7 +353,7 @@ public class Batch2JobHelper {
 		}
 
 		if (!map.isEmpty()) {
-			ourLog.error("Found Running Jobs {}",map.keySet().stream().map(k -> k + " : " + map.get(k)).collect(Collectors.joining("\n")));
+			ourLog.warn("Found Running Jobs {}",map.keySet().stream().map(k -> k + " : " + map.get(k)).collect(Collectors.joining("\n")));
 
 			return true;
 		}
