@@ -112,7 +112,7 @@ public class CdsHooksConfig {
 	}
 
 	@Bean
-	CdsPrefetchDaoSvc resourcePrefetchDao(DaoRegistry theDaoRegistry, FhirContext theFhirContext) {
+	CdsPrefetchDaoSvc resourcePrefetchDao(@Nullable DaoRegistry theDaoRegistry, FhirContext theFhirContext) {
 		return new CdsPrefetchDaoSvc(theDaoRegistry, myMatchUrlService, theFhirContext);
 	}
 

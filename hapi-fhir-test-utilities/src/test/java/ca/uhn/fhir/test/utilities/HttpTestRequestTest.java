@@ -103,13 +103,13 @@ class HttpTestRequestTest {
 	void post_contentTypeAlreadyHasCharset_isNotAppendedTwice() {
 		HttpTestResponse response = ourServer.request("/foo").post("hello", "text/plain; charset=ISO-8859-1");
 
-		assertThat(response.getBody()).contains("rawContentType=text/plain; charset=ISO-8859-1");
+		assertThat(response.getBody()).containsIgnoringCase("rawContentType=text/plain; charset=ISO-8859-1");
 	}
 
 	@Test
 	void post_contentTypeHasNoCharset_utf8IsAppended() {
 		HttpTestResponse response = ourServer.request("/foo").post("hello", "text/plain");
 
-		assertThat(response.getBody()).contains("rawContentType=text/plain; charset=UTF-8");
+		assertThat(response.getBody()).containsIgnoringCase("rawContentType=text/plain; charset=UTF-8");
 	}
 }

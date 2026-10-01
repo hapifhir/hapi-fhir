@@ -60,6 +60,20 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!--
+		Spring Boot 4 moved TestRestTemplate out of spring-boot-test into this module, and @SpringBootTest no
+		longer provides the bean automatically (see @AutoConfigureTestRestTemplate on the test).
+		-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-resttestclient</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-restclient</artifactId>
+			<scope>test</scope>
+		</dependency>
 
 		<!-- Logging -->
 		<dependency>

@@ -34,10 +34,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.Validate;
 import ca.uhn.fhir.test.utilities.TestHttpClientFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.eclipse.jetty.ee10.servlet.FilterHolder;
-import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
-import org.eclipse.jetty.ee10.websocket.jakarta.server.config.JakartaWebSocketServletContainerInitializer;
+import org.eclipse.jetty.ee11.servlet.FilterHolder;
+import org.eclipse.jetty.ee11.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee11.servlet.ServletHolder;
+import org.eclipse.jetty.ee11.websocket.jakarta.server.config.JakartaWebSocketServletContainerInitializer;
 import org.eclipse.jetty.io.Connection;
 import org.eclipse.jetty.io.Connection.Listener;
 import org.eclipse.jetty.server.Connector;
@@ -62,6 +62,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
@@ -158,7 +159,7 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 		myMaxThreads = theMaxThreads;
 		return (T) this;
 	}
-	
+
 
 	/**
 	 * Returns the total number of connections that this server has received. This

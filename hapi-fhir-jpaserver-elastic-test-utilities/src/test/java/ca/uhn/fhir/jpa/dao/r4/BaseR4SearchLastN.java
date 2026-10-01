@@ -37,7 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -95,7 +95,7 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 	@Autowired
 	protected PlatformTransactionManager myPlatformTransactionManager;
 
-	@SpyBean
+	@MockitoSpyBean
 	@Autowired
 	protected ElasticsearchSvcImpl myElasticsearchSvc;
 

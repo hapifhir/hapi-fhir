@@ -2,6 +2,7 @@ package ca.uhn.fhir.tinder.ddl;
 
 import ca.uhn.fhir.jpa.migrate.util.SqlUtil;
 import ca.uhn.fhir.jpa.util.ISequenceValueMassager;
+import ca.uhn.hapi.fhir.sql.hibernatesvc.DatabasePartitionModeIdFilteringMappingContributor;
 import ca.uhn.hapi.fhir.sql.hibernatesvc.HapiHibernateDialectSettingsService;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.Entity;
@@ -18,6 +19,7 @@ import org.hibernate.boot.registry.BootstrapServiceRegistry;
 import org.hibernate.boot.registry.BootstrapServiceRegistryBuilder;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.DialectSpecificSettings;
 import org.hibernate.cfg.JdbcSettings;
 import org.hibernate.cfg.SchemaToolingSettings;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
@@ -102,6 +104,9 @@ public class DdlGeneratorHibernate61 {
 			registryBuilder.applySetting(JdbcSettings.ALLOW_METADATA_ON_BOOT, false);
 
 			registryBuilder.applySetting(JdbcSettings.DIALECT, dialectClassName);
+
+			// The HAPI FHIR schema uses Oracle float(24)/float(53), not binary_float/binary_double.
+			registryBuilder.applySetting(DialectSpecificSettings.ORACLE_USE_BINARY_FLOATS, false);
 			registryBuilder.addService(
 					ISequenceValueMassager.class, new ISequenceValueMassager.NoopSequenceValueMassager());
 			registryBuilder.addService(
@@ -121,6 +126,9 @@ public class DdlGeneratorHibernate61 {
 			 * ConditionalIdMappingContributor leaves the model in an
 			 * inconsistent state.
 			 */
+			// Required for the validation below; see alignFilteredIdentifierTypes().
+			DatabasePartitionModeIdFilteringMappingContributor.alignFilteredIdentifierTypes(metadata);
+
 			((MetadataImpl) metadata).validate();
 
 			EnumSet<TargetType> targetTypes = EnumSet.of(TargetType.SCRIPT);
