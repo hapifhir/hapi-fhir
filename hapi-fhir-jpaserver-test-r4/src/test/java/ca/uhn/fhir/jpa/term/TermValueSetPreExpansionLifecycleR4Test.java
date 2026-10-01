@@ -462,16 +462,11 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 	 * there the job ran before the concepts were stored, here it runs when the version cannot be
 	 * resolved at all.
 	 * <p>
-	 * Most of these tests pin behaviour the FHIR specification forbids. R5 {@code ValueSet/$expand},
-	 * Out Parameters: <i>"When a server cannot correctly expand a value set because it does not fully
-	 * understand the code systems (e.g. it has the wrong version, or incomplete definitions) then it
-	 * SHALL return an error."</i> Because the sections here enumerate their concepts, the expansion
-	 * instead succeeds, stores the codes, and serves them to every later {@code validateCode} - see
-	 * <a href="https://github.com/hapifhir/hapi-fhir/issues/8415">#8415</a>. They assert the outcome the
-	 * specification requires, so the ones covering an unresolvable version are red until that issue is
-	 * fixed, and each docstring says which. The fix itself needs a version-aware
-	 * {@code isCodeSystemSupported}, which is
-	 * <a href="https://github.com/hapifhir/hapi-fhir/issues/8402">#8402</a>.
+	 * R5 {@code ValueSet/$expand}, Out Parameters: <i>"When a server cannot correctly expand a value set
+	 * because it does not fully understand the code systems (e.g. it has the wrong version, or incomplete
+	 * definitions) then it SHALL return an error."</i> These tests assert that error, and that nothing is
+	 * stored for {@code validateCode} to answer from, even though the sections here enumerate their
+	 * concepts - see <a href="https://github.com/hapifhir/hapi-fhir/issues/8415">#8415</a>.
 	 * <p>
 	 * Each defect test is paired with a control differing in one step, so that a failure states
 	 * something about the unresolved CodeSystem rather than about enumerated includes in general.
@@ -483,14 +478,9 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 		/**
 		 * When the include names a CodeSystem version that is not installed, the terminology tables cannot
 		 * resolve it and {@code TermReadSvcImpl.expandValueSetHandleIncludeOrExclude} falls through to the
-		 * in-memory expander, which copies every enumerated code across unchecked. The job reports success,
-		 * the ValueSet is marked {@code EXPANDED}, and the stored rows then answer every later
-		 * {@code validateCode} - so a code no installed CodeSystem version contains validates, attributed
-		 * to a version that was never read. On this path nothing self-heals: re-expanding produces the same
-		 * rows, because 2.0.0 is still absent.
-		 * <p>
-		 * R5 {@code ValueSet/$expand}, Out Parameters, requires an error instead, and that is what this
-		 * asserts. Red until #8415 is fixed.
+		 * in-memory expander. The enumerated codes must not be taken at face value there: storing them
+		 * would let every later {@code validateCode} accept a code no installed CodeSystem version
+		 * contains, attributed to a version that was never read.
 		 */
 		@Test
 		void preExpansion_includeNamesUninstalledCodeSystemVersion_failsAndStoresNothingToValidateAgainst() {
@@ -520,7 +510,7 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 
 		/**
 		 * Control for
-		 * {@link #preExpansion_includeNamesUninstalledCodeSystemVersion_storesAndValidatesCodesNoCodeSystemContains}:
+		 * {@link #preExpansion_includeNamesUninstalledCodeSystemVersion_failsAndStoresNothingToValidateAgainst}:
 		 * the same data with an include that resolves. Keeps that test a statement about the unresolved
 		 * version rather than about enumerated includes in general.
 		 */
@@ -550,14 +540,13 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 
 		/**
 		 * The same call as
-		 * {@link #preExpansion_includeNamesUninstalledCodeSystemVersion_storesAndValidatesCodesNoCodeSystemContains}
+		 * {@link #preExpansion_includeNamesUninstalledCodeSystemVersion_failsAndStoresNothingToValidateAgainst}
 		 * with pre-expansion turned off, so validation resolves the code live instead of reading stored
-		 * rows. It rejects the code, which is what makes the pre-expanded answer wrong rather than merely
-		 * lenient: the same server contradicts itself depending on whether a pre-expansion happens to
-		 * exist.
+		 * rows. The live answer must agree with the pre-expanded one: the code is rejected because the
+		 * version the include names cannot be found, not accepted from the enumeration.
 		 */
 		@Test
-		void validateCode_preExpansionDisabled_rejectsCodeTheCodeSystemDoesNotContain() {
+		void validateCode_preExpansionDisabled_rejectsCodeBecauseTheVersionCannotBeFound() {
 			myStorageSettings.setPreExpandValueSets(false);
 
 			// Given the same CodeSystem and ValueSet, with no pre-expansion to answer from
@@ -565,28 +554,22 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 			givenValueSetEnumeratingCodes("2.0.0", "A", "NOT-STORED");
 			myBatch2JobHelper.awaitNoJobsRunning();
 
-			// Then the enumerated code the CodeSystem does not contain is rejected
+			// Then the enumerated code is rejected, naming the version that could not be found
 			IValidationSupport.CodeValidationResult unknownCode = myValueSetDao.validateCode(
 				new CodeType(VS_URL), null, new CodeType("NOT-STORED"), new CodeType(CS_URL), null, null, null, mySrd);
 			assertFalse(unknownCode.isOk());
-			assertThat(unknownCode.getMessage()).contains("Unknown code");
+			assertThat(unknownCode.getMessage()).contains(CS_URL).contains("2.0.0");
 		}
 
 		/**
-		 * The enumeration is what turns a loud failure into a silent one. With no concepts listed, an
+		 * Listing concepts must not turn a loud failure into a silent one. With no concepts listed, an
 		 * include naming a CodeSystem the server does not have fails the job - that is
 		 * {@link TermValueSetPreExpansionLifecycleR4Test#preExpansion_onExpansionFailure_persistsExpansionError}.
-		 * Listing concepts sends the same include down the in-memory fallback, which copies them across
-		 * unchecked.
-		 * <p>
-		 * {@code validateCode} still accepts the code, and deliberately so: nothing here can look it up,
-		 * so validation takes the enumeration at face value, which is the allowance HAPI documented for a
-		 * code system that cannot be supplied. That allowance is out of scope. What this pins is that the
-		 * stored rows carry no code system version, because none was read.
-		 * </p>
+		 * With concepts listed the server understands the code system no better, so the job fails the
+		 * same way. This reverses the allowance #2994 made for enumerated codes in an unknown code system.
 		 */
 		@Test
-		void preExpansion_unknownCodeSystemWithEnumeratedConcepts_storesCodesWithoutClaimingAVersion() {
+		void preExpansion_unknownCodeSystemWithEnumeratedConcepts_failsAndStoresNothingToValidateAgainst() {
 			myStorageSettings.setPreExpandValueSets(true);
 
 			// Given an active ValueSet enumerating concepts from a CodeSystem the server does not have
@@ -594,21 +577,19 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 			givenValueSetIncluding(unknownSystem, null, "A", "NOT-STORED");
 			myBatch2JobHelper.awaitNoJobsRunning();
 
-			// Then the enumerated codes are stored, attributed to no code system version
+			// Then the expansion fails and stores nothing
 			runInTransaction(() -> {
 				TermValueSet termValueSet = myTermValueSetDao
 					.findTermValueSetByUrlAndNullVersion(VS_URL)
 					.orElseThrow(IllegalStateException::new);
-				assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
-				assertThat(preExpandedCodes()).containsExactly("A", "NOT-STORED");
-				assertThat(preExpandedSystemVersions()).containsOnlyNulls();
+				assertEquals(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND, termValueSet.getExpansionStatus());
+				assertThat(preExpandedCodes()).isEmpty();
 			});
 
-			// And the enumerated code is still accepted, which is the documented allowance rather than
-			// anything this change touches
+			// And the enumerated code is not accepted
 			IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(
 				new CodeType(VS_URL), null, new CodeType("NOT-STORED"), new CodeType(unknownSystem), null, null, null, mySrd);
-			assertTrue(outcome.isOk());
+			assertFalse(outcome.isOk());
 		}
 
 		/**
@@ -650,8 +631,7 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 		 * Not confined to not-present CodeSystems: the same thing happens for one whose content the
 		 * server holds in full, so this is not the documented compromise for a CodeSystem that cannot
 		 * be supplied. Asserts the same outcome as
-		 * {@link #preExpansion_includeNamesUninstalledCodeSystemVersion_failsAndStoresNothingToValidateAgainst},
-		 * and is red for the same reason.
+		 * {@link #preExpansion_includeNamesUninstalledCodeSystemVersion_failsAndStoresNothingToValidateAgainst}.
 		 */
 		@Test
 		void preExpansion_completeCodeSystemAndIncludeNamesUninstalledVersion_failsAndStoresNothingToValidateAgainst() {
@@ -727,18 +707,6 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 				include.addConcept().setCode(code);
 			}
 			myValueSetDao.update(vs, mySrd);
-		}
-
-		/**
-		 * The CodeSystem versions the pre-expansion of {@code VS_URL} records. Reads a lazy association,
-		 * so call inside a transaction.
-		 */
-		private List<String> preExpandedSystemVersions() {
-			return myTermValueSetConceptDao.findAll().stream()
-				.filter(concept -> VS_URL.equals(concept.getValueSet().getUrl()))
-				.map(TermValueSetConcept::getSystemVersion)
-				.distinct()
-				.toList();
 		}
 
 		/**
