@@ -348,7 +348,7 @@ public class Batch2JobHelper {
 		HashMap<String, String> map = new HashMap<>();
 		// Read through the persistence layer: the coordinator throws for instances whose job definition is not
 		// registered, which tests that store instances directly create
-		List<JobInstance> jobs = myJobPersistence.fetchInstances(1000, 0);
+		List<JobInstance> jobs = fetchAllNotEndedInstances();
 		// "All Jobs" assumes at least one job exists
 		if (jobs.isEmpty()) {
 			return false;
@@ -462,7 +462,7 @@ public class Batch2JobHelper {
 
 	@VisibleForTesting
 	void cancelAllJobsAndAwaitCancellation(Duration theTimeout) {
-		List<JobInstance> instances = myJobPersistence.fetchInstances(1000, 0);
+		List<JobInstance> instances = fetchAllNotEndedInstances();
 		for (JobInstance next : instances) {
 			myJobPersistence.cancelInstance(next.getInstanceId());
 		}
@@ -474,6 +474,21 @@ public class Batch2JobHelper {
 			.untilAsserted(() -> assertThat(describeRunningBatch2Work())
 				.as("batch2 work still running after cancelling all jobs")
 				.isEmpty());
+	}
+
+	/**
+	 * Every page, so that a test that leaves more instances than fit on one is still fully covered. Cancelling
+	 * sets a flag and leaves the status alone, so the instances do not move between pages while they are read.
+	 */
+	private List<JobInstance> fetchAllNotEndedInstances() {
+		List<JobInstance> retVal = new ArrayList<>();
+		for (int pageIndex = 0; ; pageIndex++) {
+			List<JobInstance> page = myJobPersistence.fetchInstances(1000, pageIndex, StatusEnum.getNotEndedStatuses());
+			if (page.isEmpty()) {
+				return retVal;
+			}
+			retVal.addAll(page);
+		}
 	}
 
 	private List<String> describeRunningBatch2Work() {

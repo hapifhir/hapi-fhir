@@ -38,6 +38,7 @@ class Batch2JobHelperTest {
 
 	private static final String JOB_ID = "Batch2JobHelperTest";
 	private static final String JOB_DEFINITION_ID = "test-job-def";
+	private static final Set<StatusEnum> NOT_ENDED = StatusEnum.getNotEndedStatuses();
 	@Mock
 	IJobMaintenanceService myJobMaintenanceService;
 	@Mock
@@ -87,7 +88,7 @@ class Batch2JobHelperTest {
 		JobInstance failedJob = createInstance("failed-1", StatusEnum.FAILED);
 		JobInstance cancelledJob = createInstance("cancelled-1", StatusEnum.CANCELLED);
 		JobInstance completedJob = createInstance("completed-1", StatusEnum.COMPLETED);
-		when(myJobPersistence.fetchInstances(1000, 0))
+		when(myJobPersistence.fetchInstances(1000, 0, NOT_ENDED))
 			.thenReturn(List.of(failedJob, cancelledJob, completedJob));
 
 		// execute
@@ -95,7 +96,7 @@ class Batch2JobHelperTest {
 
 		// verify
 		assertThat(result).isFalse();
-		verify(myJobPersistence).fetchInstances(1000, 0);
+		verify(myJobPersistence).fetchInstances(1000, 0, NOT_ENDED);
 	}
 
 	@Test
@@ -104,7 +105,7 @@ class Batch2JobHelperTest {
 		JobInstance failedJob = createInstance("failed-1", StatusEnum.FAILED);
 		JobInstance activeJob = createInstance("active-1", StatusEnum.IN_PROGRESS);
 		activeJob.setJobDefinitionId(JOB_DEFINITION_ID);
-		when(myJobPersistence.fetchInstances(1000, 0))
+		when(myJobPersistence.fetchInstances(1000, 0, NOT_ENDED))
 			.thenReturn(List.of(failedJob, activeJob));
 
 		// execute
@@ -112,7 +113,24 @@ class Batch2JobHelperTest {
 
 		// verify
 		assertThat(result).isTrue();
-		verify(myJobPersistence).fetchInstances(1000, 0);
+		verify(myJobPersistence).fetchInstances(1000, 0, NOT_ENDED);
+	}
+
+	@Test
+	void hasRunningJobs_countedJobOnSecondPage_returnsTrue() {
+		// setup
+		JobInstance ignoredJob = createInstance("ignored-1", StatusEnum.IN_PROGRESS);
+		ignoredJob.setJobDefinitionId(JOB_DEFINITION_ID);
+		JobInstance countedJob = createInstance("active-1", StatusEnum.IN_PROGRESS);
+		countedJob.setJobDefinitionId("other-job-def");
+		when(myJobPersistence.fetchInstances(1000, 0, NOT_ENDED)).thenReturn(List.of(ignoredJob));
+		when(myJobPersistence.fetchInstances(1000, 1, NOT_ENDED)).thenReturn(List.of(countedJob));
+
+		// execute
+		boolean result = myBatch2JobHelper.hasRunningJobs(Set.of(JOB_DEFINITION_ID));
+
+		// verify
+		assertThat(result).isTrue();
 	}
 
 	@Test
@@ -120,7 +138,7 @@ class Batch2JobHelperTest {
 		// setup
 		JobInstance ignoredJob = createInstance("ignored-1", StatusEnum.IN_PROGRESS);
 		ignoredJob.setJobDefinitionId(JOB_DEFINITION_ID);
-		when(myJobPersistence.fetchInstances(1000, 0)).thenReturn(List.of(ignoredJob));
+		when(myJobPersistence.fetchInstances(1000, 0, NOT_ENDED)).thenReturn(List.of(ignoredJob));
 
 		// execute
 		boolean result = myBatch2JobHelper.hasRunningJobs(Set.of(JOB_DEFINITION_ID));
@@ -187,7 +205,7 @@ class Batch2JobHelperTest {
 	void cancelAllJobsAndAwaitCancellation_workStillRunning_returnsOnceWorkersAndReducerAreIdle() {
 		// setup
 		JobInstance activeJob = createInstance("active-1", StatusEnum.IN_PROGRESS);
-		when(myJobPersistence.fetchInstances(1000, 0)).thenReturn(List.of(activeJob));
+		when(myJobPersistence.fetchInstances(1000, 0, NOT_ENDED)).thenReturn(List.of(activeJob));
 		setUpWorkChannel();
 		when(myWorkChannelExecutor.getActiveCount()).thenReturn(1, 1, 0);
 		when(myWorkChannelExecutor.getQueueSize()).thenReturn(2, 0);
@@ -204,9 +222,25 @@ class Batch2JobHelperTest {
 	}
 
 	@Test
+	void cancelAllJobsAndAwaitCancellation_instancesOnTwoPages_cancelsAll() {
+		// setup
+		when(myJobPersistence.fetchInstances(1000, 0, NOT_ENDED))
+			.thenReturn(List.of(createInstance("active-1", StatusEnum.IN_PROGRESS)));
+		when(myJobPersistence.fetchInstances(1000, 1, NOT_ENDED))
+			.thenReturn(List.of(createInstance("active-2", StatusEnum.QUEUED)));
+
+		// execute
+		myBatch2JobHelper.cancelAllJobsAndAwaitCancellation();
+
+		// verify
+		verify(myJobPersistence).cancelInstance("active-1");
+		verify(myJobPersistence).cancelInstance("active-2");
+	}
+
+	@Test
 	void cancelAllJobsAndAwaitCancellation_idleForOnePollOnly_waitsUntilIdleHolds() {
 		// setup
-		when(myJobPersistence.fetchInstances(1000, 0)).thenReturn(List.of());
+		when(myJobPersistence.fetchInstances(1000, 0, NOT_ENDED)).thenReturn(List.of());
 		setUpWorkChannel();
 		when(myWorkChannelExecutor.getActiveCount()).thenReturn(0, 1, 0);
 		when(myReductionStepExecutorService.isIdleForUnitTest()).thenReturn(true);
@@ -221,7 +255,7 @@ class Batch2JobHelperTest {
 	@Test
 	void cancelAllJobsAndAwaitCancellation_workNeverStops_failsNamingTheRunningWork() {
 		// setup
-		when(myJobPersistence.fetchInstances(1000, 0)).thenReturn(List.of());
+		when(myJobPersistence.fetchInstances(1000, 0, NOT_ENDED)).thenReturn(List.of());
 		setUpWorkChannel();
 		when(myWorkChannelExecutor.getActiveCount()).thenReturn(1);
 		when(myWorkChannelExecutor.getQueueSize()).thenReturn(3);
@@ -238,7 +272,7 @@ class Batch2JobHelperTest {
 	void cancelAllJobsAndAwaitCancellation_noWorkChannelOrReducer_onlyCancels() {
 		// setup
 		JobInstance activeJob = createInstance("active-1", StatusEnum.IN_PROGRESS);
-		when(myJobPersistence.fetchInstances(1000, 0)).thenReturn(List.of(activeJob));
+		when(myJobPersistence.fetchInstances(1000, 0, NOT_ENDED)).thenReturn(List.of(activeJob));
 
 		// execute
 		myBatch2JobHelper.cancelAllJobsAndAwaitCancellation();
