@@ -82,9 +82,11 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 			String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId) {
 
 		// we match on EID even if placeholder resources are set to be ignored
-		List<MatchedTarget> retval = matchBasedOnEid(theResourceType, theResource, theRequestPartitionId);
-		if (!retval.isEmpty()) {
-			return retval;
+		if (myMdmSettings.isCertainMatchOnSameEid()) {
+			List<MatchedTarget> retval = matchBasedOnEid(theResourceType, theResource, theRequestPartitionId);
+			if (!retval.isEmpty()) {
+				return retval;
+			}
 		}
 
 		if (shouldIgnoreResource(theResource)) {

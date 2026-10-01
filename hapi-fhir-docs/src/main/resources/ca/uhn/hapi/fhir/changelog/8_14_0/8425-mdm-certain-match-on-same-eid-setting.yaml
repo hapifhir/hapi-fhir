@@ -1,0 +1,6 @@
+---
+type: add
+issue: 8425
+title: "Added the MDM setting `IMdmSettings#isCertainMatchOnSameEid()` (default `true`). When set to `false`,
+the same external EID alone is no longer a MATCH: `$match` and linking leave the decision to the matching
+rules."

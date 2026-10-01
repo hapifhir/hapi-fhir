@@ -37,6 +37,7 @@ import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
@@ -44,6 +45,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -86,6 +88,13 @@ public class MdmMatchLinkSvcTest {
 		private IMdmSurvivorshipService myMdmSurvivorshipService;
 		@Autowired
 		private IMdmLinkUpdaterSvc myMdmLinkUpdaterSvc;
+
+		@Override
+		@AfterEach
+		public void after() throws IOException {
+			myMdmSettings.setCertainMatchOnSameEid(true);
+			super.after();
+		}
 
 		@Test
 		public void testAddPatientLinksToNewGoldenResourceIfNoneFound() {
@@ -358,6 +367,32 @@ public class MdmMatchLinkSvcTest {
 			createPatientAndUpdateLinks(patient2);
 
 			mdmAssertThat(patient1).is_MATCH_to(patient2);
+		}
+
+		@Test
+		public void testCertainMatchOnSameEidDisabled_patientsSharingOnlyEid_areNotLinked() {
+			myMdmSettings.setCertainMatchOnSameEid(false);
+			Patient jane = createPatientAndUpdateLinks(addExternalEID(buildJanePatient(), "uniqueid"));
+			Patient paul = createPatientAndUpdateLinks(addExternalEID(buildPaulPatient(), "uniqueid"));
+
+			// The EID alone no longer locates golden resource, and the rules reject the pair,
+			// so second patient gets a golden resource of his own.
+			mdmAssertThat(jane).is_not_MATCH_to(paul);
+			assertLinksMatchResult(MATCH, MATCH);
+			assertLinksCreatedNewResource(true, true);
+			assertLinksMatchedByEid(false, false);
+		}
+
+		@Test
+		public void testCertainMatchOnSameEidDisabled_patientsSharingAnEidAndDemographics_areLinkedByTheRules() {
+			myMdmSettings.setCertainMatchOnSameEid(false);
+			Patient jane = createPatientAndUpdateLinks(addExternalEID(buildJanePatient(), "uniqueid"));
+			Patient sameJane = createPatientAndUpdateLinks(addExternalEID(buildJanePatient(), "uniqueid"));
+
+			mdmAssertThat(jane).is_MATCH_to(sameJane);
+			assertLinksMatchResult(MATCH, MATCH);
+			assertLinksCreatedNewResource(true, false);
+			assertLinksMatchedByEid(false, false);
 		}
 
 		@Test

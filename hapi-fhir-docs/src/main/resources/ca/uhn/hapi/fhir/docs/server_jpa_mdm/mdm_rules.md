@@ -714,7 +714,9 @@ as an array. A single system may still be given as a bare string.
 ```
 
 An incoming resource is linked to a golden resource if **any** of its EIDs match, so listing several
-systems widens the set of records that can be resolved directly rather than probabilistically.
+systems widens the set of records that can be resolved directly rather than probabilistically. This
+applies while the **Certain match on same EID** setting is enabled, which is the default. When it is
+disabled, the matching rules alone decide; see [MDM EID Settings](/hapi-fhir/docs/server_jpa_mdm/mdm_eid.html#mdm-eid-settings).
 
 Order matters. The list is a priority order: the first system listed for a resource type is treated as
 its primary one, and it is the system used when a single EID has to be chosen for the resource, such as
