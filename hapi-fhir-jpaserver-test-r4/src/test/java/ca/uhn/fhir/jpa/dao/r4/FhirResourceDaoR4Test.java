@@ -4252,6 +4252,65 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 		assertThat(eventDatesFromOrdinalSearch).containsExactlyElementsOf(theExpectedDates);
 	}
 
+	// Created by claude-opus-5-5
+	// Expected to pass on master and fail on the GH-8408 branch: the branch produces no index row
+	@Test
+	void testTimingWithEventAndBoundsPeriodStartOnly_matchesLeSearch() {
+		// Given
+		IIdType id = createServiceRequestWithEventAndOpenEndedBounds();
+
+		// When
+		SearchParameterMap params = SearchParameterMap.newSynchronous(
+			ServiceRequest.SP_OCCURRENCE, new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, "2025-02-09"));
+
+		// Then
+		assertThat(toUnqualifiedVersionlessIdValues(myServiceRequestDao.search(params, mySrd))).containsExactly(id.getValue());
+	}
+
+	// Created by claude-opus-5-5
+	// Expected to fail on both master and the GH-8408 branch: master indexes a null high value,
+	// the branch produces no index row
+	@Test
+	void testTimingWithEventAndBoundsPeriodStartOnly_matchesGeSearch() {
+		// Given
+		IIdType id = createServiceRequestWithEventAndOpenEndedBounds();
+
+		// When
+		SearchParameterMap params = SearchParameterMap.newSynchronous(
+			ServiceRequest.SP_OCCURRENCE, new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, "2025-02-08"));
+
+		// Then
+		assertThat(toUnqualifiedVersionlessIdValues(myServiceRequestDao.search(params, mySrd))).containsExactly(id.getValue());
+	}
+
+	// Created by claude-opus-5-5
+	// Expected to fail on both master and the GH-8408 branch: neither returns the resource for a range
+	// containing its event
+	@Test
+	void testTimingWithEventAndBoundsPeriodStartOnly_matchesRangeContainingEvent() {
+		// Given
+		IIdType id = createServiceRequestWithEventAndOpenEndedBounds();
+
+		// When
+		SearchParameterMap params = SearchParameterMap.newSynchronous();
+		params.add(ServiceRequest.SP_OCCURRENCE, new DateRangeParam("2025-02-08T14:00:00Z", "2025-02-09T14:00:00Z"));
+
+		// Then
+		assertThat(toUnqualifiedVersionlessIdValues(myServiceRequestDao.search(params, mySrd))).containsExactly(id.getValue());
+	}
+
+	// Created by claude-opus-5-5
+	private IIdType createServiceRequestWithEventAndOpenEndedBounds() {
+		ServiceRequest sr = new ServiceRequest();
+		sr.setStatus(ServiceRequest.ServiceRequestStatus.ACTIVE);
+		sr.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
+		sr.setOccurrence(new Timing()
+			.addEvent(new DateTimeType("2025-02-08T14:00:00Z").getValue())
+			.setRepeat(new Timing.TimingRepeatComponent()
+				.setBounds(new Period().setStartElement(new DateTimeType("2025-02-07T14:00:00Z")))));
+		return myServiceRequestDao.create(sr, mySrd).getId().toUnqualifiedVersionless();
+	}
+
 	private static List<Date> getEventDatesFromServiceRequestsInSearchResponse(IBundleProvider theDateSearchResponse) {
 		return theDateSearchResponse.getAllResources().stream()
 			.filter(ServiceRequest.class::isInstance)

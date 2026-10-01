@@ -234,7 +234,7 @@ public class SearchParamExtractorDstu3Test {
 	@Test
 	void testBoundsPeriodEndOnlyIndexesStartOfTimeAsLowValue() {
 		// FHIR spec: a missing period.start is "less than" any actual date, so sp_value_low must be the
-		// start-of-time sentinel that addDate_Period()
+		// start-of-time sentinel that addDate_Period() uses
 		StorageSettings storageSettings = new StorageSettings();
 		ProcedureRequest procedureRequest = new ProcedureRequest();
 		procedureRequest.setOccurrence(new Timing()
