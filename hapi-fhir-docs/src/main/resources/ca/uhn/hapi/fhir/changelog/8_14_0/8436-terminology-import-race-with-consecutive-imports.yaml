@@ -1,0 +1,9 @@
+---
+type: fix
+issue: 8436
+title: "JPA tests built on the hapi-fhir-jpaserver-test-utilities base classes could fail intermittently when batch2
+  work left running by one test, such as a ValueSet pre-expansion, kept writing to the database after it was purged
+  and into the next test. The R4 and R5 test base classes now cancel all batch2 jobs and wait for running work to
+  finish before purging the database. Batch2JobHelper.cancelAllJobsAndAwaitCancellation now waits for the batch2
+  workers and the reducer to go idle rather than returning straight away, and it and Batch2JobHelper.hasRunningJobs
+  now see every job instance rather than only the first 1000."
