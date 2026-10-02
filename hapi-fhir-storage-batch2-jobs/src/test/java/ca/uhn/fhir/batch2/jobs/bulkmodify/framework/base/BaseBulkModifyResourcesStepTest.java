@@ -1,0 +1,367 @@
+package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base;
+
+import ca.uhn.fhir.batch2.api.IBatch2FrameworkException;
+import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
+import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
+import ca.uhn.fhir.batch2.api.ReductionStepFailureException;
+import ca.uhn.fhir.batch2.api.RetryChunkLaterException;
+import ca.uhn.fhir.batch2.api.RunOutcome;
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesChunkOutcomeJson;
+import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionJson;
+import ca.uhn.fhir.batch2.jobs.chunk.TypedPidAndVersionListWorkChunkJson;
+import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import jakarta.annotation.Nullable;
+import org.hl7.fhir.r4.model.IdType;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.support.SimpleTransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+
+import java.time.Duration;
+import java.util.List;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+
+/**
+ * Unit tests for the exception-routing contract of {@link BaseBulkModifyResourcesStep#run(StepExecutionDetails, IJobDataSink)}.
+ * <p>
+ * Note: the hooks below never assert - the production code wraps the in-transaction hook in a
+ * <code>catch (Throwable)</code> which would swallow an {@link AssertionError} and turn a failing test green.
+ * Observations are recorded into fields and asserted after <code>run()</code> returns.
+ * </p>
+ */
+@SuppressWarnings("unused")
+@ExtendWith(MockitoExtension.class)
+// Created by claude-opus-5
+class BaseBulkModifyResourcesStepTest {
+
+	private static final String RESOURCE_TYPE = "Patient";
+	private static final String RESOURCE_ID_VALUE = "Patient/ABC/_history/123";
+	private static final String FALLBACK_ID_VALUE = "Patient/ABC";
+
+	@Spy
+	private IHapiTransactionService myTransactionService = new MyMockTxService();
+
+	@Mock
+	private IIdHelperService<IResourcePersistentId<?>> myIdHelperService;
+
+	@Spy
+	private FhirContext myFhirContext = FhirContext.forR4Cached();
+
+	@Mock
+	private IJobStepExecutionServices myJobStepExecutionServices;
+
+	@Mock
+	private IJobDataSink<BulkModifyResourcesChunkOutcomeJson> mySink;
+
+	@Captor
+	private ArgumentCaptor<BulkModifyResourcesChunkOutcomeJson> myDataCaptor;
+
+	@InjectMocks
+	private MySvc mySvc = new MySvc();
+
+	/**
+	 * Optional action run by {@link MySvc#processPidsOutsideTransaction} - typically throws.
+	 */
+	private IHookAction myOutsideTransactionAction;
+
+	/**
+	 * Optional action run by {@link MySvc#processPidsInTransaction} before the default body - typically throws.
+	 */
+	private IHookAction myInTransactionAction;
+
+	private int myOutsideTransactionInvocationCount;
+	private int myInTransactionInvocationCount;
+	private Boolean myTransactionActiveInOutsideTransactionHook;
+	private Boolean myTransactionActiveInInTransactionHook;
+
+	/**
+	 * A {@link RetryChunkLaterException} raised by the outside-transaction hook is a <b>retry signal</b>, not a
+	 * failure. It must escape <code>run()</code> so that
+	 * <code>StepExecutor</code> can move the work chunk to POLL_WAITING.
+	 */
+	@Test
+	void testRun_preFlightThrowsRetryChunkLater_propagatesToStepExecutor() {
+		// Setup
+		stubIdHelperForUnresolvedPid();
+		myOutsideTransactionAction =
+				(theState, thePids) -> {
+					throw new RetryChunkLaterException(Msg.code(2830), Duration.ofSeconds(10));
+				};
+		StepExecutionDetails<MyParameters, TypedPidAndVersionListWorkChunkJson> details = createDetails();
+
+		// Test & Verify
+		assertThatThrownBy(() -> mySvc.run(details, mySink)).isInstanceOf(RetryChunkLaterException.class);
+
+		verifyNoInteractions(mySink);
+		assertThat(myOutsideTransactionInvocationCount).isEqualTo(1);
+	}
+
+	/**
+	 * A {@link JobExecutionFailedException} raised by the outside-transaction hook is an unrecoverable failure and
+	 * must escape <code>run()</code> unchanged.
+	 */
+	@Test
+	void testRun_preFlightThrowsJobExecutionFailed_stillPropagates() {
+		// Setup
+		myOutsideTransactionAction =
+				(theState, thePids) -> {
+					throw new JobExecutionFailedException("unrecoverable-marker");
+				};
+		StepExecutionDetails<MyParameters, TypedPidAndVersionListWorkChunkJson> details = createDetails();
+
+		// Test & Verify
+		assertThatThrownBy(() -> mySvc.run(details, mySink))
+				.isInstanceOf(JobExecutionFailedException.class)
+				.hasMessageContaining("unrecoverable-marker");
+
+		verifyNoInteractions(mySink);
+		assertThat(myOutsideTransactionInvocationCount).isEqualTo(1);
+	}
+
+	/**
+	 * A framework signal ({@link IBatch2FrameworkException}) raised from inside the transactional body must
+	 * escape <code>run()</code> unchanged - the same instance, not wrapped or recorded as a per-resource
+	 * failure - so that <code>StepExecutor</code> / <code>ReductionStepExecutorServiceImpl</code> can act on it.
+	 */
+	@ParameterizedTest
+	@MethodSource("frameworkExceptions")
+	void testRun_inTransactionThrowsFrameworkException_propagatesUnchanged(RuntimeException theFrameworkException) {
+		// Setup
+		stubIdHelperForUnresolvedPid();
+		myInTransactionAction = (theState, thePids) -> {
+			throw theFrameworkException;
+		};
+		StepExecutionDetails<MyParameters, TypedPidAndVersionListWorkChunkJson> details = createDetails();
+
+		// Test & Verify
+		assertThatThrownBy(() -> mySvc.run(details, mySink)).isSameAs(theFrameworkException);
+
+		verifyNoInteractions(mySink);
+		assertThat(myInTransactionInvocationCount).isEqualTo(1);
+	}
+
+	static Stream<RuntimeException> frameworkExceptions() {
+		return Stream.of(
+				new RetryChunkLaterException(Msg.code(2830), Duration.ofSeconds(10)),
+				new JobExecutionFailedException("unrecoverable-marker"),
+				new ReductionStepFailureException("reduction-marker", new BulkModifyResourcesChunkOutcomeJson()));
+	}
+
+	/**
+	 * A generic failure inside the transaction is a per-resource failure and must be recorded in the emitted
+	 * outcome rather than thrown. If this ever turns red, the set of exceptions rethrown out of
+	 * <code>run()</code> has been over-broadened.
+	 */
+	@Test
+	void testRun_inTransactionThrowsGenericException_recordedAsPerResourceFailure() {
+		// Setup
+		myInTransactionAction = (theState, thePids) -> {
+			for (TypedPidAndVersionJson pid : thePids) {
+				theState.setResourceIdForPid(pid, new IdType(RESOURCE_ID_VALUE));
+			}
+			throw new MyTestFailureException("in-transaction boom");
+		};
+		StepExecutionDetails<MyParameters, TypedPidAndVersionListWorkChunkJson> details = createDetails();
+
+		// Test
+		RunOutcome outcome = mySvc.run(details, mySink);
+
+		// Verify
+		assertThat(outcome.getRecordsProcessed()).isEqualTo(1);
+		verify(mySink, times(1)).accept(myDataCaptor.capture());
+		BulkModifyResourcesChunkOutcomeJson outputData = myDataCaptor.getValue();
+		assertThat(outputData.getFailures()).containsOnlyKeys(RESOURCE_ID_VALUE);
+		assertThat(outputData.getFailures().get(RESOURCE_ID_VALUE)).contains("in-transaction boom");
+		assertThat(outputData.getChangedIds()).isEmpty();
+		assertThat(myOutsideTransactionInvocationCount).isEqualTo(3);
+		assertThat(myInTransactionInvocationCount).isEqualTo(3);
+		assertThat(outputData.getChunkRetryCount()).isEqualTo(2);
+	}
+
+	/**
+	 * A generic failure in the outside-transaction hook is a whole-chunk guard failure, so it must escape
+	 * <code>run()</code> and let <code>StepExecutor</code> mark the chunk retriable ERRORED, rather than
+	 * being mis-attributed to each individual resource.
+	 */
+	@Test
+	void testRun_preFlightThrowsGenericException_propagatesSoChunkCanBeRetried() {
+		// Setup
+		stubIdHelperForUnresolvedPid();
+		myOutsideTransactionAction =
+				(theState, thePids) -> {
+					throw new MyTestFailureException("pre-flight boom");
+				};
+		StepExecutionDetails<MyParameters, TypedPidAndVersionListWorkChunkJson> details = createDetails();
+
+		// Test & Verify
+		assertThatThrownBy(() -> mySvc.run(details, mySink))
+				.isInstanceOf(MyTestFailureException.class)
+				.hasMessageContaining("pre-flight boom");
+
+		verifyNoInteractions(mySink);
+		assertThat(myOutsideTransactionInvocationCount).isEqualTo(1);
+	}
+
+	/**
+	 * Invariant guard - the outside-transaction hook must run exactly once, outside any transaction, before the
+	 * transactional body runs inside one.
+	 */
+	@Test
+	void testRun_happyPath_preFlightRunsOutsideTransactionAndBodyRunsInside() {
+		// Setup
+		StepExecutionDetails<MyParameters, TypedPidAndVersionListWorkChunkJson> details = createDetails();
+
+		// Test
+		RunOutcome outcome = mySvc.run(details, mySink);
+
+		// Verify
+		assertThat(myTransactionActiveInOutsideTransactionHook).isFalse();
+		assertThat(myTransactionActiveInInTransactionHook).isTrue();
+		assertThat(myOutsideTransactionInvocationCount).isEqualTo(1);
+		assertThat(myInTransactionInvocationCount).isEqualTo(1);
+		assertThat(outcome.getRecordsProcessed()).isEqualTo(1);
+
+		verify(mySink, times(1)).accept(myDataCaptor.capture());
+		BulkModifyResourcesChunkOutcomeJson outputData = myDataCaptor.getValue();
+		assertThat(outputData.getUnchangedIds()).containsExactly(RESOURCE_ID_VALUE);
+		assertThat(outputData.getFailures()).isEmpty();
+	}
+
+	private StepExecutionDetails<MyParameters, TypedPidAndVersionListWorkChunkJson> createDetails() {
+		TypedPidAndVersionListWorkChunkJson data = new TypedPidAndVersionListWorkChunkJson();
+		data.addTypedPidWithNullPartitionForUnitTest(RESOURCE_TYPE, 1L, null);
+		return new StepExecutionDetails<>(
+				new MyParameters(),
+				data,
+				new JobInstance(),
+				new WorkChunk().setId("my-chunk-id"),
+				myJobStepExecutionServices);
+	}
+
+	/**
+	 * A PID that fails before its resource has been fetched has no ID in the {@link BaseBulkModifyResourcesStep.State},
+	 * so <code>BaseBulkModifyResourcesStep#toId</code> falls back to the ID helper. An unstubbed mock returns
+	 * null there, which would surface as a {@link NullPointerException} out of
+	 * {@link BulkModifyResourcesChunkOutcomeJson#addFailure} rather than as an assertion failure. The stub is
+	 * {@link org.mockito.Mockito#lenient()} because it is only consumed when a hook failure is recorded in the
+	 * outcome instead of propagating.
+	 */
+	private void stubIdHelperForUnresolvedPid() {
+		lenient()
+				.when(myIdHelperService.translatePidIdToForcedId(any(), any(), any()))
+				.thenReturn(new IdType(FALLBACK_ID_VALUE));
+	}
+
+	@FunctionalInterface
+	private interface IHookAction {
+		void execute(BaseBulkModifyResourcesStep.State theState, List<TypedPidAndVersionJson> thePids);
+	}
+
+	/**
+	 * Marker type so that an incidental {@link NullPointerException} can not satisfy an
+	 * <code>isInstanceOf(...)</code> assertion about a "generic" failure.
+	 */
+	private static class MyTestFailureException extends RuntimeException {
+		private static final long serialVersionUID = 1L;
+
+		MyTestFailureException(String theMessage) {
+			super(theMessage);
+		}
+	}
+
+	private static class MyParameters extends BaseBulkModifyJobParameters {
+		// nothing
+	}
+
+	private static class MyMockTxService extends HapiTransactionService {
+
+		@Nullable
+		@Override
+		public <T> T doExecute(ExecutionBuilder theExecutionBuilder, TransactionCallback<T> theCallback) {
+			boolean initialState = TransactionSynchronizationManager.isActualTransactionActive();
+			try {
+				if (!initialState) {
+					TransactionSynchronizationManager.setActualTransactionActive(true);
+				}
+				return theCallback.doInTransaction(new SimpleTransactionStatus());
+			} finally {
+				if (!initialState) {
+					TransactionSynchronizationManager.setActualTransactionActive(false);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Extends {@link BaseBulkModifyResourcesStep} directly, rather than
+	 * {@link BaseBulkModifyResourcesIndividuallyStep}, so that both hooks can be overridden, as steps such as
+	 * <code>ReindexV3ModifyResourcesStep</code> do.
+	 */
+	private class MySvc extends BaseBulkModifyResourcesStep<MyParameters, Void> {
+
+		@Override
+		protected void processPidsOutsideTransaction(
+				StepExecutionDetails<MyParameters, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
+				MyParameters theJobParameters,
+				State theState,
+				List<TypedPidAndVersionJson> thePids,
+				TransactionDetails theTransactionDetails,
+				IJobDataSink<BulkModifyResourcesChunkOutcomeJson> theDataSink) {
+			myOutsideTransactionInvocationCount++;
+			myTransactionActiveInOutsideTransactionHook = TransactionSynchronizationManager.isActualTransactionActive();
+			if (myOutsideTransactionAction != null) {
+				myOutsideTransactionAction.execute(theState, thePids);
+			}
+		}
+
+		@Override
+		protected void processPidsInTransaction(
+				StepExecutionDetails<MyParameters, TypedPidAndVersionListWorkChunkJson> theStepExecutionDetails,
+				State theState,
+				List<TypedPidAndVersionJson> thePids,
+				TransactionDetails theTransactionDetails,
+				IJobDataSink<BulkModifyResourcesChunkOutcomeJson> theDataSink) {
+			myInTransactionInvocationCount++;
+			myTransactionActiveInInTransactionHook = TransactionSynchronizationManager.isActualTransactionActive();
+			if (myInTransactionAction != null) {
+				myInTransactionAction.execute(theState, thePids);
+			}
+			for (TypedPidAndVersionJson pid : thePids) {
+				theState.setResourceIdForPid(pid, new IdType(RESOURCE_ID_VALUE));
+				theState.moveToState(pid, StateEnum.UNCHANGED);
+			}
+		}
+
+		@Override
+		protected String getJobNameForLogging() {
+			return "TEST-STEP";
+		}
+	}
+}

@@ -1,19 +1,13 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -29,7 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class SearchCountParamDstu3Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchCountParamDstu3Test.class);
 	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
 	private static String ourLastMethod;
 	private static Integer ourLastParam;
@@ -41,9 +34,6 @@ public class SearchCountParamDstu3Test {
 		 .withPagingProvider(new FifoMemoryPagingProvider(100))
 		 .setDefaultPrettyPrint(false);
 
-	@RegisterExtension
-	private HttpClientExtension ourClient = new HttpClientExtension();
-
 	@BeforeEach
 	public void before() {
 		ourLastMethod = null;
@@ -52,48 +42,37 @@ public class SearchCountParamDstu3Test {
 
 	@Test
 	public void testSearch() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_count=2");
+		String responseContent = ourServer.fhirRequest("/Patient?_count=2").get().assertStatus(200).getBody();
+		assertThat(ourLastMethod).isEqualTo("search");
+		assertThat(ourLastParam).isEqualTo(Integer.valueOf(2));
 
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals("search", ourLastMethod);
-			assertEquals(Integer.valueOf(2), ourLastParam);
-
-			assertThat(responseContent).contains(
-				 "<link>",
-				 "<relation value=\"self\"/>",
-				 "<url value=\"" + ourServer.getBaseUrl() + "/Patient?_count=2\"/>",
-				 "</link>",
-				 "<link>",
-				 "<relation value=\"next\"/>",
-				 "<url value=\"" + ourServer.getBaseUrl() + "?_getpages=", "&amp;_getpagesoffset=2&amp;_count=2&amp;_bundletype=searchset\"/>",
-				 "</link>");
-
-		}
+		assertThat(responseContent).contains(
+			 "<link>",
+			 "<relation value=\"self\"/>",
+			 "<url value=\"" + ourServer.getBaseUrl() + "/Patient?_count=2\"/>",
+			 "</link>",
+			 "<link>",
+			 "<relation value=\"next\"/>",
+			 "<url value=\"" + ourServer.getBaseUrl() + "?_getpages=", "&amp;_getpagesoffset=2&amp;_count=2&amp;_bundletype=searchset\"/>",
+			 "</link>");
 
 	}
 
 
 	@Test
 	public void testSearchCount0() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_count=0&_pretty=true");
+		String responseContent = ourServer.fhirRequest("/Patient?_count=0&_pretty=true")
+			.get()
+			.assertStatus(200)
+			.getBody();
+		assertThat(ourLastMethod).isEqualTo("search");
+		assertThat(ourLastParam).isEqualTo(Integer.valueOf(0));
 
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals("search", ourLastMethod);
-			assertEquals(Integer.valueOf(0), ourLastParam);
-
-			assertThat(responseContent).contains(
-				 "<Bundle",
-				 "<total value=\"99\"/>",
-				 "</Bundle>");
-			assertThat(responseContent).doesNotContain("entry");
-
-		}
+		assertThat(responseContent).contains(
+			 "<Bundle",
+			 "<total value=\"99\"/>",
+			 "</Bundle>");
+		assertThat(responseContent).doesNotContain("entry");
 
 	}
 
@@ -102,28 +81,22 @@ public class SearchCountParamDstu3Test {
 	 */
 	@Test
 	public void testSearchWithNoCountParam() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchWithNoCountParam&_count=2");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		try {
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals("searchWithNoCountParam", ourLastMethod);
-			assertNull(ourLastParam);
+		String responseContent = ourServer.fhirRequest("/Patient?_query=searchWithNoCountParam&_count=2")
+			.get()
+			.assertStatus(200)
+			.getBody();
+		assertThat(ourLastMethod).isEqualTo("searchWithNoCountParam");
+		assertThat(ourLastParam).isNull();
 
-			assertThat(responseContent).contains(
-				 "<link>",
-				 "<relation value=\"self\"/>",
-				 "<url value=\"" + ourServer.getBaseUrl() + "/Patient?_count=2&amp;_query=searchWithNoCountParam\"/>",
-				 "</link>",
-				 "<link>",
-				 "<relation value=\"next\"/>",
-				 "<url value=\"" + ourServer.getBaseUrl() + "?_getpages=", "&amp;_getpagesoffset=2&amp;_count=2&amp;_bundletype=searchset\"/>",
-				 "</link>");
-
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
-		}
+		assertThat(responseContent).contains(
+			 "<link>",
+			 "<relation value=\"self\"/>",
+			 "<url value=\"" + ourServer.getBaseUrl() + "/Patient?_count=2&amp;_query=searchWithNoCountParam\"/>",
+			 "</link>",
+			 "<link>",
+			 "<relation value=\"next\"/>",
+			 "<url value=\"" + ourServer.getBaseUrl() + "?_getpages=", "&amp;_getpagesoffset=2&amp;_count=2&amp;_bundletype=searchset\"/>",
+			 "</link>");
 
 	}
 
