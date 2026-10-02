@@ -1,0 +1,9 @@
+---
+type: security
+issue: 8446
+title: "Previously, AuthorizationInterceptor only authorized the searched resource type, not the resource types
+  named in reverse chaining (`_has`) parameters. As a consequence, a client allowed to read Patient but not
+  Observation could search `Patient?_has:Observation:subject:code=X` to find out which patients have an
+  Observation with code X without being able to read those Observations. A `_has` search is now denied unless
+  the client has permission to read the resources it filters on: either all resources of that type, or the
+  resources in a compartment when the search is limited by `_id` to that compartment."

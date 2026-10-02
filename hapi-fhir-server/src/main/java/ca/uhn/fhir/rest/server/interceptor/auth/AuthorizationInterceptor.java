@@ -490,6 +490,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		List<IAuthRule> rules = getRulesForRequest(theRequestDetails);
 		for (ReverseChainLink nextLink : links) {
 			Verdict verdict = evaluateAccessToReachableResources(rules, nextLink, theRequestDetails);
+			logReachableResourcesVerdict(nextLink, verdict);
 			if (verdict.getDecision() != PolicyEnum.ALLOW) {
 				handleDeny(theRequestDetails, verdict);
 			}
@@ -507,7 +508,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 				if (rule.isUnrestrictedWithinType()
 						|| (theLink.linkedToSearchedType()
 								&& rule.isUnrestrictedWithinSearchedCompartment(
-										theLink.resourceType(), theLink.linkParameter(), theRequestDetails))) {
+										theLink.resourceType(), theLink.linkParameter(), theRequestDetails, this))) {
 					return new Verdict(PolicyEnum.ALLOW, rule);
 				}
 			}
@@ -812,5 +813,33 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			}
 		}
 		return retVal;
+	}
+
+	/**
+	 * Explains in the troubleshooting log why a <code>_has</code> parameter was allowed or denied, since a denial
+	 * otherwise only names the searched type.
+	 */
+	private void logReachableResourcesVerdict(ReverseChainLink theLink, Verdict theVerdict) {
+		String parameter = Constants.PARAM_HAS + ":" + theLink.resourceType() + ":" + theLink.linkParameter();
+		IAuthRule decidingRule = theVerdict.getDecidingRule();
+		Logger logger = getTroubleshootingLog();
+		if (theVerdict.getDecision() == PolicyEnum.ALLOW) {
+		} else if (decidingRule != null) {
+			if (decidingRule != null) {
+				logger.debug("Search parameter {} is allowed by rule {}", parameter, decidingRule);
+			} else {
+				logger.debug("Search parameter {} is allowed by the default policy", parameter);
+			}
+			logger.debug("Search parameter {} is denied by rule {}", parameter, decidingRule);
+		} else {
+			logger.debug(
+					"Search parameter {} is denied: no rule allows reading every {} the search can reach. This needs "
+							+ "a read rule covering all {} resources or, for a _has directly on the searched "
+							+ "resource, a compartment read rule with the search limited by _id to that "
+							+ "compartment's owners",
+					parameter,
+					theLink.resourceType(),
+					theLink.resourceType());
+		}
 	}
 }

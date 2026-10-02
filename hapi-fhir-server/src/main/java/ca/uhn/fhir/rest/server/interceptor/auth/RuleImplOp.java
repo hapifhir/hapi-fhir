@@ -26,6 +26,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.auth.CompartmentSearchParameterModifications;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -1153,25 +1154,65 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	 * search parameters, so every resource of that type the search reaches is in the compartment.
 	 */
 	boolean isUnrestrictedWithinSearchedCompartment(
-			String theResourceType, String theLinkParameter, RequestDetails theRequestDetails) {
+			String theResourceType,
+			String theLinkParameter,
+			RequestDetails theRequestDetails,
+			IRuleApplier theRuleApplier) {
 		if (myClassifierType != ClassifierTypeEnum.IN_COMPARTMENT
-				|| !getTesters().stream().allMatch(TenantCheckingTester.class::isInstance)
-				|| !StringUtils.equals(myClassifierCompartmentName, theRequestDetails.getResourceName())
-				|| !theRequestDetails.getParameters().containsKey(SP_RES_ID)) {
+				|| !getTesters().stream().allMatch(TenantCheckingTester.class::isInstance)) {
+			return false;
+		}
+
+		Logger troubleshootingLog = theRuleApplier.getTroubleshootingLog();
+
+		String parameter = Constants.PARAM_HAS + ":" + theResourceType + ":" + theLinkParameter;
+		String searchedType = theRequestDetails.getResourceName();
+		if (!StringUtils.equals(myClassifierCompartmentName, searchedType)) {
+			troubleshootingLog.debug(
+					"Compartment rule {} does not cover {}: the search is on {}, not {}",
+					this,
+					parameter,
+					searchedType,
+					myClassifierCompartmentName);
+			return false;
+		}
+		if (!theRequestDetails.getParameters().containsKey(SP_RES_ID)) {
+			troubleshootingLog.debug(
+					"Compartment rule {} does not cover {}: the search has no _id parameter limiting it to the compartment owners {}",
+					this,
+					parameter,
+					myClassifierCompartmentOwners);
 			return false;
 		}
 
 		FhirContext ctx = theRequestDetails.getFhirContext();
 		RuleTarget target = new RuleTarget();
-		target.resourceType = theRequestDetails.getResourceName();
+		target.resourceType = searchedType;
 		setTargetFromResourceId(theRequestDetails, ctx, target);
 		if (target.resourceIds == null
 				|| !target.resourceIds.stream()
 						.allMatch(id -> myClassifierCompartmentOwners.contains(id.toUnqualifiedVersionless()))) {
+			troubleshootingLog.debug(
+					"Compartment rule {} does not cover {}: not every _id value is an owner of the compartment {}",
+					this,
+					parameter,
+					myClassifierCompartmentOwners);
 			return false;
 		}
 
-		return getCompartmentSearchParamNames(ctx, theResourceType).contains(theLinkParameter);
+		Set<String> compartmentParams = getCompartmentSearchParamNames(ctx, theResourceType);
+		if (!compartmentParams.contains(theLinkParameter)) {
+			troubleshootingLog.debug(
+					"Compartment rule {} does not cover {}: {} is not a {} compartment search parameter of {} (those are {})",
+					this,
+					parameter,
+					theLinkParameter,
+					myClassifierCompartmentName,
+					theResourceType,
+					compartmentParams);
+			return false;
+		}
+		return true;
 	}
 
 	private Set<String> getCompartmentSearchParamNames(FhirContext theContext, String theResourceType) {
