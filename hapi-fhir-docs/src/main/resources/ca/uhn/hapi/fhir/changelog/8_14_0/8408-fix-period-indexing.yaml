@@ -1,0 +1,9 @@
+---
+type: fix
+issue: 8408
+jira: SMILE-12320
+title: "Previously, date searches did not match `ServiceRequest` resources whose `occurrenceTiming.repeat.boundsPeriod`
+   had no `start` or no `end`. When the `Timing` has no `event` values, a missing bound is now indexed as open-ended,
+   the same way standalone `Period` elements such as `Encounter.period` are indexed. This applies to any date search
+   parameter that indexes a `Timing`, not only the `ServiceRequest` `occurrence` parameter. Existing resources with
+   such Timings must be reindexed using the `$reindex` operation for searches to return them."
