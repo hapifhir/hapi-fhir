@@ -69,7 +69,6 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 
 	@ParameterizedTest
 	@ValueSource(strings = {
-			CommonCodeSystemsTerminologyService.MIMETYPES_VALUESET_URL,
 			CommonCodeSystemsTerminologyService.CURRENCIES_VALUESET_URL,
 			CommonCodeSystemsTerminologyService.LANGUAGES_VALUESET_URL
 	})
@@ -87,10 +86,29 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		assertNotNull(valueSet.getExpansion());
 	}
 
+	/**
+	 * Mime types are validated against their grammar and have no concepts to enumerate, so the ValueSet including
+	 * the whole system cannot be expanded.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void expandValueSet_mimeTypesValueSet_failsNamingTheCodeSystem() {
+		// Setup
+		ValueSet vs = (ValueSet) myChain.fetchValueSet(CommonCodeSystemsTerminologyService.MIMETYPES_VALUESET_URL);
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.ValueSetExpansionOutcome outcome =
+			mySvc.expandValueSet(valCtx, new ValueSetExpansionOptions(), vs);
+
+		// Verify
+		assertNotNull(outcome);
+		assertNull(outcome.getValueSet());
+		assertThat(outcome.getError()).contains(CommonCodeSystemsTerminologyService.MIMETYPES_CODESYSTEM_URL);
+	}
 
 	@ParameterizedTest
 	@ValueSource(strings = {
-			CommonCodeSystemsTerminologyService.MIMETYPES_CODESYSTEM_URL,
 			CommonCodeSystemsTerminologyService.COUNTRIES_CODESYSTEM_URL,
 			CommonCodeSystemsTerminologyService.CURRENCIES_CODESYSTEM_URL
 	})
@@ -861,6 +879,87 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		assertThat(((ValueSet) outcome.getValueSet()).getExpansion().getContains())
 			.extracting(ValueSet.ValueSetExpansionContainsComponent::getCode)
 			.containsExactly("en", "fr-CA");
+	}
+
+	/**
+	 * A not-present CodeSystem tells the server the system exists but gives it no concepts, so an include of the
+	 * whole system cannot be expanded: the expansion fails rather than coming back empty.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void expandValueSet_wholeSystemIncludeOfANotPresentCodeSystem_failsNamingTheCodeSystem() {
+		// Setup
+		addNotPresentCodeSystem();
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem("http://cs");
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.ValueSetExpansionOutcome outcome =
+			mySvc.expandValueSet(valCtx, new ValueSetExpansionOptions(), vs);
+
+		// Verify
+		assertNotNull(outcome);
+		assertNull(outcome.getValueSet());
+		assertThat(outcome.getError()).contains("http://cs");
+	}
+
+	/**
+	 * Control for {@link #expandValueSet_wholeSystemIncludeOfANotPresentCodeSystem_failsNamingTheCodeSystem}: a
+	 * caller that asks not to fail on a missing code system gets an expansion without that system's codes.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void expandValueSet_wholeSystemIncludeOfANotPresentCodeSystemAndFailOnMissingCodeSystemOff_expandsToNothing() {
+		// Setup
+		addNotPresentCodeSystem();
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem("http://cs");
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.ValueSetExpansionOutcome outcome = mySvc.expandValueSet(
+			valCtx, new ValueSetExpansionOptions().setFailOnMissingCodeSystem(false), vs);
+
+		// Verify
+		assertNotNull(outcome);
+		assertNull(outcome.getError());
+		assertThat(((ValueSet) outcome.getValueSet()).getExpansion().getContains()).isEmpty();
+	}
+
+	/**
+	 * The server has no concepts for a not-present CodeSystem, so a code in a whole-system include of it is
+	 * reported as caused by an unknown system, as for a CodeSystem the server does not have at all.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCodeInValueSet_wholeSystemIncludeOfANotPresentCodeSystem_reportsTheSystemAsCausedByUnknownSystem() {
+		// Setup
+		addNotPresentCodeSystem();
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem("http://cs");
+		myPrePopulated.addValueSet(vs);
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+			valCtx, new ConceptValidationOptions(), "http://cs", "code1", null, vs);
+
+		// Verify
+		assertNotNull(outcome);
+		assertFalse(outcome.isOk());
+		assertThat(outcome.getUnknownSystems()).containsExactly("http://cs");
+	}
+
+	private void addNotPresentCodeSystem() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://cs");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		myPrePopulated.addCodeSystem(cs);
 	}
 
 	/**

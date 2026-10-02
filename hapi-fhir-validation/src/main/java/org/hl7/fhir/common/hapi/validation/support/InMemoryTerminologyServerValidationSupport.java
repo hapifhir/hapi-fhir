@@ -1029,7 +1029,8 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 											theInclude.getVersion()))
 									.forEach(nextCodeList::add);
 							ableToHandleCode = true;
-						} else if (isIncludeCodeSystemIgnored) {
+						} else if (isIncludeCodeSystemIgnored && !theFailOnMissingCodeSystem) {
+							// A not-present CodeSystem holds no concepts to expand the whole system from
 							ableToHandleCode = true;
 						}
 					}
@@ -1054,14 +1055,11 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 					}
 				}
 
-				// Name the code system as unknown only when no module understands it at the version asked for
-				String unknownSystem = includeOrExcludeSystemResource == null
-								&& !theValidationSupportContext
-										.getRootValidationSupport()
-										.isCodeSystemSupported(
-												theValidationSupportContext,
-												includeOrExcludeConceptSystemUrl,
-												includeOrExcludeConceptSystemVersion)
+				String unknownSystem = isCodeSystemUnresolved(
+								theValidationSupportContext,
+								includeOrExcludeSystemResource,
+								includeOrExcludeConceptSystemUrl,
+								includeOrExcludeConceptSystemVersion)
 						? loadedCodeSystemUrl
 						: null;
 				throw new ExpansionCouldNotBeCompletedInternallyException(
@@ -1231,6 +1229,25 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		} else {
 			return codeSystem -> myVersionCanonicalizer.codeSystemToValidatorCanonical(codeSystem);
 		}
+	}
+
+	/**
+	 * Whether no module could answer for the code system's concepts at the version asked for: either no module
+	 * understands it, or the only definition is a not-present CodeSystem, which its holder reports as supported
+	 * although it has no concepts.
+	 */
+	// Created by Claude Opus 5.5
+	private static boolean isCodeSystemUnresolved(
+			ValidationSupportContext theValidationSupportContext,
+			@Nullable CodeSystem theCodeSystem,
+			String theCodeSystemUrl,
+			String theCodeSystemVersion) {
+		if (theCodeSystem != null) {
+			return theCodeSystem.getContent() == Enumerations.CodeSystemContentMode.NOTPRESENT;
+		}
+		return !theValidationSupportContext
+				.getRootValidationSupport()
+				.isCodeSystemSupported(theValidationSupportContext, theCodeSystemUrl, theCodeSystemVersion);
 	}
 
 	private String getFailureMessageForMissingOrUnusableCodeSystem(

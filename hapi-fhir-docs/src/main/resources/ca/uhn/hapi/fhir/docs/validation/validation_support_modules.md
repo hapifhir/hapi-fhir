@@ -61,6 +61,8 @@ Listed codes are still accepted when:
 * Another module in the chain supports the CodeSystem without a CodeSystem resource, for example the BCP-47 language codes in [CommonCodeSystemsTerminologyService](#commoncodesystemsterminologyservice).
 * The caller expands with `ValueSetExpansionOptions#setFailOnMissingCodeSystem(false)`.
 
+A CodeSystem whose `content` is `not-present` makes the system known without its concepts. A ValueSet that includes the whole system (no listed codes and no filter) cannot be expanded from it, and is treated like an unknown CodeSystem as above, including the `x-caused-by-unknown-system` parameter. This includes the mime types CodeSystem (`urn:ietf:bcp:13`) in [CommonCodeSystemsTerminologyService](#commoncodesystemsterminologyservice): its codes are still accepted by validation, but its ValueSet cannot be expanded. Expanding with `ValueSetExpansionOptions#setFailOnMissingCodeSystem(false)` returns the ValueSet without codes from that system.
+
 # PrePopulatedValidationSupport
 
 [JavaDoc](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/support/PrePopulatedValidationSupport.html) / [Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-validation/src/main/java/org/hl7/fhir/common/hapi/validation/support/PrePopulatedValidationSupport.java)
