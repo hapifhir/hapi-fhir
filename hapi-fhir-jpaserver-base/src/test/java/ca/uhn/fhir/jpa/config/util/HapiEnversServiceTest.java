@@ -33,6 +33,11 @@ import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+
+/**
+ * This test is an "alarm" to force validation that some assumptions are still valid
+ * each time Envers version is updated.
+ */
 // Created by Claude Opus 5.5
 class HapiEnversServiceTest {
 
