@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.nickname.NicknameInterceptor;
 import ca.uhn.fhir.mdm.log.Logs;
+import ca.uhn.fhir.mdm.model.MdmMatchAbortReason;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -242,7 +243,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 				"Patient", jane, RequestPartitionId.allPartitions(), context);
 
 			// verify
-			assertFalse(context.isTooManyCandidatesMatched());
+			assertFalse(context.getReason() == MdmMatchAbortReason.TOO_MANY_CANDIDATES);
 			assertEquals(warnLimit, results.size());
 
 			List<ILoggingEvent> events = appender.list
@@ -278,13 +279,13 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 				assertEquals(1, runInTransaction(() -> {
 					return myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions(), context).size();
 				}));
-				assertFalse(context.isTooManyCandidatesMatched());
+				assertFalse(context.getReason() == MdmMatchAbortReason.TOO_MANY_CANDIDATES);
 			}
 			{
 				MdmTransactionContext context = new MdmTransactionContext();
 				createActivePatient();
 				assertEquals(2, runInTransaction(() -> myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions(), context).size()));
-				assertFalse(context.isTooManyCandidatesMatched());
+				assertFalse(context.getReason() == MdmMatchAbortReason.TOO_MANY_CANDIDATES);
 			}
 
 			// test
@@ -294,7 +295,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 
 			// verify
 			assertTrue(results.isEmpty());
-			assertTrue(context.isTooManyCandidatesMatched());
+			assertTrue(context.getReason() == MdmMatchAbortReason.TOO_MANY_CANDIDATES);
 		} finally {
 			myMdmSettings.setCandidateSearchLimit(searchLimit);
 		}

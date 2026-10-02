@@ -34,6 +34,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.blocklist.svc.IBlockRuleEvaluationSvc;
 import ca.uhn.fhir.mdm.log.Logs;
+import ca.uhn.fhir.mdm.model.MdmMatchAbortReason;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
@@ -41,6 +42,7 @@ import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
+import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -126,11 +128,12 @@ public class MdmMatchLinkSvc {
 			candidateList = myMdmGoldenResourceFindingSvc.findGoldenResourceCandidates(params);
 		} else {
 			// we will mark the golden resource special for this case
-			theMdmTransactionContext.setIsBlocked(true);
+			theMdmTransactionContext.setMatchingAborted(MdmMatchAbortReason.BLOCKED);
 		}
 
-		if (theMdmTransactionContext.isTooManyCandidatesMatched() || isResourceBlocked) {
+		if (theMdmTransactionContext.isMatchingAborted() || isResourceBlocked) {
 			log(
+					Level.WARN,
 					theMdmTransactionContext,
 					"Skipping MDM matching for "
 							+ theResource.getId()
@@ -140,7 +143,7 @@ public class MdmMatchLinkSvc {
 		}
 		myMdmResourceDaoSvc.updateUnmatchedTags(theResource, theMdmTransactionContext);
 
-		if (theMdmTransactionContext.isTooManyCandidatesMatched()) {
+		if (theMdmTransactionContext.getReason() == MdmMatchAbortReason.TOO_MANY_CANDIDATES) {
 			// resources with too many candidate matches do not get a golden resource.
 			// we do this because otherwise, "too many candidates" resources will cascade and trigger
 			// earlier and earlier for every single later resource until possibly no resource is matched at all
@@ -312,8 +315,12 @@ public class MdmMatchLinkSvc {
 		}
 	}
 
-	private void log(MdmTransactionContext theMdmTransactionContext, String theMessage) {
+	private void log(MdmTransactionContext theMdmTransactionContext, String theMsg) {
+		log(Level.DEBUG, theMdmTransactionContext, theMsg);
+	}
+
+	private void log(Level theLevel, MdmTransactionContext theMdmTransactionContext, String theMessage) {
 		theMdmTransactionContext.addTransactionLogMessage(theMessage);
-		ourLog.debug(theMessage);
+		ourLog.atLevel(theLevel).log(theMessage);
 	}
 }

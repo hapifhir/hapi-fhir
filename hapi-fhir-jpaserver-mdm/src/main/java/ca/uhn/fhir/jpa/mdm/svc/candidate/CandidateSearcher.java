@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.log.Logs;
+import ca.uhn.fhir.mdm.model.MdmMatchAbortReason;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.svc.MdmSearchParamSvc;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -91,7 +92,7 @@ public class CandidateSearcher {
 						retval.size(),
 						theResourceType,
 						theResourceCriteria);
-				theContext.setTooManyCandidatesMatched(true);
+				theContext.setMatchingAborted(MdmMatchAbortReason.TOO_MANY_CANDIDATES);
 				return Optional.empty();
 			} else if (retval.size() >= myMdmSettings.getCandidateSearchWarnLimit()) {
 				ourLog.warn(

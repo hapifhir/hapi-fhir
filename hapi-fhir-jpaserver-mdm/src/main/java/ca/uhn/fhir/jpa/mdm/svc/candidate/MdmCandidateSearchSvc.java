@@ -123,7 +123,7 @@ public class MdmCandidateSearchSvc {
 						theRequestPartitionId,
 						theContext);
 
-				if (theContext.isTooManyCandidatesMatched()) {
+				if (theContext.isMatchingAborted()) {
 					// partial results don't help; return nothing and upstream we'll tag
 					// this candidate as 'too many candidates'
 					return Collections.emptyList();
@@ -186,8 +186,8 @@ public class MdmCandidateSearchSvc {
 				myCandidateSearcher.search(theResourceType, resourceCriteria, theRequestPartitionId, theContext);
 
 		if (!bundleProvider.isPresent()) {
-			// no results (typically) means too many candidates/
-			// we want to exit immediately
+			// no results means either no matches or too many candidates
+			// either way, we want to exit immediately
 			return;
 		}
 		List<IBaseResource> resources = bundleProvider.get().getAllResources();

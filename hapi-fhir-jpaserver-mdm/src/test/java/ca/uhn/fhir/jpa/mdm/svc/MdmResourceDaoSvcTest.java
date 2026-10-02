@@ -5,6 +5,7 @@ import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
@@ -15,6 +16,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
 import ca.uhn.fhir.mdm.api.MdmConstants;
+import ca.uhn.fhir.mdm.model.MdmMatchAbortReason;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.api.Constants;
@@ -31,6 +33,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -62,6 +65,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 	@AfterEach
 	public void after() throws IOException {
 		myPartitionSettings.setPartitioningEnabled(new PartitionSettings().isPartitioningEnabled());
+		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
 		super.after();
 	}
 
@@ -98,7 +102,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 		// setup
 		Patient patient = buildFrankPatient(); // not saved
 		MdmTransactionContext context = new MdmTransactionContext();
-		context.setIsBlocked(true); // won't matter
+		context.setMatchingAborted(MdmMatchAbortReason.BLOCKED); // won't matter
 
 		// test
 		myResourceDaoSvc.updateUnmatchedTags(patient, context);
@@ -123,7 +127,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 
 		DaoMethodOutcome outcome = myPatientDao.create(patient, new SystemRequestDetails());
 
-		Patient saved = myPatientDao.read(outcome.getId(), new SystemRequestDetails());
+		Patient saved = myPatientDao.read(outcome.getId().toUnqualifiedVersionless(), new SystemRequestDetails());
 
 		// test
 		myResourceDaoSvc.updateUnmatchedTags(saved, context);
@@ -141,17 +145,13 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 	}
 
 	@ParameterizedTest
-	@ValueSource(booleans = { true, false })
-	public void tagResourceAsUnmatched_withUnmatchedCriteria_works(boolean theIsTooMany) {
+	@EnumSource(value = MdmMatchAbortReason.class)
+	public void tagResourceAsUnmatched_withUnmatchedCriteria_works(MdmMatchAbortReason theReason) {
 		// setup
 		Patient patient = buildFrankPatient();
 		MdmTransactionContext context = new MdmTransactionContext();
-		if (theIsTooMany) {
-			context.setTooManyCandidatesMatched(true);
-		} else {
-			// blocked
-			context.setIsBlocked(true);
-		}
+		context.setMatchingAborted(theReason);
+
 		String existingSystem = "http://hapi-fhir.example.com";
 		String value = "abc123";
 		patient.getMeta()
@@ -161,13 +161,13 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 
 		DaoMethodOutcome outcome = myPatientDao.create(patient, new SystemRequestDetails());
 
-		Patient saved = myPatientDao.read(outcome.getId(), new SystemRequestDetails());
+		Patient saved = myPatientDao.read(outcome.getId().toUnqualifiedVersionless(), new SystemRequestDetails());
 
 		// test
 		myResourceDaoSvc.updateUnmatchedTags(saved, context);
 
 		// validate
-		saved = myPatientDao.read(outcome.getId(), new SystemRequestDetails());
+		saved = myPatientDao.read(outcome.getId().toUnqualifiedVersionless(), new SystemRequestDetails());
 
 		assertNotNull(saved.getMeta());
 		assertTrue(saved.getMeta()
@@ -175,11 +175,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 			.stream()
 			.filter(t -> t.getSystem().equalsIgnoreCase(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE))
 			.anyMatch(t -> {
-				if (theIsTooMany) {
-					return t.getCode().equalsIgnoreCase(MdmConstants.TOO_MANY_CANDIDATES);
-				} else {
-					return t.getCode().equalsIgnoreCase(MdmConstants.BLOCKED_VALUE);
-				}
+				return t.getCode().equalsIgnoreCase(theReason.getCode());
 			}));
 		assertTrue(
 			saved.getMeta()
@@ -190,13 +186,14 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 	}
 
 	@ParameterizedTest
-	@ValueSource(booleans = { true, false })
-	public void updateMatchedTags_withOppositeTagSet_flipsThem(boolean theIsTooMany) {
+	@EnumSource(value = MdmMatchAbortReason.class)
+	public void updateMatchedTags_withOppositeTagSet_flipsThem(MdmMatchAbortReason theReason) {
 		// setup
 		Patient patient = buildFrankPatient();
+		boolean isTooManyMatches = theReason == MdmMatchAbortReason.TOO_MANY_CANDIDATES;
 
 		// set the opposite value onto it
-		if (theIsTooMany) {
+		if (isTooManyMatches) {
 			patient.getMeta()
 				.addTag()
 				.setSystem(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE)
@@ -211,18 +208,15 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 
 		// test
 		MdmTransactionContext context = new MdmTransactionContext();
-		if (theIsTooMany) {
-			context.setTooManyCandidatesMatched(true);
-		} else {
-			context.setIsBlocked(true);
-		}
-		Patient saved = myPatientDao.read(outcome.getId(), new SystemRequestDetails());
+		context.setMatchingAborted(theReason);
+
+		Patient saved = myPatientDao.read(outcome.getId().toUnqualifiedVersionless(), new SystemRequestDetails());
 		myResourceDaoSvc.updateUnmatchedTags(saved, context);
 
 		// validate
-		String expectedCode = theIsTooMany ? MdmConstants.TOO_MANY_CANDIDATES : MdmConstants.BLOCKED_VALUE;
-		String unexpectedCode = theIsTooMany ? MdmConstants.BLOCKED_VALUE : MdmConstants.TOO_MANY_CANDIDATES;
-		Patient reread = myPatientDao.read(outcome.getId(), new SystemRequestDetails());
+		String expectedCode = theReason.getCode();
+		String unexpectedCode = isTooManyMatches ? MdmConstants.BLOCKED_VALUE : MdmConstants.TOO_MANY_CANDIDATES;
+		Patient reread = myPatientDao.read(outcome.getId().toUnqualifiedVersionless(), new SystemRequestDetails());
 
 		for (Patient tocheck : new Patient[] { saved, reread }) {
 			assertTrue(tocheck.getMeta()
@@ -269,11 +263,11 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 
 		// test
 		MdmTransactionContext context = new MdmTransactionContext();
-		Patient saved = myPatientDao.read(outcome.getId(), new SystemRequestDetails());
+		Patient saved = myPatientDao.read(outcome.getId().toUnqualifiedVersionless(), new SystemRequestDetails());
 		myResourceDaoSvc.updateUnmatchedTags(saved, context);
 
 		// validate
-		Patient reread = myPatientDao.read(outcome.getId(), new SystemRequestDetails());
+		Patient reread = myPatientDao.read(outcome.getId().toUnqualifiedVersionless(), new SystemRequestDetails());
 		assertTrue(reread.getMeta()
 			.getTag()
 			.stream()
@@ -308,7 +302,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 			.setCode(MdmConstants.TOO_MANY_CANDIDATES);
 
 		DaoMethodOutcome outcome = myPatientDao.create(patient, new SystemRequestDetails());
-		Patient saved = myPatientDao.read(outcome.getId(), new SystemRequestDetails());
+		Patient saved = myPatientDao.read(outcome.getId().toUnqualifiedVersionless(), new SystemRequestDetails());
 		assertEquals(2, saved.getMeta()
 			.getTag()
 			.stream()
@@ -319,11 +313,53 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 		myResourceDaoSvc.updateUnmatchedTags(saved, new MdmTransactionContext());
 
 		// validate
-		Patient reread = myPatientDao.read(outcome.getId(), new SystemRequestDetails());
+		Patient reread = myPatientDao.read(outcome.getId().toUnqualifiedVersionless(), new SystemRequestDetails());
 		assertTrue(reread.getMeta()
 			.getTag()
 			.stream()
 			.noneMatch(t -> t.getSystem().equalsIgnoreCase(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE)));
+	}
+
+	@ParameterizedTest
+	@EnumSource(value = JpaStorageSettings.TagStorageModeEnum.class)
+	public void updateUnmatchedTags_allTagStorageModes_flipsThenClearsTag(JpaStorageSettings.TagStorageModeEnum theTagStorageMode) {
+		// setup
+		myStorageSettings.setTagStorageMode(theTagStorageMode);
+		String existingSystem = "http://hapi-fhir.example.com";
+		String value = "abc123";
+		Patient patient = buildFrankPatient();
+		patient.getMeta()
+			.addTag()
+			.setSystem(existingSystem)
+			.setCode(value);
+		patient.getMeta()
+			.addTag()
+			.setSystem(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE)
+			.setCode(MdmConstants.BLOCKED_VALUE);
+		DaoMethodOutcome outcome = myPatientDao.create(patient, new SystemRequestDetails());
+		MdmTransactionContext context = new MdmTransactionContext();
+		context.setMatchingAborted(MdmMatchAbortReason.TOO_MANY_CANDIDATES);
+
+		// test - flip
+		Patient saved = myPatientDao.read(outcome.getId().toUnqualifiedVersionless(), new SystemRequestDetails());
+		myResourceDaoSvc.updateUnmatchedTags(saved, context);
+
+		// validate
+		Patient reread = myPatientDao.read(outcome.getId().toUnqualifiedVersionless(), new SystemRequestDetails());
+		assertThat(reread.getMeta().getTag())
+			.filteredOn(t -> MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE.equals(t.getSystem()))
+			.extracting(t -> t.getCode())
+			.containsExactly(MdmConstants.TOO_MANY_CANDIDATES);
+		assertThat(reread.getMeta().getTag(existingSystem, value)).isNotNull();
+
+		// test - clear
+		myResourceDaoSvc.updateUnmatchedTags(reread, new MdmTransactionContext());
+
+		// validate
+		reread = myPatientDao.read(outcome.getId().toUnqualifiedVersionless(), new SystemRequestDetails());
+		assertThat(reread.getMeta().getTag())
+			.noneMatch(t -> MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE.equals(t.getSystem()));
+		assertThat(reread.getMeta().getTag(existingSystem, value)).isNotNull();
 	}
 
 	/**

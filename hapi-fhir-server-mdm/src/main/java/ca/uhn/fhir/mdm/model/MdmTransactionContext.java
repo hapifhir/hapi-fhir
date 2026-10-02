@@ -50,14 +50,14 @@ public class MdmTransactionContext {
 	private String myResourceType;
 
 	/**
-	 * Whether or not the currently processed resource is a 'blocked resource'.
-	 * This will only be set on matching.
+	 * Whether or not mdm matching has been aborted.
+	 * If set, set the reason below
 	 */
-	private boolean myIsBlockedResource;
+	private boolean myIsMatchingAborted;
+
+	private MdmMatchAbortReason myReason;
 
 	private List<IMdmLink> myMdmLinkEvents = new ArrayList<>();
-
-	private boolean myIsTooManyCandidatesMatched;
 
 	public TransactionLogMessages getTransactionLogMessages() {
 		return myTransactionLogMessages;
@@ -120,19 +120,16 @@ public class MdmTransactionContext {
 		myMdmLinkEvents = theMdmLinkEvents;
 	}
 
-	public void setIsBlocked(boolean theIsBlocked) {
-		myIsBlockedResource = theIsBlocked;
+	public MdmMatchAbortReason getReason() {
+		return myReason;
 	}
 
-	public boolean getIsBlocked() {
-		return myIsBlockedResource;
+	public boolean isMatchingAborted() {
+		return myIsMatchingAborted;
 	}
 
-	public boolean isTooManyCandidatesMatched() {
-		return myIsTooManyCandidatesMatched;
-	}
-
-	public void setTooManyCandidatesMatched(boolean theTooManyCandidatesMatched) {
-		myIsTooManyCandidatesMatched = theTooManyCandidatesMatched;
+	public void setMatchingAborted(MdmMatchAbortReason theReason) {
+		myReason = theReason;
+		myIsMatchingAborted = myReason != null;
 	}
 }
