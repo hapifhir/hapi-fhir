@@ -61,7 +61,6 @@ import java.util.stream.Collectors;
 import static java.util.Comparator.comparing;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 class SearchParamExtractorR4Test implements ITestDataBuilder {
 
@@ -715,24 +714,23 @@ class SearchParamExtractorR4Test implements ITestDataBuilder {
 		}
 
 		// Created by claude-opus-5-5
-		// Expected to fail on both master and the GH-8408 branch: master indexes a null high value,
-		// the branch produces no index row
+		// Review 3 verification: a day-precision boundsPeriod.end must still cover the whole day when an
+		// event falls on that same day
 		@Test
-		void testTimingEventsWithBoundsPeriodStartOnlyIsIndexed() {
-			// A Timing with concrete events must stay searchable even when its boundsPeriod is open-ended
+		void testTimingEventOnDayPrecisionPeriodEndKeepsEndOfDayHigh() {
 			ServiceRequest serviceRequest = new ServiceRequest();
 			serviceRequest.setOccurrence(new Timing()
-					.addEvent(new DateTimeType("2025-02-08T14:00:00Z").getValue())
+					.addEvent(new DateTimeType("2025-02-10T10:00:00Z").getValue())
 					.setRepeat(new Timing.TimingRepeatComponent()
-							.setBounds(new Period().setStartElement(new DateTimeType("2025-02-07T14:00:00Z")))));
+							.setBounds(new Period()
+									.setStartElement(new DateTimeType("2025-02-07"))
+									.setEndElement(new DateTimeType("2025-02-10")))));
 
 			ResourceIndexedSearchParamDate result = extractOccurrenceParam(serviceRequest);
 
-			assertThat(result)
-					.as("Timing with events and a start-only boundsPeriod must produce an occurrence index row")
-					.isNotNull();
-			assertThat(result.getValueLow()).isEqualTo(new DateTimeType("2025-02-07T14:00:00Z").getValue());
-			assertThat(result.getValueHigh()).isNotNull();
+			assertThat(result).isNotNull();
+			assertThat(result.getValueHigh())
+					.isEqualTo(DateUtils.getEndOfDay(new DateTimeType("2025-02-10").getValue()));
 		}
 	}
 
