@@ -2356,7 +2356,12 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		/**
 		 * For Timings, we consider all the dates in the structure (eg. Timing.event, Timing.repeat.bounds.boundsPeriod)
 		 * to create an upper and lower bound Indexed Search Param.
-		 * If `event` is present, we don't normalize the start/end date of the period.
+		 *
+		 * If `event` is present, we don't normalize the start/end date of the period. This is to prevent unbounded
+		 * Periods turning into a catch-all and returning search results with events outside a searched Period.
+		 *
+		 * Note: `DateStringWrapper` uses only `Date` for comparison, so time values are not considered when indexing.
+		 * See comments on {@link ResourceIndexedSearchParamDate#reComputeValueHighDate}
 		 */
 		private void addDate_Timing(
 				String theResourceType,
@@ -2404,8 +2409,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 										.orElse(null);
 
 						// ONLY If we have no event dates, normalize the Period for indexing.
-						// This is to prevent unbounded Periods turning into a catch-all and returning
-						// search results with events outside a searched Period.
 						if (eventDatesSorted.isEmpty()) {
 							PeriodAsDates periodAsDates = normalizePeriodDates(periodStart, periodEnd);
 							if (periodAsDates != null) {
