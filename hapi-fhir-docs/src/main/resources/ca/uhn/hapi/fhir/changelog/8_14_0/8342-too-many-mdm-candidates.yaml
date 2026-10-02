@@ -1,0 +1,19 @@
+---
+type: add
+issue: 8342
+title: "Added two candidate search thresholds to MDM matching: a warning limit (default 50) and a maximum
+        (default 10000). At or above the warning limit, a warning is logged. At or above the maximum, the resource is skipped:
+        no golden resource is created and it is tagged `http://hapifhir.io/fhir/NamingSystem/mdm-unmatched|too-many-candidates`.
+        Resources blocked by block list rules are tagged `blocked` under the same system, and keep any golden
+        resource they already have. Either tag is removed when a later MDM pass matches the resource.
+
+        API changes:
+
+        * `IMdmMatchFinderSvc.getMatchedTargets` and `CandidateSearcher.search` now take an
+        `MdmTransactionContext`. At the maximum, `getMatchedTargets` returns an empty list and sets
+        `MdmTransactionContext.isTooManyCandidatesMatched()` instead of throwing.
+
+        * Added `IMdmResourceDaoSvc.updateUnmatchedTags` and `IMdmSettings.getCandidateSearchWarnLimit`.
+
+        * `TooManyCandidatesException` moved to `ca.uhn.fhir.mdm.model` and is thrown only by `$mdm-match`.
+"

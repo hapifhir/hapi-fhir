@@ -30,7 +30,11 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmConstants;
+import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
+import ca.uhn.fhir.mdm.model.MdmMatchAbortReason;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.mdm.util.MdmSearchParamBuildingUtils;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -38,8 +42,12 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -48,10 +56,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Service
 public class MdmResourceDaoSvcImpl implements IMdmResourceDaoSvc {
+	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	private static final int MAX_MATCHING_GOLDEN_RESOURCES = 1000;
 
@@ -162,5 +174,64 @@ public class MdmResourceDaoSvcImpl implements IMdmResourceDaoSvc {
 						myFhirContext, Collections.singletonList(theEid.getSystem()), theGoldenResource)
 				.stream()
 				.anyMatch(candidate -> Objects.equals(candidate.getValue(), theEid.getValue()));
+	}
+
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	@Override
+	public void updateUnmatchedTags(@Nonnull IBaseResource theResource, @Nonnull MdmTransactionContext theContext) {
+		if (!theResource.getIdElement().hasIdPart()) {
+			ourLog.error("Cannot tag resources that have not first been persisted!");
+			return;
+		}
+
+		String desiredCode =
+				theContext.isMatchingAborted() ? theContext.getReason().getCode() : null;
+
+		Set<String> codesToRemove = theResource.getMeta().getTag().stream()
+				.filter(tag -> MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE.equalsIgnoreCase(tag.getSystem()))
+				.map(IBaseCoding::getCode)
+				.filter(code -> !Objects.equals(desiredCode, code))
+				.collect(Collectors.toSet());
+
+		boolean needsTag = isNotBlank(desiredCode)
+				&& theResource.getMeta().getTag(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE, desiredCode) == null;
+
+		if (!needsTag && codesToRemove.isEmpty()) {
+			// already correct
+			return;
+		}
+
+		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResource.fhirType());
+
+		IIdType id = theResource.getIdElement().toUnqualifiedVersionless();
+		SystemRequestDetails rd = getSystemRequestDetailsForResource(theResource);
+
+		// tags stored outside the resource body are not removed by an update
+		for (String code : codesToRemove) {
+			resourceDao.removeTag(id, TagTypeEnum.TAG, MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE, code, rd);
+		}
+
+		MdmResourceUtil.removeTagWithSystem(theResource, MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE);
+		if (theContext.getReason() == MdmMatchAbortReason.BLOCKED) {
+			MdmResourceUtil.tagResourceAsBlocked(theResource);
+		} else if (theContext.getReason() == MdmMatchAbortReason.TOO_MANY_CANDIDATES) {
+			MdmResourceUtil.tagResourceAsTooManyMatchCandidates(theResource);
+		}
+		resourceDao.update(theResource, rd);
+	}
+
+	private SystemRequestDetails getSystemRequestDetailsForResource(IBaseResource theResource) {
+		SystemRequestDetails rd = new SystemRequestDetails();
+		RequestPartitionId partitionId = RequestPartitionId.getPartitionFromUserDataIfPresent(theResource)
+				.orElse(RequestPartitionId.allPartitions());
+		rd.setRequestPartitionId(partitionId);
+		return rd;
+	}
+
+	private static Set<String> getTagCodes(IBaseResource theResource, String theSystem) {
+		return theResource.getMeta().getTag().stream()
+				.filter(tag -> theSystem.equalsIgnoreCase(tag.getSystem()))
+				.map(IBaseCoding::getCode)
+				.collect(Collectors.toSet());
 	}
 }
