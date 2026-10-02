@@ -46,6 +46,7 @@ public class MdmSettings implements IMdmSettings {
 	private String myScriptText;
 	private String mySurvivorshipRules;
 	private MdmRulesJson myMdmRules;
+	private MdmRulesJson myMatchOperationMdmRules;
 	private boolean myPreventEidUpdates;
 	private String myGoldenResourcePartitionName;
 	private boolean mySearchAllPartitionForMatch = false;
@@ -58,6 +59,8 @@ public class MdmSettings implements IMdmSettings {
 	 * added efficiency.
 	 */
 	private boolean myIgnorePlaceholderResources = false;
+
+	private boolean myCertainMatchOnSameEid = true;
 
 	/**
 	 * If disabled, the underlying MDM system will operate under the following assumptions:
@@ -100,6 +103,23 @@ public class MdmSettings implements IMdmSettings {
 	 */
 	public void setIgnorePlaceholderResources(boolean theIgnorePlaceholderResources) {
 		myIgnorePlaceholderResources = theIgnorePlaceholderResources;
+	}
+
+	@Override
+	public boolean isCertainMatchOnSameEid() {
+		return myCertainMatchOnSameEid;
+	}
+
+	/**
+	 * Sets whether the same external EID alone is a certain match. Enabled by default. When disabled, neither
+	 * {@code $match} nor linking treats a resource with the same EID as a MATCH: the matching rules decide, and the
+	 * EID counts only as far as they use it.
+	 *
+	 * @see IMdmSettings#isCertainMatchOnSameEid()
+	 */
+	public MdmSettings setCertainMatchOnSameEid(boolean theCertainMatchOnSameEid) {
+		myCertainMatchOnSameEid = theCertainMatchOnSameEid;
+		return this;
 	}
 
 	@Override
@@ -147,6 +167,25 @@ public class MdmSettings implements IMdmSettings {
 	public MdmSettings setMdmRules(MdmRulesJson theMdmRules) {
 		myMdmRuleValidator.validate(theMdmRules);
 		myMdmRules = theMdmRules;
+		return this;
+	}
+
+	@Override
+	public MdmRulesJson getMatchOperationMdmRules() {
+		return myMatchOperationMdmRules != null ? myMatchOperationMdmRules : getMdmRules();
+	}
+
+	/**
+	 * Sets the rules the read-only {@code $match} and {@code $mdm-match} operations score with.
+	 *
+	 * @param theMatchOperationMdmRules the match operation rules, or {@code null}
+	 * @throws ConfigurationException if the match operation rules are invalid
+	 */
+	public MdmSettings setMatchOperationMdmRules(MdmRulesJson theMatchOperationMdmRules) {
+		if (theMatchOperationMdmRules != null) {
+			myMdmRuleValidator.validate(theMatchOperationMdmRules);
+		}
+		myMatchOperationMdmRules = theMatchOperationMdmRules;
 		return this;
 	}
 

@@ -27,6 +27,7 @@ import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MatchedTarget;
 import ca.uhn.fhir.mdm.api.MdmConstants;
+import ca.uhn.fhir.mdm.api.MdmRuleSetEnum;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.mdm.util.MessageHelper;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -148,8 +149,8 @@ public class MdmControllerHelper {
 			requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
 					theRequestDetails, theResourceType);
 		}
-		List<MatchedTarget> matches =
-				myMdmMatchFinderSvc.getMatchedTargets(theResourceType, theResource, requestPartitionId);
+		List<MatchedTarget> matches = myMdmMatchFinderSvc.getMatchedTargets(
+				theResourceType, theResource, requestPartitionId, MdmRuleSetEnum.MATCH_OPERATION);
 		matches.sort(
 				Comparator.comparing((MatchedTarget m) -> m.getMatchResult().getNormalizedScore())
 						.reversed());

@@ -35,11 +35,34 @@ public interface IMdmMatchFinderSvc {
 	 * placeholder resources in returned search results will be ignored. If a placeholder resource is
 	 * itself submitted to this svc, under these conditions. it will always return an empty list.
 	 * *
+	 * Scores with the {@link MdmRuleSetEnum#LINK} rules.
+	 * *
 	 * @param theResourceType the type of the resource.
 	 * @param theResource the resource that we are attempting to find matches for.
 	 * @return a List of {@link MatchedTarget} representing POSSIBLE_MATCH and MATCH outcomes.
 	 */
 	@Nonnull
+	default List<MatchedTarget> getMatchedTargets(
+			String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId) {
+		return getMatchedTargets(theResourceType, theResource, theRequestPartitionId, MdmRuleSetEnum.LINK);
+	}
+
+	/**
+	 * Same as {@link #getMatchedTargets(String, IAnyResource, RequestPartitionId)}, with the candidate search and
+	 * scoring of the given rule set. Callers whose results can create MDM links or merge data must pass
+	 * {@link MdmRuleSetEnum#LINK}.
+	 *
+	 * @param theResourceType the type of the resource.
+	 * @param theResource the resource that we are attempting to find matches for.
+	 * @param theRequestPartitionId the partitions to search for candidates in.
+	 * @param theRuleSet which rules to search for candidates and score with, see
+	 * {@link IMdmSettings#getMdmRules(MdmRuleSetEnum)}.
+	 * @return a List of {@link MatchedTarget} representing POSSIBLE_MATCH and MATCH outcomes.
+	 */
+	@Nonnull
 	List<MatchedTarget> getMatchedTargets(
-			String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId);
+			String theResourceType,
+			IAnyResource theResource,
+			RequestPartitionId theRequestPartitionId,
+			MdmRuleSetEnum theRuleSet);
 }

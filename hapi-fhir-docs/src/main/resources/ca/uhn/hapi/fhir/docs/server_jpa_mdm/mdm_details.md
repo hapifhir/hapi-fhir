@@ -24,9 +24,9 @@ Below are some simplifying principles HAPI MDM follows to reduce complexity and 
 
 1. The HAPI MDM rules define a single identifier system that holds the external enterprise id ("EID"). If a source resource has an external EID, then the Golden Resource it links to always has the same EID.
 
-1. Two different Golden Resources cannot have the same EID.
+1. Two different Golden Resources cannot have the same EID, unless the **Certain match on same EID** setting is disabled (see [MDM EID Settings](/hapi-fhir/docs/server_jpa_mdm/mdm_eid.html#mdm-eid-settings)).
 
-1. Source resources are only ever compared to Golden Resources via this EID.
+1. Source resources are only ever compared to Golden Resources via this EID. When **Certain match on same EID** is disabled, the EID is not used for this comparison, and source resources are matched by the matching rules alone.
 
 ## Meta Tags
 

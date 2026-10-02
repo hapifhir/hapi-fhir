@@ -43,6 +43,30 @@ public interface IMdmSettings {
 
 	MdmRulesJson getMdmRules();
 
+	/**
+	 * The rules the read-only {@code $match} and {@code $mdm-match} operations score with. Their results are only
+	 * returned to the caller, so these rules may be more lenient than {@link #getMdmRules()}, which decide the MDM
+	 * links.
+	 *
+	 * @return the match operation rules, or {@link #getMdmRules()} when no separate match operation rules are
+	 * configured
+	 */
+	default MdmRulesJson getMatchOperationMdmRules() {
+		return getMdmRules();
+	}
+
+	/**
+	 * @param theRuleSet which of the two rules documents to return
+	 * @return {@link #getMdmRules()} for {@link MdmRuleSetEnum#LINK}, {@link #getMatchOperationMdmRules()} for
+	 * {@link MdmRuleSetEnum#MATCH_OPERATION}
+	 */
+	default MdmRulesJson getMdmRules(MdmRuleSetEnum theRuleSet) {
+		return switch (theRuleSet) {
+			case LINK -> getMdmRules();
+			case MATCH_OPERATION -> getMatchOperationMdmRules();
+		};
+	}
+
 	boolean isPreventEidUpdates();
 
 	boolean isPreventMultipleEids();
@@ -82,5 +106,16 @@ public interface IMdmSettings {
 	// In MATCH_ONLY mode, the Patient/$match operation is available, but no mdm processing takes place.
 	default MdmModeEnum getMode() {
 		return MdmModeEnum.MATCH_AND_LINK;
+	}
+
+	/**
+	 * Whether a shared external EID alone is a certain match. When {@code true} (the default), a resource sharing an
+	 * EID with the incoming resource is an EID match and the matching rules are not evaluated: {@code $match} returns
+	 * it as a MATCH, and linking attaches the incoming resource to the Golden Resource carrying that EID. When
+	 * {@code false}, both EID lookups are skipped and the matching rules alone decide, so the EID only counts if the
+	 * rules score it.
+	 */
+	default boolean isCertainMatchOnSameEid() {
+		return true;
 	}
 }

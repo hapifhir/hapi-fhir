@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
 import ca.uhn.fhir.jpa.mdm.models.FindGoldenResourceCandidatesParams;
 import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -47,11 +48,16 @@ public class MdmGoldenResourceFindingSvc {
 	@Autowired
 	private FindCandidateByExampleSvc myFindCandidateByExampleSvc;
 
+	@Autowired
+	private IMdmSettings myMdmSettings;
+
 	/**
 	 * Given an incoming IBaseResource, limited to the supported MDM type, return a list of {@link MatchedGoldenResourceCandidate}
 	 * indicating possible candidates for a matching Golden Resource. Uses several separate methods for finding candidates:
 	 * <p>
-	 * 0. First, check the incoming Resource for an EID. If it is present, and we can find a Golden Resource with this EID, it automatically matches.
+	 * 0. First, if {@link IMdmSettings#isCertainMatchOnSameEid()} is enabled, check the incoming Resource for an EID. If it is
+	 * present, and we can find a Golden Resource with this EID, it automatically matches. If disabled, the EID only counts
+	 * as far as the matching rules score it in step 3.
 	 * 1. First, check link table for any entries where this baseresource is the source of a Golden Resource. If found, return.
 	 * 2. If none are found, attempt to find Golden Resources which link to this theResource.
 	 * 3. If none are found, attempt to find Golden Resources similar to our incoming resource based on the MDM rules and field matchers.
@@ -65,11 +71,12 @@ public class MdmGoldenResourceFindingSvc {
 	public CandidateList findGoldenResourceCandidates(FindGoldenResourceCandidatesParams theParams) {
 		IAnyResource resource = theParams.getResource();
 
-		CandidateList eidGoldenResources = myFindCandidateByEidSvc.findCandidates(resource);
-
 		// if we have matches from eid, we'll return only these
-		if (!eidGoldenResources.isEmpty()) {
-			return eidGoldenResources;
+		if (myMdmSettings.isCertainMatchOnSameEid()) {
+			CandidateList eidGoldenResources = myFindCandidateByEidSvc.findCandidates(resource);
+			if (!eidGoldenResources.isEmpty()) {
+				return eidGoldenResources;
+			}
 		}
 
 		boolean isUpdate =
