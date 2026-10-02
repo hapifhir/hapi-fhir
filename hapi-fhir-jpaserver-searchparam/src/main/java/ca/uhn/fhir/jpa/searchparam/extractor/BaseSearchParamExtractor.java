@@ -2319,9 +2319,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			theParams.add(myIndexedSearchParamDate);
 		}
 
-		/**
-		 * Sets default start/end values for Periods
-		 */
 		private PeriodAsDates normalizePeriodDates(DateStringWrapper periodStart, DateStringWrapper periodEnd) {
 			return normalizePeriodDates(
 					periodStart,
@@ -2331,7 +2328,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		}
 
 		/**
-		 * Sets default start/end values for Periods
+		 * Replaces a missing Period start or end with the configured start or end of time.
 		 */
 		private PeriodAsDates normalizePeriodDates(Date start, String startAsString, Date end, String endAsString) {
 
@@ -2360,7 +2357,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		 * If `event` is present, we don't normalize the start/end date of the period. This is to prevent unbounded
 		 * Periods turning into a catch-all and returning search results with events outside a searched Period.
 		 *
-		 * Note: `DateStringWrapper` uses only `Date` for comparison, so time values are not considered when indexing.
+		 * Note: `DateStringWrapper` compares raw `Date` values, which ignores precision. A date-only period end
+		 * (e.g. `2025-02-10`) compares as midnight, so a later event on the same day becomes the indexed high value.
 		 * See comments on {@link ResourceIndexedSearchParamDate#reComputeValueHighDate}
 		 */
 		private void addDate_Timing(
@@ -2382,7 +2380,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				}
 			}
 
-			// In order to properly set upper and lower bounds, we need to compute each of the separately
 			SortedSet<DateStringWrapper> startDates = new TreeSet<>();
 			SortedSet<DateStringWrapper> endDates = new TreeSet<>();
 
@@ -2408,7 +2405,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 										.findFirst()
 										.orElse(null);
 
-						// ONLY If we have no event dates, normalize the Period for indexing.
 						if (eventDatesSorted.isEmpty()) {
 							PeriodAsDates periodAsDates = normalizePeriodDates(periodStart, periodEnd);
 							if (periodAsDates != null) {
