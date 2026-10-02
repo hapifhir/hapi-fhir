@@ -375,7 +375,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 		Patient saved = myPatientDao.read(outcome.getId(), new SystemRequestDetails());
 
 		MdmTransactionContext context = new MdmTransactionContext();
-		context.setIsBlocked(true);
+		context.setMatchingAborted(MdmMatchAbortReason.BLOCKED);
 
 		AtomicInteger updateCount = new AtomicInteger();
 		IAnonymousInterceptor updateCounter = (thePointcut, theArgs) -> updateCount.incrementAndGet();
@@ -411,7 +411,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 			.hasSize(2);
 
 		MdmTransactionContext context = new MdmTransactionContext();
-		context.setIsBlocked(true);
+		context.setMatchingAborted(MdmMatchAbortReason.BLOCKED);
 
 		// test
 		myResourceDaoSvc.updateUnmatchedTags(saved, context);
@@ -437,7 +437,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 		Patient saved = myPatientDao.read(outcome.getId().toUnqualifiedVersionless(), partitionRequest);
 
 		MdmTransactionContext context = new MdmTransactionContext();
-		context.setIsBlocked(true);
+		context.setMatchingAborted(MdmMatchAbortReason.BLOCKED);
 
 		// test
 		myResourceDaoSvc.updateUnmatchedTags(saved, context);
@@ -466,7 +466,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 		saved.setUserData(Constants.RESOURCE_PARTITION_ID, null);
 
 		MdmTransactionContext context = new MdmTransactionContext();
-		context.setIsBlocked(true);
+		context.setMatchingAborted(MdmMatchAbortReason.BLOCKED);
 
 		FixedPartitionInterceptor partitionInterceptor = new FixedPartitionInterceptor(partitionId);
 		myInterceptorRegistry.registerInterceptor(partitionInterceptor);
