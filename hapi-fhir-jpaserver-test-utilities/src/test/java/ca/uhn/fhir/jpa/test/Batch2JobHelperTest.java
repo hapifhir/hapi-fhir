@@ -258,8 +258,8 @@ class Batch2JobHelperTest {
 
 		// execute & verify
 		assertThatThrownBy(() -> myBatch2JobHelper.awaitNoInFlightWork(Duration.ofMillis(500)))
-			.hasMessageContaining("1 running, 3 queued")
-			.hasMessageContaining("reducer busy");
+			.hasMessageContaining("\"work channel has 1 running and 3 queued work chunks\"")
+			.hasMessageContaining("\"reducer is running or waiting to run a reduction step\"");
 	}
 
 	@Test

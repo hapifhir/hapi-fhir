@@ -559,10 +559,10 @@ public class Batch2JobHelper {
 		int running = theWorkChannelExecutor.getActiveCount();
 		int queued = theWorkChannelExecutor.getQueueSize();
 		if (running > 0 || queued > 0) {
-			retVal.add("work channel: " + running + " running, " + queued + " queued");
+			retVal.add("work channel has " + running + " running and " + queued + " queued work chunks");
 		}
 		if (!theReducer.isIdleForUnitTest()) {
-			retVal.add("reducer busy");
+			retVal.add("reducer is running or waiting to run a reduction step");
 		}
 		return retVal;
 	}
