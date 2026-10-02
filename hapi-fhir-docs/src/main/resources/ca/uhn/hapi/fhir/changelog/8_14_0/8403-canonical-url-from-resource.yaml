@@ -1,0 +1,6 @@
+---
+type: add
+issue: 8403
+title: "UrlUtil has a new getCanonicalUrl method that reads the url and version of a conformance resource, such as
+  a ValueSet or CodeSystem, of any FHIR version. The getValueSetUrl, getValueSetVersion and getCodeSystemUrl
+  methods of CommonCodeSystemsTerminologyService are deprecated in its favour."

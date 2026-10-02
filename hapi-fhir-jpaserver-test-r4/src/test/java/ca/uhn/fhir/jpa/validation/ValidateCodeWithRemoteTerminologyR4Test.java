@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.rest.gclient.IOperationUnnamed;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.test.utilities.validation.IValidationProviders;
@@ -12,12 +13,15 @@ import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
@@ -55,6 +59,8 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 	private static final String CODE_SYSTEM_V2_0247_URI = "http://terminology.hl7.org/CodeSystem/v2-0247";
 	private static final String INVALID_CODE_SYSTEM_URI = "http://terminology.hl7.org/CodeSystem/INVALID-CODESYSTEM";
 	private static final String UNKNOWN_VALUE_SYSTEM_URI = "http://hl7.org/fhir/ValueSet/unknown-value-set";
+	private static final String LOCAL_CS_URL = "http://example.org/CodeSystem/multi-version";
+	private static final String LOCAL_OLDER_VERSION = "1.0.0";
 	private static final FhirContext ourCtx = FhirContext.forR4();
 
 	@RegisterExtension
@@ -254,13 +260,16 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 	}
 
 	@Test
-	void validateCode_withCodeableConcept_returnsNotSupported() {
+	void validateCode_withCodeableConcept_isValidatedByTheRemoteServer() {
+		Parameters params = new Parameters().addParameter("result", true).addParameter("display", DISPLAY);
+		setupCodeSystemValidateCode(CODE_SYSTEM_V2_0247_URI, CODE_BODY_MASS_INDEX, params);
 		CodeableConcept cc = new CodeableConcept();
 		cc.addCoding()
 			.setSystem(CODE_SYSTEM_V2_0247_URI)
 			.setCode(CODE_BODY_MASS_INDEX);
 
 		Parameters inParams = new Parameters()
+			.addParameter("url", new UriType(CODE_SYSTEM_V2_0247_URI))
 			.addParameter("codeableConcept", cc);
 
 		Parameters respParam = myClient.operation()
@@ -269,9 +278,105 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 			.withParameters(inParams)
 			.execute();
 
-		assertThat(respParam.getParameterBool("result")).isFalse();
-		assertThat(respParam.getParameterValue("message"))
-			.hasToString("Terminology service does not yet support codeable concepts.");
+		assertThat(respParam.getParameterBool("result")).isTrue();
+		assertThat(respParam.getParameterValue("display")).hasToString(DISPLAY);
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCodeOperationOnValueSetInstance_includeNamesOlderLocalVersion_validatesAgainstThatVersion() {
+		IIdType valueSetId = createLocalCodeSystemVersionsAndValueSet();
+
+		Parameters codeInNamedVersion = validateCode(myClient.operation().onInstance(valueSetId), new Parameters()
+			.addParameter("code", new CodeType("code-a"))
+			.addParameter("system", new UriType(LOCAL_CS_URL)));
+		Parameters codeOnlyInCurrentVersion = validateCode(myClient.operation().onInstance(valueSetId), new Parameters()
+			.addParameter("code", new CodeType("code-b"))
+			.addParameter("system", new UriType(LOCAL_CS_URL)));
+
+		assertThat(codeInNamedVersion.getParameterBool("result")).as(message(codeInNamedVersion)).isTrue();
+		assertThat(codeOnlyInCurrentVersion.getParameterBool("result")).as(message(codeOnlyInCurrentVersion)).isFalse();
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCodeOperationOnCodeSystem_olderLocalVersion_validatesAgainstThatVersion() {
+		createLocalCodeSystemVersionsAndValueSet();
+
+		Parameters codeInNamedVersion = validateCode(myClient.operation().onType(CodeSystem.class), new Parameters()
+			.addParameter("url", new UriType(LOCAL_CS_URL))
+			.addParameter("version", new StringType(LOCAL_OLDER_VERSION))
+			.addParameter("code", new CodeType("code-a")));
+		Parameters codeOnlyInCurrentVersion = validateCode(myClient.operation().onType(CodeSystem.class), new Parameters()
+			.addParameter("url", new UriType(LOCAL_CS_URL))
+			.addParameter("version", new StringType(LOCAL_OLDER_VERSION))
+			.addParameter("code", new CodeType("code-b")));
+
+		assertThat(codeInNamedVersion.getParameterBool("result")).as(message(codeInNamedVersion)).isTrue();
+		assertThat(codeOnlyInCurrentVersion.getParameterBool("result")).as(message(codeOnlyInCurrentVersion)).isFalse();
+	}
+
+	/**
+	 * The remote server answers only for the version registered below, so a request that loses the version on
+	 * the way finds no answer.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCodeOperation_versionOfRemoteCodeSystem_sendsTheVersion() {
+		final String version = "2.0.0";
+		final String valueSetUrl = "http://hl7.org/fhir/ValueSet/list-example-codes";
+		Parameters remoteResponse = new Parameters().addParameter("result", true).addParameter("display", DISPLAY);
+		myCodeSystemProvider.addTerminologyResource(CODE_SYSTEM_V2_0247_URI, version);
+		myCodeSystemProvider.addTerminologyResponse(OPERATION_VALIDATE_CODE, CODE_SYSTEM_V2_0247_URI, version, "P", remoteResponse);
+		myValueSetProvider.addTerminologyResource(valueSetUrl);
+		myValueSetProvider.addTerminologyResponse(OPERATION_VALIDATE_CODE, valueSetUrl, version, "P", remoteResponse);
+
+		Parameters onCodeSystem = validateCode(myClient.operation().onType(CodeSystem.class), new Parameters()
+			.addParameter("url", new UriType(CODE_SYSTEM_V2_0247_URI))
+			.addParameter("version", new StringType(version))
+			.addParameter("code", new CodeType("P")));
+		Parameters onValueSet = validateCode(myClient.operation().onType(ValueSet.class), new Parameters()
+			.addParameter("url", new UriType(valueSetUrl))
+			.addParameter("code", new CodeType("P"))
+			.addParameter("system", new UriType(CODE_SYSTEM_V2_0247_URI))
+			.addParameter("systemVersion", new StringType(version)));
+
+		assertThat(onCodeSystem.getParameterBool("result")).as(message(onCodeSystem)).isTrue();
+		assertThat(onValueSet.getParameterBool("result")).as(message(onValueSet)).isTrue();
+	}
+
+	private IIdType createLocalCodeSystemVersionsAndValueSet() {
+		// the remote server holds neither, so the locally stored terminology must answer
+		myCodeSystemProvider.setShouldThrowExceptionForResourceNotFound(false);
+		myValueSetProvider.setShouldThrowExceptionForResourceNotFound(false);
+		// 1.0.0 is written first and 1.0.1 second, so 1.0.1 is the current version
+		createLocalCodeSystem(LOCAL_OLDER_VERSION, "code-a");
+		createLocalCodeSystem("1.0.1", "code-b");
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl("http://example.org/ValueSet/older-version-only");
+		valueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		valueSet.getCompose().addInclude().setSystem(LOCAL_CS_URL).setVersion(LOCAL_OLDER_VERSION).addConcept().setCode("code-a");
+		IIdType valueSetId = myValueSetDao.create(valueSet, mySrd).getId().toUnqualifiedVersionless();
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		return valueSetId;
+	}
+
+	private void createLocalCodeSystem(String theVersion, String theCode) {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(LOCAL_CS_URL);
+		codeSystem.setVersion(theVersion);
+		codeSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		codeSystem.addConcept().setCode(theCode);
+		myCodeSystemDao.create(codeSystem, mySrd);
+	}
+
+	private static Parameters validateCode(IOperationUnnamed theTarget, Parameters theParameters) {
+		return theTarget.named(OPERATION_VALIDATE_CODE).withParameters(theParameters).execute();
+	}
+
+	private static String message(Parameters theResult) {
+		return String.valueOf(theResult.getParameterValue("message"));
 	}
 
 	private void setupValueSetValidateCode(String theUrl, String theSystem, String theCode, IBaseParameters theResponseParams) {
