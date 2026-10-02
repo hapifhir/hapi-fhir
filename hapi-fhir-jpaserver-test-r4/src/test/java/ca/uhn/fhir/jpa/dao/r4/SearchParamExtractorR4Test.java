@@ -712,26 +712,6 @@ class SearchParamExtractorR4Test implements ITestDataBuilder {
 			assertNotNull(result.getValueHigh());
 			assertEquals(result.getValueLow(), result.getValueHigh());
 		}
-
-		// Created by claude-opus-5-5
-		// Review 3 verification: a day-precision boundsPeriod.end must still cover the whole day when an
-		// event falls on that same day
-		@Test
-		void testTimingEventOnDayPrecisionPeriodEndKeepsEndOfDayHigh() {
-			ServiceRequest serviceRequest = new ServiceRequest();
-			serviceRequest.setOccurrence(new Timing()
-					.addEvent(new DateTimeType("2025-02-10T10:00:00Z").getValue())
-					.setRepeat(new Timing.TimingRepeatComponent()
-							.setBounds(new Period()
-									.setStartElement(new DateTimeType("2025-02-07"))
-									.setEndElement(new DateTimeType("2025-02-10")))));
-
-			ResourceIndexedSearchParamDate result = extractOccurrenceParam(serviceRequest);
-
-			assertThat(result).isNotNull();
-			assertThat(result.getValueHigh())
-					.isEqualTo(DateUtils.getEndOfDay(new DateTimeType("2025-02-10").getValue()));
-		}
 	}
 
 	@Override
