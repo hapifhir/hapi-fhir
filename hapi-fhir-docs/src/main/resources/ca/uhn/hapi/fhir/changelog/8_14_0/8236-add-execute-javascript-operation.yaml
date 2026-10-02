@@ -1,0 +1,10 @@
+---
+type: add
+issue: 8236
+title: "A new system-level operation `$execute-javascript` has been added to the JPA server. It runs an
+  administrator-vetted, server-side JavaScript file (sandboxed via the embedded GraalJS engine, with no
+  host, filesystem or network access, and a configurable execution timeout) to transform FHIR resources.
+  Callers reference a script by name and cannot supply code over the wire. The provider is not wired in
+  by default; deployments must add the optional `org.graalvm.js:js` dependency, configure a scripts
+  directory via `JpaStorageSettings`, and register the `JavaScriptExecutionProvider` explicitly.
+  Thanks to Jens Kristian Villadsen for the contribution!"
