@@ -119,7 +119,7 @@ public class TermReindexingSvcImpl implements ITermReindexingSvc, IHasScheduledJ
 	}
 
 	private void createParentsString(StringBuilder theParentsBuilder, Long theConceptPid) {
-		Validate.notNull(theConceptPid, "theConceptPid must not be null");
+		Validate.notNull(theConceptPid, "conceptPid must not be null");
 		List<Long> parents = myChildToParentPidCache.get(theConceptPid);
 		if (parents.contains(-1L)) {
 			return;
