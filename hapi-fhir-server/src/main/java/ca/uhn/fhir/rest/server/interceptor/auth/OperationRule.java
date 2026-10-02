@@ -50,6 +50,18 @@ class OperationRule extends BaseRule implements IAuthRule {
 	private HashSet<Class<? extends IBaseResource>> myAppliesToTypes;
 	private List<IIdType> myAppliesToIds;
 	private HashSet<Class<? extends IBaseResource>> myAppliesToInstancesOfType;
+
+	/**
+	 * Cached set of resource type name strings derived from myAppliesToTypes.
+	 * This avoids repeated iteration and FhirContext lookups on every authorization check.
+	 */
+	private volatile Set<String> myAppliesToTypeNames;
+
+	/**
+	 * Cached set of resource type name strings derived from myAppliesToInstancesOfType.
+	 * This avoids repeated iteration and FhirContext lookups on every authorization check.
+	 */
+	private volatile Set<String> myAppliesToInstancesOfTypeNames;
 	private boolean myAppliesToAnyType;
 	private boolean myAppliesToAnyInstance;
 	private boolean myAppliesAtAnyLevel;
@@ -137,14 +149,8 @@ class OperationRule extends BaseRule implements IAuthRule {
 				if (myAppliesToAnyType || myAppliesAtAnyLevel) {
 					applies = true;
 				} else if (myAppliesToTypes != null) {
-					// TODO: Convert to a map of strings and keep the result
-					for (Class<? extends IBaseResource> next : myAppliesToTypes) {
-						String resName = ctx.getResourceType(next);
-						if (resName.equals(theRequestDetails.getResourceName())) {
-							applies = true;
-							break;
-						}
-					}
+					Set<String> typeNames = getOrCreateAppliesToTypeNames(ctx);
+					applies = typeNames.contains(theRequestDetails.getResourceName());
 				}
 				break;
 			case EXTENDED_OPERATION_INSTANCE:
@@ -178,21 +184,16 @@ class OperationRule extends BaseRule implements IAuthRule {
 							}
 						}
 						if (myAppliesToInstancesOfType != null) {
-							// TODO: Convert to a map of strings and keep the result
-							for (Class<? extends IBaseResource> next : myAppliesToInstancesOfType) {
-								String resName = ctx.getResourceType(next);
-								if (resName.equals(requestResourceId.getResourceType())) {
-									applies = true;
-									if (isBlockedByInstanceFilter(
-											theRequestDetails,
-											requestResourceId,
-											theInputResource,
-											theOperation,
-											theRuleApplier)) {
-										applies = false;
-									} else {
-										break;
-									}
+							Set<String> instanceTypeNames = getOrCreateAppliesToInstancesOfTypeNames(ctx);
+							if (instanceTypeNames.contains(requestResourceId.getResourceType())) {
+								applies = true;
+								if (isBlockedByInstanceFilter(
+										theRequestDetails,
+										requestResourceId,
+										theInputResource,
+										theOperation,
+										theRuleApplier)) {
+									applies = false;
 								}
 							}
 						}
@@ -246,6 +247,38 @@ class OperationRule extends BaseRule implements IAuthRule {
 					myAppliesToAnyInstance || isNotEmpty(myAppliesToInstancesOfType) || isNotEmpty(myAppliesToIds),
 					"Instance filter is only supported for instance-level operations.");
 		}
+	}
+
+	/**
+	 * Returns a cached set of resource type name strings for myAppliesToTypes.
+	 * The set is computed once and reused on subsequent calls.
+	 */
+	private Set<String> getOrCreateAppliesToTypeNames(FhirContext theCtx) {
+		Set<String> result = myAppliesToTypeNames;
+		if (result == null) {
+			result = new HashSet<>();
+			for (Class<? extends IBaseResource> next : myAppliesToTypes) {
+				result.add(theCtx.getResourceType(next));
+			}
+			myAppliesToTypeNames = result;
+		}
+		return result;
+	}
+
+	/**
+	 * Returns a cached set of resource type name strings for myAppliesToInstancesOfType.
+	 * The set is computed once and reused on subsequent calls.
+	 */
+	private Set<String> getOrCreateAppliesToInstancesOfTypeNames(FhirContext theCtx) {
+		Set<String> result = myAppliesToInstancesOfTypeNames;
+		if (result == null) {
+			result = new HashSet<>();
+			for (Class<? extends IBaseResource> next : myAppliesToInstancesOfType) {
+				result.add(theCtx.getResourceType(next));
+			}
+			myAppliesToInstancesOfTypeNames = result;
+		}
+		return result;
 	}
 
 	/**
