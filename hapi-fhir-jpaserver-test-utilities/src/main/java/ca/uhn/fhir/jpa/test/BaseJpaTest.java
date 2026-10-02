@@ -425,7 +425,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		mySchedulerService.pause();
 		Batch2JobHelper.runCleanupWithBatch2Stopped(
 				() -> {
-					myBatch2JobHelper.cancelAllJobsAndAwaitCancellation();
+					myBatch2JobHelper.cancelAllJobs();
 					myBatch2JobHelper.awaitMaintenancePassToFinish();
 					myBatch2JobHelper.awaitNoInFlightWork();
 				},

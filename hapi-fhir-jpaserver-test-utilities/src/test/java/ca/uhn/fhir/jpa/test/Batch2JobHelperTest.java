@@ -201,7 +201,7 @@ class Batch2JobHelperTest {
 	}
 
 	@Test
-	void cancelAllJobsAndAwaitCancellation_instancesOnTwoPages_cancelsAllWithoutWaiting() {
+	void cancelAllJobs_instancesOnTwoPages_cancelsAllWithoutWaiting() {
 		// setup
 		when(myJobPersistence.fetchInstances(1000, 0, NOT_ENDED))
 			.thenReturn(List.of(createInstance("active-1", StatusEnum.IN_PROGRESS)));
@@ -209,12 +209,26 @@ class Batch2JobHelperTest {
 			.thenReturn(List.of(createInstance("active-2", StatusEnum.QUEUED)));
 
 		// execute
-		myBatch2JobHelper.cancelAllJobsAndAwaitCancellation();
+		myBatch2JobHelper.cancelAllJobs();
 
 		// verify
 		verify(myJobPersistence).cancelInstance("active-1");
 		verify(myJobPersistence).cancelInstance("active-2");
 		verifyNoInteractions(myWorkChannelConsumer, myReductionStepExecutorService, myJobMaintenanceService);
+	}
+
+	@Test
+	@SuppressWarnings("removal")
+	void cancelAllJobsAndAwaitCancellation_activeInstance_cancelsItLikeCancelAllJobs() {
+		// setup
+		when(myJobPersistence.fetchInstances(1000, 0, NOT_ENDED))
+			.thenReturn(List.of(createInstance("active-1", StatusEnum.IN_PROGRESS)));
+
+		// execute
+		myBatch2JobHelper.cancelAllJobsAndAwaitCancellation();
+
+		// verify
+		verify(myJobPersistence).cancelInstance("active-1");
 	}
 
 	@Test

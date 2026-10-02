@@ -439,16 +439,23 @@ public class Batch2JobHelper {
 	}
 
 	/**
-	 * Cancels every job that has not finished. Despite the name, it does not wait: a cancelled job only stops
-	 * later, and work it has already started keeps running. Call {@link #awaitNoInFlightWork()} to wait for that.
-	 * <p>
-	 * The name is kept because projects outside HAPI FHIR call this method; renaming it would break them.
-	 * </p>
+	 * Cancels every job that has not finished. It does not wait: a cancelled job only stops later, and work it has
+	 * already started keeps running. Call {@link #awaitNoInFlightWork()} to wait for that.
 	 */
-	public void cancelAllJobsAndAwaitCancellation() {
+	public void cancelAllJobs() {
 		for (JobInstance next : fetchAllNotEndedInstances()) {
 			myJobPersistence.cancelInstance(next.getInstanceId());
 		}
+	}
+
+	/**
+	 * Same as {@link #cancelAllJobs()}. Despite the name, it does not wait for the cancellation.
+	 *
+	 * @deprecated Use {@link #cancelAllJobs()}, then {@link #awaitNoInFlightWork()} if the caller needs to wait.
+	 */
+	@Deprecated(since = "8.14.0", forRemoval = true)
+	public void cancelAllJobsAndAwaitCancellation() {
+		cancelAllJobs();
 	}
 
 	/**
