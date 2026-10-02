@@ -19,7 +19,9 @@
  */
 package ca.uhn.fhir.util;
 
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -31,6 +33,7 @@ import com.google.common.net.PercentEscaper;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.net.MalformedURLException;
@@ -702,6 +705,44 @@ public class UrlUtil {
 	@Nullable
 	public static String toCanonicalUrl(@Nullable String theUrl, @Nullable String theVersion) {
 		return parseCanonicalUrl(theUrl, theVersion).toCanonicalUrl();
+	}
+
+	/**
+	 * Reads the canonical URL of a resource from its <code>url</code> and <code>version</code> elements, for any
+	 * FHIR version and any resource type which has them, such as ValueSet, CodeSystem or StructureDefinition.
+	 *
+	 * @param theFhirContext A context, used when it is of the resource's FHIR version
+	 * @param theResource    The resource to read
+	 * @return The URL and version, either of which is empty if the resource has no such element or no value in it
+	 * @since 8.14.0
+	 */
+	// Created by Claude Opus 5.5
+	@Nonnull
+	public static CanonicalUrlParts getCanonicalUrl(
+			@Nonnull FhirContext theFhirContext, @Nonnull IBaseResource theResource) {
+		// a resource of another FHIR version is read with a context of its own version, so that its classes are
+		// not scanned into the caller's context
+		FhirVersionEnum resourceVersion = theResource.getStructureFhirVersionEnum();
+		FhirContext context = resourceVersion == theFhirContext.getVersion().getVersion()
+				? theFhirContext
+				: FhirContext.forCached(resourceVersion);
+		RuntimeResourceDefinition resourceDefinition = context.getResourceDefinition(theResource);
+		String url = getPrimitiveChildValue(resourceDefinition, theResource, "url");
+		String version = getPrimitiveChildValue(resourceDefinition, theResource, "version");
+		return new CanonicalUrlParts(defaultIfBlank(url, null), Optional.ofNullable(defaultIfBlank(version, null)));
+	}
+
+	@Nullable
+	private static String getPrimitiveChildValue(
+			RuntimeResourceDefinition theResourceDefinition, IBaseResource theResource, String theChildName) {
+		BaseRuntimeChildDefinition child = theResourceDefinition.getChildByName(theChildName);
+		if (child == null) {
+			return null;
+		}
+		return child.getAccessor()
+				.getFirstValueOrNull(theResource)
+				.map(value -> ((IPrimitiveType<?>) value).getValueAsString())
+				.orElse(null);
 	}
 
 	private static void throwInvalidRequestExceptionForNotValidUri(String theUri, Exception theCause) {

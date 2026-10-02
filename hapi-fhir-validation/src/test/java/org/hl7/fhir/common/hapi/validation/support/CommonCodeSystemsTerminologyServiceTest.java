@@ -332,12 +332,12 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 	}
 
 	@Test
-	public void testGetCodeSystemUrl_forDSTU3_throwsException() {
-		try {
-			CommonCodeSystemsTerminologyService.getCodeSystemUrl(myCtx, new org.hl7.fhir.dstu3.model.CodeSystem());
-			fail();		} catch (IllegalArgumentException e) {
-			assertEquals(Msg.code(696) + "Can not handle version: DSTU3", e.getMessage());
-		}
+	@SuppressWarnings("deprecation")
+	public void testGetCodeSystemUrl_forDSTU3_returnsTheUrl() {
+		String url = CommonCodeSystemsTerminologyService.getCodeSystemUrl(
+				myCtx, new org.hl7.fhir.dstu3.model.CodeSystem().setUrl("http://example.org/cs"));
+
+		assertEquals("http://example.org/cs", url);
 	}
 
 	@Test

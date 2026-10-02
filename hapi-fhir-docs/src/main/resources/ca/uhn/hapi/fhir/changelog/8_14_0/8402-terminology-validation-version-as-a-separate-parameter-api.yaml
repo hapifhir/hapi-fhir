@@ -5,4 +5,6 @@ title: "`IValidationSupport` has new forms of `fetchCodeSystem`, `fetchValueSet`
   `fetchResource`, `isCodeSystemSupported` and `isValueSetSupported` that take the version as a separate
   argument, and `LookupCodeRequest` can now carry a code system version. Existing `IValidationSupport`
   implementations do not need to change. The six-argument `validateCode` method is deprecated; use the one that
-  takes a `ValidateCodeRequest` instead."
+  takes a `ValidateCodeRequest` instead. The new `UrlUtil.getCanonicalUrl` method reads the url and version of a
+  conformance resource of any FHIR version, and replaces the now deprecated `getValueSetUrl`, `getValueSetVersion`
+  and `getCodeSystemUrl` methods of `CommonCodeSystemsTerminologyService`."

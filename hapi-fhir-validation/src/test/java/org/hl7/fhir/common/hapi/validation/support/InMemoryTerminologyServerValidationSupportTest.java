@@ -464,14 +464,12 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 	}
 
 	/**
-	 * A caller naming the version of a code system which is installed only once must not cost a lookup for
-	 * the versioned canonical: fetchCodeSystem takes only a canonical and implementations differ on whether
-	 * they resolve a version packed into one, so for a remote terminology service that lookup is a network
-	 * round trip which matches nothing.
+	 * The version travels as its own parameter, so a module holding the code system under its versioned canonical
+	 * answers the first fetch, and no second lookup is made.
 	 */
-	// Created by Claude Opus 5
+	// Created by Claude Opus 5.5
 	@Test
-	void validateCode_codeSystemVersionMatchesTheUnversionedCanonical_doesNotFetchTheVersionedCanonical() {
+	void validateCode_codeSystemVersionHeld_isValidAfterOneFetchOfTheVersionedCanonical() {
 		// Setup
 		FetchRecordingValidationSupport recorder = addSingleVersionCodeSystemAndRecordFetches("1.0.0");
 		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
@@ -483,30 +481,27 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		// Verify
 		assertNotNull(outcome);
 		assertTrue(outcome.isOk());
-		assertThat(recorder.myFetchedCodeSystemUrls).containsOnly(VERSIONED_CS_URL);
+		assertThat(recorder.myFetchedCodeSystemUrls).containsExactly(VERSIONED_CS_URL + "|1.0.0");
 	}
 
 	/**
-	 * The other direction, so that the test above is not passed by code which ignores the version: when the
-	 * unversioned canonical resolves to a different version, the versioned one still has to be asked for. The
-	 * order is asserted because both canonicals are fetched either way - code which asks for the versioned one
-	 * first and only reaches the unversioned one through the lookupCode fallback ends up with the same two.
+	 * The other direction, so that the test above is not passed by code which ignores the version: when the code
+	 * system held under the URL is of another version, it is not used in place of the version asked for.
 	 */
-	// Created by Claude Opus 5
+	// Created by Claude Opus 5.5
 	@Test
-	void validateCode_codeSystemVersionDiffersFromTheUnversionedCanonical_fetchesTheVersionedCanonical() {
+	void validateCode_codeSystemVersionDiffersFromTheUnversionedCanonical_isNotValidAgainstIt() {
 		// Setup
 		FetchRecordingValidationSupport recorder = addSingleVersionCodeSystemAndRecordFetches("1.0.0");
 		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
 
 		// Test
-		mySvc.validateCode(
+		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(
 			valCtx, new ConceptValidationOptions(), new ValidateCodeRequest(VERSIONED_CS_URL, "2.0.0", "code0", null, null));
 
 		// Verify
-		assertThat(recorder.myFetchedCodeSystemUrls)
-			.containsOnly(VERSIONED_CS_URL, VERSIONED_CS_URL + "|2.0.0")
-			.containsSubsequence(VERSIONED_CS_URL, VERSIONED_CS_URL + "|2.0.0");
+		assertThat(outcome == null || !outcome.isOk()).as("validated against version 1.0.0").isTrue();
+		assertThat(recorder.myFetchedCodeSystemUrls).containsExactly(VERSIONED_CS_URL + "|2.0.0", VERSIONED_CS_URL);
 	}
 
 	/**

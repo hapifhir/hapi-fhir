@@ -65,6 +65,30 @@ public interface IFhirResourceDaoCodeSystem<T extends IBaseResource> extends IFh
 			Collection<IPrimitiveType<String>> thePropertyNames,
 			RequestDetails theRequestDetails);
 
+	/**
+	 * Looks up a code, with the code system version as its own parameter rather than packed into the system.
+	 *
+	 * @param theCode the code to look up, given together with {@literal theSystem}
+	 * @param theSystem the code system url, without a version
+	 * @param theVersion the code system version, or null for whichever version is current
+	 * @param theCoding the coding to look up, given instead of {@literal theCode} and {@literal theSystem}; its own
+	 *                  version takes precedence over {@literal theVersion}
+	 * @param theDisplayLanguage the language for the display, or null
+	 * @param thePropertyNames the properties to return, or empty for all
+	 * @param theRequestDetails the request
+	 * @return the outcome of the lookup
+	 * @since 8.14.0
+	 */
+	@Nonnull
+	IValidationSupport.LookupCodeResult lookupCode(
+			IPrimitiveType<String> theCode,
+			IPrimitiveType<String> theSystem,
+			IPrimitiveType<String> theVersion,
+			IBaseCoding theCoding,
+			IPrimitiveType<String> theDisplayLanguage,
+			Collection<IPrimitiveType<String>> thePropertyNames,
+			RequestDetails theRequestDetails);
+
 	SubsumesResult subsumes(
 			IPrimitiveType<String> theCodeA,
 			IPrimitiveType<String> theCodeB,

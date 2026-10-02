@@ -38,7 +38,6 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.LogicUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
-import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -219,9 +218,8 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 		String valueSetIdentifier;
 		if (theValueSetId != null) {
 			IBaseResource valueSet = read(theValueSetId, theRequestDetails);
-			valueSetIdentifier = UrlUtil.toCanonicalUrl(
-					CommonCodeSystemsTerminologyService.getValueSetUrl(myFhirContext, valueSet),
-					CommonCodeSystemsTerminologyService.getValueSetVersion(myFhirContext, valueSet));
+			valueSetIdentifier =
+					UrlUtil.getCanonicalUrl(myFhirContext, valueSet).toCanonicalUrl();
 		} else if (isNotBlank(toStringValue(theValueSetIdentifier))) {
 			valueSetIdentifier = toStringValue(theValueSetIdentifier);
 		} else {
