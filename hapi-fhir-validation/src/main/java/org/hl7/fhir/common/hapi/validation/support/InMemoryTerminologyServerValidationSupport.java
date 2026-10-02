@@ -119,7 +119,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			String theDisplay,
 			@Nonnull IBaseResource theValueSet) {
 		ValueSetAndMessages expansion;
-		String vsUrl = CommonCodeSystemsTerminologyService.getValueSetUrl(getFhirContext(), theValueSet);
+		String vsUrl = UrlUtil.getCanonicalUrl(getFhirContext(), theValueSet).url();
 		try {
 			expansion = expandValueSetToCanonical(
 					theValidationSupportContext, theValueSet, theCodeSystemUrlAndVersion, theCode);
@@ -295,8 +295,9 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		boolean caseSensitive = true;
 		IBaseResource codeSystemToValidateResource = null;
 		if (!theOptions.isInferSystem() && isNotBlank(codeSystemUrlToValidate)) {
-			codeSystemToValidateResource =
-					fetchCodeSystem(theValidationSupportContext, codeSystemUrlToValidate, codeSystemVersionToValidate);
+			codeSystemToValidateResource = theValidationSupportContext
+					.getRootValidationSupport()
+					.fetchCodeSystem(codeSystemUrlToValidate, codeSystemVersionToValidate);
 		}
 
 		List<FhirVersionIndependentConcept> codes = new ArrayList<>();
@@ -837,10 +838,9 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			String loadedCodeSystemUrl =
 					UrlUtil.toCanonicalUrl(includeOrExcludeConceptSystemUrl, includeOrExcludeConceptSystemVersion);
 
-			includeOrExcludeSystemResource = codeSystemConverter.apply(fetchCodeSystem(
-					theValidationSupportContext,
-					includeOrExcludeConceptSystemUrl,
-					includeOrExcludeConceptSystemVersion));
+			includeOrExcludeSystemResource = codeSystemConverter.apply(theValidationSupportContext
+					.getRootValidationSupport()
+					.fetchCodeSystem(includeOrExcludeConceptSystemUrl, includeOrExcludeConceptSystemVersion));
 
 			boolean isIncludeWithDeclaredConcepts = !theInclude.getConcept().isEmpty();
 
@@ -1096,44 +1096,6 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 					theValidationSupportContext.getRootValidationSupport().fetchValueSet(t);
 			return myVersionCanonicalizer.valueSetToValidatorCanonical(valueSet);
 		};
-	}
-
-	/**
-	 * Fetches a CodeSystem at a named version.
-	 * <p>
-	 * {@link IValidationSupport#fetchCodeSystem(String)} takes only a canonical, and implementations differ on
-	 * whether they resolve a version packed into one: a remote terminology service, for instance, searches for
-	 * the canonical whole, which matches nothing and still costs a round trip. Where a single version of the
-	 * code system is installed - the common case - the unversioned canonical already resolves to the version
-	 * being asked for, so that is tried first and the versioned canonical is only needed when it does not.
-	 * </p>
-	 *
-	 * @param theValidationSupportContext the context to fetch through
-	 * @param theCodeSystemUrl            the code system URL, carrying no version
-	 * @param theCodeSystemVersion        the version to fetch, or <code>null</code> for whichever version the
-	 *                                    unversioned canonical resolves to
-	 * @return the CodeSystem, or <code>null</code> if neither canonical resolved one
-	 */
-	// Created by Claude Opus 5
-	@Nullable
-	private IBaseResource fetchCodeSystem(
-			ValidationSupportContext theValidationSupportContext,
-			String theCodeSystemUrl,
-			@Nullable String theCodeSystemVersion) {
-		IValidationSupport rootValidationSupport = theValidationSupportContext.getRootValidationSupport();
-		IBaseResource unversioned = rootValidationSupport.fetchCodeSystem(theCodeSystemUrl);
-		if (isBlank(theCodeSystemVersion)) {
-			return unversioned;
-		}
-
-		if (unversioned != null) {
-			String unversionedVersion = myCtx.newTerser().getSinglePrimitiveValueOrNull(unversioned, "version");
-			if (theCodeSystemVersion.equals(unversionedVersion)) {
-				return unversioned;
-			}
-		}
-
-		return rootValidationSupport.fetchCodeSystem(UrlUtil.toCanonicalUrl(theCodeSystemUrl, theCodeSystemVersion));
 	}
 
 	// Created by Claude Opus 5
