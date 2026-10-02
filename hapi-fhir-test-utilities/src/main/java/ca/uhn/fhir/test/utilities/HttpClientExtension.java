@@ -20,6 +20,8 @@
 package ca.uhn.fhir.test.utilities;
 
 import ca.uhn.fhir.context.FhirContext;
+import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.Validate;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -28,6 +30,9 @@ import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * A JUnit extension owning a pooled Apache HttpClient 4.x client for the duration of a test.
@@ -43,6 +48,7 @@ import java.io.IOException;
 public class HttpClientExtension implements BeforeEachCallback, AfterEachCallback {
 	private CloseableHttpClient myClient;
 	private boolean myDontFollowRedirects;
+	private List<Consumer<HttpUriRequest>> myRequestInterceptors = new ArrayList<>();
 
 	public HttpClientExtension dontFollowRedirects() {
 		myDontFollowRedirects = true;
@@ -68,6 +74,7 @@ public class HttpClientExtension implements BeforeEachCallback, AfterEachCallbac
 	}
 
 	public CloseableHttpResponse execute(HttpUriRequest theRequest) throws IOException {
+		myRequestInterceptors.forEach(t -> t.accept(theRequest));
 		return myClient.execute(theRequest);
 	}
 
@@ -98,4 +105,20 @@ public class HttpClientExtension implements BeforeEachCallback, AfterEachCallbac
 	public HttpTestRequest fhirRequest(FhirContext theFhirContext, String theUrl) {
 		return HttpTestRequest.to(myClient, theFhirContext, theUrl);
 	}
+
+	/**
+	 * @since 8.14.0
+	 */
+	public void registerRequestInterceptor(@Nonnull Consumer<HttpUriRequest> theInterceptor) {
+		Validate.notNull(theInterceptor, "theInterceptor must not be null");
+		myRequestInterceptors.add(theInterceptor);
+	}
+
+	/**
+	 * @since 8.14.0
+	 */
+	public void clearRequestInterceptors() {
+		myRequestInterceptors.clear();
+	}
+
 }
