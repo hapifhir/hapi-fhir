@@ -2425,18 +2425,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			}
 
 			if (!eventDatesSorted.isEmpty()) {
-				/*
-				 * In order to preserve existing search behavior, if there were no end dates, discard all events
-				 * and start dates as well
-				 * @see ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4Test
-				 * 		testTimingDateRangeSearch_ordinalAndDatetimeSearchesMatch
-				 */
-				if (endDates.isEmpty() && !startDates.isEmpty()) {
-					startDates.clear();
-				} else {
-					startDates.add(eventDatesSorted.first());
-					endDates.add(eventDatesSorted.last());
-				}
+				startDates.add(eventDatesSorted.first());
+				endDates.add(eventDatesSorted.last());
 			}
 
 			if (!startDates.isEmpty() || !endDates.isEmpty()) {

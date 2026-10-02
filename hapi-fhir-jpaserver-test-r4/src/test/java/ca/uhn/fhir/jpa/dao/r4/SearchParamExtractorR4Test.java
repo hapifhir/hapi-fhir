@@ -629,7 +629,7 @@ class SearchParamExtractorR4Test implements ITestDataBuilder {
 		}
 
 		@Test
-		void testBoundsPeriodStartOnlyProducesNullHighValue() {
+		void testBoundsPeriodStartIndexesEndOfTimeAsHighValue() {
 			// FHIR spec: absent period.end means open-ended, so sp_value_high is the end-of-time sentinel
 			ServiceRequest serviceRequest = new ServiceRequest();
 			serviceRequest.setOccurrence(new Timing()
