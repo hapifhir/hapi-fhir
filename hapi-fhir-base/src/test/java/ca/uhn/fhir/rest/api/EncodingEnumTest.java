@@ -15,6 +15,15 @@ public class EncodingEnumTest {
 	}
 
 	@Test
+	public void forContentType_turtle() {
+		assertEquals(EncodingEnum.RDF, EncodingEnum.forContentType(Constants.CT_RDF_TURTLE_NEW));
+		assertEquals(EncodingEnum.RDF, EncodingEnum.forContentType(Constants.CT_RDF_TURTLE));
+		assertEquals(EncodingEnum.RDF, EncodingEnum.forContentType(Constants.CT_RDF_TURTLE_LEGACY));
+		assertEquals(EncodingEnum.RDF, EncodingEnum.forContentType("application/fhir turtle"));
+		assertEquals(EncodingEnum.RDF, EncodingEnum.forContentTypeStrict(Constants.CT_RDF_TURTLE_NEW));
+	}
+
+	@Test
 	public void getTypeWithSpace() {
 		assertEquals("application/fhir+xml", EncodingEnum.getTypeWithoutCharset("application/fhir xml"));
 		assertEquals("application/fhir+xml", EncodingEnum.getTypeWithoutCharset("application/fhir xml; charset=utf-8"));
