@@ -2,6 +2,7 @@
 type: add
 issue: 7670
 jira: SMILE-11603
+backport: 8.8.2
 title: "Added a \"heartbeat\" mechanic to Batch2 to allow
       slow running workers to have more time to process
       larger jobs.

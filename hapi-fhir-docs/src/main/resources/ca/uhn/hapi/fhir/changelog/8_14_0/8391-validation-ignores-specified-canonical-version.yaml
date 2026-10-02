@@ -2,6 +2,7 @@
 type: fix
 issue: 8391
 jira: SMILE-12842
+backport: 8.8.2
 title: "When a server held two versions of the same `CodeSystem` or `ValueSet`, such as after installing
   two versions of an implementation guide, `$validate` validated against whichever version was current
   instead of the version specified in the canonical URL that referenced it, whether that was a profile
