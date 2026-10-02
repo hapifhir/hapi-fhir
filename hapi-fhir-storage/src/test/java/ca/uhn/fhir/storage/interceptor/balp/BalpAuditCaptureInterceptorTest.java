@@ -213,7 +213,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		myClient.capabilities().ofType(CapabilityStatement.class).execute(); // pre-validate this
 		myClient.registerInterceptor(new LoggingInterceptor(false));
 
-		when(myContextServices.getAgentClientWho(any())).thenReturn(new Reference().setIdentifier(new Identifier().setSystem("http://clients").setValue("123")));
+		when(myContextServices.getAgentClientWho(any())).thenReturn(new Reference().setDisplay("Test FHIR Client").setIdentifier(new Identifier().setSystem("http://clients").setValue("123")));
 		when(myContextServices.getAgentUserWho(any())).thenReturn(new Reference().setIdentifier(new Identifier().setSystem("http://users").setValue("abc")));
 		when(myContextServices.massageResourceIdForStorage(any(), any(), any())).thenCallRealMethod();
 		when(myContextServices.getNetworkAddressType(any())).thenCallRealMethod();
@@ -908,6 +908,29 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 			.map(PrimitiveType::asStringValue)
 			.toList();
 		assertThat(profiles).containsExactly(theProfile.getProfileUrl());
+	}
+
+	@Test
+	void testClientAgentWhoIsPreserved() {
+		// Trigger an operation to generate an audit event
+		Patient patient = new Patient();
+		myClient.create().resource(patient).execute();
+
+		// Verify
+		verify(myAuditEventSink, times(1)).recordAuditEvent(myAuditEventCaptor.capture());
+		AuditEvent auditEvent = myAuditEventCaptor.getValue();
+		ourLog.info("Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
+
+		// Find the client/source, system="http://dicom.nema.org/resources/ontology/DCM" and code="110153" represents Source Role Id
+		AuditEvent.AuditEventAgentComponent clientAgent = auditEvent.getAgent().stream()
+			.filter(a -> a.getType().getCoding().stream().anyMatch(c -> "110153".equals(c.getCode())))
+			.findFirst()
+			.orElseThrow();
+
+		// who must preserve everything from getAgentClientWho()
+		assertThat(clientAgent.getWho().getDisplay()).isEqualTo("Test FHIR Client");
+		assertThat(clientAgent.getWho().getIdentifier().getSystem()).isEqualTo("http://clients");
+		assertThat(clientAgent.getWho().getIdentifier().getValue()).isEqualTo("123");
 	}
 
 	@Override
