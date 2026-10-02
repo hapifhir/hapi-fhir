@@ -104,6 +104,26 @@ public abstract class BaseRuntimeChildDefinition {
 		default void remove(IBase theTarget, int theIndex) {
 			// implemented in subclasses
 		}
+
+		/**
+		 * Replace a single existing value with a new one, preserving its position among any
+		 * sibling values.
+		 * <p>
+		 * For single-valued fields, this behaves the same as {@link #setValue(IBase, IBase)}.
+		 * For repeating (list-valued) fields, unlike {@link #setValue(IBase, IBase)} (which
+		 * clears the entire list before adding the new value), this replaces only the entry
+		 * matching {@code theOldValue} (compared by reference), leaving all other entries in
+		 * place. If {@code theOldValue} can't be found, this behaves like
+		 * {@link #addValue(IBase, IBase)}.
+		 * </p>
+		 *
+		 * @param theTarget   field holding the value to replace (e.g. planDefinition.contained)
+		 * @param theOldValue the existing value being replaced
+		 * @param theNewValue the new value
+		 */
+		default void replace(IBase theTarget, IBase theOldValue, IBase theNewValue) {
+			setValue(theTarget, theNewValue);
+		}
 	}
 
 	BaseRuntimeElementDefinition<?> findResourceReferenceDefinition(
