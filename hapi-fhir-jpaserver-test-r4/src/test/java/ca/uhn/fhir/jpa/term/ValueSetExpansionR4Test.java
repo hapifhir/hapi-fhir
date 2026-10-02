@@ -1723,6 +1723,11 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		});
 	}
 
+	/**
+	 * The include enumerates a code from version 0.17, and only another version is installed. R5
+	 * {@code ValueSet/$expand} requires an error when the server "has the wrong version", so neither the
+	 * expansion, validation nor the pre-expansion takes the enumeration at face value.
+	 */
 	@Test
 	public void testExpandValueSet_VsIsEnumeratedWithVersionedSystem_CsOnlyDifferentVersionPresent() {
 		CodeSystem cs = new CodeSystem();
@@ -1755,95 +1760,32 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(true);
 
-		// Expand VS
-		expansion = myValueSetDao.expand(vsId, new ValueSetExpansionOptions(), mySrd);
-		assertThat(myValueSetTestUtil.extractExpansionMessage(expansion)).contains("Current status: NOT_EXPANDED");
-		assertThat(myValueSetTestUtil.toCodes(expansion)).containsExactly("28571000087109");
+		// Expand VS - the include names version 0.17, which is not installed
+		assertThatThrownBy(() -> myValueSetDao.expand(vsId, new ValueSetExpansionOptions(), mySrd))
+			.isInstanceOf(InternalErrorException.class)
+			.hasMessageContaining("http://snomed.info/sct|0.17");
 
-		// Validate code - good
+		// Validate code - listed in the ValueSet, but no installed version backs it
 		codeSystemUrl = "http://snomed.info/sct";
 		code = "28571000087109";
-		String display;
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(null), null, null, mySrd);
-		assertTrue(outcome.isOk(), outcome.getMessage() + "\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.toParameters(myFhirContext)) + "\n" + outcome.getSourceDetails());
-		assertEquals("28571000087109", outcome.getCode());
-		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
-		assertEquals("0.17", outcome.getCodeSystemVersion());
-		assertThat(outcome.getSourceDetails()).contains("Code was validated against in-memory expansion of ValueSet: http://ehealthontario.ca/fhir/ValueSet/vaccinecode");
-
-		// Validate code - good code, bad display
-		codeSystemUrl = "http://snomed.info/sct";
-		code = "28571000087109";
-		display = "BLAH";
-		outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(display), null, null, mySrd);
-		assertTrue(outcome.isOk());
-		assertEquals("28571000087109", outcome.getCode());
-		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
-		assertThat(outcome.getMessage()).contains("Concept Display \"BLAH\" does not match expected \"MODERNA COVID-19 mRNA-1273\" for 'http://snomed.info/sct#28571000087109' for in-memory expansion of ValueSet 'http://ehealthontario.ca/fhir/ValueSet/vaccinecode'");
-		assertEquals("Code was validated against in-memory expansion of ValueSet: http://ehealthontario.ca/fhir/ValueSet/vaccinecode", outcome.getSourceDetails());
-		assertEquals("0.17", outcome.getCodeSystemVersion());
-
-		// Validate code - good code, good display
-		codeSystemUrl = "http://snomed.info/sct";
-		code = "28571000087109";
-		display = "MODERNA COVID-19 mRNA-1273";
-		outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(display), null, null, mySrd);
-		assertTrue(outcome.isOk());
-		assertEquals("28571000087109", outcome.getCode());
-		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
-		assertEquals("0.17", outcome.getCodeSystemVersion());
+		assertFalse(outcome.isOk());
+		assertThat(outcome.getMessage()).contains("http://snomed.info/sct|0.17");
 
 		// Validate code - bad code
-		codeSystemUrl = "http://snomed.info/sct";
 		code = "BLAH";
-		outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(display), null, null, mySrd);
+		outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(null), null, null, mySrd);
 		assertFalse(outcome.isOk());
 		assertNull(outcome.getCode());
 		assertNull(outcome.getDisplay());
 		assertNull(outcome.getCodeSystemVersion());
 
-		// Calculate pre-expansions
-		myTerminologyTestHelper.startValueSetExpansionJobAndWaitForCompletion("http://ehealthontario.ca/fhir/ValueSet/vaccinecode", "0.1.17");
-
-		// Validate code - good
-		codeSystemUrl = "http://snomed.info/sct";
+		// Pre-expansion fails too, and stores nothing for later validation to answer from
+		myBatch2JobHelper.awaitNoJobsRunning();
+		runInTransaction(() -> assertEquals(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND, myTermValueSetDao.findTermValueSetByUrlAndVersion("http://ehealthontario.ca/fhir/ValueSet/vaccinecode", "0.1.17").orElseThrow().getExpansionStatus()));
 		code = "28571000087109";
 		outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(null), null, null, mySrd);
-		assertTrue(outcome.isOk());
-		assertEquals("28571000087109", outcome.getCode());
-		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
-		assertEquals("0.17", outcome.getCodeSystemVersion());
-		assertThat(outcome.getMessage()).startsWith("Code validation occurred using a ValueSet expansion that was pre-calculated at ");
-
-		// Validate code - good code, bad display
-		codeSystemUrl = "http://snomed.info/sct";
-		code = "28571000087109";
-		display = "BLAH";
-		outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(display), null, null, mySrd);
-		assertTrue(outcome.isOk());
-		assertEquals("28571000087109", outcome.getCode());
-		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
-		assertEquals("0.17", outcome.getCodeSystemVersion());
-		assertEquals("Concept Display \"BLAH\" does not match expected \"MODERNA COVID-19 mRNA-1273\" for 'http://snomed.info/sct#28571000087109'", outcome.getMessage());
-
-		// Validate code - good code, good display
-		codeSystemUrl = "http://snomed.info/sct";
-		code = "28571000087109";
-		display = "MODERNA COVID-19 mRNA-1273";
-		outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(display), null, null, mySrd);
-		assertTrue(outcome.isOk());
-		assertEquals("28571000087109", outcome.getCode());
-		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
-		assertEquals("0.17", outcome.getCodeSystemVersion());
-
-		// Validate code - bad code
-		codeSystemUrl = "http://snomed.info/sct";
-		code = "BLAH";
-		outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(display), null, null, mySrd);
 		assertFalse(outcome.isOk());
-		assertNull(outcome.getCode());
-		assertNull(outcome.getDisplay());
-		assertNull(outcome.getCodeSystemVersion());
 	}
 
 
@@ -1890,6 +1832,11 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		assertThat(outcome.getMessage()).contains("Empty compose list for include");
 	}
 
+	/**
+	 * As {@link #testExpandValueSet_VsIsEnumeratedWithVersionedSystem_CsOnlyDifferentVersionPresent}, for a
+	 * fragment CodeSystem: the enumerated code is not taken at face value for a version that is not installed, and
+	 * the pre-expansion fails instead of storing it.
+	 */
 	@Test
 	public void testExpandValueSet_VsIsEnumeratedWithVersionedSystem_CsIsFragmentWithWrongVersion() {
 		CodeSystem cs = new CodeSystem();
@@ -1920,33 +1867,25 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		runInTransaction(() -> assertNull(myTermCodeSystemDao.findByCodeSystemUri("http://snomed.info/sct")));
 		runInTransaction(() -> assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, myTermValueSetDao.findTermValueSetByUrlAndVersion("http://ehealthontario.ca/fhir/ValueSet/vaccinecode", "0.1.17").orElseThrow().getExpansionStatus()));
 
-		// In memory expansion
-		ValueSet expansion = myValueSetDao.expand(vs, new ValueSetExpansionOptions());
-		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
-		assertThat(myValueSetTestUtil.extractExpansionMessage(expansion)).contains("has not yet been pre-expanded");
-		assertThat(myValueSetTestUtil.extractExpansionMessage(expansion)).contains("Current status: NOT_EXPANDED");
-		assertThat(myValueSetTestUtil.toCodes(expansion)).containsExactly("28571000087109");
+		// In memory expansion - http://foo-cs is installed, but not at version 0.17
+		assertThatThrownBy(() -> myValueSetDao.expand(vs, new ValueSetExpansionOptions()))
+			.isInstanceOf(InternalErrorException.class)
+			.hasMessageContaining("http://foo-cs|0.17");
 
 		codeSystemUrl = "http://snomed.info/sct";
 		valueSetUrl = "http://ehealthontario.ca/fhir/ValueSet/vaccinecode";
 		code = "28571000087109";
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
 		assertFalse(outcome.isOk());
-		assertThat(outcome.getMessage()).contains("Unknown code 'http://snomed.info/sct#28571000087109' for in-memory expansion of ValueSet 'http://ehealthontario.ca/fhir/ValueSet/vaccinecode'");
 		assertEquals("error", outcome.getSeverityCode());
 
-		// Perform Pre-Expansion
+		// Pre-expansion fails, so nothing is stored to serve later expansions from
 		myBatch2JobHelper.awaitNoJobsRunning();
-
-		// Make sure it's done
 		runInTransaction(() -> assertNull(myTermCodeSystemDao.findByCodeSystemUri("http://snomed.info/sct")));
-		runInTransaction(() -> assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, myTermValueSetDao.findTermValueSetByUrlAndVersion("http://ehealthontario.ca/fhir/ValueSet/vaccinecode", "0.1.17").orElseThrow().getExpansionStatus()));
-
-		// Try expansion again
-		expansion = myValueSetDao.expand(vs, new ValueSetExpansionOptions());
-		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
-		assertThat(myValueSetTestUtil.extractExpansionMessage(expansion)).contains("ValueSet was expanded using an expansion that was pre-calculated");
-		assertThat(myValueSetTestUtil.toCodes(expansion)).containsExactly("28571000087109");
+		runInTransaction(() -> assertEquals(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND, myTermValueSetDao.findTermValueSetByUrlAndVersion("http://ehealthontario.ca/fhir/ValueSet/vaccinecode", "0.1.17").orElseThrow().getExpansionStatus()));
+		assertThatThrownBy(() -> myValueSetDao.expand(vs, new ValueSetExpansionOptions()))
+			.isInstanceOf(InternalErrorException.class)
+			.hasMessageContaining("http://foo-cs|0.17");
 	}
 
 	@Test

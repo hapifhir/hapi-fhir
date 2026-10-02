@@ -13,6 +13,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
+import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -93,7 +94,9 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		ConceptValidationOptions options = new ConceptValidationOptions();
 		IValidationSupport.CodeValidationResult outcome = myValidationSupport.validateCode(context, options, "http://payer-to-payer-exchange/fhir/CodeSystem/ndc", "378397893", null, "http://payer-to-payer-exchange/fhir/ValueSet/mental-health/ndc");
 		assertFalse(outcome.isOk());
-		assertEquals("Unable to validate code http://payer-to-payer-exchange/fhir/CodeSystem/ndc#378397893 - No codes in ValueSet belong to CodeSystem with URL http://payer-to-payer-exchange/fhir/CodeSystem/ndc", outcome.getMessage());
+		// The ValueSet's include names ndc-codes, which nothing defines, so it is not pre-expanded (#8415) and the
+		// code is rejected by the in-memory expansion instead
+		assertThat(outcome.getMessage()).contains("Unknown code 'http://payer-to-payer-exchange/fhir/CodeSystem/ndc#378397893'");
 	}
 
 
@@ -131,6 +134,15 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 			.setProperty("concept")
 			.setOp(ValueSet.FilterOperator.ISA)
 			.setValue("parent");
+		// The enumerated include must name a code system the server holds: listed codes in one it does not have
+		// fail the expansion (#8415)
+		CodeSystem csEnumerated = new CodeSystem();
+		csEnumerated.setUrl("http://foo/cs-np");
+		csEnumerated.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		csEnumerated.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		csEnumerated.addConcept().setCode("code0");
+		csEnumerated.addConcept().setCode("code1");
+		myCodeSystemDao.create(csEnumerated);
 		vs.getCompose()
 			.addInclude()
 			.setSystem("http://foo/cs-np")
@@ -147,7 +159,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		assertFalse(outcome.isOk());
 		assertThat(outcome.getMessage()).contains("cannot apply filters");
 
-		// In memory - Enumerated in non-present CS
+		// In memory - Enumerated include
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://foo/cs-np", "code1", null, "http://vs");
 		assertNotNull(outcome);
@@ -178,7 +190,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		assertThat(outcome.getMessage()).contains("Unknown code \"http://foo/cs#childX\"");
 		assertThat(outcome.getMessage()).contains("Code validation occurred using a ValueSet expansion that was pre-calculated at ");
 
-		// Precalculated - Enumerated in non-present CS
+		// Precalculated - Enumerated include
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://foo/cs-np", "code1", null, "http://vs");
 		assertNotNull(outcome);
@@ -228,6 +240,15 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 			.setProperty("concept")
 			.setOp(ValueSet.FilterOperator.ISA)
 			.setValue("parent");
+		// The enumerated include must name a code system the server holds: listed codes in one it does not have
+		// fail the expansion (#8415)
+		CodeSystem csEnumerated = new CodeSystem();
+		csEnumerated.setUrl("http://foo/cs-np");
+		csEnumerated.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		csEnumerated.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		csEnumerated.addConcept().setCode("code0");
+		csEnumerated.addConcept().setCode("code1");
+		myCodeSystemDao.create(csEnumerated);
 		vs.getCompose()
 			.addInclude()
 			.setSystem("http://foo/cs-np")
@@ -251,7 +272,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		assertFalse(outcome.isOk());
 		assertThat(outcome.getMessage()).contains("cannot apply filters");
 
-		// In memory - Enumerated in non-present CS
+		// In memory - Enumerated include
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://foo/cs-np", "code1", null, "http://vs");
 		assertNotNull(outcome);
@@ -281,7 +302,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		assertThat(outcome.getMessage()).contains("Unknown code \"http://foo/cs#childX\"");
 		assertThat(outcome.getMessage()).contains("Code validation occurred using a ValueSet expansion that was pre-calculated at ");
 
-		// Precalculated - Enumerated in non-present CS
+		// Precalculated - Enumerated include
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://foo/cs-np", "code1", null, "http://vs");
 		assertNotNull(outcome);
@@ -552,21 +573,12 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 		myBatch2JobHelper.awaitNoJobsRunning();
 
-		myCaptureQueriesListener.clear();;
+		// The include names a version that is not installed, so the enumerated code is not taken at face value:
+		// the pre-expansion fails and the code is rejected (#8415)
+		runInTransaction(() -> assertEquals(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND, myTermValueSetDao.findTermValueSetByUrlAndVersion("http://ehealthontario.ca/fhir/ValueSet/vaccinecode", "0.1.17").orElseThrow().getExpansionStatus()));
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(null, new IdType("ValueSet/vaccinecode"), new CodeType("28571000087109"), new CodeType("http://snomed.info/sct"), null, null, null, mySrd);
-		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(9, myCaptureQueriesListener.countSelectQueries(), ()->myCaptureQueriesListener.getSelectQueries().stream().map(t->t.getSql(true, false)).collect(Collectors.joining("\n")));
-		assertThat(outcome.getMessage()).contains("Code validation occurred using a ValueSet expansion that was pre-calculated");
-		assertTrue(outcome.isOk(), outcome.getMessage());
-		outcome = myTermSvc.validateCodeInValueSet(
-			new ValidationSupportContext(myValidationSupport),
-			new ConceptValidationOptions(),
-			"http://snomed.info/sct",
-			"28571000087109",
-			"MODERNA COVID-19 mRNA-1273",
-			vs
-		);
-		assertTrue(outcome.isOk());
+		assertFalse(outcome.isOk());
+		assertThat(outcome.getMessage()).contains("http://snomed.info/sct|http://snomed.info/sct/20611000087101/version/20210331");
 	}
 
 	/** See #4449 */
